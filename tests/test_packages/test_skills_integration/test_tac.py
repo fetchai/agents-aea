@@ -553,9 +553,7 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
         missing_strings = self.missing_from_output(
             tac_aea_one_process, check_strings, timeout=30, is_terminating=False
         )
-        check_strings = (
-            "found the TAC controller. Registering...",
-        )
+        check_strings = ("found the TAC controller. Registering...",)
         missing_strings = self.missing_from_output(
             tac_aea_one_process, check_strings, timeout=240, is_terminating=False
         )  # we need to wait sufficiently long (at least 3 minutes - see above for deployment)

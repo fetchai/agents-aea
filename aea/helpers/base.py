@@ -752,7 +752,7 @@ class CertRequest:
         if (self.public_key is None and self.key_identifier is None) or (
             self.public_key is not None and self.key_identifier is not None
         ):
-            raise ValueError(
+            raise ValueError(  # pragma: nocover
                 "Exactly one of key_identifier or public_key can be specified."
             )
         if self.public_key is not None:
