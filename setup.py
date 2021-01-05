@@ -24,13 +24,14 @@ from typing import Dict
 from setuptools import find_packages, setup
 
 PACKAGE_NAME = "aea"
+here = os.path.abspath(os.path.dirname(__file__))
 
 
 def get_all_extras() -> Dict:
 
     cosmos_ledger_deps = ["ecdsa==0.15", "bech32==1.2.0"]
 
-    fetch_ledger_deps = cosmos_ledger_deps
+    fetch_ledger_deps = [f"fetchai_crypto @ file://{here}/plugins/fetchai-crypto#egg=fetchai_crypto"]
 
     ethereum_ledger_deps = [
         "web3==5.12.0",
@@ -78,7 +79,6 @@ base_deps = [
     "requests>=2.22.0",
 ]
 
-here = os.path.abspath(os.path.dirname(__file__))
 about = {}
 with open(os.path.join(here, PACKAGE_NAME, "__version__.py"), "r") as f:
     exec(f.read(), about)
