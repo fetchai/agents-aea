@@ -20,6 +20,10 @@
 """Module wrapping all the public and private keys cryptography."""
 from typing import Any, Dict, Optional, Tuple, Union
 
+from cosmos_crypto import CosmosApi
+from cosmos_crypto import DEFAULT_ADDRESS as COSMOS_DEFAULT_ADDRESS
+from cosmos_crypto import DEFAULT_CHAIN_ID as COSMOS_DEFAULT_CHAIN_ID
+from cosmos_crypto import DEFAULT_CURRENCY_DENOM as COSMOS_DEFAULT_CURRENCY_DENOM
 from ethereum_crypto import DEFAULT_ADDRESS as ETHEREUM_DEFAULT_ADDRESS
 from ethereum_crypto import DEFAULT_CHAIN_ID as ETHEREUM_DEFAULT_CHAIN_ID
 from ethereum_crypto import DEFAULT_CURRENCY_DENOM as ETHEREUM_DEFAULT_CURRENCY_DENOM
@@ -32,10 +36,6 @@ from fetchai_crypto import FetchAIApi
 from aea.common import Address
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.base import LedgerApi
-from aea.crypto.cosmos import CosmosApi
-from aea.crypto.cosmos import DEFAULT_ADDRESS as COSMOS_DEFAULT_ADDRESS
-from aea.crypto.cosmos import DEFAULT_CHAIN_ID as COSMOS_DEFAULT_CHAIN_ID
-from aea.crypto.cosmos import DEFAULT_CURRENCY_DENOM as COSMOS_DEFAULT_CURRENCY_DENOM
 from aea.crypto.registries import (
     ledger_apis_registry,
     make_ledger_api,

@@ -19,19 +19,8 @@
 
 """This module contains the crypto modules."""
 
-from aea.crypto.cosmos import CosmosCrypto
-from aea.crypto.registries import register_crypto  # noqa
-from aea.crypto.registries import register_faucet_api, register_ledger_api
-
-
-register_crypto(
-    id_=CosmosCrypto.identifier, entry_point="aea.crypto.cosmos:CosmosCrypto"
-)
-
-register_faucet_api(
-    id_=CosmosCrypto.identifier, entry_point="aea.crypto.cosmos:CosmosFaucetApi"
-)
-
-register_ledger_api(
-    id_=CosmosCrypto.identifier, entry_point="aea.crypto.cosmos:CosmosApi",
+from aea.crypto.registries import (  # noqa
+    register_crypto,
+    register_faucet_api,
+    register_ledger_api,
 )

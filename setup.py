@@ -29,7 +29,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 def get_all_extras() -> Dict:
 
-    cosmos_ledger_deps = ["ecdsa==0.15", "bech32==1.2.0"]
+    cosmos_ledger_deps = [f"cosmos_crypto @ file://{here}/plugins/cosmos-crypto#egg=cosmos_crypto"]
 
     fetch_ledger_deps = [f"fetchai_crypto @ file://{here}/plugins/fetchai-crypto#egg=fetchai_crypto"]
 

@@ -22,10 +22,10 @@
 from unittest import TestCase
 
 import pytest
+from cosmos_crypto import CosmosCrypto
 from ethereum_crypto import EthereumCrypto
 from fetchai_crypto import FetchAICrypto
 
-from aea.crypto.cosmos import CosmosCrypto
 from aea.crypto.wallet import Wallet
 from aea.exceptions import AEAException
 

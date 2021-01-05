@@ -18,22 +18,22 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Setup script for "my_crypto" package."""
+"""Setup script for "cosmos_crypto" package."""
 
 from setuptools import find_packages, setup
 
 
 setup(
-    name="fetchai_crypto",
+    name="cosmos_crypto",
     version="0.1.0",
     author="Fetch.AI Limited",
     license="Apache-2.0",
-    description="Python package wrapping the public and private key cryptography and ledger api.",
-    packages=find_packages(include=["fetchai_crypto*"]),
+    description="Python package wrapping the public and private key cryptography and ledger api of Cosmos.",
+    packages=find_packages(include=["cosmos_crypto*"]),
     install_requires=["aea>=0.8.0,<0.9.0", "ecdsa==0.15", "bech32==1.2.0"],
     entry_points={
-        "aea.cryptos": ["fetchai = fetchai_crypto:FetchAICrypto"],
-        "aea.ledger_apis": ["fetchai = fetchai_crypto:FetchAIApi"],
-        "aea.faucet_apis": ["fetchai = fetchai_crypto:FetchAIFaucetApi"]
+        "aea.cryptos": ["cosmos = cosmos_crypto:CosmosCrypto"],
+        "aea.ledger_apis": ["cosmos = cosmos_crypto:CosmosApi"],
+        "aea.faucet_apis": ["cosmos = cosmos_crypto:CosmosFaucetApi"]
     },
 )
