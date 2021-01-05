@@ -21,6 +21,8 @@
 
 import os
 
+from aea.crypto.ethereum import EthereumCrypto as Ethereum
+from aea.helpers.base import CertRequest
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from packages.fetchai.connections.p2p_libp2p.connection import (
@@ -34,7 +36,7 @@ DEFAULT_PORT = 10234
 DEFAULT_DELEGATE_PORT = 11234
 DEFAULT_NET_SIZE = 4
 
-LIBP2P_LAUNCH_TIMEOUT = 110  # may downloads up to ~66Mb
+LIBP2P_LAUNCH_TIMEOUT = 10  # may downloads up to ~66Mb
 
 
 class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
@@ -65,6 +67,59 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
         self.set_config("{}.log_file".format(config_path), log_file)
         TestP2PLibp2pConnectionAEARunningDefaultConfigNode.log_files.append(log_file)
 
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
+
+        process = self.run_agent()
+        is_running = self.is_running(process, timeout=LIBP2P_LAUNCH_TIMEOUT)
+        assert is_running, "AEA not running within timeout!"
+
+        check_strings = "Peer running in "
+        missing_strings = self.missing_from_output(process, check_strings)
+        assert (
+            missing_strings == []
+        ), "Strings {} didn't appear in agent output.".format(missing_strings)
+
+        self.terminate_agents(process)
+        assert self.is_successfully_terminated(
+            process
+        ), "AEA wasn't successfully terminated."
+
+    @libp2p_log_on_failure
+    def test_agent_ethereum(self):
+        """Test with aea."""
+        key_path = "ethereum_private_key.txt"
+        self.generate_private_key(
+            ledger_api_id=Ethereum.identifier, private_key_file=key_path
+        )
+        self.add_private_key(
+            ledger_api_id=Ethereum.identifier, private_key_filepath=key_path
+        )
+        self.generate_private_key(private_key_file=self.conn_key_file)
+        self.add_private_key(private_key_filepath=self.conn_key_file, connection=True)
+        self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
+        self.run_cli_command("build", cwd=self._get_cwd())
+        self.set_config("agent.default_connection", str(P2P_CONNECTION_PUBLIC_ID))
+
+        # for logging
+        config_path = "vendor.fetchai.connections.p2p_libp2p.config"
+        log_file = "libp2p_node_{}.log".format(self.agent_name)
+        log_file = os.path.join(os.path.abspath(os.getcwd()), log_file)
+        self.set_config("{}.log_file".format(config_path), log_file)
+        TestP2PLibp2pConnectionAEARunningDefaultConfigNode.log_files.append(log_file)
+
+        self.nested_set_config(
+            "vendor.fetchai.connections.p2p_libp2p.cert_requests",
+            [
+                CertRequest(
+                    identifier="acn",
+                    ledger_id=Ethereum.identifier,
+                    not_after="2022-01-01",
+                    not_before="2021-01-01",
+                    public_key="fetchai",
+                    save_path=".certs/cli_test_cert.txt",
+                )
+            ],
+        )
         self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
         process = self.run_agent()
