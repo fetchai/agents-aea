@@ -12,7 +12,7 @@ Usually, an interaction involves three types of framework packages: skills, prot
 
 ## Example 1: negotiation
 
-In the <a href="../generic-skills">generic buyer/seller skills</a> the protocol `fetchai/fipa` is used for maintaining the negotiation dialogue between two AEAs. The skills `fetchai/generic_buyer` and `fetchai/generic_seller` are used to implement the handling and generating of individual messages and associated logic. The connextion `fetchai/p2p_libp2p` is used for connecting to the <a href="../acn">agent communication network</a>.
+In the <a href="../generic-skills">generic buyer/seller skills</a> the protocol `fetchai/fipa` is used for maintaining the negotiation dialogue between two AEAs. The skills `fetchai/generic_buyer` and `fetchai/generic_seller` are used to implement the handling and generating of individual messages and associated logic. The connection `fetchai/p2p_libp2p` is used for connecting to the <a href="../acn">agent communication network</a>.
 
 ## Example 2: AEA <> web client 
 

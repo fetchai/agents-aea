@@ -1,4 +1,4 @@
-# p2p stub connection
+# P2P stub connection
 
 Simple file based connection to perform interaction between multiple local agents.
 

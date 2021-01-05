@@ -7,13 +7,13 @@ Generic storage provides an API for general data manipulation in key-object styl
 
 
 ## Configuration
-Storage is enabled by providing in the agent configuration (`aea-config.yaml`) an optional `storage_uri`. The storage uri consists of the backend name and string data provided to selected backend.
+Storage is enabled by providing in the agent configuration (`aea-config.yaml`) an optional `storage_uri`. The storage URI consists of the backend name and string data provided to selected backend.
 
-The storage uri schema is `<BACKEND_NAME>://[Optional string]`
-Example: `storage_uri: sqlite://./some_file.db` tells the AEA to use sqlite backend and store data in `./some_file.db`.
+The storage URI schema is `<BACKEND_NAME>://[Optional string]`
+Example: `storage_uri: sqlite://./some_file.db` tells the AEA to use SQLite backend and store data in `./some_file.db`.
 
 Supported backends:
-* sqlite - bundled with python simple sql engine that uses file or in-memory storage.
+* SQLite - bundled with python simple SQL engine that uses file or in-memory storage.
 
 ## Dialogues and Storage integration
 
@@ -22,14 +22,14 @@ One of the most useful cases is the integration of the dialogues subsystem and s
 ### Keep terminal state dialogues
 
 The Dialogues class has the optional boolean argument `keep_terminal_state_dialogues`
-which specifies whether a dialogue which has reached its terminal state is kept in memory or not. If `keep_terminal_state_dialogues` is `False`, dialogues that reach a terminal state are removed from memory and can not be used anymore. If `keep_terminal_state_dialogues` is `True`, dialogues that reach a terminal state are kept.
+which specifies whether a dialogue which has reached its terminal state is kept in memory or not. If `keep_terminal_state_dialogues` is `False`, dialogues that reach a terminal state are removed from memory and can not be used any more. If `keep_terminal_state_dialogues` is `True`, dialogues that reach a terminal state are kept.
 
 It useful to save memory with dialogues that are in terminal state and probably will be never used again.
 
 Default behaviour on keep terminals state dialogues is set according to the protocol specification but can be set explicitly with skill configuration section.
 
 
-Skill configuration to keep terminated dialogues for DefaultDialogues.
+Skill configuration to keep terminated dialogues for `DefaultDialogues`.
 Example:
 ### Dialogues dump/restore on agent restart
 If storage is enabled then all the dialogues present in memory will be stored on agent's teardown and loaded on agent's start.
@@ -51,10 +51,10 @@ Storage is available with skill context: `self.context.storage`
 if `self.context.storage` is not None, storage is enabled and ready to use.
 
 Generic storage consists of two parts: objects and collections.
-Objects consist of the object_id (unique string) and object body. The object body is any json friendly python data type: list, dict, int, float, string, bool.
+Objects consist of the `object_id` (unique string) and object body. The object body is any JSON friendly python data type: `list`, `dict`, `int`, `float`, `string`, `bool`.
 
 Collection is a group of the objects, objects data types can vary in the same collection.
-Collection name is name consists of letters, numbers and _.
+Collection name is name consists of letters, numbers and `_`.
 
 
 To get/put specific object collection instance should be used.
@@ -114,7 +114,7 @@ List of collection methods:
 
 Simple behaviour example:
 
-it saves the datetime string of the first act and print it to stdout.
+It saves the `datetime` string of the first act and print it to stdout.
 ``` python
 class TestBehaviour(TickerBehaviour):
     """Simple behaviour to count how many acts were called."""
@@ -135,4 +135,4 @@ class TestBehaviour(TickerBehaviour):
 	    print("Act was called for the first time on:", first_call_datetime)
 ```
 
-Please, pay attention: datetime object is not json friendly and can not be stored directly. it should be transformed to timestamp or string before put intmo the storage.
+Please, pay attention: `datetime` object is not JSON friendly and can not be stored directly. it should be transformed to `timestamp` or string before put into the storage.

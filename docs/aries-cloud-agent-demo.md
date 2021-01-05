@@ -8,7 +8,7 @@ Demonstrating an entire decentralised identity scenario involving AEAs and insta
 
 ## Discussion
 
-This demo corresponds with the one <a href="https://github.com/hyperledger/aries-cloudagent-python/blob/master/demo/README.md" target="_blank">here</a> from <a href="https://github.com/hyperledger/aries-cloudagent-python" target="_blank"> aries cloud agent repository </a>.
+This demo corresponds with the one <a href="https://github.com/hyperledger/aries-cloudagent-python/blob/master/demo/README.md" target="_blank">here</a> from <a href="https://github.com/hyperledger/aries-cloudagent-python" target="_blank"> Aries cloud agent repository </a>.
 
 The aim of this demo is to illustrate how AEAs can connect to ACAs, thus gaining all of their capabilities, such as issuing and requesting verifiable credentials, selective disclosure and zero knowledge proofs.
 
@@ -24,7 +24,7 @@ The aim of this demo is to illustrate how AEAs can connect to ACAs, thus gaining
         activate aaca
         activate aaea
 
-        Note right of aaea: Shows p2p ID
+        Note right of aaea: Shows P2P ID
 
         faea->>faca: Request status?
         faca->>faea: status
@@ -58,7 +58,7 @@ Each AEA is connected to its corresponding ACA: **Alice_AEA** to **Alice_ACA** a
 The following lists the sequence of interactions between the four agents:
 
  * **Alice_AEA**: starts
- * **Alice_AEA**: shows its p2p address in the terminal and waits for an `invitation` detail from **Faber_AEA**.
+ * **Alice_AEA**: shows its P2P address in the terminal and waits for an `invitation` detail from **Faber_AEA**.
  * **Alice_AEA**: registers itself on the SOEF.
  * **Faber_AEA**: starts
  * **Faber_AEA**: searches the SOEF and finds **Alice_AEA**.
@@ -77,7 +77,7 @@ The following lists the sequence of interactions between the four agents:
 
 All messages from an AEA to an ACA are http requests (using `http_client` connection).
 
-All messages from an AEA to another AEA utilise the p2p communication network accessed via the `p2p_libp2p` connection.
+All messages from an AEA to another AEA utilise the P2P communication network accessed via the `p2p_libp2p` connection.
 
 All messages initiated from an ACA to an AEA are webhooks (using `webhook` connection).
 
@@ -107,7 +107,7 @@ Install Aries cloud-agents (for more info see <a href="https://github.com/hyperl
 pip install aries-cloudagent
 ```
 
-This demo has been successfully tested with aca-py version 0.4.5.
+This demo has been successfully tested with `aca-py` version `0.4.5`.
 
 This demo requires an instance of von network running in docker locally (for more info see <a href="https://github.com/bcgov/von-network#running-the-network-locally" target="_blank">here</a>)
 
@@ -257,7 +257,7 @@ Finally run **Alice_AEA**:
 aea run
 ```
 
-Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.13.0 -u public_uri` to retrieve the address.) We will refer to this as **Alice_AEA's p2p address**.
+Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.13.0 -u public_uri` to retrieve the address.) We will refer to this as **Alice_AEA's P2P address**.
 
 ### Faber_AEA
 
@@ -327,7 +327,7 @@ aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 }'
 ```
 
-where `SOME_ADDRESS` is **Alice_AEA's p2p address** as displayed in the third terminal.
+where `SOME_ADDRESS` is **Alice_AEA's P2P address** as displayed in the third terminal.
 
 ### Install the Dependencies and Run Faber_AEA:
 
@@ -370,5 +370,5 @@ aea delete aries_alice
 In the next update to this demo, the remaining interactions between AEAs and ACAs must be implemented. This means:
 
 * An instance of Indy ledger must be installed and running. See <a href="https://github.com/bcgov/von-network#running-the-network-locally" target="_blank">here</a> for more detail.
-* The commands for running the ACAs need to be adjusted. Additional options relating to a wallet (wallet-name, type, key, storage-type, config, creds) need to be fed to the ACAs as well as the ledger's genesis file so the ACAs can connect to the ledger.
+* The commands for running the ACAs need to be adjusted. Additional options relating to a wallet (wallet-name, type, key, storage-type, configuration, credentials) need to be fed to the ACAs as well as the ledger's genesis file so the ACAs can connect to the ledger.
 * The remaining interactions between the AEAs and ACAs as described <a href="../aries-cloud-agent-demo/#discussion">here</a> need to be implemented.

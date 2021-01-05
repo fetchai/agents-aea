@@ -5,7 +5,7 @@
 
 2. Determine the next AEA version and run `python scripts/bump_aea_version.py --new-version NEW_VERSION_HERE`. Commit if satisfied.
 
-3. Check the protocols are up-to-date by running `python scripts/generate_all_protocols.py`. Commit if changes occured.
+3. Check the protocols are up-to-date by running `python scripts/generate_all_protocols.py`. Commit if changes occurred.
 
 4. Bump all the packages to their latest versions by running `python scripts/update_package_versions.py`.
 
@@ -21,7 +21,7 @@
 
 10. Pull master, make a clean environment and create distributions: `python setup.py sdist bdist_wheel`.
 
-11. Publish to pypi with twine: `twine upload dist/*`. Optionally, publish to test-pypi with twine:
+11. Publish to PyPI with twine: `twine upload dist/*`. Optionally, publish to Test-PyPI with twine:
 `twine upload --repository-url https://test.pypi.org/legacy/ dist/*`.
 
 12. Make clean environment and install release from PyPI: `pip install aea[all] --no-cache`.

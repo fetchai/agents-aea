@@ -13,7 +13,7 @@ You can read more about the AEAs <a href="../app-areas/"> here </a>
 
 <details><summary>How do agents talk to others when they don't know each other?</summary>
 For the Autonomous Economic Agents (AEAs) to be able to talk to others, firstly they need to find them,
-and then, implement the same protocols in order to be able to deserialize the envelops they receive.
+and then, implement the same protocols in order to be able to deserialise the envelops they receive.
 <br><br>
 You can read more about the Search and Discovery <a href="../oef-ledger/">here</a> and more about envelops and protocols <a href="../core-components-1/">here</a>
 
@@ -23,12 +23,12 @@ You can read more about the Search and Discovery <a href="../oef-ledger/">here</
 The AEA framework enables the agents to interact with public blockchains to complete transactions. Currently, the framework supports
 two different networks natively: the <i>Fetch.ai</i> network and the <i>Ethereum</i> network.
 <br><br>
-You can read more about the intergration of ledger <a href="../ledger-integration/">here</a>
+You can read more about the integration of ledger <a href="../ledger-integration/">here</a>
 
 </details>
 
 <details><summary>How does one install third party libraries?</summary>
-The framework supports the use of third-party libraries hosted on PyPI. We can directly reference the external dependencies in an AEA package's configuration file. The <code>aea install</code> command will install each dependency that the specific AEA needs and is listed in the one of it's packages configuration files.
+The framework supports the use of third-party libraries hosted on PyPI. We can directly reference the external dependencies in an AEA package's configuration file. The CLI <code>install</code> command will install each dependency that the specific AEA needs and is listed in the one of it's packages configuration files.
 </details>
 
 <details><summary>How does one connect to a database?</summary>
@@ -55,8 +55,8 @@ The other option is to create a frontend client that will communicate with the a
 You can find a more detailed approach <a href="../connect-a-frontend/">here</a>.
 </details>
 
-<details><summary>Is the AEA framework ideal for agent-based modeling?</summary>
-The goal of agent-based modeling is to search for explanatory insight into the collective behavior of agents obeying simple rules, typically in natural systems rather than in designing agents or solving specific practical or engineering problems.
+<details><summary>Is the AEA framework ideal for agent-based modelling?</summary>
+The goal of agent-based modelling is to search for explanatory insight into the collective behaviour of agents obeying simple rules, typically in natural systems rather than in designing agents or solving specific practical or engineering problems.
 Although it would be potentially possible, it would be inefficient to use the AEA framework for that kind of problem.
 <br><br>
 You can find more details <a href="../app-areas/">here</a>

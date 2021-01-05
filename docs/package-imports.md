@@ -40,7 +40,7 @@ aea_name/
 
 The developer can create new directories where necessary but the core structure must remain the same.
 
-## AEA Config Yaml
+## AEA Configuration YAML
 
 The `aea-config.yaml` is the top level configuration file of an AEA. It defines the global configurations as well as the component/package dependencies of the AEA. In some sense, the AEA can therefore be understood as an orchestrator of components.
 

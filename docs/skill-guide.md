@@ -311,11 +311,11 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
         )
 ```
 
-We add this code in the file `my_aea/skills/my_search/my_model.py`, replacing its original content. We then renamce `my_aea/skills/my_search/my_model.py` to `my_aea/skills/my_search/dialogues.py`.
+We add this code in the file `my_aea/skills/my_search/my_model.py`, replacing its original content. We then rename `my_aea/skills/my_search/my_model.py` to `my_aea/skills/my_search/dialogues.py`.
 
-## Step 5: Create the config file
+## Step 5: Create the configuration file
 
-Based on our skill components above, we create the following config file.
+Based on our skill components above, we create the following configuration file.
 
 ``` yaml
 name: my_search
@@ -401,16 +401,16 @@ aea fingerprint skill fetchai/my_search:0.1.0
 ```
 Ensure, you use the correct author name to reference your skill (here we use `fetchai` as the author.)
 
-## Step 7: Add the oef protocol and connection
+## Step 7: Add the OEF protocol and connection
 
-Our AEA does not have the oef protocol yet so let's add it.
+Our AEA does not have the OEF protocol yet so let's add it.
 ``` bash
 aea add protocol fetchai/oef_search:0.11.0
 ```
 
 This adds the protocol to our AEA and makes it available on the path `packages.fetchai.protocols...`.
 
-We also need to add the soef and p2p connections and install the AEA's dependencies as well as configure the AEA:
+We also need to add the soef and P2P connections and install the AEA's dependencies as well as configure the AEA:
 ``` bash
 aea add connection fetchai/soef:0.14.0
 aea add connection fetchai/p2p_libp2p:0.13.0
@@ -451,12 +451,12 @@ Finally, certify the key for use by the connections that request that:
 aea issue-certificates
 ```
 
-Then we run the aea:
+Then we run the AEA:
 ``` bash
 aea run
 ```
 
-Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.13.0 -u public_uri` to retrieve the address.) This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the simple_service_registration AEA.
+Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.13.0 -u public_uri` to retrieve the address.) This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the `simple_service_registration` AEA.
 
 <details><summary>Click here to see full code</summary>
 <p>

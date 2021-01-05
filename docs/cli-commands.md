@@ -5,14 +5,14 @@
 | `add [package_type] [public_id]`            | Add a `package_type` connection, contract, protocol, or skill, with `[public_id]`, to the AEA. `add --local` to add from local `packages` directory. |
 | `add-key [ledger_id] file [--connection]`   | Add a private key from a file for `ledger_id`.	                             |
 | `build`                                     | Build the agent and its components.                      |
-| `config get [path]`                         | Reads the config specified in `path` and prints its target.                |
+| `config get [path]`                         | Reads the configuration specified in `path` and prints its target.                |
 | `config set [path] [--type TYPE]`           | Sets a new value for the target of the `path`. Optionally cast to type.    |
-| `create [name]`                             | Create a new aea project called `name`.                                    |
-| `delete [name]`                             | Delete an aea project. See below for disabling a resource.                   |
+| `create [name]`                             | Create a new AEA project called `name`.                                    |
+| `delete [name]`                             | Delete an AEA project. See below for disabling a resource.                   |
 | `eject [package_type] [public_id]`          | Move a package of `package_type` and `package_id` from vendor to project working directory. |
-| `fetch [public_id]`                         | Fetch an aea project with `public_id`. `fetch --local` to fetch from local `packages` directory. |
+| `fetch [public_id]`                         | Fetch an AEA project with `public_id`. `fetch --local` to fetch from local `packages` directory. |
 | `fingerprint [package_type] [public_id]`    | Fingerprint connection, contract, protocol, or skill, with `public_id`.    |
-| `freeze`                                    | Get all the dependencies needed for the aea project and its components.      |
+| `freeze`                                    | Get all the dependencies needed for the AEA project and its components.      |
 | `generate protocol [protocol_spec_path]`    | Generate a protocol from the specification.                                  |
 | `generate-key [ledger_id]`                  | Generate private keys. The AEA uses a private key to derive the associated public key and address. |
 | `generate-wealth [ledger_id]`               | Generate wealth for address on test network.                                 |

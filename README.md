@@ -73,15 +73,15 @@ A framework for autonomous economic agent (AEA) development
   </a>
 </p>
 
-## Alternatively: Use Pipx (CLI usage only)
+## Alternatively: Use `pipx` (CLI usage only)
 
-1. Install [PipX](https://github.com/pipxproject/pipx)
+1. Install [pipx](https://github.com/pipxproject/pipx)
 
 2. Install the package from [PyPI](https://pypi.org/project/aea/):
 
        pipx install aea[all]
 
-3. Run aea cli e.g.:
+3. Run AEA CLI e.g.:
 
        aea --help
 
@@ -149,7 +149,7 @@ The following steps are **only relevant if you intend to contribute** to the rep
 
       make package_checks
 
-- For testing aea.{SUBMODULE} with tests/test_{TESTMODULE} use:
+- For testing `aea.{SUBMODULE}` with `tests/test_{TESTMODULE}` use:
 
       make dir={SUBMODULE} tdir={TESTMODULE} test-sub
 
@@ -177,7 +177,7 @@ The following steps are **only relevant if you intend to contribute** to the rep
 
 - To run static type checks: `tox -e mypy` or `make static`
 
-- To run pylint: `tox -e pylint` or `make pylint`
+- To run `pylint`: `tox -e pylint` or `make pylint`
 
 - To run security checks: `tox -e bandit` and `tox -e safety` or `make security`
 

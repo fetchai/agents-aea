@@ -1,7 +1,7 @@
 
 These instructions detail the Python code you need for running an AEA outside the `cli` tool, using the code interface.
 
-## Preperation
+## Preparation
 
 Get the packages directory from the AEA repository:
 

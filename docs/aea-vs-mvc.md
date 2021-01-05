@@ -5,7 +5,7 @@ The AEA framework borrows several concepts from popular web frameworks like <a h
 Both aforementioned web frameworks use the <a href="https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller" target="_blank">MVC</a> (model-view-controller) architecture.
 
 - Models: contain business logic and data representations
-- View: contain the html templates
+- View: contain the HTML templates
 - Controller: deals with the request-response handling
 
 ## Comparison to AEA framework

@@ -42,4 +42,4 @@ And then, the `fetchai/aea-deploy:latest` image:
 
 
 ## TODO
-We need to add support for setting the connection endpoints for OEF/Ledger so they can be used a deploytime. I would suggest these are set as environment variables if possible.
+We need to add support for setting the connection endpoints for OEF/Ledger so they can be used a deploy time. I would suggest these are set as environment variables if possible.

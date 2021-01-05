@@ -18,7 +18,7 @@ When an agent registers with the soef, it is issued with a _unique reference_ wh
 
 Agents identify themselves in a number of ways. These include their address, their given name, their classification and their genus. They can also describe how they "look" in other ways, and specify the services that they provide. 
 
-In order to register, agents _must_ provide a valid address and a given name. The address can be for the Fetch.ai native ledger, the Fetch.ai Cosmos ledger or the ethereum ledger. It is this that uniquely identifies them, and addresses cannot be duplicated or shared. The given name can be anything and it is not used for search filtering. Typically, it can be thought of as a debugging aid or a context. Names could be Alice, Bob or Jim, as well as they could be a flight number, train identity or reference code. They _appear_ in find results, but are not used to find by.
+In order to register, agents _must_ provide a valid address and a given name. The address can be for the Fetch.ai native ledger, the Fetch.ai Cosmos ledger or the Ethereum ledger. It is this that uniquely identifies them, and addresses cannot be duplicated or shared. The given name can be anything and it is not used for search filtering. Typically, it can be thought of as a debugging aid or a context. Names could be Alice, Bob or Jim, as well as they could be a flight number, train identity or reference code. They _appear_ in find results, but are not used to find by.
 
 ## Describing an Agent
 
@@ -32,7 +32,7 @@ We cover all of these in this next section. It's important to understand the dif
 
 ### Personality Pieces
 
-Agents can have a number of personality peices. These describe how an agent appears, where it is, and other properties such as heading, supported protocols and types of transactions. All personality pieces are optional, but **the more you set, the easier it is for searchers to narrow you down accurately**. 
+Agents can have a number of personality pieces. These describe how an agent appears, where it is, and other properties such as heading, supported protocols and types of transactions. All personality pieces are optional, but **the more you set, the easier it is for searchers to narrow you down accurately**. 
 
 | Piece               | Description                                                  |
 | ------------------- | ------------------------------------------------------------ |
@@ -68,7 +68,7 @@ The best way to use genus is to pick the **best fit** choice. If there isn't one
 
 #### Architectures
 
-An architecture is a clue to other agents to describe how the agent is built. The vast majority of agents will be built using the Fetch Agent Framework, but in some cases, such as light-weight IoT devices or test/debugging, agents are built otherwise. Architecture offers a way of describing or filtering, as agents with a similar architecture are more likely to be able to communicate with each other in a meaninful way.
+An architecture is a clue to other agents to describe how the agent is built. The vast majority of agents will be built using the Fetch Agent Framework, but in some cases, such as light-weight IoT devices or test/debugging, agents are built otherwise. Architecture offers a way of describing or filtering, as agents with a similar architecture are more likely to be able to communicate with each other in a meaningful way.
 
 | Architecture     | Description                           |
 | ---------------- | ------------------------------------- |
@@ -90,7 +90,7 @@ When filtering by classifications, the `*` wildcard can be used to, for example,
 
 ### Service Keys
 
-Agents can have a number of service keys. Service keys are simple key/value pairs that describe the list of services that the agent provides. Whilst personality pieces can be thought of as how an agent _looks_, service keys are what an agent _has_ or _does_. Service keys are user defined and as with personality pieces, currently have no convention for formatting. They are at the agent builder's descretion. As this changes, the documentation will be updated. However, for _buyer_ agents, three suggested keys are:
+Agents can have a number of service keys. Service keys are simple key/value pairs that describe the list of services that the agent provides. Whilst personality pieces can be thought of as how an agent _looks_, service keys are what an agent _has_ or _does_. Service keys are user defined and as with personality pieces, currently have no convention for formatting. They are at the agent builder's discretion. As this changes, the documentation will be updated. However, for _buyer_ agents, three suggested keys are:
 
 ```bash
 buying_genus
@@ -169,7 +169,7 @@ Until version 1.0 and main-net version 2 (expected in early 2021), some of the s
 Agents register at the `/register` page on the soef. They are expected to provide four pieces of information:
 
 1. An API key
-2. A chain identifier, which can be either `fetchai_v1` for the Fetch native network (testnet or mainnet), `fetchai_v2_*` for the Fetch version 2 network or `ethereum` for the ethereum network. See the "Chain identifiers" table below for a complete list of supported chain identifiers. 
+2. A chain identifier, which can be either `fetchai_v1` for the Fetch native network (testnet or mainnet), `fetchai_v2_*` for the Fetch version 2 network or `ethereum` for the Ethereum network. See the "Chain identifiers" table below for a complete list of supported chain identifiers. 
 3. An address, which must be a valid address for the specified chain identifier
 4. A "given name" (see "Concepts", above), which can be anything from Alice to Bob, or a flight number, or any other user-given context. It must not exceed 128 characters. 
 
@@ -241,7 +241,7 @@ The soef has a number of commands that can be used to set or update personality 
 
 | Parameter           | Use                                                          |
 | ------------------- | ------------------------------------------------------------ |
-| `range_in_km` | Range in kilometers to include agents in results. |
+| `range_in_km` | Range in kilometres to include agents in results. |
 | `of_heading` | Optional: if a pizza-slice type search is required, this is the direction, in degrees, with 0.0 being north. |
 | `within` | Optional: if a pizza-slice search, this is the angle in degrees from the `of_heading` that is allowed. If either `of_heading` or `within` are specified, **both** must be specified. Example: `of_heading` set to 90.0 and `within` set to 30 would exclude any agents that are not within 30 degrees of direct east of the me agent. |
 | `chains_must_match` | Boolean. Must be `true` or `false`. Default is `false`. If specified, this ensures that any agents returned in the search will have the same chain identifier as you. |
@@ -273,5 +273,5 @@ You can find further information, or talk to us, in the #agents channel on our o
 
 We welcome your feedback and strive to deliver the best decentralised search and discovery service for agents that is possible. There are many upcoming features, including the operation incentive mechanisms, additional security and encryption, active searches (where results happen without `find_around_me` being issued), non-geographic searches across one and many soef nodes and dimensional-reduction based approximate searches. 
 
-[Docs: issue 15, 0.3.4, 28-Dec-2020, TWS]
+[Docs: issue 15, `0.3.4`, `28-Dec-2020`, TWS]
 
