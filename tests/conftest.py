@@ -31,7 +31,7 @@ import time
 from functools import WRAPPER_ASSIGNMENTS, wraps
 from pathlib import Path
 from types import FunctionType, MethodType
-from typing import Callable, Dict, List, Optional, Sequence, Tuple, cast
+from typing import Callable, Dict, List, Optional, Sequence, Tuple, Union, cast
 from unittest.mock import patch
 
 import docker as docker
@@ -67,7 +67,7 @@ from aea.crypto.fetchai import _FETCHAI
 from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS
 from aea.crypto.registries import ledger_apis_registry, make_crypto
 from aea.crypto.wallet import CryptoStore
-from aea.helpers.base import CertRequest
+from aea.helpers.base import CertRequest, SimpleId
 from aea.identity.base import Identity
 from aea.test_tools.click_testing import CliRunner as ImportedCliRunner
 from aea.test_tools.constants import DEFAULT_AUTHOR
@@ -880,7 +880,7 @@ def _make_libp2p_client_connection(
     node_port: int = 11234,
     node_host: str = "127.0.0.1",
     uri: Optional[str] = None,
-    ledger_api_id: str = DEFAULT_LEDGER,
+    ledger_api_id: Union[SimpleId, str] = DEFAULT_LEDGER,
 ) -> P2PLibp2pClientConnection:
     crypto = make_crypto(ledger_api_id)
     identity = Identity("", address=crypto.address)
