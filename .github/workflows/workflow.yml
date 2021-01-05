@@ -135,10 +135,17 @@ jobs:
       - uses: actions/setup-python@master
         with:
           python-version: 3.6
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      - name: Install markdown-spellcheck
+        run: sudo npm install -g markdown-spellcheck
       - name: Check Docs links
         run: tox -e check_doc_links
       - name: Check API Docs updated
         run: tox -e check_api_docs
+      - name: Check spelling
+        run: tox -e spell_check
 
 
   integration_checks:
