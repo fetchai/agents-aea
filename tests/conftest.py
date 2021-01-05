@@ -823,7 +823,7 @@ def _make_libp2p_connection(
     cert_request = CertRequest(
         conn_crypto_store.public_keys[DEFAULT_LEDGER],
         POR_DEFAULT_SERVICE_ID,
-        DEFAULT_LEDGER,
+        key.identifier,
         "2021-01-01",
         "2021-01-02",
         f"./{key.address}_cert.txt",
@@ -880,13 +880,14 @@ def _make_libp2p_client_connection(
     node_port: int = 11234,
     node_host: str = "127.0.0.1",
     uri: Optional[str] = None,
+    ledger_api_id: Optional[str] = DEFAULT_LEDGER,
 ) -> P2PLibp2pClientConnection:
-    crypto = make_crypto(DEFAULT_LEDGER)
+    crypto = make_crypto(ledger_api_id)
     identity = Identity("", address=crypto.address)
     cert_request = CertRequest(
         peer_public_key,
         POR_DEFAULT_SERVICE_ID,
-        DEFAULT_LEDGER,
+        ledger_api_id,
         "2021-01-01",
         "2021-01-02",
         f"./{crypto.address}_cert.txt",

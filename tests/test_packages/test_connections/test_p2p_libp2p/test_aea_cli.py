@@ -21,6 +21,8 @@
 
 import os
 
+from aea.crypto.ethereum import EthereumCrypto as Ethereum
+from aea.helpers.base import CertRequest
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from packages.fetchai.connections.p2p_libp2p.connection import (

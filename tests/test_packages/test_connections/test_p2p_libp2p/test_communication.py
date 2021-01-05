@@ -19,12 +19,14 @@
 
 """This test module contains tests for P2PLibp2p connection."""
 
+from aea.crypto.fetchai import FetchAICrypto
 import os
 import shutil
 import tempfile
 
 import pytest
 
+from aea.crypto.ethereum import EthereumCrypto
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 
@@ -53,21 +55,37 @@ class TestP2PLibp2pConnectionConnectDisconnect:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-        cls.connection = _make_libp2p_connection()
-
     @pytest.mark.asyncio
-    async def test_p2plibp2pconnection_connect_disconnect(self):
+    async def test_p2plibp2pconnection_connect_disconnect_default(self):
         """Test connect then disconnect."""
-        assert self.connection.is_connected is False
+        connection = _make_libp2p_connection()
+
+        assert connection.is_connected is False
         try:
-            await self.connection.connect()
-            assert self.connection.is_connected is True
+            await connection.connect()
+            assert connection.is_connected is True
         except Exception as e:
-            await self.connection.disconnect()
+            await connection.disconnect()
             raise e
 
-        await self.connection.disconnect()
-        assert self.connection.is_connected is False
+        await connection.disconnect()
+        assert connection.is_connected is False
+
+    @pytest.mark.asyncio
+    async def test_p2plibp2pconnection_connect_disconnect_ethereum(self):
+        """Test connect then disconnect."""
+        connection = _make_libp2p_connection(agent_key=EthereumCrypto())
+
+        assert connection.is_connected is False
+        try:
+            await connection.connect()
+            assert connection.is_connected is True
+        except Exception as e:
+            await connection.disconnect()
+            raise e
+
+        await connection.disconnect()
+        assert connection.is_connected is False
 
     @classmethod
     def teardown_class(cls):
@@ -95,7 +113,9 @@ class TestP2PLibp2pConnectionEchoEnvelope:
         cls.multiplexers = []
 
         try:
-            cls.connection1 = _make_libp2p_connection(DEFAULT_PORT + 1)
+            cls.connection1 = _make_libp2p_connection(
+                agent_key=FetchAICrypto(), port=DEFAULT_PORT + 1
+            )
             cls.multiplexer1 = Multiplexer([cls.connection1])
             cls.log_files.append(cls.connection1.node.log_file)
             cls.multiplexer1.connect()
@@ -104,7 +124,9 @@ class TestP2PLibp2pConnectionEchoEnvelope:
             genesis_peer = cls.connection1.node.multiaddrs[0]
 
             cls.connection2 = _make_libp2p_connection(
-                port=DEFAULT_PORT + 2, entry_peers=[genesis_peer]
+                port=DEFAULT_PORT + 2,
+                entry_peers=[genesis_peer],
+                agent_key=EthereumCrypto(),
             )
             cls.multiplexer2 = Multiplexer([cls.connection2])
             cls.log_files.append(cls.connection2.node.log_file)
@@ -137,7 +159,6 @@ class TestP2PLibp2pConnectionEchoEnvelope:
             protocol_id=DefaultMessage.protocol_id,
             message=msg,
         )
-
         self.multiplexer1.put(envelope)
         delivered_envelope = self.multiplexer2.get(block=True, timeout=20)
 
