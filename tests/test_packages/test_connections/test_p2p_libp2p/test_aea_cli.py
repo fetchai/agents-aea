@@ -19,10 +19,10 @@
 
 """This test module contains AEA cli tests for P2PLibp2p connection."""
 
+import json
 import os
 
 from aea.crypto.ethereum import EthereumCrypto as Ethereum
-from aea.helpers.base import CertRequest
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from packages.fetchai.connections.p2p_libp2p.connection import (
@@ -84,8 +84,26 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
             process
         ), "AEA wasn't successfully terminated."
 
+    @classmethod
+    def teardown_class(cls):
+        """Tear down the test"""
+        cls.terminate_agents()
+
+        super(TestP2PLibp2pConnectionAEARunningDefaultConfigNode, cls).teardown_class()
+
+
+class TestP2PLibp2pConnectionAEARunningEthereumConfigNode(AEATestCaseEmpty):
+    """Test AEA with p2p_libp2p connection is correctly run"""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up"""
+        super(TestP2PLibp2pConnectionAEARunningEthereumConfigNode, cls).setup_class()
+        cls.conn_key_file = os.path.join(os.path.abspath(os.getcwd()), "./conn_key.txt")
+        cls.log_files = []
+
     @libp2p_log_on_failure
-    def test_agent_ethereum(self):
+    def test_agent(self):
         """Test with aea."""
         key_path = "ethereum_private_key.txt"
         self.generate_private_key(
@@ -98,6 +116,7 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
         self.add_private_key(private_key_filepath=self.conn_key_file, connection=True)
         self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
         self.run_cli_command("build", cwd=self._get_cwd())
+        self.set_config("agent.default_ledger", Ethereum.identifier)
         self.set_config("agent.default_connection", str(P2P_CONNECTION_PUBLIC_ID))
 
         # for logging
@@ -105,21 +124,21 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
         log_file = "libp2p_node_{}.log".format(self.agent_name)
         log_file = os.path.join(os.path.abspath(os.getcwd()), log_file)
         self.set_config("{}.log_file".format(config_path), log_file)
-        TestP2PLibp2pConnectionAEARunningDefaultConfigNode.log_files.append(log_file)
-
-        self.nested_set_config(
-            "vendor.fetchai.connections.p2p_libp2p.cert_requests",
+        self.log_files.append(log_file)
+        setting_path = "vendor.fetchai.connections.p2p_libp2p.cert_requests"
+        settings = json.dumps(
             [
-                CertRequest(
-                    identifier="acn",
-                    ledger_id=Ethereum.identifier,
-                    not_after="2022-01-01",
-                    not_before="2021-01-01",
-                    public_key="fetchai",
-                    save_path=".certs/cli_test_cert.txt",
-                )
-            ],
+                {
+                    "identifier": "acn",
+                    "ledger_id": Ethereum.identifier,
+                    "not_after": "2022-01-01",
+                    "not_before": "2021-01-01",
+                    "public_key": "fetchai",
+                    "save_path": ".certs/conn_cert.txt",
+                }
+            ]
         )
+        self.set_config(setting_path, settings, type_="list")
         self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
         process = self.run_agent()
@@ -142,7 +161,7 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
         """Tear down the test"""
         cls.terminate_agents()
 
-        super(TestP2PLibp2pConnectionAEARunningDefaultConfigNode, cls).teardown_class()
+        super(TestP2PLibp2pConnectionAEARunningEthereumConfigNode, cls).teardown_class()
 
 
 class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
