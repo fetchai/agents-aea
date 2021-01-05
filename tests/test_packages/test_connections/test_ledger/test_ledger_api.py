@@ -25,11 +25,11 @@ from typing import cast
 from unittest.mock import Mock, patch
 
 import pytest
+from ethereum_crypto import EthereumCrypto
 
 from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
-from aea.crypto import EthereumCrypto
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.registries import make_crypto, make_ledger_api
 from aea.helpers.async_utils import AsyncState

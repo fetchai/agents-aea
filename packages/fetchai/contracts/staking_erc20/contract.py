@@ -21,11 +21,12 @@
 
 import logging
 
+from ethereum_crypto import EthereumApi
+
 from aea.common import Address, JSONLike
 from aea.configurations.base import PublicId
 from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
-from aea.crypto.ethereum import EthereumApi
 
 
 _default_logger = logging.getLogger(

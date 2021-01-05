@@ -23,11 +23,11 @@ import logging
 from unittest import mock
 
 import pytest
+from ethereum_crypto import EthereumApi, EthereumCrypto
 from fetchai_crypto import FetchAIApi
 
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.cosmos import CosmosApi, CosmosCrypto
-from aea.crypto.ethereum import EthereumApi, EthereumCrypto
 from aea.crypto.ledger_apis import LedgerApis
 from aea.exceptions import AEAEnforceError
 

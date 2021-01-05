@@ -18,7 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Setup script for "fetchai_crypto" package."""
+"""Setup script for "my_crypto" package."""
 
 from setuptools import find_packages, setup
 
@@ -28,7 +28,7 @@ setup(
     version="0.1.0",
     author="Fetch.AI Limited",
     license="Apache-2.0",
-    description="Python package wrapping the public and private key cryptography and ledger API of Fetch.AI.",
+    description="Python package wrapping the public and private key cryptography and ledger api.",
     packages=find_packages(include=["fetchai_crypto*"]),
     install_requires=["aea>=0.8.0,<0.9.0", "ecdsa==0.15", "bech32==1.2.0"],
     entry_points={

@@ -27,6 +27,7 @@ from unittest.mock import patch
 
 import pytest
 import web3
+from ethereum_crypto import DEFAULT_ADDRESS as ETHEREUM_DEFAULT_ADDRESS
 from fetchai_crypto import DEFAULT_ADDRESS as FETCHAI_DEFAULT_ADDRESS
 
 from aea.configurations.base import ComponentType, ContractConfig
@@ -34,7 +35,6 @@ from aea.configurations.loader import load_component_configuration
 from aea.contracts import contract_registry
 from aea.contracts.base import Contract
 from aea.contracts.scaffold.contract import MyScaffoldContract
-from aea.crypto.ethereum import DEFAULT_ADDRESS as ETHEREUM_DEFAULT_ADDRESS
 from aea.crypto.registries import crypto_registry, ledger_apis_registry
 from aea.exceptions import AEAComponentLoadException
 

@@ -246,6 +246,7 @@ jobs:
     - if: matrix.os == 'macos-latest'
       name: Install dependencies (macos-latest)
       run: |
+        pip install --user --upgrade setuptools
         pip install tox
         brew install gcc
         # brew install protobuf
@@ -258,6 +259,7 @@ jobs:
       env:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: true
       run: |
+        pip install --user --upgrade setuptools
         pip install tox
         echo "::add-path::C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64"
         choco install protoc --version 3.11.4

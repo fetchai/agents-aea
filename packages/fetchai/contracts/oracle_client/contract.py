@@ -21,11 +21,12 @@
 
 import logging
 
+from ethereum_crypto import EthereumApi
+
 from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
-from aea.crypto.ethereum import EthereumApi
 
 
 PUBLIC_ID = PublicId.from_str("fetchai/oracle_client:0.1.0")

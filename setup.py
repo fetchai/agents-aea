@@ -33,11 +33,7 @@ def get_all_extras() -> Dict:
 
     fetch_ledger_deps = [f"fetchai_crypto @ file://{here}/plugins/fetchai-crypto#egg=fetchai_crypto"]
 
-    ethereum_ledger_deps = [
-        "web3==5.12.0",
-        "ipfshttpclient==0.6.1",
-        "eth-account==0.5.2",
-    ]
+    ethereum_ledger_deps = [f"ethereum_crypto @ file://{here}/plugins/ethereum-crypto#egg=ethereum_crypto"]
 
     crypto_deps = [*fetch_ledger_deps, *ethereum_ledger_deps, *cosmos_ledger_deps]
 
