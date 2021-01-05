@@ -19,7 +19,7 @@
 
 """Implementation of the 'aea issue_certificates' subcommand."""
 import os
-from typing import cast
+from typing import Dict, List, cast
 
 import click
 from click import ClickException
@@ -107,6 +107,7 @@ def _process_connection(
         return
 
     logger.debug(f"Processing connection '{connection_id}'...")
+    cert_requests = cast(List[Dict], cert_requests)
     for cert_request_json in cert_requests:
         cert_request = CertRequest.from_json(cert_request_json)
         click.echo(
