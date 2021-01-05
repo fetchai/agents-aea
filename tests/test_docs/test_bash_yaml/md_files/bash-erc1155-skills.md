@@ -20,6 +20,15 @@ aea config set --type dict agent.default_routing \
   "fetchai/ledger_api:0.8.0": "fetchai/ledger:0.11.0",
   "fetchai/oef_search:0.11.0": "fetchai/soef:0.14.0"
 }'
+aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
+'[{
+    "identifier": "acn",
+    "ledger_id": ethereum,
+    "not_after": "2022-01-01",
+    "not_before": "2021-01-01",
+    "public_key": fetchai,
+    "save_path": ".certs/conn_cert.txt",
+}]'
 ```
 ``` bash
 aea config set agent.default_ledger ethereum
@@ -57,6 +66,15 @@ aea config set --type dict agent.default_routing \
   "fetchai/ledger_api:0.8.0": "fetchai/ledger:0.11.0",
   "fetchai/oef_search:0.11.0": "fetchai/soef:0.14.0"
 }'
+aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
+'[{
+    "identifier": "acn",
+    "ledger_id": ethereum,
+    "not_after": "2022-01-01",
+    "not_before": "2021-01-01",
+    "public_key": fetchai,
+    "save_path": ".certs/conn_cert.txt",
+}]'
 ```
 ``` bash
 aea config set agent.default_ledger ethereum

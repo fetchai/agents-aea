@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains the integration test for the generic buyer and seller skills."""
+import json
 
 import pytest
 
@@ -27,6 +28,8 @@ from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_ME
 from tests.conftest import (
     ETHEREUM,
     ETHEREUM_PRIVATE_KEY_FILE,
+    FETCHAI,
+    FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
     FUNDED_ETH_PRIVATE_KEY_2,
     FUNDED_ETH_PRIVATE_KEY_3,
     MAX_FLAKY_RERUNS_ETH,
@@ -88,7 +91,24 @@ class TestOracleSkills(AEATestCaseMany, UseGanache):
         self.replace_private_key_in_file(
             FUNDED_ETH_PRIVATE_KEY_3, ETHEREUM_PRIVATE_KEY_FILE
         )
-
+        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
+        self.add_private_key(
+            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+        )
+        setting_path = "vendor.fetchai.connections.p2p_libp2p.cert_requests"
+        settings = json.dumps(
+            [
+                {
+                    "identifier": "acn",
+                    "ledger_id": ETHEREUM,
+                    "not_after": "2022-01-01",
+                    "not_before": "2021-01-01",
+                    "public_key": FETCHAI,
+                    "save_path": ".certs/conn_cert.txt",
+                }
+            ]
+        )
+        self.set_config(setting_path, settings, type_="list")
         self.run_install()
 
         # add packages for agent two
@@ -122,6 +142,7 @@ class TestOracleSkills(AEATestCaseMany, UseGanache):
         # run oracle agent
         self.set_agent_context(oracle_agent_name)
         self.run_cli_command("build", cwd=self._get_cwd())
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
         oracle_aea_process = self.run_agent()
 
         check_strings = (

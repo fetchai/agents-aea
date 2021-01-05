@@ -376,24 +376,24 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
         self.replace_private_key_in_file(
             NON_FUNDED_FETCHAI_PRIVATE_KEY_1, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
         )
-        setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.set_config(setting_path, FETCHAI)
+        setting_path = "vendor.fetchai.connections.p2p_libp2p.cert_requests"
+        settings = json.dumps(
+            [
+                {
+                    "identifier": "acn",
+                    "ledger_id": ETHEREUM,
+                    "not_after": "2022-01-01",
+                    "not_before": "2021-01-01",
+                    "public_key": FETCHAI,
+                    "save_path": ".certs/conn_cert.txt",
+                }
+            ]
+        )
+        self.set_config(setting_path, settings, type_="list")
         setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
         self.set_config(setting_path, ETHEREUM)
         setting_path = "vendor.fetchai.skills.tac_control.is_abstract"
         self.set_config(setting_path, True, "bool")
-        setting_path = "vendor.fetchai.connections.p2p_libp2p.cert_requests"
-        cert_requests = [
-            {
-                "identifier": "acn",
-                "ledger_id": "ethereum",
-                "not_after": "2022-01-01",
-                "not_before": "2021-01-01",
-                "public_key": "ethereum",
-                "save_path": "conn_cert.txt",
-            }
-        ]
-        self.set_config(setting_path, json.dumps(cert_requests), type_="list")
 
         # replace location
         setting_path = (
@@ -460,20 +460,20 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
             # set p2p configs
             setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
             self.nested_set_config(setting_path, config)
-            setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-            self.set_config(setting_path, FETCHAI)
             setting_path = "vendor.fetchai.connections.p2p_libp2p.cert_requests"
-            cert_requests = [
-                {
-                    "identifier": "acn",
-                    "ledger_id": "ethereum",
-                    "not_after": "2022-01-01",
-                    "not_before": "2021-01-01",
-                    "public_key": "ethereum",
-                    "save_path": "conn_cert.txt",
-                }
-            ]
-            self.set_config(setting_path, json.dumps(cert_requests), type_="list")
+            settings = json.dumps(
+                [
+                    {
+                        "identifier": "acn",
+                        "ledger_id": ETHEREUM,
+                        "not_after": "2022-01-01",
+                        "not_before": "2021-01-01",
+                        "public_key": FETCHAI,
+                        "save_path": ".certs/conn_cert.txt",
+                    }
+                ]
+            )
+            self.set_config(setting_path, settings, type_="list")
 
             # replace location
             setting_path = (

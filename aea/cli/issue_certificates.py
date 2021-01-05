@@ -19,19 +19,18 @@
 
 """Implementation of the 'aea issue_certificates' subcommand."""
 import os
-from pathlib import Path
-from typing import cast
+from typing import Dict, List, cast
 
 import click
 from click import ClickException
 
-from aea.cli.utils.config import load_item_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.loggers import logger
-from aea.cli.utils.package_utils import get_package_path_unified
-from aea.configurations.base import ConnectionConfig, PublicId
+from aea.cli.utils.package_utils import get_dotted_package_path_unified
+from aea.configurations.base import PublicId
 from aea.configurations.constants import CONNECTION
+from aea.configurations.manager import AgentConfigManager, VariableDoesNotExist
 from aea.crypto.helpers import make_certificate
 from aea.crypto.registries import crypto_registry
 from aea.exceptions import enforce
@@ -47,10 +46,13 @@ def issue_certificates(click_context):
     issue_certificates_(ctx)
 
 
-def issue_certificates_(ctx):
+def issue_certificates_(ctx: Context):
     """Issue certificates for connections that require them."""
-    for connection_id in ctx.agent_config.connections:
-        _process_connection(ctx, connection_id)
+    agent_config_manager = AgentConfigManager.load(ctx.cwd)
+
+    # agent_config_manager.
+    for connection_id in agent_config_manager.agent_config.connections:
+        _process_connection(ctx, agent_config_manager, connection_id)
 
     click.echo("All certificates have been issued.")
 
@@ -92,20 +94,24 @@ def _process_certificate(
     click.echo(f"Generated signature: '{cert}'")
 
 
-def _process_connection(ctx: Context, connection_id: PublicId):
-    path = get_package_path_unified(ctx, CONNECTION, connection_id)
-    connection_config = cast(ConnectionConfig, load_item_config(CONNECTION, Path(path)))
-    if (
-        connection_config.cert_requests is None
-        or len(connection_config.cert_requests) == 0
-    ):
+def _process_connection(
+    ctx: Context, agent_config_manager: AgentConfigManager, connection_id: PublicId
+):
+    path = get_dotted_package_path_unified(ctx, CONNECTION, connection_id)
+    path_to_cert_requests = f"{path}.cert_requests"
+
+    try:
+        cert_requests = agent_config_manager.get_variable(path_to_cert_requests)
+    except VariableDoesNotExist:
         logger.debug("No certificates to process.")
         return
 
     logger.debug(f"Processing connection '{connection_id}'...")
-    for cert_request in connection_config.cert_requests:
+    cert_requests = cast(List[Dict], cert_requests)
+    for cert_request_json in cert_requests:
+        cert_request = CertRequest.from_json(cert_request_json)
         click.echo(
-            f"Issuing certificate '{cert_request.identifier}' for connection {connection_config.public_id}..."
+            f"Issuing certificate '{cert_request.identifier}' for connection {connection_id}..."
         )
         _process_certificate(ctx, cert_request, connection_id)
         click.echo(
