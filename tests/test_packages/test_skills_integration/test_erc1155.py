@@ -33,6 +33,7 @@ from tests.conftest import (
     FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
     FUNDED_ETH_PRIVATE_KEY_2,
     FUNDED_ETH_PRIVATE_KEY_3,
+    MAX_FLAKY_RERUNS_ETH,
     NON_FUNDED_FETCHAI_PRIVATE_KEY_1,
     NON_GENESIS_CONFIG,
     UseGanache,
@@ -46,7 +47,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseGanache):
 
     @pytest.mark.integration
     @pytest.mark.ledger
-    @pytest.mark.flaky(reruns=0)  # cause possible network issues
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_ETH)  # cause possible network issues
     def test_generic(self):
         """Run the generic skills sequence."""
         deploy_aea_name = "deploy_aea"
