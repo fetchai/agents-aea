@@ -89,10 +89,16 @@ def contract(ctx: Context, contract_name: str) -> None:
 
 @scaffold.command()
 @click.argument("protocol_name", type=str, required=True)
+@click.option("-y", "--yes", is_flag=True, default=False)
 @pass_ctx
-def protocol(ctx: Context, protocol_name: str):
+def protocol(ctx: Context, protocol_name: str, yes: bool):
     """Add a protocol scaffolding to the configuration file and agent."""
-    scaffold_item(ctx, PROTOCOL, protocol_name)
+    if yes or click.confirm(
+        "We highly recommend auto-generating protocols with the aea generate command. Do you really want to continue scaffolding?"
+    ):
+        scaffold_item(ctx, PROTOCOL, protocol_name)
+    else:
+        click.echo("Aborted. Exit")  # pragma: nocover
 
 
 @scaffold.command()

@@ -2,7 +2,7 @@
 The agent communication network (ACN) provides a system for agents to find each other and communicate, solely based on their wallet addresses. It addresses the message delivery problem.
 
 ## Message delivery problem
-Agents need to contact each others. Given the wallet address of a target agent, how can the originator agent deliver a message to it whilst guarantying certain properties?
+Agents need to contact each others. Given the wallet address of a target agent, how can the originator agent deliver a message to it whilst guaranteeing certain properties?
 
 The properties we would like to have are:
 

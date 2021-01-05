@@ -160,9 +160,9 @@ You should get `1000000000000000000000`.
 </div>
 
 
-## Update SOEF configs for both AEAs
+## Update SOEF configurations for both AEAs
 
-To update the SOEF config, run in each AEA project:
+To update the SOEF configuration, run in each AEA project:
 ``` bash
 aea config set vendor.fetchai.connections.soef.config.chain_identifier ethereum
 ```
@@ -187,7 +187,7 @@ At some point you should see the log output:
 registering service on SOEF.
 ```
 
-Then, update the configuration of the client AEA's p2p connection by appending the following
+Then, update the configuration of the client AEA's P2P connection by appending the following
 YAML text at the end of the `aea-config.yaml` file:
 
 ``` yaml

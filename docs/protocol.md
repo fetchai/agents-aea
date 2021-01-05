@@ -421,7 +421,7 @@ class SellerDialogues(FipaDialogues):
         )
 ```
 
-Next, we can immitate a dialogue between the buyer and the seller. We first instantiate the dialogues models:
+Next, we can imitate a dialogue between the buyer and the seller. We first instantiate the dialogues models:
 ``` python
 buyer_address = "buyer_address_stub"
 seller_address = "seller_address_stub"

@@ -32,7 +32,7 @@ aea fetch fetchai/weather_station:0.19.0
 cd weather_station
 ```
 
-### Update the AEA configs
+### Update the AEA configurations
 
 In the terminal change the configuration:
 ``` bash

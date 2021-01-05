@@ -1,8 +1,8 @@
-This guide demonstrates how to configure an AEA to interact with a database using python-sql objects.
+This guide demonstrates how to configure an AEA to interact with a database using `python-sql` objects.
 
 ## Discussion
 
-Object-relational-mapping is the idea of being able to write SQL queries, using the object-oriented paradigm of your preferred programming language. The scope of the specific demo is to demonstrate how to create an easy configurable AEA that reads data from a database using ORMs.
+Object-relational-mapping (ORM) is the idea of being able to write SQL queries, using the object-oriented paradigm of your preferred programming language. The scope of the specific demo is to demonstrate how to create an easy configurable AEA that reads data from a database using ORMs.
 
 - We assume, that you followed the guide for the <a href="../thermometer-skills/"> thermometer-skills. </a>
 - We assume, that we have a database `genericdb.db` with table name `data`. This table contains the following columns `timestamp` and `thermometer`
@@ -171,7 +171,7 @@ aea generate-key fetchai
 ```
 
 
-### Update the seller and buyer AEA skill configs
+### Update the seller and buyer AEA skill configurations
 
 In `my_thermometer_aea/vendor/fetchai/skills/thermometer/skill.yaml`, replace the `data_for_sale` with your data:
 ``` yaml
@@ -224,7 +224,7 @@ models:
     class_name: Strategy
 ```
 
-After changing the skill config files you should run the following command for both agents to install each dependency:
+After changing the skill configuration files you should run the following command for both agents to install each dependency:
 ``` bash
 aea install
 ```
@@ -245,7 +245,7 @@ Import the newly installed library to your strategy.
 ``` python
 import sqlalchemy as db
 ```
-Then modify your strategy's \_\_init__ function to match the following code:
+Then modify your strategy's `__init__` function to match the following code:
 ``` python
 class Strategy(GenericStrategy):
     """This class defines a strategy for the agent."""

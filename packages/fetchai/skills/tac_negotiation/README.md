@@ -8,14 +8,14 @@ This skill is part of the Fetch.ai TAC demo. It manages registration and searchi
 
 ## Behaviours
 
-* clean_up: updates and cleans up confirmed and pending transactions 
-* tac_negotiation: registers/unregisters the agent and its buyeing/selling services on the SOEF 
+* `clean_up`: updates and cleans up confirmed and pending transactions 
+* `tac_negotiation`: registers/unregisters the agent and its buying/selling services on the SOEF 
 
 ## Handlers
 
-* fipa: handles fipa messages for negotiation
-* oef: handles oef_search messages to manage the buyers/sellers it finds
-* signing: handles signing messages for transaction signing by the decision maker
+* `fipa`: handles `fipa` messages for negotiation
+* `oef`: handles `oef_search` messages to manage the buyers/sellers it finds
+* `signing`: handles `signing` messages for transaction signing by the decision maker
 
 ## Links
 

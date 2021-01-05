@@ -42,7 +42,7 @@ aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
 ```
 
-Then update the agent config with the default routing:
+Then update the agent configuration with the default routing:
 ``` bash
 aea config set --type dict agent.default_routing \
 '{
@@ -78,7 +78,7 @@ Finally, certify the key for use by the connections that request that:
 aea issue-certificates
 ```
 
-The oracle AEAs require either a locally runnning test node or a connection to a remote testnet.
+The oracle AEAs require either a locally running test node or a connection to a remote testnet.
 
 ### Setting up with a local Ganache node
 

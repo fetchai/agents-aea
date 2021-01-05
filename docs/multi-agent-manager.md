@@ -3,7 +3,7 @@ The <a href="../api/manager">`MultiAgentManager`</a> allows managing multiple ag
 
 ## Setup
 
-We intantiate the manager by providing it with the working directory in which to operate and starting it:
+We instantiate the manager by providing it with the working directory in which to operate and starting it:
 
 ``` python
 from pathlib import Path

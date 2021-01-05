@@ -20,7 +20,7 @@ E.g.:
 
     ./develop-image/scripts/docker-run.sh -- /bin/bash
  
-As before, to pass params to the `docker run` command:
+As before, to pass parameters to the `docker run` command:
 
     ./develop-image/scripts/docker-run.sh -p 8080:80 -- /bin/bash
 

@@ -8,14 +8,14 @@ This skill is part of the Fetch.ai thermometer demo. It finds an agent which sel
 
 ## Behaviours
 
-* search: searches for thermometer data selling service on SOEF 
+* `search`: searches for thermometer data selling service on SOEF 
 
 ## Handlers
 
-* fipa: handles fipa messages for negotiation
-* ledger_api: handles ledger_api messages for payment
-* oef_search: handles oef_search messages to manage the sellers it finds
-* signing: handles signing messages for transaction signing by the decision maker
+* `fipa`: handles `fipa` messages for negotiation
+* `ledger_api`: handles `ledger_api` messages for payment
+* `oef_search`: handles `oef_search` messages to manage the sellers it finds
+* `signing`: handles `signing` messages for transaction signing by the decision maker
 
 
 ## Links

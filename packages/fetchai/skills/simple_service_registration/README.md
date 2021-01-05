@@ -8,11 +8,11 @@ This skill is used in the "Guide on Writing a Skill" section in the documentatio
 
 ## Behaviours
 
-* service: registers and unregisters a service on the SOEF 
+* `service`: registers and unregisters a service on the SOEF 
 
 ## Handlers
 
-* oef_search: handles oef_search messages if interactions with SOEF is erratic
+* `oef_search`: handles `oef_search` messages if interactions with SOEF is erratic
 
 ## Links
 

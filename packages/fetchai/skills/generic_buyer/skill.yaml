@@ -6,7 +6,7 @@ description: The weather client skill implements the skill to purchase weather d
 license: Apache-2.0
 aea_version: '>=0.8.0, <0.9.0'
 fingerprint:
-  README.md: QmTR91jm7WfJpmabisy74NR5mc35YXjDU1zQAUKZeHRw8L
+  README.md: Qmc6uZti6UnPffNxFY5c5oqmC6eD59FFCLBBfa5uNHmSnN
   __init__.py: QmTFcEyvXkQYYpJTey4HfMB3hbxYUTALwmCGYSgJGHQFTU
   behaviours.py: QmTRvLnJBHu6JCk8dzwxExs3YAauBAJMeM2ypPXWd4NBRZ
   dialogues.py: QmNen91qQDWy4bNBKrB3LabAP5iRf29B8iwYss4NB13iNU

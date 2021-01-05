@@ -79,7 +79,7 @@ You can inspect the `libp2p_node.log` log files of the AEA to see how they disco
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>
-  <p>Currently `p2p_libp2p` connection limits the message total size to 3Mb.
+  <p>Currently `p2p_libp2p` connection limits the message total size to 3 MB.
 </p>
 </div>
 
@@ -109,7 +109,7 @@ config:
   local_uri: 127.0.0.1:9001
 ```
 
-Note, this configuration change must be made for all of the agents which are attempting to communicate via the Agent Communication Network, i.e. BOTH Agent_A and Agent_B will require the above modifications to their `aea-config.yaml` file, however different ports need to be specified in the `local_uri.` This will allow both of these agents to default to this communication network, without the added overhead of opening/specifying ports/hosts on the individual host machines running the agents.
+Note, this configuration change must be made for all of the agents which are attempting to communicate via the Agent Communication Network, i.e. BOTH `Agent_A` and `Agent_B` will require the above modifications to their `aea-config.yaml` file, however different ports need to be specified in the `local_uri.` This will allow both of these agents to default to this communication network, without the added overhead of opening/specifying ports/hosts on the individual host machines running the agents.
 
 
 ## Configuring the `connection.yaml` entries:

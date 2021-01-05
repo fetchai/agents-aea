@@ -5,7 +5,7 @@ The AEA weather skills demonstrate an interaction between two AEAs.
 
 ## Discussion
 
-The scope of the specific demo is to demonstrate how to create a simple AEA with the usage of the AEA framework and a database. The weather_station AEA
+The scope of the specific demo is to demonstrate how to create a simple AEA with the usage of the AEA framework and a database. The `weather_station` AEA
 will read data from the database, that is populated with readings from a weather station, based on the requested dates and will deliver the data to the client upon payment.
 This demo does not utilize a smart contract. As a result, we interact with a ledger only to complete a transaction.
 
@@ -184,7 +184,7 @@ aea run
 
 Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.13.0 -u public_uri` to retrieve the address.) This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the weather station.
 
-<!-- Then, in the weather client, update the configuration of the client AEA's p2p connection by appending the following YAML text at the end of the `aea-config.yaml` file:
+<!-- Then, in the weather client, update the configuration of the client AEA's P2P connection by appending the following YAML text at the end of the `aea-config.yaml` file:
 
 ``` yaml
 ---

@@ -6,5 +6,5 @@ This contract package is used to interface with a Fetch Oracle contract, which m
 
 ## Functions
 
-* grantRole(oracle_role, oracle_address): grant oracle role to address `oracle_address`
-* updateOracleValue(value, decimals, txExpirationBlock): update oracle contract value to `value` with `decimals` decimal places, to expire at block `txExpirationBlock`
+* `grantRole(oracle_role, oracle_address)`: grant oracle role to address `oracle_address`
+* `updateOracleValue(value, decimals, txExpirationBlock)`: update oracle contract value to `value` with `decimals` decimal places, to expire at block `txExpirationBlock`

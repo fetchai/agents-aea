@@ -6,7 +6,7 @@ description: The thermometer skill implements the functionality to sell data.
 license: Apache-2.0
 aea_version: '>=0.8.0, <0.9.0'
 fingerprint:
-  README.md: QmUH2RCKZZ3sKBptXtYZaFJTsJFyk5P1aeTNYYV1YPRNxP
+  README.md: QmQZAKsfoQqq2F85f6sEreJ3pfjVmoqyyjPsKB54tYLJDh
   __init__.py: QmVoi5eZuPbS5wwd3q9svpghzapdZ6wWU7QwKGyUf6vqjM
   behaviours.py: QmWgXU9qgahXwMKNqLLfDiGNYJozSXv2SVMkoPDQncC7ok
   dialogues.py: QmPXfUWDxnHDaHQqsgtVhJ2v9dEgGWLtvEHKFvvFcDXGms

@@ -50,7 +50,7 @@ This diagram shows the communication between the various entities during the reg
 
 ### Transaction communication
 
-This diagram shows the communication between two AEAs and the controller. In this case, we have an AEA in the role of the seller, referred to as Seller_Agent. We also have an AEA in the role of the biyer, referred to as Buyer_Agent. During a given TAC, an AEA can be in both roles simultaneously in different bilateral interactions.
+This diagram shows the communication between two AEAs and the controller. In this case, we have an AEA in the role of the seller, referred to as `Seller_Agent`. We also have an AEA in the role of the buyer, referred to as `Buyer_Agent`. During a given TAC, an AEA can be in both roles simultaneously in different bilateral interactions.
 
 <div class="mermaid">
     sequenceDiagram
@@ -227,7 +227,7 @@ To set the registration time, you may find handy the following command:
 aea config set vendor.fetchai.skills.tac_control.models.parameters.args.registration_start_time "$(date -d "2 minutes" +'%d %m %Y %H:%M')"
 ```
 
-### Update the connection params
+### Update the connection parameters
 
 Briefly run the controller AEA:
 
