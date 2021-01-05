@@ -192,6 +192,7 @@ class P2PLibp2pClientConnection(Connection):
         record.peer_public_key = self.node_por.representative_public_key
         record.signature = self.node_por.signature
         record.service_id = POR_DEFAULT_SERVICE_ID
+        record.ledger_id = self.node_por.ledger_id
 
         registration = Register()
         registration.record.CopyFrom(record)  # pylint: disable=no-member
