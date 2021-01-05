@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains the integration test for the generic buyer and seller skills."""
+import json
 from random import uniform
 
 import pytest
@@ -29,7 +30,6 @@ from tests.conftest import (
     ETHEREUM,
     ETHEREUM_PRIVATE_KEY_FILE,
     FETCHAI,
-    FETCHAI_PRIVATE_KEY_FILE,
     FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
     FUNDED_ETH_PRIVATE_KEY_2,
     FUNDED_ETH_PRIVATE_KEY_3,
@@ -47,7 +47,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseGanache):
 
     @pytest.mark.integration
     @pytest.mark.ledger
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_ETH)  # cause possible network issues
+    @pytest.mark.flaky(reruns=0)  # cause possible network issues
     def test_generic(self):
         """Run the generic skills sequence."""
         deploy_aea_name = "deploy_aea"
@@ -92,9 +92,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseGanache):
         self.replace_private_key_in_file(
             FUNDED_ETH_PRIVATE_KEY_3, ETHEREUM_PRIVATE_KEY_FILE
         )
-        self.generate_private_key(FETCHAI)
         self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
             FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
@@ -103,8 +101,20 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseGanache):
         )
         setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
         self.set_config(setting_path, "ethereum")
-        setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.set_config(setting_path, FETCHAI)
+        setting_path = "vendor.fetchai.connections.p2p_libp2p.cert_requests"
+        settings = json.dumps(
+            [
+                {
+                    "identifier": "acn",
+                    "ledger_id": ETHEREUM,
+                    "not_after": "2022-01-01",
+                    "not_before": "2021-01-01",
+                    "public_key": FETCHAI,
+                    "save_path": ".certs/conn_cert.txt",
+                }
+            ]
+        )
+        self.set_config(setting_path, settings, type_="list")
         self.run_install()
 
         # replace location
@@ -137,9 +147,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseGanache):
         self.replace_private_key_in_file(
             FUNDED_ETH_PRIVATE_KEY_2, ETHEREUM_PRIVATE_KEY_FILE
         )
-        self.generate_private_key(FETCHAI)
         self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
             FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
@@ -147,6 +155,20 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseGanache):
         self.set_config(setting_path, "ethereum")
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
         self.nested_set_config(setting_path, NON_GENESIS_CONFIG)
+        setting_path = "vendor.fetchai.connections.p2p_libp2p.cert_requests"
+        settings = json.dumps(
+            [
+                {
+                    "identifier": "acn",
+                    "ledger_id": ETHEREUM,
+                    "not_after": "2022-01-01",
+                    "not_before": "2021-01-01",
+                    "public_key": FETCHAI,
+                    "save_path": ".certs/conn_cert.txt",
+                }
+            ]
+        )
+        self.set_config(setting_path, settings, type_="list")
         self.run_install()
 
         # replace location

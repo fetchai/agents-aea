@@ -746,6 +746,21 @@ class CertRequest:
         """Get the save_path"""
         return self._save_path
 
+    @property
+    def public_key_or_identifier(self) -> str:
+        """Get the public key or identifier."""
+        if (self.public_key is None and self.key_identifier is None) or (
+            self.public_key is not None and self.key_identifier is not None
+        ):
+            raise ValueError(
+                "Exactly one of key_identifier or public_key can be specified."
+            )
+        if self.public_key is not None:
+            result = self.public_key
+        elif self.key_identifier is not None:
+            result = self.key_identifier
+        return result
+
     def get_message(self, public_key: str) -> bytes:  # pylint: disable=no-self-use
         """Get the message to sign."""
         message = public_key.encode("ascii")
@@ -774,12 +789,9 @@ class CertRequest:
             ledger_id=self.ledger_id,
             not_before=self._not_before_string,
             not_after=self._not_after_string,
+            public_key=self.public_key_or_identifier,
             save_path=str(self.save_path),
         )
-        if self.public_key is not None:
-            result["public_key"] = self.public_key
-        elif self.key_identifier is not None:
-            result["public_key"] = self.key_identifier
         return result
 
     @classmethod
