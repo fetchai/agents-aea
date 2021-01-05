@@ -66,7 +66,7 @@ component_overrides = {
       "not_after": '2022-01-01',
       "not_before": '2021-01-01',
       "public_key": "fetchai",
-      "save_path": "fetchai/weather_station/.certs/conn_cert.txt"
+      "save_path": f"{weather_station_id.author}/{weather_station_id.name}/.certs/conn_cert.txt"
     }]
 }
 manager.add_agent(weather_station_id, component_overrides=[component_overrides], agent_overrides=agent_overrides)
@@ -88,7 +88,7 @@ component_overrides = {
       "not_after": '2022-01-01',
       "not_before": '2021-01-01',
       "public_key": "fetchai",
-      "save_path": "fetchai/weather_client/.certs/conn_cert.txt"
+      "save_path": f"{weather_client_id.author}/{weather_client_id.name}/.certs/conn_cert.txt"
     }]
 }
 agent_overrides = {
