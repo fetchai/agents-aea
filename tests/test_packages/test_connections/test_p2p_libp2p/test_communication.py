@@ -19,7 +19,6 @@
 
 """This test module contains tests for P2PLibp2p connection."""
 
-from aea.crypto.fetchai import FetchAICrypto
 import os
 import shutil
 import tempfile
@@ -27,6 +26,7 @@ import tempfile
 import pytest
 
 from aea.crypto.ethereum import EthereumCrypto
+from aea.crypto.fetchai import FetchAICrypto
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 
