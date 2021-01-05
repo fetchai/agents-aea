@@ -5,11 +5,11 @@ First, import the python and application specific libraries and set the static v
 ``` python
 import logging
 
-from aea.crypto.fetchai import FetchAICrypto
+from fetchai_crypto import FetchAICrypto
+
 from aea.crypto.helpers import create_private_key, try_generate_testnet_wealth
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
-
 
 logger = logging.getLogger("aea")
 logging.basicConfig(level=logging.INFO)
@@ -86,7 +86,8 @@ Finally, we create a transaction that sends the funds to the `wallet_2`
 ``` python
 import logging
 
-from aea.crypto.fetchai import FetchAICrypto
+from fetchai_crypto import FetchAICrypto
+
 from aea.crypto.helpers import create_private_key, try_generate_testnet_wealth
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet

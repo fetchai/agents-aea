@@ -20,6 +20,11 @@
 """Module wrapping all the public and private keys cryptography."""
 from typing import Any, Dict, Optional, Tuple, Union
 
+from fetchai_crypto import DEFAULT_ADDRESS as FETCHAI_DEFAULT_ADDRESS
+from fetchai_crypto import DEFAULT_CHAIN_ID as FETCHAI_DEFAULT_CHAIN_ID
+from fetchai_crypto import DEFAULT_CURRENCY_DENOM as FETCHAI_DEFAULT_CURRENCY_DENOM
+from fetchai_crypto import FetchAIApi
+
 from aea.common import Address
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.base import LedgerApi
@@ -33,10 +38,6 @@ from aea.crypto.ethereum import (
     DEFAULT_CURRENCY_DENOM as ETHEREUM_DEFAULT_CURRENCY_DENOM,
 )
 from aea.crypto.ethereum import EthereumApi
-from aea.crypto.fetchai import DEFAULT_ADDRESS as FETCHAI_DEFAULT_ADDRESS
-from aea.crypto.fetchai import DEFAULT_CHAIN_ID as FETCHAI_DEFAULT_CHAIN_ID
-from aea.crypto.fetchai import DEFAULT_CURRENCY_DENOM as FETCHAI_DEFAULT_CURRENCY_DENOM
-from aea.crypto.fetchai import FetchAIApi
 from aea.crypto.registries import (
     ledger_apis_registry,
     make_ledger_api,

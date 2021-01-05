@@ -20,3 +20,4 @@
 """Python package wrapping the public and private key cryptography and ledger api."""
 
 from .fetchai import *  # noqa
+from .fetchai import _FETCHAI, _FETCH  # noqa

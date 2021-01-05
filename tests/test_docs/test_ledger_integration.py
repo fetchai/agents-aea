@@ -23,8 +23,8 @@ from pathlib import Path
 from unittest import mock
 from unittest.mock import MagicMock
 
-from aea.crypto import FetchAICrypto
-from aea.crypto.fetchai import FetchAIApi, FetchAIFaucetApi
+from fetchai_crypto import FetchAIApi, FetchAICrypto, FetchAIFaucetApi
+
 from aea.crypto.registries import (
     crypto_registry,
     faucet_apis_registry,

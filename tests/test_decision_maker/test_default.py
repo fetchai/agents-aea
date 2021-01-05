@@ -24,11 +24,11 @@ from typing import Optional, cast
 from unittest import mock
 
 import pytest
+from fetchai_crypto import FetchAIApi, FetchAICrypto
 
 import aea
 import aea.decision_maker.default
 from aea.configurations.base import PublicId
-from aea.crypto.fetchai import FetchAIApi, FetchAICrypto
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMaker
 from aea.decision_maker.default import DecisionMakerHandler

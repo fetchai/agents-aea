@@ -25,10 +25,10 @@ from unittest.mock import mock_open, patch
 
 import pytest
 import requests
+from fetchai_crypto import FetchAICrypto
 
 from aea.crypto.cosmos import CosmosCrypto
 from aea.crypto.ethereum import EthereumCrypto
-from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import (
     create_private_key,
     make_certificate,

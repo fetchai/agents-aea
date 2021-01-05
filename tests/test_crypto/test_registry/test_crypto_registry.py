@@ -24,11 +24,11 @@ import string
 from unittest import mock
 
 import pytest
+from fetchai_crypto import FetchAICrypto
 
 import aea.crypto
 from aea.crypto.cosmos import CosmosCrypto
 from aea.crypto.ethereum import EthereumCrypto
-from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.registries.base import EntryPoint
 from aea.exceptions import AEAException
 

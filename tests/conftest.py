@@ -37,6 +37,8 @@ from unittest.mock import patch
 import docker as docker
 import gym
 import pytest
+from fetchai_crypto import DEFAULT_ADDRESS as FETCHAI_DEFAULT_ADDRESS
+from fetchai_crypto import _FETCHAI
 
 from aea import AEA_DIR
 from aea.aea import AEA
@@ -62,8 +64,6 @@ from aea.crypto.ethereum import (
     DEFAULT_CURRENCY_DENOM as ETHEREUM_DEFAULT_CURRENCY_DENOM,
 )
 from aea.crypto.ethereum import EthereumApi, EthereumCrypto, _ETHEREUM
-from aea.crypto.fetchai import DEFAULT_ADDRESS as FETCHAI_DEFAULT_ADDRESS
-from aea.crypto.fetchai import _FETCHAI
 from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS
 from aea.crypto.registries import ledger_apis_registry, make_crypto
 from aea.crypto.wallet import CryptoStore

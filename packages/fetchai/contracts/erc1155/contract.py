@@ -24,6 +24,7 @@ import logging
 import random
 from typing import Dict, List, Optional, cast
 
+from fetchai_crypto import FetchAIApi
 from vyper.utils import keccak256
 
 from aea.common import Address, JSONLike
@@ -32,7 +33,6 @@ from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
 from aea.crypto.cosmos import CosmosApi
 from aea.crypto.ethereum import EthereumApi
-from aea.crypto.fetchai import FetchAIApi
 
 
 _default_logger = logging.getLogger("aea.packages.fetchai.contracts.erc1155.contract")

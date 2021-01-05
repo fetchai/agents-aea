@@ -22,11 +22,12 @@ import uuid
 from threading import Thread
 from typing import Dict, List, Optional, Tuple, Type, Union
 
+from fetchai_crypto import FetchAICrypto
+
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
 from aea.components.base import Component
 from aea.configurations.base import SkillConfig
-from aea.crypto.fetchai import FetchAICrypto
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.skills.base import Handler, Skill, SkillContext

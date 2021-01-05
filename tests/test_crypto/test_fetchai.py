@@ -24,8 +24,7 @@ from unittest import mock
 from unittest.mock import MagicMock, call
 
 import pytest
-
-from aea.crypto.fetchai import FetchAIApi, FetchAICrypto, FetchAIFaucetApi
+from fetchai_crypto import FetchAIApi, FetchAICrypto, FetchAIFaucetApi
 
 from tests.conftest import (
     FETCHAI_PRIVATE_KEY_PATH,

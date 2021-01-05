@@ -26,6 +26,7 @@ from unittest.mock import MagicMock
 
 import pytest
 from click import BadParameter, ClickException, UsageError
+from fetchai_crypto import DEFAULT_CHAIN_ID
 from jsonschema import ValidationError
 from yaml import YAMLError
 
@@ -63,7 +64,6 @@ from aea.configurations.constants import (
     DEFAULT_SKILL,
     LEDGER_CONNECTION,
 )
-from aea.crypto.fetchai import DEFAULT_CHAIN_ID
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.helpers.base import cd
