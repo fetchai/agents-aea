@@ -26,6 +26,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Union
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
 from aea.cli.fetch import fetch_agent_locally
+from aea.cli.issue_certificates import issue_certificates_
 from aea.cli.registry.fetch import fetch_agent
 from aea.cli.utils.context import Context
 from aea.configurations.base import AgentConfig, PublicId
@@ -202,6 +203,12 @@ class AgentAlias(_Base):
     def get_aea_instance(self) -> AEA:
         """Build new aea instance."""
         return self.builder.build()
+
+    def issue_certificates(self) -> None:
+        """Issue the certificates for this agent."""
+        ctx = Context(cwd=self.project.path)
+        ctx.agent_config = self.agent_config
+        issue_certificates_(ctx)
 
     def set_overrides(
         self,

@@ -196,14 +196,12 @@ def run():
     # Add the P2P connection
     cert_path = ".certs/conn_cert.txt"
     cert_request = CertRequest(
-        **{
-            "identifier": "acn",
-            "ledger_id": FetchAICrypto.identifier,
-            "not_after": "2022-01-01",
-            "not_before": "2021-01-01",
-            "public_key": "fetchai",
-            "save_path": cert_path,
-        },
+        identifier="acn",
+        ledger_id=FetchAICrypto.identifier,
+        not_after="2022-01-01",
+        not_before="2021-01-01",
+        public_key="fetchai",
+        save_path=cert_path,
     )
     public_key = wallet.connection_cryptos.public_keys.get(FetchAICrypto.identifier)
     message = cert_request.get_message(public_key)
