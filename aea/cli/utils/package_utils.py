@@ -229,6 +229,20 @@ def get_package_path_unified(ctx: Context, item_type: str, public_id: PublicId) 
     return get_package_path(ctx, item_type, public_id, is_vendor=False)
 
 
+def get_dotted_package_path_unified(ctx: Context, *args) -> str:
+    """
+    Get a *dotted* path for a package, either vendor or not.
+
+    :param ctx: the CLI context.
+    :param args: arguments for 'get_package_path_unified'
+    :return: the dotted path to the package.
+    """
+    path = get_package_path_unified(ctx, *args)
+    path_relative_to_cwd = Path(path).relative_to(Path(ctx.cwd))
+    relative_path_str = str(path_relative_to_cwd).replace(os.sep, ".")
+    return relative_path_str
+
+
 def copy_package_directory(src: Path, dst: str) -> Path:
     """
      Copy a package directory to the agent vendor resources.
