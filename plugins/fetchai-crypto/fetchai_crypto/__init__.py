@@ -19,5 +19,5 @@
 
 """Python package wrapping the public and private key cryptography and ledger api."""
 
-from .fetchai import *  # noqa
-from .fetchai import _FETCHAI, _FETCH  # noqa
+from .fetchai import *  # noqa isort:skip
+from .fetchai import _FETCH, _FETCHAI  # noqa isort:skip

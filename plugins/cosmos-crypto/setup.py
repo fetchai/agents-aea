@@ -34,6 +34,6 @@ setup(
     entry_points={
         "aea.cryptos": ["cosmos = cosmos_crypto:CosmosCrypto"],
         "aea.ledger_apis": ["cosmos = cosmos_crypto:CosmosApi"],
-        "aea.faucet_apis": ["cosmos = cosmos_crypto:CosmosFaucetApi"]
+        "aea.faucet_apis": ["cosmos = cosmos_crypto:CosmosFaucetApi"],
     },
 )

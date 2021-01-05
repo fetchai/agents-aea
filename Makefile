@@ -40,9 +40,9 @@ clean-test:
 
 .PHONY: lint
 lint:
-	black aea benchmark examples packages scripts tests
-	isort aea benchmark examples packages scripts tests
-	flake8 aea benchmark examples packages scripts tests
+	black aea benchmark examples packages plugins scripts tests
+	isort aea benchmark examples packages plugins scripts tests
+	flake8 aea benchmark examples packages plugins scripts tests
 	vulture aea scripts/whitelist.py --exclude "*_pb2.py"
 
 .PHONY: pylint
@@ -51,13 +51,13 @@ pylint:
 
 .PHONY: security
 security:
-	bandit -r aea benchmark examples packages
+	bandit -r aea benchmark examples packages plugins
 	bandit -s B101 -r tests scripts
 	safety check -i 37524 -i 38038 -i 37776 -i 38039
 
 .PHONY: static
 static:
-	mypy aea benchmark examples packages scripts tests
+	mypy aea benchmark examples packages plugins scripts tests
 
 .PHONY: package_checks
 package_checks:

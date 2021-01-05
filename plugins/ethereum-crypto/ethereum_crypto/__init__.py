@@ -19,5 +19,5 @@
 
 """Python package wrapping the public and private key cryptography and ledger api of Ethereum."""
 
-from .ethereum import *  # noqa
-from .ethereum import _ETHEREUM, _ABI, _BYTECODE  # noqa
+from .ethereum import *  # noqa isort:skip
+from .ethereum import _ABI, _BYTECODE, _ETHEREUM  # noqa isort:skip

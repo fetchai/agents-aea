@@ -39,6 +39,6 @@ setup(
     entry_points={
         "aea.cryptos": ["ethereum = ethereum_crypto:EthereumCrypto"],
         "aea.ledger_apis": ["ethereum = ethereum_crypto:EthereumApi"],
-        "aea.faucet_apis": ["ethereum = ethereum_crypto:EthereumFaucetApi"]
+        "aea.faucet_apis": ["ethereum = ethereum_crypto:EthereumFaucetApi"],
     },
 )
