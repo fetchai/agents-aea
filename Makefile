@@ -57,7 +57,7 @@ security:
 
 .PHONY: static
 static:
-	mypy aea benchmark examples packages plugins scripts tests
+	mypy aea benchmark examples packages scripts tests
 
 .PHONY: package_checks
 package_checks:
