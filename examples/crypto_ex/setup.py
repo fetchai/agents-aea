@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,24 +17,15 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Contains the AEA package."""
+from setuptools import find_packages, setup
 
-import inspect
-import os
 
-import aea.crypto  # triggers registry population
-from aea.__version__ import (
-    __author__,
-    __copyright__,
-    __description__,
-    __license__,
-    __title__,
-    __url__,
-    __version__,
+setup(
+    name="my_crypto",
+    version="0.1.0",
+    author="Fetch.AI Limited",
+    description="A custom crypto plug-in for the AEA framework.",
+    packages=find_packages(include=["my_crypto*"]),
+    install_requires=["aea>=0.8.0,<0.9.0"],
+    entry_points={"aea.cryptos": ["my_crypto = my_crypto:MyCrypto"]},
 )
-from aea.crypto.plugin import load_all_cryptos
-
-
-AEA_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
-
-load_all_cryptos()
