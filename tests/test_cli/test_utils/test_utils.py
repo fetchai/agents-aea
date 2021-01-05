@@ -44,6 +44,7 @@ from aea.cli.utils.package_utils import (
     _override_ledger_configurations,
     find_item_in_distribution,
     find_item_locally,
+    get_dotted_package_path_unified,
     get_package_path_unified,
     get_wallet_from_context,
     is_distributed_item,
@@ -433,6 +434,22 @@ def test_get_package_path_unified(mock_present, mock_path, vendor):
     mock_present.return_value = vendor
     public_id_mock = mock.MagicMock(author="some_author")
     result = get_package_path_unified(
+        contex_mock, "some_component_type", public_id_mock
+    )
+    assert result == "some_path"
+
+
+@mock.patch("aea.cli.utils.package_utils.get_package_path", return_value="some_path")
+@mock.patch("aea.cli.utils.package_utils.is_item_present")
+@pytest.mark.parametrize("vendor", [True, False])
+def test_get_dotted_package_path_unified(mock_present, mock_path, vendor):
+    """Test 'get_package_path_unified'."""
+    contex_mock = mock.MagicMock()
+    contex_mock.cwd = "."
+    contex_mock.agent_config.author = "some_author" if vendor else "another_author"
+    mock_present.return_value = vendor
+    public_id_mock = mock.MagicMock(author="some_author")
+    result = get_dotted_package_path_unified(
         contex_mock, "some_component_type", public_id_mock
     )
     assert result == "some_path"
