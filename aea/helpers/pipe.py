@@ -159,12 +159,12 @@ class PosixNamedPipeProtocol:
 
         try:
             self._out = os.open(self._out_path, os.O_WRONLY | os.O_NONBLOCK)
-        except OSError as e:
+        except OSError as e:  # pragma: no cover
             if e.errno == errno.ENXIO:
                 self.logger.debug("Sleeping for {}...".format(self._connection_timeout))
                 await asyncio.sleep(self._connection_timeout)
                 return await self.connect(timeout)
-            raise e  # pragma: no cover
+            raise e
 
         # setup reader
         enforce(
