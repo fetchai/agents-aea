@@ -1,5 +1,5 @@
 
-The <a href="../api/manager">`MultiAgentManager`</a> allows managing multiple agent projects programmatically.
+The <a href="../api/manager/manager">`MultiAgentManager`</a> allows managing multiple agent projects programmatically.
 
 ## Setup
 

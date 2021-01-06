@@ -791,7 +791,7 @@ the AEABuilder
 #### call`_`all`_`build`_`entrypoints
 
 ```python
- | call_all_build_entrypoints()
+ | call_all_build_entrypoints(root_dir: str = ".")
 ```
 
 Call all the build entrypoints.
@@ -843,15 +843,28 @@ the AEA object.
 
 - `ValueError`: if we cannot
 
-<a name="aea.aea_builder.AEABuilder.find_component_directory_from_component_id"></a>
-#### find`_`component`_`directory`_`from`_`component`_`id
+<a name="aea.aea_builder.AEABuilder.get_default_ledger"></a>
+#### get`_`default`_`ledger
 
 ```python
- | @staticmethod
- | find_component_directory_from_component_id(aea_project_directory: Path, component_id: ComponentId) -> Path
+ | get_default_ledger() -> str
 ```
 
-Find a component directory from component id.
+Return default ledger.
+
+**Returns**:
+
+the default ledger identifier.
+
+<a name="aea.aea_builder.AEABuilder.try_to_load_agent_configuration_file"></a>
+#### try`_`to`_`load`_`agent`_`configuration`_`file
+
+```python
+ | @classmethod
+ | try_to_load_agent_configuration_file(cls, aea_project_path: Union[str, Path]) -> AgentConfig
+```
+
+Try to load the agent configuration file..
 
 <a name="aea.aea_builder.AEABuilder.set_from_configuration"></a>
 #### set`_`from`_`configuration
@@ -878,7 +891,7 @@ None
 
 ```python
  | @classmethod
- | from_aea_project(cls, aea_project_path: PathLike, skip_consistency_check: bool = False) -> "AEABuilder"
+ | from_aea_project(cls, aea_project_path: PathLike, skip_consistency_check: bool = False, create_keys: bool = True) -> "AEABuilder"
 ```
 
 Construct the builder from an AEA project.
@@ -894,30 +907,11 @@ Construct the builder from an AEA project.
 
 - `aea_project_path`: path to the AEA project.
 - `skip_consistency_check`: if True, the consistency check are skipped.
+- `create_keys`: if True, create keys, otherwise just verify
 
 **Returns**:
 
 an AEABuilder.
-
-<a name="aea.aea_builder.AEABuilder.from_config_json"></a>
-#### from`_`config`_`json
-
-```python
- | @classmethod
- | from_config_json(cls, json_data: List[Dict], aea_project_path: PathLike, skip_consistency_check: bool = False) -> "AEABuilder"
-```
-
-Load agent configuration for alreaady provided json data.
-
-**Arguments**:
-
-- `json_data`: list of dicts with agent configuration
-- `aea_project_path`: path to project root
-- `skip_consistency_check`: skip consistency check on configs load.
-
-**Returns**:
-
-AEABuilder instance
 
 <a name="aea.aea_builder.AEABuilder.get_configuration_file_path"></a>
 #### get`_`configuration`_`file`_`path

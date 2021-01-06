@@ -10,7 +10,7 @@ Miscellaneous helpers.
 locate(path: str) -> Any
 ```
 
-Locate an object by name or dotted path, importing as necessary.
+Locate an object by name or dotted save_path, importing as necessary.
 
 <a name="aea.helpers.base.load_module"></a>
 #### load`_`module
@@ -23,7 +23,7 @@ Load a module.
 
 **Arguments**:
 
-- `dotted_path`: the dotted path of the package/module.
+- `dotted_path`: the dotted save_path of the package/module.
 - `filepath`: the file to the package/module.
 
 **Returns**:
@@ -46,7 +46,7 @@ Load the content of the environment file into the process environment.
 
 **Arguments**:
 
-- `env_file`: path to the env file.
+- `env_file`: save_path to the env file.
 
 **Returns**:
 
@@ -251,7 +251,7 @@ Run code in context to log and re raise exception.
 #### recursive`_`update
 
 ```python
-recursive_update(to_update: Dict, new_values: Dict) -> None
+recursive_update(to_update: Dict, new_values: Dict, allow_new_values: bool = False) -> None
 ```
 
 Update a dictionary by replacing conflicts with the new values.
@@ -356,4 +356,220 @@ ensure_dir(dir_path: str) -> None
 ```
 
 Check if dir_path is a directory or create it.
+
+<a name="aea.helpers.base.dict_to_path_value"></a>
+#### dict`_`to`_`path`_`value
+
+```python
+dict_to_path_value(data: Mapping, path: Optional[List] = None) -> Iterable[Tuple[List[str], Any]]
+```
+
+Convert dict to sequence of terminal path build of  keys and value.
+
+<a name="aea.helpers.base.parse_datetime_from_str"></a>
+#### parse`_`datetime`_`from`_`str
+
+```python
+parse_datetime_from_str(date_string: str) -> datetime.datetime
+```
+
+Parse datetime from string.
+
+<a name="aea.helpers.base.CertRequest"></a>
+## CertRequest Objects
+
+```python
+class CertRequest()
+```
+
+Certificate request for proof of representation.
+
+<a name="aea.helpers.base.CertRequest.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(public_key: str, identifier: SimpleIdOrStr, ledger_id: SimpleIdOrStr, not_before: str, not_after: str, save_path: str)
+```
+
+Initialize the certificate request.
+
+**Arguments**:
+
+- `public_key`: the public key, or the key id.
+- `identifier`: certificate identifier.
+- `not_before`: specify the lower bound for certificate validity.
+If it is a string, it must follow the format: 'YYYY-MM-DD'. It
+will be interpreted as timezone UTC.
+- `not_before`: specify the lower bound for certificate validity.
+if it is a string, it must follow the format: 'YYYY-MM-DD' It
+will be interpreted as timezone UTC-0.
+- `save_path`: the save_path where to save the certificate.
+
+<a name="aea.helpers.base.CertRequest.public_key"></a>
+#### public`_`key
+
+```python
+ | @property
+ | public_key() -> Optional[str]
+```
+
+Get the public key.
+
+<a name="aea.helpers.base.CertRequest.ledger_id"></a>
+#### ledger`_`id
+
+```python
+ | @property
+ | ledger_id() -> str
+```
+
+Get the ledger id.
+
+<a name="aea.helpers.base.CertRequest.key_identifier"></a>
+#### key`_`identifier
+
+```python
+ | @property
+ | key_identifier() -> Optional[str]
+```
+
+Get the key identifier.
+
+<a name="aea.helpers.base.CertRequest.identifier"></a>
+#### identifier
+
+```python
+ | @property
+ | identifier() -> str
+```
+
+Get the identifier.
+
+<a name="aea.helpers.base.CertRequest.not_before_string"></a>
+#### not`_`before`_`string
+
+```python
+ | @property
+ | not_before_string() -> str
+```
+
+Get the not_before field as string.
+
+<a name="aea.helpers.base.CertRequest.not_after_string"></a>
+#### not`_`after`_`string
+
+```python
+ | @property
+ | not_after_string() -> str
+```
+
+Get the not_after field as string.
+
+<a name="aea.helpers.base.CertRequest.not_before"></a>
+#### not`_`before
+
+```python
+ | @property
+ | not_before() -> datetime.datetime
+```
+
+Get the not_before field.
+
+<a name="aea.helpers.base.CertRequest.not_after"></a>
+#### not`_`after
+
+```python
+ | @property
+ | not_after() -> datetime.datetime
+```
+
+Get the not_after field.
+
+<a name="aea.helpers.base.CertRequest.save_path"></a>
+#### save`_`path
+
+```python
+ | @property
+ | save_path() -> Path
+```
+
+Get the save_path
+
+<a name="aea.helpers.base.CertRequest.public_key_or_identifier"></a>
+#### public`_`key`_`or`_`identifier
+
+```python
+ | @property
+ | public_key_or_identifier() -> str
+```
+
+Get the public key or identifier.
+
+<a name="aea.helpers.base.CertRequest.get_message"></a>
+#### get`_`message
+
+```python
+ | get_message(public_key: str) -> bytes
+```
+
+Get the message to sign.
+
+<a name="aea.helpers.base.CertRequest.get_signature"></a>
+#### get`_`signature
+
+```python
+ | get_signature() -> str
+```
+
+Get signature from save_path.
+
+<a name="aea.helpers.base.CertRequest.json"></a>
+#### json
+
+```python
+ | @property
+ | json() -> Dict
+```
+
+Compute the JSON representation.
+
+<a name="aea.helpers.base.CertRequest.from_json"></a>
+#### from`_`json
+
+```python
+ | @classmethod
+ | from_json(cls, obj: Dict) -> "CertRequest"
+```
+
+Compute the JSON representation.
+
+<a name="aea.helpers.base.CertRequest.__eq__"></a>
+#### `__`eq`__`
+
+```python
+ | __eq__(other)
+```
+
+Check equality.
+
+<a name="aea.helpers.base.compute_specifier_from_version"></a>
+#### compute`_`specifier`_`from`_`version
+
+```python
+compute_specifier_from_version(version: Version) -> str
+```
+
+Compute the specifier set from a version, by varying only on the patch number.
+
+I.e. from "{major}.{minor}.{patch}", return
+
+">={major}.{minor}.0, <{major}.{minor + 1}.0"
+
+**Arguments**:
+
+- `version`: the version
+
+**Returns**:
+
+the specifier set
 
