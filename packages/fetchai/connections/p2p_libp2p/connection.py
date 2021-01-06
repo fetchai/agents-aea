@@ -474,7 +474,7 @@ class P2PLibp2pConnection(Connection):
         else:
             raise ValueError(
                 f"Couldn't find connection key for {str(ledger_id)} in connections keys. "
-                "Please ensure agent private key is added"
+                "Please ensure agent private key is added with `aea add-key`."
             )
 
         uri = None

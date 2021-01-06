@@ -304,7 +304,10 @@ def validate_data_with_pattern(
             # one of the values is env variable: skip data type check
             continue
 
-        if not issubclass(type(new_value), type(pattern_value)):
+        if (
+            not issubclass(type(new_value), type(pattern_value))
+            and new_value is not None
+        ):
             errors.append(
                 f"For attribute `{'.'.join(path)}` `{type(pattern_value).__name__}` data type is expected, but `{type(new_value).__name__}` was provided!"
             )
