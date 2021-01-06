@@ -47,7 +47,12 @@ var tcpUri = "localhost:12345"
 
 func init() {
 	flag.StringVar(&peersKeysFilePath, "peers-keys-file", "", "File with list of EC private keys")
-	flag.StringVar(&agentsKeysFilePath, "agents-keys-file", "", "File with list of agents EC private keys")
+	flag.StringVar(
+		&agentsKeysFilePath,
+		"agents-keys-file",
+		"",
+		"File with list of agents EC private keys",
+	)
 }
 
 /* **********************************
@@ -179,7 +184,13 @@ func getKeysAndAddrs(b *testing.B) (peers []string, agents []string) {
 	return peers, agents
 }
 
-func setupLocalDHTPeerForBench(key string, agentKey string, dhtPort uint16, delegatePort uint16, entry []string) (*DHTPeer, func(), error) {
+func setupLocalDHTPeerForBench(
+	key string,
+	agentKey string,
+	dhtPort uint16,
+	delegatePort uint16,
+	entry []string,
+) (*DHTPeer, func(), error) {
 	/*
 		peer, peerCleanup, err := SetupLocalDHTPeer(key, addr, dhtPort, delegatePort, entry)
 		if err == nil {

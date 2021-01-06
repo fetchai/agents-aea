@@ -116,7 +116,11 @@ func New(opts ...Option) (*DHTClient, error) {
 
 	// check if the PoR is delivered for my public  key
 	myPublicKey, err := utils.FetchAIPublicKeyFromPubKey(dhtClient.publicKey)
-	status, errPoR := dhtnode.IsValidProofOfRepresentation(dhtClient.myAgentRecord, dhtClient.myAgentRecord.Address, myPublicKey)
+	status, errPoR := dhtnode.IsValidProofOfRepresentation(
+		dhtClient.myAgentRecord,
+		dhtClient.myAgentRecord.Address,
+		myPublicKey,
+	)
 	if err != nil || errPoR != nil || status.Code != dhtnode.Status_SUCCESS {
 		msg := "Invalid AgentRecord"
 		if err != nil {
@@ -213,7 +217,12 @@ func (dhtClient *DHTClient) bootstrapLoopUntilTimeout() error {
 	lerror, _, _, _ := dhtClient.getLoggers()
 	ctx, cancel := context.WithTimeout(context.Background(), bootstrapTimeout)
 	defer cancel()
-	err := utils.BootstrapConnect(ctx, dhtClient.routedHost, dhtClient.dht, dhtClient.bootstrapPeers)
+	err := utils.BootstrapConnect(
+		ctx,
+		dhtClient.routedHost,
+		dhtClient.dht,
+		dhtClient.bootstrapPeers,
+	)
 	sleepTime := sleepTimeDefaultDuration
 	for err != nil {
 		lerror(err).
@@ -223,7 +232,12 @@ func (dhtClient *DHTClient) bootstrapLoopUntilTimeout() error {
 		default:
 			time.Sleep(sleepTime)
 			sleepTime = sleepTime * sleepTimeIncreaseMFactor
-			err = utils.BootstrapConnect(ctx, dhtClient.routedHost, dhtClient.dht, dhtClient.bootstrapPeers)
+			err = utils.BootstrapConnect(
+				ctx,
+				dhtClient.routedHost,
+				dhtClient.dht,
+				dhtClient.bootstrapPeers,
+			)
 		case <-ctx.Done():
 			sleepTime = 0
 			break
@@ -235,7 +249,11 @@ func (dhtClient *DHTClient) bootstrapLoopUntilTimeout() error {
 	return err
 }
 
-func (dhtClient *DHTClient) newStreamLoopUntilTimeout(peerID peer.ID, streamType protocol.ID, timeout time.Duration) (network.Stream, error) {
+func (dhtClient *DHTClient) newStreamLoopUntilTimeout(
+	peerID peer.ID,
+	streamType protocol.ID,
+	timeout time.Duration,
+) (network.Stream, error) {
 	lerror, _, _, _ := dhtClient.getLoggers()
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
@@ -368,7 +386,11 @@ func (dhtClient *DHTClient) RouteEnvelope(envel *aea.Envelope) error {
 	//	Msg("looking up peer ID for agent Address")
 
 	// client can get addresses only through bootstrap peer
-	stream, err := dhtClient.newStreamLoopUntilTimeout(dhtClient.relayPeer, dhtnode.AeaAddressStream, newStreamTimeoutRelayPeer)
+	stream, err := dhtClient.newStreamLoopUntilTimeout(
+		dhtClient.relayPeer,
+		dhtnode.AeaAddressStream,
+		newStreamTimeoutRelayPeer,
+	)
 	if err != nil {
 		return err
 	}
@@ -508,7 +530,11 @@ func (dhtClient *DHTClient) RouteEnvelope(envel *aea.Envelope) error {
 		Str("op", "route").
 		Str("target", target).
 		Msgf("opening stream to target %s", peerID)
-	stream, err = dhtClient.newStreamLoopUntilTimeout(peerID, dhtnode.AeaEnvelopeStream, newStreamTimeout)
+	stream, err = dhtClient.newStreamLoopUntilTimeout(
+		peerID,
+		dhtnode.AeaEnvelopeStream,
+		newStreamTimeout,
+	)
 	if err != nil {
 		return err
 	}
@@ -665,7 +691,10 @@ func (dhtClient *DHTClient) handleAeaEnvelopeStream(stream network.Stream) {
 	err = proto.Unmarshal(aeaEnvelope.Envel, envel)
 	if err != nil {
 		lerror(err).Msg("while deserializing acn aea envelope message")
-		status := &dhtnode.Status{Code: dhtnode.Status_ERROR_SERIALIZATION, Msgs: []string{err.Error()}}
+		status := &dhtnode.Status{
+			Code: dhtnode.Status_ERROR_SERIALIZATION,
+			Msgs: []string{err.Error()},
+		}
 		response := &dhtnode.AcnMessage{
 			Version: dhtnode.CurrentVersion,
 			Payload: &dhtnode.AcnMessage_Status{Status: status},
@@ -681,13 +710,20 @@ func (dhtClient *DHTClient) handleAeaEnvelopeStream(stream network.Stream) {
 
 	remotePubkey, err := utils.FetchAIPublicKeyFromPubKey(stream.Conn().RemotePublicKey())
 	ignore(err)
-	status, err := dhtnode.IsValidProofOfRepresentation(aeaEnvelope.Record, aeaEnvelope.Record.Address, remotePubkey)
+	status, err := dhtnode.IsValidProofOfRepresentation(
+		aeaEnvelope.Record,
+		aeaEnvelope.Record.Address,
+		remotePubkey,
+	)
 	if err != nil || status.Code != dhtnode.Status_SUCCESS {
 		if err == nil {
 			err = errors.New(status.Code.String() + ":" + strings.Join(status.Msgs, ":"))
 		}
 		lerror(err).Msg("incoming envelope PoR is not valid")
-		response := &dhtnode.AcnMessage{Version: dhtnode.CurrentVersion, Payload: &dhtnode.AcnMessage_Status{Status: status}}
+		response := &dhtnode.AcnMessage{
+			Version: dhtnode.CurrentVersion,
+			Payload: &dhtnode.AcnMessage_Status{Status: status},
+		}
 		buf, err = proto.Marshal(response)
 		ignore(err)
 		err = utils.WriteBytes(stream, buf)
@@ -765,8 +801,14 @@ func (dhtClient *DHTClient) handleAeaAddressStream(stream network.Stream) {
 	if err != nil {
 		lerror(err).Str("op", "resolve").Msg("couldn't deserialize acn registration message")
 		// TOFIX(LR) setting Msgs to err.Error is potentially a security vulnerability
-		status := &dhtnode.Status{Code: dhtnode.Status_ERROR_SERIALIZATION, Msgs: []string{err.Error()}}
-		response := &dhtnode.AcnMessage{Version: dhtnode.CurrentVersion, Payload: &dhtnode.AcnMessage_Status{Status: status}}
+		status := &dhtnode.Status{
+			Code: dhtnode.Status_ERROR_SERIALIZATION,
+			Msgs: []string{err.Error()},
+		}
+		response := &dhtnode.AcnMessage{
+			Version: dhtnode.CurrentVersion,
+			Payload: &dhtnode.AcnMessage_Status{Status: status},
+		}
 		buf, err = proto.Marshal(response)
 		ignore(err)
 		err = utils.WriteBytes(stream, buf)
@@ -846,7 +888,11 @@ func (dhtClient *DHTClient) registerAgentAddress() error {
 
 	ctx, cancel := context.WithTimeout(context.Background(), newStreamTimeoutRelayPeer)
 	defer cancel()
-	stream, err := dhtClient.routedHost.NewStream(ctx, dhtClient.relayPeer, dhtnode.AeaRegisterRelayStream)
+	stream, err := dhtClient.routedHost.NewStream(
+		ctx,
+		dhtClient.relayPeer,
+		dhtnode.AeaRegisterRelayStream,
+	)
 	if err != nil {
 		lerror(err).
 			Str("op", "register").
@@ -861,7 +907,10 @@ func (dhtClient *DHTClient) registerAgentAddress() error {
 		Msgf("registering addr and peerID to relay peer")
 
 	registration := &dhtnode.Register{Record: dhtClient.myAgentRecord}
-	msg := &dhtnode.AcnMessage{Version: dhtnode.CurrentVersion, Payload: &dhtnode.AcnMessage_Register{Register: registration}}
+	msg := &dhtnode.AcnMessage{
+		Version: dhtnode.CurrentVersion,
+		Payload: &dhtnode.AcnMessage_Register{Register: registration},
+	}
 	buf, err := proto.Marshal(msg)
 	ignore(err)
 

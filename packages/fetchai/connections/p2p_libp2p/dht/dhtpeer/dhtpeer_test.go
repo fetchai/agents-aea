@@ -658,7 +658,12 @@ func TestRoutingDelegateClientToDHTPeerX(t *testing.T) {
 	}
 	defer peerCleanup()
 
-	client, clientCleanup, err := SetupDelegateClient(AgentsTestKeys[1], DefaultLocalHost, DefaultDelegatePort, FetchAITestPublicKeys[0])
+	client, clientCleanup, err := SetupDelegateClient(
+		AgentsTestKeys[1],
+		DefaultLocalHost,
+		DefaultDelegatePort,
+		FetchAITestPublicKeys[0],
+	)
 	if err != nil {
 		t.Fatal("Failed to initialize DelegateClient:", err)
 	}
@@ -712,7 +717,12 @@ func TestRoutingDelegateClientToDHTPeerIndirect(t *testing.T) {
 	defer peerCleanup2()
 
 	time.Sleep(1 * time.Second)
-	client, clientCleanup, err := SetupDelegateClient(AgentsTestKeys[2], DefaultLocalHost, DefaultDelegatePort+1, FetchAITestPublicKeys[1])
+	client, clientCleanup, err := SetupDelegateClient(
+		AgentsTestKeys[2],
+		DefaultLocalHost,
+		DefaultDelegatePort+1,
+		FetchAITestPublicKeys[1],
+	)
 	if err != nil {
 		t.Fatal("Failed to initialize DelegateClient:", err)
 	}
@@ -777,7 +787,12 @@ func TestRoutingDelegateClientToDHTPeerIndirectTwoHops(t *testing.T) {
 	defer peerCleanup2()
 
 	time.Sleep(1 * time.Second)
-	client, clientCleanup, err := SetupDelegateClient(AgentsTestKeys[3], DefaultLocalHost, DefaultDelegatePort+2, FetchAITestPublicKeys[2])
+	client, clientCleanup, err := SetupDelegateClient(
+		AgentsTestKeys[3],
+		DefaultLocalHost,
+		DefaultDelegatePort+2,
+		FetchAITestPublicKeys[2],
+	)
 	if err != nil {
 		t.Fatal("Failed to initialize DelegateClient:", err)
 	}
@@ -823,13 +838,23 @@ func TestRoutingDelegateClientToDelegateClient(t *testing.T) {
 	}
 	defer peerCleanup()
 
-	client1, clientCleanup1, err := SetupDelegateClient(AgentsTestKeys[1], DefaultLocalHost, DefaultDelegatePort, FetchAITestPublicKeys[0])
+	client1, clientCleanup1, err := SetupDelegateClient(
+		AgentsTestKeys[1],
+		DefaultLocalHost,
+		DefaultDelegatePort,
+		FetchAITestPublicKeys[0],
+	)
 	if err != nil {
 		t.Fatal("Failed to initialize DelegateClient:", err)
 	}
 	defer clientCleanup1()
 
-	client2, clientCleanup2, err := SetupDelegateClient(AgentsTestKeys[2], DefaultLocalHost, DefaultDelegatePort, FetchAITestPublicKeys[0])
+	client2, clientCleanup2, err := SetupDelegateClient(
+		AgentsTestKeys[2],
+		DefaultLocalHost,
+		DefaultDelegatePort,
+		FetchAITestPublicKeys[0],
+	)
 	if err != nil {
 		t.Fatal("Failed to initialize DelegateClient:", err)
 	}
@@ -877,13 +902,23 @@ func TestRoutingDelegateClientToDelegateClientIndirect(t *testing.T) {
 	}
 	defer peer2Cleanup()
 
-	client1, clientCleanup1, err := SetupDelegateClient(AgentsTestKeys[2], DefaultLocalHost, DefaultDelegatePort, FetchAITestPublicKeys[0])
+	client1, clientCleanup1, err := SetupDelegateClient(
+		AgentsTestKeys[2],
+		DefaultLocalHost,
+		DefaultDelegatePort,
+		FetchAITestPublicKeys[0],
+	)
 	if err != nil {
 		t.Fatal("Failed to initialize DelegateClient:", err)
 	}
 	defer clientCleanup1()
 
-	client2, clientCleanup2, err := SetupDelegateClient(AgentsTestKeys[3], DefaultLocalHost, DefaultDelegatePort+1, FetchAITestPublicKeys[1])
+	client2, clientCleanup2, err := SetupDelegateClient(
+		AgentsTestKeys[3],
+		DefaultLocalHost,
+		DefaultDelegatePort+1,
+		FetchAITestPublicKeys[1],
+	)
 	if err != nil {
 		t.Fatal("Failed to initialize DelegateClient:", err)
 	}
@@ -931,7 +966,12 @@ func TestRoutingDelegateClientToDHTClientDirect(t *testing.T) {
 	}
 	defer dhtClientCleanup()
 
-	delegateClient, delegateClientCleanup, err := SetupDelegateClient(AgentsTestKeys[2], DefaultLocalHost, DefaultDelegatePort, FetchAITestPublicKeys[0])
+	delegateClient, delegateClientCleanup, err := SetupDelegateClient(
+		AgentsTestKeys[2],
+		DefaultLocalHost,
+		DefaultDelegatePort,
+		FetchAITestPublicKeys[0],
+	)
 	if err != nil {
 		t.Fatal("Failed to initialize DelegateClient:", err)
 	}
@@ -1374,11 +1414,19 @@ func TestFetchAICrypto(t *testing.T) {
 		t.Log("[OK] Agent address matches its public key")
 	}
 
-	valid, err := utils.VerifyFetchAISignatureBTC([]byte(peerPublicKey), pySigStrCanonize, publicKey)
+	valid, err := utils.VerifyFetchAISignatureBTC(
+		[]byte(peerPublicKey),
+		pySigStrCanonize,
+		publicKey,
+	)
 	if !valid {
 		t.Errorf("Signature using BTC don't match %s", err.Error())
 	}
-	valid, err = utils.VerifyFetchAISignatureLibp2p([]byte(peerPublicKey), pySigStrCanonize, publicKey)
+	valid, err = utils.VerifyFetchAISignatureLibp2p(
+		[]byte(peerPublicKey),
+		pySigStrCanonize,
+		publicKey,
+	)
 	if !valid {
 		t.Errorf("Signature using LPP don't match %s", err.Error())
 	}
@@ -1392,7 +1440,9 @@ func TestEthereumCrypto(t *testing.T) {
 
 	addFromPublicKey, err := utils.EthereumAddressFromPublicKey(publicKey)
 	if err != nil || addFromPublicKey != address {
-		t.Error("Error when computing address from public key or address and public key don't match")
+		t.Error(
+			"Error when computing address from public key or address and public key don't match",
+		)
 	}
 
 	_, err = utils.BTCPubKeyFromEthereumPublicKey(publicKey)
@@ -1430,7 +1480,13 @@ func TestEthereumCrypto(t *testing.T) {
 	 without having circular dependencies
 */
 
-func SetupLocalDHTPeer(key string, agentKey string, dhtPort uint16, delegatePort uint16, entry []string) (*DHTPeer, func(), error) {
+func SetupLocalDHTPeer(
+	key string,
+	agentKey string,
+	dhtPort uint16,
+	delegatePort uint16,
+	entry []string,
+) (*DHTPeer, func(), error) {
 	opts := []Option{
 		LocalURI(DefaultLocalHost, dhtPort),
 		PublicURI(DefaultLocalHost, dhtPort),
@@ -1484,7 +1540,11 @@ func SetupLocalDHTPeer(key string, agentKey string, dhtPort uint16, delegatePort
 
 // DHTClient
 
-func SetupDHTClient(key string, agentKey string, entry []string) (*dhtclient.DHTClient, func(), error) {
+func SetupDHTClient(
+	key string,
+	agentKey string,
+	entry []string,
+) (*dhtclient.DHTClient, func(), error) {
 
 	agentPubKey, err := utils.FetchAIPublicKeyFromFetchAIPrivateKey(agentKey)
 	if err != nil {
@@ -1552,7 +1612,12 @@ func (client *DelegateClient) ProcessEnvelope(fn func(*aea.Envelope) error) {
 	client.processEnvelope = fn
 }
 
-func SetupDelegateClient(key string, host string, port uint16, peerPubKey string) (*DelegateClient, func(), error) {
+func SetupDelegateClient(
+	key string,
+	host string,
+	port uint16,
+	peerPubKey string,
+) (*DelegateClient, func(), error) {
 	var err error
 	client := &DelegateClient{}
 	client.AgentKey = key
@@ -1587,7 +1652,10 @@ func SetupDelegateClient(key string, host string, port uint16, peerPubKey string
 	record.PeerPublicKey = peerPubKey
 	record.Signature = signature
 	registration := &dhtnode.Register{Record: record}
-	msg := &dhtnode.AcnMessage{Version: dhtnode.CurrentVersion, Payload: &dhtnode.AcnMessage_Register{Register: registration}}
+	msg := &dhtnode.AcnMessage{
+		Version: dhtnode.CurrentVersion,
+		Payload: &dhtnode.AcnMessage_Register{Register: registration},
+	}
 	data, err := proto.Marshal(msg)
 	ignore(err)
 	err = utils.WriteBytesConn(client.Conn, data)
