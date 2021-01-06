@@ -56,6 +56,7 @@ func RegisterAgentAddress(record *aea.AgentRecord, isReady func() bool) Option {
 		pbRecord.PeerPublicKey = record.PeerPublicKey
 		pbRecord.Signature = record.Signature
 		pbRecord.ServiceId = record.ServiceId
+		pbRecord.LedgerId = record.LedgerId
 
 		dhtPeer.myAgentAddress = record.Address
 		dhtPeer.myAgentRecord = pbRecord

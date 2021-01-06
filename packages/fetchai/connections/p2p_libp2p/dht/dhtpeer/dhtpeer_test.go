@@ -47,6 +47,8 @@ const (
 
 	EnvelopeDeliveryTimeout = 20 * time.Second
 	DHTPeerSetupTimeout     = 5 * time.Second
+
+	DefaultLedger = dhtnode.DefaultLedger
 )
 
 var (
@@ -127,7 +129,7 @@ func TestRoutingDHTPeerToSelf(t *testing.T) {
 		t.Fatal("Failed at DHTPeer initialization:", err)
 	}
 
-	record := &aea.AgentRecord{}
+	record := &aea.AgentRecord{LedgerId: DefaultLedger}
 	record.Address = AgentsTestAddresses[0]
 	record.PublicKey = agentPubKey
 	record.PeerPublicKey = FetchAITestPublicKeys[0]
@@ -1382,6 +1384,46 @@ func TestFetchAICrypto(t *testing.T) {
 	}
 }
 
+func TestEthereumCrypto(t *testing.T) {
+	//privateKey := "0xb60fe8027fb82f1a1bd6b8e66d4400f858989a2c67428a4e7f589441700339b0"
+	publicKey := "0xf753e5a9e2368e97f4db869a0d956d3ffb64672d6392670572906c786b5712ada13b6bff882951b3ba3dd65bdacc915c2b532efc3f183aa44657205c6c337225"
+	address := "0xb8d8c62d4a1999b7aea0aebBD5020244a4a9bAD8"
+	publicKeySignature := "0x304c2ba4ae7fa71295bfc2920b9c1268d574d65531f1f4d2117fc1439a45310c37ab75085a9df2a4169a4d47982b330a4387b1ded0c8881b030629db30bbaf3a1c"
+
+	addFromPublicKey, err := utils.EthereumAddressFromPublicKey(publicKey)
+	if err != nil || addFromPublicKey != address {
+		t.Error("Error when computing address from public key or address and public key don't match")
+	}
+
+	_, err = utils.BTCPubKeyFromEthereumPublicKey(publicKey)
+	if err != nil {
+		t.Errorf("While building BTC public key from string: %s", err.Error())
+	}
+
+	/*
+		ethSig, err := secp256k1.Sign(hashedPublicKey, hexutil.MustDecode(privateKey))
+		if err != nil {
+			t.Error(err.Error())
+		}
+		println(hexutil.Encode(ethSig))
+		hash := sha3.NewLegacyKeccak256()
+		_, err = hash.Write([]byte(publicKey))
+		if err != nil {
+			t.Error(err.Error())
+		}
+		sha3KeccakHash := hash.Sum(nil)
+	*/
+
+	valid, err := utils.VerifyEthereumSignatureETH([]byte(publicKey), publicKeySignature, publicKey)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	if !valid {
+		t.Errorf("Signer address don't match %s", addFromPublicKey)
+	}
+}
+
 /*
 	Helpers
 	TOFIX(LR) how to share test helpers between packages tests
@@ -1418,7 +1460,7 @@ func SetupLocalDHTPeer(key string, agentKey string, dhtPort uint16, delegatePort
 			return nil, nil, err
 		}
 
-		record := &aea.AgentRecord{}
+		record := &aea.AgentRecord{LedgerId: DefaultLedger}
 		record.Address = agentAddress
 		record.PublicKey = agentPubKey
 		record.PeerPublicKey = peerPubKey
@@ -1464,7 +1506,7 @@ func SetupDHTClient(key string, agentKey string, entry []string) (*dhtclient.DHT
 		return nil, nil, err
 	}
 
-	record := &aea.AgentRecord{}
+	record := &aea.AgentRecord{LedgerId: DefaultLedger}
 	record.Address = agentAddress
 	record.PublicKey = agentPubKey
 	record.PeerPublicKey = peerPubKey
@@ -1539,7 +1581,7 @@ func SetupDelegateClient(key string, host string, port uint16, peerPubKey string
 		return nil, nil, err
 	}
 
-	record := &dhtnode.AgentRecord{}
+	record := &dhtnode.AgentRecord{LedgerId: DefaultLedger}
 	record.Address = address
 	record.PublicKey = pubKey
 	record.PeerPublicKey = peerPubKey
