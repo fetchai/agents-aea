@@ -53,7 +53,10 @@ func NewDHTPeerWithDefaults(inbox chan<- *aea.Envelope) (*dhtpeer.DHTPeer, func(
 		dhtpeer.EnableDelegateService(DHTPeerDefaultDelegatePort),
 	}
 
-	signature, err := utils.SignFetchAI([]byte(DHTPeerDefaultFetchAIPublicKey), DHTPeerDefaultAgentKey)
+	signature, err := utils.SignFetchAI(
+		[]byte(DHTPeerDefaultFetchAIPublicKey),
+		DHTPeerDefaultAgentKey,
+	)
 	if err != nil {
 		return nil, nil, err
 	}
