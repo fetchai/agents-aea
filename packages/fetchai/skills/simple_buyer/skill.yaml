@@ -1,6 +1,6 @@
 name: simple_buyer
 author: fetchai
-version: 0.4.0
+version: 0.5.0
 type: skill
 description: This skill purchases information from other agents as specified in its
   configuration.
@@ -8,23 +8,23 @@ license: Apache-2.0
 aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
   README.md: QmVfriU6YXeJjGBCLNYUFSp6x2ExxRJjitBBtgeeRb9733
-  __init__.py: Qmf5CNQ98MeFR5DeyKzXUJ3jvEsFaQoKRjpxKezbMzD8x7
+  __init__.py: QmQ5YpwsvtRN1LL4K71kyVvKnp3MbFhGZYP2yJeGP9yT5g
   behaviours.py: QmWRRAXwJf7mEcV4L2DdG43zkyg55PBViiLnpy1Chj28xn
   dialogues.py: QmcUgBjxeytE5aAx3VvPyna5EcBuqck9KazG3HygCWjawv
   handlers.py: QmYx8WzeR2aCg2b2uiR1K2NHLn8DKhzAahLXoFnrXyDoDz
   strategy.py: QmZVALhDnpEdxLhk3HLAmTs3JdEr9tk1QTS33ZsVnxkLXZ
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.11.0
+- fetchai/ledger:0.12.0
 contracts: []
 protocols:
-- fetchai/default:0.10.0
-- fetchai/fipa:0.11.0
-- fetchai/ledger_api:0.8.0
-- fetchai/oef_search:0.11.0
-- fetchai/signing:0.8.0
+- fetchai/default:0.11.0
+- fetchai/fipa:0.12.0
+- fetchai/ledger_api:0.9.0
+- fetchai/oef_search:0.12.0
+- fetchai/signing:0.9.0
 skills:
-- fetchai/generic_buyer:0.18.0
+- fetchai/generic_buyer:0.19.0
 behaviours:
   search:
     args:

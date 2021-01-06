@@ -1,18 +1,18 @@
 name: default
 author: fetchai
-version: 0.10.0
+version: 0.11.0
 type: protocol
 description: A protocol for exchanging any bytes message.
 license: Apache-2.0
 aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
-  README.md: QmUvGzmEvzcrM4qB2iDwYhSdDkxfwoUaDJxWwnE4n4cYXW
+  README.md: Qmf68csqR6PMaKwZjgSjmNFwijJfFzuR3f8VEja7ktpDFW
   __init__.py: Qmcv4DkrYV8HETwDvounAzdvXjFydt4jzHHWhu5uTk1ha8
   custom_types.py: QmRcgwDdTxkSHyfF9eoMtsb5P5GJDm4oyLq5W6ZBko1MFU
   default.proto: QmNMoGYhsiiqQxZGGECeczvmKWnYYxyJ6TNTpvb679c4J1
   default_pb2.py: QmSbakk8PG4VWSNcDG8mwoSzMgyjKbR9ZbmZjMPnCVmM2e
   dialogues.py: QmXfP6bCy49A24RJYnzKZ6HBsf41hLyfLnV6VtaWgjBCWN
-  message.py: QmUZCG6QsTPTbwzbkKej2brJHvtv7Rn7HXMZ6NwpTD5cxH
+  message.py: QmWddNXeyqTwnwMNUQ7sYdhitYQyzCDiQuJ7FqyfLSGJGz
   serialization.py: QmTc271Ymt2tjqjgeR9ASTFujmNFi9WQKM2G7LWPrqSpK2
 fingerprint_ignore_patterns: []
 dependencies:

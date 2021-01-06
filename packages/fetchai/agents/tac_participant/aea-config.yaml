@@ -1,29 +1,29 @@
 agent_name: tac_participant
 author: fetchai
-version: 0.18.0
+version: 0.19.0
 description: An AEA to participate in the TAC (trading agent competition)
 license: Apache-2.0
 aea_version: '>=0.9.0, <0.10.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.11.0
-- fetchai/p2p_libp2p:0.13.0
-- fetchai/soef:0.14.0
+- fetchai/ledger:0.12.0
+- fetchai/p2p_libp2p:0.14.0
+- fetchai/soef:0.15.0
 contracts:
-- fetchai/erc1155:0.13.0
+- fetchai/erc1155:0.14.0
 protocols:
-- fetchai/default:0.10.0
-- fetchai/fipa:0.11.0
-- fetchai/oef_search:0.11.0
-- fetchai/signing:0.8.0
-- fetchai/state_update:0.8.0
-- fetchai/tac:0.11.0
+- fetchai/default:0.11.0
+- fetchai/fipa:0.12.0
+- fetchai/oef_search:0.12.0
+- fetchai/signing:0.9.0
+- fetchai/state_update:0.9.0
+- fetchai/tac:0.12.0
 skills:
-- fetchai/error:0.10.0
-- fetchai/tac_negotiation:0.16.0
-- fetchai/tac_participation:0.14.0
-default_connection: fetchai/p2p_libp2p:0.13.0
+- fetchai/error:0.11.0
+- fetchai/tac_negotiation:0.17.0
+- fetchai/tac_participation:0.15.0
+default_connection: fetchai/p2p_libp2p:0.14.0
 default_ledger: fetchai
 logging_config:
   disable_existing_loggers: false
@@ -31,6 +31,6 @@ logging_config:
 private_key_paths: {}
 registry_path: ../packages
 default_routing:
-  fetchai/ledger_api:0.8.0: fetchai/ledger:0.11.0
-  fetchai/oef_search:0.11.0: fetchai/soef:0.14.0
+  fetchai/ledger_api:0.9.0: fetchai/ledger:0.12.0
+  fetchai/oef_search:0.12.0: fetchai/soef:0.15.0
 connection_private_key_paths: {}

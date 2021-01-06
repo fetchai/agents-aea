@@ -1,6 +1,6 @@
 name: ml_train
 author: fetchai
-version: 0.18.0
+version: 0.19.0
 type: skill
 description: The ml train and predict skill implements a simple skill which buys training
   data, trains a model and sells predictions.
@@ -8,7 +8,7 @@ license: Apache-2.0
 aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
   README.md: QmVViVMDxEWNuS1NPiNQ2JptpNujQrznYKi3vPC4K1Jh7D
-  __init__.py: QmTurqhUDy13mCSrqmbd598Eqz7A5PAmDrL9UpeNg24dDr
+  __init__.py: QmSpPn19R9xMzDMF7VwtQHU9eLG59pXDk8TFK2yTuT7aXh
   behaviours.py: QmSLQf6neRYG27KKWVYQET497LxcDAAS9Wpu9Wo64qbtcF
   dialogues.py: QmZCXn2do9uUjSD58zkhQh2pAJikoDHGhHHV2ert9fCPcb
   handlers.py: QmaWisdbWNSRjsUCk3jUoVddq8W2hdJeWNEimHwroRUxvM
@@ -18,16 +18,16 @@ fingerprint:
   tasks.py: QmahJRCf6V61FsqrKgMMUyJ8F7PRd6C2bjunZg2XtM9fpF
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.11.0
+- fetchai/ledger:0.12.0
 contracts: []
 protocols:
-- fetchai/default:0.10.0
-- fetchai/ledger_api:0.8.0
-- fetchai/ml_trade:0.10.0
-- fetchai/oef_search:0.11.0
-- fetchai/signing:0.8.0
+- fetchai/default:0.11.0
+- fetchai/ledger_api:0.9.0
+- fetchai/ml_trade:0.11.0
+- fetchai/oef_search:0.12.0
+- fetchai/signing:0.9.0
 skills:
-- fetchai/generic_buyer:0.18.0
+- fetchai/generic_buyer:0.19.0
 behaviours:
   search:
     args:
