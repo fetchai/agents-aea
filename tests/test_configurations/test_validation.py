@@ -32,6 +32,9 @@ def test_compare_data_pattern():
         == "For attribute `a` `str` data type is expected, but `int` was provided!"
     )
 
+    errors = validate_data_with_pattern({"a": None}, {"a": int})
+    assert not errors
+
     assert not validate_data_with_pattern(
         {"a": 12}, {"a": "${var}"}, skip_env_vars=True
     )
