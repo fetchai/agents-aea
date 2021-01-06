@@ -4,9 +4,9 @@ version: 0.1.0
 type: protocol
 description: A protocol for adding and updating metrics to a prometheus server.
 license: Apache-2.0
-aea_version: '>=0.8.0, <0.9.0'
+aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
-  README.md: QmZb4NVBU8G417AcXM4Lj427MZR2D6guCvBeMiB7uhQp2m
+  README.md: QmZqBaeeFrB72pJqaW9sAbcYV9JoGyzvJxBMjGUbdqe7Gk
   __init__.py: QmQvMGLitiy95SKYYSZQdfUH2UjpZ1ueTJooVuBG19P7QE
   dialogues.py: QmYQYkByWC3sBnQPnDEzFh98ULycx1jzqqs6hLC196YZg5
   message.py: QmTQQeP2rv2QNG3AKCoMW2uP4rMNyUsG9BreSScptkUFJm

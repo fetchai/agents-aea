@@ -5,7 +5,7 @@ type: skill
 description: The tac negotiation skill implements the logic for an AEA to do fipa
   negotiation in the TAC.
 license: Apache-2.0
-aea_version: '>=0.8.0, <0.9.0'
+aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
   README.md: QmYdhQ2jH3dJhSSGT3HhbTDp785H618TD6LHyXhphCMXY5
   __init__.py: Qma8zUEhr9HbyDxhrqRv6wQFR8hrcVqgK3GpifGcYor2et

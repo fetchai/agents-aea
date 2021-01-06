@@ -4,9 +4,9 @@ version: 0.10.0
 type: protocol
 description: A protocol for trading data for training and prediction purposes.
 license: Apache-2.0
-aea_version: '>=0.8.0, <0.9.0'
+aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
-  README.md: QmccSUTpVzDpaAqpGPGXWY5aG9Dp1yStX4Sn2tqCjsKVEC
+  README.md: QmQg3boY4VKuLBG7KeMbfY1rhnsxW9rBXU1jUU79tPrn8q
   __init__.py: QmRnYbHxrQvb86cdheENeUhP7PswboKgugHaVMpcdPzaqR
   custom_types.py: QmPa6mxbN8WShsniQxJACfzAPRjGzYLbUFGoVU4N9DewUw
   dialogues.py: QmUZ3BiJYY2bNiqrvwPZyNsjZ3v9Rvj8EW1UkH52XxjAqd

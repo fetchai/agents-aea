@@ -4,7 +4,7 @@ version: 0.16.0
 description: The seller AEA sells the services specified in the `skill.yaml` file
   and delivers them upon payment to the buyer.
 license: Apache-2.0
-aea_version: '>=0.8.0, <0.9.0'
+aea_version: '>=0.9.0, <0.10.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:

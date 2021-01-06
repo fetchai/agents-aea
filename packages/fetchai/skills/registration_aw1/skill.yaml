@@ -5,7 +5,7 @@ type: skill
 description: The registration_aw1 skill is a skill for registration in Agent World
   1.
 license: Apache-2.0
-aea_version: '>=0.8.0, <0.9.0'
+aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
   README.md: QmdDPjGHTf47gbjRa65Q1LY7FSufQHFPsbdeJzcSRpymWX
   __init__.py: QmXivSD5iVEfRmK8oswm6a8yH7L5vBHGVVTaPaKEUTxrfF

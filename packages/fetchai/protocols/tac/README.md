@@ -14,7 +14,7 @@ version: 0.11.0
 description: The tac protocol implements the messages an AEA needs to participate
   in the TAC.
 license: Apache-2.0
-aea_version: '>=0.8.0, <0.9.0'
+aea_version: '>=0.9.0, <0.10.0'
 speech_acts:
   register:
     agent_name: pt:str

@@ -4,7 +4,7 @@ version: 0.2.0
 type: skill
 description: Retrieve coin price from an API
 license: Apache-2.0
-aea_version: '>=0.8.0, <0.9.0'
+aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
   README.md: QmdP2wZNxpgL4qdyipgo9JAk4Qq3qRzDTTLJCDaQxkyjvg
   __init__.py: QmP9nM6bjDz8TbSPBW2JFH9woe9m4wbffhvJhjKqxFz9gt

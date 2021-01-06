@@ -4,9 +4,9 @@ version: 0.9.0
 type: protocol
 description: A protocol for contract APIs requests and responses.
 license: Apache-2.0
-aea_version: '>=0.8.0, <0.9.0'
+aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
-  README.md: QmXmHpD7cKDzuvSu7dWXuNZhXp9weNhghauDopSPexSgif
+  README.md: QmdBr9baYqW9LozQYTC2mEkXqej6tzmTa4dmedf8tBz569
   __init__.py: QmY2WGKdVE1vExjbKz46U9dgxgEhy2anyQG12ax2NNNuot
   contract_api.proto: QmSZpXyFMf2MNgVud8iPinaaerx1CManffgHNMx8FcD8jY
   contract_api_pb2.py: QmYEVg28AVRiLDkbddDto51bumh38gRuouagn6wspDtZVN

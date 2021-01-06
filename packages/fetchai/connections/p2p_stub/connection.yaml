@@ -5,7 +5,7 @@ type: connection
 description: The stub p2p connection implements a local p2p connection allowing agents
   to communicate with each other through files created in the namespace directory.
 license: Apache-2.0
-aea_version: '>=0.8.0, <0.9.0'
+aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
   README.md: QmbyRsqeoQzecvzzXMMTNoXjVBa3Z3xnoq5MLJ1Qsc3wBx
   __init__.py: QmW9XFKGsea4u3fupkFMcQutgsjqusCMBMyTcTmLLmQ4tR
