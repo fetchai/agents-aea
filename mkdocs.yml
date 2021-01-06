@@ -114,7 +114,6 @@ nav:
       - Common: 'api/common.md'
       - Exceptions: 'api/exceptions.md'
       - Launcher: 'api/launcher.md'
-      - Manager: 'api/manager.md'
       - Multiplexer: 'api/multiplexer.md'
       - Runner: 'api/runner.md'
       - Runtime: 'api/runtime.md'
@@ -124,10 +123,12 @@ nav:
       - Configurations:
         - Base: 'api/configurations/base.md'
         - Constants: 'api/configurations/constants.md'
+        - Data Types: 'api/configurations/data_types.md'
         - Loader: 'api/configurations/loader.md'
-        - Project: 'api/configurations/project.md'
+        - Manager: 'api/configurations/manager.md'
         - Pypi: 'api/configurations/pypi.md'
         - Utils: 'api/configurations/utils.md'
+        - Validation: 'api/configurations/validation.md'
       - Connections:
         - Base: 'api/connections/base.md'
         - Stub Connection: 'api/connections/stub/connection.md'
@@ -151,9 +152,14 @@ nav:
         - Base: 'api/error_handler/base.md'
         - Default: 'api/error_handler/default.md'
       - Helpers:
+        - ACN:
+          - Agent Record: 'api/helpers/acn/agent_record.md'
+          - URI: 'api/helpers/acn/uri.md'
         - Async Friendly Queue: 'api/helpers/async_friendly_queue.md'
         - Async Utils: 'api/helpers/async_utils.md'
         - Base: 'api/helpers/base.md'
+        - Constants: 'api/helpers/constants.md'
+        - Env Vars: 'api/helpers/env_vars.md'
         - Exception Policy: 'api/helpers/exception_policy.md'
         - Exec Timeout: 'api/helpers/exec_timeout.md'
         - File IO: 'api/helpers/file_io.md'
@@ -185,6 +191,9 @@ nav:
         - YamlUtils: 'api/helpers/yaml_utils.md'
       - Identity: 'api/identity/base.md'
       - Mail: 'api/mail/base.md'
+      - Manager:
+        - Manager: 'api/manager/manager.md'
+        - Project: 'api/manager/project.md'
       - Protocols:
         - Base: 'api/protocols/base.md'
         - Dialogue:

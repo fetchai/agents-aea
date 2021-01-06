@@ -15,19 +15,21 @@
 
 7. Write release notes and place them in `HISTORY.md`. Add upgrading tips in `upgrading.md`. If necessary, adjust version references in `SECURITY.md`. Commit if satisfied.
 
-8. Open PRs and merge into master.
+8. Run spell checker `./scripts/spell-check.sh`. Commit if required.
 
-9. Tag version on master.
+9. Open PRs and merge into master.
 
-10. Pull master, make a clean environment and create distributions: `python setup.py sdist bdist_wheel`.
+10. Tag version on master.
 
-11. Publish to PyPI with twine: `twine upload dist/*`. Optionally, publish to Test-PyPI with twine:
+11. Pull master, make a clean environment and create distributions: `python setup.py sdist bdist_wheel`.
+
+12. Publish to PyPI with twine: `twine upload dist/*`. Optionally, publish to Test-PyPI with twine:
 `twine upload --repository-url https://test.pypi.org/legacy/ dist/*`.
 
-12. Make clean environment and install release from PyPI: `pip install aea[all] --no-cache`.
+13. Make clean environment and install release from PyPI: `pip install aea[all] --no-cache`.
 
-13. Release packages into registry: `python scripts/deploy_to_registry.py`.
+14. Release packages into registry: `python scripts/deploy_to_registry.py`.
 
-14. Create and push Docker images `user-image` and `deploy-image`.
+15. Create and push Docker images `user-image` and `deploy-image`.
 
 If something goes wrong and only needs a small fix do `LAST_VERSION.post1` as version, apply fixes, push again to PyPI.

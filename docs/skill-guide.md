@@ -324,12 +324,12 @@ version: 0.1.0
 type: skill
 description: A simple search skill utilising the SOEF search node.
 license: Apache-2.0
-aea_version: '>=0.8.0, <0.9.0'
+aea_version: '>=0.9.0, <0.10.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/oef_search:0.11.0
+- fetchai/oef_search:0.12.0
 skills: []
 behaviours:
   my_search_behaviour:
@@ -405,21 +405,21 @@ Ensure, you use the correct author name to reference your skill (here we use `fe
 
 Our AEA does not have the OEF protocol yet so let's add it.
 ``` bash
-aea add protocol fetchai/oef_search:0.11.0
+aea add protocol fetchai/oef_search:0.12.0
 ```
 
 This adds the protocol to our AEA and makes it available on the path `packages.fetchai.protocols...`.
 
 We also need to add the soef and P2P connections and install the AEA's dependencies as well as configure the AEA:
 ``` bash
-aea add connection fetchai/soef:0.14.0
-aea add connection fetchai/p2p_libp2p:0.13.0
+aea add connection fetchai/soef:0.15.0
+aea add connection fetchai/p2p_libp2p:0.14.0
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.14.0
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/oef_search:0.11.0": "fetchai/soef:0.14.0"
+  "fetchai/oef_search:0.12.0": "fetchai/soef:0.15.0"
 }'
 ```
 
@@ -429,7 +429,7 @@ The last command will ensure that search requests are processed by the correct c
 
 In order to be able to find another AEA when searching, from a different terminal window, we fetch another finished AEA and install its Python dependencies:
 ``` bash
-aea fetch fetchai/simple_service_registration:0.18.0 && cd simple_service_registration && aea install && aea build
+aea fetch fetchai/simple_service_registration:0.19.0 && cd simple_service_registration && aea install && aea build
 ```
 
 This AEA will simply register a location service on the <a href="../simple-oef">SOEF search node</a> so we can search for it.
@@ -456,7 +456,7 @@ Then we run the AEA:
 aea run
 ```
 
-Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.13.0 -u public_uri` to retrieve the address.) This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the `simple_service_registration` AEA.
+Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.14.0 -u public_uri` to retrieve the address.) This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the `simple_service_registration` AEA.
 
 <details><summary>Click here to see full code</summary>
 <p>
@@ -734,7 +734,7 @@ from packages.fetchai.skills.simple_service_registration.dialogues import (
     OefSearchDialogues,
 )
 
-LEDGER_API_ADDRESS = "fetchai/ledger:0.11.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.12.0"
 
 
 class OefSearchHandler(Handler):
@@ -834,7 +834,7 @@ version: 0.4.0
 type: skill
 description: The simple service registration skills is a skill to register a service.
 license: Apache-2.0
-aea_version: '>=0.8.0, <0.9.0'
+aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmRr1oe3zWKyPcktzKP4BiKqjCqmKjEDdLUQhn1JzNm4nD
@@ -844,7 +844,7 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/oef_search:0.11.0
+- fetchai/oef_search:0.12.0
 skills: []
 behaviours:
   service:

@@ -109,6 +109,26 @@ Recover the addresses from the hash.
 
 the recovered addresses
 
+<a name="aea.crypto.cosmos.CosmosHelper.recover_public_keys_from_message"></a>
+#### recover`_`public`_`keys`_`from`_`message
+
+```python
+ | @classmethod
+ | recover_public_keys_from_message(cls, message: bytes, signature: str, is_deprecated_mode: bool = False) -> Tuple[str, ...]
+```
+
+Get the public key used to produce the `signature` of the `message`
+
+**Arguments**:
+
+- `message`: raw bytes used to produce signature
+- `signature`: signature of the message
+- `is_deprecated_mode`: if the deprecated signing was used
+
+**Returns**:
+
+the recovered public keys
+
 <a name="aea.crypto.cosmos.CosmosHelper.get_hash"></a>
 #### get`_`hash
 

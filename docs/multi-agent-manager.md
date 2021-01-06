@@ -1,5 +1,5 @@
 
-The <a href="../api/manager">`MultiAgentManager`</a> allows managing multiple agent projects programmatically.
+The <a href="../api/manager/manager">`MultiAgentManager`</a> allows managing multiple agent projects programmatically.
 
 ## Setup
 
@@ -22,8 +22,8 @@ We first add a couple of finished AEA project:
 ``` python
 from aea.configurations.base import PublicId
 
-weather_client_id = PublicId.from_str("fetchai/weather_client:0.20.0")
-weather_station_id = PublicId.from_str("fetchai/weather_station:0.19.0")
+weather_client_id = PublicId.from_str("fetchai/weather_client:0.21.0")
+weather_station_id = PublicId.from_str("fetchai/weather_station:0.20.0")
 manager.add_project(weather_client_id)
 manager.add_project(weather_station_id)
 ```
@@ -58,7 +58,7 @@ agent_overrides = {
 component_overrides = {
     "name": "p2p_libp2p",
     "author": "fetchai",
-    "version": "0.13.0",
+    "version": "0.14.0",
     "type": "connection",
     "cert_requests": [{
       "identifier": "acn",
@@ -74,7 +74,7 @@ manager.add_agent(weather_station_id, component_overrides=[component_overrides],
 component_overrides = {
     "name": "p2p_libp2p",
     "author": "fetchai",
-    "version": "0.13.0",
+    "version": "0.14.0",
     "type": "connection",
     "config": {
         "delegate_uri": "127.0.0.1:11001",

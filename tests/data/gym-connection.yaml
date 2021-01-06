@@ -6,13 +6,13 @@ license: Apache-2.0
 fingerprint:
   __init__.py: QmWwxj1hGGZNteCvRtZxwtY9PuEKsrWsEmMWCKwiYCdvRR
   connection.py: QmPgSzbkwRE9CJ6sve7gvS62M3VdcBMfTozHdSgCnb7FPY
-aea_version: '>=0.8.0, <0.9.0'
+aea_version: '>=0.9.0, <0.10.0'
 description: "The gym connection wraps an OpenAI gym."
 class_name: GymConnection
 connections: []
 protocols:
-- fetchai/gym:0.10.0
-restricted_to_protocols: ["fetchai/gym:0.10.0"]
+- fetchai/gym:0.11.0
+restricted_to_protocols: ["fetchai/gym:0.11.0"]
 excluded_protocols: []
 config:
   env: 'gyms.env.BanditNArmedRandom'

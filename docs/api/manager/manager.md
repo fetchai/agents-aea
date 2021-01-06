@@ -1,9 +1,9 @@
-<a name="aea.manager"></a>
-# aea.manager
+<a name="aea.manager.manager"></a>
+# aea.manager.manager
 
 This module contains the implementation of AEA agents manager.
 
-<a name="aea.manager.AgentRunAsyncTask"></a>
+<a name="aea.manager.manager.AgentRunAsyncTask"></a>
 ## AgentRunAsyncTask Objects
 
 ```python
@@ -12,7 +12,7 @@ class AgentRunAsyncTask()
 
 Async task wrapper for agent.
 
-<a name="aea.manager.AgentRunAsyncTask.__init__"></a>
+<a name="aea.manager.manager.AgentRunAsyncTask.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -21,7 +21,7 @@ Async task wrapper for agent.
 
 Init task with agent and loop.
 
-<a name="aea.manager.AgentRunAsyncTask.create_run_loop"></a>
+<a name="aea.manager.manager.AgentRunAsyncTask.create_run_loop"></a>
 #### create`_`run`_`loop
 
 ```python
@@ -30,7 +30,7 @@ Init task with agent and loop.
 
 Create run loop.
 
-<a name="aea.manager.AgentRunAsyncTask.start"></a>
+<a name="aea.manager.manager.AgentRunAsyncTask.start"></a>
 #### start
 
 ```python
@@ -39,7 +39,7 @@ Create run loop.
 
 Start task.
 
-<a name="aea.manager.AgentRunAsyncTask.wait"></a>
+<a name="aea.manager.manager.AgentRunAsyncTask.wait"></a>
 #### wait
 
 ```python
@@ -48,7 +48,7 @@ Start task.
 
 Return future to wait task completed.
 
-<a name="aea.manager.AgentRunAsyncTask.stop"></a>
+<a name="aea.manager.manager.AgentRunAsyncTask.stop"></a>
 #### stop
 
 ```python
@@ -57,7 +57,7 @@ Return future to wait task completed.
 
 Stop task.
 
-<a name="aea.manager.AgentRunAsyncTask.run"></a>
+<a name="aea.manager.manager.AgentRunAsyncTask.run"></a>
 #### run
 
 ```python
@@ -66,7 +66,7 @@ Stop task.
 
 Run task body.
 
-<a name="aea.manager.AgentRunAsyncTask.is_running"></a>
+<a name="aea.manager.manager.AgentRunAsyncTask.is_running"></a>
 #### is`_`running
 
 ```python
@@ -76,7 +76,7 @@ Run task body.
 
 Return is task running.
 
-<a name="aea.manager.AgentRunThreadTask"></a>
+<a name="aea.manager.manager.AgentRunThreadTask"></a>
 ## AgentRunThreadTask Objects
 
 ```python
@@ -85,7 +85,7 @@ class AgentRunThreadTask(AgentRunAsyncTask)
 
 Threaded wrapper to run agent.
 
-<a name="aea.manager.AgentRunThreadTask.__init__"></a>
+<a name="aea.manager.manager.AgentRunThreadTask.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -94,7 +94,7 @@ Threaded wrapper to run agent.
 
 Init task with agent and loop.
 
-<a name="aea.manager.AgentRunThreadTask.create_run_loop"></a>
+<a name="aea.manager.manager.AgentRunThreadTask.create_run_loop"></a>
 #### create`_`run`_`loop
 
 ```python
@@ -103,7 +103,7 @@ Init task with agent and loop.
 
 Create run loop.
 
-<a name="aea.manager.AgentRunThreadTask.start"></a>
+<a name="aea.manager.manager.AgentRunThreadTask.start"></a>
 #### start
 
 ```python
@@ -112,7 +112,7 @@ Create run loop.
 
 Run task in a dedicated thread.
 
-<a name="aea.manager.MultiAgentManager"></a>
+<a name="aea.manager.manager.MultiAgentManager"></a>
 ## MultiAgentManager Objects
 
 ```python
@@ -121,7 +121,7 @@ class MultiAgentManager()
 
 Multi agents manager.
 
-<a name="aea.manager.MultiAgentManager.__init__"></a>
+<a name="aea.manager.manager.MultiAgentManager.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -134,7 +134,7 @@ Initialize manager.
 
 - `working_dir`: directory to store base agents.
 
-<a name="aea.manager.MultiAgentManager.is_running"></a>
+<a name="aea.manager.manager.MultiAgentManager.is_running"></a>
 #### is`_`running
 
 ```python
@@ -144,7 +144,7 @@ Initialize manager.
 
 Is manager running.
 
-<a name="aea.manager.MultiAgentManager.dict_state"></a>
+<a name="aea.manager.manager.MultiAgentManager.dict_state"></a>
 #### dict`_`state
 
 ```python
@@ -154,7 +154,7 @@ Is manager running.
 
 Create MultiAgentManager dist state.
 
-<a name="aea.manager.MultiAgentManager.add_error_callback"></a>
+<a name="aea.manager.manager.MultiAgentManager.add_error_callback"></a>
 #### add`_`error`_`callback
 
 ```python
@@ -163,7 +163,7 @@ Create MultiAgentManager dist state.
 
 Add error callback to call on error raised.
 
-<a name="aea.manager.MultiAgentManager.start_manager"></a>
+<a name="aea.manager.manager.MultiAgentManager.start_manager"></a>
 #### start`_`manager
 
 ```python
@@ -172,7 +172,7 @@ Add error callback to call on error raised.
 
 Start manager.
 
-<a name="aea.manager.MultiAgentManager.stop_manager"></a>
+<a name="aea.manager.manager.MultiAgentManager.stop_manager"></a>
 #### stop`_`manager
 
 ```python
@@ -192,7 +192,7 @@ Stops all running agents and stop agent.
 
 None
 
-<a name="aea.manager.MultiAgentManager.add_project"></a>
+<a name="aea.manager.manager.MultiAgentManager.add_project"></a>
 #### add`_`project
 
 ```python
@@ -207,7 +207,7 @@ Fetch agent project and all dependencies to working_dir.
 - `local`: whether or not to fetch from local registry.
 - `restore`: bool flag for restoring already fetched agent.
 
-<a name="aea.manager.MultiAgentManager.remove_project"></a>
+<a name="aea.manager.manager.MultiAgentManager.remove_project"></a>
 #### remove`_`project
 
 ```python
@@ -216,7 +216,7 @@ Fetch agent project and all dependencies to working_dir.
 
 Remove agent project.
 
-<a name="aea.manager.MultiAgentManager.list_projects"></a>
+<a name="aea.manager.manager.MultiAgentManager.list_projects"></a>
 #### list`_`projects
 
 ```python
@@ -227,13 +227,13 @@ List all agents projects added.
 
 **Returns**:
 
-lit of public ids of projects
+list of public ids of projects
 
-<a name="aea.manager.MultiAgentManager.add_agent"></a>
+<a name="aea.manager.manager.MultiAgentManager.add_agent"></a>
 #### add`_`agent
 
 ```python
- | add_agent(public_id: PublicId, agent_name: Optional[str] = None, agent_overrides: Optional[dict] = None, component_overrides: Optional[List[dict]] = None, config: Optional[List[dict]] = None) -> "MultiAgentManager"
+ | add_agent(public_id: PublicId, agent_name: Optional[str] = None, agent_overrides: Optional[dict] = None, component_overrides: Optional[List[dict]] = None) -> "MultiAgentManager"
 ```
 
 Create new agent configuration based on project with config overrides applied.
@@ -252,7 +252,64 @@ Alias is stored in memory only!
 
 manager
 
-<a name="aea.manager.MultiAgentManager.list_agents_info"></a>
+<a name="aea.manager.manager.MultiAgentManager.add_agent_with_config"></a>
+#### add`_`agent`_`with`_`config
+
+```python
+ | add_agent_with_config(public_id: PublicId, config: List[dict], agent_name: Optional[str] = None) -> "MultiAgentManager"
+```
+
+Create new agent configuration based on project with config provided.
+
+Alias is stored in memory only!
+
+**Arguments**:
+
+- `public_id`: base agent project public id
+- `agent_name`: unique name for the agent
+- `config`: agent config (used for agent re-creation).
+
+**Returns**:
+
+manager
+
+<a name="aea.manager.manager.MultiAgentManager.get_agent_overridables"></a>
+#### get`_`agent`_`overridables
+
+```python
+ | get_agent_overridables(agent_name: str) -> Tuple[Dict, List[Dict]]
+```
+
+Get agent config  overridables.
+
+**Arguments**:
+
+- `agent_name`: str
+
+**Returns**:
+
+Tuple of agent overridables dict and  and list of component overridables dict.
+
+<a name="aea.manager.manager.MultiAgentManager.set_agent_overrides"></a>
+#### set`_`agent`_`overrides
+
+```python
+ | set_agent_overrides(agent_name: str, agent_overides: Optional[Dict], components_overrides: Optional[List[Dict]]) -> None
+```
+
+Set agent overrides.
+
+**Arguments**:
+
+- `agent_name`: str
+- `agent_overides`: optional dict of agent config overrides
+- `components_overrides`: optional list of dict of components overrides
+
+**Returns**:
+
+None
+
+<a name="aea.manager.manager.MultiAgentManager.list_agents_info"></a>
 #### list`_`agents`_`info
 
 ```python
@@ -265,7 +322,7 @@ List agents detailed info.
 
 list of dicts that represents agent info: public_id, name, is_running.
 
-<a name="aea.manager.MultiAgentManager.list_agents"></a>
+<a name="aea.manager.manager.MultiAgentManager.list_agents"></a>
 #### list`_`agents
 
 ```python
@@ -282,7 +339,7 @@ List all agents.
 
 list of agents names
 
-<a name="aea.manager.MultiAgentManager.remove_agent"></a>
+<a name="aea.manager.manager.MultiAgentManager.remove_agent"></a>
 #### remove`_`agent
 
 ```python
@@ -299,7 +356,7 @@ Remove agent alias definition from registry.
 
 None
 
-<a name="aea.manager.MultiAgentManager.start_agent"></a>
+<a name="aea.manager.manager.MultiAgentManager.start_agent"></a>
 #### start`_`agent
 
 ```python
@@ -316,7 +373,7 @@ Start selected agent.
 
 None
 
-<a name="aea.manager.MultiAgentManager.start_all_agents"></a>
+<a name="aea.manager.manager.MultiAgentManager.start_all_agents"></a>
 #### start`_`all`_`agents
 
 ```python
@@ -329,7 +386,7 @@ Start all not started agents.
 
 None
 
-<a name="aea.manager.MultiAgentManager.stop_agent"></a>
+<a name="aea.manager.manager.MultiAgentManager.stop_agent"></a>
 #### stop`_`agent
 
 ```python
@@ -346,7 +403,7 @@ Stop running agent.
 
 None
 
-<a name="aea.manager.MultiAgentManager.stop_all_agents"></a>
+<a name="aea.manager.manager.MultiAgentManager.stop_all_agents"></a>
 #### stop`_`all`_`agents
 
 ```python
@@ -359,7 +416,7 @@ Stop all agents running.
 
 None
 
-<a name="aea.manager.MultiAgentManager.stop_agents"></a>
+<a name="aea.manager.manager.MultiAgentManager.stop_agents"></a>
 #### stop`_`agents
 
 ```python
@@ -372,7 +429,7 @@ Stop specified agents.
 
 None
 
-<a name="aea.manager.MultiAgentManager.start_agents"></a>
+<a name="aea.manager.manager.MultiAgentManager.start_agents"></a>
 #### start`_`agents
 
 ```python
@@ -385,7 +442,7 @@ Stop specified agents.
 
 None
 
-<a name="aea.manager.MultiAgentManager.get_agent_alias"></a>
+<a name="aea.manager.manager.MultiAgentManager.get_agent_alias"></a>
 #### get`_`agent`_`alias
 
 ```python
@@ -397,13 +454,4 @@ Return details about agent alias definition.
 **Returns**:
 
 AgentAlias
-
-<a name="aea.manager.MultiAgentManager.install_pypi_dependencies"></a>
-#### install`_`pypi`_`dependencies
-
-```python
- | install_pypi_dependencies() -> None
-```
-
-Install dependencies for every project has at least one agent alias.
 

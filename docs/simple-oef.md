@@ -269,7 +269,7 @@ In this example, the key `type` must be present, and it must match to `fruit`. I
 
 ## Further information
 
-You can find further information, or talk to us, in the #agents channel on our official developer Discord server, which you can access <a href="https://discord.gg/qnYED4hGBc" target="_blank">here</a>.
+You can find further information, or talk to us, in the #agents channel on our official developer Discord server, which you can access <a href="https://discord.com/invite/qnYED4hGBc" target="_blank">here</a>.
 
 We welcome your feedback and strive to deliver the best decentralised search and discovery service for agents that is possible. There are many upcoming features, including the operation incentive mechanisms, additional security and encryption, active searches (where results happen without `find_around_me` being issued), non-geographic searches across one and many soef nodes and dimensional-reduction based approximate searches. 
 

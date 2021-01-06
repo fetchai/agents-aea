@@ -37,7 +37,7 @@ Unset the current agent context.
 
 ```python
  | @classmethod
- | set_config(cls, dotted_path: str, value: Any, type_: str = "str") -> Result
+ | set_config(cls, dotted_path: str, value: Any, type_: Optional[str] = None) -> Result
 ```
 
 Set a config.
