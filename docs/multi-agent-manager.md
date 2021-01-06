@@ -58,7 +58,7 @@ agent_overrides = {
 component_overrides = {
     "name": "p2p_libp2p",
     "author": "fetchai",
-    "version": "0.13.0",
+    "version": "0.14.0",
     "type": "connection",
     "cert_requests": [{
       "identifier": "acn",
@@ -74,7 +74,7 @@ manager.add_agent(weather_station_id, component_overrides=[component_overrides],
 component_overrides = {
     "name": "p2p_libp2p",
     "author": "fetchai",
-    "version": "0.13.0",
+    "version": "0.14.0",
     "type": "connection",
     "config": {
         "delegate_uri": "127.0.0.1:11001",
