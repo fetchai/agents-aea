@@ -25,6 +25,7 @@ import tempfile
 
 import pytest
 
+from aea.helpers.base import CertRequest
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 from aea.test_tools.test_cases import AEATestCaseEmpty
@@ -55,8 +56,8 @@ DEFAULT_PORT = 10234
 PUBLIC_DHT_MADDRS = [PUBLIC_DHT_P2P_MADDR_1, PUBLIC_DHT_P2P_MADDR_2]
 PUBLIC_DHT_DELEGATE_URIS = [PUBLIC_DHT_DELEGATE_URI_1, PUBLIC_DHT_DELEGATE_URI_2]
 PUBLIC_DHT_PUBLIC_KEYS = [PUBLIC_DHT_P2P_PUBLIC_KEY_1, PUBLIC_DHT_P2P_PUBLIC_KEY_2]
-AEA_DEFAULT_LAUNCH_TIMEOUT = 15
-AEA_LIBP2P_LAUNCH_TIMEOUT = 15
+AEA_DEFAULT_LAUNCH_TIMEOUT = 20
+AEA_LIBP2P_LAUNCH_TIMEOUT = 20
 
 
 @pytest.mark.integration
@@ -321,7 +322,7 @@ class TestLibp2pConnectionPublicDHTDelegate:
                         continue
 
                     connection2 = _make_libp2p_client_connection(
-                        PUBLIC_DHT_PUBLIC_KEYS[i], uri=PUBLIC_DHT_DELEGATE_URIS[j]
+                        PUBLIC_DHT_PUBLIC_KEYS[j], uri=PUBLIC_DHT_DELEGATE_URIS[j]
                     )
                     multiplexer2 = Multiplexer([connection2])
                     multiplexer2.connect()
@@ -371,6 +372,13 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseEmpty):
     def test_connectivity(self):
         """Test connectivity."""
         self.log_files = []
+        self.conn_key_file = os.path.join(
+            os.path.abspath(os.getcwd()), "./conn_key.txt"
+        )
+        self.generate_private_key()
+        self.add_private_key()
+        self.generate_private_key(private_key_file=self.conn_key_file)
+        self.add_private_key(private_key_filepath=self.conn_key_file, connection=True)
         self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
         self.run_cli_command("build", cwd=self._get_cwd())
 
@@ -389,6 +397,8 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseEmpty):
                 "log_file": log_file,
             },
         )
+
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
         self.log_files = [log_file]
         process = self.run_agent()
@@ -420,12 +430,41 @@ class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseEmpty):
 
     def test_connectivity(self):
         """Test connectivity."""
+        self.generate_private_key()
+        self.add_private_key()
         self.add_item("connection", str(P2P_CLIENT_CONNECTION_PUBLIC_ID))
         config_path = "vendor.fetchai.connections.p2p_libp2p_client.config"
         self.nested_set_config(
             config_path,
             {"nodes": [{"uri": "{}".format(uri)} for uri in PUBLIC_DHT_DELEGATE_URIS]},
         )
+        conn_path = "vendor.fetchai.connections.p2p_libp2p_client"
+        self.nested_set_config(
+            conn_path + ".config",
+            {
+                "nodes": [
+                    {"uri": uri, "public_key": PUBLIC_DHT_PUBLIC_KEYS[i]}
+                    for i, uri in enumerate(PUBLIC_DHT_DELEGATE_URIS)
+                ]
+            },
+        )
+
+        # generate certificates for connection
+        self.nested_set_config(
+            conn_path + ".cert_requests",
+            [
+                CertRequest(
+                    identifier="acn",
+                    ledger_id="fetchai",
+                    not_after="2022-01-01",
+                    not_before="2021-01-01",
+                    public_key=public_key,
+                    save_path=f"./cli_test_cert_{public_key}.txt",
+                )
+                for public_key in PUBLIC_DHT_PUBLIC_KEYS
+            ],
+        )
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
         process = self.run_agent()
         is_running = self.is_running(process, timeout=AEA_DEFAULT_LAUNCH_TIMEOUT)
