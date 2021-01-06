@@ -22,7 +22,7 @@ import json
 import os
 from copy import deepcopy
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import jsonschema
 from jsonschema import Draft4Validator
@@ -313,3 +313,47 @@ def validate_data_with_pattern(
             )
 
     return errors
+
+
+NOT_SET = {"value": "not set"}
+
+
+class CleanNotSet:
+    """Tool to remove spcial NOT_SET value from the dicts."""
+
+    NOT_SET = NOT_SET
+
+    @classmethod
+    def is_not_set(cls, v: Any) -> bool:
+        """Is value equals NOT_SET."""
+        return v == cls.NOT_SET
+
+    @staticmethod
+    def is_empty(v: Any) -> bool:
+        """Is value an emtpy container."""
+        return isinstance(v, (dict, list)) and not v
+
+    @classmethod
+    def clean(cls, data: Any) -> Any:
+        """Clean from NOT_SET values."""
+        if not isinstance(data, (dict, list)):
+            return data
+
+        if not data:
+            return data
+
+        if isinstance(data, list):
+            new_list = [
+                v for v in (cls.clean(v) for v in data) if not cls.is_not_set(v)
+            ]
+            if not new_list:
+                return cls.NOT_SET
+            return new_list
+        new_dict = {
+            k: v
+            for k, v in ((k, cls.clean(v)) for k, v in data.items())
+            if not cls.is_not_set(v)
+        }
+        if not new_dict:
+            return cls.NOT_SET
+        return new_dict

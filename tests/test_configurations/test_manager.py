@@ -241,6 +241,18 @@ def test_agent_attribute_get_overridables():
     assert "is_abstract" in list(component_overrides.values())[0]
 
 
+def test_agent_attribute_get_and_apply_overridables():
+    """Test AgentConfigManager.get_overridables and apply it."""
+    agent_config_manager = AgentConfigManager.load(DUMMY_AEA, substitude_env_vars=False)
+    initial_agent_config_json = agent_config_manager.json
+    agent_overrides, component_overrides = agent_config_manager.get_overridables()
+    agent_config_manager.update_config(agent_overrides)
+    assert initial_agent_config_json == agent_config_manager.json
+
+    agent_overrides["component_configurations"] = component_overrides
+    agent_config_manager.update_config(agent_overrides)
+
+
 def test_dump_config():
     """Test AgentConfigManager.dump_config."""
     agent_config_manager = AgentConfigManager.load(DUMMY_AEA, substitude_env_vars=False)

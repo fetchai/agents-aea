@@ -72,7 +72,12 @@ from aea.configurations.data_types import (
     PackageVersion,
     PublicId,
 )
-from aea.configurations.validation import ConfigValidator, validate_data_with_pattern
+from aea.configurations.validation import (
+    CleanNotSet,
+    ConfigValidator,
+    NOT_SET,
+    validate_data_with_pattern,
+)
 from aea.exceptions import enforce
 from aea.helpers.base import (
     CertRequest,
@@ -326,6 +331,7 @@ class PackageConfiguration(Configuration, ABC):
         if not data:  # do nothing if nothing to update
             return
 
+        data = CleanNotSet.clean(data)
         self.check_overrides_valid(data, env_vars_friendly=env_vars_friendly)
         self._create_or_update_from_json(
             obj=self.make_resulting_config_data(data), instance=self
@@ -366,6 +372,7 @@ class PackageConfiguration(Configuration, ABC):
     ) -> None:
         """Check overrides is correct, return list of errors if present."""
         # check for permited overrides
+        overrides = CleanNotSet.clean(overrides)
         self._check_overrides_corresponds_to_overridable(
             overrides, env_vars_friendly=env_vars_friendly
         )
@@ -389,7 +396,7 @@ class PackageConfiguration(Configuration, ABC):
 
     def get_overridable(self) -> dict:
         """Get dictionary of values that can be updated for this config."""
-        return {k: self.json.get(k) for k in self.FIELDS_ALLOWED_TO_UPDATE}
+        return {k: self.json.get(k, NOT_SET) for k in self.FIELDS_ALLOWED_TO_UPDATE}
 
     @classmethod
     def _apply_params_to_instance(
@@ -596,7 +603,17 @@ class ConnectionConfig(ComponentConfiguration):
         self.description = description
         self.config = config if len(config) > 0 else {}
         self.is_abstract = is_abstract
-        self.cert_requests = cert_requests
+        self._cert_requests = cert_requests
+
+    @property
+    def cert_requests(self) -> List[CertRequest]:
+        """Get cert requests list."""
+        return self._cert_requests or []
+
+    @cert_requests.setter
+    def cert_requests(self, value: Optional[List[CertRequest]]) -> None:
+        """Set cert requests list."""
+        self._cert_requests = value
 
     @property
     def package_dependencies(self) -> Set[ComponentId]:
@@ -642,9 +659,11 @@ class ConnectionConfig(ComponentConfiguration):
                 "is_abstract": self.is_abstract,
             }
         )
-
-        if self.cert_requests is not None:
+        if self.cert_requests:
             result["cert_requests"] = list(map(attrgetter("json"), self.cert_requests))
+        else:
+            result["cert_requests"] = []
+
         if self.build_entrypoint:
             result["build_entrypoint"] = self.build_entrypoint
         if self.build_directory:
@@ -1063,7 +1082,6 @@ class AgentConfig(PackageConfiguration):
             "loop_mode",
             "runtime_mode",
             "execution_timeout",
-            "timeout",
             "period",
             "max_reactions",
             "skill_exception_policy",
@@ -1409,7 +1427,7 @@ class AgentConfig(PackageConfiguration):
         :param data: the data to replace.
         :return: None
         """
-        data = copy(data)
+        data = CleanNotSet.clean(data)
         # update component parts
         new_component_configurations: Dict = data.pop("component_configurations", {})
         updated_component_configurations: Dict[ComponentId, Dict] = copy(
