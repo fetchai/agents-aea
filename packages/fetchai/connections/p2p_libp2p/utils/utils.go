@@ -127,7 +127,12 @@ func NewDefaultLoggerWithFields(fields map[string]string) zerolog.Logger {
 
 // BootstrapConnect connect to `peers` at bootstrap
 // This code is borrowed from the go-ipfs bootstrap process
-func BootstrapConnect(ctx context.Context, ph host.Host, kaddht *dht.IpfsDHT, peers []peer.AddrInfo) error {
+func BootstrapConnect(
+	ctx context.Context,
+	ph host.Host,
+	kaddht *dht.IpfsDHT,
+	peers []peer.AddrInfo,
+) error {
 	if len(peers) < 1 {
 		return errors.New("not enough bootstrap peers")
 	}
@@ -184,7 +189,9 @@ func BootstrapConnect(ctx context.Context, ph host.Host, kaddht *dht.IpfsDHT, pe
 		for kaddht.RoutingTable().Find(peer.ID) == "" {
 			select {
 			case <-ctx.Done():
-				return errors.New("timeout: entry peer haven't been added to DHT routing table " + peer.ID.Pretty())
+				return errors.New(
+					"timeout: entry peer haven't been added to DHT routing table " + peer.ID.Pretty(),
+				)
 			case <-time.After(time.Millisecond * 5):
 			}
 		}
@@ -307,7 +314,12 @@ func ParseFetchAISignature(signature string) (*btcec.Signature, error) {
 }
 
 // VerifyLedgerSignature verify signature of message using public key for supported ledgers
-func VerifyLedgerSignature(ledgerId string, message []byte, signature string, pubkey string) (bool, error) {
+func VerifyLedgerSignature(
+	ledgerId string,
+	message []byte,
+	signature string,
+	pubkey string,
+) (bool, error) {
 	verifySignature, found := verifyLedgerSignatureTable[ledgerId]
 	if found {
 		return verifySignature(message, signature, pubkey)

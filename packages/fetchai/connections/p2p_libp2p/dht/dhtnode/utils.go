@@ -34,7 +34,11 @@ const (
 
 var supportedLedgers = []string{"fetchai", "cosmos", "ethereum"}
 
-func IsValidProofOfRepresentation(record *AgentRecord, agentAddress string, representativePeerPubKey string) (*Status, error) {
+func IsValidProofOfRepresentation(
+	record *AgentRecord,
+	agentAddress string,
+	representativePeerPubKey string,
+) (*Status, error) {
 	// check agent address matches
 	if record.Address != agentAddress {
 		err := errors.New("Wrong agent address, expected " + agentAddress)
@@ -51,7 +55,12 @@ func IsValidProofOfRepresentation(record *AgentRecord, agentAddress string, repr
 		}
 	}
 	if !found {
-		err := errors.New("Unsupported ledger " + record.LedgerId + ", expected " + strings.Join(supportedLedgers, ","))
+		err := errors.New(
+			"Unsupported ledger " + record.LedgerId + ", expected " + strings.Join(
+				supportedLedgers,
+				",",
+			),
+		)
 		response := &Status{Code: Status_ERROR_UNSUPPORTED_LEDGER, Msgs: []string{err.Error()}}
 		return response, err
 	}
@@ -74,7 +83,12 @@ func IsValidProofOfRepresentation(record *AgentRecord, agentAddress string, repr
 	}
 
 	// check that signature is valid
-	ok, err := utils.VerifyLedgerSignature(record.LedgerId, []byte(record.PeerPublicKey), record.Signature, record.PublicKey)
+	ok, err := utils.VerifyLedgerSignature(
+		record.LedgerId,
+		[]byte(record.PeerPublicKey),
+		record.Signature,
+		record.PublicKey,
+	)
 	if !ok || err != nil {
 		if err == nil {
 			err = errors.New("Signature is not valid")
