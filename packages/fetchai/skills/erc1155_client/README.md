@@ -13,11 +13,11 @@ This skill finds an `ERC1155 contract deployment AEA` on the SOEF, requests spec
 
 ## Handlers
 
-* contract_api: handles contract_api messages for interactions with the smart contract
-* fipa: handles fipa messages for negotiation
-* ledger_api: handles ledger_api messages for payment
-* oef_search: handles oef_search messages to manage the sellers it finds
-* signing: handles signing messages for transaction signing by the decision maker
+* `contract_api`: handles `contract_api` messages for interactions with the smart contract
+* `fipa`: handles `fipa` messages for negotiation
+* `ledger_api`: handles `ledger_api` messages for payment
+* `oef_search`: handles `oef_search` messages to manage the sellers it finds
+* `signing`: handles `signing` messages for transaction signing by the decision maker
 
 
 ## Links

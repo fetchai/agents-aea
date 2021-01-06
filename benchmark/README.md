@@ -16,12 +16,12 @@ or to save to file:
 ./benchmark/checks/run_benchmark.sh | tee benchmark.txt
 ```
 
-The benchmark will use the locally installed aea version!
+The benchmark will use the locally installed AEA version!
 
 
 # Deploying a benchmark run and serving results:
 
-First remove any old config maps and create a new one:
+First remove any old configuration maps and create a new one:
 ``` bash
 kubectl delete configmap run-benchmark
 kubectl create configmap run-benchmark --from-file=run_from_branch.sh
@@ -51,7 +51,7 @@ List pods:
 kubectl get pod -o wide
 ```
 
-To access nginx (wait for status: ` `):
+To access NGINX (wait for status: ` `):
 ``` bash
 kubectl port-forward NODE_NAME 8000:80
 ```

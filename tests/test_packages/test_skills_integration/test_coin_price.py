@@ -53,15 +53,15 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
 
     def test_coin_price(self):
         """Run the coin price skill sequence."""
-        self.add_item("connection", "fetchai/http_client:0.15.0")
-        self.add_item("connection", "fetchai/http_server:0.14.0")
-        self.add_item("connection", "fetchai/prometheus:0.1.0")
-        self.add_item("skill", "fetchai/coin_price:0.2.0")
-        self.set_config("agent.default_connection", "fetchai/http_server:0.14.0")
+        self.add_item("connection", "fetchai/http_client:0.16.0")
+        self.add_item("connection", "fetchai/http_server:0.15.0")
+        self.add_item("connection", "fetchai/prometheus:0.2.0")
+        self.add_item("skill", "fetchai/coin_price:0.3.0")
+        self.set_config("agent.default_connection", "fetchai/http_server:0.15.0")
 
         default_routing = {
-            "fetchai/http:0.13.0": "fetchai/http_client:0.15.0",
-            "fetchai/prometheus:0.1.0": "fetchai/prometheus:0.1.0",
+            "fetchai/http:0.13.0": "fetchai/http_client:0.16.0",
+            "fetchai/prometheus:0.2.0": "fetchai/prometheus:0.2.0",
         }
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)

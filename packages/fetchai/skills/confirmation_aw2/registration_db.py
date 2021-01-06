@@ -48,7 +48,7 @@ class RegistrationDB(Model):
             else custom_path
         )
         if not os.path.exists(os.path.dirname(os.path.abspath(self.db_path))):
-            raise ValueError(f"Path={self.db_path} not valid!")
+            raise ValueError(f"Path={self.db_path} not valid!")  # pragma: nocover
         self._initialise_backend()
 
     def _initialise_backend(self) -> None:
@@ -117,7 +117,7 @@ class RegistrationDB(Model):
         result = self._execute_single_sql(command, variables)
         return len(result) != 0
 
-    def is_allowed_to_trade(self, address: str, mininum_hours_between_txs: int) -> bool:
+    def is_allowed_to_trade(self, address: str, minimum_hours_between_txs: int) -> bool:
         """Check if an address is registered."""
         record = self.get_trade_table(address)
         if record is None:
@@ -136,7 +136,7 @@ class RegistrationDB(Model):
                 first_trade, "%Y-%m-%d %H:%M:%S.%f"
             )
             is_allowed_to_trade_ = now - first_trade_dt > datetime.timedelta(
-                hours=mininum_hours_between_txs
+                hours=minimum_hours_between_txs
             )
             if not is_allowed_to_trade_:
                 self.context.logger.info(

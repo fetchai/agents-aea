@@ -232,7 +232,11 @@ class TestSkillConfig:
             "handlers": {"dummy": {"args": dict(handler_arg_1=42)}},
             "models": {"dummy": {"args": dict(model_arg_1=42)}},
         }
+        directory = "test_directory"
+        skill_config.directory = directory
         skill_config.update(new_configurations)
+
+        assert skill_config.directory == directory
 
         assert (
             expected_dummy_behaviour_args == skill_config.behaviours.read("dummy").args
@@ -260,7 +264,7 @@ class TestSkillConfig:
 
         with pytest.raises(
             ValueError,
-            match="The custom configuration for skill fetchai/error:0.10.0 includes new behaviours: {'new_behaviour'}. This is not allowed.",
+            match="Attribute `behaviours.new_behaviour.args` is not allowed to be updated!",
         ):
             skill_config.update(new_configurations)
 
@@ -284,7 +288,7 @@ class TestSkillConfig:
 
         with pytest.raises(
             ValueError,
-            match="These fields of skill component configuration 'error_handler' of skill 'fetchai/error:0.10.0' are not allowed to change: {'class_name'}.",
+            match="Attribute `handlers.error_handler.class_name` is not allowed to be updated!",
         ):
             skill_config.update(new_configurations)
 
@@ -330,6 +334,10 @@ class TestAgentConfigUpdate:
             "models": {"dummy": {"args": dict(model_arg_1=42)}},
         }
 
+    def test_all_components_id(self):
+        """Test all components id listing."""
+        assert self.dummy_skill_component_id in self.aea_config.all_components_id
+
     def test_component_configurations_setter(self):
         """Test component configuration setter."""
         assert self.aea_config.component_configurations == {}
@@ -355,7 +363,9 @@ class TestAgentConfigUpdate:
         """Test the update method."""
         new_private_key_paths = dict(ethereum="foo")
         expected_private_key_paths = dict(
-            ethereum="foo", cosmos="cosmos_private_key.txt"
+            ethereum="foo",
+            cosmos="cosmos_private_key.txt",
+            fetchai="fetchai_private_key.txt",
         )
         self.aea_config.update(
             dict(
@@ -411,7 +421,7 @@ class GetDefaultConfigurationFileNameFromStrTestCase(TestCase):
 class PublicIdTestCase(TestCase):
     """Test case for PublicId class."""
 
-    @mock.patch("aea.configurations.base.re.match", return_value=None)
+    @mock.patch("aea.configurations.data_types.re.match", return_value=None)
     def test_public_id_from_str_not_matching(self, *mocks):
         """Test case for from_str method regex not matching."""
         with self.assertRaises(ValueError):
@@ -834,6 +844,7 @@ def test_agent_config_to_json_with_optional_configurations():
     agent_config.default_connection = "author/name:0.1.0"
     agent_config.default_ledger = DEFAULT_LEDGER
     agent_config.json
+    assert agent_config.package_id == PackageId.from_uri_path("agent/author/name/0.1.0")
 
 
 def test_protocol_specification_attributes():
@@ -870,15 +881,6 @@ def test_package_version_lt():
     v2 = PackageVersion("0.2.0")
     v3 = PackageVersion("latest")
     assert v1 < v2 < v3
-
-
-def test_configuration_class():
-    """Test the attribute 'configuration class' of PackageType."""
-    assert PackageType.PROTOCOL.configuration_class() == ProtocolConfig
-    assert PackageType.CONNECTION.configuration_class() == ConnectionConfig
-    assert PackageType.CONTRACT.configuration_class() == ContractConfig
-    assert PackageType.SKILL.configuration_class() == SkillConfig
-    assert PackageType.AGENT.configuration_class() == AgentConfig
 
 
 class TestDependencyGetPipInstallArgs:
@@ -982,3 +984,14 @@ def test_check_public_id_consistency_negative():
     with pytest.raises(ValueError, match=f"Directory {random_dir_name} is not valid."):
         component_configuration = ProtocolConfig("name", "author")
         component_configuration.check_public_id_consistency(Path(random_dir_name))
+
+
+def test_component_id_from_json():
+    """Test ComponentId.from_json."""
+    json_data = {
+        "type": "connection",
+        "author": "author",
+        "name": "name",
+        "version": "1.0.0",
+    }
+    assert ComponentId.from_json(json_data).json == json_data

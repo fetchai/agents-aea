@@ -25,6 +25,8 @@ import tempfile
 
 import pytest
 
+from aea.crypto.ethereum import EthereumCrypto
+from aea.crypto.fetchai import FetchAICrypto
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 
@@ -58,7 +60,7 @@ class TestLibp2pClientConnectionConnectDisconnect:
         os.chdir(cls.t)
 
         cls.connection_node = _make_libp2p_connection(delegate=True)
-        cls.connection = _make_libp2p_client_connection()
+        cls.connection = _make_libp2p_client_connection(cls.connection_node.node.pub)
 
     @pytest.mark.asyncio
     async def test_libp2pclientconnection_connect_disconnect(self):
@@ -106,11 +108,17 @@ class TestLibp2pClientConnectionEchoEnvelope:
         cls.multiplexer_node.connect()
 
         try:
-            cls.connection_client_1 = _make_libp2p_client_connection()
+            cls.connection_client_1 = _make_libp2p_client_connection(
+                peer_public_key=cls.connection_node.node.pub,
+                ledger_api_id=FetchAICrypto.identifier,
+            )
             cls.multiplexer_client_1 = Multiplexer([cls.connection_client_1])
             cls.multiplexer_client_1.connect()
 
-            cls.connection_client_2 = _make_libp2p_client_connection()
+            cls.connection_client_2 = _make_libp2p_client_connection(
+                peer_public_key=cls.connection_node.node.pub,
+                ledger_api_id=EthereumCrypto.identifier,
+            )
             cls.multiplexer_client_2 = Multiplexer([cls.connection_client_2])
             cls.multiplexer_client_2.connect()
         except Exception:
@@ -274,14 +282,14 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
             cls.mutliplexers.append(cls.multiplexer_node_2)
 
             cls.connection_client_1 = _make_libp2p_client_connection(
-                DEFAULT_DELEGATE_PORT + 1
+                cls.connection_node_1.node.pub, DEFAULT_DELEGATE_PORT + 1
             )
             cls.multiplexer_client_1 = Multiplexer([cls.connection_client_1])
             cls.multiplexer_client_1.connect()
             cls.mutliplexers.append(cls.multiplexer_client_1)
 
             cls.connection_client_2 = _make_libp2p_client_connection(
-                DEFAULT_DELEGATE_PORT + 2
+                cls.connection_node_2.node.pub, DEFAULT_DELEGATE_PORT + 2
             )
             cls.multiplexer_client_2 = Multiplexer([cls.connection_client_2])
             cls.multiplexer_client_2.connect()
@@ -453,8 +461,15 @@ class TestLibp2pClientConnectionRouting:
             ]
 
             for _ in range(DEFAULT_CLIENTS_PER_NODE):
-                for port in [DEFAULT_DELEGATE_PORT + 1, DEFAULT_DELEGATE_PORT + 2]:
-                    conn = _make_libp2p_client_connection(port)
+                ports = [DEFAULT_DELEGATE_PORT + 1, DEFAULT_DELEGATE_PORT + 2]
+                peers_public_keys = [
+                    cls.connection_node_1.node.pub,
+                    cls.connection_node_2.node.pub,
+                ]
+                for i in range(len(ports)):
+                    port = ports[i]
+                    peer_public_key = peers_public_keys[i]
+                    conn = _make_libp2p_client_connection(peer_public_key, port)
                     mux = Multiplexer([conn])
 
                     cls.connections.append(conn)

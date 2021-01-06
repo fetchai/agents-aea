@@ -25,8 +25,6 @@ import pytest
 
 from aea.test_tools.test_skill import BaseSkillTestCase
 
-from packages.fetchai.skills.confirmation_aw1.registration_db import RegistrationDB
-
 from tests.conftest import ROOT_DIR
 
 
@@ -40,12 +38,23 @@ class TestStrategy(BaseSkillTestCase):
         """Setup the test class."""
         super().setup()
         cls.custom_path = None
-        cls.db = RegistrationDB(
-            custom_path=cls.custom_path,
-            name="strategy",
-            skill_context=cls._skill.skill_context,
-        )
+        cls.db = cls._skill.skill_context.registration_db
         cls.address = "some_address"
+
+    def test__initialise_backend(self):
+        """Test the _initialise_backend method of the RegistrationDB class."""
+        # operation
+        with patch("os.path.isfile", return_value=False) as mock_is_file:
+            with patch.object(self.db, "_execute_single_sql") as mock_exe:
+                self.db._initialise_backend()
+
+        # after
+        mock_is_file.assert_called_once()
+        mock_exe.assert_any_call(
+            "CREATE TABLE IF NOT EXISTS registered_table (address TEXT, ethereum_address TEXT, "
+            "ethereum_signature TEXT, fetchai_signature TEXT, "
+            "developer_handle TEXT, tweet TEXT)"
+        )
 
     def test_set_registered(self):
         """Test the set_registered method of the RegistrationDB class."""

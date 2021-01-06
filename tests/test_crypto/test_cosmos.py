@@ -61,6 +61,21 @@ def test_sign_and_recover_message():
     ), "Failed to recover the correct address."
 
 
+def test_sign_and_recover_message_public_key():
+    """Test the signing and the recovery function for the eth_crypto."""
+    account = CosmosCrypto(COSMOS_PRIVATE_KEY_PATH)
+    sign_bytes = account.sign_message(message=b"hello")
+    assert len(sign_bytes) > 0, "The len(signature) must not be 0"
+    recovered_public_keys = CosmosApi.recover_public_keys_from_message(
+        message=b"hello", signature=sign_bytes
+    )
+    assert len(recovered_public_keys) == 2, "Wrong number of public keys recovered."
+    assert (
+        CosmosApi.get_address_from_public_key(recovered_public_keys[0])
+        == account.address
+    ), "Failed to recover the correct address."
+
+
 def test_get_hash():
     """Test the get hash functionality."""
     expected_hash = "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"

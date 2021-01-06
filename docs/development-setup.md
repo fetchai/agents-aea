@@ -48,7 +48,7 @@ It is also possible to develop directly in an AEA project:
 
 ## General advice
 
-This advice partically overlaps with the previous two sections:
+This advice partially overlaps with the previous two sections:
 
 - When developing a specific AEA, it might be helpful to publish/push or fetch/add from local registry. From your working directory/AEA project, simply execute the usual AEA CLI commands. The CLI will first search in the `packages` directory, then in the remote AEA registry. You can explicitly point to local registry by providing flag `--local` (see <a href="../cli-commands">here</a>) or `--remote` to only point to remote registry.
 

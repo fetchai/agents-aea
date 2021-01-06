@@ -28,8 +28,13 @@ from aea.aea import AEA
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import ConnectionConfig
 from aea.crypto.fetchai import FetchAICrypto
-from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA, create_private_key
+from aea.crypto.helpers import (
+    PRIVATE_KEY_PATH_SCHEMA,
+    create_private_key,
+    make_certificate,
+)
 from aea.crypto.wallet import Wallet
+from aea.helpers.base import CertRequest
 from aea.identity.base import Identity
 from aea.protocols.base import Protocol
 from aea.registries.resources import Resources
@@ -133,6 +138,20 @@ def run():
     resources.add_connection(ledger_api_connection)
 
     # Add the P2P connection
+    cert_path = ".certs/conn_cert.txt"
+    cert_request = CertRequest(
+        identifier="acn",
+        ledger_id=FetchAICrypto.identifier,
+        not_after="2022-01-01",
+        not_before="2021-01-01",
+        public_key="fetchai",
+        save_path=cert_path,
+    )
+    public_key = wallet.connection_cryptos.public_keys.get(FetchAICrypto.identifier)
+    message = cert_request.get_message(public_key)
+    make_certificate(
+        FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE, message, cert_path
+    )
     configuration = ConnectionConfig(
         connection_id=P2PLibp2pConnection.connection_id,
         delegate_uri="127.0.0.1:11001",
@@ -142,6 +161,7 @@ def run():
         public_uri="127.0.0.1:9001",
         build_directory=os.getcwd(),
         build_entrypoint="check_dependencies.py",
+        cert_requests=[cert_request],
     )
     configuration.directory = os.path.dirname(
         packages.fetchai.connections.p2p_libp2p.connection.__file__

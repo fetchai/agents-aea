@@ -19,12 +19,15 @@
 
 """This module contains the strategy class."""
 
+import uuid
+
 import numpy as np
 from tensorflow import keras
 
 from aea.exceptions import enforce
 from aea.helpers.search.generic import (
     AGENT_LOCATION_MODEL,
+    AGENT_PERSONALITY_MODEL,
     AGENT_REMOVE_SERVICE_MODEL,
     AGENT_SET_SERVICE_MODEL,
     SIMPLE_DATA_MODEL,
@@ -37,9 +40,12 @@ DEFAULT_PRICE_PER_DATA_BATCH = 10
 DEFAULT_BATCH_SIZE = 32
 DEFAULT_SELLER_TX_FEE = 0
 DEFAULT_BUYER_TX_FEE = 0
+DEFAULT_SERVICE_ID = "data_service"
 
 DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
+DEFAULT_PERSONALITY_DATA = {"piece": "genus", "value": "data"}
 DEFAULT_SERVICE_DATA = {"key": "dataset_id", "value": "fmnist"}
+DEFAULT_CLASSIFICATION = {"piece": "classification", "value": "seller"}
 
 
 class Strategy(Model):
@@ -56,6 +62,7 @@ class Strategy(Model):
         currency_id = kwargs.pop("currency_id", None)
         ledger_id = kwargs.pop("ledger_id", None)
         self._is_ledger_tx = kwargs.pop("is_ledger_tx", False)
+        self._service_id = kwargs.pop("service_id", DEFAULT_SERVICE_ID)
 
         location = kwargs.pop("location", DEFAULT_LOCATION)
         self._agent_location = {
@@ -63,6 +70,22 @@ class Strategy(Model):
                 latitude=location["latitude"], longitude=location["longitude"]
             )
         }
+        self._set_personality_data = kwargs.pop(
+            "personality_data", DEFAULT_PERSONALITY_DATA
+        )
+        enforce(
+            len(self._set_personality_data) == 2
+            and "piece" in self._set_personality_data
+            and "value" in self._set_personality_data,
+            "personality_data must contain keys `key` and `value`",
+        )
+        self._set_classification = kwargs.pop("classification", DEFAULT_CLASSIFICATION)
+        enforce(
+            len(self._set_classification) == 2
+            and "piece" in self._set_classification
+            and "value" in self._set_classification,
+            "classification must contain keys `key` and `value`",
+        )
         self._set_service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
         enforce(
             len(self._set_service_data) == 2
@@ -111,6 +134,28 @@ class Strategy(Model):
         """
         description = Description(
             self._agent_location, data_model=AGENT_LOCATION_MODEL,
+        )
+        return description
+
+    def get_register_personality_description(self) -> Description:
+        """
+        Get the register personality description.
+
+        :return: a description of the personality
+        """
+        description = Description(
+            self._set_personality_data, data_model=AGENT_PERSONALITY_MODEL,
+        )
+        return description
+
+    def get_register_classification_description(self) -> Description:
+        """
+        Get the register classification description.
+
+        :return: a description of the classification
+        """
+        description = Description(
+            self._set_classification, data_model=AGENT_PERSONALITY_MODEL,
         )
         return description
 
@@ -185,6 +230,8 @@ class Strategy(Model):
                 "currency_id": self._currency_id,
                 "ledger_id": self.ledger_id,
                 "address": address,
+                "service_id": self._service_id,
+                "nonce": uuid.uuid4().hex,
             }
         )
         return proposal
@@ -196,4 +243,19 @@ class Strategy(Model):
         :param terms: the terms
         :return: boolean
         """
-        return terms == self.generate_terms()
+        generated_terms = self.generate_terms()
+        return all(
+            [
+                terms.values[key] == generated_terms.values[key]
+                for key in [
+                    "batch_size",
+                    "price",
+                    "seller_tx_fee",
+                    "buyer_tx_fee",
+                    "currency_id",
+                    "ledger_id",
+                    "address",
+                    "service_id",
+                ]
+            ]
+        )

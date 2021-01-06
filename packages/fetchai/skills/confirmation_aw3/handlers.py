@@ -73,7 +73,7 @@ class DefaultHandler(Handler):
         default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
         default_dialogue = cast(DefaultDialogue, default_dialogues.update(default_msg))
         if default_dialogue is None:
-            self._handle_unidentified_dialogue(default_dialogue)
+            self._handle_unidentified_dialogue(default_msg)
             return
 
         # handle message

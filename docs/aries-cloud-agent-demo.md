@@ -8,7 +8,7 @@ Demonstrating an entire decentralised identity scenario involving AEAs and insta
 
 ## Discussion
 
-This demo corresponds with the one <a href="https://github.com/hyperledger/aries-cloudagent-python/blob/master/demo/README.md" target="_blank">here</a> from <a href="https://github.com/hyperledger/aries-cloudagent-python" target="_blank"> aries cloud agent repository </a>.
+This demo corresponds with the one <a href="https://github.com/hyperledger/aries-cloudagent-python/blob/master/demo/README.md" target="_blank">here</a> from <a href="https://github.com/hyperledger/aries-cloudagent-python" target="_blank"> Aries cloud agent repository </a>.
 
 The aim of this demo is to illustrate how AEAs can connect to ACAs, thus gaining all of their capabilities, such as issuing and requesting verifiable credentials, selective disclosure and zero knowledge proofs.
 
@@ -24,7 +24,7 @@ The aim of this demo is to illustrate how AEAs can connect to ACAs, thus gaining
         activate aaca
         activate aaea
 
-        Note right of aaea: Shows p2p ID
+        Note right of aaea: Shows P2P ID
 
         faea->>faca: Request status?
         faca->>faea: status
@@ -58,7 +58,7 @@ Each AEA is connected to its corresponding ACA: **Alice_AEA** to **Alice_ACA** a
 The following lists the sequence of interactions between the four agents:
 
  * **Alice_AEA**: starts
- * **Alice_AEA**: shows its p2p address in the terminal and waits for an `invitation` detail from **Faber_AEA**.
+ * **Alice_AEA**: shows its P2P address in the terminal and waits for an `invitation` detail from **Faber_AEA**.
  * **Alice_AEA**: registers itself on the SOEF.
  * **Faber_AEA**: starts
  * **Faber_AEA**: searches the SOEF and finds **Alice_AEA**.
@@ -77,7 +77,7 @@ The following lists the sequence of interactions between the four agents:
 
 All messages from an AEA to an ACA are http requests (using `http_client` connection).
 
-All messages from an AEA to another AEA utilise the p2p communication network accessed via the `p2p_libp2p` connection.
+All messages from an AEA to another AEA utilise the P2P communication network accessed via the `p2p_libp2p` connection.
 
 All messages initiated from an ACA to an AEA are webhooks (using `webhook` connection).
 
@@ -107,7 +107,7 @@ Install Aries cloud-agents (for more info see <a href="https://github.com/hyperl
 pip install aries-cloudagent
 ```
 
-This demo has been successfully tested with aca-py version 0.4.5.
+This demo has been successfully tested with `aca-py` version `0.4.5`.
 
 This demo requires an instance of von network running in docker locally (for more info see <a href="https://github.com/bcgov/von-network#running-the-network-locally" target="_blank">here</a>)
 
@@ -180,7 +180,7 @@ Now you can create **Alice_AEA** and **Faber_AEA** in terminals 3 and 4 respecti
 In the third terminal, fetch **Alice_AEA** and move into its project folder:
 
 ``` bash
-aea fetch fetchai/aries_alice:0.18.0
+aea fetch fetchai/aries_alice:0.19.0
 cd aries_alice
 ```
 
@@ -191,11 +191,11 @@ The following steps create **Alice_AEA** from scratch:
 ``` bash
 aea create aries_alice
 cd aries_alice
-aea add connection fetchai/p2p_libp2p:0.13.0
-aea add connection fetchai/soef:0.14.0
-aea add connection fetchai/http_client:0.15.0
-aea add connection fetchai/webhook:0.11.0
-aea add skill fetchai/aries_alice:0.14.0
+aea add connection fetchai/p2p_libp2p:0.14.0
+aea add connection fetchai/soef:0.15.0
+aea add connection fetchai/http_client:0.16.0
+aea add connection fetchai/webhook:0.12.0
+aea add skill fetchai/aries_alice:0.15.0
 ```
 </p>
 </details>
@@ -231,17 +231,15 @@ aea config set vendor.fetchai.connections.webhook.config.webhook_url_path /webho
 
 #### Configure the `p2p_libp2p` connection:
 
-(configuration file: `vendor/fetchai/connections/p2p_libp2p/connection.yaml`)
-
-Replace the `config` section with the following (note the changes in the URI ports):
-
-``` yaml
-config:
-  delegate_uri: 127.0.0.1:11000
-  entry_peers: []
-  local_uri: 127.0.0.1:7000
-  log_file: libp2p_node.log
-  public_uri: 127.0.0.1:7000
+``` bash
+aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
+'{
+  "delegate_uri": "127.0.0.1:11000",
+  "entry_peers": [],
+  "local_uri": "127.0.0.1:7000",
+  "log_file": "libp2p_node.log",
+  "public_uri": "127.0.0.1:7000"
+}'
 ```
 
 ### Install the Dependencies and Run Alice_AEA:
@@ -250,6 +248,7 @@ Now install all the dependencies:
 
 ``` bash
 aea install
+aea build
 ```
 
 Finally run **Alice_AEA**:
@@ -258,14 +257,14 @@ Finally run **Alice_AEA**:
 aea run
 ```
 
-Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address. We will refer to this as **Alice_AEA's p2p address**.
+Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.14.0 -u public_uri` to retrieve the address.) We will refer to this as **Alice_AEA's P2P address**.
 
 ### Faber_AEA
 
 In the fourth terminal, fetch **Faber_AEA** and move into its project folder:
 
 ``` bash
-aea fetch fetchai/aries_faber:0.18.0
+aea fetch fetchai/aries_faber:0.19.0
 cd aries_faber
 ```
 
@@ -276,11 +275,11 @@ The following steps create **Faber_AEA** from scratch:
 ``` bash
 aea create aries_faber
 cd aries_faber
-aea add connection fetchai/p2p_libp2p:0.13.0
-aea add connection fetchai/soef:0.14.0
-aea add connection fetchai/http_client:0.15.0
-aea add connection fetchai/webhook:0.11.0
-aea add skill fetchai/aries_faber:0.13.0
+aea add connection fetchai/p2p_libp2p:0.14.0
+aea add connection fetchai/soef:0.15.0
+aea add connection fetchai/http_client:0.16.0
+aea add connection fetchai/webhook:0.12.0
+aea add skill fetchai/aries_faber:0.14.0
 ```
 </p>
 </details>
@@ -317,20 +316,18 @@ aea config set vendor.fetchai.connections.webhook.config.webhook_url_path /webho
 
 #### Configure the `p2p_libp2p` connection:
 
-(configuration file: `vendor/fetchai/connections/p2p_libp2p/connection.yaml`)
-
-Replace the `config` section with the following (note the changes in the URI ports):
-
-``` yaml
-config:
-  delegate_uri: 127.0.0.1:11001
-  entry_peers: ['SOME_ADDRESS']
-  local_uri: 127.0.0.1:7001
-  log_file: libp2p_node.log
-  public_uri: 127.0.0.1:7001
+``` bash
+aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
+'{
+  "delegate_uri": "127.0.0.1:11001",
+  "entry_peers": ["SOME_ADDRESS"],
+  "local_uri": "127.0.0.1:7001",
+  "log_file": "libp2p_node.log",
+  "public_uri": "127.0.0.1:7001"
+}'
 ```
 
-where `SOME_ADDRESS` is **Alice_AEA's p2p address** as displayed in the third terminal.
+where `SOME_ADDRESS` is **Alice_AEA's P2P address** as displayed in the third terminal.
 
 ### Install the Dependencies and Run Faber_AEA:
 
@@ -338,6 +335,7 @@ Now install all the dependencies:
 
 ``` bash
 aea install
+aea build
 ```
 
 Finally run **Faber_AEA**:
@@ -372,5 +370,5 @@ aea delete aries_alice
 In the next update to this demo, the remaining interactions between AEAs and ACAs must be implemented. This means:
 
 * An instance of Indy ledger must be installed and running. See <a href="https://github.com/bcgov/von-network#running-the-network-locally" target="_blank">here</a> for more detail.
-* The commands for running the ACAs need to be adjusted. Additional options relating to a wallet (wallet-name, type, key, storage-type, config, creds) need to be fed to the ACAs as well as the ledger's genesis file so the ACAs can connect to the ledger.
+* The commands for running the ACAs need to be adjusted. Additional options relating to a wallet (wallet-name, type, key, storage-type, configuration, credentials) need to be fed to the ACAs as well as the ledger's genesis file so the ACAs can connect to the ledger.
 * The remaining interactions between the AEAs and ACAs as described <a href="../aries-cloud-agent-demo/#discussion">here</a> need to be implemented.

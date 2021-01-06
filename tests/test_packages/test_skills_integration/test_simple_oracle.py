@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains the integration test for the generic buyer and seller skills."""
+import json
 
 import pytest
 
@@ -27,6 +28,8 @@ from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_ME
 from tests.conftest import (
     ETHEREUM,
     ETHEREUM_PRIVATE_KEY_FILE,
+    FETCHAI,
+    FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
     FUNDED_ETH_PRIVATE_KEY_2,
     FUNDED_ETH_PRIVATE_KEY_3,
     MAX_FLAKY_RERUNS_ETH,
@@ -49,26 +52,26 @@ class TestOracleSkills(AEATestCaseMany, UseGanache):
 
         # add ethereum ledger in both configuration files
         default_routing = {
-            "fetchai/ledger_api:0.8.0": "fetchai/ledger:0.11.0",
-            "fetchai/contract_api:0.9.0": "fetchai/ledger:0.11.0",
-            "fetchai/http:0.10.0": "fetchai/http_client:0.15.0",
-            "fetchai/prometheus:0.1.0": "fetchai/prometheus:0.1.0",
+            "fetchai/ledger_api:0.9.0": "fetchai/ledger:0.12.0",
+            "fetchai/contract_api:0.10.0": "fetchai/ledger:0.12.0",
+            "fetchai/http:0.11.0": "fetchai/http_client:0.16.0",
+            "fetchai/prometheus:0.2.0": "fetchai/prometheus:0.2.0",
         }
 
         # add packages for oracle agent
         self.set_agent_context(oracle_agent_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.13.0")
-        self.add_item("connection", "fetchai/ledger:0.11.0")
-        self.add_item("connection", "fetchai/http_client:0.15.0")
-        self.add_item("connection", "fetchai/prometheus:0.1.0")
-        self.remove_item("connection", "fetchai/stub:0.13.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.13.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.14.0")
+        self.add_item("connection", "fetchai/ledger:0.12.0")
+        self.add_item("connection", "fetchai/http_client:0.16.0")
+        self.add_item("connection", "fetchai/prometheus:0.2.0")
+        self.remove_item("connection", "fetchai/stub:0.14.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.14.0")
         self.set_config("agent.default_ledger", ETHEREUM)
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
-        self.add_item("skill", "fetchai/coin_price:0.2.0")
-        self.add_item("contract", "fetchai/oracle:0.2.0")
-        self.add_item("skill", "fetchai/simple_oracle:0.2.0")
+        self.add_item("skill", "fetchai/coin_price:0.3.0")
+        self.add_item("contract", "fetchai/oracle:0.3.0")
+        self.add_item("skill", "fetchai/simple_oracle:0.3.0")
 
         # set erc20 address
         _, erc20_address = erc20_contract
@@ -88,25 +91,42 @@ class TestOracleSkills(AEATestCaseMany, UseGanache):
         self.replace_private_key_in_file(
             FUNDED_ETH_PRIVATE_KEY_3, ETHEREUM_PRIVATE_KEY_FILE
         )
-
+        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
+        self.add_private_key(
+            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+        )
+        setting_path = "vendor.fetchai.connections.p2p_libp2p.cert_requests"
+        settings = json.dumps(
+            [
+                {
+                    "identifier": "acn",
+                    "ledger_id": ETHEREUM,
+                    "not_after": "2022-01-01",
+                    "not_before": "2021-01-01",
+                    "public_key": FETCHAI,
+                    "save_path": ".certs/conn_cert.txt",
+                }
+            ]
+        )
+        self.set_config(setting_path, settings, type_="list")
         self.run_install()
 
         # add packages for agent two
         self.set_agent_context(client_agent_name)
-        self.add_item("connection", "fetchai/ledger:0.11.0")
-        self.remove_item("connection", "fetchai/stub:0.13.0")
-        self.set_config("agent.default_connection", "fetchai/ledger:0.11.0")
+        self.add_item("connection", "fetchai/ledger:0.12.0")
+        self.remove_item("connection", "fetchai/stub:0.14.0")
+        self.set_config("agent.default_connection", "fetchai/ledger:0.12.0")
         self.set_config("agent.default_ledger", ETHEREUM)
 
         default_routing = {
-            "fetchai/ledger_api:0.8.0": "fetchai/ledger:0.11.0",
-            "fetchai/contract_api:0.9.0": "fetchai/ledger:0.11.0",
+            "fetchai/ledger_api:0.9.0": "fetchai/ledger:0.12.0",
+            "fetchai/contract_api:0.10.0": "fetchai/ledger:0.12.0",
         }
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
-        self.add_item("contract", "fetchai/oracle_client:0.1.0")
-        self.add_item("contract", "fetchai/fet_erc20:0.1.0")
-        self.add_item("skill", "fetchai/simple_oracle_client:0.1.0")
+        self.add_item("contract", "fetchai/oracle_client:0.2.0")
+        self.add_item("contract", "fetchai/fet_erc20:0.2.0")
+        self.add_item("skill", "fetchai/simple_oracle_client:0.2.0")
 
         setting_path = "vendor.fetchai.skills.simple_oracle_client.models.strategy.args.erc20_address"
         self.set_config(setting_path, erc20_address)
@@ -122,6 +142,7 @@ class TestOracleSkills(AEATestCaseMany, UseGanache):
         # run oracle agent
         self.set_agent_context(oracle_agent_name)
         self.run_cli_command("build", cwd=self._get_cwd())
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
         oracle_aea_process = self.run_agent()
 
         check_strings = (

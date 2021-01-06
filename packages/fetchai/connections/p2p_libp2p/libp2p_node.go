@@ -90,6 +90,9 @@ func main() {
 	// entry peers
 	entryPeers := agent.EntryPeers()
 
+	// agent proof of representation
+	record := agent.AgentRecord()
+
 	// add artificial delay for agent registration
 	registrationDelay := agent.RegistrationDelayInSeconds()
 
@@ -103,8 +106,8 @@ func main() {
 			dhtclient.IdentityFromFetchAIKey(key),
 			dhtclient.BootstrapFrom(entryPeers),
 		}
-		if aeaAddr != "" {
-			opts = append(opts, dhtclient.RegisterAgentAddress(aeaAddr, agent.Connected))
+		if record != nil {
+			opts = append(opts, dhtclient.RegisterAgentAddress(record, agent.Connected))
 		}
 		node, err = dhtclient.New(opts...)
 	} else {
@@ -116,8 +119,8 @@ func main() {
 			dhtpeer.EnableDelegateService(nodePortDelegate),
 			dhtpeer.BootstrapFrom(entryPeers),
 		}
-		if aeaAddr != "" {
-			opts = append(opts, dhtpeer.RegisterAgentAddress(aeaAddr, agent.Connected))
+		if record != nil {
+			opts = append(opts, dhtpeer.RegisterAgentAddress(record, agent.Connected))
 		}
 		if nodePortMonitoring != 0 {
 			opts = append(opts, dhtpeer.EnablePrometheusMonitoring(nodePortMonitoring))

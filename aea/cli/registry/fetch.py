@@ -77,9 +77,8 @@ def fetch_agent(
 
     if alias is not None:
         ctx.agent_config.agent_name = alias
-        ctx.agent_loader.dump(
-            ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
-        )
+        with open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as fp:
+            ctx.agent_loader.dump(ctx.agent_config, fp)
 
     click.echo("Fetching dependencies...")
     for item_type in (CONNECTION, CONTRACT, SKILL, PROTOCOL):

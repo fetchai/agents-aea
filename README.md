@@ -73,15 +73,15 @@ A framework for autonomous economic agent (AEA) development
   </a>
 </p>
 
-## Alternatively: Use Pipx (CLI usage only)
+## Alternatively: Use `pipx` (CLI usage only)
 
-1. Install [PipX](https://github.com/pipxproject/pipx)
+1. Install [pipx](https://github.com/pipxproject/pipx)
 
 2. Install the package from [PyPI](https://pypi.org/project/aea/):
 
        pipx install aea[all]
 
-3. Run aea cli e.g.:
+3. Run AEA CLI e.g.:
 
        aea --help
 
@@ -94,6 +94,10 @@ This approach is not recommended!
 This repository contains submodules. Clone with recursive strategy:
 
     git clone https://github.com/fetchai/agents-aea.git --recursive && cd agents-aea
+
+- To fetch/update submodules (for existing local repo):
+
+      git submodule sync --recursive && git submodule update --init --recursive
 
 ### Dependencies
 
@@ -127,7 +131,35 @@ The following dependency is **only relevant if you intend to contribute** to the
 
 The following steps are **only relevant if you intend to contribute** to the repository. They are **not required** for agent development.
 
-- To install development dependencies (here optionally skipping `Pipfile.lock` creation):
+### Recommended commands
+
+- The simplest way to get setup for development on the framework is to run the following:
+
+      make new_env
+      pipenv shell
+
+- For linting and static analysis use:
+
+      make lint
+      make static
+      make pylint
+      make security
+
+- For checking packages integrity:
+
+      make package_checks
+
+- For testing `aea.{SUBMODULE}` with `tests/test_{TESTMODULE}` use:
+
+      make dir={SUBMODULE} tdir={TESTMODULE} test-sub
+
+  e.g.
+
+      make dir=cli tdir=cli test-sub
+
+### Alternative commands
+
+- To install development dependencies manually (here optionally skipping `Pipfile.lock` creation):
 
       pipenv install --dev --skip-lock
 
@@ -145,17 +177,25 @@ The following steps are **only relevant if you intend to contribute** to the rep
 
 - To run static type checks: `tox -e mypy` or `make static`
 
-- To run pylint: `tox -e pylint` or `make pylint`
+- To run `pylint`: `tox -e pylint` or `make pylint`
 
 - To run security checks: `tox -e bandit` and `tox -e safety` or `make security`
 
-- To start a live-reloading docs server on localhost: `mkdocs serve`
+### Go Development
 
-- To amend the docs, create a new documentation file in `docs/` and add a reference to it in `mkdocs.yml`.
+The `fetchai/p2p_libp2p` package is partially developed in Go.
 
-- To fetch/update submodules:
+- To install Go visit the [Golang site](https://golang.org/doc/install).
 
-      git submodule sync --recursive && git submodule update --init --recursive
+- We use [golines](https://github.com/segmentio/golines) and [golangci-lint](https://golangci-lint.run) for linting.
+
+- To run tests, use `go test -p 1 -timeout 0 -count 1 -v ./...` from the root directory of the package.
+
+### Documentation
+
+- To start a live-reloading docs server on localhost: `mkdocs serve`. To amend the docs, create a new documentation file in `docs/` and add a reference to it in `mkdocs.yml`.
+
+- To run demos against local packages use flag `--local` in `aea` CLI commands.
 
 ## Cite
 

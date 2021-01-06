@@ -17,7 +17,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Core definitions for the AEA command-line tool."""
 
 import click
@@ -42,8 +41,10 @@ from aea.cli.get_wealth import get_wealth
 from aea.cli.init import init
 from aea.cli.install import install
 from aea.cli.interact import interact
+from aea.cli.issue_certificates import issue_certificates
 from aea.cli.launch import launch
 from aea.cli.list import list_command as _list
+from aea.cli.local_registry_sync import local_registry_sync
 from aea.cli.login import login
 from aea.cli.logout import logout
 from aea.cli.publish import publish
@@ -137,6 +138,7 @@ cli.add_command(get_wealth)
 cli.add_command(init)
 cli.add_command(install)
 cli.add_command(interact)
+cli.add_command(issue_certificates)
 cli.add_command(launch)
 cli.add_command(login)
 cli.add_command(logout)
@@ -149,5 +151,6 @@ cli.add_command(reset_password)
 cli.add_command(run)
 cli.add_command(scaffold)
 cli.add_command(search)
+cli.add_command(local_registry_sync)
 cli.add_command(transfer)
 cli.add_command(upgrade)
