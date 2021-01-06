@@ -491,19 +491,21 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
                 "vendor.fetchai.skills.tac_participation.models.game.args.search_query"
             )
             self.nested_set_config(setting_path, data)
+            setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
+            self.set_config(setting_path, ETHEREUM)
 
         # run tac controller
         self.set_agent_context(tac_controller_name)
+        self.run_cli_command("build", cwd=self._get_cwd())
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
         now = datetime.datetime.now().strftime("%d %m %Y %H:%M")
         now_min = datetime.datetime.strptime(now, "%d %m %Y %H:%M")
         fut = now_min + datetime.timedelta(
-            0, 180
-        )  # we provide 3 minutes time for contract deployment
+            0, 120
+        )  # we provide 2 minutes time for contract deployment
         start_time = fut.strftime("%d %m %Y %H:%M")
         setting_path = "vendor.fetchai.skills.tac_control_contract.models.parameters.args.registration_start_time"
         self.set_config(setting_path, start_time)
-        self.run_cli_command("build", cwd=self._get_cwd())
-        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
         tac_controller_process = self.run_agent()
 
         check_strings = (
@@ -525,8 +527,8 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
             "TAC open for registration until:",
         )
         missing_strings = self.missing_from_output(
-            tac_controller_process, check_strings, timeout=240, is_terminating=False
-        )  # we need to wait sufficiently long (at least 3 minutes - see above for deployment)
+            tac_controller_process, check_strings, timeout=180, is_terminating=False
+        )  # we need to wait sufficiently long (at least 2 minutes - see above for deployment)
         assert (
             missing_strings == []
         ), "Strings {} didn't appear in tac_controller output.".format(missing_strings)
@@ -555,8 +557,8 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
         )
         check_strings = ("found the TAC controller. Registering...",)
         missing_strings = self.missing_from_output(
-            tac_aea_one_process, check_strings, timeout=240, is_terminating=False
-        )  # we need to wait sufficiently long (at least 3 minutes - see above for deployment)
+            tac_aea_one_process, check_strings, timeout=60, is_terminating=False
+        )  # we need to wait sufficiently long (at least 1 minutes - for registration)
         assert (
             missing_strings == []
         ), "Strings {} didn't appear in tac_aea_one output.".format(missing_strings)
