@@ -4,4 +4,4 @@ This connection wraps an HTTP server. It consumes requests from clients, transla
 
 ## Usage
 
-First, add the connection to your AEA project (`aea add connection fetchai/http_server:0.14.0`). Then, update the `config` in `connection.yaml` by providing a `host` and `port` of the server. Optionally, provide a path to an [OpenAPI spec](https://swagger.io/docs/specification/about/) for request validation.
+First, add the connection to your AEA project (`aea add connection fetchai/http_server:0.15.0`). Then, update the `config` in `connection.yaml` by providing a `host` and `port` of the server. Optionally, provide a path to an [OpenAPI specification](https://swagger.io/docs/specification/about/) for request validation.

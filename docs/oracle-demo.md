@@ -19,9 +19,10 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 Fetch the AEA that will deploy and update the oracle contract.
 
 ``` bash
-aea fetch fetchai/coin_price_oracle:0.2.0
+aea fetch fetchai/coin_price_oracle:0.3.0
 cd coin_price_oracle
 aea install
+aea build
 ```
 
 <details><summary>Alternatively, create from scratch.</summary>
@@ -32,22 +33,22 @@ Create the AEA that will deploy the contract.
 ``` bash
 aea create coin_price_oracle
 cd coin_price_oracle
-aea add connection fetchai/http_client:0.15.0
-aea add connection fetchai/ledger:0.11.0
-aea add connection fetchai/p2p_libp2p:0.13.0
-aea add skill fetchai/coin_price:0.2.0
-aea add skill fetchai/simple_oracle:0.2.0
+aea add connection fetchai/http_client:0.16.0
+aea add connection fetchai/ledger:0.12.0
+aea add connection fetchai/p2p_libp2p:0.14.0
+aea add skill fetchai/coin_price:0.3.0
+aea add skill fetchai/simple_oracle:0.3.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.13.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.14.0
 ```
 
-Then update the agent config with the default routing:
+Then update the agent configuration with the default routing:
 ``` bash
 aea config set --type dict agent.default_routing \
 '{
-"fetchai/contract_api:0.9.0": "fetchai/ledger:0.11.0",
-"fetchai/http:0.10.0": "fetchai/http_client:0.15.0",
-"fetchai/ledger_api:0.8.0": "fetchai/ledger:0.11.0"
+"fetchai/contract_api:0.10.0": "fetchai/ledger:0.12.0",
+"fetchai/http:0.11.0": "fetchai/http_client:0.16.0",
+"fetchai/ledger_api:0.9.0": "fetchai/ledger:0.12.0"
 }'
 ```
 
@@ -66,8 +67,18 @@ aea generate-key ethereum
 aea add-key ethereum ethereum_private_key.txt
 ```
 
+Next, create a private key used to secure the AEA's communications:
+``` bash
+aea generate-key fetchai fetchai_connection_private_key.txt
+aea add-key fetchai fetchai_connection_private_key.txt --connection
+```
 
-The oracle AEAs require either a locally runnning test node or a connection to a remote testnet.
+Finally, certify the key for use by the connections that request that:
+``` bash
+aea issue-certificates
+```
+
+The oracle AEAs require either a locally running test node or a connection to a remote testnet.
 
 ### Setting up with a local Ganache node
 
@@ -79,12 +90,12 @@ docker run -p 8545:8545 trufflesuite/ganache-cli:latest --verbose --gasPrice=0 -
 ### Run the Oracle AEA
 
 Run the oracle agent. This will deploy a contract to the testnet, grant oracle permissions to the AEA's wallet address, and periodically update the contract with the latest price of FET (or whichever coin was specified).
-```bash
+``` bash
 aea run
 ```
 
 After a few moments, you should see the following notices in the logs:
-```bash
+``` bash
 info: [coin_price_oracle] Oracle contract successfully deployed!
 ...
 info: [coin_price_oracle] Oracle role successfully granted!

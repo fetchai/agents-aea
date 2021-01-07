@@ -9,9 +9,9 @@ However, support for additional ledgers can be added to the framework at runtime
 
 For a ledger to be considered `supported` in the framework, three abstract base classes need to be implemented:
 
-- the <a href="../api/crypto/base#aea.crypto.base.LedgerApi">`LedgerApi`</a> class wraps the api to talk to the ledger and its helper methods
-- the <a href="../api/crypto/base#aea.crypto.base.Crypto">`Crypto`</a> class wraps the api to perform cryptographic operations for the relevant ledger
-- the <a href="../api/crypto/base#aea.crypto.base.FaucetApi">`FaucetApi`</a> class wraps the api to talk to a faucet on a testnet
+- the <a href="../api/crypto/base#aea.crypto.base.LedgerApi">`LedgerApi`</a> class wraps the API to talk to the ledger and its helper methods
+- the <a href="../api/crypto/base#aea.crypto.base.Crypto">`Crypto`</a> class wraps the API to perform cryptographic operations for the relevant ledger
+- the <a href="../api/crypto/base#aea.crypto.base.FaucetApi">`FaucetApi`</a> class wraps the API to talk to a faucet on a testnet
 
 These three classes have their own registries, which allow the developer to import the relevant object where needed:
 
@@ -33,7 +33,7 @@ register_crypto(id_="my_ledger_id", entry_point="some.dotted.path:MyLedgerCrypto
 my_ledger_crypto = make_crypto("my_ledger_id")
 ```
 
-- Examples of how to interact with the ledger api registry:
+- Examples of how to interact with the ledger API registry:
 
 ``` python
 from aea.crypto.registries import ledger_apis_registry, make_ledger_api, register_ledger_api
@@ -52,13 +52,13 @@ register_ledger_api(id_="my_ledger_id", entry_point="some.dotted.path:MyLedgerAp
 my_ledger_api = make_ledger_api("my_ledger_id")
 ```
 
-- Examples of how to interact with the faucet api registry:
+- Examples of how to interact with the faucet API registry:
 
 ``` python
 from aea.crypto.registries import faucet_apis_registry, make_faucet_api, register_faucet_api
 
 # by default we can use the native faucet apis
-CONFIG = {"network": "testnet"}
+CONFIG = dict(poll_interval=1.0)
 fetchai_faucet_api = make_faucet_api("fetchai", **CONFIG)
 
 # we can check what faucet apis are registered

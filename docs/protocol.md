@@ -66,9 +66,9 @@ The developer can generate custom protocols with the <a href="../protocol-genera
 
 We highly recommend you **do not** attempt to write your own protocol code; always use existing packages or the protocol generator!
 
-## `fetchai/default:0.10.0` protocol
+## `fetchai/default:0.11.0` protocol
 
-The `fetchai/default:0.10.0` protocol is a protocol which each AEA is meant to implement. It serves AEA to AEA interaction and includes two message performatives:
+The `fetchai/default:0.11.0` protocol is a protocol which each AEA is meant to implement. It serves AEA to AEA interaction and includes two message performatives:
 
 ``` python
 from enum import Enum
@@ -116,13 +116,13 @@ msg = DefaultMessage(
 )
 ```
 
-Each AEA's `fetchai/error:0.10.0` skill utilises the `fetchai/default:0.10.0` protocol for error handling.
+Each AEA's `fetchai/error:0.11.0` skill utilises the `fetchai/default:0.11.0` protocol for error handling.
 
-## `fetchai/oef_search:0.11.0` protocol
+## `fetchai/oef_search:0.12.0` protocol
 
-The `fetchai/oef_search:0.11.0` protocol is used by AEAs to interact with an <a href="../simple-oef">SOEF search node</a> to register and unregister their own services and search for services registered by other agents.
+The `fetchai/oef_search:0.12.0` protocol is used by AEAs to interact with an <a href="../simple-oef">SOEF search node</a> to register and unregister their own services and search for services registered by other agents.
 
-The `fetchai/oef_search:0.11.0` protocol definition includes an `OefSearchMessage` with the following message types:
+The `fetchai/oef_search:0.12.0` protocol definition includes an `OefSearchMessage` with the following message types:
 
 ``` python
 class Performative(Enum):
@@ -147,7 +147,7 @@ We show some example messages below:
 my_dialogue_reference = "a_unique_register_service_dialogue_reference"
 ```
 and a description of the service we would like to register, for instance
-```python
+``` python
 from aea.helpers.search.models import Description
 
 my_service_data = {"country": "UK", "city": "Cambridge"}
@@ -157,7 +157,7 @@ my_service_description = Description(
 )
 ```
 where we use, for instance
-```python
+``` python
 from aea.helpers.search.generic import GenericDataModel
 
 data_model_name = "location"
@@ -232,7 +232,7 @@ oef_msg = OefSearchMessage(
 )
 ```
 
-* The <a href="../simple-oef">SOEF search node</a> will respond with a message, say `msg` of type `OefSearchMessage`, of performative `OefSearchMessage.Performative.SEARCH_RESULT`. To access the tuple of agents which match the query, simply use `msg.agents`. In particular, this will return the agent addresses matching the query. The <a href="../identity">agent address</a> can then be used to send a message to the agent utilising the <a href="../oef-ledger">P2P agent communication network</a> and any protocol other than `fetchai/oef_search:0.11.0`.
+* The <a href="../simple-oef">SOEF search node</a> will respond with a message, say `msg` of type `OefSearchMessage`, of performative `OefSearchMessage.Performative.SEARCH_RESULT`. To access the tuple of agents which match the query, simply use `msg.agents`. In particular, this will return the agent addresses matching the query. The <a href="../identity">agent address</a> can then be used to send a message to the agent utilising the <a href="../oef-ledger">P2P agent communication network</a> and any protocol other than `fetchai/oef_search:0.12.0`.
 
 * If the <a href="../simple-oef">SOEF search node</a> encounters any errors with the messages you send, it will return an `OefSearchMessage` of performative `OefSearchMessage.Performative.OEF_ERROR` and indicate the error operation encountered:
 ``` python
@@ -247,11 +247,11 @@ class OefErrorOperation(Enum):
     OTHER = 10000
 ```
 
-## `fetchai/fipa:0.11.0` protocol
+## `fetchai/fipa:0.12.0` protocol
 
 This protocol provides classes and functions necessary for communication between AEAs via a variant of the <a href="http://www.fipa.org/repository/aclspecs.html" target="_blank">FIPA</a> Agent Communication Language.
 
-The `fetchai/fipa:0.11.0` protocol definition includes a `FipaMessage` with the following performatives:
+The `fetchai/fipa:0.12.0` protocol definition includes a `FipaMessage` with the following performatives:
 
 ``` python
 class Performative(Enum):
@@ -285,9 +285,9 @@ def __init__(
 )
 ```
 
-The `fetchai/fipa:0.11.0` protocol also defines a `FipaDialogue` class which specifies the valid reply structure and provides other helper methods to maintain dialogues.
+The `fetchai/fipa:0.12.0` protocol also defines a `FipaDialogue` class which specifies the valid reply structure and provides other helper methods to maintain dialogues.
 
-For examples of the usage of the `fetchai/fipa:0.11.0` protocol check out the <a href="../generic-skills-step-by-step" target="_blank"> generic skills step by step guide</a>.
+For examples of the usage of the `fetchai/fipa:0.12.0` protocol check out the <a href="../generic-skills-step-by-step" target="_blank"> generic skills step by step guide</a>.
 
 
 ### Fipa dialogue
@@ -421,7 +421,7 @@ class SellerDialogues(FipaDialogues):
         )
 ```
 
-Next, we can immitate a dialogue between the buyer and the seller. We first instantiate the dialogues models:
+Next, we can imitate a dialogue between the buyer and the seller. We first instantiate the dialogues models:
 ``` python
 buyer_address = "buyer_address_stub"
 seller_address = "seller_address_stub"

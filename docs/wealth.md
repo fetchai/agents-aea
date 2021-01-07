@@ -40,9 +40,9 @@ or
 aea get-wealth ethereum
 ```
 
-## Using the cli
+## Using the CLI
 
-Simply generate wealth via the cli:
+Simply generate wealth via the CLI:
 ``` bash
 aea generate-wealth fetchai
 ```

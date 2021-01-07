@@ -1,19 +1,19 @@
 name: http_server
 author: fetchai
-version: 0.14.0
+version: 0.15.0
 type: connection
 description: The HTTP server connection that wraps http server implementing a RESTful
   API specification.
 license: Apache-2.0
-aea_version: '>=0.8.0, <0.9.0'
+aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
-  README.md: QmfCajwnT94TgaN36xTGw9aXBiuv31uheazDuEJZw3fG45
+  README.md: QmQY8DYhg2VR4Jza7YvcYUAJCPzXwScrZsp2MwM9i4eHpH
   __init__.py: Qmb6JEAkJeb5JweqrSGiGoQp1vGXqddjGgb9WMkm2phTgA
-  connection.py: QmbMLH5oDNBm9Gpp2MJpUSVfLcxAT1sagzpqFhXXx2gCgV
+  connection.py: QmUT2RgTBxeBX3emLGE4eipWzCC6vcMpJUhsaH484ghtnA
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/http:0.10.0
+- fetchai/http:0.11.0
 class_name: HTTPServerConnection
 config:
   api_spec_path: null
@@ -21,7 +21,7 @@ config:
   port: 8000
 excluded_protocols: []
 restricted_to_protocols:
-- fetchai/http:0.10.0
+- fetchai/http:0.11.0
 dependencies:
   aiohttp:
     version: <3.7,>=3.6.2

@@ -54,7 +54,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
     def test_read_md_file(self):
         """Compare the extracted code with the python file."""
         doc_path = os.path.join(ROOT_DIR, MD_FILE)
-        code_blocks = extract_code_blocks(filepath=doc_path, filter="python")
+        code_blocks = extract_code_blocks(filepath=doc_path, filter_="python")
         test_code_path = os.path.join(CUR_PATH, PY_FILE)
         python_file = extract_python_code(test_code_path)
         assert code_blocks[-1] == python_file, "Files must be exactly the same."
@@ -65,7 +65,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         """Test the communication of the two agents."""
 
         weather_station = "weather_station"
-        self.fetch_agent("fetchai/weather_station:0.19.0", weather_station)
+        self.fetch_agent("fetchai/weather_station:0.20.0", weather_station)
         self.set_agent_context(weather_station)
         self.set_config(
             "vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx",
@@ -95,6 +95,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         self.nested_set_config(setting_path, location)
 
         self.run_cli_command("build", cwd=self._get_cwd())
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
         weather_station_process = self.run_agent()
 
         check_strings = (
@@ -104,7 +105,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            weather_station_process, check_strings, timeout=240, is_terminating=False
+            weather_station_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -123,7 +124,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            weather_client_process, check_strings, timeout=240, is_terminating=False,
+            weather_client_process, check_strings, timeout=30, is_terminating=False,
         )
         assert (
             missing_strings == []
@@ -172,7 +173,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         """Inject location into the weather client strategy."""
         file = Path(dst_file_path)
         lines = file.read_text().splitlines()
-        line_insertion_position = 180  # line below: `strategy._is_ledger_tx = False`
+        line_insertion_position = 204  # line below: `strategy._is_ledger_tx = False`
         lines.insert(
             line_insertion_position,
             "    from packages.fetchai.skills.generic_buyer.strategy import Location",

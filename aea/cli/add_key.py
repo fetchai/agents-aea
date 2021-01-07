@@ -88,6 +88,5 @@ def _try_add_key(ctx: Context, type_: str, filepath: str, connection: bool = Fal
             ctx.agent_config.private_key_paths.create(type_, filepath)
     except ValueError as e:  # pragma: no cover
         raise click.ClickException(str(e))
-    ctx.agent_loader.dump(
-        ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
-    )
+    with open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as fp:
+        ctx.agent_loader.dump(ctx.agent_config, fp)

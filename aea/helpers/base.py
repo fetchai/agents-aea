@@ -19,6 +19,7 @@
 """Miscellaneous helpers."""
 import builtins
 import contextlib
+import datetime
 import importlib.util
 import logging
 import os
@@ -30,18 +31,33 @@ import sys
 import time
 import types
 from collections import OrderedDict, UserString, defaultdict, deque
+from collections.abc import Mapping
 from copy import copy
 from functools import wraps
 from pathlib import Path
 from threading import RLock
-from typing import Any, Callable, Deque, Dict, List, Set, TypeVar, Union
+from typing import (
+    Any,
+    Callable,
+    Deque,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    TypeVar,
+    Union,
+)
 
 from dotenv import load_dotenv
+from packaging.version import Version
 
 from aea.exceptions import enforce
 
 
 STRING_LENGTH_LIMIT = 128
+ISO_8601_DATE_FORMAT = "%Y-%m-%d"
 
 _default_logger = logging.getLogger(__name__)
 
@@ -57,7 +73,7 @@ def _get_module(spec):
 
 
 def locate(path: str) -> Any:
-    """Locate an object by name or dotted path, importing as necessary."""
+    """Locate an object by name or dotted save_path, importing as necessary."""
     parts = [part for part in path.split(".") if part]
     module, n = None, 0
     while n < len(parts):
@@ -93,7 +109,7 @@ def load_module(dotted_path: str, filepath: Path) -> types.ModuleType:
     """
     Load a module.
 
-    :param dotted_path: the dotted path of the package/module.
+    :param dotted_path: the dotted save_path of the package/module.
     :param filepath: the file to the package/module.
     :return: None
     :raises ValueError: if the filepath provided is not a module.
@@ -109,7 +125,7 @@ def load_env_file(env_file: str):
     """
     Load the content of the environment file into the process environment.
 
-    :param env_file: path to the env file.
+    :param env_file: save_path to the env file.
     :return: None.
     """
     load_dotenv(dotenv_path=Path(env_file), override=False)
@@ -356,7 +372,9 @@ def _is_dict_like(obj: Any) -> bool:
     return type(obj) in {dict, OrderedDict}
 
 
-def recursive_update(to_update: Dict, new_values: Dict) -> None:
+def recursive_update(
+    to_update: Dict, new_values: Dict, allow_new_values: bool = False,
+) -> None:
     """
     Update a dictionary by replacing conflicts with the new values.
 
@@ -373,10 +391,14 @@ def recursive_update(to_update: Dict, new_values: Dict) -> None:
     :return: None
     """
     for key, value in new_values.items():
-        if key not in to_update:
+        if (not allow_new_values) and key not in to_update:
             raise ValueError(
                 f"Key '{key}' is not contained in the dictionary to update."
             )
+
+        if key not in to_update and allow_new_values:
+            to_update[key] = value
+            continue
 
         value_to_update = to_update[key]
         value_type = type(value)
@@ -393,7 +415,7 @@ def recursive_update(to_update: Dict, new_values: Dict) -> None:
             )
 
         if both_are_dict:
-            recursive_update(value_to_update, value)
+            recursive_update(value_to_update, value, allow_new_values)
         else:
             to_update[key] = value
 
@@ -402,13 +424,13 @@ def _get_aea_logger_name_prefix(module_name: str, agent_name: str) -> str:
     """
     Get the logger name prefix.
 
-    It consists of a dotted path with:
+    It consists of a dotted save_path with:
     - the name of the package, 'aea';
     - the agent name;
-    - the rest of the dotted path.
+    - the rest of the dotted save_path.
 
-    >>> _get_aea_logger_name_prefix("aea.path.to.package", "myagent")
-    'aea.myagent.path.to.package'
+    >>> _get_aea_logger_name_prefix("aea.save_path.to.package", "myagent")
+    'aea.myagent.save_path.to.package'
 
     :param module_name: the module name.
     :param agent_name: the agent name.
@@ -564,3 +586,248 @@ def ensure_dir(dir_path: str) -> None:
         os.makedirs(dir_path)
     else:
         enforce(os.path.isdir(dir_path), f"{dir_path} is not a directory!")
+
+
+def dict_to_path_value(
+    data: Mapping, path: Optional[List] = None
+) -> Iterable[Tuple[List[str], Any]]:
+    """Convert dict to sequence of terminal path build of  keys and value."""
+    path = path or []
+    for key, value in data.items():
+        if isinstance(value, Mapping) and value:
+            # terminal value
+            for p, v in dict_to_path_value(value, path + [key]):
+                yield p, v
+        else:
+            yield path + [key], value
+
+
+def parse_datetime_from_str(date_string: str) -> datetime.datetime:
+    """Parse datetime from string."""
+    result = datetime.datetime.strptime(date_string, ISO_8601_DATE_FORMAT)
+    result = result.replace(tzinfo=datetime.timezone.utc)
+    return result
+
+
+class CertRequest:
+    """Certificate request for proof of representation."""
+
+    def __init__(
+        self,
+        public_key: str,
+        identifier: SimpleIdOrStr,
+        ledger_id: SimpleIdOrStr,
+        not_before: str,
+        not_after: str,
+        save_path: str,
+    ):
+        """
+        Initialize the certificate request.
+
+        :param public_key: the public key, or the key id.
+        :param identifier: certificate identifier.
+        :param not_before: specify the lower bound for certificate validity.
+          If it is a string, it must follow the format: 'YYYY-MM-DD'. It
+          will be interpreted as timezone UTC.
+        :param not_before: specify the lower bound for certificate validity.
+          if it is a string, it must follow the format: 'YYYY-MM-DD' It
+          will be interpreted as timezone UTC-0.
+        :param save_path: the save_path where to save the certificate.
+        """
+        self._key_identifier: Optional[str] = None
+        self._public_key: Optional[str] = None
+        self._identifier = str(SimpleId(identifier))
+        self._ledger_id = str(SimpleId(ledger_id))
+        self._not_before_string = not_before
+        self._not_after_string = not_after
+        self._not_before = self._parse_datetime(not_before)
+        self._not_after = self._parse_datetime(not_after)
+        self._save_path = Path(save_path)
+
+        self._parse_public_key(public_key)
+        self._check_validation_boundaries()
+
+    @classmethod
+    def _parse_datetime(cls, obj: Union[str, datetime.datetime]) -> datetime.datetime:
+        """
+        Parse datetime string.
+
+        It is expected to follow ISO 8601.
+
+        :param obj: the input to parse.
+        :return: a datetime.datetime instance.
+        """
+        result = (
+            parse_datetime_from_str(obj)  # type: ignore
+            if isinstance(obj, str)
+            else obj
+        )
+        enforce(result.microsecond == 0, "Microsecond field not allowed.")
+        return result
+
+    def _check_validation_boundaries(self):
+        """
+        Check the validation boundaries are consistent.
+
+        Namely, that not_before < not_after.
+        """
+        enforce(
+            self._not_before < self._not_after,
+            f"Inconsistent certificate validity period: 'not_before' field '{self._not_before_string}' is not before than 'not_after' field '{self._not_after_string}'",
+            ValueError,
+        )
+
+    def _parse_public_key(self, public_key_str: str) -> None:
+        """
+        Parse public key from string.
+
+        It first tries to parse it as an identifier,
+        and in case of failure as a sequence of hexadecimals, starting with "0x".
+        """
+        with contextlib.suppress(ValueError):
+            # if this raises ValueError, we don't return
+            self._key_identifier = str(SimpleId(public_key_str))
+            return
+
+        with contextlib.suppress(ValueError):
+            # this raises ValueError if the input is not a valid hexadecimal string.
+            int(public_key_str, 16)
+            self._public_key = public_key_str
+            return
+
+        enforce(
+            False,
+            f"Public key field '{public_key_str}' is neither a valid identifier nor an address.",
+            exception_class=ValueError,
+        )
+
+    @property
+    def public_key(self) -> Optional[str]:
+        """Get the public key."""
+        return self._public_key
+
+    @property
+    def ledger_id(self) -> str:
+        """Get the ledger id."""
+        return self._ledger_id
+
+    @property
+    def key_identifier(self) -> Optional[str]:
+        """Get the key identifier."""
+        return self._key_identifier
+
+    @property
+    def identifier(self) -> str:
+        """Get the identifier."""
+        return self._identifier
+
+    @property
+    def not_before_string(self) -> str:
+        """Get the not_before field as string."""
+        return self._not_before_string
+
+    @property
+    def not_after_string(self) -> str:
+        """Get the not_after field as string."""
+        return self._not_after_string
+
+    @property
+    def not_before(self) -> datetime.datetime:
+        """Get the not_before field."""
+        return self._not_before
+
+    @property
+    def not_after(self) -> datetime.datetime:
+        """Get the not_after field."""
+        return self._not_after
+
+    @property
+    def save_path(self) -> Path:
+        """Get the save_path"""
+        return self._save_path
+
+    @property
+    def public_key_or_identifier(self) -> str:
+        """Get the public key or identifier."""
+        if (self.public_key is None and self.key_identifier is None) or (
+            self.public_key is not None and self.key_identifier is not None
+        ):
+            raise ValueError(  # pragma: nocover
+                "Exactly one of key_identifier or public_key can be specified."
+            )
+        if self.public_key is not None:
+            result = self.public_key
+        elif self.key_identifier is not None:
+            result = self.key_identifier
+        return result
+
+    def get_message(self, public_key: str) -> bytes:  # pylint: disable=no-self-use
+        """Get the message to sign."""
+        message = public_key.encode("ascii")
+        # + self.identifier.encode("ascii")  # noqa: E800
+        # + self.not_before_string.encode("ascii")  # noqa: E800
+        # + self.not_after_string.encode("ascii")  # noqa: E800
+        return message
+
+    def get_signature(self) -> str:
+        """Get signature from save_path."""
+        if not Path(self.save_path).is_file():
+            raise Exception(  # pragma: no cover
+                f"cert_request 'save_path' field {self.save_path} is not a file. "
+                "Please ensure that 'issue-certificates' command is called beforehand."
+            )
+        signature = bytes.fromhex(
+            Path(self.save_path).read_bytes().decode("ascii")
+        ).decode("ascii")
+        return signature
+
+    @property
+    def json(self) -> Dict:
+        """Compute the JSON representation."""
+        result = dict(
+            identifier=self.identifier,
+            ledger_id=self.ledger_id,
+            not_before=self._not_before_string,
+            not_after=self._not_after_string,
+            public_key=self.public_key_or_identifier,
+            save_path=str(self.save_path),
+        )
+        return result
+
+    @classmethod
+    def from_json(cls, obj: Dict) -> "CertRequest":
+        """Compute the JSON representation."""
+        return cls(**obj)
+
+    def __eq__(self, other):
+        """Check equality."""
+        return (
+            isinstance(other, CertRequest)
+            and self.identifier == other.identifier
+            and self.ledger_id == other.ledger_id
+            and self.public_key == other.public_key
+            and self.key_identifier == other.key_identifier
+            and self.not_after == other.not_after
+            and self.not_before == other.not_before
+            and self.save_path == other.save_path
+        )
+
+
+def compute_specifier_from_version(version: Version) -> str:
+    """
+    Compute the specifier set from a version, by varying only on the patch number.
+
+    I.e. from "{major}.{minor}.{patch}", return
+
+    ">={major}.{minor}.0, <{major}.{minor + 1}.0"
+
+    :param version: the version
+    :return: the specifier set
+    """
+    new_major = version.major
+    new_minor_low = version.minor
+    new_minor_high = new_minor_low + 1
+    lower_bound = Version(f"{new_major}.{new_minor_low}.0")
+    upper_bound = Version(f"{new_major}.{new_minor_high}.0")
+    specifier_set = f">={lower_bound}, <{upper_bound}"
+    return specifier_set

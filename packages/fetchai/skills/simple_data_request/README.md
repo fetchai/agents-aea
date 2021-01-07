@@ -6,8 +6,8 @@ This skill is used to request data from a HTTP endpoint and then save it in the 
 
 ## Behaviours
 
-* http_request: requests data every `request_interval` seconds from a HTTP endpoint using the `url`, `method` and `body` specified in the skill config.
+* `http_request`: requests data every `request_interval` seconds from a HTTP endpoint using the `url`, `method` and `body` specified in the skill configuration.
 
 ## Handlers
 
-* http: processes incoming HTTP messages. Data received in responses is saved in the shared state using the key specified in the skill config: `shared_state_key`.
+* `http`: processes incoming HTTP messages. Data received in responses is saved in the shared state using the key specified in the skill configuration: `shared_state_key`.

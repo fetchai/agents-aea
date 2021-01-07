@@ -1,23 +1,23 @@
 name: coin_price
 author: fetchai
-version: 0.2.0
+version: 0.3.0
 type: skill
 description: Retrieve coin price from an API
 license: Apache-2.0
-aea_version: '>=0.8.0, <0.9.0'
+aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
-  README.md: QmcNJBNktp8Hhic4LXpWWyMbiaYVx2FXAimoFPywfuhbyV
-  __init__.py: QmP9nM6bjDz8TbSPBW2JFH9woe9m4wbffhvJhjKqxFz9gt
+  README.md: QmdP2wZNxpgL4qdyipgo9JAk4Qq3qRzDTTLJCDaQxkyjvg
+  __init__.py: QmfEtr1pZuJrTbbvhVULTupVvYxmDG5HuTKAwLJdKoUAj9
   behaviours.py: QmY3XmZYKz6G9NGYChT5tKpChATrGxPvLYooNQHiJPi3DY
   coin_api_spec.yaml: QmP9pN1roizqYWbhiQstntAQFBQdBuVq5mj9CYcA9nD3Q6
   dialogues.py: QmRJgfoHqCbxJhf6bF86sRZ1JwFR1vDe4hH7gbKyWy31BP
-  handlers.py: QmbZA2VoV3yyVHjfN9HDVghqvkfymYBUirEsMgvcoCWLSt
+  handlers.py: QmQ9hj459gkrsXHaYM5xcsc9X2UW2CPQrbgQwPS7jfu8qQ
   models.py: QmP878qJZGF4tJTrbxZez3puAZ8epECtmrhTB8RYKQUkri
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/http:0.10.0
-- fetchai/prometheus:0.1.0
+- fetchai/http:0.11.0
+- fetchai/prometheus:0.2.0
 skills: []
 behaviours:
   coin_price_behaviour:

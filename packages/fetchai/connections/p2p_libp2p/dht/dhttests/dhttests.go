@@ -23,7 +23,9 @@ package dhttests
 
 import (
 	"libp2p_node/aea"
+	"libp2p_node/dht/dhtnode"
 	"libp2p_node/dht/dhtpeer"
+	"libp2p_node/utils"
 	"log"
 )
 
@@ -31,12 +33,14 @@ import (
 const (
 	DHTPeerDefaultLocalHost    = "127.0.0.1"
 	DHTPeerDefaultLocalPort    = 2000
-	DHTPeerDefaultFetchAIKey   = "5071fbef50ed1fa1061d84dbf8152c7811f9a3a992ca6c43ae70b80c5ceb56df"
-	DHTPeerDefaultAgentAddress = "2FRCqDBo7Yw3E2VJc1tAkggppWzLnCCYjPN9zHrQrj8Fupzmkr"
 	DHTPeerDefaultDelegatePort = 3000
 
-	DHTClientDefaultFetchAIKey   = "3916b301d1a0ec09de1db4833b0c945531004290caee0b4a5d7b554caa39dbf1"
-	DHTClientDefaultAgentAddress = "2TsHmM9JXeFgK928LYc6HV96gi78pBv6sWprJAXaS6ydg9MTC6"
+	DHTPeerDefaultFetchAIKey       = "34604436e55b0eb99b5e62508433e172dd3ee133cf7a2fecb705e69611147605"
+	DHTPeerDefaultFetchAIPublicKey = "039e883de988eededb9afaa4d3a6baec9ba74dd1cc237028e810569780b319940a"
+
+	DHTPeerDefaultAgentKey       = "719133dc740d76ff6d1d325e193f7cd63af4c8f3491bfe3010e58b0b58c77795"
+	DHTPeerDefaultAgentPublicKey = "039623e63ba1617404b2abbe7bd94d24eb788335f870fac1ae4519e9bc359b7833"
+	DHTPeerDefaultAgentAddress   = "fetch134rg4n3wgmwctxsrm7gp6l65uwv6hxtxyfdwgw"
 )
 
 // NewDHTPeerWithDefaults for testing
@@ -45,10 +49,25 @@ func NewDHTPeerWithDefaults(inbox chan<- *aea.Envelope) (*dhtpeer.DHTPeer, func(
 		dhtpeer.LocalURI(DHTPeerDefaultLocalHost, DHTPeerDefaultLocalPort),
 		dhtpeer.PublicURI(DHTPeerDefaultLocalHost, DHTPeerDefaultLocalPort),
 		dhtpeer.IdentityFromFetchAIKey(DHTPeerDefaultFetchAIKey),
-		dhtpeer.RegisterAgentAddress(DHTPeerDefaultAgentAddress, func() bool { return true }),
 		dhtpeer.EnableRelayService(),
 		dhtpeer.EnableDelegateService(DHTPeerDefaultDelegatePort),
 	}
+
+	signature, err := utils.SignFetchAI(
+		[]byte(DHTPeerDefaultFetchAIPublicKey),
+		DHTPeerDefaultAgentKey,
+	)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	record := &aea.AgentRecord{LedgerId: dhtnode.DefaultLedger}
+	record.Address = DHTPeerDefaultAgentAddress
+	record.PublicKey = DHTPeerDefaultAgentPublicKey
+	record.PeerPublicKey = DHTPeerDefaultFetchAIPublicKey
+	record.Signature = signature
+
+	opts = append(opts, dhtpeer.RegisterAgentAddress(record, func() bool { return true }))
 
 	dhtPeer, err := dhtpeer.New(opts...)
 	if err != nil {
@@ -58,7 +77,7 @@ func NewDHTPeerWithDefaults(inbox chan<- *aea.Envelope) (*dhtpeer.DHTPeer, func(
 	cleanup := func() {
 		errs := dhtPeer.Close()
 		if len(errs) > 0 {
-			log.Println("ERROR while stoping DHTPeer:", errs)
+			log.Println("ERROR while stopping DHTPeer:", errs)
 		}
 	}
 

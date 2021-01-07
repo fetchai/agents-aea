@@ -19,10 +19,10 @@ The framework:
 
 Steps to run a test:
 
-* Write a function you would like to test with all arguments you would like to parameterise, add some doc strings.
+* Write a function you would like to test with all arguments you would like to parametrise, add some doc strings.
 * Split the function into two parts: prepare part and performance part. The prepare part will not be included in the measurement.
 * Add `BenchmarkControl` support, to notify framework to start measurement.
-* Import `TestCli` class,  TestCli().run(function_to_be_tested)
+* Import `TestCli` class,  `TestCli().run(function_to_be_tested)`
 * Call it from console to get text results.
 
 ### Simple example
@@ -176,7 +176,7 @@ Chart is drawn for argument 1: sleep:
 
 <img src="../assets/benchmark_chart.png" alt="Char over argument 1 - sleep value" class="center">
 
-The most interesting part is CPU usage, as you can see  cPU usage decreases with increasing value of idle sleep.
+The most interesting part is CPU usage, as you can see  CPU usage decreases with increasing value of idle sleep.
 Memory usage and execution time can slightly differ per case execution.
 
 
@@ -194,7 +194,7 @@ Memory usage and execution time can slightly differ per case execution.
 ## Execution options
 
 * To pass an arguments set just provide it as a comma separated string like `10,0.1`
-* To pass several argument sets just separate them by whitespace `10,0.1 20,0.2`
+* To pass several argument sets just separate them by white space `10,0.1 20,0.2`
 * `--timeout FLOAT` is test execution timeout in seconds. If the test takes more time, it will be terminated.
 * `--period FLOAT` is measurement interval in seconds, how often to make CPU and RAM usage measurements.
 * `-N, --num-executions INTEGER` - how many time to run the same argument set to make result more accurate.

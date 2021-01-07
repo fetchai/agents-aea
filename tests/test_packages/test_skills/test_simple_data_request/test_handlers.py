@@ -126,7 +126,7 @@ class TestHttpHandler(SimpleDataRequestTestCase):
         )
 
         mock_logger.assert_any_call(
-            logging.INFO, f"updating shared_state with received data=b'some_body'!",
+            logging.INFO, "updating shared_state with received data=b'some_body'!",
         )
 
         assert (

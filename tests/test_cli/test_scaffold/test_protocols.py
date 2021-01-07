@@ -16,9 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the tests for the `aea scaffold protocol` sub-command."""
-
 import filecmp
 import json
 import os
@@ -26,6 +24,7 @@ import shutil
 import tempfile
 import unittest.mock
 from pathlib import Path
+from unittest.mock import patch
 
 import jsonschema
 import yaml
@@ -81,11 +80,15 @@ class TestScaffoldProtocol:
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
         # scaffold protocol
-        cls.result = cls.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name],
-            standalone_mode=False,
-        )
+        with patch("click.confirm", return_value=True) as confirm_mock:
+            cls.result = cls.runner.invoke(
+                cli,
+                [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name],
+                standalone_mode=False,
+            )
+            confirm_mock.assert_called_once_with(
+                "We highly recommend auto-generating protocols with the aea generate command. Do you really want to continue scaffolding?"
+            )
 
     def test_exit_code_equal_to_0(self):
         """Test that the exit code is equal to 0."""
@@ -159,11 +162,12 @@ class TestScaffoldProtocolFailsWhenDirectoryAlreadyExists:
         Path(cls.t, cls.agent_name, "protocols", cls.resource_name).mkdir(
             exist_ok=False, parents=True
         )
-        cls.result = cls.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name],
-            standalone_mode=False,
-        )
+        with patch("click.confirm", return_value=True):
+            cls.result = cls.runner.invoke(
+                cli,
+                [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name],
+                standalone_mode=False,
+            )
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -223,18 +227,20 @@ class TestScaffoldProtocolFailsWhenProtocolAlreadyExists:
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
         # add protocol first time
-        result = cls.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-        # scaffold protocol with the same protocol name
-        cls.result = cls.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name],
-            standalone_mode=False,
-        )
+        with patch("click.confirm", return_value=True):
+            result = cls.runner.invoke(
+                cli,
+                [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name],
+                standalone_mode=False,
+            )
+            assert result.exit_code == 0
+            # scaffold protocol with the same protocol name
+
+            cls.result = cls.runner.invoke(
+                cli,
+                [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name],
+                standalone_mode=False,
+            )
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -248,7 +254,7 @@ class TestScaffoldProtocolFailsWhenProtocolAlreadyExists:
         s = "A protocol with name '{}' already exists. Aborting...".format(
             self.resource_name
         )
-        assert self.result.exception.message == s
+        assert s in self.result.exception.message
 
     def test_resource_directory_exists(self):
         """Test that the resource directory still exists.
@@ -302,11 +308,12 @@ class TestScaffoldProtocolFailsWhenConfigFileIsNotCompliant:
         cls.patch.start()
 
         os.chdir(cls.agent_name)
-        cls.result = cls.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name],
-            standalone_mode=False,
-        )
+        with patch("click.confirm", return_value=True):
+            cls.result = cls.runner.invoke(
+                cli,
+                [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name],
+                standalone_mode=False,
+            )
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
@@ -374,11 +381,12 @@ class TestScaffoldProtocolFailsWhenExceptionOccurs:
         cls.patch.start()
 
         os.chdir(cls.agent_name)
-        cls.result = cls.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name],
-            standalone_mode=False,
-        )
+        with patch("click.confirm", return_value=True):
+            cls.result = cls.runner.invoke(
+                cli,
+                [*CLI_LOG_OPTION, "scaffold", "protocol", cls.resource_name],
+                standalone_mode=False,
+            )
 
     def test_exit_code_equal_to_1(self):
         """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""

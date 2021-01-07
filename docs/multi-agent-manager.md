@@ -1,11 +1,12 @@
 
-The <a href="../api/manager">`MultiAgentManager`</a> allows managing multiple agent projects programmatically.
+The <a href="../api/manager/manager">`MultiAgentManager`</a> allows managing multiple agent projects programmatically.
 
 ## Setup
 
-We intantiate the manager by providing it with the working directory in which to operate and starting it:
+We instantiate the manager by providing it with the working directory in which to operate and starting it:
 
 ``` python
+from pathlib import Path
 from aea.manager import MultiAgentManager
 
 WORKING_DIR = "."
@@ -21,8 +22,8 @@ We first add a couple of finished AEA project:
 ``` python
 from aea.configurations.base import PublicId
 
-weather_client_id = PublicId.from_str("fetchai/weather_client:0.20.0")
-weather_station_id = PublicId.from_str("fetchai/weather_station:0.19.0")
+weather_client_id = PublicId.from_str("fetchai/weather_client:0.21.0")
+weather_station_id = PublicId.from_str("fetchai/weather_station:0.20.0")
 manager.add_project(weather_client_id)
 manager.add_project(weather_station_id)
 ```
@@ -31,39 +32,68 @@ manager.add_project(weather_station_id)
 
 Save the following private keys in the respective files.
 ``` python
-# 72d3149f5689f0749eaec5ebf6dba5deeb1e89b93ae1c58c71fd43dfaa231e87
-FET_PRIVATE_KEY_PATH_1 = "fetchai_private_key_1.txt"
-# bf529acb2546e13615ef6004c48e393f0638a5dc0c4979631a9a4bc554079f6f
-COSMOS_PRIVATE_KEY_PATH_1 = "cosmos_private_key_1.txt"
-# 589839ae54b71b8754a7fe96b52045364077c28705a1806b74441debcae16e0a
-FET_PRIVATE_KEY_PATH_2 = "fetchai_private_key_2.txt"
-# c9b38eff57f678f5ab5304447997351edb08eceb883267fa4ad849074bec07e4
-COSMOS_PRIVATE_KEY_PATH_2 = "cosmos_private_key_2.txt"
+FET_PRIVATE_KEY_1 = b"72d3149f5689f0749eaec5ebf6dba5deeb1e89b93ae1c58c71fd43dfaa231e87"
+FET_PRIVATE_KEY_PATH_1 = Path("fetchai_private_key_1.txt")
+FET_PRIVATE_KEY_PATH_1.write_bytes(FET_PRIVATE_KEY_1)
+
+FET_CONNECTION_PRIVATE_KEY_1 = b"bf529acb2546e13615ef6004c48e393f0638a5dc0c4979631a9a4bc554079f6f"
+FET_CONNECTION_PRIVATE_KEY_PATH_1 = Path("fetchai_connection_private_key_1.txt")
+FET_CONNECTION_PRIVATE_KEY_PATH_1.write_bytes(FET_CONNECTION_PRIVATE_KEY_1)
+
+FET_PRIVATE_KEY_2 = b"589839ae54b71b8754a7fe96b52045364077c28705a1806b74441debcae16e0a"
+FET_PRIVATE_KEY_PATH_2 = Path("fetchai_private_key_2.txt")
+FET_PRIVATE_KEY_PATH_2.write_bytes(FET_PRIVATE_KEY_2)
+
+FET_CONNECTION_PRIVATE_KEY_2 = b"c9b38eff57f678f5ab5304447997351edb08eceb883267fa4ad849074bec07e4"
+FET_CONNECTION_PRIVATE_KEY_PATH_2 = Path("fetchai_connection_private_key_2.txt")
+FET_CONNECTION_PRIVATE_KEY_PATH_2.write_bytes(FET_CONNECTION_PRIVATE_KEY_2)
 ```
 
 Add the agent instances
 ``` python
 agent_overrides = {
-    "private_key_paths": {"fetchai": FET_PRIVATE_KEY_PATH_1},
-    "connection_private_key_paths": {"cosmos": COSMOS_PRIVATE_KEY_PATH_1}
+    "private_key_paths": {"fetchai": str(FET_PRIVATE_KEY_PATH_1.absolute())},
+    "connection_private_key_paths": {"fetchai": str(FET_CONNECTION_PRIVATE_KEY_PATH_1.absolute())}
 }
-manager.add_agent(weather_station_id, agent_overrides=agent_overrides)
+component_overrides = {
+    "name": "p2p_libp2p",
+    "author": "fetchai",
+    "version": "0.14.0",
+    "type": "connection",
+    "cert_requests": [{
+      "identifier": "acn",
+      "ledger_id": "fetchai",
+      "not_after": '2022-01-01',
+      "not_before": '2021-01-01',
+      "public_key": "fetchai",
+      "save_path": f"{weather_station_id.author}/{weather_station_id.name}/.certs/conn_cert.txt"
+    }]
+}
+manager.add_agent(weather_station_id, component_overrides=[component_overrides], agent_overrides=agent_overrides)
 
 component_overrides = {
     "name": "p2p_libp2p",
     "author": "fetchai",
-    "version": "0.9.0",
+    "version": "0.14.0",
     "type": "connection",
     "config": {
         "delegate_uri": "127.0.0.1:11001",
         "entry_peers": ['/dns4/127.0.0.1/tcp/9000/p2p/16Uiu2HAkzgZYyk25XjAhmgXcdMbahrHYi18uuAzHuxPn1KkdmLRw'],
         "local_uri": "127.0.0.1:9001",
         "public_uri": "127.0.0.1:9001",
-    }
+    },
+    "cert_requests": [{
+      "identifier": "acn",
+      "ledger_id": "fetchai",
+      "not_after": '2022-01-01',
+      "not_before": '2021-01-01',
+      "public_key": "fetchai",
+      "save_path": f"{weather_client_id.author}/{weather_client_id.name}/.certs/conn_cert.txt"
+    }]
 }
 agent_overrides = {
-    "private_key_paths": {"fetchai": FET_PRIVATE_KEY_PATH_2},
-    "connection_private_key_paths": {"cosmos": COSMOS_PRIVATE_KEY_PATH_2}
+    "private_key_paths": {"fetchai": str(FET_PRIVATE_KEY_PATH_2.absolute())},
+    "connection_private_key_paths": {"fetchai": str(FET_CONNECTION_PRIVATE_KEY_PATH_2.absolute())}
 }
 manager.add_agent(weather_client_id, component_overrides=[component_overrides], agent_overrides=agent_overrides)
 ```
@@ -71,9 +101,16 @@ manager.add_agent(weather_client_id, component_overrides=[component_overrides], 
 ## Running the agents:
 
 ``` python
+import time
+
 manager.start_agent(weather_station_id.name)
+
 # wait for ~10 seconds for peer node to go live
-manager.start_agent(weather_station_id.name)
+time.sleep(10.0)
+
+manager.start_agent(weather_client_id.name)
+
+time.sleep(5.0)
 ```
 
 ## Stopping the agents:

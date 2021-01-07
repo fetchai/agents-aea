@@ -1,10 +1,11 @@
-AEAs can create and update prometheus metrics for remote monitoring by sending messages to the prometheus connection `fetchai/prometheus:0.1.0`.
+AEAs can create and update prometheus metrics for remote monitoring by sending messages to the prometheus connection `fetchai/prometheus:0.2.0`.
 
-To see this working in an agent, fetch and run the `coin_price_feed` agent and check `localhost:9090/metrics` to see the latest values of the metrics `coin_price_feed_num_retrievals` and `coin_price_feed_num_requests`:
-```bash
-aea fetch fetchai/coin_price_feed:0.2.0
+To see this working in an agent, fetch and run the `coin_price_feed` agent and check `localhost:9090/metrics` to see the latest values of the metrics `num_retrievals` and `num_requests`:
+``` bash
+aea fetch fetchai/coin_price_feed:0.3.0
 cd coin_price_feed
 aea install
+aea build
 aea run
 ```
 You can then instruct a prometheus server running on the same computing cluster as a deployed agent to scrape these metrics for remote monitoring and visualisation with the Prometheus/Grafana toolset.
@@ -14,7 +15,7 @@ To use this connection, add a model `prometheus_dialogues` to your skill to hand
 <details><summary>Click here for example</summary>
 
 
-```python
+``` python
 class PrometheusDialogues(Model, BasePrometheusDialogues):
     """The dialogues class keeps track of all prometheus dialogues."""
 
@@ -50,7 +51,7 @@ class PrometheusDialogues(Model, BasePrometheusDialogues):
 </details>
 
 Then configure your metrics in the `skill.yaml` file. For example (from the `coin_price` skill):
-```yaml
+``` yaml
 models:
   prometheus_dialogues:
     args:
@@ -68,7 +69,7 @@ models:
 ```
 
 Add a metric `metric_name` of type `metric_type` {`Gauge`, `Counter`, ...} and description `description` by sending a message with performative `ADD_METRIC` to the prometheus connection:
-```python
+``` python
 def add_prometheus_metric(
     self,
     metric_name: str,
@@ -106,14 +107,14 @@ def add_prometheus_metric(
     self.context.outbox.put_message(message=message, context=envelope_context)
 ```
 where `PROM_CONNECTION_ID` should be imported to your skill as follows:
-```python
+``` python
 from packages.fetchai.connections.prometheus.connection import (
     PUBLIC_ID as PROM_CONNECTION_ID,
 )
 ```
 
 Update metric `metric_name` with update function `update_func` {`inc`, `set`, `observe`, ...} and value `value` by sending a message with performative `UPDATE_METRIC` to the prometheus connection:
-```python
+``` python
 def update_prometheus_metric(
     self, metric_name: str, update_func: str, value: float, labels: Dict[str, str],
 ) -> None:
@@ -148,25 +149,24 @@ def update_prometheus_metric(
 ```
 
 Initialize the metrics from the configuration file in the behaviour setup:
-```python
+``` python
 def setup(self) -> None:
     """Implement the setup of the behaviour"""
     prom_dialogues = cast(PrometheusDialogues, self.context.prometheus_dialogues)
 
     if prom_dialogues.enabled:
         for metric in prom_dialogues.metrics:
-            metric_name = self.context.agent_name + "_" + metric["name"]
-            self.context.logger.info("Adding Prometheus metric: " + metric_name)
-            self.add_prometheus_metric(metric_name, metric["type"], metric["description"], dict(metric["labels"]))
+            self.context.logger.info("Adding Prometheus metric: " + metric["name"])
+            self.add_prometheus_metric(
+                metric["name"], metric["type"], metric["description"], dict(metric["labels"]),
 ```
 
 Then call the `update_prometheus_metric` function from the appropriate places.
 For example, the following code in `handlers.py` for the `coin_price` skill updates the number of http requests served:
-```python
+``` python
 if self.context.prometheus_dialogues.enabled:
-    metric_name = self.context.agent_name + "_" + "num_requests"
     self.context.behaviours.coin_price_behaviour.update_prometheus_metric(
-        metric_name, "inc", 1.0, {}
+        "num_requests", "inc", 1.0, {}
     )
 ```
 
@@ -175,7 +175,7 @@ Finally, you can add a `PrometheusHandler` to your skill to process response mes
 <details><summary>Click here for example</summary>
 
 
-```python
+``` python
 class PrometheusHandler(Handler):
     """This class handles responses from the prometheus server."""
 

@@ -17,15 +17,16 @@
 #
 # ------------------------------------------------------------------------------
 
+
 """This test module contains the tests for the `aea build` sub-command."""
 import re
 from pathlib import Path
 from unittest import mock
 
 import pytest
+from click.exceptions import ClickException
 
 from aea.configurations.constants import DEFAULT_VERSION
-from aea.test_tools.exceptions import AEATestingException
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from tests.common.utils import run_aea_subprocess
@@ -107,5 +108,5 @@ class TestAEABuildEntrypointNegative(AEATestCaseEmpty):
     )
     def test_build_exception(self, *_mock):
         """Test build exception."""
-        with pytest.raises(AEATestingException, match="some error."):
+        with pytest.raises(ClickException, match="some error."):
             self.run_cli_command("build", cwd=self._get_cwd())

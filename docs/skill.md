@@ -5,7 +5,7 @@
 A skill encapsulates implementations of the three abstract base classes `Handler`, `Behaviour`, `Model`, and is closely related with the abstract base class `Task`:
 
 * <a href="../api/skills/base#handler-objects">`Handler`</a>: each skill has none, one or more `Handler` objects, each responsible for the registered messaging protocol. Handlers implement AEAs' **reactive** behaviour. If the AEA understands the protocol referenced in a received `Envelope`, the `Handler` reacts appropriately to the corresponding message. Each `Handler` is responsible for only one protocol. A `Handler` is also capable of dealing with internal messages (see next section).
-* <a href="../api/skills/base#behaviour-objects">`Behaviour`</a>: none, one or more `Behaviours` encapsulate actions which futher the AEAs goal and are initiated by internals of the AEA, rather than external events. Behaviours implement AEAs' **pro-activeness**. The framework provides a number of <a href="../api/skills/behaviours">abstract base classes</a> implementing different types of behaviours (e.g. cyclic/one-shot/finite-state-machine/etc.).
+* <a href="../api/skills/base#behaviour-objects">`Behaviour`</a>: none, one or more `Behaviours` encapsulate actions which further the AEAs goal and are initiated by internals of the AEA, rather than external events. Behaviours implement AEAs' **pro-activeness**. The framework provides a number of <a href="../api/skills/behaviours">abstract base classes</a> implementing different types of behaviours (e.g. cyclic/one-shot/finite-state-machine/etc.).
 * <a href="../api/skills/base#model-objects">`Model`</a>: none, one or more `Models` that inherit from the `Model` can be accessed via the `SkillContext`.
 * <a href="../api/skills/tasks#task-objects">`Task`</a>: none, one or more `Tasks` encapsulate background work internal to the AEA. `Task` differs from the other three in that it is not a part of skills, but `Task`s are declared in or from skills if a packaging approach for AEA creation is used.
 
@@ -238,7 +238,7 @@ Then, an instance of this class is available on the context level like so:
 some_model = self.context.some_model
 ``` 
 
-### Skill config
+### Skill configuration
 
 Each skill has a `skill.yaml` configuration file which lists all `Behaviour`, `Handler`, and `Task` objects pertaining to the skill.
 
@@ -262,7 +262,7 @@ handlers:
 models: {}
 dependencies: {}
 protocols:
-- fetchai/default:0.10.0
+- fetchai/default:0.11.0
 ```
 
 
@@ -275,7 +275,7 @@ All AEAs have a default `error` skill that contains error handling code for a nu
 * Envelopes with decoding errors
 * Invalid messages with respect to the registered protocol
 
-The error skill relies on the `fetchai/default:0.10.0` protocol which provides error codes for the above.
+The error skill relies on the `fetchai/default:0.11.0` protocol which provides error codes for the above.
 
 
 ## Custom Error handler

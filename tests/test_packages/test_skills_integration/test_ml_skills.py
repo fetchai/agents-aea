@@ -18,8 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the integration test for the weather skills."""
-
-import sys
+import importlib
 from random import uniform
 
 import pytest
@@ -29,24 +28,19 @@ from aea.test_tools.test_cases import AEATestCaseMany
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
 from tests.conftest import (
-    COSMOS,
-    COSMOS_PRIVATE_KEY_FILE_CONNECTION,
     FETCHAI,
     FETCHAI_PRIVATE_KEY_FILE,
+    FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
     MAX_FLAKY_RERUNS_INTEGRATION,
-    NON_FUNDED_COSMOS_PRIVATE_KEY_1,
+    NON_FUNDED_FETCHAI_PRIVATE_KEY_1,
     NON_GENESIS_CONFIG,
     wait_for_localhost_ports_to_close,
 )
 
 
 def _is_not_tensorflow_installed():
-    try:
-        import tensorflow  # noqa
-
-        return False
-    except ImportError:
-        return True
+    tf_spec = importlib.util.find_spec("tensorflow")
+    return tf_spec is None
 
 
 @pytest.mark.integration
@@ -66,8 +60,8 @@ class TestMLSkills(AEATestCaseMany):
         self.create_agents(data_provider_aea_name, model_trainer_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.8.0": "fetchai/ledger:0.11.0",
-            "fetchai/oef_search:0.11.0": "fetchai/soef:0.14.0",
+            "fetchai/ledger_api:0.9.0": "fetchai/ledger:0.12.0",
+            "fetchai/oef_search:0.12.0": "fetchai/soef:0.15.0",
         }
 
         # generate random location
@@ -78,12 +72,12 @@ class TestMLSkills(AEATestCaseMany):
 
         # prepare data provider agent
         self.set_agent_context(data_provider_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.13.0")
-        self.add_item("connection", "fetchai/soef:0.14.0")
-        self.remove_item("connection", "fetchai/stub:0.13.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.13.0")
-        self.add_item("connection", "fetchai/ledger:0.11.0")
-        self.add_item("skill", "fetchai/ml_data_provider:0.17.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.14.0")
+        self.add_item("connection", "fetchai/soef:0.15.0")
+        self.remove_item("connection", "fetchai/stub:0.14.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.14.0")
+        self.add_item("connection", "fetchai/ledger:0.12.0")
+        self.add_item("skill", "fetchai/ml_data_provider:0.18.0")
         setting_path = (
             "vendor.fetchai.skills.ml_data_provider.models.strategy.args.is_ledger_tx"
         )
@@ -94,17 +88,17 @@ class TestMLSkills(AEATestCaseMany):
 
         # add keys
         self.generate_private_key(FETCHAI)
-        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
+        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
         self.replace_private_key_in_file(
-            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
+            NON_FUNDED_FETCHAI_PRIVATE_KEY_1, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
         )
 
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.set_config(setting_path, COSMOS)
+        self.set_config(setting_path, FETCHAI)
 
         # replace location
         setting_path = (
@@ -114,12 +108,12 @@ class TestMLSkills(AEATestCaseMany):
 
         # prepare model trainer agent
         self.set_agent_context(model_trainer_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.13.0")
-        self.add_item("connection", "fetchai/soef:0.14.0")
-        self.remove_item("connection", "fetchai/stub:0.13.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.13.0")
-        self.add_item("connection", "fetchai/ledger:0.11.0")
-        self.add_item("skill", "fetchai/ml_train:0.18.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.14.0")
+        self.add_item("connection", "fetchai/soef:0.15.0")
+        self.remove_item("connection", "fetchai/stub:0.14.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.14.0")
+        self.add_item("connection", "fetchai/ledger:0.12.0")
+        self.add_item("skill", "fetchai/ml_train:0.19.0")
         setting_path = (
             "vendor.fetchai.skills.ml_train.models.strategy.args.is_ledger_tx"
         )
@@ -130,10 +124,10 @@ class TestMLSkills(AEATestCaseMany):
 
         # add keys
         self.generate_private_key(FETCHAI)
-        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
+        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
 
         # set p2p configs
@@ -146,6 +140,7 @@ class TestMLSkills(AEATestCaseMany):
 
         self.set_agent_context(data_provider_aea_name)
         self.run_cli_command("build", cwd=self._get_cwd())
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
         data_provider_aea_process = self.run_agent()
 
         check_strings = (
@@ -155,7 +150,7 @@ class TestMLSkills(AEATestCaseMany):
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            data_provider_aea_process, check_strings, timeout=240, is_terminating=False
+            data_provider_aea_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -165,6 +160,7 @@ class TestMLSkills(AEATestCaseMany):
 
         self.set_agent_context(model_trainer_aea_name)
         self.run_cli_command("build", cwd=self._get_cwd())
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
         model_trainer_aea_process = self.run_agent()
 
         check_strings = (
@@ -174,7 +170,7 @@ class TestMLSkills(AEATestCaseMany):
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            model_trainer_aea_process, check_strings, timeout=240, is_terminating=False
+            model_trainer_aea_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -231,8 +227,7 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
         reruns=MAX_FLAKY_RERUNS_INTEGRATION
     )  # cause possible network issues
     @pytest.mark.skipif(
-        sys.version_info >= (3, 8),
-        reason="cannot run on 3.8 as tensorflow not installable",
+        _is_not_tensorflow_installed(), reason="This test requires Tensorflow.",
     )
     def test_ml_skills(self, pytestconfig):
         """Run the ml skills sequence."""
@@ -241,8 +236,8 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
         self.create_agents(data_provider_aea_name, model_trainer_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.8.0": "fetchai/ledger:0.11.0",
-            "fetchai/oef_search:0.11.0": "fetchai/soef:0.14.0",
+            "fetchai/ledger_api:0.9.0": "fetchai/ledger:0.12.0",
+            "fetchai/oef_search:0.12.0": "fetchai/soef:0.15.0",
         }
 
         # generate random location
@@ -253,18 +248,18 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
 
         # prepare data provider agent
         self.set_agent_context(data_provider_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.13.0")
-        self.add_item("connection", "fetchai/soef:0.14.0")
-        self.remove_item("connection", "fetchai/stub:0.13.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.13.0")
-        self.add_item("connection", "fetchai/ledger:0.11.0")
-        self.add_item("skill", "fetchai/ml_data_provider:0.17.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.14.0")
+        self.add_item("connection", "fetchai/soef:0.15.0")
+        self.remove_item("connection", "fetchai/stub:0.14.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.14.0")
+        self.add_item("connection", "fetchai/ledger:0.12.0")
+        self.add_item("skill", "fetchai/ml_data_provider:0.18.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/ml_data_provider:0.19.0", data_provider_aea_name
+            "fetchai/ml_data_provider:0.20.0", data_provider_aea_name
         )
         assert (
             diff == []
@@ -272,17 +267,17 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
 
         # add keys
         self.generate_private_key(FETCHAI)
-        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
+        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
         self.replace_private_key_in_file(
-            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
+            NON_FUNDED_FETCHAI_PRIVATE_KEY_1, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
         )
 
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.set_config(setting_path, COSMOS)
+        self.set_config(setting_path, FETCHAI)
 
         # replace location
         setting_path = (
@@ -292,18 +287,18 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
 
         # prepare model trainer agent
         self.set_agent_context(model_trainer_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.13.0")
-        self.add_item("connection", "fetchai/soef:0.14.0")
-        self.remove_item("connection", "fetchai/stub:0.13.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.13.0")
-        self.add_item("connection", "fetchai/ledger:0.11.0")
-        self.add_item("skill", "fetchai/ml_train:0.18.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.14.0")
+        self.add_item("connection", "fetchai/soef:0.15.0")
+        self.remove_item("connection", "fetchai/stub:0.14.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.14.0")
+        self.add_item("connection", "fetchai/ledger:0.12.0")
+        self.add_item("skill", "fetchai/ml_train:0.19.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/ml_model_trainer:0.20.0", model_trainer_aea_name
+            "fetchai/ml_model_trainer:0.21.0", model_trainer_aea_name
         )
         assert (
             diff == []
@@ -311,10 +306,10 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
 
         # add keys
         self.generate_private_key(FETCHAI)
-        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
+        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
 
         # fund key
@@ -330,6 +325,7 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
 
         self.set_agent_context(data_provider_aea_name)
         self.run_cli_command("build", cwd=self._get_cwd())
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
         data_provider_aea_process = self.run_agent()
 
         check_strings = (
@@ -339,7 +335,7 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            data_provider_aea_process, check_strings, timeout=240, is_terminating=False
+            data_provider_aea_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -349,6 +345,7 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
 
         self.set_agent_context(model_trainer_aea_name)
         self.run_cli_command("build", cwd=self._get_cwd())
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
         model_trainer_aea_process = self.run_agent()
 
         check_strings = (
@@ -358,7 +355,7 @@ class TestMLSkillsFetchaiLedger(AEATestCaseMany):
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            model_trainer_aea_process, check_strings, timeout=240, is_terminating=False
+            model_trainer_aea_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []
