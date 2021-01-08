@@ -53,6 +53,11 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
 
     def test_coin_price(self):
         """Run the coin price skill sequence."""
+
+        coin_price_feed_aea_name = "coin_price_feed_aea"
+        self.create_agents(coin_price_feed_aea_name)
+
+        self.set_agent_context(coin_price_feed_aea_name)
         self.add_item("connection", "fetchai/http_client:0.16.0")
         self.add_item("connection", "fetchai/http_server:0.15.0")
         self.add_item("connection", "fetchai/prometheus:0.2.0")
@@ -60,7 +65,7 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
         self.set_config("agent.default_connection", "fetchai/http_server:0.15.0")
 
         default_routing = {
-            "fetchai/http:0.13.0": "fetchai/http_client:0.16.0",
+            "fetchai/http:0.11.0": "fetchai/http_client:0.16.0",
             "fetchai/prometheus:0.2.0": "fetchai/prometheus:0.2.0",
         }
         setting_path = "agent.default_routing"
@@ -74,6 +79,13 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
             True,
             type_="bool",
         )
+
+        diff = self.difference_to_fetched_agent(
+            "fetchai/coin_price_feed:0.3.0", coin_price_feed_aea_name
+        )
+        assert (
+            diff == []
+        ), "Difference between created and fetched project for files={}".format(diff)
 
         self.run_install()
 

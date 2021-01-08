@@ -86,6 +86,13 @@ class TestOracleSkills(AEATestCaseMany, UseGanache):
         )
         self.set_config(setting_path, oracle_address)
 
+        diff = self.difference_to_fetched_agent(
+            "fetchai/coin_price_oracle:0.3.0", oracle_agent_name
+        )
+        assert (
+            diff == []
+        ), "Difference between created and fetched project for files={}".format(diff)
+
         self.generate_private_key(ETHEREUM)
         self.add_private_key(ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE)
         self.replace_private_key_in_file(
