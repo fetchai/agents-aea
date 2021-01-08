@@ -21,10 +21,8 @@
 
 from typing import Optional
 
-from aea.configurations.base import ConnectionConfig, PublicId
+from aea.configurations.base import PublicId
 from aea.connections.base import Connection
-from aea.crypto.wallet import CryptoStore
-from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
 
@@ -33,12 +31,7 @@ class MyScaffoldConnection(Connection):
 
     connection_id = PublicId.from_str("fetchai/scaffold:0.1.0")
 
-    def __init__(
-        self,
-        configuration: ConnectionConfig,
-        identity: Optional[Identity] = None,
-        crypto_store: Optional[CryptoStore] = None,
-    ):
+    def __init__(self, **kwargs):
         """
         Initialize a connection to an SDK or API.
 
@@ -46,9 +39,7 @@ class MyScaffoldConnection(Connection):
         :param crypto_store: object to access the connection crypto objects.
         :param identity: the identity object.
         """
-        super().__init__(  # pragma: no cover
-            configuration=configuration, crypto_store=crypto_store, identity=identity
-        )
+        super().__init__(**kwargs)  # pragma: no cover
 
     async def connect(self) -> None:
         """
