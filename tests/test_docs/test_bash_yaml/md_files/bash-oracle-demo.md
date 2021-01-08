@@ -22,6 +22,8 @@ aea config set --type dict agent.default_routing \
 "fetchai/http:0.11.0": "fetchai/http_client:0.16.0",
 "fetchai/ledger_api:0.9.0": "fetchai/ledger:0.12.0"
 }'
+aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
+'[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
 ```
 ``` bash
 aea config set agent.default_ledger ethereum
