@@ -42,7 +42,7 @@ aea install
 aea config set agent.default_connection fetchai/p2p_libp2p:0.14.0
 ```
 
-Then update the agent configuration with the default routing:
+Then update the agent configuration with the default routing and cert requests:
 ``` bash
 aea config set --type dict agent.default_routing \
 '{
@@ -50,6 +50,8 @@ aea config set --type dict agent.default_routing \
 "fetchai/http:0.11.0": "fetchai/http_client:0.16.0",
 "fetchai/ledger_api:0.9.0": "fetchai/ledger:0.12.0"
 }'
+aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
+'[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
 ```
 
 And change the default ledger:
