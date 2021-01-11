@@ -435,12 +435,7 @@ class RemoveItem:
         self.agent_config.component_configurations.pop(
             ComponentId(self.item_type, current_item), None
         )
-        self._dump_agent_config()
-
-    def _dump_agent_config(self) -> None:
-        """Save agent config to the filesystem."""
-        with open(os.path.join(self.ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as f:
-            self.ctx.agent_loader.dump(self.agent_config, f)
+        self.ctx.dump_agent_config()
 
     def remove_dependencies(self) -> None:
         """Remove all the dependecies related only to the package."""
