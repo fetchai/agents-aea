@@ -187,7 +187,7 @@ The `fetchai/p2p_libp2p` package is partially developed in Go.
 
 - To install Go visit the [Golang site](https://golang.org/doc/install).
 
-- We use [golines](https://github.com/segmentio/golines) and [golangci-lint](https://golangci-lint.run) for linting.
+- We use [`golines`](https://github.com/segmentio/golines) and [`golangci-lint`](https://golangci-lint.run) for linting.
 
 - To run tests, use `go test -p 1 -timeout 0 -count 1 -v ./...` from the root directory of the package.
 

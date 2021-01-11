@@ -162,6 +162,7 @@ unregistering
 pipx
 BibTex
 Kubernetes
+Golang
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id
