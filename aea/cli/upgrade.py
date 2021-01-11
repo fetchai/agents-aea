@@ -50,7 +50,7 @@ from aea.exceptions import enforce
     help_remote="For fetching packages only from remote registry.",
 )
 @click.pass_context
-@check_aea_project
+@check_aea_project(check_aea_version=False)
 def upgrade(click_context, local, remote):  # pylint: disable=unused-argument
     """Upgrade the packages of the agent."""
     ctx = cast(Context, click_context.obj)
