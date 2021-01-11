@@ -856,11 +856,10 @@ def decorator_with_optional_params(decorator):
     def new_decorator(*args, **kwargs):
         if len(args) == 1 and len(kwargs) == 0 and callable(args[0]):
             return decorator(args[0])
-        else:
 
-            def final_decorator(real_function):
-                return decorator(real_function, *args, **kwargs)
+        def final_decorator(real_function):
+            return decorator(real_function, *args, **kwargs)
 
-            return final_decorator
+        return final_decorator
 
     return new_decorator
