@@ -152,7 +152,6 @@ def registry_path_option(f):
     """Add registry path aea option."""
     return option(
         "--registry-path",
-        "--alias",
         type=str,
         required=False,
         help="Provide a local registry directory full path.",
