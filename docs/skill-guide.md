@@ -1,4 +1,10 @@
-This guide will take you through the development of a simple skill.
+This guide will take you through the development of your first skill. To connect to the digital world, register yourself and search other agents...
+
+Autonomous Economic Agents are not, generally secret agents. You want them to be seen and found by other agents so that they can trade. Usually, this means connecting to Fetch.ai’s search-and-discovery mechanism, the simple OEF (or SOEF, for short). The SOEF lets your agents register, be found, and find other agents. You can then negotiate using the agent framework’s peer-to-peer network (ACN) and trade. This guide covers getting you connected to the SOEF, and describing yourself to make yourself visible.
+
+Typically, this means setting a name, a genus (a high-level description of what you are, e.g., “vehicle”, “building” or “service”), a classification (infrastructure.railway.train, for example) and then a bunch of other descriptors, where applicable, that provide your position, whether you buy or sell, and other descriptive items.
+
+The more you set, the easier it is for others to find you using specific filters.
 
 ### Dependencies
 

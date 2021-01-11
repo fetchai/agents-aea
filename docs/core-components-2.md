@@ -16,7 +16,7 @@ You can learn more about the decision maker <a href="../decision-maker">here</a>
 
 The <a href="../api/crypto/wallet#wallet-objects">`Wallet`</a> contains the private-public key pairs used by the AEA. Skills do not have access to the wallet, only the decision maker does.
 
-### Identity
+### Identityxw
 
 The <a href="../api/identity/base#identity-objects">`Identity`</a> is an abstraction that represents the identity of an AEA in the Open Economic Framework, backed by public-key cryptography. It contains the AEA's addresses as well as its name.
 
@@ -46,6 +46,7 @@ Taken together, the core components from this section and the <a href="../core-c
 
 We recommend you continue with the next step in the 'Getting Started' series:
 
+Fix!x
 - <a href="../generic-skills-step-by-step/">Trade between two AEAs</a>
 
 ### Relevant deep-dives
