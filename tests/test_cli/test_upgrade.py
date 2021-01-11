@@ -29,7 +29,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 from click.exceptions import ClickException
 from click.testing import Result
+from packaging.version import Version
 
+import aea
 from aea.cli import cli
 from aea.cli.upgrade import ItemRemoveHelper
 from aea.cli.utils.config import load_item_config
@@ -43,7 +45,7 @@ from aea.configurations.base import (
     PublicId,
 )
 from aea.configurations.loader import ConfigLoader, load_component_configuration
-from aea.helpers.base import cd
+from aea.helpers.base import cd, compute_specifier_from_version
 from aea.test_tools.test_cases import AEATestCaseEmpty, BaseAEATestCase
 
 from packages.fetchai.connections import oef
@@ -341,7 +343,7 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
         """Set up test case."""
         super(TestUpgradeProject, cls).setup()
         cls.change_directory(Path(".."))
-        cls.agent_name = "generic_buyer_0.12.0"
+        cls.agent_name = "generic_buyer_0.18.0"
         cls.latest_agent_name = "generic_buyer_latest"
         cls.run_cli_command(
             "--skip-consistency-check",
@@ -934,3 +936,51 @@ class TestNothingToUpgrade(AEATestCaseEmpty):
             result.stdout
             == "Starting project upgrade...\nEverything is already up to date!\n"
         )
+
+
+class TestWrongAEAVersion(TestNothingToUpgrade):
+    """Test consistency check ignores AEA version fields."""
+
+    AEA_VERSION_SPECIFIER: str = "==0.1.0"
+
+    @classmethod
+    def setup_class(cls):
+        """Set up the test."""
+        super().setup_class()
+
+        # change aea version of the AEA project
+        agent_config = cls.load_agent_config(cls.current_agent_context)
+        cls._update_aea_version(agent_config)
+        cls.nested_set_config("agent.aea_version", cls.AEA_VERSION_SPECIFIER)
+
+    @classmethod
+    def _update_aea_version(cls, agent_config: AgentConfig):
+        """Update aea version to all items and fingerprint them."""
+        for item in agent_config.package_dependencies:
+            type_ = item.component_type.to_plural()
+            dotted_path = f"vendor.{item.author}.{type_}.{item.name}.aea_version"
+            path = os.path.join("vendor", item.author, type_, item.name)
+            cls.nested_set_config(dotted_path, cls.AEA_VERSION_SPECIFIER)
+            cls.run_cli_command("fingerprint", "by-path", path, cwd=cls._get_cwd())
+
+    def test_nothing_to_upgrade(self):
+        """Test nothing to upgrade, and additionally, that 'aea_version' is correct."""
+        super().test_nothing_to_upgrade()
+
+        # test 'aea_version' of agent configuration is upgraded
+        expected_aea_version_specifier = compute_specifier_from_version(
+            Version(aea.__version__)
+        )
+        agent_config = self.load_agent_config(self.current_agent_context)
+        assert agent_config.aea_version == expected_aea_version_specifier
+
+        # test 'aea_version' of packages is still the same
+        for item in agent_config.package_dependencies:
+            type_ = item.component_type.to_plural()
+            dotted_path = f"vendor.{item.author}.{type_}.{item.name}.aea_version"
+            result = self.run_cli_command(
+                "-s", "config", "get", dotted_path, cwd=self._get_cwd()
+            )
+            actual = result.stdout.strip()
+            expected = self.AEA_VERSION_SPECIFIER
+            assert actual == expected
