@@ -83,8 +83,8 @@ class TestScaffoldConnectionAndRun(AEATestCaseEmpty):
                     [
                         "Error while connecting <class 'connection_module.MyScaffoldConnection'>: NotImplementedError()"
                     ],
-                    timeout=5,
+                    timeout=50,
                 )
             finally:
                 proc.terminate()
-                proc.wait_to_complete(timeout=10)
+                proc.wait_to_complete(timeout=50)

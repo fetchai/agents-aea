@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """Implementation of the 'aea scaffold' subcommand."""
-import glob
 import os
 import re
 import shutil
@@ -186,9 +185,12 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
         with config_filepath.open("w") as fp:
             loader.dump(config, fp)
 
-        # update 'PUBLIC_ID' variable with the right public id in all python files!
+        # update 'PUBLIC_ID' variable with the right public id in connection.py!
 
-        for file_path in glob.glob(str(Path(dest, "*.py"))):
+        for file_name in ["__init__.py", "connection.py"]:
+            file_path = Path(dest) / file_name
+            if not file_path.exists():
+                continue
             py_file = Path(file_path)
             py_file.write_text(
                 re.sub(SCAFFOLD_PUBLIC_ID, str(new_public_id), py_file.read_text())
