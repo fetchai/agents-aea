@@ -54,10 +54,8 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
     def test_coin_price(self):
         """Run the coin price skill sequence."""
 
-        coin_price_feed_aea_name = "coin_price_feed_aea"
-        self.create_agents(coin_price_feed_aea_name)
+        coin_price_feed_aea_name = self.agent_name
 
-        self.set_agent_context(coin_price_feed_aea_name)
         self.add_item("connection", "fetchai/http_client:0.16.0")
         self.add_item("connection", "fetchai/http_server:0.15.0")
         self.add_item("connection", "fetchai/prometheus:0.2.0")
