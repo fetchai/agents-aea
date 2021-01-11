@@ -29,7 +29,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 from click.exceptions import ClickException
 from click.testing import Result
+from packaging.version import Version
 
+import aea
 from aea.cli import cli
 from aea.cli.upgrade import ItemRemoveHelper
 from aea.cli.utils.config import load_item_config
@@ -43,7 +45,7 @@ from aea.configurations.base import (
     PublicId,
 )
 from aea.configurations.loader import ConfigLoader, load_component_configuration
-from aea.helpers.base import cd
+from aea.helpers.base import cd, compute_specifier_from_version
 from aea.test_tools.test_cases import AEATestCaseEmpty, BaseAEATestCase
 
 from packages.fetchai.connections import oef
@@ -965,9 +967,12 @@ class TestWrongAEAVersion(TestNothingToUpgrade):
         """Test nothing to upgrade, and additionally, that 'aea_version' is correct."""
         super().test_nothing_to_upgrade()
 
-        # test 'aea_version' of agent configuration is still the same
+        # test 'aea_version' of agent configuration is upgraded
+        expected_aea_version_specifier = compute_specifier_from_version(
+            Version(aea.__version__)
+        )
         agent_config = self.load_agent_config(self.current_agent_context)
-        assert agent_config.aea_version == self.AEA_VERSION_SPECIFIER
+        assert agent_config.aea_version == expected_aea_version_specifier
 
         # test 'aea_version' of packages is still the same
         for item in agent_config.package_dependencies:

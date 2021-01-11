@@ -22,7 +22,9 @@ from pathlib import Path
 from typing import Dict, Iterable, List, Set, Tuple, cast
 
 import click
+from packaging.version import Version
 
+import aea
 from aea.cli.add import add_item
 from aea.cli.registry.utils import get_latest_version_available_in_registry
 from aea.cli.remove import (
@@ -42,6 +44,7 @@ from aea.cli.utils.package_utils import (
 from aea.configurations.base import ComponentId, PackageId, PackageType, PublicId
 from aea.configurations.constants import CONNECTION, CONTRACT, PROTOCOL, SKILL, VENDOR
 from aea.exceptions import enforce
+from aea.helpers.base import compute_specifier_from_version
 
 
 @click.group(invoke_without_command=True)
@@ -108,6 +111,13 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
     shared_deps: Set[PackageId] = set()
     shared_deps_to_remove = set()
     items_to_upgrade_dependencies = set()
+
+    # update aea_version in case current framework version is
+    version = Version(aea.__version__)
+    if not ctx.agent_config.aea_version_specifiers.contains(version):
+        new_aea_version_specifier = compute_specifier_from_version(version)
+        ctx.agent_config.aea_version = new_aea_version_specifier
+        ctx.dump_agent_config()
 
     for package_id, deps in agent_items.items():
         item_upgrader = ItemUpgrader(
