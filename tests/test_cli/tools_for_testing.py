@@ -21,7 +21,9 @@ from typing import List
 from unittest.mock import Mock
 
 from click import ClickException
+from packaging.specifiers import SpecifierSet
 
+import aea
 from aea.configurations.base import PackageVersion
 from aea.configurations.constants import DEFAULT_LEDGER
 
@@ -39,6 +41,9 @@ class AgentConfigMock:
 
     def __init__(self, *args, **kwargs):
         """Init the AgentConfigMock object."""
+        self.aea_version_specifiers: SpecifierSet = kwargs.get(
+            "aea_version_specifier", SpecifierSet(f"=={aea.__version__}")
+        )
         self.connections: List[str] = kwargs.get("connections", [])
         self.contracts: List[str] = kwargs.get("contracts", [])
         self.description: str = kwargs.get("description", "")

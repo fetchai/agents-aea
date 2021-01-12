@@ -831,3 +831,35 @@ def compute_specifier_from_version(version: Version) -> str:
     upper_bound = Version(f"{new_major}.{new_minor_high}.0")
     specifier_set = f">={lower_bound}, <{upper_bound}"
     return specifier_set
+
+
+def decorator_with_optional_params(decorator):
+    """
+    Make a decorator usable either with or without parameters.
+
+    In other words, if a decorator "mydecorator" is decorated with this decorator,
+    It can be used both as:
+
+    @mydecorator
+    def myfunction():
+        ...
+
+    or as:
+
+    @mydecorator(arg1, kwarg1="value")
+    def myfunction():
+        ...
+
+    """
+
+    @wraps(decorator)
+    def new_decorator(*args, **kwargs):
+        if len(args) == 1 and len(kwargs) == 0 and callable(args[0]):
+            return decorator(args[0])
+
+        def final_decorator(real_function):
+            return decorator(real_function, *args, **kwargs)
+
+        return final_decorator
+
+    return new_decorator

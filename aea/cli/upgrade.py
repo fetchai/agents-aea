@@ -24,7 +24,9 @@ from pathlib import Path
 from typing import Dict, Iterable, List, Set, Tuple, cast
 
 import click
+from packaging.version import Version
 
+import aea
 from aea.cli.add import add_item
 from aea.cli.eject import _eject_item
 from aea.cli.registry.utils import get_latest_version_available_in_registry
@@ -45,7 +47,7 @@ from aea.cli.utils.package_utils import (
 from aea.configurations.base import ComponentId, PackageId, PackageType, PublicId
 from aea.configurations.constants import CONNECTION, CONTRACT, PROTOCOL, SKILL, VENDOR
 from aea.exceptions import enforce
-from aea.helpers.base import find_topological_order
+from aea.helpers.base import compute_specifier_from_version, find_topological_order
 
 
 @click.group(invoke_without_command=True)
@@ -55,7 +57,9 @@ from aea.helpers.base import find_topological_order
     help_remote="For fetching packages only from remote registry.",
 )
 @click.pass_context
-@check_aea_project
+@check_aea_project(  # pylint: disable=unused-argument,no-value-for-parameter
+    check_aea_version=False
+)
 def upgrade(
     click_context, local, remote, interactive
 ):  # pylint: disable=unused-argument
@@ -115,6 +119,17 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
     shared_deps: Set[PackageId] = set()
     shared_deps_to_remove = set()
     items_to_upgrade_dependencies = set()
+
+    # update aea_version in case current framework version is
+    version = Version(aea.__version__)
+    if not ctx.agent_config.aea_version_specifiers.contains(version):
+        old_aea_version_specifier = ctx.agent_config.aea_version
+        new_aea_version_specifier = compute_specifier_from_version(version)
+        click.echo(
+            f"Upgrading version specifier from {old_aea_version_specifier} to {new_aea_version_specifier}."
+        )
+        ctx.agent_config.aea_version = new_aea_version_specifier
+        ctx.dump_agent_config()
 
     eject_helper = InteractiveEjectHelper(ctx, agent_items, interactive=interactive)
     eject_helper.get_latest_versions()
@@ -342,7 +357,7 @@ class ItemUpgrader:
         add_item(self.ctx, str(self.item_type), self.item_public_id)
 
 
-class InteractiveEjectHelper(object):
+class InteractiveEjectHelper:
     """
     Helper class to interactively eject vendor packages.
 
@@ -386,8 +401,9 @@ class InteractiveEjectHelper(object):
             new_version = new_item.version
             self.item_to_new_version[package_id] = new_version
 
+    @staticmethod
     def _reverse_adjacency_list(
-        self, adjacency_list: Dict[PackageId, Set[PackageId]]
+        adjacency_list: Dict[PackageId, Set[PackageId]]
     ) -> Dict[PackageId, Set[PackageId]]:
         """Compute the inverse of an adjacency list."""
         inverse_adjacency_list: Dict[PackageId, Set[PackageId]] = {}
@@ -429,7 +445,8 @@ class InteractiveEjectHelper(object):
             self.to_eject.append(package_id)
         return True
 
-    def _prompt(self, package_id: PackageId, dependencies_to_upgrade: Set[PackageId]):
+    @staticmethod
+    def _prompt(package_id: PackageId, dependencies_to_upgrade: Set[PackageId]):
         """
         Ask the user permission for ejection of a package.
 
