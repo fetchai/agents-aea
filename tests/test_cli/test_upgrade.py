@@ -29,9 +29,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from click.exceptions import ClickException
 from click.testing import Result
-from packaging.version import Version
 
-import aea
 from aea.cli import cli
 from aea.cli.upgrade import ItemRemoveHelper
 from aea.cli.utils.config import load_item_config
@@ -45,7 +43,7 @@ from aea.configurations.base import (
     PublicId,
 )
 from aea.configurations.loader import ConfigLoader, load_component_configuration
-from aea.helpers.base import cd, compute_specifier_from_version
+from aea.helpers.base import cd
 from aea.test_tools.test_cases import AEATestCaseEmpty, BaseAEATestCase
 
 from packages.fetchai.connections import oef
@@ -411,9 +409,6 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
         )
         # the slice is because we don't compare the agent name and the author name
         assert lines_upgraded_agent_config[2:] == lines_latest_agent_config[2:]
-
-        # check that the author is set correctly
-        assert lines_upgraded_agent_config[1] == f"author: {self.author}"
 
         # compare vendor folders.
         assert are_dirs_equal(
@@ -972,17 +967,11 @@ class TestWrongAEAVersion(AEATestCaseEmpty):
         result = self.run_cli_command("upgrade", cwd=self._get_cwd())
         assert (
             result.stdout
-            == "Starting project upgrade...\nUpdating AEA version specifier from ==0.1.0 to >=0.9.0, <0.10.0.\nEverything is already up to date!\n"
+            == "Starting project upgrade...\nEverything is already up to date!\n"
         )
-
-        # test 'aea_version' of agent configuration is upgraded
-        expected_aea_version_specifier = compute_specifier_from_version(
-            Version(aea.__version__)
-        )
-        agent_config = self.load_agent_config(self.current_agent_context)
-        assert agent_config.aea_version == expected_aea_version_specifier
 
         # test 'aea_version' of packages is still the same
+        agent_config = self.load_agent_config(self.current_agent_context)
         for item in agent_config.package_dependencies:
             type_ = item.component_type.to_plural()
             dotted_path = f"vendor.{item.author}.{type_}.{item.name}.aea_version"

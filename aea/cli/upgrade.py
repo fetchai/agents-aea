@@ -141,8 +141,6 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
     item_remover = ItemRemoveHelper(ctx, ignore_non_vendor=True)
     agent_items = item_remover.get_agent_dependencies_with_reverse_dependencies()
 
-    _update_agent_config(ctx)
-
     eject_helper = InteractiveEjectHelper(ctx, agent_items, interactive=interactive)
     eject_helper.get_latest_versions()
     if len(eject_helper.item_to_new_version) == 0:
@@ -152,6 +150,8 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
         click.echo("Abort.")
         return
     eject_helper.eject()
+
+    _update_agent_config(ctx)
 
     # compute the upgraders and the shared dependencies.
     required_by_relation = eject_helper.get_updated_inverse_adjacency_list()
