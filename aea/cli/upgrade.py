@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 """Implementation of the 'aea upgrade' subcommand."""
 import pprint
-from contextlib import suppress
 from copy import deepcopy
 from pathlib import Path
 from typing import Dict, Iterable, List, Set, Tuple, cast
@@ -118,7 +117,9 @@ def _update_agent_config(ctx: Context):
     if not ctx.agent_config.aea_version_specifiers.contains(version):
         new_aea_version = compute_specifier_from_version(version)
         old_aea_version = ctx.agent_config.aea_version
-        click.echo(f"Updating AEA version from {old_aea_version} to {new_aea_version}")
+        click.echo(
+            f"Updating AEA version specifier from {old_aea_version} to {new_aea_version}."
+        )
         ctx.agent_config.aea_version = new_aea_version
 
     # update author name if it is different
@@ -139,11 +140,6 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
     old_component_ids = ctx.agent_config.package_dependencies
     item_remover = ItemRemoveHelper(ctx, ignore_non_vendor=True)
     agent_items = item_remover.get_agent_dependencies_with_reverse_dependencies()
-    items_to_upgrade = set()
-    upgraders: Dict[PackageId, ItemUpgrader] = {}
-    shared_deps: Set[PackageId] = set()
-    shared_deps_to_remove = set()
-    items_to_upgrade_dependencies = set()
 
     _update_agent_config(ctx)
 
@@ -157,39 +153,12 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
         return
     eject_helper.eject()
 
-    for package_id, deps in agent_items.items():
-        if package_id in eject_helper.to_eject:
-            continue
-
-        deps.difference_update(eject_helper.to_eject)
-        item_upgrader = ItemUpgrader(
-            ctx, str(package_id.package_type), package_id.public_id.to_latest()
-        )
-
-        if deps:
-            continue
-
-        with suppress(UpgraderException):
-            item_upgrader.check_in_requirements()
-            item_upgrader.check_is_non_vendor()
-            # we already computed the new version above
-            # check whether the current package should be updated.
-            # if so, add the upgrader to the upgraders for later use.
-            if package_id in eject_helper.item_to_new_version:
-                new_version = eject_helper.item_to_new_version[package_id]
-                items_to_upgrade.add((package_id, new_version))
-                upgraders[package_id] = item_upgrader
-
-        items_to_upgrade_dependencies.add(package_id)
-        items_to_upgrade_dependencies.update(item_upgrader.dependencies)
-        shared_deps.update(item_upgrader.deps_can_not_be_removed.keys())
-
-    for dep in shared_deps:
-        if agent_items[dep] - items_to_upgrade_dependencies:
-            # shared deps not resolved, nothing to do next
-            continue  # pragma: nocover
-        # add it to remove
-        shared_deps_to_remove.add(dep)
+    # compute the upgraders and the shared dependencies.
+    required_by_relation = eject_helper.get_updated_inverse_adjacency_list()
+    item_to_new_version = eject_helper.item_to_new_version
+    upgraders, shared_deps_to_remove = _compute_upgraders_and_shared_deps_to_remove(
+        ctx, required_by_relation, item_to_new_version
+    )
 
     with remove_unused_component_configurations(ctx):
         if shared_deps_to_remove:
@@ -435,6 +404,15 @@ class InteractiveEjectHelper:
             click.echo(f"Ejecting {package_id}...")
             _eject_item(self.ctx, str(package_id.package_type), package_id.public_id)
 
+    def get_updated_inverse_adjacency_list(self) -> Dict[PackageId, Set[PackageId]]:
+        """Update inverse adjacency list by removing ejected packages."""
+        result = {}
+        for package_id, deps in self.inverse_adjacency_list.items():
+            if package_id in self.to_eject:
+                continue
+            result[package_id] = deps.difference(self.to_eject)
+        return result
+
     def can_eject(self):
         """Ask to the user if packages can be ejected if needed."""
         to_upgrade = set(self.item_to_new_version.keys())
@@ -539,3 +517,50 @@ def _compute_replacements(
         if len(same_prefix) > 0:
             replacements[old_component_id] = same_prefix[0]
     return replacements
+
+
+def _compute_upgraders_and_shared_deps_to_remove(
+    ctx: Context,
+    required_by_relation: Dict[PackageId, Set[PackageId]],
+    item_to_new_version: Dict[PackageId, str],
+) -> Tuple[Dict[PackageId, ItemUpgrader], Set[PackageId]]:
+    """
+    Compute upgraders and shared dependencies to remove.
+
+    :param ctx: the CLI Context
+    :param required_by_relation: from a package id to the package ids it is required by.
+    :param item_to_new_version: from a package id to its new version available.
+    :return: the list of upgraders and the shared dependencies to remove.
+    """
+    upgraders: Dict[PackageId, ItemUpgrader] = {}
+    shared_deps: Set[PackageId] = set()
+    shared_deps_to_remove = set()
+    items_to_upgrade_dependencies = set()
+    for package_id, required_by in required_by_relation.items():
+        item_upgrader = ItemUpgrader(
+            ctx, str(package_id.package_type), package_id.public_id.to_latest()
+        )
+
+        # if the package is required by at least another package, don't upgrade.
+        is_required_by_other = len(required_by) != 0
+        if is_required_by_other:
+            continue
+
+        is_not_in_requirements = not item_upgrader.in_requirements
+        is_vendor = not item_upgrader.is_non_vendor
+        to_be_upgraded = package_id in item_to_new_version
+
+        if is_not_in_requirements and is_vendor and to_be_upgraded:
+            upgraders[package_id] = item_upgrader
+
+        items_to_upgrade_dependencies.add(package_id)
+        items_to_upgrade_dependencies.update(item_upgrader.dependencies)
+        shared_deps.update(item_upgrader.deps_can_not_be_removed.keys())
+
+    for dep in shared_deps:
+        if required_by_relation[dep] - items_to_upgrade_dependencies:
+            # shared deps not resolved, nothing to do next
+            continue  # pragma: nocover
+        # add it to remove
+        shared_deps_to_remove.add(dep)
+    return upgraders, shared_deps_to_remove

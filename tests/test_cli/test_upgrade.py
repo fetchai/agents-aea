@@ -972,7 +972,7 @@ class TestWrongAEAVersion(AEATestCaseEmpty):
         result = self.run_cli_command("upgrade", cwd=self._get_cwd())
         assert (
             result.stdout
-            == "Starting project upgrade...\nUpdating version specifier from ==0.1.0 to >=0.9.0, <0.10.0.\nEverything is already up to date!\n"
+            == "Starting project upgrade...\nUpdating AEA version specifier from ==0.1.0 to >=0.9.0, <0.10.0.\nEverything is already up to date!\n"
         )
 
         # test 'aea_version' of agent configuration is upgraded
