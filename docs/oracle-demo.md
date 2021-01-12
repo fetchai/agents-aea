@@ -105,7 +105,7 @@ aea install
 aea config set agent.default_connection fetchai/ledger:0.12.0
 ```
 
-Then update the agent configuration with the default routing and cert requests:
+Then update the agent configuration with the default routing:
 ``` bash
 aea config set --type dict agent.default_routing \
 '{
@@ -139,7 +139,7 @@ The easiest way to test the oracle agents is to set up a local Ethereum test nod
 docker run -p 8545:8545 trufflesuite/ganache-cli:latest --verbose --gasPrice=0 --gasLimit=0x1fffffffffffff --account="$(cat coin_price_oracle/ethereum_private_key.txt),1000000000000000000000" --account="$(cat coin_price_oracle_client/ethereum_private_key.txt),1000000000000000000000"
 ```
 
-<details><summary>Run the Python script below (with web3 installed) from the top-level directory to deploy a mock Fetch ERC20 contract and give some test FET to the client agent.</summary>
+<details><summary>Run the enclosed Python script (with web3 installed) from the top-level directory to deploy a mock Fetch ERC20 contract and give some test FET to the client agent.</summary>
 <p>
 
 ```python
@@ -201,7 +201,7 @@ tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash)
 ``` bash
 aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.erc20_address ERC20_ADDRESS
 ```
-where `ORACLE_ADDRESS` appears in the `contractAddress` field of the (first) contract deployment transaction.
+where `ERC20_ADDRESS` is in the output of the script above.
 
 ### Run the oracle AEA
 
@@ -225,7 +225,7 @@ The oracle contract will continue to be updated with the latest retrieved coin p
 aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.erc20_address ERC20_ADDRESS
 aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.oracle_contract_address ORACLE_ADDRESS
 ```
-where `ORACLE_ADDRESS` appears in the `contractAddress` field of the (first) contract deployment transaction.
+where `ORACLE_ADDRESS` appears in the `contractAddress` field of the contract deployment transaction.
 
 ### Run the oracle client AEA
 
