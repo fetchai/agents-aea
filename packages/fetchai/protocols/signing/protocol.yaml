@@ -5,6 +5,7 @@ type: protocol
 description: A protocol for communication between skills and decision maker.
 license: Apache-2.0
 aea_version: '>=0.9.0, <0.10.0'
+protocol_specification_id: fetchai/signing:0.9.0
 fingerprint:
   README.md: Qmc8G92xMdRVaKoZYjQdZek2YEkf3ugrMSwgBkoEsHmt3J
   __init__.py: QmPVnWg24cNfoLcZfqtRePdE2exyoKjRL2cfdz5qF7yZjg

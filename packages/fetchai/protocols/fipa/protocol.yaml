@@ -5,6 +5,7 @@ type: protocol
 description: A protocol for FIPA ACL.
 license: Apache-2.0
 aea_version: '>=0.9.0, <0.10.0'
+protocol_specification_id: fetchai/fipa:0.12.0
 fingerprint:
   README.md: QmQMHYS4ksSHBUkxQkBn8zehaH2TdgjDW1hy51iE88WhZf
   __init__.py: QmcqbJT7w5RhQVBx5W55iMwa1AgxM4LFu5RRPLmWAAxiKe

@@ -20,7 +20,7 @@
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Optional, Tuple, Union
+from typing import Dict, Optional, Tuple, Union
 from urllib.parse import urlparse
 
 from aea.common import Address
@@ -248,6 +248,46 @@ class EnvelopeSerializer(ABC):
 class ProtobufEnvelopeSerializer(EnvelopeSerializer):
     """Envelope serializer using Protobuf."""
 
+    @staticmethod
+    def _get_protocol_specification_id_by_the_protocol_id(
+        protocol_id: PublicId,
+    ) -> PublicId:
+        """
+        Get protocol specification id  from protocol id.
+
+        If not protocol was registered with given specification id, returns protocol specification id  itself.
+
+        :param protocol_id: PublicId
+
+        :return: PublicId
+        """
+        return (
+            ProtocolSpecificationsRegistry.get_specification_id_by_protocol_id(
+                protocol_id
+            )
+            or protocol_id
+        )
+
+    @staticmethod
+    def _get_protocol_id_by_protocol_specification_id(
+        protocol_specification_id: PublicId,
+    ) -> PublicId:
+        """
+        Get protocol id from specification id.
+
+        If not protocol was registered with given specification id, returns protocol_id itself.
+
+        :param protocol_specification_id: PublicId
+
+        :return: PublicId
+        """
+        return (
+            ProtocolSpecificationsRegistry.get_protocol_id_by_specification_id(
+                protocol_specification_id
+            )
+            or protocol_specification_id
+        )
+
     def encode(self, envelope: "Envelope") -> bytes:
         """
         Encode the envelope.
@@ -258,7 +298,9 @@ class ProtobufEnvelopeSerializer(EnvelopeSerializer):
         envelope_pb = base_pb2.Envelope()
         envelope_pb.to = envelope.to
         envelope_pb.sender = envelope.sender
-        envelope_pb.protocol_id = str(envelope.protocol_id)
+        envelope_pb.protocol_id = str(
+            self._get_protocol_specification_id_by_the_protocol_id(envelope.protocol_id)
+        )
         envelope_pb.message = envelope.message_bytes
         if envelope.context is not None and envelope.context.uri_raw != "":
             envelope_pb.uri = envelope.context.uri_raw
@@ -281,7 +323,10 @@ class ProtobufEnvelopeSerializer(EnvelopeSerializer):
         to = envelope_pb.to  # pylint: disable=no-member
         sender = envelope_pb.sender  # pylint: disable=no-member
         raw_protocol_id = envelope_pb.protocol_id  # pylint: disable=no-member
-        protocol_id = PublicId.from_str(raw_protocol_id)
+        protocol_specification_id = PublicId.from_str(raw_protocol_id)
+        protocol_id = self._get_protocol_id_by_protocol_specification_id(
+            protocol_specification_id
+        )
         message = envelope_pb.message  # pylint: disable=no-member
 
         uri_raw = envelope_pb.uri  # pylint: disable=no-member
@@ -495,3 +540,49 @@ class Envelope:
             protocol_id=self.protocol_id,
             message=self.message,
         )
+
+
+class ProtocolSpecificationsRegistry:
+    """Registry to store protocol id and corresponding specification ids."""
+
+    PROTOCOL_TO_SPECIFICATION: Dict[PublicId, PublicId] = {}
+    SPECIFICATION_TO_PROTOCOL: Dict[PublicId, PublicId] = {}
+
+    @classmethod
+    def register(
+        cls, protocol_id: PublicId, protocol_specification_id: PublicId
+    ) -> None:
+        """Register protocol id with protocol specification id."""
+        cls.PROTOCOL_TO_SPECIFICATION[protocol_id] = protocol_specification_id
+        cls.SPECIFICATION_TO_PROTOCOL[protocol_specification_id] = protocol_id
+
+    @classmethod
+    def get_specification_id_by_protocol_id(
+        cls, protocol_id: PublicId
+    ) -> Optional[PublicId]:
+        """Get specification id by the protocol id.
+
+        :param protocol_id: PublicId
+
+        :return: PublicId if protocol registered otherwise None
+        """
+        return cls.PROTOCOL_TO_SPECIFICATION.get(protocol_id, None)
+
+    @classmethod
+    def get_protocol_id_by_specification_id(
+        cls, protocol_specification_id: PublicId
+    ) -> Optional[PublicId]:
+        """Get protocol id by the specification id.
+
+        :param protocol_specification_id: PublicId
+
+        :return: PublicId if protocol registered otherwise None
+        """
+
+        return cls.SPECIFICATION_TO_PROTOCOL.get(protocol_specification_id, None)
+
+    @classmethod
+    def clean(cls) -> None:
+        """Clean registry."""
+        cls.PROTOCOL_TO_SPECIFICATION = {}
+        cls.SPECIFICATION_TO_PROTOCOL = {}

@@ -9,7 +9,8 @@
     "version",
     "type",
     "license",
-    "aea_version"
+    "aea_version",
+    "protocol_specification_id"
   ],
   "properties": {
     "name": {
@@ -47,6 +48,9 @@
     },
     "description": {
       "$ref": "definitions.json#/definitions/description"
+    },
+    "protocol_specification_id": {
+      "$ref": "definitions.json#/definitions/public_id"
     }
   }
 }

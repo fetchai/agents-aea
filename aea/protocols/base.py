@@ -343,8 +343,14 @@ class Protocol(Component):
         :param message_class: the message class.
         """
         super().__init__(configuration, **kwargs)
-
         self._message_class = message_class
+        from aea.mail.base import (  # pylint: disable=import-outside-toplevel
+            ProtocolSpecificationsRegistry,
+        )
+
+        ProtocolSpecificationsRegistry.register(
+            configuration.public_id, configuration.protocol_specification_id
+        )
 
     @property
     def serializer(self) -> Type[Serializer]:

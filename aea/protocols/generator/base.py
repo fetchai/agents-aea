@@ -1772,8 +1772,13 @@ class ProtocolGenerator:
 
         # heading
         proto_buff_schema_str = self.indent + 'syntax = "proto3";\n\n'
-        proto_buff_schema_str += self.indent + "package aea.{}.{};\n\n".format(
-            self.protocol_specification.author, self.protocol_specification.name
+        proto_buff_schema_str += self.indent + "package aea.{}.{}.{};\n\n".format(
+            self.protocol_specification.protocol_specification_id.author,
+            self.protocol_specification.protocol_specification_id.name,
+            "v"
+            + self.protocol_specification.protocol_specification_id.version.replace(
+                ".", "_"
+            ),
         )
         proto_buff_schema_str += self.indent + "message {}Message{{\n\n".format(
             self.protocol_specification_in_camel_case
@@ -1860,6 +1865,7 @@ class ProtocolGenerator:
         protocol_yaml_str = "name: {}\n".format(self.protocol_specification.name)
         protocol_yaml_str += "author: {}\n".format(self.protocol_specification.author)
         protocol_yaml_str += "version: {}\n".format(self.protocol_specification.version)
+        protocol_yaml_str += "protocol_specification_id: {}\n".format(str(self.protocol_specification.protocol_specification_id))
         protocol_yaml_str += "type: {}\n".format(
             self.protocol_specification.component_type
         )

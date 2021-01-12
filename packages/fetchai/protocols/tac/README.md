@@ -15,6 +15,7 @@ description: The tac protocol implements the messages an AEA needs to participat
   in the TAC.
 license: Apache-2.0
 aea_version: '>=0.9.0, <0.10.0'
+protocol_specification_id: fetchai/tac:0.12.0
 speech_acts:
   register:
     agent_name: pt:str

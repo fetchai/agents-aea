@@ -719,6 +719,7 @@ class ProtocolConfig(ComponentConfiguration):
         self,
         name: SimpleIdOrStr,
         author: SimpleIdOrStr,
+        protocol_specification_id: str,
         version: str = "",
         license_: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
@@ -744,6 +745,7 @@ class ProtocolConfig(ComponentConfiguration):
         )
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
+        self.protocol_specification_id = PublicId.from_str(protocol_specification_id)
 
     @property
     def json(self) -> Dict:
@@ -753,6 +755,7 @@ class ProtocolConfig(ComponentConfiguration):
                 "name": self.name,
                 "author": self.author,
                 "version": self.version,
+                "protocol_specification_id": self.protocol_specification_id,
                 "type": self.component_type.value,
                 "description": self.description,
                 "license": self.license,
@@ -778,6 +781,7 @@ class ProtocolConfig(ComponentConfiguration):
         params = dict(
             name=cast(str, obj.get("name")),
             author=cast(str, obj.get("author")),
+            protocol_specification_id=cast(str, obj.get("protocol_specification_id")),
             version=cast(str, obj.get("version")),
             license_=cast(str, obj.get("license")),
             aea_version=cast(str, obj.get("aea_version", "")),
@@ -1457,6 +1461,7 @@ class ProtocolSpecification(ProtocolConfig):
         self,
         name: SimpleIdOrStr,
         author: SimpleIdOrStr,
+        protocol_specification_id: str,
         version: str = "",
         license_: str = "",
         aea_version: str = "",
@@ -1466,6 +1471,7 @@ class ProtocolSpecification(ProtocolConfig):
         super().__init__(
             name,
             author,
+            protocol_specification_id,
             version,
             license_,
             aea_version=aea_version,
@@ -1506,6 +1512,7 @@ class ProtocolSpecification(ProtocolConfig):
                 "description": self.description,
                 "license": self.license,
                 "aea_version": self.aea_version,
+                "protocol_specification_id": str(self.protocol_specification_id),
                 "speech_acts": {
                     key: speech_act.json
                     for key, speech_act in self.speech_acts.read_all()
@@ -1523,6 +1530,7 @@ class ProtocolSpecification(ProtocolConfig):
         params = dict(
             name=cast(str, obj.get("name")),
             author=cast(str, obj.get("author")),
+            protocol_specification_id=cast(str, obj.get("protocol_specification_id")),
             version=cast(str, obj.get("version")),
             license_=cast(str, obj.get("license")),
             aea_version=cast(str, obj.get("aea_version", "")),

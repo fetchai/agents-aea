@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tests for Envelope of mail.base.py."""
 import time
 import unittest.mock
@@ -25,7 +24,14 @@ import pytest
 
 import aea
 from aea.configurations.base import PublicId
-from aea.mail.base import Envelope, EnvelopeContext, ProtobufEnvelopeSerializer, URI
+from aea.mail import base_pb2
+from aea.mail.base import (
+    Envelope,
+    EnvelopeContext,
+    ProtobufEnvelopeSerializer,
+    ProtocolSpecificationsRegistry,
+    URI,
+)
 from aea.multiplexer import InBox, Multiplexer, OutBox
 
 from packages.fetchai.connections.local.connection import LocalNode
@@ -382,3 +388,43 @@ def test_envelope_context_raises_with_public_id_specified_twice():
             uri=URI("skill/author/skill_name/0.1.0"),
             skill_id=PublicId("author", "skill_name", "0.1.0"),
         )
+
+
+def test_envelope_specification_id_translated():
+    """Test protocol id to protocol specification id translation and back."""
+    not_translatable_protocol_id = PublicId("author", "not_translated", "0.1.0")
+
+    envelope = Envelope(
+        to="to", sender="sender", protocol_id=not_translatable_protocol_id, message=b""
+    )
+    envelope_bytes = envelope.encode()
+    envelope_pb = base_pb2.Envelope()
+    envelope_pb.ParseFromString(envelope_bytes)
+    assert (
+        PublicId.from_str(envelope_pb.protocol_id) == envelope.protocol_id
+    )  # pylint: disable=no-member
+
+    protocol_id = PublicId("author", "protocol", "0.1.0")
+    protocol_specification_id = PublicId("author", "specification", "0.1.0")
+    ProtocolSpecificationsRegistry.register(protocol_id, protocol_specification_id)
+
+    envelope = Envelope(to="to", sender="sender", protocol_id=protocol_id, message=b"")
+
+    envelope_bytes = envelope.encode()
+    envelope_pb = base_pb2.Envelope()
+    envelope_pb.ParseFromString(envelope_bytes)
+    assert (
+        PublicId.from_str(envelope_pb.protocol_id) != protocol_id
+    )  # pylint: disable=no-member
+    assert (
+        PublicId.from_str(envelope_pb.protocol_id) == protocol_specification_id
+    )  # pylint: disable=no-member
+
+    new_envelope = Envelope.decode(envelope_bytes)
+    assert new_envelope.protocol_id == envelope.protocol_id
+    assert new_envelope.protocol_id != protocol_specification_id
+
+    class Test(ProtocolSpecificationsRegistry):
+        pass
+
+    Test.clean()
