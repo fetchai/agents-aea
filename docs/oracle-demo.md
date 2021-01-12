@@ -237,11 +237,11 @@ aea run
 
 After a few moments, you should see the following notices in the logs:
 ``` bash
-info: [coin_price_oracle] Oracle client contract successfully deployed!
+info: [coin_price_oracle_client] Oracle client contract successfully deployed!
 ...
-info: [coin_price_oracle] Oracle client transactions approved!
+info: [coin_price_oracle_client] Oracle client transactions approved!
 ...
-info: [coin_price_oracle] Oracle value successfully requested!
+info: [coin_price_oracle_client] Oracle value successfully requested!
 ```
 The AEA will continue to request the latest coin price at the default time interval (every 15 seconds).
 
