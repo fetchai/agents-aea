@@ -24,6 +24,7 @@ import re
 import signal
 import time
 from copy import copy
+from functools import wraps
 from pathlib import Path
 from subprocess import Popen  # nosec
 from tempfile import TemporaryDirectory
@@ -39,6 +40,7 @@ from aea.helpers.base import (
     MaxRetriesError,
     RegexConstrainedString,
     compute_specifier_from_version,
+    decorator_with_optional_params,
     dict_to_path_value,
     ensure_dir,
     exception_log_and_reraise,
@@ -588,3 +590,52 @@ def test_dict_to_path_value():
     }
     assert path_values.get(("a",)) == 12
     assert path_values.get(("b", "c")) == 1
+
+
+def test_decorator_with_optional_params():
+    """Test the utility 'decorator_with_optional_params'."""
+
+    def hello(name: str):
+        """Say hello to 'name'."""
+        return f"Hello, {name}!"
+
+    @decorator_with_optional_params
+    def add_preamble(f, computer_name: str = ""):
+        """
+        This function adds a preamble to the 'hello' function.
+
+        It prepends: 'Computer says: ' if the computer name is not specified,
+        else 'Computer {computer_name} says: '.
+        """
+
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            computer_name_or_space = f" {computer_name} " if computer_name else " "
+            preamble = f"Computer{computer_name_or_space}says: "
+            result = f(*args, **kwargs)
+            return preamble + result
+
+        return wrapper
+
+    # we can use the 'add_preamble' wrapper either as:
+    #    @add_preamble
+    # or:
+    #    @add_preamble()
+
+    @add_preamble
+    def hello_with_preamble(*args, **kwargs):
+        return hello(*args, **kwargs)
+
+    @add_preamble(computer_name="Commodore 64")
+    def hello_from_commodore(*args, **kwargs):
+        return hello(*args, **kwargs)
+
+    # we test that the name is updated correctly
+    with pytest.raises(
+        TypeError,
+        match=re.escape("hello() missing 1 required positional argument: 'name'"),
+    ):
+        hello_with_preamble()
+
+    assert hello_with_preamble("User") == "Computer says: Hello, User!"
+    assert hello_from_commodore("User") == "Computer Commodore 64 says: Hello, User!"

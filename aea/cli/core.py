@@ -18,6 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 """Core definitions for the AEA command-line tool."""
+from typing import Optional
 
 import click
 
@@ -58,6 +59,7 @@ from aea.cli.scaffold import scaffold
 from aea.cli.search import search
 from aea.cli.transfer import transfer
 from aea.cli.upgrade import upgrade
+from aea.cli.utils.click_utils import registry_path_option
 from aea.cli.utils.config import get_or_create_cli_config
 from aea.cli.utils.constants import AUTHOR_KEY
 from aea.cli.utils.context import Context
@@ -77,11 +79,15 @@ from aea.helpers.win32 import enable_ctrl_c_support
     default=False,
     help="Skip consistency checks of agent during command execution.",
 )
+@registry_path_option
 @click.pass_context
-def cli(click_context, skip_consistency_check: bool) -> None:
+def cli(
+    click_context, skip_consistency_check: bool, registry_path: Optional[str]
+) -> None:
     """Command-line tool for setting up an Autonomous Economic Agent (AEA)."""
     verbosity_option = click_context.meta.pop("verbosity")
     click_context.obj = Context(cwd=".", verbosity=verbosity_option)
+    click_context.obj.registry_path = registry_path
     click_context.obj.set_config("skip_consistency_check", skip_consistency_check)
 
     # enables CTRL+C support on windows!
