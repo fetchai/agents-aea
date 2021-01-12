@@ -17,7 +17,8 @@
 #
 # ------------------------------------------------------------------------------
 """Implementation of the 'aea upgrade' subcommand."""
-from contextlib import suppress
+import pprint
+from copy import deepcopy
 from pathlib import Path
 from typing import Dict, Iterable, List, Set, Tuple, cast
 
@@ -26,6 +27,7 @@ from packaging.version import Version
 
 import aea
 from aea.cli.add import add_item
+from aea.cli.eject import _eject_item
 from aea.cli.registry.utils import get_latest_version_available_in_registry
 from aea.cli.remove import (
     ItemRemoveHelper,
@@ -33,7 +35,7 @@ from aea.cli.remove import (
     remove_unused_component_configurations,
 )
 from aea.cli.utils.click_utils import PublicIdParameter, registry_flag
-from aea.cli.utils.config import load_item_config
+from aea.cli.utils.config import load_item_config, set_cli_author
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, clean_after, pass_ctx
 from aea.cli.utils.package_utils import (
@@ -42,12 +44,20 @@ from aea.cli.utils.package_utils import (
     update_references,
 )
 from aea.configurations.base import ComponentId, PackageId, PackageType, PublicId
-from aea.configurations.constants import CONNECTION, CONTRACT, PROTOCOL, SKILL, VENDOR
+from aea.configurations.constants import (
+    CONNECTION,
+    CONTRACT,
+    DEFAULT_VERSION,
+    PROTOCOL,
+    SKILL,
+    VENDOR,
+)
 from aea.exceptions import enforce
-from aea.helpers.base import compute_specifier_from_version
+from aea.helpers.base import compute_specifier_from_version, find_topological_order
 
 
 @click.group(invoke_without_command=True)
+@click.option("--interactive/--no-interactive", default=True)
 @registry_flag(
     help_local="For fetching packages only from local folder.",
     help_remote="For fetching packages only from remote registry.",
@@ -56,11 +66,15 @@ from aea.helpers.base import compute_specifier_from_version
 @check_aea_project(  # pylint: disable=unused-argument,no-value-for-parameter
     check_aea_version=False
 )
-def upgrade(click_context, local, remote):
+def upgrade(
+    click_context, local, remote, interactive
+):  # pylint: disable=unused-argument
     """Upgrade the packages of the agent."""
     ctx = cast(Context, click_context.obj)
     ctx.set_config("is_local", local and not remote)
     ctx.set_config("is_mixed", not (local or remote))
+    ctx.set_config("interactive", interactive)
+    set_cli_author(click_context)
 
     if click_context.invoked_subcommand is None:
         upgrade_project(ctx)
@@ -98,54 +112,61 @@ def skill(ctx: Context, skill_public_id: PublicId):
     upgrade_item(ctx, SKILL, skill_public_id)
 
 
+def _update_agent_config(ctx: Context):
+    """
+    Update agent configurations.
+
+    :param ctx: the context.
+    :return: None
+    """
+    # update aea_version in case current framework version is different
+    version = Version(aea.__version__)
+    if not ctx.agent_config.aea_version_specifiers.contains(version):
+        new_aea_version = compute_specifier_from_version(version)
+        old_aea_version = ctx.agent_config.aea_version
+        click.echo(
+            f"Updating AEA version specifier from {old_aea_version} to {new_aea_version}."
+        )
+        ctx.agent_config.aea_version = new_aea_version
+
+    # update author name if it is different
+    cli_author = ctx.config.get("cli_author")
+    if cli_author and ctx.agent_config.author != cli_author:
+        click.echo(f"Updating author from {ctx.agent_config.author} to {cli_author}")
+        ctx.agent_config._author = cli_author  # pylint: disable=protected-access
+        ctx.agent_config.version = DEFAULT_VERSION
+
+    ctx.dump_agent_config()
+
+
 @clean_after
 def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
     """Perform project upgrade."""
     click.echo("Starting project upgrade...")
 
+    interactive = ctx.config.get("interactive", True)
     old_component_ids = ctx.agent_config.package_dependencies
     item_remover = ItemRemoveHelper(ctx, ignore_non_vendor=True)
     agent_items = item_remover.get_agent_dependencies_with_reverse_dependencies()
-    items_to_upgrade = set()
-    upgraders: List[ItemUpgrader] = []
-    shared_deps: Set[PackageId] = set()
-    shared_deps_to_remove = set()
-    items_to_upgrade_dependencies = set()
 
-    # update aea_version in case current framework version is
-    version = Version(aea.__version__)
-    if not ctx.agent_config.aea_version_specifiers.contains(version):
-        new_aea_version_specifier = compute_specifier_from_version(version)
-        ctx.agent_config.aea_version = new_aea_version_specifier
-        ctx.dump_agent_config()
-
-    for package_id, deps in agent_items.items():
-        item_upgrader = ItemUpgrader(
-            ctx, str(package_id.package_type), package_id.public_id.to_latest()
-        )
-
-        if deps:
-            continue
-
-        with suppress(UpgraderException):
-            new_version = item_upgrader.check_upgrade_is_required()
-            items_to_upgrade.add((package_id, new_version))
-            upgraders.append(item_upgrader)
-
-        items_to_upgrade_dependencies.add(package_id)
-        items_to_upgrade_dependencies.update(item_upgrader.dependencies)
-        shared_deps.update(item_upgrader.deps_can_not_be_removed.keys())
-
-    if not items_to_upgrade:
+    eject_helper = InteractiveEjectHelper(ctx, agent_items, interactive=interactive)
+    eject_helper.get_latest_versions()
+    if len(eject_helper.item_to_new_version) == 0:
         click.echo("Everything is already up to date!")
         return
+    if not eject_helper.can_eject():
+        click.echo("Abort.")
+        return
+    eject_helper.eject()
 
-    for dep in shared_deps:
-        if agent_items[dep] - items_to_upgrade_dependencies:
-            # shared deps not resolved, nothing to do next
-            continue  # pragma: nocover
-        # add it to remove
-        shared_deps_to_remove.add(dep)
+    _update_agent_config(ctx)
+
+    # compute the upgraders and the shared dependencies.
+    required_by_relation = eject_helper.get_updated_inverse_adjacency_list()
+    item_to_new_version = eject_helper.item_to_new_version
+    upgraders, shared_deps_to_remove = _compute_upgraders_and_shared_deps_to_remove(
+        ctx, required_by_relation, item_to_new_version
+    )
 
     with remove_unused_component_configurations(ctx):
         if shared_deps_to_remove:
@@ -169,7 +190,7 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
                     f"Successfully removed {str(dep.package_type)} '{dep.public_id}'."
                 )
 
-        for upgrader in upgraders:
+        for upgrader in upgraders.values():
             upgrader.remove_item()
             upgrader.add_item()
 
@@ -274,19 +295,22 @@ class ItemUpgrader:
         )
         return VENDOR not in Path(path).parts[:2]
 
-    def check_upgrade_is_required(self) -> str:
-        """
-        Check upgrade is required otherwise raise UpgraderException.
-
-        :return: new version  of the package.
-        """
+    def check_in_requirements(self):
+        """Check if we are trying to upgrade some component dependency."""
         if self.in_requirements:
-            # check if we trying to upgrade some component dependency
             raise IsRequiredException(self.in_requirements)
 
+    def check_is_non_vendor(self):
+        """Check the package is not a vendor package."""
         if self.is_non_vendor:
             raise AlreadyActualVersionException(self.current_item_public_id.version)
 
+    def check_not_at_latest_version(self) -> str:
+        """
+        Check the package is not at the actual version.
+
+        :return: the version number.
+        """
         if self.item_public_id.version != "latest":
             new_item = self.item_public_id
         else:
@@ -298,6 +322,16 @@ class ItemUpgrader:
             raise AlreadyActualVersionException(new_item.version)
 
         return new_item.version
+
+    def check_upgrade_is_required(self) -> str:
+        """
+        Check upgrade is required otherwise raise UpgraderException.
+
+        :return: new version  of the package.
+        """
+        self.check_in_requirements()
+        self.check_is_non_vendor()
+        return self.check_not_at_latest_version()
 
     def remove_item(self) -> None:
         """Remove item from agent."""
@@ -314,6 +348,125 @@ class ItemUpgrader:
     def add_item(self) -> None:
         """Add new package version to agent."""
         add_item(self.ctx, str(self.item_type), self.item_public_id)
+
+
+class InteractiveEjectHelper:
+    """
+    Helper class to interactively eject vendor packages.
+
+    This is needed in the cases in which a vendor package
+    prevents other packages to be upgraded.
+    """
+
+    def __init__(
+        self,
+        ctx: Context,
+        inverse_adjacency_list: Dict[PackageId, Set[PackageId]],
+        interactive: bool = True,
+    ):
+        """
+        Initialize the class.
+
+        :param ctx: the CLI context.
+        :param inverse_adjacency_list: adjacency list of inverse dependency graph.
+        :param interactive: if True, interactive.
+        """
+        self.ctx = ctx
+        self.inverse_adjacency_list = deepcopy(inverse_adjacency_list)
+        self.adjacency_list = self._reverse_adjacency_list(self.inverse_adjacency_list)
+        self.interactive = interactive
+
+        self.to_eject: List[PackageId] = []
+        self.item_to_new_version: Dict[PackageId, str] = {}
+
+    def get_latest_versions(self) -> None:
+        """
+        Get latest versions for every project package.
+
+        Stores the result in 'item_to_new_version'.
+        """
+        for package_id in self.adjacency_list.keys():
+            new_item = get_latest_version_available_in_registry(
+                self.ctx, str(package_id.package_type), package_id.public_id.to_latest()
+            )
+            if package_id.public_id.version == new_item.version:
+                continue
+            new_version = new_item.version
+            self.item_to_new_version[package_id] = new_version
+
+    @staticmethod
+    def _reverse_adjacency_list(
+        adjacency_list: Dict[PackageId, Set[PackageId]]
+    ) -> Dict[PackageId, Set[PackageId]]:
+        """Compute the inverse of an adjacency list."""
+        inverse_adjacency_list: Dict[PackageId, Set[PackageId]] = {}
+        for v, neighbors in adjacency_list.items():
+            inverse_adjacency_list.setdefault(v, set())
+            for u in neighbors:
+                inverse_adjacency_list.setdefault(u, set()).add(v)
+        return inverse_adjacency_list
+
+    def eject(self):
+        """Eject packages."""
+        for package_id in self.to_eject:
+            click.echo(f"Ejecting {package_id}...")
+            _eject_item(self.ctx, str(package_id.package_type), package_id.public_id)
+
+    def get_updated_inverse_adjacency_list(self) -> Dict[PackageId, Set[PackageId]]:
+        """Update inverse adjacency list by removing ejected packages."""
+        result = {}
+        for package_id, deps in self.inverse_adjacency_list.items():
+            if package_id in self.to_eject:
+                continue
+            result[package_id] = deps.difference(self.to_eject)
+        return result
+
+    def can_eject(self):
+        """Ask to the user if packages can be ejected if needed."""
+        to_upgrade = set(self.item_to_new_version.keys())
+        order = find_topological_order(self.adjacency_list)
+        for package_id in order:
+            if package_id in self.item_to_new_version:
+                # if dependency is going to be upgraded,
+                # no need to do anything
+                continue
+
+            depends_on = self.adjacency_list[package_id]
+            dependencies_to_upgrade = depends_on.intersection(to_upgrade)
+            if len(dependencies_to_upgrade) == 0:
+                # if dependencies of the package are not going to be upgraded,
+                # no need to worry about its ejection.
+                continue
+
+            # if we are here, it means we need to eject the package.
+            answer = False
+            if self.interactive:
+                answer = self._prompt(package_id, dependencies_to_upgrade)
+            should_eject = answer
+            if not should_eject:
+                return False
+            self.to_eject.append(package_id)
+        return True
+
+    @staticmethod
+    def _prompt(package_id: PackageId, dependencies_to_upgrade: Set[PackageId]):
+        """
+        Ask the user permission for ejection of a package.
+
+        :param package_id: the package id.
+        :param dependencies_to_upgrade: the dependencies to upgrade.
+        :return: True or False, depending on the answer of the user.
+        """
+        package_type = str(package_id.package_type).capitalize()
+        message = (
+            f"{package_type} {package_id.public_id} prevents the upgrade of "
+            f"the following vendor packages:\n"
+            f"{pprint.pformat(dependencies_to_upgrade)}\n"
+            f"as there isn't a compatible version available on the AEA registry. "
+            f"Would you like to eject it?"
+        )
+        answer = click.confirm(message, default=False)
+        return answer
 
 
 @clean_after
@@ -372,3 +525,50 @@ def _compute_replacements(
         if len(same_prefix) > 0:
             replacements[old_component_id] = same_prefix[0]
     return replacements
+
+
+def _compute_upgraders_and_shared_deps_to_remove(
+    ctx: Context,
+    required_by_relation: Dict[PackageId, Set[PackageId]],
+    item_to_new_version: Dict[PackageId, str],
+) -> Tuple[Dict[PackageId, ItemUpgrader], Set[PackageId]]:
+    """
+    Compute upgraders and shared dependencies to remove.
+
+    :param ctx: the CLI Context
+    :param required_by_relation: from a package id to the package ids it is required by.
+    :param item_to_new_version: from a package id to its new version available.
+    :return: the list of upgraders and the shared dependencies to remove.
+    """
+    upgraders: Dict[PackageId, ItemUpgrader] = {}
+    shared_deps: Set[PackageId] = set()
+    shared_deps_to_remove = set()
+    items_to_upgrade_dependencies = set()
+    for package_id, required_by in required_by_relation.items():
+        item_upgrader = ItemUpgrader(
+            ctx, str(package_id.package_type), package_id.public_id.to_latest()
+        )
+
+        # if the package is required by at least another package, don't upgrade.
+        is_required_by_other = len(required_by) != 0
+        if is_required_by_other:
+            continue
+
+        is_not_in_requirements = not item_upgrader.in_requirements
+        is_vendor = not item_upgrader.is_non_vendor
+        to_be_upgraded = package_id in item_to_new_version
+
+        if is_not_in_requirements and is_vendor and to_be_upgraded:
+            upgraders[package_id] = item_upgrader
+
+        items_to_upgrade_dependencies.add(package_id)
+        items_to_upgrade_dependencies.update(item_upgrader.dependencies)
+        shared_deps.update(item_upgrader.deps_can_not_be_removed.keys())
+
+    for dep in shared_deps:
+        if required_by_relation[dep] - items_to_upgrade_dependencies:
+            # shared deps not resolved, nothing to do next
+            continue  # pragma: nocover
+        # add it to remove
+        shared_deps_to_remove.add(dep)
+    return upgraders, shared_deps_to_remove

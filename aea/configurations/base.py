@@ -250,7 +250,7 @@ class PackageConfiguration(Configuration, ABC):
             else []
         )
         self.build_entrypoint = build_entrypoint
-        self.aea_version = aea_version if aea_version != "" else __aea_version__
+        self._aea_version = aea_version if aea_version != "" else __aea_version__
         self._aea_version_specifiers = self._parse_aea_version_specifier(aea_version)
 
         self._directory = None  # type: Optional[Path]
@@ -274,6 +274,19 @@ class PackageConfiguration(Configuration, ABC):
     def author(self, value: SimpleIdOrStr):
         """Set the author."""
         self._author = SimpleId(value)
+
+    @property
+    def aea_version(self):
+        """Get the 'aea_version' attribute."""
+        return self._aea_version
+
+    @aea_version.setter
+    def aea_version(self, new_aea_version: str):
+        """Set the 'aea_version' attribute."""
+        self._aea_version_specifiers = self._parse_aea_version_specifier(
+            new_aea_version
+        )
+        self._aea_version = new_aea_version
 
     @property
     def directory(self) -> Optional[Path]:
