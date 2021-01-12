@@ -55,10 +55,11 @@ agent_overrides = {
     "private_key_paths": {"fetchai": str(FET_PRIVATE_KEY_PATH_1.absolute())},
     "connection_private_key_paths": {"fetchai": str(FET_CONNECTION_PRIVATE_KEY_PATH_1.absolute())}
 }
+
+public_id = PublicId.from_str("fetchai/p2p_libp2p:0.14.0")
+
 component_overrides = {
-    "name": "p2p_libp2p",
-    "author": "fetchai",
-    "version": "0.14.0",
+    **public_id.json,
     "type": "connection",
     "cert_requests": [{
       "identifier": "acn",
@@ -72,9 +73,7 @@ component_overrides = {
 manager.add_agent(weather_station_id, component_overrides=[component_overrides], agent_overrides=agent_overrides)
 
 component_overrides = {
-    "name": "p2p_libp2p",
-    "author": "fetchai",
-    "version": "0.14.0",
+    **public_id.json,
     "type": "connection",
     "config": {
         "delegate_uri": "127.0.0.1:11001",
