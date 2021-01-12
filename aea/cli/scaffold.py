@@ -16,9 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Implementation of the 'aea scaffold' subcommand."""
-
 import os
 import re
 import shutil
@@ -187,11 +185,16 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
         with config_filepath.open("w") as fp:
             loader.dump(config, fp)
 
-        # update 'PUBLIC_ID' variable with the right public id
-        init_module = Path(dest, "__init__.py")
-        init_module.write_text(
-            re.sub(SCAFFOLD_PUBLIC_ID, str(new_public_id), init_module.read_text())
-        )
+        # update 'PUBLIC_ID' variable with the right public id in connection.py!
+
+        for file_name in ["__init__.py", "connection.py"]:
+            file_path = Path(dest) / file_name
+            if not file_path.exists():
+                continue
+            py_file = Path(file_path)
+            py_file.write_text(
+                re.sub(SCAFFOLD_PUBLIC_ID, str(new_public_id), py_file.read_text())
+            )
 
         # fingerprint item.
         fingerprint_item(ctx, item_type, new_public_id)
