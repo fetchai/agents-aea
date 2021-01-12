@@ -100,7 +100,7 @@ aea create coin_price_oracle
 cd coin_price_oracle
 aea add connection fetchai/http_client:0.16.0
 aea add connection fetchai/ledger:0.12.0
-aea add skill fetchai/simple_oracle_client:0.3.0
+aea add skill fetchai/simple_oracle_client:0.2.0
 aea install
 aea config set agent.default_connection fetchai/ledger:0.12.0
 ```
