@@ -459,7 +459,7 @@ class InteractiveEjectHelper:
             f"{package_type} {package_id.public_id} prevents the upgrade of "
             f"the following vendor packages:\n"
             f"{pprint.pformat(dependencies_to_upgrade)}\n"
-            f"as there isn't an update available. "
+            f"as there isn't a compatible version available on the AEA registry. "
             f"Would you like to eject it?"
         )
         answer = click.confirm(message, default=False)
