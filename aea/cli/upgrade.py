@@ -457,7 +457,7 @@ class InteractiveEjectHelper:
         package_type = str(package_id.package_type).capitalize()
         message = (
             f"{package_type} {package_id.public_id} prevents the upgrade of "
-            f"the following non-vendor packages:\n"
+            f"the following vendor packages:\n"
             f"{pprint.pformat(dependencies_to_upgrade)}\n"
             f"as there isn't an update available. "
             f"Would you like to eject it?"
