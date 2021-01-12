@@ -36,7 +36,7 @@ from aea.cli.remove import (
     remove_unused_component_configurations,
 )
 from aea.cli.utils.click_utils import PublicIdParameter, registry_flag
-from aea.cli.utils.config import load_item_config
+from aea.cli.utils.config import load_item_config, set_cli_author
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, clean_after, pass_ctx
 from aea.cli.utils.package_utils import (
@@ -68,6 +68,7 @@ def upgrade(
     ctx.set_config("is_local", local and not remote)
     ctx.set_config("is_mixed", not (local or remote))
     ctx.set_config("interactive", interactive)
+    set_cli_author(click_context)
 
     if click_context.invoked_subcommand is None:
         upgrade_project(ctx)
@@ -105,6 +106,30 @@ def skill(ctx: Context, skill_public_id: PublicId):
     upgrade_item(ctx, SKILL, skill_public_id)
 
 
+def _update_agent_config(ctx: Context):
+    """
+    Update agent configurations.
+
+    :param ctx: the context.
+    :return: None
+    """
+    # update aea_version in case current framework version is different
+    version = Version(aea.__version__)
+    if not ctx.agent_config.aea_version_specifiers.contains(version):
+        new_aea_version = compute_specifier_from_version(version)
+        old_aea_version = ctx.agent_config.aea_version
+        click.echo(f"Updating AEA version from {old_aea_version} to {new_aea_version}")
+        ctx.agent_config.aea_version = new_aea_version
+
+    # update author name if it is different
+    cli_author = ctx.config.get("cli_author")
+    if cli_author and ctx.agent_config.author != cli_author:
+        click.echo(f"Updating author from {ctx.agent_config.author} to {cli_author}")
+        ctx.agent_config._author = cli_author  # pylint: disable=protected-access
+
+    ctx.dump_agent_config()
+
+
 @clean_after
 def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
     """Perform project upgrade."""
@@ -120,16 +145,7 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
     shared_deps_to_remove = set()
     items_to_upgrade_dependencies = set()
 
-    # update aea_version in case current framework version is
-    version = Version(aea.__version__)
-    if not ctx.agent_config.aea_version_specifiers.contains(version):
-        old_aea_version_specifier = ctx.agent_config.aea_version
-        new_aea_version_specifier = compute_specifier_from_version(version)
-        click.echo(
-            f"Upgrading version specifier from {old_aea_version_specifier} to {new_aea_version_specifier}."
-        )
-        ctx.agent_config.aea_version = new_aea_version_specifier
-        ctx.dump_agent_config()
+    _update_agent_config(ctx)
 
     eject_helper = InteractiveEjectHelper(ctx, agent_items, interactive=interactive)
     eject_helper.get_latest_versions()
@@ -416,6 +432,7 @@ class InteractiveEjectHelper:
     def eject(self):
         """Eject packages."""
         for package_id in self.to_eject:
+            click.echo(f"Ejecting {package_id}...")
             _eject_item(self.ctx, str(package_id.package_type), package_id.public_id)
 
     def can_eject(self):

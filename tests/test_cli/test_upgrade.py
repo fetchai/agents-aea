@@ -400,16 +400,20 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
             )
             assert latest_agent_items == agent_items
 
-        # compare both configuration files, except the agent name
+        # compare both configuration files, except the agent name and the author
         upgraded_agent_dir = Path(self.agent_name)
         latest_agent_dir = Path(self.latest_agent_name)
         lines_upgraded_agent_config = (
-            (upgraded_agent_dir / DEFAULT_AEA_CONFIG_FILE).read_text().splitlines()[1:]
+            (upgraded_agent_dir / DEFAULT_AEA_CONFIG_FILE).read_text().splitlines()
         )
         lines_latest_agent_config = (
-            (latest_agent_dir / DEFAULT_AEA_CONFIG_FILE).read_text().splitlines()[1:]
+            (latest_agent_dir / DEFAULT_AEA_CONFIG_FILE).read_text().splitlines()
         )
-        assert lines_upgraded_agent_config == lines_latest_agent_config
+        # the slice is because we don't compare the agent name and the author name
+        assert lines_upgraded_agent_config[2:] == lines_latest_agent_config[2:]
+
+        # check that the author is set correctly
+        assert lines_upgraded_agent_config[1] == f"author: {self.author}"
 
         # compare vendor folders.
         assert are_dirs_equal(
@@ -968,7 +972,7 @@ class TestWrongAEAVersion(AEATestCaseEmpty):
         result = self.run_cli_command("upgrade", cwd=self._get_cwd())
         assert (
             result.stdout
-            == "Starting project upgrade...\nUpgrading version specifier from ==0.1.0 to >=0.9.0, <0.10.0.\nEverything is already up to date!\n"
+            == "Starting project upgrade...\nUpdating version specifier from ==0.1.0 to >=0.9.0, <0.10.0.\nEverything is already up to date!\n"
         )
 
         # test 'aea_version' of agent configuration is upgraded
