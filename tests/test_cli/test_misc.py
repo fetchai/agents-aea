@@ -57,7 +57,7 @@ Options:
   -s, --skip-consistency-check  Skip consistency checks of agent during command
                                 execution.
 
-  --registry-path TEXT          Provide a local registry directory full path.
+  --registry-path DIRECTORY     Provide a local registry directory full path.
   --help                        Show this message and exit.
 
 Commands:
