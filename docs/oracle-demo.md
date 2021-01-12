@@ -127,8 +127,7 @@ Create the private key for the oracle client AEA. Generate and add a key for Eth
 
 ``` bash
 aea generate-key ethereum
-aea add-key ethereum ethereum_private_key.txt
-```
+aea add-key ethereum
 
 The oracle AEAs require either a locally running test node or a connection to a remote testnet.
 
@@ -243,4 +242,3 @@ info: [coin_price_oracle_client] Oracle client transactions approved!
 info: [coin_price_oracle_client] Oracle value successfully requested!
 ```
 The AEA will continue to request the latest coin price at the default time interval (every 15 seconds).
-
