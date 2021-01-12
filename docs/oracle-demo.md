@@ -80,89 +80,9 @@ Finally, certify the key for use by the connections that request that:
 aea issue-certificates
 ```
 
-The oracle AEAs require either a locally running test node or a connection to a remote testnet.
-
-### Setting up with a local Ganache node
-
-The easiest way to test the oracle agents is to set up a local Ethereum test node using Ganache. This can be done by running the following docker command from the directory you started from (in a separate terminal). This command will also fund the account of the AEA:
-``` bash
-docker run -p 8545:8545 trufflesuite/ganache-cli:latest --verbose --gasPrice=0 --gasLimit=0x1fffffffffffff --account="$(cat coin_price_oracle/ethereum_private_key.txt),1000000000000000000000"
-```
-
-<details><summary>If testing an oracle client agent, run the enclosed Python script (with web3 installed) to deploy a mock Fetch ERC20 contract and give some test FET to the client agent.</summary>
-<p>
-
-```python
-import json
-import os
-from web3 import Web3, eth
-
-FILE_DIR = os.path.dirname(os.path.realpath(__file__))
-CONTRACT_PATH = os.path.join(FILE_DIR, "vendor/fetchai/contracts/fet_erc20/build/FetERC20Mock.json")
-CLIENT_PRIVATE_KEY_PATH = os.path.join(FILE_DIR, "ethereum_private_key.txt")
-
-# Solidity source code
-with open(CONTRACT_PATH) as file:
-    compiled_sol = json.load(file)
-
-# web3.py instance
-w3 = Web3(Web3.HTTPProvider('http://127.0.0.1:8545'))
-
-# Set pre-funded account as sender
-w3.eth.defaultAccount = w3.eth.accounts[0]
-
-# Import client account from private key
-with open(CLIENT_PRIVATE_KEY_PATH) as file:
-    private_key = file.read()
-client_account = w3.eth.account.privateKeyToAccount(private_key)
-
-# Deploy mock Fetch ERC20 contract
-FetERC20Mock = w3.eth.contract(abi=compiled_sol['abi'], bytecode=compiled_sol['bytecode'])
-
-# Submit the transaction that deploys the contract
-tx_hash = FetERC20Mock.constructor(
-    name="FetERC20Mock",
-    symbol="MFET",
-    initialSupply=int(1e23),
-    decimals_=18).transact()
-
-# Wait for the transaction to be mined, and get the transaction receipt
-tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash)
-
-# Print out the contract address
-print("FetERC20Mock contract deployed at:", tx_receipt.contractAddress)
-
-# Get deployed contract
-fet_erc20_mock = w3.eth.contract(address=tx_receipt.contractAddress, abi=compiled_sol['abi'])
-
-# Transfer some test FET to oracle client account
-tx_hash = fet_erc20_mock.functions.transfer(client_account.address, int(1e20)).transact()
-tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash)
-```
-
-</p>
-</details>
-
-### Run the oracle AEA
-
-Run the oracle agent. This will deploy a contract to the testnet, grant oracle permissions to the AEA's wallet address, and periodically update the contract with the latest price of FET (or whichever coin was specified).
-``` bash
-aea run
-```
-
-After a few moments, you should see the following notices in the logs:
-``` bash
-info: [coin_price_oracle] Oracle contract successfully deployed!
-...
-info: [coin_price_oracle] Oracle role successfully granted!
-...
-info: [coin_price_oracle] Oracle value successfully updated!
-```
-The oracle contract will continue to be updated with the latest retrieved coin price at the default time interval (every 15 seconds).
-
 ### Create the oracle client AEA
 
-Fetch the AEA that will deploy the oracle client contract and call the function that requests the coin price from the oracle contract.
+From a new terminal (in the same top-level directory), fetch the AEA that will deploy the oracle client contract and call the function that requests the coin price from the oracle contract.
 
 ``` bash
 aea fetch fetchai/coin_price_oracle_client:0.1.0
@@ -200,33 +120,112 @@ Change the default ledger:
 aea config set agent.default_ledger ethereum
 ```
 
-And set the contract addresses:
-``` bash
-aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.erc20_address ERC20_ADDRESS
-aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.oracle_contract_address ORACLE_ADDRESS
-```
-where `ORACLE_ADDRESS` appears in the `contractAddress` field of the (first) contract deployment transaction.
-
 </p>
 </details>
 
-Additionally, create the private key for the oracle AEA. Generate and add a key for Ethereum use:
+Create the private key for the oracle client AEA. Generate and add a key for Ethereum use:
 
 ``` bash
 aea generate-key ethereum
 aea add-key ethereum ethereum_private_key.txt
 ```
 
-Next, create a private key used to secure the AEA's communications:
+The oracle AEAs require either a locally running test node or a connection to a remote testnet.
+
+### Setting up with a local Ganache node
+
+The easiest way to test the oracle agents is to set up a local Ethereum test node using Ganache. This can be done by running the following docker command from the directory you started from (in a new terminal). This command will also fund the accounts of the AEAs:
 ``` bash
-aea generate-key fetchai fetchai_connection_private_key.txt
-aea add-key fetchai fetchai_connection_private_key.txt --connection
+docker run -p 8545:8545 trufflesuite/ganache-cli:latest --verbose --gasPrice=0 --gasLimit=0x1fffffffffffff --account="$(cat coin_price_oracle/ethereum_private_key.txt),1000000000000000000000" --account="$(cat coin_price_oracle_client/ethereum_private_key.txt),1000000000000000000000"
 ```
 
-Finally, certify the key for use by the connections that request that:
-``` bash
-aea issue-certificates
+<details><summary>Run the Python script below (with web3 installed) from the top-level directory to deploy a mock Fetch ERC20 contract and give some test FET to the client agent.</summary>
+<p>
+
+```python
+import json
+import os
+from web3 import Web3
+
+FILE_DIR = os.path.dirname(os.path.realpath(__file__))
+CONTRACT_PATH = os.path.join(FILE_DIR, "coin_price_oracle_client/vendor/fetchai/contracts/fet_erc20/build/FetERC20Mock.json")
+ORACLE_PRIVATE_KEY_PATH = os.path.join(FILE_DIR, "coin_price_oracle/ethereum_private_key.txt")
+CLIENT_PRIVATE_KEY_PATH = os.path.join(FILE_DIR, "coin_price_oracle_client/ethereum_private_key.txt")
+
+# Solidity source code
+with open(CONTRACT_PATH) as file:
+    compiled_sol = json.load(file)
+
+# web3.py instance
+w3 = Web3(Web3.HTTPProvider('http://127.0.0.1:8545'))
+
+# Import oracle account from private key and set to default account
+with open(ORACLE_PRIVATE_KEY_PATH) as file:
+    private_key = file.read()
+oracle_account = w3.eth.account.privateKeyToAccount(private_key)
+w3.eth.defaultAccount = oracle_account.address
+
+# Import client account from private key
+with open(CLIENT_PRIVATE_KEY_PATH) as file:
+    private_key = file.read()
+client_account = w3.eth.account.privateKeyToAccount(private_key)
+
+# Deploy mock Fetch ERC20 contract
+FetERC20Mock = w3.eth.contract(abi=compiled_sol['abi'], bytecode=compiled_sol['bytecode'])
+
+# Submit the transaction that deploys the contract
+tx_hash = FetERC20Mock.constructor(
+    name="FetERC20Mock",
+    symbol="MFET",
+    initialSupply=int(1e23),
+    decimals_=18).transact()
+
+# Wait for the transaction to be mined, and get the transaction receipt
+tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash)
+
+# Print out the contract address
+print("FetERC20Mock contract deployed at:", tx_receipt.contractAddress)
+
+# Get deployed contract
+fet_erc20_mock = w3.eth.contract(address=tx_receipt.contractAddress, abi=compiled_sol['abi'])
+
+# Transfer some test FET to oracle client account
+tx_hash = fet_erc20_mock.functions.transfer(client_account.address, int(1e20)).transact()
+tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash)
 ```
+
+</p>
+</details>
+
+### Set the ERC20 contract address for the oracle AEA:
+``` bash
+aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.erc20_address ERC20_ADDRESS
+```
+where `ORACLE_ADDRESS` appears in the `contractAddress` field of the (first) contract deployment transaction.
+
+### Run the oracle AEA
+
+Run the oracle agent. This will deploy a contract to the testnet, grant oracle permissions to the AEA's wallet address, and periodically update the contract with the latest price of FET (or whichever coin was specified).
+``` bash
+aea run
+```
+
+After a few moments, you should see the following notices in the logs:
+``` bash
+info: [coin_price_oracle] Oracle contract successfully deployed!
+...
+info: [coin_price_oracle] Oracle role successfully granted!
+...
+info: [coin_price_oracle] Oracle value successfully updated!
+```
+The oracle contract will continue to be updated with the latest retrieved coin price at the default time interval (every 15 seconds).
+
+### Set the ERC20 and oracle contract addresses for the oracle client AEA:
+``` bash
+aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.erc20_address ERC20_ADDRESS
+aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.oracle_contract_address ORACLE_ADDRESS
+```
+where `ORACLE_ADDRESS` appears in the `contractAddress` field of the (first) contract deployment transaction.
 
 ### Run the oracle client AEA
 
