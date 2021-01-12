@@ -397,12 +397,15 @@ def test_envelope_specification_id_translated():
     envelope = Envelope(
         to="to", sender="sender", protocol_id=not_translatable_protocol_id, message=b""
     )
+    assert envelope.protocol_id == not_translatable_protocol_id
+    assert envelope.protocol_specification_id == not_translatable_protocol_id
     envelope_bytes = envelope.encode()
     envelope_pb = base_pb2.Envelope()
     envelope_pb.ParseFromString(envelope_bytes)
     assert (
-        PublicId.from_str(envelope_pb.protocol_id) == envelope.protocol_id
-    )  # pylint: disable=no-member
+        PublicId.from_str(envelope_pb.protocol_id)
+        == envelope.protocol_id  # pylint: disable=no-member
+    )
 
     protocol_id = PublicId("author", "protocol", "0.1.0")
     protocol_specification_id = PublicId("author", "specification", "0.1.0")
@@ -410,21 +413,27 @@ def test_envelope_specification_id_translated():
 
     envelope = Envelope(to="to", sender="sender", protocol_id=protocol_id, message=b"")
 
+    assert envelope.protocol_id == protocol_id
+    assert envelope.protocol_specification_id == protocol_specification_id
+
     envelope_bytes = envelope.encode()
     envelope_pb = base_pb2.Envelope()
     envelope_pb.ParseFromString(envelope_bytes)
     assert (
-        PublicId.from_str(envelope_pb.protocol_id) != protocol_id
-    )  # pylint: disable=no-member
+        PublicId.from_str(envelope_pb.protocol_id)
+        != protocol_id  # pylint: disable=no-member
+    )
     assert (
-        PublicId.from_str(envelope_pb.protocol_id) == protocol_specification_id
-    )  # pylint: disable=no-member
+        PublicId.from_str(envelope_pb.protocol_id)
+        == protocol_specification_id  # pylint: disable=no-member
+    )
 
     new_envelope = Envelope.decode(envelope_bytes)
     assert new_envelope.protocol_id == envelope.protocol_id
     assert new_envelope.protocol_id != protocol_specification_id
 
-    class Test(ProtocolSpecificationsRegistry):
-        pass
-
-    Test.clean()
+    with pytest.raises(
+        ValueError,
+        match=r"protocol_id or protocol_specification_id or message as instance of Message class must be provided!",
+    ):
+        Envelope(to="asd", sender="asdasd", message=b"sdfdf")

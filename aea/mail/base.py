@@ -248,6 +248,72 @@ class EnvelopeSerializer(ABC):
 class ProtobufEnvelopeSerializer(EnvelopeSerializer):
     """Envelope serializer using Protobuf."""
 
+    def encode(self, envelope: "Envelope") -> bytes:
+        """
+        Encode the envelope.
+
+        :param envelope: the envelope to encode
+        :return: the encoded envelope
+        """
+        envelope_pb = base_pb2.Envelope()
+        envelope_pb.to = envelope.to
+        envelope_pb.sender = envelope.sender
+        envelope_pb.protocol_id = str(envelope.protocol_specification_id)
+        envelope_pb.message = envelope.message_bytes
+        if envelope.context is not None and envelope.context.uri_raw != "":
+            envelope_pb.uri = envelope.context.uri_raw
+
+        envelope_bytes = envelope_pb.SerializeToString()
+        return envelope_bytes
+
+    def decode(self, envelope_bytes: bytes) -> "Envelope":
+        """
+        Decode the envelope.
+
+        The default serializer doesn't decode the message field.
+
+        :param envelope_bytes: the encoded envelope
+        :return: the envelope
+        """
+        envelope_pb = base_pb2.Envelope()
+        envelope_pb.ParseFromString(envelope_bytes)
+
+        to = envelope_pb.to  # pylint: disable=no-member
+        sender = envelope_pb.sender  # pylint: disable=no-member
+        raw_protocol_id = envelope_pb.protocol_id  # pylint: disable=no-member
+        protocol_specification_id = PublicId.from_str(raw_protocol_id)
+        message = envelope_pb.message  # pylint: disable=no-member
+
+        uri_raw = envelope_pb.uri  # pylint: disable=no-member
+        if uri_raw != "":  # empty string means this field is not set in proto3
+            uri = URI(uri_raw=uri_raw)
+            context = EnvelopeContext(uri=uri)
+            envelope = Envelope(
+                to=to,
+                sender=sender,
+                protocol_specification_id=protocol_specification_id,
+                message=message,
+                context=context,
+            )
+        else:
+            envelope = Envelope(
+                to=to,
+                sender=sender,
+                protocol_specification_id=protocol_specification_id,
+                message=message,
+            )
+
+        return envelope
+
+
+DefaultEnvelopeSerializer = ProtobufEnvelopeSerializer
+
+
+class Envelope:
+    """The top level message class for agent to agent communication."""
+
+    default_serializer = DefaultEnvelopeSerializer()
+
     @staticmethod
     def _get_protocol_specification_id_by_the_protocol_id(
         protocol_id: PublicId,
@@ -288,81 +354,14 @@ class ProtobufEnvelopeSerializer(EnvelopeSerializer):
             or protocol_specification_id
         )
 
-    def encode(self, envelope: "Envelope") -> bytes:
-        """
-        Encode the envelope.
-
-        :param envelope: the envelope to encode
-        :return: the encoded envelope
-        """
-        envelope_pb = base_pb2.Envelope()
-        envelope_pb.to = envelope.to
-        envelope_pb.sender = envelope.sender
-        envelope_pb.protocol_id = str(
-            self._get_protocol_specification_id_by_the_protocol_id(envelope.protocol_id)
-        )
-        envelope_pb.message = envelope.message_bytes
-        if envelope.context is not None and envelope.context.uri_raw != "":
-            envelope_pb.uri = envelope.context.uri_raw
-
-        envelope_bytes = envelope_pb.SerializeToString()
-        return envelope_bytes
-
-    def decode(self, envelope_bytes: bytes) -> "Envelope":
-        """
-        Decode the envelope.
-
-        The default serializer doesn't decode the message field.
-
-        :param envelope_bytes: the encoded envelope
-        :return: the envelope
-        """
-        envelope_pb = base_pb2.Envelope()
-        envelope_pb.ParseFromString(envelope_bytes)
-
-        to = envelope_pb.to  # pylint: disable=no-member
-        sender = envelope_pb.sender  # pylint: disable=no-member
-        raw_protocol_id = envelope_pb.protocol_id  # pylint: disable=no-member
-        protocol_specification_id = PublicId.from_str(raw_protocol_id)
-        protocol_id = self._get_protocol_id_by_protocol_specification_id(
-            protocol_specification_id
-        )
-        message = envelope_pb.message  # pylint: disable=no-member
-
-        uri_raw = envelope_pb.uri  # pylint: disable=no-member
-        if uri_raw != "":  # empty string means this field is not set in proto3
-            uri = URI(uri_raw=uri_raw)
-            context = EnvelopeContext(uri=uri)
-            envelope = Envelope(
-                to=to,
-                sender=sender,
-                protocol_id=protocol_id,
-                message=message,
-                context=context,
-            )
-        else:
-            envelope = Envelope(
-                to=to, sender=sender, protocol_id=protocol_id, message=message,
-            )
-
-        return envelope
-
-
-DefaultEnvelopeSerializer = ProtobufEnvelopeSerializer
-
-
-class Envelope:
-    """The top level message class for agent to agent communication."""
-
-    default_serializer = DefaultEnvelopeSerializer()
-
     def __init__(
         self,
         to: Address,
         sender: Address,
-        protocol_id: PublicId,
         message: Union[Message, bytes],
+        protocol_id: Optional[PublicId] = None,
         context: Optional[EnvelopeContext] = None,
+        protocol_specification_id: Optional[PublicId] = None,
     ):
         """
         Initialize a Message object.
@@ -379,9 +378,43 @@ class Envelope:
         )
         if isinstance(message, Message):
             message = self._check_consistency(message, to, sender)
+
         self._to = to
         self._sender = sender
-        self._protocol_id = protocol_id
+
+        # set protocol_id and protocol_specification_id
+        if isinstance(message, Message):
+            # protocol_id provided as an argument in priority
+            # use Message.protocol_id only if no protocol_id provided
+            protocol_id = protocol_id or Message.protocol_id
+
+        # no protocol_id provided and not a Message instance for message
+        if not protocol_id:
+            # try to get protocol_id by protocol_specification_id
+            if not protocol_specification_id:
+                raise ValueError(
+                    "protocol_id or protocol_specification_id or message as instance of Message class must be provided!"
+                )
+            protocol_id = self._get_protocol_id_by_protocol_specification_id(
+                protocol_specification_id
+            )
+
+        if not protocol_specification_id:
+            # if no protocol_spcification_id, try to resolve by protocol_id
+            protocol_specification_id = self._get_protocol_specification_id_by_the_protocol_id(
+                protocol_id
+            )
+
+        enforce(
+            protocol_id is not None, "protocol_id was not specified or auto resolved"
+        )
+        enforce(
+            protocol_specification_id is not None,
+            "protocol_specification_id was not specified or auto resolved",
+        )
+
+        self._protocol_id: PublicId = protocol_id
+        self._protocol_specification_id: PublicId = protocol_specification_id
         self._message = message
         self._context = context if context is not None else EnvelopeContext()
 
@@ -417,7 +450,15 @@ class Envelope:
     @protocol_id.setter
     def protocol_id(self, protocol_id: PublicId) -> None:
         """Set the protocol id."""
+        self._protocol_specification_id = self._get_protocol_specification_id_by_the_protocol_id(
+            protocol_id
+        )
         self._protocol_id = protocol_id
+
+    @property
+    def protocol_specification_id(self) -> PublicId:
+        """Get protocol_specification_id."""
+        return self._protocol_specification_id
 
     @property
     def message(self) -> Union[Message, bytes]:
