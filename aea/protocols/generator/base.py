@@ -17,8 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the protocol generator."""
-# pylint: skip-file
-
 import itertools
 import os
 import shutil
@@ -26,6 +24,8 @@ from datetime import date
 from pathlib import Path
 from typing import Optional, Tuple
 
+# pylint: skip-file
+from aea.configurations.data_types import PublicId
 from aea.protocols.generator.common import (
     CUSTOM_TYPES_DOT_PY_FILE_NAME,
     DIALOGUE_DOT_PY_FILE_NAME,
@@ -1772,13 +1772,10 @@ class ProtocolGenerator:
 
         # heading
         proto_buff_schema_str = self.indent + 'syntax = "proto3";\n\n'
-        proto_buff_schema_str += self.indent + "package aea.{}.{}.{};\n\n".format(
-            self.protocol_specification.protocol_specification_id.author,
-            self.protocol_specification.protocol_specification_id.name,
-            "v"
-            + self.protocol_specification.protocol_specification_id.version.replace(
-                ".", "_"
-            ),
+        proto_buff_schema_str += self.indent + "package {};\n\n".format(
+            public_id_to_package_name(
+                self.protocol_specification.protocol_specification_id
+            )
         )
         proto_buff_schema_str += self.indent + "message {}Message{{\n\n".format(
             self.protocol_specification_in_camel_case
@@ -2034,3 +2031,8 @@ class ProtocolGenerator:
         else:
             message = self.generate_full_mode()
         return message
+
+
+def public_id_to_package_name(public_id: PublicId) -> str:
+    """Make package name string from public_id provided."""
+    return f'aea.{public_id.author}.{public_id.name}.v{public_id.version.replace(".", "_")}'

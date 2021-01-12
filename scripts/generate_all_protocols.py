@@ -350,11 +350,8 @@ def _process_test_protocol(specification: Path, package_path: Path) -> None:
     """
     specification_content = specification.read_text()
     _save_specification_in_temporary_file(package_path.name, specification_content)
-    print(1)
     _generate_protocol(package_path)
-    print(2)
     _fix_generated_protocol(package_path)
-    print(3)
     replacements = [
         (
             f"from packages.fetchai.protocols.{package_path.name}",

@@ -19,6 +19,7 @@
 """This module contains the tests of the prometheus connection module."""
 import asyncio
 from typing import cast
+from unittest.mock import Mock
 
 import pytest
 
@@ -207,10 +208,7 @@ class TestPrometheusConnection:
         # Test that invalid message is rejected.
         with pytest.raises(AEAEnforceError):
             envelope = Envelope(
-                to="some_address",
-                sender="me",
-                protocol_id=self.protocol_id,
-                message=Message({}),
+                to="some_address", sender="me", message=Mock(spec=Message),
             )
             await self.prometheus_con.channel.send(envelope)
 
@@ -237,11 +235,9 @@ class TestPrometheusConnection:
                 labels={},
             )
             envelope = Envelope(
-                to=self.prometheus_address,
-                sender=self.agent_address,
-                protocol_id="bad_id",
-                message=msg,
+                to=self.prometheus_address, sender=self.agent_address, message=msg,
             )
+            envelope.protocol_id = "bad_id"
             await self.prometheus_con.channel.send(envelope)
 
     @pytest.mark.asyncio

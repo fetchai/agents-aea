@@ -252,8 +252,8 @@ def _try_construct_envelope(
         )
     except InterruptInputException:
         click.echo("Interrupting input, checking inbox ...")
-    except KeyboardInterrupt as e:
-        raise e
+    except KeyboardInterrupt:
+        raise
     except BaseException as e:  # pylint: disable=broad-except # pragma: no cover
         click.echo(e)
     return envelope

@@ -24,6 +24,7 @@ import pytest
 
 import aea
 from aea.configurations.base import PublicId
+from aea.exceptions import AEAEnforceError
 from aea.mail import base_pb2
 from aea.mail.base import (
     Envelope,
@@ -390,6 +391,29 @@ def test_envelope_context_raises_with_public_id_specified_twice():
         )
 
 
+def test_envelope_constructor():
+    """Test Envelope constructor checks."""
+    Envelope(
+        to="to",
+        sender="sender",
+        message=DefaultMessage(performative=DefaultMessage.Performative.BYTES),
+    )
+    Envelope(
+        to="to", sender="sender", message=b"", protocol_id=DefaultMessage.protocol_id
+    )
+
+    with pytest.raises(
+        AEAEnforceError, match="message should be a type of Message or bytes!"
+    ):
+        Envelope(to="to", sender="sender", message=123)
+
+    with pytest.raises(
+        ValueError,
+        match=r"if message is bytes protocol_id or protocol_specification_id must be provided!",
+    ):
+        Envelope(to="asd", sender="asdasd", message=b"sdfdf")
+
+
 def test_envelope_specification_id_translated():
     """Test protocol id to protocol specification id translation and back."""
     not_translatable_protocol_id = PublicId("author", "not_translated", "0.1.0")
@@ -403,8 +427,8 @@ def test_envelope_specification_id_translated():
     envelope_pb = base_pb2.Envelope()
     envelope_pb.ParseFromString(envelope_bytes)
     assert (
-        PublicId.from_str(envelope_pb.protocol_id)
-        == envelope.protocol_id  # pylint: disable=no-member
+        PublicId.from_str(envelope_pb.protocol_id)  # pylint: disable=no-member
+        == envelope.protocol_id
     )
 
     protocol_id = PublicId("author", "protocol", "0.1.0")
@@ -431,9 +455,3 @@ def test_envelope_specification_id_translated():
     new_envelope = Envelope.decode(envelope_bytes)
     assert new_envelope.protocol_id == envelope.protocol_id
     assert new_envelope.protocol_id != protocol_specification_id
-
-    with pytest.raises(
-        ValueError,
-        match=r"protocol_id or protocol_specification_id or message as instance of Message class must be provided!",
-    ):
-        Envelope(to="asd", sender="asdasd", message=b"sdfdf")

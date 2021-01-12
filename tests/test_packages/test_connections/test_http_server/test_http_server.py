@@ -474,7 +474,7 @@ class TestHTTPServer:
             protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=message,
         )
-
+        envelope.protocol_id = UNKNOWN_PROTOCOL_PUBLIC_ID
         with patch.object(
             self.http_connection.channel,
             "restricted_to_protocols",

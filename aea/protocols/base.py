@@ -447,9 +447,3 @@ class ProtocolSpecificationsRegistry:
         """
 
         return cls.SPECIFICATION_TO_PROTOCOL.get(protocol_specification_id, None)
-
-    @classmethod
-    def clean(cls) -> None:
-        """Clean registry."""
-        cls.PROTOCOL_TO_SPECIFICATION = {}
-        cls.SPECIFICATION_TO_PROTOCOL = {}

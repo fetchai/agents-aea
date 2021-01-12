@@ -119,7 +119,7 @@ class TryConstructEnvelopeTestCase(TestCase):
     def test__try_construct_envelope_positive(self, *mocks):
         """Test _try_construct_envelope for positive result."""
         dialogues_mock = mock.Mock()
-        msg_mock = mock.Mock()
+        msg_mock = mock.Mock(spec=DefaultMessage)
         msg_mock.to = "to"
         msg_mock.sender = "sender"
         dialogues_mock.create.return_value = msg_mock, None

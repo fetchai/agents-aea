@@ -246,12 +246,8 @@ def test_handle():
             dummy_handler = dummy_skill.skill_context.handlers.dummy
 
             # UNSUPPORTED PROTOCOL
-            envelope = Envelope(
-                to=msg.to,
-                sender=msg.sender,
-                protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
-                message=msg,
-            )
+            envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
+            envelope.protocol_id = UNKNOWN_PROTOCOL_PUBLIC_ID
             # send envelope via localnode back to agent/bypass `outbox` put consistency checks
             aea.outbox.put(envelope)
             wait_for_condition(

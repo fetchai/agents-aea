@@ -188,11 +188,10 @@ class TestHTTPClientConnect:
         request_envelope = Envelope(
             to=self.connection_address,
             sender=self.agent_address,
-            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=request_http_message,
         )
         await self.http_client_connection.connect()
-
+        request_envelope.protocol_id = UNKNOWN_PROTOCOL_PUBLIC_ID
         with patch.object(
             self.http_client_connection.channel,
             "excluded_protocols",

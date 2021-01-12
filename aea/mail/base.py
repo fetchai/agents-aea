@@ -20,7 +20,7 @@
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple, Union, cast
 from urllib.parse import urlparse
 
 from aea.common import Address
@@ -376,6 +376,11 @@ class Envelope:
         enforce(
             isinstance(sender, str), f"Sender must be string. Found '{type(sender)}'"
         )
+        enforce(
+            isinstance(message, (Message, bytes)),
+            "message should be a type of Message or bytes!",
+        )
+
         if isinstance(message, Message):
             message = self._check_consistency(message, to, sender)
 
@@ -386,19 +391,22 @@ class Envelope:
         if isinstance(message, Message):
             # protocol_id provided as an argument in priority
             # use Message.protocol_id only if no protocol_id provided
-            protocol_id = protocol_id or Message.protocol_id
+            if message.protocol_id is None:
+                raise ValueError(
+                    f"message class {type(message)} has no protocol_id specified!"
+                )
+            protocol_id = message.protocol_id
 
         # no protocol_id provided and not a Message instance for message
-        if not protocol_id:
-            # try to get protocol_id by protocol_specification_id
-            if not protocol_specification_id:
-                raise ValueError(
-                    "protocol_id or protocol_specification_id or message as instance of Message class must be provided!"
-                )
-            protocol_id = self._get_protocol_id_by_protocol_specification_id(
-                protocol_specification_id
+        if not (protocol_id or protocol_specification_id):
+            raise ValueError(
+                "if message is bytes protocol_id or protocol_specification_id must be provided!"
             )
 
+        if not protocol_id:
+            protocol_id = self._get_protocol_id_by_protocol_specification_id(
+                cast(PublicId, protocol_specification_id)
+            )
         if not protocol_specification_id:
             # if no protocol_spcification_id, try to resolve by protocol_id
             protocol_specification_id = self._get_protocol_specification_id_by_the_protocol_id(
