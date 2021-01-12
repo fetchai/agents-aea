@@ -719,7 +719,6 @@ class ProtocolConfig(ComponentConfiguration):
         self,
         name: SimpleIdOrStr,
         author: SimpleIdOrStr,
-        protocol_specification_id: str,
         version: str = "",
         license_: str = "",
         fingerprint: Optional[Dict[str, str]] = None,
@@ -729,6 +728,7 @@ class ProtocolConfig(ComponentConfiguration):
         aea_version: str = "",
         dependencies: Optional[Dependencies] = None,
         description: str = "",
+        protocol_specification_id: Optional[str] = None,
     ):
         """Initialize a connection configuration object."""
         super().__init__(
@@ -745,7 +745,13 @@ class ProtocolConfig(ComponentConfiguration):
         )
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
-        self.protocol_specification_id = PublicId.from_str(protocol_specification_id)
+
+        if protocol_specification_id is not None:
+            self.protocol_specification_id = PublicId.from_str(
+                protocol_specification_id
+            )
+        else:
+            self.protocol_specification_id = self.public_id
 
     @property
     def json(self) -> Dict:
@@ -755,7 +761,7 @@ class ProtocolConfig(ComponentConfiguration):
                 "name": self.name,
                 "author": self.author,
                 "version": self.version,
-                "protocol_specification_id": self.protocol_specification_id,
+                "protocol_specification_id": str(self.protocol_specification_id),
                 "type": self.component_type.value,
                 "description": self.description,
                 "license": self.license,
@@ -1461,21 +1467,21 @@ class ProtocolSpecification(ProtocolConfig):
         self,
         name: SimpleIdOrStr,
         author: SimpleIdOrStr,
-        protocol_specification_id: str,
         version: str = "",
         license_: str = "",
         aea_version: str = "",
         description: str = "",
+        protocol_specification_id: Optional[str] = None,
     ):
         """Initialize a protocol specification configuration object."""
         super().__init__(
             name,
             author,
-            protocol_specification_id,
             version,
             license_,
             aea_version=aea_version,
             description=description,
+            protocol_specification_id=protocol_specification_id,
         )
         self.speech_acts = CRUDCollection[SpeechActContentConfig]()
         self._protobuf_snippets = {}  # type: Dict

@@ -1,16 +1,16 @@
 name: contract_api
 author: fetchai
 version: 0.10.0
+protocol_specification_id: fetchai/contract_api:0.10.0
 type: protocol
 description: A protocol for contract APIs requests and responses.
 license: Apache-2.0
 aea_version: '>=0.9.0, <0.10.0'
-protocol_specification_id: fetchai/contract_api:0.10.0
 fingerprint:
-  README.md: QmarYJs6MCgH6i6TST85ipBBDAkiWGEtnfWgTSBLDEhPgt
+  README.md: Qmc2ZE8geEkcAgrpEXoL1b9SCwmtZP7Yg5w8aPeJhBUzs2
   __init__.py: QmY2WGKdVE1vExjbKz46U9dgxgEhy2anyQG12ax2NNNuot
-  contract_api.proto: QmSZpXyFMf2MNgVud8iPinaaerx1CManffgHNMx8FcD8jY
-  contract_api_pb2.py: QmYEVg28AVRiLDkbddDto51bumh38gRuouagn6wspDtZVN
+  contract_api.proto: QmdTRtDeCyZMGpoo8FHM8PE7bcqmA2ZtrLKR3dygbf9aiy
+  contract_api_pb2.py: QmfHpADQNxqZkzuPq2oRLbHzG4DCVULTPkxabdDQXJb7ob
   custom_types.py: QmT51f1pdiAMCnBkLJiYA2aKfreRqkyohq32RiM7vGfjVu
   dialogues.py: QmNk7CJhkAJ97e4jVmUFDGPUJaXCk3PQp6pzHcFv9hpsg5
   message.py: QmdGdHDCJ4cdKtqe4pz3UAmXJP4pRAJf3tVdFTHv9bWjNi

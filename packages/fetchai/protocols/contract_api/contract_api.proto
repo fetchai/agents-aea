@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package aea.fetchai.contract_api;
+package aea.fetchai.contract_api.v0_10_0;
 
 message ContractApiMessage{
 

@@ -58,7 +58,7 @@ message Message {
 ``` proto
 syntax = "proto3";
 
-package aea.fetchai.default;
+package aea.fetchai.default.v0_11_0;
 
 message DefaultMessage{
 

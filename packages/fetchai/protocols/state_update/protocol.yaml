@@ -1,19 +1,19 @@
 name: state_update
 author: fetchai
 version: 0.9.0
+protocol_specification_id: fetchai/state_update:0.9.0
 type: protocol
 description: A protocol for state updates to the decision maker state.
 license: Apache-2.0
 aea_version: '>=0.9.0, <0.10.0'
-protocol_specification_id: fetchai/state_update:0.9.0
 fingerprint:
-  README.md: Qmbyw4a4TEuurLY63UYKuW7o5isjgj9uc6m2FZYXUyPr32
+  README.md: QmdKPvGaMpL7fpwjVvJbA5NEaYSKVPCA4VYeSNZv7c95Wf
   __init__.py: QmYQASXkhmnZbo5Vxh6mVbcaCkBP46UCZzQHQFtWYvBELL
   dialogues.py: QmU4GFxG3DL5F515aF3z2GamzieU6XXWqzRy7V5oA7HnjV
   message.py: QmRv6Kc8c86yDfqTs77V52yrcrYzdSf4svrBFi6ecobXLu
   serialization.py: QmQrpKMDr9E4gtoknmjVenVnhGL8jbkgEmWzsSB8YYx4oh
-  state_update.proto: QmVZjMwsoSC5UYWDVCv2Sp8ELS9TG6sCR5gHqBWAKayRY7
-  state_update_pb2.py: QmdnTuC7FLetYMPWBk1Nv3TccghovZYddW6BGXcHUQ9nSh
+  state_update.proto: QmXNQWKUE84Yd4RJbjh9jh7Eus3WZNmT373ydYvgkLJe7U
+  state_update_pb2.py: QmTgadT7cB6tHNRr7o8iiS1WJZMMyminwgjR7FRWqmJXpE
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

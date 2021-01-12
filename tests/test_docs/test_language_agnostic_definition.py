@@ -89,4 +89,6 @@ class TestLanguageAgnosticDocs(BaseTestMarkdownDocs):
         """Test DefaultMessage protobuf code snippet."""
         block = self.code_blocks[2]
         assert block["info"].strip() == "proto"
-        assert block["text"] in self.actual_default_message_file_content
+        assert block["text"] in self.actual_default_message_file_content, Exception(
+            [block["text"], self.actual_default_message_file_content]
+        )

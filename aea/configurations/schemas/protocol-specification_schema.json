@@ -9,8 +9,7 @@
     "version",
     "license",
     "aea_version",
-    "speech_acts",
-    "protocol_specification_id"
+    "speech_acts"
   ],
   "properties": {
     "name": {

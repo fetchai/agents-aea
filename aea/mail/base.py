@@ -20,7 +20,7 @@
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Dict, Optional, Tuple, Union
+from typing import Optional, Tuple, Union
 from urllib.parse import urlparse
 
 from aea.common import Address
@@ -28,7 +28,7 @@ from aea.configurations.base import PackageId, PublicId
 from aea.configurations.constants import CONNECTION, SKILL
 from aea.exceptions import enforce
 from aea.mail import base_pb2
-from aea.protocols.base import Message
+from aea.protocols.base import Message, ProtocolSpecificationsRegistry
 
 
 _default_logger = logging.getLogger(__name__)
@@ -540,49 +540,3 @@ class Envelope:
             protocol_id=self.protocol_id,
             message=self.message,
         )
-
-
-class ProtocolSpecificationsRegistry:
-    """Registry to store protocol id and corresponding specification ids."""
-
-    PROTOCOL_TO_SPECIFICATION: Dict[PublicId, PublicId] = {}
-    SPECIFICATION_TO_PROTOCOL: Dict[PublicId, PublicId] = {}
-
-    @classmethod
-    def register(
-        cls, protocol_id: PublicId, protocol_specification_id: PublicId
-    ) -> None:
-        """Register protocol id with protocol specification id."""
-        cls.PROTOCOL_TO_SPECIFICATION[protocol_id] = protocol_specification_id
-        cls.SPECIFICATION_TO_PROTOCOL[protocol_specification_id] = protocol_id
-
-    @classmethod
-    def get_specification_id_by_protocol_id(
-        cls, protocol_id: PublicId
-    ) -> Optional[PublicId]:
-        """Get specification id by the protocol id.
-
-        :param protocol_id: PublicId
-
-        :return: PublicId if protocol registered otherwise None
-        """
-        return cls.PROTOCOL_TO_SPECIFICATION.get(protocol_id, None)
-
-    @classmethod
-    def get_protocol_id_by_specification_id(
-        cls, protocol_specification_id: PublicId
-    ) -> Optional[PublicId]:
-        """Get protocol id by the specification id.
-
-        :param protocol_specification_id: PublicId
-
-        :return: PublicId if protocol registered otherwise None
-        """
-
-        return cls.SPECIFICATION_TO_PROTOCOL.get(protocol_specification_id, None)
-
-    @classmethod
-    def clean(cls) -> None:
-        """Clean registry."""
-        cls.PROTOCOL_TO_SPECIFICATION = {}
-        cls.SPECIFICATION_TO_PROTOCOL = {}

@@ -9,8 +9,7 @@
     "version",
     "type",
     "license",
-    "aea_version",
-    "protocol_specification_id"
+    "aea_version"
   ],
   "properties": {
     "name": {

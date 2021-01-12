@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package aea.fetchai.tac;
+package aea.fetchai.tac.v0_12_0;
 
 message TacMessage{
 

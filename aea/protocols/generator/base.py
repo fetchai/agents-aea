@@ -1865,7 +1865,9 @@ class ProtocolGenerator:
         protocol_yaml_str = "name: {}\n".format(self.protocol_specification.name)
         protocol_yaml_str += "author: {}\n".format(self.protocol_specification.author)
         protocol_yaml_str += "version: {}\n".format(self.protocol_specification.version)
-        protocol_yaml_str += "protocol_specification_id: {}\n".format(str(self.protocol_specification.protocol_specification_id))
+        protocol_yaml_str += "protocol_specification_id: {}\n".format(
+            str(self.protocol_specification.protocol_specification_id)
+        )
         protocol_yaml_str += "type: {}\n".format(
             self.protocol_specification.component_type
         )

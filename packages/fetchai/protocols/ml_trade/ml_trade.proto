@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package aea.fetchai.ml_trade;
+package aea.fetchai.ml_trade.v0_11_0;
 
 message MlTradeMessage{
 
