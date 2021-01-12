@@ -1044,7 +1044,7 @@ class TestUpgradeWithEjectAbort(BaseTestUpgradeWithEject):
         with self._get_mock():
             result = self.run_cli_command("upgrade", cwd=self._get_cwd())
 
-        expected_stdout = dedent(  # noqa
+        expected_stdout = dedent(
             """\
         Skill fetchai/generic_seller:0.18.0 prevents the upgrade of the following vendor packages:
         {PackageId(connection, fetchai/ledger:0.11.0),
@@ -1052,11 +1052,10 @@ class TestUpgradeWithEjectAbort(BaseTestUpgradeWithEject):
          PackageId(protocol, fetchai/fipa:0.11.0),
          PackageId(protocol, fetchai/ledger_api:0.8.0),
          PackageId(protocol, fetchai/oef_search:0.11.0)}
-        as there isn't a compatible version available on the AEA registry. Would you like to eject it? [y/N]: 
-        Abort.
-        """
+        as there isn't a compatible version available on the AEA registry. Would you like to eject it? [y/N]:"""
         )
         assert expected_stdout in result.stdout
+        assert "Abort." in result.stdout
 
 
 @pytest.mark.integration
