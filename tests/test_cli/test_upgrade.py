@@ -23,7 +23,6 @@ import shutil
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
-from textwrap import dedent
 from typing import List, Set, cast
 from unittest import mock
 from unittest.mock import MagicMock, patch
@@ -47,6 +46,7 @@ from aea.configurations.base import (
     PackageType,
     PublicId,
 )
+from aea.configurations.constants import DEFAULT_VERSION
 from aea.configurations.loader import ConfigLoader, load_component_configuration
 from aea.helpers.base import cd, compute_specifier_from_version
 from aea.test_tools.test_cases import AEATestCaseEmpty, BaseAEATestCase
@@ -992,6 +992,7 @@ class TestWrongAEAVersion(AEATestCaseEmpty):
         agent_config = self.load_agent_config(self.current_agent_context)
         assert agent_config.aea_version == expected_aea_version_specifier
         assert agent_config.author == self.author
+        assert agent_config.version == DEFAULT_VERSION
 
 
 class BaseTestUpgradeWithEject(AEATestCaseEmpty):
@@ -1034,6 +1035,13 @@ class BaseTestUpgradeWithEject(AEATestCaseEmpty):
             side_effect=self.mock_get_latest_version_available_in_registry,
         )
 
+    def _assert_lines_in_stdout(self, lines: List[str], stdout: str):
+        """Assert lines are present in stdout."""
+        for expected_line in lines:
+            assert (
+                expected_line in stdout
+            ), f"Expected line {expected_line} not found in"
+
 
 @pytest.mark.integration
 class TestUpgradeWithEjectAbort(BaseTestUpgradeWithEject):
@@ -1044,18 +1052,12 @@ class TestUpgradeWithEjectAbort(BaseTestUpgradeWithEject):
         with self._get_mock():
             result = self.run_cli_command("upgrade", cwd=self._get_cwd())
 
-        expected_stdout = dedent(
-            """\
-        Skill fetchai/generic_seller:0.18.0 prevents the upgrade of the following vendor packages:
-        {PackageId(connection, fetchai/ledger:0.11.0),
-         PackageId(protocol, fetchai/default:0.10.0),
-         PackageId(protocol, fetchai/fipa:0.11.0),
-         PackageId(protocol, fetchai/ledger_api:0.8.0),
-         PackageId(protocol, fetchai/oef_search:0.11.0)}
-        as there isn't a compatible version available on the AEA registry. Would you like to eject it? [y/N]:"""
-        )
-        assert expected_stdout in result.stdout
-        assert "Abort." in result.stdout
+        expected_stdout_lines = [
+            "Skill fetchai/generic_seller:0.18.0 prevents the upgrade of the following vendor packages:",
+            "as there isn't a compatible version available on the AEA registry. Would you like to eject it? [y/N]:",
+            "Abort.",
+        ]
+        self._assert_lines_in_stdout(expected_stdout_lines, result.stdout)
 
 
 @pytest.mark.integration
@@ -1067,22 +1069,15 @@ class TestUpgradeWithEjectAccept(BaseTestUpgradeWithEject):
         with self._get_mock():
             result = self.run_cli_command("upgrade", cwd=self._get_cwd(), input="y\n")
 
-        expected_stdout = dedent(
-            """\
-        Skill fetchai/generic_seller:0.18.0 prevents the upgrade of the following vendor packages:
-        {PackageId(connection, fetchai/ledger:0.11.0),
-         PackageId(protocol, fetchai/default:0.10.0),
-         PackageId(protocol, fetchai/fipa:0.11.0),
-         PackageId(protocol, fetchai/ledger_api:0.8.0),
-         PackageId(protocol, fetchai/oef_search:0.11.0)}
-        as there isn't a compatible version available on the AEA registry. Would you like to eject it? [y/N]: y
-        Ejecting (skill, fetchai/generic_seller:0.18.0)...
-        Ejecting item skill fetchai/generic_seller:0.18.0
-        Fingerprinting skill components of 'default_author/generic_seller:0.1.0' ...
-        Successfully ejected skill fetchai/generic_seller:0.18.0 to ./skills/generic_seller as default_author/generic_seller:0.1.0.
-        """
-        )
-        assert expected_stdout in result.stdout
+        expected_stdout_lines = [
+            "Skill fetchai/generic_seller:0.18.0 prevents the upgrade of the following vendor packages:",
+            "as there isn't a compatible version available on the AEA registry. Would you like to eject it? [y/N]: y",
+            "Ejecting (skill, fetchai/generic_seller:0.18.0)...",
+            "Ejecting item skill fetchai/generic_seller:0.18.0",
+            "Fingerprinting skill components of 'default_author/generic_seller:0.1.0' ...",
+            "Successfully ejected skill fetchai/generic_seller:0.18.0 to ./skills/generic_seller as default_author/generic_seller:0.1.0.",
+        ]
+        self._assert_lines_in_stdout(expected_stdout_lines, result.stdout)
 
         ejected_package_path = Path(
             self.t, self.current_agent_context, "skills", "generic_seller"

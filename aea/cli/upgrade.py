@@ -44,7 +44,14 @@ from aea.cli.utils.package_utils import (
     update_references,
 )
 from aea.configurations.base import ComponentId, PackageId, PackageType, PublicId
-from aea.configurations.constants import CONNECTION, CONTRACT, PROTOCOL, SKILL, VENDOR
+from aea.configurations.constants import (
+    CONNECTION,
+    CONTRACT,
+    DEFAULT_VERSION,
+    PROTOCOL,
+    SKILL,
+    VENDOR,
+)
 from aea.exceptions import enforce
 from aea.helpers.base import compute_specifier_from_version, find_topological_order
 
@@ -127,6 +134,7 @@ def _update_agent_config(ctx: Context):
     if cli_author and ctx.agent_config.author != cli_author:
         click.echo(f"Updating author from {ctx.agent_config.author} to {cli_author}")
         ctx.agent_config._author = cli_author  # pylint: disable=protected-access
+        ctx.agent_config.version = DEFAULT_VERSION
 
     ctx.dump_agent_config()
 
