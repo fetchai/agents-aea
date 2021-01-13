@@ -24,13 +24,17 @@ import tempfile
 from contextlib import contextmanager
 from pathlib import Path
 from typing import List, Set, cast
+from unittest import mock
 from unittest.mock import MagicMock, patch
 
 import pytest
 from click.exceptions import ClickException
 from click.testing import Result
+from packaging.version import Version
 
+import aea
 from aea.cli import cli
+from aea.cli.registry.utils import get_latest_version_available_in_registry
 from aea.cli.upgrade import ItemRemoveHelper
 from aea.cli.utils.config import load_item_config
 from aea.configurations.base import (
@@ -42,8 +46,9 @@ from aea.configurations.base import (
     PackageType,
     PublicId,
 )
+from aea.configurations.constants import DEFAULT_VERSION
 from aea.configurations.loader import ConfigLoader, load_component_configuration
-from aea.helpers.base import cd
+from aea.helpers.base import cd, compute_specifier_from_version
 from aea.test_tools.test_cases import AEATestCaseEmpty, BaseAEATestCase
 
 from packages.fetchai.connections import oef
@@ -341,7 +346,7 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
         """Set up test case."""
         super(TestUpgradeProject, cls).setup()
         cls.change_directory(Path(".."))
-        cls.agent_name = "generic_buyer_0.12.0"
+        cls.agent_name = "generic_buyer_0.18.0"
         cls.latest_agent_name = "generic_buyer_latest"
         cls.run_cli_command(
             "--skip-consistency-check",
@@ -398,16 +403,17 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
             )
             assert latest_agent_items == agent_items
 
-        # compare both configuration files, except the agent name
+        # compare both configuration files, except the agent name and the author
         upgraded_agent_dir = Path(self.agent_name)
         latest_agent_dir = Path(self.latest_agent_name)
         lines_upgraded_agent_config = (
-            (upgraded_agent_dir / DEFAULT_AEA_CONFIG_FILE).read_text().splitlines()[1:]
+            (upgraded_agent_dir / DEFAULT_AEA_CONFIG_FILE).read_text().splitlines()
         )
         lines_latest_agent_config = (
-            (latest_agent_dir / DEFAULT_AEA_CONFIG_FILE).read_text().splitlines()[1:]
+            (latest_agent_dir / DEFAULT_AEA_CONFIG_FILE).read_text().splitlines()
         )
-        assert lines_upgraded_agent_config == lines_latest_agent_config
+        # the slice is because we don't compare the agent name and the author name
+        assert lines_upgraded_agent_config[2:] == lines_latest_agent_config[2:]
 
         # compare vendor folders.
         assert are_dirs_equal(
@@ -934,3 +940,147 @@ class TestNothingToUpgrade(AEATestCaseEmpty):
             result.stdout
             == "Starting project upgrade...\nEverything is already up to date!\n"
         )
+
+
+@pytest.mark.integration
+class TestWrongAEAVersion(AEATestCaseEmpty):
+    """
+    Test consistency check ignores AEA version fields.
+
+    Use an old version of a package to simulate an upgrade.
+    """
+
+    AEA_VERSION_SPECIFIER: str = "==0.1.0"
+    IS_EMPTY = True
+
+    @classmethod
+    def setup_class(cls):
+        """Set up the test."""
+        super().setup_class()
+
+        # this is an old version of the package, just to trigger an upgrade.
+        cls.add_item("protocol", "fetchai/default:0.10.0", local=False)
+
+        # change aea version of the AEA project
+        agent_config = cls.load_agent_config(cls.current_agent_context)
+        cls._update_aea_version(agent_config)
+        cls.nested_set_config("agent.aea_version", cls.AEA_VERSION_SPECIFIER)
+        cls.nested_set_config("agent.author", "wrong_author")
+
+    @classmethod
+    def _update_aea_version(cls, agent_config: AgentConfig):
+        """Update aea version to all items and fingerprint them."""
+        for item in agent_config.package_dependencies:
+            type_ = item.component_type.to_plural()
+            dotted_path = f"vendor.{item.author}.{type_}.{item.name}.aea_version"
+            path = os.path.join("vendor", item.author, type_, item.name)
+            cls.nested_set_config(dotted_path, cls.AEA_VERSION_SPECIFIER)
+            cls.run_cli_command("fingerprint", "by-path", path, cwd=cls._get_cwd())
+
+    def test_nothing_to_upgrade(self):
+        """Test nothing to upgrade, and additionally, that 'aea_version' is correct."""
+        result = self.run_cli_command("upgrade", cwd=self._get_cwd())
+        assert (
+            "Starting project upgrade...\nUpdating AEA version specifier from ==0.1.0 to >=0.9.0, <0.10.0."
+            in result.stdout
+        )
+
+        # test 'aea_version' of agent configuration is upgraded
+        expected_aea_version_specifier = compute_specifier_from_version(
+            Version(aea.__version__)
+        )
+        agent_config = self.load_agent_config(self.current_agent_context)
+        assert agent_config.aea_version == expected_aea_version_specifier
+        assert agent_config.author == self.author
+        assert agent_config.version == DEFAULT_VERSION
+
+
+class BaseTestUpgradeWithEject(AEATestCaseEmpty):
+    """
+    Base test class to test 'aea upgrade' with request for ejection.
+
+    We use an old version of 'generic seller' skill to simulate a request from the CLI tool.
+    The utility 'get_latest_version_available_in_registry' is mocked so to
+    hide the new version of that package, hence triggering an ejection.;
+    """
+
+    IS_EMPTY = True
+
+    GENERIC_SELLER = ComponentId(
+        ComponentType.SKILL, PublicId.from_str("fetchai/generic_seller:0.18.0")
+    )
+    unmocked = get_latest_version_available_in_registry
+
+    @classmethod
+    def setup_class(cls):
+        """Set up the test."""
+        super().setup_class()
+        cls.add_item("skill", str(cls.GENERIC_SELLER.public_id), local=False)
+
+    @classmethod
+    def mock_get_latest_version_available_in_registry(cls, *args):
+        """Mock 'get_latest_version_available_in_registry' when called with generic_seller public key."""
+        if (
+            args[1] == str(cls.GENERIC_SELLER.package_type)
+            and args[2] == cls.GENERIC_SELLER.public_id.to_latest()
+        ):
+            # return current version
+            return cls.GENERIC_SELLER
+        return cls.unmocked(*args)
+
+    def _get_mock(self):
+        """Get the mock of 'get_latest_version_available_in_registry'."""
+        return mock.patch(
+            "aea.cli.upgrade.get_latest_version_available_in_registry",
+            side_effect=self.mock_get_latest_version_available_in_registry,
+        )
+
+    def _assert_lines_in_stdout(self, lines: List[str], stdout: str):
+        """Assert lines are present in stdout."""
+        for expected_line in lines:
+            assert (
+                expected_line in stdout
+            ), f"Expected line {expected_line} not found in"
+
+
+@pytest.mark.integration
+class TestUpgradeWithEjectAbort(BaseTestUpgradeWithEject):
+    """Test 'aea upgrade' command with request for ejection, refused."""
+
+    def test_run(self):
+        """Run the test."""
+        with self._get_mock():
+            result = self.run_cli_command("upgrade", cwd=self._get_cwd())
+
+        expected_stdout_lines = [
+            "Skill fetchai/generic_seller:0.18.0 prevents the upgrade of the following vendor packages:",
+            "as there isn't a compatible version available on the AEA registry. Would you like to eject it? [y/N]:",
+            "Abort.",
+        ]
+        self._assert_lines_in_stdout(expected_stdout_lines, result.stdout)
+
+
+@pytest.mark.integration
+class TestUpgradeWithEjectAccept(BaseTestUpgradeWithEject):
+    """Test 'aea upgrade' command with request for ejection, accepted by the user."""
+
+    def test_run(self):
+        """Run the test."""
+        with self._get_mock():
+            result = self.run_cli_command("upgrade", cwd=self._get_cwd(), input="y\n")
+
+        expected_stdout_lines = [
+            "Skill fetchai/generic_seller:0.18.0 prevents the upgrade of the following vendor packages:",
+            "as there isn't a compatible version available on the AEA registry. Would you like to eject it? [y/N]: y",
+            "Ejecting (skill, fetchai/generic_seller:0.18.0)...",
+            "Ejecting item skill fetchai/generic_seller:0.18.0",
+            "Fingerprinting skill components of 'default_author/generic_seller:0.1.0' ...",
+            "Successfully ejected skill fetchai/generic_seller:0.18.0 to ./skills/generic_seller as default_author/generic_seller:0.1.0.",
+        ]
+        self._assert_lines_in_stdout(expected_stdout_lines, result.stdout)
+
+        ejected_package_path = Path(
+            self.t, self.current_agent_context, "skills", "generic_seller"
+        )
+        assert ejected_package_path.exists()
+        assert ejected_package_path.is_dir()

@@ -16,10 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the tests for the `aea scaffold connection` sub-command."""
-
-import filecmp
 import json
 import os
 import shutil
@@ -31,7 +28,6 @@ import jsonschema
 import yaml
 from jsonschema import Draft4Validator, ValidationError
 
-from aea import AEA_DIR
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE
 from aea.configurations.loader import make_jsonschema_base_uri
@@ -98,8 +94,7 @@ class TestScaffoldConnection:
         p = Path(
             self.t, self.agent_name, "connections", self.resource_name, "connection.py"
         )
-        original = Path(AEA_DIR, "connections", "scaffold", "connection.py")
-        assert filecmp.cmp(p, original)
+        assert p.exists()
 
     def test_resource_folder_contains_configuration_file(self):
         """Test that the resource folder contains a good configuration file."""
@@ -181,8 +176,7 @@ class TestScaffoldConnectionWithSymlinks:
         p = Path(
             self.t, self.agent_name, "connections", self.resource_name, "connection.py"
         )
-        original = Path(AEA_DIR, "connections", "scaffold", "connection.py")
-        assert filecmp.cmp(p, original)
+        assert p.exists()
 
     def test_resource_folder_contains_configuration_file(self):
         """Test that the resource folder contains a good configuration file."""
