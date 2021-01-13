@@ -11,16 +11,12 @@ from pathlib import Path
 from aea.manager import MultiAgentManager
 
 WORKING_DIR = "mam"
-ALIASES_DIR = "aliases"
-KEYS_DIR = str(Path(WORKING_DIR, ALIASES_DIR, "keys"))
-CERTS_DIR = str(Path(WORKING_DIR, ALIASES_DIR, "certs"))
-BUILD_DIR = str(Path(WORKING_DIR, ALIASES_DIR, "build"))
+KEYS_DIR = str(Path(WORKING_DIR, "keys"))
+CERTS_DIR = str(Path(WORKING_DIR, "certs"))
 
 manager = MultiAgentManager(WORKING_DIR)
 manager.start_manager()
-os.makedirs(KEYS_DIR)
 os.makedirs(CERTS_DIR)
-os.makedirs(BUILD_DIR)
 ```
 
 ## Adding projects
@@ -53,8 +49,7 @@ FET_CONNECTION_PRIVATE_KEY_PATH_STATION.write_bytes(FET_CONNECTION_PRIVATE_KEY_S
 
 CERT_PATH_STATION = Path(CERTS_DIR, weather_station_name, "conn_cert.txt").absolute()
 
-BUILD_PATH_STATION = Path(BUILD_DIR, weather_station_name).absolute()
-os.makedirs(BUILD_PATH_STATION)
+SOEF_STORAGE_PATH_STATION = Path(KEYS_DIR, f"{weather_station_name}_soef_token.txt").absolute()
 
 FET_PRIVATE_KEY_CLIENT = b"589839ae54b71b8754a7fe96b52045364077c28705a1806b74441debcae16e0a"
 FET_PRIVATE_KEY_PATH_CLIENT = Path(KEYS_DIR, weather_client_name, "fetchai_private_key.txt").absolute()
@@ -67,8 +62,7 @@ FET_CONNECTION_PRIVATE_KEY_PATH_CLIENT.write_bytes(FET_CONNECTION_PRIVATE_KEY_CL
 
 CERT_PATH_CLIENT = Path(CERTS_DIR, weather_client_name, "conn_cert.txt").absolute()
 
-BUILD_PATH_CLIENT = Path(BUILD_DIR, weather_client_name).absolute()
-os.makedirs(BUILD_PATH_CLIENT)
+SOEF_STORAGE_PATH_CLIENT = Path(KEYS_DIR, f"{weather_client_name}_soef_token.txt").absolute()
 ```
 
 Add the agent instances
@@ -79,11 +73,11 @@ agent_overrides = {
 }
 
 p2p_public_id = PublicId.from_str("fetchai/p2p_libp2p:0.14.0")
+soef_public_id = PublicId.from_str("fetchai/soef:0.15.0")
 
-component_overrides = {
+component_overrides = [{
     **p2p_public_id.json,
     "type": "connection",
-    "build_directory": str(BUILD_PATH_STATION),
     "cert_requests": [{
       "identifier": "acn",
       "ledger_id": "fetchai",
@@ -92,17 +86,22 @@ component_overrides = {
       "public_key": "fetchai",
       "save_path": str(CERT_PATH_STATION)
     }]
-}
-manager.add_agent(weather_station_id, component_overrides=[component_overrides], agent_overrides=agent_overrides)
+}, {
+    **soef_public_id.json,
+    "type": "connection",
+    "config": {
+        "token_storage_path": str(SOEF_STORAGE_PATH_STATION)
+    }
+}]
+manager.add_agent(weather_station_id, component_overrides=component_overrides, agent_overrides=agent_overrides)
 
 agent_overrides = {
     "private_key_paths": {"fetchai": str(FET_PRIVATE_KEY_PATH_CLIENT)},
     "connection_private_key_paths": {"fetchai": str(FET_CONNECTION_PRIVATE_KEY_PATH_CLIENT)}
 }
-component_overrides = {
+component_overrides = [{
     **p2p_public_id.json,
     "type": "connection",
-    "build_directory": str(BUILD_PATH_CLIENT),
     "config": {
         "delegate_uri": "127.0.0.1:11001",
         "entry_peers": ['/dns4/127.0.0.1/tcp/9000/p2p/16Uiu2HAkzgZYyk25XjAhmgXcdMbahrHYi18uuAzHuxPn1KkdmLRw'],
@@ -117,9 +116,15 @@ component_overrides = {
       "public_key": "fetchai",
       "save_path": str(CERT_PATH_CLIENT)
     }]
-}
+}, {
+    **soef_public_id.json,
+    "type": "connection",
+    "config": {
+        "token_storage_path": str(SOEF_STORAGE_PATH_CLIENT)
+    }
+}]
 
-manager.add_agent(weather_client_id, component_overrides=[component_overrides], agent_overrides=agent_overrides)
+manager.add_agent(weather_client_id, component_overrides=component_overrides, agent_overrides=agent_overrides)
 ```
 
 ## Running the agents:

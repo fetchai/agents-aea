@@ -903,7 +903,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
     def call_all_build_entrypoints(self, root_dir: str = "."):
         """Call all the build entrypoints."""
         for config in self._package_dependency_manager._dependencies.values():  # type: ignore # pylint: disable=protected-access
-            self.run_build_for_component_configuration(config, logger=self.logger)
+            self.run_build_for_component_configuration(
+                config, logger=self.logger, root_dir=root_dir
+            )
 
         target_directory = os.path.abspath(
             os.path.join(root_dir, self.AEA_CLASS.get_build_dir())
@@ -919,7 +921,10 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
     @classmethod
     def run_build_for_component_configuration(
-        cls, config: ComponentConfiguration, logger: Optional[logging.Logger] = None
+        cls,
+        config: ComponentConfiguration,
+        logger: Optional[logging.Logger] = None,
+        root_dir: str = ".",
     ) -> None:
         """Run a build entrypoint script for component configuration."""
         if not config.build_entrypoint:
@@ -934,7 +939,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             logger.info(f"Building package {config.component_id}...")
 
         source_directory = cast(str, config.directory)
-        target_directory = os.path.abspath(config.build_directory)
+        target_directory = os.path.abspath(
+            os.path.join(root_dir, config.build_directory)
+        )
         build_entrypoint = cast(str, config.build_entrypoint)
         cls._run_build_entrypoint(
             build_entrypoint, source_directory, target_directory, logger=logger
