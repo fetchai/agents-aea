@@ -19,6 +19,7 @@
 
 """Implementation of the 'aea issue_certificates' subcommand."""
 import os
+from pathlib import Path
 from typing import Dict, List, cast
 
 import click
@@ -64,7 +65,8 @@ def _get_cert_requests(ctx: Context, connection_id: PublicId) -> List[CertReques
     :param connection_id: the connection id.
     :return: the list of cert requests.
     """
-    manager = AgentConfigManager(ctx.agent_config, ctx.agent_config.directory)
+    directory = cast(Path, ctx.agent_config.directory)
+    manager = AgentConfigManager(ctx.agent_config, directory)
     path = get_dotted_package_path_unified(ctx, CONNECTION, connection_id)
     path_to_cert_requests = f"{path}.cert_requests"
 
