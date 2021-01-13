@@ -19,20 +19,18 @@
 
 """Implementation of the 'aea issue_certificates' subcommand."""
 import os
-from pathlib import Path
-from typing import List, cast
+from typing import Dict, List, cast
 
 import click
 from click import ClickException
 
-from aea.cli.utils.config import load_item_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.loggers import logger
-from aea.cli.utils.package_utils import get_package_path_unified
-from aea.configurations.base import ConnectionConfig, PublicId
+from aea.cli.utils.package_utils import get_dotted_package_path_unified
+from aea.configurations.base import PublicId
 from aea.configurations.constants import CONNECTION
-from aea.configurations.data_types import ComponentId, ComponentType
+from aea.configurations.manager import AgentConfigManager, VariableDoesNotExist
 from aea.crypto.helpers import make_certificate
 from aea.crypto.registries import crypto_registry
 from aea.exceptions import enforce
@@ -66,19 +64,19 @@ def _get_cert_requests(ctx: Context, connection_id: PublicId) -> List[CertReques
     :param connection_id: the connection id.
     :return: the list of cert requests.
     """
-    component_id = ComponentId(ComponentType.CONNECTION, connection_id)
-    overrides = ctx.agent_config.component_configurations.get(component_id, {})
-    cert_request_overrides = overrides.get("cert_requests", [])
+    manager = AgentConfigManager(ctx.agent_config, ctx.agent_config.directory)
+    path = get_dotted_package_path_unified(ctx, CONNECTION, connection_id)
+    path_to_cert_requests = f"{path}.cert_requests"
 
-    if cert_request_overrides:
-        return [CertRequest.from_json(obj) for obj in cert_request_overrides]
+    try:
+        cert_requests = manager.get_variable(path_to_cert_requests)
+    except VariableDoesNotExist:
+        return []
 
-    connection_path = Path(get_package_path_unified(ctx, CONNECTION, connection_id))
-    connection_config = cast(
-        ConnectionConfig, load_item_config(CONNECTION, connection_path)
-    )
-    cert_requests = connection_config.cert_requests or []
-    return cert_requests
+    cert_requests = cast(List[Dict], cert_requests)
+    return [
+        CertRequest.from_json(cert_request_json) for cert_request_json in cert_requests
+    ]
 
 
 def _process_certificate(
