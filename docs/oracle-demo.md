@@ -66,7 +66,7 @@ Additionally, create the private key for the oracle AEA. Generate and add a key 
 
 ``` bash
 aea generate-key ethereum
-aea add-key ethereum ethereum_private_key.txt
+aea add-key ethereum
 ```
 
 Next, create a private key used to secure the AEA's communications:
@@ -128,12 +128,14 @@ Create the private key for the oracle client AEA. Generate and add a key for Eth
 ``` bash
 aea generate-key ethereum
 aea add-key ethereum
+```
 
 The oracle AEAs require either a locally running test node or a connection to a remote testnet.
 
 ### Setting up with a local Ganache node
 
 The easiest way to test the oracle agents is to set up a local Ethereum test node using Ganache. This can be done by running the following docker command from the directory you started from (in a new terminal). This command will also fund the accounts of the AEAs:
+
 ``` bash
 docker run -p 8545:8545 trufflesuite/ganache-cli:latest --verbose --gasPrice=0 --gasLimit=0x1fffffffffffff --account="$(cat coin_price_oracle/ethereum_private_key.txt),1000000000000000000000" --account="$(cat coin_price_oracle_client/ethereum_private_key.txt),1000000000000000000000"
 ```
@@ -141,7 +143,7 @@ docker run -p 8545:8545 trufflesuite/ganache-cli:latest --verbose --gasPrice=0 -
 <details><summary>Run the enclosed Python script (with web3 installed) from the top-level directory to deploy a mock Fetch ERC20 contract and give some test FET to the client agent.</summary>
 <p>
 
-```python
+``` python
 import json
 import os
 from web3 import Web3
