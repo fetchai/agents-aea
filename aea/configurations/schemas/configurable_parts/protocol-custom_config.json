@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "description": "Schema for the configurable part of a connection configuration in the agent configuration file.",
+  "description": "Schema for the configurable part of a protocol configuration in the agent configuration file.",
   "additionalProperties": false,
   "required": [
     "public_id",
@@ -12,15 +12,6 @@
     },
     "type": {
       "$ref": "definitions.json#/definitions/component_type"
-    },
-    "config": {
-      "type": "object"
-    },
-    "is_abstract": {
-      "$ref": "connection-config_schema.json#/properties/is_abstract"
-    },
-    "cert_requests": {
-      "$ref": "connection-config_schema.json#/properties/cert_requests"
     },
     "build_directory": {
       "$ref": "definitions.json#/definitions/build_directory"

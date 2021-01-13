@@ -24,6 +24,9 @@
     },
     "is_abstract": {
       "$ref": "skill-config_schema.json#/properties/is_abstract"
+    },
+    "build_directory": {
+      "$ref": "definitions.json#/definitions/build_directory"
     }
   },
   "definitions": {
