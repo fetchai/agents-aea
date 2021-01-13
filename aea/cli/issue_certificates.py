@@ -49,7 +49,6 @@ def issue_certificates(click_context):
 
 def issue_certificates_(ctx: Context):
     """Issue certificates for connections that require them."""
-    # agent_config_manager.
     for connection_id in ctx.agent_config.connections:
         cert_requests = _get_cert_requests(ctx, connection_id)
         _process_connection(ctx, cert_requests, connection_id)
@@ -65,7 +64,7 @@ def _get_cert_requests(ctx: Context, connection_id: PublicId) -> List[CertReques
     :param connection_id: the connection id.
     :return: the list of cert requests.
     """
-    directory = cast(Path, ctx.agent_config.directory)
+    directory = cast(Path, ctx.cwd)
     manager = AgentConfigManager(ctx.agent_config, directory)
     path = get_dotted_package_path_unified(ctx, CONNECTION, connection_id)
     path_to_cert_requests = f"{path}.cert_requests"
