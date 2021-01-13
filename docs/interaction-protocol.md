@@ -8,6 +8,9 @@ There are multiple types of interactions an AEA can have:
 - AEA internal interactions, between components of the framework.
 
 
+<img src="../assets/interaction-protocols.jpg" alt="Interaction protocols" class="center" style="display: block; margin-left: auto; margin-right: auto;width:80%;">
+
+
 Usually, an interaction involves three types of framework packages: <a href="../skill">skills</a>, <a href="../protocol">protocols</a> and <a href="../connection">connections</a>.
 
 ### Example 1: negotiation
