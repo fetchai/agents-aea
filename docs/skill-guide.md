@@ -2,7 +2,7 @@ This guide will take you through the development of your first skill. It will te
 
 Autonomous Economic Agents are not, generally secret agents. You want them to be seen and found by other agents so that they can trade and do other useful things. Usually, this means connecting to Fetch.ai’s search-and-discovery mechanism, the <a href="../simple-oef">simple OEF</a> (or SOEF, for short). The SOEF lets your agents register, be found, and find other agents. You can then negotiate using the AEA framework’s peer-to-peer network (ACN) and trade. This guide covers getting your agent connected to the SOEF, and describing your agent to make itself visible.
 
-Typically, this means setting a name, a genus (a high-level description of what the agent represents, e.g., `vehicle`, `building` or `service`), a classification (infrastructure.railway.train, for example) and then a bunch of other descriptors, where applicable, that provide the agent's position, whether it buys or sells, and other descriptive items.
+Typically, this means setting a name, a genus (a high-level description of what the agent represents, e.g., `vehicle`, `building` or `service`), a classification (`infrastructure.railway.train`, for example) and then a bunch of other descriptors, where applicable, that provide the agent's position, whether it buys or sells, and other descriptive items.
 
 The more you describe your agent, the easier it is for others to find it using specific filters.
 
