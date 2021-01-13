@@ -65,7 +65,7 @@ cert_requests: []
 - `connections` specifies the list of other connection this connection depends on
 - `protocols` specifies the list of protocols this connection depends on
 - `class_name` needs to match the name of the connection class in `connection.py`
-- `config` can contain arbitrary configuration information which is available in the constructor of the connection.
+- `config` can contain arbitrary configuration information which is available in the constructor of the connection
 - `excluded_protocols` lists the protocols which cannot be used in this connection
 - `restricted_to_protocols` lists the protocols which this connection is restricted to be used by
 - `dependencies` lists any Python dependencies of the package
