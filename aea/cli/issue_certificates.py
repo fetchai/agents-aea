@@ -70,7 +70,7 @@ def _get_cert_requests(ctx: Context, connection_id: PublicId) -> List[CertReques
     overrides = ctx.agent_config.component_configurations.get(component_id, {})
     cert_request_overrides = overrides.get("cert_requests", [])
 
-    if overrides:
+    if cert_request_overrides:
         return [CertRequest.from_json(obj) for obj in cert_request_overrides]
 
     connection_path = Path(get_package_path_unified(ctx, CONNECTION, connection_id))
