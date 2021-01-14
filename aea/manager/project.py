@@ -52,7 +52,9 @@ class _Base:
         skip_consistency_check: bool = False,
     ) -> AEABuilder:
         """Get AEABuilder instance."""
-        builder = AEABuilder(with_default_packages=False)
+        builder = AEABuilder(
+            with_default_packages=False, build_dir_root=str(aea_project_path)
+        )
         builder.set_from_configuration(
             agent_config, Path(aea_project_path), skip_consistency_check
         )
@@ -79,7 +81,7 @@ class Project(_Base):
 
     def build(self) -> None:
         """Call all build entry points."""
-        self.builder.call_all_build_entrypoints(self.path)
+        self.builder.call_all_build_entrypoints()
 
     @classmethod
     def load(
@@ -214,8 +216,8 @@ class AgentAlias(_Base):
 
     def get_aea_instance(self) -> AEA:
         """Build new aea instance."""
-        aea = self.builder.build()
         self.issue_certificates()
+        aea = self.builder.build()
         # override build dir to project's one
         aea.DEFAULT_BUILD_DIR_NAME = os.path.join(
             self.project.path, aea.DEFAULT_BUILD_DIR_NAME
