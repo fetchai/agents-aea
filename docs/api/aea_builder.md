@@ -801,7 +801,7 @@ Call all the build entrypoints.
 
 ```python
  | @classmethod
- | run_build_for_component_configuration(cls, config: ComponentConfiguration, logger: Optional[logging.Logger] = None) -> None
+ | run_build_for_component_configuration(cls, config: ComponentConfiguration, logger: Optional[logging.Logger] = None, root_dir: str = ".") -> None
 ```
 
 Run a build entrypoint script for component configuration.

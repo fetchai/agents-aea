@@ -1,6 +1,6 @@
 The AEA framework consists of several core elements, some of which are required to run an AEA and others which are optional.
 
-The following sections discuss the use of the AEA framework, in particular its dominant usage where the framework is in charge of calling the code in custom packages (see <a href="https://en.wikipedia.org/wiki/Inversion_of_control">inversion of control</a>). Whilst it is in principle possible to use parts of the framework as a library, we do not recommend it.
+The following sections discuss the use of the AEA framework, in particular its dominant usage where the framework is in charge of calling the code in custom packages (see <a href="https://en.wikipedia.org/wiki/Inversion_of_control" target="_blank">inversion of control</a>). Whilst it is in principle possible to use parts of the framework as a library, we do not recommend it.
 
 ## The elements each AEA uses
 
