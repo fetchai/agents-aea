@@ -680,6 +680,12 @@ class Dialogue(metaclass=_DialogueMeta):
             result = other_initiated_dialogue_label in self.dialogue_labels
         return result
 
+    def get_next_message_id(self) -> int:
+        """Get next outgoinf message id."""
+        if self.last_outgoing_message:
+            return self.last_outgoing_message.message_id + 1
+        return Dialogue.STARTING_MESSAGE_ID
+
     def reply(
         self,
         performative: Message.Performative,
@@ -699,7 +705,7 @@ class Dialogue(metaclass=_DialogueMeta):
 
         :return: the reply message if it was successfully added as a reply, None otherwise.
         """
-        last_message = self.last_message
+        last_message = self.last_incoming_message
         if last_message is None:
             raise ValueError("Cannot reply in an empty dialogue!")
 
@@ -720,7 +726,7 @@ class Dialogue(metaclass=_DialogueMeta):
 
         reply = self._message_class(
             dialogue_reference=self.dialogue_label.dialogue_reference,
-            message_id=last_message.message_id + 1,
+            message_id=self.get_next_message_id(),
             target=target,
             performative=performative,
             **kwargs,
@@ -748,13 +754,6 @@ class Dialogue(metaclass=_DialogueMeta):
         is_basic_validated, msg_basic_validation = self._basic_validation(message)
         if not is_basic_validated:
             return False, msg_basic_validation
-
-        (
-            result_additional_validation,
-            msg_additional_validation,
-        ) = self._additional_validation(message)
-        if not result_additional_validation:
-            return False, msg_additional_validation
 
         result_is_valid, msg_is_valid = self._custom_validation(message)
         if not result_is_valid:
@@ -849,6 +848,8 @@ class Dialogue(metaclass=_DialogueMeta):
         target = message.target
         performative = message.performative
 
+        is_outgoing = message.to != self.self_address
+
         if dialogue_reference[0] != self.dialogue_label.dialogue_reference[0]:
             return (
                 False,
@@ -857,14 +858,6 @@ class Dialogue(metaclass=_DialogueMeta):
                 ),
             )
 
-        last_message_id = self.last_message.message_id  # type: ignore
-        if message_id != last_message_id + 1:
-            return (
-                False,
-                "Invalid message_id. Expected {}. Found {}.".format(
-                    last_message_id + 1, message_id
-                ),
-            )
         if target < 1:
             return (
                 False,
@@ -872,15 +865,67 @@ class Dialogue(metaclass=_DialogueMeta):
                     target
                 ),
             )
-        if last_message_id < target:
+
+        if is_outgoing:
+            if message_id != self.get_next_message_id():
+                return (
+                    False,
+                    "Invalid message_id. Expected  message id {} > {}.".format(
+                        message_id, self.get_next_message_id()
+                    ),
+                )
+
+            if not self.last_incoming_message:
+                return False, "Can not reply cause not incoming messages"
+
+            if target > self.last_incoming_message.message_id:
+                return (
+                    False,
+                    "Invalid target. Expected a value less than or equal to {}. Found {}.".format(
+                        self.last_incoming_message.message_id, target
+                    ),
+                )
+            target_message = None
+            for msg in self._incoming_messages:
+                if msg.message_id == target:
+                    target_message = msg
+        else:
+            if self.last_incoming_message:
+                last_message_id = cast(int, self.last_incoming_message.message_id)
+            else:
+                last_message_id = 0
+
+            if message_id != last_message_id + 1:
+                return (
+                    False,
+                    "Invalid message_id. Expected  message id {} == {}.".format(
+                        message_id, last_message_id + 1
+                    ),
+                )
+
+            last_outgoing_message_id = (
+                self.last_outgoing_message.message_id
+                if self.last_outgoing_message
+                else 0
+            )
+            if target > last_outgoing_message_id:
+                return (
+                    False,
+                    "Invalid target. Expected a value less than or equal to {}. Found {}.".format(
+                        last_outgoing_message_id, target
+                    ),
+                )
+            target_message = None
+            for msg in self._outgoing_messages:
+                if msg.message_id == target:
+                    target_message = msg
+
+        if not target_message:
             return (
                 False,
-                "Invalid target. Expected a value less than or equal to {}. Found {}.".format(
-                    last_message_id, target
-                ),
+                "Invalid target {}. target_message can not be found.".format(target),
             )
 
-        target_message = self._get_message(target)
         target_performative = target_message.performative
         if performative not in self.rules.get_valid_replies(target_performative):
             return (
@@ -891,32 +936,6 @@ class Dialogue(metaclass=_DialogueMeta):
             )
 
         return True, "The non-initial message passes basic validation."
-
-    def _additional_validation(self, message: Message) -> Tuple[bool, str]:
-        """
-        Check whether 'message' is a valid next message in the dialogue, according to additional rules.
-
-        These rules are designed to be less fundamental than basic rules and subject to change.
-        Currently the following is enforced:
-
-         - A message targets the message strictly before it in the dialogue
-
-        :param message: the message to be validated
-        :return: Boolean result, and associated message.
-        """
-        if self.is_empty:
-            return True, "The message passes additional validation."
-
-        last_target = self.last_message.target  # type: ignore
-        if message.target == last_target + 1:
-            return True, "The message passes additional validation."
-
-        return (
-            False,
-            "Invalid target. Expected {}. Found {}.".format(
-                last_target + 1, message.target
-            ),
-        )
 
     def _update_dialogue_label(self, final_dialogue_label: DialogueLabel) -> None:
         """
@@ -1703,8 +1722,8 @@ class Dialogues:
             dialogue._update(initial_message)  # pylint: disable=protected-access
         except InvalidDialogueMessage as e:
             self._dialogues_storage.remove(dialogue.dialogue_label)
-            raise SyntaxError(
-                "Cannot create a dialogue with the specified performative and contents."
+            raise ValueError(
+                f"Cannot create a dialogue with the specified performative and contents. {e}"
             ) from e
         return dialogue
 
@@ -1778,7 +1797,6 @@ class Dialogues:
         else:
             # couldn't find the dialogue referenced by the message
             result = None
-
         return result
 
     def _complete_dialogue_reference(self, message: Message) -> None:
