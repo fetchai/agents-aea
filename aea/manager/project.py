@@ -214,8 +214,8 @@ class AgentAlias(_Base):
 
     def get_aea_instance(self) -> AEA:
         """Build new aea instance."""
-        aea = self.builder.build()
         self.issue_certificates()
+        aea = self.builder.build()
         # override build dir to project's one
         aea.DEFAULT_BUILD_DIR_NAME = os.path.join(
             self.project.path, aea.DEFAULT_BUILD_DIR_NAME
