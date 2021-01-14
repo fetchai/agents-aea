@@ -134,6 +134,26 @@ Initialize manager.
 
 - `working_dir`: directory to store base agents.
 
+<a name="aea.manager.manager.MultiAgentManager.keys_dir"></a>
+#### keys`_`dir
+
+```python
+ | @property
+ | keys_dir() -> str
+```
+
+Get the keys directory.
+
+<a name="aea.manager.manager.MultiAgentManager.certs_dir"></a>
+#### certs`_`dir
+
+```python
+ | @property
+ | certs_dir() -> str
+```
+
+Get the certs directory.
+
 <a name="aea.manager.manager.MultiAgentManager.is_running"></a>
 #### is`_`running
 

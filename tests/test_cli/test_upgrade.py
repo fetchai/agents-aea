@@ -840,8 +840,8 @@ class TestUpdateReferences(AEATestCaseEmpty):
 
     How the test works:
     - add fetchai/error:0.7.0, that requires fetchai/default:0.7.0
-    - add fetchai/stub:0.14.0
-    - add 'fetchai/default:0.7.0: fetchai/stub:0.14.0' to default routing
+    - add fetchai/stub:0.15.0
+    - add 'fetchai/default:0.7.0: fetchai/stub:0.15.0' to default routing
     - add custom configuration to stub connection.
     - run 'aea upgrade'. This will upgrade `stub` connection and `error` skill, and in turn `default` protocol.
     """
@@ -850,7 +850,7 @@ class TestUpdateReferences(AEATestCaseEmpty):
 
     OLD_DEFAULT_PROTOCOL_PUBLIC_ID = PublicId.from_str("fetchai/default:0.7.0")
     OLD_ERROR_SKILL_PUBLIC_ID = PublicId.from_str("fetchai/error:0.7.0")
-    OLD_STUB_CONNECTION_PUBLIC_ID = PublicId.from_str("fetchai/stub:0.14.0")
+    OLD_STUB_CONNECTION_PUBLIC_ID = PublicId.from_str("fetchai/stub:0.15.0")
 
     @classmethod
     def setup_class(cls):
@@ -916,7 +916,7 @@ class TestUpdateReferences(AEATestCaseEmpty):
             "agent.default_connection",
             cwd=self._get_cwd(),
         )
-        assert result.stdout == "fetchai/stub:0.14.0\n"
+        assert result.stdout == "fetchai/stub:0.15.0\n"
 
     def test_custom_configuration_updated_correctly(self):
         """Test default routing has been updated correctly."""
