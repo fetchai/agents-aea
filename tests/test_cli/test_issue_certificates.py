@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains tests for 'issue-certificates' command."""
+import json
 import os
 import shutil
 from pathlib import Path
@@ -30,6 +31,9 @@ from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from tests.conftest import (
     CUR_PATH,
+    ETHEREUM,
+    ETHEREUM_PRIVATE_KEY_FILE,
+    ETHEREUM_PRIVATE_KEY_PATH,
     FETCHAI,
     FETCHAI_PRIVATE_KEY_FILE,
     FETCHAI_PRIVATE_KEY_PATH,
@@ -130,6 +134,63 @@ class TestIssueCertificatesPositive(BaseTestIssueCertificates):
         assert cert_msg_1 in stdout
         assert cert_msg_2 in stdout
         assert cert_msg_3 in stdout
+
+
+class TestIssueCertificatesWithOverride(TestIssueCertificatesPositive):
+    """Test 'issue-certificates' with override configurations."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set up the class."""
+        super().setup_class()
+
+        cls.cert_id_3 = "cert_id_3"
+        cls.cert_id_4 = "cert_id_4"
+        cls.expected_path_3 = os.path.abspath("path_3")
+        cls.expected_path_4 = os.path.abspath("path_4")
+        cls.cert_request_3 = CertRequest(
+            identifier=cls.cert_id_3,
+            ledger_id=ETHEREUM,
+            not_after="2020-01-02",
+            not_before="2020-01-01",
+            public_key=ETHEREUM,
+            save_path=cls.expected_path_3,
+        )
+        cls.cert_request_4 = CertRequest(
+            identifier=cls.cert_id_4,
+            ledger_id=ETHEREUM,
+            not_after="2020-01-02",
+            not_before="2020-01-01",
+            public_key="0xABCDEF123456",
+            save_path=cls.expected_path_4,
+        )
+
+        # Add override configurations
+        dotted_path = f"connections.{DummyConnection.connection_id.name}.cert_requests"
+        json_3 = json.dumps(cls.cert_request_3.json).replace("'", '"')
+        json_4 = json.dumps(cls.cert_request_4.json).replace("'", '"')
+        new_cert_requests = f"[{json_3}, {json_4}]"
+        cls.set_config(dotted_path, new_cert_requests, type_="list")
+
+        # add ethereum key and connection key
+        shutil.copy(
+            ETHEREUM_PRIVATE_KEY_PATH,
+            os.path.join(cls.current_agent_context, ETHEREUM_PRIVATE_KEY_FILE),
+        )
+        cls.add_private_key(
+            ledger_api_id=ETHEREUM, private_key_filepath=ETHEREUM_PRIVATE_KEY_FILE
+        )
+        cls.add_private_key(
+            ledger_api_id=ETHEREUM,
+            private_key_filepath=ETHEREUM_PRIVATE_KEY_FILE,
+            connection=True,
+        )
+
+    def test_issue_certificate(self):
+        """Test 'aea issue-certificates' in case of success."""
+        result = self.run_cli_command("issue-certificates", cwd=self._get_cwd())
+        self._check_signature(self.cert_id_3, self.expected_path_3, result.stdout)
+        self._check_signature(self.cert_id_4, self.expected_path_4, result.stdout)
 
 
 class TestIssueCertificatesWrongConnectionKey(BaseTestIssueCertificates):

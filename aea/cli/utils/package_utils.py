@@ -186,12 +186,12 @@ def try_get_item_target_path(
 
 
 def get_package_path(
-    path: str, item_type: str, public_id: PublicId, is_vendor: bool = True
+    project_directory: str, item_type: str, public_id: PublicId, is_vendor: bool = True
 ) -> str:
     """
     Get a vendorized path for a package.
 
-    :param path: path to search packages
+    :param project_directory: path to search packages
     :param item_type: item type.
     :param public_id: item public ID.
     :param is_vendor: flag for vendorized path (True by defaut).
@@ -201,13 +201,20 @@ def get_package_path(
     item_type_plural = item_type + "s"
     if is_vendor:
         return os.path.join(
-            path, VENDOR, public_id.author, item_type_plural, public_id.name
+            project_directory,
+            VENDOR,
+            public_id.author,
+            item_type_plural,
+            public_id.name,
         )
-    return os.path.join(path, item_type_plural, public_id.name)
+    return os.path.join(project_directory, item_type_plural, public_id.name)
 
 
 def get_package_path_unified(
-    path: str, agent_config: AgentConfig, item_type: str, public_id: PublicId
+    project_directory: str,
+    agent_config: AgentConfig,
+    item_type: str,
+    public_id: PublicId,
 ) -> str:
     """
     Get a path for a package, either vendor or not.
@@ -217,34 +224,36 @@ def get_package_path_unified(
       just look into vendor/
     - Otherwise, first look into local packages, then into vendor/.
 
-    :param path: directory to look for packages.
+    :param project_directory: directory to look for packages.
     :param item_type: item type.
     :param public_id: item public ID.
 
     :return: vendorized estenation path for package.
     """
-    vendor_path = get_package_path(path, item_type, public_id, is_vendor=True)
+    vendor_path = get_package_path(
+        project_directory, item_type, public_id, is_vendor=True
+    )
     if agent_config.author != public_id.author or not is_item_present(
-        path, agent_config, item_type, public_id, is_vendor=False
+        project_directory, agent_config, item_type, public_id, is_vendor=False
     ):
         return vendor_path
-    return get_package_path(path, item_type, public_id, is_vendor=False)
+    return get_package_path(project_directory, item_type, public_id, is_vendor=False)
 
 
 def get_dotted_package_path_unified(
-    base_path: str, agent_config: AgentConfig, *args
+    project_directory: str, agent_config: AgentConfig, *args
 ) -> str:
     """
     Get a *dotted* path for a package, either vendor or not.
 
-    :param base_path: base dir for package lookup.
+    :param project_directory: base dir for package lookup.
     :param agent_config: AgentConfig.
     :param args: arguments for 'get_package_path_unified'
 
     :return: the dotted path to the package.
     """
-    path = get_package_path_unified(base_path, agent_config, *args)
-    path_relative_to_cwd = Path(path).relative_to(Path(base_path))
+    path = get_package_path_unified(project_directory, agent_config, *args)
+    path_relative_to_cwd = Path(path).relative_to(Path(project_directory))
     relative_path_str = str(path_relative_to_cwd).replace(os.sep, ".")
     return relative_path_str
 
