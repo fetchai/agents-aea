@@ -19,7 +19,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 Fetch the AEA that will deploy and update the oracle contract.
 
 ``` bash
-aea fetch fetchai/coin_price_oracle:0.3.0
+aea fetch fetchai/coin_price_oracle:0.4.0
 cd coin_price_oracle
 aea install
 aea build

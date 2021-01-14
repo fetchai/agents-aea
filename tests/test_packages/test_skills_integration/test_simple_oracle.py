@@ -64,7 +64,7 @@ class TestOracleSkills(AEATestCaseMany, UseGanache):
         self.add_item("connection", "fetchai/ledger:0.12.0")
         self.add_item("connection", "fetchai/http_client:0.16.0")
         self.add_item("connection", "fetchai/prometheus:0.2.0")
-        self.remove_item("connection", "fetchai/stub:0.14.0")
+        self.remove_item("connection", "fetchai/stub:0.15.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.14.0")
         self.set_config("agent.default_ledger", ETHEREUM)
         setting_path = "agent.default_routing"
@@ -87,7 +87,7 @@ class TestOracleSkills(AEATestCaseMany, UseGanache):
         self.set_config(setting_path, oracle_address)
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/coin_price_oracle:0.3.0", oracle_agent_name
+            "fetchai/coin_price_oracle:0.4.0", oracle_agent_name
         )
         assert (
             diff == []
@@ -122,7 +122,7 @@ class TestOracleSkills(AEATestCaseMany, UseGanache):
         self.set_agent_context(client_agent_name)
         self.add_item("connection", "fetchai/ledger:0.12.0")
         self.add_item("connection", "fetchai/http_client:0.16.0")
-        self.remove_item("connection", "fetchai/stub:0.14.0")
+        self.remove_item("connection", "fetchai/stub:0.15.0")
         self.set_config("agent.default_connection", "fetchai/ledger:0.12.0")
         self.set_config("agent.default_ledger", ETHEREUM)
 

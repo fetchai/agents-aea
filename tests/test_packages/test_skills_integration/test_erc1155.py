@@ -73,7 +73,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseGanache):
         self.add_item("connection", "fetchai/p2p_libp2p:0.14.0")
         self.add_item("connection", "fetchai/ledger:0.12.0")
         self.add_item("connection", "fetchai/soef:0.15.0")
-        self.remove_item("connection", "fetchai/stub:0.14.0")
+        self.remove_item("connection", "fetchai/stub:0.15.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.14.0")
         self.set_config("agent.default_ledger", ETHEREUM)
         setting_path = "agent.default_routing"
@@ -128,7 +128,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseGanache):
         self.add_item("connection", "fetchai/p2p_libp2p:0.14.0")
         self.add_item("connection", "fetchai/ledger:0.12.0")
         self.add_item("connection", "fetchai/soef:0.15.0")
-        self.remove_item("connection", "fetchai/stub:0.14.0")
+        self.remove_item("connection", "fetchai/stub:0.15.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.14.0")
         self.set_config("agent.default_ledger", ETHEREUM)
         setting_path = "agent.default_routing"
