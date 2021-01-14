@@ -163,6 +163,7 @@ pipx
 BibTex
 Kubernetes
 Golang
+web3
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id

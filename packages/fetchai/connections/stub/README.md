@@ -1,4 +1,4 @@
-# stub connection
+# Stub connection
 A simple connection for communication with an AEA, using the file system as a point of data exchange.
 
 ## Usage

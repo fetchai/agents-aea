@@ -19,6 +19,7 @@
 
 """Implementation of the 'aea issue_certificates' subcommand."""
 import os
+from pathlib import Path
 from typing import Dict, List, cast
 
 import click
@@ -48,13 +49,35 @@ def issue_certificates(click_context):
 
 def issue_certificates_(ctx: Context):
     """Issue certificates for connections that require them."""
-    agent_config_manager = AgentConfigManager.load(ctx.cwd)
-
-    # agent_config_manager.
-    for connection_id in agent_config_manager.agent_config.connections:
-        _process_connection(ctx, agent_config_manager, connection_id)
+    for connection_id in ctx.agent_config.connections:
+        cert_requests = _get_cert_requests(ctx, connection_id)
+        _process_connection(ctx, cert_requests, connection_id)
 
     click.echo("All certificates have been issued.")
+
+
+def _get_cert_requests(ctx: Context, connection_id: PublicId) -> List[CertRequest]:
+    """
+    Get certificate requests, taking the overrides into account.
+
+    :param ctx: the CLI context.
+    :param connection_id: the connection id.
+    :return: the list of cert requests.
+    """
+    directory = cast(Path, ctx.cwd)
+    manager = AgentConfigManager(ctx.agent_config, directory)
+    path = get_dotted_package_path_unified(ctx, CONNECTION, connection_id)
+    path_to_cert_requests = f"{path}.cert_requests"
+
+    try:
+        cert_requests = manager.get_variable(path_to_cert_requests)
+    except VariableDoesNotExist:
+        return []
+
+    cert_requests = cast(List[Dict], cert_requests)
+    return [
+        CertRequest.from_json(cert_request_json) for cert_request_json in cert_requests
+    ]
 
 
 def _process_certificate(
@@ -95,21 +118,14 @@ def _process_certificate(
 
 
 def _process_connection(
-    ctx: Context, agent_config_manager: AgentConfigManager, connection_id: PublicId
+    ctx: Context, cert_requests: List[CertRequest], connection_id: PublicId
 ):
-    path = get_dotted_package_path_unified(ctx, CONNECTION, connection_id)
-    path_to_cert_requests = f"{path}.cert_requests"
-
-    try:
-        cert_requests = agent_config_manager.get_variable(path_to_cert_requests)
-    except VariableDoesNotExist:
+    if len(cert_requests) == 0:
         logger.debug("No certificates to process.")
         return
 
     logger.debug(f"Processing connection '{connection_id}'...")
-    cert_requests = cast(List[Dict], cert_requests)
-    for cert_request_json in cert_requests:
-        cert_request = CertRequest.from_json(cert_request_json)
+    for cert_request in cert_requests:
         click.echo(
             f"Issuing certificate '{cert_request.identifier}' for connection {connection_id}..."
         )
