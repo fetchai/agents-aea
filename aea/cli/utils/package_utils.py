@@ -186,12 +186,12 @@ def try_get_item_target_path(
 
 
 def get_package_path(
-    ctx: Context, item_type: str, public_id: PublicId, is_vendor: bool = True
+    project_directory: str, item_type: str, public_id: PublicId, is_vendor: bool = True
 ) -> str:
     """
     Get a vendorized path for a package.
 
-    :param ctx: context.
+    :param project_directory: path to search packages
     :param item_type: item type.
     :param public_id: item public ID.
     :param is_vendor: flag for vendorized path (True by defaut).
@@ -201,12 +201,21 @@ def get_package_path(
     item_type_plural = item_type + "s"
     if is_vendor:
         return os.path.join(
-            ctx.cwd, VENDOR, public_id.author, item_type_plural, public_id.name
+            project_directory,
+            VENDOR,
+            public_id.author,
+            item_type_plural,
+            public_id.name,
         )
-    return os.path.join(ctx.cwd, item_type_plural, public_id.name)
+    return os.path.join(project_directory, item_type_plural, public_id.name)
 
 
-def get_package_path_unified(ctx: Context, item_type: str, public_id: PublicId) -> str:
+def get_package_path_unified(
+    project_directory: str,
+    agent_config: AgentConfig,
+    item_type: str,
+    public_id: PublicId,
+) -> str:
     """
     Get a path for a package, either vendor or not.
 
@@ -215,30 +224,36 @@ def get_package_path_unified(ctx: Context, item_type: str, public_id: PublicId) 
       just look into vendor/
     - Otherwise, first look into local packages, then into vendor/.
 
-    :param ctx: context.
+    :param project_directory: directory to look for packages.
     :param item_type: item type.
     :param public_id: item public ID.
 
     :return: vendorized estenation path for package.
     """
-    vendor_path = get_package_path(ctx, item_type, public_id, is_vendor=True)
-    if ctx.agent_config.author != public_id.author or not is_item_present(
-        ctx, item_type, public_id, is_vendor=False
+    vendor_path = get_package_path(
+        project_directory, item_type, public_id, is_vendor=True
+    )
+    if agent_config.author != public_id.author or not is_item_present(
+        project_directory, agent_config, item_type, public_id, is_vendor=False
     ):
         return vendor_path
-    return get_package_path(ctx, item_type, public_id, is_vendor=False)
+    return get_package_path(project_directory, item_type, public_id, is_vendor=False)
 
 
-def get_dotted_package_path_unified(ctx: Context, *args) -> str:
+def get_dotted_package_path_unified(
+    project_directory: str, agent_config: AgentConfig, *args
+) -> str:
     """
     Get a *dotted* path for a package, either vendor or not.
 
-    :param ctx: the CLI context.
+    :param project_directory: base dir for package lookup.
+    :param agent_config: AgentConfig.
     :param args: arguments for 'get_package_path_unified'
+
     :return: the dotted path to the package.
     """
-    path = get_package_path_unified(ctx, *args)
-    path_relative_to_cwd = Path(path).relative_to(Path(ctx.cwd))
+    path = get_package_path_unified(project_directory, agent_config, *args)
+    path_relative_to_cwd = Path(path).relative_to(Path(project_directory))
     relative_path_str = str(path_relative_to_cwd).replace(os.sep, ".")
     return relative_path_str
 
@@ -466,16 +481,19 @@ def is_item_present_unified(ctx: Context, item_type: str, item_public_id: Public
     :param item_public_id: PublicId of an item.
     :return: True if the item is present, False otherwise.
     """
-    is_in_vendor = is_item_present(ctx, item_type, item_public_id, is_vendor=True)
+    is_in_vendor = is_item_present(
+        ctx.cwd, ctx.agent_config, item_type, item_public_id, is_vendor=True
+    )
     if item_public_id.author != ctx.agent_config.author:
         return is_in_vendor
     return is_in_vendor or is_item_present(
-        ctx, item_type, item_public_id, is_vendor=False
+        ctx.cwd, ctx.agent_config, item_type, item_public_id, is_vendor=False
     )
 
 
 def is_item_present(
-    ctx: Context,
+    path: str,
+    agent_config: AgentConfig,
     item_type: str,
     item_public_id: PublicId,
     is_vendor: bool = True,
@@ -486,7 +504,8 @@ def is_item_present(
 
     Optionally, consider the check also with the version.
 
-    :param ctx: context object.
+    :param path: path to look for packages.
+    :param agent_config: agent config
     :param item_type: type of an item.
     :param item_public_id: PublicId of an item.
     :param is_vendor: flag for vendorized path (True by default).
@@ -495,10 +514,10 @@ def is_item_present(
     :return: boolean is item present.
     """
     item_path = Path(
-        get_package_path(ctx, item_type, item_public_id, is_vendor=is_vendor)
+        get_package_path(path, item_type, item_public_id, is_vendor=is_vendor)
     )
     registered_item_public_id = get_item_public_id_by_author_name(
-        ctx.agent_config, item_type, item_public_id.author, item_public_id.name
+        agent_config, item_type, item_public_id.author, item_public_id.name
     )
     is_item_registered_no_version = registered_item_public_id is not None
     does_path_exist = Path(item_path).exists()
@@ -507,17 +526,17 @@ def is_item_present(
 
     # the following makes sense because public id is not latest
     component_id = ComponentId(ComponentType(item_type), item_public_id)
-    component_is_registered = component_id in ctx.agent_config.package_dependencies
+    component_is_registered = component_id in agent_config.package_dependencies
     return component_is_registered and does_path_exist
 
 
 def get_item_id_present(
-    ctx: Context, item_type: str, item_public_id: PublicId
+    agent_config: AgentConfig, item_type: str, item_public_id: PublicId
 ) -> PublicId:
     """
     Get the item present in AEA.
 
-    :param ctx: context object.
+    :param agent_config: AgentConfig.
     :param item_type: type of an item.
     :param item_public_id: PublicId of an item.
 
@@ -525,7 +544,7 @@ def get_item_id_present(
     :raises: AEAEnforceError
     """
     registered_item_public_id = get_item_public_id_by_author_name(
-        ctx.agent_config, item_type, item_public_id.author, item_public_id.name
+        agent_config, item_type, item_public_id.author, item_public_id.name
     )
     if registered_item_public_id is None:
         raise AEAEnforceError("Cannot find item.")  # pragma: nocover
@@ -715,8 +734,8 @@ def create_symlink_vendor_to_local(
 
     :return: None
     """
-    vendor_path_str = get_package_path(ctx, item_type, public_id, is_vendor=True)
-    local_path = get_package_path(ctx, item_type, public_id, is_vendor=False)
+    vendor_path_str = get_package_path(ctx.cwd, item_type, public_id, is_vendor=True)
+    local_path = get_package_path(ctx.cwd, item_type, public_id, is_vendor=False)
     vendor_path = Path(vendor_path_str)
     if not os.path.exists(vendor_path.parent):
         os.makedirs(vendor_path.parent)

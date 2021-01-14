@@ -16,6 +16,7 @@ strict: true
 nav:
   - Introduction: 'index.md'
   - Version: 'version.md'
+  - Upgrading: 'upgrading.md'
   - Concepts:
     - Language Agnostic Definition: 'language-agnostic-definition.md'
     - Agent-oriented development: 'agent-oriented-development.md'
@@ -41,9 +42,9 @@ nav:
     - AEA quick start: 'quickstart.md'
     - Core components - Part 1: 'core-components-1.md'
     - AEA and web frameworks: 'aea-vs-mvc.md'
-    - Build a skill for an AEA: 'skill-guide.md'
+    - Build your first skill - search & discovery: 'skill-guide.md'
     - Core components - Part 2: 'core-components-2.md'
-    - Interaction protocols: 'interaction-protocol.md'
+    - How AEAs talk to each other - interaction protocols: 'interaction-protocol.md'
     - Trade between two AEAs: 'generic-skills-step-by-step.md'
     - Development setup: 'development-setup.md'
   - Development - Advanced:
@@ -63,21 +64,12 @@ nav:
       - Build an AEA programmatically: 'build-aea-programmatically.md'
       - CLI vs programmatic AEAs: 'cli-vs-programmatic-aeas.md'
       - AEAs vs agents: 'agent-vs-aea.md'
-      - Upgrading versions: 'upgrading.md'
       - Modes of running an AEA: 'modes.md'
       - Generic Storage: 'generic-storage.md'
       - Multi agent manager: 'multi-agent-manager.md'
       - Debugging: 'debug.md'
       - Profiling: 'runtime-cost.md'
       - Proof of Representation: 'por.md'
-    - Use case components:
-      - Generic skills: 'generic-skills.md'
-      - Front-end intergration: 'connect-a-frontend.md'
-      - HTTP Connection: 'http-connection-and-skill.md'
-      - ORM integration: 'orm-integration.md'
-      - Contract deploy and interact: 'erc1155-skills.md'
-      - P2P Connection: 'p2p-connection.md'
-      - Build an AEA on a Raspberry Pi: 'raspberry-set-up.md'
     - Architecture & component deep-dives:
       - Design principles: 'design-principles.md'
       - Architectural diagram: 'diagram.md'
@@ -232,6 +224,14 @@ nav:
         - Generic: 'api/test_tools/generic.md'
         - Test Cases: 'api/test_tools/test_cases.md'
         - Test Skill: 'api/test_tools/test_skill.md'
+  - Development - Use Case:
+    - Generic skills: 'generic-skills.md'
+    - Front-end intergration: 'connect-a-frontend.md'
+    - HTTP Connection: 'http-connection-and-skill.md'
+    - ORM integration: 'orm-integration.md'
+    - Contract deploy and interact: 'erc1155-skills.md'
+    - P2P Connection: 'p2p-connection.md'
+    - Build an AEA on a Raspberry Pi: 'raspberry-set-up.md'
   - Glossary: 'glossary.md'
   - Q&A: 'questions-and-answers.md'
 

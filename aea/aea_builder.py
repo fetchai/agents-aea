@@ -311,6 +311,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self,
         with_default_packages: bool = True,
         registry_dir: str = DEFAULT_REGISTRY_NAME,
+        build_dir_root: Optional[str] = None,
     ):
         """
         Initialize the builder.
@@ -320,6 +321,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         WithLogger.__init__(self, logger=_default_logger)
         self.registry_dir = os.path.join(os.getcwd(), registry_dir)
         self._with_default_packages = with_default_packages
+        self.build_dir_root = build_dir_root
         self._reset(is_full_reset=True)
 
     def reset(self, is_full_reset: bool = False) -> None:
@@ -773,7 +775,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :return: None
         """
         configuration.build_directory = os.path.join(
-            self.AEA_CLASS.get_build_dir(),
+            self.get_build_root_directory(),
             configuration.component_type.value,
             configuration.author,
             configuration.name,
@@ -900,14 +902,12 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self.remove_component(ComponentId(ComponentType.CONTRACT, public_id))
         return self
 
-    def call_all_build_entrypoints(self, root_dir: str = "."):
+    def call_all_build_entrypoints(self):
         """Call all the build entrypoints."""
         for config in self._package_dependency_manager._dependencies.values():  # type: ignore # pylint: disable=protected-access
             self.run_build_for_component_configuration(config, logger=self.logger)
 
-        target_directory = os.path.abspath(
-            os.path.join(root_dir, self.AEA_CLASS.get_build_dir())
-        )
+        target_directory = self.get_build_root_directory()
 
         if self._build_entrypoint:
             self.logger.info("Building AEA package...")
@@ -917,9 +917,13 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
                 build_entrypoint, source_directory, target_directory, logger=self.logger
             )
 
+    def get_build_root_directory(self) -> str:
+        """Get build directory root."""
+        return os.path.join(self.build_dir_root or ".", self.AEA_CLASS.get_build_dir())
+
     @classmethod
     def run_build_for_component_configuration(
-        cls, config: ComponentConfiguration, logger: Optional[logging.Logger] = None
+        cls, config: ComponentConfiguration, logger: Optional[logging.Logger] = None,
     ) -> None:
         """Run a build entrypoint script for component configuration."""
         if not config.build_entrypoint:

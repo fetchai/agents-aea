@@ -206,7 +206,7 @@ class PackageConfiguration(Configuration, ABC):
 
     default_configuration_filename: str
     package_type: PackageType
-    FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset()
+    FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(["build_directory"])
     schema: str
     CHECK_EXCLUDES: List[Tuple[str]] = []
 
@@ -537,7 +537,7 @@ class ConnectionConfig(ComponentConfiguration):
     schema = "connection-config_schema.json"
 
     FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(
-        ["config", "cert_requests", "is_abstract"]
+        ["config", "cert_requests", "is_abstract", "build_directory"]
     )
 
     def __init__(
@@ -868,7 +868,7 @@ class SkillConfig(ComponentConfiguration):
     abstract_field_name = "is_abstract"
 
     FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(
-        ["behaviours", "handlers", "models", "is_abstract"]
+        ["behaviours", "handlers", "models", "is_abstract", "build_directory"]
     )
     FIELDS_WITH_NESTED_FIELDS: FrozenSet[str] = frozenset(
         ["behaviours", "handlers", "models"]
@@ -1564,7 +1564,7 @@ class ContractConfig(ComponentConfiguration):
     package_type = PackageType.CONTRACT
     schema = "contract-config_schema.json"
 
-    FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset([])
+    FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(["build_directory"])
 
     def __init__(
         self,

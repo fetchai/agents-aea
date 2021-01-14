@@ -225,7 +225,9 @@ def _try_get_connection_multiaddress(
     if connection_id not in ctx.agent_config.connections:
         raise ValueError(f"Cannot find connection with the public id {connection_id}.")
 
-    package_path = Path(get_package_path_unified(ctx, CONNECTION, connection_id))
+    package_path = Path(
+        get_package_path_unified(ctx.cwd, ctx.agent_config, CONNECTION, connection_id)
+    )
     connection_config = cast(
         ConnectionConfig, load_item_config(CONNECTION, package_path)
     )
