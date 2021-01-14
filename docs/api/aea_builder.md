@@ -204,7 +204,7 @@ my_aea_2 = builder.builder()
 #### `__`init`__`
 
 ```python
- | __init__(with_default_packages: bool = True, registry_dir: str = DEFAULT_REGISTRY_NAME)
+ | __init__(with_default_packages: bool = True, registry_dir: str = DEFAULT_REGISTRY_NAME, build_dir_root: Optional[str] = None)
 ```
 
 Initialize the builder.
@@ -791,17 +791,26 @@ the AEABuilder
 #### call`_`all`_`build`_`entrypoints
 
 ```python
- | call_all_build_entrypoints(root_dir: str = ".")
+ | call_all_build_entrypoints()
 ```
 
 Call all the build entrypoints.
+
+<a name="aea.aea_builder.AEABuilder.get_build_root_directory"></a>
+#### get`_`build`_`root`_`directory
+
+```python
+ | get_build_root_directory() -> str
+```
+
+Get build directory root.
 
 <a name="aea.aea_builder.AEABuilder.run_build_for_component_configuration"></a>
 #### run`_`build`_`for`_`component`_`configuration
 
 ```python
  | @classmethod
- | run_build_for_component_configuration(cls, config: ComponentConfiguration, logger: Optional[logging.Logger] = None, root_dir: str = ".") -> None
+ | run_build_for_component_configuration(cls, config: ComponentConfiguration, logger: Optional[logging.Logger] = None) -> None
 ```
 
 Run a build entrypoint script for component configuration.
