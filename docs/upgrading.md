@@ -1,5 +1,9 @@
 This page provides some tips of how to upgrade between versions.
 
+## `v0.9.0` to `v0.9.1`
+
+No backwards incompatible changes for skill and connection development.
+
 ## `v0.8.0` to `v0.9.0`
 
 This release introduces <a href="../por">proof of representation</a> to the ACN. You will need to upgrade to the latest `fetchai/p2p_libp2p`/`fetchai/p2p_libp2p_client` connection and then use two key pairs, one for your AEA's decision maker and one for the connection.
@@ -9,8 +13,9 @@ Please update to latest packages by running `aea upgrade`.
 ## `v0.7.5` to `v0.8.0`
 
 Minimal backwards incompatible changes for skill and connection development:
-    - The semantics of the `<`, `<=`, `>` and `>=` relations in `ConstraintTypes` are simplified.
-    - Protocols now need to correctly define terminal states. Regenerate your protocol to identify if your protocol's dialogue rules are valid.
+
+- The semantics of the `<`, `<=`, `>` and `>=` relations in `ConstraintTypes` are simplified.
+- Protocols now need to correctly define terminal states. Regenerate your protocol to identify if your protocol's dialogue rules are valid.
 
 Please update to latest packages by running `aea upgrade`.
 

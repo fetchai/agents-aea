@@ -1,6 +1,6 @@
 agent_name: coin_price_feed
 author: fetchai
-version: 0.3.0
+version: 0.4.0
 license: Apache-2.0
 description: An AEA providing a coin price feed.
 aea_version: '>=0.9.0, <0.10.0'
@@ -10,7 +10,6 @@ connections:
 - fetchai/http_client:0.16.0
 - fetchai/http_server:0.15.0
 - fetchai/prometheus:0.2.0
-- fetchai/stub:0.14.0
 contracts: []
 protocols:
 - fetchai/default:0.11.0

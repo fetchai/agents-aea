@@ -434,7 +434,7 @@ def test_get_package_path_unified(mock_present, mock_path, vendor):
     mock_present.return_value = vendor
     public_id_mock = mock.MagicMock(author="some_author")
     result = get_package_path_unified(
-        contex_mock, "some_component_type", public_id_mock
+        ".", contex_mock.agent_config, "some_component_type", public_id_mock
     )
     assert result == "some_path"
 
@@ -450,7 +450,7 @@ def test_get_dotted_package_path_unified(mock_present, mock_path, vendor):
     mock_present.return_value = vendor
     public_id_mock = mock.MagicMock(author="some_author")
     result = get_dotted_package_path_unified(
-        contex_mock, "some_component_type", public_id_mock
+        ".", contex_mock.agent_config, "some_component_type", public_id_mock
     )
     assert result == "some_path"
 

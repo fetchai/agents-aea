@@ -17,10 +17,18 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains the tests for the scaffold connection."""
+import os
+import sys
+
 import pytest
 
 from aea.configurations.base import ConnectionConfig
 from aea.connections.scaffold.connection import MyScaffoldConnection
+from aea.helpers.base import cd
+from aea.test_tools.test_cases import AEATestCaseEmpty
+
+from tests.common.pexpect_popen import PexpectWrapper
+from tests.conftest import ROOT_DIR
 
 
 class TestScaffoldConnectionReception:
@@ -47,3 +55,36 @@ class TestScaffoldConnectionReception:
 
         with pytest.raises(NotImplementedError):
             await self.connection.receive()
+
+
+class TestScaffoldConnectionAndRun(AEATestCaseEmpty):
+    """Test that the scaffold connection created."""
+
+    def setup(self):
+        """Set case up."""
+        result = self.invoke("scaffold", "connection", "my_con")
+        assert result.exit_code == 0
+
+    def test_run_and_not_implemented_error(self):
+        """Test aea run crashes with connect not implemented for scaffolded connection."""
+        with cd(self._get_cwd()):
+            proc = PexpectWrapper(  # nosec
+                [sys.executable, "-m", "aea.cli", "-v", "DEBUG", "run"],
+                env={
+                    **os.environ,
+                    "PYTHONPATH": ROOT_DIR + ":" + os.environ.get("PYTHONPATH", ""),
+                },
+                maxread=10000,
+                encoding="utf-8",
+                logfile=sys.stdout,
+            )
+            try:
+                proc.expect_all(
+                    [
+                        "Error while connecting <class 'connection_module.MyScaffoldConnection'>: NotImplementedError()"
+                    ],
+                    timeout=50,
+                )
+            finally:
+                proc.terminate()
+                proc.wait_to_complete(timeout=50)

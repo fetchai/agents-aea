@@ -52,7 +52,9 @@ class _Base:
         skip_consistency_check: bool = False,
     ) -> AEABuilder:
         """Get AEABuilder instance."""
-        builder = AEABuilder(with_default_packages=False)
+        builder = AEABuilder(
+            with_default_packages=False, build_dir_root=str(aea_project_path)
+        )
         builder.set_from_configuration(
             agent_config, Path(aea_project_path), skip_consistency_check
         )
@@ -79,7 +81,7 @@ class Project(_Base):
 
     def build(self) -> None:
         """Call all build entry points."""
-        self.builder.call_all_build_entrypoints(self.path)
+        self.builder.call_all_build_entrypoints()
 
     @classmethod
     def load(
@@ -157,6 +159,13 @@ class AgentAlias(_Base):
             builder.add_private_key(
                 default_ledger, self._create_private_key(default_ledger)
             )
+        if not builder.connection_private_key_paths:
+            default_ledger = builder.get_default_ledger()
+            builder.add_private_key(
+                default_ledger,
+                self._create_private_key(default_ledger, is_connection=True),
+                is_connection=True,
+            )
         builder.set_name(self.agent_name)
         builder.set_runtime_mode("threaded")
         return builder
@@ -166,15 +175,20 @@ class AgentAlias(_Base):
         """Get agent config."""
         return self._agent_config
 
-    def _create_private_key(self, ledger: str, replace: bool = False) -> str:
+    def _create_private_key(
+        self, ledger: str, replace: bool = False, is_connection: bool = False
+    ) -> str:
         """
         Create new key for agent alias in working dir keys dir.
 
         If file exists, check `replace` option.
         """
-        filepath = os.path.join(
-            self._keys_dir, f"{self.agent_name}_{ledger}_private.key"
+        file_name = (
+            f"{self.agent_name}_{ledger}_connection_private.key"
+            if is_connection
+            else f"{self.agent_name}_{ledger}_private.key"
         )
+        filepath = os.path.join(self._keys_dir, file_name)
         if os.path.exists(filepath) and not replace:
             return filepath
         create_private_key(ledger, filepath)
@@ -202,13 +216,17 @@ class AgentAlias(_Base):
 
     def get_aea_instance(self) -> AEA:
         """Build new aea instance."""
-        return self.builder.build()
+        self.issue_certificates()
+        aea = self.builder.build()
+        # override build dir to project's one
+        aea.DEFAULT_BUILD_DIR_NAME = os.path.join(
+            self.project.path, aea.DEFAULT_BUILD_DIR_NAME
+        )
+        return aea
 
     def issue_certificates(self) -> None:
         """Issue the certificates for this agent."""
-        ctx = Context(cwd=self.project.path)
-        ctx.agent_config = self.agent_config
-        issue_certificates_(ctx)
+        issue_certificates_(self.project.path, self.agent_config_manager)
 
     def set_overrides(
         self,
