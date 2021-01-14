@@ -52,7 +52,9 @@ class _Base:
         skip_consistency_check: bool = False,
     ) -> AEABuilder:
         """Get AEABuilder instance."""
-        builder = AEABuilder(with_default_packages=False)
+        builder = AEABuilder(
+            with_default_packages=False, build_dir_root=str(aea_project_path)
+        )
         builder.set_from_configuration(
             agent_config, Path(aea_project_path), skip_consistency_check
         )
@@ -79,7 +81,7 @@ class Project(_Base):
 
     def build(self) -> None:
         """Call all build entry points."""
-        self.builder.call_all_build_entrypoints(self.path)
+        self.builder.call_all_build_entrypoints()
 
     @classmethod
     def load(
@@ -224,9 +226,7 @@ class AgentAlias(_Base):
 
     def issue_certificates(self) -> None:
         """Issue the certificates for this agent."""
-        ctx = Context(cwd=self.project.path)
-        ctx.agent_config = self.agent_config
-        issue_certificates_(ctx)
+        issue_certificates_(self.project.path, self.agent_config_manager)
 
     def set_overrides(
         self,
