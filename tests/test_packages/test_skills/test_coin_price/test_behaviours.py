@@ -36,25 +36,39 @@ class TestSkillBehaviour(BaseSkillTestCase):
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "coin_price")
 
     @classmethod
-    def setup(cls):
+    def setup(cls, **kwargs):
         """Setup the test class."""
         super().setup()
         cls.coin_price_behaviour = cast(
-            CoinPriceBehaviour, cls._skill.skill_context.behaviours.coin_price
+            CoinPriceBehaviour, cls._skill.skill_context.behaviours.coin_price_behaviour
         )
 
-    def test__init__(self):
-        """Test the __init__ method of the coin_price behaviour."""
-        assert self.coin_price.url == "some_url"
-        assert self.coin_price.method == "some_method"
-        assert self.coin_price.body == ""
+    def test_send_http_request_message(self):
+        """Test the send_http_request_message method of the coin_price behaviour."""
+        self.coin_price_behaviour.send_http_request_message("GET", "some_url")
+        self.assert_quantity_in_outbox(1)
+
+    def test_add_prometheus_metric(self):
+        """Test the send_http_request_message method of the coin_price behaviour."""
+        self.coin_price_behaviour.add_prometheus_metric("some_metric", "Gauge", "some_description", {"label_key": "label_value"}) 
+        self.assert_quantity_in_outbox(1)
+
+    def test_update_prometheus_metric(self):
+        """Test the test_update_prometheus_metric method of the coin_price behaviour."""
+        self.coin_price_behaviour.update_prometheus_metric("some_metric", "set", 0.0, {"label_key": "label_value"}) 
+        self.assert_quantity_in_outbox(1)
+
+    def test_setup(self):
+        """Test that the setup method puts two messages (prometheus metrics) in the outbox by default."""
+        self.coin_price_behaviour.setup()
+        self.assert_quantity_in_outbox(2)
 
     def test_act(self):
-        """Test the act method of the coin_price behaviour."""
+        """Test that the act method of the coin_price behaviour puts one message (http request) in the outbox."""
         self.coin_price_behaviour.act()
-        self.assert_quantity_in_outbox(0)
+        self.assert_quantity_in_outbox(1)
 
     def test_teardown(self):
-        """Test the teardown method of the coin_price behaviour."""
+        """Test that the teardown method of the coin_price behaviour leaves no messages in the outbox."""
         assert self.coin_price_behaviour.teardown() is None
         self.assert_quantity_in_outbox(0)
