@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Implementation of the 'aea issue_certificates' subcommand."""
 import os
 from typing import Dict, List, cast
@@ -28,7 +27,7 @@ from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.loggers import logger
 from aea.cli.utils.package_utils import get_dotted_package_path_unified
-from aea.configurations.base import PublicId
+from aea.configurations.base import AgentConfig, PublicId
 from aea.configurations.constants import CONNECTION
 from aea.configurations.manager import AgentConfigManager, VariableDoesNotExist
 from aea.crypto.helpers import make_certificate
@@ -43,29 +42,30 @@ from aea.helpers.base import CertRequest
 def issue_certificates(click_context):
     """Issue certificates for connections that require them."""
     ctx = cast(Context, click_context.obj)
-    issue_certificates_(ctx)
-
-
-def issue_certificates_(ctx: Context):
-    """Issue certificates for connections that require them."""
     agent_config_manager = AgentConfigManager.load(ctx.cwd)
-
-    # agent_config_manager.
-    for connection_id in agent_config_manager.agent_config.connections:
-        _process_connection(ctx, agent_config_manager, connection_id)
-
+    issue_certificates_(ctx.cwd, agent_config_manager)
     click.echo("All certificates have been issued.")
 
 
+def issue_certificates_(path: str, agent_config_manager: AgentConfigManager):
+    """Issue certificates for connections that require them."""
+    # agent_config_manager.
+    for connection_id in agent_config_manager.agent_config.connections:
+        _process_connection(path, agent_config_manager, connection_id)
+
+
 def _process_certificate(
-    ctx: Context, cert_request: CertRequest, connection_id: PublicId
+    path: str,
+    agent_config: AgentConfig,
+    cert_request: CertRequest,
+    connection_id: PublicId,
 ):
     """Process a single certificate request."""
     ledger_id = cert_request.ledger_id
     output_path = cert_request.save_path
     if cert_request.key_identifier is not None:
         key_identifier = cert_request.key_identifier
-        connection_private_key_path = ctx.agent_config.connection_private_key_paths.read(
+        connection_private_key_path = agent_config.connection_private_key_paths.read(
             key_identifier
         )
         if connection_private_key_path is None:
@@ -82,22 +82,24 @@ def _process_certificate(
             public_key is not None,
             "Internal error - one of key_identifier or public_key must be not None.",
         )
-    crypto_private_key_path = ctx.agent_config.private_key_paths.read(ledger_id)
+    crypto_private_key_path = agent_config.private_key_paths.read(ledger_id)
     if crypto_private_key_path is None:
         raise ClickException(
             f"Cannot find private key with id '{ledger_id}'. Please use `aea generate-key {key_identifier}` and `aea add-key {key_identifier}` to add a private key with id '{key_identifier}'."
         )
     message = cert_request.get_message(public_key)
     cert = make_certificate(
-        ledger_id, crypto_private_key_path, message, os.path.join(ctx.cwd, output_path)
+        ledger_id, crypto_private_key_path, message, os.path.join(path, output_path)
     )
     click.echo(f"Generated signature: '{cert}'")
 
 
 def _process_connection(
-    ctx: Context, agent_config_manager: AgentConfigManager, connection_id: PublicId
+    base_path: str, agent_config_manager: AgentConfigManager, connection_id: PublicId
 ):
-    path = get_dotted_package_path_unified(ctx, CONNECTION, connection_id)
+    path = get_dotted_package_path_unified(
+        base_path, agent_config_manager.agent_config, CONNECTION, connection_id
+    )
     path_to_cert_requests = f"{path}.cert_requests"
 
     try:
@@ -113,7 +115,9 @@ def _process_connection(
         click.echo(
             f"Issuing certificate '{cert_request.identifier}' for connection {connection_id}..."
         )
-        _process_certificate(ctx, cert_request, connection_id)
+        _process_certificate(
+            base_path, agent_config_manager.agent_config, cert_request, connection_id
+        )
         click.echo(
             f"Dumped certificate '{cert_request.identifier}' in '{cert_request.save_path}' for connection {connection_id}."
         )

@@ -224,9 +224,7 @@ class AgentAlias(_Base):
 
     def issue_certificates(self) -> None:
         """Issue the certificates for this agent."""
-        ctx = Context(cwd=self.project.path)
-        ctx.agent_config = self.agent_config
-        issue_certificates_(ctx)
+        issue_certificates_(self.project.path, self.agent_config_manager)
 
     def set_overrides(
         self,

@@ -401,6 +401,16 @@ class TestMultiAgentManagerAsyncMode(
         assert len(components_overridables) == 3
         assert "is_abstract" in components_overridables[0]
 
+    def test_issue_certificates(self, *args):
+        """Test agent alias issue certificates."""
+        self.manager.start_manager()
+        self.manager.add_project(self.project_public_id, local=True)
+        self.manager.add_agent(self.project_public_id, self.agent_name)
+        agent_alias = self.manager.get_agent_alias(self.agent_name)
+        agent_alias.issue_certificates()
+
+        # TODO: add overrides, add checks files created.
+
 
 class TestMultiAgentManagerThreadedMode(TestMultiAgentManagerAsyncMode):
     """Tests for MultiAgentManager in threaded mode."""
