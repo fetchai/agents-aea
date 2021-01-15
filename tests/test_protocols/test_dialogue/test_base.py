@@ -16,11 +16,13 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This module contains the tests for the dialogue/base.py module."""
+import re
 import sys
 from typing import FrozenSet, Tuple, Type, cast
 from unittest import mock
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -263,7 +265,7 @@ class TestDialogueBase:
 
         cls.valid_message_2_by_other = DefaultMessage(
             dialogue_reference=(str(1), str(1)),
-            message_id=2,
+            message_id=-1,
             target=1,
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello back",
@@ -273,8 +275,8 @@ class TestDialogueBase:
 
         cls.valid_message_3_by_self = DefaultMessage(
             dialogue_reference=(str(1), str(1)),
-            message_id=3,
-            target=2,
+            message_id=2,
+            target=-1,
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello back 2",
         )
@@ -450,7 +452,7 @@ class TestDialogueBase:
         """Negative test for the 'update' method: input message is invalid with respect to the dialogue."""
         invalid_message_1_by_self = DefaultMessage(
             dialogue_reference=(str(1), ""),
-            message_id=2,
+            message_id=200,
             target=1,
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
@@ -458,13 +460,11 @@ class TestDialogueBase:
         invalid_message_1_by_self.sender = self.agent_address
         invalid_message_1_by_self.to = self.opponent_address
 
-        with pytest.raises(InvalidDialogueMessage) as cm:
+        with pytest.raises(
+            InvalidDialogueMessage,
+            match=r"Message .* is invalid with respect to this dialogue. Error: Invalid message_id. Expected .*. Found 200.",
+        ):
             self.dialogue._update(invalid_message_1_by_self)
-        assert (
-            str(cm.value)
-            == "Message 2 is invalid with respect to this dialogue. Error: "
-            + "Invalid message_id. Expected 1. Found 2."
-        )
 
         assert self.dialogue.last_outgoing_message is None
 
@@ -596,8 +596,8 @@ class TestDialogueBase:
 
         invalid_message_3_by_self = DefaultMessage(
             dialogue_reference=(str(1), str(1)),
-            message_id=3,
-            target=1,
+            message_id=2,
+            target=3,
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello back 2",
         )
@@ -606,7 +606,7 @@ class TestDialogueBase:
 
         result, msg = self.dialogue._validate_next_message(invalid_message_3_by_self)
         assert result is False
-        assert msg == "Invalid target. Expected 2. Found 1."
+        assert "Invalid target" in msg
 
     def test_is_valid_next_message_negative_is_valid_fails(self):
         """Negative test for the 'validate_next_message' method: is_valid method fails"""
@@ -644,17 +644,19 @@ class TestDialogueBase:
         invalid_message_1_by_self.sender = self.agent_address
         invalid_message_1_by_self.to = self.opponent_address
 
+        assert self.dialogue.is_empty
         result, msg = self.dialogue._basic_validation(invalid_message_1_by_self)
         assert result is False
         assert msg == "Invalid message_id. Expected 1. Found 2."
 
-    def test_basic_validation_negative_non_initial_message_invalid(self):
+    @patch.object(BaseDialogue, "_validate_message_id", return_value=None)
+    def test_basic_validation_negative_non_initial_message_invalid(self, *mocks):
         """Negative test for the '_basic_validation' method: non-initial message is invalid."""
         self.dialogue._update(self.valid_message_1_by_self)
 
         invalid_message_2_by_other = DefaultMessage(
             dialogue_reference=(str(1), str(1)),
-            message_id=2,
+            message_id=-1,
             target=0,
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello back",
@@ -697,7 +699,7 @@ class TestDialogueBase:
         """Negative test for the '_basic_validation' method: input message has invalid message id."""
         invalid_message_1_by_self = DefaultMessage(
             dialogue_reference=(str(1), ""),
-            message_id=2,
+            message_id=200,
             target=1,
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello",
@@ -709,7 +711,7 @@ class TestDialogueBase:
             invalid_message_1_by_self
         )
         assert result is False
-        assert msg == "Invalid message_id. Expected 1. Found 2."
+        assert re.match("Invalid message_id. Expected .*. Found 200.", msg)
 
     def test_basic_validation_initial_message_negative_invalid_target(self):
         """Negative test for the '_basic_validation_initial_message' method: input message has invalid target."""
@@ -790,7 +792,7 @@ class TestDialogueBase:
 
         invalid_message_2_by_other = DefaultMessage(
             dialogue_reference=(str(1), str(1)),
-            message_id=3,
+            message_id=1000500000,
             target=1,
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello back",
@@ -802,9 +804,12 @@ class TestDialogueBase:
             invalid_message_2_by_other
         )
         assert result is False
-        assert msg == "Invalid message_id. Expected 2. Found 3."
+        assert re.match("Invalid message_id. Expected .*. Found 1000500000", msg)
 
-    def test_basic_validation_non_initial_message_negative_invalid_target_1(self):
+    @patch.object(BaseDialogue, "_validate_message_id", return_value=None)
+    def test_basic_validation_non_initial_message_negative_invalid_target_1(
+        self, *mocks
+    ):
         """Negative test for the '_basic_validation_non_initial_message' method: input message has target less than 1."""
         self.dialogue._update(self.valid_message_1_by_self)
 
@@ -833,7 +838,7 @@ class TestDialogueBase:
 
         invalid_message_2_by_other = DefaultMessage(
             dialogue_reference=(str(1), str(1)),
-            message_id=2,
+            message_id=-1,
             target=2,
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello back",
@@ -845,17 +850,18 @@ class TestDialogueBase:
             invalid_message_2_by_other
         )
         assert result is False
-        assert (
-            msg == "Invalid target. Expected a value less than or equal to 1. Found 2."
-        )
+        assert "Invalid target. Expected a value less than " in msg
 
-    def test_basic_validation_non_initial_message_negative_invalid_performative(self):
+    @patch.object(BaseDialogue, "_validate_message_id", return_value=None)
+    def test_basic_validation_non_initial_message_negative_invalid_performative(
+        self, *mocks
+    ):
         """Negative test for the '_basic_validation_non_initial_message' method: input message has invalid performative."""
         self.dialogue._update(self.valid_message_1_by_self)
 
         invalid_message_2_by_other = StateUpdateMessage(
             dialogue_reference=(str(1), str(1)),
-            message_id=2,
+            message_id=Mock(),
             target=1,
             performative=StateUpdateMessage.Performative.APPLY,
             amount_by_currency_id={},
@@ -874,38 +880,6 @@ class TestDialogueBase:
             ),
             invalid_message_2_by_other.performative,
         )
-
-    def test_additional_validation_positive(self):
-        """Positive test for the '_additional_rules' method."""
-        result, msg = self.dialogue._additional_validation(self.valid_message_1_by_self)
-        assert result is True
-        assert msg == "The message passes additional validation."
-
-        self.dialogue._update(self.valid_message_1_by_self)
-        self.dialogue._update(self.valid_message_2_by_other)
-
-        result, msg = self.dialogue._additional_validation(self.valid_message_3_by_self)
-        assert result is True
-        assert msg == "The message passes additional validation."
-
-    def test_additional_validation_negative_invalid_target(self):
-        """Negative test for the '_additional_rules' method: input message has invalid target (its target is not the last message of the dialogue)."""
-        self.dialogue._update(self.valid_message_1_by_self)
-        self.dialogue._update(self.valid_message_2_by_other)
-
-        invalid_message_3_by_self = DefaultMessage(
-            dialogue_reference=(str(1), str(1)),
-            message_id=3,
-            target=1,
-            performative=DefaultMessage.Performative.BYTES,
-            content=b"Hello back 2",
-        )
-        invalid_message_3_by_self.sender = self.agent_address
-        invalid_message_3_by_self.to = self.opponent_address
-
-        result, msg = self.dialogue._additional_validation(invalid_message_3_by_self)
-        assert result is False
-        assert msg == "Invalid target. Expected 2. Found 1."
 
     def test_update_dialogue_label_positive(self):
         """Positive test for the 'update_dialogue_label' method."""
@@ -987,7 +961,7 @@ class TestDialogueBase:
 
         valid_message_2_by_self = DefaultMessage(
             dialogue_reference=(str(1), str(1)),
-            message_id=2,
+            message_id=-1,
             target=1,
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello back",
@@ -999,8 +973,8 @@ class TestDialogueBase:
 
         valid_message_3_by_other = DefaultMessage(
             dialogue_reference=(str(1), str(1)),
-            message_id=3,
-            target=2,
+            message_id=2,
+            target=-1,
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello back 2",
         )
@@ -1183,16 +1157,14 @@ class TestDialoguesBase:
         assert (
             len(self.own_dialogues._dialogues_storage._dialogues_by_dialogue_label) == 0
         )
-        with pytest.raises(SyntaxError) as cm:
+        with pytest.raises(
+            ValueError, match="Invalid initial performative. Expected one of"
+        ):
             self.own_dialogues.create(
                 self.opponent_address,
                 DefaultMessage.Performative.ERROR,
                 content=b"Hello",
             )
-        assert (
-            str(cm.value)
-            == "Cannot create a dialogue with the specified performative and contents."
-        )
         assert (
             len(self.own_dialogues._dialogues_storage._dialogues_by_dialogue_label) == 0
         )
@@ -1235,7 +1207,7 @@ class TestDialoguesBase:
         )
         valid_message_2_by_other = DefaultMessage(
             dialogue_reference=dialogue_reference,
-            message_id=msg.message_id + 1,
+            message_id=dialogue.get_incoming_next_message_id(),
             target=msg.message_id,
             performative=DefaultMessage.Performative.BYTES,
             content=b"Hello back",
@@ -1570,7 +1542,8 @@ class TestDialoguesBase:
         assert retrieved_dialogue is not None
         assert retrieved_dialogue.dialogue_label == dialogue.dialogue_label
 
-    def test_get_dialogue_negative_invalid_reference(self):
+    @patch.object(BaseDialogue, "_validate_message_id", return_value=None)
+    def test_get_dialogue_negative_invalid_reference(self, *mocks):
         """Negative test for the 'get_dialogue' method: the input message has invalid dialogue reference."""
         msg, dialogue = self.own_dialogues.create(
             self.opponent_address, DefaultMessage.Performative.BYTES, content=b"Hello"

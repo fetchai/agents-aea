@@ -868,14 +868,6 @@ class ProtocolGenerator:
             self.indent
             + "enforce(self.target == 0, \"Invalid 'target'. Expected 0 (because 'message_id' is 1). Found {}.\".format(self.target))\n"
         )
-        self._change_indent(-1)
-        cls_str += self.indent + "else:\n"
-        self._change_indent(1)
-        cls_str += (
-            self.indent + "enforce(0 < self.target < self.message_id, "
-            "\"Invalid 'target'. Expected an integer between 1 and {} inclusive. Found {}.\""
-            ".format(self.message_id - 1, self.target,))\n"
-        )
         self._change_indent(-2)
         cls_str += (
             self.indent + "except (AEAEnforceError, ValueError, KeyError) as e:\n"

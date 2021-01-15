@@ -95,10 +95,16 @@ def test_dialogues_message_resolved_properly():
     comfirmation2_msg = dialogue.reply(
         performative=TacMessage.Performative.TRANSACTION_CONFIRMATION
     )
+    assert comfirmation2_msg.target == transaction2_msg.message_id
 
     dialogue = part1.update(comfirmation2_msg)
     assert dialogue
 
     dialogue = part2.update(transaction3_msg)
     assert dialogue
-    dialogue.reply(performative=TacMessage.Performative.TRANSACTION_CONFIRMATION)
+    msg1 = dialogue.reply(performative=TacMessage.Performative.TRANSACTION_CONFIRMATION)
+
+    # self reply
+    msg2 = dialogue.reply(performative=TacMessage.Performative.TRANSACTION_CONFIRMATION)
+    assert abs(msg2.message_id) - abs(msg1.message_id) == 1
+    assert msg2.target == msg1.message_id

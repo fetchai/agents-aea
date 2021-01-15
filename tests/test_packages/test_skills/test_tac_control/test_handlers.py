@@ -481,7 +481,7 @@ class TestTacHandler(BaseSkillTestCase):
             performative=TacMessage.Performative.TRANSACTION_CONFIRMATION,
             to=tac_participant_counterparty,
             sender=self.skill.skill_context.agent_address,
-            target=counterparty_dialogue.last_message.message_id - 1,
+            target=counterparty_dialogue.last_message.message_id + 1,
             transaction_id=tx.counterparty_hash,
             amount_by_currency_id=amount_by_currency_id,
             quantities_by_good_id=quantities_by_good_id,
