@@ -24,9 +24,7 @@ from pathlib import Path
 from typing import Optional, cast
 
 import click
-from packaging.version import Version
 
-import aea
 from aea.cli.add import add_item
 from aea.cli.init import do_init
 from aea.cli.utils.config import get_or_create_cli_config
@@ -55,7 +53,7 @@ from aea.configurations.constants import (
     STATE_UPDATE_PROTOCOL,
     VENDOR,
 )
-from aea.helpers.base import compute_specifier_from_version
+from aea.helpers.base import compute_specifier_from_version, get_current_aea_version
 
 
 @click.command()
@@ -179,7 +177,7 @@ def _crete_agent_config(ctx: Context, agent_name: str, set_author: str) -> Agent
     """
     agent_config = AgentConfig(
         agent_name=agent_name,
-        aea_version=compute_specifier_from_version(Version(aea.__version__)),
+        aea_version=compute_specifier_from_version(get_current_aea_version()),
         author=set_author,
         version=DEFAULT_VERSION,
         license_=DEFAULT_LICENSE,
