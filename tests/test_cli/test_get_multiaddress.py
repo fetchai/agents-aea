@@ -192,7 +192,7 @@ class TestGetMultiAddressCommandNegativeBadHostField(AEATestCaseEmpty):
         # this will cause exception because no host configuration is in stub connection by default.
         with pytest.raises(
             Exception,
-            match="Host field 'some_host' not present in connection configuration fetchai/stub:0.14.0",
+            match="Host field 'some_host' not present in connection configuration fetchai/stub:0.15.0",
         ):
             self.run_cli_command(
                 "get-multiaddress",
@@ -223,7 +223,7 @@ class TestGetMultiAddressCommandNegativeBadPortField(AEATestCaseEmpty):
         # this will cause exception because no port configuration is in stub connection by default.
         with pytest.raises(
             Exception,
-            match="Port field 'some_port' not present in connection configuration fetchai/stub:0.14.0",
+            match="Port field 'some_port' not present in connection configuration fetchai/stub:0.15.0",
         ):
             self.run_cli_command(
                 "get-multiaddress",
@@ -335,7 +335,7 @@ class TestGetMultiAddressCommandNegativeUriNotExisting(AEATestCaseEmpty):
         # this will cause exception because only the host, and not the port, are specified.
         with pytest.raises(
             Exception,
-            match="URI field 'some_uri' not present in connection configuration fetchai/stub:0.14.0",
+            match="URI field 'some_uri' not present in connection configuration fetchai/stub:0.15.0",
         ):
             self.run_cli_command(
                 "get-multiaddress",

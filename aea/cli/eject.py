@@ -156,14 +156,21 @@ def _eject_item(
     cli_author: str = cast(str, ctx.config.get("cli_author"))
     item_type_plural = item_type + "s"
     if not is_item_present(
-        ctx, item_type, public_id, is_vendor=True, with_version=True
+        ctx.cwd,
+        ctx.agent_config,
+        item_type,
+        public_id,
+        is_vendor=True,
+        with_version=True,
     ):  # pragma: no cover
         raise click.ClickException(
             f"{item_type.title()} {public_id} not found in agent's vendor items."
         )
-    src = get_package_path(ctx, item_type, public_id)
-    dst = get_package_path(ctx, item_type, public_id, is_vendor=False)
-    if is_item_present(ctx, item_type, public_id, is_vendor=False):  # pragma: no cover
+    src = get_package_path(ctx.cwd, item_type, public_id)
+    dst = get_package_path(ctx.cwd, item_type, public_id, is_vendor=False)
+    if is_item_present(
+        ctx.cwd, ctx.agent_config, item_type, public_id, is_vendor=False
+    ):  # pragma: no cover
         raise click.ClickException(
             f"{item_type.title()} {public_id} is already a non-vendor package."
         )

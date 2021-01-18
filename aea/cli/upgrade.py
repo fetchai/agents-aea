@@ -269,9 +269,13 @@ class ItemUpgrader:
     def check_item_present(self) -> None:
         """Check item going to be upgraded already registered in agent."""
         if not is_item_present(
-            self.ctx, self.item_type, self.item_public_id
+            self.ctx.cwd, self.ctx.agent_config, self.item_type, self.item_public_id
         ) and not is_item_present(
-            self.ctx, self.item_type, self.item_public_id, is_vendor=False
+            self.ctx.cwd,
+            self.ctx.agent_config,
+            self.item_type,
+            self.item_public_id,
+            is_vendor=False,
         ):
             raise NotAddedException()
 
