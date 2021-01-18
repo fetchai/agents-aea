@@ -230,13 +230,15 @@ class MultiAgentManager:
         """Add error callback to call on error raised."""
         self._error_callbacks.append(error_callback)
 
-    def start_manager(self, local: bool = True) -> "MultiAgentManager":
+    def start_manager(
+        self, local: bool = False, remote: bool = False
+    ) -> "MultiAgentManager":
         """Start manager."""
         if self._is_running:
             return self
 
         self._ensure_working_dir()
-        self._load_state(local=local)
+        self._load_state(local=local, remote=remote)
 
         self._started_event.clear()
         self._is_running = True
@@ -300,13 +302,18 @@ class MultiAgentManager:
                 rmtree(self.working_dir)
 
     def add_project(
-        self, public_id: PublicId, local: bool = True, restore: bool = False
+        self,
+        public_id: PublicId,
+        local: bool = False,
+        remote: bool = False,
+        restore: bool = False,
     ) -> "MultiAgentManager":
         """
         Fetch agent project and all dependencies to working_dir.
 
         :param public_id: the public if of the agent project.
         :param local: whether or not to fetch from local registry.
+        :param remote: whether or not to fetch from remote registry.
         :param restore: bool flag for restoring already fetched agent.
         """
         if public_id.to_any() in self._versionless_projects_set:
@@ -320,6 +327,7 @@ class MultiAgentManager:
             self.working_dir,
             public_id,
             local,
+            remote,
             registry_path=self.registry_path,
             is_restore=restore,
         )
@@ -661,11 +669,12 @@ class MultiAgentManager:
         if not os.path.exists(self.certs_dir):
             os.makedirs(self.certs_dir)
 
-    def _load_state(self, local: bool) -> None:
+    def _load_state(self, local: bool, remote: bool) -> None:
         """
         Load saved state from file.
 
         :param local: bool is local project and agents re-creation.
+        :param remote: bool if it is a remote project.
 
         :return: None
         :raises: ValueError if failed to load state.
@@ -683,7 +692,10 @@ class MultiAgentManager:
         try:
             for public_id in save_json["projects"]:
                 self.add_project(
-                    PublicId.from_str(public_id), local=local, restore=True
+                    PublicId.from_str(public_id),
+                    local=local,
+                    remote=remote,
+                    restore=True,
                 )
 
             for agent_settings in save_json["agents"]:

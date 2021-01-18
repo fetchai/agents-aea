@@ -25,9 +25,8 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
-from aea.cli.fetch import fetch_agent_locally
+from aea.cli.fetch import do_fetch
 from aea.cli.issue_certificates import issue_certificates_
-from aea.cli.registry.fetch import fetch_agent
 from aea.cli.utils.context import Context
 from aea.configurations.base import AgentConfig, PublicId
 from aea.configurations.constants import DEFAULT_REGISTRY_NAME
@@ -89,6 +88,7 @@ class Project(_Base):
         working_dir: str,
         public_id: PublicId,
         is_local: bool = False,
+        is_remote: bool = False,
         is_restore: bool = False,
         registry_path: str = DEFAULT_REGISTRY_NAME,
         skip_consistency_check: bool = False,
@@ -98,7 +98,8 @@ class Project(_Base):
 
         :param working_dir: the working directory
         :param public_id: the public id
-        :param is_local: whether to fetch from local or remote
+        :param is_local: whether to fetch from local
+        :param is_remote whether to fetch from remote
         :param registry_path: the path to the registry locally
         :param skip_consistency_check: consistency checks flag
         """
@@ -109,12 +110,7 @@ class Project(_Base):
         target_dir = os.path.join(public_id.author, public_id.name)
 
         if not is_restore and not os.path.exists(target_dir):
-            if is_local:
-                ctx.set_config("is_local", True)
-                fetch_agent_locally(ctx, public_id, target_dir=target_dir)
-            else:
-                fetch_agent(ctx, public_id, target_dir=target_dir)  # pragma: nocover
-
+            do_fetch(ctx, public_id, is_local, is_remote, target_dir=target_dir)
         return cls(public_id, path)
 
     def remove(self) -> None:
