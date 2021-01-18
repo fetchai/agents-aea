@@ -96,6 +96,10 @@ class Project(_Base):
         """
         Load project with given public_id to working_dir.
 
+        If local = False and remote = False, then the packages
+        are fetched in mixed mode (i.e. first try from local
+        registry, and then from remote registry in case of failure).
+
         :param working_dir: the working directory
         :param public_id: the public id
         :param is_local: whether to fetch from local

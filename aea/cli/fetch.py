@@ -76,7 +76,7 @@ def do_fetch(
     :param local: whether to fetch from local
     :param remote whether to fetch from remote
     :param alias: the agent alias.
-    :param alias: the target directory, in case fetching locally.
+    :param target_dir: the target directory, in case fetching locally.
     :return: None
     """
     enforce(
@@ -86,11 +86,11 @@ def do_fetch(
     ctx.set_config("is_local", local and not remote)
     ctx.set_config("is_mixed", is_mixed)
     if remote:
-        fetch_agent(ctx, public_id, alias)
+        fetch_agent(ctx, public_id, alias=alias, target_dir=target_dir)
     elif local:
-        fetch_agent_locally(ctx, public_id, alias, target_dir=target_dir)
+        fetch_agent_locally(ctx, public_id, alias=alias, target_dir=target_dir)
     else:
-        fetch_mixed(ctx, public_id, alias)
+        fetch_mixed(ctx, public_id, alias=alias, target_dir=target_dir)
 
 
 def _is_version_correct(ctx: Context, agent_public_id: PublicId) -> bool:

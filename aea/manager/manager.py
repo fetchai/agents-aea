@@ -233,7 +233,17 @@ class MultiAgentManager:
     def start_manager(
         self, local: bool = False, remote: bool = False
     ) -> "MultiAgentManager":
-        """Start manager."""
+        """
+        Start manager.
+
+        If local = False and remote = False, then the packages
+        are fetched in mixed mode (i.e. first try from local
+        registry, and then from remote registry in case of failure).
+
+        :param local: whether or not to fetch from local registry.
+        :param remote: whether or not to fetch from remote registry.
+        :return: the MultiAgentManager instance.
+        """
         if self._is_running:
             return self
 
@@ -310,6 +320,10 @@ class MultiAgentManager:
     ) -> "MultiAgentManager":
         """
         Fetch agent project and all dependencies to working_dir.
+
+        If local = False and remote = False, then the packages
+        are fetched in mixed mode (i.e. first try from local
+        registry, and then from remote registry in case of failure).
 
         :param public_id: the public if of the agent project.
         :param local: whether or not to fetch from local registry.
@@ -673,8 +687,14 @@ class MultiAgentManager:
         """
         Load saved state from file.
 
-        :param local: bool is local project and agents re-creation.
-        :param remote: bool if it is a remote project.
+        Fetch agent project and all dependencies to working_dir.
+
+        If local = False and remote = False, then the packages
+        are fetched in mixed mode (i.e. first try from local
+        registry, and then from remote registry in case of failure).
+
+        :param local: whether or not to fetch from local registry.
+        :param remote: whether or not to fetch from remote registry.
 
         :return: None
         :raises: ValueError if failed to load state.
