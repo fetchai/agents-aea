@@ -43,6 +43,7 @@ from aea.helpers.base import (
     RegexConstrainedString,
     compute_specifier_from_version,
     decorator_with_optional_params,
+    delete_directory_contents,
     dict_to_path_value,
     ensure_dir,
     exception_log_and_reraise,
@@ -55,7 +56,7 @@ from aea.helpers.base import (
     retry_decorator,
     send_control_c,
     try_decorator,
-    win_popen_kwargs, cd, delete_directory_contents,
+    win_popen_kwargs,
 )
 
 from packages.fetchai.connections.oef.connection import OEFConnection
@@ -650,14 +651,14 @@ class TestDeleteDirectoryContents:
         """Set up the test."""
         self.root = Path(tempfile.mkdtemp())
         # create a file
-        file_1 = (self.root / "file_1")
+        file_1 = self.root / "file_1"
         file_1.touch()
 
         # create a symlink
         (self.root / "symlink_1").symlink_to(file_1)
 
         # create a subdirectory
-        subdir = (self.root / "directory")
+        subdir = self.root / "directory"
         subdir.mkdir()
 
         # create a file in the directory
