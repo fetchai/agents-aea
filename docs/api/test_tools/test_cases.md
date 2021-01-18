@@ -37,7 +37,7 @@ Unset the current agent context.
 
 ```python
  | @classmethod
- | set_config(cls, dotted_path: str, value: Any, type_: str = "str") -> Result
+ | set_config(cls, dotted_path: str, value: Any, type_: Optional[str] = None) -> Result
 ```
 
 Set a config.
@@ -85,7 +85,7 @@ None
 
 ```python
  | @classmethod
- | run_cli_command(cls, *args: str, *, cwd: str = ".") -> Result
+ | run_cli_command(cls, *args: str, *, cwd: str = ".", **kwargs) -> Result
 ```
 
 Run AEA CLI command.
@@ -94,6 +94,7 @@ Run AEA CLI command.
 
 - `args`: CLI args
 - `cwd`: the working directory from where to run the command.
+- `kwargs`: other keyword arguments to click.CLIRunner.invoke.
 
 **Raises**:
 

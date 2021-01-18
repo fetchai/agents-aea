@@ -1,14 +1,14 @@
 name: carpark_detection
 author: fetchai
-version: 0.17.0
+version: 0.18.0
 type: skill
 description: The carpark detection skill implements the detection and trading functionality
   for a carpark agent.
 license: Apache-2.0
-aea_version: '>=0.8.0, <0.9.0'
+aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
   README.md: QmW7hmuVF8Nvkw8cJYdYSsSjqc7yZxCPmV8oefYFMtBixG
-  __init__.py: QmakLeoeEG8mD6MdcUvu8cuGoq682ZJjHaVPgCD3m95twE
+  __init__.py: QmbE2Was5RRLGQTk6DB9ewW3oxdSQgUeWFpBegGC5qqvFk
   behaviours.py: QmTNboU3YH8DehWnpZmoiDUCncpNmqoSVt1Yp4j7NsgY2S
   database.py: Qma4Ydj8EQtWr4W9EgUvZs5AkZ5tKHjSgHaxQDfzrPm27N
   dialogues.py: QmPXfUWDxnHDaHQqsgtVhJ2v9dEgGWLtvEHKFvvFcDXGms
@@ -19,12 +19,12 @@ fingerprint_ignore_patterns:
 connections: []
 contracts: []
 protocols:
-- fetchai/default:0.10.0
-- fetchai/fipa:0.11.0
-- fetchai/ledger_api:0.8.0
-- fetchai/oef_search:0.11.0
+- fetchai/default:0.11.0
+- fetchai/fipa:0.12.0
+- fetchai/ledger_api:0.9.0
+- fetchai/oef_search:0.12.0
 skills:
-- fetchai/generic_seller:0.18.0
+- fetchai/generic_seller:0.19.0
 behaviours:
   service_registration:
     args:

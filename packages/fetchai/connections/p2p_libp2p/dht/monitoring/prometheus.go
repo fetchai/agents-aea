@@ -94,7 +94,11 @@ func (pmts *PrometheusMonitoring) GetGauge(name string) (Gauge, bool) {
 	return gauge, ok
 }
 
-func (pmts *PrometheusMonitoring) NewHistogram(name string, description string, buckets []float64) (Histogram, error) {
+func (pmts *PrometheusMonitoring) NewHistogram(
+	name string,
+	description string,
+	buckets []float64,
+) (Histogram, error) {
 	histogram := promauto.NewHistogram(prometheus.HistogramOpts{
 		Namespace: pmts.Namespace,
 		Name:      name,

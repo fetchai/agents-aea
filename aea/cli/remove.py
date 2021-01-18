@@ -191,7 +191,11 @@ class ItemRemoveHelper:
             items = getattr(item, f"{item_type}s", set())
             for item_public_id in items:
                 if ignore_non_vendor and is_item_present(
-                    self._ctx, item_type, item_public_id, is_vendor=False
+                    self._ctx.cwd,
+                    self._ctx.agent_config,
+                    item_type,
+                    item_public_id,
+                    is_vendor=False,
                 ):
                     continue
                 yield PackageId(item_type, item_public_id)
@@ -435,12 +439,7 @@ class RemoveItem:
         self.agent_config.component_configurations.pop(
             ComponentId(self.item_type, current_item), None
         )
-        self._dump_agent_config()
-
-    def _dump_agent_config(self) -> None:
-        """Save agent config to the filesystem."""
-        with open(os.path.join(self.ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as f:
-            self.ctx.agent_loader.dump(self.agent_config, f)
+        self.ctx.dump_agent_config()
 
     def remove_dependencies(self) -> None:
         """Remove all the dependecies related only to the package."""

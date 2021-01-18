@@ -50,7 +50,7 @@ _default_logger = logging.getLogger(
     "aea.packages.fetchai.connections.p2p_libp2p_client"
 )
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_client:0.10.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_client:0.11.0")
 
 SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 
@@ -192,6 +192,7 @@ class P2PLibp2pClientConnection(Connection):
         record.peer_public_key = self.node_por.representative_public_key
         record.signature = self.node_por.signature
         record.service_id = POR_DEFAULT_SERVICE_ID
+        record.ledger_id = self.node_por.ledger_id
 
         registration = Register()
         registration.record.CopyFrom(record)  # pylint: disable=no-member

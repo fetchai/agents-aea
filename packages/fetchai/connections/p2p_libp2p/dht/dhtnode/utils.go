@@ -24,17 +24,44 @@ package dhtnode
 import (
 	"errors"
 	utils "libp2p_node/utils"
+	"strings"
 )
 
 const (
+	DefaultLedger  = "fetchai"
 	CurrentVersion = "0.1.0"
 )
 
-func IsValidProofOfRepresentation(record *AgentRecord, agentAddress string, representativePeerPubKey string) (*Status, error) {
+var supportedLedgers = []string{"fetchai", "cosmos", "ethereum"}
+
+func IsValidProofOfRepresentation(
+	record *AgentRecord,
+	agentAddress string,
+	representativePeerPubKey string,
+) (*Status, error) {
 	// check agent address matches
 	if record.Address != agentAddress {
 		err := errors.New("Wrong agent address, expected " + agentAddress)
 		response := &Status{Code: Status_ERROR_WRONG_AGENT_ADDRESS, Msgs: []string{err.Error()}}
+		return response, err
+	}
+
+	// check if ledger is supported
+	var found = false
+	for _, supported := range supportedLedgers {
+		if record.LedgerId == supported {
+			found = true
+			break
+		}
+	}
+	if !found {
+		err := errors.New(
+			"Unsupported ledger " + record.LedgerId + ", expected " + strings.Join(
+				supportedLedgers,
+				",",
+			),
+		)
+		response := &Status{Code: Status_ERROR_UNSUPPORTED_LEDGER, Msgs: []string{err.Error()}}
 		return response, err
 	}
 
@@ -46,7 +73,7 @@ func IsValidProofOfRepresentation(record *AgentRecord, agentAddress string, repr
 	}
 
 	// check that agent address and public key match
-	addrFromPubKey, err := utils.FetchAIAddressFromPublicKey(record.PublicKey)
+	addrFromPubKey, err := utils.AgentAddressFromPublicKey(record.LedgerId, record.PublicKey)
 	if err != nil || addrFromPubKey != record.Address {
 		if err == nil {
 			err = errors.New("Agent address and public key don't match")
@@ -56,7 +83,12 @@ func IsValidProofOfRepresentation(record *AgentRecord, agentAddress string, repr
 	}
 
 	// check that signature is valid
-	ok, err := utils.VerifyFetchAISignatureBTC([]byte(record.PeerPublicKey), record.Signature, record.PublicKey)
+	ok, err := utils.VerifyLedgerSignature(
+		record.LedgerId,
+		[]byte(record.PeerPublicKey),
+		record.Signature,
+		record.PublicKey,
+	)
 	if !ok || err != nil {
 		if err == nil {
 			err = errors.New("Signature is not valid")

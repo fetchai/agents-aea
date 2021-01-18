@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains tests for aea manager."""
+import asyncio
 import os
 from contextlib import suppress
 from shutil import rmtree
@@ -26,8 +27,10 @@ from unittest.mock import Mock, patch
 import pytest
 
 from aea.configurations.base import PublicId
+from aea.crypto.helpers import create_private_key
 from aea.manager import MultiAgentManager
 
+from packages.fetchai.connections.stub.connection import StubConnection
 from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
 
 from tests.common.utils import wait_for_condition
@@ -321,13 +324,13 @@ class TestMultiAgentManagerAsyncMode(
         self.manager.stop_manager()
         assert not self.manager.is_running
 
-    @pytest.mark.asyncio
-    async def test_run_loop_direct_call(self, *args):
+    def test_run_loop_direct_call(self, *args):
         """Test do not allow to run MultiAgentManager_loop directly."""
+        loop = asyncio.new_event_loop()
         with pytest.raises(
             ValueError, match="Do not use this method directly, use start_manager"
         ):
-            await self.manager._manager_loop()
+            loop.run_until_complete(self.manager._manager_loop())
 
     def test_remove_running_agent(self, *args):
         """Test fail on remove running agent."""
@@ -399,6 +402,51 @@ class TestMultiAgentManagerAsyncMode(
         assert "description" in agent_overridables
         assert len(components_overridables) == 3
         assert "is_abstract" in components_overridables[0]
+
+    def test_issue_certificates(self, *args):
+        """Test agent alias issue certificates."""
+        self.manager.start_manager()
+        self.manager.add_project(self.project_public_id, local=True)
+
+        cert_path = os.path.abspath(os.path.join(self.working_dir, "cert.txt"))
+        assert not os.path.exists(cert_path)
+
+        priv_key_path = os.path.abspath(os.path.join(self.working_dir, "priv_key.txt"))
+        create_private_key("fetchai", priv_key_path)
+        assert os.path.exists(priv_key_path)
+
+        component_overrides = [
+            {
+                **StubConnection.connection_id.json,
+                "type": "connection",
+                "cert_requests": [
+                    {
+                        "identifier": "acn",
+                        "ledger_id": "fetchai",
+                        "not_after": "2022-01-01",
+                        "not_before": "2021-01-01",
+                        "public_key": "fetchai",
+                        "save_path": cert_path,
+                    }
+                ],
+            }
+        ]
+
+        agent_overrides = {
+            "private_key_paths": {"fetchai": priv_key_path},
+            "connection_private_key_paths": {"fetchai": priv_key_path},
+        }
+        self.manager.add_agent(
+            self.project_public_id,
+            self.agent_name,
+            agent_overrides=agent_overrides,
+            component_overrides=component_overrides,
+        )
+        agent_alias = self.manager.get_agent_alias(self.agent_name)
+
+        agent_alias.issue_certificates()
+
+        assert os.path.exists(cert_path)
 
 
 class TestMultiAgentManagerThreadedMode(TestMultiAgentManagerAsyncMode):

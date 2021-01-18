@@ -304,6 +304,14 @@ class TestAEA(AEATestCase):
         result = self.fingerprint_item("skill", "fetchai/skill1:0.1.0")
         assert result.exit_code == 0
 
+    def test_scaffold_and_fingerprint_protocol(self):
+        """Test component scaffold and fingerprint protocol."""
+        result = self.scaffold_item("protocol", "protocol1")
+        assert result.exit_code == 0
+
+        result = self.fingerprint_item("protocol", "fetchai/protocol1:0.1.0")
+        assert result.exit_code == 0
+
 
 class TestSendReceiveEnvelopesSkill(AEATestCaseEmpty):
     """Test that we can communicate with agent via stub connection."""

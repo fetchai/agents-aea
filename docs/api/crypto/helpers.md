@@ -3,24 +3,6 @@
 
 Module wrapping the helpers of public and private key cryptography.
 
-<a name="aea.crypto.helpers.verify_or_create_private_keys"></a>
-#### verify`_`or`_`create`_`private`_`keys
-
-```python
-verify_or_create_private_keys(aea_project_path: Path, exit_on_error: bool = True) -> AgentConfig
-```
-
-Verify or create private keys.
-
-**Arguments**:
-
-- `aea_project_path`: path to an AEA project.
-- `exit_on_error`: whether we should exit the program on error.
-
-**Returns**:
-
-the agent configuration.
-
 <a name="aea.crypto.helpers.try_validate_private_key_path"></a>
 #### try`_`validate`_`private`_`key`_`path
 
@@ -78,4 +60,31 @@ Try generate wealth on a testnet.
 **Returns**:
 
 None
+
+<a name="aea.crypto.helpers.private_key_verify_or_create"></a>
+#### private`_`key`_`verify`_`or`_`create
+
+```python
+private_key_verify_or_create(aea_conf: AgentConfig, aea_project_path: Path, create_keys: bool = True) -> None
+```
+
+Check key or create if none present.
+
+**Arguments**:
+
+- `aea_conf`: AgentConfig
+- `aea_project_path`: Path, where project placed.
+
+**Returns**:
+
+None
+
+<a name="aea.crypto.helpers.make_certificate"></a>
+#### make`_`certificate
+
+```python
+make_certificate(ledger_id: str, crypto_private_key_path: str, message: bytes, output_path: str) -> str
+```
+
+Create certificate.
 

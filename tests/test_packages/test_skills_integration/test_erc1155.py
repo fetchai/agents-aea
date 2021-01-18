@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains the integration test for the generic buyer and seller skills."""
+import json
 from random import uniform
 
 import pytest
@@ -29,7 +30,6 @@ from tests.conftest import (
     ETHEREUM,
     ETHEREUM_PRIVATE_KEY_FILE,
     FETCHAI,
-    FETCHAI_PRIVATE_KEY_FILE,
     FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
     FUNDED_ETH_PRIVATE_KEY_2,
     FUNDED_ETH_PRIVATE_KEY_3,
@@ -57,9 +57,9 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseGanache):
 
         # add ethereum ledger in both configuration files
         default_routing = {
-            "fetchai/ledger_api:0.8.0": "fetchai/ledger:0.11.0",
-            "fetchai/contract_api:0.9.0": "fetchai/ledger:0.11.0",
-            "fetchai/oef_search:0.11.0": "fetchai/soef:0.14.0",
+            "fetchai/ledger_api:0.9.0": "fetchai/ledger:0.12.0",
+            "fetchai/contract_api:0.10.0": "fetchai/ledger:0.12.0",
+            "fetchai/oef_search:0.12.0": "fetchai/soef:0.15.0",
         }
 
         # generate random location
@@ -70,18 +70,18 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseGanache):
 
         # add packages for agent one
         self.set_agent_context(deploy_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.13.0")
-        self.add_item("connection", "fetchai/ledger:0.11.0")
-        self.add_item("connection", "fetchai/soef:0.14.0")
-        self.remove_item("connection", "fetchai/stub:0.13.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.13.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.14.0")
+        self.add_item("connection", "fetchai/ledger:0.12.0")
+        self.add_item("connection", "fetchai/soef:0.15.0")
+        self.remove_item("connection", "fetchai/stub:0.15.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.14.0")
         self.set_config("agent.default_ledger", ETHEREUM)
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
-        self.add_item("skill", "fetchai/erc1155_deploy:0.19.0")
+        self.add_item("skill", "fetchai/erc1155_deploy:0.20.0")
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/erc1155_deployer:0.20.0", deploy_aea_name
+            "fetchai/erc1155_deployer:0.21.0", deploy_aea_name
         )
         assert (
             diff == []
@@ -92,9 +92,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseGanache):
         self.replace_private_key_in_file(
             FUNDED_ETH_PRIVATE_KEY_3, ETHEREUM_PRIVATE_KEY_FILE
         )
-        self.generate_private_key(FETCHAI)
         self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
             FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
@@ -103,8 +101,20 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseGanache):
         )
         setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
         self.set_config(setting_path, "ethereum")
-        setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.set_config(setting_path, FETCHAI)
+        setting_path = "vendor.fetchai.connections.p2p_libp2p.cert_requests"
+        settings = json.dumps(
+            [
+                {
+                    "identifier": "acn",
+                    "ledger_id": ETHEREUM,
+                    "not_after": "2022-01-01",
+                    "not_before": "2021-01-01",
+                    "public_key": FETCHAI,
+                    "save_path": ".certs/conn_cert.txt",
+                }
+            ]
+        )
+        self.set_config(setting_path, settings, type_="list")
         self.run_install()
 
         # replace location
@@ -115,18 +125,18 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseGanache):
 
         # add packages for agent two
         self.set_agent_context(client_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.13.0")
-        self.add_item("connection", "fetchai/ledger:0.11.0")
-        self.add_item("connection", "fetchai/soef:0.14.0")
-        self.remove_item("connection", "fetchai/stub:0.13.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.13.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.14.0")
+        self.add_item("connection", "fetchai/ledger:0.12.0")
+        self.add_item("connection", "fetchai/soef:0.15.0")
+        self.remove_item("connection", "fetchai/stub:0.15.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.14.0")
         self.set_config("agent.default_ledger", ETHEREUM)
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
-        self.add_item("skill", "fetchai/erc1155_client:0.18.0")
+        self.add_item("skill", "fetchai/erc1155_client:0.19.0")
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/erc1155_client:0.20.0", client_aea_name
+            "fetchai/erc1155_client:0.21.0", client_aea_name
         )
         assert (
             diff == []
@@ -137,9 +147,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseGanache):
         self.replace_private_key_in_file(
             FUNDED_ETH_PRIVATE_KEY_2, ETHEREUM_PRIVATE_KEY_FILE
         )
-        self.generate_private_key(FETCHAI)
         self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
             FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
@@ -147,6 +155,20 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseGanache):
         self.set_config(setting_path, "ethereum")
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
         self.nested_set_config(setting_path, NON_GENESIS_CONFIG)
+        setting_path = "vendor.fetchai.connections.p2p_libp2p.cert_requests"
+        settings = json.dumps(
+            [
+                {
+                    "identifier": "acn",
+                    "ledger_id": ETHEREUM,
+                    "not_after": "2022-01-01",
+                    "not_before": "2021-01-01",
+                    "public_key": FETCHAI,
+                    "save_path": ".certs/conn_cert.txt",
+                }
+            ]
+        )
+        self.set_config(setting_path, settings, type_="list")
         self.run_install()
 
         # replace location

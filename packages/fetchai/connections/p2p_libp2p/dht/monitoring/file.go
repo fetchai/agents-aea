@@ -146,7 +146,11 @@ func (fm *FileMonitoring) GetGauge(name string) (Gauge, bool) {
 	return gauge, ok
 }
 
-func (fm *FileMonitoring) NewHistogram(name string, description string, buckets []float64) (Histogram, error) {
+func (fm *FileMonitoring) NewHistogram(
+	name string,
+	description string,
+	buckets []float64,
+) (Histogram, error) {
 	histogram := &FileHistogram{
 		buckets: buckets,
 		counts:  make([]uint64, len(buckets)+1),

@@ -141,7 +141,7 @@ Confirm password:
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.8.0
+v0.9.1
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
@@ -158,7 +158,7 @@ The echo skill demo is a simple demo that introduces you to the main business lo
 The fastest way to create your first AEA is to fetch it!
 
 ``` bash
-aea fetch fetchai/my_first_aea:0.16.0
+aea fetch fetchai/my_first_aea:0.18.0
 cd my_first_aea
 ```
 
@@ -178,9 +178,9 @@ cd my_first_aea
 <br>
 Second, add the echo skill to the project.
 ``` bash
-aea add skill fetchai/echo:0.12.0
+aea add skill fetchai/echo:0.13.0
 ```
-This copies the `fetchai/echo:0.12.0` skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill `fetchai/echo:0.12.0` consists of the name of the author of the skill, followed by the skill name and its version.
+This copies the `fetchai/echo:0.13.0` skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill `fetchai/echo:0.13.0` consists of the name of the author of the skill, followed by the skill name and its version.
 </details>
 
 ## Communication via envelopes and messages
@@ -206,12 +206,12 @@ TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE,
 For example:
 
 ``` bash
-recipient_aea,sender_aea,fetchai/default:0.10.0,\x08\x01\x12\x011*\x07\n\x05hello,
+recipient_aea,sender_aea,fetchai/default:0.11.0,\x08\x01\x12\x011*\x07\n\x05hello,
 ```
 
 ## Run the AEA
 
-Run the AEA with the default `fetchai/stub:0.13.0` connection.
+Run the AEA with the default `fetchai/stub:0.15.0` connection.
 
 ``` bash
 aea run
@@ -220,7 +220,7 @@ aea run
 or
 
 ``` bash
-aea run --connections fetchai/stub:0.13.0
+aea run --connections fetchai/stub:0.15.0
 ```
 
 You will see the echo skill running in the terminal window.
@@ -232,7 +232,7 @@ You will see the echo skill running in the terminal window.
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.8.0
+v0.9.1
 
 Starting AEA 'my_first_aea' in 'async' mode ...
 info: Echo Handler: setup method called.
@@ -269,7 +269,7 @@ info: Echo Behaviour: act method called.
 Optionally, from a different terminal and same directory (i.e. the `my_first_aea` project), we send the AEA a message wrapped in an envelope via the input file.
 
 ``` bash
-echo 'my_first_aea,sender_aea,fetchai/default:0.10.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,' >> input_file
+echo 'my_first_aea,sender_aea,fetchai/default:0.11.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,' >> input_file
 ```
 
 You will see the `Echo Handler` dealing with the envelope and responding with the same message to the `output_file`, and also decoding the Base64 encrypted message in this case.

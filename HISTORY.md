@@ -1,5 +1,40 @@
 # Release History
 
+## 0.9.1 (2020-01-14)
+
+- Fixes multiple issues with `MultiAgentManager` including overrides not being correctly applied
+- Restructures docs navigation
+- Updates `MultiAgentManager` documentation
+- Extends functionality of `aea upgrade` command to cover more cases
+- Fixes a bug in the `aea upgrade` command which prevented upgrading across version minors
+- Fixes a bug in `aea fetch` where the console output was inconsistent with the actual error
+- Fixes scaffold connection constructor
+- Multiple additional tests to improve stability
+- Multiple docs updates based on user feedback
+- Multiple additional tests and test stability fixes
+
+## 0.9.0 (2020-01-06)
+
+- Adds multiple bug fixes on `MultiAgentManager`
+- Adds `AgentConfigManager` for better programmatic configuration management
+- Fixes auto-filling of `aea_version` field in AEA configuration
+- Adds tests for confirmation skills AW2/3
+- Extends `MultiAgentManager` to support proper configuration overriding
+- Fixes ML skills demo
+- Fixes environment variable resolution in configuration files
+- Adds support to fingerprint packages by providing a path
+- Adds `local-registry-sync` CLI command to sync local and remote registry
+- Adds support to push vendorised packages to local registry
+- Adds missing tests for code in documentation
+- Adds prompt in `scaffold protocol` CLI command to hint at protocol generator
+- Adds `issue-certificates` CLI command for Proof of Representation
+- Adds `cert_requests` support in connections for Proof of Representation
+- Adds support for Proof of Representation in ACN (`p2p_libp2p*` connections)
+- Adds automated spell checking for all `.md` files and makes related fixes
+- Multiple additional tests to improve stability
+- Multiple docs updates based on user feedback
+- Multiple additional tests and test stability fixes
+
 ## 0.8.0 (2020-12-17)
 
 - Adds support for protocol dialogue rules validation

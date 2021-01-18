@@ -10,10 +10,10 @@ This is a protocol for interacting with prometheus connection.
 ---
 name: prometheus
 author: fetchai
-version: 0.1.0
+version: 0.2.0
 description: A protocol for adding and updating metrics to a prometheus server.
 license: Apache-2.0
-aea_version: '>=0.8.0, <0.9.0'
+aea_version: '>=0.9.0, <0.10.0'
 speech_acts:
   add_metric:
     type: pt:str

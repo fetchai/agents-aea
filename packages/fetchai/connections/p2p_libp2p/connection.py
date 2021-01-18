@@ -64,7 +64,7 @@ PIPE_CONN_TIMEOUT = 10.0
 # TOFIX(LR) not sure is needed
 LIBP2P = "libp2p"
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.13.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.14.0")
 
 SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 
@@ -268,6 +268,7 @@ class Libp2pNode:
             )
             self._config += "AEA_P2P_POR_SIGNATURE={}\n".format(self.record.signature)
             self._config += "AEA_P2P_POR_SERVICE_ID={}\n".format(POR_DEFAULT_SERVICE_ID)
+            self._config += "AEA_P2P_POR_LEDGER_ID={}\n".format(self.record.ledger_id)
             self._config += "AEA_P2P_CFG_REGISTRATION_DELAY={}\n".format(
                 str(self.peer_registration_delay)
                 if self.peer_registration_delay is not None
@@ -473,7 +474,7 @@ class P2PLibp2pConnection(Connection):
         else:
             raise ValueError(
                 f"Couldn't find connection key for {str(ledger_id)} in connections keys. "
-                "Please ensure agent private key is added"
+                "Please ensure agent private key is added with `aea add-key`."
             )
 
         uri = None

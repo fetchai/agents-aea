@@ -130,15 +130,21 @@ jobs:
     continue-on-error: False
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: github.event_name == 'pull_request' && github.ref == 'refs/heads/master'
+    if: github.base_ref == 'master'
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-python@master
         with:
-          python-version: 3.6
+          python-version: 3.7
       - uses: actions/setup-node@v1
         with:
           node-version: 12.x
+      - name: Install dependencies (ubuntu-latest)
+        run: |
+          sudo apt-get update --fix-missing
+          sudo apt-get autoremove
+          sudo apt-get autoclean
+          pip install tox
       - name: Install markdown-spellcheck
         run: sudo npm install -g markdown-spellcheck
       - name: Check Docs links

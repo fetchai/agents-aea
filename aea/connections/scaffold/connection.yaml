@@ -5,10 +5,10 @@ type: connection
 description: The scaffold connection provides a scaffold for a connection to be implemented
   by the developer.
 license: Apache-2.0
-aea_version: '>=0.8.0, <0.9.0'
+aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
   __init__.py: QmZvYZ5ECcWwqiNGh8qNTg735wu51HqaLxTSifUxkQ4KGj
-  connection.py: QmcSunS5gm2sxatq52AEhywtr3f2LaLqnK1xmdxwM7qZ2b
+  connection.py: QmUu1PRd5PJJk9Se7A6UH9TjTfDxhGKUHtRHgcsPz6xQb4
   readme.md: Qmdt71SaCCwAG1c24VktXDm4pxgUBiPMg4bWfUTiqorypf
 fingerprint_ignore_patterns: []
 connections: []

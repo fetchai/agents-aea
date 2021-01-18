@@ -23,6 +23,7 @@ package dhttests
 
 import (
 	"libp2p_node/aea"
+	"libp2p_node/dht/dhtnode"
 	"libp2p_node/dht/dhtpeer"
 	"libp2p_node/utils"
 	"log"
@@ -52,12 +53,15 @@ func NewDHTPeerWithDefaults(inbox chan<- *aea.Envelope) (*dhtpeer.DHTPeer, func(
 		dhtpeer.EnableDelegateService(DHTPeerDefaultDelegatePort),
 	}
 
-	signature, err := utils.SignFetchAI([]byte(DHTPeerDefaultFetchAIPublicKey), DHTPeerDefaultAgentKey)
+	signature, err := utils.SignFetchAI(
+		[]byte(DHTPeerDefaultFetchAIPublicKey),
+		DHTPeerDefaultAgentKey,
+	)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	record := &aea.AgentRecord{}
+	record := &aea.AgentRecord{LedgerId: dhtnode.DefaultLedger}
 	record.Address = DHTPeerDefaultAgentAddress
 	record.PublicKey = DHTPeerDefaultAgentPublicKey
 	record.PeerPublicKey = DHTPeerDefaultFetchAIPublicKey
