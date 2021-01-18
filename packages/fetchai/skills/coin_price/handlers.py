@@ -110,11 +110,11 @@ class HttpHandler(Handler):
             self.context.logger.info("failed to get price: unexpected result")
         else:
             price = price_result.get(model.currency, None)
-            value = int(price * (10 ** model.decimals))
 
             if price is None:
                 self.context.logger.info("failed to get price: no price listed")
             else:
+                value = int(price * (10 ** model.decimals))
                 oracle_data = {
                     "value": value,
                     "decimals": model.decimals,
