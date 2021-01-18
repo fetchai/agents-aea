@@ -82,11 +82,11 @@ class TestHttpHandler(SimpleDataRequestTestCase):
             message_type=HttpMessage,
             dialogue_reference=incorrect_dialogue_reference,
             performative=HttpMessage.Performative.RESPONSE,
-            method="some_method",
-            url="some_url",
-            headers="some_headers",
-            version="some_version",
-            body=b"some_body",
+            status_code=200,
+            status_text="",
+            headers="",
+            version="",
+            body=b"",
         )
 
         # operation
@@ -108,10 +108,10 @@ class TestHttpHandler(SimpleDataRequestTestCase):
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=http_dialogue,
             performative=HttpMessage.Performative.RESPONSE,
-            method="some_method",
-            url="some_url",
-            headers="some_headers",
-            version="some_version",
+            status_code=200,
+            status_text="",
+            headers="",
+            version="",
             body=self.data,
         )
 
@@ -126,7 +126,7 @@ class TestHttpHandler(SimpleDataRequestTestCase):
         )
 
         mock_logger.assert_any_call(
-            logging.INFO, f"updating shared_state with received data=b'some_body'!",
+            logging.INFO, "updating shared_state with received data=b'some_body'!",
         )
 
         assert (
@@ -138,6 +138,29 @@ class TestHttpHandler(SimpleDataRequestTestCase):
 
     def test_handle_invalid(self):
         """Test the _handle_invalid method of the http handler."""
+        # setup
+        incoming_message = self.build_incoming_message(
+            message_type=HttpMessage,
+            performative=HttpMessage.Performative.REQUEST,
+            method="some_method",
+            url="some_url",
+            headers="some_headers",
+            version="some_version",
+            body=self.data,
+        )
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger:
+            self.http_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.WARNING,
+            f"cannot handle http message of performative={incoming_message.performative} in dialogue={self.http_dialogues.get_dialogue(incoming_message)}.",
+        )
+
+    def test_handle_request(self):
+        """Test the _handle_request method of the http handler."""
         # setup
         incoming_message = self.build_incoming_message(
             message_type=HttpMessage,
