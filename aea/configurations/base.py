@@ -52,6 +52,7 @@ from aea.configurations.constants import (
     DEFAULT_CONTRACT_CONFIG_FILE,
     DEFAULT_FINGERPRINT_IGNORE_PATTERNS,
     DEFAULT_LICENSE,
+    DEFAULT_LOGGING_CONFIG,
     DEFAULT_PROTOCOL_CONFIG_FILE,
     DEFAULT_REGISTRY_NAME,
     DEFAULT_SKILL_CONFIG_FILE,
@@ -1140,7 +1141,7 @@ class AgentConfig(PackageConfiguration):
         self.private_key_paths = CRUDCollection[str]()
         self.connection_private_key_paths = CRUDCollection[str]()
 
-        self.logging_config = logging_config if logging_config is not None else {}
+        self.logging_config = logging_config or DEFAULT_LOGGING_CONFIG
         self.default_ledger = default_ledger
         self.currency_denominations = (
             currency_denominations if currency_denominations is not None else {}
@@ -1154,10 +1155,6 @@ class AgentConfig(PackageConfiguration):
         self.contracts = set()  # type: Set[PublicId]
         self.protocols = set()  # type: Set[PublicId]
         self.skills = set()  # type: Set[PublicId]
-
-        if self.logging_config == {}:
-            self.logging_config["version"] = 1
-            self.logging_config["disable_existing_loggers"] = False
 
         self.period: Optional[float] = period
         self.execution_timeout: Optional[float] = execution_timeout

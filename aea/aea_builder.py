@@ -54,6 +54,7 @@ from aea.configurations.constants import (
     DEFAULT_CONNECTION,
     DEFAULT_ENV_DOTFILE,
     DEFAULT_LEDGER,
+    DEFAULT_LOGGING_CONFIG,
     DEFAULT_PROTOCOL,
     DEFAULT_REGISTRY_NAME,
 )
@@ -381,7 +382,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self._runtime_mode: Optional[str] = None
         self._search_service_address: Optional[str] = None
         self._storage_uri: Optional[str] = None
-        self._logging_config: Dict = {}
+        self._logging_config: Dict = DEFAULT_LOGGING_CONFIG
 
         self._package_dependency_manager = _DependenciesManager()
         if self._with_default_packages:
