@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 """Implementation of the 'aea upgrade' subcommand."""
 import pprint
+import shutil
 from copy import deepcopy
 from pathlib import Path
 from typing import Dict, Iterable, List, Set, Tuple, cast
@@ -28,6 +29,7 @@ from packaging.version import Version
 import aea
 from aea.cli.add import add_item
 from aea.cli.eject import _eject_item
+from aea.cli.registry.fetch import fetch_agent
 from aea.cli.registry.utils import get_latest_version_available_in_registry
 from aea.cli.remove import (
     ItemRemoveHelper,
@@ -53,7 +55,11 @@ from aea.configurations.constants import (
     VENDOR,
 )
 from aea.exceptions import enforce
-from aea.helpers.base import compute_specifier_from_version, find_topological_order
+from aea.helpers.base import (
+    compute_specifier_from_version,
+    delete_directory_contents,
+    find_topological_order,
+)
 
 
 @click.group(invoke_without_command=True)
@@ -144,6 +150,12 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
     """Perform project upgrade."""
     click.echo("Starting project upgrade...")
 
+    # check if there is a newer version of the same project
+    project_upgrader = ProjectUpgrader(ctx)
+    if project_upgrader.upgrade():
+        click.echo("Upgrade completed.")
+        return
+
     interactive = ctx.config.get("interactive", True)
     old_component_ids = ctx.agent_config.package_dependencies
     item_remover = ItemRemoveHelper(ctx, ignore_non_vendor=True)
@@ -225,6 +237,76 @@ class IsRequiredException(UpgraderException):
         """Init exception."""
         super().__init__(required_by)
         self.required_by = required_by
+
+
+class ProjectUpgrader:
+    """Helper class to upgrade agent project if was previously fetched from registry."""
+
+    _TEMP_ALIAS = "fetched_agent"
+
+    def __init__(self, ctx: Context):
+        """Initialize the class."""
+        self.ctx = ctx
+
+    def upgrade(self) -> bool:
+        """
+        Upgrade the project by fetching from remote registry.
+
+        :return: True if the upgrade succeeded, False otherwise.
+        """
+        agent_config = self.ctx.agent_config
+        agent_package_id = agent_config.package_id
+        click.echo(
+            f"Checking if there is a newer remote version of agent package '{agent_package_id.public_id}'..."
+        )
+        try:
+            new_item = get_latest_version_available_in_registry(
+                self.ctx,
+                str(agent_package_id.package_type),
+                agent_package_id.public_id.to_latest(),
+            )
+        except click.ClickException:
+            click.echo("Package not found, continuing with normal upgrade.")
+            return False
+
+        if new_item.package_version <= agent_config.public_id.package_version:  # type: ignore
+            click.echo(
+                f"Latest version found is '{new_item.version}' which is smaller or equal than current version '{agent_config.public_id.package_version}'. Continuing..."
+            )
+            return False
+
+        current_path = Path(self.ctx.cwd).absolute()
+        user_wants_to_upgrade = click.confirm(
+            f"Found a newer version of this project: {new_item.package_version}. "
+            f"Would you like to replace this project with it? \n"
+            f"Warning: the content in the current directory {current_path} will be removed"
+        )
+        if not user_wants_to_upgrade:
+            return False
+
+        try:
+            delete_directory_contents(current_path)
+        except OSError as e:  # pragma: nocover
+            raise click.ClickException(
+                f"Cannot remote path {current_path}. Error: {str(e)}."
+            )
+
+        fetch_agent(self.ctx, agent_package_id.public_id, alias=self._TEMP_ALIAS)
+        self.ctx.cwd = str(current_path)
+        self._unpack_fetched_agent()
+        return True
+
+    def _unpack_fetched_agent(self):
+        """
+        Unpack fetched agent in current directory and remove temporary directory.
+
+        :return: None
+        """
+        current_path = Path(self.ctx.cwd)
+        fetched_agent_dir = current_path / self._TEMP_ALIAS
+        for subpath in fetched_agent_dir.iterdir():
+            shutil.move(str(subpath), current_path)
+        shutil.rmtree(str(fetched_agent_dir))
 
 
 class ItemUpgrader:
@@ -469,7 +551,7 @@ class InteractiveEjectHelper:
             f"as there isn't a compatible version available on the AEA registry. "
             f"Would you like to eject it?"
         )
-        answer = click.confirm(message, default=False)
+        answer = click.confirm(message)
         return answer
 
 
