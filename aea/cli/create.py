@@ -25,6 +25,7 @@ from typing import Optional, cast
 
 import click
 
+from aea import get_current_aea_version
 from aea.cli.add import add_item
 from aea.cli.init import do_init
 from aea.cli.utils.config import get_or_create_cli_config
@@ -53,7 +54,7 @@ from aea.configurations.constants import (
     STATE_UPDATE_PROTOCOL,
     VENDOR,
 )
-from aea.helpers.base import compute_specifier_from_version, get_current_aea_version
+from aea.helpers.base import compute_specifier_from_version
 
 
 @click.command()

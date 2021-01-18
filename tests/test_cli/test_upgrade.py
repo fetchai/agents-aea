@@ -32,6 +32,7 @@ from click.exceptions import ClickException
 from click.testing import Result
 from packaging.version import Version
 
+from aea import get_current_aea_version
 from aea.cli import cli
 from aea.cli.registry.utils import get_latest_version_available_in_registry
 from aea.cli.upgrade import ItemRemoveHelper
@@ -47,7 +48,7 @@ from aea.configurations.base import (
 )
 from aea.configurations.constants import DEFAULT_VERSION
 from aea.configurations.loader import ConfigLoader, load_component_configuration
-from aea.helpers.base import cd, compute_specifier_from_version, get_current_aea_version
+from aea.helpers.base import cd, compute_specifier_from_version
 from aea.test_tools.test_cases import AEATestCaseEmpty, BaseAEATestCase
 
 from packages.fetchai.connections import oef

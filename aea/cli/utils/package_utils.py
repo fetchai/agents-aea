@@ -27,7 +27,7 @@ from typing import Dict, Optional, Set, Tuple
 import click
 from jsonschema import ValidationError
 
-from aea import AEA_DIR
+from aea import AEA_DIR, get_current_aea_version
 from aea.cli.fingerprint import fingerprint_item
 from aea.cli.utils.config import (
     dump_item_config,
@@ -68,11 +68,7 @@ from aea.crypto.helpers import private_key_verify_or_create
 from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS, LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.exceptions import AEAEnforceError
-from aea.helpers.base import (
-    compute_specifier_from_version,
-    get_current_aea_version,
-    recursive_update,
-)
+from aea.helpers.base import compute_specifier_from_version, recursive_update
 from aea.helpers.sym_link import create_symlink
 
 

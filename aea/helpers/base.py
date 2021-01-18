@@ -53,7 +53,6 @@ from typing import (
 from dotenv import load_dotenv
 from packaging.version import Version
 
-import aea
 from aea.exceptions import enforce
 
 
@@ -832,11 +831,6 @@ def compute_specifier_from_version(version: Version) -> str:
     upper_bound = Version(f"{new_major}.{new_minor_high}.0")
     specifier_set = f">={lower_bound}, <{upper_bound}"
     return specifier_set
-
-
-def get_current_aea_version() -> Version:
-    """Get current version."""
-    return Version(aea.__version__)
 
 
 def decorator_with_optional_params(decorator):
