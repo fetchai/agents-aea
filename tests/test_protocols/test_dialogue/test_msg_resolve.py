@@ -78,8 +78,6 @@ def test_dialogues_message_resolved_properly():
     transaction1_msg = dialogue.reply(performative=TacMessage.Performative.TRANSACTION)
     transaction2_msg = dialogue.reply(performative=TacMessage.Performative.TRANSACTION)
 
-    print(transaction1_msg, transaction1_msg)
-
     dialogue = part2.update(transaction1_msg)
     assert dialogue
     comfirmation1_msg = dialogue.reply(

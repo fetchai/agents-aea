@@ -365,7 +365,7 @@ class BaseSkillTestCase:
                 message_type=dialogues.message_class,
                 dialogue_reference=dialogue_reference,
                 message_id=Dialogue.STARTING_MESSAGE_ID,
-                target=target or 0,
+                target=target or Dialogue.STARTING_TARGET,
                 performative=performative,
                 to=self.skill.skill_context.agent_address,
                 sender=counterparty,

@@ -668,7 +668,7 @@ class TestDialogueBase:
         assert result is False
         assert (
             msg
-            == "Invalid target. Expected a value greater than or equal to 1. Found 0."
+            == "Invalid target. Expected a absolute value greater or less than 0. Found 0."
         )
 
     def test_basic_validation_initial_message_positive(self):
@@ -829,7 +829,7 @@ class TestDialogueBase:
         assert result is False
         assert (
             msg
-            == "Invalid target. Expected a value greater than or equal to 1. Found 0."
+            == "Invalid target. Expected a absolute value greater or less than 0. Found 0."
         )
 
     def test_basic_validation_non_initial_message_negative_invalid_target_2(self):

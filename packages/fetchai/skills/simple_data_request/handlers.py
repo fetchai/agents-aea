@@ -63,7 +63,6 @@ class HttpHandler(Handler):
         # recover dialogue
         http_dialogues = cast(HttpDialogues, self.context.http_dialogues)
         http_dialogue = cast(HttpDialogue, http_dialogues.update(http_msg))
-
         if http_dialogue is None:
             self._handle_unidentified_dialogue(http_msg)
             return

@@ -800,7 +800,7 @@ class Dialogue(metaclass=_DialogueMeta):
                 ),
             )
 
-        if abs(message_id) != Dialogue.STARTING_MESSAGE_ID:
+        if message_id != Dialogue.STARTING_MESSAGE_ID:
             return (
                 False,
                 "Invalid message_id. Expected {}. Found {}.".format(
@@ -869,13 +869,31 @@ class Dialogue(metaclass=_DialogueMeta):
         """Check message target corresponds to messages in the dialogue, if not return error string."""
         target = message.target
         performative = message.performative
-        if abs(target) < 1:
-            return "Invalid target. Expected a value greater than or equal to 1. Found {}.".format(
+
+        if (
+            message.message_id == self.STARTING_MESSAGE_ID
+            and target != self.STARTING_TARGET
+        ):
+            return "Invalid target. Expected 0. Found {}.".format(target)
+
+        if (
+            message.message_id != self.STARTING_MESSAGE_ID
+            and target == self.STARTING_TARGET
+        ):
+            return "Invalid target. Expected a absolute value greater or less than 0. Found {}.".format(
                 target
             )
 
         # quick target check.
-        if abs(target) > abs(cast(int, self._last_message_id)):
+        latest_ids: List[int] = []
+
+        if self.last_incoming_message:
+            latest_ids.append(abs(self.last_incoming_message.message_id))
+
+        if self.last_outgoing_message:
+            latest_ids.append(abs(self.last_outgoing_message.message_id))
+
+        if abs(target) > max(latest_ids):
             return "Invalid target. Expected a value less than or equal to abs({}). Found abs({}).".format(
                 self._last_message_id, target
             )
@@ -897,6 +915,8 @@ class Dialogue(metaclass=_DialogueMeta):
     def _validate_message_id(self, message: Message) -> Optional[str]:
         """Check message id corresponds to message id sequences, if not return error string."""
         is_outgoing = message.to != self.self_address
+
+        # This assumes that messages sent by the opponent are sent in the right order.
         if is_outgoing:
             next_message_id = self.get_outgoing_next_message_id()
         else:
