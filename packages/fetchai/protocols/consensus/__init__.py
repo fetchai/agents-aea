@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the support resources for the oracle protocol."""
+"""This module contains the support resources for the consensus protocol."""
