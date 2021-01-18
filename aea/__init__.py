@@ -41,4 +41,4 @@ AEA_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: igno
 
 def get_current_aea_version() -> Version:
     """Get current version."""
-    return Version(aea.__version__)
+    return Version(__version__)
