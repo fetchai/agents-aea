@@ -137,14 +137,14 @@ def update_agent_config(ctx: Context):
     ctx.dump_agent_config()
 
 
-def update_aea_version_in_nonvendor_packages(ctx: Context):
+def update_aea_version_in_nonvendor_packages(cwd: str):
     """
     Update aea_version in non-vendor packages.
 
-    :param ctx: the context.
+    :param cwd: the current working directory.
     :return: None
     """
-    for package_path in get_non_vendor_package_path(Path(ctx.cwd)):
+    for package_path in get_non_vendor_package_path(Path(cwd)):
         package_type = PackageType(package_path.parent.name[:-1])
         package_config = load_item_config(package_type.value, package_path)
         update_aea_version_range(package_config)
@@ -172,7 +172,7 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
     eject_helper.eject()
 
     update_agent_config(ctx)
-    update_aea_version_in_nonvendor_packages(ctx)
+    update_aea_version_in_nonvendor_packages(ctx.cwd)
 
     # compute the upgraders and the shared dependencies.
     required_by_relation = eject_helper.get_updated_inverse_adjacency_list()
