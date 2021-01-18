@@ -27,7 +27,7 @@ from asyncio.futures import Future
 from concurrent.futures._base import CancelledError as FuturesCancelledError
 from traceback import format_exc
 from typing import Dict, Optional, Set, cast
-from urllib.parse import parse_qs, urlencode, urlparse
+from urllib.parse import parse_qs, urlparse
 
 from aiohttp import web
 from aiohttp.web_request import BaseRequest
@@ -65,7 +65,7 @@ SERVER_ERROR = 500
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.http_server")
 
 RequestId = DialogueLabel
-PUBLIC_ID = PublicId.from_str("fetchai/http_server:0.13.0")
+PUBLIC_ID = PublicId.from_str("fetchai/http_server:0.15.0")
 
 
 class HttpDialogues(BaseHttpDialogues):
@@ -177,11 +177,7 @@ class Request(OpenAPIRequest):
 
         :return: envelope
         """
-        url = (
-            self.full_url_pattern
-            if self.parameters.query == {}
-            else self.full_url_pattern + "?" + urlencode(self.parameters.query)
-        )
+        url = self.full_url_pattern
         uri = URI(self.full_url_pattern)
         context = EnvelopeContext(connection_id=connection_id, uri=uri)
         http_message, http_dialogue = dialogues.create(

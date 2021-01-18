@@ -493,7 +493,6 @@ class TestExtractSpecification(TestCase):
         assert spec.terminal_performatives == [
             "PERFORMATIVE_MT",
             "PERFORMATIVE_O",
-            "PERFORMATIVE_EMPTY_CONTENTS",
         ]
         assert spec.roles == ["role_1", "role_2"]
         assert spec.end_states == ["end_state_1", "end_state_2", "end_state_3"]

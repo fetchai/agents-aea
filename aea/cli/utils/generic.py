@@ -16,47 +16,12 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Module with generic utils of the aea cli."""
-
 import os
-import subprocess  # nosec
-from typing import Dict, List
+from typing import Dict
 
 import yaml
 from click import ClickException
-
-from aea.cli.utils.constants import DEFAULT_CLI_TIMEOUT
-
-
-def get_parent_object(obj: Dict, dotted_path: List[str]):
-    """
-    Given a nested dictionary, return the object denoted by the dotted path (if any).
-
-    In particular if dotted_path = [], it returns the same object.
-
-    :param obj: the dictionary.
-    :param dotted_path: the path to the object.
-    :return: the target dictionary
-    :raise ValueError: if the path is not valid.
-    """
-    index = 0
-    current_object = obj
-    while index < len(dotted_path):
-        current_attribute_name = dotted_path[index]
-        current_object = current_object.get(current_attribute_name, None)
-        # if the dictionary does not have the key we want, fail.
-        if current_object is None:
-            raise ValueError(f"Cannot get attribute '{current_attribute_name}'.")
-        if not isinstance(current_object, dict):
-            raise ValueError(
-                f"Attribute '{current_attribute_name}' is not a dictionary."
-            )
-        index += 1
-    # if we are not at the last step and the attribute value is not a dictionary, fail.
-    if isinstance(current_object, dict):
-        return current_object
-    raise ValueError("The target object is not a dictionary.")  # pragma: nocover
 
 
 def load_yaml(filepath: str) -> Dict:
@@ -87,24 +52,3 @@ def is_readme_present(readme_path: str) -> bool:
     :return: bool is readme file present.
     """
     return os.path.exists(readme_path)
-
-
-def run_cli_command_subprocess(*args, timeout: int = DEFAULT_CLI_TIMEOUT, **kwargs):
-    """
-    Run a CLI command using a subprocess.
-
-    :param args: arguments to subprocess.Popen
-    :param timeout: the timeout for waiting the completion of the subprocess.
-    :param kwargs: keyword arguments to subprocess.Open
-    :return: None
-    """
-    process = subprocess.Popen(*args, **kwargs)  # nosec
-    try:
-        process.wait(timeout)
-        return_code = process.returncode
-    finally:
-        poll = process.poll()
-        if poll is None:  # pragma: no cover
-            process.terminate()
-            process.wait(timeout)
-    return return_code

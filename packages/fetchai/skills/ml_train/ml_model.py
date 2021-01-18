@@ -23,7 +23,6 @@ from pathlib import Path
 from queue import Queue
 
 import tensorflow as tf
-from tensorflow import keras
 
 from aea.skills.base import Model
 
@@ -48,7 +47,6 @@ class MLModel(Model):
         self._lock = threading.RLock()
         self._weights = None
 
-        self.graph = tf.get_default_graph()
         self.data_queue = Queue()
         self.training_thread = threading.Thread(target=self.training_loop)
 
@@ -66,28 +64,27 @@ class MLModel(Model):
 
         :return: None
         """
-        with self.graph.as_default():
-            model = self._make_model()
-            self._set_weights(model.get_weights())
-            while True:
-                data = self.data_queue.get()
-                if data is None:
-                    break
+        model = self._make_model()
+        self._set_weights(model.get_weights())
+        while True:
+            data = self.data_queue.get()
+            if data is None:
+                break
 
-                X, y, kwargs = data
-                model.fit(X, y, **kwargs)
-                loss, acc = model.evaluate(X, y, verbose=2)
-                self.context.logger.info("Loss: {}, Acc: {}".format(loss, acc))
-                self._set_weights(model.get_weights())
+            X, y, kwargs = data
+            model.fit(X, y, **kwargs)
+            loss, acc = model.evaluate(X, y, verbose=2)
+            self.context.logger.info("Loss: {}, Acc: {}".format(loss, acc))
+            self._set_weights(model.get_weights())
 
     @staticmethod
     def _make_model():
         """Make the model."""
-        model = keras.Sequential(
+        model = tf.keras.Sequential(
             [
-                keras.layers.Flatten(input_shape=(28, 28)),
-                keras.layers.Dense(128, activation="relu"),
-                keras.layers.Dense(10, activation="softmax"),
+                tf.keras.layers.Flatten(input_shape=(28, 28)),
+                tf.keras.layers.Dense(128, activation="relu"),
+                tf.keras.layers.Dense(10, activation="softmax"),
             ]
         )
         model.compile(
@@ -110,20 +107,18 @@ class MLModel(Model):
     def predict(self, *args, **kwargs):
         """Predict."""
         with self._lock:
-            with self.graph.as_default():
-                model = self._make_model()
-                weights = self._get_weights()
-                model.set_weights(weights)
-                return model.predict(*args, **kwargs)
+            model = self._make_model()
+            weights = self._get_weights()
+            model.set_weights(weights)
+            return model.predict(*args, **kwargs)
 
     def evaluate(self, *args, **kwargs):
         """Predict."""
         with self._lock:
-            with self.graph.as_default():
-                model = self._make_model()
-                weights = self._get_weights()
-                model.set_weights(weights)
-                return model.evaluate(*args, **kwargs)
+            model = self._make_model()
+            weights = self._get_weights()
+            model.set_weights(weights)
+            return model.evaluate(*args, **kwargs)
 
     def save(self):
         """Save the model weights."""

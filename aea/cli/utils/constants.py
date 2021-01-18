@@ -16,23 +16,15 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Module with constants of the aea cli."""
-
 import os
 from pathlib import Path
-from typing import Dict
 
 from aea.configurations.constants import (
-    AGENT,
     CONNECTION,
     CONNECTIONS,
     CONTRACT,
     CONTRACTS,
-    DEFAULT_CONNECTION_CONFIG_FILE,
-    DEFAULT_CONTRACT_CONFIG_FILE,
-    DEFAULT_PROTOCOL_CONFIG_FILE,
-    DEFAULT_SKILL_CONFIG_FILE,
     PACKAGES,
     PROTOCOL,
     PROTOCOLS,
@@ -40,6 +32,7 @@ from aea.configurations.constants import (
     SKILLS,
     VENDOR,
 )
+from aea.helpers.constants import FROM_STRING_TO_TYPE
 
 
 AEA_DIR = str(Path("."))
@@ -60,27 +53,6 @@ NOT_PERMITTED_AUTHORS = [
 ]
 
 
-FROM_STRING_TO_TYPE = dict(
-    str=str, int=int, bool=bool, float=float, dict=dict, list=list, none=None,
-)
 CONFIG_SUPPORTED_KEY_TYPES = list(FROM_STRING_TO_TYPE.keys())
-CONFIG_SUPPORTED_VALUE_TYPES = (str, int, bool, float, dict, list, type(None))
-
-ALLOWED_PATH_ROOTS = [
-    AGENT,
-    CONNECTIONS,
-    CONTRACTS,
-    PROTOCOLS,
-    SKILLS,
-    VENDOR,
-]
-RESOURCE_TYPE_TO_CONFIG_FILE = {
-    SKILLS: DEFAULT_SKILL_CONFIG_FILE,
-    PROTOCOLS: DEFAULT_PROTOCOL_CONFIG_FILE,
-    CONNECTIONS: DEFAULT_CONNECTION_CONFIG_FILE,
-    CONTRACTS: DEFAULT_CONTRACT_CONFIG_FILE,
-}  # type: Dict[str, str]
-FALSE_EQUIVALENTS = ["f", "false", "False"]
 
 REQUIREMENTS = "requirements.txt"
-DEFAULT_CLI_TIMEOUT = 120

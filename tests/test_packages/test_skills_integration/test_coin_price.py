@@ -20,10 +20,10 @@
 """This test module contains the integration test for the coin price skill."""
 
 from pathlib import Path
+from typing import Dict
 
 import pytest
 import requests
-from prometheus_client.parser import text_string_to_metric_families  # type: ignore
 
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
@@ -37,21 +37,35 @@ API_SPEC_PATH = str(
 )
 
 
+def parse_prometheus_output(prom_data: bytes) -> Dict[str, float]:
+    """Convert prometheus text output to a dict of {"metric": value}"""
+    metrics = {}
+    for line in prom_data.decode().splitlines():
+        tokens = line.split()
+        if tokens[0] != "#":
+            metrics.update({tokens[0]: float(tokens[1])})
+    return metrics
+
+
 @pytest.mark.integration
 class TestCoinPriceSkill(AEATestCaseEmpty):
     """Test that coin price skill works."""
 
     def test_coin_price(self):
         """Run the coin price skill sequence."""
-        self.add_item("connection", "fetchai/http_client:0.14.0")
-        self.add_item("connection", "fetchai/http_server:0.13.0")
-        self.add_item("connection", "fetchai/prometheus:0.1.0")
-        self.add_item("skill", "fetchai/coin_price:0.1.0")
-        self.set_config("agent.default_connection", "fetchai/http_server:0.13.0")
+
+        coin_price_feed_aea_name = self.agent_name
+
+        self.add_item("connection", "fetchai/http_client:0.16.0")
+        self.add_item("connection", "fetchai/http_server:0.15.0")
+        self.add_item("connection", "fetchai/prometheus:0.2.0")
+        self.remove_item("connection", "fetchai/stub:0.15.0")
+        self.add_item("skill", "fetchai/coin_price:0.3.0")
+        self.set_config("agent.default_connection", "fetchai/http_server:0.15.0")
 
         default_routing = {
-            "fetchai/http:0.13.0": "fetchai/http_client:0.14.0",
-            "fetchai/prometheus:0.1.0": "fetchai/prometheus:0.1.0",
+            "fetchai/http:0.11.0": "fetchai/http_client:0.16.0",
+            "fetchai/prometheus:0.2.0": "fetchai/prometheus:0.2.0",
         }
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
@@ -64,6 +78,13 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
             True,
             type_="bool",
         )
+
+        diff = self.difference_to_fetched_agent(
+            "fetchai/coin_price_feed:0.4.0", coin_price_feed_aea_name
+        )
+        assert (
+            diff == []
+        ), "Difference between created and fetched project for files={}".format(diff)
 
         self.run_install()
 
@@ -86,13 +107,10 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
         assert response.content == b"", "Post not allowed"
 
         # test prometheus metrics
-        metrics = {}
-        prom_response = requests.get("http://127.0.0.1:8080")
-        for family in text_string_to_metric_families(prom_response.content.decode()):
-            for sample in family.samples:
-                metrics[sample.name] = sample.value
-        assert metrics["num_retrievals"] > 0, "num_retrievals metric not updated"
-        assert metrics["num_requests"] == 1, "num_requests metric not equal to 1"
+        prom_response = requests.get("http://127.0.0.1:9090/metrics")
+        metrics = parse_prometheus_output(prom_response.content)
+        assert metrics["num_retrievals"] > 0.0, "num_retrievals metric not updated"
+        assert metrics["num_requests"] == 1.0, "num_requests metric not equal to 1"
 
         self.terminate_agents()
         assert (

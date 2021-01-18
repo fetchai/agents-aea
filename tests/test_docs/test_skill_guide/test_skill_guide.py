@@ -34,12 +34,11 @@ from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_ME
 
 from tests.conftest import (
     AUTHOR,
-    COSMOS,
-    COSMOS_PRIVATE_KEY_FILE_CONNECTION,
     FETCHAI,
     FETCHAI_PRIVATE_KEY_FILE,
+    FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
     MAX_FLAKY_RERUNS_INTEGRATION,
-    NON_FUNDED_COSMOS_PRIVATE_KEY_1,
+    NON_FUNDED_FETCHAI_PRIVATE_KEY_1,
     NON_GENESIS_CONFIG,
     ROOT_DIR,
     wait_for_localhost_ports_to_close,
@@ -59,7 +58,7 @@ class TestBuildSkill(AEATestCaseMany):
         """Setup the test class."""
         AEATestCaseMany.setup_class()
         cls.doc_path = os.path.join(ROOT_DIR, MD_FILE)
-        cls.code_blocks = extract_code_blocks(filepath=cls.doc_path, filter="python")
+        cls.code_blocks = extract_code_blocks(filepath=cls.doc_path, filter_="python")
 
     def test_read_md_file(self):
         """Teat that the md file is not empty."""
@@ -78,25 +77,25 @@ class TestBuildSkill(AEATestCaseMany):
 
         simple_service_registration_aea = "simple_service_registration"
         self.fetch_agent(
-            "fetchai/simple_service_registration:0.17.0",
+            "fetchai/simple_service_registration:0.19.0",
             simple_service_registration_aea,
         )
         self.set_agent_context(simple_service_registration_aea)
         # add non-funded key
         self.generate_private_key(FETCHAI)
-        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
+        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
         self.replace_private_key_in_file(
-            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
+            NON_FUNDED_FETCHAI_PRIVATE_KEY_1, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
         )
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.set_config(setting_path, COSMOS)
+        self.set_config(setting_path, FETCHAI)
 
         default_routing = {
-            "fetchai/oef_search:0.10.0": "fetchai/soef:0.13.0",
+            "fetchai/oef_search:0.12.0": "fetchai/soef:0.15.0",
         }
 
         # replace location
@@ -109,9 +108,9 @@ class TestBuildSkill(AEATestCaseMany):
         skill_name = "my_search"
         skill_id = AUTHOR + "/" + skill_name + ":" + DEFAULT_VERSION
         self.scaffold_item("skill", skill_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/soef:0.13.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.14.0")
+        self.add_item("connection", "fetchai/soef:0.15.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.14.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
 
@@ -138,7 +137,7 @@ class TestBuildSkill(AEATestCaseMany):
         os.rename(path, path_new)
 
         path = Path(self.t, search_aea, "skills", skill_name, "skill.yaml")
-        yaml_code_block = extract_code_blocks(self.doc_path, filter="yaml")
+        yaml_code_block = extract_code_blocks(self.doc_path, filter_="yaml")
         with open(path, "w") as file:
             file.write(yaml_code_block[0])  # block one is yaml
 
@@ -153,10 +152,10 @@ class TestBuildSkill(AEATestCaseMany):
 
         # add keys
         self.generate_private_key(FETCHAI)
-        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
+        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
 
         # fund key
@@ -174,11 +173,11 @@ class TestBuildSkill(AEATestCaseMany):
 
         # run agents
         self.set_agent_context(simple_service_registration_aea)
+        self.run_cli_command("build", cwd=self._get_cwd())
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
         simple_service_registration_aea_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
@@ -187,7 +186,7 @@ class TestBuildSkill(AEATestCaseMany):
         missing_strings = self.missing_from_output(
             simple_service_registration_aea_process,
             check_strings,
-            timeout=240,
+            timeout=30,
             is_terminating=False,
         )
         assert (
@@ -197,18 +196,18 @@ class TestBuildSkill(AEATestCaseMany):
         )
 
         self.set_agent_context(search_aea)
+        self.run_cli_command("build", cwd=self._get_cwd())
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
         search_aea_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            search_aea_process, check_strings, timeout=240, is_terminating=False
+            search_aea_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []

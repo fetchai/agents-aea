@@ -41,7 +41,7 @@ class TestMultiplexerStandAlone(BaseAEATestCase):
         """Setup the test class."""
         BaseAEATestCase.setup_class()
         doc_path = os.path.join(ROOT_DIR, MD_FILE)
-        cls.code_blocks = extract_code_blocks(filepath=doc_path, filter="python")
+        cls.code_blocks = extract_code_blocks(filepath=doc_path, filter_="python")
         test_code_path = os.path.join(CUR_PATH, PY_FILE)
         cls.python_file = extract_python_code(test_code_path)
 
@@ -58,7 +58,7 @@ class TestMultiplexerStandAlone(BaseAEATestCase):
         assert os.path.exists(Path(self.t, "output.txt"))
 
         message_text = (
-            "some_agent,multiplexer,fetchai/default:0.9.0,\x08\x01*\x07\n\x05hello,"
+            "some_agent,multiplexer,fetchai/default:0.11.0,\x08\x01*\x07\n\x05hello,"
         )
         path = os.path.join(str(self.t), "output.txt")
         with open(path, "r", encoding="utf-8") as file:

@@ -42,7 +42,7 @@ class TestAgentVsAEA(BaseAEATestCase):
         """Setup the test class."""
         BaseAEATestCase.setup_class()
         doc_path = os.path.join(ROOT_DIR, MD_FILE)
-        cls.code_blocks = extract_code_blocks(filepath=doc_path, filter="python")
+        cls.code_blocks = extract_code_blocks(filepath=doc_path, filter_="python")
         test_code_path = os.path.join(CUR_PATH, PY_FILE)
         cls.python_file = extract_python_code(test_code_path)
 
@@ -60,7 +60,7 @@ class TestAgentVsAEA(BaseAEATestCase):
         run()
         assert os.path.exists(Path(self.t, "input_file"))
 
-        message_text = b"other_agent,my_agent,fetchai/default:0.9.0,\x12\r\x08\x01*\t*\x07\n\x05hello,"
+        message_text = b"other_agent,my_agent,fetchai/default:0.11.0,\x12\r\x08\x01*\t*\x07\n\x05hello,"
         path = os.path.join(self.t, "output_file")
         with open(path, "rb") as file:
             msg = file.read()

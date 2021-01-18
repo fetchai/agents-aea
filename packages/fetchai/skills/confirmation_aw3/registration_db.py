@@ -24,7 +24,8 @@ import json
 import logging
 import os
 import sqlite3
-from typing import Any, Dict, List, Tuple
+from collections import defaultdict
+from typing import Any, Dict, List, Tuple, cast
 
 from aea.skills.base import Model
 
@@ -48,7 +49,7 @@ class RegistrationDB(Model):
             else custom_path
         )
         if not os.path.exists(os.path.dirname(os.path.abspath(self.db_path))):
-            raise ValueError(f"Path={self.db_path} not valid!")
+            raise ValueError(f"Path={self.db_path} not valid!")  # pragma: nocover
         self._initialise_backend()
 
     def _initialise_backend(self) -> None:
@@ -109,6 +110,25 @@ class RegistrationDB(Model):
         for address_ in addresses:
             trades += self.get_trade_count(address_)
         return (developer_handle, trades)
+
+    def get_all_addresses_and_handles(self) -> List[Tuple[str, str]]:
+        """Get all addresses."""
+        command = "SELECT address, developer_handle FROM registered_table"
+        results = cast(List[Tuple[str, str]], self._execute_single_sql(command, ()))
+        return results
+
+    def get_leaderboard(self) -> List[Tuple[str, str, int]]:
+        """Get the leader board."""
+        addresses_and_handles = self.get_all_addresses_and_handles()
+        results_dir: Dict[Tuple[str, str], int] = defaultdict(int)
+        for address, developer_handle in addresses_and_handles:
+            trades = self.get_trade_count(address)
+            if trades == 0:
+                continue
+            results_dir[(address, developer_handle)] += trades
+        results = [(k[0], k[1], v) for k, v in results_dir.items()]
+        results.sort(key=lambda x: x[2], reverse=True)
+        return results
 
     def set_registered(self, address: str, developer_handle: str):
         """Record a registration."""

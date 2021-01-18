@@ -21,10 +21,9 @@
 
 import asyncio
 import logging
-from concurrent.futures.thread import ThreadPoolExecutor
-from typing import Any, Dict, Optional, Tuple, Union, cast
+from typing import Dict, Optional, Tuple, Union, cast
 
-import prometheus_client  # type: ignore
+import aioprometheus  # type: ignore
 
 from aea.common import Address
 from aea.configurations.base import PublicId
@@ -40,11 +39,12 @@ from packages.fetchai.protocols.prometheus.dialogues import (
 from packages.fetchai.protocols.prometheus.message import PrometheusMessage
 
 
-_default_logger = logging.getLogger("aea.packages.fetchai.connections.prometheus")
+PUBLIC_ID = PublicId.from_str("fetchai/prometheus:0.2.0")
 
-PUBLIC_ID = PublicId.from_str("fetchai/prometheus:0.1.0")
-
-DEFAULT_PORT = 8080
+DEFAULT_HOST = "127.0.0.1"
+DEFAULT_PORT = 9090
+VALID_UPDATE_FUNCS = {"inc", "dec", "add", "sub", "set", "observe"}
+VALID_METRIC_TYPES = {"Counter", "Gauge", "Histogram", "Summary"}
 
 
 class PrometheusDialogues(BasePrometheusDialogues):
@@ -80,9 +80,13 @@ class PrometheusDialogues(BasePrometheusDialogues):
 class PrometheusChannel:
     """A wrapper for interacting with a prometheus server."""
 
-    THREAD_POOL_SIZE = 3
-
-    def __init__(self, address: Address, metrics: Dict[str, Any], port: int):
+    def __init__(
+        self,
+        address: Address,
+        host: str,
+        port: int,
+        logger: Union[logging.Logger, logging.LoggerAdapter],
+    ):
         """
         Initialize a prometheus channel.
 
@@ -91,15 +95,14 @@ class PrometheusChannel:
         :param port: The port at which to expose the metrics.
         """
         self.address = address
-        self.metrics = metrics
+        self.metrics = {}  # type: Dict[str, aioprometheus.Collector]
+        self.logger = logger
         self._loop: Optional[asyncio.AbstractEventLoop] = None
         self._queue: Optional[asyncio.Queue] = None
-        self._threaded_pool: ThreadPoolExecutor = ThreadPoolExecutor(
-            self.THREAD_POOL_SIZE
-        )
-        self.logger: Union[logging.Logger, logging.LoggerAdapter] = _default_logger
         self._dialogues = PrometheusDialogues()
+        self._host = host
         self._port = port
+        self._service = aioprometheus.Service()
 
     def _get_message_and_dialogue(
         self, envelope: Envelope
@@ -112,7 +115,7 @@ class PrometheusChannel:
         :return: Tuple[Message, Optional[Dialogue]]
         """
         message = cast(PrometheusMessage, envelope.message)
-        dialogue = cast(PrometheusDialogue, self._dialogues.update(message))
+        dialogue = cast(Optional[PrometheusDialogue], self._dialogues.update(message))
         return message, dialogue
 
     @property
@@ -132,7 +135,7 @@ class PrometheusChannel:
             return None
         self._loop = asyncio.get_event_loop()
         self._queue = asyncio.Queue()
-        prometheus_client.start_http_server(self._port)
+        await self._service.start(addr=self._host, port=self._port)
 
     async def send(self, envelope: Envelope) -> None:
         """
@@ -143,10 +146,12 @@ class PrometheusChannel:
         sender = envelope.sender
         self.logger.debug("Processing message from {}: {}".format(sender, envelope))
         if envelope.protocol_id != PrometheusMessage.protocol_id:
-            raise ValueError("This protocol is not valid for prometheus.")
-        await self.handle_prometheus_message(envelope)
+            raise ValueError(
+                f"Protocol {envelope.protocol_id} is not valid for prometheus."
+            )
+        await self._handle_prometheus_message(envelope)
 
-    async def handle_prometheus_message(self, envelope: Envelope) -> None:
+    async def _handle_prometheus_message(self, envelope: Envelope) -> None:
         """
         Handle messages to prometheus.
 
@@ -166,42 +171,14 @@ class PrometheusChannel:
             return
 
         if message.performative == PrometheusMessage.Performative.ADD_METRIC:
-
-            if message.title in self.metrics:
-                response_code = 409
-                response_msg = "Metric already exists."
-            else:
-                metric_type = getattr(prometheus_client, message.type, None)
-                if metric_type is None:
-                    response_code = 404
-                    response_msg = (
-                        f"{message.type} is not a recognized prometheus metric."
-                    )
-                else:
-                    self.metrics[message.title] = metric_type(
-                        message.title, message.description
-                    )
-                    response_code = 200
-                    response_msg = (
-                        f"New {message.type} successfully added: {message.title}."
-                    )
-
+            response = await self._handle_add_metric(message)
         elif message.performative == PrometheusMessage.Performative.UPDATE_METRIC:
+            response = await self._handle_update_metric(message)
+        else:  # pragma: nocover
+            self.logger.warning("Unrecognized performative for PrometheusMessage")
+            return
 
-            metric = message.title
-            if metric not in self.metrics:
-                response_code = 404
-                response_msg = f"Metric {metric} not found."
-            else:
-                update_func = getattr(self.metrics[metric], message.callable, None)
-                if update_func is None:
-                    response_code = 400
-                    response_msg = f"Update function {message.callable} not found for metric {metric}."
-                else:
-                    # Update the metric
-                    update_func(message.value)
-                    response_code = 200
-                    response_msg = f"Metric {metric} successfully updated."
+        response_code, response_msg = cast(Tuple[int, str], response)
 
         msg = dialogue.reply(
             performative=PrometheusMessage.Performative.RESPONSE,
@@ -218,6 +195,66 @@ class PrometheusChannel:
             context=context,
         )
         await self._send(envelope)
+
+    async def _handle_add_metric(self, message: PrometheusMessage) -> Tuple[int, str]:
+        """Handle add metric message.
+
+        :param message: the message to handle.
+        :return: the response code and response message.
+        """
+        if message.title in self.metrics:
+            response_code = 409
+            response_msg = "Metric already exists."
+        else:
+            metric_type = getattr(aioprometheus, message.type, None)
+            if metric_type is None or message.type not in VALID_METRIC_TYPES:
+                response_code = 404
+                response_msg = f"{message.type} is not a recognized prometheus metric."
+            else:
+                self.metrics[message.title] = metric_type(
+                    message.title, message.description, message.labels
+                )
+                self._service.register(self.metrics[message.title])
+                response_code = 200
+                response_msg = (
+                    f"New {message.type} successfully added: {message.title}."
+                )
+
+        return response_code, response_msg
+
+    async def _handle_update_metric(
+        self, message: PrometheusMessage
+    ) -> Tuple[int, str]:
+        """Handle update metric message.
+
+        :param message: the message to handle.
+        :return: the response code and response message.
+        """
+        metric = message.title
+        if metric not in self.metrics:
+            response_code = 404
+            response_msg = f"Metric {metric} not found."
+        else:
+            update_func = getattr(self.metrics[metric], message.callable, None)
+            if update_func is None:
+                response_code = 400
+                response_msg = (
+                    f"Update function {message.callable} not found for metric {metric}."
+                )
+            else:
+                if message.callable in VALID_UPDATE_FUNCS:
+                    # Update the metric ("inc" and "dec" do not take "value" argument)
+                    if message.callable in {"inc", "dec"}:
+                        update_func(message.labels)
+                    else:
+                        update_func(message.labels, message.value)
+                    response_code = 200
+                    response_msg = f"Metric {metric} successfully updated."
+                else:
+                    response_code = 400
+                    response_msg = f"Failed to update metric {metric}: {message.callable} is not a valid update function."
+
+        return response_code, response_msg
 
     async def _send(self, envelope: Envelope) -> None:
         """Send a message.
@@ -236,6 +273,7 @@ class PrometheusChannel:
         if self._queue is not None:
             await self._queue.put(None)
             self._queue = None
+        await self._service.stop()
 
     async def get(self) -> Optional[Envelope]:
         """Get incoming envelope."""
@@ -255,12 +293,11 @@ class PrometheusConnection(Connection):
         """
         super().__init__(**kwargs)
 
-        print(self.configuration)
-
+        self.host = cast(int, self.configuration.config.get("host", DEFAULT_HOST))
         self.port = cast(int, self.configuration.config.get("port", DEFAULT_PORT))
-        self.metrics = {}
-        self.channel = PrometheusChannel(self.address, self.metrics, self.port)
-        self._connection = None  # type: Optional[asyncio.Queue]
+        self.channel = PrometheusChannel(
+            self.address, self.host, self.port, self.logger
+        )
 
     async def connect(self) -> None:
         """

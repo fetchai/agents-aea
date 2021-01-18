@@ -41,16 +41,16 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 This step-by-step guide recreates two AEAs already developed by Fetch.ai. You can get the finished AEAs to compare your code against by following the next steps:
 
 ``` bash
-aea fetch fetchai/generic_seller:0.15.0
+aea fetch fetchai/generic_seller:0.17.0
 cd generic_seller
-aea eject skill fetchai/generic_seller:0.17.0
+aea eject skill fetchai/generic_seller:0.19.0
 cd ..
 ```
 
 ``` bash
-aea fetch fetchai/generic_buyer:0.16.0
+aea fetch fetchai/generic_buyer:0.18.0
 cd generic_buyer
-aea eject skill fetchai/generic_buyer:0.17.0
+aea eject skill fetchai/generic_buyer:0.19.0
 cd ..
 ```
 
@@ -76,7 +76,7 @@ Our newly created AEA is inside the current working directory. Let’s create ou
 aea scaffold skill generic_seller
 ```
 
-This command will create the correct structure for a new skill inside our AEA project You can locate the newly created skill inside the skills folder (`my_generic_seller/skills/generic_seller/`) and it must contain the following files:
+This command will create the correct structure for a new skill inside our AEA project. You can locate the newly created skill inside the skills folder (`my_generic_seller/skills/generic_seller/`) and it must contain the following files:
 
 - `__init__.py`
 - `behaviours.py`
@@ -251,7 +251,7 @@ At setup we are sending a message to the ledger connection to check the account 
 
 So far, we have tasked the AEA with sending register/unregister requests to the <a href="../simple-oef">SOEF search node</a>. However, we have at present no way of handling the responses sent to the AEA by the <a href="../simple-oef">SOEF search node</a> or messages sent from any other AEA.
 
-We have to specify the logic to negotiate with another AEA based on the strategy we want our AEA to follow. The following diagram illustrates the negotiation flow, up to the agreement between a seller_AEA and a buyer_AEA.
+We have to specify the logic to negotiate with another AEA based on the strategy we want our AEA to follow. The following diagram illustrates the negotiation flow, up to the agreement between a `seller_AEA` and a `buyer_AEA`.
 
 <div class="mermaid">
     sequenceDiagram
@@ -506,7 +506,7 @@ Alternatively, we might receive an `ACCEPT` message. In order to handle this opt
         )
         self.context.outbox.put_message(message=match_accept_msg)
 ```
-When the `my_generic_buyer` accepts the `Proposal` we send it, and therefores sends us an `ACCEPT` message, we have to respond with another message (`MATCH_ACCEPT_W_INFORM` ) to inform the buyer about the address we would like it to send the funds to.
+When the `my_generic_buyer` accepts the `Proposal` we send it, and therefore sends us an `ACCEPT` message, we have to respond with another message (`MATCH_ACCEPT_W_INFORM` ) to inform the buyer about the address we would like it to send the funds to.
 
 Lastly, we handle the `INFORM` message, which the buyer uses to inform us that it has sent the funds to the provided address. Add the following code:
 
@@ -840,7 +840,7 @@ class GenericOefSearchHandler(Handler):
         )
 ```
 
-The `GenericLedgerApiHandler` deals with `LedgerApiMessages` from the ledger connection. The `GenericOefSearchHandler` handles `OefSearchMessages` from the soef connection.
+The `GenericLedgerApiHandler` deals with `LedgerApiMessages` from the ledger connection. The `GenericOefSearchHandler` handles `OefSearchMessages` from the SOEF connection.
 
 ### Step 4: Create the strategy
 
@@ -958,7 +958,7 @@ class GenericStrategy(Model):
         self._data_for_sale = data_for_sale
 ```
 
-We initialise the strategy class. We are trying to read the strategy variables from the yaml file. If this is not possible we specified some default values.
+We initialise the strategy class. We are trying to read the strategy variables from the YAML file. If this is not possible we specified some default values.
 
 The following properties and methods deal with different aspects of the strategy. Add them under the initialization of the class:
 
@@ -1357,7 +1357,7 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
 
 The `FipaDialogues` class stores dialogue with each `my_generic_buyer` (and other AEAs) and exposes a number of helpful methods to manage them. This helps us match messages to a dialogue, access previous messages and enable us to identify possible communications problems between the `my_generic_seller` AEA and the `my_generic_buyer` AEA. It also keeps track of the data that we offer for sale during the proposal phase.
 
-The `FipaDialogues` class extends `BaseFipaDialogues`, which itself derives from the base <a href="../api/helpers/dialogue/base#dialogues-objects">`Dialogues`</a> class. Similarly, the `FipaDialogue` class extends `BaseFipaDialogue`, which itself derives from the base <a href="../api/helpers/dialogue/base#dialogue-objects">`Dialogue`</a> class. To learn more about dialogues have a look <a href="../protocol">here</a>.
+The `FipaDialogues` class extends `BaseFipaDialogues`, which itself derives from the base <a href="../api/protocols/dialogue/base#dialogues-objects">`Dialogues`</a> class. Similarly, the `FipaDialogue` class extends `BaseFipaDialogue`, which itself derives from the base <a href="../api/protocols/dialogue/base#dialogue-objects">`Dialogue`</a> class. To learn more about dialogues have a look <a href="../protocol">here</a>.
 
 ### Step 6: Update the YAML files
 
@@ -1371,7 +1371,7 @@ type: skill
 description: The weather station skill implements the functionality to sell weather
   data.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
   README.md: QmPb5kHYZyhUN87EKmuahyGqDGgqVdGPyfC1KpGC3xfmcP
   __init__.py: QmTSEedzQySy2nzRCY3F66CBSX52f8s3pWHZTejX4hKC9h
@@ -1381,13 +1381,13 @@ fingerprint:
   strategy.py: QmYTUsfv64eRQDevCfMUDQPx2GCtiMLFdacN4sS1E4Fdfx
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.10.0
+- fetchai/ledger:0.12.0
 contracts: []
 protocols:
-- fetchai/default:0.9.0
-- fetchai/fipa:0.10.0
-- fetchai/ledger_api:0.7.0
-- fetchai/oef_search:0.10.0
+- fetchai/default:0.11.0
+- fetchai/fipa:0.12.0
+- fetchai/ledger_api:0.9.0
+- fetchai/oef_search:0.12.0
 skills: []
 behaviours:
   service_registration:
@@ -1892,7 +1892,7 @@ In case we do not receive any `DECLINE` message that means that the `my_generic_
                 "informing counterparty={} of payment.".format(fipa_msg.sender[-5:])
             )
 ```
-The first thing we are checking is if we enabled our AEA to transact with a ledger. If we can transact with a ledger we generate a `LedgerApiMessage` of performative `GET_RAW_TRANSACTION` and send it to the ledger connection. The ledger connection will construct a raw transaction for us, using the relevant ledger api.
+The first thing we are checking is if we enabled our AEA to transact with a ledger. If we can transact with a ledger we generate a `LedgerApiMessage` of performative `GET_RAW_TRANSACTION` and send it to the ledger connection. The ledger connection will construct a raw transaction for us, using the relevant ledger API.
 
 Lastly, we need to handle the `INFORM` message. This is the message that will have our data:
 
@@ -2524,7 +2524,7 @@ class GenericStrategy(Model):
         self._balance = 0
 ```
 
-We initialize the strategy class by trying to read the strategy variables from the YAML file. If this is not possible we specified some default values. The following two methods are related to the oef search service, add them under the initialization of the class:
+We initialize the strategy class by trying to read the strategy variables from the YAML file. If this is not possible we specified some default values. The following two methods are related to the OEF search service, add them under the initialization of the class:
 
 ``` python
     @property
@@ -3058,7 +3058,7 @@ version: 0.1.0
 type: skill
 description: The weather client skill implements the skill to purchase weather data.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
   README.md: QmTR91jm7WfJpmabisy74NR5mc35YXjDU1zQAUKZeHRw8L
   __init__.py: QmU5vrC8FipyjfS5biNa6qDWdp4aeH5h4YTtbFDmCg8Chj
@@ -3068,14 +3068,14 @@ fingerprint:
   strategy.py: QmcrwaEWvKHDCNti8QjRhB4utJBJn5L8GpD27Uy9zHwKhY
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.10.0
+- fetchai/ledger:0.12.0
 contracts: []
 protocols:
-- fetchai/default:0.9.0
-- fetchai/fipa:0.10.0
-- fetchai/ledger_api:0.7.0
-- fetchai/oef_search:0.10.0
-- fetchai/signing:0.7.0
+- fetchai/default:0.11.0
+- fetchai/fipa:0.12.0
+- fetchai/ledger_api:0.9.0
+- fetchai/oef_search:0.12.0
+- fetchai/signing:0.9.0
 skills: []
 behaviours:
   search:
@@ -3148,41 +3148,34 @@ This will hash each file and save the hash in the fingerprint. This way, in the 
 
 ## Run the AEAs
 
-<!-- <details><summary>Additional steps for Raspberry Pi only!</summary>
-
-<div class="admonition note">
-  <p class="admonition-title">Note</p>
-  <p>If you are using the Raspberry Pi, make sure that your thermometer sensor is connected to the Raspberry Pi's USB port.</p>
-</div>
-
-You can change the end-point's address and port by modifying the connection's yaml file (`*vendor/fetchai/connections/oef/connection.yaml`)
-
-Under config locate:
-
-``` yaml
-addr: ${OEF_ADDR: 127.0.0.1}
-```
-and replace it with your IP (the IP of the machine that runs the <a href="../oef-ledger">OEF search and communication node</a> image.)
-
-</details> -->
-
 ### Create private keys
 
-Create the private key for each AEA:
-
+For each AEA, create the private key:
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
-aea add-key fetchai fetchai_private_key.txt --connection
 ```
 
-### Update the AEA configs
+Next, create a private key used to secure the AEA's communications:
+``` bash
+aea generate-key fetchai fetchai_connection_private_key.txt
+aea add-key fetchai fetchai_connection_private_key.txt --connection
+```
 
-Both in `my_generic_seller/aea-config.yaml` and `my_generic_buyer/aea-config.yaml`, and
-``` yaml
-default_routing:
-  fetchai/ledger_api:0.7.0: fetchai/ledger:0.10.0
-  fetchai/oef_search:0.10.0: fetchai/soef:0.13.0
+Finally, certify the key for use by the connections that request that:
+``` bash
+aea issue-certificates
+```
+
+### Update the AEA configurations
+
+In both AEAs run:
+``` bash
+aea config set --type dict agent.default_routing \
+'{
+  "fetchai/ledger_api:0.9.0": "fetchai/ledger:0.12.0",
+  "fetchai/oef_search:0.12.0": "fetchai/soef:0.15.0"
+}'
 ```
 
 ### Fund the buyer AEA
@@ -3198,12 +3191,13 @@ aea generate-wealth fetchai --sync
 Add the remaining packages for the seller AEA, then run it:
 
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.12.0
-aea add connection fetchai/soef:0.13.0
-aea add connection fetchai/ledger:0.10.0
-aea add protocol fetchai/fipa:0.10.0
+aea add connection fetchai/p2p_libp2p:0.14.0
+aea add connection fetchai/soef:0.15.0
+aea add connection fetchai/ledger:0.12.0
+aea add protocol fetchai/fipa:0.12.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
+aea build
+aea config set agent.default_connection fetchai/p2p_libp2p:0.14.0
 aea run
 ```
 
@@ -3214,24 +3208,27 @@ Once you see a message of the form `To join its network use multiaddr: ['SOME_AD
 Add the remaining packages for the buyer AEA:
 
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.12.0
-aea add connection fetchai/soef:0.13.0
-aea add connection fetchai/ledger:0.10.0
-aea add protocol fetchai/fipa:0.10.0
-aea add protocol fetchai/signing:0.7.0
+aea add connection fetchai/p2p_libp2p:0.14.0
+aea add connection fetchai/soef:0.15.0
+aea add connection fetchai/ledger:0.12.0
+aea add protocol fetchai/fipa:0.12.0
+aea add protocol fetchai/signing:0.9.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
+aea build
+aea config set agent.default_connection fetchai/p2p_libp2p:0.14.0
 ```
 
-Then, update the configuration of the buyer AEA's p2p connection (in `vendor/fetchai/connections/p2p_libp2p/connection.yaml`) replace the following:
+Then, update the configuration of the buyer AEA's P2P connection:
 
-``` yaml
-config:
-  delegate_uri: 127.0.0.1:11001
-  entry_peers: ['SOME_ADDRESS']
-  local_uri: 127.0.0.1:9001
-  log_file: libp2p_node.log
-  public_uri: 127.0.0.1:9001
+``` bash
+aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
+'{
+  "delegate_uri": "127.0.0.1:11001",
+  "entry_peers": ["SOME_ADDRESS"],
+  "local_uri": "127.0.0.1:9001",
+  "log_file": "libp2p_node.log",
+  "public_uri": "127.0.0.1:9001"
+}'
 ```
 
 where `SOME_ADDRESS` is replaced accordingly.

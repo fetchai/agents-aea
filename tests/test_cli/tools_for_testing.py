@@ -21,8 +21,11 @@ from typing import List
 from unittest.mock import Mock
 
 from click import ClickException
+from packaging.specifiers import SpecifierSet
 
+import aea
 from aea.configurations.base import PackageVersion
+from aea.configurations.constants import DEFAULT_LEDGER
 
 from tests.conftest import AUTHOR, COSMOS, ETHEREUM
 from tests.test_cli.constants import DEFAULT_TESTING_VERSION
@@ -38,6 +41,9 @@ class AgentConfigMock:
 
     def __init__(self, *args, **kwargs):
         """Init the AgentConfigMock object."""
+        self.aea_version_specifiers: SpecifierSet = kwargs.get(
+            "aea_version_specifier", SpecifierSet(f"=={aea.__version__}")
+        )
         self.connections: List[str] = kwargs.get("connections", [])
         self.contracts: List[str] = kwargs.get("contracts", [])
         self.description: str = kwargs.get("description", "")
@@ -49,6 +55,9 @@ class AgentConfigMock:
         private_key_paths = kwargs.get("private_key_paths", [])
         self.private_key_paths = Mock()
         self.private_key_paths.read_all = Mock(return_value=private_key_paths)
+        self.private_key_paths.read = Mock(
+            return_value=private_key_paths[0][1] if private_key_paths else None
+        )
         connection_private_key_paths = kwargs.get("connection_private_key_paths", [])
         self.connection_private_key_paths = Mock()
         self.connection_private_key_paths.read_all = Mock(
@@ -58,6 +67,7 @@ class AgentConfigMock:
         self.component_configurations = {}
         self.package_dependencies = set()
         self.config: dict = {}
+        self.default_ledger = DEFAULT_LEDGER
 
     registry_path = "registry"
     name = "name"

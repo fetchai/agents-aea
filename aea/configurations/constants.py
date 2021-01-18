@@ -19,7 +19,7 @@
 
 """Module to declare constants."""
 from pathlib import Path
-from typing import List
+from typing import Dict, List
 
 
 FETCHAI = "fetchai"
@@ -59,7 +59,6 @@ DEFAULT_SKILL_CONFIG_FILE = "skill.yaml"
 DEFAULT_CONNECTION_CONFIG_FILE = "connection.yaml"
 DEFAULT_CONTRACT_CONFIG_FILE = "contract.yaml"
 DEFAULT_PROTOCOL_CONFIG_FILE = "protocol.yaml"
-DEFAULT_LICENSE = "Apache-2.0"
 PACKAGE_PUBLIC_ID_VAR_NAME = "PUBLIC_ID"
 DEFAULT_FINGERPRINT_IGNORE_PATTERNS = [
     ".DS_Store",
@@ -74,8 +73,17 @@ DEFAULT_FINGERPRINT_IGNORE_PATTERNS = [
 ]
 DEFAULT_PYPI_INDEX_URL = "https://pypi.org/simple"
 DEFAULT_GIT_REF = "master"
+DEFAULT_LOGGING_CONFIG = {"version": 1, "disable_existing_loggers": False}
 IMPORT_TEMPLATE_1 = "from packages.{author}.{type}.{name}"
 IMPORT_TEMPLATE_2 = "import packages.{author}.{type}.{name}"
 DEFAULT_ENV_DOTFILE = ".env"
 DOTTED_PATH_MODULE_ELEMENT_SEPARATOR = ":"
 LIBPROTOC_VERSION = "libprotoc 3.11.4"
+
+CONFIG_FILE_TO_PACKAGE_TYPE = {
+    DEFAULT_SKILL_CONFIG_FILE: SKILL,
+    DEFAULT_PROTOCOL_CONFIG_FILE: PROTOCOL,
+    DEFAULT_CONNECTION_CONFIG_FILE: CONNECTION,
+    DEFAULT_CONTRACT_CONFIG_FILE: CONTRACT,
+    DEFAULT_AEA_CONFIG_FILE: AGENT,
+}  # type: Dict[str, str]

@@ -35,7 +35,7 @@ To create a new AEA and run it, follow these steps.
 
 <img src="../assets/cli_gui02_sequence_01.png" alt="gui sequence" class="center">
 
-1. In the [Create Agent id] box on the left. type the name of your AEA - e.g. my_new_aea. 
+1. In the [Create Agent id] box on the left. type the name of your AEA - e.g. `my_new_aea`.
 2. Click the [Create Agent] button - the newly created AEA should appear in the [Local Agents] table. This should now be the currently selected AEA - but you can click on its name in the list to make sure. 
 3. Click in the search input box and type "echo"
 4. Click the [Search] button - this will list all the skills with echo in their name or description. Note that at present this search functionality is not working and it will list all the skills
@@ -43,7 +43,7 @@ To create a new AEA and run it, follow these steps.
 <img src="../assets/cli_gui02_sequence_02.png" alt="gui sequence" class="center">
 
 5. Find the Echo skill and click on it - this will select it.
-6. Click on the [Add skill] button - which should now say "Add echo skill to my_new_aea agent".
+6. Click on the [Add skill] button - which should now say "Add echo skill to `my_new_aea` agent".
 
 7. Start the AEA running by clicking on the [start agent] button. You should see the output from the echo AEA appearing on the screen.
 

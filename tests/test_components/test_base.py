@@ -34,6 +34,7 @@ class TestComponentProperties:
     def setup_class(self):
         """Setup test."""
         self.configuration = ProtocolConfig("name", "author", "0.1.0")
+        self.configuration.build_directory = "test"
         self.component = Component(configuration=self.configuration)
         self.directory = Path()
         self.component._directory = self.directory
@@ -61,6 +62,10 @@ class TestComponentProperties:
     def test_directory(self):
         """Test directory."""
         assert self.component.directory == self.directory
+
+    def test_build_directory(self):
+        """Test directory."""
+        assert self.component.build_directory
 
 
 def test_directory_setter():

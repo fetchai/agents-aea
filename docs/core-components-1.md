@@ -1,5 +1,7 @@
 The AEA framework consists of several core elements, some of which are required to run an AEA and others which are optional.
 
+The following sections discuss the use of the AEA framework, in particular its dominant usage where the framework is in charge of calling the code in custom packages (see <a href="https://en.wikipedia.org/wiki/Inversion_of_control" target="_blank">inversion of control</a>). Whilst it is in principle possible to use parts of the framework as a library, we do not recommend it.
+
 ## The elements each AEA uses
 
 <a href="../api/aea#aea-objects">`AEAs`</a> communicate asynchronously via `Envelopes`.
@@ -32,7 +34,7 @@ An <a href="../api/mail/base#envelope-objects">`Envelope`</a> is the core object
 
 * `Dialogues`, which define rules over `Message` sequences.
 
-The framework provides one default `Protocol`, called `default` (current version `fetchai/default:0.9.0`). This `Protocol` provides a bare-bones implementation for an AEA `Protocol` which includes a <a href="../api/protocols/default/message#packages.fetchai.protocols.default.message">`DefaultMessage`</a>  class and associated <a href="../api/protocols/default/serialization#packages.fetchai.protocols.default.serialization">`DefaultSerializer`</a> and <a href="../api/protocols/default/dialogues#packages.fetchai.protocols.default.dialogues">`DefaultDialogue`</a> classes.
+The framework provides one default `Protocol`, called `default` (current version `fetchai/default:0.11.0`). This `Protocol` provides a bare-bones implementation for an AEA `Protocol` which includes a <a href="../api/protocols/default/message#packages.fetchai.protocols.default.message">`DefaultMessage`</a>  class and associated <a href="../api/protocols/default/serialization#packages.fetchai.protocols.default.serialization">`DefaultSerializer`</a> and <a href="../api/protocols/default/dialogues#packages.fetchai.protocols.default.dialogues">`DefaultDialogue`</a> classes.
 
 Additional `Protocols` - i.e. a new type of interaction - can be added as packages and generated with the <a href="../protocol-generator">protocol generator</a>. For more details on `Protocols` also read the `Protocol` guide <a href="../protocol">here</a>.
 
@@ -42,7 +44,7 @@ Protocol specific `Messages`, wrapped in `Envelopes`, are sent and received to o
 
 A <a href="../api/connections/base#connection-objects">`Connection`</a> wraps an SDK or API and provides an interface to network, ledgers and other services. Where necessary, a `Connection` is responsible for translating between the framework specific `Envelope` with its contained `Message` and the external service or third-party protocol (e.g. `HTTP`).
 
-The framework provides one default `Connection`, called `stub` (current version `fetchai/stub:0.12.0`). It implements an I/O reader and writer to send `Messages` to the agent from a local file.
+The framework provides one default `Connection`, called `stub` (current version `fetchai/stub:0.15.0`). It implements an I/O reader and writer to send `Messages` to the agent from a local file.
 
 Additional `Connections` can be added as packages. For more details on `Connections` also read the `Connection` guide <a href="../connection">here</a>.
 
@@ -65,7 +67,7 @@ It maintains an <a href="../api/multiplexer#inbox-objects">`InBox`</a> and <a hr
 A `Skill` encapsulates implementations of the three abstract base classes `Handler`, `Behaviour`, `Model`, and is closely related with the abstract base class `Task`:
 
 * <a href="../api/skills/base#handler-objects">`Handler`</a>: each `Skill` has none, one or more `Handler` objects, each responsible for the registered messaging `Protocol`. Handlers implement AEAs' **reactive** behaviour. If the AEA understands the `Protocol` referenced in a received `Envelope`, the `Handler` reacts appropriately to the corresponding `Message`. Each `Handler` is responsible for only one `Protocol`.
-* <a href="../api/skills/base#behaviour-objects">`Behaviour`</a>: none, one or more `Behaviours` encapsulate actions which futher the AEAs goal and are initiated by internals of the AEA, rather than external events. Behaviours implement AEAs' **pro-activeness**. The framework provides a number of <a href="../api/skills/behaviours">abstract base classes</a> implementing different types of behaviours (e.g. cyclic/one-shot/finite-state-machine/etc.).
+* <a href="../api/skills/base#behaviour-objects">`Behaviour`</a>: none, one or more `Behaviours` encapsulate actions which further the AEAs goal and are initiated by internals of the AEA, rather than external events. Behaviours implement AEAs' **pro-activeness**. The framework provides a number of <a href="../api/skills/behaviours">abstract base classes</a> implementing different types of behaviours (e.g. cyclic/one-shot/finite-state-machine/etc.).
 * <a href="../api/skills/base#model-objects">`Model`</a>: none, one or more `Models` that inherit from the `Model` can be accessed via the `SkillContext`.
 * <a href="../api/skills/tasks#task-objects">`Task`</a>: none, one or more `Tasks` encapsulate background work internal to the AEA. `Task` differs from the other three in that it is not a part of `Skills`, but `Tasks` are declared in or from `Skills` if a packaging approach for AEA creation is used.
 
@@ -101,11 +103,11 @@ Understanding `Protocols` is core to developing your own agent. You can learn mo
 
 - <a href="../protocol">Protocols</a>
 
-Most of an AEA developer's time is spent on `Skill` development. `Skills` are the core business logic commponents of an AEA. Check out the following guide to learn more:
+Most of an AEA developer's time is spent on `Skill` development. `Skills` are the core business logic components of an AEA. Check out the following guide to learn more:
 
 - <a href="../skill">Skills</a>
 
-In most cases, one of the available `Connection` packages can be used. Occassionally, you might develop your own `Connection`:
+In most cases, one of the available `Connection` packages can be used. Occasionally, you might develop your own `Connection`:
 
 - <a href="../connection">Connections</a>
 

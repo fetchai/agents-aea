@@ -9,7 +9,7 @@ aea create my_aea --author "fetchai"
 cd my_aea
 ```
 
-Then, cd into your project directory and scaffold your project skill, protocol, or connection.
+Then, enter into your project directory and scaffold your project skill, protocol, or connection.
 
 
 ### Scaffold a skill

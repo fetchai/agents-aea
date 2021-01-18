@@ -1,8 +1,8 @@
-An AEA is an intelligent agent whose goal is generating economic value for its owner. It can represent machines, humans, or data. 
+An AEA is an intelligent agent whose goal is generating economic value for its owner. It can represent machines, humans (individuals or organisations), or data. 
 
 ## General application areas
 
-As described in the guide on <a href="../agent-oriented-development">agent-oriented development</a>, AEAs are designed to operate in an envrionment with:
+As described in the guide on <a href="../agent-oriented-development">agent-oriented development</a>, AEAs are designed to operate in an environment with:
 
 * multiple stakeholders, which
 * are represented by AEAs, that
@@ -11,7 +11,7 @@ As described in the guide on <a href="../agent-oriented-development">agent-orien
 
 There are at least five general application areas for AEAs:
 
-* **Inhabitants**: agents paired with real world hardware devices such as drones, laptops, heat sensors, etc. An example is the theremometer agent that can be found <a href="../thermometer-skills">here</a>.
+* **Inhabitants**: agents paired with real world hardware devices such as drones, laptops, heat sensors, etc. An example is the thermometer agent that can be found <a href="../thermometer-skills">here</a>.
 * **Interfaces**: facilitation agents which provide the necessary API interfaces for interaction between old (Web 2.0) and new (Web 3.0) economic models. An example is the http skill in <a href="../http-connection-and-skill">this</a> agent.
 * **Pure software**: software agents living in the digital space that interact with inhabitant and interface agents and others.
 * **Digital data sales agents**: pure software agents that attach to data sources and sell it via the open economic framework. An example can be found <a href="../ml-skills">here</a>.

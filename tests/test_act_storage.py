@@ -48,7 +48,7 @@ from packages.fetchai.skills.echo import PUBLIC_ID
 from tests.common.utils import wait_for_condition
 
 
-class TestBehaviour(TickerBehaviour):
+class TBehaviour(TickerBehaviour):
     """Simple behaviour to count how many acts were called."""
 
     OBJ_ID = "some"
@@ -67,7 +67,7 @@ class TestBehaviour(TickerBehaviour):
         self.counter += 1
 
 
-class TestHandler(Handler):
+class THandler(Handler):
     """Simple behaviour to count how many acts were called."""
 
     SUPPORTED_PROTOCOL = DefaultMessage.protocol_id
@@ -99,7 +99,7 @@ def test_storage_access_from_behaviour():
     builder.add_private_key(DEFAULT_LEDGER)
 
     skill_context = SkillContext()
-    behaviour = TestBehaviour(name="behaviour", skill_context=skill_context)
+    behaviour = TBehaviour(name="behaviour", skill_context=skill_context)
     test_skill = Skill(
         SkillConfig(name="test_skill", author="fetchai"),
         skill_context=skill_context,
@@ -133,7 +133,7 @@ def test_storage_access_from_handler():
     builder.add_private_key(DEFAULT_LEDGER)
 
     skill_context = SkillContext()
-    handler = TestHandler(name="behaviour", skill_context=skill_context)
+    handler = THandler(name="behaviour", skill_context=skill_context)
     test_skill = Skill(
         SkillConfig(name="test_skill", author="fetchai"),
         skill_context=skill_context,

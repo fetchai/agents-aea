@@ -50,7 +50,7 @@ Run the launch script. This may take a while.
 python scripts/launch.py
 ```
 
-The <a href="https://github.com/facebookresearch/visdom" target="_blank">visdom</a> server is now running.
+The <a href="https://github.com/fossasia/visdom" target="_blank">Visdom</a> server is now running.
 
 The controller GUI at <a href="http://localhost:8097" target="_blank">http://localhost:8097</a> provides real time insights.
 

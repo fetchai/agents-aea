@@ -4,17 +4,17 @@
 
 This is a generic skill for selling data.
 
-This skill registers some data selling service on the SOEF. It can be requested (for example by an agent with the generic_buyer skill) to provide specific data. It then negotiates the price and delivers the data after it receives payment.
+This skill registers some data selling service on the SOEF. It can be requested (for example by an agent with the `generic_buyer` skill) to provide specific data. It then negotiates the price and delivers the data after it receives payment.
 
 ## Behaviours
 
-* service_registration: registers data selling service on the soef 
+* `service_registration`: registers data selling service on the soef 
 
 ## Handlers
 
-* fipa: handles fipa messages for negotiation
-* ledger_api: handles ledger_api messages for payment
-* oef_search: handles oef_search messages if service registration on SOEF is unsuccessful
+* `fipa`: handles `fipa` messages for negotiation
+* `ledger_api`: handles `ledger_api` messages for payment
+* `oef_search`: handles `oef_search` messages if service registration on SOEF is unsuccessful
 
 ## Links
 

@@ -58,7 +58,7 @@ def test_add_metric_serialization():
         type="some_type",
         title="some_title",
         description="some_description",
-        labels=("some_lable", "some_other_label"),
+        labels={"label_key": "label_value"},
     )
     msg.to = "receiver"
     envelope = Envelope(
@@ -92,7 +92,8 @@ def test_update_metric_serialization():
         performative=PrometheusMessage.Performative.UPDATE_METRIC,
         title="some_title",
         callable="some_update_function",
-        value=float(0),
+        value=1.0,
+        labels={"label_key": "label_value"},
     )
     msg.to = "receiver"
     envelope = Envelope(

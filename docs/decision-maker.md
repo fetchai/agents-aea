@@ -31,7 +31,7 @@ class SigningHandler(Handler):
 		# code to handle the message
 ```
 
-## Custom DecisionMaker
+## Custom `DecisionMaker`
 
 The framework implements a default <a href="../api/decision_maker/default#decisionmakerhandler-objects">`DecisionMakerHandler`</a>. You can implement your own and mount it. The easiest way to do this is to run the following command to scaffold a custom `DecisionMakerHandler`:
 

@@ -1,13 +1,13 @@
 name: echo
 author: fetchai
-version: 0.11.0
+version: 0.13.0
 type: skill
 description: The echo skill implements simple echo functionality.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
-  README.md: Qmd884WK35W5JuT6i1gXQFspxVPnCpeXv9kqWXnUaUAx4E
-  __init__.py: Qmdjjw6JCJH13AYFPRgoJVSWeRoGYzm3hL2hwt1tv7haVW
+  README.md: QmUfqrZnJg2kHyyfyNA56CrqiwQn4rqHJAEoVBkWy6ujF5
+  __init__.py: QmfYgFAv7nr33vuodH8Ku9GeCCMbfqVsYziDKYojKPsxQb
   behaviours.py: QmXARXRvJkpzuqnYNhJhv42Sk6J4KzRW2AKvC6FJWLU9JL
   dialogues.py: QmUh5RWjBPudfUavLtcUvJFf7Sab2Vb7vcpETCs9ByAe2F
   handlers.py: QmNMjjChNLe49PAAXGFWXjrxESHAUn4HTC5zGhcnVhYEyK
@@ -15,7 +15,7 @@ fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/default:0.9.0
+- fetchai/default:0.11.0
 skills: []
 behaviours:
   echo:

@@ -1,4 +1,10 @@
-This guide will take you through the development of a simple skill.
+This guide will take you through the development of your first skill. It will teach you, how to connect the agent to the digital world, register the agent and search for other agents.
+
+Autonomous Economic Agents are not, generally secret agents. You want them to be seen and found by other agents so that they can trade and do other useful things. Usually, this means connecting to Fetch.ai’s search-and-discovery mechanism, the <a href="../simple-oef">simple OEF</a> (or SOEF, for short). The SOEF lets your agents register, be found, and find other agents. You can then negotiate using the AEA framework’s peer-to-peer network (ACN) and trade. This guide covers getting your agent connected to the SOEF, and describing your agent to make itself visible.
+
+Typically, this means setting a name, a genus (a high-level description of what the agent represents, e.g., `vehicle`, `building` or `service`), a classification (`infrastructure.railway.train`, for example) and then a bunch of other descriptors, where applicable, that provide the agent's position, whether it buys or sells, and other descriptive items.
+
+The more you describe your agent, the easier it is for others to find it using specific filters.
 
 ### Dependencies
 
@@ -263,7 +269,7 @@ We place this code in `my_aea/skills/my_search/handlers.py`. Ensure you replace 
 
 ## Step 4: Add dialogues model
 
-We have implemented a behaviour and a handler. We now implement a <a href="../api/skills/base#model-objects">`Model`</a>, in particular we implement the <a href="../api/helpers/dialogue/base#dialogue-objects">`Dialogue`</a> and <a href="../api/helpers/dialogue/base#dialogues-objects">`Dialogues`</a> classes.
+We have implemented a behaviour and a handler. We now implement a <a href="../api/skills/base#model-objects">`Model`</a>, in particular we implement the <a href="../api/protocols/dialogue/base#dialogue-objects">`Dialogue`</a> and <a href="../api/protocols/dialogue/base#dialogues-objects">`Dialogues`</a> classes.
 
 ``` python
 from aea.protocols.base import Message
@@ -311,11 +317,11 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
         )
 ```
 
-We add this code in the file `my_aea/skills/my_search/my_model.py`, replacing its original content. We then renamce `my_aea/skills/my_search/my_model.py` to `my_aea/skills/my_search/dialogues.py`.
+We add this code in the file `my_aea/skills/my_search/my_model.py`, replacing its original content. We then rename `my_aea/skills/my_search/my_model.py` to `my_aea/skills/my_search/dialogues.py`.
 
-## Step 5: Create the config file
+## Step 5: Create the configuration file
 
-Based on our skill components above, we create the following config file.
+Based on our skill components above, we create the following configuration file.
 
 ``` yaml
 name: my_search
@@ -324,12 +330,12 @@ version: 0.1.0
 type: skill
 description: A simple search skill utilising the SOEF search node.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.9.0, <0.10.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/oef_search:0.10.0
+- fetchai/oef_search:0.12.0
 skills: []
 behaviours:
   my_search_behaviour:
@@ -401,36 +407,35 @@ aea fingerprint skill fetchai/my_search:0.1.0
 ```
 Ensure, you use the correct author name to reference your skill (here we use `fetchai` as the author.)
 
-## Step 7: Add the oef protocol and connection
+## Step 7: Add the OEF protocol and connection
 
-Our AEA does not have the oef protocol yet so let's add it.
+Our AEA does not have the OEF protocol yet so let's add it.
 ``` bash
-aea add protocol fetchai/oef_search:0.10.0
+aea add protocol fetchai/oef_search:0.12.0
 ```
 
 This adds the protocol to our AEA and makes it available on the path `packages.fetchai.protocols...`.
 
-We also need to add the soef and p2p connections and install the AEA's dependencies:
+We also need to add the soef and P2P connections and install the AEA's dependencies as well as configure the AEA:
 ``` bash
-aea add connection fetchai/soef:0.13.0
-aea add connection fetchai/p2p_libp2p:0.12.0
+aea add connection fetchai/soef:0.15.0
+aea add connection fetchai/p2p_libp2p:0.14.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
+aea build
+aea config set agent.default_connection fetchai/p2p_libp2p:0.14.0
+aea config set --type dict agent.default_routing \
+'{
+  "fetchai/oef_search:0.12.0": "fetchai/soef:0.15.0"
+}'
 ```
 
-Finally, in the `aea-config.yaml` add the following lines:
-``` yaml
-default_routing:
-  fetchai/oef_search:0.10.0: fetchai/soef:0.13.0
-```
-
-This will ensure that search requests are processed by the correct connection.
+The last command will ensure that search requests are processed by the correct connection.
 
 ## Step 8: Run a service provider AEA
 
 In order to be able to find another AEA when searching, from a different terminal window, we fetch another finished AEA and install its Python dependencies:
 ``` bash
-aea fetch fetchai/simple_service_registration:0.17.0 && cd simple_service_registration && aea install
+aea fetch fetchai/simple_service_registration:0.19.0 && cd simple_service_registration && aea install && aea build
 ```
 
 This AEA will simply register a location service on the <a href="../simple-oef">SOEF search node</a> so we can search for it.
@@ -439,15 +444,25 @@ We first create the private key for the service provider AEA based on the networ
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
-aea add-key fetchai fetchai_private_key.txt --connection
 ```
 
-Then we run the aea:
+Next, create a private key used to secure the AEA's communications:
+``` bash
+aea generate-key fetchai fetchai_connection_private_key.txt
+aea add-key fetchai fetchai_connection_private_key.txt --connection
+```
+
+Finally, certify the key for use by the connections that request that:
+``` bash
+aea issue-certificates
+```
+
+Then we run the AEA:
 ``` bash
 aea run
 ```
 
-Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address.
+Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.14.0 -u public_uri` to retrieve the address.) This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the `simple_service_registration` AEA.
 
 <details><summary>Click here to see full code</summary>
 <p>
@@ -725,7 +740,7 @@ from packages.fetchai.skills.simple_service_registration.dialogues import (
     OefSearchDialogues,
 )
 
-LEDGER_API_ADDRESS = "fetchai/ledger:0.10.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.12.0"
 
 
 class OefSearchHandler(Handler):
@@ -825,7 +840,7 @@ version: 0.4.0
 type: skill
 description: The simple service registration skills is a skill to register a service.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmRr1oe3zWKyPcktzKP4BiKqjCqmKjEDdLUQhn1JzNm4nD
@@ -835,7 +850,7 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/oef_search:0.10.0
+- fetchai/oef_search:0.12.0
 skills: []
 behaviours:
   service:
@@ -870,21 +885,31 @@ First, create the private key for the search AEA based on the network you want t
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
-aea add-key fetchai fetchai_private_key.txt --connection
 ```
 
-Then, update the configuration of the search AEA's p2p connection (in `vendor/fetchai/connections/p2p_libp2p/connection.yaml`) replace the following:
-
-``` yaml
-config:
-  delegate_uri: 127.0.0.1:11001
-  entry_peers: ['SOME_ADDRESS']
-  local_uri: 127.0.0.1:9001
-  log_file: libp2p_node.log
-  public_uri: 127.0.0.1:9001
+Next, create a private key used to secure the AEA's communications:
+``` bash
+aea generate-key fetchai fetchai_connection_private_key.txt
+aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
 
-where `SOME_ADDRESS` is replaced accordingly.
+Finally, certify the key for use by the connections that request that:
+``` bash
+aea issue-certificates
+```
+
+Then, in the search AEA, run this command (replace `SOME_ADDRESS` with the correct value as described above):
+``` bash
+aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
+'{
+  "delegate_uri": "127.0.0.1:11001",
+  "entry_peers": ["/dns4/127.0.0.1/tcp/9000/p2p/16Uiu2HAm1uJpFsqSgHStJdtTBPpDme1fo8uFEvvY182D2y89jQuj"],
+  "local_uri": "127.0.0.1:9001",
+  "log_file": "libp2p_node.log",
+  "public_uri": "127.0.0.1:9001"
+}'
+```
+This allows the search AEA to connect to the same local agent communication network as the service registration AEA.
 
 We can then launch our AEA.
 

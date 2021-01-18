@@ -51,7 +51,8 @@ def format_items(items):
 
 def retrieve_details(name: str, loader: ConfigLoader, config_filepath: str) -> Dict:
     """Return description of a protocol, skill, connection."""
-    config = loader.load(open(str(config_filepath)))
+    with open(str(config_filepath)) as fp:
+        config = loader.load(fp)
     item_name = config.agent_name if isinstance(config, AgentConfig) else config.name
     enforce(item_name == name, "Item names do not match!")
     return {

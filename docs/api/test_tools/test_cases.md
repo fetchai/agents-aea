@@ -37,7 +37,7 @@ Unset the current agent context.
 
 ```python
  | @classmethod
- | set_config(cls, dotted_path: str, value: Any, type_: str = "str") -> Result
+ | set_config(cls, dotted_path: str, value: Any, type_: Optional[str] = None) -> Result
 ```
 
 Set a config.
@@ -85,7 +85,7 @@ None
 
 ```python
  | @classmethod
- | run_cli_command(cls, *args: str, *, cwd: str = ".") -> Result
+ | run_cli_command(cls, *args: str, *, cwd: str = ".", **kwargs) -> Result
 ```
 
 Run AEA CLI command.
@@ -94,6 +94,7 @@ Run AEA CLI command.
 
 - `args`: CLI args
 - `cwd`: the working directory from where to run the command.
+- `kwargs`: other keyword arguments to click.CLIRunner.invoke.
 
 **Raises**:
 
@@ -457,6 +458,27 @@ Run from agent's directory.
 
 - `ledger_api_id`: ledger API ID.
 - `private_key_filepath`: private key filepath.
+- `connection`: whether or not the private key filepath is for a connection.
+
+**Returns**:
+
+Result
+
+<a name="aea.test_tools.test_cases.BaseAEATestCase.remove_private_key"></a>
+#### remove`_`private`_`key
+
+```python
+ | @classmethod
+ | remove_private_key(cls, ledger_api_id: str = DEFAULT_LEDGER, connection: bool = False) -> Result
+```
+
+Remove private key with CLI command.
+
+Run from agent's directory.
+
+**Arguments**:
+
+- `ledger_api_id`: ledger API ID.
 - `connection`: whether or not the private key filepath is for a connection.
 
 **Returns**:

@@ -363,7 +363,7 @@ def test_clean_tarfiles_error():
 @pytest.mark.integration
 def test_get_package_meta():
     """Test get package meta."""
-    package_meta = get_package_meta("protocol", DefaultMessage.protocol_id)
+    package_meta = get_package_meta("protocol", DefaultMessage.protocol_id.to_latest())
     assert isinstance(package_meta, dict)
     assert package_meta["name"] == DefaultMessage.protocol_id.name
 

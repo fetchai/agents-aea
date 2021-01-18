@@ -17,15 +17,16 @@
 #
 # ------------------------------------------------------------------------------
 
+
 """This test module contains the tests for the `aea build` sub-command."""
 import re
 from pathlib import Path
 from unittest import mock
 
 import pytest
+from click.exceptions import ClickException
 
 from aea.configurations.constants import DEFAULT_VERSION
-from aea.test_tools.exceptions import AEATestingException
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from tests.common.utils import run_aea_subprocess
@@ -38,7 +39,7 @@ class TestAEABuildEmpty(AEATestCaseEmpty):
         """Test build command."""
         result = self.run_cli_command("build", cwd=self._get_cwd())
         assert result.exit_code == 0
-        assert "Build completed!\n" == result.stdout
+        assert "Build completed!" in result.stdout
 
 
 class TestAEABuildMainEntrypoint(AEATestCaseEmpty):
@@ -60,8 +61,8 @@ class TestAEABuildMainEntrypoint(AEATestCaseEmpty):
         result, stdout, stderr = run_aea_subprocess("-s", "build", cwd=self._get_cwd())
         assert result.returncode == 0
         assert re.search(r"Building AEA package\.\.\.", stdout)
-        assert re.search(r"Running command '.*script\.py'", stdout)
-        assert "Build completed!\n" in stdout
+        assert re.search(r"Running command '.*script\.py .+'", stdout)
+        assert "Build completed!" in stdout
         assert self.expected_string in stdout
 
 
@@ -94,8 +95,8 @@ class TestAEABuildPackageEntrypoint(AEATestCaseEmpty):
             rf"Building package \(protocol, {self.author}/{self.scaffold_package_name}:{DEFAULT_VERSION}\)...",
             stdout,
         )
-        assert re.search(r"Running command '.*script\.py'", stdout)
-        assert "Build completed!\n" in stdout
+        assert re.search(r"Running command '.*script\.py .+'", stdout)
+        assert "Build completed!" in stdout
 
 
 class TestAEABuildEntrypointNegative(AEATestCaseEmpty):
@@ -107,5 +108,5 @@ class TestAEABuildEntrypointNegative(AEATestCaseEmpty):
     )
     def test_build_exception(self, *_mock):
         """Test build exception."""
-        with pytest.raises(AEATestingException, match="some error."):
+        with pytest.raises(ClickException, match="some error."):
             self.run_cli_command("build", cwd=self._get_cwd())

@@ -33,7 +33,7 @@ from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue, Dialogues
 
 
-CONNECTION_ID = PublicId.from_str("fetchai/ledger:0.10.0")
+CONNECTION_ID = PublicId.from_str("fetchai/ledger:0.12.0")
 
 
 class RequestDispatcher(ABC):

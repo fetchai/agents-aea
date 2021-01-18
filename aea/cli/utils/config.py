@@ -35,36 +35,28 @@
 #
 # ------------------------------------------------------------------------------
 """A module with config tools of the aea cli."""
-import logging
-import logging.config
 import os
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, Set
 
 import click
 import jsonschema
 import yaml
 
-from aea.cli.utils.constants import (
-    ALLOWED_PATH_ROOTS,
-    AUTHOR_KEY,
-    CLI_CONFIG_PATH,
-    RESOURCE_TYPE_TO_CONFIG_FILE,
-)
+from aea.cli.utils.constants import AUTHOR_KEY, CLI_CONFIG_PATH
 from aea.cli.utils.context import Context
 from aea.cli.utils.exceptions import AEAConfigException
 from aea.cli.utils.generic import load_yaml
 from aea.configurations.base import (
-    ComponentId,
     ComponentType,
     PackageConfiguration,
     PackageType,
-    PublicId,
     _get_default_configuration_file_name_from_type,
 )
-from aea.configurations.constants import AGENT, AGENTS, DEFAULT_AEA_CONFIG_FILE, VENDOR
+from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader, ConfigLoaders
-from aea.exceptions import AEAEnforceError, AEAException, enforce
+from aea.configurations.validation import ExtraPropertiesError
+from aea.exceptions import AEAEnforceError
 
 
 def try_to_load_agent_config(
@@ -87,7 +79,6 @@ def try_to_load_agent_config(
         with path.open(mode="r", encoding="utf-8") as fp:
             ctx.agent_config = ctx.agent_loader.load(fp)
             ctx.agent_config.directory = Path(agent_src_path)
-            logging.config.dictConfig(ctx.agent_config.logging_config)
     except FileNotFoundError:
         if is_exit_on_except:
             raise click.ClickException(
@@ -95,7 +86,7 @@ def try_to_load_agent_config(
                     DEFAULT_AEA_CONFIG_FILE
                 )
             )
-    except jsonschema.exceptions.ValidationError:
+    except (jsonschema.exceptions.ValidationError, ExtraPropertiesError):
         if is_exit_on_except:
             raise click.ClickException(
                 "Agent configuration file '{}' is invalid. Please check the documentation.".format(
@@ -203,120 +194,6 @@ def dump_item_config(
         configuration_loader.dump(package_configuration, file_output)  # type: ignore
 
 
-def handle_dotted_path(
-    value: str, author: str
-) -> Tuple[List[str], Path, ConfigLoader, Optional[ComponentId]]:
-    """Separate the path between path to resource and json path to attribute.
-
-    Allowed values:
-        'agent.an_attribute_name'
-        'protocols.my_protocol.an_attribute_name'
-        'connections.my_connection.an_attribute_name'
-        'contracts.my_contract.an_attribute_name'
-        'skills.my_skill.an_attribute_name'
-        'vendor.author.[protocols|contracts|connections|skills].package_name.attribute_name
-
-    We also return the component id to retrieve the configuration of a specific
-    component. Notice that at this point we don't know the version,
-    so we put 'latest' as version, but later we will ignore it because
-    we will filter with only the component prefix (i.e. the triple type, author and name).
-
-    :param value: dotted path.
-    :param author: the author string.
-
-    :return: Tuple[list of settings dict keys, filepath, config loader, component id].
-    """
-    parts = value.split(".")
-
-    root = parts[0]
-    if root not in ALLOWED_PATH_ROOTS:
-        raise AEAException(
-            "The root of the dotted path must be one of: {}".format(ALLOWED_PATH_ROOTS)
-        )
-
-    if (
-        len(parts) < 2
-        or parts[0] == AGENT
-        and len(parts) < 2
-        or parts[0] == VENDOR
-        and len(parts) < 5
-        or parts[0] != AGENT
-        and len(parts) < 3
-    ):
-        raise AEAException(
-            "The path is too short. Please specify a path up to an attribute name."
-        )
-
-    # if the root is 'agent', stop.
-    if root == AGENT:
-        resource_type_plural = AGENTS
-        path_to_resource_configuration = Path(DEFAULT_AEA_CONFIG_FILE)
-        json_path = parts[1:]
-        component_id = None
-    elif root == VENDOR:
-        # parse json path
-        resource_author = parts[1]
-        resource_type_plural = parts[2]
-        resource_name = parts[3]
-
-        # extract component id
-        resource_type_singular = resource_type_plural[:-1]
-        try:
-            component_type = ComponentType(resource_type_singular)
-        except ValueError as e:
-            raise AEAException(
-                f"'{resource_type_plural}' is not a valid component type. Please use one of {ComponentType.plurals()}."
-            ) from e
-        component_id = ComponentId(
-            component_type, PublicId(resource_author, resource_name)
-        )
-
-        # find path to the resource directory
-        path_to_resource_directory = (
-            Path(".") / VENDOR / resource_author / resource_type_plural / resource_name
-        )
-        path_to_resource_configuration = (
-            path_to_resource_directory
-            / RESOURCE_TYPE_TO_CONFIG_FILE[resource_type_plural]
-        )
-        json_path = parts[4:]
-        if not path_to_resource_directory.exists():
-            raise AEAException(  # pragma: nocover
-                "Resource vendor/{}/{}/{} does not exist.".format(
-                    resource_author, resource_type_plural, resource_name
-                )
-            )
-    else:
-        # navigate the resources of the agent to reach the target configuration file.
-        resource_type_plural = root
-        resource_name = parts[1]
-
-        # extract component id
-        resource_type_singular = resource_type_plural[:-1]
-        component_type = ComponentType(resource_type_singular)
-        resource_author = author
-        component_id = ComponentId(
-            component_type, PublicId(resource_author, resource_name)
-        )
-
-        # find path to the resource directory
-        path_to_resource_directory = Path(".") / resource_type_plural / resource_name
-        path_to_resource_configuration = (
-            path_to_resource_directory
-            / RESOURCE_TYPE_TO_CONFIG_FILE[resource_type_plural]
-        )
-        json_path = parts[2:]
-        if not path_to_resource_directory.exists():
-            raise AEAException(
-                "Resource {}/{} does not exist.".format(
-                    resource_type_plural, resource_name
-                )
-            )
-
-    config_loader = ConfigLoader.from_configuration_type(resource_type_plural[:-1])
-    return json_path, path_to_resource_configuration, config_loader, component_id
-
-
 def update_item_config(item_type: str, package_path: Path, **kwargs) -> None:
     """
     Update item config and item config file.
@@ -360,62 +237,6 @@ def validate_item_config(item_type: str, package_path: Path) -> None:
                     field_name, item_type
                 )
             )
-
-
-def _try_get_configuration_object_from_aea_config(
-    ctx: Context, component_id: ComponentId
-) -> Optional[Dict]:
-    """
-    Try to get the configuration object in the AEA config.
-
-    The result is not guaranteed because there might not be any
-
-    :param ctx: the CLI context.
-    :param component_id: the component id whose prefix points to the relevant
-        custom configuration in the AEA configuration file.
-    :return: the configuration object to get/set an attribute.
-    """
-    if component_id is None:
-        # this is the case when the prefix of the json path is 'agent'.
-        return None  # pragma: nocover
-    type_, author, name = (
-        component_id.component_type,
-        component_id.author,
-        component_id.name,
-    )
-    component_ids = set(ctx.agent_config.component_configurations.keys())
-    true_component_id = _try_get_component_id_from_prefix(
-        component_ids, (type_, author, name)
-    )
-    if true_component_id is not None:
-        return ctx.agent_config.component_configurations.get(true_component_id)
-    return None
-
-
-def _try_get_component_id_from_prefix(
-    component_ids: Set[ComponentId], component_prefix: Tuple[ComponentType, str, str]
-) -> Optional[ComponentId]:
-    """
-    Find the component id matching a component prefix.
-
-    :param component_ids: the set of component id.
-    :param component_prefix: the component prefix.
-    :return: the component id that matches the prefix.
-    :raises ValueError: if there are more than two components as candidate results.
-    """
-    type_, author, name = component_prefix
-    results = list(
-        filter(
-            lambda x: x.component_type == type_
-            and x.author == author
-            and x.name == name,
-            component_ids,
-        )
-    )
-    if len(results) == 0:
-        return None
-    enforce(len(results) == 1, f"Expected only one component, found {len(results)}.")
-    return results[0]
 
 
 def get_non_vendor_package_path(aea_project_path: Path) -> Set[Path]:

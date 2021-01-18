@@ -27,12 +27,11 @@ from aea.test_tools.test_cases import AEATestCaseMany
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
 from tests.conftest import (
-    COSMOS,
-    COSMOS_PRIVATE_KEY_FILE_CONNECTION,
     FETCHAI,
     FETCHAI_PRIVATE_KEY_FILE,
+    FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
     MAX_FLAKY_RERUNS_INTEGRATION,
-    NON_FUNDED_COSMOS_PRIVATE_KEY_1,
+    NON_FUNDED_FETCHAI_PRIVATE_KEY_1,
     NON_GENESIS_CONFIG,
     wait_for_localhost_ports_to_close,
 )
@@ -41,6 +40,8 @@ from tests.conftest import (
 @pytest.mark.integration
 class TestGenericSkills(AEATestCaseMany):
     """Test that generic skills work."""
+
+    capture_log = True
 
     @pytest.mark.flaky(
         reruns=MAX_FLAKY_RERUNS_INTEGRATION
@@ -52,8 +53,8 @@ class TestGenericSkills(AEATestCaseMany):
         self.create_agents(seller_aea_name, buyer_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.7.0": "fetchai/ledger:0.10.0",
-            "fetchai/oef_search:0.10.0": "fetchai/soef:0.13.0",
+            "fetchai/ledger_api:0.9.0": "fetchai/ledger:0.12.0",
+            "fetchai/oef_search:0.12.0": "fetchai/soef:0.15.0",
         }
 
         # generate random location
@@ -64,12 +65,12 @@ class TestGenericSkills(AEATestCaseMany):
 
         # prepare seller agent
         self.set_agent_context(seller_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/soef:0.13.0")
-        self.remove_item("connection", "fetchai/stub:0.12.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/ledger:0.10.0")
-        self.add_item("skill", "fetchai/generic_seller:0.17.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.14.0")
+        self.add_item("connection", "fetchai/soef:0.15.0")
+        self.remove_item("connection", "fetchai/stub:0.15.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.14.0")
+        self.add_item("connection", "fetchai/ledger:0.12.0")
+        self.add_item("skill", "fetchai/generic_seller:0.19.0")
         setting_path = (
             "vendor.fetchai.skills.generic_seller.models.strategy.args.is_ledger_tx"
         )
@@ -80,17 +81,14 @@ class TestGenericSkills(AEATestCaseMany):
 
         # add keys
         self.generate_private_key(FETCHAI)
-        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
+        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
         self.replace_private_key_in_file(
-            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
+            NON_FUNDED_FETCHAI_PRIVATE_KEY_1, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
         )
-
-        setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.set_config(setting_path, COSMOS)
 
         # make runable:
         setting_path = "vendor.fetchai.skills.generic_seller.is_abstract"
@@ -101,15 +99,17 @@ class TestGenericSkills(AEATestCaseMany):
             "vendor.fetchai.skills.generic_seller.models.strategy.args.location"
         )
         self.nested_set_config(setting_path, location)
+        self.run_cli_command("build", cwd=self._get_cwd())
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
         # prepare buyer agent
         self.set_agent_context(buyer_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/soef:0.13.0")
-        self.remove_item("connection", "fetchai/stub:0.12.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/ledger:0.10.0")
-        self.add_item("skill", "fetchai/generic_buyer:0.17.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.14.0")
+        self.add_item("connection", "fetchai/soef:0.15.0")
+        self.remove_item("connection", "fetchai/stub:0.15.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.14.0")
+        self.add_item("connection", "fetchai/ledger:0.12.0")
+        self.add_item("skill", "fetchai/generic_buyer:0.19.0")
         setting_path = (
             "vendor.fetchai.skills.generic_buyer.models.strategy.args.is_ledger_tx"
         )
@@ -120,10 +120,10 @@ class TestGenericSkills(AEATestCaseMany):
 
         # add keys
         self.generate_private_key(FETCHAI)
-        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
+        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
 
         # set p2p configs
@@ -139,21 +139,21 @@ class TestGenericSkills(AEATestCaseMany):
             "vendor.fetchai.skills.generic_buyer.models.strategy.args.location"
         )
         self.nested_set_config(setting_path, location)
+        self.run_cli_command("build", cwd=self._get_cwd())
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
         # run AEAs
         self.set_agent_context(seller_aea_name)
         seller_aea_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            seller_aea_process, check_strings, timeout=240, is_terminating=False
+            seller_aea_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -163,15 +163,13 @@ class TestGenericSkills(AEATestCaseMany):
         buyer_aea_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            buyer_aea_process, check_strings, timeout=240, is_terminating=False
+            buyer_aea_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -223,6 +221,8 @@ class TestGenericSkills(AEATestCaseMany):
 class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
     """Test that generic skills work."""
 
+    capture_log = True
+
     @pytest.mark.flaky(
         reruns=MAX_FLAKY_RERUNS_INTEGRATION
     )  # cause possible network issues
@@ -233,8 +233,8 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
         self.create_agents(seller_aea_name, buyer_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.7.0": "fetchai/ledger:0.10.0",
-            "fetchai/oef_search:0.10.0": "fetchai/soef:0.13.0",
+            "fetchai/ledger_api:0.9.0": "fetchai/ledger:0.12.0",
+            "fetchai/oef_search:0.12.0": "fetchai/soef:0.15.0",
         }
 
         # generate random location
@@ -245,18 +245,18 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
 
         # prepare seller agent
         self.set_agent_context(seller_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/soef:0.13.0")
-        self.remove_item("connection", "fetchai/stub:0.12.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/ledger:0.10.0")
-        self.add_item("skill", "fetchai/generic_seller:0.17.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.14.0")
+        self.add_item("connection", "fetchai/soef:0.15.0")
+        self.remove_item("connection", "fetchai/stub:0.15.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.14.0")
+        self.add_item("connection", "fetchai/ledger:0.12.0")
+        self.add_item("skill", "fetchai/generic_seller:0.19.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/generic_seller:0.15.0", seller_aea_name
+            "fetchai/generic_seller:0.17.0", seller_aea_name
         )
         assert (
             diff == []
@@ -264,17 +264,14 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
 
         # add keys
         self.generate_private_key(FETCHAI)
-        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
+        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
         self.replace_private_key_in_file(
-            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
+            NON_FUNDED_FETCHAI_PRIVATE_KEY_1, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
         )
-
-        setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.set_config(setting_path, COSMOS)
 
         # make runable:
         setting_path = "vendor.fetchai.skills.generic_seller.is_abstract"
@@ -285,21 +282,23 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
             "vendor.fetchai.skills.generic_seller.models.strategy.args.location"
         )
         self.nested_set_config(setting_path, location)
+        self.run_cli_command("build", cwd=self._get_cwd())
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
         # prepare buyer agent
         self.set_agent_context(buyer_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/soef:0.13.0")
-        self.remove_item("connection", "fetchai/stub:0.12.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/ledger:0.10.0")
-        self.add_item("skill", "fetchai/generic_buyer:0.17.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.14.0")
+        self.add_item("connection", "fetchai/soef:0.15.0")
+        self.remove_item("connection", "fetchai/stub:0.15.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.14.0")
+        self.add_item("connection", "fetchai/ledger:0.12.0")
+        self.add_item("skill", "fetchai/generic_buyer:0.19.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/generic_buyer:0.16.0", buyer_aea_name
+            "fetchai/generic_buyer:0.18.0", buyer_aea_name
         )
         assert (
             diff == []
@@ -310,10 +309,10 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
 
         # add keys
         self.generate_private_key(FETCHAI)
-        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
+        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
         self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
         )
 
         # fund key
@@ -328,21 +327,21 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
             "vendor.fetchai.skills.generic_buyer.models.strategy.args.location"
         )
         self.nested_set_config(setting_path, location)
+        self.run_cli_command("build", cwd=self._get_cwd())
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
         # run AEAs
         self.set_agent_context(seller_aea_name)
         seller_aea_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            seller_aea_process, check_strings, timeout=240, is_terminating=False
+            seller_aea_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -352,15 +351,13 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
         buyer_aea_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            buyer_aea_process, check_strings, timeout=240, is_terminating=False
+            buyer_aea_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -378,7 +375,7 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
             "transaction confirmed, sending data=",
         )
         missing_strings = self.missing_from_output(
-            seller_aea_process, check_strings, timeout=240, is_terminating=False
+            seller_aea_process, check_strings, timeout=120, is_terminating=False
         )
         assert (
             missing_strings == []

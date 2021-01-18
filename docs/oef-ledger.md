@@ -14,9 +14,9 @@ The 'Open Economic Framework' (OEF) consists of protocols, languages and market 
 
 At present, the OEF's capabilities are fulfilled by two components:
 
-- a permissionless, public peer to peer (agent to agent) communication network, called the Agent Communication Network;
-- a set of <a href="../protocol">agent interaction protocols</a>; and
-- a centralized search and discovery system.
+- a permissionless, public peer to peer (agent to agent) communication network, called the <a href="../acn">Agent Communication Network</a>;
+- a set of <a href="../interaction-protocol">agent interaction protocols</a>; and
+- a centralized <a href="../simple-oef">search and discovery system</a>.
 
 The latter will be decentralized over time.
 
@@ -53,7 +53,7 @@ When it is live you will see the sentence 'A thing of beauty is a joy forever...
 
 To view the `OEF search and communication node` logs for debugging, navigate to `data/oef-logs`.
 
-To connect to an `OEF search and communication node` an AEA uses the `OEFConnection` connection package (`fetchai/oef:0.13.0`).
+To connect to an `OEF search and communication node` an AEA uses the `OEFConnection` connection package (`fetchai/oef:0.15.0`).
 
 If you experience any problems launching the `OEF search and communication node` then consult <a href="https://docs.google.com/document/d/1x_hFwEIXHlr_JCkuIv-izxSz0tN-7kSmSc-g32ImL1U/edit?usp=sharing" target="_blank">this</a> guide.
 

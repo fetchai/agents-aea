@@ -16,9 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains resilience and fault tolerance tests for P2PLibp2p connection."""
-
 import os
 import shutil
 import tempfile
@@ -29,6 +27,7 @@ from aea.crypto.registries import make_crypto
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 
+from packages.fetchai.connections.p2p_libp2p.check_dependencies import build_node
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.default.serialization import DefaultSerializer
 
@@ -53,16 +52,18 @@ class TestLibp2pConnectionRelayNodeRestart:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-
+        build_node(cls.t)
         cls.log_files = []
         cls.multiplexers = []
 
         try:
-            cls.genesis = _make_libp2p_connection(DEFAULT_PORT + 1)
+            cls.genesis = _make_libp2p_connection(
+                DEFAULT_PORT + 1, build_directory=cls.t
+            )
 
             cls.multiplexer_genesis = Multiplexer([cls.genesis])
-            cls.log_files.append(cls.genesis.node.log_file)
             cls.multiplexer_genesis.connect()
+            cls.log_files.append(cls.genesis.node.log_file)
             cls.multiplexers.append(cls.multiplexer_genesis)
 
             genesis_peer = cls.genesis.node.multiaddrs[0]
@@ -75,24 +76,28 @@ class TestLibp2pConnectionRelayNodeRestart:
                 port=DEFAULT_PORT + 2,
                 entry_peers=[genesis_peer],
                 node_key_file=cls.relay_key_path,
+                build_directory=cls.t,
             )
             cls.multiplexer_relay = Multiplexer([cls.relay])
-            cls.log_files.append(cls.relay.node.log_file)
             cls.multiplexer_relay.connect()
+            cls.log_files.append(cls.relay.node.log_file)
             cls.multiplexers.append(cls.multiplexer_relay)
 
             relay_peer = cls.relay.node.multiaddrs[0]
 
             cls.connection = _make_libp2p_connection(
-                DEFAULT_PORT + 3, relay=False, entry_peers=[relay_peer]
+                DEFAULT_PORT + 3,
+                relay=False,
+                entry_peers=[relay_peer],
+                build_directory=cls.t,
             )
             cls.multiplexer = Multiplexer([cls.connection])
-            cls.log_files.append(cls.connection.node.log_file)
             cls.multiplexer.connect()
+            cls.log_files.append(cls.connection.node.log_file)
             cls.multiplexers.append(cls.multiplexer)
-        except Exception as e:
+        except Exception:
             cls.teardown_class()
-            raise e
+            raise
 
     def test_connection_is_established(self):
         """Test connection established."""
@@ -150,6 +155,7 @@ class TestLibp2pConnectionRelayNodeRestart:
             port=DEFAULT_PORT + 2,
             entry_peers=[self.genesis.node.multiaddrs[0]],
             node_key_file=self.relay_key_path,
+            build_directory=self.t,
         )
         TestLibp2pConnectionRelayNodeRestart.multiplexer_relay = Multiplexer(
             [self.relay]
@@ -210,15 +216,17 @@ class TestLibp2pConnectionAgentMobility:
             cls.multiplexer1.connect()
             cls.multiplexers.append(cls.multiplexer1)
 
+            cls.connection_key = make_crypto(DEFAULT_LEDGER)
             cls.connection2 = _make_libp2p_connection(
-                DEFAULT_PORT + 2, entry_peers=[genesis_peer]
+                DEFAULT_PORT + 2,
+                entry_peers=[genesis_peer],
+                agent_key=cls.connection_key,
             )
             cls.multiplexer2 = Multiplexer([cls.connection2])
             cls.log_files.append(cls.connection2.node.log_file)
             cls.multiplexer2.connect()
             cls.multiplexers.append(cls.multiplexer2)
 
-            cls.connection_addr = cls.connection2.address
         except Exception as e:
             cls.teardown_class()
             raise e
@@ -261,7 +269,7 @@ class TestLibp2pConnectionAgentMobility:
         TestLibp2pConnectionAgentMobility.connection2 = _make_libp2p_connection(
             port=DEFAULT_PORT + 2,
             entry_peers=[self.genesis.node.multiaddrs[0]],
-            agent_address=self.connection_addr,
+            agent_key=self.connection_key,
         )
         TestLibp2pConnectionAgentMobility.multiplexer2 = Multiplexer([self.connection2])
         self.multiplexer2.connect()

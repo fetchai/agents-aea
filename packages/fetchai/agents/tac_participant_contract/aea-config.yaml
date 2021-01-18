@@ -1,30 +1,30 @@
 agent_name: tac_participant_contract
 author: fetchai
-version: 0.7.0
+version: 0.9.0
 description: An AEA to participate in the TAC (trading agent competition) using an
   ERC1155 smart contract.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.9.0, <0.10.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.10.0
-- fetchai/p2p_libp2p:0.12.0
-- fetchai/soef:0.13.0
+- fetchai/ledger:0.12.0
+- fetchai/p2p_libp2p:0.14.0
+- fetchai/soef:0.15.0
 contracts:
-- fetchai/erc1155:0.12.0
+- fetchai/erc1155:0.14.0
 protocols:
-- fetchai/default:0.9.0
-- fetchai/fipa:0.10.0
-- fetchai/oef_search:0.10.0
-- fetchai/signing:0.7.0
-- fetchai/state_update:0.7.0
-- fetchai/tac:0.10.0
+- fetchai/default:0.11.0
+- fetchai/fipa:0.12.0
+- fetchai/oef_search:0.12.0
+- fetchai/signing:0.9.0
+- fetchai/state_update:0.9.0
+- fetchai/tac:0.12.0
 skills:
-- fetchai/error:0.9.0
-- fetchai/tac_negotiation:0.15.0
-- fetchai/tac_participation:0.13.0
-default_connection: fetchai/p2p_libp2p:0.12.0
+- fetchai/error:0.11.0
+- fetchai/tac_negotiation:0.17.0
+- fetchai/tac_participation:0.15.0
+default_connection: fetchai/p2p_libp2p:0.14.0
 default_ledger: ethereum
 logging_config:
   disable_existing_loggers: false
@@ -32,24 +32,34 @@ logging_config:
 private_key_paths: {}
 registry_path: ../packages
 default_routing:
-  fetchai/contract_api:0.8.0: fetchai/ledger:0.10.0
-  fetchai/ledger_api:0.7.0: fetchai/ledger:0.10.0
-  fetchai/oef_search:0.10.0: fetchai/soef:0.13.0
+  fetchai/contract_api:0.10.0: fetchai/ledger:0.12.0
+  fetchai/ledger_api:0.9.0: fetchai/ledger:0.12.0
+  fetchai/oef_search:0.12.0: fetchai/soef:0.15.0
 connection_private_key_paths: {}
 ---
-public_id: fetchai/soef:0.13.0
+public_id: fetchai/p2p_libp2p:0.14.0
+type: connection
+cert_requests:
+- identifier: acn
+  ledger_id: ethereum
+  not_after: '2022-01-01'
+  not_before: '2021-01-01'
+  public_key: fetchai
+  save_path: .certs/conn_cert.txt
+---
+public_id: fetchai/soef:0.15.0
 type: connection
 config:
   chain_identifier: ethereum
 ---
-public_id: fetchai/tac_participation:0.13.0
+public_id: fetchai/tac_participation:0.15.0
 type: skill
 models:
   game:
     args:
       is_using_contract: true
 ---
-public_id: fetchai/tac_negotiation:0.15.0
+public_id: fetchai/tac_negotiation:0.17.0
 type: skill
 models:
   strategy:

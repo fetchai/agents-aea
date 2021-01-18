@@ -10,20 +10,21 @@ This is a protocol for interacting with prometheus connection.
 ---
 name: prometheus
 author: fetchai
-version: 0.1.0
+version: 0.2.0
 description: A protocol for adding and updating metrics to a prometheus server.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.9.0, <0.10.0'
 speech_acts:
   add_metric:
     type: pt:str
     title: pt:str
     description: pt:str
-    labels: pt:list[pt:str]
+    labels: pt:dict[pt:str, pt:str]
   update_metric:
     title: pt:str
     callable: pt:str
-    value: pt:optional[pt:float]
+    value: pt:float
+    labels: pt:dict[pt:str, pt:str]
   response:
     code: pt:int
     message: pt:optional[pt:str]
@@ -37,6 +38,7 @@ reply:
 termination: [response]
 roles: {agent, server}
 end_states: [successful]
+keep_terminal_state_dialogues: false
 ...
 ```
 

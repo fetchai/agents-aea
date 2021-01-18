@@ -8,7 +8,7 @@ The AEAs currently use the addresses associated with their private-public key pa
 
 <img src="../assets/keys.jpg" alt="Keys of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:80%;">
 
-To learn how to generate a private-public key pair check out <a href="../cli-commands">this section</a>.
+To learn how to generate a private-public key pair check out <a href="../cli-commands">the CLI section</a>.
 
 To learn more about public-key cryptography check out <a href="https://simple.wikipedia.org/wiki/Public-key_cryptography" target="_blank">Wikipedia</a>.
 

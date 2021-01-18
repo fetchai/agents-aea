@@ -26,9 +26,10 @@ with a one-step atomic swap functionality. That means the trade between the two 
 Fetch the AEA that will deploy the contract.
 
 ``` bash
-aea fetch fetchai/erc1155_deployer:0.19.0
+aea fetch fetchai/erc1155_deployer:0.21.0
 cd erc1155_deployer
 aea install
+aea build
 ```
 
 <details><summary>Alternatively, create from scratch.</summary>
@@ -39,30 +40,21 @@ Create the AEA that will deploy the contract.
 ``` bash
 aea create erc1155_deployer
 cd erc1155_deployer
-aea add connection fetchai/p2p_libp2p:0.12.0
-aea add connection fetchai/soef:0.13.0
-aea add connection fetchai/ledger:0.10.0
-aea add skill fetchai/erc1155_deploy:0.18.0
+aea add connection fetchai/p2p_libp2p:0.14.0
+aea add connection fetchai/soef:0.15.0
+aea add connection fetchai/ledger:0.12.0
+aea add skill fetchai/erc1155_deploy:0.20.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
-```
-
-Then update the agent config (`aea-config.yaml`) with the default routing:
-``` yaml
-default_routing:
-  fetchai/contract_api:0.8.0: fetchai/ledger:0.10.0
-  fetchai/ledger_api:0.7.0: fetchai/ledger:0.10.0
-  fetchai/oef_search:0.10.0: fetchai/soef:0.13.0
-```
-
-Or, run this command:
-``` bash
+aea build
+aea config set agent.default_connection fetchai/p2p_libp2p:0.14.0
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/contract_api:0.8.0": "fetchai/ledger:0.10.0",
-  "fetchai/ledger_api:0.7.0": "fetchai/ledger:0.10.0",
-  "fetchai/oef_search:0.10.0": "fetchai/soef:0.13.0"
+  "fetchai/contract_api:0.10.0": "fetchai/ledger:0.12.0",
+  "fetchai/ledger_api:0.9.0": "fetchai/ledger:0.12.0",
+  "fetchai/oef_search:0.12.0": "fetchai/soef:0.15.0"
 }'
+aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
+'[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
 ```
 
 And change the default ledger:
@@ -74,7 +66,6 @@ aea config set agent.default_ledger ethereum
 </details>
 
 Additionally, create the private key for the deployer AEA. Generate and add a key for Ethereum use:
-
 ``` bash
 aea generate-key ethereum
 aea add-key ethereum ethereum_private_key.txt
@@ -82,8 +73,13 @@ aea add-key ethereum ethereum_private_key.txt
 
 And one for the P2P connection:
 ``` bash
-aea generate-key fetchai
-aea add-key fetchai fetchai_private_key.txt --connection
+aea generate-key fetchai fetchai_connection_private_key.txt
+aea add-key fetchai fetchai_connection_private_key.txt --connection
+```
+
+Finally, certify the key for use by the connections that request that:
+``` bash
+aea issue-certificates
 ```
 
 ### Create the client AEA
@@ -91,9 +87,10 @@ aea add-key fetchai fetchai_private_key.txt --connection
 In another terminal, fetch the AEA that will get some tokens from the deployer.
 
 ``` bash
-aea fetch fetchai/erc1155_client:0.19.0
+aea fetch fetchai/erc1155_client:0.21.0
 cd erc1155_client
 aea install
+aea build
 ```
 
 <details><summary>Alternatively, create from scratch.</summary>
@@ -104,30 +101,21 @@ Create the AEA that will get some tokens from the deployer.
 ``` bash
 aea create erc1155_client
 cd erc1155_client
-aea add connection fetchai/p2p_libp2p:0.12.0
-aea add connection fetchai/soef:0.13.0
-aea add connection fetchai/ledger:0.10.0
-aea add skill fetchai/erc1155_client:0.17.0
+aea add connection fetchai/p2p_libp2p:0.14.0
+aea add connection fetchai/soef:0.15.0
+aea add connection fetchai/ledger:0.12.0
+aea add skill fetchai/erc1155_client:0.19.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
-```
-
-Then update the agent config (`aea-config.yaml`) with the default routing:
-``` yaml
-default_routing:
-  fetchai/contract_api:0.8.0: fetchai/ledger:0.10.0
-  fetchai/ledger_api:0.7.0: fetchai/ledger:0.10.0
-  fetchai/oef_search:0.10.0: fetchai/soef:0.13.0
-```
-
-Or, run this command:
-``` bash
+aea build
+aea config set agent.default_connection fetchai/p2p_libp2p:0.14.0
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/contract_api:0.8.0": "fetchai/ledger:0.10.0",
-  "fetchai/ledger_api:0.7.0": "fetchai/ledger:0.10.0",
-  "fetchai/oef_search:0.10.0": "fetchai/soef:0.13.0"
+  "fetchai/contract_api:0.10.0": "fetchai/ledger:0.12.0",
+  "fetchai/ledger_api:0.9.0": "fetchai/ledger:0.12.0",
+  "fetchai/oef_search:0.12.0": "fetchai/soef:0.15.0"
 }'
+aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
+'[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
 ```
 
 And change the default ledger:
@@ -139,7 +127,6 @@ aea config set agent.default_ledger ethereum
 </details>
 
 Additionally, create the private key for the client AEA. Generate and add a key for Ethereum use:
-
 ``` bash
 aea generate-key ethereum
 aea add-key ethereum ethereum_private_key.txt
@@ -147,8 +134,13 @@ aea add-key ethereum ethereum_private_key.txt
 
 And one for the P2P connection:
 ``` bash
-aea generate-key fetchai
-aea add-key fetchai fetchai_private_key.txt --connection
+aea generate-key fetchai fetchai_connection_private_key.txt
+aea add-key fetchai fetchai_connection_private_key.txt --connection
+```
+
+Finally, certify the key for use by the connections that request that:
+``` bash
+aea issue-certificates
 ```
 
 ## Run Ganache
@@ -172,9 +164,9 @@ You should get `1000000000000000000000`.
 </div>
 
 
-## Update SOEF configs for both AEAs
+## Update SOEF configurations for both AEAs
 
-To update the SOEF config, run in each AEA project:
+To update the SOEF configuration, run in each AEA project:
 ``` bash
 aea config set vendor.fetchai.connections.soef.config.chain_identifier ethereum
 ```
@@ -187,7 +179,7 @@ First, run the deployer AEA.
 aea run
 ```
 
-Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address.
+Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address.
 
 It will perform the following steps:
 - deploy the smart contract
@@ -199,12 +191,12 @@ At some point you should see the log output:
 registering service on SOEF.
 ```
 
-Then, update the configuration of the client AEA's p2p connection by appending the following
+Then, update the configuration of the client AEA's P2P connection by appending the following
 YAML text at the end of the `aea-config.yaml` file:
 
 ``` yaml
 ---
-public_id: fetchai/p2p_libp2p:0.12.0
+public_id: fetchai/p2p_libp2p:0.14.0
 type: connection
 config:
   delegate_uri: 127.0.0.1:11001
@@ -216,7 +208,7 @@ config:
 ```
 
 where `SOME_ADDRESS` is the output
-of `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.12.0 -u public_uri)` in the `erc1155_deployer` project.
+of `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.14.0 -u public_uri)` in the `erc1155_deployer` project.
 The output will be something like `/dns4/127.0.0.1/tcp/9000/p2p/16Uiu2HAm2JPsUX1Su59YVDXJQizYkNSe8JCusqRpLeeTbvY76fE5`.
 
 

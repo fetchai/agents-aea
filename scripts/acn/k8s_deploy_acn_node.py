@@ -269,9 +269,9 @@ class AcnK8sPodConfig:
         config[cls.NODE_LAST_ENTRY_PEER_HOST] = '"{}"'.format(peer_host)
         config[cls.NODE_LAST_ENTRY_PEER_PORT] = '"{}"'.format(peer_port)
 
-        config[cls.NODE_URI] = "127.0.0.1:9000".format(acn_port)
-        config[cls.NODE_URI_DELEGATE] = "127.0.0.1:11000".format(acn_delegate_port)
-        config[cls.NODE_URI_MONITORING] = "127.0.0.1:8080".format(acn_monitoring_port)
+        config[cls.NODE_URI] = "127.0.0.1:9000"
+        config[cls.NODE_URI_DELEGATE] = "127.0.0.1:11000"
+        config[cls.NODE_URI_MONITORING] = "127.0.0.1:8080"
         config[cls.NODE_URI_EXTERNAL] = "{}:{}".format(k8s_public_hostname, acn_port)
         config[cls.NODE_LOG_FILE] = '"{}_{}.log"'.format(
             cls.Defaults[cls.NODE_LOG_FILE], str(acn_port)

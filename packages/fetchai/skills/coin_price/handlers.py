@@ -125,7 +125,7 @@ class HttpHandler(Handler):
                 )
                 if self.context.prometheus_dialogues.enabled:
                     self.context.behaviours.coin_price_behaviour.update_prometheus_metric(
-                        "num_retrievals", "inc", float(1)
+                        "num_retrievals", "inc", 1.0, {}
                     )
 
     def _handle_request(
@@ -177,7 +177,7 @@ class HttpHandler(Handler):
 
         if self.context.prometheus_dialogues.enabled:
             self.context.behaviours.coin_price_behaviour.update_prometheus_metric(
-                "num_requests", "inc", float(1)
+                "num_requests", "inc", 1.0, {}
             )
 
     def _handle_post(self, http_msg: HttpMessage, http_dialogue: HttpDialogue) -> None:
@@ -234,8 +234,7 @@ class PrometheusHandler(Handler):
 
     def setup(self) -> None:
         """Set up the handler."""
-        if self.context.prometheus_dialogues.enabled:
-            self.context.logger.info("setting up PrometheusHandler")
+        self.context.logger.info("setting up PrometheusHandler")
 
     def handle(self, message: Message) -> None:
         """

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2020 fetchai
+#   Copyright 2021 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -67,6 +67,9 @@ class DefaultSerializer(Serializer):
             error_data = msg.error_data
             performative.error_data.update(error_data)
             default_msg.error.CopyFrom(performative)
+        elif performative_id == DefaultMessage.Performative.END:
+            performative = default_pb2.DefaultMessage.End_Performative()  # type: ignore
+            default_msg.end.CopyFrom(performative)
         else:
             raise ValueError("Performative not valid: {}".format(performative_id))
 
@@ -110,6 +113,8 @@ class DefaultSerializer(Serializer):
             error_data = default_pb.error.error_data
             error_data_dict = dict(error_data)
             performative_content["error_data"] = error_data_dict
+        elif performative_id == DefaultMessage.Performative.END:
+            pass
         else:
             raise ValueError("Performative not valid: {}.".format(performative_id))
 

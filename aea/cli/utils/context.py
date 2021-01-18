@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """A module with context tools of the aea cli."""
-
+import os
 from pathlib import Path
 from typing import Dict, List, Optional, cast
 
@@ -30,7 +30,14 @@ from aea.configurations.base import (
     PublicId,
     _get_default_configuration_file_name_from_type,
 )
-from aea.configurations.constants import CONNECTION, CONTRACT, PROTOCOL, SKILL, VENDOR
+from aea.configurations.constants import (
+    CONNECTION,
+    CONTRACT,
+    DEFAULT_AEA_CONFIG_FILE,
+    PROTOCOL,
+    SKILL,
+    VENDOR,
+)
 from aea.configurations.loader import ConfigLoader
 
 
@@ -105,7 +112,8 @@ class Context:
         if not path.exists():
             path = Path(item_type_plural, public_id.name, default_config_file_name)
         config_loader = ConfigLoader.from_configuration_type(item_type)
-        config = config_loader.load(path.open())
+        with path.open() as fp:
+            config = config_loader.load(fp)
         deps = cast(Dependencies, config.dependencies)
         return deps
 
@@ -128,3 +136,8 @@ class Context:
             dependencies.update(self._get_item_dependencies(CONTRACT, contract_id))
 
         return dependencies
+
+    def dump_agent_config(self):
+        """Dump the current agent configuration."""
+        with open(os.path.join(self.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as f:
+            self.agent_loader.dump(self.agent_config, f)

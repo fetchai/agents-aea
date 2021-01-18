@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2020 fetchai
+#   Copyright 2021 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -37,19 +37,21 @@ DEFAULT_BODY_SIZE = 4
 class StateUpdateMessage(Message):
     """A protocol for state updates to the decision maker state."""
 
-    protocol_id = PublicId.from_str("fetchai/state_update:0.7.0")
+    protocol_id = PublicId.from_str("fetchai/state_update:0.9.0")
 
     class Performative(Message.Performative):
         """Performatives for the state_update protocol."""
 
         APPLY = "apply"
+        END = "end"
         INITIALIZE = "initialize"
 
         def __str__(self):
             """Get the string representation."""
             return str(self.value)
 
-    _performatives = {"apply", "initialize"}
+    _performatives = {"apply", "end", "initialize"}
+    __slots__: Tuple[str, ...] = tuple()
 
     class _SlotsCls:
         __slots__ = (
@@ -334,6 +336,8 @@ class StateUpdateMessage(Message):
                             type(value_of_quantities_by_good_id)
                         ),
                     )
+            elif self.performative == StateUpdateMessage.Performative.END:
+                expected_nb_of_contents = 0
 
             # Check correct content count
             enforce(

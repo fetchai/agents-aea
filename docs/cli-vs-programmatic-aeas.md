@@ -28,11 +28,11 @@ If you want to create the weather station AEA step by step you can follow this g
 Fetch the weather station AEA with the following command :
 
 ``` bash
-aea fetch fetchai/weather_station:0.18.0
+aea fetch fetchai/weather_station:0.20.0
 cd weather_station
 ```
 
-### Update the AEA configs
+### Update the AEA configurations
 
 In the terminal change the configuration:
 ``` bash
@@ -42,11 +42,21 @@ The `is_ledger_tx` will prevent the AEA to communicate with a ledger.
 
 ### Add keys
 
-Add keys for the weather station.
+Add a private key for the weather station.
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
-aea add-key fetchai fetchai_private_key.txt --connection
+```
+
+Next, create a private key used to secure the AEA's communications:
+``` bash
+aea generate-key fetchai fetchai_connection_private_key.txt
+aea add-key fetchai fetchai_connection_private_key.txt --connection
+```
+
+Finally, certify the key for use by the connections that request that:
+``` bash
+aea issue-certificates
 ```
 
 ### Run the weather station AEA
@@ -71,15 +81,22 @@ import sys
 from typing import cast
 
 from aea.aea import AEA
+from aea.aea_builder import AEABuilder
 from aea.configurations.base import ConnectionConfig
 from aea.crypto.fetchai import FetchAICrypto
-from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA, create_private_key
+from aea.crypto.helpers import (
+    PRIVATE_KEY_PATH_SCHEMA,
+    create_private_key,
+    make_certificate,
+)
 from aea.crypto.wallet import Wallet
+from aea.helpers.base import CertRequest
 from aea.identity.base import Identity
 from aea.protocols.base import Protocol
 from aea.registries.resources import Resources
 from aea.skills.base import Skill
 
+import packages.fetchai.connections.p2p_libp2p.connection
 from packages.fetchai.connections.ledger.connection import LedgerConnection
 from packages.fetchai.connections.p2p_libp2p.connection import P2PLibp2pConnection
 from packages.fetchai.connections.soef.connection import SOEFConnection
@@ -177,6 +194,20 @@ def run():
     resources.add_connection(ledger_api_connection)
 
     # Add the P2P connection
+    cert_path = ".certs/conn_cert.txt"
+    cert_request = CertRequest(
+        identifier="acn",
+        ledger_id=FetchAICrypto.identifier,
+        not_after="2022-01-01",
+        not_before="2021-01-01",
+        public_key="fetchai",
+        save_path=cert_path,
+    )
+    public_key = wallet.connection_cryptos.public_keys.get(FetchAICrypto.identifier)
+    message = cert_request.get_message(public_key)
+    make_certificate(
+        FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE, message, cert_path
+    )
     configuration = ConnectionConfig(
         connection_id=P2PLibp2pConnection.connection_id,
         delegate_uri="127.0.0.1:11001",
@@ -184,7 +215,16 @@ def run():
         local_uri="127.0.0.1:9001",
         log_file="libp2p_node.log",
         public_uri="127.0.0.1:9001",
+        build_directory=os.getcwd(),
+        build_entrypoint="check_dependencies.py",
+        cert_requests=[cert_request],
     )
+    configuration.directory = os.path.dirname(
+        packages.fetchai.connections.p2p_libp2p.connection.__file__
+    )
+
+    AEABuilder.run_build_for_component_configuration(configuration)
+
     p2p_connection = P2PLibp2pConnection(
         configuration=configuration,
         identity=identity,

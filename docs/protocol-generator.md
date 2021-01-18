@@ -26,7 +26,7 @@ If there are no errors, this command will generate the protocol and place it in 
 * `custom_types.py`: stub implementations for custom types (created only if the specification contains custom types)
 
 ## Protocol Specification
-A protocol can be described in a yaml file. As such, it needs to follow the <a href="https://pyyaml.org/wiki/PyYAMLDocumentation" target="_blank">yaml format</a>. The following is an example protocol specification:
+A protocol can be described in a YAML file. As such, it needs to follow the <a href="https://pyyaml.org/wiki/PyYAMLDocumentation" target="_blank">YAML format</a>. The following is an example protocol specification:
 
 ``` yaml
 ---
@@ -34,7 +34,7 @@ name: two_party_negotiation
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.9.0, <0.10.0'
 description: 'A protocol for negotiation over a fixed set of resources involving two parties.'
 speech_acts:
   cfp:
@@ -62,11 +62,11 @@ end_states: [successful, failed]
 ...
 ```
 
-Each protocol specification yaml file must have a minimum of one, and a maximum of three yaml documents (each yaml document is enclosed within --- and ...). 
+Each protocol specification YAML file must have a minimum of one, and a maximum of three YAML documents (each YAML document is enclosed within --- and ...). 
 
 ### Basic Protocol Detail and Messages Syntax
 
-The first yaml document is mandatory in any protocol specification. It contains some basic information about the protocol and describes the syntax of communicative messages allowed under this protocol. 
+The first YAML document is mandatory in any protocol specification. It contains some basic information about the protocol and describes the syntax of communicative messages allowed under this protocol. 
 
 The allowed fields and what they represent are:
 
@@ -77,15 +77,15 @@ The allowed fields and what they represent are:
  * `aea_version`: The version(s) of the framework that support this protocol. The format is described <a href="https://www.python.org/dev/peps/pep-0440/" target="_blank">here</a>.
  * `description`: A short description of the protocol
 
-All of the above fields are mandatory and each is a key/value pair, where both key and value are yaml strings. 
+All of the above fields are mandatory and each is a key/value pair, where both key and value are YAML strings. 
 
-In addition, the first yaml document in a protocol specification must describe the syntax of valid messages according to this protocol. Therefore, there is another mandatory field: `speech-acts`, which defines the set of _performatives_ valid under this protocol, and a set of _contents_ for each performative.
+In addition, the first YAML document in a protocol specification must describe the syntax of valid messages according to this protocol. Therefore, there is another mandatory field: `speech-acts`, which defines the set of _performatives_ valid under this protocol, and a set of _contents_ for each performative.
 
 A _performative_ defines the type of a message (e.g. propose, accept) and has a set of _contents_ (or parameters) of varying types.
 
-The format of the `speech-act` is as follows: `speech-act` is a dictionary, where each key is a **unique** _performative_ (yaml string), and the value is a _content_ dictionary. If a performative does not have any content, then its content dictionary is empty, e.g. `accept`, `decline` and `match_accept` in the above specification.
+The format of the `speech-act` is as follows: `speech-act` is a dictionary, where each key is a **unique** _performative_ (YAML string), and the value is a _content_ dictionary. If a performative does not have any content, then its content dictionary is empty, e.g. `accept`, `decline` and `match_accept` in the above specification.
 
-A content dictionary in turn is composed of key/value pairs, where each key is the name of a content (yaml string) and the value is its <a href="../protocol-generator/#types">type</a> (yaml string). For example, the `cfp` (short for 'call for proposal') performative has one content whose name is `query` and whose type is `ct:DataModel`.
+A content dictionary in turn is composed of key/value pairs, where each key is the name of a content (YAML string) and the value is its <a href="../protocol-generator/#types">type</a> (YAML string). For example, the `cfp` (short for 'call for proposal') performative has one content whose name is `query` and whose type is `ct:DataModel`.
 
 #### Types
 
@@ -122,13 +122,13 @@ An optional type for a content denotes that the content's existence is optional,
 
 Currently, there is no official method provided by the AEA framework for describing custom types in a programming language independent format. This means that if a protocol specification includes custom types, the required implementations must be provided manually. 
 
-Therefore, if any of the contents declared in `speech-acts` is of a custom type, the specification must then have a second yaml document, containing the protocol buffer schema code for every custom type.
+Therefore, if any of the contents declared in `speech-acts` is of a custom type, the specification must then have a second YAML document, containing the protocol buffer schema code for every custom type.
 
-You can see an example of the second yaml document in the above protocol specification.
+You can see an example of the second YAML document in the above protocol specification.
 
 ### Dialogues
 
-You can optionally describe some of the structural details of dialogues conforming to your protocol in a third yaml document in the protocol specification.
+You can optionally describe some of the structural details of dialogues conforming to your protocol in a third YAML document in the protocol specification.
 
 The allowed fields and what they represent are:
 
@@ -140,17 +140,17 @@ All of the above fields are mandatory.
 
 `reply` specifies for every performative, what its valid replies are. If a performative `per_1` is a valid reply to another `per_2`, this means a message with performative `per_1` can target a message whose performative is `per_2`.      
 
-`reply` is a dictionary, where the keys are the performatives (yaml string) defined in `speech-acts`. For each performtaive key, its value is a list of performatives which are defined to be a valid reply. 
+`reply` is a dictionary, where the keys are the performatives (YAML string) defined in `speech-acts`. For each performative key, its value is a list of performatives which are defined to be a valid reply. 
 For example, valid replies to `cfp` are `propose` and `decline`.
 
 `roles` lists the roles are agents which participate in dialogues conforming with your protocol. 
-`roles` takes a set, which may contain two or one roles, each role being a yaml string. 
+`roles` takes a set, which may contain two or one roles, each role being a YAML string. 
 
 If there are two roles, each agent has a distinguished role in the dialogue (e.g. buyer and seller in the above specification).
 If there is one role, then the two agents in a dialogue take the same role.
 
 `end_states` lists the final states a dialogue based on your protocol may terminate in. 
-`end_states` is a list of yaml strings. 
+`end_states` is a list of YAML strings. 
 
 ### Notes
 

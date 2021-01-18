@@ -17,8 +17,8 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Core definitions for the AEA command-line tool."""
+from typing import Optional
 
 import click
 
@@ -42,8 +42,10 @@ from aea.cli.get_wealth import get_wealth
 from aea.cli.init import init
 from aea.cli.install import install
 from aea.cli.interact import interact
+from aea.cli.issue_certificates import issue_certificates
 from aea.cli.launch import launch
 from aea.cli.list import list_command as _list
+from aea.cli.local_registry_sync import local_registry_sync
 from aea.cli.login import login
 from aea.cli.logout import logout
 from aea.cli.publish import publish
@@ -57,6 +59,7 @@ from aea.cli.scaffold import scaffold
 from aea.cli.search import search
 from aea.cli.transfer import transfer
 from aea.cli.upgrade import upgrade
+from aea.cli.utils.click_utils import registry_path_option
 from aea.cli.utils.config import get_or_create_cli_config
 from aea.cli.utils.constants import AUTHOR_KEY
 from aea.cli.utils.context import Context
@@ -76,11 +79,15 @@ from aea.helpers.win32 import enable_ctrl_c_support
     default=False,
     help="Skip consistency checks of agent during command execution.",
 )
+@registry_path_option
 @click.pass_context
-def cli(click_context, skip_consistency_check: bool) -> None:
+def cli(
+    click_context, skip_consistency_check: bool, registry_path: Optional[str]
+) -> None:
     """Command-line tool for setting up an Autonomous Economic Agent (AEA)."""
     verbosity_option = click_context.meta.pop("verbosity")
     click_context.obj = Context(cwd=".", verbosity=verbosity_option)
+    click_context.obj.registry_path = registry_path
     click_context.obj.set_config("skip_consistency_check", skip_consistency_check)
 
     # enables CTRL+C support on windows!
@@ -137,6 +144,7 @@ cli.add_command(get_wealth)
 cli.add_command(init)
 cli.add_command(install)
 cli.add_command(interact)
+cli.add_command(issue_certificates)
 cli.add_command(launch)
 cli.add_command(login)
 cli.add_command(logout)
@@ -149,5 +157,6 @@ cli.add_command(reset_password)
 cli.add_command(run)
 cli.add_command(scaffold)
 cli.add_command(search)
+cli.add_command(local_registry_sync)
 cli.add_command(transfer)
 cli.add_command(upgrade)

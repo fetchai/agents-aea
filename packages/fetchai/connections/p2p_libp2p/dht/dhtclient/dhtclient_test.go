@@ -25,30 +25,48 @@ import (
 	"time"
 
 	"libp2p_node/aea"
+	"libp2p_node/dht/dhtnode"
 	"libp2p_node/dht/dhttests"
+	utils "libp2p_node/utils"
 )
 
 //
 const (
-	DefaultFetchAIKey   = "3916b301d1a0ec09de1db4833b0c945531004290caee0b4a5d7b554caa39dbf1"
-	DefaultAgentAddress = "2TsHmM9JXeFgK928LYc6HV96gi78pBv6sWprJAXaS6ydg9MTC6"
+	DefaultFetchAIKey       = "04ab8ac134ec727917cf4f9e47685e84622151bc8b12838bc54c8ffe5d44d04a"
+	DefaultFetchAIPublicKey = "03b07ef4513e3f0372245b3d6d474d871ba58eacaf3a2a07c487af6d82006b86b4"
+	DefaultAgentKey         = "f76137a61c1ad3ee8a0a9a185bc8e6fa51be1a2528f86042c11f9cc00880024a"
+	DefaultAgentPublicKey   = "021820ce23b5f3a6ef01988149e724af854f89d37b9cabc3b1702cc5287f617b92"
+	DefaultAgentAddress     = "fetch1ver6u7xdvkjy4dq8xxrkc6ualu98k7ykumv08q"
 
 	EnvelopeDeliveryTimeout = 10 * time.Second
+
+	DefaultLedger = dhtnode.DefaultLedger
 )
 
 // TestNew dht client peer
 func TestNew(t *testing.T) {
 
-	rxEnvelopesPeer := make(chan *aea.Envelope)
+	rxEnvelopesPeer := make(chan *aea.Envelope, 2)
 	dhtPeer, cleanup, err := dhttests.NewDHTPeerWithDefaults(rxEnvelopesPeer)
 	if err != nil {
 		t.Fatal("Failed to create DHTPeer (required for DHTClient):", err)
 	}
 	defer cleanup()
 
+	signature, err := utils.SignFetchAI([]byte(DefaultFetchAIPublicKey), DefaultAgentKey)
+	if err != nil {
+		t.Fatal("Failed to initialize DHTClient:", err)
+	}
+
+	record := &aea.AgentRecord{LedgerId: DefaultLedger}
+	record.Address = DefaultAgentAddress
+	record.PublicKey = DefaultAgentPublicKey
+	record.PeerPublicKey = DefaultFetchAIPublicKey
+	record.Signature = signature
+
 	opts := []Option{
 		IdentityFromFetchAIKey(DefaultFetchAIKey),
-		RegisterAgentAddress(DefaultAgentAddress, func() bool { return true }),
+		RegisterAgentAddress(record, func() bool { return true }),
 		BootstrapFrom([]string{dhtPeer.MultiAddr()}),
 	}
 
@@ -60,7 +78,7 @@ func TestNew(t *testing.T) {
 	}
 	defer dhtClient.Close()
 
-	rxEnvelopesClient := make(chan *aea.Envelope)
+	rxEnvelopesClient := make(chan *aea.Envelope, 2)
 	dhtClient.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxEnvelopesClient <- envel
 		return nil
@@ -71,16 +89,27 @@ func TestNew(t *testing.T) {
 // TestRouteEnvelopeToPeerAgent send envelope from DHTClient agent to DHTPeer agent
 func TestRouteEnvelopeToPeerAgent(t *testing.T) {
 
-	rxEnvelopesPeer := make(chan *aea.Envelope)
+	rxEnvelopesPeer := make(chan *aea.Envelope, 2)
 	dhtPeer, cleanup, err := dhttests.NewDHTPeerWithDefaults(rxEnvelopesPeer)
 	if err != nil {
 		t.Fatal("Failed to create DHTPeer (required for DHTClient):", err)
 	}
 	defer cleanup()
 
+	signature, err := utils.SignFetchAI([]byte(DefaultFetchAIPublicKey), DefaultAgentKey)
+	if err != nil {
+		t.Fatal("Failed to initialize DHTClient:", err)
+	}
+
+	record := &aea.AgentRecord{LedgerId: DefaultLedger}
+	record.Address = DefaultAgentAddress
+	record.PublicKey = DefaultAgentPublicKey
+	record.PeerPublicKey = DefaultFetchAIPublicKey
+	record.Signature = signature
+
 	opts := []Option{
 		IdentityFromFetchAIKey(DefaultFetchAIKey),
-		RegisterAgentAddress(DefaultAgentAddress, func() bool { return true }),
+		RegisterAgentAddress(record, func() bool { return true }),
 		BootstrapFrom([]string{dhtPeer.MultiAddr()}),
 	}
 
@@ -92,7 +121,7 @@ func TestRouteEnvelopeToPeerAgent(t *testing.T) {
 	}
 	defer dhtClient.Close()
 
-	rxEnvelopesClient := make(chan *aea.Envelope)
+	rxEnvelopesClient := make(chan *aea.Envelope, 2)
 	dhtClient.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxEnvelopesClient <- envel
 		return nil

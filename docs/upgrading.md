@@ -1,26 +1,45 @@
 This page provides some tips of how to upgrade between versions.
 
-## v0.7.4 to v0.7.5
+## `v0.9.0` to `v0.9.1`
 
 No backwards incompatible changes for skill and connection development.
 
-## v0.7.3 to v0.7.4
+## `v0.8.0` to `v0.9.0`
+
+This release introduces <a href="../por">proof of representation</a> to the ACN. You will need to upgrade to the latest `fetchai/p2p_libp2p`/`fetchai/p2p_libp2p_client` connection and then use two key pairs, one for your AEA's decision maker and one for the connection.
+
+Please update to latest packages by running `aea upgrade`.
+
+## `v0.7.5` to `v0.8.0`
+
+Minimal backwards incompatible changes for skill and connection development:
+
+- The semantics of the `<`, `<=`, `>` and `>=` relations in `ConstraintTypes` are simplified.
+- Protocols now need to correctly define terminal states. Regenerate your protocol to identify if your protocol's dialogue rules are valid.
+
+Please update to latest packages by running `aea upgrade`.
+
+## `v0.7.4` to `v0.7.5`
 
 No backwards incompatible changes for skill and connection development.
 
-## v0.7.2 to v0.7.3
+## `v0.7.3` to `v0.7.4`
 
 No backwards incompatible changes for skill and connection development.
 
-## v0.7.1 to v0.7.2
+## `v0.7.2` to `v0.7.3`
 
 No backwards incompatible changes for skill and connection development.
 
-## v0.7.0 to v0.7.1
+## `v0.7.1` to `v0.7.2`
+
+No backwards incompatible changes for skill and connection development.
+
+## `v0.7.0` to `v0.7.1`
 
 To improve performance, in particular optimize memory usage, we refactored the `Message` and `Dialogue` classes. This means all protocols need to be bumped to the latest version or regenerated using the generate command.
 
-## v0.6.3 to v0.7.0
+## `v0.6.3` to `v0.7.0`
 
 Multiple breaking changes require action in this order:
 
@@ -48,28 +67,28 @@ PUBLIC_ID = PublicId.from_str("author/name:0.1.0")
 ```
 - The `fetchai/http` protocol's `bodyy` field has been renamed to `body`.
 
-- Skills can now specify `connections` as dependencies in the config yaml.
+- Skills can now specify `connections` as dependencies in the configuration YAML.
 
 
-## v0.6.2 to v0.6.3
+## `v0.6.2` to `v0.6.3`
 
 A new `upgrade` command is introduced to upgrade agent projects and components to their latest versions on the registry. To use the command first upgrade the AEA PyPI package to the latest version, then enter your project and run `aea upgrade`. The project's vendor dependencies will be updated where possible.
 
-## v0.6.1 to v0.6.2
+## `v0.6.1` to `v0.6.2`
 
 No public APIs have been changed.
 
-## v0.6.0 to v0.6.1
+## `v0.6.0` to `v0.6.1`
 
 The `soef` connection and `oef_search` protocol have backward incompatible changes.
 
-## v0.5.4 to v0.6.0
+## `v0.5.4` to `v0.6.0`
 
 ### `Dialogue` and `Dialogues` API updates
 
 The dialogue and dialogues APIs have changed significantly. The constructor is different for both classes and there are now four primary methods for the developer:
 
-- Dialogues.create: this method is used to create a new dialogue and message:
+- `Dialogues.create`: this method is used to create a new dialogue and message:
 ``` python
 cfp_msg, fipa_dialogue = fipa_dialogues.create(
     counterparty=opponent_address,
@@ -79,7 +98,7 @@ cfp_msg, fipa_dialogue = fipa_dialogues.create(
 ```
 The method will raise if the provided arguments are inconsistent.
 
-- Dialogues.create_with_message: this method is used to create a new dialogue from a message:
+- `Dialogues.create_with_message`: this method is used to create a new dialogue from a message:
 ``` python
 fipa_dialogue = fipa_dialogues.create_with_message(
     counterparty=opponent_address,
@@ -88,7 +107,7 @@ fipa_dialogue = fipa_dialogues.create_with_message(
 ```
 The method will raise if the provided arguments are inconsistent.
 
-- Dialogues.update: this method is used to handle messages passed by the framework:
+- `Dialogues.update`: this method is used to handle messages passed by the framework:
 ``` python
 fipa_dialogue = fipa_dialogues.update(
     message=cfp_msg
@@ -96,7 +115,7 @@ fipa_dialogue = fipa_dialogues.update(
 ```
 The method will return a valid dialogue if it is a valid message, otherwise it will return `None`.
 
-- Dialogue.reply: this method is used to reply within a dialogue:
+- `Dialogue.reply`: this method is used to reply within a dialogue:
 ``` python
 proposal_msg = fipa_dialogue.reply(
     performative=FipaMessage.Performative.PROPOSE,
@@ -108,56 +127,56 @@ The method will raise if the provided arguments are inconsistent.
 
 The new methods significantly reduce the lines of code needed to maintain a dialogue. They also make it easier for the developer to construct valid dialogues and messages.
 
-### FetchAICrypto - default crypto
+### `FetchAICrypto` - default crypto
 
-The FetchAICrypto has been upgraded to the default crypto. Update your `default_ledger` to `fetchai`.
+The `FetchAICrypto` has been upgraded to the default crypto. Update your `default_ledger` to `fetchai`.
 
 ### Private key file naming
 
-The private key files are now consistenly named with the `ledger_id` followed by `_private_key.txt` (e.g. `fetchai_private_key.txt`). Rename your existing files to match this pattern.
+The private key files are now consistently named with the `ledger_id` followed by `_private_key.txt` (e.g. `fetchai_private_key.txt`). Rename your existing files to match this pattern.
 
-### Type in package yaml
+### Type in package YAML
 
-The package yamls now contain a type field. This must be added for the loading mechanism to work properly.
+The package YAML files now contain a type field. This must be added for the loading mechanism to work properly.
 
 ### Moved address type
 
 The address type has moved to `aea.common`. The import paths must be updated.
 
-## v0.5.3 to v0.5.4
+## `v0.5.3` to `v0.5.4`
 
 The contract base class was slightly modified. If you have implemented your own contract package you need to update it accordingly.
 
 The dialogue reference nonce is now randomly generated. This can result in previously working but buggy implementations (which relied on the order of dialogue reference nonces) to now fail.
 
-## v0.5.2 to v0.5.3
+## `v0.5.2` to `v0.5.3`
 
 Connection states and logger usage in connections where updated. If you have implemented your own connection package you need to update it accordingly.
 
 Additional dialogue consistency checks where enabled. This can result in previously working but buggy implementations to now fail.
 
-## v0.5.1 to 0.5.2
+## `v0.5.1` to `0.5.2`
 
 No public APIs have been changed.
 
-## v0.5.0 to 0.5.1
+## `v0.5.0` to `0.5.1`
 
 No public APIs have been changed.
 
-## v0.4.1 to 0.5.0
+## `v0.4.1` to `0.5.0`
 
 A number of breaking changes where introduced which make backwards compatibility of skills rare.
 
-- Ledger apis <a href="../api/crypto/ledger_apis#ledger-apis-objects">`LedgerApis`</a> have been removed from the AEA constructor and skill context. `LedgerApis` are now exposed in the `LedgerConnection` (`fetchai/ledger`). To communicate with the `LedgerApis` use the `fetchai/ledger_api` protocol. This allows for more flexibility (anyone can add another `LedgerAPI` to the registry and execute it with the connection) and removes dependencies from the core framework.
-- Skills can now depend on other skills. As a result, skills have a new required config field in `skill.yaml` files, by default empty: `skills: []`.
+- Ledger APIs <a href="../api/crypto/ledger_apis#ledger-apis-objects">`LedgerApis`</a> have been removed from the AEA constructor and skill context. `LedgerApis` are now exposed in the `LedgerConnection` (`fetchai/ledger`). To communicate with the `LedgerApis` use the `fetchai/ledger_api` protocol. This allows for more flexibility (anyone can add another `LedgerAPI` to the registry and execute it with the connection) and removes dependencies from the core framework.
+- Skills can now depend on other skills. As a result, skills have a new required configuration field in `skill.yaml` files, by default empty: `skills: []`.
 
-## v0.4.0 to v0.4.1
+## `v0.4.0` to `v0.4.1`
 
-There are no upgrage requirements if you use the CLI based approach to AEA development.
+There are no upgrade requirements if you use the CLI based approach to AEA development.
 
 Connections are now added via <a href="../api/registries/resources#resources-objects">`Resources`</a> to the AEA, not the AEA constructor directly. For programmatic usage remove the list of connections from the AEA constructor and instead add the connections to resources.
 
-## v0.3.3 to v0.4.0
+## `v0.3.3` to `v0.4.0`
 
 <ul>
 <li> Message sending in the skills has been updated. In the past you had to construct messages, then serialize them and place them in an envelope:
@@ -190,7 +209,7 @@ self.context.outbox.put_message(message=cfp_msg)
 
 You must update your skills as the old implementation is no longer supported.
 </li>
-<li> Connection constructors have been simplified. In the past you had to implement both the `__init__` as well as the `from_config` methods of a Connection. Now you only have to implement the `__init__` method which by default at load time now receives the following kwargs: `configuration: ConnectionConfig, identity: Identity, crypto_store: CryptoStore`. See for example in the scaffold connection:
+<li> Connection constructors have been simplified. In the past you had to implement both the `__init__` as well as the `from_config` methods of a Connection. Now you only have to implement the `__init__` method which by default at load time now receives the following keyword arguments: `configuration: ConnectionConfig, identity: Identity, crypto_store: CryptoStore`. See for example in the scaffold connection:
 
 ``` python
 class MyScaffoldConnection(Connection):

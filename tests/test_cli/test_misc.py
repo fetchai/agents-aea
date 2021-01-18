@@ -57,45 +57,46 @@ Options:
   -s, --skip-consistency-check  Skip consistency checks of agent during command
                                 execution.
 
+  --registry-path DIRECTORY     Provide a local registry directory full path.
   --help                        Show this message and exit.
 
 Commands:
-  add               Add a package to the agent.
-  add-key           Add a private key to the wallet of the agent.
-  build             Build the agent and its components.
-  config            Read or modify a configuration of the agent.
-  create            Create a new agent.
-  delete            Delete an agent.
-  eject             Eject a vendor package of the agent.
-  fetch             Fetch an agent from the registry.
-  fingerprint       Fingerprint a non-vendor package of the agent.
-  freeze            Get the dependencies of the agent.
-  generate          Generate a package for the agent.
-  generate-key      Generate a private key and place it in a file.
-  generate-wealth   Generate wealth for the agent on a test network.
-  get-address       Get the address associated with a private key of the...
-  get-multiaddress  Get the multiaddress associated with a private key or...
-  get-wealth        Get the wealth associated with the private key of the...
-  gui               Run the CLI GUI.
-  init              Initialize your AEA configurations.
-  install           Install the dependencies of the agent.
-  interact          Interact with the running agent via the stub connection.
-  launch            Launch many agents at the same time.
-  list              List the installed packages of the agent.
-  login             Login to the registry account.
-  logout            Logout from the registry account.
-  publish           Publish the agent to the registry.
-  push              Push a non-vendor package of the agent to the registry.
-  register          Create a new registry account.
-  remove            Remove a package from the agent.
-  remove-key        Remove a private key from the wallet of the agent.
-  reset_password    Reset the password of the registry account.
-  run               Run the agent.
-  scaffold          Scaffold a package for the agent.
-  search            Search for packages in the registry.
-  transfer          Transfer wealth associated with a private key of the
-                    agent...
-
-  upgrade           Upgrade the packages of the agent.
+  add                  Add a package to the agent.
+  add-key              Add a private key to the wallet of the agent.
+  build                Build the agent and its components.
+  config               Read or modify a configuration of the agent.
+  create               Create a new agent.
+  delete               Delete an agent.
+  eject                Eject a vendor package of the agent.
+  fetch                Fetch an agent from the registry.
+  fingerprint          Fingerprint a non-vendor package of the agent.
+  freeze               Get the dependencies of the agent.
+  generate             Generate a package for the agent.
+  generate-key         Generate a private key and place it in a file.
+  generate-wealth      Generate wealth for the agent on a test network.
+  get-address          Get the address associated with a private key of the...
+  get-multiaddress     Get the multiaddress associated with a private key or...
+  get-wealth           Get the wealth associated with the private key of the...
+  gui                  Run the CLI GUI.
+  init                 Initialize your AEA configurations.
+  install              Install the dependencies of the agent.
+  interact             Interact with the running agent via the stub...
+  issue-certificates   Issue certificates for connections that require them.
+  launch               Launch many agents at the same time.
+  list                 List the installed packages of the agent.
+  local-registry-sync  Upgrade the local package registry.
+  login                Login to the registry account.
+  logout               Logout from the registry account.
+  publish              Publish the agent to the registry.
+  push                 Push a non-vendor package of the agent to the registry.
+  register             Create a new registry account.
+  remove               Remove a package from the agent.
+  remove-key           Remove a private key from the wallet of the agent.
+  reset_password       Reset the password of the registry account.
+  run                  Run the agent.
+  scaffold             Scaffold a package for the agent.
+  search               Search for packages in the registry.
+  transfer             Transfer wealth associated with a private key of the...
+  upgrade              Upgrade the packages of the agent.
 """
     )

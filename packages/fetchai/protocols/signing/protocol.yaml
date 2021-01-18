@@ -1,17 +1,17 @@
 name: signing
 author: fetchai
-version: 0.7.0
+version: 0.9.0
 type: protocol
 description: A protocol for communication between skills and decision maker.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
-  README.md: QmNrinWtWhu22DRcN1XWneAua7YA79bu1KFBDUNdSG4A1t
-  __init__.py: QmUcmsCfop25uvwR6XQR3GGaJ63pbDsEPQPJeXM7nASuQW
+  README.md: Qmc8G92xMdRVaKoZYjQdZek2YEkf3ugrMSwgBkoEsHmt3J
+  __init__.py: QmPVnWg24cNfoLcZfqtRePdE2exyoKjRL2cfdz5qF7yZjg
   custom_types.py: Qmc7sAyCQbAaVs5dZf9hFkTrB2BG8VAioWzbyKBAybrQ1J
-  dialogues.py: QmRZWRnWTJYDtdQAxdUY2MRcFciE6uSrrkb2F4css5tv9K
-  message.py: Qmf3Cidhsa6eaijQywk1fHKqMyMSfaZe2uamRapDfJmY8T
-  serialization.py: QmVMoDnWyDYchf8MMbBQNSh9FPXev2dXqoMCrSXFWjkLYQ
+  dialogues.py: Qmamd1T5ZDF8ExQznV9bXSoSC8s9rTgbkDoBRVTAzcARXB
+  message.py: QmXhtXTDj6xD8eL19cHE4vDSVHWHXbgTTLcUAZSM2MHoHn
+  serialization.py: QmQY5rs9C3XYErfJ2fFtgqLqJiGx12hGHG5hmFp3ePMhFW
   signing.proto: QmZN9CmcfXCBiMQd9GTG81LadsbVQQ7j5pLFxEiQsQ4Sqk
   signing_pb2.py: QmSeawGUWMvFFgDrzuYrVMfWhb5UadXbPcyhzX2rLTdCTK
 fingerprint_ignore_patterns: []

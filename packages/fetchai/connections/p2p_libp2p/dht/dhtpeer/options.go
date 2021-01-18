@@ -22,10 +22,13 @@ package dhtpeer
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/multiformats/go-multiaddr"
 	"github.com/rs/zerolog"
 
+	"libp2p_node/aea"
+	"libp2p_node/dht/dhtnode"
 	utils "libp2p_node/utils"
 )
 
@@ -45,9 +48,18 @@ func IdentityFromFetchAIKey(key string) Option {
 }
 
 // RegisterAgentAddress for dhtpeer.New
-func RegisterAgentAddress(addr string, isReady func() bool) Option {
+func RegisterAgentAddress(record *aea.AgentRecord, isReady func() bool) Option {
 	return func(dhtPeer *DHTPeer) error {
-		dhtPeer.myAgentAddress = addr
+		pbRecord := &dhtnode.AgentRecord{}
+		pbRecord.Address = record.Address
+		pbRecord.PublicKey = record.PublicKey
+		pbRecord.PeerPublicKey = record.PeerPublicKey
+		pbRecord.Signature = record.Signature
+		pbRecord.ServiceId = record.ServiceId
+		pbRecord.LedgerId = record.LedgerId
+
+		dhtPeer.myAgentAddress = record.Address
+		dhtPeer.myAgentRecord = pbRecord
 		dhtPeer.myAgentReady = isReady
 		return nil
 	}
@@ -124,6 +136,13 @@ func LoggingLevel(lvl zerolog.Level) Option {
 func EnablePrometheusMonitoring(port uint16) Option {
 	return func(dhtPeer *DHTPeer) error {
 		dhtPeer.monitoringPort = port
+		return nil
+	}
+}
+
+func WithRegistrationDelay(delay time.Duration) Option {
+	return func(dhtPeer *DHTPeer) error {
+		dhtPeer.registrationDelay = delay
 		return nil
 	}
 }

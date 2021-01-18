@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """Implementation of the 'aea remove' subcommand."""
-
 import os
 import shutil
 from collections import defaultdict
@@ -27,7 +26,6 @@ from typing import Dict, Generator, Optional, Set, Tuple, cast
 
 import click
 
-from aea.aea_builder import AEABuilder
 from aea.cli.utils.click_utils import PublicIdParameter
 from aea.cli.utils.config import load_item_config, try_to_load_agent_config
 from aea.cli.utils.context import Context
@@ -52,6 +50,7 @@ from aea.configurations.constants import (
     PROTOCOL,
     SKILL,
 )
+from aea.configurations.manager import find_component_directory_from_component_id
 
 
 @click.group()
@@ -170,7 +169,7 @@ class ItemRemoveHelper:
     def get_component_directory(package_id: PackageId) -> Path:
         """Return path for package."""
         try:
-            return AEABuilder.find_component_directory_from_component_id(
+            return find_component_directory_from_component_id(
                 Path("."),
                 ComponentId(str(package_id.package_type), package_id.public_id),
             )
@@ -192,7 +191,11 @@ class ItemRemoveHelper:
             items = getattr(item, f"{item_type}s", set())
             for item_public_id in items:
                 if ignore_non_vendor and is_item_present(
-                    self._ctx, item_type, item_public_id, is_vendor=False
+                    self._ctx.cwd,
+                    self._ctx.agent_config,
+                    item_type,
+                    item_public_id,
+                    is_vendor=False,
                 ):
                     continue
                 yield PackageId(item_type, item_public_id)
@@ -436,12 +439,7 @@ class RemoveItem:
         self.agent_config.component_configurations.pop(
             ComponentId(self.item_type, current_item), None
         )
-        self._dump_agent_config()
-
-    def _dump_agent_config(self) -> None:
-        """Save agent config to the filesystem."""
-        with open(os.path.join(self.ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as f:
-            self.ctx.agent_loader.dump(self.agent_config, f)
+        self.ctx.dump_agent_config()
 
     def remove_dependencies(self) -> None:
         """Remove all the dependecies related only to the package."""

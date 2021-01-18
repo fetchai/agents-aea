@@ -16,6 +16,7 @@ strict: true
 nav:
   - Introduction: 'index.md'
   - Version: 'version.md'
+  - Upgrading: 'upgrading.md'
   - Concepts:
     - Language Agnostic Definition: 'language-agnostic-definition.md'
     - Agent-oriented development: 'agent-oriented-development.md'
@@ -23,7 +24,7 @@ nav:
     - Application areas: 'app-areas.md'
     - Relation to OEF and Ledger: 'oef-ledger.md'
     - Identity: 'identity.md'
-    # - Trust issues: 'trust.md'
+    - Trust issues: 'trust.md'
   - Demos:
     - Demos: 'demos.md'
     - Aries Cloud Agents Demo: 'aries-cloud-agent-demo.md'
@@ -37,17 +38,18 @@ nav:
     - TAC external app: 'tac.md'
     - Thermometer skills: 'thermometer-skills.md'
     - Weather skills: 'weather-skills.md'
-  - Development:
-    - Getting started:
-      - AEA quick start: 'quickstart.md'
-      - Core components - Part 1: 'core-components-1.md'
-      - AEA and web frameworks: 'aea-vs-mvc.md'
-      - Build a skill for an AEA: 'skill-guide.md'
-      - Core components - Part 2: 'core-components-2.md'
-      - Trade between two AEAs: 'generic-skills-step-by-step.md'
+  - Development - Beginner:
+    - AEA quick start: 'quickstart.md'
+    - Core components - Part 1: 'core-components-1.md'
+    - AEA and web frameworks: 'aea-vs-mvc.md'
+    - Build your first skill - search & discovery: 'skill-guide.md'
+    - Core components - Part 2: 'core-components-2.md'
+    - How AEAs talk to each other - interaction protocols: 'interaction-protocol.md'
+    - Trade between two AEAs: 'generic-skills-step-by-step.md'
+    - Development setup: 'development-setup.md'
+  - Development - Advanced:
     - Topic guides:
       - Ways to build an AEA: 'step-one.md'
-      - Development setup: 'development-setup.md'
       - Build an AEA with the CLI: 'build-aea-step-by-step.md'
       - Scaffolding packages: 'scaffolding.md'
       - Generating protocols: 'protocol-generator.md'
@@ -57,23 +59,17 @@ nav:
       - Create decision-maker transaction: 'decision-maker-transaction.md'
       - Testing Skills: 'skill-testing.md'
       - Deployment: 'deployment.md'
+      - Prometheus monitoring: 'prometheus.md'
       - Known limitations: 'known-limits.md'
       - Build an AEA programmatically: 'build-aea-programmatically.md'
       - CLI vs programmatic AEAs: 'cli-vs-programmatic-aeas.md'
       - AEAs vs agents: 'agent-vs-aea.md'
-      - Upgrading versions: 'upgrading.md'
       - Modes of running an AEA: 'modes.md'
+      - Generic Storage: 'generic-storage.md'
       - Multi agent manager: 'multi-agent-manager.md'
       - Debugging: 'debug.md'
       - Profiling: 'runtime-cost.md'
-    - Use case components:
-      - Generic skills: 'generic-skills.md'
-      - Front-end intergration: 'connect-a-frontend.md'
-      - HTTP Connection: 'http-connection-and-skill.md'
-      - ORM integration: 'orm-integration.md'
-      - Contract deploy and interact: 'erc1155-skills.md'
-      - P2P Connection: 'p2p-connection.md'
-      - Build an AEA on a Raspberry Pi: 'raspberry-set-up.md'
+      - Proof of Representation: 'por.md'
     - Architecture & component deep-dives:
       - Design principles: 'design-principles.md'
       - Architectural diagram: 'diagram.md'
@@ -110,7 +106,6 @@ nav:
       - Common: 'api/common.md'
       - Exceptions: 'api/exceptions.md'
       - Launcher: 'api/launcher.md'
-      - Manager: 'api/manager.md'
       - Multiplexer: 'api/multiplexer.md'
       - Runner: 'api/runner.md'
       - Runtime: 'api/runtime.md'
@@ -120,10 +115,12 @@ nav:
       - Configurations:
         - Base: 'api/configurations/base.md'
         - Constants: 'api/configurations/constants.md'
+        - Data Types: 'api/configurations/data_types.md'
         - Loader: 'api/configurations/loader.md'
-        - Project: 'api/configurations/project.md'
+        - Manager: 'api/configurations/manager.md'
         - Pypi: 'api/configurations/pypi.md'
         - Utils: 'api/configurations/utils.md'
+        - Validation: 'api/configurations/validation.md'
       - Connections:
         - Base: 'api/connections/base.md'
         - Stub Connection: 'api/connections/stub/connection.md'
@@ -143,12 +140,18 @@ nav:
       - Decision Maker:
         - Base: 'api/decision_maker/base.md'
         - Default: 'api/decision_maker/default.md'
+      - Error Handler:
+        - Base: 'api/error_handler/base.md'
+        - Default: 'api/error_handler/default.md'
       - Helpers:
+        - ACN:
+          - Agent Record: 'api/helpers/acn/agent_record.md'
+          - URI: 'api/helpers/acn/uri.md'
         - Async Friendly Queue: 'api/helpers/async_friendly_queue.md'
         - Async Utils: 'api/helpers/async_utils.md'
         - Base: 'api/helpers/base.md'
-        - Dialogue:
-          - Base: 'api/helpers/dialogue/base.md'
+        - Constants: 'api/helpers/constants.md'
+        - Env Vars: 'api/helpers/env_vars.md'
         - Exception Policy: 'api/helpers/exception_policy.md'
         - Exec Timeout: 'api/helpers/exec_timeout.md'
         - File IO: 'api/helpers/file_io.md'
@@ -167,16 +170,26 @@ nav:
         - Search:
           - Generic: 'api/helpers/search/generic.md'
           - Models: 'api/helpers/search/models.md'
+        - Serializers: 'api/helpers/serializers.md'
+        - Storage:
+          - GenericStorage: 'api/helpers/storage/generic_storage.md'
+          - Backends:
+            - Base: 'api/helpers/storage/backends/base.md'
+            - Sqlite: 'api/helpers/storage/backends/sqlite.md'
         - Sym Link: 'api/helpers/sym_link.md'
-        - Temp Error Handler: 'api/helpers/temp_error_handler.md'
         - Transaction:
           - Base: 'api/helpers/transaction/base.md'
         - Win32: 'api/helpers/win32.md'
         - YamlUtils: 'api/helpers/yaml_utils.md'
       - Identity: 'api/identity/base.md'
       - Mail: 'api/mail/base.md'
+      - Manager:
+        - Manager: 'api/manager/manager.md'
+        - Project: 'api/manager/project.md'
       - Protocols:
         - Base: 'api/protocols/base.md'
+        - Dialogue:
+          - Base: 'api/protocols/dialogue/base.md'
         - Generator:
           - Base: 'api/protocols/generator/base.md'
           - Common: 'api/protocols/generator/common.md'
@@ -206,9 +219,19 @@ nav:
         - Behaviors: 'api/skills/behaviours.md'
         - Task: 'api/skills/tasks.md'
       - Test Tools:
+        - Constants: 'api/test_tools/constants.md'
+        - Exceptions: 'api/test_tools/exceptions.md'
         - Generic: 'api/test_tools/generic.md'
         - Test Cases: 'api/test_tools/test_cases.md'
         - Test Skill: 'api/test_tools/test_skill.md'
+  - Development - Use Case:
+    - Generic skills: 'generic-skills.md'
+    - Front-end intergration: 'connect-a-frontend.md'
+    - HTTP Connection: 'http-connection-and-skill.md'
+    - ORM integration: 'orm-integration.md'
+    - Contract deploy and interact: 'erc1155-skills.md'
+    - P2P Connection: 'p2p-connection.md'
+    - Build an AEA on a Raspberry Pi: 'raspberry-set-up.md'
   - Glossary: 'glossary.md'
   - Q&A: 'questions-and-answers.md'
 

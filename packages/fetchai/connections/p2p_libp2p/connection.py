@@ -16,30 +16,27 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the p2p libp2p connection."""
-
 import asyncio
 import logging
 import os
+import platform
 import shutil
 import subprocess  # nosec
 import tempfile
 from asyncio import AbstractEventLoop, CancelledError
 from ipaddress import ip_address
 from pathlib import Path
-from random import randint
 from socket import gethostbyname
 from typing import IO, List, Optional, Sequence, cast
 
-from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.connections.base import Connection, ConnectionStates
 from aea.crypto.base import Crypto
-from aea.crypto.registries import make_crypto
-from aea.exceptions import AEAException
-from aea.helpers.async_utils import AwaitableProc
+from aea.exceptions import enforce
+from aea.helpers.acn.agent_record import AgentRecord
+from aea.helpers.acn.uri import Uri
 from aea.helpers.multiaddr.base import MultiAddr
 from aea.helpers.pipe import IPCChannel, make_ipc_channel
 from aea.mail.base import Envelope
@@ -50,6 +47,9 @@ _default_logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p
 LIBP2P_NODE_MODULE = str(os.path.abspath(os.path.dirname(__file__)))
 
 LIBP2P_NODE_MODULE_NAME = "libp2p_node"
+
+if platform.system() == "Windows":  # pragma: nocover
+    LIBP2P_NODE_MODULE_NAME += ".exe"
 
 LIBP2P_NODE_LOG_FILE = "libp2p_node.log"
 
@@ -64,11 +64,13 @@ PIPE_CONN_TIMEOUT = 10.0
 # TOFIX(LR) not sure is needed
 LIBP2P = "libp2p"
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.12.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.14.0")
 
 SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 
 LIBP2P_SUCCESS_MESSAGE = "Peer running in "
+
+POR_DEFAULT_SERVICE_ID = "acn"
 
 
 def _ip_all_private_or_all_public(addrs: List[str]) -> bool:
@@ -84,42 +86,6 @@ def _ip_all_private_or_all_public(addrs: List[str]) -> bool:
         if ip_address(gethostbyname(addr)).is_loopback != is_loopback:
             return False
     return True
-
-
-async def _golang_module_build_async(
-    path: str,
-    log_file_desc: IO[str],
-    timeout: float = LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT,
-    logger: logging.Logger = _default_logger,
-) -> int:
-    """
-    Builds go module located at `path`, downloads necessary dependencies
-
-    :return: build command returncode
-    """
-    cmd = ["go", "build"]
-
-    env = os.environ
-
-    proc = AwaitableProc(
-        cmd, env=env, cwd=path, stdout=log_file_desc, stderr=log_file_desc, shell=False,
-    )
-
-    golang_build = asyncio.ensure_future(proc.start())
-
-    try:
-        returncode = await asyncio.wait_for(golang_build, timeout)
-    except asyncio.TimeoutError:
-        e = Exception(
-            "Failed to download libp2p dependencies within timeout({})".format(
-                LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT
-            )
-        )
-        logger.error(e)
-        golang_build.cancel()
-        raise e
-
-    return returncode
 
 
 def _golang_module_run(
@@ -163,52 +129,12 @@ def _golang_module_run(
     return proc
 
 
-class Uri:
-    """Holds a node address in format "host:port"."""
-
-    def __init__(
-        self,
-        uri: Optional[str] = None,
-        host: Optional[str] = None,
-        port: Optional[int] = None,
-    ):
-        """Initialise Uri."""
-        if uri is not None:
-            split = uri.split(":", 1)
-            self._host = split[0]
-            self._port = int(split[1])
-        elif host is not None and port is not None:
-            self._host = host
-            self._port = port
-        else:
-            self._host = "127.0.0.1"
-            self._port = randint(5000, 10000)  # nosec
-
-    def __str__(self):
-        """Get string representation."""
-        return "{}:{}".format(self._host, self._port)
-
-    def __repr__(self):  # pragma: no cover
-        """Get object representation."""
-        return self.__str__()
-
-    @property
-    def host(self) -> str:
-        """Get host."""
-        return self._host
-
-    @property
-    def port(self) -> int:
-        """Get port."""
-        return self._port
-
-
 class Libp2pNode:
     """Libp2p p2p node as a subprocess with named pipes interface."""
 
     def __init__(
         self,
-        agent_addr: Address,
+        agent_record: AgentRecord,
         key: Crypto,
         module_path: str,
         clargs: Optional[List[str]] = None,
@@ -220,11 +146,12 @@ class Libp2pNode:
         log_file: Optional[str] = None,
         env_file: Optional[str] = None,
         logger: logging.Logger = _default_logger,
+        peer_registration_delay: Optional[float] = None,
     ):
         """
         Initialize a p2p libp2p node.
 
-        :param agent_addr: the agent address.
+        :param agent_record: the agent proof-of-representation for peer.
         :param key: secp256k1 curve private key.
         :param module_path: the module path.
         :param clargs: the command line arguments for the libp2p node
@@ -236,9 +163,11 @@ class Libp2pNode:
         :param log_file: the logfile path for the libp2p node
         :param env_file: the env file path for the exchange of environment variables
         :param logger: the logger.
+        :param peer_registration_delay: add artificial delay to agent registration in seconds
         """
 
-        self.address = agent_addr
+        self.record = agent_record
+        self.address = self.record.address
 
         # node id in the p2p network
         self.key = key.private_key
@@ -258,6 +187,9 @@ class Libp2pNode:
 
         # entry peer
         self.entry_peers = entry_peers if entry_peers is not None else []
+
+        # peer configuration
+        self.peer_registration_delay = peer_registration_delay
 
         # node startup
         self.source = os.path.abspath(module_path)
@@ -294,24 +226,9 @@ class Libp2pNode:
         if self._loop is None:
             self._loop = asyncio.get_event_loop()
 
-        # open log file
         self._log_file_desc = open(self.log_file, "a", 1)
-
-        # build the node
-        self.logger.info("Downloading golang dependencies. This may take a while...")
-        returncode = await _golang_module_build_async(
-            self.source, self._log_file_desc, logger=self.logger
-        )
-        node_log = ""
-        with open(self.log_file, "r") as f:
-            node_log = f.read()
-        if returncode != 0:
-            raise Exception(
-                "Error while downloading golang dependencies and building it: {}\n{}".format(
-                    returncode, node_log
-                )
-            )
-        self.logger.info("Finished downloading golang dependencies.")
+        self._log_file_desc.write("test")
+        self._log_file_desc.flush()
 
         # setup fifos
         self.pipe = make_ipc_channel(logger=self.logger)
@@ -343,6 +260,19 @@ class Libp2pNode:
             )
             self._config += "AEA_P2P_URI_MONITORING={}\n".format(
                 str(self.monitoring_uri) if self.monitoring_uri is not None else ""
+            )
+            self._config += "AEA_P2P_POR_ADDRESS={}\n".format(self.record.address)
+            self._config += "AEA_P2P_POR_PUBKEY={}\n".format(self.record.public_key)
+            self._config += "AEA_P2P_POR_PEER_PUBKEY={}\n".format(
+                self.record.representative_public_key
+            )
+            self._config += "AEA_P2P_POR_SIGNATURE={}\n".format(self.record.signature)
+            self._config += "AEA_P2P_POR_SERVICE_ID={}\n".format(POR_DEFAULT_SERVICE_ID)
+            self._config += "AEA_P2P_POR_LEDGER_ID={}\n".format(self.record.ledger_id)
+            self._config += "AEA_P2P_CFG_REGISTRATION_DELAY={}\n".format(
+                str(self.peer_registration_delay)
+                if self.peer_registration_delay is not None
+                else str(0.0)
             )
             env_file.write(self._config)
 
@@ -509,7 +439,6 @@ class P2PLibp2pConnection(Connection):
     def __init__(self, **kwargs):
         """Initialize a p2p libp2p connection."""
 
-        self._check_go_installed()
         # we put it here so below we can access the address
         super().__init__(**kwargs)
         ledger_id = self.configuration.config.get("ledger_id", DEFAULT_LEDGER)
@@ -519,9 +448,6 @@ class P2PLibp2pConnection(Connection):
                     ledger_id, SUPPORTED_LEDGER_IDS
                 )
             )
-        libp2p_key_file = self.configuration.config.get(
-            "node_key_file"
-        )  # Optional[str]
         libp2p_local_uri = self.configuration.config.get("local_uri")  # Optional[str]
         libp2p_public_uri = self.configuration.config.get("public_uri")  # Optional[str]
         libp2p_delegate_uri = self.configuration.config.get(
@@ -536,16 +462,20 @@ class P2PLibp2pConnection(Connection):
         libp2p_entry_peers = list(cast(List, libp2p_entry_peers))
         log_file = self.configuration.config.get("log_file")  # Optional[str]
         env_file = self.configuration.config.get("env_file")  # Optional[str]
+        peer_registration_delay = self.configuration.config.get(
+            "peer_registration_delay"
+        )  # Optional[str]
 
         if (
             self.has_crypto_store
             and self.crypto_store.crypto_objects.get(ledger_id, None) is not None
         ):  # pragma: no cover
             key = self.crypto_store.crypto_objects[ledger_id]
-        elif libp2p_key_file is not None:
-            key = make_crypto(ledger_id, private_key_path=libp2p_key_file)
         else:
-            key = make_crypto(ledger_id)
+            raise ValueError(
+                f"Couldn't find connection key for {str(ledger_id)} in connections keys. "
+                "Please ensure agent private key is added with `aea add-key`."
+            )
 
         uri = None
         if libp2p_local_uri is not None:
@@ -567,11 +497,20 @@ class P2PLibp2pConnection(Connection):
             MultiAddr.from_string(str(maddr)) for maddr in libp2p_entry_peers
         ]
 
+        delay = None
+        if peer_registration_delay is not None:
+            try:
+                delay = float(peer_registration_delay)
+            except ValueError:
+                raise ValueError(
+                    f"peer_registration_delay {peer_registration_delay} must be a float number in seconds"
+                )
+
         if public_uri is None:
             # node will be run as a ClientDHT
             # requires entry peers to use as relay
             if entry_peers is None or len(entry_peers) == 0:
-                raise ValueError(
+                raise ValueError(  # pragma: no cover
                     "At least one Entry Peer should be provided when node is run in relayed mode"
                 )
             if delegate_uri is not None:  # pragma: no cover
@@ -581,7 +520,7 @@ class P2PLibp2pConnection(Connection):
         else:
             # node will be run as a full NodeDHT
             if uri is None:
-                raise ValueError(
+                raise ValueError(  # pragma: no cover
                     "Local Uri must be set when Public Uri is provided. "
                     "Hint: they are the same for local host/network deployment"
                 )
@@ -594,16 +533,27 @@ class P2PLibp2pConnection(Connection):
                     "Node's public ip and entry peers ip addresses are not in the same ip address space (private/public)"
                 )
 
+        cert_requests = self.configuration.cert_requests
+        if cert_requests is None or len(cert_requests) != 1:
+            raise ValueError(  # pragma: no cover
+                "cert_requests field must be set and contain exactly one entry!"
+            )
+        cert_request = cert_requests[0]
+
+        agent_record = AgentRecord.from_cert_request(
+            cert_request, self.address, key.public_key
+        )
+
         # libp2p local node
         self.logger.debug("Public key used by libp2p node: {}".format(key.public_key))
         temp_dir = tempfile.mkdtemp()
         self.libp2p_workdir = os.path.join(temp_dir, "libp2p_workdir")
-        shutil.copytree(LIBP2P_NODE_MODULE, self.libp2p_workdir)
 
+        self._check_node_built()
         self.node = Libp2pNode(
-            self.address,
+            agent_record,
             key,
-            self.libp2p_workdir,
+            self.configuration.build_directory,
             LIBP2P_NODE_CLARGS,
             uri,
             public_uri,
@@ -613,10 +563,27 @@ class P2PLibp2pConnection(Connection):
             log_file,
             env_file,
             self.logger,
+            delay,
         )
 
         self._in_queue = None  # type: Optional[asyncio.Queue]
         self._receive_from_node_task = None  # type: Optional[asyncio.Future]
+
+    def _check_node_built(self) -> None:
+        """Check node built and move it to workdir."""
+        enforce(
+            bool(self.configuration.build_directory),
+            "Connection Configuration build directory is not set!",
+        )
+
+        libp2p_node_module_path = os.path.join(
+            cast(str, self.configuration.build_directory), LIBP2P_NODE_MODULE_NAME
+        )
+        enforce(
+            os.path.exists(libp2p_node_module_path),
+            f"Module {LIBP2P_NODE_MODULE_NAME} is not present in {self.configuration.build_directory}, please call the `aea build` command first!",
+        )
+        shutil.copy(libp2p_node_module_path, self.libp2p_workdir)
 
     @property
     def libp2p_address(self) -> str:  # pragma: no cover
@@ -722,14 +689,3 @@ class P2PLibp2pConnection(Connection):
             self._in_queue.put_nowait(data)
             if data is None:
                 break
-
-    @staticmethod
-    def _check_go_installed() -> None:
-        """Checks if go is installed. Sys.exits if not"""
-        res = shutil.which("go")
-        if res is None:
-            raise AEAException(  # pragma: nocover
-                "Please install go before running the `{} connection. Go is available for download here: https://golang.org/doc/install".format(
-                    PUBLIC_ID
-                )
-            )

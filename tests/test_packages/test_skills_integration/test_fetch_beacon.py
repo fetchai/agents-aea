@@ -30,9 +30,9 @@ class TestFetchBeaconSkill(AEATestCaseEmpty):
 
     def test_fetch_beacon(self):
         """Run the fetch beacon skill sequence."""
-        self.add_item("connection", "fetchai/http_client:0.14.0")
-        self.add_item("skill", "fetchai/fetch_beacon:0.1.0")
-        self.set_config("agent.default_connection", "fetchai/http_client:0.14.0")
+        self.add_item("connection", "fetchai/http_client:0.16.0")
+        self.add_item("skill", "fetchai/fetch_beacon:0.3.0")
+        self.set_config("agent.default_connection", "fetchai/http_client:0.16.0")
 
         self.run_install()
 

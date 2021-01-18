@@ -23,7 +23,7 @@ from typing import cast
 import pytest
 
 from aea.common import Address
-from aea.configurations.base import ConnectionConfig
+from aea.configurations.base import ConnectionConfig, PublicId
 from aea.exceptions import AEAEnforceError
 from aea.identity.base import Identity
 from aea.mail.base import Envelope, Message
@@ -75,9 +75,10 @@ class TestPrometheusConnection:
         """Initialise the class."""
         self.metrics = {}
         configuration = ConnectionConfig(
-            connection_id=PrometheusConnection.connection_id, port=8080,
+            connection_id=PrometheusConnection.connection_id, port=9090,
         )
         self.agent_address = "my_address"
+        self.protocol_id = PublicId.from_str("fetchai/prometheus:0.2.0")
         identity = Identity("name", address=self.agent_address)
         self.prometheus_con = PrometheusConnection(
             identity=identity, configuration=configuration
@@ -94,7 +95,7 @@ class TestPrometheusConnection:
             title=title,
             type=metric_type,
             description="a gauge",
-            labels=(),
+            labels={},
         )
         assert sending_dialogue is not None
 
@@ -111,6 +112,7 @@ class TestPrometheusConnection:
             title=title,
             callable=update_func,
             value=1.0,
+            labels={},
         )
         assert sending_dialogue is not None
         assert sending_dialogue.last_message is not None
@@ -159,8 +161,16 @@ class TestPrometheusConnection:
         assert msg.code == 404
         assert msg.message == "CoolBar is not a recognized prometheus metric."
 
-        # test update metric (correct)
+        # test update metric (inc: correct)
         await self.send_update_metric("some_metric", "inc")
+        envelope = await self.prometheus_con.receive()
+        msg = cast(PrometheusMessage, envelope.message)
+        assert msg.performative == PrometheusMessage.Performative.RESPONSE
+        assert msg.code == 200
+        assert msg.message == "Metric some_metric successfully updated."
+
+        # test update metric (set: correct)
+        await self.send_update_metric("some_metric", "set")
         envelope = await self.prometheus_con.receive()
         msg = cast(PrometheusMessage, envelope.message)
         assert msg.performative == PrometheusMessage.Performative.RESPONSE
@@ -175,7 +185,7 @@ class TestPrometheusConnection:
         assert msg.code == 404
         assert msg.message == "Metric cool_metric not found."
 
-        # test update metric (bad update function)
+        # test update metric (bad update function: not found in attr)
         await self.send_update_metric("some_metric", "go")
         envelope = await self.prometheus_con.receive()
         msg = cast(PrometheusMessage, envelope.message)
@@ -183,15 +193,26 @@ class TestPrometheusConnection:
         assert msg.code == 400
         assert msg.message == "Update function go not found for metric some_metric."
 
+        # test update metric (bad update function: found in getattr, not a method)
+        await self.send_update_metric("some_metric", "name")
+        envelope = await self.prometheus_con.receive()
+        msg = cast(PrometheusMessage, envelope.message)
+        assert msg.performative == PrometheusMessage.Performative.RESPONSE
+        assert msg.code == 400
+        assert (
+            msg.message
+            == "Failed to update metric some_metric: name is not a valid update function."
+        )
+
         # Test that invalid message is rejected.
         with pytest.raises(AEAEnforceError):
             envelope = Envelope(
                 to="some_address",
                 sender="me",
-                protocol_id="some_id",
+                protocol_id=self.protocol_id,
                 message=Message({}),
             )
-            await self.prometheus_con.channel.handle_prometheus_message(envelope)
+            await self.prometheus_con.channel.send(envelope)
 
         # Test that envelope without dialogue produces warning.
         msg = PrometheusMessage(
@@ -200,10 +221,10 @@ class TestPrometheusConnection:
         envelope = Envelope(
             to=self.prometheus_address,
             sender=self.agent_address,
-            protocol_id="some_id",
+            protocol_id=self.protocol_id,
             message=msg,
         )
-        await self.prometheus_con.channel.handle_prometheus_message(envelope)
+        await self.prometheus_con.channel.send(envelope)
 
         # Test that envelope with invalid protocol_id raises error.
         with pytest.raises(ValueError):
@@ -213,6 +234,7 @@ class TestPrometheusConnection:
                 title="",
                 callable="",
                 value=1.0,
+                labels={},
             )
             envelope = Envelope(
                 to=self.prometheus_address,

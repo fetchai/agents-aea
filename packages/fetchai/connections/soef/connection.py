@@ -21,6 +21,7 @@
 import asyncio
 import copy
 import logging
+import os
 import re
 import urllib
 from asyncio import CancelledError
@@ -28,6 +29,7 @@ from concurrent.futures._base import CancelledError as ConcurrentCancelledError
 from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import suppress
 from enum import Enum
+from pathlib import Path
 from typing import Callable, Dict, List, Optional, Set, Type, Union, cast
 from urllib import parse
 from uuid import uuid4
@@ -66,7 +68,7 @@ from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.soef")
 
-PUBLIC_ID = PublicId.from_str("fetchai/soef:0.13.0")
+PUBLIC_ID = PublicId.from_str("fetchai/soef:0.15.0")
 
 NOT_SPECIFIED = object()
 
@@ -256,6 +258,9 @@ class SOEFChannel:
         self.oef_search_dialogues = OefSearchDialogues()
 
         self._token_storage_path = token_storage_path
+        if self._token_storage_path is not None:
+            self._token_storage_path = os.path.abspath(self._token_storage_path)
+            Path(self._token_storage_path).touch()
         self.declared_name = uuid4().hex
         self._unique_page_address = None  # type: Optional[str]
         self.agent_location = None  # type: Optional[Location]

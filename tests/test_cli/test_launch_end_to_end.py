@@ -27,6 +27,7 @@ import pytest
 from aea.test_tools.test_cases import AEATestCaseMany
 
 from tests.common.pexpect_popen import PexpectWrapper
+from tests.conftest import FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
 
 
 class TestLaunchEndToEnd(AEATestCaseMany):
@@ -82,6 +83,13 @@ class TestLaunchEndToEnd(AEATestCaseMany):
             json.dumps({"key": self.key, "value": self.value}),
             cwd=registration_agent_name,
         )
+        self.run_cli_command(
+            "config",
+            "set",
+            "vendor.fetchai.connections.soef.config.token_storage_path",
+            os.path.join(self.t, registration_agent_name, "soef_key.txt"),
+            cwd=registration_agent_name,
+        )
 
         search_agent_name = "search_agent"
         self.fetch_agent(
@@ -121,6 +129,41 @@ class TestLaunchEndToEnd(AEATestCaseMany):
             "int",
             "2",
             cwd=search_agent_name,
+        )
+        self.run_cli_command(
+            "config",
+            "set",
+            "vendor.fetchai.connections.soef.config.token_storage_path",
+            os.path.join(self.t, search_agent_name, "soef_key.txt"),
+            cwd=search_agent_name,
+        )
+        self.run_cli_command(
+            "build", cwd=registration_agent_name,
+        )
+        self.run_cli_command(
+            "build", cwd=search_agent_name,
+        )
+        self.set_agent_context(registration_agent_name)
+        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
+        self.add_private_key(
+            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+        )
+        self.generate_private_key()
+        self.add_private_key()
+        self.unset_agent_context()
+        self.run_cli_command(
+            "issue-certificates", cwd=registration_agent_name,
+        )
+        self.set_agent_context(search_agent_name)
+        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
+        self.add_private_key(
+            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+        )
+        self.generate_private_key()
+        self.add_private_key()
+        self.unset_agent_context()
+        self.run_cli_command(
+            "issue-certificates", cwd=search_agent_name,
         )
 
         proc = PexpectWrapper(  # nosec

@@ -37,17 +37,22 @@ import (
 * How to run
 * ***********
 
-	$ go test -p 1 -count 20 libp2p_node/dht/dhtpeer/ -run=XXX  -bench .  -benchtime=20x -keys-file=/path/to/file/benchmark_keys.txt -addrs-file=/path/to/file/benchmark_addrs.txt
+	$ go test -p 1 -count 20 libp2p_node/dht/dhtpeer/ -run=XXX  -bench .  -benchtime=20x -peers-keys-file=/path/to/file/benchmark_peers_keys.txt -agents-keys-file=/path/to/file/benchmark_agents_keys.txt
 
 */
 
-var keysFilePath string
-var addrsFilePath string
+var peersKeysFilePath string
+var agentsKeysFilePath string
 var tcpUri = "localhost:12345"
 
 func init() {
-	flag.StringVar(&keysFilePath, "keys-file", "", "File with list of EC private keys")
-	flag.StringVar(&addrsFilePath, "addrs-file", "", "File with list of agents addresses")
+	flag.StringVar(&peersKeysFilePath, "peers-keys-file", "", "File with list of EC private keys")
+	flag.StringVar(
+		&agentsKeysFilePath,
+		"agents-keys-file",
+		"",
+		"File with list of agents EC private keys",
+	)
 }
 
 /* **********************************
@@ -155,31 +160,37 @@ func BenchmarkBaselineTCPConnectAndEcho(b *testing.B) {
 
 // helpers
 
-func getKeysAndAddrs(b *testing.B) (keys []string, addrs []string) {
-	keysFile, err := os.Open(keysFilePath)
+func getKeysAndAddrs(b *testing.B) (peers []string, agents []string) {
+	peersKeysFile, err := os.Open(peersKeysFilePath)
 	if err != nil {
 		b.Fatal(err)
 	}
-	defer keysFile.Close()
-	addrsFile, err := os.Open(addrsFilePath)
+	defer peersKeysFile.Close()
+	agentsKeysFile, err := os.Open(agentsKeysFilePath)
 	if err != nil {
 		b.Fatal(err)
 	}
-	defer addrsFile.Close()
+	defer agentsKeysFile.Close()
 
-	ksc := bufio.NewScanner(keysFile)
-	asc := bufio.NewScanner(addrsFile)
+	ksc := bufio.NewScanner(peersKeysFile)
+	asc := bufio.NewScanner(agentsKeysFile)
 
-	keys = []string{}
-	addrs = []string{}
+	peers = []string{}
+	agents = []string{}
 	for ksc.Scan() && asc.Scan() {
-		keys = append(keys, ksc.Text())
-		addrs = append(addrs, asc.Text())
+		peers = append(peers, ksc.Text())
+		agents = append(agents, asc.Text())
 	}
-	return keys, addrs
+	return peers, agents
 }
 
-func setupLocalDHTPeerForBench(key string, addr string, dhtPort uint16, delegatePort uint16, entry []string) (*DHTPeer, func(), error) {
+func setupLocalDHTPeerForBench(
+	key string,
+	agentKey string,
+	dhtPort uint16,
+	delegatePort uint16,
+	entry []string,
+) (*DHTPeer, func(), error) {
 	/*
 		peer, peerCleanup, err := SetupLocalDHTPeer(key, addr, dhtPort, delegatePort, entry)
 		if err == nil {
@@ -197,8 +208,34 @@ func setupLocalDHTPeerForBench(key string, addr string, dhtPort uint16, delegate
 		BootstrapFrom(entry),
 	}
 
-	if addr != "" {
-		opts = append(opts, RegisterAgentAddress(addr, func() bool { return true }))
+	if agentKey != "" {
+		agentPubKey, err := utils.FetchAIPublicKeyFromFetchAIPrivateKey(agentKey)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		agentAddress, err := utils.FetchAIAddressFromPublicKey(agentPubKey)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		peerPubKey, err := utils.FetchAIPublicKeyFromFetchAIPrivateKey(key)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		signature, err := utils.SignFetchAI([]byte(peerPubKey), agentKey)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		record := &aea.AgentRecord{}
+		record.Address = agentAddress
+		record.PublicKey = agentPubKey
+		record.PeerPublicKey = peerPubKey
+		record.Signature = signature
+
+		opts = append(opts, RegisterAgentAddress(record, func() bool { return true }))
 	}
 
 	if delegatePort != 0 {
@@ -216,7 +253,7 @@ func setupLocalDHTPeerForBench(key string, addr string, dhtPort uint16, delegate
 }
 
 func deployPeers(number uint16, b *testing.B) ([]*DHTPeer, []string) {
-	keys, addrs := getKeysAndAddrs(b)
+	peerKeys, agentsKeys := getKeysAndAddrs(b)
 	peers := make([]*DHTPeer, 0, number)
 	for i := uint16(0); i < number; i++ {
 		entry := []string{}
@@ -224,7 +261,7 @@ func deployPeers(number uint16, b *testing.B) ([]*DHTPeer, []string) {
 			entry = append(entry, peers[i-1].MultiAddr())
 		}
 		peer, _, err := setupLocalDHTPeerForBench(
-			keys[i], addrs[i], DefaultLocalPort+i, 0,
+			peerKeys[i], agentsKeys[i], DefaultLocalPort+i, 0,
 			entry,
 		)
 		if err != nil {
@@ -232,7 +269,7 @@ func deployPeers(number uint16, b *testing.B) ([]*DHTPeer, []string) {
 		}
 		peers = append(peers, peer)
 	}
-	return peers, addrs
+	return peers, agentsKeys
 }
 
 func closePeers(peers ...*DHTPeer) {
@@ -284,7 +321,7 @@ func benchmarkAgentLookup(npeers uint16, b *testing.B) {
 	defer closePeers(peers...)
 
 	peer, peerCleanup, err := setupLocalDHTPeerForBench(
-		FetchAITestKeys[1], AgentsTestAddresses[1], DefaultLocalPort+npeers+1, 0,
+		FetchAITestKeys[1], AgentsTestKeys[1], DefaultLocalPort+npeers+1, 0,
 		[]string{peers[len(peers)-1].MultiAddr()},
 	)
 	if err != nil {
@@ -295,7 +332,7 @@ func benchmarkAgentLookup(npeers uint16, b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		b.ResetTimer()
-		_, err = peer.lookupAddressDHT(addrs[len(peers)-1-i%len(peers)])
+		_, _, err = peer.lookupAddressDHT(addrs[len(peers)-1-i%len(peers)])
 		if err != nil {
 			b.Fail()
 		}
@@ -310,7 +347,7 @@ func benchmarkPeerJoin(npeers uint16, b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		b.ResetTimer()
 		peer, peerCleanup, err := setupLocalDHTPeerForBench(
-			FetchAITestKeys[1], AgentsTestAddresses[1], DefaultLocalPort+npeers+1, 0,
+			FetchAITestKeys[1], AgentsTestKeys[1], DefaultLocalPort+npeers+1, 0,
 			[]string{peers[i%len(peers)].MultiAddr()},
 		)
 		if err != nil {
@@ -330,7 +367,7 @@ func benchmarkPeerEcho(npeers uint16, b *testing.B) {
 	setupEchoServicePeers(peers...)
 
 	peer, peerCleanup, err := setupLocalDHTPeerForBench(
-		FetchAITestKeys[1], AgentsTestAddresses[1], DefaultLocalPort+npeers+1, 0,
+		FetchAITestKeys[1], AgentsTestKeys[1], DefaultLocalPort+npeers+1, 0,
 		[]string{peers[len(peers)-1].MultiAddr()},
 	)
 	if err != nil {

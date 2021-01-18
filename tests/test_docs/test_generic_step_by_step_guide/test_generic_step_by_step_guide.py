@@ -37,7 +37,7 @@ class TestDemoDocs:
     def setup_class(cls):
         """Setup the test class."""
         md_path = os.path.join(ROOT_DIR, "docs", "generic-skills-step-by-step.md")
-        code_blocks = extract_code_blocks(filepath=md_path, filter="python")
+        code_blocks = extract_code_blocks(filepath=md_path, filter_="python")
         cls.generic_seller = code_blocks[0:11]
         cls.generic_buyer = code_blocks[11 : len(code_blocks)]
 

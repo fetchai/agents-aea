@@ -3,7 +3,7 @@ name: t_protocol_no_ct
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.9.0, <0.10.0'
 description: 'A protocol for testing purposes.'
 speech_acts:
   performative_pt:
@@ -79,7 +79,8 @@ reply:
   performative_mt: []
   performative_o: []
   performative_empty_contents: [performative_empty_contents]
-termination: [performative_mt, performative_o, performative_empty_contents]
+termination: [performative_mt, performative_o]
 roles: {role_1, role_2}
 end_states: [end_state_1, end_state_2, end_state_3]
+keep_terminal_state_dialogues: true
 ...

@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains definitions of agent components."""
 import importlib.util
 import logging
@@ -105,6 +104,11 @@ class Component(ABC, WithLogger):
         if self._directory is not None:  # pragma: nocover
             raise ValueError("Directory already set.")
         self._directory = path
+
+    @property
+    def build_directory(self) -> Optional[str]:
+        """Get build directory for the component."""
+        return self.configuration.build_directory
 
 
 def load_aea_package(configuration: ComponentConfiguration) -> None:

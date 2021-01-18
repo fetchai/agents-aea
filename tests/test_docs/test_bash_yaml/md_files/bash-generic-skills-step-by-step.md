@@ -5,15 +5,15 @@ sudo nano 99-hidraw-permissions.rules
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0664", GROUP="plugdev"
 ```
 ``` bash
-aea fetch fetchai/generic_seller:0.15.0
+aea fetch fetchai/generic_seller:0.17.0
 cd generic_seller
-aea eject skill fetchai/generic_seller:0.17.0
+aea eject skill fetchai/generic_seller:0.19.0
 cd ..
 ```
 ``` bash
-aea fetch fetchai/generic_buyer:0.16.0
+aea fetch fetchai/generic_buyer:0.18.0
 cd generic_buyer
-aea eject skill fetchai/generic_buyer:0.17.0
+aea eject skill fetchai/generic_buyer:0.19.0
 cd ..
 ```
 ``` bash
@@ -42,28 +42,53 @@ aea fingerprint skill fetchai/generic_buyer:0.1.0
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
-aea add-key fetchai fetchai_private_key.txt --connection
+```
+``` bash
+aea generate-key fetchai fetchai_connection_private_key.txt
+aea add-key fetchai fetchai_connection_private_key.txt --connection
+```
+``` bash
+aea issue-certificates
+```
+``` bash
+aea config set --type dict agent.default_routing \
+'{
+  "fetchai/ledger_api:0.9.0": "fetchai/ledger:0.12.0",
+  "fetchai/oef_search:0.12.0": "fetchai/soef:0.15.0"
+}'
 ```
 ``` bash
 aea generate-wealth fetchai --sync
 ```
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.12.0
-aea add connection fetchai/soef:0.13.0
-aea add connection fetchai/ledger:0.10.0
-aea add protocol fetchai/fipa:0.10.0
+aea add connection fetchai/p2p_libp2p:0.14.0
+aea add connection fetchai/soef:0.15.0
+aea add connection fetchai/ledger:0.12.0
+aea add protocol fetchai/fipa:0.12.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
+aea build
+aea config set agent.default_connection fetchai/p2p_libp2p:0.14.0
 aea run
 ```
 ``` bash 
-aea add connection fetchai/p2p_libp2p:0.12.0
-aea add connection fetchai/soef:0.13.0
-aea add connection fetchai/ledger:0.10.0
-aea add protocol fetchai/fipa:0.10.0
-aea add protocol fetchai/signing:0.7.0
+aea add connection fetchai/p2p_libp2p:0.14.0
+aea add connection fetchai/soef:0.15.0
+aea add connection fetchai/ledger:0.12.0
+aea add protocol fetchai/fipa:0.12.0
+aea add protocol fetchai/signing:0.9.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
+aea build
+aea config set agent.default_connection fetchai/p2p_libp2p:0.14.0
+```
+``` bash
+aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
+'{
+  "delegate_uri": "127.0.0.1:11001",
+  "entry_peers": ["SOME_ADDRESS"],
+  "local_uri": "127.0.0.1:9001",
+  "log_file": "libp2p_node.log",
+  "public_uri": "127.0.0.1:9001"
+}'
 ```
 ``` bash
 aea run
@@ -81,7 +106,7 @@ type: skill
 description: The weather station skill implements the functionality to sell weather
   data.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
   README.md: QmPb5kHYZyhUN87EKmuahyGqDGgqVdGPyfC1KpGC3xfmcP
   __init__.py: QmTSEedzQySy2nzRCY3F66CBSX52f8s3pWHZTejX4hKC9h
@@ -91,13 +116,13 @@ fingerprint:
   strategy.py: QmYTUsfv64eRQDevCfMUDQPx2GCtiMLFdacN4sS1E4Fdfx
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.10.0
+- fetchai/ledger:0.12.0
 contracts: []
 protocols:
-- fetchai/default:0.9.0
-- fetchai/fipa:0.10.0
-- fetchai/ledger_api:0.7.0
-- fetchai/oef_search:0.10.0
+- fetchai/default:0.11.0
+- fetchai/fipa:0.12.0
+- fetchai/ledger_api:0.9.0
+- fetchai/oef_search:0.12.0
 skills: []
 behaviours:
   service_registration:
@@ -151,7 +176,7 @@ version: 0.1.0
 type: skill
 description: The weather client skill implements the skill to purchase weather data.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
   README.md: QmTR91jm7WfJpmabisy74NR5mc35YXjDU1zQAUKZeHRw8L
   __init__.py: QmU5vrC8FipyjfS5biNa6qDWdp4aeH5h4YTtbFDmCg8Chj
@@ -161,14 +186,14 @@ fingerprint:
   strategy.py: QmcrwaEWvKHDCNti8QjRhB4utJBJn5L8GpD27Uy9zHwKhY
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.10.0
+- fetchai/ledger:0.12.0
 contracts: []
 protocols:
-- fetchai/default:0.9.0
-- fetchai/fipa:0.10.0
-- fetchai/ledger_api:0.7.0
-- fetchai/oef_search:0.10.0
-- fetchai/signing:0.7.0
+- fetchai/default:0.11.0
+- fetchai/fipa:0.12.0
+- fetchai/ledger_api:0.9.0
+- fetchai/oef_search:0.12.0
+- fetchai/signing:0.9.0
 skills: []
 behaviours:
   search:
@@ -228,14 +253,6 @@ models:
       stop_searching_on_result: true
     class_name: GenericStrategy
 dependencies: {}
-```
-``` yaml
-addr: ${OEF_ADDR: 127.0.0.1}
-```
-``` yaml
-default_routing:
-  fetchai/ledger_api:0.7.0: fetchai/ledger:0.10.0
-  fetchai/oef_search:0.10.0: fetchai/soef:0.13.0
 ```
 ``` yaml
 config:

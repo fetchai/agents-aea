@@ -13,10 +13,10 @@ This skill finds an agent on the SOEF which sells car park availability data in 
 
 ## Handlers
 
-* fipa: handles fipa messages for negotiation
-* ledger_api: handles ledger_api messages for payment
-* oef_search: handles oef_search messages to manage the sellers it finds
-* signing: handles signing messages for transaction signing by the decision maker
+* `fipa`: handles `fipa` messages for negotiation
+* `ledger_api`: handles `ledger_api` messages for payment
+* `oef_search`: handles `oef_search` messages to manage the sellers it finds
+* `signing`: handles `signing` messages for transaction signing by the decision maker
 
 
 ## Links

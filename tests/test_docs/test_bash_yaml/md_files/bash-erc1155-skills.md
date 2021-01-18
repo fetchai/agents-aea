@@ -1,17 +1,27 @@
 ``` bash
-aea fetch fetchai/erc1155_deployer:0.19.0
+aea fetch fetchai/erc1155_deployer:0.21.0
 cd erc1155_deployer
 aea install
+aea build
 ```
 ``` bash
 aea create erc1155_deployer
 cd erc1155_deployer
-aea add connection fetchai/p2p_libp2p:0.12.0
-aea add connection fetchai/soef:0.13.0
-aea add connection fetchai/ledger:0.10.0
-aea add skill fetchai/erc1155_deploy:0.18.0
+aea add connection fetchai/p2p_libp2p:0.14.0
+aea add connection fetchai/soef:0.15.0
+aea add connection fetchai/ledger:0.12.0
+aea add skill fetchai/erc1155_deploy:0.20.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
+aea build
+aea config set agent.default_connection fetchai/p2p_libp2p:0.14.0
+aea config set --type dict agent.default_routing \
+'{
+  "fetchai/contract_api:0.10.0": "fetchai/ledger:0.12.0",
+  "fetchai/ledger_api:0.9.0": "fetchai/ledger:0.12.0",
+  "fetchai/oef_search:0.12.0": "fetchai/soef:0.15.0"
+}'
+aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
+'[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
 ```
 ``` bash
 aea config set agent.default_ledger ethereum
@@ -21,31 +31,36 @@ aea generate-key ethereum
 aea add-key ethereum ethereum_private_key.txt
 ```
 ``` bash
-aea generate-key fetchai
-aea add-key fetchai fetchai_private_key.txt --connection
+aea generate-key fetchai fetchai_connection_private_key.txt
+aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
 ``` bash
-aea fetch fetchai/erc1155_client:0.19.0
+aea issue-certificates
+```
+``` bash
+aea fetch fetchai/erc1155_client:0.21.0
 cd erc1155_client
 aea install
+aea build
 ```
 ``` bash
 aea create erc1155_client
 cd erc1155_client
-aea add connection fetchai/p2p_libp2p:0.12.0
-aea add connection fetchai/soef:0.13.0
-aea add connection fetchai/ledger:0.10.0
-aea add skill fetchai/erc1155_client:0.17.0
+aea add connection fetchai/p2p_libp2p:0.14.0
+aea add connection fetchai/soef:0.15.0
+aea add connection fetchai/ledger:0.12.0
+aea add skill fetchai/erc1155_client:0.19.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
-```
-``` bash
+aea build
+aea config set agent.default_connection fetchai/p2p_libp2p:0.14.0
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/contract_api:0.8.0": "fetchai/ledger:0.10.0",
-  "fetchai/ledger_api:0.7.0": "fetchai/ledger:0.10.0",
-  "fetchai/oef_search:0.10.0": "fetchai/soef:0.13.0"
+  "fetchai/contract_api:0.10.0": "fetchai/ledger:0.12.0",
+  "fetchai/ledger_api:0.9.0": "fetchai/ledger:0.12.0",
+  "fetchai/oef_search:0.12.0": "fetchai/soef:0.15.0"
 }'
+aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
+'[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
 ```
 ``` bash
 aea config set agent.default_ledger ethereum
@@ -55,8 +70,11 @@ aea generate-key ethereum
 aea add-key ethereum ethereum_private_key.txt
 ```
 ``` bash
-aea generate-key fetchai
-aea add-key fetchai fetchai_private_key.txt --connection
+aea generate-key fetchai fetchai_connection_private_key.txt
+aea add-key fetchai fetchai_connection_private_key.txt --connection
+```
+``` bash
+aea issue-certificates
 ```
 ``` bash
 docker run -p 8545:8545 trufflesuite/ganache-cli:latest --verbose --gasPrice=0 --gasLimit=0x1fffffffffffff --account="$(cat erc1155_deployer/ethereum_private_key.txt),1000000000000000000000" --account="$(cat erc1155_client/ethereum_private_key.txt),1000000000000000000000"
@@ -93,19 +111,19 @@ aea delete erc1155_client
 ```
 ``` yaml
 default_routing:
-  fetchai/contract_api:0.8.0: fetchai/ledger:0.10.0
-  fetchai/ledger_api:0.7.0: fetchai/ledger:0.10.0
-  fetchai/oef_search:0.10.0: fetchai/soef:0.13.0
+  fetchai/contract_api:0.10.0: fetchai/ledger:0.12.0
+  fetchai/ledger_api:0.9.0: fetchai/ledger:0.12.0
+  fetchai/oef_search:0.12.0: fetchai/soef:0.15.0
 ```
 ``` yaml
 default_routing:
-  fetchai/contract_api:0.8.0: fetchai/ledger:0.10.0
-  fetchai/ledger_api:0.7.0: fetchai/ledger:0.10.0
-  fetchai/oef_search:0.10.0: fetchai/soef:0.13.0
+  fetchai/contract_api:0.10.0: fetchai/ledger:0.12.0
+  fetchai/ledger_api:0.9.0: fetchai/ledger:0.12.0
+  fetchai/oef_search:0.12.0: fetchai/soef:0.15.0
 ```
 ``` yaml
 ---
-public_id: fetchai/p2p_libp2p:0.12.0
+public_id: fetchai/p2p_libp2p:0.14.0
 type: connection
 config:
   delegate_uri: 127.0.0.1:11001

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2020 fetchai
+#   Copyright 2021 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ DEFAULT_BODY_SIZE = 4
 class FipaMessage(Message):
     """A protocol for FIPA ACL."""
 
-    protocol_id = PublicId.from_str("fetchai/fipa:0.10.0")
+    protocol_id = PublicId.from_str("fetchai/fipa:0.12.0")
 
     Description = CustomDescription
 
@@ -53,6 +53,7 @@ class FipaMessage(Message):
         ACCEPT_W_INFORM = "accept_w_inform"
         CFP = "cfp"
         DECLINE = "decline"
+        END = "end"
         INFORM = "inform"
         MATCH_ACCEPT = "match_accept"
         MATCH_ACCEPT_W_INFORM = "match_accept_w_inform"
@@ -67,11 +68,13 @@ class FipaMessage(Message):
         "accept_w_inform",
         "cfp",
         "decline",
+        "end",
         "inform",
         "match_accept",
         "match_accept_w_inform",
         "propose",
     }
+    __slots__: Tuple[str, ...] = tuple()
 
     class _SlotsCls:
         __slots__ = (
@@ -285,6 +288,8 @@ class FipaMessage(Message):
             elif self.performative == FipaMessage.Performative.DECLINE:
                 expected_nb_of_contents = 0
             elif self.performative == FipaMessage.Performative.MATCH_ACCEPT:
+                expected_nb_of_contents = 0
+            elif self.performative == FipaMessage.Performative.END:
                 expected_nb_of_contents = 0
 
             # Check correct content count

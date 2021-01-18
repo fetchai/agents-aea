@@ -395,7 +395,7 @@ class TestCommon(TestCase):
         assert spec.version == "0.1.0"
         assert spec.author == "fetchai"
         assert spec.license == "Apache-2.0"
-        assert spec.aea_version == ">=0.7.0, <0.8.0"
+        assert spec.aea_version == ">=0.9.0, <0.10.0"
         assert spec.description == "A protocol for testing purposes."
         assert spec.speech_acts is not None
         assert spec.protobuf_snippets is not None and spec.protobuf_snippets != ""

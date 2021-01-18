@@ -16,13 +16,11 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains Negative tests for Libp2p connection."""
-
-import asyncio
 import os
 import shutil
 import tempfile
+from unittest.mock import patch
 
 import pytest
 
@@ -32,60 +30,17 @@ from aea.identity.base import Identity
 from aea.multiplexer import Multiplexer
 
 from packages.fetchai.connections.p2p_libp2p.connection import (
-    AwaitableProc,
     LIBP2P_NODE_MODULE_NAME,
     P2PLibp2pConnection,
-    _golang_module_build_async,
     _golang_module_run,
     _ip_all_private_or_all_public,
 )
 
-from tests.conftest import COSMOS, _make_libp2p_connection
+from tests.conftest import DEFAULT_LEDGER, _make_libp2p_connection
 
 
 DEFAULT_PORT = 10234
 DEFAULT_NET_SIZE = 4
-
-
-@pytest.mark.asyncio
-class TestP2PLibp2pConnectionFailureGolangBuild:
-    """Test that golang build async fails if timeout exceeded or wrong path"""
-
-    @classmethod
-    def setup_class(cls):
-        """Set the test up"""
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
-
-        cls.connection = _make_libp2p_connection()
-        cls.wrong_path = tempfile.mkdtemp()
-
-    @pytest.mark.asyncio
-    async def test_timeout(self):
-        """Test the timeout."""
-        log_file_desc = open("log", "a", 1)
-        with pytest.raises(Exception):
-            await _golang_module_build_async(
-                self.connection.node.source, log_file_desc, timeout=0
-            )
-
-    @pytest.mark.asyncio
-    async def test_wrong_path(self):
-        """Test the wrong path."""
-        self.connection.node.source = self.wrong_path
-        with pytest.raises(Exception):
-            await self.connection.connect()
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear down the test"""
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-            shutil.rmtree(cls.wrong_path)
-        except (OSError, IOError):
-            pass
 
 
 class TestP2PLibp2pConnectionFailureGolangRun:
@@ -167,7 +122,7 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        crypto = make_crypto(COSMOS)
+        crypto = make_crypto(DEFAULT_LEDGER)
         cls.identity = Identity("", address=crypto.address)
         cls.host = "localhost"
         cls.port = "10000"
@@ -186,6 +141,7 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection:
             entry_peers=None,
             log_file=None,
             connection_id=P2PLibp2pConnection.connection_id,
+            build_directory=self.t,
         )
         with pytest.raises(ValueError):
             P2PLibp2pConnection(configuration=configuration, identity=self.identity)
@@ -198,6 +154,7 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection:
             entry_peers=None,
             log_file=None,
             connection_id=P2PLibp2pConnection.connection_id,
+            build_directory=self.t,
         )
         with pytest.raises(ValueError):
             P2PLibp2pConnection(configuration=configuration, identity=self.identity)
@@ -212,13 +169,6 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection:
             pass
 
 
-def test_libp2pconnection_awaitable_proc_cancelled():
-    """Test awaitable proc cancelled."""
-    proc = AwaitableProc(["sleep", "100"], shell=False)
-    proc_task = asyncio.ensure_future(proc.start())
-    proc_task.cancel()
-
-
 def test_libp2pconnection_mixed_ip_address():
     """Test correct public uri ip and entry peers ips configuration."""
     assert _ip_all_private_or_all_public([]) is True
@@ -228,3 +178,14 @@ def test_libp2pconnection_mixed_ip_address():
     assert _ip_all_private_or_all_public(["fetch.ai", "127.0.0.1"]) is False
     assert _ip_all_private_or_all_public(["104.26.2.97", "127.0.0.1"]) is False
     assert _ip_all_private_or_all_public(["fetch.ai", "acn.fetch.ai"]) is True
+
+
+@patch.object(P2PLibp2pConnection, "_check_node_built")
+def test_libp2pconnection_node_config_registration_delay(mock):
+    """Test node registration delay configuration"""
+    host = "localhost"
+    port = "10000"
+
+    _make_libp2p_connection(port, host)
+    with pytest.raises(ValueError):
+        _make_libp2p_connection(port, host, peer_registration_delay="must_be_float")

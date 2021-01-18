@@ -149,10 +149,10 @@ signature of the message in string form
 
 ```python
  | @abstractmethod
- | sign_transaction(transaction: Any) -> Any
+ | sign_transaction(transaction: JSONLike) -> JSONLike
 ```
 
-Sign a transaction in bytes string form.
+Sign a transaction in dict form.
 
 **Arguments**:
 
@@ -195,7 +195,7 @@ Interface for helper class usable as Mixin for LedgerApi or as standalone class.
 ```python
  | @staticmethod
  | @abstractmethod
- | is_transaction_settled(tx_receipt: Any) -> bool
+ | is_transaction_settled(tx_receipt: JSONLike) -> bool
 ```
 
 Check whether a transaction is settled or not.
@@ -214,7 +214,7 @@ True if the transaction has been settled, False o/w.
 ```python
  | @staticmethod
  | @abstractmethod
- | is_transaction_valid(tx: Any, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
+ | is_transaction_valid(tx: JSONLike, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
 ```
 
 Check whether a transaction is valid or not.
@@ -290,6 +290,27 @@ Recover the addresses from the hash.
 **Returns**:
 
 the recovered addresses
+
+<a name="aea.crypto.base.Helper.recover_public_keys_from_message"></a>
+#### recover`_`public`_`keys`_`from`_`message
+
+```python
+ | @classmethod
+ | @abstractmethod
+ | recover_public_keys_from_message(cls, message: bytes, signature: str, is_deprecated_mode: bool = False) -> Tuple[str, ...]
+```
+
+Get the public key used to produce the `signature` of the `message`
+
+**Arguments**:
+
+- `message`: raw bytes used to produce signature
+- `signature`: signature of the message
+- `is_deprecated_mode`: if the deprecated signing was used
+
+**Returns**:
+
+the recovered public keys
 
 <a name="aea.crypto.base.Helper.get_hash"></a>
 #### get`_`hash
@@ -387,12 +408,34 @@ This usually takes the form of a web request to be waited synchronously.
 
 the balance.
 
+<a name="aea.crypto.base.LedgerApi.get_state"></a>
+#### get`_`state
+
+```python
+ | @abstractmethod
+ | get_state(callable_name: str, *args, **kwargs) -> Optional[JSONLike]
+```
+
+Call a specified function on the underlying ledger API.
+
+This usually takes the form of a web request to be waited synchronously.
+
+**Arguments**:
+
+- `callable_name`: the name of the API function to be called.
+- `args`: the positional arguments for the API function.
+- `kwargs`: the keyword arguments for the API function.
+
+**Returns**:
+
+the ledger API response.
+
 <a name="aea.crypto.base.LedgerApi.get_transfer_transaction"></a>
 #### get`_`transfer`_`transaction
 
 ```python
  | @abstractmethod
- | get_transfer_transaction(sender_address: Address, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, **kwargs, ,) -> Optional[Any]
+ | get_transfer_transaction(sender_address: Address, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, **kwargs, ,) -> Optional[JSONLike]
 ```
 
 Submit a transfer transaction to the ledger.
@@ -414,7 +457,7 @@ the transfer transaction
 
 ```python
  | @abstractmethod
- | send_signed_transaction(tx_signed: Any) -> Optional[str]
+ | send_signed_transaction(tx_signed: JSONLike) -> Optional[str]
 ```
 
 Send a signed transaction and wait for confirmation.
@@ -430,7 +473,7 @@ Use keyword arguments for the specifying the signed transaction payload.
 
 ```python
  | @abstractmethod
- | get_transaction_receipt(tx_digest: str) -> Optional[Any]
+ | get_transaction_receipt(tx_digest: str) -> Optional[JSONLike]
 ```
 
 Get the transaction receipt for a transaction digest.
@@ -448,7 +491,7 @@ the tx receipt, if present
 
 ```python
  | @abstractmethod
- | get_transaction(tx_digest: str) -> Optional[Any]
+ | get_transaction(tx_digest: str) -> Optional[JSONLike]
 ```
 
 Get the transaction for a transaction digest.
@@ -485,7 +528,7 @@ the contract instance
 
 ```python
  | @abstractmethod
- | get_deploy_transaction(contract_interface: Dict[str, str], deployer_address: Address, **kwargs, ,) -> Dict[str, Any]
+ | get_deploy_transaction(contract_interface: Dict[str, str], deployer_address: Address, **kwargs, ,) -> Optional[JSONLike]
 ```
 
 Get the transaction to deploy the smart contract.
@@ -495,6 +538,24 @@ Get the transaction to deploy the smart contract.
 - `contract_interface`: the contract interface.
 - `deployer_address`: The address that will deploy the contract.
 :returns tx: the transaction dictionary.
+
+<a name="aea.crypto.base.LedgerApi.update_with_gas_estimate"></a>
+#### update`_`with`_`gas`_`estimate
+
+```python
+ | @abstractmethod
+ | update_with_gas_estimate(transaction: JSONLike) -> JSONLike
+```
+
+Attempts to update the transaction with a gas estimate
+
+**Arguments**:
+
+- `transaction`: the transaction
+
+**Returns**:
+
+the updated transaction
 
 <a name="aea.crypto.base.FaucetApi"></a>
 ## FaucetApi Objects
@@ -510,7 +571,7 @@ Interface for testnet faucet APIs.
 
 ```python
  | @abstractmethod
- | get_wealth(address: Address) -> None
+ | get_wealth(address: Address, url: Optional[str] = None) -> None
 ```
 
 Get wealth from the faucet for the provided address.
@@ -518,6 +579,7 @@ Get wealth from the faucet for the provided address.
 **Arguments**:
 
 - `address`: the address.
+- `url`: the url
 
 **Returns**:
 

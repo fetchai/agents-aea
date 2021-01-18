@@ -17,9 +17,9 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains the tests for CLI Registry fetch methods."""
-
 import os
 from abc import ABC
+from tempfile import TemporaryDirectory
 from unittest import TestCase, mock
 
 import click
@@ -31,6 +31,7 @@ from aea.cli import cli
 from aea.cli.fetch import _is_version_correct, fetch_agent_locally
 from aea.cli.utils.context import Context
 from aea.configurations.base import PublicId
+from aea.helpers.base import cd
 from aea.test_tools.test_cases import AEATestCaseMany, BaseAEATestCase
 
 from tests.conftest import (
@@ -38,6 +39,7 @@ from tests.conftest import (
     CliRunner,
     MAX_FLAKY_RERUNS,
     MY_FIRST_AEA_PUBLIC_ID,
+    PACKAGES_DIR,
 )
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 
@@ -178,7 +180,9 @@ class TestFetchFromRemoteRegistry(AEATestCaseMany):
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_fetch_agent_from_remote_registry_positive(self):
         """Test fetch agent from Registry for positive result."""
-        self.run_cli_command("fetch", str(MY_FIRST_AEA_PUBLIC_ID), "--remote")
+        self.run_cli_command(
+            "fetch", str(MY_FIRST_AEA_PUBLIC_ID.to_latest()), "--remote"
+        )
         assert "my_first_aea" in os.listdir(self.t)
 
 
@@ -220,7 +224,12 @@ class TestFetchAgentMixed(BaseAEATestCase):
         "aea.cli.add.find_item_locally_or_distributed",
         side_effect=click.ClickException(""),
     )
-    def test_fetch_mixed(self, mock_fetch_package, _mock_fetch_locally) -> None:
+    @mock.patch(
+        "aea.cli.fetch.fetch_agent_locally", side_effect=click.ClickException(""),
+    )
+    def test_fetch_mixed(
+        self, mock_fetch_package, _mock_fetch_locally, _mock_fetch_agent_locally
+    ) -> None:
         """Test fetch in mixed mode."""
         self.run_cli_command(
             "-v", "DEBUG", "fetch", str(MY_FIRST_AEA_PUBLIC_ID.to_latest())
@@ -264,19 +273,89 @@ class BaseTestFetchAgentError(BaseAEATestCase, ABC):
 class TestFetchAgentNonMixedErrorLocal(BaseTestFetchAgentError):
     """Test 'aea fetch' in local mode when it fails."""
 
-    EXPECTED_ERROR_MESSAGE = f".*Exception: {BaseTestFetchAgentError.ERROR_MESSAGE}"
+    EXPECTED_ERROR_MESSAGE = f".*{BaseTestFetchAgentError.ERROR_MESSAGE}"
     MODE = "--local"
 
 
 class TestFetchAgentMixedModeError(BaseTestFetchAgentError):
     """Test 'aea fetch' in mixed mode when it fails."""
 
-    EXPECTED_ERROR_MESSAGE = f".*Exception: {BaseTestFetchAgentError.ERROR_MESSAGE}"
+    EXPECTED_ERROR_MESSAGE = f".*{BaseTestFetchAgentError.ERROR_MESSAGE}"
     MODE = ""
 
 
 class TestFetchAgentRemoteModeError(BaseTestFetchAgentError):
     """Test 'aea fetch' in remote mode when it fails."""
 
-    EXPECTED_ERROR_MESSAGE = rf".*Exception: {BaseTestFetchAgentError.ERROR_MESSAGE}"
+    EXPECTED_ERROR_MESSAGE = rf".*{BaseTestFetchAgentError.ERROR_MESSAGE}"
     MODE = "--remote"
+
+
+def test_fetch_twice_locally():
+    """Test fails on fetch if dir exists."""
+    with TemporaryDirectory() as tmp_dir:
+        with cd(tmp_dir):
+            name = "my_first_aea"
+            runner = CliRunner()
+            result = runner.invoke(
+                cli,
+                [
+                    "--registry-path",
+                    PACKAGES_DIR,
+                    "fetch",
+                    "--local",
+                    "fetchai/my_first_aea",
+                ],
+                catch_exceptions=False,
+            )
+            assert result.exit_code == 0, result.stdout
+            assert os.path.exists(name)
+
+            with pytest.raises(
+                ClickException,
+                match='Item "my_first_aea" already exists in target folder.',
+            ):
+                result = runner.invoke(
+                    cli,
+                    [
+                        "--registry-path",
+                        PACKAGES_DIR,
+                        "fetch",
+                        "--local",
+                        "fetchai/my_first_aea",
+                    ],
+                    standalone_mode=False,
+                    catch_exceptions=False,
+                )
+
+
+def test_fetch_twice_remote():
+    """Test fails on fetch if dir exists."""
+    with TemporaryDirectory() as tmp_dir:
+        with cd(tmp_dir):
+            name = "my_first_aea"
+            runner = CliRunner()
+            result = runner.invoke(
+                cli,
+                [
+                    "--registry-path",
+                    PACKAGES_DIR,
+                    "fetch",
+                    "--local",
+                    "fetchai/my_first_aea",
+                ],
+                catch_exceptions=False,
+            )
+            assert result.exit_code == 0, result.stdout
+            assert os.path.exists(name)
+
+            with pytest.raises(
+                ClickException,
+                match='Item "my_first_aea" already exists in target folder.',
+            ):
+                result = runner.invoke(
+                    cli,
+                    ["fetch", "--remote", "fetchai/my_first_aea"],
+                    standalone_mode=False,
+                    catch_exceptions=False,
+                )

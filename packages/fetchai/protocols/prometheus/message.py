@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2020 fetchai
+#   Copyright 2021 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 """This module contains prometheus's message definition."""
 
 import logging
-from typing import Optional, Set, Tuple, cast
+from typing import Dict, Optional, Set, Tuple, cast
 
 from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
@@ -35,7 +35,7 @@ DEFAULT_BODY_SIZE = 4
 class PrometheusMessage(Message):
     """A protocol for adding and updating metrics to a prometheus server."""
 
-    protocol_id = PublicId.from_str("fetchai/prometheus:0.1.0")
+    protocol_id = PublicId.from_str("fetchai/prometheus:0.2.0")
 
     class Performative(Message.Performative):
         """Performatives for the prometheus protocol."""
@@ -49,6 +49,7 @@ class PrometheusMessage(Message):
             return str(self.value)
 
     _performatives = {"add_metric", "response", "update_metric"}
+    __slots__: Tuple[str, ...] = tuple()
 
     class _SlotsCls:
         __slots__ = (
@@ -138,10 +139,10 @@ class PrometheusMessage(Message):
         return cast(str, self.get("description"))
 
     @property
-    def labels(self) -> Tuple[str, ...]:
+    def labels(self) -> Dict[str, str]:
         """Get the 'labels' content from the message."""
         enforce(self.is_set("labels"), "'labels' content is not set.")
-        return cast(Tuple[str, ...], self.get("labels"))
+        return cast(Dict[str, str], self.get("labels"))
 
     @property
     def message(self) -> Optional[str]:
@@ -161,9 +162,10 @@ class PrometheusMessage(Message):
         return cast(str, self.get("type"))
 
     @property
-    def value(self) -> Optional[float]:
+    def value(self) -> float:
         """Get the 'value' content from the message."""
-        return cast(Optional[float], self.get("value"))
+        enforce(self.is_set("value"), "'value' content is not set.")
+        return cast(float, self.get("value"))
 
     def _is_consistent(self) -> bool:
         """Check that the message follows the prometheus protocol."""
@@ -232,17 +234,26 @@ class PrometheusMessage(Message):
                     ),
                 )
                 enforce(
-                    type(self.labels) == tuple,
-                    "Invalid type for content 'labels'. Expected 'tuple'. Found '{}'.".format(
+                    type(self.labels) == dict,
+                    "Invalid type for content 'labels'. Expected 'dict'. Found '{}'.".format(
                         type(self.labels)
                     ),
                 )
-                enforce(
-                    all(type(element) == str for element in self.labels),
-                    "Invalid type for tuple elements in content 'labels'. Expected 'str'.",
-                )
+                for key_of_labels, value_of_labels in self.labels.items():
+                    enforce(
+                        type(key_of_labels) == str,
+                        "Invalid type for dictionary keys in content 'labels'. Expected 'str'. Found '{}'.".format(
+                            type(key_of_labels)
+                        ),
+                    )
+                    enforce(
+                        type(value_of_labels) == str,
+                        "Invalid type for dictionary values in content 'labels'. Expected 'str'. Found '{}'.".format(
+                            type(value_of_labels)
+                        ),
+                    )
             elif self.performative == PrometheusMessage.Performative.UPDATE_METRIC:
-                expected_nb_of_contents = 2
+                expected_nb_of_contents = 4
                 enforce(
                     type(self.title) == str,
                     "Invalid type for content 'title'. Expected 'str'. Found '{}'.".format(
@@ -255,13 +266,29 @@ class PrometheusMessage(Message):
                         type(self.callable)
                     ),
                 )
-                if self.is_set("value"):
-                    expected_nb_of_contents += 1
-                    value = cast(float, self.value)
+                enforce(
+                    type(self.value) == float,
+                    "Invalid type for content 'value'. Expected 'float'. Found '{}'.".format(
+                        type(self.value)
+                    ),
+                )
+                enforce(
+                    type(self.labels) == dict,
+                    "Invalid type for content 'labels'. Expected 'dict'. Found '{}'.".format(
+                        type(self.labels)
+                    ),
+                )
+                for key_of_labels, value_of_labels in self.labels.items():
                     enforce(
-                        type(value) == float,
-                        "Invalid type for content 'value'. Expected 'float'. Found '{}'.".format(
-                            type(value)
+                        type(key_of_labels) == str,
+                        "Invalid type for dictionary keys in content 'labels'. Expected 'str'. Found '{}'.".format(
+                            type(key_of_labels)
+                        ),
+                    )
+                    enforce(
+                        type(value_of_labels) == str,
+                        "Invalid type for dictionary values in content 'labels'. Expected 'str'. Found '{}'.".format(
+                            type(value_of_labels)
                         ),
                     )
             elif self.performative == PrometheusMessage.Performative.RESPONSE:

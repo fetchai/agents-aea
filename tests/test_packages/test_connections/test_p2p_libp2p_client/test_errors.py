@@ -26,18 +26,21 @@ import tempfile
 import pytest
 
 from aea.configurations.base import ConnectionConfig
+from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.registries import make_crypto
+from aea.helpers.base import CertRequest
 from aea.identity.base import Identity
 from aea.multiplexer import Multiplexer
 
 from packages.fetchai.connections.p2p_libp2p_client.connection import (
     P2PLibp2pClientConnection,
+    POR_DEFAULT_SERVICE_ID,
 )
 
 from tests.conftest import (
-    COSMOS,
     _make_libp2p_client_connection,
     _make_libp2p_connection,
+    _process_cert,
     libp2p_log_on_failure,
 )
 
@@ -49,7 +52,7 @@ class TestLibp2pClientConnectionFailureNodeNotConnected:
     @pytest.mark.asyncio
     async def test_node_not_running(self):
         """Test the node is not running."""
-        conn = _make_libp2p_client_connection()
+        conn = _make_libp2p_client_connection(make_crypto(DEFAULT_LEDGER).public_key)
         with pytest.raises(Exception):
             await conn.connect()
 
@@ -63,7 +66,7 @@ class TestLibp2pClientConnectionFailureConnectionSetup:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        crypto = make_crypto(COSMOS)
+        crypto = make_crypto(DEFAULT_LEDGER)
         cls.node_host = "localhost"
         cls.node_port = "11234"
         cls.identity = Identity("", address=crypto.address)
@@ -73,12 +76,29 @@ class TestLibp2pClientConnectionFailureConnectionSetup:
         crypto.dump(key_file_desc)
         key_file_desc.close()
 
+        cls.peer_crypto = make_crypto(DEFAULT_LEDGER)
+        cls.cert_request = CertRequest(
+            cls.peer_crypto.public_key,
+            POR_DEFAULT_SERVICE_ID,
+            DEFAULT_LEDGER,
+            "2021-01-01",
+            "2021-01-02",
+            f"./{crypto.address}_cert.txt",
+        )
+        _process_cert(crypto, cls.cert_request)
+
     def test_empty_nodes(self):
         """Test empty nodes."""
         configuration = ConnectionConfig(
             client_key_file=self.key_file,
-            nodes=[{"uri": "{}:{}".format(self.node_host, self.node_port)}],
+            nodes=[
+                {
+                    "uri": "{}:{}".format(self.node_host, self.node_port),
+                    "public_key": self.peer_crypto.public_key,
+                }
+            ],
             connection_id=P2PLibp2pClientConnection.connection_id,
+            cert_requests=[self.cert_request],
         )
         P2PLibp2pClientConnection(configuration=configuration, identity=self.identity)
 
@@ -123,7 +143,9 @@ class TestLibp2pClientConnectionNodeDisconnected:
             cls.multiplexer_node.connect()
             cls.multiplexers.append(cls.multiplexer_node)
 
-            cls.connection_client = _make_libp2p_client_connection()
+            cls.connection_client = _make_libp2p_client_connection(
+                cls.connection_node.node.pub
+            )
             cls.multiplexer_client = Multiplexer([cls.connection_client])
             cls.multiplexer_client.connect()
             cls.multiplexers.append(cls.multiplexer_client)

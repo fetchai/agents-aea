@@ -1,5 +1,5 @@
 [MASTER]
-ignore-patterns=serialization.py,message.py,__main__.py,.*_pb2.py
+ignore-patterns=serialization.py,message.py,__main__.py,.*_pb2.py,tac.sh,tac_local.sh
 
 [MESSAGES CONTROL]
 disable=C0103,C0201,C0301,C0302,C0330,W0105,W0107,W0707,W1202,W1203,R0902,R0913,R0914,R0801,R0911,R0912,R0901,R0916,R1702,R0915
@@ -30,7 +30,7 @@ disable=C0103,C0201,C0301,C0302,C0330,W0105,W0107,W0707,W1202,W1203,R0902,R0913,
 # R0801: similar lines, # too granular
 
 [IMPORTS]
-ignored-modules=aiohttp,defusedxml,gym,fetch,matplotlib,memory_profiler,numpy,oef,openapi_core,psutil,tensorflow,temper,skimage,vyper,web3,prometheus_client
+ignored-modules=aiohttp,defusedxml,gym,fetch,matplotlib,memory_profiler,numpy,oef,openapi_core,psutil,tensorflow,temper,skimage,vyper,web3,aioprometheus
 
 [DESIGN]
 min-public-methods=1

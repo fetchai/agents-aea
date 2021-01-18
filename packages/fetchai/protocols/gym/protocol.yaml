@@ -1,19 +1,19 @@
 name: gym
 author: fetchai
-version: 0.9.0
+version: 0.11.0
 type: protocol
 description: A protocol for interacting with a gym connection.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
-  README.md: QmRzWxoKGqU2iHDDshj3DWnWgQdZGmUjG5E2SfdiyK2Pnx
-  __init__.py: QmQvogZ6FVrp15UX2GZ2YKqZASS9gamA72MGt79oieE2tq
+  README.md: QmVx4AyH5E2bPomrxeLBX2itzTGmEHmiHApBfpdjQuUB6x
+  __init__.py: QmeyBLjo4xgz4mXvg9dwwwQCapYsbX4cgBXcpwvegg4zWZ
   custom_types.py: QmT3VKT86xZKR11RR1vQ3myRpmVZNdzY6ELd8HG9U2ngwa
-  dialogues.py: QmPEFYLc966VzBV4UQb53HEtizY6D9RWP54q2gzkzmbnk9
+  dialogues.py: QmUx8de3kabB45rkbpddSpYHfmCnw74QjCjeuP7hC522Yb
   gym.proto: QmbrGMjAwLXxg4vZTTsdNkbsudhJbSbvkG2mag9RP6ejEg
   gym_pb2.py: QmPE79TZQjxqxCydj3t2gdPUeFwDXAR3mtWDqKEQfPvQe2
-  message.py: QmbdXZUTmToJxGLQuHArGepAbPos6dDym8NyPycgey6ceY
-  serialization.py: QmT2d4sLcJ96Yf2GEBoKqL3oq4pE518yQvK5WbeHaDXMSQ
+  message.py: QmeppFnYn4GDnahxyoJd5fkAPPzfe5bRSjSSGtZa56J6XK
+  serialization.py: QmQoL5VtkJCGgceAowdnRE2AvXcVSJJiGNP3dPaiBeQxXF
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

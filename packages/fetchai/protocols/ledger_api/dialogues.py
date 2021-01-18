@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2020 fetchai
+#   Copyright 2021 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -51,6 +51,7 @@ class LedgerApiDialogue(Dialogue):
             LedgerApiMessage.Performative.BALANCE,
             LedgerApiMessage.Performative.STATE,
             LedgerApiMessage.Performative.TRANSACTION_RECEIPT,
+            LedgerApiMessage.Performative.ERROR,
         }
     )
     VALID_REPLIES = {

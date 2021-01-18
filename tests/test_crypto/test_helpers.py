@@ -16,12 +16,11 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tests for the crypto/helpers module."""
-
 import logging
 import os
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest.mock import mock_open, patch
 
 import pytest
@@ -32,9 +31,10 @@ from aea.crypto.ethereum import EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import (
     create_private_key,
+    make_certificate,
+    private_key_verify_or_create,
     try_generate_testnet_wealth,
     try_validate_private_key_path,
-    verify_or_create_private_keys,
 )
 
 from tests.conftest import (
@@ -44,6 +44,7 @@ from tests.conftest import (
     ETHEREUM_PRIVATE_KEY_PATH,
     FETCHAI_PRIVATE_KEY_PATH,
 )
+from tests.test_cli.tools_for_testing import AgentConfigMock
 
 
 logger = logging.getLogger(__name__)
@@ -150,8 +151,33 @@ class TestHelperFile:
         """Test _create_cosmos_private_key positive result."""
         create_private_key(CosmosCrypto.identifier, COSMOS_PRIVATE_KEY_FILE)
 
-    @patch("aea.crypto.helpers.create_private_key")
-    @patch("aea.crypto.helpers.try_validate_private_key_path")
-    def test_verify_or_create_private_keys(self, *mocks):
-        """Test _create_ethereum_private_key positive result."""
-        verify_or_create_private_keys(Path(os.path.join(CUR_PATH, "data", "dummy_aea")))
+
+def test_private_key_verify_or_create():
+    """Test private_key_verify_or_create."""
+    agent_conf = AgentConfigMock()
+    with patch("aea.crypto.helpers.create_private_key") as mock_create:
+        private_key_verify_or_create(agent_conf, Path("."))
+    mock_create.assert_called()
+
+    agent_conf = AgentConfigMock(private_key_paths=[("fetchai", "test")])
+    with patch("aea.crypto.helpers.try_validate_private_key_path") as mock_validate:
+        private_key_verify_or_create(agent_conf, Path("."))
+    mock_validate.assert_called()
+
+    agent_conf = AgentConfigMock(private_key_paths=[("fetchai", "${var}")])
+    with patch("aea.crypto.helpers.try_validate_private_key_path") as mock_validate:
+        with patch("aea.crypto.helpers.create_private_key") as mock_create:
+            private_key_verify_or_create(agent_conf, Path("."))
+    mock_validate.assert_not_called()
+    mock_create.assert_not_called()
+
+
+def test_make_certificate():
+    """Test make_certificate."""
+    with TemporaryDirectory() as tmp_dir:
+        make_certificate(
+            "fetchai",
+            os.path.join(CUR_PATH, "data", "fetchai_private_key.txt"),
+            b"message",
+            os.path.join(tmp_dir, "test.txt"),
+        )

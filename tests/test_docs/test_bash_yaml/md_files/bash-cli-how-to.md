@@ -7,7 +7,7 @@ pip install aea[all]
 ``` bash
 pip install aea[all] --force --no-cache-dir
 ```
-```bash
+``` bash
 aea
 ```
 ``` bash
