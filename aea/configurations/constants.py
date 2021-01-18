@@ -73,6 +73,7 @@ DEFAULT_FINGERPRINT_IGNORE_PATTERNS = [
 ]
 DEFAULT_PYPI_INDEX_URL = "https://pypi.org/simple"
 DEFAULT_GIT_REF = "master"
+DEFAULT_LOGGING_CONFIG = {"version": 1, "disable_existing_loggers": False}
 IMPORT_TEMPLATE_1 = "from packages.{author}.{type}.{name}"
 IMPORT_TEMPLATE_2 = "import packages.{author}.{type}.{name}"
 DEFAULT_ENV_DOTFILE = ".env"

@@ -35,8 +35,6 @@
 #
 # ------------------------------------------------------------------------------
 """A module with config tools of the aea cli."""
-import logging
-import logging.config
 import os
 from pathlib import Path
 from typing import Dict, Set
@@ -81,7 +79,6 @@ def try_to_load_agent_config(
         with path.open(mode="r", encoding="utf-8") as fp:
             ctx.agent_config = ctx.agent_loader.load(fp)
             ctx.agent_config.directory = Path(agent_src_path)
-            logging.config.dictConfig(ctx.agent_config.logging_config)
     except FileNotFoundError:
         if is_exit_on_except:
             raise click.ClickException(
