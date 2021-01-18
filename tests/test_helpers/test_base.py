@@ -21,7 +21,9 @@ import datetime
 import os
 import platform
 import re
+import shutil
 import signal
+import tempfile
 import time
 from copy import copy
 from functools import wraps
@@ -53,7 +55,7 @@ from aea.helpers.base import (
     retry_decorator,
     send_control_c,
     try_decorator,
-    win_popen_kwargs,
+    win_popen_kwargs, cd, delete_directory_contents,
 )
 
 from packages.fetchai.connections.oef.connection import OEFConnection
@@ -639,3 +641,35 @@ def test_decorator_with_optional_params():
 
     assert hello_with_preamble("User") == "Computer says: Hello, User!"
     assert hello_from_commodore("User") == "Computer Commodore 64 says: Hello, User!"
+
+
+class TestDeleteDirectoryContents:
+    """Test utility 'delete_directory_contents'."""
+
+    def setup(self):
+        """Set up the test."""
+        self.root = Path(tempfile.mkdtemp())
+        # create a file
+        file_1 = (self.root / "file_1")
+        file_1.touch()
+
+        # create a symlink
+        (self.root / "symlink_1").symlink_to(file_1)
+
+        # create a subdirectory
+        subdir = (self.root / "directory")
+        subdir.mkdir()
+
+        # create a file in the directory
+        (subdir / "file").touch()
+
+    def test_main(self):
+        """Run the test."""
+        delete_directory_contents(self.root)
+
+        assert self.root.exists()
+        assert len(list(self.root.iterdir())) == 0
+
+    def teardown(self):
+        """Tear down the test."""
+        shutil.rmtree(str(self.root), ignore_errors=True)
