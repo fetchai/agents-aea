@@ -57,15 +57,40 @@ from aea.exceptions import enforce
 def fetch(click_context, public_id, alias, local, remote):
     """Fetch an agent from the registry."""
     ctx = cast(Context, click_context.obj)
+    do_fetch(ctx, public_id, local, remote, alias)
+
+
+def do_fetch(
+    ctx: Context,
+    public_id: PublicId,
+    local: bool,
+    remote: bool,
+    alias: Optional[str] = None,
+    target_dir: Optional[str] = None,
+):
+    """
+    Run the Fetch command.
+
+    :param ctx: the CLI context.
+    :param public_id: the public id.
+    :param local: whether to fetch from local
+    :param remote whether to fetch from remote
+    :param alias: the agent alias.
+    :param target_dir: the target directory, in case fetching locally.
+    :return: None
+    """
+    enforce(
+        not (local and remote), "'local' and 'remote' options are mutually exclusive."
+    )
     is_mixed = not local and not remote
     ctx.set_config("is_local", local and not remote)
     ctx.set_config("is_mixed", is_mixed)
     if remote:
-        fetch_agent(ctx, public_id, alias)
+        fetch_agent(ctx, public_id, alias=alias, target_dir=target_dir)
     elif local:
-        fetch_agent_locally(ctx, public_id, alias)
+        fetch_agent_locally(ctx, public_id, alias=alias, target_dir=target_dir)
     else:
-        fetch_mixed(ctx, public_id, alias)
+        fetch_mixed(ctx, public_id, alias=alias, target_dir=target_dir)
 
 
 def _is_version_correct(ctx: Context, agent_public_id: PublicId) -> bool:

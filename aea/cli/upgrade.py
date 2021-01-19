@@ -24,9 +24,7 @@ from pathlib import Path
 from typing import Dict, Iterable, List, Set, Tuple, cast
 
 import click
-from packaging.version import Version
 
-import aea
 from aea.cli.add import add_item
 from aea.cli.eject import _eject_item
 from aea.cli.registry.fetch import fetch_agent
@@ -37,12 +35,18 @@ from aea.cli.remove import (
     remove_unused_component_configurations,
 )
 from aea.cli.utils.click_utils import PublicIdParameter, registry_flag
-from aea.cli.utils.config import load_item_config, set_cli_author
+from aea.cli.utils.config import (
+    dump_item_config,
+    get_non_vendor_package_path,
+    load_item_config,
+    set_cli_author,
+)
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, clean_after, pass_ctx
 from aea.cli.utils.package_utils import (
     get_item_public_id_by_author_name,
     is_item_present,
+    update_aea_version_range,
     update_references,
 )
 from aea.configurations.base import ComponentId, PackageId, PackageType, PublicId
@@ -55,11 +59,7 @@ from aea.configurations.constants import (
     VENDOR,
 )
 from aea.exceptions import enforce
-from aea.helpers.base import (
-    compute_specifier_from_version,
-    delete_directory_contents,
-    find_topological_order,
-)
+from aea.helpers.base import delete_directory_contents, find_topological_order
 
 
 @click.group(invoke_without_command=True)
@@ -116,24 +116,18 @@ def skill(ctx: Context, skill_public_id: PublicId):
     upgrade_item(ctx, SKILL, skill_public_id)
 
 
-def _update_agent_config(ctx: Context):
+def update_agent_config(ctx: Context):
     """
     Update agent configurations.
+
+    In particular:
+    - update aea_version in case current framework version is different
+    - update author name if it is different
 
     :param ctx: the context.
     :return: None
     """
-    # update aea_version in case current framework version is different
-    version = Version(aea.__version__)
-    if not ctx.agent_config.aea_version_specifiers.contains(version):
-        new_aea_version = compute_specifier_from_version(version)
-        old_aea_version = ctx.agent_config.aea_version
-        click.echo(
-            f"Updating AEA version specifier from {old_aea_version} to {new_aea_version}."
-        )
-        ctx.agent_config.aea_version = new_aea_version
-
-    # update author name if it is different
+    update_aea_version_range(ctx.agent_config)
     cli_author = ctx.config.get("cli_author")
     if cli_author and ctx.agent_config.author != cli_author:
         click.echo(f"Updating author from {ctx.agent_config.author} to {cli_author}")
@@ -141,6 +135,20 @@ def _update_agent_config(ctx: Context):
         ctx.agent_config.version = DEFAULT_VERSION
 
     ctx.dump_agent_config()
+
+
+def update_aea_version_in_nonvendor_packages(cwd: str):
+    """
+    Update aea_version in non-vendor packages.
+
+    :param cwd: the current working directory.
+    :return: None
+    """
+    for package_path in get_non_vendor_package_path(Path(cwd)):
+        package_type = PackageType(package_path.parent.name[:-1])
+        package_config = load_item_config(package_type.value, package_path)
+        update_aea_version_range(package_config)
+        dump_item_config(package_config, package_path)
 
 
 @clean_after
@@ -171,7 +179,8 @@ def upgrade_project(ctx: Context) -> None:  # pylint: disable=unused-argument
         return
     eject_helper.eject()
 
-    _update_agent_config(ctx)
+    update_agent_config(ctx)
+    update_aea_version_in_nonvendor_packages(ctx.cwd)
 
     # compute the upgraders and the shared dependencies.
     required_by_relation = eject_helper.get_updated_inverse_adjacency_list()

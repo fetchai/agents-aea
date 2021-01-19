@@ -33,7 +33,7 @@ from click.exceptions import ClickException
 from click.testing import Result
 from packaging.version import Version
 
-import aea
+from aea import get_current_aea_version
 from aea.cli import cli
 from aea.cli.registry.utils import get_latest_version_available_in_registry
 from aea.cli.upgrade import ItemRemoveHelper
@@ -732,8 +732,9 @@ class TestUpgradeNonVendorDependencies(AEATestCaseEmpty):
     """
     Test that the command 'aea upgrade' correctly updates non-vendor package data.
 
-    In particular, check that 'aea upgrade' updates the public ids of
-    the package dependencies and the 'aea_version' field.
+    In particular, check that 'aea upgrade' updates:
+    - the public ids of the package dependencies and the 'aea_version' field.
+    - the 'aea_version' field in case it is not compatible with the current version.
 
     The test works as follows:
     - scaffold a package, one for each possible package type;
@@ -753,12 +754,15 @@ class TestUpgradeNonVendorDependencies(AEATestCaseEmpty):
     old_error_skill_id = PublicId(
         ERROR_SKILL_PUBLIC_ID.author, ERROR_SKILL_PUBLIC_ID.name, "0.7.0"
     )
+    old_aea_version_range = compute_specifier_from_version(Version("0.1.0"))
 
     @classmethod
-    def scaffold_item(cls, item_type: str, name: str) -> Result:
+    def scaffold_item(
+        cls, item_type: str, name: str, skip_consistency_check: bool = False
+    ) -> Result:
         """Override default behaviour by adding a custom dependency to the scaffolded item."""
         result = super(TestUpgradeNonVendorDependencies, cls).scaffold_item(
-            item_type, name
+            item_type, name, skip_consistency_check
         )
         # add custom dependency (a protocol) to each package
         # that supports dependencies (only connections and skills)
@@ -774,16 +778,22 @@ class TestUpgradeNonVendorDependencies(AEATestCaseEmpty):
                 f"{ComponentType(item_type).to_plural()}.{name}.skills",
                 [str(cls.old_error_skill_id)],
             )
+
+        # update 'aea_version' to an old version range.
+        cls.nested_set_config(
+            f"{ComponentType(item_type).to_plural()}.{name}.aea_version",
+            str(cls.old_aea_version_range),
+        )
         return result
 
     @classmethod
     def setup_class(cls):
         """Set up test case."""
         super(TestUpgradeNonVendorDependencies, cls).setup_class()
-        cls.scaffold_item("protocol", "my_protocol")
-        cls.scaffold_item("connection", "my_connection")
-        cls.scaffold_item("contract", "my_contract")
-        cls.scaffold_item("skill", "my_skill")
+        cls.scaffold_item("protocol", "my_protocol", skip_consistency_check=True)
+        cls.scaffold_item("connection", "my_connection", skip_consistency_check=True)
+        cls.scaffold_item("contract", "my_contract", skip_consistency_check=True)
+        cls.scaffold_item("skill", "my_skill", skip_consistency_check=True)
         cls.run_cli_command(
             "--skip-consistency-check",
             "add",
@@ -832,6 +842,11 @@ class TestUpgradeNonVendorDependencies(AEATestCaseEmpty):
         component_config = load_component_configuration(item_type, package_path)
         assert hasattr(component_config, package_type), "Test is not well-written."
         assert getattr(component_config, package_type) == expected  # type: ignore
+
+        expected_version_range = compute_specifier_from_version(
+            get_current_aea_version()
+        )
+        assert component_config.aea_version == expected_version_range
 
 
 class TestUpdateReferences(AEATestCaseEmpty):
@@ -998,7 +1013,7 @@ class TestWrongAEAVersion(AEATestCaseEmpty):
 
         # test 'aea_version' of agent configuration is upgraded
         expected_aea_version_specifier = compute_specifier_from_version(
-            Version(aea.__version__)
+            get_current_aea_version()
         )
         agent_config = self.load_agent_config(self.current_agent_context)
         assert agent_config.aea_version == expected_aea_version_specifier
