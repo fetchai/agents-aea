@@ -23,11 +23,8 @@ import logging
 from unittest import mock
 
 import pytest
-from cosmos_crypto import CosmosApi, CosmosCrypto
-from ethereum_crypto import EthereumApi, EthereumCrypto
-from fetchai_crypto import FetchAIApi
 
-from aea.configurations.constants import DEFAULT_LEDGER
+from aea.configurations.constants import DEFAULT_LEDGER, ETHEREUM, FETCHAI
 from aea.crypto.ledger_apis import LedgerApis
 from aea.exceptions import AEAEnforceError
 
@@ -49,12 +46,12 @@ def _raise_exception(*args, **kwargs):
 def test_initialisation():
     """Test the initialisation of the ledger APIs."""
     ledger_apis = LedgerApis
-    assert ledger_apis.has_ledger(FetchAIApi.identifier)
-    assert type(LedgerApis.get_api(FetchAIApi.identifier)) == FetchAIApi
-    assert LedgerApis.has_ledger(EthereumApi.identifier)
-    assert type(LedgerApis.get_api(EthereumApi.identifier)) == EthereumApi
-    assert LedgerApis.has_ledger(CosmosApi.identifier)
-    assert type(LedgerApis.get_api(CosmosApi.identifier)) == CosmosApi
+    assert ledger_apis.has_ledger(FETCHAI)
+    assert type(LedgerApis.get_api(FETCHAI)) == FetchAIApi
+    assert LedgerApis.has_ledger(ETHEREUM)
+    assert type(LedgerApis.get_api(ETHEREUM)) == EthereumApi
+    assert LedgerApis.has_ledger(COSMOS)
+    assert type(LedgerApis.get_api(COSMOS)) == CosmosApi
     with pytest.raises(AEAEnforceError):
         ledger_apis.get_api("UNKNOWN")
 
@@ -70,9 +67,7 @@ class TestLedgerApis:
     def test_get_balance(self):
         """Test the get_balance."""
         with mock.patch.object(EthereumApi, "get_balance", return_value=10):
-            balance = self.ledger_apis.get_balance(
-                EthereumApi.identifier, ETHEREUM_ADDRESS_ONE
-            )
+            balance = self.ledger_apis.get_balance(ETHEREUM, ETHEREUM_ADDRESS_ONE)
             assert balance == 10
 
     def test_get_transfer_transaction(self):
@@ -171,7 +166,7 @@ class TestLedgerApis:
 
     def test_generate_tx_nonce_positive(self):
         """Test generate_tx_nonce positive result."""
-        result = LedgerApis.generate_tx_nonce(CosmosApi.identifier, "seller", "client")
+        result = LedgerApis.generate_tx_nonce(COSMOS, "seller", "client")
         assert int(result, 16)
 
 

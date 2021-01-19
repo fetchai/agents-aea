@@ -31,11 +31,12 @@ setup(
     description="Python package wrapping the public and private key cryptography and ledger api of Ethereum.",
     packages=find_packages(include=["ethereum_crypto*"]),
     install_requires=[
-        "aea>=0.8.0,<0.9.0",
+        "aea>=0.9.0,<0.10.0",
         "web3==5.12.0",
         "ipfshttpclient==0.6.1",
         "eth-account==0.5.2",
     ],
+    tests_require=["pytest"],
     entry_points={
         "aea.cryptos": ["ethereum = ethereum_crypto:EthereumCrypto"],
         "aea.ledger_apis": ["ethereum = ethereum_crypto:EthereumApi"],

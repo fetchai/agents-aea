@@ -37,14 +37,6 @@ from unittest.mock import patch
 import docker as docker
 import gym
 import pytest
-from cosmos_crypto import DEFAULT_ADDRESS as COSMOS_DEFAULT_ADDRESS
-from cosmos_crypto import _COSMOS
-from ethereum_crypto import DEFAULT_ADDRESS as ETHEREUM_DEFAULT_ADDRESS
-from ethereum_crypto import DEFAULT_CHAIN_ID as ETHEREUM_DEFAULT_CHAIN_ID
-from ethereum_crypto import DEFAULT_CURRENCY_DENOM as ETHEREUM_DEFAULT_CURRENCY_DENOM
-from ethereum_crypto import EthereumApi, EthereumCrypto, _ETHEREUM
-from fetchai_crypto import DEFAULT_ADDRESS as FETCHAI_DEFAULT_ADDRESS
-from fetchai_crypto import _FETCHAI
 
 from aea import AEA_DIR
 from aea.aea import AEA
@@ -57,12 +49,25 @@ from aea.configurations.base import DEFAULT_CONTRACT_CONFIG_FILE as CONTRACT_YAM
 from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE as PROTOCOL_YAML
 from aea.configurations.base import DEFAULT_SKILL_CONFIG_FILE as SKILL_YAML
 from aea.configurations.base import PublicId
-from aea.configurations.constants import DEFAULT_LEDGER, PRIVATE_KEY_PATH_SCHEMA
+from aea.configurations.constants import (
+    COSMOS,
+    DEFAULT_LEDGER,
+    ETHEREUM,
+    FETCHAI,
+    PRIVATE_KEY_PATH_SCHEMA,
+)
 from aea.configurations.loader import load_component_configuration
 from aea.connections.base import Connection
 from aea.contracts.base import Contract, contract_registry
 from aea.crypto.base import Crypto
-from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS
+from aea.crypto.ledger_apis import (
+    COSMOS_DEFAULT_ADDRESS,
+    DEFAULT_LEDGER_CONFIGS,
+    ETHEREUM_DEFAULT_ADDRESS,
+    ETHEREUM_DEFAULT_CHAIN_ID,
+    ETHEREUM_DEFAULT_CURRENCY_DENOM,
+    FETCHAI_DEFAULT_ADDRESS,
+)
 from aea.crypto.registries import ledger_apis_registry, make_crypto
 from aea.crypto.wallet import CryptoStore
 from aea.helpers.base import CertRequest, SimpleId
@@ -124,16 +129,6 @@ PROTOCOL_SPEC_CONFIGURATION_SCHEMA = os.path.join(
 )
 
 DUMMY_ENV = gym.GoalEnv
-
-# Ledger identifiers
-COSMOS = _COSMOS
-ETHEREUM = _ETHEREUM
-FETCHAI = _FETCHAI
-
-# URL to local Ganache instance
-DEFAULT_GANACHE_ADDR = "http://127.0.0.1"
-DEFAULT_GANACHE_PORT = 8545
-DEFAULT_GANACHE_CHAIN_ID = 1337
 
 COSMOS_PRIVATE_KEY_FILE_CONNECTION = "cosmos_connection_private_key.txt"
 FETCHAI_PRIVATE_KEY_FILE_CONNECTION = "fetchai_connection_private_key.txt"
@@ -622,11 +617,11 @@ def ethereum_testnet_config(ganache_addr, ganache_port):
 @pytest.fixture(scope="function")
 def update_default_ethereum_ledger_api(ethereum_testnet_config):
     """Change temporarily default Ethereum ledger api configurations to interact with local Ganache."""
-    old_config = DEFAULT_LEDGER_CONFIGS.pop(EthereumApi.identifier, None)
-    DEFAULT_LEDGER_CONFIGS[EthereumApi.identifier] = ethereum_testnet_config
+    old_config = DEFAULT_LEDGER_CONFIGS.pop(ETHEREUM, None)
+    DEFAULT_LEDGER_CONFIGS[ETHEREUM] = ethereum_testnet_config
     yield
-    DEFAULT_LEDGER_CONFIGS.pop(EthereumApi.identifier)
-    DEFAULT_LEDGER_CONFIGS[EthereumApi.identifier] = old_config
+    DEFAULT_LEDGER_CONFIGS.pop(ETHEREUM)
+    DEFAULT_LEDGER_CONFIGS[ETHEREUM] = old_config
 
 
 @pytest.mark.integration
@@ -1099,7 +1094,7 @@ def erc1155_contract(ledger_api, ganache, ganache_addr, ganache_port):
     contract = contract_registry.make(str(configuration.public_id))
 
     # deploy contract
-    crypto = EthereumCrypto(ETHEREUM_PRIVATE_KEY_PATH)
+    crypto = make_crypto(ETHEREUM, private_key_path=ETHEREUM_PRIVATE_KEY_PATH)
 
     tx = contract.get_deploy_transaction(
         ledger_api=ledger_api, deployer_address=crypto.address, gas=5000000
@@ -1128,8 +1123,8 @@ def erc20_contract(ledger_api, ganache, ganache_addr, ganache_port):
     contract = contract_registry.make(str(configuration.public_id))
 
     # get two accounts
-    account1 = EthereumCrypto(ETHEREUM_PRIVATE_KEY_PATH)
-    account2 = EthereumCrypto(ETHEREUM_PRIVATE_KEY_TWO_PATH)
+    account1 = make_crypto(ETHEREUM, private_key_path=ETHEREUM_PRIVATE_KEY_PATH)
+    account2 = make_crypto(ETHEREUM, private_key_path=ETHEREUM_PRIVATE_KEY_TWO_PATH)
 
     tx = contract.get_deploy_transaction(
         ledger_api=ledger_api,
@@ -1179,7 +1174,7 @@ def oracle_contract(ledger_api, ganache, ganache_addr, ganache_port, erc20_contr
     _, erc20_address = erc20_contract
 
     # deploy contract
-    crypto = EthereumCrypto(ETHEREUM_PRIVATE_KEY_PATH)
+    crypto = make_crypto(ETHEREUM, private_key_path=ETHEREUM_PRIVATE_KEY_PATH)
 
     tx = contract.get_deploy_transaction(
         ledger_api=ledger_api,

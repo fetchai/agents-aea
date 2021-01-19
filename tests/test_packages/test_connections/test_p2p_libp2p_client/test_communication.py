@@ -25,8 +25,7 @@ import tempfile
 
 import pytest
 
-from aea.crypto.ethereum import EthereumCrypto
-from aea.crypto.fetchai import FetchAICrypto
+from aea.configurations.constants import ETHEREUM, FETCHAI
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 
@@ -109,15 +108,13 @@ class TestLibp2pClientConnectionEchoEnvelope:
 
         try:
             cls.connection_client_1 = _make_libp2p_client_connection(
-                peer_public_key=cls.connection_node.node.pub,
-                ledger_api_id=FetchAICrypto.identifier,
+                peer_public_key=cls.connection_node.node.pub, ledger_api_id=FETCHAI,
             )
             cls.multiplexer_client_1 = Multiplexer([cls.connection_client_1])
             cls.multiplexer_client_1.connect()
 
             cls.connection_client_2 = _make_libp2p_client_connection(
-                peer_public_key=cls.connection_node.node.pub,
-                ledger_api_id=EthereumCrypto.identifier,
+                peer_public_key=cls.connection_node.node.pub, ledger_api_id=ETHEREUM,
             )
             cls.multiplexer_client_2 = Multiplexer([cls.connection_client_2])
             cls.multiplexer_client_2.connect()

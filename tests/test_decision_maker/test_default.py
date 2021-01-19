@@ -24,11 +24,11 @@ from typing import Optional, cast
 from unittest import mock
 
 import pytest
-from fetchai_crypto import FetchAIApi, FetchAICrypto
 
 import aea
 import aea.decision_maker.default
 from aea.configurations.base import PublicId
+from aea.crypto.registries import make_crypto, make_ledger_api
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMaker
 from aea.decision_maker.default import DecisionMakerHandler
@@ -303,9 +303,9 @@ class TestDecisionMaker2:
 
     def test_handle_tx_signing_fetchai(self):
         """Test tx signing for fetchai."""
-        fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
-        account = FetchAICrypto()
-        fc2 = FetchAICrypto()
+        fetchai_api = make_ledger_api(FETCHAI, *FETCHAI_TESTNET_CONFIG)
+        account = make_crypto(FETCHAI)
+        fc2 = make_crypto(FETCHAI)
         amount = 10000
         transfer_transaction = fetchai_api.get_transfer_transaction(
             sender_address=account.address,

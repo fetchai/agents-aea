@@ -24,9 +24,6 @@ import string
 from unittest import mock
 
 import pytest
-from cosmos_crypto import CosmosCrypto
-from ethereum_crypto import EthereumCrypto
-from fetchai_crypto import FetchAICrypto
 
 import aea.crypto
 from aea.crypto.registries.base import EntryPoint
@@ -47,8 +44,6 @@ def test_make_fetchai():
     """Test the 'make' method for 'fetchai' crypto."""
     fetchai_crypto = aea.crypto.registries.make_crypto(FETCHAI)
 
-    assert type(fetchai_crypto) == FetchAICrypto
-
     # calling 'make' again will give a different object.
     fetchai_crypto_1 = aea.crypto.registries.make_crypto(FETCHAI)
     assert type(fetchai_crypto) == type(fetchai_crypto_1)
@@ -59,8 +54,6 @@ def test_make_ethereum():
     """Test the 'make' method for 'ethereum' crypto."""
     ethereum_crypto = aea.crypto.registries.make_crypto(ETHEREUM)
 
-    assert type(ethereum_crypto) == EthereumCrypto
-
     # calling 'make' again will give a different object.
     ethereum_crypto_1 = aea.crypto.registries.make_crypto(ETHEREUM)
     assert type(ethereum_crypto) == type(ethereum_crypto_1)
@@ -70,8 +63,6 @@ def test_make_ethereum():
 def test_make_cosmos():
     """Test the 'make' method for 'cosmos' crypto."""
     cosmos_crypto = aea.crypto.registries.make_crypto(COSMOS)
-
-    assert type(cosmos_crypto) == CosmosCrypto
 
     # calling 'make' again will give a different object.
     cosmos_crypto_1 = aea.crypto.registries.make_crypto(COSMOS)

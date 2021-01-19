@@ -23,8 +23,6 @@ from pathlib import Path
 from unittest import mock
 from unittest.mock import MagicMock
 
-from fetchai_crypto import FetchAIApi, FetchAICrypto, FetchAIFaucetApi
-
 from aea.crypto.registries import (
     crypto_registry,
     faucet_apis_registry,
@@ -54,17 +52,21 @@ class TestLedgerIntegration(BasePythonMarkdownDocs):
 
     DOC_PATH = Path(ROOT_DIR, "docs", "ledger-integration.md")
 
-    def _assert_isinstance(self, locals_key, cls, locals_):
+    def _assert_isinstance(self, locals_key, cls_or_str, locals_):
         """Assert that the member of 'locals' is an instance of a class."""
         assert locals_key in locals_
         obj = locals_[locals_key]
-        assert isinstance(obj, cls)
+
+        if type(cls_or_str) == type:
+            assert isinstance(obj, cls_or_str)
+        else:
+            assert obj.__class__.__name__ == cls_or_str
 
     def _assert(self, locals_, *mocks):
         """Assert code outputs."""
-        self._assert_isinstance("fetchai_crypto", FetchAICrypto, locals_)
-        self._assert_isinstance("fetchai_ledger_api", FetchAIApi, locals_)
-        self._assert_isinstance("fetchai_faucet_api", FetchAIFaucetApi, locals_)
+        self._assert_isinstance("fetchai_crypto", "FetchAICrypto", locals_)
+        self._assert_isinstance("fetchai_ledger_api", "FetchAIApi", locals_)
+        self._assert_isinstance("fetchai_faucet_api", "FetchAIFaucetApi", locals_)
         self._assert_isinstance("my_ledger_crypto", MagicMock, locals_)
         self._assert_isinstance("my_ledger_api", MagicMock, locals_)
         self._assert_isinstance("my_faucet_api", MagicMock, locals_)

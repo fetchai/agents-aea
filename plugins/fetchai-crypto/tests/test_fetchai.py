@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the tests of the ethereum module."""
+"""This module contains the tests of the fetchai module."""
 import logging
 import time
 from unittest import mock
@@ -599,7 +599,7 @@ def test_get_contract_instance():
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
-@mock.patch("aea.crypto.fetchai.FetchAIApi._execute_shell_command")
+@mock.patch("fetchai_crypto.FetchAIApi._execute_shell_command")
 def test_get_contract_address(mock_api_call):
     """Test the get_contract_address method used for interaction with CosmWasm contracts."""
 
@@ -623,7 +623,7 @@ def test_get_contract_address(mock_api_call):
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
-@mock.patch("aea.crypto.fetchai.FetchAIApi._execute_shell_command")
+@mock.patch("fetchai_crypto.FetchAIApi._execute_shell_command")
 def test_get_last_code_id(mock_api_call):
     """Test the get_last_code_id method used for interaction with CosmWasm contracts."""
 

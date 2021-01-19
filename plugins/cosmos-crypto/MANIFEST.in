@@ -1,0 +1,4 @@
+include README.md LICENSE HISTORY.md
+
+recursive-include cosmos_crypto
+recursive-include tests *

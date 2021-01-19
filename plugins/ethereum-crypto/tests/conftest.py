@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
@@ -18,23 +17,28 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Setup script for "cosmos_crypto" package."""
+"""Conftest module for Pytest."""
+import inspect
+import os
 
-from setuptools import find_packages, setup
+from ethereum_crypto import EthereumCrypto
+
+from aea.configurations.constants import PRIVATE_KEY_PATH_SCHEMA
 
 
-setup(
-    name="cosmos_crypto",
-    version="0.1.0",
-    author="Fetch.AI Limited",
-    license="Apache-2.0",
-    description="Python package wrapping the public and private key cryptography and ledger api of Cosmos.",
-    packages=find_packages(include=["cosmos_crypto*"]),
-    install_requires=["aea>=0.9.0,<0.10.0", "ecdsa==0.15", "bech32==1.2.0"],
-    tests_require=["pytest"],
-    entry_points={
-        "aea.cryptos": ["cosmos = cosmos_crypto:CosmosCrypto"],
-        "aea.ledger_apis": ["cosmos = cosmos_crypto:CosmosApi"],
-        "aea.faucet_apis": ["cosmos = cosmos_crypto:CosmosFaucetApi"],
-    },
+CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
+ROOT_DIR = os.path.join(CUR_PATH, "..")
+MAX_FLAKY_RERUNS = 3
+FETCHAI = EthereumCrypto.identifier
+
+FETCHAI_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(FETCHAI)
+
+FETCHAI_PRIVATE_KEY_PATH = os.path.join(
+    ROOT_DIR, "tests", "data", FETCHAI_PRIVATE_KEY_FILE
 )
+
+FETCHAI_DEFAULT_ADDRESS = "https://rest-agent-land.fetch.ai"
+FETCHAI_DEFAULT_CURRENCY_DENOM = "atestfet"
+FETCHAI_DEFAULT_CHAIN_ID = "agent-land"
+FETCHAI_TESTNET_CONFIG = {"address": FETCHAI_DEFAULT_ADDRESS}
+

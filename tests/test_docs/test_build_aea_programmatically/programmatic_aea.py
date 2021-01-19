@@ -23,10 +23,9 @@ import os
 import time
 from threading import Thread
 
-from fetchai_crypto import FetchAICrypto
-
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
+from aea.configurations.constants import FETCHAI
 from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA, create_private_key
 from aea.helpers.file_io import write_with_lock
 from aea.skills.base import Skill
@@ -35,14 +34,14 @@ from aea.skills.base import Skill
 ROOT_DIR = "./"
 INPUT_FILE = "input_file"
 OUTPUT_FILE = "output_file"
-FETCHAI_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifier)
+FETCHAI_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(FETCHAI)
 
 
 def run():
     """Run demo."""
 
     # Create a private key
-    create_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
+    create_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
 
     # Ensure the input and output files do not exist initially
     if os.path.isfile(INPUT_FILE):
@@ -56,7 +55,7 @@ def run():
 
     builder.set_name("my_aea")
 
-    builder.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
+    builder.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
 
     # Add the echo skill (assuming it is present in the local directory 'packages')
     builder.add_skill("./packages/fetchai/skills/echo")
