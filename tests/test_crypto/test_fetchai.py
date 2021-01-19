@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the ethereum module."""
+import json
 import logging
 import time
 from unittest import mock
@@ -549,29 +550,34 @@ def test_try_execute_wasm_query():
     """Test the execute wasm query method."""
     cosmos_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
     process_mock = mock.Mock()
-    output = "output".encode("ascii")
+    output_raw = {"output": 1}
+    output = json.dumps(output_raw).encode("ascii")
     attrs = {"communicate.return_value": (output, "error")}
     process_mock.configure_mock(**attrs)
     with mock.patch("subprocess.Popen", return_value=process_mock):
         result = cosmos_api._try_execute_wasm_query(
             contract_address="contract_address", query_msg={}
         )
-    assert result == output.decode("ascii")
+    assert result == output_raw
 
 
-# @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # noqa: E800
-# @pytest.mark.integration  # noqa: E800
-# @pytest.mark.ledger  # noqa: E800
-# def test_try_execute_wasm_transaction():  # noqa: E800
-#     """Test the execute wasm query method."""  # noqa: E800
-#     cosmos_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)  # noqa: E800
-#     process_mock = mock.Mock()  # noqa: E800
-#     output = "output".encode("ascii")  # noqa: E800
-#     attrs = {"communicate.return_value": (output, "error")}  # noqa: E800
-#     process_mock.configure_mock(**attrs)  # noqa: E800
-#     with mock.patch("subprocess.Popen", return_value=process_mock):  # noqa: E800
-#         result = cosmos_api._try_execute_wasm_transaction(tx_signed="signed_transaction")  # noqa: E800
-#     assert result == json.loads(output.decode("ascii"))  # noqa: E800
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+@pytest.mark.integration
+@pytest.mark.ledger
+def test_try_execute_wasm_transaction():
+    """Test the execute wasm query method."""
+    cosmos_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
+    process_mock = mock.Mock()
+    hash_ = "some_hash"
+    output_raw = {"txhash": hash_}
+    output = json.dumps(output_raw).encode("ascii")
+    attrs = {"communicate.return_value": (output, "error")}
+    process_mock.configure_mock(**attrs)
+    with mock.patch("subprocess.Popen", return_value=process_mock):
+        result = cosmos_api._try_execute_wasm_transaction(
+            tx_signed="signed_transaction"
+        )
+    assert result == hash_
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
@@ -613,7 +619,7 @@ def test_get_contract_address(mock_api_call):
         }
     ]
 
-    mock_api_call.return_value = mock_res
+    mock_api_call.return_value = json.dumps(mock_res).encode("ascii")
 
     cosmos_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
 
@@ -638,7 +644,7 @@ def test_get_last_code_id(mock_api_call):
         }
     ]
 
-    mock_api_call.return_value = mock_res
+    mock_api_call.return_value = json.dumps(mock_res).encode("ascii")
 
     cosmos_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
 
@@ -659,5 +665,5 @@ def test_execute_shell_command(mock_api_call):
 
     cosmos_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
 
-    res = cosmos_api._execute_shell_command(["test", "command"])
+    res = json.loads(cosmos_api._execute_shell_command(["test", "command"]))
     assert res == {"SOME": "RESULT"}

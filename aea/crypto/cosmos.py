@@ -643,7 +643,7 @@ class _CosmosApi(LedgerApi):
                 os.path.join(tmpdirname, signed_tx_filename),
             ]
 
-            tx_digest_json = self._execute_shell_command(command)
+            tx_digest_json = json.loads(self._execute_shell_command(command))
 
         hash_ = cast(str, tx_digest_json["txhash"])
         return hash_
@@ -685,7 +685,7 @@ class _CosmosApi(LedgerApi):
             json.dumps(query_msg),
         ]
 
-        return self._execute_shell_command(command)
+        return json.loads(self._execute_shell_command(command))
 
     def get_transfer_transaction(  # pylint: disable=arguments-differ
         self,
@@ -914,7 +914,7 @@ class _CosmosApi(LedgerApi):
         return None
 
     @staticmethod
-    def _execute_shell_command(command: List[str]) -> JSONLike:
+    def _execute_shell_command(command: List[str]) -> str:
         """
         Execute command using subprocess and get result as JSON dict.
 
@@ -925,7 +925,7 @@ class _CosmosApi(LedgerApi):
             command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
         ).communicate()
 
-        return json.loads(stdout.decode("ascii"))
+        return stdout.decode("ascii")
 
     def get_last_code_id(self) -> int:
         """
@@ -935,7 +935,7 @@ class _CosmosApi(LedgerApi):
         """
 
         command = [self.cli_command, "query", "wasm", "list-code"]
-        res = self._execute_shell_command(command)
+        res = json.loads(self._execute_shell_command(command))
 
         return int(res[-1]["id"])
 
@@ -954,7 +954,7 @@ class _CosmosApi(LedgerApi):
             "list-contract-by-code",
             str(code_id),
         ]
-        res = self._execute_shell_command(command)
+        res = json.loads(self._execute_shell_command(command))
 
         return res[-1]["address"]
 

@@ -349,10 +349,14 @@ class ERC1155Contract(Contract):
             return {"balance": result}
         if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
             cosmos_api = cast(CosmosApi, ledger_api)
-            msg = {"balance": {"address": str(agent_address), "id": str(token_id)}}
+            msg: JSONLike = {
+                "balance": {"address": str(agent_address), "id": str(token_id)}
+            }
             query_res = cosmos_api.execute_contract_query(contract_address, msg)
+            if query_res is None:
+                raise ValueError("call to contract returned None")
             # Convert {"balance": balance: str} balances to Dict[token_id: int, balance: int]
-            result = {token_id: int(query_res["balance"])}
+            result = {token_id: int(cast(str, query_res["balance"]))}
             return {"balance": result}
         raise NotImplementedError
 
@@ -445,14 +449,18 @@ class ERC1155Contract(Contract):
             for token_id in token_ids:
                 tokens.append({"address": agent_address, "id": str(token_id)})
 
-            msg = {"balance_batch": {"addresses": tokens}}
+            msg: JSONLike = {"balance_batch": {"addresses": tokens}}
 
             cosmos_api = cast(CosmosApi, ledger_api)
             query_res = cosmos_api.execute_contract_query(contract_address, msg)
             # Convert List[balances: str] balances to Dict[token_id: int, balance: int]
+            if query_res is None:
+                raise ValueError("call to contract returned None")
             result = {
                 token_id: int(balance)
-                for token_id, balance in zip(token_ids, query_res["balances"])
+                for token_id, balance in zip(
+                    token_ids, cast(List[str], query_res["balances"])
+                )
             }
             return {"balances": result}
         raise NotImplementedError
