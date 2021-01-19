@@ -22,6 +22,7 @@ import os
 import shutil
 import tempfile
 from contextlib import contextmanager
+from filecmp import dircmp
 from pathlib import Path
 from typing import List, Set, cast
 from unittest import mock
@@ -62,6 +63,7 @@ from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
 from packages.fetchai.skills.error import PUBLIC_ID as ERROR_SKILL_PUBLIC_ID
 
+from tests.common.mocks import RegexComparator
 from tests.common.utils import are_dirs_equal
 from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, CliRunner
 
@@ -945,19 +947,27 @@ class TestUpdateReferences(AEATestCaseEmpty):
         assert result.stdout == "True\n"
 
 
+@mock.patch("click.echo")
 class TestNothingToUpgrade(AEATestCaseEmpty):
     """Test the upgrade command when there's nothing t upgrade."""
 
-    def test_nothing_to_upgrade(self):
+    def test_nothing_to_upgrade(self, mock_click_echo):
         """Test nothing to upgrade."""
+        agent_config = self.load_agent_config(self.agent_name)
         result = self.run_cli_command("upgrade", cwd=self._get_cwd())
-        assert (
-            result.stdout
-            == "Starting project upgrade...\nEverything is already up to date!\n"
+        assert result.exit_code == 0
+        mock_click_echo.assert_any_call("Starting project upgrade...")
+        mock_click_echo.assert_any_call(
+            f"Checking if there is a newer remote version of agent package '{agent_config.public_id}'..."
         )
+        mock_click_echo.assert_any_call(
+            "Package not found, continuing with normal upgrade."
+        )
+        mock_click_echo.assert_any_call("Everything is already up to date!")
 
 
 @pytest.mark.integration
+@mock.patch("click.echo")
 class TestWrongAEAVersion(AEATestCaseEmpty):
     """
     Test consistency check ignores AEA version fields.
@@ -992,12 +1002,13 @@ class TestWrongAEAVersion(AEATestCaseEmpty):
             cls.nested_set_config(dotted_path, cls.AEA_VERSION_SPECIFIER)
             cls.run_cli_command("fingerprint", "by-path", path, cwd=cls._get_cwd())
 
-    def test_nothing_to_upgrade(self):
+    def test_nothing_to_upgrade(self, mock_click_echo):
         """Test nothing to upgrade, and additionally, that 'aea_version' is correct."""
         result = self.run_cli_command("upgrade", cwd=self._get_cwd())
-        assert (
-            "Starting project upgrade...\nUpdating AEA version specifier from ==0.1.0 to >=0.9.0, <0.10.0."
-            in result.stdout
+        assert result.exit_code == 0
+        mock_click_echo.assert_any_call("Starting project upgrade...")
+        mock_click_echo.assert_any_call(
+            "Updating AEA version specifier from ==0.1.0 to >=0.9.0, <0.10.0."
         )
 
         # test 'aea_version' of agent configuration is upgraded
@@ -1010,6 +1021,9 @@ class TestWrongAEAVersion(AEATestCaseEmpty):
         assert agent_config.version == DEFAULT_VERSION
 
 
+@mock.patch("click.echo")
+@mock.patch("click.confirm")
+@mock.patch("aea.cli.upgrade.get_latest_version_available_in_registry")
 class BaseTestUpgradeWithEject(AEATestCaseEmpty):
     """
     Base test class to test 'aea upgrade' with request for ejection.
@@ -1025,6 +1039,10 @@ class BaseTestUpgradeWithEject(AEATestCaseEmpty):
         ComponentType.SKILL, PublicId.from_str("fetchai/generic_seller:0.18.0")
     )
     unmocked = get_latest_version_available_in_registry
+
+    EXPECTED_CLICK_ECHO_CALLS: List[str] = []
+    EXPECTED_CLICK_CONFIRM_CALLS: List[str] = []
+    CONFIRM_OUTPUT = [False, False]
 
     @classmethod
     def setup_class(cls):
@@ -1050,52 +1068,133 @@ class BaseTestUpgradeWithEject(AEATestCaseEmpty):
             side_effect=self.mock_get_latest_version_available_in_registry,
         )
 
-    def _assert_lines_in_stdout(self, lines: List[str], stdout: str):
+    def test_run(self, mock_get_latest_version, mock_click_confirm, mock_click_echo):
+        """Run the test."""
+        mock_get_latest_version.side_effect = (
+            self.mock_get_latest_version_available_in_registry
+        )
+        mock_click_confirm.side_effect = self.CONFIRM_OUTPUT
+        result = self.run_cli_command("upgrade", cwd=self._get_cwd())
+        assert result.exit_code == 0
+        self.mock_click_echo = mock_click_echo
+        self.mock_click_confirm = mock_click_confirm
+        self._assert_calls(self.EXPECTED_CLICK_ECHO_CALLS, mock_click_echo)
+        self._assert_calls(self.EXPECTED_CLICK_CONFIRM_CALLS, mock_click_confirm)
+
+    def _assert_calls(self, args: List, stdout_mock: MagicMock):
         """Assert lines are present in stdout."""
-        for expected_line in lines:
-            assert (
-                expected_line in stdout
-            ), f"Expected line {expected_line} not found in"
+        for expected_line in args:
+            stdout_mock.assert_any_call(expected_line)
 
 
 @pytest.mark.integration
 class TestUpgradeWithEjectAbort(BaseTestUpgradeWithEject):
     """Test 'aea upgrade' command with request for ejection, refused."""
 
-    def test_run(self):
-        """Run the test."""
-        with self._get_mock():
-            result = self.run_cli_command("upgrade", cwd=self._get_cwd())
-
-        expected_stdout_lines = [
-            "Skill fetchai/generic_seller:0.18.0 prevents the upgrade of the following vendor packages:",
-            "as there isn't a compatible version available on the AEA registry. Would you like to eject it? [y/N]:",
-            "Abort.",
-        ]
-        self._assert_lines_in_stdout(expected_stdout_lines, result.stdout)
+    EXPECTED_CLICK_ECHO_CALLS = ["Abort."]
+    EXPECTED_CLICK_CONFIRM_CALLS = [
+        RegexComparator(
+            r"Skill fetchai/generic_seller:0.18.0 prevents the upgrade of the following vendor packages:.*as there isn't a compatible version available on the AEA registry\. Would you like to eject it\?"
+        )
+    ]
 
 
 @pytest.mark.integration
 class TestUpgradeWithEjectAccept(BaseTestUpgradeWithEject):
     """Test 'aea upgrade' command with request for ejection, accepted by the user."""
 
-    def test_run(self):
+    CONFIRM_OUTPUT = [True, True]
+
+    EXPECTED_CLICK_ECHO_CALLS = [
+        "Ejecting (skill, fetchai/generic_seller:0.18.0)...",
+        "Ejecting item skill fetchai/generic_seller:0.18.0",
+        "Fingerprinting skill components of 'default_author/generic_seller:0.1.0' ...",
+        "Successfully ejected skill fetchai/generic_seller:0.18.0 to ./skills/generic_seller as default_author/generic_seller:0.1.0.",
+    ]
+    EXPECTED_CLICK_CONFIRM_CALLS = [
+        RegexComparator(
+            "Skill fetchai/generic_seller:0.18.0 prevents the upgrade of the following vendor packages:"
+        ),
+        RegexComparator(
+            "as there isn't a compatible version available on the AEA registry. Would you like to eject it?"
+        ),
+    ]
+
+    def test_run(self, *mocks):
         """Run the test."""
-        with self._get_mock():
-            result = self.run_cli_command("upgrade", cwd=self._get_cwd(), input="y\n")
-
-        expected_stdout_lines = [
-            "Skill fetchai/generic_seller:0.18.0 prevents the upgrade of the following vendor packages:",
-            "as there isn't a compatible version available on the AEA registry. Would you like to eject it? [y/N]: y",
-            "Ejecting (skill, fetchai/generic_seller:0.18.0)...",
-            "Ejecting item skill fetchai/generic_seller:0.18.0",
-            "Fingerprinting skill components of 'default_author/generic_seller:0.1.0' ...",
-            "Successfully ejected skill fetchai/generic_seller:0.18.0 to ./skills/generic_seller as default_author/generic_seller:0.1.0.",
-        ]
-        self._assert_lines_in_stdout(expected_stdout_lines, result.stdout)
-
+        super().test_run(*mocks)
         ejected_package_path = Path(
             self.t, self.current_agent_context, "skills", "generic_seller"
         )
         assert ejected_package_path.exists()
         assert ejected_package_path.is_dir()
+
+
+class BaseTestUpgradeProject(AEATestCaseEmpty):
+    """Base test class for testing project upgrader."""
+
+    OLD_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.19.0")
+    EXPECTED = "expected_agent"
+
+    @classmethod
+    def setup_class(cls):
+        """Set up the test."""
+        super().setup_class()
+        cls.run_cli_command(
+            "--skip-consistency-check",
+            "fetch",
+            str(cls.OLD_AGENT_PUBLIC_ID.to_latest()),
+            "--alias",
+            cls.EXPECTED,
+        )
+
+    def setup(self):
+        """Set up the class."""
+        self.run_cli_command("fetch", str(self.OLD_AGENT_PUBLIC_ID))
+        self.set_agent_context(self.OLD_AGENT_PUBLIC_ID.name)
+
+    def teardown(self):
+        """Tear down class."""
+        shutil.rmtree(self.current_agent_context)
+
+
+@mock.patch("click.confirm")
+class TestUpgradeProjectWithNewerVersion(BaseTestUpgradeProject):
+    """Test upgrade project with newer version available."""
+
+    @pytest.mark.parametrize("confirm", [True, False])
+    def test_upgrade(self, mock_confirm, confirm):
+        """Test upgrade."""
+        mock_confirm.return_value = confirm
+        result = self.run_cli_command("upgrade", cwd=self._get_cwd())
+        assert result.exit_code == 0
+
+        mock_confirm.assert_any_call(
+            RegexComparator(
+                r"Found a newer version of this project:.*Would you like to replace this project with it\?.*Warning: the content in the current directory.*will be removed"
+            )
+        )
+
+        # compare with latest fetched agent.
+        assert dircmp(self.current_agent_context, self.EXPECTED)
+
+
+@mock.patch("aea.cli.upgrade.get_latest_version_available_in_registry")
+@mock.patch("click.echo")
+class TestUpgradeProjectWithoutNewerVersion(BaseTestUpgradeProject):
+    """Test upgrade project without newer version available (but available on registry)."""
+
+    def test_run(self, mock_click_echo, mock_get_latest_version):
+        """Run the test."""
+        fake_old_public_id = self.OLD_AGENT_PUBLIC_ID
+        mock_get_latest_version.return_value = fake_old_public_id
+        result = self.run_cli_command("upgrade", cwd=self._get_cwd())
+        assert result.exit_code == 0
+
+        version_str = str(self.OLD_AGENT_PUBLIC_ID.version)
+        mock_click_echo.assert_any_call(
+            f"Latest version found is '{version_str}' which is smaller or equal than current version '{version_str}'. Continuing..."
+        )
+
+        # compare with latest fetched agent.
+        assert dircmp(self.current_agent_context, self.EXPECTED)
