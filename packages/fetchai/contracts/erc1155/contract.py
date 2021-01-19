@@ -19,7 +19,6 @@
 
 """This module contains the erc1155 contract definition."""
 
-import json
 import logging
 import random
 from typing import Dict, List, Optional, cast
@@ -351,10 +350,9 @@ class ERC1155Contract(Contract):
         if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
             cosmos_api = cast(CosmosApi, ledger_api)
             msg = {"balance": {"address": str(agent_address), "id": str(token_id)}}
-            query_res = cosmos_api.try_execute_wasm_query(contract_address, msg)
-            query_json_res = json.loads(query_res)
+            query_res = cosmos_api.execute_contract_query(contract_address, msg)
             # Convert {"balance": balance: str} balances to Dict[token_id: int, balance: int]
-            result = {token_id: int(query_json_res["balance"])}
+            result = {token_id: int(query_res["balance"])}
             return {"balance": result}
         raise NotImplementedError
 
@@ -450,12 +448,11 @@ class ERC1155Contract(Contract):
             msg = {"balance_batch": {"addresses": tokens}}
 
             cosmos_api = cast(CosmosApi, ledger_api)
-            query_res = cosmos_api.try_execute_wasm_query(contract_address, msg)
-            query_json_res = json.loads(query_res)
+            query_res = cosmos_api.execute_contract_query(contract_address, msg)
             # Convert List[balances: str] balances to Dict[token_id: int, balance: int]
             result = {
                 token_id: int(balance)
-                for token_id, balance in zip(token_ids, query_json_res["balances"])
+                for token_id, balance in zip(token_ids, query_res["balances"])
             }
             return {"balances": result}
         raise NotImplementedError

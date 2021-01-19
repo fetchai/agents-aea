@@ -52,6 +52,7 @@ DEFAULT_ADDRESS = "INVALID_URL"
 DEFAULT_CURRENCY_DENOM = "INVALID_CURRENCY_DENOM"
 DEFAULT_CHAIN_ID = "INVALID_CHAIN_ID"
 _BYTECODE = "wasm_byte_code"
+DEFAULT_CLI_COMMAND = "wasmcli"
 
 
 class CosmosHelper(Helper):
@@ -405,6 +406,7 @@ class _CosmosApi(LedgerApi):
         self.network_address = kwargs.pop("address", DEFAULT_ADDRESS)
         self.denom = kwargs.pop("denom", DEFAULT_CURRENCY_DENOM)
         self.chain_id = kwargs.pop("chain_id", DEFAULT_CHAIN_ID)
+        self.cli_command = kwargs.pop("cli_command", DEFAULT_CLI_COMMAND)
 
     @property
     def api(self) -> None:
@@ -617,13 +619,12 @@ class _CosmosApi(LedgerApi):
         )
         return tx
 
-    @staticmethod
     @try_decorator(
         "Encountered exception when trying to execute wasm transaction: {}",
         logger_method=_default_logger.warning,
     )
     def _try_execute_wasm_transaction(
-        tx_signed: JSONLike, signed_tx_filename: str = "tx.signed"
+        self, tx_signed: JSONLike, signed_tx_filename: str = "tx.signed"
     ) -> Optional[str]:
         """
         Execute a CosmWasm Transaction. QueryMsg doesn't require signing.
@@ -636,27 +637,37 @@ class _CosmosApi(LedgerApi):
                 f.write(json.dumps(tx_signed))
 
             command = [
-                "wasmcli",
+                self.cli_command,
                 "tx",
                 "broadcast",
                 os.path.join(tmpdirname, signed_tx_filename),
             ]
 
-            stdout, _ = subprocess.Popen(  # nosec
-                command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
-            ).communicate()
+            tx_digest_json = self._execute_shell_command(command)
 
-        tx_digest_json = json.loads(stdout.decode("ascii"))
-        return tx_digest_json["txhash"]
+        hash_ = cast(str, tx_digest_json["txhash"])
+        return hash_
 
-    @staticmethod
+    def execute_contract_query(
+        self, contract_address: Address, query_msg: JSONLike
+    ) -> Optional[JSONLike]:
+        """
+        Execute a CosmWasm QueryMsg. QueryMsg doesn't require signing.
+
+        :param contract_address: the address of the smart contract.
+        :param query_msg: QueryMsg in JSON format.
+        :return: the message receipt
+        """
+        result = self._try_execute_wasm_query(contract_address, query_msg)
+        return result
+
     @try_decorator(
         "Encountered exception when trying to execute wasm query: {}",
         logger_method=_default_logger.warning,
     )
     def _try_execute_wasm_query(
-        contract_address: Address, query_msg: JSONLike
-    ) -> Optional[str]:
+        self, contract_address: Address, query_msg: JSONLike
+    ) -> Optional[JSONLike]:
         """
         Execute a CosmWasm QueryMsg. QueryMsg doesn't require signing.
 
@@ -665,7 +676,7 @@ class _CosmosApi(LedgerApi):
         :return: the message receipt
         """
         command = [
-            "wasmcli",
+            self.cli_command,
             "query",
             "wasm",
             "contract-state",
@@ -674,11 +685,7 @@ class _CosmosApi(LedgerApi):
             json.dumps(query_msg),
         ]
 
-        stdout, _ = subprocess.Popen(  # nosec
-            command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
-        ).communicate()
-
-        return stdout.decode("ascii")
+        return self._execute_shell_command(command)
 
     def get_transfer_transaction(  # pylint: disable=arguments-differ
         self,
@@ -907,7 +914,7 @@ class _CosmosApi(LedgerApi):
         return None
 
     @staticmethod
-    def _execute_shell_command(command: List[str]) -> List[Dict[str, str]]:
+    def _execute_shell_command(command: List[str]) -> JSONLike:
         """
         Execute command using subprocess and get result as JSON dict.
 
@@ -927,7 +934,7 @@ class _CosmosApi(LedgerApi):
         :return: code id of last deployed .wasm bytecode
         """
 
-        command = ["wasmcli", "query", "wasm", "list-code"]
+        command = [self.cli_command, "query", "wasm", "list-code"]
         res = self._execute_shell_command(command)
 
         return int(res[-1]["id"])
@@ -940,7 +947,13 @@ class _CosmosApi(LedgerApi):
         :return: contract address of last initialised contract
         """
 
-        command = ["wasmcli", "query", "wasm", "list-contract-by-code", str(code_id)]
+        command = [
+            self.cli_command,
+            "query",
+            "wasm",
+            "list-contract-by-code",
+            str(code_id),
+        ]
         res = self._execute_shell_command(command)
 
         return res[-1]["address"]
