@@ -292,7 +292,7 @@ class CosmosCrypto(Crypto[SigningKey]):
         return signature_base64_str
 
     @staticmethod
-    def format_default_transaction(
+    def _format_default_transaction(
         transaction: JSONLike, signature: str, base64_pbk: str
     ) -> JSONLike:
         """
@@ -326,7 +326,7 @@ class CosmosCrypto(Crypto[SigningKey]):
         return pushable_tx
 
     @staticmethod
-    def format_wasm_transaction(
+    def _format_wasm_transaction(
         transaction: JSONLike, signature: str, base64_pbk: str
     ) -> JSONLike:
         """
@@ -371,10 +371,10 @@ class CosmosCrypto(Crypto[SigningKey]):
 
         msgs = cast(list, transaction.get("msgs", []))
         if len(msgs) == 1 and "type" in msgs[0] and "wasm" in msgs[0]["type"]:
-            return self.format_wasm_transaction(
+            return self._format_wasm_transaction(
                 transaction, signed_transaction, base64_pbk
             )
-        return self.format_default_transaction(
+        return self._format_default_transaction(
             transaction, signed_transaction, base64_pbk
         )
 
@@ -622,7 +622,7 @@ class _CosmosApi(LedgerApi):
         "Encountered exception when trying to execute wasm transaction: {}",
         logger_method=_default_logger.warning,
     )
-    def try_execute_wasm_transaction(
+    def _try_execute_wasm_transaction(
         tx_signed: JSONLike, signed_tx_filename: str = "tx.signed"
     ) -> Optional[str]:
         """
@@ -646,14 +646,15 @@ class _CosmosApi(LedgerApi):
                 command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
             ).communicate()
 
-        return stdout.decode("ascii")
+        tx_digest_json = json.loads(stdout.decode("ascii"))
+        return tx_digest_json["txhash"]
 
     @staticmethod
     @try_decorator(
         "Encountered exception when trying to execute wasm query: {}",
         logger_method=_default_logger.warning,
     )
-    def try_execute_wasm_query(
+    def _try_execute_wasm_query(
         contract_address: Address, query_msg: JSONLike
     ) -> Optional[str]:
         """
@@ -801,7 +802,7 @@ class _CosmosApi(LedgerApi):
         :return: tx_digest, if present
         """
         if self.is_cosmwasm_transaction(tx_signed):
-            tx_digest = self.try_execute_wasm_transaction(tx_signed)
+            tx_digest = self._try_execute_wasm_transaction(tx_signed)
         elif self.is_transfer_transaction(tx_signed):
             tx_digest = self._try_send_signed_transaction(tx_signed)
         else:  # pragma: nocover
