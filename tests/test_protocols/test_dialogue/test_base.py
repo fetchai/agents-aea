@@ -354,22 +354,22 @@ class TestDialogueBase:
     def test_try_get_message(self):
         """Test the 'try_get_message' method."""
         assert (
-            self.dialogue._try_get_message(self.valid_message_1_by_self.message_id)
+            self.dialogue.get_message_by_id(self.valid_message_1_by_self.message_id)
             is None
         )
         self.dialogue._update(self.valid_message_1_by_self)
         assert (
-            self.dialogue._try_get_message(self.valid_message_1_by_self.message_id)
+            self.dialogue.get_message_by_id(self.valid_message_1_by_self.message_id)
             == self.valid_message_1_by_self
         )
 
         assert (
-            self.dialogue._try_get_message(self.valid_message_2_by_other.message_id)
+            self.dialogue.get_message_by_id(self.valid_message_2_by_other.message_id)
             is None
         )
         self.dialogue._update(self.valid_message_2_by_other)
         assert (
-            self.dialogue._try_get_message(self.valid_message_2_by_other.message_id)
+            self.dialogue.get_message_by_id(self.valid_message_2_by_other.message_id)
             == self.valid_message_2_by_other
         )
 
@@ -666,10 +666,7 @@ class TestDialogueBase:
 
         result, msg = self.dialogue._basic_validation(invalid_message_2_by_other)
         assert result is False
-        assert (
-            msg
-            == "Invalid target. Expected a absolute value greater or less than 0. Found 0."
-        )
+        assert msg == "Invalid target. Expected a non-zero integer. Found 0."
 
     def test_basic_validation_initial_message_positive(self):
         """Positive test for the '_basic_validation_initial_message' method."""
@@ -827,10 +824,7 @@ class TestDialogueBase:
             invalid_message_2_by_other
         )
         assert result is False
-        assert (
-            msg
-            == "Invalid target. Expected a absolute value greater or less than 0. Found 0."
-        )
+        assert msg == "Invalid target. Expected a non-zero integer. Found 0."
 
     def test_basic_validation_non_initial_message_negative_invalid_target_2(self):
         """Negative test for the '_basic_validation_non_initial_message' method: input message has target greater than the id of the last existing message."""

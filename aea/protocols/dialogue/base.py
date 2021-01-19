@@ -31,7 +31,6 @@ import sys
 from collections import defaultdict, namedtuple
 from enum import Enum
 from inspect import signature
-from itertools import chain
 from typing import (
     Callable,
     Dict,
@@ -569,23 +568,6 @@ class Dialogue(metaclass=_DialogueMeta):
         """
         return not self._is_message_by_self(message)
 
-    def _try_get_message(self, message_id: int) -> Optional[Message]:
-        """
-        Try to get the message whose id is 'message_id'.
-
-        :param message_id: the id of the message
-        :return: the message if it exists, None otherwise
-        """
-        result = None  # type: Optional[Message]
-        list_of_all_messages = itertools.chain(
-            self._outgoing_messages, self._incoming_messages
-        )
-        for message in list_of_all_messages:
-            if message.message_id == message_id:
-                result = message
-                break
-        return result
-
     def _get_message(self, message_id: int) -> Message:
         """
         Get the message whose id is 'message_id'.
@@ -594,7 +576,7 @@ class Dialogue(metaclass=_DialogueMeta):
         :return: the message
         :raises: AssertionError if message is not present
         """
-        message = self._try_get_message(message_id)
+        message = self.get_message_by_id(message_id)
         if message is None:
             raise ValueError("Message not present.")
         return message
@@ -606,17 +588,7 @@ class Dialogue(metaclass=_DialogueMeta):
         :param message_id: the message id
         :return: True if message with that id exists in this dialogue, False otherwise
         """
-        if self.is_empty:
-            return False
-
-        if abs(message_id) < self.STARTING_MESSAGE_ID:
-            return False
-
-        for msg in chain(self._incoming_messages, self._outgoing_messages):
-            if msg.message_id == message_id:
-                return True
-
-        return False
+        return self.get_message_by_id(message_id) is not None
 
     def _update(self, message: Message) -> None:
         """
@@ -789,7 +761,6 @@ class Dialogue(metaclass=_DialogueMeta):
         """
         dialogue_reference = message.dialogue_reference
         message_id = message.message_id
-        target = message.target
         performative = message.performative
 
         if dialogue_reference[0] != self.dialogue_label.dialogue_reference[0]:
@@ -808,13 +779,9 @@ class Dialogue(metaclass=_DialogueMeta):
                 ),
             )
 
-        if target != Dialogue.STARTING_TARGET:
-            return (
-                False,
-                "Invalid target. Expected {}. Found {}.".format(
-                    Dialogue.STARTING_TARGET, target
-                ),
-            )
+        err = self._validate_message_target(message)
+        if err:
+            return False, err
 
         if performative not in self.rules.initial_performatives:
             return (
@@ -851,10 +818,6 @@ class Dialogue(metaclass=_DialogueMeta):
                 ),
             )
 
-        # it's non initial check, assume there some messages in the dialogue
-        if self.is_empty:
-            return False, "Can not reply cause no messages in the dialogue."
-
         err = self._validate_message_id(message)
         if err:
             return False, err
@@ -870,17 +833,18 @@ class Dialogue(metaclass=_DialogueMeta):
         target = message.target
         performative = message.performative
 
-        if (
-            message.message_id == self.STARTING_MESSAGE_ID
-            and target != self.STARTING_TARGET
-        ):
+        if message.message_id == self.STARTING_MESSAGE_ID:
+            # for initial message!
+            if target == self.STARTING_TARGET:
+                # no need to check in details
+                return None
             return "Invalid target. Expected 0. Found {}.".format(target)
 
         if (
             message.message_id != self.STARTING_MESSAGE_ID
             and target == self.STARTING_TARGET
         ):
-            return "Invalid target. Expected a absolute value greater or less than 0. Found {}.".format(
+            return "Invalid target. Expected a non-zero integer. Found {}.".format(
                 target
             )
 
@@ -930,16 +894,26 @@ class Dialogue(metaclass=_DialogueMeta):
 
         return None
 
-    def iter_all_messages(self) -> Iterable:
-        """Iterate over all messages in the dialogue."""
-        return chain(self._incoming_messages, self._outgoing_messages)
-
     def get_message_by_id(self, message_id: int) -> Optional[Message]:
         """Get message by id, if not presents return None."""
-        for message in self.iter_all_messages():
-            if message.message_id == message_id:
-                return message
-        return None
+        if self.is_empty:
+            return None
+
+        if message_id == 0:
+            return None
+
+        if bool(message_id > 0) == self.is_self_initiated:
+            messages_list = self._outgoing_messages
+        else:
+            messages_list = self._incoming_messages
+
+        if len(messages_list) == 0:
+            return None
+
+        if abs(message_id) > abs(messages_list[-1].message_id):
+            return None
+
+        return messages_list[abs(message_id) - 1]
 
     def get_outgoing_next_message_id(self) -> int:
         """Get next outgoing message id."""
@@ -1792,7 +1766,8 @@ class Dialogues:
         is_incomplete_label_and_non_initial_msg = (
             dialogue_reference[0] != Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
             and dialogue_reference[1] == Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
-            and message.message_id != Dialogue.STARTING_MESSAGE_ID
+            and message.message_id
+            not in (Dialogue.STARTING_MESSAGE_ID, Dialogue.STARTING_TARGET)
         )
 
         if is_invalid_label:
