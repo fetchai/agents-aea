@@ -17,13 +17,15 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the protocol generator."""
-# pylint: skip-file
-
 import itertools
 import os
 import shutil
+
+# pylint: skip-file
+import sys
 from datetime import date
 from pathlib import Path
+from subprocess import call  # nosec
 from typing import Optional, Tuple
 
 from aea.protocols.generator.common import (
@@ -1903,7 +1905,7 @@ class ProtocolGenerator:
 
         return init_str
 
-    def generate_protobuf_only_mode(self) -> None:
+    def generate_protobuf_only_mode(self, run_protolint: bool = True) -> None:
         """
         Run the generator in "protobuf only" mode:
 
@@ -1929,12 +1931,31 @@ class ProtocolGenerator:
             self.path_to_generated_protocol_package, self.protocol_specification.name
         )
 
-        if is_valid_protobuf_schema:
-            pass
-        else:
+        if run_protolint:
+            self.run_protolint_for_file(
+                os.path.join(
+                    self.path_to_generated_protocol_package,
+                    "{}.proto".format(self.protocol_specification.name),
+                )
+            )
+
+        if not is_valid_protobuf_schema:
             # Remove the generated folder and files
             shutil.rmtree(output_folder)
             raise SyntaxError("Error in the protocol buffer schema code:\n" + msg)
+
+    def run_protolint_for_file(self, filepath: str) -> None:
+        """Perform protolint check for file."""
+        if sys.platform.startswith("win"):
+            protolint_base_cmd = "protolint"
+        else:
+            protolint_base_cmd = "PATH=${PATH}:${GOPATH}/bin/:~/go/bin protolint"
+
+        if call(f"{protolint_base_cmd} version", shell=True) != 0:  # nosec
+            raise ValueError("protolint is not installed!")
+
+        cmd = f'{protolint_base_cmd} lint -fix "{filepath}"'
+        call(cmd, shell=True)  # nosec
 
     def generate_full_mode(self) -> Optional[str]:
         """

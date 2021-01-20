@@ -13,7 +13,7 @@ fingerprint:
   dialogues.py: QmRjWdedEm43231zPpSad7R97BZ567qNSjjjtPnabrziRd
   message.py: QmSDNDhdNehuBaGuTS7JHRfGp7uABiodLNLVScmpWa4ZvC
   serialization.py: QmVHNaPqLYsNe5PTA8qFSWaHonmfkcnxcMbBdjLexSmCH7
-  tac.proto: QmUXk2kwqp1vo22oZdvLbWKirojeqkXdGSmiz6r14bMqSE
+  tac.proto: Qmat9YtA9ep7mjhjWQtNwV8qssWQn5aY1YyFtoGWqgqJPK
   tac_pb2.py: QmVHkh5GctFUU36wiVZZfZYYoQxT4uZP8eUzAtgKgUBxn6
 fingerprint_ignore_patterns: []
 dependencies:
