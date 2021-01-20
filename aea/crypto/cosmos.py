@@ -526,7 +526,6 @@ class _CosmosApi(LedgerApi):
         tx_fee: int = 0,
         gas: int = 80000,
         memo: str = "",
-        **kwargs,
     ) -> Optional[JSONLike]:
         """
         Create a CosmWasm bytecode deployment transaction.
