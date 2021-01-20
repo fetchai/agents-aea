@@ -488,10 +488,16 @@ class _CosmosApi(LedgerApi):
         )
         if account_number is None or sequence is None:
             return None
+        label = kwargs.pop("label", None)
         code_id = kwargs.pop("code_id", None)
         amount = kwargs.pop("amount", None)
         init_msg = kwargs.pop("init_msg", None)
-        if code_id is None and amount is None and init_msg is None:
+        unexpected_keys = [
+            key for key in kwargs.keys() if key not in ["tx_fee", "gas", "memo"]
+        ]
+        if len(unexpected_keys) != 0:
+            raise ValueError(f"Unexpected keyword arguments: {unexpected_keys}")
+        if label is None and code_id is None and amount is None and init_msg is None:
             return self._get_storage_transaction(
                 contract_interface,
                 deployer_address,
@@ -501,17 +507,21 @@ class _CosmosApi(LedgerApi):
                 sequence,
                 **kwargs,
             )
+        if label is None:
+            raise ValueError(
+                "Missing required keyword argument `label` of type `str` for `_get_init_transaction`."
+            )
         if code_id is None:
             raise ValueError(
-                "Missing required keyword argument `code_id` of type `int` for `_get_init_transaction`"
+                "Missing required keyword argument `code_id` of type `int` for `_get_init_transaction`."
             )
         if amount is None:
             raise ValueError(
-                "Missing required keyword argument `amount` of type `int` for `_get_init_transaction`"
+                "Missing required keyword argument `amount` of type `int` for `_get_init_transaction`."
             )
         if init_msg is None:
             raise ValueError(
-                "Missing required keyword argument `init_msg` of type `JSONLike` `for `_get_init_transaction`"
+                "Missing required keyword argument `init_msg` of type `JSONLike` `for `_get_init_transaction`."
             )
         return self._get_init_transaction(
             deployer_address,
@@ -534,7 +544,7 @@ class _CosmosApi(LedgerApi):
         account_number: int,
         sequence: int,
         tx_fee: int = 0,
-        gas: int = 80000,
+        gas: int = 0,
         memo: str = "",
     ) -> Optional[JSONLike]:
         """
@@ -571,9 +581,9 @@ class _CosmosApi(LedgerApi):
         amount: int,
         code_id: int,
         init_msg: JSONLike,
-        label: str = "",
+        label: str,
         tx_fee: int = 0,
-        gas: int = 80000,
+        gas: int = 0,
         memo: str = "",
     ) -> Optional[JSONLike]:
         """
@@ -620,7 +630,7 @@ class _CosmosApi(LedgerApi):
         amount: int,
         tx_fee: int,
         denom: Optional[str] = None,
-        gas: int = 80000,
+        gas: int = 0,
         memo: str = "",
         chain_id: Optional[str] = None,
     ) -> Optional[JSONLike]:
