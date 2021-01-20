@@ -488,8 +488,10 @@ class _CosmosApi(LedgerApi):
         )
         if account_number is None or sequence is None:
             return None
+        code_id = kwargs.pop("code_id", None)
+        amount = kwargs.pop("amount", None)
         init_msg = kwargs.pop("init_msg", None)
-        if init_msg is None:
+        if code_id is None and amount is None and init_msg is None:
             return self._get_storage_transaction(
                 contract_interface,
                 deployer_address,
@@ -499,10 +501,18 @@ class _CosmosApi(LedgerApi):
                 sequence,
                 **kwargs,
             )
-        amount = kwargs.pop("amount", None)
-        code_id = kwargs.pop("code_id", None)
-        if amount is None or code_id is None:
-            return None
+        if code_id is None:
+            raise ValueError(
+                "Missing required keyword argument `code_id` of type `int` for `_get_init_transaction`"
+            )
+        if amount is None:
+            raise ValueError(
+                "Missing required keyword argument `amount` of type `int` for `_get_init_transaction`"
+            )
+        if init_msg is None:
+            raise ValueError(
+                "Missing required keyword argument `init_msg` of type `JSONLike` `for `_get_init_transaction`"
+            )
         return self._get_init_transaction(
             deployer_address,
             denom,
@@ -560,7 +570,7 @@ class _CosmosApi(LedgerApi):
         sequence: int,
         amount: int,
         code_id: int,
-        init_msg: Any,
+        init_msg: JSONLike,
         label: str = "",
         tx_fee: int = 0,
         gas: int = 80000,
