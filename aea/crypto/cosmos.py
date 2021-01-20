@@ -463,15 +463,69 @@ class _CosmosApi(LedgerApi):
             result = response.json()
         return result
 
-    def get_deploy_transaction(  # pylint: disable=arguments-differ
+    def get_deploy_transaction(
+        self, contract_interface: Dict[str, str], deployer_address: Address, **kwargs
+    ) -> Optional[JSONLike]:
+        """
+        Get the transaction to deploy the smart contract.
+
+        Dispatches to _get_storage_transaction and _get_init_transaction based on kwargs.
+
+        :param contract_interface: the contract interface.
+        :param deployer_address: The address that will deploy the contract.
+        :returns tx: the transaction dictionary.
+        """
+        denom = (
+            kwargs.pop("denom") if kwargs.get("denom", None) is not None else self.denom
+        )
+        chain_id = (
+            kwargs.pop("chain_id")
+            if kwargs.get("chain_id", None) is not None
+            else self.chain_id
+        )
+        account_number, sequence = self._try_get_account_number_and_sequence(
+            deployer_address
+        )
+        if account_number is None or sequence is None:
+            return None
+        init_msg = kwargs.pop("init_msg", None)
+        if init_msg is None:
+            return self._get_storage_transaction(
+                contract_interface,
+                deployer_address,
+                denom,
+                chain_id,
+                account_number,
+                sequence,
+                **kwargs,
+            )
+        amount = kwargs.pop("amount", None)
+        code_id = kwargs.pop("code_id", None)
+        if amount is None or code_id is None:
+            return None
+        return self._get_init_transaction(
+            deployer_address,
+            denom,
+            chain_id,
+            account_number,
+            sequence,
+            amount,
+            code_id,
+            init_msg,
+            **kwargs,
+        )
+
+    def _get_storage_transaction(
         self,
         contract_interface: Dict[str, str],
         deployer_address: Address,
+        denom: str,
+        chain_id: str,
+        account_number: int,
+        sequence: int,
         tx_fee: int = 0,
         gas: int = 80000,
-        denom: Optional[str] = None,
         memo: str = "",
-        chain_id: Optional[str] = None,
         **kwargs,
     ) -> Optional[JSONLike]:
         """
@@ -484,14 +538,7 @@ class _CosmosApi(LedgerApi):
         :param chain_id: the Chain ID of the CosmWasm transaction. Default is 1 (i.e. mainnet).
         :return: the unsigned CosmWasm contract deploy message
         """
-        denom = denom if denom is not None else self.denom
-        chain_id = chain_id if chain_id is not None else self.chain_id
-        account_number, sequence = self._try_get_account_number_and_sequence(
-            deployer_address
-        )
-        if account_number is None or sequence is None:
-            return None
-        deploy_msg = {
+        store_msg = {
             "type": "wasm/store-code",
             "value": {
                 "sender": deployer_address,
@@ -501,29 +548,24 @@ class _CosmosApi(LedgerApi):
             },
         }
         tx = self._get_transaction(
-            account_number,
-            chain_id,
-            tx_fee,
-            denom,
-            gas,
-            memo,
-            sequence,
-            msg=deploy_msg,
+            account_number, chain_id, tx_fee, denom, gas, memo, sequence, msg=store_msg,
         )
         return tx
 
-    def get_init_transaction(
+    def _get_init_transaction(
         self,
         deployer_address: Address,
+        denom: str,
+        chain_id: str,
+        account_number: int,
+        sequence: int,
+        amount: int,
         code_id: int,
         init_msg: Any,
-        amount: int,
-        tx_fee: int,
-        gas: int = 80000,
-        denom: Optional[str] = None,
         label: str = "",
+        tx_fee: int = 0,
+        gas: int = 80000,
         memo: str = "",
-        chain_id: Optional[str] = None,
     ) -> Optional[JSONLike]:
         """
         Create a CosmWasm InitMsg transaction.
@@ -539,13 +581,6 @@ class _CosmosApi(LedgerApi):
         :param chain_id: the Chain ID of the CosmWasm transaction. Default is 1 (i.e. mainnet).
         :return: the unsigned CosmWasm InitMsg
         """
-        denom = denom if denom is not None else self.denom
-        chain_id = chain_id if chain_id is not None else self.chain_id
-        account_number, sequence = self._try_get_account_number_and_sequence(
-            deployer_address
-        )
-        if account_number is None or sequence is None:
-            return None
         instantiate_msg = {
             "type": "wasm/instantiate",
             "value": {

@@ -438,8 +438,8 @@ def test_format_cosmwasm():
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
-def test_get_deploy_transaction_cosmwasm():
-    """Test the get deploy transaction method."""
+def test_get_storage_transaction_cosmwasm():
+    """Test the get storage transaction method."""
     cc2 = FetchAICrypto()
     cosmos_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
 
@@ -480,8 +480,14 @@ def test_get_init_transaction_cosmwasm():
     deployer_address = cc2.address
     tx_fee = 1
     amount = 10
-    deploy_transaction = cosmos_api.get_init_transaction(
-        deployer_address, code_id, init_msg, amount, tx_fee
+    contract_interface = {"wasm_byte_code": b""}
+    deploy_transaction = cosmos_api.get_deploy_transaction(
+        contract_interface,
+        deployer_address,
+        code_id=code_id,
+        init_msg=init_msg,
+        amount=amount,
+        tx_fee=tx_fee,
     )
 
     assert type(deploy_transaction) == dict and len(deploy_transaction) == 6
@@ -555,7 +561,7 @@ def test_try_execute_wasm_query():
     attrs = {"communicate.return_value": (output, "error")}
     process_mock.configure_mock(**attrs)
     with mock.patch("subprocess.Popen", return_value=process_mock):
-        result = cosmos_api._try_execute_wasm_query(
+        result = cosmos_api.execute_contract_query(
             contract_address="contract_address", query_msg={}
         )
     assert result == output_raw
