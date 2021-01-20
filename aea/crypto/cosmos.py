@@ -532,6 +532,7 @@ class _CosmosApi(LedgerApi):
             amount,
             code_id,
             init_msg,
+            label,
             **kwargs,
         )
 
