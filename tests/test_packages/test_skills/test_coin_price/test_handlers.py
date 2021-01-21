@@ -248,29 +248,6 @@ class TestHttpHandler(BaseSkillTestCase):
         # check that outbox is empty
         self.assert_quantity_in_outbox(0)
 
-    def test_handle_request(self):
-        """Test the _handle_request method of the http handler."""
-        # setup
-        incoming_message = self.build_incoming_message(
-            message_type=HttpMessage,
-            performative=HttpMessage.Performative.REQUEST,
-            method="some_method",
-            url="some_url",
-            headers="some_headers",
-            version="some_version",
-            body=self.data,
-        )
-
-        # operation
-        with patch.object(self.logger, "log") as mock_logger:
-            self.http_handler.handle(incoming_message)
-
-        # after
-        mock_logger.assert_any_call(
-            logging.WARNING,
-            f"cannot handle http message of performative={incoming_message.performative} in dialogue={self.http_dialogues.get_dialogue(incoming_message)}.",
-        )
-
     def test_teardown(self):
         """Test the teardown method of the http handler."""
         assert self.http_handler.teardown() is None
