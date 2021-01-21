@@ -149,7 +149,7 @@ class HttpHandler(Handler):
             if http_msg.method == "get":
                 self._handle_get(http_msg, http_dialogue)
             elif http_msg.method == "post":
-                self._handle_post(http_msg, http_dialogue)
+                self.context.logger.info("method 'post' is not supported.")
         else:
             self.context.logger.info("http server is not enabled.")
 
@@ -181,26 +181,6 @@ class HttpHandler(Handler):
             self.context.behaviours.coin_price_behaviour.update_prometheus_metric(
                 metric_name, "inc", 1.0, {}
             )
-
-    def _handle_post(self, http_msg: HttpMessage, http_dialogue: HttpDialogue) -> None:
-        """
-        Handle a Http request of verb POST.
-
-        :param http_msg: the http message
-        :param http_dialogue: the http dialogue
-        :return: None
-        """
-        http_response = http_dialogue.reply(
-            performative=HttpMessage.Performative.RESPONSE,
-            target_message=http_msg,
-            version=http_msg.version,
-            status_code=200,
-            status_text="Success",
-            headers=http_msg.headers,
-            body=b"",
-        )
-        self.context.logger.info("responding with: {}".format(http_response))
-        self.context.outbox.put_message(message=http_response)
 
     def _handle_unidentified_dialogue(self, msg: Message) -> None:
         """
