@@ -23,8 +23,8 @@ from pathlib import Path
 from typing import Dict
 
 import pytest
-import requests
 
+from aea.helpers import http_requests as requests
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from tests.conftest import ROOT_DIR
