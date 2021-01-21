@@ -76,7 +76,7 @@ Our newly created AEA is inside the current working directory. Let’s create ou
 aea scaffold skill generic_seller
 ```
 
-This command will create the correct structure for a new skill inside our AEA project You can locate the newly created skill inside the skills folder (`my_generic_seller/skills/generic_seller/`) and it must contain the following files:
+This command will create the correct structure for a new skill inside our AEA project. You can locate the newly created skill inside the skills folder (`my_generic_seller/skills/generic_seller/`) and it must contain the following files:
 
 - `__init__.py`
 - `behaviours.py`

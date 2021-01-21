@@ -26,6 +26,7 @@ from unittest import TestCase, mock
 import pytest
 import semver
 import yaml
+from packaging.specifiers import SpecifierSet
 
 from aea.configurations.base import (
     AgentConfig,
@@ -358,6 +359,15 @@ class TestAgentConfigUpdate:
             ValueError, match=r"Configuration of component .* is not valid.*"
         ):
             self.aea_config.component_configurations = new_component_configurations
+
+    def test_aea_version_setter(self):
+        """Test 'aea_version' setter."""
+        new_version_specifier = "==0.1.0"
+        self.aea_config.aea_version = new_version_specifier
+        assert self.aea_config.aea_version == new_version_specifier
+        assert self.aea_config.aea_version_specifiers == SpecifierSet(
+            new_version_specifier
+        )
 
     def test_update(self):
         """Test the update method."""

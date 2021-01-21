@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Schema for the configurable part of a protocol configuration in the agent configuration file.",
+  "additionalProperties": false,
+  "required": [
+    "public_id",
+    "type"
+  ],
+  "properties": {
+    "public_id": {
+      "$ref": "definitions.json#/definitions/public_id"
+    },
+    "type": {
+      "$ref": "definitions.json#/definitions/component_type"
+    },
+    "build_directory": {
+      "$ref": "definitions.json#/definitions/build_directory"
+    }
+  }
+}

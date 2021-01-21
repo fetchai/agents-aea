@@ -157,12 +157,13 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
             cls.run_cli_command("config", "set", path, value, cwd=cls._get_cwd())
 
     @classmethod
-    def run_cli_command(cls, *args: str, cwd: str = ".") -> Result:
+    def run_cli_command(cls, *args: str, cwd: str = ".", **kwargs) -> Result:
         """
         Run AEA CLI command.
 
         :param args: CLI args
         :param cwd: the working directory from where to run the command.
+        :param kwargs: other keyword arguments to click.CLIRunner.invoke.
         :raises AEATestingException: if command fails.
 
         :return: Result
@@ -173,6 +174,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
                 [*CLI_LOG_OPTION, *args],
                 standalone_mode=False,
                 catch_exceptions=False,
+                **kwargs,
             )
             cls.last_cli_runner_result = result
             if result.exit_code != 0:  # pragma: nocover

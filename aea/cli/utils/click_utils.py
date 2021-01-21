@@ -148,6 +148,16 @@ def registry_flag(
     return wrapper
 
 
+def registry_path_option(f):
+    """Add registry path aea option."""
+    return option(
+        "--registry-path",
+        type=click.Path(dir_okay=True, exists=True, file_okay=False),
+        required=False,
+        help="Provide a local registry directory full path.",
+    )(f)
+
+
 class MutuallyExclusiveOption(Option):
     """Represent a mutually exclusive option."""
 

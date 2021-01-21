@@ -178,6 +178,26 @@ Get the author.
 
 Set the author.
 
+<a name="aea.configurations.base.PackageConfiguration.aea_version"></a>
+#### aea`_`version
+
+```python
+ | @property
+ | aea_version()
+```
+
+Get the 'aea_version' attribute.
+
+<a name="aea.configurations.base.PackageConfiguration.aea_version"></a>
+#### aea`_`version
+
+```python
+ | @aea_version.setter
+ | aea_version(new_aea_version: str)
+```
+
+Set the 'aea_version' attribute.
+
 <a name="aea.configurations.base.PackageConfiguration.directory"></a>
 #### directory
 

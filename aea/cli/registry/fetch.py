@@ -22,6 +22,7 @@ import shutil
 from typing import Optional
 
 import click
+from click.exceptions import ClickException
 
 from aea.cli.add import add_item
 from aea.cli.registry.utils import download_file, extract, request_api
@@ -55,15 +56,18 @@ def fetch_agent(
     :return: None
     """
     author, name, version = public_id.author, public_id.name, public_id.version
-    api_path = f"/agents/{author}/{name}/{version}"
-    resp = request_api("GET", api_path)
-    file_url = resp["file"]
-
-    filepath = download_file(file_url, ctx.cwd)
 
     folder_name = target_dir or (name if alias is None else alias)
     aea_folder = os.path.join(ctx.cwd, folder_name)
+    if os.path.exists(aea_folder):
+        raise ClickException(f'Item "{folder_name}" already exists in target folder.')
+
     ctx.clean_paths.append(aea_folder)
+
+    api_path = f"/agents/{author}/{name}/{version}"
+    resp = request_api("GET", api_path)
+    file_url = resp["file"]
+    filepath = download_file(file_url, ctx.cwd)
 
     extract(filepath, ctx.cwd)
 
