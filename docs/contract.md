@@ -39,6 +39,12 @@ Any additional arguments needed by the contract's constructor method should be a
 
 This message will be handled by the `fetchai/ledger:0.12.0` connection and then a `raw_transaction` message will be returned with the matching raw transaction. To send this transaction to the ledger for processing, we first sign the message with the decision maker and then send the signed transaction to the `fetchai/ledger:0.12.0` connection using the `fetchai/ledger_api:0.9.0` protocol. For details on how to implement the message handling, see the handlers in the `erc1155_deploy` skill.
 
+<div class="admonition note">
+  <p class="admonition-title">CosmWasm based smart contract deployments</p>
+  <p>When using CosmWasm based smart contracts two types of deployment transactions exist. The first transaction stores the code on the chain. The second transaction initialises the code. This way, the same contract code can be initialised many times.<br>Both the <code>store</code> and <code>init</code> messages use the <code>ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION</code> performative. The ledger api automatically detects the type of transactions based on the provided keyword arguments. In particular, an <code>init</code> transaction requires the keyword arguments <code>code_id</code> (integer), <code>label</code> (string), <code>amount</code> (integer) and <code>init_msg</code> (json-like).<br>For an example look at the <code>fetchai/erc1155:0.14.0</code> package.
+</p>
+</div>
+
 - the `get_raw_transaction` message is used to request any transaction for a specific contract which changes state in the contract. For instance, to request a transaction for the creation of token in the deployed `erc1155` smart contract wrapped in the `fetchai/erc1155:0.14.0` package, we send the following message to the `fetchai/ledger:0.12.0`:
 
 ``` python

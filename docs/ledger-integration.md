@@ -4,6 +4,7 @@ The framework currently natively supports two ledgers:
 
 - Fetch.ai
 - Ethereum
+- Cosmos
 
 However, support for additional ledgers can be added to the framework at runtime.
 
@@ -74,3 +75,54 @@ my_faucet_api = make_faucet_api("my_ledger_id")
 The framework wraps all `LedgerApi` classes and exposes them in the <a href="../api/crypto/ledger_apis#aea.crypto.base.LedgerApis">`LedgerApis` classes. The framework also wraps the crypto APIs to create identities on both ledgers and exposes them in the `Wallet`.
 
 The separation between the `Crypto` and `LedgerApi` is fundamental to the framework design. In particular, the object which holds the private key is separated from the object which interacts with the ledger. This design pattern is repeated throughout the framework: the decision maker is the only entity with access to the AEA's `Wallet` whilst `LedgerApis` are accessible by all skills.
+
+
+## Cosmwasm-supporting chains
+
+The Fetch.ai networks use <a href="https://cosmwasm.com" target="_blank">CosmWasm</a> for smart contract support.
+
+Currently, to use the smart contract functionality of the Fetch.ai network you have to install a CLI tool which is used by the AEA framework to perform some necessary actions for the smart contract functionality on-chain.
+
+1. Install Rust using the following command:
+
+``` bash 
+curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh
+```
+
+2. Update the configs for rust:
+
+``` bash
+rustup default stable
+cargo version
+# If this is lower than 1.44.1+, update with:
+# rustup update stable
+
+rustup target list --installed
+rustup target add wasm32-unknown-unknown
+```
+
+3. Install Fetchd:
+
+``` bash
+git clone https://github.com/fetchai/fetchd.git
+cd fetchd
+git checkout release/v0.2.x
+make install
+
+# Check if wasmcli is properly installed
+wasmcli version
+# Version should be >=0.2.5
+```
+
+4. Configure wasmcli:
+
+``` bash
+wasmcli config chain-id agent-land
+wasmcli config trust-node false
+wasmcli config node https://rpc-agent-land.fetch.ai:443
+wasmcli config output json
+wasmcli config indent true
+wasmcli config broadcast-mode block
+```
+
+Now wasmcli will be ready for use on your system.
