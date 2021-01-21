@@ -454,7 +454,7 @@ def test_get_storage_transaction_cosmwasm():
     assert "chain_id" in deploy_transaction
     assert "fee" in deploy_transaction and deploy_transaction["fee"] == {
         "amount": [{"amount": "0", "denom": "atestfet"}],
-        "gas": "80000",
+        "gas": "0",
     }
     assert "memo" in deploy_transaction
     assert "msgs" in deploy_transaction and len(deploy_transaction["msgs"]) == 1
@@ -488,6 +488,7 @@ def test_get_init_transaction_cosmwasm():
         init_msg=init_msg,
         amount=amount,
         tx_fee=tx_fee,
+        label="",
     )
 
     assert type(deploy_transaction) == dict and len(deploy_transaction) == 6
@@ -495,7 +496,7 @@ def test_get_init_transaction_cosmwasm():
     assert "chain_id" in deploy_transaction
     assert "fee" in deploy_transaction and deploy_transaction["fee"] == {
         "amount": [{"denom": "atestfet", "amount": "{}".format(tx_fee)}],
-        "gas": "80000",
+        "gas": "0",
     }
     assert "memo" in deploy_transaction
     assert "msgs" in deploy_transaction and len(deploy_transaction["msgs"]) == 1
@@ -533,7 +534,7 @@ def test_get_handle_transaction_cosmwasm():
     assert "chain_id" in handle_transaction
     assert "fee" in handle_transaction and handle_transaction["fee"] == {
         "amount": [{"denom": "atestfet", "amount": "{}".format(tx_fee)}],
-        "gas": "80000",
+        "gas": "0",
     }
     assert "memo" in handle_transaction
     assert "msgs" in handle_transaction and len(handle_transaction["msgs"]) == 1
