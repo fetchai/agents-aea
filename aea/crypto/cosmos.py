@@ -48,9 +48,9 @@ _default_logger = logging.getLogger(__name__)
 _COSMOS = "cosmos"
 TESTNET_NAME = "testnet"
 DEFAULT_FAUCET_URL = "INVALID_URL"
-DEFAULT_ADDRESS = "INVALID_URL"
-DEFAULT_CURRENCY_DENOM = "INVALID_CURRENCY_DENOM"
-DEFAULT_CHAIN_ID = "INVALID_CHAIN_ID"
+DEFAULT_ADDRESS = "https://cosmos.bigdipper.live"
+DEFAULT_CURRENCY_DENOM = "uatom"
+DEFAULT_CHAIN_ID = "cosmoshub-3"
 _BYTECODE = "wasm_byte_code"
 DEFAULT_CLI_COMMAND = "wasmcli"
 
@@ -495,7 +495,7 @@ class _CosmosApi(LedgerApi):
         unexpected_keys = [
             key for key in kwargs.keys() if key not in ["tx_fee", "gas", "memo"]
         ]
-        if len(unexpected_keys) != 0:
+        if len(unexpected_keys) != 0:  # pragma: nocover
             raise ValueError(f"Unexpected keyword arguments: {unexpected_keys}")
         if label is None and code_id is None and amount is None and init_msg is None:
             return self._get_storage_transaction(
@@ -508,19 +508,19 @@ class _CosmosApi(LedgerApi):
                 **kwargs,
             )
         if label is None:
-            raise ValueError(
+            raise ValueError(  # pragma: nocover
                 "Missing required keyword argument `label` of type `str` for `_get_init_transaction`."
             )
         if code_id is None:
-            raise ValueError(
+            raise ValueError(  # pragma: nocover
                 "Missing required keyword argument `code_id` of type `int` for `_get_init_transaction`."
             )
         if amount is None:
-            raise ValueError(
+            raise ValueError(  # pragma: nocover
                 "Missing required keyword argument `amount` of type `int` for `_get_init_transaction`."
             )
         if init_msg is None:
-            raise ValueError(
+            raise ValueError(  # pragma: nocover
                 "Missing required keyword argument `init_msg` of type `JSONLike` `for `_get_init_transaction`."
             )
         return self._get_init_transaction(
