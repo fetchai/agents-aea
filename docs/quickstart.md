@@ -13,7 +13,7 @@ You need <a href="https://www.python.org/downloads/" target="_blank">Python 3.6<
 ​
 ### Option 1: Manual system preparation
 
-Install a compatible Python and Go version on your system.
+Install a compatible Python and Go version on your system (see <a href="https://realpython.com/installing-python/" target="_blank">this external resource</a> for a comprehensive guide).
 
 The following hints can help:
 
