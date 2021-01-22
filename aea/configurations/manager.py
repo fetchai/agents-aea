@@ -508,7 +508,7 @@ class AgentConfigManager:
 
         self.agent_config.update(overrides, env_vars_friendly=self.env_vars_friendly)
 
-    def _filter_overrides(self, overrides: Dict):
+    def _filter_overrides(self, overrides: Dict) -> Dict:
         """Stay only updated values for agent config."""
         agent_overridable, components_overridables = self.get_overridables()
 
