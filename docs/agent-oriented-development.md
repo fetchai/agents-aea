@@ -1,6 +1,6 @@
 # Agent-oriented development
 
-In this section, we highlight some of the most fundamental characteristics of the agent-oriented approach to solution development, which might be different from some of the existing paradigms and methodologies you may be used to. We hope that with this, we can guide you towards having the right mindset when you are designing your own agent-based solutions to real world problems.
+In this section, we discuss some of the most fundamental char of the existing paradigms and methodologies you may be used to. We hope that with this, we can guide you towards having the right mindset when you are designing your own agent-based solutioacteristics of an agent-oriented approach to solution development, which might be different from somensacteristics of an agent-oriented approach to solution development, which might be different from some to real world problems.
 
 ## Decentralisation
 
@@ -45,6 +45,12 @@ We cannot take for granted that an agent `j` will execute an action (the equival
 
 All of this makes asynchronisation the preferred method for designing agent processes and interactions. An agent's interactions should be independent of each other, as much as possible, and of the agent's decision making processes and actions. This means the success or failure of, or delay in any single interaction does not block the agent's other tasks. 
 
+## Time
+
+Closely related with the discussion of asynchronicity is the idea that time is not a universally agreed notion in multi-agent systems. Any two agents `i` and `j` may not necessarily share the same clock and this must be taken into account when designing systems comprising these agents. For example, you cannot necessarily expect agents to synchronise their behaviour according to time (e.g. perform a certain task at a certain time). 
+
+Another time-related issue is that, unlike some agent-based simulation (ABS) systems where there is a global tick rate for all agents, in AEA-based systems tick rates may be different for different agents. This is because of a fundamental difference, where ABS systems control some aspects of all of their agents' execution while in AEA-based systems, agents are truely decoupled from one another  - most likely distributed and running on different machines and networks - and there is absolutely no central unit that moderates any aspect of their behaviour.    
+
 ## Complex, Incomplete, Inconsistent and Uncertain
 
 The fourth characteristic(s) relate to the environment in which agents are expected to operate in, and these have been mentioned a number of times in the previous sections.
@@ -54,5 +60,10 @@ The environment agents are suited for typically tend to be complex, to the point
 Consider an agent which represents a driverless vehicle. The complexity of the problem of driving on the road makes it impossible for a single vehicle to have an accurate and up-to-date knowledge of the overall state of the world . This means that an agent's model of the world is at best uncertain. For instance, the vehicle, through its sensor may detect green light at a junction, and by being aware of what it means, it may infer that it is safe to cross a junction. However, that simply may not be true as another car in the opposite direction may still cross the junction violating their red light. Therefore, there is uncertainty associated with the knowledge "it is safe to cross the road because the light is green", and the agent must recognise that. 
 
 Furthermore, the often conflicting nature of the environment means information obtained from multiple sources (agents) may be inconsistent. Again, this must be taken into consideration when designing an agent which is expected to operate successfully in a potentially conflicting environment. 
+
+## Further Reading
+
+* Wooldridge, M. (2009). _An Introduction to MultiAgent Systems_. Wiley, Second edition.
+* Shoham, Y. and Leyton-Brown, K. (2008). _Multiagent Systems: Algorithmic, Game-Theoretic, and Logical Foundations_. Cambridge University Press
 
 <br />
