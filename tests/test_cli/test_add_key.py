@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the tests for the `aea add-key` sub-command."""
 import os
 import shutil
@@ -24,7 +23,9 @@ import tempfile
 from pathlib import Path
 from unittest import TestCase, mock
 
+import pytest
 import yaml
+from click.exceptions import BadParameter
 
 import aea
 from aea.cli import cli
@@ -358,3 +359,40 @@ class AddKeyCommandTestCase(TestCase):
             standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)
+
+
+@mock.patch("aea.cli.utils.decorators.try_to_load_agent_config")
+@mock.patch("aea.cli.add_key.try_validate_private_key_path")
+@mock.patch("aea.cli.add_key._try_add_key")
+class CheckFileNotExistsTestCase(TestCase):
+    """Test case for CLI add_key command."""
+
+    def setUp(self):
+        """Set it up."""
+        self.runner = CliRunner()
+
+    def test_file_specified_does_not_exist(self, *mocks):
+        """Test for CLI add_key fails on file not exists."""
+        with pytest.raises(BadParameter, match=r"File '.*' does not exist."):
+            self.runner.invoke(
+                cli,
+                [
+                    *CLI_LOG_OPTION,
+                    "--skip-consistency-check",
+                    "add-key",
+                    FETCHAI,
+                    "somefile",
+                ],
+                standalone_mode=False,
+                catch_exceptions=False,
+            )
+
+    def test_file_not_specified_does_not_exist(self, *mocks):
+        """Test for CLI add_key fails on file not exists."""
+        with pytest.raises(BadParameter, match=r"File '.*' does not exist."):
+            self.runner.invoke(
+                cli,
+                [*CLI_LOG_OPTION, "--skip-consistency-check", "add-key", FETCHAI],
+                standalone_mode=False,
+                catch_exceptions=False,
+            )

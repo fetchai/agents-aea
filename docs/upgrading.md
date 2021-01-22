@@ -1,5 +1,9 @@
 This page provides some tips of how to upgrade between versions.
 
+## `v0.9.1` to `v0.9.2`
+
+No backwards incompatible changes for skill and connection development.
+
 ## `v0.9.0` to `v0.9.1`
 
 No backwards incompatible changes for skill and connection development.

@@ -279,46 +279,6 @@ Sign a message in bytes string form.
 
 signature of the message in string form
 
-<a name="aea.crypto.cosmos.CosmosCrypto.format_default_transaction"></a>
-#### format`_`default`_`transaction
-
-```python
- | @staticmethod
- | format_default_transaction(transaction: JSONLike, signature: str, base64_pbk: str) -> JSONLike
-```
-
-Format default CosmosSDK transaction and add signature.
-
-**Arguments**:
-
-- `transaction`: the transaction to be formatted
-- `signature`: the transaction signature
-- `base64_pbk`: the base64 formatted public key
-
-**Returns**:
-
-formatted transaction with signature
-
-<a name="aea.crypto.cosmos.CosmosCrypto.format_wasm_transaction"></a>
-#### format`_`wasm`_`transaction
-
-```python
- | @staticmethod
- | format_wasm_transaction(transaction: JSONLike, signature: str, base64_pbk: str) -> JSONLike
-```
-
-Format CosmWasm transaction and add signature.
-
-**Arguments**:
-
-- `transaction`: the transaction to be formatted
-- `signature`: the transaction signature
-- `base64_pbk`: the base64 formatted public key
-
-**Returns**:
-
-formatted transaction with signature
-
 <a name="aea.crypto.cosmos.CosmosCrypto.sign_transaction"></a>
 #### sign`_`transaction
 
@@ -418,53 +378,24 @@ as the callable_name and the rest of the path as args.
 #### get`_`deploy`_`transaction
 
 ```python
- | get_deploy_transaction(contract_interface: Dict[str, str], deployer_address: Address, tx_fee: int = 0, gas: int = 80000, denom: Optional[str] = None, memo: str = "", chain_id: Optional[str] = None, **kwargs, ,) -> Optional[JSONLike]
+ | get_deploy_transaction(contract_interface: Dict[str, str], deployer_address: Address, **kwargs) -> Optional[JSONLike]
 ```
 
-Create a CosmWasm bytecode deployment transaction.
+Get the transaction to deploy the smart contract.
+
+Dispatches to _get_storage_transaction and _get_init_transaction based on kwargs.
 
 **Arguments**:
 
-- `sender_address`: the sender address of the message initiator.
-- `filename`: the path to wasm bytecode file.
-- `gas`: Maximum amount of gas to be used on executing command.
-- `memo`: any string comment.
-- `chain_id`: the Chain ID of the CosmWasm transaction. Default is 1 (i.e. mainnet).
-
-**Returns**:
-
-the unsigned CosmWasm contract deploy message
-
-<a name="aea.crypto.cosmos._CosmosApi.get_init_transaction"></a>
-#### get`_`init`_`transaction
-
-```python
- | get_init_transaction(deployer_address: Address, code_id: int, init_msg: Any, amount: int, tx_fee: int, gas: int = 80000, denom: Optional[str] = None, label: str = "", memo: str = "", chain_id: Optional[str] = None) -> Optional[JSONLike]
-```
-
-Create a CosmWasm InitMsg transaction.
-
-**Arguments**:
-
-- `deployer_address`: the deployer address of the message initiator.
-- `amount`: Contract's initial funds amount
-- `code_id`: the ID of contract bytecode.
-- `init_msg`: the InitMsg containing parameters for contract constructor.
-- `gas`: Maximum amount of gas to be used on executing command.
-- `denom`: the name of the denomination of the contract funds
-- `label`: the label name of the contract
-- `memo`: any string comment.
-- `chain_id`: the Chain ID of the CosmWasm transaction. Default is 1 (i.e. mainnet).
-
-**Returns**:
-
-the unsigned CosmWasm InitMsg
+- `contract_interface`: the contract interface.
+- `deployer_address`: The address that will deploy the contract.
+:returns tx: the transaction dictionary.
 
 <a name="aea.crypto.cosmos._CosmosApi.get_handle_transaction"></a>
 #### get`_`handle`_`transaction
 
 ```python
- | get_handle_transaction(sender_address: Address, contract_address: Address, handle_msg: Any, amount: int, tx_fee: int, denom: Optional[str] = None, gas: int = 80000, memo: str = "", chain_id: Optional[str] = None) -> Optional[JSONLike]
+ | get_handle_transaction(sender_address: Address, contract_address: Address, handle_msg: Any, amount: int, tx_fee: int, denom: Optional[str] = None, gas: int = 0, memo: str = "", chain_id: Optional[str] = None) -> Optional[JSONLike]
 ```
 
 Create a CosmWasm HandleMsg transaction.
@@ -482,38 +413,11 @@ Create a CosmWasm HandleMsg transaction.
 
 the unsigned CosmWasm HandleMsg
 
-<a name="aea.crypto.cosmos._CosmosApi.try_execute_wasm_transaction"></a>
-#### try`_`execute`_`wasm`_`transaction
+<a name="aea.crypto.cosmos._CosmosApi.execute_contract_query"></a>
+#### execute`_`contract`_`query
 
 ```python
- | @staticmethod
- | @try_decorator(
- |         "Encountered exception when trying to execute wasm transaction: {}",
- |         logger_method=_default_logger.warning,
- |     )
- | try_execute_wasm_transaction(tx_signed: JSONLike, signed_tx_filename: str = "tx.signed") -> Optional[str]
-```
-
-Execute a CosmWasm Transaction. QueryMsg doesn't require signing.
-
-**Arguments**:
-
-- `tx_signed`: the signed transaction.
-
-**Returns**:
-
-the transaction digest
-
-<a name="aea.crypto.cosmos._CosmosApi.try_execute_wasm_query"></a>
-#### try`_`execute`_`wasm`_`query
-
-```python
- | @staticmethod
- | @try_decorator(
- |         "Encountered exception when trying to execute wasm query: {}",
- |         logger_method=_default_logger.warning,
- |     )
- | try_execute_wasm_query(contract_address: Address, query_msg: JSONLike) -> Optional[str]
+ | execute_contract_query(contract_address: Address, query_msg: JSONLike) -> Optional[JSONLike]
 ```
 
 Execute a CosmWasm QueryMsg. QueryMsg doesn't require signing.

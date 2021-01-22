@@ -45,6 +45,7 @@ from aea.configurations.constants import (
 )
 from aea.configurations.data_types import ComponentType, PublicId
 from aea.configurations.loader import ConfigLoader, load_component_configuration
+from aea.configurations.validation import SAME_MARK, filter_data
 from aea.exceptions import AEAException, enforce
 from aea.helpers.env_vars import apply_env_variables
 from aea.helpers.storage.backends.base import JSON_TYPES
@@ -490,6 +491,15 @@ class AgentConfigManager:
 
         :return: None
         """
+        if not overrides:
+            # nothing to update
+            return
+
+        overrides = self._filter_overrides(overrides)
+        if overrides is SAME_MARK:
+            # nothing to update
+            return
+
         for component_id, obj in overrides.get("component_configurations", {}).items():
             component_configuration = self.load_component_configuration(component_id)
             component_configuration.check_overrides_valid(
@@ -497,6 +507,15 @@ class AgentConfigManager:
             )
 
         self.agent_config.update(overrides, env_vars_friendly=self.env_vars_friendly)
+
+    def _filter_overrides(self, overrides: Dict) -> Dict:
+        """Stay only updated values for agent config."""
+        agent_overridable, components_overridables = self.get_overridables()
+
+        agent_overridable["component_configurations"] = components_overridables
+
+        filtered_overrides = filter_data(agent_overridable, overrides)
+        return filtered_overrides
 
     def validate_current_config(self):
         """Check is current config valid."""

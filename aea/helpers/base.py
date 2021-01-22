@@ -25,6 +25,7 @@ import logging
 import os
 import platform
 import re
+import shutil
 import signal
 import subprocess  # nosec
 import sys
@@ -863,3 +864,13 @@ def decorator_with_optional_params(decorator):
         return final_decorator
 
     return new_decorator
+
+
+def delete_directory_contents(directory: Path):
+    """Delete the content of a directory, without deleting it."""
+    enforce(directory.is_dir(), f"Path '{directory}' must be a directory.")
+    for filename in directory.iterdir():
+        if filename.is_file() or filename.is_symlink():
+            filename.unlink()
+        elif filename.is_dir():
+            shutil.rmtree(str(filename), ignore_errors=False)

@@ -34,6 +34,11 @@ from aea.crypto.helpers import try_validate_private_key_path
 from aea.crypto.registries import crypto_registry
 
 
+key_file_argument = click.Path(
+    exists=True, file_okay=True, dir_okay=False, readable=True
+)
+
+
 @click.command()
 @click.argument(
     "type_",
@@ -42,10 +47,7 @@ from aea.crypto.registries import crypto_registry
     required=True,
 )
 @click.argument(
-    "file",
-    metavar="FILE",
-    type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True),
-    required=False,
+    "file", metavar="FILE", type=key_file_argument, required=False,
 )
 @click.option(
     "--connection", is_flag=True, help="For adding a private key for connections."
@@ -76,6 +78,9 @@ def _add_private_key(
     ctx = cast(Context, click_context.obj)
     if file is None:
         file = PRIVATE_KEY_PATH_SCHEMA.format(type_)
+
+    key_file_argument.convert(file, None, click_context)
+
     try_validate_private_key_path(type_, file)
     _try_add_key(ctx, type_, file, connection)
 

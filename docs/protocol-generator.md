@@ -33,32 +33,35 @@ A protocol can be described in a YAML file. As such, it needs to follow the <a h
 name: two_party_negotiation
 author: fetchai
 version: 0.1.0
+description: An example of a protocol specification that describes a protocol for bilateral negotiation.
 license: Apache-2.0
 aea_version: '>=0.9.0, <0.10.0'
-description: 'A protocol for negotiation over a fixed set of resources involving two parties.'
 speech_acts:
   cfp:
-    query: ct:DataModel
+    query: ct:Query
   propose:
-    offer: ct:DataModel
     price: pt:float
+    proposal: pt:dict[pt:str, pt:str]
+    conditions: pt:optional[pt:union[pt:str, pt:dict[pt:str,pt:str], pt:set[pt:str]]]
+    resources: pt:list[pt:bytes]
   accept: {}
   decline: {}
-  match_accept: {}
 ...
 ---
-ct:DataModel: |
-  bytes data_model = 1;
+ct:Query: |
+  bytes query_bytes = 1;
 ...
 ---
+initiation: [cfp]
 reply:
   cfp: [propose, decline]
-  propose: [accept, decline]
-  accept: [decline, match_accept]
+  propose: [propose, accept, decline]
+  accept: []
   decline: []
-  match_accept: []
+termination: [accept, decline]
 roles: {buyer, seller}
-end_states: [successful, failed]
+end_states: [agreement_reached, agreement_unreached]
+keep_terminal_state_dialogues: true
 ...
 ```
 
@@ -79,13 +82,13 @@ The allowed fields and what they represent are:
 
 All of the above fields are mandatory and each is a key/value pair, where both key and value are YAML strings. 
 
-In addition, the first YAML document in a protocol specification must describe the syntax of valid messages according to this protocol. Therefore, there is another mandatory field: `speech-acts`, which defines the set of _performatives_ valid under this protocol, and a set of _contents_ for each performative.
+Additionally, the first YAML document of a protocol specification must describe the syntax of valid messages according to this protocol. Therefore, it must contain another mandatory `speech-acts` field which defines the set of _performatives_ valid under this protocol, and a set of _contents_ for each performative.
 
 A _performative_ defines the type of a message (e.g. propose, accept) and has a set of _contents_ (or parameters) of varying types.
 
-The format of the `speech-act` is as follows: `speech-act` is a dictionary, where each key is a **unique** _performative_ (YAML string), and the value is a _content_ dictionary. If a performative does not have any content, then its content dictionary is empty, e.g. `accept`, `decline` and `match_accept` in the above specification.
+The format of the `speech-act` is as follows: `speech-act` is a dictionary, where each key is a **unique** _performative_ (YAML string), and the value is a _content_ dictionary. If a performative does not have any content, then its content dictionary is empty, for instance `accept` and `decline` in the specification above.
 
-A content dictionary in turn is composed of key/value pairs, where each key is the name of a content (YAML string) and the value is its <a href="../protocol-generator/#types">type</a> (YAML string). For example, the `cfp` (short for 'call for proposal') performative has one content whose name is `query` and whose type is `ct:DataModel`.
+A content dictionary in turn has key/value pairs, where each key is the name of a content (YAML string) and the value is its <a href="../protocol-generator/#types">type</a> (YAML string). For example, the `cfp` (short for 'call for proposal') performative has one content whose name is `query` and whose type is `ct:Query`.
 
 #### Types
 
@@ -94,13 +97,13 @@ The specific types which could be assigned to contents in a protocol specificati
 Types are either user defined (i.e. custom types) or primitive: 
 
 * Custom types are prepended with `ct:` and their format is described using regular expression in the table below. 
-* Primitive types are prepended with `pt:`. There are different categories of primitive types, e.g. `<PT>` such as integers and booleans, `<PCT>` such as sets and lists, and so on. Primitive types are compositional: 
+* Primitive types are prepended with `pt:`. There are different categories of primitive types. For example, `<PT>` such as integers and booleans, `<PCT>` such as sets and lists, and so on. Primitive types are compositional: 
     - For example, consider `pt:set[...]` under `<PCT>`, i.e. an unordered collection of elements without duplicates. A `pt:set[...]` describes the type of its elements (called "sub-type") in square brackets. The sub-type of a `pt:set[...]` must be a `<PT>` (e.g. `pt:int`, `pt:bool`). 
-    - In describing the format of types, `/` between two sub-types should be treated as "or". For example, the sub-type of a `pt:optional[...]` is either a `<PT>`, `<CT>`, `<PCT>`, `<PMT>` or an `<MT>`.
+    - In describing the format of types, `/` between two sub-types should be treated as "or". For example, the sub-type of a `pt:optional[...]` is either a `<PT>`, `<CT>`, `<PCT>`, `<PMT>` or `<MT>`.
 
-A multi type denotes an "or" separated set of sub-types, e.g. `pt:union[pt:str, pt:int]` as the type of a `content` means `content` should either be a `pt:int` or a `pt:float`.
+A multi type denotes an "or" separated set of sub-types. For example, a content whose type is specified as `pt:union[pt:str, pt:int]` should either be `pt:int` or `pt:float`.
 
-An optional type for a content denotes that the content's existence is optional, but if it is present, its type must match `pt:optional[...]`'s sub-type. 
+An optional type `pt:optional[...]` assigned to a content means the content's existence is optional, but if it is present, its type must match `pt:optional[...]`'s sub-type. 
                                                                                                                                                                  
 | Type                                | Code    | Format                                                        | Example                                  | In Python                          |
 | ------------------------------------| --------| --------------------------------------------------------------|------------------------------------------|------------------------------------|
@@ -120,37 +123,51 @@ An optional type for a content denotes that the content's existence is optional,
 
 ### Protocol Buffer Schema
 
-Currently, there is no official method provided by the AEA framework for describing custom types in a programming language independent format. This means that if a protocol specification includes custom types, the required implementations must be provided manually. 
+Currently, the AEA framework does not officially support describing custom types in a programming language independent format. This means that if a protocol specification includes custom types, the required serialisation logic must be provided manually.
 
-Therefore, if any of the contents declared in `speech-acts` is of a custom type, the specification must then have a second YAML document, containing the protocol buffer schema code for every custom type.
+Therefore, if any of the contents declared in `speech-acts` is of a custom type, the specification must then have a second YAML document, containing the protocol buffer schema code for each custom type.
 
 You can see an example of the second YAML document in the above protocol specification.
 
 ### Dialogues
 
-You can optionally describe some of the structural details of dialogues conforming to your protocol in a third YAML document in the protocol specification.
+You can optionally specify the structure of dialogues conforming to your protocol in a third YAML document in the specification.
 
 The allowed fields and what they represent are:
 
+ * `initiation`: The list of initial performatives
  * `reply`: The reply structure of speech-acts
- * `roles`: The roles of agents participating in dialogues
- * `end_states`: The final states a dialogue could end up in.
+ * `termination`: The list of terminal performatives
+ * `roles`: The roles of players participating in a dialogue
+ * `end_states`: The possible outcomes a terminated dialogue.
+ * `keep_terminal_state_dialogues`: whether to keep or dismiss a terminated dialogue.
 
 All of the above fields are mandatory. 
 
+`initiation` is a YAML list, containing the performatives which can be used to start a dialogue. 
+
 `reply` specifies for every performative, what its valid replies are. If a performative `per_1` is a valid reply to another `per_2`, this means a message with performative `per_1` can target a message whose performative is `per_2`.      
 
-`reply` is a dictionary, where the keys are the performatives (YAML string) defined in `speech-acts`. For each performative key, its value is a list of performatives which are defined to be a valid reply. 
+`reply` is a YAML dictionary, where the keys are the performatives (YAML string) defined in `speech-acts`. For each performative key, its value is a list of performatives which are defined to be a valid reply. 
 For example, valid replies to `cfp` are `propose` and `decline`.
 
-`roles` lists the roles are agents which participate in dialogues conforming with your protocol. 
-`roles` takes a set, which may contain two or one roles, each role being a YAML string. 
+`termination` is a YAML list, containing the performatives which terminate a dialogue. Once any of these performatives are used in a dialogue, the dialogue is terminated and no other messages may be added to it.
 
-If there are two roles, each agent has a distinguished role in the dialogue (e.g. buyer and seller in the above specification).
-If there is one role, then the two agents in a dialogue take the same role.
+`roles` is a YAML set, containing the roles  players participating in dialogues can take. `roles` may contain one or two roles, each role being a YAML string. If there are two roles, each participant has a distinguished role in the dialogue (e.g. buyer and seller in the above specification). If there is only one role, then both participants in a dialogue have this same role.
 
-`end_states` lists the final states a dialogue based on your protocol may terminate in. 
-`end_states` is a list of YAML strings. 
+`end_states` lists the final states a terminated dialogue may have. `end_states` is a YAML list of strings. 
+
+`keep_terminal_state_dialogues` has a boolean value and specifies whether the terminated dialogues of this protocol are to be kept or discarded. 
+
+## Design Guidelines
+
+1. `initiation` and `termination` cannot be empty.
+
+2. Make sure that when defining `reply`, you include every speech-act you specified under `speech_acts`. If any of the speech-acts does not have a reply, indicate that with an empty list `[]` similar to `accept` and `decline` in the specification above.
+
+3. If a speech-act is listed in `termination`, it must not have any replies in `reply`. The reason is simple: a terminal speech-act terminates a dialogue and so its reply can never be used.
+
+4. If a speech-act replies to no other speech-acts, it should be listed in `initiation` otherwise it could never be used in a dialogue (neither to a start a dialogue with, nor as a reply to another speech-act). 
 
 ### Notes
 
