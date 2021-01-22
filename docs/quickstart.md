@@ -13,7 +13,7 @@ You need <a href="https://www.python.org/downloads/" target="_blank">Python 3.6<
 ​
 ### Option 1: Manual system preparation
 
-Install a compatible Python and Go version on your system.
+Install a compatible Python and Go version on your system (see <a href="https://realpython.com/installing-python/" target="_blank">this external resource</a> for a comprehensive guide).
 
 The following hints can help:
 
@@ -141,7 +141,7 @@ Confirm password:
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.9.1
+v0.9.2
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
@@ -232,7 +232,7 @@ You will see the echo skill running in the terminal window.
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.9.1
+v0.9.2
 
 Starting AEA 'my_first_aea' in 'async' mode ...
 info: Echo Handler: setup method called.

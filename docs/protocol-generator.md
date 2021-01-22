@@ -135,27 +135,27 @@ You can optionally specify the structure of dialogues conforming to your protoco
 
 The allowed fields and what they represent are:
 
- * `initiation`: The list of initial prformatives
+ * `initiation`: The list of initial performatives
  * `reply`: The reply structure of speech-acts
- * `termination`: The list of terminal prformatives
+ * `termination`: The list of terminal performatives
  * `roles`: The roles of players participating in a dialogue
  * `end_states`: The possible outcomes a terminated dialogue.
  * `keep_terminal_state_dialogues`: whether to keep or dismiss a terminated dialogue.
 
 All of the above fields are mandatory. 
 
-`initiation` is a yaml list, containing the performatives which can be used to start a dialogue. 
+`initiation` is a YAML list, containing the performatives which can be used to start a dialogue. 
 
 `reply` specifies for every performative, what its valid replies are. If a performative `per_1` is a valid reply to another `per_2`, this means a message with performative `per_1` can target a message whose performative is `per_2`.      
 
-`reply` is a yaml dictionary, where the keys are the performatives (YAML string) defined in `speech-acts`. For each performative key, its value is a list of performatives which are defined to be a valid reply. 
+`reply` is a YAML dictionary, where the keys are the performatives (YAML string) defined in `speech-acts`. For each performative key, its value is a list of performatives which are defined to be a valid reply. 
 For example, valid replies to `cfp` are `propose` and `decline`.
 
-`termination` is a yaml list, containing the performatives which terminate a dialogue. Once any of these performatives are used in a dialogue, the dialogue is terminated and no other messages may be added to it.
+`termination` is a YAML list, containing the performatives which terminate a dialogue. Once any of these performatives are used in a dialogue, the dialogue is terminated and no other messages may be added to it.
 
-`roles` is a yaml set, containing the roles  players participating in dialogues can take. `roles` may contain one or two roles, each role being a YAML string. If there are two roles, each participant has a distinguished role in the dialogue (e.g. buyer and seller in the above specification). If there is only one role, then both participants in a dialogue have this same role.
+`roles` is a YAML set, containing the roles  players participating in dialogues can take. `roles` may contain one or two roles, each role being a YAML string. If there are two roles, each participant has a distinguished role in the dialogue (e.g. buyer and seller in the above specification). If there is only one role, then both participants in a dialogue have this same role.
 
-`end_states` lists the final states a terminated dialogue may have. `end_states` is a yaml list of strings. 
+`end_states` lists the final states a terminated dialogue may have. `end_states` is a YAML list of strings. 
 
 `keep_terminal_state_dialogues` has a boolean value and specifies whether the terminated dialogues of this protocol are to be kept or discarded. 
 

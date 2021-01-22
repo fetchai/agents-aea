@@ -1,5 +1,5 @@
 ``` bash
-aea fetch fetchai/tac_controller:0.17.0
+aea fetch fetchai/tac_controller:0.18.0
 cd tac_controller
 aea install
 aea build
@@ -10,7 +10,7 @@ cd tac_controller
 aea add connection fetchai/p2p_libp2p:0.14.0
 aea add connection fetchai/soef:0.15.0
 aea add connection fetchai/ledger:0.12.0
-aea add skill fetchai/tac_control:0.14.0
+aea add skill fetchai/tac_control:0.15.0
 aea config set agent.default_connection fetchai/p2p_libp2p:0.14.0
 aea config set agent.default_ledger fetchai
 aea config set --type dict agent.default_routing \
@@ -21,12 +21,12 @@ aea install
 aea build
 ```
 ``` bash
-aea fetch fetchai/tac_participant:0.19.0 --alias tac_participant_one
+aea fetch fetchai/tac_participant:0.20.0 --alias tac_participant_one
 cd tac_participant_one
 aea install
 aea build
 cd ..
-aea fetch fetchai/tac_participant:0.19.0 --alias tac_participant_two
+aea fetch fetchai/tac_participant:0.20.0 --alias tac_participant_two
 cd tac_participant_two
 aea build
 ```
@@ -39,8 +39,8 @@ cd tac_participant_one
 aea add connection fetchai/p2p_libp2p:0.14.0
 aea add connection fetchai/soef:0.15.0
 aea add connection fetchai/ledger:0.12.0
-aea add skill fetchai/tac_participation:0.15.0
-aea add skill fetchai/tac_negotiation:0.17.0
+aea add skill fetchai/tac_participation:0.16.0
+aea add skill fetchai/tac_negotiation:0.18.0
 aea config set agent.default_connection fetchai/p2p_libp2p:0.14.0
 aea config set agent.default_ledger fetchai
 aea config set --type dict agent.default_routing \
@@ -56,8 +56,8 @@ cd tac_participant_two
 aea add connection fetchai/p2p_libp2p:0.14.0
 aea add connection fetchai/soef:0.15.0
 aea add connection fetchai/ledger:0.12.0
-aea add skill fetchai/tac_participation:0.15.0
-aea add skill fetchai/tac_negotiation:0.17.0
+aea add skill fetchai/tac_participation:0.16.0
+aea add skill fetchai/tac_negotiation:0.18.0
 aea config set agent.default_connection fetchai/p2p_libp2p:0.14.0
 aea config set agent.default_ledger fetchai
 aea config set --type dict agent.default_routing \

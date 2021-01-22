@@ -77,7 +77,7 @@ The framework wraps all `LedgerApi` classes and exposes them in the <a href="../
 The separation between the `Crypto` and `LedgerApi` is fundamental to the framework design. In particular, the object which holds the private key is separated from the object which interacts with the ledger. This design pattern is repeated throughout the framework: the decision maker is the only entity with access to the AEA's `Wallet` whilst `LedgerApis` are accessible by all skills.
 
 
-## Cosmwasm-supporting chains
+## CosmWasm supporting chains
 
 The Fetch.ai networks use <a href="https://cosmwasm.com" target="_blank">CosmWasm</a> for smart contract support.
 
@@ -89,7 +89,7 @@ Currently, to use the smart contract functionality of the Fetch.ai network you h
 curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh
 ```
 
-2. Update the configs for rust:
+2. Update the configuration for Rust:
 
 ``` bash
 rustup default stable
@@ -101,7 +101,7 @@ rustup target list --installed
 rustup target add wasm32-unknown-unknown
 ```
 
-3. Install Fetchd:
+3. Install `fetchd`:
 
 ``` bash
 git clone https://github.com/fetchai/fetchd.git
@@ -114,7 +114,7 @@ wasmcli version
 # Version should be >=0.2.5
 ```
 
-4. Configure wasmcli:
+4. Configure `wasmcli`:
 
 ``` bash
 wasmcli config chain-id agent-land
@@ -125,4 +125,4 @@ wasmcli config indent true
 wasmcli config broadcast-mode block
 ```
 
-Now wasmcli will be ready for use on your system.
+Now `wasmcli` will be ready for use on your system.
