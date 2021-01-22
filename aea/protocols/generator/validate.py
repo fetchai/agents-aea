@@ -580,6 +580,16 @@ def _validate_initiation(
                 ),
             )
 
+    # check that there are no repetitive performatives in initiation
+    number_of_duplicates = len(initiation) - len(set(initiation))
+    if number_of_duplicates > 0:
+        return (
+            False,
+            'There are {} duplicate performatives in "initiation".'.format(
+                number_of_duplicates,
+            ),
+        )
+
     return True, "Initial messages are valid."
 
 
@@ -712,16 +722,6 @@ def _validate_termination(
             return (
                 False,
                 'The terminal performative \'{}\' specified in "termination" is assigned replies in "reply".'.format(
-                    performative,
-                ),
-            )
-
-    # check performatives with no replies are specified as terminal performatives
-    for performative in terminal_performatives_from_reply:
-        if performative not in termination:
-            return (
-                False,
-                "The performative '{}' has no replies but is not listed as a terminal performative in \"termination\".".format(
                     performative,
                 ),
             )
