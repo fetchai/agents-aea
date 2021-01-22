@@ -22,7 +22,7 @@ import json
 import os
 from copy import deepcopy
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import jsonschema
 from jsonschema import Draft4Validator
@@ -313,3 +313,31 @@ def validate_data_with_pattern(
             )
 
     return errors
+
+
+SAME_MARK = object()
+
+
+def filter_data(base: Any, updates: Any) -> Any:
+    """Return difference in values or `SAME_MARK` object if values are the same."""
+    if not isinstance(updates, type(base)):
+        return updates
+
+    if not isinstance(base, dict):
+        if base == updates:
+            return SAME_MARK
+        return updates
+
+    new_keys = set(updates.keys()) - set(base.keys())
+    common_keys = set(updates.keys()).intersection(set(base.keys()))
+    new_data = {key: updates[key] for key in new_keys}
+
+    for key in common_keys:
+        value = filter_data(base[key], updates[key])
+        if value is SAME_MARK:
+            continue
+        new_data[key] = value
+
+    if not new_data:
+        return SAME_MARK
+    return new_data
