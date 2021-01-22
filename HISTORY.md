@@ -8,6 +8,7 @@
 - Extend `upgrade` command to fetch newer agent if present on registry
 - Add support for mixed fetch mode in `MultiAgentManager`
 - Fixes logging overrides in `MultiAgentManager`
+- Configuration overrides now properly handle `None` values
 - Multiple docs updates based on user feedback
 - Multiple additional tests and test stability fixes
 

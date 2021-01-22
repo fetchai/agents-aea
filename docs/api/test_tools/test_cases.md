@@ -347,7 +347,7 @@ Result
 
 ```python
  | @classmethod
- | scaffold_item(cls, item_type: str, name: str) -> Result
+ | scaffold_item(cls, item_type: str, name: str, skip_consistency_check: bool = False) -> Result
 ```
 
 Scaffold an item for the agent.
@@ -358,6 +358,7 @@ Run from agent's directory.
 
 - `item_type`: str item type.
 - `name`: name of the item.
+- `skip_consistency_check`: if True, skip consistency check.
 
 **Returns**:
 
