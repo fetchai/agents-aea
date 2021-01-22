@@ -10,6 +10,21 @@ function install_python {
 
 }
 
+function install_build_tools {
+	$output=pip install wheel --force --no-cache-dir 2>&1 |out-string;
+	$output=pip wheel cytoolz --no-cache-dir 2>&1 |out-string;
+    if ($LastExitCode -ne 0) {
+    	echo "Installing visual studio build tools"
+	    Invoke-WebRequest https://download.microsoft.com/download/5/f/7/5f7acaeb-8363-451f-9425-68a90f98b238/visualcppbuildtools_full.exe -OutFile visualcppbuildtools_full.exe
+	    ./visualcppbuildtools_full.exe /NoRestart /Passive | Out-Null
+	    rm ./visualcppbuildtools_full.exe
+	} else{
+		echo "Visual studio build tools are already installed"
+
+	}
+
+}
+
 function install_aea {
 	echo "Install aea"
     $output=pip install aea[all]==0.9.2 --force --no-cache-dir 2>&1 |out-string;
@@ -48,6 +63,7 @@ function check_python {
 function main{
     refresh-path
     check_python
+    install_build_tools
     refresh-path
     install_aea
     pause
