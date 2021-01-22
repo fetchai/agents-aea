@@ -32,6 +32,7 @@ from aea.configurations.manager import (
     find_component_directory_from_component_id,
     handle_dotted_path,
 )
+from aea.configurations.validation import SAME_MARK
 from aea.exceptions import AEAException
 
 from tests.conftest import ROOT_DIR
@@ -138,7 +139,8 @@ def test_envvars_applied():
     )
 
 
-def test_envvars_preserved():
+@patch.object(AgentConfigManager, "get_overridables", return_value=[{}, {}])
+def test_envvars_preserved(*mocks):
     """Test env vars not modified on config update."""
     dct = deepcopy(agent_config_data)
     new_cosmos_key_value = "cosmons_key_updated"
@@ -283,3 +285,24 @@ def test_find_component_directory_from_component_id():
                 component_type=CONNECTION, public_id=PublicId("test", "test", "1.0.1")
             ),
         )
+
+
+def test_agent_attribute_get_and_apply_overridables():
+    """Test AgentConfigManager.get_overridables and apply it."""
+    agent_config_manager = AgentConfigManager.load(DUMMY_AEA, substitude_env_vars=False)
+    initial_agent_config_json = agent_config_manager.json
+
+    agent_overrides, component_overrides = agent_config_manager.get_overridables()
+
+    agent_config_manager.update_config(agent_overrides)
+    assert initial_agent_config_json == agent_config_manager.json
+
+    agent_overrides["component_configurations"] = component_overrides
+    agent_config_manager.update_config(agent_overrides)
+
+    assert agent_config_manager._filter_overrides(agent_overrides) == SAME_MARK
+
+    agent_overrides["execution_timeout"] = 12
+    assert agent_config_manager._filter_overrides(agent_overrides) == {
+        "execution_timeout": 12
+    }
