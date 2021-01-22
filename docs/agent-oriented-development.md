@@ -47,9 +47,9 @@ All of this makes asynchronisation the preferred method for designing agent proc
 
 ## Time
 
-Closely related with the discussion of asynchronicity is the idea that time is not a universally agreed notion in multi-agent systems. Any two agents `i` and `j` may not necessarily share the same clock and this must be taken into account when designing systems comprising these agents. For example, you cannot necessarily expect agents to synchronise their behaviour according to time (e.g. perform a certain task at a certain time). 
+Closely related with the discussion of asynchronicity, is the idea that in multi-agent systems, time is not a universally agreed notion. Agents may not necessarily share the same clock and this fact must be taken into account when designing agent-based systems. For example, you cannot necessarily expect agents to synchronise their behaviour according to time (e.g. perform a certain task at a time `X`). 
 
-Another time-related issue is that, unlike some agent-based simulation (ABS) systems where there is a global tick rate for all agents, in AEA-based systems tick rates may be different for different agents. This is because of a fundamental difference, where ABS systems control some aspects of all of their agents' execution while in AEA-based systems, agents are truely decoupled from one another  - most likely distributed and running on different machines and networks - and there is absolutely no central unit that moderates any aspect of their behaviour.    
+Another related issue, is that unlike some agent-based simulation (ABS) systems where there is a global tick rate for all agents, in AEA-based systems tick rates may be different for different agents. This is due to the fundamental difference that ABS systems control some aspects of all of their agents' executions while in AEA-based systems, agents are truely decoupled from one another  - most likely distributed and running on different machines and networks - and there is absolutely no central unit that moderates any aspect of their behaviour.    
 
 ## Complex, Incomplete, Inconsistent and Uncertain
 
