@@ -1,6 +1,6 @@
 # Agent-oriented development
 
-In this section, we discuss some of the most fundamental char of the existing paradigms and methodologies you may be used to. We hope that with this, we can guide you towards having the right mindset when you are designing your own agent-based solutioacteristics of an agent-oriented approach to solution development, which might be different from somensacteristics of an agent-oriented approach to solution development, which might be different from some to real world problems.
+In this section, we discuss some of the most fundamental characteristics of an agent-oriented approach to solution development, which might be different from existing paradigms and methodologies that you may be used to. We hope that with this, we can guide you towards the right mindset when designing your own agent-based solutions to real world problems.
 
 ## Decentralisation
 
