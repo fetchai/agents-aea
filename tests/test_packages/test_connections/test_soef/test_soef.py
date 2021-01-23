@@ -644,7 +644,7 @@ class TestSoef:
     @pytest.mark.asyncio
     async def test_request(self):
         """Test internal method request_text."""
-        with patch("requests.request"):
+        with patch("aea.helpers.http_requests.request"):
             await self.connection.channel._request_text("get", "http://not-exists.com")
 
     @pytest.mark.asyncio
