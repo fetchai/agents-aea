@@ -47,7 +47,7 @@ class RegexComparator(str):
         """Check equality."""
         regex = re.compile(str(self), re.MULTILINE | re.DOTALL)
         s = str(other)
-        return bool(regex.match(s))
+        return bool(regex.search(s))
 
 
 @contextmanager

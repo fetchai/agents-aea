@@ -425,6 +425,27 @@ Set the storage uri.
 
 self
 
+<a name="aea.aea_builder.AEABuilder.set_logging_config"></a>
+#### set`_`logging`_`config
+
+```python
+ | set_logging_config(logging_config: Dict) -> "AEABuilder"
+```
+
+Set the logging configurations.
+
+The dictionary must satisfy the following schema:
+
+https://docs.python.org/3/library/logging.config.html#logging-config-dictschema
+
+**Arguments**:
+
+- `logging_config`: the logging configurations.
+
+**Returns**:
+
+self
+
 <a name="aea.aea_builder.AEABuilder.set_search_service_address"></a>
 #### set`_`search`_`service`_`address
 

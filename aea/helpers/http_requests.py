@@ -16,10 +16,32 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+"""Wrapper over requests library."""
+from functools import wraps
+from typing import Callable
 
-"""This module contains the implementation of the tac control skill."""
+import requests
 
-from aea.configurations.base import PublicId
+from aea.helpers.constants import NETWORK_REQUEST_DEFAULT_TIMEOUT
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/tac_control:0.15.0")
+DEFAULT_TIMEOUT = NETWORK_REQUEST_DEFAULT_TIMEOUT
+
+
+def add_default_timeout(fn: Callable, timeout: float) -> Callable:
+    """Add default timeout for requests methods."""
+
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        kwargs["timeout"] = kwargs.get("timeout", timeout)
+        return fn(*args, **kwargs)
+
+    return wrapper
+
+
+get = add_default_timeout(requests.get, DEFAULT_TIMEOUT)
+post = add_default_timeout(requests.post, DEFAULT_TIMEOUT)
+request = add_default_timeout(requests.request, DEFAULT_TIMEOUT)
+head = add_default_timeout(requests.head, DEFAULT_TIMEOUT)
+
+exceptions = requests.exceptions

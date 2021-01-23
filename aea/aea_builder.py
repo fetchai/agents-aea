@@ -54,6 +54,7 @@ from aea.configurations.constants import (
     DEFAULT_CONNECTION,
     DEFAULT_ENV_DOTFILE,
     DEFAULT_LEDGER,
+    DEFAULT_LOGGING_CONFIG,
     DEFAULT_PROTOCOL,
     DEFAULT_REGISTRY_NAME,
 )
@@ -381,6 +382,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self._runtime_mode: Optional[str] = None
         self._search_service_address: Optional[str] = None
         self._storage_uri: Optional[str] = None
+        self._logging_config: Dict = DEFAULT_LOGGING_CONFIG
 
         self._package_dependency_manager = _DependenciesManager()
         if self._with_default_packages:
@@ -560,6 +562,22 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :return: self
         """
         self._storage_uri = storage_uri
+        return self
+
+    def set_logging_config(
+        self, logging_config: Dict
+    ) -> "AEABuilder":  # pragma: nocover
+        """
+        Set the logging configurations.
+
+        The dictionary must satisfy the following schema:
+
+          https://docs.python.org/3/library/logging.config.html#logging-config-dictschema
+
+        :param logging_config: the logging configurations.
+        :return: self
+        """
+        self._logging_config = logging_config
         return self
 
     def set_search_service_address(
@@ -1100,6 +1118,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :raises ValueError: if we cannot
         """
         self._check_we_can_build()
+        logging.config.dictConfig(self._logging_config)
         wallet = Wallet(
             copy(self.private_key_paths), copy(self.connection_private_key_paths)
         )
@@ -1454,6 +1473,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self.set_loop_mode(agent_configuration.loop_mode)
         self.set_runtime_mode(agent_configuration.runtime_mode)
         self.set_storage_uri(agent_configuration.storage_uri)
+        self.set_logging_config(agent_configuration.logging_config)
 
         # load private keys
         for (
@@ -1561,7 +1581,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         """
         aea_project_path = Path(aea_project_path)
         cls.try_to_load_agent_configuration_file(aea_project_path)
-
         load_env_file(str(aea_project_path / DEFAULT_ENV_DOTFILE))
 
         # check and create missing, do not replace env variables. updates config
