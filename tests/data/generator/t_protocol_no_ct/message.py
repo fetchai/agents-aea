@@ -1165,13 +1165,6 @@ class TProtocolNoCtMessage(Message):
                         self.target
                     ),
                 )
-            else:
-                enforce(
-                    0 < self.target < self.message_id,
-                    "Invalid 'target'. Expected an integer between 1 and {} inclusive. Found {}.".format(
-                        self.message_id - 1, self.target,
-                    ),
-                )
         except (AEAEnforceError, ValueError, KeyError) as e:
             _default_logger.error(str(e))
             return False

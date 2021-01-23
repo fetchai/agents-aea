@@ -1136,7 +1136,7 @@ class TestSigningHandler(BaseSkillTestCase):
             performative=FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
             to=fipa_dialogue.dialogue_label.dialogue_opponent_addr,
             # (line below) match-accept is already added to fipa_dialogue, hence "-1"
-            target=fipa_dialogue.last_message.message_id - 1,
+            target=fipa_dialogue.last_incoming_message.message_id,
             sender=self.skill.skill_context.agent_address,
             info={"signature": incoming_message.signed_message.body},
         )
@@ -1352,7 +1352,6 @@ class TestSigningHandler(BaseSkillTestCase):
             performative=FipaMessage.Performative.MATCH_ACCEPT_W_INFORM,
             to=fipa_dialogue.dialogue_label.dialogue_opponent_addr,
             # (line below) match-accept is already added to fipa_dialogue, hence "-1"
-            target=fipa_dialogue.last_message.message_id - 1,
             sender=self.skill.skill_context.agent_address,
             info={"tx_signature": incoming_message.signed_transaction},
         )

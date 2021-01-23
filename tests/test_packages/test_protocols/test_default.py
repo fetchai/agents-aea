@@ -36,7 +36,7 @@ from packages.fetchai.protocols.default.dialogues import (
 from packages.fetchai.protocols.default.dialogues import (
     DefaultDialogues as BaseDefaultDialogues,
 )
-from packages.fetchai.protocols.default.message import DefaultMessage, _default_logger
+from packages.fetchai.protocols.default.message import DefaultMessage
 
 
 def test_default_bytes_serialization():
@@ -127,38 +127,6 @@ def test_default_valid_performatives():
     assert msg.valid_performatives == set(
         map(lambda x: x.value, iter(DefaultMessage.Performative))
     )
-
-
-def test_light_protocol_rule_3_target_0():
-    """Test that if message_id is not 1, target must be > 0"""
-    with patch.object(_default_logger, "error") as mock_logger:
-        message_id = 2
-        target = 0
-        DefaultMessage(
-            message_id=message_id,
-            target=target,
-            performative=DefaultMessage.Performative.BYTES,
-            content=b"",
-        )
-        mock_logger.assert_any_call(
-            f"Invalid 'target'. Expected an integer between 1 and {message_id - 1} inclusive. Found {target}."
-        )
-
-
-def test_light_protocol_rule_3_target_less_than_message_id():
-    """Test that if message_id is not 1, target must be > message_id"""
-    with patch.object(_default_logger, "error") as mock_logger:
-        message_id = 2
-        target = 2
-        DefaultMessage(
-            message_id=message_id,
-            target=target,
-            performative=DefaultMessage.Performative.BYTES,
-            content=b"",
-        )
-        mock_logger.assert_any_call(
-            f"Invalid 'target'. Expected an integer between 1 and {message_id - 1} inclusive. Found {target}."
-        )
 
 
 def test_serializer_performative_not_found():
