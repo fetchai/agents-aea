@@ -40,10 +40,10 @@ clean-test:
 
 .PHONY: lint
 lint:
-	black cosmos_crypto
-	isort cosmos_crypto
-	flake8 cosmos_crypto
-	vulture cosmos_crypto
+	black cosmos_crypto tests
+	isort cosmos_crypto tests
+	flake8 cosmos_crypto tests
+	vulture cosmos_crypto scripts/whitelist.py
 
 .PHONY: pylint
 pylint:
@@ -51,13 +51,13 @@ pylint:
 
 .PHONY: security
 security:
-	bandit -r cosmos_crypto
+	bandit -r cosmos_crypto tests
 	bandit -s B101 -r tests scripts
 	safety check -i 37524 -i 38038 -i 37776 -i 38039
 
 .PHONY: static
 static:
-	mypy cosmos_crypto
+	mypy cosmos_crypto tests
 
 .PHONY: common_checks
 common_checks: security lint static

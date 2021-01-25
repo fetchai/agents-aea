@@ -20,8 +20,13 @@
 
 """Setup script for "fetchai_crypto" package."""
 
+import os
+
 from setuptools import find_packages, setup
 
+
+here = os.path.abspath(os.path.dirname(__file__))
+plugin_dir = os.path.abspath(os.path.join(here, ".."))
 
 setup(
     name="fetchai_crypto",
@@ -30,7 +35,12 @@ setup(
     license="Apache-2.0",
     description="Python package wrapping the public and private key cryptography and ledger API of Fetch.AI.",
     packages=find_packages(include=["fetchai_crypto*"]),
-    install_requires=["aea>=0.9.0,<0.10.0", "ecdsa==0.15", "bech32==1.2.0"],
+    install_requires=[
+        "aea>=0.9.0,<0.10.0",
+        "ecdsa==0.15",
+        "bech32==1.2.0",
+        f"cosmos_crypto @ file://{plugin_dir}/cosmos-crypto#egg=cosmos_crypto",
+    ],
     tests_require=["pytest"],
     entry_points={
         "aea.cryptos": ["fetchai = fetchai_crypto:FetchAICrypto"],

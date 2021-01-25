@@ -21,9 +21,9 @@
 import inspect
 import os
 
-from cosmos_crypto import CosmosCrypto
-
 from aea.configurations.constants import PRIVATE_KEY_PATH_SCHEMA
+
+from cosmos_crypto import CosmosCrypto
 
 
 CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore

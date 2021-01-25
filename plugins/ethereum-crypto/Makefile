@@ -40,10 +40,10 @@ clean-test:
 
 .PHONY: lint
 lint:
-	black ethereum_crypto
-	isort ethereum_crypto
-	flake8 ethereum_crypto
-	vulture ethereum_crypto
+	black ethereum_crypto tests
+	isort ethereum_crypto tests
+	flake8 ethereum_crypto tests
+	vulture ethereum_crypto scripts/whitelist.py
 
 .PHONY: pylint
 pylint:
@@ -51,13 +51,13 @@ pylint:
 
 .PHONY: security
 security:
-	bandit -r ethereum_crypto
+	bandit -r ethereum_crypto tests
 	bandit -s B101 -r tests scripts
 	safety check -i 37524 -i 38038 -i 37776 -i 38039
 
 .PHONY: static
 static:
-	mypy ethereum_crypto
+	mypy ethereum_crypto tests
 
 .PHONY: common_checks
 common_checks: security lint static

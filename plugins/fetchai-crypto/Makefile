@@ -40,24 +40,24 @@ clean-test:
 
 .PHONY: lint
 lint:
-	black fetchai_crypto
-	isort fetchai_crypto
-	flake8 fetchai_crypto
-	vulture fetchai_crypto
+	black fetchai_crypto tests
+	isort fetchai_crypto tests
+	flake8 fetchai_crypto tests
+	vulture fetchai_crypto scripts/whitelist.py
 
 .PHONY: pylint
 pylint:
-	pylint fetchai_crypto
+	pylint fetchai_crypto tests
 
 .PHONY: security
 security:
-	bandit -r fetchai_crypto
+	bandit -r fetchai_crypto tests
 	bandit -s B101 -r tests scripts
 	safety check -i 37524 -i 38038 -i 37776 -i 38039
 
 .PHONY: static
 static:
-	mypy fetchai_crypto
+	mypy fetchai_crypto tests
 
 .PHONY: common_checks
 common_checks: security lint static

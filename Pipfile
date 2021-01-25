@@ -57,8 +57,8 @@ vulture = "==2.1"
 vyper = "==0.1.0b12"
 isort = "==5.5.2"
 fetchai-crypto = {editable = true, path = "./plugins/fetchai-crypto"}
-ethereum-crypto = {editable = true, path = "./plugins/ethereum-crypto"}
-cosmos-crypto = {editable = true, path = "./plugins/cosmos-crypto"}
+ethereum-crypto = {path = "./plugins/ethereum-crypto"}
+cosmos-crypto = {path = "./plugins/cosmos-crypto"}
 
 [packages]
 # we don't specify dependencies for the library here for intallation as per: https://pipenv-fork.readthedocs.io/en/latest/advanced.html#pipfile-vs-setuppy

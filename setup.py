@@ -60,6 +60,7 @@ base_deps = [
     "pyyaml>=4.2b1",
     "requests>=2.22.0",
     "python-dotenv>=0.14.0",
+    "ecdsa>=0.16"
 ]
 
 about = {}
