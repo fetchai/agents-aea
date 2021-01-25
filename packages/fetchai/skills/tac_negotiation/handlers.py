@@ -233,11 +233,17 @@ class FipaNegotiationHandler(Handler):
         """
         fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
 
-        if decline.target == 1:
+        target_message = fipa_dialogue.get_message_by_id(decline.target)
+
+        if not target_message:
+            raise ValueError("Can not find target message!")
+
+        declined_performative = target_message.performative
+        if declined_performative == FipaMessage.Performative.CFP:
             fipa_dialogues.dialogue_stats.add_dialogue_endstate(
                 FipaDialogue.EndState.DECLINED_CFP, fipa_dialogue.is_self_initiated
             )
-        elif decline.target == 2:
+        if declined_performative == FipaMessage.Performative.PROPOSE:
             fipa_dialogues.dialogue_stats.add_dialogue_endstate(
                 FipaDialogue.EndState.DECLINED_PROPOSE, fipa_dialogue.is_self_initiated
             )
@@ -245,7 +251,7 @@ class FipaNegotiationHandler(Handler):
             terms = transactions.pop_pending_proposal(
                 fipa_dialogue.dialogue_label, decline.target
             )
-        elif decline.target == 3:
+        if declined_performative == FipaMessage.Performative.ACCEPT:
             fipa_dialogues.dialogue_stats.add_dialogue_endstate(
                 FipaDialogue.EndState.DECLINED_ACCEPT, fipa_dialogue.is_self_initiated
             )

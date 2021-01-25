@@ -138,16 +138,7 @@ def test_helper_is_settled():
 def test_cosmos_api_get_deploy_transaction(*args):
     """Test CosmosApi._get_deploy_transaction."""
     cosmos_api = CosmosApi()
-    assert cosmos_api.get_deploy_transaction(*[Mock()] * 7) is None
-
-
-@patch.object(
-    CosmosApi, "_try_get_account_number_and_sequence", return_value=(None, None)
-)
-def test_cosmos_api_get_init_transaction(*args):
-    """Test CosmosApi.get_init_transaction."""
-    cosmos_api = CosmosApi()
-    assert cosmos_api.get_init_transaction(*[Mock()] * 7) is None
+    assert cosmos_api.get_deploy_transaction(*[Mock()] * 2) is None
 
 
 @patch.object(

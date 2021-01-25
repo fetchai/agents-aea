@@ -595,3 +595,12 @@ or as:
 def myfunction():
     ...
 
+<a name="aea.helpers.base.delete_directory_contents"></a>
+#### delete`_`directory`_`contents
+
+```python
+delete_directory_contents(directory: Path)
+```
+
+Delete the content of a directory, without deleting it.
+

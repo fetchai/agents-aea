@@ -187,10 +187,23 @@ Add error callback to call on error raised.
 #### start`_`manager
 
 ```python
- | start_manager(local: bool = True) -> "MultiAgentManager"
+ | start_manager(local: bool = False, remote: bool = False) -> "MultiAgentManager"
 ```
 
 Start manager.
+
+If local = False and remote = False, then the packages
+are fetched in mixed mode (i.e. first try from local
+registry, and then from remote registry in case of failure).
+
+**Arguments**:
+
+- `local`: whether or not to fetch from local registry.
+- `remote`: whether or not to fetch from remote registry.
+
+**Returns**:
+
+the MultiAgentManager instance.
 
 <a name="aea.manager.manager.MultiAgentManager.stop_manager"></a>
 #### stop`_`manager
@@ -216,15 +229,20 @@ None
 #### add`_`project
 
 ```python
- | add_project(public_id: PublicId, local: bool = True, restore: bool = False) -> "MultiAgentManager"
+ | add_project(public_id: PublicId, local: bool = False, remote: bool = False, restore: bool = False) -> "MultiAgentManager"
 ```
 
 Fetch agent project and all dependencies to working_dir.
+
+If local = False and remote = False, then the packages
+are fetched in mixed mode (i.e. first try from local
+registry, and then from remote registry in case of failure).
 
 **Arguments**:
 
 - `public_id`: the public if of the agent project.
 - `local`: whether or not to fetch from local registry.
+- `remote`: whether or not to fetch from remote registry.
 - `restore`: bool flag for restoring already fetched agent.
 
 <a name="aea.manager.manager.MultiAgentManager.remove_project"></a>

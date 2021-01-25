@@ -33,7 +33,6 @@ def get_all_extras() -> Dict:
         "click",
         "pyyaml>=4.2b1",
         "jsonschema>=3.0.0",
-        "python-dotenv",
     ]
 
     cli_gui = ["flask", "connexion[swagger-ui]>=2.4.0", "docker", *cli_deps]
@@ -60,6 +59,7 @@ base_deps = [
     "pymultihash==0.8.2",
     "pyyaml>=4.2b1",
     "requests>=2.22.0",
+    "python-dotenv>=0.14.0",
 ]
 
 about = {}

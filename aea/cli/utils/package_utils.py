@@ -27,7 +27,7 @@ from typing import Dict, Optional, Set, Tuple
 import click
 from jsonschema import ValidationError
 
-from aea import AEA_DIR
+from aea import AEA_DIR, get_current_aea_version
 from aea.cli.fingerprint import fingerprint_item
 from aea.cli.utils.config import (
     dump_item_config,
@@ -42,6 +42,7 @@ from aea.configurations.base import (
     ComponentConfiguration,
     ComponentId,
     ComponentType,
+    PackageConfiguration,
     PackageType,
     PublicId,
     _compute_fingerprint,
@@ -67,7 +68,7 @@ from aea.crypto.helpers import private_key_verify_or_create
 from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS, LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.exceptions import AEAEnforceError
-from aea.helpers.base import recursive_update
+from aea.helpers.base import compute_specifier_from_version, recursive_update
 from aea.helpers.sym_link import create_symlink
 
 
@@ -807,3 +808,15 @@ def fingerprint_all(ctx: Context) -> None:
         item_type = package_path.parent.name[:-1]
         config = load_item_config(item_type, package_path)
         fingerprint_item(ctx, item_type, config.public_id)
+
+
+def update_aea_version_range(package_configuration: PackageConfiguration) -> None:
+    """Update 'aea_version' range."""
+    version = get_current_aea_version()
+    if not package_configuration.aea_version_specifiers.contains(version):
+        new_aea_version = compute_specifier_from_version(version)
+        old_aea_version = package_configuration.aea_version
+        click.echo(
+            f"Updating AEA version specifier from {old_aea_version} to {new_aea_version}."
+        )
+        package_configuration.aea_version = new_aea_version

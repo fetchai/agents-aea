@@ -44,7 +44,6 @@ def issue_certificates(click_context):
     ctx = cast(Context, click_context.obj)
     agent_config_manager = AgentConfigManager.load(ctx.cwd)
     issue_certificates_(ctx.cwd, agent_config_manager)
-    click.echo("All certificates have been issued.")
 
 
 def issue_certificates_(

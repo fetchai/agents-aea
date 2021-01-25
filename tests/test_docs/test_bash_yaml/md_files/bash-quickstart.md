@@ -51,7 +51,7 @@ Confirm password:
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.9.1
+v0.9.2
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
@@ -85,7 +85,7 @@ aea run --connections fetchai/stub:0.15.0
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.9.1
+v0.9.2
 
 Starting AEA 'my_first_aea' in 'async' mode ...
 info: Echo Handler: setup method called.

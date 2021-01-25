@@ -17,7 +17,11 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for the aea.configurations.validation module."""
-from aea.configurations.validation import validate_data_with_pattern
+from aea.configurations.validation import (
+    SAME_MARK,
+    filter_data,
+    validate_data_with_pattern,
+)
 
 
 def test_compare_data_pattern():
@@ -49,3 +53,22 @@ def test_compare_data_pattern():
     errors = validate_data_with_pattern({"a": {}}, {"a": {"b": 12}})
     assert errors
     assert errors[0] == "Attribute `a` is not allowed to be updated!"
+
+
+def test_filter_data():
+    """Test filter_data function."""
+    assert filter_data(1, 1) == SAME_MARK
+    assert filter_data(1, 2) == 2
+    assert filter_data(2, 1) == 1
+
+    assert filter_data({}, {}) == SAME_MARK
+    assert filter_data({1: 2}, {1: 2}) == SAME_MARK
+    assert filter_data({1: 2}, {1: 3}) == {1: 3}
+
+    assert filter_data([1, 2, 3], [1, 2, 3]) == SAME_MARK
+    assert filter_data([1, 2, 3], [1, 2]) == [1, 2]
+
+    assert filter_data({1: {2: 3}, 3: {2: 1}}, {1: {2: 3}, 3: {2: 3}, 0: 0}) == {
+        3: {2: 3},
+        0: 0,
+    }

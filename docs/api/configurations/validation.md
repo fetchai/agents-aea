@@ -212,3 +212,12 @@ Validate data dict with pattern dict for attributes present and type match.
 
 list of str with error descriptions
 
+<a name="aea.configurations.validation.filter_data"></a>
+#### filter`_`data
+
+```python
+filter_data(base: Any, updates: Any) -> Any
+```
+
+Return difference in values or `SAME_MARK` object if values are the same.
+

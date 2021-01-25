@@ -16,9 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Abstract module wrapping the public and private key cryptography and ledger api."""
-
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, BinaryIO, Dict, Generic, Optional, Tuple, TypeVar

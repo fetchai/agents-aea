@@ -111,6 +111,7 @@ jobs:
           tar xvfz go-ipfs.tar.gz
           sudo mv go-ipfs/ipfs /usr/local/bin/ipfs
           ipfs init
+          make protolint_install
       - name: License Check
         run: tox -e liccheck
       - name: Copyright Check
@@ -153,8 +154,27 @@ jobs:
         run: tox -e check_api_docs
       - name: Check spelling
         run: tox -e spell_check
-
-
+  protolint:
+    continue-on-error: False
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-python@master
+        with:
+          python-version: 3.6
+      - uses: actions/setup-go@master
+        with:
+          go-version: '^1.14.0'
+      - name: Install protolint (ubuntu-latest)
+        run: |
+          sudo apt-get update --fix-missing
+          sudo apt-get autoremove
+          sudo apt-get autoclean
+          make protolint_install
+      - name: Protolint check
+        run: |
+          make protolint
   integration_checks:
     continue-on-error: True
     needs:
@@ -246,6 +266,7 @@ jobs:
         wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
         unzip protoc-3.11.4-linux-x86_64.zip -d protoc
         sudo mv protoc/bin/protoc /usr/local/bin/protoc
+        make protolint_install
     # sudo apt-get install -y protobuf-compiler
     # use sudo rm /var/lib/apt/lists/lock above in line above update if dependency install failures persist
     # use sudo apt-get dist-upgrade above in line below update if dependency install failures persist
@@ -260,6 +281,8 @@ jobs:
         wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-osx-x86_64.zip
         unzip protoc-3.11.4-osx-x86_64.zip -d protoc
         sudo mv protoc/bin/protoc /usr/local/bin/protoc
+        brew tap yoheimuta/protolint
+        brew install protolint
     - if: matrix.os == 'windows-latest'
       name: Install dependencies (windows-latest)
       env:
@@ -270,10 +293,14 @@ jobs:
         echo "::add-path::C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64"
         choco install protoc --version 3.11.4
         choco install mingw -y
+        choco install make -y
         # wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-win64.zip
         # unzip protoc-3.11.4-win64.zip -d protoc
         # sudo mv protoc/bin/protoc /usr/local/bin/protoc
         python scripts/update_symlinks_cross_platform.py
+        make protolint_install_win
+        # just check protolint runs
+        protolint version
     - if: matrix.os == 'ubuntu-latest' || matrix.python_version != '3.9'
       name: Unit tests
       run: |
@@ -306,6 +333,7 @@ jobs:
         wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
         unzip protoc-3.11.4-linux-x86_64.zip -d protoc
         sudo mv protoc/bin/protoc /usr/local/bin/protoc
+        make protolint_install
     - name: Unit tests with sync agent loop
       run: |
         tox -e py3.8 -- --aea-loop sync -m 'not integration and not unstable'
@@ -364,6 +392,7 @@ jobs:
         wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
         unzip protoc-3.11.4-linux-x86_64.zip -d protoc
         sudo mv protoc/bin/protoc /usr/local/bin/protoc
+        make protolint_install
     # sudo apt-get install -y protobuf-compiler
     - name: Run all tests
       run: tox -e py3.7-cov -- --ignore=tests/test_docs --ignore=tests/test_examples --ignore=tests/test_packages/test_contracts --ignore=tests/test_packages/test_skills_integration -m 'not unstable'

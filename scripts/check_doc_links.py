@@ -25,7 +25,7 @@ import xml.etree.ElementTree as ET  # nosec
 from pathlib import Path
 from typing import Pattern, Set
 
-import requests
+from aea.helpers import http_requests as requests
 
 
 LINK_PATTERN_MD = re.compile(r"\[([^]]+)]\(\s*([^]]+)\s*\)")
