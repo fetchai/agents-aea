@@ -140,9 +140,18 @@ func EnablePrometheusMonitoring(port uint16) Option {
 	}
 }
 
+// WithRegistrationDelay for dhtpeer.New
 func WithRegistrationDelay(delay time.Duration) Option {
 	return func(dhtPeer *DHTPeer) error {
 		dhtPeer.registrationDelay = delay
+		return nil
+	}
+}
+
+// StoreRecordsTo for dhtpeer.New
+func StoreRecordsTo(path string) Option {
+	return func(dhtPeer *DHTPeer) error {
+		dhtPeer.persistentStoragePath = path
 		return nil
 	}
 }

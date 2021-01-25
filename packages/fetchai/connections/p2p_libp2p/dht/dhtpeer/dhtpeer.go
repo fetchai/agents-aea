@@ -24,11 +24,14 @@
 package dhtpeer
 
 import (
+	"bufio"
 	"context"
+	"encoding/binary"
 	"fmt"
 	"io"
 	"log"
 	"net"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -87,6 +90,7 @@ const (
 	metricServiceDelegateClientsCountAll = "service_delegate_clients_count_all"
 	metricServiceRelayClientsCount       = "service_relay_clients_count"
 	metricServiceRelayClientsCountAll    = "service_relay_clients_count_all"
+	defaultPersistentStoragePath         = "./agent_records_store"
 )
 
 var (
@@ -132,6 +136,9 @@ type DHTPeer struct {
 	// TOFIX(LR): maps and locks need refactoring for better abstraction
 	processEnvelope func(*aea.Envelope) error
 
+	persistentStoragePath string
+	storage               *os.File
+
 	monitor    monitoring.MonitoringService
 	closing    chan struct{}
 	goroutines *sync.WaitGroup
@@ -149,6 +156,7 @@ func New(opts ...Option) (*DHTPeer, error) {
 	dhtPeer.dhtAddressesLock = sync.RWMutex{}
 	dhtPeer.tcpAddressesLock = sync.RWMutex{}
 	dhtPeer.agentRecordsLock = sync.RWMutex{}
+	dhtPeer.persistentStoragePath = defaultPersistentStoragePath
 
 	for _, opt := range opts {
 		if err := opt(dhtPeer); err != nil {
@@ -290,6 +298,22 @@ func New(opts ...Option) (*DHTPeer, error) {
 		s.Close()
 	}
 
+	// initialize agents records persistent storage
+	nbr, err := dhtPeer.initAgentRecordPersistentStorage()
+	if err != nil {
+		return nil, errors.Wrap(err, "while initializing agent record storage")
+	}
+	if len(dhtPeer.bootstrapPeers) > 0 {
+		for addr := range dhtPeer.dhtAddresses {
+			err := dhtPeer.registerAgentAddress(addr)
+			if err != nil {
+				lerror(err).Str("addr", addr).
+					Msg("while announcing stored client address")
+			}
+		}
+	}
+	linfo().Msgf("successfully loaded %d agents", nbr)
+
 	// if peer is joining an existing network, announce my agent address if set
 	if len(dhtPeer.bootstrapPeers) > 0 {
 		dhtPeer.addressAnnounced = true
@@ -335,6 +359,85 @@ func New(opts ...Option) (*DHTPeer, error) {
 	return dhtPeer, nil
 }
 
+func (dhtPeer *DHTPeer) saveAgentRecordToPersistentStorage(record *dhtnode.AgentRecord) error {
+	msg := formatPersistentStorageLine(record)
+	if len(msg) == 0 {
+		return errors.New("while formating record " + record.String())
+	}
+
+	size := uint32(len(msg))
+	buf := make([]byte, 4)
+	binary.BigEndian.PutUint32(buf, size)
+
+	buf = append(buf, msg...)
+	_, err := dhtPeer.storage.Write(buf)
+	if err != nil {
+		return errors.Wrap(err, "while writing record to persistent storage")
+	}
+	return nil
+}
+
+func parsePersistentStorageLine(line []byte) (*dhtnode.AgentRecord, error) {
+	record := &dhtnode.AgentRecord{}
+	err := proto.Unmarshal(line, record)
+	return record, err
+}
+
+func formatPersistentStorageLine(record *dhtnode.AgentRecord) []byte {
+	msg, err := proto.Marshal(record)
+	ignore(err)
+	return msg
+}
+
+func (dhtPeer *DHTPeer) initAgentRecordPersistentStorage() (int, error) {
+	var err error
+	dhtPeer.storage, err = os.OpenFile(dhtPeer.persistentStoragePath, os.O_APPEND|os.O_RDWR|os.O_CREATE, 0600)
+	if err != nil {
+		return 0, err
+	}
+
+	reader := bufio.NewReader(dhtPeer.storage)
+	var counter int = 0
+	for {
+		buf := make([]byte, 4)
+		_, err = io.ReadFull(reader, buf)
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return 0, errors.Wrap(err, "while loading agent records")
+		}
+
+		size := binary.BigEndian.Uint32(buf)
+		line := make([]byte, size)
+		_, err = io.ReadFull(reader, line)
+		if err != nil {
+			return 0, errors.Wrap(err, "while loading agent records")
+		}
+
+		record, err := parsePersistentStorageLine(line)
+		if err != nil {
+			return 0, errors.Wrap(err, "while loading agent records")
+		}
+		dhtPeer.agentRecords[record.Address] = record
+		relayPeerID, err := utils.IDFromFetchAIPublicKey(record.PeerPublicKey)
+		if err != nil {
+			return 0, errors.Wrap(err, "While loading agent records")
+		}
+		dhtPeer.dhtAddresses[record.Address] = relayPeerID.Pretty()
+		counter++
+	}
+
+	return counter, nil
+}
+
+func (dhtPeer *DHTPeer) closeAgentRecordPersistentStorage() error {
+	dhtPeer.agentRecordsLock.Lock()
+	err := dhtPeer.storage.Close()
+	dhtPeer.agentRecordsLock.Unlock()
+	return err
+}
+
 func (dhtPeer *DHTPeer) setupMonitoring() {
 	if dhtPeer.monitoringPort != 0 {
 		dhtPeer.monitor = monitoring.NewPrometheusMonitoring(
@@ -351,7 +454,7 @@ func (dhtPeer *DHTPeer) setupMonitoring() {
 func (dhtPeer *DHTPeer) startMonitoring(ready *sync.WaitGroup) {
 	_, _, linfo, _ := dhtPeer.getLoggers()
 	linfo().Msg("Starting monitoring service: " + dhtPeer.monitor.Info())
-	dhtPeer.monitor.Start()
+	go dhtPeer.monitor.Start()
 	ready.Done()
 }
 
@@ -458,6 +561,9 @@ func (dhtPeer *DHTPeer) Close() []error {
 	err = dhtPeer.dht.Close()
 	errappend(err)
 	err = dhtPeer.routedHost.Close()
+	errappend(err)
+
+	err = dhtPeer.closeAgentRecordPersistentStorage()
 	errappend(err)
 
 	//linfo().Msg("Stopping DHTPeer: waiting for goroutines to cancel...")
@@ -1632,6 +1738,7 @@ func (dhtPeer *DHTPeer) handleAeaRegisterStream(stream network.Stream) {
 	dhtPeer.agentRecordsLock.Unlock()
 	dhtPeer.dhtAddressesLock.Lock()
 	dhtPeer.dhtAddresses[clientAddr] = clientPeerID
+	dhtPeer.saveAgentRecordToPersistentStorage(record)
 	dhtPeer.dhtAddressesLock.Unlock()
 	if dhtPeer.addressAnnounced {
 		linfo().Str("op", "register").
