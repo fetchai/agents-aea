@@ -20,4 +20,4 @@
 """Python package wrapping the public and private key cryptography and ledger api."""
 
 from .cosmos import *  # noqa isort:skip
-from .cosmos import _BYTECODE, _COSMOS, _CosmosApi  # noqa isort:skip
+from .cosmos import _default_logger, _BYTECODE, _COSMOS, _CosmosApi  # noqa isort:skip

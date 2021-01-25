@@ -525,7 +525,7 @@ def test_override_ledger_configurations_positive():
         LedgerApis.ledger_api_configs = old_configurations
         assert (
             LedgerApis.ledger_api_configs[DEFAULT_LEDGER]["chain_id"]
-            == DEFAULT_CHAIN_ID
+            == FETCHAI_DEFAULT_CHAIN_ID
         )
 
 

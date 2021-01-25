@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
@@ -18,27 +17,27 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Setup script for "ethereum_crypto" package."""
+"""Conftest module for Pytest."""
+import inspect
+import os
 
-from setuptools import find_packages, setup
+from cosmos_crypto import CosmosCrypto
+
+from aea.configurations.constants import PRIVATE_KEY_PATH_SCHEMA
 
 
-setup(
-    name="ethereum_crypto",
-    version="0.1.0",
-    author="Fetch.AI Limited",
-    license="Apache-2.0",
-    description="Python package wrapping the public and private key cryptography and ledger api of Ethereum.",
-    packages=find_packages(include=["ethereum_crypto*"]),
-    install_requires=[
-        "aea>=0.9.0,<0.10.0",
-        "web3==5.12.0",
-        "ipfshttpclient==0.6.1",
-        "eth-account==0.5.2",
-    ],
-    entry_points={
-        "aea.cryptos": ["ethereum = ethereum_crypto:EthereumCrypto"],
-        "aea.ledger_apis": ["ethereum = ethereum_crypto:EthereumApi"],
-        "aea.faucet_apis": ["ethereum = ethereum_crypto:EthereumFaucetApi"],
-    },
+CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
+ROOT_DIR = os.path.join(CUR_PATH, "..")
+MAX_FLAKY_RERUNS = 3
+COSMOS = CosmosCrypto.identifier
+
+COSMOS_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(COSMOS)
+
+COSMOS_PRIVATE_KEY_PATH = os.path.join(
+    ROOT_DIR, "tests", "data", COSMOS_PRIVATE_KEY_FILE
 )
+
+COSMOS_DEFAULT_ADDRESS = "INVALID_URL"
+COSMOS_DEFAULT_CURRENCY_DENOM = "INVALID_CURRENCY_DENOM"
+COSMOS_DEFAULT_CHAIN_ID = "INVALID_CHAIN_ID"
+COSMOS_TESTNET_CONFIG = {"address": COSMOS_DEFAULT_ADDRESS}

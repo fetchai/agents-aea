@@ -22,7 +22,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
 
 from cosmos_crypto import CosmosApi, CosmosCrypto, CosmosHelper
-from cosmos_crypto import _default_logger as cosmos_logger
+from cosmos_crypto.cosmos import _default_logger as cosmos_logger
 
 from tests.conftest import COSMOS_PRIVATE_KEY_PATH, COSMOS_TESTNET_CONFIG, ROOT_DIR
 

@@ -130,6 +130,11 @@ PROTOCOL_SPEC_CONFIGURATION_SCHEMA = os.path.join(
 
 DUMMY_ENV = gym.GoalEnv
 
+# URL to local Ganache instance
+DEFAULT_GANACHE_ADDR = "http://127.0.0.1"
+DEFAULT_GANACHE_PORT = 8545
+DEFAULT_GANACHE_CHAIN_ID = 1337
+
 COSMOS_PRIVATE_KEY_FILE_CONNECTION = "cosmos_connection_private_key.txt"
 FETCHAI_PRIVATE_KEY_FILE_CONNECTION = "fetchai_connection_private_key.txt"
 

@@ -256,24 +256,6 @@ def test_get_wealth_positive(caplog):
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
-def test_get_contract_instance(erc1155_contract, ethereum_testnet_config):
-    """Test the get contract instance method."""
-    contract, contract_address = erc1155_contract
-    ethereum_api = EthereumApi(**ethereum_testnet_config)
-    interface = {"abi": [], "bytecode": b""}
-    instance = ethereum_api.get_contract_instance(
-        contract_interface=interface, contract_address=contract_address,
-    )
-    assert str(type(instance)) == "<class 'web3._utils.datatypes.Contract'>"
-    instance = ethereum_api.get_contract_instance(contract_interface=interface,)
-    assert (
-        str(type(instance)) == "<class 'web3._utils.datatypes.PropertyCheckingFactory'>"
-    )
-
-
-@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
-@pytest.mark.integration
-@pytest.mark.ledger
 def test_get_deploy_transaction(ethereum_testnet_config, ganache):
     """Test the get deploy transaction method."""
     ethereum_api = EthereumApi(**ethereum_testnet_config)

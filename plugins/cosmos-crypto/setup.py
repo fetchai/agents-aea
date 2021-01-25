@@ -31,7 +31,6 @@ setup(
     description="Python package wrapping the public and private key cryptography and ledger api of Cosmos.",
     packages=find_packages(include=["cosmos_crypto*"]),
     install_requires=["aea>=0.9.0,<0.10.0", "ecdsa==0.15", "bech32==1.2.0"],
-    tests_require=["pytest"],
     entry_points={
         "aea.cryptos": ["cosmos = cosmos_crypto:CosmosCrypto"],
         "aea.ledger_apis": ["cosmos = cosmos_crypto:CosmosApi"],

@@ -29,20 +29,11 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 def get_all_extras() -> Dict:
 
-    cosmos_ledger_deps = [f"cosmos_crypto @ file://{here}/plugins/cosmos-crypto#egg=cosmos_crypto"]
-
-    fetch_ledger_deps = [f"fetchai_crypto @ file://{here}/plugins/fetchai-crypto#egg=fetchai_crypto"]
-
-    ethereum_ledger_deps = [f"ethereum_crypto @ file://{here}/plugins/ethereum-crypto#egg=ethereum_crypto"]
-
-    crypto_deps = [*fetch_ledger_deps, *ethereum_ledger_deps, *cosmos_ledger_deps]
-
     cli_deps = [
         "click",
         "pyyaml>=4.2b1",
         "jsonschema>=3.0.0",
         "python-dotenv",
-        *crypto_deps,
     ]
 
     cli_gui = ["flask", "connexion[swagger-ui]>=2.4.0", "docker", *cli_deps]
@@ -50,10 +41,6 @@ def get_all_extras() -> Dict:
     extras = {
         "cli": cli_deps,
         "cli_gui": cli_gui,
-        "fetch": fetch_ledger_deps,
-        "ethereum": ethereum_ledger_deps,
-        "cosmos": cosmos_ledger_deps,
-        "crypto": crypto_deps,
     }
 
     # add "all" extras

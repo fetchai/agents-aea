@@ -47,11 +47,11 @@ def test_initialisation():
     """Test the initialisation of the ledger APIs."""
     ledger_apis = LedgerApis
     assert ledger_apis.has_ledger(FETCHAI)
-    assert type(LedgerApis.get_api(FETCHAI)) == FetchAIApi
+    assert type(LedgerApis.get_api(FETCHAI)).__name__ == "FetchAIApi"
     assert LedgerApis.has_ledger(ETHEREUM)
-    assert type(LedgerApis.get_api(ETHEREUM)) == EthereumApi
+    assert type(LedgerApis.get_api(ETHEREUM)).__name__ == "EthereumApi"
     assert LedgerApis.has_ledger(COSMOS)
-    assert type(LedgerApis.get_api(COSMOS)) == CosmosApi
+    assert type(LedgerApis.get_api(COSMOS)).__name__ == "CosmosApi"
     with pytest.raises(AEAEnforceError):
         ledger_apis.get_api("UNKNOWN")
 
@@ -66,14 +66,15 @@ class TestLedgerApis:
 
     def test_get_balance(self):
         """Test the get_balance."""
-        with mock.patch.object(EthereumApi, "get_balance", return_value=10):
+        with mock.patch("ethereum_crypto.EthereumApi.get_balance", return_value=10):
             balance = self.ledger_apis.get_balance(ETHEREUM, ETHEREUM_ADDRESS_ONE)
             assert balance == 10
 
     def test_get_transfer_transaction(self):
         """Test the get_transfer_transaction."""
-        with mock.patch.object(
-            CosmosApi, "get_transfer_transaction", return_value="mock_transaction",
+        with mock.patch(
+            "cosmos_crypto.CosmosApi.get_transfer_transaction",
+            return_value="mock_transaction",
         ):
             tx = self.ledger_apis.get_transfer_transaction(
                 identifier=COSMOS,
@@ -87,9 +88,8 @@ class TestLedgerApis:
 
     def test_send_signed_transaction(self):
         """Test the send_signed_transaction."""
-        with mock.patch.object(
-            CosmosApi,
-            "send_signed_transaction",
+        with mock.patch(
+            "cosmos_crypto.CosmosApi.send_signed_transaction",
             return_value="mock_transaction_digest",
         ):
             tx_digest = self.ledger_apis.send_signed_transaction(
@@ -99,9 +99,8 @@ class TestLedgerApis:
 
     def test_get_transaction_receipt(self):
         """Test the get_transaction_receipt."""
-        with mock.patch.object(
-            CosmosApi,
-            "get_transaction_receipt",
+        with mock.patch(
+            "cosmos_crypto.CosmosApi.get_transaction_receipt",
             return_value="mock_transaction_receipt",
         ):
             tx_receipt = self.ledger_apis.get_transaction_receipt(
@@ -111,8 +110,8 @@ class TestLedgerApis:
 
     def test_get_transaction(self):
         """Test the get_transaction."""
-        with mock.patch.object(
-            CosmosApi, "get_transaction", return_value="mock_transaction",
+        with mock.patch(
+            "cosmos_crypto.CosmosApi.get_transaction", return_value="mock_transaction",
         ):
             tx = self.ledger_apis.get_transaction(
                 identifier=COSMOS, tx_digest="tx_digest",
@@ -121,8 +120,8 @@ class TestLedgerApis:
 
     def test_is_transaction_settled(self):
         """Test the is_transaction_settled."""
-        with mock.patch.object(
-            CosmosApi, "is_transaction_settled", return_value=True,
+        with mock.patch(
+            "cosmos_crypto.CosmosApi.is_transaction_settled", return_value=True,
         ):
             is_settled = self.ledger_apis.is_transaction_settled(
                 identifier=COSMOS, tx_receipt="tx_receipt",
@@ -131,8 +130,8 @@ class TestLedgerApis:
 
     def test_is_transaction_valid(self):
         """Test the is_transaction_valid."""
-        with mock.patch.object(
-            CosmosApi, "is_transaction_valid", return_value=True,
+        with mock.patch(
+            "cosmos_crypto.CosmosApi.is_transaction_valid", return_value=True,
         ):
             is_valid = self.ledger_apis.is_transaction_valid(
                 identifier=COSMOS,
@@ -147,8 +146,8 @@ class TestLedgerApis:
     def test_recover_message(self):
         """Test the is_transaction_valid."""
         expected_addresses = ("address_1", "address_2")
-        with mock.patch.object(
-            CosmosApi, "recover_message", return_value=expected_addresses,
+        with mock.patch(
+            "cosmos_crypto.CosmosApi.recover_message", return_value=expected_addresses,
         ):
             addresses = self.ledger_apis.recover_message(
                 identifier=COSMOS, message="message", signature="signature",
@@ -158,8 +157,8 @@ class TestLedgerApis:
     def test_get_hash(self):
         """Test the is_transaction_valid."""
         expected_hash = "hash"
-        with mock.patch.object(
-            CosmosApi, "get_hash", return_value=expected_hash,
+        with mock.patch(
+            "cosmos_crypto.CosmosApi.get_hash", return_value=expected_hash,
         ):
             hash_ = self.ledger_apis.get_hash(identifier=COSMOS, message=b"message",)
             assert hash_ == expected_hash
@@ -173,5 +172,5 @@ class TestLedgerApis:
 def test_is_valid_address():
     """Test LedgerApis.is_valid_address."""
     assert LedgerApis.is_valid_address(DEFAULT_LEDGER, FETCHAI_ADDRESS_ONE)
-    assert LedgerApis.is_valid_address(EthereumCrypto.identifier, ETHEREUM_ADDRESS_ONE)
-    assert LedgerApis.is_valid_address(CosmosCrypto.identifier, COSMOS_ADDRESS_ONE)
+    assert LedgerApis.is_valid_address(ETHEREUM, ETHEREUM_ADDRESS_ONE)
+    assert LedgerApis.is_valid_address(COSMOS, COSMOS_ADDRESS_ONE)
