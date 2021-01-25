@@ -1936,10 +1936,11 @@ class ProtocolGenerator:
             shutil.rmtree(output_folder)
             raise SyntaxError("Error in the protocol buffer schema code:\n" + msg)
 
-    def run_protolint_for_file(self, filepath: str) -> None:
+    @staticmethod
+    def run_protolint_for_file(filepath: str) -> None:
         """Perform protolint check for file."""
         if sys.platform.startswith("win"):
-            protolint_base_cmd = "protolint"
+            protolint_base_cmd = "protolint"  # pragma: nocover
         else:
             protolint_base_cmd = "PATH=${PATH}:${GOPATH}/bin/:~/go/bin protolint"
 

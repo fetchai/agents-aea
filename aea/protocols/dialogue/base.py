@@ -866,7 +866,9 @@ class Dialogue(metaclass=_DialogueMeta):
         target_message = self.get_message_by_id(target)
 
         if not target_message:
-            return "Invalid target {}. target_message can not be found.".format(target)
+            return "Invalid target {}. target_message can not be found.".format(
+                target
+            )  # pragma: nocover
 
         target_performative = target_message.performative
         if performative not in self.rules.get_valid_replies(target_performative):
@@ -900,7 +902,7 @@ class Dialogue(metaclass=_DialogueMeta):
             return None
 
         if message_id == 0:
-            return None
+            raise ValueError("message_id == 0 is invalid!")  # pragma: nocover
 
         if bool(message_id > 0) == self.is_self_initiated:
             messages_list = self._outgoing_messages
