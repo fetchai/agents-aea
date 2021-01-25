@@ -24,7 +24,11 @@ import tempfile
 from pathlib import Path
 from subprocess import CalledProcessError  # nosec
 from unittest import TestCase, mock
+from unittest.mock import patch
 
+import pytest
+
+from aea.protocols.generator.base import ProtocolGenerator
 from aea.protocols.generator.common import (
     _camel_case_to_snake_case,
     _create_protocol_file,
@@ -463,3 +467,10 @@ class TestCommon(TestCase):
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
+
+
+def test_protolint_not_found():
+    """Check exception raised if protolint not installed in system."""
+    with patch("aea.protocols.generator.base.call", return_value=1):
+        with pytest.raises(ValueError, match=r"protolint is not installed!"):
+            ProtocolGenerator.run_protolint_for_file("some_file")
