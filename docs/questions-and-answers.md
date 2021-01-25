@@ -1,91 +1,58 @@
-<details><summary>What is the Open Economic Framework (OEF)?</summary>
-The <i>Open Economic Framework' (OEF)</i> consists of protocols, languages and market mechanisms agents use to search and find each other, communicate with as well as trade with each other. As such the OEF defines the decentralised virtual environment that supplies and supports APIs for autonomous third-party software agents, also known as Autonomous Economic Agents (AEAs).
+<details><summary>What is an AEA?</summary>
+AEA stands for Autonomous Economic Agent. AEAs act independently of constant user input and autonomously execute actions to achieve their objective. Their goal is to create economic value for you, their owner.
 <br><br>
-You can read more about the ledgers and the OEF <a href="../oef-ledger/"> here </a>
+You can read more about an introduction to AEAs <a href="../"> here</a>.
 </details>
 
-<details><summary>What is the AEA?</summary>
-AEA is short for Autonomous Economic Agents. AEAs act independently of constant user input and autonomously execute actions to achieve their objective.
-Their goal is to create economic value for you, their owner.
+<details><summary>How do AEAs talk to each other when they do not know each other?</summary>
+For Autonomous Economic Agents (AEAs) to be able to talk to other AEAs, firstly they need to find them, then they need to use the same protocol for communication as them and finally they need to deliver messages to each other.
 <br><br>
-You can read more about the AEAs <a href="../app-areas/"> here </a>
-</details>
-
-<details><summary>How do agents talk to others when they don't know each other?</summary>
-For the Autonomous Economic Agents (AEAs) to be able to talk to others, firstly they need to find them,
-and then, implement the same protocols in order to be able to deserialise the envelops they receive.
-<br><br>
-You can read more about the Search and Discovery <a href="../oef-ledger/">here</a> and more about envelops and protocols <a href="../core-components-1/">here</a>
-
+You can read more about Search and Discovery <a href="../oef-ledger/">here</a>, about protocols <a href="../core-components-1/">here</a> and about the Agent Communication Network <a href="../acn/">here</a>.
 </details>
 
 <details><summary>How does an AEA use blockchain?</summary>
-The AEA framework enables the agents to interact with public blockchains to complete transactions. Currently, the framework supports
-two different networks natively: the <i>Fetch.ai</i> network and the <i>Ethereum</i> network.
+The AEA framework enables the agents to interact with public blockchains to complete transactions. Currently, the framework supports three different networks natively: the <i>Fetch.ai</i> network, the <i>Ethereum</i> network and the <i>Cosmos</i> network.
 <br><br>
-You can read more about the integration of ledger <a href="../ledger-integration/">here</a>
-
+You can read more about the integration with the different blockchains <a href="../ledger-integration/">here</a> and gain a high level overview <a href="../oef-ledger/">here</a>.
 </details>
 
 <details><summary>How does one install third party libraries?</summary>
-The framework supports the use of third-party libraries hosted on PyPI. We can directly reference the external dependencies in an AEA package's configuration file. The CLI <code>install</code> command will install each dependency that the specific AEA needs and is listed in the one of it's packages configuration files.
+The framework supports the use of third-party libraries hosted on <a href="https://pypi.org">PyPI</a>. We can directly reference the external dependencies in an AEA package's configuration file. The CLI <code>install</code> command installs each dependency that the specific AEA needs and is listed in the one of it's packages configuration files.
 </details>
 
 <details><summary>How does one connect to a database?</summary>
-You have two options to connect to a database:
-- Creating a wrapper that communicates with the database and imports a Model. You can find an example implementation in the `weather_station` package
-- Using an ORM (object-relational mapping) library, and implementing the logic inside a class that inherits from the Model abstract class.
+You have two options to connect to a database: using the built-in storage solution or using a custom ORM (object-relational mapping) library and backend.
 <br><br>
-For a detailed example of how to use an ORM follow the <a href='../orm-integration/'>ORM use case</a>
-</details>
-
-<details><summary>How does one connect to a live-stream of data?</summary>
-You can create a wrapper class that communicates with the source and import this class in your skill,
-or you can use a third-party library by listing the dependency in the skill's `.yaml` file. Then you can import this library in a strategy class that inherits
-from the Model abstract class.
-<br><br>
-You can find example of this implementation in the <a href='../generic-skills-step-by-step/#step4-create-the-strategy_1'> thermometer step by step guide </a>
+The use of the built-in storage is explained <a href='../generic-storage/'>here</a>. For a detailed example of how to use an ORM follow the <a href='../orm-integration/'>ORM guide</a>.
 </details>
 
 <details><summary>How does one connect a frontend?</summary>
-There are two options that one could connect a frontend. The first option would be to create an HTTP connection and then create an app that will communicate with this
-connections.
-The other option is to create a frontend client that will communicate with the agent via the <a href="../oef-ledger/">OEF communication network</a>.
+There are multiple options, with the most obvious being the usage of a HTTP server connection and creation of a client that communicates with this connection.
 <br><br>
-You can find a more detailed approach <a href="../connect-a-frontend/">here</a>.
+You can find a more detailed discussion <a href="../connect-a-frontend/">here</a>.
 </details>
 
 <details><summary>Is the AEA framework ideal for agent-based modelling?</summary>
 The goal of agent-based modelling is to search for explanatory insight into the collective behaviour of agents obeying simple rules, typically in natural systems rather than in designing agents or solving specific practical or engineering problems.
-Although it would be potentially possible, it would be inefficient to use the AEA framework for that kind of problem.
+Although it would be potentially possible, it would likely be inefficient to use the AEA framework for that kind of problem.
 <br><br>
-You can find more details <a href="../app-areas/">here</a>
+You can find more details on the application areas of the AEA framework <a href="../app-areas/">here</a>.
 </details>
 
-<details><summary>Can you manage multiple AEA projects at once with the CLI?</summary>
-Individual CLI calls are currently scoped to a single project. You can have multiple AEA projects in a given root directory but you will have to use the CLI for each project independently.
-<br>
-We are looking to add support for interacting with multiple AEA projects via a single CLI call in the future.
-<br><br>
-You can find more details about the CLI commands <a href="../cli-commands/">here</a>
-</details>
-
-<details><summary>When a new AEA is created, is the `vendor` folder populated with some default packages?</summary>
-All AEA projects by default hold the `fetchai/stub:0.15.0` connection, the `fetchai/default:0.11.0` protocol and the `fetchai/error:0.11.0` skill. These (as all other packages installed from the registry) are placed in the vendor's folder.
+<details><summary>When a new AEA is created, is the <code>vendor</code> folder populated with some default packages?</summary>
+All AEA projects by default hold the <code>fetchai/stub:0.15.0</code> connection, the <code>fetchai/default:0.11.0</code>, <code>fetchai/state_update:0.9.0</code> and <code>fetchai/signing:0.9.0</code> protocol and the <code>fetchai/error:0.11.0</code> skill. These (as all other packages installed from the registry) are placed in the <code>vendor</code> folder.
 <br><br>
 You can find more details about the file structure <a href="../package-imports/">here</a>
 </details>
 
 <details><summary>Is there a standardization for private key files?</summary>
-Currently, the private keys are stored in `.txt` files. This is temporary and will be improved soon.
+Currently, the private keys are stored in <code>.txt</code> files. This is temporary and will be improved soon.
 </details>
 
 <details><summary>How to use the same protocol in different skills?</summary>
-By default, envelopes of a given protocol get routed to all skills which have a handler supporting that protocol.
-
-The `URI` in the `EnvelopeContext` can be used to route envelopes of a given protocol to a specific skill. The `URI` path needs to be set to the skill's `public_id.to_uri_path`.
+The details of envelope/message routing by the AEA framework are discussed in <a href="../message-routing/">this guide</a>.
 </details>
 
 <details><summary>Why does the AEA framework use its own package registry?</summary>
-AEA packages could be described as personalized plugins for the AEA runtime. They are not like a library and therefore not suitable for distribution via <a href='https://pypi.org/' target="_blank">PyPI</a>.
+AEA packages could be described as personalized plugins for the AEA runtime. They are not like a library - they have no direct use outside the context of the framework - and therefore are not suitable for distribution via <a href='https://pypi.org/' target="_blank">PyPI</a>.
 </details>

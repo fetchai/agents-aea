@@ -172,3 +172,9 @@ protocol_id
  - docs/simple-oef.md
 _do_
 CosmWasm
+ - docs/ledger-integration.md
+atestfet
+v0.2.x
+ - docs/questions-and-answers.md
+state_update
+txt
