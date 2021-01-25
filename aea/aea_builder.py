@@ -62,7 +62,6 @@ from aea.configurations.constants import (
     DEFAULT_SEARCH_SERVICE_ADDRESS as _DEFAULT_SEARCH_SERVICE_ADDRESS,
 )
 from aea.configurations.constants import (
-    DEFAULT_SKILL,
     DOTTED_PATH_MODULE_ELEMENT_SEPARATOR,
     FETCHAI,
     PROTOCOLS,
@@ -613,9 +612,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self.add_connection(
             Path(self.registry_dir, FETCHAI, CONNECTIONS, self.DEFAULT_CONNECTION.name)
         )
-        # add error skill
-        default_skill = PublicId.from_str(DEFAULT_SKILL)
-        self.add_skill(Path(self.registry_dir, FETCHAI, SKILLS, default_skill.name))
 
     def _check_can_remove(self, component_id: ComponentId) -> None:
         """

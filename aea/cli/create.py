@@ -160,7 +160,6 @@ def create_aea(
             add_item(ctx, PROTOCOL, PublicId.from_str(SIGNING_PROTOCOL))
             add_item(ctx, PROTOCOL, PublicId.from_str(STATE_UPDATE_PROTOCOL))
             add_item(ctx, CONNECTION, PublicId.from_str(DEFAULT_CONNECTION))
-            add_item(ctx, SKILL, PublicId.from_str(DEFAULT_SKILL))
 
     except Exception as e:
         raise click.ClickException(str(e))
