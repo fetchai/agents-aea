@@ -24,7 +24,6 @@ from tempfile import TemporaryDirectory
 from unittest.mock import mock_open, patch
 
 import pytest
-import requests
 
 from aea.crypto.cosmos import CosmosCrypto
 from aea.crypto.ethereum import EthereumCrypto
@@ -36,6 +35,7 @@ from aea.crypto.helpers import (
     try_generate_testnet_wealth,
     try_validate_private_key_path,
 )
+from aea.helpers import http_requests as requests
 
 from tests.conftest import (
     COSMOS_PRIVATE_KEY_FILE,

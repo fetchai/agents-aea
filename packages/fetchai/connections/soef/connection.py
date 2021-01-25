@@ -16,8 +16,8 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""Extension to the Simple OEF and OEF Python SDK."""
 
+"""Extension to the Simple OEF and OEF Python SDK."""
 import asyncio
 import copy
 import logging
@@ -34,13 +34,13 @@ from typing import Callable, Dict, List, Optional, Set, Type, Union, cast
 from urllib import parse
 from uuid import uuid4
 
-import requests
 from defusedxml import ElementTree as ET  # pylint: disable=wrong-import-order
 
 from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
 from aea.exceptions import enforce
+from aea.helpers import http_requests as requests
 from aea.helpers.search.models import (
     Constraint,
     ConstraintTypes,
@@ -446,7 +446,7 @@ class SOEFChannel:
 
     async def _request_text(self, *args, **kwargs) -> str:
         """Perform and http request and return text of response."""
-        # pydocstyle fix. cause black reformat.
+
         def _do_request():
             return requests.request(*args, **kwargs).text
 
