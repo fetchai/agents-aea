@@ -88,11 +88,6 @@ class Agent(AbstractAgent, WithLogger):
         self._outbox = OutBox(self.runtime.multiplexer)
 
     @property
-    def connections(self) -> List[Connection]:
-        """Return list of connections."""
-        return self._connections
-
-    @property
     def storage_uri(self) -> Optional[str]:
         """Return storage uri."""
         return self._storage_uri

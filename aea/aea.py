@@ -123,6 +123,9 @@ class AEA(Agent):
             logger=get_logger(__name__, identity.name), agent_name=identity.name,
         )
 
+        self._connection_ids = connection_ids
+        self._resources = resources
+
         super().__init__(
             identity=identity,
             connections=[],
@@ -178,8 +181,6 @@ class AEA(Agent):
             **kwargs,
         )
         self._execution_timeout = execution_timeout
-        self._connection_ids = connection_ids
-        self._resources = resources
         self._filter = Filter(
             self.resources, self.runtime.decision_maker.message_out_queue
         )

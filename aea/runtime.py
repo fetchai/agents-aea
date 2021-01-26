@@ -131,7 +131,7 @@ class BaseRuntime(Runnable, WithLogger):
             self._agent, "_connection_exception_policy", ExceptionPolicyEnum.propagate
         )
         return AsyncMultiplexer(
-            self._agent.connections,
+            self._agent.active_connections,
             loop=self.loop,
             exception_policy=exception_policy,
             agent_name=self._agent.name,
@@ -347,4 +347,4 @@ class ThreadedRuntime(AsyncRuntime):
 
     def _get_multiplexer_instance(self) -> AsyncMultiplexer:
         """Create multiplexer instance."""
-        return AsyncMultiplexer(self._agent.connections, threaded=True)
+        return AsyncMultiplexer(self._agent.active_connections, threaded=True)

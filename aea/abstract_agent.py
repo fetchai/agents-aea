@@ -100,8 +100,8 @@ class AbstractAgent(ABC):
         """
 
     @abstractproperty
-    def connections(self) -> List[Connection]:
-        """Return list of connections."""
+    def active_connections(self) -> List[Connection]:
+        """Return list of active connections."""
 
     @abstractproperty
     def storage_uri(self) -> Optional[str]:
