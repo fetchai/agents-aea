@@ -1,17 +1,17 @@
 <details><summary>What is an AEA?</summary>
-AEA stands for Autonomous Economic Agent. AEAs act independently of constant user input and autonomously execute actions to achieve their objective. Their goal is to create economic value for you, their owner.
+AEA stands for Autonomous Economic Agent. AEAs act independently of constant user input and autonomously execute actions to achieve their goals. Their purpose is to create economic value for you, their owner.
 <br><br>
 You can read more about an introduction to AEAs in the introduction.
 </details>
 
 <details><summary>How do AEAs talk to each other when they do not know each other?</summary>
-For Autonomous Economic Agents (AEAs) to be able to talk to other AEAs, firstly they need to find them, then they need to use the same protocol for communication as them and finally they need to deliver messages to each other.
+For an Autonomous Economic Agent (AEA) to be able to talk to other AEAs, it first needs to find them. Once it does, it must use the same protocol for communication. If so, it then needs to send messages to them.
 <br><br>
 You can read more about Search and Discovery <a href="../oef-ledger/">here</a>, about protocols <a href="../core-components-1/">here</a> and about the Agent Communication Network <a href="../acn/">here</a>.
 </details>
 
 <details><summary>How does an AEA use blockchain?</summary>
-The AEA framework enables the agents to interact with public blockchains to complete transactions. Currently, the framework supports three different networks natively: the <i>Fetch.ai</i> network, the <i>Ethereum</i> network and the <i>Cosmos</i> network.
+The AEA framework enables the agents to interact with public blockchains to settle transactions. Currently, the framework has native support for three different networks: <i>Fetch.ai</i>, <i>Ethereum</i> and <i>Cosmos</i>.
 <br><br>
 You can read more about the integration with the different blockchains <a href="../ledger-integration/">here</a> and gain a high level overview <a href="../oef-ledger/">here</a>.
 </details>

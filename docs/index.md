@@ -21,14 +21,14 @@ AEAs are not:
 * just any <a href="https://en.wikipedia.org/wiki/Software_agent"  target="_blank">agents</a>: AEAs' purpose is to generate economic value in a multi-stakeholder environment with competing incentives between agents. They represent humans, organisations or objects.
 * APIs or sensors which do not have agency.
 * <a href="https://en.wikipedia.org/wiki/Smart_contract" target="_blank">smart contracts</a> which do not display any proactiveness and are purely reactive to external requests (=contract calls and transactions). 
-* <a href="https://en.wikipedia.org/wiki/Artificial_general_intelligence" target="_blank">artificial general intelligence (AGI)</a>: AEAs can have a very narrow goal directed focus involving some economic gain and implemented via simple conditional logic.
+* <a href="https://en.wikipedia.org/wiki/Artificial_general_intelligence" target="_blank">artificial general intelligence (AGI)</a>: AEAs can have a very narrow, goal directed focus involving some economic gain and can be implemented via simple conditional logic.
 
 
 ## What is the AEA Framework?
 
 The AEA framework is a Python-based development suite which equips you with an efficient and accessible set of tools for building AEAs. The framework is modular, extensible, and composable. It attempts to make agent development as straightforward an experience as possible, similar to web development using popular web frameworks.
 
-AEAs achieve their goals with the help of a decentralized search & discovery system for agents the <a href="oef-ledger">simple Open Economic Framework (sOEF)</a>, the <a href="acn">Agent Communication Network</a> - a decentralized communication system for agents - and using <a href="oef-ledger">Fetch.ai's blockchain</a> as a financial settlement and commitment layer. Third-party blockchains, such as <a href="https://ethereum.org/en/" target="_blank">Ethereum</a>, may also allow AEA integration.
+AEAs achieve their goals with the help of a decentralized search & discovery system for agents the <a href="oef-ledger">simple Open Economic Framework (sOEF)</a>, the <a href="acn">Agent Communication Network</a> - a decentralized communication system for agents - and using <a href="oef-ledger">Fetch.ai's blockchain</a> as a financial settlement and commitment layer. AEAs can also be integrated with third-party blockchains, such as <a href="https://ethereum.org/en/" target="_blank">Ethereum</a>.
 
 
 ## Why build with the AEA Framework?

@@ -1,6 +1,6 @@
 In this section, we show you how to integrate the AEA with the Fetch.ai and third-party ledgers.
 
-The framework currently natively supports three ledgers:
+At the moment, the framework natively supports the following three ledgers:
 
 - Fetch.ai
 - Ethereum
@@ -78,7 +78,7 @@ The separation between the `Crypto` and `LedgerApi` is fundamental to the framew
 
 ## Agent Land - Fetch.ai testnet for agents
 
-Agent Land is our stable, public testnet for the Fetch Ledger v2. As such most developers will be interacting with this testnet. This is specifically designed and supported for autonomous economic agent development.
+Agent Land is our stable, public testnet for the Fetch Ledger v2. As such, most developers will be interacting with this testnet. This is specifically designed and supported for AEA development.
 
 
 | Parameter      | Value                                                                      |
@@ -92,7 +92,7 @@ Agent Land is our stable, public testnet for the Fetch Ledger v2. As such most d
 | Block Explorer | <a href="https://explore-agent-land.fetch.ai" target="_blank">https://explore-agent-land.fetch.ai</a> |
 | Token Faucet   | Use block explorer                                                         |
 
-You can read more detailed information on <a href="https://github.com/fetchai/networks-agentland" target="_blank">GitHub</a>.
+You can access more details on <a href="https://github.com/fetchai/networks-agentland" target="_blank">GitHub</a>.
 
 The configurations can be specified for the `fetchai/ledger:0.12.0` connection.
 
