@@ -59,7 +59,7 @@ isort = "==5.5.2"
 fetchai-crypto = {path = "./plugins/fetchai-crypto"}
 ethereum-crypto = {path = "./plugins/ethereum-crypto"}
 cosmos-crypto = {path = "./plugins/cosmos-crypto"}
+ipfshttpclient = "==0.6.1"
 
 [packages]
 # we don't specify dependencies for the library here for intallation as per: https://pipenv-fork.readthedocs.io/en/latest/advanced.html#pipfile-vs-setuppy
-ipfshttpclient = "==0.6.1"
