@@ -1583,7 +1583,7 @@ class TestDialoguesBase:
             self.opponent_address, DefaultMessage.Performative.BYTES, content=b"Hello"
         )
 
-        retrieved_dialogue = self.own_dialogues._get_dialogue_from_label(
+        retrieved_dialogue = self.own_dialogues.get_dialogue_from_label(
             dialogue.dialogue_label
         )
         assert retrieved_dialogue.dialogue_label == dialogue.dialogue_label
@@ -1598,7 +1598,7 @@ class TestDialoguesBase:
             (str(1), "error"), self.opponent_address, self.agent_address
         )
 
-        retrieved_dialogue = self.own_dialogues._get_dialogue_from_label(
+        retrieved_dialogue = self.own_dialogues.get_dialogue_from_label(
             incorrect_label
         )
         assert retrieved_dialogue is None

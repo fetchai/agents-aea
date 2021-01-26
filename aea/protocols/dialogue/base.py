@@ -1872,10 +1872,10 @@ class Dialogues:
             other_initiated_dialogue_label
         )
 
-        self_initiated_dialogue = self._get_dialogue_from_label(
+        self_initiated_dialogue = self.get_dialogue_from_label(
             self_initiated_dialogue_label
         )
-        other_initiated_dialogue = self._get_dialogue_from_label(
+        other_initiated_dialogue = self.get_dialogue_from_label(
             other_initiated_dialogue_label
         )
 
@@ -1891,7 +1891,7 @@ class Dialogues:
         """
         return self._dialogues_storage.get_latest_label(dialogue_label)
 
-    def _get_dialogue_from_label(
+    def get_dialogue_from_label(
         self, dialogue_label: DialogueLabel
     ) -> Optional[Dialogue]:
         """
