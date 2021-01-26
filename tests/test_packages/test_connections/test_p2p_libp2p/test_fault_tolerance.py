@@ -189,7 +189,6 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes:
         """Test envelope routed from third relay client after relay restart."""
         addr_1 = self.connection.address
         addr_2 = self.connection2.address
-        addr_3 = self.genesis.address
 
         msg = DefaultMessage(
             dialogue_reference=("", ""),
@@ -238,22 +237,6 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes:
             performative=DefaultMessage.Performative.BYTES,
             content=b"helloAfterRestart",
         )
-
-        envelope = Envelope(
-            to=addr_3,
-            sender=addr_1,
-            protocol_id=DefaultMessage.protocol_id,
-            message=DefaultSerializer().encode(msg),
-        )
-
-        self.multiplexer.put(envelope)
-        delivered_envelope = self.multiplexer_genesis.get(block=True, timeout=20)
-
-        assert delivered_envelope is not None
-        assert delivered_envelope.to == envelope.to
-        assert delivered_envelope.sender == envelope.sender
-        assert delivered_envelope.protocol_id == envelope.protocol_id
-        assert delivered_envelope.message_bytes == envelope.message_bytes
 
         envelope = Envelope(
             to=addr_1,

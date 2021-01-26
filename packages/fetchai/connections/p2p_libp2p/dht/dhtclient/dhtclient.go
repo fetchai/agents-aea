@@ -37,11 +37,13 @@ import (
 
 	"github.com/libp2p/go-libp2p"
 	"github.com/libp2p/go-libp2p-core/crypto"
+	"github.com/libp2p/go-libp2p-core/host"
 	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/libp2p/go-libp2p-core/protocol"
 	"github.com/multiformats/go-multiaddr"
 
+	peerstore "github.com/libp2p/go-libp2p-core/peerstore"
 	kaddht "github.com/libp2p/go-libp2p-kad-dht"
 	routedhost "github.com/libp2p/go-libp2p/p2p/host/routed"
 
@@ -63,6 +65,46 @@ const (
 	sleepTimeDefaultDuration  = 100 * time.Millisecond
 	sleepTimeIncreaseMFactor  = 2 // multiplicative increase
 )
+
+// Notifee Handle DHTClient network events
+type Notifee struct {
+	myRelayPeer peer.AddrInfo
+	myHost      host.Host
+	logger      zerolog.Logger
+}
+
+// Listen called when network starts listening on an addr
+func (notifee *Notifee) Listen(network.Network, multiaddr.Multiaddr) {}
+
+// ListenClose called when network stops listening on an addr
+func (notifee *Notifee) ListenClose(network.Network, multiaddr.Multiaddr) {}
+
+// Connected called when a connection opened
+func (notifee *Notifee) Connected(network.Network, network.Conn) {}
+
+// Disconnected called when a connection closed
+func (notifee *Notifee) Disconnected(net network.Network, conn network.Conn) {
+	pinfo := notifee.myRelayPeer
+	if conn.RemotePeer().Pretty() != pinfo.ID.Pretty() {
+		return
+	}
+
+	notifee.myHost.Peerstore().AddAddrs(pinfo.ID, pinfo.Addrs, peerstore.PermanentAddrTTL)
+	for {
+		notifee.logger.Warn().Msgf("Lost connection to relay peer %s, reconnecting...", pinfo.ID.Pretty())
+		if err := notifee.myHost.Connect(context.Background(), pinfo); err == nil {
+			break
+		}
+		time.Sleep(1 * time.Second)
+	}
+	notifee.logger.Info().Msgf("Connection to relay peer %s reestablished", pinfo.ID.Pretty())
+}
+
+// OpenedStream called when a stream opened
+func (notifee *Notifee) OpenedStream(network.Network, network.Stream) {}
+
+// ClosedStream called when a stream closed
+func (notifee *Notifee) ClosedStream(network.Network, network.Stream) {}
 
 // DHTClient A restricted libp2p node for the Agents Communication Network
 // It use a `DHTPeer` to communicate with other peers.
@@ -197,6 +239,12 @@ func New(opts ...Option) (*DHTClient, error) {
 		dhtClient.Close()
 		return nil, err
 	}
+
+	dhtClient.routedHost.Network().Notify(&Notifee{
+		myRelayPeer: dhtClient.bootstrapPeers[index],
+		myHost:      dhtClient.routedHost,
+		logger:      dhtClient.logger,
+	})
 
 	/* setup DHTClient message handlers */
 
