@@ -33,14 +33,14 @@ You can find a more detailed discussion <a href="../connect-a-frontend/">here</a
 </details>
 
 <details><summary>Is the AEA framework ideal for agent-based modelling?</summary>
-The goal of agent-based modelling is to search for explanatory insight into the collective behaviour of agents obeying simple rules, typically in natural systems rather than in designing agents or solving specific practical or engineering problems.
+The goal of agent-based modelling (ABM) is to study the unknown (often complex) behaviour of systems comprised of agents with known (much simpler) behaviour. ABM is a popular technique for studying biological and social systems. Despite some similarities between ABM and the AEA framework, the two have fundamentally different goals. ABM's goal is not the design of agents or solving specific practical or engineering problems.
 Although it would be potentially possible, it would likely be inefficient to use the AEA framework for that kind of problem.
 <br><br>
 You can find more details on the application areas of the AEA framework <a href="../app-areas/">here</a>.
 </details>
 
 <details><summary>When a new AEA is created, is the <code>vendor</code> folder populated with some default packages?</summary>
-All AEA projects by default hold the <code>fetchai/stub:0.15.0</code> connection, the <code>fetchai/default:0.11.0</code>, <code>fetchai/state_update:0.9.0</code> and <code>fetchai/signing:0.9.0</code> protocol and the <code>fetchai/error:0.11.0</code> skill. These (as all other packages installed from the registry) are placed in the <code>vendor</code> folder.
+All AEA projects by default hold the <code>fetchai/stub:0.15.0</code> connection, the <code>fetchai/default:0.11.0</code>, <code>fetchai/state_update:0.9.0</code> and <code>fetchai/signing:0.9.0</code> protocols and the <code>fetchai/error:0.11.0</code> skill. These (as all other packages installed from the registry) are placed in the <code>vendor</code> folder.
 <br><br>
 You can find more details about the file structure <a href="../package-imports/">here</a>
 </details>
