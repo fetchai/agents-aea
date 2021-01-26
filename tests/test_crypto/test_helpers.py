@@ -81,7 +81,7 @@ class TestHelperFile:
         """Test generate wealth for ethereum."""
         address = "my_address"
         with caplog.at_level(
-            logging.DEBUG, logger="aea.crypto.ethereum._default_logger"
+            logging.DEBUG, logger="ethereum_crypto._default_logger"
         ):
             try_generate_testnet_wealth(identifier=ETHEREUM, address=address)
             assert (
@@ -95,7 +95,7 @@ class TestHelperFile:
         result = ResponseMock(status_code=500)
         with patch.object(requests, "get", return_value=result):
             with caplog.at_level(
-                logging.DEBUG, logger="aea.crypto.ethereum._default_logger"
+                logging.DEBUG, logger="ethereum_crypto._default_logger"
             ):
                 try_generate_testnet_wealth(
                     identifier=ETHEREUM, address=address, url="wrong_url",
@@ -108,14 +108,14 @@ class TestHelperFile:
         result = ResponseMock(status_code=200)
         with patch.object(requests, "get", return_value=result):
             with caplog.at_level(
-                logging.DEBUG, logger="aea.crypto.ethereum._default_logger"
+                logging.DEBUG, logger="ethereum_crypto._default_logger"
             ):
                 try_generate_testnet_wealth(
                     identifier=ETHEREUM, address=address, url="correct_url",
                 )
 
-    @patch("aea.crypto.ethereum.requests.post", return_value=ResponseMock())
-    @patch("aea.crypto.ethereum.json.loads", return_value={"error_message": ""})
+    @patch("ethereum_crypto.requests.post", return_value=ResponseMock())
+    @patch("ethereum_crypto.json.loads", return_value={"error_message": ""})
     def test_try_generate_testnet_wealth_error_resp_ethereum(self, *mocks):
         """Test try_generate_testnet_wealth error_resp."""
         try_generate_testnet_wealth(ETHEREUM, "address")
