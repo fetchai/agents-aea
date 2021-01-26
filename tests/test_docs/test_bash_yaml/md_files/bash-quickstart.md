@@ -4,6 +4,11 @@ python3 --version
 ``` bash
 sudo apt-get install python3.7-dev
 ```
+``` bash
+curl https://raw.githubusercontent.com/fetchai/agents-aea/master/scripts/install.sh --output install.sh
+chmod +x install.sh
+./install.sh
+```
 ```bash
 docker pull fetchai/aea-user:latest
 ```
