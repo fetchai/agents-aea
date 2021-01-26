@@ -40,6 +40,7 @@ from tests.conftest import (
 
 DEFAULT_PORT = 10234
 
+
 @libp2p_log_on_failure_all
 class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes:
     """Test that connection will reliably receive envelopes after its relay node restarted"""
@@ -49,9 +50,8 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes:
     def setup_class(cls):
         """Set the test up"""
         cls.cwd = os.getcwd()
-        cls.t = cls.cwd
-        #cls.t = tempfile.mkdtemp()
-        #os.chdir(cls.t)
+        cls.t = tempfile.mkdtemp()
+        os.chdir(cls.t)
         build_node(cls.t)
         cls.log_files = []
         cls.multiplexers = []
@@ -95,9 +95,9 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes:
             cls.multiplexer.connect()
             cls.log_files.append(cls.connection.node.log_file)
             cls.multiplexers.append(cls.multiplexer)
-            
+
             cls.connection2 = _make_libp2p_connection(
-                DEFAULT_PORT + 3,
+                DEFAULT_PORT + 4,
                 relay=False,
                 entry_peers=[relay_peer],
                 build_directory=cls.t,
@@ -120,7 +120,7 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes:
         """Test envelope routed from third peer after relay restart."""
         addr_1 = self.genesis.address
         addr_2 = self.connection.address
-        
+
         msg = DefaultMessage(
             dialogue_reference=("", ""),
             message_id=1,
@@ -157,7 +157,9 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes:
             [self.relay]
         )
         self.multiplexer_relay.connect()
-        TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes.multiplexers.append(self.multiplexer_relay)
+        TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes.multiplexers.append(
+            self.multiplexer_relay
+        )
 
         msg = DefaultMessage(
             dialogue_reference=("", ""),
@@ -187,6 +189,7 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes:
         """Test envelope routed from third relay client after relay restart."""
         addr_1 = self.connection.address
         addr_2 = self.connection2.address
+        addr_3 = self.genesis.address
 
         msg = DefaultMessage(
             dialogue_reference=("", ""),
@@ -224,7 +227,9 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes:
             [self.relay]
         )
         self.multiplexer_relay.connect()
-        TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes.multiplexers.append(self.multiplexer_relay)
+        TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes.multiplexers.append(
+            self.multiplexer_relay
+        )
 
         msg = DefaultMessage(
             dialogue_reference=("", ""),
@@ -233,6 +238,23 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes:
             performative=DefaultMessage.Performative.BYTES,
             content=b"helloAfterRestart",
         )
+
+        envelope = Envelope(
+            to=addr_3,
+            sender=addr_1,
+            protocol_id=DefaultMessage.protocol_id,
+            message=DefaultSerializer().encode(msg),
+        )
+
+        self.multiplexer.put(envelope)
+        delivered_envelope = self.multiplexer_genesis.get(block=True, timeout=20)
+
+        assert delivered_envelope is not None
+        assert delivered_envelope.to == envelope.to
+        assert delivered_envelope.sender == envelope.sender
+        assert delivered_envelope.protocol_id == envelope.protocol_id
+        assert delivered_envelope.message_bytes == envelope.message_bytes
+
         envelope = Envelope(
             to=addr_1,
             sender=addr_2,
@@ -256,11 +278,9 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes:
             mux.disconnect()
         os.chdir(cls.cwd)
         try:
-            pass
-            #shutil.rmtree(cls.t)
+            shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
-
 
 
 @libp2p_log_on_failure_all
@@ -383,7 +403,9 @@ class TestLibp2pConnectionRelayNodeRestartOutgoingEnvelopes:
             [self.relay]
         )
         self.multiplexer_relay.connect()
-        TestLibp2pConnectionRelayNodeRestartOutgoingEnvelopes.multiplexers.append(self.multiplexer_relay)
+        TestLibp2pConnectionRelayNodeRestartOutgoingEnvelopes.multiplexers.append(
+            self.multiplexer_relay
+        )
 
         delivered_envelope = self.multiplexer_genesis.get(block=True, timeout=20)
 

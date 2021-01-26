@@ -472,7 +472,9 @@ class P2PLibp2pConnection(Connection):
         peer_registration_delay = self.configuration.config.get(
             "peer_registration_delay"
         )  # Optional[str]
-        records_storage_path = self.configuration.config.get("storage_path") # Optional[str]
+        records_storage_path = self.configuration.config.get(
+            "storage_path"
+        )  # Optional[str]
         if (
             self.has_crypto_store
             and self.crypto_store.crypto_objects.get(ledger_id, None) is not None

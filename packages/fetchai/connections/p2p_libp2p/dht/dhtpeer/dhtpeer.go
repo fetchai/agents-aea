@@ -299,6 +299,11 @@ func New(opts ...Option) (*DHTPeer, error) {
 	}
 
 	// initialize agents records persistent storage
+	if dhtPeer.persistentStoragePath == defaultPersistentStoragePath {
+		myPeerID, err := peer.IDFromPublicKey(dhtPeer.publicKey)
+		ignore(err)
+		dhtPeer.persistentStoragePath += "_" + myPeerID.Pretty()
+	}
 	nbr, err := dhtPeer.initAgentRecordPersistentStorage()
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing agent record storage")
