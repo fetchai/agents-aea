@@ -10,9 +10,9 @@ The `confirmation_aw1` skill is for handling registrations in Agent World 1.
 
 ## Handlers
 
-* `contract_api`: handles `contract_api` messages for communication with a staking contract.
-* `ledger_api`: handles `ledger_api` messages for processing transaction settlements
-* `registration`: handles `register` messages for registration requests.
+* `contract_api`: handles `contract_api` messages for communication with a staking contract
+* `ledger_api`: handles `ledger_api` messages for interacting with a ledger
+* `registration`: handles `register` messages for registration requests
 * `signing`: handles `signing` messages for transaction signing by the decision maker
 
 ## Models

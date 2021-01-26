@@ -2,7 +2,7 @@
 
 ## Description
 
-This contract package is used to interface with a Fetch Oracle Client contract, which requests a real-world value from a Fetch Oracle contract.
+This contract package is used to interface with an ERC1155 smart contract.
 
 ## Functions
 
@@ -19,3 +19,8 @@ This contract package is used to interface with a Fetch Oracle Client contract, 
 * `get_hash_single(token_id)`: Get the hash for a trustless trade between two agents for a single `token_id` token.
 * `get_hash_batch(token_ids)`: Get the hash for a trustless trade between two agents for a batch of `token_ids` token.
 * `generate_trade_nonce()`: Generate a valid trade nonce.
+
+
+## Links
+
+* <a href="https://eips.ethereum.org/EIPS/eip-1155" target="_blank">ERC1155 Standard</a>

@@ -4,18 +4,19 @@
 
 This skill purchases information from other agents as specified in its configuration.
 
-This skill searches for an agent in a vicinity on the SOEF that sells the data this skill is configured to buy. Once found, it requests this data, negotiates the price, pays the proposed amount if agreement is reached, and receives the data bought.
+This skill searches for an agent in a vicinity on the sOEF that sells the data this skill is configured to buy. Once found, it requests this data, negotiates the price, pays the proposed amount if agreement is reached, and receives the data bought.
 
 
 ## Behaviours
 
-* `search`: searches for data selling service on SOEF
+* `search`: searches for data selling service on the sOEF
+* `transaction`: sequentially processes transactions' settlements on a blockchain
 
 ## Handlers
 
 * `fipa`: handles `fipa` messages for negotiation
-* `ledger_api`: handles `ledger_api` messages for payment
-* `oef_search`: handles `oef_search` messages to manage the sellers it finds
+* `ledger_api`: handles `ledger_api` messages for interacting with a ledger
+* `oef_search`: handles `oef_search` messages to manage the sellers found
 * `signing`: handles `signing` messages for transaction signing by the decision maker
 
 
