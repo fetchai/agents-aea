@@ -175,7 +175,6 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes:
             message=DefaultSerializer().encode(msg),
         )
 
-        time.sleep(1)
         self.multiplexer_genesis.put(envelope)
 
         delivered_envelope = self.multiplexer.get(block=True, timeout=20)
@@ -246,6 +245,7 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes:
             message=DefaultSerializer().encode(msg),
         )
 
+        time.sleep(2)
         self.multiplexer2.put(envelope)
         delivered_envelope = self.multiplexer.get(block=True, timeout=20)
 
