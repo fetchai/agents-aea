@@ -14,23 +14,23 @@ _sym_db = _symbol_database.Default()
 
 DESCRIPTOR = _descriptor.FileDescriptor(
     name="ledger_api.proto",
-    package="aea.fetchai.ledger_api.v0_9_0",
+    package="aea.fetchai.ledger_api.v0_1_0",
     syntax="proto3",
     serialized_options=None,
-    serialized_pb=b'\n\x10ledger_api.proto\x12\x1d\x61\x65\x61.fetchai.ledger_api.v0_9_0"\x86\x15\n\x10LedgerApiMessage\x12W\n\x07\x62\x61lance\x18\x05 \x01(\x0b\x32\x44.aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Balance_PerformativeH\x00\x12S\n\x05\x65rror\x18\x06 \x01(\x0b\x32\x42.aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Error_PerformativeH\x00\x12_\n\x0bget_balance\x18\x07 \x01(\x0b\x32H.aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Get_Balance_PerformativeH\x00\x12o\n\x13get_raw_transaction\x18\x08 \x01(\x0b\x32P.aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Get_Raw_Transaction_PerformativeH\x00\x12[\n\tget_state\x18\t \x01(\x0b\x32\x46.aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Get_State_PerformativeH\x00\x12w\n\x17get_transaction_receipt\x18\n \x01(\x0b\x32T.aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Get_Transaction_Receipt_PerformativeH\x00\x12g\n\x0fraw_transaction\x18\x0b \x01(\x0b\x32L.aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Raw_Transaction_PerformativeH\x00\x12w\n\x17send_signed_transaction\x18\x0c \x01(\x0b\x32T.aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Send_Signed_Transaction_PerformativeH\x00\x12S\n\x05state\x18\r \x01(\x0b\x32\x42.aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.State_PerformativeH\x00\x12m\n\x12transaction_digest\x18\x0e \x01(\x0b\x32O.aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Transaction_Digest_PerformativeH\x00\x12o\n\x13transaction_receipt\x18\x0f \x01(\x0b\x32P.aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Transaction_Receipt_PerformativeH\x00\x1a\x18\n\x06Kwargs\x12\x0e\n\x06kwargs\x18\x01 \x01(\x0c\x1a)\n\x0eRawTransaction\x12\x17\n\x0fraw_transaction\x18\x01 \x01(\x0c\x1a/\n\x11SignedTransaction\x12\x1a\n\x12signed_transaction\x18\x01 \x01(\x0c\x1a\x16\n\x05State\x12\r\n\x05state\x18\x01 \x01(\x0c\x1a\x16\n\x05Terms\x12\r\n\x05terms\x18\x01 \x01(\x0c\x1a/\n\x11TransactionDigest\x12\x1a\n\x12transaction_digest\x18\x01 \x01(\x0c\x1a\x31\n\x12TransactionReceipt\x12\x1b\n\x13transaction_receipt\x18\x01 \x01(\x0c\x1a>\n\x18Get_Balance_Performative\x12\x11\n\tledger_id\x18\x01 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x02 \x01(\t\x1ah\n Get_Raw_Transaction_Performative\x12\x44\n\x05terms\x18\x01 \x01(\x0b\x32\x35.aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Terms\x1a\x85\x01\n$Send_Signed_Transaction_Performative\x12]\n\x12signed_transaction\x18\x01 \x01(\x0b\x32\x41.aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.SignedTransaction\x1a\x85\x01\n$Get_Transaction_Receipt_Performative\x12]\n\x12transaction_digest\x18\x01 \x01(\x0b\x32\x41.aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.TransactionDigest\x1a:\n\x14\x42\x61lance_Performative\x12\x11\n\tledger_id\x18\x01 \x01(\t\x12\x0f\n\x07\x62\x61lance\x18\x02 \x01(\x05\x1aw\n\x1cRaw_Transaction_Performative\x12W\n\x0fraw_transaction\x18\x01 \x01(\x0b\x32>.aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.RawTransaction\x1a\x80\x01\n\x1fTransaction_Digest_Performative\x12]\n\x12transaction_digest\x18\x01 \x01(\x0b\x32\x41.aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.TransactionDigest\x1a\x83\x01\n Transaction_Receipt_Performative\x12_\n\x13transaction_receipt\x18\x01 \x01(\x0b\x32\x42.aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.TransactionReceipt\x1a\x93\x01\n\x16Get_State_Performative\x12\x11\n\tledger_id\x18\x01 \x01(\t\x12\x10\n\x08\x63\x61llable\x18\x02 \x01(\t\x12\x0c\n\x04\x61rgs\x18\x03 \x03(\t\x12\x46\n\x06kwargs\x18\x04 \x01(\x0b\x32\x36.aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Kwargs\x1am\n\x12State_Performative\x12\x11\n\tledger_id\x18\x01 \x01(\t\x12\x44\n\x05state\x18\x02 \x01(\x0b\x32\x35.aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.State\x1an\n\x12\x45rror_Performative\x12\x0c\n\x04\x63ode\x18\x01 \x01(\x05\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x16\n\x0emessage_is_set\x18\x03 \x01(\x08\x12\x0c\n\x04\x64\x61ta\x18\x04 \x01(\x0c\x12\x13\n\x0b\x64\x61ta_is_set\x18\x05 \x01(\x08\x42\x0e\n\x0cperformativeb\x06proto3',
+    serialized_pb=b'\n\x10ledger_api.proto\x12\x1d\x61\x65\x61.fetchai.ledger_api.v0_1_0"\x86\x15\n\x10LedgerApiMessage\x12W\n\x07\x62\x61lance\x18\x05 \x01(\x0b\x32\x44.aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Balance_PerformativeH\x00\x12S\n\x05\x65rror\x18\x06 \x01(\x0b\x32\x42.aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Error_PerformativeH\x00\x12_\n\x0bget_balance\x18\x07 \x01(\x0b\x32H.aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Get_Balance_PerformativeH\x00\x12o\n\x13get_raw_transaction\x18\x08 \x01(\x0b\x32P.aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Get_Raw_Transaction_PerformativeH\x00\x12[\n\tget_state\x18\t \x01(\x0b\x32\x46.aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Get_State_PerformativeH\x00\x12w\n\x17get_transaction_receipt\x18\n \x01(\x0b\x32T.aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Get_Transaction_Receipt_PerformativeH\x00\x12g\n\x0fraw_transaction\x18\x0b \x01(\x0b\x32L.aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Raw_Transaction_PerformativeH\x00\x12w\n\x17send_signed_transaction\x18\x0c \x01(\x0b\x32T.aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Send_Signed_Transaction_PerformativeH\x00\x12S\n\x05state\x18\r \x01(\x0b\x32\x42.aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.State_PerformativeH\x00\x12m\n\x12transaction_digest\x18\x0e \x01(\x0b\x32O.aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Transaction_Digest_PerformativeH\x00\x12o\n\x13transaction_receipt\x18\x0f \x01(\x0b\x32P.aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Transaction_Receipt_PerformativeH\x00\x1a\x18\n\x06Kwargs\x12\x0e\n\x06kwargs\x18\x01 \x01(\x0c\x1a)\n\x0eRawTransaction\x12\x17\n\x0fraw_transaction\x18\x01 \x01(\x0c\x1a/\n\x11SignedTransaction\x12\x1a\n\x12signed_transaction\x18\x01 \x01(\x0c\x1a\x16\n\x05State\x12\r\n\x05state\x18\x01 \x01(\x0c\x1a\x16\n\x05Terms\x12\r\n\x05terms\x18\x01 \x01(\x0c\x1a/\n\x11TransactionDigest\x12\x1a\n\x12transaction_digest\x18\x01 \x01(\x0c\x1a\x31\n\x12TransactionReceipt\x12\x1b\n\x13transaction_receipt\x18\x01 \x01(\x0c\x1a>\n\x18Get_Balance_Performative\x12\x11\n\tledger_id\x18\x01 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x02 \x01(\t\x1ah\n Get_Raw_Transaction_Performative\x12\x44\n\x05terms\x18\x01 \x01(\x0b\x32\x35.aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Terms\x1a\x85\x01\n$Send_Signed_Transaction_Performative\x12]\n\x12signed_transaction\x18\x01 \x01(\x0b\x32\x41.aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.SignedTransaction\x1a\x85\x01\n$Get_Transaction_Receipt_Performative\x12]\n\x12transaction_digest\x18\x01 \x01(\x0b\x32\x41.aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.TransactionDigest\x1a:\n\x14\x42\x61lance_Performative\x12\x11\n\tledger_id\x18\x01 \x01(\t\x12\x0f\n\x07\x62\x61lance\x18\x02 \x01(\x05\x1aw\n\x1cRaw_Transaction_Performative\x12W\n\x0fraw_transaction\x18\x01 \x01(\x0b\x32>.aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.RawTransaction\x1a\x80\x01\n\x1fTransaction_Digest_Performative\x12]\n\x12transaction_digest\x18\x01 \x01(\x0b\x32\x41.aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.TransactionDigest\x1a\x83\x01\n Transaction_Receipt_Performative\x12_\n\x13transaction_receipt\x18\x01 \x01(\x0b\x32\x42.aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.TransactionReceipt\x1a\x93\x01\n\x16Get_State_Performative\x12\x11\n\tledger_id\x18\x01 \x01(\t\x12\x10\n\x08\x63\x61llable\x18\x02 \x01(\t\x12\x0c\n\x04\x61rgs\x18\x03 \x03(\t\x12\x46\n\x06kwargs\x18\x04 \x01(\x0b\x32\x36.aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Kwargs\x1am\n\x12State_Performative\x12\x11\n\tledger_id\x18\x01 \x01(\t\x12\x44\n\x05state\x18\x02 \x01(\x0b\x32\x35.aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.State\x1an\n\x12\x45rror_Performative\x12\x0c\n\x04\x63ode\x18\x01 \x01(\x05\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x16\n\x0emessage_is_set\x18\x03 \x01(\x08\x12\x0c\n\x04\x64\x61ta\x18\x04 \x01(\x0c\x12\x13\n\x0b\x64\x61ta_is_set\x18\x05 \x01(\x08\x42\x0e\n\x0cperformativeb\x06proto3',
 )
 
 
 _LEDGERAPIMESSAGE_KWARGS = _descriptor.Descriptor(
     name="Kwargs",
-    full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Kwargs",
+    full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Kwargs",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="kwargs",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Kwargs.kwargs",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Kwargs.kwargs",
             index=0,
             number=1,
             type=12,
@@ -61,14 +61,14 @@ _LEDGERAPIMESSAGE_KWARGS = _descriptor.Descriptor(
 
 _LEDGERAPIMESSAGE_RAWTRANSACTION = _descriptor.Descriptor(
     name="RawTransaction",
-    full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.RawTransaction",
+    full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.RawTransaction",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="raw_transaction",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.RawTransaction.raw_transaction",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.RawTransaction.raw_transaction",
             index=0,
             number=1,
             type=12,
@@ -99,14 +99,14 @@ _LEDGERAPIMESSAGE_RAWTRANSACTION = _descriptor.Descriptor(
 
 _LEDGERAPIMESSAGE_SIGNEDTRANSACTION = _descriptor.Descriptor(
     name="SignedTransaction",
-    full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.SignedTransaction",
+    full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.SignedTransaction",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="signed_transaction",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.SignedTransaction.signed_transaction",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.SignedTransaction.signed_transaction",
             index=0,
             number=1,
             type=12,
@@ -137,14 +137,14 @@ _LEDGERAPIMESSAGE_SIGNEDTRANSACTION = _descriptor.Descriptor(
 
 _LEDGERAPIMESSAGE_STATE = _descriptor.Descriptor(
     name="State",
-    full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.State",
+    full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.State",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="state",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.State.state",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.State.state",
             index=0,
             number=1,
             type=12,
@@ -175,14 +175,14 @@ _LEDGERAPIMESSAGE_STATE = _descriptor.Descriptor(
 
 _LEDGERAPIMESSAGE_TERMS = _descriptor.Descriptor(
     name="Terms",
-    full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Terms",
+    full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Terms",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="terms",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Terms.terms",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Terms.terms",
             index=0,
             number=1,
             type=12,
@@ -213,14 +213,14 @@ _LEDGERAPIMESSAGE_TERMS = _descriptor.Descriptor(
 
 _LEDGERAPIMESSAGE_TRANSACTIONDIGEST = _descriptor.Descriptor(
     name="TransactionDigest",
-    full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.TransactionDigest",
+    full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.TransactionDigest",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="transaction_digest",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.TransactionDigest.transaction_digest",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.TransactionDigest.transaction_digest",
             index=0,
             number=1,
             type=12,
@@ -251,14 +251,14 @@ _LEDGERAPIMESSAGE_TRANSACTIONDIGEST = _descriptor.Descriptor(
 
 _LEDGERAPIMESSAGE_TRANSACTIONRECEIPT = _descriptor.Descriptor(
     name="TransactionReceipt",
-    full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.TransactionReceipt",
+    full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.TransactionReceipt",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="transaction_receipt",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.TransactionReceipt.transaction_receipt",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.TransactionReceipt.transaction_receipt",
             index=0,
             number=1,
             type=12,
@@ -289,14 +289,14 @@ _LEDGERAPIMESSAGE_TRANSACTIONRECEIPT = _descriptor.Descriptor(
 
 _LEDGERAPIMESSAGE_GET_BALANCE_PERFORMATIVE = _descriptor.Descriptor(
     name="Get_Balance_Performative",
-    full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Get_Balance_Performative",
+    full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Get_Balance_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="ledger_id",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Get_Balance_Performative.ledger_id",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Get_Balance_Performative.ledger_id",
             index=0,
             number=1,
             type=9,
@@ -314,7 +314,7 @@ _LEDGERAPIMESSAGE_GET_BALANCE_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="address",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Get_Balance_Performative.address",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Get_Balance_Performative.address",
             index=1,
             number=2,
             type=9,
@@ -345,14 +345,14 @@ _LEDGERAPIMESSAGE_GET_BALANCE_PERFORMATIVE = _descriptor.Descriptor(
 
 _LEDGERAPIMESSAGE_GET_RAW_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
     name="Get_Raw_Transaction_Performative",
-    full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Get_Raw_Transaction_Performative",
+    full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Get_Raw_Transaction_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="terms",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Get_Raw_Transaction_Performative.terms",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Get_Raw_Transaction_Performative.terms",
             index=0,
             number=1,
             type=11,
@@ -383,14 +383,14 @@ _LEDGERAPIMESSAGE_GET_RAW_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
 
 _LEDGERAPIMESSAGE_SEND_SIGNED_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
     name="Send_Signed_Transaction_Performative",
-    full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Send_Signed_Transaction_Performative",
+    full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Send_Signed_Transaction_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="signed_transaction",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Send_Signed_Transaction_Performative.signed_transaction",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Send_Signed_Transaction_Performative.signed_transaction",
             index=0,
             number=1,
             type=11,
@@ -421,14 +421,14 @@ _LEDGERAPIMESSAGE_SEND_SIGNED_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
 
 _LEDGERAPIMESSAGE_GET_TRANSACTION_RECEIPT_PERFORMATIVE = _descriptor.Descriptor(
     name="Get_Transaction_Receipt_Performative",
-    full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Get_Transaction_Receipt_Performative",
+    full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Get_Transaction_Receipt_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="transaction_digest",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Get_Transaction_Receipt_Performative.transaction_digest",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Get_Transaction_Receipt_Performative.transaction_digest",
             index=0,
             number=1,
             type=11,
@@ -459,14 +459,14 @@ _LEDGERAPIMESSAGE_GET_TRANSACTION_RECEIPT_PERFORMATIVE = _descriptor.Descriptor(
 
 _LEDGERAPIMESSAGE_BALANCE_PERFORMATIVE = _descriptor.Descriptor(
     name="Balance_Performative",
-    full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Balance_Performative",
+    full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Balance_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="ledger_id",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Balance_Performative.ledger_id",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Balance_Performative.ledger_id",
             index=0,
             number=1,
             type=9,
@@ -484,7 +484,7 @@ _LEDGERAPIMESSAGE_BALANCE_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="balance",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Balance_Performative.balance",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Balance_Performative.balance",
             index=1,
             number=2,
             type=5,
@@ -515,14 +515,14 @@ _LEDGERAPIMESSAGE_BALANCE_PERFORMATIVE = _descriptor.Descriptor(
 
 _LEDGERAPIMESSAGE_RAW_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
     name="Raw_Transaction_Performative",
-    full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Raw_Transaction_Performative",
+    full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Raw_Transaction_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="raw_transaction",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Raw_Transaction_Performative.raw_transaction",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Raw_Transaction_Performative.raw_transaction",
             index=0,
             number=1,
             type=11,
@@ -553,14 +553,14 @@ _LEDGERAPIMESSAGE_RAW_TRANSACTION_PERFORMATIVE = _descriptor.Descriptor(
 
 _LEDGERAPIMESSAGE_TRANSACTION_DIGEST_PERFORMATIVE = _descriptor.Descriptor(
     name="Transaction_Digest_Performative",
-    full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Transaction_Digest_Performative",
+    full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Transaction_Digest_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="transaction_digest",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Transaction_Digest_Performative.transaction_digest",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Transaction_Digest_Performative.transaction_digest",
             index=0,
             number=1,
             type=11,
@@ -591,14 +591,14 @@ _LEDGERAPIMESSAGE_TRANSACTION_DIGEST_PERFORMATIVE = _descriptor.Descriptor(
 
 _LEDGERAPIMESSAGE_TRANSACTION_RECEIPT_PERFORMATIVE = _descriptor.Descriptor(
     name="Transaction_Receipt_Performative",
-    full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Transaction_Receipt_Performative",
+    full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Transaction_Receipt_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="transaction_receipt",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Transaction_Receipt_Performative.transaction_receipt",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Transaction_Receipt_Performative.transaction_receipt",
             index=0,
             number=1,
             type=11,
@@ -629,14 +629,14 @@ _LEDGERAPIMESSAGE_TRANSACTION_RECEIPT_PERFORMATIVE = _descriptor.Descriptor(
 
 _LEDGERAPIMESSAGE_GET_STATE_PERFORMATIVE = _descriptor.Descriptor(
     name="Get_State_Performative",
-    full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Get_State_Performative",
+    full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Get_State_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="ledger_id",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Get_State_Performative.ledger_id",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Get_State_Performative.ledger_id",
             index=0,
             number=1,
             type=9,
@@ -654,7 +654,7 @@ _LEDGERAPIMESSAGE_GET_STATE_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="callable",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Get_State_Performative.callable",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Get_State_Performative.callable",
             index=1,
             number=2,
             type=9,
@@ -672,7 +672,7 @@ _LEDGERAPIMESSAGE_GET_STATE_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="args",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Get_State_Performative.args",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Get_State_Performative.args",
             index=2,
             number=3,
             type=9,
@@ -690,7 +690,7 @@ _LEDGERAPIMESSAGE_GET_STATE_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="kwargs",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Get_State_Performative.kwargs",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Get_State_Performative.kwargs",
             index=3,
             number=4,
             type=11,
@@ -721,14 +721,14 @@ _LEDGERAPIMESSAGE_GET_STATE_PERFORMATIVE = _descriptor.Descriptor(
 
 _LEDGERAPIMESSAGE_STATE_PERFORMATIVE = _descriptor.Descriptor(
     name="State_Performative",
-    full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.State_Performative",
+    full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.State_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="ledger_id",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.State_Performative.ledger_id",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.State_Performative.ledger_id",
             index=0,
             number=1,
             type=9,
@@ -746,7 +746,7 @@ _LEDGERAPIMESSAGE_STATE_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="state",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.State_Performative.state",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.State_Performative.state",
             index=1,
             number=2,
             type=11,
@@ -777,14 +777,14 @@ _LEDGERAPIMESSAGE_STATE_PERFORMATIVE = _descriptor.Descriptor(
 
 _LEDGERAPIMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
     name="Error_Performative",
-    full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Error_Performative",
+    full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Error_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="code",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Error_Performative.code",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Error_Performative.code",
             index=0,
             number=1,
             type=5,
@@ -802,7 +802,7 @@ _LEDGERAPIMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="message",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Error_Performative.message",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Error_Performative.message",
             index=1,
             number=2,
             type=9,
@@ -820,7 +820,7 @@ _LEDGERAPIMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="message_is_set",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Error_Performative.message_is_set",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Error_Performative.message_is_set",
             index=2,
             number=3,
             type=8,
@@ -838,7 +838,7 @@ _LEDGERAPIMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="data",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Error_Performative.data",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Error_Performative.data",
             index=3,
             number=4,
             type=12,
@@ -856,7 +856,7 @@ _LEDGERAPIMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="data_is_set",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Error_Performative.data_is_set",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Error_Performative.data_is_set",
             index=4,
             number=5,
             type=8,
@@ -887,14 +887,14 @@ _LEDGERAPIMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
 
 _LEDGERAPIMESSAGE = _descriptor.Descriptor(
     name="LedgerApiMessage",
-    full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage",
+    full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="balance",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.balance",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.balance",
             index=0,
             number=5,
             type=11,
@@ -912,7 +912,7 @@ _LEDGERAPIMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="error",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.error",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.error",
             index=1,
             number=6,
             type=11,
@@ -930,7 +930,7 @@ _LEDGERAPIMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="get_balance",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.get_balance",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.get_balance",
             index=2,
             number=7,
             type=11,
@@ -948,7 +948,7 @@ _LEDGERAPIMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="get_raw_transaction",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.get_raw_transaction",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.get_raw_transaction",
             index=3,
             number=8,
             type=11,
@@ -966,7 +966,7 @@ _LEDGERAPIMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="get_state",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.get_state",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.get_state",
             index=4,
             number=9,
             type=11,
@@ -984,7 +984,7 @@ _LEDGERAPIMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="get_transaction_receipt",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.get_transaction_receipt",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.get_transaction_receipt",
             index=5,
             number=10,
             type=11,
@@ -1002,7 +1002,7 @@ _LEDGERAPIMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="raw_transaction",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.raw_transaction",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.raw_transaction",
             index=6,
             number=11,
             type=11,
@@ -1020,7 +1020,7 @@ _LEDGERAPIMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="send_signed_transaction",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.send_signed_transaction",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.send_signed_transaction",
             index=7,
             number=12,
             type=11,
@@ -1038,7 +1038,7 @@ _LEDGERAPIMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="state",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.state",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.state",
             index=8,
             number=13,
             type=11,
@@ -1056,7 +1056,7 @@ _LEDGERAPIMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="transaction_digest",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.transaction_digest",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.transaction_digest",
             index=9,
             number=14,
             type=11,
@@ -1074,7 +1074,7 @@ _LEDGERAPIMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="transaction_receipt",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.transaction_receipt",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.transaction_receipt",
             index=10,
             number=15,
             type=11,
@@ -1120,7 +1120,7 @@ _LEDGERAPIMESSAGE = _descriptor.Descriptor(
     oneofs=[
         _descriptor.OneofDescriptor(
             name="performative",
-            full_name="aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.performative",
+            full_name="aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.performative",
             index=0,
             containing_type=None,
             fields=[],
@@ -1288,7 +1288,7 @@ LedgerApiMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _LEDGERAPIMESSAGE_KWARGS,
                 "__module__": "ledger_api_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Kwargs)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Kwargs)
             },
         ),
         "RawTransaction": _reflection.GeneratedProtocolMessageType(
@@ -1297,7 +1297,7 @@ LedgerApiMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _LEDGERAPIMESSAGE_RAWTRANSACTION,
                 "__module__": "ledger_api_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.RawTransaction)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.RawTransaction)
             },
         ),
         "SignedTransaction": _reflection.GeneratedProtocolMessageType(
@@ -1306,7 +1306,7 @@ LedgerApiMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _LEDGERAPIMESSAGE_SIGNEDTRANSACTION,
                 "__module__": "ledger_api_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.SignedTransaction)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.SignedTransaction)
             },
         ),
         "State": _reflection.GeneratedProtocolMessageType(
@@ -1315,7 +1315,7 @@ LedgerApiMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _LEDGERAPIMESSAGE_STATE,
                 "__module__": "ledger_api_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.State)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.State)
             },
         ),
         "Terms": _reflection.GeneratedProtocolMessageType(
@@ -1324,7 +1324,7 @@ LedgerApiMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _LEDGERAPIMESSAGE_TERMS,
                 "__module__": "ledger_api_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Terms)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Terms)
             },
         ),
         "TransactionDigest": _reflection.GeneratedProtocolMessageType(
@@ -1333,7 +1333,7 @@ LedgerApiMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _LEDGERAPIMESSAGE_TRANSACTIONDIGEST,
                 "__module__": "ledger_api_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.TransactionDigest)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.TransactionDigest)
             },
         ),
         "TransactionReceipt": _reflection.GeneratedProtocolMessageType(
@@ -1342,7 +1342,7 @@ LedgerApiMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _LEDGERAPIMESSAGE_TRANSACTIONRECEIPT,
                 "__module__": "ledger_api_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.TransactionReceipt)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.TransactionReceipt)
             },
         ),
         "Get_Balance_Performative": _reflection.GeneratedProtocolMessageType(
@@ -1351,7 +1351,7 @@ LedgerApiMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _LEDGERAPIMESSAGE_GET_BALANCE_PERFORMATIVE,
                 "__module__": "ledger_api_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Get_Balance_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Get_Balance_Performative)
             },
         ),
         "Get_Raw_Transaction_Performative": _reflection.GeneratedProtocolMessageType(
@@ -1360,7 +1360,7 @@ LedgerApiMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _LEDGERAPIMESSAGE_GET_RAW_TRANSACTION_PERFORMATIVE,
                 "__module__": "ledger_api_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Get_Raw_Transaction_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Get_Raw_Transaction_Performative)
             },
         ),
         "Send_Signed_Transaction_Performative": _reflection.GeneratedProtocolMessageType(
@@ -1369,7 +1369,7 @@ LedgerApiMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _LEDGERAPIMESSAGE_SEND_SIGNED_TRANSACTION_PERFORMATIVE,
                 "__module__": "ledger_api_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Send_Signed_Transaction_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Send_Signed_Transaction_Performative)
             },
         ),
         "Get_Transaction_Receipt_Performative": _reflection.GeneratedProtocolMessageType(
@@ -1378,7 +1378,7 @@ LedgerApiMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _LEDGERAPIMESSAGE_GET_TRANSACTION_RECEIPT_PERFORMATIVE,
                 "__module__": "ledger_api_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Get_Transaction_Receipt_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Get_Transaction_Receipt_Performative)
             },
         ),
         "Balance_Performative": _reflection.GeneratedProtocolMessageType(
@@ -1387,7 +1387,7 @@ LedgerApiMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _LEDGERAPIMESSAGE_BALANCE_PERFORMATIVE,
                 "__module__": "ledger_api_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Balance_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Balance_Performative)
             },
         ),
         "Raw_Transaction_Performative": _reflection.GeneratedProtocolMessageType(
@@ -1396,7 +1396,7 @@ LedgerApiMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _LEDGERAPIMESSAGE_RAW_TRANSACTION_PERFORMATIVE,
                 "__module__": "ledger_api_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Raw_Transaction_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Raw_Transaction_Performative)
             },
         ),
         "Transaction_Digest_Performative": _reflection.GeneratedProtocolMessageType(
@@ -1405,7 +1405,7 @@ LedgerApiMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _LEDGERAPIMESSAGE_TRANSACTION_DIGEST_PERFORMATIVE,
                 "__module__": "ledger_api_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Transaction_Digest_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Transaction_Digest_Performative)
             },
         ),
         "Transaction_Receipt_Performative": _reflection.GeneratedProtocolMessageType(
@@ -1414,7 +1414,7 @@ LedgerApiMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _LEDGERAPIMESSAGE_TRANSACTION_RECEIPT_PERFORMATIVE,
                 "__module__": "ledger_api_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Transaction_Receipt_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Transaction_Receipt_Performative)
             },
         ),
         "Get_State_Performative": _reflection.GeneratedProtocolMessageType(
@@ -1423,7 +1423,7 @@ LedgerApiMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _LEDGERAPIMESSAGE_GET_STATE_PERFORMATIVE,
                 "__module__": "ledger_api_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Get_State_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Get_State_Performative)
             },
         ),
         "State_Performative": _reflection.GeneratedProtocolMessageType(
@@ -1432,7 +1432,7 @@ LedgerApiMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _LEDGERAPIMESSAGE_STATE_PERFORMATIVE,
                 "__module__": "ledger_api_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.State_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.State_Performative)
             },
         ),
         "Error_Performative": _reflection.GeneratedProtocolMessageType(
@@ -1441,12 +1441,12 @@ LedgerApiMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _LEDGERAPIMESSAGE_ERROR_PERFORMATIVE,
                 "__module__": "ledger_api_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage.Error_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage.Error_Performative)
             },
         ),
         "DESCRIPTOR": _LEDGERAPIMESSAGE,
         "__module__": "ledger_api_pb2"
-        # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_9_0.LedgerApiMessage)
+        # @@protoc_insertion_point(class_scope:aea.fetchai.ledger_api.v0_1_0.LedgerApiMessage)
     },
 )
 _sym_db.RegisterMessage(LedgerApiMessage)

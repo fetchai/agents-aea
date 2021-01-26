@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package aea.fetchai.ledger_api.v0_9_0;
+package aea.fetchai.ledger_api.v0_1_0;
 
 message LedgerApiMessage{
 

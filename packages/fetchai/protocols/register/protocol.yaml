@@ -1,18 +1,18 @@
 name: register
 author: fetchai
 version: 0.4.0
-protocol_specification_id: fetchai/register:0.4.0
+protocol_specification_id: fetchai/register:0.1.0
 type: protocol
 description: A protocol for communication between two AEAs for registration.
 license: Apache-2.0
 aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
-  README.md: QmYytjpTkFumkcWeJvxL3aL7pQbaeVzWKGD8FKxF7UoFrv
+  README.md: Qma647mxSRgHiSDoTEPeetCk45927hDEQzzJMbHPxjuKEe
   __init__.py: QmZgAVL7zheA4UnmaYBBaFetMyhFBVyTvcLF5HMvTicGvF
   dialogues.py: QmfBmUxThNF1Qgz4bSrvPPPVYqxvdRtaMuXpQUQ5XVTPQC
   message.py: QmPzVtZ9dxwHTo7v7S6beMTnnEEre573X65Cj8gCcauC35
-  register.proto: QmdDPBWvKQMhfQXsD7KEHLGiHj9XM7v4pHuNCQcKurbtkj
-  register_pb2.py: QmbFgsdVd5Yszihc5anLGuEYRyDoesb69Du3DR5Zpq7XNZ
+  register.proto: QmRTR82KHn36WZWszFrBfYAwJSCmXnMDPkZ3jf7MUCH9o1
+  register_pb2.py: Qmf4Au6Xiq9svJxhYpVQ4x7JaVhtzuv2PKAUiSrMCfucXe
   serialization.py: QmP3BiPfJZ8JYdPLdGRWUA6dpJRdsAvt5mLuoXDMMBBzDX
 fingerprint_ignore_patterns: []
 dependencies:

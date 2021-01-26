@@ -387,8 +387,12 @@ class Envelope:
         self._to = to
         self._sender = sender
 
-        # set protocol_id and protocol_specification_id
-        if isinstance(message, Message):
+        if isinstance(message, bytes):
+            enforce(
+                bool(protocol_id) or bool(protocol_specification_id),
+                "Message is bytes object, protocol_id or protocol_specification_id must be provided!",
+            )
+        elif isinstance(message, Message):
             # protocol_id provided as an argument in priority
             # use Message.protocol_id only if no protocol_id provided
             if message.protocol_id is None:
@@ -396,12 +400,10 @@ class Envelope:
                     f"message class {type(message)} has no protocol_id specified!"
                 )
             protocol_id = message.protocol_id
-
-        # no protocol_id provided and not a Message instance for message
-        if not (protocol_id or protocol_specification_id):
+        else:
             raise ValueError(
-                "if message is bytes protocol_id or protocol_specification_id must be provided!"
-            )
+                f"Message type: {type(message)} is not supported!"
+            )  # pragma: nocover
 
         if not protocol_id:
             protocol_id = self._get_protocol_id_by_protocol_specification_id(

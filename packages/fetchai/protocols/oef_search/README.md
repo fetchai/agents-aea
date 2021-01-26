@@ -15,7 +15,7 @@ version: 0.12.0
 description: A protocol for interacting with an OEF search service.
 license: Apache-2.0
 aea_version: '>=0.9.0, <0.10.0'
-protocol_specification_id: fetchai/oef_search:0.12.0
+protocol_specification_id: fetchai/oef_search:0.1.0
 speech_acts:
   register_service:
     service_description: ct:Description

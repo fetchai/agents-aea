@@ -408,8 +408,8 @@ def test_envelope_constructor():
         Envelope(to="to", sender="sender", message=123)
 
     with pytest.raises(
-        ValueError,
-        match=r"if message is bytes protocol_id or protocol_specification_id must be provided!",
+        Exception,
+        match=r"Message is bytes object, protocol_id or protocol_specification_id must be provided!",
     ):
         Envelope(to="asd", sender="asdasd", message=b"sdfdf")
 

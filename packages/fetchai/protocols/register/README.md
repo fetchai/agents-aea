@@ -14,7 +14,7 @@ version: 0.4.0
 description: A protocol for communication between two AEAs for registration.
 license: Apache-2.0
 aea_version: '>=0.9.0, <0.10.0'
-protocol_specification_id: fetchai/register:0.4.0
+protocol_specification_id: fetchai/register:0.1.0
 speech_acts:
   register:
     info: pt:dict[pt:str, pt:str]

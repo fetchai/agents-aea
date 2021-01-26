@@ -14,23 +14,23 @@ _sym_db = _symbol_database.Default()
 
 DESCRIPTOR = _descriptor.FileDescriptor(
     name="prometheus.proto",
-    package="aea.fetchai.prometheus.v0_2_0",
+    package="aea.fetchai.prometheus.v0_1_0",
     syntax="proto3",
     serialized_options=None,
-    serialized_pb=b'\n\x10prometheus.proto\x12\x1d\x61\x65\x61.fetchai.prometheus.v0_2_0"\xdf\x06\n\x11PrometheusMessage\x12^\n\nadd_metric\x18\x05 \x01(\x0b\x32H.aea.fetchai.prometheus.v0_2_0.PrometheusMessage.Add_Metric_PerformativeH\x00\x12Z\n\x08response\x18\x06 \x01(\x0b\x32\x46.aea.fetchai.prometheus.v0_2_0.PrometheusMessage.Response_PerformativeH\x00\x12\x64\n\rupdate_metric\x18\x07 \x01(\x0b\x32K.aea.fetchai.prometheus.v0_2_0.PrometheusMessage.Update_Metric_PerformativeH\x00\x1a\xe0\x01\n\x17\x41\x64\x64_Metric_Performative\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\r\n\x05title\x18\x02 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\x12\x64\n\x06labels\x18\x04 \x03(\x0b\x32T.aea.fetchai.prometheus.v0_2_0.PrometheusMessage.Add_Metric_Performative.LabelsEntry\x1a-\n\x0bLabelsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\xe4\x01\n\x1aUpdate_Metric_Performative\x12\r\n\x05title\x18\x01 \x01(\t\x12\x10\n\x08\x63\x61llable\x18\x02 \x01(\t\x12\r\n\x05value\x18\x03 \x01(\x02\x12g\n\x06labels\x18\x04 \x03(\x0b\x32W.aea.fetchai.prometheus.v0_2_0.PrometheusMessage.Update_Metric_Performative.LabelsEntry\x1a-\n\x0bLabelsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1aN\n\x15Response_Performative\x12\x0c\n\x04\x63ode\x18\x01 \x01(\x05\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x16\n\x0emessage_is_set\x18\x03 \x01(\x08\x42\x0e\n\x0cperformativeb\x06proto3',
+    serialized_pb=b'\n\x10prometheus.proto\x12\x1d\x61\x65\x61.fetchai.prometheus.v0_1_0"\xdf\x06\n\x11PrometheusMessage\x12^\n\nadd_metric\x18\x05 \x01(\x0b\x32H.aea.fetchai.prometheus.v0_1_0.PrometheusMessage.Add_Metric_PerformativeH\x00\x12Z\n\x08response\x18\x06 \x01(\x0b\x32\x46.aea.fetchai.prometheus.v0_1_0.PrometheusMessage.Response_PerformativeH\x00\x12\x64\n\rupdate_metric\x18\x07 \x01(\x0b\x32K.aea.fetchai.prometheus.v0_1_0.PrometheusMessage.Update_Metric_PerformativeH\x00\x1a\xe0\x01\n\x17\x41\x64\x64_Metric_Performative\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\r\n\x05title\x18\x02 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\x12\x64\n\x06labels\x18\x04 \x03(\x0b\x32T.aea.fetchai.prometheus.v0_1_0.PrometheusMessage.Add_Metric_Performative.LabelsEntry\x1a-\n\x0bLabelsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\xe4\x01\n\x1aUpdate_Metric_Performative\x12\r\n\x05title\x18\x01 \x01(\t\x12\x10\n\x08\x63\x61llable\x18\x02 \x01(\t\x12\r\n\x05value\x18\x03 \x01(\x02\x12g\n\x06labels\x18\x04 \x03(\x0b\x32W.aea.fetchai.prometheus.v0_1_0.PrometheusMessage.Update_Metric_Performative.LabelsEntry\x1a-\n\x0bLabelsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1aN\n\x15Response_Performative\x12\x0c\n\x04\x63ode\x18\x01 \x01(\x05\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x16\n\x0emessage_is_set\x18\x03 \x01(\x08\x42\x0e\n\x0cperformativeb\x06proto3',
 )
 
 
 _PROMETHEUSMESSAGE_ADD_METRIC_PERFORMATIVE_LABELSENTRY = _descriptor.Descriptor(
     name="LabelsEntry",
-    full_name="aea.fetchai.prometheus.v0_2_0.PrometheusMessage.Add_Metric_Performative.LabelsEntry",
+    full_name="aea.fetchai.prometheus.v0_1_0.PrometheusMessage.Add_Metric_Performative.LabelsEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="aea.fetchai.prometheus.v0_2_0.PrometheusMessage.Add_Metric_Performative.LabelsEntry.key",
+            full_name="aea.fetchai.prometheus.v0_1_0.PrometheusMessage.Add_Metric_Performative.LabelsEntry.key",
             index=0,
             number=1,
             type=9,
@@ -48,7 +48,7 @@ _PROMETHEUSMESSAGE_ADD_METRIC_PERFORMATIVE_LABELSENTRY = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="aea.fetchai.prometheus.v0_2_0.PrometheusMessage.Add_Metric_Performative.LabelsEntry.value",
+            full_name="aea.fetchai.prometheus.v0_1_0.PrometheusMessage.Add_Metric_Performative.LabelsEntry.value",
             index=1,
             number=2,
             type=9,
@@ -79,14 +79,14 @@ _PROMETHEUSMESSAGE_ADD_METRIC_PERFORMATIVE_LABELSENTRY = _descriptor.Descriptor(
 
 _PROMETHEUSMESSAGE_ADD_METRIC_PERFORMATIVE = _descriptor.Descriptor(
     name="Add_Metric_Performative",
-    full_name="aea.fetchai.prometheus.v0_2_0.PrometheusMessage.Add_Metric_Performative",
+    full_name="aea.fetchai.prometheus.v0_1_0.PrometheusMessage.Add_Metric_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="type",
-            full_name="aea.fetchai.prometheus.v0_2_0.PrometheusMessage.Add_Metric_Performative.type",
+            full_name="aea.fetchai.prometheus.v0_1_0.PrometheusMessage.Add_Metric_Performative.type",
             index=0,
             number=1,
             type=9,
@@ -104,7 +104,7 @@ _PROMETHEUSMESSAGE_ADD_METRIC_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="title",
-            full_name="aea.fetchai.prometheus.v0_2_0.PrometheusMessage.Add_Metric_Performative.title",
+            full_name="aea.fetchai.prometheus.v0_1_0.PrometheusMessage.Add_Metric_Performative.title",
             index=1,
             number=2,
             type=9,
@@ -122,7 +122,7 @@ _PROMETHEUSMESSAGE_ADD_METRIC_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="description",
-            full_name="aea.fetchai.prometheus.v0_2_0.PrometheusMessage.Add_Metric_Performative.description",
+            full_name="aea.fetchai.prometheus.v0_1_0.PrometheusMessage.Add_Metric_Performative.description",
             index=2,
             number=3,
             type=9,
@@ -140,7 +140,7 @@ _PROMETHEUSMESSAGE_ADD_METRIC_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="labels",
-            full_name="aea.fetchai.prometheus.v0_2_0.PrometheusMessage.Add_Metric_Performative.labels",
+            full_name="aea.fetchai.prometheus.v0_1_0.PrometheusMessage.Add_Metric_Performative.labels",
             index=3,
             number=4,
             type=11,
@@ -171,14 +171,14 @@ _PROMETHEUSMESSAGE_ADD_METRIC_PERFORMATIVE = _descriptor.Descriptor(
 
 _PROMETHEUSMESSAGE_UPDATE_METRIC_PERFORMATIVE_LABELSENTRY = _descriptor.Descriptor(
     name="LabelsEntry",
-    full_name="aea.fetchai.prometheus.v0_2_0.PrometheusMessage.Update_Metric_Performative.LabelsEntry",
+    full_name="aea.fetchai.prometheus.v0_1_0.PrometheusMessage.Update_Metric_Performative.LabelsEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="aea.fetchai.prometheus.v0_2_0.PrometheusMessage.Update_Metric_Performative.LabelsEntry.key",
+            full_name="aea.fetchai.prometheus.v0_1_0.PrometheusMessage.Update_Metric_Performative.LabelsEntry.key",
             index=0,
             number=1,
             type=9,
@@ -196,7 +196,7 @@ _PROMETHEUSMESSAGE_UPDATE_METRIC_PERFORMATIVE_LABELSENTRY = _descriptor.Descript
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="aea.fetchai.prometheus.v0_2_0.PrometheusMessage.Update_Metric_Performative.LabelsEntry.value",
+            full_name="aea.fetchai.prometheus.v0_1_0.PrometheusMessage.Update_Metric_Performative.LabelsEntry.value",
             index=1,
             number=2,
             type=9,
@@ -227,14 +227,14 @@ _PROMETHEUSMESSAGE_UPDATE_METRIC_PERFORMATIVE_LABELSENTRY = _descriptor.Descript
 
 _PROMETHEUSMESSAGE_UPDATE_METRIC_PERFORMATIVE = _descriptor.Descriptor(
     name="Update_Metric_Performative",
-    full_name="aea.fetchai.prometheus.v0_2_0.PrometheusMessage.Update_Metric_Performative",
+    full_name="aea.fetchai.prometheus.v0_1_0.PrometheusMessage.Update_Metric_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="title",
-            full_name="aea.fetchai.prometheus.v0_2_0.PrometheusMessage.Update_Metric_Performative.title",
+            full_name="aea.fetchai.prometheus.v0_1_0.PrometheusMessage.Update_Metric_Performative.title",
             index=0,
             number=1,
             type=9,
@@ -252,7 +252,7 @@ _PROMETHEUSMESSAGE_UPDATE_METRIC_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="callable",
-            full_name="aea.fetchai.prometheus.v0_2_0.PrometheusMessage.Update_Metric_Performative.callable",
+            full_name="aea.fetchai.prometheus.v0_1_0.PrometheusMessage.Update_Metric_Performative.callable",
             index=1,
             number=2,
             type=9,
@@ -270,7 +270,7 @@ _PROMETHEUSMESSAGE_UPDATE_METRIC_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="aea.fetchai.prometheus.v0_2_0.PrometheusMessage.Update_Metric_Performative.value",
+            full_name="aea.fetchai.prometheus.v0_1_0.PrometheusMessage.Update_Metric_Performative.value",
             index=2,
             number=3,
             type=2,
@@ -288,7 +288,7 @@ _PROMETHEUSMESSAGE_UPDATE_METRIC_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="labels",
-            full_name="aea.fetchai.prometheus.v0_2_0.PrometheusMessage.Update_Metric_Performative.labels",
+            full_name="aea.fetchai.prometheus.v0_1_0.PrometheusMessage.Update_Metric_Performative.labels",
             index=3,
             number=4,
             type=11,
@@ -319,14 +319,14 @@ _PROMETHEUSMESSAGE_UPDATE_METRIC_PERFORMATIVE = _descriptor.Descriptor(
 
 _PROMETHEUSMESSAGE_RESPONSE_PERFORMATIVE = _descriptor.Descriptor(
     name="Response_Performative",
-    full_name="aea.fetchai.prometheus.v0_2_0.PrometheusMessage.Response_Performative",
+    full_name="aea.fetchai.prometheus.v0_1_0.PrometheusMessage.Response_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="code",
-            full_name="aea.fetchai.prometheus.v0_2_0.PrometheusMessage.Response_Performative.code",
+            full_name="aea.fetchai.prometheus.v0_1_0.PrometheusMessage.Response_Performative.code",
             index=0,
             number=1,
             type=5,
@@ -344,7 +344,7 @@ _PROMETHEUSMESSAGE_RESPONSE_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="message",
-            full_name="aea.fetchai.prometheus.v0_2_0.PrometheusMessage.Response_Performative.message",
+            full_name="aea.fetchai.prometheus.v0_1_0.PrometheusMessage.Response_Performative.message",
             index=1,
             number=2,
             type=9,
@@ -362,7 +362,7 @@ _PROMETHEUSMESSAGE_RESPONSE_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="message_is_set",
-            full_name="aea.fetchai.prometheus.v0_2_0.PrometheusMessage.Response_Performative.message_is_set",
+            full_name="aea.fetchai.prometheus.v0_1_0.PrometheusMessage.Response_Performative.message_is_set",
             index=2,
             number=3,
             type=8,
@@ -393,14 +393,14 @@ _PROMETHEUSMESSAGE_RESPONSE_PERFORMATIVE = _descriptor.Descriptor(
 
 _PROMETHEUSMESSAGE = _descriptor.Descriptor(
     name="PrometheusMessage",
-    full_name="aea.fetchai.prometheus.v0_2_0.PrometheusMessage",
+    full_name="aea.fetchai.prometheus.v0_1_0.PrometheusMessage",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="add_metric",
-            full_name="aea.fetchai.prometheus.v0_2_0.PrometheusMessage.add_metric",
+            full_name="aea.fetchai.prometheus.v0_1_0.PrometheusMessage.add_metric",
             index=0,
             number=5,
             type=11,
@@ -418,7 +418,7 @@ _PROMETHEUSMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="response",
-            full_name="aea.fetchai.prometheus.v0_2_0.PrometheusMessage.response",
+            full_name="aea.fetchai.prometheus.v0_1_0.PrometheusMessage.response",
             index=1,
             number=6,
             type=11,
@@ -436,7 +436,7 @@ _PROMETHEUSMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="update_metric",
-            full_name="aea.fetchai.prometheus.v0_2_0.PrometheusMessage.update_metric",
+            full_name="aea.fetchai.prometheus.v0_1_0.PrometheusMessage.update_metric",
             index=2,
             number=7,
             type=11,
@@ -467,7 +467,7 @@ _PROMETHEUSMESSAGE = _descriptor.Descriptor(
     oneofs=[
         _descriptor.OneofDescriptor(
             name="performative",
-            full_name="aea.fetchai.prometheus.v0_2_0.PrometheusMessage.performative",
+            full_name="aea.fetchai.prometheus.v0_1_0.PrometheusMessage.performative",
             index=0,
             containing_type=None,
             fields=[],
@@ -536,12 +536,12 @@ PrometheusMessage = _reflection.GeneratedProtocolMessageType(
                     {
                         "DESCRIPTOR": _PROMETHEUSMESSAGE_ADD_METRIC_PERFORMATIVE_LABELSENTRY,
                         "__module__": "prometheus_pb2"
-                        # @@protoc_insertion_point(class_scope:aea.fetchai.prometheus.v0_2_0.PrometheusMessage.Add_Metric_Performative.LabelsEntry)
+                        # @@protoc_insertion_point(class_scope:aea.fetchai.prometheus.v0_1_0.PrometheusMessage.Add_Metric_Performative.LabelsEntry)
                     },
                 ),
                 "DESCRIPTOR": _PROMETHEUSMESSAGE_ADD_METRIC_PERFORMATIVE,
                 "__module__": "prometheus_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.prometheus.v0_2_0.PrometheusMessage.Add_Metric_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.prometheus.v0_1_0.PrometheusMessage.Add_Metric_Performative)
             },
         ),
         "Update_Metric_Performative": _reflection.GeneratedProtocolMessageType(
@@ -554,12 +554,12 @@ PrometheusMessage = _reflection.GeneratedProtocolMessageType(
                     {
                         "DESCRIPTOR": _PROMETHEUSMESSAGE_UPDATE_METRIC_PERFORMATIVE_LABELSENTRY,
                         "__module__": "prometheus_pb2"
-                        # @@protoc_insertion_point(class_scope:aea.fetchai.prometheus.v0_2_0.PrometheusMessage.Update_Metric_Performative.LabelsEntry)
+                        # @@protoc_insertion_point(class_scope:aea.fetchai.prometheus.v0_1_0.PrometheusMessage.Update_Metric_Performative.LabelsEntry)
                     },
                 ),
                 "DESCRIPTOR": _PROMETHEUSMESSAGE_UPDATE_METRIC_PERFORMATIVE,
                 "__module__": "prometheus_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.prometheus.v0_2_0.PrometheusMessage.Update_Metric_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.prometheus.v0_1_0.PrometheusMessage.Update_Metric_Performative)
             },
         ),
         "Response_Performative": _reflection.GeneratedProtocolMessageType(
@@ -568,12 +568,12 @@ PrometheusMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _PROMETHEUSMESSAGE_RESPONSE_PERFORMATIVE,
                 "__module__": "prometheus_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.prometheus.v0_2_0.PrometheusMessage.Response_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.prometheus.v0_1_0.PrometheusMessage.Response_Performative)
             },
         ),
         "DESCRIPTOR": _PROMETHEUSMESSAGE,
         "__module__": "prometheus_pb2"
-        # @@protoc_insertion_point(class_scope:aea.fetchai.prometheus.v0_2_0.PrometheusMessage)
+        # @@protoc_insertion_point(class_scope:aea.fetchai.prometheus.v0_1_0.PrometheusMessage)
     },
 )
 _sym_db.RegisterMessage(PrometheusMessage)

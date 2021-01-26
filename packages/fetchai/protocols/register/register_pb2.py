@@ -14,23 +14,23 @@ _sym_db = _symbol_database.Default()
 
 DESCRIPTOR = _descriptor.FileDescriptor(
     name="register.proto",
-    package="aea.fetchai.register.v0_4_0",
+    package="aea.fetchai.register.v0_1_0",
     syntax="proto3",
     serialized_options=None,
-    serialized_pb=b'\n\x0eregister.proto\x12\x1b\x61\x65\x61.fetchai.register.v0_4_0"\xa9\x06\n\x0fRegisterMessage\x12P\n\x05\x65rror\x18\x05 \x01(\x0b\x32?.aea.fetchai.register.v0_4_0.RegisterMessage.Error_PerformativeH\x00\x12V\n\x08register\x18\x06 \x01(\x0b\x32\x42.aea.fetchai.register.v0_4_0.RegisterMessage.Register_PerformativeH\x00\x12T\n\x07success\x18\x07 \x01(\x0b\x32\x41.aea.fetchai.register.v0_4_0.RegisterMessage.Success_PerformativeH\x00\x1a\xa0\x01\n\x15Register_Performative\x12Z\n\x04info\x18\x01 \x03(\x0b\x32L.aea.fetchai.register.v0_4_0.RegisterMessage.Register_Performative.InfoEntry\x1a+\n\tInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x9e\x01\n\x14Success_Performative\x12Y\n\x04info\x18\x01 \x03(\x0b\x32K.aea.fetchai.register.v0_4_0.RegisterMessage.Success_Performative.InfoEntry\x1a+\n\tInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\xc1\x01\n\x12\x45rror_Performative\x12\x12\n\nerror_code\x18\x01 \x01(\x05\x12\x11\n\terror_msg\x18\x02 \x01(\t\x12W\n\x04info\x18\x03 \x03(\x0b\x32I.aea.fetchai.register.v0_4_0.RegisterMessage.Error_Performative.InfoEntry\x1a+\n\tInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x42\x0e\n\x0cperformativeb\x06proto3',
+    serialized_pb=b'\n\x0eregister.proto\x12\x1b\x61\x65\x61.fetchai.register.v0_1_0"\xa9\x06\n\x0fRegisterMessage\x12P\n\x05\x65rror\x18\x05 \x01(\x0b\x32?.aea.fetchai.register.v0_1_0.RegisterMessage.Error_PerformativeH\x00\x12V\n\x08register\x18\x06 \x01(\x0b\x32\x42.aea.fetchai.register.v0_1_0.RegisterMessage.Register_PerformativeH\x00\x12T\n\x07success\x18\x07 \x01(\x0b\x32\x41.aea.fetchai.register.v0_1_0.RegisterMessage.Success_PerformativeH\x00\x1a\xa0\x01\n\x15Register_Performative\x12Z\n\x04info\x18\x01 \x03(\x0b\x32L.aea.fetchai.register.v0_1_0.RegisterMessage.Register_Performative.InfoEntry\x1a+\n\tInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x9e\x01\n\x14Success_Performative\x12Y\n\x04info\x18\x01 \x03(\x0b\x32K.aea.fetchai.register.v0_1_0.RegisterMessage.Success_Performative.InfoEntry\x1a+\n\tInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\xc1\x01\n\x12\x45rror_Performative\x12\x12\n\nerror_code\x18\x01 \x01(\x05\x12\x11\n\terror_msg\x18\x02 \x01(\t\x12W\n\x04info\x18\x03 \x03(\x0b\x32I.aea.fetchai.register.v0_1_0.RegisterMessage.Error_Performative.InfoEntry\x1a+\n\tInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x42\x0e\n\x0cperformativeb\x06proto3',
 )
 
 
 _REGISTERMESSAGE_REGISTER_PERFORMATIVE_INFOENTRY = _descriptor.Descriptor(
     name="InfoEntry",
-    full_name="aea.fetchai.register.v0_4_0.RegisterMessage.Register_Performative.InfoEntry",
+    full_name="aea.fetchai.register.v0_1_0.RegisterMessage.Register_Performative.InfoEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="aea.fetchai.register.v0_4_0.RegisterMessage.Register_Performative.InfoEntry.key",
+            full_name="aea.fetchai.register.v0_1_0.RegisterMessage.Register_Performative.InfoEntry.key",
             index=0,
             number=1,
             type=9,
@@ -48,7 +48,7 @@ _REGISTERMESSAGE_REGISTER_PERFORMATIVE_INFOENTRY = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="aea.fetchai.register.v0_4_0.RegisterMessage.Register_Performative.InfoEntry.value",
+            full_name="aea.fetchai.register.v0_1_0.RegisterMessage.Register_Performative.InfoEntry.value",
             index=1,
             number=2,
             type=9,
@@ -79,14 +79,14 @@ _REGISTERMESSAGE_REGISTER_PERFORMATIVE_INFOENTRY = _descriptor.Descriptor(
 
 _REGISTERMESSAGE_REGISTER_PERFORMATIVE = _descriptor.Descriptor(
     name="Register_Performative",
-    full_name="aea.fetchai.register.v0_4_0.RegisterMessage.Register_Performative",
+    full_name="aea.fetchai.register.v0_1_0.RegisterMessage.Register_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="info",
-            full_name="aea.fetchai.register.v0_4_0.RegisterMessage.Register_Performative.info",
+            full_name="aea.fetchai.register.v0_1_0.RegisterMessage.Register_Performative.info",
             index=0,
             number=1,
             type=11,
@@ -117,14 +117,14 @@ _REGISTERMESSAGE_REGISTER_PERFORMATIVE = _descriptor.Descriptor(
 
 _REGISTERMESSAGE_SUCCESS_PERFORMATIVE_INFOENTRY = _descriptor.Descriptor(
     name="InfoEntry",
-    full_name="aea.fetchai.register.v0_4_0.RegisterMessage.Success_Performative.InfoEntry",
+    full_name="aea.fetchai.register.v0_1_0.RegisterMessage.Success_Performative.InfoEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="aea.fetchai.register.v0_4_0.RegisterMessage.Success_Performative.InfoEntry.key",
+            full_name="aea.fetchai.register.v0_1_0.RegisterMessage.Success_Performative.InfoEntry.key",
             index=0,
             number=1,
             type=9,
@@ -142,7 +142,7 @@ _REGISTERMESSAGE_SUCCESS_PERFORMATIVE_INFOENTRY = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="aea.fetchai.register.v0_4_0.RegisterMessage.Success_Performative.InfoEntry.value",
+            full_name="aea.fetchai.register.v0_1_0.RegisterMessage.Success_Performative.InfoEntry.value",
             index=1,
             number=2,
             type=9,
@@ -173,14 +173,14 @@ _REGISTERMESSAGE_SUCCESS_PERFORMATIVE_INFOENTRY = _descriptor.Descriptor(
 
 _REGISTERMESSAGE_SUCCESS_PERFORMATIVE = _descriptor.Descriptor(
     name="Success_Performative",
-    full_name="aea.fetchai.register.v0_4_0.RegisterMessage.Success_Performative",
+    full_name="aea.fetchai.register.v0_1_0.RegisterMessage.Success_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="info",
-            full_name="aea.fetchai.register.v0_4_0.RegisterMessage.Success_Performative.info",
+            full_name="aea.fetchai.register.v0_1_0.RegisterMessage.Success_Performative.info",
             index=0,
             number=1,
             type=11,
@@ -211,14 +211,14 @@ _REGISTERMESSAGE_SUCCESS_PERFORMATIVE = _descriptor.Descriptor(
 
 _REGISTERMESSAGE_ERROR_PERFORMATIVE_INFOENTRY = _descriptor.Descriptor(
     name="InfoEntry",
-    full_name="aea.fetchai.register.v0_4_0.RegisterMessage.Error_Performative.InfoEntry",
+    full_name="aea.fetchai.register.v0_1_0.RegisterMessage.Error_Performative.InfoEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="aea.fetchai.register.v0_4_0.RegisterMessage.Error_Performative.InfoEntry.key",
+            full_name="aea.fetchai.register.v0_1_0.RegisterMessage.Error_Performative.InfoEntry.key",
             index=0,
             number=1,
             type=9,
@@ -236,7 +236,7 @@ _REGISTERMESSAGE_ERROR_PERFORMATIVE_INFOENTRY = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="aea.fetchai.register.v0_4_0.RegisterMessage.Error_Performative.InfoEntry.value",
+            full_name="aea.fetchai.register.v0_1_0.RegisterMessage.Error_Performative.InfoEntry.value",
             index=1,
             number=2,
             type=9,
@@ -267,14 +267,14 @@ _REGISTERMESSAGE_ERROR_PERFORMATIVE_INFOENTRY = _descriptor.Descriptor(
 
 _REGISTERMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
     name="Error_Performative",
-    full_name="aea.fetchai.register.v0_4_0.RegisterMessage.Error_Performative",
+    full_name="aea.fetchai.register.v0_1_0.RegisterMessage.Error_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="error_code",
-            full_name="aea.fetchai.register.v0_4_0.RegisterMessage.Error_Performative.error_code",
+            full_name="aea.fetchai.register.v0_1_0.RegisterMessage.Error_Performative.error_code",
             index=0,
             number=1,
             type=5,
@@ -292,7 +292,7 @@ _REGISTERMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="error_msg",
-            full_name="aea.fetchai.register.v0_4_0.RegisterMessage.Error_Performative.error_msg",
+            full_name="aea.fetchai.register.v0_1_0.RegisterMessage.Error_Performative.error_msg",
             index=1,
             number=2,
             type=9,
@@ -310,7 +310,7 @@ _REGISTERMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="info",
-            full_name="aea.fetchai.register.v0_4_0.RegisterMessage.Error_Performative.info",
+            full_name="aea.fetchai.register.v0_1_0.RegisterMessage.Error_Performative.info",
             index=2,
             number=3,
             type=11,
@@ -341,14 +341,14 @@ _REGISTERMESSAGE_ERROR_PERFORMATIVE = _descriptor.Descriptor(
 
 _REGISTERMESSAGE = _descriptor.Descriptor(
     name="RegisterMessage",
-    full_name="aea.fetchai.register.v0_4_0.RegisterMessage",
+    full_name="aea.fetchai.register.v0_1_0.RegisterMessage",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="error",
-            full_name="aea.fetchai.register.v0_4_0.RegisterMessage.error",
+            full_name="aea.fetchai.register.v0_1_0.RegisterMessage.error",
             index=0,
             number=5,
             type=11,
@@ -366,7 +366,7 @@ _REGISTERMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="register",
-            full_name="aea.fetchai.register.v0_4_0.RegisterMessage.register",
+            full_name="aea.fetchai.register.v0_1_0.RegisterMessage.register",
             index=1,
             number=6,
             type=11,
@@ -384,7 +384,7 @@ _REGISTERMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="success",
-            full_name="aea.fetchai.register.v0_4_0.RegisterMessage.success",
+            full_name="aea.fetchai.register.v0_1_0.RegisterMessage.success",
             index=2,
             number=7,
             type=11,
@@ -415,7 +415,7 @@ _REGISTERMESSAGE = _descriptor.Descriptor(
     oneofs=[
         _descriptor.OneofDescriptor(
             name="performative",
-            full_name="aea.fetchai.register.v0_4_0.RegisterMessage.performative",
+            full_name="aea.fetchai.register.v0_1_0.RegisterMessage.performative",
             index=0,
             containing_type=None,
             fields=[],
@@ -490,12 +490,12 @@ RegisterMessage = _reflection.GeneratedProtocolMessageType(
                     {
                         "DESCRIPTOR": _REGISTERMESSAGE_REGISTER_PERFORMATIVE_INFOENTRY,
                         "__module__": "register_pb2"
-                        # @@protoc_insertion_point(class_scope:aea.fetchai.register.v0_4_0.RegisterMessage.Register_Performative.InfoEntry)
+                        # @@protoc_insertion_point(class_scope:aea.fetchai.register.v0_1_0.RegisterMessage.Register_Performative.InfoEntry)
                     },
                 ),
                 "DESCRIPTOR": _REGISTERMESSAGE_REGISTER_PERFORMATIVE,
                 "__module__": "register_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.register.v0_4_0.RegisterMessage.Register_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.register.v0_1_0.RegisterMessage.Register_Performative)
             },
         ),
         "Success_Performative": _reflection.GeneratedProtocolMessageType(
@@ -508,12 +508,12 @@ RegisterMessage = _reflection.GeneratedProtocolMessageType(
                     {
                         "DESCRIPTOR": _REGISTERMESSAGE_SUCCESS_PERFORMATIVE_INFOENTRY,
                         "__module__": "register_pb2"
-                        # @@protoc_insertion_point(class_scope:aea.fetchai.register.v0_4_0.RegisterMessage.Success_Performative.InfoEntry)
+                        # @@protoc_insertion_point(class_scope:aea.fetchai.register.v0_1_0.RegisterMessage.Success_Performative.InfoEntry)
                     },
                 ),
                 "DESCRIPTOR": _REGISTERMESSAGE_SUCCESS_PERFORMATIVE,
                 "__module__": "register_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.register.v0_4_0.RegisterMessage.Success_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.register.v0_1_0.RegisterMessage.Success_Performative)
             },
         ),
         "Error_Performative": _reflection.GeneratedProtocolMessageType(
@@ -526,17 +526,17 @@ RegisterMessage = _reflection.GeneratedProtocolMessageType(
                     {
                         "DESCRIPTOR": _REGISTERMESSAGE_ERROR_PERFORMATIVE_INFOENTRY,
                         "__module__": "register_pb2"
-                        # @@protoc_insertion_point(class_scope:aea.fetchai.register.v0_4_0.RegisterMessage.Error_Performative.InfoEntry)
+                        # @@protoc_insertion_point(class_scope:aea.fetchai.register.v0_1_0.RegisterMessage.Error_Performative.InfoEntry)
                     },
                 ),
                 "DESCRIPTOR": _REGISTERMESSAGE_ERROR_PERFORMATIVE,
                 "__module__": "register_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.register.v0_4_0.RegisterMessage.Error_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.register.v0_1_0.RegisterMessage.Error_Performative)
             },
         ),
         "DESCRIPTOR": _REGISTERMESSAGE,
         "__module__": "register_pb2"
-        # @@protoc_insertion_point(class_scope:aea.fetchai.register.v0_4_0.RegisterMessage)
+        # @@protoc_insertion_point(class_scope:aea.fetchai.register.v0_1_0.RegisterMessage)
     },
 )
 _sym_db.RegisterMessage(RegisterMessage)

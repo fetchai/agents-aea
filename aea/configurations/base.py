@@ -746,12 +746,16 @@ class ProtocolConfig(ComponentConfiguration):
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
 
+        # temporary solution till all protocols updated
         if protocol_specification_id is not None:
             self.protocol_specification_id = PublicId.from_str(
-                protocol_specification_id
+                str(protocol_specification_id)
             )
         else:
-            self.protocol_specification_id = self.public_id
+            # make version 0.1.0 as a default protocol specification version
+            self.protocol_specification_id = PublicId(
+                self.public_id.author, self.public_id.name, "0.1.0"
+            )
 
     @property
     def json(self) -> Dict:
