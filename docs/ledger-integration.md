@@ -87,9 +87,9 @@ Agent Land is our stable, public testnet for the Fetch Ledger v2. As such most d
 | Denomination   | atestfet                                                                   |
 | Decimals       | 18                                                                         |
 | Version        | v0.2.x                                                                     |
-| RPC Endpoint   | https://rpc-agent-land.fetch.ai:443                                        |
-| REST Endpoint  | https://rest-agent-land.fetch.ai:443                                       |
-| Block Explorer | [https://explore-agent-land.fetch.ai](https://explore-agent-land.fetch.ai) |
+| RPC Endpoint   | https://rpc-agent-land.fetch.ai:443                            |
+| REST Endpoint  | https://rest-agent-land.fetch.ai:443                            |
+| Block Explorer | <a href="https://explore-agent-land.fetch.ai" target="_blank">https://explore-agent-land.fetch.ai</a> |
 | Token Faucet   | Use block explorer                                                         |
 
 You can read more detailed information on <a href="https://github.com/fetchai/networks-agentland" target="_blank">GitHub</a>.
@@ -98,7 +98,7 @@ The configurations can be specified for the `fetchai/ledger:0.12.0` connection.
 
 ## CosmWasm supporting chains
 
-The Fetch.ai networks use <a href="https://cosmwasm.com" target="_blank">CosmWasm</a> for smart contract support.
+The Fetch.ai networks use <a href="https://docs.cosmwasm.com" target="_blank">CosmWasm</a> for smart contract support.
 
 Currently, to use the smart contract functionality of the Fetch.ai network you have to install a CLI tool which is used by the AEA framework to perform some necessary actions for the smart contract functionality on-chain.
 

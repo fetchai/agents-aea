@@ -1,7 +1,7 @@
 <details><summary>What is an AEA?</summary>
 AEA stands for Autonomous Economic Agent. AEAs act independently of constant user input and autonomously execute actions to achieve their objective. Their goal is to create economic value for you, their owner.
 <br><br>
-You can read more about an introduction to AEAs <a href="../"> here</a>.
+You can read more about an introduction to AEAs in the introduction.
 </details>
 
 <details><summary>How do AEAs talk to each other when they do not know each other?</summary>
@@ -17,13 +17,13 @@ You can read more about the integration with the different blockchains <a href="
 </details>
 
 <details><summary>How does one install third party libraries?</summary>
-The framework supports the use of third-party libraries hosted on <a href="https://pypi.org">PyPI</a>. We can directly reference the external dependencies in an AEA package's configuration file. The CLI <code>install</code> command installs each dependency that the specific AEA needs and is listed in the one of it's packages configuration files.
+The framework supports the use of third-party libraries hosted on <a href="https://pypi.org" target="_blank">PyPI</a>. We can directly reference the external dependencies in an AEA package's configuration file. The CLI <code>install</code> command installs each dependency that the specific AEA needs and is listed in the one of it's packages configuration files.
 </details>
 
 <details><summary>How does one connect to a database?</summary>
 You have two options to connect to a database: using the built-in storage solution or using a custom ORM (object-relational mapping) library and backend.
 <br><br>
-The use of the built-in storage is explained <a href='../generic-storage/'>here</a>. For a detailed example of how to use an ORM follow the <a href='../orm-integration/'>ORM guide</a>.
+The use of the built-in storage is explained <a href="../generic-storage/">here</a>. For a detailed example of how to use an ORM follow the <a href="../orm-integration/">ORM guide</a>.
 </details>
 
 <details><summary>How does one connect a frontend?</summary>
@@ -54,5 +54,5 @@ The details of envelope/message routing by the AEA framework are discussed in <a
 </details>
 
 <details><summary>Why does the AEA framework use its own package registry?</summary>
-AEA packages could be described as personalized plugins for the AEA runtime. They are not like a library - they have no direct use outside the context of the framework - and therefore are not suitable for distribution via <a href='https://pypi.org/' target="_blank">PyPI</a>.
+AEA packages could be described as personalized plugins for the AEA runtime. They are not like a library - they have no direct use outside the context of the framework - and therefore are not suitable for distribution via <a href="https://pypi.org/" target="_blank">PyPI</a>.
 </details>
