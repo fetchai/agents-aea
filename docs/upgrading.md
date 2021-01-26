@@ -1,4 +1,8 @@
-This page provides some tips of how to upgrade between versions.
+This page provides some tips on how to upgrade AEA projects between versions of the AEA framework.
+
+The primary tool to upgrade AEA projects between versions of the AEA framework is the `aea upgrade` command available in the CLI.
+
+Below we provide additional manual steps required to be taken to upgrade between versions:
 
 ## `v0.9.1` to `v0.9.2`
 
