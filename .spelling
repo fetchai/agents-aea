@@ -163,8 +163,12 @@ pipx
 BibTex
 Kubernetes
 Golang
+web3
+CosmWasm
+Shoham
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id
  - docs/simple-oef.md
 _do_
+CosmWasm

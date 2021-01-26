@@ -256,7 +256,7 @@ class TestInteractEcho(AEATestCaseEmpty):
                 f"to: {self.agent_name}_interact",
                 f"sender: {self.agent_name}",
                 f"protocol_id: {str(DefaultMessage.protocol_id)}",
-                "message_id=2",
+                "message_id=-1",
                 "target=1",
                 "performative=bytes",
                 "content=b'hello'",

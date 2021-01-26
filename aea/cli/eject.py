@@ -23,10 +23,13 @@ from pathlib import Path
 from typing import cast
 
 import click
+from packaging.version import Version
 
+import aea
 from aea.cli.remove import ItemRemoveHelper
 from aea.cli.utils.click_utils import PublicIdParameter
 from aea.cli.utils.config import (
+    load_item_config,
     set_cli_author,
     try_to_load_agent_config,
     update_item_config,
@@ -59,7 +62,11 @@ from aea.configurations.constants import (
     SKILL,
 )
 from aea.configurations.utils import get_latest_component_id_from_prefix
-from aea.helpers.base import find_topological_order, reachable_nodes
+from aea.helpers.base import (
+    compute_specifier_from_version,
+    find_topological_order,
+    reachable_nodes,
+)
 
 
 @click.group()
@@ -149,17 +156,25 @@ def _eject_item(
     cli_author: str = cast(str, ctx.config.get("cli_author"))
     item_type_plural = item_type + "s"
     if not is_item_present(
-        ctx, item_type, public_id, is_vendor=True, with_version=True
+        ctx.cwd,
+        ctx.agent_config,
+        item_type,
+        public_id,
+        is_vendor=True,
+        with_version=True,
     ):  # pragma: no cover
         raise click.ClickException(
             f"{item_type.title()} {public_id} not found in agent's vendor items."
         )
-    src = get_package_path(ctx, item_type, public_id)
-    dst = get_package_path(ctx, item_type, public_id, is_vendor=False)
-    if is_item_present(ctx, item_type, public_id, is_vendor=False):  # pragma: no cover
+    src = get_package_path(ctx.cwd, item_type, public_id)
+    dst = get_package_path(ctx.cwd, item_type, public_id, is_vendor=False)
+    if is_item_present(
+        ctx.cwd, ctx.agent_config, item_type, public_id, is_vendor=False
+    ):  # pragma: no cover
         raise click.ClickException(
             f"{item_type.title()} {public_id} is already a non-vendor package."
         )
+    configuration = load_item_config(item_type, Path(src))
 
     if public_id.package_version.is_latest:
         # get 'concrete' public id, in case it is 'latest'
@@ -208,8 +223,18 @@ def _eject_item(
     copy_package_directory(Path(src), dst)
 
     new_public_id = PublicId(cli_author, public_id.name, DEFAULT_VERSION)
+    current_version = Version(aea.__version__)
+    new_aea_range = (
+        configuration.aea_version
+        if configuration.aea_version_specifiers.contains(current_version)
+        else compute_specifier_from_version(current_version)
+    )
     update_item_config(
-        item_type, Path(dst), author=new_public_id.author, version=new_public_id.version
+        item_type,
+        Path(dst),
+        author=new_public_id.author,
+        version=new_public_id.version,
+        aea_version=new_aea_range,
     )
     update_item_public_id_in_init(item_type, Path(dst), new_public_id)
     shutil.rmtree(src)

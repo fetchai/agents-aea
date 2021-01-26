@@ -175,11 +175,18 @@ class GenericFipaHandler(Handler):
         self.context.logger.info(
             "received DECLINE from sender={}".format(fipa_msg.sender[-5:])
         )
-        if fipa_msg.target == 1:
+        target_message = fipa_dialogue.get_message_by_id(fipa_msg.target)
+
+        if not target_message:
+            raise ValueError("Can not find target message!")
+
+        declined_performative = target_message.performative
+
+        if declined_performative == FipaMessage.Performative.CFP:
             fipa_dialogues.dialogue_stats.add_dialogue_endstate(
                 FipaDialogue.EndState.DECLINED_CFP, fipa_dialogue.is_self_initiated
             )
-        elif fipa_msg.target == 3:
+        if declined_performative == FipaMessage.Performative.ACCEPT:
             fipa_dialogues.dialogue_stats.add_dialogue_endstate(
                 FipaDialogue.EndState.DECLINED_ACCEPT, fipa_dialogue.is_self_initiated
             )

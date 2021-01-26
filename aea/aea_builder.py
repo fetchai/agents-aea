@@ -54,6 +54,7 @@ from aea.configurations.constants import (
     DEFAULT_CONNECTION,
     DEFAULT_ENV_DOTFILE,
     DEFAULT_LEDGER,
+    DEFAULT_LOGGING_CONFIG,
     DEFAULT_PROTOCOL,
     DEFAULT_REGISTRY_NAME,
 )
@@ -311,6 +312,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self,
         with_default_packages: bool = True,
         registry_dir: str = DEFAULT_REGISTRY_NAME,
+        build_dir_root: Optional[str] = None,
     ):
         """
         Initialize the builder.
@@ -320,6 +322,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         WithLogger.__init__(self, logger=_default_logger)
         self.registry_dir = os.path.join(os.getcwd(), registry_dir)
         self._with_default_packages = with_default_packages
+        self.build_dir_root = build_dir_root
         self._reset(is_full_reset=True)
 
     def reset(self, is_full_reset: bool = False) -> None:
@@ -379,6 +382,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self._runtime_mode: Optional[str] = None
         self._search_service_address: Optional[str] = None
         self._storage_uri: Optional[str] = None
+        self._logging_config: Dict = DEFAULT_LOGGING_CONFIG
 
         self._package_dependency_manager = _DependenciesManager()
         if self._with_default_packages:
@@ -558,6 +562,22 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :return: self
         """
         self._storage_uri = storage_uri
+        return self
+
+    def set_logging_config(
+        self, logging_config: Dict
+    ) -> "AEABuilder":  # pragma: nocover
+        """
+        Set the logging configurations.
+
+        The dictionary must satisfy the following schema:
+
+          https://docs.python.org/3/library/logging.config.html#logging-config-dictschema
+
+        :param logging_config: the logging configurations.
+        :return: self
+        """
+        self._logging_config = logging_config
         return self
 
     def set_search_service_address(
@@ -773,7 +793,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :return: None
         """
         configuration.build_directory = os.path.join(
-            self.AEA_CLASS.get_build_dir(),
+            self.get_build_root_directory(),
             configuration.component_type.value,
             configuration.author,
             configuration.name,
@@ -900,14 +920,12 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self.remove_component(ComponentId(ComponentType.CONTRACT, public_id))
         return self
 
-    def call_all_build_entrypoints(self, root_dir: str = "."):
+    def call_all_build_entrypoints(self):
         """Call all the build entrypoints."""
         for config in self._package_dependency_manager._dependencies.values():  # type: ignore # pylint: disable=protected-access
             self.run_build_for_component_configuration(config, logger=self.logger)
 
-        target_directory = os.path.abspath(
-            os.path.join(root_dir, self.AEA_CLASS.get_build_dir())
-        )
+        target_directory = self.get_build_root_directory()
 
         if self._build_entrypoint:
             self.logger.info("Building AEA package...")
@@ -917,9 +935,13 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
                 build_entrypoint, source_directory, target_directory, logger=self.logger
             )
 
+    def get_build_root_directory(self) -> str:
+        """Get build directory root."""
+        return os.path.join(self.build_dir_root or ".", self.AEA_CLASS.get_build_dir())
+
     @classmethod
     def run_build_for_component_configuration(
-        cls, config: ComponentConfiguration, logger: Optional[logging.Logger] = None
+        cls, config: ComponentConfiguration, logger: Optional[logging.Logger] = None,
     ) -> None:
         """Run a build entrypoint script for component configuration."""
         if not config.build_entrypoint:
@@ -1096,6 +1118,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :raises ValueError: if we cannot
         """
         self._check_we_can_build()
+        logging.config.dictConfig(self._logging_config)
         wallet = Wallet(
             copy(self.private_key_paths), copy(self.connection_private_key_paths)
         )
@@ -1450,6 +1473,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self.set_loop_mode(agent_configuration.loop_mode)
         self.set_runtime_mode(agent_configuration.runtime_mode)
         self.set_storage_uri(agent_configuration.storage_uri)
+        self.set_logging_config(agent_configuration.logging_config)
 
         # load private keys
         for (
@@ -1557,7 +1581,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         """
         aea_project_path = Path(aea_project_path)
         cls.try_to_load_agent_configuration_file(aea_project_path)
-
         load_env_file(str(aea_project_path / DEFAULT_ENV_DOTFILE))
 
         # check and create missing, do not replace env variables. updates config

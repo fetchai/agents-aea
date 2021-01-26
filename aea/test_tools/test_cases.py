@@ -157,12 +157,13 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
             cls.run_cli_command("config", "set", path, value, cwd=cls._get_cwd())
 
     @classmethod
-    def run_cli_command(cls, *args: str, cwd: str = ".") -> Result:
+    def run_cli_command(cls, *args: str, cwd: str = ".", **kwargs) -> Result:
         """
         Run AEA CLI command.
 
         :param args: CLI args
         :param cwd: the working directory from where to run the command.
+        :param kwargs: other keyword arguments to click.CLIRunner.invoke.
         :raises AEATestingException: if command fails.
 
         :return: Result
@@ -173,6 +174,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
                 [*CLI_LOG_OPTION, *args],
                 standalone_mode=False,
                 catch_exceptions=False,
+                **kwargs,
             )
             cls.last_cli_runner_result = result
             if result.exit_code != 0:  # pragma: nocover
@@ -478,7 +480,9 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         return cls.run_cli_command(*cli_args, cwd=cls._get_cwd())
 
     @classmethod
-    def scaffold_item(cls, item_type: str, name: str) -> Result:
+    def scaffold_item(
+        cls, item_type: str, name: str, skip_consistency_check: bool = False
+    ) -> Result:
         """
         Scaffold an item for the agent.
 
@@ -486,14 +490,18 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
 
         :param item_type: str item type.
         :param name: name of the item.
+        :param skip_consistency_check: if True, skip consistency check.
 
         :return: Result
         """
+        flags = ["-s"] if skip_consistency_check else []
         if item_type == "protocol":
             return cls.run_cli_command(
-                "scaffold", item_type, "-y", name, cwd=cls._get_cwd()
+                *flags, "scaffold", item_type, "-y", name, cwd=cls._get_cwd()
             )
-        return cls.run_cli_command("scaffold", item_type, name, cwd=cls._get_cwd())
+        return cls.run_cli_command(
+            *flags, "scaffold", item_type, name, cwd=cls._get_cwd()
+        )
 
     @classmethod
     def fingerprint_item(cls, item_type: str, public_id: str) -> Result:

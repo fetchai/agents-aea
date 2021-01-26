@@ -44,7 +44,6 @@ def get_all_extras() -> Dict:
         "click",
         "pyyaml>=4.2b1",
         "jsonschema>=3.0.0",
-        "python-dotenv",
         *crypto_deps,
     ]
 
@@ -76,6 +75,7 @@ base_deps = [
     "pymultihash==0.8.2",
     "pyyaml>=4.2b1",
     "requests>=2.22.0",
+    "python-dotenv>=0.14.0",
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -122,6 +122,7 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Topic :: Communications",
         "Topic :: Internet",
         "Topic :: Scientific/Engineering",

@@ -59,7 +59,6 @@ DEFAULT_SKILL_CONFIG_FILE = "skill.yaml"
 DEFAULT_CONNECTION_CONFIG_FILE = "connection.yaml"
 DEFAULT_CONTRACT_CONFIG_FILE = "contract.yaml"
 DEFAULT_PROTOCOL_CONFIG_FILE = "protocol.yaml"
-DEFAULT_LICENSE = "Apache-2.0"
 PACKAGE_PUBLIC_ID_VAR_NAME = "PUBLIC_ID"
 DEFAULT_FINGERPRINT_IGNORE_PATTERNS = [
     ".DS_Store",
@@ -74,6 +73,7 @@ DEFAULT_FINGERPRINT_IGNORE_PATTERNS = [
 ]
 DEFAULT_PYPI_INDEX_URL = "https://pypi.org/simple"
 DEFAULT_GIT_REF = "master"
+DEFAULT_LOGGING_CONFIG = {"version": 1, "disable_existing_loggers": False}
 IMPORT_TEMPLATE_1 = "from packages.{author}.{type}.{name}"
 IMPORT_TEMPLATE_2 = "import packages.{author}.{type}.{name}"
 DEFAULT_ENV_DOTFILE = ".env"

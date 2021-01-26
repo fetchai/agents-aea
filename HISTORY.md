@@ -1,5 +1,30 @@
 # Release History
 
+## 0.9.2 (2020-01-21)
+
+- Fixes `CosmosApi`, in particular for CosmWasm
+- Fixes error output from `add-key` CLI command
+- Update `aea_version` in non-vendor packages when calling `upgrade` CLI command
+- Extend `upgrade` command to fetch newer agent if present on registry
+- Add support for mixed fetch mode in `MultiAgentManager`
+- Fixes logging overrides in `MultiAgentManager`
+- Configuration overrides now properly handle `None` values
+- Multiple docs updates based on user feedback
+- Multiple additional tests and test stability fixes
+
+## 0.9.1 (2020-01-14)
+
+- Fixes multiple issues with `MultiAgentManager` including overrides not being correctly applied
+- Restructures docs navigation
+- Updates `MultiAgentManager` documentation
+- Extends functionality of `aea upgrade` command to cover more cases
+- Fixes a bug in the `aea upgrade` command which prevented upgrading across version minors
+- Fixes a bug in `aea fetch` where the console output was inconsistent with the actual error
+- Fixes scaffold connection constructor
+- Multiple additional tests to improve stability
+- Multiple docs updates based on user feedback
+- Multiple additional tests and test stability fixes
+
 ## 0.9.0 (2020-01-06)
 
 - Adds multiple bug fixes on `MultiAgentManager`

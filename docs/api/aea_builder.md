@@ -204,7 +204,7 @@ my_aea_2 = builder.builder()
 #### `__`init`__`
 
 ```python
- | __init__(with_default_packages: bool = True, registry_dir: str = DEFAULT_REGISTRY_NAME)
+ | __init__(with_default_packages: bool = True, registry_dir: str = DEFAULT_REGISTRY_NAME, build_dir_root: Optional[str] = None)
 ```
 
 Initialize the builder.
@@ -420,6 +420,27 @@ self
 Set the storage uri.
 
 :param storage uri:  storage uri
+
+**Returns**:
+
+self
+
+<a name="aea.aea_builder.AEABuilder.set_logging_config"></a>
+#### set`_`logging`_`config
+
+```python
+ | set_logging_config(logging_config: Dict) -> "AEABuilder"
+```
+
+Set the logging configurations.
+
+The dictionary must satisfy the following schema:
+
+https://docs.python.org/3/library/logging.config.html#logging-config-dictschema
+
+**Arguments**:
+
+- `logging_config`: the logging configurations.
 
 **Returns**:
 
@@ -791,10 +812,19 @@ the AEABuilder
 #### call`_`all`_`build`_`entrypoints
 
 ```python
- | call_all_build_entrypoints(root_dir: str = ".")
+ | call_all_build_entrypoints()
 ```
 
 Call all the build entrypoints.
+
+<a name="aea.aea_builder.AEABuilder.get_build_root_directory"></a>
+#### get`_`build`_`root`_`directory
+
+```python
+ | get_build_root_directory() -> str
+```
+
+Get build directory root.
 
 <a name="aea.aea_builder.AEABuilder.run_build_for_component_configuration"></a>
 #### run`_`build`_`for`_`component`_`configuration

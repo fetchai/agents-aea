@@ -26,7 +26,7 @@ with a one-step atomic swap functionality. That means the trade between the two 
 Fetch the AEA that will deploy the contract.
 
 ``` bash
-aea fetch fetchai/erc1155_deployer:0.21.0
+aea fetch fetchai/erc1155_deployer:0.22.0
 cd erc1155_deployer
 aea install
 aea build
@@ -43,7 +43,7 @@ cd erc1155_deployer
 aea add connection fetchai/p2p_libp2p:0.14.0
 aea add connection fetchai/soef:0.15.0
 aea add connection fetchai/ledger:0.12.0
-aea add skill fetchai/erc1155_deploy:0.20.0
+aea add skill fetchai/erc1155_deploy:0.21.0
 aea install
 aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.14.0
@@ -87,7 +87,7 @@ aea issue-certificates
 In another terminal, fetch the AEA that will get some tokens from the deployer.
 
 ``` bash
-aea fetch fetchai/erc1155_client:0.21.0
+aea fetch fetchai/erc1155_client:0.22.0
 cd erc1155_client
 aea install
 aea build
@@ -104,7 +104,7 @@ cd erc1155_client
 aea add connection fetchai/p2p_libp2p:0.14.0
 aea add connection fetchai/soef:0.15.0
 aea add connection fetchai/ledger:0.12.0
-aea add skill fetchai/erc1155_client:0.19.0
+aea add skill fetchai/erc1155_client:0.20.0
 aea install
 aea build
 aea config set agent.default_connection fetchai/p2p_libp2p:0.14.0

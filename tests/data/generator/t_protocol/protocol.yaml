@@ -10,9 +10,9 @@ fingerprint:
   __init__.py: QmVEtFTkpwEHfaijkMso9P6JMJCSepSvUKeqcRJLVJMyji
   custom_types.py: QmWg8HFav8w9tfZfMrTG5Uo7QpexvYKKkhpGPD18233pLw
   dialogues.py: QmWAdikDRJWTG7HUXsCsZRg4Wxnf8cMr5KujpyC4M75gnB
-  message.py: Qmf4TsCLKT2PudSxm8eUCQVKPfvwUmpSt3bDssEaqPZp1J
+  message.py: QmPdyJTsK3mTbJiamMRyeB2PEYm7y4w7VW5UQJnsemWE7e
   serialization.py: QmPBxFuGJ9EZdwT1mP1wZqffYCsQYo7t2kxvSSWnG6msFp
-  t_protocol.proto: QmNpp354j5eNPyzcqPwqbMR8B7Ta6wn4Hrk5Q8dniNkeDE
+  t_protocol.proto: Qme4PL8P5ZXZDxWEcNkhbTZssAYANVugY1uyx32WRfik9S
   t_protocol_pb2.py: QmW9X5uTdM53oQUk3mipVVKBWQw9m9LWSP9qM4kfzejh2V
 fingerprint_ignore_patterns: []
 dependencies:

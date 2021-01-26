@@ -85,7 +85,7 @@ None
 
 ```python
  | @classmethod
- | run_cli_command(cls, *args: str, *, cwd: str = ".") -> Result
+ | run_cli_command(cls, *args: str, *, cwd: str = ".", **kwargs) -> Result
 ```
 
 Run AEA CLI command.
@@ -94,6 +94,7 @@ Run AEA CLI command.
 
 - `args`: CLI args
 - `cwd`: the working directory from where to run the command.
+- `kwargs`: other keyword arguments to click.CLIRunner.invoke.
 
 **Raises**:
 
@@ -346,7 +347,7 @@ Result
 
 ```python
  | @classmethod
- | scaffold_item(cls, item_type: str, name: str) -> Result
+ | scaffold_item(cls, item_type: str, name: str, skip_consistency_check: bool = False) -> Result
 ```
 
 Scaffold an item for the agent.
@@ -357,6 +358,7 @@ Run from agent's directory.
 
 - `item_type`: str item type.
 - `name`: name of the item.
+- `skip_consistency_check`: if True, skip consistency check.
 
 **Returns**:
 

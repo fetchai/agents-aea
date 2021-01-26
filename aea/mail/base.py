@@ -396,7 +396,7 @@ class Envelope:
             # protocol_id provided as an argument in priority
             # use Message.protocol_id only if no protocol_id provided
             if message.protocol_id is None:
-                raise ValueError(
+                raise ValueError(  # pragma: nocover
                     f"message class {type(message)} has no protocol_id specified!"
                 )
             protocol_id = message.protocol_id

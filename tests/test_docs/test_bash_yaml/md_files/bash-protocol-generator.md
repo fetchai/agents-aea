@@ -13,31 +13,34 @@ aea generate protocol ../examples/protocol_specification_ex/sample.yaml
 name: two_party_negotiation
 author: fetchai
 version: 0.1.0
+description: An example of a protocol specification that describes a protocol for bilateral negotiation.
 license: Apache-2.0
 aea_version: '>=0.9.0, <0.10.0'
-description: 'A protocol for negotiation over a fixed set of resources involving two parties.'
 speech_acts:
   cfp:
-    query: ct:DataModel
+    query: ct:Query
   propose:
-    offer: ct:DataModel
     price: pt:float
+    proposal: pt:dict[pt:str, pt:str]
+    conditions: pt:optional[pt:union[pt:str, pt:dict[pt:str,pt:str], pt:set[pt:str]]]
+    resources: pt:list[pt:bytes]
   accept: {}
   decline: {}
-  match_accept: {}
 ...
 ---
-ct:DataModel: |
-  bytes data_model = 1;
+ct:Query: |
+  bytes query_bytes = 1;
 ...
 ---
+initiation: [cfp]
 reply:
   cfp: [propose, decline]
-  propose: [accept, decline]
-  accept: [decline, match_accept]
+  propose: [propose, accept, decline]
+  accept: []
   decline: []
-  match_accept: []
+termination: [accept, decline]
 roles: {buyer, seller}
-end_states: [successful, failed]
+end_states: [agreement_reached, agreement_unreached]
+keep_terminal_state_dialogues: true
 ...
 ```

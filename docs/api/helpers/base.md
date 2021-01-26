@@ -573,3 +573,34 @@ I.e. from "{major}.{minor}.{patch}", return
 
 the specifier set
 
+<a name="aea.helpers.base.decorator_with_optional_params"></a>
+#### decorator`_`with`_`optional`_`params
+
+```python
+decorator_with_optional_params(decorator)
+```
+
+Make a decorator usable either with or without parameters.
+
+In other words, if a decorator "mydecorator" is decorated with this decorator,
+It can be used both as:
+
+@mydecorator
+def myfunction():
+    ...
+
+or as:
+
+@mydecorator(arg1, kwarg1="value")
+def myfunction():
+    ...
+
+<a name="aea.helpers.base.delete_directory_contents"></a>
+#### delete`_`directory`_`contents
+
+```python
+delete_directory_contents(directory: Path)
+```
+
+Delete the content of a directory, without deleting it.
+

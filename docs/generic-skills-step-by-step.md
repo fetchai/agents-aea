@@ -76,7 +76,7 @@ Our newly created AEA is inside the current working directory. Let’s create ou
 aea scaffold skill generic_seller
 ```
 
-This command will create the correct structure for a new skill inside our AEA project You can locate the newly created skill inside the skills folder (`my_generic_seller/skills/generic_seller/`) and it must contain the following files:
+This command will create the correct structure for a new skill inside our AEA project. You can locate the newly created skill inside the skills folder (`my_generic_seller/skills/generic_seller/`) and it must contain the following files:
 
 - `__init__.py`
 - `behaviours.py`
@@ -1823,7 +1823,7 @@ When we receive a proposal we have to check if we have the funds to complete the
 The next code-block handles the `DECLINE` message that we may receive from the buyer on our `CFP`message or our `ACCEPT` message:
 
 ``` python
-    def _handle_decline(
+	def _handle_decline(
         self,
         fipa_msg: FipaMessage,
         fipa_dialogue: FipaDialogue,
@@ -1840,11 +1840,18 @@ The next code-block handles the `DECLINE` message that we may receive from the b
         self.context.logger.info(
             "received DECLINE from sender={}".format(fipa_msg.sender[-5:])
         )
-        if fipa_msg.target == 1:
+        target_message = fipa_dialogue.get_message_by_id(fipa_msg.target)
+
+        if not target_message:
+            raise ValueError("Can not find target message!")
+
+        declined_performative = target_message.performative
+
+        if declined_performative == FipaMessage.Performative.CFP:
             fipa_dialogues.dialogue_stats.add_dialogue_endstate(
                 FipaDialogue.EndState.DECLINED_CFP, fipa_dialogue.is_self_initiated
             )
-        elif fipa_msg.target == 3:
+        if declined_performative == FipaMessage.Performative.ACCEPT:
             fipa_dialogues.dialogue_stats.add_dialogue_endstate(
                 FipaDialogue.EndState.DECLINED_ACCEPT, fipa_dialogue.is_self_initiated
             )

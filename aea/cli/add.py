@@ -98,15 +98,17 @@ def add_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
     :return: None
     """
     click.echo(f"Adding {item_type} '{item_public_id}'...")
-    if is_item_present(ctx, item_type, item_public_id):
-        present_item_id = get_item_id_present(ctx, item_type, item_public_id)
+    if is_item_present(ctx.cwd, ctx.agent_config, item_type, item_public_id):
+        present_item_id = get_item_id_present(
+            ctx.agent_config, item_type, item_public_id
+        )
         raise click.ClickException(
             "A {} with id '{}' already exists. Aborting...".format(
                 item_type, present_item_id
             )
         )
 
-    dest_path = get_package_path(ctx, item_type, item_public_id)
+    dest_path = get_package_path(ctx.cwd, item_type, item_public_id)
     is_local = ctx.config.get("is_local")
     is_mixed = ctx.config.get("is_mixed")
 

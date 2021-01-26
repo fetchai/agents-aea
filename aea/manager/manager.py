@@ -146,6 +146,7 @@ class MultiAgentManager:
         self._projects: Dict[PublicId, Project] = {}
         self._versionless_projects_set: Set[PublicId] = set()
         self._keys_dir = os.path.abspath(os.path.join(self.working_dir, "keys"))
+        self._certs_dir = os.path.abspath(os.path.join(self.working_dir, "certs"))
         self._agents: Dict[str, AgentAlias] = {}
         self._agents_tasks: Dict[str, AgentRunAsyncTask] = {}
 
@@ -161,6 +162,16 @@ class MultiAgentManager:
             )
         self._started_event = threading.Event()
         self._mode = mode
+
+    @property
+    def keys_dir(self) -> str:
+        """Get the keys directory."""
+        return self._keys_dir
+
+    @property
+    def certs_dir(self) -> str:
+        """Get the certs directory."""
+        return self._certs_dir
 
     @property
     def is_running(self) -> bool:
@@ -219,13 +230,25 @@ class MultiAgentManager:
         """Add error callback to call on error raised."""
         self._error_callbacks.append(error_callback)
 
-    def start_manager(self, local: bool = True) -> "MultiAgentManager":
-        """Start manager."""
+    def start_manager(
+        self, local: bool = False, remote: bool = False
+    ) -> "MultiAgentManager":
+        """
+        Start manager.
+
+        If local = False and remote = False, then the packages
+        are fetched in mixed mode (i.e. first try from local
+        registry, and then from remote registry in case of failure).
+
+        :param local: whether or not to fetch from local registry.
+        :param remote: whether or not to fetch from remote registry.
+        :return: the MultiAgentManager instance.
+        """
         if self._is_running:
             return self
 
         self._ensure_working_dir()
-        self._load_state(local=local)
+        self._load_state(local=local, remote=remote)
 
         self._started_event.clear()
         self._is_running = True
@@ -282,19 +305,29 @@ class MultiAgentManager:
     def _cleanup(self, only_keys: bool = False) -> None:
         """Remove workdir if was created."""
         if only_keys:
-            rmtree(self._keys_dir)
+            rmtree(self.keys_dir)
+            rmtree(self.certs_dir)
         else:
             if self._was_working_dir_created and os.path.exists(self.working_dir):
                 rmtree(self.working_dir)
 
     def add_project(
-        self, public_id: PublicId, local: bool = True, restore: bool = False
+        self,
+        public_id: PublicId,
+        local: bool = False,
+        remote: bool = False,
+        restore: bool = False,
     ) -> "MultiAgentManager":
         """
         Fetch agent project and all dependencies to working_dir.
 
+        If local = False and remote = False, then the packages
+        are fetched in mixed mode (i.e. first try from local
+        registry, and then from remote registry in case of failure).
+
         :param public_id: the public if of the agent project.
         :param local: whether or not to fetch from local registry.
+        :param remote: whether or not to fetch from remote registry.
         :param restore: bool flag for restoring already fetched agent.
         """
         if public_id.to_any() in self._versionless_projects_set:
@@ -308,6 +341,7 @@ class MultiAgentManager:
             self.working_dir,
             public_id,
             local,
+            remote,
             registry_path=self.registry_path,
             is_restore=restore,
         )
@@ -377,7 +411,7 @@ class MultiAgentManager:
         project = self._projects[public_id]
 
         agent_alias = AgentAlias(
-            project=project, agent_name=agent_name, keys_dir=self._keys_dir,
+            project=project, agent_name=agent_name, keys_dir=self.keys_dir,
         )
         agent_alias.set_overrides(agent_overrides, component_overrides)
         project.agents.add(agent_name)
@@ -409,7 +443,7 @@ class MultiAgentManager:
         project = self._projects[public_id]
 
         agent_alias = AgentAlias(
-            project=project, agent_name=agent_name, keys_dir=self._keys_dir,
+            project=project, agent_name=agent_name, keys_dir=self.keys_dir,
         )
         agent_alias.set_agent_config_from_data(config)
         project.agents.add(agent_name)
@@ -516,12 +550,8 @@ class MultiAgentManager:
         if self._is_agent_running(agent_name):
             raise ValueError(f"{agent_name} is already started!")
 
-        agent_alias.issue_certificates()
         aea = agent_alias.get_aea_instance()
-        # override build dir to project's one
-        aea.DEFAULT_BUILD_DIR_NAME = os.path.join(
-            agent_alias.project.path, aea.DEFAULT_BUILD_DIR_NAME
-        )
+
         if self._mode == "async":
             task = AgentRunAsyncTask(aea, self._loop)
         elif self._mode == "threaded":
@@ -648,14 +678,23 @@ class MultiAgentManager:
 
         if not os.path.isdir(self.working_dir):  # pragma: nocover
             raise ValueError(f"{self.working_dir} is not a directory!")
-        if not os.path.exists(self._keys_dir):
-            os.makedirs(self._keys_dir)
+        if not os.path.exists(self.keys_dir):
+            os.makedirs(self.keys_dir)
+        if not os.path.exists(self.certs_dir):
+            os.makedirs(self.certs_dir)
 
-    def _load_state(self, local: bool) -> None:
+    def _load_state(self, local: bool, remote: bool) -> None:
         """
         Load saved state from file.
 
-        :param local: bool is local project and agents re-creation.
+        Fetch agent project and all dependencies to working_dir.
+
+        If local = False and remote = False, then the packages
+        are fetched in mixed mode (i.e. first try from local
+        registry, and then from remote registry in case of failure).
+
+        :param local: whether or not to fetch from local registry.
+        :param remote: whether or not to fetch from remote registry.
 
         :return: None
         :raises: ValueError if failed to load state.
@@ -673,7 +712,10 @@ class MultiAgentManager:
         try:
             for public_id in save_json["projects"]:
                 self.add_project(
-                    PublicId.from_str(public_id), local=local, restore=True
+                    PublicId.from_str(public_id),
+                    local=local,
+                    remote=remote,
+                    restore=True,
                 )
 
             for agent_settings in save_json["agents"]:

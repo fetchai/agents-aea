@@ -52,6 +52,7 @@ from aea.configurations.constants import (
     DEFAULT_CONTRACT_CONFIG_FILE,
     DEFAULT_FINGERPRINT_IGNORE_PATTERNS,
     DEFAULT_LICENSE,
+    DEFAULT_LOGGING_CONFIG,
     DEFAULT_PROTOCOL_CONFIG_FILE,
     DEFAULT_REGISTRY_NAME,
     DEFAULT_SKILL_CONFIG_FILE,
@@ -206,7 +207,7 @@ class PackageConfiguration(Configuration, ABC):
 
     default_configuration_filename: str
     package_type: PackageType
-    FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset()
+    FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(["build_directory"])
     schema: str
     CHECK_EXCLUDES: List[Tuple[str]] = []
 
@@ -250,7 +251,7 @@ class PackageConfiguration(Configuration, ABC):
             else []
         )
         self.build_entrypoint = build_entrypoint
-        self.aea_version = aea_version if aea_version != "" else __aea_version__
+        self._aea_version = aea_version if aea_version != "" else __aea_version__
         self._aea_version_specifiers = self._parse_aea_version_specifier(aea_version)
 
         self._directory = None  # type: Optional[Path]
@@ -274,6 +275,19 @@ class PackageConfiguration(Configuration, ABC):
     def author(self, value: SimpleIdOrStr):
         """Set the author."""
         self._author = SimpleId(value)
+
+    @property
+    def aea_version(self):
+        """Get the 'aea_version' attribute."""
+        return self._aea_version
+
+    @aea_version.setter
+    def aea_version(self, new_aea_version: str):
+        """Set the 'aea_version' attribute."""
+        self._aea_version_specifiers = self._parse_aea_version_specifier(
+            new_aea_version
+        )
+        self._aea_version = new_aea_version
 
     @property
     def directory(self) -> Optional[Path]:
@@ -524,7 +538,7 @@ class ConnectionConfig(ComponentConfiguration):
     schema = "connection-config_schema.json"
 
     FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(
-        ["config", "cert_requests", "is_abstract"]
+        ["config", "cert_requests", "is_abstract", "build_directory"]
     )
 
     def __init__(
@@ -869,7 +883,7 @@ class SkillConfig(ComponentConfiguration):
     abstract_field_name = "is_abstract"
 
     FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(
-        ["behaviours", "handlers", "models", "is_abstract"]
+        ["behaviours", "handlers", "models", "is_abstract", "build_directory"]
     )
     FIELDS_WITH_NESTED_FIELDS: FrozenSet[str] = frozenset(
         ["behaviours", "handlers", "models"]
@@ -1141,7 +1155,7 @@ class AgentConfig(PackageConfiguration):
         self.private_key_paths = CRUDCollection[str]()
         self.connection_private_key_paths = CRUDCollection[str]()
 
-        self.logging_config = logging_config if logging_config is not None else {}
+        self.logging_config = logging_config or DEFAULT_LOGGING_CONFIG
         self.default_ledger = default_ledger
         self.currency_denominations = (
             currency_denominations if currency_denominations is not None else {}
@@ -1155,10 +1169,6 @@ class AgentConfig(PackageConfiguration):
         self.contracts = set()  # type: Set[PublicId]
         self.protocols = set()  # type: Set[PublicId]
         self.skills = set()  # type: Set[PublicId]
-
-        if self.logging_config == {}:
-            self.logging_config["version"] = 1
-            self.logging_config["disable_existing_loggers"] = False
 
         self.period: Optional[float] = period
         self.execution_timeout: Optional[float] = execution_timeout
@@ -1569,7 +1579,7 @@ class ContractConfig(ComponentConfiguration):
     package_type = PackageType.CONTRACT
     schema = "contract-config_schema.json"
 
-    FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset([])
+    FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(["build_directory"])
 
     def __init__(
         self,
