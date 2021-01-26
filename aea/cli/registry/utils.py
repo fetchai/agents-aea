@@ -23,7 +23,6 @@ import tarfile
 from json.decoder import JSONDecodeError
 
 import click
-import requests
 
 from aea.cli.registry.settings import AUTH_TOKEN_KEY, REGISTRY_API_URL
 from aea.cli.utils.config import get_or_create_cli_config
@@ -31,6 +30,12 @@ from aea.cli.utils.context import Context
 from aea.cli.utils.loggers import logger
 from aea.cli.utils.package_utils import find_item_locally
 from aea.configurations.base import PublicId
+from aea.helpers import http_requests as requests
+
+
+FILE_DOWNLOAD_TIMEOUT = (
+    180  # quite big number case possible slow channels and package can be quite big
+)
 
 
 def get_auth_token() -> str:
@@ -119,19 +124,20 @@ def request_api(
     return resp_json
 
 
-def download_file(url: str, cwd: str) -> str:
+def download_file(url: str, cwd: str, timeout: float = FILE_DOWNLOAD_TIMEOUT) -> str:
     """
     Download file from URL and save it in CWD (current working directory).
 
     :param url: str url of the file to download.
     :param cwd: str path to current working directory.
+    :param timeout: float. timeout to download a file
 
     :return: str path to downloaded file
     """
     local_filename = url.split("/")[-1]
     filepath = os.path.join(cwd, local_filename)
     # NOTE the stream=True parameter below
-    response = requests.get(url, stream=True)
+    response = requests.get(url, stream=True, timeout=timeout)
     if response.status_code == 200:
         with open(filepath, "wb") as f:
             f.write(response.raw.read())

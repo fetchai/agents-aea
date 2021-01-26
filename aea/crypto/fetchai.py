@@ -29,6 +29,7 @@ FETCHAI_TESTNET_FAUCET_URL = "https://faucet-agent-land.fetch.ai"
 DEFAULT_ADDRESS = "https://rest-agent-land.fetch.ai"
 DEFAULT_CURRENCY_DENOM = "atestfet"
 DEFAULT_CHAIN_ID = "agent-land"
+DEFAULT_CLI_COMMAND = "fetchcli"
 
 
 class FetchAIHelper(CosmosHelper):
@@ -57,6 +58,8 @@ class FetchAIApi(_CosmosApi, FetchAIHelper):
             kwargs["denom"] = DEFAULT_CURRENCY_DENOM
         if "chain_id" not in kwargs:
             kwargs["chain_id"] = DEFAULT_CHAIN_ID
+        if "cli_command" not in kwargs:
+            kwargs["cli_command"] = DEFAULT_CLI_COMMAND
         super().__init__(**kwargs)
 
 

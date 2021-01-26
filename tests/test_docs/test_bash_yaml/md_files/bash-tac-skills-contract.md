@@ -1,5 +1,5 @@
 ``` bash
-aea fetch fetchai/tac_controller_contract:0.19.0
+aea fetch fetchai/tac_controller_contract:0.20.0
 cd tac_controller_contract
 aea install
 aea build
@@ -10,7 +10,7 @@ cd tac_controller_contract
 aea add connection fetchai/p2p_libp2p:0.14.0
 aea add connection fetchai/soef:0.15.0
 aea add connection fetchai/ledger:0.12.0
-aea add skill fetchai/tac_control_contract:0.16.0
+aea add skill fetchai/tac_control_contract:0.17.0
 aea config set agent.default_connection fetchai/p2p_libp2p:0.14.0
 aea config set agent.default_ledger ethereum
 aea config set vendor.fetchai.connections.soef.config.chain_identifier ethereum
@@ -31,14 +31,14 @@ aea generate-key ethereum
 aea add-key ethereum ethereum_private_key.txt
 ```
 ``` bash
-aea fetch fetchai/tac_participant:0.19.0 --alias tac_participant_one
+aea fetch fetchai/tac_participant:0.20.0 --alias tac_participant_one
 cd tac_participant_one
 aea generate-key ethereum
 aea add-key ethereum ethereum_private_key.txt
 aea install
 aea build
 cd ..
-aea fetch fetchai/tac_participant:0.19.0 --alias tac_participant_two
+aea fetch fetchai/tac_participant:0.20.0 --alias tac_participant_two
 cd tac_participant_two
 aea generate-key ethereum
 aea add-key ethereum ethereum_private_key.txt
@@ -54,8 +54,8 @@ cd tac_participant_one
 aea add connection fetchai/p2p_libp2p:0.14.0
 aea add connection fetchai/soef:0.15.0
 aea add connection fetchai/ledger:0.12.0
-aea add skill fetchai/tac_participation:0.15.0
-aea add skill fetchai/tac_negotiation:0.17.0
+aea add skill fetchai/tac_participation:0.16.0
+aea add skill fetchai/tac_negotiation:0.18.0
 aea config set agent.default_connection fetchai/p2p_libp2p:0.14.0
 aea config set agent.default_ledger ethereum
 aea config set vendor.fetchai.connections.soef.config.chain_identifier ethereum
@@ -79,8 +79,8 @@ cd tac_participant_two
 aea add connection fetchai/p2p_libp2p:0.14.0
 aea add connection fetchai/soef:0.15.0
 aea add connection fetchai/ledger:0.12.0
-aea add skill fetchai/tac_participation:0.15.0
-aea add skill fetchai/tac_negotiation:0.17.0
+aea add skill fetchai/tac_participation:0.16.0
+aea add skill fetchai/tac_negotiation:0.18.0
 aea config set agent.default_connection fetchai/p2p_libp2p:0.14.0
 aea config set agent.default_ledger ethereum
 aea config set vendor.fetchai.connections.soef.config.chain_identifier ethereum

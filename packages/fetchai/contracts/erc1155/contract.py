@@ -19,7 +19,6 @@
 
 """This module contains the erc1155 contract definition."""
 
-import json
 import logging
 import random
 from typing import Dict, List, Optional, cast
@@ -38,7 +37,7 @@ from aea.crypto.fetchai import FetchAIApi
 _default_logger = logging.getLogger("aea.packages.fetchai.contracts.erc1155.contract")
 MAX_UINT_256 = 2 ^ 256 - 1
 
-PUBLIC_ID = PublicId.from_str("fetchai/erc1155:0.14.0")
+PUBLIC_ID = PublicId.from_str("fetchai/erc1155:0.15.0")
 
 
 class ERC1155Contract(Contract):
@@ -350,11 +349,14 @@ class ERC1155Contract(Contract):
             return {"balance": result}
         if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
             cosmos_api = cast(CosmosApi, ledger_api)
-            msg = {"balance": {"address": str(agent_address), "id": str(token_id)}}
-            query_res = cosmos_api.try_execute_wasm_query(contract_address, msg)
-            query_json_res = json.loads(query_res)
+            msg: JSONLike = {
+                "balance": {"address": str(agent_address), "id": str(token_id)}
+            }
+            query_res = cosmos_api.execute_contract_query(contract_address, msg)
+            if query_res is None:
+                raise ValueError("call to contract returned None")
             # Convert {"balance": balance: str} balances to Dict[token_id: int, balance: int]
-            result = {token_id: int(query_json_res["balance"])}
+            result = {token_id: int(cast(str, query_res["balance"]))}
             return {"balance": result}
         raise NotImplementedError
 
@@ -447,15 +449,18 @@ class ERC1155Contract(Contract):
             for token_id in token_ids:
                 tokens.append({"address": agent_address, "id": str(token_id)})
 
-            msg = {"balance_batch": {"addresses": tokens}}
+            msg: JSONLike = {"balance_batch": {"addresses": tokens}}
 
             cosmos_api = cast(CosmosApi, ledger_api)
-            query_res = cosmos_api.try_execute_wasm_query(contract_address, msg)
-            query_json_res = json.loads(query_res)
+            query_res = cosmos_api.execute_contract_query(contract_address, msg)
             # Convert List[balances: str] balances to Dict[token_id: int, balance: int]
+            if query_res is None:
+                raise ValueError("call to contract returned None")
             result = {
                 token_id: int(balance)
-                for token_id, balance in zip(token_ids, query_json_res["balances"])
+                for token_id, balance in zip(
+                    token_ids, cast(List[str], query_res["balances"])
+                )
             }
             return {"balances": result}
         raise NotImplementedError

@@ -78,10 +78,10 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseGanache):
         self.set_config("agent.default_ledger", ETHEREUM)
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
-        self.add_item("skill", "fetchai/erc1155_deploy:0.20.0")
+        self.add_item("skill", "fetchai/erc1155_deploy:0.21.0")
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/erc1155_deployer:0.21.0", deploy_aea_name
+            "fetchai/erc1155_deployer:0.22.0", deploy_aea_name
         )
         assert (
             diff == []
@@ -133,10 +133,10 @@ class TestERCSkillsEthereumLedger(AEATestCaseMany, UseGanache):
         self.set_config("agent.default_ledger", ETHEREUM)
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
-        self.add_item("skill", "fetchai/erc1155_client:0.19.0")
+        self.add_item("skill", "fetchai/erc1155_client:0.20.0")
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/erc1155_client:0.21.0", client_aea_name
+            "fetchai/erc1155_client:0.22.0", client_aea_name
         )
         assert (
             diff == []

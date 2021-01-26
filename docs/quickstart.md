@@ -1,5 +1,5 @@
 If you want to create Autonomous Economic Agents (AEAs) that can act independently of constant user input and autonomously execute actions to achieve their objective,
-you can use the Fetch.ai AEA framework.
+you can use the AEA framework.
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/mwkAUh-_uxA" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
@@ -13,7 +13,7 @@ You need <a href="https://www.python.org/downloads/" target="_blank">Python 3.6<
 ​
 ### Option 1: Manual system preparation
 
-Install a compatible Python and Go version on your system.
+Install a compatible Python and Go version on your system (see <a href="https://realpython.com/installing-python/" target="_blank">this external resource</a> for a comprehensive guide).
 
 The following hints can help:
 
@@ -39,8 +39,26 @@ sudo apt-get install python3.7-dev
 
 - Windows users: install <a href="https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019" target="_blank">tools for Visual Studio</a>.
 
+### Option 2: Automated install script
 
-### Option 2: Using Docker
+We provide a script to automatically install all framework dependencies and the framework itself.
+
+On MacOS or Ubuntu run:
+
+``` bash
+curl https://raw.githubusercontent.com/fetchai/agents-aea/master/scripts/install.sh --output install.sh
+chmod +x install.sh
+./install.sh
+```
+
+On Windows run:
+
+Download `https://raw.githubusercontent.com/fetchai/agents-aea/master/scripts/install.ps1`
+
+Run `install.ps1` with powershell terminal.
+
+
+### Option 3: Using Docker
 ​
 We also provide a Docker image with all the needed dependencies.
 
@@ -141,7 +159,7 @@ Confirm password:
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.9.1
+v0.9.2
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
@@ -232,7 +250,7 @@ You will see the echo skill running in the terminal window.
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.9.1
+v0.9.2
 
 Starting AEA 'my_first_aea' in 'async' mode ...
 info: Echo Handler: setup method called.

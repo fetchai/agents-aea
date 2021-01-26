@@ -241,7 +241,6 @@ class TestTransactionProcessBehaviour(BaseSkillTestCase):
                 performative=TacMessage.Performative.TRANSACTION,
                 to=COUNTERPARTY_ADDRESS,
                 sender=self.skill.skill_context.agent_address,
-                target=tac_dialogue.last_message.message_id - no_tx + count,
                 transaction_id=self.tx_ids[count],
                 ledger_id=self.terms[count].ledger_id,
                 sender_address=self.terms[count].sender_address,

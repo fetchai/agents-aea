@@ -63,16 +63,21 @@ Call all build entry points.
 
 ```python
  | @classmethod
- | load(cls, working_dir: str, public_id: PublicId, is_local: bool = False, is_restore: bool = False, registry_path: str = DEFAULT_REGISTRY_NAME, skip_consistency_check: bool = False) -> "Project"
+ | load(cls, working_dir: str, public_id: PublicId, is_local: bool = False, is_remote: bool = False, is_restore: bool = False, registry_path: str = DEFAULT_REGISTRY_NAME, skip_consistency_check: bool = False) -> "Project"
 ```
 
 Load project with given public_id to working_dir.
+
+If local = False and remote = False, then the packages
+are fetched in mixed mode (i.e. first try from local
+registry, and then from remote registry in case of failure).
 
 **Arguments**:
 
 - `working_dir`: the working directory
 - `public_id`: the public id
-- `is_local`: whether to fetch from local or remote
+- `is_local`: whether to fetch from local
+:param is_remote whether to fetch from remote
 - `registry_path`: the path to the registry locally
 - `skip_consistency_check`: consistency checks flag
 
