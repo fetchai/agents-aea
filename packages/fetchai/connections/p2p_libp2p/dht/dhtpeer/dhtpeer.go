@@ -1744,9 +1744,11 @@ func (dhtPeer *DHTPeer) handleAeaRegisterStream(stream network.Stream) {
 	dhtPeer.dhtAddressesLock.Lock()
 	dhtPeer.dhtAddresses[clientAddr] = clientPeerID
 	err = dhtPeer.saveAgentRecordToPersistentStorage(record)
-	lerror(err).Str("op", "register").
-		Str("addr", clientAddr).
-		Msg("while saving agent record to persistent storage")
+	if err != nil {
+		lerror(err).Str("op", "register").
+			Str("addr", clientAddr).
+			Msg("while saving agent record to persistent storage")
+	}
 	dhtPeer.dhtAddressesLock.Unlock()
 	if dhtPeer.addressAnnounced {
 		linfo().Str("op", "register").
