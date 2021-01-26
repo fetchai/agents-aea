@@ -12,13 +12,13 @@ We define an autonomous economic agent or AEA as:
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/xpJA4IT5X88" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
-AEAs act independently of constant input from their owner and autonomously execute actions to achieve their prescribed goal. Their goal is to create economic value for you, their owner, in a clearly defined domain. AEAs have a wide range of <a href="app-areas">application areas</a> and we provide <a href="demos">demo guides</a> to highlight some examples.
+AEAs act independently of constant input from their owner and autonomously execute actions to achieve their prescribed goals. Their purpose is to create economic value for you, their owner, in clearly defined domains. AEAs have a wide range of <a href="app-areas">application areas</a> and we provide <a href="demos">demo guides</a> to highlight examples of their use cases.
 
 <!-- Autonomous Economic Agents are digital entities that run complex dynamic decision-making algorithms for application owners and clients. -->
 
 AEAs are not:
 
-* just any <a href="https://en.wikipedia.org/wiki/Software_agent"  target="_blank">agents</a>: AEAs' purpose is to generate economic value in a multi-stakeholder environment with competing incentives between agents. They represent humans, organisations or things.
+* just any <a href="https://en.wikipedia.org/wiki/Software_agent"  target="_blank">agents</a>: AEAs' purpose is to generate economic value in a multi-stakeholder environment with competing incentives between agents. They represent humans, organisations or objects.
 * APIs or sensors which do not have agency.
 * <a href="https://en.wikipedia.org/wiki/Smart_contract" target="_blank">smart contracts</a> which do not display any proactiveness and are purely reactive to external requests (=contract calls and transactions). 
 * <a href="https://en.wikipedia.org/wiki/Artificial_general_intelligence" target="_blank">artificial general intelligence (AGI)</a>: AEAs can have a very narrow goal directed focus involving some economic gain and implemented via simple conditional logic.
