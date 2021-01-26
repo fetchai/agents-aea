@@ -23,13 +23,11 @@ import logging
 import random
 from typing import Dict, List, Optional, cast
 
-from cosmos_crypto import CosmosApi
-from ethereum_crypto import EthereumApi
-from fetchai_crypto import FetchAIApi
 from vyper.utils import keccak256
 
 from aea.common import Address, JSONLike
 from aea.configurations.base import PublicId
+from aea.configurations.constants import COSMOS, ETHEREUM, FETCHAI
 from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
 
@@ -97,7 +95,7 @@ class ERC1155Contract(Contract):
         :param gas: the gas to be used
         :return: the transaction object
         """
-        if ledger_api.identifier == EthereumApi.identifier:
+        if ledger_api.identifier == ETHEREUM:
             nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
             instance = cls.get_instance(ledger_api, contract_address)
             tx = instance.functions.createBatch(
@@ -111,7 +109,7 @@ class ERC1155Contract(Contract):
             )
             tx = ledger_api.update_with_gas_estimate(tx)
             return tx
-        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+        if ledger_api.identifier in [COSMOS, FETCHAI]:
             tokens = []
             for token_id in token_ids:
                 tokens.append({"id": str(token_id), "path": str(token_id)})
@@ -119,8 +117,8 @@ class ERC1155Contract(Contract):
             msg = {
                 "create_batch": {"item_owner": str(deployer_address), "tokens": tokens}
             }
-            cosmos_api = cast(CosmosApi, ledger_api)
-            tx = cosmos_api.get_handle_transaction(
+            cosmos_api = ledger_api
+            tx = cosmos_api.get_handle_transaction(  # type: ignore
                 deployer_address, contract_address, msg, amount=0, tx_fee=0, gas=gas
             )
             return tx
@@ -147,7 +145,7 @@ class ERC1155Contract(Contract):
         :param gas: the gas to be used
         :return: the transaction object
         """
-        if ledger_api.identifier == EthereumApi.identifier:
+        if ledger_api.identifier == ETHEREUM:
             nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
             instance = cls.get_instance(ledger_api, contract_address)
             tx = instance.functions.createSingle(
@@ -161,7 +159,7 @@ class ERC1155Contract(Contract):
             )
             tx = ledger_api.update_with_gas_estimate(tx)
             return tx
-        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+        if ledger_api.identifier in [COSMOS, FETCHAI]:
             msg = {
                 "create_single": {
                     "item_owner": deployer_address,
@@ -169,8 +167,8 @@ class ERC1155Contract(Contract):
                     "path": str(data),
                 }
             }
-            cosmos_api = cast(CosmosApi, ledger_api)
-            tx = cosmos_api.get_handle_transaction(
+            cosmos_api = ledger_api
+            tx = cosmos_api.get_handle_transaction(  # type: ignore
                 deployer_address, contract_address, msg, amount=0, tx_fee=0, gas=gas
             )
             return tx
@@ -202,7 +200,7 @@ class ERC1155Contract(Contract):
         :return: the transaction object
         """
         cls.validate_mint_quantities(token_ids, mint_quantities)
-        if ledger_api.identifier == EthereumApi.identifier:
+        if ledger_api.identifier == ETHEREUM:
             nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
             instance = cls.get_instance(ledger_api, contract_address)
             tx = instance.functions.mintBatch(
@@ -216,7 +214,7 @@ class ERC1155Contract(Contract):
             )
             tx = ledger_api.update_with_gas_estimate(tx)
             return tx
-        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+        if ledger_api.identifier in [COSMOS, FETCHAI]:
             tokens = []
             for token_id, quantity in zip(token_ids, mint_quantities):
                 tokens.append({"id": str(token_id), "value": str(quantity)})
@@ -228,8 +226,8 @@ class ERC1155Contract(Contract):
                     "tokens": tokens,
                 }
             }
-            cosmos_api = cast(CosmosApi, ledger_api)
-            tx = cosmos_api.get_handle_transaction(
+            cosmos_api = ledger_api
+            tx = cosmos_api.get_handle_transaction(  # type: ignore
                 deployer_address, contract_address, msg, amount=0, tx_fee=0, gas=gas
             )
             return tx
@@ -295,7 +293,7 @@ class ERC1155Contract(Contract):
         :param gas: the gas to be used
         :return: the transaction object
         """
-        if ledger_api.identifier == EthereumApi.identifier:
+        if ledger_api.identifier == ETHEREUM:
             nonce = ledger_api.api.eth.getTransactionCount(deployer_address)
             instance = cls.get_instance(ledger_api, contract_address)
             tx = instance.functions.mint(
@@ -309,7 +307,7 @@ class ERC1155Contract(Contract):
             )
             tx = ledger_api.update_with_gas_estimate(tx)
             return tx
-        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+        if ledger_api.identifier in [COSMOS, FETCHAI]:
             msg = {
                 "mint_single": {
                     "to_address": recipient_address,
@@ -318,8 +316,8 @@ class ERC1155Contract(Contract):
                     "data": str(data),
                 }
             }
-            cosmos_api = cast(CosmosApi, ledger_api)
-            tx = cosmos_api.get_handle_transaction(
+            cosmos_api = ledger_api
+            tx = cosmos_api.get_handle_transaction(  # type: ignore
                 deployer_address, contract_address, msg, amount=0, tx_fee=0, gas=gas
             )
             return tx
@@ -342,17 +340,17 @@ class ERC1155Contract(Contract):
         :param token_id: the token id
         :return: the balance in a dictionary - {"balance": {token_id: int, balance: int}}
         """
-        if ledger_api.identifier == EthereumApi.identifier:
+        if ledger_api.identifier == ETHEREUM:
             instance = cls.get_instance(ledger_api, contract_address)
             balance = instance.functions.balanceOf(agent_address, token_id).call()
             result = {token_id: balance}
             return {"balance": result}
-        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
-            cosmos_api = cast(CosmosApi, ledger_api)
+        if ledger_api.identifier in [COSMOS, FETCHAI]:
+            cosmos_api = ledger_api
             msg: JSONLike = {
                 "balance": {"address": str(agent_address), "id": str(token_id)}
             }
-            query_res = cosmos_api.execute_contract_query(contract_address, msg)
+            query_res = cosmos_api.execute_contract_query(contract_address, msg)  # type: ignore
             if query_res is None:
                 raise ValueError("call to contract returned None")
             # Convert {"balance": balance: str} balances to Dict[token_id: int, balance: int]
@@ -393,7 +391,7 @@ class ERC1155Contract(Contract):
         :param gas: the gas to be used
         :return: a ledger transaction object
         """
-        if ledger_api.identifier == EthereumApi.identifier:
+        if ledger_api.identifier == ETHEREUM:
             nonce = ledger_api.api.eth.getTransactionCount(from_address)
             instance = cls.get_instance(ledger_api, contract_address)
             value_eth_wei = ledger_api.api.toWei(value, "ether")
@@ -437,22 +435,22 @@ class ERC1155Contract(Contract):
         :param token_ids: the token id
         :return: the balances in dictionary - {"balances": {id: int, balance: int}}
         """
-        if ledger_api.identifier == EthereumApi.identifier:
+        if ledger_api.identifier == ETHEREUM:
             instance = cls.get_instance(ledger_api, contract_address)
             balances = instance.functions.balanceOfBatch(
                 [agent_address] * 10, token_ids
             ).call()
             result = dict(zip(token_ids, balances))
             return {"balances": result}
-        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+        if ledger_api.identifier in [COSMOS, FETCHAI]:
             tokens = []
             for token_id in token_ids:
                 tokens.append({"address": agent_address, "id": str(token_id)})
 
             msg: JSONLike = {"balance_batch": {"addresses": tokens}}
 
-            cosmos_api = cast(CosmosApi, ledger_api)
-            query_res = cosmos_api.execute_contract_query(contract_address, msg)
+            cosmos_api = ledger_api
+            query_res = cosmos_api.execute_contract_query(contract_address, msg)  # type: ignore
             # Convert List[balances: str] balances to Dict[token_id: int, balance: int]
             if query_res is None:
                 raise ValueError("call to contract returned None")
@@ -498,7 +496,7 @@ class ERC1155Contract(Contract):
         :param gas: the gas to be used
         :return: a ledger transaction object
         """
-        if ledger_api.identifier == EthereumApi.identifier:
+        if ledger_api.identifier == ETHEREUM:
             nonce = ledger_api.api.eth.getTransactionCount(from_address)
             instance = cls.get_instance(ledger_api, contract_address)
             value_eth_wei = ledger_api.api.toWei(value, "ether")
@@ -552,7 +550,7 @@ class ERC1155Contract(Contract):
         :param ledger_api: the ledger API
         :return: the transaction hash in a dict
         """
-        if ledger_api.identifier == EthereumApi.identifier:
+        if ledger_api.identifier == ETHEREUM:
             instance = cls.get_instance(ledger_api, contract_address)
             from_address_hash = instance.functions.getAddress(from_address).call()
             to_address_hash = instance.functions.getAddress(to_address).call()
@@ -647,7 +645,7 @@ class ERC1155Contract(Contract):
         :param trade_nonce: the trade nonce
         :return: the transaction hash in a dict
         """
-        if ledger_api.identifier == EthereumApi.identifier:
+        if ledger_api.identifier == ETHEREUM:
             instance = cls.get_instance(ledger_api, contract_address)
             from_address_hash = instance.functions.getAddress(from_address).call()
             to_address_hash = instance.functions.getAddress(to_address).call()
@@ -743,7 +741,7 @@ class ERC1155Contract(Contract):
         :param agent_address: the address to use
         :return: the generated trade nonce
         """
-        if ledger_api.identifier == EthereumApi.identifier:
+        if ledger_api.identifier == ETHEREUM:
             instance = cls.get_instance(ledger_api, contract_address)
             trade_nonce = random.randrange(0, MAX_UINT_256)  # nosec
             while instance.functions.is_nonce_used(agent_address, trade_nonce).call():
@@ -760,9 +758,9 @@ class ERC1155Contract(Contract):
 
         :return: code id of last deployed .wasm bytecode
         """
-        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
-            cosmos_api = cast(CosmosApi, ledger_api)
-            return cosmos_api.get_last_code_id()
+        if ledger_api.identifier in [COSMOS, FETCHAI]:
+            cosmos_api = ledger_api
+            return cosmos_api.get_last_code_id()  # type: ignore
         raise NotImplementedError
 
     @staticmethod
@@ -775,7 +773,7 @@ class ERC1155Contract(Contract):
 
         :return: contract address of last initialised contract
         """
-        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
-            cosmos_api = cast(CosmosApi, ledger_api)
-            return cosmos_api.get_contract_address(code_id)
+        if ledger_api.identifier in [COSMOS, FETCHAI]:
+            cosmos_api = ledger_api
+            return cosmos_api.get_contract_address(code_id)  # type: ignore
         raise NotImplementedError

@@ -21,10 +21,9 @@
 
 import logging
 
-from ethereum_crypto import EthereumApi
-
 from aea.common import Address
 from aea.configurations.base import PublicId
+from aea.configurations.constants import ETHEREUM
 from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
 
@@ -58,7 +57,7 @@ class FetchOracleClientContract(Contract):
         :param gas: the gas limit for the transaction.
         :return: None
         """
-        if ledger_api.identifier == EthereumApi.identifier:
+        if ledger_api.identifier == ETHEREUM:
             nonce = ledger_api.api.eth.getTransactionCount(from_address)
             instance = cls.get_instance(ledger_api, contract_address)
             function = getattr(instance.functions, query_function)

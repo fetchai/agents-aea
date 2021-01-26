@@ -22,12 +22,11 @@ import uuid
 from threading import Thread
 from typing import Dict, List, Optional, Tuple, Type, Union
 
-from fetchai_crypto import FetchAICrypto
-
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
 from aea.components.base import Component
 from aea.configurations.base import SkillConfig
+from aea.configurations.constants import FETCHAI
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.skills.base import Handler, Skill, SkillContext
@@ -70,7 +69,7 @@ class AEATestWrapper:
 
         builder.set_name(name or self.name)
 
-        builder.add_private_key(FetchAICrypto.identifier, private_key_path=None)
+        builder.add_private_key(FETCHAI, private_key_path=None)
 
         for component in components:
             builder.add_component_instance(component)
