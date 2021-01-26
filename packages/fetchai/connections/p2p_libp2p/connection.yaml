@@ -26,7 +26,7 @@ fingerprint:
   dht/dhtnode/streams.go: Qmc2JcyiU4wHsgDj6aUunMAp4c5yMzo2ixeqRZHSW5PVwo
   dht/dhtnode/utils.go: QmcHGWgCXh1mtZCL9S9yQ2qjgKB2AbsYiG5sajrSBjCGuF
   dht/dhtpeer/benchmarks_test.go: QmX2KWsaFaVd9KGjvgYNgkLtgnu1CUhBPtTe9abKYndq4C
-  dht/dhtpeer/dhtpeer.go: QmVHm4ntVX7hPJbVFz4DMfJsbcSds5wSuGAr7PHctzN3Rz
+  dht/dhtpeer/dhtpeer.go: QmT1TiGXJWkS8BQBtLGoDtXPJR85an9RBkwk1KTqF6ctiz
   dht/dhtpeer/dhtpeer_test.go: QmPivQj2vTKnuwn8dgnhnuUKPLrqwADR7EJ7Lkfn4MfxjP
   dht/dhtpeer/options.go: QmRbB1dnA5TEeJZQpKBJQoxFNHSPLRiEtwtkK6ZJDZdjAX
   dht/dhttests/dhttests.go: QmWTwAqXy4xPBWx49dvg91pBfaeyh79bgbh4yYc3u6kGhg
