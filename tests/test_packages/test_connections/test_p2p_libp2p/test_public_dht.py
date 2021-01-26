@@ -59,6 +59,7 @@ PUBLIC_DHT_PUBLIC_KEYS = [PUBLIC_DHT_P2P_PUBLIC_KEY_1, PUBLIC_DHT_P2P_PUBLIC_KEY
 AEA_DEFAULT_LAUNCH_TIMEOUT = 20
 AEA_LIBP2P_LAUNCH_TIMEOUT = 20
 
+
 @pytest.mark.integration
 @libp2p_log_on_failure_all
 class TestLibp2pConnectionPublicDHTRelay:
