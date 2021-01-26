@@ -71,6 +71,7 @@ type Notifee struct {
 	myRelayPeer peer.AddrInfo
 	myHost      host.Host
 	logger      zerolog.Logger
+	closing     chan struct{}
 }
 
 // Listen called when network starts listening on an addr
@@ -84,6 +85,7 @@ func (notifee *Notifee) Connected(network.Network, network.Conn) {}
 
 // Disconnected called when a connection closed
 func (notifee *Notifee) Disconnected(net network.Network, conn network.Conn) {
+
 	pinfo := notifee.myRelayPeer
 	if conn.RemotePeer().Pretty() != pinfo.ID.Pretty() {
 		return
@@ -91,11 +93,23 @@ func (notifee *Notifee) Disconnected(net network.Network, conn network.Conn) {
 
 	notifee.myHost.Peerstore().AddAddrs(pinfo.ID, pinfo.Addrs, peerstore.PermanentAddrTTL)
 	for {
-		notifee.logger.Warn().Msgf("Lost connection to relay peer %s, reconnecting...", pinfo.ID.Pretty())
-		if err := notifee.myHost.Connect(context.Background(), pinfo); err == nil {
+		var err error
+		select {
+		case _, open := <-notifee.closing:
+			if !open {
+				return
+			}
+		default:
+			notifee.logger.Warn().Msgf("Lost connection to relay peer %s, reconnecting...", pinfo.ID.Pretty())
+			if err = notifee.myHost.Connect(context.Background(), pinfo); err == nil {
+				break
+			}
+			time.Sleep(1 * time.Second)
+
+		}
+		if err == nil {
 			break
 		}
-		time.Sleep(1 * time.Second)
 	}
 	notifee.logger.Info().Msgf("Connection to relay peer %s reestablished", pinfo.ID.Pretty())
 }
@@ -244,6 +258,7 @@ func New(opts ...Option) (*DHTClient, error) {
 		myRelayPeer: dhtClient.bootstrapPeers[index],
 		myHost:      dhtClient.routedHost,
 		logger:      dhtClient.logger,
+		closing:     dhtClient.closing,
 	})
 
 	/* setup DHTClient message handlers */
