@@ -21,9 +21,9 @@
 import inspect
 import os
 
-from fetchai_crypto import FetchAICrypto
-
 from aea.configurations.constants import PRIVATE_KEY_PATH_SCHEMA
+
+from fetchai_crypto import FetchAICrypto
 
 
 CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
