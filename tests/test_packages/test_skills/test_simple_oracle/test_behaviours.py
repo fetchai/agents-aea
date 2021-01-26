@@ -50,12 +50,16 @@ class TestSkillBehaviour(BaseSkillTestCase):
 
     def test_add_prometheus_metric(self):
         """Test the send_http_request_message method of the coin_price behaviour."""
-        self.coin_price_behaviour.add_prometheus_metric("some_metric", "Gauge", "some_description", {"label_key": "label_value"}) 
+        self.coin_price_behaviour.add_prometheus_metric(
+            "some_metric", "Gauge", "some_description", {"label_key": "label_value"}
+        )
         self.assert_quantity_in_outbox(1)
 
     def test_update_prometheus_metric(self):
         """Test the test_update_prometheus_metric method of the coin_price behaviour."""
-        self.coin_price_behaviour.update_prometheus_metric("some_metric", "set", 0.0, {"label_key": "label_value"}) 
+        self.coin_price_behaviour.update_prometheus_metric(
+            "some_metric", "set", 0.0, {"label_key": "label_value"}
+        )
         self.assert_quantity_in_outbox(1)
 
     def test_setup(self):

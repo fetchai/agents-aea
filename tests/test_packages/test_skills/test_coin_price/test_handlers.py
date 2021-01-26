@@ -19,28 +19,27 @@
 """This module contains the tests of the handler classes of the simple_data_request skill."""
 
 import logging
-from pathlib import Path
 import sys
+from pathlib import Path
 from typing import cast
 from unittest.mock import patch
 
 import pytest
 
 from aea.protocols.dialogue.base import DialogueMessage
-
 from aea.test_tools.test_skill import BaseSkillTestCase
 
 from packages.fetchai.protocols.http.message import HttpMessage
-from packages.fetchai.skills.coin_price.dialogues import HttpDialogues
-from packages.fetchai.skills.coin_price.handlers import HttpHandler
-
 from packages.fetchai.protocols.prometheus.message import PrometheusMessage
-from packages.fetchai.skills.coin_price.dialogues import PrometheusDialogues
-from packages.fetchai.skills.coin_price.handlers import PrometheusHandler
-
+from packages.fetchai.skills.coin_price.dialogues import (
+    HttpDialogues,
+    PrometheusDialogues,
+)
+from packages.fetchai.skills.coin_price.handlers import HttpHandler, PrometheusHandler
 from packages.fetchai.skills.coin_price.models import CoinPriceModel
 
 from tests.conftest import ROOT_DIR
+
 
 class TestHttpHandler(BaseSkillTestCase):
     """Test http handler of coin_price skill."""
@@ -106,7 +105,6 @@ class TestHttpHandler(BaseSkillTestCase):
         # check that outbox contains update_prometheus metric message
         self.assert_quantity_in_outbox(1)
 
-
     def test_handle_response_invalid_body(self):
         """Test the _handle_response method of the http handler to an unexpected response."""
         # setup
@@ -131,10 +129,8 @@ class TestHttpHandler(BaseSkillTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO,
-            "failed to get price: unexpected result",
+            logging.INFO, "failed to get price: unexpected result",
         )
-
 
     def test_handle_response_no_price(self):
         """Test the _handle_response method of the http handler to a response with no price."""
@@ -160,8 +156,7 @@ class TestHttpHandler(BaseSkillTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO,
-            "failed to get price: no price listed",
+            logging.INFO, "failed to get price: no price listed",
         )
 
     def test_handle_request_get(self):
@@ -212,8 +207,7 @@ class TestHttpHandler(BaseSkillTestCase):
             self.http_handler.handle(incoming_message)
 
         mock_logger.assert_any_call(
-            logging.INFO,
-            "method 'post' is not supported.",
+            logging.INFO, "method 'post' is not supported.",
         )
         # check that outbox is empty
         self.assert_quantity_in_outbox(0)
@@ -242,8 +236,7 @@ class TestHttpHandler(BaseSkillTestCase):
         )
 
         mock_logger.assert_any_call(
-            logging.INFO,
-            "http server is not enabled.",
+            logging.INFO, "http server is not enabled.",
         )
         # check that outbox is empty
         self.assert_quantity_in_outbox(0)
