@@ -7,7 +7,7 @@ description: This skill purchases information from other agents as specified in 
 license: Apache-2.0
 aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
-  README.md: QmPjvWrmttUQdJEF5SnE5a9NUFrtw8pqSAU4S5pqcb9oPs
+  README.md: QmNecTgkCBTBCsNB4B5o3YVwdAC3xozJodg8NiAWMT1zyf
   __init__.py: QmVsnVwM6FZVeuS6A6ZTsPmBpZGGV67H76MXipoCproQXH
   behaviours.py: QmeTbjNHgFJddBcxxz9LoiT8tTaod5hZvptp2etgnP9JRe
   dialogues.py: QmeuRrNPpbvyTAcPwAtEkTfJTDunqyfzPoDhMZWTvCyrJA

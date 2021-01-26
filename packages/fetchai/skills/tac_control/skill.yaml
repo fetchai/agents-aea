@@ -7,7 +7,7 @@ description: The tac control skill implements the logic for an AEA to control an
 license: Apache-2.0
 aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
-  README.md: QmYNWwC2QmdSY72U5ouotSYP14wHNS1kfTtEYeJvibzHph
+  README.md: QmPakq2qYHCenyWKfqQHRLWdF7uo6eG24GTprsBfrkyny2
   __init__.py: QmXMCV741y1s74w5R2ZHTnp6SymEbFvneyYjACrgnCg9nx
   behaviours.py: QmPtGBEFGEdQCzeXC3ZkJuNTrSe217JupP1wtP8DMnm6cK
   dialogues.py: QmR4LnuUkRz3EBzF6eom9dZczsz3xFUFokceZbsdRYMiVh
