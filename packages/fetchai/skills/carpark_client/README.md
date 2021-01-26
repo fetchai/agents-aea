@@ -10,6 +10,7 @@ This skill finds an agent on the sOEF which sells car park availability data in 
 ## Behaviours
 
 * `search`: searches for car park data selling service on the sOEF
+* `transaction`: sequentially processes transactions' settlements on a blockchain
 
 ## Handlers
 
