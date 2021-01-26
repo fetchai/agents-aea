@@ -10,4 +10,4 @@ This skill is used to get the latest coin or token price from an API, which can 
 
 ## Handlers
 
-* `http`: processes incoming HTTP messages, retrieves the coin price from the appropriate response, stores it in shared state under the key: `oracle_data`, and responds to requests meeting the API specification listed in `coin_api_spec.yaml`.
+* `http`: processes incoming HTTP messages, retrieves the coin price from the appropriate response, stores it in shared state under the key: `oracle_data`, and responds to requests satisfying the API specification listed in `coin_api_spec.yaml`.

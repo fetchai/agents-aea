@@ -10,11 +10,13 @@ This skill searches for an agent in a vicinity on the SOEF that sells the data t
 ## Behaviours
 
 * `search`: searches for data selling service on SOEF
+* `transaction`: sequentially processes transactions' settlements on a blockchain
 
 ## Handlers
 
+* `default`: handles `default` messages for registration
 * `fipa`: handles `fipa` messages for negotiation
-* `ledger_api`: handles `ledger_api` messages for payment
+* `ledger_api`: handles `ledger_api` messages for processing transaction settlements
 * `oef_search`: handles `oef_search` messages to manage the sellers it finds
 * `signing`: handles `signing` messages for transaction signing by the decision maker
 

@@ -6,7 +6,7 @@ This skill is used to get the latest value of the Fetch Decentralised Random Bea
 
 ## Behaviours
 
-* `fetch_beacon_behaviour`: requests beacon value every `tick_interval` seconds from REST the endpoint `beacon_url` specified in the skill configuration.
+* `fetch_beacon_behaviour`: requests beacon value every `tick_interval` seconds from the REST endpoint `beacon_url` specified in the skill configuration.
 
 ## Handlers
 

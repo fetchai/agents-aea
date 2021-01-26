@@ -634,7 +634,7 @@ class ERC1155Contract(Contract):
         trade_nonce: int,
     ) -> bytes:
         """
-        Get the hash for a trustless trade between two agents for a single token.
+        Get the hash for a trustless trade between two agents for a batch of tokens.
 
         :param ledger_api: the ledger API
         :param contract_address: the address of the contract

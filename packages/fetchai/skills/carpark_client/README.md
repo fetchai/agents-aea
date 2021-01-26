@@ -9,7 +9,7 @@ This skill finds an agent on the SOEF which sells car park availability data in 
 
 ## Behaviours
 
-* search: searches for data selling service on SOEF
+* `search`: searches for data selling service on SOEF
 
 ## Handlers
 
