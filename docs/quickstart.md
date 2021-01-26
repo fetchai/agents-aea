@@ -53,11 +53,10 @@ chmod +x install.sh
 
 On Windows run:
 
-``` bash
-curl https://raw.githubusercontent.com/fetchai/agents-aea/master/scripts/install.ps1 --output install.ps1
-chmod +x install.ps1
-./install.ps1
-```
+Download `https://raw.githubusercontent.com/fetchai/agents-aea/master/scripts/install.ps1`
+
+Run `install.ps1` with powershell terminal.
+
 
 ### Option 3: Using Docker
 ​
