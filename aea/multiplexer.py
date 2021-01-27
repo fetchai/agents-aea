@@ -80,6 +80,8 @@ class AsyncMultiplexer(Runnable, WithLogger):
         exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
         threaded: bool = False,
         agent_name: str = "standalone",
+        default_routing: Optional[Dict[PublicId, PublicId]] = None,
+        default_connection: Optional[PublicId] = None,
     ):
         """
         Initialize the connection multiplexer.
@@ -95,11 +97,20 @@ class AsyncMultiplexer(Runnable, WithLogger):
         logger = get_logger(__name__, agent_name)
         WithLogger.__init__(self, logger=logger)
         Runnable.__init__(self, loop=loop, threaded=threaded)
+
+        connections = connections or []
         self._connections: List[Connection] = []
         self._id_to_connection: Dict[PublicId, Connection] = {}
         self._default_connection: Optional[Connection] = None
-        self._initialize_connections_if_any(connections, default_connection_index)
 
+        if not default_connection and connections:
+            enforce(
+                len(connections) - 1 >= default_connection_index,
+                "default_connection_index os out of connections range!",
+            )
+            default_connection = connections[default_connection_index].connection_id
+
+        self._setup(connections or [], default_routing, default_connection)
         self._connection_status = MultiplexerStatus()
 
         self._in_queue = AsyncFriendlyQueue()  # type: AsyncFriendlyQueue
@@ -139,17 +150,6 @@ class AsyncMultiplexer(Runnable, WithLogger):
         """
         self._loop = loop
         self._lock = asyncio.Lock(loop=self._loop)
-
-    def _initialize_connections_if_any(
-        self, connections: Optional[Sequence[Connection]], default_connection_index: int
-    ):
-        if connections is not None and len(connections) > 0:
-            enforce(
-                (0 <= default_connection_index <= len(connections) - 1),
-                "Default connection index out of range.",
-            )
-            for idx, connection in enumerate(connections):
-                self.add_connection(connection, idx == default_connection_index)
 
     def _handle_exception(self, fn: Callable, exc: Exception) -> None:
         """
@@ -597,7 +597,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
         else:
             self.out_queue.put_nowait(envelope)
 
-    def setup(
+    def _setup(
         self,
         connections: Collection[Connection],
         default_routing: Optional[Dict[PublicId, PublicId]] = None,

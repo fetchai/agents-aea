@@ -21,7 +21,6 @@ import datetime
 from abc import ABC, abstractmethod, abstractproperty
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
-from aea.connections.base import Connection
 from aea.mail.base import Envelope
 
 
@@ -90,18 +89,6 @@ class AbstractAgent(ABC):
 
         :return: List of tuples of callables: handler and coroutine to get a message
         """
-
-    @abstractmethod
-    def get_multiplexer_setup_options(self) -> Optional[Dict]:
-        """
-        Get options to pass to Multiplexer.setup.
-
-        :return: dict of kwargs
-        """
-
-    @abstractproperty
-    def active_connections(self) -> List[Connection]:
-        """Return list of active connections."""
 
     @abstractproperty
     def storage_uri(self) -> Optional[str]:

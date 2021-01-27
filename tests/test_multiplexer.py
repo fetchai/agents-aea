@@ -647,7 +647,7 @@ def test_multiplexer_setup():
     multiplexer = Multiplexer([])
     with pytest.raises(AEAEnforceError):
         multiplexer._connection_consistency_checks()
-    multiplexer.setup(connections, default_routing=None)
+    multiplexer._setup(connections, default_routing=None)
     multiplexer._connection_consistency_checks()
 
 
@@ -853,6 +853,6 @@ def test_multiplexer_setup_replaces_connections():
     assert len(m._id_to_connection) == 3
     assert len(m._connections) == 3
 
-    m.setup([MagicMock()], MagicMock())
+    m._setup([MagicMock()], MagicMock())
     assert len(m._id_to_connection) == 1
     assert len(m._connections) == 1

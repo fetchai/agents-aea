@@ -25,7 +25,6 @@ from logging import Logger
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
 from aea.abstract_agent import AbstractAgent
-from aea.configurations.constants import CONNECTIONS
 from aea.connections.base import Connection
 from aea.exceptions import AEAException
 from aea.helpers.logging import WithLogger
@@ -46,6 +45,10 @@ class Agent(AbstractAgent, WithLogger):
         "threaded": ThreadedRuntime,
     }
     DEFAULT_RUNTIME: str = "threaded"
+
+    _runtime: BaseRuntime
+    _inbox: InBox
+    _outbox: OutBox
 
     def __init__(
         self,
@@ -72,18 +75,34 @@ class Agent(AbstractAgent, WithLogger):
         :return: None
         """
         WithLogger.__init__(self, logger=logger)
-        self._connections = connections
         self._identity = identity
         self._period = period
         self._tick = 0
         self._runtime_mode = runtime_mode or self.DEFAULT_RUNTIME
         self._storage_uri = storage_uri
 
-        runtime_cls = self._get_runtime_class()
-        self._runtime: BaseRuntime = runtime_cls(
-            agent=self, loop_mode=loop_mode, loop=loop
+        runtime_class = self._get_runtime_class()
+
+        self._set_runtime_and_inboxes(
+            runtime_class=runtime_class,
+            loop_mode=loop_mode,
+            loop=loop,
+            multiplexer_options={"connections": connections},
         )
 
+    def _set_runtime_and_inboxes(
+        self,
+        runtime_class: Type[BaseRuntime],
+        multiplexer_options: Dict,
+        loop_mode: Optional[str] = None,
+        loop: Optional[AbstractEventLoop] = None,
+    ):
+        self._runtime = runtime_class(
+            agent=self,
+            loop_mode=loop_mode,
+            loop=loop,
+            multiplexer_options=multiplexer_options,
+        )
         self._inbox = InBox(self.runtime.multiplexer)
         self._outbox = OutBox(self.runtime.multiplexer)
 
@@ -91,11 +110,6 @@ class Agent(AbstractAgent, WithLogger):
     def storage_uri(self) -> Optional[str]:
         """Return storage uri."""
         return self._storage_uri
-
-    @property
-    def active_connections(self) -> List[Connection]:
-        """Return list of active connections."""
-        return self._connections
 
     @property
     def is_running(self) -> bool:
@@ -114,14 +128,6 @@ class Agent(AbstractAgent, WithLogger):
                 f"Runtime `{self._runtime_mode} is not supported. valid are: `{list(self.RUNTIMES.keys())}`"
             )
         return self.RUNTIMES[self._runtime_mode]
-
-    def get_multiplexer_setup_options(self) -> Optional[Dict]:
-        """
-        Get options to pass to Multiplexer.setup.
-
-        :return: dict of kwargs
-        """
-        return {CONNECTIONS: self.active_connections}
 
     @property
     def identity(self) -> Identity:
