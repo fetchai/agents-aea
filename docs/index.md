@@ -57,7 +57,7 @@ If you would run a demo, check out the <a href="demos">demo guides</a>.
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>
-  <p>This developer documentation is a work in progress. If you spot any errors please open an issue on <a href="https://github.com/fetchai/agents-aea" target="_blank">Github</a> or contact us in the <a href="https://fetch-ai.slack.com" target="_blank">developer Slack channel</a>.</p>
+  <p>This developer documentation is a work in progress. If you spot any errors please open an issue on <a href="https://github.com/fetchai/agents-aea" target="_blank">Github</a> or contact us in the <<a href="https://discord.com/invite/btedfjPJTj" target="_blank">developer Discord channel</a>.</p>
 </div>
 
 <br />
