@@ -1,12 +1,12 @@
-This guide will take you through the development of your first skill. It will teach you, how to connect the agent to the digital world, register the agent and search for other agents.
+This guide will take you through the development of your first skill. It will teach you, how to connect the AEA to the digital world, register the AEA and search for other AEAs.
 
-Autonomous Economic Agents are not, generally secret agents. You want them to be seen and found by other agents so that they can trade and do other useful things. Usually, this means connecting to Fetch.ai’s search-and-discovery mechanism, the <a href="../simple-oef">simple OEF</a> (or SOEF, for short). The SOEF lets your agents register, be found, and find other agents. You can then negotiate using the AEA framework’s peer-to-peer network (ACN) and trade. This guide covers getting your agent connected to the SOEF, and describing your agent to make itself visible.
+AEAs are not, generally secret agents. You want them to be seen and found by other agents so that they can trade and do other useful things. Usually, this means connecting to Fetch.ai’s search-and-discovery mechanism, the <a href="../simple-oef">simple OEF</a> (or SOEF, for short). The SOEF lets your agents register, be found, and find other agents. You can then negotiate using the AEA framework’s <a href="../acn">peer-to-peer network (ACN)</a> and trade. This guide covers getting your AEA connected to the SOEF, and describing your AEA to make itself visible.
 
 Typically, this means setting a name, a genus (a high-level description of what the agent represents, e.g., `vehicle`, `building` or `service`), a classification (`infrastructure.railway.train`, for example) and then a bunch of other descriptors, where applicable, that provide the agent's position, whether it buys or sells, and other descriptive items.
 
-The more you describe your agent, the easier it is for others to find it using specific filters.
+The more you describe your AEA, the easier it is for others to find it using specific filters.
 
-### Dependencies
+## Dependencies (Required)
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
@@ -416,7 +416,7 @@ aea add protocol fetchai/oef_search:0.12.0
 
 This adds the protocol to our AEA and makes it available on the path `packages.fetchai.protocols...`.
 
-We also need to add the soef and P2P connections and install the AEA's dependencies as well as configure the AEA:
+We also need to add the SOEF and P2P connections and install the AEA's dependencies as well as configure the AEA:
 ``` bash
 aea add connection fetchai/soef:0.15.0
 aea add connection fetchai/p2p_libp2p:0.14.0

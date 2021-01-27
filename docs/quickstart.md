@@ -51,11 +51,9 @@ chmod +x install.sh
 ./install.sh
 ```
 
-On Windows run:
+On Windows:
 
-Download `https://raw.githubusercontent.com/fetchai/agents-aea/master/scripts/install.ps1`
-
-Run `install.ps1` with powershell terminal.
+Download `https://raw.githubusercontent.com/fetchai/agents-aea/master/scripts/install.ps1`, then run `install.ps1` with the PowerShell terminal.
 
 
 ### Option 3: Using Docker
@@ -203,13 +201,11 @@ This copies the `fetchai/echo:0.13.0` skill code containing the "behaviours", an
 
 ## Communication via envelopes and messages
 
-AEAs use envelopes containing messages for communication. To learn more check out the next section in the getting started series.
+AEAs use envelopes containing messages for communication. To learn more check out the <a href="../core-components-1/">next section</a> in the getting started series.
 
 ## Usage of the stub connection
 
-In this demo we use a stub connection to send envelopes to and receive envelopes from the AEA.
-
-The stub connection is already added to the AEA by default.
+In this demo we use a stub connection (`fetchai/stub0.15.0`) to send envelopes to and receive envelopes from the AEA.
 
 A stub connection provides an I/O reader and writer. It uses two files for communication: one for incoming envelopes and the other for outgoing envelopes.
 
@@ -327,6 +323,7 @@ We can write an end-to-end test for the AEA utilising helper classes provided by
 The following test class replicates the preceding demo and tests it's correct behaviour. The `AEATestCase` classes are a tool for AEA developers to write useful end-to-end tests of their AEAs.
 
 First, get the packages directory from the AEA repository (execute from the working directory which contains the `my_first_aea` folder):
+
 ``` bash
 svn export https://github.com/fetchai/agents-aea.git/trunk/packages
 ```
@@ -427,7 +424,7 @@ aea delete my_first_aea
 
 To gain an understanding of the core components of the framework, please continue to the next step of 'Getting Started':
 
-- <a href="../core-components-1/">Core components</a>
+- <a href="../core-components-1/">Core components - Part 1</a>
 
 For more demos, use cases or step by step guides, please check the following:
 

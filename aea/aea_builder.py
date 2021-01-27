@@ -808,7 +808,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         Notice also that this will make the call to 'build()' non re-entrant.
         You will have to `reset()` the builder before calling `build()` again.
 
-        :params component: Component instance already initialized.
+        :param component: Component instance already initialized.
         """
         self._to_reset = True
         self._check_can_add(component.configuration)
@@ -1438,8 +1438,8 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         """
         Set builder variables from AgentConfig.
 
-        :params agent_configuration: AgentConfig to get values from.
-        :params aea_project_path: PathLike root directory of the agent project.
+        :param agent_configuration: AgentConfig to get values from.
+        :param aea_project_path: PathLike root directory of the agent project.
         :param skip_consistency_check: if True, the consistency check are skipped.
 
         :return: None
