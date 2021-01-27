@@ -269,7 +269,7 @@ We place this code in `my_aea/skills/my_search/handlers.py`. Ensure you replace 
 
 ## Step 4: Add dialogues model
 
-We have implemented a behaviour and a handler. We now implement a <a href="../api/skills/base#model-objects">`Model`</a>, in particular we implement the <a href="../api/protocols/dialogue/base#dialogue-objects">`Dialogue`</a> and <a href="../api/protocols/dialogue/base#dialogues-objects">`Dialogues`</a> classes.
+We have implemented a behaviour and a handler. We now implement a <a href="../api/skills/base#model-objects">`Model`</a>, in particular we implement the <a href="../api/protocols/dialogue/base#dialogue-objects">`Dialogue`</a> and <a href="../api/protocols/dialogue/base#dialogues-objects">`Dialogues`</a> classes. These ensure that the message flow satisfies the `fetchai/oef_search:0.12.0` protocol and keep track of the individual messages being sent and received.
 
 ``` python
 from aea.protocols.base import Message
@@ -464,7 +464,7 @@ aea run
 
 Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.14.0 -u public_uri` to retrieve the address.) This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the `simple_service_registration` AEA.
 
-<details><summary>Click here to see full code</summary>
+<details><summary>Click here to see full code and guide for this AEA</summary>
 <p>
 
 We use a <a href="../api/skills/behaviours#tickerbehaviour-objects">`TickerBehaviour`</a> to update the service registration at regular intervals. The following code is placed in `behaviours.py`.
@@ -604,7 +604,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         self.context.logger.info("unregistering agent from SOEF.")
 ```
 
-We create a <a href="../api/skills/base#model-objects">`Model`</a> type strategy class and place it in `strategy.py`. We use a generic data model to register the service.
+We create a <a href="../api/skills/base#model-objects">`Model`</a> type strategy class and place it in `strategy.py`. We use a generic data model to register the service. As part of the registration we register a location and a key pair describing our service.
 
 ``` python
 from aea.helpers.search.generic import (
@@ -675,7 +675,7 @@ class Strategy(Model):
         return description
 ```
 
-We create a <a href="../api/skills/base#model-objects">`Model`</a> type dialogue class and place it in `dialogues.py`.
+We create a <a href="../api/skills/base#model-objects">`Model`</a> type dialogue class and place it in `dialogues.py`. These classes ensure that the message flow satisfies the `fetchai/oef_search:0.12.0` protocol and keep track of the individual messages being sent and received.
 
 ``` python
 from aea.protocols.base import Message
@@ -725,7 +725,7 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
 
 ```
 
-Finally, we have a handler, placed in `handlers.py`:
+Finally, we have a handler, placed in `handlers.py`. The handler deals with handling any error messages which might occur during service registration:
 
 ``` python
 from typing import Optional, cast
