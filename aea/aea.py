@@ -44,7 +44,7 @@ from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler
 from aea.error_handler.base import AbstractErrorHandler
 from aea.error_handler.default import ErrorHandler as DefaultErrorHandler
-from aea.exceptions import AEAException, _StopRuntime
+from aea.exceptions import AEAException, _StopRuntime, enforce
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import AgentLoggerAdapter, get_logger
 from aea.identity.base import Identity
@@ -135,6 +135,11 @@ class AEA(Agent):
             logger=cast(Logger, aea_logger),
         )
 
+        enforce(
+            bool(self.resources.get_all_connections()),
+            "Resource connections list is empty, please add at least one connection!",
+        )
+
         default_routing = default_routing if default_routing is not None else {}
         connection_ids = connection_ids or []
         connections = [
@@ -142,6 +147,11 @@ class AEA(Agent):
             for c in self.resources.get_all_connections()
             if (not connection_ids) or (c.connection_id in connection_ids)
         ]
+        enforce(
+            bool(connections),
+            "Please check connection_ids and resources.connections! No connection left after filtering!",
+        )
+
         self._set_runtime_and_inboxes(
             runtime_class=self._get_runtime_class(),
             loop_mode=loop_mode,

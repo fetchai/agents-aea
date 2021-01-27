@@ -98,11 +98,11 @@ class AsyncMultiplexer(Runnable, WithLogger):
         WithLogger.__init__(self, logger=logger)
         Runnable.__init__(self, loop=loop, threaded=threaded)
 
-        connections = connections or []
         self._connections: List[Connection] = []
         self._id_to_connection: Dict[PublicId, Connection] = {}
         self._default_connection: Optional[Connection] = None
 
+        connections = connections or []
         if not default_connection and connections:
             enforce(
                 len(connections) - 1 >= default_connection_index,
@@ -110,7 +110,14 @@ class AsyncMultiplexer(Runnable, WithLogger):
             )
             default_connection = connections[default_connection_index].connection_id
 
+        if default_connection:
+            enforce(
+                default_connection in [i.connection_id for i in connections],
+                f"Default connection {default_connection} does not present in connections list!",
+            )
+
         self._setup(connections or [], default_routing, default_connection)
+
         self._connection_status = MultiplexerStatus()
 
         self._in_queue = AsyncFriendlyQueue()  # type: AsyncFriendlyQueue
