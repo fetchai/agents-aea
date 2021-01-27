@@ -1,5 +1,5 @@
 If you want to create Autonomous Economic Agents (AEAs) that can act independently of constant user input and autonomously execute actions to achieve their objective,
-you can use the Fetch.ai AEA framework.
+you can use the AEA framework.
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/mwkAUh-_uxA" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
@@ -39,8 +39,26 @@ sudo apt-get install python3.7-dev
 
 - Windows users: install <a href="https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019" target="_blank">tools for Visual Studio</a>.
 
+### Option 2: Automated install script
 
-### Option 2: Using Docker
+We provide a script to automatically install all framework dependencies and the framework itself.
+
+On MacOS or Ubuntu run:
+
+``` bash
+curl https://raw.githubusercontent.com/fetchai/agents-aea/master/scripts/install.sh --output install.sh
+chmod +x install.sh
+./install.sh
+```
+
+On Windows run:
+
+Download `https://raw.githubusercontent.com/fetchai/agents-aea/master/scripts/install.ps1`
+
+Run `install.ps1` with powershell terminal.
+
+
+### Option 3: Using Docker
 ​
 We also provide a Docker image with all the needed dependencies.
 

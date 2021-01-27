@@ -4,40 +4,40 @@ package aea.fetchai.ml_trade;
 
 message MlTradeMessage{
 
-    // Custom Types
-    message Description{
-        bytes description_bytes = 1;
-    }
+  // Custom Types
+  message Description{
+    bytes description_bytes = 1;
+  }
 
-    message Query{
-        bytes query_bytes = 1;
-    }
-
-
-    // Performatives and contents
-    message Cfp_Performative{
-        Query query = 1;
-    }
-
-    message Terms_Performative{
-        Description terms = 1;
-    }
-
-    message Accept_Performative{
-        Description terms = 1;
-        string tx_digest = 2;
-    }
-
-    message Data_Performative{
-        Description terms = 1;
-        bytes payload = 2;
-    }
+  message Query{
+    bytes query_bytes = 1;
+  }
 
 
-    oneof performative{
-        Accept_Performative accept = 5;
-        Cfp_Performative cfp = 6;
-        Data_Performative data = 7;
-        Terms_Performative terms = 8;
-    }
+  // Performatives and contents
+  message Cfp_Performative{
+    Query query = 1;
+  }
+
+  message Terms_Performative{
+    Description terms = 1;
+  }
+
+  message Accept_Performative{
+    Description terms = 1;
+    string tx_digest = 2;
+  }
+
+  message Data_Performative{
+    Description terms = 1;
+    bytes payload = 2;
+  }
+
+
+  oneof performative{
+    Accept_Performative accept = 5;
+    Cfp_Performative cfp = 6;
+    Data_Performative data = 7;
+    Terms_Performative terms = 8;
+  }
 }

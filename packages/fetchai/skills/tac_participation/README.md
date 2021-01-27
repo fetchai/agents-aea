@@ -4,7 +4,7 @@
 
 This is the skill for participating in a TAC.
 
-This skill is part of the Fetch.ai TAC demo. It searches for a TAC on the SOEF, and if found, participates in the TAC by communicating with the controller agent.
+This skill is part of the Fetch.ai TAC demo. It searches for a TAC on the sOEF, and if found, participates in the TAC by communicating with the controller agent.
 
 ## Behaviours
 

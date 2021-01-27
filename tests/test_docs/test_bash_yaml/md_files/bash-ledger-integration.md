@@ -16,15 +16,15 @@ cd fetchd
 git checkout release/v0.2.x
 make install
 
-# Check if wasmcli is properly installed
-wasmcli version
+# Check if fetchcli is properly installed
+fetchcli version
 # Version should be >=0.2.5
 ```
 ``` bash
-wasmcli config chain-id agent-land
-wasmcli config trust-node false
-wasmcli config node https://rpc-agent-land.fetch.ai:443
-wasmcli config output json
-wasmcli config indent true
-wasmcli config broadcast-mode block
+fetchcli config chain-id agent-land
+fetchcli config trust-node false
+fetchcli config node https://rpc-agent-land.fetch.ai:443
+fetchcli config output json
+fetchcli config indent true
+fetchcli config broadcast-mode block
 ```

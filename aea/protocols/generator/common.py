@@ -364,7 +364,7 @@ def _create_protocol_file(
     """
     pathname = os.path.join(path_to_protocol_package, file_name)
 
-    with open(pathname, "w") as file:
+    with open(pathname, "w", newline="\n") as file:
         file.write(file_content)
 
 
