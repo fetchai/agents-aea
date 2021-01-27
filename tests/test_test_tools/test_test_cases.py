@@ -38,6 +38,7 @@ from packages.fetchai.protocols.default.dialogues import (
 )
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
+from packages.fetchai.skills.error import PUBLIC_ID as ERROR_SKILL_PUBLIC_ID
 
 from tests.conftest import FETCHAI, MY_FIRST_AEA_PUBLIC_ID
 from tests.test_cli import test_generate_wealth, test_interact
@@ -49,6 +50,12 @@ TestInteractCommand = test_interact.TestInteractCommand
 
 class TestConfigCases(AEATestCaseEmpty):
     """Test config set/get."""
+
+    @classmethod
+    def setup_class(cls):
+        """Setup class."""
+        super(TestConfigCases, cls).setup_class()
+        cls.add_item("skill", str(ERROR_SKILL_PUBLIC_ID))
 
     def test_agent_nested_set_agent_crudcollection(self):
         """Test agent test nested set from path."""

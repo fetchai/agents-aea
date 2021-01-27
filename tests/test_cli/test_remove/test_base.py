@@ -34,11 +34,7 @@ from aea.configurations.base import (
     PackageType,
     PublicId,
 )
-from aea.configurations.constants import (
-    DEFAULT_CONNECTION,
-    DEFAULT_PROTOCOL,
-    DEFAULT_SKILL,
-)
+from aea.configurations.constants import DEFAULT_CONNECTION, DEFAULT_PROTOCOL
 from aea.configurations.loader import ConfigLoader
 from aea.helpers.base import cd
 from aea.test_tools.test_cases import AEATestCaseEmpty
@@ -92,7 +88,6 @@ class TestRemovePackageWithLatestVersion(AEATestCaseEmpty):
             ("protocol", PublicId.from_str(DEFAULT_PROTOCOL)),
             ("connection", PublicId.from_str(DEFAULT_CONNECTION)),
             ("contract", PublicId("fetchai", "erc1155").to_latest()),
-            ("skill", PublicId.from_str(DEFAULT_SKILL)),
         ],
     )
     def test_remove_pacakge_latest_version(self, type_, public_id):

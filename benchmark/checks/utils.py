@@ -37,7 +37,6 @@ from aea.configurations.base import ConnectionConfig, PublicId, SkillConfig
 from aea.configurations.constants import (
     DEFAULT_LEDGER,
     DEFAULT_PROTOCOL,
-    DEFAULT_SKILL,
     FETCHAI,
     PACKAGES,
     PROTOCOLS,
@@ -54,6 +53,7 @@ from aea.skills.base import Skill, SkillContext
 from packages.fetchai.protocols.default.message import DefaultMessage
 
 
+ERROR_SKILL_NAME = "error"
 ROOT_DIR = os.path.join(os.path.dirname(inspect.getfile(inspect.currentframe())))  # type: ignore
 PACKAGES_DIR = Path(AEA_DIR, "..", PACKAGES)
 
@@ -79,9 +79,7 @@ def make_agent(agent_name="my_agent", runtime_mode="threaded") -> AEA:
 
     resources.add_skill(
         Skill.from_dir(
-            str(
-                PACKAGES_DIR / FETCHAI / SKILLS / PublicId.from_str(DEFAULT_SKILL).name
-            ),
+            str(PACKAGES_DIR / FETCHAI / SKILLS / ERROR_SKILL_NAME),
             agent_context=agent_context,
         )
     )
