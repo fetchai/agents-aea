@@ -453,5 +453,5 @@ def test_envelope_specification_id_translated():
     )
 
     new_envelope = Envelope.decode(envelope_bytes)
-    assert new_envelope.protocol_id == envelope.protocol_id
-    assert new_envelope.protocol_id != protocol_specification_id
+    assert new_envelope.protocol_specification_id == envelope.protocol_specification_id
+    assert new_envelope.protocol_id == protocol_specification_id

@@ -349,6 +349,11 @@ class Protocol(Component):
         )
 
     @property
+    def protocol_specification_id(self) -> PublicId:
+        """Get protocol specification id."""
+        return cast(ProtocolConfig, self._configuration).protocol_specification_id
+
+    @property
     def serializer(self) -> Type[Serializer]:
         """Get the serializer."""
         return self._message_class.serializer
@@ -434,16 +439,3 @@ class ProtocolSpecificationsRegistry:
         :return: PublicId if protocol registered otherwise None
         """
         return cls.PROTOCOL_TO_SPECIFICATION.get(protocol_id, None)
-
-    @classmethod
-    def get_protocol_id_by_specification_id(
-        cls, protocol_specification_id: PublicId
-    ) -> Optional[PublicId]:
-        """Get protocol id by the specification id.
-
-        :param protocol_specification_id: PublicId
-
-        :return: PublicId if protocol registered otherwise None
-        """
-
-        return cls.SPECIFICATION_TO_PROTOCOL.get(protocol_specification_id, None)

@@ -129,6 +129,15 @@ class Resources:
         protocols = self._component_registry.fetch_by_type(ComponentType.PROTOCOL)
         return cast(List[Protocol], protocols)
 
+    def get_protocol_for_specification_id(
+        self, protocol_specification_id: PublicId
+    ) -> Optional[Protocol]:
+        """Get protocol by protocol specification id."""
+        for protocol in self.get_all_protocols():
+            if protocol.protocol_specification_id == protocol_specification_id:
+                return protocol
+        return None
+
     def remove_protocol(self, protocol_id: PublicId) -> None:
         """
         Remove a protocol from the set of resources.

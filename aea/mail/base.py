@@ -334,26 +334,6 @@ class Envelope:
             or protocol_id
         )
 
-    @staticmethod
-    def _get_protocol_id_by_protocol_specification_id(
-        protocol_specification_id: PublicId,
-    ) -> PublicId:
-        """
-        Get protocol id from specification id.
-
-        If not protocol was registered with given specification id, returns protocol_id itself.
-
-        :param protocol_specification_id: PublicId
-
-        :return: PublicId
-        """
-        return (
-            ProtocolSpecificationsRegistry.get_protocol_id_by_specification_id(
-                protocol_specification_id
-            )
-            or protocol_specification_id
-        )
-
     def __init__(
         self,
         to: Address,
@@ -405,10 +385,14 @@ class Envelope:
                 f"Message type: {type(message)} is not supported!"
             )  # pragma: nocover
 
+        enforce(
+            bool(protocol_id) or bool(protocol_specification_id),
+            "protocol_id or protocol_specification_if",
+        )
+
         if not protocol_id:
-            protocol_id = self._get_protocol_id_by_protocol_specification_id(
-                cast(PublicId, protocol_specification_id)
-            )
+            protocol_id = cast(PublicId, protocol_specification_id)
+
         if not protocol_specification_id:
             # if no protocol_spcification_id, try to resolve by protocol_id
             protocol_specification_id = self._get_protocol_specification_id_by_the_protocol_id(
