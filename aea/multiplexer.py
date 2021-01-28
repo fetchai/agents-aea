@@ -112,9 +112,16 @@ class AsyncMultiplexer(Runnable, WithLogger):
 
         if default_connection:
             enforce(
-                default_connection in [i.connection_id for i in connections],
+                bool(
+                    [
+                        i.connection_id.same_prefix(default_connection)
+                        for i in connections
+                    ]
+                ),
                 f"Default connection {default_connection} does not present in connections list!",
             )
+
+        self._default_routing = {}  # type: Dict[PublicId, PublicId]
 
         self._setup(connections or [], default_routing, default_connection)
 
@@ -125,7 +132,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
 
         self._recv_loop_task = None  # type: Optional[asyncio.Task]
         self._send_loop_task = None  # type: Optional[asyncio.Task]
-        self._default_routing = {}  # type: Dict[PublicId, PublicId]
+
         self._loop: asyncio.AbstractEventLoop = loop if loop is not None else asyncio.new_event_loop()
         self._lock: asyncio.Lock = asyncio.Lock(loop=self._loop)
         self.set_loop(self._loop)

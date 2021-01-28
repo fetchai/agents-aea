@@ -131,6 +131,8 @@ class BaseRuntime(Runnable, WithLogger):
             exception_policy=multiplexer_options.get(
                 "connection_exception_policy", ExceptionPolicyEnum.propagate
             ),
+            default_routing=multiplexer_options.get("default_routing"),
+            default_connection=multiplexer_options.get("default_connection"),
         )
 
     def _get_main_loop_class(self, loop_mode: str) -> Type[BaseAgentLoop]:
@@ -349,5 +351,12 @@ class ThreadedRuntime(AsyncRuntime):
     def _get_multiplexer_instance(self, multiplexer_options: Dict) -> AsyncMultiplexer:
         """Create multiplexer instance."""
         return AsyncMultiplexer(
-            connections=multiplexer_options["connections"], threaded=True
+            connections=multiplexer_options["connections"],
+            threaded=True,
+            agent_name=self._agent.name,
+            exception_policy=multiplexer_options.get(
+                "connection_exception_policy", ExceptionPolicyEnum.propagate
+            ),
+            default_routing=multiplexer_options.get("default_routing"),
+            default_connection=multiplexer_options.get("default_connection"),
         )
