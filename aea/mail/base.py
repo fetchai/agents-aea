@@ -20,7 +20,7 @@
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Optional, Tuple, Union, cast
+from typing import Optional, Tuple, Union
 from urllib.parse import urlparse
 
 from aea.common import Address
@@ -317,7 +317,7 @@ class Envelope:
     @staticmethod
     def _get_protocol_specification_id_by_the_protocol_id(
         protocol_id: PublicId,
-    ) -> PublicId:
+    ) -> Optional[PublicId]:
         """
         Get protocol specification id  from protocol id.
 
@@ -327,31 +327,8 @@ class Envelope:
 
         :return: PublicId
         """
-        return (
-            ProtocolSpecificationsRegistry.get_specification_id_by_protocol_id(
-                protocol_id
-            )
-            or protocol_id
-        )
-
-    @staticmethod
-    def _get_protocol_id_by_protocol_specification_id(
-        protocol_specification_id: PublicId,
-    ) -> PublicId:
-        """
-        Get protocol id from specification id.
-
-        If not protocol was registered with given specification id, returns protocol_id itself.
-
-        :param protocol_specification_id: PublicId
-
-        :return: PublicId
-        """
-        return (
-            ProtocolSpecificationsRegistry.get_protocol_id_by_specification_id(
-                protocol_specification_id
-            )
-            or protocol_specification_id
+        return ProtocolSpecificationsRegistry.get_specification_id_by_protocol_id(
+            protocol_id
         )
 
     def __init__(
@@ -392,38 +369,42 @@ class Envelope:
                 bool(protocol_id) or bool(protocol_specification_id),
                 "Message is bytes object, protocol_id or protocol_specification_id must be provided!",
             )
+            if protocol_id is not None and protocol_specification_id is not None:
+                protocol_specification_id_ = self._get_protocol_specification_id_by_the_protocol_id(
+                    protocol_id
+                )
+                enforce(
+                    protocol_specification_id == protocol_specification_id_,
+                    "Protocol specification id mismatch.",
+                )
+            elif protocol_id is not None:
+                protocol_specification_id = self._get_protocol_specification_id_by_the_protocol_id(
+                    protocol_id
+                )
         elif isinstance(message, Message):
-            # protocol_id provided as an argument in priority
-            # use Message.protocol_id only if no protocol_id provided
             if message.protocol_id is None:
                 raise ValueError(  # pragma: nocover
                     f"message class {type(message)} has no protocol_id specified!"
                 )
+            if protocol_id is not None:
+                enforce(
+                    protocol_id == message.protocol_id, "Inconsistent args provided."
+                )
             protocol_id = message.protocol_id
+            protocol_specification_id = self._get_protocol_specification_id_by_the_protocol_id(
+                protocol_id
+            )
         else:
             raise ValueError(
                 f"Message type: {type(message)} is not supported!"
             )  # pragma: nocover
 
-        if not protocol_id:
-            protocol_id = self._get_protocol_id_by_protocol_specification_id(
-                cast(PublicId, protocol_specification_id)
-            )
-        if not protocol_specification_id:
-            # if no protocol_spcification_id, try to resolve by protocol_id
-            protocol_specification_id = self._get_protocol_specification_id_by_the_protocol_id(
-                protocol_id
+        if protocol_specification_id is None:
+            raise ValueError(
+                "protocol_specification_id was not specified or auto resolved"
             )
 
-        enforce(
-            protocol_id is not None, "protocol_id was not specified or auto resolved"
-        )
-        enforce(
-            protocol_specification_id is not None,
-            "protocol_specification_id was not specified or auto resolved",
-        )
-
-        self._protocol_id: PublicId = protocol_id
+        self._protocol_id: Optional[PublicId] = protocol_id
         self._protocol_specification_id: PublicId = protocol_specification_id
         self._message = message
         self._context = context if context is not None else EnvelopeContext()
@@ -455,14 +436,19 @@ class Envelope:
     @property
     def protocol_id(self) -> PublicId:
         """Get protocol id."""
+        if self._protocol_id is None:
+            raise ValueError("No protocol_id set on envelope.")
         return self._protocol_id
 
     @protocol_id.setter
     def protocol_id(self, protocol_id: PublicId) -> None:
         """Set the protocol id."""
-        self._protocol_specification_id = self._get_protocol_specification_id_by_the_protocol_id(
+        protocol_specification_id_ = self._get_protocol_specification_id_by_the_protocol_id(
             protocol_id
         )
+        if protocol_specification_id_ is None:
+            raise ValueError("Non-resolvable protocol.")
+        self._protocol_specification_id = protocol_specification_id_
         self._protocol_id = protocol_id
 
     @property

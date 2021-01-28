@@ -19,7 +19,7 @@
 
 """This module contains the resources class."""
 from contextlib import suppress
-from typing import List, Optional, cast
+from typing import Dict, List, Optional, cast
 
 from aea.components.base import Component
 from aea.configurations.base import ComponentId, ComponentType, PublicId
@@ -46,6 +46,7 @@ class Resources:
         """
         self._agent_name = agent_name
         self._component_registry = AgentComponentRegistry(agent_name=agent_name)
+        self._specification_to_protocol_id: Dict[PublicId, PublicId] = {}
         self._handler_registry = HandlerRegistry(agent_name=agent_name)
         self._behaviour_registry = ComponentRegistry[Behaviour](agent_name=agent_name)
         self._model_registry = ComponentRegistry[Model](agent_name=agent_name)
@@ -107,18 +108,26 @@ class Resources:
         :return: None
         """
         self._component_registry.register(protocol.component_id, protocol)
+        self._specification_to_protocol_id[
+            protocol.specification_id
+        ] = protocol.public_id
 
-    def get_protocol(self, protocol_id: PublicId) -> Optional[Protocol]:
+    def get_protocol(self, protocol_specification_id: PublicId) -> Optional[Protocol]:
         """
-        Get protocol for given protocol id.
+        Get protocol for given protocol_specification_id.
 
-        :param protocol_id: the protocol id
+        :param protocol_specification_id: the protocol id
         :return: a matching protocol, if present, else None
         """
+        protocol_id = self._specification_to_protocol_id.get(
+            protocol_specification_id, None
+        )
+        if protocol_id is None:
+            return None
         protocol = self._component_registry.fetch(
             ComponentId(ComponentType.PROTOCOL, protocol_id)
         )
-        return cast(Protocol, protocol)
+        return cast(Optional[Protocol], protocol)
 
     def get_all_protocols(self) -> List[Protocol]:
         """
@@ -136,9 +145,14 @@ class Resources:
         :param protocol_id: the protocol id for the protocol to be removed.
         :return: None
         """
-        self._component_registry.unregister(
-            ComponentId(ComponentType.PROTOCOL, protocol_id)
+        protocol = cast(
+            Optional[Protocol],
+            self._component_registry.unregister(
+                ComponentId(ComponentType.PROTOCOL, protocol_id)
+            ),
         )
+        if protocol is not None:
+            self._specification_to_protocol_id.pop(protocol.specification_id)
 
     def add_contract(self, contract: Contract) -> None:
         """

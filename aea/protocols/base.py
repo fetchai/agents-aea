@@ -347,6 +347,12 @@ class Protocol(Component):
         ProtocolSpecificationsRegistry.register(
             configuration.public_id, configuration.protocol_specification_id
         )
+        self._specification_id = configuration.protocol_specification_id
+
+    @property
+    def specification_id(self):
+        """Get protocol specification_id."""
+        return self._specification_id
 
     @property
     def serializer(self) -> Type[Serializer]:
@@ -413,7 +419,6 @@ class ProtocolSpecificationsRegistry:
     """Registry to store protocol id and corresponding specification ids."""
 
     PROTOCOL_TO_SPECIFICATION: Dict[PublicId, PublicId] = {}
-    SPECIFICATION_TO_PROTOCOL: Dict[PublicId, PublicId] = {}
 
     @classmethod
     def register(
@@ -421,7 +426,6 @@ class ProtocolSpecificationsRegistry:
     ) -> None:
         """Register protocol id with protocol specification id."""
         cls.PROTOCOL_TO_SPECIFICATION[protocol_id] = protocol_specification_id
-        cls.SPECIFICATION_TO_PROTOCOL[protocol_specification_id] = protocol_id
 
     @classmethod
     def get_specification_id_by_protocol_id(
@@ -434,16 +438,3 @@ class ProtocolSpecificationsRegistry:
         :return: PublicId if protocol registered otherwise None
         """
         return cls.PROTOCOL_TO_SPECIFICATION.get(protocol_id, None)
-
-    @classmethod
-    def get_protocol_id_by_specification_id(
-        cls, protocol_specification_id: PublicId
-    ) -> Optional[PublicId]:
-        """Get protocol id by the specification id.
-
-        :param protocol_specification_id: PublicId
-
-        :return: PublicId if protocol registered otherwise None
-        """
-
-        return cls.SPECIFICATION_TO_PROTOCOL.get(protocol_specification_id, None)
