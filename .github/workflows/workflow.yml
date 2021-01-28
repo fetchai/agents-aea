@@ -210,10 +210,10 @@ jobs:
   integration_checks_ledger:
     continue-on-error: True
     needs:
-    - common_checks_1
-    - common_checks_2
-    - common_checks_3
-    - common_checks_4
+      - common_checks_1
+      - common_checks_2
+      - common_checks_3
+      - common_checks_4
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -221,13 +221,20 @@ jobs:
       - uses: actions/setup-python@master
         with:
           python-version: 3.8
-      - uses: icepuma/rust-action@master
       - name: Install dependencies (ubuntu-latest)
         run: |
           sudo apt-get update --fix-missing
           sudo apt-get autoremove
           sudo apt-get autoclean
           pip install tox
+      - name: Install Rust
+        run: |
+          # Install rust
+          curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf > install.sh
+          sudo chmod u+x install.sh
+          ./install.sh -y
+          rustup default stable
+          cargo version
       - name: Install fetchcli
         run: |
           # Update the configuration for Rust
@@ -239,9 +246,11 @@ jobs:
           cd fetchd
           git checkout release/v0.2.x
           make install
+          echo "PATH=$PATH:${HOME}/go/bin" >> $GITHUB_ENV
       - name: Check fetchcli installation
         run: |
           # Check if fetchcli is properly installed
+          which fetchcli
           fetchcli version
       - name: Configure fetchcli
         run: |
