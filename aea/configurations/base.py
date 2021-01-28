@@ -766,10 +766,8 @@ class ProtocolConfig(ComponentConfiguration):
                 str(protocol_specification_id)
             )
         else:
-            # make version 0.1.0 as a default protocol specification version
-            self.protocol_specification_id = PublicId(
-                self.public_id.author, self.public_id.name, "0.1.0"
-            )
+            # make protocol specification same as protocol id
+            self.protocol_specification_id = self.public_id
 
     @property
     def json(self) -> Dict:
