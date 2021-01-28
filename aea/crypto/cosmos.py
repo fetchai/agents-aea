@@ -65,7 +65,7 @@ class CosmosHelper(Helper):
         """
         Check whether a transaction is settled or not.
 
-        :param tx_digest: the digest associated to the transaction.
+        :param tx_receipt: the receipt of the transaction.
         :return: True if the transaction has been settled, False o/w.
         """
         is_successful = False
@@ -77,6 +77,36 @@ class CosmosHelper(Helper):
                     f"Transaction not settled. Raw log: {tx_receipt.get('raw_log')}"
                 )
         return is_successful
+
+    @staticmethod
+    def get_code_id(tx_receipt: JSONLike) -> Optional[int]:
+        """
+        Retrieve the `code_id` from a transaction receipt.
+
+        :param tx_receipt: the receipt of the transaction.
+        :return: the code id, if present
+        """
+        code_id: Optional[int] = None
+        try:
+            code_id = int(["logs"][0]["events"][0]["attributes"][3]["value"])  # type: ignore
+        except (KeyError, IndexError):
+            code_id = None
+        return code_id
+
+    @staticmethod
+    def get_contract_address(tx_receipt: JSONLike) -> Optional[str]:
+        """
+        Retrieve the `contract_address` from a transaction receipt.
+
+        :param tx_receipt: the receipt of the transaction.
+        :return: the contract address, if present
+        """
+        contract_address: Optional[str] = None
+        try:
+            contract_address = ""
+        except (KeyError, IndexError):
+            contract_address = None
+        return contract_address
 
     @staticmethod
     def is_transaction_valid(
@@ -994,7 +1024,7 @@ class _CosmosApi(LedgerApi):
 
         return int(res[-1]["id"])
 
-    def get_contract_address(self, code_id: int) -> str:
+    def get_last_contract_address(self, code_id: int) -> str:
         """
         Get contract address of latest initialised contract by its ID.
 
