@@ -263,9 +263,7 @@ class AEATestWrapper:
         self._fake_connection = FakeConnection(
             envelope, inbox_num, connection_id="fake_connection"
         )
-        self.aea._connections.append(  # pylint: disable=protected-access
-            self._fake_connection
-        )
+        self.aea.runtime.multiplexer.add_connection(self._fake_connection)
 
     def is_messages_in_fake_connection(self) -> bool:
         """
