@@ -239,18 +239,18 @@ jobs:
           cd fetchd
           git checkout release/v0.2.x
           make install
-
+      - name: Check fetchcli installation
+        run: |
           # Check if fetchcli is properly installed
           fetchcli version
-
-          # Configure `fetchcli`
+      - name: Configure fetchcli
+        run: |
           fetchcli config chain-id agent-land
           fetchcli config trust-node false
           fetchcli config node https://rpc-agent-land.fetch.ai:443
           fetchcli config output json
           fetchcli config indent true
           fetchcli config broadcast-mode block
-
       - name: Integration tests
         run: tox -e py3.8 -- -m 'integration and not unstable and ledger'
 
