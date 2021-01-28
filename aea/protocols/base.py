@@ -431,7 +431,8 @@ class ProtocolSpecificationsRegistry:
     def get_specification_id_by_protocol_id(
         cls, protocol_id: PublicId
     ) -> Optional[PublicId]:
-        """Get specification id by the protocol id.
+        """
+        Get specification id by the protocol id.
 
         :param protocol_id: PublicId
 

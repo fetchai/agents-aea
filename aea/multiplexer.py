@@ -855,5 +855,6 @@ class OutBox:
             protocol_id=message.protocol_id,
             message=message,
             context=context,
+            is_framework_set=True,
         )
         self.put(envelope)

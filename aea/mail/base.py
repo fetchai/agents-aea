@@ -272,6 +272,8 @@ class ProtobufEnvelopeSerializer(EnvelopeSerializer):
 
         The default serializer doesn't decode the message field.
 
+        The default serializer does not resolve the protocol id.
+
         :param envelope_bytes: the encoded envelope
         :return: the envelope
         """
@@ -321,7 +323,8 @@ class Envelope:
         """
         Get protocol specification id  from protocol id.
 
-        If not protocol was registered with given specification id, returns protocol specification id  itself.
+        If no protocol is registered with then given specification id then it returns protocol specification id itself.
+        This assumption ensures we can instantiate Envelopes without a registry.
 
         :param protocol_id: PublicId
 
@@ -339,6 +342,7 @@ class Envelope:
         protocol_id: Optional[PublicId] = None,
         context: Optional[EnvelopeContext] = None,
         protocol_specification_id: Optional[PublicId] = None,
+        is_framework_set: bool = False,
     ):
         """
         Initialize a Message object.
@@ -398,6 +402,11 @@ class Envelope:
             raise ValueError(
                 f"Message type: {type(message)} is not supported!"
             )  # pragma: nocover
+
+        if protocol_specification_id is None and not is_framework_set:
+            protocol_specification_id = protocol_id
+        if protocol_id is None and not is_framework_set:
+            protocol_id = protocol_specification_id
 
         if protocol_specification_id is None:
             raise ValueError(

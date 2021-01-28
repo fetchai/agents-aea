@@ -248,7 +248,11 @@ def _try_construct_envelope(
             counterparty=agent_name, performative=performative, content=message,
         )
         envelope = Envelope(
-            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
+            to=msg.to,
+            sender=msg.sender,
+            protocol_id=msg.protocol_id,
+            message=msg,
+            is_framework_set=True,
         )
     except InterruptInputException:
         click.echo("Interrupting input, checking inbox ...")
