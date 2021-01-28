@@ -19,7 +19,6 @@
 
 """The tests module contains the tests of the packages/contracts/erc1155 dir."""
 
-import json
 import time
 from pathlib import Path
 from typing import Dict, cast
@@ -279,7 +278,7 @@ class TestCosmWasmContract:
         self.refill_from_faucet(
             self.ledger_api, self.faucet_api, self.item_owner_crypto.address
         )
-        self.deploy_contract()
+        self.set_contract()
 
     def refill_from_faucet(self, ledger_api, faucet_api, address):
         """Refill from faucet."""
@@ -306,41 +305,13 @@ class TestCosmWasmContract:
         """
 
         signed_tx = sender_crypto.sign_transaction(tx)
-        res: str = self.ledger_api.send_signed_transaction(signed_tx)
-        # Convert message return string to JSON dict
-        receipt: Dict[str, str] = json.loads(res)
-        assert len(receipt) == 6
-        assert all(
-            [
-                key in receipt
-                for key in [
-                    "height",
-                    "txhash",
-                    "raw_log",
-                    "logs",
-                    "gas_wanted",
-                    "gas_used",
-                ]
-            ]
-        )
-
-    def sign_send_verify_deploy_init_transaction(
-        self, tx: Dict[str, str], sender_crypto
-    ):
-        """
-        Sign, send and verify if deploy or InitMsg transaction was successful.
-
-        :param tx: the transaction
-        :param sender_crypto: Crypto to sign transaction with
-        :return: Nothing - asserts pass if transaction is successful
-        """
-
-        signed_tx = sender_crypto.sign_transaction(tx)
         tx_hash = self.ledger_api.send_signed_transaction(signed_tx)
-        return tx_hash
+        tx_receipt = self.ledger_api.get_transaction_receipt(tx_hash)
+        assert len(tx_receipt) == 8
+        assert self.ledger_api.is_transaction_settled(tx_receipt), tx_receipt["raw_log"]
 
-    def deploy_contract(self):
-        """Deploy contract."""
+    def set_contract(self):
+        """Set contract."""
         directory = Path(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155")
         configuration = load_component_configuration(ComponentType.CONTRACT, directory)
         configuration._directory = directory
@@ -352,6 +323,8 @@ class TestCosmWasmContract:
 
         self.contract = contract_registry.make(str(configuration.public_id))
 
+    def deploy_contract(self):
+        """Deploy contract."""
         tx = self.contract.get_deploy_transaction(
             ledger_api=self.ledger_api,
             deployer_address=self.deployer_crypto.address,
@@ -371,13 +344,15 @@ class TestCosmWasmContract:
         self.code_id = code_id
 
         # Init contract
-        tx = self.ledger_api.get_deploy_transaction(
-            self.deployer_crypto.address,
-            self.code_id,
+        tx = self.contract.get_deploy_transaction(
+            ledger_api=self.ledger_api,
+            deployer_address=self.deployer_crypto.address,
+            code_id=self.code_id,
             init_msg={},
             tx_fee=0,
             amount=0,
             label="ERC1155",
+            gas=1000000,
         )
         assert len(tx) == 6
         signed_tx = self.deployer_crypto.sign_transaction(tx)
@@ -398,6 +373,7 @@ class TestCosmWasmContract:
     @pytest.mark.ledger
     def test_cosmwasm_contract_deploy_and_interact(self):
         """Test cosmwasm contract deploy and interact."""
+        self.deploy_contract()
 
         # Create single token
         tx = self.contract.get_create_single_transaction(

@@ -88,7 +88,8 @@ class CosmosHelper(Helper):
         """
         code_id: Optional[int] = None
         try:
-            code_id = int(["logs"][0]["events"][0]["attributes"][3]["value"])  # type: ignore
+            res = [dic_["value"] for dic_ in tx_receipt["logs"][0]["events"][0]["attributes"] if dic_["key"] == "code_id"]  # type: ignore
+            code_id = int(res[0])
         except (KeyError, IndexError):
             code_id = None
         return code_id
@@ -103,7 +104,8 @@ class CosmosHelper(Helper):
         """
         contract_address: Optional[str] = None
         try:
-            contract_address = ""
+            res = [dic_["value"] for dic_ in tx_receipt["logs"][0]["events"][0]["attributes"] if dic_["key"] == "contract_address"]  # type: ignore
+            contract_address = res[0]
         except (KeyError, IndexError):
             contract_address = None
         return contract_address
