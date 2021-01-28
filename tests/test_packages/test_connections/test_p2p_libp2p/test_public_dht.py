@@ -137,7 +137,10 @@ class TestLibp2pConnectionPublicDHTRelay:
                 assert delivered_envelope is not None
                 assert delivered_envelope.to == envelope.to
                 assert delivered_envelope.sender == envelope.sender
-                assert delivered_envelope.protocol_id == envelope.protocol_id
+                assert (
+                    delivered_envelope.protocol_specification_id
+                    == envelope.protocol_specification_id
+                )
                 assert delivered_envelope.message != envelope.message
                 msg = DefaultMessage.serializer.decode(delivered_envelope.message)
                 msg.to = delivered_envelope.to
@@ -201,7 +204,10 @@ class TestLibp2pConnectionPublicDHTRelay:
                     assert delivered_envelope is not None
                     assert delivered_envelope.to == envelope.to
                     assert delivered_envelope.sender == envelope.sender
-                    assert delivered_envelope.protocol_id == envelope.protocol_id
+                    assert (
+                        delivered_envelope.protocol_specification_id
+                        == envelope.protocol_specification_id
+                    )
                     assert delivered_envelope.message != envelope.message
                     msg = DefaultMessage.serializer.decode(delivered_envelope.message)
                     msg.to = delivered_envelope.to
@@ -287,7 +293,10 @@ class TestLibp2pConnectionPublicDHTDelegate:
                 assert delivered_envelope is not None
                 assert delivered_envelope.to == envelope.to
                 assert delivered_envelope.sender == envelope.sender
-                assert delivered_envelope.protocol_id == envelope.protocol_id
+                assert (
+                    delivered_envelope.protocol_specification_id
+                    == envelope.protocol_specification_id
+                )
                 assert delivered_envelope.message != envelope.message
                 msg = DefaultMessage.serializer.decode(delivered_envelope.message)
                 msg.to = delivered_envelope.to
@@ -349,7 +358,10 @@ class TestLibp2pConnectionPublicDHTDelegate:
                     assert delivered_envelope is not None
                     assert delivered_envelope.to == envelope.to
                     assert delivered_envelope.sender == envelope.sender
-                    assert delivered_envelope.protocol_id == envelope.protocol_id
+                    assert (
+                        delivered_envelope.protocol_specification_id
+                        == envelope.protocol_specification_id
+                    )
                     assert delivered_envelope.message != envelope.message
                     msg = DefaultMessage.serializer.decode(delivered_envelope.message)
                     msg.to = delivered_envelope.to

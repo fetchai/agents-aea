@@ -165,7 +165,10 @@ class TestP2PLibp2pConnectionEchoEnvelope:
         assert delivered_envelope is not None
         assert delivered_envelope.to == envelope.to
         assert delivered_envelope.sender == envelope.sender
-        assert delivered_envelope.protocol_id == envelope.protocol_id
+        assert (
+            delivered_envelope.protocol_specification_id
+            == envelope.protocol_specification_id
+        )
         assert delivered_envelope.message != envelope.message
         msg = DefaultMessage.serializer.decode(delivered_envelope.message)
         msg.to = delivered_envelope.to
@@ -204,7 +207,10 @@ class TestP2PLibp2pConnectionEchoEnvelope:
         assert echoed_envelope is not None
         assert echoed_envelope.to == original_envelope.sender
         assert delivered_envelope.sender == original_envelope.to
-        assert delivered_envelope.protocol_id == original_envelope.protocol_id
+        assert (
+            delivered_envelope.protocol_specification_id
+            == original_envelope.protocol_specification_id
+        )
         assert delivered_envelope.message != original_envelope.message
         assert original_envelope.message_bytes == delivered_envelope.message_bytes
 
@@ -298,7 +304,10 @@ class TestP2PLibp2pConnectionRouting:
                 assert delivered_envelope is not None
                 assert delivered_envelope.to == envelope.to
                 assert delivered_envelope.sender == envelope.sender
-                assert delivered_envelope.protocol_id == envelope.protocol_id
+                assert (
+                    delivered_envelope.protocol_specification_id
+                    == envelope.protocol_specification_id
+                )
                 assert delivered_envelope.message != envelope.message
                 msg = DefaultMessage.serializer.decode(delivered_envelope.message)
                 msg.to = delivered_envelope.to
@@ -391,7 +400,10 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
         assert delivered_envelope is not None
         assert delivered_envelope.to == envelope.to
         assert delivered_envelope.sender == envelope.sender
-        assert delivered_envelope.protocol_id == envelope.protocol_id
+        assert (
+            delivered_envelope.protocol_specification_id
+            == envelope.protocol_specification_id
+        )
         assert delivered_envelope.message != envelope.message
         msg = DefaultMessage.serializer.decode(delivered_envelope.message)
         msg.to = delivered_envelope.to
@@ -430,7 +442,10 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
         assert echoed_envelope is not None
         assert echoed_envelope.to == original_envelope.sender
         assert delivered_envelope.sender == original_envelope.to
-        assert delivered_envelope.protocol_id == original_envelope.protocol_id
+        assert (
+            delivered_envelope.protocol_specification_id
+            == original_envelope.protocol_specification_id
+        )
         assert delivered_envelope.message != original_envelope.message
         assert original_envelope.message_bytes == delivered_envelope.message_bytes
 
@@ -548,7 +563,10 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
                 assert delivered_envelope is not None
                 assert delivered_envelope.to == envelope.to
                 assert delivered_envelope.sender == envelope.sender
-                assert delivered_envelope.protocol_id == envelope.protocol_id
+                assert (
+                    delivered_envelope.protocol_specification_id
+                    == envelope.protocol_specification_id
+                )
                 assert delivered_envelope.message != envelope.message
                 msg = DefaultMessage.serializer.decode(delivered_envelope.message)
                 msg.sender = delivered_envelope.sender

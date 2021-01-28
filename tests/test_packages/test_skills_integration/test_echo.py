@@ -96,7 +96,10 @@ class TestEchoSkill(AEATestCaseEmpty):
         received_envelope = self.read_envelope_from_agent(self.agent_name)
 
         assert sent_envelope.sender == received_envelope.to
-        assert sent_envelope.protocol_id == received_envelope.protocol_id
+        assert (
+            sent_envelope.protocol_specification_id
+            == received_envelope.protocol_specification_id
+        )
         msg = DefaultMessage.serializer.decode(received_envelope.message)
         assert sent_envelope.message.content == msg.content
 

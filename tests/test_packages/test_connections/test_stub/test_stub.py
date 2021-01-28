@@ -107,7 +107,10 @@ class TestStubConnectionReception:
         actual_envelope = self.multiplexer.get(block=True, timeout=3.0)
         assert expected_envelope.to == actual_envelope.to
         assert expected_envelope.sender == actual_envelope.sender
-        assert expected_envelope.protocol_id == actual_envelope.protocol_id
+        assert (
+            expected_envelope.protocol_specification_id
+            == actual_envelope.protocol_specification_id
+        )
         msg = DefaultMessage.serializer.decode(actual_envelope.message)
         msg.to = actual_envelope.to
         msg.sender = actual_envelope.sender
@@ -250,7 +253,10 @@ class TestStubConnectionSending:
         )
         assert expected_envelope.to == actual_envelope.to
         assert expected_envelope.sender == actual_envelope.sender
-        assert expected_envelope.protocol_id == actual_envelope.protocol_id
+        assert (
+            expected_envelope.protocol_specification_id
+            == actual_envelope.protocol_specification_id
+        )
         msg = DefaultMessage.serializer.decode(actual_envelope.message)
         msg.to = actual_envelope.to
         msg.sender = actual_envelope.sender

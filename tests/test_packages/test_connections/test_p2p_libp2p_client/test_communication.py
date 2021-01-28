@@ -155,7 +155,10 @@ class TestLibp2pClientConnectionEchoEnvelope:
         assert delivered_envelope is not None
         assert delivered_envelope.to == envelope.to
         assert delivered_envelope.sender == envelope.sender
-        assert delivered_envelope.protocol_id == envelope.protocol_id
+        assert (
+            delivered_envelope.protocol_specification_id
+            == envelope.protocol_specification_id
+        )
         assert delivered_envelope.message == envelope.message
 
     def test_envelope_echoed_back(self):
@@ -190,7 +193,10 @@ class TestLibp2pClientConnectionEchoEnvelope:
         assert echoed_envelope is not None
         assert echoed_envelope.to == original_envelope.sender
         assert delivered_envelope.sender == original_envelope.to
-        assert delivered_envelope.protocol_id == original_envelope.protocol_id
+        assert (
+            delivered_envelope.protocol_specification_id
+            == original_envelope.protocol_specification_id
+        )
         assert delivered_envelope.message == original_envelope.message
 
     def test_envelope_echoed_back_node_agent(self):
@@ -225,7 +231,10 @@ class TestLibp2pClientConnectionEchoEnvelope:
         assert echoed_envelope is not None
         assert echoed_envelope.to == original_envelope.sender
         assert delivered_envelope.sender == original_envelope.to
-        assert delivered_envelope.protocol_id == original_envelope.protocol_id
+        assert (
+            delivered_envelope.protocol_specification_id
+            == original_envelope.protocol_specification_id
+        )
         assert delivered_envelope.message == original_envelope.message
 
     @classmethod
@@ -330,7 +339,10 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         assert delivered_envelope is not None
         assert delivered_envelope.to == envelope.to
         assert delivered_envelope.sender == envelope.sender
-        assert delivered_envelope.protocol_id == envelope.protocol_id
+        assert (
+            delivered_envelope.protocol_specification_id
+            == envelope.protocol_specification_id
+        )
         assert delivered_envelope.message == envelope.message
 
     def test_envelope_echoed_back(self):
@@ -365,7 +377,10 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         assert echoed_envelope is not None
         assert echoed_envelope.to == original_envelope.sender
         assert delivered_envelope.sender == original_envelope.to
-        assert delivered_envelope.protocol_id == original_envelope.protocol_id
+        assert (
+            delivered_envelope.protocol_specification_id
+            == original_envelope.protocol_specification_id
+        )
         assert delivered_envelope.message == original_envelope.message
 
     def test_envelope_echoed_back_node_agent(self):
@@ -400,7 +415,10 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         assert echoed_envelope is not None
         assert echoed_envelope.to == original_envelope.sender
         assert delivered_envelope.sender == original_envelope.to
-        assert delivered_envelope.protocol_id == original_envelope.protocol_id
+        assert (
+            delivered_envelope.protocol_specification_id
+            == original_envelope.protocol_specification_id
+        )
         assert delivered_envelope.message == original_envelope.message
 
     @classmethod
@@ -515,7 +533,10 @@ class TestLibp2pClientConnectionRouting:
                 assert delivered_envelope is not None
                 assert delivered_envelope.to == envelope.to
                 assert delivered_envelope.sender == envelope.sender
-                assert delivered_envelope.protocol_id == envelope.protocol_id
+                assert (
+                    delivered_envelope.protocol_specification_id
+                    == envelope.protocol_specification_id
+                )
                 assert delivered_envelope.message == envelope.message
 
     @classmethod
