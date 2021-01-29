@@ -12,7 +12,7 @@ fingerprint:
   dialogues.py: QmSBawWTSmg42xnVFZ2HHhQ7XjmhZab7UQ3iMDwwFUshLd
   http.proto: QmNZnCTv9bUTdbzDr5bZ31Zj1G4TBYWSu8ogFbbzWLgRcR
   http_pb2.py: QmQawcZy4H5rSANgkTMgjQWHYCYnDRkyMjtYF8bgNroTh8
-  message.py: QmRJAiF8f4kWucRGqYQePuWRDN913B8TqQYC2aHHwytNUW
+  message.py: QmbZNEJZkPWgtnfZvJyGCyPZry76bef7SunR52XsgHpddz
   serialization.py: QmUfoq7RSFuuRNGHBt8oDymPjEk17U4AjbaZgSkQ9bbUcz
 fingerprint_ignore_patterns: []
 dependencies:

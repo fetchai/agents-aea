@@ -45,6 +45,7 @@ class Message:
     """This class implements a message."""
 
     protocol_id = None  # type: PublicId
+    protocol_specification_id = None  # type: PublicId
     serializer = None  # type: Type["Serializer"]
 
     __slots__ = ("_slots", "_to", "_sender")
@@ -344,9 +345,6 @@ class Protocol(Component):
         """
         super().__init__(configuration, **kwargs)
         self._message_class = message_class
-        ProtocolSpecificationsRegistry.register(
-            configuration.public_id, configuration.protocol_specification_id
-        )
         self._specification_id = configuration.protocol_specification_id
 
     @property
@@ -413,28 +411,3 @@ class Protocol(Component):
         message_class.serializer = serialize_class
 
         return Protocol(configuration, message_class, **kwargs)
-
-
-class ProtocolSpecificationsRegistry:
-    """Registry to store protocol id and corresponding specification ids."""
-
-    PROTOCOL_TO_SPECIFICATION: Dict[PublicId, PublicId] = {}
-
-    @classmethod
-    def register(
-        cls, protocol_id: PublicId, protocol_specification_id: PublicId
-    ) -> None:
-        """Register protocol id with protocol specification id."""
-        cls.PROTOCOL_TO_SPECIFICATION[protocol_id] = protocol_specification_id
-
-    @classmethod
-    def get_specification_id_by_protocol_id(
-        cls, protocol_id: PublicId
-    ) -> Optional[PublicId]:
-        """Get specification id by the protocol id.
-
-        :param protocol_id: PublicId
-
-        :return: PublicId if protocol registered otherwise None
-        """
-        return cls.PROTOCOL_TO_SPECIFICATION.get(protocol_id, None)

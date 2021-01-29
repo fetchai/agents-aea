@@ -28,7 +28,7 @@ from aea.configurations.base import PackageId, PublicId
 from aea.configurations.constants import CONNECTION, SKILL
 from aea.exceptions import enforce
 from aea.mail import base_pb2
-from aea.protocols.base import Message, ProtocolSpecificationsRegistry
+from aea.protocols.base import Message
 
 
 _default_logger = logging.getLogger(__name__)
@@ -356,9 +356,7 @@ class Envelope:
                 raise ValueError(  # pragma: nocover
                     f"message class {type(message)} has no protocol_id specified!"
                 )
-            protocol_specification_id = ProtocolSpecificationsRegistry.get_specification_id_by_protocol_id(
-                message.protocol_id
-            )
+            protocol_specification_id = message.protocol_specification_id
             if protocol_specification_id is None:
                 raise ValueError(
                     "Message is Message object, protocol_specification_id could not be resolved! Ensure protocol is registered!"

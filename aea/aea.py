@@ -269,11 +269,9 @@ class AEA(Agent):
         self, envelope: Envelope
     ) -> Tuple[Optional[Message], List[Handler]]:
         """Get the msg and its handlers."""
-        protocol = self.resources.get_protocol(envelope.protocol_specification_id)
-
-        # adjust protocol by specification id
-        if protocol:
-            envelope.protocol_id = protocol.public_id
+        protocol = self.resources.get_protocol_by_specification_id(
+            envelope.protocol_specification_id
+        )
 
         msg, handlers = self._handle_decoding(envelope, protocol)
 

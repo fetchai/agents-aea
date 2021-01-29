@@ -11,7 +11,7 @@ fingerprint:
   __init__.py: QmPVnWg24cNfoLcZfqtRePdE2exyoKjRL2cfdz5qF7yZjg
   custom_types.py: Qmc7sAyCQbAaVs5dZf9hFkTrB2BG8VAioWzbyKBAybrQ1J
   dialogues.py: Qmamd1T5ZDF8ExQznV9bXSoSC8s9rTgbkDoBRVTAzcARXB
-  message.py: QmQ9HXHdTZ9E82c3RuxwHESxQr8WxKJfasjzQUSV3YGFQZ
+  message.py: QmTTeivPtyCJqfB1ShG7G8m37S9ZNxQ5KMwJATGp2Pr5Cg
   serialization.py: QmQY5rs9C3XYErfJ2fFtgqLqJiGx12hGHG5hmFp3ePMhFW
   signing.proto: QmUY3MUZ6KMo8eBsMayrnNVzmqXKZqrgak1gwvsDVyPcgU
   signing_pb2.py: QmUPXhoYLZ9nZQ8LJEh98Hgq4EpZte3qT8tH62FXivm67j

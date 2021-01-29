@@ -629,6 +629,16 @@ class ProtocolGenerator:
             self.protocol_specification.name,
             self.protocol_specification.version,
         )
+
+        cls_str += (
+            self.indent
+            + 'protocol_specification_id = PublicId.from_str("{}/{}:{}")\n'.format(
+                self.protocol_specification.protocol_specification_id.author,
+                self.protocol_specification.protocol_specification_id.name,
+                self.protocol_specification.protocol_specification_id.version,
+            )
+        )
+
         for custom_type in self.spec.all_custom_types:
             cls_str += "\n"
             cls_str += self.indent + "{} = Custom{}\n".format(custom_type, custom_type)

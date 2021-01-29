@@ -500,9 +500,11 @@ class AsyncMultiplexer(Runnable, WithLogger):
         if envelope_context is not None:
             connection_id = envelope_context.connection_id
 
+        envelope_protocol_id = envelope.protocol_specification_id
+
         # second, try to route by default routing
-        if connection_id is None and envelope.protocol_id in self.default_routing:
-            connection_id = self.default_routing[envelope.protocol_id]
+        if connection_id is None and envelope_protocol_id in self.default_routing:
+            connection_id = self.default_routing[envelope_protocol_id]
             self.logger.debug("Using default routing: {}".format(connection_id))
 
         if connection_id is not None and connection_id not in self._id_to_connection:
@@ -522,11 +524,11 @@ class AsyncMultiplexer(Runnable, WithLogger):
         connection = cast(Connection, connection)
         if (
             len(connection.restricted_to_protocols) > 0
-            and envelope.protocol_id not in connection.restricted_to_protocols
+            and envelope_protocol_id not in connection.restricted_to_protocols
         ):
             self.logger.warning(
                 "Connection {} cannot handle protocol {}. Cannot send the envelope.".format(
-                    connection.connection_id, envelope.protocol_id
+                    connection.connection_id, envelope_protocol_id
                 )
             )
             return
@@ -733,11 +735,7 @@ class InBox:
         if envelope is None:  # pragma: nocover
             raise Empty()
 
-        self._multiplexer.logger.debug(
-            "Incoming envelope: to='{}' sender='{}' protocol_id='{}' message='{!r}'".format(
-                envelope.to, envelope.sender, envelope.protocol_id, envelope.message
-            )
-        )
+        self._multiplexer.logger.debug(f"Incoming {envelope}")
         return envelope
 
     def get_nowait(self) -> Optional[Envelope]:
@@ -765,11 +763,7 @@ class InBox:
         if envelope is None:  # pragma: nocover
             raise Empty()
 
-        self._multiplexer.logger.debug(
-            "Incoming envelope: to='{}' sender='{}' protocol_id='{}' message='{!r}'".format(
-                envelope.to, envelope.sender, envelope.protocol_id, envelope.message
-            )
-        )
+        self._multiplexer.logger.debug(f"Incoming envelope: {envelope}")
         return envelope
 
     async def async_wait(self) -> None:
@@ -811,15 +805,7 @@ class OutBox:
         :param envelope: the envelope.
         :return: None
         """
-        self._multiplexer.logger.debug(
-            "Put an envelope in the queue: to='{}' sender='{}' protocol_id='{}' message='{!r}' context='{}'.".format(
-                envelope.to,
-                envelope.sender,
-                envelope.protocol_id,
-                envelope.message,
-                envelope.context,
-            )
-        )
+        self._multiplexer.logger.debug(f"Put an envelope in the queue: {envelope}.")
         if not isinstance(envelope.message, Message):
             raise ValueError(
                 "Only Message type allowed in envelope message field when putting into outbox."
@@ -850,10 +836,6 @@ class OutBox:
         if not message.has_sender:
             raise ValueError("Provided message has message.sender not set.")
         envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-            context=context,
+            to=message.to, sender=message.sender, message=message, context=context,
         )
         self.put(envelope)
