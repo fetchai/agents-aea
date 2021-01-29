@@ -51,7 +51,14 @@ class TestAsyncRuntime:
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
         builder.set_storage_uri("sqlite://:memory:")
         self.agent = builder.build()
-        self.runtime = self.RUNTIME(self.agent, threaded=True)
+
+        self.runtime = self.RUNTIME(
+            self.agent,
+            threaded=True,
+            multiplexer_options={
+                "connections": self.agent.runtime.multiplexer.connections
+            },
+        )
 
     def teardown(self):
         """Tear down."""

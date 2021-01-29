@@ -12,23 +12,23 @@ We define an autonomous economic agent or AEA as:
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/xpJA4IT5X88" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
-AEAs act independently of constant input from their owner and autonomously execute actions to achieve their prescribed goal. Their goal is to create economic value for you, their owner, in a clearly defined domain. AEAs have a wide range of <a href="app-areas">application areas</a> and we provide <a href="demos">demo guides</a> for some examples.
+AEAs act independently of constant input from their owner and autonomously execute actions to achieve their prescribed goals. Their purpose is to create economic value for you, their owner, in clearly defined domains. AEAs have a wide range of <a href="app-areas">application areas</a> and we provide <a href="demos">demo guides</a> to highlight examples of their use cases.
 
 <!-- Autonomous Economic Agents are digital entities that run complex dynamic decision-making algorithms for application owners and clients. -->
 
 AEAs are not:
 
-* just any agents: AEAs' purpose is to generate economic value in a multi-stakeholder environment with competing incentives between agents. The represent humans, organisations or things.
+* just any <a href="https://en.wikipedia.org/wiki/Software_agent"  target="_blank">agents</a>: AEAs' purpose is to generate economic value in a multi-stakeholder environment with competing incentives between agents. They represent humans, organisations or objects.
 * APIs or sensors which do not have agency.
-* smart contracts which do not display any proactiveness and are purely reactive to external requests (=contract calls). 
-* artificial general intelligence (AGI): AEAs can have a very narrow goal directed focus involving some economic gain and implemented via simple conditional logic.
+* <a href="https://en.wikipedia.org/wiki/Smart_contract" target="_blank">smart contracts</a> which do not display any proactiveness and are purely reactive to external requests (=contract calls and transactions). 
+* <a href="https://en.wikipedia.org/wiki/Artificial_general_intelligence" target="_blank">artificial general intelligence (AGI)</a>: AEAs can have a very narrow, goal directed focus involving some economic gain and can be implemented via simple conditional logic.
 
 
 ## What is the AEA Framework?
 
 The AEA framework is a Python-based development suite which equips you with an efficient and accessible set of tools for building AEAs. The framework is modular, extensible, and composable. It attempts to make agent development as straightforward an experience as possible, similar to web development using popular web frameworks.
 
-AEAs achieve their goals with the help of the <a href="oef-ledger">Open Economic Framework (OEF)</a> - a decentralized communication and search & discovery system for agents - and using <a href="oef-ledger">Fetch.ai's blockchain</a> as a financial settlement and commitment layer. Third-party blockchains, such as <a href="https://ethereum.org/en/" target="_blank">Ethereum</a>, may also allow AEA integration.
+AEAs achieve their goals with the help of a decentralized search & discovery system for agents the <a href="oef-ledger">simple Open Economic Framework (sOEF)</a>, the <a href="acn">Agent Communication Network</a> - a decentralized communication system for agents - and using <a href="oef-ledger">Fetch.ai's blockchain</a> as a financial settlement and commitment layer. AEAs can also be integrated with third-party blockchains, such as <a href="https://ethereum.org/en/" target="_blank">Ethereum</a>.
 
 
 ## Why build with the AEA Framework?
@@ -57,7 +57,7 @@ If you would run a demo, check out the <a href="demos">demo guides</a>.
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>
-  <p>This developer documentation is a work in progress. If you spot any errors please open an issue on <a href="https://github.com/fetchai/agents-aea" target="_blank">Github</a> or contact us in the <a href="https://fetch-ai.slack.com" target="_blank">developer Slack channel</a>.</p>
+  <p>This developer documentation is a work in progress. If you spot any errors please open an issue on <a href="https://github.com/fetchai/agents-aea" target="_blank">Github</a> or contact us in the <<a href="https://discord.com/invite/btedfjPJTj" target="_blank">developer Discord channel</a>.</p>
 </div>
 
 <br />

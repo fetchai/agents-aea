@@ -85,9 +85,15 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
             [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
             standalone_mode=False,
         )
-        # this also by default adds the oef skill and error skill
+        # this also by default adds the stub connection
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
+        cls.result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "--local", "skill", str(cls.skill_id)],
+            standalone_mode=False,
+        )
+        assert result.exit_code == 0
 
         # add the error skill again
         cls.result = cls.runner.invoke(
@@ -165,7 +171,7 @@ class TestAddSkillFailsWhenSkillWithSameAuthorAndNameButDifferentVersion:
             [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
             standalone_mode=False,
         )
-        # this also by default adds the oef skill and error skill
+        # this also by default adds the stub connection
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
         cls.result = cls.runner.invoke(

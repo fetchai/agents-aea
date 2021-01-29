@@ -22,7 +22,6 @@ protocols:
 - fetchai/state_update:0.9.0
 skills:
 - fetchai/confirmation_aw1:0.6.0
-- fetchai/error:0.11.0
 - fetchai/simple_service_registration:0.15.0
 default_connection: fetchai/p2p_libp2p:0.14.0
 default_ledger: fetchai

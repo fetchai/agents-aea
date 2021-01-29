@@ -20,7 +20,6 @@ protocols:
 - fetchai/state_update:0.9.0
 - fetchai/tac:0.12.0
 skills:
-- fetchai/error:0.11.0
 - fetchai/tac_negotiation:0.18.0
 - fetchai/tac_participation:0.16.0
 default_connection: fetchai/p2p_libp2p:0.14.0

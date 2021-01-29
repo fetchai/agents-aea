@@ -387,18 +387,18 @@ def test_initialize_aea_programmatically_build_resources():
             connection = _make_local_connection(agent_name, node)
 
             resources = Resources()
+            default_protocol = Protocol.from_dir(
+                str(Path("packages", "fetchai", "protocols", "default"))
+            )
+            resources.add_protocol(default_protocol)
+            resources.add_connection(connection)
+
             aea = AEA(
                 identity,
                 wallet,
                 resources=resources,
                 default_connection=connection.public_id,
             )
-
-            default_protocol = Protocol.from_dir(
-                str(Path("packages", "fetchai", "protocols", "default"))
-            )
-            resources.add_protocol(default_protocol)
-            resources.add_connection(connection)
 
             error_skill = Skill.from_dir(
                 str(Path("packages", "fetchai", "skills", "error")),
@@ -480,8 +480,9 @@ def test_add_behaviour_dynamically():
     resources = Resources()
     identity = Identity(agent_name, address=wallet.addresses[DEFAULT_LEDGER])
     connection = _make_local_connection(identity.address, LocalNode())
-    agent = AEA(identity, wallet, resources, default_connection=connection.public_id,)
     resources.add_connection(connection)
+
+    agent = AEA(identity, wallet, resources, default_connection=connection.public_id,)
     resources.add_component(
         Skill.from_dir(
             Path(CUR_PATH, "data", "dummy_skill"), agent_context=agent.context
@@ -556,10 +557,10 @@ class TestContextNamespace:
         identity = Identity(agent_name, address=wallet.addresses[DEFAULT_LEDGER])
         connection = _make_local_connection(identity.address, LocalNode())
         resources = Resources()
+        resources.add_connection(connection)
         cls.context_namespace = {"key1": 1, "key2": 2}
         cls.agent = AEA(identity, wallet, resources, **cls.context_namespace)
 
-        resources.add_connection(connection)
         resources.add_component(
             Skill.from_dir(
                 Path(CUR_PATH, "data", "dummy_skill"), agent_context=cls.agent.context

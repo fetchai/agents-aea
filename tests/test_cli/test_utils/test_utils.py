@@ -61,7 +61,6 @@ from aea.configurations.constants import (
     DEFAULT_CONNECTION,
     DEFAULT_LEDGER,
     DEFAULT_PROTOCOL,
-    DEFAULT_SKILL,
     LEDGER_CONNECTION,
 )
 from aea.crypto.fetchai import DEFAULT_CHAIN_ID
@@ -474,7 +473,6 @@ def test_is_item_present_unified(mock_, vendor):
         (PublicId.from_str("fetchai/oef:0.1.0"), False),
         (PublicId.from_str("fetchai/oef:latest"), False),
         (PublicId.from_str(DEFAULT_CONNECTION), False),
-        (PublicId.from_str(DEFAULT_SKILL), False),
         (PublicId.from_str(DEFAULT_PROTOCOL), False),
     ],
 )

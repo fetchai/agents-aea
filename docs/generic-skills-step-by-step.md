@@ -3260,8 +3260,10 @@ aea delete my_generic_buyer
 
 You have completed the "Getting Started" series. Congratulations!
 
+The following guide provides some hints on <a href="../development-setup">AEA development setup</a>.
+
 ### Recommended
 
-We recommend you build your own AEA next. There are many helpful guides on here and a developer community on <a href="https://fetch-ai.slack.com" target="_blank">Slack</a>. Speak to you there!
+We recommend you build your own AEA next. There are many helpful guides on here and a developer community on <a href="https://discord.com/invite/btedfjPJTj" target="_blank">Discord</a>. Speak to you there!
 
 <br />

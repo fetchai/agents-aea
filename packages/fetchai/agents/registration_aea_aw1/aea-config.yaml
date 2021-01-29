@@ -18,7 +18,6 @@ protocols:
 - fetchai/signing:0.9.0
 - fetchai/state_update:0.9.0
 skills:
-- fetchai/error:0.11.0
 - fetchai/registration_aw1:0.4.0
 - fetchai/simple_service_registration:0.15.0
 - fetchai/simple_service_search:0.4.0

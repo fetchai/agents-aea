@@ -261,6 +261,12 @@ class TestEjectCommandReplacesCustomConfigurationReference(BaseTestEjectCommand)
 class TestEjectWithLatest(AEATestCaseEmpty):
     """Test the eject command when a public id 'latest' is provided."""
 
+    @classmethod
+    def setup_class(cls):
+        """Setup class."""
+        super(TestEjectWithLatest, cls).setup_class()
+        cls.add_item("skill", str(ERROR_PUBLIC_ID.to_latest()))
+
     def test_command(self):
         """Run the test."""
         latest_public_id = ERROR_PUBLIC_ID.to_latest()
@@ -275,6 +281,12 @@ class TestEjectWithLatest(AEATestCaseEmpty):
 
 class TestEjectWithSymlink(AEATestCaseEmpty):
     """Test the eject command with symlinks flag."""
+
+    @classmethod
+    def setup_class(cls):
+        """Setup class."""
+        super(TestEjectWithSymlink, cls).setup_class()
+        cls.add_item("skill", str(ERROR_PUBLIC_ID.to_latest()))
 
     def test_command(self):
         """Run the test."""

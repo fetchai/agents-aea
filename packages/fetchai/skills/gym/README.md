@@ -4,13 +4,11 @@
 
 This skill trains an RL algorithm using OpenAI Gym.
 
-This skill is part of the Fetch.ai Gym demo. It trains a reinforcement learning (RL) algorithm using OpenAI Gym. It demonstrate how to wrap a RL agent in a skill by decoupling the RL agent from the `gym.Env`, allowing them to run in separate execution environments.
-
-## Behaviours
+This skill is part of the Fetch.ai Gym demo. It trains a reinforcement learning (RL) algorithm using OpenAI Gym. It demonstrates how to wrap an RL agent in a skill by decoupling the RL agent from `gym.Env`, allowing them to run in separate execution environments.
 
 ## Handlers
 
-* `gym`: handles `ml_trade` messages for negotiating the terms of trade
+* `gym`: handles `gym` messages for interactions with a gym environment.
 
 
 ## Links
