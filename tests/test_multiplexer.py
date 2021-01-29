@@ -16,9 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-from aea.protocols.base import Protocol
-
-
 """This module contains the tests for the Multiplexer."""
 
 import asyncio

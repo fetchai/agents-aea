@@ -349,7 +349,7 @@ class TestSendReceiveEnvelopesSkill(AEATestCaseEmpty):
         sent_envelope = Envelope(
             to=self.agent_name,
             sender=sender,
-            protocol_id=message.protocol_id,
+            protocol_specification_id=message.protocol_specification_id,
             message=message,
         )
 

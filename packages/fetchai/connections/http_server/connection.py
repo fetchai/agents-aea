@@ -485,10 +485,13 @@ class HTTPChannel(BaseAsyncChannel):
         if self.http_server is None:  # pragma: nocover
             raise ValueError("Server not connected, call connect first!")
 
-        if envelope.protocol_specification_id not in self.restricted_to_protocols:
+        if (
+            self.restricted_to_protocols
+            and envelope.protocol_specification_id not in self.restricted_to_protocols
+        ):
             self.logger.error(
-                "This envelope cannot be sent with the http connection: protocol_id={}".format(
-                    envelope.message.protocol_id
+                "This envelope cannot be sent with the http connection: protocol_specification_id={}".format(
+                    envelope.protocol_specification_id
                 )
             )
             raise ValueError("Cannot send message.")

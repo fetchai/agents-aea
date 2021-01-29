@@ -110,9 +110,7 @@ def make_envelope(
         )
     message.sender = sender
     message.to = to
-    return Envelope(
-        to=to, sender=sender, protocol_id=DefaultMessage.protocol_id, message=message,
-    )
+    return Envelope(to=to, sender=sender, message=message,)
 
 
 class GeneratorConnection(Connection):

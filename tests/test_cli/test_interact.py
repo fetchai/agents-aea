@@ -75,7 +75,7 @@ class ConstructMessageTestCase(TestCase):
         envelope = mock.Mock()
         envelope.to = "receiver"
         envelope.sender = "sender"
-        envelope.protocol_id = "protocol-id"
+        envelope.protocol_specification_id = "protocol-id"
 
         envelope.message = "Message"
         message_class = DefaultMessage
