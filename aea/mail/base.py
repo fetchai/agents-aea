@@ -399,13 +399,9 @@ class Envelope:
                 f"Message type: {type(message)} is not supported!"
             )  # pragma: nocover
 
-        if protocol_specification_id is None:
-            raise ValueError(
-                "protocol_specification_id was not specified or auto resolved"
-            )
-
+        # if protocol_specification_id is None then resolution did not yield anything
         self._protocol_id: Optional[PublicId] = protocol_id
-        self._protocol_specification_id: PublicId = protocol_specification_id
+        self._protocol_specification_id: Optional[PublicId] = protocol_specification_id
         self._message = message
         self._context = context if context is not None else EnvelopeContext()
 
@@ -443,17 +439,16 @@ class Envelope:
     @protocol_id.setter
     def protocol_id(self, protocol_id: PublicId) -> None:
         """Set the protocol id."""
-        protocol_specification_id_ = self._get_protocol_specification_id_by_the_protocol_id(
+        self._protocol_specification_id = self._get_protocol_specification_id_by_the_protocol_id(
             protocol_id
         )
-        if protocol_specification_id_ is None:
-            raise ValueError("Non-resolvable protocol.")
-        self._protocol_specification_id = protocol_specification_id_
         self._protocol_id = protocol_id
 
     @property
     def protocol_specification_id(self) -> PublicId:
         """Get protocol_specification_id."""
+        if self._protocol_specification_id is None:
+            raise ValueError("No protocol_specification_id set on envelope.")
         return self._protocol_specification_id
 
     @property
