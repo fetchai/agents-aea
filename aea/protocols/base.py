@@ -411,3 +411,15 @@ class Protocol(Component):
         message_class.serializer = serialize_class
 
         return Protocol(configuration, message_class, **kwargs)
+
+    @property
+    def protocol_id(self) -> PublicId:
+        return self._configuration.public_id
+
+    @property
+    def protocol_specification_id(self) -> PublicId:
+        return self._configuration.protocol_specification_id
+
+    def __repr__(self) -> str:
+        """Get str repr of the protocol."""
+        return f"Protocol({self._configuration.public_id})"

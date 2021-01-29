@@ -42,7 +42,7 @@ class ErrorHandler(AbstractErrorHandler):
         """
         cls.unsupported_protocol_count += 1
         logger.warning(
-            f"Unsupported protocol: {envelope.protocol_id}. You might want to add a handler for this protocol. Sender={envelope.sender}, to={envelope.sender}."
+            f"Unsupported protocol: {envelope.protocol_specification_id}. You might want to add a handler for this protocol. Sender={envelope.sender}, to={envelope.sender}."
         )
 
     @classmethod
@@ -55,7 +55,7 @@ class ErrorHandler(AbstractErrorHandler):
         """
         cls.decoding_error_count += 1
         logger.warning(
-            f"Decoding error for envelope: {envelope}. Protocol_id='{envelope.protocol_id}' and message are inconsistent. Sender={envelope.sender}, to={envelope.sender}."
+            f"Decoding error for envelope: {envelope}. Protocol_specification_id='{envelope.protocol_specification_id}' and message are inconsistent. Sender={envelope.sender}, to={envelope.sender}."
         )
 
     @classmethod
@@ -69,9 +69,9 @@ class ErrorHandler(AbstractErrorHandler):
         cls.unsupported_skill_count += 1
         if envelope.skill_id is None:
             logger.warning(
-                f"Cannot handle envelope: no active handler registered for the protocol_id='{envelope.protocol_id}'. Sender={envelope.sender}, to={envelope.sender}."
+                f"Cannot handle envelope: no active handler registered for the protocol_specification_id='{envelope.protocol_specification_id}'. Sender={envelope.sender}, to={envelope.sender}."
             )
         else:
             logger.warning(
-                f"Cannot handle envelope: no active handler registered for the protocol_id='{envelope.protocol_id}' and skill_id='{envelope.skill_id}'. Sender={envelope.sender}, to={envelope.sender}."
+                f"Cannot handle envelope: no active handler registered for the protocol_specification_id='{envelope.protocol_specification_id}' and skill_id='{envelope.skill_id}'. Sender={envelope.sender}, to={envelope.sender}."
             )

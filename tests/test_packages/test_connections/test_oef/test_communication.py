@@ -124,12 +124,7 @@ class TestDefault(UseOef):
             content=b"hello",
         )
         self.multiplexer.put(
-            Envelope(
-                to=FETCHAI_ADDRESS_ONE,
-                sender=FETCHAI_ADDRESS_ONE,
-                protocol_id=DefaultMessage.protocol_id,
-                message=msg,
-            )
+            Envelope(to=FETCHAI_ADDRESS_ONE, sender=FETCHAI_ADDRESS_ONE, message=msg,)
         )
         recv_msg = self.multiplexer.get(block=True, timeout=3.0)
         assert recv_msg is not None
@@ -172,7 +167,6 @@ class TestOEF(UseOef):
                 Envelope(
                     to=oef_search_request.to,
                     sender=oef_search_request.sender,
-                    protocol_id=oef_search_request.protocol_id,
                     message=oef_search_request,
                 )
             )
@@ -206,7 +200,6 @@ class TestOEF(UseOef):
                 Envelope(
                     to=oef_search_request.to,
                     sender=oef_search_request.sender,
-                    protocol_id=oef_search_request.protocol_id,
                     message=oef_search_request,
                 )
             )
@@ -247,7 +240,6 @@ class TestOEF(UseOef):
                 Envelope(
                     to=oef_search_request.to,
                     sender=oef_search_request.sender,
-                    protocol_id=oef_search_request.protocol_id,
                     message=oef_search_request,
                 )
             )
@@ -294,7 +286,6 @@ class TestOEF(UseOef):
                 Envelope(
                     to=oef_search_registration.to,
                     sender=oef_search_registration.sender,
-                    protocol_id=OefSearchMessage.protocol_id,
                     message=oef_search_registration,
                 )
             )
@@ -311,7 +302,6 @@ class TestOEF(UseOef):
                 Envelope(
                     to=oef_search_request.to,
                     sender=oef_search_request.sender,
-                    protocol_id=oef_search_request.protocol_id,
                     message=oef_search_request,
                 )
             )
@@ -365,7 +355,6 @@ class TestOEF(UseOef):
                 Envelope(
                     to=oef_search_registration.to,
                     sender=oef_search_registration.sender,
-                    protocol_id=oef_search_registration.protocol_id,
                     message=oef_search_registration,
                 )
             )
@@ -384,7 +373,6 @@ class TestOEF(UseOef):
                 Envelope(
                     to=oef_search_request.to,
                     sender=oef_search_request.sender,
-                    protocol_id=oef_search_request.protocol_id,
                     message=oef_search_request,
                 )
             )
@@ -417,7 +405,6 @@ class TestOEF(UseOef):
                 Envelope(
                     to=oef_search_deregistration.to,
                     sender=oef_search_deregistration.sender,
-                    protocol_id=oef_search_deregistration.protocol_id,
                     message=oef_search_deregistration,
                 )
             )
@@ -436,7 +423,6 @@ class TestOEF(UseOef):
                 Envelope(
                     to=oef_search_request.to,
                     sender=oef_search_request.sender,
-                    protocol_id=oef_search_request.protocol_id,
                     message=oef_search_request,
                 )
             )
@@ -486,12 +472,7 @@ class TestFIPA(UseOef):
         cfp_message.to = FETCHAI_ADDRESS_TWO
         cfp_message.sender = FETCHAI_ADDRESS_ONE
         self.multiplexer1.put(
-            Envelope(
-                to=cfp_message.to,
-                sender=cfp_message.sender,
-                protocol_id=cfp_message.protocol_id,
-                message=cfp_message,
-            )
+            Envelope(to=cfp_message.to, sender=cfp_message.sender, message=cfp_message,)
         )
         envelope = self.multiplexer2.get(block=True, timeout=5.0)
         expected_cfp_message = FipaMessage.serializer.decode(envelope.message)
@@ -509,12 +490,7 @@ class TestFIPA(UseOef):
         cfp_none.to = FETCHAI_ADDRESS_TWO
         cfp_none.sender = FETCHAI_ADDRESS_ONE
         self.multiplexer1.put(
-            Envelope(
-                to=cfp_none.to,
-                sender=cfp_none.sender,
-                protocol_id=cfp_none.protocol_id,
-                message=cfp_none,
-            )
+            Envelope(to=cfp_none.to, sender=cfp_none.sender, message=cfp_none,)
         )
         envelope = self.multiplexer2.get(block=True, timeout=5.0)
         expected_cfp_none = FipaMessage.serializer.decode(envelope.message)
@@ -535,10 +511,7 @@ class TestFIPA(UseOef):
         propose_empty.sender = FETCHAI_ADDRESS_ONE
         self.multiplexer1.put(
             Envelope(
-                to=propose_empty.to,
-                sender=propose_empty.sender,
-                protocol_id=propose_empty.protocol_id,
-                message=propose_empty,
+                to=propose_empty.to, sender=propose_empty.sender, message=propose_empty,
             )
         )
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
@@ -563,7 +536,6 @@ class TestFIPA(UseOef):
             Envelope(
                 to=propose_descriptions.to,
                 sender=propose_descriptions.sender,
-                protocol_id=propose_descriptions.protocol_id,
                 message=propose_descriptions,
             )
         )
@@ -584,12 +556,7 @@ class TestFIPA(UseOef):
         accept.to = FETCHAI_ADDRESS_TWO
         accept.sender = FETCHAI_ADDRESS_ONE
         self.multiplexer1.put(
-            Envelope(
-                to=accept.to,
-                sender=accept.sender,
-                protocol_id=FipaMessage.protocol_id,
-                message=accept,
-            )
+            Envelope(to=accept.to, sender=accept.sender, message=accept,)
         )
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         expected_accept = FipaMessage.serializer.decode(envelope.message)
@@ -610,10 +577,7 @@ class TestFIPA(UseOef):
         match_accept.sender = FETCHAI_ADDRESS_ONE
         self.multiplexer1.put(
             Envelope(
-                to=match_accept.to,
-                sender=match_accept.sender,
-                protocol_id=match_accept.protocol_id,
-                message=match_accept,
+                to=match_accept.to, sender=match_accept.sender, message=match_accept,
             )
         )
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
@@ -633,12 +597,7 @@ class TestFIPA(UseOef):
         decline.to = FETCHAI_ADDRESS_TWO
         decline.sender = FETCHAI_ADDRESS_ONE
         self.multiplexer1.put(
-            Envelope(
-                to=decline.to,
-                sender=decline.sender,
-                protocol_id=decline.protocol_id,
-                message=decline,
-            )
+            Envelope(to=decline.to, sender=decline.sender, message=decline,)
         )
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         expected_decline = FipaMessage.serializer.decode(envelope.message)
@@ -661,7 +620,6 @@ class TestFIPA(UseOef):
             Envelope(
                 to=match_accept_w_inform.to,
                 sender=match_accept_w_inform.sender,
-                protocol_id=match_accept_w_inform.protocol_id,
                 message=match_accept_w_inform,
             )
         )
@@ -686,7 +644,6 @@ class TestFIPA(UseOef):
             Envelope(
                 to=accept_w_inform.to,
                 sender=accept_w_inform.sender,
-                protocol_id=accept_w_inform.protocol_id,
                 message=accept_w_inform,
             )
         )
@@ -709,12 +666,7 @@ class TestFIPA(UseOef):
         inform.to = FETCHAI_ADDRESS_TWO
         inform.sender = FETCHAI_ADDRESS_ONE
         self.multiplexer1.put(
-            Envelope(
-                to=inform.to,
-                sender=inform.sender,
-                protocol_id=inform.protocol_id,
-                message=inform,
-            )
+            Envelope(to=inform.to, sender=inform.sender, message=inform,)
         )
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         returned_inform = FipaMessage.serializer.decode(envelope.message)
@@ -827,7 +779,7 @@ class TestFIPA(UseOef):
         envelope = Envelope(
             to=str(self.connection1.connection_id),
             sender="me",
-            protocol_id=DefaultMessage.protocol_id,
+            protocol_specification_id=DefaultMessage.protocol_specification_id,
             message=b"Hello",
         )
         self.multiplexer1.put(envelope)
@@ -1010,9 +962,7 @@ class TestSendWithOEF(UseOef):
             )
             msg.to = str(oef_connection.connection_id)
             msg.sender = FETCHAI_ADDRESS_ONE
-            envelope = Envelope(
-                to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
-            )
+            envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
             with caplog.at_level(logging.DEBUG, "aea.packages.fetchai.connections.oef"):
                 await oef_connection.send(envelope)
                 assert "Could not create dialogue for message=" in caplog.text
@@ -1028,9 +978,7 @@ class TestSendWithOEF(UseOef):
                 performative=OefSearchMessage.Performative.SEARCH_SERVICES,
                 query=query,
             )
-            envelope = Envelope(
-                to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
-            )
+            envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
             await oef_connection.send(envelope)
             envelope = await oef_connection.receive()
             search_result = envelope.message

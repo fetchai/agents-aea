@@ -222,7 +222,10 @@ class LocalNode:
         :param envelope: the envelope
         :return: None
         """
-        if envelope.protocol_id == OefSearchMessage.protocol_id:
+        if (
+            envelope.protocol_specification_id
+            == OefSearchMessage.protocol_specification_id
+        ):
             await self._handle_oef_message(envelope)
         else:
             OEFLocalConnection._ensure_valid_envelope_for_external_comms(  # pylint: disable=protected-access
@@ -282,7 +285,6 @@ class LocalNode:
             error_envelope = Envelope(
                 to=envelope.sender,
                 sender=str(OEFLocalConnection.connection_id),
-                protocol_id=DefaultMessage.protocol_id,
                 message=msg,
             )
             await self._send(error_envelope)
@@ -324,7 +326,6 @@ class LocalNode:
                 envelope = Envelope(
                     to=msg.to,
                     sender=msg.sender,
-                    protocol_id=msg.protocol_id,
                     message=msg,
                     context=dialogue.envelope_context,
                 )
@@ -367,7 +368,6 @@ class LocalNode:
             envelope = Envelope(
                 to=msg.to,
                 sender=msg.sender,
-                protocol_id=msg.protocol_id,
                 message=msg,
                 context=dialogue.envelope_context,
             )

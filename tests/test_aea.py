@@ -177,9 +177,7 @@ def test_react():
         )
         msg.to = agent.identity.address
         msg.sender = agent.identity.address
-        envelope = Envelope(
-            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
-        )
+        envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
 
         with run_in_thread(agent.start, timeout=20, on_exit=agent.stop):
             wait_for_condition(lambda: agent.is_running, timeout=20)
@@ -244,10 +242,9 @@ def test_handle():
             wait_for_condition(lambda: aea.is_running, timeout=10)
             dummy_skill = aea.resources.get_skill(DUMMY_SKILL_PUBLIC_ID)
             dummy_handler = dummy_skill.skill_context.handlers.dummy
-
             # UNSUPPORTED PROTOCOL
             envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
-            envelope.protocol_id = UNKNOWN_PROTOCOL_PUBLIC_ID
+            envelope._protocol_specification_id = UNKNOWN_PROTOCOL_PUBLIC_ID
             # send envelope via localnode back to agent/bypass `outbox` put consistency checks
             aea.outbox.put(envelope)
             wait_for_condition(
@@ -258,7 +255,7 @@ def test_handle():
             envelope = Envelope(
                 to=aea.identity.address,
                 sender=aea.identity.address,
-                protocol_id=DefaultMessage.protocol_id,
+                protocol_specification_id=DefaultMessage.protocol_specification_id,
                 message=b"",
             )
             aea.outbox._multiplexer.put(envelope)
@@ -275,9 +272,7 @@ def test_handle():
             )
             msg.to = aea.identity.address
             msg.sender = aea.identity.address
-            envelope = Envelope(
-                to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
-            )
+            envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
             # send envelope via localnode back to agent/bypass `outbox` put consistency checks
             aea.outbox.put(envelope)
             wait_for_condition(
@@ -288,7 +283,7 @@ def test_handle():
             envelope = Envelope(
                 to=msg.to,
                 sender=msg.sender,
-                protocol_id=DefaultMessage.protocol_id,
+                protocol_specification_id=DefaultMessage.protocol_specification_id,
                 message=encoded_msg,
             )
             # send envelope via localnode back to agent/bypass `outbox` put consistency checks
@@ -332,7 +327,6 @@ def test_initialize_aea_programmatically():
         envelope = Envelope(
             to=expected_message.to,
             sender=expected_message.sender,
-            protocol_id=expected_message.protocol_id,
             message=expected_message,
         )
 
@@ -410,8 +404,6 @@ def test_initialize_aea_programmatically_build_resources():
             resources.add_skill(dummy_skill)
             resources.add_skill(error_skill)
 
-            default_protocol_id = DefaultMessage.protocol_id
-
             expected_message = DefaultMessage(
                 dialogue_reference=("", ""),
                 message_id=1,
@@ -426,10 +418,7 @@ def test_initialize_aea_programmatically_build_resources():
                 wait_for_condition(lambda: aea.is_running, timeout=10)
                 aea.outbox.put(
                     Envelope(
-                        to=agent_name,
-                        sender=agent_name,
-                        protocol_id=default_protocol_id,
-                        message=expected_message,
+                        to=agent_name, sender=agent_name, message=expected_message,
                     )
                 )
 
@@ -529,10 +518,7 @@ def test_no_handlers_registered():
         )
         msg.to = aea.identity.address
         envelope = Envelope(
-            to=aea.identity.address,
-            sender=aea.identity.address,
-            protocol_id=DefaultMessage.protocol_id,
-            message=msg,
+            to=aea.identity.address, sender=aea.identity.address, message=msg,
         )
         with patch.object(
             aea.filter, "get_active_handlers", return_value=[]
@@ -541,7 +527,7 @@ def test_no_handlers_registered():
         ):
             aea.handle_envelope(envelope)
         mock_logger.assert_any_call(
-            f"Cannot handle envelope: no active handler registered for the protocol_id='{DefaultMessage.protocol_id}'. Sender={envelope.sender}, to={envelope.sender}."
+            f"Cannot handle envelope: no active handler registered for the protocol_specification_id='{DefaultMessage.protocol_specification_id}'. Sender={envelope.sender}, to={envelope.sender}."
         )
 
 

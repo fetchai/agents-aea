@@ -61,19 +61,17 @@ def test_add_metric_serialization():
         labels={"label_key": "label_value"},
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to,
-        sender="sender",
-        protocol_id=PrometheusMessage.protocol_id,
-        message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = PrometheusMessage.serializer.decode(actual_envelope.message)
@@ -96,19 +94,17 @@ def test_update_metric_serialization():
         labels={"label_key": "label_value"},
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to,
-        sender="sender",
-        protocol_id=PrometheusMessage.protocol_id,
-        message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = PrometheusMessage.serializer.decode(actual_envelope.message)
@@ -129,19 +125,17 @@ def test_response_serialization():
         message="some_message",
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to,
-        sender="sender",
-        protocol_id=PrometheusMessage.protocol_id,
-        message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = PrometheusMessage.serializer.decode(actual_envelope.message)

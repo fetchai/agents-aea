@@ -56,16 +56,17 @@ def test_request_serialization():
         body=b"some_body",
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=HttpMessage.protocol_id, message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = HttpMessage.serializer.decode(actual_envelope.message)
@@ -88,16 +89,17 @@ def test_response_serialization():
         body=b"some_body",
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=HttpMessage.protocol_id, message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = HttpMessage.serializer.decode(actual_envelope.message)

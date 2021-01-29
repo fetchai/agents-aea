@@ -117,10 +117,7 @@ class TestLibp2pConnectionRelayNodeRestart:
             content=b"hello",
         )
         envelope = Envelope(
-            to=addr_2,
-            sender=addr_1,
-            protocol_id=DefaultMessage.protocol_id,
-            message=DefaultSerializer().encode(msg),
+            to=addr_2, sender=addr_1, message=DefaultSerializer().encode(msg),
         )
 
         self.multiplexer.put(envelope)
@@ -129,7 +126,10 @@ class TestLibp2pConnectionRelayNodeRestart:
         assert delivered_envelope is not None
         assert delivered_envelope.to == envelope.to
         assert delivered_envelope.sender == envelope.sender
-        assert delivered_envelope.protocol_id == envelope.protocol_id
+        assert (
+            delivered_envelope.protocol_specification_id
+            == envelope.protocol_specification_id
+        )
         assert delivered_envelope.message_bytes == envelope.message_bytes
 
         self.multiplexer_relay.disconnect()
@@ -142,10 +142,7 @@ class TestLibp2pConnectionRelayNodeRestart:
             content=b"helloAfterRestart",
         )
         envelope = Envelope(
-            to=addr_2,
-            sender=addr_1,
-            protocol_id=DefaultMessage.protocol_id,
-            message=DefaultSerializer().encode(msg),
+            to=addr_2, sender=addr_1, message=DefaultSerializer().encode(msg),
         )
 
         self.multiplexer.put(envelope)
@@ -168,7 +165,10 @@ class TestLibp2pConnectionRelayNodeRestart:
         assert delivered_envelope is not None
         assert delivered_envelope.to == envelope.to
         assert delivered_envelope.sender == envelope.sender
-        assert delivered_envelope.protocol_id == envelope.protocol_id
+        assert (
+            delivered_envelope.protocol_specification_id
+            == envelope.protocol_specification_id
+        )
         assert delivered_envelope.message_bytes == envelope.message_bytes
 
     @classmethod
@@ -249,10 +249,7 @@ class TestLibp2pConnectionAgentMobility:
             content=b"hello",
         )
         envelope = Envelope(
-            to=addr_2,
-            sender=addr_1,
-            protocol_id=DefaultMessage.protocol_id,
-            message=DefaultSerializer().encode(msg),
+            to=addr_2, sender=addr_1, message=DefaultSerializer().encode(msg),
         )
 
         self.multiplexer1.put(envelope)
@@ -261,7 +258,10 @@ class TestLibp2pConnectionAgentMobility:
         assert delivered_envelope is not None
         assert delivered_envelope.to == envelope.to
         assert delivered_envelope.sender == envelope.sender
-        assert delivered_envelope.protocol_id == envelope.protocol_id
+        assert (
+            delivered_envelope.protocol_specification_id
+            == envelope.protocol_specification_id
+        )
         assert delivered_envelope.message_bytes == envelope.message_bytes
 
         self.multiplexer2.disconnect()
@@ -283,9 +283,7 @@ class TestLibp2pConnectionAgentMobility:
             performative=DefaultMessage.Performative.BYTES,
             content=b"helloAfterChangingPeer",
         )
-        envelope = Envelope(
-            to=addr_2, sender=addr_1, protocol_id=msg.protocol_id, message=msg.encode(),
-        )
+        envelope = Envelope(to=addr_2, sender=addr_1, message=msg.encode(),)
 
         self.multiplexer1.put(envelope)
 
@@ -294,7 +292,10 @@ class TestLibp2pConnectionAgentMobility:
         assert delivered_envelope is not None
         assert delivered_envelope.to == envelope.to
         assert delivered_envelope.sender == envelope.sender
-        assert delivered_envelope.protocol_id == envelope.protocol_id
+        assert (
+            delivered_envelope.protocol_specification_id
+            == envelope.protocol_specification_id
+        )
         assert delivered_envelope.message_bytes == envelope.message_bytes
 
     @classmethod

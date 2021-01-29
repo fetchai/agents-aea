@@ -359,4 +359,5 @@ class ThreadedRuntime(AsyncRuntime):
             ),
             default_routing=multiplexer_options.get("default_routing"),
             default_connection=multiplexer_options.get("default_connection"),
+            protocols=multiplexer_options.get("protocols", []),
         )

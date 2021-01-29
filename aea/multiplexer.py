@@ -34,7 +34,7 @@ from aea.helpers.async_utils import AsyncState, Runnable, ThreadedAsyncRunner
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import WithLogger, get_logger
 from aea.mail.base import AEAConnectionError, Empty, Envelope, EnvelopeContext
-from aea.protocols.base import Message
+from aea.protocols.base import Message, Protocol
 
 
 class MultiplexerStatus(AsyncState):
@@ -82,6 +82,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
         agent_name: str = "standalone",
         default_routing: Optional[Dict[PublicId, PublicId]] = None,
         default_connection: Optional[PublicId] = None,
+        protocols: Optional[List[Protocol]] = None,
     ):
         """
         Initialize the connection multiplexer.
@@ -126,6 +127,9 @@ class AsyncMultiplexer(Runnable, WithLogger):
         self._setup(connections or [], default_routing, default_connection)
 
         self._connection_status = MultiplexerStatus()
+        self._specification_id_to_protocol_id = {
+            p.protocol_specification_id: p.protocol_id for p in protocols or []
+        }
 
         self._in_queue = AsyncFriendlyQueue()  # type: AsyncFriendlyQueue
         self._out_queue = None  # type: Optional[asyncio.Queue]
@@ -149,6 +153,22 @@ class AsyncMultiplexer(Runnable, WithLogger):
             await asyncio.gather(self._recv_loop_task, self._send_loop_task)
         finally:
             await self.disconnect()
+
+    def _get_protocol_id_for_envelope(self, envelope: Envelope) -> PublicId:
+        """Get protocol id for envelope."""
+        if isinstance(envelope.message, Message):
+            return cast(Message, envelope.message).protocol_id
+
+        protocol_id = self._specification_id_to_protocol_id.get(
+            envelope.protocol_specification_id
+        )
+
+        if not protocol_id:
+            raise ValueError(
+                f"Can not resolve protocol id for {envelope}, pass protocols supported to multipelxer instance {self._specification_id_to_protocol_id}"
+            )
+
+        return protocol_id
 
     @property
     def default_connection(self) -> Optional[Connection]:
@@ -514,7 +534,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
         if envelope_context is not None:
             connection_id = envelope_context.connection_id
 
-        envelope_protocol_id = envelope.protocol_specification_id
+        envelope_protocol_id = self._get_protocol_id_for_envelope(envelope)
 
         # second, try to route by default routing
         if connection_id is None and envelope_protocol_id in self.default_routing:

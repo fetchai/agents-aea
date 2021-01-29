@@ -168,7 +168,6 @@ class TestHTTPServer:
         response_envelope = Envelope(
             to=envelope.sender,
             sender=envelope.to,
-            protocol_id=envelope.protocol_id,
             context=envelope.context,
             message=message,
         )
@@ -202,7 +201,6 @@ class TestHTTPServer:
         response_envelope = Envelope(
             to=envelope.sender,
             sender=envelope.to,
-            protocol_id=envelope.protocol_id,
             context=envelope.context,
             message=message,
         )
@@ -242,7 +240,6 @@ class TestHTTPServer:
         response_envelope = Envelope(
             to=incorrect_message.to,
             sender=envelope.to,
-            protocol_id=envelope.protocol_id,
             context=envelope.context,
             message=incorrect_message,
         )
@@ -280,7 +277,6 @@ class TestHTTPServer:
         response_envelope = Envelope(
             to=message.to,
             sender=envelope.to,
-            protocol_id=envelope.protocol_id,
             context=envelope.context,
             message=message,
         )
@@ -319,7 +315,6 @@ class TestHTTPServer:
         response_envelope = Envelope(
             to=message.to,
             sender=envelope.to,
-            protocol_id=envelope.protocol_id,
             context=envelope.context,
             message=message,
         )
@@ -396,12 +391,7 @@ class TestHTTPServer:
         )
         message.to = str(HTTPServerConnection.connection_id)
         message.sender = "from_key"
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         await self.http_connection.send(envelope)
 
     @pytest.mark.asyncio
@@ -443,7 +433,6 @@ class TestHTTPServer:
         response_envelope = Envelope(
             to=message.to,
             sender=envelope.to,
-            protocol_id=envelope.protocol_id,
             context=envelope.context,
             message=message,
         )
@@ -471,7 +460,7 @@ class TestHTTPServer:
         envelope = Envelope(
             to="receiver",
             sender="sender",
-            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
+            protocol_specification_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=message,
         )
         envelope.protocol_id = UNKNOWN_PROTOCOL_PUBLIC_ID
