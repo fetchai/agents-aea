@@ -750,32 +750,3 @@ class ERC1155Contract(Contract):
                 trade_nonce = random.randrange(0, MAX_UINT_256)  # nosec
             return {"trade_nonce": trade_nonce}
         raise NotImplementedError
-
-    @staticmethod
-    def get_last_code_id(ledger_api: LedgerApi) -> int:
-        """
-        Uses wasmcli to get ID of latest deployed .wasm bytecode
-
-        :param ledger_api: the ledger API
-
-        :return: code id of last deployed .wasm bytecode
-        """
-        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
-            cosmos_api = cast(CosmosApi, ledger_api)
-            return cosmos_api.get_last_code_id()
-        raise NotImplementedError
-
-    @staticmethod
-    def get_contract_address(ledger_api: LedgerApi, code_id: int) -> str:
-        """
-        Uses wasmcli to get contract address of latest initialised contract by its ID
-
-        :param ledger_api: the ledger API
-        :param code_id: the ID of stored contract CosmWasm
-
-        :return: contract address of last initialised contract
-        """
-        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
-            cosmos_api = cast(CosmosApi, ledger_api)
-            return cosmos_api.get_contract_address(code_id)
-        raise NotImplementedError
