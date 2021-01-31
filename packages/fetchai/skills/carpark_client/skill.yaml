@@ -7,7 +7,7 @@ description: The carpark client skill implements the functionality to run a clie
 license: Apache-2.0
 aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
-  README.md: QmabRmPLBXqeq38eFrcsyTn4Xui1GdJzT2jFYSYVfmERiN
+  README.md: QmXD1pndXTJafb8YY4xRTM47LCoeiQ9VxAvzj474TNknT4
   __init__.py: QmUw6rb7ATmuNoruWfkmq7zd8HdN7nujyviDNmZgSSA8nB
   behaviours.py: QmWRRAXwJf7mEcV4L2DdG43zkyg55PBViiLnpy1Chj28xn
   dialogues.py: QmcUgBjxeytE5aAx3VvPyna5EcBuqck9KazG3HygCWjawv

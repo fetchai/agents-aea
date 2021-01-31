@@ -59,6 +59,7 @@ class BaseRuntime(Runnable, WithLogger):
     def __init__(
         self,
         agent: AbstractAgent,
+        multiplexer_options: Dict,
         loop_mode: Optional[str] = None,
         loop: Optional[AbstractEventLoop] = None,
         threaded: bool = False,
@@ -78,7 +79,9 @@ class BaseRuntime(Runnable, WithLogger):
         self._state: AsyncState = AsyncState(RuntimeStates.stopped, RuntimeStates)
         self._state.add_callback(self._log_runtime_state)
 
-        self._multiplexer: AsyncMultiplexer = self._get_multiplexer_instance()
+        self._multiplexer: AsyncMultiplexer = self._get_multiplexer_instance(
+            multiplexer_options
+        )
         self._task_manager = TaskManager()
         self._decision_maker: Optional[DecisionMaker] = None
         self._storage: Optional[Storage] = self._get_storage(agent)
@@ -104,12 +107,6 @@ class BaseRuntime(Runnable, WithLogger):
         """Get current loop mode."""
         return self._loop_mode
 
-    def setup_multiplexer(self) -> None:
-        """Set up the multiplexer."""
-        setup_options = self._agent.get_multiplexer_setup_options()
-        if setup_options:
-            self.multiplexer.setup(**setup_options)
-
     @property
     def task_manager(self) -> TaskManager:
         """Get the task manager."""
@@ -125,16 +122,17 @@ class BaseRuntime(Runnable, WithLogger):
         """Get multiplexer."""
         return self._multiplexer
 
-    def _get_multiplexer_instance(self) -> AsyncMultiplexer:
+    def _get_multiplexer_instance(self, multiplexer_options: Dict) -> AsyncMultiplexer:
         """Create multiplexer instance."""
-        exception_policy = getattr(
-            self._agent, "_connection_exception_policy", ExceptionPolicyEnum.propagate
-        )
         return AsyncMultiplexer(
-            self._agent.connections,
             loop=self.loop,
-            exception_policy=exception_policy,
             agent_name=self._agent.name,
+            connections=multiplexer_options["connections"],
+            exception_policy=multiplexer_options.get(
+                "connection_exception_policy", ExceptionPolicyEnum.propagate
+            ),
+            default_routing=multiplexer_options.get("default_routing"),
+            default_connection=multiplexer_options.get("default_connection"),
         )
 
     def _get_main_loop_class(self, loop_mode: str) -> Type[BaseAgentLoop]:
@@ -227,6 +225,7 @@ class AsyncRuntime(BaseRuntime):
     def __init__(
         self,
         agent: AbstractAgent,
+        multiplexer_options: Dict,
         loop_mode: Optional[str] = None,
         loop: Optional[AbstractEventLoop] = None,
         threaded=False,
@@ -239,7 +238,13 @@ class AsyncRuntime(BaseRuntime):
         :param loop: optional event loop. if not provided a new one will be created.
         :return: None
         """
-        super().__init__(agent=agent, loop_mode=loop_mode, loop=loop, threaded=threaded)
+        super().__init__(
+            agent=agent,
+            multiplexer_options=multiplexer_options,
+            loop_mode=loop_mode,
+            loop=loop,
+            threaded=threaded,
+        )
         self._task: Optional[asyncio.Task] = None
 
     def set_loop(self, loop: AbstractEventLoop) -> None:
@@ -310,8 +315,6 @@ class AsyncRuntime(BaseRuntime):
         if not self._loop:  # pragma: nocover
             raise ValueError("no loop is set for runtime.")
 
-        self.setup_multiplexer()
-
         self.multiplexer.set_loop(self._loop)
         self.multiplexer.start()
         await self.multiplexer.wait_completed()
@@ -345,6 +348,16 @@ class AsyncRuntime(BaseRuntime):
 class ThreadedRuntime(AsyncRuntime):
     """Run agent and multiplexer in different threads with own asyncio loops."""
 
-    def _get_multiplexer_instance(self) -> AsyncMultiplexer:
+    def _get_multiplexer_instance(self, multiplexer_options: Dict) -> AsyncMultiplexer:
         """Create multiplexer instance."""
-        return AsyncMultiplexer(self._agent.connections, threaded=True)
+        return AsyncMultiplexer(
+            connections=multiplexer_options["connections"],
+            threaded=True,
+            agent_name=self._agent.name,
+            exception_policy=multiplexer_options.get(
+                "connection_exception_policy", ExceptionPolicyEnum.propagate
+            ),
+            default_routing=multiplexer_options.get("default_routing"),
+            default_connection=multiplexer_options.get("default_connection"),
+            protocols=multiplexer_options.get("protocols", []),
+        )

@@ -34,7 +34,7 @@ from aea.helpers.async_utils import AsyncState, Runnable, ThreadedAsyncRunner
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import WithLogger, get_logger
 from aea.mail.base import AEAConnectionError, Empty, Envelope, EnvelopeContext
-from aea.protocols.base import Message
+from aea.protocols.base import Message, Protocol
 
 
 class MultiplexerStatus(AsyncState):
@@ -80,6 +80,9 @@ class AsyncMultiplexer(Runnable, WithLogger):
         exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
         threaded: bool = False,
         agent_name: str = "standalone",
+        default_routing: Optional[Dict[PublicId, PublicId]] = None,
+        default_connection: Optional[PublicId] = None,
+        protocols: Optional[List[Protocol]] = None,
     ):
         """
         Initialize the connection multiplexer.
@@ -95,19 +98,45 @@ class AsyncMultiplexer(Runnable, WithLogger):
         logger = get_logger(__name__, agent_name)
         WithLogger.__init__(self, logger=logger)
         Runnable.__init__(self, loop=loop, threaded=threaded)
+
         self._connections: List[Connection] = []
         self._id_to_connection: Dict[PublicId, Connection] = {}
         self._default_connection: Optional[Connection] = None
-        self._initialize_connections_if_any(connections, default_connection_index)
+
+        connections = connections or []
+        if not default_connection and connections:
+            enforce(
+                len(connections) - 1 >= default_connection_index,
+                "default_connection_index os out of connections range!",
+            )
+            default_connection = connections[default_connection_index].connection_id
+
+        if default_connection:
+            enforce(
+                bool(
+                    [
+                        i.connection_id.same_prefix(default_connection)
+                        for i in connections
+                    ]
+                ),
+                f"Default connection {default_connection} does not present in connections list!",
+            )
+
+        self._default_routing = {}  # type: Dict[PublicId, PublicId]
+
+        self._setup(connections or [], default_routing, default_connection)
 
         self._connection_status = MultiplexerStatus()
+        self._specification_id_to_protocol_id = {
+            p.protocol_specification_id: p.protocol_id for p in protocols or []
+        }
 
         self._in_queue = AsyncFriendlyQueue()  # type: AsyncFriendlyQueue
         self._out_queue = None  # type: Optional[asyncio.Queue]
 
         self._recv_loop_task = None  # type: Optional[asyncio.Task]
         self._send_loop_task = None  # type: Optional[asyncio.Task]
-        self._default_routing = {}  # type: Dict[PublicId, PublicId]
+
         self._loop: asyncio.AbstractEventLoop = loop if loop is not None else asyncio.new_event_loop()
         self._lock: asyncio.Lock = asyncio.Lock(loop=self._loop)
         self.set_loop(self._loop)
@@ -125,6 +154,22 @@ class AsyncMultiplexer(Runnable, WithLogger):
         finally:
             await self.disconnect()
 
+    def _get_protocol_id_for_envelope(self, envelope: Envelope) -> PublicId:
+        """Get protocol id for envelope."""
+        if isinstance(envelope.message, Message):
+            return cast(Message, envelope.message).protocol_id
+
+        protocol_id = self._specification_id_to_protocol_id.get(
+            envelope.protocol_specification_id
+        )
+
+        if not protocol_id:
+            raise ValueError(
+                f"Can not resolve protocol id for {envelope}, pass protocols supported to multipelxer instance {self._specification_id_to_protocol_id}"
+            )
+
+        return protocol_id
+
     @property
     def default_connection(self) -> Optional[Connection]:
         """Get the default connection."""
@@ -139,17 +184,6 @@ class AsyncMultiplexer(Runnable, WithLogger):
         """
         self._loop = loop
         self._lock = asyncio.Lock(loop=self._loop)
-
-    def _initialize_connections_if_any(
-        self, connections: Optional[Sequence[Connection]], default_connection_index: int
-    ):
-        if connections is not None and len(connections) > 0:
-            enforce(
-                (0 <= default_connection_index <= len(connections) - 1),
-                "Default connection index out of range.",
-            )
-            for idx, connection in enumerate(connections):
-                self.add_connection(connection, idx == default_connection_index)
 
     def _handle_exception(self, fn: Callable, exc: Exception) -> None:
         """
@@ -500,9 +534,11 @@ class AsyncMultiplexer(Runnable, WithLogger):
         if envelope_context is not None:
             connection_id = envelope_context.connection_id
 
+        envelope_protocol_id = self._get_protocol_id_for_envelope(envelope)
+
         # second, try to route by default routing
-        if connection_id is None and envelope.protocol_id in self.default_routing:
-            connection_id = self.default_routing[envelope.protocol_id]
+        if connection_id is None and envelope_protocol_id in self.default_routing:
+            connection_id = self.default_routing[envelope_protocol_id]
             self.logger.debug("Using default routing: {}".format(connection_id))
 
         if connection_id is not None and connection_id not in self._id_to_connection:
@@ -522,11 +558,11 @@ class AsyncMultiplexer(Runnable, WithLogger):
         connection = cast(Connection, connection)
         if (
             len(connection.restricted_to_protocols) > 0
-            and envelope.protocol_id not in connection.restricted_to_protocols
+            and envelope_protocol_id not in connection.restricted_to_protocols
         ):
             self.logger.warning(
                 "Connection {} cannot handle protocol {}. Cannot send the envelope.".format(
-                    connection.connection_id, envelope.protocol_id
+                    connection.connection_id, envelope_protocol_id
                 )
             )
             return
@@ -597,7 +633,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
         else:
             self.out_queue.put_nowait(envelope)
 
-    def setup(
+    def _setup(
         self,
         connections: Collection[Connection],
         default_routing: Optional[Dict[PublicId, PublicId]] = None,
@@ -733,11 +769,7 @@ class InBox:
         if envelope is None:  # pragma: nocover
             raise Empty()
 
-        self._multiplexer.logger.debug(
-            "Incoming envelope: to='{}' sender='{}' protocol_id='{}' message='{!r}'".format(
-                envelope.to, envelope.sender, envelope.protocol_id, envelope.message
-            )
-        )
+        self._multiplexer.logger.debug(f"Incoming {envelope}")
         return envelope
 
     def get_nowait(self) -> Optional[Envelope]:
@@ -765,11 +797,7 @@ class InBox:
         if envelope is None:  # pragma: nocover
             raise Empty()
 
-        self._multiplexer.logger.debug(
-            "Incoming envelope: to='{}' sender='{}' protocol_id='{}' message='{!r}'".format(
-                envelope.to, envelope.sender, envelope.protocol_id, envelope.message
-            )
-        )
+        self._multiplexer.logger.debug(f"Incoming envelope: {envelope}")
         return envelope
 
     async def async_wait(self) -> None:
@@ -811,15 +839,7 @@ class OutBox:
         :param envelope: the envelope.
         :return: None
         """
-        self._multiplexer.logger.debug(
-            "Put an envelope in the queue: to='{}' sender='{}' protocol_id='{}' message='{!r}' context='{}'.".format(
-                envelope.to,
-                envelope.sender,
-                envelope.protocol_id,
-                envelope.message,
-                envelope.context,
-            )
-        )
+        self._multiplexer.logger.debug(f"Put an envelope in the queue: {envelope}.")
         if not isinstance(envelope.message, Message):
             raise ValueError(
                 "Only Message type allowed in envelope message field when putting into outbox."
@@ -850,10 +870,6 @@ class OutBox:
         if not message.has_sender:
             raise ValueError("Provided message has message.sender not set.")
         envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-            context=context,
+            to=message.to, sender=message.sender, message=message, context=context,
         )
         self.put(envelope)

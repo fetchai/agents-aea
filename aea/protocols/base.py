@@ -45,6 +45,7 @@ class Message:
     """This class implements a message."""
 
     protocol_id = None  # type: PublicId
+    protocol_specification_id = None  # type: PublicId
     serializer = None  # type: Type["Serializer"]
 
     __slots__ = ("_slots", "_to", "_sender")
@@ -344,9 +345,12 @@ class Protocol(Component):
         """
         super().__init__(configuration, **kwargs)
         self._message_class = message_class
-        ProtocolSpecificationsRegistry.register(
-            configuration.public_id, configuration.protocol_specification_id
-        )
+        self._specification_id = configuration.protocol_specification_id
+
+    @property
+    def specification_id(self):
+        """Get protocol specification_id."""
+        return self._specification_id
 
     @property
     def serializer(self) -> Type[Serializer]:
@@ -408,42 +412,14 @@ class Protocol(Component):
 
         return Protocol(configuration, message_class, **kwargs)
 
+    @property
+    def protocol_id(self) -> PublicId:
+        return self._configuration.public_id
 
-class ProtocolSpecificationsRegistry:
-    """Registry to store protocol id and corresponding specification ids."""
+    @property
+    def protocol_specification_id(self) -> PublicId:
+        return self._configuration.protocol_specification_id
 
-    PROTOCOL_TO_SPECIFICATION: Dict[PublicId, PublicId] = {}
-    SPECIFICATION_TO_PROTOCOL: Dict[PublicId, PublicId] = {}
-
-    @classmethod
-    def register(
-        cls, protocol_id: PublicId, protocol_specification_id: PublicId
-    ) -> None:
-        """Register protocol id with protocol specification id."""
-        cls.PROTOCOL_TO_SPECIFICATION[protocol_id] = protocol_specification_id
-        cls.SPECIFICATION_TO_PROTOCOL[protocol_specification_id] = protocol_id
-
-    @classmethod
-    def get_specification_id_by_protocol_id(
-        cls, protocol_id: PublicId
-    ) -> Optional[PublicId]:
-        """Get specification id by the protocol id.
-
-        :param protocol_id: PublicId
-
-        :return: PublicId if protocol registered otherwise None
-        """
-        return cls.PROTOCOL_TO_SPECIFICATION.get(protocol_id, None)
-
-    @classmethod
-    def get_protocol_id_by_specification_id(
-        cls, protocol_specification_id: PublicId
-    ) -> Optional[PublicId]:
-        """Get protocol id by the specification id.
-
-        :param protocol_specification_id: PublicId
-
-        :return: PublicId if protocol registered otherwise None
-        """
-
-        return cls.SPECIFICATION_TO_PROTOCOL.get(protocol_specification_id, None)
+    def __repr__(self) -> str:
+        """Get str repr of the protocol."""
+        return f"Protocol({self._configuration.public_id})"

@@ -38,6 +38,7 @@ class StateUpdateMessage(Message):
     """A protocol for state updates to the decision maker state."""
 
     protocol_id = PublicId.from_str("fetchai/state_update:0.9.0")
+    protocol_specification_id = PublicId.from_str("fetchai/state_update:0.1.0")
 
     class Performative(Message.Performative):
         """Performatives for the state_update protocol."""

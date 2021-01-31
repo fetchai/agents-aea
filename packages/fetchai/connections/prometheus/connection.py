@@ -145,9 +145,12 @@ class PrometheusChannel:
         """
         sender = envelope.sender
         self.logger.debug("Processing message from {}: {}".format(sender, envelope))
-        if envelope.protocol_id != PrometheusMessage.protocol_id:
+        if (
+            envelope.protocol_specification_id
+            != PrometheusMessage.protocol_specification_id
+        ):
             raise ValueError(
-                f"Protocol {envelope.protocol_id} is not valid for prometheus."
+                f"Protocol {envelope.protocol_specification_id} is not valid for prometheus."
             )
         await self._handle_prometheus_message(envelope)
 
@@ -187,13 +190,7 @@ class PrometheusChannel:
             message=response_msg,
         )
         context = cast(EnvelopeContext, envelope.context)
-        envelope = Envelope(
-            to=msg.to,
-            sender=msg.sender,
-            protocol_id=msg.protocol_id,
-            message=msg,
-            context=context,
-        )
+        envelope = Envelope(to=msg.to, sender=msg.sender, message=msg, context=context,)
         await self._send(envelope)
 
     async def _handle_add_metric(self, message: PrometheusMessage) -> Tuple[int, str]:

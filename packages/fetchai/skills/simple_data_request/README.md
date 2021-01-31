@@ -10,4 +10,4 @@ This skill is used to request data from a HTTP endpoint and then save it in the 
 
 ## Handlers
 
-* `http`: processes incoming HTTP messages. Data received in responses is saved in the shared state using the key specified in the skill configuration: `shared_state_key`.
+* `http`: handles incoming `http` messages. Data received in responses is saved in the shared state using the key specified in the skill configuration: `shared_state_key`.

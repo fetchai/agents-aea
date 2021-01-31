@@ -123,11 +123,17 @@ class LedgerConnection(Connection):
         :return: None
         """
         dispatcher: RequestDispatcher
-        if envelope.protocol_id == LedgerApiMessage.protocol_id:
+        if (
+            envelope.protocol_specification_id
+            == LedgerApiMessage.protocol_specification_id
+        ):
             if self._ledger_dispatcher is None:  # pragma: nocover
                 raise ValueError("No ledger dispatcher set.")
             dispatcher = self._ledger_dispatcher
-        elif envelope.protocol_id == ContractApiMessage.protocol_id:
+        elif (
+            envelope.protocol_specification_id
+            == ContractApiMessage.protocol_specification_id
+        ):
             if self._contract_dispatcher is None:  # pragma: nocover
                 raise ValueError("No contract dispatcher set.")
             dispatcher = self._contract_dispatcher
@@ -181,7 +187,6 @@ class LedgerConnection(Connection):
             response_envelope = Envelope(
                 to=request.sender,
                 sender=request.to,
-                protocol_id=response_message.protocol_id,
                 message=response_message,
                 context=request.context,
             )

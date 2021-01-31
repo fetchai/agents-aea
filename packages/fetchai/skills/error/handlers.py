@@ -94,8 +94,8 @@ class ErrorHandler(Handler):
         :return: None
         """
         self.context.logger.warning(
-            "Decoding error for envelope: {}. Protocol_id='{}' and message='{!r}' are inconsistent.".format(
-                envelope, envelope.protocol_id, envelope.message
+            "Decoding error for envelope: {}. protocol_specification_id='{}' and message='{!r}' are inconsistent.".format(
+                envelope, envelope.protocol_specification_id, envelope.message
             )
         )
         encoded_envelope = base64.b85encode(envelope.encode())
@@ -121,14 +121,14 @@ class ErrorHandler(Handler):
         """
         if envelope.skill_id is None:
             self.context.logger.warning(
-                "Cannot handle envelope: no active handler registered for the protocol_id='{}'.".format(
-                    envelope.protocol_id
+                "Cannot handle envelope: no active handler registered for the protocol_specification_id='{}'.".format(
+                    envelope.protocol_specification_id
                 )
             )
         else:
             self.context.logger.warning(
-                "Cannot handle envelope: no active handler registered for the protocol_id='{}' and skill_id='{}'.".format(
-                    envelope.protocol_id, envelope.skill_id
+                "Cannot handle envelope: no active handler registered for the protocol_specification_id='{}' and skill_id='{}'.".format(
+                    envelope.protocol_specification_id, envelope.skill_id
                 )
             )
         encoded_envelope = base64.b85encode(envelope.encode())

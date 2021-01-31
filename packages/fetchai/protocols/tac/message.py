@@ -38,6 +38,7 @@ class TacMessage(Message):
     """The tac protocol implements the messages an AEA needs to participate in the TAC."""
 
     protocol_id = PublicId.from_str("fetchai/tac:0.12.0")
+    protocol_specification_id = PublicId.from_str("fetchai/tac:0.1.0")
 
     ErrorCode = CustomErrorCode
 

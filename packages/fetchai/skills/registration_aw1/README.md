@@ -10,8 +10,8 @@ The `registration_aw1` skill is for registration in Agent World 1.
 
 ## Handlers
 
-* `registration`: handles register messages.
-* `signing`: handles signing messages.
+* `registration`: handles `register` messages.
+* `signing`: handles `signing` messages for transaction signing by the decision maker
 
 ## Models
 

@@ -419,19 +419,25 @@ class SOEFChannel:
         :param envelope: envelope to check protocol of
         :return: None
         """
-        is_in_excluded = envelope.protocol_id in (self.excluded_protocols or [])
-        is_in_restricted = not self.restricted_to_protocols or envelope.protocol_id in (
-            self.restricted_to_protocols or []
+        is_in_excluded = envelope.protocol_specification_id in (
+            self.excluded_protocols or []
+        )
+        is_in_restricted = (
+            not self.restricted_to_protocols
+            or envelope.protocol_specification_id
+            in (self.restricted_to_protocols or [])
         )
 
         if is_in_excluded or not is_in_restricted:
             self.logger.error(
                 "This envelope cannot be sent with the soef connection: protocol_id={}".format(
-                    envelope.protocol_id
+                    envelope.protocol_specification_id
                 )
             )
             raise ValueError(
-                "Cannot send message, invalid protocol: {}".format(envelope.protocol_id)
+                "Cannot send message, invalid protocol: {}".format(
+                    envelope.protocol_specification_id
+                )
             )
 
     async def send(self, envelope: Envelope) -> None:
@@ -602,7 +608,6 @@ class SOEFChannel:
         envelope = Envelope(
             to=message.to,
             sender=message.sender,
-            protocol_id=message.protocol_id,
             message=message,
             context=oef_search_dialogue.envelope_context,
         )
@@ -922,7 +927,6 @@ class SOEFChannel:
         envelope = Envelope(
             to=message.to,
             sender=message.sender,
-            protocol_id=message.protocol_id,
             message=message,
             context=oef_search_dialogue.envelope_context,
         )
@@ -1156,7 +1160,6 @@ class SOEFChannel:
         envelope = Envelope(
             to=message.to,
             sender=message.sender,
-            protocol_id=message.protocol_id,
             message=message,
             context=oef_search_dialogue.envelope_context,
         )

@@ -20,7 +20,7 @@
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Optional, Tuple, Union, cast
+from typing import Optional, Tuple, Union
 from urllib.parse import urlparse
 
 from aea.common import Address
@@ -28,7 +28,7 @@ from aea.configurations.base import PackageId, PublicId
 from aea.configurations.constants import CONNECTION, SKILL
 from aea.exceptions import enforce
 from aea.mail import base_pb2
-from aea.protocols.base import Message, ProtocolSpecificationsRegistry
+from aea.protocols.base import Message
 
 
 _default_logger = logging.getLogger(__name__)
@@ -314,52 +314,11 @@ class Envelope:
 
     default_serializer = DefaultEnvelopeSerializer()
 
-    @staticmethod
-    def _get_protocol_specification_id_by_the_protocol_id(
-        protocol_id: PublicId,
-    ) -> PublicId:
-        """
-        Get protocol specification id  from protocol id.
-
-        If not protocol was registered with given specification id, returns protocol specification id  itself.
-
-        :param protocol_id: PublicId
-
-        :return: PublicId
-        """
-        return (
-            ProtocolSpecificationsRegistry.get_specification_id_by_protocol_id(
-                protocol_id
-            )
-            or protocol_id
-        )
-
-    @staticmethod
-    def _get_protocol_id_by_protocol_specification_id(
-        protocol_specification_id: PublicId,
-    ) -> PublicId:
-        """
-        Get protocol id from specification id.
-
-        If not protocol was registered with given specification id, returns protocol_id itself.
-
-        :param protocol_specification_id: PublicId
-
-        :return: PublicId
-        """
-        return (
-            ProtocolSpecificationsRegistry.get_protocol_id_by_specification_id(
-                protocol_specification_id
-            )
-            or protocol_specification_id
-        )
-
     def __init__(
         self,
         to: Address,
         sender: Address,
         message: Union[Message, bytes],
-        protocol_id: Optional[PublicId] = None,
         context: Optional[EnvelopeContext] = None,
         protocol_specification_id: Optional[PublicId] = None,
     ):
@@ -368,9 +327,9 @@ class Envelope:
 
         :param to: the address of the receiver.
         :param sender: the address of the sender.
-        :param protocol_id: the protocol id.
         :param message: the protocol-specific message.
         :param context: the optional envelope context.
+        :param protocol_specification_id: the protocol specification id (wire id).
         """
         enforce(isinstance(to, str), f"To must be string. Found '{type(to)}'")
         enforce(
@@ -388,42 +347,25 @@ class Envelope:
         self._sender = sender
 
         if isinstance(message, bytes):
-            enforce(
-                bool(protocol_id) or bool(protocol_specification_id),
-                "Message is bytes object, protocol_id or protocol_specification_id must be provided!",
-            )
+            if protocol_specification_id is None:
+                raise ValueError(
+                    "Message is bytes object, protocol_specification_id must be provided!"
+                )
         elif isinstance(message, Message):
-            # protocol_id provided as an argument in priority
-            # use Message.protocol_id only if no protocol_id provided
             if message.protocol_id is None:
                 raise ValueError(  # pragma: nocover
                     f"message class {type(message)} has no protocol_id specified!"
                 )
-            protocol_id = message.protocol_id
+            protocol_specification_id = message.protocol_specification_id
+            if protocol_specification_id is None:
+                raise ValueError(
+                    "Message is Message object, protocol_specification_id could not be resolved! Ensure protocol is registered!"
+                )
         else:
             raise ValueError(
                 f"Message type: {type(message)} is not supported!"
             )  # pragma: nocover
 
-        if not protocol_id:
-            protocol_id = self._get_protocol_id_by_protocol_specification_id(
-                cast(PublicId, protocol_specification_id)
-            )
-        if not protocol_specification_id:
-            # if no protocol_spcification_id, try to resolve by protocol_id
-            protocol_specification_id = self._get_protocol_specification_id_by_the_protocol_id(
-                protocol_id
-            )
-
-        enforce(
-            protocol_id is not None, "protocol_id was not specified or auto resolved"
-        )
-        enforce(
-            protocol_specification_id is not None,
-            "protocol_specification_id was not specified or auto resolved",
-        )
-
-        self._protocol_id: PublicId = protocol_id
         self._protocol_specification_id: PublicId = protocol_specification_id
         self._message = message
         self._context = context if context is not None else EnvelopeContext()
@@ -451,19 +393,6 @@ class Envelope:
             isinstance(sender, str), f"Sender must be string. Found '{type(sender)}'"
         )
         self._sender = sender
-
-    @property
-    def protocol_id(self) -> PublicId:
-        """Get protocol id."""
-        return self._protocol_id
-
-    @protocol_id.setter
-    def protocol_id(self, protocol_id: PublicId) -> None:
-        """Set the protocol id."""
-        self._protocol_specification_id = self._get_protocol_specification_id_by_the_protocol_id(
-            protocol_id
-        )
-        self._protocol_id = protocol_id
 
     @property
     def protocol_specification_id(self) -> PublicId:
@@ -550,7 +479,7 @@ class Envelope:
             isinstance(other, Envelope)
             and self.to == other.to
             and self.sender == other.sender
-            and self.protocol_id == other.protocol_id
+            and self.protocol_specification_id == other.protocol_specification_id
             and self.message == other.message
             and self.context == other.context
         )
@@ -585,9 +514,9 @@ class Envelope:
 
     def __str__(self):
         """Get the string representation of an envelope."""
-        return "Envelope(to={to}, sender={sender}, protocol_id={protocol_id}, message={message})".format(
+        return "Envelope(to={to}, sender={sender}, protocol_specification_id={protocol_specification_id}, message={message})".format(
             to=self.to,
             sender=self.sender,
-            protocol_id=self.protocol_id,
+            protocol_specification_id=self.protocol_specification_id,
             message=self.message,
         )
