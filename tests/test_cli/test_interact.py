@@ -87,7 +87,7 @@ class ConstructMessageTestCase(TestCase):
                 "\nAction envelope:"
                 "\nto: receiver"
                 "\nsender: sender"
-                "\nprotocol_id: protocol-id"
+                "\nprotocol_specification_id: protocol-id"
                 "\nmessage: Message\n"
             )
             self.assertEqual(result, expected_result)
@@ -98,7 +98,7 @@ class ConstructMessageTestCase(TestCase):
                 "\nAction envelope:"
                 "\nto: receiver"
                 "\nsender: sender"
-                "\nprotocol_id: protocol-id"
+                "\nprotocol_specification_id: protocol-id"
                 "\nmessage: Decoded message\n"
             )
             self.assertEqual(result, expected_result)
@@ -234,7 +234,7 @@ class TestInteractEcho(AEATestCaseEmpty):
                 "Sending envelope:",
                 f"to: {self.agent_name}",
                 f"sender: {self.agent_name}_interact",
-                f"protocol_id: {str(DefaultMessage.protocol_id)}",
+                f"protocol_specification_id: {str(DefaultMessage.protocol_specification_id)}",
                 "message_id=1",
                 "target=0",
                 "performative=bytes",
@@ -255,7 +255,7 @@ class TestInteractEcho(AEATestCaseEmpty):
                 "Received envelope:",
                 f"to: {self.agent_name}_interact",
                 f"sender: {self.agent_name}",
-                f"protocol_id: {str(DefaultMessage.protocol_id)}",
+                f"protocol_specification_id: {str(DefaultMessage.protocol_specification_id)}",
                 "message_id=-1",
                 "target=1",
                 "performative=bytes",

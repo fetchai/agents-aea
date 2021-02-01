@@ -38,7 +38,7 @@ def test_send_unsupported_protocol():
     with patch.object(_default_logger, "warning") as mock_logger:
         handler.send_unsupported_protocol(envelope_mock, _default_logger)
         mock_logger.assert_any_call(
-            f"Unsupported protocol: {envelope_mock.protocol_specification_id}. You might want to add a handler for this protocol. Sender={envelope_mock.sender}, to={envelope_mock.sender}."
+            f"Unsupported protocol: protocol_specification_id={envelope_mock.protocol_specification_id}. You might want to add a handler for a protocol implementing this specification. Sender={envelope_mock.sender}, to={envelope_mock.sender}."
         )
     assert count + 1 == handler.unsupported_protocol_count
 

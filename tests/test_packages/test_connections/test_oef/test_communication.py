@@ -455,8 +455,10 @@ class TestFIPA(UseOef):
         cls.connection2 = _make_oef_connection(
             FETCHAI_ADDRESS_TWO, oef_addr="127.0.0.1", oef_port=10000,
         )
-        cls.multiplexer1 = Multiplexer([cls.connection1])
-        cls.multiplexer2 = Multiplexer([cls.connection2])
+        cls.multiplexer1 = Multiplexer(
+            [cls.connection1], protocols=[DefaultMessage, FipaMessage]
+        )
+        cls.multiplexer2 = Multiplexer([cls.connection2], protocols=[FipaMessage])
         cls.multiplexer1.connect()
         cls.multiplexer2.connect()
 
