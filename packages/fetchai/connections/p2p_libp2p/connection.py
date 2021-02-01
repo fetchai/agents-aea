@@ -147,6 +147,7 @@ class Libp2pNode:
         env_file: Optional[str] = None,
         logger: logging.Logger = _default_logger,
         peer_registration_delay: Optional[float] = None,
+        records_storage_path: Optional[str] = None,
     ):
         """
         Initialize a p2p libp2p node.
@@ -190,6 +191,7 @@ class Libp2pNode:
 
         # peer configuration
         self.peer_registration_delay = peer_registration_delay
+        self.records_storage_path = records_storage_path
 
         # node startup
         self.source = os.path.abspath(module_path)
@@ -273,6 +275,11 @@ class Libp2pNode:
                 str(self.peer_registration_delay)
                 if self.peer_registration_delay is not None
                 else str(0.0)
+            )
+            self._config += "AEA_P2P_CFG_STORAGE_PATH={}\n".format(
+                self.records_storage_path
+                if self.records_storage_path is not None
+                else ""
             )
             env_file.write(self._config)
 
@@ -465,7 +472,9 @@ class P2PLibp2pConnection(Connection):
         peer_registration_delay = self.configuration.config.get(
             "peer_registration_delay"
         )  # Optional[str]
-
+        records_storage_path = self.configuration.config.get(
+            "storage_path"
+        )  # Optional[str]
         if (
             self.has_crypto_store
             and self.crypto_store.crypto_objects.get(ledger_id, None) is not None
@@ -564,6 +573,7 @@ class P2PLibp2pConnection(Connection):
             env_file,
             self.logger,
             delay,
+            records_storage_path,
         )
 
         self._in_queue = None  # type: Optional[asyncio.Queue]

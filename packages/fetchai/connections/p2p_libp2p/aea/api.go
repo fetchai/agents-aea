@@ -83,7 +83,8 @@ type AeaApi struct {
 	host_monitoring string
 	port_monitoring uint16
 
-	registrationDelay float64
+	registrationDelay  float64
+	recordsStoragePath string
 
 	pipe      Pipe
 	out_queue chan *Envelope
@@ -128,6 +129,10 @@ func (aea AeaApi) AgentRecord() *AgentRecord {
 
 func (aea AeaApi) RegistrationDelayInSeconds() float64 {
 	return aea.registrationDelay
+}
+
+func (aea AeaApi) RecordStoragePath() string {
+	return aea.recordsStoragePath
 }
 
 func (aea AeaApi) Put(envelope *Envelope) error {
@@ -204,6 +209,7 @@ func (aea *AeaApi) Init() error {
 	}
 
 	registrationDelay := os.Getenv("AEA_P2P_CFG_REGISTRATION_DELAY")
+	aea.recordsStoragePath = os.Getenv("AEA_P2P_CFG_STORAGE_PATH")
 
 	logger.Debug().Msgf("msgin_path: %s", aea.msgin_path)
 	logger.Debug().Msgf("msgout_path: %s", aea.msgout_path)

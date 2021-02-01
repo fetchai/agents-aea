@@ -96,6 +96,8 @@ func main() {
 	// add artificial delay for agent registration
 	registrationDelay := agent.RegistrationDelayInSeconds()
 
+	// persist agent records to file
+	storagePath := agent.RecordStoragePath()
 	// libp2p node
 	var node dhtnode.DHTNode
 
@@ -128,6 +130,9 @@ func main() {
 		if registrationDelay != 0 {
 			durationSeconds := time.Duration(registrationDelay)
 			opts = append(opts, dhtpeer.WithRegistrationDelay(durationSeconds*1000000*time.Microsecond))
+		}
+		if storagePath != "" {
+			opts = append(opts, dhtpeer.StoreRecordsTo(storagePath))
 		}
 		node, err = dhtpeer.New(opts...)
 	}
