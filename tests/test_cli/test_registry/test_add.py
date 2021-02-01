@@ -41,6 +41,8 @@ class FetchPackageTestCase(TestCase):
         dest_path = os.path.join("dest", "path", "package_folder_name")
 
         fetch_package(obj_type, public_id, cwd, dest_path)
-        request_api_mock.assert_called_with("GET", "/connections/author/name/0.1.0")
+        request_api_mock.assert_called_with(
+            "GET", "/connections/author/name/0.1.0", params=None
+        )
         download_file_mock.assert_called_once_with("url", "cwd")
         extract_mock.assert_called_once_with("filepath", os.path.join("dest", "path"))

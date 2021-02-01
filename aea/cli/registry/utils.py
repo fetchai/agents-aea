@@ -234,7 +234,7 @@ def get_package_meta(
 
     :return: dict with package details
     """
-    params = dict(aea_version=aea_version) if aea_version else {}
+    params = dict(aea_version=aea_version) if aea_version else None
     api_path = f"/{obj_type}s/{public_id.author}/{public_id.name}/{public_id.version}"
     resp = request_api("GET", api_path, params=params)
     return resp

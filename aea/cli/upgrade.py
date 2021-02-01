@@ -305,7 +305,7 @@ class ProjectUpgrader:
                 f"Cannot remote path {current_path}. Error: {str(e)}."
             )
 
-        fetch_agent(self.ctx, agent_package_id.public_id, alias=self._TEMP_ALIAS)
+        fetch_agent(self.ctx, new_item, alias=self._TEMP_ALIAS)
         self.ctx.cwd = str(current_path)
         self._unpack_fetched_agent()
         return True

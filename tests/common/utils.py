@@ -24,9 +24,8 @@ import sys
 import time
 from contextlib import contextmanager
 from functools import wraps
-from pathlib import Path
 from threading import Thread
-from typing import Any, Callable, Tuple, Type, Union
+from typing import Any, Callable, List, Optional, Set, Tuple, Type, Union
 
 from aea.aea import AEA
 from aea.configurations.base import PublicId
@@ -299,10 +298,63 @@ def wait_for_condition(condition_checker, timeout=2, error_msg="Timeout", period
             raise TimeoutError(error_msg)
 
 
-def are_dirs_equal(dir1: Path, dir2: Path) -> bool:
-    """Compare the content of two directories, recursively."""
-    comparison = filecmp.dircmp(str(dir1), str(dir2))
-    return comparison.diff_files == []
+def are_dirs_equal(
+    dir1: Union[str, os.PathLike],
+    dir2: Union[str, os.PathLike],
+    ignore: Optional[List[str]] = None,
+) -> bool:
+    """
+    Compare the content of two directories, recursively.
+
+    :param dir1: the left operand.
+    :param dir2: the right operand.
+    :param ignore: is a list of names to ignore (see dircmp docs regarding 'ignore').
+    :return: True if the directories are equal, False otherwise.
+    """
+    ignore = ignore or None
+    left_only, right_only, diff = dircmp_recursive(
+        filecmp.dircmp(dir1, dir2, ignore=ignore)
+    )
+    return left_only == right_only == diff == set()
+
+
+def dircmp_recursive(dircmp_obj: filecmp.dircmp) -> Tuple[Set[str], Set[str], Set[str]]:
+    """
+    Compare the content of two directories, recursively.
+
+    :param dircmp_obj: the filecmp.dircmp object.
+    :return: three sets:
+     - the set of files that are only in the left operand
+     - the set of files that are only in the right operand
+     - the set of files in both operands, but that differ.
+    """
+
+    def _dircmp_recursive(
+        dircmp_obj: filecmp.dircmp, prefix: str = ""
+    ) -> Tuple[Set[str], Set[str], Set[str]]:
+        """
+        Helper private function that also accepts the 'prefix' parameter.
+
+        It is used to keep track of the path prefix during the recursive calls.
+        """
+
+        def join_with_prefix(suffix: str) -> str:
+            return os.path.join(prefix, suffix)
+
+        left_only: Set[str] = set(map(join_with_prefix, dircmp_obj.left_only))
+        right_only: Set[str] = set(map(join_with_prefix, dircmp_obj.right_only))
+        diff_files: Set[str] = set(map(join_with_prefix, dircmp_obj.diff_files))
+        for name, sub_dircmp_obj in dircmp_obj.subdirs.items():
+            subprefix = join_with_prefix(name)
+            subleft, subright, subdiff = _dircmp_recursive(
+                sub_dircmp_obj, prefix=subprefix
+            )
+            left_only.update(subleft)
+            right_only.update(subright)
+            diff_files.update(subdiff)
+        return left_only, right_only, diff_files
+
+    return _dircmp_recursive(dircmp_obj, "")
 
 
 def run_aea_subprocess(*args, cwd: str = ".") -> Tuple[subprocess.Popen, str, str]:

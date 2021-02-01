@@ -18,11 +18,11 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea add connection` sub-command."""
+import filecmp
 import os
 import shutil
 import tempfile
 from contextlib import contextmanager
-from filecmp import dircmp
 from pathlib import Path
 from typing import List, Set, cast
 from unittest import mock
@@ -64,7 +64,7 @@ from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
 from packages.fetchai.skills.error import PUBLIC_ID as ERROR_SKILL_PUBLIC_ID
 
 from tests.common.mocks import RegexComparator
-from tests.common.utils import are_dirs_equal
+from tests.common.utils import are_dirs_equal, dircmp_recursive
 from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, CliRunner
 
 
@@ -1130,10 +1130,12 @@ class TestUpgradeWithEjectAccept(BaseTestUpgradeWithEject):
         assert ejected_package_path.is_dir()
 
 
+@pytest.mark.integration
 class BaseTestUpgradeProject(AEATestCaseEmpty):
     """Base test class for testing project upgrader."""
 
     OLD_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.19.0")
+    EXPECTED_NEW_AGENT_PUBLIC_ID = OLD_AGENT_PUBLIC_ID.to_latest()
     EXPECTED = "expected_agent"
 
     @classmethod
@@ -1143,7 +1145,8 @@ class BaseTestUpgradeProject(AEATestCaseEmpty):
         cls.run_cli_command(
             "--skip-consistency-check",
             "fetch",
-            str(cls.OLD_AGENT_PUBLIC_ID.to_latest()),
+            "--remote",
+            str(cls.EXPECTED_NEW_AGENT_PUBLIC_ID),
             "--alias",
             cls.EXPECTED,
         )
@@ -1166,7 +1169,7 @@ class TestUpgradeProjectWithNewerVersion(BaseTestUpgradeProject):
     def test_upgrade(self, mock_confirm, confirm):
         """Test upgrade."""
         mock_confirm.return_value = confirm
-        result = self.run_cli_command("upgrade", cwd=self._get_cwd())
+        result = self.run_cli_command("upgrade", "--remote", cwd=self._get_cwd())
         assert result.exit_code == 0
 
         mock_confirm.assert_any_call(
@@ -1176,7 +1179,12 @@ class TestUpgradeProjectWithNewerVersion(BaseTestUpgradeProject):
         )
 
         # compare with latest fetched agent.
-        assert dircmp(self.current_agent_context, self.EXPECTED)
+        ignore = [DEFAULT_AEA_CONFIG_FILE] + filecmp.DEFAULT_IGNORES
+        dircmp = filecmp.dircmp(
+            self.current_agent_context, self.EXPECTED, ignore=ignore
+        )
+        _left_only, _right_only, diff = dircmp_recursive(dircmp)
+        assert diff == set()
 
 
 @mock.patch("aea.cli.upgrade.get_latest_version_available_in_registry")
@@ -1188,7 +1196,7 @@ class TestUpgradeProjectWithoutNewerVersion(BaseTestUpgradeProject):
         """Run the test."""
         fake_old_public_id = self.OLD_AGENT_PUBLIC_ID
         mock_get_latest_version.return_value = fake_old_public_id
-        result = self.run_cli_command("upgrade", cwd=self._get_cwd())
+        result = self.run_cli_command("upgrade", "--remote", cwd=self._get_cwd())
         assert result.exit_code == 0
 
         version_str = str(self.OLD_AGENT_PUBLIC_ID.version)
@@ -1197,4 +1205,30 @@ class TestUpgradeProjectWithoutNewerVersion(BaseTestUpgradeProject):
         )
 
         # compare with latest fetched agent.
-        assert dircmp(self.current_agent_context, self.EXPECTED)
+        ignore = [DEFAULT_AEA_CONFIG_FILE] + filecmp.DEFAULT_IGNORES
+        assert are_dirs_equal(self.current_agent_context, self.EXPECTED, ignore=ignore)
+
+
+"""
+@mock.patch.object(aea, "__version__", "0.8.0")
+class TestUpgradeAEACompatibility(BaseTestUpgradeProject):
+    "
+    Test 'aea upgrade' takes into account the current aea version.
+
+    The test works as follows:
+    "
+
+    OLD_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.18.0")
+    EXPECTED_NEW_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.19.0")
+
+    def test_upgrade(self):
+        "Test upgrade."
+        result = self.run_cli_command("upgrade", "--remote", "-y", cwd=self._get_cwd())
+        assert result.exit_code == 0
+
+        # compare with latest fetched agent.
+        ignore = [DEFAULT_AEA_CONFIG_FILE] + filecmp.DEFAULT_IGNORES
+        dircmp = filecmp.dircmp(self.current_agent_context, self.EXPECTED, ignore=ignore)
+        _left_only, _right_only, diff = dircmp_recursive(dircmp)
+        assert diff == set()
+"""
