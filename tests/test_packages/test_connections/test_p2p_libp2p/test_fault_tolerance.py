@@ -22,6 +22,8 @@ import shutil
 import tempfile
 import time
 
+import pytest
+
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.registries import make_crypto
 from aea.mail.base import Envelope
@@ -33,6 +35,7 @@ from packages.fetchai.protocols.default.serialization import DefaultSerializer
 
 from tests.common.utils import wait_for_condition
 from tests.conftest import (
+    MAX_FLAKY_RERUNS_INTEGRATION,
     _make_libp2p_connection,
     libp2p_log_on_failure,
     libp2p_log_on_failure_all,
@@ -42,6 +45,7 @@ from tests.conftest import (
 DEFAULT_PORT = 10234
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_INTEGRATION)
 class BaseTestLibp2pRelay:
     """Base test class for libp2p connection relay."""
 
