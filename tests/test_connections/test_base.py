@@ -101,10 +101,13 @@ def test_loop_property():
 
 def test_ensure_valid_envelope_for_external_comms_negative_cases():
     """Test the staticmethod '_ensure_valid_envelope_for_external_comms', negative cases."""
-    protocol_id = PublicId("author", "name", "0.1.0")
+    protocol_specification_id = PublicId("author", "name", "0.1.0")
     wrong_sender = wrong_to = "author/name:0.1.0"
     envelope_wrong_sender = Envelope(
-        to="to", sender=wrong_sender, protocol_id=protocol_id, message=b""
+        to="to",
+        sender=wrong_sender,
+        protocol_specification_id=protocol_specification_id,
+        message=b"",
     )
     with pytest.raises(
         AEAEnforceError,
@@ -113,7 +116,10 @@ def test_ensure_valid_envelope_for_external_comms_negative_cases():
         Connection._ensure_valid_envelope_for_external_comms(envelope_wrong_sender)
 
     envelope_wrong_sender = Envelope(
-        to=wrong_to, sender="sender", protocol_id=protocol_id, message=b""
+        to=wrong_to,
+        sender="sender",
+        protocol_specification_id=protocol_specification_id,
+        message=b"",
     )
     with pytest.raises(
         AEAEnforceError,

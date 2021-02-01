@@ -21,6 +21,7 @@ import os
 import shutil
 import tempfile
 import time
+from unittest.mock import Mock
 
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.registries import make_crypto
@@ -39,6 +40,13 @@ from tests.conftest import (
 
 
 DEFAULT_PORT = 10234
+
+
+MockDefaultMessageProtocol = Mock()
+MockDefaultMessageProtocol.protocol_id = DefaultMessage.protocol_id
+MockDefaultMessageProtocol.protocol_specification_id = (
+    DefaultMessage.protocol_specification_id
+)
 
 
 @libp2p_log_on_failure_all
@@ -61,7 +69,9 @@ class TestLibp2pConnectionRelayNodeRestart:
                 DEFAULT_PORT + 1, build_directory=cls.t
             )
 
-            cls.multiplexer_genesis = Multiplexer([cls.genesis])
+            cls.multiplexer_genesis = Multiplexer(
+                [cls.genesis], protocols=[MockDefaultMessageProtocol]
+            )
             cls.multiplexer_genesis.connect()
             cls.log_files.append(cls.genesis.node.log_file)
             cls.multiplexers.append(cls.multiplexer_genesis)
@@ -78,7 +88,9 @@ class TestLibp2pConnectionRelayNodeRestart:
                 node_key_file=cls.relay_key_path,
                 build_directory=cls.t,
             )
-            cls.multiplexer_relay = Multiplexer([cls.relay])
+            cls.multiplexer_relay = Multiplexer(
+                [cls.relay], protocols=[MockDefaultMessageProtocol]
+            )
             cls.multiplexer_relay.connect()
             cls.log_files.append(cls.relay.node.log_file)
             cls.multiplexers.append(cls.multiplexer_relay)
@@ -91,7 +103,9 @@ class TestLibp2pConnectionRelayNodeRestart:
                 entry_peers=[relay_peer],
                 build_directory=cls.t,
             )
-            cls.multiplexer = Multiplexer([cls.connection])
+            cls.multiplexer = Multiplexer(
+                [cls.connection], protocols=[MockDefaultMessageProtocol]
+            )
             cls.multiplexer.connect()
             cls.log_files.append(cls.connection.node.log_file)
             cls.multiplexers.append(cls.multiplexer)
@@ -117,7 +131,10 @@ class TestLibp2pConnectionRelayNodeRestart:
             content=b"hello",
         )
         envelope = Envelope(
-            to=addr_2, sender=addr_1, message=DefaultSerializer().encode(msg),
+            to=addr_2,
+            sender=addr_1,
+            protocol_specification_id=DefaultMessage.protocol_specification_id,
+            message=DefaultSerializer().encode(msg),
         )
 
         self.multiplexer.put(envelope)
@@ -142,7 +159,10 @@ class TestLibp2pConnectionRelayNodeRestart:
             content=b"helloAfterRestart",
         )
         envelope = Envelope(
-            to=addr_2, sender=addr_1, message=DefaultSerializer().encode(msg),
+            to=addr_2,
+            sender=addr_1,
+            protocol_specification_id=DefaultMessage.protocol_specification_id,
+            message=DefaultSerializer().encode(msg),
         )
 
         self.multiplexer.put(envelope)
@@ -201,7 +221,9 @@ class TestLibp2pConnectionAgentMobility:
         try:
             cls.genesis = _make_libp2p_connection(DEFAULT_PORT)
 
-            cls.multiplexer_genesis = Multiplexer([cls.genesis])
+            cls.multiplexer_genesis = Multiplexer(
+                [cls.genesis], protocols=[MockDefaultMessageProtocol]
+            )
             cls.log_files.append(cls.genesis.node.log_file)
             cls.multiplexer_genesis.connect()
             cls.multiplexers.append(cls.multiplexer_genesis)
@@ -211,7 +233,9 @@ class TestLibp2pConnectionAgentMobility:
             cls.connection1 = _make_libp2p_connection(
                 DEFAULT_PORT + 1, entry_peers=[genesis_peer]
             )
-            cls.multiplexer1 = Multiplexer([cls.connection1])
+            cls.multiplexer1 = Multiplexer(
+                [cls.connection1], protocols=[MockDefaultMessageProtocol]
+            )
             cls.log_files.append(cls.connection1.node.log_file)
             cls.multiplexer1.connect()
             cls.multiplexers.append(cls.multiplexer1)
@@ -222,7 +246,9 @@ class TestLibp2pConnectionAgentMobility:
                 entry_peers=[genesis_peer],
                 agent_key=cls.connection_key,
             )
-            cls.multiplexer2 = Multiplexer([cls.connection2])
+            cls.multiplexer2 = Multiplexer(
+                [cls.connection2], protocols=[MockDefaultMessageProtocol]
+            )
             cls.log_files.append(cls.connection2.node.log_file)
             cls.multiplexer2.connect()
             cls.multiplexers.append(cls.multiplexer2)
@@ -249,7 +275,10 @@ class TestLibp2pConnectionAgentMobility:
             content=b"hello",
         )
         envelope = Envelope(
-            to=addr_2, sender=addr_1, message=DefaultSerializer().encode(msg),
+            to=addr_2,
+            sender=addr_1,
+            protocol_specification_id=DefaultMessage.protocol_specification_id,
+            message=DefaultSerializer().encode(msg),
         )
 
         self.multiplexer1.put(envelope)
@@ -283,7 +312,12 @@ class TestLibp2pConnectionAgentMobility:
             performative=DefaultMessage.Performative.BYTES,
             content=b"helloAfterChangingPeer",
         )
-        envelope = Envelope(to=addr_2, sender=addr_1, message=msg.encode(),)
+        envelope = Envelope(
+            to=addr_2,
+            sender=addr_1,
+            protocol_specification_id=DefaultMessage.protocol_specification_id,
+            message=msg.encode(),
+        )
 
         self.multiplexer1.put(envelope)
 

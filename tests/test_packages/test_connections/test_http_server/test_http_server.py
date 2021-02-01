@@ -125,7 +125,9 @@ class TestHTTPServer:
             port=self.port,
             api_spec_path=self.api_spec_path,
             connection_id=HTTPServerConnection.connection_id,
-            restricted_to_protocols=set([self.protocol_id]),
+            restricted_to_protocols=set(
+                [self.protocol_id, HttpMessage.protocol_specification_id]
+            ),
         )
         self.http_connection = HTTPServerConnection(
             configuration=self.configuration, identity=self.identity,
@@ -463,7 +465,7 @@ class TestHTTPServer:
             protocol_specification_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=message,
         )
-        envelope.protocol_id = UNKNOWN_PROTOCOL_PUBLIC_ID
+        envelope._protocol_specification_id = UNKNOWN_PROTOCOL_PUBLIC_ID
         with patch.object(
             self.http_connection.channel,
             "restricted_to_protocols",

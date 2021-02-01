@@ -53,7 +53,7 @@ def test_envelope_serialization():
     envelope = Envelope(
         to="to",
         sender="sender",
-        protocol_id=PublicId("author", "name", "0.1.0"),
+        protocol_specification_id=PublicId("author", "name", "0.1.0"),
         message=b"",
     )
     with tempfile.TemporaryDirectory() as temp_dir:

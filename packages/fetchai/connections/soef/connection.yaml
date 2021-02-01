@@ -8,7 +8,7 @@ aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
   README.md: QmPogWgZQY86XEHrVNBMaDW6YD8v9YhfSDA99MS48avXDa
   __init__.py: Qmd5VBGFJHXFe1H45XoUh5mMSYBwvLSViJuGFeMgbPdQts
-  connection.py: QmP5ZPLo86ERxqfA2PdNjTpWoPMz3zQc693k7yzGCi8WLw
+  connection.py: QmPmev4xLZgNBSknRGhntV4WhhF1tHF6PhFfG8vi97oQ1s
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
@@ -22,6 +22,7 @@ config:
   token_storage_path: soef_token.txt
 excluded_protocols: []
 restricted_to_protocols:
+- fetchai/oef_search:0.1.0
 - fetchai/oef_search:0.12.0
 dependencies:
   defusedxml: {}

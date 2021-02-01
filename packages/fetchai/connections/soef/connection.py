@@ -423,14 +423,14 @@ class SOEFChannel:
             self.excluded_protocols or []
         )
         is_in_restricted = (
-            not self.restricted_to_protocols
-            or envelope.protocol_specification_id
+            self.restricted_to_protocols
+            and envelope.protocol_specification_id
             in (self.restricted_to_protocols or [])
         )
 
         if is_in_excluded or not is_in_restricted:
             self.logger.error(
-                "This envelope cannot be sent with the soef connection: protocol_id={}".format(
+                "This envelope cannot be sent with the soef connection: protocol_specification_id={}".format(
                     envelope.protocol_specification_id
                 )
             )

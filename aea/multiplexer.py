@@ -24,7 +24,17 @@ from asyncio.events import AbstractEventLoop
 from concurrent.futures._base import CancelledError
 from concurrent.futures._base import TimeoutError as FuturesTimeoutError
 from contextlib import suppress
-from typing import Callable, Collection, Dict, List, Optional, Sequence, Tuple, cast
+from typing import (
+    Callable,
+    Collection,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    Union,
+    cast,
+)
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
@@ -82,7 +92,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
         agent_name: str = "standalone",
         default_routing: Optional[Dict[PublicId, PublicId]] = None,
         default_connection: Optional[PublicId] = None,
-        protocols: Optional[List[Protocol]] = None,
+        protocols: Optional[List[Union[Protocol, Message]]] = None,
     ):
         """
         Initialize the connection multiplexer.

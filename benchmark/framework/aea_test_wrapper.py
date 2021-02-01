@@ -149,7 +149,6 @@ class AEATestWrapper:
 
         :param to: the address of the receiver.
         :param sender: the address of the sender.
-        :param protocol_id: the protocol id.
         :param message: the protocol-specific message.
 
         :return: Envelope
@@ -158,7 +157,7 @@ class AEATestWrapper:
         return Envelope(
             to=to,
             sender=sender,
-            protocol_id=DefaultMessage.protocol_id,
+            protocol_specification_id=DefaultMessage.protocol_specification_id,
             message=DefaultSerializer().encode(message),
         )
 

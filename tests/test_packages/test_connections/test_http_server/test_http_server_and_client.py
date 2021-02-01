@@ -64,7 +64,6 @@ class TestClientServer:
             port=self.port,
             api_spec_path=None,  # do not filter on API spec
             connection_id=HTTPServerConnection.connection_id,
-            restricted_to_protocols=set([self.protocol_id]),
         )
         self.server = HTTPServerConnection(
             configuration=self.configuration, identity=self.server_agent_identity,

@@ -398,10 +398,10 @@ class OEFChannel(OEFAgent):
         :return: None
         """
         if self.excluded_protocols is not None:  # pragma: nocover
-            if envelope.message.protocol_id in self.excluded_protocols:
+            if envelope.protocol_specification_id in self.excluded_protocols:
                 self.aea_logger.error(
-                    "This envelope cannot be sent with the oef connection: protocol_id={}".format(
-                        envelope.message.protocol_id
+                    "This envelope cannot be sent with the oef connection: protocol_specification_id={}".format(
+                        envelope.protocol_specification_id
                     )
                 )
                 raise ValueError("Cannot send message.")

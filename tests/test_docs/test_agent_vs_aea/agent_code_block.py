@@ -62,7 +62,11 @@ class MyAgent(Agent):
         :return: None
         """
         print("React called for tick {}".format(self.tick))
-        if envelope is not None and envelope.protocol_id == DefaultMessage.protocol_id:
+        if (
+            envelope is not None
+            and envelope.protocol_specification_id
+            == DefaultMessage.protocol_specification_id
+        ):
             sender = envelope.sender
             receiver = envelope.to
             envelope.to = sender
@@ -71,8 +75,8 @@ class MyAgent(Agent):
             envelope.message.sender = receiver
             envelope.message.to = sender
             print(
-                "Received envelope from {} with protocol_id={}".format(
-                    sender, envelope.protocol_id
+                "Received envelope from {} with protocol_specification_id={}".format(
+                    sender, envelope.protocol_specification_id
                 )
             )
             self.outbox.put(envelope)
@@ -114,7 +118,7 @@ def run():
         time.sleep(3)
 
         # Create a message inside an envelope and get the stub connection to pass it into the agent
-        message_text = b"my_agent,other_agent,fetchai/default:0.11.0,\x12\r\x08\x01*\t*\x07\n\x05hello,"
+        message_text = b"my_agent,other_agent,fetchai/default:0.1.0,\x12\r\x08\x01*\t*\x07\n\x05hello,"
 
         with open(INPUT_FILE, "wb") as f:
             write_with_lock(f, message_text)

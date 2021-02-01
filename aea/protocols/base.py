@@ -414,12 +414,14 @@ class Protocol(Component):
 
     @property
     def protocol_id(self) -> PublicId:
-        return self._configuration.public_id
+        """Get protocol id."""
+        return cast(ProtocolConfig, self._configuration).public_id
 
     @property
     def protocol_specification_id(self) -> PublicId:
-        return self._configuration.protocol_specification_id
+        """Get protocol specification id."""
+        return cast(ProtocolConfig, self._configuration).protocol_specification_id
 
     def __repr__(self) -> str:
         """Get str repr of the protocol."""
-        return f"Protocol({self._configuration.public_id})"
+        return f"Protocol({self.protocol_id})"
