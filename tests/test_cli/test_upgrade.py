@@ -1051,7 +1051,7 @@ class BaseTestUpgradeWithEject(AEATestCaseEmpty):
         cls.add_item("skill", str(cls.GENERIC_SELLER.public_id), local=False)
 
     @classmethod
-    def mock_get_latest_version_available_in_registry(cls, *args):
+    def mock_get_latest_version_available_in_registry(cls, *args, **kwargs):
         """Mock 'get_latest_version_available_in_registry' when called with generic_seller public key."""
         if (
             args[1] == str(cls.GENERIC_SELLER.package_type)
@@ -1059,7 +1059,7 @@ class BaseTestUpgradeWithEject(AEATestCaseEmpty):
         ):
             # return current version
             return cls.GENERIC_SELLER
-        return cls.unmocked(*args)
+        return cls.unmocked(*args, **kwargs)
 
     def _get_mock(self):
         """Get the mock of 'get_latest_version_available_in_registry'."""

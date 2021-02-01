@@ -25,6 +25,7 @@ from typing import Dict, Iterable, List, Set, Tuple, cast
 
 import click
 
+import aea
 from aea.cli.add import add_item
 from aea.cli.eject import _eject_item
 from aea.cli.registry.fetch import fetch_agent
@@ -258,6 +259,8 @@ class ProjectUpgrader:
         self.ctx = ctx
         self.yes_by_default = yes_by_default
 
+        self._current_aea_version = aea.__version__
+
     def upgrade(self) -> bool:
         """
         Upgrade the project by fetching from remote registry.
@@ -274,6 +277,7 @@ class ProjectUpgrader:
                 self.ctx,
                 str(agent_package_id.package_type),
                 agent_package_id.public_id.to_latest(),
+                aea_version=self._current_aea_version,
             )
         except click.ClickException:
             click.echo("Package not found, continuing with normal upgrade.")
@@ -362,6 +366,8 @@ class ItemUpgrader:
         self.dependencies.update(self.deps_can_be_removed)
         self.dependencies.update(self.deps_can_not_be_removed)
 
+        self._current_aea_version = aea.__version__
+
     def get_current_item(self) -> PublicId:
         """Return public id of the item already presents in agent config."""
         self.check_item_present()
@@ -428,7 +434,10 @@ class ItemUpgrader:
             new_item = self.item_public_id
         else:
             new_item = get_latest_version_available_in_registry(
-                self.ctx, self.item_type, self.item_public_id
+                self.ctx,
+                self.item_type,
+                self.item_public_id,
+                aea_version=self._current_aea_version,
             )
 
         if self.current_item_public_id.version == new_item.version:
@@ -489,6 +498,7 @@ class InteractiveEjectHelper:
         self.adjacency_list = self._reverse_adjacency_list(self.inverse_adjacency_list)
         self.yes_by_default = yes_by_default
 
+        self._current_aea_version = aea.__version__
         self.to_eject: List[PackageId] = []
         self.item_to_new_version: Dict[PackageId, str] = {}
 
@@ -500,7 +510,10 @@ class InteractiveEjectHelper:
         """
         for package_id in self.adjacency_list.keys():
             new_item = get_latest_version_available_in_registry(
-                self.ctx, str(package_id.package_type), package_id.public_id.to_latest()
+                self.ctx,
+                str(package_id.package_type),
+                package_id.public_id.to_latest(),
+                aea_version=self._current_aea_version,
             )
             if package_id.public_id.version == new_item.version:
                 continue
