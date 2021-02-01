@@ -359,7 +359,7 @@ class Envelope:
             protocol_specification_id = message.protocol_specification_id
             if protocol_specification_id is None:
                 raise ValueError(
-                    "Message is Message object, protocol_specification_id could not be resolved! Ensure protocol is registered!"
+                    "Message is Message object, protocol_specification_id could not be resolved! Ensure protocol is valid!"
                 )
         else:
             raise ValueError(

@@ -42,7 +42,7 @@ class ErrorHandler(AbstractErrorHandler):
         """
         cls.unsupported_protocol_count += 1
         logger.warning(
-            f"Unsupported protocol: {envelope.protocol_specification_id}. You might want to add a handler for this protocol. Sender={envelope.sender}, to={envelope.sender}."
+            f"Unsupported protocol: protocol_specification_id={envelope.protocol_specification_id}. You might want to add a handler for a protocol implementing this specification. Sender={envelope.sender}, to={envelope.sender}."
         )
 
     @classmethod

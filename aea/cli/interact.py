@@ -218,7 +218,7 @@ def _construct_message(
     )
     message = (
         "\n{} envelope:\nto: "
-        "{}\nsender: {}\nprotocol_id: {}\nmessage: {}\n".format(
+        "{}\nsender: {}\nprotocol_specification_id: {}\nmessage: {}\n".format(
             action_name,
             envelope.to,
             envelope.sender,
