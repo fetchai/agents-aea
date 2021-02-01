@@ -5,3 +5,5 @@ This glossary defines a number of common terms used throughout the documentation
 * (Software) Agent: a software agent is a computer program that acts on behalf of an entity (e.g. individual, organisation, business). [<a href="https://en.wikipedia.org/wiki/Software_agent" target="_blank">more</a>]
 
 * sOEF (Simple-OEF): The Simple-OEF, or soef, is a search and discovery mechanism for autonomous economic agents. [<a href="../simple-oef">more</a>]
+
+* ACN (Agent Communication Network): The ACN is a peer-to-peer communication network for autonomous economic agents. [<a href="../acn">more</a>]

@@ -112,7 +112,21 @@ class Resources:
             protocol.specification_id
         ] = protocol.public_id
 
-    def get_protocol(self, protocol_specification_id: PublicId) -> Optional[Protocol]:
+    def get_protocol(self, protocol_id: PublicId) -> Optional[Protocol]:
+        """
+        Get protocol for given protocol id.
+
+        :param protocol_id: the protocol id
+        :return: a matching protocol, if present, else None
+        """
+        protocol = self._component_registry.fetch(
+            ComponentId(ComponentType.PROTOCOL, protocol_id)
+        )
+        return cast(Protocol, protocol)
+
+    def get_protocol_by_specification_id(
+        self, protocol_specification_id: PublicId
+    ) -> Optional[Protocol]:
         """
         Get protocol for given protocol_specification_id.
 
@@ -122,12 +136,11 @@ class Resources:
         protocol_id = self._specification_to_protocol_id.get(
             protocol_specification_id, None
         )
+
         if protocol_id is None:
             return None
-        protocol = self._component_registry.fetch(
-            ComponentId(ComponentType.PROTOCOL, protocol_id)
-        )
-        return cast(Optional[Protocol], protocol)
+
+        return self.get_protocol(protocol_id)
 
     def get_all_protocols(self) -> List[Protocol]:
         """

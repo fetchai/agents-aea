@@ -64,19 +64,17 @@ def test_get_deploy_transaction_serialization():
         kwargs=kwargs_arg,
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to,
-        sender="sender",
-        protocol_id=ContractApiMessage.protocol_id,
-        message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = ContractApiMessage.serializer.decode(actual_envelope.message)
@@ -101,19 +99,17 @@ def test_get_raw_transaction_serialization():
         kwargs=kwargs_arg,
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to,
-        sender="sender",
-        protocol_id=ContractApiMessage.protocol_id,
-        message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = ContractApiMessage.serializer.decode(actual_envelope.message)
@@ -138,19 +134,17 @@ def test_get_raw_message_serialization():
         kwargs=kwargs_arg,
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to,
-        sender="sender",
-        protocol_id=ContractApiMessage.protocol_id,
-        message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = ContractApiMessage.serializer.decode(actual_envelope.message)
@@ -175,19 +169,17 @@ def test_get_state_serialization():
         kwargs=kwargs_arg,
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to,
-        sender="sender",
-        protocol_id=ContractApiMessage.protocol_id,
-        message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = ContractApiMessage.serializer.decode(actual_envelope.message)
@@ -208,19 +200,17 @@ def test_state_serialization():
         state=state_arg,
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to,
-        sender="sender",
-        protocol_id=ContractApiMessage.protocol_id,
-        message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = ContractApiMessage.serializer.decode(actual_envelope.message)
@@ -242,19 +232,17 @@ def test_raw_transaction_serialization():
         raw_transaction=raw_transaction_arg,
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to,
-        sender="sender",
-        protocol_id=ContractApiMessage.protocol_id,
-        message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = ContractApiMessage.serializer.decode(actual_envelope.message)
@@ -272,19 +260,17 @@ def test_raw_message_serialization():
         raw_message=raw_message_arg,
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to,
-        sender="sender",
-        protocol_id=ContractApiMessage.protocol_id,
-        message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = ContractApiMessage.serializer.decode(actual_envelope.message)
@@ -303,19 +289,17 @@ def test_error_serialization():
         data=b"some_error_data",
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to,
-        sender="sender",
-        protocol_id=ContractApiMessage.protocol_id,
-        message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = ContractApiMessage.serializer.decode(actual_envelope.message)

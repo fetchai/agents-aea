@@ -38,6 +38,9 @@ class TProtocolMessage(Message):
     """A protocol for testing purposes."""
 
     protocol_id = PublicId.from_str("fetchai/t_protocol:0.1.0")
+    protocol_specification_id = PublicId.from_str(
+        "some_author/some_protocol_name:0.1.0"
+    )
 
     DataModel = CustomDataModel
 

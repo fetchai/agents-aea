@@ -7,9 +7,9 @@ The buyer of weather data (managed programmatically).
 
 ## Discussion
 
-The scope of the specific demo is to demonstrate how a CLI based AEA can interact with a programmatically managed AEA. In order 
-to achieve this we are going to use the weather station skills. 
-This demo does not utilize a smart contract or a ledger interaction. 
+The scope of the specific demo is to demonstrate how a CLI based AEA can interact with a programmatically managed AEA. In order
+to achieve this we are going to use the weather station skills.
+This demo does not utilize a smart contract or a ledger interaction.
 
 ## Get required packages
 
@@ -147,14 +147,10 @@ def run():
     }
     default_connection = P2PLibp2pConnection.connection_id
 
-    # create the AEA
-    my_aea = AEA(
-        identity,
-        wallet,
-        resources,
-        default_connection=default_connection,
-        default_routing=default_routing,
+    state_update_protocol = Protocol.from_dir(
+        os.path.join(os.getcwd(), "packages", "fetchai", "protocols", "state_update")
     )
+    resources.add_protocol(state_update_protocol)
 
     # Add the default protocol (which is part of the AEA distribution)
     default_protocol = Protocol.from_dir(
@@ -237,12 +233,23 @@ def run():
         api_key=API_KEY,
         soef_addr=SOEF_ADDR,
         soef_port=SOEF_PORT,
-        restricted_to_protocols={OefSearchMessage.protocol_id},
+        restricted_to_protocols={
+            OefSearchMessage.protocol_specification_id,
+            OefSearchMessage.protocol_id,
+        },
         connection_id=SOEFConnection.connection_id,
     )
     soef_connection = SOEFConnection(configuration=configuration, identity=identity)
     resources.add_connection(soef_connection)
 
+    # create the AEA
+    my_aea = AEA(
+        identity,
+        wallet,
+        resources,
+        default_connection=default_connection,
+        default_routing=default_routing,
+    )
     # Add the error and weather_client skills
     error_skill = Skill.from_dir(
         os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "error"),

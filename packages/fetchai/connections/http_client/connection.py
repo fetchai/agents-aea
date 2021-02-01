@@ -315,10 +315,12 @@ class HTTPClientAsyncChannel:
         if request_envelope is None:
             return
 
-        if request_envelope.protocol_id in (self.excluded_protocols or []):
+        if request_envelope.protocol_specification_id in (
+            self.excluded_protocols or []
+        ):
             self.logger.error(
-                "This envelope cannot be sent with the http client connection: protocol_id={}".format(
-                    request_envelope.protocol_id
+                "This envelope cannot be sent with the http client connection: protocol_specification_id={}".format(
+                    request_envelope.protocol_specification_id
                 )
             )
             raise ValueError("Cannot send message.")
@@ -401,7 +403,6 @@ class HTTPClientAsyncChannel:
         envelope = Envelope(
             to=http_message.to,
             sender=http_message.sender,
-            protocol_id=http_message.protocol_id,
             context=dialogue.envelope_context,
             message=http_message,
         )

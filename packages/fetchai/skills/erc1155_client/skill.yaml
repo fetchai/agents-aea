@@ -7,7 +7,7 @@ description: The erc1155 client interacts with the erc1155 deployer to conduct a
 license: Apache-2.0
 aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
-  README.md: QmTD9z5VNqeNY2eQKdVXiFSEySM8qWiWgNMsJzCiGAf4Wk
+  README.md: QmWwmYKMpr8A9VsN1dNAi8BdfkbVhFVrDfaSZeEgwgcVGv
   __init__.py: QmUAB3FCbG8cmqW4VfBPCWYu9GHV9QgkZFR4ReQsRn1ZGT
   behaviours.py: QmSXggCpVFzM3J4xGgTpNXQp87Rh3aykPaJKbEJdrdym3f
   dialogues.py: QmVz44ZiXKHfefyBJjCgjs4vcjsequsDLajww4Mvs3kHCv

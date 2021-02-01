@@ -54,16 +54,17 @@ def test_act_serialization():
         step_id=1,
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=GymMessage.protocol_id, message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = GymMessage.serializer.decode(actual_envelope.message)
@@ -87,16 +88,17 @@ def test_percept_serialization():
         info=GymMessage.AnyObject("some_info"),
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=GymMessage.protocol_id, message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = GymMessage.serializer.decode(actual_envelope.message)
@@ -120,16 +122,17 @@ def test_status_serialization():
         content=content_arg,
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=GymMessage.protocol_id, message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = GymMessage.serializer.decode(actual_envelope.message)
@@ -148,16 +151,17 @@ def test_reset_serialization():
         performative=GymMessage.Performative.RESET,
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=GymMessage.protocol_id, message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = GymMessage.serializer.decode(actual_envelope.message)
@@ -176,16 +180,17 @@ def test_close_serialization():
         performative=GymMessage.Performative.CLOSE,
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=GymMessage.protocol_id, message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = GymMessage.serializer.decode(actual_envelope.message)

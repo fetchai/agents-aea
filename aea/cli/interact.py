@@ -219,7 +219,11 @@ def _construct_message(
     message = (
         "\n{} envelope:\nto: "
         "{}\nsender: {}\nprotocol_id: {}\nmessage: {}\n".format(
-            action_name, envelope.to, envelope.sender, envelope.protocol_id, msg,
+            action_name,
+            envelope.to,
+            envelope.sender,
+            envelope.protocol_specification_id,
+            msg,
         )
     )
     return message
@@ -247,9 +251,7 @@ def _try_construct_envelope(
         msg, _ = dialogues.create(
             counterparty=agent_name, performative=performative, content=message,
         )
-        envelope = Envelope(
-            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
-        )
+        envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
     except InterruptInputException:
         click.echo("Interrupting input, checking inbox ...")
     except KeyboardInterrupt:

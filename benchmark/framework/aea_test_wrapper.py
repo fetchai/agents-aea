@@ -149,7 +149,6 @@ class AEATestWrapper:
 
         :param to: the address of the receiver.
         :param sender: the address of the sender.
-        :param protocol_id: the protocol id.
         :param message: the protocol-specific message.
 
         :return: Envelope
@@ -158,7 +157,7 @@ class AEATestWrapper:
         return Envelope(
             to=to,
             sender=sender,
-            protocol_id=DefaultMessage.protocol_id,
+            protocol_specification_id=DefaultMessage.protocol_specification_id,
             message=DefaultSerializer().encode(message),
         )
 
@@ -263,9 +262,7 @@ class AEATestWrapper:
         self._fake_connection = FakeConnection(
             envelope, inbox_num, connection_id="fake_connection"
         )
-        self.aea._connections.append(  # pylint: disable=protected-access
-            self._fake_connection
-        )
+        self.aea.runtime.multiplexer.add_connection(self._fake_connection)
 
     def is_messages_in_fake_connection(self) -> bool:
         """

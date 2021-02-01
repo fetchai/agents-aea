@@ -1,16 +1,16 @@
 The AEA framework consists of several core elements, some of which are required to run an AEA and others which are optional.
 
-The following sections discuss the use of the AEA framework, in particular its dominant usage where the framework is in charge of calling the code in custom packages (see <a href="https://en.wikipedia.org/wiki/Inversion_of_control" target="_blank">inversion of control</a>). Whilst it is in principle possible to use parts of the framework as a library, we do not recommend it.
+The following sections discuss the use of the AEA framework, in particular its dominant usage where the framework is in charge of calling the code in custom packages (see <a href="https://en.wikipedia.org/wiki/Inversion_of_control" target="_blank">inversion of control</a> and a helpful comparison <a href="https://www.freecodecamp.org/news/the-difference-between-a-framework-and-a-library-bd133054023f/" target="_blank">here</a>). Whilst it is in principle possible to use parts of the framework as a library, we do not recommend it.
 
 ## The elements each AEA uses
 
-<a href="../api/aea#aea-objects">`AEAs`</a> communicate asynchronously via `Envelopes`.
+<a href="../api/aea#aea-objects">`AEAs`</a> communicate asynchronously via <a href="../api/mail/base#envelope-objects">`Envelopes`</a>.
 
 ### Envelope
 
 <img src="../assets/envelope.jpg" alt="Envelope of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:50%;">
 
-An <a href="../api/mail/base#envelope-objects">`Envelope`</a> is the core object with which agents communicate. It is a vehicle for `Messages` with five attributes:
+An <a href="../api/mail/base#envelope-objects">`Envelope`</a> is the core object with which agents communicate. It is a vehicle for <a href="../api/protocols/base#message-objects">`Messages`</a> with five attributes:
 
 * `to`: defines the destination address.
 
@@ -26,7 +26,7 @@ An <a href="../api/mail/base#envelope-objects">`Envelope`</a> is the core object
 
 ### Protocol
 
-<a href="../api/protocols/base#protocol-objects">`Protocols`</a> define agent-to-agent as well as component-to-component interactions within agents. As such, they include:
+<a href="../api/protocols/base#protocol-objects">`Protocols`</a> define agent-to-agent as well as component-to-component interactions within AEAs. As such, they include:
 
 * `Messages`, which define the representation;
 
@@ -36,7 +36,7 @@ An <a href="../api/mail/base#envelope-objects">`Envelope`</a> is the core object
 
 The framework provides one default `Protocol`, called `default` (current version `fetchai/default:0.11.0`). This `Protocol` provides a bare-bones implementation for an AEA `Protocol` which includes a <a href="../api/protocols/default/message#packages.fetchai.protocols.default.message">`DefaultMessage`</a>  class and associated <a href="../api/protocols/default/serialization#packages.fetchai.protocols.default.serialization">`DefaultSerializer`</a> and <a href="../api/protocols/default/dialogues#packages.fetchai.protocols.default.dialogues">`DefaultDialogue`</a> classes.
 
-Additional `Protocols` - i.e. a new type of interaction - can be added as packages and generated with the <a href="../protocol-generator">protocol generator</a>. For more details on `Protocols` also read the `Protocol` guide <a href="../protocol">here</a>.
+Additional `Protocols` - i.e. a new type of interaction - can be added as packages and generated with the <a href="../protocol-generator">protocol generator</a>. For more details on `Protocols` also read the <a href="../protocol">protocol guide</a>.
 
 Protocol specific `Messages`, wrapped in `Envelopes`, are sent and received to other agents, agent components and services via `Connections`.
 
@@ -73,19 +73,21 @@ A `Skill` encapsulates implementations of the three abstract base classes `Handl
 
 A `Skill` can read (parts of) the state of the the AEA (as summarised in the <a href="../api/context/base#agentcontext-objects">`AgentContext`</a>), and suggest actions to the AEA according to its specific logic. As such, more than one `Skill` could exist per `Protocol`, competing with each other in suggesting to the AEA the best course of actions to take. In technical terms this means `Skills` are horizontally arranged.
 
-For instance, an AEA which is trading goods, could subscribe to more than one `Skill`, where each `Skill` corresponds to a different trading strategy.  The `Skills` could then read the preference and ownership state of the AEA, and independently suggest profitable transactions.
+For instance, an AEA which is trading goods, could subscribe to more than one `Skill`, where each `Skill` corresponds to a different trading strategy.
 
 The framework places no limits on the complexity of `Skills`. They can implement simple (e.g. `if-this-then-that`) or complex (e.g. a deep learning model or reinforcement learning agent).
 
 The framework provides one default `Skill`, called `error`. Additional `Skills` can be added as packages. For more details on `Skills` also read the `Skill` guide <a href="../skill">here</a>.
 
-### Main loop
+### Agent loop
 
-The main `AgentLoop` performs a series of activities while the `Agent` state is not stopped.
+The <a href="../api/agent_loop#baseagentloop-objects">`AgentLoop`</a> performs a series of activities while the `AEA` state is not stopped.
 
-* `act()`: this function calls the `act()` function of all active registered Behaviours.
-* `react()`: this function grabs all Envelopes waiting in the `InBox` queue and calls the `handle()` function for the Handlers currently registered against the `Protocol` of the `Envelope`.
-* `update()`: this function dispatches the internal `Messages` from the decision maker (described below) to the handler in the relevant `Skill`.
+* it calls the `act()` function of all active registered `Behaviours` at their respective tick rate.
+* it grabs all Envelopes waiting in the `InBox` queue and calls the `handle()` function for the `Handlers` currently registered against the `Protocol` of the `Envelope`.
+* it dispatches the internal `Messages` from the decision maker (described below) to the handler in the relevant `Skill`.
+
+The <a href="../api/agent_loop#baseagentloop-objects">`AgentLoop`</a> and <a href="../api/multiplexer#multiplexer-objects">`Multiplexer`</a> are decoupled via the <a href="../api/multiplexer#inbox-objects">`InBox`</a> and <a href="../api/multiplexer#outbox-objects">`OutBox`</a>, and both are maintained by the <a href="../api/runtime#baseruntime-objects">`Runtime`</a>.
 
 ## Next steps
 

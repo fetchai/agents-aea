@@ -52,6 +52,7 @@ class LedgerApiMessage(Message):
     """A protocol for ledger APIs requests and responses."""
 
     protocol_id = PublicId.from_str("fetchai/ledger_api:0.9.0")
+    protocol_specification_id = PublicId.from_str("fetchai/ledger_api:0.1.0")
 
     Kwargs = CustomKwargs
 

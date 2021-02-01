@@ -47,7 +47,6 @@ from packages.fetchai.connections.stub.connection import (
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.signing.message import SigningMessage
 from packages.fetchai.protocols.state_update.message import StateUpdateMessage
-from packages.fetchai.skills.error import PUBLIC_ID as ERROR_SKILL_PUBLIC_ID
 
 from tests.conftest import (
     AGENT_CONFIGURATION_SCHEMA,
@@ -177,13 +176,9 @@ class TestCreate:
             str(StateUpdateMessage.protocol_id),
         ]
 
-    def test_skills_field_is_not_empty_list(self):
+    def test_skills_field_is_empty_list(self):
         """Check that the 'skills' field is a list with the 'error' skill."""
-        assert self.agent_config["skills"] == [str(ERROR_SKILL_PUBLIC_ID)]
-
-    def test_connections_field_is_not_empty_list(self):
-        """Check that the 'connections' field is a list with the 'error' skill."""
-        assert self.agent_config["skills"] == [str(ERROR_SKILL_PUBLIC_ID)]
+        assert self.agent_config["skills"] == []
 
     def test_version_field_is_equal_to_0_1_0(self):
         """Check that the 'version' field is equal to the string '0.1.0'."""
@@ -238,25 +233,6 @@ class TestCreate:
         comparison = filecmp.dircmp(
             str(default_protocol_dirpath),
             str(Path(ROOT_DIR, "packages", "fetchai", "protocols", "default")),
-        )
-        assert comparison.diff_files == []
-
-    def test_vendor_skills_contains_error_skill(self):
-        """Check that the vendor skills directory contains the error skill."""
-        error_skill_dirpath = Path(
-            self.agent_name, "vendor", "fetchai", "skills", "error"
-        )
-        assert error_skill_dirpath.exists()
-        assert error_skill_dirpath.is_dir()
-
-    def test_error_skill_is_equal_to_library_error_skill(self):
-        """Check that the error skill directory is equal to the package's one (aea.skills.error)."""
-        default_protocol_dirpath = Path(
-            self.agent_name, "vendor", "fetchai", "skills", "error"
-        )
-        comparison = filecmp.dircmp(
-            str(default_protocol_dirpath),
-            str(Path(ROOT_DIR, "packages", "fetchai", "skills", "error")),
         )
         assert comparison.diff_files == []
 

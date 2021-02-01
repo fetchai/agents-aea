@@ -11,5 +11,5 @@ This skill is used to deploy an oracle client smart contract to a ledger, approv
 ## Handlers
 
 * `contract_api`: handles `contract_api` messages for interactions with the smart contract
-* `ledger_api`: handles `ledger_api` messages for payment
+* `ledger_api`: handles `ledger_api` messages for interacting with a ledger
 * `signing`: handles `signing` messages for transaction signing by the decision maker

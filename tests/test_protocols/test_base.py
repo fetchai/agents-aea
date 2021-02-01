@@ -251,7 +251,7 @@ class TestBaseSerializations:
         envelope = Envelope(
             to="receiver",
             sender="sender",
-            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
+            protocol_specification_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=message_bytes,
         )
         envelope_bytes = envelope.encode()
@@ -270,7 +270,7 @@ class TestBaseSerializations:
         envelope = Envelope(
             to="receiver",
             sender="sender",
-            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
+            protocol_specification_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=message_bytes,
         )
         envelope_bytes = envelope.encode()

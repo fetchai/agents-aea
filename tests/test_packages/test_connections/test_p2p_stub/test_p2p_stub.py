@@ -48,9 +48,7 @@ def make_test_envelope(to_="any", sender_="sender") -> Envelope:
     )
     msg.to = to_
     msg.sender = sender_
-    envelope = Envelope(
-        to=to_, sender=sender_, protocol_id=DefaultMessage.protocol_id, message=msg,
-    )
+    envelope = Envelope(to=to_, sender=sender_, message=msg,)
     return envelope
 
 

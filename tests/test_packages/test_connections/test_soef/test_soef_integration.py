@@ -67,7 +67,10 @@ def make_multiplexer_and_dialogues() -> Tuple[Multiplexer, OefSearchDialogues, C
         api_key="TwiCIriSl0mLahw17pyqoA",
         soef_addr="soef.fetch.ai",
         soef_port=9002,
-        restricted_to_protocols={OefSearchMessage.protocol_id},
+        restricted_to_protocols={
+            OefSearchMessage.protocol_specification_id,
+            OefSearchMessage.protocol_id,
+        },
         connection_id=SOEFConnection.connection_id,
     )
     soef_connection = SOEFConnection(configuration=configuration, identity=identity,)
@@ -119,12 +122,7 @@ class Instance:
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         logger.info(
             "Registering agent at location=({},{}) by agent={}".format(
                 self.location.latitude, self.location.longitude, self.crypto.address,
@@ -145,12 +143,7 @@ class Instance:
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         logger.info("Registering agent personality")
         self.multiplexer.put(envelope)
 
@@ -165,12 +158,7 @@ class Instance:
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         logger.info("Registering agent service key")
         self.multiplexer.put(envelope)
 
@@ -182,10 +170,7 @@ class Instance:
             query=query,
         )
         search_envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
+            to=message.to, sender=message.sender, message=message,
         )
         logger.info(f"Searching for agents with query: {query}")
         self.multiplexer.put(search_envelope)
@@ -218,12 +203,7 @@ class Instance:
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         logger.info(f"Send generic command {command} {parameters}")
         self.multiplexer.put(envelope)
 
@@ -345,10 +325,7 @@ class TestRealNetwork:
                 service_description=service_description,
             )
             envelope = Envelope(
-                to=message.to,
-                sender=agent.crypto.address,
-                protocol_id=message.protocol_id,
-                message=message,
+                to=message.to, sender=agent.crypto.address, message=message,
             )
             logger.info("Pinging")
             agent.multiplexer.put(envelope)
@@ -407,12 +384,7 @@ class TestRealNetwork:
                 counterparty=str(SOEFConnection.connection_id.to_any()),
             )
 
-            envelope = Envelope(
-                to=message.to,
-                sender=message.sender,
-                protocol_id=message.protocol_id,
-                message=message,
-            )
+            envelope = Envelope(to=message.to, sender=message.sender, message=message,)
             agent1.multiplexer.put(envelope)
 
             envelope = agent1.get()

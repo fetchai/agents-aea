@@ -85,7 +85,7 @@ async def test_send_to_unknown_destination():
     envelope = Envelope(
         to="non_existing_destination",
         sender="address",
-        protocol_id=DefaultMessage.protocol_id,
+        protocol_specification_id=DefaultMessage.protocol_specification_id,
         message=b"",
     )
     with unittest.mock.patch.object(tcp_connection.logger, "error") as mock_logger:
@@ -111,7 +111,7 @@ async def test_send_cancelled():
         envelope = Envelope(
             to="address_client",
             sender="address_server",
-            protocol_id=DefaultMessage.protocol_id,
+            protocol_specification_id=DefaultMessage.protocol_specification_id,
             message=b"",
         )
         await tcp_client.send(envelope)

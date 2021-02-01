@@ -158,9 +158,7 @@ def test_storage_access_from_handler():
     )
     msg.to = aea.identity.address
     msg.sender = aea.identity.address
-    envelope = Envelope(
-        to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
     try:
         wait_for_condition(lambda: aea.is_running, timeout=10)
 
@@ -235,9 +233,7 @@ class TestDialogueModelSaveLoad(AEATestCaseEmpty):
                 performative=DefaultMessage.Performative.BYTES,
                 content=b"hello",
             )
-            envelope = Envelope(
-                to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
-            )
+            envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
             aea.runtime.multiplexer.in_queue.put(envelope)
 
             dialogue_storage: PersistDialoguesStorage = echo_skill.skill_context.default_dialogues._dialogues_storage
