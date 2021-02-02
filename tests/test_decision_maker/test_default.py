@@ -303,7 +303,7 @@ class TestDecisionMaker2:
 
     def test_handle_tx_signing_fetchai(self):
         """Test tx signing for fetchai."""
-        fetchai_api = make_ledger_api(FETCHAI, *FETCHAI_TESTNET_CONFIG)
+        fetchai_api = make_ledger_api(FETCHAI, **FETCHAI_TESTNET_CONFIG)
         account = make_crypto(FETCHAI)
         fc2 = make_crypto(FETCHAI)
         amount = 10000

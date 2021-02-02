@@ -33,7 +33,6 @@ from aea.crypto.helpers import (
     try_generate_testnet_wealth,
     try_validate_private_key_path,
 )
-from aea.helpers import http_requests as requests
 
 from tests.conftest import (
     COSMOS_PRIVATE_KEY_FILE,
@@ -91,7 +90,7 @@ class TestHelperFile:
         """Test generate wealth for ethereum."""
         address = "my_address"
         result = ResponseMock(status_code=500)
-        with patch.object(requests, "get", return_value=result):
+        with patch("requests.get", return_value=result):
             with caplog.at_level(
                 logging.DEBUG, logger="ethereum_crypto._default_logger"
             ):
@@ -104,7 +103,7 @@ class TestHelperFile:
         """Test generate wealth for ethereum."""
         address = "my_address"
         result = ResponseMock(status_code=200)
-        with patch.object(requests, "get", return_value=result):
+        with patch("requests.get", return_value=result):
             with caplog.at_level(
                 logging.DEBUG, logger="ethereum_crypto._default_logger"
             ):
