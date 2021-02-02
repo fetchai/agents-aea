@@ -1598,9 +1598,7 @@ class TestDialoguesBase:
             (str(1), "error"), self.opponent_address, self.agent_address
         )
 
-        retrieved_dialogue = self.own_dialogues.get_dialogue_from_label(
-            incorrect_label
-        )
+        retrieved_dialogue = self.own_dialogues.get_dialogue_from_label(incorrect_label)
         assert retrieved_dialogue is None
 
     def test_create_self_initiated_positive(self):
