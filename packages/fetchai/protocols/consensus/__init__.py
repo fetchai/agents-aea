@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2020 fetchai
+#   Copyright 2021 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -18,3 +18,9 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the support resources for the consensus protocol."""
+
+from packages.fetchai.protocols.consensus.message import ConsensusMessage
+from packages.fetchai.protocols.consensus.serialization import ConsensusSerializer
+
+
+ConsensusMessage.serializer = ConsensusSerializer

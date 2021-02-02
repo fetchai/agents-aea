@@ -1,8 +1,8 @@
-# Oracle Protocol
+# Consensus Protocol
 
 ## Description
 
-This is a protocol for oracle networks.
+This is a consensus protocol for aggregating observations.
 
 ## Specification
 
@@ -13,30 +13,26 @@ author: fetchai
 version: 0.1.0
 description: A protocol for agents to aggregate individual observations
 license: Apache-2.0
-aea_version: '>=0.8.0, <0.9.0'
+aea_version: '>=0.9.0, <0.10.0'
 speech_acts:
-  value:
-    value: ct:Value
-    signature: ct:SignedValue
-  aggregated_value:
-    value: ct:Value
-    signature: ct:MultiSignedValue
+  observation:
+    value: pt:int
+    time: pt:int
+    source: pt:str
+    signature: pt:str
+  aggregation:
+    value: pt:int
+    time: pt:int
+    contributors: pt:list[pt:int]
+    signature: pt:str
 ...
 ---
-ct:Value:
-  bytes value = 1;
-ct:SignedValue:
-  bytes signed_value = 1;
-ct:MultiSignedValue:
-  bytes multi_signed_value = 1;
-...
----
-initiation: [value, aggregated_value]
+initiation: [observation, aggregation]
 reply:
-  value: [value]
-  aggregated_value: [aggregated_value]
-termination: [value, raw_transaction, raw_message, error]
-roles: {agent, ledger}
+  observation: []
+  aggregation: []
+termination: [observation, aggregation]
+roles: {agent}
 end_states: [successful, failed]
 keep_terminal_state_dialogues: false
 ...
