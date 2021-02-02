@@ -7,7 +7,7 @@ description: The ml train and predict skill implements a simple skill which buys
 license: Apache-2.0
 aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
-  README.md: QmVViVMDxEWNuS1NPiNQ2JptpNujQrznYKi3vPC4K1Jh7D
+  README.md: QmUk1XEpYnxte5GKZjSvJY2LJPpVzzP6zLvnxT2Y1g9f4m
   __init__.py: QmSpPn19R9xMzDMF7VwtQHU9eLG59pXDk8TFK2yTuT7aXh
   behaviours.py: QmSLQf6neRYG27KKWVYQET497LxcDAAS9Wpu9Wo64qbtcF
   dialogues.py: QmZCXn2do9uUjSD58zkhQh2pAJikoDHGhHHV2ert9fCPcb

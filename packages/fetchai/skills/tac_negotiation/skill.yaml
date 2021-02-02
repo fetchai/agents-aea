@@ -7,7 +7,7 @@ description: The tac negotiation skill implements the logic for an AEA to do fip
 license: Apache-2.0
 aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
-  README.md: QmYdhQ2jH3dJhSSGT3HhbTDp785H618TD6LHyXhphCMXY5
+  README.md: QmdpJypf1uoDBW54DC2req7bst1Hw548piYmMKUaPPVHeB
   __init__.py: QmWn28DxHy763jA88ggonq176H7Kvhn7t2ZmAskNnLjZTj
   behaviours.py: QmSAJdieXfpCKSda51KgFoivemjt4iXhCKKuYubMmHVxeo
   dialogues.py: QmZE41d7QcY9Zr7Cbbz9qxDFToMq4CNHaeRtL72yGWmSac

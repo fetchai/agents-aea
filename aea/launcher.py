@@ -102,7 +102,7 @@ def _run_agent(
         try:
             stop_event.wait()
         except (KeyboardInterrupt, EOFError, BrokenPipeError) as e:  # pragma: nocover
-            _default_logger.error(
+            _default_logger.debug(
                 f"Exception raised in stop_event_thread {e} {type(e)}. Skip it, looks process is closed."
             )
         finally:
@@ -196,7 +196,7 @@ class AEADirMultiprocessTask(AbstractMultiprocessExecutorTask):
         try:
             self._stop_event.set()
         except (FileNotFoundError, BrokenPipeError, EOFError) as e:  # pragma: nocover
-            _default_logger.error(
+            _default_logger.debug(
                 f"Exception raised in task.stop {e} {type(e)}. Skip it, looks process is closed."
             )
 

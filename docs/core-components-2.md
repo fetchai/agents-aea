@@ -2,7 +2,7 @@ The AEA framework consists of several core elements, some of which are required 
 
 ## The advanced elements AEAs use
 
-In <a href="../core-components-1">Core Components - Part 1</a> we discussed the elements each AEA uses. We will now look at some of the advanced elements each AEA uses.
+In <a href="../core-components-1">Core Components - Part 1</a> we discussed the common elements each AEA uses. We will now look at some of the advanced elements each AEA uses.
 
 ### Decision Maker
 
@@ -30,7 +30,7 @@ The identity can be accessed in a `Skill` via the <a href="../api/context/base#a
 
 <a href="../api/contracts/base#contract-objects">`Contracts`</a> wrap smart contracts for third-party decentralized ledgers. In particular, they provide wrappers around the API or ABI of a smart contract. They expose an API to abstract implementation specifics of the ABI from the `Skills`.
 
-`Contracts` usually contain the logic to create contract transactions.
+`Contracts` usually contain the logic to create contract transactions and make contract calls.
 
 `Contracts` can be added as packages. For more details on `Contracts` also read the `Contract` guide <a href="../contract">here</a>.
 

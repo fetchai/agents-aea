@@ -31,6 +31,7 @@ from aea.configurations.base import (
     ProtocolSpecification,
     ProtocolSpecificationParseError,
 )
+from aea.configurations.data_types import PublicId
 from aea.protocols.generator.base import ProtocolGenerator
 
 from tests.conftest import ROOT_DIR, match_files
@@ -1188,6 +1189,10 @@ class ProtocolGeneratorTestCase(TestCase):
             p_spec_mock = mock.MagicMock(ProtocolSpecification)
             p_spec_mock.name = "some_name"
             p_spec_mock.author = "some_author"
+            p_spec_mock.protocol_specification_id = PublicId(
+                "some_author", "some_protocol_name", "0.1.0"
+            )
+
             with mock.patch(
                 "aea.protocols.generator.base.load_protocol_specification",
                 return_value=p_spec_mock,
@@ -1206,7 +1211,7 @@ class ProtocolGeneratorTestCase(TestCase):
                     print(proto_buff_schema_str)
                     expected = (
                         'syntax = "proto3";\n\n'
-                        "package aea.some_author.some_name;\n\n"
+                        "package aea.some_author.some_protocol_name.v0_1_0;\n\n"
                         "message SomeNameMessage{\n\n"
                         "    // Custom Types\n"
                         "    message SomeCustomType{\n"

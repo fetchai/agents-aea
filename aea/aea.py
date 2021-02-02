@@ -38,14 +38,13 @@ from aea.agent import Agent
 from aea.agent_loop import AsyncAgentLoop, BaseAgentLoop, SyncAgentLoop
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_SEARCH_SERVICE_ADDRESS
-from aea.connections.base import Connection
 from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import DEFAULT_CURRENCY_DENOMINATIONS
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler
 from aea.error_handler.base import AbstractErrorHandler
 from aea.error_handler.default import ErrorHandler as DefaultErrorHandler
-from aea.exceptions import AEAException, _StopRuntime
+from aea.exceptions import AEAException, _StopRuntime, enforce
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import AgentLoggerAdapter, get_logger
 from aea.identity.base import Identity
@@ -123,6 +122,8 @@ class AEA(Agent):
             logger=get_logger(__name__, identity.name), agent_name=identity.name,
         )
 
+        self._resources = resources
+
         super().__init__(
             identity=identity,
             connections=[],
@@ -132,6 +133,35 @@ class AEA(Agent):
             runtime_mode=runtime_mode,
             storage_uri=storage_uri,
             logger=cast(Logger, aea_logger),
+        )
+
+        enforce(
+            bool(self.resources.get_all_connections()),
+            "Resource connections list is empty, please add at least one connection!",
+        )
+
+        default_routing = default_routing if default_routing is not None else {}
+        connection_ids = connection_ids or []
+        connections = [
+            c
+            for c in self.resources.get_all_connections()
+            if (not connection_ids) or (c.connection_id in connection_ids)
+        ]
+        enforce(
+            bool(connections),
+            "Please check connection_ids and resources.connections! No connection left after filtering!",
+        )
+
+        self._set_runtime_and_inboxes(
+            runtime_class=self._get_runtime_class(),
+            loop_mode=loop_mode,
+            loop=loop,
+            multiplexer_options=dict(
+                connections=connections,
+                default_routing=default_routing,
+                default_connection=default_connection,
+                protocols=self.resources.get_all_protocols(),
+            ),
         )
 
         self.max_reactions = max_reactions
@@ -170,7 +200,7 @@ class AEA(Agent):
             default_ledger_id,
             currency_denominations,
             default_connection,
-            default_routing if default_routing is not None else {},
+            default_routing,
             search_service_address,
             decision_maker_handler.self_address,
             storage_callable=lambda: self._runtime.storage,
@@ -178,8 +208,6 @@ class AEA(Agent):
             **kwargs,
         )
         self._execution_timeout = execution_timeout
-        self._connection_ids = connection_ids
-        self._resources = resources
         self._filter = Filter(
             self.resources, self.runtime.decision_maker.message_out_queue
         )
@@ -239,28 +267,6 @@ class AEA(Agent):
         """
         self.filter.handle_new_handlers_and_behaviours()
 
-    @property
-    def active_connections(self) -> List[Connection]:
-        """Return list of active connections."""
-        connections = self.resources.get_all_connections()
-        if self._connection_ids is not None:
-            connections = [
-                c for c in connections if c.connection_id in self._connection_ids
-            ]
-        return connections
-
-    def get_multiplexer_setup_options(self) -> Optional[Dict]:
-        """
-        Get options to pass to Multiplexer.setup.
-
-        :return: dict of kwargs
-        """
-        return dict(
-            connections=self.active_connections,
-            default_routing=self.context.default_routing,
-            default_connection=self.context.default_connection,
-        )
-
     def _get_error_handler(self) -> Type[AbstractErrorHandler]:
         """Get error handler."""
         return self._error_handler_class
@@ -269,7 +275,9 @@ class AEA(Agent):
         self, envelope: Envelope
     ) -> Tuple[Optional[Message], List[Handler]]:
         """Get the msg and its handlers."""
-        protocol = self.resources.get_protocol(envelope.protocol_id)
+        protocol = self.resources.get_protocol_by_specification_id(
+            envelope.protocol_specification_id
+        )
 
         msg, handlers = self._handle_decoding(envelope, protocol)
 

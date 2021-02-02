@@ -210,7 +210,6 @@ class WebhookChannel:
         envelope = Envelope(
             to=http_message.to,
             sender=http_message.sender,
-            protocol_id=http_message.protocol_id,
             context=context,
             message=http_message,
         )

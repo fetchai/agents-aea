@@ -46,12 +46,7 @@ from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpD
 from packages.fetchai.protocols.http.message import HttpMessage
 
 from tests.common.mocks import RegexComparator
-from tests.conftest import (
-    ROOT_DIR,
-    UNKNOWN_PROTOCOL_PUBLIC_ID,
-    get_host,
-    get_unused_tcp_port,
-)
+from tests.conftest import ROOT_DIR, get_host, get_unused_tcp_port
 
 
 logger = logging.getLogger(__name__)
@@ -125,7 +120,7 @@ class TestHTTPServer:
             port=self.port,
             api_spec_path=self.api_spec_path,
             connection_id=HTTPServerConnection.connection_id,
-            restricted_to_protocols=set([self.protocol_id]),
+            restricted_to_protocols={HttpMessage.protocol_id},
         )
         self.http_connection = HTTPServerConnection(
             configuration=self.configuration, identity=self.identity,
@@ -168,7 +163,6 @@ class TestHTTPServer:
         response_envelope = Envelope(
             to=envelope.sender,
             sender=envelope.to,
-            protocol_id=envelope.protocol_id,
             context=envelope.context,
             message=message,
         )
@@ -202,7 +196,6 @@ class TestHTTPServer:
         response_envelope = Envelope(
             to=envelope.sender,
             sender=envelope.to,
-            protocol_id=envelope.protocol_id,
             context=envelope.context,
             message=message,
         )
@@ -242,7 +235,6 @@ class TestHTTPServer:
         response_envelope = Envelope(
             to=incorrect_message.to,
             sender=envelope.to,
-            protocol_id=envelope.protocol_id,
             context=envelope.context,
             message=incorrect_message,
         )
@@ -280,7 +272,6 @@ class TestHTTPServer:
         response_envelope = Envelope(
             to=message.to,
             sender=envelope.to,
-            protocol_id=envelope.protocol_id,
             context=envelope.context,
             message=message,
         )
@@ -319,7 +310,6 @@ class TestHTTPServer:
         response_envelope = Envelope(
             to=message.to,
             sender=envelope.to,
-            protocol_id=envelope.protocol_id,
             context=envelope.context,
             message=message,
         )
@@ -396,12 +386,7 @@ class TestHTTPServer:
         )
         message.to = str(HTTPServerConnection.connection_id)
         message.sender = "from_key"
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         await self.http_connection.send(envelope)
 
     @pytest.mark.asyncio
@@ -443,7 +428,6 @@ class TestHTTPServer:
         response_envelope = Envelope(
             to=message.to,
             sender=envelope.to,
-            protocol_id=envelope.protocol_id,
             context=envelope.context,
             message=message,
         )
@@ -453,35 +437,6 @@ class TestHTTPServer:
             response = await asyncio.wait_for(request_task, timeout=20,)
 
         assert response and response.status == 500 and response.reason == "Server Error"
-
-    @pytest.mark.asyncio
-    async def test_send_envelope_restricted_to_protocols_fail(self):
-        """Test fail on send if envelope protocol not supported."""
-        message = HttpMessage(
-            performative=HttpMessage.Performative.RESPONSE,
-            dialogue_reference=("", ""),
-            target=1,
-            message_id=2,
-            version="1.0",
-            headers="",
-            status_code=200,
-            status_text="Success",
-            body=b"Response body",
-        )
-        envelope = Envelope(
-            to="receiver",
-            sender="sender",
-            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
-            message=message,
-        )
-
-        with patch.object(
-            self.http_connection.channel,
-            "restricted_to_protocols",
-            new=[HttpMessage.protocol_id],
-        ):
-            with pytest.raises(ValueError):
-                await self.http_connection.send(envelope)
 
     def teardown(self):
         """Teardown the test case."""

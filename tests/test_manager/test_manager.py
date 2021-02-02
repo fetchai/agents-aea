@@ -400,7 +400,7 @@ class TestMultiAgentManagerAsyncMode(
         assert "default_ledger" in agent_overridables
         assert "timeout" in agent_overridables
         assert "description" in agent_overridables
-        assert len(components_overridables) == 3
+        assert len(components_overridables) == 2
         assert "is_abstract" in components_overridables[0]
 
     def test_issue_certificates(self, *args):

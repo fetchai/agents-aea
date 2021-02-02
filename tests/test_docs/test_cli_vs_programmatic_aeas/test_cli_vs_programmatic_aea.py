@@ -51,6 +51,8 @@ DEST = "programmatic_aea.py"
 class TestCliVsProgrammaticAEA(AEATestCaseMany):
     """This class contains the tests for the code-blocks in the build-aea-programmatically.md file."""
 
+    capture_log: bool = True
+
     def test_read_md_file(self):
         """Compare the extracted code with the python file."""
         doc_path = os.path.join(ROOT_DIR, MD_FILE)
@@ -173,7 +175,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         """Inject location into the weather client strategy."""
         file = Path(dst_file_path)
         lines = file.read_text().splitlines()
-        line_insertion_position = 204  # line below: `strategy._is_ledger_tx = False`
+        line_insertion_position = 209  # line below: `strategy._is_ledger_tx = False`
         lines.insert(
             line_insertion_position,
             "    from packages.fetchai.skills.generic_buyer.strategy import Location",

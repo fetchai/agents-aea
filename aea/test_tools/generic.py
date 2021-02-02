@@ -66,13 +66,22 @@ def read_envelope_from_file(file_path: str):
 
     enforce(len(lines) == 2, "Did not find two lines.")
     line = lines[0] + lines[1]
-    to_b, sender_b, protocol_id_b, message, end = line.strip().split(b",", maxsplit=4)
+    to_b, sender_b, protocol_specification_id_b, message, end = line.strip().split(
+        b",", maxsplit=4
+    )
     to = to_b.decode("utf-8")
     sender = sender_b.decode("utf-8")
-    protocol_id = PublicId.from_str(protocol_id_b.decode("utf-8"))
+    protocol_specification_id = PublicId.from_str(
+        protocol_specification_id_b.decode("utf-8")
+    )
     enforce(end in [b"", b"\n"], "Envelope improperly formatted.")
 
-    return Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message,)
+    return Envelope(
+        to=to,
+        sender=sender,
+        protocol_specification_id=protocol_specification_id,
+        message=message,
+    )
 
 
 def _nested_set(

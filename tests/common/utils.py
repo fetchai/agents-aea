@@ -174,7 +174,7 @@ class AeaTool:
         cls,
         to: str = "test",
         sender: str = "test",
-        protocol_id: PublicId = DefaultMessage.protocol_id,
+        protocol_specification_id: PublicId = DefaultMessage.protocol_specification_id,
         message: Message = None,
     ) -> Envelope:
         """
@@ -185,7 +185,12 @@ class AeaTool:
         message = message or cls.dummy_default_message()
         message.sender = sender
         message.to = to
-        return Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message,)
+        return Envelope(
+            to=to,
+            sender=sender,
+            protocol_specification_id=protocol_specification_id,
+            message=message,
+        )
 
     def put_inbox(self, envelope: Envelope) -> None:
         """Add an envelope to agent's inbox."""

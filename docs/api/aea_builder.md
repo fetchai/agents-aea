@@ -644,7 +644,9 @@ Please, pay attention, all dependencies have to be already loaded.
 Notice also that this will make the call to 'build()' non re-entrant.
 You will have to `reset()` the builder before calling `build()` again.
 
-:params component: Component instance already initialized.
+**Arguments**:
+
+- `component`: Component instance already initialized.
 
 <a name="aea.aea_builder.AEABuilder.set_context_namespace"></a>
 #### set`_`context`_`namespace
@@ -905,11 +907,10 @@ Try to load the agent configuration file..
 
 Set builder variables from AgentConfig.
 
-:params agent_configuration: AgentConfig to get values from.
-:params aea_project_path: PathLike root directory of the agent project.
-
 **Arguments**:
 
+- `agent_configuration`: AgentConfig to get values from.
+- `aea_project_path`: PathLike root directory of the agent project.
 - `skip_consistency_check`: if True, the consistency check are skipped.
 
 **Returns**:

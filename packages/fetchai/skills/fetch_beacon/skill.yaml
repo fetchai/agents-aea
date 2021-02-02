@@ -6,7 +6,7 @@ description: Retrieve the value of the Fetch DRB
 license: Apache-2.0
 aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
-  README.md: QmZm7ef9dduPHdSePJvTQKnbVjzVqSSSh8pLrqFePbWyXB
+  README.md: QmWDGoCDEiYqf9tztY327hH4kY914erKvxkyG26EYPcUeT
   __init__.py: QmZZiSwjAYGig9iy2bLBHktn72kC6ojJByLhENrZhVsF5X
   behaviours.py: QmPVmQhvtxHHbPko3C5nTfUoGdVTKVCCatvkLTy3uhVWXc
   dialogues.py: QmTu7FDLSLprn4KJJ1XboYfL3M7VnAAgkvGSJuw1emqCp6

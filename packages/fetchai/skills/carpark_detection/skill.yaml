@@ -7,7 +7,7 @@ description: The carpark detection skill implements the detection and trading fu
 license: Apache-2.0
 aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
-  README.md: QmW7hmuVF8Nvkw8cJYdYSsSjqc7yZxCPmV8oefYFMtBixG
+  README.md: Qmd5Xe9jY8AjJjFR5QY7L9QQ3AeCEKx837UgiGuf3BSRVN
   __init__.py: QmbE2Was5RRLGQTk6DB9ewW3oxdSQgUeWFpBegGC5qqvFk
   behaviours.py: QmTNboU3YH8DehWnpZmoiDUCncpNmqoSVt1Yp4j7NsgY2S
   database.py: Qma4Ydj8EQtWr4W9EgUvZs5AkZ5tKHjSgHaxQDfzrPm27N

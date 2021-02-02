@@ -742,6 +742,7 @@ class ProtocolConfig(ComponentConfiguration):
         aea_version: str = "",
         dependencies: Optional[Dependencies] = None,
         description: str = "",
+        protocol_specification_id: Optional[str] = None,
     ):
         """Initialize a connection configuration object."""
         super().__init__(
@@ -759,6 +760,15 @@ class ProtocolConfig(ComponentConfiguration):
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
 
+        # temporary solution till all protocols updated
+        if protocol_specification_id is not None:
+            self.protocol_specification_id = PublicId.from_str(
+                str(protocol_specification_id)
+            )
+        else:
+            # make protocol specification same as protocol id
+            self.protocol_specification_id = self.public_id
+
     @property
     def json(self) -> Dict:
         """Return the JSON representation."""
@@ -767,6 +777,7 @@ class ProtocolConfig(ComponentConfiguration):
                 "name": self.name,
                 "author": self.author,
                 "version": self.version,
+                "protocol_specification_id": str(self.protocol_specification_id),
                 "type": self.component_type.value,
                 "description": self.description,
                 "license": self.license,
@@ -792,6 +803,7 @@ class ProtocolConfig(ComponentConfiguration):
         params = dict(
             name=cast(str, obj.get("name")),
             author=cast(str, obj.get("author")),
+            protocol_specification_id=cast(str, obj.get("protocol_specification_id")),
             version=cast(str, obj.get("version")),
             license_=cast(str, obj.get("license")),
             aea_version=cast(str, obj.get("aea_version", "")),
@@ -948,7 +960,7 @@ class SkillConfig(ComponentConfiguration):
     @property
     def is_abstract_component(self) -> bool:
         """Check whether the component is abstract."""
-        return self.is_abstract
+        return self.is_abstract  # pragma: nocover
 
     @property
     def json(self) -> Dict:
@@ -1471,6 +1483,7 @@ class ProtocolSpecification(ProtocolConfig):
         license_: str = "",
         aea_version: str = "",
         description: str = "",
+        protocol_specification_id: Optional[str] = None,
     ):
         """Initialize a protocol specification configuration object."""
         super().__init__(
@@ -1480,6 +1493,7 @@ class ProtocolSpecification(ProtocolConfig):
             license_,
             aea_version=aea_version,
             description=description,
+            protocol_specification_id=protocol_specification_id,
         )
         self.speech_acts = CRUDCollection[SpeechActContentConfig]()
         self._protobuf_snippets = {}  # type: Dict
@@ -1516,6 +1530,7 @@ class ProtocolSpecification(ProtocolConfig):
                 "description": self.description,
                 "license": self.license,
                 "aea_version": self.aea_version,
+                "protocol_specification_id": str(self.protocol_specification_id),
                 "speech_acts": {
                     key: speech_act.json
                     for key, speech_act in self.speech_acts.read_all()
@@ -1533,6 +1548,7 @@ class ProtocolSpecification(ProtocolConfig):
         params = dict(
             name=cast(str, obj.get("name")),
             author=cast(str, obj.get("author")),
+            protocol_specification_id=cast(str, obj.get("protocol_specification_id")),
             version=cast(str, obj.get("version")),
             license_=cast(str, obj.get("license")),
             aea_version=cast(str, obj.get("aea_version", "")),

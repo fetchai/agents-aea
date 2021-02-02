@@ -128,5 +128,4 @@ def _generate_item(ctx: Context, item_type: str, specification_path: str):
             "Protocol is NOT generated. The following error happened while generating the protocol:\n"
             + str(e)
         )
-
     fingerprint_item(ctx, PROTOCOL, protocol_spec.public_id)

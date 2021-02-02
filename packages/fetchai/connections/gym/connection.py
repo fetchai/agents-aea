@@ -133,7 +133,7 @@ class GymChannel:
         """
         sender = envelope.sender
         self.logger.debug("Processing message from {}: {}".format(sender, envelope))
-        if envelope.protocol_id != GymMessage.protocol_id:
+        if envelope.protocol_specification_id != GymMessage.protocol_specification_id:
             raise ValueError("This protocol is not valid for gym.")
         await self.handle_gym_message(envelope)
 
@@ -185,9 +185,7 @@ class GymChannel:
         elif gym_message.performative == GymMessage.Performative.CLOSE:
             await self._run_in_executor(self.gym_env.close)
             return
-        envelope = Envelope(
-            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
-        )
+        envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
         await self._send(envelope)
 
     async def _send(self, envelope: Envelope) -> None:

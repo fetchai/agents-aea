@@ -215,7 +215,6 @@ nav:
         - Resources: 'api/registries/resources.md'
       - Skills:
         - Base: 'api/skills/base.md'
-        - Error Skill: 'api/skills/error/handlers.md'
         - Behaviors: 'api/skills/behaviours.md'
         - Task: 'api/skills/tasks.md'
       - Test Tools:

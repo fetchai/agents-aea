@@ -1,17 +1,18 @@
 name: prometheus
 author: fetchai
 version: 0.2.0
+protocol_specification_id: fetchai/prometheus:0.1.0
 type: protocol
 description: A protocol for adding and updating metrics to a prometheus server.
 license: Apache-2.0
 aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
-  README.md: QmNiPjfhpV7pfuuVEcodjMf82cZ8BuLegJBcir5XgDHyS9
+  README.md: QmceL37HrT7NP8dZ3qovvKHv3ZeDVNXgbKiC9xQztEZA9X
   __init__.py: QmQvMGLitiy95SKYYSZQdfUH2UjpZ1ueTJooVuBG19P7QE
   dialogues.py: QmYQYkByWC3sBnQPnDEzFh98ULycx1jzqqs6hLC196YZg5
-  message.py: QmPfb6xd1inFja4tksitea2vi26DqtfNAiFrTspVdjccAP
-  prometheus.proto: QmYFZmhDkaQ2FoPb3sb9Hzha3EKjyoN7rmH6xdTDrbSBdr
-  prometheus_pb2.py: QmXwmam9ZPyR3yf6UTmgMNVuvxTAZzgx6hPohzVPmKq452
+  message.py: QmXESDtmpjA6UXceWvVcFaA63M9QJRGUHtYBSEhXNhwrYW
+  prometheus.proto: QmZ77hX3z4FaJKvLykjX3so2e2iVSFkr6iR6degGJGnMqw
+  prometheus_pb2.py: QmYBTsqax7YwdorTdUHz1e6g47iU1bshHpgH4nxzuo6d28
   serialization.py: QmaWVbKwubB4pymQpQQg3yXfjeEdxrehxcHDkb8o4SeXun
 fingerprint_ignore_patterns: []
 dependencies:

@@ -141,17 +141,23 @@ class TestSkillTestCase(BaseSkillTestCase):
         self.drop_messages_from_outbox(5)
         assert self.get_quantity_in_outbox() == 0
 
-        dummy_message_1 = Message()
+        dummy_message_1 = DefaultMessage(
+            performative=DefaultMessage.Performative.BYTES, content="dummy_2"
+        )
         dummy_message_1.to = "some_to_1"
         dummy_message_1.sender = "some_sender_1"
         self.skill.skill_context.outbox.put_message(dummy_message_1)
 
-        dummy_message_2 = Message()
+        dummy_message_2 = DefaultMessage(
+            performative=DefaultMessage.Performative.BYTES, content="dummy_2"
+        )
         dummy_message_2.to = "some_to_2"
         dummy_message_2.sender = "some_sender_2"
         self.skill.skill_context.outbox.put_message(dummy_message_2)
 
-        dummy_message_3 = Message()
+        dummy_message_3 = DefaultMessage(
+            performative=DefaultMessage.Performative.BYTES, content="dummy_2"
+        )
         dummy_message_3.to = "some_to_3"
         dummy_message_3.sender = "some_sender_3"
         self.skill.skill_context.outbox.put_message(dummy_message_3)
