@@ -25,9 +25,10 @@ from typing import Dict, List, Optional
 
 import docker
 import requests
-from aea.exceptions import enforce
 from docker import DockerClient
 from docker.models.containers import Container
+
+from aea.exceptions import enforce
 
 
 logger = logging.getLogger(__name__)

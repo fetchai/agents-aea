@@ -38,7 +38,7 @@ setup(
     install_requires=[
         "aea>=0.9.0,<0.10.0",
         "ecdsa==0.15",
-        # f"cosmos_crypto @ file://{plugin_dir}/cosmos-crypto#egg=cosmos_crypto",
+        "cosmos_crypto>=0.1.0,<0.2.0",
     ],
     tests_require=["pytest"],
     entry_points={

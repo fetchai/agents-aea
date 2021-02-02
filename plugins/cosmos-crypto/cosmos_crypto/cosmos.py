@@ -33,13 +33,14 @@ from pathlib import Path
 from typing import Any, BinaryIO, Collection, Dict, List, Optional, Tuple, cast
 
 import requests
+from bech32 import bech32_decode, bech32_encode, convertbits
+from ecdsa import SECP256k1, SigningKey, VerifyingKey
+from ecdsa.util import sigencode_string_canonize
+
 from aea.common import Address, JSONLike
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
 from aea.exceptions import AEAEnforceError
 from aea.helpers.base import try_decorator
-from bech32 import bech32_decode, bech32_encode, convertbits
-from ecdsa import SECP256k1, SigningKey, VerifyingKey
-from ecdsa.util import sigencode_string_canonize
 
 
 _default_logger = logging.getLogger(__name__)

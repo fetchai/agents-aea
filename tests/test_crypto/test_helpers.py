@@ -80,9 +80,7 @@ class TestHelperFile:
     def tests_generate_wealth_ethereum_fail_no_url(self, caplog):
         """Test generate wealth for ethereum."""
         address = "my_address"
-        with caplog.at_level(
-            logging.DEBUG, logger="ethereum_crypto._default_logger"
-        ):
+        with caplog.at_level(logging.DEBUG, logger="ethereum_crypto._default_logger"):
             try_generate_testnet_wealth(identifier=ETHEREUM, address=address)
             assert (
                 "Url is none, no default url provided. Please provide a faucet url."

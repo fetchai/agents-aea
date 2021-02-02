@@ -27,10 +27,6 @@ from pathlib import Path
 from typing import Any, BinaryIO, Callable, Dict, Optional, Tuple, Union, cast
 
 import requests
-from aea.common import Address, JSONLike
-from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
-from aea.exceptions import enforce
-from aea.helpers.base import try_decorator
 from eth_account import Account
 from eth_account._utils.signing import to_standard_signature_bytes
 from eth_account.datastructures import HexBytes, SignedTransaction
@@ -38,6 +34,11 @@ from eth_account.messages import _hash_eip191_message, encode_defunct
 from eth_keys import keys
 from web3 import HTTPProvider, Web3
 from web3.datastructures import AttributeDict
+
+from aea.common import Address, JSONLike
+from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
+from aea.exceptions import enforce
+from aea.helpers.base import try_decorator
 
 
 _default_logger = logging.getLogger(__name__)

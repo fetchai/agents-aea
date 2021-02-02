@@ -71,6 +71,7 @@ from aea.exceptions import AEAEnforceError
 from aea.helpers.base import compute_specifier_from_version, recursive_update
 from aea.helpers.sym_link import create_symlink
 
+
 DISTRIBUTED_PACKAGES = [PublicId.from_str(dp) for dp in DISTRIBUTED_PACKAGES_STR]
 ROOT = Path(".")
 

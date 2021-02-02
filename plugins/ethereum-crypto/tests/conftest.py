@@ -29,9 +29,9 @@ from typing import Callable
 
 import docker
 import pytest
-from aea.configurations.constants import PRIVATE_KEY_PATH_SCHEMA
-
 from ethereum_crypto import EthereumCrypto
+
+from aea.configurations.constants import PRIVATE_KEY_PATH_SCHEMA
 
 from tests.docker_image import DockerImage, GanacheDockerImage
 
