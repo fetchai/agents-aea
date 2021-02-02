@@ -14,23 +14,23 @@ _sym_db = _symbol_database.Default()
 
 DESCRIPTOR = _descriptor.FileDescriptor(
     name="consensus.proto",
-    package="aea.fetchai.consensus",
+    package="aea.fetchai.consensus.v0_1_0",
     syntax="proto3",
     serialized_options=None,
-    serialized_pb=b'\n\x0f\x63onsensus.proto\x12\x15\x61\x65\x61.fetchai.consensus"\x92\x03\n\x10\x43onsensusMessage\x12W\n\x0b\x61ggregation\x18\x05 \x01(\x0b\x32@.aea.fetchai.consensus.ConsensusMessage.Aggregation_PerformativeH\x00\x12W\n\x0bobservation\x18\x06 \x01(\x0b\x32@.aea.fetchai.consensus.ConsensusMessage.Observation_PerformativeH\x00\x1aZ\n\x18Observation_Performative\x12\r\n\x05value\x18\x01 \x01(\x05\x12\x0c\n\x04time\x18\x02 \x01(\x05\x12\x0e\n\x06source\x18\x03 \x01(\t\x12\x11\n\tsignature\x18\x04 \x01(\t\x1a`\n\x18\x41ggregation_Performative\x12\r\n\x05value\x18\x01 \x01(\x05\x12\x0c\n\x04time\x18\x02 \x01(\x05\x12\x14\n\x0c\x63ontributors\x18\x03 \x03(\x05\x12\x11\n\tsignature\x18\x04 \x01(\tB\x0e\n\x0cperformativeb\x06proto3',
+    serialized_pb=b'\n\x0f\x63onsensus.proto\x12\x1c\x61\x65\x61.fetchai.consensus.v0_1_0"\xa0\x03\n\x10\x43onsensusMessage\x12^\n\x0b\x61ggregation\x18\x05 \x01(\x0b\x32G.aea.fetchai.consensus.v0_1_0.ConsensusMessage.Aggregation_PerformativeH\x00\x12^\n\x0bobservation\x18\x06 \x01(\x0b\x32G.aea.fetchai.consensus.v0_1_0.ConsensusMessage.Observation_PerformativeH\x00\x1aZ\n\x18Observation_Performative\x12\r\n\x05value\x18\x01 \x01(\x05\x12\x0c\n\x04time\x18\x02 \x01(\x05\x12\x0e\n\x06source\x18\x03 \x01(\t\x12\x11\n\tsignature\x18\x04 \x01(\t\x1a`\n\x18\x41ggregation_Performative\x12\r\n\x05value\x18\x01 \x01(\x05\x12\x0c\n\x04time\x18\x02 \x01(\x05\x12\x14\n\x0c\x63ontributors\x18\x03 \x03(\x05\x12\x11\n\tsignature\x18\x04 \x01(\tB\x0e\n\x0cperformativeb\x06proto3',
 )
 
 
 _CONSENSUSMESSAGE_OBSERVATION_PERFORMATIVE = _descriptor.Descriptor(
     name="Observation_Performative",
-    full_name="aea.fetchai.consensus.ConsensusMessage.Observation_Performative",
+    full_name="aea.fetchai.consensus.v0_1_0.ConsensusMessage.Observation_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="aea.fetchai.consensus.ConsensusMessage.Observation_Performative.value",
+            full_name="aea.fetchai.consensus.v0_1_0.ConsensusMessage.Observation_Performative.value",
             index=0,
             number=1,
             type=5,
@@ -48,7 +48,7 @@ _CONSENSUSMESSAGE_OBSERVATION_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="time",
-            full_name="aea.fetchai.consensus.ConsensusMessage.Observation_Performative.time",
+            full_name="aea.fetchai.consensus.v0_1_0.ConsensusMessage.Observation_Performative.time",
             index=1,
             number=2,
             type=5,
@@ -66,7 +66,7 @@ _CONSENSUSMESSAGE_OBSERVATION_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="source",
-            full_name="aea.fetchai.consensus.ConsensusMessage.Observation_Performative.source",
+            full_name="aea.fetchai.consensus.v0_1_0.ConsensusMessage.Observation_Performative.source",
             index=2,
             number=3,
             type=9,
@@ -84,7 +84,7 @@ _CONSENSUSMESSAGE_OBSERVATION_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="signature",
-            full_name="aea.fetchai.consensus.ConsensusMessage.Observation_Performative.signature",
+            full_name="aea.fetchai.consensus.v0_1_0.ConsensusMessage.Observation_Performative.signature",
             index=3,
             number=4,
             type=9,
@@ -109,20 +109,20 @@ _CONSENSUSMESSAGE_OBSERVATION_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=241,
-    serialized_end=331,
+    serialized_start=262,
+    serialized_end=352,
 )
 
 _CONSENSUSMESSAGE_AGGREGATION_PERFORMATIVE = _descriptor.Descriptor(
     name="Aggregation_Performative",
-    full_name="aea.fetchai.consensus.ConsensusMessage.Aggregation_Performative",
+    full_name="aea.fetchai.consensus.v0_1_0.ConsensusMessage.Aggregation_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="aea.fetchai.consensus.ConsensusMessage.Aggregation_Performative.value",
+            full_name="aea.fetchai.consensus.v0_1_0.ConsensusMessage.Aggregation_Performative.value",
             index=0,
             number=1,
             type=5,
@@ -140,7 +140,7 @@ _CONSENSUSMESSAGE_AGGREGATION_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="time",
-            full_name="aea.fetchai.consensus.ConsensusMessage.Aggregation_Performative.time",
+            full_name="aea.fetchai.consensus.v0_1_0.ConsensusMessage.Aggregation_Performative.time",
             index=1,
             number=2,
             type=5,
@@ -158,7 +158,7 @@ _CONSENSUSMESSAGE_AGGREGATION_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="contributors",
-            full_name="aea.fetchai.consensus.ConsensusMessage.Aggregation_Performative.contributors",
+            full_name="aea.fetchai.consensus.v0_1_0.ConsensusMessage.Aggregation_Performative.contributors",
             index=2,
             number=3,
             type=5,
@@ -176,7 +176,7 @@ _CONSENSUSMESSAGE_AGGREGATION_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="signature",
-            full_name="aea.fetchai.consensus.ConsensusMessage.Aggregation_Performative.signature",
+            full_name="aea.fetchai.consensus.v0_1_0.ConsensusMessage.Aggregation_Performative.signature",
             index=3,
             number=4,
             type=9,
@@ -201,20 +201,20 @@ _CONSENSUSMESSAGE_AGGREGATION_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=333,
-    serialized_end=429,
+    serialized_start=354,
+    serialized_end=450,
 )
 
 _CONSENSUSMESSAGE = _descriptor.Descriptor(
     name="ConsensusMessage",
-    full_name="aea.fetchai.consensus.ConsensusMessage",
+    full_name="aea.fetchai.consensus.v0_1_0.ConsensusMessage",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="aggregation",
-            full_name="aea.fetchai.consensus.ConsensusMessage.aggregation",
+            full_name="aea.fetchai.consensus.v0_1_0.ConsensusMessage.aggregation",
             index=0,
             number=5,
             type=11,
@@ -232,7 +232,7 @@ _CONSENSUSMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="observation",
-            full_name="aea.fetchai.consensus.ConsensusMessage.observation",
+            full_name="aea.fetchai.consensus.v0_1_0.ConsensusMessage.observation",
             index=1,
             number=6,
             type=11,
@@ -262,14 +262,14 @@ _CONSENSUSMESSAGE = _descriptor.Descriptor(
     oneofs=[
         _descriptor.OneofDescriptor(
             name="performative",
-            full_name="aea.fetchai.consensus.ConsensusMessage.performative",
+            full_name="aea.fetchai.consensus.v0_1_0.ConsensusMessage.performative",
             index=0,
             containing_type=None,
             fields=[],
         ),
     ],
-    serialized_start=43,
-    serialized_end=445,
+    serialized_start=50,
+    serialized_end=466,
 )
 
 _CONSENSUSMESSAGE_OBSERVATION_PERFORMATIVE.containing_type = _CONSENSUSMESSAGE
@@ -305,7 +305,7 @@ ConsensusMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _CONSENSUSMESSAGE_OBSERVATION_PERFORMATIVE,
                 "__module__": "consensus_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.consensus.ConsensusMessage.Observation_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.consensus.v0_1_0.ConsensusMessage.Observation_Performative)
             },
         ),
         "Aggregation_Performative": _reflection.GeneratedProtocolMessageType(
@@ -314,12 +314,12 @@ ConsensusMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _CONSENSUSMESSAGE_AGGREGATION_PERFORMATIVE,
                 "__module__": "consensus_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.consensus.ConsensusMessage.Aggregation_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.consensus.v0_1_0.ConsensusMessage.Aggregation_Performative)
             },
         ),
         "DESCRIPTOR": _CONSENSUSMESSAGE,
         "__module__": "consensus_pb2"
-        # @@protoc_insertion_point(class_scope:aea.fetchai.consensus.ConsensusMessage)
+        # @@protoc_insertion_point(class_scope:aea.fetchai.consensus.v0_1_0.ConsensusMessage)
     },
 )
 _sym_db.RegisterMessage(ConsensusMessage)

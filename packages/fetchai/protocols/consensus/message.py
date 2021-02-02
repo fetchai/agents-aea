@@ -36,6 +36,7 @@ class ConsensusMessage(Message):
     """A protocol for agents to aggregate individual observations"""
 
     protocol_id = PublicId.from_str("fetchai/consensus:0.1.0")
+    protocol_specification_id = PublicId.from_str("fetchai/consensus:0.1.0")
 
     class Performative(Message.Performative):
         """Performatives for the consensus protocol."""

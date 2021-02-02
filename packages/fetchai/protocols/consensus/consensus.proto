@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package aea.fetchai.consensus;
+package aea.fetchai.consensus.v0_1_0;
 
 message ConsensusMessage{
 

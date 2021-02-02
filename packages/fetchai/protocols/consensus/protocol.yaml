@@ -1,6 +1,7 @@
 name: consensus
 author: fetchai
 version: 0.1.0
+protocol_specification_id: fetchai/consensus:0.1.0
 type: protocol
 description: A protocol for agents to aggregate individual observations
 license: Apache-2.0
@@ -8,10 +9,10 @@ aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
   README.md: Qmc8MEz58XRvZeJhBRnAYUhEVXx8GybC3DPhyR6o8Ygtaf
   __init__.py: QmVgebYqP99yE76pacoH78538ieqFEo6ne61HPcwaNmNeL
-  consensus.proto: QmRzNd95fjS3JLWJC3NorgDPSSzbdE9NVg1ibWTwEsQCnu
-  consensus_pb2.py: QmXH8ZnfrTCFJEvN98KogwdFEWpaoiH6xg2Rt7H165qqP6
+  consensus.proto: QmRp7r7Ycfqn8QrEcJ3fnFTAbCWrJZCSKjMMABzzrgxKHa
+  consensus_pb2.py: QmVriVWS2K1BbkHKstcnLkuJTyQwufMXVzrU6Rb39typME
   dialogues.py: QmfMuTCU4cgHopANLeUCTt5BMFssoZ7g8aS2KugT5JrTRf
-  message.py: QmYRwy5vbwCYowm87zLqkQu5p31XpU4msxfH7b2RazjPcQ
+  message.py: QmP164VbRu1Kfe89Hp1RDtwv2YpHqcu5q2EHr4JM2wqiYQ
   serialization.py: QmWq7bXDaicU7d9TsbXhPyTAqVC8DdsG3jBMx87EfQvuWw
 fingerprint_ignore_patterns: []
 dependencies:
