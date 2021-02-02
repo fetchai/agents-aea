@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests of the soef connection module."""
-
 import asyncio
 import os
 from typing import Any, Callable
@@ -29,6 +28,7 @@ from aea.common import Address
 from aea.configurations.base import ConnectionConfig
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.registries import make_crypto
+from aea.exceptions import AEAEnforceError
 from aea.helpers.search.models import (
     Attribute,
     Constraint,
@@ -367,21 +367,6 @@ class TestSoef:
             await asyncio.wait_for(self.connection.receive(), timeout=1)
 
     @pytest.mark.asyncio
-    async def test_send_excluded_protocol(self):
-        """Test fail on unsupported protocol."""
-        envelope = Envelope(
-            to="soef",
-            sender=self.crypto.address,
-            protocol_specification_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
-            message=b"some msg",
-        )
-        self.connection.channel.excluded_protocols = [UNKNOWN_PROTOCOL_PUBLIC_ID]
-        with pytest.raises(
-            ValueError, match=r"Cannot send message, invalid protocol:.*"
-        ):
-            await self.connection.send(envelope)
-
-    @pytest.mark.asyncio
     async def test_bad_message(self):
         """Test fail on bad message."""
         envelope = Envelope(
@@ -390,7 +375,9 @@ class TestSoef:
             protocol_specification_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=b"some msg",
         )
-        with pytest.raises(ValueError):
+        with pytest.raises(
+            AEAEnforceError, match=r"Message not of type OefSearchMessage"
+        ):
             await self.connection.send(envelope)
 
     @pytest.mark.asyncio

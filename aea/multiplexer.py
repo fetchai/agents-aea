@@ -566,21 +566,35 @@ class AsyncMultiplexer(Runnable, WithLogger):
             connection = self._id_to_connection[connection_id]
 
         connection = cast(Connection, connection)
-        if (
-            len(connection.restricted_to_protocols) > 0
-            and envelope_protocol_id not in connection.restricted_to_protocols
-        ):
-            self.logger.warning(
-                "Connection {} cannot handle protocol {}. Cannot send the envelope.".format(
-                    connection.connection_id, envelope_protocol_id
-                )
-            )
+
+        if not self._is_connection_supports_protocol(connection, envelope_protocol_id):
             return
 
         try:
             await connection.send(envelope)
         except Exception as e:  # pylint: disable=broad-except
             self._handle_exception(self._send, e)
+
+    def _is_connection_supports_protocol(
+        self, connection: Connection, protocol_id: PublicId
+    ) -> bool:
+        """Check protocol id is supported by the connection."""
+        if protocol_id in connection.excluded_protocols:
+            self.logger.warning(
+                f"Connection {connection.connection_id} does not support protocol {protocol_id} cause it's excluded."
+            )
+            return False
+
+        if (
+            connection.restricted_to_protocols
+            and protocol_id not in connection.restricted_to_protocols
+        ):
+            self.logger.warning(
+                f"Connection {connection.connection_id} does not support protocol {protocol_id} cause it's not in protocols list."
+            )
+            return False
+
+        return True
 
     def get(
         self, block: bool = False, timeout: Optional[float] = None

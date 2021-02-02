@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for the Multiplexer."""
-
 import asyncio
 import logging
 import os
@@ -36,7 +35,6 @@ from pexpect.exceptions import EOF  # type: ignore
 
 import aea
 from aea.cli.core import cli
-from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.connections.base import ConnectionStates
 from aea.exceptions import AEAEnforceError
@@ -51,6 +49,7 @@ from packages.fetchai.connections.p2p_libp2p.connection import (
     PUBLIC_ID as P2P_PUBLIC_ID,
 )
 from packages.fetchai.protocols.default.message import DefaultMessage
+from packages.fetchai.protocols.fipa.message import FipaMessage
 
 from .conftest import (
     AUTHOR,
@@ -396,15 +395,14 @@ def test_send_message_no_supported_protocol():
     """Test the case when we send an envelope with a specific connection that does not support the protocol."""
     with LocalNode() as node:
         identity_1 = Identity("", address="address_1")
-        public_id = PublicId.from_str("fetchai/my_private_protocol:0.1.0")
         connection_1 = _make_local_connection(
             identity_1.address,
             node,
-            restricted_to_protocols={public_id},
-            excluded_protocols={public_id},
+            restricted_to_protocols={DefaultMessage.protocol_id},
+            excluded_protocols={FipaMessage.protocol_id},
         )
         multiplexer = Multiplexer(
-            [connection_1], protocols=[DefaultProtocolMock, UnknownProtocolMock]
+            [connection_1], protocols=[DefaultMessage, FipaMessage, UnknownProtocolMock]
         )
 
         multiplexer.connect()
@@ -413,14 +411,29 @@ def test_send_message_no_supported_protocol():
             envelope = Envelope(
                 to=identity_1.address,
                 sender=identity_1.address,
-                protocol_specification_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
+                protocol_specification_id=FipaMessage.protocol_specification_id,
                 message=b"some bytes",
             )
             multiplexer.put(envelope)
             time.sleep(0.5)
             mock_logger_warning.assert_called_with(
-                "Connection {} cannot handle protocol {}. Cannot send the envelope.".format(
-                    connection_1.connection_id, UNKNOWN_PROTOCOL_PUBLIC_ID
+                "Connection {} does not support protocol {} cause it's excluded.".format(
+                    connection_1.connection_id, FipaMessage.protocol_id
+                )
+            )
+
+        with mock.patch.object(multiplexer.logger, "warning") as mock_logger_warning:
+            envelope = Envelope(
+                to=identity_1.address,
+                sender=identity_1.address,
+                protocol_specification_id=UnknownProtocolMock.protocol_specification_id,
+                message=b"some bytes",
+            )
+            multiplexer.put(envelope)
+            time.sleep(0.5)
+            mock_logger_warning.assert_called_with(
+                "Connection {} does not support protocol {} cause it's not in protocols list.".format(
+                    connection_1.connection_id, UnknownProtocolMock.protocol_id
                 )
             )
 
