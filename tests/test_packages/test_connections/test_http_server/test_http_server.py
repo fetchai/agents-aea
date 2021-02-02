@@ -120,9 +120,7 @@ class TestHTTPServer:
             port=self.port,
             api_spec_path=self.api_spec_path,
             connection_id=HTTPServerConnection.connection_id,
-            restricted_to_protocols=set(
-                [self.protocol_id, HttpMessage.protocol_specification_id]
-            ),
+            restricted_to_protocols={HttpMessage.protocol_id},
         )
         self.http_connection = HTTPServerConnection(
             configuration=self.configuration, identity=self.identity,

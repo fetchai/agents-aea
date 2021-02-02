@@ -345,12 +345,6 @@ class Protocol(Component):
         """
         super().__init__(configuration, **kwargs)
         self._message_class = message_class
-        self._specification_id = configuration.protocol_specification_id
-
-    @property
-    def specification_id(self):
-        """Get protocol specification_id."""
-        return self._specification_id
 
     @property
     def serializer(self) -> Type[Serializer]:

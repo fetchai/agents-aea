@@ -17,7 +17,8 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the tests of the messages module."""
+"""This module contains the tests of the protocols base module."""
+
 import os
 import shutil
 import tempfile
