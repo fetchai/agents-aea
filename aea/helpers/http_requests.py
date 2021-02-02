@@ -32,7 +32,7 @@ def add_default_timeout(fn: Callable, timeout: float) -> Callable:
     """Add default timeout for requests methods."""
 
     @wraps(fn)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args, **kwargs):  # pragma: nocover
         kwargs["timeout"] = kwargs.get("timeout", timeout)
         return fn(*args, **kwargs)
 

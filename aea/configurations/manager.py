@@ -493,7 +493,7 @@ class AgentConfigManager:
         """
         if not overrides:
             # nothing to update
-            return
+            return  # pragma: nocover
 
         overrides = self._filter_overrides(overrides)
         if overrides is SAME_MARK:

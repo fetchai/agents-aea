@@ -174,33 +174,6 @@ class TestHTTPClientConnect:
             self.http_client_connection.channel.send(Mock())
 
     @pytest.mark.asyncio
-    async def test_send_envelope_excluded_protocol_fail(self):
-        """Test send error if protocol not supported."""
-        request_http_message, _ = self.http_dialogs.create(
-            counterparty=self.connection_address,
-            performative=HttpMessage.Performative.REQUEST,
-            method="get",
-            url="bad url",
-            headers="",
-            version="",
-            body=b"",
-        )
-        request_envelope = Envelope(
-            to=self.connection_address,
-            sender=self.agent_address,
-            message=request_http_message,
-        )
-        await self.http_client_connection.connect()
-        request_envelope._protocol_specification_id = UNKNOWN_PROTOCOL_PUBLIC_ID
-        with patch.object(
-            self.http_client_connection.channel,
-            "excluded_protocols",
-            new=[UNKNOWN_PROTOCOL_PUBLIC_ID],
-        ):
-            with pytest.raises(ValueError):
-                await self.http_client_connection.send(request_envelope)
-
-    @pytest.mark.asyncio
     async def test_send_empty_envelope_skip(self):
         """Test skip on empty envelope request sent."""
         await self.http_client_connection.connect()
