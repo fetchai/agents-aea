@@ -581,7 +581,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
         """Check protocol id is supported by the connection."""
         if protocol_id in connection.excluded_protocols:
             self.logger.warning(
-                f"Connection {connection.connection_id} does not support protocol {protocol_id} cause it's excluded."
+                f"Connection {connection.connection_id} does not support protocol {protocol_id}. It is explicitly excluded."
             )
             return False
 
