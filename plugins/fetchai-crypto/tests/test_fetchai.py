@@ -629,7 +629,7 @@ def test_get_contract_address(mock_api_call):
 
     cosmos_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
 
-    res = cosmos_api.get_contract_address(code_id=999)
+    res = cosmos_api.get_last_contract_address(code_id=999)
     assert res == mock_res[-1]["address"]
 
 

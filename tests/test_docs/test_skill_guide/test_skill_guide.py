@@ -53,6 +53,8 @@ MD_FILE = "docs/skill-guide.md"
 class TestBuildSkill(AEATestCaseMany):
     """This class contains the tests for the code-blocks in the skill-guide.md file."""
 
+    capture_log = True
+
     @classmethod
     def setup_class(cls):
         """Setup the test class."""
@@ -186,7 +188,7 @@ class TestBuildSkill(AEATestCaseMany):
         missing_strings = self.missing_from_output(
             simple_service_registration_aea_process,
             check_strings,
-            timeout=30,
+            timeout=5,
             is_terminating=False,
         )
         assert (

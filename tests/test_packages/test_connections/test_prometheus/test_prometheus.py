@@ -19,6 +19,7 @@
 """This module contains the tests of the prometheus connection module."""
 import asyncio
 from typing import cast
+from unittest.mock import Mock
 
 import pytest
 
@@ -78,7 +79,7 @@ class TestPrometheusConnection:
             connection_id=PrometheusConnection.connection_id, port=9090,
         )
         self.agent_address = "my_address"
-        self.protocol_id = PublicId.from_str("fetchai/prometheus:0.2.0")
+        self.protocol_specification_id = PublicId.from_str("fetchai/prometheus:0.2.0")
         identity = Identity("name", address=self.agent_address)
         self.prometheus_con = PrometheusConnection(
             identity=identity, configuration=configuration
@@ -99,9 +100,7 @@ class TestPrometheusConnection:
         )
         assert sending_dialogue is not None
 
-        envelope = Envelope(
-            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
-        )
+        envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
         await self.prometheus_con.send(envelope)
 
     async def send_update_metric(self, title: str, update_func: str) -> None:
@@ -117,9 +116,7 @@ class TestPrometheusConnection:
         assert sending_dialogue is not None
         assert sending_dialogue.last_message is not None
 
-        envelope = Envelope(
-            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
-        )
+        envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
         await self.prometheus_con.send(envelope)
 
     def teardown(self):
@@ -207,10 +204,7 @@ class TestPrometheusConnection:
         # Test that invalid message is rejected.
         with pytest.raises(AEAEnforceError):
             envelope = Envelope(
-                to="some_address",
-                sender="me",
-                protocol_id=self.protocol_id,
-                message=Message({}),
+                to="some_address", sender="me", message=Mock(spec=Message),
             )
             await self.prometheus_con.channel.send(envelope)
 
@@ -219,14 +213,11 @@ class TestPrometheusConnection:
             PrometheusMessage.Performative.RESPONSE, code=0, message=""
         )
         envelope = Envelope(
-            to=self.prometheus_address,
-            sender=self.agent_address,
-            protocol_id=self.protocol_id,
-            message=msg,
+            to=self.prometheus_address, sender=self.agent_address, message=msg,
         )
         await self.prometheus_con.channel.send(envelope)
 
-        # Test that envelope with invalid protocol_id raises error.
+        # Test that envelope with invalid protocol_specification_id raises error.
         with pytest.raises(ValueError):
             msg, _ = self.dialogues.create(
                 counterparty=self.prometheus_address,
@@ -237,11 +228,9 @@ class TestPrometheusConnection:
                 labels={},
             )
             envelope = Envelope(
-                to=self.prometheus_address,
-                sender=self.agent_address,
-                protocol_id="bad_id",
-                message=msg,
+                to=self.prometheus_address, sender=self.agent_address, message=msg,
             )
+            envelope._protocol_specification_id = "bad_id"
             await self.prometheus_con.channel.send(envelope)
 
     @pytest.mark.asyncio

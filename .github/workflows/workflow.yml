@@ -210,10 +210,10 @@ jobs:
   integration_checks_ledger:
     continue-on-error: True
     needs:
-    - common_checks_1
-    - common_checks_2
-    - common_checks_3
-    - common_checks_4
+      - common_checks_1
+      - common_checks_2
+      - common_checks_3
+      - common_checks_4
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -227,6 +227,39 @@ jobs:
           sudo apt-get autoremove
           sudo apt-get autoclean
           pip install tox
+      - name: Install Rust
+        run: |
+          # Install rust
+          curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf > install.sh
+          sudo chmod u+x install.sh
+          ./install.sh -y
+          rustup default stable
+          cargo version
+      - name: Install fetchcli
+        run: |
+          # Update the configuration for Rust
+          rustup target list --installed
+          rustup target add wasm32-unknown-unknown
+
+          # Install fetchd
+          git clone https://github.com/fetchai/fetchd.git
+          cd fetchd
+          git checkout release/v0.2.x
+          make install
+          echo "PATH=$PATH:${HOME}/go/bin" >> $GITHUB_ENV
+      - name: Check fetchcli installation
+        run: |
+          # Check if fetchcli is properly installed
+          which fetchcli
+          fetchcli version
+      - name: Configure fetchcli
+        run: |
+          fetchcli config chain-id agent-land
+          fetchcli config trust-node false
+          fetchcli config node https://rpc-agent-land.fetch.ai:443
+          fetchcli config output json
+          fetchcli config indent true
+          fetchcli config broadcast-mode block
       - name: Integration tests
         run: tox -e py3.8 -- -m 'integration and not unstable and ledger'
 

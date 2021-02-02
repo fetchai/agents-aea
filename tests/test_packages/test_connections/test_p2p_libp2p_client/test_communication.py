@@ -17,11 +17,12 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This test module contains tests for Libp2p tcp client connection."""
 
+"""This test module contains tests for Libp2p tcp client connection."""
 import os
 import shutil
 import tempfile
+from unittest.mock import Mock
 
 import pytest
 
@@ -45,6 +46,12 @@ DEFAULT_PORT = 10234
 DEFAULT_DELEGATE_PORT = 11234
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_CLIENTS_PER_NODE = 4
+
+MockDefaultMessageProtocol = Mock()
+MockDefaultMessageProtocol.protocol_id = DefaultMessage.protocol_id
+MockDefaultMessageProtocol.protocol_specification_id = (
+    DefaultMessage.protocol_specification_id
+)
 
 
 @pytest.mark.asyncio
@@ -102,7 +109,9 @@ class TestLibp2pClientConnectionEchoEnvelope:
         cls.log_files = []
 
         cls.connection_node = _make_libp2p_connection(DEFAULT_PORT + 1, delegate=True)
-        cls.multiplexer_node = Multiplexer([cls.connection_node])
+        cls.multiplexer_node = Multiplexer(
+            [cls.connection_node], protocols=[MockDefaultMessageProtocol]
+        )
         cls.log_files.append(cls.connection_node.node.log_file)
         cls.multiplexer_node.connect()
 
@@ -110,13 +119,17 @@ class TestLibp2pClientConnectionEchoEnvelope:
             cls.connection_client_1 = _make_libp2p_client_connection(
                 peer_public_key=cls.connection_node.node.pub, ledger_api_id=FETCHAI,
             )
-            cls.multiplexer_client_1 = Multiplexer([cls.connection_client_1])
+            cls.multiplexer_client_1 = Multiplexer(
+                [cls.connection_client_1], protocols=[MockDefaultMessageProtocol]
+            )
             cls.multiplexer_client_1.connect()
 
             cls.connection_client_2 = _make_libp2p_client_connection(
                 peer_public_key=cls.connection_node.node.pub, ledger_api_id=ETHEREUM,
             )
-            cls.multiplexer_client_2 = Multiplexer([cls.connection_client_2])
+            cls.multiplexer_client_2 = Multiplexer(
+                [cls.connection_client_2], protocols=[MockDefaultMessageProtocol]
+            )
             cls.multiplexer_client_2.connect()
         except Exception:
             cls.multiplexer_node.disconnect()
@@ -142,7 +155,7 @@ class TestLibp2pClientConnectionEchoEnvelope:
         envelope = Envelope(
             to=addr_2,
             sender=addr_1,
-            protocol_id=DefaultMessage.protocol_id,
+            protocol_specification_id=DefaultMessage.protocol_specification_id,
             message=DefaultSerializer().encode(msg),
         )
 
@@ -152,7 +165,10 @@ class TestLibp2pClientConnectionEchoEnvelope:
         assert delivered_envelope is not None
         assert delivered_envelope.to == envelope.to
         assert delivered_envelope.sender == envelope.sender
-        assert delivered_envelope.protocol_id == envelope.protocol_id
+        assert (
+            delivered_envelope.protocol_specification_id
+            == envelope.protocol_specification_id
+        )
         assert delivered_envelope.message == envelope.message
 
     def test_envelope_echoed_back(self):
@@ -170,7 +186,7 @@ class TestLibp2pClientConnectionEchoEnvelope:
         original_envelope = Envelope(
             to=addr_2,
             sender=addr_1,
-            protocol_id=DefaultMessage.protocol_id,
+            protocol_specification_id=DefaultMessage.protocol_specification_id,
             message=DefaultSerializer().encode(msg),
         )
 
@@ -187,7 +203,10 @@ class TestLibp2pClientConnectionEchoEnvelope:
         assert echoed_envelope is not None
         assert echoed_envelope.to == original_envelope.sender
         assert delivered_envelope.sender == original_envelope.to
-        assert delivered_envelope.protocol_id == original_envelope.protocol_id
+        assert (
+            delivered_envelope.protocol_specification_id
+            == original_envelope.protocol_specification_id
+        )
         assert delivered_envelope.message == original_envelope.message
 
     def test_envelope_echoed_back_node_agent(self):
@@ -205,7 +224,7 @@ class TestLibp2pClientConnectionEchoEnvelope:
         original_envelope = Envelope(
             to=addr_n,
             sender=addr_1,
-            protocol_id=DefaultMessage.protocol_id,
+            protocol_specification_id=DefaultMessage.protocol_specification_id,
             message=DefaultSerializer().encode(msg),
         )
 
@@ -222,7 +241,10 @@ class TestLibp2pClientConnectionEchoEnvelope:
         assert echoed_envelope is not None
         assert echoed_envelope.to == original_envelope.sender
         assert delivered_envelope.sender == original_envelope.to
-        assert delivered_envelope.protocol_id == original_envelope.protocol_id
+        assert (
+            delivered_envelope.protocol_specification_id
+            == original_envelope.protocol_specification_id
+        )
         assert delivered_envelope.message == original_envelope.message
 
     @classmethod
@@ -259,7 +281,9 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
             delegate_port=DEFAULT_DELEGATE_PORT + 1,
             delegate=True,
         )
-        cls.multiplexer_node_1 = Multiplexer([cls.connection_node_1])
+        cls.multiplexer_node_1 = Multiplexer(
+            [cls.connection_node_1], protocols=[MockDefaultMessageProtocol]
+        )
         cls.log_files.append(cls.connection_node_1.node.log_file)
         cls.multiplexer_node_1.connect()
         cls.mutliplexers.append(cls.multiplexer_node_1)
@@ -273,7 +297,9 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
                 entry_peers=[genesis_peer],
                 delegate=True,
             )
-            cls.multiplexer_node_2 = Multiplexer([cls.connection_node_2])
+            cls.multiplexer_node_2 = Multiplexer(
+                [cls.connection_node_2], protocols=[MockDefaultMessageProtocol]
+            )
             cls.log_files.append(cls.connection_node_2.node.log_file)
             cls.multiplexer_node_2.connect()
             cls.mutliplexers.append(cls.multiplexer_node_2)
@@ -281,14 +307,18 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
             cls.connection_client_1 = _make_libp2p_client_connection(
                 cls.connection_node_1.node.pub, DEFAULT_DELEGATE_PORT + 1
             )
-            cls.multiplexer_client_1 = Multiplexer([cls.connection_client_1])
+            cls.multiplexer_client_1 = Multiplexer(
+                [cls.connection_client_1], protocols=[MockDefaultMessageProtocol]
+            )
             cls.multiplexer_client_1.connect()
             cls.mutliplexers.append(cls.multiplexer_client_1)
 
             cls.connection_client_2 = _make_libp2p_client_connection(
                 cls.connection_node_2.node.pub, DEFAULT_DELEGATE_PORT + 2
             )
-            cls.multiplexer_client_2 = Multiplexer([cls.connection_client_2])
+            cls.multiplexer_client_2 = Multiplexer(
+                [cls.connection_client_2], protocols=[MockDefaultMessageProtocol]
+            )
             cls.multiplexer_client_2.connect()
             cls.mutliplexers.append(cls.multiplexer_client_2)
         except Exception:
@@ -317,7 +347,7 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         envelope = Envelope(
             to=addr_2,
             sender=addr_1,
-            protocol_id=DefaultMessage.protocol_id,
+            protocol_specification_id=DefaultMessage.protocol_specification_id,
             message=DefaultSerializer().encode(msg),
         )
 
@@ -327,7 +357,10 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         assert delivered_envelope is not None
         assert delivered_envelope.to == envelope.to
         assert delivered_envelope.sender == envelope.sender
-        assert delivered_envelope.protocol_id == envelope.protocol_id
+        assert (
+            delivered_envelope.protocol_specification_id
+            == envelope.protocol_specification_id
+        )
         assert delivered_envelope.message == envelope.message
 
     def test_envelope_echoed_back(self):
@@ -345,7 +378,7 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         original_envelope = Envelope(
             to=addr_2,
             sender=addr_1,
-            protocol_id=DefaultMessage.protocol_id,
+            protocol_specification_id=DefaultMessage.protocol_specification_id,
             message=DefaultSerializer().encode(msg),
         )
 
@@ -362,7 +395,10 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         assert echoed_envelope is not None
         assert echoed_envelope.to == original_envelope.sender
         assert delivered_envelope.sender == original_envelope.to
-        assert delivered_envelope.protocol_id == original_envelope.protocol_id
+        assert (
+            delivered_envelope.protocol_specification_id
+            == original_envelope.protocol_specification_id
+        )
         assert delivered_envelope.message == original_envelope.message
 
     def test_envelope_echoed_back_node_agent(self):
@@ -380,7 +416,7 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         original_envelope = Envelope(
             to=addr_n,
             sender=addr_1,
-            protocol_id=DefaultMessage.protocol_id,
+            protocol_specification_id=DefaultMessage.protocol_specification_id,
             message=DefaultSerializer().encode(msg),
         )
 
@@ -397,7 +433,10 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
         assert echoed_envelope is not None
         assert echoed_envelope.to == original_envelope.sender
         assert delivered_envelope.sender == original_envelope.to
-        assert delivered_envelope.protocol_id == original_envelope.protocol_id
+        assert (
+            delivered_envelope.protocol_specification_id
+            == original_envelope.protocol_specification_id
+        )
         assert delivered_envelope.message == original_envelope.message
 
     @classmethod
@@ -433,7 +472,9 @@ class TestLibp2pClientConnectionRouting:
                 delegate_port=DEFAULT_DELEGATE_PORT + 1,
                 delegate=True,
             )
-            cls.multiplexer_node_1 = Multiplexer([cls.connection_node_1])
+            cls.multiplexer_node_1 = Multiplexer(
+                [cls.connection_node_1], protocols=[MockDefaultMessageProtocol]
+            )
             cls.log_files.append(cls.connection_node_1.node.log_file)
             cls.multiplexer_node_1.connect()
             cls.multiplexers.append(cls.multiplexer_node_1)
@@ -446,7 +487,9 @@ class TestLibp2pClientConnectionRouting:
                 entry_peers=[entry_peer],
                 delegate=True,
             )
-            cls.multiplexer_node_2 = Multiplexer([cls.connection_node_2])
+            cls.multiplexer_node_2 = Multiplexer(
+                [cls.connection_node_2], protocols=[MockDefaultMessageProtocol]
+            )
             cls.log_files.append(cls.connection_node_2.node.log_file)
             cls.multiplexer_node_2.connect()
             cls.multiplexers.append(cls.multiplexer_node_2)
@@ -467,7 +510,7 @@ class TestLibp2pClientConnectionRouting:
                     port = ports[i]
                     peer_public_key = peers_public_keys[i]
                     conn = _make_libp2p_client_connection(peer_public_key, port)
-                    mux = Multiplexer([conn])
+                    mux = Multiplexer([conn], protocols=[MockDefaultMessageProtocol])
 
                     cls.connections.append(conn)
                     cls.addresses.append(conn.address)
@@ -500,7 +543,7 @@ class TestLibp2pClientConnectionRouting:
                 envelope = Envelope(
                     to=self.addresses[destination],
                     sender=self.addresses[source],
-                    protocol_id=DefaultMessage.protocol_id,
+                    protocol_specification_id=DefaultMessage.protocol_specification_id,
                     message=DefaultSerializer().encode(msg),
                 )
 
@@ -512,7 +555,10 @@ class TestLibp2pClientConnectionRouting:
                 assert delivered_envelope is not None
                 assert delivered_envelope.to == envelope.to
                 assert delivered_envelope.sender == envelope.sender
-                assert delivered_envelope.protocol_id == envelope.protocol_id
+                assert (
+                    delivered_envelope.protocol_specification_id
+                    == envelope.protocol_specification_id
+                )
                 assert delivered_envelope.message == envelope.message
 
     @classmethod

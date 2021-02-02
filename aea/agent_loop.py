@@ -68,8 +68,8 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
     ) -> None:
         """Init loop.
 
-        :params agent: Agent or AEA to run.
-        :params loop: optional asyncio event loop. if not specified a new loop will be created.
+        :param agent: Agent or AEA to run.
+        :param loop: optional asyncio event loop. if not specified a new loop will be created.
         """
         logger = get_logger(__name__, agent.name)
         WithLogger.__init__(self, logger)

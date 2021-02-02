@@ -117,7 +117,6 @@ class TestNoValidDialogue:
         envelope = Envelope(
             to=search_services_request.to,
             sender=search_services_request.sender,
-            protocol_id=search_services_request.protocol_id,
             message=search_services_request,
         )
         with unittest.mock.patch.object(
@@ -164,14 +163,16 @@ class TestEmptySearch:
         envelope = Envelope(
             to=search_services_request.to,
             sender=search_services_request.sender,
-            protocol_id=search_services_request.protocol_id,
             message=search_services_request,
         )
         self.multiplexer.put(envelope)
 
         # check the result
         response_envelope = self.multiplexer.get(block=True, timeout=2.0)
-        assert response_envelope.protocol_id == OefSearchMessage.protocol_id
+        assert (
+            response_envelope.protocol_specification_id
+            == OefSearchMessage.protocol_specification_id
+        )
         search_result = cast(OefSearchMessage, response_envelope.message)
         response_dialogue = self.dialogues.update(search_result)
         assert response_dialogue == sending_dialogue
@@ -218,7 +219,6 @@ class TestSimpleSearchResult:
         envelope = Envelope(
             to=register_service_request.to,
             sender=register_service_request.sender,
-            protocol_id=register_service_request.protocol_id,
             message=register_service_request,
         )
         cls.multiplexer.put(envelope)
@@ -237,14 +237,16 @@ class TestSimpleSearchResult:
         envelope = Envelope(
             to=search_services_request.to,
             sender=search_services_request.sender,
-            protocol_id=search_services_request.protocol_id,
             message=search_services_request,
         )
         self.multiplexer.put(envelope)
 
         # check the result
         response_envelope = self.multiplexer.get(block=True, timeout=2.0)
-        assert response_envelope.protocol_id == OefSearchMessage.protocol_id
+        assert (
+            response_envelope.protocol_specification_id
+            == OefSearchMessage.protocol_specification_id
+        )
         search_result = cast(OefSearchMessage, response_envelope.message)
         response_dialogue = self.dialogues.update(search_result)
         assert response_dialogue == sending_dialogue
@@ -293,14 +295,15 @@ class TestUnregister:
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(
-            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
-        )
+        envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
         self.multiplexer1.put(envelope)
 
         # check the result
         response_envelope = self.multiplexer1.get(block=True, timeout=5.0)
-        assert response_envelope.protocol_id == OefSearchMessage.protocol_id
+        assert (
+            response_envelope.protocol_specification_id
+            == OefSearchMessage.protocol_specification_id
+        )
         response = cast(OefSearchMessage, response_envelope.message)
         response_dialogue = self.dialogues.update(response)
         assert response_dialogue == sending_dialogue
@@ -311,9 +314,7 @@ class TestUnregister:
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(
-            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
-        )
+        envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
         self.multiplexer1.put(envelope)
 
         # Search for the registered service
@@ -322,9 +323,7 @@ class TestUnregister:
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             query=Query([Constraint("foo", ConstraintType("==", 1))]),
         )
-        envelope = Envelope(
-            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
-        )
+        envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
         self.multiplexer1.put(envelope)
         # check the result
         response_envelope = self.multiplexer1.get(block=True, timeout=5.0)
@@ -340,9 +339,7 @@ class TestUnregister:
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(
-            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
-        )
+        envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
         self.multiplexer1.put(envelope)
 
         # the same query returns empty
@@ -352,9 +349,7 @@ class TestUnregister:
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             query=Query([Constraint("foo", ConstraintType("==", 1))]),
         )
-        envelope = Envelope(
-            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
-        )
+        envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
         self.multiplexer1.put(envelope)
         # check the result
         response_envelope = self.multiplexer1.get(block=True, timeout=5.0)
@@ -407,9 +402,7 @@ class TestAgentMessage:
             performative=FipaMessage.Performative.CFP,
             query=Query([Constraint("something", ConstraintType(">", 1))]),
         )
-        envelope = Envelope(
-            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
-        )
+        envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
         with pytest.raises(ConnectionError):
             await _make_local_connection(self.address_1, self.node,).send(envelope)
 
@@ -419,14 +412,15 @@ class TestAgentMessage:
             performative=FipaMessage.Performative.CFP,
             query=Query([Constraint("something", ConstraintType(">", 1))]),
         )
-        envelope = Envelope(
-            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
-        )
+        envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
         self.multiplexer1.put(envelope)
 
         # check the result
         response_envelope = self.multiplexer1.get(block=True, timeout=5.0)
-        assert response_envelope.protocol_id == DefaultMessage.protocol_id
+        assert (
+            response_envelope.protocol_specification_id
+            == DefaultMessage.protocol_specification_id
+        )
         assert response_envelope.sender == str(OEFLocalConnection.connection_id)
         result = response_envelope.message
         assert result.performative == DefaultMessage.Performative.ERROR
@@ -476,7 +470,6 @@ class TestFilteredSearchResult:
         envelope = Envelope(
             to=register_service_request.to,
             sender=register_service_request.sender,
-            protocol_id=register_service_request.protocol_id,
             message=register_service_request,
         )
         cls.multiplexer1.put(envelope)
@@ -498,7 +491,6 @@ class TestFilteredSearchResult:
         envelope = Envelope(
             to=register_service_request.to,
             sender=register_service_request.sender,
-            protocol_id=register_service_request.protocol_id,
             message=register_service_request,
         )
 
@@ -518,9 +510,7 @@ class TestFilteredSearchResult:
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(
-            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
-        )
+        envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
         cls.multiplexer1.put(envelope)
         # ensure one service stays registered
         wait_for_condition(lambda: len(cls.node.services) == 1, timeout=10)
@@ -536,7 +526,6 @@ class TestFilteredSearchResult:
         envelope = Envelope(
             to=search_services_request.to,
             sender=search_services_request.sender,
-            protocol_id=search_services_request.protocol_id,
             message=search_services_request,
         )
         self.multiplexer1.put(envelope)

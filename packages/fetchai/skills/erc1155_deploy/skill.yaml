@@ -7,7 +7,7 @@ description: The ERC1155 deploy skill has the ability to deploy and interact wit
 license: Apache-2.0
 aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
-  README.md: QmNqTfr4bRCmp8ozgckVQALYdx1vuhR91A4NAphP6TtYNY
+  README.md: QmNg45JuqfVzDmvgpWLeaR861LSEvf9pishDKSPihtQnLE
   __init__.py: QmaJBwGuD5Knh5DdSwup44ipwFRGcXF4sravc7wAdEL6X1
   behaviours.py: QmYpVzrvKogxSfRf24kKmyiEumBN4CHsWdGvmdjyq3gt6b
   dialogues.py: QmQ9ybVCcavoUFTn8pzT531X3WBb9cDawi7iMkru7vCUVA

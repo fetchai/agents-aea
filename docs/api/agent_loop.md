@@ -39,8 +39,10 @@ Base abstract  agent loop class.
 
 Init loop.
 
-:params agent: Agent or AEA to run.
-:params loop: optional asyncio event loop. if not specified a new loop will be created.
+**Arguments**:
+
+- `agent`: Agent or AEA to run.
+- `loop`: optional asyncio event loop. if not specified a new loop will be created.
 
 <a name="aea.agent_loop.BaseAgentLoop.agent"></a>
 #### agent

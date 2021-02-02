@@ -153,7 +153,7 @@ class AsyncState:
     async def wait(self, state_or_states: Union[Any, Sequence[Any]]) -> Tuple[Any, Any]:
         """Wait state to be set.
 
-        :params state_or_states: state or list of states.
+        :param state_or_states: state or list of states.
         :return: tuple of previous state and new state.
         """
         states = ensure_list(state_or_states)

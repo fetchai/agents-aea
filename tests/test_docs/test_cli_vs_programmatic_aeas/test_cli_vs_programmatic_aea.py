@@ -51,6 +51,8 @@ DEST = "programmatic_aea.py"
 class TestCliVsProgrammaticAEA(AEATestCaseMany):
     """This class contains the tests for the code-blocks in the build-aea-programmatically.md file."""
 
+    capture_log: bool = True
+
     def test_read_md_file(self):
         """Compare the extracted code with the python file."""
         doc_path = os.path.join(ROOT_DIR, MD_FILE)

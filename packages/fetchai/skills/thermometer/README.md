@@ -8,13 +8,13 @@ This skill is part of the Fetch.ai thermometer demo. It can be requested (for ex
 
 ## Behaviours
 
-* `service_registration`: registers thermometer data selling service on the SOEF 
+* `service_registration`: registers thermometer data selling service on the sOEF 
 
 ## Handlers
 
 * `fipa`: handles `fipa` messages for negotiation
-* `ledger_api`: handles `ledger_api` messages for payment
-* `oef_search`: handles `oef_search` messages if service registration on SOEF is unsuccessful
+* `ledger_api`: handles `ledger_api` messages for interacting with a ledger
+* `oef_search`: handles `oef_search` messages if service registration on the sOEF is unsuccessful
 
 ## Links
 

@@ -79,7 +79,9 @@ Get state.
 
 Wait state to be set.
 
-:params state_or_states: state or list of states.
+**Arguments**:
+
+- `state_or_states`: state or list of states.
 
 **Returns**:
 

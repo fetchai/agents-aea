@@ -22,6 +22,7 @@ package dhtpeer
 
 import (
 	"context"
+	"math/rand"
 	"net"
 	"strconv"
 	"testing"
@@ -1480,6 +1481,15 @@ func TestEthereumCrypto(t *testing.T) {
 	 without having circular dependencies
 */
 
+func randSeq(n int) string {
+	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
+}
+
 func SetupLocalDHTPeer(
 	key string,
 	agentKey string,
@@ -1493,6 +1503,7 @@ func SetupLocalDHTPeer(
 		IdentityFromFetchAIKey(key),
 		EnableRelayService(),
 		BootstrapFrom(entry),
+		StoreRecordsTo("agents_records_" + randSeq(5)),
 	}
 
 	if agentKey != "" {

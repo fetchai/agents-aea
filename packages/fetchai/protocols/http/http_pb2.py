@@ -14,23 +14,23 @@ _sym_db = _symbol_database.Default()
 
 DESCRIPTOR = _descriptor.FileDescriptor(
     name="http.proto",
-    package="aea.fetchai.http",
+    package="aea.fetchai.http.v0_1_0",
     syntax="proto3",
     serialized_options=None,
-    serialized_pb=b'\n\nhttp.proto\x12\x10\x61\x65\x61.fetchai.http"\x85\x03\n\x0bHttpMessage\x12\x45\n\x07request\x18\x05 \x01(\x0b\x32\x32.aea.fetchai.http.HttpMessage.Request_PerformativeH\x00\x12G\n\x08response\x18\x06 \x01(\x0b\x32\x33.aea.fetchai.http.HttpMessage.Response_PerformativeH\x00\x1a\x63\n\x14Request_Performative\x12\x0e\n\x06method\x18\x01 \x01(\t\x12\x0b\n\x03url\x18\x02 \x01(\t\x12\x0f\n\x07version\x18\x03 \x01(\t\x12\x0f\n\x07headers\x18\x04 \x01(\t\x12\x0c\n\x04\x62ody\x18\x05 \x01(\x0c\x1aq\n\x15Response_Performative\x12\x0f\n\x07version\x18\x01 \x01(\t\x12\x13\n\x0bstatus_code\x18\x02 \x01(\x05\x12\x13\n\x0bstatus_text\x18\x03 \x01(\t\x12\x0f\n\x07headers\x18\x04 \x01(\t\x12\x0c\n\x04\x62ody\x18\x05 \x01(\x0c\x42\x0e\n\x0cperformativeb\x06proto3',
+    serialized_pb=b'\n\nhttp.proto\x12\x17\x61\x65\x61.fetchai.http.v0_1_0"\x93\x03\n\x0bHttpMessage\x12L\n\x07request\x18\x05 \x01(\x0b\x32\x39.aea.fetchai.http.v0_1_0.HttpMessage.Request_PerformativeH\x00\x12N\n\x08response\x18\x06 \x01(\x0b\x32:.aea.fetchai.http.v0_1_0.HttpMessage.Response_PerformativeH\x00\x1a\x63\n\x14Request_Performative\x12\x0e\n\x06method\x18\x01 \x01(\t\x12\x0b\n\x03url\x18\x02 \x01(\t\x12\x0f\n\x07version\x18\x03 \x01(\t\x12\x0f\n\x07headers\x18\x04 \x01(\t\x12\x0c\n\x04\x62ody\x18\x05 \x01(\x0c\x1aq\n\x15Response_Performative\x12\x0f\n\x07version\x18\x01 \x01(\t\x12\x13\n\x0bstatus_code\x18\x02 \x01(\x05\x12\x13\n\x0bstatus_text\x18\x03 \x01(\t\x12\x0f\n\x07headers\x18\x04 \x01(\t\x12\x0c\n\x04\x62ody\x18\x05 \x01(\x0c\x42\x0e\n\x0cperformativeb\x06proto3',
 )
 
 
 _HTTPMESSAGE_REQUEST_PERFORMATIVE = _descriptor.Descriptor(
     name="Request_Performative",
-    full_name="aea.fetchai.http.HttpMessage.Request_Performative",
+    full_name="aea.fetchai.http.v0_1_0.HttpMessage.Request_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="method",
-            full_name="aea.fetchai.http.HttpMessage.Request_Performative.method",
+            full_name="aea.fetchai.http.v0_1_0.HttpMessage.Request_Performative.method",
             index=0,
             number=1,
             type=9,
@@ -48,7 +48,7 @@ _HTTPMESSAGE_REQUEST_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="url",
-            full_name="aea.fetchai.http.HttpMessage.Request_Performative.url",
+            full_name="aea.fetchai.http.v0_1_0.HttpMessage.Request_Performative.url",
             index=1,
             number=2,
             type=9,
@@ -66,7 +66,7 @@ _HTTPMESSAGE_REQUEST_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="version",
-            full_name="aea.fetchai.http.HttpMessage.Request_Performative.version",
+            full_name="aea.fetchai.http.v0_1_0.HttpMessage.Request_Performative.version",
             index=2,
             number=3,
             type=9,
@@ -84,7 +84,7 @@ _HTTPMESSAGE_REQUEST_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="headers",
-            full_name="aea.fetchai.http.HttpMessage.Request_Performative.headers",
+            full_name="aea.fetchai.http.v0_1_0.HttpMessage.Request_Performative.headers",
             index=3,
             number=4,
             type=9,
@@ -102,7 +102,7 @@ _HTTPMESSAGE_REQUEST_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="body",
-            full_name="aea.fetchai.http.HttpMessage.Request_Performative.body",
+            full_name="aea.fetchai.http.v0_1_0.HttpMessage.Request_Performative.body",
             index=4,
             number=5,
             type=12,
@@ -127,20 +127,20 @@ _HTTPMESSAGE_REQUEST_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=192,
-    serialized_end=291,
+    serialized_start=213,
+    serialized_end=312,
 )
 
 _HTTPMESSAGE_RESPONSE_PERFORMATIVE = _descriptor.Descriptor(
     name="Response_Performative",
-    full_name="aea.fetchai.http.HttpMessage.Response_Performative",
+    full_name="aea.fetchai.http.v0_1_0.HttpMessage.Response_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="version",
-            full_name="aea.fetchai.http.HttpMessage.Response_Performative.version",
+            full_name="aea.fetchai.http.v0_1_0.HttpMessage.Response_Performative.version",
             index=0,
             number=1,
             type=9,
@@ -158,7 +158,7 @@ _HTTPMESSAGE_RESPONSE_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="status_code",
-            full_name="aea.fetchai.http.HttpMessage.Response_Performative.status_code",
+            full_name="aea.fetchai.http.v0_1_0.HttpMessage.Response_Performative.status_code",
             index=1,
             number=2,
             type=5,
@@ -176,7 +176,7 @@ _HTTPMESSAGE_RESPONSE_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="status_text",
-            full_name="aea.fetchai.http.HttpMessage.Response_Performative.status_text",
+            full_name="aea.fetchai.http.v0_1_0.HttpMessage.Response_Performative.status_text",
             index=2,
             number=3,
             type=9,
@@ -194,7 +194,7 @@ _HTTPMESSAGE_RESPONSE_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="headers",
-            full_name="aea.fetchai.http.HttpMessage.Response_Performative.headers",
+            full_name="aea.fetchai.http.v0_1_0.HttpMessage.Response_Performative.headers",
             index=3,
             number=4,
             type=9,
@@ -212,7 +212,7 @@ _HTTPMESSAGE_RESPONSE_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="body",
-            full_name="aea.fetchai.http.HttpMessage.Response_Performative.body",
+            full_name="aea.fetchai.http.v0_1_0.HttpMessage.Response_Performative.body",
             index=4,
             number=5,
             type=12,
@@ -237,20 +237,20 @@ _HTTPMESSAGE_RESPONSE_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=293,
-    serialized_end=406,
+    serialized_start=314,
+    serialized_end=427,
 )
 
 _HTTPMESSAGE = _descriptor.Descriptor(
     name="HttpMessage",
-    full_name="aea.fetchai.http.HttpMessage",
+    full_name="aea.fetchai.http.v0_1_0.HttpMessage",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="request",
-            full_name="aea.fetchai.http.HttpMessage.request",
+            full_name="aea.fetchai.http.v0_1_0.HttpMessage.request",
             index=0,
             number=5,
             type=11,
@@ -268,7 +268,7 @@ _HTTPMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="response",
-            full_name="aea.fetchai.http.HttpMessage.response",
+            full_name="aea.fetchai.http.v0_1_0.HttpMessage.response",
             index=1,
             number=6,
             type=11,
@@ -298,14 +298,14 @@ _HTTPMESSAGE = _descriptor.Descriptor(
     oneofs=[
         _descriptor.OneofDescriptor(
             name="performative",
-            full_name="aea.fetchai.http.HttpMessage.performative",
+            full_name="aea.fetchai.http.v0_1_0.HttpMessage.performative",
             index=0,
             containing_type=None,
             fields=[],
         ),
     ],
-    serialized_start=33,
-    serialized_end=422,
+    serialized_start=40,
+    serialized_end=443,
 )
 
 _HTTPMESSAGE_REQUEST_PERFORMATIVE.containing_type = _HTTPMESSAGE
@@ -339,7 +339,7 @@ HttpMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _HTTPMESSAGE_REQUEST_PERFORMATIVE,
                 "__module__": "http_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.http.HttpMessage.Request_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.http.v0_1_0.HttpMessage.Request_Performative)
             },
         ),
         "Response_Performative": _reflection.GeneratedProtocolMessageType(
@@ -348,12 +348,12 @@ HttpMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _HTTPMESSAGE_RESPONSE_PERFORMATIVE,
                 "__module__": "http_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.http.HttpMessage.Response_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.http.v0_1_0.HttpMessage.Response_Performative)
             },
         ),
         "DESCRIPTOR": _HTTPMESSAGE,
         "__module__": "http_pb2"
-        # @@protoc_insertion_point(class_scope:aea.fetchai.http.HttpMessage)
+        # @@protoc_insertion_point(class_scope:aea.fetchai.http.v0_1_0.HttpMessage)
     },
 )
 _sym_db.RegisterMessage(HttpMessage)

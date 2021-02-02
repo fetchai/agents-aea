@@ -47,6 +47,7 @@ class ContractApiMessage(Message):
     """A protocol for contract APIs requests and responses."""
 
     protocol_id = PublicId.from_str("fetchai/contract_api:0.10.0")
+    protocol_specification_id = PublicId.from_str("fetchai/contract_api:0.1.0")
 
     Kwargs = CustomKwargs
 

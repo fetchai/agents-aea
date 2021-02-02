@@ -29,7 +29,6 @@ DEFAULT_CONNECTION = "fetchai/stub:latest"
 DEFAULT_PROTOCOL = "fetchai/default:latest"
 SIGNING_PROTOCOL = "fetchai/signing:latest"
 STATE_UPDATE_PROTOCOL = "fetchai/state_update:latest"
-DEFAULT_SKILL = "fetchai/error:latest"
 LEDGER_CONNECTION = "fetchai/ledger:latest"
 DEFAULT_LEDGER = FETCHAI
 PRIVATE_KEY_PATH_SCHEMA = "{}_private_key.txt"

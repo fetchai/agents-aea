@@ -28,6 +28,8 @@ from pathlib import Path
 from subprocess import call  # nosec
 from typing import Optional, Tuple
 
+# pylint: skip-file
+from aea.configurations.data_types import PublicId
 from aea.protocols.generator.common import (
     CUSTOM_TYPES_DOT_PY_FILE_NAME,
     DIALOGUE_DOT_PY_FILE_NAME,
@@ -627,6 +629,16 @@ class ProtocolGenerator:
             self.protocol_specification.name,
             self.protocol_specification.version,
         )
+
+        cls_str += (
+            self.indent
+            + 'protocol_specification_id = PublicId.from_str("{}/{}:{}")\n'.format(
+                self.protocol_specification.protocol_specification_id.author,
+                self.protocol_specification.protocol_specification_id.name,
+                self.protocol_specification.protocol_specification_id.version,
+            )
+        )
+
         for custom_type in self.spec.all_custom_types:
             cls_str += "\n"
             cls_str += self.indent + "{} = Custom{}\n".format(custom_type, custom_type)
@@ -1766,8 +1778,10 @@ class ProtocolGenerator:
 
         # heading
         proto_buff_schema_str = self.indent + 'syntax = "proto3";\n\n'
-        proto_buff_schema_str += self.indent + "package aea.{}.{};\n\n".format(
-            self.protocol_specification.author, self.protocol_specification.name
+        proto_buff_schema_str += self.indent + "package {};\n\n".format(
+            public_id_to_package_name(
+                self.protocol_specification.protocol_specification_id
+            )
         )
         proto_buff_schema_str += self.indent + "message {}Message{{\n\n".format(
             self.protocol_specification_in_camel_case
@@ -1854,6 +1868,9 @@ class ProtocolGenerator:
         protocol_yaml_str = "name: {}\n".format(self.protocol_specification.name)
         protocol_yaml_str += "author: {}\n".format(self.protocol_specification.author)
         protocol_yaml_str += "version: {}\n".format(self.protocol_specification.version)
+        protocol_yaml_str += "protocol_specification_id: {}\n".format(
+            str(self.protocol_specification.protocol_specification_id)
+        )
         protocol_yaml_str += "type: {}\n".format(
             self.protocol_specification.component_type
         )
@@ -2040,3 +2057,8 @@ class ProtocolGenerator:
         else:
             message = self.generate_full_mode()
         return message
+
+
+def public_id_to_package_name(public_id: PublicId) -> str:
+    """Make package name string from public_id provided."""
+    return f'aea.{public_id.author}.{public_id.name}.v{public_id.version.replace(".", "_")}'
