@@ -12,8 +12,6 @@ fingerprint:
   handlers.py: QmcfYneKjLjQ6WZfab2md6TjnhHSe6XU4fDtbGq4mYqnpY
   strategy.py: QmaihdgZ8QSNMiM7jHHFrMorxk9Dt1s2xf99RWHo1jKrUv
 fingerprint_ignore_patterns: []
-connections:
-- fetchai/ledger:0.12.0
 contracts: []
 protocols:
 - fetchai/default:0.11.0
@@ -55,3 +53,4 @@ models:
     class_name: GenericStrategy
 dependencies: {}
 is_abstract: false
+connections: []

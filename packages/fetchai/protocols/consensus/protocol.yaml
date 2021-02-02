@@ -7,7 +7,7 @@ description: A protocol for agents to aggregate individual observations
 license: Apache-2.0
 aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
-  README.md: Qmc8MEz58XRvZeJhBRnAYUhEVXx8GybC3DPhyR6o8Ygtaf
+  README.md: QmeNz9B2Wswy7sDi2AMwyfhLV4VPZ89h3m1J5ZxrTxJdZd
   __init__.py: QmVgebYqP99yE76pacoH78538ieqFEo6ne61HPcwaNmNeL
   consensus.proto: QmRp7r7Ycfqn8QrEcJ3fnFTAbCWrJZCSKjMMABzzrgxKHa
   consensus_pb2.py: QmVriVWS2K1BbkHKstcnLkuJTyQwufMXVzrU6Rb39typME

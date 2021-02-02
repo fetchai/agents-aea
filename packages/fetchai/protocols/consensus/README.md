@@ -35,6 +35,7 @@ termination: [observation, aggregation]
 roles: {agent}
 end_states: [successful, failed]
 keep_terminal_state_dialogues: false
+protocol_specification_id: 0.1.0
 ...
 ```
 
