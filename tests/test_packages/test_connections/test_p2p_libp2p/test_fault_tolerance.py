@@ -21,7 +21,6 @@ import os
 import shutil
 import tempfile
 import time
-from unittest.mock import Mock
 
 import pytest
 
@@ -44,13 +43,6 @@ from tests.conftest import (
 
 
 DEFAULT_PORT = 10234
-
-
-MockDefaultMessageProtocol = Mock()
-MockDefaultMessageProtocol.protocol_id = DefaultMessage.protocol_id
-MockDefaultMessageProtocol.protocol_specification_id = (
-    DefaultMessage.protocol_specification_id
-)
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_INTEGRATION)
@@ -527,7 +519,7 @@ class TestLibp2pConnectionAgentMobility(BaseTestLibp2pRelay):
         envelope = Envelope(
             to=addr_2,
             sender=addr_1,
-            protocol_specification_id=DefaultMessage.protocol_specification_id,
+            protocol_specification_id=msg.protocol_specification_id,
             message=msg.encode(),
         )
 
