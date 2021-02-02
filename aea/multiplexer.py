@@ -567,7 +567,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
 
         connection = cast(Connection, connection)
 
-        if not self._is_connection_supports_protocol(connection, envelope_protocol_id):
+        if not self._is_connection_supported_protocol(connection, envelope_protocol_id):
             return
 
         try:
