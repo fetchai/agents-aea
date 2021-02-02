@@ -19,6 +19,7 @@
 
 """This module contains the tests for the aea.configurations.base module."""
 import re
+import tempfile
 from copy import copy
 from pathlib import Path
 from unittest import TestCase, mock
@@ -244,6 +245,7 @@ class TestSkillConfig:
         )
         assert expected_dummy_handler_args == skill_config.handlers.read("dummy").args
         assert expected_dummy_model_args == skill_config.models.read("dummy").args
+        assert len(skill_config.package_dependencies)
 
     def test_update_method_raises_error_if_skill_component_not_allowed(self):
         """Test that we raise error if the custom configuration contain unexpected skill components."""
@@ -994,6 +996,14 @@ def test_check_public_id_consistency_negative():
     with pytest.raises(ValueError, match=f"Directory {random_dir_name} is not valid."):
         component_configuration = ProtocolConfig("name", "author")
         component_configuration.check_public_id_consistency(Path(random_dir_name))
+
+
+def test_check_public_id_consistency_positive():
+    """Test ComponentId.check_public_id_consistency works."""
+    skill_config_path = Path(DUMMY_SKILL_PATH)
+    loader = ConfigLoaders.from_package_type(PackageType.SKILL)
+    skill_config = loader.load(skill_config_path.open())
+    skill_config.check_public_id_consistency(Path(skill_config_path).parent)
 
 
 def test_component_id_from_json():
