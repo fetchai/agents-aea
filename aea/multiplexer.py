@@ -575,7 +575,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
         except Exception as e:  # pylint: disable=broad-except
             self._handle_exception(self._send, e)
 
-    def _is_connection_supports_protocol(
+    def _is_connection_supported_protocol(
         self, connection: Connection, protocol_id: PublicId
     ) -> bool:
         """Check protocol id is supported by the connection."""

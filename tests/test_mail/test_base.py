@@ -28,6 +28,7 @@ from aea.exceptions import AEAEnforceError
 from aea.mail import base_pb2
 from aea.mail.base import Envelope, EnvelopeContext, ProtobufEnvelopeSerializer, URI
 from aea.multiplexer import InBox, Multiplexer, OutBox
+from aea.protocols.base import Message
 
 from packages.fetchai.connections.local.connection import LocalNode
 from packages.fetchai.protocols.default.message import DefaultMessage
@@ -214,6 +215,18 @@ def test_multiplexer():
             multiplexer.is_connected
         ), "Mailbox cannot connect to the specific Connection(OEFLocalConnection)"
         multiplexer.disconnect()
+
+
+def test_envelope_fails_on_message_empty_protocol_specification_id():
+    """Check message.protocol_specification_id."""
+
+    class BadMessage(Message):
+        protocol_id = "some/some:0.1.0"
+
+    message = BadMessage()
+
+    with pytest.raises(ValueError):
+        Envelope(message=message, to="1", sender="1")
 
 
 def test_protobuf_envelope_serializer():

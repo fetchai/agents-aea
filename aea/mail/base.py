@@ -209,7 +209,7 @@ class EnvelopeContext:
             )
         return (skill_id, connection_id)
 
-    def __str__(self):
+    def __str__(self):  # pragma: nocover
         """Get the string representation."""
         return f"EnvelopeContext(connection_id={self.connection_id}, skill_id={self.skill_id}, uri_raw={self.uri_raw})"
 

@@ -417,7 +417,7 @@ def test_send_message_no_supported_protocol():
             multiplexer.put(envelope)
             time.sleep(0.5)
             mock_logger_warning.assert_called_with(
-                "Connection {} does not support protocol {} cause it's excluded.".format(
+                "Connection {} does not support protocol {}. It is explicitly excluded.".format(
                     connection_1.connection_id, FipaMessage.protocol_id
                 )
             )
@@ -432,12 +432,28 @@ def test_send_message_no_supported_protocol():
             multiplexer.put(envelope)
             time.sleep(0.5)
             mock_logger_warning.assert_called_with(
-                "Connection {} does not support protocol {} cause it's not in protocols list.".format(
-                    connection_1.connection_id, UnknownProtocolMock.protocol_id
+                "Connection {} does not support protocol {}. The connection is restricted to protocols in {}.".format(
+                    connection_1.connection_id,
+                    UnknownProtocolMock.protocol_id,
+                    connection_1.restricted_to_protocols,
                 )
             )
 
         multiplexer.disconnect()
+
+
+def test_protocol_not_resolved():
+    """Test multiplexer raises ValueError on protocol not resolved."""
+    multiplexer = Multiplexer([Mock()])
+
+    envelope = Envelope(
+        to="1",
+        sender="2",
+        protocol_specification_id=FipaMessage.protocol_specification_id,
+        message=b"some bytes",
+    )
+    with pytest.raises(ValueError):
+        multiplexer._get_protocol_id_for_envelope(envelope)
 
 
 def test_autoset_default_connection():

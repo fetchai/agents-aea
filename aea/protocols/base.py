@@ -424,4 +424,4 @@ class Protocol(Component):
 
     def __repr__(self) -> str:
         """Get str repr of the protocol."""
-        return f"Protocol({self.protocol_id})"
+        return f"Protocol({self.protocol_id})"  # pragma: nocover

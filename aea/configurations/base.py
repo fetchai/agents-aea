@@ -960,7 +960,7 @@ class SkillConfig(ComponentConfiguration):
     @property
     def is_abstract_component(self) -> bool:
         """Check whether the component is abstract."""
-        return self.is_abstract
+        return self.is_abstract  # pragma: nocover
 
     @property
     def json(self) -> Dict:
