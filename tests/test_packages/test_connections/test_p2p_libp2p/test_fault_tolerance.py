@@ -98,7 +98,9 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay)
         super().setup()
         self.genesis = _make_libp2p_connection(DEFAULT_PORT + 1, build_directory=self.t)
 
-        self.multiplexer_genesis = Multiplexer([self.genesis])
+        self.multiplexer_genesis = Multiplexer(
+            [self.genesis], protocols=[DefaultMessage]
+        )
         self.multiplexer_genesis.connect()
         self.log_files.append(self.genesis.node.log_file)
         self.multiplexers.append(self.multiplexer_genesis)
@@ -115,7 +117,7 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay)
             node_key_file=self.relay_key_path,
             build_directory=self.t,
         )
-        self.multiplexer_relay = Multiplexer([self.relay])
+        self.multiplexer_relay = Multiplexer([self.relay], protocols=[DefaultMessage])
         self.multiplexer_relay.connect()
         self.log_files.append(self.relay.node.log_file)
         self.multiplexers.append(self.multiplexer_relay)
@@ -128,7 +130,7 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay)
             entry_peers=[relay_peer],
             build_directory=self.t,
         )
-        self.multiplexer = Multiplexer([self.connection])
+        self.multiplexer = Multiplexer([self.connection], protocols=[DefaultMessage])
         self.multiplexer.connect()
         self.log_files.append(self.connection.node.log_file)
         self.multiplexers.append(self.multiplexer)
@@ -139,7 +141,7 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay)
             entry_peers=[relay_peer],
             build_directory=self.t,
         )
-        self.multiplexer2 = Multiplexer([self.connection2])
+        self.multiplexer2 = Multiplexer([self.connection2], protocols=[DefaultMessage])
         self.multiplexer2.connect()
         self.log_files.append(self.connection2.node.log_file)
         self.multiplexers.append(self.multiplexer2)
@@ -165,7 +167,7 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay)
         envelope = Envelope(
             to=addr_2,
             sender=addr_1,
-            protocol_id=DefaultMessage.protocol_id,
+            protocol_specification_id=DefaultMessage.protocol_specification_id,
             message=DefaultSerializer().encode(msg),
         )
 
@@ -175,7 +177,10 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay)
         assert delivered_envelope is not None
         assert delivered_envelope.to == envelope.to
         assert delivered_envelope.sender == envelope.sender
-        assert delivered_envelope.protocol_id == envelope.protocol_id
+        assert (
+            delivered_envelope.protocol_specification_id
+            == envelope.protocol_specification_id
+        )
         assert delivered_envelope.message_bytes == envelope.message_bytes
 
         self.multiplexer_relay.disconnect()
@@ -187,7 +192,7 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay)
             node_key_file=self.relay_key_path,
             build_directory=self.t,
         )
-        self.multiplexer_relay = Multiplexer([self.relay])
+        self.multiplexer_relay = Multiplexer([self.relay], protocols=[DefaultMessage])
         self.multiplexer_relay.connect()
         self.change_state_and_wait(self.multiplexer_relay, expected_is_connected=True)
         self.multiplexers.append(self.multiplexer_relay)
@@ -202,7 +207,7 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay)
         envelope = Envelope(
             to=addr_2,
             sender=addr_1,
-            protocol_id=DefaultMessage.protocol_id,
+            protocol_specification_id=DefaultMessage.protocol_specification_id,
             message=DefaultSerializer().encode(msg),
         )
 
@@ -213,7 +218,10 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay)
         assert delivered_envelope is not None
         assert delivered_envelope.to == envelope.to
         assert delivered_envelope.sender == envelope.sender
-        assert delivered_envelope.protocol_id == envelope.protocol_id
+        assert (
+            delivered_envelope.protocol_specification_id
+            == envelope.protocol_specification_id
+        )
         assert delivered_envelope.message_bytes == envelope.message_bytes
 
     def test_envelope_routed_from_client_after_relay_restart(self):
@@ -231,7 +239,7 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay)
         envelope = Envelope(
             to=addr_1,
             sender=addr_2,
-            protocol_id=DefaultMessage.protocol_id,
+            protocol_specification_id=DefaultMessage.protocol_specification_id,
             message=DefaultSerializer().encode(msg),
         )
 
@@ -241,7 +249,10 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay)
         assert delivered_envelope is not None
         assert delivered_envelope.to == envelope.to
         assert delivered_envelope.sender == envelope.sender
-        assert delivered_envelope.protocol_id == envelope.protocol_id
+        assert (
+            delivered_envelope.protocol_specification_id
+            == envelope.protocol_specification_id
+        )
         assert delivered_envelope.message_bytes == envelope.message_bytes
 
         self.multiplexer_relay.disconnect()
@@ -253,7 +264,7 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay)
             node_key_file=self.relay_key_path,
             build_directory=self.t,
         )
-        self.multiplexer_relay = Multiplexer([self.relay])
+        self.multiplexer_relay = Multiplexer([self.relay], protocols=[DefaultMessage])
         self.multiplexer_relay.connect()
         self.change_state_and_wait(self.multiplexer_relay, expected_is_connected=True)
         self.multiplexers.append(self.multiplexer_relay)
@@ -269,7 +280,7 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay)
         envelope = Envelope(
             to=addr_1,
             sender=addr_2,
-            protocol_id=DefaultMessage.protocol_id,
+            protocol_specification_id=DefaultMessage.protocol_specification_id,
             message=DefaultSerializer().encode(msg),
         )
 
@@ -280,7 +291,10 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay)
         assert delivered_envelope is not None
         assert delivered_envelope.to == envelope.to
         assert delivered_envelope.sender == envelope.sender
-        assert delivered_envelope.protocol_id == envelope.protocol_id
+        assert (
+            delivered_envelope.protocol_specification_id
+            == envelope.protocol_specification_id
+        )
         assert delivered_envelope.message_bytes == envelope.message_bytes
 
 
@@ -294,7 +308,9 @@ class TestLibp2pConnectionRelayNodeRestartOutgoingEnvelopes(BaseTestLibp2pRelay)
         super().setup()
         self.genesis = _make_libp2p_connection(DEFAULT_PORT + 1, build_directory=self.t)
 
-        self.multiplexer_genesis = Multiplexer([self.genesis])
+        self.multiplexer_genesis = Multiplexer(
+            [self.genesis], protocols=[DefaultMessage]
+        )
         self.multiplexer_genesis.connect()
         self.log_files.append(self.genesis.node.log_file)
         self.multiplexers.append(self.multiplexer_genesis)
@@ -311,7 +327,7 @@ class TestLibp2pConnectionRelayNodeRestartOutgoingEnvelopes(BaseTestLibp2pRelay)
             node_key_file=self.relay_key_path,
             build_directory=self.t,
         )
-        self.multiplexer_relay = Multiplexer([self.relay])
+        self.multiplexer_relay = Multiplexer([self.relay], protocols=[DefaultMessage])
         self.multiplexer_relay.connect()
         self.log_files.append(self.relay.node.log_file)
         self.multiplexers.append(self.multiplexer_relay)
@@ -324,7 +340,7 @@ class TestLibp2pConnectionRelayNodeRestartOutgoingEnvelopes(BaseTestLibp2pRelay)
             entry_peers=[relay_peer],
             build_directory=self.t,
         )
-        self.multiplexer = Multiplexer([self.connection])
+        self.multiplexer = Multiplexer([self.connection], protocols=[DefaultMessage])
         self.multiplexer.connect()
         self.log_files.append(self.connection.node.log_file)
         self.multiplexers.append(self.multiplexer)
@@ -349,7 +365,7 @@ class TestLibp2pConnectionRelayNodeRestartOutgoingEnvelopes(BaseTestLibp2pRelay)
         envelope = Envelope(
             to=addr_2,
             sender=addr_1,
-            protocol_id=DefaultMessage.protocol_id,
+            protocol_specification_id=DefaultMessage.protocol_specification_id,
             message=DefaultSerializer().encode(msg),
         )
 
@@ -359,7 +375,10 @@ class TestLibp2pConnectionRelayNodeRestartOutgoingEnvelopes(BaseTestLibp2pRelay)
         assert delivered_envelope is not None
         assert delivered_envelope.to == envelope.to
         assert delivered_envelope.sender == envelope.sender
-        assert delivered_envelope.protocol_id == envelope.protocol_id
+        assert (
+            delivered_envelope.protocol_specification_id
+            == envelope.protocol_specification_id
+        )
         assert delivered_envelope.message_bytes == envelope.message_bytes
 
         self.multiplexer_relay.disconnect()
@@ -375,7 +394,7 @@ class TestLibp2pConnectionRelayNodeRestartOutgoingEnvelopes(BaseTestLibp2pRelay)
         envelope = Envelope(
             to=addr_2,
             sender=addr_1,
-            protocol_id=DefaultMessage.protocol_id,
+            protocol_specification_id=DefaultMessage.protocol_specification_id,
             message=DefaultSerializer().encode(msg),
         )
 
@@ -388,7 +407,7 @@ class TestLibp2pConnectionRelayNodeRestartOutgoingEnvelopes(BaseTestLibp2pRelay)
             node_key_file=self.relay_key_path,
             build_directory=self.t,
         )
-        self.multiplexer_relay = Multiplexer([self.relay])
+        self.multiplexer_relay = Multiplexer([self.relay], protocols=[DefaultMessage])
         self.multiplexer_relay.connect()
         self.change_state_and_wait(self.multiplexer_relay, expected_is_connected=True)
         self.multiplexers.append(self.multiplexer_relay)
@@ -398,7 +417,10 @@ class TestLibp2pConnectionRelayNodeRestartOutgoingEnvelopes(BaseTestLibp2pRelay)
         assert delivered_envelope is not None
         assert delivered_envelope.to == envelope.to
         assert delivered_envelope.sender == envelope.sender
-        assert delivered_envelope.protocol_id == envelope.protocol_id
+        assert (
+            delivered_envelope.protocol_specification_id
+            == envelope.protocol_specification_id
+        )
         assert delivered_envelope.message_bytes == envelope.message_bytes
 
 
@@ -412,7 +434,9 @@ class TestLibp2pConnectionAgentMobility(BaseTestLibp2pRelay):
         super().setup()
         self.genesis = _make_libp2p_connection(DEFAULT_PORT)
 
-        self.multiplexer_genesis = Multiplexer([self.genesis])
+        self.multiplexer_genesis = Multiplexer(
+            [self.genesis], protocols=[DefaultMessage]
+        )
         self.log_files.append(self.genesis.node.log_file)
         self.multiplexer_genesis.connect()
         self.multiplexers.append(self.multiplexer_genesis)
@@ -422,7 +446,7 @@ class TestLibp2pConnectionAgentMobility(BaseTestLibp2pRelay):
         self.connection1 = _make_libp2p_connection(
             DEFAULT_PORT + 1, entry_peers=[genesis_peer]
         )
-        self.multiplexer1 = Multiplexer([self.connection1])
+        self.multiplexer1 = Multiplexer([self.connection1], protocols=[DefaultMessage])
         self.log_files.append(self.connection1.node.log_file)
         self.multiplexer1.connect()
         self.multiplexers.append(self.multiplexer1)
@@ -431,7 +455,7 @@ class TestLibp2pConnectionAgentMobility(BaseTestLibp2pRelay):
         self.connection2 = _make_libp2p_connection(
             DEFAULT_PORT + 2, entry_peers=[genesis_peer], agent_key=self.connection_key,
         )
-        self.multiplexer2 = Multiplexer([self.connection2])
+        self.multiplexer2 = Multiplexer([self.connection2], protocols=[DefaultMessage])
         self.log_files.append(self.connection2.node.log_file)
         self.multiplexer2.connect()
         self.multiplexers.append(self.multiplexer2)
@@ -456,7 +480,7 @@ class TestLibp2pConnectionAgentMobility(BaseTestLibp2pRelay):
         envelope = Envelope(
             to=addr_2,
             sender=addr_1,
-            protocol_id=DefaultMessage.protocol_id,
+            protocol_specification_id=DefaultMessage.protocol_specification_id,
             message=DefaultSerializer().encode(msg),
         )
 
@@ -466,7 +490,10 @@ class TestLibp2pConnectionAgentMobility(BaseTestLibp2pRelay):
         assert delivered_envelope is not None
         assert delivered_envelope.to == envelope.to
         assert delivered_envelope.sender == envelope.sender
-        assert delivered_envelope.protocol_id == envelope.protocol_id
+        assert (
+            delivered_envelope.protocol_specification_id
+            == envelope.protocol_specification_id
+        )
         assert delivered_envelope.message_bytes == envelope.message_bytes
 
         self.multiplexer2.disconnect()
@@ -477,7 +504,7 @@ class TestLibp2pConnectionAgentMobility(BaseTestLibp2pRelay):
             entry_peers=[self.genesis.node.multiaddrs[0]],
             agent_key=self.connection_key,
         )
-        self.multiplexer2 = Multiplexer([self.connection2])
+        self.multiplexer2 = Multiplexer([self.connection2], protocols=[DefaultMessage])
         self.multiplexer2.connect()
         self.change_state_and_wait(self.multiplexer2, expected_is_connected=True)
         self.multiplexers.append(self.multiplexer2)
@@ -490,7 +517,10 @@ class TestLibp2pConnectionAgentMobility(BaseTestLibp2pRelay):
             content=b"helloAfterChangingPeer",
         )
         envelope = Envelope(
-            to=addr_2, sender=addr_1, protocol_id=msg.protocol_id, message=msg.encode(),
+            to=addr_2,
+            sender=addr_1,
+            protocol_specification_id=msg.protocol_specification_id,
+            message=msg.encode(),
         )
 
         self.multiplexer1.put(envelope)
@@ -500,5 +530,8 @@ class TestLibp2pConnectionAgentMobility(BaseTestLibp2pRelay):
         assert delivered_envelope is not None
         assert delivered_envelope.to == envelope.to
         assert delivered_envelope.sender == envelope.sender
-        assert delivered_envelope.protocol_id == envelope.protocol_id
+        assert (
+            delivered_envelope.protocol_specification_id
+            == envelope.protocol_specification_id
+        )
         assert delivered_envelope.message_bytes == envelope.message_bytes

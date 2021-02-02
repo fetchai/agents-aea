@@ -160,6 +160,7 @@ class AEA(Agent):
                 connections=connections,
                 default_routing=default_routing,
                 default_connection=default_connection,
+                protocols=self.resources.get_all_protocols(),
             ),
         )
 
@@ -274,7 +275,9 @@ class AEA(Agent):
         self, envelope: Envelope
     ) -> Tuple[Optional[Message], List[Handler]]:
         """Get the msg and its handlers."""
-        protocol = self.resources.get_protocol(envelope.protocol_id)
+        protocol = self.resources.get_protocol_by_specification_id(
+            envelope.protocol_specification_id
+        )
 
         msg, handlers = self._handle_decoding(envelope, protocol)
 

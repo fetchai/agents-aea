@@ -14,23 +14,23 @@ _sym_db = _symbol_database.Default()
 
 DESCRIPTOR = _descriptor.FileDescriptor(
     name="ml_trade.proto",
-    package="aea.fetchai.ml_trade",
+    package="aea.fetchai.ml_trade.v0_1_0",
     syntax="proto3",
     serialized_options=None,
-    serialized_pb=b'\n\x0eml_trade.proto\x12\x14\x61\x65\x61.fetchai.ml_trade"\x84\x06\n\x0eMlTradeMessage\x12J\n\x06\x61\x63\x63\x65pt\x18\x05 \x01(\x0b\x32\x38.aea.fetchai.ml_trade.MlTradeMessage.Accept_PerformativeH\x00\x12\x44\n\x03\x63\x66p\x18\x06 \x01(\x0b\x32\x35.aea.fetchai.ml_trade.MlTradeMessage.Cfp_PerformativeH\x00\x12\x46\n\x04\x64\x61ta\x18\x07 \x01(\x0b\x32\x36.aea.fetchai.ml_trade.MlTradeMessage.Data_PerformativeH\x00\x12H\n\x05terms\x18\x08 \x01(\x0b\x32\x37.aea.fetchai.ml_trade.MlTradeMessage.Terms_PerformativeH\x00\x1a(\n\x0b\x44\x65scription\x12\x19\n\x11\x64\x65scription_bytes\x18\x01 \x01(\x0c\x1a\x1c\n\x05Query\x12\x13\n\x0bquery_bytes\x18\x01 \x01(\x0c\x1aM\n\x10\x43\x66p_Performative\x12\x39\n\x05query\x18\x01 \x01(\x0b\x32*.aea.fetchai.ml_trade.MlTradeMessage.Query\x1aU\n\x12Terms_Performative\x12?\n\x05terms\x18\x01 \x01(\x0b\x32\x30.aea.fetchai.ml_trade.MlTradeMessage.Description\x1ai\n\x13\x41\x63\x63\x65pt_Performative\x12?\n\x05terms\x18\x01 \x01(\x0b\x32\x30.aea.fetchai.ml_trade.MlTradeMessage.Description\x12\x11\n\ttx_digest\x18\x02 \x01(\t\x1a\x65\n\x11\x44\x61ta_Performative\x12?\n\x05terms\x18\x01 \x01(\x0b\x32\x30.aea.fetchai.ml_trade.MlTradeMessage.Description\x12\x0f\n\x07payload\x18\x02 \x01(\x0c\x42\x0e\n\x0cperformativeb\x06proto3',
+    serialized_pb=b'\n\x0eml_trade.proto\x12\x1b\x61\x65\x61.fetchai.ml_trade.v0_1_0"\xbc\x06\n\x0eMlTradeMessage\x12Q\n\x06\x61\x63\x63\x65pt\x18\x05 \x01(\x0b\x32?.aea.fetchai.ml_trade.v0_1_0.MlTradeMessage.Accept_PerformativeH\x00\x12K\n\x03\x63\x66p\x18\x06 \x01(\x0b\x32<.aea.fetchai.ml_trade.v0_1_0.MlTradeMessage.Cfp_PerformativeH\x00\x12M\n\x04\x64\x61ta\x18\x07 \x01(\x0b\x32=.aea.fetchai.ml_trade.v0_1_0.MlTradeMessage.Data_PerformativeH\x00\x12O\n\x05terms\x18\x08 \x01(\x0b\x32>.aea.fetchai.ml_trade.v0_1_0.MlTradeMessage.Terms_PerformativeH\x00\x1a(\n\x0b\x44\x65scription\x12\x19\n\x11\x64\x65scription_bytes\x18\x01 \x01(\x0c\x1a\x1c\n\x05Query\x12\x13\n\x0bquery_bytes\x18\x01 \x01(\x0c\x1aT\n\x10\x43\x66p_Performative\x12@\n\x05query\x18\x01 \x01(\x0b\x32\x31.aea.fetchai.ml_trade.v0_1_0.MlTradeMessage.Query\x1a\\\n\x12Terms_Performative\x12\x46\n\x05terms\x18\x01 \x01(\x0b\x32\x37.aea.fetchai.ml_trade.v0_1_0.MlTradeMessage.Description\x1ap\n\x13\x41\x63\x63\x65pt_Performative\x12\x46\n\x05terms\x18\x01 \x01(\x0b\x32\x37.aea.fetchai.ml_trade.v0_1_0.MlTradeMessage.Description\x12\x11\n\ttx_digest\x18\x02 \x01(\t\x1al\n\x11\x44\x61ta_Performative\x12\x46\n\x05terms\x18\x01 \x01(\x0b\x32\x37.aea.fetchai.ml_trade.v0_1_0.MlTradeMessage.Description\x12\x0f\n\x07payload\x18\x02 \x01(\x0c\x42\x0e\n\x0cperformativeb\x06proto3',
 )
 
 
 _MLTRADEMESSAGE_DESCRIPTION = _descriptor.Descriptor(
     name="Description",
-    full_name="aea.fetchai.ml_trade.MlTradeMessage.Description",
+    full_name="aea.fetchai.ml_trade.v0_1_0.MlTradeMessage.Description",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="description_bytes",
-            full_name="aea.fetchai.ml_trade.MlTradeMessage.Description.description_bytes",
+            full_name="aea.fetchai.ml_trade.v0_1_0.MlTradeMessage.Description.description_bytes",
             index=0,
             number=1,
             type=12,
@@ -55,20 +55,20 @@ _MLTRADEMESSAGE_DESCRIPTION = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=351,
-    serialized_end=391,
+    serialized_start=386,
+    serialized_end=426,
 )
 
 _MLTRADEMESSAGE_QUERY = _descriptor.Descriptor(
     name="Query",
-    full_name="aea.fetchai.ml_trade.MlTradeMessage.Query",
+    full_name="aea.fetchai.ml_trade.v0_1_0.MlTradeMessage.Query",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="query_bytes",
-            full_name="aea.fetchai.ml_trade.MlTradeMessage.Query.query_bytes",
+            full_name="aea.fetchai.ml_trade.v0_1_0.MlTradeMessage.Query.query_bytes",
             index=0,
             number=1,
             type=12,
@@ -93,20 +93,20 @@ _MLTRADEMESSAGE_QUERY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=393,
-    serialized_end=421,
+    serialized_start=428,
+    serialized_end=456,
 )
 
 _MLTRADEMESSAGE_CFP_PERFORMATIVE = _descriptor.Descriptor(
     name="Cfp_Performative",
-    full_name="aea.fetchai.ml_trade.MlTradeMessage.Cfp_Performative",
+    full_name="aea.fetchai.ml_trade.v0_1_0.MlTradeMessage.Cfp_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="query",
-            full_name="aea.fetchai.ml_trade.MlTradeMessage.Cfp_Performative.query",
+            full_name="aea.fetchai.ml_trade.v0_1_0.MlTradeMessage.Cfp_Performative.query",
             index=0,
             number=1,
             type=11,
@@ -131,20 +131,20 @@ _MLTRADEMESSAGE_CFP_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=423,
-    serialized_end=500,
+    serialized_start=458,
+    serialized_end=542,
 )
 
 _MLTRADEMESSAGE_TERMS_PERFORMATIVE = _descriptor.Descriptor(
     name="Terms_Performative",
-    full_name="aea.fetchai.ml_trade.MlTradeMessage.Terms_Performative",
+    full_name="aea.fetchai.ml_trade.v0_1_0.MlTradeMessage.Terms_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="terms",
-            full_name="aea.fetchai.ml_trade.MlTradeMessage.Terms_Performative.terms",
+            full_name="aea.fetchai.ml_trade.v0_1_0.MlTradeMessage.Terms_Performative.terms",
             index=0,
             number=1,
             type=11,
@@ -169,20 +169,20 @@ _MLTRADEMESSAGE_TERMS_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=502,
-    serialized_end=587,
+    serialized_start=544,
+    serialized_end=636,
 )
 
 _MLTRADEMESSAGE_ACCEPT_PERFORMATIVE = _descriptor.Descriptor(
     name="Accept_Performative",
-    full_name="aea.fetchai.ml_trade.MlTradeMessage.Accept_Performative",
+    full_name="aea.fetchai.ml_trade.v0_1_0.MlTradeMessage.Accept_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="terms",
-            full_name="aea.fetchai.ml_trade.MlTradeMessage.Accept_Performative.terms",
+            full_name="aea.fetchai.ml_trade.v0_1_0.MlTradeMessage.Accept_Performative.terms",
             index=0,
             number=1,
             type=11,
@@ -200,7 +200,7 @@ _MLTRADEMESSAGE_ACCEPT_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="tx_digest",
-            full_name="aea.fetchai.ml_trade.MlTradeMessage.Accept_Performative.tx_digest",
+            full_name="aea.fetchai.ml_trade.v0_1_0.MlTradeMessage.Accept_Performative.tx_digest",
             index=1,
             number=2,
             type=9,
@@ -225,20 +225,20 @@ _MLTRADEMESSAGE_ACCEPT_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=589,
-    serialized_end=694,
+    serialized_start=638,
+    serialized_end=750,
 )
 
 _MLTRADEMESSAGE_DATA_PERFORMATIVE = _descriptor.Descriptor(
     name="Data_Performative",
-    full_name="aea.fetchai.ml_trade.MlTradeMessage.Data_Performative",
+    full_name="aea.fetchai.ml_trade.v0_1_0.MlTradeMessage.Data_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="terms",
-            full_name="aea.fetchai.ml_trade.MlTradeMessage.Data_Performative.terms",
+            full_name="aea.fetchai.ml_trade.v0_1_0.MlTradeMessage.Data_Performative.terms",
             index=0,
             number=1,
             type=11,
@@ -256,7 +256,7 @@ _MLTRADEMESSAGE_DATA_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="payload",
-            full_name="aea.fetchai.ml_trade.MlTradeMessage.Data_Performative.payload",
+            full_name="aea.fetchai.ml_trade.v0_1_0.MlTradeMessage.Data_Performative.payload",
             index=1,
             number=2,
             type=12,
@@ -281,20 +281,20 @@ _MLTRADEMESSAGE_DATA_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=696,
-    serialized_end=797,
+    serialized_start=752,
+    serialized_end=860,
 )
 
 _MLTRADEMESSAGE = _descriptor.Descriptor(
     name="MlTradeMessage",
-    full_name="aea.fetchai.ml_trade.MlTradeMessage",
+    full_name="aea.fetchai.ml_trade.v0_1_0.MlTradeMessage",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="accept",
-            full_name="aea.fetchai.ml_trade.MlTradeMessage.accept",
+            full_name="aea.fetchai.ml_trade.v0_1_0.MlTradeMessage.accept",
             index=0,
             number=5,
             type=11,
@@ -312,7 +312,7 @@ _MLTRADEMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="cfp",
-            full_name="aea.fetchai.ml_trade.MlTradeMessage.cfp",
+            full_name="aea.fetchai.ml_trade.v0_1_0.MlTradeMessage.cfp",
             index=1,
             number=6,
             type=11,
@@ -330,7 +330,7 @@ _MLTRADEMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="data",
-            full_name="aea.fetchai.ml_trade.MlTradeMessage.data",
+            full_name="aea.fetchai.ml_trade.v0_1_0.MlTradeMessage.data",
             index=2,
             number=7,
             type=11,
@@ -348,7 +348,7 @@ _MLTRADEMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="terms",
-            full_name="aea.fetchai.ml_trade.MlTradeMessage.terms",
+            full_name="aea.fetchai.ml_trade.v0_1_0.MlTradeMessage.terms",
             index=3,
             number=8,
             type=11,
@@ -382,14 +382,14 @@ _MLTRADEMESSAGE = _descriptor.Descriptor(
     oneofs=[
         _descriptor.OneofDescriptor(
             name="performative",
-            full_name="aea.fetchai.ml_trade.MlTradeMessage.performative",
+            full_name="aea.fetchai.ml_trade.v0_1_0.MlTradeMessage.performative",
             index=0,
             containing_type=None,
             fields=[],
         ),
     ],
-    serialized_start=41,
-    serialized_end=813,
+    serialized_start=48,
+    serialized_end=876,
 )
 
 _MLTRADEMESSAGE_DESCRIPTION.containing_type = _MLTRADEMESSAGE
@@ -455,7 +455,7 @@ MlTradeMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _MLTRADEMESSAGE_DESCRIPTION,
                 "__module__": "ml_trade_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.ml_trade.MlTradeMessage.Description)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.ml_trade.v0_1_0.MlTradeMessage.Description)
             },
         ),
         "Query": _reflection.GeneratedProtocolMessageType(
@@ -464,7 +464,7 @@ MlTradeMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _MLTRADEMESSAGE_QUERY,
                 "__module__": "ml_trade_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.ml_trade.MlTradeMessage.Query)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.ml_trade.v0_1_0.MlTradeMessage.Query)
             },
         ),
         "Cfp_Performative": _reflection.GeneratedProtocolMessageType(
@@ -473,7 +473,7 @@ MlTradeMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _MLTRADEMESSAGE_CFP_PERFORMATIVE,
                 "__module__": "ml_trade_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.ml_trade.MlTradeMessage.Cfp_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.ml_trade.v0_1_0.MlTradeMessage.Cfp_Performative)
             },
         ),
         "Terms_Performative": _reflection.GeneratedProtocolMessageType(
@@ -482,7 +482,7 @@ MlTradeMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _MLTRADEMESSAGE_TERMS_PERFORMATIVE,
                 "__module__": "ml_trade_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.ml_trade.MlTradeMessage.Terms_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.ml_trade.v0_1_0.MlTradeMessage.Terms_Performative)
             },
         ),
         "Accept_Performative": _reflection.GeneratedProtocolMessageType(
@@ -491,7 +491,7 @@ MlTradeMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _MLTRADEMESSAGE_ACCEPT_PERFORMATIVE,
                 "__module__": "ml_trade_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.ml_trade.MlTradeMessage.Accept_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.ml_trade.v0_1_0.MlTradeMessage.Accept_Performative)
             },
         ),
         "Data_Performative": _reflection.GeneratedProtocolMessageType(
@@ -500,12 +500,12 @@ MlTradeMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _MLTRADEMESSAGE_DATA_PERFORMATIVE,
                 "__module__": "ml_trade_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.ml_trade.MlTradeMessage.Data_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.ml_trade.v0_1_0.MlTradeMessage.Data_Performative)
             },
         ),
         "DESCRIPTOR": _MLTRADEMESSAGE,
         "__module__": "ml_trade_pb2"
-        # @@protoc_insertion_point(class_scope:aea.fetchai.ml_trade.MlTradeMessage)
+        # @@protoc_insertion_point(class_scope:aea.fetchai.ml_trade.v0_1_0.MlTradeMessage)
     },
 )
 _sym_db.RegisterMessage(MlTradeMessage)

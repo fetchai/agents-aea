@@ -43,7 +43,7 @@ def _encode(e: Envelope, separator: bytes = SEPARATOR):
     result += separator
     result += e.sender.encode("utf-8")
     result += separator
-    result += str(e.protocol_id).encode("utf-8")
+    result += str(e.protocol_specification_id).encode("utf-8")
     result += separator
     result += e.message_bytes
     result += separator
@@ -63,7 +63,7 @@ def _decode(e: bytes, separator: bytes = SEPARATOR):
 
     to = split[0].decode("utf-8").strip().lstrip("\x00")
     sender = split[1].decode("utf-8").strip()
-    protocol_id = PublicId.from_str(split[2].decode("utf-8").strip())
+    protocol_specification_id = PublicId.from_str(split[2].decode("utf-8").strip())
     # protobuf messages cannot be delimited as they can contain an arbitrary byte sequence; however
     # we know everything remaining constitutes the protobuf message.
     message = SEPARATOR.join(split[3:-1])
@@ -71,7 +71,12 @@ def _decode(e: bytes, separator: bytes = SEPARATOR):
         # hack to account for manual usage of `echo`
         message = codecs.decode(message, "unicode-escape").encode("utf-8")
 
-    return Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message)
+    return Envelope(
+        to=to,
+        sender=sender,
+        protocol_specification_id=protocol_specification_id,
+        message=message,
+    )
 
 
 @contextmanager

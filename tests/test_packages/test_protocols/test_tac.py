@@ -95,16 +95,17 @@ def test_register_serialization():
         performative=TacMessage.Performative.REGISTER, agent_name="some_agent_name",
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=TacMessage.protocol_id, message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = TacMessage.serializer.decode(actual_envelope.message)
@@ -120,16 +121,17 @@ def test_unregister_serialization():
         message_id=2, target=1, performative=TacMessage.Performative.UNREGISTER,
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=TacMessage.protocol_id, message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = TacMessage.serializer.decode(actual_envelope.message)
@@ -155,16 +157,17 @@ def test_transaction_serialization():
         counterparty_signature="some_counterparty_signature",
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=TacMessage.protocol_id, message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = TacMessage.serializer.decode(actual_envelope.message)
@@ -178,16 +181,17 @@ def test_cancelled_serialization():
     """Test the serialization for 'cancelled' speech-act works."""
     msg = TacMessage(performative=TacMessage.Performative.CANCELLED,)
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=TacMessage.protocol_id, message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = TacMessage.serializer.decode(actual_envelope.message)
@@ -213,16 +217,17 @@ def test_game_data_serialization():
         info={"key_1": "value_1", "key_2": "value_2"},
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=TacMessage.protocol_id, message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = TacMessage.serializer.decode(actual_envelope.message)
@@ -241,16 +246,17 @@ def test_transaction_confirmation_serialization():
         quantities_by_good_id={"key_1": 1, "key_2": 2},
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=TacMessage.protocol_id, message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = TacMessage.serializer.decode(actual_envelope.message)
@@ -268,16 +274,17 @@ def test_tac_error_serialization():
         info={"key_1": "value_1", "key_2": "value_2"},
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=TacMessage.protocol_id, message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = TacMessage.serializer.decode(actual_envelope.message)

@@ -70,7 +70,7 @@ message Envelope{
 ``` proto
 syntax = "proto3";
 
-package aea.fetchai.default;
+package aea.fetchai.default.v0_1_0;
 
 message DefaultMessage{
 

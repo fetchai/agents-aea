@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package aea.fetchai.gym;
+package aea.fetchai.gym.v0_1_0;
 
 message GymMessage{
 

@@ -58,16 +58,17 @@ def test_cfp_serialization():
         query=Query([Constraint("something", ConstraintType(">", 1))]),
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=FipaMessage.protocol_id, message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
@@ -87,16 +88,17 @@ def test_propose_serialization():
         proposal=Description({"foo1": 1, "bar1": 2}),
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=FipaMessage.protocol_id, message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
@@ -115,16 +117,17 @@ def test_accept_serialization():
         performative=FipaMessage.Performative.ACCEPT,
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=FipaMessage.protocol_id, message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
@@ -143,16 +146,17 @@ def test_decline_serialization():
         performative=FipaMessage.Performative.DECLINE,
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=FipaMessage.protocol_id, message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
@@ -171,16 +175,17 @@ def test_match_accept_serialization():
         performative=FipaMessage.Performative.MATCH_ACCEPT,
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=FipaMessage.protocol_id, message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
@@ -200,16 +205,17 @@ def test_accept_with_inform_serialization():
         info={"address": "dummy_address"},
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=FipaMessage.protocol_id, message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
@@ -229,16 +235,17 @@ def test_match_accept_with_inform_serialization():
         info={"address": "dummy_address", "signature": "my_signature"},
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=FipaMessage.protocol_id, message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
@@ -258,16 +265,17 @@ def test_inform_serialization():
         info={"foo": "bar"},
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=FipaMessage.protocol_id, message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = FipaMessage.serializer.decode(actual_envelope.message)
@@ -286,16 +294,17 @@ def test_end_serialization():
         performative=FipaMessage.Performative.END,
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=FipaMessage.protocol_id, message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = FipaMessage.serializer.decode(actual_envelope.message)

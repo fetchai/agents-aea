@@ -144,7 +144,7 @@ class TestHTTPClientConnect:
         request_envelope = Envelope(
             to=self.connection_address,
             sender=self.agent_address,
-            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
+            protocol_specification_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=request_http_message,
         )
 
@@ -172,34 +172,6 @@ class TestHTTPClientConnect:
         """Test channel.send error if not conencted."""
         with pytest.raises(ValueError):
             self.http_client_connection.channel.send(Mock())
-
-    @pytest.mark.asyncio
-    async def test_send_envelope_excluded_protocol_fail(self):
-        """Test send error if protocol not supported."""
-        request_http_message, _ = self.http_dialogs.create(
-            counterparty=self.connection_address,
-            performative=HttpMessage.Performative.REQUEST,
-            method="get",
-            url="bad url",
-            headers="",
-            version="",
-            body=b"",
-        )
-        request_envelope = Envelope(
-            to=self.connection_address,
-            sender=self.agent_address,
-            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
-            message=request_http_message,
-        )
-        await self.http_client_connection.connect()
-
-        with patch.object(
-            self.http_client_connection.channel,
-            "excluded_protocols",
-            new=[UNKNOWN_PROTOCOL_PUBLIC_ID],
-        ):
-            with pytest.raises(ValueError):
-                await self.http_client_connection.send(request_envelope)
 
     @pytest.mark.asyncio
     async def test_send_empty_envelope_skip(self):
@@ -233,7 +205,7 @@ class TestHTTPClientConnect:
         request_envelope = Envelope(
             to=self.connection_address,
             sender=self.agent_address,
-            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
+            protocol_specification_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=request_http_message,
         )
 
@@ -278,7 +250,6 @@ class TestHTTPClientConnect:
         request_envelope = Envelope(
             to=self.connection_address,
             sender=self.agent_address,
-            protocol_id=request_http_message.protocol_id,
             message=request_http_message,
         )
 
@@ -331,7 +302,6 @@ class TestHTTPClientConnect:
         envelope = Envelope(
             to=incorrect_http_message.to,
             sender=incorrect_http_message.sender,
-            protocol_id=incorrect_http_message.protocol_id,
             message=incorrect_http_message,
         )
         with patch.object(

@@ -161,12 +161,7 @@ class TestWebhookConnection:
             body="",
             version="",
         )
-        envelope = Envelope(
-            to="addr",
-            sender="my_id",
-            protocol_id=HttpMessage.protocol_id,
-            message=http_message,
-        )
+        envelope = Envelope(to="addr", sender="my_id", message=http_message,)
         with patch.object(self.webhook_connection.logger, "warning") as mock_logger:
             await self.webhook_connection.send(envelope)
             await asyncio.sleep(0.01)
