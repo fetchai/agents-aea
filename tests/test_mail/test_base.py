@@ -387,6 +387,14 @@ def test_envelope_constructor():
         Envelope(to="asd", sender="asdasd", message=b"sdfdf")
 
 
+def test_envelope_context_repr():
+    """Check repr for EnvelopeContext."""
+    assert (
+        str(EnvelopeContext(1, 2))
+        == "EnvelopeContext(connection_id=1, skill_id=2, uri_raw=)"
+    )
+
+
 def test_envelope_specification_id_translated():
     """Test protocol id to protocol specification id translation and back."""
     protocol_specification_id = PublicId("author", "specification", "0.1.0")
