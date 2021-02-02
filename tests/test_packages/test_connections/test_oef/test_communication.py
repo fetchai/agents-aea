@@ -111,7 +111,9 @@ class TestDefault(UseOef):
         cls.connection = _make_oef_connection(
             FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
         )
-        cls.multiplexer = Multiplexer([cls.connection])
+        cls.multiplexer = Multiplexer(
+            [cls.connection], protocols=[FipaMessage, DefaultMessage]
+        )
         cls.multiplexer.connect()
 
     def test_send_message(self):
@@ -146,7 +148,9 @@ class TestOEF(UseOef):
             self.connection = _make_oef_connection(
                 FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
             )
-            self.multiplexer = Multiplexer([self.connection])
+            self.multiplexer = Multiplexer(
+                [self.connection], protocols=[FipaMessage, DefaultMessage]
+            )
             self.multiplexer.connect()
             self.oef_search_dialogues = OefSearchDialogues(FETCHAI_ADDRESS_ONE)
 
@@ -267,7 +271,9 @@ class TestOEF(UseOef):
             cls.connection = _make_oef_connection(
                 FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
             )
-            cls.multiplexer = Multiplexer([cls.connection])
+            cls.multiplexer = Multiplexer(
+                [cls.connection], protocols=[FipaMessage, DefaultMessage]
+            )
             cls.multiplexer.connect()
             cls.oef_search_dialogues = OefSearchDialogues(FETCHAI_ADDRESS_ONE)
 
@@ -337,7 +343,9 @@ class TestOEF(UseOef):
             cls.connection = _make_oef_connection(
                 FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
             )
-            cls.multiplexer = Multiplexer([cls.connection])
+            cls.multiplexer = Multiplexer(
+                [cls.connection], protocols=[FipaMessage, DefaultMessage]
+            )
             cls.multiplexer.connect()
             cls.oef_search_dialogues = OefSearchDialogues(FETCHAI_ADDRESS_ONE)
 
@@ -456,9 +464,11 @@ class TestFIPA(UseOef):
             FETCHAI_ADDRESS_TWO, oef_addr="127.0.0.1", oef_port=10000,
         )
         cls.multiplexer1 = Multiplexer(
-            [cls.connection1], protocols=[DefaultMessage, FipaMessage]
+            [cls.connection1], protocols=[FipaMessage, DefaultMessage]
         )
-        cls.multiplexer2 = Multiplexer([cls.connection2], protocols=[FipaMessage])
+        cls.multiplexer2 = Multiplexer(
+            [cls.connection2], protocols=[FipaMessage, DefaultMessage]
+        )
         cls.multiplexer1.connect()
         cls.multiplexer2.connect()
 
@@ -803,7 +813,7 @@ class TestOefConnection(UseOef):
         connection = _make_oef_connection(
             FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
         )
-        multiplexer = Multiplexer([connection])
+        multiplexer = Multiplexer([connection], protocols=[FipaMessage, DefaultMessage])
         multiplexer.connect()
         multiplexer.disconnect()
 

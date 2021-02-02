@@ -125,10 +125,7 @@ class TestAEAToACA:
         )
         request_http_message.to = "ACA"
         request_envelope = Envelope(
-            to="ACA",
-            sender="AEA",
-            protocol_id=HttpMessage.protocol_id,
-            message=request_http_message,
+            to="ACA", sender="AEA", message=request_http_message,
         )
 
         try:
@@ -220,10 +217,7 @@ class TestAEAToACA:
         )
         request_http_message.to = "ACA"
         request_envelope = Envelope(
-            to="ACA",
-            sender="AEA",
-            protocol_id=HttpMessage.protocol_id,
-            message=request_http_message,
+            to="ACA", sender="AEA", message=request_http_message,
         )
 
         # add a simple skill with handler
