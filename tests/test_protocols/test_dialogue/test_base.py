@@ -918,16 +918,6 @@ class TestDialogueBase:
         assert str(cm.value) == "Dialogue label cannot be updated."
         assert self.dialogue.dialogue_label != new_label
 
-    def test_interleave(self):
-        """Test the '_interleave' method."""
-        list_1 = [1, 3, 5, 7]
-        list_2 = [2, 4, 6, 8]
-        assert Dialogue._interleave(list_1, list_2) == [1, 2, 3, 4, 5, 6, 7, 8]
-
-        list_3 = [1, 3, 4]
-        list_4 = [2]
-        assert Dialogue._interleave(list_3, list_4) == [1, 2, 3, 4]
-
     def test___str__1(self):
         """Test the '__str__' method: dialogue is self initiated"""
         self.dialogue._update(self.valid_message_1_by_self)
@@ -935,9 +925,7 @@ class TestDialogueBase:
 
         self.dialogue._update(self.valid_message_3_by_self)
 
-        dialogue_str = (
-            "Dialogue Label: 1__agent 2_agent 1\nbytes( )\nbytes( )\nbytes( )"
-        )
+        dialogue_str = "Dialogue Label:\n1__agent 2_agent 1\nMessages:\nmessage_id=1, target=0, performative=bytes\nmessage_id=-1, target=1, performative=bytes\nmessage_id=2, target=-1, performative=bytes\n"
 
         assert str(self.dialogue) == dialogue_str
 
@@ -977,9 +965,7 @@ class TestDialogueBase:
 
         self.dialogue_opponent_started._update(valid_message_3_by_other)
 
-        dialogue_str = (
-            "Dialogue Label: 1_1_agent 2_agent 2\nbytes( )\nbytes( )\nbytes( )"
-        )
+        dialogue_str = "Dialogue Label:\n1_1_agent 2_agent 2\nMessages:\nmessage_id=1, target=0, performative=bytes\nmessage_id=-1, target=1, performative=bytes\nmessage_id=2, target=-1, performative=bytes\n"
 
         assert str(self.dialogue_opponent_started) == dialogue_str
 
