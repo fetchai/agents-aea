@@ -19,7 +19,6 @@
 
 """This module contains the tests for the aea.configurations.base module."""
 import re
-import tempfile
 from copy import copy
 from pathlib import Path
 from unittest import TestCase, mock
