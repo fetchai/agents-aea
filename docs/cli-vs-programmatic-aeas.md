@@ -233,10 +233,7 @@ def run():
         api_key=API_KEY,
         soef_addr=SOEF_ADDR,
         soef_port=SOEF_PORT,
-        restricted_to_protocols={
-            OefSearchMessage.protocol_specification_id,
-            OefSearchMessage.protocol_id,
-        },
+        restricted_to_protocols={OefSearchMessage.protocol_id},
         connection_id=SOEFConnection.connection_id,
     )
     soef_connection = SOEFConnection(configuration=configuration, identity=identity)

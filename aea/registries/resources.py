@@ -109,7 +109,7 @@ class Resources:
         """
         self._component_registry.register(protocol.component_id, protocol)
         self._specification_to_protocol_id[
-            protocol.specification_id
+            protocol.protocol_specification_id
         ] = protocol.public_id
 
     def get_protocol(self, protocol_id: PublicId) -> Optional[Protocol]:
@@ -165,7 +165,7 @@ class Resources:
             ),
         )
         if protocol is not None:
-            self._specification_to_protocol_id.pop(protocol.specification_id)
+            self._specification_to_protocol_id.pop(protocol.protocol_specification_id)
 
     def add_contract(self, contract: Contract) -> None:
         """
