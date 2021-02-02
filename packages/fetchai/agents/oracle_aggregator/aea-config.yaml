@@ -1,0 +1,42 @@
+agent_name: oracle_aggregator
+author: fetchai
+version: 0.1.0
+description: AEA that aggregates oracle observations
+license: Apache-2.0
+aea_version: '>=0.9.0, <0.10.0'
+fingerprint: {}
+fingerprint_ignore_patterns: []
+connections:
+- fetchai/p2p_libp2p:0.14.0
+- fetchai/soef:0.15.0
+contracts: []
+protocols:
+- fetchai/consensus:0.1.0
+- fetchai/default:0.11.0
+- fetchai/oef_search:0.12.0
+- fetchai/state_update:0.9.0
+skills:
+- fetchai/error:0.11.0
+- fetchai/oracle_aggregation:0.1.0
+default_connection: fetchai/p2p_libp2p:0.14.0
+default_ledger: fetchai
+logging_config:
+  disable_existing_loggers: false
+  version: 1
+private_key_paths:
+  fetchai: fetchai_private_key.txt
+registry_path: ../packages
+default_routing:
+  fetchai/ledger_api:0.9.0: fetchai/ledger:0.12.0
+  fetchai/oef_search:0.12.0: fetchai/soef:0.15.0
+connection_private_key_paths:
+  fetchai: fetchai_connection_private_key.txt
+---
+public_id: fetchai/p2p_libp2p:0.14.0
+type: connection
+config:
+  delegate_uri: 127.0.0.1:11002
+  entry_peers:
+  - /dns4/127.0.0.1/tcp/9000/p2p/16Uiu2HAmLdwhwATwK5Pp1gUUVX8bmYcwMdb5bcRVXvLUVpv184zB
+  local_uri: 127.0.0.1:9002
+  public_uri: 127.0.0.1:9002
