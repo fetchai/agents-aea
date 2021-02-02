@@ -590,7 +590,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
             and protocol_id not in connection.restricted_to_protocols
         ):
             self.logger.warning(
-                f"Connection {connection.connection_id} does not support protocol {protocol_id} cause it's not in protocols list."
+                f"Connection {connection.connection_id} does not support protocol {protocol_id}. The connection is restricted to protocols in {connection.restricted_to_protocols}."
             )
             return False
 
