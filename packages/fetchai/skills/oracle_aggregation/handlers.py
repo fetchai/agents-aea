@@ -1,19 +1,39 @@
-import pprint
+# -*- coding: utf-8 -*-
+# ------------------------------------------------------------------------------
+#
+#   Copyright 2018-2019 Fetch.AI Limited
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+# ------------------------------------------------------------------------------
+
+"""This package contains the handlers for the oracle aggregation skill."""
+
 from typing import Optional, cast
 
 from aea.configurations.base import PublicId
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
+from packages.fetchai.protocols.consensus.message import ConsensusMessage
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.protocols.consensus.message import ConsensusMessage
 from packages.fetchai.skills.oracle_aggregation.dialogues import (
+    ConsensusDialogue,
+    ConsensusDialogues,
     DefaultDialogues,
     OefSearchDialogue,
     OefSearchDialogues,
-    ConsensusDialogue,
-    ConsensusDialogues,
 )
 from packages.fetchai.skills.oracle_aggregation.strategy import GenericStrategy
 
@@ -38,16 +58,18 @@ class GenericConsensusHandler(Handler):
 
         # recover dialogue
         consensus_dialogues = cast(ConsensusDialogues, self.context.consensus_dialogues)
-        consensus_dialogue = cast(ConsensusDialogue, consensus_dialogues.update(consensus_msg))
+        consensus_dialogue = cast(
+            ConsensusDialogue, consensus_dialogues.update(consensus_msg)
+        )
         if consensus_dialogue is None:
             self._handle_unidentified_dialogue(consensus_msg)
             return
 
         # handle message
         if consensus_msg.performative == ConsensusMessage.Performative.OBSERVATION:
-            self._handle_observation(consensus_msg, consensus_dialogue)
+            self._handle_observation(consensus_msg)
         elif consensus_msg.performative == ConsensusMessage.Performative.AGGREGATION:
-            self._handle_aggregation(consensus_msg, consensus_dialogue)
+            self._handle_aggregation(consensus_msg)
         else:
             self._handle_invalid(consensus_msg, consensus_dialogue)
 
@@ -66,7 +88,9 @@ class GenericConsensusHandler(Handler):
         :param consensus_msg: the message
         """
         self.context.logger.info(
-            "received invalid consensus message={}, unidentified dialogue.".format(consensus_msg)
+            "received invalid consensus message={}, unidentified dialogue.".format(
+                consensus_msg
+            )
         )
         default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
         default_msg, _ = default_dialogues.create(
@@ -78,7 +102,7 @@ class GenericConsensusHandler(Handler):
         )
         self.context.outbox.put_message(message=default_msg)
 
-    def _handle_observation(self, obs_msg: ConsensusMessage, consensus_dialogue: ConsensusDialogue) -> None:
+    def _handle_observation(self, obs_msg: ConsensusMessage) -> None:
         """
         Handle the observation.
 
@@ -102,16 +126,9 @@ class GenericConsensusHandler(Handler):
         strategy.add_observation(obs_msg.sender, obs)
         strategy.aggregate_observations()
 
-        self.context.logger.info(
-            f"observation: {obs}"
-        )
+        self.context.logger.info(f"observation: {obs}")
 
-        # decline_msg = consensus_dialogue.reply(
-        #     performative=ConsensusMessage.Performative.RESPONSE, target_message=obs_msg,
-        # )
-        # self.context.outbox.put_message(message=decline_msg)
-
-    def _handle_aggregation(self, consensus_msg: ConsensusMessage, consensus_dialogue: ConsensusDialogue) -> None:
+    def _handle_aggregation(self, consensus_msg: ConsensusMessage) -> None:
         """
         Handle the aggregation.
 
@@ -122,10 +139,6 @@ class GenericConsensusHandler(Handler):
         self.context.logger.info(
             "received aggregation from sender={}".format(consensus_msg.sender[-5:])
         )
-        # decline_msg = consensus_dialogue.reply(
-        #     performative=ConsensusMessage.Performative.RESPONSE, target_message=consensus_msg,
-        # )
-        # self.context.outbox.put_message(message=decline_msg)
 
     def _handle_invalid(
         self, consensus_msg: ConsensusMessage, consensus_dialogue: ConsensusDialogue

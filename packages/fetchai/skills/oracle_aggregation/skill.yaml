@@ -6,11 +6,11 @@ description: The skill for aggregating observations for oracle networks
 license: Apache-2.0
 aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
-  __init__.py: QmUZTY13utK14aoMxV2t34dCU1d5qzWoyBWPkcp9ytHKDo
-  behaviours.py: QmQWGNgXGiAo974rKU52PCBqyXad8py8TFXS1tZ6hYYnW4
-  dialogues.py: QmYJLgVDFLJ2JsvZmZJNYZRmyxDia5dtAkgwnayycKbRjW
-  handlers.py: QmRhZuAS4dyXTCqvbxqyLqPe6nevJjLWKCc1NhfKWGEpbe
-  strategy.py: QmcvPieRmZydA56yE4Jbdw1Y7TPDYpJn3ysDxhz6YdhTNm
+  __init__.py: QmPGxMBBZ8CRvLe3aiN8dTw62jj8PHWk3XJSRCqdk9TjBb
+  behaviours.py: QmSg3YDtQn1GijkVm3VcM7RJKh71XPuXJeiy86qkE6e4pa
+  dialogues.py: QmWwXSWWLgrw9Hwawym2g8CpmbS46detq2MWPrRU8eckne
+  handlers.py: QmcfYneKjLjQ6WZfab2md6TjnhHSe6XU4fDtbGq4mYqnpY
+  strategy.py: QmaihdgZ8QSNMiM7jHHFrMorxk9Dt1s2xf99RWHo1jKrUv
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/ledger:0.12.0
@@ -41,9 +41,6 @@ models:
   oef_search_dialogues:
     args: {}
     class_name: OefSearchDialogues
-  signing_dialogues:
-    args: {}
-    class_name: SigningDialogues
   strategy:
     args:
       location:

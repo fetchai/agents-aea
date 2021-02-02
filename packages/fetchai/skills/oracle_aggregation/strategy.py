@@ -1,18 +1,30 @@
-from typing import Any, Dict, Optional, Tuple, Set
+# -*- coding: utf-8 -*-
+# ------------------------------------------------------------------------------
+#
+#   Copyright 2018-2019 Fetch.AI Limited
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+# ------------------------------------------------------------------------------
 
-from time import time
+"""This package contains the strategy for the oracle aggregation skill."""
+
 from random import randint
+from time import time
+from typing import Any, Dict, Set, Tuple
 
 from aea.common import Address
 from aea.exceptions import enforce
-from aea.helpers.search.generic import SIMPLE_SERVICE_MODEL
-from aea.helpers.search.models import (
-    Constraint,
-    ConstraintType,
-    Description,
-    Location,
-    Query,
-)
 from aea.helpers.search.generic import (
     AGENT_LOCATION_MODEL,
     AGENT_PERSONALITY_MODEL,
@@ -20,7 +32,13 @@ from aea.helpers.search.generic import (
     AGENT_SET_SERVICE_MODEL,
     SIMPLE_SERVICE_MODEL,
 )
-from aea.helpers.transaction.base import Terms
+from aea.helpers.search.models import (
+    Constraint,
+    ConstraintType,
+    Description,
+    Location,
+    Query,
+)
 from aea.skills.base import Model
 
 
@@ -46,13 +64,13 @@ DEFAULT_ORACLE_REQUEST = {
     "trusted_sources": "all",
     "trusted_agents": "all",
     "reward": 0,
-    "agg_thresh": 2/3,
-    "sign_thresh": 2/3,
+    "agg_thresh": 2 / 3,
+    "sign_thresh": 2 / 3,
     "id": 0,
 }
 
 DEFAULT_OBSERVATION = {
-    "value": randint(0,10),
+    "value": randint(0, 10),
     "time": time(),
     "source": "source",
     "signature": "xxx",
@@ -83,10 +101,11 @@ class GenericStrategy(Model):
         }
         self._radius = kwargs.pop("search_radius", DEFAULT_SEARCH_RADIUS)
 
-        self._oracle_request = DEFAULT_ORACLE_REQUEST       
+        self._oracle_request = DEFAULT_ORACLE_REQUEST
         self._round = 0
         self._peers = {}
         self._observations = {}
+        self._aggregation = None
 
         self._set_personality_data = kwargs.pop(
             "personality_data", DEFAULT_PERSONALITY_DATA
@@ -239,7 +258,10 @@ class GenericStrategy(Model):
         :return: the query
         """
         close_to_my_service = Constraint(
-            "location", ConstraintType("distance", (self._agent_location["location"], self._radius))
+            "location",
+            ConstraintType(
+                "distance", (self._agent_location["location"], self._radius)
+            ),
         )
         service_key_filter = Constraint(
             self._search_query["search_key"],
@@ -267,9 +289,7 @@ class GenericStrategy(Model):
         query = Query([service_key_filter], model=SIMPLE_SERVICE_MODEL)
         return query
 
-    def add_peers(
-        self, found_peers: Tuple[str, ...]
-    ) -> Tuple[str, ...]:
+    def add_peers(self, found_peers: Tuple[str, ...]) -> Tuple[str, ...]:
         """
         Update registered peers with list found in search
 
@@ -278,12 +298,9 @@ class GenericStrategy(Model):
         for _, peer in enumerate(found_peers):
             self._peers.update({peer: {}})
 
-    def add_observation(
-        self, peer: Address, obs: Dict[str, Any]
-    ) -> None:
+    def add_observation(self, peer: Address, obs: Dict[str, Any]) -> None:
         """Add new observation to list of observations"""
         if peer in self._peers:
-            # TODO: verify observation and signature
             self._observations[peer] = obs
 
     def make_observation(self) -> None:
@@ -297,4 +314,3 @@ class GenericStrategy(Model):
         self._aggregation = sum(values) / len(values)
         self.context.logger.info(f"Observations: {values}")
         self.context.logger.info(f"Average: {self._aggregation}")
-

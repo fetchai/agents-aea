@@ -1,13 +1,39 @@
-from typing import Optional, Type
+# -*- coding: utf-8 -*-
+# ------------------------------------------------------------------------------
+#
+#   Copyright 2018-2019 Fetch.AI Limited
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+# ------------------------------------------------------------------------------
+
+"""This package contains the dialogues for the oracle aggregation skill."""
+
+from typing import Type
 
 from aea.common import Address
-from aea.exceptions import AEAEnforceError, enforce
-from aea.helpers.transaction.base import Terms
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.skills.base import Model
 
+from packages.fetchai.protocols.consensus.dialogues import (
+    ConsensusDialogue as BaseConsensusDialogue,
+)
+from packages.fetchai.protocols.consensus.dialogues import (
+    ConsensusDialogues as BaseConsensusDialogues,
+)
+from packages.fetchai.protocols.consensus.message import ConsensusMessage
 from packages.fetchai.protocols.default.dialogues import (
     DefaultDialogue as BaseDefaultDialogue,
 )
@@ -20,9 +46,6 @@ from packages.fetchai.protocols.oef_search.dialogues import (
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogues as BaseOefSearchDialogues,
 )
-from packages.fetchai.protocols.consensus.dialogues import ConsensusDialogue as BaseConsensusDialogue
-from packages.fetchai.protocols.consensus.dialogues import ConsensusDialogues as BaseConsensusDialogues
-from packages.fetchai.protocols.consensus.message import ConsensusMessage
 
 
 DefaultDialogue = BaseDefaultDialogue
@@ -56,6 +79,7 @@ class DefaultDialogues(Model, BaseDefaultDialogues):
             role_from_first_message=role_from_first_message,
         )
 
+
 class ConsensusDialogue(BaseConsensusDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
 
@@ -82,7 +106,6 @@ class ConsensusDialogue(BaseConsensusDialogue):
             role=role,
             message_class=message_class,
         )
-
 
 
 class ConsensusDialogues(Model, BaseConsensusDialogues):
