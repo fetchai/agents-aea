@@ -1,11 +1,11 @@
 AEA applications have different requirements for _trustlessness_ or _trust minimisation_.
 
-For example, using the AEA <a href="../weather-skills/">weather skills demo</a> without ledger payments means that clients must trust that any data the weather station sends is sufficient, including no data at all. Similarly, the weather station must trust the weather clients to send payment via some mechanism.
+For example, using the AEA <a href="../weather-skills/">weather skills demo</a> _without_ ledger payments means that the client has no way of validating the data it receives from the weather station (including no data at all) and so must accept anything the weather station sends. Similarly, the station must trust that the client somehow sends the payment amount that they agree.
 
-A step up, if you run the <a href="../weather-skills/">weather skills demo</a> with a ledger (e.g. Fetch.ai or Ethereum) then the clients must again trust the weather station to send sufficient data. However, all payment transactions are executed via the public ledger. This means the weather station no longer needs to trust the weather clients as it can observe the transactions taking place on the public ledger.
+A step up, if you run the <a href="../weather-skills/">weather skills demo</a> with a ledger (e.g. Fetch.ai or Ethereum) then the client must still trust that the weather station sends valid data. However, all payment transactions are executed via the public ledger. This means the weather station no longer needs to trust the client for payment and can verify whether the transactions take place on the public ledger.
 
-We can further minimise trust requirements by incorporating a third-party as an <a href="https://en.wikipedia.org/wiki/Escrow" target="_blank">arbitrator or escrow</a> implemented in a <a href="https://en.wikipedia.org/wiki/Smart_contract" target="_blank">smart contract</a>. However, in the weather skills demo there are limits to trustlessness as the station ultimately offers unverifiable data.
+We can further minimise trust requirements by incorporating a third party as an <a href="https://en.wikipedia.org/wiki/Escrow" target="_blank">arbitrator or escrow</a> implemented in a <a href="https://en.wikipedia.org/wiki/Smart_contract" target="_blank">smart contract</a> to further reduce trust requirements. However, in the current weather skills demo, there are limits to trustlessness as the station ultimately offers unverifiable data.
 
-Finally, in the case of (non-fungible) token transactions where there is an atomic swap, trustlessness is clearly satisfied (e.g. in the <a href="../tac-skills-contract/">TAC demo</a>).
+Another example of minimising trust, is applications with (non-fungible) token transactions involving <a href="https://dl.acm.org/doi/10.1145/3212734.3212736" target="_blank">atomic swaps</a> where trustlessness is clearly satisfied (e.g. in the <a href="../tac-skills-contract/">TAC demo</a>).
 
 <br />
