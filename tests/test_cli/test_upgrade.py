@@ -33,6 +33,7 @@ from click.exceptions import ClickException
 from click.testing import Result
 from packaging.version import Version
 
+import aea
 from aea import get_current_aea_version
 from aea.cli import cli
 from aea.cli.registry.utils import get_latest_version_available_in_registry
@@ -1184,7 +1185,7 @@ class TestUpgradeProjectWithNewerVersion(BaseTestUpgradeProject):
             self.current_agent_context, self.EXPECTED, ignore=ignore
         )
         _left_only, _right_only, diff = dircmp_recursive(dircmp)
-        assert diff == set()
+        assert diff == _left_only == _right_only == set()
 
 
 @mock.patch("aea.cli.upgrade.get_latest_version_available_in_registry")
@@ -1209,26 +1210,37 @@ class TestUpgradeProjectWithoutNewerVersion(BaseTestUpgradeProject):
         assert are_dirs_equal(self.current_agent_context, self.EXPECTED, ignore=ignore)
 
 
-"""
 @mock.patch.object(aea, "__version__", "0.8.0")
 class TestUpgradeAEACompatibility(BaseTestUpgradeProject):
-    "
+    """
     Test 'aea upgrade' takes into account the current aea version.
 
     The test works as follows:
-    "
+    """
 
     OLD_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.18.0")
     EXPECTED_NEW_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.19.0")
 
     def test_upgrade(self):
-        "Test upgrade."
+        """Test upgrade."""
         result = self.run_cli_command("upgrade", "--remote", "-y", cwd=self._get_cwd())
         assert result.exit_code == 0
 
         # compare with latest fetched agent.
         ignore = [DEFAULT_AEA_CONFIG_FILE] + filecmp.DEFAULT_IGNORES
-        dircmp = filecmp.dircmp(self.current_agent_context, self.EXPECTED, ignore=ignore)
+        dircmp = filecmp.dircmp(
+            self.current_agent_context, self.EXPECTED, ignore=ignore
+        )
         _left_only, _right_only, diff = dircmp_recursive(dircmp)
-        assert diff == set()
-"""
+        assert diff == _left_only == _right_only == set()
+
+        # compare agent configuration files (except the name)
+        expected_content = (
+            Path(self.EXPECTED, DEFAULT_AEA_CONFIG_FILE).read_text().splitlines()[1:]
+        )
+        actual_content = (
+            Path(self.current_agent_context, DEFAULT_AEA_CONFIG_FILE)
+            .read_text()
+            .splitlines()[1:]
+        )
+        assert expected_content == actual_content
