@@ -90,7 +90,7 @@ class CosmosHelper(Helper):
         try:
             res = [dic_["value"] for dic_ in tx_receipt["logs"][0]["events"][0]["attributes"] if dic_["key"] == "code_id"]  # type: ignore
             code_id = int(res[0])
-        except (KeyError, IndexError):
+        except (KeyError, IndexError):  # pragma: nocover
             code_id = None
         return code_id
 
@@ -106,7 +106,7 @@ class CosmosHelper(Helper):
         try:
             res = [dic_["value"] for dic_ in tx_receipt["logs"][0]["events"][0]["attributes"] if dic_["key"] == "contract_address"]  # type: ignore
             contract_address = res[0]
-        except (KeyError, IndexError):
+        except (KeyError, IndexError):  # pragma: nocover
             contract_address = None
         return contract_address
 

@@ -334,6 +334,9 @@ class TestProtocolFromDir:
         assert str(default_protocol.public_id) == str(
             DefaultMessage.protocol_id
         ), "Protocol not loaded correctly."
+        assert str(default_protocol.protocol_specification_id) == str(
+            DefaultMessage.protocol_specification_id
+        ), "Protocol not loaded correctly."
         assert default_protocol.serializer is not None
 
     @classmethod

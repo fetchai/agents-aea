@@ -300,9 +300,21 @@ class TestResources:
         )
         self.resources.add_component(cast(Protocol, a_protocol))
         assert self.resources.get_protocol(a_protocol.public_id) == a_protocol
+        assert (
+            self.resources.get_protocol_by_specification_id(
+                a_protocol.protocol_specification_id
+            )
+            == a_protocol
+        )
         # restore state
         self.resources.remove_protocol(a_protocol.public_id)
         assert self.resources.get_protocol(a_protocol.public_id) is None
+        assert (
+            self.resources.get_protocol_by_specification_id(
+                a_protocol.protocol_specification_id
+            )
+            is None
+        )
 
     def test_get_all_protocols(self):
         """Test get all protocols."""

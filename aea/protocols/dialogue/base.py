@@ -25,7 +25,6 @@ This module contains the classes required for dialogue management.
 - Dialogues: The dialogues class keeps track of all dialogues.
 """
 import inspect
-import itertools
 import secrets
 import sys
 from collections import defaultdict, namedtuple
@@ -353,6 +352,7 @@ class Dialogue(metaclass=_DialogueMeta):
         self._message_class = message_class
         self._terminal_state_callbacks: Set[Callable[["Dialogue"], None]] = set()
         self._last_message_id: Optional[int] = None
+        self._ordered_message_ids: List[int] = []
 
     def add_terminal_state_callback(self, fn: Callable[["Dialogue"], None]) -> None:
         """
@@ -371,6 +371,7 @@ class Dialogue(metaclass=_DialogueMeta):
             and self.message_class == other.message_class
             and self._incoming_messages == other._incoming_messages
             and self._outgoing_messages == other._outgoing_messages
+            and self._ordered_message_ids == other._ordered_message_ids
             and self.role == other.role
             and self.self_address == other.self_address
         )
@@ -383,6 +384,8 @@ class Dialogue(metaclass=_DialogueMeta):
             "role": self._role.value,
             "incoming_messages": [i.json() for i in self._incoming_messages],
             "outgoing_messages": [i.json() for i in self._outgoing_messages],
+            "last_message_id": self._last_message_id,
+            "ordered_message_ids": self._ordered_message_ids,
         }
         return data
 
@@ -408,6 +411,11 @@ class Dialogue(metaclass=_DialogueMeta):
             ]
             obj._outgoing_messages = [  # pylint: disable=protected-access
                 message_class.from_json(i) for i in data["outgoing_messages"]
+            ]
+            last_message_id = int(data["last_message_id"])
+            obj._last_message_id = last_message_id  # pylint: disable=protected-access
+            obj._ordered_message_ids = [  # pylint: disable=protected-access
+                int(el) for el in data["ordered_message_ids"]
             ]
             return obj
         except KeyError:  # pragma: nocover
@@ -626,6 +634,7 @@ class Dialogue(metaclass=_DialogueMeta):
             self._incoming_messages.append(message)
 
         self._last_message_id = message.message_id
+        self._ordered_message_ids.append(message.message_id)
 
         if message.performative in self.rules.terminal_performatives:
             for fn in self._terminal_state_callbacks:
@@ -859,7 +868,7 @@ class Dialogue(metaclass=_DialogueMeta):
 
         if abs(target) > max(latest_ids):
             return "Invalid target. Expected a value less than or equal to abs({}). Found abs({}).".format(
-                self._last_message_id, target
+                max(latest_ids), abs(target)
             )
 
         # detailed target check
@@ -969,37 +978,19 @@ class Dialogue(metaclass=_DialogueMeta):
         """
         return True, "The message passes custom validation."
 
-    @staticmethod
-    def _interleave(list_1, list_2) -> List:
-        all_elements = [
-            element
-            for element in itertools.chain(*itertools.zip_longest(list_1, list_2))
-            if element is not None
-        ]
-
-        return all_elements
-
     def __str__(self) -> str:
         """
         Get the string representation.
 
         :return: The string representation of the dialogue
         """
-        representation = "Dialogue Label: " + str(self.dialogue_label) + "\n"
+        representation = f"Dialogue Label:\n{self.dialogue_label}\nMessages:\n"
 
-        if self.is_self_initiated:
-            all_messages = self._interleave(
-                self._outgoing_messages, self._incoming_messages
-            )
-        else:
-            all_messages = self._interleave(
-                self._incoming_messages, self._outgoing_messages
-            )
-
-        for msg in all_messages:
-            representation += str(msg.performative) + "( )\n"
-
-        representation = representation[:-1]
+        for msg_id in self._ordered_message_ids:
+            msg = self.get_message_by_id(msg_id)
+            if msg is None:  # pragma: nocover
+                raise ValueError("Dialogue inconsistent! Missing message.")
+            representation += f"message_id={msg.message_id}, target={msg.target}, performative={msg.performative}\n"
         return representation
 
 
