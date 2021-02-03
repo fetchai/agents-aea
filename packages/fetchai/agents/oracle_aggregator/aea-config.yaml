@@ -14,6 +14,7 @@ protocols:
 - fetchai/consensus:0.1.0
 - fetchai/default:0.11.0
 - fetchai/oef_search:0.12.0
+- fetchai/signing:0.9.0
 - fetchai/state_update:0.9.0
 skills:
 - fetchai/error:0.11.0
