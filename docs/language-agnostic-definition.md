@@ -1,13 +1,13 @@
 Currently, there is an implementation of the AEA framework in Python which enables the development of AEAs in Python, and allows AEAs which are built with it to run.
 
-However, AEAs, by design, are not constrained by any technical requirement, including the choice of programming language. This is further backed by the idea that agent-based solutions are suited for multi-stakeholder environments where the different AEAs may be developed independently of one another, resulting in a heterogeneous system. 
+However, AEAs can be developed in different programming languages. This is further backed by the idea that agent-based solutions are suited for multi-stakeholder environments where the different AEAs may be developed independently of one another, resulting in heterogeneous systems. 
 
 This means that in principle, there could be different implementations of the AEA framework, in various programming languages and for different platforms. However, to ensure that AEAs under any implementation are compatible with one another and able to interact, they must satisfy specific definitions. In this page, we compile a set of definitions which any AEA independent of its implementation must satisfy in order to be able to interact with other AEAs.
 
-An Autonomous Economic Agent, in technical terms, must satisfy the following requirements:
+An AEA, in technical terms, must satisfy the following requirements:
 
 <ul>
-<li> It MUST be capable of receiving and sending <code>Envelopes</code> with the following <a href="https://developers.google.com/protocol-buffers" target="_blank">protobuf</a> schema:
+<li> It MUST be capable of receiving and sending <code>Envelopes</code> which satisfy the following <a href="https://developers.google.com/protocol-buffers" target="_blank">protobuf</a> schema:
 
 ``` proto
 syntax = "proto3";

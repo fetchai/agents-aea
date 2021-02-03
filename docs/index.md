@@ -25,7 +25,7 @@ An AEA represents an individual, organisation or object and looks after its inte
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>
-  <p>From now on, unless specified otherwise, we use the terms AEA and agent interchangeably to refer to AEA as defined above.</p>
+  <p>In the rest of the documentation, unless specified otherwise, we use the terms AEA and agent interchangeably to refer to AEA as defined above.</p>
 </div>
 
 ## What is the AEA Framework?

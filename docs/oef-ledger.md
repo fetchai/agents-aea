@@ -86,7 +86,7 @@ You can install the `svn` command with (`brew install subversion` or `sudo apt-g
 
 ## Ledgers
 
-Ledgers enable AEAs to complete transactions (for example, transfer funds between themselves, store states and commitments) and interact with smart contracts. They optionally ensure the truth and integrity of agent to agent interactions.
+Ledgers enable AEAs to store transactions, for example involving the transfer of funds to each other, or the execution of smart contracts. They optionally ensure the truth and integrity of agent to agent interactions.
 
 Whilst a ledger can, in principle, be used to store structured data (for instance, training data in a machine learning model) in most use cases the resulting costs and privacy implications do not make this an efficient use of the ledger. Instead, usually only references to structured data - often in the form of hashes - are stored on a ledger, and the actual data is stored off-chain.
 
