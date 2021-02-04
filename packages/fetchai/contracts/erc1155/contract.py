@@ -777,5 +777,5 @@ class ERC1155Contract(Contract):
         """
         if ledger_api.identifier in [CosmosCrypto.identifier, FetchAICrypto.identifier]:
             cosmos_api = cast(CosmosApi, ledger_api)
-            return cosmos_api.get_contract_address(code_id)
+            return cosmos_api.get_contract_address(code_id)  # type: ignore
         raise NotImplementedError
