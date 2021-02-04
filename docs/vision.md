@@ -1,11 +1,10 @@
-The AEA framework has two commercial roles which are outlined below.
-
+Our vision is that the AEA framework enables businesses of all sizes, from single independent developers to large corporations and consortiums, to create and deploy agent-based solutions in different domains, thus contributing to and advancing a decentralized agent economy as envisaged by Fetch.ai.
 
 ## Open source technology for everyone
 
 We are creating infrastructure for developers to build their own agent-based solutions. 
 
-AEA users are, among others:
+AEA users include, amongst others:
 
 * Data scientists
 * Economists
@@ -17,13 +16,4 @@ AEA users are, among others:
 * Crypto connoisseurs and enthusiasts
 * Web developers
 
-
-## Decentralised agent economy for businesses
-
-We envisage the AEA framework to be used by businesses of all sizes to deploy multi-agent solutions into the decentralized agent economy cultivated by Fetch.ai.
-
-With start up grants we kick start solutions while testing product-market fit and identifying our user base.
-
-
 <br />
-

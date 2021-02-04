@@ -1,4 +1,10 @@
-An Autonomous Economic Agent is, in technical terms, defined by the following characteristics:
+Currently, there is an implementation of the AEA framework in Python which enables the development of AEAs in Python, and allows AEAs which are built with it to run.
+
+However, AEAs can be developed in different programming languages. This is further backed by the idea that agent-based solutions are suited for multi-stakeholder environments where the different AEAs may be developed independently of one another, resulting in heterogeneous systems. 
+
+This means that in principle, there could be different implementations of the AEA framework, in various programming languages and for different platforms. However, to ensure that AEAs under any implementation are compatible with one another and able to interact, they must satisfy specific definitions. In this page, we compile a set of definitions which any AEA independent of its implementation must satisfy in order to be able to interact with other AEAs.
+
+An AEA, in technical terms, must satisfy the following requirements:
 
 <ul>
 <li> It MUST be capable of receiving and sending <code>Envelopes</code> which satisfy the following <a href="https://developers.google.com/protocol-buffers" target="_blank">protobuf</a> schema:
@@ -17,13 +23,13 @@ message Envelope{
 }
 ```
 
-The format for the above fields, except <code>message</code>, is specified below.
+The format for the above fields are as follows:
 
 <ul>
 <li><code>to</code> and <code>sender</code>: an address derived from the private key of a <a href="https://en.bitcoin.it/wiki/Secp256k1" target="_blank">secp256k1</a>-compatible elliptic curve</li>
 <li><code>protocol_id</code>: this must match a defined  <a href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference" target="_blank">regular expression</a> (see below)
 <li><code>message</code>: a bytes string representing a serialized message in the specified  <a href="../protocol">protocol</a></li>
-<li><code>URI</code>: <a href="https://tools.ietf.org/html/rfc3986" target="_blank">this syntax</a></li>
+<li><code>URI</code>: follows <a href="https://tools.ietf.org/html/rfc3986" target="_blank">this syntax</a></li>
 </ul>
 </li>
 
