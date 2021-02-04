@@ -19,7 +19,7 @@
 
 """This package contains the handlers for the oracle aggregation skill."""
 
-from typing import Optional, cast
+from typing import Any, Dict, Optional, cast
 
 from aea.configurations.base import PublicId
 from aea.protocols.base import Message
@@ -102,6 +102,16 @@ class GenericConsensusHandler(Handler):
         )
         self.context.outbox.put_message(message=default_msg)
 
+    def get_observation_from_message(self, obs_msg: ConsensusMessage) -> Dict[str, Any]:
+        """Extract the observation from an observation message"""
+        obs = {
+            "value": obs_msg.value,
+            "time": obs_msg.time,
+            "source": obs_msg.source,
+            "signature": obs_msg.signature,
+        }
+        return obs
+
     def _handle_observation(self, obs_msg: ConsensusMessage) -> None:
         """
         Handle the observation.
@@ -116,12 +126,7 @@ class GenericConsensusHandler(Handler):
         )
 
         strategy = cast(GenericStrategy, self.context.strategy)
-        obs = {
-            "value": obs_msg.value,
-            "time": obs_msg.time,
-            "source": obs_msg.source,
-            "signature": obs_msg.signature,
-        }
+        obs = self.get_observation_from_message(obs_msg)
 
         strategy.add_observation(obs_msg.sender, obs)
         strategy.aggregate_observations()
@@ -252,14 +257,12 @@ class GenericOefSearchHandler(Handler):
         )
         consensus_dialogues = cast(ConsensusDialogues, self.context.consensus_dialogues)
         strategy.add_peers(oef_search_msg.agents)
+        obs = strategy.observation
         for counterparty in strategy.peers:
             obs_msg, _ = consensus_dialogues.create(
                 counterparty=counterparty,
                 performative=ConsensusMessage.Performative.OBSERVATION,
-                value=1,
-                time=1,
-                source="source",
-                signature="sign",
+                **obs,
             )
             self.context.outbox.put_message(message=obs_msg)
             self.context.logger.info(

@@ -7,10 +7,10 @@ license: Apache-2.0
 aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
   __init__.py: QmPGxMBBZ8CRvLe3aiN8dTw62jj8PHWk3XJSRCqdk9TjBb
-  behaviours.py: QmSg3YDtQn1GijkVm3VcM7RJKh71XPuXJeiy86qkE6e4pa
+  behaviours.py: QmTAybpt7aVJh5Y4GtgC64KnveVYLCF1VBFCiYbSmJM551
   dialogues.py: QmWwXSWWLgrw9Hwawym2g8CpmbS46detq2MWPrRU8eckne
-  handlers.py: QmcfYneKjLjQ6WZfab2md6TjnhHSe6XU4fDtbGq4mYqnpY
-  strategy.py: QmaihdgZ8QSNMiM7jHHFrMorxk9Dt1s2xf99RWHo1jKrUv
+  handlers.py: QmWGuSDjUWnHJV6BmdVjJV5bsjCaS38mqyoiKEs4nF43ZF
+  strategy.py: QmcNHcN3T6ctmZzxsenhygLs8FHdBrpCsZRK3uwniRUePv
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
@@ -46,10 +46,10 @@ models:
         longitude: 0.127
       search_query:
         constraint_type: ==
-        search_key: generic_service
-        search_value: generic_service
+        search_key: service
+        search_value: oracle_aggregation
       search_radius: 5.0
-      service_id: generic_service
+      service_id: oracle_aggregation
     class_name: GenericStrategy
 dependencies: {}
 is_abstract: false

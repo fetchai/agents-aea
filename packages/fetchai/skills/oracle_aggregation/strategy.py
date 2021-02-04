@@ -48,14 +48,14 @@ DEFAULT_SERVICE_ID = "generic_service"
 
 DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
 DEFAULT_SEARCH_QUERY = {
-    "search_key": "seller_service",
-    "search_value": "generic_service",
+    "search_key": "service",
+    "search_value": "oracle_aggregation",
     "constraint_type": "==",
 }
 DEFAULT_SEARCH_RADIUS = 5.0
-DEFAULT_SERVICE_DATA = {"key": "seller_service", "value": "generic_service"}
+DEFAULT_SERVICE_DATA = {"key": "service", "value": "oracle_aggregation"}
 DEFAULT_PERSONALITY_DATA = {"piece": "genus", "value": "data"}
-DEFAULT_CLASSIFICATION = {"piece": "classification", "value": "seller"}
+DEFAULT_CLASSIFICATION = {"piece": "classification", "value": "agent"}
 
 DEFAULT_ORACLE_REQUEST = {
     "quantity": "price-fetchai-usd",
@@ -71,7 +71,7 @@ DEFAULT_ORACLE_REQUEST = {
 
 DEFAULT_OBSERVATION = {
     "value": randint(0, 10),
-    "time": time(),
+    "time": int(time()),
     "source": "source",
     "signature": "xxx",
 }
@@ -171,14 +171,10 @@ class GenericStrategy(Model):
         self._is_searching = is_searching
 
     @property
-    def balance(self) -> int:
-        """Get the balance."""
-        return self._balance
-
-    @balance.setter
-    def balance(self, balance: int) -> None:
-        """Set the balance."""
-        self._balance = balance
+    def observation(self) -> Dict[str, Any]:
+        """Get latest observation"""
+        my_address = self.context.agent_addresses[self._ledger_id]
+        return self._observations.get(my_address, None)
 
     @property
     def peers(self) -> Set[str]:

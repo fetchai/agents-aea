@@ -43,10 +43,8 @@ class GenericSearchBehaviour(TickerBehaviour):
 
     def setup(self) -> None:
         """Implement the setup for the behaviour."""
-        strategy = cast(GenericStrategy, self.context.strategy)
         self._register_agent()
         self._register_service_personality_classification()
-        strategy.make_observation()
 
     def act(self) -> None:
         """
@@ -55,7 +53,7 @@ class GenericSearchBehaviour(TickerBehaviour):
         :return: None
         """
         strategy = cast(GenericStrategy, self.context.strategy)
-
+        strategy.make_observation()
         if strategy.is_searching:
             query = strategy.get_location_and_service_query()
             oef_search_dialogues = cast(
