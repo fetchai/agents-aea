@@ -653,6 +653,7 @@ class TestAeaExceptionPolicy:
         try:
             assert self.handler_called >= 2
         finally:
+            self.aea.stop()
             t.join()
 
     def test_handle_propagate(self) -> None:
@@ -695,6 +696,7 @@ class TestAeaExceptionPolicy:
             assert self.aea.is_running
             assert patched.call_count == 2
         finally:
+            self.aea.stop()
             t.join()
 
     def test_act_propagate(self) -> None:
@@ -734,6 +736,7 @@ class TestAeaExceptionPolicy:
             assert self.aea.is_running
             assert patched.call_count > 1
         finally:
+            self.aea.stop()
             t.join()
 
     def test_act_bad_policy(self) -> None:
