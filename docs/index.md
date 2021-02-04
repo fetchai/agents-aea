@@ -23,6 +23,10 @@ An AEA represents an individual, organisation or object and looks after its inte
 * <a href="https://en.wikipedia.org/wiki/Smart_contract" target="_blank">Smart contracts</a> which do not display any proactiveness and are purely reactive to external requests (=contract calls and transactions). 
 * <a href="https://en.wikipedia.org/wiki/Artificial_general_intelligence" target="_blank">Artificial General Intelligence (AGI)</a>. AEAs can have a very narrow, goal directed focus involving some economic gain and can have a very simple logic.
 
+<div class="admonition note">
+  <p class="admonition-title">Note</p>
+  <p>In the rest of the documentation, unless specified otherwise, we use the terms AEA and agent interchangeably to refer to AEA as defined above.</p>
+</div>
 
 ## What is the AEA Framework?
 

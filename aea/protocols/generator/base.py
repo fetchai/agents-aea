@@ -1962,7 +1962,9 @@ class ProtocolGenerator:
             protolint_base_cmd = "PATH=${PATH}:${GOPATH}/bin/:~/go/bin protolint"
 
         if call(f"{protolint_base_cmd} version", shell=True) != 0:  # nosec
-            raise ValueError("protolint is not installed!")
+            raise ValueError(
+                "protolint is not installed! Please install from https://github.com/yoheimuta/protolint."
+            )
 
         cmd = f'{protolint_base_cmd} lint -fix "{filepath}"'
         call(cmd, shell=True)  # nosec
