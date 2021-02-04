@@ -202,7 +202,6 @@ class Agent(AbstractAgent, WithLogger):
 
         - increment the tick,
         - call to act(),
-        - sleep for specified timeout,
         - call to react(),
         - call to update().
 
@@ -237,7 +236,7 @@ class Agent(AbstractAgent, WithLogger):
 
         :return: RuntimeStates
         """
-        return self._runtime.state
+        return self.runtime.state
 
     def get_periodic_tasks(
         self,

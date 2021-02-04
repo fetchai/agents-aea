@@ -87,7 +87,7 @@ class BaseRuntime(Runnable, WithLogger):
         self._storage: Optional[Storage] = self._get_storage(agent)
 
         self._loop_mode = loop_mode or self.DEFAULT_RUN_LOOP
-        self.main_loop: BaseAgentLoop = self._get_main_loop_instance(self._loop_mode)
+        self._agent_loop: BaseAgentLoop = self._get_agent_loop_instance(self._loop_mode)
 
     @staticmethod
     def _get_storage(agent) -> Optional[Storage]:
@@ -118,6 +118,11 @@ class BaseRuntime(Runnable, WithLogger):
         return self._loop
 
     @property
+    def agent_loop(self) -> BaseAgentLoop:
+        """Get the agent loop."""
+        return self._agent_loop
+
+    @property
     def multiplexer(self) -> AsyncMultiplexer:
         """Get multiplexer."""
         return self._multiplexer
@@ -135,13 +140,13 @@ class BaseRuntime(Runnable, WithLogger):
             default_connection=multiplexer_options.get("default_connection"),
         )
 
-    def _get_main_loop_class(self, loop_mode: str) -> Type[BaseAgentLoop]:
+    def _get_agent_loop_class(self, loop_mode: str) -> Type[BaseAgentLoop]:
         """
-        Get main loop class based on loop mode.
+        Get agent loop class based on loop mode.
 
         :param: loop_mode: str.
 
-        :return: MainLoop class
+        :return: AgentLoop class
         """
         if loop_mode not in self.RUN_LOOPS:  # pragma: nocover
             raise ValueError(
@@ -165,15 +170,15 @@ class BaseRuntime(Runnable, WithLogger):
             decision_maker_handler=decision_maker_handler
         )
 
-    def _get_main_loop_instance(self, loop_mode: str) -> BaseAgentLoop:
+    def _get_agent_loop_instance(self, loop_mode: str) -> BaseAgentLoop:
         """
-        Construct main loop instance.
+        Construct agent loop instance.
 
         :param: loop_mode: str.
 
         :return: AgentLoop instance
         """
-        loop_cls = self._get_main_loop_class(loop_mode)
+        loop_cls = self._get_agent_loop_class(loop_mode)
         return loop_cls(self._agent)
 
     def _log_runtime_state(self, state) -> None:
@@ -284,9 +289,9 @@ class AsyncRuntime(BaseRuntime):
         Tear down the agent..
         Disconnect multiplexer.
         """
-        self.main_loop.stop()
+        self.agent_loop.stop()
         with suppress(_StopRuntime):
-            await self.main_loop.wait_completed()
+            await self.agent_loop.wait_completed()
         self._teardown()
 
         if self._storage is not None:
@@ -335,13 +340,13 @@ class AsyncRuntime(BaseRuntime):
         self.logger.debug("[{}] Calling setup method...".format(self._agent.name))
         self._agent.setup()
         self.logger.debug("[{}] Run main loop...".format(self._agent.name))
-        self.main_loop.start()
+        self.agent_loop.start()
         self._state.set(RuntimeStates.running)
         try:
-            await self.main_loop.wait_completed()
+            await self.agent_loop.wait_completed()
         except asyncio.CancelledError:
-            self.main_loop.stop()
-            await self.main_loop.wait_completed()
+            self.agent_loop.stop()
+            await self.agent_loop.wait_completed()
             raise
 
 

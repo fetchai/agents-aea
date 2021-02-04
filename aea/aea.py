@@ -203,7 +203,7 @@ class AEA(Agent):
             default_routing,
             search_service_address,
             decision_maker_handler.self_address,
-            storage_callable=lambda: self._runtime.storage,
+            storage_callable=lambda: self.runtime.storage,
             build_dir=self.get_build_dir(),
             **kwargs,
         )
@@ -339,7 +339,7 @@ class AEA(Agent):
     def _setup_loggers(self):
         """Set up logger with agent name."""
         for element in [
-            self.runtime.main_loop,
+            self.runtime.agent_loop,
             self.runtime.multiplexer,
             self.runtime.task_manager,
             self.resources.component_registry,
