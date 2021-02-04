@@ -23,7 +23,7 @@ import logging
 import random
 from typing import Dict, List, Optional, cast
 
-from cosmos_crypto import CosmosCrypto
+from cosmos_crypto import CosmosApi, CosmosCrypto
 from ethereum_crypto import EthereumCrypto
 from fetchai_crypto import FetchAICrypto
 from vyper.utils import keccak256
@@ -119,8 +119,8 @@ class ERC1155Contract(Contract):
             msg = {
                 "create_batch": {"item_owner": str(deployer_address), "tokens": tokens}
             }
-            cosmos_api = ledger_api
-            tx = cosmos_api.get_handle_transaction(  # type: ignore
+            cosmos_api = cast(CosmosApi, ledger_api)
+            tx = cosmos_api.get_handle_transaction(
                 deployer_address, contract_address, msg, amount=0, tx_fee=0, gas=gas
             )
             return tx
@@ -169,8 +169,8 @@ class ERC1155Contract(Contract):
                     "path": str(data),
                 }
             }
-            cosmos_api = ledger_api
-            tx = cosmos_api.get_handle_transaction(  # type: ignore
+            cosmos_api = cast(CosmosApi, ledger_api)
+            tx = cosmos_api.get_handle_transaction(
                 deployer_address, contract_address, msg, amount=0, tx_fee=0, gas=gas
             )
             return tx
@@ -228,8 +228,8 @@ class ERC1155Contract(Contract):
                     "tokens": tokens,
                 }
             }
-            cosmos_api = ledger_api
-            tx = cosmos_api.get_handle_transaction(  # type: ignore
+            cosmos_api = cast(CosmosApi, ledger_api)
+            tx = cosmos_api.get_handle_transaction(
                 deployer_address, contract_address, msg, amount=0, tx_fee=0, gas=gas
             )
             return tx
@@ -318,8 +318,8 @@ class ERC1155Contract(Contract):
                     "data": str(data),
                 }
             }
-            cosmos_api = ledger_api
-            tx = cosmos_api.get_handle_transaction(  # type: ignore
+            cosmos_api = cast(CosmosApi, ledger_api)
+            tx = cosmos_api.get_handle_transaction(
                 deployer_address, contract_address, msg, amount=0, tx_fee=0, gas=gas
             )
             return tx
@@ -348,11 +348,11 @@ class ERC1155Contract(Contract):
             result = {token_id: balance}
             return {"balance": result}
         if ledger_api.identifier in [CosmosCrypto.identifier, FetchAICrypto.identifier]:
-            cosmos_api = ledger_api
+            cosmos_api = cast(CosmosApi, ledger_api)
             msg: JSONLike = {
                 "balance": {"address": str(agent_address), "id": str(token_id)}
             }
-            query_res = cosmos_api.execute_contract_query(contract_address, msg)  # type: ignore
+            query_res = cosmos_api.execute_contract_query(contract_address, msg)
             if query_res is None:
                 raise ValueError("call to contract returned None")
             # Convert {"balance": balance: str} balances to Dict[token_id: int, balance: int]
@@ -451,8 +451,8 @@ class ERC1155Contract(Contract):
 
             msg: JSONLike = {"balance_batch": {"addresses": tokens}}
 
-            cosmos_api = ledger_api
-            query_res = cosmos_api.execute_contract_query(contract_address, msg)  # type: ignore
+            cosmos_api = cast(CosmosApi, ledger_api)
+            query_res = cosmos_api.execute_contract_query(contract_address, msg)
             # Convert List[balances: str] balances to Dict[token_id: int, balance: int]
             if query_res is None:
                 raise ValueError("call to contract returned None")
@@ -761,8 +761,8 @@ class ERC1155Contract(Contract):
         :return: code id of last deployed .wasm bytecode
         """
         if ledger_api.identifier in [CosmosCrypto.identifier, FetchAICrypto.identifier]:
-            cosmos_api = ledger_api
-            return cosmos_api.get_last_code_id()  # type: ignore
+            cosmos_api = cast(CosmosApi, ledger_api)
+            return cosmos_api.get_last_code_id()
         raise NotImplementedError
 
     @staticmethod
@@ -776,6 +776,6 @@ class ERC1155Contract(Contract):
         :return: contract address of last initialised contract
         """
         if ledger_api.identifier in [CosmosCrypto.identifier, FetchAICrypto.identifier]:
-            cosmos_api = ledger_api
-            return cosmos_api.get_contract_address(code_id)  # type: ignore
+            cosmos_api = cast(CosmosApi, ledger_api)
+            return cosmos_api.get_contract_address(code_id)
         raise NotImplementedError
