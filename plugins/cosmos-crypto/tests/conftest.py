@@ -23,19 +23,11 @@ import os
 
 from cosmos_crypto import CosmosCrypto
 
-from aea.configurations.constants import PRIVATE_KEY_PATH_SCHEMA
-
 
 CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 ROOT_DIR = os.path.join(CUR_PATH, "..")
 MAX_FLAKY_RERUNS = 3
 COSMOS = CosmosCrypto.identifier
-
-COSMOS_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(COSMOS)
-
-COSMOS_PRIVATE_KEY_PATH = os.path.join(
-    ROOT_DIR, "tests", "data", COSMOS_PRIVATE_KEY_FILE
-)
 
 COSMOS_DEFAULT_ADDRESS = "INVALID_URL"
 COSMOS_DEFAULT_CURRENCY_DENOM = "INVALID_CURRENCY_DENOM"

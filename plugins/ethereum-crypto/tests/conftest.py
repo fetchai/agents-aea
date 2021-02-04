@@ -22,6 +22,8 @@ import inspect
 import logging
 import os
 import platform
+import shutil
+import tempfile
 import time
 from functools import wraps
 from pathlib import Path
@@ -42,10 +44,6 @@ MAX_FLAKY_RERUNS = 3
 ETHEREUM = EthereumCrypto.identifier
 
 ETHEREUM_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(ETHEREUM)
-
-ETHEREUM_PRIVATE_KEY_PATH = os.path.join(
-    ROOT_DIR, "tests", "data", ETHEREUM_PRIVATE_KEY_FILE
-)
 
 ETHEREUM_DEFAULT_ADDRESS = "http://127.0.0.1:8545"
 ETHEREUM_DEFAULT_CHAIN_ID = 1337
@@ -133,6 +131,19 @@ def action_for_platform(platform_name: str, skip: bool = True) -> Callable:
 
 
 @pytest.fixture(scope="session")
+def ethereum_private_key_file():
+    """Pytest fixture to create a temporary Ethereum private key file."""
+    crypto = EthereumCrypto()
+    temp_dir = Path(tempfile.mkdtemp())
+    try:
+        temp_file = temp_dir / "private.key"
+        temp_file.write_text(crypto.private_key)
+        yield str(temp_file)
+    finally:
+        shutil.rmtree(temp_dir)
+
+
+@pytest.fixture(scope="session")
 def ethereum_testnet_config(ganache_addr, ganache_port):
     """Get Ethereum ledger api configurations using Ganache."""
     new_uri = f"{ganache_addr}:{ganache_port}"
@@ -157,14 +168,14 @@ def ganache_port() -> int:
 
 
 @pytest.fixture(scope="session")
-def ganache_configuration():
+def ganache_configuration(ethereum_private_key_file):
     """Get the Ganache configuration for testing purposes."""
     return dict(
         accounts_balances=[
             (FUNDED_ETH_PRIVATE_KEY_1, DEFAULT_AMOUNT),
             (FUNDED_ETH_PRIVATE_KEY_2, DEFAULT_AMOUNT),
             (FUNDED_ETH_PRIVATE_KEY_3, DEFAULT_AMOUNT),
-            (Path(ETHEREUM_PRIVATE_KEY_PATH).read_text().strip(), DEFAULT_AMOUNT),
+            (Path(ethereum_private_key_file).read_text().strip(), DEFAULT_AMOUNT),
         ],
     )
 

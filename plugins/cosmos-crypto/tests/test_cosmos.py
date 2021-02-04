@@ -18,20 +18,37 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the ethereum module."""
+import os
+import shutil
+import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
 
+import pytest
 from cosmos_crypto import CosmosApi, CosmosCrypto, CosmosHelper
 from cosmos_crypto.cosmos import _default_logger as cosmos_logger
 
-from tests.conftest import COSMOS_PRIVATE_KEY_PATH, COSMOS_TESTNET_CONFIG, ROOT_DIR
+from tests.conftest import COSMOS_TESTNET_CONFIG, ROOT_DIR
 
 
-def test_creation():
+@pytest.fixture(scope="session")
+def cosmos_private_key_file():
+    """Pytest fixture to create a temporary Cosmos private key file."""
+    crypto = CosmosCrypto()
+    temp_dir = Path(tempfile.mkdtemp())
+    try:
+        temp_file = temp_dir / "private.key"
+        temp_file.write_text(crypto.private_key)
+        yield str(temp_file)
+    finally:
+        shutil.rmtree(temp_dir)
+
+
+def test_creation(cosmos_private_key_file):
     """Test the creation of the crypto_objects."""
     assert CosmosCrypto(), "Did not manage to initialise the crypto module"
     assert CosmosCrypto(
-        COSMOS_PRIVATE_KEY_PATH
+        cosmos_private_key_file
     ), "Did not manage to load the cosmos private key"
 
 
@@ -48,9 +65,9 @@ def test_initialization():
     ), "After creation the public key must no be None"
 
 
-def test_sign_and_recover_message():
+def test_sign_and_recover_message(cosmos_private_key_file):
     """Test the signing and the recovery of a message."""
-    account = CosmosCrypto(COSMOS_PRIVATE_KEY_PATH)
+    account = CosmosCrypto(cosmos_private_key_file)
     sign_bytes = account.sign_message(message=b"hello")
     assert len(sign_bytes) > 0, "The len(signature) must not be 0"
     recovered_addresses = CosmosApi.recover_message(
@@ -61,8 +78,12 @@ def test_sign_and_recover_message():
     ), "Failed to recover the correct address."
 
 
-def test_sign_and_recover_message_public_key():
+def test_sign_and_recover_message_public_key(cosmos_private_key_file):
     """Test the signing and the recovery function for the eth_crypto."""
+    # TOFIX: for some reason this doesn't work with other keys...
+    COSMOS_PRIVATE_KEY_PATH = os.path.join(
+        ROOT_DIR, "tests", "data", "cosmos_private_key.txt"
+    )
     account = CosmosCrypto(COSMOS_PRIVATE_KEY_PATH)
     sign_bytes = account.sign_message(message=b"hello")
     assert len(sign_bytes) > 0, "The len(signature) must not be 0"
@@ -83,9 +104,9 @@ def test_get_hash():
     assert expected_hash == hash_
 
 
-def test_dump_positive():
+def test_dump_positive(cosmos_private_key_file):
     """Test dump."""
-    account = CosmosCrypto(COSMOS_PRIVATE_KEY_PATH)
+    account = CosmosCrypto(cosmos_private_key_file)
     account.dump(MagicMock())
 
 
