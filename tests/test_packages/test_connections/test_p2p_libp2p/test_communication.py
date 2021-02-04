@@ -25,8 +25,9 @@ import tempfile
 from unittest.mock import Mock
 
 import pytest
+from ethereum_crypto import EthereumCrypto
+from fetchai_crypto import FetchAICrypto
 
-from aea.crypto.ledger_apis import ETHEREUM, FETCHAI
 from aea.crypto.registries import make_crypto
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
@@ -81,7 +82,7 @@ class TestP2PLibp2pConnectionConnectDisconnect:
     @pytest.mark.asyncio
     async def test_p2plibp2pconnection_connect_disconnect_ethereum(self):
         """Test connect then disconnect."""
-        crypto = make_crypto(ETHEREUM)
+        crypto = make_crypto(EthereumCrypto.identifier)
         connection = _make_libp2p_connection(agent_key=crypto)
 
         assert connection.is_connected is False
@@ -120,8 +121,8 @@ class TestP2PLibp2pConnectionEchoEnvelope:
         cls.log_files = []
         cls.multiplexers = []
 
-        fetchai_crypto = make_crypto(FETCHAI)
-        ethereum_crypto = make_crypto(ETHEREUM)
+        fetchai_crypto = make_crypto(FetchAICrypto.identifier)
+        ethereum_crypto = make_crypto(EthereumCrypto.identifier)
 
         try:
             cls.connection1 = _make_libp2p_connection(

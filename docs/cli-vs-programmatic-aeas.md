@@ -80,10 +80,11 @@ import os
 import sys
 from typing import cast
 
+from fetchai_crypto import FetchAICrypto
+
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import ConnectionConfig
-from aea.configurations.constants import FETCHAI
 from aea.crypto.helpers import (
     PRIVATE_KEY_PATH_SCHEMA,
     create_private_key,
@@ -111,7 +112,7 @@ SOEF_PORT = 9002
 ENTRY_PEER_ADDRESS = (
     "/dns4/127.0.0.1/tcp/9000/p2p/16Uiu2HAmLBCAqHL8SuFosyDhAKYsLKXBZBWXBsB9oFw2qU4Kckun"
 )
-FETCHAI_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(FETCHAI)
+FETCHAI_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifier)
 FETCHAI_PRIVATE_KEY_FILE_CONNECTION = PRIVATE_KEY_PATH_SCHEMA.format(
     "fetchai_connection"
 )
@@ -125,15 +126,19 @@ def run():
     """Run demo."""
 
     # Create a private key
-    create_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
-    create_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
+    create_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
+    create_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
 
     # Set up the wallet, identity and (empty) resources
     wallet = Wallet(
-        private_key_paths={FETCHAI: FETCHAI_PRIVATE_KEY_FILE},
-        connection_private_key_paths={FETCHAI: FETCHAI_PRIVATE_KEY_FILE_CONNECTION},
+        private_key_paths={FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_FILE},
+        connection_private_key_paths={
+            FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        },
     )
-    identity = Identity("my_aea", address=wallet.addresses.get(FETCHAI))
+    identity = Identity(
+        "my_aea", address=wallet.addresses.get(FetchAICrypto.identifier)
+    )
     resources = Resources()
 
     # specify the default routing for some protocols
@@ -189,15 +194,17 @@ def run():
     cert_path = ".certs/conn_cert.txt"
     cert_request = CertRequest(
         identifier="acn",
-        ledger_id=FETCHAI,
+        ledger_id=FetchAICrypto.identifier,
         not_after="2022-01-01",
         not_before="2021-01-01",
         public_key="fetchai",
         save_path=cert_path,
     )
-    public_key = wallet.connection_cryptos.public_keys.get(FETCHAI)
+    public_key = wallet.connection_cryptos.public_keys.get(FetchAICrypto.identifier)
     message = cert_request.get_message(public_key)
-    make_certificate(FETCHAI, FETCHAI_PRIVATE_KEY_FILE, message, cert_path)
+    make_certificate(
+        FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE, message, cert_path
+    )
     configuration = ConnectionConfig(
         connection_id=P2PLibp2pConnection.connection_id,
         delegate_uri="127.0.0.1:11001",

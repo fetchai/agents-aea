@@ -21,13 +21,13 @@
 from random import uniform
 
 import pytest
+from fetchai_crypto import FetchAICrypto
 
 from aea.test_tools.test_cases import AEATestCaseMany
 
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
 from tests.conftest import (
-    FETCHAI,
     FETCHAI_PRIVATE_KEY_FILE,
     FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
     MAX_FLAKY_RERUNS_INTEGRATION,
@@ -79,17 +79,21 @@ class TestThermometerSkill(AEATestCaseMany):
         self.run_install()
 
         # add keys
-        self.generate_private_key(FETCHAI)
-        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.generate_private_key(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        )
+        self.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+            connection=True,
         )
         self.replace_private_key_in_file(
             NON_FUNDED_FETCHAI_PRIVATE_KEY_1, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
         )
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.set_config(setting_path, FETCHAI)
+        self.set_config(setting_path, FetchAICrypto.identifier)
 
         # replace location
         setting_path = "vendor.fetchai.skills.thermometer.models.strategy.args.location"
@@ -112,11 +116,15 @@ class TestThermometerSkill(AEATestCaseMany):
         self.run_install()
 
         # add keys
-        self.generate_private_key(FETCHAI)
-        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.generate_private_key(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        )
+        self.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+            connection=True,
         )
 
         # set p2p configs
@@ -258,17 +266,21 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
         ), "Difference between created and fetched project for files={}".format(diff)
 
         # add keys
-        self.generate_private_key(FETCHAI)
-        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.generate_private_key(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        )
+        self.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+            connection=True,
         )
         self.replace_private_key_in_file(
             NON_FUNDED_FETCHAI_PRIVATE_KEY_1, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
         )
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.set_config(setting_path, FETCHAI)
+        self.set_config(setting_path, FetchAICrypto.identifier)
 
         # replace location
         setting_path = "vendor.fetchai.skills.thermometer.models.strategy.args.location"
@@ -294,15 +306,19 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
         ), "Difference between created and fetched project for files={}".format(diff)
 
         # add keys
-        self.generate_private_key(FETCHAI)
-        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.generate_private_key(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        )
+        self.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+            connection=True,
         )
 
         # fund key
-        self.generate_wealth(FETCHAI)
+        self.generate_wealth(FetchAICrypto.identifier)
 
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"

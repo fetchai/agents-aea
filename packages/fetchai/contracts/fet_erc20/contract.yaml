@@ -14,4 +14,5 @@ fingerprint_ignore_patterns:
 class_name: FetERC20
 contract_interface_paths:
   ethereum: build/FetERC20Mock.json
-dependencies: {}
+dependencies:
+  ethereum_crypto: {}

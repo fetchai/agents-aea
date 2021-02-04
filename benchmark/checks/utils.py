@@ -37,10 +37,10 @@ from aea.configurations.base import ConnectionConfig, PublicId, SkillConfig
 from aea.configurations.constants import (
     DEFAULT_LEDGER,
     DEFAULT_PROTOCOL,
-    FETCHAI,
     PACKAGES,
     PROTOCOLS,
     SKILLS,
+    _FETCHAI_IDENTIFIER,
 )
 from aea.connections.base import Connection, ConnectionStates
 from aea.crypto.wallet import Wallet
@@ -79,7 +79,7 @@ def make_agent(agent_name="my_agent", runtime_mode="threaded") -> AEA:
 
     resources.add_skill(
         Skill.from_dir(
-            str(PACKAGES_DIR / FETCHAI / SKILLS / ERROR_SKILL_NAME),
+            str(PACKAGES_DIR / _FETCHAI_IDENTIFIER / SKILLS / ERROR_SKILL_NAME),
             agent_context=agent_context,
         )
     )
@@ -87,7 +87,7 @@ def make_agent(agent_name="my_agent", runtime_mode="threaded") -> AEA:
         Protocol.from_dir(
             str(
                 PACKAGES_DIR
-                / FETCHAI
+                / _FETCHAI_IDENTIFIER
                 / PROTOCOLS
                 / PublicId.from_str(DEFAULT_PROTOCOL).name
             )

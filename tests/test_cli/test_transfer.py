@@ -24,10 +24,11 @@ from unittest.mock import patch
 
 import pytest
 from click.exceptions import ClickException
+from cosmos_crypto import CosmosCrypto
+from fetchai_crypto import FetchAICrypto
 
 from aea.cli.transfer import wait_tx_settled
 from aea.cli.utils.package_utils import get_wallet_from_agent_config, try_get_balance
-from aea.configurations.constants import COSMOS, FETCHAI
 from aea.configurations.manager import AgentConfigManager
 from aea.crypto.helpers import private_key_verify_or_create
 from aea.helpers.base import cd
@@ -40,8 +41,8 @@ from tests.conftest import MAX_FLAKY_RERUNS
 class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
     """Test cli transfer command."""
 
-    LEDGER_ID = FETCHAI
-    ANOTHER_LEDGER_ID = COSMOS
+    LEDGER_ID = FetchAICrypto.identifier
+    ANOTHER_LEDGER_ID = CosmosCrypto.identifier
 
     @classmethod
     def setup_class(cls):

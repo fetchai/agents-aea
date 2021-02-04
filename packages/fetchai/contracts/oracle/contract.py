@@ -22,11 +22,11 @@
 import logging
 from typing import Any, Dict
 
+from ethereum_crypto import EthereumCrypto
 from vyper.utils import keccak256
 
 from aea.common import Address, JSONLike
 from aea.configurations.base import PublicId
-from aea.configurations.constants import ETHEREUM
 from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
 
@@ -57,7 +57,7 @@ class FetchOracleContract(Contract):
         :param gas: the gas limit
         :return: the transaction object
         """
-        if ledger_api.identifier == ETHEREUM:
+        if ledger_api.identifier == EthereumCrypto.identifier:
             nonce = ledger_api.api.eth.getTransactionCount(oracle_address)
             instance = cls.get_instance(ledger_api, contract_address)
             tx = instance.functions.grantRole(
@@ -93,7 +93,7 @@ class FetchOracleContract(Contract):
         :param update_args: the arguments to the contract's update function.
         :return: None
         """
-        if ledger_api.identifier == ETHEREUM:
+        if ledger_api.identifier == EthereumCrypto.identifier:
             nonce = ledger_api.api.eth.getTransactionCount(oracle_address)
             instance = cls.get_instance(ledger_api, contract_address)
             function = getattr(instance.functions, update_function)

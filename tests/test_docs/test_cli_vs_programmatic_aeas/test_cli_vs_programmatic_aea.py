@@ -25,6 +25,7 @@ from pathlib import Path
 from random import uniform
 
 import pytest
+from fetchai_crypto import FetchAICrypto
 
 from aea.test_tools.test_cases import AEATestCaseMany
 
@@ -32,7 +33,6 @@ from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_ME
 
 from tests.conftest import (
     CUR_PATH,
-    FETCHAI,
     FETCHAI_PRIVATE_KEY_FILE,
     FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
     MAX_FLAKY_RERUNS_INTEGRATION,
@@ -77,11 +77,15 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         self.run_install()
 
         # add non-funded key
-        self.generate_private_key(FETCHAI)
-        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.generate_private_key(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        )
+        self.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+            connection=True,
         )
         self.replace_private_key_in_file(
             NON_FUNDED_FETCHAI_PRIVATE_KEY_1, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
@@ -175,7 +179,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         """Inject location into the weather client strategy."""
         file = Path(dst_file_path)
         lines = file.read_text().splitlines()
-        line_insertion_position = 203  # line below: `strategy._is_ledger_tx = False`
+        line_insertion_position = 207  # line below: `strategy._is_ledger_tx = False`
         lines.insert(
             line_insertion_position,
             "    from packages.fetchai.skills.generic_buyer.strategy import Location",

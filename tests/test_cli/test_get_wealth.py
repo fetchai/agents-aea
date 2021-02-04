@@ -20,10 +20,12 @@
 
 from unittest import TestCase, mock
 
+from fetchai_crypto import FetchAICrypto
+
 from aea.cli import cli
 from aea.cli.get_wealth import _try_get_wealth
 
-from tests.conftest import CLI_LOG_OPTION, CliRunner, FETCHAI
+from tests.conftest import CLI_LOG_OPTION, CliRunner
 from tests.test_cli.tools_for_testing import ContextMock
 
 
@@ -54,7 +56,12 @@ class GetWealthCommandTestCase(TestCase):
         """Test for CLI get_wealth positive result."""
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "--skip-consistency-check", "get-wealth", FETCHAI],
+            [
+                *CLI_LOG_OPTION,
+                "--skip-consistency-check",
+                "get-wealth",
+                FetchAICrypto.identifier,
+            ],
             standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)

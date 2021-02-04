@@ -24,12 +24,14 @@ import string
 from unittest import mock
 
 import pytest
+from cosmos_crypto import CosmosCrypto
+from ethereum_crypto import EthereumCrypto
+from fetchai_crypto import FetchAICrypto
 
 import aea.crypto
 from aea.crypto.registries.base import EntryPoint
 from aea.exceptions import AEAException
 
-from tests.conftest import COSMOS, ETHEREUM, FETCHAI
 from tests.data.custom_crypto import CustomCrypto
 
 
@@ -42,30 +44,30 @@ forbidden_special_characters = "".join(
 
 def test_make_fetchai():
     """Test the 'make' method for 'fetchai' crypto."""
-    fetchai_crypto = aea.crypto.registries.make_crypto(FETCHAI)
+    fetchai_crypto = aea.crypto.registries.make_crypto(FetchAICrypto.identifier)
 
     # calling 'make' again will give a different object.
-    fetchai_crypto_1 = aea.crypto.registries.make_crypto(FETCHAI)
+    fetchai_crypto_1 = aea.crypto.registries.make_crypto(FetchAICrypto.identifier)
     assert type(fetchai_crypto) == type(fetchai_crypto_1)
     assert fetchai_crypto.address != fetchai_crypto_1
 
 
 def test_make_ethereum():
     """Test the 'make' method for 'ethereum' crypto."""
-    ethereum_crypto = aea.crypto.registries.make_crypto(ETHEREUM)
+    ethereum_crypto = aea.crypto.registries.make_crypto(EthereumCrypto.identifier)
 
     # calling 'make' again will give a different object.
-    ethereum_crypto_1 = aea.crypto.registries.make_crypto(ETHEREUM)
+    ethereum_crypto_1 = aea.crypto.registries.make_crypto(EthereumCrypto.identifier)
     assert type(ethereum_crypto) == type(ethereum_crypto_1)
     assert ethereum_crypto.address != ethereum_crypto_1.address
 
 
 def test_make_cosmos():
     """Test the 'make' method for 'cosmos' crypto."""
-    cosmos_crypto = aea.crypto.registries.make_crypto(COSMOS)
+    cosmos_crypto = aea.crypto.registries.make_crypto(CosmosCrypto.identifier)
 
     # calling 'make' again will give a different object.
-    cosmos_crypto_1 = aea.crypto.registries.make_crypto(COSMOS)
+    cosmos_crypto_1 = aea.crypto.registries.make_crypto(CosmosCrypto.identifier)
     assert type(cosmos_crypto) == type(cosmos_crypto_1)
     assert cosmos_crypto.address != cosmos_crypto_1.address
 

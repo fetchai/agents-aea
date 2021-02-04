@@ -23,17 +23,15 @@ import logging
 from unittest import mock
 
 import pytest
+from cosmos_crypto import CosmosCrypto
+from ethereum_crypto import EthereumCrypto
+from fetchai_crypto import FetchAICrypto
 
-from aea.configurations.constants import DEFAULT_LEDGER, ETHEREUM, FETCHAI
+from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.ledger_apis import LedgerApis
 from aea.exceptions import AEAEnforceError
 
-from tests.conftest import (
-    COSMOS,
-    COSMOS_ADDRESS_ONE,
-    ETHEREUM_ADDRESS_ONE,
-    FETCHAI_ADDRESS_ONE,
-)
+from tests.conftest import COSMOS_ADDRESS_ONE, ETHEREUM_ADDRESS_ONE, FETCHAI_ADDRESS_ONE
 
 
 logger = logging.getLogger(__name__)
@@ -46,12 +44,12 @@ def _raise_exception(*args, **kwargs):
 def test_initialisation():
     """Test the initialisation of the ledger APIs."""
     ledger_apis = LedgerApis
-    assert ledger_apis.has_ledger(FETCHAI)
-    assert type(LedgerApis.get_api(FETCHAI)).__name__ == "FetchAIApi"
-    assert LedgerApis.has_ledger(ETHEREUM)
-    assert type(LedgerApis.get_api(ETHEREUM)).__name__ == "EthereumApi"
-    assert LedgerApis.has_ledger(COSMOS)
-    assert type(LedgerApis.get_api(COSMOS)).__name__ == "CosmosApi"
+    assert ledger_apis.has_ledger(FetchAICrypto.identifier)
+    assert type(LedgerApis.get_api(FetchAICrypto.identifier)).__name__ == "FetchAIApi"
+    assert LedgerApis.has_ledger(EthereumCrypto.identifier)
+    assert type(LedgerApis.get_api(EthereumCrypto.identifier)).__name__ == "EthereumApi"
+    assert LedgerApis.has_ledger(CosmosCrypto.identifier)
+    assert type(LedgerApis.get_api(CosmosCrypto.identifier)).__name__ == "CosmosApi"
     with pytest.raises(AEAEnforceError):
         ledger_apis.get_api("UNKNOWN")
 
@@ -67,7 +65,9 @@ class TestLedgerApis:
     def test_get_balance(self):
         """Test the get_balance."""
         with mock.patch("ethereum_crypto.EthereumApi.get_balance", return_value=10):
-            balance = self.ledger_apis.get_balance(ETHEREUM, ETHEREUM_ADDRESS_ONE)
+            balance = self.ledger_apis.get_balance(
+                EthereumCrypto.identifier, ETHEREUM_ADDRESS_ONE
+            )
             assert balance == 10
 
     def test_get_transfer_transaction(self):
@@ -77,7 +77,7 @@ class TestLedgerApis:
             return_value="mock_transaction",
         ):
             tx = self.ledger_apis.get_transfer_transaction(
-                identifier=COSMOS,
+                identifier=CosmosCrypto.identifier,
                 sender_address="sender_address",
                 destination_address=COSMOS_ADDRESS_ONE,
                 amount=10,
@@ -93,7 +93,7 @@ class TestLedgerApis:
             return_value="mock_transaction_digest",
         ):
             tx_digest = self.ledger_apis.send_signed_transaction(
-                identifier=COSMOS, tx_signed="signed_transaction",
+                identifier=CosmosCrypto.identifier, tx_signed="signed_transaction",
             )
             assert tx_digest == "mock_transaction_digest"
 
@@ -104,7 +104,7 @@ class TestLedgerApis:
             return_value="mock_transaction_receipt",
         ):
             tx_receipt = self.ledger_apis.get_transaction_receipt(
-                identifier=COSMOS, tx_digest="tx_digest",
+                identifier=CosmosCrypto.identifier, tx_digest="tx_digest",
             )
             assert tx_receipt == "mock_transaction_receipt"
 
@@ -114,7 +114,7 @@ class TestLedgerApis:
             "cosmos_crypto.CosmosApi.get_transaction", return_value="mock_transaction",
         ):
             tx = self.ledger_apis.get_transaction(
-                identifier=COSMOS, tx_digest="tx_digest",
+                identifier=CosmosCrypto.identifier, tx_digest="tx_digest",
             )
             assert tx == "mock_transaction"
 
@@ -124,7 +124,7 @@ class TestLedgerApis:
             "cosmos_crypto.CosmosApi.is_transaction_settled", return_value=True,
         ):
             is_settled = self.ledger_apis.is_transaction_settled(
-                identifier=COSMOS, tx_receipt="tx_receipt",
+                identifier=CosmosCrypto.identifier, tx_receipt="tx_receipt",
             )
             assert is_settled
 
@@ -134,7 +134,7 @@ class TestLedgerApis:
             "cosmos_crypto.CosmosApi.is_transaction_valid", return_value=True,
         ):
             is_valid = self.ledger_apis.is_transaction_valid(
-                identifier=COSMOS,
+                identifier=CosmosCrypto.identifier,
                 tx="tx",
                 seller="seller",
                 client="client",
@@ -150,7 +150,9 @@ class TestLedgerApis:
             "cosmos_crypto.CosmosApi.recover_message", return_value=expected_addresses,
         ):
             addresses = self.ledger_apis.recover_message(
-                identifier=COSMOS, message="message", signature="signature",
+                identifier=CosmosCrypto.identifier,
+                message="message",
+                signature="signature",
             )
             assert addresses == expected_addresses
 
@@ -160,17 +162,21 @@ class TestLedgerApis:
         with mock.patch(
             "cosmos_crypto.CosmosApi.get_hash", return_value=expected_hash,
         ):
-            hash_ = self.ledger_apis.get_hash(identifier=COSMOS, message=b"message",)
+            hash_ = self.ledger_apis.get_hash(
+                identifier=CosmosCrypto.identifier, message=b"message",
+            )
             assert hash_ == expected_hash
 
     def test_generate_tx_nonce_positive(self):
         """Test generate_tx_nonce positive result."""
-        result = LedgerApis.generate_tx_nonce(COSMOS, "seller", "client")
+        result = LedgerApis.generate_tx_nonce(
+            CosmosCrypto.identifier, "seller", "client"
+        )
         assert int(result, 16)
 
 
 def test_is_valid_address():
     """Test LedgerApis.is_valid_address."""
     assert LedgerApis.is_valid_address(DEFAULT_LEDGER, FETCHAI_ADDRESS_ONE)
-    assert LedgerApis.is_valid_address(ETHEREUM, ETHEREUM_ADDRESS_ONE)
-    assert LedgerApis.is_valid_address(COSMOS, COSMOS_ADDRESS_ONE)
+    assert LedgerApis.is_valid_address(EthereumCrypto.identifier, ETHEREUM_ADDRESS_ONE)
+    assert LedgerApis.is_valid_address(CosmosCrypto.identifier, COSMOS_ADDRESS_ONE)

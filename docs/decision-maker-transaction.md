@@ -8,10 +8,12 @@ import time
 from threading import Thread
 from typing import Optional, cast
 
+from fetchai_crypto import FetchAICrypto
+
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import PublicId, SkillConfig
 from aea.crypto.helpers import create_private_key
-from aea.crypto.ledger_apis import FETCHAI, LedgerApis
+from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.helpers.transaction.base import RawTransaction, Terms
 from aea.identity.base import Identity
@@ -39,7 +41,9 @@ To have access to the decision-maker, which is responsible for signing transacti
 
 ``` python
     # Create a private key
-    create_private_key(FETCHAI, private_key_file=FETCHAI_PRIVATE_KEY_FILE_1)
+    create_private_key(
+        FetchAICrypto.identifier, private_key_file=FETCHAI_PRIVATE_KEY_FILE_1
+    )
 
     # Instantiate the builder and build the AEA
     # By default, the default protocol, error skill and stub connection are added
@@ -47,7 +51,7 @@ To have access to the decision-maker, which is responsible for signing transacti
 
     builder.set_name("my_aea")
 
-    builder.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_1)
+    builder.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_1)
 
     # Create our AEA
     my_aea = builder.build()
@@ -81,14 +85,17 @@ Add a simple skill with a signing handler and the signing dialogues.
 
 ## Create a second identity
 ``` python
-    create_private_key(FETCHAI, private_key_file=FETCHAI_PRIVATE_KEY_FILE_2)
+    # create a second identity
+    create_private_key(
+        FetchAICrypto.identifier, private_key_file=FETCHAI_PRIVATE_KEY_FILE_2
+    )
 
-    counterparty_wallet = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE_2})
+    counterparty_wallet = Wallet({FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_FILE_2})
 
     counterparty_identity = Identity(
         name="counterparty_aea",
         addresses=counterparty_wallet.addresses,
-        default_address_key=FETCHAI,
+        default_address_key=FetchAICrypto.identifier,
     )
 ```
 
@@ -98,7 +105,7 @@ Next, we are creating the signing message and we send it to the decision-maker.
 ``` python
     # create signing message for decision maker to sign
     terms = Terms(
-        ledger_id=FETCHAI,
+        ledger_id=FetchAICrypto.identifier,
         sender_address=my_aea.identity.address,
         counterparty_address=counterparty_identity.address,
         amount_by_currency_id={"FET": -1},
@@ -118,7 +125,7 @@ Next, we are creating the signing message and we send it to the decision-maker.
     signing_msg = SigningMessage(
         performative=SigningMessage.Performative.SIGN_TRANSACTION,
         dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
-        raw_transaction=RawTransaction(FETCHAI, stub_transaction),
+        raw_transaction=RawTransaction(FetchAICrypto.identifier, stub_transaction),
         terms=terms,
     )
     signing_dialogue = cast(
@@ -295,10 +302,12 @@ import time
 from threading import Thread
 from typing import Optional, cast
 
+from fetchai_crypto import FetchAICrypto
+
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import PublicId, SkillConfig
 from aea.crypto.helpers import create_private_key
-from aea.crypto.ledger_apis import FETCHAI, LedgerApis
+from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.helpers.transaction.base import RawTransaction, Terms
 from aea.identity.base import Identity
@@ -324,7 +333,9 @@ def run():
     """Run demo."""
 
     # Create a private key
-    create_private_key(FETCHAI, private_key_file=FETCHAI_PRIVATE_KEY_FILE_1)
+    create_private_key(
+        FetchAICrypto.identifier, private_key_file=FETCHAI_PRIVATE_KEY_FILE_1
+    )
 
     # Instantiate the builder and build the AEA
     # By default, the default protocol, error skill and stub connection are added
@@ -332,7 +343,7 @@ def run():
 
     builder.set_name("my_aea")
 
-    builder.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_1)
+    builder.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_1)
 
     # Create our AEA
     my_aea = builder.build()
@@ -358,19 +369,21 @@ def run():
     my_aea.resources.add_skill(simple_skill)
 
     # create a second identity
-    create_private_key(FETCHAI, private_key_file=FETCHAI_PRIVATE_KEY_FILE_2)
+    create_private_key(
+        FetchAICrypto.identifier, private_key_file=FETCHAI_PRIVATE_KEY_FILE_2
+    )
 
-    counterparty_wallet = Wallet({FETCHAI: FETCHAI_PRIVATE_KEY_FILE_2})
+    counterparty_wallet = Wallet({FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_FILE_2})
 
     counterparty_identity = Identity(
         name="counterparty_aea",
         addresses=counterparty_wallet.addresses,
-        default_address_key=FETCHAI,
+        default_address_key=FetchAICrypto.identifier,
     )
 
     # create signing message for decision maker to sign
     terms = Terms(
-        ledger_id=FETCHAI,
+        ledger_id=FetchAICrypto.identifier,
         sender_address=my_aea.identity.address,
         counterparty_address=counterparty_identity.address,
         amount_by_currency_id={"FET": -1},
@@ -390,7 +403,7 @@ def run():
     signing_msg = SigningMessage(
         performative=SigningMessage.Performative.SIGN_TRANSACTION,
         dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
-        raw_transaction=RawTransaction(FETCHAI, stub_transaction),
+        raw_transaction=RawTransaction(FetchAICrypto.identifier, stub_transaction),
         terms=terms,
     )
     signing_dialogue = cast(

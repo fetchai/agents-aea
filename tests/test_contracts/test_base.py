@@ -27,6 +27,8 @@ from unittest.mock import patch
 
 import pytest
 import web3
+from ethereum_crypto import EthereumCrypto
+from fetchai_crypto import FetchAICrypto
 
 from aea.configurations.base import ComponentType, ContractConfig
 from aea.configurations.loader import load_component_configuration
@@ -37,7 +39,7 @@ from aea.crypto.ledger_apis import ETHEREUM_DEFAULT_ADDRESS, FETCHAI_DEFAULT_ADD
 from aea.crypto.registries import crypto_registry, ledger_apis_registry
 from aea.exceptions import AEAComponentLoadException
 
-from tests.conftest import ETHEREUM, FETCHAI, ROOT_DIR, make_uri
+from tests.conftest import ROOT_DIR, make_uri
 
 
 logger = logging.getLogger(__name__)
@@ -132,7 +134,9 @@ def dummy_contract(request):
 
 def test_get_instance_no_address_ethereum(dummy_contract):
     """Tests get instance method with no address for ethereum."""
-    ledger_api = ledger_apis_registry.make(ETHEREUM, address=ETHEREUM_DEFAULT_ADDRESS,)
+    ledger_api = ledger_apis_registry.make(
+        EthereumCrypto.identifier, address=ETHEREUM_DEFAULT_ADDRESS,
+    )
     instance = dummy_contract.get_instance(ledger_api)
     assert type(instance) == web3._utils.datatypes.PropertyCheckingFactory
 
@@ -143,9 +147,9 @@ def test_get_deploy_transaction_ethereum(
     dummy_contract, ganache_addr, ganache_port, ganache
 ):
     """Tests the deploy transaction classmethod for ethereum."""
-    ethereum_crypto = crypto_registry.make(ETHEREUM)
+    ethereum_crypto = crypto_registry.make(EthereumCrypto.identifier)
     ledger_api = ledger_apis_registry.make(
-        ETHEREUM, address=make_uri(ganache_addr, ganache_port)
+        EthereumCrypto.identifier, address=make_uri(ganache_addr, ganache_port)
     )
     with patch(
         "web3.contract.ContractConstructor.buildTransaction",
@@ -163,15 +167,19 @@ def test_get_deploy_transaction_ethereum(
 
 def test_get_instance_no_address_cosmwasm(dummy_contract):
     """Tests get instance method with no address for fetchai."""
-    ledger_api = ledger_apis_registry.make(FETCHAI, address=FETCHAI_DEFAULT_ADDRESS,)
+    ledger_api = ledger_apis_registry.make(
+        FetchAICrypto.identifier, address=FETCHAI_DEFAULT_ADDRESS,
+    )
     instance = dummy_contract.get_instance(ledger_api)
     assert instance is None
 
 
 def test_get_deploy_transaction_cosmwasm(dummy_contract):
     """Tests the deploy transaction classmethod for fetchai."""
-    fetchai_crypto = crypto_registry.make(FETCHAI)
-    ledger_api = ledger_apis_registry.make(FETCHAI, address=FETCHAI_DEFAULT_ADDRESS,)
+    fetchai_crypto = crypto_registry.make(FetchAICrypto.identifier)
+    ledger_api = ledger_apis_registry.make(
+        FetchAICrypto.identifier, address=FETCHAI_DEFAULT_ADDRESS,
+    )
     deploy_tx = dummy_contract.get_deploy_transaction(
         ledger_api, fetchai_crypto.address
     )

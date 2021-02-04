@@ -25,6 +25,7 @@ from pathlib import Path
 from random import uniform
 
 import pytest
+from fetchai_crypto import FetchAICrypto
 
 from aea import AEA_DIR
 from aea.configurations.base import DEFAULT_VERSION
@@ -34,7 +35,6 @@ from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_ME
 
 from tests.conftest import (
     AUTHOR,
-    FETCHAI,
     FETCHAI_PRIVATE_KEY_FILE,
     FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
     MAX_FLAKY_RERUNS_INTEGRATION,
@@ -84,17 +84,21 @@ class TestBuildSkill(AEATestCaseMany):
         )
         self.set_agent_context(simple_service_registration_aea)
         # add non-funded key
-        self.generate_private_key(FETCHAI)
-        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.generate_private_key(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        )
+        self.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+            connection=True,
         )
         self.replace_private_key_in_file(
             NON_FUNDED_FETCHAI_PRIVATE_KEY_1, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
         )
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.set_config(setting_path, FETCHAI)
+        self.set_config(setting_path, FetchAICrypto.identifier)
 
         default_routing = {
             "fetchai/oef_search:0.12.0": "fetchai/soef:0.15.0",
@@ -153,15 +157,19 @@ class TestBuildSkill(AEATestCaseMany):
         self.fingerprint_item("skill", skill_id)
 
         # add keys
-        self.generate_private_key(FETCHAI)
-        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.generate_private_key(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        )
+        self.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+            connection=True,
         )
 
         # fund key
-        self.generate_wealth(FETCHAI)
+        self.generate_wealth(FetchAICrypto.identifier)
 
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"

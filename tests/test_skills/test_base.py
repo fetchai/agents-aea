@@ -25,6 +25,8 @@ from unittest import TestCase, mock
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
+from ethereum_crypto import EthereumCrypto
+from fetchai_crypto import FetchAICrypto
 
 import aea
 from aea.aea import AEA
@@ -50,9 +52,7 @@ from aea.skills.base import (
 )
 
 from tests.conftest import (
-    ETHEREUM,
     ETHEREUM_PRIVATE_KEY_PATH,
-    FETCHAI,
     FETCHAI_PRIVATE_KEY_PATH,
     ROOT_DIR,
     _make_dummy_connection,
@@ -66,13 +66,18 @@ class TestSkillContext:
     def setup_class(cls):
         """Test the initialisation of the AEA."""
         cls.wallet = Wallet(
-            {FETCHAI: FETCHAI_PRIVATE_KEY_PATH, ETHEREUM: ETHEREUM_PRIVATE_KEY_PATH}
+            {
+                FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_PATH,
+                EthereumCrypto.identifier: ETHEREUM_PRIVATE_KEY_PATH,
+            }
         )
         cls.connection = _make_dummy_connection()
         resources = Resources()
         resources.add_connection(cls.connection)
         cls.identity = Identity(
-            "name", addresses=cls.wallet.addresses, default_address_key=FETCHAI,
+            "name",
+            addresses=cls.wallet.addresses,
+            default_address_key=FetchAICrypto.identifier,
         )
         cls.my_aea = AEA(cls.identity, cls.wallet, resources=resources)
 

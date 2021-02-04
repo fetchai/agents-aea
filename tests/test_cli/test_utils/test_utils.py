@@ -26,6 +26,7 @@ from unittest.mock import MagicMock
 
 import pytest
 from click import BadParameter, ClickException, UsageError
+from fetchai_crypto import FetchAICrypto
 from jsonschema import ValidationError
 from yaml import YAMLError
 
@@ -68,7 +69,6 @@ from aea.crypto.wallet import Wallet
 from aea.helpers.base import cd
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
-from tests.conftest import FETCHAI
 from tests.test_cli.tools_for_testing import (
     ConfigLoaderMock,
     ContextMock,
@@ -406,11 +406,11 @@ class TryGetBalanceTestCase(TestCase):
     def test_try_get_balance_positive(self):
         """Test for try_get_balance method positive result."""
         agent_config = mock.Mock()
-        agent_config.default_ledger_config = FETCHAI
+        agent_config.default_ledger_config = FetchAICrypto.identifier
 
         wallet_mock = mock.Mock()
-        wallet_mock.addresses = {FETCHAI: "some-adress"}
-        try_get_balance(agent_config, wallet_mock, FETCHAI)
+        wallet_mock.addresses = {FetchAICrypto.identifier: "some-adress"}
+        try_get_balance(agent_config, wallet_mock, FetchAICrypto.identifier)
 
 
 @mock.patch("aea.cli.utils.generic.os.path.exists", return_value=True)

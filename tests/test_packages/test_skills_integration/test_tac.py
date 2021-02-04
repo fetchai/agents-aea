@@ -24,15 +24,15 @@ import uuid
 from random import uniform
 
 import pytest
+from ethereum_crypto import EthereumCrypto
+from fetchai_crypto import FetchAICrypto
 
 from aea.test_tools.test_cases import AEATestCaseMany
 
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
 from tests.conftest import (
-    ETHEREUM,
     ETHEREUM_PRIVATE_KEY_FILE,
-    FETCHAI,
     FETCHAI_PRIVATE_KEY_FILE,
     FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
     FUNDED_ETH_PRIVATE_KEY_1,
@@ -90,7 +90,7 @@ class TestTacSkills(AEATestCaseMany):
         self.add_item("connection", "fetchai/soef:0.15.0")
         self.remove_item("connection", "fetchai/stub:0.15.0")
         self.add_item("skill", "fetchai/tac_control:0.15.0")
-        self.set_config("agent.default_ledger", FETCHAI)
+        self.set_config("agent.default_ledger", FetchAICrypto.identifier)
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()
@@ -103,17 +103,21 @@ class TestTacSkills(AEATestCaseMany):
         ), "Difference between created and fetched project for files={}".format(diff)
 
         # add keys
-        self.generate_private_key(FETCHAI)
-        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.generate_private_key(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        )
+        self.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+            connection=True,
         )
         self.replace_private_key_in_file(
             NON_FUNDED_FETCHAI_PRIVATE_KEY_1, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
         )
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.set_config(setting_path, FETCHAI)
+        self.set_config(setting_path, FetchAICrypto.identifier)
 
         # replace location
         setting_path = (
@@ -146,7 +150,7 @@ class TestTacSkills(AEATestCaseMany):
             self.remove_item("connection", "fetchai/stub:0.15.0")
             self.add_item("skill", "fetchai/tac_participation:0.16.0")
             self.add_item("skill", "fetchai/tac_negotiation:0.18.0")
-            self.set_config("agent.default_ledger", FETCHAI)
+            self.set_config("agent.default_ledger", FetchAICrypto.identifier)
             setting_path = "agent.default_routing"
             self.nested_set_config(setting_path, default_routing)
             self.run_install()
@@ -160,11 +164,15 @@ class TestTacSkills(AEATestCaseMany):
             )
 
             # add keys
-            self.generate_private_key(FETCHAI)
-            self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
-            self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+            self.generate_private_key(FetchAICrypto.identifier)
+            self.generate_private_key(
+                FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+            )
+            self.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
             self.add_private_key(
-                FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+                FetchAICrypto.identifier,
+                FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+                connection=True,
             )
 
             # set p2p configs
@@ -351,7 +359,7 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
         self.add_item("connection", "fetchai/ledger:0.12.0")
         self.remove_item("connection", "fetchai/stub:0.15.0")
         self.add_item("skill", "fetchai/tac_control_contract:0.17.0")
-        self.set_config("agent.default_ledger", ETHEREUM)
+        self.set_config("agent.default_ledger", EthereumCrypto.identifier)
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()
@@ -364,11 +372,15 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
         ), "Difference between created and fetched project for files={}".format(diff)
 
         # add keys
-        self.generate_private_key(ETHEREUM)
-        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE)
+        self.generate_private_key(EthereumCrypto.identifier)
+        self.generate_private_key(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        )
+        self.add_private_key(EthereumCrypto.identifier, ETHEREUM_PRIVATE_KEY_FILE)
         self.add_private_key(
-            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+            connection=True,
         )
         self.replace_private_key_in_file(
             FUNDED_ETH_PRIVATE_KEY_1, ETHEREUM_PRIVATE_KEY_FILE
@@ -381,17 +393,17 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
             [
                 {
                     "identifier": "acn",
-                    "ledger_id": ETHEREUM,
+                    "ledger_id": EthereumCrypto.identifier,
                     "not_after": "2022-01-01",
                     "not_before": "2021-01-01",
-                    "public_key": FETCHAI,
+                    "public_key": FetchAICrypto.identifier,
                     "save_path": ".certs/conn_cert.txt",
                 }
             ]
         )
         self.set_config(setting_path, settings, type_="list")
         setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
-        self.set_config(setting_path, ETHEREUM)
+        self.set_config(setting_path, EthereumCrypto.identifier)
         setting_path = "vendor.fetchai.skills.tac_control.is_abstract"
         self.set_config(setting_path, True, "bool")
 
@@ -425,7 +437,7 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
             self.remove_item("connection", "fetchai/stub:0.15.0")
             self.add_item("skill", "fetchai/tac_participation:0.16.0")
             self.add_item("skill", "fetchai/tac_negotiation:0.18.0")
-            self.set_config("agent.default_ledger", ETHEREUM)
+            self.set_config("agent.default_ledger", EthereumCrypto.identifier)
             setting_path = "agent.default_routing"
             self.nested_set_config(setting_path, default_routing)
             self.set_config(
@@ -449,11 +461,15 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
             )
 
             # add keys
-            self.generate_private_key(ETHEREUM)
-            self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
-            self.add_private_key(ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE)
+            self.generate_private_key(EthereumCrypto.identifier)
+            self.generate_private_key(
+                FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+            )
+            self.add_private_key(EthereumCrypto.identifier, ETHEREUM_PRIVATE_KEY_FILE)
             self.add_private_key(
-                FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+                FetchAICrypto.identifier,
+                FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+                connection=True,
             )
             self.replace_private_key_in_file(private_key, ETHEREUM_PRIVATE_KEY_FILE)
 
@@ -465,10 +481,10 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
                 [
                     {
                         "identifier": "acn",
-                        "ledger_id": ETHEREUM,
+                        "ledger_id": EthereumCrypto.identifier,
                         "not_after": "2022-01-01",
                         "not_before": "2021-01-01",
-                        "public_key": FETCHAI,
+                        "public_key": FetchAICrypto.identifier,
                         "save_path": ".certs/conn_cert.txt",
                     }
                 ]
@@ -492,7 +508,7 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
             )
             self.nested_set_config(setting_path, data)
             setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
-            self.set_config(setting_path, ETHEREUM)
+            self.set_config(setting_path, EthereumCrypto.identifier)
 
         # run tac controller
         self.set_agent_context(tac_controller_name)

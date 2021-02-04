@@ -30,10 +30,10 @@ from aea.configurations.base import ComponentType, PublicId
 from aea.configurations.constants import (
     DEFAULT_CONNECTION,
     DEFAULT_PROTOCOL,
-    FETCHAI,
     PACKAGES,
     SIGNING_PROTOCOL,
     STATE_UPDATE_PROTOCOL,
+    _FETCHAI_IDENTIFIER,
 )
 from scripts.common import check_working_tree_is_dirty
 
@@ -42,7 +42,7 @@ DOCS_DIR = Path("docs/")
 API_DIR = DOCS_DIR / "api/"
 AEA_DIR = Path("aea")
 PACKAGES_DIR = Path(PACKAGES)
-FETCHAI_PACKAGES = PACKAGES_DIR / FETCHAI
+FETCHAI_PACKAGES = PACKAGES_DIR / _FETCHAI_IDENTIFIER
 DEFAULT_PACKAGES = {
     (ComponentType.PROTOCOL, DEFAULT_PROTOCOL),
     (ComponentType.PROTOCOL, SIGNING_PROTOCOL),

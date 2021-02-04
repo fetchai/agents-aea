@@ -18,19 +18,17 @@
 # ------------------------------------------------------------------------------
 
 """This module contains a test for aea.context."""
-
+from fetchai_crypto import FetchAICrypto
 
 from aea.context.base import AgentContext
 from aea.identity.base import Identity
-
-from tests.conftest import FETCHAI
 
 
 def test_agent_context():
     """Test the agent context."""
     agent_name = "name"
     address = "address"
-    addresses = {FETCHAI: address}
+    addresses = {FetchAICrypto.identifier: address}
     identity = Identity(agent_name, addresses)
     connection_status = "connection_status_stub"
     outbox = "outbox_stub"

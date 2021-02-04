@@ -22,14 +22,14 @@
 import logging
 
 import pytest
+from ethereum_crypto import EthereumCrypto
+from fetchai_crypto import FetchAICrypto
 
 import aea.crypto
 
 from tests.conftest import (
-    ETHEREUM,
     ETHEREUM_ADDRESS_ONE,
     ETHEREUM_TESTNET_CONFIG,
-    FETCHAI,
     FETCHAI_ADDRESS_ONE,
     FETCHAI_TESTNET_CONFIG,
 )
@@ -41,8 +41,8 @@ logger = logging.getLogger(__name__)
 @pytest.mark.parametrize(
     "identifier,address,config",
     [
-        (FETCHAI, FETCHAI_ADDRESS_ONE, FETCHAI_TESTNET_CONFIG),
-        (ETHEREUM, ETHEREUM_ADDRESS_ONE, ETHEREUM_TESTNET_CONFIG),
+        (FetchAICrypto.identifier, FETCHAI_ADDRESS_ONE, FETCHAI_TESTNET_CONFIG),
+        (EthereumCrypto.identifier, ETHEREUM_ADDRESS_ONE, ETHEREUM_TESTNET_CONFIG),
     ],
 )
 def test_make_ledger_apis(identifier, address, config):

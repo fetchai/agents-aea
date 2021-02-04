@@ -22,15 +22,15 @@ from pathlib import Path
 from typing import Dict, List
 
 
-FETCHAI = "fetchai"
-ETHEREUM = "ethereum"
-COSMOS = "cosmos"
+_FETCHAI_IDENTIFIER = "fetchai"
+_ETHEREUM_IDENTIFIER = "ethereum"
+_COSMOS_IDENTIFIER = "cosmos"
 DEFAULT_CONNECTION = "fetchai/stub:latest"
 DEFAULT_PROTOCOL = "fetchai/default:latest"
 SIGNING_PROTOCOL = "fetchai/signing:latest"
 STATE_UPDATE_PROTOCOL = "fetchai/state_update:latest"
 LEDGER_CONNECTION = "fetchai/ledger:latest"
-DEFAULT_LEDGER = FETCHAI
+DEFAULT_LEDGER = _FETCHAI_IDENTIFIER
 PRIVATE_KEY_PATH_SCHEMA = "{}_private_key.txt"
 DEFAULT_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(DEFAULT_LEDGER)
 DEFAULT_LICENSE = "Apache-2.0"

@@ -24,6 +24,9 @@ from typing import Optional, cast
 from unittest import mock
 
 import pytest
+from cosmos_crypto import CosmosCrypto
+from ethereum_crypto import EthereumCrypto
+from fetchai_crypto import FetchAICrypto
 
 import aea
 import aea.decision_maker.default
@@ -54,11 +57,8 @@ from packages.fetchai.protocols.state_update.dialogues import (
 from packages.fetchai.protocols.state_update.message import StateUpdateMessage
 
 from tests.conftest import (
-    COSMOS,
     COSMOS_PRIVATE_KEY_PATH,
-    ETHEREUM,
     ETHEREUM_PRIVATE_KEY_PATH,
-    FETCHAI,
     FETCHAI_PRIVATE_KEY_PATH,
     FETCHAI_TESTNET_CONFIG,
 )
@@ -143,14 +143,16 @@ class TestDecisionMaker:
         cls._patch_logger()
         cls.wallet = Wallet(
             {
-                COSMOS: COSMOS_PRIVATE_KEY_PATH,
-                ETHEREUM: ETHEREUM_PRIVATE_KEY_PATH,
-                FETCHAI: FETCHAI_PRIVATE_KEY_PATH,
+                CosmosCrypto.identifier: COSMOS_PRIVATE_KEY_PATH,
+                EthereumCrypto.identifier: ETHEREUM_PRIVATE_KEY_PATH,
+                FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_PATH,
             }
         )
         cls.agent_name = "test"
         cls.identity = Identity(
-            cls.agent_name, addresses=cls.wallet.addresses, default_address_key=FETCHAI,
+            cls.agent_name,
+            addresses=cls.wallet.addresses,
+            default_address_key=FetchAICrypto.identifier,
         )
         cls.decision_maker_handler = DecisionMakerHandler(
             identity=cls.identity, wallet=cls.wallet
@@ -160,7 +162,7 @@ class TestDecisionMaker:
         cls.tx_sender_addr = "agent_1"
         cls.tx_counterparty_addr = "pk"
         cls.info = {"some_info_key": "some_info_value"}
-        cls.ledger_id = FETCHAI
+        cls.ledger_id = FetchAICrypto.identifier
 
         cls.decision_maker.start()
 
@@ -262,14 +264,16 @@ class TestDecisionMaker2:
         cls._patch_logger()
         cls.wallet = Wallet(
             {
-                COSMOS: COSMOS_PRIVATE_KEY_PATH,
-                ETHEREUM: ETHEREUM_PRIVATE_KEY_PATH,
-                FETCHAI: FETCHAI_PRIVATE_KEY_PATH,
+                CosmosCrypto.identifier: COSMOS_PRIVATE_KEY_PATH,
+                EthereumCrypto.identifier: ETHEREUM_PRIVATE_KEY_PATH,
+                FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_PATH,
             }
         )
         cls.agent_name = "test"
         cls.identity = Identity(
-            cls.agent_name, addresses=cls.wallet.addresses, default_address_key=FETCHAI,
+            cls.agent_name,
+            addresses=cls.wallet.addresses,
+            default_address_key=FetchAICrypto.identifier,
         )
         cls.decision_maker_handler = DecisionMakerHandler(
             identity=cls.identity, wallet=cls.wallet
@@ -279,7 +283,7 @@ class TestDecisionMaker2:
         cls.tx_sender_addr = "agent_1"
         cls.tx_counterparty_addr = "pk"
         cls.info = {"some_info_key": "some_info_value"}
-        cls.ledger_id = FETCHAI
+        cls.ledger_id = FetchAICrypto.identifier
 
         cls.decision_maker.start()
 
@@ -303,9 +307,11 @@ class TestDecisionMaker2:
 
     def test_handle_tx_signing_fetchai(self):
         """Test tx signing for fetchai."""
-        fetchai_api = make_ledger_api(FETCHAI, **FETCHAI_TESTNET_CONFIG)
-        account = make_crypto(FETCHAI)
-        fc2 = make_crypto(FETCHAI)
+        fetchai_api = make_ledger_api(
+            FetchAICrypto.identifier, **FETCHAI_TESTNET_CONFIG
+        )
+        account = make_crypto(FetchAICrypto.identifier)
+        fc2 = make_crypto(FetchAICrypto.identifier)
         amount = 10000
         transfer_transaction = fetchai_api.get_transfer_transaction(
             sender_address=account.address,
@@ -321,7 +327,7 @@ class TestDecisionMaker2:
             performative=SigningMessage.Performative.SIGN_TRANSACTION,
             dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
             terms=Terms(
-                ledger_id=FETCHAI,
+                ledger_id=FetchAICrypto.identifier,
                 sender_address="pk1",
                 counterparty_address="pk2",
                 amount_by_currency_id={"FET": -1},
@@ -329,7 +335,9 @@ class TestDecisionMaker2:
                 quantities_by_good_id={"good_id": 10},
                 nonce="transaction nonce",
             ),
-            raw_transaction=RawTransaction(FETCHAI, transfer_transaction),
+            raw_transaction=RawTransaction(
+                FetchAICrypto.identifier, transfer_transaction
+            ),
         )
         signing_dialogue = signing_dialogues.create_with_message(
             "decision_maker", signing_msg
@@ -355,7 +363,7 @@ class TestDecisionMaker2:
             performative=SigningMessage.Performative.SIGN_TRANSACTION,
             dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
             terms=Terms(
-                ledger_id=ETHEREUM,
+                ledger_id=EthereumCrypto.identifier,
                 sender_address="pk1",
                 counterparty_address="pk2",
                 amount_by_currency_id={"FET": -1},
@@ -363,7 +371,7 @@ class TestDecisionMaker2:
                 quantities_by_good_id={"good_id": 10},
                 nonce="transaction nonce",
             ),
-            raw_transaction=RawTransaction(ETHEREUM, tx),
+            raw_transaction=RawTransaction(EthereumCrypto.identifier, tx),
         )
         signing_dialogue = signing_dialogues.create_with_message(
             "decision_maker", signing_msg
@@ -423,7 +431,7 @@ class TestDecisionMaker2:
             performative=SigningMessage.Performative.SIGN_MESSAGE,
             dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
             terms=Terms(
-                ledger_id=FETCHAI,
+                ledger_id=FetchAICrypto.identifier,
                 sender_address="pk1",
                 counterparty_address="pk2",
                 amount_by_currency_id={"FET": -1},
@@ -431,7 +439,7 @@ class TestDecisionMaker2:
                 quantities_by_good_id={"good_id": 10},
                 nonce="transaction nonce",
             ),
-            raw_message=RawMessage(FETCHAI, message),
+            raw_message=RawMessage(FetchAICrypto.identifier, message),
         )
         signing_dialogue = signing_dialogues.create_with_message(
             "decision_maker", signing_msg
@@ -457,7 +465,7 @@ class TestDecisionMaker2:
             performative=SigningMessage.Performative.SIGN_MESSAGE,
             dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
             terms=Terms(
-                ledger_id=ETHEREUM,
+                ledger_id=EthereumCrypto.identifier,
                 sender_address="pk1",
                 counterparty_address="pk2",
                 amount_by_currency_id={"FET": -1},
@@ -465,7 +473,7 @@ class TestDecisionMaker2:
                 quantities_by_good_id={"good_id": 10},
                 nonce="transaction nonce",
             ),
-            raw_message=RawMessage(ETHEREUM, message),
+            raw_message=RawMessage(EthereumCrypto.identifier, message),
         )
         signing_dialogue = signing_dialogues.create_with_message(
             "decision_maker", signing_msg
@@ -491,7 +499,7 @@ class TestDecisionMaker2:
             performative=SigningMessage.Performative.SIGN_MESSAGE,
             dialogue_reference=signing_dialogues.new_self_initiated_dialogue_reference(),
             terms=Terms(
-                ledger_id=ETHEREUM,
+                ledger_id=EthereumCrypto.identifier,
                 sender_address="pk1",
                 counterparty_address="pk2",
                 amount_by_currency_id={"FET": -1},
@@ -499,7 +507,9 @@ class TestDecisionMaker2:
                 quantities_by_good_id={"good_id": 10},
                 nonce="transaction nonce",
             ),
-            raw_message=RawMessage(ETHEREUM, message, is_deprecated_mode=True),
+            raw_message=RawMessage(
+                EthereumCrypto.identifier, message, is_deprecated_mode=True
+            ),
         )
         signing_dialogue = signing_dialogues.create_with_message(
             "decision_maker", signing_msg

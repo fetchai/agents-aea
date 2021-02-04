@@ -20,15 +20,15 @@
 import json
 
 import pytest
+from ethereum_crypto import EthereumCrypto
+from fetchai_crypto import FetchAICrypto
 
 from aea.test_tools.test_cases import AEATestCaseMany
 
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
 from tests.conftest import (
-    ETHEREUM,
     ETHEREUM_PRIVATE_KEY_FILE,
-    FETCHAI,
     FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
     FUNDED_ETH_PRIVATE_KEY_2,
     FUNDED_ETH_PRIVATE_KEY_3,
@@ -66,7 +66,7 @@ class TestOracleSkills(AEATestCaseMany, UseGanache):
         self.add_item("connection", "fetchai/prometheus:0.2.0")
         self.remove_item("connection", "fetchai/stub:0.15.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.14.0")
-        self.set_config("agent.default_ledger", ETHEREUM)
+        self.set_config("agent.default_ledger", EthereumCrypto.identifier)
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.add_item("skill", "fetchai/coin_price:0.3.0")
@@ -93,24 +93,28 @@ class TestOracleSkills(AEATestCaseMany, UseGanache):
             diff == []
         ), "Difference between created and fetched project for files={}".format(diff)
 
-        self.generate_private_key(ETHEREUM)
-        self.add_private_key(ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE)
+        self.generate_private_key(EthereumCrypto.identifier)
+        self.add_private_key(EthereumCrypto.identifier, ETHEREUM_PRIVATE_KEY_FILE)
         self.replace_private_key_in_file(
             FUNDED_ETH_PRIVATE_KEY_3, ETHEREUM_PRIVATE_KEY_FILE
         )
-        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
+        self.generate_private_key(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        )
         self.add_private_key(
-            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+            connection=True,
         )
         setting_path = "vendor.fetchai.connections.p2p_libp2p.cert_requests"
         settings = json.dumps(
             [
                 {
                     "identifier": "acn",
-                    "ledger_id": ETHEREUM,
+                    "ledger_id": EthereumCrypto.identifier,
                     "not_after": "2022-01-01",
                     "not_before": "2021-01-01",
-                    "public_key": FETCHAI,
+                    "public_key": FetchAICrypto.identifier,
                     "save_path": ".certs/conn_cert.txt",
                 }
             ]
@@ -124,7 +128,7 @@ class TestOracleSkills(AEATestCaseMany, UseGanache):
         self.add_item("connection", "fetchai/http_client:0.16.0")
         self.remove_item("connection", "fetchai/stub:0.15.0")
         self.set_config("agent.default_connection", "fetchai/ledger:0.12.0")
-        self.set_config("agent.default_ledger", ETHEREUM)
+        self.set_config("agent.default_ledger", EthereumCrypto.identifier)
 
         default_routing = {
             "fetchai/ledger_api:0.9.0": "fetchai/ledger:0.12.0",
@@ -149,8 +153,8 @@ class TestOracleSkills(AEATestCaseMany, UseGanache):
         setting_path = "vendor.fetchai.skills.simple_oracle_client.models.strategy.args.oracle_contract_address"
         self.set_config(setting_path, oracle_address)
 
-        self.generate_private_key(ETHEREUM)
-        self.add_private_key(ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE)
+        self.generate_private_key(EthereumCrypto.identifier)
+        self.add_private_key(EthereumCrypto.identifier, ETHEREUM_PRIVATE_KEY_FILE)
         self.replace_private_key_in_file(
             FUNDED_ETH_PRIVATE_KEY_2, ETHEREUM_PRIVATE_KEY_FILE
         )

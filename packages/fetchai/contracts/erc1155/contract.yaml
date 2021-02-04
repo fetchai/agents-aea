@@ -25,3 +25,7 @@ contract_interface_paths:
 dependencies:
   vyper:
     version: ==0.1.0b12
+  fetchai_crypto: {}
+  cosmos_crypto: {}
+  ethereum_crypto: {}
+

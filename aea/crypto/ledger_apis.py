@@ -21,7 +21,12 @@
 from typing import Any, Dict, Optional, Tuple, Union
 
 from aea.common import Address
-from aea.configurations.constants import COSMOS, DEFAULT_LEDGER, ETHEREUM, FETCHAI
+from aea.configurations.constants import (
+    DEFAULT_LEDGER,
+    _COSMOS_IDENTIFIER,
+    _ETHEREUM_IDENTIFIER,
+    _FETCHAI_IDENTIFIER,
+)
 from aea.crypto.base import LedgerApi
 from aea.crypto.registries import (
     ledger_apis_registry,
@@ -43,26 +48,26 @@ FETCHAI_DEFAULT_CHAIN_ID = "agent-land"
 
 
 DEFAULT_LEDGER_CONFIGS: Dict[str, Dict[str, Union[str, int]]] = {
-    COSMOS: {
+    _COSMOS_IDENTIFIER: {
         "address": COSMOS_DEFAULT_ADDRESS,
         "chain_id": COSMOS_DEFAULT_CHAIN_ID,
         "denom": COSMOS_DEFAULT_CURRENCY_DENOM,
     },
-    ETHEREUM: {
+    _ETHEREUM_IDENTIFIER: {
         "address": ETHEREUM_DEFAULT_ADDRESS,
         "chain_id": ETHEREUM_DEFAULT_CHAIN_ID,
         "denom": ETHEREUM_DEFAULT_CURRENCY_DENOM,
     },
-    FETCHAI: {
+    _FETCHAI_IDENTIFIER: {
         "address": FETCHAI_DEFAULT_ADDRESS,
         "chain_id": FETCHAI_DEFAULT_CHAIN_ID,
         "denom": FETCHAI_DEFAULT_CURRENCY_DENOM,
     },
 }
 DEFAULT_CURRENCY_DENOMINATIONS = {
-    COSMOS: COSMOS_DEFAULT_CURRENCY_DENOM,
-    ETHEREUM: ETHEREUM_DEFAULT_CURRENCY_DENOM,
-    FETCHAI: FETCHAI_DEFAULT_CURRENCY_DENOM,
+    _COSMOS_IDENTIFIER: COSMOS_DEFAULT_CURRENCY_DENOM,
+    _ETHEREUM_IDENTIFIER: ETHEREUM_DEFAULT_CURRENCY_DENOM,
+    _FETCHAI_IDENTIFIER: FETCHAI_DEFAULT_CURRENCY_DENOM,
 }
 
 

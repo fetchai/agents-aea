@@ -63,11 +63,11 @@ from aea.configurations.constants import (
 )
 from aea.configurations.constants import (
     DOTTED_PATH_MODULE_ELEMENT_SEPARATOR,
-    FETCHAI,
     PROTOCOLS,
     SIGNING_PROTOCOL,
     SKILLS,
     STATE_UPDATE_PROTOCOL,
+    _FETCHAI_IDENTIFIER,
 )
 from aea.configurations.loader import ConfigLoader, load_component_configuration
 from aea.configurations.manager import (
@@ -596,21 +596,35 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         # add default protocol
         default_protocol = PublicId.from_str(DEFAULT_PROTOCOL)
         self.add_protocol(
-            Path(self.registry_dir, FETCHAI, PROTOCOLS, default_protocol.name)
+            Path(
+                self.registry_dir, _FETCHAI_IDENTIFIER, PROTOCOLS, default_protocol.name
+            )
         )
         # add signing protocol
         signing_protocol = PublicId.from_str(SIGNING_PROTOCOL)
         self.add_protocol(
-            Path(self.registry_dir, FETCHAI, PROTOCOLS, signing_protocol.name)
+            Path(
+                self.registry_dir, _FETCHAI_IDENTIFIER, PROTOCOLS, signing_protocol.name
+            )
         )
         # add state update protocol
         state_update_protocol = PublicId.from_str(STATE_UPDATE_PROTOCOL)
         self.add_protocol(
-            Path(self.registry_dir, FETCHAI, PROTOCOLS, state_update_protocol.name)
+            Path(
+                self.registry_dir,
+                _FETCHAI_IDENTIFIER,
+                PROTOCOLS,
+                state_update_protocol.name,
+            )
         )
         # add stub connection
         self.add_connection(
-            Path(self.registry_dir, FETCHAI, CONNECTIONS, self.DEFAULT_CONNECTION.name)
+            Path(
+                self.registry_dir,
+                _FETCHAI_IDENTIFIER,
+                CONNECTIONS,
+                self.DEFAULT_CONNECTION.name,
+            )
         )
 
     def _check_can_remove(self, component_id: ComponentId) -> None:
