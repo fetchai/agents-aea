@@ -89,6 +89,30 @@ class BaseRuntime(Runnable, WithLogger):
         self._loop_mode = loop_mode or self.DEFAULT_RUN_LOOP
         self._agent_loop: BaseAgentLoop = self._get_agent_loop_instance(self._loop_mode)
 
+    def _log_runtime_state(self, state) -> None:
+        """Log a runtime state changed."""
+        self.logger.debug(f"[{self._agent.name}]: Runtime state changed to {state}.")
+
+    def _get_multiplexer_instance(
+        self, multiplexer_options: Dict, threaded: bool = False
+    ) -> AsyncMultiplexer:
+        """Create multiplexer instance."""
+        loop: Optional[AbstractEventLoop] = None
+        if not threaded:
+            loop = self.loop
+        return AsyncMultiplexer(
+            loop=loop,
+            threaded=threaded,
+            agent_name=self._agent.name,
+            connections=multiplexer_options["connections"],
+            exception_policy=multiplexer_options.get(
+                "connection_exception_policy", ExceptionPolicyEnum.propagate
+            ),
+            default_routing=multiplexer_options.get("default_routing"),
+            default_connection=multiplexer_options.get("default_connection"),
+            protocols=multiplexer_options.get("protocols", []),
+        )
+
     @staticmethod
     def _get_storage(agent) -> Optional[Storage]:
         """Get storage instance if storage_uri provided."""
@@ -96,6 +120,31 @@ class BaseRuntime(Runnable, WithLogger):
             # threaded has to be always True, cause syncrhonous operations are supported
             return Storage(agent.storage_uri, threaded=True)
         return None  # pragma: nocover
+
+    def _get_agent_loop_instance(self, loop_mode: str) -> BaseAgentLoop:
+        """
+        Construct agent loop instance.
+
+        :param: loop_mode: str.
+
+        :return: AgentLoop instance
+        """
+        loop_cls = self._get_agent_loop_class(loop_mode)
+        return loop_cls(self._agent)
+
+    def _get_agent_loop_class(self, loop_mode: str) -> Type[BaseAgentLoop]:
+        """
+        Get agent loop class based on loop mode.
+
+        :param: loop_mode: str.
+
+        :return: AgentLoop class
+        """
+        if loop_mode not in self.RUN_LOOPS:  # pragma: nocover
+            raise ValueError(
+                f"Loop `{loop_mode} is not supported. valid are: `{list(self.RUN_LOOPS.keys())}`"
+            )
+        return self.RUN_LOOPS[loop_mode]
 
     @property
     def storage(self) -> Optional[Storage]:
@@ -127,35 +176,24 @@ class BaseRuntime(Runnable, WithLogger):
         """Get multiplexer."""
         return self._multiplexer
 
-    def _get_multiplexer_instance(self, multiplexer_options: Dict) -> AsyncMultiplexer:
-        """Create multiplexer instance."""
-        return AsyncMultiplexer(
-            loop=self.loop,
-            agent_name=self._agent.name,
-            connections=multiplexer_options["connections"],
-            exception_policy=multiplexer_options.get(
-                "connection_exception_policy", ExceptionPolicyEnum.propagate
-            ),
-            default_routing=multiplexer_options.get("default_routing"),
-            default_connection=multiplexer_options.get("default_connection"),
-        )
+    @property
+    def is_running(self) -> bool:
+        """Get running state of the runtime."""
+        return self._state.get() == RuntimeStates.running
 
-    def _get_agent_loop_class(self, loop_mode: str) -> Type[BaseAgentLoop]:
+    @property
+    def is_stopped(self) -> bool:  # pragma: nocover
+        """Get stopped state of the runtime."""
+        return self._state.get() in [RuntimeStates.stopped]
+
+    @property
+    def state(self) -> RuntimeStates:  # pragma: nocover
         """
-        Get agent loop class based on loop mode.
+        Get runtime state.
 
-        :param: loop_mode: str.
-
-        :return: AgentLoop class
+        :return: RuntimeStates
         """
-        if loop_mode not in self.RUN_LOOPS:  # pragma: nocover
-            raise ValueError(
-                f"Loop `{loop_mode} is not supported. valid are: `{list(self.RUN_LOOPS.keys())}`"
-            )
-        return self.RUN_LOOPS[loop_mode]
-
-    def _set_task(self):
-        self._task = self._loop.create_task(self._run_wrapper())
+        return cast(RuntimeStates, self._state.get())
 
     @property
     def decision_maker(self) -> DecisionMaker:
@@ -164,26 +202,14 @@ class BaseRuntime(Runnable, WithLogger):
             raise ValueError("call `set_decision_maker` first!")
         return self._decision_maker
 
+    def _set_task(self):
+        self._task = self._loop.create_task(self._run_wrapper())
+
     def set_decision_maker(self, decision_maker_handler: DecisionMakerHandler) -> None:
         """Set decision maker with handler provided."""
         self._decision_maker = DecisionMaker(
             decision_maker_handler=decision_maker_handler
         )
-
-    def _get_agent_loop_instance(self, loop_mode: str) -> BaseAgentLoop:
-        """
-        Construct agent loop instance.
-
-        :param: loop_mode: str.
-
-        :return: AgentLoop instance
-        """
-        loop_cls = self._get_agent_loop_class(loop_mode)
-        return loop_cls(self._agent)
-
-    def _log_runtime_state(self, state) -> None:
-        """Log a runtime state changed."""
-        self.logger.debug(f"[{self._agent.name}]: Runtime state changed to {state}.")
 
     def _teardown(self) -> None:
         """Tear down runtime."""
@@ -195,16 +221,6 @@ class BaseRuntime(Runnable, WithLogger):
         self._agent.teardown()
         self.logger.debug("[{}]: Runtime teardown completed".format(self._agent.name))
 
-    @property
-    def is_running(self) -> bool:
-        """Get running state of the runtime."""
-        return self._state.get() == RuntimeStates.running
-
-    @property
-    def is_stopped(self) -> bool:  # pragma: nocover
-        """Get stopped state of the runtime."""
-        return self._state.get() in [RuntimeStates.stopped]
-
     def set_loop(self, loop: AbstractEventLoop) -> None:
         """
         Set event loop to be used.
@@ -213,15 +229,6 @@ class BaseRuntime(Runnable, WithLogger):
         """
         self._loop = loop
         asyncio.set_event_loop(self._loop)
-
-    @property
-    def state(self) -> RuntimeStates:  # pragma: nocover
-        """
-        Get runtime state.
-
-        :return: RuntimeStates
-        """
-        return cast(RuntimeStates, self._state.get())
 
 
 class AsyncRuntime(BaseRuntime):
@@ -303,14 +310,14 @@ class AsyncRuntime(BaseRuntime):
         self.logger.debug("Runtime loop stopped!")
 
     async def run_runtime(self) -> None:
-        """Run agent and starts multiplexer."""
+        """Run runtime which means start agent loop, multiplexer and storage."""
         self._state.set(RuntimeStates.starting)
         await asyncio.gather(
             self._start_multiplexer(), self._start_agent_loop(), self._start_storage()
         )
 
     async def _start_storage(self) -> None:
-        """Start storage component."""
+        """Start storage component asynchronously."""
         if self._storage is not None:
             self._storage.start()
             await self._storage.wait_completed()
@@ -353,16 +360,10 @@ class AsyncRuntime(BaseRuntime):
 class ThreadedRuntime(AsyncRuntime):
     """Run agent and multiplexer in different threads with own asyncio loops."""
 
-    def _get_multiplexer_instance(self, multiplexer_options: Dict) -> AsyncMultiplexer:
+    def _get_multiplexer_instance(
+        self, multiplexer_options: Dict, threaded: bool = True
+    ) -> AsyncMultiplexer:
         """Create multiplexer instance."""
-        return AsyncMultiplexer(
-            connections=multiplexer_options["connections"],
-            threaded=True,
-            agent_name=self._agent.name,
-            exception_policy=multiplexer_options.get(
-                "connection_exception_policy", ExceptionPolicyEnum.propagate
-            ),
-            default_routing=multiplexer_options.get("default_routing"),
-            default_connection=multiplexer_options.get("default_connection"),
-            protocols=multiplexer_options.get("protocols", []),
+        return super()._get_multiplexer_instance(
+            multiplexer_options=multiplexer_options, threaded=threaded
         )

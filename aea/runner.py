@@ -49,6 +49,11 @@ class AEAInstanceTask(AbstractExecutorTask):
         self._agent = agent
         super().__init__()
 
+    @property
+    def id(self):
+        """Return agent name."""
+        return self._agent.name
+
     def start(self) -> None:
         """Start task."""
         try:
@@ -74,11 +79,6 @@ class AEAInstanceTask(AbstractExecutorTask):
                 "Agent runtime is not async compatible. Please use runtime_mode=async"
             )
         return loop.create_task(self._agent.runtime.start_and_wait_completed())
-
-    @property
-    def id(self):
-        """Return agent name."""
-        return self._agent.name
 
 
 class AEARunner(AbstractMultipleRunner):

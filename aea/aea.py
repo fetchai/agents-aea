@@ -152,7 +152,7 @@ class AEA(Agent):
             "Please check connection_ids and resources.connections! No connection left after filtering!",
         )
 
-        self._set_runtime_and_inboxes(
+        self._set_runtime_and_mail_boxes(
             runtime_class=self._get_runtime_class(),
             loop_mode=loop_mode,
             loop=loop,
@@ -248,10 +248,7 @@ class AEA(Agent):
         """
         Set up the agent.
 
-        Performs the following:
-
-        - loads the resources (unless in programmatic mode)
-        - calls setup() on the resources
+        Calls setup() on the resources.
 
         :return: None
         """
@@ -261,7 +258,7 @@ class AEA(Agent):
         """
         Perform actions.
 
-        Calls act() of each active behaviour.
+        Adds new handlers and behaviours for use/execution by the runtime.
 
         :return: None
         """
@@ -318,10 +315,12 @@ class AEA(Agent):
         """
         Handle an envelope.
 
+        Performs the following:
+
         - fetching the protocol referenced by the envelope, and
-        - returning an envelope to sender if the protocol is unsupported, using the error handler, or
-        - returning an envelope to sender if there is a decoding error, using the error handler, or
-        - returning an envelope to sender if no active handler is available for the specified protocol, using the error handler, or
+        - handling if the protocol is unsupported, using the error handler, or
+        - handling if there is a decoding error, using the error handler, or
+        - handling if no active handler is available for the specified protocol, using the error handler, or
         - handling the message recovered from the envelope with all active handlers for the specified protocol.
 
         :param envelope: the envelope to handle.

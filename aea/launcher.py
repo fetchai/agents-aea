@@ -137,6 +137,11 @@ class AEADirTask(AbstractExecutorTask):
         self._agent: AEA = load_agent(self._agent_dir)
         super().__init__()
 
+    @property
+    def id(self) -> Union[PathLike, str]:
+        """Return agent_dir."""
+        return self._agent_dir
+
     def start(self) -> None:
         """Start task."""
         self._agent.start()
@@ -155,11 +160,6 @@ class AEADirTask(AbstractExecutorTask):
                 "Agent runtime is not async compatible. Please use runtime_mode=async"
             )
         return loop.create_task(self._agent.runtime.start_and_wait_completed())
-
-    @property
-    def id(self) -> Union[PathLike, str]:
-        """Return agent_dir."""
-        return self._agent_dir
 
 
 class AEADirMultiprocessTask(AbstractMultiprocessExecutorTask):
@@ -183,22 +183,6 @@ class AEADirMultiprocessTask(AbstractMultiprocessExecutorTask):
         self._stop_event = self._manager.Event()
         self._log_level = log_level
         super().__init__()
-
-    def start(self) -> Tuple[Callable, Sequence[Any]]:
-        """Return function and arguments to call within subprocess."""
-        return (_run_agent, (self._agent_dir, self._stop_event, self._log_level))
-
-    def stop(self):
-        """Stop task."""
-        if self._future.done():
-            _default_logger.debug("Stop called, but task is already done.")
-            return
-        try:
-            self._stop_event.set()
-        except (FileNotFoundError, BrokenPipeError, EOFError) as e:  # pragma: nocover
-            _default_logger.debug(
-                f"Exception raised in task.stop {e} {type(e)}. Skip it, looks process is closed."
-            )
 
     @property
     def id(self) -> Union[PathLike, str]:
@@ -225,6 +209,22 @@ class AEADirMultiprocessTask(AbstractMultiprocessExecutorTask):
             return False
 
         return super().failed
+
+    def start(self) -> Tuple[Callable, Sequence[Any]]:
+        """Return function and arguments to call within subprocess."""
+        return (_run_agent, (self._agent_dir, self._stop_event, self._log_level))
+
+    def stop(self):
+        """Stop task."""
+        if self._future.done():
+            _default_logger.debug("Stop called, but task is already done.")
+            return
+        try:
+            self._stop_event.set()
+        except (FileNotFoundError, BrokenPipeError, EOFError) as e:  # pragma: nocover
+            _default_logger.debug(
+                f"Exception raised in task.stop {e} {type(e)}. Skip it, looks process is closed."
+            )
 
 
 class AEALauncher(AbstractMultipleRunner):
