@@ -248,9 +248,8 @@ class GenericFipaHandler(Handler):
         )
         if len(fipa_msg.info.keys()) >= 1:
             data = fipa_msg.info
-            self.context.logger.info(
-                "received the following data={}".format(pprint.pformat(data))
-            )
+            data_string = pprint.pformat(data)[:1000]
+            self.context.logger.info(f"received the following data={data_string}")
             fipa_dialogues.dialogue_stats.add_dialogue_endstate(
                 FipaDialogue.EndState.SUCCESSFUL, fipa_dialogue.is_self_initiated
             )
