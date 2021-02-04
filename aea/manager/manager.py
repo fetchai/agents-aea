@@ -118,6 +118,12 @@ class AgentRunThreadTask(AgentRunAsyncTask):
         )
         self._thread.start()
 
+    def stop(self,) -> None:
+        """Stop the task."""
+        super().stop()
+        if self._thread is not None:
+            self._thread.join()
+
 
 class MultiAgentManager:
     """Multi agents manager."""

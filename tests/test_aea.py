@@ -143,6 +143,7 @@ def test_double_start():
             assert not t.is_alive()
         finally:
             agent.stop()
+            t.join()
 
 
 def test_react():
@@ -649,7 +650,10 @@ class TestAeaExceptionPolicy:
 
         self.aea_tool.put_inbox(self.aea_tool.dummy_envelope())
         time.sleep(1)
-        assert self.handler_called >= 2
+        try:
+            assert self.handler_called >= 2
+        finally:
+            t.join()
 
     def test_handle_propagate(self) -> None:
         """Test propagate policy on message handle."""
@@ -687,8 +691,11 @@ class TestAeaExceptionPolicy:
             self.aea_tool.put_inbox(self.aea_tool.dummy_envelope())
             self.aea_tool.put_inbox(self.aea_tool.dummy_envelope())
             time.sleep(1)
-        assert self.aea.is_running
-        assert patched.call_count == 2
+        try:
+            assert self.aea.is_running
+            assert patched.call_count == 2
+        finally:
+            t.join()
 
     def test_act_propagate(self) -> None:
         """Test propagate policy on behaviour act."""
@@ -723,8 +730,11 @@ class TestAeaExceptionPolicy:
             t.start()
 
             time.sleep(1)
-        assert self.aea.is_running
-        assert patched.call_count > 1
+        try:
+            assert self.aea.is_running
+            assert patched.call_count > 1
+        finally:
+            t.join()
 
     def test_act_bad_policy(self) -> None:
         """Test propagate policy on behaviour act."""
