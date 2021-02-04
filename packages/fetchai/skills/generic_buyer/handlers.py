@@ -621,7 +621,7 @@ class GenericLedgerApiHandler(Handler):
             strategy.is_searching = True
         else:
             self.context.logger.warning(
-                "you have no starting balance on {} ledger!".format(strategy.ledger_id)
+                f"you have no starting balance on {strategy.ledger_id} ledger! Stopping skill {self.skill_id}."
             )
             self.context.is_active = False
 
