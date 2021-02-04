@@ -23,19 +23,12 @@ import os
 
 from fetchai_crypto import FetchAICrypto
 
-from aea.configurations.constants import PRIVATE_KEY_PATH_SCHEMA
-
 
 CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 ROOT_DIR = os.path.join(CUR_PATH, "..")
 MAX_FLAKY_RERUNS = 3
 FETCHAI = FetchAICrypto.identifier
 
-FETCHAI_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(FETCHAI)
-
-FETCHAI_PRIVATE_KEY_PATH = os.path.join(
-    ROOT_DIR, "tests", "data", FETCHAI_PRIVATE_KEY_FILE
-)
 
 FETCHAI_DEFAULT_ADDRESS = "https://rest-agent-land.fetch.ai"
 FETCHAI_DEFAULT_CURRENCY_DENOM = "atestfet"
