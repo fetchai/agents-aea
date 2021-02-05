@@ -244,7 +244,7 @@ class AEALauncher(AbstractMultipleRunner):
         log_level: Optional[str] = None,
     ) -> None:
         """
-        Init AEARunner.
+        Init AEALauncher.
 
         :param agent_dirs: sequence of AEA config directories.
         :param mode: executor name to use.
