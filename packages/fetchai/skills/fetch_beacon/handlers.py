@@ -93,15 +93,17 @@ class HttpHandler(Handler):
             .get("group_signature", {})
         )
         block_hash = msg_body.get("result", {}).get("block_id", {}).get("hash", {})
-        block_height = int(
-            msg_body.get("result", {})
-            .get("block", {})
-            .get("header", {})
-            .get("height", {})
-        )
+        block_height_str = msg_body.get("result", {}).get("block", {}).get("header", {}).get("height", {})
+        
+        if block_height_str:
+            block_height = int(block_height_str)
+        else:
+            block_height = None
 
         if entropy is None:
             self.context.logger.info("entropy not present")
+        elif block_height is None:
+            self.context.logger.info("block height not present")
         else:
             beacon_data = {
                 "entropy": keccak256(entropy.encode("utf-8")),

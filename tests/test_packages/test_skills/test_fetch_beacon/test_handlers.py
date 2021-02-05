@@ -18,11 +18,13 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests of the handler classes of the simple_data_request skill."""
 
+import json
 import logging
 import sys
 from pathlib import Path
 from typing import cast
 from unittest.mock import patch
+from vyper.utils import keccak256
 
 import pytest
 
@@ -30,13 +32,10 @@ from aea.protocols.dialogue.base import DialogueMessage
 from aea.test_tools.test_skill import BaseSkillTestCase
 
 from packages.fetchai.protocols.http.message import HttpMessage
-from packages.fetchai.protocols.prometheus.message import PrometheusMessage
 from packages.fetchai.skills.fetch_beacon.dialogues import (
     HttpDialogues,
-    PrometheusDialogues,
 )
-from packages.fetchai.skills.fetch_beacon.handlers import HttpHandler, PrometheusHandler
-from packages.fetchai.skills.fetch_beacon.models import FetchBeaconModel
+from packages.fetchai.skills.fetch_beacon.handlers import HttpHandler
 
 from tests.conftest import ROOT_DIR
 
@@ -52,10 +51,6 @@ class TestHttpHandler(BaseSkillTestCase):
         super().setup()
         cls.http_handler = cast(HttpHandler, cls._skill.skill_context.handlers.http)
         cls.logger = cls._skill.skill_context.logger
-
-        cls.fetch_beacon_model = cast(
-            FetchBeaconModel, cls._skill.skill_context.fetch_beacon_model
-        )
 
         cls.http_dialogues = cast(
             HttpDialogues, cls._skill.skill_context.http_dialogues
@@ -85,6 +80,23 @@ class TestHttpHandler(BaseSkillTestCase):
         http_dialogue = self.prepare_skill_dialogue(
             dialogues=self.http_dialogues, messages=self.list_of_messages[:1],
         )
+
+        test_response = {
+            "result": {
+                "block_id": {
+                    "hash": "00000000",
+                },
+                "block": {
+                    "header": {
+                        "height": "1",
+                        "entropy": {
+                            "group_signature": "SIGNATURE"
+                        }
+                    }
+                }
+            }
+        }
+
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=http_dialogue,
             performative=HttpMessage.Performative.RESPONSE,
@@ -92,18 +104,22 @@ class TestHttpHandler(BaseSkillTestCase):
             status_code=200,
             status_text="",
             headers="",
-            body=b'{"fetch-ai":{"usd":100.00}}',
+            body=json.dumps(test_response).encode("utf-8"),
         )
 
         # handle message
         self.http_handler.handle(incoming_message)
 
         # check that data was correctly entered into shared state
-        oracle_data = {"value": 10000000, "decimals": self.fetch_beacon_model.decimals}
-        assert self.http_handler.context.shared_state["oracle_data"] == oracle_data
+        beacon_data = {
+            "entropy": keccak256("SIGNATURE".encode("utf-8")),
+            "block_hash": bytes.fromhex("00000000"),
+            "block_height": 1,
+        }
+        assert self.http_handler.context.shared_state["oracle_data"] == beacon_data
 
-        # check that outbox contains update_prometheus metric message
-        self.assert_quantity_in_outbox(1)
+        # check that outbox is empty
+        self.assert_quantity_in_outbox(0)
 
     def test_handle_response_invalid_body(self):
         """Test the _handle_response method of the http handler to an unexpected response."""
@@ -129,117 +145,8 @@ class TestHttpHandler(BaseSkillTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO, "failed to get price: unexpected result",
+            logging.INFO, "block height not present",
         )
-
-    def test_handle_response_no_price(self):
-        """Test the _handle_response method of the http handler to a response with no price."""
-        # setup
-        http_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.http_dialogues, messages=self.list_of_messages[:1],
-        )
-        incoming_message = self.build_incoming_message_for_skill_dialogue(
-            dialogue=http_dialogue,
-            performative=HttpMessage.Performative.RESPONSE,
-            version="",
-            status_code=200,
-            status_text="",
-            headers="",
-            body=b'{"fetch-ai":{}}',
-        )
-
-        # handle message with logging
-        with patch.object(self.logger, "log") as mock_logger:
-            self.http_handler.handle(incoming_message)
-
-        assert "oracle_data" not in self.http_handler.context.shared_state
-
-        # after
-        mock_logger.assert_any_call(
-            logging.INFO, "failed to get price: no price listed",
-        )
-
-    def test_handle_request_get(self):
-        """Test the _handle_request method of the http handler with 'get' method."""
-
-        incoming_message = self.build_incoming_message(
-            message_type=HttpMessage,
-            performative=HttpMessage.Performative.REQUEST,
-            method="get",
-            url="some_url",
-            headers="",
-            version="",
-            body=b"",
-        )
-
-        self.http_handler._http_server_id = "some_id"
-
-        # handle message with logging
-        with patch.object(self.logger, "log") as mock_logger:
-            self.http_handler.handle(incoming_message)
-
-        # after
-        mock_logger.assert_any_call(
-            logging.INFO,
-            "received http request with method=get, url=some_url and body=b''",
-        )
-
-        # check that outbox contains the http response prometheus metric update messages
-        self.assert_quantity_in_outbox(2)
-
-    def test_handle_request_post(self):
-        """Test the _handle_request method of the http handler with 'post' method."""
-
-        incoming_message = self.build_incoming_message(
-            message_type=HttpMessage,
-            performative=HttpMessage.Performative.REQUEST,
-            method="post",
-            url="some_url",
-            headers="",
-            version="",
-            body=b"",
-        )
-
-        self.http_handler._http_server_id = "some_id"
-
-        # handle message with logging
-        with patch.object(self.logger, "log") as mock_logger:
-            self.http_handler.handle(incoming_message)
-
-        mock_logger.assert_any_call(
-            logging.INFO, "method 'post' is not supported.",
-        )
-        # check that outbox is empty
-        self.assert_quantity_in_outbox(0)
-
-    def test_handle_request_no_http_server(self):
-        """Test the _handle_request method of the http handler when http server is disabled."""
-
-        incoming_message = self.build_incoming_message(
-            message_type=HttpMessage,
-            performative=HttpMessage.Performative.REQUEST,
-            method="get",
-            url="some_url",
-            headers="",
-            version="",
-            body=b"",
-        )
-
-        # handle message with logging
-        with patch.object(self.logger, "log") as mock_logger:
-            self.http_handler.handle(incoming_message)
-
-        # after
-        mock_logger.assert_any_call(
-            logging.INFO,
-            "received http request with method=get, url=some_url and body=b''",
-        )
-
-        mock_logger.assert_any_call(
-            logging.INFO, "http server is not enabled.",
-        )
-        # check that outbox is empty
-        self.assert_quantity_in_outbox(0)
 
     def test_teardown(self):
         """Test the teardown method of the http handler."""
