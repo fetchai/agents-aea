@@ -94,7 +94,7 @@ class MyScaffoldSyncConnection(BaseSyncConnection):
 
     connection_id = CONNECTION_ID
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):  # pragma: no cover
         """
         Initialize the connection.
 
@@ -108,7 +108,7 @@ class MyScaffoldSyncConnection(BaseSyncConnection):
         :param excluded_protocols: the set of protocols ids that we want to exclude for this connection.
         """
         super().__init__(*args, **kwargs)
-        raise NotImplementedError  # pragma: no cover
+        raise NotImplementedError
 
     def main(self) -> None:
         """
