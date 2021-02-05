@@ -383,7 +383,7 @@ class AbstractMultipleRunner:  # pragma: nocover
         else:
             self._executor.start()
 
-    def stop(self, timeout: float = 0) -> None:
+    def stop(self, timeout: Optional[float] = None) -> None:
         """
         Stop agents.
 
