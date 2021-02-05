@@ -110,8 +110,30 @@ class MyScaffoldSyncConnection(BaseSyncConnection):
         super().__init__(*args, **kwargs)
         raise NotImplementedError  # pragma: no cover
 
-    def main(self):
-        """Implement main loop of the connection to run in dedicated thread (if required)."""
+    def main(self) -> None:
+        """
+        Run syncrhonous code in background.
+
+        SyncConnection `main()` usage:
+        The idea of the `main` method in the sync connection
+        is to provide for a way to actively generate messages by the connection via the `put_envelope` method.
+
+        A simple example is the generation of a message every second:
+        ```
+        while self.is_connected:
+            envelope = make_envelope_for_current_time()
+            self.put_enevelope(envelope)
+            time.sleep(1)
+        ```
+        In this case, the connection will generate a message every second
+        regardless of envelopes sent to the connection by the agent.
+        For instance, this way one can implement periodically polling some internet resources
+        and generate envelopes for the agent if some updates are available.
+        Another example is the case where there is some framework that runs blocking
+        code and provides a callback on some internal event.
+        This blocking code can be executed in the main function and new envelopse
+        can be created in the event callback.
+        """
         raise NotImplementedError  # pragma: no cover
 
     def on_send(self, envelope: Envelope) -> None:
