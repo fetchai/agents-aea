@@ -27,7 +27,7 @@ from aea.mail.base import Envelope
 """
 Choose one of the possible implementations:
 
-Sync or Async connection and remove unused one.
+Sync (inherited from BaseSyncConnection) or Async (inherited from Connection) connection and remove unused one.
 """
 
 
