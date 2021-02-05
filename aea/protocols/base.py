@@ -45,6 +45,7 @@ class Message:
     """This class implements a message."""
 
     protocol_id = None  # type: PublicId
+    protocol_specification_id = None  # type: PublicId
     serializer = None  # type: Type["Serializer"]
 
     __slots__ = ("_slots", "_to", "_sender")
@@ -343,7 +344,6 @@ class Protocol(Component):
         :param message_class: the message class.
         """
         super().__init__(configuration, **kwargs)
-
         self._message_class = message_class
 
     @property
@@ -405,3 +405,17 @@ class Protocol(Component):
         message_class.serializer = serialize_class
 
         return Protocol(configuration, message_class, **kwargs)
+
+    @property
+    def protocol_id(self) -> PublicId:
+        """Get protocol id."""
+        return cast(ProtocolConfig, self._configuration).public_id
+
+    @property
+    def protocol_specification_id(self) -> PublicId:
+        """Get protocol specification id."""
+        return cast(ProtocolConfig, self._configuration).protocol_specification_id
+
+    def __repr__(self) -> str:
+        """Get str repr of the protocol."""
+        return f"Protocol({self.protocol_id})"

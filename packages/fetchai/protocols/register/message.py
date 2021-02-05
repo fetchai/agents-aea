@@ -36,6 +36,7 @@ class RegisterMessage(Message):
     """A protocol for communication between two AEAs for registration."""
 
     protocol_id = PublicId.from_str("fetchai/register:0.4.0")
+    protocol_specification_id = PublicId.from_str("fetchai/register:0.1.0")
 
     class Performative(Message.Performative):
         """Performatives for the register protocol."""
@@ -269,13 +270,6 @@ class RegisterMessage(Message):
                     self.target == 0,
                     "Invalid 'target'. Expected 0 (because 'message_id' is 1). Found {}.".format(
                         self.target
-                    ),
-                )
-            else:
-                enforce(
-                    0 < self.target < self.message_id,
-                    "Invalid 'target'. Expected an integer between 1 and {} inclusive. Found {}.".format(
-                        self.message_id - 1, self.target,
                     ),
                 )
         except (AEAEnforceError, ValueError, KeyError) as e:

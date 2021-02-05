@@ -16,8 +16,8 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""Extension to the Simple OEF and OEF Python SDK."""
 
+"""Extension to the Simple OEF and OEF Python SDK."""
 import asyncio
 import copy
 import logging
@@ -30,17 +30,17 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import suppress
 from enum import Enum
 from pathlib import Path
-from typing import Callable, Dict, List, Optional, Set, Type, Union, cast
+from typing import Callable, Dict, List, Optional, Type, Union, cast
 from urllib import parse
 from uuid import uuid4
 
-import requests
 from defusedxml import ElementTree as ET  # pylint: disable=wrong-import-order
 
 from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
 from aea.exceptions import enforce
+from aea.helpers import http_requests as requests
 from aea.helpers.search.models import (
     Constraint,
     ConstraintTypes,
@@ -224,8 +224,6 @@ class SOEFChannel:
         api_key: str,
         soef_addr: str,
         soef_port: int,
-        excluded_protocols: Set[PublicId],
-        restricted_to_protocols: Set[PublicId],
         chain_identifier: Optional[str] = None,
         token_storage_path: Optional[str] = None,
         logger: logging.Logger = _default_logger,
@@ -237,8 +235,6 @@ class SOEFChannel:
         :param api_key: the SOEF API key.
         :param soef_addr: the SOEF IP address.
         :param soef_port: the SOEF port.
-        :param excluded_protocols: the protocol ids excluded
-        :param restricted_to_protocols: the protocol ids restricted to
         :param chain_identifier: supported chain id
         """
         if chain_identifier is not None and not any(
@@ -253,8 +249,6 @@ class SOEFChannel:
         self.soef_addr = soef_addr
         self.soef_port = soef_port
         self.base_url = "http://{}:{}".format(soef_addr, soef_port)
-        self.excluded_protocols = excluded_protocols
-        self.restricted_to_protocols = restricted_to_protocols
         self.oef_search_dialogues = OefSearchDialogues()
 
         self._token_storage_path = token_storage_path
@@ -412,28 +406,6 @@ class SOEFChannel:
             return {}
         return {"skfilter": filters}
 
-    def _check_protocol_valid(self, envelope: Envelope) -> None:
-        """
-        Check protocol is supported and raises ValueError if not.
-
-        :param envelope: envelope to check protocol of
-        :return: None
-        """
-        is_in_excluded = envelope.protocol_id in (self.excluded_protocols or [])
-        is_in_restricted = not self.restricted_to_protocols or envelope.protocol_id in (
-            self.restricted_to_protocols or []
-        )
-
-        if is_in_excluded or not is_in_restricted:
-            self.logger.error(
-                "This envelope cannot be sent with the soef connection: protocol_id={}".format(
-                    envelope.protocol_id
-                )
-            )
-            raise ValueError(
-                "Cannot send message, invalid protocol: {}".format(envelope.protocol_id)
-            )
-
     async def send(self, envelope: Envelope) -> None:
         """
         Send message handler.
@@ -441,12 +413,11 @@ class SOEFChannel:
         :param envelope: the envelope.
         :return: None
         """
-        self._check_protocol_valid(envelope)
         await self.process_envelope(envelope)
 
     async def _request_text(self, *args, **kwargs) -> str:
         """Perform and http request and return text of response."""
-        # pydocstyle fix. cause black reformat.
+
         def _do_request():
             return requests.request(*args, **kwargs).text
 
@@ -602,7 +573,6 @@ class SOEFChannel:
         envelope = Envelope(
             to=message.to,
             sender=message.sender,
-            protocol_id=message.protocol_id,
             message=message,
             context=oef_search_dialogue.envelope_context,
         )
@@ -922,7 +892,6 @@ class SOEFChannel:
         envelope = Envelope(
             to=message.to,
             sender=message.sender,
-            protocol_id=message.protocol_id,
             message=message,
             context=oef_search_dialogue.envelope_context,
         )
@@ -1156,7 +1125,6 @@ class SOEFChannel:
         envelope = Envelope(
             to=message.to,
             sender=message.sender,
-            protocol_id=message.protocol_id,
             message=message,
             context=oef_search_dialogue.envelope_context,
         )
@@ -1195,8 +1163,6 @@ class SOEFConnection(Connection):
             self.api_key,
             self.soef_addr,
             self.soef_port,
-            self.excluded_protocols,
-            self.restricted_to_protocols,
             chain_identifier=chain_identifier,
             token_storage_path=token_storage_path,
         )

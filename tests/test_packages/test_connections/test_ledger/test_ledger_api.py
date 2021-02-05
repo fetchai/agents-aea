@@ -130,12 +130,7 @@ async def test_get_balance(
         ledger_id=ledger_id,
         address=address,
     )
-    envelope = Envelope(
-        to=request.to,
-        sender=request.sender,
-        protocol_id=request.protocol_id,
-        message=request,
-    )
+    envelope = Envelope(to=request.to, sender=request.sender, message=request,)
 
     await ledger_apis_connection.send(envelope)
     await asyncio.sleep(0.01)
@@ -188,12 +183,7 @@ async def test_get_state(
         args=args,
         kwargs=kwargs,
     )
-    envelope = Envelope(
-        to=request.to,
-        sender=request.sender,
-        protocol_id=request.protocol_id,
-        message=request,
-    )
+    envelope = Envelope(to=request.to, sender=request.sender, message=request,)
 
     await ledger_apis_connection.send(envelope)
     await asyncio.sleep(0.01)
@@ -247,12 +237,7 @@ async def test_send_signed_transaction_ethereum(
         ),
     )
     request = cast(LedgerApiMessage, request)
-    envelope = Envelope(
-        to=request.to,
-        sender=request.sender,
-        protocol_id=request.protocol_id,
-        message=request,
-    )
+    envelope = Envelope(to=request.to, sender=request.sender, message=request,)
     await ledger_apis_connection.send(envelope)
     await asyncio.sleep(0.01)
     response = await ledger_apis_connection.receive()
@@ -277,12 +262,7 @@ async def test_send_signed_transaction_ethereum(
             signed_transaction=SignedTransaction(ETHEREUM, signed_transaction),
         ),
     )
-    envelope = Envelope(
-        to=request.to,
-        sender=request.sender,
-        protocol_id=request.protocol_id,
-        message=request,
-    )
+    envelope = Envelope(to=request.to, sender=request.sender, message=request,)
     await ledger_apis_connection.send(envelope)
     await asyncio.sleep(0.01)
     response = await ledger_apis_connection.receive()
@@ -315,12 +295,7 @@ async def test_send_signed_transaction_ethereum(
             transaction_digest=response_message.transaction_digest,
         ),
     )
-    envelope = Envelope(
-        to=request.to,
-        sender=request.sender,
-        protocol_id=request.protocol_id,
-        message=request,
-    )
+    envelope = Envelope(to=request.to, sender=request.sender, message=request,)
     await ledger_apis_connection.send(envelope)
     await asyncio.sleep(0.01)
     response = await ledger_apis_connection.receive()
@@ -353,7 +328,7 @@ async def test_unsupported_protocol(ledger_apis_connection: LedgerConnection):
     envelope = Envelope(
         to=str(ledger_apis_connection.connection_id),
         sender="test",
-        protocol_id=PublicId.from_str("author/package_name:0.1.0"),
+        protocol_specification_id=PublicId.from_str("author/package_name:0.1.0"),
         message=b"message",
     )
     with pytest.raises(ValueError):

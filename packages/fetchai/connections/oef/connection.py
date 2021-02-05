@@ -24,7 +24,7 @@ from asyncio import AbstractEventLoop, CancelledError
 from concurrent.futures.thread import ThreadPoolExecutor
 from itertools import cycle
 from logging import Logger
-from typing import Dict, List, Optional, Set, Type, cast
+from typing import Dict, List, Optional, Type, cast
 
 import oef
 from oef.agents import OEFAgent
@@ -142,7 +142,6 @@ class OEFChannel(OEFAgent):
         address: Address,
         oef_addr: str,
         oef_port: int,
-        excluded_protocols: Optional[Set[str]] = None,
         logger: Logger = _default_logger,
     ):
         """
@@ -164,7 +163,6 @@ class OEFChannel(OEFAgent):
         self._in_queue = None  # type: Optional[asyncio.Queue]
         self._loop = None  # type: Optional[AbstractEventLoop]
 
-        self.excluded_protocols = excluded_protocols
         self.oef_search_dialogues = OefSearchDialogues()
         self.oef_msg_id = 0
         self.oef_msg_id_to_dialogue = {}  # type: Dict[int, OefSearchDialogue]
@@ -323,7 +321,6 @@ class OEFChannel(OEFAgent):
         envelope = Envelope(
             to=msg.to,
             sender=msg.sender,
-            protocol_id=msg.protocol_id,
             message=msg,
             context=oef_search_dialogue.envelope_context,
         )
@@ -362,7 +359,6 @@ class OEFChannel(OEFAgent):
         envelope = Envelope(
             to=msg.to,
             sender=msg.sender,
-            protocol_id=msg.protocol_id,
             message=msg,
             context=oef_search_dialogue.envelope_context,
         )
@@ -389,12 +385,7 @@ class OEFChannel(OEFAgent):
             error_msg="Destination not available",
             error_data={},
         )
-        envelope = Envelope(
-            to=self.address,
-            sender=DEFAULT_OEF,
-            protocol_id=DefaultMessage.protocol_id,
-            message=msg,
-        )
+        envelope = Envelope(to=self.address, sender=DEFAULT_OEF, message=msg,)
         asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop)
 
     def send(self, envelope: Envelope) -> None:
@@ -404,16 +395,10 @@ class OEFChannel(OEFAgent):
         :param envelope: the message.
         :return: None
         """
-        if self.excluded_protocols is not None:  # pragma: nocover
-            if envelope.protocol_id in self.excluded_protocols:
-                self.aea_logger.error(
-                    "This envelope cannot be sent with the oef connection: protocol_id={}".format(
-                        envelope.protocol_id
-                    )
-                )
-                raise ValueError("Cannot send message.")
-
-        if envelope.protocol_id == OefSearchMessage.protocol_id:
+        if (
+            envelope.protocol_specification_id
+            == OefSearchMessage.protocol_specification_id
+        ):
             self.send_oef_message(envelope)
         else:
             self.send_default_message(envelope)

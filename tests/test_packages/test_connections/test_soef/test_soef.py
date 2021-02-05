@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests of the soef connection module."""
-
 import asyncio
 import os
 from typing import Any, Callable
@@ -29,6 +28,7 @@ from aea.common import Address
 from aea.configurations.base import ConnectionConfig
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.registries import make_crypto
+from aea.exceptions import AEAEnforceError
 from aea.helpers.search.models import (
     Attribute,
     Constraint,
@@ -116,7 +116,7 @@ class TestSoefTokenStorage:
             soef_addr="soef.fetch.ai",
             soef_port=9002,
             token_storage_path=self.token_storage_path,
-            restricted_to_protocols={OefSearchMessage.protocol_id},
+            restricted_to_protocols={OefSearchMessage.protocol_specification_id},
             connection_id=SOEFConnection.connection_id,
         )
         self.connection = SOEFConnection(
@@ -178,7 +178,7 @@ class TestSoef:
             api_key="TwiCIriSl0mLahw17pyqoA",
             soef_addr="soef.fetch.ai",
             soef_port=9002,
-            restricted_to_protocols={OefSearchMessage.protocol_id},
+            restricted_to_protocols={OefSearchMessage.protocol_specification_id},
             connection_id=SOEFConnection.connection_id,
         )
         self.connection = SOEFConnection(
@@ -205,12 +205,7 @@ class TestSoef:
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
 
         with patch.object(
             self.connection.channel,
@@ -235,12 +230,7 @@ class TestSoef:
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
 
         with patch.object(
             self.connection.channel,
@@ -281,12 +271,7 @@ class TestSoef:
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
 
         with patch.object(
             self.connection.channel,
@@ -322,12 +307,7 @@ class TestSoef:
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         await self.connection.send(envelope)
 
         expected_envelope = await asyncio.wait_for(self.connection.receive(), timeout=1)
@@ -353,12 +333,7 @@ class TestSoef:
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         with patch.object(
             self.connection.channel,
             "_request_text",
@@ -380,12 +355,7 @@ class TestSoef:
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         with patch.object(
             self.connection.channel,
             "_request_text",
@@ -397,30 +367,17 @@ class TestSoef:
             await asyncio.wait_for(self.connection.receive(), timeout=1)
 
     @pytest.mark.asyncio
-    async def test_send_excluded_protocol(self):
-        """Test fail on unsupported protocol."""
-        envelope = Envelope(
-            to="soef",
-            sender=self.crypto.address,
-            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
-            message=b"some msg",
-        )
-        self.connection.channel.excluded_protocols = [UNKNOWN_PROTOCOL_PUBLIC_ID]
-        with pytest.raises(
-            ValueError, match=r"Cannot send message, invalid protocol:.*"
-        ):
-            await self.connection.send(envelope)
-
-    @pytest.mark.asyncio
     async def test_bad_message(self):
         """Test fail on bad message."""
         envelope = Envelope(
             to="soef",
             sender=self.crypto.address,
-            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
+            protocol_specification_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=b"some msg",
         )
-        with pytest.raises(ValueError):
+        with pytest.raises(
+            AEAEnforceError, match=r"Message not of type OefSearchMessage"
+        ):
             await self.connection.send(envelope)
 
     @pytest.mark.asyncio
@@ -438,12 +395,7 @@ class TestSoef:
         )
         message.to = str(SOEFConnection.connection_id.to_any())
         message.sender = self.crypto.address
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         with pytest.raises(ValueError):
             await self.connection.send(envelope)
 
@@ -457,12 +409,7 @@ class TestSoef:
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             query=closeness_query,
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
 
         with patch.object(
             self.connection.channel,
@@ -504,12 +451,7 @@ class TestSoef:
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             query=closeness_query,
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
 
         with patch.object(
             self.connection.channel,
@@ -644,7 +586,7 @@ class TestSoef:
     @pytest.mark.asyncio
     async def test_request(self):
         """Test internal method request_text."""
-        with patch("requests.request"):
+        with patch("aea.helpers.http_requests.request"):
             await self.connection.channel._request_text("get", "http://not-exists.com")
 
     @pytest.mark.asyncio
@@ -719,7 +661,7 @@ class TestSoef:
             api_key="TwiCIriSl0mLahw17pyqoA",
             soef_addr="soef.fetch.ai",
             soef_port=9002,
-            restricted_to_protocols={OefSearchMessage.protocol_id},
+            restricted_to_protocols={OefSearchMessage.protocol_specification_id},
             connection_id=SOEFConnection.connection_id,
             chain_identifier=chain_identifier,
         )
@@ -737,7 +679,7 @@ class TestSoef:
             api_key="TwiCIriSl0mLahw17pyqoA",
             soef_addr="soef.fetch.ai",
             soef_port=9002,
-            restricted_to_protocols={OefSearchMessage.protocol_id},
+            restricted_to_protocols={OefSearchMessage.protocol_specification_id},
             connection_id=SOEFConnection.connection_id,
             chain_identifier=chain_identifier,
         )
@@ -754,12 +696,7 @@ class TestSoef:
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
 
         with patch.object(
             self.connection.channel,

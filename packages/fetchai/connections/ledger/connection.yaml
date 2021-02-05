@@ -9,7 +9,7 @@ fingerprint:
   README.md: QmfREqbpqmcSWorR8E7KVFmzYWaYFTAvhM7Q2ujwLRHGHr
   __init__.py: QmZvYZ5ECcWwqiNGh8qNTg735wu51HqaLxTSifUxkQ4KGj
   base.py: QmVYppCr8hjxrungLegu63TEWRTqLZNKbQJcAR4ufLTSgx
-  connection.py: Qmc9XVMhHh3DDsWAWRt7TVgqRe1utQChMUWW8zZUehTKU7
+  connection.py: QmaAHDgnZeBCZF31bGPVQ8LsgajsEpAfLZXbL9a7e4YnMb
   contract_dispatcher.py: QmXYJfCnUADdAXKZYzzGuZt7R7Fh1Mio2B8BWYajS5PoPL
   ledger_dispatcher.py: QmSVrfAv7ScRUzuRmjYsde23xPG11tBoDLXsZKe8eE6eNv
 fingerprint_ignore_patterns: []

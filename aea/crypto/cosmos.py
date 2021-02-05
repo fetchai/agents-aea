@@ -32,7 +32,6 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Any, BinaryIO, Collection, Dict, List, Optional, Tuple, cast
 
-import requests
 from bech32 import bech32_decode, bech32_encode, convertbits
 from ecdsa import SECP256k1, SigningKey, VerifyingKey
 from ecdsa.util import sigencode_string_canonize
@@ -40,6 +39,7 @@ from ecdsa.util import sigencode_string_canonize
 from aea.common import Address, JSONLike
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
 from aea.exceptions import AEAEnforceError
+from aea.helpers import http_requests as requests
 from aea.helpers.base import try_decorator
 
 
@@ -48,10 +48,11 @@ _default_logger = logging.getLogger(__name__)
 _COSMOS = "cosmos"
 TESTNET_NAME = "testnet"
 DEFAULT_FAUCET_URL = "INVALID_URL"
-DEFAULT_ADDRESS = "INVALID_URL"
-DEFAULT_CURRENCY_DENOM = "INVALID_CURRENCY_DENOM"
-DEFAULT_CHAIN_ID = "INVALID_CHAIN_ID"
+DEFAULT_ADDRESS = "https://cosmos.bigdipper.live"
+DEFAULT_CURRENCY_DENOM = "uatom"
+DEFAULT_CHAIN_ID = "cosmoshub-3"
 _BYTECODE = "wasm_byte_code"
+DEFAULT_CLI_COMMAND = "wasmcli"
 
 
 class CosmosHelper(Helper):
@@ -64,7 +65,7 @@ class CosmosHelper(Helper):
         """
         Check whether a transaction is settled or not.
 
-        :param tx_digest: the digest associated to the transaction.
+        :param tx_receipt: the receipt of the transaction.
         :return: True if the transaction has been settled, False o/w.
         """
         is_successful = False
@@ -76,6 +77,38 @@ class CosmosHelper(Helper):
                     f"Transaction not settled. Raw log: {tx_receipt.get('raw_log')}"
                 )
         return is_successful
+
+    @staticmethod
+    def get_code_id(tx_receipt: JSONLike) -> Optional[int]:
+        """
+        Retrieve the `code_id` from a transaction receipt.
+
+        :param tx_receipt: the receipt of the transaction.
+        :return: the code id, if present
+        """
+        code_id: Optional[int] = None
+        try:
+            res = [dic_["value"] for dic_ in tx_receipt["logs"][0]["events"][0]["attributes"] if dic_["key"] == "code_id"]  # type: ignore
+            code_id = int(res[0])
+        except (KeyError, IndexError):  # pragma: nocover
+            code_id = None
+        return code_id
+
+    @staticmethod
+    def get_contract_address(tx_receipt: JSONLike) -> Optional[str]:
+        """
+        Retrieve the `contract_address` from a transaction receipt.
+
+        :param tx_receipt: the receipt of the transaction.
+        :return: the contract address, if present
+        """
+        contract_address: Optional[str] = None
+        try:
+            res = [dic_["value"] for dic_ in tx_receipt["logs"][0]["events"][0]["attributes"] if dic_["key"] == "contract_address"]  # type: ignore
+            contract_address = res[0]
+        except (KeyError, IndexError):  # pragma: nocover
+            contract_address = None
+        return contract_address
 
     @staticmethod
     def is_transaction_valid(
@@ -292,7 +325,7 @@ class CosmosCrypto(Crypto[SigningKey]):
         return signature_base64_str
 
     @staticmethod
-    def format_default_transaction(
+    def _format_default_transaction(
         transaction: JSONLike, signature: str, base64_pbk: str
     ) -> JSONLike:
         """
@@ -326,7 +359,7 @@ class CosmosCrypto(Crypto[SigningKey]):
         return pushable_tx
 
     @staticmethod
-    def format_wasm_transaction(
+    def _format_wasm_transaction(
         transaction: JSONLike, signature: str, base64_pbk: str
     ) -> JSONLike:
         """
@@ -371,10 +404,10 @@ class CosmosCrypto(Crypto[SigningKey]):
 
         msgs = cast(list, transaction.get("msgs", []))
         if len(msgs) == 1 and "type" in msgs[0] and "wasm" in msgs[0]["type"]:
-            return self.format_wasm_transaction(
+            return self._format_wasm_transaction(
                 transaction, signed_transaction, base64_pbk
             )
-        return self.format_default_transaction(
+        return self._format_default_transaction(
             transaction, signed_transaction, base64_pbk
         )
 
@@ -405,6 +438,7 @@ class _CosmosApi(LedgerApi):
         self.network_address = kwargs.pop("address", DEFAULT_ADDRESS)
         self.denom = kwargs.pop("denom", DEFAULT_CURRENCY_DENOM)
         self.chain_id = kwargs.pop("chain_id", DEFAULT_CHAIN_ID)
+        self.cli_command = kwargs.pop("cli_command", DEFAULT_CLI_COMMAND)
 
     @property
     def api(self) -> None:
@@ -461,16 +495,90 @@ class _CosmosApi(LedgerApi):
             result = response.json()
         return result
 
-    def get_deploy_transaction(  # pylint: disable=arguments-differ
+    def get_deploy_transaction(
+        self, contract_interface: Dict[str, str], deployer_address: Address, **kwargs
+    ) -> Optional[JSONLike]:
+        """
+        Get the transaction to deploy the smart contract.
+
+        Dispatches to _get_storage_transaction and _get_init_transaction based on kwargs.
+
+        :param contract_interface: the contract interface.
+        :param deployer_address: The address that will deploy the contract.
+        :returns tx: the transaction dictionary.
+        """
+        denom = (
+            kwargs.pop("denom") if kwargs.get("denom", None) is not None else self.denom
+        )
+        chain_id = (
+            kwargs.pop("chain_id")
+            if kwargs.get("chain_id", None) is not None
+            else self.chain_id
+        )
+        account_number, sequence = self._try_get_account_number_and_sequence(
+            deployer_address
+        )
+        if account_number is None or sequence is None:
+            return None
+        label = kwargs.pop("label", None)
+        code_id = kwargs.pop("code_id", None)
+        amount = kwargs.pop("amount", None)
+        init_msg = kwargs.pop("init_msg", None)
+        unexpected_keys = [
+            key for key in kwargs.keys() if key not in ["tx_fee", "gas", "memo"]
+        ]
+        if len(unexpected_keys) != 0:  # pragma: nocover
+            raise ValueError(f"Unexpected keyword arguments: {unexpected_keys}")
+        if label is None and code_id is None and amount is None and init_msg is None:
+            return self._get_storage_transaction(
+                contract_interface,
+                deployer_address,
+                denom,
+                chain_id,
+                account_number,
+                sequence,
+                **kwargs,
+            )
+        if label is None:
+            raise ValueError(  # pragma: nocover
+                "Missing required keyword argument `label` of type `str` for `_get_init_transaction`."
+            )
+        if code_id is None:
+            raise ValueError(  # pragma: nocover
+                "Missing required keyword argument `code_id` of type `int` for `_get_init_transaction`."
+            )
+        if amount is None:
+            raise ValueError(  # pragma: nocover
+                "Missing required keyword argument `amount` of type `int` for `_get_init_transaction`."
+            )
+        if init_msg is None:
+            raise ValueError(  # pragma: nocover
+                "Missing required keyword argument `init_msg` of type `JSONLike` `for `_get_init_transaction`."
+            )
+        return self._get_init_transaction(
+            deployer_address,
+            denom,
+            chain_id,
+            account_number,
+            sequence,
+            amount,
+            code_id,
+            init_msg,
+            label,
+            **kwargs,
+        )
+
+    def _get_storage_transaction(
         self,
         contract_interface: Dict[str, str],
         deployer_address: Address,
+        denom: str,
+        chain_id: str,
+        account_number: int,
+        sequence: int,
         tx_fee: int = 0,
-        gas: int = 80000,
-        denom: Optional[str] = None,
+        gas: int = 0,
         memo: str = "",
-        chain_id: Optional[str] = None,
-        **kwargs,
     ) -> Optional[JSONLike]:
         """
         Create a CosmWasm bytecode deployment transaction.
@@ -482,14 +590,7 @@ class _CosmosApi(LedgerApi):
         :param chain_id: the Chain ID of the CosmWasm transaction. Default is 1 (i.e. mainnet).
         :return: the unsigned CosmWasm contract deploy message
         """
-        denom = denom if denom is not None else self.denom
-        chain_id = chain_id if chain_id is not None else self.chain_id
-        account_number, sequence = self._try_get_account_number_and_sequence(
-            deployer_address
-        )
-        if account_number is None or sequence is None:
-            return None
-        deploy_msg = {
+        store_msg = {
             "type": "wasm/store-code",
             "value": {
                 "sender": deployer_address,
@@ -499,29 +600,24 @@ class _CosmosApi(LedgerApi):
             },
         }
         tx = self._get_transaction(
-            account_number,
-            chain_id,
-            tx_fee,
-            denom,
-            gas,
-            memo,
-            sequence,
-            msg=deploy_msg,
+            account_number, chain_id, tx_fee, denom, gas, memo, sequence, msg=store_msg,
         )
         return tx
 
-    def get_init_transaction(
+    def _get_init_transaction(
         self,
         deployer_address: Address,
-        code_id: int,
-        init_msg: Any,
+        denom: str,
+        chain_id: str,
+        account_number: int,
+        sequence: int,
         amount: int,
-        tx_fee: int,
-        gas: int = 80000,
-        denom: Optional[str] = None,
-        label: str = "",
+        code_id: int,
+        init_msg: JSONLike,
+        label: str,
+        tx_fee: int = 0,
+        gas: int = 0,
         memo: str = "",
-        chain_id: Optional[str] = None,
     ) -> Optional[JSONLike]:
         """
         Create a CosmWasm InitMsg transaction.
@@ -537,13 +633,6 @@ class _CosmosApi(LedgerApi):
         :param chain_id: the Chain ID of the CosmWasm transaction. Default is 1 (i.e. mainnet).
         :return: the unsigned CosmWasm InitMsg
         """
-        denom = denom if denom is not None else self.denom
-        chain_id = chain_id if chain_id is not None else self.chain_id
-        account_number, sequence = self._try_get_account_number_and_sequence(
-            deployer_address
-        )
-        if account_number is None or sequence is None:
-            return None
         instantiate_msg = {
             "type": "wasm/instantiate",
             "value": {
@@ -574,7 +663,7 @@ class _CosmosApi(LedgerApi):
         amount: int,
         tx_fee: int,
         denom: Optional[str] = None,
-        gas: int = 80000,
+        gas: int = 0,
         memo: str = "",
         chain_id: Optional[str] = None,
     ) -> Optional[JSONLike]:
@@ -617,13 +706,12 @@ class _CosmosApi(LedgerApi):
         )
         return tx
 
-    @staticmethod
     @try_decorator(
         "Encountered exception when trying to execute wasm transaction: {}",
         logger_method=_default_logger.warning,
     )
-    def try_execute_wasm_transaction(
-        tx_signed: JSONLike, signed_tx_filename: str = "tx.signed"
+    def _try_execute_wasm_transaction(
+        self, tx_signed: JSONLike, signed_tx_filename: str = "tx.signed"
     ) -> Optional[str]:
         """
         Execute a CosmWasm Transaction. QueryMsg doesn't require signing.
@@ -636,26 +724,37 @@ class _CosmosApi(LedgerApi):
                 f.write(json.dumps(tx_signed))
 
             command = [
-                "wasmcli",
+                self.cli_command,
                 "tx",
                 "broadcast",
                 os.path.join(tmpdirname, signed_tx_filename),
             ]
 
-            stdout, _ = subprocess.Popen(  # nosec
-                command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
-            ).communicate()
+            tx_digest_json = json.loads(self._execute_shell_command(command))
 
-        return stdout.decode("ascii")
+        hash_ = cast(str, tx_digest_json["txhash"])
+        return hash_
 
-    @staticmethod
+    def execute_contract_query(
+        self, contract_address: Address, query_msg: JSONLike
+    ) -> Optional[JSONLike]:
+        """
+        Execute a CosmWasm QueryMsg. QueryMsg doesn't require signing.
+
+        :param contract_address: the address of the smart contract.
+        :param query_msg: QueryMsg in JSON format.
+        :return: the message receipt
+        """
+        result = self._try_execute_wasm_query(contract_address, query_msg)
+        return result
+
     @try_decorator(
         "Encountered exception when trying to execute wasm query: {}",
         logger_method=_default_logger.warning,
     )
-    def try_execute_wasm_query(
-        contract_address: Address, query_msg: JSONLike
-    ) -> Optional[str]:
+    def _try_execute_wasm_query(
+        self, contract_address: Address, query_msg: JSONLike
+    ) -> Optional[JSONLike]:
         """
         Execute a CosmWasm QueryMsg. QueryMsg doesn't require signing.
 
@@ -664,7 +763,7 @@ class _CosmosApi(LedgerApi):
         :return: the message receipt
         """
         command = [
-            "wasmcli",
+            self.cli_command,
             "query",
             "wasm",
             "contract-state",
@@ -673,11 +772,7 @@ class _CosmosApi(LedgerApi):
             json.dumps(query_msg),
         ]
 
-        stdout, _ = subprocess.Popen(  # nosec
-            command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
-        ).communicate()
-
-        return stdout.decode("ascii")
+        return json.loads(self._execute_shell_command(command))
 
     def get_transfer_transaction(  # pylint: disable=arguments-differ
         self,
@@ -801,7 +896,7 @@ class _CosmosApi(LedgerApi):
         :return: tx_digest, if present
         """
         if self.is_cosmwasm_transaction(tx_signed):
-            tx_digest = self.try_execute_wasm_transaction(tx_signed)
+            tx_digest = self._try_execute_wasm_transaction(tx_signed)
         elif self.is_transfer_transaction(tx_signed):
             tx_digest = self._try_send_signed_transaction(tx_signed)
         else:  # pragma: nocover
@@ -906,7 +1001,7 @@ class _CosmosApi(LedgerApi):
         return None
 
     @staticmethod
-    def _execute_shell_command(command: List[str]) -> List[Dict[str, str]]:
+    def _execute_shell_command(command: List[str]) -> str:
         """
         Execute command using subprocess and get result as JSON dict.
 
@@ -917,7 +1012,7 @@ class _CosmosApi(LedgerApi):
             command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
         ).communicate()
 
-        return json.loads(stdout.decode("ascii"))
+        return stdout.decode("ascii")
 
     def get_last_code_id(self) -> int:
         """
@@ -926,12 +1021,12 @@ class _CosmosApi(LedgerApi):
         :return: code id of last deployed .wasm bytecode
         """
 
-        command = ["wasmcli", "query", "wasm", "list-code"]
-        res = self._execute_shell_command(command)
+        command = [self.cli_command, "query", "wasm", "list-code"]
+        res = json.loads(self._execute_shell_command(command))
 
         return int(res[-1]["id"])
 
-    def get_contract_address(self, code_id: int) -> str:
+    def get_last_contract_address(self, code_id: int) -> str:
         """
         Get contract address of latest initialised contract by its ID.
 
@@ -939,8 +1034,14 @@ class _CosmosApi(LedgerApi):
         :return: contract address of last initialised contract
         """
 
-        command = ["wasmcli", "query", "wasm", "list-contract-by-code", str(code_id)]
-        res = self._execute_shell_command(command)
+        command = [
+            self.cli_command,
+            "query",
+            "wasm",
+            "list-contract-by-code",
+            str(code_id),
+        ]
+        res = json.loads(self._execute_shell_command(command))
 
         return res[-1]["address"]
 

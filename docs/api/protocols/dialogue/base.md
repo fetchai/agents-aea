@@ -576,6 +576,33 @@ Note if no target_message is provided, the last message in the dialogue will be 
 
 the reply message if it was successfully added as a reply, None otherwise.
 
+<a name="aea.protocols.dialogue.base.Dialogue.get_message_by_id"></a>
+#### get`_`message`_`by`_`id
+
+```python
+ | get_message_by_id(message_id: int) -> Optional[Message]
+```
+
+Get message by id, if not presents return None.
+
+<a name="aea.protocols.dialogue.base.Dialogue.get_outgoing_next_message_id"></a>
+#### get`_`outgoing`_`next`_`message`_`id
+
+```python
+ | get_outgoing_next_message_id() -> int
+```
+
+Get next outgoing message id.
+
+<a name="aea.protocols.dialogue.base.Dialogue.get_incoming_next_message_id"></a>
+#### get`_`incoming`_`next`_`message`_`id
+
+```python
+ | get_incoming_next_message_id() -> int
+```
+
+Get next incoming message id.
+
 <a name="aea.protocols.dialogue.base.Dialogue.__str__"></a>
 #### `__`str`__`
 

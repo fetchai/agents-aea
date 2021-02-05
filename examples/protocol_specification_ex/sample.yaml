@@ -2,60 +2,34 @@
 name: two_party_negotiation
 author: fetchai
 version: 0.1.0
-description: A protocol for negotiation over a fixed set of resources involving two parties.
+description: An example of a protocol specification that describes a protocol for bilateral negotiation.
 license: Apache-2.0
 aea_version: '>=0.9.0, <0.10.0'
+protocol_specification_id: fetchai/two_party_negotiation:0.1.0
 speech_acts:
   cfp:
     query: ct:Query
   propose:
-    number: pt:int
     price: pt:float
-    description: ct:Description
-    flag: pt:bool
-    query: ct:Query
-    proposal: pt:optional[pt:dict[pt:str, pt:str]]
-    rounds: pt:set[pt:int]
-    items: pt:list[pt:str]
-    conditions: pt:optional[pt:union[pt:str, pt:dict[pt:str,pt:int], pt:set[pt:str], pt:dict[pt:str, pt:float]]]
-  request:
-    method: pt:str
-    url: pt:str
-    version: pt:str
-    headers: pt:str
-    bodyy: pt:optional[pt:bytes]
+    proposal: pt:dict[pt:str, pt:str]
+    conditions: pt:optional[pt:union[pt:str, pt:dict[pt:str,pt:str], pt:set[pt:str]]]
+    resources: pt:list[pt:bytes]
   accept: {}
-  inform:
-    inform_number: pt:list[pt:int]
-  inform_reply:
-    reply_message: pt:dict[pt:int, pt:str]
   decline: {}
-  match_accept: {}
 ...
 ---
 ct:Query: |
-  message Nothing {
-  }
-  oneof query{
-      bytes bytes = 1;
-      Nothing nothing = 2;
-      bytes query_bytes = 3;
-  }
-ct:Description: |
-  bytes description = 1;
+  bytes query_bytes = 1;
 ...
 ---
 initiation: [cfp]
 reply:
   cfp: [propose, decline]
-  propose: [accept, decline]
-  request: []
-  inform: [inform-reply]
-  inform_reply: []
-  accept: [decline, match_accept]
+  propose: [propose, accept, decline]
+  accept: []
   decline: []
-  match_accept: []
-termination: [decline, match_accept]
+termination: [accept, decline]
 roles: {buyer, seller}
-end_states: [successful, failed]
+end_states: [agreement_reached, agreement_unreached]
+keep_terminal_state_dialogues: true
 ...

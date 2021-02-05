@@ -26,7 +26,7 @@ from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future
 from concurrent.futures._base import CancelledError as FuturesCancelledError
 from traceback import format_exc
-from typing import Dict, Optional, Set, cast
+from typing import Dict, Optional, cast
 from urllib.parse import parse_qs, urlparse
 
 from aiohttp import web
@@ -194,7 +194,6 @@ class Request(OpenAPIRequest):
         envelope = Envelope(
             to=http_message.to,
             sender=http_message.sender,
-            protocol_id=http_message.protocol_id,
             context=context,
             message=http_message,
         )
@@ -359,7 +358,6 @@ class HTTPChannel(BaseAsyncChannel):
         port: int,
         api_spec_path: Optional[str],
         connection_id: PublicId,
-        restricted_to_protocols: Set[PublicId],
         timeout_window: float = 5.0,
         logger: logging.Logger = _default_logger,
     ):
@@ -378,7 +376,6 @@ class HTTPChannel(BaseAsyncChannel):
         self.host = host
         self.port = port
         self.server_address = "http://{}:{}".format(self.host, self.port)
-        self.restricted_to_protocols = restricted_to_protocols
 
         self._api_spec = APISpec(api_spec_path, self.server_address, logger)
         self.timeout_window = timeout_window
@@ -486,14 +483,6 @@ class HTTPChannel(BaseAsyncChannel):
         if self.http_server is None:  # pragma: nocover
             raise ValueError("Server not connected, call connect first!")
 
-        if envelope.protocol_id not in self.restricted_to_protocols:
-            self.logger.error(
-                "This envelope cannot be sent with the http connection: protocol_id={}".format(
-                    envelope.protocol_id
-                )
-            )
-            raise ValueError("Cannot send message.")
-
         message = cast(HttpMessage, envelope.message)
         dialogue = self._dialogues.update(message)
 
@@ -552,7 +541,6 @@ class HTTPServerConnection(Connection):
             port,
             api_spec_path,
             connection_id=self.connection_id,
-            restricted_to_protocols=self.restricted_to_protocols,
             logger=self.logger,
         )
 

@@ -31,6 +31,7 @@ from requests.exceptions import ConnectionError
 
 from aea.cli.registry.settings import AUTH_TOKEN_KEY, REGISTRY_API_URL
 from aea.cli.registry.utils import (
+    FILE_DOWNLOAD_TIMEOUT,
     _rm_tarfiles,
     check_is_author_logged_in,
     clean_tarfiles,
@@ -226,7 +227,9 @@ class DownloadFileTestCase(TestCase):
         result = download_file(url, cwd)
         expected_result = filepath
         self.assertEqual(result, expected_result)
-        get_mock.assert_called_once_with(url, stream=True)
+        get_mock.assert_called_once_with(
+            url, stream=True, timeout=FILE_DOWNLOAD_TIMEOUT
+        )
 
     def test_download_file_wrong_response(self, get_mock):
         """Test for download_file method wrong response from file server."""

@@ -141,17 +141,23 @@ class TestSkillTestCase(BaseSkillTestCase):
         self.drop_messages_from_outbox(5)
         assert self.get_quantity_in_outbox() == 0
 
-        dummy_message_1 = Message()
+        dummy_message_1 = DefaultMessage(
+            performative=DefaultMessage.Performative.BYTES, content="dummy_2"
+        )
         dummy_message_1.to = "some_to_1"
         dummy_message_1.sender = "some_sender_1"
         self.skill.skill_context.outbox.put_message(dummy_message_1)
 
-        dummy_message_2 = Message()
+        dummy_message_2 = DefaultMessage(
+            performative=DefaultMessage.Performative.BYTES, content="dummy_2"
+        )
         dummy_message_2.to = "some_to_2"
         dummy_message_2.sender = "some_sender_2"
         self.skill.skill_context.outbox.put_message(dummy_message_2)
 
-        dummy_message_3 = Message()
+        dummy_message_3 = DefaultMessage(
+            performative=DefaultMessage.Performative.BYTES, content="dummy_2"
+        )
         dummy_message_3.to = "some_to_3"
         dummy_message_3.sender = "some_sender_3"
         self.skill.skill_context.outbox.put_message(dummy_message_3)
@@ -389,7 +395,7 @@ class TestSkillTestCase(BaseSkillTestCase):
         fipa_dialogues = FipaDialogues(
             self_address=self.skill.skill_context.agent_address
         )
-        _, dialogue = fipa_dialogues.create(
+        base_msg, dialogue = fipa_dialogues.create(
             counterparty="some_counterparty",
             performative=FipaMessage.Performative.CFP,
             query="some_query",
@@ -407,8 +413,8 @@ class TestSkillTestCase(BaseSkillTestCase):
             incoming_message.dialogue_reference
             == dialogue.dialogue_label.dialogue_reference
         )
-        assert incoming_message.message_id == 2
-        assert incoming_message.target == 1
+        assert incoming_message.message_id != base_msg.message_id
+        assert incoming_message.target == base_msg.message_id
         assert incoming_message.performative == performative
         assert incoming_message.proposal == proposal
         assert incoming_message.sender == dialogue.dialogue_label.dialogue_opponent_addr
@@ -450,17 +456,17 @@ class TestSkillTestCase(BaseSkillTestCase):
         )
 
         is_incoming, target = self._provide_unspecified_fields(
-            dialogue_message_unspecified, last_is_incoming=False, message_id=2
+            dialogue_message_unspecified, last_is_incoming=False
         )
         assert is_incoming is True
-        assert target == 1
+        assert target is None
 
         dialogue_message_specified = DialogueMessage(
             FipaMessage.Performative.ACCEPT, {}, False, 4
         )
 
         is_incoming, target = self._provide_unspecified_fields(
-            dialogue_message_specified, last_is_incoming=True, message_id=7
+            dialogue_message_specified, last_is_incoming=True
         )
         assert is_incoming is False
         assert target == 4
@@ -555,8 +561,8 @@ class TestSkillTestCase(BaseSkillTestCase):
         assert dialogue.is_self_initiated
         assert len(dialogue._outgoing_messages) == 4
         assert len(dialogue._incoming_messages) == 4
-        assert dialogue._get_message(4).proposal == "some_counter_proposal_2"
-        assert dialogue._get_message(8).info == "some_info"
+        assert dialogue._incoming_messages[1].proposal == "some_counter_proposal_2"
+        assert dialogue._incoming_messages[3].info == "some_info"
 
     def test_prepare_skill_dialogue_valid_opponent_initiated(self):
         """Positive test for prepare_skill_dialogue method with a valid dialogue initiated by the opponent."""
@@ -599,8 +605,8 @@ class TestSkillTestCase(BaseSkillTestCase):
         assert not dialogue.is_self_initiated
         assert len(dialogue._outgoing_messages) == 4
         assert len(dialogue._incoming_messages) == 4
-        assert dialogue._get_message(4).proposal == "some_counter_proposal_2"
-        assert dialogue._get_message(8).info == "some_info"
+        assert dialogue._outgoing_messages[1].proposal == "some_counter_proposal_2"
+        assert dialogue._outgoing_messages[-1].info == "some_info"
 
     def test_negative_prepare_skill_dialogue_invalid_opponent_initiated(self):
         """Negative test for prepare_skill_dialogue method with an invalid dialogue initiated by the opponent."""
@@ -668,7 +674,7 @@ class TestSkillTestCase(BaseSkillTestCase):
         )
 
         with pytest.raises(
-            AEAEnforceError, match="Cannot update the dialogue with message number 2"
+            AEAEnforceError, match="Cannot update the dialogue with message number .*"
         ):
             self.prepare_skill_dialogue(
                 fipa_dialogues, dialogue_messages, "counterparty",

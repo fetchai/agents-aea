@@ -7,7 +7,7 @@ description: The aries_alice skill implements the alice player in the aries clou
 license: Apache-2.0
 aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
-  README.md: QmTPM1izhVpeEVTvDqicwDoVM9Y1X1TzsKnhZEM7KxtRVv
+  README.md: Qmc88RFakLqDTqT42YGJDCDrH22tW2dkCBAs8wLKMGt5TV
   __init__.py: QmS5M6SpdchpUfdmKfWnjQff4Whu6Q52xLicpChQQZwwYz
   behaviours.py: QmRmz3ch5wbqYoDYRwmHSKzWUartZqbceGzsMMdRJk4RVv
   dialogues.py: QmbNu2XAdis9ot16egeoUYLkuu8FibKtUd125BVMZFodxB

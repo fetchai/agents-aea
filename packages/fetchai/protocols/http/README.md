@@ -14,6 +14,7 @@ version: 0.11.0
 description: A protocol for HTTP requests and responses.
 license: Apache-2.0
 aea_version: '>=0.9.0, <0.10.0'
+protocol_specification_id: fetchai/http:0.1.0
 speech_acts:
   request:
     method: pt:str

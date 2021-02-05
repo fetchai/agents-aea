@@ -1,43 +1,45 @@
 syntax = "proto3";
 
-package aea.fetchai.gym;
+package aea.fetchai.gym.v0_1_0;
 
 message GymMessage{
 
-    // Custom Types
-    message AnyObject{
-        bytes any = 1;
-    }
+  // Custom Types
+  message AnyObject{
+    bytes any = 1;
+  }
 
 
-    // Performatives and contents
-    message Act_Performative{
-        AnyObject action = 1;
-        int32 step_id = 2;
-    }
+  // Performatives and contents
+  message Act_Performative{
+    AnyObject action = 1;
+    int32 step_id = 2;
+  }
 
-    message Percept_Performative{
-        int32 step_id = 1;
-        AnyObject observation = 2;
-        float reward = 3;
-        bool done = 4;
-        AnyObject info = 5;
-    }
+  message Percept_Performative{
+    int32 step_id = 1;
+    AnyObject observation = 2;
+    float reward = 3;
+    bool done = 4;
+    AnyObject info = 5;
+  }
 
-    message Status_Performative{
-        map<string, string> content = 1;
-    }
+  message Status_Performative{
+    map<string, string> content = 1;
+  }
 
-    message Reset_Performative{}
+  message Reset_Performative{
+  }
 
-    message Close_Performative{}
+  message Close_Performative{
+  }
 
 
-    oneof performative{
-        Act_Performative act = 5;
-        Close_Performative close = 6;
-        Percept_Performative percept = 7;
-        Reset_Performative reset = 8;
-        Status_Performative status = 9;
-    }
+  oneof performative{
+    Act_Performative act = 5;
+    Close_Performative close = 6;
+    Percept_Performative percept = 7;
+    Reset_Performative reset = 8;
+    Status_Performative status = 9;
+  }
 }

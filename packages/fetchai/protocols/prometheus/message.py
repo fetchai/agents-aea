@@ -36,6 +36,7 @@ class PrometheusMessage(Message):
     """A protocol for adding and updating metrics to a prometheus server."""
 
     protocol_id = PublicId.from_str("fetchai/prometheus:0.2.0")
+    protocol_specification_id = PublicId.from_str("fetchai/prometheus:0.1.0")
 
     class Performative(Message.Performative):
         """Performatives for the prometheus protocol."""
@@ -323,13 +324,6 @@ class PrometheusMessage(Message):
                     self.target == 0,
                     "Invalid 'target'. Expected 0 (because 'message_id' is 1). Found {}.".format(
                         self.target
-                    ),
-                )
-            else:
-                enforce(
-                    0 < self.target < self.message_id,
-                    "Invalid 'target'. Expected an integer between 1 and {} inclusive. Found {}.".format(
-                        self.message_id - 1, self.target,
                     ),
                 )
         except (AEAEnforceError, ValueError, KeyError) as e:

@@ -124,12 +124,7 @@ class TestLibp2pConnectionPublicDHTRelay:
                     performative=DefaultMessage.Performative.BYTES,
                     content=b"hello",
                 )
-                envelope = Envelope(
-                    to=addr_2,
-                    sender=addr_1,
-                    protocol_id=DefaultMessage.protocol_id,
-                    message=msg,
-                )
+                envelope = Envelope(to=addr_2, sender=addr_1, message=msg,)
 
                 multiplexer1.put(envelope)
                 delivered_envelope = multiplexer2.get(block=True, timeout=20)
@@ -137,7 +132,10 @@ class TestLibp2pConnectionPublicDHTRelay:
                 assert delivered_envelope is not None
                 assert delivered_envelope.to == envelope.to
                 assert delivered_envelope.sender == envelope.sender
-                assert delivered_envelope.protocol_id == envelope.protocol_id
+                assert (
+                    delivered_envelope.protocol_specification_id
+                    == envelope.protocol_specification_id
+                )
                 assert delivered_envelope.message != envelope.message
                 msg = DefaultMessage.serializer.decode(delivered_envelope.message)
                 msg.to = delivered_envelope.to
@@ -188,12 +186,7 @@ class TestLibp2pConnectionPublicDHTRelay:
                         performative=DefaultMessage.Performative.BYTES,
                         content=b"hello",
                     )
-                    envelope = Envelope(
-                        to=addr_2,
-                        sender=addr_1,
-                        protocol_id=DefaultMessage.protocol_id,
-                        message=msg,
-                    )
+                    envelope = Envelope(to=addr_2, sender=addr_1, message=msg,)
 
                     multiplexer1.put(envelope)
                     delivered_envelope = multiplexer2.get(block=True, timeout=20)
@@ -201,7 +194,10 @@ class TestLibp2pConnectionPublicDHTRelay:
                     assert delivered_envelope is not None
                     assert delivered_envelope.to == envelope.to
                     assert delivered_envelope.sender == envelope.sender
-                    assert delivered_envelope.protocol_id == envelope.protocol_id
+                    assert (
+                        delivered_envelope.protocol_specification_id
+                        == envelope.protocol_specification_id
+                    )
                     assert delivered_envelope.message != envelope.message
                     msg = DefaultMessage.serializer.decode(delivered_envelope.message)
                     msg.to = delivered_envelope.to
@@ -274,12 +270,7 @@ class TestLibp2pConnectionPublicDHTDelegate:
                     performative=DefaultMessage.Performative.BYTES,
                     content=b"hello",
                 )
-                envelope = Envelope(
-                    to=addr_2,
-                    sender=addr_1,
-                    protocol_id=DefaultMessage.protocol_id,
-                    message=msg,
-                )
+                envelope = Envelope(to=addr_2, sender=addr_1, message=msg,)
 
                 multiplexer1.put(envelope)
                 delivered_envelope = multiplexer2.get(block=True, timeout=20)
@@ -287,7 +278,10 @@ class TestLibp2pConnectionPublicDHTDelegate:
                 assert delivered_envelope is not None
                 assert delivered_envelope.to == envelope.to
                 assert delivered_envelope.sender == envelope.sender
-                assert delivered_envelope.protocol_id == envelope.protocol_id
+                assert (
+                    delivered_envelope.protocol_specification_id
+                    == envelope.protocol_specification_id
+                )
                 assert delivered_envelope.message != envelope.message
                 msg = DefaultMessage.serializer.decode(delivered_envelope.message)
                 msg.to = delivered_envelope.to
@@ -336,12 +330,7 @@ class TestLibp2pConnectionPublicDHTDelegate:
                         performative=DefaultMessage.Performative.BYTES,
                         content=b"hello",
                     )
-                    envelope = Envelope(
-                        to=addr_2,
-                        sender=addr_1,
-                        protocol_id=DefaultMessage.protocol_id,
-                        message=msg,
-                    )
+                    envelope = Envelope(to=addr_2, sender=addr_1, message=msg,)
 
                     multiplexer1.put(envelope)
                     delivered_envelope = multiplexer2.get(block=True, timeout=20)
@@ -349,7 +338,10 @@ class TestLibp2pConnectionPublicDHTDelegate:
                     assert delivered_envelope is not None
                     assert delivered_envelope.to == envelope.to
                     assert delivered_envelope.sender == envelope.sender
-                    assert delivered_envelope.protocol_id == envelope.protocol_id
+                    assert (
+                        delivered_envelope.protocol_specification_id
+                        == envelope.protocol_specification_id
+                    )
                     assert delivered_envelope.message != envelope.message
                     msg = DefaultMessage.serializer.decode(delivered_envelope.message)
                     msg.to = delivered_envelope.to

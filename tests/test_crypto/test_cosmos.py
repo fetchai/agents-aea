@@ -132,22 +132,79 @@ def test_helper_is_settled():
         warning_mock.assert_called_once()
 
 
+def test_helper_get_code_id():
+    """Test CosmosHelper.is_transaction_settled."""
+    assert (
+        CosmosHelper.get_code_id(
+            {
+                "logs": [
+                    {
+                        "msg_index": 0,
+                        "log": "",
+                        "events": [
+                            {
+                                "type": "message",
+                                "attributes": [
+                                    {"key": "action", "value": "store-code"},
+                                    {"key": "module", "value": "wasm"},
+                                    {
+                                        "key": "signer",
+                                        "value": "fetch1pa7q6urt98dfe2rsvfaefj8zhh792sdfuzym2t",
+                                    },
+                                    {"key": "code_id", "value": "631"},
+                                ],
+                            }
+                        ],
+                    }
+                ]
+            }
+        )
+        == 631
+    )
+
+
+def test_helper_get_contract_address():
+    """Test CosmosHelper.is_transaction_settled."""
+    assert (
+        CosmosHelper.get_contract_address(
+            {
+                "logs": [
+                    {
+                        "msg_index": 0,
+                        "log": "",
+                        "events": [
+                            {
+                                "type": "message",
+                                "attributes": [
+                                    {"key": "action", "value": "instantiate"},
+                                    {"key": "module", "value": "wasm"},
+                                    {
+                                        "key": "signer",
+                                        "value": "fetch1pa7q6urt98dfe2rsvfaefj8zhh792sdfuzym2t",
+                                    },
+                                    {"key": "code_id", "value": "631"},
+                                    {
+                                        "key": "contract_address",
+                                        "value": "fetch1lhd5t8jdjn0n4q27hsah6c0907nxrswcp5l4nw",
+                                    },
+                                ],
+                            }
+                        ],
+                    }
+                ]
+            }
+        )
+        == "fetch1lhd5t8jdjn0n4q27hsah6c0907nxrswcp5l4nw"
+    )
+
+
 @patch.object(
     CosmosApi, "_try_get_account_number_and_sequence", return_value=(None, None)
 )
 def test_cosmos_api_get_deploy_transaction(*args):
     """Test CosmosApi._get_deploy_transaction."""
     cosmos_api = CosmosApi()
-    assert cosmos_api.get_deploy_transaction(*[Mock()] * 7) is None
-
-
-@patch.object(
-    CosmosApi, "_try_get_account_number_and_sequence", return_value=(None, None)
-)
-def test_cosmos_api_get_init_transaction(*args):
-    """Test CosmosApi.get_init_transaction."""
-    cosmos_api = CosmosApi()
-    assert cosmos_api.get_init_transaction(*[Mock()] * 7) is None
+    assert cosmos_api.get_deploy_transaction(*[Mock()] * 2) is None
 
 
 @patch.object(

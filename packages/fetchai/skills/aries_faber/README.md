@@ -9,7 +9,7 @@ This skill is part of the Fetch.ai Aries demo. It simulates the Faber actor of t
  * register credential definition
  * create an invitation
  
-It then sends the invitation detail to an Alice agent that it finds via the SOEF.
+It then sends the invitation detail to an Alice agent that it finds via the sOEF.
 
 ## Behaviours
 
@@ -17,8 +17,8 @@ It then sends the invitation detail to an Alice agent that it finds via the SOEF
 
 ## Handlers
 
-* `http`: handles HTTP messages for communicating with the ledger and Faber ACA
-* `oef_search`: handles `oef_search` messages of finding Alice on the SOEF
+* `http`: handles `http` messages for communicating with the ledger and Faber ACA
+* `oef_search`: handles `oef_search` messages of finding Alice on the sOEF
 
 ## Links
 

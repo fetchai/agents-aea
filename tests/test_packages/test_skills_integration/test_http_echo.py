@@ -21,8 +21,7 @@
 
 from pathlib import Path
 
-import requests
-
+from aea.helpers import http_requests as requests
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from tests.conftest import ROOT_DIR
@@ -33,6 +32,8 @@ API_SPEC_PATH = str(Path(ROOT_DIR, "examples", "http_ex", "petstore.yaml").absol
 
 class TestHttpEchoSkill(AEATestCaseEmpty):
     """Test that http echo skill works."""
+
+    capture_log = True
 
     def test_echo(self):
         """Run the echo skill sequence."""

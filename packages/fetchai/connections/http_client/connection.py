@@ -150,13 +150,7 @@ class HTTPClientAsyncChannel:
     )
 
     def __init__(
-        self,
-        agent_address: Address,
-        address: str,
-        port: int,
-        connection_id: PublicId,
-        excluded_protocols: Optional[Set[PublicId]] = None,
-        restricted_to_protocols: Optional[Set[PublicId]] = None,
+        self, agent_address: Address, address: str, port: int, connection_id: PublicId,
     ):
         """
         Initialize an http client channel.
@@ -171,14 +165,12 @@ class HTTPClientAsyncChannel:
         self.address = address
         self.port = port
         self.connection_id = connection_id
-        self.restricted_to_protocols = restricted_to_protocols
         self._dialogues = HttpDialogues()
 
         self._in_queue = None  # type: Optional[asyncio.Queue]  # pragma: no cover
         self._loop = (
             None
         )  # type: Optional[asyncio.AbstractEventLoop]  # pragma: no cover
-        self.excluded_protocols = excluded_protocols
         self.is_stopped = True
         self._tasks: Set[Task] = set()
 
@@ -315,14 +307,6 @@ class HTTPClientAsyncChannel:
         if request_envelope is None:
             return
 
-        if request_envelope.protocol_id in (self.excluded_protocols or []):
-            self.logger.error(
-                "This envelope cannot be sent with the http client connection: protocol_id={}".format(
-                    request_envelope.protocol_id
-                )
-            )
-            raise ValueError("Cannot send message.")
-
         enforce(
             isinstance(request_envelope.message, HttpMessage),
             "Message not of type HttpMessage",
@@ -401,7 +385,6 @@ class HTTPClientAsyncChannel:
         envelope = Envelope(
             to=http_message.to,
             sender=http_message.sender,
-            protocol_id=http_message.protocol_id,
             context=dialogue.envelope_context,
             message=http_message,
         )
@@ -444,11 +427,7 @@ class HTTPClientConnection(Connection):
         if host is None or port is None:  # pragma: nocover
             raise ValueError("host and port must be set!")
         self.channel = HTTPClientAsyncChannel(
-            self.address,
-            host,
-            port,
-            connection_id=self.connection_id,
-            excluded_protocols=self.excluded_protocols,
+            self.address, host, port, connection_id=self.connection_id,
         )
 
     async def connect(self) -> None:

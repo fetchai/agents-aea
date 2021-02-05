@@ -1,6 +1,6 @@
 agent_name: tac_participant_contract
 author: fetchai
-version: 0.9.0
+version: 0.10.0
 description: An AEA to participate in the TAC (trading agent competition) using an
   ERC1155 smart contract.
 license: Apache-2.0
@@ -12,7 +12,7 @@ connections:
 - fetchai/p2p_libp2p:0.14.0
 - fetchai/soef:0.15.0
 contracts:
-- fetchai/erc1155:0.14.0
+- fetchai/erc1155:0.15.0
 protocols:
 - fetchai/default:0.11.0
 - fetchai/fipa:0.12.0
@@ -21,9 +21,8 @@ protocols:
 - fetchai/state_update:0.9.0
 - fetchai/tac:0.12.0
 skills:
-- fetchai/error:0.11.0
-- fetchai/tac_negotiation:0.17.0
-- fetchai/tac_participation:0.15.0
+- fetchai/tac_negotiation:0.18.0
+- fetchai/tac_participation:0.16.0
 default_connection: fetchai/p2p_libp2p:0.14.0
 default_ledger: ethereum
 logging_config:
@@ -52,14 +51,14 @@ type: connection
 config:
   chain_identifier: ethereum
 ---
-public_id: fetchai/tac_participation:0.15.0
+public_id: fetchai/tac_participation:0.16.0
 type: skill
 models:
   game:
     args:
       is_using_contract: true
 ---
-public_id: fetchai/tac_negotiation:0.17.0
+public_id: fetchai/tac_negotiation:0.18.0
 type: skill
 models:
   strategy:

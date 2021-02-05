@@ -91,14 +91,10 @@ def run():
     }
     default_connection = P2PLibp2pConnection.connection_id
 
-    # create the AEA
-    my_aea = AEA(
-        identity,
-        wallet,
-        resources,
-        default_connection=default_connection,
-        default_routing=default_routing,
+    state_update_protocol = Protocol.from_dir(
+        os.path.join(os.getcwd(), "packages", "fetchai", "protocols", "state_update")
     )
+    resources.add_protocol(state_update_protocol)
 
     # Add the default protocol (which is part of the AEA distribution)
     default_protocol = Protocol.from_dir(
@@ -187,6 +183,14 @@ def run():
     soef_connection = SOEFConnection(configuration=configuration, identity=identity)
     resources.add_connection(soef_connection)
 
+    # create the AEA
+    my_aea = AEA(
+        identity,
+        wallet,
+        resources,
+        default_connection=default_connection,
+        default_routing=default_routing,
+    )
     # Add the error and weather_client skills
     error_skill = Skill.from_dir(
         os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "error"),

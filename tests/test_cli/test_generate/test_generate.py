@@ -55,7 +55,12 @@ def _raise_psperror(*args, **kwargs):
 @mock.patch("builtins.open", mock.mock_open())
 @mock.patch(
     "aea.protocols.generator.common.ConfigLoader.load_protocol_specification",
-    return_value=ProtocolSpecification(name="name", author="author", version="1.0.0"),
+    return_value=ProtocolSpecification(
+        name="name",
+        author="author",
+        version="1.0.0",
+        protocol_specification_id="author/name:0.1.0",
+    ),
 )
 @mock.patch("aea.cli.utils.decorators._cast_ctx")
 class GenerateItemTestCase(TestCase):

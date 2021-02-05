@@ -10,7 +10,7 @@ This skill sends back the contents of any message it receives.
 
 ## Handlers
 
-* `echo`: handles default messages for echoing back the contents of any message received
+* `echo`: handles `default` messages for echoing back the contents of any message received
 
 ## Links
 

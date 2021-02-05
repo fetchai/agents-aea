@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the ethereum module."""
+import json
 import logging
 import time
 from unittest import mock
@@ -243,8 +244,8 @@ def test_get_wealth_positive(caplog):
 
 
 @pytest.mark.ledger
-@mock.patch("requests.get")
-@mock.patch("requests.post")
+@mock.patch("aea.helpers.http_requests.get")
+@mock.patch("aea.helpers.http_requests.post")
 def test_successful_faucet_operation(mock_post, mock_get):
     """Test successful faucet operation."""
     address = "a normal cosmos address would be here"
@@ -280,8 +281,8 @@ def test_successful_faucet_operation(mock_post, mock_get):
 
 
 @pytest.mark.ledger
-@mock.patch("requests.get")
-@mock.patch("requests.post")
+@mock.patch("aea.helpers.http_requests.get")
+@mock.patch("aea.helpers.http_requests.post")
 def test_successful_realistic_faucet_operation(mock_post, mock_get):
     """Test successful realistic faucet operation."""
     address = "a normal cosmos address would be here"
@@ -372,7 +373,7 @@ def test_format_default():
     assert "signature" in signed_transaction["tx"]["signatures"][0]
     signature = signed_transaction["tx"]["signatures"][0]["signature"]
 
-    default_formated_transaction = cc2.format_default_transaction(
+    default_formated_transaction = cc2._format_default_transaction(
         transfer_transaction, signature, base64_pbk
     )
 
@@ -426,7 +427,7 @@ def test_format_cosmwasm():
     assert "signature" in signed_transaction["value"]["signatures"][0]
     signature = signed_transaction["value"]["signatures"][0]["signature"]
 
-    wasm_formated_transaction = cc2.format_wasm_transaction(
+    wasm_formated_transaction = cc2._format_wasm_transaction(
         wasm_transaction, signature, base64_pbk
     )
 
@@ -437,8 +438,8 @@ def test_format_cosmwasm():
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
-def test_get_deploy_transaction_cosmwasm():
-    """Test the get deploy transaction method."""
+def test_get_storage_transaction_cosmwasm():
+    """Test the get storage transaction method."""
     cc2 = FetchAICrypto()
     cosmos_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
 
@@ -453,7 +454,7 @@ def test_get_deploy_transaction_cosmwasm():
     assert "chain_id" in deploy_transaction
     assert "fee" in deploy_transaction and deploy_transaction["fee"] == {
         "amount": [{"amount": "0", "denom": "atestfet"}],
-        "gas": "80000",
+        "gas": "0",
     }
     assert "memo" in deploy_transaction
     assert "msgs" in deploy_transaction and len(deploy_transaction["msgs"]) == 1
@@ -479,8 +480,15 @@ def test_get_init_transaction_cosmwasm():
     deployer_address = cc2.address
     tx_fee = 1
     amount = 10
-    deploy_transaction = cosmos_api.get_init_transaction(
-        deployer_address, code_id, init_msg, amount, tx_fee
+    contract_interface = {"wasm_byte_code": b""}
+    deploy_transaction = cosmos_api.get_deploy_transaction(
+        contract_interface,
+        deployer_address,
+        code_id=code_id,
+        init_msg=init_msg,
+        amount=amount,
+        tx_fee=tx_fee,
+        label="",
     )
 
     assert type(deploy_transaction) == dict and len(deploy_transaction) == 6
@@ -488,7 +496,7 @@ def test_get_init_transaction_cosmwasm():
     assert "chain_id" in deploy_transaction
     assert "fee" in deploy_transaction and deploy_transaction["fee"] == {
         "amount": [{"denom": "atestfet", "amount": "{}".format(tx_fee)}],
-        "gas": "80000",
+        "gas": "0",
     }
     assert "memo" in deploy_transaction
     assert "msgs" in deploy_transaction and len(deploy_transaction["msgs"]) == 1
@@ -526,7 +534,7 @@ def test_get_handle_transaction_cosmwasm():
     assert "chain_id" in handle_transaction
     assert "fee" in handle_transaction and handle_transaction["fee"] == {
         "amount": [{"denom": "atestfet", "amount": "{}".format(tx_fee)}],
-        "gas": "80000",
+        "gas": "0",
     }
     assert "memo" in handle_transaction
     assert "msgs" in handle_transaction and len(handle_transaction["msgs"]) == 1
@@ -549,14 +557,15 @@ def test_try_execute_wasm_query():
     """Test the execute wasm query method."""
     cosmos_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
     process_mock = mock.Mock()
-    output = "output".encode("ascii")
+    output_raw = {"output": 1}
+    output = json.dumps(output_raw).encode("ascii")
     attrs = {"communicate.return_value": (output, "error")}
     process_mock.configure_mock(**attrs)
     with mock.patch("subprocess.Popen", return_value=process_mock):
-        result = cosmos_api.try_execute_wasm_query(
+        result = cosmos_api.execute_contract_query(
             contract_address="contract_address", query_msg={}
         )
-    assert result == output.decode("ascii")
+    assert result == output_raw
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
@@ -566,12 +575,16 @@ def test_try_execute_wasm_transaction():
     """Test the execute wasm query method."""
     cosmos_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
     process_mock = mock.Mock()
-    output = "output".encode("ascii")
+    hash_ = "some_hash"
+    output_raw = {"txhash": hash_}
+    output = json.dumps(output_raw).encode("ascii")
     attrs = {"communicate.return_value": (output, "error")}
     process_mock.configure_mock(**attrs)
     with mock.patch("subprocess.Popen", return_value=process_mock):
-        result = cosmos_api.try_execute_wasm_transaction(tx_signed="signed_transaction")
-    assert result == output.decode("ascii")
+        result = cosmos_api._try_execute_wasm_transaction(
+            tx_signed="signed_transaction"
+        )
+    assert result == hash_
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
@@ -582,7 +595,7 @@ def test_send_signed_transaction_wasm_transaction():
     cosmos_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
     tx_signed = {"value": {"msg": [{"type": "wasm/store-code"}]}}
     with mock.patch.object(
-        cosmos_api, "try_execute_wasm_transaction", return_value="digest"
+        cosmos_api, "_try_execute_wasm_transaction", return_value="digest"
     ):
         result = cosmos_api.send_signed_transaction(tx_signed=tx_signed)
     assert result == "digest"
@@ -613,11 +626,11 @@ def test_get_contract_address(mock_api_call):
         }
     ]
 
-    mock_api_call.return_value = mock_res
+    mock_api_call.return_value = json.dumps(mock_res).encode("ascii")
 
     cosmos_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
 
-    res = cosmos_api.get_contract_address(code_id=999)
+    res = cosmos_api.get_last_contract_address(code_id=999)
     assert res == mock_res[-1]["address"]
 
 
@@ -638,7 +651,7 @@ def test_get_last_code_id(mock_api_call):
         }
     ]
 
-    mock_api_call.return_value = mock_res
+    mock_api_call.return_value = json.dumps(mock_res).encode("ascii")
 
     cosmos_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
 
@@ -659,5 +672,5 @@ def test_execute_shell_command(mock_api_call):
 
     cosmos_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
 
-    res = cosmos_api._execute_shell_command(["test", "command"])
+    res = json.loads(cosmos_api._execute_shell_command(["test", "command"]))
     assert res == {"SOME": "RESULT"}

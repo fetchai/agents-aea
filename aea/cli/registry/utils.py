@@ -21,9 +21,9 @@
 import os
 import tarfile
 from json.decoder import JSONDecodeError
+from typing import Optional
 
 import click
-import requests
 
 from aea.cli.registry.settings import AUTH_TOKEN_KEY, REGISTRY_API_URL
 from aea.cli.utils.config import get_or_create_cli_config
@@ -31,6 +31,12 @@ from aea.cli.utils.context import Context
 from aea.cli.utils.loggers import logger
 from aea.cli.utils.package_utils import find_item_locally
 from aea.configurations.base import PublicId
+from aea.helpers import http_requests as requests
+
+
+FILE_DOWNLOAD_TIMEOUT = (
+    180  # quite big number case possible slow channels and package can be quite big
+)
 
 
 def get_auth_token() -> str:
@@ -119,19 +125,20 @@ def request_api(
     return resp_json
 
 
-def download_file(url: str, cwd: str) -> str:
+def download_file(url: str, cwd: str, timeout: float = FILE_DOWNLOAD_TIMEOUT) -> str:
     """
     Download file from URL and save it in CWD (current working directory).
 
     :param url: str url of the file to download.
     :param cwd: str path to current working directory.
+    :param timeout: float. timeout to download a file
 
     :return: str path to downloaded file
     """
     local_filename = url.split("/")[-1]
     filepath = os.path.join(cwd, local_filename)
     # NOTE the stream=True parameter below
-    response = requests.get(url, stream=True)
+    response = requests.get(url, stream=True, timeout=timeout)
     if response.status_code == 200:
         with open(filepath, "wb") as f:
             f.write(response.raw.read())
@@ -213,22 +220,31 @@ def is_auth_token_present():
     return get_auth_token() is not None
 
 
-def get_package_meta(obj_type: str, public_id: PublicId) -> dict:
+def get_package_meta(
+    obj_type: str, public_id: PublicId, aea_version: Optional[str] = None
+) -> dict:
     """
     Get package meta data from remote registry.
 
+    Optionally filter by AEA version.
+
     :param obj_type: str. component type
     :param public_id: component public id
+    :param aea_version: the AEA version (e.g. "0.1.0") or None.
 
     :return: dict with package details
     """
+    params = dict(aea_version=aea_version) if aea_version else None
     api_path = f"/{obj_type}s/{public_id.author}/{public_id.name}/{public_id.version}"
-    resp = request_api("GET", api_path)
+    resp = request_api("GET", api_path, params=params)
     return resp
 
 
 def get_latest_public_id_mixed(
-    ctx: Context, item_type: str, item_public_id: PublicId,
+    ctx: Context,
+    item_type: str,
+    item_public_id: PublicId,
+    aea_version: Optional[str] = None,
 ) -> PublicId:
     """
     Get latest public id of the message, mixed mode.
@@ -239,6 +255,7 @@ def get_latest_public_id_mixed(
     :param ctx: the CLI context.
     :param item_type: the item type.
     :param item_public_id: the item public id.
+    :param aea_version: the AEA version constraint, or None
     :return: the path to the found package.
     """
     try:
@@ -249,20 +266,28 @@ def get_latest_public_id_mixed(
             "Get latest public id from local registry failed, trying remote registry..."
         )
         # the following might raise exception, but we don't catch it this time
-        package_meta = get_package_meta(item_type, item_public_id)
+        package_meta = get_package_meta(
+            item_type, item_public_id, aea_version=aea_version
+        )
         latest_item_public_id = PublicId.from_str(package_meta["public_id"])
     return latest_item_public_id
 
 
 def get_latest_version_available_in_registry(
-    ctx: Context, item_type: str, item_public_id: PublicId
+    ctx: Context,
+    item_type: str,
+    item_public_id: PublicId,
+    aea_version: Optional[str] = None,
 ) -> PublicId:
     """
     Get latest available package version public id.
 
+    Optionally consider AEA version through the `aea_version` parameter.
+
     :param ctx: Context object.
     :param item_type: the item type.
     :param item_public_id: the item public id.
+    :param aea_version: the AEA version (e.g. "0.1.0") or None.
     :return: the latest public id.
     """
     is_local = ctx.config.get("is_local")
@@ -270,13 +295,13 @@ def get_latest_version_available_in_registry(
     try:
         if is_mixed:
             latest_item_public_id = get_latest_public_id_mixed(
-                ctx, item_type, item_public_id
+                ctx, item_type, item_public_id, aea_version
             )
         elif is_local:
             _, item_config = find_item_locally(ctx, item_type, item_public_id)
             latest_item_public_id = item_config.public_id
         else:
-            package_meta = get_package_meta(item_type, item_public_id)
+            package_meta = get_package_meta(item_type, item_public_id, aea_version)
             latest_item_public_id = PublicId.from_str(package_meta["public_id"])
     except Exception:  # pylint: disable=broad-except
         raise click.ClickException(

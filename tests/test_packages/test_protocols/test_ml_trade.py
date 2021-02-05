@@ -58,16 +58,17 @@ def test_cfp_serialization():
         query=Query([Constraint("something", ConstraintType(">", 1))]),
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=MlTradeMessage.protocol_id, message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = MlTradeMessage.serializer.decode(actual_envelope.message)
@@ -86,16 +87,17 @@ def test_terms_serialization():
         terms=Description({"foo1": 1, "bar1": 2}),
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=MlTradeMessage.protocol_id, message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = MlTradeMessage.serializer.decode(actual_envelope.message)
@@ -113,16 +115,17 @@ def test_accept_serialization():
         tx_digest="some_tx_digest",
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=MlTradeMessage.protocol_id, message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = MlTradeMessage.serializer.decode(actual_envelope.message)
@@ -140,16 +143,17 @@ def test_data_serialization():
         payload=b"some_payload",
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to, sender="sender", protocol_id=MlTradeMessage.protocol_id, message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = MlTradeMessage.serializer.decode(actual_envelope.message)
