@@ -23,7 +23,6 @@ from typing import Dict, List
 
 
 FETCHAI = "fetchai"
-DEFAULT_CONNECTION = "fetchai/stub:latest"
 DEFAULT_PROTOCOL = "fetchai/default:latest"
 SIGNING_PROTOCOL = "fetchai/signing:latest"
 STATE_UPDATE_PROTOCOL = "fetchai/state_update:latest"

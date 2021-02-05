@@ -33,7 +33,6 @@ from aea.configurations.base import ConnectionConfig, PackageType, PublicId
 from aea.configurations.constants import (
     CONNECTIONS,
     DEFAULT_AEA_CONFIG_FILE,
-    DEFAULT_CONNECTION,
     DEFAULT_PROTOCOL,
     PROTOCOLS,
     SIGNING_PROTOCOL,
@@ -62,6 +61,8 @@ if TYPE_CHECKING:  # pragma: nocover
         DefaultDialogues,
     )
     from packages.fetchai.protocols.default.message import DefaultMessage  # noqa: F401
+
+STUB_CONNECTION = "fetchai/stub:latest"
 
 
 @click.command()
@@ -96,13 +97,9 @@ def _load_packages(agent_identity: Identity):
             state_update_protocol_id.name,
         )
     )
-    default_connection_id = PublicId.from_str(DEFAULT_CONNECTION)
     Connection.from_dir(
         os.path.join(
-            VENDOR,
-            default_connection_id.author,
-            CONNECTIONS,
-            default_connection_id.name,
+            VENDOR, STUB_CONNECTION.author, CONNECTIONS, STUB_CONNECTION.name,
         ),
         agent_identity,
         CryptoStore(),

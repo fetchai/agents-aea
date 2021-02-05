@@ -88,7 +88,7 @@
       }
     },
     "default_connection": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "protocols": {
       "type": "array",

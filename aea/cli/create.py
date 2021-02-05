@@ -35,11 +35,9 @@ from aea.cli.utils.decorators import clean_after
 from aea.cli.utils.loggers import logger
 from aea.configurations.base import AgentConfig, PublicId
 from aea.configurations.constants import (
-    CONNECTION,
     CONNECTIONS,
     CONTRACTS,
     DEFAULT_AEA_CONFIG_FILE,
-    DEFAULT_CONNECTION,
     DEFAULT_LEDGER,
     DEFAULT_LICENSE,
     DEFAULT_PROTOCOL,
@@ -144,7 +142,7 @@ def create_aea(
 
         # create a config file inside it
         click.echo("Creating config file {}".format(DEFAULT_AEA_CONFIG_FILE))
-        agent_config = _crete_agent_config(ctx, agent_name, set_author)
+        agent_config = _create_agent_config(ctx, agent_name, set_author)
 
         # next commands must be done from the agent's directory -> overwrite ctx.cwd
         ctx.agent_config = agent_config
@@ -157,13 +155,12 @@ def create_aea(
             add_item(ctx, PROTOCOL, PublicId.from_str(DEFAULT_PROTOCOL))
             add_item(ctx, PROTOCOL, PublicId.from_str(SIGNING_PROTOCOL))
             add_item(ctx, PROTOCOL, PublicId.from_str(STATE_UPDATE_PROTOCOL))
-            add_item(ctx, CONNECTION, PublicId.from_str(DEFAULT_CONNECTION))
 
     except Exception as e:
         raise click.ClickException(str(e))
 
 
-def _crete_agent_config(ctx: Context, agent_name: str, set_author: str) -> AgentConfig:
+def _create_agent_config(ctx: Context, agent_name: str, set_author: str) -> AgentConfig:
     """
     Create agent config.
 
@@ -182,7 +179,7 @@ def _crete_agent_config(ctx: Context, agent_name: str, set_author: str) -> Agent
         registry_path=os.path.join("..", DEFAULT_REGISTRY_PATH),
         description="",
         default_ledger=DEFAULT_LEDGER,
-        default_connection=str(PublicId.from_str(DEFAULT_CONNECTION).to_any()),
+        default_connection=None,
     )
 
     with open(os.path.join(agent_name, DEFAULT_AEA_CONFIG_FILE), "w") as config_file:

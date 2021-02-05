@@ -51,7 +51,6 @@ from aea.configurations.base import (
 from aea.configurations.constants import (
     CONNECTIONS,
     DEFAULT_AEA_CONFIG_FILE,
-    DEFAULT_CONNECTION,
     DEFAULT_ENV_DOTFILE,
     DEFAULT_LEDGER,
     DEFAULT_LOGGING_CONFIG,
@@ -291,7 +290,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
     """
 
     DEFAULT_LEDGER = DEFAULT_LEDGER
-    DEFAULT_CONNECTION = PublicId.from_str(DEFAULT_CONNECTION)
     DEFAULT_CURRENCY_DENOMINATIONS = DEFAULT_CURRENCY_DENOMINATIONS
     DEFAULT_AGENT_ACT_PERIOD = 0.05  # seconds
     DEFAULT_EXECUTION_TIMEOUT = 0
@@ -607,10 +605,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         state_update_protocol = PublicId.from_str(STATE_UPDATE_PROTOCOL)
         self.add_protocol(
             Path(self.registry_dir, FETCHAI, PROTOCOLS, state_update_protocol.name)
-        )
-        # add stub connection
-        self.add_connection(
-            Path(self.registry_dir, FETCHAI, CONNECTIONS, self.DEFAULT_CONNECTION.name)
         )
 
     def _check_can_remove(self, component_id: ComponentId) -> None:
@@ -1075,8 +1069,12 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
                 for component_id in self._package_dependency_manager.connections.keys()
             ]
 
+        if len(selected_connections_ids) == 0:
+            return selected_connections_ids
         # sort default id to be first
         default_connection = self._get_default_connection()
+        if default_connection is None:
+            return []
         full_default_connection_id = [
             connection_id
             for connection_id in selected_connections_ids
@@ -1260,13 +1258,13 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         """
         return self._default_routing
 
-    def _get_default_connection(self) -> PublicId:
+    def _get_default_connection(self) -> Optional[PublicId]:
         """
         Return the default connection.
 
         :return: the default connection
         """
-        return self._default_connection or self.DEFAULT_CONNECTION
+        return self._default_connection
 
     def _get_loop_mode(self) -> str:
         """

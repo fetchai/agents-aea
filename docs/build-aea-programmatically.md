@@ -56,7 +56,7 @@ We will use the stub connection to pass envelopes in and out of the AEA. Ensure 
 ```
 
 ## Initialise the AEA
-We use the <a href="../api/aea_builder#aeabuilder-objects">`AEABuilder`</a> to readily build an AEA. By default, the `AEABuilder` adds the `fetchai/default:0.11.0` protocol, the `fetchai/stub:0.15.0` connection and the `fetchai/error:0.11.0` skill.
+We use the <a href="../api/aea_builder#aeabuilder-objects">`AEABuilder`</a> to readily build an AEA. By default, the `AEABuilder` adds the `fetchai/default:0.11.0` protocol.
 ``` python
     # Instantiate the builder and build the AEA
     # By default, the default protocol, error skill and stub connection are added
@@ -68,6 +68,12 @@ We set the name, add the private key for the AEA to use and set the ledger confi
     builder.set_name("my_aea")
 
     builder.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
+```
+
+Next, we add the `fetchai/stub:0.15.0` connection which will read/write messages from file:
+``` python
+    # Add the stub connection (assuming it is present in the local directory 'packages')
+    builder.add_connection("./packages/fetchai/connections/echo")
 ```
 
 Next, we add the echo skill which will bounce our messages back to us. We first need to place the echo skill into a relevant directory (see path), either by downloading the `packages` directory from the AEA repo or by getting the package from the registry.
