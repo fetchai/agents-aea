@@ -767,7 +767,7 @@ class BaseTimeExecutionCase(TestCase):
     def tearDown(self) -> None:
         """Tear down."""
         self.aea_tool.teardown()
-        self.aea_tool.aea.runtime.main_loop._teardown()
+        self.aea_tool.aea.runtime.agent_loop._teardown()
 
     def prepare(self, function: Callable) -> None:
         """Prepare aea_tool for testing.
@@ -806,7 +806,7 @@ class BaseTimeExecutionCase(TestCase):
         aea = builder.build()
         self.aea_tool = AeaTool(aea)
         self.envelope = AeaTool.dummy_envelope()
-        self.aea_tool.aea.runtime.main_loop._setup()
+        self.aea_tool.aea.runtime.agent_loop._setup()
 
     def test_long_handler_cancelled_by_timeout(self):
         """Test long function terminated by timeout."""
@@ -867,7 +867,7 @@ class HandleTimeoutExecutionCase(BaseTimeExecutionCase):
 
     def aea_action(self):
         """Spin react on AEA."""
-        self.aea_tool.aea.runtime.main_loop._execution_control(
+        self.aea_tool.aea.runtime.agent_loop._execution_control(
             self.aea_tool.handle_envelope, [self.envelope]
         )
 
@@ -877,6 +877,6 @@ class ActTimeoutExecutionCase(BaseTimeExecutionCase):
 
     def aea_action(self):
         """Spin act on AEA."""
-        self.aea_tool.aea.runtime.main_loop._execution_control(
+        self.aea_tool.aea.runtime.agent_loop._execution_control(
             self.behaviour.act_wrapper
         )
