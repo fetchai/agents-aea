@@ -421,7 +421,7 @@ class BaseSyncConnection(Connection):
 
         def _():
             task = self._loop.create_task(self._run_in_pool(self.main))
-            # cause task.set_name sfor python3.8+
+            # cause task.set_name for python3.8+
             setattr(task, "task_name", "Connection main")  # noqa
             task.add_done_callback(self._task_done_callback)
             self._tasks.add(task)
