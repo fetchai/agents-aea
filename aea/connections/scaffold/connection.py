@@ -30,11 +30,13 @@ Choose one of the possible implementations:
 Sync (inherited from BaseSyncConnection) or Async (inherited from Connection) connection and remove unused one.
 """
 
+CONNECTION_ID = PublicId.from_str("fetchai/scaffold:0.1.0")
 
-class MyScaffoldConnection(Connection):
+
+class MyScaffoldAsyncConnection(Connection):
     """Proxy to the functionality of the SDK or API."""
 
-    connection_id = PublicId.from_str("fetchai/scaffold:0.1.0")
+    connection_id = CONNECTION_ID
 
     def __init__(self, **kwargs):
         """
@@ -53,7 +55,7 @@ class MyScaffoldConnection(Connection):
 
     async def connect(self) -> None:
         """
-        Tear down the connection.
+        Set up the connection.
 
         In the implementation, remember to update 'connection_status' accordingly.
         """
@@ -90,7 +92,7 @@ class MyScaffoldSyncConnection(BaseSyncConnection):
 
     MAX_WORKER_THREADS = 5
 
-    connection_id = PublicId.from_str("fetchai/sync_scaffold:0.1.0")
+    connection_id = CONNECTION_ID
 
     def __init__(self, *args, **kwargs):
         """
@@ -109,7 +111,7 @@ class MyScaffoldSyncConnection(BaseSyncConnection):
         raise NotImplementedError  # pragma: no cover
 
     def main(self):
-        """Run main."""
+        """Implement main loop of the connection to run in dedicated thread (if required)."""
         raise NotImplementedError  # pragma: no cover
 
     def on_send(self, envelope: Envelope) -> None:

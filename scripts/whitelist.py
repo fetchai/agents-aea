@@ -71,7 +71,7 @@ _._ensure_valid_envelope_for_external_comms  # unused method (aea/connections/ba
 _._connect_context  # unused method (aea/connections/base.py:125)
 _.has_crypto_store  # unused property (aea/connections/base.py:138)
 _.from_dir  # unused method (aea/connections/base.py:200)
-MyScaffoldConnection  # unused class (aea/connections/scaffold/connection.py:31)
+MyScaffoldAsyncConnection  # unused class (aea/connections/scaffold/connection.py:31)
 _.get_instance  # unused method (aea/contracts/base.py:64)
 _.from_dir  # unused method (aea/contracts/base.py:81)
 _.get_raw_transaction  # unused method (aea/contracts/base.py:147)

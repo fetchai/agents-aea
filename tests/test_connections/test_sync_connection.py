@@ -53,7 +53,7 @@ class SampleConnection(BaseSyncConnection):
 
     def on_send(self, envelope: Envelope) -> None:
         """Run on send."""
-        time.sleep(0.1)
+        time.sleep(self.PAUSE)
         resp_envelope = Mock()
         resp_envelope.message = f"resp for {str(envelope.message)}"
         self.put_envelope(resp_envelope)
