@@ -50,7 +50,7 @@ from aea.protocols.base import Message, Protocol
 class MultiplexerStatus(AsyncState):
     """The connection status class."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the connection status."""
         super().__init__(
             initial_state=ConnectionStates.disconnected, states_enum=ConnectionStates
@@ -93,7 +93,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
         default_routing: Optional[Dict[PublicId, PublicId]] = None,
         default_connection: Optional[PublicId] = None,
         protocols: Optional[List[Union[Protocol, Message]]] = None,
-    ):
+    ) -> None:
         """
         Initialize the connection multiplexer.
 
@@ -684,7 +684,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
 class Multiplexer(AsyncMultiplexer):
     """Transit sync multiplexer for compatibility."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         """
         Initialize the connection multiplexer.
 
@@ -760,7 +760,7 @@ class Multiplexer(AsyncMultiplexer):
 class InBox:
     """A queue from where you can only consume envelopes."""
 
-    def __init__(self, multiplexer: AsyncMultiplexer):
+    def __init__(self, multiplexer: AsyncMultiplexer) -> None:
         """
         Initialize the inbox.
 
@@ -839,7 +839,7 @@ class InBox:
 class OutBox:
     """A queue from where you can only enqueue envelopes."""
 
-    def __init__(self, multiplexer: AsyncMultiplexer):
+    def __init__(self, multiplexer: AsyncMultiplexer) -> None:
         """
         Initialize the outbox.
 

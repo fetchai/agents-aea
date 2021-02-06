@@ -85,7 +85,7 @@ class GoalPursuitReadiness:
         READY = "ready"
         NOT_READY = "not_ready"
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Instantiate the goal pursuit readiness."""
         self._status = GoalPursuitReadiness.Status.NOT_READY
 
@@ -107,7 +107,7 @@ class GoalPursuitReadiness:
 class OwnershipState(BaseOwnershipState):
     """Represent the ownership state of an agent (can proxy a ledger)."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Instantiate an ownership state object.
 
@@ -303,7 +303,7 @@ class OwnershipState(BaseOwnershipState):
 class Preferences(BasePreferences):
     """Class to represent the preferences."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Instantiate an agent preference object."""
         self._exchange_params_by_currency_id = None  # type: Optional[ExchangeParams]
         self._utility_params_by_good_id = None  # type: Optional[UtilityParams]
@@ -597,7 +597,7 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
                 **kwargs,
             )
 
-    def __init__(self, identity: Identity, wallet: Wallet):
+    def __init__(self, identity: Identity, wallet: Wallet) -> None:
         """
         Initialize the decision maker.
 

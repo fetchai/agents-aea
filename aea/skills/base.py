@@ -66,7 +66,7 @@ class SkillContext:
         self,
         agent_context: Optional[AgentContext] = None,
         skill: Optional["Skill"] = None,
-    ):
+    ) -> None:
         """
         Initialize a skill context.
 
@@ -262,7 +262,7 @@ class SkillComponent(ABC):
         skill_context: SkillContext,
         configuration: Optional[SkillComponentConfiguration] = None,
         **kwargs,
-    ):
+    ) -> None:
         """
         Initialize a skill component.
 
@@ -341,7 +341,7 @@ class SkillComponent(ABC):
         path: str,
         configs: Dict[str, SkillComponentConfiguration],
         skill_context: SkillContext,
-    ):
+    ) -> dict:
         """Parse the component module."""
 
 

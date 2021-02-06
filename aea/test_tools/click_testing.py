@@ -50,7 +50,7 @@ class CliRunner(ClickCliRunner):
         catch_exceptions=True,
         color=False,
         **extra
-    ):
+    ) -> Result:
         """Call a cli command with click.testing.CliRunner.invoke."""
         exc_info = None
         exception: Optional[BaseException] = None

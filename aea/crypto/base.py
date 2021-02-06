@@ -34,7 +34,7 @@ class Crypto(Generic[EntityClass], ABC):
 
     def __init__(
         self, private_key_path: Optional[str] = None, **kwargs
-    ):  # pylint: disable=unused-argument
+    ) -> None:  # pylint: disable=unused-argument
         """
         Initialize the crypto object.
 
@@ -47,6 +47,7 @@ class Crypto(Generic[EntityClass], ABC):
                 If not None, the path will be processed by 'load_private_key_from_path()'.
         :param kwargs: keyword arguments.
         """
+        self._kwargs = kwargs
         self._entity = (
             self.generate_private_key()
             if private_key_path is None

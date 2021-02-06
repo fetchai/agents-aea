@@ -24,7 +24,18 @@ from abc import ABC, abstractmethod
 from copy import deepcopy
 from enum import Enum
 from math import asin, cos, radians, sin, sqrt
-from typing import Any, Dict, List, Mapping, Optional, Tuple, Type, Union, cast
+from typing import (
+    Any,
+    Dict,
+    Iterator,
+    List,
+    Mapping,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 
 import aea.helpers.search.models_pb2 as models_pb2
 from aea.exceptions import enforce
@@ -85,7 +96,7 @@ CONSTRAINT_CATEGORIES = [
 class Location:
     """Data structure to represent locations (i.e. a pair of latitude and longitude)."""
 
-    def __init__(self, latitude: float, longitude: float):
+    def __init__(self, latitude: float, longitude: float) -> None:
         """
         Initialize a location.
 
@@ -109,13 +120,13 @@ class Location:
         """
         return haversine(self.latitude, self.longitude, other.latitude, other.longitude)
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         """Compare equality of two locations."""
         if not isinstance(other, Location):
             return False  # pragma: nocover
         return self.latitude == other.latitude and self.longitude == other.longitude
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get the string representation of the data model."""
         return "Location(latitude={},longitude={})".format(
             self.latitude, self.longitude
@@ -180,7 +191,7 @@ class Attribute:
         type_: Type[ATTRIBUTE_TYPES],
         is_required: bool,
         description: str = "",
-    ):
+    ) -> None:
         """
         Initialize an attribute.
 
@@ -194,7 +205,7 @@ class Attribute:
         self.is_required = is_required
         self.description = description
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, Attribute)
@@ -203,7 +214,7 @@ class Attribute:
             and self.is_required == other.is_required
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get the string representation of the data model."""
         return "Attribute(name={},type={},is_required={})".format(
             self.name, self.type, self.is_required
@@ -243,7 +254,9 @@ class Attribute:
 class DataModel:
     """Implements an OEF data model."""
 
-    def __init__(self, name: str, attributes: List[Attribute], description: str = ""):
+    def __init__(
+        self, name: str, attributes: List[Attribute], description: str = ""
+    ) -> None:
         """
         Initialize a data model.
 
@@ -258,7 +271,7 @@ class DataModel:
         self.attributes_by_name = {a.name: a for a in self.attributes}
         self.description = description
 
-    def _check_validity(self):
+    def _check_validity(self) -> None:
         # check if there are duplicated attribute names
         attribute_names = [attribute.name for attribute in self.attributes]
         if len(attribute_names) != len(set(attribute_names)):
@@ -276,7 +289,7 @@ class DataModel:
             and self.attributes == other.attributes
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get the string representation of the data model."""
         return "DataModel(name={},attributes={},description={})".format(
             self.name, {a.name: str(a) for a in self.attributes}, self.description
@@ -336,7 +349,7 @@ class Description:
         values: Mapping[str, ATTRIBUTE_TYPES],
         data_model: Optional[DataModel] = None,
         data_model_name: str = "",
-    ):
+    ) -> None:
         """
         Initialize the description object.
 
@@ -365,11 +378,11 @@ class Description:
             and self.data_model == other.data_model
         )
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator:
         """Create an iterator."""
         return iter(self.values)
 
-    def _check_consistency(self):
+    def _check_consistency(self) -> None:
         """
         Check the consistency of the values of this description.
 
@@ -424,7 +437,7 @@ class Description:
                     )
                 )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get the string representation of the description."""
         return "Description(values={},data_model={})".format(
             self._values, self.data_model
@@ -558,7 +571,7 @@ class ConstraintTypes(Enum):
     NOT_IN = "not_in"
     DISTANCE = "distance"
 
-    def __str__(self):  # pragma: nocover
+    def __str__(self) -> str:  # pragma: nocover
         """Get the string representation."""
         return str(self.value)
 
@@ -583,7 +596,7 @@ class ConstraintType:
 
     """
 
-    def __init__(self, type_: Union[ConstraintTypes, str], value: Any):
+    def __init__(self, type_: Union[ConstraintTypes, str], value: Any) -> None:
         """
         Initialize a constraint type.
 
@@ -597,7 +610,7 @@ class ConstraintType:
         self.value = value
         enforce(self.check_validity(), "ConstraintType initialization inconsistent.")
 
-    def check_validity(self):
+    def check_validity(self) -> bool:
         """
         Check the validity of the input provided.
 
@@ -785,7 +798,7 @@ class ConstraintType:
             return location.distance(value) <= distance
         raise ValueError("Constraint type not recognized.")  # pragma: nocover
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         """Check equality with another object."""
         return (
             isinstance(other, ConstraintType)
@@ -793,17 +806,17 @@ class ConstraintType:
             and self.type == other.type
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get the string representation of the constraint type."""
         return "ConstraintType(value={},type={})".format(self.value, self.type)
 
-    def encode(self):
+    def encode(self) -> Optional[Any]:
         """
         Encode an instance of this class into a protocol buffer object.
 
         :return: the matching protocol buffer object
         """
-        encoding = None
+        encoding: Optional[Any] = None
 
         if (
             self.type == ConstraintTypes.EQUAL
@@ -1101,7 +1114,7 @@ class ConstraintExpr(ABC):
 class And(ConstraintExpr):
     """Implementation of the 'And' constraint expression."""
 
-    def __init__(self, constraints: List[ConstraintExpr]):
+    def __init__(self, constraints: List[ConstraintExpr]) -> None:
         """
         Initialize an 'And' expression.
 
@@ -1128,7 +1141,7 @@ class And(ConstraintExpr):
         """
         return all(constraint.is_valid(data_model) for constraint in self.constraints)
 
-    def check_validity(self):
+    def check_validity(self) -> None:
         """
         Check whether the Constraint Expression satisfies some basic requirements.
 
@@ -1143,7 +1156,7 @@ class And(ConstraintExpr):
         for constraint in self.constraints:
             constraint.check_validity()
 
-    def __eq__(self, other):  # pragma: nocover
+    def __eq__(self, other) -> bool:  # pragma: nocover
         """Compare with another object."""
         return isinstance(other, And) and self.constraints == other.constraints
 
@@ -1175,7 +1188,7 @@ class And(ConstraintExpr):
 class Or(ConstraintExpr):
     """Implementation of the 'Or' constraint expression."""
 
-    def __init__(self, constraints: List[ConstraintExpr]):
+    def __init__(self, constraints: List[ConstraintExpr]) -> None:
         """
         Initialize an 'Or' expression.
 
@@ -1202,7 +1215,7 @@ class Or(ConstraintExpr):
         """
         return all(constraint.is_valid(data_model) for constraint in self.constraints)
 
-    def check_validity(self):
+    def check_validity(self) -> None:
         """
         Check whether the Constraint Expression satisfies some basic requirements.
 
@@ -1217,7 +1230,7 @@ class Or(ConstraintExpr):
         for constraint in self.constraints:
             constraint.check_validity()
 
-    def __eq__(self, other):  # pragma: nocover
+    def __eq__(self, other) -> bool:  # pragma: nocover
         """Compare with another object."""
         return isinstance(other, Or) and self.constraints == other.constraints
 
@@ -1249,7 +1262,7 @@ class Or(ConstraintExpr):
 class Not(ConstraintExpr):
     """Implementation of the 'Not' constraint expression."""
 
-    def __init__(self, constraint: ConstraintExpr):
+    def __init__(self, constraint: ConstraintExpr) -> None:
         """
         Initialize a 'Not' expression.
 
@@ -1275,7 +1288,7 @@ class Not(ConstraintExpr):
         """
         return self.constraint.is_valid(data_model)
 
-    def __eq__(self, other):  # pragma: nocover
+    def __eq__(self, other) -> bool:  # pragma: nocover
         """Compare with another object."""
         return isinstance(other, Not) and self.constraint == other.constraint
 
@@ -1305,7 +1318,7 @@ class Not(ConstraintExpr):
 class Constraint(ConstraintExpr):
     """The atomic component of a constraint expression."""
 
-    def __init__(self, attribute_name: str, constraint_type: ConstraintType):
+    def __init__(self, attribute_name: str, constraint_type: ConstraintType) -> None:
         """
         Initialize a constraint.
 
@@ -1393,7 +1406,7 @@ class Constraint(ConstraintExpr):
         attribute = data_model.attributes_by_name[self.attribute_name]
         return self.constraint_type.is_valid(attribute)
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, Constraint)
@@ -1401,7 +1414,7 @@ class Constraint(ConstraintExpr):
             and self.constraint_type == other.constraint_type
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get the string representation of the constraint."""
         return "Constraint(attribute_name={},constraint_type={})".format(
             self.attribute_name, self.constraint_type
@@ -1503,7 +1516,7 @@ class Query:
 
         return all(c.is_valid(data_model) for c in self.constraints)
 
-    def check_validity(self):
+    def check_validity(self) -> None:
         """
         Check whether the` object is valid.
 
@@ -1528,7 +1541,7 @@ class Query:
                 "for the given data model.".format(type(self).__name__)
             )
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, Query)
@@ -1536,7 +1549,7 @@ class Query:
             and self.model == other.model
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get the string representation of the constraint."""
         return "Query(constraints={},model={})".format(
             [str(c) for c in self.constraints], self.model

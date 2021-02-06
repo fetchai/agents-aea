@@ -40,7 +40,7 @@ _default_logger = logging.getLogger(__name__)
 class AEAInstanceTask(AbstractExecutorTask):
     """Task to run agent instance."""
 
-    def __init__(self, agent: AEA):
+    def __init__(self, agent: AEA) -> None:
         """
         Init aea instance task.
 

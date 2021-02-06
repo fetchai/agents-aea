@@ -69,7 +69,7 @@ class Connection(Component, ABC):
         restricted_to_protocols: Optional[Set[PublicId]] = None,
         excluded_protocols: Optional[Set[PublicId]] = None,
         **kwargs,
-    ):
+    ) -> None:
         """
         Initialize the connection.
 
@@ -190,11 +190,11 @@ class Connection(Component, ABC):
         return self._state.get()
 
     @abstractmethod
-    async def connect(self):
+    async def connect(self) -> None:
         """Set up the connection."""
 
     @abstractmethod
-    async def disconnect(self):
+    async def disconnect(self) -> None:
         """Tear down the connection."""
 
     @abstractmethod
@@ -320,7 +320,7 @@ class BaseSyncConnection(Connection):
         restricted_to_protocols: Optional[Set[PublicId]] = None,
         excluded_protocols: Optional[Set[PublicId]] = None,
         **kwargs,
-    ):
+    ) -> None:
         """
         Initialize the connection.
 
@@ -419,7 +419,7 @@ class BaseSyncConnection(Connection):
     def start_main(self) -> None:
         """Start main function of the connection."""
 
-        def _():
+        def _() -> None:
             task = self._loop.create_task(self._run_in_pool(self.main))
             # cause task.set_name for python3.8+
             setattr(task, "task_name", "Connection main")  # noqa

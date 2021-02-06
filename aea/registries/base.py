@@ -39,7 +39,7 @@ SkillComponentType = TypeVar("SkillComponentType", Handler, Behaviour, Model)
 class Registry(Generic[ItemId, Item], WithLogger, ABC):
     """This class implements an abstract registry."""
 
-    def __init__(self, agent_name: str = "standalone"):
+    def __init__(self, agent_name: str = "standalone") -> None:
         """
         Initialize the registry.
 
@@ -122,7 +122,7 @@ class PublicIdRegistry(Generic[Item], Registry[PublicId, Item]):
     points to the 'latest' version of a package.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the registry."""
         super().__init__()
         self._public_id_to_item: Dict[PublicId, Item] = {}

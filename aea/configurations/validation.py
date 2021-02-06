@@ -22,7 +22,7 @@ import json
 import os
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Iterator, List, Optional, Tuple
 
 import jsonschema
 from jsonschema import Draft4Validator
@@ -92,14 +92,14 @@ class ExtraPropertiesError(ValueError):
 class CustomTypeChecker(TypeChecker):
     """Custom type checker to handle env variables."""
 
-    def is_type(self, instance, type):  # pylint: disable=redefined-builtin
+    def is_type(self, instance, type) -> bool:  # pylint: disable=redefined-builtin
         """Check is instance of type."""
         if is_env_variable(instance):
             return True
         return super().is_type(instance, type)
 
 
-def ownAdditionalProperties(validator, aP, instance, schema):
+def ownAdditionalProperties(validator, aP, instance, schema) -> Iterator:
     """Additioinal properties validator."""
     for _ in additionalProperties(validator, aP, instance, schema):
         raise ExtraPropertiesError(list(find_additional_properties(instance, schema)))
@@ -123,7 +123,7 @@ EnvVarsFriendlyDraft4Validator = extend(
 class ConfigValidator:
     """Configuration validator implementation."""
 
-    def __init__(self, schema_filename: str, env_vars_friendly: bool = False):
+    def __init__(self, schema_filename: str, env_vars_friendly: bool = False) -> None:
         """
         Initialize the parser for configuration files.
 
@@ -277,7 +277,7 @@ def validate_data_with_pattern(
     data_path_value = {tuple(path): value for path, value in dict_to_path_value(data)}
     errors = []
 
-    def check_excludes(path):
+    def check_excludes(path) -> bool:
         for exclude in excludes_:
             if len(exclude) > len(path):  # pragma: nocover
                 continue

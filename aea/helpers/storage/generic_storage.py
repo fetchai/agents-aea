@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 """This module contains the storage implementation."""
 import asyncio
-from typing import List, Optional
+from typing import Any, List, Optional
 from urllib.parse import urlparse
 
 from aea.helpers.async_utils import AsyncState, Runnable
@@ -37,7 +37,9 @@ BACKENDS = {"sqlite": SqliteStorageBackend}
 class AsyncCollection:
     """Async collection."""
 
-    def __init__(self, storage_backend: AbstractStorageBackend, collection_name: str):
+    def __init__(
+        self, storage_backend: AbstractStorageBackend, collection_name: str
+    ) -> None:
         """
         Init collection object.
 
@@ -103,7 +105,7 @@ class AsyncCollection:
 class SyncCollection:
     """Async collection."""
 
-    def __init__(self, async_collection_coro, loop: asyncio.AbstractEventLoop):
+    def __init__(self, async_collection_coro, loop: asyncio.AbstractEventLoop) -> None:
         """
         Init collection object.
 
@@ -113,7 +115,7 @@ class SyncCollection:
         self._loop = loop
         self._async_collection = self._run_sync(async_collection_coro)
 
-    def _run_sync(self, coro):
+    def _run_sync(self, coro) -> Any:
         return asyncio.run_coroutine_threadsafe(coro, self._loop).result()
 
     def put(self, object_id: str, object_body: JSON_TYPES) -> None:
@@ -199,7 +201,7 @@ class Storage(Runnable):
         """Get running state of the storage."""
         return self._is_connected
 
-    async def run(self):
+    async def run(self) -> None:
         """Connect storage."""
         await self._backend.connect()
         self._is_connected = True

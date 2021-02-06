@@ -98,7 +98,7 @@ def _run_agent(
 
     agent = load_agent(agent_dir)
 
-    def stop_event_thread():
+    def stop_event_thread() -> None:
         try:
             stop_event.wait()
         except (KeyboardInterrupt, EOFError, BrokenPipeError) as e:  # pragma: nocover
@@ -171,7 +171,7 @@ class AEADirMultiprocessTask(AbstractMultiprocessExecutorTask):
 
     def __init__(
         self, agent_dir: Union[PathLike, str], log_level: Optional[str] = None
-    ):
+    ) -> None:
         """
         Init aea config dir task.
 

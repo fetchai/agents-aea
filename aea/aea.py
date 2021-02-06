@@ -402,7 +402,7 @@ class AEA(Agent):
         :return: bool, propagate exception if True otherwise skip it.
         """
         # docstyle: ignore # noqa: E800
-        def log_exception(e, fn, is_debug: bool = False):
+        def log_exception(e, fn, is_debug: bool = False) -> None:
             if is_debug:
                 self.logger.debug(f"<{e}> raised during `{fn}`")
             else:

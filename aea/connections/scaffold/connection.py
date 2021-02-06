@@ -38,7 +38,7 @@ class MyScaffoldAsyncConnection(Connection):
 
     connection_id = CONNECTION_ID
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         """
         Initialize the connection.
 
@@ -94,7 +94,7 @@ class MyScaffoldSyncConnection(BaseSyncConnection):
 
     connection_id = CONNECTION_ID
 
-    def __init__(self, *args, **kwargs):  # pragma: no cover
+    def __init__(self, *args, **kwargs) -> None:  # pragma: no cover
         """
         Initialize the connection.
 
@@ -145,7 +145,7 @@ class MyScaffoldSyncConnection(BaseSyncConnection):
         """
         raise NotImplementedError  # pragma: no cover
 
-    def on_connect(self):
+    def on_connect(self) -> None:
         """
         Tear down the connection.
 
@@ -153,7 +153,7 @@ class MyScaffoldSyncConnection(BaseSyncConnection):
         """
         raise NotImplementedError  # pragma: no cover
 
-    def on_disconnect(self):
+    def on_disconnect(self) -> None:
         """
         Tear down the connection.
 

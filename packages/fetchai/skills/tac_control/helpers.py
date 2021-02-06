@@ -276,6 +276,7 @@ def generate_equilibrium_prices_and_holdings(  # pylint: disable=unused-argument
     utility_params_l = []  # type: List[List[float]]
     currency_endowment_l = []  # type: List[int]
     count = 0
+    currency_id = ""
     for agent_addr, good_endowment in agent_addr_to_good_endowments.items():
         agent_addresses.append(agent_addr)
         enforce(
@@ -285,6 +286,7 @@ def generate_equilibrium_prices_and_holdings(  # pylint: disable=unused-argument
         currency_endowment_l.append(
             list(agent_addr_to_currency_endowments[agent_addr].values())[0]
         )
+        currency_id = list(agent_addr_to_currency_endowments[agent_addr].keys())[0]
         enforce(
             len(good_endowment.keys())
             == len(agent_addr_to_utility_params[agent_addr].keys()),
@@ -334,7 +336,7 @@ def generate_equilibrium_prices_and_holdings(  # pylint: disable=unused-argument
         for agent_addr, egh in zip(agent_addresses, eq_good_holdings.tolist())
     }
     eq_currency_holdings_dict = {
-        agent_addr: {"currency_id": cast(float, eq_currency_holding)}
+        agent_addr: {currency_id: cast(float, eq_currency_holding)}
         for agent_addr, eq_currency_holding in zip(
             agent_addresses, eq_currency_holdings.tolist()
         )

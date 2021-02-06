@@ -147,7 +147,7 @@ class Preferences(ABC):
 class ProtectedQueue(Queue):
     """A wrapper of a queue to protect which object can read from it."""
 
-    def __init__(self, access_code: str):
+    def __init__(self, access_code: str) -> None:
         """
         Initialize the protected queue.
 
@@ -237,7 +237,7 @@ class DecisionMakerHandler(WithLogger, ABC):
 
     self_address: str = "decision_maker"
 
-    def __init__(self, identity: Identity, wallet: Wallet, **kwargs):
+    def __init__(self, identity: Identity, wallet: Wallet, **kwargs) -> None:
         """
         Initialize the decision maker handler.
 
@@ -291,9 +291,7 @@ class DecisionMakerHandler(WithLogger, ABC):
 class DecisionMaker(WithLogger):
     """This class implements the decision maker."""
 
-    def __init__(
-        self, decision_maker_handler: DecisionMakerHandler,
-    ):
+    def __init__(self, decision_maker_handler: DecisionMakerHandler,) -> None:
         """
         Initialize the decision maker.
 

@@ -36,11 +36,11 @@ class MyScaffoldMessage(Message):
     class Performative(Enum):
         """Scaffold Message types."""
 
-        def __str__(self):
+        def __str__(self) -> str:
             """Get string representation."""
             return str(self.value)  # pragma: no cover
 
-    def __init__(self, performative: Performative, **kwargs):
+    def __init__(self, performative: Performative, **kwargs) -> None:
         """
         Initialize.
 

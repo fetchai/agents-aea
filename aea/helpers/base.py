@@ -205,7 +205,7 @@ class RegexConstrainedString(UserString):
 
     REGEX = re.compile(".*", flags=re.DOTALL)
 
-    def __init__(self, seq):
+    def __init__(self, seq) -> None:
         """Initialize a regex constrained string."""
         super().__init__(seq)
 
@@ -297,7 +297,7 @@ def try_decorator(
     """
 
     # for pydocstyle
-    def decorator(fn):
+    def decorator(fn) -> Callable:
         @wraps(fn)
         def wrapper(*args, **kwargs):
             try:
@@ -332,7 +332,7 @@ def retry_decorator(
     """
 
     # for pydocstyle
-    def decorator(fn):
+    def decorator(fn) -> Callable:
         @wraps(fn)
         def wrapper(*args, **kwargs):
             log = get_logger_method(fn, logger_method)
@@ -533,14 +533,14 @@ _NOT_FOUND = object()
 class cached_property:  # pragma: nocover
     """Cached property from python3.8 functools."""
 
-    def __init__(self, func):
+    def __init__(self, func) -> None:
         """Init cached property."""
         self.func = func
         self.attrname = None
         self.__doc__ = func.__doc__
         self.lock = RLock()
 
-    def __set_name__(self, _, name):
+    def __set_name__(self, _, name) -> None:
         """Set name."""
         if self.attrname is None:
             self.attrname = name
@@ -550,7 +550,7 @@ class cached_property:  # pragma: nocover
                 f"({self.attrname!r} and {name!r})."
             )
 
-    def __get__(self, instance, _=None):
+    def __get__(self, instance, _=None) -> Any:
         """Get instance."""
         if instance is None:
             return self
@@ -624,7 +624,7 @@ class CertRequest:
         not_before: str,
         not_after: str,
         save_path: str,
-    ):
+    ) -> None:
         """
         Initialize the certificate request.
 
@@ -803,7 +803,7 @@ class CertRequest:
         """Compute the JSON representation."""
         return cls(**obj)
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         """Check equality."""
         return (
             isinstance(other, CertRequest)

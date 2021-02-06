@@ -98,12 +98,12 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
     cli_log_options: List[str] = []
 
     @classmethod
-    def set_agent_context(cls, agent_name: str):
+    def set_agent_context(cls, agent_name: str) -> None:
         """Set the current agent context."""
         cls.current_agent_context = agent_name
 
     @classmethod
-    def unset_agent_context(cls):
+    def unset_agent_context(cls) -> None:
         """Unset the current agent context."""
         cls.current_agent_context = ""
 
@@ -430,7 +430,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
             process.wait(timeout=timeout)
 
     @classmethod
-    def is_successfully_terminated(cls, *subprocesses: subprocess.Popen):
+    def is_successfully_terminated(cls, *subprocesses: subprocess.Popen) -> bool:
         """Check if all subprocesses terminated successfully."""
         if not subprocesses:
             subprocesses = tuple(cls.subprocesses)
@@ -685,7 +685,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         os.chdir(Path(path))
 
     @classmethod
-    def _terminate_subprocesses(cls):
+    def _terminate_subprocesses(cls) -> None:
         """Terminate all launched subprocesses."""
         for process in cls.subprocesses:
             if not process.returncode == 0:
@@ -696,27 +696,31 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         cls.subprocesses = []
 
     @classmethod
-    def _join_threads(cls):
+    def _join_threads(cls) -> None:
         """Join all started threads."""
         for thread in cls.threads:
             thread.join()
         cls.threads = []
 
     @classmethod
-    def _read_out(cls, process: subprocess.Popen):  # pragma: nocover # runs in thread!
+    def _read_out(
+        cls, process: subprocess.Popen
+    ) -> None:  # pragma: nocover # runs in thread!
         for line in TextIOWrapper(process.stdout, encoding="utf-8"):
             cls._log_capture("stdout", process.pid, line)
             cls.stdout[process.pid] += line
 
     @classmethod
-    def _read_err(cls, process: subprocess.Popen):  # pragma: nocover # runs in thread!
+    def _read_err(
+        cls, process: subprocess.Popen
+    ) -> None:  # pragma: nocover # runs in thread!
         if process.stderr is not None:
             for line in TextIOWrapper(process.stderr, encoding="utf-8"):
                 cls._log_capture("stderr", process.pid, line)
                 cls.stderr[process.pid] += line
 
     @classmethod
-    def _log_capture(cls, name, pid, line):  # pragma: nocover
+    def _log_capture(cls, name, pid, line) -> None:  # pragma: nocover
         if not cls.capture_log:
             return
         sys.stdout.write(f"[{pid}]{name}>{line}")
@@ -752,7 +756,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         return str(cls.t / cls.current_agent_context)
 
     @classmethod
-    def send_envelope_to_agent(cls, envelope: Envelope, agent: str):
+    def send_envelope_to_agent(cls, envelope: Envelope, agent: str) -> None:
         """Send an envelope to an agent, using the stub connection."""
         # check added cause sometimes fails on win with permission error
         dir_path = Path(cls.t / agent)
@@ -814,7 +818,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
     @classmethod
     def is_running(
         cls, process: subprocess.Popen, timeout: int = DEFAULT_LAUNCH_TIMEOUT
-    ):
+    ) -> bool:
         """
         Check if the AEA is launched and running (ready to process messages).
 
@@ -828,7 +832,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         return missing_strings == []
 
     @classmethod
-    def invoke(cls, *args):
+    def invoke(cls, *args) -> Result:
         """Call the cli command."""
         with cd(cls._get_cwd()):
             result = cls.runner.invoke(
@@ -853,7 +857,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         return agent_config
 
     @classmethod
-    def setup_class(cls):
+    def setup_class(cls) -> None:
         """Set up the test class."""
         cls.runner = CliRunner()
         cls.old_cwd = Path(os.getcwd())
@@ -873,7 +877,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         cls.stderr = {}
 
     @classmethod
-    def teardown_class(cls):
+    def teardown_class(cls) -> None:
         """Teardown the test."""
         cls.change_directory(cls.old_cwd)
         cls.terminate_agents(*cls.subprocesses)
@@ -899,7 +903,7 @@ class UseOef:  # pylint: disable=too-few-public-methods
     """Inherit from this class to launch an OEF node."""
 
     @pytest.fixture(autouse=True)
-    def _start_oef_node(self, network_node):
+    def _start_oef_node(self, network_node) -> None:
         """Start an oef node."""
 
 
@@ -915,7 +919,7 @@ class AEATestCaseEmpty(BaseAEATestCase):
     IS_EMPTY = False
 
     @classmethod
-    def setup_class(cls):
+    def setup_class(cls) -> None:
         """Set up the test class."""
         super(AEATestCaseEmpty, cls).setup_class()
         cls.agent_name = "agent-" + "".join(random.choices(string.ascii_lowercase, k=5))
@@ -923,7 +927,7 @@ class AEATestCaseEmpty(BaseAEATestCase):
         cls.set_agent_context(cls.agent_name)
 
     @classmethod
-    def teardown_class(cls):
+    def teardown_class(cls) -> None:
         """Teardown the test class."""
         super(AEATestCaseEmpty, cls).teardown_class()
         cls.agent_name = ""
@@ -933,12 +937,12 @@ class AEATestCaseMany(BaseAEATestCase):
     """Test case for many AEA projects."""
 
     @classmethod
-    def setup_class(cls):
+    def setup_class(cls) -> None:
         """Set up the test class."""
         super(AEATestCaseMany, cls).setup_class()
 
     @classmethod
-    def teardown_class(cls):
+    def teardown_class(cls) -> None:
         """Teardown the test class."""
         super(AEATestCaseMany, cls).teardown_class()
 
@@ -958,7 +962,7 @@ class AEATestCase(BaseAEATestCase):
     t: Path  # temporary directory path
 
     @classmethod
-    def setup_class(cls):
+    def setup_class(cls) -> None:
         """Set up the test class."""
         # make paths absolute
         cls.path_to_aea = cls.path_to_aea.absolute()
@@ -980,7 +984,7 @@ class AEATestCase(BaseAEATestCase):
         cls.set_agent_context(cls.agent_name)
 
     @classmethod
-    def teardown_class(cls):
+    def teardown_class(cls) -> None:
         """Teardown the test class."""
         cls.agent_name = ""
         cls.path_to_aea = Path(".")

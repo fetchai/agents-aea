@@ -104,7 +104,7 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
         # start and stop methods are classmethods cause one instance shared across muiltiple threads
         ExecTimeoutThreadGuard.start()
 
-    def _teardown(self):  # pylint: disable=no-self-use
+    def _teardown(self) -> None:  # pylint: disable=no-self-use
         """Tear down loop on stop."""
         # start and stop methods are classmethods cause one instance shared across muiltiple threads
         ExecTimeoutThreadGuard.stop()
@@ -156,7 +156,7 @@ class AsyncAgentLoop(BaseAgentLoop):
 
     def __init__(
         self, agent: AbstractAgent, loop: AbstractEventLoop = None, threaded=False
-    ):
+    ) -> None:
         """
         Init agent loop.
 

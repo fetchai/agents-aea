@@ -97,7 +97,7 @@ _default_logger = logging.getLogger(__name__)
 class _DependenciesManager:
     """Class to manage dependencies of agent packages."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the dependency graph."""
         # adjacency list of the dependency DAG
         # an arc means "depends on"
@@ -182,7 +182,7 @@ class _DependenciesManager:
                 configuration.component_id
             )
 
-    def remove_component(self, component_id: ComponentId):
+    def remove_component(self, component_id: ComponentId) -> None:
         """
         Remove a component.
 
@@ -312,7 +312,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         with_default_packages: bool = True,
         registry_dir: str = DEFAULT_REGISTRY_NAME,
         build_dir_root: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Initialize the builder.
 
@@ -833,7 +833,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self._remove(component_id)
         return self
 
-    def _remove(self, component_id: ComponentId):
+    def _remove(self, component_id: ComponentId) -> None:
         self._package_dependency_manager.remove_component(component_id)
 
     def add_protocol(self, directory: PathLike) -> "AEABuilder":
@@ -916,7 +916,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self.remove_component(ComponentId(ComponentType.CONTRACT, public_id))
         return self
 
-    def call_all_build_entrypoints(self):
+    def call_all_build_entrypoints(self) -> None:
         """Call all the build entrypoints."""
         for config in self._package_dependency_manager._dependencies.values():  # type: ignore # pylint: disable=protected-access
             self.run_build_for_component_configuration(config, logger=self.logger)
@@ -1352,7 +1352,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
                 )
             )
 
-    def _check_pypi_dependencies(self, configuration: ComponentConfiguration):
+    def _check_pypi_dependencies(self, configuration: ComponentConfiguration) -> None:
         """
         Check that PyPI dependencies of a package don't conflict with the existing ones.
 
@@ -1397,7 +1397,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             )
 
     @staticmethod
-    def _check_valid_entrypoint(build_entrypoint: str, directory: str):
+    def _check_valid_entrypoint(build_entrypoint: str, directory: str) -> None:
         """
         Check a configuration has a valid entrypoint.
 
@@ -1643,7 +1643,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
             resources.add_component(component)
 
-    def _check_we_can_build(self):
+    def _check_we_can_build(self) -> None:
         if self._build_called and self._to_reset:
             raise ValueError(
                 "Cannot build the agent; You have done one of the following:\n"
@@ -1652,7 +1652,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
                 "Please call 'reset() if you want to build another agent."
             )
 
-    def _overwrite_custom_configuration(self, configuration: ComponentConfiguration):
+    def _overwrite_custom_configuration(
+        self, configuration: ComponentConfiguration
+    ) -> ComponentConfiguration:
         """
         Overwrite custom configurations.
 
@@ -1675,7 +1677,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         agent_configuration: AgentConfig,
         aea_project_path: Path,
         skip_consistency_check: bool,
-    ):
+    ) -> None:
         """
         Add components of a given type.
 

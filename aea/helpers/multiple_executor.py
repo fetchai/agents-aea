@@ -58,7 +58,7 @@ class ExecutorExceptionPolicies(Enum):
 class AbstractExecutorTask(ABC):
     """Abstract task class to create Task classes."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Init task."""
         self._future: Optional[TaskAwaitable] = None
 

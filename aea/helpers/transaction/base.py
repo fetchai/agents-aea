@@ -35,9 +35,7 @@ Address = str
 class RawTransaction:
     """This class represents an instance of RawTransaction."""
 
-    def __init__(
-        self, ledger_id: str, body: JSONLike,
-    ):
+    def __init__(self, ledger_id: str, body: JSONLike,) -> None:
         """Initialise an instance of RawTransaction."""
         self._ledger_id = ledger_id
         self._body = body
@@ -54,7 +52,7 @@ class RawTransaction:
         return self._ledger_id
 
     @property
-    def body(self):
+    def body(self) -> JSONLike:
         """Get the body."""
         return self._body
 
@@ -96,7 +94,7 @@ class RawTransaction:
         )
         return cls(raw_transaction_dict["ledger_id"], raw_transaction_dict["body"])
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         """Check equality."""
         return (
             isinstance(other, RawTransaction)
@@ -104,7 +102,7 @@ class RawTransaction:
             and self.body == other.body
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get string representation."""
         return "RawTransaction: ledger_id={}, body={}".format(
             self.ledger_id, self.body,
@@ -116,7 +114,7 @@ class RawMessage:
 
     def __init__(
         self, ledger_id: str, body: bytes, is_deprecated_mode: bool = False,
-    ):
+    ) -> None:
         """Initialise an instance of RawMessage."""
         self._ledger_id = ledger_id
         self._body = body
@@ -138,12 +136,12 @@ class RawMessage:
         return self._ledger_id
 
     @property
-    def body(self):
+    def body(self) -> bytes:
         """Get the body."""
         return self._body
 
     @property
-    def is_deprecated_mode(self):
+    def is_deprecated_mode(self) -> bool:
         """Get the is_deprecated_mode."""
         return self._is_deprecated_mode
 
@@ -187,7 +185,7 @@ class RawMessage:
             raw_message_dict["is_deprecated_mode"],
         )
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         """Check equality."""
         return (
             isinstance(other, RawMessage)
@@ -196,9 +194,9 @@ class RawMessage:
             and self.is_deprecated_mode == other.is_deprecated_mode
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get string representation."""
-        return "RawMessage: ledger_id={}, body={}, is_deprecated_mode={}".format(
+        return "RawMessage: ledger_id={}, body={!r}, is_deprecated_mode={}".format(
             self.ledger_id, self.body, self.is_deprecated_mode,
         )
 
@@ -206,9 +204,7 @@ class RawMessage:
 class SignedTransaction:
     """This class represents an instance of SignedTransaction."""
 
-    def __init__(
-        self, ledger_id: str, body: JSONLike,
-    ):
+    def __init__(self, ledger_id: str, body: JSONLike,) -> None:
         """Initialise an instance of SignedTransaction."""
         self._ledger_id = ledger_id
         self._body = body
@@ -225,7 +221,7 @@ class SignedTransaction:
         return self._ledger_id
 
     @property
-    def body(self):
+    def body(self) -> JSONLike:
         """Get the body."""
         return self._body
 
@@ -269,7 +265,7 @@ class SignedTransaction:
             signed_transaction_dict["ledger_id"], signed_transaction_dict["body"]
         )
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         """Check equality."""
         return (
             isinstance(other, SignedTransaction)
@@ -277,7 +273,7 @@ class SignedTransaction:
             and self.body == other.body
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get string representation."""
         return "SignedTransaction: ledger_id={}, body={}".format(
             self.ledger_id, self.body,
@@ -289,7 +285,7 @@ class SignedMessage:
 
     def __init__(
         self, ledger_id: str, body: str, is_deprecated_mode: bool = False,
-    ):
+    ) -> None:
         """Initialise an instance of SignedMessage."""
         self._ledger_id = ledger_id
         self._body = body
@@ -311,12 +307,12 @@ class SignedMessage:
         return self._ledger_id
 
     @property
-    def body(self):
+    def body(self) -> str:
         """Get the body."""
         return self._body
 
     @property
-    def is_deprecated_mode(self):
+    def is_deprecated_mode(self) -> bool:
         """Get the is_deprecated_mode."""
         return self._is_deprecated_mode
 
@@ -362,7 +358,7 @@ class SignedMessage:
             signed_message_dict["is_deprecated_mode"],
         )
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         """Check equality."""
         return (
             isinstance(other, SignedMessage)
@@ -371,7 +367,7 @@ class SignedMessage:
             and self.is_deprecated_mode == other.is_deprecated_mode
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get string representation."""
         return "SignedMessage: ledger_id={}, body={}, is_deprecated_mode={}".format(
             self.ledger_id, self.body, self.is_deprecated_mode,
@@ -381,7 +377,7 @@ class SignedMessage:
 class State:
     """This class represents an instance of State."""
 
-    def __init__(self, ledger_id: str, body: JSONLike):
+    def __init__(self, ledger_id: str, body: JSONLike) -> None:
         """Initialise an instance of State."""
         self._ledger_id = ledger_id
         self._body = body
@@ -433,7 +429,7 @@ class State:
         state_dict = DictProtobufStructSerializer.decode(state_protobuf_object.state)
         return cls(state_dict["ledger_id"], state_dict["body"])
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         """Check equality."""
         return (
             isinstance(other, State)
@@ -441,7 +437,7 @@ class State:
             and self.body == other.body
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get string representation."""
         return "State: ledger_id={}, body={}".format(self.ledger_id, self.body)
 
@@ -461,7 +457,7 @@ class Terms:
         fee_by_currency_id: Optional[Dict[str, int]] = None,
         is_strict: bool = False,
         **kwargs,
-    ):
+    ) -> None:
         """
         Instantiate terms of a transaction.
 
@@ -909,7 +905,7 @@ class Terms:
             **dict(terms_dict["kwargs"]),
         )
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         """Check equality."""
         return (
             isinstance(other, Terms)
@@ -926,7 +922,7 @@ class Terms:
             else self.has_fee == other.has_fee
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get string representation."""
         return "Terms: ledger_id={}, sender_address={}, counterparty_address={}, amount_by_currency_id={}, quantities_by_good_id={}, is_sender_payable_tx_fee={}, nonce={}, fee_by_currency_id={}, kwargs={}".format(
             self.ledger_id,
@@ -944,7 +940,7 @@ class Terms:
 class TransactionDigest:
     """This class represents an instance of TransactionDigest."""
 
-    def __init__(self, ledger_id: str, body: str):
+    def __init__(self, ledger_id: str, body: str) -> None:
         """Initialise an instance of TransactionDigest."""
         self._ledger_id = ledger_id
         self._body = body
@@ -1006,7 +1002,7 @@ class TransactionDigest:
             transaction_digest_dict["ledger_id"], transaction_digest_dict["body"]
         )
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         """Check equality."""
         return (
             isinstance(other, TransactionDigest)
@@ -1014,7 +1010,7 @@ class TransactionDigest:
             and self.body == other.body
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get string representation."""
         return "TransactionDigest: ledger_id={}, body={}".format(
             self.ledger_id, self.body
@@ -1024,7 +1020,9 @@ class TransactionDigest:
 class TransactionReceipt:
     """This class represents an instance of TransactionReceipt."""
 
-    def __init__(self, ledger_id: str, receipt: JSONLike, transaction: JSONLike):
+    def __init__(
+        self, ledger_id: str, receipt: JSONLike, transaction: JSONLike
+    ) -> None:
         """Initialise an instance of TransactionReceipt."""
         self._ledger_id = ledger_id
         self._receipt = receipt
@@ -1095,7 +1093,7 @@ class TransactionReceipt:
             transaction_receipt_dict["transaction"],
         )
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         """Check equality."""
         return (
             isinstance(other, TransactionReceipt)
@@ -1104,7 +1102,7 @@ class TransactionReceipt:
             and self.transaction == other.transaction
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get string representation."""
         return "TransactionReceipt: ledger_id={}, receipt={}, transaction={}".format(
             self.ledger_id, self.receipt, self.transaction

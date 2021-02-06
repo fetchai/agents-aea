@@ -53,7 +53,7 @@ class Message:
     class Performative(Enum):
         """Performatives for the base message."""
 
-        def __str__(self):
+        def __str__(self) -> str:
             """Get the string representation."""
             return str(self.value)
 
@@ -67,7 +67,7 @@ class Message:
 
     _performatives: Set[str] = set()
 
-    def __init__(self, _body: Optional[Dict] = None, **kwargs):
+    def __init__(self, _body: Optional[Dict] = None, **kwargs) -> None:
         """
         Initialize a Message object.
 
@@ -240,7 +240,7 @@ class Message:
         """Check that the data is consistent."""
         return True
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, Message)
@@ -249,7 +249,7 @@ class Message:
             and self._body == other._body
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Get the representation of the message."""
         body = ",".join(
             map(
@@ -259,7 +259,7 @@ class Message:
         )
         return f"Message(sender={self._sender},to={self._to},{body})"
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get the string representation of the message. Abbreviated to prevent spamming of logs."""
         body = ",".join(
             map(
@@ -336,7 +336,7 @@ class Protocol(Component):
 
     def __init__(
         self, configuration: ProtocolConfig, message_class: Type[Message], **kwargs
-    ):
+    ) -> None:
         """
         Initialize the protocol manager.
 

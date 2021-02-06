@@ -47,7 +47,7 @@ class Component(ABC, WithLogger):
         configuration: Optional[ComponentConfiguration] = None,
         is_vendor: bool = False,
         **kwargs,
-    ):
+    ) -> None:
         """
         Initialize a package.
 
@@ -70,7 +70,7 @@ class Component(ABC, WithLogger):
         return self._is_vendor
 
     @property
-    def prefix_import_path(self):
+    def prefix_import_path(self) -> str:
         """Get the prefix import path for this component."""
         return self.configuration.prefix_import_path
 

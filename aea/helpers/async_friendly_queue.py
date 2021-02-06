@@ -28,7 +28,7 @@ from typing import Any, Deque
 class AsyncFriendlyQueue(queue.Queue):
     """queue.Queue with async_get method."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         """Init queue."""
         super().__init__(*args, **kwargs)
         self._non_empty_waiters: Deque = deque()

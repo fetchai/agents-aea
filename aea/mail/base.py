@@ -45,7 +45,7 @@ class Empty(Exception):
 class URI:
     """URI following RFC3986."""
 
-    def __init__(self, uri_raw: str):
+    def __init__(self, uri_raw: str) -> None:
         """
         Initialize the URI.
 
@@ -117,11 +117,11 @@ class URI:
         """Get the port."""
         return self._port
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get string representation."""
         return self.uri_raw
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, URI)
@@ -146,7 +146,7 @@ class EnvelopeContext:
         connection_id: Optional[PublicId] = None,
         skill_id: Optional[PublicId] = None,
         uri: Optional[URI] = None,
-    ):
+    ) -> None:
         """
         Initialize the envelope context.
 
@@ -209,11 +209,11 @@ class EnvelopeContext:
             )
         return (skill_id, connection_id)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get the string representation."""
         return f"EnvelopeContext(connection_id={self.connection_id}, skill_id={self.skill_id}, uri_raw={self.uri_raw})"
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, EnvelopeContext)
@@ -321,7 +321,7 @@ class Envelope:
         message: Union[Message, bytes],
         context: Optional[EnvelopeContext] = None,
         protocol_specification_id: Optional[PublicId] = None,
-    ):
+    ) -> None:
         """
         Initialize a Message object.
 
@@ -446,12 +446,12 @@ class Envelope:
         return connection_id
 
     @property
-    def is_sender_public_id(self):
+    def is_sender_public_id(self) -> bool:
         """Check if sender is a public id."""
         return PublicId.is_valid_str(self.sender)
 
     @property
-    def is_to_public_id(self):
+    def is_to_public_id(self) -> bool:
         """Check if to is a public id."""
         return PublicId.is_valid_str(self.to)
 
@@ -473,7 +473,7 @@ class Envelope:
             message.sender = sender
         return message
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, Envelope)
@@ -512,13 +512,13 @@ class Envelope:
         envelope = serializer.decode(envelope_bytes)
         return envelope
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get the string representation of an envelope."""
         return "Envelope(to={to}, sender={sender}, protocol_specification_id={protocol_specification_id}, message={message})".format(
             to=self.to,
             sender=self.sender,
             protocol_specification_id=self.protocol_specification_id,
-            message=self.message.decode("utf-8")
+            message="{!r}".format(self.message)
             if isinstance(self.message, bytes)
             else self.message,
         )

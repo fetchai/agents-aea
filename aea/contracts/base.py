@@ -45,7 +45,7 @@ class Contract(Component):
     contract_id = None  # type: PublicId
     contract_interface: Any = None
 
-    def __init__(self, contract_config: ContractConfig, **kwargs):
+    def __init__(self, contract_config: ContractConfig, **kwargs) -> None:
         """
         Initialize the contract.
 
@@ -197,7 +197,7 @@ class Contract(Component):
         raise NotImplementedError
 
 
-def _try_to_register_contract(configuration: ContractConfig):
+def _try_to_register_contract(configuration: ContractConfig) -> None:
     """Register a contract to the registry."""
     if str(configuration.public_id) in contract_registry.specs:  # pragma: nocover
         _default_logger.warning(

@@ -148,11 +148,11 @@ class ProtocolSpecificationParseError(Exception):
 class Configuration(JSONSerializable, ABC):
     """Configuration class."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize a configuration object."""
         # a list of keys that remembers the key order of the configuration file.
         # this is set by the configuration loader.
-        self._key_order = []
+        self._key_order: List[str] = []
 
     @classmethod
     def from_json(cls, obj: Dict) -> "Configuration":
@@ -221,7 +221,7 @@ class PackageConfiguration(Configuration, ABC):
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
         build_entrypoint: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Initialize a package configuration.
 
@@ -262,7 +262,7 @@ class PackageConfiguration(Configuration, ABC):
         return str(self._name)
 
     @name.setter
-    def name(self, value: SimpleIdOrStr):
+    def name(self, value: SimpleIdOrStr) -> None:
         """Set the name."""
         self._name = SimpleId(value)
 
@@ -277,12 +277,12 @@ class PackageConfiguration(Configuration, ABC):
         self._author = SimpleId(value)
 
     @property
-    def aea_version(self):
+    def aea_version(self) -> str:
         """Get the 'aea_version' attribute."""
         return self._aea_version
 
     @aea_version.setter
-    def aea_version(self, new_aea_version: str):
+    def aea_version(self, new_aea_version: str) -> None:
         """Set the 'aea_version' attribute."""
         self._aea_version_specifiers = self._parse_aea_version_specifier(
             new_aea_version
@@ -355,7 +355,7 @@ class PackageConfiguration(Configuration, ABC):
         )
 
     @classmethod
-    def from_json(cls, obj: Dict):
+    def from_json(cls, obj: Dict) -> "PackageConfiguration":
         """Initialize from a JSON object."""
         return cls._create_or_update_from_json(obj=obj, instance=None)
 
@@ -442,7 +442,7 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         build_entrypoint: Optional[str] = None,
         build_directory: Optional[str] = None,
         dependencies: Optional[Dependencies] = None,
-    ):
+    ) -> None:
         """Set component configuration."""
         super().__init__(
             name,
@@ -489,7 +489,7 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         """Check whether the component is abstract."""
         return False
 
-    def _check_configuration_consistency(self, directory: Path):
+    def _check_configuration_consistency(self, directory: Path) -> None:
         """Check that the configuration file is consistent against a directory."""
         self.check_fingerprint(directory)
         self.check_aea_version()
@@ -509,7 +509,7 @@ class ComponentConfiguration(PackageConfiguration, ABC):
             self, directory, False, self.component_type.to_package_type()
         )
 
-    def check_aea_version(self):
+    def check_aea_version(self) -> None:
         """
         Check that the AEA version matches the specifier set.
 
@@ -563,7 +563,7 @@ class ConnectionConfig(ComponentConfiguration):
         is_abstract: bool = False,
         cert_requests: Optional[List[CertRequest]] = None,
         **config,
-    ):
+    ) -> None:
         """Initialize a connection configuration object."""
         if connection_id is None:
             enforce(name != "", "Name or connection_id must be set.")
@@ -743,7 +743,7 @@ class ProtocolConfig(ComponentConfiguration):
         dependencies: Optional[Dependencies] = None,
         description: str = "",
         protocol_specification_id: Optional[str] = None,
-    ):
+    ) -> None:
         """Initialize a connection configuration object."""
         super().__init__(
             name,
@@ -824,7 +824,7 @@ class ProtocolConfig(ComponentConfiguration):
 class SkillComponentConfiguration:
     """This class represent a skill component configuration."""
 
-    def __init__(self, class_name: str, **args):
+    def __init__(self, class_name: str, **args) -> None:
         """
         Initialize a skill component configuration.
 
@@ -906,7 +906,7 @@ class SkillConfig(ComponentConfiguration):
         dependencies: Optional[Dependencies] = None,
         description: str = "",
         is_abstract: bool = False,
-    ):
+    ) -> None:
         """Initialize a skill configuration."""
         super().__init__(
             name,
@@ -1135,7 +1135,7 @@ class AgentConfig(PackageConfiguration):
         runtime_mode: Optional[str] = None,
         storage_uri: Optional[str] = None,
         component_configurations: Optional[Dict[ComponentId, Dict]] = None,
-    ):
+    ) -> None:
         """Instantiate the agent configuration object."""
         super().__init__(
             agent_name,
@@ -1456,7 +1456,7 @@ class AgentConfig(PackageConfiguration):
 class SpeechActContentConfig(Configuration):
     """Handle a speech_act content configuration."""
 
-    def __init__(self, **args):
+    def __init__(self, **args) -> None:
         """Initialize a speech_act content configuration."""
         super().__init__()
         self.args = args  # type: Dict[str, str]
@@ -1467,7 +1467,7 @@ class SpeechActContentConfig(Configuration):
         return self.args
 
     @classmethod
-    def from_json(cls, obj: Dict):
+    def from_json(cls, obj: Dict) -> "SpeechActContentConfig":
         """Initialize from a JSON object."""
         return SpeechActContentConfig(**obj)
 
@@ -1484,7 +1484,7 @@ class ProtocolSpecification(ProtocolConfig):
         aea_version: str = "",
         description: str = "",
         protocol_specification_id: Optional[str] = None,
-    ):
+    ) -> None:
         """Initialize a protocol specification configuration object."""
         super().__init__(
             name,
@@ -1505,7 +1505,7 @@ class ProtocolSpecification(ProtocolConfig):
         return self._protobuf_snippets
 
     @protobuf_snippets.setter
-    def protobuf_snippets(self, protobuf_snippets: Dict):
+    def protobuf_snippets(self, protobuf_snippets: Dict) -> None:
         """Set the protobuf snippets."""
         self._protobuf_snippets = protobuf_snippets
 
@@ -1515,7 +1515,7 @@ class ProtocolSpecification(ProtocolConfig):
         return self._dialogue_config
 
     @dialogue_config.setter
-    def dialogue_config(self, dialogue_config: Dict):
+    def dialogue_config(self, dialogue_config: Dict) -> None:
         """Set the dialogue config."""
         self._dialogue_config = dialogue_config
 
@@ -1594,7 +1594,7 @@ class ContractConfig(ComponentConfiguration):
         description: str = "",
         contract_interface_paths: Optional[Dict[str, str]] = None,
         class_name: str = "",
-    ):
+    ) -> None:
         """Initialize a protocol configuration object."""
         super().__init__(
             name,
@@ -1709,7 +1709,7 @@ def _compare_fingerprints(
     package_directory: Path,
     is_vendor: bool,
     item_type: PackageType,
-):
+) -> None:
     """
     Check fingerprints of a package directory against the fingerprints declared in the configuration file.
 
@@ -1751,7 +1751,7 @@ def _compare_fingerprints(
         )
 
 
-def _check_aea_version(package_configuration: PackageConfiguration):
+def _check_aea_version(package_configuration: PackageConfiguration) -> None:
     """Check the package configuration version against the version of the framework."""
     current_aea_version = Version(__aea_version__)
     version_specifiers = package_configuration.aea_version_specifiers

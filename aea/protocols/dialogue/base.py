@@ -180,7 +180,7 @@ class DialogueLabel:
         )
         return dialogue_label
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get the string representation."""
         return "{}_{}_{}_{}".format(
             self.dialogue_starter_reference,
@@ -214,7 +214,7 @@ class _DialogueMeta(type):
     Creates classlevvel Rules instance
     """
 
-    def __new__(cls, name: str, bases: Tuple[Type], dct: Dict):
+    def __new__(cls, name: str, bases: Tuple[Type], dct: Dict) -> "_DialogueMeta":
         """Construct a new type."""
         # set class level `_rules`
         dialogue_cls: Type[Dialogue] = super().__new__(cls, name, bases, dct)
@@ -309,14 +309,14 @@ class Dialogue(metaclass=_DialogueMeta):
     class Role(Enum):
         """This class defines the agent's role in a dialogue."""
 
-        def __str__(self):
+        def __str__(self) -> str:
             """Get the string representation."""
             return str(self.value)
 
     class EndState(Enum):
         """This class defines the end states of a dialogue."""
 
-        def __str__(self):
+        def __str__(self) -> str:
             """Get the string representation."""
             return str(self.value)
 
