@@ -1492,7 +1492,7 @@ class Query:
         """
         return all(c.check(description) for c in self.constraints)
 
-    def is_valid(self, data_model: DataModel) -> bool:
+    def is_valid(self, data_model: Optional[DataModel]) -> bool:
         """
         Given a data model, check whether the query is valid for that data model.
 
@@ -1522,8 +1522,6 @@ class Query:
                 "Invalid input value for type '{}': empty list of constraints. The number of "
                 "constraints must be at least 1.".format(type(self).__name__)
             )
-        if self.model is None:
-            raise ValueError("No model specified.")
         if not self.is_valid(self.model):
             raise ValueError(
                 "Invalid input value for type '{}': the query is not valid "
