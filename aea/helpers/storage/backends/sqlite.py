@@ -158,8 +158,9 @@ class SqliteStorageBackend(AbstractStorageBackend):
         result = await self._executute_sql(sql, [object_id])
         if (
             result
-            and isinstance(result, dict)
+            and isinstance(result, (list, tuple))
             and len(result) > 0
+            and isinstance(result[0], (list, tuple))
             and len(result[0]) > 0
         ):
             return json.loads(result[0][0])

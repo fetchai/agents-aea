@@ -24,6 +24,7 @@ import logging
 import random
 import struct
 from asyncio import CancelledError
+from asyncio.streams import IncompleteReadError
 from pathlib import Path
 from typing import List, Optional, Union, cast
 
@@ -316,7 +317,10 @@ class P2PLibp2pClientConnection(Connection):
             if not data:  # pragma: no cover
                 return None
             return data
-        except asyncio.streams.IncompleteReadError as e:  # pragma: no cover
+        except ConnectionError as e:
+            self.logger.info(f"Connection error: {e}")
+            return None
+        except IncompleteReadError as e:  # pragma: no cover
             self.logger.info(
                 "Connection disconnected while reading from node ({}/{})".format(
                     len(e.partial), e.expected

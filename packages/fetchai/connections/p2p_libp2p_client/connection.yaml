@@ -12,7 +12,7 @@ fingerprint:
   __init__.py: QmT1FEHkPGMHV5oiVEfQHHr25N2qdZxydSNRJabJvYiTgf
   acn_message.proto: QmQtqmAqRM6KhYyfXGPYbYLBLuwfTRwTbvt5Rmt1ghS33J
   acn_message_pb2.py: QmRmTieVDVaRoiynFx9YJbXEf41JfTTWdqTWuRYWFpM8iw
-  connection.py: QmQoNbFAAP55Ns3fkZnyR85edHcX2Kve7sbiGVkqYvhWud
+  connection.py: Qmd8jtpVcUtVqTxocgfCgRvnW1BYY1KLjXert99GrG1QFP
 fingerprint_ignore_patterns: []
 connections: []
 protocols: []
