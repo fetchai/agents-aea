@@ -37,7 +37,10 @@ from typing import (
 from aea.agent import Agent
 from aea.agent_loop import AsyncAgentLoop, BaseAgentLoop, SyncAgentLoop
 from aea.configurations.base import PublicId
-from aea.configurations.constants import DEFAULT_SEARCH_SERVICE_ADDRESS
+from aea.configurations.constants import (
+    DEFAULT_BUILD_DIR_NAME,
+    DEFAULT_SEARCH_SERVICE_ADDRESS,
+)
 from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import DEFAULT_CURRENCY_DENOMINATIONS
 from aea.crypto.wallet import Wallet
@@ -64,7 +67,7 @@ class AEA(Agent):
     }
     DEFAULT_RUN_LOOP: str = "async"
 
-    DEFAULT_BUILD_DIR_NAME = ".build"
+    DEFAULT_BUILD_DIR_NAME = DEFAULT_BUILD_DIR_NAME
 
     def __init__(
         self,

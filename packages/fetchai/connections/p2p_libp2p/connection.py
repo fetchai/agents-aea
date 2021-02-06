@@ -559,10 +559,13 @@ class P2PLibp2pConnection(Connection):
         self.libp2p_workdir = os.path.join(temp_dir, "libp2p_workdir")
 
         self._check_node_built()
+        module_dir = self.configuration.build_directory
+        if module_dir is None:
+            raise ValueError("Build directory not set on configuration.")
         self.node = Libp2pNode(
             agent_record,
             key,
-            self.configuration.build_directory,
+            module_dir,
             LIBP2P_NODE_CLARGS,
             uri,
             public_uri,
