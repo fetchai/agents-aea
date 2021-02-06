@@ -458,8 +458,10 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         self._build_directory = build_directory
 
     @property
-    def build_directory(self) -> Optional[str]:
+    def build_directory(self) -> str:
         """Get the component type."""
+        if self._build_directory is None:
+            raise ValueError("No build_directory set!")
         return self._build_directory
 
     @build_directory.setter

@@ -46,7 +46,7 @@ from aea.error_handler.base import AbstractErrorHandler
 from aea.error_handler.default import ErrorHandler as DefaultErrorHandler
 from aea.exceptions import AEAException, _StopRuntime, enforce
 from aea.helpers.exception_policy import ExceptionPolicyEnum
-from aea.helpers.logging import AgentLoggerAdapter, get_logger
+from aea.helpers.logging import AgentLoggerAdapter, WithLogger, get_logger
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.base import Message, Protocol
@@ -335,7 +335,7 @@ class AEA(Agent):
         for handler in handlers:
             handler.handle_wrapper(msg)
 
-    def _setup_loggers(self):
+    def _setup_loggers(self) -> None:
         """Set up logger with agent name."""
         for element in [
             self.runtime.agent_loop,
@@ -346,8 +346,10 @@ class AEA(Agent):
             self.resources.handler_registry,
             self.resources.model_registry,
         ]:
-            element.logger = AgentLoggerAdapter(
-                element.logger, agent_name=self._identity.name
+            element = cast(WithLogger, element)
+            element.logger = cast(
+                Logger,
+                AgentLoggerAdapter(element.logger, agent_name=self._identity.name),
             )
 
     def get_periodic_tasks(

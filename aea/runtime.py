@@ -202,7 +202,10 @@ class BaseRuntime(Runnable, WithLogger):
             raise ValueError("call `set_decision_maker` first!")
         return self._decision_maker
 
-    def _set_task(self):
+    def _set_task(self) -> None:
+        """Set task."""
+        if self._loop is None:
+            raise ValueError("Loop not set!")
         self._task = self._loop.create_task(self._run_wrapper())
 
     def set_decision_maker(self, decision_maker_handler: DecisionMakerHandler) -> None:

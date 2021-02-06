@@ -368,16 +368,37 @@ class AwaitableProc:
         """Initialise awaitable proc."""
         self.args = args
         self.kwargs = kwargs
-        self.proc = None
+        self._proc = None
         self._thread = None
-        self.loop = None
-        self.future = None
+        self._loop = None
+        self._future = None
 
-    async def start(self):
+    @property
+    def proc(self) -> subprocess.Popen:
+        """Get proc."""
+        if self._proc is None:
+            raise ValueError("subprocess not set!")
+        return self._proc
+
+    @property
+    def loop(self) -> AbstractEventLoop:
+        """Get loop."""
+        if self._loop is None:
+            raise ValueError("loop not set!")
+        return self._loop
+
+    @property
+    def future(self) -> Future:
+        """Get future."""
+        if self._future is None:
+            raise ValueError("future not set!")
+        return self._future
+
+    async def start(self) -> None:
         """Start the subprocess."""
-        self.proc = subprocess.Popen(*self.args, **self.kwargs)  # nosec
-        self.loop = asyncio.get_event_loop()
-        self.future = asyncio.futures.Future()
+        self._proc = subprocess.Popen(*self.args, **self.kwargs)  # nosec
+        self._loop = asyncio.get_event_loop()
+        self._future = asyncio.futures.Future()
         self._thread = Thread(target=self._in_thread)
         self._thread.start()
         try:
@@ -388,7 +409,7 @@ class AwaitableProc:
         finally:
             self._thread.join()
 
-    def _in_thread(self):
+    def _in_thread(self) -> None:
         """Run in dedicated thread."""
         self.proc.wait()
         self.loop.call_soon_threadsafe(self._set_return_code, self.proc.returncode)
@@ -627,9 +648,12 @@ class Runnable(ABC):
                 asyncio.wait_for(self._wait(), timeout=timeout)
             )
 
-    def _wait_async(self, timeout):
+    def _wait_async(self, timeout: Optional[float] = None) -> Awaitable:
         if not self._threaded:
             return asyncio.wait_for(self._wait(), timeout=timeout)
+
+        if self._task is None:  # pragma: nocover
+            raise ValueError("task is not set!")
 
         # for threaded mode create a future and bind it to task
         loop = asyncio.get_event_loop()

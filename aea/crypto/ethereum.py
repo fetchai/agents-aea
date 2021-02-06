@@ -31,8 +31,10 @@ from eth_account._utils.signing import to_standard_signature_bytes
 from eth_account.datastructures import HexBytes, SignedTransaction
 from eth_account.messages import _hash_eip191_message, encode_defunct
 from eth_keys import keys
+from eth_typing import HexStr
 from web3 import HTTPProvider, Web3
 from web3.datastructures import AttributeDict
+from web3.types import TxData, TxParams, TxReceipt
 
 from aea.common import Address, JSONLike
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
@@ -143,7 +145,7 @@ class AttributeDictTranslator:
         raise ValueError("Key must be string.")  # pragma: nocover
 
     @classmethod
-    def to_dict(cls, attr_dict: AttributeDict) -> JSONLike:
+    def to_dict(cls, attr_dict: Union[AttributeDict, TxReceipt, TxData]) -> JSONLike:
         """Simplify to dict."""
         if not isinstance(attr_dict, AttributeDict):
             raise ValueError("No AttributeDict provided.")  # pragma: nocover
@@ -447,7 +449,8 @@ class EthereumApi(LedgerApi, EthereumHelper):
     @try_decorator("Unable to retrieve balance: {}", logger_method="warning")
     def _try_get_balance(self, address: Address) -> Optional[int]:
         """Get the balance of a given account."""
-        return self._api.eth.getBalance(address)  # pylint: disable=no-member
+        check_address = self._api.toChecksumAddress(address)
+        return self._api.eth.getBalance(check_address)  # pylint: disable=no-member
 
     def get_state(self, callable_name: str, *args, **kwargs) -> Optional[JSONLike]:
         """Call a specified function on the ledger API."""
@@ -545,7 +548,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
     def _try_get_gas_estimate(self, transaction: JSONLike) -> Optional[int]:
         """Try get the gas estimate."""
         gas_estimate = self._api.eth.estimateGas(  # pylint: disable=no-member
-            transaction=AttributeDictTranslator.from_dict(transaction)
+            transaction=cast(TxParams, AttributeDictTranslator.from_dict(transaction))
         )
         return gas_estimate
 
@@ -598,7 +601,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :return: the tx receipt, if present
         """
         tx_receipt = self._api.eth.getTransactionReceipt(  # pylint: disable=no-member
-            tx_digest
+            cast(HexStr, tx_digest)
         )
         return AttributeDictTranslator.to_dict(tx_receipt)
 
@@ -620,7 +623,9 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :param tx_digest: the transaction digest.
         :return: the tx, if found
         """
-        tx = self._api.eth.getTransaction(tx_digest)  # pylint: disable=no-member
+        tx = self._api.eth.getTransaction(
+            cast(HexStr, tx_digest)
+        )  # pylint: disable=no-member
         return AttributeDictTranslator.to_dict(tx)
 
     def get_contract_instance(

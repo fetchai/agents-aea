@@ -48,7 +48,7 @@ class _AEAYamlLoader(yaml.SafeLoader):
         )
 
     @staticmethod
-    def _construct_mapping(loader: "_AEAYamlLoader", node: MappingNode):
+    def _construct_mapping(loader: "_AEAYamlLoader", node: MappingNode) -> OrderedDict:
         """Construct a YAML mapping with OrderedDict."""
         object_pairs_hook = OrderedDict
         loader.flatten_mapping(node)

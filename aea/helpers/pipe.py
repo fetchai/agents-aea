@@ -367,7 +367,7 @@ class TCPSocketChannel(IPCChannel):
 
     async def _handle_connection(
         self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
-    ):
+    ) -> None:
         """Handle connection."""
         if self._connected is None:
             raise ValueError("Connected is None!")  # pragma: nocover

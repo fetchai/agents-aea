@@ -50,11 +50,11 @@ class AEAInstanceTask(AbstractExecutorTask):
         super().__init__()
 
     @property
-    def id(self):
+    def id(self) -> str:
         """Return agent name."""
         return self._agent.name
 
-    def start(self) -> None:
+    def start(self) -> None:  # type: ignore
         """Start task."""
         try:
             self._agent.start()

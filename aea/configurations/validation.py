@@ -267,7 +267,10 @@ def validate_data_with_pattern(
 
     :return: list of str with error descriptions
     """
-    excludes = excludes or []
+    if excludes is None:
+        excludes_: List[Tuple[str]] = []
+    else:
+        excludes_ = excludes
     pattern_path_value = {
         tuple(path): value for path, value in dict_to_path_value(pattern)
     }
@@ -275,7 +278,7 @@ def validate_data_with_pattern(
     errors = []
 
     def check_excludes(path):
-        for exclude in excludes:
+        for exclude in excludes_:
             if len(exclude) > len(path):  # pragma: nocover
                 continue
 

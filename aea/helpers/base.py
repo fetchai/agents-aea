@@ -42,6 +42,7 @@ from typing import (
     Callable,
     Deque,
     Dict,
+    Generator,
     Iterable,
     List,
     Optional,
@@ -63,7 +64,7 @@ ISO_8601_DATE_FORMAT = "%Y-%m-%d"
 _default_logger = logging.getLogger(__name__)
 
 
-def _get_module(spec):
+def _get_module(spec) -> Optional[types.ModuleType]:
     """Try to execute a module. Return None if the attempt fail."""
     try:
         module = importlib.util.module_from_spec(spec)
@@ -122,7 +123,7 @@ def load_module(dotted_path: str, filepath: Path) -> types.ModuleType:
     return module
 
 
-def load_env_file(env_file: str):
+def load_env_file(env_file: str) -> None:
     """
     Load the content of the environment file into the process environment.
 
@@ -211,7 +212,7 @@ class RegexConstrainedString(UserString):
         if not self.REGEX.match(self.data):
             self._handle_no_match()
 
-    def _handle_no_match(self):
+    def _handle_no_match(self) -> None:
         raise ValueError(
             "Value {data} does not match the regular expression {regex}".format(
                 data=self.data, regex=self.REGEX
@@ -252,7 +253,7 @@ SimpleIdOrStr = Union[SimpleId, str]
 
 
 @contextlib.contextmanager
-def cd(path):  # pragma: nocover
+def cd(path) -> Generator:  # pragma: nocover
     """Change working directory temporarily."""
     old_path = os.getcwd()
     os.chdir(path)
@@ -282,7 +283,9 @@ def get_logger_method(fn: Callable, logger_method: Union[str, Callable]) -> Call
     return getattr(logger_, logger_method)
 
 
-def try_decorator(error_message: str, default_return=None, logger_method="error"):
+def try_decorator(
+    error_message: str, default_return=None, logger_method="error"
+) -> Callable:
     """
     Run function, log and return default value on exception.
 
@@ -316,7 +319,7 @@ class MaxRetriesError(Exception):
 
 def retry_decorator(
     number_of_retries: int, error_message: str, delay: float = 0, logger_method="error"
-):
+) -> Callable:
     """
     Run function with several attempts.
 
@@ -349,7 +352,7 @@ def retry_decorator(
 
 
 @contextlib.contextmanager
-def exception_log_and_reraise(log_method: Callable, message: str):
+def exception_log_and_reraise(log_method: Callable, message: str) -> Generator:
     """
     Run code in context to log and re raise exception.
 
@@ -666,7 +669,7 @@ class CertRequest:
         enforce(result.microsecond == 0, "Microsecond field not allowed.")
         return result
 
-    def _check_validation_boundaries(self):
+    def _check_validation_boundaries(self) -> None:
         """
         Check the validation boundaries are consistent.
 
@@ -834,7 +837,7 @@ def compute_specifier_from_version(version: Version) -> str:
     return specifier_set
 
 
-def decorator_with_optional_params(decorator):
+def decorator_with_optional_params(decorator) -> Callable:
     """
     Make a decorator usable either with or without parameters.
 
@@ -866,7 +869,7 @@ def decorator_with_optional_params(decorator):
     return new_decorator
 
 
-def delete_directory_contents(directory: Path):
+def delete_directory_contents(directory: Path) -> None:
     """Delete the content of a directory, without deleting it."""
     enforce(directory.is_dir(), f"Path '{directory}' must be a directory.")
     for filename in directory.iterdir():

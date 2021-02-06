@@ -23,9 +23,10 @@ import contextlib
 import os
 from functools import reduce
 from pathlib import Path
+from typing import Generator
 
 
-def make_symlink(link_name: str, target: str):
+def make_symlink(link_name: str, target: str) -> None:
     """
     Make a symbolic link, cross platform.
 
@@ -40,7 +41,7 @@ def make_symlink(link_name: str, target: str):
 
 
 @contextlib.contextmanager
-def cd(path):
+def cd(path) -> Generator:
     """Change directory with context manager."""
     old_cwd = os.getcwd()
     try:
@@ -52,7 +53,7 @@ def cd(path):
         raise e from e
 
 
-def create_symlink(link_path: Path, target_path: Path, root_path: Path):
+def create_symlink(link_path: Path, target_path: Path, root_path: Path) -> int:
     """
     Change directory and call the cross-platform script.
 

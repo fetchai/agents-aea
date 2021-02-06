@@ -518,5 +518,7 @@ class Envelope:
             to=self.to,
             sender=self.sender,
             protocol_specification_id=self.protocol_specification_id,
-            message=self.message,
+            message=self.message.decode("utf-8")
+            if isinstance(self.message, bytes)
+            else self.message,
         )

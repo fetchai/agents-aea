@@ -73,7 +73,7 @@ class AbstractExecutorTask(ABC):
         self._future = future
 
     @abstractmethod
-    def start(self):
+    def start(self) -> Tuple[Callable, Sequence[Any]]:
         """Implement start task function here."""
 
     @abstractmethod
@@ -413,17 +413,17 @@ class AbstractMultipleRunner:  # pragma: nocover
         """Make tasks to run with executor."""
 
     @property
-    def num_failed(self):  # pragma: nocover
+    def num_failed(self) -> int:  # pragma: nocover
         """Return number of failed tasks."""
         return self._executor.num_failed
 
     @property
-    def failed(self):  # pragma: nocover
+    def failed(self) -> Sequence[Task]:  # pragma: nocover
         """Return sequence failed tasks."""
         return [i.id for i in self._executor.failed_tasks]
 
     @property
-    def not_failed(self):  # pragma: nocover
+    def not_failed(self) -> Sequence[Task]:  # pragma: nocover
         """Return sequence successful tasks."""
         return [i.id for i in self._executor.not_failed_tasks]
 

@@ -101,7 +101,7 @@ class Profiling(Runnable):
         self._output_function = output_function
         self._counter: Dict[Type, int] = Counter()
 
-    def set_counters(self):
+    def set_counters(self) -> None:
         """Modify obj.__new__ to count objects created created."""
         for obj in self._objects_created_to_count:
             self._counter[obj] = 0

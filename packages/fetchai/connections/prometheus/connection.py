@@ -290,7 +290,7 @@ class PrometheusConnection(Connection):
         """
         super().__init__(**kwargs)
 
-        self.host = cast(int, self.configuration.config.get("host", DEFAULT_HOST))
+        self.host = cast(str, self.configuration.config.get("host", DEFAULT_HOST))
         self.port = cast(int, self.configuration.config.get("port", DEFAULT_PORT))
         self.channel = PrometheusChannel(
             self.address, self.host, self.port, self.logger

@@ -441,7 +441,7 @@ class _CosmosApi(LedgerApi):
         self.cli_command = kwargs.pop("cli_command", DEFAULT_CLI_COMMAND)
 
     @property
-    def api(self) -> None:
+    def api(self) -> Any:
         """Get the underlying API object."""
         return self._api
 

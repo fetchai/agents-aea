@@ -256,7 +256,7 @@ def generate_equilibrium_prices_and_holdings(  # pylint: disable=unused-argument
     agent_addr_to_exchange_params: Dict[str, Dict[str, float]],
     scaling_factor: float,
     quantity_shift: int = QUANTITY_SHIFT,
-) -> Tuple[Dict[str, float], Dict[str, Dict[str, float]], Dict[str, float]]:
+) -> Tuple[Dict[str, float], Dict[str, Dict[str, float]], Dict[str, Dict[str, float]]]:
     """
     Compute the competitive equilibrium prices and allocation.
 
@@ -334,7 +334,7 @@ def generate_equilibrium_prices_and_holdings(  # pylint: disable=unused-argument
         for agent_addr, egh in zip(agent_addresses, eq_good_holdings.tolist())
     }
     eq_currency_holdings_dict = {
-        agent_addr: cast(float, eq_currency_holding)
+        agent_addr: {"currency_id": cast(float, eq_currency_holding)}
         for agent_addr, eq_currency_holding in zip(
             agent_addresses, eq_currency_holdings.tolist()
         )

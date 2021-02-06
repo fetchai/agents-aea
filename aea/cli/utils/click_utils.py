@@ -74,7 +74,7 @@ class PublicIdParameter(click.ParamType):
 
         Just forwards arguments to parent constructor.
         """
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)  # type: ignore
 
     def get_metavar(self, param):
         """Return the metavar default for this param if it provides one."""

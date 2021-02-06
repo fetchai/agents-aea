@@ -211,10 +211,10 @@ class P2PLibp2pClientConnection(Connection):
             raise Exception(f"Wrong response message from peer: {payload}")
         response = msg.status  # pylint: disable=no-member
 
-        if response.code != Status.SUCCESS:  # pylint: disable=no-member
+        if response.code != Status.SUCCESS:  # type: ignore # pylint: disable=no-member
             raise Exception(  # pragma: nocover
                 "Registration to peer failed: {}".format(
-                    Status.ErrCode.Name(response.code)  # pylint: disable=no-member
+                    Status.ErrCode.Name(response.code)  # type: ignore # pylint: disable=no-member
                 )
             )
 

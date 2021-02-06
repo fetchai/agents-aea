@@ -47,7 +47,7 @@ class TestConnectionMixIn:
 
     def __init__(self, *args, **kwargs):
         """Init connection."""
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)  # type: ignore
         self.sends = list()
         self.recvs = list()
 
@@ -98,7 +98,7 @@ def run(duration, runtime_mode, connection_mode):
     base_cls = CONNECTION_MODES[connection_mode]
 
     conn_cls = type("conn_cls", (TestConnectionMixIn, base_cls), {})
-    connection = conn_cls.make()  # pylint: disable=no-member
+    connection = conn_cls.make()  # type: ignore # pylint: disable=no-member
     agent.resources.add_connection(connection)
     agent.resources.add_skill(make_skill(agent, handlers={"test": TestHandler}))
     t = Thread(target=agent.start, daemon=True)

@@ -407,6 +407,8 @@ class Description:
                 ),
                 None,
             )
+            if attribute is None:
+                raise ValueError("Attribute {} not found!".format(key))
             if not isinstance(value, attribute.type):
                 # values does not match type in data model
                 raise AttributeInconsistencyException(
@@ -811,22 +813,22 @@ class ConstraintType:
             or self.type == ConstraintTypes.GREATER_THAN
             or self.type == ConstraintTypes.GREATER_THAN_EQ
         ):
-            relation = models_pb2.Query.Relation()
+            relation = models_pb2.Query.Relation()  # type: ignore
 
             if self.type == ConstraintTypes.EQUAL:
-                relation.operator = models_pb2.Query.Relation.EQ
+                relation.operator = models_pb2.Query.Relation.EQ  # type: ignore
             elif self.type == ConstraintTypes.NOT_EQUAL:
-                relation.operator = models_pb2.Query.Relation.NOTEQ
+                relation.operator = models_pb2.Query.Relation.NOTEQ  # type: ignore
             elif self.type == ConstraintTypes.LESS_THAN:
-                relation.operator = models_pb2.Query.Relation.LT
+                relation.operator = models_pb2.Query.Relation.LT  # type: ignore
             elif self.type == ConstraintTypes.LESS_THAN_EQ:
-                relation.operator = models_pb2.Query.Relation.LTEQ
+                relation.operator = models_pb2.Query.Relation.LTEQ  # type: ignore
             elif self.type == ConstraintTypes.GREATER_THAN:
-                relation.operator = models_pb2.Query.Relation.GT
+                relation.operator = models_pb2.Query.Relation.GT  # type: ignore
             elif self.type == ConstraintTypes.GREATER_THAN_EQ:
-                relation.operator = models_pb2.Query.Relation.GTEQ
+                relation.operator = models_pb2.Query.Relation.GTEQ  # type: ignore
 
-            query_value = models_pb2.Query.Value()
+            query_value = models_pb2.Query.Value()  # type: ignore
 
             if isinstance(self.value, bool):
                 query_value.boolean = self.value
@@ -841,60 +843,60 @@ class ConstraintType:
             encoding = relation
 
         elif self.type == ConstraintTypes.WITHIN:
-            range_ = models_pb2.Query.Range()
+            range_ = models_pb2.Query.Range()  # type: ignore
 
             if type(self.value[0]) == str:  # pylint: disable=unidiomatic-typecheck
-                values = models_pb2.Query.StringPair()
+                values = models_pb2.Query.StringPair()  # type: ignore
                 values.first = self.value[0]
                 values.second = self.value[1]
                 range_.string_pair.CopyFrom(values)
             elif type(self.value[0]) == int:  # pylint: disable=unidiomatic-typecheck
-                values = models_pb2.Query.IntPair()
+                values = models_pb2.Query.IntPair()  # type: ignore
                 values.first = self.value[0]
                 values.second = self.value[1]
                 range_.integer_pair.CopyFrom(values)
             elif type(self.value[0]) == float:  # pylint: disable=unidiomatic-typecheck
-                values = models_pb2.Query.DoublePair()
+                values = models_pb2.Query.DoublePair()  # type: ignore
                 values.first = self.value[0]
                 values.second = self.value[1]
                 range_.double_pair.CopyFrom(values)
             encoding = range_
 
         elif self.type == ConstraintTypes.IN or self.type == ConstraintTypes.NOT_IN:
-            set_ = models_pb2.Query.Set()
+            set_ = models_pb2.Query.Set()  # type: ignore
 
             if self.type == ConstraintTypes.IN:
-                set_.operator = models_pb2.Query.Set.IN
+                set_.operator = models_pb2.Query.Set.IN  # type: ignore
             elif self.type == ConstraintTypes.NOT_IN:
-                set_.operator = models_pb2.Query.Set.NOTIN
+                set_.operator = models_pb2.Query.Set.NOTIN  # type: ignore
 
             value_type = type(self.value[0]) if len(self.value) > 0 else str
 
             if value_type == str:
-                values = models_pb2.Query.Set.Values.Strings()
+                values = models_pb2.Query.Set.Values.Strings()  # type: ignore
                 values.values.extend(self.value)
                 set_.values.string.CopyFrom(values)
             elif value_type == bool:
-                values = models_pb2.Query.Set.Values.Bools()
+                values = models_pb2.Query.Set.Values.Bools()  # type: ignore
                 values.values.extend(self.value)
                 set_.values.boolean.CopyFrom(values)
             elif value_type == int:
-                values = models_pb2.Query.Set.Values.Ints()
+                values = models_pb2.Query.Set.Values.Ints()  # type: ignore
                 values.values.extend(self.value)
                 set_.values.integer.CopyFrom(values)
             elif value_type == float:
-                values = models_pb2.Query.Set.Values.Doubles()
+                values = models_pb2.Query.Set.Values.Doubles()  # type: ignore
                 values.values.extend(self.value)
                 set_.values.double.CopyFrom(values)
             elif value_type == Location:
-                values = models_pb2.Query.Set.Values.Locations()
+                values = models_pb2.Query.Set.Values.Locations()  # type: ignore
                 values.values.extend([value.encode() for value in self.value])
                 set_.values.location.CopyFrom(values)
 
             encoding = set_
 
         elif self.type == ConstraintTypes.DISTANCE:
-            distance_pb = models_pb2.Query.Distance()
+            distance_pb = models_pb2.Query.Distance()  # type: ignore
             distance_pb.distance = self.value[1]
             distance_pb.center.CopyFrom(self.value[0].encode())
 
@@ -1520,6 +1522,8 @@ class Query:
                 "Invalid input value for type '{}': empty list of constraints. The number of "
                 "constraints must be at least 1.".format(type(self).__name__)
             )
+        if self.model is None:
+            raise ValueError("No model specified.")
         if not self.is_valid(self.model):
             raise ValueError(
                 "Invalid input value for type '{}': the query is not valid "

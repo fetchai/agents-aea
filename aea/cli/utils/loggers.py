@@ -21,6 +21,7 @@
 
 import logging
 import sys
+from typing import Callable
 
 import click
 
@@ -43,28 +44,28 @@ class ColorFormatter(logging.Formatter):
         "warning": dict(fg="yellow"),
     }
 
-    def format(self, record):
+    def format(self, record) -> str:
         """Format the log message."""
         if not record.exc_info:
             level = record.levelname.lower()
             msg = record.getMessage()
             if level in self.colors:
-                prefix = click.style("{}: ".format(level), **self.colors[level])
+                prefix = click.style("{}: ".format(level), **self.colors[level])  # type: ignore
                 msg = "\n".join(prefix + x for x in msg.splitlines())
             return msg
         return logging.Formatter.format(self, record)  # pragma: no cover
 
 
 def simple_verbosity_option(
-    logger=None, *names, **kwargs
-):  # pylint: disable=redefined-outer-name,keyword-arg-before-vararg
+    logger_, *names, **kwargs
+) -> Callable:  # pylint: disable=redefined-outer-name,keyword-arg-before-vararg
     """Add a decorator that adds a `--verbosity, -v` option to the decorated command.
 
     Name can be configured through `*names`. Keyword arguments are passed to
     the underlying `click.option` decorator.
     """
     if not names:
-        names = ["--verbosity", "-v"]
+        names = ("--verbosity", "-v")
 
     kwargs.setdefault("default", "INFO")
     kwargs.setdefault("type", click.Choice(LOG_LEVELS, case_sensitive=False))
@@ -76,7 +77,7 @@ def simple_verbosity_option(
     def decorator(f):
         def _set_level(ctx, param, value):  # pylint: disable=unused-argument
             level = logging.getLevelName(value)
-            logger.setLevel(level)
+            logger_.setLevel(level)
             # save verbosity option so it can be
             # read in the main CLI entrypoint
             ctx.meta["verbosity"] = value

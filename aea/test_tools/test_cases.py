@@ -33,7 +33,7 @@ from filecmp import dircmp
 from io import TextIOWrapper
 from pathlib import Path
 from threading import Thread
-from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple
 
 import pytest
 import yaml
@@ -84,6 +84,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
     subprocesses: List[subprocess.Popen] = []  # list of launched subprocesses
     threads: List[Thread] = []  # list of started threads
     packages_dir_path: Path = Path(DEFAULT_REGISTRY_NAME)
+    package_registry_src: Path = Path(".")
     use_packages_dir: bool = True
     package_registry_src_rel: Path = Path(os.getcwd(), packages_dir_path)
     old_cwd: Path  # current working directory path
@@ -909,6 +910,7 @@ class AEATestCaseEmpty(BaseAEATestCase):
     This test case will create a default AEA project.
     """
 
+    agent_name = ""
     IS_LOCAL = True
     IS_EMPTY = False
 
@@ -919,6 +921,12 @@ class AEATestCaseEmpty(BaseAEATestCase):
         cls.agent_name = "agent-" + "".join(random.choices(string.ascii_lowercase, k=5))
         cls.create_agents(cls.agent_name, is_local=cls.IS_LOCAL, is_empty=cls.IS_EMPTY)
         cls.set_agent_context(cls.agent_name)
+
+    @classmethod
+    def teardown_class(cls):
+        """Teardown the test class."""
+        super(AEATestCaseEmpty, cls).teardown_class()
+        cls.agent_name = ""
 
 
 class AEATestCaseMany(BaseAEATestCase):
@@ -943,9 +951,10 @@ class AEATestCase(BaseAEATestCase):
     it is assumed the project is inside the current working directory.
     """
 
-    path_to_aea: Union[Path, str] = Path(".")
+    agent_name = ""
+    path_to_aea: Path = Path(".")
     packages_dir_path: Path = Path("..", DEFAULT_REGISTRY_NAME)
-    agent_configuration: AgentConfig
+    agent_configuration: Optional[AgentConfig] = None
     t: Path  # temporary directory path
 
     @classmethod
@@ -973,6 +982,7 @@ class AEATestCase(BaseAEATestCase):
     @classmethod
     def teardown_class(cls):
         """Teardown the test class."""
+        cls.agent_name = ""
         cls.path_to_aea = Path(".")
         cls.agent_configuration = None
         super(AEATestCase, cls).teardown_class()

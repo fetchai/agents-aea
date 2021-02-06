@@ -184,7 +184,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
         return self._default_routing
 
     @default_routing.setter
-    def default_routing(self, default_routing: Dict[PublicId, PublicId]):
+    def default_routing(self, default_routing: Dict[PublicId, PublicId]) -> None:
         """Set the default routing."""
         self._default_routing = default_routing
 
@@ -268,7 +268,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
         if is_default:
             self._default_connection = connection
 
-    def _connection_consistency_checks(self):
+    def _connection_consistency_checks(self) -> None:
         """
         Do some consistency checks on the multiplexer connections.
 
@@ -283,7 +283,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
             "Connection names must be unique.",
         )
 
-    def _set_default_connection_if_none(self):
+    def _set_default_connection_if_none(self) -> None:
         """Set the default connection if it is none."""
         if self._default_connection is None:
             self._default_connection = self.connections[0]

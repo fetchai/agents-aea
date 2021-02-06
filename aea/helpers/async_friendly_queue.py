@@ -22,7 +22,7 @@ import asyncio
 import queue
 from collections import deque
 from contextlib import suppress
-from typing import Any
+from typing import Any, Deque
 
 
 class AsyncFriendlyQueue(queue.Queue):
@@ -31,7 +31,7 @@ class AsyncFriendlyQueue(queue.Queue):
     def __init__(self, *args, **kwargs):
         """Init queue."""
         super().__init__(*args, **kwargs)
-        self._non_empty_waiters = deque()
+        self._non_empty_waiters: Deque = deque()
 
     def put(  # pylint: disable=signature-differs
         self, item: Any, *args, **kwargs
