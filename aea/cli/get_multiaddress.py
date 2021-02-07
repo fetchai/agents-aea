@@ -94,7 +94,7 @@ def _try_get_multiaddress(
     host_field: str,
     port_field: str,
     uri_field: str,
-):
+) -> str:
     """
     Try to get the multi-address.
 

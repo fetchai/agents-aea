@@ -49,7 +49,7 @@ def get_wealth(click_context, type_):
     click.echo(wealth)
 
 
-def _try_get_wealth(ctx: Context, type_: str):
+def _try_get_wealth(ctx: Context, type_: str) -> int:
     wallet = get_wallet_from_context(ctx)
     _override_ledger_configurations(ctx.agent_config)
     return try_get_balance(ctx.agent_config, wallet, type_)

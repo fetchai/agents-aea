@@ -85,7 +85,9 @@ def _add_private_key(
     _try_add_key(ctx, type_, file, connection)
 
 
-def _try_add_key(ctx: Context, type_: str, filepath: str, connection: bool = False):
+def _try_add_key(
+    ctx: Context, type_: str, filepath: str, connection: bool = False
+) -> None:
     try:
         if connection:
             ctx.agent_config.connection_private_key_paths.create(type_, filepath)

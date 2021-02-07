@@ -74,8 +74,8 @@ def simple_verbosity_option(
     kwargs.setdefault("help", "One of {}".format(", ".join(LOG_LEVELS)))
     kwargs.setdefault("is_eager", True)
 
-    def decorator(f):
-        def _set_level(ctx, param, value):  # pylint: disable=unused-argument
+    def decorator(f) -> Callable:
+        def _set_level(ctx, param, value) -> None:  # pylint: disable=unused-argument
             level = logging.getLevelName(value)
             logger_.setLevel(level)
             # save verbosity option so it can be
@@ -87,7 +87,9 @@ def simple_verbosity_option(
     return decorator
 
 
-def default_logging_config(logger):  # pylint: disable=redefined-outer-name
+def default_logging_config(
+    logger: logging.Logger,
+) -> logging.Logger:  # pylint: disable=redefined-outer-name
     """Set up the default handler and formatter on the given logger."""
     default_handler = logging.StreamHandler(stream=sys.stdout)
     default_handler.formatter = ColorFormatter()

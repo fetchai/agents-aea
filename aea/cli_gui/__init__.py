@@ -23,7 +23,7 @@ import os
 import subprocess  # nosec
 import sys
 import threading
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, Union
 
 import connexion
 import flask
@@ -52,6 +52,7 @@ from aea.cli_gui.utils import (
     stop_agent_process,
     terminate_processes,
 )
+from aea.common import JSONLike
 from aea.configurations.base import PublicId
 from aea.configurations.constants import AGENT, CONNECTION, CONTRACT, PROTOCOL, SKILL
 
@@ -113,7 +114,9 @@ def get_agents() -> List[Dict]:
     return agent_list
 
 
-def get_registered_items(item_type: str):
+def get_registered_items(
+    item_type: str,
+) -> Union[Tuple[List[Dict[Any, Any]], int], Tuple[Dict[str, str], int]]:
     """Create a new AEA project."""
     # need to place ourselves one directory down so the cher can find the packages
     ctx = Context(cwd=app_context.agents_dir)
@@ -127,7 +130,9 @@ def get_registered_items(item_type: str):
         return sorted_items, 200  # 200 (Success)
 
 
-def search_registered_items(item_type: str, search_term: str):
+def search_registered_items(
+    item_type: str, search_term: str
+) -> Union[Tuple[str, int], Tuple[Dict[str, Any], int]]:
     """Create a new AEA project."""
     # need to place ourselves one directory down so the searcher can find the packages
     ctx = Context(cwd=app_context.agents_dir)
@@ -146,7 +151,7 @@ def search_registered_items(item_type: str, search_term: str):
         return response, 200  # 200 (Success)
 
 
-def create_agent(agent_id: str):
+def create_agent(agent_id: str) -> Union[Tuple[str, int], Tuple[Dict[str, str], int]]:
     """Create a new AEA project."""
     ctx = Context(cwd=app_context.agents_dir)
     try:
@@ -160,7 +165,7 @@ def create_agent(agent_id: str):
         return agent_id, 201  # 201 (Created)
 
 
-def delete_agent(agent_id: str):
+def delete_agent(agent_id: str) -> Union[Tuple[str, int], Tuple[Dict[str, str], int]]:
     """Delete an existing AEA project."""
     ctx = Context(cwd=app_context.agents_dir)
     try:
@@ -174,7 +179,9 @@ def delete_agent(agent_id: str):
         return "Agent {} deleted".format(agent_id), 200  # 200 (OK)
 
 
-def add_item(agent_id: str, item_type: str, item_id: str):
+def add_item(
+    agent_id: str, item_type: str, item_id: str
+) -> Union[Tuple[str, int], Tuple[Dict[str, str], int]]:
     """Add a protocol, skill or connection to the register to a local agent."""
     ctx = Context(cwd=os.path.join(app_context.agents_dir, agent_id))
     ctx.set_config("is_local", app_context.local)
@@ -194,7 +201,7 @@ def add_item(agent_id: str, item_type: str, item_id: str):
         return agent_id, 201  # 200 (OK)
 
 
-def fetch_agent(agent_id: str):
+def fetch_agent(agent_id: str) -> Union[Tuple[str, int], Tuple[Dict[str, str], int]]:
     """Fetch an agent."""
     ctx = Context(cwd=app_context.agents_dir)
     fetch_agent_ = cli_fetch_agent_locally if app_context.local else cli_fetch_agent
@@ -210,7 +217,9 @@ def fetch_agent(agent_id: str):
         return agent_public_id.name, 201  # 200 (OK)
 
 
-def remove_local_item(agent_id: str, item_type: str, item_id: str):
+def remove_local_item(
+    agent_id: str, item_type: str, item_id: str
+) -> Union[Tuple[str, int], Tuple[Dict[str, str], int]]:
     """Remove a protocol, skill or connection from a local agent."""
     agent_dir = os.path.join(app_context.agents_dir, agent_id)
     ctx = Context(cwd=agent_dir)
@@ -252,7 +261,9 @@ def get_local_items(agent_id: str, item_type: str) -> Tuple[List[Dict[Any, Any]]
         return sorted_items, 200  # 200 (Success)
 
 
-def scaffold_item(agent_id: str, item_type: str, item_id: str):
+def scaffold_item(
+    agent_id: str, item_type: str, item_id: str
+) -> Union[Tuple[str, int], Tuple[Dict[str, str], int]]:
     """Scaffold a moslty empty item on an agent (either protocol, skill or connection)."""
     agent_dir = os.path.join(app_context.agents_dir, agent_id)
     ctx = Context(cwd=agent_dir)
@@ -272,7 +283,9 @@ def scaffold_item(agent_id: str, item_type: str, item_id: str):
         return agent_id, 201  # 200 (OK)
 
 
-def start_agent(agent_id: str, connection_id: PublicId):
+def start_agent(
+    agent_id: str, connection_id: PublicId
+) -> Union[Tuple[str, int], Tuple[Dict[str, str], int]]:
     """Start a local agent running."""
     # Test if it is already running in some form
     if agent_id in app_context.agent_processes:
@@ -355,7 +368,7 @@ def start_agent(agent_id: str, connection_id: PublicId):
     return agent_id, 201  # 200 (OK)
 
 
-def get_agent_status(agent_id: str):
+def get_agent_status(agent_id: str) -> Tuple[JSONLike, int]:
     """Get the status of the running agent Node."""
     status_str = str(ProcessState.NOT_STARTED).replace("ProcessState.", "")
     tty_str = ""
@@ -393,13 +406,13 @@ def get_agent_status(agent_id: str):
     return {"status": status_str, "tty": tty_str, "error": error_str}, 200  # (OK)
 
 
-def stop_agent(agent_id: str):
+def stop_agent(agent_id: str) -> Tuple[str, int]:
     """Stop agent running."""
     # pass to private function to make it easier to mock
     return stop_agent_process(agent_id, app_context)
 
 
-def create_app():
+def create_app() -> connexion.FlaskApp:
     """Run the flask server."""
     CUR_DIR = os.path.abspath(os.path.dirname(__file__))
     app = connexion.FlaskApp(__name__, specification_dir=CUR_DIR)
@@ -418,21 +431,21 @@ def create_app():
     app.add_api("aea_cli_rest.yaml")
 
     @app.route("/")
-    def home():  # pylint: disable=unused-variable
+    def home() -> str:  # pylint: disable=unused-variable
         """Respond to browser URL:  localhost:5000/."""
         return flask.render_template(
             "home.html", len=len(elements), htmlElements=elements
         )
 
     @app.route("/static/js/home.js")
-    def homejs():  # pylint: disable=unused-variable
+    def homejs() -> str:  # pylint: disable=unused-variable
         """Serve the home.js file (as it needs templating)."""
         return flask.render_template(
             "home.js", len=len(elements), htmlElements=elements
         )
 
     @app.route("/favicon.ico")
-    def favicon():  # pylint: disable=unused-variable
+    def favicon() -> str:  # pylint: disable=unused-variable
         """Return an icon to be displayed in the browser."""
         return flask.send_from_directory(
             os.path.join(app.root_path, "static"),
@@ -443,7 +456,7 @@ def create_app():
     return app
 
 
-def run(port: int, host: str = "127.0.0.1"):
+def run(port: int, host: str = "127.0.0.1") -> connexion.FlaskApp:
     """Run the GUI."""
 
     app = create_app()
@@ -455,7 +468,7 @@ def run(port: int, host: str = "127.0.0.1"):
     return app
 
 
-def run_test():
+def run_test() -> connexion.FlaskApp:
     """Run the gui in the form where we can run tests against it."""
     app = create_app()
     return app.app.test_client()

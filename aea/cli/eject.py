@@ -140,7 +140,7 @@ def _eject_item(
     public_id: PublicId,
     quiet: bool = True,
     with_symlinks: bool = False,
-):
+) -> None:
     """
     Eject item from installed (vendor) to custom folder.
 

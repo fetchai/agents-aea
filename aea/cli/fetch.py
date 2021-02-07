@@ -67,7 +67,7 @@ def do_fetch(
     remote: bool,
     alias: Optional[str] = None,
     target_dir: Optional[str] = None,
-):
+) -> None:
     """
     Run the Fetch command.
 

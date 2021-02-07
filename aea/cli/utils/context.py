@@ -51,7 +51,7 @@ class Context:
         cwd: str = ".",
         verbosity: str = "INFO",
         registry_path: Optional[str] = None,
-    ):
+    ) -> None:
         """Init the context."""
         self.config = dict()  # type: Dict
         self.cwd = cwd
@@ -137,7 +137,7 @@ class Context:
 
         return dependencies
 
-    def dump_agent_config(self):
+    def dump_agent_config(self) -> None:
         """Dump the current agent configuration."""
         with open(os.path.join(self.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as f:
             self.agent_loader.dump(self.agent_config, f)

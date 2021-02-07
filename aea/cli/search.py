@@ -32,6 +32,7 @@ from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import pass_ctx
 from aea.cli.utils.formatting import format_items, retrieve_details
 from aea.cli.utils.loggers import logger
+from aea.common import JSONLike
 from aea.configurations.constants import (
     AGENT,
     AGENTS,
@@ -143,7 +144,7 @@ def setup_search_ctx(ctx: Context, local: bool) -> None:
         logger.debug("Using registry {}".format(registry_directory))
 
 
-def _is_invalid_item(name, dir_path, config_path):
+def _is_invalid_item(name, dir_path, config_path) -> bool:
     """Return true if this protocol, connection or skill should not be returned in the list."""
     return (
         name == "scaffold"
@@ -158,7 +159,7 @@ def _get_details_from_dir(
     sub_dir_glob_pattern: str,
     config_filename: str,
     results: List[Dict],
-):
+) -> None:
     for dir_path in Path(root_path).glob(sub_dir_glob_pattern + "/*/"):
         config_path = dir_path / config_filename
 
@@ -169,7 +170,7 @@ def _get_details_from_dir(
         results.append(details)
 
 
-def _search_items_locally(ctx, item_type_plural):
+def _search_items_locally(ctx, item_type_plural) -> List[Dict]:
     registry = cast(str, ctx.config.get("registry_directory"))
     result = []  # type: List[Dict]
     configs = {
@@ -212,7 +213,7 @@ def _search_items_locally(ctx, item_type_plural):
 
 def search_items(
     ctx: Context, item_type: str, query: str, page: int
-) -> Tuple[List, int]:
+) -> Tuple[List[Dict], int]:
     """
     Search items by query and click.echo results.
 
@@ -228,13 +229,16 @@ def search_items(
         results = _search_items_locally(ctx, item_type_plural)
         count = len(results)
     else:
-        resp = request_api(
-            "GET",
-            "/{}".format(item_type_plural),
-            params={"search": query, "page": page},
+        resp = cast(
+            JSONLike,
+            request_api(
+                "GET",
+                "/{}".format(item_type_plural),
+                params={"search": query, "page": page},
+            ),
         )
-        results = resp["results"]
-        count = resp["count"]
+        results = cast(List[Dict], resp["results"])
+        count = cast(int, resp["count"])
     return results, count
 
 

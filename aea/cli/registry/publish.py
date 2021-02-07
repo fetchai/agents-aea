@@ -22,6 +22,7 @@ import os
 import shutil
 import tarfile
 import tempfile
+from typing import cast
 
 import click
 
@@ -34,6 +35,7 @@ from aea.cli.utils.config import try_to_load_agent_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.generic import is_readme_present
 from aea.cli.utils.loggers import logger
+from aea.common import JSONLike
 from aea.configurations.constants import (
     CONNECTIONS,
     CONTRACTS,
@@ -44,7 +46,7 @@ from aea.configurations.constants import (
 )
 
 
-def _compress(output_filename: str, *filepaths):
+def _compress(output_filename: str, *filepaths) -> None:
     """Compare the output file."""
     with tarfile.open(output_filename, "w:gz") as f:
         for filepath in filepaths:
@@ -90,7 +92,9 @@ def publish_agent(ctx: Context):
             files["readme"] = open(readme_source_path, "rb")
         path = "/agents/create"
         logger.debug("Publishing agent {} to Registry ...".format(name))
-        resp = request_api("POST", path, data=data, is_auth=True, files=files)
+        resp = cast(
+            JSONLike, request_api("POST", path, data=data, is_auth=True, files=files)
+        )
     finally:
         for fd in files.values():
             fd.close()

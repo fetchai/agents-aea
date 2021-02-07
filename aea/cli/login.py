@@ -34,7 +34,7 @@ def login(username, password):
     do_login(username, password)
 
 
-def do_login(username: str, password: str):
+def do_login(username: str, password: str) -> None:
     """
     Login to the registry account and save auth token in config.
 

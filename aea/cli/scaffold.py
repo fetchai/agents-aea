@@ -214,7 +214,7 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
         raise click.ClickException(str(e))
 
 
-def _scaffold_dm_handler(ctx: Context):
+def _scaffold_dm_handler(ctx: Context) -> None:
     """Scaffold the decision maker handler."""
     _scaffold_non_package_item(
         ctx,
@@ -225,7 +225,7 @@ def _scaffold_dm_handler(ctx: Context):
     )
 
 
-def _scaffold_error_handler(ctx):
+def _scaffold_error_handler(ctx) -> None:
     """Scaffold the error handler."""
     _scaffold_non_package_item(
         ctx, "error_handler", "error handler", "ErrorHandler", "error_handler"
@@ -234,7 +234,7 @@ def _scaffold_error_handler(ctx):
 
 def _scaffold_non_package_item(
     ctx: Context, item_type: str, type_name: str, class_name: str, aea_dir: str
-):
+) -> None:
     """
     Scaffold a non-package item (e.g. decision maker handler, or error handler).
 

@@ -128,7 +128,9 @@ def _check_is_item_in_remote_registry(
     get_package_meta(item_type_plural[:-1], public_id)
 
 
-def _check_is_item_in_local_registry(public_id, item_type_plural, registry_path):
+def _check_is_item_in_local_registry(
+    public_id, item_type_plural, registry_path
+) -> None:
     try:
         try_get_item_source_path(
             registry_path, public_id.author, item_type_plural, public_id.name

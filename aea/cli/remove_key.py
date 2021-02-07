@@ -63,7 +63,7 @@ def _remove_private_key(
     _try_remove_key(ctx, type_, connection)
 
 
-def _try_remove_key(ctx: Context, type_: str, connection: bool = False):
+def _try_remove_key(ctx: Context, type_: str, connection: bool = False) -> None:
     private_keys = (
         ctx.agent_config.connection_private_key_paths
         if connection

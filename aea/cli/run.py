@@ -19,7 +19,7 @@
 """Implementation of the 'aea run' subcommand."""
 from contextlib import contextmanager
 from pathlib import Path
-from typing import List, Optional, cast
+from typing import Generator, List, Optional, cast
 
 import click
 
@@ -93,7 +93,7 @@ def run(
 
 
 @contextmanager
-def _profiling_context(period: int):
+def _profiling_context(period: int) -> Generator:
     """Start profiling context."""
     OBJECTS_INSTANCES = [
         Message,

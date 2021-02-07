@@ -41,7 +41,7 @@ _processes = set()  # type: Set[subprocess.Popen]
 lock = threading.Lock()
 
 
-def _call_subprocess(*args, timeout=None, **kwargs):
+def _call_subprocess(*args, timeout=None, **kwargs) -> int:
     """
     Create a subprocess.Popen, but with error handling.
 

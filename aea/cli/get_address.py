@@ -45,7 +45,7 @@ def get_address(click_context, type_):
     click.echo(address)
 
 
-def _try_get_address(ctx: Context, type_: str):
+def _try_get_address(ctx: Context, type_: str) -> str:
     """
     Try to get address.
 

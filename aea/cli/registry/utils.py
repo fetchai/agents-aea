@@ -21,7 +21,7 @@
 import os
 import tarfile
 from json.decoder import JSONDecodeError
-from typing import Optional
+from typing import Callable, Optional, Tuple, Union, cast
 
 import click
 
@@ -30,6 +30,7 @@ from aea.cli.utils.config import get_or_create_cli_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.loggers import logger
 from aea.cli.utils.package_utils import find_item_locally
+from aea.common import JSONLike
 from aea.configurations.base import PublicId
 from aea.helpers import http_requests as requests
 
@@ -58,7 +59,7 @@ def request_api(
     files=None,
     handle_400=True,
     return_code=False,
-):
+) -> Union[JSONLike, Tuple[JSONLike, int]]:
     """
     Request Registry API.
 
@@ -168,7 +169,7 @@ def extract(source: str, target: str) -> None:
     os.remove(source)
 
 
-def _rm_tarfiles():
+def _rm_tarfiles() -> None:
     cwd = os.getcwd()
     for filename in os.listdir(cwd):
         if filename.endswith(".tar.gz"):
@@ -176,7 +177,7 @@ def _rm_tarfiles():
             os.remove(filepath)
 
 
-def clean_tarfiles(func):
+def clean_tarfiles(func) -> Callable:
     """Decorate func to clean tarfiles after executing."""
 
     def wrapper(*args, **kwargs):
@@ -201,7 +202,7 @@ def check_is_author_logged_in(author_name: str) -> None:
     :raise ClickException: if username and author's name are not equal.
     :return: None.
     """
-    resp = request_api("GET", "/rest-auth/user/", is_auth=True)
+    resp = cast(JSONLike, request_api("GET", "/rest-auth/user/", is_auth=True))
     if not author_name == resp["username"]:
         raise click.ClickException(
             "Author username is not equal to current logged in username "
@@ -211,7 +212,7 @@ def check_is_author_logged_in(author_name: str) -> None:
         )
 
 
-def is_auth_token_present():
+def is_auth_token_present() -> bool:
     """
     Check if any user is currently logged in.
 
@@ -222,7 +223,7 @@ def is_auth_token_present():
 
 def get_package_meta(
     obj_type: str, public_id: PublicId, aea_version: Optional[str] = None
-) -> dict:
+) -> JSONLike:
     """
     Get package meta data from remote registry.
 
@@ -236,7 +237,7 @@ def get_package_meta(
     """
     params = dict(aea_version=aea_version) if aea_version else None
     api_path = f"/{obj_type}s/{public_id.author}/{public_id.name}/{public_id.version}"
-    resp = request_api("GET", api_path, params=params)
+    resp = cast(JSONLike, request_api("GET", api_path, params=params))
     return resp
 
 
@@ -269,7 +270,7 @@ def get_latest_public_id_mixed(
         package_meta = get_package_meta(
             item_type, item_public_id, aea_version=aea_version
         )
-        latest_item_public_id = PublicId.from_str(package_meta["public_id"])
+        latest_item_public_id = PublicId.from_str(cast(str, package_meta["public_id"]))
     return latest_item_public_id
 
 
@@ -302,7 +303,9 @@ def get_latest_version_available_in_registry(
             latest_item_public_id = item_config.public_id
         else:
             package_meta = get_package_meta(item_type, item_public_id, aea_version)
-            latest_item_public_id = PublicId.from_str(package_meta["public_id"])
+            latest_item_public_id = PublicId.from_str(
+                cast(str, package_meta["public_id"])
+            )
     except Exception:  # pylint: disable=broad-except
         raise click.ClickException(
             f"Package {item_public_id} details can not be fetched from the registry!"

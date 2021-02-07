@@ -48,7 +48,7 @@ def issue_certificates(click_context):
 
 def issue_certificates_(
     project_directory: str, agent_config_manager: AgentConfigManager
-):
+) -> None:
     """Issue certificates for connections that require them."""
     for connection_id in agent_config_manager.agent_config.connections:
         cert_requests = _get_cert_requests(
@@ -94,7 +94,7 @@ def _process_certificate(
     agent_config: AgentConfig,
     cert_request: CertRequest,
     connection_id: PublicId,
-):
+) -> None:
     """Process a single certificate request."""
     ledger_id = cert_request.ledger_id
     output_path = cert_request.save_path
@@ -137,7 +137,7 @@ def _process_connection(
     agent_config_manager: AgentConfigManager,
     cert_requests: List[CertRequest],
     connection_id: PublicId,
-):
+) -> None:
 
     if len(cert_requests) == 0:
         logger.debug("No certificates to process.")

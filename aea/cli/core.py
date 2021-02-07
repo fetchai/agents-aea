@@ -67,7 +67,7 @@ from aea.cli.utils.loggers import logger, simple_verbosity_option
 from aea.helpers.win32 import enable_ctrl_c_support
 
 
-@click.group(name="aea")
+@click.group(name="aea")  # type: ignore
 @click.version_option(aea.__version__, prog_name="aea")
 @simple_verbosity_option(logger, default="INFO")
 @click.option(
