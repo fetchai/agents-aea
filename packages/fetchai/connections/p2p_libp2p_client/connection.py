@@ -47,9 +47,9 @@ from packages.fetchai.connections.p2p_libp2p_client.acn_message_pb2 import (
 
 
 try:
-    from asyncio.streams import IncompleteReadError
+    from asyncio.streams import IncompleteReadError  # pylint: disable=ungrouped-imports
 except ImportError:
-    from asyncio import IncompleteReadError
+    from asyncio import IncompleteReadError  # pylint: disable=ungrouped-imports
 
 
 _default_logger = logging.getLogger(
