@@ -24,7 +24,6 @@ import logging
 import random
 import struct
 from asyncio import CancelledError
-from asyncio.streams import IncompleteReadError
 from pathlib import Path
 from typing import List, Optional, Union, cast
 
@@ -45,6 +44,12 @@ from packages.fetchai.connections.p2p_libp2p_client.acn_message_pb2 import (
     Register,
     Status,
 )
+
+
+try:
+    from asyncio.streams import IncompleteReadError
+except ImportError:
+    from asyncio import IncompleteReadError
 
 
 _default_logger = logging.getLogger(

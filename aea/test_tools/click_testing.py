@@ -91,7 +91,7 @@ class CliRunner(ClickCliRunner):
                 sys.stdout.flush()
                 stdout = outstreams[0].getvalue() if not outstreams[0].closed else b""  # type: ignore
                 if self.mix_stderr:
-                    stderr = b""
+                    stderr: Optional[bytes] = None
                 else:
                     stderr = (
                         outstreams[1].getvalue() if not outstreams[1].closed else b""  # type: ignore
@@ -100,7 +100,7 @@ class CliRunner(ClickCliRunner):
         return Result(
             runner=self,
             stdout_bytes=stdout,
-            stderr_bytes=stderr,
+            stderr_bytes=stderr,  # type: ignore
             exit_code=exit_code,
             exception=exception,
             exc_info=exc_info,
