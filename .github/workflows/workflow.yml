@@ -26,9 +26,16 @@ jobs:
           pip install pipenv
       - name: Pipenv lock
         run: pipenv lock
-      - name: Check FetchAI-Cosmos crypto plugin consistency
-        # these two files should not be different
-        run: diff plugins/cosmos-crypto/cosmos_crypto/cosmos.py plugins/fetchai-crypto/fetchai_crypto/_cosmos.py
+      - name: Check plugin consistency
+        run: |
+          # these two files should not be different;
+          # we vendorize main "cosmos.py" module in fetchai crypto plugin package
+          diff plugins/cosmos-crypto/cosmos_crypto/cosmos.py plugins/fetchai-crypto/fetchai_crypto/_cosmos.py
+
+          # http_requests.py is copied from "aea", and should be the same for every plugin
+          diff aea/helpers/http_requests.py plugins/cosmos-crypto/cosmos_crypto/http_requests.py
+          diff plugins/cosmos-crypto/cosmos_crypto/http_requests.py plugins/ethereum-crypto/ethereum_crypto/http_requests.py
+          diff plugins/ethereum-crypto/ethereum_crypto/http_requests.py plugins/fetchai-crypto/fetchai_crypto/http_requests.py
 
   common_checks_2:
     continue-on-error: False

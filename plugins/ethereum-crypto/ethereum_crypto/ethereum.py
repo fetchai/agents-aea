@@ -26,7 +26,7 @@ import warnings
 from pathlib import Path
 from typing import Any, BinaryIO, Callable, Dict, Optional, Tuple, Union, cast
 
-import requests
+from ethereum_crypto import http_requests as requests
 from eth_account import Account
 from eth_account._utils.signing import to_standard_signature_bytes
 from eth_account.datastructures import HexBytes, SignedTransaction
