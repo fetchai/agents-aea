@@ -171,23 +171,30 @@ class SyncedGeneratorConnection(GeneratorConnection):
     def __init__(self, *args, **kwargs):
         """Init connection."""
         super().__init__(*args, **kwargs)
-        self._condition = None
+        self._condition: Optional[asyncio.Event] = None
+
+    @property
+    def condition(self) -> asyncio.Event:
+        """Get condition."""
+        if self._condition is None:
+            raise ValueError("Event not set.")
+        return self._condition
 
     async def connect(self):
         """Connect connection."""
         await super().connect()
         self._condition = asyncio.Event()
-        self._condition.set()
+        self.condition.set()
 
     async def send(self, envelope: "Envelope") -> None:
         """Handle incoming envelope."""
         await super().send(envelope)
-        self._condition.set()
+        self.condition.set()
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """Generate an envelope."""
-        await self._condition.wait()
-        self._condition.clear()
+        await self.condition.wait()
+        self.condition.clear()
         return await super().receive(*args, **kwargs)
 
 

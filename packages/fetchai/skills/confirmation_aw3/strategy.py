@@ -109,9 +109,7 @@ class Strategy(GenericStrategy):
         """
         registration_db = cast(RegistrationDB, self.context.registration_db)
         registration_db.set_trade(counterparty, datetime.datetime.now(), data)
-        self.context.logger.info(
-            f"Successful trade with={counterparty}. Data acquired={data}!"
-        )
+        self.context.logger.info(f"Successful trade with={counterparty}.")
         developer_handle, nb_trades = registration_db.get_handle_and_trades(
             counterparty
         )

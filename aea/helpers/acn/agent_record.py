@@ -35,7 +35,7 @@ class AgentRecord:
         message: bytes,
         signature: str,
         ledger_id: str,
-    ):
+    ) -> None:
         """
         Initialize the AgentRecord
 
@@ -123,7 +123,7 @@ class AgentRecord:
         # + self.not_after_string.encode("ascii")  # noqa: E800
         return message
 
-    def __str__(self):  # pragma: no cover
+    def __str__(self) -> str:  # pragma: no cover
         """Get string representation."""
         return f"(address={self.address}, public_key={self.public_key}, representative_public_key={self.representative_public_key}, signature={self.signature}, ledger_id={self.ledger_id})"
 

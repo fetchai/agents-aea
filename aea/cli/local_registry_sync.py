@@ -21,7 +21,7 @@ import os
 import shutil
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Generator, Tuple, Union
+from typing import Generator, Tuple, Union, cast
 
 import click
 
@@ -40,7 +40,7 @@ PACKAGES_DIRS = [i.to_plural() for i in PackageType]
 
 @click.command()
 @pass_ctx
-def local_registry_sync(ctx: Context):
+def local_registry_sync(ctx: Context) -> None:
     """Upgrade the local package registry."""
     skip_consistency_check = ctx.config["skip_consistency_check"]
     do_local_registry_update(ctx.cwd, skip_consistency_check)
@@ -101,7 +101,7 @@ def get_package_latest_public_id(package_id: PackageId) -> PublicId:
     package_meta = get_package_meta(
         str(package_id.package_type), package_id.public_id.to_latest()
     )
-    return PublicId.from_str(package_meta["public_id"])
+    return PublicId.from_str(cast(str, package_meta["public_id"]))
 
 
 def enlist_packages(

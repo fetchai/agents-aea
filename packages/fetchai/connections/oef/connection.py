@@ -172,6 +172,8 @@ class OEFChannel(OEFAgent):
         self.aea_logger = logger
 
     async def _run_in_executor(self, fn, *args):
+        if not self._loop:  # pragma: nocover
+            raise ValueError("Channel not connected!")
         return await self._loop.run_in_executor(self._threaded_pool, fn, *args)
 
     @property

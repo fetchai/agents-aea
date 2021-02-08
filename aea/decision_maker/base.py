@@ -24,7 +24,7 @@ from abc import ABC, abstractmethod
 from queue import Queue
 from threading import Thread
 from types import SimpleNamespace
-from typing import List, Optional
+from typing import Any, List, Optional
 from uuid import uuid4
 
 from aea.crypto.wallet import Wallet
@@ -50,7 +50,7 @@ class OwnershipState(ABC):
     """Represent the ownership state of an agent (can proxy a ledger)."""
 
     @abstractmethod
-    def set(self, **kwargs) -> None:
+    def set(self, **kwargs: Any) -> None:
         """
         Set values on the ownership state.
 
@@ -59,7 +59,7 @@ class OwnershipState(ABC):
         """
 
     @abstractmethod
-    def apply_delta(self, **kwargs) -> None:
+    def apply_delta(self, **kwargs: Any) -> None:
         """
         Apply a state update to the ownership state.
 
@@ -101,7 +101,7 @@ class Preferences(ABC):
     """Class to represent the preferences."""
 
     @abstractmethod
-    def set(self, **kwargs,) -> None:
+    def set(self, **kwargs: Any) -> None:
         """
         Set values on the preferences.
 
@@ -118,7 +118,7 @@ class Preferences(ABC):
         """
 
     @abstractmethod
-    def marginal_utility(self, ownership_state: OwnershipState, **kwargs,) -> float:
+    def marginal_utility(self, ownership_state: OwnershipState, **kwargs: Any) -> float:
         """
         Compute the marginal utility.
 
@@ -147,7 +147,7 @@ class Preferences(ABC):
 class ProtectedQueue(Queue):
     """A wrapper of a queue to protect which object can read from it."""
 
-    def __init__(self, access_code: str):
+    def __init__(self, access_code: str) -> None:
         """
         Initialize the protected queue.
 
@@ -157,7 +157,10 @@ class ProtectedQueue(Queue):
         self._access_code_hash = _hash(access_code)
 
     def put(  # pylint: disable=arguments-differ
-        self, internal_message: Optional[Message], block=True, timeout=None
+        self,
+        internal_message: Optional[Message],
+        block: bool = True,
+        timeout: Optional[float] = None,
     ) -> None:
         """
         Put an internal message on the queue.
@@ -194,7 +197,7 @@ class ProtectedQueue(Queue):
             raise ValueError("Only messages are allowed!")
         super().put_nowait(internal_message)
 
-    def get(self, block=True, timeout=None) -> None:
+    def get(self, block: bool = True, timeout: Optional[float] = None) -> None:
         """
         Inaccessible get method.
 
@@ -213,7 +216,7 @@ class ProtectedQueue(Queue):
         raise ValueError("Access not permitted!")
 
     def protected_get(
-        self, access_code: str, block=True, timeout=None
+        self, access_code: str, block: bool = True, timeout: Optional[float] = None
     ) -> Optional[Message]:
         """
         Access protected get method.
@@ -237,7 +240,7 @@ class DecisionMakerHandler(WithLogger, ABC):
 
     self_address: str = "decision_maker"
 
-    def __init__(self, identity: Identity, wallet: Wallet, **kwargs):
+    def __init__(self, identity: Identity, wallet: Wallet, **kwargs: Any) -> None:
         """
         Initialize the decision maker handler.
 
@@ -291,9 +294,7 @@ class DecisionMakerHandler(WithLogger, ABC):
 class DecisionMaker(WithLogger):
     """This class implements the decision maker."""
 
-    def __init__(
-        self, decision_maker_handler: DecisionMakerHandler,
-    ):
+    def __init__(self, decision_maker_handler: DecisionMakerHandler,) -> None:
         """
         Initialize the decision maker.
 

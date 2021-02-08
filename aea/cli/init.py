@@ -41,7 +41,7 @@ from aea.cli.utils.package_utils import validate_author_name
 @pass_ctx
 def init(  # pylint: disable=unused-argument
     ctx: Context, author: str, reset: bool, local: bool, no_subscribe: bool
-):
+) -> None:
     """Initialize your AEA configurations."""
     do_init(author, reset, not local, no_subscribe)
 

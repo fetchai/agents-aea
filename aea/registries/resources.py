@@ -83,7 +83,7 @@ class Resources:
         """Get the model registry."""
         return self._model_registry
 
-    def add_component(self, component: Component):
+    def add_component(self, component: Component) -> None:
         """Add a component to resources."""
         if component.component_type == ComponentType.PROTOCOL:
             self.add_protocol(cast(Protocol, component))

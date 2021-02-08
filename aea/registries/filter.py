@@ -33,7 +33,7 @@ class Filter(WithLogger):
 
     def __init__(
         self, resources: Resources, decision_maker_out_queue: AsyncFriendlyQueue
-    ):
+    ) -> None:
         """
         Instantiate the filter.
 
@@ -141,7 +141,7 @@ class Filter(WithLogger):
                         "Error when trying to add a new handler: {}".format(str(e))
                     )
 
-    def _handle_internal_message(self, message: Message):
+    def _handle_internal_message(self, message: Message) -> None:
         """Handle message from the Decision Maker."""
         try:
             skill_id = PublicId.from_str(message.to)

@@ -72,7 +72,7 @@ class _Base:
 class Project(_Base):
     """Agent project representation."""
 
-    def __init__(self, public_id: PublicId, path: str):
+    def __init__(self, public_id: PublicId, path: str) -> None:
         """Init project with public_id and project's path."""
         self.public_id: PublicId = public_id
         self.path: str = path
@@ -199,7 +199,7 @@ class AgentAlias(_Base):
         create_private_key(ledger, filepath)
         return filepath
 
-    def remove_from_project(self):
+    def remove_from_project(self) -> None:
         """Remove agent alias from project."""
         self.project.agents.remove(self.agent_name)
 

@@ -970,15 +970,18 @@ class Game(Model):
         result = result + "Equilibrium money allocation: \n"
         for (
             agent_addr,
-            eq_allocation,
+            eq_allocations,
         ) in self.initialization.agent_addr_to_eq_currency_holdings.items():
-            result = (
-                result
-                + self.conf.agent_addr_to_name[agent_addr]
-                + " "
-                + str(eq_allocation)
-                + "\n"
-            )
+            result = result + "- " + self.conf.agent_addr_to_name[agent_addr] + ":\n"
+            for currency_id, quantity in eq_allocations.items():
+                result = (
+                    result
+                    + "    "
+                    + self.conf.currency_id_to_name[currency_id]
+                    + ": "
+                    + str(quantity)
+                    + "\n"
+                )
         result = result + "\n"
         return result
 

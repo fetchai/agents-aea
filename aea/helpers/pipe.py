@@ -46,7 +46,7 @@ class IPCChannelClient(ABC):
     """Multi-platform interprocess communication channel for the client side."""
 
     @abstractmethod
-    async def connect(self, timeout=PIPE_CONN_TIMEOUT) -> bool:
+    async def connect(self, timeout: float = PIPE_CONN_TIMEOUT) -> bool:
         """
         Connect to communication channel
 
@@ -113,7 +113,7 @@ class PosixNamedPipeProtocol:
         out_path: str,
         logger: logging.Logger = _default_logger,
         loop: Optional[AbstractEventLoop] = None,
-    ):
+    ) -> None:
         """
         Initialize a new posix named pipe.
 
@@ -256,7 +256,7 @@ class TCPSocketProtocol:
         writer: asyncio.StreamWriter,
         logger: logging.Logger = _default_logger,
         loop: Optional[AbstractEventLoop] = None,
-    ):
+    ) -> None:
         """
         Initialize the tcp socket protocol.
 
@@ -322,7 +322,7 @@ class TCPSocketChannel(IPCChannel):
         self,
         logger: logging.Logger = _default_logger,
         loop: Optional[AbstractEventLoop] = None,
-    ):
+    ) -> None:
         """Initialize tcp socket interprocess communication channel."""
         self.logger = logger
         self._loop = loop
@@ -367,7 +367,7 @@ class TCPSocketChannel(IPCChannel):
 
     async def _handle_connection(
         self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
-    ):
+    ) -> None:
         """Handle connection."""
         if self._connected is None:
             raise ValueError("Connected is None!")  # pragma: nocover
@@ -420,7 +420,7 @@ class PosixNamedPipeChannel(IPCChannel):
         self,
         logger: logging.Logger = _default_logger,
         loop: Optional[AbstractEventLoop] = None,
-    ):
+    ) -> None:
         """Initialize posix named pipe interprocess communication channel."""
         self.logger = logger
         self._loop = loop
@@ -498,7 +498,7 @@ class TCPSocketChannelClient(IPCChannelClient):
         out_path: str,
         logger: logging.Logger = _default_logger,
         loop: Optional[AbstractEventLoop] = None,
-    ):
+    ) -> None:
         """
         Initialize a tcp socket communication channel client.
 
@@ -586,7 +586,7 @@ class PosixNamedPipeChannelClient(IPCChannelClient):
         out_path: str,
         logger: logging.Logger = _default_logger,
         loop: Optional[AbstractEventLoop] = None,
-    ):
+    ) -> None:
         """
         Initialize a posix named pipe communication channel client.
 

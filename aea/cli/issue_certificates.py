@@ -109,7 +109,7 @@ def _process_certificate(
     agent_config: AgentConfig,
     cert_request: CertRequest,
     connection_id: PublicId,
-):
+) -> None:
     """Process a single certificate request."""
     ledger_id = cert_request.ledger_id
     output_path = cert_request.save_path
@@ -154,7 +154,7 @@ def _process_connection(
     agent_config_manager: AgentConfigManager,
     cert_requests: List[CertRequest],
     connection_id: PublicId,
-):
+) -> None:
 
     if len(cert_requests) == 0:
         logger.debug("No certificates to process.")

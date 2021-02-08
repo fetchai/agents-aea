@@ -175,9 +175,10 @@ def run(duration, runtime_mode, runner_mode, start_messages, num_of_agents):
 
     for agent1, agent2 in itertools.permutations(agents, 2):
         for _ in range(int(start_messages)):
-            skills[agent1.identity.address].handlers[handler_name].make_request(
-                agent2.identity.address
-            )
+            cast(
+                HttpPingPongHandler,
+                skills[agent1.identity.address].handlers[handler_name],
+            ).make_request(agent2.identity.address)
 
     time.sleep(duration)
 
@@ -187,25 +188,40 @@ def run(duration, runtime_mode, runner_mode, start_messages, num_of_agents):
     runner.stop()
 
     total_messages = sum(
-        [skill.handlers[handler_name].count for skill in skills.values()]
+        [
+            cast(HttpPingPongHandler, skill.handlers[handler_name]).count
+            for skill in skills.values()
+        ]
     )
     rate = total_messages / duration
 
     rtt_total_time = sum(
-        [skill.handlers[handler_name].rtt_total_time for skill in skills.values()]
+        [
+            cast(HttpPingPongHandler, skill.handlers[handler_name]).rtt_total_time
+            for skill in skills.values()
+        ]
     )
     rtt_count = sum(
-        [skill.handlers[handler_name].rtt_count for skill in skills.values()]
+        [
+            cast(HttpPingPongHandler, skill.handlers[handler_name]).rtt_count
+            for skill in skills.values()
+        ]
     )
 
     if rtt_count == 0:
         rtt_count = -1
 
     latency_total_time = sum(
-        [skill.handlers[handler_name].latency_total_time for skill in skills.values()]
+        [
+            cast(HttpPingPongHandler, skill.handlers[handler_name]).latency_total_time
+            for skill in skills.values()
+        ]
     )
     latency_count = sum(
-        [skill.handlers[handler_name].latency_count for skill in skills.values()]
+        [
+            cast(HttpPingPongHandler, skill.handlers[handler_name]).latency_count
+            for skill in skills.values()
+        ]
     )
 
     if latency_count == 0:

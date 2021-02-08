@@ -47,7 +47,7 @@ class MLModel(Model):
         self._lock = threading.RLock()
         self._weights = None
 
-        self.data_queue = Queue()
+        self.data_queue: Queue = Queue()
         self.training_thread = threading.Thread(target=self.training_loop)
 
     def setup(self) -> None:

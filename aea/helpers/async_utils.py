@@ -77,7 +77,7 @@ class AsyncState:
 
     def __init__(
         self, initial_state: Any = None, states_enum: Optional[Container[Any]] = None
-    ):
+    ) -> None:
         """Init async state.
 
         :param initial_state: state to set on start.
@@ -143,7 +143,7 @@ class AsyncState:
     def _watcher_result_callback(watcher: Future) -> Callable:
         """Create callback for watcher result."""
         # docstyle.
-        def _callback(result):
+        def _callback(result: Any) -> None:
             if watcher.done():  # pragma: nocover
                 return
             watcher.set_result(result)
@@ -208,7 +208,7 @@ class PeriodicCaller:
         start_at: Optional[datetime.datetime] = None,
         exception_callback: Optional[Callable[[Callable, Exception], None]] = None,
         loop: Optional[AbstractEventLoop] = None,
-    ):
+    ) -> None:
         """
         Init periodic caller.
 
@@ -312,7 +312,7 @@ class AnotherThreadTask:
 class ThreadedAsyncRunner(Thread):
     """Util to run thread with event loop and execute coroutines inside."""
 
-    def __init__(self, loop=None) -> None:
+    def __init__(self, loop: Optional[AbstractEventLoop] = None) -> None:
         """
         Init threaded runner.
 
@@ -364,31 +364,59 @@ class ThreadedAsyncRunner(Thread):
 class AwaitableProc:
     """Async-friendly subprocess.Popen."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Initialise awaitable proc."""
         self.args = args
         self.kwargs = kwargs
-        self.proc = None
-        self._thread = None
-        self.loop = None
-        self.future = None
+        self._proc: Optional[subprocess.Popen] = None
+        self._thread: Optional[Thread] = None
+        self._loop: Optional[AbstractEventLoop] = None
+        self._future: Optional[Future] = None
 
-    async def start(self):
+    @property
+    def thread(self) -> Thread:
+        """Get the thread."""
+        if self._thread is None:
+            raise ValueError("Thread not set!")
+        return self._thread
+
+    @property
+    def proc(self) -> subprocess.Popen:
+        """Get proc."""
+        if self._proc is None:
+            raise ValueError("subprocess not set!")
+        return self._proc
+
+    @property
+    def loop(self) -> AbstractEventLoop:
+        """Get loop."""
+        if self._loop is None:
+            raise ValueError("loop not set!")
+        return self._loop
+
+    @property
+    def future(self) -> Future:
+        """Get future."""
+        if self._future is None:
+            raise ValueError("future not set!")
+        return self._future
+
+    async def start(self) -> None:
         """Start the subprocess."""
-        self.proc = subprocess.Popen(*self.args, **self.kwargs)  # nosec
-        self.loop = asyncio.get_event_loop()
-        self.future = asyncio.futures.Future()
+        self._proc = subprocess.Popen(*self.args, **self.kwargs)  # nosec
+        self._loop = asyncio.get_event_loop()
+        self._future = asyncio.futures.Future()
         self._thread = Thread(target=self._in_thread)
-        self._thread.start()
+        self.thread.start()
         try:
             return await asyncio.shield(self.future)
         except asyncio.CancelledError:  # pragma: nocover
             self.proc.terminate()
             return await self.future
         finally:
-            self._thread.join()
+            self.thread.join()
 
-    def _in_thread(self):
+    def _in_thread(self) -> None:
         """Run in dedicated thread."""
         self.proc.wait()
         self.loop.call_soon_threadsafe(self._set_return_code, self.proc.returncode)
@@ -451,12 +479,12 @@ class HandlerItemGetter(ItemGetter):
         :return: callable to return handler and item from getter.
         """
         # for pydocstyle
-        async def _getter():
+        async def _getter() -> Tuple[Callable, Any]:
             return handler, await getter()
 
         return _getter
 
-    def __init__(self, getters: List[Tuple[Callable[[Any], None], Callable]]):
+    def __init__(self, getters: List[Tuple[Callable[[Any], None], Callable]]) -> None:
         """
         Init HandlerItemGetter.
 
@@ -627,15 +655,18 @@ class Runnable(ABC):
                 asyncio.wait_for(self._wait(), timeout=timeout)
             )
 
-    def _wait_async(self, timeout):
+    def _wait_async(self, timeout: Optional[float] = None) -> Awaitable:
         if not self._threaded:
             return asyncio.wait_for(self._wait(), timeout=timeout)
+
+        if self._task is None:  # pragma: nocover
+            raise ValueError("task is not set!")
 
         # for threaded mode create a future and bind it to task
         loop = asyncio.get_event_loop()
         fut = loop.create_future()
 
-        def done(task):
+        def done(task: Future) -> None:
             try:
                 if fut.done():  # pragma: nocover
                     return
@@ -689,7 +720,7 @@ class Runnable(ABC):
         self._was_cancelled = True
         self._task.cancel()
 
-    def start_and_wait_completed(self, *args, **kwargs) -> Awaitable:
+    def start_and_wait_completed(self, *args: Any, **kwargs: Any) -> Awaitable:
         """Alias for start and wait methods."""
         self.start()
         return self.wait_completed(*args, **kwargs)
