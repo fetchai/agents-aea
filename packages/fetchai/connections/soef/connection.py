@@ -30,7 +30,7 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import suppress
 from enum import Enum
 from pathlib import Path
-from typing import Callable, Dict, List, Optional, Type, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Type, Union, cast
 from urllib import parse
 from uuid import uuid4
 
@@ -415,10 +415,10 @@ class SOEFChannel:
         """
         await self.process_envelope(envelope)
 
-    async def _request_text(self, *args, **kwargs) -> str:
+    async def _request_text(self, *args: Any, **kwargs: Any) -> str:
         """Perform and http request and return text of response."""
 
-        def _do_request():
+        def _do_request() -> str:
             return requests.request(*args, **kwargs).text
 
         return await self.loop.run_in_executor(self._executor_pool, _do_request)
@@ -798,7 +798,7 @@ class SOEFChannel:
 
         await self._set_personality_piece(piece, value)
 
-    async def _set_personality_piece(self, piece: str, value: str):
+    async def _set_personality_piece(self, piece: str, value: str) -> None:
         """
         Set the personality piece.
 
@@ -1136,7 +1136,7 @@ class SOEFConnection(Connection):
 
     connection_id = PUBLIC_ID
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize."""
         if kwargs.get("configuration") is None:  # pragma: nocover
             kwargs["excluded_protocols"] = kwargs.get("excluded_protocols") or []
@@ -1199,7 +1199,7 @@ class SOEFConnection(Connection):
         await self.channel.disconnect()
         self._state.set(ConnectionStates.disconnected)
 
-    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
+    async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """
         Receive an envelope. Blocking.
 

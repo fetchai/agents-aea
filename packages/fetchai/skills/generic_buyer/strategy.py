@@ -19,7 +19,7 @@
 
 """This module contains the strategy class."""
 
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Tuple
 
 from aea.common import Address
 from aea.exceptions import enforce
@@ -57,7 +57,7 @@ DEFAULT_MAX_NEGOTIATIONS = 2
 class GenericStrategy(Model):
     """This class defines a strategy for the agent."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize the strategy of the agent.
 

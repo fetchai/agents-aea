@@ -19,6 +19,8 @@
 
 """This module contains the strategy class."""
 
+from typing import Any
+
 from aea.helpers.search.generic import SIMPLE_SERVICE_MODEL
 from aea.helpers.search.models import Constraint, ConstraintType, Location, Query
 from aea.skills.base import Model
@@ -38,7 +40,7 @@ DEFAULT_SEARCH_RADIUS = 5.0
 class Strategy(Model):
     """This class defines a strategy for the agent."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize the strategy of the agent.
 

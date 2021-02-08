@@ -27,7 +27,7 @@ from asyncio import (  # pylint: disable=unused-import
     StreamReader,
     StreamWriter,
 )
-from typing import Optional, cast
+from typing import Any, Optional, cast
 
 from aea.configurations.base import ConnectionConfig
 from aea.mail.base import Envelope
@@ -43,7 +43,7 @@ STUB_DIALOGUE_ID = 0
 class TCPClientConnection(TCPConnection):
     """This class implements a TCP client."""
 
-    def __init__(self, configuration: ConnectionConfig, **kwargs):
+    def __init__(self, configuration: ConnectionConfig, **kwargs: Any) -> None:
         """
         Initialize a TCP client connection.
 
@@ -59,13 +59,13 @@ class TCPClientConnection(TCPConnection):
             None,
         )  # type: Optional[StreamReader], Optional[StreamWriter]
 
-    async def setup(self):
+    async def setup(self) -> None:
         """Set the connection up."""
         self._reader, self._writer = await asyncio.open_connection(self.host, self.port)
         address_bytes = self.address.encode("utf-8")
         await self._send(self._writer, address_bytes)
 
-    async def teardown(self):
+    async def teardown(self) -> None:
         """Tear the connection down."""
         if self._reader is not None:
             self._reader.feed_eof()
@@ -80,7 +80,7 @@ class TCPClientConnection(TCPConnection):
         # this turned out to work in the tests
         await asyncio.sleep(0.0)
 
-    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
+    async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """
         Receive an envelope.
 

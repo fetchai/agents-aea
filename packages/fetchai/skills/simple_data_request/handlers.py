@@ -19,7 +19,7 @@
 
 """This package contains a handler to process HTTP responses."""
 
-from typing import cast
+from typing import Any, cast
 
 from aea.protocols.base import Message
 from aea.skills.base import Handler
@@ -36,7 +36,7 @@ class HttpHandler(Handler):
 
     SUPPORTED_PROTOCOL = HttpMessage.protocol_id
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         """Initialize the handler."""
         self.shared_state_key = kwargs.pop("shared_state_key", None)
         if self.shared_state_key is None:

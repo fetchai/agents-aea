@@ -19,7 +19,7 @@
 
 """This package contains the behaviours."""
 
-from typing import List, Optional, Set, cast
+from typing import Any, List, Optional, Set, cast
 
 from aea.protocols.dialogue.base import DialogueLabel
 from aea.skills.behaviours import TickerBehaviour
@@ -48,7 +48,7 @@ SearchBehaviour = GenericSearchBehaviour
 class TransactionBehaviour(TickerBehaviour):
     """A behaviour to sequentially submit transactions to the blockchain."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         """Initialize the transaction behaviour."""
         tx_interval = cast(
             float, kwargs.pop("transaction_interval", DEFAULT_TX_INTERVAL)

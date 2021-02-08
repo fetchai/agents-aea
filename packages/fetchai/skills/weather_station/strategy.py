@@ -34,7 +34,7 @@ DEFAULT_DATE_TWO = "15/10/2019"
 class Strategy(GenericStrategy):
     """This class defines a strategy for the agent."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize the strategy of the agent.
 

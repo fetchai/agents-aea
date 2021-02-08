@@ -19,7 +19,7 @@
 
 """This package contains a scaffold of a behaviour."""
 
-from typing import cast
+from typing import Any, cast
 
 from aea.mail.base import EnvelopeContext
 from aea.skills.behaviours import TickerBehaviour
@@ -39,7 +39,7 @@ DEFAULT_REGISTER_AND_SEARCH_INTERVAL = 5.0
 class GoodsRegisterAndSearchBehaviour(TickerBehaviour):
     """This class implements the goods register and search behaviour."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         """Initialize the search behaviour."""
         search_interval = cast(
             float, kwargs.pop("search_interval", DEFAULT_REGISTER_AND_SEARCH_INTERVAL)
