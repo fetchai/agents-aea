@@ -139,6 +139,19 @@ def test_state():
     assert connection.state == ConnectionStates.connected
 
 
+def test_ensure_connected():
+    """Test ensure_connected method."""
+    connection = TConnection(MagicMock(public_id=TConnection.connection_id))
+    assert not connection.is_connected
+    with pytest.raises(
+        ConnectionError, match="Connection is not connected! Connect first!"
+    ):
+        connection._ensure_connected()
+
+    connection._state.set(ConnectionStates.connected)
+    connection._ensure_connected()
+
+
 def test_from_dir():
     """Test Connection.from_dir"""
     dummy_connection_dir = os.path.join(CUR_PATH, "data", "dummy_connection")

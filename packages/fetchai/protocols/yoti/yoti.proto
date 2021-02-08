@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package aea.fetchai.yoti.v0_1_0;
+
+message YotiMessage{
+
+  // Performatives and contents
+  message Get_Profile_Performative{
+    string token = 1;
+    string dotted_path = 2;
+    repeated string args = 3;
+  }
+
+  message Profile_Performative{
+    map<string, string> info = 1;
+  }
+
+  message Error_Performative{
+    int32 error_code = 1;
+    string error_msg = 2;
+  }
+
+
+  oneof performative{
+    Error_Performative error = 5;
+    Get_Profile_Performative get_profile = 6;
+    Profile_Performative profile = 7;
+  }
+}

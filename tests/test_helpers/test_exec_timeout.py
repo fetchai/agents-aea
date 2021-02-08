@@ -34,6 +34,7 @@ from aea.helpers.exec_timeout import (
 )
 
 from tests.common.utils import timeit_context
+from tests.conftest import MAX_FLAKY_RERUNS
 
 
 if os.name == "nt":
@@ -134,6 +135,7 @@ class TestThreadGuard(BaseTestExecTimeout):
         for _ in range(fractions):
             time.sleep(sleep / fractions)
 
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_execution_limit_in_threads(self):
         """Test two threads with different timeouts same time."""
         # pydocstyle: ignore # conflict with black # noqa: E800

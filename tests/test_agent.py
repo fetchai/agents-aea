@@ -108,6 +108,6 @@ def test_runtime_modes():
         agent._get_runtime_class()
 
     with pytest.raises(ValueError):
-        agent.runtime._get_main_loop_class("not exists")
+        agent.runtime._get_agent_loop_class("not exists")
 
     assert agent.runtime.loop_mode == agent.runtime.DEFAULT_RUN_LOOP

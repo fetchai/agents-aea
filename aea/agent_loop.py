@@ -85,6 +85,16 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
         """Get agent."""
         return self._agent
 
+    @property
+    def state(self) -> AgentLoopStates:
+        """Get current main loop state."""
+        return self._state.get()
+
+    @property
+    def is_running(self) -> bool:
+        """Get running state of the loop."""
+        return self._state.get() == AgentLoopStates.started
+
     def set_loop(self, loop: AbstractEventLoop) -> None:
         """Set event loop and all event loopp related objects."""
         self._loop: AbstractEventLoop = loop
@@ -137,16 +147,6 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
             if task.done():
                 continue  #  pragma: nocover
             task.cancel()
-
-    @property
-    def state(self) -> AgentLoopStates:
-        """Get current main loop state."""
-        return self._state.get()
-
-    @property
-    def is_running(self) -> bool:
-        """Get running state of the loop."""
-        return self._state.get() == AgentLoopStates.started
 
 
 class AsyncAgentLoop(BaseAgentLoop):

@@ -167,7 +167,7 @@ class TestGenericCases(AEATestCaseEmpty):
             called = True
 
         thread = self.start_thread(fn)
-        thread.join(10)
+        thread.join()
         assert called
 
     def test_fetch_and_delete(self):

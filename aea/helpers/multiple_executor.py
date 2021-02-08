@@ -383,7 +383,7 @@ class AbstractMultipleRunner:  # pragma: nocover
         else:
             self._executor.start()
 
-    def stop(self, timeout: float = 0) -> None:
+    def stop(self, timeout: Optional[float] = None) -> None:
         """
         Stop agents.
 
@@ -427,8 +427,8 @@ class AbstractMultipleRunner:  # pragma: nocover
         """Return sequence successful tasks."""
         return [i.id for i in self._executor.not_failed_tasks]
 
-    def join_thread(self) -> None:  # pragma: nocover
-        """Join thread if running in thread mode."""
+    def try_join_thread(self) -> None:  # pragma: nocover
+        """Try to join thread if running in thread mode."""
         if self._thread is None:
             raise ValueError("Not started in thread mode.")
         # do not block with join, helpful to catch Keyboardiinterrupted exception

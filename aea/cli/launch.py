@@ -17,10 +17,11 @@
 #
 # ------------------------------------------------------------------------------
 """Implementation of the 'aea launch' subcommand."""
+import os
 import sys
 from collections import OrderedDict
 from pathlib import Path
-from typing import List, cast
+from typing import List, Optional, cast
 
 import click
 
@@ -69,11 +70,15 @@ def _launch_agents(
         probably keyboard interrupt exception gets lost in executor pool or in asyncio module
         """
         launcher.start(threaded=True)
-        launcher.join_thread()
+        launcher.try_join_thread()
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt detected.")
     finally:
-        launcher.stop()
+        timeout: Optional[float] = None
+        if os.name == "nt":
+            # Windows bug: https://bugs.python.org/issue21822
+            timeout = 0
+        launcher.stop(timeout)
 
     for agent in launcher.failed:
         logger.info(f"Agent {agent} terminated with exit code 1")

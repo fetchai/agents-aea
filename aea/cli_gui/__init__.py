@@ -335,12 +335,14 @@ def start_agent(agent_id: str, connection_id: PublicId):
     app_context.agent_tty[agent_id] = []
     app_context.agent_error[agent_id] = []
 
+    # we don't seem to ever join this
     tty_read_thread = threading.Thread(
         target=read_tty,
         args=(app_context.agent_processes[agent_id], app_context.agent_tty[agent_id],),
     )
     tty_read_thread.start()
 
+    # we don't seem to ever join this
     error_read_thread = threading.Thread(
         target=read_error,
         args=(

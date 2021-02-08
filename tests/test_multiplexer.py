@@ -544,7 +544,7 @@ async def test_threaded_mode():
     context = EnvelopeContext(connection_id=connection_1.connection_id)
     envelope = Envelope(to="to", sender="sender", message=msg, context=context,)
     try:
-        multiplexer.start()
+        await multiplexer.connect()
         await asyncio.sleep(0.5)
         inbox = InBox(multiplexer)
         outbox = OutBox(multiplexer)
@@ -565,7 +565,7 @@ async def test_threaded_mode():
         assert received == envelope
 
     finally:
-        multiplexer.stop()
+        await multiplexer.disconnect()
 
 
 @pytest.mark.asyncio
