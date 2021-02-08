@@ -39,7 +39,7 @@ from aea.helpers.base import CertRequest
 @click.command()
 @click.pass_context
 @check_aea_project
-def issue_certificates(click_context: click.Context):
+def issue_certificates(click_context: click.Context) -> None:
     """
     Issue certificates for connections that require them.
 
@@ -55,7 +55,7 @@ def issue_certificates_(
     project_directory: str,
     agent_config_manager: AgentConfigManager,
     path_prefix: Optional[str] = None,
-):
+) -> None:
     """
     Issue certificates for connections that require them.
 
