@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This package contains a class representing the game parameters."""
+from typing import Any
 
 from aea.helpers.transaction.base import Terms
 
@@ -27,7 +28,7 @@ from packages.fetchai.skills.tac_control.parameters import Parameters as BasePar
 class Parameters(BaseParameters):
     """This class contains the parameters of the game."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Instantiate the parameter class."""
         super().__init__(**kwargs)
         self.nb_completed_minting = 0

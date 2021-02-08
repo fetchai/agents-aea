@@ -56,7 +56,7 @@ DEFAULT_DATA_FOR_SALE = {
 class GenericStrategy(Model):
     """This class defines a strategy for the agent."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize the strategy of the agent.
 

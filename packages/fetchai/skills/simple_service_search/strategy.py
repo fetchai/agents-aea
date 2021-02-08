@@ -19,6 +19,8 @@
 
 """This package contains a strategy model."""
 
+from typing import Any
+
 from aea.helpers.search.models import Constraint, ConstraintType, Location, Query
 from aea.skills.base import Model
 
@@ -36,7 +38,7 @@ DEFAULT_SHARED_STORAGE_KEY = "agents_found"
 class Strategy(Model):
     """This class defines a strategy for the agent."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize the strategy of the agent.
 

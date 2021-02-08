@@ -20,7 +20,7 @@
 """This package contains the behaviour for the aries_faber skill."""
 
 import json
-from typing import Dict, cast
+from typing import Any, Dict, cast
 
 from aea.skills.behaviours import TickerBehaviour
 
@@ -42,7 +42,7 @@ DEFAULT_SEARCH_INTERVAL = 5.0
 class FaberBehaviour(TickerBehaviour):
     """This class represents the behaviour of faber."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         """Initialize the handler."""
         search_interval = cast(
             float, kwargs.pop("search_interval", DEFAULT_SEARCH_INTERVAL)

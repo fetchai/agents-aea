@@ -85,10 +85,10 @@ class Kwargs:
         kwargs = DictProtobufStructSerializer.decode(kwargs_protobuf_object.kwargs)
         return cls(kwargs)
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Check equality."""
         return isinstance(other, Kwargs) and self.body == other.body
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get string representation."""
         return "Kwargs: body={}".format(self.body)

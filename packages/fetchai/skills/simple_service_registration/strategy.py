@@ -19,6 +19,8 @@
 
 """This package contains a strategy model."""
 
+from typing import Any
+
 from aea.exceptions import enforce
 from aea.helpers.search.generic import (
     AGENT_LOCATION_MODEL,
@@ -36,7 +38,7 @@ DEFAULT_SERVICE_DATA = {"key": "seller_service", "value": "generic_service"}
 class Strategy(Model):
     """This class defines a strategy for the agent."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize the strategy of the agent.
 

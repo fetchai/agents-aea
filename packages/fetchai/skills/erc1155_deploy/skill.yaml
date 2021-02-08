@@ -9,10 +9,10 @@ aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
   README.md: QmNg45JuqfVzDmvgpWLeaR861LSEvf9pishDKSPihtQnLE
   __init__.py: QmaJBwGuD5Knh5DdSwup44ipwFRGcXF4sravc7wAdEL6X1
-  behaviours.py: QmYpVzrvKogxSfRf24kKmyiEumBN4CHsWdGvmdjyq3gt6b
-  dialogues.py: QmQ9ybVCcavoUFTn8pzT531X3WBb9cDawi7iMkru7vCUVA
+  behaviours.py: QmZ3SrAXarJa1iCMoShxHUsARDtak9R9GLGpXfmeGTcCDR
+  dialogues.py: QmTnfwica866L3Ns5PwUPeew1YUDdmUKYMZxUseM91gHfD
   handlers.py: QmUPwUbg9DW3rAmAYdZwS616goTKzZ2rbx21yL31wj8SsV
-  strategy.py: QmYbzzBKkpyeA95tucRNM3qRdR28HXAc5puDhyszqL2RfG
+  strategy.py: QmUDturpVPqMf6FqkTcd7byE61Vc9dCsdbecpmPHrsWqKM
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/ledger:0.12.0

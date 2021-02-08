@@ -114,7 +114,7 @@ class Forecast:
         con_.commit()
         con_.close()
 
-    def generate(self):
+    def generate(self) -> None:
         """Generate weather data."""
         while True:  # nosec
             dict_of_data = {

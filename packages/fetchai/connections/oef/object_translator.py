@@ -20,6 +20,7 @@
 """Extension to the OEF Python SDK."""
 
 import logging
+from typing import Tuple
 
 from oef.query import And as OEFAnd
 from oef.query import Constraint as OEFConstraint
@@ -160,7 +161,7 @@ class OEFObjectTranslator:
         """From our constraint type to OEF constraint type."""
         value = constraint_type.value
 
-        def distance(value):
+        def distance(value: Tuple) -> Distance:
             location = cls.to_oef_location(location=value[0])
             return Distance(center=location, distance=value[1])
 

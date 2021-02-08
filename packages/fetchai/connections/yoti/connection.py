@@ -19,7 +19,7 @@
 """Yoti connection implementation."""
 import functools
 import json
-from typing import Callable, Optional, cast
+from typing import Any, Callable, Optional, cast
 
 from yoti_python_sdk import Client as YotiClient  # type: ignore
 
@@ -38,10 +38,10 @@ from packages.fetchai.protocols.yoti.message import YotiMessage
 CONNECTION_ID = PublicId.from_str("fetchai/yoti:0.1.0")
 
 
-def rgetattr(obj, attr, *args):
+def rgetattr(obj: Any, attr: str, *args: Any) -> Any:
     """Recursive getattr."""
 
-    def _getattr(obj, attr):
+    def _getattr(obj: Any, attr: str) -> Any:
         return getattr(obj, attr, *args)
 
     return functools.reduce(_getattr, [obj] + attr.split("."))
@@ -50,7 +50,7 @@ def rgetattr(obj, attr, *args):
 class YotiDialogues(BaseYotiDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -84,7 +84,7 @@ class YotiConnection(BaseSyncConnection):
 
     connection_id = PublicId.from_str("fetchai/yoti:0.1.0")
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize a connection to an SDK or API.
 

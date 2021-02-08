@@ -19,7 +19,7 @@
 
 """This package contains a simple behaviour to register a service."""
 
-from typing import cast
+from typing import Any, cast
 
 from aea.mail.base import EnvelopeContext
 from aea.skills.behaviours import TickerBehaviour
@@ -37,7 +37,7 @@ DEFAULT_SERVICES_INTERVAL = 30.0
 class ServiceRegistrationBehaviour(TickerBehaviour):
     """This class implements a behaviour."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialise the behaviour."""
         services_interval = kwargs.pop(
             "services_interval", DEFAULT_SERVICES_INTERVAL

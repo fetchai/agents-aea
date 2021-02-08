@@ -10,9 +10,9 @@ fingerprint:
   README.md: QmYBr97UhQA8GoWFN6yNKdWix1AKJYx4zY246HYAFGpYRP
   __init__.py: Qma4L2bXMu8pPhvg1FJETDjBDbb9uHmCd1Ypqd1W7XE2C9
   behaviours.py: QmWgXU9qgahXwMKNqLLfDiGNYJozSXv2SVMkoPDQncC7ok
-  dialogues.py: QmVwLCVudrwmJ33t5npXFDfRp8UYK7QFH4djanZgzziPTw
+  dialogues.py: QmQ6npxd6ryYvz5F9stGYc1q2zSXef4TXc3aamyzMvZUCQ
   handlers.py: QmWCVSnLMSLLPB9koJVc7g12YsfW3eCgkMET8TTpwDDW69
-  strategy.py: QmYBoMmcmfkV1jvFsVwBaUNostXWouApgAL1GXhQAN5nAX
+  strategy.py: QmaYTxBGGZUF1AuQ6gxzwaWKoJB5k3au4AuRtZboPSrsrh
 fingerprint_ignore_patterns: []
 connections: []
 contracts: []

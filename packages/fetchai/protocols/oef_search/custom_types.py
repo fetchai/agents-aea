@@ -91,7 +91,7 @@ class AgentsInfo:
         )
         return cls(body)
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Compare with another object."""
         if not isinstance(other, AgentsInfo):
             return False  # pragma: nocover
@@ -108,13 +108,13 @@ class OefErrorOperation(Enum):
 
     OTHER = 10000
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get string representation."""
         return str(self.value)
 
     @staticmethod
     def encode(
-        oef_error_operation_protobuf_object,
+        oef_error_operation_protobuf_object: Any,
         oef_error_operation_object: "OefErrorOperation",
     ) -> None:
         """
@@ -130,7 +130,7 @@ class OefErrorOperation(Enum):
         oef_error_operation_protobuf_object.oef_error = oef_error_operation_object.value
 
     @classmethod
-    def decode(cls, oef_error_operation_protobuf_object) -> "OefErrorOperation":
+    def decode(cls, oef_error_operation_protobuf_object: Any) -> "OefErrorOperation":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
