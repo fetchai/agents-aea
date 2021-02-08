@@ -25,6 +25,7 @@ from concurrent.futures._base import CancelledError
 from concurrent.futures._base import TimeoutError as FuturesTimeoutError
 from contextlib import suppress
 from typing import (
+    Any,
     Callable,
     Collection,
     Dict,
@@ -50,7 +51,7 @@ from aea.protocols.base import Message, Protocol
 class MultiplexerStatus(AsyncState):
     """The connection status class."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the connection status."""
         super().__init__(
             initial_state=ConnectionStates.disconnected, states_enum=ConnectionStates
@@ -93,7 +94,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
         default_routing: Optional[Dict[PublicId, PublicId]] = None,
         default_connection: Optional[PublicId] = None,
         protocols: Optional[List[Union[Protocol, Message]]] = None,
-    ):
+    ) -> None:
         """
         Initialize the connection multiplexer.
 
@@ -151,6 +152,48 @@ class AsyncMultiplexer(Runnable, WithLogger):
         self._lock: asyncio.Lock = asyncio.Lock(loop=self._loop)
         self.set_loop(self._loop)
 
+    @property
+    def default_connection(self) -> Optional[Connection]:
+        """Get the default connection."""
+        return self._default_connection
+
+    @property
+    def in_queue(self) -> AsyncFriendlyQueue:
+        """Get the in queue."""
+        return self._in_queue
+
+    @property
+    def out_queue(self) -> asyncio.Queue:
+        """Get the out queue."""
+        if self._out_queue is None:  # pragma: nocover
+            raise ValueError("Accessing out queue before loop is started.")
+        return self._out_queue
+
+    @property
+    def connections(self) -> Tuple[Connection, ...]:
+        """Get the connections."""
+        return tuple(self._connections)
+
+    @property
+    def is_connected(self) -> bool:
+        """Check whether the multiplexer is processing envelopes."""
+        return self.connection_status.is_connected
+
+    @property
+    def default_routing(self) -> Dict[PublicId, PublicId]:
+        """Get the default routing."""
+        return self._default_routing
+
+    @default_routing.setter
+    def default_routing(self, default_routing: Dict[PublicId, PublicId]) -> None:
+        """Set the default routing."""
+        self._default_routing = default_routing
+
+    @property
+    def connection_status(self) -> MultiplexerStatus:
+        """Get the connection status."""
+        return self._connection_status
+
     async def run(self) -> None:
         """Run multiplexer connect and recv/send tasks."""
         self.set_loop(asyncio.get_event_loop())
@@ -179,11 +222,6 @@ class AsyncMultiplexer(Runnable, WithLogger):
             )
 
         return protocol_id
-
-    @property
-    def default_connection(self) -> Optional[Connection]:
-        """Get the default connection."""
-        return self._default_connection
 
     def set_loop(self, loop: AbstractEventLoop) -> None:
         """
@@ -231,7 +269,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
         if is_default:
             self._default_connection = connection
 
-    def _connection_consistency_checks(self):
+    def _connection_consistency_checks(self) -> None:
         """
         Do some consistency checks on the multiplexer connections.
 
@@ -246,47 +284,10 @@ class AsyncMultiplexer(Runnable, WithLogger):
             "Connection names must be unique.",
         )
 
-    def _set_default_connection_if_none(self):
+    def _set_default_connection_if_none(self) -> None:
         """Set the default connection if it is none."""
         if self._default_connection is None:
             self._default_connection = self.connections[0]
-
-    @property
-    def in_queue(self) -> AsyncFriendlyQueue:
-        """Get the in queue."""
-        return self._in_queue
-
-    @property
-    def out_queue(self) -> asyncio.Queue:
-        """Get the out queue."""
-        if self._out_queue is None:  # pragma: nocover
-            raise ValueError("Accessing out queue before loop is started.")
-        return self._out_queue
-
-    @property
-    def connections(self) -> Tuple[Connection, ...]:
-        """Get the connections."""
-        return tuple(self._connections)
-
-    @property
-    def is_connected(self) -> bool:
-        """Check whether the multiplexer is processing envelopes."""
-        return self.connection_status.is_connected
-
-    @property
-    def default_routing(self) -> Dict[PublicId, PublicId]:
-        """Get the default routing."""
-        return self._default_routing
-
-    @default_routing.setter
-    def default_routing(self, default_routing: Dict[PublicId, PublicId]):
-        """Set the default routing."""
-        self._default_routing = default_routing
-
-    @property
-    def connection_status(self) -> MultiplexerStatus:
-        """Get the connection status."""
-        return self._connection_status
 
     async def connect(self) -> None:
         """Connect the multiplexer."""
@@ -684,7 +685,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
 class Multiplexer(AsyncMultiplexer):
     """Transit sync multiplexer for compatibility."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """
         Initialize the connection multiplexer.
 
@@ -760,7 +761,7 @@ class Multiplexer(AsyncMultiplexer):
 class InBox:
     """A queue from where you can only consume envelopes."""
 
-    def __init__(self, multiplexer: AsyncMultiplexer):
+    def __init__(self, multiplexer: AsyncMultiplexer) -> None:
         """
         Initialize the inbox.
 
@@ -839,7 +840,7 @@ class InBox:
 class OutBox:
     """A queue from where you can only enqueue envelopes."""
 
-    def __init__(self, multiplexer: AsyncMultiplexer):
+    def __init__(self, multiplexer: AsyncMultiplexer) -> None:
         """
         Initialize the outbox.
 

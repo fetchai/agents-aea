@@ -149,7 +149,7 @@ class TestThreadLauncherMode:
         t.start()
         time.sleep(1)
         stop_event.set()
-        t.join(10)
+        t.join()
 
 
 class TestAsyncLauncherMode(TestThreadLauncherMode):

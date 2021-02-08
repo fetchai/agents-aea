@@ -82,7 +82,7 @@ def load_component_from_config(  # type: ignore
 
 def _handle_error_while_loading_component_module_not_found(
     configuration: ComponentConfiguration, e: ModuleNotFoundError
-):
+) -> None:
     """
     Handle ModuleNotFoundError for AEA packages.
 
@@ -159,7 +159,7 @@ def _handle_error_while_loading_component_module_not_found(
 
 def _handle_error_while_loading_component_generic_error(
     configuration: ComponentConfiguration, e: Exception
-):
+) -> None:
     """
     Handle Exception for AEA packages.
 

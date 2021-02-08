@@ -118,12 +118,12 @@ class Forecast:
         """Generate weather data."""
         while True:  # nosec
             dict_of_data = {
-                "abs_pressure": random.randrange(1022.0, 1025, 1),
+                "abs_pressure": random.randrange(1022, 1025, 1),
                 "delay": random.randint(2, 7),
-                "hum_in": random.randrange(33.0, 40.0, 1),
-                "hum_out": random.randrange(33.0, 80.0, 1),
+                "hum_in": random.randrange(33, 40, 1),
+                "hum_out": random.randrange(33, 80, 1),
                 "idx": datetime.datetime.now(),
-                "rain": random.randrange(70.0, 74.0, 1),
+                "rain": random.randrange(70, 74, 1),
                 "temp_in": random.randrange(18, 28, 1),
                 "temp_out": random.randrange(2, 20, 1),
                 "wind_ave": random.randrange(0, 10, 1),

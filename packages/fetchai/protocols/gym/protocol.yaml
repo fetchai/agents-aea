@@ -9,11 +9,11 @@ aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
   README.md: QmSDFL7utCpCczyoPXs8WT5pT8r2efJ16vks44Qwk7YrVF
   __init__.py: QmeyBLjo4xgz4mXvg9dwwwQCapYsbX4cgBXcpwvegg4zWZ
-  custom_types.py: QmT3VKT86xZKR11RR1vQ3myRpmVZNdzY6ELd8HG9U2ngwa
+  custom_types.py: QmabLjuZiPY21m7GRG3uu9cBwvanam7WNwk3hx3xarauDS
   dialogues.py: QmUx8de3kabB45rkbpddSpYHfmCnw74QjCjeuP7hC522Yb
   gym.proto: QmaS4rkQQhqg3YPv4owmmRfseC6AuJVaQnga6x5jsjbmaT
   gym_pb2.py: QmSs6xYyUwFXuNUXKBaRiuTNGTkbdayF31Zjx6ncBFNG4v
-  message.py: Qmf4Ft8PvzUELd8GT4NoAgcBqmUqqxXaUHsv6wADZ5S57p
+  message.py: QmVcZKiJtieGKXbCLX9y5BDZhuEtzb82PMM4johqk9GgED
   serialization.py: QmQoL5VtkJCGgceAowdnRE2AvXcVSJJiGNP3dPaiBeQxXF
 fingerprint_ignore_patterns: []
 dependencies:

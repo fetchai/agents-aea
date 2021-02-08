@@ -37,7 +37,10 @@ from typing import (
 from aea.agent import Agent
 from aea.agent_loop import AsyncAgentLoop, BaseAgentLoop, SyncAgentLoop
 from aea.configurations.base import PublicId
-from aea.configurations.constants import DEFAULT_SEARCH_SERVICE_ADDRESS
+from aea.configurations.constants import (
+    DEFAULT_BUILD_DIR_NAME,
+    DEFAULT_SEARCH_SERVICE_ADDRESS,
+)
 from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import DEFAULT_CURRENCY_DENOMINATIONS
 from aea.crypto.wallet import Wallet
@@ -46,7 +49,7 @@ from aea.error_handler.base import AbstractErrorHandler
 from aea.error_handler.default import ErrorHandler as DefaultErrorHandler
 from aea.exceptions import AEAException, _StopRuntime, enforce
 from aea.helpers.exception_policy import ExceptionPolicyEnum
-from aea.helpers.logging import AgentLoggerAdapter, get_logger
+from aea.helpers.logging import AgentLoggerAdapter, WithLogger, get_logger
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.base import Message, Protocol
@@ -64,7 +67,7 @@ class AEA(Agent):
     }
     DEFAULT_RUN_LOOP: str = "async"
 
-    DEFAULT_BUILD_DIR_NAME = ".build"
+    DEFAULT_BUILD_DIR_NAME = DEFAULT_BUILD_DIR_NAME
 
     def __init__(
         self,
@@ -88,7 +91,7 @@ class AEA(Agent):
         connection_ids: Optional[Collection[PublicId]] = None,
         search_service_address: str = DEFAULT_SEARCH_SERVICE_ADDRESS,
         storage_uri: Optional[str] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         """
         Instantiate the agent.
@@ -152,7 +155,7 @@ class AEA(Agent):
             "Please check connection_ids and resources.connections! No connection left after filtering!",
         )
 
-        self._set_runtime_and_inboxes(
+        self._set_runtime_and_mail_boxes(
             runtime_class=self._get_runtime_class(),
             loop_mode=loop_mode,
             loop=loop,
@@ -203,7 +206,7 @@ class AEA(Agent):
             default_routing,
             search_service_address,
             decision_maker_handler.self_address,
-            storage_callable=lambda: self._runtime.storage,
+            storage_callable=lambda: self.runtime.storage,
             build_dir=self.get_build_dir(),
             **kwargs,
         )
@@ -248,10 +251,7 @@ class AEA(Agent):
         """
         Set up the agent.
 
-        Performs the following:
-
-        - loads the resources (unless in programmatic mode)
-        - calls setup() on the resources
+        Calls setup() on the resources.
 
         :return: None
         """
@@ -261,7 +261,7 @@ class AEA(Agent):
         """
         Perform actions.
 
-        Calls act() of each active behaviour.
+        Adds new handlers and behaviours for use/execution by the runtime.
 
         :return: None
         """
@@ -318,10 +318,12 @@ class AEA(Agent):
         """
         Handle an envelope.
 
+        Performs the following:
+
         - fetching the protocol referenced by the envelope, and
-        - returning an envelope to sender if the protocol is unsupported, using the error handler, or
-        - returning an envelope to sender if there is a decoding error, using the error handler, or
-        - returning an envelope to sender if no active handler is available for the specified protocol, using the error handler, or
+        - handling if the protocol is unsupported, using the error handler, or
+        - handling if there is a decoding error, using the error handler, or
+        - handling if no active handler is available for the specified protocol, using the error handler, or
         - handling the message recovered from the envelope with all active handlers for the specified protocol.
 
         :param envelope: the envelope to handle.
@@ -336,10 +338,10 @@ class AEA(Agent):
         for handler in handlers:
             handler.handle_wrapper(msg)
 
-    def _setup_loggers(self):
+    def _setup_loggers(self) -> None:
         """Set up logger with agent name."""
         for element in [
-            self.runtime.main_loop,
+            self.runtime.agent_loop,
             self.runtime.multiplexer,
             self.runtime.task_manager,
             self.resources.component_registry,
@@ -347,8 +349,10 @@ class AEA(Agent):
             self.resources.handler_registry,
             self.resources.model_registry,
         ]:
-            element.logger = AgentLoggerAdapter(
-                element.logger, agent_name=self._identity.name
+            element = cast(WithLogger, element)
+            element.logger = cast(
+                Logger,
+                AgentLoggerAdapter(element.logger, agent_name=self._identity.name),
             )
 
     def get_periodic_tasks(
@@ -398,7 +402,7 @@ class AEA(Agent):
         :return: bool, propagate exception if True otherwise skip it.
         """
         # docstyle: ignore # noqa: E800
-        def log_exception(e, fn, is_debug: bool = False):
+        def log_exception(e: Exception, fn: Callable, is_debug: bool = False) -> None:
             if is_debug:
                 self.logger.debug(f"<{e}> raised during `{fn}`")
             else:

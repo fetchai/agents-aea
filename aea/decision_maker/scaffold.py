@@ -30,7 +30,7 @@ from aea.protocols.base import Message
 class DecisionMakerHandler(BaseDecisionMakerHandler):
     """This class implements the decision maker."""
 
-    def __init__(self, identity: Identity, wallet: Wallet):
+    def __init__(self, identity: Identity, wallet: Wallet) -> None:
         """
         Initialize the decision maker.
 

@@ -20,7 +20,7 @@
 """This module contains http's message definition."""
 
 import logging
-from typing import Set, Tuple, cast
+from typing import Any, Set, Tuple, cast
 
 from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
@@ -44,7 +44,7 @@ class HttpMessage(Message):
         REQUEST = "request"
         RESPONSE = "response"
 
-        def __str__(self):
+        def __str__(self) -> str:
             """Get the string representation."""
             return str(self.value)
 
@@ -72,7 +72,7 @@ class HttpMessage(Message):
         dialogue_reference: Tuple[str, str] = ("", ""),
         message_id: int = 1,
         target: int = 0,
-        **kwargs,
+        **kwargs: Any,
     ):
         """
         Initialise an instance of HttpMessage.

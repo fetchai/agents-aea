@@ -46,6 +46,12 @@ from packages.fetchai.connections.p2p_libp2p_client.acn_message_pb2 import (
 )
 
 
+try:
+    from asyncio.streams import IncompleteReadError  # pylint: disable=ungrouped-imports
+except ImportError:
+    from asyncio import IncompleteReadError  # pylint: disable=ungrouped-imports
+
+
 _default_logger = logging.getLogger(
     "aea.packages.fetchai.connections.p2p_libp2p_client"
 )
@@ -211,10 +217,10 @@ class P2PLibp2pClientConnection(Connection):
             raise Exception(f"Wrong response message from peer: {payload}")
         response = msg.status  # pylint: disable=no-member
 
-        if response.code != Status.SUCCESS:  # pylint: disable=no-member
+        if response.code != Status.SUCCESS:  # type: ignore # pylint: disable=no-member
             raise Exception(  # pragma: nocover
                 "Registration to peer failed: {}".format(
-                    Status.ErrCode.Name(response.code)  # pylint: disable=no-member
+                    Status.ErrCode.Name(response.code)  # type: ignore # pylint: disable=no-member
                 )
             )
 
@@ -316,7 +322,10 @@ class P2PLibp2pClientConnection(Connection):
             if not data:  # pragma: no cover
                 return None
             return data
-        except asyncio.streams.IncompleteReadError as e:  # pragma: no cover
+        except ConnectionError as e:
+            self.logger.info(f"Connection error: {e}")
+            return None
+        except IncompleteReadError as e:  # pragma: no cover
             self.logger.info(
                 "Connection disconnected while reading from node ({}/{})".format(
                     len(e.partial), e.expected

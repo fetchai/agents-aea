@@ -25,6 +25,7 @@ from typing import Dict, Iterable, List, Set, Tuple, cast
 
 import click
 
+import aea
 from aea.cli.add import add_item
 from aea.cli.eject import _eject_item
 from aea.cli.registry.fetch import fetch_agent
@@ -72,7 +73,9 @@ from aea.helpers.base import delete_directory_contents, find_topological_order
 @check_aea_project(  # pylint: disable=unused-argument,no-value-for-parameter
     check_aea_version=False
 )
-def upgrade(click_context, local, remote, yes):  # pylint: disable=unused-argument
+def upgrade(
+    click_context: click.Context, local: bool, remote: bool, yes: bool
+) -> None:  # pylint: disable=unused-argument
     """Upgrade the packages of the agent."""
     ctx = cast(Context, click_context.obj)
     ctx.set_config("is_local", local and not remote)
@@ -87,7 +90,7 @@ def upgrade(click_context, local, remote, yes):  # pylint: disable=unused-argume
 @upgrade.command()
 @click.argument("connection_public_id", type=PublicIdParameter(), required=True)
 @pass_ctx
-def connection(ctx: Context, connection_public_id: PublicId):
+def connection(ctx: Context, connection_public_id: PublicId) -> None:
     """Upgrade a connection of the agent."""
     upgrade_item(ctx, CONNECTION, connection_public_id)
 
@@ -95,7 +98,7 @@ def connection(ctx: Context, connection_public_id: PublicId):
 @upgrade.command()
 @click.argument("contract_public_id", type=PublicIdParameter(), required=True)
 @pass_ctx
-def contract(ctx: Context, contract_public_id: PublicId):
+def contract(ctx: Context, contract_public_id: PublicId) -> None:
     """Upgrade a contract of the agent."""
     upgrade_item(ctx, CONTRACT, contract_public_id)
 
@@ -103,7 +106,7 @@ def contract(ctx: Context, contract_public_id: PublicId):
 @upgrade.command()
 @click.argument("protocol_public_id", type=PublicIdParameter(), required=True)
 @pass_ctx
-def protocol(ctx: Context, protocol_public_id):
+def protocol(ctx: Context, protocol_public_id: PublicId) -> None:
     """Upgrade a protocol of the agent."""
     upgrade_item(ctx, PROTOCOL, protocol_public_id)
 
@@ -111,12 +114,12 @@ def protocol(ctx: Context, protocol_public_id):
 @upgrade.command()
 @click.argument("skill_public_id", type=PublicIdParameter(), required=True)
 @pass_ctx
-def skill(ctx: Context, skill_public_id: PublicId):
+def skill(ctx: Context, skill_public_id: PublicId) -> None:
     """Upgrade a skill of the agent."""
     upgrade_item(ctx, SKILL, skill_public_id)
 
 
-def update_agent_config(ctx: Context):
+def update_agent_config(ctx: Context) -> None:
     """
     Update agent configurations.
 
@@ -137,7 +140,7 @@ def update_agent_config(ctx: Context):
     ctx.dump_agent_config()
 
 
-def update_aea_version_in_nonvendor_packages(cwd: str):
+def update_aea_version_in_nonvendor_packages(cwd: str) -> None:
     """
     Update aea_version in non-vendor packages.
 
@@ -233,7 +236,7 @@ class NotAddedException(UpgraderException):
 class AlreadyActualVersionException(UpgraderException):
     """Actual version already installed."""
 
-    def __init__(self, version: str):
+    def __init__(self, version: str) -> None:
         """Init exception."""
         super().__init__(version)
         self.version = version
@@ -242,7 +245,7 @@ class AlreadyActualVersionException(UpgraderException):
 class IsRequiredException(UpgraderException):
     """Package can not be upgraded cause required by another."""
 
-    def __init__(self, required_by: Iterable[PackageId]):
+    def __init__(self, required_by: Iterable[PackageId]) -> None:
         """Init exception."""
         super().__init__(required_by)
         self.required_by = required_by
@@ -253,10 +256,12 @@ class ProjectUpgrader:
 
     _TEMP_ALIAS = "fetched_agent"
 
-    def __init__(self, ctx: Context, yes_by_default: bool = False):
+    def __init__(self, ctx: Context, yes_by_default: bool = False) -> None:
         """Initialize the class."""
         self.ctx = ctx
         self.yes_by_default = yes_by_default
+
+        self._current_aea_version = aea.__version__
 
     def upgrade(self) -> bool:
         """
@@ -274,6 +279,7 @@ class ProjectUpgrader:
                 self.ctx,
                 str(agent_package_id.package_type),
                 agent_package_id.public_id.to_latest(),
+                aea_version=self._current_aea_version,
             )
         except click.ClickException:
             click.echo("Package not found, continuing with normal upgrade.")
@@ -301,12 +307,12 @@ class ProjectUpgrader:
                 f"Cannot remote path {current_path}. Error: {str(e)}."
             )
 
-        fetch_agent(self.ctx, agent_package_id.public_id, alias=self._TEMP_ALIAS)
+        fetch_agent(self.ctx, new_item, alias=self._TEMP_ALIAS)
         self.ctx.cwd = str(current_path)
         self._unpack_fetched_agent()
         return True
 
-    def _unpack_fetched_agent(self):
+    def _unpack_fetched_agent(self) -> None:
         """
         Unpack fetched agent in current directory and remove temporary directory.
 
@@ -362,6 +368,8 @@ class ItemUpgrader:
         self.dependencies.update(self.deps_can_be_removed)
         self.dependencies.update(self.deps_can_not_be_removed)
 
+        self._current_aea_version = aea.__version__
+
     def get_current_item(self) -> PublicId:
         """Return public id of the item already presents in agent config."""
         self.check_item_present()
@@ -408,12 +416,12 @@ class ItemUpgrader:
         )
         return VENDOR not in Path(path).parts[:2]
 
-    def check_in_requirements(self):
+    def check_in_requirements(self) -> None:
         """Check if we are trying to upgrade some component dependency."""
         if self.in_requirements:
             raise IsRequiredException(self.in_requirements)
 
-    def check_is_non_vendor(self):
+    def check_is_non_vendor(self) -> None:
         """Check the package is not a vendor package."""
         if self.is_non_vendor:
             raise AlreadyActualVersionException(self.current_item_public_id.version)
@@ -428,7 +436,10 @@ class ItemUpgrader:
             new_item = self.item_public_id
         else:
             new_item = get_latest_version_available_in_registry(
-                self.ctx, self.item_type, self.item_public_id
+                self.ctx,
+                self.item_type,
+                self.item_public_id,
+                aea_version=self._current_aea_version,
             )
 
         if self.current_item_public_id.version == new_item.version:
@@ -476,7 +487,7 @@ class InteractiveEjectHelper:
         ctx: Context,
         inverse_adjacency_list: Dict[PackageId, Set[PackageId]],
         yes_by_default: bool = False,
-    ):
+    ) -> None:
         """
         Initialize the class.
 
@@ -489,6 +500,7 @@ class InteractiveEjectHelper:
         self.adjacency_list = self._reverse_adjacency_list(self.inverse_adjacency_list)
         self.yes_by_default = yes_by_default
 
+        self._current_aea_version = aea.__version__
         self.to_eject: List[PackageId] = []
         self.item_to_new_version: Dict[PackageId, str] = {}
 
@@ -500,7 +512,10 @@ class InteractiveEjectHelper:
         """
         for package_id in self.adjacency_list.keys():
             new_item = get_latest_version_available_in_registry(
-                self.ctx, str(package_id.package_type), package_id.public_id.to_latest()
+                self.ctx,
+                str(package_id.package_type),
+                package_id.public_id.to_latest(),
+                aea_version=self._current_aea_version,
             )
             if package_id.public_id.version == new_item.version:
                 continue
@@ -519,7 +534,7 @@ class InteractiveEjectHelper:
                 inverse_adjacency_list.setdefault(u, set()).add(v)
         return inverse_adjacency_list
 
-    def eject(self):
+    def eject(self) -> None:
         """Eject packages."""
         for package_id in self.to_eject:
             click.echo(f"Ejecting {package_id}...")
@@ -534,7 +549,7 @@ class InteractiveEjectHelper:
             result[package_id] = deps.difference(self.to_eject)
         return result
 
-    def can_eject(self):
+    def can_eject(self) -> bool:
         """Ask to the user if packages can be ejected if needed."""
         to_upgrade = set(self.item_to_new_version.keys())
         order = find_topological_order(self.adjacency_list)
@@ -560,7 +575,9 @@ class InteractiveEjectHelper:
             self.to_eject.append(package_id)
         return True
 
-    def _prompt(self, package_id: PackageId, dependencies_to_upgrade: Set[PackageId]):
+    def _prompt(
+        self, package_id: PackageId, dependencies_to_upgrade: Set[PackageId]
+    ) -> bool:
         """
         Ask the user permission for ejection of a package.
 
@@ -579,7 +596,7 @@ class InteractiveEjectHelper:
         return _try_to_confirm(message, self.yes_by_default)
 
 
-def _try_to_confirm(message: str, yes_by_default: bool):
+def _try_to_confirm(message: str, yes_by_default: bool) -> bool:
     """
     Try to prompt a question to the user.
 

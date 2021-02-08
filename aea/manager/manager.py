@@ -118,6 +118,12 @@ class AgentRunThreadTask(AgentRunAsyncTask):
         )
         self._thread.start()
 
+    def stop(self,) -> None:
+        """Stop the task."""
+        super().stop()
+        if self._thread is not None:
+            self._thread.join()
+
 
 class MultiAgentManager:
     """Multi agents manager."""
@@ -608,10 +614,10 @@ class MultiAgentManager:
 
         event = threading.Event()
 
-        def event_set(*args):  # pylint: disable=unused-argument
+        def event_set(*args: Any) -> None:  # pylint: disable=unused-argument
             event.set()
 
-        def _add_cb():
+        def _add_cb() -> None:
             if wait_future.done():
                 event_set()  # pragma: nocover
             else:

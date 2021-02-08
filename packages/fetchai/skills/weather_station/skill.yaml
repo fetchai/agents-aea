@@ -12,7 +12,7 @@ fingerprint:
   behaviours.py: QmfPE6zrMmY2QARQt3gNZ2oiV3uAqvAQXSvU3XWnFDUQkG
   db_communication.py: QmSLm4jic8JbP2wz35WyWevc9H2ZxsEYfaBMWcEx4pzVcy
   dialogues.py: QmPXfUWDxnHDaHQqsgtVhJ2v9dEgGWLtvEHKFvvFcDXGms
-  dummy_weather_station_data.py: QmNvUTxRnLQbVak2jWZ4JarhUxn1T2n3S3yERjqaKatHcU
+  dummy_weather_station_data.py: QmP31Uz2uNUhbh9eqmHzzxJTTnJcZzXDVysvAyQCwEzYRX
   handlers.py: QmNujxh4FtecTar5coHTJyY3BnVnsseuARSpyTLUDmFmfX
   strategy.py: QmVDAXUA1YBGa2PSQKDekyf5j1qZfEfLvZpuLJ6MnURvS8
 fingerprint_ignore_patterns:

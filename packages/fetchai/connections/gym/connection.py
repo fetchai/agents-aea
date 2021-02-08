@@ -138,6 +138,8 @@ class GymChannel:
         await self.handle_gym_message(envelope)
 
     async def _run_in_executor(self, fn, *args):
+        if self._loop is None:
+            raise ValueError("Loop not set!")
         return await self._loop.run_in_executor(self._threaded_pool, fn, *args)
 
     async def handle_gym_message(self, envelope: Envelope) -> None:

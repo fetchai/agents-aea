@@ -27,7 +27,7 @@ class BenchmarkControl:
 
     def __init__(self):
         """Init."""
-        self._queue = Queue(2)
+        self._queue: Queue = Queue(2)
 
     def start(self) -> None:
         """

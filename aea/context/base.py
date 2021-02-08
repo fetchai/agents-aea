@@ -50,8 +50,8 @@ class AgentContext:
         search_service_address: Address,
         decision_maker_address: Address,
         storage_callable: Callable[[], Optional[Storage]] = lambda: None,
-        **kwargs
-    ):
+        **kwargs: Any
+    ) -> None:
         """
         Initialize an agent context.
 

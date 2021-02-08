@@ -143,6 +143,7 @@ def test_double_start():
             assert not t.is_alive()
         finally:
             agent.stop()
+            t.join()
 
 
 def test_react():
@@ -649,7 +650,11 @@ class TestAeaExceptionPolicy:
 
         self.aea_tool.put_inbox(self.aea_tool.dummy_envelope())
         time.sleep(1)
-        assert self.handler_called >= 2
+        try:
+            assert self.handler_called >= 2
+        finally:
+            self.aea.stop()
+            t.join()
 
     def test_handle_propagate(self) -> None:
         """Test propagate policy on message handle."""
@@ -687,8 +692,12 @@ class TestAeaExceptionPolicy:
             self.aea_tool.put_inbox(self.aea_tool.dummy_envelope())
             self.aea_tool.put_inbox(self.aea_tool.dummy_envelope())
             time.sleep(1)
-        assert self.aea.is_running
-        assert patched.call_count == 2
+        try:
+            assert self.aea.is_running
+            assert patched.call_count == 2
+        finally:
+            self.aea.stop()
+            t.join()
 
     def test_act_propagate(self) -> None:
         """Test propagate policy on behaviour act."""
@@ -723,8 +732,12 @@ class TestAeaExceptionPolicy:
             t.start()
 
             time.sleep(1)
-        assert self.aea.is_running
-        assert patched.call_count > 1
+        try:
+            assert self.aea.is_running
+            assert patched.call_count > 1
+        finally:
+            self.aea.stop()
+            t.join()
 
     def test_act_bad_policy(self) -> None:
         """Test propagate policy on behaviour act."""
@@ -767,7 +780,7 @@ class BaseTimeExecutionCase(TestCase):
     def tearDown(self) -> None:
         """Tear down."""
         self.aea_tool.teardown()
-        self.aea_tool.aea.runtime.main_loop._teardown()
+        self.aea_tool.aea.runtime.agent_loop._teardown()
 
     def prepare(self, function: Callable) -> None:
         """Prepare aea_tool for testing.
@@ -806,7 +819,7 @@ class BaseTimeExecutionCase(TestCase):
         aea = builder.build()
         self.aea_tool = AeaTool(aea)
         self.envelope = AeaTool.dummy_envelope()
-        self.aea_tool.aea.runtime.main_loop._setup()
+        self.aea_tool.aea.runtime.agent_loop._setup()
 
     def test_long_handler_cancelled_by_timeout(self):
         """Test long function terminated by timeout."""
@@ -867,7 +880,7 @@ class HandleTimeoutExecutionCase(BaseTimeExecutionCase):
 
     def aea_action(self):
         """Spin react on AEA."""
-        self.aea_tool.aea.runtime.main_loop._execution_control(
+        self.aea_tool.aea.runtime.agent_loop._execution_control(
             self.aea_tool.handle_envelope, [self.envelope]
         )
 
@@ -877,6 +890,6 @@ class ActTimeoutExecutionCase(BaseTimeExecutionCase):
 
     def aea_action(self):
         """Spin act on AEA."""
-        self.aea_tool.aea.runtime.main_loop._execution_control(
+        self.aea_tool.aea.runtime.agent_loop._execution_control(
             self.behaviour.act_wrapper
         )

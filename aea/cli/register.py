@@ -37,7 +37,7 @@ from aea.cli.utils.package_utils import validate_author_name
 @click.option("--no-subscribe", is_flag=True, help="For developers subscription.")
 def register(
     username: str, email: str, password: str, confirm_password: str, no_subscribe: bool
-):
+) -> None:
     """Create a new registry account."""
     do_register(username, email, password, confirm_password, no_subscribe)
 

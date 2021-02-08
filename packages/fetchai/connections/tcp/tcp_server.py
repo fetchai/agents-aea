@@ -123,6 +123,8 @@ class TCPServerConnection(TCPConnection):
         for t in self._read_tasks_to_address:
             t.cancel()
 
+        if self._server is None:
+            raise ValueError("Server not set!")
         self._server.close()
         await self._server.wait_closed()
 

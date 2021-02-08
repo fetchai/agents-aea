@@ -22,6 +22,7 @@ import asyncio
 import logging
 from asyncio import AbstractEventLoop, Queue
 from collections import defaultdict
+from concurrent.futures import Future
 from threading import Thread
 from typing import Dict, List, Optional, Tuple, Type, cast
 
@@ -140,7 +141,7 @@ class LocalNode:
         self._in_queue = asyncio.Queue(loop=self._loop)  # type: asyncio.Queue
         self._out_queues = {}  # type: Dict[str, asyncio.Queue]
 
-        self._receiving_loop_task = None  # type: Optional[asyncio.Task]
+        self._receiving_loop_task = None  # type: Optional[Future]
         self.address: Optional[Address] = None
         self._dialogues: Optional[OefSearchDialogues] = None
         self.logger = logger
@@ -199,6 +200,8 @@ class LocalNode:
     def stop(self):
         """Stop the node."""
         asyncio.run_coroutine_threadsafe(self._in_queue.put(None), self._loop).result()
+        if self._receiving_loop_task is None:
+            raise ValueError("Connection not started!")
         self._receiving_loop_task.result()
 
         if self._loop.is_running():

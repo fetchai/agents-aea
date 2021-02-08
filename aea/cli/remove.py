@@ -62,7 +62,9 @@ from aea.configurations.manager import find_component_directory_from_component_i
 )
 @click.pass_context
 @check_aea_project
-def remove(click_context, with_dependencies):  # pylint: disable=unused-argument
+def remove(
+    click_context: click.Context, with_dependencies: bool
+) -> None:  # pylint: disable=unused-argument
     """Remove a package from the agent."""
     ctx = cast(Context, click_context.obj)
     if with_dependencies:
@@ -72,7 +74,7 @@ def remove(click_context, with_dependencies):  # pylint: disable=unused-argument
 @remove.command()
 @click.argument("connection_id", type=PublicIdParameter(), required=True)
 @pass_ctx
-def connection(ctx: Context, connection_id):
+def connection(ctx: Context, connection_id: PublicId) -> None:
     """
     Remove a connection from the agent.
 
@@ -84,7 +86,7 @@ def connection(ctx: Context, connection_id):
 @remove.command()
 @click.argument("contract_id", type=PublicIdParameter(), required=True)
 @pass_ctx
-def contract(ctx: Context, contract_id):
+def contract(ctx: Context, contract_id: PublicId) -> None:
     """
     Remove a contract from the agent.
 
@@ -96,7 +98,7 @@ def contract(ctx: Context, contract_id):
 @remove.command()
 @click.argument("protocol_id", type=PublicIdParameter(), required=True)
 @pass_ctx
-def protocol(ctx: Context, protocol_id):
+def protocol(ctx: Context, protocol_id: PublicId) -> None:
     """
     Remove a protocol from the agent.
 
@@ -108,7 +110,7 @@ def protocol(ctx: Context, protocol_id):
 @remove.command()
 @click.argument("skill_id", type=PublicIdParameter(), required=True)
 @pass_ctx
-def skill(ctx: Context, skill_id):
+def skill(ctx: Context, skill_id: PublicId) -> None:
     """
     Remove a skill from the agent.
 
@@ -272,7 +274,7 @@ class ItemRemoveHelper:
 
 
 @contextmanager
-def remove_unused_component_configurations(ctx: Context):
+def remove_unused_component_configurations(ctx: Context) -> Generator:
     """
     Remove all component configurations for items not registered and dump agent config.
 

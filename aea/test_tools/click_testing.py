@@ -31,6 +31,7 @@ Links:
 """
 import shlex
 import sys
+from typing import Optional
 
 from click._compat import string_types  # type: ignore
 from click.testing import CliRunner as ClickCliRunner
@@ -40,7 +41,7 @@ from click.testing import Result
 class CliRunner(ClickCliRunner):
     """Patch of click.testing.CliRunner."""
 
-    def invoke(
+    def invoke(  # type: ignore
         self,
         cli,
         args=None,
@@ -49,10 +50,10 @@ class CliRunner(ClickCliRunner):
         catch_exceptions=True,
         color=False,
         **extra
-    ):
+    ) -> Result:
         """Call a cli command with click.testing.CliRunner.invoke."""
         exc_info = None
-        exception = None
+        exception: Optional[BaseException] = None
         exit_code = 0
 
         with self.isolation(input=input, env=env, color=color) as outstreams:
@@ -88,18 +89,18 @@ class CliRunner(ClickCliRunner):
                 exc_info = sys.exc_info()
             finally:
                 sys.stdout.flush()
-                stdout = outstreams[0].getvalue() if not outstreams[0].closed else b""
+                stdout = outstreams[0].getvalue() if not outstreams[0].closed else b""  # type: ignore
                 if self.mix_stderr:
-                    stderr = None
+                    stderr: Optional[bytes] = None
                 else:
                     stderr = (
-                        outstreams[1].getvalue() if not outstreams[1].closed else b""
+                        outstreams[1].getvalue() if not outstreams[1].closed else b""  # type: ignore
                     )
 
         return Result(
             runner=self,
             stdout_bytes=stdout,
-            stderr_bytes=stderr,
+            stderr_bytes=stderr,  # type: ignore
             exit_code=exit_code,
             exception=exception,
             exc_info=exc_info,

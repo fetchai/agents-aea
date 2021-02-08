@@ -20,7 +20,7 @@
 """This module contains tac's message definition."""
 
 import logging
-from typing import Dict, Optional, Set, Tuple, cast
+from typing import Any, Dict, Optional, Set, Tuple, cast
 
 from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
@@ -53,7 +53,7 @@ class TacMessage(Message):
         TRANSACTION_CONFIRMATION = "transaction_confirmation"
         UNREGISTER = "unregister"
 
-        def __str__(self):
+        def __str__(self) -> str:
             """Get the string representation."""
             return str(self.value)
 
@@ -101,7 +101,7 @@ class TacMessage(Message):
         dialogue_reference: Tuple[str, str] = ("", ""),
         message_id: int = 1,
         target: int = 0,
-        **kwargs,
+        **kwargs: Any,
     ):
         """
         Initialise an instance of TacMessage.

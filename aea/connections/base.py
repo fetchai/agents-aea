@@ -16,16 +16,16 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """The base connection package."""
 import asyncio
 import inspect
 import re
 from abc import ABC, abstractmethod
+from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import contextmanager
 from enum import Enum
 from pathlib import Path
-from typing import Generator, Optional, Set, TYPE_CHECKING, cast
+from typing import Any, Callable, Generator, Optional, Set, TYPE_CHECKING, cast
 
 from aea.components.base import Component, load_aea_package
 from aea.configurations.base import ComponentType, ConnectionConfig, PublicId
@@ -68,8 +68,8 @@ class Connection(Component, ABC):
         crypto_store: Optional[CryptoStore] = None,
         restricted_to_protocols: Optional[Set[PublicId]] = None,
         excluded_protocols: Optional[Set[PublicId]] = None,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         """
         Initialize the connection.
 
@@ -190,11 +190,11 @@ class Connection(Component, ABC):
         return self._state.get()
 
     @abstractmethod
-    async def connect(self):
+    async def connect(self) -> None:
         """Set up the connection."""
 
     @abstractmethod
-    async def disconnect(self):
+    async def disconnect(self) -> None:
         """Tear down the connection."""
 
     @abstractmethod
@@ -207,7 +207,7 @@ class Connection(Component, ABC):
         """
 
     @abstractmethod
-    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
+    async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """
         Receive an envelope.
 
@@ -216,7 +216,11 @@ class Connection(Component, ABC):
 
     @classmethod
     def from_dir(
-        cls, directory: str, identity: Identity, crypto_store: CryptoStore, **kwargs
+        cls,
+        directory: str,
+        identity: Identity,
+        crypto_store: CryptoStore,
+        **kwargs: Any,
     ) -> "Connection":
         """
         Load the connection from a directory.
@@ -239,7 +243,7 @@ class Connection(Component, ABC):
         configuration: ConnectionConfig,
         identity: Identity,
         crypto_store: CryptoStore,
-        **kwargs,
+        **kwargs: Any,
     ) -> "Connection":
         """
         Load a connection from a configuration.
@@ -301,3 +305,144 @@ class Connection(Component, ABC):
     def is_disconnected(self) -> bool:  # pragma: nocover
         """Return is disconnected state."""
         return self.state == ConnectionStates.disconnected
+
+
+class BaseSyncConnection(Connection):
+    """Base sync connection class to write connections with sync code."""
+
+    MAX_WORKER_THREADS = 5
+
+    _executor_pool: ThreadPoolExecutor
+    _incoming_messages_queue: asyncio.Queue  # [Optional[Envelope]]
+    _loop: asyncio.AbstractEventLoop
+
+    def __init__(
+        self,
+        configuration: ConnectionConfig,
+        identity: Optional[Identity] = None,
+        crypto_store: Optional[CryptoStore] = None,
+        restricted_to_protocols: Optional[Set[PublicId]] = None,
+        excluded_protocols: Optional[Set[PublicId]] = None,
+        **kwargs: Any,
+    ) -> None:
+        """
+        Initialize the connection.
+
+        The configuration must be specified if and only if the following
+        parameters are None: connection_id, excluded_protocols or restricted_to_protocols.
+
+        :param configuration: the connection configuration.
+        :param identity: the identity object held by the agent.
+        :param crypto_store: the crypto store for encrypted communication.
+        :param restricted_to_protocols: the set of protocols ids of the only supported protocols for this connection.
+        :param excluded_protocols: the set of protocols ids that we want to exclude for this connection.
+        """
+        super().__init__(
+            configuration=configuration,
+            identity=identity,
+            crypto_store=crypto_store,
+            restricted_to_protocols=restricted_to_protocols,
+            excluded_protocols=excluded_protocols,
+            **kwargs,
+        )
+
+        self._tasks: Set[asyncio.Task] = set()
+
+    def _set_executor_pool(self, max_workers: Optional[int] = None) -> None:
+        """Set executors pool."""
+        max_workers = self.configuration.config.get(
+            "max_thread_workers", self.MAX_WORKER_THREADS
+        )
+        thread_name_prefix = f"conn:{self.connection_id}:"
+        self._executor_pool = ThreadPoolExecutor(
+            max_workers=max_workers, thread_name_prefix=thread_name_prefix
+        )
+
+    def _task_done_callback(self, task: asyncio.Task) -> None:
+        """Remove task on done, log error if happened."""
+        self._tasks.remove(task)
+        if task.exception():
+            # cause task.get_name for python3.8+
+            task_name = getattr(task, "task_name", "TASK NAME NOT SET")
+            self.logger.exception(
+                f"in task `{task_name}`, exception occured", exc_info=task.exception(),
+            )
+
+    async def _run_in_pool(self, fn: Callable, *args: Any) -> Any:
+        """Run sync function in threaded executor pool."""
+        return await self._loop.run_in_executor(self._executor_pool, fn, *args)
+
+    def put_envelope(self, envelope: Optional["Envelope"]) -> None:
+        """Put envelope in to the incoming queue."""
+        self._ensure_connected()
+        self._loop.call_soon_threadsafe(
+            self._incoming_messages_queue.put_nowait, envelope
+        )
+
+    async def connect(self) -> None:
+        """Connect connection."""
+        with self._connect_context():
+            self._loop = asyncio.get_event_loop()
+            self._incoming_messages_queue = asyncio.Queue()
+            self._set_executor_pool()
+            await self._run_in_pool(self.on_connect)
+        self.start_main()
+
+    async def disconnect(self) -> None:
+        """Disconnect connection."""
+        self._ensure_connected()
+        with self._state.transit(
+            initial=ConnectionStates.disconnecting,
+            success=ConnectionStates.disconnected,
+            fail=ConnectionStates.disconnected,
+        ):
+            if self._tasks:
+                await asyncio.wait(self._tasks)
+            await self._run_in_pool(self.on_disconnect)
+            self._executor_pool.shutdown(wait=False)
+
+    async def send(self, envelope: "Envelope") -> None:
+        """Send envelope to connection."""
+        self._ensure_connected()
+        task = self._loop.create_task(self._run_in_pool(self._send_wrapper, envelope))
+        # cause task.set_name for python3.8+
+        setattr(task, "task_name", f"On send({envelope})")  # noqa
+        task.add_done_callback(self._task_done_callback)
+        self._tasks.add(task)
+
+    def _send_wrapper(self, *args: Any) -> None:
+        """Check is connected and call on_send method."""
+        self._ensure_connected()
+        self.on_send(*args)
+
+    async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
+        """Get an envelope from the connection."""
+        self._ensure_connected()
+        return await self._incoming_messages_queue.get()
+
+    def start_main(self) -> None:
+        """Start main function of the connection."""
+
+        def _() -> None:
+            task = self._loop.create_task(self._run_in_pool(self.main))
+            # cause task.set_name for python3.8+
+            setattr(task, "task_name", "Connection main")  # noqa
+            task.add_done_callback(self._task_done_callback)
+            self._tasks.add(task)
+
+        self._loop.call_soon_threadsafe(_)
+
+    def main(self) -> None:
+        """Run main body of the connection in dedicated thread."""
+
+    @abstractmethod
+    def on_connect(self) -> None:
+        """Run on connect method called."""
+
+    @abstractmethod
+    def on_disconnect(self) -> None:
+        """Run on discconnect method called."""
+
+    @abstractmethod
+    def on_send(self, envelope: "Envelope") -> None:
+        """Run on send method called."""

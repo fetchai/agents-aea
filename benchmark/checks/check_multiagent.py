@@ -23,6 +23,7 @@ import os
 import struct
 import sys
 import time
+from typing import cast
 
 import click
 
@@ -151,19 +152,30 @@ def run(duration, runtime_mode, runner_mode, start_messages, num_of_agents):
     local_node.stop()
     runner.stop()
 
-    total_messages = sum([skill.handlers["test"].count for skill in skills])
+    total_messages = sum(
+        [cast(TestHandler, skill.handlers["test"]).count for skill in skills]
+    )
     rate = total_messages / duration
 
-    rtt_total_time = sum([skill.handlers["test"].rtt_total_time for skill in skills])
-    rtt_count = sum([skill.handlers["test"].rtt_count for skill in skills])
+    rtt_total_time = sum(
+        [cast(TestHandler, skill.handlers["test"]).rtt_total_time for skill in skills]
+    )
+    rtt_count = sum(
+        [cast(TestHandler, skill.handlers["test"]).rtt_count for skill in skills]
+    )
 
     if rtt_count == 0:
         rtt_count = -1
 
     latency_total_time = sum(
-        [skill.handlers["test"].latency_total_time for skill in skills]
+        [
+            cast(TestHandler, skill.handlers["test"]).latency_total_time
+            for skill in skills
+        ]
     )
-    latency_count = sum([skill.handlers["test"].latency_count for skill in skills])
+    latency_count = sum(
+        [cast(TestHandler, skill.handlers["test"]).latency_count for skill in skills]
+    )
 
     if latency_count == 0:
         latency_count = -1

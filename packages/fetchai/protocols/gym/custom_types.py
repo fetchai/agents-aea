@@ -31,7 +31,7 @@ class AnyObject:
         self.any = _any
 
     @staticmethod
-    def encode(any_object_protobuf_object, any_object_object: "AnyObject") -> None:
+    def encode(any_object_protobuf_object: Any, any_object_object: "AnyObject") -> None:
         """
         Encode an instance of this class into the protocol buffer object.
 
@@ -44,7 +44,7 @@ class AnyObject:
         any_object_protobuf_object.any = pickle.dumps(any_object_object)  # nosec
 
     @classmethod
-    def decode(cls, any_object_protobuf_object) -> "AnyObject":
+    def decode(cls, any_object_protobuf_object: Any) -> "AnyObject":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
