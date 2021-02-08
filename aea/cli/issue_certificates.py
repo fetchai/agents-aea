@@ -70,11 +70,7 @@ def issue_certificates_(
             project_directory, agent_config_manager, connection_id
         )
         _process_connection(
-            project_directory,
-            agent_config_manager,
-            cert_requests,
-            connection_id,
-            path_prefix,
+            path_prefix, agent_config_manager, cert_requests, connection_id,
         )
 
     click.echo("All certificates have been issued.")
@@ -109,11 +105,10 @@ def _get_cert_requests(
 
 
 def _process_certificate(
-    project_directory: str,
+    path_prefix: str,
     agent_config: AgentConfig,
     cert_request: CertRequest,
     connection_id: PublicId,
-    path_prefix: str,
 ):
     """Process a single certificate request."""
     ledger_id = cert_request.ledger_id
@@ -144,7 +139,7 @@ def _process_certificate(
         )
     message = cert_request.get_message(public_key)
     final_output_path = (
-        output_path
+        str(output_path)
         if output_path.is_absolute()
         else os.path.join(path_prefix, output_path)
     )
@@ -155,11 +150,10 @@ def _process_certificate(
 
 
 def _process_connection(
-    project_directory: str,
+    path_prefix: str,
     agent_config_manager: AgentConfigManager,
     cert_requests: List[CertRequest],
     connection_id: PublicId,
-    path_prefix: str,
 ):
 
     if len(cert_requests) == 0:
@@ -172,11 +166,7 @@ def _process_connection(
             f"Issuing certificate '{cert_request.identifier}' for connection {connection_id}..."
         )
         _process_certificate(
-            project_directory,
-            agent_config_manager.agent_config,
-            cert_request,
-            connection_id,
-            path_prefix,
+            path_prefix, agent_config_manager.agent_config, cert_request, connection_id,
         )
         click.echo(
             f"Dumped certificate '{cert_request.identifier}' in '{cert_request.save_path}' for connection {connection_id}."
