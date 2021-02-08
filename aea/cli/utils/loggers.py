@@ -88,14 +88,14 @@ def simple_verbosity_option(
 
 
 def default_logging_config(
-    logger: logging.Logger,
+    logger_: logging.Logger,
 ) -> logging.Logger:  # pylint: disable=redefined-outer-name
     """Set up the default handler and formatter on the given logger."""
     default_handler = logging.StreamHandler(stream=sys.stdout)
     default_handler.formatter = ColorFormatter()
-    logger.handlers = [default_handler]
-    logger.propagate = True
-    return logger
+    logger_.handlers = [default_handler]
+    logger_.propagate = True
+    return logger_
 
 
 logger = logging.getLogger("aea")

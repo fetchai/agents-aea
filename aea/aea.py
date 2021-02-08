@@ -91,7 +91,7 @@ class AEA(Agent):
         connection_ids: Optional[Collection[PublicId]] = None,
         search_service_address: str = DEFAULT_SEARCH_SERVICE_ADDRESS,
         storage_uri: Optional[str] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         """
         Instantiate the agent.
@@ -402,7 +402,7 @@ class AEA(Agent):
         :return: bool, propagate exception if True otherwise skip it.
         """
         # docstyle: ignore # noqa: E800
-        def log_exception(e, fn, is_debug: bool = False) -> None:
+        def log_exception(e: Exception, fn: Callable, is_debug: bool = False) -> None:
             if is_debug:
                 self.logger.debug(f"<{e}> raised during `{fn}`")
             else:

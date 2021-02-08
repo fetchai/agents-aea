@@ -31,6 +31,7 @@ from collections import defaultdict, namedtuple
 from enum import Enum
 from inspect import signature
 from typing import (
+    Any,
     Callable,
     Dict,
     FrozenSet,
@@ -128,7 +129,7 @@ class DialogueLabel:
         """Get the address of the dialogue starter."""
         return self._dialogue_starter_addr
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Check for equality between two DialogueLabel objects."""
         if isinstance(other, DialogueLabel):
             return (
@@ -363,7 +364,7 @@ class Dialogue(metaclass=_DialogueMeta):
         """
         self._terminal_state_callbacks.add(fn)
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Compare two dialogues."""
         return (
             type(self) == type(other)  # pylint: disable=unidiomatic-typecheck
@@ -670,7 +671,7 @@ class Dialogue(metaclass=_DialogueMeta):
         performative: Message.Performative,
         target_message: Optional[Message] = None,
         target: Optional[int] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Message:
         """
         Reply to the 'target_message' in this dialogue with a message with 'performative', and contents from kwargs.
@@ -1039,7 +1040,7 @@ class DialogueStats:
             self._other_initiated[end_state] += 1
 
 
-def find_caller_object(object_type: Type):
+def find_caller_object(object_type: Type) -> Any:
     """Find caller object of certain type in the call stack."""
     caller_object = None
     for frame_info in inspect.stack():
@@ -1178,7 +1179,9 @@ class BasicDialoguesStorage:
         return dialogue_label in self._incomplete_to_complete_dialogue_labels
 
     def set_incomplete_dialogue(
-        self, incomplete_dialogue_label, complete_dialogue_label
+        self,
+        incomplete_dialogue_label: DialogueLabel,
+        complete_dialogue_label: DialogueLabel,
     ) -> None:
         """Set incomplete dialogue label."""
         self._incomplete_to_complete_dialogue_labels[
@@ -1645,7 +1648,7 @@ class Dialogues:
         return cls._generate_dialogue_nonce(), Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
 
     def create(
-        self, counterparty: Address, performative: Message.Performative, **kwargs,
+        self, counterparty: Address, performative: Message.Performative, **kwargs: Any,
     ) -> Tuple[Message, Dialogue]:
         """
         Create a dialogue with 'counterparty', with an initial message whose performative is 'performative' and contents are from 'kwargs'.

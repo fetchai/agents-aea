@@ -22,7 +22,7 @@
 import copy
 from abc import ABC, abstractmethod
 from operator import itemgetter
-from typing import Dict, Generic, List, Optional, Set, Tuple, TypeVar, cast
+from typing import Any, Dict, Generic, List, Optional, Set, Tuple, TypeVar, cast
 
 from aea.components.base import Component
 from aea.configurations.base import ComponentId, ComponentType, PublicId
@@ -187,7 +187,7 @@ class PublicIdRegistry(Generic[Item], Registry[PublicId, Item]):
 class AgentComponentRegistry(Registry[ComponentId, Component]):
     """This class implements a simple dictionary-based registry for agent components."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Instantiate the registry.
 
@@ -329,7 +329,7 @@ class ComponentRegistry(
 ):
     """This class implements a generic registry for skill components."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Instantiate the registry.
 
@@ -517,7 +517,7 @@ class ComponentRegistry(
 class HandlerRegistry(ComponentRegistry[Handler]):
     """This class implements the handlers registry."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Instantiate the registry.
 

@@ -68,9 +68,9 @@ class ConnectionsOption(click.Option):
 class PublicIdParameter(click.ParamType):
     """Define a public id parameter for Click applications."""
 
-    def __init__(
+    def __init__(  # pylint: disable=useless-super-delegation
         self, *args, **kwargs
-    ) -> None:  # pylint: disable=useless-super-delegation
+    ) -> None:
         """
         Initialize the Public Id parameter.
 

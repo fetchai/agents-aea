@@ -1611,7 +1611,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         component_type: ComponentType,
         resources: Resources,
         agent_name: str,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         """
         Load and add components added to the builder to a Resources instance.

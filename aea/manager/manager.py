@@ -614,7 +614,7 @@ class MultiAgentManager:
 
         event = threading.Event()
 
-        def event_set(*args) -> None:  # pylint: disable=unused-argument
+        def event_set(*args: Any) -> None:  # pylint: disable=unused-argument
             event.set()
 
         def _add_cb() -> None:

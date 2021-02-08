@@ -158,7 +158,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
             cls.run_cli_command("config", "set", path, value, cwd=cls._get_cwd())
 
     @classmethod
-    def run_cli_command(cls, *args: str, cwd: str = ".", **kwargs) -> Result:
+    def run_cli_command(cls, *args: str, cwd: str = ".", **kwargs: str) -> Result:
         """
         Run AEA CLI command.
 
@@ -225,7 +225,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         return process
 
     @classmethod
-    def start_thread(cls, target: Callable, **kwargs) -> Thread:
+    def start_thread(cls, target: Callable, **kwargs: subprocess.Popen) -> Thread:
         """
         Start python Thread.
 
@@ -295,7 +295,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         """
         # for pydocstyle
         def is_allowed_diff_in_agent_config(
-            path_to_fetched_aea, path_to_manually_created_aea
+            path_to_fetched_aea: str, path_to_manually_created_aea: str
         ) -> Tuple[bool, Dict[str, str], Dict[str, str]]:
             with open(
                 os.path.join(path_to_fetched_aea, "aea-config.yaml"), "r"
@@ -439,7 +439,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         return all_terminated
 
     @classmethod
-    def initialize_aea(cls, author) -> None:
+    def initialize_aea(cls, author: str) -> None:
         """
         Initialize AEA locally with author name.
 
@@ -720,7 +720,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
                 cls.stderr[process.pid] += line
 
     @classmethod
-    def _log_capture(cls, name, pid, line) -> None:  # pragma: nocover
+    def _log_capture(cls, name: str, pid: int, line: str) -> None:  # pragma: nocover
         if not cls.capture_log:
             return
         sys.stdout.write(f"[{pid}]{name}>{line}")
@@ -832,7 +832,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         return missing_strings == []
 
     @classmethod
-    def invoke(cls, *args) -> Result:
+    def invoke(cls, *args: str) -> Result:
         """Call the cli command."""
         with cd(cls._get_cwd()):
             result = cls.runner.invoke(
@@ -903,7 +903,7 @@ class UseOef:  # pylint: disable=too-few-public-methods
     """Inherit from this class to launch an OEF node."""
 
     @pytest.fixture(autouse=True)
-    def _start_oef_node(self, network_node) -> None:
+    def _start_oef_node(self, network_node: Callable) -> None:
         """Start an oef node."""
 
 
