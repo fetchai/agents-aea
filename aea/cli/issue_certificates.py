@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 """Implementation of the 'aea issue_certificates' subcommand."""
 import os
-from typing import Dict, List, cast
+from typing import Dict, List, Optional, cast
 
 import click
 from click import ClickException
@@ -39,23 +39,42 @@ from aea.helpers.base import CertRequest
 @click.command()
 @click.pass_context
 @check_aea_project
-def issue_certificates(click_context):
-    """Issue certificates for connections that require them."""
+def issue_certificates(click_context: click.Context):
+    """
+    Issue certificates for connections that require them.
+
+    :param click_context: the click.Context object.
+    :return: None
+    """
     ctx = cast(Context, click_context.obj)
     agent_config_manager = AgentConfigManager.load(ctx.cwd)
     issue_certificates_(ctx.cwd, agent_config_manager)
 
 
 def issue_certificates_(
-    project_directory: str, agent_config_manager: AgentConfigManager
+    project_directory: str,
+    agent_config_manager: AgentConfigManager,
+    path_prefix: Optional[str] = None,
 ):
-    """Issue certificates for connections that require them."""
+    """
+    Issue certificates for connections that require them.
+
+    :param project_directory: the directory of the project.
+    :param agent_config_manager: the agent configuration manager.
+    :param path_prefix: the path prefix for "save_path". Defaults to project directory.
+    :return: None
+    """
+    path_prefix = path_prefix or project_directory
     for connection_id in agent_config_manager.agent_config.connections:
         cert_requests = _get_cert_requests(
             project_directory, agent_config_manager, connection_id
         )
         _process_connection(
-            project_directory, agent_config_manager, cert_requests, connection_id
+            project_directory,
+            agent_config_manager,
+            cert_requests,
+            connection_id,
+            path_prefix,
         )
 
     click.echo("All certificates have been issued.")
@@ -94,6 +113,7 @@ def _process_certificate(
     agent_config: AgentConfig,
     cert_request: CertRequest,
     connection_id: PublicId,
+    path_prefix: str,
 ):
     """Process a single certificate request."""
     ledger_id = cert_request.ledger_id
@@ -123,11 +143,13 @@ def _process_certificate(
             f"Cannot find private key with id '{ledger_id}'. Please use `aea generate-key {key_identifier}` and `aea add-key {key_identifier}` to add a private key with id '{key_identifier}'."
         )
     message = cert_request.get_message(public_key)
+    final_output_path = (
+        output_path
+        if output_path.is_absolute()
+        else os.path.join(path_prefix, output_path)
+    )
     cert = make_certificate(
-        ledger_id,
-        crypto_private_key_path,
-        message,
-        os.path.join(project_directory, output_path),
+        ledger_id, crypto_private_key_path, message, final_output_path,
     )
     click.echo(f"Generated signature: '{cert}'")
 
@@ -137,6 +159,7 @@ def _process_connection(
     agent_config_manager: AgentConfigManager,
     cert_requests: List[CertRequest],
     connection_id: PublicId,
+    path_prefix: str,
 ):
 
     if len(cert_requests) == 0:
@@ -153,6 +176,7 @@ def _process_connection(
             agent_config_manager.agent_config,
             cert_request,
             connection_id,
+            path_prefix,
         )
         click.echo(
             f"Dumped certificate '{cert_request.identifier}' in '{cert_request.save_path}' for connection {connection_id}."

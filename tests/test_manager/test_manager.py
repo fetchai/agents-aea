@@ -408,8 +408,9 @@ class TestMultiAgentManagerAsyncMode(
         self.manager.start_manager()
         self.manager.add_project(self.project_public_id, local=True)
 
-        cert_path = os.path.abspath(os.path.join(self.working_dir, "cert.txt"))
-        assert not os.path.exists(cert_path)
+        cert_filename = "cert.txt"
+        cert_path = os.path.join(self.manager.certs_dir, cert_filename)
+        assert not os.path.exists(cert_filename)
 
         priv_key_path = os.path.abspath(os.path.join(self.working_dir, "priv_key.txt"))
         create_private_key("fetchai", priv_key_path)
@@ -426,7 +427,7 @@ class TestMultiAgentManagerAsyncMode(
                         "not_after": "2022-01-01",
                         "not_before": "2021-01-01",
                         "public_key": "fetchai",
-                        "save_path": cert_path,
+                        "save_path": cert_filename,
                     }
                 ],
             }

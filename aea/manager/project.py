@@ -131,12 +131,17 @@ class AgentAlias(_Base):
     """Agent alias representation."""
 
     def __init__(
-        self, project: Project, agent_name: str, keys_dir: Optional[str],
+        self,
+        project: Project,
+        agent_name: str,
+        keys_dir: Optional[str],
+        certs_dir: Optional[str],
     ):
         """Init agent alias with project, config, name, agent, builder."""
         self.project = project
         self.agent_name = agent_name
         self._keys_dir = keys_dir or project.path
+        self._certs_dir = certs_dir or project.path
         self._agent_config: AgentConfig = self._get_agent_config(project.path)
 
     def set_agent_config_from_data(self, json_data: List[Dict]) -> None:
@@ -226,7 +231,9 @@ class AgentAlias(_Base):
 
     def issue_certificates(self) -> None:
         """Issue the certificates for this agent."""
-        issue_certificates_(self.project.path, self.agent_config_manager)
+        issue_certificates_(
+            self.project.path, self.agent_config_manager, self._certs_dir
+        )
 
     def set_overrides(
         self,

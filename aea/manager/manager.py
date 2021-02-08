@@ -417,7 +417,10 @@ class MultiAgentManager:
         project = self._projects[public_id]
 
         agent_alias = AgentAlias(
-            project=project, agent_name=agent_name, keys_dir=self.keys_dir,
+            project=project,
+            agent_name=agent_name,
+            keys_dir=self.keys_dir,
+            certs_dir=self.certs_dir,
         )
         agent_alias.set_overrides(agent_overrides, component_overrides)
         project.agents.add(agent_name)
@@ -449,7 +452,10 @@ class MultiAgentManager:
         project = self._projects[public_id]
 
         agent_alias = AgentAlias(
-            project=project, agent_name=agent_name, keys_dir=self.keys_dir,
+            project=project,
+            agent_name=agent_name,
+            keys_dir=self.keys_dir,
+            certs_dir=self.certs_dir,
         )
         agent_alias.set_agent_config_from_data(config)
         project.agents.add(agent_name)
