@@ -67,7 +67,7 @@ from aea.cli.utils.loggers import logger, simple_verbosity_option
 from aea.helpers.win32 import enable_ctrl_c_support
 
 
-@click.group(name="aea")
+@click.group(name="aea")  # type: ignore
 @click.version_option(aea.__version__, prog_name="aea")
 @simple_verbosity_option(logger, default="INFO")
 @click.option(
@@ -82,7 +82,9 @@ from aea.helpers.win32 import enable_ctrl_c_support
 @registry_path_option
 @click.pass_context
 def cli(
-    click_context, skip_consistency_check: bool, registry_path: Optional[str]
+    click_context: click.Context,
+    skip_consistency_check: bool,
+    registry_path: Optional[str],
 ) -> None:
     """Command-line tool for setting up an Autonomous Economic Agent (AEA)."""
     verbosity_option = click_context.meta.pop("verbosity")
@@ -99,8 +101,8 @@ def cli(
 @click.option("--local", is_flag=True, help="For using local folder.")
 @click.pass_context
 def gui(  # pylint: disable=unused-argument
-    click_context, port, local
-):  # pragma: no cover
+    click_context: click.Context, port: int, local: bool
+) -> None:  # pragma: no cover
     """Run the CLI GUI."""
     _init_gui()
     import aea.cli_gui  # pylint: disable=import-outside-toplevel,redefined-outer-name

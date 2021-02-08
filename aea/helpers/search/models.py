@@ -24,7 +24,18 @@ from abc import ABC, abstractmethod
 from copy import deepcopy
 from enum import Enum
 from math import asin, cos, radians, sin, sqrt
-from typing import Any, Dict, List, Mapping, Optional, Tuple, Type, Union, cast
+from typing import (
+    Any,
+    Dict,
+    Iterator,
+    List,
+    Mapping,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 
 import aea.helpers.search.models_pb2 as models_pb2
 from aea.exceptions import enforce
@@ -85,7 +96,7 @@ CONSTRAINT_CATEGORIES = [
 class Location:
     """Data structure to represent locations (i.e. a pair of latitude and longitude)."""
 
-    def __init__(self, latitude: float, longitude: float):
+    def __init__(self, latitude: float, longitude: float) -> None:
         """
         Initialize a location.
 
@@ -109,13 +120,13 @@ class Location:
         """
         return haversine(self.latitude, self.longitude, other.latitude, other.longitude)
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Compare equality of two locations."""
         if not isinstance(other, Location):
             return False  # pragma: nocover
         return self.latitude == other.latitude and self.longitude == other.longitude
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get the string representation of the data model."""
         return "Location(latitude={},longitude={})".format(
             self.latitude, self.longitude
@@ -133,7 +144,7 @@ class Location:
         return location_pb
 
     @classmethod
-    def decode(cls, location_pb) -> "Location":
+    def decode(cls, location_pb: Any) -> "Location":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -180,7 +191,7 @@ class Attribute:
         type_: Type[ATTRIBUTE_TYPES],
         is_required: bool,
         description: str = "",
-    ):
+    ) -> None:
         """
         Initialize an attribute.
 
@@ -194,7 +205,7 @@ class Attribute:
         self.is_required = is_required
         self.description = description
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, Attribute)
@@ -203,7 +214,7 @@ class Attribute:
             and self.is_required == other.is_required
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get the string representation of the data model."""
         return "Attribute(name={},type={},is_required={})".format(
             self.name, self.type, self.is_required
@@ -224,7 +235,7 @@ class Attribute:
         return attribute
 
     @classmethod
-    def decode(cls, attribute_pb) -> "Attribute":
+    def decode(cls, attribute_pb: models_pb2.Query.Attribute) -> "Attribute":  # type: ignore
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -243,7 +254,9 @@ class Attribute:
 class DataModel:
     """Implements an OEF data model."""
 
-    def __init__(self, name: str, attributes: List[Attribute], description: str = ""):
+    def __init__(
+        self, name: str, attributes: List[Attribute], description: str = ""
+    ) -> None:
         """
         Initialize a data model.
 
@@ -258,7 +271,7 @@ class DataModel:
         self.attributes_by_name = {a.name: a for a in self.attributes}
         self.description = description
 
-    def _check_validity(self):
+    def _check_validity(self) -> None:
         # check if there are duplicated attribute names
         attribute_names = [attribute.name for attribute in self.attributes]
         if len(attribute_names) != len(set(attribute_names)):
@@ -268,7 +281,7 @@ class DataModel:
                 )
             )
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, DataModel)
@@ -276,7 +289,7 @@ class DataModel:
             and self.attributes == other.attributes
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get the string representation of the data model."""
         return "DataModel(name={},attributes={},description={})".format(
             self.name, {a.name: str(a) for a in self.attributes}, self.description
@@ -296,7 +309,7 @@ class DataModel:
         return model
 
     @classmethod
-    def decode(cls, data_model_pb) -> "DataModel":
+    def decode(cls, data_model_pb: Any) -> "DataModel":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -336,7 +349,7 @@ class Description:
         values: Mapping[str, ATTRIBUTE_TYPES],
         data_model: Optional[DataModel] = None,
         data_model_name: str = "",
-    ):
+    ) -> None:
         """
         Initialize the description object.
 
@@ -357,7 +370,7 @@ class Description:
         """Get the values."""
         return cast(Dict, self._values)
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, Description)
@@ -365,11 +378,11 @@ class Description:
             and self.data_model == other.data_model
         )
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator:
         """Create an iterator."""
         return iter(self.values)
 
-    def _check_consistency(self):
+    def _check_consistency(self) -> None:
         """
         Check the consistency of the values of this description.
 
@@ -407,6 +420,8 @@ class Description:
                 ),
                 None,
             )
+            if attribute is None:
+                raise ValueError("Attribute {} not found!".format(key))
             if not isinstance(value, attribute.type):
                 # values does not match type in data model
                 raise AttributeInconsistencyException(
@@ -422,7 +437,7 @@ class Description:
                     )
                 )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get the string representation of the description."""
         return "Description(values={},data_model={})".format(
             self._values, self.data_model
@@ -468,7 +483,7 @@ class Description:
         return instance
 
     @classmethod
-    def encode(cls, description_pb, description: "Description") -> None:
+    def encode(cls, description_pb: Any, description: "Description") -> None:
         """
         Encode an instance of this class into the protocol buffer object.
 
@@ -512,7 +527,7 @@ class Description:
         return result
 
     @classmethod
-    def _decode(cls, description_pb) -> "Description":
+    def _decode(cls, description_pb: Any) -> "Description":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -526,7 +541,7 @@ class Description:
         return cls(values, model)
 
     @classmethod
-    def decode(cls, description_pb) -> "Description":
+    def decode(cls, description_pb: Any) -> "Description":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -556,7 +571,7 @@ class ConstraintTypes(Enum):
     NOT_IN = "not_in"
     DISTANCE = "distance"
 
-    def __str__(self):  # pragma: nocover
+    def __str__(self) -> str:  # pragma: nocover
         """Get the string representation."""
         return str(self.value)
 
@@ -581,7 +596,7 @@ class ConstraintType:
 
     """
 
-    def __init__(self, type_: Union[ConstraintTypes, str], value: Any):
+    def __init__(self, type_: Union[ConstraintTypes, str], value: Any) -> None:
         """
         Initialize a constraint type.
 
@@ -595,7 +610,7 @@ class ConstraintType:
         self.value = value
         enforce(self.check_validity(), "ConstraintType initialization inconsistent.")
 
-    def check_validity(self):
+    def check_validity(self) -> bool:
         """
         Check the validity of the input provided.
 
@@ -783,7 +798,7 @@ class ConstraintType:
             return location.distance(value) <= distance
         raise ValueError("Constraint type not recognized.")  # pragma: nocover
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Check equality with another object."""
         return (
             isinstance(other, ConstraintType)
@@ -791,17 +806,17 @@ class ConstraintType:
             and self.type == other.type
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get the string representation of the constraint type."""
         return "ConstraintType(value={},type={})".format(self.value, self.type)
 
-    def encode(self):
+    def encode(self) -> Optional[Any]:
         """
         Encode an instance of this class into a protocol buffer object.
 
         :return: the matching protocol buffer object
         """
-        encoding = None
+        encoding: Optional[Any] = None
 
         if (
             self.type == ConstraintTypes.EQUAL
@@ -811,22 +826,22 @@ class ConstraintType:
             or self.type == ConstraintTypes.GREATER_THAN
             or self.type == ConstraintTypes.GREATER_THAN_EQ
         ):
-            relation = models_pb2.Query.Relation()
+            relation = models_pb2.Query.Relation()  # type: ignore
 
             if self.type == ConstraintTypes.EQUAL:
-                relation.operator = models_pb2.Query.Relation.EQ
+                relation.operator = models_pb2.Query.Relation.EQ  # type: ignore
             elif self.type == ConstraintTypes.NOT_EQUAL:
-                relation.operator = models_pb2.Query.Relation.NOTEQ
+                relation.operator = models_pb2.Query.Relation.NOTEQ  # type: ignore
             elif self.type == ConstraintTypes.LESS_THAN:
-                relation.operator = models_pb2.Query.Relation.LT
+                relation.operator = models_pb2.Query.Relation.LT  # type: ignore
             elif self.type == ConstraintTypes.LESS_THAN_EQ:
-                relation.operator = models_pb2.Query.Relation.LTEQ
+                relation.operator = models_pb2.Query.Relation.LTEQ  # type: ignore
             elif self.type == ConstraintTypes.GREATER_THAN:
-                relation.operator = models_pb2.Query.Relation.GT
+                relation.operator = models_pb2.Query.Relation.GT  # type: ignore
             elif self.type == ConstraintTypes.GREATER_THAN_EQ:
-                relation.operator = models_pb2.Query.Relation.GTEQ
+                relation.operator = models_pb2.Query.Relation.GTEQ  # type: ignore
 
-            query_value = models_pb2.Query.Value()
+            query_value = models_pb2.Query.Value()  # type: ignore
 
             if isinstance(self.value, bool):
                 query_value.boolean = self.value
@@ -841,60 +856,60 @@ class ConstraintType:
             encoding = relation
 
         elif self.type == ConstraintTypes.WITHIN:
-            range_ = models_pb2.Query.Range()
+            range_ = models_pb2.Query.Range()  # type: ignore
 
             if type(self.value[0]) == str:  # pylint: disable=unidiomatic-typecheck
-                values = models_pb2.Query.StringPair()
+                values = models_pb2.Query.StringPair()  # type: ignore
                 values.first = self.value[0]
                 values.second = self.value[1]
                 range_.string_pair.CopyFrom(values)
             elif type(self.value[0]) == int:  # pylint: disable=unidiomatic-typecheck
-                values = models_pb2.Query.IntPair()
+                values = models_pb2.Query.IntPair()  # type: ignore
                 values.first = self.value[0]
                 values.second = self.value[1]
                 range_.integer_pair.CopyFrom(values)
             elif type(self.value[0]) == float:  # pylint: disable=unidiomatic-typecheck
-                values = models_pb2.Query.DoublePair()
+                values = models_pb2.Query.DoublePair()  # type: ignore
                 values.first = self.value[0]
                 values.second = self.value[1]
                 range_.double_pair.CopyFrom(values)
             encoding = range_
 
         elif self.type == ConstraintTypes.IN or self.type == ConstraintTypes.NOT_IN:
-            set_ = models_pb2.Query.Set()
+            set_ = models_pb2.Query.Set()  # type: ignore
 
             if self.type == ConstraintTypes.IN:
-                set_.operator = models_pb2.Query.Set.IN
+                set_.operator = models_pb2.Query.Set.IN  # type: ignore
             elif self.type == ConstraintTypes.NOT_IN:
-                set_.operator = models_pb2.Query.Set.NOTIN
+                set_.operator = models_pb2.Query.Set.NOTIN  # type: ignore
 
             value_type = type(self.value[0]) if len(self.value) > 0 else str
 
             if value_type == str:
-                values = models_pb2.Query.Set.Values.Strings()
+                values = models_pb2.Query.Set.Values.Strings()  # type: ignore
                 values.values.extend(self.value)
                 set_.values.string.CopyFrom(values)
             elif value_type == bool:
-                values = models_pb2.Query.Set.Values.Bools()
+                values = models_pb2.Query.Set.Values.Bools()  # type: ignore
                 values.values.extend(self.value)
                 set_.values.boolean.CopyFrom(values)
             elif value_type == int:
-                values = models_pb2.Query.Set.Values.Ints()
+                values = models_pb2.Query.Set.Values.Ints()  # type: ignore
                 values.values.extend(self.value)
                 set_.values.integer.CopyFrom(values)
             elif value_type == float:
-                values = models_pb2.Query.Set.Values.Doubles()
+                values = models_pb2.Query.Set.Values.Doubles()  # type: ignore
                 values.values.extend(self.value)
                 set_.values.double.CopyFrom(values)
             elif value_type == Location:
-                values = models_pb2.Query.Set.Values.Locations()
+                values = models_pb2.Query.Set.Values.Locations()  # type: ignore
                 values.values.extend([value.encode() for value in self.value])
                 set_.values.location.CopyFrom(values)
 
             encoding = set_
 
         elif self.type == ConstraintTypes.DISTANCE:
-            distance_pb = models_pb2.Query.Distance()
+            distance_pb = models_pb2.Query.Distance()  # type: ignore
             distance_pb.distance = self.value[1]
             distance_pb.center.CopyFrom(self.value[0].encode())
 
@@ -903,7 +918,7 @@ class ConstraintType:
         return encoding
 
     @classmethod
-    def decode(cls, constraint_type_pb, category: str) -> "ConstraintType":
+    def decode(cls, constraint_type_pb: Any, category: str) -> "ConstraintType":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -1045,7 +1060,7 @@ class ConstraintExpr(ABC):
         return None
 
     @staticmethod
-    def _encode(expression) -> models_pb2.Query.ConstraintExpr:  # type: ignore
+    def _encode(expression: Any) -> models_pb2.Query.ConstraintExpr:  # type: ignore
         """
         Encode an instance of this class into a protocol buffer object.
 
@@ -1069,7 +1084,7 @@ class ConstraintExpr(ABC):
         return constraint_expression_pb
 
     @staticmethod
-    def _decode(constraint_expression_pb) -> "ConstraintExpr":
+    def _decode(constraint_expression_pb: Any) -> "ConstraintExpr":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -1099,7 +1114,7 @@ class ConstraintExpr(ABC):
 class And(ConstraintExpr):
     """Implementation of the 'And' constraint expression."""
 
-    def __init__(self, constraints: List[ConstraintExpr]):
+    def __init__(self, constraints: List[ConstraintExpr]) -> None:
         """
         Initialize an 'And' expression.
 
@@ -1126,7 +1141,7 @@ class And(ConstraintExpr):
         """
         return all(constraint.is_valid(data_model) for constraint in self.constraints)
 
-    def check_validity(self):
+    def check_validity(self) -> None:
         """
         Check whether the Constraint Expression satisfies some basic requirements.
 
@@ -1141,7 +1156,7 @@ class And(ConstraintExpr):
         for constraint in self.constraints:
             constraint.check_validity()
 
-    def __eq__(self, other):  # pragma: nocover
+    def __eq__(self, other: Any) -> bool:  # pragma: nocover
         """Compare with another object."""
         return isinstance(other, And) and self.constraints == other.constraints
 
@@ -1159,7 +1174,7 @@ class And(ConstraintExpr):
         return and_pb
 
     @classmethod
-    def decode(cls, and_pb) -> "And":
+    def decode(cls, and_pb: Any) -> "And":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -1173,7 +1188,7 @@ class And(ConstraintExpr):
 class Or(ConstraintExpr):
     """Implementation of the 'Or' constraint expression."""
 
-    def __init__(self, constraints: List[ConstraintExpr]):
+    def __init__(self, constraints: List[ConstraintExpr]) -> None:
         """
         Initialize an 'Or' expression.
 
@@ -1200,7 +1215,7 @@ class Or(ConstraintExpr):
         """
         return all(constraint.is_valid(data_model) for constraint in self.constraints)
 
-    def check_validity(self):
+    def check_validity(self) -> None:
         """
         Check whether the Constraint Expression satisfies some basic requirements.
 
@@ -1215,7 +1230,7 @@ class Or(ConstraintExpr):
         for constraint in self.constraints:
             constraint.check_validity()
 
-    def __eq__(self, other):  # pragma: nocover
+    def __eq__(self, other: Any) -> bool:  # pragma: nocover
         """Compare with another object."""
         return isinstance(other, Or) and self.constraints == other.constraints
 
@@ -1233,7 +1248,7 @@ class Or(ConstraintExpr):
         return or_pb
 
     @classmethod
-    def decode(cls, or_pb) -> "Or":
+    def decode(cls, or_pb: Any) -> "Or":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -1247,7 +1262,7 @@ class Or(ConstraintExpr):
 class Not(ConstraintExpr):
     """Implementation of the 'Not' constraint expression."""
 
-    def __init__(self, constraint: ConstraintExpr):
+    def __init__(self, constraint: ConstraintExpr) -> None:
         """
         Initialize a 'Not' expression.
 
@@ -1273,7 +1288,7 @@ class Not(ConstraintExpr):
         """
         return self.constraint.is_valid(data_model)
 
-    def __eq__(self, other):  # pragma: nocover
+    def __eq__(self, other: Any) -> bool:  # pragma: nocover
         """Compare with another object."""
         return isinstance(other, Not) and self.constraint == other.constraint
 
@@ -1289,7 +1304,7 @@ class Not(ConstraintExpr):
         return not_pb
 
     @classmethod
-    def decode(cls, not_pb) -> "Not":
+    def decode(cls, not_pb: Any) -> "Not":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -1303,7 +1318,7 @@ class Not(ConstraintExpr):
 class Constraint(ConstraintExpr):
     """The atomic component of a constraint expression."""
 
-    def __init__(self, attribute_name: str, constraint_type: ConstraintType):
+    def __init__(self, attribute_name: str, constraint_type: ConstraintType) -> None:
         """
         Initialize a constraint.
 
@@ -1391,7 +1406,7 @@ class Constraint(ConstraintExpr):
         attribute = data_model.attributes_by_name[self.attribute_name]
         return self.constraint_type.is_valid(attribute)
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, Constraint)
@@ -1399,7 +1414,7 @@ class Constraint(ConstraintExpr):
             and self.constraint_type == other.constraint_type
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get the string representation of the constraint."""
         return "Constraint(attribute_name={},constraint_type={})".format(
             self.attribute_name, self.constraint_type
@@ -1439,7 +1454,7 @@ class Constraint(ConstraintExpr):
         return constraint
 
     @classmethod
-    def decode(cls, constraint_pb) -> "Constraint":
+    def decode(cls, constraint_pb: Any) -> "Constraint":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -1490,7 +1505,7 @@ class Query:
         """
         return all(c.check(description) for c in self.constraints)
 
-    def is_valid(self, data_model: DataModel) -> bool:
+    def is_valid(self, data_model: Optional[DataModel]) -> bool:
         """
         Given a data model, check whether the query is valid for that data model.
 
@@ -1501,7 +1516,7 @@ class Query:
 
         return all(c.is_valid(data_model) for c in self.constraints)
 
-    def check_validity(self):
+    def check_validity(self) -> None:
         """
         Check whether the` object is valid.
 
@@ -1526,7 +1541,7 @@ class Query:
                 "for the given data model.".format(type(self).__name__)
             )
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, Query)
@@ -1534,7 +1549,7 @@ class Query:
             and self.model == other.model
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get the string representation of the constraint."""
         return "Query(constraints={},model={})".format(
             [str(c) for c in self.constraints], self.model
@@ -1558,7 +1573,7 @@ class Query:
         return query
 
     @classmethod
-    def encode(cls, query_pb, query: "Query") -> None:
+    def encode(cls, query_pb: Any, query: "Query") -> None:
         """
         Encode an instance of this class into the protocol buffer object.
 
@@ -1575,7 +1590,7 @@ class Query:
         query_pb.query_bytes = query_bytes_bytes
 
     @classmethod
-    def _decode(cls, query_pb) -> "Query":
+    def _decode(cls, query_pb: Any) -> "Query":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -1591,7 +1606,7 @@ class Query:
         return cls(constraints, data_model if query_pb.HasField("model") else None,)
 
     @classmethod
-    def decode(cls, query_pb) -> "Query":
+    def decode(cls, query_pb: Any) -> "Query":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 

@@ -217,4 +217,4 @@ class TestHelpers(BaseSkillTestCase):
         assert type(eq_good_holdings_dict["ag_1"]["good_1"]) == float
 
         assert len(eq_currency_holdings_dict) == 1
-        assert type(eq_currency_holdings_dict["ag_1"]) == float
+        assert type(eq_currency_holdings_dict["ag_1"]["currency_1"]) == float

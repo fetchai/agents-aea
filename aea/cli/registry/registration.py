@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 """Module with methods for new user registration."""
 
-from typing import List
+from typing import Dict, List, cast
 
 from click import ClickException
 
@@ -51,14 +51,15 @@ def register(
         handle_400=False,
         return_code=True,
     )
+    resp_json = cast(Dict, resp_json)
     if status_code == 400:
         errors: List[str] = []
         for key in ("username", "email", "password1", "password2"):
-            param_errors = resp_json.get(key)
+            param_errors = cast(str, resp_json.get(key))
             if param_errors:
                 errors.extend(param_errors)
 
         raise ClickException(
             "Errors occured during registration.\n" + "\n".join(errors)
         )
-    return resp_json["key"]
+    return cast(str, resp_json["key"])

@@ -20,7 +20,7 @@
 """This module contains prometheus's message definition."""
 
 import logging
-from typing import Dict, Optional, Set, Tuple, cast
+from typing import Any, Dict, Optional, Set, Tuple, cast
 
 from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
@@ -45,7 +45,7 @@ class PrometheusMessage(Message):
         RESPONSE = "response"
         UPDATE_METRIC = "update_metric"
 
-        def __str__(self):
+        def __str__(self) -> str:
             """Get the string representation."""
             return str(self.value)
 
@@ -74,7 +74,7 @@ class PrometheusMessage(Message):
         dialogue_reference: Tuple[str, str] = ("", ""),
         message_id: int = 1,
         target: int = 0,
-        **kwargs,
+        **kwargs: Any,
     ):
         """
         Initialise an instance of PrometheusMessage.

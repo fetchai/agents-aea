@@ -1070,8 +1070,10 @@ class TestGame(BaseSkillTestCase):
             "    good_1: 1.1\n"
             "    good_2: 1.4\n\n"
             "Equilibrium money allocation: \n"
-            "agent_name_1 {'1': 1.1}\n"
-            "agent_name_2 {'1': 1.2}\n\n"
+            "- agent_name_1:\n"
+            "    currency_1: 1.1\n"
+            "- agent_name_2:\n"
+            "    currency_1: 1.2\n\n"
         )
         # operation
         equilibrium_summary = self.game.equilibrium_summary

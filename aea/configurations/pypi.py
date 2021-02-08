@@ -29,7 +29,7 @@ from packaging.version import InvalidVersion, Version
 from aea.configurations.base import Dependencies, Dependency
 
 
-def and_(s1: SpecifierSet, s2: SpecifierSet):
+def and_(s1: SpecifierSet, s2: SpecifierSet) -> SpecifierSet:
     """Do the and between two specifier sets."""
     return operator.and_(s1, s2)
 

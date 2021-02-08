@@ -36,7 +36,9 @@ from aea.launcher import AEALauncher
 @click.argument("agents", nargs=-1, type=AgentDirectory())
 @click.option("--multithreaded", is_flag=True)
 @click.pass_context
-def launch(click_context, agents: List[str], multithreaded: bool):
+def launch(
+    click_context: click.Context, agents: List[str], multithreaded: bool
+) -> None:
     """Launch many agents at the same time."""
     _launch_agents(click_context, agents, multithreaded)
 

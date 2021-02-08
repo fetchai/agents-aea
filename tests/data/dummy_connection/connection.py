@@ -48,6 +48,7 @@ class DummyConnection(Connection):
 
     async def disconnect(self, *args, **kwargs):
         """Disconnect."""
+        assert self._queue is not None
         await self._queue.put(None)
         self._state.set(ConnectionStates.disconnected)
 

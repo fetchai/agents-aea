@@ -9,11 +9,11 @@ aea_version: '>=0.9.0, <0.10.0'
 fingerprint:
   README.md: QmSSYui9DqPrTRmxjxsAygBKMxeaRjwbEg5t2LTJLwNNuH
   __init__.py: Qmcv4DkrYV8HETwDvounAzdvXjFydt4jzHHWhu5uTk1ha8
-  custom_types.py: QmRcgwDdTxkSHyfF9eoMtsb5P5GJDm4oyLq5W6ZBko1MFU
+  custom_types.py: QmbAu5CYv5VtKKbEtzCbGQGE5cPZezDjubLNbiTPycXrHv
   default.proto: QmNxgMEnvFtS9NDUjhUStFUmU1XU9fUvn8PJPvHTqdmdYE
   default_pb2.py: QmQ6RtRYU87AhjdoMQuBvj2WCdu1KVjhkVofAUE8c1UD4Z
   dialogues.py: QmXfP6bCy49A24RJYnzKZ6HBsf41hLyfLnV6VtaWgjBCWN
-  message.py: QmdDJXPSotQaPwfSkQVBXe6Jw5RWe7vb62EtE1jiYS2AsA
+  message.py: QmPCNkgKCtFb8dnis4UYD4hfhr46rYnjCdqWDdFaAkm5Fh
   serialization.py: QmTc271Ymt2tjqjgeR9ASTFujmNFi9WQKM2G7LWPrqSpK2
 fingerprint_ignore_patterns: []
 dependencies:

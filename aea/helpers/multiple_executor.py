@@ -58,7 +58,7 @@ class ExecutorExceptionPolicies(Enum):
 class AbstractExecutorTask(ABC):
     """Abstract task class to create Task classes."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Init task."""
         self._future: Optional[TaskAwaitable] = None
 
@@ -73,7 +73,7 @@ class AbstractExecutorTask(ABC):
         self._future = future
 
     @abstractmethod
-    def start(self):
+    def start(self) -> Tuple[Callable, Sequence[Any]]:
         """Implement start task function here."""
 
     @abstractmethod
@@ -147,7 +147,7 @@ class AbstractMultipleExecutor(ABC):  # pragma: nocover
     def __init__(
         self,
         tasks: Sequence[AbstractExecutorTask],
-        task_fail_policy=ExecutorExceptionPolicies.propagate,
+        task_fail_policy: ExecutorExceptionPolicies = ExecutorExceptionPolicies.propagate,
     ) -> None:
         """
         Init executor.
@@ -205,7 +205,7 @@ class AbstractMultipleExecutor(ABC):  # pragma: nocover
         """
         pending = cast(Set[asyncio.futures.Future], set(self._future_task.keys()))
 
-        async def wait_future(future):
+        async def wait_future(future) -> None:  # type: ignore
             try:
                 await future
             except KeyboardInterrupt:  # pragma: nocover
@@ -349,7 +349,9 @@ class AbstractMultipleRunner:  # pragma: nocover
     SUPPORTED_MODES: Dict[str, Type[AbstractMultipleExecutor]] = {}
 
     def __init__(
-        self, mode: str, fail_policy=ExecutorExceptionPolicies.propagate
+        self,
+        mode: str,
+        fail_policy: ExecutorExceptionPolicies = ExecutorExceptionPolicies.propagate,
     ) -> None:
         """
         Init with selected executor mode.
@@ -413,17 +415,17 @@ class AbstractMultipleRunner:  # pragma: nocover
         """Make tasks to run with executor."""
 
     @property
-    def num_failed(self):  # pragma: nocover
+    def num_failed(self) -> int:  # pragma: nocover
         """Return number of failed tasks."""
         return self._executor.num_failed
 
     @property
-    def failed(self):  # pragma: nocover
+    def failed(self) -> Sequence[Task]:  # pragma: nocover
         """Return sequence failed tasks."""
         return [i.id for i in self._executor.failed_tasks]
 
     @property
-    def not_failed(self):  # pragma: nocover
+    def not_failed(self) -> Sequence[Task]:  # pragma: nocover
         """Return sequence successful tasks."""
         return [i.id for i in self._executor.not_failed_tasks]
 

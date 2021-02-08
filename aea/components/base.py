@@ -23,7 +23,7 @@ import sys
 import types
 from abc import ABC
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from aea.configurations.base import (
     ComponentConfiguration,
@@ -46,8 +46,8 @@ class Component(ABC, WithLogger):
         self,
         configuration: Optional[ComponentConfiguration] = None,
         is_vendor: bool = False,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         """
         Initialize a package.
 
@@ -70,7 +70,7 @@ class Component(ABC, WithLogger):
         return self._is_vendor
 
     @property
-    def prefix_import_path(self):
+    def prefix_import_path(self) -> str:
         """Get the prefix import path for this component."""
         return self.configuration.prefix_import_path
 

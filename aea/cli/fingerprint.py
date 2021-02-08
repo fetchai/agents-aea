@@ -44,14 +44,16 @@ from aea.configurations.loader import ConfigLoader
 
 @click.group()
 @click.pass_context
-def fingerprint(click_context: click.core.Context):  # pylint: disable=unused-argument
+def fingerprint(
+    click_context: click.core.Context,  # pylint: disable=unused-argument
+) -> None:
     """Fingerprint a non-vendor package of the agent."""
 
 
 @fingerprint.command()
 @click.argument("connection_public_id", type=PublicIdParameter(), required=True)
 @pass_ctx
-def connection(ctx: Context, connection_public_id: PublicId):
+def connection(ctx: Context, connection_public_id: PublicId) -> None:
     """Fingerprint a connection and add the fingerprints to the configuration file."""
     fingerprint_item(ctx, CONNECTION, connection_public_id)
 
@@ -59,7 +61,7 @@ def connection(ctx: Context, connection_public_id: PublicId):
 @fingerprint.command()
 @click.argument("contract_public_id", type=PublicIdParameter(), required=True)
 @pass_ctx
-def contract(ctx: Context, contract_public_id: PublicId):
+def contract(ctx: Context, contract_public_id: PublicId) -> None:
     """Fingerprint a contract and add the fingerprints to the configuration file."""
     fingerprint_item(ctx, CONTRACT, contract_public_id)
 
@@ -67,7 +69,7 @@ def contract(ctx: Context, contract_public_id: PublicId):
 @fingerprint.command()
 @click.argument("protocol_public_id", type=PublicIdParameter(), required=True)
 @pass_ctx
-def protocol(ctx: Context, protocol_public_id: PublicId):
+def protocol(ctx: Context, protocol_public_id: PublicId) -> None:
     """Fingerprint a protocol and add the fingerprints to the configuration file.."""
     fingerprint_item(ctx, PROTOCOL, protocol_public_id)
 
@@ -75,7 +77,7 @@ def protocol(ctx: Context, protocol_public_id: PublicId):
 @fingerprint.command()
 @click.argument("skill_public_id", type=PublicIdParameter(), required=True)
 @pass_ctx
-def skill(ctx: Context, skill_public_id: PublicId):
+def skill(ctx: Context, skill_public_id: PublicId) -> None:
     """Fingerprint a skill and add the fingerprints to the configuration file."""
     fingerprint_item(ctx, SKILL, skill_public_id)
 
@@ -83,7 +85,7 @@ def skill(ctx: Context, skill_public_id: PublicId):
 @fingerprint.command()
 @click.argument("path", type=str, required=True)
 @pass_ctx
-def by_path(ctx: Context, path: str):
+def by_path(ctx: Context, path: str) -> None:
     """Fingerprint a package by its path."""
     try:
         click.echo("Fingerprinting component in '{}' ...".format(path))
