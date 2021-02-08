@@ -1537,17 +1537,28 @@ class GenericSearchBehaviour(TickerBehaviour):
         :return: None
         """
         strategy = cast(GenericStrategy, self.context.strategy)
-        if strategy.is_searching:
-            query = strategy.get_location_and_service_query()
-            oef_search_dialogues = cast(
-                OefSearchDialogues, self.context.oef_search_dialogues
+        if not strategy.is_searching:
+            return
+        transaction_behaviour = cast(
+            GenericTransactionBehaviour, self.context.behaviours.transaction
+        )
+        remaining_transactions_count = len(transaction_behaviour.waiting)
+        if remaining_transactions_count > 0:
+            self.context.logger.info(
+                f"Transaction behaviour has {remaining_transactions_count} transactions remaining. Skipping search!"
             )
-            oef_search_msg, _ = oef_search_dialogues.create(
-                counterparty=self.context.search_service_address,
-                performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-                query=query,
-            )
-            self.context.outbox.put_message(message=oef_search_msg)
+            return
+        strategy.update_search_query_params()
+        query = strategy.get_location_and_service_query()
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
+        )
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
+            performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+            query=query,
+        )
+        self.context.outbox.put_message(message=oef_search_msg)
 
     def teardown(self) -> None:
         """
@@ -1923,9 +1934,8 @@ Lastly, we need to handle the `INFORM` message. This is the message that will ha
         )
         if len(fipa_msg.info.keys()) >= 1:
             data = fipa_msg.info
-            self.context.logger.info(
-                "received the following data={}".format(pprint.pformat(data))
-            )
+            data_string = pprint.pformat(data)[:1000]
+            self.context.logger.info(f"received the following data={data_string}")
             fipa_dialogues.dialogue_stats.add_dialogue_endstate(
                 FipaDialogue.EndState.SUCCESSFUL, fipa_dialogue.is_self_initiated
             )
@@ -2307,7 +2317,7 @@ class GenericLedgerApiHandler(Handler):
             strategy.is_searching = True
         else:
             self.context.logger.warning(
-                "you have no starting balance on {} ledger!".format(strategy.ledger_id)
+                f"you have no starting balance on {strategy.ledger_id} ledger! Stopping skill {self.skill_id}."
             )
             self.context.is_active = False
 

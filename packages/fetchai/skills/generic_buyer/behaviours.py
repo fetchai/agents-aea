@@ -78,17 +78,28 @@ class GenericSearchBehaviour(TickerBehaviour):
         :return: None
         """
         strategy = cast(GenericStrategy, self.context.strategy)
-        if strategy.is_searching:
-            query = strategy.get_location_and_service_query()
-            oef_search_dialogues = cast(
-                OefSearchDialogues, self.context.oef_search_dialogues
+        if not strategy.is_searching:
+            return
+        transaction_behaviour = cast(
+            GenericTransactionBehaviour, self.context.behaviours.transaction
+        )
+        remaining_transactions_count = len(transaction_behaviour.waiting)
+        if remaining_transactions_count > 0:
+            self.context.logger.info(
+                f"Transaction behaviour has {remaining_transactions_count} transactions remaining. Skipping search!"
             )
-            oef_search_msg, _ = oef_search_dialogues.create(
-                counterparty=self.context.search_service_address,
-                performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-                query=query,
-            )
-            self.context.outbox.put_message(message=oef_search_msg)
+            return
+        strategy.update_search_query_params()
+        query = strategy.get_location_and_service_query()
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
+        )
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
+            performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+            query=query,
+        )
+        self.context.outbox.put_message(message=oef_search_msg)
 
     def teardown(self) -> None:
         """

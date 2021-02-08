@@ -272,3 +272,11 @@ class GenericStrategy(Model):
         :return: False
         """
         pass
+
+    def update_search_query_params(self) -> None:
+        """
+        Update agent location and query for search.
+
+        :return: None
+        """
+        pass
