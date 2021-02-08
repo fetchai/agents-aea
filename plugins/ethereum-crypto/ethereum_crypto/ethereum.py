@@ -26,7 +26,7 @@ import warnings
 from pathlib import Path
 from typing import Any, BinaryIO, Callable, Dict, Optional, Tuple, Union, cast
 
-from ethereum_crypto import http_requests as requests
+import requests
 from eth_account import Account
 from eth_account._utils.signing import to_standard_signature_bytes
 from eth_account.datastructures import HexBytes, SignedTransaction
@@ -42,6 +42,7 @@ from aea.helpers.base import try_decorator
 
 
 _default_logger = logging.getLogger(__name__)
+DEFAULT_TIMEOUT = 60.0
 
 _ETHEREUM = "ethereum"
 GAS_ID = "gwei"
@@ -725,7 +726,7 @@ class EthereumFaucetApi(FaucetApi):
             raise ValueError(
                 "Url is none, no default url provided. Please provide a faucet url."
             )
-        response = requests.get(url + address)
+        response = requests.get(url + address, timeout=DEFAULT_TIMEOUT)
         if response.status_code // 100 == 5:
             _default_logger.error("Response: {}".format(response.status_code))
         elif response.status_code // 100 in [3, 4]:  # pragma: nocover
