@@ -27,7 +27,7 @@ function is_python_version_ok() {
 	if which python3 2>&1 >/dev/null;
 	then
 		version=`python3 -V 2>/dev/null`
-		if [[ -z `echo $version|grep -E 'Python 3\.[(678]\.[0-9]+'` ]];
+		if [[ -z `echo $version|grep -E 'Python 3\.[(6789]\.[0-9]+'` ]];
 		then
 			echo "Python3 version: ${version} is not supported. Supported versions are 3.6, 3.7, 3.8."
 			return 1
@@ -42,14 +42,20 @@ function is_python_version_ok() {
 
 function install_aea (){
 	echo "Install AEA"
-	output=$(pip3 install aea[all]==0.9.2 --force --no-cache-dir)
+	output=$(pip3 install --user aea[all]==0.9.2 --force --no-cache-dir)
 	if [[  $? -ne 0 ]];
 	then
 		echo "$output"
 		echo 'Failed to install aea'
 		exit 1
 	fi
-	source ~/.profile  # sometimes ~/.local/bin is not in PATH
+	touch ~/.profile
+	py_user_base=`python3 -m site --user-base`
+	echo  >>~/.bashrc
+	echo 'export PATH=$PATH'":${py_user_base}/bin" >>~/.bashrc 
+	echo  >>~/.zshrc
+	echo 'export PATH=$PATH'":${py_user_base}/bin" >>~/.zshrc
+	source ~/.bashrc  # sometimes ~/.local/bin is not in PATH
 	output=`aea --help 2>&1`
 	if [[  $? -ne 0 ]];
 	then
