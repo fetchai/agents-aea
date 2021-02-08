@@ -60,7 +60,9 @@ class AgentsInfo:
         return self._body.get(agent_address, {})
 
     @staticmethod
-    def encode(agents_info_protobuf_object: Any, agents_info_object: "AgentsInfo") -> None:
+    def encode(
+        agents_info_protobuf_object: Any, agents_info_object: "AgentsInfo"
+    ) -> None:
         """
         Encode an instance of this class into the protocol buffer object.
 

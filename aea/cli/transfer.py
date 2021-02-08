@@ -58,7 +58,16 @@ DEFAULT_SETTLE_TIMEOUT = 60
 @click.option("--sync", type=bool, is_flag=True, default=False)
 @click.pass_context
 @check_aea_project
-def transfer(click_context, type_, address, amount, fee, yes, settle_timeout, sync):
+def transfer(
+    click_context: click.Context,
+    type_: str,
+    address: str,
+    amount: int,
+    fee: int,
+    yes: bool,
+    settle_timeout: int,
+    sync: bool,
+) -> None:
     """Transfer wealth associated with a private key of the agent to another account."""
     ctx = cast(Context, click_context.obj)
     try:
@@ -91,7 +100,7 @@ def transfer(click_context, type_, address, amount, fee, yes, settle_timeout, sy
 
 
 def wait_tx_settled(
-    identifier: str, tx_digest: str, timeout=DEFAULT_SETTLE_TIMEOUT
+    identifier: str, tx_digest: str, timeout: float = DEFAULT_SETTLE_TIMEOUT
 ) -> None:
     """
     Wait transaction is settled succesfuly.

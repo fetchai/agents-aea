@@ -57,7 +57,7 @@ security:
 
 .PHONY: static
 static:
-	mypy aea --check-untyped-defs
+	mypy aea --disallow-untyped-defs
 	mypy benchmark examples packages --check-untyped-defs
 	mypy scripts tests 
 

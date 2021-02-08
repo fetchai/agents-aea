@@ -95,7 +95,7 @@ class AttributeDictTranslator:
     """Translator for AttributeDict."""
 
     @classmethod
-    def _remove_hexbytes(cls, value: Any):
+    def _remove_hexbytes(cls, value: Any) -> Any:
         """Process value to remove hexbytes."""
         if value is None:
             return value
@@ -112,7 +112,7 @@ class AttributeDictTranslator:
         )
 
     @classmethod
-    def _add_hexbytes(cls, value: Any):
+    def _add_hexbytes(cls, value: Any) -> Any:
         """Process value to add hexbytes."""
         if value is None:
             return value
@@ -452,7 +452,9 @@ class EthereumApi(LedgerApi, EthereumHelper):
         check_address = self._api.toChecksumAddress(address)
         return self._api.eth.getBalance(check_address)  # pylint: disable=no-member
 
-    def get_state(self, callable_name: str, *args: Any, **kwargs: Any) -> Optional[JSONLike]:
+    def get_state(
+        self, callable_name: str, *args: Any, **kwargs: Any
+    ) -> Optional[JSONLike]:
         """Call a specified function on the ledger API."""
         response = self._try_get_state(callable_name, *args, **kwargs)
         return response

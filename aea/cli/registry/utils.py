@@ -21,7 +21,7 @@
 import os
 import tarfile
 from json.decoder import JSONDecodeError
-from typing import Callable, Optional, Tuple, Union, cast
+from typing import Any, Callable, Dict, Optional, Tuple, Union, cast
 
 import click
 
@@ -53,12 +53,12 @@ def get_auth_token() -> str:
 def request_api(
     method: str,
     path: str,
-    params=None,
-    data=None,
-    is_auth=False,
-    files=None,
-    handle_400=True,
-    return_code=False,
+    params: Optional[Dict] = None,
+    data: Optional[Dict] = None,
+    is_auth: bool = False,
+    files: Optional[Dict] = None,
+    handle_400: bool = True,
+    return_code: bool = False,
 ) -> Union[JSONLike, Tuple[JSONLike, int]]:
     """
     Request Registry API.
@@ -177,10 +177,10 @@ def _rm_tarfiles() -> None:
             os.remove(filepath)
 
 
-def clean_tarfiles(func) -> Callable:
+def clean_tarfiles(func: Callable) -> Callable:
     """Decorate func to clean tarfiles after executing."""
 
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: Any, **kwargs: Any) -> Callable:
         try:
             result = func(*args, **kwargs)
         except Exception as e:

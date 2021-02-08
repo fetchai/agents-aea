@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """Scaffold connection and channel."""
-from typing import Optional
+from typing import Any, Optional
 
 from aea.configurations.base import PublicId
 from aea.connections.base import BaseSyncConnection, Connection
@@ -38,7 +38,7 @@ class MyScaffoldAsyncConnection(Connection):
 
     connection_id = CONNECTION_ID
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize the connection.
 
@@ -78,7 +78,7 @@ class MyScaffoldAsyncConnection(Connection):
         """
         raise NotImplementedError  # pragma: no cover
 
-    async def receive(self, *args, **kwargs) -> Optional[Envelope]:
+    async def receive(self, *args: Any, **kwargs: Any) -> Optional[Envelope]:
         """
         Receive an envelope. Blocking.
 
@@ -94,7 +94,7 @@ class MyScaffoldSyncConnection(BaseSyncConnection):
 
     connection_id = CONNECTION_ID
 
-    def __init__(self, *args, **kwargs) -> None:  # pragma: no cover
+    def __init__(self, *args: Any, **kwargs: Any) -> None:  # pragma: no cover
         """
         Initialize the connection.
 

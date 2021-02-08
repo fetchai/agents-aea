@@ -20,7 +20,7 @@
 """This module contains t_protocol's message definition."""
 
 import logging
-from typing import Dict, FrozenSet, Optional, Set, Tuple, Union, cast
+from typing import Any, Dict, FrozenSet, Optional, Set, Tuple, Union, cast
 
 from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
@@ -55,7 +55,7 @@ class TProtocolMessage(Message):
         PERFORMATIVE_PMT = "performative_pmt"
         PERFORMATIVE_PT = "performative_pt"
 
-        def __str__(self):
+        def __str__(self) -> str:
             """Get the string representation."""
             return str(self.value)
 
@@ -122,7 +122,7 @@ class TProtocolMessage(Message):
         dialogue_reference: Tuple[str, str] = ("", ""),
         message_id: int = 1,
         target: int = 0,
-        **kwargs,
+        **kwargs: Any,
     ):
         """
         Initialise an instance of TProtocolMessage.

@@ -20,7 +20,6 @@
 
 import glob
 import os
-import subprocess  # nosec
 import sys
 import threading
 from typing import Any, Dict, List, Tuple, Union
@@ -43,6 +42,7 @@ from aea.cli.utils.config import try_to_load_agent_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.formatting import sort_items
 from aea.cli_gui.utils import (
+    AppContext,
     ProcessState,
     call_aea_async,
     get_process_status,
@@ -70,23 +70,6 @@ elements = [
 
 
 max_log_lines = 100
-
-
-class AppContext:  # pylint: disable=too-few-public-methods
-    """Store useful global information about the app.
-
-    Can't add it into the app object itself because mypy complains.
-    """
-
-    agent_processes: Dict[str, subprocess.Popen] = {}
-    agent_tty: Dict[str, List[str]] = {}
-    agent_error: Dict[str, List[str]] = {}
-
-    ui_is_starting = False
-    agents_dir = os.path.abspath(os.getcwd())
-    module_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), "../../")
-
-    local = "--local" in sys.argv  # a hack to get "local" option from cli args
 
 
 app_context = AppContext()

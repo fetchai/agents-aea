@@ -147,7 +147,7 @@ class AbstractMultipleExecutor(ABC):  # pragma: nocover
     def __init__(
         self,
         tasks: Sequence[AbstractExecutorTask],
-        task_fail_policy=ExecutorExceptionPolicies.propagate,
+        task_fail_policy: ExecutorExceptionPolicies = ExecutorExceptionPolicies.propagate,
     ) -> None:
         """
         Init executor.
@@ -205,7 +205,7 @@ class AbstractMultipleExecutor(ABC):  # pragma: nocover
         """
         pending = cast(Set[asyncio.futures.Future], set(self._future_task.keys()))
 
-        async def wait_future(future):
+        async def wait_future(future) -> None:  # type: ignore
             try:
                 await future
             except KeyboardInterrupt:  # pragma: nocover
@@ -349,7 +349,9 @@ class AbstractMultipleRunner:  # pragma: nocover
     SUPPORTED_MODES: Dict[str, Type[AbstractMultipleExecutor]] = {}
 
     def __init__(
-        self, mode: str, fail_policy=ExecutorExceptionPolicies.propagate
+        self,
+        mode: str,
+        fail_policy: ExecutorExceptionPolicies = ExecutorExceptionPolicies.propagate,
     ) -> None:
         """
         Init with selected executor mode.

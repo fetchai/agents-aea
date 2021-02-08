@@ -226,7 +226,7 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         return agent_configuration_obj
 
     def _get_component_configurations(
-        self, configuration_file_jsons
+        self, configuration_file_jsons: List[Dict]
     ) -> Dict[ComponentId, Dict]:
         """
         Get the component configurations from the tail pages of the aea-config.yaml file.

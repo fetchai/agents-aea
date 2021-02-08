@@ -86,7 +86,7 @@ from aea.helpers.base import (
 )
 @click.pass_context
 @check_aea_project
-def eject(click_context: click.core.Context, quiet: bool, with_symlinks: bool):
+def eject(click_context: click.core.Context, quiet: bool, with_symlinks: bool) -> None:
     """Eject a vendor package of the agent."""
     click_context.obj.set_config("quiet", quiet)
     click_context.obj.set_config("with_symlinks", with_symlinks)
@@ -96,7 +96,7 @@ def eject(click_context: click.core.Context, quiet: bool, with_symlinks: bool):
 @eject.command()
 @click.argument("public_id", type=PublicIdParameter(), required=True)
 @pass_ctx
-def connection(ctx: Context, public_id: PublicId):
+def connection(ctx: Context, public_id: PublicId) -> None:
     """Eject a vendor connection."""
     quiet = ctx.config.get("quiet")
     with_symlinks = ctx.config.get("with_symlinks")
@@ -106,7 +106,7 @@ def connection(ctx: Context, public_id: PublicId):
 @eject.command()
 @click.argument("public_id", type=PublicIdParameter(), required=True)
 @pass_ctx
-def contract(ctx: Context, public_id: PublicId):
+def contract(ctx: Context, public_id: PublicId) -> None:
     """Eject a vendor contract."""
     quiet = ctx.config.get("quiet")
     with_symlinks = ctx.config.get("with_symlinks")
@@ -116,7 +116,7 @@ def contract(ctx: Context, public_id: PublicId):
 @eject.command()
 @click.argument("public_id", type=PublicIdParameter(), required=True)
 @pass_ctx
-def protocol(ctx: Context, public_id: PublicId):
+def protocol(ctx: Context, public_id: PublicId) -> None:
     """Eject a vendor protocol."""
     quiet = ctx.config.get("quiet")
     with_symlinks = ctx.config.get("with_symlinks")
@@ -126,7 +126,7 @@ def protocol(ctx: Context, public_id: PublicId):
 @eject.command()
 @click.argument("public_id", type=PublicIdParameter(), required=True)
 @pass_ctx
-def skill(ctx: Context, public_id: PublicId):
+def skill(ctx: Context, public_id: PublicId) -> None:
     """Eject a vendor skill."""
     quiet = ctx.config.get("quiet")
     with_symlinks = ctx.config.get("with_symlinks")

@@ -20,7 +20,7 @@
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Optional, Tuple, Union
+from typing import Any, Optional, Tuple, Union
 from urllib.parse import urlparse
 
 from aea.common import Address
@@ -121,7 +121,7 @@ class URI:
         """Get string representation."""
         return self.uri_raw
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, URI)
@@ -213,7 +213,7 @@ class EnvelopeContext:
         """Get the string representation."""
         return f"EnvelopeContext(connection_id={self.connection_id}, skill_id={self.skill_id}, uri_raw={self.uri_raw})"
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, EnvelopeContext)
@@ -473,7 +473,7 @@ class Envelope:
             message.sender = sender
         return message
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, Envelope)

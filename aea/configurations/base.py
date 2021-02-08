@@ -272,7 +272,7 @@ class PackageConfiguration(Configuration, ABC):
         return str(self._author)
 
     @author.setter
-    def author(self, value: SimpleIdOrStr):
+    def author(self, value: SimpleIdOrStr) -> None:
         """Set the author."""
         self._author = SimpleId(value)
 
@@ -361,7 +361,7 @@ class PackageConfiguration(Configuration, ABC):
 
     @classmethod
     def _create_or_update_from_json(
-        cls, obj: Dict, instance=None
+        cls, obj: Dict, instance: Any = None
     ) -> "PackageConfiguration":
         """Create new config object or updates existing one from json data."""
         raise NotImplementedError  # pragma: nocover
@@ -562,7 +562,7 @@ class ConnectionConfig(ComponentConfiguration):
         connection_id: Optional[PublicId] = None,
         is_abstract: bool = False,
         cert_requests: Optional[List[CertRequest]] = None,
-        **config,
+        **config: Any,
     ) -> None:
         """Initialize a connection configuration object."""
         if connection_id is None:
@@ -795,7 +795,7 @@ class ProtocolConfig(ComponentConfiguration):
 
     @classmethod
     def _create_or_update_from_json(
-        cls, obj: Dict, instance: "ProtocolConfig" = Optional[None]
+        cls, obj: Dict, instance: Optional["ProtocolConfig"] = None
     ) -> "ProtocolConfig":
         """Initialize from a JSON object."""
         obj = {**(instance.json if instance else {}), **copy(obj)}
@@ -824,7 +824,7 @@ class ProtocolConfig(ComponentConfiguration):
 class SkillComponentConfiguration:
     """This class represent a skill component configuration."""
 
-    def __init__(self, class_name: str, **args) -> None:
+    def __init__(self, class_name: str, **args: Any) -> None:
         """
         Initialize a skill component configuration.
 
@@ -995,7 +995,7 @@ class SkillConfig(ComponentConfiguration):
 
     @classmethod
     def _create_or_update_from_json(
-        cls, obj: Dict, instance: "SkillConfig" = Optional[None]
+        cls, obj: Dict, instance: Optional["SkillConfig"] = None
     ) -> "SkillConfig":
         """Initialize from a JSON object."""
         obj = {**(instance.json if instance else {}), **copy(obj)}
@@ -1333,7 +1333,9 @@ class AgentConfig(PackageConfiguration):
         return config
 
     @classmethod
-    def _create_or_update_from_json(cls, obj: Dict, instance=None) -> "AgentConfig":
+    def _create_or_update_from_json(
+        cls, obj: Dict, instance: Optional[Any] = None
+    ) -> "AgentConfig":
         """Create new config object or updates existing one from json data."""
         obj = {**(instance.json if instance else {}), **copy(obj)}
         params = dict(
@@ -1456,7 +1458,7 @@ class AgentConfig(PackageConfiguration):
 class SpeechActContentConfig(Configuration):
     """Handle a speech_act content configuration."""
 
-    def __init__(self, **args) -> None:
+    def __init__(self, **args: Any) -> None:
         """Initialize a speech_act content configuration."""
         super().__init__()
         self.args = args  # type: Dict[str, str]
@@ -1642,7 +1644,7 @@ class ContractConfig(ComponentConfiguration):
 
     @classmethod
     def _create_or_update_from_json(
-        cls, obj: Dict, instance: "ContractConfig" = Optional[None]
+        cls, obj: Dict, instance: Optional["ContractConfig"] = None
     ) -> "ContractConfig":
         """Initialize from a JSON object."""
         obj = {**(instance.json if instance else {}), **copy(obj)}

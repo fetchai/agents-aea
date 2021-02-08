@@ -52,6 +52,7 @@ from typing import (
     Tuple,
     TypeVar,
     Union,
+    cast,
 )
 
 from dotenv import load_dotenv
@@ -286,7 +287,7 @@ def get_logger_method(fn: Callable, logger_method: Union[str, Callable]) -> Call
 
 
 def try_decorator(
-    error_message: str, default_return: Optional[Any] = None, logger_method: Any = "error"
+    error_message: str, default_return: Callable = None, logger_method: Any = "error"
 ) -> Callable:
     """
     Run function, log and return default value on exception.
@@ -301,14 +302,14 @@ def try_decorator(
     # for pydocstyle
     def decorator(fn: Callable) -> Callable:
         @wraps(fn)
-        def wrapper(*args: Any, **kwargs: Any):
+        def wrapper(*args: Any, **kwargs: Any) -> Callable:
             try:
                 return fn(*args, **kwargs)
             except Exception as e:  # pylint: disable=broad-except  # pragma: no cover  # generic code
                 if error_message:
                     log = get_logger_method(fn, logger_method)
                     log(error_message.format(e))
-                return default_return
+                return cast(Callable, default_return)
 
         return wrapper
 
@@ -320,7 +321,10 @@ class MaxRetriesError(Exception):
 
 
 def retry_decorator(
-    number_of_retries: int, error_message: str, delay: float = 0, logger_method: str = "error"
+    number_of_retries: int,
+    error_message: str,
+    delay: float = 0,
+    logger_method: str = "error",
 ) -> Callable:
     """
     Run function with several attempts.
@@ -334,9 +338,9 @@ def retry_decorator(
     """
 
     # for pydocstyle
-    def decorator(fn) -> Callable:
+    def decorator(fn: Callable) -> Callable:
         @wraps(fn)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Callable:
             log = get_logger_method(fn, logger_method)
             for retry in range(number_of_retries):
                 try:
@@ -542,7 +546,7 @@ class cached_property:  # pragma: nocover
         self.__doc__ = func.__doc__
         self.lock = RLock()
 
-    def __set_name__(self, _, name: Any) -> None:
+    def __set_name__(self, _: Any, name: Any) -> None:
         """Set name."""
         if self.attrname is None:
             self.attrname = name
@@ -552,7 +556,7 @@ class cached_property:  # pragma: nocover
                 f"({self.attrname!r} and {name!r})."
             )
 
-    def __get__(self, instance: Any, _=None) -> Any:
+    def __get__(self, instance: Any, _: Optional[Any] = None) -> Any:
         """Get instance."""
         if instance is None:
             return self
@@ -859,11 +863,11 @@ def decorator_with_optional_params(decorator: Callable) -> Callable:
     """
 
     @wraps(decorator)
-    def new_decorator(*args: Any, **kwargs: Any):
+    def new_decorator(*args: Any, **kwargs: Any) -> Callable:
         if len(args) == 1 and len(kwargs) == 0 and callable(args[0]):
             return decorator(args[0])
 
-        def final_decorator(real_function: Callable):
+        def final_decorator(real_function: Callable) -> Callable:
             return decorator(real_function, *args, **kwargs)
 
         return final_decorator

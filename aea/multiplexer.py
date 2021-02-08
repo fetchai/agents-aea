@@ -25,6 +25,7 @@ from concurrent.futures._base import CancelledError
 from concurrent.futures._base import TimeoutError as FuturesTimeoutError
 from contextlib import suppress
 from typing import (
+    Any,
     Callable,
     Collection,
     Dict,
@@ -684,7 +685,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
 class Multiplexer(AsyncMultiplexer):
     """Transit sync multiplexer for compatibility."""
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """
         Initialize the connection multiplexer.
 

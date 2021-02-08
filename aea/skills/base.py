@@ -794,7 +794,9 @@ class Skill(Component):
         return self._models
 
     @classmethod
-    def from_dir(cls, directory: str, agent_context: AgentContext, **kwargs: Any) -> "Skill":
+    def from_dir(
+        cls, directory: str, agent_context: AgentContext, **kwargs: Any
+    ) -> "Skill":
         """
         Load the skill from a directory.
 
@@ -883,7 +885,7 @@ def _print_warning_message_for_non_declared_skill_components(
     config_components: Set[str],
     item_type: str,
     skill_path: str,
-):
+) -> None:
     """Print a warning message if a skill component is not declared in the config files."""
     for class_name in classes.difference(config_components):
         skill_context.logger.warning(

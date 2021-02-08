@@ -22,7 +22,7 @@ import re
 import shutil
 import sys
 from pathlib import Path
-from typing import Dict, Optional, Set, Tuple
+from typing import Any, Dict, Optional, Set, Tuple
 
 import click
 from jsonschema import ValidationError
@@ -242,7 +242,7 @@ def get_package_path_unified(
 
 
 def get_dotted_package_path_unified(
-    project_directory: str, agent_config: AgentConfig, *args
+    project_directory: str, agent_config: AgentConfig, *args: Any
 ) -> str:
     """
     Get a *dotted* path for a package, either vendor or not.
@@ -434,7 +434,9 @@ def validate_author_name(author: Optional[str] = None) -> str:
     return valid_author
 
 
-def is_fingerprint_correct(package_path: Path, item_config) -> bool:
+def is_fingerprint_correct(
+    package_path: Path, item_config: PackageConfiguration
+) -> bool:
     """
     Validate fingerprint of item before adding.
 

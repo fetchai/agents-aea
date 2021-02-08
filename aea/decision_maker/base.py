@@ -157,7 +157,10 @@ class ProtectedQueue(Queue):
         self._access_code_hash = _hash(access_code)
 
     def put(  # pylint: disable=arguments-differ
-        self, internal_message: Optional[Message], block: bool = True, timeout: Optional[float] = None
+        self,
+        internal_message: Optional[Message],
+        block: bool = True,
+        timeout: Optional[float] = None,
     ) -> None:
         """
         Put an internal message on the queue.

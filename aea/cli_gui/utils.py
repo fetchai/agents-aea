@@ -22,9 +22,27 @@ import io
 import logging
 import os
 import subprocess  # nosec
+import sys
 import threading
 from enum import Enum
-from typing import List, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
+
+
+class AppContext:  # pylint: disable=too-few-public-methods
+    """Store useful global information about the app.
+
+    Can't add it into the app object itself because mypy complains.
+    """
+
+    agent_processes: Dict[str, subprocess.Popen] = {}
+    agent_tty: Dict[str, List[str]] = {}
+    agent_error: Dict[str, List[str]] = {}
+
+    ui_is_starting = False
+    agents_dir = os.path.abspath(os.getcwd())
+    module_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), "../../")
+
+    local = "--local" in sys.argv  # a hack to get "local" option from cli args
 
 
 class ProcessState(Enum):
@@ -41,7 +59,7 @@ _processes = set()  # type: Set[subprocess.Popen]
 lock = threading.Lock()
 
 
-def _call_subprocess(*args, timeout=None, **kwargs) -> int:
+def _call_subprocess(*args: Any, timeout: Optional[float] = None, **kwargs: Any) -> int:
     """
     Create a subprocess.Popen, but with error handling.
 
@@ -116,7 +134,7 @@ def read_error(pid: subprocess.Popen, str_list: List[str]) -> None:
     str_list.append("process terminated\n")
 
 
-def stop_agent_process(agent_id: str, app_context) -> Tuple[str, int]:
+def stop_agent_process(agent_id: str, app_context: AppContext) -> Tuple[str, int]:
     """
     Stop an agent processs.
 

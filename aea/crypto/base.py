@@ -273,7 +273,9 @@ class LedgerApi(Helper, ABC):
         """
 
     @abstractmethod
-    def get_state(self, callable_name: str, *args: Any, **kwargs: Any) -> Optional[JSONLike]:
+    def get_state(
+        self, callable_name: str, *args: Any, **kwargs: Any
+    ) -> Optional[JSONLike]:
         """
         Call a specified function on the underlying ledger API.
 
@@ -348,7 +350,10 @@ class LedgerApi(Helper, ABC):
 
     @abstractmethod
     def get_deploy_transaction(
-        self, contract_interface: Dict[str, str], deployer_address: Address, **kwargs: Any,
+        self,
+        contract_interface: Dict[str, str],
+        deployer_address: Address,
+        **kwargs: Any,
     ) -> Optional[JSONLike]:
         """
         Get the transaction to deploy the smart contract.

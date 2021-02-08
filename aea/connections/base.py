@@ -216,7 +216,11 @@ class Connection(Component, ABC):
 
     @classmethod
     def from_dir(
-        cls, directory: str, identity: Identity, crypto_store: CryptoStore, **kwargs: Any
+        cls,
+        directory: str,
+        identity: Identity,
+        crypto_store: CryptoStore,
+        **kwargs: Any,
     ) -> "Connection":
         """
         Load the connection from a directory.
@@ -239,7 +243,7 @@ class Connection(Component, ABC):
         configuration: ConnectionConfig,
         identity: Identity,
         crypto_store: CryptoStore,
-        **kwargs,
+        **kwargs: Any,
     ) -> "Connection":
         """
         Load a connection from a configuration.

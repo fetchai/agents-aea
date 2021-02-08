@@ -63,7 +63,7 @@ from aea.configurations.constants import (  # noqa: F401  # pylint: disable=unus
 @check_aea_project
 def scaffold(
     click_context: click.core.Context, with_symlinks: bool
-):  # pylint: disable=unused-argument
+) -> None:  # pylint: disable=unused-argument
     """Scaffold a package for the agent."""
     ctx = cast(Context, click_context.obj)
     ctx.set_config("with_symlinks", with_symlinks)
@@ -89,7 +89,7 @@ def contract(ctx: Context, contract_name: str) -> None:
 @click.argument("protocol_name", type=str, required=True)
 @click.option("-y", "--yes", is_flag=True, default=False)
 @pass_ctx
-def protocol(ctx: Context, protocol_name: str, yes: bool):
+def protocol(ctx: Context, protocol_name: str, yes: bool) -> None:
     """Add a protocol scaffolding to the configuration file and agent."""
     if yes or click.confirm(
         "We highly recommend auto-generating protocols with the aea generate command. Do you really want to continue scaffolding?"
@@ -102,21 +102,21 @@ def protocol(ctx: Context, protocol_name: str, yes: bool):
 @scaffold.command()
 @click.argument("skill_name", type=str, required=True)
 @pass_ctx
-def skill(ctx: Context, skill_name: str):
+def skill(ctx: Context, skill_name: str) -> None:
     """Add a skill scaffolding to the configuration file and agent."""
     scaffold_item(ctx, SKILL, skill_name)
 
 
 @scaffold.command()
 @pass_ctx
-def decision_maker_handler(ctx: Context):
+def decision_maker_handler(ctx: Context) -> None:
     """Add a decision maker scaffolding to the configuration file and agent."""
     _scaffold_dm_handler(ctx)
 
 
 @scaffold.command()
 @pass_ctx
-def error_handler(ctx: Context):
+def error_handler(ctx: Context) -> None:
     """Add an error scaffolding to the configuration file and agent."""
     _scaffold_error_handler(ctx)
 
@@ -225,7 +225,7 @@ def _scaffold_dm_handler(ctx: Context) -> None:
     )
 
 
-def _scaffold_error_handler(ctx) -> None:
+def _scaffold_error_handler(ctx: Context) -> None:
     """Scaffold the error handler."""
     _scaffold_non_package_item(
         ctx, "error_handler", "error handler", "ErrorHandler", "error_handler"

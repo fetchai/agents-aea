@@ -67,7 +67,7 @@ class Message:
 
     _performatives: Set[str] = set()
 
-    def __init__(self, _body: Optional[Dict] = None, **kwargs) -> None:
+    def __init__(self, _body: Optional[Dict] = None, **kwargs: Any) -> None:
         """
         Initialize a Message object.
 
@@ -240,7 +240,7 @@ class Message:
         """Check that the data is consistent."""
         return True
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, Message)
@@ -335,7 +335,7 @@ class Protocol(Component):
     """
 
     def __init__(
-        self, configuration: ProtocolConfig, message_class: Type[Message], **kwargs
+        self, configuration: ProtocolConfig, message_class: Type[Message], **kwargs: Any
     ) -> None:
         """
         Initialize the protocol manager.
@@ -352,7 +352,7 @@ class Protocol(Component):
         return self._message_class.serializer
 
     @classmethod
-    def from_dir(cls, directory: str, **kwargs) -> "Protocol":
+    def from_dir(cls, directory: str, **kwargs: Any) -> "Protocol":
         """
         Load the protocol from a directory.
 
@@ -367,7 +367,7 @@ class Protocol(Component):
         return Protocol.from_config(configuration, **kwargs)
 
     @classmethod
-    def from_config(cls, configuration: ProtocolConfig, **kwargs) -> "Protocol":
+    def from_config(cls, configuration: ProtocolConfig, **kwargs: Any) -> "Protocol":
         """
         Load the protocol from configuration.
 

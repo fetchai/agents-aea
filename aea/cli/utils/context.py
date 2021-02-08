@@ -20,7 +20,7 @@
 """A module with context tools of the aea cli."""
 import os
 from pathlib import Path
-from typing import Dict, List, Optional, cast
+from typing import Any, Dict, List, Optional, cast
 
 from aea.cli.utils.loggers import logger
 from aea.configurations.base import (
@@ -84,7 +84,7 @@ class Context:
         """Get the contract loader."""
         return ConfigLoader.from_configuration_type(PackageType.CONTRACT)
 
-    def set_config(self, key, value) -> None:
+    def set_config(self, key: str, value: Any) -> None:
         """
         Set a config.
 
@@ -96,7 +96,7 @@ class Context:
         logger.debug("  config[{}] = {}".format(key, value))
 
     @staticmethod
-    def _get_item_dependencies(item_type, public_id: PublicId) -> Dependencies:
+    def _get_item_dependencies(item_type: str, public_id: PublicId) -> Dependencies:
         """Get the dependencies from item type and public id."""
         item_type_plural = item_type + "s"
         default_config_file_name = _get_default_configuration_file_name_from_type(

@@ -31,7 +31,7 @@ from aea.helpers.logging import WithLogger
 class Task(WithLogger):
     """This class implements an abstract task."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize a task."""
         super().__init__(**kwargs)
         self._is_executed = False
@@ -39,7 +39,7 @@ class Task(WithLogger):
         self._result = None
         self.config = kwargs
 
-    def __call__(self, *args, **kwargs) -> "Task":
+    def __call__(self, *args: Any, **kwargs: Any) -> "Task":
         """
         Execute the task.
 
@@ -90,7 +90,7 @@ class Task(WithLogger):
         """
 
     @abstractmethod
-    def execute(self, *args, **kwargs) -> None:
+    def execute(self, *args: Any, **kwargs: Any) -> None:
         """
         Run the task logic.
 

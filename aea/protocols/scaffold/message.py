@@ -20,6 +20,7 @@
 """This module contains the scaffold message definition."""
 
 from enum import Enum
+from typing import Any
 
 from aea.configurations.base import PublicId
 from aea.exceptions import enforce
@@ -40,7 +41,7 @@ class MyScaffoldMessage(Message):
             """Get string representation."""
             return str(self.value)  # pragma: no cover
 
-    def __init__(self, performative: Performative, **kwargs) -> None:
+    def __init__(self, performative: Performative, **kwargs: Any) -> None:
         """
         Initialize.
 

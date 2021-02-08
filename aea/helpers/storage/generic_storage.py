@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 """This module contains the storage implementation."""
 import asyncio
-from typing import Any, List, Optional
+from typing import Any, Coroutine, List, Optional
 from urllib.parse import urlparse
 
 from aea.helpers.async_utils import AsyncState, Runnable
@@ -105,7 +105,9 @@ class AsyncCollection:
 class SyncCollection:
     """Async collection."""
 
-    def __init__(self, async_collection_coro, loop: asyncio.AbstractEventLoop) -> None:
+    def __init__(
+        self, async_collection_coro: Coroutine, loop: asyncio.AbstractEventLoop
+    ) -> None:
         """
         Init collection object.
 
@@ -115,7 +117,7 @@ class SyncCollection:
         self._loop = loop
         self._async_collection = self._run_sync(async_collection_coro)
 
-    def _run_sync(self, coro) -> Any:
+    def _run_sync(self, coro: Coroutine) -> Any:
         return asyncio.run_coroutine_threadsafe(coro, self._loop).result()
 
     def put(self, object_id: str, object_body: JSON_TYPES) -> None:
