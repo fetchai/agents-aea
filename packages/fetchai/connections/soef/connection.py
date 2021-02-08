@@ -226,6 +226,7 @@ class SOEFChannel:
         soef_port: int,
         chain_identifier: Optional[str] = None,
         token_storage_path: Optional[str] = None,
+        assets_dir: Optional[str] = None,
         logger: logging.Logger = _default_logger,
     ):
         """
@@ -253,7 +254,10 @@ class SOEFChannel:
 
         self._token_storage_path = token_storage_path
         if self._token_storage_path is not None:
-            self._token_storage_path = os.path.abspath(self._token_storage_path)
+            if not Path(self._token_storage_path).is_absolute():
+                self._token_storage_path = os.path.abspath(
+                    os.path.join(assets_dir, self._token_storage_path)
+                )
             Path(self._token_storage_path).touch()
         self.declared_name = uuid4().hex
         self._unique_page_address = None  # type: Optional[str]
@@ -1163,6 +1167,7 @@ class SOEFConnection(Connection):
             self.api_key,
             self.soef_addr,
             self.soef_port,
+            assets_dir=self.assets_dir,
             chain_identifier=chain_identifier,
             token_storage_path=token_storage_path,
         )

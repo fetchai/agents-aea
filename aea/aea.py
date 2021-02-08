@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 """This module contains the implementation of an autonomous economic agent (AEA)."""
 import datetime
+import os
 from asyncio import AbstractEventLoop
 from logging import Logger
 from multiprocessing.pool import AsyncResult
@@ -91,6 +92,8 @@ class AEA(Agent):
         connection_ids: Optional[Collection[PublicId]] = None,
         search_service_address: str = DEFAULT_SEARCH_SERVICE_ADDRESS,
         storage_uri: Optional[str] = None,
+        assets_dir: Optional[str] = None,
+        certs_dir: Optional[str] = None,
         **kwargs: Any,
     ) -> None:
         """
@@ -114,6 +117,8 @@ class AEA(Agent):
         :param connection_ids: active connection ids. Default: consider all the ones in the resources.
         :param search_service_address: the address of the search service used.
         :param storage_uri: optional uri to set generic storage
+        :param assets_dir: optional directory where to put local files. Defaults to cwd.
+        :param certs_dir: optional directory where to put certificates. Defaults to cwd.
         :param kwargs: keyword arguments to be attached in the agent context namespace.
         :return: None
         """
@@ -206,6 +211,8 @@ class AEA(Agent):
             default_routing,
             search_service_address,
             decision_maker_handler.self_address,
+            assets_dir or os.getcwd(),
+            certs_dir or os.getcwd(),
             storage_callable=lambda: self.runtime.storage,
             build_dir=self.get_build_dir(),
             **kwargs,

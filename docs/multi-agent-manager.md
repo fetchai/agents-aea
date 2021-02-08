@@ -43,7 +43,7 @@ FET_CONNECTION_PRIVATE_KEY_STATION = b"bf529acb2546e13615ef6004c48e393f0638a5dc0
 FET_CONNECTION_PRIVATE_KEY_PATH_STATION = Path(manager.keys_dir, f"fetchai_connection_private_key_{weather_station_name}.txt").absolute()
 FET_CONNECTION_PRIVATE_KEY_PATH_STATION.write_bytes(FET_CONNECTION_PRIVATE_KEY_STATION)
 
-CERT_PATH_STATION = Path(manager.certs_dir, f"conn_cert_{weather_station_name}.txt").absolute()
+CERT_PATH_STATION = Path(f"conn_cert_{weather_station_name}.txt")
 
 SOEF_STORAGE_PATH_STATION = Path(manager.keys_dir, f"soef_token_{weather_station_name}.txt").absolute()
 
@@ -55,7 +55,7 @@ FET_CONNECTION_PRIVATE_KEY_CLIENT = b"c9b38eff57f678f5ab5304447997351edb08eceb88
 FET_CONNECTION_PRIVATE_KEY_PATH_CLIENT = Path(manager.keys_dir, f"fetchai_connection_private_key_{weather_client_name}.txt").absolute()
 FET_CONNECTION_PRIVATE_KEY_PATH_CLIENT.write_bytes(FET_CONNECTION_PRIVATE_KEY_CLIENT)
 
-CERT_PATH_CLIENT = Path(manager.certs_dir, f"conn_cert_{weather_client_name}.txt").absolute()
+CERT_PATH_CLIENT = Path(f"conn_cert_{weather_client_name}.txt")
 
 SOEF_STORAGE_PATH_CLIENT = Path(manager.keys_dir, f"soef_token_{weather_client_name}.txt").absolute()
 ```

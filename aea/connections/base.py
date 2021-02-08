@@ -19,6 +19,7 @@
 """The base connection package."""
 import asyncio
 import inspect
+import os
 import re
 from abc import ABC, abstractmethod
 from concurrent.futures.thread import ThreadPoolExecutor
@@ -66,6 +67,7 @@ class Connection(Component, ABC):
         configuration: ConnectionConfig,
         identity: Optional[Identity] = None,
         crypto_store: Optional[CryptoStore] = None,
+        assets_dir: Optional[str] = None,
         restricted_to_protocols: Optional[Set[PublicId]] = None,
         excluded_protocols: Optional[Set[PublicId]] = None,
         **kwargs: Any,
@@ -92,6 +94,7 @@ class Connection(Component, ABC):
 
         self._identity = identity
         self._crypto_store = crypto_store
+        self._assets_dir = assets_dir or os.getcwd()
 
         self._restricted_to_protocols = (
             restricted_to_protocols if restricted_to_protocols is not None else set()
@@ -159,6 +162,11 @@ class Connection(Component, ABC):
         return self._crypto_store is not None
 
     @property
+    def assets_dir(self) -> str:  # pragma: nocover
+        """Get the asset directory."""
+        return self._assets_dir
+
+    @property
     def component_type(self) -> ComponentType:  # pragma: nocover
         """Get the component type."""
         return ComponentType.CONNECTION
@@ -220,6 +228,8 @@ class Connection(Component, ABC):
         directory: str,
         identity: Identity,
         crypto_store: CryptoStore,
+        assets_dir: Optional[str] = None,
+        certs_dir: Optional[str] = None,
         **kwargs: Any,
     ) -> "Connection":
         """
@@ -228,6 +238,8 @@ class Connection(Component, ABC):
         :param directory: the directory to the connection package.
         :param identity: the identity object.
         :param crypto_store: object to access the connection crypto objects.
+        :param assets_dir: the assets directory.
+        :param certs_dir: the certificates directory.
         :return: the connection object.
         """
         configuration = cast(
@@ -235,7 +247,9 @@ class Connection(Component, ABC):
             load_component_configuration(ComponentType.CONNECTION, Path(directory)),
         )
         configuration.directory = Path(directory)
-        return Connection.from_config(configuration, identity, crypto_store, **kwargs)
+        return Connection.from_config(
+            configuration, identity, crypto_store, assets_dir, certs_dir, **kwargs
+        )
 
     @classmethod
     def from_config(
@@ -243,6 +257,8 @@ class Connection(Component, ABC):
         configuration: ConnectionConfig,
         identity: Identity,
         crypto_store: CryptoStore,
+        assets_dir: Optional[str] = None,
+        certs_dir: Optional[str] = None,
         **kwargs: Any,
     ) -> "Connection":
         """
@@ -251,8 +267,12 @@ class Connection(Component, ABC):
         :param configuration: the connection configuration.
         :param identity: the identity object.
         :param crypto_store: object to access the connection crypto objects.
+        :param assets_dir: the directory of the assets.
+        :param certs_dir: the directory of the certificates.
         :return: an instance of the concrete connection class.
         """
+        assets_dir = assets_dir or os.getcwd()
+        certs_dir = certs_dir or os.getcwd()
         configuration = cast(ConnectionConfig, configuration)
         directory = cast(Path, configuration.directory)
         load_aea_package(configuration)
@@ -282,6 +302,7 @@ class Connection(Component, ABC):
                 configuration=configuration,
                 identity=identity,
                 crypto_store=crypto_store,
+                assets_dir=assets_dir,
                 **kwargs,
             )
         except Exception as e:  # pragma: nocover # pylint: disable=broad-except

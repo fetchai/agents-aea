@@ -381,6 +381,8 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self._runtime_mode: Optional[str] = None
         self._search_service_address: Optional[str] = None
         self._storage_uri: Optional[str] = None
+        self._assets_dir: Optional[str] = None
+        self._certs_dir: Optional[str] = None
         self._logging_config: Dict = DEFAULT_LOGGING_CONFIG
 
         self._package_dependency_manager = _DependenciesManager()
@@ -561,6 +563,30 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :return: self
         """
         self._storage_uri = storage_uri
+        return self
+
+    def set_certs_dir(
+        self, certs_dir: Optional[str]
+    ) -> "AEABuilder":  # pragma: nocover
+        """
+        Set the certificates directory.
+
+        :param certs_dir: path to directory where to store certificates.
+        :return: self
+        """
+        self._certs_dir = certs_dir
+        return self
+
+    def set_assets_dir(
+        self, assets_dir: Optional[str]
+    ) -> "AEABuilder":  # pragma: nocover
+        """
+        Set the assets directory.
+
+        :param assets_dir: path to directory where to store assets.
+        :return: self
+        """
+        self._assets_dir = assets_dir
         return self
 
     def set_logging_config(
@@ -1128,6 +1154,8 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             identity.name,
             identity=identity,
             crypto_store=wallet.connection_cryptos,
+            assets_dir=self._get_assets_dir(),
+            certs_dir=self._get_certs_dir(),
         )
         connection_ids = self._process_connection_ids(connection_ids)
         aea = self.AEA_CLASS(
@@ -1149,6 +1177,8 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             runtime_mode=self._get_runtime_mode(),
             connection_ids=connection_ids,
             search_service_address=self._get_search_service_address(),
+            assets_dir=self._get_assets_dir(),
+            certs_dir=self._get_certs_dir(),
             storage_uri=self._get_storage_uri(),
             **deepcopy(self._context_namespace),
         )
@@ -1297,6 +1327,22 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :return: the storage uri
         """
         return self._storage_uri
+
+    def _get_assets_dir(self) -> Optional[str]:
+        """
+        Return the assets directory.
+
+        :return: the assets directory.
+        """
+        return self._assets_dir
+
+    def _get_certs_dir(self) -> Optional[str]:
+        """
+        Return the certificate directory.
+
+        :return: the certificate directory.
+        """
+        return self._certs_dir
 
     def _get_search_service_address(self) -> str:
         """
