@@ -91,7 +91,7 @@ A <a href="../api/skills/base#behaviour-objects">`Behaviour`</a> class contains 
 Open the `behaviours.py` file (`my_generic_seller/skills/generic_seller/behaviours.py`) and add the following code (replacing the stub code already present in the file):
 
 ``` python
-from typing import cast
+from typing import Any, cast
 
 from aea.skills.behaviours import TickerBehaviour
 
@@ -114,7 +114,7 @@ LEDGER_API_ADDRESS = str(LEDGER_CONNECTION_PUBLIC_ID)
 class GenericServiceRegistrationBehaviour(TickerBehaviour):
     """This class implements a behaviour."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         """Initialise the behaviour."""
         services_interval = kwargs.pop(
             "services_interval", DEFAULT_SERVICES_INTERVAL
@@ -884,7 +884,7 @@ DEFAULT_DATA_FOR_SALE = {
 class GenericStrategy(Model):
     """This class defines a strategy for the agent."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize the strategy of the agent.
 
@@ -1111,7 +1111,7 @@ Before the creation of the actual proposal, we have to check if the sale generat
 When we are negotiating with other AEAs we would like to keep track of the state of these negotiations. To this end we create a new file in the skill folder (`my_generic_seller/skills/generic_seller/`) and name it `dialogues.py`. Inside this file add the following code:
 
 ``` python
-from typing import Dict, Optional, Type
+from typing import Any, Dict, Optional, Type
 
 from aea.common import Address
 from aea.exceptions import AEAEnforceError, enforce
@@ -1151,7 +1151,7 @@ DefaultDialogue = BaseDefaultDialogue
 class DefaultDialogues(Model, BaseDefaultDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -1223,7 +1223,7 @@ class FipaDialogue(BaseFipaDialogue):
 class FipaDialogues(Model, BaseFipaDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -1295,7 +1295,7 @@ class LedgerApiDialogue(BaseLedgerApiDialogue):
 class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -1328,7 +1328,7 @@ OefSearchDialogue = BaseOefSearchDialogue
 class OefSearchDialogues(Model, BaseOefSearchDialogues):
     """This class keeps track of all oef_search dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -1478,7 +1478,7 @@ A <a href="../api/skills/base#behaviour-objects">`Behaviour`</a> class contains 
 Open the `behaviours.py` (`my_generic_buyer/skills/generic_buyer/behaviours.py`) and add the following code (replacing the stub code already present in the file):
 
 ``` python
-from typing import List, Optional, Set, cast
+from typing import Any, List, Optional, Set, cast
 
 from aea.protocols.dialogue.base import DialogueLabel
 from aea.skills.behaviours import TickerBehaviour
@@ -1506,7 +1506,7 @@ LEDGER_API_ADDRESS = str(LEDGER_CONNECTION_PUBLIC_ID)
 class GenericSearchBehaviour(TickerBehaviour):
     """This class implements a search behaviour."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         """Initialize the search behaviour."""
         search_interval = cast(
             float, kwargs.pop("search_interval", DEFAULT_SEARCH_INTERVAL)
@@ -1572,7 +1572,7 @@ class GenericSearchBehaviour(TickerBehaviour):
 class GenericTransactionBehaviour(TickerBehaviour):
     """A behaviour to sequentially submit transactions to the blockchain."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         """Initialize the transaction behaviour."""
         tx_interval = cast(
             float, kwargs.pop("transaction_interval", DEFAULT_TX_INTERVAL)
@@ -2462,6 +2462,8 @@ class GenericLedgerApiHandler(Handler):
 We are going to create the strategy that we want our AEA to follow. Rename the `my_model.py` file (in `my_generic_buyer/skills/generic_buyer/`) to `strategy.py` and paste the following code (replacing the stub code already present in the file):
 
 ``` python
+from typing import Any, Dict, List, Tuple
+
 from aea.common import Address
 from aea.exceptions import enforce
 from aea.helpers.search.generic import SIMPLE_SERVICE_MODEL
@@ -2498,7 +2500,7 @@ DEFAULT_MAX_NEGOTIATIONS = 2
 class GenericStrategy(Model):
     """This class defines a strategy for the agent."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize the strategy of the agent.
 
@@ -2725,6 +2727,14 @@ The `is_affordable_proposal` method checks if we can afford the transaction base
         :return: False
         """
         pass
+
+    def update_search_query_params(self) -> None:
+        """
+        Update agent location and query for search.
+
+        :return: None
+        """
+        pass
 ```
 
 ### Step 5: Create the dialogues
@@ -2732,7 +2742,7 @@ The `is_affordable_proposal` method checks if we can afford the transaction base
 As mentioned, when we are negotiating with other AEA we would like to keep track of these negotiations for various reasons. Create a new file and name it `dialogues.py` (in `my_generic_buyer/skills/generic_buyer/`). Inside this file add the following code:
 
 ``` python
-from typing import Optional, Type
+from typing import Any, Optional, Type
 
 from aea.common import Address
 from aea.exceptions import AEAEnforceError, enforce
@@ -2779,7 +2789,7 @@ DefaultDialogue = BaseDefaultDialogue
 class DefaultDialogues(Model, BaseDefaultDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -2850,7 +2860,7 @@ class FipaDialogue(BaseFipaDialogue):
 class FipaDialogues(Model, BaseFipaDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -2922,7 +2932,7 @@ class LedgerApiDialogue(BaseLedgerApiDialogue):
 class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -2955,7 +2965,7 @@ OefSearchDialogue = BaseOefSearchDialogue
 class OefSearchDialogues(Model, BaseOefSearchDialogues):
     """This class keeps track of all oef_search dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -3032,7 +3042,7 @@ class SigningDialogue(BaseSigningDialogue):
 class SigningDialogues(Model, BaseSigningDialogues):
     """This class keeps track of all oef_search dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
