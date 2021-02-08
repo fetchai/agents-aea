@@ -144,7 +144,7 @@ def setup_search_ctx(ctx: Context, local: bool) -> None:
         logger.debug("Using registry {}".format(registry_directory))
 
 
-def _is_invalid_item(name, dir_path, config_path) -> bool:
+def _is_invalid_item(name: str, dir_path: Path, config_path: Path) -> bool:
     """Return true if this protocol, connection or skill should not be returned in the list."""
     return (
         name == "scaffold"

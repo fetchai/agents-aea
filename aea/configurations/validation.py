@@ -277,7 +277,7 @@ def validate_data_with_pattern(
     data_path_value = {tuple(path): value for path, value in dict_to_path_value(data)}
     errors = []
 
-    def check_excludes(path) -> bool:
+    def check_excludes(path: Tuple[str, ...]) -> bool:
         for exclude in excludes_:
             if len(exclude) > len(path):  # pragma: nocover
                 continue

@@ -99,7 +99,7 @@ def enforce(
         raise exception_class(exception_text)
 
 
-def parse_exception(exception: Exception, limit=-1) -> str:
+def parse_exception(exception: Exception, limit: int = -1) -> str:
     """
     Parse an exception to get the relevant lines.
 

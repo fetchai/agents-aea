@@ -21,7 +21,7 @@
 
 import logging
 import sys
-from typing import Callable
+from typing import Any, Callable
 
 import click
 
@@ -57,7 +57,7 @@ class ColorFormatter(logging.Formatter):
 
 
 def simple_verbosity_option(
-    logger_, *names, **kwargs
+    logger_: logging.Logger, *names: str, **kwargs: Any
 ) -> Callable:  # pylint: disable=redefined-outer-name,keyword-arg-before-vararg
     """Add a decorator that adds a `--verbosity, -v` option to the decorated command.
 

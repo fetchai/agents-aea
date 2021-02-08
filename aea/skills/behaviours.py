@@ -20,7 +20,7 @@
 """This module contains the classes for specific behaviours."""
 import datetime
 from abc import ABC, abstractmethod
-from typing import Callable, Dict, List, Optional, Set
+from typing import Any, Callable, Dict, List, Optional, Set
 
 from aea.exceptions import enforce
 from aea.skills.base import Behaviour
@@ -29,7 +29,7 @@ from aea.skills.base import Behaviour
 class SimpleBehaviour(Behaviour, ABC):
     """This class implements a simple behaviour."""
 
-    def __init__(self, act: Optional[Callable[[], None]] = None, **kwargs) -> None:
+    def __init__(self, act: Optional[Callable[[], None]] = None, **kwargs: Any) -> None:
         """
         Initialize a simple behaviour.
 
@@ -58,7 +58,7 @@ class CompositeBehaviour(Behaviour, ABC):
 class CyclicBehaviour(SimpleBehaviour, ABC):
     """This behaviour is executed until the agent is stopped."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize the cyclic behaviour."""
         super().__init__(**kwargs)
         self._number_of_executions = 0
@@ -86,7 +86,7 @@ class CyclicBehaviour(SimpleBehaviour, ABC):
 class OneShotBehaviour(SimpleBehaviour, ABC):
     """This behaviour is executed only once."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize the cyclic behaviour."""
         super().__init__(**kwargs)
         self._already_executed = False  # type
@@ -109,7 +109,7 @@ class TickerBehaviour(SimpleBehaviour, ABC):
         self,
         tick_interval: float = 1.0,
         start_at: Optional[datetime.datetime] = None,
-        **kwargs
+        **kwargs: Any
     ) -> None:
         """
         Initialize the ticker behaviour.
@@ -165,7 +165,7 @@ class TickerBehaviour(SimpleBehaviour, ABC):
 class SequenceBehaviour(CompositeBehaviour, ABC):
     """This behaviour executes sub-behaviour serially."""
 
-    def __init__(self, behaviour_sequence: List[Behaviour], **kwargs) -> None:
+    def __init__(self, behaviour_sequence: List[Behaviour], **kwargs: Any) -> None:
         """
         Initialize the sequence behaviour.
 
@@ -227,7 +227,7 @@ class State(SimpleBehaviour, ABC):
     transition to trigger.
     """
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize a state of the state machine."""
         super().__init__(**kwargs)
         self._event = None  # type: Optional[str]
@@ -249,7 +249,7 @@ class State(SimpleBehaviour, ABC):
 class FSMBehaviour(CompositeBehaviour, ABC):
     """This class implements a finite-state machine behaviour."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize the finite-state machine behaviour."""
         super().__init__(**kwargs)
 
@@ -339,7 +339,7 @@ class FSMBehaviour(CompositeBehaviour, ABC):
         """Get the final state names."""
         return self._final_states
 
-    def get_state(self, name) -> Optional[State]:
+    def get_state(self, name: str) -> Optional[State]:
         """Get a state from its name."""
         return self._name_to_state.get(name, None)
 

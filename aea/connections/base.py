@@ -68,7 +68,7 @@ class Connection(Component, ABC):
         crypto_store: Optional[CryptoStore] = None,
         restricted_to_protocols: Optional[Set[PublicId]] = None,
         excluded_protocols: Optional[Set[PublicId]] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         """
         Initialize the connection.
@@ -207,7 +207,7 @@ class Connection(Component, ABC):
         """
 
     @abstractmethod
-    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
+    async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """
         Receive an envelope.
 
@@ -216,7 +216,7 @@ class Connection(Component, ABC):
 
     @classmethod
     def from_dir(
-        cls, directory: str, identity: Identity, crypto_store: CryptoStore, **kwargs
+        cls, directory: str, identity: Identity, crypto_store: CryptoStore, **kwargs: Any
     ) -> "Connection":
         """
         Load the connection from a directory.
@@ -319,7 +319,7 @@ class BaseSyncConnection(Connection):
         crypto_store: Optional[CryptoStore] = None,
         restricted_to_protocols: Optional[Set[PublicId]] = None,
         excluded_protocols: Optional[Set[PublicId]] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         """
         Initialize the connection.
@@ -344,7 +344,7 @@ class BaseSyncConnection(Connection):
 
         self._tasks: Set[asyncio.Task] = set()
 
-    def _set_executor_pool(self, max_workers=None) -> None:
+    def _set_executor_pool(self, max_workers: Optional[int] = None) -> None:
         """Set executors pool."""
         max_workers = self.configuration.config.get(
             "max_thread_workers", self.MAX_WORKER_THREADS
@@ -364,7 +364,7 @@ class BaseSyncConnection(Connection):
                 f"in task `{task_name}`, exception occured", exc_info=task.exception(),
             )
 
-    async def _run_in_pool(self, fn: Callable, *args) -> Any:
+    async def _run_in_pool(self, fn: Callable, *args: Any) -> Any:
         """Run sync function in threaded executor pool."""
         return await self._loop.run_in_executor(self._executor_pool, fn, *args)
 
@@ -406,12 +406,12 @@ class BaseSyncConnection(Connection):
         task.add_done_callback(self._task_done_callback)
         self._tasks.add(task)
 
-    def _send_wrapper(self, *args) -> None:
+    def _send_wrapper(self, *args: Any) -> None:
         """Check is connected and call on_send method."""
         self._ensure_connected()
         self.on_send(*args)
 
-    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
+    async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """Get an envelope from the connection."""
         self._ensure_connected()
         return await self._incoming_messages_queue.get()

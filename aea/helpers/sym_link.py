@@ -41,7 +41,7 @@ def make_symlink(link_name: str, target: str) -> None:
 
 
 @contextlib.contextmanager
-def cd(path) -> Generator:
+def cd(path: Path) -> Generator:
     """Change directory with context manager."""
     old_cwd = os.getcwd()
     try:

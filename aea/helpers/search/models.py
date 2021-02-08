@@ -120,7 +120,7 @@ class Location:
         """
         return haversine(self.latitude, self.longitude, other.latitude, other.longitude)
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Compare equality of two locations."""
         if not isinstance(other, Location):
             return False  # pragma: nocover
@@ -144,7 +144,7 @@ class Location:
         return location_pb
 
     @classmethod
-    def decode(cls, location_pb) -> "Location":
+    def decode(cls, location_pb:  models_pb2.Query.Location) -> "Location":  # type: ignore
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -205,7 +205,7 @@ class Attribute:
         self.is_required = is_required
         self.description = description
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, Attribute)
@@ -235,7 +235,7 @@ class Attribute:
         return attribute
 
     @classmethod
-    def decode(cls, attribute_pb) -> "Attribute":
+    def decode(cls, attribute_pb: models_pb2.Query.Attribute) -> "Attribute":  # type: ignore
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 

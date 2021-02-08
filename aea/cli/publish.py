@@ -129,7 +129,7 @@ def _check_is_item_in_remote_registry(
 
 
 def _check_is_item_in_local_registry(
-    public_id, item_type_plural, registry_path
+    public_id: PublicId, item_type_plural: str, registry_path: str
 ) -> None:
     try:
         try_get_item_source_path(

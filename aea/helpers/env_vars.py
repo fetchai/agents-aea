@@ -40,7 +40,7 @@ NotSet = object()
 
 
 def replace_with_env_var(
-    value: str, env_variables: dict, default_value=NotSet
+    value: str, env_variables: dict, default_value: Any = NotSet
 ) -> JSON_TYPES:
     """Replace env var with value."""
     result = ENV_VARIABLE_RE.match(value)
@@ -72,7 +72,7 @@ def replace_with_env_var(
 def apply_env_variables(
     data: Union[Dict, List[Dict]],
     env_variables: Mapping[str, Any],
-    default_value=NotSet,
+    default_value: Any = NotSet,
 ) -> JSON_TYPES:
     """Create new resulting dict with env variables applied."""
 
