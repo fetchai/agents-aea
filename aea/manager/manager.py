@@ -27,11 +27,7 @@ from threading import Thread
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 
 from aea.aea import AEA
-from aea.configurations.constants import (
-    AEA_MANAGER_DATA_DIRNAME,
-    AEA_MANAGER_KEY_DIRNAME,
-    DEFAULT_REGISTRY_NAME,
-)
+from aea.configurations.constants import AEA_MANAGER_DATA_DIRNAME, DEFAULT_REGISTRY_NAME
 from aea.configurations.data_types import PublicId
 from aea.manager.project import AgentAlias, Project
 
@@ -155,9 +151,6 @@ class MultiAgentManager:
         self._is_running = False
         self._projects: Dict[PublicId, Project] = {}
         self._versionless_projects_set: Set[PublicId] = set()
-        self._keys_dir = os.path.abspath(
-            os.path.join(self.working_dir, AEA_MANAGER_KEY_DIRNAME)
-        )
         self._data_dir = os.path.abspath(
             os.path.join(self.working_dir, AEA_MANAGER_DATA_DIRNAME)
         )
@@ -176,11 +169,6 @@ class MultiAgentManager:
             )
         self._started_event = threading.Event()
         self._mode = mode
-
-    @property
-    def keys_dir(self) -> str:
-        """Get the keys directory."""
-        return self._keys_dir
 
     @property
     def data_dir(self) -> str:
@@ -323,7 +311,6 @@ class MultiAgentManager:
     def _cleanup(self, only_keys: bool = False) -> None:
         """Remove workdir if was created."""
         if only_keys:
-            rmtree(self.keys_dir)
             rmtree(self.data_dir)
         else:
             if self._was_working_dir_created and os.path.exists(self.working_dir):
@@ -431,7 +418,6 @@ class MultiAgentManager:
         agent_alias = AgentAlias(
             project=project,
             agent_name=agent_name,
-            keys_dir=self.keys_dir,
             data_dir=self.get_data_dir_of_agent(agent_name),
         )
         agent_alias.set_overrides(agent_overrides, component_overrides)
@@ -466,7 +452,6 @@ class MultiAgentManager:
         agent_alias = AgentAlias(
             project=project,
             agent_name=agent_name,
-            keys_dir=self.keys_dir,
             data_dir=self.get_data_dir_of_agent(agent_name),
         )
         agent_alias.set_agent_config_from_data(config)
@@ -702,8 +687,6 @@ class MultiAgentManager:
 
         if not os.path.isdir(self.working_dir):  # pragma: nocover
             raise ValueError(f"{self.working_dir} is not a directory!")
-        if not os.path.exists(self.keys_dir):
-            os.makedirs(self.keys_dir)
         if not os.path.exists(self.data_dir):
             os.makedirs(self.data_dir)
 
