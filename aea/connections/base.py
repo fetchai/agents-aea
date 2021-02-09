@@ -19,7 +19,6 @@
 """The base connection package."""
 import asyncio
 import inspect
-import os
 import re
 from abc import ABC, abstractmethod
 from concurrent.futures.thread import ThreadPoolExecutor
@@ -65,9 +64,9 @@ class Connection(Component, ABC):
     def __init__(
         self,
         configuration: ConnectionConfig,
+        data_dir: str,
         identity: Optional[Identity] = None,
         crypto_store: Optional[CryptoStore] = None,
-        data_dir: Optional[str] = None,
         restricted_to_protocols: Optional[Set[PublicId]] = None,
         excluded_protocols: Optional[Set[PublicId]] = None,
         **kwargs: Any,
@@ -79,6 +78,7 @@ class Connection(Component, ABC):
         parameters are None: connection_id, excluded_protocols or restricted_to_protocols.
 
         :param configuration: the connection configuration.
+        :param data_dir: directory where to put local files.
         :param identity: the identity object held by the agent.
         :param crypto_store: the crypto store for encrypted communication.
         :param restricted_to_protocols: the set of protocols ids of the only supported protocols for this connection.
@@ -94,7 +94,7 @@ class Connection(Component, ABC):
 
         self._identity = identity
         self._crypto_store = crypto_store
-        self._data_dir = data_dir or os.getcwd()
+        self._data_dir = data_dir
 
         self._restricted_to_protocols = (
             restricted_to_protocols if restricted_to_protocols is not None else set()
@@ -294,9 +294,9 @@ class Connection(Component, ABC):
         try:
             connection = connection_class(
                 configuration=configuration,
+                data_dir=data_dir,
                 identity=identity,
                 crypto_store=crypto_store,
-                data_dir=data_dir,
                 **kwargs,
             )
         except Exception as e:  # pragma: nocover # pylint: disable=broad-except
@@ -334,6 +334,7 @@ class BaseSyncConnection(Connection):
     def __init__(
         self,
         configuration: ConnectionConfig,
+        data_dir: str,
         identity: Optional[Identity] = None,
         crypto_store: Optional[CryptoStore] = None,
         restricted_to_protocols: Optional[Set[PublicId]] = None,
@@ -347,6 +348,7 @@ class BaseSyncConnection(Connection):
         parameters are None: connection_id, excluded_protocols or restricted_to_protocols.
 
         :param configuration: the connection configuration.
+        :param data_dir: directory where to put local files.
         :param identity: the identity object held by the agent.
         :param crypto_store: the crypto store for encrypted communication.
         :param restricted_to_protocols: the set of protocols ids of the only supported protocols for this connection.
@@ -354,6 +356,7 @@ class BaseSyncConnection(Connection):
         """
         super().__init__(
             configuration=configuration,
+            data_dir=data_dir,
             identity=identity,
             crypto_store=crypto_store,
             restricted_to_protocols=restricted_to_protocols,

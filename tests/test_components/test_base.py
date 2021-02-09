@@ -19,6 +19,7 @@
 
 """This module contains tests for aea/components/base.py"""
 from pathlib import Path
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -71,7 +72,7 @@ class TestComponentProperties:
 def test_directory_setter():
     """Test directory."""
     configuration = ProtocolConfig("author", "name", "0.1.0")
-    component = Component(configuration=configuration)
+    component = Component(configuration=configuration, data_dir=MagicMock())
 
     with pytest.raises(ValueError):
         component.directory

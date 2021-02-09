@@ -23,7 +23,7 @@ import json
 import logging
 from traceback import print_exc
 from typing import cast
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import aiohttp
 import pytest
@@ -95,7 +95,7 @@ class TestWebhookConnection:
             connection_id=WebhookConnection.connection_id,
         )
         self.webhook_connection = WebhookConnection(
-            configuration=configuration, identity=self.identity,
+            configuration=configuration, data_dir=MagicMock(), identity=self.identity,
         )
         self.dialogues = HttpDialogues(self.identity.address)
 

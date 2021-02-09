@@ -130,7 +130,7 @@ def run():
     # Add the LedgerAPI connection
     configuration = ConnectionConfig(connection_id=LedgerConnection.connection_id)
     ledger_api_connection = LedgerConnection(
-        configuration=configuration, identity=identity
+        configuration=configuration, data_dir=data_dir, identity=identity
     )
     resources.add_connection(ledger_api_connection)
 
@@ -168,6 +168,7 @@ def run():
 
     p2p_connection = P2PLibp2pConnection(
         configuration=configuration,
+        data_dir=data_dir,
         identity=identity,
         crypto_store=wallet.connection_cryptos,
     )
@@ -181,7 +182,9 @@ def run():
         restricted_to_protocols={OefSearchMessage.protocol_id},
         connection_id=SOEFConnection.connection_id,
     )
-    soef_connection = SOEFConnection(configuration=configuration, identity=identity)
+    soef_connection = SOEFConnection(
+        configuration=configuration, data_dir=data_dir, identity=identity
+    )
     resources.add_connection(soef_connection)
 
     # create the AEA

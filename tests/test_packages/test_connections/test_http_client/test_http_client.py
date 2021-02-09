@@ -20,7 +20,7 @@
 import asyncio
 import logging
 from asyncio import CancelledError
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import aiohttp
 import pytest
@@ -103,7 +103,9 @@ class TestHTTPClientConnect:
             connection_id=HTTPClientConnection.connection_id,
         )
         self.http_client_connection = HTTPClientConnection(
-            configuration=configuration, identity=self.agent_identity
+            configuration=configuration,
+            data_dir=MagicMock(),
+            identity=self.agent_identity,
         )
         self.connection_address = str(HTTPClientConnection.connection_id)
         self.http_dialogs = HttpDialogues(self.agent_address)

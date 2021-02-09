@@ -21,7 +21,7 @@ import asyncio
 import logging
 import os
 from typing import cast
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import gym
 import pytest
@@ -81,7 +81,10 @@ class TestGymConnection:
         self.agent_address = "my_address"
         identity = Identity("name", address=self.agent_address)
         self.gym_con = GymConnection(
-            gym_env=self.env, identity=identity, configuration=configuration
+            gym_env=self.env,
+            identity=identity,
+            configuration=configuration,
+            data_dir=MagicMock(),
         )
         self.loop = asyncio.get_event_loop()
         self.gym_address = str(GymConnection.connection_id)
@@ -240,7 +243,10 @@ class TestGymConnection:
         )
         identity = Identity("name", address=self.agent_address)
         gym_con = GymConnection(
-            gym_env=None, identity=identity, configuration=configuration
+            gym_env=None,
+            identity=identity,
+            configuration=configuration,
+            data_dir=MagicMock(),
         )
         assert gym_con.channel.gym_env is not None
         os.chdir(curdir)

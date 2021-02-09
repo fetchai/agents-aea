@@ -20,7 +20,7 @@
 import asyncio
 import logging
 from typing import cast
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 from uuid import uuid4
 
 import pytest
@@ -106,7 +106,9 @@ mock_conf.config = {"yoti_client_sdk_id": "1", "yoti_key_file_path": 1}
 async def test_yoti_profile_ok():
     """Test mesasge processed ok."""
     with patch.object(yoti_connection, "YotiClient", FakeYotiClientOk):
-        con = YotiConnection(configuration=mock_conf, logger=logging.getLogger())
+        con = YotiConnection(
+            configuration=mock_conf, data_dir=MagicMock(), logger=logging.getLogger()
+        )
         await con.connect()
         assert con.is_connected
 
@@ -151,7 +153,9 @@ async def test_yoti_profile_error_on_handle():
     with patch.object(
         yoti_connection, "YotiClient", FakeYotiClientBadProfile,
     ):
-        con = YotiConnection(configuration=mock_conf, logger=logging.getLogger())
+        con = YotiConnection(
+            configuration=mock_conf, data_dir=MagicMock(), logger=logging.getLogger()
+        )
         await con.connect()
         dialogues = YotiDialogues()
 
@@ -177,7 +181,7 @@ def test_empty_config():
     mock_conf.public_id = YotiConnection.connection_id
     mock_conf.config = {}
     with pytest.raises(ValueError, match="Missing configuration."):
-        YotiConnection(configuration=mock_conf)
+        YotiConnection(configuration=mock_conf, data_dir=MagicMock())
 
 
 class TestMisc:
@@ -187,7 +191,9 @@ class TestMisc:
         """Setup test case."""
         with patch.object(yoti_connection, "YotiClient", FakeYotiClientOk):
             self.con = YotiConnection(
-                configuration=mock_conf, logger=logging.getLogger()
+                configuration=mock_conf,
+                data_dir=MagicMock(),
+                logger=logging.getLogger(),
             )
         self.dialogues = YotiDialogues()
         self.message, self.dialogue = self.dialogues.create(

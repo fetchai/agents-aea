@@ -106,7 +106,9 @@ class TestAEAToACA:
             connection_id=HTTPClientConnection.connection_id,
         )
         http_client_connection = HTTPClientConnection(
-            configuration=configuration, identity=self.aea_identity
+            configuration=configuration,
+            data_dir=MagicMock(),
+            identity=self.aea_identity,
         )
         http_client_connection.loop = asyncio.get_event_loop()
 
@@ -177,7 +179,7 @@ class TestAEAToACA:
             connection_id=HTTPClientConnection.connection_id,
         )
         http_client_connection = HTTPClientConnection(
-            configuration=configuration, identity=identity,
+            configuration=configuration, data_dir=MagicMock(), identity=identity,
         )
         resources = Resources()
         resources.add_connection(http_client_connection)
