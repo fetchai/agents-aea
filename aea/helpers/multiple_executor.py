@@ -209,7 +209,7 @@ class AbstractMultipleExecutor(ABC):  # pragma: nocover
 
         pending = cast(Set[asyncio.futures.Future], set(self._future_task.keys()))
 
-        async def wait_future(future) -> None:  # type: ignore
+        async def wait_future(future: asyncio.futures.Future) -> None:
             try:
                 await future
             except KeyboardInterrupt:  # pragma: nocover
@@ -219,7 +219,9 @@ class AbstractMultipleExecutor(ABC):  # pragma: nocover
             except Exception as e:  # pylint: disable=broad-except  # handle any exception with own code.
                 _default_logger.exception("Exception in task!")
                 if not skip_exceptions:
-                    await self._handle_exception(self._future_task[future], e)
+                    await self._handle_exception(
+                        self._future_task[cast(TaskAwaitable, future)], e
+                    )
 
         while pending:
             done, pending = await asyncio.wait(pending, return_when=FIRST_EXCEPTION)
