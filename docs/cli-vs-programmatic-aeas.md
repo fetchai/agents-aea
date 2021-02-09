@@ -238,7 +238,9 @@ def run():
         restricted_to_protocols={OefSearchMessage.protocol_id},
         connection_id=SOEFConnection.connection_id,
     )
-    soef_connection = SOEFConnection(configuration=configuration, data_dir=data_dir, identity=identity)
+    soef_connection = SOEFConnection(
+        configuration=configuration, data_dir=data_dir, identity=identity
+    )
     resources.add_connection(soef_connection)
 
     # create the AEA

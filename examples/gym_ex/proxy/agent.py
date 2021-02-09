@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This contains the proxy agent class."""
-
+import os
 import sys
 from queue import Queue
 
@@ -60,7 +60,14 @@ class ProxyAgent(Agent):
         configuration = ConnectionConfig(connection_id=GymConnection.connection_id)
         super().__init__(
             identity,
-            [GymConnection(gym_env, identity=identity, configuration=configuration)],
+            [
+                GymConnection(
+                    gym_env,
+                    identity=identity,
+                    configuration=configuration,
+                    data_dir=os.getcwd(),
+                )
+            ],
             period=0.01,
         )
         self.proxy_env_queue = proxy_env_queue
