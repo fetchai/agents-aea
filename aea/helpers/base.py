@@ -36,7 +36,6 @@ from collections.abc import Mapping
 from copy import copy
 from functools import wraps
 from importlib.machinery import ModuleSpec
-from os import PathLike
 from pathlib import Path
 from threading import RLock
 from typing import (
@@ -58,6 +57,7 @@ from typing import (
 from dotenv import load_dotenv
 from packaging.version import Version
 
+from aea.common import PathLike
 from aea.exceptions import enforce
 
 
@@ -256,7 +256,7 @@ SimpleIdOrStr = Union[SimpleId, str]
 
 
 @contextlib.contextmanager
-def cd(path: Union[PathLike, str]) -> Generator:  # pragma: nocover
+def cd(path: PathLike) -> Generator:  # pragma: nocover
     """Change working directory temporarily."""
     old_path = os.getcwd()
     os.chdir(path)
@@ -753,8 +753,32 @@ class CertRequest:
 
     @property
     def save_path(self) -> Path:
-        """Get the save_path"""
+        """
+        Get the save path for the certificate.
+
+        Note: if the path is *not* absolute, then
+        the actual save path might depend on the context.
+        """
         return self._save_path
+
+    def get_absolute_save_path(self, path_prefix: Optional[PathLike] = None) -> Path:
+        """
+        Get the absolute save path.
+
+        If save_path is an absolute path, then the prefix is ignored.
+        Otherwise, the path prefix is prepended.
+
+        :param path_prefix: the (absolute) path to prepend to the save path.
+        :return: the actual save path.
+        """
+        path_prefix = (
+            Path(path_prefix).absolute() if path_prefix is not None else Path.cwd()
+        )
+        return (
+            self.save_path
+            if self.save_path.is_absolute()
+            else path_prefix / self.save_path
+        )
 
     @property
     def public_key_or_identifier(self) -> str:
@@ -779,16 +803,22 @@ class CertRequest:
         # + self.not_after_string.encode("ascii")  # noqa: E800
         return message
 
-    def get_signature(self) -> str:
-        """Get signature from save_path."""
-        if not Path(self.save_path).is_file():
+    def get_signature(self, path_prefix: Optional[PathLike] = None) -> str:
+        """
+        Get signature from save_path.
+
+        :param path_prefix: the path prefix to be prependend to save_path. Defaults to cwd.
+        :return: the signature.
+        """
+        save_path = self.get_absolute_save_path(path_prefix)
+        if not Path(save_path).is_file():
             raise Exception(  # pragma: no cover
-                f"cert_request 'save_path' field {self.save_path} is not a file. "
+                f"cert_request 'save_path' field {save_path} is not a file. "
                 "Please ensure that 'issue-certificates' command is called beforehand."
             )
-        signature = bytes.fromhex(
-            Path(self.save_path).read_bytes().decode("ascii")
-        ).decode("ascii")
+        signature = bytes.fromhex(Path(save_path).read_bytes().decode("ascii")).decode(
+            "ascii"
+        )
         return signature
 
     @property

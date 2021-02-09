@@ -33,6 +33,7 @@ import jsonschema
 from packaging.specifiers import SpecifierSet
 
 from aea.aea import AEA
+from aea.common import PathLike
 from aea.components.base import Component, load_aea_package
 from aea.components.loader import load_component_from_config
 from aea.configurations.base import (
@@ -88,8 +89,6 @@ from aea.helpers.logging import AgentLoggerAdapter, WithLogger, get_logger
 from aea.identity.base import Identity
 from aea.registries.resources import Resources
 
-
-PathLike = Union[os.PathLike, Path, str]
 
 _default_logger = logging.getLogger(__name__)
 
@@ -381,8 +380,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self._runtime_mode: Optional[str] = None
         self._search_service_address: Optional[str] = None
         self._storage_uri: Optional[str] = None
-        self._assets_dir: Optional[str] = None
-        self._certs_dir: Optional[str] = None
+        self._data_dir: Optional[str] = None
         self._logging_config: Dict = DEFAULT_LOGGING_CONFIG
 
         self._package_dependency_manager = _DependenciesManager()
@@ -565,28 +563,14 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self._storage_uri = storage_uri
         return self
 
-    def set_certs_dir(
-        self, certs_dir: Optional[str]
-    ) -> "AEABuilder":  # pragma: nocover
+    def set_data_dir(self, data_dir: Optional[str]) -> "AEABuilder":  # pragma: nocover
         """
-        Set the certificates directory.
+        Set the data directory.
 
-        :param certs_dir: path to directory where to store certificates.
+        :param data_dir: path to directory where to store data.
         :return: self
         """
-        self._certs_dir = certs_dir
-        return self
-
-    def set_assets_dir(
-        self, assets_dir: Optional[str]
-    ) -> "AEABuilder":  # pragma: nocover
-        """
-        Set the assets directory.
-
-        :param assets_dir: path to directory where to store assets.
-        :return: self
-        """
-        self._assets_dir = assets_dir
+        self._data_dir = data_dir
         return self
 
     def set_logging_config(
@@ -1154,8 +1138,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             identity.name,
             identity=identity,
             crypto_store=wallet.connection_cryptos,
-            assets_dir=self._get_assets_dir(),
-            certs_dir=self._get_certs_dir(),
+            data_dir=self._get_data_dir(),
         )
         connection_ids = self._process_connection_ids(connection_ids)
         aea = self.AEA_CLASS(
@@ -1177,8 +1160,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             runtime_mode=self._get_runtime_mode(),
             connection_ids=connection_ids,
             search_service_address=self._get_search_service_address(),
-            assets_dir=self._get_assets_dir(),
-            certs_dir=self._get_certs_dir(),
+            data_dir=self._get_data_dir(),
             storage_uri=self._get_storage_uri(),
             **deepcopy(self._context_namespace),
         )
@@ -1328,21 +1310,13 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         """
         return self._storage_uri
 
-    def _get_assets_dir(self) -> Optional[str]:
+    def _get_data_dir(self) -> Optional[str]:
         """
-        Return the assets directory.
+        Return the data directory.
 
-        :return: the assets directory.
+        :return: the data directory.
         """
-        return self._assets_dir
-
-    def _get_certs_dir(self) -> Optional[str]:
-        """
-        Return the certificate directory.
-
-        :return: the certificate directory.
-        """
-        return self._certs_dir
+        return self._data_dir
 
     def _get_search_service_address(self) -> str:
         """

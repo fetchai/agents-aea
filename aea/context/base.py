@@ -19,7 +19,7 @@
 
 
 """This module contains the agent context class."""
-
+import os
 from queue import Queue
 from types import SimpleNamespace
 from typing import Any, Callable, Dict, Optional
@@ -49,8 +49,7 @@ class AgentContext:
         default_routing: Dict[PublicId, PublicId],
         search_service_address: Address,
         decision_maker_address: Address,
-        assets_dir: str,
-        certs_dir: str,
+        data_dir: Optional[str] = None,
         storage_callable: Callable[[], Optional[Storage]] = lambda: None,
         **kwargs: Any
     ) -> None:
@@ -69,8 +68,7 @@ class AgentContext:
         :param default_routing: the default routing
         :param search_service_address: the address of the search service
         :param decision_maker_address: the address of the decision maker
-        :param assets_dir: directory where to put local files.
-        :param certs_dir: directory where to put certificates.
+        :param data_dir: prefix path prependend to relative paths in the configurations.
         :param storage_callable: function that returns optional storage attached to agent.
         :param kwargs: keyword arguments to be attached in the agent context namespace.
         """
@@ -88,8 +86,7 @@ class AgentContext:
         self._default_connection = default_connection
         self._default_routing = default_routing
         self._storage_callable = storage_callable
-        self._assets_dir = assets_dir
-        self._certs_dir = certs_dir
+        self._data_dir = data_dir or os.getcwd()
         self._namespace = SimpleNamespace(**kwargs)
 
     @property
@@ -98,14 +95,9 @@ class AgentContext:
         return self._storage_callable()
 
     @property
-    def assets_dir(self) -> str:
+    def data_dir(self) -> str:
         """Return assets directory."""
-        return self._assets_dir
-
-    @property
-    def certs_dir(self) -> str:
-        """Return certs directory."""
-        return self._certs_dir
+        return self._data_dir
 
     @property
     def shared_state(self) -> Dict[str, Any]:

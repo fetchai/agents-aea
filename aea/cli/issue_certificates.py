@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """Implementation of the 'aea issue_certificates' subcommand."""
-import os
 from typing import Dict, List, Optional, cast
 
 import click
@@ -112,7 +111,6 @@ def _process_certificate(
 ) -> None:
     """Process a single certificate request."""
     ledger_id = cert_request.ledger_id
-    output_path = cert_request.save_path
     if cert_request.key_identifier is not None:
         key_identifier = cert_request.key_identifier
         connection_private_key_path = agent_config.connection_private_key_paths.read(
@@ -138,15 +136,14 @@ def _process_certificate(
             f"Cannot find private key with id '{ledger_id}'. Please use `aea generate-key {key_identifier}` and `aea add-key {key_identifier}` to add a private key with id '{key_identifier}'."
         )
     message = cert_request.get_message(public_key)
-    final_output_path = (
-        str(output_path)
-        if output_path.is_absolute()
-        else os.path.join(path_prefix, output_path)
-    )
+    output_path = cert_request.get_absolute_save_path(path_prefix)
     cert = make_certificate(
-        ledger_id, crypto_private_key_path, message, final_output_path,
+        ledger_id, crypto_private_key_path, message, str(output_path),
     )
     click.echo(f"Generated signature: '{cert}'")
+    click.echo(
+        f"Dumped certificate '{cert_request.identifier}' in '{output_path}' for connection {connection_id}."
+    )
 
 
 def _process_connection(
@@ -167,7 +164,4 @@ def _process_connection(
         )
         _process_certificate(
             path_prefix, agent_config_manager.agent_config, cert_request, connection_id,
-        )
-        click.echo(
-            f"Dumped certificate '{cert_request.identifier}' in '{cert_request.save_path}' for connection {connection_id}."
         )

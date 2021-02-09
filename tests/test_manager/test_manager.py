@@ -409,7 +409,7 @@ class TestMultiAgentManagerAsyncMode(
         self.manager.add_project(self.project_public_id, local=True)
 
         cert_filename = "cert.txt"
-        cert_path = os.path.join(self.manager.certs_dir, cert_filename)
+        cert_path = os.path.join(self.manager.data_dir, cert_filename)
         assert not os.path.exists(cert_filename)
 
         priv_key_path = os.path.abspath(os.path.join(self.working_dir, "priv_key.txt"))

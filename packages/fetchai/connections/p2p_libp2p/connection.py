@@ -550,7 +550,7 @@ class P2PLibp2pConnection(Connection):
         cert_request = cert_requests[0]
 
         agent_record = AgentRecord.from_cert_request(
-            cert_request, self.address, key.public_key
+            cert_request, self.address, key.public_key, Path(self.data_dir)
         )
 
         # libp2p local node
