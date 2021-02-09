@@ -328,7 +328,7 @@ jobs:
         make protolint_install_win
         # just check protolint runs
         protolint version
-    - if: matrix.os == 'ubuntu-latest' || matrix.python_version != '3.9'
+    - if: True
       name: Unit tests
       run: |
         tox -e py${{ matrix.python_version }} -- -m 'not integration and not unstable'
