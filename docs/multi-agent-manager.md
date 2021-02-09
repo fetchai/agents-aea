@@ -43,10 +43,6 @@ FET_CONNECTION_PRIVATE_KEY_STATION = b"bf529acb2546e13615ef6004c48e393f0638a5dc0
 FET_CONNECTION_PRIVATE_KEY_PATH_STATION = Path(manager.keys_dir, f"fetchai_connection_private_key_{weather_station_name}.txt").absolute()
 FET_CONNECTION_PRIVATE_KEY_PATH_STATION.write_bytes(FET_CONNECTION_PRIVATE_KEY_STATION)
 
-CERT_PATH_STATION = Path(f"conn_cert_{weather_station_name}.txt")
-
-SOEF_STORAGE_PATH_STATION = Path(manager.keys_dir, f"soef_token_{weather_station_name}.txt").absolute()
-
 FET_PRIVATE_KEY_CLIENT = b"589839ae54b71b8754a7fe96b52045364077c28705a1806b74441debcae16e0a"
 FET_PRIVATE_KEY_PATH_CLIENT = Path(manager.keys_dir, f"fetchai_private_key_{weather_client_name}.txt").absolute()
 FET_PRIVATE_KEY_PATH_CLIENT.write_bytes(FET_PRIVATE_KEY_CLIENT)
@@ -54,10 +50,6 @@ FET_PRIVATE_KEY_PATH_CLIENT.write_bytes(FET_PRIVATE_KEY_CLIENT)
 FET_CONNECTION_PRIVATE_KEY_CLIENT = b"c9b38eff57f678f5ab5304447997351edb08eceb883267fa4ad849074bec07e4"
 FET_CONNECTION_PRIVATE_KEY_PATH_CLIENT = Path(manager.keys_dir, f"fetchai_connection_private_key_{weather_client_name}.txt").absolute()
 FET_CONNECTION_PRIVATE_KEY_PATH_CLIENT.write_bytes(FET_CONNECTION_PRIVATE_KEY_CLIENT)
-
-CERT_PATH_CLIENT = Path(f"conn_cert_{weather_client_name}.txt")
-
-SOEF_STORAGE_PATH_CLIENT = Path(manager.keys_dir, f"soef_token_{weather_client_name}.txt").absolute()
 ```
 
 Add the agent instances
@@ -79,13 +71,13 @@ component_overrides = [{
       "not_after": '2022-01-01',
       "not_before": '2021-01-01',
       "public_key": "fetchai",
-      "save_path": str(CERT_PATH_STATION)
+      "save_path": "conn_cert.txt"
     }]
 }, {
     **soef_public_id.json,
     "type": "connection",
     "config": {
-        "token_storage_path": str(SOEF_STORAGE_PATH_STATION)
+        "token_storage_path": "soef_token.txt"
     }
 }]
 manager.add_agent(weather_station_id, component_overrides=component_overrides, agent_overrides=agent_overrides)
@@ -109,13 +101,13 @@ component_overrides = [{
       "not_after": '2022-01-01',
       "not_before": '2021-01-01',
       "public_key": "fetchai",
-      "save_path": str(CERT_PATH_CLIENT)
+      "save_path": "conn_cert.txt"
     }]
 }, {
     **soef_public_id.json,
     "type": "connection",
     "config": {
-        "token_storage_path": str(SOEF_STORAGE_PATH_CLIENT)
+        "token_storage_path": "soef_token.txt"
     }
 }]
 

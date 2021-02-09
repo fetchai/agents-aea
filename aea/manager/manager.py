@@ -187,6 +187,10 @@ class MultiAgentManager:
         """Get the certs directory."""
         return self._data_dir
 
+    def get_data_dir_of_agent(self, agent_name: str) -> str:
+        """Get the data directory of a specific agent."""
+        return os.path.join(self.data_dir, agent_name)
+
     @property
     def is_running(self) -> bool:
         """Is manager running."""
@@ -428,7 +432,7 @@ class MultiAgentManager:
             project=project,
             agent_name=agent_name,
             keys_dir=self.keys_dir,
-            data_dir=self.data_dir,
+            data_dir=self.get_data_dir_of_agent(agent_name),
         )
         agent_alias.set_overrides(agent_overrides, component_overrides)
         project.agents.add(agent_name)
@@ -463,7 +467,7 @@ class MultiAgentManager:
             project=project,
             agent_name=agent_name,
             keys_dir=self.keys_dir,
-            data_dir=self.data_dir,
+            data_dir=self.get_data_dir_of_agent(agent_name),
         )
         agent_alias.set_agent_config_from_data(config)
         project.agents.add(agent_name)

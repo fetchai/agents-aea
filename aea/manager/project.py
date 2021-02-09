@@ -141,7 +141,11 @@ class AgentAlias(_Base):
         self.project = project
         self.agent_name = agent_name
         self._keys_dir = keys_dir or project.path
+        if not os.path.exists(self._keys_dir):
+            os.makedirs(self._keys_dir)
         self._data_dir = data_dir or project.path
+        if not os.path.exists(self._data_dir):
+            os.makedirs(self._data_dir)
         self._agent_config: AgentConfig = self._get_agent_config(project.path)
 
     def set_agent_config_from_data(self, json_data: List[Dict]) -> None:
