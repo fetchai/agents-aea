@@ -125,6 +125,8 @@ class OefSearchDialogues(BaseOefSearchDialogues):
 class LocalNode:
     """A light-weight local implementation of a OEF Node."""
 
+    _lock: asyncio.Lock
+
     def __init__(
         self, loop: AbstractEventLoop = None, logger: logging.Logger = _default_logger
     ):
@@ -134,7 +136,6 @@ class LocalNode:
         :param loop: the event loop. If None, a new event loop is instantiated.
         """
         self.services = defaultdict(lambda: [])  # type: Dict[str, List[Description]]
-        self._lock = asyncio.Lock()
         self._loop = loop if loop is not None else asyncio.new_event_loop()
         self._thread = Thread(target=self._run_loop, daemon=True)
 
@@ -176,6 +177,7 @@ class LocalNode:
         :param writer: the queue where the client is listening.
         :return: an asynchronous queue, that constitutes the communication channel.
         """
+        self._lock = asyncio.Lock()
         if address in self._out_queues.keys():
             return None
 
