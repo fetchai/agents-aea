@@ -210,6 +210,10 @@ class P2PLibp2pClientConnection(Connection):
         await self._send(buf)
 
         buf = await self._receive()
+        if buf is None:  # pragma: nocover
+            raise ConnectionError(
+                "Error on connection setup. Incoming buffer is empty!"
+            )
         msg = AcnMessage()
         msg.ParseFromString(buf)
         payload = msg.WhichOneof("payload")
