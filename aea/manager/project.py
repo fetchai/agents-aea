@@ -187,9 +187,9 @@ class AgentAlias(_Base):
         If file exists, check `replace` option.
         """
         file_name = (
-            f"{self.agent_name}_{ledger}_connection_private.key"
+            f"{ledger}_connection_private.key"
             if is_connection
-            else f"{self.agent_name}_{ledger}_private.key"
+            else f"{ledger}_private.key"
         )
         filepath = os.path.join(self._data_dir, file_name)
         if os.path.exists(filepath) and not replace:

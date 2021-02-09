@@ -32,7 +32,7 @@ from aea.configurations.manager import AgentConfigManager, VariableDoesNotExist
 from aea.crypto.helpers import make_certificate
 from aea.crypto.registries import crypto_registry
 from aea.exceptions import enforce
-from aea.helpers.base import CertRequest
+from aea.helpers.base import CertRequest, prepend_if_not_absolute
 
 
 @click.command()
@@ -120,8 +120,11 @@ def _process_certificate(
             raise ClickException(
                 f"Cannot find connection private key with id '{key_identifier}'. Connection '{connection_id}' requires this. Please use `aea generate-key {key_identifier} connection_{key_identifier}_private_key.txt` and `aea add-key {key_identifier} connection_{key_identifier}_private_key.txt --connection` to add a connection private key with id '{key_identifier}'."
             )
+        new_connection_private_key_path = prepend_if_not_absolute(
+            connection_private_key_path, path_prefix
+        )
         connection_crypto = crypto_registry.make(
-            key_identifier, private_key_path=connection_private_key_path
+            key_identifier, private_key_path=new_connection_private_key_path
         )
         public_key = connection_crypto.public_key
     else:
@@ -137,8 +140,11 @@ def _process_certificate(
         )
     message = cert_request.get_message(public_key)
     output_path = cert_request.get_absolute_save_path(path_prefix)
+    absolute_crypto_private_key_path = prepend_if_not_absolute(
+        crypto_private_key_path, path_prefix
+    )
     cert = make_certificate(
-        ledger_id, crypto_private_key_path, message, str(output_path),
+        ledger_id, str(absolute_crypto_private_key_path), message, str(output_path),
     )
     click.echo(f"Generated signature: '{cert}'")
     click.echo(

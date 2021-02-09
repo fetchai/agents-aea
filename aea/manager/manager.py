@@ -296,7 +296,7 @@ class MultiAgentManager:
         if cleanup:
             for project in list(self._projects.keys()):
                 self.remove_project(project, keep_files=save)
-            self._cleanup(only_keys=save)
+            self._cleanup(only_data=save)
 
         self._is_running = False
 
@@ -308,9 +308,9 @@ class MultiAgentManager:
         self._thread = None
         return self
 
-    def _cleanup(self, only_keys: bool = False) -> None:
+    def _cleanup(self, only_data: bool = False) -> None:
         """Remove workdir if was created."""
-        if only_keys:
+        if only_data:
             rmtree(self.data_dir)
         else:
             if self._was_working_dir_created and os.path.exists(self.working_dir):
