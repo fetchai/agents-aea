@@ -463,6 +463,7 @@ class Runnable(ABC):
         self._got_result = False
         self._was_cancelled = False
         self._is_running: bool = False
+        self._stop_called = 0
 
     def start(self) -> bool:
         """
@@ -479,6 +480,13 @@ class Runnable(ABC):
         self._set_loop()
         self._completed_event = asyncio.Event(loop=self._loop)
         self._was_cancelled = False
+
+        if self._stop_called > 0:
+            # used in case of race when stop called before start!
+            _default_logger.debug(f"{self} was already stopped before started!")
+            self._stop_called = 0
+            return True
+
         self._set_task()
 
         if self._threaded:
@@ -487,7 +495,7 @@ class Runnable(ABC):
             )
             self._thread.setDaemon(True)
             self._thread.start()
-
+        self._stop_called = 0
         return True
 
     def _thread_target(self) -> None:
@@ -516,6 +524,7 @@ class Runnable(ABC):
         if not self._loop:  # pragma: nocover
             raise ValueError("Loop was not set.")
         self._task = self._loop.create_task(self._run_wrapper())
+        _default_logger.debug(f"{self} task set")
 
     async def _run_wrapper(self) -> None:
         """Wrap run() method."""
@@ -634,6 +643,7 @@ class Runnable(ABC):
         """Stop runnable."""
         _default_logger.debug(f"{self} is going to be stopped {self._task}")
         if not self._task or not self._loop:  # pragma: nocover
+            self._stop_called += 1
             return
 
         if self._task.done():

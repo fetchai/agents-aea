@@ -251,7 +251,7 @@ class AbstractMultipleExecutor(ABC):  # pragma: nocover
                 "Stopping executor according to fail policy cause exception raised in task"
             )
             self.stop()
-            await self._wait_tasks_complete(skip_exceptions=True)
+            await self._wait_tasks_complete(skip_exceptions=True, on_stop=True)
         else:  # pragma: nocover
             raise ValueError(f"Unknown fail policy: {self._task_fail_policy}")
 
