@@ -17,9 +17,9 @@
 #
 # ------------------------------------------------------------------------------
 """Extension to the Local Node."""
-
 import asyncio
 import logging
+import threading
 from asyncio import AbstractEventLoop, Queue
 from collections import defaultdict
 from concurrent.futures import Future
@@ -125,8 +125,6 @@ class OefSearchDialogues(BaseOefSearchDialogues):
 class LocalNode:
     """A light-weight local implementation of a OEF Node."""
 
-    _lock: asyncio.Lock
-
     def __init__(
         self, loop: AbstractEventLoop = None, logger: logging.Logger = _default_logger
     ):
@@ -135,6 +133,7 @@ class LocalNode:
 
         :param loop: the event loop. If None, a new event loop is instantiated.
         """
+        self._lock = threading.Lock()
         self.services = defaultdict(lambda: [])  # type: Dict[str, List[Description]]
         self._loop = loop if loop is not None else asyncio.new_event_loop()
         self._thread = Thread(target=self._run_loop, daemon=True)
@@ -177,7 +176,6 @@ class LocalNode:
         :param writer: the queue where the client is listening.
         :return: an asynchronous queue, that constitutes the communication channel.
         """
-        self._lock = asyncio.Lock()
         if address in self._out_queues.keys():
             return None
 
@@ -306,7 +304,7 @@ class LocalNode:
         :param service_description: the description of the service agent to be registered.
         :return: None
         """
-        async with self._lock:
+        with self._lock:
             self.services[address].append(service_description)
 
     async def _unregister_service(
@@ -321,7 +319,7 @@ class LocalNode:
         """
         service_description = oef_search_msg.service_description
         address = oef_search_msg.sender
-        async with self._lock:
+        with self._lock:
             if address not in self.services:
                 msg = dialogue.reply(
                     performative=OefSearchMessage.Performative.OEF_ERROR,
@@ -353,7 +351,7 @@ class LocalNode:
         :param dialogue: the dialogue.
         :return: None
         """
-        async with self._lock:
+        with self._lock:
             query = oef_search_msg.query
             result = []  # type: List[str]
             if query.model is None:
@@ -410,7 +408,7 @@ class LocalNode:
         :param address: the address of the agent
         :return: None
         """
-        async with self._lock:
+        with self._lock:
             self._out_queues.pop(address, None)
             self.services.pop(address, None)
 
