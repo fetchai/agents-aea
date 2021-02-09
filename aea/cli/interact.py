@@ -23,7 +23,6 @@ import codecs
 import os
 from pathlib import Path
 from typing import Optional, TYPE_CHECKING, Type, Union
-from unittest.mock import MagicMock
 
 import click
 
@@ -109,7 +108,7 @@ def _load_packages(agent_identity: Identity) -> None:
         ),
         agent_identity,
         CryptoStore(),
-        MagicMock(),
+        os.getcwd(),
     )
 
 
