@@ -258,6 +258,7 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay)
         self.multiplexer_relay.disconnect()
         self.change_state_and_wait(self.multiplexer_relay, expected_is_connected=False)
 
+        print(1111111111111, "DISCONNECTED", flush=True)
         self.relay = _make_libp2p_connection(
             port=DEFAULT_PORT + 2,
             entry_peers=[self.genesis.node.multiaddrs[0]],
@@ -267,6 +268,7 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay)
         self.multiplexer_relay = Multiplexer([self.relay], protocols=[DefaultMessage])
         self.multiplexer_relay.connect()
         self.change_state_and_wait(self.multiplexer_relay, expected_is_connected=True)
+        print(1111111111111, "CONNECTED", flush=True)
         self.multiplexers.append(self.multiplexer_relay)
 
         msg = DefaultMessage(
@@ -286,6 +288,7 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay)
 
         time.sleep(2)
         self.multiplexer2.put(envelope)
+        print(1111111111111, "SEND", flush=True)
         delivered_envelope = self.multiplexer.get(block=True, timeout=20)
 
         assert delivered_envelope is not None
