@@ -131,19 +131,15 @@ class AgentAlias(_Base):
     """Agent alias representation."""
 
     def __init__(
-        self,
-        project: Project,
-        agent_name: str,
-        keys_dir: Optional[str],
-        data_dir: Optional[str],
+        self, project: Project, agent_name: str, keys_dir: str, data_dir: str,
     ):
         """Init agent alias with project, config, name, agent, builder."""
         self.project = project
         self.agent_name = agent_name
-        self._keys_dir = keys_dir or project.path
+        self._keys_dir = keys_dir
         if not os.path.exists(self._keys_dir):
             os.makedirs(self._keys_dir)
-        self._data_dir = data_dir or project.path
+        self._data_dir = data_dir
         if not os.path.exists(self._data_dir):
             os.makedirs(self._data_dir)
         self._agent_config: AgentConfig = self._get_agent_config(project.path)

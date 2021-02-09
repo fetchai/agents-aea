@@ -67,7 +67,7 @@ class AgentContext:
         :param default_routing: the default routing
         :param search_service_address: the address of the search service
         :param decision_maker_address: the address of the decision maker
-        :param data_dir: prefix path prependend to relative paths in the configurations.
+        :param data_dir: directory where to put local files.
         :param storage_callable: function that returns optional storage attached to agent.
         :param kwargs: keyword arguments to be attached in the agent context namespace.
         """

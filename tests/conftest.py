@@ -42,7 +42,7 @@ from typing import (
     Union,
     cast,
 )
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import docker as docker
 import gym
@@ -1081,7 +1081,7 @@ async def ledger_apis_connection(request, ethereum_testnet_config):
     crypto_store = CryptoStore()
     directory = Path(ROOT_DIR, "packages", "fetchai", "connections", "ledger")
     connection = Connection.from_dir(
-        directory, identity=identity, crypto_store=crypto_store
+        directory, data_dir=MagicMock(), identity=identity, crypto_store=crypto_store
     )
     connection = cast(Connection, connection)
     connection._logger = logging.getLogger("aea.packages.fetchai.connections.ledger")

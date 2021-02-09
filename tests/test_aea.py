@@ -392,6 +392,7 @@ def test_initialize_aea_programmatically_build_resources():
                 identity,
                 wallet,
                 resources=resources,
+                data_dir=MagicMock(),
                 default_connection=connection.public_id,
             )
 

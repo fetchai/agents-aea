@@ -100,7 +100,7 @@ class AEA(Agent):
         :param identity: the identity of the agent
         :param wallet: the wallet of the agent.
         :param resources: the resources (protocols and skills) of the agent.
-        :param data_dir: optional directory where to put local files.
+        :param data_dir: directory where to put local files.
         :param loop: the event loop to run the connections.
         :param period: period to call agent's act
         :param execution_timeout: amount of time to limit single act/handle to execute.

@@ -224,9 +224,9 @@ class SOEFChannel:
         api_key: str,
         soef_addr: str,
         soef_port: int,
+        data_dir: str,
         chain_identifier: Optional[str] = None,
         token_storage_path: Optional[str] = None,
-        data_dir: Optional[str] = None,
         logger: logging.Logger = _default_logger,
     ):
         """
@@ -252,7 +252,6 @@ class SOEFChannel:
         self.base_url = "http://{}:{}".format(soef_addr, soef_port)
         self.oef_search_dialogues = OefSearchDialogues()
 
-        data_dir = data_dir or os.getcwd()
         self._token_storage_path = token_storage_path
         if self._token_storage_path is not None:
             if not Path(self._token_storage_path).is_absolute():
