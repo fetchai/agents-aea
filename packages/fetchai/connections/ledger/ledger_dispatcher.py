@@ -19,7 +19,7 @@
 """This module contains the implementation of the ledger API request dispatcher."""
 import logging
 import time
-from typing import cast
+from typing import Any, cast
 
 from aea.connections.base import ConnectionStates
 from aea.crypto.base import LedgerApi
@@ -45,7 +45,7 @@ _default_logger = logging.getLogger(
 class LedgerApiDialogues(BaseLedgerApiDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -75,7 +75,7 @@ class LedgerApiDialogues(BaseLedgerApiDialogues):
 class LedgerApiRequestDispatcher(RequestDispatcher):
     """Implement ledger API request dispatcher."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Initialize the dispatcher."""
         logger = kwargs.pop("logger", None)
         logger = logger if logger is not None else _default_logger

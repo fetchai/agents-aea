@@ -156,6 +156,7 @@ nav:
         - Exec Timeout: 'api/helpers/exec_timeout.md'
         - File IO: 'api/helpers/file_io.md'
         - File Lock: 'api/helpers/file_lock.md'
+        - HttpRequests: 'api/helpers/http_requests.md'
         - Install Dependency: 'api/helpers/install_dependency.md'
         - IPFS:
           - Base: 'api/helpers/ipfs/base.md'

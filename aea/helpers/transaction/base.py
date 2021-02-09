@@ -21,7 +21,7 @@
 
 import collections
 import copy
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from aea.common import JSONLike
 from aea.crypto.ledger_apis import LedgerApis
@@ -58,7 +58,7 @@ class RawTransaction:
 
     @staticmethod
     def encode(
-        raw_transaction_protobuf_object, raw_transaction_object: "RawTransaction"
+        raw_transaction_protobuf_object: Any, raw_transaction_object: "RawTransaction"
     ) -> None:
         """
         Encode an instance of this class into the protocol buffer object.
@@ -80,7 +80,7 @@ class RawTransaction:
         )
 
     @classmethod
-    def decode(cls, raw_transaction_protobuf_object) -> "RawTransaction":
+    def decode(cls, raw_transaction_protobuf_object: Any) -> "RawTransaction":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -94,7 +94,7 @@ class RawTransaction:
         )
         return cls(raw_transaction_dict["ledger_id"], raw_transaction_dict["body"])
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Check equality."""
         return (
             isinstance(other, RawTransaction)
@@ -146,7 +146,9 @@ class RawMessage:
         return self._is_deprecated_mode
 
     @staticmethod
-    def encode(raw_message_protobuf_object, raw_message_object: "RawMessage") -> None:
+    def encode(
+        raw_message_protobuf_object: Any, raw_message_object: "RawMessage"
+    ) -> None:
         """
         Encode an instance of this class into the protocol buffer object.
 
@@ -167,7 +169,7 @@ class RawMessage:
         )
 
     @classmethod
-    def decode(cls, raw_message_protobuf_object) -> "RawMessage":
+    def decode(cls, raw_message_protobuf_object: Any) -> "RawMessage":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -185,7 +187,7 @@ class RawMessage:
             raw_message_dict["is_deprecated_mode"],
         )
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Check equality."""
         return (
             isinstance(other, RawMessage)
@@ -227,7 +229,7 @@ class SignedTransaction:
 
     @staticmethod
     def encode(
-        signed_transaction_protobuf_object,
+        signed_transaction_protobuf_object: Any,
         signed_transaction_object: "SignedTransaction",
     ) -> None:
         """
@@ -249,7 +251,7 @@ class SignedTransaction:
         )
 
     @classmethod
-    def decode(cls, signed_transaction_protobuf_object) -> "SignedTransaction":
+    def decode(cls, signed_transaction_protobuf_object: Any) -> "SignedTransaction":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -265,7 +267,7 @@ class SignedTransaction:
             signed_transaction_dict["ledger_id"], signed_transaction_dict["body"]
         )
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Check equality."""
         return (
             isinstance(other, SignedTransaction)
@@ -318,7 +320,7 @@ class SignedMessage:
 
     @staticmethod
     def encode(
-        signed_message_protobuf_object, signed_message_object: "SignedMessage"
+        signed_message_protobuf_object: Any, signed_message_object: "SignedMessage"
     ) -> None:
         """
         Encode an instance of this class into the protocol buffer object.
@@ -340,7 +342,7 @@ class SignedMessage:
         )
 
     @classmethod
-    def decode(cls, signed_message_protobuf_object) -> "SignedMessage":
+    def decode(cls, signed_message_protobuf_object: Any) -> "SignedMessage":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -358,7 +360,7 @@ class SignedMessage:
             signed_message_dict["is_deprecated_mode"],
         )
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Check equality."""
         return (
             isinstance(other, SignedMessage)
@@ -399,7 +401,7 @@ class State:
         return self._body
 
     @staticmethod
-    def encode(state_protobuf_object, state_object: "State") -> None:
+    def encode(state_protobuf_object: Any, state_object: "State") -> None:
         """
         Encode an instance of this class into the protocol buffer object.
 
@@ -417,7 +419,7 @@ class State:
         state_protobuf_object.state = DictProtobufStructSerializer.encode(state_dict)
 
     @classmethod
-    def decode(cls, state_protobuf_object) -> "State":
+    def decode(cls, state_protobuf_object: Any) -> "State":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -429,7 +431,7 @@ class State:
         state_dict = DictProtobufStructSerializer.decode(state_protobuf_object.state)
         return cls(state_dict["ledger_id"], state_dict["body"])
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Check equality."""
         return (
             isinstance(other, State)
@@ -456,7 +458,7 @@ class Terms:
         is_sender_payable_tx_fee: bool = True,
         fee_by_currency_id: Optional[Dict[str, int]] = None,
         is_strict: bool = False,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         """
         Instantiate terms of a transaction.
@@ -856,7 +858,7 @@ class Terms:
         return digest
 
     @staticmethod
-    def encode(terms_protobuf_object, terms_object: "Terms") -> None:
+    def encode(terms_protobuf_object: Any, terms_object: "Terms") -> None:
         """
         Encode an instance of this class into the protocol buffer object.
 
@@ -881,7 +883,7 @@ class Terms:
         terms_protobuf_object.terms = DictProtobufStructSerializer.encode(terms_dict)
 
     @classmethod
-    def decode(cls, terms_protobuf_object) -> "Terms":
+    def decode(cls, terms_protobuf_object: Any) -> "Terms":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -905,7 +907,7 @@ class Terms:
             **dict(terms_dict["kwargs"]),
         )
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Check equality."""
         return (
             isinstance(other, Terms)
@@ -963,7 +965,7 @@ class TransactionDigest:
 
     @staticmethod
     def encode(
-        transaction_digest_protobuf_object,
+        transaction_digest_protobuf_object: Any,
         transaction_digest_object: "TransactionDigest",
     ) -> None:
         """
@@ -985,7 +987,7 @@ class TransactionDigest:
         )
 
     @classmethod
-    def decode(cls, transaction_digest_protobuf_object) -> "TransactionDigest":
+    def decode(cls, transaction_digest_protobuf_object: Any) -> "TransactionDigest":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -1002,7 +1004,7 @@ class TransactionDigest:
             transaction_digest_dict["ledger_id"], transaction_digest_dict["body"]
         )
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Check equality."""
         return (
             isinstance(other, TransactionDigest)
@@ -1052,7 +1054,7 @@ class TransactionReceipt:
 
     @staticmethod
     def encode(
-        transaction_receipt_protobuf_object,
+        transaction_receipt_protobuf_object: Any,
         transaction_receipt_object: "TransactionReceipt",
     ) -> None:
         """
@@ -1075,7 +1077,7 @@ class TransactionReceipt:
         )
 
     @classmethod
-    def decode(cls, transaction_receipt_protobuf_object) -> "TransactionReceipt":
+    def decode(cls, transaction_receipt_protobuf_object: Any) -> "TransactionReceipt":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -1093,7 +1095,7 @@ class TransactionReceipt:
             transaction_receipt_dict["transaction"],
         )
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Check equality."""
         return (
             isinstance(other, TransactionReceipt)

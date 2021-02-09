@@ -46,7 +46,7 @@ class IPCChannelClient(ABC):
     """Multi-platform interprocess communication channel for the client side."""
 
     @abstractmethod
-    async def connect(self, timeout=PIPE_CONN_TIMEOUT) -> bool:
+    async def connect(self, timeout: float = PIPE_CONN_TIMEOUT) -> bool:
         """
         Connect to communication channel
 

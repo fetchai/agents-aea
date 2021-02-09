@@ -28,13 +28,13 @@ from typing import Any, Deque
 class AsyncFriendlyQueue(queue.Queue):
     """queue.Queue with async_get method."""
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Init queue."""
         super().__init__(*args, **kwargs)
         self._non_empty_waiters: Deque = deque()
 
     def put(  # pylint: disable=signature-differs
-        self, item: Any, *args, **kwargs
+        self, item: Any, *args: Any, **kwargs: Any
     ) -> None:
         """
         Put an item into the queue.
@@ -50,13 +50,15 @@ class AsyncFriendlyQueue(queue.Queue):
             )
 
     @staticmethod
-    def _set_waiter(waiter) -> None:
+    def _set_waiter(waiter: Any) -> None:
         """Set waiter result."""
         if waiter.done():  # pragma: nocover
             return
         waiter.set_result(True)
 
-    def get(self, *args, **kwargs) -> Any:  # pylint: disable=signature-differs
+    def get(  # pylint: disable=signature-differs
+        self, *args: Any, **kwargs: Any
+    ) -> Any:
         """
         Get an item into the queue.
 

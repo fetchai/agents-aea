@@ -248,7 +248,7 @@ class SkillContext:
         """Get the agent context namespace."""
         return self._get_agent_context().namespace
 
-    def __getattr__(self, item) -> Any:
+    def __getattr__(self, item: Any) -> Any:
         """Get attribute."""
         return super().__getattribute__(item)  # pragma: no cover
 
@@ -261,7 +261,7 @@ class SkillComponent(ABC):
         name: str,
         skill_context: SkillContext,
         configuration: Optional[SkillComponentConfiguration] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         """
         Initialize a skill component.
@@ -583,7 +583,7 @@ class Model(SkillComponent, ABC):
         skill_context: SkillContext,
         configuration: Optional[SkillComponentConfiguration] = None,
         keep_terminal_state_dialogues: Optional[bool] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         """
         Initialize a model.
@@ -707,7 +707,7 @@ class Model(SkillComponent, ABC):
         return instances
 
 
-def _check_duplicate_classes(name_class_pairs: Sequence[Tuple[str, Type]]):
+def _check_duplicate_classes(name_class_pairs: Sequence[Tuple[str, Type]]) -> None:
     """
     Given a sequence of pairs (class_name, class_obj), check whether there are duplicates in the class names.
 
@@ -735,7 +735,7 @@ class Skill(Component):
         handlers: Optional[Dict[str, Handler]] = None,
         behaviours: Optional[Dict[str, Behaviour]] = None,
         models: Optional[Dict[str, Model]] = None,
-        **kwargs,
+        **kwargs: Any,
     ):
         """
         Initialize a skill.
@@ -794,7 +794,9 @@ class Skill(Component):
         return self._models
 
     @classmethod
-    def from_dir(cls, directory: str, agent_context: AgentContext, **kwargs) -> "Skill":
+    def from_dir(
+        cls, directory: str, agent_context: AgentContext, **kwargs: Any
+    ) -> "Skill":
         """
         Load the skill from a directory.
 
@@ -820,13 +822,13 @@ class Skill(Component):
         return self.skill_context.logger
 
     @logger.setter
-    def logger(self, *args) -> None:
+    def logger(self, *args: str) -> None:
         """Set the logger."""
         raise ValueError("Cannot set logger to a skill component.")
 
     @classmethod
     def from_config(
-        cls, configuration: SkillConfig, agent_context: AgentContext, **kwargs
+        cls, configuration: SkillConfig, agent_context: AgentContext, **kwargs: Any
     ) -> "Skill":
         """
         Load the skill from configuration.
@@ -881,9 +883,9 @@ def _print_warning_message_for_non_declared_skill_components(
     skill_context: SkillContext,
     classes: Set[str],
     config_components: Set[str],
-    item_type,
-    skill_path,
-):
+    item_type: str,
+    skill_path: str,
+) -> None:
     """Print a warning message if a skill component is not declared in the config files."""
     for class_name in classes.difference(config_components):
         skill_context.logger.warning(

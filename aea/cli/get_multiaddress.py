@@ -65,14 +65,14 @@ URI_REGEX = re.compile(r"(?:https?://)?(?P<host>[^:/ ]+):(?P<port>[0-9]*)")
 @click.pass_context
 @check_aea_project
 def get_multiaddress(
-    click_context,
+    click_context: click.Context,
     ledger_id: str,
     connection: bool,
     connection_id: Optional[PublicId],
     host_field: str,
     port_field: str,
     uri_field: str,
-):
+) -> None:
     """Get the multiaddress associated with a private key or connection of the agent."""
     address = _try_get_multiaddress(
         click_context,
@@ -87,7 +87,7 @@ def get_multiaddress(
 
 
 def _try_get_multiaddress(
-    click_context,
+    click_context: click.Context,
     ledger_id: str,
     is_connection: bool,
     connection_id: Optional[PublicId],
@@ -201,7 +201,7 @@ def _read_host_and_port_from_config(
 
 
 def _try_get_connection_multiaddress(
-    click_context,
+    click_context: click.Context,
     crypto: Crypto,
     connection_id: PublicId,
     host_field: Optional[str],

@@ -92,14 +92,14 @@ class ExtraPropertiesError(ValueError):
 class CustomTypeChecker(TypeChecker):
     """Custom type checker to handle env variables."""
 
-    def is_type(self, instance, type) -> bool:  # pylint: disable=redefined-builtin
+    def is_type(self, instance, type) -> bool:  # type: ignore # pylint: disable=redefined-builtin
         """Check is instance of type."""
         if is_env_variable(instance):
             return True
         return super().is_type(instance, type)
 
 
-def ownAdditionalProperties(validator, aP, instance, schema) -> Iterator:
+def ownAdditionalProperties(validator, aP, instance, schema) -> Iterator:  # type: ignore
     """Additioinal properties validator."""
     for _ in additionalProperties(validator, aP, instance, schema):
         raise ExtraPropertiesError(list(find_additional_properties(instance, schema)))
@@ -277,7 +277,7 @@ def validate_data_with_pattern(
     data_path_value = {tuple(path): value for path, value in dict_to_path_value(data)}
     errors = []
 
-    def check_excludes(path) -> bool:
+    def check_excludes(path: Tuple[str, ...]) -> bool:
         for exclude in excludes_:
             if len(exclude) > len(path):  # pragma: nocover
                 continue

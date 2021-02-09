@@ -73,7 +73,9 @@ from aea.helpers.base import delete_directory_contents, find_topological_order
 @check_aea_project(  # pylint: disable=unused-argument,no-value-for-parameter
     check_aea_version=False
 )
-def upgrade(click_context, local, remote, yes):  # pylint: disable=unused-argument
+def upgrade(
+    click_context: click.Context, local: bool, remote: bool, yes: bool
+) -> None:  # pylint: disable=unused-argument
     """Upgrade the packages of the agent."""
     ctx = cast(Context, click_context.obj)
     ctx.set_config("is_local", local and not remote)
@@ -88,7 +90,7 @@ def upgrade(click_context, local, remote, yes):  # pylint: disable=unused-argume
 @upgrade.command()
 @click.argument("connection_public_id", type=PublicIdParameter(), required=True)
 @pass_ctx
-def connection(ctx: Context, connection_public_id: PublicId):
+def connection(ctx: Context, connection_public_id: PublicId) -> None:
     """Upgrade a connection of the agent."""
     upgrade_item(ctx, CONNECTION, connection_public_id)
 
@@ -96,7 +98,7 @@ def connection(ctx: Context, connection_public_id: PublicId):
 @upgrade.command()
 @click.argument("contract_public_id", type=PublicIdParameter(), required=True)
 @pass_ctx
-def contract(ctx: Context, contract_public_id: PublicId):
+def contract(ctx: Context, contract_public_id: PublicId) -> None:
     """Upgrade a contract of the agent."""
     upgrade_item(ctx, CONTRACT, contract_public_id)
 
@@ -104,7 +106,7 @@ def contract(ctx: Context, contract_public_id: PublicId):
 @upgrade.command()
 @click.argument("protocol_public_id", type=PublicIdParameter(), required=True)
 @pass_ctx
-def protocol(ctx: Context, protocol_public_id):
+def protocol(ctx: Context, protocol_public_id: PublicId) -> None:
     """Upgrade a protocol of the agent."""
     upgrade_item(ctx, PROTOCOL, protocol_public_id)
 
@@ -112,7 +114,7 @@ def protocol(ctx: Context, protocol_public_id):
 @upgrade.command()
 @click.argument("skill_public_id", type=PublicIdParameter(), required=True)
 @pass_ctx
-def skill(ctx: Context, skill_public_id: PublicId):
+def skill(ctx: Context, skill_public_id: PublicId) -> None:
     """Upgrade a skill of the agent."""
     upgrade_item(ctx, SKILL, skill_public_id)
 

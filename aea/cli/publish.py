@@ -56,7 +56,9 @@ from aea.configurations.constants import (
 )
 @click.pass_context
 @check_aea_project
-def publish(click_context, local, remote):  # pylint: disable=unused-argument
+def publish(
+    click_context: click.Context, local: bool, remote: bool
+) -> None:  # pylint: disable=unused-argument
     """Publish the agent to the registry."""
     ctx = cast(Context, click_context.obj)
     _validate_pkp(ctx.agent_config.private_key_paths)
@@ -129,7 +131,7 @@ def _check_is_item_in_remote_registry(
 
 
 def _check_is_item_in_local_registry(
-    public_id, item_type_plural, registry_path
+    public_id: PublicId, item_type_plural: str, registry_path: str
 ) -> None:
     try:
         try_get_item_source_path(

@@ -64,7 +64,7 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
         self,
         agent: AbstractAgent,
         loop: Optional[AbstractEventLoop] = None,
-        threaded=False,
+        threaded: bool = False,
     ) -> None:
         """Init loop.
 
@@ -155,7 +155,10 @@ class AsyncAgentLoop(BaseAgentLoop):
     NEW_BEHAVIOURS_PROCESS_SLEEP = 1  # check new behaviours registered every second.
 
     def __init__(
-        self, agent: AbstractAgent, loop: AbstractEventLoop = None, threaded=False
+        self,
+        agent: AbstractAgent,
+        loop: AbstractEventLoop = None,
+        threaded: bool = False,
     ) -> None:
         """
         Init agent loop.

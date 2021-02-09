@@ -37,7 +37,7 @@
 """A module with config tools of the aea cli."""
 import os
 from pathlib import Path
-from typing import Dict, Set
+from typing import Any, Dict, Set
 
 import click
 import jsonschema
@@ -137,7 +137,7 @@ def get_or_create_cli_config() -> Dict:
     return load_yaml(CLI_CONFIG_PATH)
 
 
-def set_cli_author(click_context) -> None:
+def set_cli_author(click_context: click.Context) -> None:
     """
     Set CLI author in the CLI Context.
 
@@ -194,7 +194,7 @@ def dump_item_config(
         configuration_loader.dump(package_configuration, file_output)  # type: ignore
 
 
-def update_item_config(item_type: str, package_path: Path, **kwargs) -> None:
+def update_item_config(item_type: str, package_path: Path, **kwargs: Any) -> None:
     """
     Update item config and item config file.
 

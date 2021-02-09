@@ -64,7 +64,7 @@ MINIMUM_GO_VERSION: VERSION = (1, 13, 0)
 MINIMUM_GCC_VERSION: VERSION = (7, 5, 0)
 
 
-def nth(iterable: Iterable, n: int, default: Any = None):
+def nth(iterable: Iterable, n: int, default: int = 0) -> int:
     """Returns the nth item or a default value"""
     return next(islice(iterable, n, None), default)
 
@@ -93,7 +93,7 @@ def version_to_string(version: VERSION) -> str:
 
 def print_ok_message(
     binary_name: str, actual_version: VERSION, version_lower_bound: VERSION
-):
+) -> None:
     """
     Print OK message.
 
@@ -112,7 +112,7 @@ def check_binary(
     args: List[str],
     version_regex: Pattern,
     version_lower_bound: VERSION,
-):
+) -> None:
     """
     Check a binary is accessible from the terminal.
 
@@ -154,7 +154,7 @@ def check_binary(
     print_ok_message(binary_name, actual_version, version_lower_bound)
 
 
-def check_versions():
+def check_versions() -> None:
     """Check versions."""
     check_binary(
         "go",
@@ -178,7 +178,7 @@ def check_versions():
         )
 
 
-def main():  # pragma: nocover
+def main() -> None:  # pragma: nocover
     """The main entrypoint of the script."""
     if len(sys.argv) < 2:
         raise ValueError("Please provide build directory path as an argument!")

@@ -21,7 +21,7 @@
 
 import logging
 import sys
-from typing import Callable
+from typing import Any, Callable
 
 import click
 
@@ -44,7 +44,7 @@ class ColorFormatter(logging.Formatter):
         "warning": dict(fg="yellow"),
     }
 
-    def format(self, record) -> str:
+    def format(self, record: logging.LogRecord) -> str:
         """Format the log message."""
         if not record.exc_info:
             level = record.levelname.lower()
@@ -57,7 +57,7 @@ class ColorFormatter(logging.Formatter):
 
 
 def simple_verbosity_option(
-    logger_, *names, **kwargs
+    logger_: logging.Logger, *names: str, **kwargs: Any
 ) -> Callable:  # pylint: disable=redefined-outer-name,keyword-arg-before-vararg
     """Add a decorator that adds a `--verbosity, -v` option to the decorated command.
 
@@ -74,8 +74,12 @@ def simple_verbosity_option(
     kwargs.setdefault("help", "One of {}".format(", ".join(LOG_LEVELS)))
     kwargs.setdefault("is_eager", True)
 
-    def decorator(f) -> Callable:
-        def _set_level(ctx, param, value) -> None:  # pylint: disable=unused-argument
+    def decorator(f: Callable) -> Callable:
+        def _set_level(
+            ctx: click.Context,
+            param: Any,  # pylint: disable=unused-argument
+            value: str,
+        ) -> None:
             level = logging.getLevelName(value)
             logger_.setLevel(level)
             # save verbosity option so it can be

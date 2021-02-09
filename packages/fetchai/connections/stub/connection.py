@@ -25,7 +25,7 @@ from asyncio import CancelledError
 from asyncio.tasks import Task
 from concurrent.futures.thread import ThreadPoolExecutor
 from pathlib import Path
-from typing import AsyncIterable, List, Optional
+from typing import Any, AsyncIterable, List, Optional
 
 from aea.configurations.base import PublicId
 from aea.configurations.constants import (
@@ -82,7 +82,7 @@ class StubConnection(Connection):
 
     read_delay = 0.001
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         """Initialize a stub connection."""
         super().__init__(**kwargs)
         input_file: str = self.configuration.config.get(
@@ -155,7 +155,7 @@ class StubConnection(Connection):
         """
         return [m.group(0) for m in cls.message_regex.finditer(data)]
 
-    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
+    async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """Receive an envelope."""
         self._ensure_connected()
         if self.in_queue is None:  # pragma: nocover

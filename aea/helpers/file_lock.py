@@ -21,6 +21,7 @@
 """Patch of 'fnctl' to make it compatible with Windows."""
 
 import os
+from typing import IO
 
 
 # needs win32all to work on Windows
@@ -34,14 +35,14 @@ if os.name == "nt":  # pragma: nocover  # cause platform dependent!
     LOCK_NB = win32con.LOCKFILE_FAIL_IMMEDIATELY
     __overlapped = pywintypes.OVERLAPPED()
 
-    def lock(file, flags) -> None:
+    def lock(file: IO, flags: int) -> None:
         """Lock a file with flags."""
         hfile = win32file._get_osfhandle(  # pylint: disable=protected-access
             file.fileno()
         )
         win32file.LockFileEx(hfile, flags, 0, 0xFFFF0000, __overlapped)
 
-    def unlock(file) -> None:
+    def unlock(file: IO) -> None:
         """Unlock a file."""
         hfile = win32file._get_osfhandle(  # pylint: disable=protected-access
             file.fileno()
@@ -53,11 +54,11 @@ elif os.name == "posix":  # pragma: nocover  # cause platform dependent!
     import fcntl
     from fcntl import LOCK_EX, LOCK_NB, LOCK_SH  # noqa # pylint: disable=unused-import
 
-    def lock(file, flags) -> None:
+    def lock(file: IO, flags: int) -> None:
         """Lock a file with flags."""
         fcntl.flock(file.fileno(), flags)
 
-    def unlock(file) -> None:
+    def unlock(file: IO) -> None:
         """Unlock a file."""
         fcntl.flock(file.fileno(), fcntl.LOCK_UN)
 

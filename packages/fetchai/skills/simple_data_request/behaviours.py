@@ -20,7 +20,7 @@
 """This package contains a a behaviour to request data from a HTTP endpoint."""
 
 import json
-from typing import cast
+from typing import Any, cast
 
 from aea.skills.behaviours import TickerBehaviour
 
@@ -37,7 +37,7 @@ DEFAULT_REQUEST_INTERVAL = 20.0
 class HttpRequestBehaviour(TickerBehaviour):
     """This class defines an http request behaviour."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         """Initialise the behaviour."""
         request_interval = kwargs.pop(
             "request_interval", DEFAULT_REQUEST_INTERVAL

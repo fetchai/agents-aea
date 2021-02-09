@@ -34,7 +34,9 @@ from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE
 class ConnectionsOption(click.Option):
     """Click option for the --connections option in 'aea run'."""
 
-    def type_cast_value(self, ctx, value) -> Optional[List[PublicId]]:
+    def type_cast_value(
+        self, ctx: click.Context, value: str
+    ) -> Optional[List[PublicId]]:
         """
         Parse the list of string passed through command line.
 
@@ -48,7 +50,7 @@ class ConnectionsOption(click.Option):
             return None
         try:
 
-            def arg_strip(s) -> str:
+            def arg_strip(s: str) -> str:
                 return s.strip(" '\"")
 
             input_connection_ids = [
@@ -69,7 +71,7 @@ class PublicIdParameter(click.ParamType):
     """Define a public id parameter for Click applications."""
 
     def __init__(  # pylint: disable=useless-super-delegation
-        self, *args, **kwargs
+        self, *args: Any, **kwargs: Any
     ) -> None:
         """
         Initialize the Public Id parameter.
@@ -78,11 +80,11 @@ class PublicIdParameter(click.ParamType):
         """
         super().__init__(*args, **kwargs)  # type: ignore
 
-    def get_metavar(self, param) -> str:
+    def get_metavar(self, param: Any) -> str:
         """Return the metavar default for this param if it provides one."""
         return "PUBLIC_ID"
 
-    def convert(self, value, param, ctx) -> PublicId:
+    def convert(self, value: str, param: Any, ctx: Optional[click.Context]) -> PublicId:
         """Convert the value. This is not invoked for values that are `None` (the missing value)."""
         try:
             return PublicId.from_str(value)
@@ -99,11 +101,11 @@ class AgentDirectory(click.Path):
             exists=True, file_okay=False, dir_okay=True, readable=True, writable=False
         )
 
-    def get_metavar(self, param) -> str:
+    def get_metavar(self, param: Any) -> str:
         """Return the metavar default for this param if it provides one."""
         return "AGENT_DIRECTORY"  # pragma: no cover
 
-    def convert(self, value, param, ctx) -> str:  # type: ignore
+    def convert(self, value: str, param: Any, ctx: click.Context) -> str:  # type: ignore
         """Convert the value. This is not invoked for values that are `None` (the missing value)."""
         cwd = os.getcwd()
         path = Path(value)
@@ -129,7 +131,7 @@ def registry_flag(
 ) -> Callable:
     """Choice of one flag between: '--local/--remote'."""
 
-    def wrapper(f):
+    def wrapper(f: Callable) -> Callable:
         f = option(
             "--local",
             is_flag=True,
@@ -150,7 +152,7 @@ def registry_flag(
     return wrapper
 
 
-def registry_path_option(f) -> Option:
+def registry_path_option(f: Callable) -> Callable:
     """Add registry path aea option."""
     return option(
         "--registry-path",
@@ -163,7 +165,7 @@ def registry_path_option(f) -> Option:
 class MutuallyExclusiveOption(Option):
     """Represent a mutually exclusive option."""
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Initialize the option."""
         self.mutually_exclusive = set(kwargs.pop("mutually_exclusive", []))
         help_ = kwargs.get("help", "")

@@ -143,7 +143,7 @@ class AsyncState:
     def _watcher_result_callback(watcher: Future) -> Callable:
         """Create callback for watcher result."""
         # docstyle.
-        def _callback(result) -> None:
+        def _callback(result: Any) -> None:
             if watcher.done():  # pragma: nocover
                 return
             watcher.set_result(result)
@@ -312,7 +312,7 @@ class AnotherThreadTask:
 class ThreadedAsyncRunner(Thread):
     """Util to run thread with event loop and execute coroutines inside."""
 
-    def __init__(self, loop=None) -> None:
+    def __init__(self, loop: Optional[AbstractEventLoop] = None) -> None:
         """
         Init threaded runner.
 
@@ -364,7 +364,7 @@ class ThreadedAsyncRunner(Thread):
 class AwaitableProc:
     """Async-friendly subprocess.Popen."""
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Initialise awaitable proc."""
         self.args = args
         self.kwargs = kwargs
@@ -479,7 +479,7 @@ class HandlerItemGetter(ItemGetter):
         :return: callable to return handler and item from getter.
         """
         # for pydocstyle
-        async def _getter():
+        async def _getter() -> Tuple[Callable, Any]:
             return handler, await getter()
 
         return _getter
@@ -666,7 +666,7 @@ class Runnable(ABC):
         loop = asyncio.get_event_loop()
         fut = loop.create_future()
 
-        def done(task) -> None:
+        def done(task: Future) -> None:
             try:
                 if fut.done():  # pragma: nocover
                     return
@@ -720,7 +720,7 @@ class Runnable(ABC):
         self._was_cancelled = True
         self._task.cancel()
 
-    def start_and_wait_completed(self, *args, **kwargs) -> Awaitable:
+    def start_and_wait_completed(self, *args: Any, **kwargs: Any) -> Awaitable:
         """Alias for start and wait methods."""
         self.start()
         return self.wait_completed(*args, **kwargs)

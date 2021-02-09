@@ -25,7 +25,7 @@ import random
 import struct
 from asyncio import CancelledError
 from pathlib import Path
-from typing import List, Optional, Union, cast
+from typing import Any, List, Optional, Union, cast
 
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_LEDGER
@@ -75,7 +75,7 @@ class P2PLibp2pClientConnection(Connection):
 
     connection_id = PUBLIC_ID
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize a libp2p client connection."""
         super().__init__(**kwargs)
 
@@ -191,7 +191,7 @@ class P2PLibp2pClientConnection(Connection):
             self._state.set(ConnectionStates.disconnected)
             raise e
 
-    async def _setup_connection(self):
+    async def _setup_connection(self) -> None:
         record = AgentRecordPb()
         record.address = self.node_por.address
         record.public_key = self.node_por.public_key
@@ -257,7 +257,7 @@ class P2PLibp2pClientConnection(Connection):
             self.logger.debug("Called disconnect when input queue not initialized.")
         self._state.set(ConnectionStates.disconnected)
 
-    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
+    async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """
         Receive an envelope. Blocking.
 
@@ -282,7 +282,7 @@ class P2PLibp2pClientConnection(Connection):
             self.logger.exception(e)
             return None
 
-    async def send(self, envelope: Envelope):
+    async def send(self, envelope: Envelope) -> None:
         """
         Send messages.
 

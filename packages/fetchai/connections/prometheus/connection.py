@@ -21,7 +21,7 @@
 
 import asyncio
 import logging
-from typing import Dict, Optional, Tuple, Union, cast
+from typing import Any, Dict, Optional, Tuple, Union, cast
 
 import aioprometheus  # type: ignore
 
@@ -50,7 +50,7 @@ VALID_METRIC_TYPES = {"Counter", "Gauge", "Histogram", "Summary"}
 class PrometheusDialogues(BasePrometheusDialogues):
     """The dialogues class keeps track of all prometheus dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -282,7 +282,7 @@ class PrometheusConnection(Connection):
 
     connection_id = PUBLIC_ID
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize a connection to a local prometheus server.
 
@@ -334,7 +334,7 @@ class PrometheusConnection(Connection):
         self._ensure_connected()
         await self.channel.send(envelope)
 
-    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
+    async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """
         Receive an envelope.
 

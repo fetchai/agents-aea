@@ -36,7 +36,7 @@ class _AEAYamlLoader(yaml.SafeLoader):
     the public functions of the module 'yaml_load' and 'yaml_load_all'.
     """
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """
         Initialize the AEAYamlLoader.
 
@@ -66,7 +66,7 @@ class _AEAYamlDumper(yaml.SafeDumper):
     the public functions of the module 'yaml_dump' and 'yaml_dump_all'.
     """
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """
         Initialize the AEAYamlDumper.
 

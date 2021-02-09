@@ -26,7 +26,7 @@ from aea.configurations.loader import ConfigLoader
 from aea.exceptions import enforce
 
 
-def format_items(items) -> str:
+def format_items(items: List[Dict]) -> str:
     """Format list of items (protocols/connections) to a string for CLI output."""
     list_str = ""
     for item in items:

@@ -28,7 +28,7 @@ from asyncio import Future
 from asyncio.events import AbstractEventLoop
 from threading import Lock
 from types import TracebackType
-from typing import Optional, Type
+from typing import Any, Optional, Type
 
 
 _default_logger = logging.getLogger(__file__)
@@ -84,7 +84,7 @@ class BaseExecTimeout(ABC):
         self.timeout = timeout
         self.result = TimeoutResult()
 
-    def _on_timeout(self, *args, **kwargs) -> None:
+    def _on_timeout(self, *args: Any, **kwargs: Any) -> None:
         """Raise exception on timeout."""
         raise self.exception_class()
 

@@ -54,7 +54,9 @@ key_file_argument = click.Path(
 )
 @click.pass_context
 @check_aea_project
-def add_key(click_context, type_, file, connection):
+def add_key(
+    click_context: click.Context, type_: str, file: str, connection: bool
+) -> None:
     """Add a private key to the wallet of the agent."""
     _add_private_key(click_context, type_, file, connection)
 

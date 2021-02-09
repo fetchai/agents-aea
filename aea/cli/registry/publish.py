@@ -46,7 +46,7 @@ from aea.configurations.constants import (
 )
 
 
-def _compress(output_filename: str, *filepaths) -> None:
+def _compress(output_filename: str, *filepaths: str) -> None:
     """Compare the output file."""
     with tarfile.open(output_filename, "w:gz") as f:
         for filepath in filepaths:
@@ -54,7 +54,7 @@ def _compress(output_filename: str, *filepaths) -> None:
 
 
 @clean_tarfiles
-def publish_agent(ctx: Context):
+def publish_agent(ctx: Context) -> None:
     """Publish an agent."""
     try_to_load_agent_config(ctx)
     check_is_author_logged_in(ctx.agent_config.author)

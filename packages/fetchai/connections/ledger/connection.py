@@ -21,7 +21,7 @@
 import asyncio
 from asyncio import Task
 from collections import deque
-from typing import Deque, Dict, List, Optional, cast
+from typing import Any, Deque, Dict, List, Optional, cast
 
 from aea.connections.base import Connection, ConnectionStates
 from aea.mail.base import Envelope
@@ -43,7 +43,7 @@ class LedgerConnection(Connection):
 
     connection_id = CONNECTION_ID
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         """Initialize a connection to interact with a ledger APIs."""
         super().__init__(**kwargs)
 
@@ -143,7 +143,7 @@ class LedgerConnection(Connection):
         task = dispatcher.dispatch(envelope)
         return task
 
-    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
+    async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """
         Receive an envelope. Blocking.
 

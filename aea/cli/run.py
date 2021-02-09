@@ -76,12 +76,12 @@ from aea.skills.base import Behaviour, Handler, Model, Skill
 @click.pass_context
 @check_aea_project
 def run(
-    click_context,
+    click_context: click.Context,
     connection_ids: List[PublicId],
     env_file: str,
     is_install_deps: bool,
     profiling: int,
-):
+) -> None:
     """Run the agent."""
     ctx = cast(Context, click_context.obj)
     profiling = int(profiling)

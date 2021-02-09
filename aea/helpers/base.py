@@ -35,6 +35,8 @@ from collections import OrderedDict, UserString, defaultdict, deque
 from collections.abc import Mapping
 from copy import copy
 from functools import wraps
+from importlib.machinery import ModuleSpec
+from os import PathLike
 from pathlib import Path
 from threading import RLock
 from typing import (
@@ -50,6 +52,7 @@ from typing import (
     Tuple,
     TypeVar,
     Union,
+    cast,
 )
 
 from dotenv import load_dotenv
@@ -64,11 +67,11 @@ ISO_8601_DATE_FORMAT = "%Y-%m-%d"
 _default_logger = logging.getLogger(__name__)
 
 
-def _get_module(spec) -> Optional[types.ModuleType]:
+def _get_module(spec: ModuleSpec) -> Optional[types.ModuleType]:
     """Try to execute a module. Return None if the attempt fail."""
     try:
         module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
+        spec.loader.exec_module(module)  # type: ignore
         return module
     except Exception:  # pylint: disable=broad-except
         return None
@@ -205,7 +208,7 @@ class RegexConstrainedString(UserString):
 
     REGEX = re.compile(".*", flags=re.DOTALL)
 
-    def __init__(self, seq) -> None:
+    def __init__(self, seq: Union[UserString, str]) -> None:
         """Initialize a regex constrained string."""
         super().__init__(seq)
 
@@ -253,7 +256,7 @@ SimpleIdOrStr = Union[SimpleId, str]
 
 
 @contextlib.contextmanager
-def cd(path) -> Generator:  # pragma: nocover
+def cd(path: Union[PathLike, str]) -> Generator:  # pragma: nocover
     """Change working directory temporarily."""
     old_path = os.getcwd()
     os.chdir(path)
@@ -284,7 +287,7 @@ def get_logger_method(fn: Callable, logger_method: Union[str, Callable]) -> Call
 
 
 def try_decorator(
-    error_message: str, default_return=None, logger_method="error"
+    error_message: str, default_return: Callable = None, logger_method: Any = "error"
 ) -> Callable:
     """
     Run function, log and return default value on exception.
@@ -297,16 +300,16 @@ def try_decorator(
     """
 
     # for pydocstyle
-    def decorator(fn) -> Callable:
+    def decorator(fn: Callable) -> Callable:
         @wraps(fn)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Callable:
             try:
                 return fn(*args, **kwargs)
             except Exception as e:  # pylint: disable=broad-except  # pragma: no cover  # generic code
                 if error_message:
                     log = get_logger_method(fn, logger_method)
                     log(error_message.format(e))
-                return default_return
+                return cast(Callable, default_return)
 
         return wrapper
 
@@ -318,7 +321,10 @@ class MaxRetriesError(Exception):
 
 
 def retry_decorator(
-    number_of_retries: int, error_message: str, delay: float = 0, logger_method="error"
+    number_of_retries: int,
+    error_message: str,
+    delay: float = 0,
+    logger_method: str = "error",
 ) -> Callable:
     """
     Run function with several attempts.
@@ -332,9 +338,9 @@ def retry_decorator(
     """
 
     # for pydocstyle
-    def decorator(fn) -> Callable:
+    def decorator(fn: Callable) -> Callable:
         @wraps(fn)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Callable:
             log = get_logger_method(fn, logger_method)
             for retry in range(number_of_retries):
                 try:
@@ -533,14 +539,14 @@ _NOT_FOUND = object()
 class cached_property:  # pragma: nocover
     """Cached property from python3.8 functools."""
 
-    def __init__(self, func) -> None:
+    def __init__(self, func: Callable) -> None:
         """Init cached property."""
         self.func = func
         self.attrname = None
         self.__doc__ = func.__doc__
         self.lock = RLock()
 
-    def __set_name__(self, _, name) -> None:
+    def __set_name__(self, _: Any, name: Any) -> None:
         """Set name."""
         if self.attrname is None:
             self.attrname = name
@@ -550,7 +556,7 @@ class cached_property:  # pragma: nocover
                 f"({self.attrname!r} and {name!r})."
             )
 
-    def __get__(self, instance, _=None) -> Any:
+    def __get__(self, instance: Any, _: Optional[Any] = None) -> Any:
         """Get instance."""
         if instance is None:
             return self
@@ -803,7 +809,7 @@ class CertRequest:
         """Compute the JSON representation."""
         return cls(**obj)
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Check equality."""
         return (
             isinstance(other, CertRequest)
@@ -837,7 +843,7 @@ def compute_specifier_from_version(version: Version) -> str:
     return specifier_set
 
 
-def decorator_with_optional_params(decorator) -> Callable:
+def decorator_with_optional_params(decorator: Callable) -> Callable:
     """
     Make a decorator usable either with or without parameters.
 
@@ -857,11 +863,11 @@ def decorator_with_optional_params(decorator) -> Callable:
     """
 
     @wraps(decorator)
-    def new_decorator(*args, **kwargs):
+    def new_decorator(*args: Any, **kwargs: Any) -> Callable:
         if len(args) == 1 and len(kwargs) == 0 and callable(args[0]):
             return decorator(args[0])
 
-        def final_decorator(real_function):
+        def final_decorator(real_function: Callable) -> Callable:
             return decorator(real_function, *args, **kwargs)
 
         return final_decorator

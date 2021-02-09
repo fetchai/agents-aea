@@ -45,7 +45,7 @@ class Contract(Component):
     contract_id = None  # type: PublicId
     contract_interface: Any = None
 
-    def __init__(self, contract_config: ContractConfig, **kwargs) -> None:
+    def __init__(self, contract_config: ContractConfig, **kwargs: Any) -> None:
         """
         Initialize the contract.
 
@@ -83,7 +83,7 @@ class Contract(Component):
         return instance
 
     @classmethod
-    def from_dir(cls, directory: str, **kwargs) -> "Contract":
+    def from_dir(cls, directory: str, **kwargs: Any) -> "Contract":
         """
         Load the protocol from a directory.
 
@@ -98,7 +98,7 @@ class Contract(Component):
         return Contract.from_config(configuration, **kwargs)
 
     @classmethod
-    def from_config(cls, configuration: ContractConfig, **kwargs) -> "Contract":
+    def from_config(cls, configuration: ContractConfig, **kwargs: Any) -> "Contract":
         """
         Load contract from configuration.
 
@@ -129,7 +129,7 @@ class Contract(Component):
 
     @classmethod
     def get_deploy_transaction(
-        cls, ledger_api: LedgerApi, deployer_address: str, **kwargs
+        cls, ledger_api: LedgerApi, deployer_address: str, **kwargs: Any
     ) -> Optional[JSONLike]:
         """
         Handler method for the 'GET_DEPLOY_TRANSACTION' requests.
@@ -150,7 +150,7 @@ class Contract(Component):
 
     @classmethod
     def get_raw_transaction(
-        cls, ledger_api: LedgerApi, contract_address: str, **kwargs
+        cls, ledger_api: LedgerApi, contract_address: str, **kwargs: Any
     ) -> Optional[JSONLike]:
         """
         Handler method for the 'GET_RAW_TRANSACTION' requests.
@@ -166,7 +166,7 @@ class Contract(Component):
 
     @classmethod
     def get_raw_message(
-        cls, ledger_api: LedgerApi, contract_address: str, **kwargs
+        cls, ledger_api: LedgerApi, contract_address: str, **kwargs: Any
     ) -> Optional[bytes]:
         """
         Handler method for the 'GET_RAW_MESSAGE' requests.
@@ -182,7 +182,7 @@ class Contract(Component):
 
     @classmethod
     def get_state(
-        cls, ledger_api: LedgerApi, contract_address: str, **kwargs
+        cls, ledger_api: LedgerApi, contract_address: str, **kwargs: Any
     ) -> Optional[JSONLike]:
         """
         Handler method for the 'GET_STATE' requests.

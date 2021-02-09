@@ -89,7 +89,7 @@ class BaseRuntime(Runnable, WithLogger):
         self._loop_mode = loop_mode or self.DEFAULT_RUN_LOOP
         self._agent_loop: BaseAgentLoop = self._get_agent_loop_instance(self._loop_mode)
 
-    def _log_runtime_state(self, state) -> None:
+    def _log_runtime_state(self, state: RuntimeStates) -> None:
         """Log a runtime state changed."""
         self.logger.debug(f"[{self._agent.name}]: Runtime state changed to {state}.")
 
@@ -114,7 +114,7 @@ class BaseRuntime(Runnable, WithLogger):
         )
 
     @staticmethod
-    def _get_storage(agent) -> Optional[Storage]:
+    def _get_storage(agent: AbstractAgent) -> Optional[Storage]:
         """Get storage instance if storage_uri provided."""
         if agent.storage_uri:
             # threaded has to be always True, cause syncrhonous operations are supported
@@ -243,7 +243,7 @@ class AsyncRuntime(BaseRuntime):
         multiplexer_options: Dict,
         loop_mode: Optional[str] = None,
         loop: Optional[AbstractEventLoop] = None,
-        threaded=False,
+        threaded: bool = False,
     ) -> None:
         """
         Init runtime.

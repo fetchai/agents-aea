@@ -394,7 +394,7 @@ def try_run_isort_formatting(path_to_protocol_package: str) -> None:
     )
 
 
-def try_run_protoc(path_to_generated_protocol_package, name) -> None:
+def try_run_protoc(path_to_generated_protocol_package: str, name: str) -> None:
     """
     Run 'protoc' protocol buffer compiler via subprocess.
 
@@ -418,7 +418,7 @@ def try_run_protoc(path_to_generated_protocol_package, name) -> None:
 
 
 def check_protobuf_using_protoc(
-    path_to_generated_protocol_package, name
+    path_to_generated_protocol_package: str, name: str
 ) -> Tuple[bool, str]:
     """
     Check whether a protocol buffer schema file is valid.

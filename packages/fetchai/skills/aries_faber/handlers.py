@@ -21,7 +21,7 @@
 
 import json
 import random
-from typing import Dict, Optional, cast
+from typing import Any, Dict, List, Optional, cast
 
 from aea.configurations.base import PublicId
 from aea.protocols.base import Message
@@ -56,7 +56,7 @@ class FaberHTTPHandler(Handler):
 
     SUPPORTED_PROTOCOL = HttpMessage.protocol_id  # type: Optional[PublicId]
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         """Initialize the handler."""
         super().__init__(**kwargs)
 
@@ -67,15 +67,19 @@ class FaberHTTPHandler(Handler):
         # use rand_name to not use any seed when starting up the accompanying ACA
         self.seed = ("my_seed_000000000000000000000000" + rand_name)[-32:]
         self.did = None  # type: Optional[str]
-        self.schema_id = None  # type: Optional[str]
+        self._schema_id = None  # type: Optional[str]
         self.credential_definition_id = None  # type: Optional[str]
 
         # Helpers
         self.connection_id = None  # type: Optional[str]
         self.is_connected_to_Alice = False
 
-        # AEA stuff
-        self.handled_message = None
+    @property
+    def schema_id(self) -> str:
+        """Get schema id."""
+        if self._schema_id is None:
+            raise ValueError("schema_id not set")
+        return self._schema_id
 
     def _send_default_message(self, content: Dict) -> None:
         """
@@ -112,7 +116,9 @@ class FaberHTTPHandler(Handler):
             content=data,
         )
 
-    def _register_schema(self, schema_name, version, schema_attrs) -> None:
+    def _register_schema(
+        self, schema_name: str, version: str, schema_attrs: List[str]
+    ) -> None:
         """
         Register schema definition.
 
@@ -137,7 +143,7 @@ class FaberHTTPHandler(Handler):
             content=schema_body,
         )
 
-    def _register_creddef(self, schema_id) -> None:
+    def _register_creddef(self, schema_id: str) -> None:
         """
         Register credential definition.
 
@@ -174,7 +180,6 @@ class FaberHTTPHandler(Handler):
         http_dialogues = cast(HttpDialogues, self.context.http_dialogues)
         strategy = cast(FaberStrategy, self.context.strategy)
 
-        self.handled_message = message
         if (
             message.performative == HttpMessage.Performative.RESPONSE
             and message.status_code == 200
@@ -204,7 +209,7 @@ class FaberHTTPHandler(Handler):
                     schema_attrs=["name", "date", "degree", "age", "timestamp"],
                 )
             elif "schema_id" in content:
-                self.schema_id = content["schema_id"]
+                self._schema_id = content["schema_id"]
                 self._register_creddef(self.schema_id)
             elif "credential_definition_id" in content:
                 self.credential_definition_id = content["credential_definition_id"]

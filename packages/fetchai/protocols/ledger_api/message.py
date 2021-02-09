@@ -20,7 +20,7 @@
 """This module contains ledger_api's message definition."""
 
 import logging
-from typing import Optional, Set, Tuple, cast
+from typing import Any, Optional, Set, Tuple, cast
 
 from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
@@ -83,7 +83,7 @@ class LedgerApiMessage(Message):
         TRANSACTION_DIGEST = "transaction_digest"
         TRANSACTION_RECEIPT = "transaction_receipt"
 
-        def __str__(self):
+        def __str__(self) -> str:
             """Get the string representation."""
             return str(self.value)
 
@@ -131,7 +131,7 @@ class LedgerApiMessage(Message):
         dialogue_reference: Tuple[str, str] = ("", ""),
         message_id: int = 1,
         target: int = 0,
-        **kwargs,
+        **kwargs: Any,
     ):
         """
         Initialise an instance of LedgerApiMessage.

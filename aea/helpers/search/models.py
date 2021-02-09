@@ -120,7 +120,7 @@ class Location:
         """
         return haversine(self.latitude, self.longitude, other.latitude, other.longitude)
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Compare equality of two locations."""
         if not isinstance(other, Location):
             return False  # pragma: nocover
@@ -144,7 +144,7 @@ class Location:
         return location_pb
 
     @classmethod
-    def decode(cls, location_pb) -> "Location":
+    def decode(cls, location_pb: Any) -> "Location":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -205,7 +205,7 @@ class Attribute:
         self.is_required = is_required
         self.description = description
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, Attribute)
@@ -235,7 +235,7 @@ class Attribute:
         return attribute
 
     @classmethod
-    def decode(cls, attribute_pb) -> "Attribute":
+    def decode(cls, attribute_pb: models_pb2.Query.Attribute) -> "Attribute":  # type: ignore
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -281,7 +281,7 @@ class DataModel:
                 )
             )
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, DataModel)
@@ -309,7 +309,7 @@ class DataModel:
         return model
 
     @classmethod
-    def decode(cls, data_model_pb) -> "DataModel":
+    def decode(cls, data_model_pb: Any) -> "DataModel":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -370,7 +370,7 @@ class Description:
         """Get the values."""
         return cast(Dict, self._values)
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, Description)
@@ -483,7 +483,7 @@ class Description:
         return instance
 
     @classmethod
-    def encode(cls, description_pb, description: "Description") -> None:
+    def encode(cls, description_pb: Any, description: "Description") -> None:
         """
         Encode an instance of this class into the protocol buffer object.
 
@@ -527,7 +527,7 @@ class Description:
         return result
 
     @classmethod
-    def _decode(cls, description_pb) -> "Description":
+    def _decode(cls, description_pb: Any) -> "Description":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -541,7 +541,7 @@ class Description:
         return cls(values, model)
 
     @classmethod
-    def decode(cls, description_pb) -> "Description":
+    def decode(cls, description_pb: Any) -> "Description":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -798,7 +798,7 @@ class ConstraintType:
             return location.distance(value) <= distance
         raise ValueError("Constraint type not recognized.")  # pragma: nocover
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Check equality with another object."""
         return (
             isinstance(other, ConstraintType)
@@ -918,7 +918,7 @@ class ConstraintType:
         return encoding
 
     @classmethod
-    def decode(cls, constraint_type_pb, category: str) -> "ConstraintType":
+    def decode(cls, constraint_type_pb: Any, category: str) -> "ConstraintType":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -1060,7 +1060,7 @@ class ConstraintExpr(ABC):
         return None
 
     @staticmethod
-    def _encode(expression) -> models_pb2.Query.ConstraintExpr:  # type: ignore
+    def _encode(expression: Any) -> models_pb2.Query.ConstraintExpr:  # type: ignore
         """
         Encode an instance of this class into a protocol buffer object.
 
@@ -1084,7 +1084,7 @@ class ConstraintExpr(ABC):
         return constraint_expression_pb
 
     @staticmethod
-    def _decode(constraint_expression_pb) -> "ConstraintExpr":
+    def _decode(constraint_expression_pb: Any) -> "ConstraintExpr":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -1156,7 +1156,7 @@ class And(ConstraintExpr):
         for constraint in self.constraints:
             constraint.check_validity()
 
-    def __eq__(self, other) -> bool:  # pragma: nocover
+    def __eq__(self, other: Any) -> bool:  # pragma: nocover
         """Compare with another object."""
         return isinstance(other, And) and self.constraints == other.constraints
 
@@ -1174,7 +1174,7 @@ class And(ConstraintExpr):
         return and_pb
 
     @classmethod
-    def decode(cls, and_pb) -> "And":
+    def decode(cls, and_pb: Any) -> "And":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -1230,7 +1230,7 @@ class Or(ConstraintExpr):
         for constraint in self.constraints:
             constraint.check_validity()
 
-    def __eq__(self, other) -> bool:  # pragma: nocover
+    def __eq__(self, other: Any) -> bool:  # pragma: nocover
         """Compare with another object."""
         return isinstance(other, Or) and self.constraints == other.constraints
 
@@ -1248,7 +1248,7 @@ class Or(ConstraintExpr):
         return or_pb
 
     @classmethod
-    def decode(cls, or_pb) -> "Or":
+    def decode(cls, or_pb: Any) -> "Or":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -1288,7 +1288,7 @@ class Not(ConstraintExpr):
         """
         return self.constraint.is_valid(data_model)
 
-    def __eq__(self, other) -> bool:  # pragma: nocover
+    def __eq__(self, other: Any) -> bool:  # pragma: nocover
         """Compare with another object."""
         return isinstance(other, Not) and self.constraint == other.constraint
 
@@ -1304,7 +1304,7 @@ class Not(ConstraintExpr):
         return not_pb
 
     @classmethod
-    def decode(cls, not_pb) -> "Not":
+    def decode(cls, not_pb: Any) -> "Not":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -1406,7 +1406,7 @@ class Constraint(ConstraintExpr):
         attribute = data_model.attributes_by_name[self.attribute_name]
         return self.constraint_type.is_valid(attribute)
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, Constraint)
@@ -1454,7 +1454,7 @@ class Constraint(ConstraintExpr):
         return constraint
 
     @classmethod
-    def decode(cls, constraint_pb) -> "Constraint":
+    def decode(cls, constraint_pb: Any) -> "Constraint":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -1541,7 +1541,7 @@ class Query:
                 "for the given data model.".format(type(self).__name__)
             )
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, Query)
@@ -1573,7 +1573,7 @@ class Query:
         return query
 
     @classmethod
-    def encode(cls, query_pb, query: "Query") -> None:
+    def encode(cls, query_pb: Any, query: "Query") -> None:
         """
         Encode an instance of this class into the protocol buffer object.
 
@@ -1590,7 +1590,7 @@ class Query:
         query_pb.query_bytes = query_bytes_bytes
 
     @classmethod
-    def _decode(cls, query_pb) -> "Query":
+    def _decode(cls, query_pb: Any) -> "Query":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -1606,7 +1606,7 @@ class Query:
         return cls(constraints, data_model if query_pb.HasField("model") else None,)
 
     @classmethod
-    def decode(cls, query_pb) -> "Query":
+    def decode(cls, query_pb: Any) -> "Query":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 

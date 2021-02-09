@@ -22,6 +22,7 @@ import re
 from abc import ABC, abstractmethod
 from enum import Enum
 from typing import (
+    Any,
     Collection,
     Dict,
     Generic,
@@ -107,11 +108,11 @@ class PackageVersion:
         """Get the string representation."""
         return str(self._version)
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Check equality."""
         return isinstance(other, PackageVersion) and self._version == other._version
 
-    def __lt__(self, other) -> bool:
+    def __lt__(self, other: Any) -> bool:
         """Compare with another object."""
         enforce(
             isinstance(other, PackageVersion),
@@ -383,7 +384,7 @@ class PublicId(JSONSerializable):
         """Get the representation."""
         return f"<{self}>"
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, PublicId)
@@ -392,7 +393,7 @@ class PublicId(JSONSerializable):
             and self.version == other.version
         )
 
-    def __lt__(self, other) -> bool:
+    def __lt__(self, other: Any) -> bool:
         """
         Compare two public ids.
 
@@ -531,7 +532,7 @@ class PackageId:
         """Get the object representation in string."""
         return f"PackageId{self.__str__()}"
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, PackageId)
@@ -539,7 +540,7 @@ class PackageId:
             and self.public_id == other.public_id
         )
 
-    def __lt__(self, other) -> bool:
+    def __lt__(self, other: Any) -> bool:
         """Compare two public ids."""
         return str(self) < str(other)
 
@@ -761,7 +762,7 @@ class Dependency:
         """Get the string representation."""
         return f"{self.__class__.__name__}(name='{self.name}', version='{self.version}', index='{self.index}', git='{self.git}', ref='{self.ref}')"
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, Dependency)

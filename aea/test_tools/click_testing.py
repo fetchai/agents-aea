@@ -41,7 +41,7 @@ from click.testing import Result
 class CliRunner(ClickCliRunner):
     """Patch of click.testing.CliRunner."""
 
-    def invoke(
+    def invoke(  # type: ignore
         self,
         cli,
         args=None,
