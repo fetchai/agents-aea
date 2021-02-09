@@ -69,7 +69,7 @@ class TCPClientConnection(TCPConnection):
         """Tear the connection down."""
         if self._reader is not None:
             self._reader.feed_eof()
-        if self._writer is None:
+        if self._writer is None:  # pragma: nocover
             return
         if self._writer.can_write_eof():
             self._writer.write_eof()

@@ -206,6 +206,7 @@ class BaseRuntime(Runnable, WithLogger):
         """Set task."""
         if self._loop is None:
             raise ValueError("Loop not set!")  #  pragma: nocover
+
         self._task = self._loop.create_task(self._run_wrapper())
 
     def set_decision_maker(self, decision_maker_handler: DecisionMakerHandler) -> None:

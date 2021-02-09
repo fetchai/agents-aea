@@ -410,7 +410,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
 
     @classmethod
     def terminate_agents(
-        cls, *subprocesses: subprocess.Popen, timeout: int = 10,
+        cls, *subprocesses: subprocess.Popen, timeout: int = 20,
     ) -> None:
         """
         Terminate agent subprocesses.

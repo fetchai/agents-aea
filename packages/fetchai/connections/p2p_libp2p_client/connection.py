@@ -48,7 +48,7 @@ from packages.fetchai.connections.p2p_libp2p_client.acn_message_pb2 import (
 
 try:
     from asyncio.streams import IncompleteReadError  # pylint: disable=ungrouped-imports
-except ImportError:
+except ImportError:  # pragma: nocover
     from asyncio import IncompleteReadError  # pylint: disable=ungrouped-imports
 
 
@@ -210,6 +210,10 @@ class P2PLibp2pClientConnection(Connection):
         await self._send(buf)
 
         buf = await self._receive()
+        if buf is None:  # pragma: nocover
+            raise ConnectionError(
+                "Error on connection setup. Incoming buffer is empty!"
+            )
         msg = AcnMessage()
         msg.ParseFromString(buf)
         payload = msg.WhichOneof("payload")
@@ -322,7 +326,7 @@ class P2PLibp2pClientConnection(Connection):
             if not data:  # pragma: no cover
                 return None
             return data
-        except ConnectionError as e:
+        except ConnectionError as e:  # pragma: nocover
             self.logger.info(f"Connection error: {e}")
             return None
         except IncompleteReadError as e:  # pragma: no cover

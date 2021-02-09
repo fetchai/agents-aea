@@ -26,7 +26,6 @@ import pytest
 
 from aea.helpers.async_utils import (
     AsyncState,
-    AwaitableProc,
     HandlerItemGetter,
     PeriodicCaller,
     Runnable,
@@ -238,17 +237,6 @@ async def test_handler_item_getter():
 
     with pytest.raises(asyncio.TimeoutError):
         handler, item = await asyncio.wait_for(getter.get(), timeout=1)
-
-
-@pytest.mark.asyncio
-async def test_libp2pconnection_awaitable_proc_cancelled():
-    """Test awaitable proc."""
-    proc = AwaitableProc(["sleep", "100"], shell=False)
-    proc_task = asyncio.ensure_future(proc.start())
-    await asyncio.sleep(0.1)
-    proc_task.cancel()
-    with suppress(asyncio.CancelledError):
-        await proc_task
 
 
 class RunAndExit(Runnable):

@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for Envelope of mail.base.py."""
-import time
 import unittest.mock
 
 import pytest
@@ -33,6 +32,7 @@ from aea.protocols.base import Message
 from packages.fetchai.connections.local.connection import LocalNode
 from packages.fetchai.protocols.default.message import DefaultMessage
 
+from tests.common.utils import wait_for_condition
 from tests.conftest import _make_dummy_connection, _make_local_connection
 
 
@@ -165,8 +165,9 @@ def test_outbox_put():
     multiplexer.connect()
     envelope = Envelope(to=receiver_address, sender=agent_address, message=msg,)
     outbox.put(envelope)
-    time.sleep(0.5)
-    assert not inbox.empty(), "Inbox must not be empty after putting an envelope"
+    wait_for_condition(
+        lambda: inbox.empty(), 15, "Inbox must not be empty after putting an envelope"
+    )
     multiplexer.disconnect()
 
 
@@ -188,9 +189,13 @@ def test_outbox_put_message():
     outbox = OutBox(multiplexer)
     inbox = InBox(multiplexer)
     multiplexer.connect()
+    wait_for_condition(
+        lambda: multiplexer.is_connected, 15, "Multiplexer is not connected"
+    )
     outbox.put_message(msg)
-    time.sleep(0.5)
-    assert not inbox.empty(), "Inbox will not be empty after putting a message."
+    wait_for_condition(
+        lambda: inbox.empty(), 15, "Inbox must not be empty after putting a message"
+    )
     multiplexer.disconnect()
 
 

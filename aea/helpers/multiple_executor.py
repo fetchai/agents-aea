@@ -170,7 +170,6 @@ class AbstractMultipleExecutor(ABC):  # pragma: nocover
 
     def start(self) -> None:
         """Start tasks."""
-        self._is_running = True
         self._start_tasks()
         self._loop.run_until_complete(self._wait_tasks_complete())
         self._is_running = False
@@ -184,7 +183,7 @@ class AbstractMultipleExecutor(ABC):  # pragma: nocover
 
         if not self._loop.is_running():
             self._loop.run_until_complete(
-                self._wait_tasks_complete(skip_exceptions=True)
+                self._wait_tasks_complete(skip_exceptions=True, on_stop=True)
             )
 
         if self._executor_pool:
@@ -197,15 +196,20 @@ class AbstractMultipleExecutor(ABC):  # pragma: nocover
             task.future = future
             self._future_task[future] = task
 
-    async def _wait_tasks_complete(self, skip_exceptions: bool = False) -> None:
+    async def _wait_tasks_complete(
+        self, skip_exceptions: bool = False, on_stop: bool = False
+    ) -> None:
         """
         Wait tasks execution to complete.
 
         :param skip_exceptions: skip exceptions if raised in tasks
         """
+        if not on_stop:
+            self._is_running = True
+
         pending = cast(Set[asyncio.futures.Future], set(self._future_task.keys()))
 
-        async def wait_future(future) -> None:  # type: ignore
+        async def wait_future(future: asyncio.futures.Future) -> None:
             try:
                 await future
             except KeyboardInterrupt:  # pragma: nocover
@@ -215,7 +219,9 @@ class AbstractMultipleExecutor(ABC):  # pragma: nocover
             except Exception as e:  # pylint: disable=broad-except  # handle any exception with own code.
                 _default_logger.exception("Exception in task!")
                 if not skip_exceptions:
-                    await self._handle_exception(self._future_task[future], e)
+                    await self._handle_exception(
+                        self._future_task[cast(TaskAwaitable, future)], e
+                    )
 
         while pending:
             done, pending = await asyncio.wait(pending, return_when=FIRST_EXCEPTION)
@@ -245,7 +251,7 @@ class AbstractMultipleExecutor(ABC):  # pragma: nocover
                 "Stopping executor according to fail policy cause exception raised in task"
             )
             self.stop()
-            await self._wait_tasks_complete(skip_exceptions=True)
+            await self._wait_tasks_complete(skip_exceptions=True, on_stop=True)
         else:  # pragma: nocover
             raise ValueError(f"Unknown fail policy: {self._task_fail_policy}")
 

@@ -140,7 +140,7 @@ class GymChannel:
     async def _run_in_executor(
         self, fn: Callable, *args: Any
     ) -> Tuple[Any, float, bool, Dict]:
-        if self._loop is None:
+        if self._loop is None:  # pragma: nocover
             raise ValueError("Loop not set!")
         return await self._loop.run_in_executor(self._threaded_pool, fn, *args)
 

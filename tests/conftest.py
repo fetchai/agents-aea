@@ -31,7 +31,17 @@ import time
 from functools import WRAPPER_ASSIGNMENTS, wraps
 from pathlib import Path
 from types import FunctionType, MethodType
-from typing import Callable, Dict, List, Optional, Sequence, Tuple, Union, cast
+from typing import (
+    Callable,
+    Dict,
+    Generator,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    Union,
+    cast,
+)
 from unittest.mock import patch
 
 import docker as docker
@@ -40,6 +50,7 @@ import pytest
 
 from aea import AEA_DIR
 from aea.aea import AEA
+from aea.aea_builder import AEABuilder
 from aea.cli.utils.config import _init_cli_config
 from aea.common import Address
 from aea.configurations.base import ComponentType, ConnectionConfig, ContractConfig
@@ -575,6 +586,17 @@ def inet_disable(request) -> None:
 
     p = patch.object(socket.socket, "connect", new=socket_connect)
     p.start()
+
+
+@pytest.fixture(scope="session", autouse=True)
+def increase_aea_builder_build_timeout(request) -> Generator:
+    """Increase build timeout for aea builder."""
+    old_timeout = AEABuilder.BUILD_TIMEOUT
+    AEABuilder.BUILD_TIMEOUT = 420
+    try:
+        yield
+    finally:
+        AEABuilder.BUILD_TIMEOUT = old_timeout
 
 
 @pytest.fixture(scope="session", autouse=True)

@@ -189,3 +189,19 @@ def test_libp2pconnection_node_config_registration_delay(mock):
     _make_libp2p_connection(port, host)
     with pytest.raises(ValueError):
         _make_libp2p_connection(port, host, peer_registration_delay="must_be_float")
+
+
+@patch.object(P2PLibp2pConnection, "_check_node_built")
+def test_build_dir_not_set(*mocks):
+    """Test build dir not set."""
+    host = "localhost"
+    port = "10000"
+
+    con = _make_libp2p_connection(port, host)
+    con.configuration.build_directory = None
+    with pytest.raises(ValueError, match="Build directory not set on configuration."):
+        P2PLibp2pConnection(
+            configuration=con.configuration,
+            identity=con._identity,
+            crypto_store=con.crypto_store,
+        )
