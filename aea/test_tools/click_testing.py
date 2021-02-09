@@ -91,6 +91,7 @@ class CliRunner(ClickCliRunner):
                 sys.stdout.flush()
                 stdout = outstreams[0].getvalue() if not outstreams[0].closed else b""  # type: ignore
                 if self.mix_stderr:
+                    # when it mixed, stderr always empty cause all output goes to stdout
                     stderr: Optional[bytes] = None
                 else:
                     stderr = (
