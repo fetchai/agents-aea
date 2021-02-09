@@ -204,3 +204,10 @@ async def test_connecting_to_node_with_same_key():
         assert ret is not None and isinstance(ret, asyncio.Queue)
         ret = await node.connect(address, my_queue)
         assert ret is None
+
+
+def test_stop_before_start():
+    """Test stop called before start."""
+    node = LocalNode()
+    with pytest.raises(ValueError, match="Connection not started!"):
+        node.stop()

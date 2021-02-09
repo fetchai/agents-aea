@@ -116,7 +116,7 @@ jobs:
       - name: Copyright Check
         run: tox -e copyright_check
       - name: AEA Package Hashes Check
-        run: tox -e hash_check -- --timeout 20.0
+        run: tox -e hash_check -- --timeout 40.0
       - name: Check package versions in documentation
         run: tox -e package_version_checks
       - name: Check package dependencies
