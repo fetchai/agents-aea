@@ -52,7 +52,7 @@ An AEA can run `Connections` via a `Multiplexer`.
 
 ### Multiplexer
 
-<img src="../assets/multiplexer.jpg" alt="Multiplexer of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:50%;">
+<img src="../assets/multiplexer.png" alt="Multiplexer of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:50%;">
 
 The <a href="../api/multiplexer#multiplexer-objects">`Multiplexer`</a> is responsible for maintaining potentially multiple `Connections`.
 
