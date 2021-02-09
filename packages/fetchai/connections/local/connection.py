@@ -199,9 +199,10 @@ class LocalNode:
 
     def stop(self) -> None:
         """Stop the node."""
-        asyncio.run_coroutine_threadsafe(self._in_queue.put(None), self._loop).result()
+
         if self._receiving_loop_task is None:
             raise ValueError("Connection not started!")
+        asyncio.run_coroutine_threadsafe(self._in_queue.put(None), self._loop).result()
         self._receiving_loop_task.result()
 
         if self._loop.is_running():

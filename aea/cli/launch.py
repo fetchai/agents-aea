@@ -79,7 +79,7 @@ def _launch_agents(
         timeout: Optional[float] = None
         if os.name == "nt":
             # Windows bug: https://bugs.python.org/issue21822
-            timeout = 0
+            timeout = 0  # pragma: nocover
         launcher.stop(timeout)
 
     for agent in launcher.failed:

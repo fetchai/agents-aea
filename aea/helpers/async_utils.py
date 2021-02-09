@@ -21,7 +21,6 @@ import asyncio
 import collections
 import datetime
 import logging
-import subprocess  # nosec
 import time
 from abc import ABC, abstractmethod
 from asyncio import CancelledError
@@ -359,73 +358,6 @@ class ThreadedAsyncRunner(Thread):
         _default_logger.debug("Wait thread to join...")
         self.join(10)
         _default_logger.debug("Stopped.")
-
-
-class AwaitableProc:
-    """Async-friendly subprocess.Popen."""
-
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        """Initialise awaitable proc."""
-        self.args = args
-        self.kwargs = kwargs
-        self._proc: Optional[subprocess.Popen] = None
-        self._thread: Optional[Thread] = None
-        self._loop: Optional[AbstractEventLoop] = None
-        self._future: Optional[Future] = None
-
-    @property
-    def thread(self) -> Thread:
-        """Get the thread."""
-        if self._thread is None:
-            raise ValueError("Thread not set!")
-        return self._thread
-
-    @property
-    def proc(self) -> subprocess.Popen:
-        """Get proc."""
-        if self._proc is None:
-            raise ValueError("subprocess not set!")
-        return self._proc
-
-    @property
-    def loop(self) -> AbstractEventLoop:
-        """Get loop."""
-        if self._loop is None:
-            raise ValueError("loop not set!")
-        return self._loop
-
-    @property
-    def future(self) -> Future:
-        """Get future."""
-        if self._future is None:
-            raise ValueError("future not set!")
-        return self._future
-
-    async def start(self) -> None:
-        """Start the subprocess."""
-        self._proc = subprocess.Popen(*self.args, **self.kwargs)  # nosec
-        self._loop = asyncio.get_event_loop()
-        self._future = asyncio.futures.Future()
-        self._thread = Thread(target=self._in_thread)
-        self.thread.start()
-        try:
-            return await asyncio.shield(self.future)
-        except asyncio.CancelledError:  # pragma: nocover
-            self.proc.terminate()
-            return await self.future
-        finally:
-            self.thread.join()
-
-    def _in_thread(self) -> None:
-        """Run in dedicated thread."""
-        self.proc.wait()
-        self.loop.call_soon_threadsafe(self._set_return_code, self.proc.returncode)
-
-    def _set_return_code(self, code: int) -> None:
-        """Set future with return code."""
-        if self.future.done():  # pragma: nocover
-            return
-        self.future.set_result(code)
 
 
 class ItemGetter:

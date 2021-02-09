@@ -420,7 +420,8 @@ class Description:
                 ),
                 None,
             )
-            if attribute is None:
+            if attribute is None:  # pragma: nocover
+                # looks like this check is redundant, cause checks done above for all attributes
                 raise ValueError("Attribute {} not found!".format(key))
             if not isinstance(value, attribute.type):
                 # values does not match type in data model
