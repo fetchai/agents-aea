@@ -19,7 +19,7 @@
 
 """This package contains the strategy model."""
 
-from typing import Dict, List, Optional, Tuple, cast
+from typing import Any, Dict, List, Optional, Tuple, cast
 
 from aea.common import JSONLike
 from aea.crypto.ledger_apis import LedgerApis
@@ -46,7 +46,7 @@ DEFAULT_OVERRIDE = False
 class Strategy(Model):
     """This class is the strategy model."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize the strategy of the agent.
 

@@ -78,7 +78,7 @@ class EntryPoint(Generic[ItemType], RegexConstrainedString):
 
         match = self.REGEX.match(self.data)
         if match is None:
-            raise ValueError("No match found!")
+            raise ValueError("No match found!")  #  pragma: nocover
         self._import_path = match.group(1)
         self._class_name = match.group(2)
 

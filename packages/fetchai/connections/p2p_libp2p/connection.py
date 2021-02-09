@@ -28,7 +28,7 @@ from asyncio import AbstractEventLoop, CancelledError
 from ipaddress import ip_address
 from pathlib import Path
 from socket import gethostbyname
-from typing import IO, List, Optional, Sequence, cast
+from typing import Any, IO, List, Optional, Sequence, cast
 
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_LEDGER
@@ -443,7 +443,7 @@ class P2PLibp2pConnection(Connection):
 
     connection_id = PUBLIC_ID
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize a p2p libp2p connection."""
 
         # we put it here so below we can access the address
@@ -655,7 +655,7 @@ class P2PLibp2pConnection(Connection):
             )
         self._state.set(ConnectionStates.disconnected)
 
-    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
+    async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """
         Receive an envelope. Blocking.
 
@@ -680,7 +680,7 @@ class P2PLibp2pConnection(Connection):
             self.logger.exception(e)
             return None
 
-    async def send(self, envelope: Envelope):
+    async def send(self, envelope: Envelope) -> None:
         """
         Send messages.
 

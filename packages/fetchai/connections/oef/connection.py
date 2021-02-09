@@ -24,7 +24,7 @@ from asyncio import AbstractEventLoop, CancelledError
 from concurrent.futures.thread import ThreadPoolExecutor
 from itertools import cycle
 from logging import Logger
-from typing import Dict, List, Optional, Type, cast
+from typing import Any, Callable, Dict, List, Optional, Type, cast
 
 import oef
 from oef.agents import OEFAgent
@@ -171,7 +171,7 @@ class OEFChannel(OEFAgent):
 
         self.aea_logger = logger
 
-    async def _run_in_executor(self, fn, *args):
+    async def _run_in_executor(self, fn: Callable, *args: Any) -> None:
         if not self._loop:  # pragma: nocover
             raise ValueError("Channel not connected!")
         return await self._loop.run_in_executor(self._threaded_pool, fn, *args)
@@ -405,7 +405,7 @@ class OEFChannel(OEFAgent):
         else:
             self.send_default_message(envelope)
 
-    def send_default_message(self, envelope: Envelope):
+    def send_default_message(self, envelope: Envelope) -> None:
         """Send a 'default' message."""
         self.send_message(
             STUB_MESSAGE_ID, STUB_DIALOGUE_ID, envelope.to, envelope.encode()
@@ -456,20 +456,20 @@ class OEFChannel(OEFAgent):
             raise ValueError("OEF request not recognized.")  # pragma: nocover
 
     def handle_failure(  # pylint: disable=no-self-use,unused-argument
-        self, exception: Exception, conn
+        self, exception: Exception, conn: Any
     ) -> None:
         """Handle failure."""
         self.aea_logger.exception(exception)  # pragma: nocover
 
-    async def _set_loop_and_queue(self):
+    async def _set_loop_and_queue(self) -> None:
         self._loop = asyncio.get_event_loop()
         self._in_queue = asyncio.Queue()
 
-    async def _unset_loop_and_queue(self):
+    async def _unset_loop_and_queue(self) -> None:
         self._loop = None
         self._in_queue = None
 
-    def _check_loop_and_queue(self):
+    def _check_loop_and_queue(self) -> None:
         enforce(self.in_queue is not None, "In queue is not set!")
         enforce(self.loop is not None, "Loop is not set!")
 
@@ -530,7 +530,7 @@ class OEFConnection(Connection):
 
     connection_id = PUBLIC_ID
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize.
 
@@ -602,7 +602,7 @@ class OEFConnection(Connection):
 
         self._state.set(ConnectionStates.disconnected)
 
-    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
+    async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """
         Receive an envelope. Blocking.
 

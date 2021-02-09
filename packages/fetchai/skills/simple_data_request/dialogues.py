@@ -24,6 +24,8 @@ This module contains the classes required for dialogue management.
 - HttpDialogues: The dialogues class keeps track of all http dialogues.
 """
 
+from typing import Any
+
 from aea.protocols.base import Address, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.skills.base import Model
@@ -38,7 +40,7 @@ HttpDialogue = BaseHttpDialogue
 class HttpDialogues(Model, BaseHttpDialogues):
     """This class keeps track of all http dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 

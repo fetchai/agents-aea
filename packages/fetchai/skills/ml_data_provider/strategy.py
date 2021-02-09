@@ -20,6 +20,7 @@
 """This module contains the strategy class."""
 
 import uuid
+from typing import Any, Tuple
 
 import numpy as np
 from tensorflow import keras
@@ -51,7 +52,7 @@ DEFAULT_CLASSIFICATION = {"piece": "classification", "value": "seller"}
 class Strategy(Model):
     """This class defines a strategy for the agent."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize the strategy of the agent."""
         self.price_per_data_batch = kwargs.pop(
             "price_per_data_batch", DEFAULT_PRICE_PER_DATA_BATCH
@@ -192,7 +193,7 @@ class Strategy(Model):
         )
         return description
 
-    def sample_data(self, n: int):
+    def sample_data(self, n: int) -> Tuple:
         """Sample N rows from data."""
         idx = np.arange(self.train_x.shape[0])
         mask = np.zeros_like(idx, dtype=bool)

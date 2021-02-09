@@ -19,7 +19,7 @@
 
 """This package contains a simple Fetch oracle client behaviour."""
 
-from typing import cast
+from typing import Any, cast
 
 from aea.mail.base import EnvelopeContext
 from aea.skills.behaviours import TickerBehaviour
@@ -47,7 +47,7 @@ DEFAULT_QUERY_INTERVAL = 5
 class SimpleOracleClientBehaviour(TickerBehaviour):
     """This class implements a behaviour that deploys a Fetch oracle client contract."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         """Initialise the behaviour."""
         query_interval = kwargs.pop(
             "query_interval", DEFAULT_QUERY_INTERVAL
@@ -202,7 +202,7 @@ class SimpleOracleClientBehaviour(TickerBehaviour):
         )
         self.context.logger.info("requesting query transaction...")
 
-    def _get_balance(self):
+    def _get_balance(self) -> None:
         """
         Request balance of agent account by sending a message to the ledger API
 

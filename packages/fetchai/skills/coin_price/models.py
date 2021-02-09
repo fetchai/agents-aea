@@ -19,6 +19,8 @@
 
 """This package contains a model for the CoinPrice skill"""
 
+from typing import Any
+
 from aea.skills.base import Model
 
 
@@ -32,7 +34,7 @@ DEFAULT_USE_HTTP_SERVER = False
 class CoinPriceModel(Model):
     """This class models the CoinPrice skill."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 

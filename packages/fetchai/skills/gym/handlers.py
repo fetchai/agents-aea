@@ -19,7 +19,7 @@
 
 """This module contains the handler for the 'gym' skill."""
 
-from typing import cast
+from typing import Any, cast
 
 from aea.protocols.base import Message
 from aea.skills.base import Handler
@@ -40,7 +40,7 @@ class GymHandler(Handler):
 
     SUPPORTED_PROTOCOL = GymMessage.protocol_id
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         """Initialize the handler."""
         nb_steps = kwargs.pop("nb_steps", DEFAULT_NB_STEPS)
         super().__init__(**kwargs)

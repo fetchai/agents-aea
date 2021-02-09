@@ -55,6 +55,6 @@ class AnyObject:
         """
         return pickle.loads(any_object_protobuf_object.any)  # nosec
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Check equality."""
         return self.any == other.any

@@ -21,7 +21,7 @@
 
 import logging
 import random
-from typing import Any, Dict
+from typing import Any, Dict, Tuple
 
 import numpy as np
 
@@ -140,7 +140,12 @@ class MyRLAgent(RLAgent):
         return action
 
     def _update_model(  # pylint: disable=unused-argument
-        self, observation, reward, done, info, action
+        self,
+        observation: Any,
+        reward: float,
+        done: bool,
+        info: Dict,
+        action: Tuple[int, int],
     ) -> None:
         """
         Update the model.
@@ -156,7 +161,8 @@ class MyRLAgent(RLAgent):
 
         # Update the price model:
         good_price_model = self.good_price_models[good_id]
-        good_price_model.update(reward, price)
+        outcome = reward == 1.0
+        good_price_model.update(outcome, price)
 
     def _get_random_next_good(self) -> int:
         """

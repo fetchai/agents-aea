@@ -24,7 +24,7 @@ import logging
 from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop
 from concurrent.futures.thread import ThreadPoolExecutor
-from typing import Optional, Tuple, Union, cast
+from typing import Any, Callable, Dict, Optional, Tuple, Union, cast
 
 import gym
 
@@ -49,7 +49,7 @@ PUBLIC_ID = PublicId.from_str("fetchai/gym:0.13.0")
 class GymDialogues(BaseGymDialogues):
     """The dialogues class keeps track of all gym dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -137,7 +137,9 @@ class GymChannel:
             raise ValueError("This protocol is not valid for gym.")
         await self.handle_gym_message(envelope)
 
-    async def _run_in_executor(self, fn, *args):
+    async def _run_in_executor(
+        self, fn: Callable, *args: Any
+    ) -> Tuple[Any, float, bool, Dict]:
         if self._loop is None:
             raise ValueError("Loop not set!")
         return await self._loop.run_in_executor(self._threaded_pool, fn, *args)
@@ -218,7 +220,7 @@ class GymConnection(Connection):
 
     connection_id = PUBLIC_ID
 
-    def __init__(self, gym_env: Optional[gym.Env] = None, **kwargs):
+    def __init__(self, gym_env: Optional[gym.Env] = None, **kwargs: Any) -> None:
         """
         Initialize a connection to a local gym environment.
 
@@ -271,7 +273,7 @@ class GymConnection(Connection):
         self._ensure_connected()
         await self.channel.send(envelope)
 
-    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
+    async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """Receive an envelope."""
         self._ensure_connected()
         try:

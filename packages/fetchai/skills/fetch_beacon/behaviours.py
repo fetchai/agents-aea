@@ -20,7 +20,7 @@
 """This package contains the behaviour to get the Fetch random beacon."""
 
 import json
-from typing import Dict, Optional, cast
+from typing import Any, Dict, Optional, cast
 
 from aea.mail.base import EnvelopeContext
 from aea.skills.behaviours import TickerBehaviour
@@ -37,7 +37,7 @@ DEFAULT_PUBLISH_INTERVAL = 3600
 class FetchBeaconBehaviour(TickerBehaviour):
     """This class provides a simple beacon fetch behaviour."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize the beacon fetch behaviour."""
 
         super().__init__(**kwargs)

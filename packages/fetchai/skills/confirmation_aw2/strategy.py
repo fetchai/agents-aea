@@ -20,7 +20,7 @@
 """This module contains the strategy class."""
 
 import datetime
-from typing import Dict, List, Optional, Tuple, cast
+from typing import Any, Dict, List, Optional, Tuple, cast
 
 from packages.fetchai.skills.confirmation_aw2.registration_db import RegistrationDB
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
@@ -29,7 +29,7 @@ from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 class Strategy(GenericStrategy):
     """Strategy class extending Generic Strategy."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize the strategy of the agent.
 

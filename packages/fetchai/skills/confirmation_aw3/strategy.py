@@ -22,7 +22,7 @@
 import datetime
 import json
 import random
-from typing import Dict, List, Optional, Tuple, cast
+from typing import Any, Dict, List, Optional, Tuple, cast
 
 from aea.helpers.search.models import Location
 
@@ -38,7 +38,7 @@ from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 class Strategy(GenericStrategy):
     """Strategy class extending Generic Strategy."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize the strategy of the agent.
 
