@@ -1,8 +1,8 @@
 This guide will take you through the development of your first skill. It will teach you, how to connect the AEA to the digital world, register the AEA and search for other AEAs.
 
-AEAs are not, generally secret agents. You want them to be seen and found by other agents so that they can trade and do other useful things. Usually, this means connecting to Fetch.ai’s search-and-discovery mechanism, the <a href="../simple-oef">simple OEF</a> (or SOEF, for short). The SOEF lets your agents register, be found, and find other agents. You can then negotiate using the AEA framework’s <a href="../acn">peer-to-peer network (ACN)</a> and trade. This guide covers getting your AEA connected to the SOEF, and describing your AEA to make itself visible.
+Although one can imagine scenarios where a single AEA pursues its goals in isolation without interacting with other AEAs, there is no doubt that by working together, AEAs can achieve much more. To do so, an AEA must be seen and found by other AEAs so that they can trade and do other useful things. Fetch.ai’s search-and-discovery mechanism, the <a href="../simple-oef">simple OEF</a> (or SOEF, for short) lets your agents register, be discovered, and find other agents. You can then negotiate using the AEA framework’s <a href="../acn">peer-to-peer network (ACN)</a> and trade. This guide covers getting your AEA connected to the SOEF, and describing your AEA to make itself visible.
 
-Typically, this means setting a name, a genus (a high-level description of what the agent represents, e.g., `vehicle`, `building` or `service`), a classification (`infrastructure.railway.train`, for example) and then a bunch of other descriptors, where applicable, that provide the agent's position, whether it buys or sells, and other descriptive items.
+Registering your AEA with the SOEF involves setting a name, a genus (a high-level description of what the agent represents, e.g. `vehicle`, `building` or `service`), a classification (for example `infrastructure.railway.train`) and other descriptors to further fine-tune the kind of service your AEA offers (for example, the agent's position, whether it buys or sells, and other descriptive items).
 
 The more you describe your AEA, the easier it is for others to find it using specific filters.
 
@@ -23,7 +23,7 @@ In the following steps, we replace the scaffolded `Behaviour` and `Handler` in `
 
 ## Step 2: Develop a Behaviour
 
-A <a href="../api/skills/base#behaviour-objects">`Behaviour`</a> class contains the business logic specific to initial actions initiated by the AEA rather than reactions to other events.
+A <a href="../api/skills/base#behaviour-objects">`Behaviour`</a> class contains the business logic specific to actions initiated by the AEA rather than reactions to other events.
 
 In this example, we implement a simple search behaviour. Each time, `act()` gets called by the main agent loop, we will send a search request to the <a href="../simple-oef">SOEF search node</a> via the <a href="../oef-ledger">P2P communication network</a>.
 
@@ -401,7 +401,7 @@ Again, ensure the author field matches your own.
 
 ## Step 6: Update fingerprint
 
-We need to update the fingerprint of our skill next:
+To run an AEA with new or modified code, you need to update the fingerprint of the new/modified components. In this case, we need to fingerprint our skill:
 ``` bash
 aea fingerprint skill fetchai/my_search:0.1.0
 ```
@@ -416,7 +416,7 @@ aea add protocol fetchai/oef_search:0.12.0
 
 This adds the protocol to our AEA and makes it available on the path `packages.fetchai.protocols...`.
 
-We also need to add the SOEF and P2P connections and install the AEA's dependencies as well as configure the AEA:
+At this point we need to add the SOEF and P2P connections to allow the AEA to communicate with the SOEF node and other AEAs, install the AEA's dependencies, and configure the AEA:
 ``` bash
 aea add connection fetchai/soef:0.15.0
 aea add connection fetchai/p2p_libp2p:0.14.0
@@ -433,7 +433,9 @@ The last command will ensure that search requests are processed by the correct c
 
 ## Step 8: Run a service provider AEA
 
-In order to be able to find another AEA when searching, from a different terminal window, we fetch another finished AEA and install its Python dependencies:
+In order for this AEA to find another AEA when searching, the second AEA (let's call it the service provider AEA) must exist and have been registered with the SOEF. 
+
+From a different terminal window, we fetch a finished service provider AEA and install its Python dependencies:
 ``` bash
 aea fetch fetchai/simple_service_registration:0.19.0 && cd simple_service_registration && aea install && aea build
 ```
@@ -462,7 +464,7 @@ Then we run the AEA:
 aea run
 ```
 
-Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.14.0 -u public_uri` to retrieve the address.) This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the `simple_service_registration` AEA.
+Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.14.0 -u public_uri` to retrieve the address.) This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the `simple_service_registration` (service provider) AEA.
 
 <details><summary>Click here to see full code and guide for this AEA</summary>
 <p>
@@ -929,10 +931,5 @@ We stop the AEA with `CTRL + C`.
 We recommend you continue with the next step in the 'Getting Started' series:
 
 - <a href="../core-components-2">Core components (Part 2)</a>
-
-
-### Relevant deep-dives
-
-We hope this step by step introduction has helped you develop your own skill. We are excited to see what you will build.
 
 <br />
