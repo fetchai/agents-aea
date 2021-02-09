@@ -1123,6 +1123,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :return: the AEA object.
         :raises ValueError: if we cannot
         """
+        datadir = self._get_data_dir()
         self._check_we_can_build()
         logging.config.dictConfig(self._logging_config)
         wallet = Wallet(
@@ -1138,13 +1139,14 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             identity.name,
             identity=identity,
             crypto_store=wallet.connection_cryptos,
-            data_dir=self._get_data_dir(),
+            data_dir=datadir,
         )
         connection_ids = self._process_connection_ids(connection_ids)
         aea = self.AEA_CLASS(
             identity,
             wallet,
             resources,
+            datadir,
             loop=None,
             period=self._get_agent_act_period(),
             execution_timeout=self._get_execution_timeout(),
@@ -1160,7 +1162,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             runtime_mode=self._get_runtime_mode(),
             connection_ids=connection_ids,
             search_service_address=self._get_search_service_address(),
-            data_dir=self._get_data_dir(),
             storage_uri=self._get_storage_uri(),
             **deepcopy(self._context_namespace),
         )
@@ -1310,13 +1311,13 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         """
         return self._storage_uri
 
-    def _get_data_dir(self) -> Optional[str]:
+    def _get_data_dir(self) -> str:
         """
         Return the data directory.
 
         :return: the data directory.
         """
-        return self._data_dir
+        return self._data_dir if self._data_dir is not None else os.getcwd()
 
     def _get_search_service_address(self) -> str:
         """

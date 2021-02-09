@@ -19,7 +19,6 @@
 
 
 """This module contains the agent context class."""
-import os
 from queue import Queue
 from types import SimpleNamespace
 from typing import Any, Callable, Dict, Optional
@@ -49,7 +48,7 @@ class AgentContext:
         default_routing: Dict[PublicId, PublicId],
         search_service_address: Address,
         decision_maker_address: Address,
-        data_dir: Optional[str] = None,
+        data_dir: str,
         storage_callable: Callable[[], Optional[Storage]] = lambda: None,
         **kwargs: Any
     ) -> None:
@@ -86,7 +85,7 @@ class AgentContext:
         self._default_connection = default_connection
         self._default_routing = default_routing
         self._storage_callable = storage_callable
-        self._data_dir = data_dir or os.getcwd()
+        self._data_dir = data_dir
         self._namespace = SimpleNamespace(**kwargs)
 
     @property

@@ -158,7 +158,11 @@ def test_from_dir():
     identity = MagicMock()
     identity.name = "agent_name"
     crypto_store = MagicMock()
-    connection = Connection.from_dir(dummy_connection_dir, identity, crypto_store)
+
+    data_dir = MagicMock()
+    connection = Connection.from_dir(
+        dummy_connection_dir, identity, crypto_store, data_dir
+    )
     assert isinstance(connection, Connection)
     assert connection.component_id == ComponentId(
         ComponentType.CONNECTION, PublicId("fetchai", "dummy", "0.1.0")
@@ -179,8 +183,9 @@ def test_from_config_exception_path():
     identity = MagicMock()
     identity.name = "agent_name"
     crypto_store = MagicMock()
+    data_dir = MagicMock()
     with pytest.raises(AEAComponentLoadException, match="Connection module"):
-        Connection.from_config(configuration, identity, crypto_store)
+        Connection.from_config(configuration, identity, crypto_store, data_dir)
 
 
 def test_from_config_exception_class():
@@ -197,5 +202,6 @@ def test_from_config_exception_class():
     identity = MagicMock()
     identity.name = "agent_name"
     crypto_store = MagicMock()
+    data_dir = MagicMock()
     with pytest.raises(AEAComponentLoadException, match="Connection class"):
-        Connection.from_config(configuration, identity, crypto_store)
+        Connection.from_config(configuration, identity, crypto_store, data_dir)

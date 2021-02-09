@@ -27,6 +27,7 @@ import subprocess  # nosec
 import time
 from threading import Thread
 from typing import Optional
+from unittest.mock import MagicMock
 
 import pytest
 import yaml
@@ -169,6 +170,7 @@ class TestAEAToACA:
             address=wallet.addresses.get(DEFAULT_LEDGER),
             default_address_key=DEFAULT_LEDGER,
         )
+        data_dir = MagicMock()
         configuration = ConnectionConfig(
             host=self.aca_admin_address,
             port=self.aca_admin_port,
@@ -181,7 +183,7 @@ class TestAEAToACA:
         resources.add_connection(http_client_connection)
 
         # create AEA
-        aea = AEA(identity, wallet, resources)
+        aea = AEA(identity, wallet, resources, data_dir)
 
         # Add http protocol to AEA resources
         http_protocol_configuration = ProtocolConfig.from_json(

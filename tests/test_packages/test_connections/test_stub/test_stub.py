@@ -25,6 +25,7 @@ import tempfile
 import time
 from pathlib import Path
 from unittest import mock
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -376,6 +377,7 @@ async def test_load_from_dir():
         ROOT_DIR + "/packages/fetchai/connections/stub",
         Identity("name", "address"),
         CryptoStore(),
+        MagicMock(),
     )
 
 

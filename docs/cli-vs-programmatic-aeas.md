@@ -139,6 +139,7 @@ def run():
         "my_aea", address=wallet.addresses.get(FetchAICrypto.identifier)
     )
     resources = Resources()
+    data_dir = os.getcwd()
 
     # specify the default routing for some protocols
     default_routing = {
@@ -244,6 +245,7 @@ def run():
         identity,
         wallet,
         resources,
+        data_dir,
         default_connection=default_connection,
         default_routing=default_routing,
     )

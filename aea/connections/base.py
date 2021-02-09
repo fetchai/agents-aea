@@ -228,7 +228,7 @@ class Connection(Component, ABC):
         directory: str,
         identity: Identity,
         crypto_store: CryptoStore,
-        data_dir: Optional[str] = None,
+        data_dir: str,
         **kwargs: Any,
     ) -> "Connection":
         """
@@ -255,7 +255,7 @@ class Connection(Component, ABC):
         configuration: ConnectionConfig,
         identity: Identity,
         crypto_store: CryptoStore,
-        data_dir: Optional[str] = None,
+        data_dir: str,
         **kwargs: Any,
     ) -> "Connection":
         """
@@ -267,7 +267,6 @@ class Connection(Component, ABC):
         :param data_dir: the directory of the AEA project data.
         :return: an instance of the concrete connection class.
         """
-        data_dir = data_dir or os.getcwd()
         configuration = cast(ConnectionConfig, configuration)
         directory = cast(Path, configuration.directory)
         load_aea_package(configuration)

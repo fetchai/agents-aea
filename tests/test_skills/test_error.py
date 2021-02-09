@@ -74,6 +74,7 @@ class TestSkillError:
         private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
         self.wallet = Wallet({DEFAULT_LEDGER: private_key_path})
         self.agent_name = "Agent0"
+        self.data_dir = unittest.MagicMock()
 
         self.connection = _make_dummy_connection()
         self.identity = Identity(
@@ -85,6 +86,7 @@ class TestSkillError:
         self.my_aea = AEA(
             self.identity,
             self.wallet,
+            self.data_dir,
             period=0.1,
             resources=resources,
             default_connection=self.connection.public_id,
