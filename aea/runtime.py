@@ -56,12 +56,6 @@ class BaseRuntime(Runnable, WithLogger):
     }
     DEFAULT_RUN_LOOP: str = "async"
 
-    def start(self) -> bool:
-        import time
-
-        time.sleep(1)
-        return Runnable.start(self)
-
     def __init__(
         self,
         agent: AbstractAgent,
