@@ -121,9 +121,8 @@ class TestThreadLauncherMode:
                 [self.agent_name_1, self.agent_name_2], self.RUNNER_MODE
             )
             runner.start(True)
-            wait_for_condition(lambda: runner.is_running, timeout=5)
+            wait_for_condition(lambda: runner.is_running, timeout=10)
             assert runner.num_failed == 0
-            time.sleep(1)
         finally:
             runner.stop()
             assert not runner.is_running

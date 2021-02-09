@@ -170,7 +170,6 @@ class AbstractMultipleExecutor(ABC):  # pragma: nocover
 
     def start(self) -> None:
         """Start tasks."""
-        self._is_running = True
         self._start_tasks()
         self._loop.run_until_complete(self._wait_tasks_complete())
         self._is_running = False
@@ -184,7 +183,7 @@ class AbstractMultipleExecutor(ABC):  # pragma: nocover
 
         if not self._loop.is_running():
             self._loop.run_until_complete(
-                self._wait_tasks_complete(skip_exceptions=True)
+                self._wait_tasks_complete(skip_exceptions=True, on_stop=True)
             )
 
         if self._executor_pool:
@@ -197,12 +196,17 @@ class AbstractMultipleExecutor(ABC):  # pragma: nocover
             task.future = future
             self._future_task[future] = task
 
-    async def _wait_tasks_complete(self, skip_exceptions: bool = False) -> None:
+    async def _wait_tasks_complete(
+        self, skip_exceptions: bool = False, on_stop: bool = False
+    ) -> None:
         """
         Wait tasks execution to complete.
 
         :param skip_exceptions: skip exceptions if raised in tasks
         """
+        if not on_stop:
+            self._is_running = True
+
         pending = cast(Set[asyncio.futures.Future], set(self._future_task.keys()))
 
         async def wait_future(future) -> None:  # type: ignore
