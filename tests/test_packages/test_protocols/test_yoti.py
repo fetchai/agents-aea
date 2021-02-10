@@ -18,7 +18,10 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the tests of the yoti protocol package."""
+from unittest import mock
 from uuid import uuid4
+
+import pytest
 
 from packages.fetchai.protocols.yoti.message import YotiMessage
 
@@ -46,3 +49,22 @@ def test_encode_decode_error():
         performative=YotiMessage.Performative.ERROR, error_code=500, error_msg="msg"
     )
     assert YotiMessage.decode(msg.encode()) == msg
+
+
+def test_encoding_unknown_performative():
+    """Test that we raise an exception when the performative is unknown during encoding."""
+    msg = YotiMessage(performative=YotiMessage.Performative.PROFILE, info={},)
+
+    with pytest.raises(ValueError, match="Performative not valid:"):
+        with mock.patch.object(YotiMessage.Performative, "__eq__", return_value=False):
+            YotiMessage.serializer.encode(msg)
+
+
+def test_decoding_unknown_performative():
+    """Test that we raise an exception when the performative is unknown during decoding."""
+    msg = YotiMessage(performative=YotiMessage.Performative.PROFILE, info={},)
+
+    encoded_msg = YotiMessage.serializer.encode(msg)
+    with pytest.raises(ValueError, match="Performative not valid:"):
+        with mock.patch.object(YotiMessage.Performative, "__eq__", return_value=False):
+            YotiMessage.serializer.decode(encoded_msg)
