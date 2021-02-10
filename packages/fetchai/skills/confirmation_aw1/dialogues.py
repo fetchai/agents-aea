@@ -24,7 +24,7 @@ This module contains the classes required for dialogue management.
 - OefSearchDialogues: The dialogues class keeps track of all dialogues.
 """
 
-from typing import Optional, Type
+from typing import Any, Optional, Type
 
 from aea.exceptions import AEAEnforceError, enforce
 from aea.helpers.transaction.base import Terms
@@ -75,7 +75,7 @@ DefaultDialogue = BaseDefaultDialogue
 class DefaultDialogues(Model, BaseDefaultDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -146,7 +146,7 @@ class RegisterDialogue(BaseRegisterDialogue):
 class RegisterDialogues(Model, BaseRegisterDialogues):
     """This class keeps track of all register dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -237,7 +237,7 @@ class ContractApiDialogue(BaseContractApiDialogue):
 class ContractApiDialogues(Model, BaseContractApiDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -312,7 +312,7 @@ class LedgerApiDialogue(BaseLedgerApiDialogue):
 class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -389,7 +389,7 @@ class SigningDialogue(BaseSigningDialogue):
 class SigningDialogues(Model, BaseSigningDialogues):
     """This class keeps track of all signing dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 

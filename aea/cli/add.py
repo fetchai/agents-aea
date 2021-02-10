@@ -19,7 +19,7 @@
 
 """Implementation of the 'aea add' subcommand."""
 from pathlib import Path
-from typing import cast
+from typing import Union, cast
 
 import click
 
@@ -40,7 +40,12 @@ from aea.cli.utils.package_utils import (
     is_item_present,
     register_item,
 )
-from aea.configurations.base import PublicId
+from aea.configurations.base import (
+    ConnectionConfig,
+    PackageConfiguration,
+    PublicId,
+    SkillConfig,
+)
 from aea.configurations.constants import CONNECTION, CONTRACT, PROTOCOL, SKILL
 
 
@@ -48,7 +53,7 @@ from aea.configurations.constants import CONNECTION, CONTRACT, PROTOCOL, SKILL
 @registry_flag()
 @click.pass_context
 @check_aea_project
-def add(click_context, local, remote):
+def add(click_context: click.Context, local: bool, remote: bool) -> None:
     """Add a package to the agent."""
     ctx = cast(Context, click_context.obj)
     ctx.set_config("is_local", local and not remote)
@@ -58,7 +63,7 @@ def add(click_context, local, remote):
 @add.command()
 @click.argument("connection_public_id", type=PublicIdParameter(), required=True)
 @pass_ctx
-def connection(ctx: Context, connection_public_id: PublicId):
+def connection(ctx: Context, connection_public_id: PublicId) -> None:
     """Add a connection to the agent."""
     add_item(ctx, CONNECTION, connection_public_id)
 
@@ -66,7 +71,7 @@ def connection(ctx: Context, connection_public_id: PublicId):
 @add.command()
 @click.argument("contract_public_id", type=PublicIdParameter(), required=True)
 @pass_ctx
-def contract(ctx: Context, contract_public_id: PublicId):
+def contract(ctx: Context, contract_public_id: PublicId) -> None:
     """Add a contract to the agent."""
     add_item(ctx, CONTRACT, contract_public_id)
 
@@ -74,7 +79,7 @@ def contract(ctx: Context, contract_public_id: PublicId):
 @add.command()
 @click.argument("protocol_public_id", type=PublicIdParameter(), required=True)
 @pass_ctx
-def protocol(ctx: Context, protocol_public_id):
+def protocol(ctx: Context, protocol_public_id: PublicId) -> None:
     """Add a protocol to the agent."""
     add_item(ctx, PROTOCOL, protocol_public_id)
 
@@ -82,7 +87,7 @@ def protocol(ctx: Context, protocol_public_id):
 @add.command()
 @click.argument("skill_public_id", type=PublicIdParameter(), required=True)
 @pass_ctx
-def skill(ctx: Context, skill_public_id: PublicId):
+def skill(ctx: Context, skill_public_id: PublicId) -> None:
     """Add a skill to the agent."""
     add_item(ctx, SKILL, skill_public_id)
 
@@ -136,7 +141,9 @@ def add_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
     click.echo(f"Successfully added {item_type} '{item_config.public_id}'.")
 
 
-def _add_item_deps(ctx: Context, item_type: str, item_config) -> None:
+def _add_item_deps(
+    ctx: Context, item_type: str, item_config: PackageConfiguration
+) -> None:
     """
     Add item dependencies. Calls add_item recursively.
 
@@ -147,12 +154,14 @@ def _add_item_deps(ctx: Context, item_type: str, item_config) -> None:
     :return: None
     """
     if item_type in {CONNECTION, SKILL}:
+        item_config = cast(Union[SkillConfig, ConnectionConfig], item_config)
         # add missing protocols
         for protocol_public_id in item_config.protocols:
             if protocol_public_id not in ctx.agent_config.protocols:
                 add_item(ctx, PROTOCOL, protocol_public_id)
 
     if item_type == SKILL:
+        item_config = cast(SkillConfig, item_config)
         # add missing contracts
         for contract_public_id in item_config.contracts:
             if contract_public_id not in ctx.agent_config.contracts:

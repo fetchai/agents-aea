@@ -501,12 +501,6 @@ class PrometheusHandler(Handler):
 
     SUPPORTED_PROTOCOL = PrometheusMessage.protocol_id
 
-    def __init__(self, **kwargs):
-        """Initialize the handler."""
-        super().__init__(**kwargs)
-
-        self.handled_message = None
-
     def setup(self) -> None:
         """Set up the handler."""
         if self.context.prometheus_dialogues.enabled:
@@ -533,7 +527,6 @@ class PrometheusHandler(Handler):
             self._handle_unidentified_dialogue(message)
             return
 
-        self.handled_message = message
         if message.performative == PrometheusMessage.Performative.RESPONSE:
             self.context.logger.debug(
                 f"Prometheus response ({message.code}): {message.message}"

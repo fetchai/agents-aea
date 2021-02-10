@@ -54,7 +54,13 @@ from aea.exceptions import enforce
 )
 @click.argument("public-id", type=PublicIdParameter(), required=True)
 @click.pass_context
-def fetch(click_context, public_id, alias, local, remote):
+def fetch(
+    click_context: click.Context,
+    public_id: PublicId,
+    alias: str,
+    local: bool,
+    remote: bool,
+) -> None:
     """Fetch an agent from the registry."""
     ctx = cast(Context, click_context.obj)
     do_fetch(ctx, public_id, local, remote, alias)
@@ -67,7 +73,7 @@ def do_fetch(
     remote: bool,
     alias: Optional[str] = None,
     target_dir: Optional[str] = None,
-):
+) -> None:
     """
     Run the Fetch command.
 

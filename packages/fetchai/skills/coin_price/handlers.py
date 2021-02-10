@@ -20,7 +20,7 @@
 """This package contains handlers for the coin_price skill."""
 
 import json
-from typing import Optional, cast
+from typing import Any, Optional, cast
 
 from aea.configurations.base import PublicId
 from aea.mail.base import EnvelopeContext
@@ -42,11 +42,10 @@ class HttpHandler(Handler):
 
     SUPPORTED_PROTOCOL = HttpMessage.protocol_id
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         """Initialize the handler."""
         super().__init__(**kwargs)
 
-        self.handled_message = None
         self._http_server_id = None  # type: Optional[PublicId]
 
     def setup(self) -> None:
@@ -80,7 +79,6 @@ class HttpHandler(Handler):
             self._handle_unidentified_dialogue(message)
             return
 
-        self.handled_message = message
         if (
             message.performative == HttpMessage.Performative.RESPONSE
             and message.status_code == 200
@@ -208,12 +206,6 @@ class PrometheusHandler(Handler):
 
     SUPPORTED_PROTOCOL = PrometheusMessage.protocol_id
 
-    def __init__(self, **kwargs):
-        """Initialize the handler."""
-        super().__init__(**kwargs)
-
-        self.handled_message = None
-
     def setup(self) -> None:
         """Set up the handler."""
         self.context.logger.info("setting up PrometheusHandler")
@@ -239,7 +231,6 @@ class PrometheusHandler(Handler):
             self._handle_unidentified_dialogue(message)
             return
 
-        self.handled_message = message
         if message.performative == PrometheusMessage.Performative.RESPONSE:
             self.context.logger.debug(
                 f"Prometheus response ({message.code}): {message.message}"

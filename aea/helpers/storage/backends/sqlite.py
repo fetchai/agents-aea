@@ -66,7 +66,9 @@ class SqliteStorageBackend(AbstractStorageBackend):
             self._connection.commit()
             return result
 
-    async def _executute_sql(self, query: str, args: Optional[List] = None):
+    async def _executute_sql(
+        self, query: str, args: Optional[List] = None
+    ) -> Optional[JSON_TYPES]:
         """
         Execute sql command and return results in async executor.
 
@@ -154,7 +156,13 @@ class SqliteStorageBackend(AbstractStorageBackend):
         self._check_collection_name(collection_name)
         sql = f"""SELECT object_body FROM {collection_name} WHERE object_id = ? LIMIT 1;"""  # nosec
         result = await self._executute_sql(sql, [object_id])
-        if result:
+        if (
+            result
+            and isinstance(result, (list, tuple))
+            and len(result) > 0
+            and isinstance(result[0], (list, tuple))
+            and len(result[0]) > 0
+        ):
             return json.loads(result[0][0])
         return None
 
@@ -189,7 +197,7 @@ class SqliteStorageBackend(AbstractStorageBackend):
             field = f"$.{field}"
         return [
             (i[0], json.loads(i[1]))
-            for i in await self._executute_sql(sql, [field, equals])
+            for i in await self._executute_sql(sql, [field, equals])  # type: ignore
         ]
 
     async def list(self, collection_name: str) -> List[OBJECT_ID_AND_BODY]:
@@ -201,4 +209,4 @@ class SqliteStorageBackend(AbstractStorageBackend):
         """
         self._check_collection_name(collection_name)
         sql = f"""SELECT object_id, object_body FROM {collection_name};"""  # nosec
-        return [(i[0], json.loads(i[1])) for i in await self._executute_sql(sql)]
+        return [(i[0], json.loads(i[1])) for i in await self._executute_sql(sql)]  # type: ignore

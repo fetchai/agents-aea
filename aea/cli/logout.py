@@ -27,7 +27,7 @@ from aea.cli.utils.config import update_cli_config
 
 
 @click.command(name="logout", help="Logout from the registry account.")
-def logout():
+def logout() -> None:
     """Logout from the registry account."""
     click.echo("Logging out...")
     do_logout()

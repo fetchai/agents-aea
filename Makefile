@@ -47,7 +47,7 @@ lint:
 
 .PHONY: pylint
 pylint:
-	pylint aea benchmark packages scripts examples/*
+	pylint -j4 aea benchmark packages scripts examples/*
 
 .PHONY: security
 security:
@@ -57,7 +57,9 @@ security:
 
 .PHONY: static
 static:
-	mypy aea benchmark examples packages scripts tests
+	mypy aea packages --disallow-untyped-defs
+	mypy benchmark examples --check-untyped-defs
+	mypy scripts tests
 
 .PHONY: package_checks
 package_checks:
@@ -130,9 +132,9 @@ new_env: clean
 		echo "In a virtual environment! Exit first: 'exit'.";\
 	fi
 protolint_install:
-	GO111MODULE=on GOPATH=~/go go get -u -v github.com/yoheimuta/protolint/cmd/protolint@v0.27.0 
+	GO111MODULE=on GOPATH=~/go go get -u -v github.com/yoheimuta/protolint/cmd/protolint@v0.27.0
 protolint:
-	PATH=${PATH}:${GOPATH}/bin/:~/go/bin protolint lint -config_path=./protolint.yaml -fix ./aea/mail ./packages/fetchai/protocols	
+	PATH=${PATH}:${GOPATH}/bin/:~/go/bin protolint lint -config_path=./protolint.yaml -fix ./aea/mail ./packages/fetchai/protocols
 protolint_install_win:
 	powershell -command '$$env:GO111MODULE="on"; go get -u -v github.com/yoheimuta/protolint/cmd/protolint@v0.27.0'
 protolint_win:

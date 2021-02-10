@@ -20,6 +20,7 @@
 
 import os
 from pathlib import Path
+from typing import cast
 
 from aea.cli.registry.utils import download_file, extract, get_package_meta
 from aea.cli.utils.loggers import logger
@@ -49,7 +50,7 @@ def fetch_package(obj_type: str, public_id: PublicId, cwd: str, dest: str) -> Pa
         )
     )
     package_meta = get_package_meta(obj_type, public_id)
-    file_url = package_meta["file"]
+    file_url = cast(str, package_meta["file"])
     filepath = download_file(file_url, cwd)
 
     # next code line is needed because the items are stored in tarball packages as folders

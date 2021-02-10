@@ -21,6 +21,7 @@
 
 import logging
 import sys
+from typing import Any, Callable
 
 import click
 
@@ -43,28 +44,28 @@ class ColorFormatter(logging.Formatter):
         "warning": dict(fg="yellow"),
     }
 
-    def format(self, record):
+    def format(self, record: logging.LogRecord) -> str:
         """Format the log message."""
         if not record.exc_info:
             level = record.levelname.lower()
             msg = record.getMessage()
             if level in self.colors:
-                prefix = click.style("{}: ".format(level), **self.colors[level])
+                prefix = click.style("{}: ".format(level), **self.colors[level])  # type: ignore
                 msg = "\n".join(prefix + x for x in msg.splitlines())
             return msg
         return logging.Formatter.format(self, record)  # pragma: no cover
 
 
 def simple_verbosity_option(
-    logger=None, *names, **kwargs
-):  # pylint: disable=redefined-outer-name,keyword-arg-before-vararg
+    logger_: logging.Logger, *names: str, **kwargs: Any
+) -> Callable:  # pylint: disable=redefined-outer-name,keyword-arg-before-vararg
     """Add a decorator that adds a `--verbosity, -v` option to the decorated command.
 
     Name can be configured through `*names`. Keyword arguments are passed to
     the underlying `click.option` decorator.
     """
     if not names:
-        names = ["--verbosity", "-v"]
+        names = ("--verbosity", "-v")
 
     kwargs.setdefault("default", "INFO")
     kwargs.setdefault("type", click.Choice(LOG_LEVELS, case_sensitive=False))
@@ -73,10 +74,14 @@ def simple_verbosity_option(
     kwargs.setdefault("help", "One of {}".format(", ".join(LOG_LEVELS)))
     kwargs.setdefault("is_eager", True)
 
-    def decorator(f):
-        def _set_level(ctx, param, value):  # pylint: disable=unused-argument
+    def decorator(f: Callable) -> Callable:
+        def _set_level(
+            ctx: click.Context,
+            param: Any,  # pylint: disable=unused-argument
+            value: str,
+        ) -> None:
             level = logging.getLevelName(value)
-            logger.setLevel(level)
+            logger_.setLevel(level)
             # save verbosity option so it can be
             # read in the main CLI entrypoint
             ctx.meta["verbosity"] = value
@@ -86,13 +91,15 @@ def simple_verbosity_option(
     return decorator
 
 
-def default_logging_config(logger):  # pylint: disable=redefined-outer-name
+def default_logging_config(
+    logger_: logging.Logger,
+) -> logging.Logger:  # pylint: disable=redefined-outer-name
     """Set up the default handler and formatter on the given logger."""
     default_handler = logging.StreamHandler(stream=sys.stdout)
     default_handler.formatter = ColorFormatter()
-    logger.handlers = [default_handler]
-    logger.propagate = True
-    return logger
+    logger_.handlers = [default_handler]
+    logger_.propagate = True
+    return logger_
 
 
 logger = logging.getLogger("aea")

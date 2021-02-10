@@ -23,7 +23,7 @@ import sys
 import pytest
 
 from aea.configurations.base import ConnectionConfig
-from aea.connections.scaffold.connection import MyScaffoldConnection
+from aea.connections.scaffold.connection import MyScaffoldAsyncConnection
 from aea.helpers.base import cd
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
@@ -37,9 +37,9 @@ class TestScaffoldConnectionReception:
     def setup(self):
         """Set case up."""
         configuration = ConnectionConfig(
-            connection_id=MyScaffoldConnection.connection_id,
+            connection_id=MyScaffoldAsyncConnection.connection_id,
         )
-        self.connection = MyScaffoldConnection(configuration=configuration)
+        self.connection = MyScaffoldAsyncConnection(configuration=configuration)
 
     @pytest.mark.asyncio
     async def test_methods_not_implemented(self):
@@ -81,7 +81,7 @@ class TestScaffoldConnectionAndRun(AEATestCaseEmpty):
             try:
                 proc.expect_all(
                     [
-                        "Error while connecting <class 'connection_module.MyScaffoldConnection'>: NotImplementedError()"
+                        "Error while connecting <class 'connection_module.MyScaffoldAsyncConnection'>: NotImplementedError()"
                     ],
                     timeout=50,
                 )

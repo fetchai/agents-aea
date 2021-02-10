@@ -22,7 +22,7 @@
 import asyncio
 import logging
 from asyncio import AbstractServer, Future, StreamReader, StreamWriter
-from typing import Dict, Optional, Tuple, cast
+from typing import Any, Dict, Optional, Tuple, cast
 
 from aea.common import Address
 from aea.configurations.base import ConnectionConfig
@@ -39,7 +39,7 @@ STUB_DIALOGUE_ID = 0
 class TCPServerConnection(TCPConnection):
     """This class implements a TCP server."""
 
-    def __init__(self, configuration: ConnectionConfig, **kwargs):
+    def __init__(self, configuration: ConnectionConfig, **kwargs: Any) -> None:
         """
         Initialize a TCP server connection.
 
@@ -73,7 +73,7 @@ class TCPServerConnection(TCPConnection):
             read_task = asyncio.ensure_future(self._recv(reader), loop=self.loop)
             self._read_tasks_to_address[read_task] = address
 
-    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
+    async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """
         Receive an envelope.
 
@@ -108,14 +108,14 @@ class TCPServerConnection(TCPConnection):
             self.logger.error("Error in the receiving loop: {}".format(str(e)))
             return None
 
-    async def setup(self):
+    async def setup(self) -> None:
         """Set the connection up."""
         self._server = await asyncio.start_server(
             self.handle, host=self.host, port=self.port
         )
         self.logger.debug("Start listening on {}:{}".format(self.host, self.port))
 
-    async def teardown(self):
+    async def teardown(self) -> None:
         """Tear the connection down."""
         for (reader, _) in self.connections.values():
             reader.feed_eof()
@@ -123,10 +123,13 @@ class TCPServerConnection(TCPConnection):
         for t in self._read_tasks_to_address:
             t.cancel()
 
+        if self._server is None:  # pragma: nocover
+            raise ValueError("Server not set!")
+
         self._server.close()
         await self._server.wait_closed()
 
-    def select_writer_from_envelope(self, envelope: Envelope):
+    def select_writer_from_envelope(self, envelope: Envelope) -> Optional[StreamWriter]:
         """Select the destination, given the envelope."""
         to = envelope.to
         if to not in self.connections:

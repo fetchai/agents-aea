@@ -19,7 +19,7 @@
 
 """This package contains the behaviour for the generic buyer skill."""
 
-from typing import List, Optional, Set, cast
+from typing import Any, List, Optional, Set, cast
 
 from aea.protocols.dialogue.base import DialogueLabel
 from aea.skills.behaviours import TickerBehaviour
@@ -47,7 +47,7 @@ LEDGER_API_ADDRESS = str(LEDGER_CONNECTION_PUBLIC_ID)
 class GenericSearchBehaviour(TickerBehaviour):
     """This class implements a search behaviour."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         """Initialize the search behaviour."""
         search_interval = cast(
             float, kwargs.pop("search_interval", DEFAULT_SEARCH_INTERVAL)
@@ -78,17 +78,28 @@ class GenericSearchBehaviour(TickerBehaviour):
         :return: None
         """
         strategy = cast(GenericStrategy, self.context.strategy)
-        if strategy.is_searching:
-            query = strategy.get_location_and_service_query()
-            oef_search_dialogues = cast(
-                OefSearchDialogues, self.context.oef_search_dialogues
+        if not strategy.is_searching:
+            return
+        transaction_behaviour = cast(
+            GenericTransactionBehaviour, self.context.behaviours.transaction
+        )
+        remaining_transactions_count = len(transaction_behaviour.waiting)
+        if remaining_transactions_count > 0:
+            self.context.logger.info(
+                f"Transaction behaviour has {remaining_transactions_count} transactions remaining. Skipping search!"
             )
-            oef_search_msg, _ = oef_search_dialogues.create(
-                counterparty=self.context.search_service_address,
-                performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-                query=query,
-            )
-            self.context.outbox.put_message(message=oef_search_msg)
+            return
+        strategy.update_search_query_params()
+        query = strategy.get_location_and_service_query()
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
+        )
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
+            performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+            query=query,
+        )
+        self.context.outbox.put_message(message=oef_search_msg)
 
     def teardown(self) -> None:
         """
@@ -102,7 +113,7 @@ class GenericSearchBehaviour(TickerBehaviour):
 class GenericTransactionBehaviour(TickerBehaviour):
     """A behaviour to sequentially submit transactions to the blockchain."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         """Initialize the transaction behaviour."""
         tx_interval = cast(
             float, kwargs.pop("transaction_interval", DEFAULT_TX_INTERVAL)

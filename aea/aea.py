@@ -37,7 +37,10 @@ from typing import (
 from aea.agent import Agent
 from aea.agent_loop import AsyncAgentLoop, BaseAgentLoop, SyncAgentLoop
 from aea.configurations.base import PublicId
-from aea.configurations.constants import DEFAULT_SEARCH_SERVICE_ADDRESS
+from aea.configurations.constants import (
+    DEFAULT_BUILD_DIR_NAME,
+    DEFAULT_SEARCH_SERVICE_ADDRESS,
+)
 from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import DEFAULT_CURRENCY_DENOMINATIONS
 from aea.crypto.wallet import Wallet
@@ -46,7 +49,7 @@ from aea.error_handler.base import AbstractErrorHandler
 from aea.error_handler.default import ErrorHandler as DefaultErrorHandler
 from aea.exceptions import AEAException, _StopRuntime, enforce
 from aea.helpers.exception_policy import ExceptionPolicyEnum
-from aea.helpers.logging import AgentLoggerAdapter, get_logger
+from aea.helpers.logging import AgentLoggerAdapter, WithLogger, get_logger
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.base import Message, Protocol
@@ -64,7 +67,7 @@ class AEA(Agent):
     }
     DEFAULT_RUN_LOOP: str = "async"
 
-    DEFAULT_BUILD_DIR_NAME = ".build"
+    DEFAULT_BUILD_DIR_NAME = DEFAULT_BUILD_DIR_NAME
 
     def __init__(
         self,
@@ -88,7 +91,7 @@ class AEA(Agent):
         connection_ids: Optional[Collection[PublicId]] = None,
         search_service_address: str = DEFAULT_SEARCH_SERVICE_ADDRESS,
         storage_uri: Optional[str] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         """
         Instantiate the agent.
@@ -335,7 +338,7 @@ class AEA(Agent):
         for handler in handlers:
             handler.handle_wrapper(msg)
 
-    def _setup_loggers(self):
+    def _setup_loggers(self) -> None:
         """Set up logger with agent name."""
         for element in [
             self.runtime.agent_loop,
@@ -346,8 +349,10 @@ class AEA(Agent):
             self.resources.handler_registry,
             self.resources.model_registry,
         ]:
-            element.logger = AgentLoggerAdapter(
-                element.logger, agent_name=self._identity.name
+            element = cast(WithLogger, element)
+            element.logger = cast(
+                Logger,
+                AgentLoggerAdapter(element.logger, agent_name=self._identity.name),
             )
 
     def get_periodic_tasks(
@@ -397,7 +402,7 @@ class AEA(Agent):
         :return: bool, propagate exception if True otherwise skip it.
         """
         # docstyle: ignore # noqa: E800
-        def log_exception(e, fn, is_debug: bool = False):
+        def log_exception(e: Exception, fn: Callable, is_debug: bool = False) -> None:
             if is_debug:
                 self.logger.debug(f"<{e}> raised during `{fn}`")
             else:

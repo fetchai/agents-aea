@@ -36,20 +36,22 @@ from aea.protocols.generator.common import load_protocol_specification
 @click.group()
 @click.pass_context
 @check_aea_project
-def generate(click_context: click.core.Context):  # pylint: disable=unused-argument
+def generate(
+    click_context: click.core.Context,  # pylint: disable=unused-argument
+) -> None:
     """Generate a package for the agent."""
 
 
 @generate.command()
 @click.argument("protocol_specification_path", type=str, required=True)
 @pass_ctx
-def protocol(ctx: Context, protocol_specification_path: str):
+def protocol(ctx: Context, protocol_specification_path: str) -> None:
     """Generate a protocol based on a specification and add it to the configuration file and agent."""
     _generate_item(ctx, PROTOCOL, protocol_specification_path)
 
 
 @clean_after
-def _generate_item(ctx: Context, item_type: str, specification_path: str):
+def _generate_item(ctx: Context, item_type: str, specification_path: str) -> None:
     """Generate an item based on a specification and add it to the configuration file and agent."""
     # Get existing items
     existing_id_list = getattr(ctx.agent_config, "{}s".format(item_type))

@@ -19,6 +19,8 @@
 
 """This module contains class representations corresponding to every custom type in the protocol specification."""
 
+from typing import Any
+
 from aea.common import JSONLike
 from aea.exceptions import enforce
 from aea.helpers.serializers import DictProtobufStructSerializer
@@ -56,7 +58,7 @@ class Kwargs:
         return self._body
 
     @staticmethod
-    def encode(kwargs_protobuf_object, kwargs_object: "Kwargs") -> None:
+    def encode(kwargs_protobuf_object: Any, kwargs_object: "Kwargs") -> None:
         """
         Encode an instance of this class into the protocol buffer object.
 
@@ -71,7 +73,7 @@ class Kwargs:
         )
 
     @classmethod
-    def decode(cls, kwargs_protobuf_object) -> "Kwargs":
+    def decode(cls, kwargs_protobuf_object: Any) -> "Kwargs":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -83,10 +85,10 @@ class Kwargs:
         kwargs = DictProtobufStructSerializer.decode(kwargs_protobuf_object.kwargs)
         return cls(kwargs)
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Check equality."""
         return isinstance(other, Kwargs) and self.body == other.body
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get string representation."""
         return "Kwargs: body={}".format(self.body)

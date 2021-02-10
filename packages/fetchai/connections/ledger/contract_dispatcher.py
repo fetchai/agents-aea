@@ -21,7 +21,7 @@
 import inspect
 import logging
 from collections.abc import Mapping
-from typing import Callable, Optional, Union, cast
+from typing import Any, Callable, Optional, Union, cast
 
 from aea.common import JSONLike
 from aea.contracts import Contract, contract_registry
@@ -49,7 +49,7 @@ _default_logger = logging.getLogger(
 class ContractApiDialogues(BaseContractApiDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -79,7 +79,7 @@ class ContractApiDialogues(BaseContractApiDialogues):
 class ContractApiRequestDispatcher(RequestDispatcher):
     """Implement the contract API request dispatcher."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Initialize the dispatcher."""
         logger = kwargs.pop("logger", None)
         logger = logger if logger is not None else _default_logger

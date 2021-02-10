@@ -522,7 +522,7 @@ def _validate_protocol_buffer_schema_code_snippets(
     return True, "Protobuf code snippet section is valid."
 
 
-def _validate_field_existence(dialogue_config) -> Tuple[bool, str]:
+def _validate_field_existence(dialogue_config: List[str]) -> Tuple[bool, str]:
     """
     Evaluate whether the dialogue section of a protocol specification contains the required fields.
 

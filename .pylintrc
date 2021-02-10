@@ -2,19 +2,11 @@
 ignore-patterns=serialization.py,message.py,__main__.py,.*_pb2.py,tac.sh,tac_local.sh
 
 [MESSAGES CONTROL]
-disable=C0103,C0201,C0301,C0302,C0330,W0105,W0107,W0707,W1202,W1203,R0902,R0913,R0914,R0801,R0911,R0912,R0901,R0916,R1702,R0915
+disable=C0103,C0201,C0301,C0302,C0330,W0105,W0107,W0707,W1202,W1203,R0801
 
+# See here for more options: https://www.codeac.io/documentation/pylint-configuration.html
 ## Eventually resolve these:
 # W0707: raise-missing-from
-# R0902: too-many-instance-attributes
-# R0913: too-many-arguments
-# R0914: too-many-locals
-# R0911: too-many-return-statements
-# R0912: too-many-branches
-# R0901: too-many-ancestors
-# R0916: too-many-boolean-expressions
-# R1702: too-many-nested-blocks
-# R0915: too-many-statements
 # decide on a logging policy:
 # W1202: logging-format-interpolation
 # W1203: logging-fstring-interpolation
@@ -35,3 +27,14 @@ ignored-modules=aiohttp,defusedxml,gym,fetch,matplotlib,memory_profiler,numpy,oe
 [DESIGN]
 min-public-methods=1
 max-public-methods=36
+max-returns=10
+max-bool-expr=7
+max-args=27
+max-locals=31
+max-statements=80
+max-parents=11
+max-branches=24
+max-attributes=32
+
+[REFACTORING]
+max-nested-blocks=6

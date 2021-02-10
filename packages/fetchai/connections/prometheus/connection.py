@@ -21,7 +21,7 @@
 
 import asyncio
 import logging
-from typing import Dict, Optional, Tuple, Union, cast
+from typing import Any, Dict, Optional, Tuple, Union, cast
 
 import aioprometheus  # type: ignore
 
@@ -50,7 +50,7 @@ VALID_METRIC_TYPES = {"Counter", "Gauge", "Histogram", "Summary"}
 class PrometheusDialogues(BasePrometheusDialogues):
     """The dialogues class keeps track of all prometheus dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -282,7 +282,7 @@ class PrometheusConnection(Connection):
 
     connection_id = PUBLIC_ID
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize a connection to a local prometheus server.
 
@@ -290,7 +290,7 @@ class PrometheusConnection(Connection):
         """
         super().__init__(**kwargs)
 
-        self.host = cast(int, self.configuration.config.get("host", DEFAULT_HOST))
+        self.host = cast(str, self.configuration.config.get("host", DEFAULT_HOST))
         self.port = cast(int, self.configuration.config.get("port", DEFAULT_PORT))
         self.channel = PrometheusChannel(
             self.address, self.host, self.port, self.logger
@@ -307,9 +307,9 @@ class PrometheusConnection(Connection):
 
         with self._connect_context():
             self.channel.logger = self.logger
-            self._state.set(ConnectionStates.connecting)
+            self.state = ConnectionStates.connecting
             await self.channel.connect()
-            self._state.set(ConnectionStates.connected)
+            self.state = ConnectionStates.connected
 
     async def disconnect(self) -> None:
         """
@@ -320,9 +320,9 @@ class PrometheusConnection(Connection):
         if self.is_disconnected:  # pragma: nocover
             return
 
-        self._state.set(ConnectionStates.disconnecting)
+        self.state = ConnectionStates.disconnecting
         await self.channel.disconnect()
-        self._state.set(ConnectionStates.disconnected)
+        self.state = ConnectionStates.disconnected
 
     async def send(self, envelope: Envelope) -> None:
         """
@@ -334,7 +334,7 @@ class PrometheusConnection(Connection):
         self._ensure_connected()
         await self.channel.send(envelope)
 
-    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
+    async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """
         Receive an envelope.
 

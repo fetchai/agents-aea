@@ -28,7 +28,7 @@ from asyncio import AbstractEventLoop, CancelledError
 from ipaddress import ip_address
 from pathlib import Path
 from socket import gethostbyname
-from typing import IO, List, Optional, Sequence, cast
+from typing import Any, IO, List, Optional, Sequence, cast
 
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_LEDGER
@@ -443,7 +443,7 @@ class P2PLibp2pConnection(Connection):
 
     connection_id = PUBLIC_ID
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize a p2p libp2p connection."""
 
         # we put it here so below we can access the address
@@ -559,10 +559,13 @@ class P2PLibp2pConnection(Connection):
         self.libp2p_workdir = os.path.join(temp_dir, "libp2p_workdir")
 
         self._check_node_built()
+        module_dir = self.configuration.build_directory
+        if module_dir is None:
+            raise ValueError("Build directory not set on configuration.")
         self.node = Libp2pNode(
             agent_record,
             key,
-            self.configuration.build_directory,
+            module_dir,
             LIBP2P_NODE_CLARGS,
             uri,
             public_uri,
@@ -613,10 +616,10 @@ class P2PLibp2pConnection(Connection):
         """
         if self.is_connected:
             return  # pragma: nocover
-        self._state.set(ConnectionStates.connecting)
+        self.state = ConnectionStates.connecting
         try:
             # start libp2p node
-            self._state.set(ConnectionStates.connecting)
+            self.state = ConnectionStates.connecting
             self.node.logger = self.logger
             await self.node.start()
             # starting receiving msgs
@@ -624,9 +627,9 @@ class P2PLibp2pConnection(Connection):
             self._receive_from_node_task = asyncio.ensure_future(
                 self._receive_from_node(), loop=self.loop
             )
-            self._state.set(ConnectionStates.connected)
+            self.state = ConnectionStates.connected
         except (CancelledError, Exception) as e:
-            self._state.set(ConnectionStates.disconnected)
+            self.state = ConnectionStates.disconnected
             raise e
 
     async def disconnect(self) -> None:
@@ -637,7 +640,7 @@ class P2PLibp2pConnection(Connection):
         """
         if self.is_disconnected:
             return  # pragma: nocover
-        self._state.set(ConnectionStates.disconnecting)
+        self.state = ConnectionStates.disconnecting
         if self._receive_from_node_task is not None:
             self._receive_from_node_task.cancel()
             self._receive_from_node_task = None
@@ -650,9 +653,9 @@ class P2PLibp2pConnection(Connection):
             self.logger.debug(  # pragma: nocover
                 "Called disconnect when input queue not initialized."
             )
-        self._state.set(ConnectionStates.disconnected)
+        self.state = ConnectionStates.disconnected
 
-    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
+    async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """
         Receive an envelope. Blocking.
 
@@ -665,7 +668,7 @@ class P2PLibp2pConnection(Connection):
             if data is None:
                 self.logger.debug("Received None.")
                 self.node.stop()
-                self._state.set(ConnectionStates.disconnected)
+                self.state = ConnectionStates.disconnected
                 return None
                 # TOFIX(LR) attempt restarting the node?
             self.logger.debug("Received data: {}".format(data))
@@ -677,7 +680,7 @@ class P2PLibp2pConnection(Connection):
             self.logger.exception(e)
             return None
 
-    async def send(self, envelope: Envelope):
+    async def send(self, envelope: Envelope) -> None:
         """
         Send messages.
 

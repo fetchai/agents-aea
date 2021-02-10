@@ -127,7 +127,7 @@ class ProxyEnv(gym.Env):
 
         return observation, reward, done, info
 
-    def render(self, mode="human") -> None:
+    def render(self, mode: str = "human") -> None:
         """
         Render the environment.
 

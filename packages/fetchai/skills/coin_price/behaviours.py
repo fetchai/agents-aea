@@ -20,7 +20,7 @@
 """This package contains a behaviour for fetching a coin price from an API."""
 
 import json
-from typing import Dict, cast
+from typing import Any, Dict, cast
 
 from aea.mail.base import EnvelopeContext
 from aea.skills.behaviours import TickerBehaviour
@@ -43,7 +43,7 @@ from packages.fetchai.skills.coin_price.models import CoinPriceModel
 class CoinPriceBehaviour(TickerBehaviour):
     """This class provides a simple behaviour to fetch a coin price."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         """Initialize the coin price behaviour."""
 
         super().__init__(**kwargs)

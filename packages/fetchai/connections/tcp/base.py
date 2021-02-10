@@ -22,7 +22,7 @@ import logging
 import struct
 from abc import ABC, abstractmethod
 from asyncio import CancelledError, StreamReader, StreamWriter
-from typing import Optional
+from typing import Any, Optional
 
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
@@ -39,7 +39,7 @@ class TCPConnection(Connection, ABC):
 
     connection_id = PUBLIC_ID
 
-    def __init__(self, host: str, port: int, **kwargs):
+    def __init__(self, host: str, port: int, **kwargs: Any) -> None:
         """
         Initialize a TCP connection.
 
@@ -53,11 +53,11 @@ class TCPConnection(Connection, ABC):
         self.port = port
 
     @abstractmethod
-    async def setup(self):
+    async def setup(self) -> None:
         """Set the TCP connection up."""
 
     @abstractmethod
-    async def teardown(self):
+    async def teardown(self) -> None:
         """Tear the TCP connection down."""
 
     @abstractmethod
@@ -69,7 +69,7 @@ class TCPConnection(Connection, ABC):
         :return: the stream writer to communicate with the recipient. None if it cannot be determined.
         """
 
-    async def connect(self):
+    async def connect(self) -> None:
         """
         Set up the connection.
 
@@ -80,13 +80,13 @@ class TCPConnection(Connection, ABC):
             self.logger.warning("Connection already set up.")
             return
 
-        self._state.set(ConnectionStates.connecting)
+        self.state = ConnectionStates.connecting
         try:
             await self.setup()
-            self._state.set(ConnectionStates.connected)
+            self.state = ConnectionStates.connected
         except Exception as e:  # pragma: nocover # pylint: disable=broad-except
             self.logger.error(str(e))
-            self._state.set(ConnectionStates.disconnected)
+            self.state = ConnectionStates.disconnected
 
     async def disconnect(self) -> None:
         """
@@ -99,9 +99,9 @@ class TCPConnection(Connection, ABC):
             self.logger.warning("Connection already disconnected.")
             return
 
-        self._state.set(ConnectionStates.disconnecting)
+        self.state = ConnectionStates.disconnecting
         await self.teardown()
-        self._state.set(ConnectionStates.disconnected)
+        self.state = ConnectionStates.disconnected
 
     async def _recv(self, reader: StreamReader) -> Optional[bytes]:
         """Receive bytes."""
@@ -116,7 +116,7 @@ class TCPConnection(Connection, ABC):
             nbytes_read = len(data)
         return data
 
-    async def _send(self, writer, data):
+    async def _send(self, writer: StreamWriter, data: bytes) -> None:
         self.logger.debug("[{}] Send a message".format(self.address))
         nbytes = struct.pack("I", len(data))
         self.logger.debug("#bytes: {!r}".format(nbytes))

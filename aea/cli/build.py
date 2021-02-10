@@ -30,7 +30,7 @@ from aea.cli.utils.decorators import check_aea_project
 @click.command()
 @click.pass_context
 @check_aea_project
-def build(click_context):
+def build(click_context: click.Context) -> None:
     """Build the agent and its components."""
     ctx = cast(Context, click_context.obj)
     skip_consistency_check = ctx.config.get("skip_consistency_check", False)

@@ -28,7 +28,7 @@ from asyncio import Future
 from asyncio.events import AbstractEventLoop
 from threading import Lock
 from types import TracebackType
-from typing import Optional, Type
+from typing import Any, Optional, Type
 
 
 _default_logger = logging.getLogger(__file__)
@@ -37,7 +37,7 @@ _default_logger = logging.getLogger(__file__)
 class TimeoutResult:
     """Result of ExecTimeout context manager."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Init."""
         self._cancelled_by_timeout = False
 
@@ -75,7 +75,7 @@ class BaseExecTimeout(ABC):
 
     exception_class: Type[BaseException] = TimeoutException
 
-    def __init__(self, timeout: float = 0.0):
+    def __init__(self, timeout: float = 0.0) -> None:
         """
         Init.
 
@@ -84,7 +84,7 @@ class BaseExecTimeout(ABC):
         self.timeout = timeout
         self.result = TimeoutResult()
 
-    def _on_timeout(self, *args, **kwargs) -> None:
+    def _on_timeout(self, *args: Any, **kwargs: Any) -> None:
         """Raise exception on timeout."""
         raise self.exception_class()
 
@@ -152,7 +152,7 @@ class ExecTimeoutSigAlarm(BaseExecTimeout):  # pylint: disable=too-few-public-me
         signal.setitimer(signal.ITIMER_REAL, self.timeout, 0)
         signal.signal(signal.SIGALRM, self._on_timeout)
 
-    def _remove_timeout_watch(self):
+    def _remove_timeout_watch(self) -> None:
         """
         Stop control over execution time.
 
@@ -176,7 +176,7 @@ class ExecTimeoutThreadGuard(BaseExecTimeout):
     _start_count: int = 0
     _lock: Lock = Lock()
 
-    def __init__(self, timeout: float = 0.0):
+    def __init__(self, timeout: float = 0.0) -> None:
         """
         Init ExecTimeoutThreadGuard variables.
 

@@ -42,7 +42,7 @@ from aea.crypto.registries import crypto_registry
     type=click.Path(exists=False, file_okay=True, dir_okay=False, readable=True),
     required=False,
 )
-def generate_key(type_, file):
+def generate_key(type_: str, file: str) -> None:
     """Generate a private key and place it in a file."""
     _generate_private_key(type_, file)
 
@@ -67,7 +67,7 @@ def _generate_private_key(type_: str, file: Optional[str] = None) -> None:
             create_private_key(type__, private_key_file)
 
 
-def _can_write(path) -> bool:
+def _can_write(path: str) -> bool:
     if Path(path).exists():
         value = click.confirm(
             "The file {} already exists. Do you want to overwrite it?".format(path),

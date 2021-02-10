@@ -17,10 +17,11 @@
 #
 # ------------------------------------------------------------------------------
 """Implementation of the 'aea launch' subcommand."""
+import os
 import sys
 from collections import OrderedDict
 from pathlib import Path
-from typing import List, cast
+from typing import List, Optional, cast
 
 import click
 
@@ -35,7 +36,9 @@ from aea.launcher import AEALauncher
 @click.argument("agents", nargs=-1, type=AgentDirectory())
 @click.option("--multithreaded", is_flag=True)
 @click.pass_context
-def launch(click_context, agents: List[str], multithreaded: bool):
+def launch(
+    click_context: click.Context, agents: List[str], multithreaded: bool
+) -> None:
     """Launch many agents at the same time."""
     _launch_agents(click_context, agents, multithreaded)
 
@@ -69,11 +72,15 @@ def _launch_agents(
         probably keyboard interrupt exception gets lost in executor pool or in asyncio module
         """
         launcher.start(threaded=True)
-        launcher.join_thread()
+        launcher.try_join_thread()
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt detected.")
     finally:
-        launcher.stop()
+        timeout: Optional[float] = None
+        if os.name == "nt":
+            # Windows bug: https://bugs.python.org/issue21822
+            timeout = 0  # pragma: nocover
+        launcher.stop(timeout)
 
     for agent in launcher.failed:
         logger.info(f"Agent {agent} terminated with exit code 1")

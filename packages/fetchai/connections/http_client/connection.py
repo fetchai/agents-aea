@@ -57,7 +57,7 @@ RequestId = str
 ssl_context = ssl.create_default_context(cafile=certifi.where())
 
 
-def headers_to_string(headers: Dict):
+def headers_to_string(headers: Dict) -> str:
     """
     Convert headers to string.
 
@@ -241,7 +241,7 @@ class HTTPClientAsyncChannel:
                 else b"",
                 dialogue=dialogue,
             )
-        except Exception:  # pragma: nocover # pylint: disable=broad-except
+        except Exception:  # pylint: disable=broad-except
             envelope = self.to_envelope(
                 request_http_message,
                 status_code=self.DEFAULT_EXCEPTION_CODE,
@@ -419,7 +419,7 @@ class HTTPClientConnection(Connection):
 
     connection_id = PUBLIC_ID
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize a HTTP client connection."""
         super().__init__(**kwargs)
         host = cast(str, self.configuration.config.get("host"))
@@ -451,9 +451,9 @@ class HTTPClientConnection(Connection):
         """
         if self.is_disconnected:
             return  # pragma: nocover
-        self._state.set(ConnectionStates.disconnecting)
+        self.state = ConnectionStates.disconnecting
         await self.channel.disconnect()
-        self._state.set(ConnectionStates.disconnected)
+        self.state = ConnectionStates.disconnected
 
     async def send(self, envelope: "Envelope") -> None:
         """
@@ -465,7 +465,9 @@ class HTTPClientConnection(Connection):
         self._ensure_connected()
         self.channel.send(envelope)
 
-    async def receive(self, *args, **kwargs) -> Optional[Union["Envelope", None]]:
+    async def receive(
+        self, *args: Any, **kwargs: Any
+    ) -> Optional[Union["Envelope", None]]:
         """
         Receive an envelope.
 

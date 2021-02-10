@@ -22,7 +22,7 @@ import re
 import shutil
 import sys
 from pathlib import Path
-from typing import Dict, Optional, Set, Tuple
+from typing import Any, Dict, Optional, Set, Tuple
 
 import click
 from jsonschema import ValidationError
@@ -101,7 +101,7 @@ def verify_or_create_private_keys_ctx(
         raise click.ClickException(str(e))
 
 
-def validate_package_name(package_name: str):
+def validate_package_name(package_name: str) -> None:
     """Check that the package name matches the pattern r"[a-zA-Z_][a-zA-Z0-9_]*".
 
     >>> validate_package_name("this_is_a_good_package_name")
@@ -242,7 +242,7 @@ def get_package_path_unified(
 
 
 def get_dotted_package_path_unified(
-    project_directory: str, agent_config: AgentConfig, *args
+    project_directory: str, agent_config: AgentConfig, *args: Any
 ) -> str:
     """
     Get a *dotted* path for a package, either vendor or not.
@@ -434,7 +434,9 @@ def validate_author_name(author: Optional[str] = None) -> str:
     return valid_author
 
 
-def is_fingerprint_correct(package_path: Path, item_config) -> bool:
+def is_fingerprint_correct(
+    package_path: Path, item_config: PackageConfiguration
+) -> bool:
     """
     Validate fingerprint of item before adding.
 
@@ -468,7 +470,9 @@ def register_item(ctx: Context, item_type: str, item_public_id: PublicId) -> Non
         ctx.agent_loader.dump(ctx.agent_config, fp)
 
 
-def is_item_present_unified(ctx: Context, item_type: str, item_public_id: PublicId):
+def is_item_present_unified(
+    ctx: Context, item_type: str, item_public_id: PublicId
+) -> bool:
     """
     Check if item is present, either vendor or not.
 
@@ -689,7 +693,9 @@ def update_item_public_id_in_init(
                 f.write(line)
 
 
-def update_references(ctx: Context, replacements: Dict[ComponentId, ComponentId]):
+def update_references(
+    ctx: Context, replacements: Dict[ComponentId, ComponentId]
+) -> None:
     """
     Update references across an AEA project.
 
@@ -760,7 +766,7 @@ def replace_all_import_statements(
     item_type: ComponentType,
     old_public_id: PublicId,
     new_public_id: PublicId,
-):
+) -> None:
     """
     Replace all import statements in Python modules of all the non-vendor packages.
 

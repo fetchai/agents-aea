@@ -19,7 +19,7 @@
 
 """This package contains a scaffold of a model."""
 
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from aea.crypto.ledger_apis import LedgerApis
 from aea.exceptions import enforce
@@ -37,7 +37,7 @@ DEFAULT_WHITELIST: List[str] = []
 class Strategy(Model):
     """This class is the strategy model."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize the strategy of the agent.
 

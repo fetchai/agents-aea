@@ -63,7 +63,7 @@ class TestListProtocols:
             "aea.cli.list.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT
         ):
             cls.result = cls.runner.invoke(
-                cli, [*CLI_LOG_OPTION, "list", "protocols"], standalone_mode=False
+                cli, [*CLI_LOG_OPTION, "list", "protocols"], standalone_mode=False,
             )
 
     def test_exit_code_equal_to_zero(self):
