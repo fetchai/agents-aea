@@ -37,7 +37,7 @@ class FakeConnection(Connection):
         Connection.__init__(self, *args, **kwargs)
         self.num = num
         self.envelope = envelope
-        self._state.set(ConnectionStates.connected)
+        self.state = ConnectionStates.connected
 
     async def connect(self) -> None:
         """
@@ -52,7 +52,7 @@ class FakeConnection(Connection):
 
         :return: None
         """
-        self._state.set(ConnectionStates.disconnected)
+        self.state = ConnectionStates.disconnected
 
     async def send(self, envelope: Envelope) -> None:
         """

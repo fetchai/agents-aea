@@ -213,11 +213,11 @@ class StubConnection(Connection):
         if self.in_queue is None:  # pragma: nocover
             raise ValueError("Input queue not initialized.")
 
-        self._state.set(ConnectionStates.disconnecting)
+        self.state = ConnectionStates.disconnecting
         await self._stop_read_envelopes()
         self._write_pool.shutdown(wait=False)
         self.in_queue.put_nowait(None)
-        self._state.set(ConnectionStates.disconnected)
+        self.state = ConnectionStates.disconnected
 
     async def send(self, envelope: Envelope) -> None:
         """

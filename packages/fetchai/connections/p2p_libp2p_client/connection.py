@@ -163,7 +163,7 @@ class P2PLibp2pClientConnection(Connection):
         if self.is_connected:  # pragma: nocover
             return
 
-        self._state.set(ConnectionStates.connecting)
+        self.state = ConnectionStates.connecting
 
         try:
             # connect libp2p client
@@ -187,9 +187,9 @@ class P2PLibp2pClientConnection(Connection):
             self._process_messages_task = asyncio.ensure_future(
                 self._process_messages(), loop=self.loop
             )
-            self._state.set(ConnectionStates.connected)
+            self.state = ConnectionStates.connected
         except (CancelledError, Exception) as e:
-            self._state.set(ConnectionStates.disconnected)
+            self.state = ConnectionStates.disconnected
             raise e
 
     async def _setup_connection(self) -> None:
@@ -241,7 +241,7 @@ class P2PLibp2pClientConnection(Connection):
             raise ValueError("Message task is not set.")  # pragma: nocover
         if self._writer is None:
             raise ValueError("Writer is not set.")  # pragma: nocover
-        self._state.set(ConnectionStates.disconnecting)
+        self.state = ConnectionStates.disconnecting
         if self._process_messages_task is not None:
             self._process_messages_task.cancel()
             # TOFIX(LR) mypy issue https://github.com/python/mypy/issues/8546
@@ -256,7 +256,7 @@ class P2PLibp2pClientConnection(Connection):
             self._in_queue.put_nowait(None)
         else:  # pragma: no cover
             self.logger.debug("Called disconnect when input queue not initialized.")
-        self._state.set(ConnectionStates.disconnected)
+        self.state = ConnectionStates.disconnected
 
     async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """

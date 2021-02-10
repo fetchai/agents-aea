@@ -616,10 +616,10 @@ class P2PLibp2pConnection(Connection):
         """
         if self.is_connected:
             return  # pragma: nocover
-        self._state.set(ConnectionStates.connecting)
+        self.state = ConnectionStates.connecting
         try:
             # start libp2p node
-            self._state.set(ConnectionStates.connecting)
+            self.state = ConnectionStates.connecting
             self.node.logger = self.logger
             await self.node.start()
             # starting receiving msgs
@@ -627,9 +627,9 @@ class P2PLibp2pConnection(Connection):
             self._receive_from_node_task = asyncio.ensure_future(
                 self._receive_from_node(), loop=self.loop
             )
-            self._state.set(ConnectionStates.connected)
+            self.state = ConnectionStates.connected
         except (CancelledError, Exception) as e:
-            self._state.set(ConnectionStates.disconnected)
+            self.state = ConnectionStates.disconnected
             raise e
 
     async def disconnect(self) -> None:
@@ -640,7 +640,7 @@ class P2PLibp2pConnection(Connection):
         """
         if self.is_disconnected:
             return  # pragma: nocover
-        self._state.set(ConnectionStates.disconnecting)
+        self.state = ConnectionStates.disconnecting
         if self._receive_from_node_task is not None:
             self._receive_from_node_task.cancel()
             self._receive_from_node_task = None
@@ -653,7 +653,7 @@ class P2PLibp2pConnection(Connection):
             self.logger.debug(  # pragma: nocover
                 "Called disconnect when input queue not initialized."
             )
-        self._state.set(ConnectionStates.disconnected)
+        self.state = ConnectionStates.disconnected
 
     async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """
@@ -668,7 +668,7 @@ class P2PLibp2pConnection(Connection):
             if data is None:
                 self.logger.debug("Received None.")
                 self.node.stop()
-                self._state.set(ConnectionStates.disconnected)
+                self.state = ConnectionStates.disconnected
                 return None
                 # TOFIX(LR) attempt restarting the node?
             self.logger.debug("Received data: {}".format(data))

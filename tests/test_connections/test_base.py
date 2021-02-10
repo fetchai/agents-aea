@@ -217,3 +217,12 @@ def test_from_config_exception_class():
     data_dir = MagicMock()
     with pytest.raises(AEAComponentLoadException, match="Connection class"):
         Connection.from_config(configuration, identity, crypto_store, data_dir)
+
+
+def test_set_base_state():
+    """Check error raised on bad state set."""
+    con = TConnection(
+        configuration=ConnectionConfig("some_connection", "fetchai", "0.1.0")
+    )
+    with pytest.raises(ValueError, match="Incorrect state.*"):
+        con.state = "some bad state"
