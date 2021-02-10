@@ -38,19 +38,19 @@ class DummyConnection(Connection):
     def __init__(self, **kwargs):
         """Initialize."""
         super().__init__(**kwargs)
-        self._state.set(ConnectionStates.disconnected)
+        self.state = ConnectionStates.disconnected
         self._queue = None
 
     async def connect(self, *args, **kwargs):
         """Connect."""
         self._queue = asyncio.Queue(loop=self.loop)
-        self._state.set(ConnectionStates.connected)
+        self.state = ConnectionStates.connected
 
     async def disconnect(self, *args, **kwargs):
         """Disconnect."""
         assert self._queue is not None
         await self._queue.put(None)
-        self._state.set(ConnectionStates.disconnected)
+        self.state = ConnectionStates.disconnected
 
     async def send(self, envelope: "Envelope"):
         """Send an envelope."""

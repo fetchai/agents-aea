@@ -307,9 +307,9 @@ class PrometheusConnection(Connection):
 
         with self._connect_context():
             self.channel.logger = self.logger
-            self._state.set(ConnectionStates.connecting)
+            self.state = ConnectionStates.connecting
             await self.channel.connect()
-            self._state.set(ConnectionStates.connected)
+            self.state = ConnectionStates.connected
 
     async def disconnect(self) -> None:
         """
@@ -320,9 +320,9 @@ class PrometheusConnection(Connection):
         if self.is_disconnected:  # pragma: nocover
             return
 
-        self._state.set(ConnectionStates.disconnecting)
+        self.state = ConnectionStates.disconnecting
         await self.channel.disconnect()
-        self._state.set(ConnectionStates.disconnected)
+        self.state = ConnectionStates.disconnected
 
     async def send(self, envelope: Envelope) -> None:
         """

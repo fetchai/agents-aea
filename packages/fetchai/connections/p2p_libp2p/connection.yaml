@@ -16,7 +16,7 @@ fingerprint:
   aea/pipe_unix.go: QmSzbAexrSUSA9ZE6VT6MmcWF5MhEcmceQjAbnfRoK7Ruv
   aea/pipe_windows.go: QmdYpfjgdgFbA6Pothg65NYM45ubfpZeKr8cVQoqbFzgUK
   check_dependencies.py: QmVFwyoFn8Xmi428GxENASE8o1oALANaXRY3Uwb3TQ2EqH
-  connection.py: Qme3kZUXzpFcih9746ZJZp9us3aPAsubHyUP2oevYcEDje
+  connection.py: QmeT6zsScLAYpQyZNjdon9uDv4Gj1u8WGdAxQmrTbv56Ta
   dht/dhtclient/dhtclient.go: QmNTFZHMRVNqD8RgWSLdW9jQYLDY6dvm9JennNYmnRkfXD
   dht/dhtclient/dhtclient_test.go: QmS9SiLAojXYobqV9m5yeRpyPzt6JcSbQD78RNvSp6LPx6
   dht/dhtclient/options.go: QmaoJiavHescgx98inQjVUipPFRvcFFrodrScZ3fvrXJ4z

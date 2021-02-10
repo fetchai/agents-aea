@@ -1195,9 +1195,9 @@ class SOEFConnection(Connection):
             return
         if self.in_queue is None:
             raise ValueError("In queue not set.")  # pragma: nocover
-        self._state.set(ConnectionStates.disconnecting)
+        self.state = ConnectionStates.disconnecting
         await self.channel.disconnect()
-        self._state.set(ConnectionStates.disconnected)
+        self.state = ConnectionStates.disconnected
 
     async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """

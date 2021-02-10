@@ -455,13 +455,13 @@ class OEFLocalConnection(Connection):
             raise ValueError("No local node set!")  # pragma: nocover
         if self.is_disconnected:
             return  # pragma: nocover
-        self._state.set(ConnectionStates.disconnecting)
+        self.state = ConnectionStates.disconnecting
         if self._reader is None:
             raise ValueError("No reader set!")  # pragma: nocover
         await self._local_node.disconnect(self.address)
         await self._reader.put(None)
         self._reader, self._writer = None, None
-        self._state.set(ConnectionStates.disconnected)
+        self.state = ConnectionStates.disconnected
 
     async def send(self, envelope: Envelope) -> None:
         """Send a message."""

@@ -80,13 +80,13 @@ class TCPConnection(Connection, ABC):
             self.logger.warning("Connection already set up.")
             return
 
-        self._state.set(ConnectionStates.connecting)
+        self.state = ConnectionStates.connecting
         try:
             await self.setup()
-            self._state.set(ConnectionStates.connected)
+            self.state = ConnectionStates.connected
         except Exception as e:  # pragma: nocover # pylint: disable=broad-except
             self.logger.error(str(e))
-            self._state.set(ConnectionStates.disconnected)
+            self.state = ConnectionStates.disconnected
 
     async def disconnect(self) -> None:
         """
@@ -99,9 +99,9 @@ class TCPConnection(Connection, ABC):
             self.logger.warning("Connection already disconnected.")
             return
 
-        self._state.set(ConnectionStates.disconnecting)
+        self.state = ConnectionStates.disconnecting
         await self.teardown()
-        self._state.set(ConnectionStates.disconnected)
+        self.state = ConnectionStates.disconnected
 
     async def _recv(self, reader: StreamReader) -> Optional[bytes]:
         """Receive bytes."""

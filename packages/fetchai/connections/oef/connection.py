@@ -576,12 +576,12 @@ class OEFConnection(Connection):
         while self.is_connected:
             await asyncio.sleep(2.0)
             if not self.channel.get_state() == "connected":  # pragma: no cover
-                self._state.set(ConnectionStates.connecting)
+                self.state = ConnectionStates.connecting
                 self.logger.warning(
                     "Lost connection to OEFChannel. Retrying to connect soon ..."
                 )
                 await self.channel.connect()
-                self._state.set(ConnectionStates.connected)
+                self.state = ConnectionStates.connected
                 self.logger.warning(
                     "Successfully re-established connection to OEFChannel."
                 )
@@ -594,13 +594,13 @@ class OEFConnection(Connection):
         """
         if self.is_disconnected:
             return
-        self._state.set(ConnectionStates.disconnecting)
+        self.state = ConnectionStates.disconnecting
         if self._connection_check_task is not None:
             self._connection_check_task.cancel()
             self._connection_check_task = None
         await self.channel.disconnect()
 
-        self._state.set(ConnectionStates.disconnected)
+        self.state = ConnectionStates.disconnected
 
     async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """
