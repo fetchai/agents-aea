@@ -18,20 +18,22 @@
 # ------------------------------------------------------------------------------
 
 """Ethereum module wrapping the public and private key cryptography and ledger api."""
-
 import json
 import logging
+import threading
 import time
 import warnings
 from pathlib import Path
 from typing import Any, BinaryIO, Callable, Dict, List, Optional, Tuple, Union, cast
 
+import web3._utils.request
 from eth_account import Account
 from eth_account._utils.signing import to_standard_signature_bytes
 from eth_account.datastructures import HexBytes, SignedTransaction
 from eth_account.messages import _hash_eip191_message, encode_defunct
 from eth_keys import keys
 from eth_typing import HexStr
+from lru import LRU  # type: ignore  # pylint: disable=no-name-in-module
 from web3 import HTTPProvider, Web3
 from web3.datastructures import AttributeDict
 from web3.types import TxData, TxParams, TxReceipt
@@ -749,3 +751,44 @@ class EthereumFaucetApi(FaucetApi):
                     response.status_code, response_dict.get("message")
                 )
             )  # pragma: no cover
+
+
+class LruLockWrapper:
+    """Wrapper for LRU with threading.Lock."""
+
+    def __init__(self, lru: LRU) -> None:
+        """Init wrapper."""
+        self.lru = lru
+        self.lock = threading.Lock()
+
+    def __getitem__(self, *args: Any, **kwargs: Any) -> Any:
+        """Get item"""
+        with self.lock:
+            return self.lru.__getitem__(*args, **kwargs)
+
+    def __setitem__(self, *args: Any, **kwargs: Any) -> Any:
+        """Set item."""
+        with self.lock:
+            return self.lru.__setitem__(*args, **kwargs)
+
+    def __contains__(self, *args: Any, **kwargs: Any) -> Any:
+        """Contain item."""
+        with self.lock:
+            return self.lru.__contains__(*args, **kwargs)
+
+    def __delitem__(self, *args: Any, **kwargs: Any) -> Any:
+        """Del item."""
+        with self.lock:
+            return self.lru.__delitem__(*args, **kwargs)
+
+
+def set_wrapper_for_web3py_session_cache() -> None:
+    """Wrap web3py session cache with threading.Lock."""
+
+    # pylint: disable=protected-access
+    web3._utils.request._session_cache = LruLockWrapper(
+        web3._utils.request._session_cache
+    )
+
+
+set_wrapper_for_web3py_session_cache()

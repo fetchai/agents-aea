@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests for AsyncFriendlyQueue."""
 import asyncio
+import time
 from concurrent.futures._base import CancelledError
 from contextlib import suppress
 from threading import Thread
@@ -422,3 +423,16 @@ class TestRunnable:
         run.stop()
         run.stop()
         await run.wait_completed()
+
+    def test_stop_before_run(self):
+        """Test stop before run."""
+        # for pydocstyle
+        class TestRun(Runnable):
+            async def run(self):
+                await asyncio.sleep(0.1)
+
+        run = TestRun()
+        run.stop()
+        run.start()
+        time.sleep(1)
+        assert not run.is_running

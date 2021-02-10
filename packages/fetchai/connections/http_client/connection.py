@@ -241,7 +241,7 @@ class HTTPClientAsyncChannel:
                 else b"",
                 dialogue=dialogue,
             )
-        except Exception:  # pragma: nocover # pylint: disable=broad-except
+        except Exception:  # pylint: disable=broad-except
             envelope = self.to_envelope(
                 request_http_message,
                 status_code=self.DEFAULT_EXCEPTION_CODE,
