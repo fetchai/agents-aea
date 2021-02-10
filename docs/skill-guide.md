@@ -116,6 +116,11 @@ Searches are proactive and, as such, well placed in a <a href="../api/skills/bas
 
 We place this code in `my_aea/skills/my_search/behaviours.py`. Ensure you replace the `fetchai` author in this line `from packages.fetchai.skills.my_search.dialogues import OefSearchDialogues` with your author handle (run `aea init` to set or check the author name).
 
+<div class="admonition note">
+  <p class="admonition-title">Note</p>
+  <p> Note that the import paths to agent packages, fo example `packages.fetchai.skills.my_search.dialogues` above, are not actual paths. Package files always reside in your AEA's folder, either under a specific package directory (e.g. connection, protocol, skill) if the package is custom built, or under `vendor` if it is pulled from the registry. These paths are virtual and created automatically when an AEA is run. </p>
+</div>
+
 ## Step 3: Develop a Handler
 
 So far, we have tasked the AEA with sending search requests to the <a href="../simple-oef">SOEF search node</a>. However, we have no way of handling the responses sent to the AEA by the <a href="../simple-oef">SOEF search node</a> at the moment. The AEA would simply respond to the <a href="../simple-oef">SOEF search node</a> via the default `error` skill which sends all unrecognised envelopes back to the sender.
