@@ -73,7 +73,7 @@ class YotiSerializer(Serializer):
             error_msg = msg.error_msg
             performative.error_msg = error_msg
             yoti_msg.error.CopyFrom(performative)
-        else:
+        else:  # pragma: nocover
             raise ValueError("Performative not valid: {}".format(performative_id))
 
         dialogue_message_pb.content = yoti_msg.SerializeToString()
@@ -121,7 +121,7 @@ class YotiSerializer(Serializer):
             performative_content["error_code"] = error_code
             error_msg = yoti_pb.error.error_msg
             performative_content["error_msg"] = error_msg
-        else:
+        else:  # pragma: nocover
             raise ValueError("Performative not valid: {}.".format(performative_id))
 
         return YotiMessage(
