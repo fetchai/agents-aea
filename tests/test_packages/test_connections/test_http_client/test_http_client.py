@@ -20,6 +20,7 @@
 import asyncio
 import logging
 from asyncio import CancelledError
+from typing import cast
 from unittest.mock import MagicMock, Mock, patch
 
 import aiohttp
@@ -313,3 +314,37 @@ class TestHTTPClientConnect:
             mock_logger.assert_any_call(
                 AnyStringWith("Could not create dialogue for message=")
             )
+
+    @pytest.mark.asyncio
+    async def test_http_send_exception(self):
+        """Test request is ok cause mocked."""
+        await self.http_client_connection.connect()
+        request_http_message, sending_dialogue = self.http_dialogs.create(
+            counterparty=self.connection_address,
+            performative=HttpMessage.Performative.REQUEST,
+            method="get",
+            url="https://not-a-google.com",
+            headers="",
+            version="",
+            body=b"",
+        )
+        request_envelope = Envelope(
+            to=self.connection_address,
+            sender=self.agent_address,
+            message=request_http_message,
+        )
+
+        with patch.object(
+            aiohttp.ClientSession,
+            "request",
+            side_effect=asyncio.TimeoutError("expected exception"),
+        ):
+            await self.http_client_connection.send(envelope=request_envelope)
+            envelope = await asyncio.wait_for(
+                self.http_client_connection.receive(), timeout=10
+            )
+
+        assert envelope
+        message = cast(HttpMessage, envelope.message)
+        assert message.performative == HttpMessage.Performative.RESPONSE
+        assert b"expected exception" in message.body
