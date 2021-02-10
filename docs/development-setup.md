@@ -1,6 +1,6 @@
 
 
-An AEA <a href="../package-imports">consists of many packages </a>. When developing, it helps to be able to save packages in a local package registry, rather than pushing them to <a href="https://aea-registry.fetch.ai" target="_blank">remote registry</a>. This guide helps setting up a local package registry and configuring the working directory for development.
+An AEA <a href="../package-imports">consists of packages </a>. When developing, it helps to be able to save packages in a local package registry, rather than pushing them to <a href="https://aea-registry.fetch.ai" target="_blank">remote registry</a>. This guide helps setting up a local package registry and configuring the working directory for development.
 
 There are two ways to write code for an AEA:
 

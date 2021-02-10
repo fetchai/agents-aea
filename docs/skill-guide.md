@@ -937,4 +937,8 @@ We recommend you continue with the next step in the 'Getting Started' series:
 
 - <a href="../core-components-2">Core components (Part 2)</a>
 
+### Relevant deep-dives
+
+<a href="../generic-skills-step-by-step"> This guide </a> goes through a more elaborate scenario than the one on this page, where after finding each other, the two AEAs negotiate and trade via a ledger. 
+
 <br />
