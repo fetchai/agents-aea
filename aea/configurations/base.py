@@ -1107,7 +1107,7 @@ class AgentConfig(PackageConfiguration):
         ("logging_config",),
     ]
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         agent_name: SimpleIdOrStr,
         author: SimpleIdOrStr,
