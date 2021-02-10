@@ -222,7 +222,8 @@ def test_from_config_exception_class():
 def test_set_base_state():
     """Check error raised on bad state set."""
     con = TConnection(
-        configuration=ConnectionConfig("some_connection", "fetchai", "0.1.0")
+        configuration=ConnectionConfig("some_connection", "fetchai", "0.1.0"),
+        data_dir=MagicMock(),
     )
     with pytest.raises(ValueError, match="Incorrect state.*"):
         con.state = "some bad state"
