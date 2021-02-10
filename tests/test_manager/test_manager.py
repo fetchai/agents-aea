@@ -73,11 +73,11 @@ class TestMultiAgentManagerAsyncMode(
         assert not os.path.exists(self.working_dir)
         assert not os.path.exists(self.working_dir)
 
-    def test_keys_dir_presents(self, *args):
-        """Check not fails on exists key dir."""
+    def test_data_dir_presents(self, *args):
+        """Check not fails on exists data dir."""
         try:
             os.makedirs(self.working_dir)
-            os.makedirs(self.manager._keys_dir)
+            os.makedirs(self.manager._data_dir)
             self.manager.start_manager()
             self.manager.stop_manager()
         finally:

@@ -25,7 +25,7 @@ import pprint
 import subprocess  # nosec
 import sys
 from collections import defaultdict
-from copy import copy, deepcopy
+from copy import deepcopy
 from pathlib import Path
 from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Type, Union, cast
 
@@ -1022,6 +1022,35 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         stderr = res.stderr.decode("utf-8")
         return stdout, stderr, code
 
+    def _build_wallet(self, data_directory: str) -> Wallet:
+        """
+        Build the wallet.
+
+        We need to prepend the path to the data directory
+        to each private key path, but only if
+        the path is not an absolute path.
+
+        :param data_directory: the path prefix to be prepended to each private key path.
+        :return: the wallet instance.
+        """
+
+        def _prepend_if_not_none(
+            obj: Dict[str, Optional[str]]
+        ) -> Dict[str, Optional[str]]:
+            return {
+                key: os.path.join(data_directory, value)
+                if value is not None and not os.path.isabs(value)
+                else value
+                for key, value in obj.items()
+            }
+
+        private_key_paths = _prepend_if_not_none(self.private_key_paths)
+        connection_private_key_paths = _prepend_if_not_none(
+            self.connection_private_key_paths
+        )
+        wallet = Wallet(private_key_paths, connection_private_key_paths)
+        return wallet
+
     def _build_identity_from_wallet(self, wallet: Wallet) -> Identity:
         """
         Get the identity associated to a wallet.
@@ -1126,9 +1155,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         datadir = self._get_data_dir()
         self._check_we_can_build()
         logging.config.dictConfig(self._logging_config)
-        wallet = Wallet(
-            copy(self.private_key_paths), copy(self.connection_private_key_paths)
-        )
+        wallet = self._build_wallet(datadir)
         identity = self._build_identity_from_wallet(wallet)
         resources = Resources(identity.name)
         self._load_and_add_components(ComponentType.PROTOCOL, resources, identity.name)

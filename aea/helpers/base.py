@@ -913,3 +913,14 @@ def delete_directory_contents(directory: Path) -> None:
             filename.unlink()
         elif filename.is_dir():
             shutil.rmtree(str(filename), ignore_errors=False)
+
+
+def prepend_if_not_absolute(path: PathLike, prefix: PathLike) -> PathLike:
+    """
+    Prepend a path with a prefix, but only if not absolute
+
+    :param path: the path to process.
+    :param prefix: the path prefix.
+    :return: the same path if absolute, else the prepended path.
+    """
+    return path if Path(path).is_absolute() else Path(prefix) / path

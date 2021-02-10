@@ -131,14 +131,11 @@ class AgentAlias(_Base):
     """Agent alias representation."""
 
     def __init__(
-        self, project: Project, agent_name: str, keys_dir: str, data_dir: str,
+        self, project: Project, agent_name: str, data_dir: str,
     ):
         """Init agent alias with project, config, name, agent, builder."""
         self.project = project
         self.agent_name = agent_name
-        self._keys_dir = keys_dir
-        if not os.path.exists(self._keys_dir):
-            os.makedirs(self._keys_dir)
         self._data_dir = data_dir
         if not os.path.exists(self._data_dir):
             os.makedirs(self._data_dir)
@@ -190,11 +187,11 @@ class AgentAlias(_Base):
         If file exists, check `replace` option.
         """
         file_name = (
-            f"{self.agent_name}_{ledger}_connection_private.key"
+            f"{ledger}_connection_private.key"
             if is_connection
-            else f"{self.agent_name}_{ledger}_private.key"
+            else f"{ledger}_private.key"
         )
-        filepath = os.path.join(self._keys_dir, file_name)
+        filepath = os.path.join(self._data_dir, file_name)
         if os.path.exists(filepath) and not replace:
             return filepath
         create_private_key(ledger, filepath)
