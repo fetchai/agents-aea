@@ -43,6 +43,8 @@ loop_mode: async                                # The agent loop mode (must be o
 runtime_mode: threaded                          # The runtime mode (must be one of "threaded" or "async") and determines how agent loop and multiplexer are run
 error_handler: None                             # The error handler to be used.
 decision_maker_handler: None                    # The decision maker handler to be used.
+storage_uri: None                               # The URI to the storage.
+data_dir: None                                  # The path to the directory for local files. Defaults to current working directory.
 ```
 ``` yaml
 public_id: some_author/some_package:0.1.0       # The public id of the connection (must satisfy PUBLIC_ID_REGEX).
