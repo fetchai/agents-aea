@@ -53,7 +53,7 @@ runtime_mode: threaded                          # The runtime mode (must be one 
 error_handler: None                             # The error handler to be used.
 decision_maker_handler: None                    # The decision maker handler to be used.
 storage_uri: None                               # The URI to the storage.
-data_dir: None                                  # The path to the directory for local files.
+data_dir: None                                  # The path to the directory for local files. Defaults to current working directory.
 ```
 
 The `aea-config.yaml` can further be extended with component configuration overrides.
