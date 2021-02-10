@@ -18,9 +18,9 @@
 # ------------------------------------------------------------------------------
 
 """This module contains types and helpers for acn Proof-of-Representation."""
-
 from typing import Optional
 
+from aea.common import PathLike
 from aea.crypto.registries import make_ledger_api
 from aea.helpers.base import CertRequest
 
@@ -129,11 +129,15 @@ class AgentRecord:
 
     @classmethod
     def from_cert_request(
-        cls, cert_request: CertRequest, address: str, representative_public_key: str,
+        cls,
+        cert_request: CertRequest,
+        address: str,
+        representative_public_key: str,
+        data_dir: Optional[PathLike] = None,
     ) -> "AgentRecord":
         """Get agent record from cert request."""
         message = cert_request.get_message(representative_public_key)
-        signature = cert_request.get_signature()
+        signature = cert_request.get_signature(data_dir)
         record = cls(
             address,
             representative_public_key,

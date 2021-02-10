@@ -75,25 +75,33 @@ class TestConnectionTestCase:
     @pytest.mark.asyncio
     async def test_loop_only_in_running_loop(self):
         """Test loop property positive result."""
-        obj = self.TConnection(ConnectionConfig("some_connection", "fetchai", "0.1.0"))
+        obj = self.TConnection(
+            ConnectionConfig("some_connection", "fetchai", "0.1.0"), MagicMock()
+        )
         obj.loop
 
     def test_loop_fails_on_non_running_loop(self):
         """Test loop property positive result."""
-        obj = self.TConnection(ConnectionConfig("some_connection", "fetchai", "0.1.0"))
+        obj = self.TConnection(
+            ConnectionConfig("some_connection", "fetchai", "0.1.0"), MagicMock()
+        )
         with pytest.raises(AEAEnforceError):
             obj.loop
 
     def test_excluded_protocols_positive(self):
         """Test excluded_protocols property positive result."""
-        obj = self.TConnection(ConnectionConfig("some_connection", "fetchai", "0.1.0"))
+        obj = self.TConnection(
+            ConnectionConfig("some_connection", "fetchai", "0.1.0"), MagicMock()
+        )
         obj._excluded_protocols = "excluded_protocols"
         obj.excluded_protocols
 
 
 def test_loop_property():
     """Test connection's loop property."""
-    connection = TConnection(MagicMock(public_id=TConnection.connection_id))
+    connection = TConnection(
+        MagicMock(public_id=TConnection.connection_id), MagicMock()
+    )
     with unittest.mock.patch.object(aea.connections.base, "enforce"):
         loop = connection.loop
         assert isinstance(loop, asyncio.AbstractEventLoop)
@@ -130,7 +138,9 @@ def test_ensure_valid_envelope_for_external_comms_negative_cases():
 
 def test_state():
     """Test connect context of a connection."""
-    connection = TConnection(MagicMock(public_id=TConnection.connection_id))
+    connection = TConnection(
+        MagicMock(public_id=TConnection.connection_id), MagicMock()
+    )
     assert connection.state == ConnectionStates.disconnected
 
     with connection._connect_context():
@@ -141,7 +151,9 @@ def test_state():
 
 def test_ensure_connected():
     """Test ensure_connected method."""
-    connection = TConnection(MagicMock(public_id=TConnection.connection_id))
+    connection = TConnection(
+        MagicMock(public_id=TConnection.connection_id), MagicMock()
+    )
     assert not connection.is_connected
     with pytest.raises(
         ConnectionError, match="Connection is not connected! Connect first!"
@@ -158,7 +170,11 @@ def test_from_dir():
     identity = MagicMock()
     identity.name = "agent_name"
     crypto_store = MagicMock()
-    connection = Connection.from_dir(dummy_connection_dir, identity, crypto_store)
+
+    data_dir = MagicMock()
+    connection = Connection.from_dir(
+        dummy_connection_dir, identity, crypto_store, data_dir
+    )
     assert isinstance(connection, Connection)
     assert connection.component_id == ComponentId(
         ComponentType.CONNECTION, PublicId("fetchai", "dummy", "0.1.0")
@@ -179,8 +195,9 @@ def test_from_config_exception_path():
     identity = MagicMock()
     identity.name = "agent_name"
     crypto_store = MagicMock()
+    data_dir = MagicMock()
     with pytest.raises(AEAComponentLoadException, match="Connection module"):
-        Connection.from_config(configuration, identity, crypto_store)
+        Connection.from_config(configuration, identity, crypto_store, data_dir)
 
 
 def test_from_config_exception_class():
@@ -197,14 +214,16 @@ def test_from_config_exception_class():
     identity = MagicMock()
     identity.name = "agent_name"
     crypto_store = MagicMock()
+    data_dir = MagicMock()
     with pytest.raises(AEAComponentLoadException, match="Connection class"):
-        Connection.from_config(configuration, identity, crypto_store)
+        Connection.from_config(configuration, identity, crypto_store, data_dir)
 
 
 def test_set_base_state():
     """Check error raised on bad state set."""
     con = TConnection(
-        configuration=ConnectionConfig("some_connection", "fetchai", "0.1.0")
+        configuration=ConnectionConfig("some_connection", "fetchai", "0.1.0"),
+        data_dir=MagicMock(),
     )
     with pytest.raises(ValueError, match="Incorrect state.*"):
         con.state = "some bad state"

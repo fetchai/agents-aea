@@ -55,7 +55,9 @@ def run():
         connection_id=StubConnection.connection_id,
     )
     stub_connection = StubConnection(
-        configuration=configuration, identity=Identity("some_agent", "some_address")
+        configuration=configuration,
+        data_dir=".",
+        identity=Identity("some_agent", "some_address"),
     )
     multiplexer = Multiplexer([stub_connection], protocols=[DefaultMessage])
     try:

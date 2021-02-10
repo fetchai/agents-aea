@@ -33,38 +33,12 @@ weather_client_name = weather_client_id.name
 
 ## Adding agent instances
 
-Save the following private keys in the respective files.
-``` python
-FET_PRIVATE_KEY_STATION = b"72d3149f5689f0749eaec5ebf6dba5deeb1e89b93ae1c58c71fd43dfaa231e87"
-FET_PRIVATE_KEY_PATH_STATION = Path(manager.keys_dir, f"fetchai_private_key_{weather_station_name}.txt").absolute()
-FET_PRIVATE_KEY_PATH_STATION.write_bytes(FET_PRIVATE_KEY_STATION)
-
-FET_CONNECTION_PRIVATE_KEY_STATION = b"bf529acb2546e13615ef6004c48e393f0638a5dc0c4979631a9a4bc554079f6f"
-FET_CONNECTION_PRIVATE_KEY_PATH_STATION = Path(manager.keys_dir, f"fetchai_connection_private_key_{weather_station_name}.txt").absolute()
-FET_CONNECTION_PRIVATE_KEY_PATH_STATION.write_bytes(FET_CONNECTION_PRIVATE_KEY_STATION)
-
-CERT_PATH_STATION = Path(manager.certs_dir, f"conn_cert_{weather_station_name}.txt").absolute()
-
-SOEF_STORAGE_PATH_STATION = Path(manager.keys_dir, f"soef_token_{weather_station_name}.txt").absolute()
-
-FET_PRIVATE_KEY_CLIENT = b"589839ae54b71b8754a7fe96b52045364077c28705a1806b74441debcae16e0a"
-FET_PRIVATE_KEY_PATH_CLIENT = Path(manager.keys_dir, f"fetchai_private_key_{weather_client_name}.txt").absolute()
-FET_PRIVATE_KEY_PATH_CLIENT.write_bytes(FET_PRIVATE_KEY_CLIENT)
-
-FET_CONNECTION_PRIVATE_KEY_CLIENT = b"c9b38eff57f678f5ab5304447997351edb08eceb883267fa4ad849074bec07e4"
-FET_CONNECTION_PRIVATE_KEY_PATH_CLIENT = Path(manager.keys_dir, f"fetchai_connection_private_key_{weather_client_name}.txt").absolute()
-FET_CONNECTION_PRIVATE_KEY_PATH_CLIENT.write_bytes(FET_CONNECTION_PRIVATE_KEY_CLIENT)
-
-CERT_PATH_CLIENT = Path(manager.certs_dir, f"conn_cert_{weather_client_name}.txt").absolute()
-
-SOEF_STORAGE_PATH_CLIENT = Path(manager.keys_dir, f"soef_token_{weather_client_name}.txt").absolute()
-```
 
 Add the agent instances
 ``` python
 agent_overrides = {
-    "private_key_paths": {"fetchai": str(FET_PRIVATE_KEY_PATH_STATION)},
-    "connection_private_key_paths": {"fetchai": str(FET_CONNECTION_PRIVATE_KEY_PATH_STATION)}
+    "private_key_paths": {"fetchai": "fetchai_private_key.txt"},
+    "connection_private_key_paths": {"fetchai": "fetchai_connection_private_key.txt"}
 }
 
 p2p_public_id = PublicId.from_str("fetchai/p2p_libp2p:0.14.0")
@@ -79,20 +53,20 @@ component_overrides = [{
       "not_after": '2022-01-01',
       "not_before": '2021-01-01',
       "public_key": "fetchai",
-      "save_path": str(CERT_PATH_STATION)
+      "save_path": "conn_cert.txt"
     }]
 }, {
     **soef_public_id.json,
     "type": "connection",
     "config": {
-        "token_storage_path": str(SOEF_STORAGE_PATH_STATION)
+        "token_storage_path": "soef_token.txt"
     }
 }]
 manager.add_agent(weather_station_id, component_overrides=component_overrides, agent_overrides=agent_overrides)
 
 agent_overrides = {
-    "private_key_paths": {"fetchai": str(FET_PRIVATE_KEY_PATH_CLIENT)},
-    "connection_private_key_paths": {"fetchai": str(FET_CONNECTION_PRIVATE_KEY_PATH_CLIENT)}
+    "private_key_paths": {"fetchai": "fetchai_private_key.txt"},
+    "connection_private_key_paths": {"fetchai": "fetchai_connection_private_key.txt"}
 }
 component_overrides = [{
     **p2p_public_id.json,
@@ -109,17 +83,37 @@ component_overrides = [{
       "not_after": '2022-01-01',
       "not_before": '2021-01-01',
       "public_key": "fetchai",
-      "save_path": str(CERT_PATH_CLIENT)
+      "save_path": "conn_cert.txt"
     }]
 }, {
     **soef_public_id.json,
     "type": "connection",
     "config": {
-        "token_storage_path": str(SOEF_STORAGE_PATH_CLIENT)
+        "token_storage_path": "soef_token.txt"
     }
 }]
 
 manager.add_agent(weather_client_id, component_overrides=component_overrides, agent_overrides=agent_overrides)
+```
+
+
+Save the following private keys in the respective files.
+``` python
+FET_PRIVATE_KEY_STATION = b"72d3149f5689f0749eaec5ebf6dba5deeb1e89b93ae1c58c71fd43dfaa231e87"
+FET_PRIVATE_KEY_PATH_STATION = Path(manager.data_dir, weather_station_name, "fetchai_private_key.txt").absolute()
+FET_PRIVATE_KEY_PATH_STATION.write_bytes(FET_PRIVATE_KEY_STATION)
+
+FET_CONNECTION_PRIVATE_KEY_STATION = b"bf529acb2546e13615ef6004c48e393f0638a5dc0c4979631a9a4bc554079f6f"
+FET_CONNECTION_PRIVATE_KEY_PATH_STATION = Path(manager.data_dir, weather_station_name, "fetchai_connection_private_key.txt").absolute()
+FET_CONNECTION_PRIVATE_KEY_PATH_STATION.write_bytes(FET_CONNECTION_PRIVATE_KEY_STATION)
+
+FET_PRIVATE_KEY_CLIENT = b"589839ae54b71b8754a7fe96b52045364077c28705a1806b74441debcae16e0a"
+FET_PRIVATE_KEY_PATH_CLIENT = Path(manager.data_dir, weather_client_name, "fetchai_private_key.txt").absolute()
+FET_PRIVATE_KEY_PATH_CLIENT.write_bytes(FET_PRIVATE_KEY_CLIENT)
+
+FET_CONNECTION_PRIVATE_KEY_CLIENT = b"c9b38eff57f678f5ab5304447997351edb08eceb883267fa4ad849074bec07e4"
+FET_CONNECTION_PRIVATE_KEY_PATH_CLIENT = Path(manager.data_dir, weather_client_name, "fetchai_connection_private_key.txt").absolute()
+FET_CONNECTION_PRIVATE_KEY_PATH_CLIENT.write_bytes(FET_CONNECTION_PRIVATE_KEY_CLIENT)
 ```
 
 ## Running the agents:

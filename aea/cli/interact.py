@@ -108,6 +108,7 @@ def _load_packages(agent_identity: Identity) -> None:
         ),
         agent_identity,
         CryptoStore(),
+        os.getcwd(),
     )
 
 
@@ -141,7 +142,7 @@ def _run_interaction_channel() -> None:
     )
 
     stub_connection = StubConnection(
-        configuration=configuration, identity=identity_stub
+        configuration=configuration, data_dir=os.getcwd(), identity=identity_stub
     )
     multiplexer = Multiplexer([stub_connection])
     inbox = InBox(multiplexer)

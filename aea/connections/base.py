@@ -64,6 +64,7 @@ class Connection(Component, ABC):
     def __init__(
         self,
         configuration: ConnectionConfig,
+        data_dir: str,
         identity: Optional[Identity] = None,
         crypto_store: Optional[CryptoStore] = None,
         restricted_to_protocols: Optional[Set[PublicId]] = None,
@@ -77,6 +78,7 @@ class Connection(Component, ABC):
         parameters are None: connection_id, excluded_protocols or restricted_to_protocols.
 
         :param configuration: the connection configuration.
+        :param data_dir: directory where to put local files.
         :param identity: the identity object held by the agent.
         :param crypto_store: the crypto store for encrypted communication.
         :param restricted_to_protocols: the set of protocols ids of the only supported protocols for this connection.
@@ -92,6 +94,7 @@ class Connection(Component, ABC):
 
         self._identity = identity
         self._crypto_store = crypto_store
+        self._data_dir = data_dir
 
         self._restricted_to_protocols = (
             restricted_to_protocols if restricted_to_protocols is not None else set()
@@ -157,6 +160,11 @@ class Connection(Component, ABC):
     def has_crypto_store(self) -> bool:  # pragma: nocover
         """Check if the connection has the crypto store."""
         return self._crypto_store is not None
+
+    @property
+    def data_dir(self) -> str:  # pragma: nocover
+        """Get the data directory."""
+        return self._data_dir
 
     @property
     def component_type(self) -> ComponentType:  # pragma: nocover
@@ -227,6 +235,7 @@ class Connection(Component, ABC):
         directory: str,
         identity: Identity,
         crypto_store: CryptoStore,
+        data_dir: str,
         **kwargs: Any,
     ) -> "Connection":
         """
@@ -235,6 +244,7 @@ class Connection(Component, ABC):
         :param directory: the directory to the connection package.
         :param identity: the identity object.
         :param crypto_store: object to access the connection crypto objects.
+        :param data_dir: the assets directory.
         :return: the connection object.
         """
         configuration = cast(
@@ -242,7 +252,9 @@ class Connection(Component, ABC):
             load_component_configuration(ComponentType.CONNECTION, Path(directory)),
         )
         configuration.directory = Path(directory)
-        return Connection.from_config(configuration, identity, crypto_store, **kwargs)
+        return Connection.from_config(
+            configuration, identity, crypto_store, data_dir, **kwargs
+        )
 
     @classmethod
     def from_config(
@@ -250,6 +262,7 @@ class Connection(Component, ABC):
         configuration: ConnectionConfig,
         identity: Identity,
         crypto_store: CryptoStore,
+        data_dir: str,
         **kwargs: Any,
     ) -> "Connection":
         """
@@ -258,6 +271,7 @@ class Connection(Component, ABC):
         :param configuration: the connection configuration.
         :param identity: the identity object.
         :param crypto_store: object to access the connection crypto objects.
+        :param data_dir: the directory of the AEA project data.
         :return: an instance of the concrete connection class.
         """
         configuration = cast(ConnectionConfig, configuration)
@@ -287,6 +301,7 @@ class Connection(Component, ABC):
         try:
             connection = connection_class(
                 configuration=configuration,
+                data_dir=data_dir,
                 identity=identity,
                 crypto_store=crypto_store,
                 **kwargs,
@@ -326,6 +341,7 @@ class BaseSyncConnection(Connection):
     def __init__(
         self,
         configuration: ConnectionConfig,
+        data_dir: str,
         identity: Optional[Identity] = None,
         crypto_store: Optional[CryptoStore] = None,
         restricted_to_protocols: Optional[Set[PublicId]] = None,
@@ -339,6 +355,7 @@ class BaseSyncConnection(Connection):
         parameters are None: connection_id, excluded_protocols or restricted_to_protocols.
 
         :param configuration: the connection configuration.
+        :param data_dir: directory where to put local files.
         :param identity: the identity object held by the agent.
         :param crypto_store: the crypto store for encrypted communication.
         :param restricted_to_protocols: the set of protocols ids of the only supported protocols for this connection.
@@ -346,6 +363,7 @@ class BaseSyncConnection(Connection):
         """
         super().__init__(
             configuration=configuration,
+            data_dir=data_dir,
             identity=identity,
             crypto_store=crypto_store,
             restricted_to_protocols=restricted_to_protocols,

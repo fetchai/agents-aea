@@ -19,6 +19,7 @@
 """This test module contains the tests for the scaffold connection."""
 import os
 import sys
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -39,7 +40,9 @@ class TestScaffoldConnectionReception:
         configuration = ConnectionConfig(
             connection_id=MyScaffoldAsyncConnection.connection_id,
         )
-        self.connection = MyScaffoldAsyncConnection(configuration=configuration)
+        self.connection = MyScaffoldAsyncConnection(
+            configuration=configuration, data_dir=MagicMock()
+        )
 
     @pytest.mark.asyncio
     async def test_methods_not_implemented(self):

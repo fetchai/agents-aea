@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains a test for aea.context."""
-
+import os
 
 from aea.context.base import AgentContext
 from aea.identity.base import Identity
@@ -63,6 +63,7 @@ def test_agent_context():
         search_service_address=search_service_address,
         decision_maker_address=decision_maker_address,
         storage_callable=storage_callable_,
+        data_dir=os.getcwd(),
         **kwargs
     )
     assert ac.shared_state == {}

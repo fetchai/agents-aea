@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 """This module contains test case classes based on pytest for AEA skill testing."""
 import asyncio
+import os
 from pathlib import Path
 from queue import Queue
 from types import SimpleNamespace
@@ -449,6 +450,7 @@ class BaseSkillTestCase:
             default_routing={},
             search_service_address="dummy_search_service_address",
             decision_maker_address="dummy_decision_maker_address",
+            data_dir=os.getcwd(),
         )
 
         # This enables pre-populating the 'shared_state' prior to loading the skill

@@ -73,6 +73,7 @@ def make_agent(agent_name="my_agent", runtime_mode="threaded") -> AEA:
     wallet = Wallet({DEFAULT_LEDGER: None})
     identity = Identity(agent_name, address=agent_name)
     resources = Resources()
+    datadir = os.getcwd()
     agent_context = MagicMock()
     agent_context.agent_name = agent_name
     agent_context.agent_address = agent_name
@@ -93,7 +94,7 @@ def make_agent(agent_name="my_agent", runtime_mode="threaded") -> AEA:
             )
         )
     )
-    return AEA(identity, wallet, resources, runtime_mode=runtime_mode)
+    return AEA(identity, wallet, resources, datadir, runtime_mode=runtime_mode)
 
 
 def make_envelope(

@@ -74,6 +74,7 @@ class AEA(Agent):
         identity: Identity,
         wallet: Wallet,
         resources: Resources,
+        data_dir: str,
         loop: Optional[AbstractEventLoop] = None,
         period: float = 0.05,
         execution_timeout: float = 0,
@@ -99,6 +100,7 @@ class AEA(Agent):
         :param identity: the identity of the agent
         :param wallet: the wallet of the agent.
         :param resources: the resources (protocols and skills) of the agent.
+        :param data_dir: directory where to put local files.
         :param loop: the event loop to run the connections.
         :param period: period to call agent's act
         :param execution_timeout: amount of time to limit single act/handle to execute.
@@ -206,6 +208,7 @@ class AEA(Agent):
             default_routing,
             search_service_address,
             decision_maker_handler.self_address,
+            data_dir,
             storage_callable=lambda: self.runtime.storage,
             build_dir=self.get_build_dir(),
             **kwargs,

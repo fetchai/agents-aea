@@ -23,6 +23,7 @@ import time
 import urllib
 from threading import Thread
 from typing import Any, Dict, Optional, Tuple, cast
+from unittest.mock import MagicMock
 from urllib.parse import urlencode
 
 import pytest
@@ -73,7 +74,9 @@ def make_multiplexer_and_dialogues() -> Tuple[Multiplexer, OefSearchDialogues, C
         },
         connection_id=SOEFConnection.connection_id,
     )
-    soef_connection = SOEFConnection(configuration=configuration, identity=identity,)
+    soef_connection = SOEFConnection(
+        configuration=configuration, data_dir=MagicMock(), identity=identity,
+    )
     multiplexer = Multiplexer([soef_connection])
     return multiplexer, oef_search_dialogues, crypto
 

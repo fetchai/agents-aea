@@ -23,9 +23,11 @@ import logging
 import os
 import platform
 import random
+import shutil
 import socket
 import string
 import sys
+import tempfile
 import threading
 import time
 from functools import WRAPPER_ASSIGNMENTS, wraps
@@ -42,7 +44,7 @@ from typing import (
     Union,
     cast,
 )
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import docker as docker
 import gym
@@ -78,7 +80,7 @@ from aea.crypto.fetchai import _FETCHAI
 from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS
 from aea.crypto.registries import ledger_apis_registry, make_crypto
 from aea.crypto.wallet import CryptoStore
-from aea.helpers.base import CertRequest, SimpleId
+from aea.helpers.base import CertRequest, SimpleId, cd
 from aea.identity.base import Identity
 from aea.test_tools.click_testing import CliRunner as ImportedCliRunner
 from aea.test_tools.constants import DEFAULT_AUTHOR
@@ -736,7 +738,9 @@ def double_escape_windows_path_separator(path):
 def _make_dummy_connection() -> Connection:
     configuration = ConnectionConfig(connection_id=DummyConnection.connection_id,)
     dummy_connection = DummyConnection(
-        configuration=configuration, identity=Identity("name", "address")
+        configuration=configuration,
+        data_dir=MagicMock(),
+        identity=Identity("name", "address"),
     )
     return dummy_connection
 
@@ -753,7 +757,10 @@ def _make_local_connection(
         connection_id=OEFLocalConnection.connection_id,
     )
     oef_local_connection = OEFLocalConnection(
-        configuration=configuration, identity=Identity("name", address), local_node=node
+        configuration=configuration,
+        data_dir=MagicMock(),
+        identity=Identity("name", address),
+        local_node=node,
     )
     return oef_local_connection
 
@@ -763,7 +770,9 @@ def _make_oef_connection(address: Address, oef_addr: str, oef_port: int):
         addr=oef_addr, port=oef_port, connection_id=OEFConnection.connection_id
     )
     oef_connection = OEFConnection(
-        configuration=configuration, identity=Identity("name", address),
+        configuration=configuration,
+        data_dir=MagicMock(),
+        identity=Identity("name", address),
     )
     oef_connection._default_logger_name = "aea.packages.fetchai.connections.oef"
     return oef_connection
@@ -774,7 +783,9 @@ def _make_tcp_server_connection(address: str, host: str, port: int):
         address=host, port=port, connection_id=TCPServerConnection.connection_id
     )
     tcp_connection = TCPServerConnection(
-        configuration=configuration, identity=Identity("name", address),
+        configuration=configuration,
+        data_dir=MagicMock(),
+        identity=Identity("name", address),
     )
     tcp_connection._default_logger_name = (
         "aea.packages.fetchai.connections.tcp.tcp_server"
@@ -787,7 +798,9 @@ def _make_tcp_client_connection(address: str, host: str, port: int):
         address=host, port=port, connection_id=TCPClientConnection.connection_id
     )
     tcp_connection = TCPClientConnection(
-        configuration=configuration, identity=Identity("name", address),
+        configuration=configuration,
+        data_dir=MagicMock(),
+        identity=Identity("name", address),
     )
     tcp_connection._default_logger_name = (
         "aea.packages.fetchai.connections.tcp.tcp_client"
@@ -801,16 +814,18 @@ def _make_stub_connection(input_file_path: str, output_file_path: str):
         output_file=output_file_path,
         connection_id=StubConnection.connection_id,
     )
-    connection = StubConnection(configuration=configuration)
+    connection = StubConnection(configuration=configuration, data_dir=MagicMock())
     return connection
 
 
-def _process_cert(key: Crypto, cert: CertRequest):
+def _process_cert(key: Crypto, cert: CertRequest, path_prefix: str):
     # must match aea/cli/issue_certificates.py:_process_certificate
     assert cert.public_key is not None
     message = cert.get_message(cert.public_key)
     signature = key.sign_message(message).encode("ascii").hex()
-    Path(cert.save_path).write_bytes(signature.encode("ascii"))
+    Path(cert.get_absolute_save_path(path_prefix)).write_bytes(
+        signature.encode("ascii")
+    )
 
 
 def _make_libp2p_connection(
@@ -824,6 +839,7 @@ def _make_libp2p_connection(
     node_key_file: Optional[str] = None,
     agent_key: Optional[Crypto] = None,
     build_directory: Optional[str] = None,
+    data_dir: str = ".",
     peer_registration_delay: str = "0.0",
 ) -> P2PLibp2pConnection:
     log_file = "libp2p_node_{}.log".format(port)
@@ -850,7 +866,7 @@ def _make_libp2p_connection(
         "2021-01-02",
         f"./{key.address}_cert.txt",
     )
-    _process_cert(key, cert_request)
+    _process_cert(key, cert_request, path_prefix=data_dir)
     if not build_directory:
         build_directory = os.getcwd()
     if relay and delegate:
@@ -892,7 +908,10 @@ def _make_libp2p_connection(
     if not os.path.exists(os.path.join(build_directory, LIBP2P_NODE_MODULE_NAME)):
         build_node(build_directory)
     connection = P2PLibp2pConnection(
-        configuration=configuration, identity=identity, crypto_store=conn_crypto_store
+        configuration=configuration,
+        data_dir=data_dir,
+        identity=identity,
+        crypto_store=conn_crypto_store,
     )
     return connection
 
@@ -903,6 +922,7 @@ def _make_libp2p_client_connection(
     node_host: str = "127.0.0.1",
     uri: Optional[str] = None,
     ledger_api_id: Union[SimpleId, str] = DEFAULT_LEDGER,
+    data_dir: str = ".",
 ) -> P2PLibp2pClientConnection:
     crypto = make_crypto(ledger_api_id)
     identity = Identity("", address=crypto.address)
@@ -914,7 +934,7 @@ def _make_libp2p_client_connection(
         "2021-01-02",
         f"./{crypto.address}_cert.txt",
     )
-    _process_cert(crypto, cert_request)
+    _process_cert(crypto, cert_request, path_prefix=data_dir)
     configuration = ConnectionConfig(
         client_key_file=None,
         nodes=[
@@ -928,7 +948,9 @@ def _make_libp2p_client_connection(
         connection_id=P2PLibp2pClientConnection.connection_id,
         cert_requests=[cert_request],
     )
-    return P2PLibp2pClientConnection(configuration=configuration, identity=identity)
+    return P2PLibp2pClientConnection(
+        configuration=configuration, data_dir=data_dir, identity=identity
+    )
 
 
 def libp2p_log_on_failure(fn: Callable) -> Callable:
@@ -1081,7 +1103,7 @@ async def ledger_apis_connection(request, ethereum_testnet_config):
     crypto_store = CryptoStore()
     directory = Path(ROOT_DIR, "packages", "fetchai", "connections", "ledger")
     connection = Connection.from_dir(
-        directory, identity=identity, crypto_store=crypto_store
+        directory, data_dir=MagicMock(), identity=identity, crypto_store=crypto_store
     )
     connection = cast(Connection, connection)
     connection._logger = logging.getLogger("aea.packages.fetchai.connections.ledger")
@@ -1255,3 +1277,14 @@ class UseGanache:
     @pytest.fixture(autouse=True)
     def _start_ganache(self, ganache):
         """Start a Ganache image."""
+
+
+@pytest.fixture()
+def change_directory():
+    """Change directory and execute the test."""
+    temporary_directory = tempfile.mkdtemp()
+    try:
+        with cd(temporary_directory):
+            yield temporary_directory
+    finally:
+        shutil.rmtree(temporary_directory)
