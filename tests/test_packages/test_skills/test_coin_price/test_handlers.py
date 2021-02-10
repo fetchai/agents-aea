@@ -19,23 +19,16 @@
 """This module contains the tests of the handler classes of the simple_data_request skill."""
 
 import logging
-import sys
 from pathlib import Path
 from typing import cast
 from unittest.mock import patch
-
-import pytest
 
 from aea.protocols.dialogue.base import DialogueMessage
 from aea.test_tools.test_skill import BaseSkillTestCase
 
 from packages.fetchai.protocols.http.message import HttpMessage
-from packages.fetchai.protocols.prometheus.message import PrometheusMessage
-from packages.fetchai.skills.coin_price.dialogues import (
-    HttpDialogues,
-    PrometheusDialogues,
-)
-from packages.fetchai.skills.coin_price.handlers import HttpHandler, PrometheusHandler
+from packages.fetchai.skills.coin_price.dialogues import HttpDialogues
+from packages.fetchai.skills.coin_price.handlers import HttpHandler
 from packages.fetchai.skills.coin_price.models import CoinPriceModel
 
 from tests.conftest import ROOT_DIR

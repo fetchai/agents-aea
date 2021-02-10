@@ -18,13 +18,12 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests of the behaviour classes of the fetch beacon skill."""
 
-import logging
 from pathlib import Path
 from typing import cast
-from unittest.mock import patch
 
 from aea.test_tools.test_skill import BaseSkillTestCase
 
+from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.skills.fetch_beacon.behaviours import FetchBeaconBehaviour
 
 from tests.conftest import ROOT_DIR
@@ -40,13 +39,20 @@ class TestSkillBehaviour(BaseSkillTestCase):
         """Setup the test class."""
         super().setup()
         cls.fetch_beacon_behaviour = cast(
-            FetchBeaconBehaviour, cls._skill.skill_context.behaviours.fetch_beacon_behaviour
+            FetchBeaconBehaviour,
+            cls._skill.skill_context.behaviours.fetch_beacon_behaviour,
         )
 
     def test_send_http_request_message(self):
         """Test the send_http_request_message method of the fetch_beacon behaviour."""
         self.fetch_beacon_behaviour.send_http_request_message("GET", "some_url")
         self.assert_quantity_in_outbox(1)
+        msg = cast(HttpMessage, self.get_message_from_outbox())
+        assert msg, "Wrong message type"
+        assert (
+            msg.performative == HttpMessage.Performative.REQUEST
+        ), "Wrong message performative"
+        assert msg.url == "some_url", "Wrong url"
 
     def test_setup(self):
         """Test that the setup method puts no messages in the outbox by default."""
@@ -54,9 +60,15 @@ class TestSkillBehaviour(BaseSkillTestCase):
         self.assert_quantity_in_outbox(0)
 
     def test_act(self):
-        """Test that the act method of the fetch_beacon behaviour puts one message (http request) in the outbox."""
+        """Test that the act method of the fetch_beacon behaviour puts the correct message in the outbox."""
         self.fetch_beacon_behaviour.act()
         self.assert_quantity_in_outbox(1)
+        msg = cast(HttpMessage, self.get_message_from_outbox())
+        assert msg, "Wrong message type"
+        assert (
+            msg.Performative == HttpMessage.Performative
+        ), "Wrong message performative"
+        assert msg.url == self.fetch_beacon_behaviour.beacon_url, "Wrong url"
 
     def test_teardown(self):
         """Test that the teardown method of the fetch_beacon behaviour leaves no messages in the outbox."""

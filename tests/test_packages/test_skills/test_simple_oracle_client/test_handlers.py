@@ -37,17 +37,18 @@ from packages.fetchai.protocols.ledger_api.custom_types import (
     TransactionReceipt,
 )
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
-from packages.fetchai.protocols.prometheus.message import PrometheusMessage
 from packages.fetchai.protocols.signing.custom_types import RawTransaction
 from packages.fetchai.protocols.signing.message import SigningMessage
-from packages.fetchai.skills.simple_oracle.behaviours import SimpleOracleBehaviour
-from packages.fetchai.skills.simple_oracle.dialogues import (
+from packages.fetchai.skills.simple_oracle_client.behaviours import (
+    SimpleOracleClientBehaviour,
+)
+from packages.fetchai.skills.simple_oracle_client.dialogues import (
     ContractApiDialogues,
     LedgerApiDialogues,
     SigningDialogues,
 )
-from packages.fetchai.skills.simple_oracle.handlers import LedgerApiHandler
-from packages.fetchai.skills.simple_oracle.strategy import Strategy
+from packages.fetchai.skills.simple_oracle_client.handlers import LedgerApiHandler
+from packages.fetchai.skills.simple_oracle_client.strategy import Strategy
 
 from tests.conftest import ROOT_DIR
 
@@ -65,9 +66,11 @@ DEFAULT_TERMS = [
 
 
 class TestLedgerApiHandler(BaseSkillTestCase):
-    """Test ledger_api handler of simple_oracle skill."""
+    """Test ledger_api handler of simple_oracle_client skill."""
 
-    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "simple_oracle")
+    path_to_skill = Path(
+        ROOT_DIR, "packages", "fetchai", "skills", "simple_oracle_client"
+    )
 
     @classmethod
     def setup(cls, **kwargs):
@@ -77,9 +80,9 @@ class TestLedgerApiHandler(BaseSkillTestCase):
             LedgerApiHandler, cls._skill.skill_context.handlers.ledger_api
         )
         cls.logger = cls._skill.skill_context.logger
-        cls.simple_oracle_behaviour = cast(
-            SimpleOracleBehaviour,
-            cls._skill.skill_context.behaviours.simple_oracle_behaviour,
+        cls.simple_oracle_client_behaviour = cast(
+            SimpleOracleClientBehaviour,
+            cls._skill.skill_context.behaviours.simple_oracle_client_behaviour,
         )
         cls.ledger_api_dialogues = cast(
             LedgerApiDialogues, cls._skill.skill_context.ledger_api_dialogues
@@ -175,10 +178,10 @@ class TestLedgerApiHandler(BaseSkillTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO, f"Balance on {LEDGER_ID} ledger={balance}.",
+            logging.INFO, f"starting balance on {LEDGER_ID} ledger={balance}.",
         )
 
-        self.assert_quantity_in_outbox(1)
+        self.assert_quantity_in_outbox(0)
 
     def test__handle_transaction_digest(self):
         """Test handling a transaction digest"""
@@ -271,16 +274,16 @@ class TestLedgerApiHandler(BaseSkillTestCase):
             f"transaction was successfully settled. Transaction receipt={transaction_receipt}",
         )
         mock_logger.assert_any_call(
-            logging.INFO, "Oracle contract successfully deployed!",
+            logging.INFO, "Oracle client contract successfully deployed!",
         )
 
         assert (
-            self.simple_oracle_behaviour.context.strategy.is_contract_deployed
+            self.simple_oracle_client_behaviour.context.strategy.is_client_contract_deployed
         ), "Contract deployment status not set"
         self.assert_quantity_in_outbox(0)
 
-    def test__handle_transaction_receipt_grant_role(self):
-        """Test handling a grant_role transaction receipt"""
+    def test__handle_transaction_receipt_approve(self):
+        """Test handling an approve transaction receipt"""
         # setup
         ledger_api_dialogue = self.prepare_skill_dialogue(
             self.ledger_api_dialogues, self.list_of_ledger_api_messages[2:3]
@@ -292,9 +295,9 @@ class TestLedgerApiHandler(BaseSkillTestCase):
             self.signing_dialogues, self.list_of_signing_messages[:1]
         )
 
-        terms = Terms(*DEFAULT_TERMS, label="grant_role")
+        terms = Terms(*DEFAULT_TERMS, label="approve")
 
-        strategy = cast(Strategy, self.simple_oracle_behaviour.context.strategy)
+        strategy = cast(Strategy, self.simple_oracle_client_behaviour.context.strategy)
         strategy.is_contract_deployed = True
 
         contract_api_dialogue.terms = terms
@@ -319,17 +322,17 @@ class TestLedgerApiHandler(BaseSkillTestCase):
             f"transaction was successfully settled. Transaction receipt={transaction_receipt}",
         )
         mock_logger.assert_any_call(
-            logging.INFO, "Oracle role successfully granted!",
+            logging.INFO, "Oracle client transactions approved!",
         )
 
         assert (
-            self.simple_oracle_behaviour.context.strategy.is_oracle_role_granted
-        ), "Oracle role status not set"
+            self.simple_oracle_client_behaviour.context.strategy.is_oracle_transaction_approved
+        ), "Contract deployment status not set"
 
         self.assert_quantity_in_outbox(0)
 
-    def test__handle_transaction_receipt_update(self):
-        """Test handling an update transaction receipt"""
+    def test__handle_transaction_receipt_query(self):
+        """Test handling a query transaction receipt"""
         # setup
         ledger_api_dialogue = self.prepare_skill_dialogue(
             self.ledger_api_dialogues, self.list_of_ledger_api_messages[2:3]
@@ -341,9 +344,9 @@ class TestLedgerApiHandler(BaseSkillTestCase):
             self.signing_dialogues, self.list_of_signing_messages[:1]
         )
 
-        terms = Terms(*DEFAULT_TERMS, label="update")
+        terms = Terms(*DEFAULT_TERMS, label="query")
 
-        strategy = cast(Strategy, self.simple_oracle_behaviour.context.strategy)
+        strategy = cast(Strategy, self.simple_oracle_client_behaviour.context.strategy)
         strategy.is_contract_deployed = True
         strategy.is_oracle_role_granted = True
 
@@ -369,19 +372,10 @@ class TestLedgerApiHandler(BaseSkillTestCase):
             f"transaction was successfully settled. Transaction receipt={transaction_receipt}",
         )
         mock_logger.assert_any_call(
-            logging.INFO, "Oracle value successfully updated!",
+            logging.INFO, "Oracle value successfully requested!",
         )
 
-        self.assert_quantity_in_outbox(1)
-        msg = cast(PrometheusMessage, self.get_message_from_outbox())
-        assert msg, "Wrong message type"
-        assert (
-            msg.performative == PrometheusMessage.Performative.UPDATE_METRIC
-        ), "Wrong message performative"
-        assert msg.title == "num_oracle_updates", "Wrong metric title"
-        assert msg.callable == "inc", "Wrong metric description"
-        assert msg.value == 1.0, "Wrong value"
-        assert msg.labels == {}, "Wrong labels"
+        self.assert_quantity_in_outbox(0)
 
     def test_teardown(self):
         """Test the teardown method of the ledger_api handler."""

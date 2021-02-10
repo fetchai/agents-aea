@@ -18,13 +18,13 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests of the behaviour classes of the coin price skill."""
 
-import logging
 from pathlib import Path
 from typing import cast
-from unittest.mock import patch
 
 from aea.test_tools.test_skill import BaseSkillTestCase
 
+from packages.fetchai.protocols.http.message import HttpMessage
+from packages.fetchai.protocols.prometheus.message import PrometheusMessage
 from packages.fetchai.skills.coin_price.behaviours import CoinPriceBehaviour
 
 from tests.conftest import ROOT_DIR
@@ -47,6 +47,12 @@ class TestSkillBehaviour(BaseSkillTestCase):
         """Test the send_http_request_message method of the coin_price behaviour."""
         self.coin_price_behaviour.send_http_request_message("GET", "some_url")
         self.assert_quantity_in_outbox(1)
+        msg = cast(HttpMessage, self.get_message_from_outbox())
+        assert msg, "Wrong message type"
+        assert (
+            msg.performative == HttpMessage.Performative.REQUEST
+        ), "Wrong message performative"
+        assert msg.url == "some_url", "Wrong url"
 
     def test_add_prometheus_metric(self):
         """Test the send_http_request_message method of the coin_price behaviour."""
@@ -54,6 +60,15 @@ class TestSkillBehaviour(BaseSkillTestCase):
             "some_metric", "Gauge", "some_description", {"label_key": "label_value"}
         )
         self.assert_quantity_in_outbox(1)
+        msg = cast(PrometheusMessage, self.get_message_from_outbox())
+        assert msg, "Wrong message type"
+        assert (
+            msg.performative == PrometheusMessage.Performative.ADD_METRIC
+        ), "Wrong message performative"
+        assert msg.type == "Gauge", "Wrong metric type"
+        assert msg.title == "some_metric", "Wrong metric title"
+        assert msg.description == "some_description", "Wrong metric description"
+        assert msg.labels == {"label_key": "label_value"}, "Wrong labels"
 
     def test_update_prometheus_metric(self):
         """Test the test_update_prometheus_metric method of the coin_price behaviour."""
@@ -61,6 +76,15 @@ class TestSkillBehaviour(BaseSkillTestCase):
             "some_metric", "set", 0.0, {"label_key": "label_value"}
         )
         self.assert_quantity_in_outbox(1)
+        msg = cast(PrometheusMessage, self.get_message_from_outbox())
+        assert msg, "Wrong message type"
+        assert (
+            msg.performative == PrometheusMessage.Performative.UPDATE_METRIC
+        ), "Wrong message performative"
+        assert msg.callable == "set", "Wrong metric callable"
+        assert msg.title == "some_metric", "Wrong metric title"
+        assert msg.value == 0.0, "Wrong metric value"
+        assert msg.labels == {"label_key": "label_value"}, "Wrong labels"
 
     def test_setup(self):
         """Test that the setup method puts two messages (prometheus metrics) in the outbox by default."""

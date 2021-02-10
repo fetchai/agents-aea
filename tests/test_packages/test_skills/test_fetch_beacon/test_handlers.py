@@ -20,21 +20,17 @@
 
 import json
 import logging
-import sys
 from pathlib import Path
 from typing import cast
 from unittest.mock import patch
-from vyper.utils import keccak256
 
-import pytest
+from vyper.utils import keccak256
 
 from aea.protocols.dialogue.base import DialogueMessage
 from aea.test_tools.test_skill import BaseSkillTestCase
 
 from packages.fetchai.protocols.http.message import HttpMessage
-from packages.fetchai.skills.fetch_beacon.dialogues import (
-    HttpDialogues,
-)
+from packages.fetchai.skills.fetch_beacon.dialogues import HttpDialogues
 from packages.fetchai.skills.fetch_beacon.handlers import HttpHandler
 
 from tests.conftest import ROOT_DIR
@@ -48,7 +44,7 @@ class TestHttpHandler(BaseSkillTestCase):
     @classmethod
     def setup(cls, **kwargs):
         """Setup the test class."""
-        super().setup()
+        super().setup(**kwargs)
         cls.http_handler = cast(HttpHandler, cls._skill.skill_context.handlers.http)
         cls.logger = cls._skill.skill_context.logger
 
@@ -83,17 +79,13 @@ class TestHttpHandler(BaseSkillTestCase):
 
         test_response = {
             "result": {
-                "block_id": {
-                    "hash": "00000000",
-                },
+                "block_id": {"hash": "00000000"},
                 "block": {
                     "header": {
                         "height": "1",
-                        "entropy": {
-                            "group_signature": "SIGNATURE"
-                        }
+                        "entropy": {"group_signature": "SIGNATURE"},
                     }
-                }
+                },
             }
         }
 
