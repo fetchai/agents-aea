@@ -189,6 +189,13 @@ class Connection(Component, ABC):
         """Get the connection status."""
         return self._state.get()
 
+    @state.setter
+    def state(self, value: ConnectionStates) -> None:
+        """Set the connection status."""
+        if not isinstance(value, ConnectionStates):
+            raise ValueError(f"Incorrect state: `{value}`")
+        self._state.set(value)
+
     @abstractmethod
     async def connect(self) -> None:
         """Set up the connection."""

@@ -69,7 +69,7 @@ class LedgerConnection(Connection):
         if self.is_connected:  # pragma: nocover
             return
 
-        self._state.set(ConnectionStates.connecting)
+        self.state = ConnectionStates.connecting
 
         self._ledger_dispatcher = LedgerApiRequestDispatcher(
             self._state,
@@ -85,14 +85,14 @@ class LedgerConnection(Connection):
         )
         self._event_new_receiving_task = asyncio.Event(loop=self.loop)
 
-        self._state.set(ConnectionStates.connected)
+        self.state = ConnectionStates.connected
 
     async def disconnect(self) -> None:
         """Tear down the connection."""
         if self.is_disconnected:  # pragma: nocover
             return
 
-        self._state.set(ConnectionStates.disconnecting)
+        self.state = ConnectionStates.disconnecting
 
         for task in self.receiving_tasks:
             if not task.cancelled():  # pragma: nocover
@@ -101,7 +101,7 @@ class LedgerConnection(Connection):
         self._contract_dispatcher = None
         self._event_new_receiving_task = None
 
-        self._state.set(ConnectionStates.disconnected)
+        self.state = ConnectionStates.disconnected
 
     async def send(self, envelope: "Envelope") -> None:
         """

@@ -553,13 +553,13 @@ class HTTPServerConnection(Connection):
         if self.is_connected:
             return
 
-        self._state.set(ConnectionStates.connecting)
+        self.state = ConnectionStates.connecting
         self.channel.logger = self.logger
         await self.channel.connect(loop=self.loop)
         if self.channel.is_stopped:
-            self._state.set(ConnectionStates.disconnected)
+            self.state = ConnectionStates.disconnected
         else:
-            self._state.set(ConnectionStates.connected)
+            self.state = ConnectionStates.connected
 
     async def disconnect(self) -> None:
         """
@@ -570,9 +570,9 @@ class HTTPServerConnection(Connection):
         if self.is_disconnected:
             return
 
-        self._state.set(ConnectionStates.disconnecting)
+        self.state = ConnectionStates.disconnecting
         await self.channel.disconnect()
-        self._state.set(ConnectionStates.disconnected)
+        self.state = ConnectionStates.disconnected
 
     async def send(self, envelope: "Envelope") -> None:
         """

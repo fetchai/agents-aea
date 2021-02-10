@@ -259,9 +259,9 @@ class GymConnection(Connection):
         if self.is_disconnected:  # pragma: nocover
             return
 
-        self._state.set(ConnectionStates.disconnecting)
+        self.state = ConnectionStates.disconnecting
         await self.channel.disconnect()
-        self._state.set(ConnectionStates.disconnected)
+        self.state = ConnectionStates.disconnected
 
     async def send(self, envelope: Envelope) -> None:
         """
