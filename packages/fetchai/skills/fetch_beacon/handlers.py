@@ -20,7 +20,7 @@
 """This package contains handlers for the fetch_beacon skill."""
 
 import json
-from typing import cast
+from typing import Optional, cast
 
 from vyper.utils import keccak256
 
@@ -93,10 +93,15 @@ class HttpHandler(Handler):
             .get("group_signature", {})
         )
         block_hash = msg_body.get("result", {}).get("block_id", {}).get("hash", {})
-        block_height_str = msg_body.get("result", {}).get("block", {}).get("header", {}).get("height", {})
-        
+        block_height_str = (
+            msg_body.get("result", {})
+            .get("block", {})
+            .get("header", {})
+            .get("height", {})
+        )
+
         if block_height_str:
-            block_height = int(block_height_str)
+            block_height = int(block_height_str)  # type: Optional[int]
         else:
             block_height = None
 
