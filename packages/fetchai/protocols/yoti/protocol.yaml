@@ -11,7 +11,7 @@ fingerprint:
   __init__.py: QmYXXb6r2jBiTd7xcSAzkibVSiuq87UE3iKQV3pW9XoVmd
   dialogues.py: QmNkHJMcahoC7QtkM8k9RHCUozfhu6BvRfSsLxkPvE73xF
   message.py: Qmcd62X1bwQSY1wFNoox5p9V4GQfZqZp5ZScbhuXUpvc7C
-  serialization.py: Qma7eMYAS2hCynyXVV7ZKbgAv94reUqUL9PshugTdFJVng
+  serialization.py: QmSSmdvGoN2yPUVEwoWhaWBCsjhas71chP9uJ9HiysS8oq
   yoti.proto: QmfYHqTy7fohs9F6MBELt4tevnP1fDB8GxHRbN9kop6vui
   yoti_pb2.py: Qmaktf58Z2AzxCFW8CjsJLrFSucrngmnrtcmv4oub6Ptf7
 fingerprint_ignore_patterns: []
