@@ -321,6 +321,8 @@ jobs:
         choco install protoc --version 3.11.4
         choco install mingw -y
         choco install make -y
+        # to check make was installed
+        make --version
         # wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-win64.zip
         # unzip protoc-3.11.4-win64.zip -d protoc
         # sudo mv protoc/bin/protoc /usr/local/bin/protoc
