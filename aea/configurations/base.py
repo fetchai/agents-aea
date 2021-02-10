@@ -1134,6 +1134,7 @@ class AgentConfig(PackageConfiguration):
         loop_mode: Optional[str] = None,
         runtime_mode: Optional[str] = None,
         storage_uri: Optional[str] = None,
+        data_dir: Optional[str] = None,
         component_configurations: Optional[Dict[ComponentId, Dict]] = None,
     ) -> None:
         """Instantiate the agent configuration object."""
@@ -1191,6 +1192,7 @@ class AgentConfig(PackageConfiguration):
         self.loop_mode = loop_mode
         self.runtime_mode = runtime_mode
         self.storage_uri = storage_uri
+        self.data_dir = data_dir
         # this attribute will be set through the setter below
         self._component_configurations: Dict[ComponentId, Dict] = {}
         self.component_configurations = (
@@ -1327,6 +1329,8 @@ class AgentConfig(PackageConfiguration):
             config["runtime_mode"] = self.runtime_mode
         if self.storage_uri is not None:
             config["storage_uri"] = self.storage_uri
+        if self.data_dir is not None:
+            config["data_dir"] = self.data_dir
         if self.currency_denominations != {}:
             config["currency_denominations"] = self.currency_denominations
 
@@ -1368,6 +1372,7 @@ class AgentConfig(PackageConfiguration):
             loop_mode=cast(str, obj.get("loop_mode")),
             runtime_mode=cast(str, obj.get("runtime_mode")),
             storage_uri=cast(str, obj.get("storage_uri")),
+            data_dir=cast(str, obj.get("data_dir")),
             component_configurations=None,
         )
         instance = cast(AgentConfig, cls._apply_params_to_instance(params, instance))

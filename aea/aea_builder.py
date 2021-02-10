@@ -1517,6 +1517,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self.set_loop_mode(agent_configuration.loop_mode)
         self.set_runtime_mode(agent_configuration.runtime_mode)
         self.set_storage_uri(agent_configuration.storage_uri)
+        self.set_data_dir(agent_configuration.data_dir)
         self.set_logging_config(agent_configuration.logging_config)
 
         # load private keys
