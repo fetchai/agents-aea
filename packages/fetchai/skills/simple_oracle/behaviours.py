@@ -77,7 +77,7 @@ class SimpleOracleBehaviour(TickerBehaviour):
 
         if prom_dialogues.enabled:
             for metric in prom_dialogues.metrics:
-                metric_name = self.context.agent_name + "_" + metric["name"]
+                metric_name = metric["name"]
                 self.context.logger.info("Adding Prometheus metric: " + metric_name)
                 self.add_prometheus_metric(
                     metric_name,

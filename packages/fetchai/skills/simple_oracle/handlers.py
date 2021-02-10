@@ -127,7 +127,7 @@ class LedgerApiHandler(Handler):
             )
         )
         if self.context.prometheus_dialogues.enabled:
-            metric_name = self.context.agent_name + "_" + "oracle_account_balance_ETH"
+            metric_name = "oracle_account_balance_ETH"
             self.context.behaviours.simple_oracle_behaviour.update_prometheus_metric(
                 metric_name, "set", float(ledger_api_msg.balance), {}
             )
@@ -208,7 +208,7 @@ class LedgerApiHandler(Handler):
             elif transaction_label == "update":
                 self.context.logger.info("Oracle value successfully updated!")
                 if self.context.prometheus_dialogues.enabled:
-                    metric_name = self.context.agent_name + "_" + "num_oracle_updates"
+                    metric_name = "num_oracle_updates"
                     self.context.behaviours.simple_oracle_behaviour.update_prometheus_metric(
                         metric_name, "inc", 1.0, {}
                     )
