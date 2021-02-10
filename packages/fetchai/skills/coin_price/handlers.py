@@ -122,7 +122,7 @@ class HttpHandler(Handler):
                     f"{model.coin_id} price = {price} {model.currency}"
                 )
                 if self.context.prometheus_dialogues.enabled:
-                    metric_name = self.context.agent_name + "_" + "num_retrievals"
+                    metric_name = "num_retrievals"
                     self.context.behaviours.coin_price_behaviour.update_prometheus_metric(
                         metric_name, "inc", 1.0, {}
                     )
@@ -175,7 +175,7 @@ class HttpHandler(Handler):
         self.context.outbox.put_message(message=http_response, context=envelope_context)
 
         if self.context.prometheus_dialogues.enabled:
-            metric_name = self.context.agent_name + "_" + "num_requests"
+            metric_name = "num_requests"
             self.context.behaviours.coin_price_behaviour.update_prometheus_metric(
                 metric_name, "inc", 1.0, {}
             )
