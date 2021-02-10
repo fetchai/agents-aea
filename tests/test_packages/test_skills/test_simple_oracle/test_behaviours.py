@@ -33,6 +33,7 @@ from packages.fetchai.skills.simple_oracle.strategy import Strategy
 
 from tests.conftest import ROOT_DIR
 
+
 DEFAULT_ADDRESS = "0x0000000000000000000000000000000000000000"
 
 

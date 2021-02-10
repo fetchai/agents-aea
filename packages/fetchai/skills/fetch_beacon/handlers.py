@@ -20,7 +20,7 @@
 """This package contains handlers for the fetch_beacon skill."""
 
 import json
-from typing import Optional, Any, cast
+from typing import Any, Optional, cast
 
 from vyper.utils import keccak256
 
