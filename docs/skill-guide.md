@@ -118,7 +118,7 @@ We place this code in `my_aea/skills/my_search/behaviours.py`. Ensure you replac
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>
-  <p> Note that the import paths to agent packages, fo example `packages.fetchai.skills.my_search.dialogues` above, are not actual paths. Package files always reside in your AEA's folder, either under a specific package directory (e.g. connection, protocol, skill) if the package is custom built, or under `vendor` if it is pulled from the registry. These paths are virtual and created automatically when an AEA is run. </p>
+  <p> Note that the import paths to agent packages, for example `packages.fetchai.skills.my_search.dialogues` above, are not actual paths. Package files always reside in your AEA's folder, either under a specific package directory (e.g. connection, protocol, skill) if the package is custom built, or under `vendor` if it is pulled from the registry. These paths are virtual and created automatically when an AEA is run. See <a href="../package-imports"> this page </a> for more details. </p>
 </div>
 
 ## Step 3: Develop a Handler

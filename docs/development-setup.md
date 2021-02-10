@@ -1,6 +1,6 @@
 
 
-An AEA <a href="../package-imports">consists of packages </a>. When developing, it helps to be able to save packages in a local package registry, rather than pushing them to <a href="https://aea-registry.fetch.ai" target="_blank">remote registry</a>. This guide helps setting up a local package registry and configuring the working directory for development.
+An AEA <a href="../package-imports">consists of packages </a>. When developing, it helps to be able to save packages in a local package registry, rather than pushing them to <a href="https://aea-registry.fetch.ai" target="_blank">remote registry</a>. This guide helps you set up a local package registry and configure the working directory for development.
 
 There are two ways to write code for an AEA:
 
@@ -14,7 +14,7 @@ To prepare a directory (henceforth working directory) for development with the A
 
 - Either, manually:
 
-	- Ensure you start with an empty working directory to avoid any unnecessary side-effects.
+	- Ensure you start with an empty working directory to avoid any unnecessary side effects.
 
 	- In your working directory, create an empty folder called `packages`. This folder will act as the local registry for packages.
 
@@ -38,9 +38,9 @@ It is also possible to develop directly in an AEA project:
 
 - Create a new project `aea create AGENT_NAME && cd AGENT_NAME`
 
-- Scaffold a new package `aea scaffold --with-symlinks PACKAGE_TYPE PACKAGE_NAME`. This will create the package scaffold under the directory `{PACKAGE_TYPE}s` and create symlinks to ensure package import paths line up with the folder structure. The symlinks are not needed to run the AEA. They are a purely for your IDE.
+- Scaffold a new package `aea scaffold --with-symlinks PACKAGE_TYPE PACKAGE_NAME`. This will create the package scaffold under the directory `{PACKAGE_TYPE}s` and create symlinks to ensure package import paths line up with the folder structure. The symlinks are not needed to run the AEA. They are purely for your IDE.
 
-- In your project, create a `.env` file with the constant `PYTHONPATH=$PYTHONPATH:path_to_project_dir` where `path_to_project_dir` is the path to the AEA project contained in your working directory.
+- In your working directory, create a `.env` file with the constant `PYTHONPATH=$PYTHONPATH:path_to_project_dir` where `path_to_project_dir` is the path to the AEA project contained in your working directory.
 
 - Depending on your editor, you might take further steps:
 
@@ -50,8 +50,8 @@ It is also possible to develop directly in an AEA project:
 
 This advice partially overlaps with the previous two sections:
 
-- When developing a specific AEA, it might be helpful to publish/push or fetch/add from local registry. From your working directory/AEA project, simply execute the usual AEA CLI commands. The CLI will first search in the `packages` directory, then in the remote AEA registry. You can explicitly point to local registry by providing flag `--local` (see <a href="../cli-commands">here</a>) or `--remote` to only point to remote registry.
+- When developing a specific AEA, it might be helpful to publish/push or fetch/add from local registry. From your working directory/AEA project, simply execute the usual AEA CLI commands. The CLI will first search in the `packages` directory, then in the remote AEA registry. You can explicitly point to local registry by providing flag `--local` or `--remote` to only point to remote registry (see <a href="../cli-commands">here</a> for more details on CLI commands).
 
-- When working on an AEA it can help to provide a symbolic link to the packages directory, so that the import paths are detected by your editor. Simply create an empty file with `touch packages` in your AEA project, then create a symbolic link to the `packages` directory with `ln -s ../packages packages`.
+- When working on an AEA, it may help to provide a symbolic link to the packages directory, so that the import paths are detected by your editor. Simply create an empty file with `touch packages` in your AEA project, then create a symbolic link to the `packages` directory with `ln -s ../packages packages`.
 
 - Alternatively, it can help to provide symbolic links within an AEA to align import paths with folder structure. Simply create an empty file with `touch packages` in your AEA project, then create a symbolic link to `ln -s vendor packages`.
