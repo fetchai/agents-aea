@@ -942,7 +942,7 @@ class AEATestCaseEmptyFlaky(AEATestCaseEmpty):
     Use for flaky tests with the flaky decorator.
     """
 
-    failure_count: int
+    failure_count: int = 0
 
     @classmethod
     def setup_class(cls) -> None:
@@ -997,7 +997,7 @@ class AEATestCaseManyFlaky(AEATestCaseMany):
     Use for flaky tests with the flaky decorator.
     """
 
-    failure_count: int
+    failure_count: int = 0
 
     @classmethod
     def setup_class(cls) -> None:
