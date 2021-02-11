@@ -35,16 +35,6 @@ Instantiate the agent.
 
 None
 
-<a name="aea.agent.Agent.connections"></a>
-#### connections
-
-```python
- | @property
- | connections() -> List[Connection]
-```
-
-Return list of connections.
-
 <a name="aea.agent.Agent.storage_uri"></a>
 #### storage`_`uri
 
@@ -54,16 +44,6 @@ Return list of connections.
 ```
 
 Return storage uri.
-
-<a name="aea.agent.Agent.active_connections"></a>
-#### active`_`connections
-
-```python
- | @property
- | active_connections() -> List[Connection]
-```
-
-Return list of active connections.
 
 <a name="aea.agent.Agent.is_running"></a>
 #### is`_`running
@@ -84,19 +64,6 @@ Get running state of the runtime and agent.
 ```
 
 Get running state of the runtime and agent.
-
-<a name="aea.agent.Agent.get_multiplexer_setup_options"></a>
-#### get`_`multiplexer`_`setup`_`options
-
-```python
- | get_multiplexer_setup_options() -> Optional[Dict]
-```
-
-Get options to pass to Multiplexer.setup.
-
-**Returns**:
-
-dict of kwargs
 
 <a name="aea.agent.Agent.identity"></a>
 #### identity
@@ -121,6 +88,10 @@ Get the inbox.
 The inbox contains Envelopes from the Multiplexer.
 The agent can pick these messages for processing.
 
+**Returns**:
+
+InBox instance
+
 <a name="aea.agent.Agent.outbox"></a>
 #### outbox
 
@@ -133,6 +104,10 @@ Get the outbox.
 
 The outbox contains Envelopes for the Multiplexer.
 Envelopes placed in the Outbox are processed by the Multiplexer.
+
+**Returns**:
+
+OutBox instance
 
 <a name="aea.agent.Agent.name"></a>
 #### name
@@ -156,22 +131,19 @@ Get the tick or agent loop count.
 
 Each agent loop (one call to each one of act(), react(), update()) increments the tick.
 
-<a name="aea.agent.Agent.handle_envelope"></a>
-#### handle`_`envelope
+<a name="aea.agent.Agent.state"></a>
+#### state
 
 ```python
- | handle_envelope(envelope: Envelope) -> None
+ | @property
+ | state() -> RuntimeStates
 ```
 
-Handle an envelope.
-
-**Arguments**:
-
-- `envelope`: the envelope to handle.
+Get state of the agent's runtime.
 
 **Returns**:
 
-None
+RuntimeStates
 
 <a name="aea.agent.Agent.period"></a>
 #### period
@@ -193,6 +165,19 @@ Get a period to call act.
 
 Get the runtime.
 
+<a name="aea.agent.Agent.setup"></a>
+#### setup
+
+```python
+ | setup() -> None
+```
+
+Set up the agent.
+
+**Returns**:
+
+None
+
 <a name="aea.agent.Agent.start"></a>
 #### start
 
@@ -204,18 +189,38 @@ Start the agent.
 
 Performs the following:
 
-- calls connect() on the multiplexer (unless in debug mode), and
-- calls setup(), and
-- calls start() on the liveness, and
-- enters the agent main loop.
+- calls start() on runtime.
+- waits for runtime to complete running (blocking)
 
-While the liveness of the agent is not stopped it continues to loop over:
+**Returns**:
 
-- increment the tick,
-- call to act(),
-- sleep for specified timeout,
-- call to react(),
-- call to update().
+None
+
+<a name="aea.agent.Agent.handle_envelope"></a>
+#### handle`_`envelope
+
+```python
+ | handle_envelope(envelope: Envelope) -> None
+```
+
+Handle an envelope.
+
+**Arguments**:
+
+- `envelope`: the envelope to handle.
+
+**Returns**:
+
+None
+
+<a name="aea.agent.Agent.act"></a>
+#### act
+
+```python
+ | act() -> None
+```
+
+Perform actions on period.
 
 **Returns**:
 
@@ -232,27 +237,25 @@ Stop the agent.
 
 Performs the following:
 
-- calls stop() on the liveness, and
-- calls teardown(), and
-- calls disconnect() on the multiplexer.
+- calls stop() on runtime
+- waits for runtime to stop (blocking)
 
 **Returns**:
 
 None
 
-<a name="aea.agent.Agent.state"></a>
-#### state
+<a name="aea.agent.Agent.teardown"></a>
+#### teardown
 
 ```python
- | @property
- | state() -> RuntimeStates
+ | teardown() -> None
 ```
 
-Get state of the agent's runtime.
+Tear down the agent.
 
 **Returns**:
 
-RuntimeStates
+None
 
 <a name="aea.agent.Agent.get_periodic_tasks"></a>
 #### get`_`periodic`_`tasks

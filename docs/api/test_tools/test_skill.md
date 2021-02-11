@@ -80,7 +80,7 @@ Dismiss the first 'number' number of message from decision maker inbox.
 #### assert`_`quantity`_`in`_`outbox
 
 ```python
- | assert_quantity_in_outbox(expected_quantity) -> None
+ | assert_quantity_in_outbox(expected_quantity: int) -> None
 ```
 
 Assert the quantity of messages in the outbox.
@@ -89,7 +89,7 @@ Assert the quantity of messages in the outbox.
 #### assert`_`quantity`_`in`_`decision`_`making`_`queue
 
 ```python
- | assert_quantity_in_decision_making_queue(expected_quantity) -> None
+ | assert_quantity_in_decision_making_queue(expected_quantity: int) -> None
 ```
 
 Assert the quantity of messages in the decision maker queue.
@@ -99,7 +99,7 @@ Assert the quantity of messages in the decision maker queue.
 
 ```python
  | @staticmethod
- | message_has_attributes(actual_message: Message, message_type: Type[Message], **kwargs, ,) -> Tuple[bool, str]
+ | message_has_attributes(actual_message: Message, message_type: Type[Message], **kwargs: Any, ,) -> Tuple[bool, str]
 ```
 
 Evaluates whether a message's attributes match the expected attributes provided.
@@ -118,7 +118,7 @@ boolean result of the evaluation and accompanied message
 #### build`_`incoming`_`message
 
 ```python
- | build_incoming_message(message_type: Type[Message], performative: Message.Performative, dialogue_reference: Optional[Tuple[str, str]] = None, message_id: Optional[int] = None, target: Optional[int] = None, to: Optional[Address] = None, sender: Address = COUNTERPARTY_ADDRESS, **kwargs, ,) -> Message
+ | build_incoming_message(message_type: Type[Message], performative: Message.Performative, dialogue_reference: Optional[Tuple[str, str]] = None, message_id: Optional[int] = None, target: Optional[int] = None, to: Optional[Address] = None, sender: Address = COUNTERPARTY_ADDRESS, **kwargs: Any, ,) -> Message
 ```
 
 Quickly create an incoming message with the provided attributes.
@@ -144,7 +144,7 @@ the created incoming message
 #### build`_`incoming`_`message`_`for`_`skill`_`dialogue
 
 ```python
- | build_incoming_message_for_skill_dialogue(dialogue: Dialogue, performative: Message.Performative, message_type: Optional[Type[Message]] = None, dialogue_reference: Optional[Tuple[str, str]] = None, message_id: Optional[int] = None, target: Optional[int] = None, to: Optional[Address] = None, sender: Optional[Address] = None, **kwargs, ,) -> Message
+ | build_incoming_message_for_skill_dialogue(dialogue: Dialogue, performative: Message.Performative, message_type: Optional[Type[Message]] = None, dialogue_reference: Optional[Tuple[str, str]] = None, message_id: Optional[int] = None, target: Optional[int] = None, to: Optional[Address] = None, sender: Optional[Address] = None, **kwargs: Any, ,) -> Message
 ```
 
 Quickly create an incoming message with the provided attributes for a dialogue.
@@ -203,7 +203,7 @@ the created incoming message
 
 ```python
  | @classmethod
- | setup(cls, **kwargs) -> None
+ | setup(cls, **kwargs: Any) -> None
 ```
 
 Set up the skill test case.

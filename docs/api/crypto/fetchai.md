@@ -34,7 +34,7 @@ Class to interact with the Fetch ledger APIs.
 #### `__`init`__`
 
 ```python
- | __init__(**kwargs)
+ | __init__(**kwargs: Any) -> None
 ```
 
 Initialize the Fetch.ai ledger APIs.

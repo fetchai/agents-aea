@@ -173,7 +173,7 @@ None
 #### validate`_`current`_`config
 
 ```python
- | validate_current_config()
+ | validate_current_config() -> None
 ```
 
 Check is current config valid.

@@ -17,7 +17,7 @@ Base class for AEA test cases.
 
 ```python
  | @classmethod
- | set_agent_context(cls, agent_name: str)
+ | set_agent_context(cls, agent_name: str) -> None
 ```
 
 Set the current agent context.
@@ -27,7 +27,7 @@ Set the current agent context.
 
 ```python
  | @classmethod
- | unset_agent_context(cls)
+ | unset_agent_context(cls) -> None
 ```
 
 Unset the current agent context.
@@ -85,7 +85,7 @@ None
 
 ```python
  | @classmethod
- | run_cli_command(cls, *args: str, *, cwd: str = ".", **kwargs) -> Result
+ | run_cli_command(cls, *args: str, *, cwd: str = ".", **kwargs: str) -> Result
 ```
 
 Run AEA CLI command.
@@ -127,7 +127,7 @@ subprocess object.
 
 ```python
  | @classmethod
- | start_thread(cls, target: Callable, **kwargs) -> Thread
+ | start_thread(cls, target: Callable, **kwargs: subprocess.Popen) -> Thread
 ```
 
 Start python Thread.
@@ -263,7 +263,7 @@ subprocess object.
 
 ```python
  | @classmethod
- | terminate_agents(cls, *subprocesses: subprocess.Popen, *, timeout: int = 10) -> None
+ | terminate_agents(cls, *subprocesses: subprocess.Popen, *, timeout: int = 20) -> None
 ```
 
 Terminate agent subprocesses.
@@ -280,7 +280,7 @@ Run from agent's directory.
 
 ```python
  | @classmethod
- | is_successfully_terminated(cls, *subprocesses: subprocess.Popen)
+ | is_successfully_terminated(cls, *subprocesses: subprocess.Popen) -> bool
 ```
 
 Check if all subprocesses terminated successfully.
@@ -290,7 +290,7 @@ Check if all subprocesses terminated successfully.
 
 ```python
  | @classmethod
- | initialize_aea(cls, author) -> None
+ | initialize_aea(cls, author: str) -> None
 ```
 
 Initialize AEA locally with author name.
@@ -588,7 +588,7 @@ None
 
 ```python
  | @classmethod
- | send_envelope_to_agent(cls, envelope: Envelope, agent: str)
+ | send_envelope_to_agent(cls, envelope: Envelope, agent: str) -> None
 ```
 
 Send an envelope to an agent, using the stub connection.
@@ -633,7 +633,7 @@ list of missed strings.
 
 ```python
  | @classmethod
- | is_running(cls, process: subprocess.Popen, timeout: int = DEFAULT_LAUNCH_TIMEOUT)
+ | is_running(cls, process: subprocess.Popen, timeout: int = DEFAULT_LAUNCH_TIMEOUT) -> bool
 ```
 
 Check if the AEA is launched and running (ready to process messages).
@@ -648,7 +648,7 @@ Check if the AEA is launched and running (ready to process messages).
 
 ```python
  | @classmethod
- | invoke(cls, *args)
+ | invoke(cls, *args: str) -> Result
 ```
 
 Call the cli command.
@@ -668,7 +668,7 @@ Load agent configuration.
 
 ```python
  | @classmethod
- | setup_class(cls)
+ | setup_class(cls) -> None
 ```
 
 Set up the test class.
@@ -678,7 +678,7 @@ Set up the test class.
 
 ```python
  | @classmethod
- | teardown_class(cls)
+ | teardown_class(cls) -> None
 ```
 
 Teardown the test.
@@ -709,10 +709,20 @@ This test case will create a default AEA project.
 
 ```python
  | @classmethod
- | setup_class(cls)
+ | setup_class(cls) -> None
 ```
 
 Set up the test class.
+
+<a name="aea.test_tools.test_cases.AEATestCaseEmpty.teardown_class"></a>
+#### teardown`_`class
+
+```python
+ | @classmethod
+ | teardown_class(cls) -> None
+```
+
+Teardown the test class.
 
 <a name="aea.test_tools.test_cases.AEATestCaseMany"></a>
 ## AEATestCaseMany Objects
@@ -728,7 +738,7 @@ Test case for many AEA projects.
 
 ```python
  | @classmethod
- | setup_class(cls)
+ | setup_class(cls) -> None
 ```
 
 Set up the test class.
@@ -738,7 +748,7 @@ Set up the test class.
 
 ```python
  | @classmethod
- | teardown_class(cls)
+ | teardown_class(cls) -> None
 ```
 
 Teardown the test class.
@@ -760,7 +770,7 @@ it is assumed the project is inside the current working directory.
 
 ```python
  | @classmethod
- | setup_class(cls)
+ | setup_class(cls) -> None
 ```
 
 Set up the test class.
@@ -770,7 +780,7 @@ Set up the test class.
 
 ```python
  | @classmethod
- | teardown_class(cls)
+ | teardown_class(cls) -> None
 ```
 
 Teardown the test class.
