@@ -4,6 +4,16 @@ The primary tool for upgrading AEA projects is the `aea upgrade` command in the 
 
 Below we describe the additional manual steps required to upgrade between different versions:
 
+## `v0.9.2` to `v0.10.0`
+
+Skill development sees no backward incompatible changes. 
+
+Connection development requires updating the keyword arguments of the constructor: the new `data_dir` argument must be defined.
+
+Protocol specifications now need to contain a `protocol_specification_id` in addition to the public id. The `protocol_specification_id` is used for identifying Envelopes during transport. By being able to set the id independently of the protocol id backwards compatibility in the specification (and therefore wire format) can be maintained even when the Python implementation changes.
+
+Please update to the latest packages by running `aea upgrade` and then re-generating your own protocols.
+
 ## `v0.9.1` to `v0.9.2`
 
 No backwards incompatible changes for skill and connection development.
