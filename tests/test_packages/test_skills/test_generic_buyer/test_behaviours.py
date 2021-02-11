@@ -63,7 +63,12 @@ class TestSearchBehaviour(BaseSkillTestCase):
         cls.search_behaviour = cast(
             GenericSearchBehaviour, cls._skill.skill_context.behaviours.search
         )
+        cls.tx_behaviour = cast(
+            GenericTransactionBehaviour, cls._skill.skill_context.behaviours.transaction
+        )
         cls.strategy = cast(GenericStrategy, cls._skill.skill_context.strategy)
+
+        cls.logger = cls._skill.skill_context.logger
 
     def test_setup_is_ledger_tx(self):
         """Test the setup method of the search behaviour where is_ledger_tx is True."""
@@ -127,6 +132,23 @@ class TestSearchBehaviour(BaseSkillTestCase):
 
         # after
         self.assert_quantity_in_outbox(0)
+
+    def test_act_remaining_transactions(self):
+        """Test the act method of the search behaviour where remaining_transactions_count > 0."""
+        # setup
+        self.strategy._is_searching = True
+        self.tx_behaviour.waiting = ['some_dialogue']
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger:
+            self.search_behaviour.act()
+
+        # after
+        self.assert_quantity_in_outbox(0)
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"Transaction behaviour has {len(self.tx_behaviour.waiting)} transactions remaining. Skipping search!",
+        )
 
     def test_teardown(self):
         """Test the teardown method of the search behaviour."""
