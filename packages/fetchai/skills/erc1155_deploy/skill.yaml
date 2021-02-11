@@ -1,6 +1,6 @@
 name: erc1155_deploy
 author: fetchai
-version: 0.21.0
+version: 0.22.0
 type: skill
 description: The ERC1155 deploy skill has the ability to deploy and interact with
   the smart contract.
@@ -8,23 +8,23 @@ license: Apache-2.0
 aea_version: '>=0.10.0, <0.11.0'
 fingerprint:
   README.md: QmNg45JuqfVzDmvgpWLeaR861LSEvf9pishDKSPihtQnLE
-  __init__.py: QmaJBwGuD5Knh5DdSwup44ipwFRGcXF4sravc7wAdEL6X1
+  __init__.py: QmaWmRLy8e3iZ2SG3sytnhu2ACnQkoPBWHNTH5QwKDCsJ9
   behaviours.py: QmZ3SrAXarJa1iCMoShxHUsARDtak9R9GLGpXfmeGTcCDR
   dialogues.py: QmTnfwica866L3Ns5PwUPeew1YUDdmUKYMZxUseM91gHfD
   handlers.py: QmUPwUbg9DW3rAmAYdZwS616goTKzZ2rbx21yL31wj8SsV
   strategy.py: QmUDturpVPqMf6FqkTcd7byE61Vc9dCsdbecpmPHrsWqKM
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.12.0
+- fetchai/ledger:0.13.0
 contracts:
-- fetchai/erc1155:0.15.0
+- fetchai/erc1155:0.16.0
 protocols:
-- fetchai/contract_api:0.10.0
-- fetchai/default:0.11.0
-- fetchai/fipa:0.12.0
-- fetchai/ledger_api:0.9.0
-- fetchai/oef_search:0.12.0
-- fetchai/signing:0.9.0
+- fetchai/contract_api:0.11.0
+- fetchai/default:0.12.0
+- fetchai/fipa:0.13.0
+- fetchai/ledger_api:0.10.0
+- fetchai/oef_search:0.13.0
+- fetchai/signing:0.10.0
 skills: []
 behaviours:
   service_registration:

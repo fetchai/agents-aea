@@ -56,16 +56,16 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
 
         coin_price_feed_aea_name = self.agent_name
 
-        self.add_item("connection", "fetchai/http_client:0.16.0")
-        self.add_item("connection", "fetchai/http_server:0.15.0")
-        self.add_item("connection", "fetchai/prometheus:0.2.0")
-        self.remove_item("connection", "fetchai/stub:0.15.0")
-        self.add_item("skill", "fetchai/coin_price:0.3.0")
-        self.set_config("agent.default_connection", "fetchai/http_server:0.15.0")
+        self.add_item("connection", "fetchai/http_client:0.17.0")
+        self.add_item("connection", "fetchai/http_server:0.16.0")
+        self.add_item("connection", "fetchai/prometheus:0.3.0")
+        self.remove_item("connection", "fetchai/stub:0.16.0")
+        self.add_item("skill", "fetchai/coin_price:0.4.0")
+        self.set_config("agent.default_connection", "fetchai/http_server:0.16.0")
 
         default_routing = {
-            "fetchai/http:0.11.0": "fetchai/http_client:0.16.0",
-            "fetchai/prometheus:0.2.0": "fetchai/prometheus:0.2.0",
+            "fetchai/http:0.12.0": "fetchai/http_client:0.17.0",
+            "fetchai/prometheus:0.3.0": "fetchai/prometheus:0.3.0",
         }
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
@@ -80,7 +80,7 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
         )
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/coin_price_feed:0.4.0", coin_price_feed_aea_name
+            "fetchai/coin_price_feed:0.5.0", coin_price_feed_aea_name
         )
         assert (
             diff == []

@@ -1,6 +1,6 @@
 agent_name: confirmation_aea_aw3
 author: fetchai
-version: 0.3.0
+version: 0.4.0
 description: This agent purchases information from other agents as specified in its
   configuration. It acts as the confirmation AEA in Agent World 3.
 license: Apache-2.0
@@ -8,29 +8,29 @@ aea_version: '>=0.10.0, <0.11.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/http_client:0.16.0
-- fetchai/ledger:0.12.0
-- fetchai/p2p_libp2p:0.14.0
-- fetchai/soef:0.15.0
+- fetchai/http_client:0.17.0
+- fetchai/ledger:0.13.0
+- fetchai/p2p_libp2p:0.15.0
+- fetchai/soef:0.16.0
 contracts: []
 protocols:
-- fetchai/contract_api:0.10.0
-- fetchai/default:0.11.0
-- fetchai/fipa:0.12.0
-- fetchai/http:0.11.0
-- fetchai/ledger_api:0.9.0
-- fetchai/oef_search:0.12.0
-- fetchai/signing:0.9.0
-- fetchai/state_update:0.9.0
+- fetchai/contract_api:0.11.0
+- fetchai/default:0.12.0
+- fetchai/fipa:0.13.0
+- fetchai/http:0.12.0
+- fetchai/ledger_api:0.10.0
+- fetchai/oef_search:0.13.0
+- fetchai/signing:0.10.0
+- fetchai/state_update:0.10.0
 skills:
-- fetchai/confirmation_aw3:0.3.0
-- fetchai/generic_buyer:0.19.0
-default_connection: fetchai/p2p_libp2p:0.14.0
+- fetchai/confirmation_aw3:0.4.0
+- fetchai/generic_buyer:0.20.0
+default_connection: fetchai/p2p_libp2p:0.15.0
 default_ledger: fetchai
 default_routing:
-  fetchai/http:0.11.0: fetchai/http_client:0.16.0
-  fetchai/ledger_api:0.9.0: fetchai/ledger:0.12.0
-  fetchai/oef_search:0.12.0: fetchai/soef:0.15.0
+  fetchai/http:0.12.0: fetchai/http_client:0.17.0
+  fetchai/ledger_api:0.10.0: fetchai/ledger:0.13.0
+  fetchai/oef_search:0.13.0: fetchai/soef:0.16.0
 connection_private_key_paths: {}
 private_key_paths: {}
 logging_config:
@@ -66,7 +66,7 @@ logging_config:
       propagate: false
 registry_path: ../packages
 ---
-public_id: fetchai/p2p_libp2p:0.14.0
+public_id: fetchai/p2p_libp2p:0.15.0
 type: connection
 config:
   delegate_uri: null
@@ -74,13 +74,13 @@ config:
   entry_peers:
   - /dns4/acn.fetch.ai/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW
 ---
-public_id: fetchai/soef:0.15.0
+public_id: fetchai/soef:0.16.0
 type: connection
 config:
   chain_identifier: fetchai_v2_testnet_incentivised
   token_storage_path: /data/soef_key.txt
 ---
-public_id: fetchai/ledger:0.12.0
+public_id: fetchai/ledger:0.13.0
 type: connection
 config:
   ledger_apis:
@@ -90,7 +90,7 @@ config:
       address: https://rest-agentworld.prod.fetch-ai.com:443
       chain_id: agentworld-1
 ---
-public_id: fetchai/confirmation_aw3:0.3.0
+public_id: fetchai/confirmation_aw3:0.4.0
 type: skill
 behaviours:
   search:

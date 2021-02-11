@@ -52,8 +52,8 @@ class TestCarPark(AEATestCaseMany):
         self.create_agents(carpark_aea_name, carpark_client_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.9.0": "fetchai/ledger:0.12.0",
-            "fetchai/oef_search:0.12.0": "fetchai/soef:0.15.0",
+            "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
+            "fetchai/oef_search:0.13.0": "fetchai/soef:0.16.0",
         }
 
         # generate random location
@@ -64,12 +64,12 @@ class TestCarPark(AEATestCaseMany):
 
         # Setup agent one
         self.set_agent_context(carpark_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.14.0")
-        self.add_item("connection", "fetchai/soef:0.15.0")
-        self.remove_item("connection", "fetchai/stub:0.15.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.14.0")
-        self.add_item("connection", "fetchai/ledger:0.12.0")
-        self.add_item("skill", "fetchai/carpark_detection:0.18.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.15.0")
+        self.add_item("connection", "fetchai/soef:0.16.0")
+        self.remove_item("connection", "fetchai/stub:0.16.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.15.0")
+        self.add_item("connection", "fetchai/ledger:0.13.0")
+        self.add_item("skill", "fetchai/carpark_detection:0.19.0")
         setting_path = (
             "vendor.fetchai.skills.carpark_detection.models.strategy.args.is_ledger_tx"
         )
@@ -99,12 +99,12 @@ class TestCarPark(AEATestCaseMany):
 
         # Setup agent two
         self.set_agent_context(carpark_client_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.14.0")
-        self.add_item("connection", "fetchai/soef:0.15.0")
-        self.remove_item("connection", "fetchai/stub:0.15.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.14.0")
-        self.add_item("connection", "fetchai/ledger:0.12.0")
-        self.add_item("skill", "fetchai/carpark_client:0.19.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.15.0")
+        self.add_item("connection", "fetchai/soef:0.16.0")
+        self.remove_item("connection", "fetchai/stub:0.16.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.15.0")
+        self.add_item("connection", "fetchai/ledger:0.13.0")
+        self.add_item("skill", "fetchai/carpark_client:0.20.0")
         setting_path = (
             "vendor.fetchai.skills.carpark_client.models.strategy.args.is_ledger_tx"
         )
@@ -224,8 +224,8 @@ class TestCarParkFetchaiLedger(AEATestCaseMany):
         self.create_agents(carpark_aea_name, carpark_client_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.9.0": "fetchai/ledger:0.12.0",
-            "fetchai/oef_search:0.12.0": "fetchai/soef:0.15.0",
+            "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
+            "fetchai/oef_search:0.13.0": "fetchai/soef:0.16.0",
         }
 
         # generate random location
@@ -236,18 +236,18 @@ class TestCarParkFetchaiLedger(AEATestCaseMany):
 
         # Setup agent one
         self.set_agent_context(carpark_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.14.0")
-        self.add_item("connection", "fetchai/soef:0.15.0")
-        self.remove_item("connection", "fetchai/stub:0.15.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.14.0")
-        self.add_item("connection", "fetchai/ledger:0.12.0")
-        self.add_item("skill", "fetchai/carpark_detection:0.18.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.15.0")
+        self.add_item("connection", "fetchai/soef:0.16.0")
+        self.remove_item("connection", "fetchai/stub:0.16.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.15.0")
+        self.add_item("connection", "fetchai/ledger:0.13.0")
+        self.add_item("skill", "fetchai/carpark_detection:0.19.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/car_detector:0.20.0", carpark_aea_name
+            "fetchai/car_detector:0.21.0", carpark_aea_name
         )
         assert (
             diff == []
@@ -274,18 +274,18 @@ class TestCarParkFetchaiLedger(AEATestCaseMany):
 
         # Setup agent two
         self.set_agent_context(carpark_client_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.14.0")
-        self.add_item("connection", "fetchai/soef:0.15.0")
-        self.remove_item("connection", "fetchai/stub:0.15.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.14.0")
-        self.add_item("connection", "fetchai/ledger:0.12.0")
-        self.add_item("skill", "fetchai/carpark_client:0.19.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.15.0")
+        self.add_item("connection", "fetchai/soef:0.16.0")
+        self.remove_item("connection", "fetchai/stub:0.16.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.15.0")
+        self.add_item("connection", "fetchai/ledger:0.13.0")
+        self.add_item("skill", "fetchai/carpark_client:0.20.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/car_data_buyer:0.21.0", carpark_client_aea_name
+            "fetchai/car_data_buyer:0.22.0", carpark_client_aea_name
         )
         assert (
             diff == []
