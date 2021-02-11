@@ -2,7 +2,7 @@ agent_name: random_beacon_feed
 author: fetchai
 version: 0.2.0
 license: Apache-2.0
-description: ''
+description: An agent that retrieves the Fetch.ai decentralised random beacon value.
 aea_version: '>=0.10.0, <0.11.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
