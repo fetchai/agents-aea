@@ -137,7 +137,7 @@ class TestSearchBehaviour(BaseSkillTestCase):
         """Test the act method of the search behaviour where remaining_transactions_count > 0."""
         # setup
         self.strategy._is_searching = True
-        self.tx_behaviour.waiting = ['some_dialogue']
+        self.tx_behaviour.waiting = ["some_dialogue"]
 
         # operation
         with patch.object(self.logger, "log") as mock_logger:

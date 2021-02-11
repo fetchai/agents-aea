@@ -235,9 +235,6 @@ class FipaNegotiationHandler(Handler):
 
         target_message = fipa_dialogue.get_message_by_id(decline.target)
 
-        if not target_message:
-            raise ValueError("Can not find target message!")
-
         declined_performative = target_message.performative
         if declined_performative == FipaMessage.Performative.CFP:
             fipa_dialogues.dialogue_stats.add_dialogue_endstate(
