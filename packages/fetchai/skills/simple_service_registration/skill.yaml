@@ -4,7 +4,7 @@ version: 0.15.0
 type: skill
 description: The simple service registration skills is a skill to register a service.
 license: Apache-2.0
-aea_version: '>=0.9.0, <0.10.0'
+aea_version: '>=0.10.0, <0.11.0'
 fingerprint:
   README.md: QmUgCcR7sDBQeeCBRKwDT7tPBTi3t4zSibyEqR3xdQUKmh
   __init__.py: QmZRAeLgEEnvzHBaJHKdwqDTUFacMMDTRAn6xbNuY8Q7vD

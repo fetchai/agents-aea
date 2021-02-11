@@ -5,7 +5,7 @@ type: skill
 description: The http echo skill prints out the content of received http messages
   and responds with success.
 license: Apache-2.0
-aea_version: '>=0.9.0, <0.10.0'
+aea_version: '>=0.10.0, <0.11.0'
 fingerprint:
   README.md: QmYC2Y95Mg327LyHzQ3WbxZA8g1NfSHasmDTRcvrGCXmiR
   __init__.py: QmPMBNeEbxmbLm6FMr71NXLB6JT7kXE5Ktf94Zp6j8B9LR

@@ -5,7 +5,7 @@ type: skill
 description: The carpark detection skill implements the detection and trading functionality
   for a carpark agent.
 license: Apache-2.0
-aea_version: '>=0.9.0, <0.10.0'
+aea_version: '>=0.10.0, <0.11.0'
 fingerprint:
   README.md: Qmd5Xe9jY8AjJjFR5QY7L9QQ3AeCEKx837UgiGuf3BSRVN
   __init__.py: QmbE2Was5RRLGQTk6DB9ewW3oxdSQgUeWFpBegGC5qqvFk

@@ -3,7 +3,7 @@ author: fetchai
 version: 0.6.0
 description: This is an agent to register for Agent World 1.
 license: Apache-2.0
-aea_version: '>=0.9.0, <0.10.0'
+aea_version: '>=0.10.0, <0.11.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:

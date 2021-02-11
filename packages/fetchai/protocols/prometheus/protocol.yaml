@@ -5,9 +5,9 @@ protocol_specification_id: fetchai/prometheus:0.1.0
 type: protocol
 description: A protocol for adding and updating metrics to a prometheus server.
 license: Apache-2.0
-aea_version: '>=0.9.0, <0.10.0'
+aea_version: '>=0.10.0, <0.11.0'
 fingerprint:
-  README.md: QmceL37HrT7NP8dZ3qovvKHv3ZeDVNXgbKiC9xQztEZA9X
+  README.md: QmYS9QENmFBcsFC1RQ1CRNBoJ2vyBJHhT1BPy9hHMs2Ghy
   __init__.py: QmQvMGLitiy95SKYYSZQdfUH2UjpZ1ueTJooVuBG19P7QE
   dialogues.py: QmYQYkByWC3sBnQPnDEzFh98ULycx1jzqqs6hLC196YZg5
   message.py: QmVuDfTrR8DVwCr6Q4xCbUDjGkPYQwsKarzAqcVF29i3jL

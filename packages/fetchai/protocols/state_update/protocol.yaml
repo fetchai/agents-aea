@@ -5,9 +5,9 @@ protocol_specification_id: fetchai/state_update:0.1.0
 type: protocol
 description: A protocol for state updates to the decision maker state.
 license: Apache-2.0
-aea_version: '>=0.9.0, <0.10.0'
+aea_version: '>=0.10.0, <0.11.0'
 fingerprint:
-  README.md: QmQAYn2AQGpEqii5EMo3usPBvfd1Snp8WjSAf2kRJJZyUH
+  README.md: QmexRN4fAZKqWGYYBPbXYb3UqWVvVexZuUUuXEhnznzzZr
   __init__.py: QmYQASXkhmnZbo5Vxh6mVbcaCkBP46UCZzQHQFtWYvBELL
   dialogues.py: QmU4GFxG3DL5F515aF3z2GamzieU6XXWqzRy7V5oA7HnjV
   message.py: QmXD2gDiSgekqSDrWrMHtcHNa1zM1R9VEMCpXSBj1ratLA

@@ -4,7 +4,7 @@ version: 0.20.0
 description: An AEA to manage an instance of the TAC (trading agent competition) using
   an ERC1155 smart contract.
 license: Apache-2.0
-aea_version: '>=0.9.0, <0.10.0'
+aea_version: '>=0.10.0, <0.11.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:

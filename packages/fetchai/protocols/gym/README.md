@@ -13,7 +13,7 @@ author: fetchai
 version: 0.11.0
 description: A protocol for interacting with a gym connection.
 license: Apache-2.0
-aea_version: '>=0.9.0, <0.10.0'
+aea_version: '>=0.10.0, <0.11.0'
 protocol_specification_id: fetchai/gym:0.1.0
 speech_acts:
   act:

@@ -5,7 +5,7 @@ type: skill
 description: The weather station skill implements the functionality to sell weather
   data.
 license: Apache-2.0
-aea_version: '>=0.9.0, <0.10.0'
+aea_version: '>=0.10.0, <0.11.0'
 fingerprint:
   README.md: QmQ3hBSdCTwsFziUgPkbUqRcBU95yF2yZfrGXbowgaof5R
   __init__.py: QmUtYeAa8Wf4Qn9mDuwZDpBm4sMCCzsdfcmXSxB11G6MEU
