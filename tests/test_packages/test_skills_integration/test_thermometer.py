@@ -22,7 +22,7 @@ from random import uniform
 
 import pytest
 
-from aea.test_tools.test_cases import AEATestCaseMany
+from aea.test_tools.test_cases import AEATestCaseManyFlaky
 
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
@@ -38,7 +38,7 @@ from tests.conftest import (
 
 
 @pytest.mark.integration
-class TestThermometerSkill(AEATestCaseMany):
+class TestThermometerSkill(AEATestCaseManyFlaky):
     """Test that thermometer skills work."""
 
     @pytest.mark.flaky(
@@ -214,7 +214,7 @@ class TestThermometerSkill(AEATestCaseMany):
 
 
 @pytest.mark.integration
-class TestThermometerSkillFetchaiLedger(AEATestCaseMany):
+class TestThermometerSkillFetchaiLedger(AEATestCaseManyFlaky):
     """Test that thermometer skills work."""
 
     @pytest.mark.flaky(

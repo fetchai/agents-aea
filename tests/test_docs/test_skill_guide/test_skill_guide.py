@@ -28,7 +28,7 @@ import pytest
 
 from aea import AEA_DIR
 from aea.configurations.base import DEFAULT_VERSION
-from aea.test_tools.test_cases import AEATestCaseMany
+from aea.test_tools.test_cases import AEATestCaseManyFlaky
 
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
@@ -50,7 +50,7 @@ MD_FILE = "docs/skill-guide.md"
 
 
 @pytest.mark.integration
-class TestBuildSkill(AEATestCaseMany):
+class TestBuildSkill(AEATestCaseManyFlaky):
     """This class contains the tests for the code-blocks in the skill-guide.md file."""
 
     capture_log = True

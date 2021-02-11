@@ -189,29 +189,28 @@ class TestEmptySearch:
 class TestSimpleSearchResult:
     """Test that a simple search result return the expected result."""
 
-    @classmethod
-    def setup_class(cls):
+    def setup(self):
         """Set up the test."""
-        cls.node = LocalNode()
-        cls.node.start()
+        self.node = LocalNode()
+        self.node.start()
 
-        cls.address_1 = "address"
-        cls.multiplexer = Multiplexer(
-            [_make_local_connection(cls.address_1, cls.node,)]
+        self.address_1 = "address"
+        self.multiplexer = Multiplexer(
+            [_make_local_connection(self.address_1, self.node,)]
         )
 
-        cls.multiplexer.connect()
+        self.multiplexer.connect()
 
         # register a service.
-        cls.dialogues = OefSearchDialogues(cls.address_1)
-        cls.data_model = DataModel(
+        self.dialogues = OefSearchDialogues(self.address_1)
+        self.data_model = DataModel(
             "foobar",
             attributes=[Attribute("foo", int, True), Attribute("bar", str, True)],
         )
         service_description = Description(
-            {"foo": 1, "bar": "baz"}, data_model=cls.data_model
+            {"foo": 1, "bar": "baz"}, data_model=self.data_model
         )
-        register_service_request, cls.sending_dialogue = cls.dialogues.create(
+        register_service_request, self.sending_dialogue = self.dialogues.create(
             counterparty=str(OEFLocalConnection.connection_id),
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
@@ -221,7 +220,7 @@ class TestSimpleSearchResult:
             sender=register_service_request.sender,
             message=register_service_request,
         )
-        cls.multiplexer.put(envelope)
+        self.multiplexer.put(envelope)
 
     @pytest.mark.flaky(
         reruns=MAX_FLAKY_RERUNS
@@ -253,11 +252,10 @@ class TestSimpleSearchResult:
         assert search_result.performative == OefSearchMessage.Performative.SEARCH_RESULT
         assert search_result.agents == (self.address_1,)
 
-    @classmethod
-    def teardown_class(cls):
+    def teardown(self):
         """Teardown the test."""
-        cls.multiplexer.disconnect()
-        cls.node.stop()
+        self.multiplexer.disconnect()
+        self.node.stop()
 
 
 class TestUnregister:

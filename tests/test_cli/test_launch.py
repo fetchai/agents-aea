@@ -52,6 +52,8 @@ logger = logging.getLogger(__name__)
 class BaseLaunchTestCase:
     """Base Test case for launch tests."""
 
+    failure_count: int
+
     @contextmanager
     def _cli_launch(
         self, agents: List[str], options: Optional[List[str]] = None
@@ -91,6 +93,16 @@ class BaseLaunchTestCase:
         if cls is BaseLaunchTestCase:
             raise unittest.SkipTest("Skip BaseTest tests, it's a base class")
 
+        method_list = [
+            func
+            for func in dir(cls)
+            if callable(getattr(cls, func))
+            and not func.startswith("__")
+            and func.startswith("test_")
+        ]
+        if len(method_list) > 1:
+            raise ValueError(f"{cls.__name__} can only contain one test method!")
+
         cls.runner = CliRunner()
         cls.agent_name_1 = "myagent_1"
         cls.agent_name_2 = "myagent_2"
@@ -113,6 +125,19 @@ class BaseLaunchTestCase:
             cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name_2]
         )
         assert result.exit_code == 0
+
+        cls.failure_count = 0
+
+    def setup(self) -> None:
+        """Set up test case instance."""
+        if self.failure_count == 0:
+            return
+        self.teardown_class()
+        self.setup_class()
+
+    def teardown(self) -> None:
+        """Tear down test case instance."""
+        self.failure_count += 1
 
     @classmethod
     def teardown_class(cls):

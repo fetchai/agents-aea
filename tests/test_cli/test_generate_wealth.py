@@ -23,7 +23,7 @@ import pytest
 
 from aea.cli import cli
 from aea.cli.generate_wealth import _try_generate_wealth
-from aea.test_tools.test_cases import AEATestCaseMany
+from aea.test_tools.test_cases import AEATestCaseMany, AEATestCaseManyFlaky
 
 from tests.conftest import (
     CLI_LOG_OPTION,
@@ -73,7 +73,7 @@ class GenerateWealthCommandTestCase(TestCase):
         self.assertEqual(result.exit_code, 0)
 
 
-class TestWealthCommandsPositive(AEATestCaseMany):
+class TestWealthCommandsPositive(AEATestCaseManyFlaky):
     """Test case for CLI wealth commands."""
 
     @pytest.mark.integration

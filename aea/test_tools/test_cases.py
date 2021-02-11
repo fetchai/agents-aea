@@ -933,6 +933,49 @@ class AEATestCaseEmpty(BaseAEATestCase):
         cls.agent_name = ""
 
 
+class AEATestCaseEmptyFlaky(AEATestCaseEmpty):
+    """
+    Test case for a default AEA project.
+
+    This test case will create a default AEA project.
+
+    Use for flaky tests with the flaky decorator.
+    """
+
+    failure_count: int
+
+    @classmethod
+    def setup_class(cls) -> None:
+        """Set up the test class."""
+        method_list = [
+            func
+            for func in dir(cls)
+            if callable(getattr(cls, func))
+            and not func.startswith("__")
+            and func.startswith("test_")
+        ]
+        if len(method_list) > 1:
+            raise ValueError(f"{cls.__name__} can only contain one test method!")
+        super(AEATestCaseEmptyFlaky, cls).setup_class()
+        cls.failure_count = 0
+
+    def setup(self) -> None:
+        """Set up test case instance."""
+        if self.failure_count == 0:
+            return
+        self.teardown_class()
+        self.setup_class()
+
+    def teardown(self) -> None:
+        """Tear down test case instance."""
+        self.failure_count += 1
+
+    @classmethod
+    def teardown_class(cls) -> None:
+        """Teardown the test class."""
+        super(AEATestCaseEmptyFlaky, cls).teardown_class()
+
+
 class AEATestCaseMany(BaseAEATestCase):
     """Test case for many AEA projects."""
 
@@ -945,6 +988,47 @@ class AEATestCaseMany(BaseAEATestCase):
     def teardown_class(cls) -> None:
         """Teardown the test class."""
         super(AEATestCaseMany, cls).teardown_class()
+
+
+class AEATestCaseManyFlaky(AEATestCaseMany):
+    """
+    Test case for many AEA projects which are flaky.
+
+    Use for flaky tests with the flaky decorator.
+    """
+
+    failure_count: int
+
+    @classmethod
+    def setup_class(cls) -> None:
+        """Set up the test class."""
+        method_list = [
+            func
+            for func in dir(cls)
+            if callable(getattr(cls, func))
+            and not func.startswith("__")
+            and func.startswith("test_")
+        ]
+        if len(method_list) > 1:
+            raise ValueError(f"{cls.__name__} can only contain one test method!")
+        super(AEATestCaseManyFlaky, cls).setup_class()
+        cls.failure_count = 0
+
+    def setup(self) -> None:
+        """Set up test case instance."""
+        if self.failure_count == 0:
+            return
+        self.teardown_class()
+        self.setup_class()
+
+    def teardown(self) -> None:
+        """Tear down test case instance."""
+        self.failure_count += 1
+
+    @classmethod
+    def teardown_class(cls) -> None:
+        """Teardown the test class."""
+        super(AEATestCaseManyFlaky, cls).teardown_class()
 
 
 class AEATestCase(BaseAEATestCase):
