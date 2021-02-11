@@ -235,8 +235,6 @@ class FipaNegotiationHandler(Handler):
 
         target_message = fipa_dialogue.get_message_by_id(decline.target)
 
-        # to tell mypy target isn't none (it cannot be because this makes it
-        # invalid, therefore rejected by the dialogue when trying to add it)
         if not target_message:
             raise ValueError("Can not find target message!")  # pragma: nocover
 
