@@ -30,7 +30,7 @@ An <a href="../api/mail/base#envelope-objects">`Envelope`</a> is the core object
 
 * `Messages` defining the syntax of messages;
 
-* `Serialization` definning how a `Message` is encoded for transport; and, optionally
+* `Serialization` defining how a `Message` is encoded for transport; and, optionally
 
 * `Dialogues`, which define rules over `Message` sequences.
 

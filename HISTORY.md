@@ -5,10 +5,10 @@
 - Removes error skill from agents which do not need it
 - Adds support for relay connection reconnect in ACN
 - Multiplexer refactoring for easier connection handling
-- Fix erc1155 skill tests on CosmWasm chains
+- Fix `erc1155` skill tests on CosmWasm chains
 - Extends docs on usage of CosmWasm chains
 - Adds version compatibility in `aea upgrade` command
-- Introduces protocol spec id and related changes for better interoperability
+- Introduces protocol specification id and related changes for better interoperability
 - Adds synchronous connection base class
 - Exposes state setter in connection base class
 - Adds Yoti protocol and connection
