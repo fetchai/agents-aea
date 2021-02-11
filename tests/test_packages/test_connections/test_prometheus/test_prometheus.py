@@ -79,7 +79,7 @@ class TestPrometheusConnection:
             connection_id=PrometheusConnection.connection_id, port=9090,
         )
         self.agent_address = "my_address"
-        self.protocol_specification_id = PublicId.from_str("fetchai/prometheus:0.2.0")
+        self.protocol_specification_id = PublicId.from_str("fetchai/prometheus:0.3.0")
         identity = Identity("name", address=self.agent_address)
         self.prometheus_con = PrometheusConnection(
             identity=identity, configuration=configuration, data_dir=MagicMock()

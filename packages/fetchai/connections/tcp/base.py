@@ -31,7 +31,7 @@ from aea.mail.base import Envelope
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.tcp")
 
-PUBLIC_ID = PublicId.from_str("fetchai/tcp:0.12.0")
+PUBLIC_ID = PublicId.from_str("fetchai/tcp:0.13.0")
 
 
 class TCPConnection(Connection, ABC):

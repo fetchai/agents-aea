@@ -30,7 +30,7 @@ Init profiler.
 #### set`_`counters
 
 ```python
- | set_counters()
+ | set_counters() -> None
 ```
 
 Modify obj.__new__ to count objects created created.

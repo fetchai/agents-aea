@@ -17,7 +17,7 @@ The identifier of an item class.
 
 ```python
  | @property
- | name()
+ | name() -> str
 ```
 
 Get the id name.
@@ -39,7 +39,7 @@ The regular expression matches the strings in the following format:
 #### `__`init`__`
 
 ```python
- | __init__(seq)
+ | __init__(seq: Union["EntryPoint", str]) -> None
 ```
 
 Initialize the entrypoint.
@@ -90,7 +90,7 @@ A specification for a particular instance of an object.
 #### `__`init`__`
 
 ```python
- | __init__(id_: ItemId, entry_point: EntryPoint[ItemType], class_kwargs: Optional[Dict[str, Any]] = None, **kwargs: Dict, ,)
+ | __init__(id_: ItemId, entry_point: EntryPoint[ItemType], class_kwargs: Optional[Dict[str, Any]] = None, **kwargs: Dict, ,) -> None
 ```
 
 Initialize an item specification.
@@ -106,7 +106,7 @@ Initialize an item specification.
 #### make
 
 ```python
- | make(**kwargs) -> ItemType
+ | make(**kwargs: Any) -> ItemType
 ```
 
 Instantiate an instance of the item object with appropriate arguments.
@@ -145,7 +145,7 @@ Registry for generic classes.
 #### `__`init`__`
 
 ```python
- | __init__()
+ | __init__() -> None
 ```
 
 Initialize the registry.
@@ -164,7 +164,7 @@ Get the supported item ids.
 #### register
 
 ```python
- | register(id_: Union[ItemId, str], entry_point: Union[EntryPoint[ItemType], str], class_kwargs: Optional[Dict[str, Any]] = None, **kwargs, ,)
+ | register(id_: Union[ItemId, str], entry_point: Union[EntryPoint[ItemType], str], class_kwargs: Optional[Dict[str, Any]] = None, **kwargs: Any, ,) -> None
 ```
 
 Register an item type.
@@ -184,7 +184,7 @@ None.
 #### make
 
 ```python
- | make(id_: Union[ItemId, str], module: Optional[str] = None, **kwargs) -> ItemType
+ | make(id_: Union[ItemId, str], module: Optional[str] = None, **kwargs: Any) -> ItemType
 ```
 
 Create an instance of the associated type item id.

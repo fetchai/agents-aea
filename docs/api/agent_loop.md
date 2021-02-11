@@ -34,7 +34,7 @@ Base abstract  agent loop class.
 #### `__`init`__`
 
 ```python
- | __init__(agent: AbstractAgent, loop: Optional[AbstractEventLoop] = None, threaded=False) -> None
+ | __init__(agent: AbstractAgent, loop: Optional[AbstractEventLoop] = None, threaded: bool = False) -> None
 ```
 
 Init loop.
@@ -53,24 +53,6 @@ Init loop.
 ```
 
 Get agent.
-
-<a name="aea.agent_loop.BaseAgentLoop.set_loop"></a>
-#### set`_`loop
-
-```python
- | set_loop(loop: AbstractEventLoop) -> None
-```
-
-Set event loop and all event loopp related objects.
-
-<a name="aea.agent_loop.BaseAgentLoop.run"></a>
-#### run
-
-```python
- | async run() -> None
-```
-
-Run agent loop.
 
 <a name="aea.agent_loop.BaseAgentLoop.state"></a>
 #### state
@@ -92,6 +74,24 @@ Get current main loop state.
 
 Get running state of the loop.
 
+<a name="aea.agent_loop.BaseAgentLoop.set_loop"></a>
+#### set`_`loop
+
+```python
+ | set_loop(loop: AbstractEventLoop) -> None
+```
+
+Set event loop and all event loopp related objects.
+
+<a name="aea.agent_loop.BaseAgentLoop.run"></a>
+#### run
+
+```python
+ | async run() -> None
+```
+
+Run agent loop.
+
 <a name="aea.agent_loop.AsyncAgentLoop"></a>
 ## AsyncAgentLoop Objects
 
@@ -105,7 +105,7 @@ Asyncio based agent loop suitable only for AEA.
 #### `__`init`__`
 
 ```python
- | __init__(agent: AbstractAgent, loop: AbstractEventLoop = None, threaded=False)
+ | __init__(agent: AbstractAgent, loop: AbstractEventLoop = None, threaded: bool = False) -> None
 ```
 
 Init agent loop.

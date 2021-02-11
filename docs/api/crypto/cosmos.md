@@ -24,11 +24,47 @@ Check whether a transaction is settled or not.
 
 **Arguments**:
 
-- `tx_digest`: the digest associated to the transaction.
+- `tx_receipt`: the receipt of the transaction.
 
 **Returns**:
 
 True if the transaction has been settled, False o/w.
+
+<a name="aea.crypto.cosmos.CosmosHelper.get_code_id"></a>
+#### get`_`code`_`id
+
+```python
+ | @staticmethod
+ | get_code_id(tx_receipt: JSONLike) -> Optional[int]
+```
+
+Retrieve the `code_id` from a transaction receipt.
+
+**Arguments**:
+
+- `tx_receipt`: the receipt of the transaction.
+
+**Returns**:
+
+the code id, if present
+
+<a name="aea.crypto.cosmos.CosmosHelper.get_contract_address"></a>
+#### get`_`contract`_`address
+
+```python
+ | @staticmethod
+ | get_contract_address(tx_receipt: JSONLike) -> Optional[str]
+```
+
+Retrieve the `contract_address` from a transaction receipt.
+
+**Arguments**:
+
+- `tx_receipt`: the receipt of the transaction.
+
+**Returns**:
+
+the contract address, if present
 
 <a name="aea.crypto.cosmos.CosmosHelper.is_transaction_valid"></a>
 #### is`_`transaction`_`valid
@@ -192,7 +228,7 @@ Class wrapping the Account Generation from Ethereum ledger.
 #### `__`init`__`
 
 ```python
- | __init__(private_key_path: Optional[str] = None)
+ | __init__(private_key_path: Optional[str] = None) -> None
 ```
 
 Instantiate an ethereum crypto object.
@@ -248,7 +284,7 @@ a display_address str
 
 ```python
  | @classmethod
- | load_private_key_from_path(cls, file_name) -> SigningKey
+ | load_private_key_from_path(cls, file_name: str) -> SigningKey
 ```
 
 Load a private key in hex format from a file.
@@ -336,7 +372,7 @@ Class to interact with the Cosmos SDK via a HTTP APIs.
 #### `__`init`__`
 
 ```python
- | __init__(**kwargs)
+ | __init__(**kwargs: Any) -> None
 ```
 
 Initialize the Cosmos ledger APIs.
@@ -346,7 +382,7 @@ Initialize the Cosmos ledger APIs.
 
 ```python
  | @property
- | api() -> None
+ | api() -> Any
 ```
 
 Get the underlying API object.
@@ -364,7 +400,7 @@ Get the balance of a given account.
 #### get`_`state
 
 ```python
- | get_state(callable_name: str, *args, **kwargs) -> Optional[JSONLike]
+ | get_state(callable_name: str, *args: Any, **kwargs: Any) -> Optional[JSONLike]
 ```
 
 Call a specified function on the ledger API.
@@ -378,7 +414,7 @@ as the callable_name and the rest of the path as args.
 #### get`_`deploy`_`transaction
 
 ```python
- | get_deploy_transaction(contract_interface: Dict[str, str], deployer_address: Address, **kwargs) -> Optional[JSONLike]
+ | get_deploy_transaction(contract_interface: Dict[str, str], deployer_address: Address, **kwargs: Any, ,) -> Optional[JSONLike]
 ```
 
 Get the transaction to deploy the smart contract.
@@ -435,7 +471,7 @@ the message receipt
 #### get`_`transfer`_`transaction
 
 ```python
- | get_transfer_transaction(sender_address: Address, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, denom: Optional[str] = None, gas: int = 80000, memo: str = "", chain_id: Optional[str] = None, **kwargs, ,) -> Optional[JSONLike]
+ | get_transfer_transaction(sender_address: Address, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, denom: Optional[str] = None, gas: int = 80000, memo: str = "", chain_id: Optional[str] = None, **kwargs: Any, ,) -> Optional[JSONLike]
 ```
 
 Submit a transfer transaction to the ledger.
@@ -558,11 +594,11 @@ Get ID of latest deployed .wasm bytecode.
 
 code id of last deployed .wasm bytecode
 
-<a name="aea.crypto.cosmos._CosmosApi.get_contract_address"></a>
-#### get`_`contract`_`address
+<a name="aea.crypto.cosmos._CosmosApi.get_last_contract_address"></a>
+#### get`_`last`_`contract`_`address
 
 ```python
- | get_contract_address(code_id: int) -> str
+ | get_last_contract_address(code_id: int) -> str
 ```
 
 Get contract address of latest initialised contract by its ID.
@@ -614,7 +650,7 @@ Cosmos testnet faucet API.
 #### `__`init`__`
 
 ```python
- | __init__(poll_interval=None)
+ | __init__(poll_interval: Optional[float] = None)
 ```
 
 Initialize CosmosFaucetApi.

@@ -16,7 +16,7 @@ This class implements an abstract task.
 #### `__`init`__`
 
 ```python
- | __init__(**kwargs)
+ | __init__(**kwargs: Any) -> None
 ```
 
 Initialize a task.
@@ -25,7 +25,7 @@ Initialize a task.
 #### `__`call`__`
 
 ```python
- | __call__(*args, **kwargs)
+ | __call__(*args: Any, **kwargs: Any) -> "Task"
 ```
 
 Execute the task.
@@ -84,7 +84,7 @@ None
 
 ```python
  | @abstractmethod
- | execute(*args, **kwargs) -> None
+ | execute(*args: Any, **kwargs: Any) -> None
 ```
 
 Run the task logic.
@@ -135,7 +135,7 @@ A Task manager.
 #### `__`init`__`
 
 ```python
- | __init__(nb_workers: int = 1, is_lazy_pool_start: bool = True, logger: Optional[logging.Logger] = None)
+ | __init__(nb_workers: int = 1, is_lazy_pool_start: bool = True, logger: Optional[logging.Logger] = None) -> None
 ```
 
 Initialize the task manager.
