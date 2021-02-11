@@ -187,7 +187,7 @@ class TestBuildSkill(AEATestCaseMany):
         missing_strings = self.missing_from_output(
             simple_service_registration_aea_process,
             check_strings,
-            timeout=5,
+            timeout=30,
             is_terminating=False,
         )
         assert (
