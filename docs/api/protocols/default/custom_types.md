@@ -17,7 +17,7 @@ This class represents an instance of ErrorCode.
 
 ```python
  | @staticmethod
- | encode(error_code_protobuf_object, error_code_object: "ErrorCode") -> None
+ | encode(error_code_protobuf_object: Any, error_code_object: "ErrorCode") -> None
 ```
 
 Encode an instance of this class into the protocol buffer object.
@@ -38,7 +38,7 @@ None
 
 ```python
  | @classmethod
- | decode(cls, error_code_protobuf_object) -> "ErrorCode"
+ | decode(cls, error_code_protobuf_object: Any) -> "ErrorCode"
 ```
 
 Decode a protocol buffer object that corresponds with this class into an instance of this class.

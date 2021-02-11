@@ -85,7 +85,7 @@ class GoalPursuitReadiness:
         READY = "ready"
         NOT_READY = "not_ready"
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Instantiate the goal pursuit readiness."""
         self._status = GoalPursuitReadiness.Status.NOT_READY
 
@@ -107,7 +107,7 @@ class GoalPursuitReadiness:
 class OwnershipState(BaseOwnershipState):
     """Represent the ownership state of an agent (can proxy a ledger)."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Instantiate an ownership state object.
 
@@ -120,7 +120,7 @@ class OwnershipState(BaseOwnershipState):
         self,
         amount_by_currency_id: CurrencyHoldings = None,
         quantities_by_good_id: GoodHoldings = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         """
         Set values on the ownership state.
@@ -144,7 +144,7 @@ class OwnershipState(BaseOwnershipState):
         self,
         delta_amount_by_currency_id: Dict[str, int] = None,
         delta_quantities_by_good_id: Dict[str, int] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         """
         Apply a state update to the ownership state.
@@ -303,7 +303,7 @@ class OwnershipState(BaseOwnershipState):
 class Preferences(BasePreferences):
     """Class to represent the preferences."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Instantiate an agent preference object."""
         self._exchange_params_by_currency_id = None  # type: Optional[ExchangeParams]
         self._utility_params_by_good_id = None  # type: Optional[UtilityParams]
@@ -313,7 +313,7 @@ class Preferences(BasePreferences):
         self,
         exchange_params_by_currency_id: ExchangeParams = None,
         utility_params_by_good_id: UtilityParams = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         """
         Set values on the preferences.
@@ -407,7 +407,7 @@ class Preferences(BasePreferences):
         ownership_state: BaseOwnershipState,
         delta_quantities_by_good_id: Optional[GoodHoldings] = None,
         delta_amount_by_currency_id: Optional[CurrencyHoldings] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> float:
         """
         Compute the marginal utility.
@@ -524,7 +524,7 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
     class SigningDialogues(BaseSigningDialogues):
         """This class keeps track of all oef_search dialogues."""
 
-        def __init__(self, self_address: Address, **kwargs) -> None:
+        def __init__(self, self_address: Address, **kwargs: Any) -> None:
             """
             Initialize dialogues.
 
@@ -562,7 +562,7 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
     class StateUpdateDialogues(BaseStateUpdateDialogues):
         """This class keeps track of all oef_search dialogues."""
 
-        def __init__(self, self_address: Address, **kwargs) -> None:
+        def __init__(self, self_address: Address, **kwargs: Any) -> None:
             """
             Initialize dialogues.
 
@@ -597,7 +597,7 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
                 **kwargs,
             )
 
-    def __init__(self, identity: Identity, wallet: Wallet):
+    def __init__(self, identity: Identity, wallet: Wallet) -> None:
         """
         Initialize the decision maker.
 

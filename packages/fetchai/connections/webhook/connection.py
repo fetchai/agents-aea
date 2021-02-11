@@ -22,7 +22,7 @@ import asyncio
 import json
 import logging
 from asyncio import CancelledError
-from typing import Optional, Union, cast
+from typing import Any, Optional, Union, cast
 
 from aiohttp import web  # type: ignore
 
@@ -42,7 +42,7 @@ SUCCESS = 200
 NOT_FOUND = 404
 REQUEST_TIMEOUT = 408
 SERVER_ERROR = 500
-PUBLIC_ID = PublicId.from_str("fetchai/webhook:0.12.0")
+PUBLIC_ID = PublicId.from_str("fetchai/webhook:0.13.0")
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.webhook")
 
@@ -52,7 +52,7 @@ RequestId = str
 class HttpDialogues(BaseHttpDialogues):
     """The dialogues class keeps track of all http dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -210,7 +210,6 @@ class WebhookChannel:
         envelope = Envelope(
             to=http_message.to,
             sender=http_message.sender,
-            protocol_id=http_message.protocol_id,
             context=context,
             message=http_message,
         )
@@ -222,7 +221,7 @@ class WebhookConnection(Connection):
 
     connection_id = PUBLIC_ID
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize a web hook connection."""
         super().__init__(**kwargs)
         webhook_address = cast(str, self.configuration.config.get("webhook_address"))
@@ -264,9 +263,9 @@ class WebhookConnection(Connection):
         if self.is_disconnected:  # pragma: nocover
             return
 
-        self._state.set(ConnectionStates.disconnecting)
+        self.state = ConnectionStates.disconnecting
         await self.channel.disconnect()
-        self._state.set(ConnectionStates.disconnected)
+        self.state = ConnectionStates.disconnected
 
     async def send(self, envelope: "Envelope") -> None:
         """
@@ -280,7 +279,9 @@ class WebhookConnection(Connection):
             raise ValueError("Channel in queue not set.")  # pragma: nocover
         await self.channel.send(envelope)
 
-    async def receive(self, *args, **kwargs) -> Optional[Union["Envelope", None]]:
+    async def receive(
+        self, *args: Any, **kwargs: Any
+    ) -> Optional[Union["Envelope", None]]:
         """
         Receive an envelope.
 

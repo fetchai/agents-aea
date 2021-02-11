@@ -22,7 +22,7 @@
 import logging
 import os
 import sqlite3
-from typing import List, Tuple
+from typing import Any, List, Tuple
 
 from aea.skills.base import Model
 
@@ -35,7 +35,7 @@ _default_logger = logging.getLogger(
 class RegistrationDB(Model):
     """Communicate between the database and the python objects."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialise the class."""
         custom_path = kwargs.pop("custom_path", None)
         super().__init__(**kwargs)
@@ -67,7 +67,7 @@ class RegistrationDB(Model):
         fetchai_signature: str,
         developer_handle: str,
         tweet: str,
-    ):
+    ) -> None:
         """Record a registration."""
         command = "INSERT OR REPLACE INTO registered_table(address, ethereum_address, ethereum_signature, fetchai_signature, developer_handle, tweet) values(?, ?, ?, ?, ?, ?)"
         variables = (

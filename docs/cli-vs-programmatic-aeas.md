@@ -7,9 +7,9 @@ The buyer of weather data (managed programmatically).
 
 ## Discussion
 
-The scope of the specific demo is to demonstrate how a CLI based AEA can interact with a programmatically managed AEA. In order 
-to achieve this we are going to use the weather station skills. 
-This demo does not utilize a smart contract or a ledger interaction. 
+The scope of the specific demo is to demonstrate how a CLI based AEA can interact with a programmatically managed AEA. In order
+to achieve this we are going to use the weather station skills.
+This demo does not utilize a smart contract or a ledger interaction.
 
 ## Get required packages
 
@@ -28,7 +28,7 @@ If you want to create the weather station AEA step by step you can follow this g
 Fetch the weather station AEA with the following command :
 
 ``` bash
-aea fetch fetchai/weather_station:0.20.0
+aea fetch fetchai/weather_station:0.21.0
 cd weather_station
 ```
 
@@ -139,6 +139,7 @@ def run():
         "my_aea", address=wallet.addresses.get(FetchAICrypto.identifier)
     )
     resources = Resources()
+    data_dir = os.getcwd()
 
     # specify the default routing for some protocols
     default_routing = {
@@ -147,14 +148,10 @@ def run():
     }
     default_connection = P2PLibp2pConnection.connection_id
 
-    # create the AEA
-    my_aea = AEA(
-        identity,
-        wallet,
-        resources,
-        default_connection=default_connection,
-        default_routing=default_routing,
+    state_update_protocol = Protocol.from_dir(
+        os.path.join(os.getcwd(), "packages", "fetchai", "protocols", "state_update")
     )
+    resources.add_protocol(state_update_protocol)
 
     # Add the default protocol (which is part of the AEA distribution)
     default_protocol = Protocol.from_dir(
@@ -189,7 +186,7 @@ def run():
     # Add the LedgerAPI connection
     configuration = ConnectionConfig(connection_id=LedgerConnection.connection_id)
     ledger_api_connection = LedgerConnection(
-        configuration=configuration, identity=identity
+        configuration=configuration, data_dir=data_dir, identity=identity
     )
     resources.add_connection(ledger_api_connection)
 
@@ -227,6 +224,7 @@ def run():
 
     p2p_connection = P2PLibp2pConnection(
         configuration=configuration,
+        data_dir=data_dir,
         identity=identity,
         crypto_store=wallet.connection_cryptos,
     )
@@ -240,9 +238,20 @@ def run():
         restricted_to_protocols={OefSearchMessage.protocol_id},
         connection_id=SOEFConnection.connection_id,
     )
-    soef_connection = SOEFConnection(configuration=configuration, identity=identity)
+    soef_connection = SOEFConnection(
+        configuration=configuration, data_dir=data_dir, identity=identity
+    )
     resources.add_connection(soef_connection)
 
+    # create the AEA
+    my_aea = AEA(
+        identity,
+        wallet,
+        resources,
+        data_dir,
+        default_connection=default_connection,
+        default_routing=default_routing,
+    )
     # Add the error and weather_client skills
     error_skill = Skill.from_dir(
         os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "error"),

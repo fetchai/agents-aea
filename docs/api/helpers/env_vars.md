@@ -16,7 +16,7 @@ Check is variable string with env variable pattern.
 #### replace`_`with`_`env`_`var
 
 ```python
-replace_with_env_var(value: str, env_variables: dict, default_value=NotSet) -> JSON_TYPES
+replace_with_env_var(value: str, env_variables: dict, default_value: Any = NotSet) -> JSON_TYPES
 ```
 
 Replace env var with value.
@@ -25,7 +25,7 @@ Replace env var with value.
 #### apply`_`env`_`variables
 
 ```python
-apply_env_variables(data: Union[Dict, List[Dict]], env_variables: Mapping[str, Any], default_value=NotSet) -> JSON_TYPES
+apply_env_variables(data: Union[Dict, List[Dict]], env_variables: Mapping[str, Any], default_value: Any = NotSet) -> JSON_TYPES
 ```
 
 Create new resulting dict with env variables applied.

@@ -23,10 +23,8 @@ import asyncio
 from concurrent.futures._base import CancelledError
 from typing import Optional
 
-from aea.configurations.base import ConnectionConfig, PublicId
+from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
-from aea.crypto.wallet import CryptoStore
-from aea.identity.base import Identity
 from aea.mail.base import Envelope
 
 
@@ -38,18 +36,19 @@ class DummyConnection(Connection):
     def __init__(self, **kwargs):
         """Initialize."""
         super().__init__(**kwargs)
-        self._state.set(ConnectionStates.disconnected)
+        self.state = ConnectionStates.disconnected
         self._queue = None
 
     async def connect(self, *args, **kwargs):
         """Connect."""
         self._queue = asyncio.Queue(loop=self.loop)
-        self._state.set(ConnectionStates.connected)
+        self.state = ConnectionStates.connected
 
     async def disconnect(self, *args, **kwargs):
         """Disconnect."""
+        assert self._queue is not None
         await self._queue.put(None)
-        self._state.set(ConnectionStates.disconnected)
+        self.state = ConnectionStates.disconnected
 
     async def send(self, envelope: "Envelope"):
         """Send an envelope."""
@@ -74,23 +73,3 @@ class DummyConnection(Connection):
         """Put an envelope in the queue."""
         assert self._queue is not None
         self._queue.put_nowait(envelope)
-
-    @classmethod
-    def from_config(
-        cls,
-        configuration: ConnectionConfig,
-        identity: Identity,
-        crypto_store: CryptoStore,
-        **kwargs
-    ) -> "Connection":
-        """
-        Get the dummy connection from the connection configuration.
-
-        :param configuration: the connection configuration.
-        :param identity: the identity object.
-        :param crypto_store: object to access the connection crypto objects.
-        :return: the connection object
-        """
-        return DummyConnection(
-            configuration=configuration, identity=identity, crypto_store=crypto_store
-        )

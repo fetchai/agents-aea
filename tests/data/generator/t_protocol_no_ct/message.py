@@ -20,7 +20,7 @@
 """This module contains t_protocol_no_ct's message definition."""
 
 import logging
-from typing import Dict, FrozenSet, Optional, Set, Tuple, Union, cast
+from typing import Any, Dict, FrozenSet, Optional, Set, Tuple, Union, cast
 
 from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
@@ -38,6 +38,9 @@ class TProtocolNoCtMessage(Message):
     """A protocol for testing purposes."""
 
     protocol_id = PublicId.from_str("fetchai/t_protocol_no_ct:0.1.0")
+    protocol_specification_id = PublicId.from_str(
+        "some_author/some_protocol_name:0.1.0"
+    )
 
     class Performative(Message.Performative):
         """Performatives for the t_protocol_no_ct protocol."""
@@ -49,7 +52,7 @@ class TProtocolNoCtMessage(Message):
         PERFORMATIVE_PMT = "performative_pmt"
         PERFORMATIVE_PT = "performative_pt"
 
-        def __str__(self):
+        def __str__(self) -> str:
             """Get the string representation."""
             return str(self.value)
 
@@ -113,7 +116,7 @@ class TProtocolNoCtMessage(Message):
         dialogue_reference: Tuple[str, str] = ("", ""),
         message_id: int = 1,
         target: int = 0,
-        **kwargs,
+        **kwargs: Any,
     ):
         """
         Initialise an instance of TProtocolNoCtMessage.
@@ -1163,13 +1166,6 @@ class TProtocolNoCtMessage(Message):
                     self.target == 0,
                     "Invalid 'target'. Expected 0 (because 'message_id' is 1). Found {}.".format(
                         self.target
-                    ),
-                )
-            else:
-                enforce(
-                    0 < self.target < self.message_id,
-                    "Invalid 'target'. Expected an integer between 1 and {} inclusive. Found {}.".format(
-                        self.message_id - 1, self.target,
                     ),
                 )
         except (AEAEnforceError, ValueError, KeyError) as e:

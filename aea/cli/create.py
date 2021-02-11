@@ -44,12 +44,10 @@ from aea.configurations.constants import (
     DEFAULT_LICENSE,
     DEFAULT_PROTOCOL,
     DEFAULT_REGISTRY_PATH,
-    DEFAULT_SKILL,
     DEFAULT_VERSION,
     PROTOCOL,
     PROTOCOLS,
     SIGNING_PROTOCOL,
-    SKILL,
     SKILLS,
     STATE_UPDATE_PROTOCOL,
     VENDOR,
@@ -74,7 +72,7 @@ def create(
     author: str,
     local: bool,
     empty: bool,
-):
+) -> None:
     """Create a new agent."""
     ctx = cast(Context, click_context.obj)
     create_aea(ctx, agent_name, local, author=author, empty=empty)
@@ -160,7 +158,6 @@ def create_aea(
             add_item(ctx, PROTOCOL, PublicId.from_str(SIGNING_PROTOCOL))
             add_item(ctx, PROTOCOL, PublicId.from_str(STATE_UPDATE_PROTOCOL))
             add_item(ctx, CONNECTION, PublicId.from_str(DEFAULT_CONNECTION))
-            add_item(ctx, SKILL, PublicId.from_str(DEFAULT_SKILL))
 
     except Exception as e:
         raise click.ClickException(str(e))
@@ -212,7 +209,7 @@ def _check_is_parent_folders_are_aea_projects_recursively() -> None:
         current = current.parent.resolve()
 
 
-def _setup_package_folder(path: Path):
+def _setup_package_folder(path: Path) -> None:
     """Set a package folder up."""
     path.mkdir(exist_ok=False)
     init_module = path / "__init__.py"

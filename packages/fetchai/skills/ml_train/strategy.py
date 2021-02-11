@@ -19,6 +19,8 @@
 
 """This module contains the strategy class."""
 
+from typing import Any
+
 from aea.exceptions import enforce
 from aea.helpers.search.generic import SIMPLE_DATA_MODEL
 from aea.helpers.search.models import (
@@ -49,7 +51,7 @@ DEFAULT_SEARCH_RADIUS = 5.0
 class Strategy(Model):
     """This class defines a strategy for the agent."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize the strategy of the agent."""
         self._max_unit_price = kwargs.pop("max_unit_price", DEFAULT_MAX_ROW_PRICE)
         self._max_buyer_tx_fee = kwargs.pop("max_buyer_tx_fee", DEFAULT_MAX_TX_FEE)

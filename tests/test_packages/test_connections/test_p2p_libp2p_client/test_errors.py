@@ -85,7 +85,7 @@ class TestLibp2pClientConnectionFailureConnectionSetup:
             "2021-01-02",
             f"./{crypto.address}_cert.txt",
         )
-        _process_cert(crypto, cls.cert_request)
+        _process_cert(crypto, cls.cert_request, cls.t)
 
     def test_empty_nodes(self):
         """Test empty nodes."""
@@ -100,7 +100,9 @@ class TestLibp2pClientConnectionFailureConnectionSetup:
             connection_id=P2PLibp2pClientConnection.connection_id,
             cert_requests=[self.cert_request],
         )
-        P2PLibp2pClientConnection(configuration=configuration, identity=self.identity)
+        P2PLibp2pClientConnection(
+            configuration=configuration, data_dir=self.t, identity=self.identity
+        )
 
         configuration = ConnectionConfig(
             client_key_file=self.key_file,
@@ -109,7 +111,7 @@ class TestLibp2pClientConnectionFailureConnectionSetup:
         )
         with pytest.raises(Exception):
             P2PLibp2pClientConnection(
-                configuration=configuration, identity=self.identity
+                configuration=configuration, data_dir=self.t, identity=self.identity,
             )
 
     @classmethod

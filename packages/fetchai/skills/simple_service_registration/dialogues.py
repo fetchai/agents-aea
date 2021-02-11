@@ -23,6 +23,7 @@ This module contains the classes required for dialogue management.
 - OefSearchDialogue: The dialogue class maintains state of a dialogue and manages it.
 - OefSearchDialogues: The dialogues class keeps track of all dialogues.
 """
+from typing import Any
 
 from aea.protocols.base import Address, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
@@ -42,7 +43,7 @@ OefSearchDialogue = BaseOefSearchDialogue
 class OefSearchDialogues(Model, BaseOefSearchDialogues):
     """This class keeps track of all oef_search dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 

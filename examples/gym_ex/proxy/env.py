@@ -235,7 +235,10 @@ class ProxyEnv(gym.Env):
         :return: a message received as a response to the action performed in apply_action.
         """
         if envelope is not None:
-            if envelope.protocol_id == GymMessage.protocol_id:
+            if (
+                envelope.protocol_specification_id
+                == GymMessage.protocol_specification_id
+            ):
                 gym_msg = cast(GymMessage, envelope.message)
                 gym_dialogue = self.gym_dialogues.update(gym_msg)
                 if not gym_dialogue:
@@ -252,7 +255,11 @@ class ProxyEnv(gym.Env):
                         gym_msg.performative
                     )
                 )
-            raise ValueError("Unknown protocol_id: {}".format(envelope.protocol_id))
+            raise ValueError(
+                "Unknown protocol_specification_id: {}".format(
+                    envelope.protocol_specification_id
+                )
+            )
         raise ValueError("Missing envelope.")
 
     def _decode_status(self, envelope: Envelope) -> None:
@@ -264,7 +271,10 @@ class ProxyEnv(gym.Env):
         :return: a message received as a response to the action performed in apply_action.
         """
         if envelope is not None:
-            if envelope.protocol_id == GymMessage.protocol_id:
+            if (
+                envelope.protocol_specification_id
+                == GymMessage.protocol_specification_id
+            ):
                 gym_msg = cast(GymMessage, envelope.message)
                 gym_dialogue = self.gym_dialogues.update(gym_msg)
                 if not gym_dialogue:
@@ -282,7 +292,9 @@ class ProxyEnv(gym.Env):
                         gym_msg.performative
                     )
                 )
-            raise ValueError("Unknown protocol_id: {}".format(envelope.protocol_id))
+            raise ValueError(
+                "Unknown protocol_id: {}".format(envelope.protocol_specification_id)
+            )
         raise ValueError("Missing envelope.")
 
     @staticmethod

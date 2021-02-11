@@ -35,7 +35,7 @@ None
 #### generate`_`protobuf`_`only`_`mode
 
 ```python
- | generate_protobuf_only_mode() -> None
+ | generate_protobuf_only_mode(run_protolint: bool = True) -> None
 ```
 
 Run the generator in "protobuf only" mode:
@@ -46,6 +46,16 @@ b) create the protocol buffer schema file.
 **Returns**:
 
 None
+
+<a name="aea.protocols.generator.base.ProtocolGenerator.run_protolint_for_file"></a>
+#### run`_`protolint`_`for`_`file
+
+```python
+ | @staticmethod
+ | run_protolint_for_file(filepath: str) -> None
+```
+
+Perform protolint check for file.
 
 <a name="aea.protocols.generator.base.ProtocolGenerator.generate_full_mode"></a>
 #### generate`_`full`_`mode
@@ -90,4 +100,13 @@ If in "protobuf only" mode (protobuf_only is True), it only does a) and b).
 **Returns**:
 
 optional warning message.
+
+<a name="aea.protocols.generator.base.public_id_to_package_name"></a>
+#### public`_`id`_`to`_`package`_`name
+
+```python
+public_id_to_package_name(public_id: PublicId) -> str
+```
+
+Make package name string from public_id provided.
 

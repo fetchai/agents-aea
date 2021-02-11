@@ -30,7 +30,7 @@ In particular, it can be one of the following:
 #### `__`init`__`
 
 ```python
- | __init__()
+ | __init__() -> None
 ```
 
 Instantiate the goal pursuit readiness.
@@ -75,7 +75,7 @@ Represent the ownership state of an agent (can proxy a ledger).
 #### `__`init`__`
 
 ```python
- | __init__()
+ | __init__() -> None
 ```
 
 Instantiate an ownership state object.
@@ -88,7 +88,7 @@ Instantiate an ownership state object.
 #### set
 
 ```python
- | set(amount_by_currency_id: CurrencyHoldings = None, quantities_by_good_id: GoodHoldings = None, **kwargs, ,) -> None
+ | set(amount_by_currency_id: CurrencyHoldings = None, quantities_by_good_id: GoodHoldings = None, **kwargs: Any, ,) -> None
 ```
 
 Set values on the ownership state.
@@ -102,7 +102,7 @@ Set values on the ownership state.
 #### apply`_`delta
 
 ```python
- | apply_delta(delta_amount_by_currency_id: Dict[str, int] = None, delta_quantities_by_good_id: Dict[str, int] = None, **kwargs, ,) -> None
+ | apply_delta(delta_amount_by_currency_id: Dict[str, int] = None, delta_quantities_by_good_id: Dict[str, int] = None, **kwargs: Any, ,) -> None
 ```
 
 Apply a state update to the ownership state.
@@ -241,7 +241,7 @@ Class to represent the preferences.
 #### `__`init`__`
 
 ```python
- | __init__()
+ | __init__() -> None
 ```
 
 Instantiate an agent preference object.
@@ -250,7 +250,7 @@ Instantiate an agent preference object.
 #### set
 
 ```python
- | set(exchange_params_by_currency_id: ExchangeParams = None, utility_params_by_good_id: UtilityParams = None, **kwargs, ,) -> None
+ | set(exchange_params_by_currency_id: ExchangeParams = None, utility_params_by_good_id: UtilityParams = None, **kwargs: Any, ,) -> None
 ```
 
 Set values on the preferences.
@@ -348,7 +348,7 @@ the utility value.
 #### marginal`_`utility
 
 ```python
- | marginal_utility(ownership_state: BaseOwnershipState, delta_quantities_by_good_id: Optional[GoodHoldings] = None, delta_amount_by_currency_id: Optional[CurrencyHoldings] = None, **kwargs, ,) -> float
+ | marginal_utility(ownership_state: BaseOwnershipState, delta_quantities_by_good_id: Optional[GoodHoldings] = None, delta_amount_by_currency_id: Optional[CurrencyHoldings] = None, **kwargs: Any, ,) -> float
 ```
 
 Compute the marginal utility.
@@ -430,7 +430,7 @@ This class keeps track of all oef_search dialogues.
 #### `__`init`__`
 
 ```python
- | __init__(self_address: Address, **kwargs) -> None
+ | __init__(self_address: Address, **kwargs: Any) -> None
 ```
 
 Initialize dialogues.
@@ -456,7 +456,7 @@ This class keeps track of all oef_search dialogues.
 #### `__`init`__`
 
 ```python
- | __init__(self_address: Address, **kwargs) -> None
+ | __init__(self_address: Address, **kwargs: Any) -> None
 ```
 
 Initialize dialogues.
@@ -473,7 +473,7 @@ None
 #### `__`init`__`
 
 ```python
- | __init__(identity: Identity, wallet: Wallet)
+ | __init__(identity: Identity, wallet: Wallet) -> None
 ```
 
 Initialize the decision maker.

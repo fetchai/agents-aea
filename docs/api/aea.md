@@ -16,7 +16,7 @@ This class implements an autonomous economic agent.
 #### `__`init`__`
 
 ```python
- | __init__(identity: Identity, wallet: Wallet, resources: Resources, loop: Optional[AbstractEventLoop] = None, period: float = 0.05, execution_timeout: float = 0, max_reactions: int = 20, error_handler_class: Optional[Type[AbstractErrorHandler]] = None, decision_maker_handler_class: Optional[Type[DecisionMakerHandler]] = None, skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate, connection_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None, default_ledger: Optional[str] = None, currency_denominations: Optional[Dict[str, str]] = None, default_connection: Optional[PublicId] = None, default_routing: Optional[Dict[PublicId, PublicId]] = None, connection_ids: Optional[Collection[PublicId]] = None, search_service_address: str = DEFAULT_SEARCH_SERVICE_ADDRESS, storage_uri: Optional[str] = None, **kwargs, ,) -> None
+ | __init__(identity: Identity, wallet: Wallet, resources: Resources, data_dir: str, loop: Optional[AbstractEventLoop] = None, period: float = 0.05, execution_timeout: float = 0, max_reactions: int = 20, error_handler_class: Optional[Type[AbstractErrorHandler]] = None, decision_maker_handler_class: Optional[Type[DecisionMakerHandler]] = None, skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate, connection_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None, default_ledger: Optional[str] = None, currency_denominations: Optional[Dict[str, str]] = None, default_connection: Optional[PublicId] = None, default_routing: Optional[Dict[PublicId, PublicId]] = None, connection_ids: Optional[Collection[PublicId]] = None, search_service_address: str = DEFAULT_SEARCH_SERVICE_ADDRESS, storage_uri: Optional[str] = None, **kwargs: Any, ,) -> None
 ```
 
 Instantiate the agent.
@@ -26,6 +26,7 @@ Instantiate the agent.
 - `identity`: the identity of the agent
 - `wallet`: the wallet of the agent.
 - `resources`: the resources (protocols and skills) of the agent.
+- `data_dir`: directory where to put local files.
 - `loop`: the event loop to run the connections.
 - `period`: period to call agent's act
 - `execution_timeout`: amount of time to limit single act/handle to execute.
@@ -116,10 +117,7 @@ Get all active behaviours to use in act.
 
 Set up the agent.
 
-Performs the following:
-
-- loads the resources (unless in programmatic mode)
-- calls setup() on the resources
+Calls setup() on the resources.
 
 **Returns**:
 
@@ -134,34 +132,11 @@ None
 
 Perform actions.
 
-Calls act() of each active behaviour.
+Adds new handlers and behaviours for use/execution by the runtime.
 
 **Returns**:
 
 None
-
-<a name="aea.aea.AEA.active_connections"></a>
-#### active`_`connections
-
-```python
- | @property
- | active_connections() -> List[Connection]
-```
-
-Return list of active connections.
-
-<a name="aea.aea.AEA.get_multiplexer_setup_options"></a>
-#### get`_`multiplexer`_`setup`_`options
-
-```python
- | get_multiplexer_setup_options() -> Optional[Dict]
-```
-
-Get options to pass to Multiplexer.setup.
-
-**Returns**:
-
-dict of kwargs
 
 <a name="aea.aea.AEA.handle_envelope"></a>
 #### handle`_`envelope
@@ -172,10 +147,12 @@ dict of kwargs
 
 Handle an envelope.
 
+Performs the following:
+
 - fetching the protocol referenced by the envelope, and
-- returning an envelope to sender if the protocol is unsupported, using the error handler, or
-- returning an envelope to sender if there is a decoding error, using the error handler, or
-- returning an envelope to sender if no active handler is available for the specified protocol, using the error handler, or
+- handling if the protocol is unsupported, using the error handler, or
+- handling if there is a decoding error, using the error handler, or
+- handling if no active handler is available for the specified protocol, using the error handler, or
 - handling the message recovered from the envelope with all active handlers for the specified protocol.
 
 **Arguments**:

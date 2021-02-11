@@ -27,12 +27,12 @@ tac_name=v1_$identifier
 
 echo "Creating controller..."
 rm -rf tac_controller
-aea fetch --local fetchai/tac_controller:0.15.0
+aea fetch --local fetchai/tac_controller:latest
 cd tac_controller
-aea install
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
-aea add-key fetchai fetchai_private_key.txt --connection
+aea generate-key fetchai fetchai_connection_private_key.txt
+aea add-key fetchai fetchai_connection_private_key.txt --connection
 json=$(printf '{"delegate_uri": null, "entry_peers": ["%s"], "local_uri": "127.0.0.1:10000", "public_uri": null}' "$entry_peer")
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config "$json"
 aea config get vendor.fetchai.connections.p2p_libp2p.config
@@ -40,6 +40,9 @@ aea config get vendor.fetchai.connections.p2p_libp2p.config
 json=$(printf '{"key": "tac", "value": "%s"}' $tac_name)
 aea config set --type dict vendor.fetchai.skills.tac_control.models.parameters.args.service_data "$json"
 aea config get vendor.fetchai.skills.tac_control.models.parameters.args.service_data
+aea install
+aea build
+aea issue-certificates
 cd ..
 
 empty_lines
@@ -50,14 +53,20 @@ do
 agent=tac_participant_$i
 agents=$(echo $agent $agents)
 rm -rf $agent
-aea fetch --local fetchai/tac_participant:0.17.0 --alias $agent
+aea fetch --local fetchai/tac_participant:latest --alias $agent
 cd $agent
+aea generate-key fetchai
+aea add-key fetchai fetchai_private_key.txt
+aea generate-key fetchai fetchai_connection_private_key.txt
+aea add-key fetchai fetchai_connection_private_key.txt --connection
 json=$(printf '{"delegate_uri": null, "entry_peers": ["%s"], "local_uri": "127.0.0.1:1%0.4d", "public_uri": null}' "$entry_peer" "$i")
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config "$json"
 aea config get vendor.fetchai.connections.p2p_libp2p.config
 aea config set vendor.fetchai.skills.tac_participation.models.game.args.search_query.search_value $tac_name
 aea config get vendor.fetchai.skills.tac_participation.models.game.args.search_query
 aea install
+aea build
+aea issue-certificates
 cd ..
 done
 

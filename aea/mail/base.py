@@ -20,7 +20,7 @@
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Optional, Tuple, Union
+from typing import Any, Optional, Tuple, Union
 from urllib.parse import urlparse
 
 from aea.common import Address
@@ -45,7 +45,7 @@ class Empty(Exception):
 class URI:
     """URI following RFC3986."""
 
-    def __init__(self, uri_raw: str):
+    def __init__(self, uri_raw: str) -> None:
         """
         Initialize the URI.
 
@@ -117,11 +117,11 @@ class URI:
         """Get the port."""
         return self._port
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get string representation."""
         return self.uri_raw
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, URI)
@@ -146,7 +146,7 @@ class EnvelopeContext:
         connection_id: Optional[PublicId] = None,
         skill_id: Optional[PublicId] = None,
         uri: Optional[URI] = None,
-    ):
+    ) -> None:
         """
         Initialize the envelope context.
 
@@ -209,11 +209,11 @@ class EnvelopeContext:
             )
         return (skill_id, connection_id)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get the string representation."""
         return f"EnvelopeContext(connection_id={self.connection_id}, skill_id={self.skill_id}, uri_raw={self.uri_raw})"
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, EnvelopeContext)
@@ -258,7 +258,7 @@ class ProtobufEnvelopeSerializer(EnvelopeSerializer):
         envelope_pb = base_pb2.Envelope()
         envelope_pb.to = envelope.to
         envelope_pb.sender = envelope.sender
-        envelope_pb.protocol_id = str(envelope.protocol_id)
+        envelope_pb.protocol_id = str(envelope.protocol_specification_id)
         envelope_pb.message = envelope.message_bytes
         if envelope.context is not None and envelope.context.uri_raw != "":
             envelope_pb.uri = envelope.context.uri_raw
@@ -281,7 +281,7 @@ class ProtobufEnvelopeSerializer(EnvelopeSerializer):
         to = envelope_pb.to  # pylint: disable=no-member
         sender = envelope_pb.sender  # pylint: disable=no-member
         raw_protocol_id = envelope_pb.protocol_id  # pylint: disable=no-member
-        protocol_id = PublicId.from_str(raw_protocol_id)
+        protocol_specification_id = PublicId.from_str(raw_protocol_id)
         message = envelope_pb.message  # pylint: disable=no-member
 
         uri_raw = envelope_pb.uri  # pylint: disable=no-member
@@ -291,13 +291,16 @@ class ProtobufEnvelopeSerializer(EnvelopeSerializer):
             envelope = Envelope(
                 to=to,
                 sender=sender,
-                protocol_id=protocol_id,
+                protocol_specification_id=protocol_specification_id,
                 message=message,
                 context=context,
             )
         else:
             envelope = Envelope(
-                to=to, sender=sender, protocol_id=protocol_id, message=message,
+                to=to,
+                sender=sender,
+                protocol_specification_id=protocol_specification_id,
+                message=message,
             )
 
         return envelope
@@ -315,28 +318,55 @@ class Envelope:
         self,
         to: Address,
         sender: Address,
-        protocol_id: PublicId,
         message: Union[Message, bytes],
         context: Optional[EnvelopeContext] = None,
-    ):
+        protocol_specification_id: Optional[PublicId] = None,
+    ) -> None:
         """
         Initialize a Message object.
 
         :param to: the address of the receiver.
         :param sender: the address of the sender.
-        :param protocol_id: the protocol id.
         :param message: the protocol-specific message.
         :param context: the optional envelope context.
+        :param protocol_specification_id: the protocol specification id (wire id).
         """
         enforce(isinstance(to, str), f"To must be string. Found '{type(to)}'")
         enforce(
             isinstance(sender, str), f"Sender must be string. Found '{type(sender)}'"
         )
+        enforce(
+            isinstance(message, (Message, bytes)),
+            "message should be a type of Message or bytes!",
+        )
+
         if isinstance(message, Message):
             message = self._check_consistency(message, to, sender)
+
         self._to = to
         self._sender = sender
-        self._protocol_id = protocol_id
+
+        if isinstance(message, bytes):
+            if protocol_specification_id is None:
+                raise ValueError(
+                    "Message is bytes object, protocol_specification_id must be provided!"
+                )
+        elif isinstance(message, Message):
+            if message.protocol_id is None:
+                raise ValueError(  # pragma: nocover
+                    f"message class {type(message)} has no protocol_id specified!"
+                )
+            protocol_specification_id = message.protocol_specification_id
+            if protocol_specification_id is None:
+                raise ValueError(
+                    "Message is Message object, protocol_specification_id could not be resolved! Ensure protocol is valid!"
+                )
+        else:
+            raise ValueError(
+                f"Message type: {type(message)} is not supported!"
+            )  # pragma: nocover
+
+        self._protocol_specification_id: PublicId = protocol_specification_id
         self._message = message
         self._context = context if context is not None else EnvelopeContext()
 
@@ -365,14 +395,9 @@ class Envelope:
         self._sender = sender
 
     @property
-    def protocol_id(self) -> PublicId:
-        """Get protocol id."""
-        return self._protocol_id
-
-    @protocol_id.setter
-    def protocol_id(self, protocol_id: PublicId) -> None:
-        """Set the protocol id."""
-        self._protocol_id = protocol_id
+    def protocol_specification_id(self) -> PublicId:
+        """Get protocol_specification_id."""
+        return self._protocol_specification_id
 
     @property
     def message(self) -> Union[Message, bytes]:
@@ -421,12 +446,12 @@ class Envelope:
         return connection_id
 
     @property
-    def is_sender_public_id(self):
+    def is_sender_public_id(self) -> bool:
         """Check if sender is a public id."""
         return PublicId.is_valid_str(self.sender)
 
     @property
-    def is_to_public_id(self):
+    def is_to_public_id(self) -> bool:
         """Check if to is a public id."""
         return PublicId.is_valid_str(self.to)
 
@@ -448,13 +473,13 @@ class Envelope:
             message.sender = sender
         return message
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, Envelope)
             and self.to == other.to
             and self.sender == other.sender
-            and self.protocol_id == other.protocol_id
+            and self.protocol_specification_id == other.protocol_specification_id
             and self.message == other.message
             and self.context == other.context
         )
@@ -487,11 +512,13 @@ class Envelope:
         envelope = serializer.decode(envelope_bytes)
         return envelope
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get the string representation of an envelope."""
-        return "Envelope(to={to}, sender={sender}, protocol_id={protocol_id}, message={message})".format(
+        return "Envelope(to={to}, sender={sender}, protocol_specification_id={protocol_specification_id}, message={message})".format(
             to=self.to,
             sender=self.sender,
-            protocol_id=self.protocol_id,
-            message=self.message,
+            protocol_specification_id=self.protocol_specification_id,
+            message="{!r}".format(self.message)
+            if isinstance(self.message, bytes)
+            else self.message,
         )

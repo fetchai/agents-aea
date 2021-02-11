@@ -64,12 +64,12 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
         self,
         agent: AbstractAgent,
         loop: Optional[AbstractEventLoop] = None,
-        threaded=False,
+        threaded: bool = False,
     ) -> None:
         """Init loop.
 
-        :params agent: Agent or AEA to run.
-        :params loop: optional asyncio event loop. if not specified a new loop will be created.
+        :param agent: Agent or AEA to run.
+        :param loop: optional asyncio event loop. if not specified a new loop will be created.
         """
         logger = get_logger(__name__, agent.name)
         WithLogger.__init__(self, logger)
@@ -85,6 +85,16 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
         """Get agent."""
         return self._agent
 
+    @property
+    def state(self) -> AgentLoopStates:
+        """Get current main loop state."""
+        return self._state.get()
+
+    @property
+    def is_running(self) -> bool:
+        """Get running state of the loop."""
+        return self._state.get() == AgentLoopStates.started
+
     def set_loop(self, loop: AbstractEventLoop) -> None:
         """Set event loop and all event loopp related objects."""
         self._loop: AbstractEventLoop = loop
@@ -94,7 +104,7 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
         # start and stop methods are classmethods cause one instance shared across muiltiple threads
         ExecTimeoutThreadGuard.start()
 
-    def _teardown(self):  # pylint: disable=no-self-use
+    def _teardown(self) -> None:  # pylint: disable=no-self-use
         """Tear down loop on stop."""
         # start and stop methods are classmethods cause one instance shared across muiltiple threads
         ExecTimeoutThreadGuard.stop()
@@ -138,16 +148,6 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
                 continue  #  pragma: nocover
             task.cancel()
 
-    @property
-    def state(self) -> AgentLoopStates:
-        """Get current main loop state."""
-        return self._state.get()
-
-    @property
-    def is_running(self) -> bool:
-        """Get running state of the loop."""
-        return self._state.get() == AgentLoopStates.started
-
 
 class AsyncAgentLoop(BaseAgentLoop):
     """Asyncio based agent loop suitable only for AEA."""
@@ -155,8 +155,11 @@ class AsyncAgentLoop(BaseAgentLoop):
     NEW_BEHAVIOURS_PROCESS_SLEEP = 1  # check new behaviours registered every second.
 
     def __init__(
-        self, agent: AbstractAgent, loop: AbstractEventLoop = None, threaded=False
-    ):
+        self,
+        agent: AbstractAgent,
+        loop: AbstractEventLoop = None,
+        threaded: bool = False,
+    ) -> None:
         """
         Init agent loop.
 

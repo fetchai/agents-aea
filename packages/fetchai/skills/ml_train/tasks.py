@@ -19,7 +19,7 @@
 
 """This module contains the tasks for the 'ml_train' skill."""
 
-from typing import Tuple
+from typing import Any, Tuple
 
 import numpy as np
 from tensorflow import keras
@@ -51,7 +51,7 @@ class MLTrainTask(Task):
         """Set up the task."""
         self.logger.info("ML Train task: setup method called.")
 
-    def execute(self, *args, **kwargs) -> keras.Model:
+    def execute(self, *args: Any, **kwargs: Any) -> keras.Model:
         """Execute the task."""
         self.logger.info("Start training with {} rows".format(self.train_x.shape[0]))
         self.model.fit(self.train_x, self.train_y, epochs=self.epochs_per_batch)

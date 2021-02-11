@@ -32,6 +32,7 @@ from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 
 from packages.fetchai.connections.stub.connection import StubConnection
+from packages.fetchai.protocols.default.message import DefaultMessage
 
 
 INPUT_FILE = "input.txt"
@@ -54,9 +55,11 @@ def run():
         connection_id=StubConnection.connection_id,
     )
     stub_connection = StubConnection(
-        configuration=configuration, identity=Identity("some_agent", "some_address")
+        configuration=configuration,
+        data_dir=".",
+        identity=Identity("some_agent", "some_address"),
     )
-    multiplexer = Multiplexer([stub_connection])
+    multiplexer = Multiplexer([stub_connection], protocols=[DefaultMessage])
     try:
         # Set the multiplexer running in a different thread
         t = Thread(target=multiplexer.connect)
@@ -67,7 +70,7 @@ def run():
 
         # Create a message inside an envelope and get the stub connection to pass it into the multiplexer
         message_text = (
-            "multiplexer,some_agent,fetchai/default:0.11.0,\x08\x01*\x07\n\x05hello,"
+            "multiplexer,some_agent,fetchai/default:0.1.0,\x08\x01*\x07\n\x05hello,"
         )
         with open(INPUT_FILE, "w") as f:
             write_with_lock(f, message_text)
@@ -81,8 +84,11 @@ def run():
 
         # Inspect its contents
         print(
-            "Envelope received by Multiplexer: sender={}, to={}, protocol_id={}, message={}".format(
-                envelope.sender, envelope.to, envelope.protocol_id, envelope.message
+            "Envelope received by Multiplexer: sender={}, to={}, protocol_specification_id={}, message={}".format(
+                envelope.sender,
+                envelope.to,
+                envelope.protocol_specification_id,
+                envelope.message,
             )
         )
 

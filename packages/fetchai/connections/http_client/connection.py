@@ -48,7 +48,7 @@ SUCCESS = 200
 NOT_FOUND = 404
 REQUEST_TIMEOUT = 408
 SERVER_ERROR = 500
-PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.16.0")
+PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.17.0")
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.http_client")
 
@@ -57,7 +57,7 @@ RequestId = str
 ssl_context = ssl.create_default_context(cafile=certifi.where())
 
 
-def headers_to_string(headers: Dict):
+def headers_to_string(headers: Dict) -> str:
     """
     Convert headers to string.
 
@@ -150,13 +150,7 @@ class HTTPClientAsyncChannel:
     )
 
     def __init__(
-        self,
-        agent_address: Address,
-        address: str,
-        port: int,
-        connection_id: PublicId,
-        excluded_protocols: Optional[Set[PublicId]] = None,
-        restricted_to_protocols: Optional[Set[PublicId]] = None,
+        self, agent_address: Address, address: str, port: int, connection_id: PublicId,
     ):
         """
         Initialize an http client channel.
@@ -171,14 +165,12 @@ class HTTPClientAsyncChannel:
         self.address = address
         self.port = port
         self.connection_id = connection_id
-        self.restricted_to_protocols = restricted_to_protocols
         self._dialogues = HttpDialogues()
 
         self._in_queue = None  # type: Optional[asyncio.Queue]  # pragma: no cover
         self._loop = (
             None
         )  # type: Optional[asyncio.AbstractEventLoop]  # pragma: no cover
-        self.excluded_protocols = excluded_protocols
         self.is_stopped = True
         self._tasks: Set[Task] = set()
 
@@ -249,7 +241,7 @@ class HTTPClientAsyncChannel:
                 else b"",
                 dialogue=dialogue,
             )
-        except Exception:  # pragma: nocover # pylint: disable=broad-except
+        except Exception:  # pylint: disable=broad-except
             envelope = self.to_envelope(
                 request_http_message,
                 status_code=self.DEFAULT_EXCEPTION_CODE,
@@ -314,14 +306,6 @@ class HTTPClientAsyncChannel:
 
         if request_envelope is None:
             return
-
-        if request_envelope.protocol_id in (self.excluded_protocols or []):
-            self.logger.error(
-                "This envelope cannot be sent with the http client connection: protocol_id={}".format(
-                    request_envelope.protocol_id
-                )
-            )
-            raise ValueError("Cannot send message.")
 
         enforce(
             isinstance(request_envelope.message, HttpMessage),
@@ -401,7 +385,6 @@ class HTTPClientAsyncChannel:
         envelope = Envelope(
             to=http_message.to,
             sender=http_message.sender,
-            protocol_id=http_message.protocol_id,
             context=dialogue.envelope_context,
             message=http_message,
         )
@@ -436,7 +419,7 @@ class HTTPClientConnection(Connection):
 
     connection_id = PUBLIC_ID
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize a HTTP client connection."""
         super().__init__(**kwargs)
         host = cast(str, self.configuration.config.get("host"))
@@ -444,11 +427,7 @@ class HTTPClientConnection(Connection):
         if host is None or port is None:  # pragma: nocover
             raise ValueError("host and port must be set!")
         self.channel = HTTPClientAsyncChannel(
-            self.address,
-            host,
-            port,
-            connection_id=self.connection_id,
-            excluded_protocols=self.excluded_protocols,
+            self.address, host, port, connection_id=self.connection_id,
         )
 
     async def connect(self) -> None:
@@ -472,9 +451,9 @@ class HTTPClientConnection(Connection):
         """
         if self.is_disconnected:
             return  # pragma: nocover
-        self._state.set(ConnectionStates.disconnecting)
+        self.state = ConnectionStates.disconnecting
         await self.channel.disconnect()
-        self._state.set(ConnectionStates.disconnected)
+        self.state = ConnectionStates.disconnected
 
     async def send(self, envelope: "Envelope") -> None:
         """
@@ -486,7 +465,9 @@ class HTTPClientConnection(Connection):
         self._ensure_connected()
         self.channel.send(envelope)
 
-    async def receive(self, *args, **kwargs) -> Optional[Union["Envelope", None]]:
+    async def receive(
+        self, *args: Any, **kwargs: Any
+    ) -> Optional[Union["Envelope", None]]:
         """
         Receive an envelope.
 

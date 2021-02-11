@@ -20,7 +20,7 @@
 """This package contains handlers for the fetch_beacon skill."""
 
 import json
-from typing import cast
+from typing import Any, cast
 
 from vyper.utils import keccak256
 
@@ -36,11 +36,10 @@ class HttpHandler(Handler):
 
     SUPPORTED_PROTOCOL = HttpMessage.protocol_id
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize the handler."""
         super().__init__(**kwargs)
         self.received_http_count = 0
-        self.handled_message = None
 
     def setup(self) -> None:
         """Set up the handler."""
@@ -63,7 +62,6 @@ class HttpHandler(Handler):
             self._handle_unidentified_dialogue(message)
             return
 
-        self.handled_message = message
         if (
             message.performative == HttpMessage.Performative.RESPONSE
             and message.status_code == 200

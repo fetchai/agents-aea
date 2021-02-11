@@ -31,7 +31,7 @@ from aea.crypto.base import LedgerApi
 from aea.crypto.ethereum import EthereumApi
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/oracle:0.3.0")
+PUBLIC_ID = PublicId.from_str("fetchai/oracle:0.4.0")
 CONTRACT_ROLE = keccak256(b"ORACLE_ROLE")
 
 _default_logger = logging.getLogger("aea.packages.fetchai.contracts.oracle.contract")

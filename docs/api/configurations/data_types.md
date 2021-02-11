@@ -28,7 +28,7 @@ Compute the JSON representation.
 
 ```python
  | @classmethod
- | from_json(cls, obj: Dict)
+ | from_json(cls, obj: Dict) -> "JSONSerializable"
 ```
 
 Build from a JSON object.
@@ -47,7 +47,7 @@ A package version.
 #### `__`init`__`
 
 ```python
- | __init__(version_like: PackageVersionLike)
+ | __init__(version_like: PackageVersionLike) -> None
 ```
 
 Initialize a package version.
@@ -79,7 +79,7 @@ Get the string representation.
 #### `__`eq`__`
 
 ```python
- | __eq__(other) -> bool
+ | __eq__(other: Any) -> bool
 ```
 
 Check equality.
@@ -88,7 +88,7 @@ Check equality.
 #### `__`lt`__`
 
 ```python
- | __lt__(other)
+ | __lt__(other: Any) -> bool
 ```
 
 Compare with another object.
@@ -126,7 +126,7 @@ Get the plural name.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Convert to string.
@@ -224,7 +224,7 @@ True
 #### `__`init`__`
 
 ```python
- | __init__(author: SimpleIdOrStr, name: SimpleIdOrStr, version: Optional[PackageVersionLike] = None)
+ | __init__(author: SimpleIdOrStr, name: SimpleIdOrStr, version: Optional[PackageVersionLike] = None) -> None
 ```
 
 Initialize the public identifier.
@@ -405,7 +405,7 @@ Compute the JSON representation.
 
 ```python
  | @classmethod
- | from_json(cls, obj: Dict)
+ | from_json(cls, obj: Dict) -> "PublicId"
 ```
 
 Build from a JSON object.
@@ -414,7 +414,7 @@ Build from a JSON object.
 #### `__`hash`__`
 
 ```python
- | __hash__()
+ | __hash__() -> int
 ```
 
 Get the hash.
@@ -423,7 +423,7 @@ Get the hash.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get the string representation.
@@ -432,7 +432,7 @@ Get the string representation.
 #### `__`repr`__`
 
 ```python
- | __repr__()
+ | __repr__() -> str
 ```
 
 Get the representation.
@@ -441,7 +441,7 @@ Get the representation.
 #### `__`eq`__`
 
 ```python
- | __eq__(other)
+ | __eq__(other: Any) -> bool
 ```
 
 Compare with another object.
@@ -450,7 +450,7 @@ Compare with another object.
 #### `__`lt`__`
 
 ```python
- | __lt__(other)
+ | __lt__(other: Any) -> bool
 ```
 
 Compare two public ids.
@@ -481,7 +481,7 @@ A package identifier.
 #### `__`init`__`
 
 ```python
- | __init__(package_type: Union[PackageType, str], public_id: PublicId)
+ | __init__(package_type: Union[PackageType, str], public_id: PublicId) -> None
 ```
 
 Initialize the package id.
@@ -600,7 +600,7 @@ uri path string
 #### `__`hash`__`
 
 ```python
- | __hash__()
+ | __hash__() -> int
 ```
 
 Get the hash.
@@ -609,7 +609,7 @@ Get the hash.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get the string representation.
@@ -618,7 +618,7 @@ Get the string representation.
 #### `__`repr`__`
 
 ```python
- | __repr__()
+ | __repr__() -> str
 ```
 
 Get the object representation in string.
@@ -627,7 +627,7 @@ Get the object representation in string.
 #### `__`eq`__`
 
 ```python
- | __eq__(other)
+ | __eq__(other: Any) -> bool
 ```
 
 Compare with another object.
@@ -636,7 +636,7 @@ Compare with another object.
 #### `__`lt`__`
 
 ```python
- | __lt__(other)
+ | __lt__(other: Any) -> bool
 ```
 
 Compare two public ids.
@@ -664,7 +664,7 @@ False
 #### `__`init`__`
 
 ```python
- | __init__(component_type: Union[ComponentType, str], public_id: PublicId)
+ | __init__(component_type: Union[ComponentType, str], public_id: PublicId) -> None
 ```
 
 Initialize the component id.
@@ -775,7 +775,7 @@ These fields will be forwarded to the 'pip' command.
 #### `__`init`__`
 
 ```python
- | __init__(name: Union[PyPIPackageName, str], version: Union[str, SpecifierSet] = "", index: Optional[Union[str, Url]] = None, git: Optional[Union[str, Url]] = None, ref: Optional[Union[GitRef, str]] = None)
+ | __init__(name: Union[PyPIPackageName, str], version: Union[str, SpecifierSet] = "", index: Optional[Union[str, Url]] = None, git: Optional[Union[str, Url]] = None, ref: Optional[Union[GitRef, str]] = None) -> None
 ```
 
 Initialize a PyPI dependency.
@@ -879,7 +879,7 @@ Get the string representation.
 #### `__`eq`__`
 
 ```python
- | __eq__(other)
+ | __eq__(other: Any) -> bool
 ```
 
 Compare with another object.
@@ -906,7 +906,7 @@ Interface of a CRUD collection.
 #### `__`init`__`
 
 ```python
- | __init__()
+ | __init__() -> None
 ```
 
 Instantiate a CRUD collection.

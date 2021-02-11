@@ -20,7 +20,7 @@
 """This package contains a class representing the game parameters."""
 
 import datetime
-from typing import Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional, Set
 
 from aea.exceptions import AEAEnforceError, enforce
 from aea.helpers.search.models import Location
@@ -54,7 +54,7 @@ DEFAULT_SERVICE_DATA = {"key": "tac", "value": "v1"}
 class Parameters(Model):
     """This class contains the parameters of the game."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Instantiate the parameter class."""
         ledger_id = kwargs.pop("ledger_id", None)
         self._contract_address = kwargs.pop(
@@ -279,7 +279,7 @@ class Parameters(Model):
         return self._end_time
 
     @property
-    def inactivity_timeout(self):
+    def inactivity_timeout(self) -> int:
         """Timeout of agent inactivity from controller perspective (no received transactions)."""
         return self._inactivity_timeout
 

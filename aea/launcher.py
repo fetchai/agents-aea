@@ -61,7 +61,7 @@ def load_agent(agent_dir: Union[PathLike, str]) -> AEA:
 
 def _set_logger(
     log_level: Optional[str],
-):  # pragma: nocover # used in spawned process and pytest does not see this code
+) -> None:  # pragma: nocover # used in spawned process and pytest does not see this code
     from aea.cli.utils.loggers import (  # pylint: disable=import-outside-toplevel
         default_logging_config,
     )
@@ -98,11 +98,11 @@ def _run_agent(
 
     agent = load_agent(agent_dir)
 
-    def stop_event_thread():
+    def stop_event_thread() -> None:
         try:
             stop_event.wait()
         except (KeyboardInterrupt, EOFError, BrokenPipeError) as e:  # pragma: nocover
-            _default_logger.error(
+            _default_logger.debug(
                 f"Exception raised in stop_event_thread {e} {type(e)}. Skip it, looks process is closed."
             )
         finally:
@@ -137,11 +137,16 @@ class AEADirTask(AbstractExecutorTask):
         self._agent: AEA = load_agent(self._agent_dir)
         super().__init__()
 
-    def start(self) -> None:
+    @property
+    def id(self) -> Union[PathLike, str]:
+        """Return agent_dir."""
+        return self._agent_dir
+
+    def start(self) -> None:  # type: ignore
         """Start task."""
         self._agent.start()
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop task."""
         if not self._agent:  # pragma: nocover
             raise ValueError("Task was not started!")
@@ -156,11 +161,6 @@ class AEADirTask(AbstractExecutorTask):
             )
         return loop.create_task(self._agent.runtime.start_and_wait_completed())
 
-    @property
-    def id(self) -> Union[PathLike, str]:
-        """Return agent_dir."""
-        return self._agent_dir
-
 
 class AEADirMultiprocessTask(AbstractMultiprocessExecutorTask):
     """
@@ -171,7 +171,7 @@ class AEADirMultiprocessTask(AbstractMultiprocessExecutorTask):
 
     def __init__(
         self, agent_dir: Union[PathLike, str], log_level: Optional[str] = None
-    ):
+    ) -> None:
         """
         Init aea config dir task.
 
@@ -183,22 +183,6 @@ class AEADirMultiprocessTask(AbstractMultiprocessExecutorTask):
         self._stop_event = self._manager.Event()
         self._log_level = log_level
         super().__init__()
-
-    def start(self) -> Tuple[Callable, Sequence[Any]]:
-        """Return function and arguments to call within subprocess."""
-        return (_run_agent, (self._agent_dir, self._stop_event, self._log_level))
-
-    def stop(self):
-        """Stop task."""
-        if self._future.done():
-            _default_logger.debug("Stop called, but task is already done.")
-            return
-        try:
-            self._stop_event.set()
-        except (FileNotFoundError, BrokenPipeError, EOFError) as e:  # pragma: nocover
-            _default_logger.error(
-                f"Exception raised in task.stop {e} {type(e)}. Skip it, looks process is closed."
-            )
 
     @property
     def id(self) -> Union[PathLike, str]:
@@ -226,6 +210,25 @@ class AEADirMultiprocessTask(AbstractMultiprocessExecutorTask):
 
         return super().failed
 
+    def start(self) -> Tuple[Callable, Sequence[Any]]:
+        """Return function and arguments to call within subprocess."""
+        return (_run_agent, (self._agent_dir, self._stop_event, self._log_level))
+
+    def stop(self) -> None:
+        """Stop task."""
+        if not self._future:  #  pragma: nocover
+            _default_logger.debug("Stop called, but no future set.")
+            return
+        if self._future.done():
+            _default_logger.debug("Stop called, but task is already done.")
+            return
+        try:
+            self._stop_event.set()
+        except (FileNotFoundError, BrokenPipeError, EOFError) as e:  # pragma: nocover
+            _default_logger.debug(
+                f"Exception raised in task.stop {e} {type(e)}. Skip it, looks process is closed."
+            )
+
 
 class AEALauncher(AbstractMultipleRunner):
     """Run multiple AEA instances."""
@@ -244,7 +247,7 @@ class AEALauncher(AbstractMultipleRunner):
         log_level: Optional[str] = None,
     ) -> None:
         """
-        Init AEARunner.
+        Init AEALauncher.
 
         :param agent_dirs: sequence of AEA config directories.
         :param mode: executor name to use.

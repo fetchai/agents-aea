@@ -24,7 +24,7 @@ nav:
     - Application areas: 'app-areas.md'
     - Relation to OEF and Ledger: 'oef-ledger.md'
     - Identity: 'identity.md'
-    - Trust issues: 'trust.md'
+    - Trust minimisation: 'trust.md'
   - Demos:
     - Demos: 'demos.md'
     - Aries Cloud Agents Demo: 'aries-cloud-agent-demo.md'
@@ -156,6 +156,7 @@ nav:
         - Exec Timeout: 'api/helpers/exec_timeout.md'
         - File IO: 'api/helpers/file_io.md'
         - File Lock: 'api/helpers/file_lock.md'
+        - HttpRequests: 'api/helpers/http_requests.md'
         - Install Dependency: 'api/helpers/install_dependency.md'
         - IPFS:
           - Base: 'api/helpers/ipfs/base.md'
@@ -215,7 +216,6 @@ nav:
         - Resources: 'api/registries/resources.md'
       - Skills:
         - Base: 'api/skills/base.md'
-        - Error Skill: 'api/skills/error/handlers.md'
         - Behaviors: 'api/skills/behaviours.md'
         - Task: 'api/skills/tasks.md'
       - Test Tools:

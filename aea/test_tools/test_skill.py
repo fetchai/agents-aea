@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 """This module contains test case classes based on pytest for AEA skill testing."""
 import asyncio
+import os
 from pathlib import Path
 from queue import Queue
 from types import SimpleNamespace
@@ -91,14 +92,14 @@ class BaseSkillTestCase:
             self._skill.skill_context.decision_maker_message_queue.get_nowait()
             number -= 1
 
-    def assert_quantity_in_outbox(self, expected_quantity) -> None:
+    def assert_quantity_in_outbox(self, expected_quantity: int) -> None:
         """Assert the quantity of messages in the outbox."""
         quantity = self.get_quantity_in_outbox()
         assert (  # nosec
             quantity == expected_quantity
         ), f"Invalid number of messages in outbox. Expected {expected_quantity}. Found {quantity}."
 
-    def assert_quantity_in_decision_making_queue(self, expected_quantity) -> None:
+    def assert_quantity_in_decision_making_queue(self, expected_quantity: int) -> None:
         """Assert the quantity of messages in the decision maker queue."""
         quantity = self.get_quantity_in_decision_maker_inbox()
         assert (  # nosec
@@ -107,7 +108,7 @@ class BaseSkillTestCase:
 
     @staticmethod
     def message_has_attributes(
-        actual_message: Message, message_type: Type[Message], **kwargs,
+        actual_message: Message, message_type: Type[Message], **kwargs: Any,
     ) -> Tuple[bool, str]:
         """
         Evaluates whether a message's attributes match the expected attributes provided.
@@ -148,7 +149,7 @@ class BaseSkillTestCase:
         target: Optional[int] = None,
         to: Optional[Address] = None,
         sender: Address = COUNTERPARTY_ADDRESS,
-        **kwargs,
+        **kwargs: Any,
     ) -> Message:
         """
         Quickly create an incoming message with the provided attributes.
@@ -187,7 +188,6 @@ class BaseSkillTestCase:
         incoming_message.to = (
             self.skill.skill_context.agent_address if to is None else to
         )
-
         return incoming_message
 
     def build_incoming_message_for_skill_dialogue(
@@ -200,7 +200,7 @@ class BaseSkillTestCase:
         target: Optional[int] = None,
         to: Optional[Address] = None,
         sender: Optional[Address] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Message:
         """
         Quickly create an incoming message with the provided attributes for a dialogue.
@@ -241,7 +241,7 @@ class BaseSkillTestCase:
         message_id = (
             message_id
             if message_id is not None
-            else dialogue.last_message.message_id + 1
+            else dialogue.get_incoming_next_message_id()
         )
         target = target if target is not None else dialogue.last_message.message_id
         to = to if to is not None else dialogue.self_address
@@ -261,13 +261,12 @@ class BaseSkillTestCase:
             sender=sender,
             **kwargs,
         )
-
         return incoming_message
 
     @staticmethod
     def _provide_unspecified_fields(
-        message: DialogueMessage, last_is_incoming: Optional[bool], message_id: int
-    ) -> Tuple[bool, int]:
+        message: DialogueMessage, last_is_incoming: Optional[bool]
+    ) -> Tuple[bool, Optional[int]]:
         """
         Specifies values (an interpretation) for the unspecified fields of a DialogueMessage.
 
@@ -276,14 +275,13 @@ class BaseSkillTestCase:
 
         :param message: the DialogueMessage
         :param last_is_incoming: the is_incoming value of the previous DialogueMessage
-        :param message_id: the message_id of this DialogueMessage
 
         :return: the is_incoming and target values
         """
         default_is_incoming = not last_is_incoming
         is_incoming = default_is_incoming if message[2] is None else message[2]
 
-        default_target = message_id - 1
+        default_target = None
         target = default_target if message[3] is None else message[3]
         return is_incoming, target
 
@@ -311,7 +309,7 @@ class BaseSkillTestCase:
 
     def _extract_message_fields(
         self, message: DialogueMessage, index: int, last_is_incoming: bool,
-    ) -> Tuple[Message.Performative, Dict, int, bool, int]:
+    ) -> Tuple[Message.Performative, Dict, int, bool, Optional[int]]:
         """
         Extracts message attributes from a dialogue message.
 
@@ -325,7 +323,7 @@ class BaseSkillTestCase:
         contents = message[1]
         message_id = index + 1
         is_incoming, target = self._provide_unspecified_fields(
-            message, last_is_incoming=last_is_incoming, message_id=message_id,
+            message, last_is_incoming=last_is_incoming
         )
         return performative, contents, message_id, is_incoming, target
 
@@ -367,8 +365,8 @@ class BaseSkillTestCase:
             message = self.build_incoming_message(
                 message_type=dialogues.message_class,
                 dialogue_reference=dialogue_reference,
-                message_id=message_id,
-                target=target,
+                message_id=Dialogue.STARTING_MESSAGE_ID,
+                target=target or Dialogue.STARTING_TARGET,
                 performative=performative,
                 to=self.skill.skill_context.agent_address,
                 sender=counterparty,
@@ -394,10 +392,15 @@ class BaseSkillTestCase:
                 is_incoming,
                 target,
             ) = self._extract_message_fields(dialogue_message, idx + 1, is_incoming)
+            if target is None:
+                target = cast(Message, dialogue.last_message).message_id
+
             if is_incoming:  # messages from the opponent
                 dialogue_reference = self._non_initial_incoming_message_dialogue_reference(
                     dialogue
                 )
+                message_id = dialogue.get_incoming_next_message_id()
+
                 message = self.build_incoming_message(
                     message_type=dialogues.message_class,
                     dialogue_reference=dialogue_reference,
@@ -421,7 +424,7 @@ class BaseSkillTestCase:
         return dialogue
 
     @classmethod
-    def setup(cls, **kwargs) -> None:
+    def setup(cls, **kwargs: Any) -> None:
         """Set up the skill test case."""
         identity = Identity("test_agent_name", "test_agent_address")
 
@@ -447,6 +450,7 @@ class BaseSkillTestCase:
             default_routing={},
             search_service_address="dummy_search_service_address",
             decision_maker_address="dummy_decision_maker_address",
+            data_dir=os.getcwd(),
         )
 
         # This enables pre-populating the 'shared_state' prior to loading the skill

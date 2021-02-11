@@ -32,7 +32,6 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Any, BinaryIO, Collection, Dict, List, Optional, Tuple, cast
 
-import requests
 from bech32 import bech32_decode, bech32_encode, convertbits
 from ecdsa import SECP256k1, SigningKey, VerifyingKey
 from ecdsa.util import sigencode_string_canonize
@@ -40,6 +39,7 @@ from ecdsa.util import sigencode_string_canonize
 from aea.common import Address, JSONLike
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
 from aea.exceptions import AEAEnforceError
+from aea.helpers import http_requests as requests
 from aea.helpers.base import try_decorator
 
 
@@ -65,7 +65,7 @@ class CosmosHelper(Helper):
         """
         Check whether a transaction is settled or not.
 
-        :param tx_digest: the digest associated to the transaction.
+        :param tx_receipt: the receipt of the transaction.
         :return: True if the transaction has been settled, False o/w.
         """
         is_successful = False
@@ -77,6 +77,38 @@ class CosmosHelper(Helper):
                     f"Transaction not settled. Raw log: {tx_receipt.get('raw_log')}"
                 )
         return is_successful
+
+    @staticmethod
+    def get_code_id(tx_receipt: JSONLike) -> Optional[int]:
+        """
+        Retrieve the `code_id` from a transaction receipt.
+
+        :param tx_receipt: the receipt of the transaction.
+        :return: the code id, if present
+        """
+        code_id: Optional[int] = None
+        try:
+            res = [dic_["value"] for dic_ in tx_receipt["logs"][0]["events"][0]["attributes"] if dic_["key"] == "code_id"]  # type: ignore
+            code_id = int(res[0])
+        except (KeyError, IndexError):  # pragma: nocover
+            code_id = None
+        return code_id
+
+    @staticmethod
+    def get_contract_address(tx_receipt: JSONLike) -> Optional[str]:
+        """
+        Retrieve the `contract_address` from a transaction receipt.
+
+        :param tx_receipt: the receipt of the transaction.
+        :return: the contract address, if present
+        """
+        contract_address: Optional[str] = None
+        try:
+            res = [dic_["value"] for dic_ in tx_receipt["logs"][0]["events"][0]["attributes"] if dic_["key"] == "contract_address"]  # type: ignore
+            contract_address = res[0]
+        except (KeyError, IndexError):  # pragma: nocover
+            contract_address = None
+        return contract_address
 
     @staticmethod
     def is_transaction_valid(
@@ -225,7 +257,7 @@ class CosmosCrypto(Crypto[SigningKey]):
     identifier = _COSMOS
     helper = CosmosHelper
 
-    def __init__(self, private_key_path: Optional[str] = None):
+    def __init__(self, private_key_path: Optional[str] = None) -> None:
         """
         Instantiate an ethereum crypto object.
 
@@ -263,7 +295,7 @@ class CosmosCrypto(Crypto[SigningKey]):
         return self._address
 
     @classmethod
-    def load_private_key_from_path(cls, file_name) -> SigningKey:
+    def load_private_key_from_path(cls, file_name: str) -> SigningKey:
         """
         Load a private key in hex format from a file.
 
@@ -400,7 +432,7 @@ class _CosmosApi(LedgerApi):
 
     identifier = _COSMOS
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize the Cosmos ledger APIs."""
         self._api = None
         self.network_address = kwargs.pop("address", DEFAULT_ADDRESS)
@@ -409,7 +441,7 @@ class _CosmosApi(LedgerApi):
         self.cli_command = kwargs.pop("cli_command", DEFAULT_CLI_COMMAND)
 
     @property
-    def api(self) -> None:
+    def api(self) -> Any:
         """Get the underlying API object."""
         return self._api
 
@@ -435,7 +467,9 @@ class _CosmosApi(LedgerApi):
                 balance = int(result[0]["amount"])
         return balance
 
-    def get_state(self, callable_name: str, *args, **kwargs) -> Optional[JSONLike]:
+    def get_state(
+        self, callable_name: str, *args: Any, **kwargs: Any
+    ) -> Optional[JSONLike]:
         """
         Call a specified function on the ledger API.
 
@@ -452,7 +486,7 @@ class _CosmosApi(LedgerApi):
         logger_method=_default_logger.warning,
     )
     def _try_get_state(  # pylint: disable=unused-argument
-        self, callable_name: str, *args, **kwargs
+        self, callable_name: str, *args: Any, **kwargs: Any
     ) -> Optional[JSONLike]:
         """Try to call a function on the ledger API."""
         result: Optional[JSONLike] = None
@@ -464,7 +498,10 @@ class _CosmosApi(LedgerApi):
         return result
 
     def get_deploy_transaction(
-        self, contract_interface: Dict[str, str], deployer_address: Address, **kwargs
+        self,
+        contract_interface: Dict[str, str],
+        deployer_address: Address,
+        **kwargs: Any,
     ) -> Optional[JSONLike]:
         """
         Get the transaction to deploy the smart contract.
@@ -753,7 +790,7 @@ class _CosmosApi(LedgerApi):
         gas: int = 80000,
         memo: str = "",
         chain_id: Optional[str] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Optional[JSONLike]:
         """
         Submit a transfer transaction to the ledger.
@@ -994,7 +1031,7 @@ class _CosmosApi(LedgerApi):
 
         return int(res[-1]["id"])
 
-    def get_contract_address(self, code_id: int) -> str:
+    def get_last_contract_address(self, code_id: int) -> str:
         """
         Get contract address of latest initialised contract by its ID.
 
@@ -1057,7 +1094,7 @@ class CosmosFaucetApi(FaucetApi):
     testnet_faucet_url = DEFAULT_FAUCET_URL
     testnet_name = TESTNET_NAME
 
-    def __init__(self, poll_interval=None):
+    def __init__(self, poll_interval: Optional[float] = None):
         """Initialize CosmosFaucetApi."""
         self._poll_interval = float(poll_interval or 1)
 

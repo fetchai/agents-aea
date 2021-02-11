@@ -16,7 +16,8 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This module contains the tests of the messages module."""
+
+"""This module contains the tests of the protocols base module."""
 
 import os
 import shutil
@@ -25,6 +26,7 @@ from copy import copy
 from enum import Enum
 from pathlib import Path
 from typing import Callable, List, Tuple, Type
+from unittest.mock import Mock
 
 import pytest
 from google.protobuf.struct_pb2 import Struct
@@ -251,7 +253,7 @@ class TestBaseSerializations:
         envelope = Envelope(
             to="receiver",
             sender="sender",
-            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
+            protocol_specification_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=message_bytes,
         )
         envelope_bytes = envelope.encode()
@@ -270,7 +272,7 @@ class TestBaseSerializations:
         envelope = Envelope(
             to="receiver",
             sender="sender",
-            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
+            protocol_specification_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=message_bytes,
         )
         envelope_bytes = envelope.encode()
@@ -331,6 +333,9 @@ class TestProtocolFromDir:
         )
         assert str(default_protocol.public_id) == str(
             DefaultMessage.protocol_id
+        ), "Protocol not loaded correctly."
+        assert str(default_protocol.protocol_specification_id) == str(
+            DefaultMessage.protocol_specification_id
         ), "Protocol not loaded correctly."
         assert default_protocol.serializer is not None
 
@@ -399,3 +404,11 @@ def test_dialogues(dialogues_classes):
     """Test dialogues initialization."""
     dialogue_class, dialogues_class, _, role_from_first_message = dialogues_classes
     dialogues_class("agent_address", role_from_first_message, dialogue_class)
+
+
+def test_protocol_repr():
+    """Test protocol repr."""
+    config_mock = Mock()
+    config_mock.public_id = UNKNOWN_PROTOCOL_PUBLIC_ID
+    protocol = Protocol(config_mock, message_class=Message)
+    assert repr(protocol) == f"Protocol({UNKNOWN_PROTOCOL_PUBLIC_ID})"

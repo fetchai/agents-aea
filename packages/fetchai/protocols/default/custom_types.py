@@ -20,6 +20,7 @@
 """This module contains class representations corresponding to every custom type in the protocol specification."""
 
 from enum import Enum
+from typing import Any
 
 
 class ErrorCode(Enum):
@@ -32,7 +33,7 @@ class ErrorCode(Enum):
     INVALID_DIALOGUE = 4
 
     @staticmethod
-    def encode(error_code_protobuf_object, error_code_object: "ErrorCode") -> None:
+    def encode(error_code_protobuf_object: Any, error_code_object: "ErrorCode") -> None:
         """
         Encode an instance of this class into the protocol buffer object.
 
@@ -45,7 +46,7 @@ class ErrorCode(Enum):
         error_code_protobuf_object.error_code = error_code_object.value
 
     @classmethod
-    def decode(cls, error_code_protobuf_object) -> "ErrorCode":
+    def decode(cls, error_code_protobuf_object: Any) -> "ErrorCode":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 

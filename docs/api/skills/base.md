@@ -16,7 +16,7 @@ This class implements the context of a skill.
 #### `__`init`__`
 
 ```python
- | __init__(agent_context: Optional[AgentContext] = None, skill: Optional["Skill"] = None)
+ | __init__(agent_context: Optional[AgentContext] = None, skill: Optional["Skill"] = None) -> None
 ```
 
 Initialize a skill context.
@@ -297,7 +297,7 @@ Get the agent context namespace.
 #### `__`getattr`__`
 
 ```python
- | __getattr__(item) -> Any
+ | __getattr__(item: Any) -> Any
 ```
 
 Get attribute.
@@ -315,7 +315,7 @@ This class defines an abstract interface for skill component classes.
 #### `__`init`__`
 
 ```python
- | __init__(name: str, skill_context: SkillContext, configuration: Optional[SkillComponentConfiguration] = None, **kwargs, ,)
+ | __init__(name: str, skill_context: SkillContext, configuration: Optional[SkillComponentConfiguration] = None, **kwargs: Any, ,) -> None
 ```
 
 Initialize a skill component.
@@ -410,7 +410,7 @@ None
 ```python
  | @classmethod
  | @abstractmethod
- | parse_module(cls, path: str, configs: Dict[str, SkillComponentConfiguration], skill_context: SkillContext)
+ | parse_module(cls, path: str, configs: Dict[str, SkillComponentConfiguration], skill_context: SkillContext) -> dict
 ```
 
 Parse the component module.
@@ -577,7 +577,7 @@ This class implements an abstract model.
 #### `__`init`__`
 
 ```python
- | __init__(name: str, skill_context: SkillContext, configuration: Optional[SkillComponentConfiguration] = None, keep_terminal_state_dialogues: Optional[bool] = None, **kwargs, ,) -> None
+ | __init__(name: str, skill_context: SkillContext, configuration: Optional[SkillComponentConfiguration] = None, keep_terminal_state_dialogues: Optional[bool] = None, **kwargs: Any, ,) -> None
 ```
 
 Initialize a model.
@@ -644,7 +644,7 @@ This class implements a skill.
 #### `__`init`__`
 
 ```python
- | __init__(configuration: SkillConfig, skill_context: Optional[SkillContext] = None, handlers: Optional[Dict[str, Handler]] = None, behaviours: Optional[Dict[str, Behaviour]] = None, models: Optional[Dict[str, Model]] = None, **kwargs, ,)
+ | __init__(configuration: SkillConfig, skill_context: Optional[SkillContext] = None, handlers: Optional[Dict[str, Handler]] = None, behaviours: Optional[Dict[str, Behaviour]] = None, models: Optional[Dict[str, Model]] = None, **kwargs: Any, ,)
 ```
 
 Initialize a skill.
@@ -702,7 +702,7 @@ Get the handlers.
 
 ```python
  | @classmethod
- | from_dir(cls, directory: str, agent_context: AgentContext, **kwargs) -> "Skill"
+ | from_dir(cls, directory: str, agent_context: AgentContext, **kwargs: Any) -> "Skill"
 ```
 
 Load the skill from a directory.
@@ -734,7 +734,7 @@ logger provided by the skill context.
 
 ```python
  | @logger.setter
- | logger(*args) -> None
+ | logger(*args: str) -> None
 ```
 
 Set the logger.
@@ -744,7 +744,7 @@ Set the logger.
 
 ```python
  | @classmethod
- | from_config(cls, configuration: SkillConfig, agent_context: AgentContext, **kwargs) -> "Skill"
+ | from_config(cls, configuration: SkillConfig, agent_context: AgentContext, **kwargs: Any) -> "Skill"
 ```
 
 Load the skill from configuration.

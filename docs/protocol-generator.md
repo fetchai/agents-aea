@@ -35,7 +35,7 @@ author: fetchai
 version: 0.1.0
 description: An example of a protocol specification that describes a protocol for bilateral negotiation.
 license: Apache-2.0
-aea_version: '>=0.9.0, <0.10.0'
+aea_version: '>=0.10.0, <0.11.0'
 speech_acts:
   cfp:
     query: ct:Query

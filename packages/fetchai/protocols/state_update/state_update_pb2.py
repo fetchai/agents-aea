@@ -14,23 +14,23 @@ _sym_db = _symbol_database.Default()
 
 DESCRIPTOR = _descriptor.FileDescriptor(
     name="state_update.proto",
-    package="aea.fetchai.state_update",
+    package="aea.fetchai.state_update.v0_1_0",
     syntax="proto3",
     serialized_options=None,
-    serialized_pb=b'\n\x12state_update.proto\x12\x18\x61\x65\x61.fetchai.state_update"\xd2\x0b\n\x12StateUpdateMessage\x12P\n\x05\x61pply\x18\x05 \x01(\x0b\x32?.aea.fetchai.state_update.StateUpdateMessage.Apply_PerformativeH\x00\x12L\n\x03\x65nd\x18\x06 \x01(\x0b\x32=.aea.fetchai.state_update.StateUpdateMessage.End_PerformativeH\x00\x12Z\n\ninitialize\x18\x07 \x01(\x0b\x32\x44.aea.fetchai.state_update.StateUpdateMessage.Initialize_PerformativeH\x00\x1a\x9e\x06\n\x17Initialize_Performative\x12\x8c\x01\n\x1e\x65xchange_params_by_currency_id\x18\x01 \x03(\x0b\x32\x64.aea.fetchai.state_update.StateUpdateMessage.Initialize_Performative.ExchangeParamsByCurrencyIdEntry\x12\x82\x01\n\x19utility_params_by_good_id\x18\x02 \x03(\x0b\x32_.aea.fetchai.state_update.StateUpdateMessage.Initialize_Performative.UtilityParamsByGoodIdEntry\x12{\n\x15\x61mount_by_currency_id\x18\x03 \x03(\x0b\x32\\.aea.fetchai.state_update.StateUpdateMessage.Initialize_Performative.AmountByCurrencyIdEntry\x12{\n\x15quantities_by_good_id\x18\x04 \x03(\x0b\x32\\.aea.fetchai.state_update.StateUpdateMessage.Initialize_Performative.QuantitiesByGoodIdEntry\x1a\x41\n\x1f\x45xchangeParamsByCurrencyIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a<\n\x1aUtilityParamsByGoodIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a\x39\n\x17\x41mountByCurrencyIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x39\n\x17QuantitiesByGoodIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\xfa\x02\n\x12\x41pply_Performative\x12v\n\x15\x61mount_by_currency_id\x18\x01 \x03(\x0b\x32W.aea.fetchai.state_update.StateUpdateMessage.Apply_Performative.AmountByCurrencyIdEntry\x12v\n\x15quantities_by_good_id\x18\x02 \x03(\x0b\x32W.aea.fetchai.state_update.StateUpdateMessage.Apply_Performative.QuantitiesByGoodIdEntry\x1a\x39\n\x17\x41mountByCurrencyIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x39\n\x17QuantitiesByGoodIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x12\n\x10\x45nd_PerformativeB\x0e\n\x0cperformativeb\x06proto3',
+    serialized_pb=b'\n\x12state_update.proto\x12\x1f\x61\x65\x61.fetchai.state_update.v0_1_0"\x93\x0c\n\x12StateUpdateMessage\x12W\n\x05\x61pply\x18\x05 \x01(\x0b\x32\x46.aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Apply_PerformativeH\x00\x12S\n\x03\x65nd\x18\x06 \x01(\x0b\x32\x44.aea.fetchai.state_update.v0_1_0.StateUpdateMessage.End_PerformativeH\x00\x12\x61\n\ninitialize\x18\x07 \x01(\x0b\x32K.aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Initialize_PerformativeH\x00\x1a\xbc\x06\n\x17Initialize_Performative\x12\x93\x01\n\x1e\x65xchange_params_by_currency_id\x18\x01 \x03(\x0b\x32k.aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Initialize_Performative.ExchangeParamsByCurrencyIdEntry\x12\x89\x01\n\x19utility_params_by_good_id\x18\x02 \x03(\x0b\x32\x66.aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Initialize_Performative.UtilityParamsByGoodIdEntry\x12\x82\x01\n\x15\x61mount_by_currency_id\x18\x03 \x03(\x0b\x32\x63.aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Initialize_Performative.AmountByCurrencyIdEntry\x12\x82\x01\n\x15quantities_by_good_id\x18\x04 \x03(\x0b\x32\x63.aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Initialize_Performative.QuantitiesByGoodIdEntry\x1a\x41\n\x1f\x45xchangeParamsByCurrencyIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a<\n\x1aUtilityParamsByGoodIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x02:\x02\x38\x01\x1a\x39\n\x17\x41mountByCurrencyIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x39\n\x17QuantitiesByGoodIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x88\x03\n\x12\x41pply_Performative\x12}\n\x15\x61mount_by_currency_id\x18\x01 \x03(\x0b\x32^.aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Apply_Performative.AmountByCurrencyIdEntry\x12}\n\x15quantities_by_good_id\x18\x02 \x03(\x0b\x32^.aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Apply_Performative.QuantitiesByGoodIdEntry\x1a\x39\n\x17\x41mountByCurrencyIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x39\n\x17QuantitiesByGoodIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\x1a\x12\n\x10\x45nd_PerformativeB\x0e\n\x0cperformativeb\x06proto3',
 )
 
 
 _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_EXCHANGEPARAMSBYCURRENCYIDENTRY = _descriptor.Descriptor(
     name="ExchangeParamsByCurrencyIdEntry",
-    full_name="aea.fetchai.state_update.StateUpdateMessage.Initialize_Performative.ExchangeParamsByCurrencyIdEntry",
+    full_name="aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Initialize_Performative.ExchangeParamsByCurrencyIdEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="aea.fetchai.state_update.StateUpdateMessage.Initialize_Performative.ExchangeParamsByCurrencyIdEntry.key",
+            full_name="aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Initialize_Performative.ExchangeParamsByCurrencyIdEntry.key",
             index=0,
             number=1,
             type=9,
@@ -48,7 +48,7 @@ _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_EXCHANGEPARAMSBYCURRENCYIDENTRY = _d
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="aea.fetchai.state_update.StateUpdateMessage.Initialize_Performative.ExchangeParamsByCurrencyIdEntry.value",
+            full_name="aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Initialize_Performative.ExchangeParamsByCurrencyIdEntry.value",
             index=1,
             number=2,
             type=2,
@@ -73,20 +73,20 @@ _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_EXCHANGEPARAMSBYCURRENCYIDENTRY = _d
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=877,
-    serialized_end=942,
+    serialized_start=935,
+    serialized_end=1000,
 )
 
 _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_UTILITYPARAMSBYGOODIDENTRY = _descriptor.Descriptor(
     name="UtilityParamsByGoodIdEntry",
-    full_name="aea.fetchai.state_update.StateUpdateMessage.Initialize_Performative.UtilityParamsByGoodIdEntry",
+    full_name="aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Initialize_Performative.UtilityParamsByGoodIdEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="aea.fetchai.state_update.StateUpdateMessage.Initialize_Performative.UtilityParamsByGoodIdEntry.key",
+            full_name="aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Initialize_Performative.UtilityParamsByGoodIdEntry.key",
             index=0,
             number=1,
             type=9,
@@ -104,7 +104,7 @@ _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_UTILITYPARAMSBYGOODIDENTRY = _descri
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="aea.fetchai.state_update.StateUpdateMessage.Initialize_Performative.UtilityParamsByGoodIdEntry.value",
+            full_name="aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Initialize_Performative.UtilityParamsByGoodIdEntry.value",
             index=1,
             number=2,
             type=2,
@@ -129,20 +129,20 @@ _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_UTILITYPARAMSBYGOODIDENTRY = _descri
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=944,
-    serialized_end=1004,
+    serialized_start=1002,
+    serialized_end=1062,
 )
 
 _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY = _descriptor.Descriptor(
     name="AmountByCurrencyIdEntry",
-    full_name="aea.fetchai.state_update.StateUpdateMessage.Initialize_Performative.AmountByCurrencyIdEntry",
+    full_name="aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Initialize_Performative.AmountByCurrencyIdEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="aea.fetchai.state_update.StateUpdateMessage.Initialize_Performative.AmountByCurrencyIdEntry.key",
+            full_name="aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Initialize_Performative.AmountByCurrencyIdEntry.key",
             index=0,
             number=1,
             type=9,
@@ -160,7 +160,7 @@ _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY = _descripto
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="aea.fetchai.state_update.StateUpdateMessage.Initialize_Performative.AmountByCurrencyIdEntry.value",
+            full_name="aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Initialize_Performative.AmountByCurrencyIdEntry.value",
             index=1,
             number=2,
             type=5,
@@ -185,20 +185,20 @@ _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY = _descripto
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1006,
-    serialized_end=1063,
+    serialized_start=1064,
+    serialized_end=1121,
 )
 
 _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_QUANTITIESBYGOODIDENTRY = _descriptor.Descriptor(
     name="QuantitiesByGoodIdEntry",
-    full_name="aea.fetchai.state_update.StateUpdateMessage.Initialize_Performative.QuantitiesByGoodIdEntry",
+    full_name="aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Initialize_Performative.QuantitiesByGoodIdEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="aea.fetchai.state_update.StateUpdateMessage.Initialize_Performative.QuantitiesByGoodIdEntry.key",
+            full_name="aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Initialize_Performative.QuantitiesByGoodIdEntry.key",
             index=0,
             number=1,
             type=9,
@@ -216,7 +216,7 @@ _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_QUANTITIESBYGOODIDENTRY = _descripto
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="aea.fetchai.state_update.StateUpdateMessage.Initialize_Performative.QuantitiesByGoodIdEntry.value",
+            full_name="aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Initialize_Performative.QuantitiesByGoodIdEntry.value",
             index=1,
             number=2,
             type=5,
@@ -241,20 +241,20 @@ _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_QUANTITIESBYGOODIDENTRY = _descripto
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1065,
-    serialized_end=1122,
+    serialized_start=1123,
+    serialized_end=1180,
 )
 
 _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE = _descriptor.Descriptor(
     name="Initialize_Performative",
-    full_name="aea.fetchai.state_update.StateUpdateMessage.Initialize_Performative",
+    full_name="aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Initialize_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="exchange_params_by_currency_id",
-            full_name="aea.fetchai.state_update.StateUpdateMessage.Initialize_Performative.exchange_params_by_currency_id",
+            full_name="aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Initialize_Performative.exchange_params_by_currency_id",
             index=0,
             number=1,
             type=11,
@@ -272,7 +272,7 @@ _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="utility_params_by_good_id",
-            full_name="aea.fetchai.state_update.StateUpdateMessage.Initialize_Performative.utility_params_by_good_id",
+            full_name="aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Initialize_Performative.utility_params_by_good_id",
             index=1,
             number=2,
             type=11,
@@ -290,7 +290,7 @@ _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="amount_by_currency_id",
-            full_name="aea.fetchai.state_update.StateUpdateMessage.Initialize_Performative.amount_by_currency_id",
+            full_name="aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Initialize_Performative.amount_by_currency_id",
             index=2,
             number=3,
             type=11,
@@ -308,7 +308,7 @@ _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="quantities_by_good_id",
-            full_name="aea.fetchai.state_update.StateUpdateMessage.Initialize_Performative.quantities_by_good_id",
+            full_name="aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Initialize_Performative.quantities_by_good_id",
             index=3,
             number=4,
             type=11,
@@ -338,20 +338,20 @@ _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=324,
-    serialized_end=1122,
+    serialized_start=352,
+    serialized_end=1180,
 )
 
 _STATEUPDATEMESSAGE_APPLY_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY = _descriptor.Descriptor(
     name="AmountByCurrencyIdEntry",
-    full_name="aea.fetchai.state_update.StateUpdateMessage.Apply_Performative.AmountByCurrencyIdEntry",
+    full_name="aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Apply_Performative.AmountByCurrencyIdEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="aea.fetchai.state_update.StateUpdateMessage.Apply_Performative.AmountByCurrencyIdEntry.key",
+            full_name="aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Apply_Performative.AmountByCurrencyIdEntry.key",
             index=0,
             number=1,
             type=9,
@@ -369,7 +369,7 @@ _STATEUPDATEMESSAGE_APPLY_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY = _descriptor.Des
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="aea.fetchai.state_update.StateUpdateMessage.Apply_Performative.AmountByCurrencyIdEntry.value",
+            full_name="aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Apply_Performative.AmountByCurrencyIdEntry.value",
             index=1,
             number=2,
             type=5,
@@ -394,20 +394,20 @@ _STATEUPDATEMESSAGE_APPLY_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY = _descriptor.Des
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1006,
-    serialized_end=1063,
+    serialized_start=1064,
+    serialized_end=1121,
 )
 
 _STATEUPDATEMESSAGE_APPLY_PERFORMATIVE_QUANTITIESBYGOODIDENTRY = _descriptor.Descriptor(
     name="QuantitiesByGoodIdEntry",
-    full_name="aea.fetchai.state_update.StateUpdateMessage.Apply_Performative.QuantitiesByGoodIdEntry",
+    full_name="aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Apply_Performative.QuantitiesByGoodIdEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="aea.fetchai.state_update.StateUpdateMessage.Apply_Performative.QuantitiesByGoodIdEntry.key",
+            full_name="aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Apply_Performative.QuantitiesByGoodIdEntry.key",
             index=0,
             number=1,
             type=9,
@@ -425,7 +425,7 @@ _STATEUPDATEMESSAGE_APPLY_PERFORMATIVE_QUANTITIESBYGOODIDENTRY = _descriptor.Des
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="aea.fetchai.state_update.StateUpdateMessage.Apply_Performative.QuantitiesByGoodIdEntry.value",
+            full_name="aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Apply_Performative.QuantitiesByGoodIdEntry.value",
             index=1,
             number=2,
             type=5,
@@ -450,20 +450,20 @@ _STATEUPDATEMESSAGE_APPLY_PERFORMATIVE_QUANTITIESBYGOODIDENTRY = _descriptor.Des
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1065,
-    serialized_end=1122,
+    serialized_start=1123,
+    serialized_end=1180,
 )
 
 _STATEUPDATEMESSAGE_APPLY_PERFORMATIVE = _descriptor.Descriptor(
     name="Apply_Performative",
-    full_name="aea.fetchai.state_update.StateUpdateMessage.Apply_Performative",
+    full_name="aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Apply_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="amount_by_currency_id",
-            full_name="aea.fetchai.state_update.StateUpdateMessage.Apply_Performative.amount_by_currency_id",
+            full_name="aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Apply_Performative.amount_by_currency_id",
             index=0,
             number=1,
             type=11,
@@ -481,7 +481,7 @@ _STATEUPDATEMESSAGE_APPLY_PERFORMATIVE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="quantities_by_good_id",
-            full_name="aea.fetchai.state_update.StateUpdateMessage.Apply_Performative.quantities_by_good_id",
+            full_name="aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Apply_Performative.quantities_by_good_id",
             index=1,
             number=2,
             type=11,
@@ -509,13 +509,13 @@ _STATEUPDATEMESSAGE_APPLY_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1125,
-    serialized_end=1503,
+    serialized_start=1183,
+    serialized_end=1575,
 )
 
 _STATEUPDATEMESSAGE_END_PERFORMATIVE = _descriptor.Descriptor(
     name="End_Performative",
-    full_name="aea.fetchai.state_update.StateUpdateMessage.End_Performative",
+    full_name="aea.fetchai.state_update.v0_1_0.StateUpdateMessage.End_Performative",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
@@ -528,20 +528,20 @@ _STATEUPDATEMESSAGE_END_PERFORMATIVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1505,
-    serialized_end=1523,
+    serialized_start=1577,
+    serialized_end=1595,
 )
 
 _STATEUPDATEMESSAGE = _descriptor.Descriptor(
     name="StateUpdateMessage",
-    full_name="aea.fetchai.state_update.StateUpdateMessage",
+    full_name="aea.fetchai.state_update.v0_1_0.StateUpdateMessage",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="apply",
-            full_name="aea.fetchai.state_update.StateUpdateMessage.apply",
+            full_name="aea.fetchai.state_update.v0_1_0.StateUpdateMessage.apply",
             index=0,
             number=5,
             type=11,
@@ -559,7 +559,7 @@ _STATEUPDATEMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="end",
-            full_name="aea.fetchai.state_update.StateUpdateMessage.end",
+            full_name="aea.fetchai.state_update.v0_1_0.StateUpdateMessage.end",
             index=1,
             number=6,
             type=11,
@@ -577,7 +577,7 @@ _STATEUPDATEMESSAGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="initialize",
-            full_name="aea.fetchai.state_update.StateUpdateMessage.initialize",
+            full_name="aea.fetchai.state_update.v0_1_0.StateUpdateMessage.initialize",
             index=2,
             number=7,
             type=11,
@@ -608,14 +608,14 @@ _STATEUPDATEMESSAGE = _descriptor.Descriptor(
     oneofs=[
         _descriptor.OneofDescriptor(
             name="performative",
-            full_name="aea.fetchai.state_update.StateUpdateMessage.performative",
+            full_name="aea.fetchai.state_update.v0_1_0.StateUpdateMessage.performative",
             index=0,
             containing_type=None,
             fields=[],
         ),
     ],
-    serialized_start=49,
-    serialized_end=1539,
+    serialized_start=56,
+    serialized_end=1611,
 )
 
 _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_EXCHANGEPARAMSBYCURRENCYIDENTRY.containing_type = (
@@ -703,7 +703,7 @@ StateUpdateMessage = _reflection.GeneratedProtocolMessageType(
                     {
                         "DESCRIPTOR": _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_EXCHANGEPARAMSBYCURRENCYIDENTRY,
                         "__module__": "state_update_pb2"
-                        # @@protoc_insertion_point(class_scope:aea.fetchai.state_update.StateUpdateMessage.Initialize_Performative.ExchangeParamsByCurrencyIdEntry)
+                        # @@protoc_insertion_point(class_scope:aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Initialize_Performative.ExchangeParamsByCurrencyIdEntry)
                     },
                 ),
                 "UtilityParamsByGoodIdEntry": _reflection.GeneratedProtocolMessageType(
@@ -712,7 +712,7 @@ StateUpdateMessage = _reflection.GeneratedProtocolMessageType(
                     {
                         "DESCRIPTOR": _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_UTILITYPARAMSBYGOODIDENTRY,
                         "__module__": "state_update_pb2"
-                        # @@protoc_insertion_point(class_scope:aea.fetchai.state_update.StateUpdateMessage.Initialize_Performative.UtilityParamsByGoodIdEntry)
+                        # @@protoc_insertion_point(class_scope:aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Initialize_Performative.UtilityParamsByGoodIdEntry)
                     },
                 ),
                 "AmountByCurrencyIdEntry": _reflection.GeneratedProtocolMessageType(
@@ -721,7 +721,7 @@ StateUpdateMessage = _reflection.GeneratedProtocolMessageType(
                     {
                         "DESCRIPTOR": _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY,
                         "__module__": "state_update_pb2"
-                        # @@protoc_insertion_point(class_scope:aea.fetchai.state_update.StateUpdateMessage.Initialize_Performative.AmountByCurrencyIdEntry)
+                        # @@protoc_insertion_point(class_scope:aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Initialize_Performative.AmountByCurrencyIdEntry)
                     },
                 ),
                 "QuantitiesByGoodIdEntry": _reflection.GeneratedProtocolMessageType(
@@ -730,12 +730,12 @@ StateUpdateMessage = _reflection.GeneratedProtocolMessageType(
                     {
                         "DESCRIPTOR": _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE_QUANTITIESBYGOODIDENTRY,
                         "__module__": "state_update_pb2"
-                        # @@protoc_insertion_point(class_scope:aea.fetchai.state_update.StateUpdateMessage.Initialize_Performative.QuantitiesByGoodIdEntry)
+                        # @@protoc_insertion_point(class_scope:aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Initialize_Performative.QuantitiesByGoodIdEntry)
                     },
                 ),
                 "DESCRIPTOR": _STATEUPDATEMESSAGE_INITIALIZE_PERFORMATIVE,
                 "__module__": "state_update_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.state_update.StateUpdateMessage.Initialize_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Initialize_Performative)
             },
         ),
         "Apply_Performative": _reflection.GeneratedProtocolMessageType(
@@ -748,7 +748,7 @@ StateUpdateMessage = _reflection.GeneratedProtocolMessageType(
                     {
                         "DESCRIPTOR": _STATEUPDATEMESSAGE_APPLY_PERFORMATIVE_AMOUNTBYCURRENCYIDENTRY,
                         "__module__": "state_update_pb2"
-                        # @@protoc_insertion_point(class_scope:aea.fetchai.state_update.StateUpdateMessage.Apply_Performative.AmountByCurrencyIdEntry)
+                        # @@protoc_insertion_point(class_scope:aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Apply_Performative.AmountByCurrencyIdEntry)
                     },
                 ),
                 "QuantitiesByGoodIdEntry": _reflection.GeneratedProtocolMessageType(
@@ -757,12 +757,12 @@ StateUpdateMessage = _reflection.GeneratedProtocolMessageType(
                     {
                         "DESCRIPTOR": _STATEUPDATEMESSAGE_APPLY_PERFORMATIVE_QUANTITIESBYGOODIDENTRY,
                         "__module__": "state_update_pb2"
-                        # @@protoc_insertion_point(class_scope:aea.fetchai.state_update.StateUpdateMessage.Apply_Performative.QuantitiesByGoodIdEntry)
+                        # @@protoc_insertion_point(class_scope:aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Apply_Performative.QuantitiesByGoodIdEntry)
                     },
                 ),
                 "DESCRIPTOR": _STATEUPDATEMESSAGE_APPLY_PERFORMATIVE,
                 "__module__": "state_update_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.state_update.StateUpdateMessage.Apply_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.state_update.v0_1_0.StateUpdateMessage.Apply_Performative)
             },
         ),
         "End_Performative": _reflection.GeneratedProtocolMessageType(
@@ -771,12 +771,12 @@ StateUpdateMessage = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _STATEUPDATEMESSAGE_END_PERFORMATIVE,
                 "__module__": "state_update_pb2"
-                # @@protoc_insertion_point(class_scope:aea.fetchai.state_update.StateUpdateMessage.End_Performative)
+                # @@protoc_insertion_point(class_scope:aea.fetchai.state_update.v0_1_0.StateUpdateMessage.End_Performative)
             },
         ),
         "DESCRIPTOR": _STATEUPDATEMESSAGE,
         "__module__": "state_update_pb2"
-        # @@protoc_insertion_point(class_scope:aea.fetchai.state_update.StateUpdateMessage)
+        # @@protoc_insertion_point(class_scope:aea.fetchai.state_update.v0_1_0.StateUpdateMessage)
     },
 )
 _sym_db.RegisterMessage(StateUpdateMessage)

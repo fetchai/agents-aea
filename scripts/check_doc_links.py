@@ -25,7 +25,7 @@ import xml.etree.ElementTree as ET  # nosec
 from pathlib import Path
 from typing import Pattern, Set
 
-import requests
+from aea.helpers import http_requests as requests
 
 
 LINK_PATTERN_MD = re.compile(r"\[([^]]+)]\(\s*([^]]+)\s*\)")
@@ -36,6 +36,7 @@ RELATIVE_PATH_STR_LEN = len(RELATIVE_PATH_STR)
 INDEX_FILE_PATH = Path("docs/index.md")
 
 WHITELIST_URL_TO_CODE = {
+    "https://dl.acm.org/doi/10.1145/3212734.3212736": 302,
     "http://soef.fetch.ai:9002": 405,
     "https://golang.org/dl/": 403,
     "https://www.wiley.com/en-gb/An+Introduction+to+MultiAgent+Systems%2C+2nd+Edition-p-9781119959519": 403,
@@ -56,8 +57,8 @@ def is_url_reachable(url: str) -> bool:
         response = requests.head(url, timeout=3)
         if response.status_code == 200:
             return True
-        if response.status_code in [403, 405]:
-            return WHITELIST_URL_TO_CODE.get(url, 404) in [403, 405]
+        if response.status_code in [403, 405, 302]:
+            return WHITELIST_URL_TO_CODE.get(url, 404) in [403, 405, 302]
         return False
     except Exception as e:  # pylint: disable=broad-except
         print(e)

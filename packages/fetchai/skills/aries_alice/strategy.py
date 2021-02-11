@@ -19,6 +19,8 @@
 
 """This module contains the strategy class."""
 
+from typing import Any
+
 from aea.exceptions import enforce
 from aea.helpers.search.generic import (
     AGENT_LOCATION_MODEL,
@@ -48,7 +50,7 @@ DEFAULT_SERVICE_DATA = {"key": "intro_service", "value": "intro_alice"}
 class AliceStrategy(Model):
     """This class defines a strategy for the agent."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize the strategy of the agent.
 

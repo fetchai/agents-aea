@@ -79,7 +79,7 @@ class Strategy(Model):
         BUYERS = "buyers"
         BOTH = "both"
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize the strategy of the agent.
 
@@ -354,7 +354,9 @@ class Strategy(Model):
             )
         return proposal_description
 
-    def _generate_candidate_proposals(self, is_seller: bool):  # pragma: no cover
+    def _generate_candidate_proposals(
+        self, is_seller: bool
+    ) -> List[Description]:  # pragma: no cover
         """
         Generate proposals from the agent in the role of seller/buyer.
 

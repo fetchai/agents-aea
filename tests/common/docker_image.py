@@ -28,13 +28,13 @@ from typing import Dict, List, Optional
 
 import docker
 import pytest
-import requests
 from docker import DockerClient
 from docker.models.containers import Container
 from oef.agents import OEFAgent
 from oef.core import AsyncioCore
 
 from aea.exceptions import enforce
+from aea.helpers import http_requests as requests
 
 
 logger = logging.getLogger(__name__)
@@ -162,7 +162,7 @@ class OEFHealthCheck(object):
             print(str(e))
             return self._result
         finally:
-            t.join(1.0)
+            t.join()
             self.agent.stop()
             self.agent.disconnect()
             self._core.stop()

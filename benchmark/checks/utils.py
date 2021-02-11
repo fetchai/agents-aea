@@ -37,7 +37,6 @@ from aea.configurations.base import ConnectionConfig, PublicId, SkillConfig
 from aea.configurations.constants import (
     DEFAULT_LEDGER,
     DEFAULT_PROTOCOL,
-    DEFAULT_SKILL,
     FETCHAI,
     PACKAGES,
     PROTOCOLS,
@@ -54,6 +53,7 @@ from aea.skills.base import Skill, SkillContext
 from packages.fetchai.protocols.default.message import DefaultMessage
 
 
+ERROR_SKILL_NAME = "error"
 ROOT_DIR = os.path.join(os.path.dirname(inspect.getfile(inspect.currentframe())))  # type: ignore
 PACKAGES_DIR = Path(AEA_DIR, "..", PACKAGES)
 
@@ -73,15 +73,14 @@ def make_agent(agent_name="my_agent", runtime_mode="threaded") -> AEA:
     wallet = Wallet({DEFAULT_LEDGER: None})
     identity = Identity(agent_name, address=agent_name)
     resources = Resources()
+    datadir = os.getcwd()
     agent_context = MagicMock()
     agent_context.agent_name = agent_name
     agent_context.agent_address = agent_name
 
     resources.add_skill(
         Skill.from_dir(
-            str(
-                PACKAGES_DIR / FETCHAI / SKILLS / PublicId.from_str(DEFAULT_SKILL).name
-            ),
+            str(PACKAGES_DIR / FETCHAI / SKILLS / ERROR_SKILL_NAME),
             agent_context=agent_context,
         )
     )
@@ -95,7 +94,7 @@ def make_agent(agent_name="my_agent", runtime_mode="threaded") -> AEA:
             )
         )
     )
-    return AEA(identity, wallet, resources, runtime_mode=runtime_mode)
+    return AEA(identity, wallet, resources, datadir, runtime_mode=runtime_mode)
 
 
 def make_envelope(
@@ -112,9 +111,7 @@ def make_envelope(
         )
     message.sender = sender
     message.to = to
-    return Envelope(
-        to=to, sender=sender, protocol_id=DefaultMessage.protocol_id, message=message,
-    )
+    return Envelope(to=to, sender=sender, message=message,)
 
 
 class GeneratorConnection(Connection):
@@ -175,23 +172,30 @@ class SyncedGeneratorConnection(GeneratorConnection):
     def __init__(self, *args, **kwargs):
         """Init connection."""
         super().__init__(*args, **kwargs)
-        self._condition = None
+        self._condition: Optional[asyncio.Event] = None
+
+    @property
+    def condition(self) -> asyncio.Event:
+        """Get condition."""
+        if self._condition is None:
+            raise ValueError("Event not set.")
+        return self._condition
 
     async def connect(self):
         """Connect connection."""
         await super().connect()
         self._condition = asyncio.Event()
-        self._condition.set()
+        self.condition.set()
 
     async def send(self, envelope: "Envelope") -> None:
         """Handle incoming envelope."""
         await super().send(envelope)
-        self._condition.set()
+        self.condition.set()
 
     async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
         """Generate an envelope."""
-        await self._condition.wait()
-        self._condition.clear()
+        await self.condition.wait()
+        self.condition.clear()
         return await super().receive(*args, **kwargs)
 
 

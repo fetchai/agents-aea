@@ -17,13 +17,14 @@
 #
 # ------------------------------------------------------------------------------
 """Extension to the Local Node."""
-
 import asyncio
 import logging
+import threading
 from asyncio import AbstractEventLoop, Queue
 from collections import defaultdict
+from concurrent.futures import Future
 from threading import Thread
-from typing import Dict, List, Optional, Tuple, Type, cast
+from typing import Any, Dict, List, Optional, Tuple, Type, cast
 
 from aea.common import Address
 from aea.configurations.base import PublicId
@@ -52,7 +53,7 @@ MESSAGE_ID = 1
 RESPONSE_TARGET = MESSAGE_ID
 RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
 STUB_DIALOGUE_ID = 0
-PUBLIC_ID = PublicId.from_str("fetchai/local:0.14.0")
+PUBLIC_ID = PublicId.from_str("fetchai/local:0.15.0")
 
 
 class OefSearchDialogue(BaseOefSearchDialogue):
@@ -132,29 +133,29 @@ class LocalNode:
 
         :param loop: the event loop. If None, a new event loop is instantiated.
         """
+        self._lock = threading.Lock()
         self.services = defaultdict(lambda: [])  # type: Dict[str, List[Description]]
-        self._lock = asyncio.Lock()
         self._loop = loop if loop is not None else asyncio.new_event_loop()
         self._thread = Thread(target=self._run_loop, daemon=True)
 
         self._in_queue = asyncio.Queue(loop=self._loop)  # type: asyncio.Queue
         self._out_queues = {}  # type: Dict[str, asyncio.Queue]
 
-        self._receiving_loop_task = None  # type: Optional[asyncio.Task]
+        self._receiving_loop_task = None  # type: Optional[Future]
         self.address: Optional[Address] = None
         self._dialogues: Optional[OefSearchDialogues] = None
         self.logger = logger
 
-    def __enter__(self):
+    def __enter__(self) -> "LocalNode":
         """Start the local node."""
         self.start()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: str, exc_val: str, exc_tb: str) -> None:
         """Stop the local node."""
         self.stop()
 
-    def _run_loop(self):
+    def _run_loop(self) -> None:
         """
         Run the asyncio loop.
 
@@ -187,7 +188,7 @@ class LocalNode:
         self._dialogues = OefSearchDialogues()
         return q
 
-    def start(self):
+    def start(self) -> None:
         """Start the node."""
         if not self._loop.is_running() and not self._thread.is_alive():
             self._thread.start()
@@ -196,8 +197,11 @@ class LocalNode:
         )
         self.logger.debug("Local node has been started.")
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop the node."""
+
+        if self._receiving_loop_task is None:
+            raise ValueError("Connection not started!")
         asyncio.run_coroutine_threadsafe(self._in_queue.put(None), self._loop).result()
         self._receiving_loop_task.result()
 
@@ -206,7 +210,7 @@ class LocalNode:
         if self._thread.is_alive():
             self._thread.join()
 
-    async def receiving_loop(self):
+    async def receiving_loop(self) -> None:
         """Process incoming messages."""
         while True:
             envelope = await self._in_queue.get()
@@ -222,7 +226,10 @@ class LocalNode:
         :param envelope: the envelope
         :return: None
         """
-        if envelope.protocol_id == OefSearchMessage.protocol_id:
+        if (
+            envelope.protocol_specification_id
+            == OefSearchMessage.protocol_specification_id
+        ):
             await self._handle_oef_message(envelope)
         else:
             OEFLocalConnection._ensure_valid_envelope_for_external_comms(  # pylint: disable=protected-access
@@ -282,7 +289,6 @@ class LocalNode:
             error_envelope = Envelope(
                 to=envelope.sender,
                 sender=str(OEFLocalConnection.connection_id),
-                protocol_id=DefaultMessage.protocol_id,
                 message=msg,
             )
             await self._send(error_envelope)
@@ -291,7 +297,7 @@ class LocalNode:
 
     async def _register_service(
         self, address: Address, service_description: Description
-    ):
+    ) -> None:
         """
         Register a service agent in the service directory of the node.
 
@@ -299,7 +305,7 @@ class LocalNode:
         :param service_description: the description of the service agent to be registered.
         :return: None
         """
-        async with self._lock:
+        with self._lock:
             self.services[address].append(service_description)
 
     async def _unregister_service(
@@ -314,7 +320,7 @@ class LocalNode:
         """
         service_description = oef_search_msg.service_description
         address = oef_search_msg.sender
-        async with self._lock:
+        with self._lock:
             if address not in self.services:
                 msg = dialogue.reply(
                     performative=OefSearchMessage.Performative.OEF_ERROR,
@@ -324,7 +330,6 @@ class LocalNode:
                 envelope = Envelope(
                     to=msg.to,
                     sender=msg.sender,
-                    protocol_id=msg.protocol_id,
                     message=msg,
                     context=dialogue.envelope_context,
                 )
@@ -347,7 +352,7 @@ class LocalNode:
         :param dialogue: the dialogue.
         :return: None
         """
-        async with self._lock:
+        with self._lock:
             query = oef_search_msg.query
             result = []  # type: List[str]
             if query.model is None:
@@ -367,7 +372,6 @@ class LocalNode:
             envelope = Envelope(
                 to=msg.to,
                 sender=msg.sender,
-                protocol_id=msg.protocol_id,
                 message=msg,
                 context=dialogue.envelope_context,
             )
@@ -391,7 +395,7 @@ class LocalNode:
             dialogue.envelope_context = envelope.context
         return message, dialogue
 
-    async def _send(self, envelope: Envelope):
+    async def _send(self, envelope: Envelope) -> None:
         """Send a message."""
         destination = envelope.to
         destination_queue = self._out_queues[destination]
@@ -405,7 +409,7 @@ class LocalNode:
         :param address: the address of the agent
         :return: None
         """
-        async with self._lock:
+        with self._lock:
             self._out_queues.pop(address, None)
             self.services.pop(address, None)
 
@@ -420,7 +424,7 @@ class OEFLocalConnection(Connection):
 
     connection_id = PUBLIC_ID
 
-    def __init__(self, local_node: Optional[LocalNode] = None, **kwargs):
+    def __init__(self, local_node: Optional[LocalNode] = None, **kwargs: Any) -> None:
         """
         Load the connection configuration.
 
@@ -451,20 +455,20 @@ class OEFLocalConnection(Connection):
             raise ValueError("No local node set!")  # pragma: nocover
         if self.is_disconnected:
             return  # pragma: nocover
-        self._state.set(ConnectionStates.disconnecting)
+        self.state = ConnectionStates.disconnecting
         if self._reader is None:
             raise ValueError("No reader set!")  # pragma: nocover
         await self._local_node.disconnect(self.address)
         await self._reader.put(None)
         self._reader, self._writer = None, None
-        self._state.set(ConnectionStates.disconnected)
+        self.state = ConnectionStates.disconnected
 
-    async def send(self, envelope: Envelope):
+    async def send(self, envelope: Envelope) -> None:
         """Send a message."""
         self._ensure_connected()
         self._writer._loop.call_soon_threadsafe(self._writer.put_nowait, envelope)  # type: ignore  # pylint: disable=protected-access
 
-    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
+    async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """
         Receive an envelope. Blocking.
 

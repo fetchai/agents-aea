@@ -1,4 +1,18 @@
-This page provides some tips of how to upgrade between versions.
+This page provides some tips on how to upgrade AEA projects between different versions of the AEA framework.
+
+The primary tool for upgrading AEA projects is the `aea upgrade` command in the <a href="../cli-commands/">CLI</a>.
+
+Below we describe the additional manual steps required to upgrade between different versions:
+
+## `v0.9.2` to `v0.10.0`
+
+Skill development sees no backward incompatible changes. 
+
+Connection development requires updating the keyword arguments of the constructor: the new `data_dir` argument must be defined.
+
+Protocol specifications now need to contain a `protocol_specification_id` in addition to the public id. The `protocol_specification_id` is used for identifying Envelopes during transport. By being able to set the id independently of the protocol id backwards compatibility in the specification (and therefore wire format) can be maintained even when the Python implementation changes.
+
+Please update to the latest packages by running `aea upgrade` and then re-generating your own protocols.
 
 ## `v0.9.1` to `v0.9.2`
 
@@ -10,9 +24,9 @@ No backwards incompatible changes for skill and connection development.
 
 ## `v0.8.0` to `v0.9.0`
 
-This release introduces <a href="../por">proof of representation</a> to the ACN. You will need to upgrade to the latest `fetchai/p2p_libp2p`/`fetchai/p2p_libp2p_client` connection and then use two key pairs, one for your AEA's decision maker and one for the connection.
+This release introduces <a href="../por">proof of representation</a> in the ACN. You will need to upgrade to the latest `fetchai/p2p_libp2p` or `fetchai/p2p_libp2p_client` connection and then use two key pairs, one for your AEA's decision maker and one for the connection.
 
-Please update to latest packages by running `aea upgrade`.
+Please update to the latest packages by running `aea upgrade`.
 
 ## `v0.7.5` to `v0.8.0`
 
@@ -21,7 +35,7 @@ Minimal backwards incompatible changes for skill and connection development:
 - The semantics of the `<`, `<=`, `>` and `>=` relations in `ConstraintTypes` are simplified.
 - Protocols now need to correctly define terminal states. Regenerate your protocol to identify if your protocol's dialogue rules are valid.
 
-Please update to latest packages by running `aea upgrade`.
+Please update to the latest packages by running `aea upgrade`.
 
 ## `v0.7.4` to `v0.7.5`
 
@@ -41,7 +55,7 @@ No backwards incompatible changes for skill and connection development.
 
 ## `v0.7.0` to `v0.7.1`
 
-To improve performance, in particular optimize memory usage, we refactored the `Message` and `Dialogue` classes. This means all protocols need to be bumped to the latest version or regenerated using the generate command.
+To improve performance, in particular optimize memory usage, we refactored the `Message` and `Dialogue` classes. This means all protocols need to be bumped to the latest version or regenerated using the `aea generate protocol` command in the <a href="../cli-commands/">CLI</a>.
 
 ## `v0.6.3` to `v0.7.0`
 

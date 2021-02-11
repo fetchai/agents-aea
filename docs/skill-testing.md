@@ -77,6 +77,7 @@ agent_context = AgentContext(
     default_routing={},
     search_service_address="dummy_search_service_address",
     decision_maker_address="dummy_decision_maker_address",
+    data_dir="."
 )
 ```
 

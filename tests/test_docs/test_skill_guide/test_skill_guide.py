@@ -53,10 +53,12 @@ MD_FILE = "docs/skill-guide.md"
 class TestBuildSkill(AEATestCaseMany):
     """This class contains the tests for the code-blocks in the skill-guide.md file."""
 
+    capture_log = True
+
     @classmethod
     def setup_class(cls):
         """Setup the test class."""
-        AEATestCaseMany.setup_class()
+        super().setup_class()
         cls.doc_path = os.path.join(ROOT_DIR, MD_FILE)
         cls.code_blocks = extract_code_blocks(filepath=cls.doc_path, filter_="python")
 
@@ -77,7 +79,7 @@ class TestBuildSkill(AEATestCaseMany):
 
         simple_service_registration_aea = "simple_service_registration"
         self.fetch_agent(
-            "fetchai/simple_service_registration:0.19.0",
+            "fetchai/simple_service_registration:0.20.0",
             simple_service_registration_aea,
         )
         self.set_agent_context(simple_service_registration_aea)
@@ -95,7 +97,7 @@ class TestBuildSkill(AEATestCaseMany):
         self.set_config(setting_path, FETCHAI)
 
         default_routing = {
-            "fetchai/oef_search:0.12.0": "fetchai/soef:0.15.0",
+            "fetchai/oef_search:0.13.0": "fetchai/soef:0.16.0",
         }
 
         # replace location
@@ -108,9 +110,9 @@ class TestBuildSkill(AEATestCaseMany):
         skill_name = "my_search"
         skill_id = AUTHOR + "/" + skill_name + ":" + DEFAULT_VERSION
         self.scaffold_item("skill", skill_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.14.0")
-        self.add_item("connection", "fetchai/soef:0.15.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.14.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.15.0")
+        self.add_item("connection", "fetchai/soef:0.16.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.15.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
 

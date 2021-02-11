@@ -40,7 +40,7 @@ _default_logger = logging.getLogger(__name__)
 class AEAInstanceTask(AbstractExecutorTask):
     """Task to run agent instance."""
 
-    def __init__(self, agent: AEA):
+    def __init__(self, agent: AEA) -> None:
         """
         Init aea instance task.
 
@@ -49,7 +49,12 @@ class AEAInstanceTask(AbstractExecutorTask):
         self._agent = agent
         super().__init__()
 
-    def start(self) -> None:
+    @property
+    def id(self) -> str:
+        """Return agent name."""
+        return self._agent.name
+
+    def start(self) -> None:  # type: ignore
         """Start task."""
         try:
             self._agent.start()
@@ -74,11 +79,6 @@ class AEAInstanceTask(AbstractExecutorTask):
                 "Agent runtime is not async compatible. Please use runtime_mode=async"
             )
         return loop.create_task(self._agent.runtime.start_and_wait_completed())
-
-    @property
-    def id(self):
-        """Return agent name."""
-        return self._agent.name
 
 
 class AEARunner(AbstractMultipleRunner):

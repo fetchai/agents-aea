@@ -60,6 +60,10 @@ spec:
             value: /dns4/{{ $.Values.dns.publicdnsname }}/tcp/{{ $.Values.acnnodes.bootstrap.p2pport }}/p2p/{{ $.Values.acnnodes.bootstrap.peerid }}
           - name: ACN_LOG_FILE
             value: /acn_data/libp2p_node_{{ .p2pport }}.log
+          - name: AEA_P2P_CFG_REGISTRATION_DELAY
+            value: "3.0"
+          - name: AEA_P2P_CFG_STORAGE_PATH
+            value: /acn_data/agents_record_store_{{ .peerid }}
 
         {{- if $.Values.acnnodes.resources }}
         resources: {{- toYaml $.Values.acnnodes.resources | nindent 10 }}
@@ -82,7 +86,7 @@ spec:
       - ReadWriteOnce
       resources:
         requests:
-          storage: 2Gi
+          storage: 20Gi
 ---
 apiVersion: v1
 kind: Service

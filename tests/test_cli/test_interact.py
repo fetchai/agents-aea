@@ -75,7 +75,7 @@ class ConstructMessageTestCase(TestCase):
         envelope = mock.Mock()
         envelope.to = "receiver"
         envelope.sender = "sender"
-        envelope.protocol_id = "protocol-id"
+        envelope.protocol_specification_id = "protocol-id"
 
         envelope.message = "Message"
         message_class = DefaultMessage
@@ -87,7 +87,7 @@ class ConstructMessageTestCase(TestCase):
                 "\nAction envelope:"
                 "\nto: receiver"
                 "\nsender: sender"
-                "\nprotocol_id: protocol-id"
+                "\nprotocol_specification_id: protocol-id"
                 "\nmessage: Message\n"
             )
             self.assertEqual(result, expected_result)
@@ -98,7 +98,7 @@ class ConstructMessageTestCase(TestCase):
                 "\nAction envelope:"
                 "\nto: receiver"
                 "\nsender: sender"
-                "\nprotocol_id: protocol-id"
+                "\nprotocol_specification_id: protocol-id"
                 "\nmessage: Decoded message\n"
             )
             self.assertEqual(result, expected_result)
@@ -119,7 +119,7 @@ class TryConstructEnvelopeTestCase(TestCase):
     def test__try_construct_envelope_positive(self, *mocks):
         """Test _try_construct_envelope for positive result."""
         dialogues_mock = mock.Mock()
-        msg_mock = mock.Mock()
+        msg_mock = mock.Mock(spec=DefaultMessage)
         msg_mock.to = "to"
         msg_mock.sender = "sender"
         dialogues_mock.create.return_value = msg_mock, None
@@ -234,7 +234,7 @@ class TestInteractEcho(AEATestCaseEmpty):
                 "Sending envelope:",
                 f"to: {self.agent_name}",
                 f"sender: {self.agent_name}_interact",
-                f"protocol_id: {str(DefaultMessage.protocol_id)}",
+                f"protocol_specification_id: {str(DefaultMessage.protocol_specification_id)}",
                 "message_id=1",
                 "target=0",
                 "performative=bytes",
@@ -255,8 +255,8 @@ class TestInteractEcho(AEATestCaseEmpty):
                 "Received envelope:",
                 f"to: {self.agent_name}_interact",
                 f"sender: {self.agent_name}",
-                f"protocol_id: {str(DefaultMessage.protocol_id)}",
-                "message_id=2",
+                f"protocol_specification_id: {str(DefaultMessage.protocol_specification_id)}",
+                "message_id=-1",
                 "target=1",
                 "performative=bytes",
                 "content=b'hello'",

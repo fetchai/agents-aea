@@ -56,19 +56,17 @@ def test_register_service_serialization():
         service_description=Description({"foo1": 1, "bar1": 2}),
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to,
-        sender="sender",
-        protocol_id=OefSearchMessage.protocol_id,
-        message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = OefSearchMessage.serializer.decode(actual_envelope.message)
@@ -87,19 +85,17 @@ def test_unregister_service_serialization():
         service_description=Description({"foo1": 1, "bar1": 2}),
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to,
-        sender="sender",
-        protocol_id=OefSearchMessage.protocol_id,
-        message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = OefSearchMessage.serializer.decode(actual_envelope.message)
@@ -116,19 +112,17 @@ def test_search_services_serialization():
         query=Query([Constraint("something", ConstraintType(">", 1))]),
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to,
-        sender="sender",
-        protocol_id=OefSearchMessage.protocol_id,
-        message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = OefSearchMessage.serializer.decode(actual_envelope.message)
@@ -151,19 +145,17 @@ def test_search_result_serialization():
         ),
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to,
-        sender="sender",
-        protocol_id=OefSearchMessage.protocol_id,
-        message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = OefSearchMessage.serializer.decode(actual_envelope.message)
@@ -185,19 +177,17 @@ def test_success_serialization():
         ),
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to,
-        sender="sender",
-        protocol_id=OefSearchMessage.protocol_id,
-        message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = OefSearchMessage.serializer.decode(actual_envelope.message)
@@ -214,19 +204,17 @@ def test_oef_error_serialization():
         oef_error_operation=OefSearchMessage.OefErrorOperation.OTHER,
     )
     msg.to = "receiver"
-    envelope = Envelope(
-        to=msg.to,
-        sender="sender",
-        protocol_id=OefSearchMessage.protocol_id,
-        message=msg,
-    )
+    envelope = Envelope(to=msg.to, sender="sender", message=msg,)
     envelope_bytes = envelope.encode()
 
     actual_envelope = Envelope.decode(envelope_bytes)
     expected_envelope = envelope
     assert expected_envelope.to == actual_envelope.to
     assert expected_envelope.sender == actual_envelope.sender
-    assert expected_envelope.protocol_id == actual_envelope.protocol_id
+    assert (
+        expected_envelope.protocol_specification_id
+        == actual_envelope.protocol_specification_id
+    )
     assert expected_envelope.message != actual_envelope.message
 
     actual_msg = OefSearchMessage.serializer.decode(actual_envelope.message)

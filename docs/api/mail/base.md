@@ -34,7 +34,7 @@ URI following RFC3986.
 #### `__`init`__`
 
 ```python
- | __init__(uri_raw: str)
+ | __init__(uri_raw: str) -> None
 ```
 
 Initialize the URI.
@@ -153,7 +153,7 @@ Get the port.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get string representation.
@@ -162,7 +162,7 @@ Get string representation.
 #### `__`eq`__`
 
 ```python
- | __eq__(other)
+ | __eq__(other: Any) -> bool
 ```
 
 Compare with another object.
@@ -180,7 +180,7 @@ Extra information for the handling of an envelope.
 #### `__`init`__`
 
 ```python
- | __init__(connection_id: Optional[PublicId] = None, skill_id: Optional[PublicId] = None, uri: Optional[URI] = None)
+ | __init__(connection_id: Optional[PublicId] = None, skill_id: Optional[PublicId] = None, uri: Optional[URI] = None) -> None
 ```
 
 Initialize the envelope context.
@@ -225,7 +225,7 @@ Get uri in string format.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get the string representation.
@@ -234,7 +234,7 @@ Get the string representation.
 #### `__`eq`__`
 
 ```python
- | __eq__(other)
+ | __eq__(other: Any) -> bool
 ```
 
 Compare with another object.
@@ -342,7 +342,7 @@ The top level message class for agent to agent communication.
 #### `__`init`__`
 
 ```python
- | __init__(to: Address, sender: Address, protocol_id: PublicId, message: Union[Message, bytes], context: Optional[EnvelopeContext] = None)
+ | __init__(to: Address, sender: Address, message: Union[Message, bytes], context: Optional[EnvelopeContext] = None, protocol_specification_id: Optional[PublicId] = None) -> None
 ```
 
 Initialize a Message object.
@@ -351,9 +351,9 @@ Initialize a Message object.
 
 - `to`: the address of the receiver.
 - `sender`: the address of the sender.
-- `protocol_id`: the protocol id.
 - `message`: the protocol-specific message.
 - `context`: the optional envelope context.
+- `protocol_specification_id`: the protocol specification id (wire id).
 
 <a name="aea.mail.base.Envelope.to"></a>
 #### to
@@ -395,25 +395,15 @@ Get address of sender.
 
 Set address of sender.
 
-<a name="aea.mail.base.Envelope.protocol_id"></a>
-#### protocol`_`id
+<a name="aea.mail.base.Envelope.protocol_specification_id"></a>
+#### protocol`_`specification`_`id
 
 ```python
  | @property
- | protocol_id() -> PublicId
+ | protocol_specification_id() -> PublicId
 ```
 
-Get protocol id.
-
-<a name="aea.mail.base.Envelope.protocol_id"></a>
-#### protocol`_`id
-
-```python
- | @protocol_id.setter
- | protocol_id(protocol_id: PublicId) -> None
-```
-
-Set the protocol id.
+Get protocol_specification_id.
 
 <a name="aea.mail.base.Envelope.message"></a>
 #### message
@@ -488,7 +478,7 @@ connection id
 
 ```python
  | @property
- | is_sender_public_id()
+ | is_sender_public_id() -> bool
 ```
 
 Check if sender is a public id.
@@ -498,7 +488,7 @@ Check if sender is a public id.
 
 ```python
  | @property
- | is_to_public_id()
+ | is_to_public_id() -> bool
 ```
 
 Check if to is a public id.
@@ -507,7 +497,7 @@ Check if to is a public id.
 #### `__`eq`__`
 
 ```python
- | __eq__(other)
+ | __eq__(other: Any) -> bool
 ```
 
 Compare with another object.
@@ -552,7 +542,7 @@ the decoded envelope.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get the string representation of an envelope.

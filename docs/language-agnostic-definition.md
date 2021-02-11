@@ -1,4 +1,10 @@
-An Autonomous Economic Agent is, in technical terms, defined by the following characteristics:
+Currently, there is an implementation of the AEA framework in Python which enables the development of AEAs in Python, and allows AEAs which are built with it to run.
+
+However, AEAs can be developed in different programming languages. This is further backed by the idea that agent-based solutions are suited for multi-stakeholder environments where the different AEAs may be developed independently of one another, resulting in heterogeneous systems. 
+
+This means that in principle, there could be different implementations of the AEA framework, in various programming languages and for different platforms. However, to ensure that AEAs under any implementation are compatible with one another and able to interact, they must satisfy specific definitions. In this page, we compile a set of definitions which any AEA independent of its implementation must satisfy in order to be able to interact with other AEAs.
+
+An AEA, in technical terms, must satisfy the following requirements:
 
 <ul>
 <li> It MUST be capable of receiving and sending <code>Envelopes</code> which satisfy the following <a href="https://developers.google.com/protocol-buffers" target="_blank">protobuf</a> schema:
@@ -9,43 +15,55 @@ syntax = "proto3";
 package aea;
 
 message Envelope{
-    string to = 1;
-    string sender = 2;
-    string protocol_id = 3;
-    bytes message = 4;
-    string uri = 5;
+  string to = 1;
+  string sender = 2;
+  string protocol_id = 3;
+  bytes message = 4;
+  string uri = 5;
 }
 ```
 
-The format for the above fields, except <code>message</code>, is specified below.
+The format for the above fields are as follows:
 
 <ul>
 <li><code>to</code> and <code>sender</code>: an address derived from the private key of a <a href="https://en.bitcoin.it/wiki/Secp256k1" target="_blank">secp256k1</a>-compatible elliptic curve</li>
 <li><code>protocol_id</code>: this must match a defined  <a href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference" target="_blank">regular expression</a> (see below)
 <li><code>message</code>: a bytes string representing a serialized message in the specified  <a href="../protocol">protocol</a></li>
-<li><code>URI</code>: <a href="https://tools.ietf.org/html/rfc3986" target="_blank">this syntax</a></li>
+<li><code>URI</code>: follows <a href="https://tools.ietf.org/html/rfc3986" target="_blank">this syntax</a></li>
 </ul>
 </li>
 
 <li> It MUST implement each protocol's <code>message</code> with the required meta-fields:
 
 ``` proto
+syntax = "proto3";
+
+package aea;
+
 import "google/protobuf/struct.proto";
 
 
 message DialogueMessage {
-    int32 message_id = 1;
-    string dialogue_starter_reference = 2;
-    string dialogue_responder_reference = 3;
-    int32 target = 4;
-    bytes content = 5;
+  int32 message_id = 1;
+  string dialogue_starter_reference = 2;
+  string dialogue_responder_reference = 3;
+  int32 target = 4;
+  bytes content = 5;
 }
 
 message Message {
-    oneof message {
-        google.protobuf.Struct body = 1;
-        DialogueMessage dialogue_message = 2;
-    }
+  oneof message {
+    google.protobuf.Struct body = 1;
+    DialogueMessage dialogue_message = 2;
+  }
+}
+
+message Envelope{
+  string to = 1;
+  string sender = 2;
+  string protocol_id = 3;
+  bytes message = 4;
+  string uri = 5;
 }
 ```
  where <code>content</code> is replaced with the protocol specific content (see <a href="../protocol-generator">here</a> for details).
@@ -53,47 +71,48 @@ message Message {
 
 <li> It MUST implement protocols according to their specification (see <a href="../protocol-generator">here</a> for details).
 
-<li> It SHOULD implement the <code>fetchai/default:0.11.0</code> protocol which satisfies the following protobuf schema:
+<li> It SHOULD implement the <code>fetchai/default:0.12.0</code> protocol which satisfies the following protobuf schema:
 
 ``` proto
 syntax = "proto3";
 
-package aea.fetchai.default;
+package aea.fetchai.default.v0_1_0;
 
 message DefaultMessage{
 
-    // Custom Types
-    message ErrorCode{
-        enum ErrorCodeEnum {
-            UNSUPPORTED_PROTOCOL = 0;
-            DECODING_ERROR = 1;
-            INVALID_MESSAGE = 2;
-            UNSUPPORTED_SKILL = 3;
-            INVALID_DIALOGUE = 4;
-          }
-        ErrorCodeEnum error_code = 1;
+  // Custom Types
+  message ErrorCode{
+    enum ErrorCodeEnum {
+      UNSUPPORTED_PROTOCOL = 0;
+      DECODING_ERROR = 1;
+      INVALID_MESSAGE = 2;
+      UNSUPPORTED_SKILL = 3;
+      INVALID_DIALOGUE = 4;
     }
+    ErrorCodeEnum error_code = 1;
+  }
 
 
-    // Performatives and contents
-    message Bytes_Performative{
-        bytes content = 1;
-    }
+  // Performatives and contents
+  message Bytes_Performative{
+    bytes content = 1;
+  }
 
-    message Error_Performative{
-        ErrorCode error_code = 1;
-        string error_msg = 2;
-        map<string, bytes> error_data = 3;
-    }
+  message Error_Performative{
+    ErrorCode error_code = 1;
+    string error_msg = 2;
+    map<string, bytes> error_data = 3;
+  }
 
-    message End_Performative{}
+  message End_Performative{
+  }
 
 
-    oneof performative{
-        Bytes_Performative bytes = 5;
-        End_Performative end = 6;
-        Error_Performative error = 7;
-    }
+  oneof performative{
+    Bytes_Performative bytes = 5;
+    End_Performative end = 6;
+    Error_Performative error = 7;
+  }
 }
 ```
 </li>
@@ -102,7 +121,7 @@ message DefaultMessage{
 </li>
 <li> It MUST have an identity in the form of, at a minimum, an address derived from a public key and its associated private key (where the elliptic curve must be of type <a href="https://en.bitcoin.it/wiki/Secp256k1" target="_blank">SECP256k1</a>).
 </li>
-<li> It SHOULD implement handling of errors using the <code>fetchai/default:0.11.0</code> protocol. The protobuf schema is given above.
+<li> It SHOULD implement handling of errors using the <code>fetchai/default:0.12.0</code> protocol. The protobuf schema is given above.
 </li>
 <li> It MUST implement the following principles when handling messages:
 <ul>

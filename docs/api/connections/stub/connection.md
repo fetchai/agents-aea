@@ -14,7 +14,7 @@ class StubConnection(Connection)
 #### `__`init`__`
 
 ```python
- | __init__(**kwargs)
+ | __init__(**kwargs: Any)
 ```
 
 Initialize a stub connection.
@@ -32,7 +32,7 @@ Read envelopes from inptut file, decode and put into in_queue.
 #### receive
 
 ```python
- | async receive(*args, **kwargs) -> Optional["Envelope"]
+ | async receive(*args: Any, **kwargs: Any) -> Optional["Envelope"]
 ```
 
 Receive an envelope.

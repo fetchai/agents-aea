@@ -30,7 +30,6 @@ from aea.configurations.base import ComponentType, PublicId
 from aea.configurations.constants import (
     DEFAULT_CONNECTION,
     DEFAULT_PROTOCOL,
-    DEFAULT_SKILL,
     FETCHAI,
     PACKAGES,
     SIGNING_PROTOCOL,
@@ -49,7 +48,6 @@ DEFAULT_PACKAGES = {
     (ComponentType.PROTOCOL, SIGNING_PROTOCOL),
     (ComponentType.PROTOCOL, STATE_UPDATE_PROTOCOL),
     (ComponentType.CONNECTION, DEFAULT_CONNECTION),
-    (ComponentType.SKILL, DEFAULT_SKILL),
 }
 
 IGNORE_NAMES = {r"^__init__\.py$", r"^__version__\.py$", r"^py\.typed$", r"^.*_pb2.py$"}

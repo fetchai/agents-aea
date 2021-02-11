@@ -18,7 +18,10 @@
 # ------------------------------------------------------------------------------
 """Registry utils used for CLI login command."""
 
+from typing import cast
+
 from aea.cli.registry.utils import request_api
+from aea.common import JSONLike
 
 
 def registry_login(username: str, password: str) -> str:
@@ -30,10 +33,15 @@ def registry_login(username: str, password: str) -> str:
 
     :return: str token
     """
-    resp = request_api(
-        "POST", "/rest-auth/login/", data={"username": username, "password": password}
+    resp = cast(
+        JSONLike,
+        request_api(
+            "POST",
+            "/rest-auth/login/",
+            data={"username": username, "password": password},
+        ),
     )
-    return resp["key"]
+    return cast(str, resp["key"])
 
 
 def registry_reset_password(email: str) -> None:

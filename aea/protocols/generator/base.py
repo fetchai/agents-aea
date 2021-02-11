@@ -17,15 +17,19 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the protocol generator."""
-# pylint: skip-file
-
 import itertools
 import os
 import shutil
+
+# pylint: skip-file
+import sys
 from datetime import date
 from pathlib import Path
+from subprocess import call  # nosec
 from typing import Optional, Tuple
 
+# pylint: skip-file
+from aea.configurations.data_types import PublicId
 from aea.protocols.generator.common import (
     CUSTOM_TYPES_DOT_PY_FILE_NAME,
     DIALOGUE_DOT_PY_FILE_NAME,
@@ -184,7 +188,7 @@ class ProtocolGenerator:
             "Union",
             "cast",
         ]
-        import_str = "from typing import "
+        import_str = "from typing import Any, "
         for package in ordered_packages:
             if self.spec.typing_imports[package]:
                 import_str += "{}, ".format(package)
@@ -237,7 +241,7 @@ class ProtocolGenerator:
                 performative.upper(), performative
             )
         enum_str += "\n"
-        enum_str += self.indent + "def __str__(self):\n"
+        enum_str += self.indent + "def __str__(self) -> str:\n"
         self._change_indent(1)
         enum_str += self.indent + '"""Get the string representation."""\n'
         enum_str += self.indent + "return str(self.value)\n"
@@ -625,6 +629,16 @@ class ProtocolGenerator:
             self.protocol_specification.name,
             self.protocol_specification.version,
         )
+
+        cls_str += (
+            self.indent
+            + 'protocol_specification_id = PublicId.from_str("{}/{}:{}")\n'.format(
+                self.protocol_specification.protocol_specification_id.author,
+                self.protocol_specification.protocol_specification_id.name,
+                self.protocol_specification.protocol_specification_id.version,
+            )
+        )
+
         for custom_type in self.spec.all_custom_types:
             cls_str += "\n"
             cls_str += self.indent + "{} = Custom{}\n".format(custom_type, custom_type)
@@ -659,7 +673,7 @@ class ProtocolGenerator:
         cls_str += self.indent + 'dialogue_reference: Tuple[str, str] = ("", ""),\n'
         cls_str += self.indent + "message_id: int = 1,\n"
         cls_str += self.indent + "target: int = 0,\n"
-        cls_str += self.indent + "**kwargs,\n"
+        cls_str += self.indent + "**kwargs: Any,\n"
         self._change_indent(-1)
         cls_str += self.indent + "):\n"
         self._change_indent(1)
@@ -867,14 +881,6 @@ class ProtocolGenerator:
         cls_str += (
             self.indent
             + "enforce(self.target == 0, \"Invalid 'target'. Expected 0 (because 'message_id' is 1). Found {}.\".format(self.target))\n"
-        )
-        self._change_indent(-1)
-        cls_str += self.indent + "else:\n"
-        self._change_indent(1)
-        cls_str += (
-            self.indent + "enforce(0 < self.target < self.message_id, "
-            "\"Invalid 'target'. Expected an integer between 1 and {} inclusive. Found {}.\""
-            ".format(self.message_id - 1, self.target,))\n"
         )
         self._change_indent(-2)
         cls_str += (
@@ -1772,8 +1778,10 @@ class ProtocolGenerator:
 
         # heading
         proto_buff_schema_str = self.indent + 'syntax = "proto3";\n\n'
-        proto_buff_schema_str += self.indent + "package aea.{}.{};\n\n".format(
-            self.protocol_specification.author, self.protocol_specification.name
+        proto_buff_schema_str += self.indent + "package {};\n\n".format(
+            public_id_to_package_name(
+                self.protocol_specification.protocol_specification_id
+            )
         )
         proto_buff_schema_str += self.indent + "message {}Message{{\n\n".format(
             self.protocol_specification_in_camel_case
@@ -1860,6 +1868,9 @@ class ProtocolGenerator:
         protocol_yaml_str = "name: {}\n".format(self.protocol_specification.name)
         protocol_yaml_str += "author: {}\n".format(self.protocol_specification.author)
         protocol_yaml_str += "version: {}\n".format(self.protocol_specification.version)
+        protocol_yaml_str += "protocol_specification_id: {}\n".format(
+            str(self.protocol_specification.protocol_specification_id)
+        )
         protocol_yaml_str += "type: {}\n".format(
             self.protocol_specification.component_type
         )
@@ -1903,7 +1914,7 @@ class ProtocolGenerator:
 
         return init_str
 
-    def generate_protobuf_only_mode(self) -> None:
+    def generate_protobuf_only_mode(self, run_protolint: bool = True) -> None:
         """
         Run the generator in "protobuf only" mode:
 
@@ -1929,12 +1940,34 @@ class ProtocolGenerator:
             self.path_to_generated_protocol_package, self.protocol_specification.name
         )
 
-        if is_valid_protobuf_schema:
-            pass
-        else:
+        if run_protolint:
+            self.run_protolint_for_file(
+                os.path.join(
+                    self.path_to_generated_protocol_package,
+                    "{}.proto".format(self.protocol_specification.name),
+                )
+            )
+
+        if not is_valid_protobuf_schema:
             # Remove the generated folder and files
             shutil.rmtree(output_folder)
             raise SyntaxError("Error in the protocol buffer schema code:\n" + msg)
+
+    @staticmethod
+    def run_protolint_for_file(filepath: str) -> None:
+        """Perform protolint check for file."""
+        if sys.platform.startswith("win"):
+            protolint_base_cmd = "protolint"  # pragma: nocover
+        else:
+            protolint_base_cmd = "PATH=${PATH}:${GOPATH}/bin/:~/go/bin protolint"
+
+        if call(f"{protolint_base_cmd} version", shell=True) != 0:  # nosec
+            raise ValueError(
+                "protolint is not installed! Please install from https://github.com/yoheimuta/protolint."
+            )
+
+        cmd = f'{protolint_base_cmd} lint -fix "{filepath}"'
+        call(cmd, shell=True)  # nosec
 
     def generate_full_mode(self) -> Optional[str]:
         """
@@ -2026,3 +2059,8 @@ class ProtocolGenerator:
         else:
             message = self.generate_full_mode()
         return message
+
+
+def public_id_to_package_name(public_id: PublicId) -> str:
+    """Make package name string from public_id provided."""
+    return f'aea.{public_id.author}.{public_id.name}.v{public_id.version.replace(".", "_")}'

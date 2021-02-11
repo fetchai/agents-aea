@@ -334,7 +334,7 @@ class AgentConfigManager:
         return self._get_agent_config_file_path(self.aea_project_directory)
 
     @classmethod
-    def _get_agent_config_file_path(cls, aea_project_path) -> Path:
+    def _get_agent_config_file_path(cls, aea_project_path: Union[str, Path]) -> Path:
         """Get agent config file path for aea project path."""
         return Path(aea_project_path) / DEFAULT_AEA_CONFIG_FILE
 
@@ -493,7 +493,7 @@ class AgentConfigManager:
         """
         if not overrides:
             # nothing to update
-            return
+            return  # pragma: nocover
 
         overrides = self._filter_overrides(overrides)
         if overrides is SAME_MARK:
@@ -517,7 +517,7 @@ class AgentConfigManager:
         filtered_overrides = filter_data(agent_overridable, overrides)
         return filtered_overrides
 
-    def validate_current_config(self):
+    def validate_current_config(self) -> None:
         """Check is current config valid."""
         for component_id, obj in self.agent_config.component_configurations.items():
             component_configuration = self.load_component_configuration(component_id)

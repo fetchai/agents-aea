@@ -35,7 +35,7 @@ ITEM_ID_REGEX = fr"([_A-Za-z][_A-Za-z0-9]*)|{PublicId.PUBLIC_ID_REGEX}"
 ItemType = TypeVar("ItemType")
 
 
-def _handle_malformed_string(class_name: str, malformed_id: str):
+def _handle_malformed_string(class_name: str, malformed_id: str) -> None:
     raise AEAException(
         "Malformed {}: '{}'. It must be of the form '{}'.".format(
             class_name, malformed_id, ItemId.REGEX.pattern
@@ -49,11 +49,11 @@ class ItemId(RegexConstrainedString):
     REGEX = re.compile(r"^({})$".format(ITEM_ID_REGEX))
 
     @property
-    def name(self):
+    def name(self) -> str:
         """Get the id name."""
         return self.data
 
-    def _handle_no_match(self):
+    def _handle_no_match(self) -> None:
         _handle_malformed_string(ItemId.__name__, self.data)
 
 
@@ -72,11 +72,16 @@ class EntryPoint(Generic[ItemType], RegexConstrainedString):
         )
     )
 
-    def __init__(self, seq):
+    def __init__(self, seq: Union["EntryPoint", str]) -> None:
         """Initialize the entrypoint."""
         super().__init__(seq)
 
         match = self.REGEX.match(self.data)
+
+        if match is None:
+            # actual match done in base class
+            raise ValueError("No match found!")  #  pragma: nocover
+
         self._import_path = match.group(1)
         self._class_name = match.group(2)
 
@@ -90,7 +95,7 @@ class EntryPoint(Generic[ItemType], RegexConstrainedString):
         """Get the class name."""
         return self._class_name
 
-    def _handle_no_match(self):
+    def _handle_no_match(self) -> None:
         _handle_malformed_string(EntryPoint.__name__, self.data)
 
     def load(self) -> Type[ItemType]:
@@ -114,7 +119,7 @@ class ItemSpec(Generic[ItemType]):
         entry_point: EntryPoint[ItemType],
         class_kwargs: Optional[Dict[str, Any]] = None,
         **kwargs: Dict,
-    ):
+    ) -> None:
         """
         Initialize an item specification.
 
@@ -128,7 +133,7 @@ class ItemSpec(Generic[ItemType]):
         self._class_kwargs = {} if class_kwargs is None else class_kwargs
         self._kwargs = {} if kwargs is None else kwargs
 
-    def make(self, **kwargs) -> ItemType:
+    def make(self, **kwargs: Any) -> ItemType:
         """
         Instantiate an instance of the item object with appropriate arguments.
 
@@ -156,7 +161,7 @@ class ItemSpec(Generic[ItemType]):
 class Registry(Generic[ItemType]):
     """Registry for generic classes."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the registry."""
         self.specs = {}  # type: Dict[ItemId, ItemSpec[ItemType]]
 
@@ -170,8 +175,8 @@ class Registry(Generic[ItemType]):
         id_: Union[ItemId, str],
         entry_point: Union[EntryPoint[ItemType], str],
         class_kwargs: Optional[Dict[str, Any]] = None,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         """
         Register an item type.
 
@@ -190,7 +195,7 @@ class Registry(Generic[ItemType]):
         )
 
     def make(
-        self, id_: Union[ItemId, str], module: Optional[str] = None, **kwargs
+        self, id_: Union[ItemId, str], module: Optional[str] = None, **kwargs: Any
     ) -> ItemType:
         """
         Create an instance of the associated type item id.

@@ -40,7 +40,7 @@ class TestAgentVsAEA(BaseAEATestCase):
     @classmethod
     def setup_class(cls):
         """Setup the test class."""
-        BaseAEATestCase.setup_class()
+        super().setup_class()
         doc_path = os.path.join(ROOT_DIR, MD_FILE)
         cls.code_blocks = extract_code_blocks(filepath=doc_path, filter_="python")
         test_code_path = os.path.join(CUR_PATH, PY_FILE)
@@ -54,13 +54,13 @@ class TestAgentVsAEA(BaseAEATestCase):
 
     @pytest.mark.flaky(
         reruns=MAX_FLAKY_RERUNS
-    )  # TODO: check why it raises permission error on file on windows platform!
+    )  # TODO: check why test_run_agent raises permission error on file on windows platform!
     def test_run_agent(self):
         """Run the agent from the file."""
         run()
         assert os.path.exists(Path(self.t, "input_file"))
 
-        message_text = b"other_agent,my_agent,fetchai/default:0.11.0,\x12\r\x08\x01*\t*\x07\n\x05hello,"
+        message_text = b"other_agent,my_agent,fetchai/default:0.1.0,\x12\r\x08\x01*\t*\x07\n\x05hello,"
         path = os.path.join(self.t, "output_file")
         with open(path, "rb") as file:
             msg = file.read()

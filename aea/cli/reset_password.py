@@ -28,7 +28,7 @@ from aea.cli.registry.login import registry_reset_password
     name="reset_password", help="Reset the password of the registry account."
 )
 @click.argument("email", type=str, required=True)
-def reset_password(email):
+def reset_password(email: str) -> None:
     """Command to request Registry to reset password."""
     _do_password_reset(email)
 

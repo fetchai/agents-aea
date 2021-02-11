@@ -25,3 +25,5 @@ FROM_STRING_TO_TYPE = dict(
     str=str, int=int, bool=bool, float=float, dict=dict, list=list, none=None,
 )
 JSON_TYPES = Union[Dict, str, List, None, int, float]
+
+NETWORK_REQUEST_DEFAULT_TIMEOUT = 60.0  # in seconds

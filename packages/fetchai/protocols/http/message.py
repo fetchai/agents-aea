@@ -20,7 +20,7 @@
 """This module contains http's message definition."""
 
 import logging
-from typing import Set, Tuple, cast
+from typing import Any, Set, Tuple, cast
 
 from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
@@ -35,7 +35,8 @@ DEFAULT_BODY_SIZE = 4
 class HttpMessage(Message):
     """A protocol for HTTP requests and responses."""
 
-    protocol_id = PublicId.from_str("fetchai/http:0.11.0")
+    protocol_id = PublicId.from_str("fetchai/http:0.12.0")
+    protocol_specification_id = PublicId.from_str("fetchai/http:0.1.0")
 
     class Performative(Message.Performative):
         """Performatives for the http protocol."""
@@ -43,7 +44,7 @@ class HttpMessage(Message):
         REQUEST = "request"
         RESPONSE = "response"
 
-        def __str__(self):
+        def __str__(self) -> str:
             """Get the string representation."""
             return str(self.value)
 
@@ -71,7 +72,7 @@ class HttpMessage(Message):
         dialogue_reference: Tuple[str, str] = ("", ""),
         message_id: int = 1,
         target: int = 0,
-        **kwargs,
+        **kwargs: Any,
     ):
         """
         Initialise an instance of HttpMessage.
@@ -285,13 +286,6 @@ class HttpMessage(Message):
                     self.target == 0,
                     "Invalid 'target'. Expected 0 (because 'message_id' is 1). Found {}.".format(
                         self.target
-                    ),
-                )
-            else:
-                enforce(
-                    0 < self.target < self.message_id,
-                    "Invalid 'target'. Expected an integer between 1 and {} inclusive. Found {}.".format(
-                        self.message_id - 1, self.target,
                     ),
                 )
         except (AEAEnforceError, ValueError, KeyError) as e:

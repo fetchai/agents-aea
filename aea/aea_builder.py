@@ -25,7 +25,7 @@ import pprint
 import subprocess  # nosec
 import sys
 from collections import defaultdict
-from copy import copy, deepcopy
+from copy import deepcopy
 from pathlib import Path
 from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Type, Union, cast
 
@@ -33,6 +33,7 @@ import jsonschema
 from packaging.specifiers import SpecifierSet
 
 from aea.aea import AEA
+from aea.common import PathLike
 from aea.components.base import Component, load_aea_package
 from aea.components.loader import load_component_from_config
 from aea.configurations.base import (
@@ -62,7 +63,6 @@ from aea.configurations.constants import (
     DEFAULT_SEARCH_SERVICE_ADDRESS as _DEFAULT_SEARCH_SERVICE_ADDRESS,
 )
 from aea.configurations.constants import (
-    DEFAULT_SKILL,
     DOTTED_PATH_MODULE_ELEMENT_SEPARATOR,
     FETCHAI,
     PROTOCOLS,
@@ -90,15 +90,13 @@ from aea.identity.base import Identity
 from aea.registries.resources import Resources
 
 
-PathLike = Union[os.PathLike, Path, str]
-
 _default_logger = logging.getLogger(__name__)
 
 
 class _DependenciesManager:
     """Class to manage dependencies of agent packages."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the dependency graph."""
         # adjacency list of the dependency DAG
         # an arc means "depends on"
@@ -183,7 +181,7 @@ class _DependenciesManager:
                 configuration.component_id
             )
 
-    def remove_component(self, component_id: ComponentId):
+    def remove_component(self, component_id: ComponentId) -> None:
         """
         Remove a component.
 
@@ -313,7 +311,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         with_default_packages: bool = True,
         registry_dir: str = DEFAULT_REGISTRY_NAME,
         build_dir_root: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Initialize the builder.
 
@@ -382,6 +380,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self._runtime_mode: Optional[str] = None
         self._search_service_address: Optional[str] = None
         self._storage_uri: Optional[str] = None
+        self._data_dir: Optional[str] = None
         self._logging_config: Dict = DEFAULT_LOGGING_CONFIG
 
         self._package_dependency_manager = _DependenciesManager()
@@ -564,6 +563,16 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self._storage_uri = storage_uri
         return self
 
+    def set_data_dir(self, data_dir: Optional[str]) -> "AEABuilder":  # pragma: nocover
+        """
+        Set the data directory.
+
+        :param data_dir: path to directory where to store data.
+        :return: self
+        """
+        self._data_dir = data_dir
+        return self
+
     def set_logging_config(
         self, logging_config: Dict
     ) -> "AEABuilder":  # pragma: nocover
@@ -613,9 +622,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self.add_connection(
             Path(self.registry_dir, FETCHAI, CONNECTIONS, self.DEFAULT_CONNECTION.name)
         )
-        # add error skill
-        default_skill = PublicId.from_str(DEFAULT_SKILL)
-        self.add_skill(Path(self.registry_dir, FETCHAI, SKILLS, default_skill.name))
 
     def _check_can_remove(self, component_id: ComponentId) -> None:
         """
@@ -808,7 +814,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         Notice also that this will make the call to 'build()' non re-entrant.
         You will have to `reset()` the builder before calling `build()` again.
 
-        :params component: Component instance already initialized.
+        :param component: Component instance already initialized.
         """
         self._to_reset = True
         self._check_can_add(component.configuration)
@@ -837,7 +843,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self._remove(component_id)
         return self
 
-    def _remove(self, component_id: ComponentId):
+    def _remove(self, component_id: ComponentId) -> None:
         self._package_dependency_manager.remove_component(component_id)
 
     def add_protocol(self, directory: PathLike) -> "AEABuilder":
@@ -920,7 +926,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self.remove_component(ComponentId(ComponentType.CONTRACT, public_id))
         return self
 
-    def call_all_build_entrypoints(self):
+    def call_all_build_entrypoints(self) -> None:
         """Call all the build entrypoints."""
         for config in self._package_dependency_manager._dependencies.values():  # type: ignore # pylint: disable=protected-access
             self.run_build_for_component_configuration(config, logger=self.logger)
@@ -1015,6 +1021,35 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         stdout = res.stdout.decode("utf-8")
         stderr = res.stderr.decode("utf-8")
         return stdout, stderr, code
+
+    def _build_wallet(self, data_directory: str) -> Wallet:
+        """
+        Build the wallet.
+
+        We need to prepend the path to the data directory
+        to each private key path, but only if
+        the path is not an absolute path.
+
+        :param data_directory: the path prefix to be prepended to each private key path.
+        :return: the wallet instance.
+        """
+
+        def _prepend_if_not_none(
+            obj: Dict[str, Optional[str]]
+        ) -> Dict[str, Optional[str]]:
+            return {
+                key: os.path.join(data_directory, value)
+                if value is not None and not os.path.isabs(value)
+                else value
+                for key, value in obj.items()
+            }
+
+        private_key_paths = _prepend_if_not_none(self.private_key_paths)
+        connection_private_key_paths = _prepend_if_not_none(
+            self.connection_private_key_paths
+        )
+        wallet = Wallet(private_key_paths, connection_private_key_paths)
+        return wallet
 
     def _build_identity_from_wallet(self, wallet: Wallet) -> Identity:
         """
@@ -1117,11 +1152,10 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :return: the AEA object.
         :raises ValueError: if we cannot
         """
+        datadir = self._get_data_dir()
         self._check_we_can_build()
         logging.config.dictConfig(self._logging_config)
-        wallet = Wallet(
-            copy(self.private_key_paths), copy(self.connection_private_key_paths)
-        )
+        wallet = self._build_wallet(datadir)
         identity = self._build_identity_from_wallet(wallet)
         resources = Resources(identity.name)
         self._load_and_add_components(ComponentType.PROTOCOL, resources, identity.name)
@@ -1132,12 +1166,14 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             identity.name,
             identity=identity,
             crypto_store=wallet.connection_cryptos,
+            data_dir=datadir,
         )
         connection_ids = self._process_connection_ids(connection_ids)
         aea = self.AEA_CLASS(
             identity,
             wallet,
             resources,
+            datadir,
             loop=None,
             period=self._get_agent_act_period(),
             execution_timeout=self._get_execution_timeout(),
@@ -1302,6 +1338,14 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         """
         return self._storage_uri
 
+    def _get_data_dir(self) -> str:
+        """
+        Return the data directory.
+
+        :return: the data directory.
+        """
+        return self._data_dir if self._data_dir is not None else os.getcwd()
+
     def _get_search_service_address(self) -> str:
         """
         Return the search service address.
@@ -1356,7 +1400,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
                 )
             )
 
-    def _check_pypi_dependencies(self, configuration: ComponentConfiguration):
+    def _check_pypi_dependencies(self, configuration: ComponentConfiguration) -> None:
         """
         Check that PyPI dependencies of a package don't conflict with the existing ones.
 
@@ -1401,7 +1445,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             )
 
     @staticmethod
-    def _check_valid_entrypoint(build_entrypoint: str, directory: str):
+    def _check_valid_entrypoint(build_entrypoint: str, directory: str) -> None:
         """
         Check a configuration has a valid entrypoint.
 
@@ -1438,8 +1482,8 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         """
         Set builder variables from AgentConfig.
 
-        :params agent_configuration: AgentConfig to get values from.
-        :params aea_project_path: PathLike root directory of the agent project.
+        :param agent_configuration: AgentConfig to get values from.
+        :param aea_project_path: PathLike root directory of the agent project.
         :param skip_consistency_check: if True, the consistency check are skipped.
 
         :return: None
@@ -1473,6 +1517,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self.set_loop_mode(agent_configuration.loop_mode)
         self.set_runtime_mode(agent_configuration.runtime_mode)
         self.set_storage_uri(agent_configuration.storage_uri)
+        self.set_data_dir(agent_configuration.data_dir)
         self.set_logging_config(agent_configuration.logging_config)
 
         # load private keys
@@ -1615,7 +1660,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         component_type: ComponentType,
         resources: Resources,
         agent_name: str,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         """
         Load and add components added to the builder to a Resources instance.
@@ -1647,7 +1692,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
             resources.add_component(component)
 
-    def _check_we_can_build(self):
+    def _check_we_can_build(self) -> None:
         if self._build_called and self._to_reset:
             raise ValueError(
                 "Cannot build the agent; You have done one of the following:\n"
@@ -1656,7 +1701,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
                 "Please call 'reset() if you want to build another agent."
             )
 
-    def _overwrite_custom_configuration(self, configuration: ComponentConfiguration):
+    def _overwrite_custom_configuration(
+        self, configuration: ComponentConfiguration
+    ) -> ComponentConfiguration:
         """
         Overwrite custom configurations.
 
@@ -1679,7 +1726,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         agent_configuration: AgentConfig,
         aea_project_path: Path,
         skip_consistency_check: bool,
-    ):
+    ) -> None:
         """
         Add components of a given type.
 

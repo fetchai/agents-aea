@@ -45,6 +45,7 @@ class Message:
     """This class implements a message."""
 
     protocol_id = None  # type: PublicId
+    protocol_specification_id = None  # type: PublicId
     serializer = None  # type: Type["Serializer"]
 
     __slots__ = ("_slots", "_to", "_sender")
@@ -52,7 +53,7 @@ class Message:
     class Performative(Enum):
         """Performatives for the base message."""
 
-        def __str__(self):
+        def __str__(self) -> str:
             """Get the string representation."""
             return str(self.value)
 
@@ -66,7 +67,7 @@ class Message:
 
     _performatives: Set[str] = set()
 
-    def __init__(self, _body: Optional[Dict] = None, **kwargs):
+    def __init__(self, _body: Optional[Dict] = None, **kwargs: Any) -> None:
         """
         Initialize a Message object.
 
@@ -239,7 +240,7 @@ class Message:
         """Check that the data is consistent."""
         return True
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, Message)
@@ -248,7 +249,7 @@ class Message:
             and self._body == other._body
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Get the representation of the message."""
         body = ",".join(
             map(
@@ -258,7 +259,7 @@ class Message:
         )
         return f"Message(sender={self._sender},to={self._to},{body})"
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get the string representation of the message. Abbreviated to prevent spamming of logs."""
         body = ",".join(
             map(
@@ -334,8 +335,8 @@ class Protocol(Component):
     """
 
     def __init__(
-        self, configuration: ProtocolConfig, message_class: Type[Message], **kwargs
-    ):
+        self, configuration: ProtocolConfig, message_class: Type[Message], **kwargs: Any
+    ) -> None:
         """
         Initialize the protocol manager.
 
@@ -343,7 +344,6 @@ class Protocol(Component):
         :param message_class: the message class.
         """
         super().__init__(configuration, **kwargs)
-
         self._message_class = message_class
 
     @property
@@ -352,7 +352,7 @@ class Protocol(Component):
         return self._message_class.serializer
 
     @classmethod
-    def from_dir(cls, directory: str, **kwargs) -> "Protocol":
+    def from_dir(cls, directory: str, **kwargs: Any) -> "Protocol":
         """
         Load the protocol from a directory.
 
@@ -367,7 +367,7 @@ class Protocol(Component):
         return Protocol.from_config(configuration, **kwargs)
 
     @classmethod
-    def from_config(cls, configuration: ProtocolConfig, **kwargs) -> "Protocol":
+    def from_config(cls, configuration: ProtocolConfig, **kwargs: Any) -> "Protocol":
         """
         Load the protocol from configuration.
 
@@ -405,3 +405,17 @@ class Protocol(Component):
         message_class.serializer = serialize_class
 
         return Protocol(configuration, message_class, **kwargs)
+
+    @property
+    def protocol_id(self) -> PublicId:
+        """Get protocol id."""
+        return cast(ProtocolConfig, self._configuration).public_id
+
+    @property
+    def protocol_specification_id(self) -> PublicId:
+        """Get protocol specification id."""
+        return cast(ProtocolConfig, self._configuration).protocol_specification_id
+
+    def __repr__(self) -> str:
+        """Get str repr of the protocol."""
+        return f"Protocol({self.protocol_id})"

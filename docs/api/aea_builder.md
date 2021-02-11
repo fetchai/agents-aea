@@ -16,7 +16,7 @@ Class to manage dependencies of agent packages.
 #### `__`init`__`
 
 ```python
- | __init__()
+ | __init__() -> None
 ```
 
 Initialize the dependency graph.
@@ -111,7 +111,7 @@ None
 #### remove`_`component
 
 ```python
- | remove_component(component_id: ComponentId)
+ | remove_component(component_id: ComponentId) -> None
 ```
 
 Remove a component.
@@ -204,7 +204,7 @@ my_aea_2 = builder.builder()
 #### `__`init`__`
 
 ```python
- | __init__(with_default_packages: bool = True, registry_dir: str = DEFAULT_REGISTRY_NAME, build_dir_root: Optional[str] = None)
+ | __init__(with_default_packages: bool = True, registry_dir: str = DEFAULT_REGISTRY_NAME, build_dir_root: Optional[str] = None) -> None
 ```
 
 Initialize the builder.
@@ -420,6 +420,23 @@ self
 Set the storage uri.
 
 :param storage uri:  storage uri
+
+**Returns**:
+
+self
+
+<a name="aea.aea_builder.AEABuilder.set_data_dir"></a>
+#### set`_`data`_`dir
+
+```python
+ | set_data_dir(data_dir: Optional[str]) -> "AEABuilder"
+```
+
+Set the data directory.
+
+**Arguments**:
+
+- `data_dir`: path to directory where to store data.
 
 **Returns**:
 
@@ -644,7 +661,9 @@ Please, pay attention, all dependencies have to be already loaded.
 Notice also that this will make the call to 'build()' non re-entrant.
 You will have to `reset()` the builder before calling `build()` again.
 
-:params component: Component instance already initialized.
+**Arguments**:
+
+- `component`: Component instance already initialized.
 
 <a name="aea.aea_builder.AEABuilder.set_context_namespace"></a>
 #### set`_`context`_`namespace
@@ -812,7 +831,7 @@ the AEABuilder
 #### call`_`all`_`build`_`entrypoints
 
 ```python
- | call_all_build_entrypoints()
+ | call_all_build_entrypoints() -> None
 ```
 
 Call all the build entrypoints.
@@ -905,11 +924,10 @@ Try to load the agent configuration file..
 
 Set builder variables from AgentConfig.
 
-:params agent_configuration: AgentConfig to get values from.
-:params aea_project_path: PathLike root directory of the agent project.
-
 **Arguments**:
 
+- `agent_configuration`: AgentConfig to get values from.
+- `aea_project_path`: PathLike root directory of the agent project.
 - `skip_consistency_check`: if True, the consistency check are skipped.
 
 **Returns**:

@@ -38,7 +38,7 @@ from aea.configurations.base import (
 def replace_component_ids(
     _arg: PackageConfiguration,
     _replacements: Dict[ComponentType, Dict[PublicId, PublicId]],
-):
+) -> None:
     """
     Update public id references in a package configuration.
 
@@ -49,7 +49,7 @@ def replace_component_ids(
 @replace_component_ids.register(AgentConfig)  # type: ignore
 def _(
     arg: AgentConfig, replacements: Dict[ComponentType, Dict[PublicId, PublicId]],
-):
+) -> None:
     """
     Replace references in agent configuration.
 
@@ -112,14 +112,14 @@ def _(
 @replace_component_ids.register(ProtocolConfig)  # type: ignore
 def _(
     _arg: ProtocolConfig, _replacements: Dict[ComponentType, Dict[PublicId, PublicId]],
-):
+) -> None:
     """Do nothing - protocols have no references."""
 
 
 @replace_component_ids.register(ConnectionConfig)  # type: ignore
 def _(
     arg: ConnectionConfig, replacements: Dict[ComponentType, Dict[PublicId, PublicId]],
-):
+) -> None:
     """Replace references in a connection configuration."""
     _replace_component_id(
         arg, {ComponentType.PROTOCOL, ComponentType.CONNECTION}, replacements
@@ -140,14 +140,14 @@ def _(
 @replace_component_ids.register(ContractConfig)  # type: ignore
 def _(  # type: ignore
     _arg: ContractConfig, _replacements: Dict[ComponentType, Dict[PublicId, PublicId]],
-):
+) -> None:
     """Do nothing - contracts have no references."""
 
 
 @replace_component_ids.register(SkillConfig)  # type: ignore
 def _(
     arg: SkillConfig, replacements: Dict[ComponentType, Dict[PublicId, PublicId]],
-):
+) -> None:
     """Replace references in a skill configuration."""
     _replace_component_id(
         arg,
@@ -165,7 +165,7 @@ def _replace_component_id(
     config: PackageConfiguration,
     types_to_update: Set[ComponentType],
     replacements: Dict[ComponentType, Dict[PublicId, PublicId]],
-):
+) -> None:
     """
     Replace a component id.
 

@@ -244,8 +244,8 @@ def test_get_wealth_positive(caplog):
 
 
 @pytest.mark.ledger
-@mock.patch("requests.get")
-@mock.patch("requests.post")
+@mock.patch("aea.helpers.http_requests.get")
+@mock.patch("aea.helpers.http_requests.post")
 def test_successful_faucet_operation(mock_post, mock_get):
     """Test successful faucet operation."""
     address = "a normal cosmos address would be here"
@@ -281,8 +281,8 @@ def test_successful_faucet_operation(mock_post, mock_get):
 
 
 @pytest.mark.ledger
-@mock.patch("requests.get")
-@mock.patch("requests.post")
+@mock.patch("aea.helpers.http_requests.get")
+@mock.patch("aea.helpers.http_requests.post")
 def test_successful_realistic_faucet_operation(mock_post, mock_get):
     """Test successful realistic faucet operation."""
     address = "a normal cosmos address would be here"
@@ -630,7 +630,7 @@ def test_get_contract_address(mock_api_call):
 
     cosmos_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
 
-    res = cosmos_api.get_contract_address(code_id=999)
+    res = cosmos_api.get_last_contract_address(code_id=999)
     assert res == mock_res[-1]["address"]
 
 

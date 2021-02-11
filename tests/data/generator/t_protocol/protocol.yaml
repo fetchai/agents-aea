@@ -1,18 +1,19 @@
 name: t_protocol
 author: fetchai
 version: 0.1.0
+protocol_specification_id: some_author/some_protocol_name:0.1.0
 type: protocol
 description: A protocol for testing purposes.
 license: Apache-2.0
-aea_version: '>=0.9.0, <0.10.0'
+aea_version: '>=0.10.0, <0.11.0'
 fingerprint:
   __init__.py: QmVEtFTkpwEHfaijkMso9P6JMJCSepSvUKeqcRJLVJMyji
   custom_types.py: QmWg8HFav8w9tfZfMrTG5Uo7QpexvYKKkhpGPD18233pLw
   dialogues.py: QmWAdikDRJWTG7HUXsCsZRg4Wxnf8cMr5KujpyC4M75gnB
-  message.py: Qmf4TsCLKT2PudSxm8eUCQVKPfvwUmpSt3bDssEaqPZp1J
+  message.py: QmVktBDEFNoxs6zreJiqDhM4TinRiYg625mHgNvhocW5ek
   serialization.py: QmPBxFuGJ9EZdwT1mP1wZqffYCsQYo7t2kxvSSWnG6msFp
-  t_protocol.proto: QmWdNaAJ9Mkf2SHF1RSZrsk2a5jZyXZtCD7XU5PHLCph5z
-  t_protocol_pb2.py: QmamuU3UsGEFKWPSbt5Qeo31kXSCLpTD81TkuX44njkYgh
+  t_protocol.proto: Qme4PL8P5ZXZDxWEcNkhbTZssAYANVugY1uyx32WRfik9S
+  t_protocol_pb2.py: QmW9X5uTdM53oQUk3mipVVKBWQw9m9LWSP9qM4kfzejh2V
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

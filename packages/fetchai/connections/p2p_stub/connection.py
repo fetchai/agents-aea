@@ -21,7 +21,7 @@
 import os
 import tempfile
 from pathlib import Path
-from typing import Union, cast
+from typing import Any, Union, cast
 
 from aea.configurations.base import ConnectionConfig, PublicId
 from aea.identity.base import Identity
@@ -30,7 +30,7 @@ from aea.mail.base import Envelope
 from packages.fetchai.connections.stub.connection import StubConnection, write_envelope
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_stub:0.12.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_stub:0.13.0")
 
 
 class P2PStubConnection(StubConnection):
@@ -44,7 +44,9 @@ class P2PStubConnection(StubConnection):
 
     connection_id = PUBLIC_ID
 
-    def __init__(self, configuration: ConnectionConfig, identity: Identity, **kwargs):
+    def __init__(
+        self, configuration: ConnectionConfig, identity: Identity, **kwargs: Any
+    ) -> None:
         """
         Initialize a p2p stub connection.
 
@@ -67,7 +69,7 @@ class P2PStubConnection(StubConnection):
         configuration.config["output_file"] = output_file_path
         super().__init__(configuration=configuration, identity=identity, **kwargs)
 
-    async def send(self, envelope: Envelope):
+    async def send(self, envelope: Envelope) -> None:
         """
         Send messages.
 
@@ -90,7 +92,7 @@ class P2PStubConnection(StubConnection):
         await self.loop.run_in_executor(self._write_pool, self._cleanup)
         await super().disconnect()
 
-    def _cleanup(self):
+    def _cleanup(self) -> None:
         try:
             os.unlink(self.configuration.config["input_file"])
         except OSError:

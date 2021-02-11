@@ -27,7 +27,6 @@ DEFAULT_CONNECTION = "fetchai/stub:latest"
 DEFAULT_PROTOCOL = "fetchai/default:latest"
 SIGNING_PROTOCOL = "fetchai/signing:latest"
 STATE_UPDATE_PROTOCOL = "fetchai/state_update:latest"
-DEFAULT_SKILL = "fetchai/error:latest"
 LEDGER_CONNECTION = "fetchai/ledger:latest"
 DEFAULT_LEDGER = FETCHAI
 PRIVATE_KEY_PATH_SCHEMA = "{}_private_key.txt"
@@ -79,6 +78,7 @@ IMPORT_TEMPLATE_2 = "import packages.{author}.{type}.{name}"
 DEFAULT_ENV_DOTFILE = ".env"
 DOTTED_PATH_MODULE_ELEMENT_SEPARATOR = ":"
 LIBPROTOC_VERSION = "libprotoc 3.11.4"
+DEFAULT_BUILD_DIR_NAME = ".build"
 
 CONFIG_FILE_TO_PACKAGE_TYPE = {
     DEFAULT_SKILL_CONFIG_FILE: SKILL,
@@ -87,3 +87,5 @@ CONFIG_FILE_TO_PACKAGE_TYPE = {
     DEFAULT_CONTRACT_CONFIG_FILE: CONTRACT,
     DEFAULT_AEA_CONFIG_FILE: AGENT,
 }  # type: Dict[str, str]
+
+AEA_MANAGER_DATA_DIRNAME = "data"

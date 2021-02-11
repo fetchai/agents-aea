@@ -22,6 +22,7 @@ import email
 import logging
 import urllib
 from typing import Dict, Optional, cast
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -64,10 +65,11 @@ class TestClientServer:
             port=self.port,
             api_spec_path=None,  # do not filter on API spec
             connection_id=HTTPServerConnection.connection_id,
-            restricted_to_protocols=set([self.protocol_id]),
         )
         self.server = HTTPServerConnection(
-            configuration=self.configuration, identity=self.server_agent_identity,
+            configuration=self.configuration,
+            data_dir=MagicMock(),
+            identity=self.server_agent_identity,
         )
         self.loop = asyncio.get_event_loop()
         self.loop.run_until_complete(self.server.connect())
@@ -100,7 +102,9 @@ class TestClientServer:
             connection_id=HTTPClientConnection.connection_id,
         )
         self.client = HTTPClientConnection(
-            configuration=configuration, identity=self.client_agent_identity
+            configuration=configuration,
+            data_dir=MagicMock(),
+            identity=self.client_agent_identity,
         )
         self.loop.run_until_complete(self.client.connect())
 
@@ -145,7 +149,6 @@ class TestClientServer:
         request_envelope = Envelope(
             to=request_http_message.to,
             sender=request_http_message.sender,
-            protocol_id=request_http_message.protocol_id,
             message=request_http_message,
         )
         return request_envelope
@@ -169,7 +172,6 @@ class TestClientServer:
         response_envelope = Envelope(
             to=message.to,
             sender=message.sender,
-            protocol_id=message.protocol_id,
             context=request_envelope.context,
             message=message,
         )

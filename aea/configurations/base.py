@@ -148,11 +148,11 @@ class ProtocolSpecificationParseError(Exception):
 class Configuration(JSONSerializable, ABC):
     """Configuration class."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize a configuration object."""
         # a list of keys that remembers the key order of the configuration file.
         # this is set by the configuration loader.
-        self._key_order = []
+        self._key_order: List[str] = []
 
     @classmethod
     def from_json(cls, obj: Dict) -> "Configuration":
@@ -221,7 +221,7 @@ class PackageConfiguration(Configuration, ABC):
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
         build_entrypoint: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Initialize a package configuration.
 
@@ -262,7 +262,7 @@ class PackageConfiguration(Configuration, ABC):
         return str(self._name)
 
     @name.setter
-    def name(self, value: SimpleIdOrStr):
+    def name(self, value: SimpleIdOrStr) -> None:
         """Set the name."""
         self._name = SimpleId(value)
 
@@ -272,17 +272,17 @@ class PackageConfiguration(Configuration, ABC):
         return str(self._author)
 
     @author.setter
-    def author(self, value: SimpleIdOrStr):
+    def author(self, value: SimpleIdOrStr) -> None:
         """Set the author."""
         self._author = SimpleId(value)
 
     @property
-    def aea_version(self):
+    def aea_version(self) -> str:
         """Get the 'aea_version' attribute."""
         return self._aea_version
 
     @aea_version.setter
-    def aea_version(self, new_aea_version: str):
+    def aea_version(self, new_aea_version: str) -> None:
         """Set the 'aea_version' attribute."""
         self._aea_version_specifiers = self._parse_aea_version_specifier(
             new_aea_version
@@ -355,13 +355,13 @@ class PackageConfiguration(Configuration, ABC):
         )
 
     @classmethod
-    def from_json(cls, obj: Dict):
+    def from_json(cls, obj: Dict) -> "PackageConfiguration":
         """Initialize from a JSON object."""
         return cls._create_or_update_from_json(obj=obj, instance=None)
 
     @classmethod
     def _create_or_update_from_json(
-        cls, obj: Dict, instance=None
+        cls, obj: Dict, instance: Any = None
     ) -> "PackageConfiguration":
         """Create new config object or updates existing one from json data."""
         raise NotImplementedError  # pragma: nocover
@@ -442,7 +442,7 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         build_entrypoint: Optional[str] = None,
         build_directory: Optional[str] = None,
         dependencies: Optional[Dependencies] = None,
-    ):
+    ) -> None:
         """Set component configuration."""
         super().__init__(
             name,
@@ -489,7 +489,7 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         """Check whether the component is abstract."""
         return False
 
-    def _check_configuration_consistency(self, directory: Path):
+    def _check_configuration_consistency(self, directory: Path) -> None:
         """Check that the configuration file is consistent against a directory."""
         self.check_fingerprint(directory)
         self.check_aea_version()
@@ -509,7 +509,7 @@ class ComponentConfiguration(PackageConfiguration, ABC):
             self, directory, False, self.component_type.to_package_type()
         )
 
-    def check_aea_version(self):
+    def check_aea_version(self) -> None:
         """
         Check that the AEA version matches the specifier set.
 
@@ -562,8 +562,8 @@ class ConnectionConfig(ComponentConfiguration):
         connection_id: Optional[PublicId] = None,
         is_abstract: bool = False,
         cert_requests: Optional[List[CertRequest]] = None,
-        **config,
-    ):
+        **config: Any,
+    ) -> None:
         """Initialize a connection configuration object."""
         if connection_id is None:
             enforce(name != "", "Name or connection_id must be set.")
@@ -742,7 +742,8 @@ class ProtocolConfig(ComponentConfiguration):
         aea_version: str = "",
         dependencies: Optional[Dependencies] = None,
         description: str = "",
-    ):
+        protocol_specification_id: Optional[str] = None,
+    ) -> None:
         """Initialize a connection configuration object."""
         super().__init__(
             name,
@@ -759,6 +760,15 @@ class ProtocolConfig(ComponentConfiguration):
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
 
+        # temporary solution till all protocols updated
+        if protocol_specification_id is not None:
+            self.protocol_specification_id = PublicId.from_str(
+                str(protocol_specification_id)
+            )
+        else:
+            # make protocol specification same as protocol id
+            self.protocol_specification_id = self.public_id
+
     @property
     def json(self) -> Dict:
         """Return the JSON representation."""
@@ -767,6 +777,7 @@ class ProtocolConfig(ComponentConfiguration):
                 "name": self.name,
                 "author": self.author,
                 "version": self.version,
+                "protocol_specification_id": str(self.protocol_specification_id),
                 "type": self.component_type.value,
                 "description": self.description,
                 "license": self.license,
@@ -784,7 +795,7 @@ class ProtocolConfig(ComponentConfiguration):
 
     @classmethod
     def _create_or_update_from_json(
-        cls, obj: Dict, instance: "ProtocolConfig" = Optional[None]
+        cls, obj: Dict, instance: Optional["ProtocolConfig"] = None
     ) -> "ProtocolConfig":
         """Initialize from a JSON object."""
         obj = {**(instance.json if instance else {}), **copy(obj)}
@@ -792,6 +803,7 @@ class ProtocolConfig(ComponentConfiguration):
         params = dict(
             name=cast(str, obj.get("name")),
             author=cast(str, obj.get("author")),
+            protocol_specification_id=cast(str, obj.get("protocol_specification_id")),
             version=cast(str, obj.get("version")),
             license_=cast(str, obj.get("license")),
             aea_version=cast(str, obj.get("aea_version", "")),
@@ -812,7 +824,7 @@ class ProtocolConfig(ComponentConfiguration):
 class SkillComponentConfiguration:
     """This class represent a skill component configuration."""
 
-    def __init__(self, class_name: str, **args):
+    def __init__(self, class_name: str, **args: Any) -> None:
         """
         Initialize a skill component configuration.
 
@@ -894,7 +906,7 @@ class SkillConfig(ComponentConfiguration):
         dependencies: Optional[Dependencies] = None,
         description: str = "",
         is_abstract: bool = False,
-    ):
+    ) -> None:
         """Initialize a skill configuration."""
         super().__init__(
             name,
@@ -948,7 +960,7 @@ class SkillConfig(ComponentConfiguration):
     @property
     def is_abstract_component(self) -> bool:
         """Check whether the component is abstract."""
-        return self.is_abstract
+        return self.is_abstract  # pragma: nocover
 
     @property
     def json(self) -> Dict:
@@ -983,7 +995,7 @@ class SkillConfig(ComponentConfiguration):
 
     @classmethod
     def _create_or_update_from_json(
-        cls, obj: Dict, instance: "SkillConfig" = Optional[None]
+        cls, obj: Dict, instance: Optional["SkillConfig"] = None
     ) -> "SkillConfig":
         """Initialize from a JSON object."""
         obj = {**(instance.json if instance else {}), **copy(obj)}
@@ -1095,7 +1107,7 @@ class AgentConfig(PackageConfiguration):
         ("logging_config",),
     ]
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         agent_name: SimpleIdOrStr,
         author: SimpleIdOrStr,
@@ -1122,8 +1134,9 @@ class AgentConfig(PackageConfiguration):
         loop_mode: Optional[str] = None,
         runtime_mode: Optional[str] = None,
         storage_uri: Optional[str] = None,
+        data_dir: Optional[str] = None,
         component_configurations: Optional[Dict[ComponentId, Dict]] = None,
-    ):
+    ) -> None:
         """Instantiate the agent configuration object."""
         super().__init__(
             agent_name,
@@ -1179,6 +1192,7 @@ class AgentConfig(PackageConfiguration):
         self.loop_mode = loop_mode
         self.runtime_mode = runtime_mode
         self.storage_uri = storage_uri
+        self.data_dir = data_dir
         # this attribute will be set through the setter below
         self._component_configurations: Dict[ComponentId, Dict] = {}
         self.component_configurations = (
@@ -1315,13 +1329,17 @@ class AgentConfig(PackageConfiguration):
             config["runtime_mode"] = self.runtime_mode
         if self.storage_uri is not None:
             config["storage_uri"] = self.storage_uri
+        if self.data_dir is not None:
+            config["data_dir"] = self.data_dir
         if self.currency_denominations != {}:
             config["currency_denominations"] = self.currency_denominations
 
         return config
 
     @classmethod
-    def _create_or_update_from_json(cls, obj: Dict, instance=None) -> "AgentConfig":
+    def _create_or_update_from_json(
+        cls, obj: Dict, instance: Optional[Any] = None
+    ) -> "AgentConfig":
         """Create new config object or updates existing one from json data."""
         obj = {**(instance.json if instance else {}), **copy(obj)}
         params = dict(
@@ -1354,6 +1372,7 @@ class AgentConfig(PackageConfiguration):
             loop_mode=cast(str, obj.get("loop_mode")),
             runtime_mode=cast(str, obj.get("runtime_mode")),
             storage_uri=cast(str, obj.get("storage_uri")),
+            data_dir=cast(str, obj.get("data_dir")),
             component_configurations=None,
         )
         instance = cast(AgentConfig, cls._apply_params_to_instance(params, instance))
@@ -1444,7 +1463,7 @@ class AgentConfig(PackageConfiguration):
 class SpeechActContentConfig(Configuration):
     """Handle a speech_act content configuration."""
 
-    def __init__(self, **args):
+    def __init__(self, **args: Any) -> None:
         """Initialize a speech_act content configuration."""
         super().__init__()
         self.args = args  # type: Dict[str, str]
@@ -1455,7 +1474,7 @@ class SpeechActContentConfig(Configuration):
         return self.args
 
     @classmethod
-    def from_json(cls, obj: Dict):
+    def from_json(cls, obj: Dict) -> "SpeechActContentConfig":
         """Initialize from a JSON object."""
         return SpeechActContentConfig(**obj)
 
@@ -1471,7 +1490,8 @@ class ProtocolSpecification(ProtocolConfig):
         license_: str = "",
         aea_version: str = "",
         description: str = "",
-    ):
+        protocol_specification_id: Optional[str] = None,
+    ) -> None:
         """Initialize a protocol specification configuration object."""
         super().__init__(
             name,
@@ -1480,6 +1500,7 @@ class ProtocolSpecification(ProtocolConfig):
             license_,
             aea_version=aea_version,
             description=description,
+            protocol_specification_id=protocol_specification_id,
         )
         self.speech_acts = CRUDCollection[SpeechActContentConfig]()
         self._protobuf_snippets = {}  # type: Dict
@@ -1491,7 +1512,7 @@ class ProtocolSpecification(ProtocolConfig):
         return self._protobuf_snippets
 
     @protobuf_snippets.setter
-    def protobuf_snippets(self, protobuf_snippets: Dict):
+    def protobuf_snippets(self, protobuf_snippets: Dict) -> None:
         """Set the protobuf snippets."""
         self._protobuf_snippets = protobuf_snippets
 
@@ -1501,7 +1522,7 @@ class ProtocolSpecification(ProtocolConfig):
         return self._dialogue_config
 
     @dialogue_config.setter
-    def dialogue_config(self, dialogue_config: Dict):
+    def dialogue_config(self, dialogue_config: Dict) -> None:
         """Set the dialogue config."""
         self._dialogue_config = dialogue_config
 
@@ -1516,6 +1537,7 @@ class ProtocolSpecification(ProtocolConfig):
                 "description": self.description,
                 "license": self.license,
                 "aea_version": self.aea_version,
+                "protocol_specification_id": str(self.protocol_specification_id),
                 "speech_acts": {
                     key: speech_act.json
                     for key, speech_act in self.speech_acts.read_all()
@@ -1533,6 +1555,7 @@ class ProtocolSpecification(ProtocolConfig):
         params = dict(
             name=cast(str, obj.get("name")),
             author=cast(str, obj.get("author")),
+            protocol_specification_id=cast(str, obj.get("protocol_specification_id")),
             version=cast(str, obj.get("version")),
             license_=cast(str, obj.get("license")),
             aea_version=cast(str, obj.get("aea_version", "")),
@@ -1578,7 +1601,7 @@ class ContractConfig(ComponentConfiguration):
         description: str = "",
         contract_interface_paths: Optional[Dict[str, str]] = None,
         class_name: str = "",
-    ):
+    ) -> None:
         """Initialize a protocol configuration object."""
         super().__init__(
             name,
@@ -1626,7 +1649,7 @@ class ContractConfig(ComponentConfiguration):
 
     @classmethod
     def _create_or_update_from_json(
-        cls, obj: Dict, instance: "ContractConfig" = Optional[None]
+        cls, obj: Dict, instance: Optional["ContractConfig"] = None
     ) -> "ContractConfig":
         """Initialize from a JSON object."""
         obj = {**(instance.json if instance else {}), **copy(obj)}
@@ -1693,7 +1716,7 @@ def _compare_fingerprints(
     package_directory: Path,
     is_vendor: bool,
     item_type: PackageType,
-):
+) -> None:
     """
     Check fingerprints of a package directory against the fingerprints declared in the configuration file.
 
@@ -1735,7 +1758,7 @@ def _compare_fingerprints(
         )
 
 
-def _check_aea_version(package_configuration: PackageConfiguration):
+def _check_aea_version(package_configuration: PackageConfiguration) -> None:
     """Check the package configuration version against the version of the framework."""
     current_aea_version = Version(__aea_version__)
     version_specifiers = package_configuration.aea_version_specifiers

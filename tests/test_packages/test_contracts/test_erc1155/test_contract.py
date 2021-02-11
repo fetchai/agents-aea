@@ -19,12 +19,15 @@
 
 """The tests module contains the tests of the packages/contracts/erc1155 dir."""
 
-import json
 import time
-from typing import Dict
+from pathlib import Path
+from typing import Dict, cast
 
 import pytest
 
+from aea.configurations.base import ComponentType, ContractConfig
+from aea.configurations.loader import load_component_configuration
+from aea.contracts.base import Contract, contract_registry
 from aea.crypto.registries import (
     crypto_registry,
     faucet_apis_registry,
@@ -37,6 +40,8 @@ from tests.conftest import (
     ETHEREUM_ADDRESS_TWO,
     FETCHAI,
     FETCHAI_TESTNET_CONFIG,
+    MAX_FLAKY_RERUNS,
+    ROOT_DIR,
 )
 
 
@@ -274,6 +279,7 @@ class TestCosmWasmContract:
         self.refill_from_faucet(
             self.ledger_api, self.faucet_api, self.item_owner_crypto.address
         )
+        self.set_contract()
 
     def refill_from_faucet(self, ledger_api, faucet_api, address):
         """Refill from faucet."""
@@ -300,89 +306,81 @@ class TestCosmWasmContract:
         """
 
         signed_tx = sender_crypto.sign_transaction(tx)
-        res: str = self.ledger_api.send_signed_transaction(signed_tx)
-        # Convert message return string to JSON dict
-        receipt: Dict[str, str] = json.loads(res)
-        assert len(receipt) == 6
-        assert all(
-            [
-                key in receipt
-                for key in [
-                    "height",
-                    "txhash",
-                    "raw_log",
-                    "logs",
-                    "gas_wanted",
-                    "gas_used",
-                ]
-            ]
-        )
+        tx_hash = self.ledger_api.send_signed_transaction(signed_tx)
+        tx_receipt = self.ledger_api.get_transaction_receipt(tx_hash)
+        assert len(tx_receipt) == 8
+        assert self.ledger_api.is_transaction_settled(tx_receipt), tx_receipt["raw_log"]
 
-    def sign_send_verify_deploy_init_transaction(
-        self, tx: Dict[str, str], sender_crypto
-    ):
-        """
-        Sign, send and verify if deploy or InitMsg transaction was successful.
+    def set_contract(self):
+        """Set contract."""
+        directory = Path(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155")
+        configuration = load_component_configuration(ComponentType.CONTRACT, directory)
+        configuration._directory = directory
+        configuration = cast(ContractConfig, configuration)
 
-        :param tx: the transaction
-        :param sender_crypto: Crypto to sign transaction with
-        :return: Nothing - asserts pass if transaction is successful
-        """
+        if str(configuration.public_id) not in contract_registry.specs:
+            # load contract into sys modules
+            Contract.from_config(configuration)
 
-        signed_tx = sender_crypto.sign_transaction(tx)
-        res: str = self.ledger_api.send_signed_transaction(signed_tx)
-        # Convert message return string to JSON dict
-        receipt: Dict[str, str] = json.loads(res)
-        assert len(receipt) == 7
-        assert all(
-            [
-                key in receipt
-                for key in [
-                    "height",
-                    "txhash",
-                    "data",
-                    "raw_log",
-                    "logs",
-                    "gas_wanted",
-                    "gas_used",
-                ]
-            ]
-        )
+        self.contract = contract_registry.make(str(configuration.public_id))
 
-    @pytest.mark.skip
-    @pytest.mark.integration
-    @pytest.mark.ledger
-    def test_cosmwasm_contract_deploy_and_interact(self, erc1155_contract):
-        """Test cosmwasm contract deploy and interact."""
-        # Deploy contract
-        contract, contract_address = erc1155_contract
-        tx = contract.get_deploy_transaction(
+    def deploy_contract(self):
+        """Deploy contract."""
+        tx = self.contract.get_deploy_transaction(
             ledger_api=self.ledger_api,
             deployer_address=self.deployer_crypto.address,
-            gas=900000,
+            gas=2000000,
         )
         assert len(tx) == 6
-        self.sign_send_verify_deploy_init_transaction(tx, self.deployer_crypto)
-        code_id = contract.get_last_code_id(self.ledger_api)
+        signed_tx = self.deployer_crypto.sign_transaction(tx)
+        tx_hash = self.ledger_api.send_signed_transaction(signed_tx)
+        tx_receipt = self.ledger_api.get_transaction_receipt(tx_hash)
+        assert len(tx_receipt) == 9
+        assert self.ledger_api.is_transaction_settled(tx_receipt), tx_receipt["raw_log"]
+
+        code_id = self.ledger_api.get_code_id(tx_receipt)
+
+        assert code_id is not None
+        assert code_id == self.ledger_api.get_last_code_id()
+        self.code_id = code_id
 
         # Init contract
-        tx = self.ledger_api.get_init_transaction(
-            self.deployer_crypto.address,
-            code_id,
+        tx = self.contract.get_deploy_transaction(
+            ledger_api=self.ledger_api,
+            deployer_address=self.deployer_crypto.address,
+            code_id=self.code_id,
             init_msg={},
             tx_fee=0,
             amount=0,
             label="ERC1155",
+            gas=1000000,
         )
         assert len(tx) == 6
-        self.sign_send_verify_deploy_init_transaction(tx, self.deployer_crypto)
+        signed_tx = self.deployer_crypto.sign_transaction(tx)
+        tx_hash = self.ledger_api.send_signed_transaction(signed_tx)
+        tx_receipt = self.ledger_api.get_transaction_receipt(tx_hash)
+        assert len(tx_receipt) == 9
+        assert self.ledger_api.is_transaction_settled(tx_receipt), tx_receipt["raw_log"]
 
-        contract_address = contract.get_contract_address(self.ledger_api, code_id)
+        contract_address = self.ledger_api.get_contract_address(tx_receipt)
+
+        assert contract_address is not None
+        assert contract_address == self.ledger_api.get_last_contract_address(
+            self.code_id
+        )
+        self.contract_address = contract_address
+
+    @pytest.mark.integration
+    @pytest.mark.ledger
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+    def test_cosmwasm_contract_deploy_and_interact(self):
+        """Test cosmwasm contract deploy and interact."""
+        self.deploy_contract()
 
         # Create single token
-        tx = contract.get_create_single_transaction(
+        tx = self.contract.get_create_single_transaction(
             ledger_api=self.ledger_api,
-            contract_address=contract_address,
+            contract_address=self.contract_address,
             deployer_address=self.deployer_crypto.address,
             token_id=self.token_id_b,
         )
@@ -390,9 +388,9 @@ class TestCosmWasmContract:
         self.sign_send_verify_handle_transaction(tx, self.deployer_crypto)
 
         # Create batch of tokens
-        tx = contract.get_create_batch_transaction(
+        tx = self.contract.get_create_batch_transaction(
             ledger_api=self.ledger_api,
-            contract_address=contract_address,
+            contract_address=self.contract_address,
             deployer_address=self.deployer_crypto.address,
             token_ids=self.token_ids_a,
         )
@@ -400,9 +398,9 @@ class TestCosmWasmContract:
         self.sign_send_verify_handle_transaction(tx, self.deployer_crypto)
 
         # Mint single token
-        tx = contract.get_mint_single_transaction(
+        tx = self.contract.get_mint_single_transaction(
             ledger_api=self.ledger_api,
-            contract_address=contract_address,
+            contract_address=self.contract_address,
             deployer_address=self.deployer_crypto.address,
             recipient_address=self.item_owner_crypto.address,
             token_id=self.token_id_b,
@@ -412,9 +410,9 @@ class TestCosmWasmContract:
         self.sign_send_verify_handle_transaction(tx, self.deployer_crypto)
 
         # Get balance of single token
-        res = contract.get_balance(
+        res = self.contract.get_balance(
             ledger_api=self.ledger_api,
-            contract_address=contract_address,
+            contract_address=self.contract_address,
             agent_address=self.item_owner_crypto.address,
             token_id=self.token_id_b,
         )
@@ -422,9 +420,9 @@ class TestCosmWasmContract:
         assert res["balance"][self.token_id_b] == 1
 
         # Mint batch of tokens
-        tx = contract.get_mint_batch_transaction(
+        tx = self.contract.get_mint_batch_transaction(
             ledger_api=self.ledger_api,
-            contract_address=contract_address,
+            contract_address=self.contract_address,
             deployer_address=self.deployer_crypto.address,
             recipient_address=self.item_owner_crypto.address,
             token_ids=self.token_ids_a,
@@ -434,9 +432,9 @@ class TestCosmWasmContract:
         self.sign_send_verify_handle_transaction(tx, self.deployer_crypto)
 
         # Get balances of multiple tokens
-        res = contract.get_balances(
+        res = self.contract.get_balances(
             ledger_api=self.ledger_api,
-            contract_address=contract_address,
+            contract_address=self.contract_address,
             agent_address=self.item_owner_crypto.address,
             token_ids=self.token_ids_a,
         )
@@ -446,14 +444,11 @@ class TestCosmWasmContract:
 
     @pytest.mark.integration
     @pytest.mark.ledger
-    def test_cosmwasm_unimplemented_exception_single_atomic_swap(
-        self, erc1155_contract
-    ):
+    def test_cosmwasm_unimplemented_exception_single_atomic_swap(self):
         """Test unimplemented exception single atomic swap."""
-        contract, contract_address = erc1155_contract
         pytest.raises(
             NotImplementedError,
-            contract.get_atomic_swap_single_transaction,
+            self.contract.get_atomic_swap_single_transaction,
             self.ledger_api,
             contract_address=None,
             from_address=None,
@@ -468,12 +463,11 @@ class TestCosmWasmContract:
 
     @pytest.mark.integration
     @pytest.mark.ledger
-    def test_cosmwasm_unimplemented_exception_batch_atomic_swap(self, erc1155_contract):
+    def test_cosmwasm_unimplemented_exception_batch_atomic_swap(self):
         """Test unimplemented exception batch atomic swap."""
-        contract, contract_address = erc1155_contract
         pytest.raises(
             NotImplementedError,
-            contract.get_atomic_swap_batch_transaction,
+            self.contract.get_atomic_swap_batch_transaction,
             self.ledger_api,
             contract_address=None,
             from_address=None,

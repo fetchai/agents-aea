@@ -8,7 +8,7 @@ Read to and write from file with envelopes.
 
 ```python
 @contextmanager
-lock_file(file_descriptor: IO[bytes], logger: Logger = _default_logger)
+lock_file(file_descriptor: IO[bytes], logger: Logger = _default_logger) -> Generator
 ```
 
 Lock file in context manager.

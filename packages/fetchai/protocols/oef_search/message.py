@@ -20,7 +20,7 @@
 """This module contains oef_search's message definition."""
 
 import logging
-from typing import Set, Tuple, cast
+from typing import Any, Set, Tuple, cast
 
 from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
@@ -46,7 +46,8 @@ DEFAULT_BODY_SIZE = 4
 class OefSearchMessage(Message):
     """A protocol for interacting with an OEF search service."""
 
-    protocol_id = PublicId.from_str("fetchai/oef_search:0.12.0")
+    protocol_id = PublicId.from_str("fetchai/oef_search:0.13.0")
+    protocol_specification_id = PublicId.from_str("fetchai/oef_search:0.1.0")
 
     AgentsInfo = CustomAgentsInfo
 
@@ -66,7 +67,7 @@ class OefSearchMessage(Message):
         SUCCESS = "success"
         UNREGISTER_SERVICE = "unregister_service"
 
-        def __str__(self):
+        def __str__(self) -> str:
             """Get the string representation."""
             return str(self.value)
 
@@ -99,7 +100,7 @@ class OefSearchMessage(Message):
         dialogue_reference: Tuple[str, str] = ("", ""),
         message_id: int = 1,
         target: int = 0,
-        **kwargs,
+        **kwargs: Any,
     ):
         """
         Initialise an instance of OefSearchMessage.
@@ -301,13 +302,6 @@ class OefSearchMessage(Message):
                     self.target == 0,
                     "Invalid 'target'. Expected 0 (because 'message_id' is 1). Found {}.".format(
                         self.target
-                    ),
-                )
-            else:
-                enforce(
-                    0 < self.target < self.message_id,
-                    "Invalid 'target'. Expected an integer between 1 and {} inclusive. Found {}.".format(
-                        self.message_id - 1, self.target,
                     ),
                 )
         except (AEAEnforceError, ValueError, KeyError) as e:
