@@ -44,7 +44,7 @@ from aea.skills.base import Model
 
 DEFAULT_IS_LEDGER_TX = True
 
-DEFAULT_SERVICE_ID = "generic_service"
+DEFAULT_SERVICE_ID = "oracle_aggregation"
 
 DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
 DEFAULT_SEARCH_QUERY = {
