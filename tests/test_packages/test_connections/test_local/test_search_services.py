@@ -186,6 +186,7 @@ class TestEmptySearch:
         cls.node.stop()
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # TODO: check reasons!. quite unstable test
 class TestSimpleSearchResult:
     """Test that a simple search result return the expected result."""
 
@@ -223,9 +224,6 @@ class TestSimpleSearchResult:
         )
         cls.multiplexer.put(envelope)
 
-    @pytest.mark.flaky(
-        reruns=MAX_FLAKY_RERUNS
-    )  # TODO: check reasons!. quite unstable test
     def test_not_empty_search_result(self):
         """Test that the search result contains one entry after a successful registration."""
         # build and send the request
