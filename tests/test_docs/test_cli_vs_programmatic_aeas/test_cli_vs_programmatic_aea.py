@@ -48,6 +48,7 @@ PY_FILE = "test_docs/test_cli_vs_programmatic_aeas/programmatic_aea.py"
 DEST = "programmatic_aea.py"
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_INTEGRATION)
 class TestCliVsProgrammaticAEA(AEATestCaseMany):
     """This class contains the tests for the code-blocks in the build-aea-programmatically.md file."""
 
@@ -61,7 +62,6 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         python_file = extract_python_code(test_code_path)
         assert code_blocks[-1] == python_file, "Files must be exactly the same."
 
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_INTEGRATION)
     @pytest.mark.integration
     def test_cli_programmatic_communication(self):
         """Test the communication of the two agents."""

@@ -115,11 +115,11 @@ ORM_SELLER_STRATEGY_PATH = Path(
 )
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_INTEGRATION)
 @pytest.mark.integration
 class TestOrmIntegrationDocs(AEATestCaseMany):
     """This class contains the tests for the orm-integration.md guide."""
 
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_INTEGRATION)
     def test_orm_integration_docs_example(self):
         """Run the weather skills sequence."""
         seller_aea_name = "my_thermometer_aea"
