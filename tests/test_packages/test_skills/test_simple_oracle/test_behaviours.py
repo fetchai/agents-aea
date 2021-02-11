@@ -57,6 +57,8 @@ class TestSkillBehaviour(BaseSkillTestCase):
         self.assert_quantity_in_outbox(3)
 
         msg = cast(ContractApiMessage, self.get_message_from_outbox())
+
+
         assert msg, "Wrong message type"
         assert (
             msg.performative == ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION

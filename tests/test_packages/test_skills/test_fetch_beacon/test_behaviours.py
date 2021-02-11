@@ -48,11 +48,14 @@ class TestSkillBehaviour(BaseSkillTestCase):
         self.fetch_beacon_behaviour.send_http_request_message("GET", "some_url")
         self.assert_quantity_in_outbox(1)
         msg = cast(HttpMessage, self.get_message_from_outbox())
-        assert msg, "Wrong message type"
-        assert (
-            msg.performative == HttpMessage.Performative.REQUEST
-        ), "Wrong message performative"
-        assert msg.url == "some_url", "Wrong url"
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=HttpMessage,
+            performative=HttpMessage.Performative.REQUEST,
+            method="GET"
+            url="some_url",
+        )
+        assert has_attributes, error_str
 
     def test_setup(self):
         """Test that the setup method puts no messages in the outbox by default."""
@@ -64,11 +67,14 @@ class TestSkillBehaviour(BaseSkillTestCase):
         self.fetch_beacon_behaviour.act()
         self.assert_quantity_in_outbox(1)
         msg = cast(HttpMessage, self.get_message_from_outbox())
-        assert msg, "Wrong message type"
-        assert (
-            msg.Performative == HttpMessage.Performative
-        ), "Wrong message performative"
-        assert msg.url == self.fetch_beacon_behaviour.beacon_url, "Wrong url"
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=HttpMessage,
+            performative=HttpMessage.Performative.REQUEST,
+            method="GET"
+            url=self.fetch_beacon_behaviour.beacon_url,
+        )
+        assert has_attributes, error_str
 
     def test_teardown(self):
         """Test that the teardown method of the fetch_beacon behaviour leaves no messages in the outbox."""

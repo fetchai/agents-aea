@@ -48,11 +48,13 @@ class TestSkillBehaviour(BaseSkillTestCase):
         self.coin_price_behaviour.send_http_request_message("GET", "some_url")
         self.assert_quantity_in_outbox(1)
         msg = cast(HttpMessage, self.get_message_from_outbox())
-        assert msg, "Wrong message type"
-        assert (
-            msg.performative == HttpMessage.Performative.REQUEST
-        ), "Wrong message performative"
-        assert msg.url == "some_url", "Wrong url"
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=HttpMessage,
+            performative=HttpMessage.Performative.REQUEST,
+            url="some_url",
+        )
+        assert has_attributes, error_str
 
     def test_add_prometheus_metric(self):
         """Test the send_http_request_message method of the coin_price behaviour."""
@@ -61,14 +63,16 @@ class TestSkillBehaviour(BaseSkillTestCase):
         )
         self.assert_quantity_in_outbox(1)
         msg = cast(PrometheusMessage, self.get_message_from_outbox())
-        assert msg, "Wrong message type"
-        assert (
-            msg.performative == PrometheusMessage.Performative.ADD_METRIC
-        ), "Wrong message performative"
-        assert msg.type == "Gauge", "Wrong metric type"
-        assert msg.title == "some_metric", "Wrong metric title"
-        assert msg.description == "some_description", "Wrong metric description"
-        assert msg.labels == {"label_key": "label_value"}, "Wrong labels"
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=PrometheusMessage,
+            performative=PrometheusMessage.Performative.ADD_METRIC,
+            type="Gauge",
+            title="some_metric",
+            description="some_description",
+            labels={"label_key": "label_value"},
+        )
+        assert has_attributes, error_str
 
     def test_update_prometheus_metric(self):
         """Test the test_update_prometheus_metric method of the coin_price behaviour."""
@@ -77,24 +81,61 @@ class TestSkillBehaviour(BaseSkillTestCase):
         )
         self.assert_quantity_in_outbox(1)
         msg = cast(PrometheusMessage, self.get_message_from_outbox())
-        assert msg, "Wrong message type"
-        assert (
-            msg.performative == PrometheusMessage.Performative.UPDATE_METRIC
-        ), "Wrong message performative"
-        assert msg.callable == "set", "Wrong metric callable"
-        assert msg.title == "some_metric", "Wrong metric title"
-        assert msg.value == 0.0, "Wrong metric value"
-        assert msg.labels == {"label_key": "label_value"}, "Wrong labels"
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=PrometheusMessage,
+            performative=PrometheusMessage.Performative.UPDATE_METRIC,
+            callable="set",
+            title="some_metric",
+            value=0.0,
+            labels={"label_key": "label_value"},
+        )
+        assert has_attributes, error_str
 
     def test_setup(self):
         """Test that the setup method puts two messages (prometheus metrics) in the outbox by default."""
         self.coin_price_behaviour.setup()
         self.assert_quantity_in_outbox(2)
 
+        msg = cast(PrometheusMessage, self.get_message_from_outbox())
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=PrometheusMessage,
+            performative=PrometheusMessage.Performative.ADD_METRIC,
+            type="Gauge",
+            title="num_retrievals",
+        )
+        assert has_attributes, error_str
+
+        msg = cast(PrometheusMessage, self.get_message_from_outbox())
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=PrometheusMessage,
+            performative=PrometheusMessage.Performative.ADD_METRIC,
+            type="Gauge",
+            title="num_requests",
+        )
+        assert has_attributes, error_str
+
     def test_act(self):
         """Test that the act method of the coin_price behaviour puts one message (http request) in the outbox."""
         self.coin_price_behaviour.act()
         self.assert_quantity_in_outbox(1)
+
+        url = self.coin_price_behaviour.context.coin_price_model.url
+        coin_id = self.coin_price_behaviour.context.coin_price_model.coin_id
+        currency = self.coin_price_behaviour.context.coin_price_model.currency
+
+        query_url = url + f"simple/price?ids={coin_id}&vs_currencies={currency}"
+
+        msg = cast(HttpMessage, self.get_message_from_outbox())
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=HttpMessage,
+            performative=HttpMessage.Performative.REQUEST,
+            url=query_url,
+        )
+        assert has_attributes, error_str
 
     def test_teardown(self):
         """Test that the teardown method of the coin_price behaviour leaves no messages in the outbox."""
