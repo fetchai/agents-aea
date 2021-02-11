@@ -180,8 +180,9 @@ def try_get_item_target_path(
     """
     target_path = os.path.join(path, author_name, item_type_plural, item_name)
     if os.path.exists(target_path):
+        path_ = Path(target_path)
         raise click.ClickException(
-            'Item "{}" already exists in target folder.'.format(item_name)
+            f'Item "{path_.name}" already exists in target folder "{path_.parent}".'
         )
     return target_path
 

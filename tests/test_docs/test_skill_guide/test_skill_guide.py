@@ -58,7 +58,7 @@ class TestBuildSkill(AEATestCaseMany):
     @classmethod
     def setup_class(cls):
         """Setup the test class."""
-        AEATestCaseMany.setup_class()
+        super().setup_class()
         cls.doc_path = os.path.join(ROOT_DIR, MD_FILE)
         cls.code_blocks = extract_code_blocks(filepath=cls.doc_path, filter_="python")
 
@@ -188,7 +188,7 @@ class TestBuildSkill(AEATestCaseMany):
         missing_strings = self.missing_from_output(
             simple_service_registration_aea_process,
             check_strings,
-            timeout=5,
+            timeout=30,
             is_terminating=False,
         )
         assert (

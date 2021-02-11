@@ -143,7 +143,6 @@ class TestLaunch(BaseLaunchTestCase):
             )
 
 
-@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 class TestLaunchWithOneFailingAgent(BaseLaunchTestCase):
     """Test aea launch when there is a failing agent.."""
 
@@ -163,6 +162,7 @@ class TestLaunchWithOneFailingAgent(BaseLaunchTestCase):
         yaml.safe_dump(config, open(config_path, "w"))
         os.chdir(cls.t)
 
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_exit_code_equal_to_one(self):
         """Assert that the exit code is equal to one (i.e. generic failure)."""
         with self._cli_launch([self.agent_name_1, self.agent_name_2]) as process_launch:
