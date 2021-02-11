@@ -400,7 +400,7 @@ Below the unused `teardown` function, we continue by adding the following functi
 
 The above code handles an unidentified dialogue by responding to the sender with a `DefaultMessage` containing the appropriate error information.
 
-The next code block handles `CFP` (call-for-protposal) negotiation messages. Paste the following code below the `_handle_unidentified_dialogue` function:
+The next code block handles `CFP` (call-for-proposal) negotiation messages. Paste the following code below the `_handle_unidentified_dialogue` function:
 
 ``` python
     def _handle_cfp(self, fipa_msg: FipaMessage, fipa_dialogue: FipaDialogue) -> None:
@@ -956,7 +956,7 @@ class GenericStrategy(Model):
         self._data_for_sale = data_for_sale
 ```
 
-In the above code snippet, we initialise the strategy class by trying to read the variables specific to the strategy from a YAML configuration file. If any variable isn't provided, some default values will be used.
+In the above code snippet, we initialise the strategy class by trying to read the variables specific to the strategy from a YAML configuration file. If any variable is not provided, some default values will be used.
 
 The following properties and methods deal with different aspects of the strategy. They should be relatively self-descriptive. Add them under the initialization of the strategy class:
 
@@ -3045,7 +3045,7 @@ class SigningDialogues(Model, BaseSigningDialogues):
         )
 ```
 
-The various dialogues classes in the above code snippet store dialogues with other AEAs, services and components, (e.g. SOEF search node, Ledgers, Decision maker). They expose useful methods to manipulate these interactions, access previous messages, and enable us to identify possible communications problems between `my_generic_seller` and `my_generic_buyer` AEAs.
+The various dialogues classes in the above code snippet store dialogues with other AEAs, services and components, (e.g. SOEF search node via the `fetchai/soef` connection, ledgers via the `fetchai/ledger` connection and the decision maker). They expose useful methods to manipulate these interactions, access previous messages, and enable us to identify possible communications problems between `my_generic_seller` and `my_generic_buyer` AEAs.
 
 ### Step 6: Update the YAML files
 
