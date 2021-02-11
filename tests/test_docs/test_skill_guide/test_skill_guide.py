@@ -37,6 +37,7 @@ from tests.conftest import (
     FETCHAI,
     FETCHAI_PRIVATE_KEY_FILE,
     FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+    MAX_FLAKY_RERUNS_INTEGRATION,
     NON_FUNDED_FETCHAI_PRIVATE_KEY_1,
     NON_GENESIS_CONFIG,
     ROOT_DIR,
@@ -48,7 +49,6 @@ from tests.test_docs.helper import extract_code_blocks
 MD_FILE = "docs/skill-guide.md"
 
 
-@pytest.mark.flaky(reruns=0)
 @pytest.mark.integration
 class TestBuildSkill(AEATestCaseMany):
     """This class contains the tests for the code-blocks in the skill-guide.md file."""
@@ -66,6 +66,7 @@ class TestBuildSkill(AEATestCaseMany):
         """Teat that the md file is not empty."""
         assert self.code_blocks != [], "File must not be empty."
 
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_INTEGRATION)
     def test_update_skill_and_run(self):
         """Test that the resource folder contains scaffold handlers.py module."""
         self.initialize_aea(AUTHOR)

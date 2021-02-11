@@ -34,9 +34,6 @@ MD_FILE = "docs/agent-vs-aea.md"
 PY_FILE = "test_docs/test_agent_vs_aea/agent_code_block.py"
 
 
-@pytest.mark.flaky(
-    reruns=MAX_FLAKY_RERUNS
-)  # TODO: check why test_run_agent raises permission error on file on windows platform!
 class TestAgentVsAEA(BaseAEATestCase):
     """This class contains the tests for the code-blocks in the agent-vs-aea.md file."""
 
@@ -55,6 +52,9 @@ class TestAgentVsAEA(BaseAEATestCase):
             self.code_blocks[-1] == self.python_file
         ), "Files must be exactly the same."
 
+    @pytest.mark.flaky(
+        reruns=MAX_FLAKY_RERUNS
+    )  # TODO: check why test_run_agent raises permission error on file on windows platform!
     def test_run_agent(self):
         """Run the agent from the file."""
         run()
