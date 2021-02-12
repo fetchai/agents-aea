@@ -1212,7 +1212,12 @@ class TestUpgradeProjectWithoutNewerVersion(BaseTestUpgradeProject):
 
         # compare with latest fetched agent.
         ignore = [DEFAULT_AEA_CONFIG_FILE] + filecmp.DEFAULT_IGNORES
-        assert are_dirs_equal(self.current_agent_context, self.EXPECTED, ignore=ignore)
+        dircmp = filecmp.dircmp(
+            self.current_agent_context, self.EXPECTED, ignore=ignore
+        )
+        _left_only, _right_only, diff = dircmp_recursive(dircmp)
+        assert _left_only == {"vendor/fetchai/skills/error"}
+        assert diff == _right_only == set()
 
 
 @mock.patch.object(aea, "__version__", "0.8.0")
