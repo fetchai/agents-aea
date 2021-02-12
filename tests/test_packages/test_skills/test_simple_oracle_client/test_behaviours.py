@@ -67,12 +67,14 @@ class TestSkillBehaviour(BaseSkillTestCase):
         self.assert_quantity_in_outbox(1)
 
         msg = cast(ContractApiMessage, self.get_message_from_outbox())
-        assert msg, "Wrong message type"
-        assert (
-            msg.performative == ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION
-        ), "Wrong message performative"
-        assert msg.contract_id == str(CLIENT_CONTRACT_PUBLIC_ID), "Wrong contract_id"
-        assert msg.callable == "get_deploy_transaction", "Wrong callable"
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=ContractApiMessage,
+            performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
+            contract_id=str(CLIENT_CONTRACT_PUBLIC_ID),
+            callable="get_deploy_transaction",
+        )
+        assert has_attributes, error_str
 
     def test_setup_with_contract_config(self):
         """Test the setup method of the simple_oracle_client behaviour for existing contract."""
@@ -104,16 +106,15 @@ class TestSkillBehaviour(BaseSkillTestCase):
         self.assert_quantity_in_outbox(1)
 
         msg = cast(ContractApiMessage, self.get_message_from_outbox())
-        assert msg, "Wrong message type"
-        assert (
-            msg.performative == ContractApiMessage.Performative.GET_RAW_TRANSACTION
-        ), "Wrong message performative"
-        assert msg.ledger_id == strategy.ledger_id, "Wrong ledger_id"
-        assert msg.contract_id == str(ERC20_PUBLIC_ID), "Wrong contract_id"
-        assert (
-            msg.contract_address == strategy.client_contract_address
-        ), "Wrong contract address"
-        assert msg.callable == "get_approve_transaction", "Wrong callable"
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=ContractApiMessage,
+            performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
+            contract_id=str(ERC20_PUBLIC_ID),
+            contract_address=strategy.client_contract_address,
+            callable="get_approve_transaction",
+        )
+        assert has_attributes, error_str
 
     def test_act_query(self):
         """Test the act method of the simple_oracle_client behaviour for normal querying."""
@@ -129,16 +130,15 @@ class TestSkillBehaviour(BaseSkillTestCase):
         self.assert_quantity_in_outbox(1)
 
         msg = cast(ContractApiMessage, self.get_message_from_outbox())
-        assert msg, "Wrong message type"
-        assert (
-            msg.performative == ContractApiMessage.Performative.GET_RAW_TRANSACTION
-        ), "Wrong message performative"
-        assert msg.ledger_id == strategy.ledger_id, "Wrong ledger_id"
-        assert msg.contract_id == str(CLIENT_CONTRACT_PUBLIC_ID), "Wrong contract_id"
-        assert (
-            msg.contract_address == strategy.client_contract_address
-        ), "Wrong contract address"
-        assert msg.callable == "get_query_transaction", "Wrong callable"
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=ContractApiMessage,
+            performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
+            contract_id=str(CLIENT_CONTRACT_PUBLIC_ID),
+            contract_address=strategy.client_contract_address,
+            callable="get_query_transaction",
+        )
+        assert has_attributes, error_str
 
     def test_teardown(self):
         """Test that the teardown method of the simple_oracle_client behaviour leaves no messages in the outbox."""

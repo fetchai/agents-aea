@@ -52,7 +52,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             actual_message=msg,
             message_type=HttpMessage,
             performative=HttpMessage.Performative.REQUEST,
-            method="GET"
+            method="GET",
             url="some_url",
         )
         assert has_attributes, error_str
@@ -71,7 +71,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             actual_message=msg,
             message_type=HttpMessage,
             performative=HttpMessage.Performative.REQUEST,
-            method="GET"
+            method="GET",
             url=self.fetch_beacon_behaviour.beacon_url,
         )
         assert has_attributes, error_str

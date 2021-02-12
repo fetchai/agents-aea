@@ -374,14 +374,16 @@ class TestLedgerApiHandler(BaseSkillTestCase):
 
         self.assert_quantity_in_outbox(1)
         msg = cast(PrometheusMessage, self.get_message_from_outbox())
-        assert msg, "Wrong message type"
-        assert (
-            msg.performative == PrometheusMessage.Performative.UPDATE_METRIC
-        ), "Wrong message performative"
-        assert msg.title == "num_oracle_updates", "Wrong metric title"
-        assert msg.callable == "inc", "Wrong metric description"
-        assert msg.value == 1.0, "Wrong value"
-        assert msg.labels == {}, "Wrong labels"
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=PrometheusMessage,
+            performative=PrometheusMessage.Performative.UPDATE_METRIC,
+            callable="inc",
+            title="num_oracle_updates",
+            value=1.0,
+            labels={},
+        )
+        assert has_attributes, error_str
 
     def test_teardown(self):
         """Test the teardown method of the ledger_api handler."""

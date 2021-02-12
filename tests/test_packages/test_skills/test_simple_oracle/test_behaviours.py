@@ -34,6 +34,8 @@ from packages.fetchai.skills.simple_oracle.strategy import Strategy
 from tests.conftest import ROOT_DIR
 
 
+LEDGER_ID = "ethereum"
+AGENT_ADDRESS = "some_eth_address"
 DEFAULT_ADDRESS = "0x0000000000000000000000000000000000000000"
 
 
@@ -57,38 +59,36 @@ class TestSkillBehaviour(BaseSkillTestCase):
         self.assert_quantity_in_outbox(3)
 
         msg = cast(ContractApiMessage, self.get_message_from_outbox())
-
-
-        assert msg, "Wrong message type"
-        assert (
-            msg.performative == ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION
-        ), "Wrong message performative"
-        assert msg.contract_id == str(CONTRACT_PUBLIC_ID), "Wrong contract_id"
-        assert msg.callable == "get_deploy_transaction", "Wrong callable"
-
-        msg = cast(PrometheusMessage, self.get_message_from_outbox())
-        assert msg, "Wrong message type"
-        assert (
-            msg.performative == PrometheusMessage.Performative.ADD_METRIC
-        ), "Wrong message performative"
-        assert msg.type == "Gauge", "Wrong metric type"
-        assert msg.title == "oracle_account_balance_ETH", "Wrong metric title"
-        assert (
-            msg.description == "Balance of oracle contract (ETH)"
-        ), "Wrong metric description"
-        assert msg.labels == {}, "Wrong labels"
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=ContractApiMessage,
+            performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
+            contract_id=str(CONTRACT_PUBLIC_ID),
+            callable="get_deploy_transaction",
+        )
+        assert has_attributes, error_str
 
         msg = cast(PrometheusMessage, self.get_message_from_outbox())
-        assert msg, "Wrong message type"
-        assert (
-            msg.performative == PrometheusMessage.Performative.ADD_METRIC
-        ), "Wrong message performative"
-        assert msg.type == "Gauge", "Wrong metric type"
-        assert msg.title == "num_oracle_updates", "Wrong metric title"
-        assert (
-            msg.description == "Number of updates published to oracle contract"
-        ), "Wrong metric description"
-        assert msg.labels == {}, "Wrong labels"
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=PrometheusMessage,
+            performative=PrometheusMessage.Performative.ADD_METRIC,
+            type="Gauge",
+            title="oracle_account_balance_ETH",
+            description="Balance of oracle contract (ETH)",
+        )
+        assert has_attributes, error_str
+
+        msg = cast(PrometheusMessage, self.get_message_from_outbox())
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=PrometheusMessage,
+            performative=PrometheusMessage.Performative.ADD_METRIC,
+            type="Gauge",
+            title="num_oracle_updates",
+            description="Number of updates published to oracle contract",
+        )
+        assert has_attributes, error_str
 
     def test_setup_with_contract_config(self):
         """Test the setup method of the simple_oracle behaviour for existing contract."""
@@ -106,55 +106,59 @@ class TestSkillBehaviour(BaseSkillTestCase):
 
     def test_act_pre_deploy(self):
         """Test the act method of the simple_oracle behaviour before contract is deployed."""
-        strategy = cast(Strategy, self.simple_oracle_behaviour.context.strategy)
+        self.simple_oracle_behaviour.context.agent_addresses[
+            LEDGER_ID
+        ] = "AGENT_ADDRESS"
         self.simple_oracle_behaviour.act()
         self.assert_quantity_in_outbox(1)
 
         msg = cast(LedgerApiMessage, self.get_message_from_outbox())
-        assert msg, "Wrong message type"
-        assert (
-            msg.performative == LedgerApiMessage.Performative.GET_BALANCE
-        ), "Wrong message performative"
-        assert msg.ledger_id == strategy.ledger_id, "Wrong metric type"
-        assert msg.address == cast(
-            str,
-            self.simple_oracle_behaviour.context.agent_addresses.get(
-                strategy.ledger_id
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=LedgerApiMessage,
+            performative=LedgerApiMessage.Performative.GET_BALANCE,
+            ledger_id=LEDGER_ID,
+            address=cast(
+                str,
+                self.simple_oracle_behaviour.context.agent_addresses.get(LEDGER_ID),
             ),
-        ), "Wrong metric title"
+        )
+        assert has_attributes, error_str
 
     def test_act_grant_role(self):
         """Test the act method of the simple_oracle behaviour before role is granted."""
         strategy = cast(Strategy, self.simple_oracle_behaviour.context.strategy)
         strategy.contract_address = DEFAULT_ADDRESS
         strategy.is_contract_deployed = True
+        self.simple_oracle_behaviour.context.agent_addresses[
+            LEDGER_ID
+        ] = "AGENT_ADDRESS"
         self.simple_oracle_behaviour.act()
         self.assert_quantity_in_outbox(2)
 
         msg = cast(LedgerApiMessage, self.get_message_from_outbox())
-        assert msg, "Wrong message type"
-        assert (
-            msg.performative == LedgerApiMessage.Performative.GET_BALANCE
-        ), "Wrong message performative"
-        assert msg.ledger_id == strategy.ledger_id, "Wrong metric type"
-        assert msg.address == cast(
-            str,
-            self.simple_oracle_behaviour.context.agent_addresses.get(
-                strategy.ledger_id
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=LedgerApiMessage,
+            performative=LedgerApiMessage.Performative.GET_BALANCE,
+            ledger_id=LEDGER_ID,
+            address=cast(
+                str,
+                self.simple_oracle_behaviour.context.agent_addresses.get(LEDGER_ID),
             ),
-        ), "Wrong metric title"
+        )
+        assert has_attributes, error_str
 
         msg = cast(ContractApiMessage, self.get_message_from_outbox())
-        assert msg, "Wrong message type"
-        assert (
-            msg.performative == ContractApiMessage.Performative.GET_RAW_TRANSACTION
-        ), "Wrong message performative"
-        assert msg.ledger_id == strategy.ledger_id, "Wrong ledger_id"
-        assert msg.contract_id == str(CONTRACT_PUBLIC_ID), "Wrong contract_id"
-        assert (
-            msg.contract_address == strategy.contract_address
-        ), "Wrong contract address"
-        assert msg.callable == "get_grant_role_transaction", "Wrong callable"
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=ContractApiMessage,
+            performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
+            contract_id=str(CONTRACT_PUBLIC_ID),
+            contract_address=strategy.contract_address,
+            callable="get_grant_role_transaction",
+        )
+        assert has_attributes, error_str
 
     def test_act_update(self):
         """Test the act method of the simple_oracle behaviour for normal updating."""
@@ -165,49 +169,50 @@ class TestSkillBehaviour(BaseSkillTestCase):
         self.simple_oracle_behaviour.context.shared_state["oracle_data"] = {
             "some_key": "some_value"
         }
+        self.simple_oracle_behaviour.context.agent_addresses[
+            LEDGER_ID
+        ] = "AGENT_ADDRESS"
         self.simple_oracle_behaviour.act()
         self.assert_quantity_in_outbox(2)
 
         msg = cast(LedgerApiMessage, self.get_message_from_outbox())
-        assert msg, "Wrong message type"
-        assert (
-            msg.performative == LedgerApiMessage.Performative.GET_BALANCE
-        ), "Wrong message performative"
-        assert msg.ledger_id == strategy.ledger_id, "Wrong metric type"
-        assert msg.address == cast(
-            str,
-            self.simple_oracle_behaviour.context.agent_addresses.get(
-                strategy.ledger_id
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=LedgerApiMessage,
+            performative=LedgerApiMessage.Performative.GET_BALANCE,
+            ledger_id=LEDGER_ID,
+            address=cast(
+                str,
+                self.simple_oracle_behaviour.context.agent_addresses.get(LEDGER_ID),
             ),
-        ), "Wrong metric title"
+        )
+        assert has_attributes, error_str
 
         msg = cast(ContractApiMessage, self.get_message_from_outbox())
-        assert msg, "Wrong message type"
-        assert (
-            msg.performative == ContractApiMessage.Performative.GET_RAW_TRANSACTION
-        ), "Wrong message performative"
-        assert msg.ledger_id == strategy.ledger_id, "Wrong ledger_id"
-        assert msg.contract_id == str(CONTRACT_PUBLIC_ID), "Wrong contract_id"
-        assert (
-            msg.contract_address == strategy.contract_address
-        ), "Wrong contract address"
-        assert msg.callable == "get_update_transaction", "Wrong callable"
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=ContractApiMessage,
+            performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
+            contract_id=str(CONTRACT_PUBLIC_ID),
+            contract_address=strategy.contract_address,
+            callable="get_update_transaction",
+        )
+        assert has_attributes, error_str
 
     def test__request_contract_deploy_transaction(self):
         """Test that the _request_contract_deploy_transaction function sends the right message to the contract_api."""
-        strategy = cast(Strategy, self.simple_oracle_behaviour.context.strategy)
-
         self.simple_oracle_behaviour._request_contract_deploy_transaction()
         self.assert_quantity_in_outbox(1)
 
         msg = cast(ContractApiMessage, self.get_message_from_outbox())
-        assert msg, "Wrong message type"
-        assert (
-            msg.performative == ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION
-        ), "Wrong message performative"
-        assert msg.ledger_id == strategy.ledger_id, "Wrong ledger_id"
-        assert msg.contract_id == str(CONTRACT_PUBLIC_ID), "Wrong contract_id"
-        assert msg.callable == "get_deploy_transaction", "Wrong callable"
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=ContractApiMessage,
+            performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
+            contract_id=str(CONTRACT_PUBLIC_ID),
+            callable="get_deploy_transaction",
+        )
+        assert has_attributes, error_str
 
     def test__request_grant_role_transaction(self):
         """Test that the _request_grant_role_transaction function sends the right message to the contract_api."""
@@ -218,16 +223,15 @@ class TestSkillBehaviour(BaseSkillTestCase):
         self.assert_quantity_in_outbox(1)
 
         msg = cast(ContractApiMessage, self.get_message_from_outbox())
-        assert msg, "Wrong message type"
-        assert (
-            msg.performative == ContractApiMessage.Performative.GET_RAW_TRANSACTION
-        ), "Wrong message performative"
-        assert msg.ledger_id == strategy.ledger_id, "Wrong ledger_id"
-        assert msg.contract_id == str(CONTRACT_PUBLIC_ID), "Wrong contract_id"
-        assert (
-            msg.contract_address == strategy.contract_address
-        ), "Wrong contract address"
-        assert msg.callable == "get_grant_role_transaction", "Wrong callable"
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=ContractApiMessage,
+            performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
+            contract_id=str(CONTRACT_PUBLIC_ID),
+            contract_address=strategy.contract_address,
+            callable="get_grant_role_transaction",
+        )
+        assert has_attributes, error_str
 
     def test__request_update_transaction(self):
         """Test that the _request_update_transaction function sends the right message to the contract_api."""
@@ -239,39 +243,37 @@ class TestSkillBehaviour(BaseSkillTestCase):
         self.assert_quantity_in_outbox(1)
 
         msg = cast(ContractApiMessage, self.get_message_from_outbox())
-        assert msg, "Wrong message type"
-        assert (
-            msg.performative == ContractApiMessage.Performative.GET_RAW_TRANSACTION
-        ), "Wrong message performative"
-        assert msg.ledger_id == strategy.ledger_id, "Wrong ledger_id"
-        assert msg.contract_id == str(CONTRACT_PUBLIC_ID), "Wrong contract_id"
-        assert (
-            msg.contract_address == strategy.contract_address
-        ), "Wrong contract address"
-        assert msg.callable == "get_update_transaction", "Wrong callable"
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=ContractApiMessage,
+            performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
+            contract_id=str(CONTRACT_PUBLIC_ID),
+            contract_address=strategy.contract_address,
+            callable="get_update_transaction",
+        )
+        assert has_attributes, error_str
 
     def test__get_balance(self):
         """Test that the _get_balance function sends the right message to the ledger_api."""
-        strategy = cast(Strategy, self.simple_oracle_behaviour.context.strategy)
         self.simple_oracle_behaviour.context.agent_addresses[
-            strategy.ledger_id
-        ] = "some_eth_address"
+            LEDGER_ID
+        ] = "AGENT_ADDRESS"
 
         self.simple_oracle_behaviour._get_balance()
         self.assert_quantity_in_outbox(1)
 
         msg = cast(LedgerApiMessage, self.get_message_from_outbox())
-        assert msg, "Wrong message type"
-        assert (
-            msg.performative == LedgerApiMessage.Performative.GET_BALANCE
-        ), "Wrong message performative"
-        assert msg.ledger_id == strategy.ledger_id, "Wrong metric type"
-        assert msg.address == cast(
-            str,
-            self.simple_oracle_behaviour.context.agent_addresses.get(
-                strategy.ledger_id
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=LedgerApiMessage,
+            performative=LedgerApiMessage.Performative.GET_BALANCE,
+            ledger_id=LEDGER_ID,
+            address=cast(
+                str,
+                self.simple_oracle_behaviour.context.agent_addresses.get(LEDGER_ID),
             ),
-        ), "Wrong metric title"
+        )
+        assert has_attributes, error_str
 
     def test_add_prometheus_metric(self):
         """Test the send_http_request_message method of the simple_oracle behaviour."""
@@ -279,15 +281,18 @@ class TestSkillBehaviour(BaseSkillTestCase):
             "some_metric", "Gauge", "some_description", {"label_key": "label_value"}
         )
         self.assert_quantity_in_outbox(1)
+
         msg = cast(PrometheusMessage, self.get_message_from_outbox())
-        assert msg, "Wrong message type"
-        assert (
-            msg.performative == PrometheusMessage.Performative.ADD_METRIC
-        ), "Wrong message performative"
-        assert msg.type == "Gauge", "Wrong metric type"
-        assert msg.title == "some_metric", "Wrong metric title"
-        assert msg.description == "some_description", "Wrong metric description"
-        assert msg.labels == {"label_key": "label_value"}, "Wrong labels"
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=PrometheusMessage,
+            performative=PrometheusMessage.Performative.ADD_METRIC,
+            type="Gauge",
+            title="some_metric",
+            description="some_description",
+            labels={"label_key": "label_value"},
+        )
+        assert has_attributes, error_str
 
     def test_update_prometheus_metric(self):
         """Test the test_update_prometheus_metric method of the simple_oracle behaviour."""
@@ -295,15 +300,18 @@ class TestSkillBehaviour(BaseSkillTestCase):
             "some_metric", "set", 0.0, {"label_key": "label_value"}
         )
         self.assert_quantity_in_outbox(1)
+
         msg = cast(PrometheusMessage, self.get_message_from_outbox())
-        assert msg, "Wrong message type"
-        assert (
-            msg.performative == PrometheusMessage.Performative.UPDATE_METRIC
-        ), "Wrong message performative"
-        assert msg.callable == "set", "Wrong metric callable"
-        assert msg.title == "some_metric", "Wrong metric title"
-        assert msg.value == 0.0, "Wrong metric value"
-        assert msg.labels == {"label_key": "label_value"}, "Wrong labels"
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=PrometheusMessage,
+            performative=PrometheusMessage.Performative.UPDATE_METRIC,
+            callable="set",
+            title="some_metric",
+            value=0.0,
+            labels={"label_key": "label_value"},
+        )
+        assert has_attributes, error_str
 
     def test_teardown(self):
         """Test that the teardown method of the simple_oracle behaviour leaves no messages in the outbox."""
