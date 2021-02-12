@@ -62,13 +62,11 @@ class TestBuildSkill(AEATestCaseManyFlaky):
         cls.doc_path = os.path.join(ROOT_DIR, MD_FILE)
         cls.code_blocks = extract_code_blocks(filepath=cls.doc_path, filter_="python")
 
-    def test_read_md_file(self):
-        """Teat that the md file is not empty."""
-        assert self.code_blocks != [], "File must not be empty."
-
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_INTEGRATION)
     def test_update_skill_and_run(self):
         """Test that the resource folder contains scaffold handlers.py module."""
+        assert self.code_blocks != [], "File must not be empty."
+
         self.initialize_aea(AUTHOR)
 
         # generate random location

@@ -1185,7 +1185,12 @@ class TestUpgradeProjectWithNewerVersion(BaseTestUpgradeProject):
             self.current_agent_context, self.EXPECTED, ignore=ignore
         )
         _left_only, _right_only, diff = dircmp_recursive(dircmp)
-        assert diff == _left_only == _right_only == set()
+        if confirm:
+            assert diff == _right_only == _left_only == set()
+        else:
+            assert diff == _right_only == set()
+            # temporary: due to change in deps
+            assert _left_only == {"vendor/fetchai/skills/error"}
 
 
 @mock.patch("aea.cli.upgrade.get_latest_version_available_in_registry")

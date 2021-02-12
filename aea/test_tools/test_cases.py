@@ -96,6 +96,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
     _is_teardown_class_called: bool = False
     capture_log: bool = False
     cli_log_options: List[str] = []
+    method_list: List[str] = []
 
     @classmethod
     def set_agent_context(cls, agent_name: str) -> None:
@@ -859,6 +860,13 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
     @classmethod
     def setup_class(cls) -> None:
         """Set up the test class."""
+        cls.method_list = [
+            func
+            for func in dir(cls)
+            if callable(getattr(cls, func))
+            and not func.startswith("__")
+            and func.startswith("test_")
+        ]
         cls.runner = CliRunner()
         cls.old_cwd = Path(os.getcwd())
         cls.subprocesses = []
@@ -942,33 +950,15 @@ class AEATestCaseEmptyFlaky(AEATestCaseEmpty):
     Use for flaky tests with the flaky decorator.
     """
 
-    failure_count: int = 0
+    run_count: int = 0
 
     @classmethod
     def setup_class(cls) -> None:
         """Set up the test class."""
-        method_list = [
-            func
-            for func in dir(cls)
-            if callable(getattr(cls, func))
-            and not func.startswith("__")
-            and func.startswith("test_")
-        ]
-        if len(method_list) > 1:
-            raise ValueError(f"{cls.__name__} can only contain one test method!")
         super(AEATestCaseEmptyFlaky, cls).setup_class()
-        cls.failure_count = 0
-
-    def setup(self) -> None:
-        """Set up test case instance."""
-        if self.failure_count == 0:
-            return
-        self.teardown_class()
-        self.setup_class()
-
-    def teardown(self) -> None:
-        """Tear down test case instance."""
-        self.failure_count += 1
+        if len(cls.method_list) > 1:  # pragma: nocover
+            raise ValueError(f"{cls.__name__} can only contain one test method!")
+        cls.run_count += 1
 
     @classmethod
     def teardown_class(cls) -> None:
@@ -997,33 +987,15 @@ class AEATestCaseManyFlaky(AEATestCaseMany):
     Use for flaky tests with the flaky decorator.
     """
 
-    failure_count: int = 0
+    run_count: int = 0
 
     @classmethod
     def setup_class(cls) -> None:
         """Set up the test class."""
-        method_list = [
-            func
-            for func in dir(cls)
-            if callable(getattr(cls, func))
-            and not func.startswith("__")
-            and func.startswith("test_")
-        ]
-        if len(method_list) > 1:
-            raise ValueError(f"{cls.__name__} can only contain one test method!")
         super(AEATestCaseManyFlaky, cls).setup_class()
-        cls.failure_count = 0
-
-    def setup(self) -> None:
-        """Set up test case instance."""
-        if self.failure_count == 0:
-            return
-        self.teardown_class()
-        self.setup_class()
-
-    def teardown(self) -> None:
-        """Tear down test case instance."""
-        self.failure_count += 1
+        if len(cls.method_list) > 1:  # pragma: nocover
+            raise ValueError(f"{cls.__name__} can only contain one test method!")
+        cls.run_count += 1
 
     @classmethod
     def teardown_class(cls) -> None:
