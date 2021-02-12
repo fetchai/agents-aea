@@ -40,7 +40,6 @@ class TestFiles:
     @classmethod
     def setup_class(cls):
         """Setup the test class."""
-        super().setup_class()
         doc_path = os.path.join(ROOT_DIR, MD_FILE)
         cls.code_blocks = extract_code_blocks(filepath=doc_path, filter_="python")
         test_code_path = os.path.join(CUR_PATH, PY_FILE)

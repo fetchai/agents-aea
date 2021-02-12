@@ -220,10 +220,9 @@ class TestLaunchWithWrongArguments(BaseLaunchTestCase):
     @classmethod
     def setup_class(cls):
         """Set the test up."""
-        cls.runner = CliRunner()
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
+        super().setup_class()
+        cls.temp_agent = tempfile.mkdtemp()
+        os.chdir(cls.temp_agent)
 
         cls.result = cls.runner.invoke(
             cli,
@@ -234,6 +233,16 @@ class TestLaunchWithWrongArguments(BaseLaunchTestCase):
     def test_exit_code_equal_to_one(self):
         """Assert that the exit code is equal to 1."""
         assert self.result.exit_code == 1
+
+    @classmethod
+    def teardown_class(cls):
+        """Set the test up."""
+        os.chdir(cls.t)
+        try:
+            shutil.rmtree(cls.temp_agent)
+        except (OSError, IOError):
+            pass
+        super().teardown_class()
 
 
 class TestLaunchMultithreaded(BaseLaunchTestCase):

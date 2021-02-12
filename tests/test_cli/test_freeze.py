@@ -70,7 +70,7 @@ class TestFreeze:
         """Test that the command has printed the correct output."""
         assert self.result.output == """protobuf\nvyper==0.1.0b12\n"""
 
-    def teardown_class(self):
+    def teardown(self):
         """Tear the test down."""
         os.chdir(self.cwd)
         try:
