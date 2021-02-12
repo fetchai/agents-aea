@@ -22,7 +22,7 @@ from random import uniform
 
 import pytest
 
-from aea.test_tools.test_cases import AEATestCaseMany
+from aea.test_tools.test_cases import AEATestCaseManyFlaky
 
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
@@ -42,7 +42,7 @@ from tests.conftest import (
 
 
 @pytest.mark.integration
-class TestERCSkillsEthereumLedger(AEATestCaseMany, UseGanache):
+class TestERCSkillsEthereumLedger(AEATestCaseManyFlaky, UseGanache):
     """Test that erc1155 skills work."""
 
     @pytest.mark.integration

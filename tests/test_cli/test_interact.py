@@ -28,7 +28,7 @@ from aea.cli.interact import (
 )
 from aea.helpers.base import send_control_c
 from aea.mail.base import Envelope
-from aea.test_tools.test_cases import AEATestCaseEmpty, AEATestCaseMany
+from aea.test_tools.test_cases import AEATestCaseEmptyFlaky, AEATestCaseManyFlaky
 
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
@@ -36,7 +36,7 @@ from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
 from tests.conftest import MAX_FLAKY_RERUNS
 
 
-class TestInteractCommand(AEATestCaseMany):
+class TestInteractCommand(AEATestCaseManyFlaky):
     """Test that interact command work."""
 
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
@@ -203,7 +203,7 @@ class ProcessEnvelopesTestCase(TestCase):
             _process_envelopes(agent_name, inbox, outbox, dialogues, message_class)
 
 
-class TestInteractEcho(AEATestCaseEmpty):
+class TestInteractEcho(AEATestCaseEmptyFlaky):
     """Test 'aea interact' with the echo skill."""
 
     @pytest.mark.integration

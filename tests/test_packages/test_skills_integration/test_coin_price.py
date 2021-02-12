@@ -19,6 +19,7 @@
 
 """This test module contains the integration test for the coin price skill."""
 
+import time
 from pathlib import Path
 from typing import Dict
 
@@ -91,6 +92,8 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
         process = self.run_agent()
         is_running = self.is_running(process)
         assert is_running, "AEA not running within timeout!"
+
+        time.sleep(6)  # we wait a bit longer than the tick rate of the behaviour
 
         response = requests.get("http://127.0.0.1:8000/price")
         assert response.status_code == 200, "Failed to get response code 200"

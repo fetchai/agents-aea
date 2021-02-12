@@ -26,7 +26,7 @@ from random import uniform
 
 import pytest
 
-from aea.test_tools.test_cases import AEATestCaseMany
+from aea.test_tools.test_cases import AEATestCaseManyFlaky
 
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
@@ -48,18 +48,19 @@ PY_FILE = "test_docs/test_cli_vs_programmatic_aeas/programmatic_aea.py"
 DEST = "programmatic_aea.py"
 
 
-class TestCliVsProgrammaticAEA(AEATestCaseMany):
+def test_read_md_file():
+    """Compare the extracted code with the python file."""
+    doc_path = os.path.join(ROOT_DIR, MD_FILE)
+    code_blocks = extract_code_blocks(filepath=doc_path, filter_="python")
+    test_code_path = os.path.join(CUR_PATH, PY_FILE)
+    python_file = extract_python_code(test_code_path)
+    assert code_blocks[-1] == python_file, "Files must be exactly the same."
+
+
+class TestCliVsProgrammaticAEA(AEATestCaseManyFlaky):
     """This class contains the tests for the code-blocks in the build-aea-programmatically.md file."""
 
     capture_log: bool = True
-
-    def test_read_md_file(self):
-        """Compare the extracted code with the python file."""
-        doc_path = os.path.join(ROOT_DIR, MD_FILE)
-        code_blocks = extract_code_blocks(filepath=doc_path, filter_="python")
-        test_code_path = os.path.join(CUR_PATH, PY_FILE)
-        python_file = extract_python_code(test_code_path)
-        assert code_blocks[-1] == python_file, "Files must be exactly the same."
 
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_INTEGRATION)
     @pytest.mark.integration
