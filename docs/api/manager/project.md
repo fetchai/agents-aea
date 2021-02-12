@@ -44,7 +44,7 @@ Agent project representation.
 #### `__`init`__`
 
 ```python
- | __init__(public_id: PublicId, path: str)
+ | __init__(public_id: PublicId, path: str) -> None
 ```
 
 Init project with public_id and project's path.
@@ -113,7 +113,7 @@ Agent alias representation.
 #### `__`init`__`
 
 ```python
- | __init__(project: Project, agent_name: str, keys_dir: Optional[str])
+ | __init__(project: Project, agent_name: str, data_dir: str)
 ```
 
 Init agent alias with project, config, name, agent, builder.
@@ -159,7 +159,7 @@ Get agent config.
 #### remove`_`from`_`project
 
 ```python
- | remove_from_project()
+ | remove_from_project() -> None
 ```
 
 Remove agent alias from project.

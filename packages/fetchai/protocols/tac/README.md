@@ -10,11 +10,11 @@ This is a protocol for participating in a Trading Agent Competition (TAC).
 ---
 name: tac
 author: fetchai
-version: 0.12.0
+version: 0.13.0
 description: The tac protocol implements the messages an AEA needs to participate
   in the TAC.
 license: Apache-2.0
-aea_version: '>=0.9.0, <0.10.0'
+aea_version: '>=0.10.0, <0.11.0'
 protocol_specification_id: fetchai/tac:0.1.0
 speech_acts:
   register:

@@ -28,7 +28,7 @@ from aea.helpers.base import CertRequest
 from tests.conftest import _process_cert
 
 
-def test_agent_record():
+def test_agent_record(change_directory):
     """Test signature and public key proper retrieval from a CertRequest"""
     agent_key_1 = make_crypto(DEFAULT_LEDGER)
     agent_key_2 = make_crypto(DEFAULT_LEDGER)
@@ -46,7 +46,7 @@ def test_agent_record():
         "2022-01-01",
         cert_path,
     )
-    _process_cert(agent_key_1, cert)
+    _process_cert(agent_key_1, cert, change_directory)
 
     # success
     agent_record = AgentRecord.from_cert_request(

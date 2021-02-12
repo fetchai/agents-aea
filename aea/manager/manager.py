@@ -27,7 +27,7 @@ from threading import Thread
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 
 from aea.aea import AEA
-from aea.configurations.constants import DEFAULT_REGISTRY_NAME
+from aea.configurations.constants import AEA_MANAGER_DATA_DIRNAME, DEFAULT_REGISTRY_NAME
 from aea.configurations.data_types import PublicId
 from aea.manager.project import AgentAlias, Project
 
@@ -151,8 +151,9 @@ class MultiAgentManager:
         self._is_running = False
         self._projects: Dict[PublicId, Project] = {}
         self._versionless_projects_set: Set[PublicId] = set()
-        self._keys_dir = os.path.abspath(os.path.join(self.working_dir, "keys"))
-        self._certs_dir = os.path.abspath(os.path.join(self.working_dir, "certs"))
+        self._data_dir = os.path.abspath(
+            os.path.join(self.working_dir, AEA_MANAGER_DATA_DIRNAME)
+        )
         self._agents: Dict[str, AgentAlias] = {}
         self._agents_tasks: Dict[str, AgentRunAsyncTask] = {}
 
@@ -170,14 +171,13 @@ class MultiAgentManager:
         self._mode = mode
 
     @property
-    def keys_dir(self) -> str:
-        """Get the keys directory."""
-        return self._keys_dir
-
-    @property
-    def certs_dir(self) -> str:
+    def data_dir(self) -> str:
         """Get the certs directory."""
-        return self._certs_dir
+        return self._data_dir
+
+    def get_data_dir_of_agent(self, agent_name: str) -> str:
+        """Get the data directory of a specific agent."""
+        return os.path.join(self.data_dir, agent_name)
 
     @property
     def is_running(self) -> bool:
@@ -296,7 +296,7 @@ class MultiAgentManager:
         if cleanup:
             for project in list(self._projects.keys()):
                 self.remove_project(project, keep_files=save)
-            self._cleanup(only_keys=save)
+            self._cleanup(only_data=save)
 
         self._is_running = False
 
@@ -308,11 +308,10 @@ class MultiAgentManager:
         self._thread = None
         return self
 
-    def _cleanup(self, only_keys: bool = False) -> None:
+    def _cleanup(self, only_data: bool = False) -> None:
         """Remove workdir if was created."""
-        if only_keys:
-            rmtree(self.keys_dir)
-            rmtree(self.certs_dir)
+        if only_data:
+            rmtree(self.data_dir)
         else:
             if self._was_working_dir_created and os.path.exists(self.working_dir):
                 rmtree(self.working_dir)
@@ -417,7 +416,9 @@ class MultiAgentManager:
         project = self._projects[public_id]
 
         agent_alias = AgentAlias(
-            project=project, agent_name=agent_name, keys_dir=self.keys_dir,
+            project=project,
+            agent_name=agent_name,
+            data_dir=self.get_data_dir_of_agent(agent_name),
         )
         agent_alias.set_overrides(agent_overrides, component_overrides)
         project.agents.add(agent_name)
@@ -449,7 +450,9 @@ class MultiAgentManager:
         project = self._projects[public_id]
 
         agent_alias = AgentAlias(
-            project=project, agent_name=agent_name, keys_dir=self.keys_dir,
+            project=project,
+            agent_name=agent_name,
+            data_dir=self.get_data_dir_of_agent(agent_name),
         )
         agent_alias.set_agent_config_from_data(config)
         project.agents.add(agent_name)
@@ -684,10 +687,8 @@ class MultiAgentManager:
 
         if not os.path.isdir(self.working_dir):  # pragma: nocover
             raise ValueError(f"{self.working_dir} is not a directory!")
-        if not os.path.exists(self.keys_dir):
-            os.makedirs(self.keys_dir)
-        if not os.path.exists(self.certs_dir):
-            os.makedirs(self.certs_dir)
+        if not os.path.exists(self.data_dir):
+            os.makedirs(self.data_dir)
 
     def _load_state(self, local: bool, remote: bool) -> None:
         """

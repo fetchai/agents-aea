@@ -42,6 +42,16 @@ Init aea config dir task.
 
 - `agent_dir`: direcory with aea config.
 
+<a name="aea.launcher.AEADirTask.id"></a>
+#### id
+
+```python
+ | @property
+ | id() -> Union[PathLike, str]
+```
+
+Return agent_dir.
+
 <a name="aea.launcher.AEADirTask.start"></a>
 #### start
 
@@ -55,7 +65,7 @@ Start task.
 #### stop
 
 ```python
- | stop()
+ | stop() -> None
 ```
 
 Stop task.
@@ -68,16 +78,6 @@ Stop task.
 ```
 
 Return asyncio Task for task run in asyncio loop.
-
-<a name="aea.launcher.AEADirTask.id"></a>
-#### id
-
-```python
- | @property
- | id() -> Union[PathLike, str]
-```
-
-Return agent_dir.
 
 <a name="aea.launcher.AEADirMultiprocessTask"></a>
 ## AEADirMultiprocessTask Objects
@@ -94,7 +94,7 @@ Version for multiprocess executor mode.
 #### `__`init`__`
 
 ```python
- | __init__(agent_dir: Union[PathLike, str], log_level: Optional[str] = None)
+ | __init__(agent_dir: Union[PathLike, str], log_level: Optional[str] = None) -> None
 ```
 
 Init aea config dir task.
@@ -103,24 +103,6 @@ Init aea config dir task.
 
 - `agent_dir`: direcory with aea config.
 - `log_level`: debug level applied for AEA in subprocess
-
-<a name="aea.launcher.AEADirMultiprocessTask.start"></a>
-#### start
-
-```python
- | start() -> Tuple[Callable, Sequence[Any]]
-```
-
-Return function and arguments to call within subprocess.
-
-<a name="aea.launcher.AEADirMultiprocessTask.stop"></a>
-#### stop
-
-```python
- | stop()
-```
-
-Stop task.
 
 <a name="aea.launcher.AEADirMultiprocessTask.id"></a>
 #### id
@@ -146,6 +128,24 @@ If it's running it's not failed.
 
 :rerurn: bool
 
+<a name="aea.launcher.AEADirMultiprocessTask.start"></a>
+#### start
+
+```python
+ | start() -> Tuple[Callable, Sequence[Any]]
+```
+
+Return function and arguments to call within subprocess.
+
+<a name="aea.launcher.AEADirMultiprocessTask.stop"></a>
+#### stop
+
+```python
+ | stop() -> None
+```
+
+Stop task.
+
 <a name="aea.launcher.AEALauncher"></a>
 ## AEALauncher Objects
 
@@ -162,7 +162,7 @@ Run multiple AEA instances.
  | __init__(agent_dirs: Sequence[Union[PathLike, str]], mode: str, fail_policy: ExecutorExceptionPolicies = ExecutorExceptionPolicies.propagate, log_level: Optional[str] = None) -> None
 ```
 
-Init AEARunner.
+Init AEALauncher.
 
 **Arguments**:
 

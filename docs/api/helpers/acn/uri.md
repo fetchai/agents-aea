@@ -16,7 +16,7 @@ Holds a node address in format "host:port".
 #### `__`init`__`
 
 ```python
- | __init__(uri: Optional[str] = None, host: Optional[str] = None, port: Optional[int] = None)
+ | __init__(uri: Optional[str] = None, host: Optional[str] = None, port: Optional[int] = None) -> None
 ```
 
 Initialise Uri.
@@ -25,7 +25,7 @@ Initialise Uri.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get string representation.
@@ -34,7 +34,7 @@ Get string representation.
 #### `__`repr`__`
 
 ```python
- | __repr__()
+ | __repr__() -> str
 ```
 
 Get object representation.

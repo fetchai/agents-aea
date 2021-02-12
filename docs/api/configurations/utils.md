@@ -8,7 +8,7 @@ AEA configuration utils.
 
 ```python
 @singledispatch
-replace_component_ids(_arg: PackageConfiguration, _replacements: Dict[ComponentType, Dict[PublicId, PublicId]])
+replace_component_ids(_arg: PackageConfiguration, _replacements: Dict[ComponentType, Dict[PublicId, PublicId]]) -> None
 ```
 
 Update public id references in a package configuration.
@@ -20,7 +20,7 @@ This depends on the actual configuration being considered.
 
 ```python
 @replace_component_ids.register(AgentConfig)  # type: ignore
-_(arg: AgentConfig, replacements: Dict[ComponentType, Dict[PublicId, PublicId]])
+_(arg: AgentConfig, replacements: Dict[ComponentType, Dict[PublicId, PublicId]]) -> None
 ```
 
 Replace references in agent configuration.
@@ -45,7 +45,7 @@ None
 
 ```python
 @replace_component_ids.register(ProtocolConfig)  # type: ignore
-_(_arg: ProtocolConfig, _replacements: Dict[ComponentType, Dict[PublicId, PublicId]])
+_(_arg: ProtocolConfig, _replacements: Dict[ComponentType, Dict[PublicId, PublicId]]) -> None
 ```
 
 Do nothing - protocols have no references.
@@ -55,7 +55,7 @@ Do nothing - protocols have no references.
 
 ```python
 @replace_component_ids.register(ConnectionConfig)  # type: ignore
-_(arg: ConnectionConfig, replacements: Dict[ComponentType, Dict[PublicId, PublicId]])
+_(arg: ConnectionConfig, replacements: Dict[ComponentType, Dict[PublicId, PublicId]]) -> None
 ```
 
 Replace references in a connection configuration.
@@ -65,7 +65,7 @@ Replace references in a connection configuration.
 
 ```python
 @replace_component_ids.register(ContractConfig)  # type: ignore
-_(_arg: ContractConfig, _replacements: Dict[ComponentType, Dict[PublicId, PublicId]])
+_(_arg: ContractConfig, _replacements: Dict[ComponentType, Dict[PublicId, PublicId]]) -> None
 ```
 
 Do nothing - contracts have no references.
@@ -75,7 +75,7 @@ Do nothing - contracts have no references.
 
 ```python
 @replace_component_ids.register(SkillConfig)  # type: ignore
-_(arg: SkillConfig, replacements: Dict[ComponentType, Dict[PublicId, PublicId]])
+_(arg: SkillConfig, replacements: Dict[ComponentType, Dict[PublicId, PublicId]]) -> None
 ```
 
 Replace references in a skill configuration.

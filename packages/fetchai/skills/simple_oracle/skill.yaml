@@ -1,26 +1,26 @@
 name: simple_oracle
 author: fetchai
-version: 0.3.0
+version: 0.4.0
 type: skill
 description: This skill deploys a Fetch oracle contract
 license: Apache-2.0
-aea_version: '>=0.9.0, <0.10.0'
+aea_version: '>=0.10.0, <0.11.0'
 fingerprint:
   README.md: QmcvyraEedZd5PEnmbijkkcsDrQQKDVJxPDUXVrwP3Ni3J
-  __init__.py: QmPS8LNPYyPohsn9AFCDVD2nc5tYK87sxQE5sAs1uDqS1b
+  __init__.py: QmVbhUeRPEtr8vcz4cH65wC3Bo6K2TULjMh7VEpyQwzrPB
   behaviours.py: Qmetc4pV2fxPy2KmA1krSK3RRDTzerjRBDvyqZF2uYpxhA
   dialogues.py: QmeUchePbWuDmKEEfSjtBDmYzfvcqDzXxTayENKYKNivgu
   handlers.py: QmNjMiEdQc6uebvmDiud5YmMUvoe49JyoQGFDAGGhRwRYw
   strategy.py: QmaKmfXErSczeGpzNssVZddwkyvpXxUpZ3ohXbM3h7VmDc
 fingerprint_ignore_patterns: []
 contracts:
-- fetchai/oracle:0.3.0
+- fetchai/oracle:0.4.0
 protocols:
-- fetchai/contract_api:0.10.0
-- fetchai/default:0.11.0
-- fetchai/ledger_api:0.9.0
-- fetchai/prometheus:0.2.0
-- fetchai/signing:0.9.0
+- fetchai/contract_api:0.11.0
+- fetchai/default:0.12.0
+- fetchai/ledger_api:0.10.0
+- fetchai/prometheus:0.3.0
+- fetchai/signing:0.10.0
 skills: []
 behaviours:
   simple_oracle_behaviour:

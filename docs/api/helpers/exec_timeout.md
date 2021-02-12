@@ -16,7 +16,7 @@ Result of ExecTimeout context manager.
 #### `__`init`__`
 
 ```python
- | __init__()
+ | __init__() -> None
 ```
 
 Init.
@@ -73,7 +73,7 @@ exception_class - is exception type to raise in code controlled in case of timeo
 #### `__`init`__`
 
 ```python
- | __init__(timeout: float = 0.0)
+ | __init__(timeout: float = 0.0) -> None
 ```
 
 Init.
@@ -136,7 +136,7 @@ Possible will be not accurate in case of long c functions used inside code contr
 #### `__`init`__`
 
 ```python
- | __init__(timeout: float = 0.0)
+ | __init__(timeout: float = 0.0) -> None
 ```
 
 Init ExecTimeoutThreadGuard variables.

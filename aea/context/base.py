@@ -19,7 +19,6 @@
 
 
 """This module contains the agent context class."""
-
 from queue import Queue
 from types import SimpleNamespace
 from typing import Any, Callable, Dict, Optional
@@ -49,6 +48,7 @@ class AgentContext:
         default_routing: Dict[PublicId, PublicId],
         search_service_address: Address,
         decision_maker_address: Address,
+        data_dir: str,
         storage_callable: Callable[[], Optional[Storage]] = lambda: None,
         **kwargs: Any
     ) -> None:
@@ -67,6 +67,7 @@ class AgentContext:
         :param default_routing: the default routing
         :param search_service_address: the address of the search service
         :param decision_maker_address: the address of the decision maker
+        :param data_dir: directory where to put local files.
         :param storage_callable: function that returns optional storage attached to agent.
         :param kwargs: keyword arguments to be attached in the agent context namespace.
         """
@@ -84,12 +85,18 @@ class AgentContext:
         self._default_connection = default_connection
         self._default_routing = default_routing
         self._storage_callable = storage_callable
+        self._data_dir = data_dir
         self._namespace = SimpleNamespace(**kwargs)
 
     @property
     def storage(self) -> Optional[Storage]:
         """Return storage instance if enabled in AEA."""
         return self._storage_callable()
+
+    @property
+    def data_dir(self) -> str:
+        """Return assets directory."""
+        return self._data_dir
 
     @property
     def shared_state(self) -> Dict[str, Any]:

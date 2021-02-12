@@ -53,7 +53,7 @@ class TestP2PLibp2pConnectionFailureGolangRun:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-        cls.connection = _make_libp2p_connection()
+        cls.connection = _make_libp2p_connection(data_dir=cls.t)
         cls.wrong_path = tempfile.mkdtemp()
 
     def test_wrong_path(self):
@@ -93,7 +93,7 @@ class TestP2PLibp2pConnectionFailureNodeDisconnect:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-        cls.connection = _make_libp2p_connection()
+        cls.connection = _make_libp2p_connection(data_dir=cls.t)
 
     def test_node_disconnect(self):
         """Test node disconnect."""
@@ -144,7 +144,9 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection:
             build_directory=self.t,
         )
         with pytest.raises(ValueError):
-            P2PLibp2pConnection(configuration=configuration, identity=self.identity)
+            P2PLibp2pConnection(
+                configuration=configuration, data_dir=self.t, identity=self.identity
+            )
 
     def test_local_uri_provided_when_public_uri_provided(self):
         """Test local uri provided when public uri provided."""
@@ -157,7 +159,9 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection:
             build_directory=self.t,
         )
         with pytest.raises(ValueError):
-            P2PLibp2pConnection(configuration=configuration, identity=self.identity)
+            P2PLibp2pConnection(
+                configuration=configuration, data_dir=self.t, identity=self.identity
+            )
 
     @classmethod
     def teardown_class(cls):
@@ -181,27 +185,33 @@ def test_libp2pconnection_mixed_ip_address():
 
 
 @patch.object(P2PLibp2pConnection, "_check_node_built")
-def test_libp2pconnection_node_config_registration_delay(mock):
+def test_libp2pconnection_node_config_registration_delay(_mock, change_directory):
     """Test node registration delay configuration"""
     host = "localhost"
     port = "10000"
 
-    _make_libp2p_connection(port, host)
+    _make_libp2p_connection(port, host, data_dir=change_directory)
     with pytest.raises(ValueError):
-        _make_libp2p_connection(port, host, peer_registration_delay="must_be_float")
+        _make_libp2p_connection(
+            port,
+            host,
+            data_dir=change_directory,
+            peer_registration_delay="must_be_float",
+        )
 
 
 @patch.object(P2PLibp2pConnection, "_check_node_built")
-def test_build_dir_not_set(*mocks):
+def test_build_dir_not_set(_mock, change_directory):
     """Test build dir not set."""
     host = "localhost"
     port = "10000"
 
-    con = _make_libp2p_connection(port, host)
+    con = _make_libp2p_connection(port, host, data_dir=change_directory)
     con.configuration.build_directory = None
     with pytest.raises(ValueError, match="Build directory not set on configuration."):
         P2PLibp2pConnection(
             configuration=con.configuration,
+            data_dir=change_directory,
             identity=con._identity,
             crypto_store=con.crypto_store,
         )

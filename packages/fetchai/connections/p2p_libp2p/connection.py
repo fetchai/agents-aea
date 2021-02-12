@@ -64,7 +64,7 @@ PIPE_CONN_TIMEOUT = 10.0
 # TOFIX(LR) not sure is needed
 LIBP2P = "libp2p"
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.14.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.15.0")
 
 SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 
@@ -550,7 +550,7 @@ class P2PLibp2pConnection(Connection):
         cert_request = cert_requests[0]
 
         agent_record = AgentRecord.from_cert_request(
-            cert_request, self.address, key.public_key
+            cert_request, self.address, key.public_key, Path(self.data_dir)
         )
 
         # libp2p local node

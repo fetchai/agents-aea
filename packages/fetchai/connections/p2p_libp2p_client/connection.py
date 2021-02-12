@@ -56,7 +56,7 @@ _default_logger = logging.getLogger(
     "aea.packages.fetchai.connections.p2p_libp2p_client"
 )
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_client:0.11.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_client:0.12.0")
 
 SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 
@@ -112,7 +112,8 @@ class P2PLibp2pClientConnection(Connection):
                 "cert_requests field must be set and contain exactly as many entries as 'nodes'!"
             )
         for cert_request in cert_requests:
-            if not Path(cert_request.save_path).is_file():
+            save_path = cert_request.get_absolute_save_path(Path(self.data_dir))
+            if not save_path.is_file():
                 raise Exception(  # pragma: nocover
                     "cert_request 'save_path' field is not a file. "
                     "Please ensure that 'issue-certificates' command is called beforehand"
@@ -136,7 +137,7 @@ class P2PLibp2pClientConnection(Connection):
         self.delegate_pors: List[AgentRecord] = []
         for i, cert_request in enumerate(cert_requests):
             agent_record = AgentRecord.from_cert_request(
-                cert_request, self.address, nodes_public_keys[i]
+                cert_request, self.address, nodes_public_keys[i], self.data_dir
             )
             self.delegate_pors.append(agent_record)
 

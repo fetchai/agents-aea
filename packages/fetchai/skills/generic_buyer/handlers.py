@@ -178,7 +178,7 @@ class GenericFipaHandler(Handler):
         target_message = fipa_dialogue.get_message_by_id(fipa_msg.target)
 
         if not target_message:
-            raise ValueError("Can not find target message!")
+            raise ValueError("Can not find target message!")  # pragma: nocover
 
         declined_performative = target_message.performative
 

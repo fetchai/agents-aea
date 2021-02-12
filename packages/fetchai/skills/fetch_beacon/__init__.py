@@ -22,4 +22,4 @@
 from aea.configurations.base import PublicId
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/fetch_beacon:0.3.0")
+PUBLIC_ID = PublicId.from_str("fetchai/fetch_beacon:0.4.0")

@@ -5,9 +5,9 @@ type: connection
 description: The yoti connection wraps the Yoti Client SDK and translates to the yoti
   protocol.
 license: Apache-2.0
-aea_version: '>=0.9.0, <0.10.0'
+aea_version: '>=0.10.0, <0.11.0'
 fingerprint:
-  README.md: QmVZAUteCQV1So2kecMvC95T3EtP1mqzXVF4WafjF6iZCL
+  README.md: QmZJYfyacuUnAKrYrNBJUX6kzQdzk4PL3EaXcVopWspxSP
   __init__.py: QmZvYZ5ECcWwqiNGh8qNTg735wu51HqaLxTSifUxkQ4KGj
   connection.py: QmNNaxHW2DuL1y5odX21g45VCFxiQgTGx7qqGFCq2XvTot
 fingerprint_ignore_patterns: []

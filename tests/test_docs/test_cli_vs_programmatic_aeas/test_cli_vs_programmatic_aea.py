@@ -67,7 +67,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         """Test the communication of the two agents."""
 
         weather_station = "weather_station"
-        self.fetch_agent("fetchai/weather_station:0.20.0", weather_station)
+        self.fetch_agent("fetchai/weather_station:0.21.0", weather_station)
         self.set_agent_context(weather_station)
         self.set_config(
             "vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx",
@@ -175,7 +175,9 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         """Inject location into the weather client strategy."""
         file = Path(dst_file_path)
         lines = file.read_text().splitlines()
-        line_insertion_position = 209  # line below: `strategy._is_ledger_tx = False`
+
+        target_line = "    strategy._is_ledger_tx = False"
+        line_insertion_position = lines.index(target_line) + 1
         lines.insert(
             line_insertion_position,
             "    from packages.fetchai.skills.generic_buyer.strategy import Location",

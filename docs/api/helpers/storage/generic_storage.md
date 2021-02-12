@@ -16,7 +16,7 @@ Async collection.
 #### `__`init`__`
 
 ```python
- | __init__(storage_backend: AbstractStorageBackend, collection_name: str)
+ | __init__(storage_backend: AbstractStorageBackend, collection_name: str) -> None
 ```
 
 Init collection object.
@@ -122,7 +122,7 @@ Async collection.
 #### `__`init`__`
 
 ```python
- | __init__(async_collection_coro, loop: asyncio.AbstractEventLoop)
+ | __init__(async_collection_coro: Coroutine, loop: asyncio.AbstractEventLoop) -> None
 ```
 
 Init collection object.
@@ -266,7 +266,7 @@ Get running state of the storage.
 #### run
 
 ```python
- | async run()
+ | async run() -> None
 ```
 
 Connect storage.

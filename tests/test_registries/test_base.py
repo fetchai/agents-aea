@@ -351,6 +351,7 @@ class TestResources:
         """Test that the 'add connection' and 'remove connection' methods work correctly."""
         a_connection = Connection.from_dir(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "oef"),
+            data_dir=MagicMock(),
             identity=Identity("name", "address"),
             crypto_store=MagicMock(),
         )
@@ -363,6 +364,7 @@ class TestResources:
         """Test get all connections."""
         a_connection = Connection.from_dir(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "oef"),
+            data_dir=MagicMock(),
             identity=Identity("name", "address"),
             crypto_store=MagicMock(),
         )
@@ -526,7 +528,7 @@ class TestFilter:
 
         resources.add_connection(connection)
 
-        cls.aea = AEA(identity, wallet, resources=resources,)
+        cls.aea = AEA(identity, wallet, resources=resources, data_dir=MagicMock())
         cls.aea.setup()
 
     def test_handle_internal_messages(self):

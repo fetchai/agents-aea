@@ -19,7 +19,7 @@
 """This module contains the tests for the sync connection module."""
 import asyncio
 import time
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
@@ -74,7 +74,7 @@ async def test_sync_connection():
     conf = Mock()
     conf.public_id = SampleConnection.connection_id
     conf.config = {}
-    con = SampleConnection(conf)
+    con = SampleConnection(conf, MagicMock())
     await asyncio.wait_for(con.connect(), timeout=10)
     assert con.is_connected
     envelope = Mock()

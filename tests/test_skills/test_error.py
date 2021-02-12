@@ -23,6 +23,7 @@ import logging
 import os
 import unittest.mock
 from threading import Thread
+from unittest.mock import MagicMock
 
 from aea.aea import AEA
 from aea.configurations.base import PublicId
@@ -74,6 +75,7 @@ class TestSkillError:
         private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
         self.wallet = Wallet({DEFAULT_LEDGER: private_key_path})
         self.agent_name = "Agent0"
+        self.data_dir = MagicMock()
 
         self.connection = _make_dummy_connection()
         self.identity = Identity(
@@ -85,8 +87,9 @@ class TestSkillError:
         self.my_aea = AEA(
             self.identity,
             self.wallet,
-            period=0.1,
             resources=resources,
+            data_dir=self.data_dir,
+            period=0.1,
             default_connection=self.connection.public_id,
         )
 

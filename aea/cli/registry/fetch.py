@@ -19,6 +19,7 @@
 """Methods for CLI fetch functionality."""
 import os
 import shutil
+from pathlib import Path
 from typing import Optional, cast
 
 import click
@@ -61,7 +62,10 @@ def fetch_agent(
     folder_name = target_dir or (name if alias is None else alias)
     aea_folder = os.path.join(ctx.cwd, folder_name)
     if os.path.exists(aea_folder):
-        raise ClickException(f'Item "{folder_name}" already exists in target folder.')
+        path = Path(aea_folder)
+        raise ClickException(
+            f'Item "{path.name}" already exists in target folder "{path.parent}".'
+        )
 
     ctx.clean_paths.append(aea_folder)
 

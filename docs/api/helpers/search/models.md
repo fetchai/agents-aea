@@ -16,7 +16,7 @@ Data structure to represent locations (i.e. a pair of latitude and longitude).
 #### `__`init`__`
 
 ```python
- | __init__(latitude: float, longitude: float)
+ | __init__(latitude: float, longitude: float) -> None
 ```
 
 Initialize a location.
@@ -54,7 +54,7 @@ Get the distance to another location.
 #### `__`eq`__`
 
 ```python
- | __eq__(other)
+ | __eq__(other: Any) -> bool
 ```
 
 Compare equality of two locations.
@@ -63,7 +63,7 @@ Compare equality of two locations.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get the string representation of the data model.
@@ -86,7 +86,7 @@ the matching protocol buffer object
 
 ```python
  | @classmethod
- | decode(cls, location_pb) -> "Location"
+ | decode(cls, location_pb: Any) -> "Location"
 ```
 
 Decode a protocol buffer object that corresponds with this class into an instance of this class.
@@ -124,7 +124,7 @@ Implements an attribute for an OEF data model.
 #### `__`init`__`
 
 ```python
- | __init__(name: str, type_: Type[ATTRIBUTE_TYPES], is_required: bool, description: str = "")
+ | __init__(name: str, type_: Type[ATTRIBUTE_TYPES], is_required: bool, description: str = "") -> None
 ```
 
 Initialize an attribute.
@@ -140,7 +140,7 @@ Initialize an attribute.
 #### `__`eq`__`
 
 ```python
- | __eq__(other)
+ | __eq__(other: Any) -> bool
 ```
 
 Compare with another object.
@@ -149,7 +149,7 @@ Compare with another object.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get the string representation of the data model.
@@ -172,7 +172,7 @@ the matching protocol buffer object
 
 ```python
  | @classmethod
- | decode(cls, attribute_pb) -> "Attribute"
+ | decode(cls, attribute_pb: models_pb2.Query.Attribute) -> "Attribute"
 ```
 
 Decode a protocol buffer object that corresponds with this class into an instance of this class.
@@ -198,7 +198,7 @@ Implements an OEF data model.
 #### `__`init`__`
 
 ```python
- | __init__(name: str, attributes: List[Attribute], description: str = "")
+ | __init__(name: str, attributes: List[Attribute], description: str = "") -> None
 ```
 
 Initialize a data model.
@@ -212,7 +212,7 @@ Initialize a data model.
 #### `__`eq`__`
 
 ```python
- | __eq__(other) -> bool
+ | __eq__(other: Any) -> bool
 ```
 
 Compare with another object.
@@ -221,7 +221,7 @@ Compare with another object.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get the string representation of the data model.
@@ -244,7 +244,7 @@ the matching protocol buffer object
 
 ```python
  | @classmethod
- | decode(cls, data_model_pb) -> "DataModel"
+ | decode(cls, data_model_pb: Any) -> "DataModel"
 ```
 
 Decode a protocol buffer object that corresponds with this class into an instance of this class.
@@ -291,7 +291,7 @@ Implements an OEF description.
 #### `__`init`__`
 
 ```python
- | __init__(values: Mapping[str, ATTRIBUTE_TYPES], data_model: Optional[DataModel] = None, data_model_name: str = "")
+ | __init__(values: Mapping[str, ATTRIBUTE_TYPES], data_model: Optional[DataModel] = None, data_model_name: str = "") -> None
 ```
 
 Initialize the description object.
@@ -316,7 +316,7 @@ Get the values.
 #### `__`eq`__`
 
 ```python
- | __eq__(other) -> bool
+ | __eq__(other: Any) -> bool
 ```
 
 Compare with another object.
@@ -325,7 +325,7 @@ Compare with another object.
 #### `__`iter`__`
 
 ```python
- | __iter__()
+ | __iter__() -> Iterator
 ```
 
 Create an iterator.
@@ -334,7 +334,7 @@ Create an iterator.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get the string representation of the description.
@@ -344,7 +344,7 @@ Get the string representation of the description.
 
 ```python
  | @classmethod
- | encode(cls, description_pb, description: "Description") -> None
+ | encode(cls, description_pb: Any, description: "Description") -> None
 ```
 
 Encode an instance of this class into the protocol buffer object.
@@ -366,7 +366,7 @@ None
 
 ```python
  | @classmethod
- | decode(cls, description_pb) -> "Description"
+ | decode(cls, description_pb: Any) -> "Description"
 ```
 
 Decode a protocol buffer object that corresponds with this class into an instance of this class.
@@ -395,7 +395,7 @@ Types of constraint.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get the string representation.
@@ -428,7 +428,7 @@ Used with the Constraint class, this class allows to specify constraint over att
 #### `__`init`__`
 
 ```python
- | __init__(type_: Union[ConstraintTypes, str], value: Any)
+ | __init__(type_: Union[ConstraintTypes, str], value: Any) -> None
 ```
 
 Initialize a constraint type.
@@ -448,7 +448,7 @@ Initialize a constraint type.
 #### check`_`validity
 
 ```python
- | check_validity()
+ | check_validity() -> bool
 ```
 
 Check the validity of the input provided.
@@ -538,7 +538,7 @@ True if the value satisfy the constraint, False otherwise.
 #### `__`eq`__`
 
 ```python
- | __eq__(other)
+ | __eq__(other: Any) -> bool
 ```
 
 Check equality with another object.
@@ -547,7 +547,7 @@ Check equality with another object.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get the string representation of the constraint type.
@@ -556,7 +556,7 @@ Get the string representation of the constraint type.
 #### encode
 
 ```python
- | encode()
+ | encode() -> Optional[Any]
 ```
 
 Encode an instance of this class into a protocol buffer object.
@@ -570,7 +570,7 @@ the matching protocol buffer object
 
 ```python
  | @classmethod
- | decode(cls, constraint_type_pb, category: str) -> "ConstraintType"
+ | decode(cls, constraint_type_pb: Any, category: str) -> "ConstraintType"
 ```
 
 Decode a protocol buffer object that corresponds with this class into an instance of this class.
@@ -660,7 +660,7 @@ Implementation of the 'And' constraint expression.
 #### `__`init`__`
 
 ```python
- | __init__(constraints: List[ConstraintExpr])
+ | __init__(constraints: List[ConstraintExpr]) -> None
 ```
 
 Initialize an 'And' expression.
@@ -707,7 +707,7 @@ Check whether the constraint expression is valid wrt a data model.
 #### check`_`validity
 
 ```python
- | check_validity()
+ | check_validity() -> None
 ```
 
 Check whether the Constraint Expression satisfies some basic requirements.
@@ -722,7 +722,7 @@ Check whether the Constraint Expression satisfies some basic requirements.
 #### `__`eq`__`
 
 ```python
- | __eq__(other)
+ | __eq__(other: Any) -> bool
 ```
 
 Compare with another object.
@@ -745,7 +745,7 @@ the matching protocol buffer object
 
 ```python
  | @classmethod
- | decode(cls, and_pb) -> "And"
+ | decode(cls, and_pb: Any) -> "And"
 ```
 
 Decode a protocol buffer object that corresponds with this class into an instance of this class.
@@ -771,7 +771,7 @@ Implementation of the 'Or' constraint expression.
 #### `__`init`__`
 
 ```python
- | __init__(constraints: List[ConstraintExpr])
+ | __init__(constraints: List[ConstraintExpr]) -> None
 ```
 
 Initialize an 'Or' expression.
@@ -818,7 +818,7 @@ Check whether the constraint expression is valid wrt a data model.
 #### check`_`validity
 
 ```python
- | check_validity()
+ | check_validity() -> None
 ```
 
 Check whether the Constraint Expression satisfies some basic requirements.
@@ -833,7 +833,7 @@ Check whether the Constraint Expression satisfies some basic requirements.
 #### `__`eq`__`
 
 ```python
- | __eq__(other)
+ | __eq__(other: Any) -> bool
 ```
 
 Compare with another object.
@@ -856,7 +856,7 @@ the matching protocol buffer object
 
 ```python
  | @classmethod
- | decode(cls, or_pb) -> "Or"
+ | decode(cls, or_pb: Any) -> "Or"
 ```
 
 Decode a protocol buffer object that corresponds with this class into an instance of this class.
@@ -882,7 +882,7 @@ Implementation of the 'Not' constraint expression.
 #### `__`init`__`
 
 ```python
- | __init__(constraint: ConstraintExpr)
+ | __init__(constraint: ConstraintExpr) -> None
 ```
 
 Initialize a 'Not' expression.
@@ -929,7 +929,7 @@ Check whether the constraint expression is valid wrt a data model.
 #### `__`eq`__`
 
 ```python
- | __eq__(other)
+ | __eq__(other: Any) -> bool
 ```
 
 Compare with another object.
@@ -952,7 +952,7 @@ the matching protocol buffer object
 
 ```python
  | @classmethod
- | decode(cls, not_pb) -> "Not"
+ | decode(cls, not_pb: Any) -> "Not"
 ```
 
 Decode a protocol buffer object that corresponds with this class into an instance of this class.
@@ -978,7 +978,7 @@ The atomic component of a constraint expression.
 #### `__`init`__`
 
 ```python
- | __init__(attribute_name: str, constraint_type: ConstraintType)
+ | __init__(attribute_name: str, constraint_type: ConstraintType) -> None
 ```
 
 Initialize a constraint.
@@ -1061,7 +1061,7 @@ Check whether the constraint expression is valid wrt a data model.
 #### `__`eq`__`
 
 ```python
- | __eq__(other)
+ | __eq__(other: Any) -> bool
 ```
 
 Compare with another object.
@@ -1070,7 +1070,7 @@ Compare with another object.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get the string representation of the constraint.
@@ -1093,7 +1093,7 @@ the matching protocol buffer object
 
 ```python
  | @classmethod
- | decode(cls, constraint_pb) -> "Constraint"
+ | decode(cls, constraint_pb: Any) -> "Constraint"
 ```
 
 Decode a protocol buffer object that corresponds with this class into an instance of this class.
@@ -1152,7 +1152,7 @@ True if the description satisfies all the constraints, False otherwise.
 #### is`_`valid
 
 ```python
- | is_valid(data_model: DataModel) -> bool
+ | is_valid(data_model: Optional[DataModel]) -> bool
 ```
 
 Given a data model, check whether the query is valid for that data model.
@@ -1165,7 +1165,7 @@ Given a data model, check whether the query is valid for that data model.
 #### check`_`validity
 
 ```python
- | check_validity()
+ | check_validity() -> None
 ```
 
 Check whether the` object is valid.
@@ -1180,7 +1180,7 @@ Check whether the` object is valid.
 #### `__`eq`__`
 
 ```python
- | __eq__(other)
+ | __eq__(other: Any) -> bool
 ```
 
 Compare with another object.
@@ -1189,7 +1189,7 @@ Compare with another object.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get the string representation of the constraint.
@@ -1199,7 +1199,7 @@ Get the string representation of the constraint.
 
 ```python
  | @classmethod
- | encode(cls, query_pb, query: "Query") -> None
+ | encode(cls, query_pb: Any, query: "Query") -> None
 ```
 
 Encode an instance of this class into the protocol buffer object.
@@ -1221,7 +1221,7 @@ None
 
 ```python
  | @classmethod
- | decode(cls, query_pb) -> "Query"
+ | decode(cls, query_pb: Any) -> "Query"
 ```
 
 Decode a protocol buffer object that corresponds with this class into an instance of this class.
