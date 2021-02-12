@@ -153,6 +153,21 @@ jobs:
         run: tox -e check_api_docs
       - name: Check spelling
         run: tox -e spell_check
+  dependencies_checks:
+    continue-on-error: False
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-python@master
+        with:
+          python-version: 3.6
+      - name: Install current aea
+        run: |
+          pip install -e .[all]
+      - name: Check dependecnies and imports
+        run: |
+          python ./scripts/check_imports_and_dependencies.py
   protolint:
     continue-on-error: False
     runs-on: ubuntu-latest

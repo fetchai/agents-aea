@@ -35,7 +35,6 @@ from pathlib import Path
 from threading import Thread
 from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple
 
-import pytest
 import yaml
 
 from aea.cli import cli
@@ -896,15 +895,6 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
             shutil.rmtree(cls.t)
 
         cls._is_teardown_class_called = True
-
-
-@pytest.mark.integration
-class UseOef:  # pylint: disable=too-few-public-methods
-    """Inherit from this class to launch an OEF node."""
-
-    @pytest.fixture(autouse=True)
-    def _start_oef_node(self, network_node: Callable) -> None:
-        """Start an oef node."""
 
 
 class AEATestCaseEmpty(BaseAEATestCase):
