@@ -143,7 +143,7 @@ def is_external_url(url: str) -> bool:
     return url.startswith("https://") or url.startswith("http://")
 
 
-def validate_external_url(url, file):
+def validate_external_url(url: str, file: Path) -> None:
     """
     Validate external URL.
 
@@ -205,7 +205,7 @@ def _checks_image(file: Path, regex: Pattern = IMAGE_PATTERN) -> None:
         raise ValueError("Image path={} in file={} not `.png` or `.jpg`!")
 
 
-def _checks_target_blank(file: Path):
+def _checks_target_blank(file: Path) -> None:
     """
     Check target blank.
 

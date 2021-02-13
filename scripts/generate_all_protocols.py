@@ -43,7 +43,7 @@ from io import StringIO
 from itertools import chain
 from operator import methodcaller
 from pathlib import Path
-from typing import Iterator, List, Match, Optional, Tuple, cast
+from typing import Any, Iterator, List, Match, Optional, Tuple, cast
 
 from aea.configurations.base import ComponentType, ProtocolSpecification
 from aea.configurations.constants import LIBPROTOC_VERSION
@@ -86,18 +86,18 @@ def _setup_logger() -> logging.Logger:
 logger = _setup_logger()
 
 
-def log(message: str, level: int = logging.INFO):
+def log(message: str, level: int = logging.INFO) -> None:
     """Produce a logging message."""
     logger.log(level, message)
 
 
-def enforce(condition, message=""):
+def enforce(condition: bool, message: str = "") -> None:
     """Custom assertion."""
     if not condition:
         raise AssertionError(message)
 
 
-def run_cli(*args, **kwargs):
+def run_cli(*args: Any, **kwargs: Any) -> None:
     """Run a CLI command."""
     log(f"Calling command {args} with kwargs {kwargs}")
     return_code = subprocess.check_call(args, **kwargs)  # nosec
@@ -107,7 +107,7 @@ def run_cli(*args, **kwargs):
     )
 
 
-def run_aea(*args, **kwargs) -> None:
+def run_aea(*args: Any, **kwargs: Any) -> None:
     """
     Run an AEA command.
 
@@ -133,7 +133,7 @@ class AEAProject:
         self.name = name
         self.parent_dir = parent_dir
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         """Create and enter into the project."""
         self.old_cwd = os.getcwd()
         self.temp_dir = tempfile.mkdtemp(dir=self.parent_dir)
@@ -142,7 +142,7 @@ class AEAProject:
         run_aea("create", "--local", "--empty", self.name, "--author", "fetchai")
         os.chdir(self.name)
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:  # type: ignore
         """Exit the context manager."""
         os.chdir(self.old_cwd)
         shutil.rmtree(self.temp_dir)
@@ -181,7 +181,9 @@ def _get_protocol_specification_from_readme(package_path: Path) -> str:
     return specification_content
 
 
-def _save_specification_in_temporary_file(name: str, specification_content: str):
+def _save_specification_in_temporary_file(
+    name: str, specification_content: str
+) -> None:
     """
     Save the specification in a temporary file.
 
@@ -208,7 +210,7 @@ def _generate_protocol(package_path: Path) -> None:
     run_aea(*cmd)
 
 
-def run_isort_and_black(directory: Path, **kwargs):
+def run_isort_and_black(directory: Path, **kwargs: Any) -> None:
     """Run black and isort against a directory."""
     run_cli(
         sys.executable, "-m", "black", "--verbose", str(directory.absolute()), **kwargs,
@@ -225,7 +227,7 @@ def run_isort_and_black(directory: Path, **kwargs):
     )
 
 
-def replace_in_directory(name: str, replacement_pairs: List[Tuple[str, str]]):
+def replace_in_directory(name: str, replacement_pairs: List[Tuple[str, str]]) -> None:
     """
     Replace text in directory.
 
@@ -286,7 +288,7 @@ def _update_original_protocol(package_path: Path) -> None:
     shutil.copytree(Path(PROTOCOLS_PLURALS, package_path.name), package_path)
 
 
-def _fingerprint_protocol(name: str):
+def _fingerprint_protocol(name: str) -> None:
     """Fingerprint the generated (and modified) protocol."""
     log(f"Fingerprint the generated (and modified) protocol '{name}'")
     protocol_config = load_component_configuration(
@@ -321,7 +323,7 @@ def _process_packages_protocol(package_path: Path) -> None:
     _update_original_protocol(package_path)
 
 
-def _check_preliminaries():
+def _check_preliminaries() -> None:
     """Check that the required packages are installed."""
     try:
         import aea  # noqa: F401  # pylint: disable=import-outside-toplevel,unused-import
@@ -364,7 +366,7 @@ def _process_test_protocol(specification: Path, package_path: Path) -> None:
     _update_original_protocol(package_path)
 
 
-def main():
+def main() -> None:
     """Run the script."""
     _check_preliminaries()
 

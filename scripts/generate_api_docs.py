@@ -64,7 +64,7 @@ IGNORE_PREFIXES = {
 }
 
 
-def create_subdir(path) -> None:
+def create_subdir(path: str) -> None:
     """
     Create a subdirectory.
 
@@ -95,7 +95,7 @@ def is_not_dir(p: Path) -> bool:
     return not p.is_dir()
 
 
-def should_skip(module_path: Path):
+def should_skip(module_path: Path) -> bool:
     """Return true if the file should be skipped."""
     if any(re.search(pattern, module_path.name) for pattern in IGNORE_NAMES):
         print("Skipping, it's in ignore patterns")
@@ -109,7 +109,7 @@ def should_skip(module_path: Path):
     return False
 
 
-def _generate_apidocs_aea_modules():
+def _generate_apidocs_aea_modules() -> None:
     """Generate API docs for aea.* modules."""
     for module_path in filter(is_not_dir, Path(AEA_DIR).rglob("*")):
         print(f"Processing {module_path}... ", end="")
@@ -123,7 +123,7 @@ def _generate_apidocs_aea_modules():
         make_pydoc(dotted_path, doc_file)
 
 
-def _generate_apidocs_default_packages():
+def _generate_apidocs_default_packages() -> None:
     """Generate API docs for Fetch.AI default packages."""
     for component_type, default_package in DEFAULT_PACKAGES:
         public_id = PublicId.from_str(default_package)
@@ -173,7 +173,7 @@ def run_pydoc_markdown(module: str) -> str:
     return text
 
 
-def generate_api_docs():
+def generate_api_docs() -> None:
     """Generate the api docs."""
     shutil.rmtree(API_DIR, ignore_errors=True)
     API_DIR.mkdir()

@@ -30,7 +30,7 @@ import sys
 from functools import partial
 from itertools import chain
 from pathlib import Path
-from typing import Dict, List, Set
+from typing import Any, Dict, Generator, List, Set
 
 import yaml
 
@@ -64,8 +64,8 @@ class DependencyNotFound(Exception):
         configuration_file: Path,
         expected_deps: Set[PackageId],
         missing_dependencies: Set[PackageId],
-        *args,
-    ):
+        *args: Any,
+    ) -> None:
         """
         Initialize DependencyNotFound exception.
 
@@ -80,7 +80,7 @@ class DependencyNotFound(Exception):
         self.missing_dependencies = missing_dependencies
 
 
-def find_all_configuration_files():
+def find_all_configuration_files() -> List:
     """Find all configuration files."""
     packages_dir = Path("packages")
     config_files = [
@@ -91,13 +91,13 @@ def find_all_configuration_files():
     return list(chain(config_files, default_config_file_paths()))
 
 
-def default_config_file_paths():
+def default_config_file_paths() -> Generator:
     """Get (generator) the default config file paths."""
     for item in DEFAULT_CONFIG_FILE_PATHS:
         yield item
 
 
-def get_public_id_from_yaml(configuration_file: Path):
+def get_public_id_from_yaml(configuration_file: Path) -> PublicId:
     """
     Get the public id from yaml.
 
@@ -131,7 +131,7 @@ def find_all_packages_ids() -> Set[PackageId]:
     return package_ids
 
 
-def handle_dependency_not_found(e: DependencyNotFound):
+def handle_dependency_not_found(e: DependencyNotFound) -> None:
     """Handle PackageIdNotFound errors."""
     sorted_expected = list(map(str, sorted(e.expected_dependencies)))
     sorted_missing = list(map(str, sorted(e.missing_dependencies)))
@@ -159,7 +159,9 @@ def unified_yaml_load(configuration_file: Path) -> Dict:
         return list(data)[0]
 
 
-def check_dependencies(configuration_file: Path, all_packages_ids: Set[PackageId]):
+def check_dependencies(
+    configuration_file: Path, all_packages_ids: Set[PackageId]
+) -> None:
     """
     Check dependencies of configuration file.
 
@@ -169,10 +171,12 @@ def check_dependencies(configuration_file: Path, all_packages_ids: Set[PackageId
     """
     data = unified_yaml_load(configuration_file)
 
-    def _add_package_type(package_type, public_id_str):
+    def _add_package_type(package_type: PackageType, public_id_str: str) -> PackageId:
         return PackageId(package_type, PublicId.from_str(public_id_str))
 
-    def _get_package_ids(package_type, public_ids):
+    def _get_package_ids(
+        package_type: PackageType, public_ids: Set[PublicId]
+    ) -> Set[PackageId]:
         return set(map(partial(_add_package_type, package_type), public_ids))
 
     dependencies: Set[PackageId] = set.union(

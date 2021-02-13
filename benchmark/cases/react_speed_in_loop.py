@@ -26,7 +26,7 @@ from benchmark.framework.benchmark import BenchmarkControl
 from benchmark.framework.cli import TestCli
 
 
-def react_speed_in_loop(benchmark: BenchmarkControl, inbox_amount=1000) -> None:
+def react_speed_in_loop(benchmark: BenchmarkControl, inbox_amount: int = 1000) -> None:
     """
     Test inbox message processing in a loop.
 

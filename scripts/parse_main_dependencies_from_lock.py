@@ -20,9 +20,14 @@
 
 """This CLI tool takes the main dependencies of the Pipfile.lock and prints it to stdout in requirements.txt format."""
 import json
+from typing import TYPE_CHECKING
 
 
-def parse_args():
+if TYPE_CHECKING:
+    import argparse
+
+
+def parse_args() -> argparse.Namespace:
     """Parse CLI arguments."""
     import argparse  # pylint: disable=import-outside-toplevel
 

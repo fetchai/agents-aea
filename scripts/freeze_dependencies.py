@@ -21,9 +21,14 @@
 """This CLI tool freezes the dependencies."""
 import re
 import subprocess  # nosec
+from typing import TYPE_CHECKING
 
 
-def parse_args():
+if TYPE_CHECKING:
+    import argparse
+
+
+def parse_args() -> argparse.Namespace:
     """Parse CLI arguments."""
     import argparse  # pylint: disable=import-outside-toplevel
 
