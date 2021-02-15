@@ -19,6 +19,7 @@
 """This module contains the tests for the 'aea.helpers.io' module."""
 import os
 from pathlib import Path
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -38,3 +39,9 @@ def test_open_file(change_directory, path_builder):
 
     with open(path, "rb") as bytes_in:
         assert bytes_in.read() == bytes(expected_string, encoding="utf-8")
+
+
+def test_raise_if_binary_mode():
+    """Raise if mode is binary mode."""
+    with pytest.raises(ValueError, match="This function can only work in text mode."):
+        open_file(MagicMock(), mode="rb")
