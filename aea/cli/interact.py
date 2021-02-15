@@ -26,6 +26,7 @@ from typing import Optional, TYPE_CHECKING, Type, Union
 
 import click
 
+from aea.cli.utils.constants import STUB_CONNECTION
 from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.exceptions import InterruptInputException
 from aea.common import Address
@@ -62,8 +63,6 @@ if TYPE_CHECKING:  # pragma: nocover
     )
     from packages.fetchai.protocols.default.message import DefaultMessage  # noqa: F401
 
-STUB_CONNECTION = "fetchai/stub:latest"
-
 
 @click.command()
 @click.pass_context
@@ -99,9 +98,10 @@ def _load_packages(agent_identity: Identity) -> None:
             state_update_protocol_id.name,
         )
     )
+    stub_connection_id = PublicId.from_str(STUB_CONNECTION)
     Connection.from_dir(
         os.path.join(
-            VENDOR, STUB_CONNECTION.author, CONNECTIONS, STUB_CONNECTION.name,
+            VENDOR, stub_connection_id.author, CONNECTIONS, stub_connection_id.name,
         ),
         agent_identity,
         CryptoStore(),

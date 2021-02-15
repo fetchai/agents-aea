@@ -26,7 +26,7 @@ import sys
 from collections import defaultdict
 from functools import wraps
 from pathlib import Path
-from typing import Any, Callable, Dict, Generator, List, Set, Tuple, Union
+from typing import Any, Callable, Dict, Generator, List, Optional, Set, Tuple, Union
 
 from pip._internal.commands.show import search_packages_info  # type: ignore
 
@@ -47,7 +47,7 @@ def list_decorator(fn: Callable) -> Callable:
     """Wraps generator to return list."""
 
     @wraps(fn)
-    def wrapper(*args, **kwargs) -> List[Any]:
+    def wrapper(*args: Any, **kwargs: Any) -> List[Any]:
         return list(fn(*args, **kwargs))
 
     return wrapper
@@ -103,7 +103,9 @@ class ImportsTool:
 
     @staticmethod
     @list_decorator
-    def list_all_pyfiles(root_path: Union[Path, str], pattern="**/*.py") -> Generator:
+    def list_all_pyfiles(
+        root_path: Union[Path, str], pattern: str = "**/*.py"
+    ) -> Generator:
         """List all python files in directory."""
         root_path = Path(root_path)
         for path in root_path.rglob(pattern):
@@ -230,13 +232,17 @@ class CheckTool:
     ) -> Tuple[Dict[str, List[str]], List[str]]:
         """Find missing dependencies for imports and not imported dependencies."""
 
-        def _find_dependency_for_module(dependencies, pyfile):
+        def _find_dependency_for_module(
+            dependencies: Dict[str, List[str]], pyfile: str
+        ) -> Optional[str]:
             for package, files in dependencies.items():
                 if pyfile in files:
                     return package
             return None
 
-        sections_imports_packages: Dict[str, Dict[str, str]] = defaultdict(dict)
+        sections_imports_packages: Dict[str, Dict[str, Optional[str]]] = defaultdict(
+            dict
+        )
         for section, modules in sections_imports.items():
             for module, pyfile in modules:
                 package = _find_dependency_for_module(

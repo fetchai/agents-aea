@@ -471,7 +471,7 @@ def test_is_item_present_unified(mock_, vendor):
         (PublicId.from_str("author/package:latest"), False),
         (PublicId.from_str("fetchai/oef:0.1.0"), False),
         (PublicId.from_str("fetchai/oef:latest"), False),
-        (PublicId.from_str("fetchai/stub:lastest"), False),
+        (PublicId.from_str("fetchai/stub:latest"), False),
         (PublicId.from_str(DEFAULT_PROTOCOL), False),
     ],
 )
