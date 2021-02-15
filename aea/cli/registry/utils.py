@@ -160,7 +160,6 @@ def extract(source: str, target: str) -> None:
     :return: None
     """
     if source.endswith("tar.gz"):
-        # TODO investigate
         tar = tarfile.open(source, "r:gz")
         tar.extractall(path=target)
         tar.close()
