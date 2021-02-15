@@ -64,7 +64,7 @@ static:
 package_checks:
 	python scripts/generate_ipfs_hashes.py --check
 	python scripts/check_package_versions_in_docs.py
-	python scripts/check_package_dependencies.py
+	python scripts/check_packages.py
 
 .PHONY: docs
 docs:
