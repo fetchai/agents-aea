@@ -60,7 +60,6 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
         self.add_item("connection", "fetchai/http_client:0.17.0")
         self.add_item("connection", "fetchai/http_server:0.16.0")
         self.add_item("connection", "fetchai/prometheus:0.3.0")
-        self.remove_item("connection", "fetchai/stub:0.16.0")
         self.add_item("skill", "fetchai/coin_price:0.4.0")
         self.set_config("agent.default_connection", "fetchai/http_server:0.16.0")
 

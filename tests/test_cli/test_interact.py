@@ -30,6 +30,7 @@ from aea.helpers.base import send_control_c
 from aea.mail.base import Envelope
 from aea.test_tools.test_cases import AEATestCaseEmptyFlaky, AEATestCaseManyFlaky
 
+from packages.fetchai.connections.stub.connection import PUBLIC_ID as STUB_CONNECTION_ID
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
 
@@ -47,6 +48,7 @@ class TestInteractCommand(AEATestCaseManyFlaky):
 
         # prepare agent
         self.set_agent_context(agent_name)
+        self.add_item("connection", str(STUB_CONNECTION_ID))
         self.run_install()
 
         agent_process = self.run_agent()
@@ -210,6 +212,7 @@ class TestInteractEcho(AEATestCaseEmptyFlaky):
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # can be flaky on Windows
     def test_interact(self):
         """Test the 'aea interact' command with the echo skill."""
+        self.add_item("connection", str(STUB_CONNECTION_ID))
         self.add_item("skill", str(ECHO_SKILL_PUBLIC_ID))
         self.run_agent()
         process = self.run_interaction()

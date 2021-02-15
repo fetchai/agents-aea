@@ -50,6 +50,7 @@ from aea.configurations.constants import (
     DEFAULT_OUTPUT_FILE_NAME,
     DEFAULT_PRIVATE_KEY_FILE,
     DEFAULT_REGISTRY_NAME,
+    LAUNCH_SUCCEED_MESSAGE,
 )
 from aea.configurations.loader import ConfigLoader, ConfigLoaders
 from aea.exceptions import enforce
@@ -72,7 +73,6 @@ CLI_LOG_OPTION = ["-v", "OFF"]
 
 DEFAULT_PROCESS_TIMEOUT = 120
 DEFAULT_LAUNCH_TIMEOUT = 10
-LAUNCH_SUCCEED_MESSAGE = ("Start processing messages...",)
 
 
 class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
@@ -827,7 +827,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         :param timeout: the timeout to wait for launch to complete
         """
         missing_strings = cls.missing_from_output(
-            process, LAUNCH_SUCCEED_MESSAGE, timeout, is_terminating=False
+            process, (LAUNCH_SUCCEED_MESSAGE,), timeout, is_terminating=False
         )
 
         return missing_strings == []

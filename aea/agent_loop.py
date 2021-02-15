@@ -31,6 +31,7 @@ from functools import partial
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 from aea.abstract_agent import AbstractAgent
+from aea.configurations.constants import LAUNCH_SUCCEED_MESSAGE
 from aea.exceptions import AEAException
 from aea.helpers.async_utils import (
     AsyncState,
@@ -311,7 +312,7 @@ class AsyncAgentLoop(BaseAgentLoop):
 
     async def _process_messages(self, getter: HandlerItemGetter) -> None:
         """Process message from ItemGetter."""
-        self.logger.info("Start processing messages...")
+        self.logger.info(LAUNCH_SUCCEED_MESSAGE)
         self._state.set(AgentLoopStates.started)
         while self.is_running:
             handler, item = await getter.get()

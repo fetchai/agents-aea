@@ -56,3 +56,4 @@ NOT_PERMITTED_AUTHORS = [
 CONFIG_SUPPORTED_KEY_TYPES = list(FROM_STRING_TO_TYPE.keys())
 
 REQUIREMENTS = "requirements.txt"
+STUB_CONNECTION = "fetchai/stub:latest"

@@ -58,7 +58,6 @@ from aea.cli.utils.package_utils import (
 )
 from aea.configurations.base import ComponentId, ComponentType, PublicId
 from aea.configurations.constants import (
-    DEFAULT_CONNECTION,
     DEFAULT_LEDGER,
     DEFAULT_PROTOCOL,
     LEDGER_CONNECTION,
@@ -472,7 +471,7 @@ def test_is_item_present_unified(mock_, vendor):
         (PublicId.from_str("author/package:latest"), False),
         (PublicId.from_str("fetchai/oef:0.1.0"), False),
         (PublicId.from_str("fetchai/oef:latest"), False),
-        (PublicId.from_str(DEFAULT_CONNECTION), False),
+        (PublicId.from_str("fetchai/stub:latest"), False),
         (PublicId.from_str(DEFAULT_PROTOCOL), False),
     ],
 )
