@@ -47,7 +47,7 @@ def list_decorator(fn: Callable) -> Callable:
     """Wraps generator to return list."""
 
     @wraps(fn)
-    def wrapper(*args, **kwargs) -> List[Any]:
+    def wrapper(*args, **kwargs) -> List[Any]:  # type: ignore
         return list(fn(*args, **kwargs))
 
     return wrapper
@@ -103,7 +103,7 @@ class ImportsTool:
 
     @staticmethod
     @list_decorator
-    def list_all_pyfiles(root_path: Union[Path, str], pattern="**/*.py") -> Generator:
+    def list_all_pyfiles(root_path: Union[Path, str], pattern="**/*.py") -> Generator:  # type: ignore
         """List all python files in directory."""
         root_path = Path(root_path)
         for path in root_path.rglob(pattern):
@@ -230,7 +230,7 @@ class CheckTool:
     ) -> Tuple[Dict[str, List[str]], List[str]]:
         """Find missing dependencies for imports and not imported dependencies."""
 
-        def _find_dependency_for_module(dependencies, pyfile):
+        def _find_dependency_for_module(dependencies, pyfile): # type: ignore
             for package, files in dependencies.items():
                 if pyfile in files:
                     return package
