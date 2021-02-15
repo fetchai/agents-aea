@@ -18,11 +18,15 @@
 #
 # ------------------------------------------------------------------------------
 """
-Check that every package has existing dependencies.
+Run different checks on AEA packages.
+
+Namely:
+- Check that every package has existing dependencies
+- Check that every package has non-empty description
 
 Run this script from the root of the project directory:
 
-    python scripts/check_package_dependencies.py
+    python scripts/check_packages.py
 
 """
 import pprint
@@ -78,6 +82,20 @@ class DependencyNotFound(Exception):
         self.configuration_file = configuration_file
         self.expected_dependencies = expected_deps
         self.missing_dependencies = missing_dependencies
+
+
+class EmptyPackageDescription(Exception):
+    """Custom exception for empty description field."""
+
+    def __init__(self, configuration_file: Path, *args: Any,) -> None:
+        """
+        Initialize EmptyPackageDescription exception.
+
+        :param configuration_file: path to the checked file.
+        :param kwargs: super class args.
+        """
+        super().__init__(*args)
+        self.configuration_file = configuration_file
 
 
 def find_all_configuration_files() -> List:
@@ -139,6 +157,14 @@ def handle_dependency_not_found(e: DependencyNotFound) -> None:
     print(f"Package {e.configuration_file}:")
     print(f"Expected: {pprint.pformat(sorted_expected)}")
     print(f"Missing: {pprint.pformat(sorted_missing)}")
+    print("=" * 50)
+
+
+def handle_empty_package_description(e: EmptyPackageDescription) -> None:
+    """Handle EmptyPackageDescription errors."""
+    print("=" * 50)
+    print(f"Package '{e.configuration_file}' has empty description field.")
+    print("=" * 50)
 
 
 def unified_yaml_load(configuration_file: Path) -> Dict:
@@ -191,6 +217,14 @@ def check_dependencies(
         raise DependencyNotFound(configuration_file, dependencies, diff)
 
 
+def check_description(configuration_file: Path) -> None:
+    """Check description field of a package is non-empty."""
+    yaml_object = unified_yaml_load(configuration_file)
+    description = yaml_object.get("description")
+    if description == "":
+        raise EmptyPackageDescription(configuration_file)
+
+
 if __name__ == "__main__":
     all_packages_ids_ = find_all_packages_ids()
     failed: bool = False
@@ -198,8 +232,12 @@ if __name__ == "__main__":
         try:
             print("Processing " + str(file))
             check_dependencies(file, all_packages_ids_)
+            check_description(file)
         except DependencyNotFound as e_:
             handle_dependency_not_found(e_)
+            failed = True
+        except EmptyPackageDescription as e_:
+            handle_empty_package_description(e_)
             failed = True
 
     if failed:
