@@ -29,7 +29,7 @@ import tempfile
 from distutils.dir_util import copy_tree
 from itertools import islice
 from subprocess import Popen, TimeoutExpired  # nosec
-from typing import Any, Iterable, List, Optional, Pattern, Tuple
+from typing import Iterable, List, Optional, Pattern, Tuple
 
 from aea.helpers.base import ensure_dir
 

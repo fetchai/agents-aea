@@ -26,6 +26,7 @@ import warnings
 from pathlib import Path
 from typing import Any, BinaryIO, Callable, Dict, List, Optional, Tuple, Union, cast
 
+import ipfshttpclient  # noqa: F401 # pylint: disable=unused-import
 import web3._utils.request
 from eth_account import Account
 from eth_account._utils.signing import to_standard_signature_bytes

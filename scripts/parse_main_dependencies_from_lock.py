@@ -19,18 +19,12 @@
 # ------------------------------------------------------------------------------
 
 """This CLI tool takes the main dependencies of the Pipfile.lock and prints it to stdout in requirements.txt format."""
+import argparse
 import json
-from typing import TYPE_CHECKING
-
-
-if TYPE_CHECKING:
-    import argparse
 
 
 def parse_args() -> argparse.Namespace:
     """Parse CLI arguments."""
-    import argparse  # pylint: disable=import-outside-toplevel
-
     parser = argparse.ArgumentParser("parse_main_dependencies_from_lock")
     parser.add_argument(
         "pipfile_lock_path", type=argparse.FileType("r"), help="Path to Pipfile.lock."
