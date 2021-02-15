@@ -33,7 +33,6 @@ class TestGymSkill(AEATestCaseEmpty):
     def test_gym(self):
         """Run the gym skill sequence."""
         self.add_item("skill", "fetchai/gym:0.14.0")
-        self.remove_item("connection", "fetchai/stub:0.16.0")
         self.run_install()
 
         # change default connection

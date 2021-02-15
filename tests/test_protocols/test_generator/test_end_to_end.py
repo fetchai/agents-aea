@@ -33,12 +33,12 @@ from aea.crypto.helpers import create_private_key
 from aea.protocols.base import Address, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.skills.base import Handler, Skill, SkillContext
-from aea.test_tools.test_cases import UseOef
 
 from packages.fetchai.connections.oef.connection import (
     PUBLIC_ID as OEF_CONNECTION_PUBLIC_ID,
 )
 
+from tests.common.utils import UseOef
 from tests.conftest import ROOT_DIR
 from tests.data.generator.t_protocol.dialogues import (
     TProtocolDialogue,

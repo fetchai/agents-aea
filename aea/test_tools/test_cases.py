@@ -35,7 +35,6 @@ from pathlib import Path
 from threading import Thread
 from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple
 
-import pytest
 import yaml
 
 from aea.cli import cli
@@ -51,6 +50,7 @@ from aea.configurations.constants import (
     DEFAULT_OUTPUT_FILE_NAME,
     DEFAULT_PRIVATE_KEY_FILE,
     DEFAULT_REGISTRY_NAME,
+    LAUNCH_SUCCEED_MESSAGE,
 )
 from aea.configurations.loader import ConfigLoader, ConfigLoaders
 from aea.exceptions import enforce
@@ -72,7 +72,6 @@ CLI_LOG_OPTION = ["-v", "OFF"]
 
 DEFAULT_PROCESS_TIMEOUT = 120
 DEFAULT_LAUNCH_TIMEOUT = 10
-LAUNCH_SUCCEED_MESSAGE = ("Start processing messages...",)
 
 
 class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
@@ -827,7 +826,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         :param timeout: the timeout to wait for launch to complete
         """
         missing_strings = cls.missing_from_output(
-            process, LAUNCH_SUCCEED_MESSAGE, timeout, is_terminating=False
+            process, (LAUNCH_SUCCEED_MESSAGE,), timeout, is_terminating=False
         )
 
         return missing_strings == []
@@ -904,15 +903,6 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
             shutil.rmtree(cls.t)
 
         cls._is_teardown_class_called = True
-
-
-@pytest.mark.integration
-class UseOef:  # pylint: disable=too-few-public-methods
-    """Inherit from this class to launch an OEF node."""
-
-    @pytest.fixture(autouse=True)
-    def _start_oef_node(self, network_node: Callable) -> None:
-        """Start an oef node."""
 
 
 class AEATestCaseEmpty(BaseAEATestCase):

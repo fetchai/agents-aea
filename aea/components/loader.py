@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains utilities for loading components."""
 import re
 from typing import Dict, Type
@@ -80,6 +79,10 @@ def load_component_from_config(  # type: ignore
         _handle_error_while_loading_component_generic_error(configuration, e)
 
 
+class AEAPackageNotFound(Exception):
+    """Exception when failed to import package, cause not exists."""
+
+
 def _handle_error_while_loading_component_module_not_found(
     configuration: ComponentConfiguration, e: ModuleNotFoundError
 ) -> None:
@@ -99,8 +102,7 @@ def _handle_error_while_loading_component_module_not_found(
     :raises AEAPackageLoadingError: the same exception, but prepending an informative message.
     """
     error_message = str(e)
-    extract_import_path_regex = re.compile(r"No module named '([\w.]+)'")
-    match = extract_import_path_regex.match(error_message)
+    match = re.match(r"No module named '([\w.]+)'", error_message)
     if match is None:
         # if for some reason we cannot extract the import path, just re-raise the error
         raise e from e
@@ -147,14 +149,14 @@ def _handle_error_while_loading_component_module_not_found(
     else:
         new_message = get_new_error_message_with_package_found()
 
+    new_exc = AEAPackageNotFound(new_message)
+    new_exc.__traceback__ = e.__traceback__
+    e_str = parse_exception(new_exc)
     raise AEAPackageLoadingError(
-        "Package loading error: An error occurred while loading {} {}: No module named {}; {}".format(
-            str(configuration.component_type),
-            configuration.public_id,
-            import_path,
-            new_message,
+        "Package loading error: An error occurred while loading {} {}:\n{}".format(
+            str(configuration.component_type), configuration.public_id, e_str,
         )
-    ) from e
+    )
 
 
 def _handle_error_while_loading_component_generic_error(
@@ -170,4 +172,4 @@ def _handle_error_while_loading_component_generic_error(
         "Package loading error: An error occurred while loading {} {}: {}".format(
             str(configuration.component_type), configuration.public_id, e_str
         )
-    )
+    ) from e
