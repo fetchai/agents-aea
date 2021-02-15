@@ -127,5 +127,3 @@ output_file
 packages/fetchai/connections/p2p_libp2p/libp2p_node
 
 !tests/data/dummy_contract/build
-
-!deploy_image/.aea
