@@ -26,7 +26,7 @@ from asyncio.events import AbstractEventLoop
 from asyncio.futures import Future
 from concurrent.futures._base import CancelledError as FuturesCancelledError
 from traceback import format_exc
-from typing import Dict, Optional, cast
+from typing import Any, Dict, Optional, cast
 from urllib.parse import parse_qs, urlparse
 
 from aiohttp import web
@@ -65,13 +65,13 @@ SERVER_ERROR = 500
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.http_server")
 
 RequestId = DialogueLabel
-PUBLIC_ID = PublicId.from_str("fetchai/http_server:0.15.0")
+PUBLIC_ID = PublicId.from_str("fetchai/http_server:0.16.0")
 
 
 class HttpDialogues(BaseHttpDialogues):
     """The dialogues class keeps track of all http dialogues."""
 
-    def __init__(self, self_address: Address, **kwargs) -> None:
+    def __init__(self, self_address: Address, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -98,7 +98,7 @@ class HttpDialogues(BaseHttpDialogues):
         )
 
 
-def headers_to_string(headers: Dict):
+def headers_to_string(headers: Dict) -> str:
     """
     Convert headers to string.
 
@@ -116,7 +116,7 @@ class Request(OpenAPIRequest):
     """Generic request object."""
 
     @property
-    def is_id_set(self):
+    def is_id_set(self) -> bool:
         """Check if id is set."""
         return self._id is not None
 
@@ -525,7 +525,7 @@ class HTTPServerConnection(Connection):
 
     connection_id = PUBLIC_ID
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize a HTTP server connection."""
         super().__init__(**kwargs)
         host = cast(str, self.configuration.config.get("host"))
@@ -553,13 +553,13 @@ class HTTPServerConnection(Connection):
         if self.is_connected:
             return
 
-        self._state.set(ConnectionStates.connecting)
+        self.state = ConnectionStates.connecting
         self.channel.logger = self.logger
         await self.channel.connect(loop=self.loop)
         if self.channel.is_stopped:
-            self._state.set(ConnectionStates.disconnected)
+            self.state = ConnectionStates.disconnected
         else:
-            self._state.set(ConnectionStates.connected)
+            self.state = ConnectionStates.connected
 
     async def disconnect(self) -> None:
         """
@@ -570,9 +570,9 @@ class HTTPServerConnection(Connection):
         if self.is_disconnected:
             return
 
-        self._state.set(ConnectionStates.disconnecting)
+        self.state = ConnectionStates.disconnecting
         await self.channel.disconnect()
-        self._state.set(ConnectionStates.disconnected)
+        self.state = ConnectionStates.disconnected
 
     async def send(self, envelope: "Envelope") -> None:
         """
@@ -584,7 +584,7 @@ class HTTPServerConnection(Connection):
         self._ensure_connected()
         self.channel.send(envelope)
 
-    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
+    async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """
         Receive an envelope.
 

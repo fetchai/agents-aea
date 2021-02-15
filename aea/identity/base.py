@@ -41,7 +41,7 @@ class Identity:
         address: Optional[str] = None,
         addresses: Optional[Dict[str, Address]] = None,
         default_address_key: str = DEFAULT_LEDGER,
-    ):
+    ) -> None:
         """
         Instantiate the identity.
 

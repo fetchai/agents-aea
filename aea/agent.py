@@ -96,7 +96,7 @@ class Agent(AbstractAgent, WithLogger):
         multiplexer_options: Dict,
         loop_mode: Optional[str] = None,
         loop: Optional[AbstractEventLoop] = None,
-    ):
+    ) -> None:
         """Set the runtime and inbox and outbox."""
         self._runtime = runtime_class(
             agent=self,

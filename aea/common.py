@@ -17,7 +17,8 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the common types and interfaces used in the aea framework."""
-
+import os
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 
@@ -28,3 +29,4 @@ _JSONDict = Dict[Any, Any]  # temporary placeholder
 _JSONList = List[Any]  # temporary placeholder
 _JSONType = Optional[Union[Primitive, _JSONDict, _JSONList]]
 JSONLike = Dict[str, _JSONType]
+PathLike = Union[os.PathLike, Path, str]

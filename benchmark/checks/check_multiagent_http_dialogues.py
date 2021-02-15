@@ -24,7 +24,7 @@ import os
 import struct
 import sys
 import time
-from typing import cast
+from typing import Any, List, Tuple, Union, cast
 
 import click
 
@@ -128,7 +128,7 @@ class HttpPingPongHandler(Handler):
         self.context.outbox.put_message(message)
 
 
-def make_agent(*args, **kwargs) -> AEA:
+def make_agent(*args: Any, **kwargs: Any) -> AEA:
     """Make agent with http protocol support."""
     aea = base_make_agent(*args, **kwargs)
     aea.resources.add_protocol(
@@ -137,7 +137,13 @@ def make_agent(*args, **kwargs) -> AEA:
     return aea
 
 
-def run(duration, runtime_mode, runner_mode, start_messages, num_of_agents):
+def run(
+    duration: int,
+    runtime_mode: str,
+    runner_mode: str,
+    start_messages: int,
+    num_of_agents: int,
+) -> List[Tuple[str, Union[int, float]]]:
     """Test multiagent message exchange."""
     # pylint: disable=import-outside-toplevel,unused-import
     # import manually due to some lazy imports in decision_maker
@@ -175,9 +181,10 @@ def run(duration, runtime_mode, runner_mode, start_messages, num_of_agents):
 
     for agent1, agent2 in itertools.permutations(agents, 2):
         for _ in range(int(start_messages)):
-            skills[agent1.identity.address].handlers[handler_name].make_request(
-                agent2.identity.address
-            )
+            cast(
+                HttpPingPongHandler,
+                skills[agent1.identity.address].handlers[handler_name],
+            ).make_request(agent2.identity.address)
 
     time.sleep(duration)
 
@@ -187,25 +194,40 @@ def run(duration, runtime_mode, runner_mode, start_messages, num_of_agents):
     runner.stop()
 
     total_messages = sum(
-        [skill.handlers[handler_name].count for skill in skills.values()]
+        [
+            cast(HttpPingPongHandler, skill.handlers[handler_name]).count
+            for skill in skills.values()
+        ]
     )
     rate = total_messages / duration
 
     rtt_total_time = sum(
-        [skill.handlers[handler_name].rtt_total_time for skill in skills.values()]
+        [
+            cast(HttpPingPongHandler, skill.handlers[handler_name]).rtt_total_time
+            for skill in skills.values()
+        ]
     )
     rtt_count = sum(
-        [skill.handlers[handler_name].rtt_count for skill in skills.values()]
+        [
+            cast(HttpPingPongHandler, skill.handlers[handler_name]).rtt_count
+            for skill in skills.values()
+        ]
     )
 
     if rtt_count == 0:
         rtt_count = -1
 
     latency_total_time = sum(
-        [skill.handlers[handler_name].latency_total_time for skill in skills.values()]
+        [
+            cast(HttpPingPongHandler, skill.handlers[handler_name]).latency_total_time
+            for skill in skills.values()
+        ]
     )
     latency_count = sum(
-        [skill.handlers[handler_name].latency_count for skill in skills.values()]
+        [
+            cast(HttpPingPongHandler, skill.handlers[handler_name]).latency_count
+            for skill in skills.values()
+        ]
     )
 
     if latency_count == 0:
@@ -232,8 +254,13 @@ def run(duration, runtime_mode, runner_mode, start_messages, num_of_agents):
 @click.option("--num_of_agents", default=2, help="Amount of agents to run.")
 @click.option("--number_of_runs", default=10, help="How many times run test.")
 def main(
-    duration, runtime_mode, runner_mode, start_messages, num_of_agents, number_of_runs
-):
+    duration: int,
+    runtime_mode: str,
+    runner_mode: str,
+    start_messages: int,
+    num_of_agents: int,
+    number_of_runs: int,
+) -> None:
     """Run test."""
     click.echo("Start test with options:")
     click.echo(f"* Duration: {duration} seconds")

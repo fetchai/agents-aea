@@ -25,7 +25,7 @@ Performatives for the base message.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get the string representation.
@@ -34,7 +34,7 @@ Get the string representation.
 #### `__`init`__`
 
 ```python
- | __init__(_body: Optional[Dict] = None, **kwargs)
+ | __init__(_body: Optional[Dict] = None, **kwargs: Any) -> None
 ```
 
 Initialize a Message object.
@@ -215,7 +215,7 @@ Check value is set for key.
 #### `__`eq`__`
 
 ```python
- | __eq__(other)
+ | __eq__(other: Any) -> bool
 ```
 
 Compare with another object.
@@ -224,7 +224,7 @@ Compare with another object.
 #### `__`repr`__`
 
 ```python
- | __repr__()
+ | __repr__() -> str
 ```
 
 Get the representation of the message.
@@ -233,7 +233,7 @@ Get the representation of the message.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get the string representation of the message. Abbreviated to prevent spamming of logs.
@@ -354,7 +354,7 @@ It includes a serializer to encode/decode a message.
 #### `__`init`__`
 
 ```python
- | __init__(configuration: ProtocolConfig, message_class: Type[Message], **kwargs)
+ | __init__(configuration: ProtocolConfig, message_class: Type[Message], **kwargs: Any) -> None
 ```
 
 Initialize the protocol manager.
@@ -379,7 +379,7 @@ Get the serializer.
 
 ```python
  | @classmethod
- | from_dir(cls, directory: str, **kwargs) -> "Protocol"
+ | from_dir(cls, directory: str, **kwargs: Any) -> "Protocol"
 ```
 
 Load the protocol from a directory.
@@ -397,7 +397,7 @@ the protocol object.
 
 ```python
  | @classmethod
- | from_config(cls, configuration: ProtocolConfig, **kwargs) -> "Protocol"
+ | from_config(cls, configuration: ProtocolConfig, **kwargs: Any) -> "Protocol"
 ```
 
 Load the protocol from configuration.
@@ -409,4 +409,33 @@ Load the protocol from configuration.
 **Returns**:
 
 the protocol object.
+
+<a name="aea.protocols.base.Protocol.protocol_id"></a>
+#### protocol`_`id
+
+```python
+ | @property
+ | protocol_id() -> PublicId
+```
+
+Get protocol id.
+
+<a name="aea.protocols.base.Protocol.protocol_specification_id"></a>
+#### protocol`_`specification`_`id
+
+```python
+ | @property
+ | protocol_specification_id() -> PublicId
+```
+
+Get protocol specification id.
+
+<a name="aea.protocols.base.Protocol.__repr__"></a>
+#### `__`repr`__`
+
+```python
+ | __repr__() -> str
+```
+
+Get str repr of the protocol.
 

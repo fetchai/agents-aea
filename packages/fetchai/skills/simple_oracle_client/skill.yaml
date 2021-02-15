@@ -1,27 +1,27 @@
 name: simple_oracle_client
 author: fetchai
-version: 0.2.0
+version: 0.3.0
 type: skill
 description: This skill deploys a Fetch oracle client contract and calls this contract
   to request an oracle value
 license: Apache-2.0
-aea_version: '>=0.9.0, <0.10.0'
+aea_version: '>=0.10.0, <0.11.0'
 fingerprint:
   README.md: QmRqzw2aTE6rsUnoB8XvvWoF4sg4ZUpvgQwStZpAVG5sUj
-  __init__.py: QmebVnXubnqXCGurbLY2An23qJ4EBDvgYYmt55MTcT2BKi
-  behaviours.py: QmeMQQb7YBMr2Rr3rFhnmxue7uXj6P4yxGfTeryAAQWoTx
-  dialogues.py: QmZjvjbQk2m4mB2ExDGgM5kGzMi58zk3QvWxmSzRL56i9o
+  __init__.py: QmdDKTs3FQskbHYhmUxQEi3AnDH6HKdNmVagBVoz4YRDCW
+  behaviours.py: QmWYyrJJD9EXv5EFPqCSiaDwzdPJHZshuBV2JUSqQ3akvh
+  dialogues.py: QmdCnZCCNbDi2fciTfzjXhK5ZtCByLzX5pLHFRydgKJczV
   handlers.py: QmZ7ZK8BPstj8jDRtKPgHUaYTTdNSGysSAjqJJLpFCdub9
-  strategy.py: QmVeeiJye8skheC1vv3WKjNrHTkM4HtKA56RQU6eHrTw7E
+  strategy.py: QmfVTqJeWpFxCFzjyfGjFwAvU9fm3VJFu9BCdThhnHBXHA
 fingerprint_ignore_patterns: []
 contracts:
-- fetchai/fet_erc20:0.2.0
-- fetchai/oracle_client:0.2.0
+- fetchai/fet_erc20:0.3.0
+- fetchai/oracle_client:0.3.0
 protocols:
-- fetchai/contract_api:0.10.0
-- fetchai/default:0.11.0
-- fetchai/ledger_api:0.9.0
-- fetchai/signing:0.9.0
+- fetchai/contract_api:0.11.0
+- fetchai/default:0.12.0
+- fetchai/ledger_api:0.10.0
+- fetchai/signing:0.10.0
 skills: []
 behaviours:
   simple_oracle_client_behaviour:

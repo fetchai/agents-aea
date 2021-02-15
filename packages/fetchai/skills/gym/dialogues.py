@@ -25,6 +25,7 @@ This module contains the classes required for dialogue management.
 - GymDialogue: The dialogue class maintains state of a dialogue of type gym and manages it.
 - GymDialogues: The dialogues class keeps track of all dialogues of type gym.
 """
+from typing import Any
 
 from aea.protocols.base import Address, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
@@ -46,7 +47,7 @@ DefaultDialogue = BaseDefaultDialogue
 class DefaultDialogues(Model, BaseDefaultDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -78,7 +79,7 @@ GymDialogue = BaseGymDialogue
 class GymDialogues(Model, BaseGymDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 

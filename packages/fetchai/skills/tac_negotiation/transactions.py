@@ -21,7 +21,7 @@
 
 import datetime
 from collections import defaultdict, deque
-from typing import Deque, Dict, List, Tuple, cast
+from typing import Any, Deque, Dict, List, Tuple, cast
 
 from aea.decision_maker.default import OwnershipState
 from aea.exceptions import enforce
@@ -38,7 +38,7 @@ MessageId = int
 class Transactions(Model):
     """Class to handle pending transaction proposals/acceptances and locked transactions."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize the transactions."""
         self._pending_transaction_timeout = kwargs.pop(
             "pending_transaction_timeout", 30

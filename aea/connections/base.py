@@ -64,12 +64,13 @@ class Connection(Component, ABC):
     def __init__(
         self,
         configuration: ConnectionConfig,
+        data_dir: str,
         identity: Optional[Identity] = None,
         crypto_store: Optional[CryptoStore] = None,
         restricted_to_protocols: Optional[Set[PublicId]] = None,
         excluded_protocols: Optional[Set[PublicId]] = None,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         """
         Initialize the connection.
 
@@ -77,6 +78,7 @@ class Connection(Component, ABC):
         parameters are None: connection_id, excluded_protocols or restricted_to_protocols.
 
         :param configuration: the connection configuration.
+        :param data_dir: directory where to put local files.
         :param identity: the identity object held by the agent.
         :param crypto_store: the crypto store for encrypted communication.
         :param restricted_to_protocols: the set of protocols ids of the only supported protocols for this connection.
@@ -92,6 +94,7 @@ class Connection(Component, ABC):
 
         self._identity = identity
         self._crypto_store = crypto_store
+        self._data_dir = data_dir
 
         self._restricted_to_protocols = (
             restricted_to_protocols if restricted_to_protocols is not None else set()
@@ -159,6 +162,11 @@ class Connection(Component, ABC):
         return self._crypto_store is not None
 
     @property
+    def data_dir(self) -> str:  # pragma: nocover
+        """Get the data directory."""
+        return self._data_dir
+
+    @property
     def component_type(self) -> ComponentType:  # pragma: nocover
         """Get the component type."""
         return ComponentType.CONNECTION
@@ -189,12 +197,19 @@ class Connection(Component, ABC):
         """Get the connection status."""
         return self._state.get()
 
+    @state.setter
+    def state(self, value: ConnectionStates) -> None:
+        """Set the connection status."""
+        if not isinstance(value, ConnectionStates):
+            raise ValueError(f"Incorrect state: `{value}`")
+        self._state.set(value)
+
     @abstractmethod
-    async def connect(self):
+    async def connect(self) -> None:
         """Set up the connection."""
 
     @abstractmethod
-    async def disconnect(self):
+    async def disconnect(self) -> None:
         """Tear down the connection."""
 
     @abstractmethod
@@ -207,7 +222,7 @@ class Connection(Component, ABC):
         """
 
     @abstractmethod
-    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
+    async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """
         Receive an envelope.
 
@@ -216,7 +231,12 @@ class Connection(Component, ABC):
 
     @classmethod
     def from_dir(
-        cls, directory: str, identity: Identity, crypto_store: CryptoStore, **kwargs
+        cls,
+        directory: str,
+        identity: Identity,
+        crypto_store: CryptoStore,
+        data_dir: str,
+        **kwargs: Any,
     ) -> "Connection":
         """
         Load the connection from a directory.
@@ -224,6 +244,7 @@ class Connection(Component, ABC):
         :param directory: the directory to the connection package.
         :param identity: the identity object.
         :param crypto_store: object to access the connection crypto objects.
+        :param data_dir: the assets directory.
         :return: the connection object.
         """
         configuration = cast(
@@ -231,7 +252,9 @@ class Connection(Component, ABC):
             load_component_configuration(ComponentType.CONNECTION, Path(directory)),
         )
         configuration.directory = Path(directory)
-        return Connection.from_config(configuration, identity, crypto_store, **kwargs)
+        return Connection.from_config(
+            configuration, identity, crypto_store, data_dir, **kwargs
+        )
 
     @classmethod
     def from_config(
@@ -239,7 +262,8 @@ class Connection(Component, ABC):
         configuration: ConnectionConfig,
         identity: Identity,
         crypto_store: CryptoStore,
-        **kwargs,
+        data_dir: str,
+        **kwargs: Any,
     ) -> "Connection":
         """
         Load a connection from a configuration.
@@ -247,6 +271,7 @@ class Connection(Component, ABC):
         :param configuration: the connection configuration.
         :param identity: the identity object.
         :param crypto_store: object to access the connection crypto objects.
+        :param data_dir: the directory of the AEA project data.
         :return: an instance of the concrete connection class.
         """
         configuration = cast(ConnectionConfig, configuration)
@@ -276,6 +301,7 @@ class Connection(Component, ABC):
         try:
             connection = connection_class(
                 configuration=configuration,
+                data_dir=data_dir,
                 identity=identity,
                 crypto_store=crypto_store,
                 **kwargs,
@@ -315,12 +341,13 @@ class BaseSyncConnection(Connection):
     def __init__(
         self,
         configuration: ConnectionConfig,
+        data_dir: str,
         identity: Optional[Identity] = None,
         crypto_store: Optional[CryptoStore] = None,
         restricted_to_protocols: Optional[Set[PublicId]] = None,
         excluded_protocols: Optional[Set[PublicId]] = None,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         """
         Initialize the connection.
 
@@ -328,6 +355,7 @@ class BaseSyncConnection(Connection):
         parameters are None: connection_id, excluded_protocols or restricted_to_protocols.
 
         :param configuration: the connection configuration.
+        :param data_dir: directory where to put local files.
         :param identity: the identity object held by the agent.
         :param crypto_store: the crypto store for encrypted communication.
         :param restricted_to_protocols: the set of protocols ids of the only supported protocols for this connection.
@@ -335,6 +363,7 @@ class BaseSyncConnection(Connection):
         """
         super().__init__(
             configuration=configuration,
+            data_dir=data_dir,
             identity=identity,
             crypto_store=crypto_store,
             restricted_to_protocols=restricted_to_protocols,
@@ -344,7 +373,7 @@ class BaseSyncConnection(Connection):
 
         self._tasks: Set[asyncio.Task] = set()
 
-    def _set_executor_pool(self, max_workers=None) -> None:
+    def _set_executor_pool(self, max_workers: Optional[int] = None) -> None:
         """Set executors pool."""
         max_workers = self.configuration.config.get(
             "max_thread_workers", self.MAX_WORKER_THREADS
@@ -364,7 +393,7 @@ class BaseSyncConnection(Connection):
                 f"in task `{task_name}`, exception occured", exc_info=task.exception(),
             )
 
-    async def _run_in_pool(self, fn: Callable, *args) -> Any:
+    async def _run_in_pool(self, fn: Callable, *args: Any) -> Any:
         """Run sync function in threaded executor pool."""
         return await self._loop.run_in_executor(self._executor_pool, fn, *args)
 
@@ -406,12 +435,12 @@ class BaseSyncConnection(Connection):
         task.add_done_callback(self._task_done_callback)
         self._tasks.add(task)
 
-    def _send_wrapper(self, *args) -> None:
+    def _send_wrapper(self, *args: Any) -> None:
         """Check is connected and call on_send method."""
         self._ensure_connected()
         self.on_send(*args)
 
-    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
+    async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """Get an envelope from the connection."""
         self._ensure_connected()
         return await self._incoming_messages_queue.get()
@@ -419,7 +448,7 @@ class BaseSyncConnection(Connection):
     def start_main(self) -> None:
         """Start main function of the connection."""
 
-        def _():
+        def _() -> None:
             task = self._loop.create_task(self._run_in_pool(self.main))
             # cause task.set_name for python3.8+
             setattr(task, "task_name", "Connection main")  # noqa

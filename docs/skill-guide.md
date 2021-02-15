@@ -1,8 +1,8 @@
 This guide will take you through the development of your first skill. It will teach you, how to connect the AEA to the digital world, register the AEA and search for other AEAs.
 
-AEAs are not, generally secret agents. You want them to be seen and found by other agents so that they can trade and do other useful things. Usually, this means connecting to Fetch.ai’s search-and-discovery mechanism, the <a href="../simple-oef">simple OEF</a> (or SOEF, for short). The SOEF lets your agents register, be found, and find other agents. You can then negotiate using the AEA framework’s <a href="../acn">peer-to-peer network (ACN)</a> and trade. This guide covers getting your AEA connected to the SOEF, and describing your AEA to make itself visible.
+Although one can imagine scenarios where a single AEA pursues its goals in isolation without interacting with other AEAs, there is no doubt that by working together, AEAs can achieve much more. To do so, an AEA must be seen and found by other AEAs so that they can trade and do other useful things. Fetch.ai’s search-and-discovery mechanism, the <a href="../simple-oef">simple OEF</a> (or SOEF, for short) lets your agents register, be discovered, and find other agents. You can then negotiate using the AEA framework’s <a href="../acn">peer-to-peer network (ACN)</a> and trade. This guide covers getting your AEA connected to the SOEF, and describing your AEA to make itself visible.
 
-Typically, this means setting a name, a genus (a high-level description of what the agent represents, e.g., `vehicle`, `building` or `service`), a classification (`infrastructure.railway.train`, for example) and then a bunch of other descriptors, where applicable, that provide the agent's position, whether it buys or sells, and other descriptive items.
+Registering your AEA with the SOEF involves setting a name, a genus (a high-level description of what the agent represents, e.g. `vehicle`, `building` or `service`), a classification (for example `infrastructure.railway.train`) and other descriptors to further fine-tune the kind of service your AEA offers (for example, the agent's position, whether it buys or sells, and other descriptive items).
 
 The more you describe your AEA, the easier it is for others to find it using specific filters.
 
@@ -23,7 +23,7 @@ In the following steps, we replace the scaffolded `Behaviour` and `Handler` in `
 
 ## Step 2: Develop a Behaviour
 
-A <a href="../api/skills/base#behaviour-objects">`Behaviour`</a> class contains the business logic specific to initial actions initiated by the AEA rather than reactions to other events.
+A <a href="../api/skills/base#behaviour-objects">`Behaviour`</a> class contains the business logic specific to actions initiated by the AEA rather than reactions to other events.
 
 In this example, we implement a simple search behaviour. Each time, `act()` gets called by the main agent loop, we will send a search request to the <a href="../simple-oef">SOEF search node</a> via the <a href="../oef-ledger">P2P communication network</a>.
 
@@ -115,6 +115,11 @@ class MySearchBehaviour(TickerBehaviour):
 Searches are proactive and, as such, well placed in a <a href="../api/skills/base#behaviour-objects">`Behaviour`</a>. Specifically, we subclass the <a href="../api/skills/behaviours#tickerbehaviour-objects">`TickerBehaviour`</a> as it allows us to repeatedly search at a defined tick interval.
 
 We place this code in `my_aea/skills/my_search/behaviours.py`. Ensure you replace the `fetchai` author in this line `from packages.fetchai.skills.my_search.dialogues import OefSearchDialogues` with your author handle (run `aea init` to set or check the author name).
+
+<div class="admonition note">
+  <p class="admonition-title">Note</p>
+  <p> Note that the import paths to agent packages, for example `packages.fetchai.skills.my_search.dialogues` above, are not actual paths. Package files always reside in your AEA's folder, either under a specific package directory (e.g. connection, protocol, skill) if the package is custom built, or under `vendor` if it is pulled from the registry. These paths are virtual and created automatically when an AEA is run. See <a href="../package-imports"> this page </a> for more details. </p>
+</div>
 
 ## Step 3: Develop a Handler
 
@@ -269,7 +274,7 @@ We place this code in `my_aea/skills/my_search/handlers.py`. Ensure you replace 
 
 ## Step 4: Add dialogues model
 
-We have implemented a behaviour and a handler. We now implement a <a href="../api/skills/base#model-objects">`Model`</a>, in particular we implement the <a href="../api/protocols/dialogue/base#dialogue-objects">`Dialogue`</a> and <a href="../api/protocols/dialogue/base#dialogues-objects">`Dialogues`</a> classes. These ensure that the message flow satisfies the `fetchai/oef_search:0.12.0` protocol and keep track of the individual messages being sent and received.
+We have implemented a behaviour and a handler. We now implement a <a href="../api/skills/base#model-objects">`Model`</a>, in particular we implement the <a href="../api/protocols/dialogue/base#dialogue-objects">`Dialogue`</a> and <a href="../api/protocols/dialogue/base#dialogues-objects">`Dialogues`</a> classes. These ensure that the message flow satisfies the `fetchai/oef_search:0.13.0` protocol and keep track of the individual messages being sent and received.
 
 ``` python
 from aea.protocols.base import Message
@@ -330,12 +335,12 @@ version: 0.1.0
 type: skill
 description: A simple search skill utilising the SOEF search node.
 license: Apache-2.0
-aea_version: '>=0.9.0, <0.10.0'
+aea_version: '>=0.10.0, <0.11.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/oef_search:0.12.0
+- fetchai/oef_search:0.13.0
 skills: []
 behaviours:
   my_search_behaviour:
@@ -401,7 +406,7 @@ Again, ensure the author field matches your own.
 
 ## Step 6: Update fingerprint
 
-We need to update the fingerprint of our skill next:
+To run an AEA with new or modified code, you need to update the fingerprint of the new/modified components. In this case, we need to fingerprint our skill:
 ``` bash
 aea fingerprint skill fetchai/my_search:0.1.0
 ```
@@ -411,21 +416,21 @@ Ensure, you use the correct author name to reference your skill (here we use `fe
 
 Our AEA does not have the OEF protocol yet so let's add it.
 ``` bash
-aea add protocol fetchai/oef_search:0.12.0
+aea add protocol fetchai/oef_search:0.13.0
 ```
 
 This adds the protocol to our AEA and makes it available on the path `packages.fetchai.protocols...`.
 
-We also need to add the SOEF and P2P connections and install the AEA's dependencies as well as configure the AEA:
+At this point we need to add the SOEF and P2P connections to allow the AEA to communicate with the SOEF node and other AEAs, install the AEA's dependencies, and configure the AEA:
 ``` bash
-aea add connection fetchai/soef:0.15.0
-aea add connection fetchai/p2p_libp2p:0.14.0
+aea add connection fetchai/soef:0.16.0
+aea add connection fetchai/p2p_libp2p:0.15.0
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.14.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.15.0
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/oef_search:0.12.0": "fetchai/soef:0.15.0"
+  "fetchai/oef_search:0.13.0": "fetchai/soef:0.16.0"
 }'
 ```
 
@@ -433,9 +438,11 @@ The last command will ensure that search requests are processed by the correct c
 
 ## Step 8: Run a service provider AEA
 
-In order to be able to find another AEA when searching, from a different terminal window, we fetch another finished AEA and install its Python dependencies:
+In order for this AEA to find another AEA when searching, the second AEA (let's call it the service provider AEA) must exist and have been registered with the SOEF. 
+
+From a different terminal window, we fetch a finished service provider AEA and install its Python dependencies:
 ``` bash
-aea fetch fetchai/simple_service_registration:0.19.0 && cd simple_service_registration && aea install && aea build
+aea fetch fetchai/simple_service_registration:0.20.0 && cd simple_service_registration && aea install && aea build
 ```
 
 This AEA will simply register a location service on the <a href="../simple-oef">SOEF search node</a> so we can search for it.
@@ -462,7 +469,7 @@ Then we run the AEA:
 aea run
 ```
 
-Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.14.0 -u public_uri` to retrieve the address.) This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the `simple_service_registration` AEA.
+Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.15.0 -u public_uri` to retrieve the address.) This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the `simple_service_registration` (service provider) AEA.
 
 <details><summary>Click here to see full code and guide for this AEA</summary>
 <p>
@@ -675,7 +682,7 @@ class Strategy(Model):
         return description
 ```
 
-We create a <a href="../api/skills/base#model-objects">`Model`</a> type dialogue class and place it in `dialogues.py`. These classes ensure that the message flow satisfies the `fetchai/oef_search:0.12.0` protocol and keep track of the individual messages being sent and received.
+We create a <a href="../api/skills/base#model-objects">`Model`</a> type dialogue class and place it in `dialogues.py`. These classes ensure that the message flow satisfies the `fetchai/oef_search:0.13.0` protocol and keep track of the individual messages being sent and received.
 
 ``` python
 from aea.protocols.base import Message
@@ -740,7 +747,7 @@ from packages.fetchai.skills.simple_service_registration.dialogues import (
     OefSearchDialogues,
 )
 
-LEDGER_API_ADDRESS = "fetchai/ledger:0.12.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.13.0"
 
 
 class OefSearchHandler(Handler):
@@ -840,7 +847,7 @@ version: 0.4.0
 type: skill
 description: The simple service registration skills is a skill to register a service.
 license: Apache-2.0
-aea_version: '>=0.9.0, <0.10.0'
+aea_version: '>=0.10.0, <0.11.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmRr1oe3zWKyPcktzKP4BiKqjCqmKjEDdLUQhn1JzNm4nD
@@ -850,7 +857,7 @@ fingerprint:
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/oef_search:0.12.0
+- fetchai/oef_search:0.13.0
 skills: []
 behaviours:
   service:
@@ -930,9 +937,8 @@ We recommend you continue with the next step in the 'Getting Started' series:
 
 - <a href="../core-components-2">Core components (Part 2)</a>
 
-
 ### Relevant deep-dives
 
-We hope this step by step introduction has helped you develop your own skill. We are excited to see what you will build.
+<a href="../generic-skills-step-by-step"> This guide </a> goes through a more elaborate scenario than the one on this page, where after finding each other, the two AEAs negotiate and trade via a ledger. 
 
 <br />

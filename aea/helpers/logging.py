@@ -33,7 +33,7 @@ def get_logger(module_path: str, agent_name: str) -> Logger:
 class AgentLoggerAdapter(LoggerAdapter):
     """This class is a logger adapter that prepends the agent name to log messages."""
 
-    def __init__(self, logger: Logger, agent_name: str):
+    def __init__(self, logger: Logger, agent_name: str) -> None:
         """
         Initialize the logger adapter.
 
@@ -53,7 +53,7 @@ class WithLogger:
 
     def __init__(
         self, logger: Optional[Logger] = None, default_logger_name: str = "aea",
-    ):
+    ) -> None:
         """
         Initialize the logger.
 
@@ -73,6 +73,6 @@ class WithLogger:
         return cast(Logger, self._logger)
 
     @logger.setter
-    def logger(self, logger: Optional[Logger]):
+    def logger(self, logger: Optional[Logger]) -> None:
         """Set the logger."""
         self._logger = logger

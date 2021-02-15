@@ -33,7 +33,7 @@ DB_SOURCE = os.path.join(my_path, "dummy_weather_station_data.db")
 class DBCommunication:
     """A class to communicate with a database."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Initialize the database communication.
 

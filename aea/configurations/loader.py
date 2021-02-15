@@ -59,7 +59,7 @@ T = TypeVar(
 class BaseConfigLoader:
     """Base class for configuration loader classes."""
 
-    def __init__(self, schema_filename: str):
+    def __init__(self, schema_filename: str) -> None:
         """
         Initialize the parser for configuration files.
 
@@ -94,7 +94,7 @@ class BaseConfigLoader:
 class ConfigLoader(Generic[T], BaseConfigLoader):
     """Parsing, serialization and validation for package configuration files."""
 
-    def __init__(self, schema_filename: str, configuration_class: Type[T]):
+    def __init__(self, schema_filename: str, configuration_class: Type[T]) -> None:
         """
         Initialize the parser for configuration files.
 
@@ -109,7 +109,9 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         """Get the configuration class of the loader."""
         return self._configuration_class
 
-    def load_protocol_specification(self, file_pointer: TextIO) -> T:
+    def load_protocol_specification(
+        self, file_pointer: TextIO
+    ) -> ProtocolSpecification:
         """
         Load an agent configuration file.
 
@@ -140,8 +142,9 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
 
         self.validate(configuration_file_json)
 
-        protocol_specification = self.configuration_class.from_json(
-            configuration_file_json
+        protocol_specification = cast(
+            ProtocolSpecification,
+            self.configuration_class.from_json(configuration_file_json),
         )
         protocol_specification.protobuf_snippets = protobuf_snippets_json
         protocol_specification.dialogue_config = dialogue_configuration
@@ -187,7 +190,9 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         """Load component configuration from JSON object."""
         self.validate(configuration_file_json)
         key_order = list(configuration_file_json.keys())
-        configuration_obj = self.configuration_class.from_json(configuration_file_json)
+        configuration_obj = cast(
+            T, self.configuration_class.from_json(configuration_file_json)
+        )
         configuration_obj._key_order = key_order  # pylint: disable=protected-access
         return configuration_obj
 
@@ -221,7 +226,7 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         return agent_configuration_obj
 
     def _get_component_configurations(
-        self, configuration_file_jsons
+        self, configuration_file_jsons: List[Dict]
     ) -> Dict[ComponentId, Dict]:
         """
         Get the component configurations from the tail pages of the aea-config.yaml file.

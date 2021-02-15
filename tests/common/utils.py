@@ -27,6 +27,8 @@ from functools import wraps
 from threading import Thread
 from typing import Any, Callable, List, Optional, Set, Tuple, Type, Union
 
+import pytest
+
 from aea.aea import AEA
 from aea.configurations.base import PublicId
 from aea.mail.base import Envelope
@@ -378,3 +380,12 @@ def run_aea_subprocess(*args, cwd: str = ".") -> Tuple[subprocess.Popen, str, st
     result.wait()
     stdout, stderr = result.communicate()
     return result, stdout.decode("utf-8"), stderr.decode("utf-8")
+
+
+@pytest.mark.integration
+class UseOef:  # pylint: disable=too-few-public-methods
+    """Inherit from this class to launch an OEF node."""
+
+    @pytest.fixture(autouse=True)
+    def _start_oef_node(self, network_node: Callable) -> None:
+        """Start an oef node."""

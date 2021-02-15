@@ -23,6 +23,7 @@ import os
 import shutil
 import tempfile
 from pathlib import Path
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -69,10 +70,10 @@ class Testp2pStubConnectionReception:
         self.identity1 = Identity("test", "con1")
         self.identity2 = Identity("test", "con2")
         self.connection1 = P2PStubConnection(
-            configuration=configuration, identity=self.identity1
+            configuration=configuration, data_dir=MagicMock(), identity=self.identity1
         )
         self.connection2 = P2PStubConnection(
-            configuration=configuration, identity=self.identity2
+            configuration=configuration, data_dir=MagicMock(), identity=self.identity2
         )
         os.chdir(self.tmpdir)
 

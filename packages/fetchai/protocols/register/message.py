@@ -20,7 +20,7 @@
 """This module contains register's message definition."""
 
 import logging
-from typing import Dict, Set, Tuple, cast
+from typing import Any, Dict, Set, Tuple, cast
 
 from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
@@ -35,7 +35,7 @@ DEFAULT_BODY_SIZE = 4
 class RegisterMessage(Message):
     """A protocol for communication between two AEAs for registration."""
 
-    protocol_id = PublicId.from_str("fetchai/register:0.4.0")
+    protocol_id = PublicId.from_str("fetchai/register:0.5.0")
     protocol_specification_id = PublicId.from_str("fetchai/register:0.1.0")
 
     class Performative(Message.Performative):
@@ -45,7 +45,7 @@ class RegisterMessage(Message):
         REGISTER = "register"
         SUCCESS = "success"
 
-        def __str__(self):
+        def __str__(self) -> str:
             """Get the string representation."""
             return str(self.value)
 
@@ -69,7 +69,7 @@ class RegisterMessage(Message):
         dialogue_reference: Tuple[str, str] = ("", ""),
         message_id: int = 1,
         target: int = 0,
-        **kwargs,
+        **kwargs: Any,
     ):
         """
         Initialise an instance of RegisterMessage.

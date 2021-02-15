@@ -4,7 +4,7 @@ author: fetchai
 version: 0.1.0
 license: Apache-2.0
 protocol_specification_id: some_author/some_protocol_name:0.1.0
-aea_version: '>=0.9.0, <0.10.0'
+aea_version: '>=0.10.0, <0.11.0'
 description: 'A protocol for testing purposes.'
 speech_acts:
   performative_ct:

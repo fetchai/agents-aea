@@ -31,7 +31,7 @@ class Uri:
         uri: Optional[str] = None,
         host: Optional[str] = None,
         port: Optional[int] = None,
-    ):
+    ) -> None:
         """Initialise Uri."""
         if uri is not None:
             split = uri.split(":", 1)
@@ -44,11 +44,11 @@ class Uri:
             self._host = "127.0.0.1"
             self._port = randint(5000, 10000)  # nosec
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get string representation."""
         return "{}:{}".format(self._host, self._port)
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         """Get object representation."""
         return self.__str__()
 

@@ -19,7 +19,7 @@
 """Implementation of the 'aea run' subcommand."""
 from contextlib import contextmanager
 from pathlib import Path
-from typing import List, Optional, cast
+from typing import Generator, List, Optional, cast
 
 import click
 
@@ -76,12 +76,12 @@ from aea.skills.base import Behaviour, Handler, Model, Skill
 @click.pass_context
 @check_aea_project
 def run(
-    click_context,
+    click_context: click.Context,
     connection_ids: List[PublicId],
     env_file: str,
     is_install_deps: bool,
     profiling: int,
-):
+) -> None:
     """Run the agent."""
     ctx = cast(Context, click_context.obj)
     profiling = int(profiling)
@@ -93,7 +93,7 @@ def run(
 
 
 @contextmanager
-def _profiling_context(period: int):
+def _profiling_context(period: int) -> Generator:
     """Start profiling context."""
     OBJECTS_INSTANCES = [
         Message,

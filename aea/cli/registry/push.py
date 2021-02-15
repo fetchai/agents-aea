@@ -21,6 +21,7 @@
 import os
 import shutil
 import tarfile
+from typing import cast
 
 import click
 
@@ -32,6 +33,7 @@ from aea.cli.registry.utils import (
 from aea.cli.utils.context import Context
 from aea.cli.utils.generic import is_readme_present, load_yaml
 from aea.cli.utils.loggers import logger
+from aea.common import JSONLike
 from aea.configurations.base import PublicId
 from aea.configurations.constants import (
     CONNECTIONS,
@@ -42,13 +44,13 @@ from aea.configurations.constants import (
 )
 
 
-def _remove_pycache(source_dir: str):
+def _remove_pycache(source_dir: str) -> None:
     pycache_path = os.path.join(source_dir, "__pycache__")
     if os.path.exists(pycache_path):
         shutil.rmtree(pycache_path)
 
 
-def _compress_dir(output_filename: str, source_dir: str):
+def _compress_dir(output_filename: str, source_dir: str) -> None:
     _remove_pycache(source_dir)
     with tarfile.open(output_filename, "w:gz") as f:
         f.add(source_dir, arcname=os.path.basename(source_dir))
@@ -152,7 +154,9 @@ def push_item(ctx: Context, item_type: str, item_id: PublicId) -> None:
 
         path = "/{}/create".format(item_type_plural)
         logger.debug("Pushing {} {} to Registry ...".format(item_id.name, item_type))
-        resp = request_api("POST", path, data=data, is_auth=True, files=files)
+        resp = cast(
+            JSONLike, request_api("POST", path, data=data, is_auth=True, files=files)
+        )
     finally:
         for fd in files.values():
             fd.close()

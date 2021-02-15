@@ -19,7 +19,8 @@
 """Methods for CLI fetch functionality."""
 import os
 import shutil
-from typing import Optional
+from pathlib import Path
+from typing import Optional, cast
 
 import click
 from click.exceptions import ClickException
@@ -29,6 +30,7 @@ from aea.cli.registry.utils import download_file, extract, request_api
 from aea.cli.utils.config import try_to_load_agent_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import clean_after
+from aea.common import JSONLike
 from aea.configurations.base import PublicId
 from aea.configurations.constants import (
     CONNECTION,
@@ -60,13 +62,16 @@ def fetch_agent(
     folder_name = target_dir or (name if alias is None else alias)
     aea_folder = os.path.join(ctx.cwd, folder_name)
     if os.path.exists(aea_folder):
-        raise ClickException(f'Item "{folder_name}" already exists in target folder.')
+        path = Path(aea_folder)
+        raise ClickException(
+            f'Item "{path.name}" already exists in target folder "{path.parent}".'
+        )
 
     ctx.clean_paths.append(aea_folder)
 
     api_path = f"/agents/{author}/{name}/{version}"
-    resp = request_api("GET", api_path)
-    file_url = resp["file"]
+    resp = cast(JSONLike, request_api("GET", api_path))
+    file_url = cast(str, resp["file"])
     filepath = download_file(file_url, ctx.cwd)
 
     extract(filepath, ctx.cwd)

@@ -60,7 +60,7 @@ Custom type checker to handle env variables.
 #### is`_`type
 
 ```python
- | is_type(instance, type)
+ | is_type(instance, type) -> bool
 ```
 
 Check is instance of type.
@@ -69,7 +69,7 @@ Check is instance of type.
 #### ownAdditionalProperties
 
 ```python
-ownAdditionalProperties(validator, aP, instance, schema)
+ownAdditionalProperties(validator, aP, instance, schema) -> Iterator
 ```
 
 Additioinal properties validator.
@@ -87,7 +87,7 @@ Configuration validator implementation.
 #### `__`init`__`
 
 ```python
- | __init__(schema_filename: str, env_vars_friendly: bool = False)
+ | __init__(schema_filename: str, env_vars_friendly: bool = False) -> None
 ```
 
 Initialize the parser for configuration files.

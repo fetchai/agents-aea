@@ -45,39 +45,35 @@ from tests.conftest import (
 class TestFreeze:
     """Test that the command 'aea freeze' works as expected."""
 
-    @classmethod
-    def setup_class(cls):
+    def setup(self):
         """Set the test up."""
-        cls.schema = json.load(open(AGENT_CONFIGURATION_SCHEMA))
-        cls.resolver = jsonschema.RefResolver(
-            make_jsonschema_base_uri(Path(CONFIGURATION_SCHEMA_DIR)), cls.schema
+        self.schema = json.load(open(AGENT_CONFIGURATION_SCHEMA))
+        self.resolver = jsonschema.RefResolver(
+            make_jsonschema_base_uri(Path(CONFIGURATION_SCHEMA_DIR)), self.schema
         )
-        cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
+        self.validator = Draft4Validator(self.schema, resolver=self.resolver)
 
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
+        self.cwd = os.getcwd()
+        self.t = tempfile.mkdtemp()
         # copy the 'dummy_aea' directory in the parent of the agent folder.
-        shutil.copytree(Path(CUR_PATH, "data", "dummy_aea"), Path(cls.t, "dummy_aea"))
-        cls.runner = CliRunner()
-        os.chdir(Path(cls.t, "dummy_aea"))
-        cls.result = cls.runner.invoke(
+        shutil.copytree(Path(CUR_PATH, "data", "dummy_aea"), Path(self.t, "dummy_aea"))
+        self.runner = CliRunner()
+        os.chdir(Path(self.t, "dummy_aea"))
+        self.result = self.runner.invoke(
             cli, [*CLI_LOG_OPTION, "freeze"], standalone_mode=False
         )
 
-    def test_exit_code_equal_to_zero(self):
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
+    def test_exit_code_equal_to_zero_and_correct_output(self):
         """Assert that the exit code is equal to zero (i.e. success)."""
         assert self.result.exit_code == 0
-
-    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
-    def test_correct_output(self):
         """Test that the command has printed the correct output."""
         assert self.result.output == """protobuf\nvyper==0.1.0b12\n"""
 
-    @classmethod
-    def teardown_class(cls):
+    def teardown(self):
         """Tear the test down."""
-        os.chdir(cls.cwd)
+        os.chdir(self.cwd)
         try:
-            shutil.rmtree(cls.t)
+            shutil.rmtree(self.t)
         except (OSError, IOError):
             pass

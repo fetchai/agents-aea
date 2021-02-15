@@ -1,5 +1,26 @@
 # Release History
 
+## 0.10.0 (2020-02-11)
+
+- Removes error skill from agents which do not need it
+- Adds support for relay connection reconnect in ACN
+- Multiplexer refactoring for easier connection handling
+- Fix `erc1155` skill tests on CosmWasm chains
+- Extends docs on usage of CosmWasm chains
+- Adds version compatibility in `aea upgrade` command
+- Introduces protocol specification id and related changes for better interoperability
+- Adds synchronous connection base class
+- Exposes state setter in connection base class
+- Adds Yoti protocol and connection
+- Multiple updates to generic buyer
+- Adds additional automation to `MultiAgentManager`, including automated handling of certs, keys and other package specific data
+- Multiple test improvements and fixes
+- Add stricter typing and checks
+- Fixes to MacOS install script
+- Adds threading patch for web3
+- Multiple docs updates based on user feedback
+- Multiple additional tests and test stability fixes
+
 ## 0.9.2 (2020-01-21)
 
 - Fixes `CosmosApi`, in particular for CosmWasm

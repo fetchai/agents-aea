@@ -73,11 +73,11 @@ class TestMultiAgentManagerAsyncMode(
         assert not os.path.exists(self.working_dir)
         assert not os.path.exists(self.working_dir)
 
-    def test_keys_dir_presents(self, *args):
-        """Check not fails on exists key dir."""
+    def test_data_dir_presents(self, *args):
+        """Check not fails on exists data dir."""
         try:
             os.makedirs(self.working_dir)
-            os.makedirs(self.manager._keys_dir)
+            os.makedirs(self.manager._data_dir)
             self.manager.start_manager()
             self.manager.stop_manager()
         finally:
@@ -408,8 +408,9 @@ class TestMultiAgentManagerAsyncMode(
         self.manager.start_manager()
         self.manager.add_project(self.project_public_id, local=True)
 
-        cert_path = os.path.abspath(os.path.join(self.working_dir, "cert.txt"))
-        assert not os.path.exists(cert_path)
+        cert_filename = "cert.txt"
+        cert_path = os.path.join(self.manager.data_dir, self.agent_name, cert_filename)
+        assert not os.path.exists(cert_filename)
 
         priv_key_path = os.path.abspath(os.path.join(self.working_dir, "priv_key.txt"))
         create_private_key("fetchai", priv_key_path)
@@ -426,7 +427,7 @@ class TestMultiAgentManagerAsyncMode(
                         "not_after": "2022-01-01",
                         "not_before": "2021-01-01",
                         "public_key": "fetchai",
-                        "save_path": cert_path,
+                        "save_path": cert_filename,
                     }
                 ],
             }

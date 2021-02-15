@@ -30,9 +30,9 @@ class TestFetchBeaconSkill(AEATestCaseEmpty):
 
     def test_fetch_beacon(self):
         """Run the fetch beacon skill sequence."""
-        self.add_item("connection", "fetchai/http_client:0.16.0")
-        self.add_item("skill", "fetchai/fetch_beacon:0.3.0")
-        self.set_config("agent.default_connection", "fetchai/http_client:0.16.0")
+        self.add_item("connection", "fetchai/http_client:0.17.0")
+        self.add_item("skill", "fetchai/fetch_beacon:0.4.0")
+        self.set_config("agent.default_connection", "fetchai/http_client:0.17.0")
 
         self.run_install()
 
@@ -44,11 +44,13 @@ class TestFetchBeaconSkill(AEATestCaseEmpty):
             "setting up FetchBeaconBehaviour",
             "Fetching random beacon from https://rpc-beaconworld.fetch.ai/block...",
             "Beacon info:",
+            "entropy not present",
         )
         missing_strings = self.missing_from_output(process, check_strings)
-        assert (
-            missing_strings == []
-        ), "Strings {} didn't appear in agent output.".format(missing_strings)
+        assert len(missing_strings) in [
+            0,
+            1,
+        ], "Strings {} didn't appear in agent output.".format(missing_strings)
 
         self.terminate_agents()
         assert (

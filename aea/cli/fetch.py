@@ -19,6 +19,7 @@
 """Implementation of the 'aea fetch' subcommand."""
 import os
 from distutils.dir_util import copy_tree
+from pathlib import Path
 from typing import Optional, cast
 
 import click
@@ -54,7 +55,13 @@ from aea.exceptions import enforce
 )
 @click.argument("public-id", type=PublicIdParameter(), required=True)
 @click.pass_context
-def fetch(click_context, public_id, alias, local, remote):
+def fetch(
+    click_context: click.Context,
+    public_id: PublicId,
+    alias: str,
+    local: bool,
+    remote: bool,
+) -> None:
     """Fetch an agent from the registry."""
     ctx = cast(Context, click_context.obj)
     do_fetch(ctx, public_id, local, remote, alias)
@@ -67,7 +74,7 @@ def do_fetch(
     remote: bool,
     alias: Optional[str] = None,
     target_dir: Optional[str] = None,
-):
+) -> None:
     """
     Run the Fetch command.
 
@@ -145,8 +152,9 @@ def fetch_agent_locally(
     folder_name = target_dir or (public_id.name if alias is None else alias)
     target_path = os.path.join(ctx.cwd, folder_name)
     if os.path.exists(target_path):
+        path = Path(target_path)
         raise click.ClickException(
-            'Item "{}" already exists in target folder.'.format(public_id.name)
+            f'Item "{path.name}" already exists in target folder "{path.parent}".'
         )
     if target_dir is not None:
         os.makedirs(target_path)  # pragma: nocover

@@ -19,7 +19,7 @@
 """This module contains the tests for the sync connection module."""
 import asyncio
 import time
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
@@ -34,7 +34,7 @@ class SampleConnection(BaseSyncConnection):
     MAX_WORKER_THREADS = 3
 
     connection_id = PublicId("test", "test", "0.1.0")
-    PAUSE = 0.2
+    PAUSE = 0.5
 
     def __init__(self, *args, **kwargs):
         """Init connection."""
@@ -74,16 +74,17 @@ async def test_sync_connection():
     conf = Mock()
     conf.public_id = SampleConnection.connection_id
     conf.config = {}
-    con = SampleConnection(conf)
-    await asyncio.wait_for(con.connect(), timeout=3)
+    con = SampleConnection(conf, MagicMock())
+    await asyncio.wait_for(con.connect(), timeout=10)
     assert con.is_connected
-    for i in range(10):
-        envelope = Mock()
-        envelope.message = str(i)
-        await asyncio.wait_for(con.send(envelope), timeout=3)
+    envelope = Mock()
 
-    await asyncio.sleep(con.PAUSE * 1.3)
-    await asyncio.wait_for(con.disconnect(), timeout=3)
+    for i in range(10):
+        envelope.message = str(i)
+        await asyncio.wait_for(con.send(envelope), timeout=10)
+
+    await asyncio.sleep(con.PAUSE * 1.5)
+    await asyncio.wait_for(con.disconnect(), timeout=10)
     assert con.is_disconnected
 
     assert con.on_connect_called

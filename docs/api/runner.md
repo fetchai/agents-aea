@@ -16,7 +16,7 @@ Task to run agent instance.
 #### `__`init`__`
 
 ```python
- | __init__(agent: AEA)
+ | __init__(agent: AEA) -> None
 ```
 
 Init aea instance task.
@@ -24,6 +24,16 @@ Init aea instance task.
 **Arguments**:
 
 - `agent`: AEA instance to run within task.
+
+<a name="aea.runner.AEAInstanceTask.id"></a>
+#### id
+
+```python
+ | @property
+ | id() -> str
+```
+
+Return agent name.
 
 <a name="aea.runner.AEAInstanceTask.start"></a>
 #### start
@@ -59,16 +69,6 @@ Return asyncio Task for task run in asyncio loop.
 **Returns**:
 
 task to run runtime
-
-<a name="aea.runner.AEAInstanceTask.id"></a>
-#### id
-
-```python
- | @property
- | id()
-```
-
-Return agent name.
 
 <a name="aea.runner.AEARunner"></a>
 ## AEARunner Objects

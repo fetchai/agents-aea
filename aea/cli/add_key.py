@@ -54,7 +54,9 @@ key_file_argument = click.Path(
 )
 @click.pass_context
 @check_aea_project
-def add_key(click_context, type_, file, connection):
+def add_key(
+    click_context: click.Context, type_: str, file: str, connection: bool
+) -> None:
     """Add a private key to the wallet of the agent."""
     _add_private_key(click_context, type_, file, connection)
 
@@ -85,7 +87,9 @@ def _add_private_key(
     _try_add_key(ctx, type_, file, connection)
 
 
-def _try_add_key(ctx: Context, type_: str, filepath: str, connection: bool = False):
+def _try_add_key(
+    ctx: Context, type_: str, filepath: str, connection: bool = False
+) -> None:
     try:
         if connection:
             ctx.agent_config.connection_private_key_paths.create(type_, filepath)

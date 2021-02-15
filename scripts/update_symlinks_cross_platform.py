@@ -28,7 +28,7 @@ import sys
 import traceback
 from functools import reduce
 from pathlib import Path
-from typing import List, Tuple
+from typing import Generator, List, Tuple, Union
 
 
 SCRIPTS_PATH = Path(os.path.dirname(inspect.getfile(inspect.currentframe())))  # type: ignore
@@ -79,7 +79,7 @@ SYMLINKS = [
 """A list of pairs: (link_path, target_path)"""
 
 
-def make_symlink(link_name: str, target: str):
+def make_symlink(link_name: str, target: str) -> None:
     """
     Make a symbolic link, cross platform.
 
@@ -94,7 +94,7 @@ def make_symlink(link_name: str, target: str):
 
 
 @contextlib.contextmanager
-def cd(path):
+def cd(path: Union[Path, str]) -> Generator:
     """Change directory with context manager."""
     old_cwd = os.getcwd()
     try:
@@ -106,7 +106,7 @@ def cd(path):
         raise e from e
 
 
-def create_symlink(link_path: Path, target_path: Path, root_path: Path):
+def create_symlink(link_path: Path, target_path: Path, root_path: Path) -> int:
     """
     Change directory and call the cross-platform script.
 
@@ -149,7 +149,7 @@ def create_symlink(link_path: Path, target_path: Path, root_path: Path):
     return 0
 
 
-def main():
+def main() -> None:
     """Run main script."""
     failed = False
     for link_name, target in SYMLINKS:

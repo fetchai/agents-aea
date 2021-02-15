@@ -16,7 +16,7 @@ This class implements the filter of an AEA.
 #### `__`init`__`
 
 ```python
- | __init__(resources: Resources, decision_maker_out_queue: AsyncFriendlyQueue)
+ | __init__(resources: Resources, decision_maker_out_queue: AsyncFriendlyQueue) -> None
 ```
 
 Instantiate the filter.

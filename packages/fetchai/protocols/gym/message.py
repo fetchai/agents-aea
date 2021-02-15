@@ -20,7 +20,7 @@
 """This module contains gym's message definition."""
 
 import logging
-from typing import Dict, Set, Tuple, cast
+from typing import Any, Dict, Set, Tuple, cast
 
 from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
@@ -37,7 +37,7 @@ DEFAULT_BODY_SIZE = 4
 class GymMessage(Message):
     """A protocol for interacting with a gym connection."""
 
-    protocol_id = PublicId.from_str("fetchai/gym:0.11.0")
+    protocol_id = PublicId.from_str("fetchai/gym:0.12.0")
     protocol_specification_id = PublicId.from_str("fetchai/gym:0.1.0")
 
     AnyObject = CustomAnyObject
@@ -51,7 +51,7 @@ class GymMessage(Message):
         RESET = "reset"
         STATUS = "status"
 
-        def __str__(self):
+        def __str__(self) -> str:
             """Get the string representation."""
             return str(self.value)
 
@@ -79,7 +79,7 @@ class GymMessage(Message):
         dialogue_reference: Tuple[str, str] = ("", ""),
         message_id: int = 1,
         target: int = 0,
-        **kwargs,
+        **kwargs: Any,
     ):
         """
         Initialise an instance of GymMessage.

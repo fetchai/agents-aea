@@ -112,6 +112,15 @@ Create run loop.
 
 Run task in a dedicated thread.
 
+<a name="aea.manager.manager.AgentRunThreadTask.stop"></a>
+#### stop
+
+```python
+ | stop() -> None
+```
+
+Stop the task.
+
 <a name="aea.manager.manager.MultiAgentManager"></a>
 ## MultiAgentManager Objects
 
@@ -134,25 +143,24 @@ Initialize manager.
 
 - `working_dir`: directory to store base agents.
 
-<a name="aea.manager.manager.MultiAgentManager.keys_dir"></a>
-#### keys`_`dir
+<a name="aea.manager.manager.MultiAgentManager.data_dir"></a>
+#### data`_`dir
 
 ```python
  | @property
- | keys_dir() -> str
-```
-
-Get the keys directory.
-
-<a name="aea.manager.manager.MultiAgentManager.certs_dir"></a>
-#### certs`_`dir
-
-```python
- | @property
- | certs_dir() -> str
+ | data_dir() -> str
 ```
 
 Get the certs directory.
+
+<a name="aea.manager.manager.MultiAgentManager.get_data_dir_of_agent"></a>
+#### get`_`data`_`dir`_`of`_`agent
+
+```python
+ | get_data_dir_of_agent(agent_name: str) -> str
+```
+
+Get the data directory of a specific agent.
 
 <a name="aea.manager.manager.MultiAgentManager.is_running"></a>
 #### is`_`running

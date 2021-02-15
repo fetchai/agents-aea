@@ -22,7 +22,7 @@
 import base64
 import binascii
 import json
-from typing import Dict, Optional, cast
+from typing import Any, Dict, Optional, cast
 from urllib.parse import urlparse
 
 from aea.configurations.base import PublicId
@@ -51,11 +51,11 @@ class AliceDefaultHandler(Handler):
 
     SUPPORTED_PROTOCOL = DefaultMessage.protocol_id  # type: Optional[PublicId]
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize the handler."""
         super().__init__(**kwargs)
 
-        self.handled_message = None
+        self.handled_message: Optional[DefaultMessage] = None
 
     def _handle_received_invite(self, invite_detail: Dict[str, str]) -> Optional[str]:
         """
@@ -153,14 +153,14 @@ class AliceHttpHandler(Handler):
 
     SUPPORTED_PROTOCOL = HttpMessage.protocol_id  # type: Optional[PublicId]
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize the handler."""
         super().__init__(**kwargs)
 
         self.connection_id = None  # type: Optional[str]
         self.is_connected_to_Faber = False
 
-        self.handled_message = None
+        self.handled_message: Optional[HttpMessage] = None
 
     def setup(self) -> None:
         """

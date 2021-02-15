@@ -16,7 +16,7 @@ This class implements a simple behaviour.
 #### `__`init`__`
 
 ```python
- | __init__(act: Optional[Callable[[], None]] = None, **kwargs)
+ | __init__(act: Optional[Callable[[], None]] = None, **kwargs: Any) -> None
 ```
 
 Initialize a simple behaviour.
@@ -75,7 +75,7 @@ This behaviour is executed until the agent is stopped.
 #### `__`init`__`
 
 ```python
- | __init__(**kwargs)
+ | __init__(**kwargs: Any) -> None
 ```
 
 Initialize the cyclic behaviour.
@@ -123,7 +123,7 @@ This behaviour is executed only once.
 #### `__`init`__`
 
 ```python
- | __init__(**kwargs)
+ | __init__(**kwargs: Any) -> None
 ```
 
 Initialize the cyclic behaviour.
@@ -159,7 +159,7 @@ This behaviour is executed periodically with an interval.
 #### `__`init`__`
 
 ```python
- | __init__(tick_interval: float = 1.0, start_at: Optional[datetime.datetime] = None, **kwargs)
+ | __init__(tick_interval: float = 1.0, start_at: Optional[datetime.datetime] = None, **kwargs: Any) -> None
 ```
 
 Initialize the ticker behaviour.
@@ -234,7 +234,7 @@ This behaviour executes sub-behaviour serially.
 #### `__`init`__`
 
 ```python
- | __init__(behaviour_sequence: List[Behaviour], **kwargs)
+ | __init__(behaviour_sequence: List[Behaviour], **kwargs: Any) -> None
 ```
 
 Initialize the sequence behaviour.
@@ -293,7 +293,7 @@ transition to trigger.
 #### `__`init`__`
 
 ```python
- | __init__(**kwargs)
+ | __init__(**kwargs: Any) -> None
 ```
 
 Initialize a state of the state machine.
@@ -340,7 +340,7 @@ This class implements a finite-state machine behaviour.
 #### `__`init`__`
 
 ```python
- | __init__(**kwargs)
+ | __init__(**kwargs: Any) -> None
 ```
 
 Initialize the finite-state machine behaviour.
@@ -446,7 +446,7 @@ Get the initial state name.
 
 ```python
  | @initial_state.setter
- | initial_state(name: str)
+ | initial_state(name: str) -> None
 ```
 
 Set the initial state.
@@ -465,7 +465,7 @@ Get the final state names.
 #### get`_`state
 
 ```python
- | get_state(name) -> Optional[State]
+ | get_state(name: str) -> Optional[State]
 ```
 
 Get a state from its name.
@@ -474,7 +474,7 @@ Get a state from its name.
 #### act
 
 ```python
- | act()
+ | act() -> None
 ```
 
 Implement the behaviour.
@@ -492,7 +492,7 @@ Return True if the behaviour is terminated, False otherwise.
 #### register`_`transition
 
 ```python
- | register_transition(source: str, destination: str, event: Optional[str] = None)
+ | register_transition(source: str, destination: str, event: Optional[str] = None) -> None
 ```
 
 Register a transition.
@@ -517,7 +517,7 @@ None
 #### unregister`_`transition
 
 ```python
- | unregister_transition(source: str, destination: str, event: Optional[str] = None)
+ | unregister_transition(source: str, destination: str, event: Optional[str] = None) -> None
 ```
 
 Unregister a transition.

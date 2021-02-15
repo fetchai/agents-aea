@@ -20,7 +20,7 @@
 """This module contains the classes for specific behaviours."""
 import datetime
 from abc import ABC, abstractmethod
-from typing import Callable, Dict, List, Optional, Set
+from typing import Any, Callable, Dict, List, Optional, Set
 
 from aea.exceptions import enforce
 from aea.skills.base import Behaviour
@@ -29,7 +29,7 @@ from aea.skills.base import Behaviour
 class SimpleBehaviour(Behaviour, ABC):
     """This class implements a simple behaviour."""
 
-    def __init__(self, act: Optional[Callable[[], None]] = None, **kwargs):
+    def __init__(self, act: Optional[Callable[[], None]] = None, **kwargs: Any) -> None:
         """
         Initialize a simple behaviour.
 
@@ -58,7 +58,7 @@ class CompositeBehaviour(Behaviour, ABC):
 class CyclicBehaviour(SimpleBehaviour, ABC):
     """This behaviour is executed until the agent is stopped."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize the cyclic behaviour."""
         super().__init__(**kwargs)
         self._number_of_executions = 0
@@ -86,7 +86,7 @@ class CyclicBehaviour(SimpleBehaviour, ABC):
 class OneShotBehaviour(SimpleBehaviour, ABC):
     """This behaviour is executed only once."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize the cyclic behaviour."""
         super().__init__(**kwargs)
         self._already_executed = False  # type
@@ -109,8 +109,8 @@ class TickerBehaviour(SimpleBehaviour, ABC):
         self,
         tick_interval: float = 1.0,
         start_at: Optional[datetime.datetime] = None,
-        **kwargs
-    ):
+        **kwargs: Any
+    ) -> None:
         """
         Initialize the ticker behaviour.
 
@@ -165,7 +165,7 @@ class TickerBehaviour(SimpleBehaviour, ABC):
 class SequenceBehaviour(CompositeBehaviour, ABC):
     """This behaviour executes sub-behaviour serially."""
 
-    def __init__(self, behaviour_sequence: List[Behaviour], **kwargs):
+    def __init__(self, behaviour_sequence: List[Behaviour], **kwargs: Any) -> None:
         """
         Initialize the sequence behaviour.
 
@@ -191,7 +191,7 @@ class SequenceBehaviour(CompositeBehaviour, ABC):
             else self._behaviour_sequence[self._index]
         )
 
-    def _increase_index_if_possible(self):
+    def _increase_index_if_possible(self) -> None:
         if self._index < len(self._behaviour_sequence):
             self._index += 1
 
@@ -227,7 +227,7 @@ class State(SimpleBehaviour, ABC):
     transition to trigger.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize a state of the state machine."""
         super().__init__(**kwargs)
         self._event = None  # type: Optional[str]
@@ -249,7 +249,7 @@ class State(SimpleBehaviour, ABC):
 class FSMBehaviour(CompositeBehaviour, ABC):
     """This class implements a finite-state machine behaviour."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize the finite-state machine behaviour."""
         super().__init__(**kwargs)
 
@@ -327,7 +327,7 @@ class FSMBehaviour(CompositeBehaviour, ABC):
         return self._initial_state
 
     @initial_state.setter
-    def initial_state(self, name: str):
+    def initial_state(self, name: str) -> None:
         """Set the initial state."""
         if name not in self._name_to_state:
             raise ValueError("Name is not registered as state.")
@@ -339,11 +339,11 @@ class FSMBehaviour(CompositeBehaviour, ABC):
         """Get the final state names."""
         return self._final_states
 
-    def get_state(self, name) -> Optional[State]:
+    def get_state(self, name: str) -> Optional[State]:
         """Get a state from its name."""
         return self._name_to_state.get(name, None)
 
-    def act(self):
+    def act(self) -> None:
         """Implement the behaviour."""
         if self.current is None:
             return
@@ -368,7 +368,7 @@ class FSMBehaviour(CompositeBehaviour, ABC):
 
     def register_transition(
         self, source: str, destination: str, event: Optional[str] = None
-    ):
+    ) -> None:
         """
         Register a transition.
 
@@ -387,7 +387,7 @@ class FSMBehaviour(CompositeBehaviour, ABC):
 
     def unregister_transition(
         self, source: str, destination: str, event: Optional[str] = None
-    ):
+    ) -> None:
         """
         Unregister a transition.
 

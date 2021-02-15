@@ -178,7 +178,7 @@ class GenericFipaHandler(Handler):
         target_message = fipa_dialogue.get_message_by_id(fipa_msg.target)
 
         if not target_message:
-            raise ValueError("Can not find target message!")
+            raise ValueError("Can not find target message!")  # pragma: nocover
 
         declined_performative = target_message.performative
 
@@ -248,9 +248,8 @@ class GenericFipaHandler(Handler):
         )
         if len(fipa_msg.info.keys()) >= 1:
             data = fipa_msg.info
-            self.context.logger.info(
-                "received the following data={}".format(pprint.pformat(data))
-            )
+            data_string = pprint.pformat(data)[:1000]
+            self.context.logger.info(f"received the following data={data_string}")
             fipa_dialogues.dialogue_stats.add_dialogue_endstate(
                 FipaDialogue.EndState.SUCCESSFUL, fipa_dialogue.is_self_initiated
             )
@@ -622,7 +621,7 @@ class GenericLedgerApiHandler(Handler):
             strategy.is_searching = True
         else:
             self.context.logger.warning(
-                "you have no starting balance on {} ledger!".format(strategy.ledger_id)
+                f"you have no starting balance on {strategy.ledger_id} ledger! Stopping skill {self.skill_id}."
             )
             self.context.is_active = False
 

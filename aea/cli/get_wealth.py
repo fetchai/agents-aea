@@ -42,14 +42,14 @@ from aea.crypto.registries import ledger_apis_registry
 )
 @click.pass_context
 @check_aea_project
-def get_wealth(click_context, type_):
+def get_wealth(click_context: click.Context, type_: str) -> None:
     """Get the wealth associated with the private key of the agent."""
     ctx = cast(Context, click_context.obj)
     wealth = _try_get_wealth(ctx, type_)
     click.echo(wealth)
 
 
-def _try_get_wealth(ctx: Context, type_: str):
+def _try_get_wealth(ctx: Context, type_: str) -> int:
     wallet = get_wallet_from_context(ctx)
     _override_ledger_configurations(ctx.agent_config)
     return try_get_balance(ctx.agent_config, wallet, type_)

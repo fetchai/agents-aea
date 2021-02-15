@@ -31,7 +31,9 @@ SUPPORTED_TYPES = {"str": str, "int": int, "float": float, "bool": bool}
 class GenericDataModel(DataModel):  # pylint: disable=too-few-public-methods
     """Generic data model."""
 
-    def __init__(self, data_model_name: str, data_model_attributes: Dict[str, Any]):
+    def __init__(
+        self, data_model_name: str, data_model_attributes: Dict[str, Any]
+    ) -> None:
         """Initialise the dataModel."""
         self.attributes = []  # type: List[Attribute]
         for values in data_model_attributes.values():

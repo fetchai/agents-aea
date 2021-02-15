@@ -16,7 +16,7 @@ This class implements an abstract registry.
 #### `__`init`__`
 
 ```python
- | __init__(agent_name: str = "standalone")
+ | __init__(agent_name: str = "standalone") -> None
 ```
 
 Initialize the registry.
@@ -51,7 +51,7 @@ None
 
 ```python
  | @abstractmethod
- | unregister(item_id: ItemId) -> None
+ | unregister(item_id: ItemId) -> Optional[Item]
 ```
 
 Unregister an item.
@@ -62,7 +62,7 @@ Unregister an item.
 
 **Returns**:
 
-None
+the item
 :raises: ValueError if no item registered with that item id.
 
 <a name="aea.registries.base.Registry.fetch"></a>
@@ -155,7 +155,7 @@ points to the 'latest' version of a package.
 #### `__`init`__`
 
 ```python
- | __init__()
+ | __init__() -> None
 ```
 
 Initialize the registry.
@@ -173,7 +173,7 @@ Register an item.
 #### unregister
 
 ```python
- | unregister(public_id: PublicId) -> None
+ | unregister(public_id: PublicId) -> Item
 ```
 
 Unregister an item.
@@ -244,7 +244,7 @@ This class implements a simple dictionary-based registry for agent components.
 #### `__`init`__`
 
 ```python
- | __init__(**kwargs) -> None
+ | __init__(**kwargs: Any) -> None
 ```
 
 Instantiate the registry.
@@ -276,7 +276,7 @@ Register a component.
 #### unregister
 
 ```python
- | unregister(component_id: ComponentId) -> None
+ | unregister(component_id: ComponentId) -> Optional[Component]
 ```
 
 Unregister a component.
@@ -284,6 +284,10 @@ Unregister a component.
 **Arguments**:
 
 - `component_id`: the ComponentId
+
+**Returns**:
+
+the item
 
 <a name="aea.registries.base.AgentComponentRegistry.fetch"></a>
 #### fetch
@@ -376,7 +380,7 @@ This class implements a generic registry for skill components.
 #### `__`init`__`
 
 ```python
- | __init__(**kwargs) -> None
+ | __init__(**kwargs: Any) -> None
 ```
 
 Instantiate the registry.
@@ -413,7 +417,7 @@ None
 #### unregister
 
 ```python
- | unregister(item_id: Tuple[PublicId, str]) -> None
+ | unregister(item_id: Tuple[PublicId, str]) -> Optional[SkillComponentType]
 ```
 
 Unregister a item.
@@ -424,7 +428,7 @@ Unregister a item.
 
 **Returns**:
 
-None
+skill component
 :raises: ValueError if no item registered with that item id.
 
 <a name="aea.registries.base.ComponentRegistry.fetch"></a>
@@ -519,7 +523,7 @@ This class implements the handlers registry.
 #### `__`init`__`
 
 ```python
- | __init__(**kwargs) -> None
+ | __init__(**kwargs: Any) -> None
 ```
 
 Instantiate the registry.
@@ -559,7 +563,7 @@ None
 #### unregister
 
 ```python
- | unregister(item_id: Tuple[PublicId, str]) -> None
+ | unregister(item_id: Tuple[PublicId, str]) -> Handler
 ```
 
 Unregister a item.

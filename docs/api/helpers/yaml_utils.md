@@ -23,7 +23,7 @@ the public functions of the module 'yaml_load' and 'yaml_load_all'.
 #### `__`init`__`
 
 ```python
- | __init__(*args, **kwargs)
+ | __init__(*args: Any, **kwargs: Any) -> None
 ```
 
 Initialize the AEAYamlLoader.
@@ -49,7 +49,7 @@ the public functions of the module 'yaml_dump' and 'yaml_dump_all'.
 #### `__`init`__`
 
 ```python
- | __init__(*args, **kwargs)
+ | __init__(*args: Any, **kwargs: Any) -> None
 ```
 
 Initialize the AEAYamlDumper.

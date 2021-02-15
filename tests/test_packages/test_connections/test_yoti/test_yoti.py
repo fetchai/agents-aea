@@ -20,7 +20,7 @@
 import asyncio
 import logging
 from typing import cast
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 from uuid import uuid4
 
 import pytest
@@ -106,7 +106,9 @@ mock_conf.config = {"yoti_client_sdk_id": "1", "yoti_key_file_path": 1}
 async def test_yoti_profile_ok():
     """Test mesasge processed ok."""
     with patch.object(yoti_connection, "YotiClient", FakeYotiClientOk):
-        con = YotiConnection(configuration=mock_conf, logger=logging.getLogger())
+        con = YotiConnection(
+            configuration=mock_conf, data_dir=MagicMock(), logger=logging.getLogger()
+        )
         await con.connect()
         assert con.is_connected
 
@@ -151,7 +153,9 @@ async def test_yoti_profile_error_on_handle():
     with patch.object(
         yoti_connection, "YotiClient", FakeYotiClientBadProfile,
     ):
-        con = YotiConnection(configuration=mock_conf, logger=logging.getLogger())
+        con = YotiConnection(
+            configuration=mock_conf, data_dir=MagicMock(), logger=logging.getLogger()
+        )
         await con.connect()
         dialogues = YotiDialogues()
 
@@ -169,3 +173,70 @@ async def test_yoti_profile_error_on_handle():
             == YotiMessage.Performative.ERROR
         )
         await con.disconnect()
+
+
+def test_empty_config():
+    """Test no sdk or token provided."""
+    mock_conf = Mock()
+    mock_conf.public_id = YotiConnection.connection_id
+    mock_conf.config = {}
+    with pytest.raises(ValueError, match="Missing configuration."):
+        YotiConnection(configuration=mock_conf, data_dir=MagicMock())
+
+
+class TestMisc:
+    """Misc tests."""
+
+    def setup(self):
+        """Setup test case."""
+        with patch.object(yoti_connection, "YotiClient", FakeYotiClientOk):
+            self.con = YotiConnection(
+                configuration=mock_conf,
+                data_dir=MagicMock(),
+                logger=logging.getLogger(),
+            )
+        self.dialogues = YotiDialogues()
+        self.message, self.dialogue = self.dialogues.create(
+            str(self.con.connection_id),
+            performative=YotiMessage.Performative.GET_PROFILE,
+            token=str(uuid4()),
+            dotted_path="a",
+            args=tuple(),
+        )
+        self.envelope = Envelope(
+            to=str(self.con.connection_id), sender="agent", message=self.message
+        )
+
+    def test_yoti_no_response_from_handler(self):
+        """Test yoti handler returns no response."""
+        with patch.object(self.con, "get_profile", return_value=None):
+            self.con.dispatch(self.envelope)
+
+    def test_no_handler(self):
+        """Test bad peroformative for get handler."""
+        with pytest.raises(Exception, match="Performative not recognized."):
+            self.con.get_handler("some")
+
+    def test_get_no_profile_data(self):
+        """Test no profile data returned."""
+        with patch.object(self.con._client, "get_activity_details", return_value=None):
+            resp = self.con.get_profile(self.message, self.dialogue)
+
+        assert resp
+        assert resp.error_code == 500
+        assert resp.error_msg == "No activity_details returned"
+
+    def test_get_attribute(self):
+        """Test get not callable attribute of profile."""
+        activity_details = Mock()
+        activity_details.profile.attributes = {}
+        activity_details.profile.a.sources = []
+        activity_details.profile.a.verifiers = []
+
+        with patch.object(
+            self.con._client, "get_activity_details", return_value=activity_details
+        ):
+            resp = self.con.get_profile(self.message, self.dialogue)
+
+        assert resp
+        assert resp.performative == YotiMessage.Performative.PROFILE

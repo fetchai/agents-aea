@@ -354,7 +354,7 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
         cls.run_cli_command(
             "--skip-consistency-check",
             "fetch",
-            "fetchai/generic_buyer:0.18.0",
+            "fetchai/generic_buyer:0.19.0",
             "--alias",
             cls.agent_name,
         )
@@ -436,7 +436,7 @@ class TestNonVendorProject(BaseAEATestCase, BaseTestCase):
         cls.change_directory(Path(".."))
         cls.agent_name = "generic_buyer_0.12.0"
         cls.run_cli_command(
-            "fetch", "fetchai/generic_buyer:0.18.0", "--alias", cls.agent_name
+            "fetch", "fetchai/generic_buyer:0.19.0", "--alias", cls.agent_name
         )
         cls.agents.add(cls.agent_name)
         cls.set_agent_context(cls.agent_name)
@@ -858,8 +858,8 @@ class TestUpdateReferences(AEATestCaseEmpty):
 
     How the test works:
     - add fetchai/error:0.7.0, that requires fetchai/default:0.7.0
-    - add fetchai/stub:0.15.0
-    - add 'fetchai/default:0.7.0: fetchai/stub:0.15.0' to default routing
+    - add fetchai/stub:0.16.0
+    - add 'fetchai/default:0.7.0: fetchai/stub:0.16.0' to default routing
     - add custom configuration to stub connection.
     - run 'aea upgrade'. This will upgrade `stub` connection and `error` skill, and in turn `default` protocol.
     """
@@ -868,7 +868,7 @@ class TestUpdateReferences(AEATestCaseEmpty):
 
     OLD_DEFAULT_PROTOCOL_PUBLIC_ID = PublicId.from_str("fetchai/default:0.7.0")
     OLD_ERROR_SKILL_PUBLIC_ID = PublicId.from_str("fetchai/error:0.7.0")
-    OLD_STUB_CONNECTION_PUBLIC_ID = PublicId.from_str("fetchai/stub:0.15.0")
+    OLD_STUB_CONNECTION_PUBLIC_ID = PublicId.from_str("fetchai/stub:0.16.0")
 
     @classmethod
     def setup_class(cls):
@@ -934,7 +934,7 @@ class TestUpdateReferences(AEATestCaseEmpty):
             "agent.default_connection",
             cwd=self._get_cwd(),
         )
-        assert result.stdout == "fetchai/stub:0.15.0\n"
+        assert result.stdout == "fetchai/stub:0.16.0\n"
 
     def test_custom_configuration_updated_correctly(self):
         """Test default routing has been updated correctly."""
@@ -1009,7 +1009,7 @@ class TestWrongAEAVersion(AEATestCaseEmpty):
         assert result.exit_code == 0
         mock_click_echo.assert_any_call("Starting project upgrade...")
         mock_click_echo.assert_any_call(
-            "Updating AEA version specifier from ==0.1.0 to >=0.9.0, <0.10.0."
+            "Updating AEA version specifier from ==0.1.0 to >=0.10.0, <0.11.0."
         )
 
         # test 'aea_version' of agent configuration is upgraded
@@ -1185,7 +1185,12 @@ class TestUpgradeProjectWithNewerVersion(BaseTestUpgradeProject):
             self.current_agent_context, self.EXPECTED, ignore=ignore
         )
         _left_only, _right_only, diff = dircmp_recursive(dircmp)
-        assert diff == _left_only == _right_only == set()
+        if confirm:
+            assert diff == _right_only == _left_only == set()
+        else:
+            assert diff == _right_only == set()
+            # temporary: due to change in deps
+            assert _left_only == {"vendor/fetchai/skills/error"}
 
 
 @mock.patch("aea.cli.upgrade.get_latest_version_available_in_registry")
@@ -1207,7 +1212,12 @@ class TestUpgradeProjectWithoutNewerVersion(BaseTestUpgradeProject):
 
         # compare with latest fetched agent.
         ignore = [DEFAULT_AEA_CONFIG_FILE] + filecmp.DEFAULT_IGNORES
-        assert are_dirs_equal(self.current_agent_context, self.EXPECTED, ignore=ignore)
+        dircmp = filecmp.dircmp(
+            self.current_agent_context, self.EXPECTED, ignore=ignore
+        )
+        _left_only, _right_only, diff = dircmp_recursive(dircmp)
+        assert _left_only == {"vendor/fetchai/skills/error"}
+        assert diff == _right_only == set()
 
 
 @mock.patch.object(aea, "__version__", "0.8.0")
@@ -1218,7 +1228,7 @@ class TestUpgradeAEACompatibility(BaseTestUpgradeProject):
     The test works as follows:
     """
 
-    OLD_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.18.0")
+    OLD_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.19.0")
     EXPECTED_NEW_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.19.0")
 
     def test_upgrade(self):

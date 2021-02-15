@@ -24,6 +24,7 @@ import time
 from multiprocessing import Event
 from pathlib import Path
 from threading import Thread
+from unittest.mock import patch
 
 import pytest
 import yaml
@@ -31,7 +32,7 @@ import yaml
 from aea.cli.core import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
 from aea.helpers.base import cd
-from aea.launcher import AEALauncher, _run_agent
+from aea.launcher import AEADirMultiprocessTask, AEALauncher, _run_agent
 from aea.test_tools.test_cases import CLI_LOG_OPTION
 
 from tests.common.utils import wait_for_condition
@@ -121,9 +122,8 @@ class TestThreadLauncherMode:
                 [self.agent_name_1, self.agent_name_2], self.RUNNER_MODE
             )
             runner.start(True)
-            wait_for_condition(lambda: runner.is_running, timeout=5)
+            wait_for_condition(lambda: runner.is_running, timeout=10)
             assert runner.num_failed == 0
-            time.sleep(1)
         finally:
             runner.stop()
             assert not runner.is_running
@@ -162,3 +162,12 @@ class TestProcessLauncherMode(TestThreadLauncherMode):
     """Test launcher in process mode."""
 
     RUNNER_MODE = "multiprocess"
+
+
+def test_task_stop():
+    """Test AEADirMultiprocessTask.stop when not started."""
+    task = AEADirMultiprocessTask("some")
+    assert not task.failed
+    with patch.object(task._stop_event, "set") as set_mock:
+        task.stop()
+        set_mock.assert_not_called()

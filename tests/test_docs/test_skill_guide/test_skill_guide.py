@@ -28,7 +28,7 @@ import pytest
 
 from aea import AEA_DIR
 from aea.configurations.base import DEFAULT_VERSION
-from aea.test_tools.test_cases import AEATestCaseMany
+from aea.test_tools.test_cases import AEATestCaseManyFlaky
 
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
@@ -50,7 +50,7 @@ MD_FILE = "docs/skill-guide.md"
 
 
 @pytest.mark.integration
-class TestBuildSkill(AEATestCaseMany):
+class TestBuildSkill(AEATestCaseManyFlaky):
     """This class contains the tests for the code-blocks in the skill-guide.md file."""
 
     capture_log = True
@@ -58,17 +58,15 @@ class TestBuildSkill(AEATestCaseMany):
     @classmethod
     def setup_class(cls):
         """Setup the test class."""
-        AEATestCaseMany.setup_class()
+        super().setup_class()
         cls.doc_path = os.path.join(ROOT_DIR, MD_FILE)
         cls.code_blocks = extract_code_blocks(filepath=cls.doc_path, filter_="python")
-
-    def test_read_md_file(self):
-        """Teat that the md file is not empty."""
-        assert self.code_blocks != [], "File must not be empty."
 
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_INTEGRATION)
     def test_update_skill_and_run(self):
         """Test that the resource folder contains scaffold handlers.py module."""
+        assert self.code_blocks != [], "File must not be empty."
+
         self.initialize_aea(AUTHOR)
 
         # generate random location
@@ -79,7 +77,7 @@ class TestBuildSkill(AEATestCaseMany):
 
         simple_service_registration_aea = "simple_service_registration"
         self.fetch_agent(
-            "fetchai/simple_service_registration:0.19.0",
+            "fetchai/simple_service_registration:0.20.0",
             simple_service_registration_aea,
         )
         self.set_agent_context(simple_service_registration_aea)
@@ -97,7 +95,7 @@ class TestBuildSkill(AEATestCaseMany):
         self.set_config(setting_path, FETCHAI)
 
         default_routing = {
-            "fetchai/oef_search:0.12.0": "fetchai/soef:0.15.0",
+            "fetchai/oef_search:0.13.0": "fetchai/soef:0.16.0",
         }
 
         # replace location
@@ -110,9 +108,9 @@ class TestBuildSkill(AEATestCaseMany):
         skill_name = "my_search"
         skill_id = AUTHOR + "/" + skill_name + ":" + DEFAULT_VERSION
         self.scaffold_item("skill", skill_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.14.0")
-        self.add_item("connection", "fetchai/soef:0.15.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.14.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.15.0")
+        self.add_item("connection", "fetchai/soef:0.16.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.15.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
 
@@ -188,7 +186,7 @@ class TestBuildSkill(AEATestCaseMany):
         missing_strings = self.missing_from_output(
             simple_service_registration_aea_process,
             check_strings,
-            timeout=5,
+            timeout=30,
             is_terminating=False,
         )
         assert (

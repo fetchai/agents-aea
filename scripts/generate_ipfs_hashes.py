@@ -123,7 +123,7 @@ def _get_all_packages() -> List[Tuple[PackageType, Path]]:
     return ALL_PACKAGES
 
 
-def sort_configuration_file(config: PackageConfiguration):
+def sort_configuration_file(config: PackageConfiguration) -> None:
     """Sort the order of the fields in the configuration files."""
     # load config file to get ignore patterns, dump again immediately to impose ordering
     assert config.directory is not None
@@ -172,7 +172,7 @@ def ipfs_hashing(
     return key, directory_hash, result_list
 
 
-def to_csv(package_hashes: Dict[str, str], path: str):
+def to_csv(package_hashes: Dict[str, str], path: str) -> None:
     """Outputs a dictionary to CSV."""
     try:
         ordered = collections.OrderedDict(sorted(package_hashes.items()))
@@ -219,7 +219,7 @@ class IPFSDaemon:
             )
         self.process = None  # type: Optional[subprocess.Popen]
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         """Run the ipfs daemon."""
         self.process = subprocess.Popen(  # nosec
             ["ipfs", "daemon"], stdout=subprocess.PIPE, env=os.environ.copy(),
@@ -227,8 +227,10 @@ class IPFSDaemon:
         print("Waiting for {} seconds the IPFS daemon to be up.".format(self.timeout))
         time.sleep(self.timeout)
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:  # type: ignore
         """Terminate the ipfs daemon."""
+        if self.process is None:
+            return
         self.process.send_signal(signal.SIGTERM)
         self.process.wait(timeout=30)
         poll = self.process.poll()
@@ -260,7 +262,7 @@ def load_configuration(
 
 
 def assert_hash_consistency(
-    fingerprint, path_prefix, client: ipfshttpclient.Client
+    fingerprint: Dict[str, str], path_prefix: Path, client: ipfshttpclient.Client
 ) -> None:
     """
     Check that our implementation of IPFS hashing for a package is correct against the true IPFS.
@@ -279,7 +281,9 @@ def assert_hash_consistency(
         ), "WARNING, hashes don't match for: {}".format(path)
 
 
-def _replace_fingerprint_non_invasive(fingerprint_dict: dict, text: str):
+def _replace_fingerprint_non_invasive(
+    fingerprint_dict: Dict[str, str], text: str
+) -> str:
     """
     Replace the fingerprint in a configuration file (not invasive).
 
@@ -292,7 +296,7 @@ def _replace_fingerprint_non_invasive(fingerprint_dict: dict, text: str):
     :return: the updated content of the configuration file.
     """
 
-    def to_row(x):
+    def to_row(x: Tuple[str, str]) -> str:
         return x[0] + ": " + x[1]
 
     replacement = "\nfingerprint:\n  {}\n".format(
@@ -448,7 +452,10 @@ def update_hashes(timeout: float = 15.0) -> int:
 
 
 def check_same_ipfs_hash(
-    client, configuration, package_type, all_expected_hashes
+    client: ipfshttpclient,
+    configuration: PackageConfiguration,
+    package_type: PackageType,
+    all_expected_hashes: Dict[str, str],
 ) -> bool:
     """
     Compute actual package hash and compare with expected hash.

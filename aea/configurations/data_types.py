@@ -22,6 +22,7 @@ import re
 from abc import ABC, abstractmethod
 from enum import Enum
 from typing import (
+    Any,
     Collection,
     Dict,
     Generic,
@@ -36,7 +37,6 @@ from typing import (
 
 import semver
 from packaging.specifiers import SpecifierSet
-from urllib3.util import Url, parse_url
 
 from aea.configurations.constants import (
     AGENT,
@@ -71,7 +71,7 @@ class JSONSerializable(ABC):
         """Compute the JSON representation."""
 
     @classmethod
-    def from_json(cls, obj: Dict):
+    def from_json(cls, obj: Dict) -> "JSONSerializable":
         """Build from a JSON object."""
 
 
@@ -81,7 +81,7 @@ class PackageVersion:
 
     _version: PackageVersionLike
 
-    def __init__(self, version_like: PackageVersionLike):
+    def __init__(self, version_like: PackageVersionLike) -> None:
         """
         Initialize a package version.
 
@@ -107,11 +107,11 @@ class PackageVersion:
         """Get the string representation."""
         return str(self._version)
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Check equality."""
         return isinstance(other, PackageVersion) and self._version == other._version
 
-    def __lt__(self, other):
+    def __lt__(self, other: Any) -> bool:
         """Compare with another object."""
         enforce(
             isinstance(other, PackageVersion),
@@ -150,7 +150,7 @@ class PackageType(Enum):
         """
         return self.value + "s"
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Convert to string."""
         return str(self.value)
 
@@ -240,7 +240,7 @@ class PublicId(JSONSerializable):
         author: SimpleIdOrStr,
         name: SimpleIdOrStr,
         version: Optional[PackageVersionLike] = None,
-    ):
+    ) -> None:
         """Initialize the public identifier."""
         self._author = SimpleId(author)
         self._name = SimpleId(name)
@@ -365,25 +365,25 @@ class PublicId(JSONSerializable):
         return {"author": self.author, "name": self.name, "version": self.version}
 
     @classmethod
-    def from_json(cls, obj: Dict):
+    def from_json(cls, obj: Dict) -> "PublicId":
         """Build from a JSON object."""
         return PublicId(obj["author"], obj["name"], obj["version"],)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         """Get the hash."""
         return hash((self.author, self.name, self.version))
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get the string representation."""
         return "{author}/{name}:{version}".format(
             author=self.author, name=self.name, version=self.version
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Get the representation."""
         return f"<{self}>"
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, PublicId)
@@ -392,7 +392,7 @@ class PublicId(JSONSerializable):
             and self.version == other.version
         )
 
-    def __lt__(self, other):
+    def __lt__(self, other: Any) -> bool:
         """
         Compare two public ids.
 
@@ -437,7 +437,9 @@ class PackageId:
         PACKAGE_TYPE_REGEX, PublicId.PUBLIC_ID_URI_REGEX[1:-1]
     )
 
-    def __init__(self, package_type: Union[PackageType, str], public_id: PublicId):
+    def __init__(
+        self, package_type: Union[PackageType, str], public_id: PublicId
+    ) -> None:
         """
         Initialize the package id.
 
@@ -515,21 +517,21 @@ class PackageId:
         """
         return f"{str(self.package_type)}/{self.author}/{self.name}/{self.version}"
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         """Get the hash."""
         return hash((self.package_type, self.public_id))
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get the string representation."""
         return "({package_type}, {public_id})".format(
             package_type=self.package_type.value, public_id=self.public_id,
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Get the object representation in string."""
         return f"PackageId{self.__str__()}"
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, PackageId)
@@ -537,7 +539,7 @@ class PackageId:
             and self.public_id == other.public_id
         )
 
-    def __lt__(self, other):
+    def __lt__(self, other: Any) -> bool:
         """Compare two public ids."""
         return str(self) < str(other)
 
@@ -557,7 +559,9 @@ class ComponentId(PackageId):
     False
     """
 
-    def __init__(self, component_type: Union[ComponentType, str], public_id: PublicId):
+    def __init__(
+        self, component_type: Union[ComponentType, str], public_id: PublicId
+    ) -> None:
         """
         Initialize the component id.
 
@@ -640,10 +644,10 @@ class Dependency:
         self,
         name: Union[PyPIPackageName, str],
         version: Union[str, SpecifierSet] = "",
-        index: Optional[Union[str, Url]] = None,
-        git: Optional[Union[str, Url]] = None,
+        index: Optional[str] = None,
+        git: Optional[str] = None,
         ref: Optional[Union[GitRef, str]] = None,
-    ):
+    ) -> None:
         """
         Initialize a PyPI dependency.
 
@@ -655,10 +659,8 @@ class Dependency:
         """
         self._name: PyPIPackageName = PyPIPackageName(name)
         self._version: SpecifierSet = self._parse_version(version)
-        self._index: Optional[Url] = self._parse_url(
-            index
-        ) if index is not None else None
-        self._git: Optional[Url] = self._parse_url(git) if git is not None else None
+        self._index: Optional[str] = index
+        self._git: Optional[str] = git
         self._ref: Optional[GitRef] = GitRef(ref) if ref is not None else None
 
     @property
@@ -695,16 +697,6 @@ class Dependency:
         :return: the SpecifierSet instance.
         """
         return version if isinstance(version, SpecifierSet) else SpecifierSet(version)
-
-    @staticmethod
-    def _parse_url(url: Union[str, Url]) -> Url:
-        """
-        Parse an URL.
-
-        :param url: the URL, in either string or an urllib3.Url instance.
-        :return: the urllib3.Url instance.
-        """
-        return url if isinstance(url, Url) else parse_url(url)
 
     @classmethod
     def from_json(cls, obj: Dict[str, Dict[str, str]]) -> "Dependency":
@@ -757,7 +749,7 @@ class Dependency:
         """Get the string representation."""
         return f"{self.__class__.__name__}(name='{self.name}', version='{self.version}', index='{self.index}', git='{self.git}', ref='{self.ref}')"
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, Dependency)
@@ -782,7 +774,7 @@ We cannot have two items with the same package name since the keys of a YAML obj
 class CRUDCollection(Generic[T]):
     """Interface of a CRUD collection."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Instantiate a CRUD collection."""
         self._items_by_id = {}  # type: Dict[str, T]
 

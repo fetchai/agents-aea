@@ -70,7 +70,7 @@ def create(
     author: str,
     local: bool,
     empty: bool,
-):
+) -> None:
     """Create a new agent."""
     ctx = cast(Context, click_context.obj)
     create_aea(ctx, agent_name, local, author=author, empty=empty)
@@ -206,7 +206,7 @@ def _check_is_parent_folders_are_aea_projects_recursively() -> None:
         current = current.parent.resolve()
 
 
-def _setup_package_folder(path: Path):
+def _setup_package_folder(path: Path) -> None:
     """Set a package folder up."""
     path.mkdir(exist_ok=False)
     init_module = path / "__init__.py"

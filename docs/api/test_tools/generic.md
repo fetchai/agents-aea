@@ -25,7 +25,7 @@ None
 #### read`_`envelope`_`from`_`file
 
 ```python
-read_envelope_from_file(file_path: str)
+read_envelope_from_file(file_path: str) -> Envelope
 ```
 
 Read an envelope from a file.

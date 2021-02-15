@@ -5,11 +5,11 @@ protocol_specification_id: some_author/some_protocol_name:0.1.0
 type: protocol
 description: A protocol for testing purposes.
 license: Apache-2.0
-aea_version: '>=0.9.0, <0.10.0'
+aea_version: '>=0.10.0, <0.11.0'
 fingerprint:
   __init__.py: QmWsBeSVmG4FZWq4mGEzvERUDmDh4jC59UhYQWFvdYvcPo
   dialogues.py: Qmeq7m8vf1LW5WeehNG8qnoGoRstQrABw2vdQh5tmB3KxX
-  message.py: QmPsAV6KwTdwyPFgkLcvpBi9K9WPNu3t3aj8GytPxMK43S
+  message.py: QmTVfH68gHM6G667Pqpt2hBFncAXz5oFxjGYj81vimxm5H
   serialization.py: QmcxwDYsX1r8Yyy13Ci8vpZFtrpD7RaNXd2MJHCPuXCvBG
   t_protocol_no_ct.proto: Qmatf8YqFXPXTUfTJgtE3PsiGFPyrSKWFpTgtV9wxDwkAD
   t_protocol_no_ct_pb2.py: Qmc28KQJZPpr7xb4ME354bo5f1pf7Qu6RHKxd4g6cTSRbU
