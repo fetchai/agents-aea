@@ -16,20 +16,27 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains tests for aea/components/loader.py"""
+from pathlib import Path
+from typing import cast
 from unittest import mock
+from unittest.mock import Mock
 
 import pytest
+from click.exceptions import ClickException
 
 from aea.components.loader import load_component_from_config
-from aea.configurations.base import ProtocolConfig
+from aea.configurations.base import ProtocolConfig, SkillConfig
+from aea.configurations.data_types import ComponentType
+from aea.configurations.loader import load_component_configuration
 from aea.exceptions import (
     AEAComponentLoadException,
     AEAInstantiationException,
     AEAPackageLoadingError,
 )
+from aea.helpers.base import cd
 from aea.protocols.base import Protocol
+from aea.test_tools.test_cases import AEATestCaseEmpty
 
 
 @pytest.fixture(scope="module")
@@ -101,9 +108,10 @@ def test_component_loading_module_not_found_error_framework_package_with_wrong_a
     ):
         with pytest.raises(
             AEAPackageLoadingError,
-            match="No module named packages.some_author; No AEA package found with author name 'some_author'",
-        ):
+            match="An error occurred while loading protocol an_author/a_protocol:0.1.0:",
+        ) as e:
             load_component_from_config(component_configuration)
+            assert "some_type" in str(e)
 
 
 def test_component_loading_module_not_found_error_framework_package_with_wrong_type(
@@ -119,9 +127,10 @@ def test_component_loading_module_not_found_error_framework_package_with_wrong_t
     ):
         with pytest.raises(
             AEAPackageLoadingError,
-            match=r"No module named packages.some_author.some_type; 'some_type' is not a valid type name, choose one of \['protocols', 'connections', 'skills', 'contracts'\]",
-        ):
+            match="An error occurred while loading protocol an_author/a_protocol:0.1.0:",
+        ) as e:
             load_component_from_config(component_configuration)
+            assert "some_type" in str(e)
 
 
 def test_component_loading_module_not_found_error_framework_package_with_wrong_name(
@@ -137,9 +146,10 @@ def test_component_loading_module_not_found_error_framework_package_with_wrong_n
     ):
         with pytest.raises(
             AEAPackageLoadingError,
-            match="No module named packages.some_author.protocols.some_name; No AEA package found with author name 'some_author', type 'protocols', name 'some_name'",
-        ):
+            match="An error occurred while loading protocol an_author/a_protocol:0.1.0:",
+        ) as e:
             load_component_from_config(component_configuration)
+        assert "some_name" in str(e)
 
 
 def test_component_loading_module_not_found_error_framework_package_with_wrong_suffix(
@@ -155,9 +165,10 @@ def test_component_loading_module_not_found_error_framework_package_with_wrong_s
     ):
         with pytest.raises(
             AEAPackageLoadingError,
-            match="No module named packages.some_author.protocols.some_name.some_subpackage; The package 'packages/some_author' of type 'protocols' exists, but cannot find module 'some_subpackage'",
-        ):
+            match="An error occurred while loading protocol an_author/a_protocol:0.1.0:",
+        ) as e:
             load_component_from_config(component_configuration)
+        assert "some_subpackage" in str(e)
 
 
 def test_component_loading_instantiation_exception(component_configuration):
@@ -185,3 +196,38 @@ def test_component_loading_component_exception(component_configuration):
             match="Package loading error: An error occurred while loading protocol an_author/a_protocol:0.1.0: Generic exception",
         ):
             load_component_from_config(component_configuration)
+
+
+class TestLoadFailedCauseImportedPackageNotFound(AEATestCaseEmpty):
+    """Test package not found in import."""
+
+    def test_load_component_failed_cause_package_not_found(self):
+        """Test package not found in import."""
+        self.add_item("skill", "fetchai/echo:latest", local=True)
+
+        with cd(self._get_cwd()):
+            echo_dir = "./vendor/fetchai/skills/echo"
+            handlers_file = Path(echo_dir) / "handlers.py"
+            assert handlers_file.exists()
+            file_data = handlers_file.read_text()
+            file_data = file_data.replace(
+                "from packages.fetchai.protocols.default",
+                "from packages.fetchai.protocols.not_exist_protocol",
+            )
+            handlers_file.write_text(file_data)
+            with cd("./vendor/fetchai"):
+                self.run_cli_command("fingerprint", "skill", "fetchai/echo:0.14.0")
+            agent_context = Mock()
+            agent_context.agent_name = self.agent_name
+            configuration = cast(
+                SkillConfig,
+                load_component_configuration(ComponentType.SKILL, Path(echo_dir)),
+            )
+            configuration.directory = Path(echo_dir)
+            with pytest.raises(
+                ClickException,
+                match=r"Package loading error: An error occurred while loading skill fetchai/echo:.*\nTraceback",
+            ) as e:
+                self.run_cli_command("run", cwd=self._get_cwd())
+            assert "No AEA package found with author name" in str(e)
+            assert "not_exist_protocol" in str(e)
