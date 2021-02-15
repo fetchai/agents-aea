@@ -34,13 +34,18 @@ def get_all_extras() -> Dict:
 
     ethereum_ledger_deps = [
         "web3==5.12.0",
+        "ipfshttpclient==0.6.1",
         "eth-account==0.5.2",
         "eth-keys==0.3.3",
         "eth-typing==2.2.2",
         "lru-dict==1.1.6",
     ]
 
-    crypto_deps = [*fetch_ledger_deps, *ethereum_ledger_deps, *cosmos_ledger_deps]
+    crypto_deps = [
+        *fetch_ledger_deps,
+        *ethereum_ledger_deps,
+        *cosmos_ledger_deps,
+    ]
 
     cli_deps = [
         "click",
@@ -59,9 +64,8 @@ def get_all_extras() -> Dict:
         "ethereum": ethereum_ledger_deps,
         "cosmos": cosmos_ledger_deps,
         "crypto": crypto_deps,
-        "test_tools": cli_deps
+        "test_tools": cli_deps,
     }
-
 
     # add "all" extras
     extras["all"] = list(set(dep for e in extras.values() for dep in e))
