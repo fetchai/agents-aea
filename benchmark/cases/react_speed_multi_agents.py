@@ -21,6 +21,7 @@
 import time
 
 from aea.configurations.base import SkillConfig
+from aea.skills.base import Skill
 from benchmark.cases.helpers.dummy_handler import DummyHandler
 from benchmark.framework.aea_test_wrapper import AEATestWrapper
 from benchmark.framework.benchmark import BenchmarkControl
@@ -37,7 +38,7 @@ def _make_custom_config(name: str = "dummy_agent", skills_num: int = 1) -> dict:
     :return: dict to be used in AEATestWrapper(**result)
     """
     # noqa
-    def _make_skill(id_):
+    def _make_skill(id_: int) -> Skill:
         return AEATestWrapper.make_skill(
             config=SkillConfig(name=f"sc{id_}", author="fetchai"),
             handlers={"dummy_handler": DummyHandler},

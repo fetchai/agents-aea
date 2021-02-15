@@ -25,7 +25,7 @@ class BenchmarkControl:
 
     START_MSG = "start"
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Init."""
         self._queue: Queue = Queue(2)
 

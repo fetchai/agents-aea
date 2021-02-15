@@ -21,7 +21,7 @@
 import os
 import sys
 import time
-from typing import Any, List
+from typing import Any, List, Tuple, Union
 
 import click
 
@@ -47,7 +47,7 @@ def make_message() -> Message:
     )
 
 
-def run(messages_amount: int):
+def run(messages_amount: int) -> List[Tuple[str, Union[int, float]]]:
     """Test messages generation and memory consumption."""
     messages: List[Any] = [
         0 for i in range(messages_amount)
@@ -68,7 +68,7 @@ def run(messages_amount: int):
 @click.command()
 @click.option("--messages", default=10 ** 6, help="Amount of messages.")
 @click.option("--number_of_runs", default=10, help="How many times run test.")
-def main(messages, number_of_runs):
+def main(messages: int, number_of_runs: int) -> None:
     """Run test."""
     click.echo("Start test with messages:")
     click.echo(f"* Messages: {messages}")

@@ -25,7 +25,7 @@ import time
 from multiprocessing import Pool
 from pathlib import Path
 from statistics import mean, stdev, variance
-from typing import Any, Callable, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 from unittest.mock import MagicMock
 
 import click
@@ -48,7 +48,7 @@ from aea.identity.base import Identity
 from aea.mail.base import Envelope
 from aea.protocols.base import Protocol
 from aea.registries.resources import Resources
-from aea.skills.base import Skill, SkillContext
+from aea.skills.base import Behaviour, Handler, Skill, SkillContext
 
 from packages.fetchai.protocols.default.message import DefaultMessage
 
@@ -58,7 +58,9 @@ ROOT_DIR = os.path.join(os.path.dirname(inspect.getfile(inspect.currentframe()))
 PACKAGES_DIR = Path(AEA_DIR, "..", PACKAGES)
 
 
-def wait_for_condition(condition_checker, timeout=2, error_msg="Timeout") -> None:
+def wait_for_condition(
+    condition_checker: Callable, timeout: int = 2, error_msg: str = "Timeout"
+) -> None:
     """Wait for condition occures in selected timeout."""
     start_time = time.time()
 
@@ -68,7 +70,7 @@ def wait_for_condition(condition_checker, timeout=2, error_msg="Timeout") -> Non
             raise TimeoutError(error_msg)
 
 
-def make_agent(agent_name="my_agent", runtime_mode="threaded") -> AEA:
+def make_agent(agent_name: str = "my_agent", runtime_mode: str = "threaded") -> AEA:
     """Make AEA instance."""
     wallet = Wallet({DEFAULT_LEDGER: None})
     identity = Identity(agent_name, address=agent_name)
@@ -120,7 +122,7 @@ class GeneratorConnection(Connection):
     connection_id = PublicId("fetchai", "generator", "0.1.0")
     ENABLED_WAIT_SLEEP = 0.00001
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any):
         """Init connection."""
         super().__init__(*args, **kwargs)
         self._enabled = False
@@ -139,7 +141,7 @@ class GeneratorConnection(Connection):
         """Connect connection."""
         self._state.set(ConnectionStates.connected)
 
-    async def disconnect(self):
+    async def disconnect(self) -> None:
         """Disonnect connection."""
         self._state.set(ConnectionStates.disconnected)
 
@@ -147,7 +149,7 @@ class GeneratorConnection(Connection):
         """Handle incoming envelope."""
         self.count_in += 1
 
-    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
+    async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """Generate an envelope."""
         while not self._enabled:
             await asyncio.sleep(self.ENABLED_WAIT_SLEEP)
@@ -157,7 +159,7 @@ class GeneratorConnection(Connection):
         return envelope
 
     @classmethod
-    def make(cls):
+    def make(cls) -> "GeneratorConnection":
         """Construct connection instance."""
         configuration = ConnectionConfig(connection_id=cls.connection_id,)
         test_connection = cls(
@@ -169,7 +171,7 @@ class GeneratorConnection(Connection):
 class SyncedGeneratorConnection(GeneratorConnection):
     """Synchronized message generator."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Init connection."""
         super().__init__(*args, **kwargs)
         self._condition: Optional[asyncio.Event] = None
@@ -181,7 +183,7 @@ class SyncedGeneratorConnection(GeneratorConnection):
             raise ValueError("Event not set.")
         return self._condition
 
-    async def connect(self):
+    async def connect(self) -> None:
         """Connect connection."""
         await super().connect()
         self._condition = asyncio.Event()
@@ -192,14 +194,18 @@ class SyncedGeneratorConnection(GeneratorConnection):
         await super().send(envelope)
         self.condition.set()
 
-    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
+    async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """Generate an envelope."""
         await self.condition.wait()
         self.condition.clear()
         return await super().receive(*args, **kwargs)
 
 
-def make_skill(agent, handlers=None, behaviours=None) -> Skill:
+def make_skill(
+    agent: AEA,
+    handlers: Optional[Dict[str, Type[Handler]]] = None,
+    behaviours: Optional[Dict[str, Type[Behaviour]]] = None,
+) -> Skill:
     """Construct skill instance for agent from behaviours."""
     handlers = handlers or {}
     behaviours = behaviours or {}

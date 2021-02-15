@@ -4,7 +4,7 @@ version: 0.20.0
 description: A simple example of service registration.
 license: Apache-2.0
 aea_version: '>=0.10.0, <0.11.0'
-fingerprint: ''
+fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/p2p_libp2p:0.15.0

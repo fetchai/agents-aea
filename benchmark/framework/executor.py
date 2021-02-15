@@ -26,7 +26,7 @@ from contextlib import contextmanager
 from multiprocessing import Process
 from operator import attrgetter
 from statistics import mean
-from typing import Callable, List, Tuple
+from typing import Callable, Generator, List, Tuple
 
 import memory_profiler  # type: ignore
 import psutil  # type: ignore
@@ -37,13 +37,13 @@ from benchmark.framework.benchmark import BenchmarkControl  # noqa: I100
 class TimeItResult:  # pylint: disable=too-few-public-methods
     """Class to store execution time for timeit_context."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Init with time passed = -1."""
         self.time_passed = -1.0
 
 
 @contextmanager
-def timeit_context():
+def timeit_context() -> Generator:
     """
     Context manager to measure execution time of code in context.
 

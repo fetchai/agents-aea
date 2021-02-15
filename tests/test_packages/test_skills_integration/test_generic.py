@@ -22,7 +22,7 @@ from random import uniform
 
 import pytest
 
-from aea.test_tools.test_cases import AEATestCaseMany
+from aea.test_tools.test_cases import AEATestCaseManyFlaky
 
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
@@ -38,7 +38,7 @@ from tests.conftest import (
 
 
 @pytest.mark.integration
-class TestGenericSkills(AEATestCaseMany):
+class TestGenericSkills(AEATestCaseManyFlaky):
     """Test that generic skills work."""
 
     capture_log = True
@@ -218,7 +218,7 @@ class TestGenericSkills(AEATestCaseMany):
 
 @pytest.mark.sync
 @pytest.mark.integration
-class TestGenericSkillsFetchaiLedger(AEATestCaseMany):
+class TestGenericSkillsFetchaiLedger(AEATestCaseManyFlaky):
     """Test that generic skills work."""
 
     capture_log = True

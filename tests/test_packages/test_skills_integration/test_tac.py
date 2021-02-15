@@ -25,7 +25,7 @@ from random import uniform
 
 import pytest
 
-from aea.test_tools.test_cases import AEATestCaseMany
+from aea.test_tools.test_cases import AEATestCaseManyFlaky
 
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
@@ -50,7 +50,7 @@ from tests.conftest import (
 MAX_FLAKY_RERUNS_ETH -= 1
 
 
-class TestTacSkills(AEATestCaseMany):
+class TestTacSkills(AEATestCaseManyFlaky):
     """Test that tac skills work."""
 
     capture_log = True
@@ -309,7 +309,7 @@ class TestTacSkills(AEATestCaseMany):
         ), "Agents weren't successfully terminated."
 
 
-class TestTacSkillsContract(AEATestCaseMany, UseGanache):
+class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache):
     """Test that tac skills work."""
 
     capture_log = True

@@ -24,7 +24,9 @@ from benchmark.framework.benchmark import BenchmarkControl
 from benchmark.framework.cli import TestCli
 
 
-def cpu_burn(benchmark: BenchmarkControl, run_time=10, sleep=0.0001) -> None:
+def cpu_burn(
+    benchmark: BenchmarkControl, run_time: int = 10, sleep: float = 0.0001
+) -> None:
     """
     Do nothing, just burn cpu to check cpu load changed on sleep.
 

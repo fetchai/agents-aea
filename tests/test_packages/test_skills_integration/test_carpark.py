@@ -23,7 +23,7 @@ from random import uniform
 
 import pytest
 
-from aea.test_tools.test_cases import AEATestCaseMany
+from aea.test_tools.test_cases import AEATestCaseManyFlaky
 
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
@@ -39,7 +39,7 @@ from tests.conftest import (
 
 
 @pytest.mark.integration
-class TestCarPark(AEATestCaseMany):
+class TestCarPark(AEATestCaseManyFlaky):
     """Test that carpark skills work."""
 
     @pytest.mark.flaky(
@@ -211,7 +211,7 @@ class TestCarPark(AEATestCaseMany):
 
 
 @pytest.mark.integration
-class TestCarParkFetchaiLedger(AEATestCaseMany):
+class TestCarParkFetchaiLedger(AEATestCaseManyFlaky):
     """Test that carpark skills work."""
 
     @pytest.mark.flaky(

@@ -23,7 +23,7 @@ from pathlib import Path
 
 import pytest
 
-from aea.test_tools.test_cases import BaseAEATestCase
+from aea.test_tools.test_cases import AEATestCaseManyFlaky
 
 from tests.conftest import CUR_PATH, MAX_FLAKY_RERUNS, ROOT_DIR
 from tests.test_docs.helper import extract_code_blocks, extract_python_code
@@ -34,13 +34,12 @@ MD_FILE = "docs/agent-vs-aea.md"
 PY_FILE = "test_docs/test_agent_vs_aea/agent_code_block.py"
 
 
-class TestAgentVsAEA(BaseAEATestCase):
-    """This class contains the tests for the code-blocks in the agent-vs-aea.md file."""
+class TestFiles:
+    """Test consistency of the files."""
 
     @classmethod
     def setup_class(cls):
         """Setup the test class."""
-        super().setup_class()
         doc_path = os.path.join(ROOT_DIR, MD_FILE)
         cls.code_blocks = extract_code_blocks(filepath=doc_path, filter_="python")
         test_code_path = os.path.join(CUR_PATH, PY_FILE)
@@ -51,6 +50,17 @@ class TestAgentVsAEA(BaseAEATestCase):
         assert (
             self.code_blocks[-1] == self.python_file
         ), "Files must be exactly the same."
+
+    def test_code_blocks_exist(self):
+        """Test that all the code-blocks exist in the python file."""
+        for blocks in self.code_blocks:
+            assert (
+                blocks in self.python_file
+            ), "Code-block doesn't exist in the python file."
+
+
+class TestAgentVsAEA(AEATestCaseManyFlaky):
+    """This class contains the tests for the code-blocks in the agent-vs-aea.md file."""
 
     @pytest.mark.flaky(
         reruns=MAX_FLAKY_RERUNS
@@ -65,10 +75,3 @@ class TestAgentVsAEA(BaseAEATestCase):
         with open(path, "rb") as file:
             msg = file.read()
         assert msg == message_text, "The messages must be identical."
-
-    def test_code_blocks_exist(self):
-        """Test that all the code-blocks exist in the python file."""
-        for blocks in self.code_blocks:
-            assert (
-                blocks in self.python_file
-            ), "Code-block doesn't exist in the python file."

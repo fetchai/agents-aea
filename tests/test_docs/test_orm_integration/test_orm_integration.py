@@ -25,7 +25,7 @@ import mistune
 import pytest
 import yaml
 
-from aea.test_tools.test_cases import AEATestCaseMany
+from aea.test_tools.test_cases import AEATestCaseManyFlaky
 
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
@@ -116,7 +116,7 @@ ORM_SELLER_STRATEGY_PATH = Path(
 
 
 @pytest.mark.integration
-class TestOrmIntegrationDocs(AEATestCaseMany):
+class TestOrmIntegrationDocs(AEATestCaseManyFlaky):
     """This class contains the tests for the orm-integration.md guide."""
 
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_INTEGRATION)

@@ -30,7 +30,12 @@ from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue
 from aea.test_tools.exceptions import AEATestingException
-from aea.test_tools.test_cases import AEATestCase, AEATestCaseEmpty
+from aea.test_tools.test_cases import (
+    AEATestCase,
+    AEATestCaseEmpty,
+    AEATestCaseEmptyFlaky,
+    AEATestCaseManyFlaky,
+)
 
 from packages.fetchai.protocols.default.dialogues import (
     DefaultDialogue,
@@ -369,3 +374,31 @@ class TestInvoke(AEATestCaseEmpty):
         result = self.invoke("--version")
         assert result.exit_code == 0
         assert f"aea, version {aea.__version__}" in result.stdout
+
+
+class TestFlakyMany(AEATestCaseManyFlaky):
+    """Test that flaky tests are properly rerun."""
+
+    @pytest.mark.flaky(reruns=1)
+    def test_fail_on_first_run(self):
+        """Test failure on first run leads to second run."""
+        file = os.path.join(self.t, "test_file")
+        if self.run_count == 1:
+            open(file, "a").close()
+            raise AssertionError("Expected error to trigger rerun!")
+        assert self.run_count == 2, "Should only be rerun once!"
+        assert not os.path.isfile(file), "File should not exist"
+
+
+class TestFlakyEmpty(AEATestCaseEmptyFlaky):
+    """Test that flaky tests are properly rerun."""
+
+    @pytest.mark.flaky(reruns=1)
+    def test_fail_on_first_run(self):
+        """Test failure on first run leads to second run."""
+        file = os.path.join(self.t, "test_file")
+        if self.run_count == 1:
+            open(file, "a").close()
+            raise AssertionError("Expected error to trigger rerun!")
+        assert self.run_count == 2, "Should only be rerun once!"
+        assert not os.path.isfile(file), "File should not exist"
