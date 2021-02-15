@@ -140,9 +140,6 @@ class AEA(Agent):
             logger=cast(Logger, aea_logger),
         )
 
-        if not bool(self.resources.get_all_connections()):
-            self.logger.warning("Resource connections list is empty!")
-
         default_routing = default_routing if default_routing is not None else {}
         connection_ids = connection_ids or []
         connections = [
@@ -151,8 +148,14 @@ class AEA(Agent):
             if (not connection_ids) or (c.connection_id in connection_ids)
         ]
 
-        if not bool(connections):
-            self.logger.warning("No connection left after filtering!")
+        if not bool(self.resources.get_all_connections()):
+            self.logger.warning(
+                "Resource's connections list is empty! Instantiating AEA without connections..."
+            )
+        elif bool(self.resources.get_all_connections()) and not bool(connections):
+            self.logger.warning(
+                "No connection left after filtering! Instantiating AEA without connections..."
+            )
 
         self._set_runtime_and_mail_boxes(
             runtime_class=self._get_runtime_class(),
