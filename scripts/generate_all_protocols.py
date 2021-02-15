@@ -389,7 +389,6 @@ def _bump_protocol_specification_id(
 ) -> None:
     """Bump spec id version."""
     spec_id: PublicId = configuration.protocol_specification_id  # type: ignore
-    log(f"Bumping protocol specification id '{spec_id}'")
     old_version = semver.VersionInfo.parse(spec_id.version)
     new_version = str(old_version.bump_minor())
     new_spec_id = PublicId(spec_id.author, spec_id.name, new_version)
@@ -430,20 +429,25 @@ def _bump_protocol_specification_id_if_needed(package_path: Path) -> None:
     )
     old_configuration: ProtocolConfig = cast(
         ProtocolConfig,
-        load_component_configuration(ComponentType.PROTOCOL, temp_directory),
+        load_component_configuration(
+            ComponentType.PROTOCOL, downloaded_package_directory
+        ),
     )
 
     # if different, bump protocol specification version, else don't.
-    version_is_newer = (
+    public_id_version_is_newer = (
         old_configuration.public_id.package_version  # type: ignore
         <= configuration.public_id.package_version
     )
     content_is_different = current_specification_content != old_specification_content
-    if version_is_newer and content_is_different:
+    if public_id_version_is_newer and content_is_different:
+        log(
+            f"Bumping protocol specification id from '{configuration.protocol_specification_id}' to '{old_configuration.protocol_specification_id}'"
+        )
         _bump_protocol_specification_id(package_path, configuration)
         return
     log(
-        f"Protocol specification id not bumped - content is not different, or version is not newer."
+        "Protocol specification id not bumped - content is not different, or version is not newer."
     )
 
 
@@ -467,8 +471,8 @@ def main() -> None:
         for package_path in all_protocols:
             log("=" * 100)
             log(f"Processing protocol at path {package_path}")
-            _process_packages_protocol(package_path)
             _bump_protocol_specification_id_if_needed(package_path)
+            _process_packages_protocol(package_path)
 
 
 if __name__ == "__main__":
