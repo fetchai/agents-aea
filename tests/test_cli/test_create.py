@@ -40,9 +40,6 @@ from aea.cli import cli
 from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader, make_jsonschema_base_uri
 
-from packages.fetchai.connections.stub.connection import (
-    PUBLIC_ID as STUB_CONNECTION_PUBLIC_ID,
-)
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.signing.message import SigningMessage
 from packages.fetchai.protocols.state_update.message import StateUpdateMessage
@@ -151,12 +148,12 @@ class TestCreate:
         """Check that the 'authors' field in the config file is the empty string."""
         assert self.agent_config["author"] == AUTHOR
 
-    def test_connections_contains_only_stub(self):
+    def test_connections_contains_nothing(self):
         """Check that the 'connections' list contains only the 'stub' connection."""
-        assert self.agent_config["connections"] == [str(STUB_CONNECTION_PUBLIC_ID)]
+        assert self.agent_config["connections"] == []
 
-    def test_default_connection_field_is_stub(self):
-        """Check that the 'default_connection' is the 'stub' connection."""
+    def test_default_connection_field_is_empty(self):
+        """Check that the 'default_connection' is not specified."""
         assert self.agent_config["default_connection"] is None
 
     def test_license_field_is_empty_string(self):
@@ -194,25 +191,6 @@ class TestCreate:
         # (i.e. that contains __init__.py)
         for package_dir in (vendor_dir / "fetchai").iterdir():
             assert (package_dir / "__init__.py").exists()
-
-    def test_vendor_connections_contains_stub_connection(self):
-        """Check that the vendor connections directory contains the stub directory."""
-        stub_connection_dirpath = Path(
-            self.agent_name, "vendor", "fetchai", "connections", "stub"
-        )
-        assert stub_connection_dirpath.exists()
-        assert stub_connection_dirpath.is_dir()
-
-    def test_stub_connection_directory_is_equal_to_library_stub_connection(self):
-        """Check that the stub connection directory is equal to the package's one (aea.connections.stub)."""
-        stub_connection_dirpath = Path(
-            self.agent_name, "vendor", "fetchai", "connections", "stub"
-        )
-        comparison = filecmp.dircmp(
-            str(stub_connection_dirpath),
-            str(Path(ROOT_DIR, "packages", "fetchai", "connections", "stub")),
-        )
-        assert comparison.diff_files == []
 
     def test_vendor_protocols_contains_default_protocol(self):
         """Check that the vendor protocols directory contains the default protocol."""

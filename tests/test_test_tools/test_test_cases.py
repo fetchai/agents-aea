@@ -37,6 +37,7 @@ from aea.test_tools.test_cases import (
     AEATestCaseManyFlaky,
 )
 
+from packages.fetchai.connections.stub.connection import PUBLIC_ID as STUB_CONNECTION_ID
 from packages.fetchai.protocols.default.dialogues import (
     DefaultDialogue,
     DefaultDialogues,
@@ -60,6 +61,7 @@ class TestConfigCases(AEATestCaseEmpty):
     def setup_class(cls):
         """Setup class."""
         super(TestConfigCases, cls).setup_class()
+        cls.add_item("connection", str(STUB_CONNECTION_ID))
         cls.add_item("skill", str(ERROR_SKILL_PUBLIC_ID))
 
     def test_agent_nested_set_agent_crudcollection(self):
@@ -330,6 +332,7 @@ class TestSendReceiveEnvelopesSkill(AEATestCaseEmpty):
 
     def test_send_receive_envelope(self):
         """Run the echo skill sequence."""
+        self.add_item("connection", str(STUB_CONNECTION_ID))
         self.add_item("skill", str(ECHO_SKILL_PUBLIC_ID))
 
         process = self.run_agent()

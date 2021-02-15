@@ -88,3 +88,4 @@ CONFIG_FILE_TO_PACKAGE_TYPE = {
 }  # type: Dict[str, str]
 
 AEA_MANAGER_DATA_DIRNAME = "data"
+LAUNCH_SUCCEED_MESSAGE = "Start processing messages..."

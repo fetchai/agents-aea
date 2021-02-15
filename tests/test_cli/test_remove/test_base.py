@@ -93,7 +93,9 @@ class TestRemovePackageWithLatestVersion(AEATestCaseEmpty):
     def test_remove_pacakge_latest_version(self, type_, public_id):
         """Test remove protocol with latest version."""
         assert public_id.package_version.is_latest
-        # we need this because there isn't a default contract
+        # we need this because there isn't a default contract/connection
+        if type_ == "connection":
+            self.add_item("connection", str(public_id))
         if type_ == "contract":
             self.add_item("contract", str(public_id))
 

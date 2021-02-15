@@ -73,7 +73,7 @@ We set the name, add the private key for the AEA to use and set the ledger confi
 Next, we add the `fetchai/stub:0.15.0` connection which will read/write messages from file:
 ``` python
     # Add the stub connection (assuming it is present in the local directory 'packages')
-    builder.add_connection("./packages/fetchai/connections/echo")
+    builder.add_connection("./packages/fetchai/connections/stub")
 ```
 
 Next, we add the echo skill which will bounce our messages back to us. We first need to place the echo skill into a relevant directory (see path), either by downloading the `packages` directory from the AEA repo or by getting the package from the registry.
