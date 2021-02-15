@@ -26,7 +26,7 @@ import sys
 import time
 from itertools import chain
 from pathlib import Path
-from typing import Dict, List, Set
+from typing import Dict, Generator, List, Set
 
 import yaml
 from click.testing import CliRunner
@@ -56,7 +56,7 @@ CLI_LOG_OPTION = ["-v", "OFF"]
 DEFAULT_CONFIG_FILE_PATHS = []  # type: List[Path]
 
 
-def default_config_file_paths():
+def default_config_file_paths() -> Generator:
     """Get (generator) the default config file paths."""
     for item in DEFAULT_CONFIG_FILE_PATHS:
         yield item
@@ -80,7 +80,7 @@ def unified_yaml_load(configuration_file: Path) -> Dict:
         return list(data)[0]
 
 
-def get_public_id_from_yaml(configuration_file: Path):
+def get_public_id_from_yaml(configuration_file: Path) -> PublicId:
     """
     Get the public id from yaml.
 
