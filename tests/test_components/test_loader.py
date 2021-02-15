@@ -130,7 +130,10 @@ def test_component_loading_module_not_found_error_framework_package_with_wrong_t
             match="An error occurred while loading protocol an_author/a_protocol:0.1.0:",
         ) as e:
             load_component_from_config(component_configuration)
-            assert "some_type" in str(e)
+            assert (
+                "package 'packages/some_author' of type 'protocols' exists, but cannot find module 'some_type'"
+                in e.value.args[0]
+            )
 
 
 def test_component_loading_module_not_found_error_framework_package_with_wrong_name(
@@ -149,7 +152,10 @@ def test_component_loading_module_not_found_error_framework_package_with_wrong_n
             match="An error occurred while loading protocol an_author/a_protocol:0.1.0:",
         ) as e:
             load_component_from_config(component_configuration)
-        assert "some_name" in str(e)
+        assert (
+            " No AEA package found with author name 'some_author', type 'protocols', name 'some_name'"
+            in e.value.args[0]
+        )
 
 
 def test_component_loading_module_not_found_error_framework_package_with_wrong_suffix(
@@ -168,7 +174,10 @@ def test_component_loading_module_not_found_error_framework_package_with_wrong_s
             match="An error occurred while loading protocol an_author/a_protocol:0.1.0:",
         ) as e:
             load_component_from_config(component_configuration)
-        assert "some_subpackage" in str(e)
+        assert (
+            "package 'packages/some_author' of type 'protocols' exists, but cannot find module 'some_subpackage'"
+            in e.value.args[0]
+        )
 
 
 def test_component_loading_instantiation_exception(component_configuration):
