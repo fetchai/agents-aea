@@ -81,7 +81,6 @@ base_deps = [
     "pyyaml>=4.2b1",
     "requests>=2.22.0",
     "python-dotenv>=0.14.0",
-    "urllib3==1.25.8",
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))
