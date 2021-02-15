@@ -139,7 +139,7 @@ class CheckTool:
     """Tool to check imports in sources match dependencies in setup.py."""
 
     @classmethod
-    def get_section_dependecnies_from_setup(cls) -> Dict[str, Dict[str, List[str]]]:
+    def get_section_dependencies_from_setup(cls) -> Dict[str, Dict[str, List[str]]]:
         """Get sections with dependencies with files lists."""
         spec = importlib.util.spec_from_file_location(
             "setup", str(AEA_ROOT_DIR / "setup.py")
@@ -181,7 +181,7 @@ class CheckTool:
             AEA_ROOT_DIR, pattern="aea/**/*.py"
         )
 
-        sections_dependencies = cls.get_section_dependecnies_from_setup()
+        sections_dependencies = cls.get_section_dependencies_from_setup()
         sections_imports = cls.make_sections_with_3rdpart_imports(
             files_and_modules, set(sections_dependencies.keys())
         )
