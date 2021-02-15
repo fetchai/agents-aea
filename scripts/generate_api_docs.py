@@ -28,7 +28,6 @@ from pathlib import Path
 
 from aea.configurations.base import ComponentType, PublicId
 from aea.configurations.constants import (
-    DEFAULT_CONNECTION,
     DEFAULT_PROTOCOL,
     FETCHAI,
     PACKAGES,
@@ -47,7 +46,6 @@ DEFAULT_PACKAGES = {
     (ComponentType.PROTOCOL, DEFAULT_PROTOCOL),
     (ComponentType.PROTOCOL, SIGNING_PROTOCOL),
     (ComponentType.PROTOCOL, STATE_UPDATE_PROTOCOL),
-    (ComponentType.CONNECTION, DEFAULT_CONNECTION),
 }
 
 IGNORE_NAMES = {r"^__init__\.py$", r"^__version__\.py$", r"^py\.typed$", r"^.*_pb2.py$"}

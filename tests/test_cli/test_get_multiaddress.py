@@ -70,6 +70,7 @@ class TestGetMultiAddressCommandConnectionIdPositive(AEATestCaseEmpty):
 
     def test_run(self, *mocks):
         """Run the test."""
+        self.add_item("connection", str(STUB_CONNECTION_PUBLIC_ID))
         self.generate_private_key(FETCHAI)
         self.add_private_key(FETCHAI, connection=True)
 
@@ -104,6 +105,7 @@ class TestGetMultiAddressCommandConnectionIdURIPositive(AEATestCaseEmpty):
 
     def test_run(self, *mocks):
         """Run the test."""
+        self.add_item("connection", str(STUB_CONNECTION_PUBLIC_ID))
         self.generate_private_key(FETCHAI)
         self.add_private_key(FETCHAI, connection=True)
 
@@ -186,6 +188,7 @@ class TestGetMultiAddressCommandNegativeBadHostField(AEATestCaseEmpty):
 
     def test_run(self, *mocks):
         """Run the test."""
+        self.add_item("connection", str(STUB_CONNECTION_PUBLIC_ID))
         self.generate_private_key(FETCHAI)
         self.add_private_key(FETCHAI, connection=True)
 
@@ -213,6 +216,7 @@ class TestGetMultiAddressCommandNegativeBadPortField(AEATestCaseEmpty):
 
     def test_run(self, *mocks):
         """Run the test."""
+        self.add_item("connection", str(STUB_CONNECTION_PUBLIC_ID))
         self.generate_private_key(FETCHAI)
         self.add_private_key(FETCHAI, connection=True)
 
@@ -272,6 +276,7 @@ class TestGetMultiAddressCommandNegativeFullMultiaddrComputation(AEATestCaseEmpt
     )
     def test_run(self, *mocks):
         """Run the test."""
+        self.add_item("connection", str(STUB_CONNECTION_PUBLIC_ID))
         self.generate_private_key(FETCHAI)
         self.add_private_key(FETCHAI, connection=True)
 
@@ -304,6 +309,7 @@ class TestGetMultiAddressCommandNegativeOnlyHostSpecified(AEATestCaseEmpty):
 
     def test_run(self, *mocks):
         """Run the test."""
+        self.add_item("connection", str(STUB_CONNECTION_PUBLIC_ID))
         self.generate_private_key(FETCHAI)
         self.add_private_key(FETCHAI, connection=True)
 
@@ -329,6 +335,7 @@ class TestGetMultiAddressCommandNegativeUriNotExisting(AEATestCaseEmpty):
 
     def test_run(self, *mocks):
         """Run the test."""
+        self.add_item("connection", str(STUB_CONNECTION_PUBLIC_ID))
         self.generate_private_key(FETCHAI)
         self.add_private_key(FETCHAI, connection=True)
 
@@ -354,6 +361,7 @@ class TestGetMultiAddressCommandNegativeBadUri(AEATestCaseEmpty):
 
     def test_run(self, *mocks):
         """Run the test."""
+        self.add_item("connection", str(STUB_CONNECTION_PUBLIC_ID))
         self.generate_private_key(FETCHAI)
         self.add_private_key(FETCHAI, connection=True)
 

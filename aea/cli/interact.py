@@ -26,6 +26,7 @@ from typing import Optional, TYPE_CHECKING, Type, Union
 
 import click
 
+from aea.cli.utils.constants import STUB_CONNECTION
 from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.exceptions import InterruptInputException
 from aea.common import Address
@@ -33,7 +34,6 @@ from aea.configurations.base import ConnectionConfig, PackageType, PublicId
 from aea.configurations.constants import (
     CONNECTIONS,
     DEFAULT_AEA_CONFIG_FILE,
-    DEFAULT_CONNECTION,
     DEFAULT_PROTOCOL,
     PROTOCOLS,
     SIGNING_PROTOCOL,
@@ -98,13 +98,10 @@ def _load_packages(agent_identity: Identity) -> None:
             state_update_protocol_id.name,
         )
     )
-    default_connection_id = PublicId.from_str(DEFAULT_CONNECTION)
+    stub_connection_id = PublicId.from_str(STUB_CONNECTION)
     Connection.from_dir(
         os.path.join(
-            VENDOR,
-            default_connection_id.author,
-            CONNECTIONS,
-            default_connection_id.name,
+            VENDOR, stub_connection_id.author, CONNECTIONS, stub_connection_id.name,
         ),
         agent_identity,
         CryptoStore(),

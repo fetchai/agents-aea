@@ -270,6 +270,18 @@ def test_run_multiple_connections(connection_ids):
 
     result = runner.invoke(
         cli,
+        [
+            *CLI_LOG_OPTION,
+            "add",
+            "--local",
+            "connection",
+            str(STUB_CONNECTION_PUBLIC_ID),
+        ],
+    )
+    assert result.exit_code == 0
+
+    result = runner.invoke(
+        cli,
         [*CLI_LOG_OPTION, "add", "--local", "connection", str(HTTP_ClIENT_PUBLIC_ID)],
     )
     assert result.exit_code == 0

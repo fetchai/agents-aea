@@ -62,6 +62,15 @@ def test_create_and_run_agent():
         ctx.set_config("is_local", True)
         create_aea(ctx, agent_id, local=True, author=DEFAULT_AUTHOR)
 
+        # Add the stub connection
+        with patch("aea.cli_gui.app_context.local", True):
+            response_add = app.post(
+                "api/agent/" + agent_id + "/connection",
+                content_type="application/json",
+                data=json.dumps(str(STUB_CONNECTION_PUBLIC_ID)),
+            )
+            assert response_add.status_code == 201
+
         # Add the local connection
         with patch("aea.cli_gui.app_context.local", True):
             response_add = app.post(
