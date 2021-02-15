@@ -85,6 +85,7 @@ from aea.exceptions import AEAException, AEAValidationError, enforce
 from aea.helpers.base import find_topological_order, load_env_file, load_module
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.install_dependency import install_dependency
+from aea.helpers.io import open_file
 from aea.helpers.logging import AgentLoggerAdapter, WithLogger, get_logger
 from aea.identity.base import Identity
 from aea.registries.resources import Resources
@@ -1427,7 +1428,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         try:
             aea_project_path = Path(aea_project_path)
             configuration_file_path = cls.get_configuration_file_path(aea_project_path)
-            with configuration_file_path.open(mode="r", encoding="utf-8") as fp:
+            with open_file(configuration_file_path, mode="r", encoding="utf-8") as fp:
                 loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
                 agent_configuration = loader.load(fp)
                 return agent_configuration

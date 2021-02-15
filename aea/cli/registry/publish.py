@@ -48,6 +48,7 @@ from aea.configurations.constants import (
 
 def _compress(output_filename: str, *filepaths: str) -> None:
     """Compare the output file."""
+    # TODO investigate
     with tarfile.open(output_filename, "w:gz") as f:
         for filepath in filepaths:
             f.add(filepath, arcname=os.path.basename(filepath))

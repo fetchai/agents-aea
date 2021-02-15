@@ -230,7 +230,7 @@ class CheckTool:
     ) -> Tuple[Dict[str, List[str]], List[str]]:
         """Find missing dependencies for imports and not imported dependencies."""
 
-        def _find_dependency_for_module(dependencies, pyfile): # type: ignore
+        def _find_dependency_for_module(dependencies, pyfile):  # type: ignore
             for package, files in dependencies.items():
                 if pyfile in files:
                     return package

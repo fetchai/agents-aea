@@ -52,6 +52,7 @@ def _remove_pycache(source_dir: str) -> None:
 
 def _compress_dir(output_filename: str, source_dir: str) -> None:
     _remove_pycache(source_dir)
+    # TODO investigate
     with tarfile.open(output_filename, "w:gz") as f:
         f.add(source_dir, arcname=os.path.basename(source_dir))
 

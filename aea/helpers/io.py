@@ -41,7 +41,8 @@ calling the 'open' or the 'pathlib.Path.open' functions.
 """
 from functools import partial
 from pathlib import Path
-from typing import Callable, IO, Union, Dict
+from typing import Callable, Optional, TextIO, Union
+
 
 UNIX_LINESEP = "\n"
 
@@ -51,19 +52,40 @@ _open_file_pathlib: Callable = partial(Path.open, newline=UNIX_LINESEP)
 PathNameTypes = Union[int, str, bytes, Path]
 
 
-def open_file(file: PathNameTypes, **kwargs: Dict) -> IO:
+def open_file(
+    file: PathNameTypes,
+    mode: str = "r",
+    buffering: int = -1,
+    encoding: Optional[str] = None,
+    errors: Optional[str] = None,
+) -> TextIO:
     r"""
     Open a file.
 
     Behaviour, kwargs and return type are the same for built-in 'open'
     and pathlib.Path.open, except for 'newline', which is fixed to '\n'.
 
+    For more details on the keyword arguments, please refer
+    to the documentation for the built-in 'open':
+
+        https://docs.python.org/3/library/functions.html#open
+
     :param file: either a pathlib.Path object or the type accepted by 'open',
             i.e. a string, bytes or integer.
-    :param kwargs: the keyword arguments to the wrapped function.
+    :param mode: the mode in which the file is opened.
+    :param buffering: the buffering policy.
+    :param encoding: the name of the encoding used to decode or encode the file.
+    :param errors: how encoding errors are to be handled
+    :param closefd: If closefd is False, the underlying file descriptor will be kept open
+        when the file is closed. This does not work when a file name is given
+        and must be True in that case.
     :return: the IO object.
     """
+    if "b" in mode:
+        raise ValueError("This function can only work in text mode.")
     actual_wrapped_function = _open_file_builtin
     if isinstance(file, Path):
         actual_wrapped_function = _open_file_pathlib
-    return actual_wrapped_function(file, **kwargs)
+    return actual_wrapped_function(
+        file, mode=mode, buffering=buffering, encoding=encoding, errors=errors
+    )

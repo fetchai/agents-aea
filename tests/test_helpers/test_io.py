@@ -16,41 +16,25 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""Module with generic utils of the aea cli."""
+"""This module contains the tests for the 'aea.helpers.io' module."""
 import os
-from typing import Dict
+from pathlib import Path
 
-import yaml
-from click import ClickException
+import pytest
 
 from aea.helpers.io import open_file
 
 
-def load_yaml(filepath: str) -> Dict:
-    """
-    Read content from yaml file.
+@pytest.mark.parametrize(argnames="path_builder", argvalues=[os.path.join, Path])
+def test_open_file(change_directory, path_builder):
+    """Test 'open_file' for the built-in open."""
+    expected_string = "hello\nworld"
+    path = path_builder(change_directory, "temporary-file")
+    with open_file(path, "w") as file_out:
+        file_out.write(expected_string)
 
-    :param filepath: str path to yaml file.
+    with open_file(path, "r") as file_in:
+        assert file_in.read() == expected_string
 
-    :return: dict YAML content
-    """
-    with open_file(filepath, "r") as f:
-        try:
-            return yaml.safe_load(f)
-        except yaml.YAMLError as e:
-            raise ClickException(
-                "Loading yaml config from {} failed: {}".format(filepath, e)
-            )
-
-
-def is_readme_present(readme_path: str) -> bool:
-    """
-    Check is readme file present.
-
-    This method is needed for proper testing.
-
-    :param readme_path: path to readme file.
-
-    :return: bool is readme file present.
-    """
-    return os.path.exists(readme_path)
+    with open(path, "rb") as bytes_in:
+        assert bytes_in.read() == bytes(expected_string, encoding="utf-8")
