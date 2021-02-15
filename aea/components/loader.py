@@ -80,7 +80,7 @@ def load_component_from_config(  # type: ignore
 
 
 class AEAPackageNotFound(Exception):
-    """Exception when failed toi import package, cause not exists."""
+    """Exception when failed to import package, cause not exists."""
 
 
 def _handle_error_while_loading_component_module_not_found(
