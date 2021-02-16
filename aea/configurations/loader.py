@@ -37,6 +37,7 @@ from aea.configurations.base import (
     SkillConfig,
 )
 from aea.configurations.validation import ConfigValidator, make_jsonschema_base_uri
+from aea.helpers.io import open_file
 from aea.helpers.yaml_utils import yaml_dump, yaml_dump_all, yaml_load, yaml_load_all
 
 
@@ -371,7 +372,7 @@ def _load_configuration_object(
     )
     configuration_filepath = directory / configuration_filename
     try:
-        with open(configuration_filepath) as fp:
+        with open_file(configuration_filepath) as fp:
             configuration_object = configuration_loader.load(fp)
     except FileNotFoundError:
         raise FileNotFoundError(

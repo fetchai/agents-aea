@@ -40,6 +40,7 @@ from aea.configurations.constants import (  # noqa: F401 # pylint: disable=unuse
 )
 from aea.configurations.data_types import PackageType
 from aea.configurations.loader import ConfigLoader
+from aea.helpers.io import open_file
 
 
 @click.group()
@@ -175,7 +176,7 @@ def fingerprint_package(
     default_config_file_name = _get_default_configuration_file_name_from_type(item_type)
     config_loader = ConfigLoader.from_configuration_type(item_type)
     config_file_path = Path(package_dir, default_config_file_name)
-    config = config_loader.load(config_file_path.open())
+    config = config_loader.load(open_file(config_file_path))
 
     if not package_dir.exists():
         # we only permit non-vendorized packages to be fingerprinted
@@ -187,4 +188,4 @@ def fingerprint_package(
 
     # Load item specification yaml file and add fingerprints
     config.fingerprint = fingerprints_dict
-    config_loader.dump(config, open(config_file_path, "w"))
+    config_loader.dump(config, open_file(config_file_path, "w"))

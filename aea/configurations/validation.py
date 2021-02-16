@@ -35,6 +35,7 @@ from aea.configurations.constants import AGENT
 from aea.configurations.data_types import ComponentId, ComponentType, PublicId
 from aea.helpers.base import dict_to_path_value
 from aea.helpers.env_vars import is_env_variable
+from aea.helpers.io import open_file
 
 
 _CUR_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
@@ -130,7 +131,7 @@ class ConfigValidator:
         :param schema_filename: the path to the JSON-schema file in 'aea/configurations/schemas'.
         """
         base_uri = Path(_SCHEMAS_DIR)
-        with (base_uri / schema_filename).open() as fp:
+        with open_file(base_uri / schema_filename) as fp:
             self._schema = json.load(fp)
         root_path = make_jsonschema_base_uri(base_uri)
         self._resolver = jsonschema.RefResolver(root_path, self._schema)

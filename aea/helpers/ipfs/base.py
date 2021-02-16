@@ -25,6 +25,7 @@ import re
 
 import base58
 
+from aea.helpers.io import open_file
 from aea.helpers.ipfs.pb import merkledag_pb2, unixfs_pb2
 
 
@@ -46,7 +47,7 @@ def _dos2unix(file_content: bytes) -> bytes:
 def _is_text(file_path: str) -> bool:
     """Check if a file can be read as text or not."""
     try:
-        with open(file_path, "r") as f:
+        with open_file(file_path, "r") as f:
             f.read()
         return True
     except UnicodeDecodeError:
