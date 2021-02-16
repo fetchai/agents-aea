@@ -214,7 +214,7 @@ class Libp2pNode:
             self.log_file = os.path.join(data_dir, self.log_file)
         # env file
         self.env_file = env_file if env_file is not None else LIBP2P_NODE_ENV_FILE
-        if not Path(self.log_file).is_absolute():
+        if not Path(self.env_file).is_absolute():
             self.env_file = os.path.join(data_dir, self.env_file)
 
         # named pipes (fifos)
@@ -443,8 +443,8 @@ class Libp2pNode:
             self._log_file_desc.close()
         else:
             self.logger.debug("Called stop when process not set!")  # pragma: no cover
-        if os.path.exists(LIBP2P_NODE_ENV_FILE):
-            os.remove(LIBP2P_NODE_ENV_FILE)
+        if os.path.exists(self.env_file):
+            os.remove(self.env_file)
 
 
 class P2PLibp2pConnection(Connection):
