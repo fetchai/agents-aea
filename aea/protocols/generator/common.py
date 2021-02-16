@@ -439,3 +439,26 @@ def check_protobuf_using_protoc(
         pattern = name + ".proto:[0-9]+:[0-9]+: "
         error_message = re.sub(pattern, "", e.stderr[:-1])
         return False, error_message
+
+
+def compile_protobuf_using_protoc(
+    path_to_generated_protocol_package: str, name: str
+) -> Tuple[bool, str]:
+    """
+    Compile a protocol buffer schema file using protoc.
+
+    If successfully compiled, return True and a success message,
+    otherwise return False and the error thrown by the compiler.
+
+    :param path_to_generated_protocol_package: path to the protocol buffer schema file.
+    :param name: name of the protocol buffer schema file.
+
+    :return: Boolean result and an accompanying message
+    """
+    try:
+        try_run_protoc(path_to_generated_protocol_package, name)
+        return True, "protobuf schema successfully compiled"
+    except subprocess.CalledProcessError as e:
+        pattern = name + ".proto:[0-9]+:[0-9]+: "
+        error_message = re.sub(pattern, "", e.stderr[:-1])
+        return False, error_message
