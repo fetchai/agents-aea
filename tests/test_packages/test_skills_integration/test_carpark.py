@@ -23,7 +23,7 @@ from random import uniform
 
 import pytest
 
-from aea.test_tools.test_cases import AEATestCaseMany
+from aea.test_tools.test_cases import AEATestCaseManyFlaky
 
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
@@ -39,7 +39,7 @@ from tests.conftest import (
 
 
 @pytest.mark.integration
-class TestCarPark(AEATestCaseMany):
+class TestCarPark(AEATestCaseManyFlaky):
     """Test that carpark skills work."""
 
     @pytest.mark.flaky(
@@ -66,7 +66,6 @@ class TestCarPark(AEATestCaseMany):
         self.set_agent_context(carpark_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.15.0")
         self.add_item("connection", "fetchai/soef:0.16.0")
-        self.remove_item("connection", "fetchai/stub:0.16.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.15.0")
         self.add_item("connection", "fetchai/ledger:0.13.0")
         self.add_item("skill", "fetchai/carpark_detection:0.19.0")
@@ -101,7 +100,6 @@ class TestCarPark(AEATestCaseMany):
         self.set_agent_context(carpark_client_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.15.0")
         self.add_item("connection", "fetchai/soef:0.16.0")
-        self.remove_item("connection", "fetchai/stub:0.16.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.15.0")
         self.add_item("connection", "fetchai/ledger:0.13.0")
         self.add_item("skill", "fetchai/carpark_client:0.20.0")
@@ -211,7 +209,7 @@ class TestCarPark(AEATestCaseMany):
 
 
 @pytest.mark.integration
-class TestCarParkFetchaiLedger(AEATestCaseMany):
+class TestCarParkFetchaiLedger(AEATestCaseManyFlaky):
     """Test that carpark skills work."""
 
     @pytest.mark.flaky(
@@ -238,7 +236,6 @@ class TestCarParkFetchaiLedger(AEATestCaseMany):
         self.set_agent_context(carpark_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.15.0")
         self.add_item("connection", "fetchai/soef:0.16.0")
-        self.remove_item("connection", "fetchai/stub:0.16.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.15.0")
         self.add_item("connection", "fetchai/ledger:0.13.0")
         self.add_item("skill", "fetchai/carpark_detection:0.19.0")
@@ -276,7 +273,6 @@ class TestCarParkFetchaiLedger(AEATestCaseMany):
         self.set_agent_context(carpark_client_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.15.0")
         self.add_item("connection", "fetchai/soef:0.16.0")
-        self.remove_item("connection", "fetchai/stub:0.16.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.15.0")
         self.add_item("connection", "fetchai/ledger:0.13.0")
         self.add_item("skill", "fetchai/carpark_client:0.20.0")

@@ -21,7 +21,7 @@ import json
 
 import pytest
 
-from aea.test_tools.test_cases import AEATestCaseMany
+from aea.test_tools.test_cases import AEATestCaseManyFlaky
 
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
@@ -38,7 +38,7 @@ from tests.conftest import (
 
 
 @pytest.mark.integration
-class TestOracleSkills(AEATestCaseMany, UseGanache):
+class TestOracleSkills(AEATestCaseManyFlaky, UseGanache):
     """Test that oracle skills work."""
 
     @pytest.mark.ledger
@@ -64,7 +64,6 @@ class TestOracleSkills(AEATestCaseMany, UseGanache):
         self.add_item("connection", "fetchai/ledger:0.13.0")
         self.add_item("connection", "fetchai/http_client:0.17.0")
         self.add_item("connection", "fetchai/prometheus:0.3.0")
-        self.remove_item("connection", "fetchai/stub:0.16.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.15.0")
         self.set_config("agent.default_ledger", ETHEREUM)
         setting_path = "agent.default_routing"
@@ -122,7 +121,6 @@ class TestOracleSkills(AEATestCaseMany, UseGanache):
         self.set_agent_context(client_agent_name)
         self.add_item("connection", "fetchai/ledger:0.13.0")
         self.add_item("connection", "fetchai/http_client:0.17.0")
-        self.remove_item("connection", "fetchai/stub:0.16.0")
         self.set_config("agent.default_connection", "fetchai/ledger:0.13.0")
         self.set_config("agent.default_ledger", ETHEREUM)
 

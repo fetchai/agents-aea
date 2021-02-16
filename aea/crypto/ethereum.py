@@ -26,6 +26,7 @@ import warnings
 from pathlib import Path
 from typing import Any, BinaryIO, Callable, Dict, List, Optional, Tuple, Union, cast
 
+import ipfshttpclient  # noqa: F401 # pylint: disable=unused-import
 import web3._utils.request
 from eth_account import Account
 from eth_account._utils.signing import to_standard_signature_bytes
@@ -43,6 +44,7 @@ from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
 from aea.exceptions import enforce
 from aea.helpers import http_requests as requests
 from aea.helpers.base import try_decorator
+from aea.helpers.io import open_file
 
 
 _default_logger = logging.getLogger(__name__)
@@ -220,7 +222,7 @@ class EthereumCrypto(Crypto[Account]):
         :return: the Entity.
         """
         path = Path(file_name)
-        with open(path, "r") as key:
+        with open_file(path, "r") as key:
             data = key.read()
             account = Account.from_key(  # pylint: disable=no-value-for-parameter
                 private_key=data
@@ -414,7 +416,7 @@ class EthereumHelper(Helper):
         :param file_path: the file path to the interface
         :return: the interface
         """
-        with open(file_path, "r") as interface_file_ethereum:
+        with open_file(file_path, "r") as interface_file_ethereum:
             contract_interface = json.load(interface_file_ethereum)
         for key in [_ABI, _BYTECODE]:
             if key not in contract_interface:  # pragma: nocover

@@ -37,7 +37,6 @@ from typing import (
 
 import semver
 from packaging.specifiers import SpecifierSet
-from urllib3.util import Url, parse_url
 
 from aea.configurations.constants import (
     AGENT,
@@ -645,8 +644,8 @@ class Dependency:
         self,
         name: Union[PyPIPackageName, str],
         version: Union[str, SpecifierSet] = "",
-        index: Optional[Union[str, Url]] = None,
-        git: Optional[Union[str, Url]] = None,
+        index: Optional[str] = None,
+        git: Optional[str] = None,
         ref: Optional[Union[GitRef, str]] = None,
     ) -> None:
         """
@@ -660,10 +659,8 @@ class Dependency:
         """
         self._name: PyPIPackageName = PyPIPackageName(name)
         self._version: SpecifierSet = self._parse_version(version)
-        self._index: Optional[Url] = self._parse_url(
-            index
-        ) if index is not None else None
-        self._git: Optional[Url] = self._parse_url(git) if git is not None else None
+        self._index: Optional[str] = index
+        self._git: Optional[str] = git
         self._ref: Optional[GitRef] = GitRef(ref) if ref is not None else None
 
     @property
@@ -700,16 +697,6 @@ class Dependency:
         :return: the SpecifierSet instance.
         """
         return version if isinstance(version, SpecifierSet) else SpecifierSet(version)
-
-    @staticmethod
-    def _parse_url(url: Union[str, Url]) -> Url:
-        """
-        Parse an URL.
-
-        :param url: the URL, in either string or an urllib3.Url instance.
-        :return: the urllib3.Url instance.
-        """
-        return url if isinstance(url, Url) else parse_url(url)
 
     @classmethod
     def from_json(cls, obj: Dict[str, Dict[str, str]]) -> "Dependency":

@@ -25,7 +25,7 @@ from random import uniform
 
 import pytest
 
-from aea.test_tools.test_cases import AEATestCaseMany
+from aea.test_tools.test_cases import AEATestCaseManyFlaky
 
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
@@ -50,7 +50,7 @@ from tests.conftest import (
 MAX_FLAKY_RERUNS_ETH -= 1
 
 
-class TestTacSkills(AEATestCaseMany):
+class TestTacSkills(AEATestCaseManyFlaky):
     """Test that tac skills work."""
 
     capture_log = True
@@ -88,7 +88,6 @@ class TestTacSkills(AEATestCaseMany):
         self.add_item("connection", "fetchai/p2p_libp2p:0.15.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.15.0")
         self.add_item("connection", "fetchai/soef:0.16.0")
-        self.remove_item("connection", "fetchai/stub:0.16.0")
         self.add_item("skill", "fetchai/tac_control:0.16.0")
         self.set_config("agent.default_ledger", FETCHAI)
         setting_path = "agent.default_routing"
@@ -143,7 +142,6 @@ class TestTacSkills(AEATestCaseMany):
             self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.15.0")
             self.add_item("connection", "fetchai/soef:0.16.0")
             self.add_item("connection", "fetchai/ledger:0.13.0")
-            self.remove_item("connection", "fetchai/stub:0.16.0")
             self.add_item("skill", "fetchai/tac_participation:0.17.0")
             self.add_item("skill", "fetchai/tac_negotiation:0.19.0")
             self.set_config("agent.default_ledger", FETCHAI)
@@ -309,7 +307,7 @@ class TestTacSkills(AEATestCaseMany):
         ), "Agents weren't successfully terminated."
 
 
-class TestTacSkillsContract(AEATestCaseMany, UseGanache):
+class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache):
     """Test that tac skills work."""
 
     capture_log = True
@@ -349,7 +347,6 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.15.0")
         self.add_item("connection", "fetchai/soef:0.16.0")
         self.add_item("connection", "fetchai/ledger:0.13.0")
-        self.remove_item("connection", "fetchai/stub:0.16.0")
         self.add_item("skill", "fetchai/tac_control_contract:0.18.0")
         self.set_config("agent.default_ledger", ETHEREUM)
         setting_path = "agent.default_routing"
@@ -422,7 +419,6 @@ class TestTacSkillsContract(AEATestCaseMany, UseGanache):
             self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.15.0")
             self.add_item("connection", "fetchai/soef:0.16.0")
             self.add_item("connection", "fetchai/ledger:0.13.0")
-            self.remove_item("connection", "fetchai/stub:0.16.0")
             self.add_item("skill", "fetchai/tac_participation:0.17.0")
             self.add_item("skill", "fetchai/tac_negotiation:0.19.0")
             self.set_config("agent.default_ledger", ETHEREUM)

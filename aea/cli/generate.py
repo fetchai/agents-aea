@@ -29,6 +29,7 @@ from aea.cli.utils.decorators import check_aea_project, clean_after, pass_ctx
 from aea.cli.utils.loggers import logger
 from aea.configurations.base import ProtocolSpecificationParseError, PublicId
 from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE, PROTOCOL
+from aea.helpers.io import open_file
 from aea.protocols.generator.base import ProtocolGenerator
 from aea.protocols.generator.common import load_protocol_specification
 
@@ -112,7 +113,8 @@ def _generate_item(ctx: Context, item_type: str, specification_path: str) -> Non
             PublicId(protocol_spec.author, protocol_spec.name, protocol_spec.version)
         )
         ctx.agent_loader.dump(
-            ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
+            ctx.agent_config,
+            open_file(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"),
         )
     except FileExistsError:
         raise click.ClickException(  # pragma: no cover

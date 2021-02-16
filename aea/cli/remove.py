@@ -51,6 +51,7 @@ from aea.configurations.constants import (
     SKILL,
 )
 from aea.configurations.manager import find_component_directory_from_component_id
+from aea.helpers.io import open_file
 
 
 @click.group()
@@ -299,7 +300,7 @@ def remove_unused_component_configurations(ctx: Context) -> Generator:
                     component_id.component_prefix
                 ]
 
-    with open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as f:
+    with open_file(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as f:
         ctx.agent_loader.dump(ctx.agent_config, f)
 
 

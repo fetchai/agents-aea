@@ -35,7 +35,6 @@ from pathlib import Path
 from threading import Thread
 from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple
 
-import pytest
 import yaml
 
 from aea.cli import cli
@@ -51,10 +50,12 @@ from aea.configurations.constants import (
     DEFAULT_OUTPUT_FILE_NAME,
     DEFAULT_PRIVATE_KEY_FILE,
     DEFAULT_REGISTRY_NAME,
+    LAUNCH_SUCCEED_MESSAGE,
 )
 from aea.configurations.loader import ConfigLoader, ConfigLoaders
 from aea.exceptions import enforce
 from aea.helpers.base import cd, send_control_c, win_popen_kwargs
+from aea.helpers.io import open_file
 from aea.mail.base import Envelope
 from aea.test_tools.click_testing import CliRunner, Result
 from aea.test_tools.constants import DEFAULT_AUTHOR
@@ -72,7 +73,6 @@ CLI_LOG_OPTION = ["-v", "OFF"]
 
 DEFAULT_PROCESS_TIMEOUT = 120
 DEFAULT_LAUNCH_TIMEOUT = 10
-LAUNCH_SUCCEED_MESSAGE = ("Start processing messages...",)
 
 
 class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
@@ -96,6 +96,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
     _is_teardown_class_called: bool = False
     capture_log: bool = False
     cli_log_options: List[str] = []
+    method_list: List[str] = []
 
     @classmethod
     def set_agent_context(cls, agent_name: str) -> None:
@@ -297,11 +298,11 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         def is_allowed_diff_in_agent_config(
             path_to_fetched_aea: str, path_to_manually_created_aea: str
         ) -> Tuple[bool, Dict[str, str], Dict[str, str]]:
-            with open(
+            with open_file(
                 os.path.join(path_to_fetched_aea, "aea-config.yaml"), "r"
             ) as file:
                 content1 = list(yaml.safe_load_all(file))[0]  # only load first page
-            with open(
+            with open_file(
                 os.path.join(path_to_manually_created_aea, "aea-config.yaml"), "r"
             ) as file:
                 content2 = list(yaml.safe_load_all(file))[0]
@@ -626,7 +627,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         :raises: exception if file does not exist
         """
         with cd(cls._get_cwd()):  # pragma: nocover
-            with open(private_key_filepath, "wt") as f:
+            with open_file(private_key_filepath, "wt") as f:
                 f.write(private_key)
 
     @classmethod
@@ -826,7 +827,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         :param timeout: the timeout to wait for launch to complete
         """
         missing_strings = cls.missing_from_output(
-            process, LAUNCH_SUCCEED_MESSAGE, timeout, is_terminating=False
+            process, (LAUNCH_SUCCEED_MESSAGE,), timeout, is_terminating=False
         )
 
         return missing_strings == []
@@ -852,13 +853,20 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
             PackageType.AGENT
         )
         configuration_file_path = Path(cls.t, agent_name, config_file_name)
-        with configuration_file_path.open() as file_input:
+        with open_file(configuration_file_path) as file_input:
             agent_config = loader.load(file_input)
         return agent_config
 
     @classmethod
     def setup_class(cls) -> None:
         """Set up the test class."""
+        cls.method_list = [
+            func
+            for func in dir(cls)
+            if callable(getattr(cls, func))
+            and not func.startswith("__")
+            and func.startswith("test_")
+        ]
         cls.runner = CliRunner()
         cls.old_cwd = Path(os.getcwd())
         cls.subprocesses = []
@@ -898,15 +906,6 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         cls._is_teardown_class_called = True
 
 
-@pytest.mark.integration
-class UseOef:  # pylint: disable=too-few-public-methods
-    """Inherit from this class to launch an OEF node."""
-
-    @pytest.fixture(autouse=True)
-    def _start_oef_node(self, network_node: Callable) -> None:
-        """Start an oef node."""
-
-
 class AEATestCaseEmpty(BaseAEATestCase):
     """
     Test case for a default AEA project.
@@ -933,6 +932,31 @@ class AEATestCaseEmpty(BaseAEATestCase):
         cls.agent_name = ""
 
 
+class AEATestCaseEmptyFlaky(AEATestCaseEmpty):
+    """
+    Test case for a default AEA project.
+
+    This test case will create a default AEA project.
+
+    Use for flaky tests with the flaky decorator.
+    """
+
+    run_count: int = 0
+
+    @classmethod
+    def setup_class(cls) -> None:
+        """Set up the test class."""
+        super(AEATestCaseEmptyFlaky, cls).setup_class()
+        if len(cls.method_list) > 1:  # pragma: nocover
+            raise ValueError(f"{cls.__name__} can only contain one test method!")
+        cls.run_count += 1
+
+    @classmethod
+    def teardown_class(cls) -> None:
+        """Teardown the test class."""
+        super(AEATestCaseEmptyFlaky, cls).teardown_class()
+
+
 class AEATestCaseMany(BaseAEATestCase):
     """Test case for many AEA projects."""
 
@@ -945,6 +969,29 @@ class AEATestCaseMany(BaseAEATestCase):
     def teardown_class(cls) -> None:
         """Teardown the test class."""
         super(AEATestCaseMany, cls).teardown_class()
+
+
+class AEATestCaseManyFlaky(AEATestCaseMany):
+    """
+    Test case for many AEA projects which are flaky.
+
+    Use for flaky tests with the flaky decorator.
+    """
+
+    run_count: int = 0
+
+    @classmethod
+    def setup_class(cls) -> None:
+        """Set up the test class."""
+        super(AEATestCaseManyFlaky, cls).setup_class()
+        if len(cls.method_list) > 1:  # pragma: nocover
+            raise ValueError(f"{cls.__name__} can only contain one test method!")
+        cls.run_count += 1
+
+    @classmethod
+    def teardown_class(cls) -> None:
+        """Teardown the test class."""
+        super(AEATestCaseManyFlaky, cls).teardown_class()
 
 
 class AEATestCase(BaseAEATestCase):

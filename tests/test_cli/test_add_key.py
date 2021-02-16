@@ -312,7 +312,7 @@ def test_add_key_fails_bad_ledger_id():
         os.chdir(oldcwd)
 
 
-@mock.patch("builtins.open", mock.mock_open())
+@mock.patch("aea.cli.add_key.open_file", mock.mock_open())
 class AddKeyTestCase(TestCase):
     """Test case for _add_key method."""
 
@@ -322,7 +322,7 @@ class AddKeyTestCase(TestCase):
         _try_add_key(ctx, "type", "filepath")
 
 
-@mock.patch("builtins.open", mock.mock_open())
+@mock.patch("aea.cli.add_key.open_file", mock.mock_open())
 class AddKeyConnectionTestCase(TestCase):
     """Test case for _add_key method."""
 

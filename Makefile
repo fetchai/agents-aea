@@ -57,15 +57,14 @@ security:
 
 .PHONY: static
 static:
-	mypy aea packages --disallow-untyped-defs
-	mypy benchmark examples --check-untyped-defs
-	mypy scripts tests
+	mypy aea benchmark examples packages scripts --disallow-untyped-defs
+	mypy tests
 
 .PHONY: package_checks
 package_checks:
 	python scripts/generate_ipfs_hashes.py --check
 	python scripts/check_package_versions_in_docs.py
-	python scripts/check_package_dependencies.py
+	python scripts/check_packages.py
 
 .PHONY: docs
 docs:

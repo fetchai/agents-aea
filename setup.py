@@ -21,7 +21,7 @@ import os
 import re
 from typing import Dict
 
-from setuptools import find_packages, setup
+from setuptools import find_packages, setup  # type: ignore
 
 PACKAGE_NAME = "aea"
 
@@ -36,18 +36,26 @@ def get_all_extras() -> Dict:
         "web3==5.12.0",
         "ipfshttpclient==0.6.1",
         "eth-account==0.5.2",
+        "eth-keys==0.3.3",
+        "eth-typing==2.2.2",
+        "lru-dict==1.1.6",
     ]
 
-    crypto_deps = [*fetch_ledger_deps, *ethereum_ledger_deps, *cosmos_ledger_deps]
+    crypto_deps = [
+        *fetch_ledger_deps,
+        *ethereum_ledger_deps,
+        *cosmos_ledger_deps,
+    ]
 
     cli_deps = [
         "click",
         "pyyaml>=4.2b1",
         "jsonschema>=3.0.0",
+        "packaging>=20.3",
         *crypto_deps,
     ]
 
-    cli_gui = ["flask", "connexion[swagger-ui]>=2.4.0", "docker", *cli_deps]
+    cli_gui = ["flask", "connexion[swagger-ui]>=2.4.0", *cli_deps]
 
     extras = {
         "cli": cli_deps,
@@ -56,6 +64,7 @@ def get_all_extras() -> Dict:
         "ethereum": ethereum_ledger_deps,
         "cosmos": cosmos_ledger_deps,
         "crypto": crypto_deps,
+        "test_tools": cli_deps,
     }
 
     # add "all" extras
@@ -79,7 +88,7 @@ base_deps = [
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))
-about = {}
+about: Dict[str, str] = {}
 with open(os.path.join(here, PACKAGE_NAME, "__version__.py"), "r") as f:
     exec(f.read(), about)
 
@@ -99,47 +108,48 @@ def parse_readme():
     return "\n".join([header, get_started, cite])
 
 
-setup(
-    name=about["__title__"],
-    description=about["__description__"],
-    version=about["__version__"],
-    author=about["__author__"],
-    url=about["__url__"],
-    long_description=parse_readme(),
-    long_description_content_type="text/markdown",
-    package_data={"aea": ["py.typed"]},
-    packages=find_packages(include=["aea*"]),
-    classifiers=[
-        "Environment :: Console",
-        "Environment :: Web Environment",
-        "Development Status :: 2 - Pre-Alpha",
-        "Intended Audience :: Developers",
-        "License :: OSI Approved :: Apache Software License",
-        "Natural Language :: English",
-        "Operating System :: MacOS",
-        "Operating System :: Microsoft",
-        "Operating System :: Unix",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Topic :: Communications",
-        "Topic :: Internet",
-        "Topic :: Scientific/Engineering",
-        "Topic :: Software Development",
-        "Topic :: System",
-    ],
-    install_requires=base_deps,
-    tests_require=["tox"],
-    extras_require=all_extras,
-    entry_points={"console_scripts": ["aea=aea.cli:cli"]},
-    zip_safe=False,
-    include_package_data=True,
-    license=about["__license__"],
-    python_requires=">=3.6",
-    keywords="aea autonomous-economic-agents agent-framework multi-agent-systems multi-agent cryptocurrency cryptocurrencies dezentralized dezentralized-network fetch-ai",
-    project_urls={
-        "Bug Reports": "https://github.com/fetchai/agents-aea/issues",
-        "Source": "https://github.com/fetchai/agents-aea",
-    },
-)
+if __name__ == "__main__":
+    setup(
+        name=about["__title__"],
+        description=about["__description__"],
+        version=about["__version__"],
+        author=about["__author__"],
+        url=about["__url__"],
+        long_description=parse_readme(),
+        long_description_content_type="text/markdown",
+        package_data={"aea": ["py.typed"]},
+        packages=find_packages(include=["aea*"]),
+        classifiers=[
+            "Environment :: Console",
+            "Environment :: Web Environment",
+            "Development Status :: 2 - Pre-Alpha",
+            "Intended Audience :: Developers",
+            "License :: OSI Approved :: Apache Software License",
+            "Natural Language :: English",
+            "Operating System :: MacOS",
+            "Operating System :: Microsoft",
+            "Operating System :: Unix",
+            "Programming Language :: Python :: 3.6",
+            "Programming Language :: Python :: 3.7",
+            "Programming Language :: Python :: 3.8",
+            "Programming Language :: Python :: 3.9",
+            "Topic :: Communications",
+            "Topic :: Internet",
+            "Topic :: Scientific/Engineering",
+            "Topic :: Software Development",
+            "Topic :: System",
+        ],
+        install_requires=base_deps,
+        tests_require=["tox"],
+        extras_require=all_extras,
+        entry_points={"console_scripts": ["aea=aea.cli:cli"]},
+        zip_safe=False,
+        include_package_data=True,
+        license=about["__license__"],
+        python_requires=">=3.6",
+        keywords="aea autonomous-economic-agents agent-framework multi-agent-systems multi-agent cryptocurrency cryptocurrencies dezentralized dezentralized-network fetch-ai",
+        project_urls={
+            "Bug Reports": "https://github.com/fetchai/agents-aea/issues",
+            "Source": "https://github.com/fetchai/agents-aea",
+        },
+    )

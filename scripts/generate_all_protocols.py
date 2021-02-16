@@ -43,11 +43,20 @@ from io import StringIO
 from itertools import chain
 from operator import methodcaller
 from pathlib import Path
-from typing import Iterator, List, Match, Optional, Tuple, cast
+from typing import Any, Iterator, List, Match, Optional, Tuple, cast
 
-from aea.configurations.base import ComponentType, ProtocolSpecification
-from aea.configurations.constants import LIBPROTOC_VERSION
-from aea.configurations.loader import ConfigLoader, load_component_configuration
+import semver
+
+from aea.cli.registry.utils import download_file, extract, request_api
+from aea.common import JSONLike
+from aea.configurations.base import ComponentType, ProtocolConfig, ProtocolSpecification
+from aea.configurations.constants import DEFAULT_PROTOCOL_CONFIG_FILE, LIBPROTOC_VERSION
+from aea.configurations.data_types import PackageId, PublicId
+from aea.configurations.loader import (
+    ConfigLoader,
+    ConfigLoaders,
+    load_component_configuration,
+)
 from scripts.common import check_working_tree_is_dirty
 
 
@@ -86,18 +95,18 @@ def _setup_logger() -> logging.Logger:
 logger = _setup_logger()
 
 
-def log(message: str, level: int = logging.INFO):
+def log(message: str, level: int = logging.INFO) -> None:
     """Produce a logging message."""
     logger.log(level, message)
 
 
-def enforce(condition, message=""):
+def enforce(condition: bool, message: str = "") -> None:
     """Custom assertion."""
     if not condition:
         raise AssertionError(message)
 
 
-def run_cli(*args, **kwargs):
+def run_cli(*args: Any, **kwargs: Any) -> None:
     """Run a CLI command."""
     log(f"Calling command {args} with kwargs {kwargs}")
     return_code = subprocess.check_call(args, **kwargs)  # nosec
@@ -107,7 +116,7 @@ def run_cli(*args, **kwargs):
     )
 
 
-def run_aea(*args, **kwargs) -> None:
+def run_aea(*args: Any, **kwargs: Any) -> None:
     """
     Run an AEA command.
 
@@ -133,7 +142,7 @@ class AEAProject:
         self.name = name
         self.parent_dir = parent_dir
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         """Create and enter into the project."""
         self.old_cwd = os.getcwd()
         self.temp_dir = tempfile.mkdtemp(dir=self.parent_dir)
@@ -142,7 +151,7 @@ class AEAProject:
         run_aea("create", "--local", "--empty", self.name, "--author", "fetchai")
         os.chdir(self.name)
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:  # type: ignore
         """Exit the context manager."""
         os.chdir(self.old_cwd)
         shutil.rmtree(self.temp_dir)
@@ -181,7 +190,9 @@ def _get_protocol_specification_from_readme(package_path: Path) -> str:
     return specification_content
 
 
-def _save_specification_in_temporary_file(name: str, specification_content: str):
+def _save_specification_in_temporary_file(
+    name: str, specification_content: str
+) -> None:
     """
     Save the specification in a temporary file.
 
@@ -208,7 +219,7 @@ def _generate_protocol(package_path: Path) -> None:
     run_aea(*cmd)
 
 
-def run_isort_and_black(directory: Path, **kwargs):
+def run_isort_and_black(directory: Path, **kwargs: Any) -> None:
     """Run black and isort against a directory."""
     run_cli(
         sys.executable, "-m", "black", "--verbose", str(directory.absolute()), **kwargs,
@@ -225,7 +236,7 @@ def run_isort_and_black(directory: Path, **kwargs):
     )
 
 
-def replace_in_directory(name: str, replacement_pairs: List[Tuple[str, str]]):
+def replace_in_directory(name: str, replacement_pairs: List[Tuple[str, str]]) -> None:
     """
     Replace text in directory.
 
@@ -286,7 +297,7 @@ def _update_original_protocol(package_path: Path) -> None:
     shutil.copytree(Path(PROTOCOLS_PLURALS, package_path.name), package_path)
 
 
-def _fingerprint_protocol(name: str):
+def _fingerprint_protocol(name: str) -> None:
     """Fingerprint the generated (and modified) protocol."""
     log(f"Fingerprint the generated (and modified) protocol '{name}'")
     protocol_config = load_component_configuration(
@@ -299,7 +310,7 @@ def _fingerprint_protocol(name: str):
 
 def _process_packages_protocol(package_path: Path) -> None:
     """
-    Process protocol pacakge from local registry.
+    Process protocol package from local registry.
 
     It means:
     - extract protocol specification from README
@@ -321,7 +332,7 @@ def _process_packages_protocol(package_path: Path) -> None:
     _update_original_protocol(package_path)
 
 
-def _check_preliminaries():
+def _check_preliminaries() -> None:
     """Check that the required packages are installed."""
     try:
         import aea  # noqa: F401  # pylint: disable=import-outside-toplevel,unused-import
@@ -364,7 +375,83 @@ def _process_test_protocol(specification: Path, package_path: Path) -> None:
     _update_original_protocol(package_path)
 
 
-def main():
+def download_package(package_id: PackageId, destination_path: str) -> None:
+    """Download a package into a directory."""
+    api_path = f"/{package_id.package_type.to_plural()}/{package_id.author}/{package_id.name}/{package_id.public_id.LATEST_VERSION}"
+    resp = cast(JSONLike, request_api("GET", api_path))
+    file_url = cast(str, resp["file"])
+    filepath = download_file(file_url, destination_path)
+    extract(filepath, destination_path)
+
+
+def _bump_protocol_specification_id(
+    package_path: Path, configuration: ProtocolConfig
+) -> None:
+    """Bump spec id version."""
+    spec_id: PublicId = configuration.protocol_specification_id  # type: ignore
+    old_version = semver.VersionInfo.parse(spec_id.version)
+    new_version = str(old_version.bump_minor())
+    new_spec_id = PublicId(spec_id.author, spec_id.name, new_version)
+    configuration.protocol_specification_id = new_spec_id
+    with (package_path / DEFAULT_PROTOCOL_CONFIG_FILE).open("w") as file_output:
+        ConfigLoaders.from_package_type(configuration.package_type).dump(
+            configuration, file_output
+        )
+
+
+def _bump_protocol_specification_id_if_needed(package_path: Path) -> None:
+    """
+    Check if protocol specification id needs to be bumped.
+
+    Workflow:
+    - extract protocol specification file from README
+    - download latest protocol id and extract its protocol specification as above
+    - if different, bump protocol specification version, else don't.
+
+    :param package_path: path to the protocol package.
+    :return: None
+    """
+    # extract protocol specification file from README
+    current_specification_content = _get_protocol_specification_from_readme(
+        package_path
+    )
+
+    # download latest protocol id and extract its protocol specification as above
+    configuration: ProtocolConfig = cast(
+        ProtocolConfig,
+        load_component_configuration(ComponentType.PROTOCOL, package_path),
+    )
+    temp_directory = Path(tempfile.mkdtemp())
+    download_package(configuration.package_id, str(temp_directory))
+    downloaded_package_directory = temp_directory / configuration.name
+    old_specification_content = _get_protocol_specification_from_readme(
+        downloaded_package_directory
+    )
+    old_configuration: ProtocolConfig = cast(
+        ProtocolConfig,
+        load_component_configuration(
+            ComponentType.PROTOCOL, downloaded_package_directory
+        ),
+    )
+
+    # if different, bump protocol specification version, else don't.
+    public_id_version_is_newer = (
+        old_configuration.public_id.package_version  # type: ignore
+        <= configuration.public_id.package_version
+    )
+    content_is_different = current_specification_content != old_specification_content
+    if public_id_version_is_newer and content_is_different:
+        log(
+            f"Bumping protocol specification id from '{old_configuration.protocol_specification_id}' to '{configuration.protocol_specification_id}'"
+        )
+        _bump_protocol_specification_id(package_path, configuration)
+        return
+    log(
+        "Protocol specification id not bumped - content is not different, or version is not newer."
+    )
+
+
+def main() -> None:
     """Run the script."""
     _check_preliminaries()
 
@@ -384,6 +471,7 @@ def main():
         for package_path in all_protocols:
             log("=" * 100)
             log(f"Processing protocol at path {package_path}")
+            _bump_protocol_specification_id_if_needed(package_path)
             _process_packages_protocol(package_path)
 
 
