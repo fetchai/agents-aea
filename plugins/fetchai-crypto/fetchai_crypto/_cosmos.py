@@ -258,7 +258,7 @@ class CosmosCrypto(Crypto[SigningKey]):
     identifier = _COSMOS
     helper = CosmosHelper
 
-    def __init__(self, private_key_path: Optional[str] = None):
+    def __init__(self, private_key_path: Optional[str] = None) -> None:
         """
         Instantiate an ethereum crypto object.
 
@@ -433,7 +433,7 @@ class _CosmosApi(LedgerApi):
 
     identifier = _COSMOS
 
-    def __init__(self, **kwargs: str) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize the Cosmos ledger APIs."""
         self._api = None
         self.network_address = kwargs.pop("address", DEFAULT_ADDRESS)
@@ -442,7 +442,7 @@ class _CosmosApi(LedgerApi):
         self.cli_command = kwargs.pop("cli_command", DEFAULT_CLI_COMMAND)
 
     @property
-    def api(self) -> None:
+    def api(self) -> Any:
         """Get the underlying API object."""
         return self._api
 
