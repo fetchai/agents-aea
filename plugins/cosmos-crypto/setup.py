@@ -30,7 +30,7 @@ setup(
     license="Apache-2.0",
     description="Python package wrapping the public and private key cryptography and ledger api of Cosmos.",
     packages=find_packages(include=["cosmos_crypto*"]),
-    install_requires=["aea>=0.9.0,<0.10.0", "ecdsa==0.15", "bech32==1.2.0"],
+    install_requires=["aea>=0.10.0,<0.11.0", "ecdsa>=0.16", "bech32==1.2.0"],
     entry_points={
         "aea.cryptos": ["cosmos = cosmos_crypto:CosmosCrypto"],
         "aea.ledger_apis": ["cosmos = cosmos_crypto:CosmosApi"],
