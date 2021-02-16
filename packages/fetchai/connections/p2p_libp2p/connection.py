@@ -137,6 +137,7 @@ class Libp2pNode:
         agent_record: AgentRecord,
         key: Crypto,
         module_path: str,
+        data_dir: str,
         clargs: Optional[List[str]] = None,
         uri: Optional[Uri] = None,
         public_uri: Optional[Uri] = None,
@@ -192,6 +193,13 @@ class Libp2pNode:
         # peer configuration
         self.peer_registration_delay = peer_registration_delay
         self.records_storage_path = records_storage_path
+        if (
+            self.records_storage_path is not None
+            and not Path(self.records_storage_path).is_absolute()
+        ):
+            self.records_storage_path = os.path.abspath(
+                os.path.join(data_dir, self.records_storage_path)
+            )
 
         # node startup
         self.source = os.path.abspath(module_path)
@@ -202,11 +210,12 @@ class Libp2pNode:
 
         # log file
         self.log_file = log_file if log_file is not None else LIBP2P_NODE_LOG_FILE
-        self.log_file = os.path.join(os.path.abspath(os.getcwd()), self.log_file)
-
+        if not Path(self.log_file).is_absolute():
+            self.log_file = os.path.abspath(os.path.join(data_dir, self.log_file))
         # env file
         self.env_file = env_file if env_file is not None else LIBP2P_NODE_ENV_FILE
-        self.env_file = os.path.join(os.path.abspath(os.getcwd()), self.env_file)
+        if not Path(self.log_file).is_absolute():
+            self.env_file = os.path.abspath(os.path.join(data_dir, self.env_file))
 
         # named pipes (fifos)
         self.pipe = None  # type: Optional[IPCChannel]
@@ -566,6 +575,7 @@ class P2PLibp2pConnection(Connection):
             agent_record,
             key,
             module_dir,
+            self.data_dir,
             LIBP2P_NODE_CLARGS,
             uri,
             public_uri,
