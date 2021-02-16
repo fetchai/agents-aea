@@ -93,9 +93,9 @@ class StubConnection(Connection):
             OUTPUT_FILE_KEY, DEFAULT_OUTPUT_FILE_NAME
         )
         if not Path(input_file).is_absolute():
-            input_file = os.path.abspath(os.path.join(self.data_dir, input_file))
+            input_file = os.path.join(self.data_dir, input_file)
         if not Path(output_file).is_absolute():
-            output_file = os.path.abspath(os.path.join(self.data_dir, output_file))
+            output_file = os.path.join(self.data_dir, output_file)
         input_file_path = Path(input_file)
         output_file_path = Path(output_file)
         if not input_file_path.exists():

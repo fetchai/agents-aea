@@ -255,8 +255,8 @@ class SOEFChannel:
         self._token_storage_path = token_storage_path
         if self._token_storage_path is not None:
             if not Path(self._token_storage_path).is_absolute():
-                self._token_storage_path = os.path.abspath(
-                    os.path.join(data_dir, self._token_storage_path)
+                self._token_storage_path = os.path.join(
+                    data_dir, self._token_storage_path
                 )
             Path(self._token_storage_path).touch()
         self.declared_name = uuid4().hex
