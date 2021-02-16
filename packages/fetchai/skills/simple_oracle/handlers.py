@@ -203,7 +203,7 @@ class LedgerApiHandler(Handler):
                 strategy.is_oracle_role_granted = is_transaction_successful
                 if is_transaction_successful:
                     self.context.logger.info("Oracle role successfully granted!")
-                else:
+                else:  # pragma: nocover
                     self.context.logger.info("Failed to grant oracle role")
             elif transaction_label == "update":
                 self.context.logger.info("Oracle value successfully updated!")
@@ -212,7 +212,7 @@ class LedgerApiHandler(Handler):
                     self.context.behaviours.simple_oracle_behaviour.update_prometheus_metric(
                         metric_name, "inc", 1.0, {}
                     )
-            else:
+            else:  # pragma: nocover
                 self.context.logger.error("unexpected transaction receipt!")
         else:
             self.context.logger.error(

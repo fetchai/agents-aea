@@ -67,7 +67,7 @@ class HttpHandler(Handler):
             and message.status_code == 200
         ):
             self._handle_response(message)
-        else:
+        else:  # pragma: nocover
             self.context.logger.info(
                 "got unexpected http response: code = " + str(message.status_code)
             )
@@ -88,14 +88,14 @@ class HttpHandler(Handler):
             .get("block", {})
             .get("header", {})
             .get("entropy", {})
-            .get("group_signature", {})
+            .get("group_signature", None)
         )
         block_hash = msg_body.get("result", {}).get("block_id", {}).get("hash", {})
         block_height_str = (
             msg_body.get("result", {})
             .get("block", {})
             .get("header", {})
-            .get("height", {})
+            .get("height", None)
         )
 
         if block_height_str:
@@ -105,7 +105,7 @@ class HttpHandler(Handler):
 
         if entropy is None:
             self.context.logger.info("entropy not present")
-        elif block_height is None:
+        elif block_height is None:  # pragma: nocover
             self.context.logger.info("block height not present")
         else:
             beacon_data = {

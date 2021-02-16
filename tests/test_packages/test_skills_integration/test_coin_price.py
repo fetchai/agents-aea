@@ -89,7 +89,7 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
         self.run_install()
 
         process = self.run_agent()
-        is_running = self.is_running(process)
+        is_running = self.is_running(process, timeout=30)
         assert is_running, "AEA not running within timeout!"
 
         response = requests.get("http://127.0.0.1:8000/price")

@@ -88,7 +88,7 @@ class HttpHandler(Handler):
             self._handle_request(message, http_dialogue)
         else:
             self.context.logger.info(
-                "got unexpected http message: code = " + str(message.status_code)
+                f"got unexpected http message: code = {message.status_code}"
             )
 
     def _handle_response(self, http_msg: HttpMessage) -> None:
@@ -235,7 +235,7 @@ class PrometheusHandler(Handler):
             self.context.logger.debug(
                 f"Prometheus response ({message.code}): {message.message}"
             )
-        else:
+        else:  # pragma: nocover
             self.context.logger.debug(
                 f"got unexpected prometheus message: Performative = {PrometheusMessage.Performative}"
             )

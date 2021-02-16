@@ -18,8 +18,10 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests of the behaviour classes of the simple oracle client skill."""
 
+import logging
 from pathlib import Path
 from typing import cast
+from unittest.mock import patch
 
 from aea.test_tools.test_skill import BaseSkillTestCase
 
@@ -76,7 +78,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         )
         assert has_attributes, error_str
 
-    def test_setup_with_contract_config(self):
+    def test_setup_with_contract_set(self):
         """Test the setup method of the simple_oracle_client behaviour for existing contract."""
         strategy = cast(Strategy, self.simple_oracle_client_behaviour.context.strategy)
         strategy.client_contract_address = DEFAULT_ADDRESS
@@ -85,12 +87,25 @@ class TestSkillBehaviour(BaseSkillTestCase):
         strategy.is_client_contract_deployed = True
         strategy.is_oracle_contract_set = True
 
-        self.simple_oracle_client_behaviour.setup()
+        with patch.object(
+            self.simple_oracle_client_behaviour.context.logger, "log"
+        ) as mock_logger:
+            self.simple_oracle_client_behaviour.setup()
+        mock_logger.assert_any_call(
+            logging.INFO, "Fetch oracle client contract address already added",
+        )
         self.assert_quantity_in_outbox(0)
 
     def test_act_pre_deploy(self):
         """Test the act method of the simple_oracle_client behaviour before contract is deployed."""
-        self.simple_oracle_client_behaviour.act()
+
+        with patch.object(
+            self.simple_oracle_client_behaviour.context.logger, "log"
+        ) as mock_logger:
+            self.simple_oracle_client_behaviour.act()
+        mock_logger.assert_any_call(
+            logging.INFO, "Oracle client contract not yet deployed",
+        )
         self.assert_quantity_in_outbox(0)
 
     def test_act_approve_transactions(self):
@@ -128,6 +143,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
 
         self.simple_oracle_client_behaviour.act()
         self.assert_quantity_in_outbox(1)
+        assert strategy.is_oracle_contract_set
 
         msg = cast(ContractApiMessage, self.get_message_from_outbox())
         has_attributes, error_str = self.message_has_attributes(

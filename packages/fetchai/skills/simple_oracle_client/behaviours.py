@@ -32,11 +32,9 @@ from packages.fetchai.contracts.oracle_client.contract import (
     PUBLIC_ID as CLIENT_CONTRACT_PUBLIC_ID,
 )
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
-from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.skills.simple_oracle_client.dialogues import (
     ContractApiDialogue,
     ContractApiDialogues,
-    LedgerApiDialogues,
 )
 from packages.fetchai.skills.simple_oracle_client.strategy import Strategy
 
@@ -201,29 +199,6 @@ class SimpleOracleClientBehaviour(TickerBehaviour):
             message=contract_api_msg, context=envelope_context
         )
         self.context.logger.info("requesting query transaction...")
-
-    def _get_balance(self) -> None:
-        """
-        Request balance of agent account by sending a message to the ledger API
-
-        :return: None
-        """
-        strategy = cast(Strategy, self.context.strategy)
-        ledger_api_dialogues = cast(
-            LedgerApiDialogues, self.context.ledger_api_dialogues
-        )
-        ledger_api_msg, _ = ledger_api_dialogues.create(
-            counterparty=str(LEDGER_API_ADDRESS),
-            performative=LedgerApiMessage.Performative.GET_BALANCE,
-            ledger_id=strategy.ledger_id,
-            address=cast(str, self.context.agent_addresses.get(strategy.ledger_id)),
-        )
-        envelope_context = EnvelopeContext(
-            skill_id=self.context.skill_id, connection_id=LEDGER_API_ADDRESS
-        )
-        self.context.outbox.put_message(
-            message=ledger_api_msg, context=envelope_context
-        )
 
     def teardown(self) -> None:
         """

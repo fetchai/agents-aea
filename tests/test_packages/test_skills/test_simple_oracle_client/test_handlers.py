@@ -27,9 +27,14 @@ from aea.helpers.transaction.base import Terms
 from aea.protocols.dialogue.base import DialogueMessage
 from aea.test_tools.test_skill import BaseSkillTestCase
 
+from packages.fetchai.connections.ledger.base import (
+    CONNECTION_ID as LEDGER_CONNECTION_PUBLIC_ID,
+)
+from packages.fetchai.protocols.contract_api.custom_types import Kwargs
 from packages.fetchai.protocols.contract_api.custom_types import (
     Kwargs as ContractApiKwargs,
 )
+from packages.fetchai.protocols.contract_api.custom_types import State
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.ledger_api.custom_types import (
     SignedTransaction,
@@ -43,11 +48,18 @@ from packages.fetchai.skills.simple_oracle_client.behaviours import (
     SimpleOracleClientBehaviour,
 )
 from packages.fetchai.skills.simple_oracle_client.dialogues import (
+    ContractApiDialogue,
     ContractApiDialogues,
+    LedgerApiDialogue,
     LedgerApiDialogues,
+    SigningDialogue,
     SigningDialogues,
 )
-from packages.fetchai.skills.simple_oracle_client.handlers import LedgerApiHandler
+from packages.fetchai.skills.simple_oracle_client.handlers import (
+    ContractApiHandler,
+    LedgerApiHandler,
+    SigningHandler,
+)
 from packages.fetchai.skills.simple_oracle_client.strategy import Strategy
 
 from tests.conftest import ROOT_DIR
@@ -106,6 +118,15 @@ class TestLedgerApiHandler(BaseSkillTestCase):
             DialogueMessage(
                 LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
                 {"transaction_digest": TransactionDigest(LEDGER_ID, "some_digest")},
+            ),
+            DialogueMessage(
+                LedgerApiMessage.Performative.GET_STATE,
+                {
+                    "ledger_id": LEDGER_ID,
+                    "callable": "some_callable",
+                    "args": (),
+                    "kwargs": LedgerApiMessage.Kwargs({}),
+                },
             ),
         )
         cls.list_of_contract_api_messages = (
@@ -377,7 +398,401 @@ class TestLedgerApiHandler(BaseSkillTestCase):
 
         self.assert_quantity_in_outbox(0)
 
+    def test__handle_error(self):
+        """Test handling an error message"""
+        # setup
+        dialogue = self.prepare_skill_dialogue(
+            self.ledger_api_dialogues, self.list_of_ledger_api_messages[2:3]
+        )
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
+            dialogue=dialogue, performative=LedgerApiMessage.Performative.ERROR, code=1,
+        )
+
+        # operation
+        with patch.object(self.ledger_api_handler.context.logger, "log") as mock_logger:
+            self.ledger_api_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received ledger_api error message={incoming_message} in dialogue={dialogue}.",
+        )
+
+        self.assert_quantity_in_outbox(0)
+
+    def test__handle_invalid(self):
+        """Test handling an invalid performative"""
+        # setup
+        dialogue = self.prepare_skill_dialogue(
+            self.ledger_api_dialogues, self.list_of_ledger_api_messages[3:4]
+        )
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
+            dialogue=dialogue,
+            performative=LedgerApiMessage.Performative.STATE,
+            ledger_id=LEDGER_ID,
+            state=LedgerApiMessage.State(LEDGER_ID, {}),
+        )
+
+        # operation
+        with patch.object(self.ledger_api_handler.context.logger, "log") as mock_logger:
+            self.ledger_api_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.WARNING,
+            f"cannot handle ledger_api message of performative={incoming_message.performative} in dialogue={dialogue}.",
+        )
+
+        self.assert_quantity_in_outbox(0)
+
     def test_teardown(self):
         """Test the teardown method of the ledger_api handler."""
         assert self.ledger_api_handler.teardown() is None
+        self.assert_quantity_in_outbox(0)
+
+
+class TestContractApiHandler(BaseSkillTestCase):
+    """Test contract_api handler of simple oracle client."""
+
+    path_to_skill = Path(
+        ROOT_DIR, "packages", "fetchai", "skills", "simple_oracle_client"
+    )
+
+    @classmethod
+    def setup(cls):
+        """Setup the test class."""
+        super().setup()
+        cls.contract_api_handler = cast(
+            ContractApiHandler, cls._skill.skill_context.handlers.contract_api
+        )
+        cls.strategy = cast(Strategy, cls._skill.skill_context.strategy)
+        cls.logger = cls.contract_api_handler.context.logger
+
+        cls.contract_api_dialogues = cast(
+            ContractApiDialogues, cls._skill.skill_context.contract_api_dialogues
+        )
+
+        cls.contract_id = "some_contract_id"
+        cls.contract_address = "some_contract_address,"
+        cls.callable = "some_callable"
+        cls.kwargs = Kwargs({"some_key": "some_value"})
+
+        cls.state = State("some_ledger_id", {"some_key": "some_value"})
+        cls.terms = Terms(
+            ledger_id="some_ledger_id",
+            sender_address="some_sender_address",
+            counterparty_address="some_counterparty",
+            amount_by_currency_id={"1": -10},
+            quantities_by_good_id={},
+            is_sender_payable_tx_fee=True,
+            nonce="some_none",
+            fee_by_currency_id={"1": 100},
+        )
+        cls.list_of_contract_api_messages = (
+            DialogueMessage(
+                ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
+                {
+                    "ledger_id": LEDGER_ID,
+                    "contract_id": cls.contract_id,
+                    "callable": cls.callable,
+                    "kwargs": cls.kwargs,
+                },
+            ),
+        )
+        cls.info = {"ethereum_address": "some_ethereum_address"}
+
+    def test_setup(self):
+        """Test the setup method of the contract_api handler."""
+        assert self.contract_api_handler.setup() is None
+        self.assert_quantity_in_outbox(0)
+
+    def test_handle_unidentified_dialogue(self):
+        """Test the _handle_unidentified_dialogue method of the contract_api handler."""
+        # setup
+        incorrect_dialogue_reference = ("", "")
+        incoming_message = self.build_incoming_message(
+            message_type=ContractApiMessage,
+            dialogue_reference=incorrect_dialogue_reference,
+            performative=ContractApiMessage.Performative.STATE,
+            state=self.state,
+        )
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger:
+            self.contract_api_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received invalid contract_api message={incoming_message}, unidentified dialogue.",
+        )
+
+    def test_handle_raw_transaction(self):
+        """Test the _handle_raw_transaction method of the contract_api handler."""
+        # setup
+        contract_api_dialogue = cast(
+            ContractApiDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.contract_api_dialogues,
+                messages=self.list_of_contract_api_messages[:1],
+            ),
+        )
+        contract_api_dialogue.terms = self.terms
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
+            dialogue=contract_api_dialogue,
+            performative=ContractApiMessage.Performative.RAW_TRANSACTION,
+            raw_transaction=ContractApiMessage.RawTransaction(LEDGER_ID, {}),
+        )
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger:
+            self.contract_api_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.INFO, f"received raw transaction={incoming_message}",
+        )
+        mock_logger.assert_any_call(
+            logging.INFO,
+            "proposing the transaction to the decision maker. Waiting for confirmation ...",
+        )
+
+        self.assert_quantity_in_decision_making_queue(1)
+
+    def test_handle_error(self):
+        """Test the _handle_error method of the contract_api handler."""
+        # setup
+        contract_api_dialogue = cast(
+            ContractApiDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.contract_api_dialogues,
+                messages=self.list_of_contract_api_messages[:1],
+            ),
+        )
+
+        incoming_message = cast(
+            ContractApiMessage,
+            self.build_incoming_message_for_skill_dialogue(
+                dialogue=contract_api_dialogue,
+                performative=ContractApiMessage.Performative.ERROR,
+                data=b"some_data",
+            ),
+        )
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger:
+            self.contract_api_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received ledger_api error message={incoming_message} in dialogue={contract_api_dialogue}.",
+        )
+
+    def test_handle_invalid(self):
+        """Test the _handle_invalid method of the contract_api handler."""
+        # setup
+        invalid_performative = ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION
+        incoming_message = self.build_incoming_message(
+            message_type=ContractApiMessage,
+            dialogue_reference=("1", ""),
+            performative=invalid_performative,
+            ledger_id=LEDGER_ID,
+            contract_id=self.contract_id,
+            callable=self.callable,
+            kwargs=self.kwargs,
+        )
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger:
+            self.contract_api_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.WARNING,
+            f"cannot handle contract_api message of performative={invalid_performative} in dialogue={self.contract_api_dialogues.get_dialogue(incoming_message)}.",
+        )
+
+    def test_teardown(self):
+        """Test the teardown method of the contract_api handler."""
+        assert self.contract_api_handler.teardown() is None
+        self.assert_quantity_in_outbox(0)
+
+
+class TestSigningHandler(BaseSkillTestCase):
+    """Test signing handler of simple oracle client."""
+
+    path_to_skill = Path(
+        ROOT_DIR, "packages", "fetchai", "skills", "simple_oracle_client"
+    )
+
+    @classmethod
+    def setup(cls):
+        """Setup the test class."""
+        super().setup()
+        cls.signing_handler = cast(
+            SigningHandler, cls._skill.skill_context.handlers.signing
+        )
+        cls.ledger_api_dialogues = cast(
+            LedgerApiDialogues, cls._skill.skill_context.ledger_api_dialogues
+        )
+        cls.signing_dialogues = cast(
+            SigningDialogues, cls._skill.skill_context.signing_dialogues
+        )
+        cls.logger = cls.signing_handler.context.logger
+
+        cls.terms = Terms(
+            "some_ledger_id",
+            cls._skill.skill_context.agent_address,
+            "counterprty",
+            {"currency_id": 50},
+            {"good_id": -10},
+            "some_nonce",
+        )
+        cls.list_of_signing_messages = (
+            DialogueMessage(
+                SigningMessage.Performative.SIGN_TRANSACTION,
+                {
+                    "terms": cls.terms,
+                    "raw_transaction": SigningMessage.RawTransaction(
+                        "some_ledger_id", {"some_key": "some_value"}
+                    ),
+                },
+            ),
+        )
+
+    def test_setup(self):
+        """Test the setup method of the signing handler."""
+        assert self.signing_handler.setup() is None
+        self.assert_quantity_in_outbox(0)
+
+    def test_handle_unidentified_dialogue(self):
+        """Test the _handle_unidentified_dialogue method of the signing handler."""
+        # setup
+        incorrect_dialogue_reference = ("", "")
+        incoming_message = self.build_incoming_message(
+            message_type=SigningMessage,
+            dialogue_reference=incorrect_dialogue_reference,
+            performative=SigningMessage.Performative.ERROR,
+            error_code=SigningMessage.ErrorCode.UNSUCCESSFUL_MESSAGE_SIGNING,
+            to=str(self.skill.skill_context.skill_id),
+        )
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger:
+            self.signing_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received invalid signing message={incoming_message}, unidentified dialogue.",
+        )
+
+    def test_handle_signed_transaction(self,):
+        """Test the _handle_signed_transaction method of the signing handler."""
+        # setup
+        signing_counterparty = self.skill.skill_context.decision_maker_address
+        signing_dialogue = cast(
+            SigningDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.signing_dialogues,
+                messages=self.list_of_signing_messages[:1],
+                counterparty=signing_counterparty,
+            ),
+        )
+        incoming_message = cast(
+            SigningMessage,
+            self.build_incoming_message_for_skill_dialogue(
+                dialogue=signing_dialogue,
+                performative=SigningMessage.Performative.SIGNED_TRANSACTION,
+                signed_transaction=SigningMessage.SignedTransaction(
+                    "some_ledger_id", {"some_key": "some_value"}
+                ),
+            ),
+        )
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger:
+            self.signing_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(logging.INFO, "transaction signing was successful.")
+
+        self.assert_quantity_in_outbox(1)
+        message = self.get_message_from_outbox()
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=message,
+            message_type=LedgerApiMessage,
+            performative=LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
+            to=str(LEDGER_CONNECTION_PUBLIC_ID),
+            sender=self.skill.skill_context.agent_address,
+            signed_transaction=incoming_message.signed_transaction,
+        )
+        assert has_attributes, error_str
+
+        assert (
+            cast(
+                LedgerApiDialogue, self.ledger_api_dialogues.get_dialogue(message)
+            ).associated_signing_dialogue
+            == signing_dialogue
+        )
+
+        mock_logger.assert_any_call(logging.INFO, "sending transaction to ledger.")
+
+    def test_handle_error(self):
+        """Test the _handle_error method of the signing handler."""
+        # setup
+        signing_counterparty = self.skill.skill_context.decision_maker_address
+        signing_dialogue = self.prepare_skill_dialogue(
+            dialogues=self.signing_dialogues,
+            messages=self.list_of_signing_messages[:1],
+            counterparty=signing_counterparty,
+        )
+        incoming_message = cast(
+            SigningMessage,
+            self.build_incoming_message_for_skill_dialogue(
+                dialogue=signing_dialogue,
+                performative=SigningMessage.Performative.ERROR,
+                error_code=SigningMessage.ErrorCode.UNSUCCESSFUL_TRANSACTION_SIGNING,
+            ),
+        )
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger:
+            self.signing_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"transaction signing was not successful. Error_code={incoming_message.error_code} in dialogue={signing_dialogue}",
+        )
+
+    def test_handle_invalid(self):
+        """Test the _handle_invalid method of the signing handler."""
+        # setup
+        invalid_performative = SigningMessage.Performative.SIGN_TRANSACTION
+        incoming_message = self.build_incoming_message(
+            message_type=SigningMessage,
+            dialogue_reference=("1", ""),
+            performative=invalid_performative,
+            terms=self.terms,
+            raw_transaction=SigningMessage.RawTransaction(
+                "some_ledger_id", {"some_key": "some_value"}
+            ),
+            to=str(self.skill.skill_context.skill_id),
+        )
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger:
+            self.signing_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.WARNING,
+            f"cannot handle signing message of performative={invalid_performative} in dialogue={self.signing_dialogues.get_dialogue(incoming_message)}.",
+        )
+
+    def test_teardown(self):
+        """Test the teardown method of the signing handler."""
+        assert self.signing_handler.teardown() is None
         self.assert_quantity_in_outbox(0)

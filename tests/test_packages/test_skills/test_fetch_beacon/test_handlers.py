@@ -137,8 +137,35 @@ class TestHttpHandler(BaseSkillTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO, "block height not present",
+            logging.INFO, "entropy not present",
         )
+
+    def test_handle__handle_unidentified_dialogue(self):
+        """Test handling an unidentified dialogoue"""
+        # setup
+        incorrect_dialogue_reference = ("", "")
+        incoming_message = self.build_incoming_message(
+            message_type=HttpMessage,
+            dialogue_reference=incorrect_dialogue_reference,
+            performative=HttpMessage.Performative.RESPONSE,
+            version="",
+            status_code=200,
+            status_text="",
+            headers="",
+            body=b"{}",
+        )
+
+        # operation
+        with patch.object(self.http_handler.context.logger, "log") as mock_logger:
+            self.http_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received invalid message={incoming_message}, unidentified dialogue.",
+        )
+
+        self.assert_quantity_in_outbox(0)
 
     def test_teardown(self):
         """Test the teardown method of the http handler."""

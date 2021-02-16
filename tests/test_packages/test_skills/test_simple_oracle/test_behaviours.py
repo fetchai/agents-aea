@@ -18,8 +18,10 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests of the behaviour classes of the simple oracle skill."""
 
+import logging
 from pathlib import Path
 from typing import cast
+from unittest.mock import patch
 
 from aea.test_tools.test_skill import BaseSkillTestCase
 
@@ -90,7 +92,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         )
         assert has_attributes, error_str
 
-    def test_setup_with_contract_config(self):
+    def test_setup_with_contract_set(self):
         """Test the setup method of the simple_oracle behaviour for existing contract."""
         prometheus_dialogues = cast(
             PrometheusDialogues,
@@ -101,7 +103,37 @@ class TestSkillBehaviour(BaseSkillTestCase):
         strategy.contract_address = DEFAULT_ADDRESS
         strategy.is_contract_deployed = True
 
-        self.simple_oracle_behaviour.setup()
+        with patch.object(
+            self.simple_oracle_behaviour.context.logger, "log"
+        ) as mock_logger:
+            self.simple_oracle_behaviour.setup()
+        mock_logger.assert_any_call(
+            logging.INFO, "Fetch oracle contract address already added",
+        )
+        self.assert_quantity_in_outbox(0)
+
+    def test_setup_with_contract_set_and_oracle_role_granted(self):
+        """Test the setup method of the simple_oracle behaviour for existing contract and oracle role."""
+        prometheus_dialogues = cast(
+            PrometheusDialogues,
+            self.simple_oracle_behaviour.context.prometheus_dialogues,
+        )
+        prometheus_dialogues.enabled = False
+        strategy = cast(Strategy, self.simple_oracle_behaviour.context.strategy)
+        strategy.contract_address = DEFAULT_ADDRESS
+        strategy.is_contract_deployed = True
+        strategy.is_oracle_role_granted = True
+
+        assert strategy.erc20_address == DEFAULT_ADDRESS
+
+        with patch.object(
+            self.simple_oracle_behaviour.context.logger, "log"
+        ) as mock_logger:
+            self.simple_oracle_behaviour.setup()
+        mock_logger.assert_any_call(
+            logging.INFO, "Oracle role already granted",
+        )
+
         self.assert_quantity_in_outbox(0)
 
     def test_act_pre_deploy(self):
@@ -196,6 +228,31 @@ class TestSkillBehaviour(BaseSkillTestCase):
             contract_id=str(CONTRACT_PUBLIC_ID),
             contract_address=strategy.contract_address,
             callable="get_update_transaction",
+        )
+        assert has_attributes, error_str
+
+    def test_act_no_oracle_value(self):
+        """Test the act method of the simple_oracle behaviour when no oracle value is present."""
+        strategy = cast(Strategy, self.simple_oracle_behaviour.context.strategy)
+        strategy.contract_address = DEFAULT_ADDRESS
+        strategy.is_contract_deployed = True
+        strategy.is_oracle_role_granted = True
+        self.simple_oracle_behaviour.context.agent_addresses[
+            LEDGER_ID
+        ] = "AGENT_ADDRESS"
+        self.simple_oracle_behaviour.act()
+        self.assert_quantity_in_outbox(1)
+
+        msg = cast(LedgerApiMessage, self.get_message_from_outbox())
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=LedgerApiMessage,
+            performative=LedgerApiMessage.Performative.GET_BALANCE,
+            ledger_id=LEDGER_ID,
+            address=cast(
+                str,
+                self.simple_oracle_behaviour.context.agent_addresses.get(LEDGER_ID),
+            ),
         )
         assert has_attributes, error_str
 
