@@ -31,7 +31,6 @@ from tests.conftest import (
     CLI_LOG_OPTION,
     COSMOS_ADDRESS_ONE,
     CliRunner,
-    FETCHAI,
     MAX_FLAKY_RERUNS_INTEGRATION,
 )
 from tests.test_cli.tools_for_testing import ContextMock
