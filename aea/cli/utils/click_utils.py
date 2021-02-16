@@ -29,6 +29,7 @@ from click import Context, Option, UsageError, option
 from aea.cli.utils.config import try_to_load_agent_config
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE
+from aea.helpers.io import open_file
 
 
 class ConnectionsOption(click.Option):
@@ -112,7 +113,7 @@ class AgentDirectory(click.Path):
         try:
             # check that the target folder is an AEA project.
             os.chdir(path)
-            with open(DEFAULT_AEA_CONFIG_FILE, mode="r", encoding="utf-8") as fp:
+            with open_file(DEFAULT_AEA_CONFIG_FILE, mode="r", encoding="utf-8") as fp:
                 ctx.obj.agent_config = ctx.obj.agent_loader.load(fp)
             try_to_load_agent_config(ctx.obj)
             # everything ok - return the parameter to the command

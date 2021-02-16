@@ -41,6 +41,7 @@ from aea.common import Address, JSONLike
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
 from aea.exceptions import AEAEnforceError
 from aea.helpers.base import try_decorator
+from aea.helpers.io import open_file
 
 
 _default_logger = logging.getLogger(__name__)
@@ -304,7 +305,7 @@ class CosmosCrypto(Crypto[SigningKey]):
         :return: the Entity.
         """
         path = Path(file_name)
-        with open(path, "r") as key:
+        with open_file(path, "r") as key:
             data = key.read()
             signing_key = SigningKey.from_string(bytes.fromhex(data), curve=SECP256k1)
         return signing_key
@@ -726,7 +727,7 @@ class _CosmosApi(LedgerApi):
         :return: the transaction digest
         """
         with tempfile.TemporaryDirectory() as tmpdirname:
-            with open(os.path.join(tmpdirname, signed_tx_filename), "w") as f:
+            with open_file(os.path.join(tmpdirname, signed_tx_filename), "w") as f:
                 f.write(json.dumps(tx_signed))
 
             command = [

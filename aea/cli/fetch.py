@@ -43,6 +43,7 @@ from aea.configurations.constants import (
     SKILL,
 )
 from aea.exceptions import enforce
+from aea.helpers.io import open_file
 
 
 @click.command(name="fetch")
@@ -168,7 +169,8 @@ def fetch_agent_locally(
     if alias is not None:
         ctx.agent_config.agent_name = alias
         ctx.agent_loader.dump(
-            ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
+            ctx.agent_config,
+            open_file(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"),
         )
 
     _fetch_agent_deps(ctx)

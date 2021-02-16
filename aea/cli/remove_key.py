@@ -28,6 +28,7 @@ from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE
 from aea.crypto.registries import crypto_registry
+from aea.helpers.io import open_file
 
 
 @click.command()
@@ -76,5 +77,5 @@ def _try_remove_key(ctx: Context, type_: str, connection: bool = False) -> None:
         )
     private_keys.delete(type_)
     ctx.agent_loader.dump(
-        ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
+        ctx.agent_config, open_file(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
     )
