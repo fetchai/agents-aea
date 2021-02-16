@@ -1231,7 +1231,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         # after
         mock_logger.assert_any_call(
             logging.WARNING,
-            f"you have no starting balance on {self.strategy.ledger_id} ledger!",
+            f"you have no starting balance on {self.strategy.ledger_id} ledger! Stopping skill {self.strategy.context.skill_id}.",
         )
         assert not self.skill.skill_context.is_active
 

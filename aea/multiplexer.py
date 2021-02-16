@@ -25,6 +25,7 @@ from concurrent.futures._base import CancelledError
 from concurrent.futures._base import TimeoutError as FuturesTimeoutError
 from contextlib import suppress
 from typing import (
+    Any,
     Callable,
     Collection,
     Dict,
@@ -50,7 +51,7 @@ from aea.protocols.base import Message, Protocol
 class MultiplexerStatus(AsyncState):
     """The connection status class."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the connection status."""
         super().__init__(
             initial_state=ConnectionStates.disconnected, states_enum=ConnectionStates
@@ -93,7 +94,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
         default_routing: Optional[Dict[PublicId, PublicId]] = None,
         default_connection: Optional[PublicId] = None,
         protocols: Optional[List[Union[Protocol, Message]]] = None,
-    ):
+    ) -> None:
         """
         Initialize the connection multiplexer.
 
@@ -184,7 +185,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
         return self._default_routing
 
     @default_routing.setter
-    def default_routing(self, default_routing: Dict[PublicId, PublicId]):
+    def default_routing(self, default_routing: Dict[PublicId, PublicId]) -> None:
         """Set the default routing."""
         self._default_routing = default_routing
 
@@ -268,14 +269,15 @@ class AsyncMultiplexer(Runnable, WithLogger):
         if is_default:
             self._default_connection = connection
 
-    def _connection_consistency_checks(self):
+    def _connection_consistency_checks(self) -> None:
         """
         Do some consistency checks on the multiplexer connections.
 
         :return: None
         :raise AEAEnforceError: if an inconsistency is found.
         """
-        enforce(len(self.connections) > 0, "List of connections cannot be empty.")
+        if len(self.connections) == 0:
+            self.logger.debug("List of connections is empty.")
 
         enforce(
             len(set(c.connection_id for c in self.connections))
@@ -283,9 +285,9 @@ class AsyncMultiplexer(Runnable, WithLogger):
             "Connection names must be unique.",
         )
 
-    def _set_default_connection_if_none(self):
+    def _set_default_connection_if_none(self) -> None:
         """Set the default connection if it is none."""
-        if self._default_connection is None:
+        if self._default_connection is None and bool(self.connections):
             self._default_connection = self.connections[0]
 
     async def connect(self) -> None:
@@ -684,7 +686,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
 class Multiplexer(AsyncMultiplexer):
     """Transit sync multiplexer for compatibility."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """
         Initialize the connection multiplexer.
 
@@ -760,7 +762,7 @@ class Multiplexer(AsyncMultiplexer):
 class InBox:
     """A queue from where you can only consume envelopes."""
 
-    def __init__(self, multiplexer: AsyncMultiplexer):
+    def __init__(self, multiplexer: AsyncMultiplexer) -> None:
         """
         Initialize the inbox.
 
@@ -839,7 +841,7 @@ class InBox:
 class OutBox:
     """A queue from where you can only enqueue envelopes."""
 
-    def __init__(self, multiplexer: AsyncMultiplexer):
+    def __init__(self, multiplexer: AsyncMultiplexer) -> None:
         """
         Initialize the outbox.
 

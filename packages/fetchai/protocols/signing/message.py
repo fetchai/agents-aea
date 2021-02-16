@@ -20,7 +20,7 @@
 """This module contains signing's message definition."""
 
 import logging
-from typing import Set, Tuple, cast
+from typing import Any, Set, Tuple, cast
 
 from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
@@ -50,7 +50,7 @@ DEFAULT_BODY_SIZE = 4
 class SigningMessage(Message):
     """A protocol for communication between skills and decision maker."""
 
-    protocol_id = PublicId.from_str("fetchai/signing:0.9.0")
+    protocol_id = PublicId.from_str("fetchai/signing:0.10.0")
     protocol_specification_id = PublicId.from_str("fetchai/signing:0.1.0")
 
     ErrorCode = CustomErrorCode
@@ -74,7 +74,7 @@ class SigningMessage(Message):
         SIGNED_MESSAGE = "signed_message"
         SIGNED_TRANSACTION = "signed_transaction"
 
-        def __str__(self):
+        def __str__(self) -> str:
             """Get the string representation."""
             return str(self.value)
 
@@ -107,7 +107,7 @@ class SigningMessage(Message):
         dialogue_reference: Tuple[str, str] = ("", ""),
         message_id: int = 1,
         target: int = 0,
-        **kwargs,
+        **kwargs: Any,
     ):
         """
         Initialise an instance of SigningMessage.

@@ -19,6 +19,8 @@
 
 """This module contains the strategy class."""
 
+from typing import Any
+
 from aea.common import Address
 from aea.exceptions import enforce
 from aea.helpers.search.models import Constraint, ConstraintType, Location, Query
@@ -53,7 +55,7 @@ DEFAULT_SEARCH_RADIUS = 5.0
 class FaberStrategy(Model):
     """This class defines a strategy for the agent."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize the strategy of the agent.
 

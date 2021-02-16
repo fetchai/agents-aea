@@ -38,7 +38,7 @@ _default_logger = logging.getLogger(
 class RegistrationDB(Model):
     """Communicate between the database and the python objects."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialise the class."""
         custom_path = kwargs.pop("custom_path", None)
         super().__init__(**kwargs)
@@ -130,7 +130,7 @@ class RegistrationDB(Model):
         results.sort(key=lambda x: x[2], reverse=True)
         return results
 
-    def set_registered(self, address: str, developer_handle: str):
+    def set_registered(self, address: str, developer_handle: str) -> None:
         """Record a registration."""
         if self.is_registered(address):
             return

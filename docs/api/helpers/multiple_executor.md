@@ -25,7 +25,7 @@ Abstract task class to create Task classes.
 #### `__`init`__`
 
 ```python
- | __init__()
+ | __init__() -> None
 ```
 
 Init task.
@@ -55,7 +55,7 @@ Set awaitable to get result of task execution.
 
 ```python
  | @abstractmethod
- | start()
+ | start() -> Tuple[Callable, Sequence[Any]]
 ```
 
 Implement start task function here.
@@ -163,7 +163,7 @@ Abstract class to create multiple executors classes.
 #### `__`init`__`
 
 ```python
- | __init__(tasks: Sequence[AbstractExecutorTask], task_fail_policy=ExecutorExceptionPolicies.propagate) -> None
+ | __init__(tasks: Sequence[AbstractExecutorTask], task_fail_policy: ExecutorExceptionPolicies = ExecutorExceptionPolicies.propagate) -> None
 ```
 
 Init executor.
@@ -271,7 +271,7 @@ Abstract multiple runner to create classes to launch tasks with selected mode.
 #### `__`init`__`
 
 ```python
- | __init__(mode: str, fail_policy=ExecutorExceptionPolicies.propagate) -> None
+ | __init__(mode: str, fail_policy: ExecutorExceptionPolicies = ExecutorExceptionPolicies.propagate) -> None
 ```
 
 Init with selected executor mode.
@@ -312,7 +312,7 @@ None
 #### stop
 
 ```python
- | stop(timeout: float = 0) -> None
+ | stop(timeout: Optional[float] = None) -> None
 ```
 
 Stop agents.
@@ -330,7 +330,7 @@ None
 
 ```python
  | @property
- | num_failed()
+ | num_failed() -> int
 ```
 
 Return number of failed tasks.
@@ -340,7 +340,7 @@ Return number of failed tasks.
 
 ```python
  | @property
- | failed()
+ | failed() -> Sequence[Task]
 ```
 
 Return sequence failed tasks.
@@ -350,17 +350,17 @@ Return sequence failed tasks.
 
 ```python
  | @property
- | not_failed()
+ | not_failed() -> Sequence[Task]
 ```
 
 Return sequence successful tasks.
 
-<a name="aea.helpers.multiple_executor.AbstractMultipleRunner.join_thread"></a>
-#### join`_`thread
+<a name="aea.helpers.multiple_executor.AbstractMultipleRunner.try_join_thread"></a>
+#### try`_`join`_`thread
 
 ```python
- | join_thread() -> None
+ | try_join_thread() -> None
 ```
 
-Join thread if running in thread mode.
+Try to join thread if running in thread mode.
 

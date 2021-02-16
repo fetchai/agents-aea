@@ -52,7 +52,7 @@ def write_envelope_to_file(envelope: Envelope, file_path: str) -> None:
         write_envelope(envelope, f)
 
 
-def read_envelope_from_file(file_path: str):
+def read_envelope_from_file(file_path: str) -> Envelope:
     """
     Read an envelope from a file.
 

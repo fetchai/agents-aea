@@ -23,7 +23,7 @@ import os
 import shutil
 from functools import update_wrapper
 from pathlib import Path
-from typing import Callable, Dict, Union, cast
+from typing import Any, Callable, Dict, Tuple, Union, cast
 
 import click
 from jsonschema import ValidationError
@@ -46,7 +46,7 @@ from aea.helpers.base import decorator_with_optional_params
 pass_ctx = click.make_pass_decorator(Context)
 
 
-def _validate_config_consistency(ctx: Context, check_aea_version: bool = True):
+def _validate_config_consistency(ctx: Context, check_aea_version: bool = True) -> None:
     """
     Validate fingerprints for every agent component.
 
@@ -113,7 +113,7 @@ def _validate_config_consistency(ctx: Context, check_aea_version: bool = True):
         )
 
 
-def _check_aea_project(args, check_aea_version: bool = True):
+def _check_aea_project(args: Tuple[Any, ...], check_aea_version: bool = True) -> None:
     try:
         click_context = args[0]
         ctx = cast(Context, click_context.obj)
@@ -126,7 +126,7 @@ def _check_aea_project(args, check_aea_version: bool = True):
 
 
 @decorator_with_optional_params
-def check_aea_project(f, check_aea_version: bool = True):
+def check_aea_project(f: Callable, check_aea_version: bool = True) -> Callable:
     """
     Check the consistency of the project as a decorator.
 
@@ -134,7 +134,7 @@ def check_aea_project(f, check_aea_version: bool = True):
     - iterate over all the agent packages and check for consistency.
     """
 
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: Any, **kwargs: Any) -> Callable:
         _check_aea_project(args, check_aea_version=check_aea_version)
         return f(*args, **kwargs)
 
@@ -182,7 +182,9 @@ def clean_after(func: Callable) -> Callable:
     :return: decorated method.
     """
 
-    def wrapper(context: Union[Context, click.core.Context], *args, **kwargs):
+    def wrapper(
+        context: Union[Context, click.core.Context], *args: Any, **kwargs: Any
+    ) -> Callable:
         """
         Call a source method, remove dirs listed in ctx.clean_paths if ClickException is raised.
 

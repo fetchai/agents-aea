@@ -24,7 +24,7 @@ import codecs
 import logging
 from contextlib import contextmanager
 from logging import Logger
-from typing import IO, Optional, Union
+from typing import Generator, IO, Optional, Union
 
 from aea.configurations.base import PublicId
 from aea.helpers import file_lock
@@ -37,7 +37,7 @@ SEPARATOR = b","
 _default_logger = logging.getLogger(__name__)
 
 
-def _encode(e: Envelope, separator: bytes = SEPARATOR):
+def _encode(e: Envelope, separator: bytes = SEPARATOR) -> bytes:
     result = b""
     result += e.to.encode("utf-8")
     result += separator
@@ -51,7 +51,7 @@ def _encode(e: Envelope, separator: bytes = SEPARATOR):
     return result
 
 
-def _decode(e: bytes, separator: bytes = SEPARATOR):
+def _decode(e: bytes, separator: bytes = SEPARATOR) -> Envelope:
     split = e.split(separator)
 
     if len(split) < 5 or split[-1] not in [b"", b"\n"]:
@@ -80,7 +80,9 @@ def _decode(e: bytes, separator: bytes = SEPARATOR):
 
 
 @contextmanager
-def lock_file(file_descriptor: IO[bytes], logger: Logger = _default_logger):
+def lock_file(
+    file_descriptor: IO[bytes], logger: Logger = _default_logger
+) -> Generator:
     """Lock file in context manager.
 
     :param file_descriptor: file descriptio of file to lock.
@@ -104,7 +106,7 @@ def write_envelope(
 ) -> None:
     """Write envelope to file."""
     encoded_envelope = _encode(envelope, separator=separator)
-    logger.debug("write {}: to {}".format(encoded_envelope, file_pointer.name))
+    logger.debug("write {!r}: to {}".format(encoded_envelope, file_pointer.name))
     write_with_lock(file_pointer, encoded_envelope, logger)
 
 

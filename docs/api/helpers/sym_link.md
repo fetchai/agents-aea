@@ -7,7 +7,7 @@ Sym link implementation for Linux, MacOS, and Windows.
 #### make`_`symlink
 
 ```python
-make_symlink(link_name: str, target: str)
+make_symlink(link_name: str, target: str) -> None
 ```
 
 Make a symbolic link, cross platform.
@@ -22,7 +22,7 @@ Make a symbolic link, cross platform.
 
 ```python
 @contextlib.contextmanager
-cd(path)
+cd(path: Path) -> Generator
 ```
 
 Change directory with context manager.
@@ -31,7 +31,7 @@ Change directory with context manager.
 #### create`_`symlink
 
 ```python
-create_symlink(link_path: Path, target_path: Path, root_path: Path)
+create_symlink(link_path: Path, target_path: Path, root_path: Path) -> int
 ```
 
 Change directory and call the cross-platform script.

@@ -18,6 +18,8 @@
 # ------------------------------------------------------------------------------
 
 """This module contains a test for aea.context."""
+import os
+
 from fetchai_crypto import FetchAICrypto
 
 from aea.context.base import AgentContext
@@ -43,6 +45,7 @@ def test_agent_context():
     kwargs = {"some_key": value}
     default_ledger_id = "fetchai"
     currency_denominations = {}
+    data_dir = os.getcwd()
 
     def storage_callable_():
         pass
@@ -61,8 +64,10 @@ def test_agent_context():
         search_service_address=search_service_address,
         decision_maker_address=decision_maker_address,
         storage_callable=storage_callable_,
+        data_dir=data_dir,
         **kwargs
     )
+    assert ac.data_dir == data_dir
     assert ac.shared_state == {}
     assert ac.identity == identity
     assert ac.agent_name == identity.name

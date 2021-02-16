@@ -75,7 +75,7 @@ class _StopRuntime(Exception):
     Used to perform asyncio call from sync callbacks.
     """
 
-    def __init__(self, reraise: Optional[Exception] = None):
+    def __init__(self, reraise: Optional[Exception] = None) -> None:
         """
         Init _StopRuntime exception.
 
@@ -103,7 +103,7 @@ def enforce(
         raise exception_class(exception_text)
 
 
-def parse_exception(exception: Exception, limit=-1) -> str:
+def parse_exception(exception: Exception, limit: int = -1) -> str:
     """
     Parse an exception to get the relevant lines.
 

@@ -28,7 +28,7 @@ If you want to create the weather station AEA step by step you can follow this g
 Fetch the weather station AEA with the following command :
 
 ``` bash
-aea fetch fetchai/weather_station:0.20.0
+aea fetch fetchai/weather_station:0.21.0
 cd weather_station
 ```
 
@@ -140,6 +140,7 @@ def run():
         "my_aea", address=wallet.addresses.get(FetchAICrypto.identifier)
     )
     resources = Resources()
+    data_dir = os.getcwd()
 
     # specify the default routing for some protocols
     default_routing = {
@@ -186,7 +187,7 @@ def run():
     # Add the LedgerAPI connection
     configuration = ConnectionConfig(connection_id=LedgerConnection.connection_id)
     ledger_api_connection = LedgerConnection(
-        configuration=configuration, identity=identity
+        configuration=configuration, data_dir=data_dir, identity=identity
     )
     resources.add_connection(ledger_api_connection)
 
@@ -224,6 +225,7 @@ def run():
 
     p2p_connection = P2PLibp2pConnection(
         configuration=configuration,
+        data_dir=data_dir,
         identity=identity,
         crypto_store=wallet.connection_cryptos,
     )
@@ -237,7 +239,9 @@ def run():
         restricted_to_protocols={OefSearchMessage.protocol_id},
         connection_id=SOEFConnection.connection_id,
     )
-    soef_connection = SOEFConnection(configuration=configuration, identity=identity)
+    soef_connection = SOEFConnection(
+        configuration=configuration, data_dir=data_dir, identity=identity
+    )
     resources.add_connection(soef_connection)
 
     # create the AEA
@@ -245,6 +249,7 @@ def run():
         identity,
         wallet,
         resources,
+        data_dir,
         default_connection=default_connection,
         default_routing=default_routing,
     )

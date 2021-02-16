@@ -36,14 +36,14 @@ from aea.helpers.env_vars import convert_value_str_to_type
 @click.group()
 @click.pass_context
 @check_aea_project
-def config(click_context):  # pylint: disable=unused-argument
+def config(click_context: click.Context) -> None:  # pylint: disable=unused-argument
     """Read or modify a configuration of the agent."""
 
 
 @config.command()
 @click.argument("JSON_PATH", required=True)
 @pass_ctx
-def get(ctx: Context, json_path: str):
+def get(ctx: Context, json_path: str) -> None:
     """Get a field."""
     try:
         agent_config_manager = AgentConfigManager.load(ctx.cwd)
@@ -70,7 +70,7 @@ def get(ctx: Context, json_path: str):
 @pass_ctx
 def set_command(
     ctx: Context, json_path: str, value: str, type_: Optional[str],
-):
+) -> None:
     """Set a field."""
     try:
         agent_config_manager = AgentConfigManager.load(ctx.cwd)

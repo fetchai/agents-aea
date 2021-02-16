@@ -58,6 +58,9 @@ def run():
 
     builder.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
 
+    # Add the stub connection (assuming it is present in the local directory 'packages')
+    builder.add_connection("./packages/fetchai/connections/stub")
+
     # Add the echo skill (assuming it is present in the local directory 'packages')
     builder.add_skill("./packages/fetchai/skills/echo")
 

@@ -22,7 +22,7 @@
 import datetime
 import json
 import random
-from typing import Dict, List, Optional, Tuple, cast
+from typing import Any, Dict, List, Optional, Tuple, cast
 
 from aea.helpers.search.models import Location
 
@@ -38,7 +38,7 @@ from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 class Strategy(GenericStrategy):
     """Strategy class extending Generic Strategy."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize the strategy of the agent.
 
@@ -109,9 +109,7 @@ class Strategy(GenericStrategy):
         """
         registration_db = cast(RegistrationDB, self.context.registration_db)
         registration_db.set_trade(counterparty, datetime.datetime.now(), data)
-        self.context.logger.info(
-            f"Successful trade with={counterparty}. Data acquired={data}!"
-        )
+        self.context.logger.info(f"Successful trade with={counterparty}.")
         developer_handle, nb_trades = registration_db.get_handle_and_trades(
             counterparty
         )

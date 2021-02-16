@@ -109,7 +109,7 @@ Used to perform asyncio call from sync callbacks.
 #### `__`init`__`
 
 ```python
- | __init__(reraise: Optional[Exception] = None)
+ | __init__(reraise: Optional[Exception] = None) -> None
 ```
 
 Init _StopRuntime exception.
@@ -141,7 +141,7 @@ Evaluate a condition and raise an exception with the provided text if it is not 
 #### parse`_`exception
 
 ```python
-parse_exception(exception: Exception, limit=-1) -> str
+parse_exception(exception: Exception, limit: int = -1) -> str
 ```
 
 Parse an exception to get the relevant lines.

@@ -19,6 +19,8 @@
 
 """This package contains dialogues used by the coin_price skill."""
 
+from typing import Any
+
 from aea.protocols.base import Address, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.skills.base import Model
@@ -41,7 +43,7 @@ PrometheusDialogue = BasePrometheusDialogue
 class HttpDialogues(Model, BaseHttpDialogues):
     """This class keeps track of all http dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -80,7 +82,7 @@ class HttpDialogues(Model, BaseHttpDialogues):
 class PrometheusDialogues(Model, BasePrometheusDialogues):
     """The dialogues class keeps track of all prometheus dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 

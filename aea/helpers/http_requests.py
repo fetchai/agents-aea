@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 """Wrapper over requests library."""
 from functools import wraps
-from typing import Callable
+from typing import Any, Callable
 
 import requests
 
@@ -32,7 +32,7 @@ def add_default_timeout(fn: Callable, timeout: float) -> Callable:
     """Add default timeout for requests methods."""
 
     @wraps(fn)
-    def wrapper(*args, **kwargs):  # pragma: nocover
+    def wrapper(*args: Any, **kwargs: Any) -> Callable:  # pragma: nocover
         kwargs["timeout"] = kwargs.get("timeout", timeout)
         return fn(*args, **kwargs)
 

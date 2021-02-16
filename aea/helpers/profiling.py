@@ -30,7 +30,7 @@ import time
 from collections import Counter
 from concurrent.futures._base import CancelledError
 from functools import wraps
-from typing import Callable, Dict, List, Type
+from typing import Any, Callable, Dict, List, Type
 
 from aea.helpers.async_utils import Runnable
 
@@ -101,17 +101,17 @@ class Profiling(Runnable):
         self._output_function = output_function
         self._counter: Dict[Type, int] = Counter()
 
-    def set_counters(self):
+    def set_counters(self) -> None:
         """Modify obj.__new__ to count objects created created."""
         for obj in self._objects_created_to_count:
             self._counter[obj] = 0
 
-            def make_fn(obj) -> Callable:
+            def make_fn(obj: Any) -> Callable:
                 orig_new = obj.__new__
                 # pylint: disable=protected-access  # type: ignore
 
                 @wraps(orig_new)
-                def new(*args, **kwargs):
+                def new(*args: Any, **kwargs: Any) -> Callable:
                     self._counter[obj] += 1
                     if orig_new is object.__new__:
                         return orig_new(args[0])  # pragma: nocover

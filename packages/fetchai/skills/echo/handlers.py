@@ -105,7 +105,7 @@ class EchoHandler(Handler):
             )
         )
 
-    def _handle_bytes(self, message: DefaultMessage, dialogue: DefaultDialogue):
+    def _handle_bytes(self, message: DefaultMessage, dialogue: DefaultDialogue) -> None:
         """
         Handle a message of bytes performative.
 
@@ -123,7 +123,9 @@ class EchoHandler(Handler):
         )
         self.context.outbox.put_message(message=reply)
 
-    def _handle_invalid(self, message: DefaultMessage, dialogue: DefaultDialogue):
+    def _handle_invalid(
+        self, message: DefaultMessage, dialogue: DefaultDialogue
+    ) -> None:
         """
         Handle an invalid message.
 

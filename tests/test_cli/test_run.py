@@ -270,6 +270,18 @@ def test_run_multiple_connections(connection_ids):
 
     result = runner.invoke(
         cli,
+        [
+            *CLI_LOG_OPTION,
+            "add",
+            "--local",
+            "connection",
+            str(STUB_CONNECTION_PUBLIC_ID),
+        ],
+    )
+    assert result.exit_code == 0
+
+    result = runner.invoke(
+        cli,
         [*CLI_LOG_OPTION, "add", "--local", "connection", str(HTTP_ClIENT_PUBLIC_ID)],
     )
     assert result.exit_code == 0
@@ -295,15 +307,15 @@ def test_run_multiple_connections(connection_ids):
     )
 
     try:
-        process.expect_all(["Start processing messages"], timeout=20)
+        process.expect_all(["Start processing messages"], timeout=40)
         process.control_c()
         process.expect(
-            EOF, timeout=20,
+            EOF, timeout=40,
         )
-        process.wait_to_complete(10)
+        process.wait_to_complete(15)
         assert process.returncode == 0
     finally:
-        process.wait_to_complete(10)
+        process.wait_to_complete(15)
         os.chdir(cwd)
         try:
             shutil.rmtree(t)

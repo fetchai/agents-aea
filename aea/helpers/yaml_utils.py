@@ -36,7 +36,7 @@ class _AEAYamlLoader(yaml.SafeLoader):
     the public functions of the module 'yaml_load' and 'yaml_load_all'.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """
         Initialize the AEAYamlLoader.
 
@@ -48,7 +48,7 @@ class _AEAYamlLoader(yaml.SafeLoader):
         )
 
     @staticmethod
-    def _construct_mapping(loader: "_AEAYamlLoader", node: MappingNode):
+    def _construct_mapping(loader: "_AEAYamlLoader", node: MappingNode) -> OrderedDict:
         """Construct a YAML mapping with OrderedDict."""
         object_pairs_hook = OrderedDict
         loader.flatten_mapping(node)
@@ -66,7 +66,7 @@ class _AEAYamlDumper(yaml.SafeDumper):
     the public functions of the module 'yaml_dump' and 'yaml_dump_all'.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """
         Initialize the AEAYamlDumper.
 

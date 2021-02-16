@@ -21,7 +21,7 @@
 import time
 from statistics import mean
 from threading import Thread
-from typing import Optional
+from typing import Any, List, Optional, Tuple, Union
 
 import click
 
@@ -45,18 +45,18 @@ from packages.fetchai.protocols.default.message import DefaultMessage
 class TestConnectionMixIn:
     """Test connection with messages timing."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any):
         """Init connection."""
-        super().__init__(*args, **kwargs)
-        self.sends = list()
-        self.recvs = list()
+        super().__init__(*args, **kwargs)  # type: ignore
+        self.sends: List[float] = list()
+        self.recvs: List[float] = list()
 
     async def send(self, envelope: Envelope) -> None:
         """Handle incoming envelope."""
         self.recvs.append(time.time())
         return await super().send(envelope)  # type: ignore
 
-    async def receive(self, *args, **kwargs) -> Optional[Envelope]:
+    async def receive(self, *args: Any, **kwargs: Any) -> Optional[Envelope]:
         """Generate outgoing envelope."""
         envelope = await super().receive(*args, **kwargs)  # type: ignore
         self.sends.append(time.time())
@@ -82,7 +82,9 @@ class TestHandler(Handler):
         self.context.outbox.put(make_envelope(message.to, message.sender))
 
 
-def run(duration, runtime_mode, connection_mode):
+def run(
+    duration: int, runtime_mode: str, connection_mode: str
+) -> List[Tuple[str, Union[int, float]]]:
     """Test memory usage."""
     # pylint: disable=import-outside-toplevel,unused-import
     # import manually due to some lazy imports in decision_maker
@@ -98,7 +100,7 @@ def run(duration, runtime_mode, connection_mode):
     base_cls = CONNECTION_MODES[connection_mode]
 
     conn_cls = type("conn_cls", (TestConnectionMixIn, base_cls), {})
-    connection = conn_cls.make()  # pylint: disable=no-member
+    connection = conn_cls.make()  # type: ignore # pylint: disable=no-member
     agent.resources.add_connection(connection)
     agent.resources.add_skill(make_skill(agent, handlers={"test": TestHandler}))
     t = Thread(target=agent.start, daemon=True)
@@ -131,7 +133,9 @@ def run(duration, runtime_mode, connection_mode):
     "--connection_mode", default="sync", help="Connection mode: sync or nonsync."
 )
 @click.option("--number_of_runs", default=10, help="How many times run test.")
-def main(duration, runtime_mode, connection_mode, number_of_runs):
+def main(
+    duration: int, runtime_mode: str, connection_mode: str, number_of_runs: int
+) -> None:
     """Run test."""
     click.echo("Start test with options:")
     click.echo(f"* Duration: {duration} seconds")

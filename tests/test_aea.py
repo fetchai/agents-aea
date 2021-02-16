@@ -25,7 +25,7 @@ from pathlib import Path
 from threading import Thread
 from typing import Callable
 from unittest.case import TestCase
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -392,6 +392,7 @@ def test_initialize_aea_programmatically_build_resources():
                 identity,
                 wallet,
                 resources=resources,
+                data_dir=MagicMock(),
                 default_connection=connection.public_id,
             )
 
@@ -467,12 +468,15 @@ def test_add_behaviour_dynamically():
     agent_name = "MyAgent"
     private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
     wallet = Wallet({DEFAULT_LEDGER: private_key_path})
+    data_dir = MagicMock()
     resources = Resources()
     identity = Identity(agent_name, address=wallet.addresses[DEFAULT_LEDGER])
     connection = _make_local_connection(identity.address, LocalNode())
     resources.add_connection(connection)
 
-    agent = AEA(identity, wallet, resources, default_connection=connection.public_id,)
+    agent = AEA(
+        identity, wallet, resources, data_dir, default_connection=connection.public_id,
+    )
     resources.add_component(
         Skill.from_dir(
             Path(CUR_PATH, "data", "dummy_skill"), agent_context=agent.context
@@ -539,6 +543,7 @@ class TestContextNamespace:
     def setup_class(cls):
         """Set the test up."""
         agent_name = "my_agent"
+        data_dir = MagicMock()
         private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
         wallet = Wallet({DEFAULT_LEDGER: private_key_path})
         identity = Identity(agent_name, address=wallet.addresses[DEFAULT_LEDGER])
@@ -546,7 +551,7 @@ class TestContextNamespace:
         resources = Resources()
         resources.add_connection(connection)
         cls.context_namespace = {"key1": 1, "key2": 2}
-        cls.agent = AEA(identity, wallet, resources, **cls.context_namespace)
+        cls.agent = AEA(identity, wallet, resources, data_dir, **cls.context_namespace)
 
         resources.add_component(
             Skill.from_dir(

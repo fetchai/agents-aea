@@ -39,7 +39,7 @@ from aea.configurations.base import (
     DEFAULT_SKILL_CONFIG_FILE,
     PublicId,
 )
-from aea.test_tools.test_cases import AEATestCaseEmpty
+from aea.test_tools.test_cases import AEATestCaseEmpty, AEATestCaseEmptyFlaky
 
 from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_PUBLIC_ID
 from packages.fetchai.skills.erc1155_client import PUBLIC_ID as ERC1155_CLIENT_PUBLIC_ID
@@ -487,7 +487,7 @@ class TestAddSkillWithContractsDeps(AEATestCaseEmpty):
         assert contract_dependency_name in contracts_folders
 
 
-class TestAddSkillFromRemoteRegistry(AEATestCaseEmpty):
+class TestAddSkillFromRemoteRegistry(AEATestCaseEmptyFlaky):
     """Test case for add skill from Registry command."""
 
     IS_LOCAL = False

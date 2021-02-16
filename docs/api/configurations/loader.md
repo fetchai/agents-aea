@@ -16,7 +16,7 @@ Base class for configuration loader classes.
 #### `__`init`__`
 
 ```python
- | __init__(schema_filename: str)
+ | __init__(schema_filename: str) -> None
 ```
 
 Initialize the parser for configuration files.
@@ -79,7 +79,7 @@ Parsing, serialization and validation for package configuration files.
 #### `__`init`__`
 
 ```python
- | __init__(schema_filename: str, configuration_class: Type[T])
+ | __init__(schema_filename: str, configuration_class: Type[T]) -> None
 ```
 
 Initialize the parser for configuration files.
@@ -103,7 +103,7 @@ Get the configuration class of the loader.
 #### load`_`protocol`_`specification
 
 ```python
- | load_protocol_specification(file_pointer: TextIO) -> T
+ | load_protocol_specification(file_pointer: TextIO) -> ProtocolSpecification
 ```
 
 Load an agent configuration file.

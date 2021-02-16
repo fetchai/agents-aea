@@ -117,7 +117,7 @@ class LedgerApis:
         amount: int,
         tx_fee: int,
         tx_nonce: str,
-        **kwargs,
+        **kwargs: Any,
     ) -> Optional[Any]:
         """
         Get a transaction to transfer from self to destination.

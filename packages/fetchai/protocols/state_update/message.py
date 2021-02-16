@@ -20,7 +20,7 @@
 """This module contains state_update's message definition."""
 
 import logging
-from typing import Dict, Set, Tuple, cast
+from typing import Any, Dict, Set, Tuple, cast
 
 from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
@@ -37,7 +37,7 @@ DEFAULT_BODY_SIZE = 4
 class StateUpdateMessage(Message):
     """A protocol for state updates to the decision maker state."""
 
-    protocol_id = PublicId.from_str("fetchai/state_update:0.9.0")
+    protocol_id = PublicId.from_str("fetchai/state_update:0.10.0")
     protocol_specification_id = PublicId.from_str("fetchai/state_update:0.1.0")
 
     class Performative(Message.Performative):
@@ -47,7 +47,7 @@ class StateUpdateMessage(Message):
         END = "end"
         INITIALIZE = "initialize"
 
-        def __str__(self):
+        def __str__(self) -> str:
             """Get the string representation."""
             return str(self.value)
 
@@ -72,7 +72,7 @@ class StateUpdateMessage(Message):
         dialogue_reference: Tuple[str, str] = ("", ""),
         message_id: int = 1,
         target: int = 0,
-        **kwargs,
+        **kwargs: Any,
     ):
         """
         Initialise an instance of StateUpdateMessage.

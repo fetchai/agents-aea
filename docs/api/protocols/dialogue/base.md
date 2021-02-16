@@ -98,7 +98,7 @@ Get the address of the dialogue starter.
 #### `__`eq`__`
 
 ```python
- | __eq__(other) -> bool
+ | __eq__(other: Any) -> bool
 ```
 
 Check for equality between two DialogueLabel objects.
@@ -145,7 +145,7 @@ Get the incomplete version of the label.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get the string representation.
@@ -176,7 +176,7 @@ Creates classlevvel Rules instance
 #### `__`new`__`
 
 ```python
- | __new__(cls, name: str, bases: Tuple[Type], dct: Dict)
+ | __new__(cls, name: str, bases: Tuple[Type], dct: Dict) -> "_DialogueMeta"
 ```
 
 Construct a new type.
@@ -290,7 +290,7 @@ This class defines the agent's role in a dialogue.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get the string representation.
@@ -308,7 +308,7 @@ This class defines the end states of a dialogue.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get the string representation.
@@ -353,7 +353,7 @@ None
 #### `__`eq`__`
 
 ```python
- | __eq__(other) -> bool
+ | __eq__(other: Any) -> bool
 ```
 
 Compare two dialogues.
@@ -558,7 +558,7 @@ True if empty, False otherwise
 #### reply
 
 ```python
- | reply(performative: Message.Performative, target_message: Optional[Message] = None, target: Optional[int] = None, **kwargs, ,) -> Message
+ | reply(performative: Message.Performative, target_message: Optional[Message] = None, target: Optional[int] = None, **kwargs: Any, ,) -> Message
 ```
 
 Reply to the 'target_message' in this dialogue with a message with 'performative', and contents from kwargs.
@@ -680,7 +680,7 @@ None
 #### find`_`caller`_`object
 
 ```python
-find_caller_object(object_type: Type)
+find_caller_object(object_type: Type) -> Any
 ```
 
 Find caller object of certain type in the call stack.
@@ -841,7 +841,7 @@ Check dialogue label presents in list of incomplete.
 #### set`_`incomplete`_`dialogue
 
 ```python
- | set_incomplete_dialogue(incomplete_dialogue_label, complete_dialogue_label) -> None
+ | set_incomplete_dialogue(incomplete_dialogue_label: DialogueLabel, complete_dialogue_label: DialogueLabel) -> None
 ```
 
 Set incomplete dialogue label.
@@ -1100,7 +1100,7 @@ the next nonce
 #### create
 
 ```python
- | create(counterparty: Address, performative: Message.Performative, **kwargs, ,) -> Tuple[Message, Dialogue]
+ | create(counterparty: Address, performative: Message.Performative, **kwargs: Any, ,) -> Tuple[Message, Dialogue]
 ```
 
 Create a dialogue with 'counterparty', with an initial message whose performative is 'performative' and contents are from 'kwargs'.
@@ -1170,6 +1170,23 @@ Retrieve the dialogue 'message' belongs to.
 **Returns**:
 
 the dialogue, or None in case such a dialogue does not exist
+
+<a name="aea.protocols.dialogue.base.Dialogues.get_dialogue_from_label"></a>
+#### get`_`dialogue`_`from`_`label
+
+```python
+ | get_dialogue_from_label(dialogue_label: DialogueLabel) -> Optional[Dialogue]
+```
+
+Retrieve a dialogue based on its label.
+
+**Arguments**:
+
+- `dialogue_label`: the dialogue label
+
+**Returns**:
+
+the dialogue if present
 
 <a name="aea.protocols.dialogue.base.Dialogues.setup"></a>
 #### setup

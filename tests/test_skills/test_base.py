@@ -79,7 +79,9 @@ class TestSkillContext:
             addresses=cls.wallet.addresses,
             default_address_key=FetchAICrypto.identifier,
         )
-        cls.my_aea = AEA(cls.identity, cls.wallet, resources=resources)
+        cls.my_aea = AEA(
+            cls.identity, cls.wallet, data_dir=MagicMock(), resources=resources
+        )
 
         cls.skill_context = SkillContext(
             cls.my_aea.context, skill=MagicMock(contracts={})

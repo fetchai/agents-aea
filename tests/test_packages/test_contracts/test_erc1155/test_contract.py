@@ -40,6 +40,7 @@ from tests.conftest import (
     ETHEREUM_ADDRESS_ONE,
     ETHEREUM_ADDRESS_TWO,
     FETCHAI_TESTNET_CONFIG,
+    MAX_FLAKY_RERUNS,
     ROOT_DIR,
 )
 
@@ -373,6 +374,7 @@ class TestCosmWasmContract:
 
     @pytest.mark.integration
     @pytest.mark.ledger
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_cosmwasm_contract_deploy_and_interact(self):
         """Test cosmwasm contract deploy and interact."""
         self.deploy_contract()

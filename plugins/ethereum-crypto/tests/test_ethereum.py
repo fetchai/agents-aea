@@ -30,7 +30,9 @@ from ethereum_crypto import (
     EthereumApi,
     EthereumCrypto,
     EthereumFaucetApi,
+    LruLockWrapper,
 )
+from web3._utils.request import _session_cache as session_cache
 
 from tests.conftest import DEFAULT_GANACHE_CHAIN_ID, MAX_FLAKY_RERUNS, ROOT_DIR
 
@@ -291,3 +293,13 @@ def test_ethereum_api_get_deploy_transaction(*args):
             )
             is None
         )
+
+
+def test_session_cache():
+    """Test session cache."""
+    assert isinstance(session_cache, LruLockWrapper)
+
+    session_cache[1] = 1
+    assert session_cache[1] == 1
+    del session_cache[1]
+    assert 1 not in session_cache

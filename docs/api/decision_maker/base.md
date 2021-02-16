@@ -17,7 +17,7 @@ Represent the ownership state of an agent (can proxy a ledger).
 
 ```python
  | @abstractmethod
- | set(**kwargs) -> None
+ | set(**kwargs: Any) -> None
 ```
 
 Set values on the ownership state.
@@ -35,7 +35,7 @@ None
 
 ```python
  | @abstractmethod
- | apply_delta(**kwargs) -> None
+ | apply_delta(**kwargs: Any) -> None
 ```
 
 Apply a state update to the ownership state.
@@ -121,7 +121,7 @@ Class to represent the preferences.
 
 ```python
  | @abstractmethod
- | set(**kwargs, ,) -> None
+ | set(**kwargs: Any) -> None
 ```
 
 Set values on the preferences.
@@ -148,7 +148,7 @@ Returns True if exchange_params_by_currency_id and utility_params_by_good_id are
 
 ```python
  | @abstractmethod
- | marginal_utility(ownership_state: OwnershipState, **kwargs, ,) -> float
+ | marginal_utility(ownership_state: OwnershipState, **kwargs: Any) -> float
 ```
 
 Compute the marginal utility.
@@ -204,7 +204,7 @@ A wrapper of a queue to protect which object can read from it.
 #### `__`init`__`
 
 ```python
- | __init__(access_code: str)
+ | __init__(access_code: str) -> None
 ```
 
 Initialize the protected queue.
@@ -217,7 +217,7 @@ Initialize the protected queue.
 #### put
 
 ```python
- | put(internal_message: Optional[Message], block=True, timeout=None) -> None
+ | put(internal_message: Optional[Message], block: bool = True, timeout: Optional[float] = None) -> None
 ```
 
 Put an internal message on the queue.
@@ -263,7 +263,7 @@ None
 #### get
 
 ```python
- | get(block=True, timeout=None) -> None
+ | get(block: bool = True, timeout: Optional[float] = None) -> None
 ```
 
 Inaccessible get method.
@@ -293,7 +293,7 @@ None
 #### protected`_`get
 
 ```python
- | protected_get(access_code: str, block=True, timeout=None) -> Optional[Message]
+ | protected_get(access_code: str, block: bool = True, timeout: Optional[float] = None) -> Optional[Message]
 ```
 
 Access protected get method.
@@ -322,7 +322,7 @@ This class implements the decision maker.
 #### `__`init`__`
 
 ```python
- | __init__(identity: Identity, wallet: Wallet, **kwargs)
+ | __init__(identity: Identity, wallet: Wallet, **kwargs: Any) -> None
 ```
 
 Initialize the decision maker handler.
@@ -415,7 +415,7 @@ This class implements the decision maker.
 #### `__`init`__`
 
 ```python
- | __init__(decision_maker_handler: DecisionMakerHandler)
+ | __init__(decision_maker_handler: DecisionMakerHandler) -> None
 ```
 
 Initialize the decision maker.

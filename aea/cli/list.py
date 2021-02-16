@@ -41,13 +41,15 @@ from aea.configurations.loader import ConfigLoader
 @click.group(name="list")
 @click.pass_context
 @check_aea_project
-def list_command(click_context):  # pylint: disable=unused-argument
+def list_command(
+    click_context: click.Context,  # pylint: disable=unused-argument
+) -> None:
     """List the installed packages of the agent."""
 
 
 @list_command.command(name="all")
 @pass_ctx
-def all_command(ctx: Context):
+def all_command(ctx: Context) -> None:
     """List all the installed packages."""
     for item_type in ITEM_TYPES:
         details = list_agent_items(ctx, item_type)
@@ -61,7 +63,7 @@ def all_command(ctx: Context):
 
 @list_command.command()
 @pass_ctx
-def connections(ctx: Context):
+def connections(ctx: Context) -> None:
     """List all the installed connections."""
     result = list_agent_items(ctx, CONNECTION)
     click.echo(format_items(sort_items(result)))
@@ -69,7 +71,7 @@ def connections(ctx: Context):
 
 @list_command.command()
 @pass_ctx
-def contracts(ctx: Context):
+def contracts(ctx: Context) -> None:
     """List all the installed protocols."""
     result = list_agent_items(ctx, CONTRACT)
     click.echo(format_items(sort_items(result)))
@@ -77,7 +79,7 @@ def contracts(ctx: Context):
 
 @list_command.command()
 @pass_ctx
-def protocols(ctx: Context):
+def protocols(ctx: Context) -> None:
     """List all the installed protocols."""
     result = list_agent_items(ctx, PROTOCOL)
     click.echo(format_items(sort_items(result)))
@@ -85,7 +87,7 @@ def protocols(ctx: Context):
 
 @list_command.command()
 @pass_ctx
-def skills(ctx: Context):
+def skills(ctx: Context) -> None:
     """List all the installed skills."""
     result = list_agent_items(ctx, SKILL)
     click.echo(format_items(sorted(result, key=lambda k: k["name"])))

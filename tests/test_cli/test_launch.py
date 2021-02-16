@@ -91,6 +91,16 @@ class BaseLaunchTestCase:
         if cls is BaseLaunchTestCase:
             raise unittest.SkipTest("Skip BaseTest tests, it's a base class")
 
+        method_list = [
+            func
+            for func in dir(cls)
+            if callable(getattr(cls, func))
+            and not func.startswith("__")
+            and func.startswith("test_")
+        ]
+        if len(method_list) > 1:
+            raise ValueError(f"{cls.__name__} can only contain one test method!")
+
         cls.runner = CliRunner()
         cls.agent_name_1 = "myagent_1"
         cls.agent_name_2 = "myagent_2"
@@ -143,7 +153,6 @@ class TestLaunch(BaseLaunchTestCase):
             )
 
 
-@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 class TestLaunchWithOneFailingAgent(BaseLaunchTestCase):
     """Test aea launch when there is a failing agent.."""
 
@@ -163,6 +172,7 @@ class TestLaunchWithOneFailingAgent(BaseLaunchTestCase):
         yaml.safe_dump(config, open(config_path, "w"))
         os.chdir(cls.t)
 
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_exit_code_equal_to_one(self):
         """Assert that the exit code is equal to one (i.e. generic failure)."""
         with self._cli_launch([self.agent_name_1, self.agent_name_2]) as process_launch:
@@ -195,10 +205,9 @@ class TestLaunchWithWrongArguments(BaseLaunchTestCase):
     @classmethod
     def setup_class(cls):
         """Set the test up."""
-        cls.runner = CliRunner()
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
+        super().setup_class()
+        cls.temp_agent = tempfile.mkdtemp()
+        os.chdir(cls.temp_agent)
 
         cls.result = cls.runner.invoke(
             cli,
@@ -209,6 +218,16 @@ class TestLaunchWithWrongArguments(BaseLaunchTestCase):
     def test_exit_code_equal_to_one(self):
         """Assert that the exit code is equal to 1."""
         assert self.result.exit_code == 1
+
+    @classmethod
+    def teardown_class(cls):
+        """Set the test up."""
+        os.chdir(cls.t)
+        try:
+            shutil.rmtree(cls.temp_agent)
+        except (OSError, IOError):
+            pass
+        super().teardown_class()
 
 
 class TestLaunchMultithreaded(BaseLaunchTestCase):

@@ -23,6 +23,7 @@ import os
 import struct
 import sys
 import time
+from typing import List, Tuple, Union, cast
 
 import click
 
@@ -103,7 +104,13 @@ class TestHandler(Handler):
         self.context.outbox.put(make_envelope(message.to, message.sender, response_msg))
 
 
-def run(duration, runtime_mode, runner_mode, start_messages, num_of_agents):
+def run(
+    duration: int,
+    runtime_mode: str,
+    runner_mode: str,
+    start_messages: int,
+    num_of_agents: int,
+) -> List[Tuple[str, Union[int, float]]]:
     """Test multiagent message exchange."""
     # pylint: disable=import-outside-toplevel,unused-import
     # import manually due to some lazy imports in decision_maker
@@ -151,19 +158,30 @@ def run(duration, runtime_mode, runner_mode, start_messages, num_of_agents):
     local_node.stop()
     runner.stop()
 
-    total_messages = sum([skill.handlers["test"].count for skill in skills])
+    total_messages = sum(
+        [cast(TestHandler, skill.handlers["test"]).count for skill in skills]
+    )
     rate = total_messages / duration
 
-    rtt_total_time = sum([skill.handlers["test"].rtt_total_time for skill in skills])
-    rtt_count = sum([skill.handlers["test"].rtt_count for skill in skills])
+    rtt_total_time = sum(
+        [cast(TestHandler, skill.handlers["test"]).rtt_total_time for skill in skills]
+    )
+    rtt_count = sum(
+        [cast(TestHandler, skill.handlers["test"]).rtt_count for skill in skills]
+    )
 
     if rtt_count == 0:
         rtt_count = -1
 
     latency_total_time = sum(
-        [skill.handlers["test"].latency_total_time for skill in skills]
+        [
+            cast(TestHandler, skill.handlers["test"]).latency_total_time
+            for skill in skills
+        ]
     )
-    latency_count = sum([skill.handlers["test"].latency_count for skill in skills])
+    latency_count = sum(
+        [cast(TestHandler, skill.handlers["test"]).latency_count for skill in skills]
+    )
 
     if latency_count == 0:
         latency_count = -1
@@ -189,8 +207,13 @@ def run(duration, runtime_mode, runner_mode, start_messages, num_of_agents):
 @click.option("--num_of_agents", default=2, help="Amount of agents to run.")
 @click.option("--number_of_runs", default=10, help="How many times run test.")
 def main(
-    duration, runtime_mode, runner_mode, start_messages, num_of_agents, number_of_runs
-):
+    duration: int,
+    runtime_mode: str,
+    runner_mode: str,
+    start_messages: int,
+    num_of_agents: int,
+    number_of_runs: int,
+) -> None:
     """Run test."""
     click.echo("Start test with options:")
     click.echo(f"* Duration: {duration} seconds")

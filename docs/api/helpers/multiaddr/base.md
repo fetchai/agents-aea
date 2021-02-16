@@ -16,7 +16,7 @@ Protocol Labs' Multiaddress representation of a network address.
 #### `__`init`__`
 
 ```python
- | __init__(host: str, port: int, public_key: Optional[str] = None, multihash_id: Optional[str] = None)
+ | __init__(host: str, port: int, public_key: Optional[str] = None, multihash_id: Optional[str] = None) -> None
 ```
 
 Initialize a multiaddress.

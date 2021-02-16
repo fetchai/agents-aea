@@ -25,7 +25,7 @@ import random
 import struct
 from asyncio import CancelledError
 from pathlib import Path
-from typing import List, Optional, Union, cast
+from typing import Any, List, Optional, Union, cast
 
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_LEDGER
@@ -46,11 +46,17 @@ from packages.fetchai.connections.p2p_libp2p_client.acn_message_pb2 import (
 )
 
 
+try:
+    from asyncio.streams import IncompleteReadError  # pylint: disable=ungrouped-imports
+except ImportError:  # pragma: nocover
+    from asyncio import IncompleteReadError  # pylint: disable=ungrouped-imports
+
+
 _default_logger = logging.getLogger(
     "aea.packages.fetchai.connections.p2p_libp2p_client"
 )
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_client:0.11.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_client:0.12.0")
 
 SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 
@@ -69,7 +75,7 @@ class P2PLibp2pClientConnection(Connection):
 
     connection_id = PUBLIC_ID
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize a libp2p client connection."""
         super().__init__(**kwargs)
 
@@ -106,7 +112,8 @@ class P2PLibp2pClientConnection(Connection):
                 "cert_requests field must be set and contain exactly as many entries as 'nodes'!"
             )
         for cert_request in cert_requests:
-            if not Path(cert_request.save_path).is_file():
+            save_path = cert_request.get_absolute_save_path(Path(self.data_dir))
+            if not save_path.is_file():
                 raise Exception(  # pragma: nocover
                     "cert_request 'save_path' field is not a file. "
                     "Please ensure that 'issue-certificates' command is called beforehand"
@@ -130,7 +137,7 @@ class P2PLibp2pClientConnection(Connection):
         self.delegate_pors: List[AgentRecord] = []
         for i, cert_request in enumerate(cert_requests):
             agent_record = AgentRecord.from_cert_request(
-                cert_request, self.address, nodes_public_keys[i]
+                cert_request, self.address, nodes_public_keys[i], self.data_dir
             )
             self.delegate_pors.append(agent_record)
 
@@ -156,7 +163,7 @@ class P2PLibp2pClientConnection(Connection):
         if self.is_connected:  # pragma: nocover
             return
 
-        self._state.set(ConnectionStates.connecting)
+        self.state = ConnectionStates.connecting
 
         try:
             # connect libp2p client
@@ -180,12 +187,12 @@ class P2PLibp2pClientConnection(Connection):
             self._process_messages_task = asyncio.ensure_future(
                 self._process_messages(), loop=self.loop
             )
-            self._state.set(ConnectionStates.connected)
+            self.state = ConnectionStates.connected
         except (CancelledError, Exception) as e:
-            self._state.set(ConnectionStates.disconnected)
+            self.state = ConnectionStates.disconnected
             raise e
 
-    async def _setup_connection(self):
+    async def _setup_connection(self) -> None:
         record = AgentRecordPb()
         record.address = self.node_por.address
         record.public_key = self.node_por.public_key
@@ -204,6 +211,10 @@ class P2PLibp2pClientConnection(Connection):
         await self._send(buf)
 
         buf = await self._receive()
+        if buf is None:  # pragma: nocover
+            raise ConnectionError(
+                "Error on connection setup. Incoming buffer is empty!"
+            )
         msg = AcnMessage()
         msg.ParseFromString(buf)
         payload = msg.WhichOneof("payload")
@@ -211,10 +222,10 @@ class P2PLibp2pClientConnection(Connection):
             raise Exception(f"Wrong response message from peer: {payload}")
         response = msg.status  # pylint: disable=no-member
 
-        if response.code != Status.SUCCESS:  # pylint: disable=no-member
+        if response.code != Status.SUCCESS:  # type: ignore # pylint: disable=no-member
             raise Exception(  # pragma: nocover
                 "Registration to peer failed: {}".format(
-                    Status.ErrCode.Name(response.code)  # pylint: disable=no-member
+                    Status.ErrCode.Name(response.code)  # type: ignore # pylint: disable=no-member
                 )
             )
 
@@ -230,7 +241,7 @@ class P2PLibp2pClientConnection(Connection):
             raise ValueError("Message task is not set.")  # pragma: nocover
         if self._writer is None:
             raise ValueError("Writer is not set.")  # pragma: nocover
-        self._state.set(ConnectionStates.disconnecting)
+        self.state = ConnectionStates.disconnecting
         if self._process_messages_task is not None:
             self._process_messages_task.cancel()
             # TOFIX(LR) mypy issue https://github.com/python/mypy/issues/8546
@@ -245,9 +256,9 @@ class P2PLibp2pClientConnection(Connection):
             self._in_queue.put_nowait(None)
         else:  # pragma: no cover
             self.logger.debug("Called disconnect when input queue not initialized.")
-        self._state.set(ConnectionStates.disconnected)
+        self.state = ConnectionStates.disconnected
 
-    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
+    async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """
         Receive an envelope. Blocking.
 
@@ -272,7 +283,7 @@ class P2PLibp2pClientConnection(Connection):
             self.logger.exception(e)
             return None
 
-    async def send(self, envelope: Envelope):
+    async def send(self, envelope: Envelope) -> None:
         """
         Send messages.
 
@@ -316,7 +327,10 @@ class P2PLibp2pClientConnection(Connection):
             if not data:  # pragma: no cover
                 return None
             return data
-        except asyncio.streams.IncompleteReadError as e:  # pragma: no cover
+        except ConnectionError as e:  # pragma: nocover
+            self.logger.info(f"Connection error: {e}")
+            return None
+        except IncompleteReadError as e:  # pragma: no cover
             self.logger.info(
                 "Connection disconnected while reading from node ({}/{})".format(
                     len(e.partial), e.expected

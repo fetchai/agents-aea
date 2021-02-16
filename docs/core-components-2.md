@@ -1,16 +1,16 @@
-The AEA framework consists of several core elements, some of which are required to run an AEA and others which are optional.
+The AEA framework consists of several core components, some required to run an AEA and others optional.
 
-## The advanced elements AEAs use
+In <a href="../core-components-1">Core Components - Part 1</a> we described the common components each AEA uses. In this page, we will look at more advanced components. 
 
-In <a href="../core-components-1">Core Components - Part 1</a> we discussed the common elements each AEA uses. We will now look at some of the advanced elements each AEA uses.
+## Required components used by AEAs
 
 ### Decision Maker
 
 <img src="../assets/decision-maker.jpg" alt="Decision Maker of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:50%;">
 
-The <a href="../api/decision_maker/base#decisionmaker-objects">`DecisionMaker`</a> can be thought of as a `Wallet` manager plus "economic brain" of the AEA. It is responsible for the AEA's crypto-economic security and goal management, and it contains the preference and ownership representation of the AEA. The decision maker is the only component which has access to the `Wallet`'s private keys.
+The <a href="../api/decision_maker/base#decisionmaker-objects">`DecisionMaker`</a> can be thought of as a `Wallet` manager plus "economic brain" of the AEA. It is responsible for the AEA's crypto-economic security and goal management, and it contains the preference and ownership representation of the AEA. The decision maker is the only component with access to the `Wallet`'s private keys.
 
-You can learn more about the decision maker <a href="../decision-maker">here</a>. In the simplest form, it acts like a `Handler` with a `Wallet`.
+You can learn more about the decision maker <a href="../decision-maker">here</a>. In its simplest form, the decision maker acts like a `Wallet` with `Handler` to react to messages it receives from the skills.
 
 ### Wallet
 
@@ -22,7 +22,7 @@ The <a href="../api/identity/base#identity-objects">`Identity`</a> is an abstrac
 
 The identity can be accessed in a `Skill` via the <a href="../api/context/base#agentcontext-objects">`AgentContext`</a>.
 
-## Optional elements AEAs use
+## Optional components used by AEAs
 
 ### Contracts
 
@@ -55,7 +55,7 @@ Understanding the decision maker is vital to developing a goal oriented and cryp
 - <a href="../decision-maker">Decision Maker</a>
 
 
-Understanding `Contracts` is important when developing AEAs that make commitments or use smart contracts for other aims. You can learn more about the `Contracts` agents use in the following section:
+Understanding `Contracts` is important when developing AEAs that make commitments or use smart contracts for other purposes. You can learn more about the `Contracts` agents use in the following section:
 
 - <a href="../contract">Contracts</a>
 

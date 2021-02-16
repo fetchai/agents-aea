@@ -25,7 +25,6 @@ from typing import Dict, List
 _FETCHAI_IDENTIFIER = "fetchai"
 _ETHEREUM_IDENTIFIER = "ethereum"
 _COSMOS_IDENTIFIER = "cosmos"
-DEFAULT_CONNECTION = "fetchai/stub:latest"
 DEFAULT_PROTOCOL = "fetchai/default:latest"
 SIGNING_PROTOCOL = "fetchai/signing:latest"
 STATE_UPDATE_PROTOCOL = "fetchai/state_update:latest"
@@ -80,6 +79,7 @@ IMPORT_TEMPLATE_2 = "import packages.{author}.{type}.{name}"
 DEFAULT_ENV_DOTFILE = ".env"
 DOTTED_PATH_MODULE_ELEMENT_SEPARATOR = ":"
 LIBPROTOC_VERSION = "libprotoc 3.11.4"
+DEFAULT_BUILD_DIR_NAME = ".build"
 
 CONFIG_FILE_TO_PACKAGE_TYPE = {
     DEFAULT_SKILL_CONFIG_FILE: SKILL,
@@ -97,3 +97,5 @@ ALLOWED_GROUPS = {
     LEDGER_APIS_PLUGIN_GROUP,
     FAUCET_APIS_PLUGIN_GROUP,
 }
+AEA_MANAGER_DATA_DIRNAME = "data"
+LAUNCH_SUCCEED_MESSAGE = "Start processing messages..."

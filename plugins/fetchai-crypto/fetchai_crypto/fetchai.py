@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 """Fetchai module wrapping the public and private key cryptography and ledger api."""
 
+from typing import Any
 
 from fetchai_crypto._cosmos import (
     CosmosCrypto,
@@ -55,7 +56,7 @@ class FetchAIApi(_CosmosApi, FetchAIHelper):
 
     identifier = _FETCHAI
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize the Fetch.ai ledger APIs."""
         if "address" not in kwargs:
             kwargs["address"] = DEFAULT_ADDRESS  # pragma: nocover

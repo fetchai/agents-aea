@@ -23,7 +23,7 @@ import pytest
 from ethereum_crypto import EthereumCrypto
 from fetchai_crypto import FetchAICrypto
 
-from aea.test_tools.test_cases import AEATestCaseMany
+from aea.test_tools.test_cases import AEATestCaseManyFlaky
 
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
@@ -38,7 +38,7 @@ from tests.conftest import (
 
 
 @pytest.mark.integration
-class TestOracleSkills(AEATestCaseMany, UseGanache):
+class TestOracleSkills(AEATestCaseManyFlaky, UseGanache):
     """Test that oracle skills work."""
 
     @pytest.mark.ledger
@@ -52,26 +52,25 @@ class TestOracleSkills(AEATestCaseMany, UseGanache):
 
         # add ethereum ledger in both configuration files
         default_routing = {
-            "fetchai/ledger_api:0.9.0": "fetchai/ledger:0.12.0",
-            "fetchai/contract_api:0.10.0": "fetchai/ledger:0.12.0",
-            "fetchai/http:0.11.0": "fetchai/http_client:0.16.0",
-            "fetchai/prometheus:0.2.0": "fetchai/prometheus:0.2.0",
+            "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
+            "fetchai/contract_api:0.11.0": "fetchai/ledger:0.13.0",
+            "fetchai/http:0.12.0": "fetchai/http_client:0.17.0",
+            "fetchai/prometheus:0.3.0": "fetchai/prometheus:0.3.0",
         }
 
         # add packages for oracle agent
         self.set_agent_context(oracle_agent_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.14.0")
-        self.add_item("connection", "fetchai/ledger:0.12.0")
-        self.add_item("connection", "fetchai/http_client:0.16.0")
-        self.add_item("connection", "fetchai/prometheus:0.2.0")
-        self.remove_item("connection", "fetchai/stub:0.15.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.14.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.15.0")
+        self.add_item("connection", "fetchai/ledger:0.13.0")
+        self.add_item("connection", "fetchai/http_client:0.17.0")
+        self.add_item("connection", "fetchai/prometheus:0.3.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.15.0")
         self.set_config("agent.default_ledger", EthereumCrypto.identifier)
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
-        self.add_item("skill", "fetchai/coin_price:0.3.0")
-        self.add_item("contract", "fetchai/oracle:0.3.0")
-        self.add_item("skill", "fetchai/simple_oracle:0.3.0")
+        self.add_item("skill", "fetchai/coin_price:0.4.0")
+        self.add_item("contract", "fetchai/oracle:0.4.0")
+        self.add_item("skill", "fetchai/simple_oracle:0.4.0")
 
         # set erc20 address
         _, erc20_address = erc20_contract
@@ -87,7 +86,7 @@ class TestOracleSkills(AEATestCaseMany, UseGanache):
         self.set_config(setting_path, oracle_address)
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/coin_price_oracle:0.4.0", oracle_agent_name
+            "fetchai/coin_price_oracle:0.5.0", oracle_agent_name
         )
         assert (
             diff == []
@@ -124,25 +123,24 @@ class TestOracleSkills(AEATestCaseMany, UseGanache):
 
         # add packages for oracle client agent
         self.set_agent_context(client_agent_name)
-        self.add_item("connection", "fetchai/ledger:0.12.0")
-        self.add_item("connection", "fetchai/http_client:0.16.0")
-        self.remove_item("connection", "fetchai/stub:0.15.0")
-        self.set_config("agent.default_connection", "fetchai/ledger:0.12.0")
+        self.add_item("connection", "fetchai/ledger:0.13.0")
+        self.add_item("connection", "fetchai/http_client:0.17.0")
+        self.set_config("agent.default_connection", "fetchai/ledger:0.13.0")
         self.set_config("agent.default_ledger", EthereumCrypto.identifier)
 
         default_routing = {
-            "fetchai/ledger_api:0.9.0": "fetchai/ledger:0.12.0",
-            "fetchai/contract_api:0.10.0": "fetchai/ledger:0.12.0",
-            "fetchai/http:0.11.0": "fetchai/http_client:0.16.0",
+            "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
+            "fetchai/contract_api:0.11.0": "fetchai/ledger:0.13.0",
+            "fetchai/http:0.12.0": "fetchai/http_client:0.17.0",
         }
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
-        self.add_item("contract", "fetchai/oracle_client:0.2.0")
-        self.add_item("contract", "fetchai/fet_erc20:0.2.0")
-        self.add_item("skill", "fetchai/simple_oracle_client:0.2.0")
+        self.add_item("contract", "fetchai/oracle_client:0.3.0")
+        self.add_item("contract", "fetchai/fet_erc20:0.3.0")
+        self.add_item("skill", "fetchai/simple_oracle_client:0.3.0")
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/coin_price_oracle_client:0.1.0", client_agent_name
+            "fetchai/coin_price_oracle_client:0.2.0", client_agent_name
         )
         assert (
             diff == []

@@ -26,6 +26,8 @@ This module contains the classes required for dialogue management.
 - OefSearchDialogues: The dialogues class keeps track of all dialogues of type oef_search.
 - SigningDialogues: The dialogues class keeps track of all dialogues of type signing.
 """
+from typing import Any
+
 from aea.common import Address
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
@@ -65,7 +67,7 @@ HttpDialogue = BaseHttpDialogue
 class HttpDialogues(Model, BaseHttpDialogues):
     """This class keeps track of all http dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 

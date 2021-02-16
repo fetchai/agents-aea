@@ -21,6 +21,7 @@
 
 from queue import Queue
 from threading import Thread
+from typing import Any
 
 from aea.skills.base import SkillContext
 from aea.skills.tasks import Task
@@ -44,7 +45,7 @@ class GymTask(Task):
         )
         self.is_rl_agent_training = False
 
-    def _fit(self, proxy_env: ProxyEnv, nb_steps: int):
+    def _fit(self, proxy_env: ProxyEnv, nb_steps: int) -> None:
         """Fit the RL agent."""
         self._rl_agent.fit(proxy_env, nb_steps)
         self.logger.info("Training finished. You can exit now via CTRL+C.")
@@ -63,7 +64,7 @@ class GymTask(Task):
         """Set up the task."""
         self.logger.info("Gym task: setup method called.")
 
-    def execute(self, *args, **kwargs) -> None:
+    def execute(self, *args: Any, **kwargs: Any) -> None:
         """Execute the task."""
         if not self._proxy_env.is_rl_agent_trained and not self.is_rl_agent_training:
             self._start_training()

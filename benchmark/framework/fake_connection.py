@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 """Fake connection to generate test messages."""
 import asyncio
-from typing import Optional
+from typing import Any, Optional
 
 from aea.connections.base import Connection, ConnectionStates
 from aea.mail.base import Envelope
@@ -27,7 +27,7 @@ from aea.mail.base import Envelope
 class FakeConnection(Connection):
     """Simple fake connection to populate inbox."""
 
-    def __init__(self, envelope: Envelope, num: int, *args, **kwargs):
+    def __init__(self, envelope: Envelope, num: int, *args: Any, **kwargs: Any):
         """
         Set fake connection with num of envelops to be generated.
 
@@ -37,7 +37,7 @@ class FakeConnection(Connection):
         Connection.__init__(self, *args, **kwargs)
         self.num = num
         self.envelope = envelope
-        self._state.set(ConnectionStates.connected)
+        self.state = ConnectionStates.connected
 
     async def connect(self) -> None:
         """
@@ -52,7 +52,7 @@ class FakeConnection(Connection):
 
         :return: None
         """
-        self._state.set(ConnectionStates.disconnected)
+        self.state = ConnectionStates.disconnected
 
     async def send(self, envelope: Envelope) -> None:
         """
@@ -63,7 +63,7 @@ class FakeConnection(Connection):
         """
         return None
 
-    async def receive(self, *args, **kwargs) -> Optional[Envelope]:
+    async def receive(self, *args: Any, **kwargs: Any) -> Optional[Envelope]:
         """
         Return envelope set `num` times.
 

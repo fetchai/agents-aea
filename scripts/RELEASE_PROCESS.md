@@ -9,7 +9,7 @@
 
 4. Bump all the packages to their latest versions by running `python scripts/update_package_versions.py`.
 
-5. Check the package upgrades are correct by running `python scripts/check_package_dependencies.py` and `python scripts/check_package_versions_in_docs.py`. Commit if satisfied.
+5. Check the package upgrades are correct by running `python scripts/check_packages.py` and `python scripts/check_package_versions_in_docs.py`. Commit if satisfied.
 
 6. Check the docs are up-to-date by running `python scripts/generate_api_docs.py` and `python scripts/check_doc_links.py`. Ensure all links are configured `mkdocs serve`. Commit if satisfied.
 

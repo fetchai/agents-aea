@@ -16,7 +16,7 @@ Abstract class for an agent component.
 #### `__`init`__`
 
 ```python
- | __init__(configuration: Optional[ComponentConfiguration] = None, is_vendor: bool = False, **kwargs, ,)
+ | __init__(configuration: Optional[ComponentConfiguration] = None, is_vendor: bool = False, **kwargs: Any, ,) -> None
 ```
 
 Initialize a package.
@@ -51,7 +51,7 @@ Get whether the component is vendorized or not.
 
 ```python
  | @property
- | prefix_import_path()
+ | prefix_import_path() -> str
 ```
 
 Get the prefix import path for this component.

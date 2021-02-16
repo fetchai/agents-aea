@@ -77,7 +77,7 @@ Get the model registry.
 #### add`_`component
 
 ```python
- | add_component(component: Component)
+ | add_component(component: Component) -> None
 ```
 
 Add a component to resources.
@@ -111,6 +111,23 @@ Get protocol for given protocol id.
 **Arguments**:
 
 - `protocol_id`: the protocol id
+
+**Returns**:
+
+a matching protocol, if present, else None
+
+<a name="aea.registries.resources.Resources.get_protocol_by_specification_id"></a>
+#### get`_`protocol`_`by`_`specification`_`id
+
+```python
+ | get_protocol_by_specification_id(protocol_specification_id: PublicId) -> Optional[Protocol]
+```
+
+Get protocol for given protocol_specification_id.
+
+**Arguments**:
+
+- `protocol_specification_id`: the protocol id
 
 **Returns**:
 

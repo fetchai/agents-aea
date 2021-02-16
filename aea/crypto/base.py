@@ -33,8 +33,8 @@ class Crypto(Generic[EntityClass], ABC):
     identifier = "base"
 
     def __init__(
-        self, private_key_path: Optional[str] = None, **kwargs
-    ):  # pylint: disable=unused-argument
+        self, private_key_path: Optional[str] = None, **kwargs: Any
+    ) -> None:  # pylint: disable=unused-argument
         """
         Initialize the crypto object.
 
@@ -47,6 +47,7 @@ class Crypto(Generic[EntityClass], ABC):
                 If not None, the path will be processed by 'load_private_key_from_path()'.
         :param kwargs: keyword arguments.
         """
+        self._kwargs = kwargs
         self._entity = (
             self.generate_private_key()
             if private_key_path is None
@@ -272,7 +273,9 @@ class LedgerApi(Helper, ABC):
         """
 
     @abstractmethod
-    def get_state(self, callable_name: str, *args, **kwargs) -> Optional[JSONLike]:
+    def get_state(
+        self, callable_name: str, *args: Any, **kwargs: Any
+    ) -> Optional[JSONLike]:
         """
         Call a specified function on the underlying ledger API.
 
@@ -292,7 +295,7 @@ class LedgerApi(Helper, ABC):
         amount: int,
         tx_fee: int,
         tx_nonce: str,
-        **kwargs,
+        **kwargs: Any,
     ) -> Optional[JSONLike]:
         """
         Submit a transfer transaction to the ledger.
@@ -347,7 +350,10 @@ class LedgerApi(Helper, ABC):
 
     @abstractmethod
     def get_deploy_transaction(
-        self, contract_interface: Dict[str, str], deployer_address: Address, **kwargs,
+        self,
+        contract_interface: Dict[str, str],
+        deployer_address: Address,
+        **kwargs: Any,
     ) -> Optional[JSONLike]:
         """
         Get the transaction to deploy the smart contract.

@@ -88,7 +88,7 @@
       }
     },
     "default_connection": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "protocols": {
       "type": "array",
@@ -103,9 +103,6 @@
       "items": {
         "$ref": "definitions.json#/definitions/public_id"
       }
-    },
-    "logging_config": {
-      "type": "object"
     },
     "description": {
       "$ref": "definitions.json#/definitions/description"
@@ -151,6 +148,9 @@
     },
     "storage_uri": {
       "$ref": "definitions.json#/definitions/storage_uri"
+    },
+    "data_dir": {
+      "type": "string"
     }
   }
 }

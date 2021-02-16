@@ -258,7 +258,7 @@ class CosmosCrypto(Crypto[SigningKey]):
     identifier = _COSMOS
     helper = CosmosHelper
 
-    def __init__(self, private_key_path: Optional[str] = None):
+    def __init__(self, private_key_path: Optional[str] = None) -> None:
         """
         Instantiate an ethereum crypto object.
 
@@ -296,7 +296,7 @@ class CosmosCrypto(Crypto[SigningKey]):
         return self._address
 
     @classmethod
-    def load_private_key_from_path(cls, file_name) -> SigningKey:
+    def load_private_key_from_path(cls, file_name: str) -> SigningKey:
         """
         Load a private key in hex format from a file.
 
@@ -433,7 +433,7 @@ class _CosmosApi(LedgerApi):
 
     identifier = _COSMOS
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize the Cosmos ledger APIs."""
         self._api = None
         self.network_address = kwargs.pop("address", DEFAULT_ADDRESS)
@@ -442,7 +442,7 @@ class _CosmosApi(LedgerApi):
         self.cli_command = kwargs.pop("cli_command", DEFAULT_CLI_COMMAND)
 
     @property
-    def api(self) -> None:
+    def api(self) -> Any:
         """Get the underlying API object."""
         return self._api
 
@@ -468,7 +468,9 @@ class _CosmosApi(LedgerApi):
                 balance = int(result[0]["amount"])
         return balance
 
-    def get_state(self, callable_name: str, *args, **kwargs) -> Optional[JSONLike]:
+    def get_state(
+        self, callable_name: str, *args: Any, **kwargs: Any
+    ) -> Optional[JSONLike]:
         """
         Call a specified function on the ledger API.
 
@@ -485,7 +487,7 @@ class _CosmosApi(LedgerApi):
         logger_method=_default_logger.warning,
     )
     def _try_get_state(  # pylint: disable=unused-argument
-        self, callable_name: str, *args, **kwargs
+        self, callable_name: str, *args: Any, **kwargs: Any
     ) -> Optional[JSONLike]:
         """Try to call a function on the ledger API."""
         result: Optional[JSONLike] = None
@@ -497,7 +499,10 @@ class _CosmosApi(LedgerApi):
         return result
 
     def get_deploy_transaction(
-        self, contract_interface: Dict[str, str], deployer_address: Address, **kwargs
+        self,
+        contract_interface: Dict[str, str],
+        deployer_address: Address,
+        **kwargs: Any,
     ) -> Optional[JSONLike]:
         """
         Get the transaction to deploy the smart contract.
@@ -786,7 +791,7 @@ class _CosmosApi(LedgerApi):
         gas: int = 80000,
         memo: str = "",
         chain_id: Optional[str] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Optional[JSONLike]:
         """
         Submit a transfer transaction to the ledger.
@@ -1090,7 +1095,7 @@ class CosmosFaucetApi(FaucetApi):
     testnet_faucet_url = DEFAULT_FAUCET_URL
     testnet_name = TESTNET_NAME
 
-    def __init__(self, poll_interval=None):
+    def __init__(self, poll_interval: Optional[float] = None):
         """Initialize CosmosFaucetApi."""
         self._poll_interval = float(poll_interval or 1)
 

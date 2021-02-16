@@ -28,6 +28,7 @@ import pytest
 
 from aea.configurations.base import PublicId
 from aea.crypto.helpers import create_private_key
+from aea.crypto.registries import crypto_registry
 from aea.manager import MultiAgentManager
 
 from packages.fetchai.connections.stub.connection import StubConnection
@@ -73,11 +74,11 @@ class TestMultiAgentManagerAsyncMode(
         assert not os.path.exists(self.working_dir)
         assert not os.path.exists(self.working_dir)
 
-    def test_keys_dir_presents(self, *args):
-        """Check not fails on exists key dir."""
+    def test_data_dir_presents(self, *args):
+        """Check not fails on exists data dir."""
         try:
             os.makedirs(self.working_dir)
-            os.makedirs(self.manager._keys_dir)
+            os.makedirs(self.manager._data_dir)
             self.manager.start_manager()
             self.manager.stop_manager()
         finally:
@@ -408,8 +409,9 @@ class TestMultiAgentManagerAsyncMode(
         self.manager.start_manager()
         self.manager.add_project(self.project_public_id, local=True)
 
-        cert_path = os.path.abspath(os.path.join(self.working_dir, "cert.txt"))
-        assert not os.path.exists(cert_path)
+        cert_filename = "cert.txt"
+        cert_path = os.path.join(self.manager.data_dir, self.agent_name, cert_filename)
+        assert not os.path.exists(cert_filename)
 
         priv_key_path = os.path.abspath(os.path.join(self.working_dir, "priv_key.txt"))
         create_private_key("fetchai", priv_key_path)
@@ -426,7 +428,7 @@ class TestMultiAgentManagerAsyncMode(
                         "not_after": "2022-01-01",
                         "not_before": "2021-01-01",
                         "public_key": "fetchai",
-                        "save_path": cert_path,
+                        "save_path": cert_filename,
                     }
                 ],
             }
@@ -447,6 +449,32 @@ class TestMultiAgentManagerAsyncMode(
         agent_alias.issue_certificates()
 
         assert os.path.exists(cert_path)
+
+    def test_get_addresses(self, *args) -> None:
+        """Test get addr for agent alias."""
+        self.test_add_agent()
+        agent_alias = self.manager.get_agent_alias(self.agent_name)
+        keys = {
+            name: agent_alias._create_private_key(
+                ledger=name, replace=True, is_connection=False
+            )
+            for name in crypto_registry.supported_ids
+        }
+
+        connection_keys = {
+            name: agent_alias._create_private_key(
+                ledger=name, replace=True, is_connection=True
+            )
+            for name in crypto_registry.supported_ids
+        }
+        agent_alias.set_overrides(
+            {"private_key_paths": keys, "connection_private_key_paths": connection_keys}
+        )
+
+        assert len(agent_alias.get_addresses()) == len(crypto_registry.supported_ids)
+        assert len(agent_alias.get_connections_addresses()) == len(
+            crypto_registry.supported_ids
+        )
 
 
 class TestMultiAgentManagerThreadedMode(TestMultiAgentManagerAsyncMode):

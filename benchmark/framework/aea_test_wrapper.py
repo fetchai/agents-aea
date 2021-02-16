@@ -209,7 +209,7 @@ class AEATestWrapper:
         """Contenxt manager enter."""
         self.start_loop()
 
-    def __exit__(  # pylint: disable=useless-return
+    def __exit__(  # type: ignore # pylint: disable=useless-return
         self, exc_type=None, exc=None, traceback=None
     ) -> None:
         """
