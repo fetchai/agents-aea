@@ -36,7 +36,8 @@ def load_yaml(filepath: str) -> Dict:
     """
     with open_file(filepath, "r") as f:
         try:
-            return yaml.safe_load(f)
+            result = yaml.safe_load(f)
+            return result if result is not None else {}
         except yaml.YAMLError as e:
             raise ClickException(
                 "Loading yaml config from {} failed: {}".format(filepath, e)

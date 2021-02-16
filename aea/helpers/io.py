@@ -76,9 +76,6 @@ def open_file(
     :param buffering: the buffering policy.
     :param encoding: the name of the encoding used to decode or encode the file.
     :param errors: how encoding errors are to be handled
-    :param closefd: If closefd is False, the underlying file descriptor will be kept open
-        when the file is closed. This does not work when a file name is given
-        and must be True in that case.
     :return: the IO object.
     """
     if "b" in mode:

@@ -40,7 +40,7 @@ def test_is_text_negative():
     """Test the helper method 'is_text' negative case."""
     # https://gehrcke.de/2015/12/how-to-raise-unicodedecodeerror-in-python-3/
     with patch(
-        "builtins.open",
+        "aea.helpers.ipfs.base.open_file",
         side_effect=UnicodeDecodeError("foo", b"bytes", 1, 2, "Fake reason"),
     ):
         assert not _is_text("path")
