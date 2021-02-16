@@ -26,11 +26,14 @@ import pytest
 from click.exceptions import ClickException
 
 from aea.cli.transfer import wait_tx_settled
-from aea.cli.utils.package_utils import get_wallet_from_agent_config, try_get_balance
+from aea.cli.utils.package_utils import try_get_balance
 from aea.configurations.manager import AgentConfigManager
 from aea.crypto.cosmos import CosmosCrypto
 from aea.crypto.fetchai import FetchAICrypto
-from aea.crypto.helpers import private_key_verify_or_create
+from aea.crypto.helpers import (
+    get_wallet_from_agent_config,
+    private_key_verify_or_create,
+)
 from aea.helpers.base import cd
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
