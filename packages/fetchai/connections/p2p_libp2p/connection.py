@@ -197,8 +197,8 @@ class Libp2pNode:
             self.records_storage_path is not None
             and not Path(self.records_storage_path).is_absolute()
         ):
-            self.records_storage_path = os.path.abspath(
-                os.path.join(data_dir, self.records_storage_path)
+            self.records_storage_path = os.path.join(
+                data_dir, self.records_storage_path
             )
 
         # node startup
@@ -211,11 +211,11 @@ class Libp2pNode:
         # log file
         self.log_file = log_file if log_file is not None else LIBP2P_NODE_LOG_FILE
         if not Path(self.log_file).is_absolute():
-            self.log_file = os.path.abspath(os.path.join(data_dir, self.log_file))
+            self.log_file = os.path.join(data_dir, self.log_file)
         # env file
         self.env_file = env_file if env_file is not None else LIBP2P_NODE_ENV_FILE
         if not Path(self.log_file).is_absolute():
-            self.env_file = os.path.abspath(os.path.join(data_dir, self.env_file))
+            self.env_file = os.path.join(data_dir, self.env_file)
 
         # named pipes (fifos)
         self.pipe = None  # type: Optional[IPCChannel]
