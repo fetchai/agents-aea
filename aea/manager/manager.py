@@ -29,6 +29,7 @@ from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 from aea.aea import AEA
 from aea.configurations.constants import AEA_MANAGER_DATA_DIRNAME, DEFAULT_REGISTRY_NAME
 from aea.configurations.data_types import PublicId
+from aea.helpers.io import open_file
 from aea.manager.project import AgentAlias, Project
 
 
@@ -710,7 +711,7 @@ class MultiAgentManager:
             return
 
         save_json = {}
-        with open(self._save_path) as f:
+        with open_file(self._save_path) as f:
             save_json = json.load(f)
 
         if not save_json:
@@ -740,5 +741,5 @@ class MultiAgentManager:
 
         :return: None.
         """
-        with open(self._save_path, "w") as f:
+        with open_file(self._save_path, "w") as f:
             json.dump(self.dict_state, f, indent=4, sort_keys=True)

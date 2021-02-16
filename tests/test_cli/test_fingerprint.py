@@ -116,7 +116,7 @@ def _raise_exception(*args, **kwargs):
     raise Exception()
 
 
-@mock.patch("aea.cli.fingerprint.Path.open", mock.mock_open())
+@mock.patch("aea.cli.fingerprint.open_file", mock.mock_open())
 class FingerprintItemTestCase(TestCase):
     """Test case for fingerprint_item method."""
 

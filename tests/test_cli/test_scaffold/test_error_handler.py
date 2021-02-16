@@ -78,7 +78,7 @@ class ScaffoldErrHandlerTestCase(TestCase):
 
     @mock.patch("aea.cli.scaffold.shutil.copyfile")
     @mock.patch("aea.cli.scaffold.os.remove")
-    @mock.patch("builtins.open", mock.mock_open())
+    @mock.patch("aea.cli.scaffold.open_file", mock.mock_open())
     @mock.patch("aea.cli.scaffold.Path", return_value="Path")
     def test__scaffold_error_handler_positive(self, *mocks):
         """Test _scaffold_error_handler method for positive result."""

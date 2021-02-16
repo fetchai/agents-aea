@@ -39,6 +39,7 @@ from aea.configurations.constants import (
     VENDOR,
 )
 from aea.configurations.loader import ConfigLoader
+from aea.helpers.io import open_file
 
 
 class Context:
@@ -112,7 +113,7 @@ class Context:
         if not path.exists():
             path = Path(item_type_plural, public_id.name, default_config_file_name)
         config_loader = ConfigLoader.from_configuration_type(item_type)
-        with path.open() as fp:
+        with open_file(path) as fp:
             config = config_loader.load(fp)
         deps = cast(Dependencies, config.dependencies)
         return deps

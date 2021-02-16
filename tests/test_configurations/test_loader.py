@@ -92,7 +92,11 @@ def test_load_protocol_specification_only_first_part():
     )
     with mock.patch.object(
         yaml, "safe_load_all", return_value=[valid_protocol_specification]
-    ), mock.patch("builtins.open"), mock.patch.object(OwnDraft4Validator, "validate"):
+    ), mock.patch("builtins.open"), mock.patch(
+        "aea.protocols.generator.common.open_file"
+    ), mock.patch.object(
+        OwnDraft4Validator, "validate"
+    ):
         load_protocol_specification("foo")
 
 
@@ -110,7 +114,11 @@ def test_load_protocol_specification_two_parts():
         yaml,
         "safe_load_all",
         return_value=[valid_protocol_specification, valid_protocol_specification],
-    ), mock.patch("builtins.open"), mock.patch.object(OwnDraft4Validator, "validate"):
+    ), mock.patch("builtins.open"), mock.patch(
+        "aea.protocols.generator.common.open_file"
+    ), mock.patch.object(
+        OwnDraft4Validator, "validate"
+    ):
         load_protocol_specification("foo")
 
 
@@ -122,5 +130,7 @@ def test_load_protocol_specification_too_many_parts():
     ):
         with mock.patch.object(
             yaml, "safe_load_all", return_value=[{}] * 4
-        ), mock.patch("builtins.open"):
+        ), mock.patch("builtins.open"), mock.patch(
+            "aea.protocols.generator.common.open_file"
+        ):
             load_protocol_specification("foo")

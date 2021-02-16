@@ -90,7 +90,8 @@ def yaml_load(stream: TextIO) -> Dict[str, Any]:
     :param stream: file pointer to the input file.
     :return: the dictionary object with the YAML file content.
     """
-    return yaml.load(stream, Loader=_AEAYamlLoader)  # nosec
+    result = yaml.load(stream, Loader=_AEAYamlLoader)  # nosec
+    return result if result is not None else {}
 
 
 def yaml_load_all(stream: TextIO) -> List[Dict[str, Any]]:

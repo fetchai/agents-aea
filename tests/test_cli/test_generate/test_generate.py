@@ -52,7 +52,8 @@ def _raise_psperror(*args, **kwargs):
     raise ProtocolSpecificationParseError()
 
 
-@mock.patch("builtins.open", mock.mock_open())
+@mock.patch("aea.protocols.generator.common.open_file", mock.mock_open())
+@mock.patch("aea.cli.generate.open_file", mock.mock_open())
 @mock.patch(
     "aea.protocols.generator.common.ConfigLoader.load_protocol_specification",
     return_value=ProtocolSpecification(

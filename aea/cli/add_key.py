@@ -32,6 +32,7 @@ from aea.configurations.constants import (
 )
 from aea.crypto.helpers import try_validate_private_key_path
 from aea.crypto.registries import crypto_registry
+from aea.helpers.io import open_file
 
 
 key_file_argument = click.Path(
@@ -97,5 +98,5 @@ def _try_add_key(
             ctx.agent_config.private_key_paths.create(type_, filepath)
     except ValueError as e:  # pragma: no cover
         raise click.ClickException(str(e))
-    with open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as fp:
+    with open_file(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as fp:
         ctx.agent_loader.dump(ctx.agent_config, fp)
