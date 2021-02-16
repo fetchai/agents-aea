@@ -442,7 +442,7 @@ def _bump_protocol_specification_id_if_needed(package_path: Path) -> None:
     content_is_different = current_specification_content != old_specification_content
     if public_id_version_is_newer and content_is_different:
         log(
-            f"Bumping protocol specification id from '{configuration.protocol_specification_id}' to '{old_configuration.protocol_specification_id}'"
+            f"Bumping protocol specification id from '{old_configuration.protocol_specification_id}' to '{configuration.protocol_specification_id}'"
         )
         _bump_protocol_specification_id(package_path, configuration)
         return
