@@ -2086,7 +2086,7 @@ class ProtocolGenerator:
         :return: optional warning message.
         """
         if protobuf_only:
-            message = self.generate_protobuf_only_mode(language)
+            message = self.generate_protobuf_only_mode(language)  # type: Optional[str]
         else:
             message = self.generate_full_mode()
         return message

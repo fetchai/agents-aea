@@ -21,7 +21,7 @@ from unittest import TestCase, mock
 
 from click import ClickException
 
-from aea.cli.generate import _generate_item
+from aea.cli.generate import protocol
 from aea.configurations.base import (
     ProtocolSpecification,
     ProtocolSpecificationParseError,
@@ -70,14 +70,14 @@ class GenerateItemTestCase(TestCase):
         """Test for fetch_agent_locally method file exists result."""
         ctx_mock = ContextMock()
         with self.assertRaises(ClickException):
-            _generate_item(ctx_mock, "protocol", "path")
+            protocol(ctx_mock, "protocol", "path")
 
     @mock.patch("aea.protocols.generator.base.shutil.which", _which_mock)
     def test__generate_item_no_res(self, *_mocks):
         """Test for fetch_agent_locally method no black."""
         ctx_mock = ContextMock()
         with self.assertRaises(ClickException) as cm:
-            _generate_item(ctx_mock, "protocol", "path")
+            protocol(ctx_mock, "protocol", "path")
         expected_msg = (
             "Protocol is NOT generated. The following error happened while generating the protocol:\n"
             "Cannot find black code formatter! To install, please follow this link: "
@@ -90,7 +90,7 @@ class GenerateItemTestCase(TestCase):
         """Test for fetch_agent_locally method no isort."""
         ctx_mock = ContextMock()
         with self.assertRaises(ClickException) as cm:
-            _generate_item(ctx_mock, "protocol", "path")
+            protocol(ctx_mock, "protocol", "path")
         expected_msg = (
             "Protocol is NOT generated. The following error happened while generating the protocol:\n"
             "Cannot find isort code formatter! To install, please follow this link: "
@@ -105,7 +105,7 @@ class GenerateItemTestCase(TestCase):
         """Test for fetch_agent_locally method parsing specs fail."""
         ctx_mock = ContextMock()
         with self.assertRaises(ClickException) as cm:
-            _generate_item(ctx_mock, "protocol", "path")
+            protocol(ctx_mock, "protocol", "path")
         expected_msg = (
             "The following error happened while parsing the protocol specification"
         )

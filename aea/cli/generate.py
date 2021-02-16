@@ -20,15 +20,20 @@
 """Implementation of the 'aea generate' subcommand."""
 
 import os
-import yaml
+from typing import Set
 
 import click
+import yaml
 
 from aea.cli.fingerprint import fingerprint_item
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, clean_after, pass_ctx
 from aea.cli.utils.loggers import logger
-from aea.configurations.base import ProtocolSpecificationParseError, PublicId, ProtocolSpecification
+from aea.configurations.base import (
+    ProtocolSpecification,
+    ProtocolSpecificationParseError,
+    PublicId,
+)
 from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE, PROTOCOL
 from aea.protocols.generator.base import ProtocolGenerator
 
@@ -118,15 +123,17 @@ def protocol(ctx: Context, protocol_specification_path: str, language: str) -> N
     if language == "python":
         _generate_full_mode(ctx, protocol_generator, protocol_spec, existing_id_list)
     else:
-        _generate_protobuf_mode(ctx, protocol_generator, protocol_spec, existing_id_list, language)
+        _generate_protobuf_mode(
+            ctx, protocol_generator, protocol_spec, existing_id_list, language
+        )
 
 
 @clean_after
 def _generate_full_mode(
-        ctx: Context,
-        protocol_generator: ProtocolGenerator,
-        protocol_spec: ProtocolSpecification,
-        existing_id_list
+    ctx: Context,
+    protocol_generator: ProtocolGenerator,
+    protocol_spec: ProtocolSpecification,
+    existing_id_list: Set[PublicId],
 ) -> None:
     """Generate a protocol in 'full' mode, and add it to the configuration file and agent."""
     try:
@@ -160,15 +167,17 @@ def _generate_full_mode(
 
 @clean_after
 def _generate_protobuf_mode(
-        ctx: Context,
-        protocol_generator: ProtocolGenerator,
-        protocol_spec: ProtocolSpecification,
-        existing_id_list,
-        language: str
+    ctx: Context,
+    protocol_generator: ProtocolGenerator,
+    protocol_spec: ProtocolSpecification,
+    existing_id_list: Set[PublicId],
+    language: str,
 ) -> None:
     """Generate a protocol in 'protobuf' mode, and add it to the configuration file and agent."""
     try:
-        warning_message = protocol_generator.generate(protobuf_only=True)
+        warning_message = protocol_generator.generate(
+            protobuf_only=True, language=language
+        )
         if warning_message is not None:
             click.echo(warning_message)
 
