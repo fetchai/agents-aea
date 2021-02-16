@@ -567,7 +567,11 @@ class AsyncMultiplexer(Runnable, WithLogger):
         else:
             connection = self._id_to_connection[connection_id]
 
-        connection = cast(Connection, connection)
+        if connection is None:
+            self.logger.warning(
+                f"Dropping envelope, no connection available for sending: {envelope}"
+            )
+            return
 
         if not self._is_connection_supported_protocol(connection, envelope_protocol_id):
             return
