@@ -246,7 +246,7 @@ def test_agent_attribute_get_overridables():
 def test_dump_config():
     """Test AgentConfigManager.dump_config."""
     agent_config_manager = AgentConfigManager.load(DUMMY_AEA, substitude_env_vars=False)
-    with patch("aea.configurations.manager.open", mock_open()), patch(
+    with patch("aea.configurations.manager.open_file", mock_open()), patch(
         "aea.configurations.loader.ConfigLoader.dump"
     ) as dump_mock:
         agent_config_manager.dump_config()

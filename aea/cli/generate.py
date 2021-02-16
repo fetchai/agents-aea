@@ -35,6 +35,7 @@ from aea.configurations.base import (
     PublicId,
 )
 from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE, PROTOCOL
+from aea.helpers.io import open_file
 from aea.protocols.generator.base import ProtocolGenerator
 
 
@@ -149,7 +150,8 @@ def _generate_full_mode(
             PublicId(protocol_spec.author, protocol_spec.name, protocol_spec.version)
         )
         ctx.agent_loader.dump(
-            ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
+            ctx.agent_config,
+            open_file(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"),
         )
     except FileExistsError:
         raise click.ClickException(  # pragma: no cover

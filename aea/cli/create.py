@@ -51,6 +51,7 @@ from aea.configurations.constants import (
     VENDOR,
 )
 from aea.helpers.base import compute_specifier_from_version
+from aea.helpers.io import open_file
 
 
 @click.command()
@@ -182,7 +183,9 @@ def _create_agent_config(ctx: Context, agent_name: str, set_author: str) -> Agen
         default_connection=None,
     )
 
-    with open(os.path.join(agent_name, DEFAULT_AEA_CONFIG_FILE), "w") as config_file:
+    with open_file(
+        os.path.join(agent_name, DEFAULT_AEA_CONFIG_FILE), "w"
+    ) as config_file:
         ctx.agent_loader.dump(agent_config, config_file)
 
     return agent_config

@@ -21,7 +21,6 @@
 
 import codecs
 import os
-from pathlib import Path
 from typing import Optional, TYPE_CHECKING, Type, Union
 
 import click
@@ -43,6 +42,7 @@ from aea.configurations.constants import (
 from aea.configurations.loader import ConfigLoader
 from aea.connections.base import Connection
 from aea.crypto.wallet import CryptoStore
+from aea.helpers.io import open_file
 from aea.identity.base import Identity
 from aea.mail.base import Envelope, Message
 from aea.multiplexer import InBox, Multiplexer, OutBox
@@ -111,7 +111,7 @@ def _load_packages(agent_identity: Identity) -> None:
 
 def _run_interaction_channel() -> None:
     loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
-    agent_configuration = loader.load(Path(DEFAULT_AEA_CONFIG_FILE).open())
+    agent_configuration = loader.load(open_file(DEFAULT_AEA_CONFIG_FILE))
     agent_name = agent_configuration.name
 
     identity_stub = Identity(agent_name + "_interact", "interact")

@@ -39,6 +39,7 @@ from aea.configurations.constants import (
     PROTOCOL,
     SKILL,
 )
+from aea.helpers.io import open_file
 
 
 @clean_after
@@ -86,7 +87,7 @@ def fetch_agent(
 
     if alias is not None:
         ctx.agent_config.agent_name = alias
-        with open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as fp:
+        with open_file(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as fp:
             ctx.agent_loader.dump(ctx.agent_config, fp)
 
     click.echo("Fetching dependencies...")

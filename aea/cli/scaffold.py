@@ -51,6 +51,7 @@ from aea.configurations.constants import (  # noqa: F401  # pylint: disable=unus
     SCAFFOLD_PUBLIC_ID,
     SKILL,
 )
+from aea.helpers.io import open_file
 
 
 @click.group()
@@ -171,18 +172,18 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
         logger.debug(f"Registering the {item_type} into {DEFAULT_AEA_CONFIG_FILE}")
         new_public_id = PublicId(author_name, item_name, DEFAULT_VERSION)
         existing_ids.add(new_public_id)
-        with open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as fp:
+        with open_file(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as fp:
             ctx.agent_loader.dump(ctx.agent_config, fp)
 
         # ensure the name in the yaml and the name of the folder are the same
         config_filepath = Path(
             ctx.cwd, item_type_plural, item_name, default_config_filename
         )
-        with config_filepath.open() as fp:
+        with open_file(config_filepath) as fp:
             config = loader.load(fp)
         config.name = item_name
         config.author = author_name
-        with config_filepath.open("w") as fp:
+        with open_file(config_filepath, "w") as fp:
             loader.dump(config, fp)
 
         # update 'PUBLIC_ID' variable with the right public id in connection.py!
@@ -273,7 +274,8 @@ def _scaffold_non_package_item(
             },
         )
         ctx.agent_loader.dump(
-            ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
+            ctx.agent_config,
+            open_file(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"),
         )
 
     except Exception as e:

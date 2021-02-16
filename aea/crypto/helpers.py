@@ -21,11 +21,12 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Dict, Optional
 
 from aea.configurations.base import AgentConfig
 from aea.configurations.constants import PRIVATE_KEY_PATH_SCHEMA
 from aea.crypto.registries import crypto_registry, make_crypto, make_faucet_api
+from aea.crypto.wallet import Wallet
 from aea.helpers.base import ensure_dir
 from aea.helpers.env_vars import is_env_variable
 
@@ -158,3 +159,17 @@ def make_certificate(
     ensure_dir(os.path.dirname(output_path))
     Path(output_path).write_bytes(signature.encode("ascii"))
     return signature
+
+
+def get_wallet_from_agent_config(agent_config: AgentConfig) -> Wallet:
+    """Get wallet from agent_cofig provided."""
+    private_key_paths: Dict[str, Optional[str]] = {
+        config_pair[0]: config_pair[1]
+        for config_pair in agent_config.private_key_paths.read_all()
+    }
+    connections_private_key_paths: Dict[str, Optional[str]] = {
+        config_pair[0]: config_pair[1]
+        for config_pair in agent_config.connection_private_key_paths.read_all()
+    }
+    wallet = Wallet(private_key_paths, connections_private_key_paths)
+    return wallet
