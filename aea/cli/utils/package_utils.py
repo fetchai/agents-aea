@@ -64,7 +64,10 @@ from aea.configurations.constants import (
 from aea.configurations.loader import ConfigLoader
 from aea.configurations.manager import AgentConfigManager
 from aea.configurations.utils import replace_component_ids
-from aea.crypto.helpers import private_key_verify_or_create
+from aea.crypto.helpers import (
+    get_wallet_from_agent_config,
+    private_key_verify_or_create,
+)
 from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS, LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.exceptions import AEAEnforceError
@@ -655,16 +658,6 @@ def get_wallet_from_context(ctx: Context) -> Wallet:
     """
     verify_or_create_private_keys_ctx(ctx=ctx)
     wallet = get_wallet_from_agent_config(ctx.agent_config)
-    return wallet
-
-
-def get_wallet_from_agent_config(agent_config: AgentConfig) -> Wallet:
-    """Get wallet from agent_cofig provided."""
-    private_key_paths: Dict[str, Optional[str]] = {
-        config_pair[0]: config_pair[1]
-        for config_pair in agent_config.private_key_paths.read_all()
-    }
-    wallet = Wallet(private_key_paths)
     return wallet
 
 

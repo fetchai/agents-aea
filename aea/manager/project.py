@@ -32,7 +32,7 @@ from aea.configurations.base import AgentConfig, PublicId
 from aea.configurations.constants import DEFAULT_REGISTRY_NAME
 from aea.configurations.data_types import ComponentId
 from aea.configurations.manager import AgentConfigManager
-from aea.crypto.helpers import create_private_key
+from aea.crypto.helpers import create_private_key, get_wallet_from_agent_config
 
 
 class _Base:
@@ -279,3 +279,21 @@ class AgentAlias(_Base):
             components_configurations.append(obj)
 
         return agent_overridables, components_configurations
+
+    def get_addresses(self) -> Dict[str, str]:
+        """
+        Get addresses from private keys.
+
+        :return: dict with crypto id str as key and address str as value
+        """
+        wallet = get_wallet_from_agent_config(self.agent_config)
+        return wallet.addresses
+
+    def get_connections_addresses(self) -> Dict[str, str]:
+        """
+        Get connections addresses from connections private keys.
+
+        :return: dict with crypto id str as key and address str as value
+        """
+        wallet = get_wallet_from_agent_config(self.agent_config)
+        return wallet.connection_cryptos.addresses
