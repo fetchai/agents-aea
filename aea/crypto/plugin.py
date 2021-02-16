@@ -58,7 +58,7 @@ class Plugin:
         self._entry_point = entry_point
         self._check_consistency()
 
-    def _check_consistency(self):
+    def _check_consistency(self) -> None:
         """
         Check consistency of input.
 
@@ -71,7 +71,7 @@ class Plugin:
             AEAPluginError,
         )
         enforce(
-            ItemId.REGEX.match(self._entry_point.name),
+            ItemId.REGEX.match(self._entry_point.name) is not None,
             f"{_error_message_prefix} '{self._entry_point.name}' is not a valid identifier for a plugin.",
             AEAPluginError,
         )
@@ -86,7 +86,7 @@ class Plugin:
             AEAPluginError,
         )
         enforce(
-            EntryPointString.REGEX.match(self.entry_point_path),
+            EntryPointString.REGEX.match(self.entry_point_path) is not None,
             f"{_error_message_prefix} Entry point path '{self.entry_point_path}' is not valid.",
         )
 
@@ -101,7 +101,7 @@ class Plugin:
         return self._group
 
     @property
-    def attr(self):
+    def attr(self) -> str:
         """Get the class name."""
         return self._entry_point.attrs[0]
 
@@ -112,7 +112,7 @@ class Plugin:
         return f"{self._entry_point.module_name}{DOTTED_PATH_MODULE_ELEMENT_SEPARATOR}{class_name}"
 
 
-def _check_no_duplicates(plugins: List[EntryPoint]):
+def _check_no_duplicates(plugins: List[EntryPoint]) -> None:
     """Check there are no two plugins with the same id."""
     seen: Set[str] = set()
     duplicate_plugins = [p for p in plugins if p.name in seen or seen.add(p.name)]  # type: ignore
