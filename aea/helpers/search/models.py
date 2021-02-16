@@ -16,7 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
+# pylint: disable=no-member
 """Useful classes for the OEF search."""
 
 import logging
