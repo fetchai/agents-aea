@@ -857,6 +857,7 @@ fingerprint:
   handlers.py: QmViyyV5KvR3kkLEMpvDfqH5QtHowTbnpDxRYnKABpVvpC
   strategy.py: Qmdp6LCPZSnnyfM4EdRDTGZPqwxiJ3A1jsc3oF2Hv4m5Mv
 fingerprint_ignore_patterns: []
+connections: []
 contracts: []
 protocols:
 - fetchai/oef_search:0.13.0
@@ -884,6 +885,7 @@ models:
         value: generic_service
     class_name: Strategy
 dependencies: {}
+is_abstract: false
 ```
 </p>
 </details>
