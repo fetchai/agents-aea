@@ -136,7 +136,7 @@ class StubConnection(Connection):
         :return: async generator return file read bytes.
         """
         if not self.input_file:  # pragma: nocover
-            raise ValueError("Input file not opened! Call Connectioin.connect first.")
+            raise ValueError("Input file not opened! Call Connection.connect first.")
 
         while True:
             if self.input_file.closed:  # pragma: nocover
@@ -257,7 +257,7 @@ class StubConnection(Connection):
         self._ensure_valid_envelope_for_external_comms(envelope)
         if not self.output_file:  # pragma: nocover
             raise ValueError(
-                "output_file file not opened! Call Connectioin.connect first."
+                "output_file file not opened! Call Connection.connect first."
             )
 
         await self.loop.run_in_executor(
