@@ -130,13 +130,6 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         :param signing_msg: the transaction message
         :return: None
         """
-        if not self.context.goal_pursuit_readiness.is_ready:
-            self.logger.debug(
-                "[{}]: Preferences and ownership state not initialized!".format(
-                    self.agent_name
-                )
-            )
-
         from packages.fetchai.protocols.signing.dialogues import SigningDialogue
 
         signing_dialogue = cast(

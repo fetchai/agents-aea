@@ -31,6 +31,7 @@ from aea.aea import AEA
 from aea.common import Address
 from aea.configurations.base import PublicId, SkillComponentConfiguration, SkillConfig
 from aea.crypto.wallet import Wallet
+from aea.decision_maker.gop import DecisionMakerHandler as GOPDecisionMakerHandler
 from aea.decision_maker.gop import GoalPursuitReadiness, OwnershipState, Preferences
 from aea.exceptions import AEAException, AEAHandleException, _StopRuntime
 from aea.identity.base import Identity
@@ -59,11 +60,11 @@ from tests.conftest import (
 )
 
 
-class TestSkillContext:
+class BaseTestSkillContext:
     """Test the skill context."""
 
     @classmethod
-    def setup_class(cls):
+    def setup_class(cls, decision_maker_handler_class=None):
         """Test the initialisation of the AEA."""
         cls.wallet = Wallet(
             {FETCHAI: FETCHAI_PRIVATE_KEY_PATH, ETHEREUM: ETHEREUM_PRIVATE_KEY_PATH}
@@ -75,7 +76,11 @@ class TestSkillContext:
             "name", addresses=cls.wallet.addresses, default_address_key=FETCHAI,
         )
         cls.my_aea = AEA(
-            cls.identity, cls.wallet, data_dir=MagicMock(), resources=resources
+            cls.identity,
+            cls.wallet,
+            data_dir=MagicMock(),
+            resources=resources,
+            decision_maker_handler_class=decision_maker_handler_class,
         )
 
         cls.skill_context = SkillContext(
@@ -102,24 +107,10 @@ class TestSkillContext:
         """Test the decision maker's queue."""
         assert isinstance(self.skill_context.decision_maker_message_queue, Queue)
 
-    def test_agent_ownership_state(self):
-        """Test the ownership state."""
+    def test_decision_maker_handler_context(self):
+        """Test the decision_maker_handler_context."""
         assert isinstance(
-            self.skill_context.decision_maker_handler_context.ownership_state,
-            OwnershipState,
-        )
-
-    def test_agent_preferences(self):
-        """Test the agents_preferences."""
-        assert isinstance(
-            self.skill_context.decision_maker_handler_context.preferences, Preferences
-        )
-
-    def test_agent_is_ready_to_pursuit_goals(self):
-        """Test if the agent is ready to pursuit his goals."""
-        assert isinstance(
-            self.skill_context.decision_maker_handler_context.goal_pursuit_readiness,
-            GoalPursuitReadiness,
+            self.skill_context.decision_maker_handler_context, SimpleNamespace,
         )
 
     def test_storage(self):
@@ -193,6 +184,39 @@ class TestSkillContext:
     def teardown_class(cls):
         """Test teardown."""
         pass
+
+
+class TestSkillContextDefault(BaseTestSkillContext):
+    """Test skill context with default dm."""
+
+
+class TestSkillContextGOP(BaseTestSkillContext):
+    """Test skill context with GOP dm."""
+
+    @classmethod
+    def setup_class(cls, decision_maker_handler_class=GOPDecisionMakerHandler):
+        """Setup test class."""
+        super().setup_class(decision_maker_handler_class)
+
+    def test_agent_ownership_state(self):
+        """Test the ownership state."""
+        assert isinstance(
+            self.skill_context.decision_maker_handler_context.ownership_state,
+            OwnershipState,
+        )
+
+    def test_agent_preferences(self):
+        """Test the agents_preferences."""
+        assert isinstance(
+            self.skill_context.decision_maker_handler_context.preferences, Preferences
+        )
+
+    def test_agent_is_ready_to_pursuit_goals(self):
+        """Test if the agent is ready to pursuit his goals."""
+        assert isinstance(
+            self.skill_context.decision_maker_handler_context.goal_pursuit_readiness,
+            GoalPursuitReadiness,
+        )
 
 
 class SkillContextTestCase(TestCase):
