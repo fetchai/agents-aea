@@ -98,7 +98,7 @@ def _generate_protocol(ctx: Context, protocol_specification_path: str) -> None:
             + str(e)
         )
     except Exception as e:
-        raise click.ClickException(
+        raise click.ClickException(  # pragma: no cover
             "Protocol is NOT generated. The following error happened while generating the protocol:\n"
             + str(e)
         )
@@ -209,7 +209,7 @@ def _generate_protobuf_mode(
             )
         )
     except Exception as e:
-        raise click.ClickException(
+        raise click.ClickException(  # pragma: no cover
             "Protocol is NOT generated. The following error happened while generating the protocol:\n"
             + str(e)
         )
