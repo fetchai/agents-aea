@@ -144,3 +144,6 @@ class GymHandler(Handler):
         """
         self.context.logger.info("Gym handler: teardown method called.")
         self.task.teardown()
+        result = self.context.task_manager.get_task_result(self._task_id)
+        if not result.successful():
+            self.logger.warning("Task not successful!")
