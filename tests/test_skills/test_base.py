@@ -31,7 +31,7 @@ from aea.aea import AEA
 from aea.common import Address
 from aea.configurations.base import PublicId, SkillComponentConfiguration, SkillConfig
 from aea.crypto.wallet import Wallet
-from aea.decision_maker.default import GoalPursuitReadiness, OwnershipState, Preferences
+from aea.decision_maker.gop import GoalPursuitReadiness, OwnershipState, Preferences
 from aea.exceptions import AEAException, AEAHandleException, _StopRuntime
 from aea.identity.base import Identity
 from aea.multiplexer import MultiplexerStatus

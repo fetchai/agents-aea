@@ -23,7 +23,7 @@ import datetime
 from collections import defaultdict, deque
 from typing import Any, Deque, Dict, List, Tuple, cast
 
-from aea.decision_maker.default import OwnershipState
+from aea.decision_maker.gop import OwnershipState
 from aea.exceptions import enforce
 from aea.helpers.transaction.base import Terms
 from aea.protocols.dialogue.base import DialogueLabel
