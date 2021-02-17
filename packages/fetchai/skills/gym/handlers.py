@@ -143,7 +143,9 @@ class GymHandler(Handler):
         :return: None
         """
         self.context.logger.info("Gym handler: teardown method called.")
+        if self._task_id is None:
+            return  # pragma: nocover
         self.task.teardown()
         result = self.context.task_manager.get_task_result(self._task_id)
         if not result.successful():
-            self.logger.warning("Task not successful!")
+            self.context.logger.warning("Task not successful!")
