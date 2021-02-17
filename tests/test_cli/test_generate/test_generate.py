@@ -19,6 +19,7 @@
 """This test module contains the tests for the aea.cli.generate sub-module."""
 from unittest import TestCase, mock
 
+import yaml
 from click import ClickException
 
 from aea.cli.generate import _generate_protocol
@@ -50,6 +51,14 @@ def _which_mock_isort(arg):
 
 def _raise_psperror(*args, **kwargs):
     raise ProtocolSpecificationParseError()
+
+
+def _raise_yamlerror(*args, **kwargs):
+    raise yaml.YAMLError("some yaml error")
+
+
+def _raise_fnfError(*args, **kwargs):
+    raise FileNotFoundError("some fnf error")
 
 
 @mock.patch("aea.protocols.generator.common.open_file", mock.mock_open())
@@ -101,13 +110,39 @@ class GenerateItemTestCase(TestCase):
 
     @mock.patch("aea.cli.generate.os.path.exists", return_value=False)
     @mock.patch("aea.protocols.generator.base.shutil.which", return_value="some")
-    @mock.patch("aea.cli.generate.ProtocolGenerator.generate", _raise_psperror)
+    @mock.patch("aea.cli.generate.ProtocolGenerator.__init__", _raise_fnfError)
+    def test__generate_item_prerequisite_app_not_installed(self, *mocks):
+        """Test for fetch_agent_locally method parsing specs fail."""
+        ctx_mock = ContextMock()
+        with self.assertRaises(ClickException) as cm:
+            _generate_protocol(ctx_mock, "path")
+        expected_msg = "Protocol is NOT generated. The following error happened while generating the protocol:\n"
+        self.assertIn(expected_msg, cm.exception.message)
+
+    @mock.patch("aea.cli.generate.os.path.exists", return_value=False)
+    @mock.patch("aea.protocols.generator.base.shutil.which", return_value="some")
+    @mock.patch("aea.cli.generate.ProtocolGenerator.__init__", _raise_yamlerror)
+    def test__generate_item_parsing_yaml_fail(self, *mocks):
+        """Test for fetch_agent_locally method parsing specs fail."""
+        ctx_mock = ContextMock()
+        with self.assertRaises(ClickException) as cm:
+            _generate_protocol(ctx_mock, "path")
+        expected_msg = (
+            "Protocol is NOT generated. The following error happened while generating the protocol:\n"
+            "Yaml error in the protocol specification file:"
+        )
+        self.assertIn(expected_msg, cm.exception.message)
+
+    @mock.patch("aea.cli.generate.os.path.exists", return_value=False)
+    @mock.patch("aea.protocols.generator.base.shutil.which", return_value="some")
+    @mock.patch("aea.cli.generate.ProtocolGenerator.__init__", _raise_psperror)
     def test__generate_item_parsing_specs_fail(self, *mocks):
         """Test for fetch_agent_locally method parsing specs fail."""
         ctx_mock = ContextMock()
         with self.assertRaises(ClickException) as cm:
             _generate_protocol(ctx_mock, "path")
         expected_msg = (
-            "The following error happened while parsing the protocol specification"
+            "Protocol is NOT generated. The following error happened while generating the protocol:\n"
+            "Error while parsing the protocol specification: "
         )
         self.assertIn(expected_msg, cm.exception.message)

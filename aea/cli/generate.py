@@ -88,16 +88,20 @@ def _generate_protocol(ctx: Context, protocol_specification_path: str) -> None:
     except yaml.YAMLError as e:
         raise click.ClickException(  # pragma: no cover
             "Protocol is NOT generated. The following error happened while generating the protocol:\n"
-            + "Error in protocol specification yaml file:"
+            + "Yaml error in the protocol specification file:"
             + str(e)
         )
     except ProtocolSpecificationParseError as e:
         raise click.ClickException(  # pragma: no cover
-            "The following error happened while parsing the protocol specification: "
+            "Protocol is NOT generated. The following error happened while generating the protocol:\n"
+            + "Error while parsing the protocol specification: "
             + str(e)
         )
     except Exception as e:
-        raise click.ClickException(str(e))
+        raise click.ClickException(
+            "Protocol is NOT generated. The following error happened while generating the protocol:\n"
+            + str(e)
+        )
 
     # helpers
     language = ctx.config.get("language")

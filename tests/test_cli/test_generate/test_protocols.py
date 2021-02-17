@@ -45,7 +45,7 @@ from tests.conftest import (
 )
 
 
-class TestGenerateProtocol:
+class TestGenerateProtocolFullMode:
     """Test that the command 'aea generate protocol' works correctly in correct preconditions."""
 
     @classmethod
@@ -115,6 +115,97 @@ class TestGenerateProtocol:
         )
         config_file = yaml.safe_load(open(p))
         self.validator.validate(instance=config_file)
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
+
+
+class TestGenerateProtocolProtobufOnlyMode:
+    """Test that the command 'aea generate protocol' works correctly in correct preconditions."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.runner = CliRunner()
+        cls.agent_name = "myagent"
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
+        shutil.copyfile(
+            Path(CUR_PATH, "data", "sample_specification.yaml"),
+            Path(cls.t, "sample_specification.yaml"),
+        )
+        cls.path_to_specification = str(Path("..", "sample_specification.yaml"))
+
+        cls.schema = json.load(open(PROTOCOL_CONFIGURATION_SCHEMA))
+        cls.resolver = jsonschema.RefResolver(
+            make_jsonschema_base_uri(Path(CONFIGURATION_SCHEMA_DIR).absolute()),
+            cls.schema,
+        )
+        cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
+
+        # create an agent
+        os.chdir(cls.t)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
+        assert result.exit_code == 0
+
+        cls.create_result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
+        )
+        os.chdir(cls.agent_name)
+
+        # generate protocol
+        cls.result = cls.runner.invoke(
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "generate",
+                "protocol",
+                "--l",
+                "cpp",
+                cls.path_to_specification,
+            ],
+            standalone_mode=False,
+        )
+        os.chdir(cls.cwd)
+
+    def test_create_agent_exit_code_equal_to_0(self):
+        """Test that the exit code is equal to 0 when creating the agent."""
+        assert self.create_result.exit_code == 0
+
+    def test_exit_code_equal_to_0(self):
+        """Test that the exit code is equal to 0 when generating a protocol."""
+        assert self.result.exit_code == 0, "Failed with stdout='{}'".format(
+            self.result.stdout
+        )
+
+    def test_resource_folder_contains_protobuf_schema_file(self):
+        """Test that the protocol folder contains a structurally valid configuration file."""
+        protobuf_schema_file = Path(
+            self.t, self.agent_name, "protocols", "t_protocol", "t_protocol.proto",
+        )
+        cpp_header_file = Path(
+            self.t, self.agent_name, "protocols", "t_protocol", "t_protocol.pb.h",
+        )
+        cpp_implementation_file = Path(
+            self.t, self.agent_name, "protocols", "t_protocol", "t_protocol.pb.cc",
+        )
+
+        assert protobuf_schema_file.exists()
+        assert cpp_header_file.exists()
+        assert cpp_implementation_file.exists()
 
     @classmethod
     def teardown_class(cls):

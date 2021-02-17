@@ -31,8 +31,10 @@ from aea.configurations.base import (
     ProtocolSpecification,
     ProtocolSpecificationParseError,
 )
+from aea.configurations.constants import SUPPORTED_PROTOCOL_LANGUAGES
 from aea.configurations.data_types import PublicId
 from aea.protocols.generator.base import ProtocolGenerator
+from aea.protocols.generator.common import _to_camel_case
 
 from tests.conftest import ROOT_DIR, match_files
 from tests.data.generator.t_protocol.message import TProtocolMessage  # type: ignore
@@ -1267,31 +1269,136 @@ class ProtocolGeneratorTestCase(TestCase):
                         )
                         assert proto_buff_schema_str == expected
 
-    def test_generate_protobuf_only_mode_positive(self):
-        """Positive test for the 'generate_protobuf_only_mode' method."""
+    def test_generate_protobuf_only_mode_positive_python(self):
+        """Positive test for the 'generate_protobuf_only_mode' where language is Python."""
         protocol_generator = ProtocolGenerator(PATH_TO_T_PROTOCOL_SPECIFICATION, self.t)
         protocol_generator.generate_protobuf_only_mode()
-        path_to_protobuf_file = os.path.join(
+        path_to_protobuf_schema_file = os.path.join(
             self.t, T_PROTOCOL_NAME, T_PROTOCOL_NAME + ".proto"
         )
-        assert Path(path_to_protobuf_file).exists()
+        path_to_protobuf_python_implementation = os.path.join(
+            self.t, T_PROTOCOL_NAME, T_PROTOCOL_NAME + "_pb2.py"
+        )
+        assert Path(path_to_protobuf_schema_file).exists()
+        assert Path(path_to_protobuf_python_implementation).exists()
+
+    def test_generate_protobuf_only_mode_positive_cpp(self):
+        """Positive test for the 'generate_protobuf_only_mode' where language is C++."""
+        protocol_generator = ProtocolGenerator(PATH_TO_T_PROTOCOL_SPECIFICATION, self.t)
+        protocol_generator.generate_protobuf_only_mode(language="cpp")
+        path_to_protobuf_schema_file = os.path.join(
+            self.t, T_PROTOCOL_NAME, T_PROTOCOL_NAME + ".proto"
+        )
+        path_to_protobuf_cpp_headers = os.path.join(
+            self.t, T_PROTOCOL_NAME, T_PROTOCOL_NAME + ".pb.h"
+        )
+        path_to_protobuf_cpp_implementation = os.path.join(
+            self.t, T_PROTOCOL_NAME, T_PROTOCOL_NAME + ".pb.cc"
+        )
+        assert Path(path_to_protobuf_schema_file).exists()
+        assert Path(path_to_protobuf_cpp_headers).exists()
+        assert Path(path_to_protobuf_cpp_implementation).exists()
+
+    def test_generate_protobuf_only_mode_positive_java(self):
+        """Positive test for the 'generate_protobuf_only_mode' where language is Java."""
+        protocol_generator = ProtocolGenerator(PATH_TO_T_PROTOCOL_SPECIFICATION, self.t)
+        protocol_generator.generate_protobuf_only_mode(language="java")
+        path_to_protobuf_schema_file = os.path.join(
+            self.t, T_PROTOCOL_NAME, T_PROTOCOL_NAME + ".proto"
+        )
+        assert Path(path_to_protobuf_schema_file).exists()
+
+        java_implementation_exists = False
+        for _, _, files in os.walk(os.path.join(self.t, T_PROTOCOL_NAME)):
+            for file in files:  # loops through directories and files
+                if file == _to_camel_case(T_PROTOCOL_NAME) + ".java":
+                    java_implementation_exists = True
+                    break
+
+        assert java_implementation_exists
+
+    def test_generate_protobuf_only_mode_positive_csharp(self):
+        """Positive test for the 'generate_protobuf_only_mode' where language is C#."""
+        protocol_generator = ProtocolGenerator(PATH_TO_T_PROTOCOL_SPECIFICATION, self.t)
+        protocol_generator.generate_protobuf_only_mode(language="csharp")
+        path_to_protobuf_schema_file = os.path.join(
+            self.t, T_PROTOCOL_NAME, T_PROTOCOL_NAME + ".proto"
+        )
+        path_to_protobuf_csharp_implementation = os.path.join(
+            self.t, T_PROTOCOL_NAME, _to_camel_case(T_PROTOCOL_NAME) + ".cs"
+        )
+        assert Path(path_to_protobuf_schema_file).exists()
+        assert Path(path_to_protobuf_csharp_implementation).exists()
+
+    def test_generate_protobuf_only_mode_positive_ruby(self):
+        """Positive test for the 'generate_protobuf_only_mode' where language is Ruby."""
+        protocol_generator = ProtocolGenerator(PATH_TO_T_PROTOCOL_SPECIFICATION, self.t)
+        protocol_generator.generate_protobuf_only_mode(language="ruby")
+        path_to_protobuf_schema_file = os.path.join(
+            self.t, T_PROTOCOL_NAME, T_PROTOCOL_NAME + ".proto"
+        )
+        path_to_protobuf_ruby_implementation = os.path.join(
+            self.t, T_PROTOCOL_NAME, T_PROTOCOL_NAME + "_pb.rb"
+        )
+        assert Path(path_to_protobuf_schema_file).exists()
+        assert Path(path_to_protobuf_ruby_implementation).exists()
+
+    def test_generate_protobuf_only_mode_positive_objc(self):
+        """Positive test for the 'generate_protobuf_only_mode' where language is objective-c."""
+        protocol_generator = ProtocolGenerator(PATH_TO_T_PROTOCOL_SPECIFICATION, self.t)
+        protocol_generator.generate_protobuf_only_mode(language="objc")
+        path_to_protobuf_schema_file = os.path.join(
+            self.t, T_PROTOCOL_NAME, T_PROTOCOL_NAME + ".proto"
+        )
+        path_to_protobuf_objc_headers = os.path.join(
+            self.t, T_PROTOCOL_NAME, _to_camel_case(T_PROTOCOL_NAME) + ".pbobjc.h"
+        )
+        path_to_protobuf_objc_implementation = os.path.join(
+            self.t, T_PROTOCOL_NAME, _to_camel_case(T_PROTOCOL_NAME) + ".pbobjc.m"
+        )
+        assert Path(path_to_protobuf_schema_file).exists()
+        assert Path(path_to_protobuf_objc_headers).exists()
+        assert Path(path_to_protobuf_objc_implementation).exists()
+
+    def test_generate_protobuf_only_mode_negative_incorrect_language(self):
+        """Negative test for the 'generate_protobuf_only_mode' method: invalid language."""
+        invalid_language = "wrong_language"
+        protocol_generator = ProtocolGenerator(PATH_TO_T_PROTOCOL_SPECIFICATION, self.t)
+        with self.assertRaises(ValueError) as cm:
+            protocol_generator.generate_protobuf_only_mode(language=invalid_language)
+            expected_msg = f"Unsupported language. Expected one of {SUPPORTED_PROTOCOL_LANGUAGES}. Found {invalid_language}."
+            assert str(cm.exception) == expected_msg
 
     @mock.patch(
-        "aea.protocols.generator.base.check_protobuf_using_protoc",
+        "aea.protocols.generator.base.compile_protobuf_using_protoc",
         return_value=(False, "Some error!"),
     )
-    def test_generate_protobuf_only_mode_negative(self, mocked_check_protobuf):
-        """Negative test for the 'generate_protobuf_only_mode' method: protobuf schema file is invalid"""
+    def test_generate_protobuf_only_mode_negative_compile_fails(
+        self, mocked_compile_protobuf
+    ):
+        """Negative test for the 'generate_protobuf_only_mode' method: compiling protobuf schema file fails"""
         protocol_generator = ProtocolGenerator(PATH_TO_T_PROTOCOL_SPECIFICATION, self.t)
         with self.assertRaises(SyntaxError) as cm:
             protocol_generator.generate_protobuf_only_mode()
-            expected_msg = "Error in the protocol buffer schema code:\n" + "Some error!"
+            expected_msg = (
+                "Error when trying to compile the protocol buffer schema file:\n"
+                + "Some error!"
+            )
             assert str(cm.exception) == expected_msg
 
         path_to_protobuf_file = os.path.join(
             self.t, T_PROTOCOL_NAME, T_PROTOCOL_NAME + ".proto"
         )
         assert not Path(path_to_protobuf_file).exists()
+
+    def test_generate_full_mode_negative_incorrect_language(self):
+        """Negative test for the 'generate_protobuf_only_mode' method: invalid language."""
+        invalid_language = "wrong_language"
+        protocol_generator = ProtocolGenerator(PATH_TO_T_PROTOCOL_SPECIFICATION, self.t)
+        with self.assertRaises(ValueError) as cm:
+            protocol_generator.generate_full_mode(language=invalid_language)
+            expected_msg = f"Unsupported language. Expected 'python' because currently the framework supports full generation of protocols only in Python. Found {invalid_language}."
+            assert str(cm.exception) == expected_msg
 
     @mock.patch(
         "aea.protocols.generator.base.ProtocolGenerator.generate_protobuf_only_mode"

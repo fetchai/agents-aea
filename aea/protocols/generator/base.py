@@ -2025,7 +2025,7 @@ class ProtocolGenerator:
         """
         if language != PROTOCOL_LANGUAGE_PYTHON:
             raise ValueError(
-                "Currently the framework supports full generation of protocols only in Python."
+                f"Unsupported language. Expected 'python' because currently the framework supports full generation of protocols only in Python. Found {language}."
             )
 
         # Run protobuf only mode
