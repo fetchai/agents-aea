@@ -9,7 +9,9 @@
     "version",
     "license",
     "aea_version",
-    "speech_acts"
+    "speech_acts",
+    "protocol_specification_id",
+    "description"
   ],
   "properties": {
     "name": {
@@ -39,9 +41,6 @@
           "$ref": "#/definitions/speech_act"
         }
       }
-    },
-    "dependencies": {
-      "$ref": "definitions.json#/definitions/dependencies"
     },
     "description": {
       "$ref": "definitions.json#/definitions/description"

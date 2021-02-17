@@ -8,12 +8,19 @@
     "author",
     "version",
     "type",
+    "description",
     "license",
     "aea_version",
+    "fingerprint",
+    "fingerprint_ignore_patterns",
     "class_name",
     "config",
     "connections",
-    "protocols"
+    "protocols",
+    "restricted_to_protocols",
+    "excluded_protocols",
+    "dependencies",
+    "is_abstract"
   ],
   "properties": {
     "name": {

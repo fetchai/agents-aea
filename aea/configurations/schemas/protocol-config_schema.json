@@ -9,7 +9,11 @@
     "version",
     "type",
     "license",
-    "aea_version"
+    "aea_version",
+    "fingerprint",
+    "fingerprint_ignore_patterns",
+    "description",
+    "dependencies"
   ],
   "properties": {
     "name": {

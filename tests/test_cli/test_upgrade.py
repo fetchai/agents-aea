@@ -739,8 +739,8 @@ class TestUpgradeNonVendorDependencies(AEATestCaseEmpty):
 
     The test works as follows:
     - scaffold a package, one for each possible package type;
-    - add the protocol "fetchai/default:0.7.0" as dependency to each of them.
-    - add the skill "fetchai/error:0.7.0"; this will also add the default protocol.
+    - add the protocol "fetchai/default:0.11.0" as dependency to each of them.
+    - add the skill "fetchai/error:0.11.0"; this will also add the default protocol.
       add it also as dependency of non-vendor skill.
     - run 'aea upgrade'
     - check that the reference to "fetchai/default" in each scaffolded package
@@ -750,10 +750,10 @@ class TestUpgradeNonVendorDependencies(AEATestCaseEmpty):
     capture_log = True
     IS_EMPTY = True
     old_default_protocol_id = PublicId(
-        DefaultMessage.protocol_id.author, DefaultMessage.protocol_id.name, "0.7.0"
+        DefaultMessage.protocol_id.author, DefaultMessage.protocol_id.name, "0.11.0"
     )
     old_error_skill_id = PublicId(
-        ERROR_SKILL_PUBLIC_ID.author, ERROR_SKILL_PUBLIC_ID.name, "0.7.0"
+        ERROR_SKILL_PUBLIC_ID.author, ERROR_SKILL_PUBLIC_ID.name, "0.11.0"
     )
     old_aea_version_range = compute_specifier_from_version(Version("0.1.0"))
 
@@ -857,18 +857,18 @@ class TestUpdateReferences(AEATestCaseEmpty):
     In particular, 'default_routing', 'default_connection' and custom component configurations in AEA configuration.
 
     How the test works:
-    - add fetchai/error:0.7.0, that requires fetchai/default:0.7.0
-    - add fetchai/stub:0.16.0
-    - add 'fetchai/default:0.7.0: fetchai/stub:0.16.0' to default routing
+    - add fetchai/error:0.11.0, that requires fetchai/default:0.11.0
+    - add fetchai/stub:0.15.0
+    - add 'fetchai/default:0.11.0: fetchai/stub:0.15.0' to default routing
     - add custom configuration to stub connection.
     - run 'aea upgrade'. This will upgrade `stub` connection and `error` skill, and in turn `default` protocol.
     """
 
     IS_EMPTY = True
 
-    OLD_DEFAULT_PROTOCOL_PUBLIC_ID = PublicId.from_str("fetchai/default:0.7.0")
-    OLD_ERROR_SKILL_PUBLIC_ID = PublicId.from_str("fetchai/error:0.7.0")
-    OLD_STUB_CONNECTION_PUBLIC_ID = PublicId.from_str("fetchai/stub:0.16.0")
+    OLD_DEFAULT_PROTOCOL_PUBLIC_ID = PublicId.from_str("fetchai/default:0.11.0")
+    OLD_ERROR_SKILL_PUBLIC_ID = PublicId.from_str("fetchai/error:0.11.0")
+    OLD_STUB_CONNECTION_PUBLIC_ID = PublicId.from_str("fetchai/stub:0.15.0")
 
     @classmethod
     def setup_class(cls):

@@ -338,6 +338,7 @@ license: Apache-2.0
 aea_version: '>=0.10.0, <0.11.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
+connections: []
 contracts: []
 protocols:
 - fetchai/oef_search:0.13.0
@@ -364,6 +365,7 @@ models:
     args: {}
     class_name: OefSearchDialogues
 dependencies: {}
+is_abstract: false
 ```
 
 Ensure, you replace the author field with your author name! (Run `aea init` to set or check the author name.)
@@ -855,6 +857,7 @@ fingerprint:
   handlers.py: QmViyyV5KvR3kkLEMpvDfqH5QtHowTbnpDxRYnKABpVvpC
   strategy.py: Qmdp6LCPZSnnyfM4EdRDTGZPqwxiJ3A1jsc3oF2Hv4m5Mv
 fingerprint_ignore_patterns: []
+connections: []
 contracts: []
 protocols:
 - fetchai/oef_search:0.13.0
@@ -882,6 +885,7 @@ models:
         value: generic_service
     class_name: Strategy
 dependencies: {}
+is_abstract: false
 ```
 </p>
 </details>
