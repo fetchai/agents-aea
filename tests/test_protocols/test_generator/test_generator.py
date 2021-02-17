@@ -1118,7 +1118,10 @@ class ProtocolGeneratorTestCase(TestCase):
                 "aea.protocols.generator.base.load_protocol_specification",
                 return_value=p_spec_mock,
             ):
-                with mock.patch("aea.protocols.generator.base.validate", return_value=(True, "valid!")):
+                with mock.patch(
+                    "aea.protocols.generator.base.validate",
+                    return_value=(True, "valid!"),
+                ):
                     with self.assertRaises(ProtocolSpecificationParseError) as cm:
                         ProtocolGenerator(
                             "some_path_to_protocol_specification", "some_path_to_output"
@@ -1127,8 +1130,7 @@ class ProtocolGeneratorTestCase(TestCase):
                         assert str(cm.exception) == expected_msg
 
     @mock.patch(
-        "aea.protocols.generator.base.validate",
-        return_value=(False, "Some error!"),
+        "aea.protocols.generator.base.validate", return_value=(False, "Some error!"),
     )
     def test_extract_negative_invalid_specification(self, mocked_validate):
         """Negative test the 'extract' method: invalid protocol specification"""
@@ -1157,14 +1159,19 @@ class ProtocolGeneratorTestCase(TestCase):
                 "aea.protocols.generator.base.load_protocol_specification",
                 return_value=p_spec_mock,
             ):
-                with mock.patch("aea.protocols.generator.base.validate", return_value=(True, "valid!")):
+                with mock.patch(
+                    "aea.protocols.generator.base.validate",
+                    return_value=(True, "valid!"),
+                ):
                     with mock.patch("aea.protocols.generator.base.extract"):
                         protocol_generator = ProtocolGenerator(
                             "some_path_to_protocol_specification", "some_path_to_output"
                         )
                         with self.assertRaises(ValueError) as cm:
                             protocol_generator._change_indent(-1, "s")
-                            expected_msg = "Error: setting indent to be a negative number."
+                            expected_msg = (
+                                "Error: setting indent to be a negative number."
+                            )
                             assert str(cm.exception) == expected_msg
 
     def test_change_indent_negative_decreasing_more_spaces_than_available(self):
@@ -1177,7 +1184,10 @@ class ProtocolGeneratorTestCase(TestCase):
                 "aea.protocols.generator.base.load_protocol_specification",
                 return_value=p_spec_mock,
             ):
-                with mock.patch("aea.protocols.generator.base.validate",return_value=(True, "valid!")):
+                with mock.patch(
+                    "aea.protocols.generator.base.validate",
+                    return_value=(True, "valid!"),
+                ):
                     with mock.patch("aea.protocols.generator.base.extract"):
                         protocol_generator = ProtocolGenerator(
                             "some_path_to_protocol_specification", "some_path_to_output"
@@ -1200,13 +1210,18 @@ class ProtocolGeneratorTestCase(TestCase):
                 "aea.protocols.generator.base.load_protocol_specification",
                 return_value=p_spec_mock,
             ):
-                with mock.patch("aea.protocols.generator.base.validate", return_value=(True, "valid!")):
+                with mock.patch(
+                    "aea.protocols.generator.base.validate",
+                    return_value=(True, "valid!"),
+                ):
                     with mock.patch("aea.protocols.generator.base.extract"):
                         protocol_generator = ProtocolGenerator(
                             "some_path_to_protocol_specification", "some_path_to_output"
                         )
                         protocol_generator.spec.all_custom_types = []
-                        assert protocol_generator._import_from_custom_types_module() == ""
+                        assert (
+                            protocol_generator._import_from_custom_types_module() == ""
+                        )
 
     def test_protocol_buffer_schema_str(self):
         """Negative test for the '_protocol_buffer_schema_str' method: 1 line protobuf snippet."""
@@ -1222,7 +1237,10 @@ class ProtocolGeneratorTestCase(TestCase):
                 "aea.protocols.generator.base.load_protocol_specification",
                 return_value=p_spec_mock,
             ):
-                with mock.patch("aea.protocols.generator.base.validate", return_value=(True, "valid!")):
+                with mock.patch(
+                    "aea.protocols.generator.base.validate",
+                    return_value=(True, "valid!"),
+                ):
                     with mock.patch("aea.protocols.generator.base.extract"):
                         protocol_generator = ProtocolGenerator(
                             "some_path_to_protocol_specification", "some_path_to_output"

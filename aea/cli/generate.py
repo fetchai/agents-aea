@@ -37,8 +37,8 @@ from aea.configurations.base import (
 from aea.configurations.constants import (
     DEFAULT_AEA_CONFIG_FILE,
     PROTOCOL,
-    SUPPORTED_PROTOCOL_LANGUAGES,
     PROTOCOL_LANGUAGE_PYTHON,
+    SUPPORTED_PROTOCOL_LANGUAGES,
 )
 from aea.helpers.io import open_file
 from aea.protocols.generator.base import ProtocolGenerator
@@ -88,7 +88,8 @@ def _generate_protocol(ctx: Context, protocol_specification_path: str) -> None:
     except yaml.YAMLError as e:
         raise click.ClickException(  # pragma: no cover
             "Protocol is NOT generated. The following error happened while generating the protocol:\n"
-            + "Error in protocol specification yaml file:" + str(e)
+            + "Error in protocol specification yaml file:"
+            + str(e)
         )
     except ProtocolSpecificationParseError as e:
         raise click.ClickException(  # pragma: no cover
@@ -101,11 +102,11 @@ def _generate_protocol(ctx: Context, protocol_specification_path: str) -> None:
     # helpers
     language = ctx.config.get("language")
     existing_protocol_ids_list = getattr(ctx.agent_config, "{}s".format(PROTOCOL))
-    existing_protocol_name_list = [public_id.name for public_id in existing_protocol_ids_list]
+    existing_protocol_name_list = [
+        public_id.name for public_id in existing_protocol_ids_list
+    ]
     protocol_spec = protocol_generator.protocol_specification
-    protocol_directory_path = os.path.join(
-        ctx.cwd, protocol_plural, protocol_spec.name
-    )
+    protocol_directory_path = os.path.join(ctx.cwd, protocol_plural, protocol_spec.name)
     logger.debug(
         "{} already supported by the agent: {}".format(
             protocol_plural, existing_protocol_name_list
@@ -136,7 +137,9 @@ def _generate_protocol(ctx: Context, protocol_specification_path: str) -> None:
     )
 
     if language == PROTOCOL_LANGUAGE_PYTHON:
-        _generate_full_mode(ctx, protocol_generator, protocol_spec, existing_protocol_ids_list, language)
+        _generate_full_mode(
+            ctx, protocol_generator, protocol_spec, existing_protocol_ids_list, language
+        )
     else:
         _generate_protobuf_mode(ctx, protocol_generator, language)
 
@@ -151,7 +154,9 @@ def _generate_full_mode(
 ) -> None:
     """Generate a protocol in 'full' mode, and add it to the configuration file and agent."""
     try:
-        warning_message = protocol_generator.generate(protobuf_only=False, language=language)
+        warning_message = protocol_generator.generate(
+            protobuf_only=False, language=language
+        )
         if warning_message is not None:
             click.echo(warning_message)
 

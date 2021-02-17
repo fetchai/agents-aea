@@ -398,7 +398,11 @@ def try_run_isort_formatting(path_to_protocol_package: str) -> None:
     )
 
 
-def try_run_protoc(path_to_generated_protocol_package: str, name: str, language: str = PROTOCOL_LANGUAGE_PYTHON) -> None:
+def try_run_protoc(
+    path_to_generated_protocol_package: str,
+    name: str,
+    language: str = PROTOCOL_LANGUAGE_PYTHON,
+) -> None:
     """
     Run 'protoc' protocol buffer compiler via subprocess.
 
@@ -408,7 +412,9 @@ def try_run_protoc(path_to_generated_protocol_package: str, name: str, language:
 
     :return: A completed process object.
     """
-    language_part_of_the_command = f"--{language}_out={path_to_generated_protocol_package}"
+    language_part_of_the_command = (
+        f"--{language}_out={path_to_generated_protocol_package}"
+    )
     subprocess.run(  # nosec
         [
             "protoc",

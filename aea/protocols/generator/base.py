@@ -31,8 +31,8 @@ from typing import Optional, Tuple
 # pylint: skip-file
 from aea.configurations.base import ProtocolSpecificationParseError
 from aea.configurations.constants import (
-    SUPPORTED_PROTOCOL_LANGUAGES,
     PROTOCOL_LANGUAGE_PYTHON,
+    SUPPORTED_PROTOCOL_LANGUAGES,
 )
 from aea.configurations.data_types import PublicId
 from aea.protocols.generator.common import (
@@ -1930,7 +1930,7 @@ class ProtocolGenerator:
         return init_str
 
     def generate_protobuf_only_mode(
-        self, language: str = PROTOCOL_LANGUAGE_PYTHON, run_protolint: bool = False
+        self, language: str = PROTOCOL_LANGUAGE_PYTHON, run_protolint: bool = True
     ) -> str:
         """
         Run the generator in "protobuf only" mode:
@@ -1944,7 +1944,9 @@ class ProtocolGenerator:
         :return: None
         """
         if language not in SUPPORTED_PROTOCOL_LANGUAGES:
-            raise ValueError(f"Unsupported language. Expected one of {SUPPORTED_PROTOCOL_LANGUAGES}. Found {language}.")
+            raise ValueError(
+                f"Unsupported language. Expected one of {SUPPORTED_PROTOCOL_LANGUAGES}. Found {language}."
+            )
 
         # Create the output folder
         output_folder = Path(self.path_to_generated_protocol_package)
@@ -1960,12 +1962,16 @@ class ProtocolGenerator:
 
         # Try to compile protobuf schema file
         is_compiled, msg = compile_protobuf_using_protoc(
-            self.path_to_generated_protocol_package, self.protocol_specification.name, language
+            self.path_to_generated_protocol_package,
+            self.protocol_specification.name,
+            language,
         )
         if not is_compiled:
             # Remove the generated folder and files
             shutil.rmtree(output_folder)
-            raise SyntaxError("Error when trying to compile the protocol buffer schema file:\n" + msg)
+            raise SyntaxError(
+                "Error when trying to compile the protocol buffer schema file:\n" + msg
+            )
 
         if run_protolint:
             self.run_protolint_for_file(
@@ -2018,7 +2024,9 @@ class ProtocolGenerator:
         :return: optional warning message
         """
         if language != PROTOCOL_LANGUAGE_PYTHON:
-            raise ValueError("Currently the framework supports full generation of protocols only in Python.")
+            raise ValueError(
+                "Currently the framework supports full generation of protocols only in Python."
+            )
 
         # Run protobuf only mode
         self.generate_protobuf_only_mode(language=PROTOCOL_LANGUAGE_PYTHON)
