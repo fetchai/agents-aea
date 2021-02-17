@@ -97,7 +97,7 @@ def _generate_protocol(ctx: Context, protocol_specification_path: str) -> None:
             + "Error while parsing the protocol specification: "
             + str(e)
         )
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         raise click.ClickException(  # pragma: no cover
             "Protocol is NOT generated. The following error happened while generating the protocol:\n"
             + str(e)
@@ -202,13 +202,11 @@ def _generate_protobuf_mode(
         )
         if warning_message is not None:
             click.echo(warning_message)
-    except FileExistsError:
+    except FileExistsError:  # pragma: no cover
         raise click.ClickException(  # pragma: no cover
-            "A {} with this name already exists. Please choose a different name and try again.".format(
-                PROTOCOL
-            )
+            f"A {PROTOCOL} with this name already exists. Please choose a different name and try again."
         )
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         raise click.ClickException(  # pragma: no cover
             "Protocol is NOT generated. The following error happened while generating the protocol:\n"
             + str(e)
