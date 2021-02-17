@@ -16,9 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the tests for the OEF communication using an OEF."""
-
 import asyncio
 import logging
 import sys
@@ -51,7 +49,6 @@ from aea.mail.base_pb2 import Message as ProtobufMessage
 from aea.multiplexer import Multiplexer
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
-from aea.test_tools.test_cases import UseOef
 
 from packages.fetchai.connections.oef.connection import OEFObjectTranslator
 from packages.fetchai.protocols.default.message import DefaultMessage
@@ -63,6 +60,7 @@ from packages.fetchai.protocols.oef_search.dialogues import (
 )
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
+from tests.common.utils import UseOef
 from tests.conftest import (
     FETCHAI_ADDRESS_ONE,
     FETCHAI_ADDRESS_TWO,

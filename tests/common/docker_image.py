@@ -162,7 +162,7 @@ class OEFHealthCheck(object):
             print(str(e))
             return self._result
         finally:
-            t.join(1.0)
+            t.join()
             self.agent.stop()
             self.agent.disconnect()
             self._core.stop()

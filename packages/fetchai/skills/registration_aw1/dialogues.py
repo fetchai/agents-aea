@@ -24,6 +24,8 @@ This module contains the classes required for dialogue management.
 - OefSearchDialogues: The dialogues class keeps track of all dialogues.
 """
 
+from typing import Any
+
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.skills.base import Address, Model
@@ -48,7 +50,7 @@ RegisterDialogue = BaseRegisterDialogue
 class RegisterDialogues(Model, BaseRegisterDialogues):
     """This class keeps track of all register dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -81,7 +83,7 @@ SigningDialogue = BaseSigningDialogue
 class SigningDialogues(Model, BaseSigningDialogues):
     """This class keeps track of all signing dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 

@@ -31,6 +31,10 @@ class AbstractAgent(ABC):
     def name(self) -> str:
         """Get agent's name."""
 
+    @abstractproperty
+    def storage_uri(self) -> Optional[str]:
+        """Return storage uri."""
+
     @abstractmethod
     def start(self) -> None:
         """
@@ -89,10 +93,6 @@ class AbstractAgent(ABC):
 
         :return: List of tuples of callables: handler and coroutine to get a message
         """
-
-    @abstractproperty
-    def storage_uri(self) -> Optional[str]:
-        """Return storage uri."""
 
     @abstractmethod
     def exception_handler(

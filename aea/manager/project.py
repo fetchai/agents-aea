@@ -32,7 +32,7 @@ from aea.configurations.base import AgentConfig, PublicId
 from aea.configurations.constants import DEFAULT_REGISTRY_NAME
 from aea.configurations.data_types import ComponentId
 from aea.configurations.manager import AgentConfigManager
-from aea.crypto.helpers import create_private_key
+from aea.crypto.helpers import create_private_key, get_wallet_from_agent_config
 
 
 class _Base:
@@ -72,7 +72,7 @@ class _Base:
 class Project(_Base):
     """Agent project representation."""
 
-    def __init__(self, public_id: PublicId, path: str):
+    def __init__(self, public_id: PublicId, path: str) -> None:
         """Init project with public_id and project's path."""
         self.public_id: PublicId = public_id
         self.path: str = path
@@ -131,12 +131,14 @@ class AgentAlias(_Base):
     """Agent alias representation."""
 
     def __init__(
-        self, project: Project, agent_name: str, keys_dir: Optional[str],
+        self, project: Project, agent_name: str, data_dir: str,
     ):
         """Init agent alias with project, config, name, agent, builder."""
         self.project = project
         self.agent_name = agent_name
-        self._keys_dir = keys_dir or project.path
+        self._data_dir = data_dir
+        if not os.path.exists(self._data_dir):
+            os.makedirs(self._data_dir)
         self._agent_config: AgentConfig = self._get_agent_config(project.path)
 
     def set_agent_config_from_data(self, json_data: List[Dict]) -> None:
@@ -168,6 +170,7 @@ class AgentAlias(_Base):
             )
         builder.set_name(self.agent_name)
         builder.set_runtime_mode("threaded")
+        builder.set_data_dir(self._data_dir)
         return builder
 
     @property
@@ -184,17 +187,17 @@ class AgentAlias(_Base):
         If file exists, check `replace` option.
         """
         file_name = (
-            f"{self.agent_name}_{ledger}_connection_private.key"
+            f"{ledger}_connection_private.key"
             if is_connection
-            else f"{self.agent_name}_{ledger}_private.key"
+            else f"{ledger}_private.key"
         )
-        filepath = os.path.join(self._keys_dir, file_name)
+        filepath = os.path.join(self._data_dir, file_name)
         if os.path.exists(filepath) and not replace:
             return filepath
         create_private_key(ledger, filepath)
         return filepath
 
-    def remove_from_project(self):
+    def remove_from_project(self) -> None:
         """Remove agent alias from project."""
         self.project.agents.remove(self.agent_name)
 
@@ -226,7 +229,9 @@ class AgentAlias(_Base):
 
     def issue_certificates(self) -> None:
         """Issue the certificates for this agent."""
-        issue_certificates_(self.project.path, self.agent_config_manager)
+        issue_certificates_(
+            self.project.path, self.agent_config_manager, self._data_dir
+        )
 
     def set_overrides(
         self,
@@ -274,3 +279,21 @@ class AgentAlias(_Base):
             components_configurations.append(obj)
 
         return agent_overridables, components_configurations
+
+    def get_addresses(self) -> Dict[str, str]:
+        """
+        Get addresses from private keys.
+
+        :return: dict with crypto id str as key and address str as value
+        """
+        wallet = get_wallet_from_agent_config(self.agent_config)
+        return wallet.addresses
+
+    def get_connections_addresses(self) -> Dict[str, str]:
+        """
+        Get connections addresses from connections private keys.
+
+        :return: dict with crypto id str as key and address str as value
+        """
+        wallet = get_wallet_from_agent_config(self.agent_config)
+        return wallet.connection_cryptos.addresses

@@ -46,7 +46,7 @@ Translator for AttributeDict.
 
 ```python
  | @classmethod
- | to_dict(cls, attr_dict: AttributeDict) -> JSONLike
+ | to_dict(cls, attr_dict: Union[AttributeDict, TxReceipt, TxData]) -> JSONLike
 ```
 
 Simplify to dict.
@@ -130,7 +130,7 @@ a display_address str
 
 ```python
  | @classmethod
- | load_private_key_from_path(cls, file_name) -> Account
+ | load_private_key_from_path(cls, file_name: str) -> Account
 ```
 
 Load a private key in hex format from a file.
@@ -380,7 +380,7 @@ Class to interact with the Ethereum Web3 APIs.
 #### `__`init`__`
 
 ```python
- | __init__(**kwargs)
+ | __init__(**kwargs: Any)
 ```
 
 Initialize the Ethereum ledger APIs.
@@ -412,7 +412,7 @@ Get the balance of a given account.
 #### get`_`state
 
 ```python
- | get_state(callable_name: str, *args, **kwargs) -> Optional[JSONLike]
+ | get_state(callable_name: str, *args: Any, **kwargs: Any) -> Optional[JSONLike]
 ```
 
 Call a specified function on the ledger API.
@@ -421,7 +421,7 @@ Call a specified function on the ledger API.
 #### get`_`transfer`_`transaction
 
 ```python
- | get_transfer_transaction(sender_address: Address, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, chain_id: Optional[int] = None, gas_price: Optional[str] = None, **kwargs, ,) -> Optional[JSONLike]
+ | get_transfer_transaction(sender_address: Address, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, chain_id: Optional[int] = None, gas_price: Optional[str] = None, **kwargs: Any, ,) -> Optional[JSONLike]
 ```
 
 Submit a transfer transaction to the ledger.
@@ -530,7 +530,7 @@ the contract instance
 #### get`_`deploy`_`transaction
 
 ```python
- | get_deploy_transaction(contract_interface: Dict[str, str], deployer_address: Address, value: int = 0, gas: int = 0, **kwargs, ,) -> Optional[JSONLike]
+ | get_deploy_transaction(contract_interface: Dict[str, str], deployer_address: Address, value: int = 0, gas: int = 0, **kwargs: Any, ,) -> Optional[JSONLike]
 ```
 
 Get the transaction to deploy the smart contract.
@@ -583,4 +583,67 @@ Get wealth from the faucet for the provided address.
 **Returns**:
 
 None
+
+<a name="aea.crypto.ethereum.LruLockWrapper"></a>
+## LruLockWrapper Objects
+
+```python
+class LruLockWrapper()
+```
+
+Wrapper for LRU with threading.Lock.
+
+<a name="aea.crypto.ethereum.LruLockWrapper.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(lru: LRU) -> None
+```
+
+Init wrapper.
+
+<a name="aea.crypto.ethereum.LruLockWrapper.__getitem__"></a>
+#### `__`getitem`__`
+
+```python
+ | __getitem__(*args: Any, **kwargs: Any) -> Any
+```
+
+Get item
+
+<a name="aea.crypto.ethereum.LruLockWrapper.__setitem__"></a>
+#### `__`setitem`__`
+
+```python
+ | __setitem__(*args: Any, **kwargs: Any) -> Any
+```
+
+Set item.
+
+<a name="aea.crypto.ethereum.LruLockWrapper.__contains__"></a>
+#### `__`contains`__`
+
+```python
+ | __contains__(*args: Any, **kwargs: Any) -> Any
+```
+
+Contain item.
+
+<a name="aea.crypto.ethereum.LruLockWrapper.__delitem__"></a>
+#### `__`delitem`__`
+
+```python
+ | __delitem__(*args: Any, **kwargs: Any) -> Any
+```
+
+Del item.
+
+<a name="aea.crypto.ethereum.set_wrapper_for_web3py_session_cache"></a>
+#### set`_`wrapper`_`for`_`web3py`_`session`_`cache
+
+```python
+set_wrapper_for_web3py_session_cache() -> None
+```
+
+Wrap web3py session cache with threading.Lock.
 

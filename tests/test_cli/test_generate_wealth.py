@@ -18,15 +18,17 @@
 # ------------------------------------------------------------------------------
 """This test module contains the tests for commands in aea.cli.generate_wealth module."""
 from unittest import TestCase, mock
+from unittest.mock import MagicMock
 
 import pytest
 
 from aea.cli import cli
 from aea.cli.generate_wealth import _try_generate_wealth
-from aea.test_tools.test_cases import AEATestCaseMany
+from aea.test_tools.test_cases import AEATestCaseMany, AEATestCaseManyFlaky
 
 from tests.conftest import (
     CLI_LOG_OPTION,
+    COSMOS_ADDRESS_ONE,
     CliRunner,
     FETCHAI,
     MAX_FLAKY_RERUNS_INTEGRATION,
@@ -40,7 +42,10 @@ class GenerateWealthTestCase(TestCase):
     @mock.patch("aea.cli.utils.package_utils.Wallet")
     @mock.patch("aea.cli.generate_wealth.click.echo")
     @mock.patch("aea.cli.generate_wealth.try_generate_testnet_wealth")
-    @mock.patch("aea.cli.utils.package_utils.verify_or_create_private_keys_ctx")
+    @mock.patch(
+        "aea.cli.generate_wealth.get_wallet_from_context",
+        return_value=MagicMock(addresses={"cosmos": COSMOS_ADDRESS_ONE}),
+    )
     def test__generate_wealth_positive(self, *mocks):
         """Test for _generate_wealth method positive result."""
         ctx = ContextMock()
@@ -73,7 +78,7 @@ class GenerateWealthCommandTestCase(TestCase):
         self.assertEqual(result.exit_code, 0)
 
 
-class TestWealthCommandsPositive(AEATestCaseMany):
+class TestWealthCommandsPositive(AEATestCaseManyFlaky):
     """Test case for CLI wealth commands."""
 
     @pytest.mark.integration

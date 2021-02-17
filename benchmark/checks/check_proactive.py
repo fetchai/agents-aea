@@ -20,6 +20,7 @@
 """Envelopes generation speed for Behaviour act test."""
 import time
 from threading import Thread
+from typing import List, Tuple, Union, cast
 
 import click
 
@@ -51,7 +52,7 @@ class TestBehaviour(Behaviour):
     def teardown(self) -> None:
         """Tear up behaviour."""
 
-    def act(self):
+    def act(self) -> None:
         """Perform action on periodic basis."""
         s = time.time()
         while time.time() - s < self.tick_interval:
@@ -59,7 +60,7 @@ class TestBehaviour(Behaviour):
             self.count += 1
 
 
-def run(duration, runtime_mode):
+def run(duration: int, runtime_mode: str) -> List[Tuple[str, Union[int, float]]]:
     """Test act message generate performance."""
     # pylint: disable=import-outside-toplevel,unused-import
     # import manually due to some lazy imports in decision_maker
@@ -80,7 +81,7 @@ def run(duration, runtime_mode):
 
     rate = connection.count_in / duration
     return [
-        ("envelopes sent", skill.behaviours["test"].count),
+        ("envelopes sent", cast(TestBehaviour, skill.behaviours["test"]).count),
         ("envelopes received", connection.count_in),
         ("rate(envelopes/second)", rate),
     ]
@@ -92,7 +93,7 @@ def run(duration, runtime_mode):
     "--runtime_mode", default="async", help="Runtime mode: async or threaded."
 )
 @click.option("--number_of_runs", default=10, help="How many times run test.")
-def main(duration, runtime_mode, number_of_runs):
+def main(duration: int, runtime_mode: str, number_of_runs: int) -> None:
     """Run test."""
     click.echo("Start test with options:")
     click.echo(f"* Duration: {duration} seconds")

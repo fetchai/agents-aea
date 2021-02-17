@@ -22,7 +22,7 @@ import os
 import sys
 import time
 import uuid
-from typing import cast
+from typing import List, Tuple, Union, cast
 
 import click
 
@@ -43,7 +43,7 @@ sys.path.append(ROOT_PATH)
 class DialogueHandler:
     """Generate messages and process with dialogues."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Set dialogues."""
         # pylint: disable=unused-argument
 
@@ -69,7 +69,7 @@ class DialogueHandler:
         return cast(HttpDialogue, self.dialogues.update(message))
 
     @staticmethod
-    def reply(dialogue: HttpDialogue, message: HttpMessage):
+    def reply(dialogue: HttpDialogue, message: HttpMessage) -> Message:
         """Construct and send a response for message received."""
         return dialogue.reply(
             target_message=message,
@@ -97,7 +97,7 @@ class DialogueHandler:
         return message
 
 
-def run(messages_amount: int):
+def run(messages_amount: int) -> List[Tuple[str, Union[float, int]]]:
     """Test messages generation and memory consumption with dialogues."""
     handler = DialogueHandler()
     mem_usage_on_start = get_mem_usage_in_mb()
@@ -115,7 +115,7 @@ def run(messages_amount: int):
 @click.command()
 @click.option("--messages", default=1000, help="Run time in seconds.")
 @click.option("--number_of_runs", default=10, help="How many times run test.")
-def main(messages, number_of_runs):
+def main(messages: str, number_of_runs: int) -> None:
     """Run test."""
     click.echo("Start test with options:")
     click.echo(f"* Messages: {messages}")

@@ -22,7 +22,7 @@ import re
 import shutil
 import sys
 from pathlib import Path
-from typing import Dict, Optional, Set, Tuple
+from typing import Any, Dict, Optional, Set, Tuple
 
 import click
 from jsonschema import ValidationError
@@ -64,11 +64,15 @@ from aea.configurations.constants import (
 from aea.configurations.loader import ConfigLoader
 from aea.configurations.manager import AgentConfigManager
 from aea.configurations.utils import replace_component_ids
-from aea.crypto.helpers import private_key_verify_or_create
+from aea.crypto.helpers import (
+    get_wallet_from_agent_config,
+    private_key_verify_or_create,
+)
 from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS, LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.exceptions import AEAEnforceError
 from aea.helpers.base import compute_specifier_from_version, recursive_update
+from aea.helpers.io import open_file
 from aea.helpers.sym_link import create_symlink
 
 
@@ -101,7 +105,7 @@ def verify_or_create_private_keys_ctx(
         raise click.ClickException(str(e))
 
 
-def validate_package_name(package_name: str):
+def validate_package_name(package_name: str) -> None:
     """Check that the package name matches the pattern r"[a-zA-Z_][a-zA-Z0-9_]*".
 
     >>> validate_package_name("this_is_a_good_package_name")
@@ -180,8 +184,9 @@ def try_get_item_target_path(
     """
     target_path = os.path.join(path, author_name, item_type_plural, item_name)
     if os.path.exists(target_path):
+        path_ = Path(target_path)
         raise click.ClickException(
-            'Item "{}" already exists in target folder.'.format(item_name)
+            f'Item "{path_.name}" already exists in target folder "{path_.parent}".'
         )
     return target_path
 
@@ -242,7 +247,7 @@ def get_package_path_unified(
 
 
 def get_dotted_package_path_unified(
-    project_directory: str, agent_config: AgentConfig, *args
+    project_directory: str, agent_config: AgentConfig, *args: Any
 ) -> str:
     """
     Get a *dotted* path for a package, either vendor or not.
@@ -320,7 +325,7 @@ def find_item_locally(
         item_configuration_loader = ConfigLoader.from_configuration_type(
             PackageType(item_type)
         )
-        with item_configuration_filepath.open() as fp:
+        with open_file(item_configuration_filepath) as fp:
             item_configuration = item_configuration_loader.load(fp)
     except ValidationError as e:
         raise click.ClickException(
@@ -371,7 +376,7 @@ def find_item_in_distribution(  # pylint: disable=unused-argument
         item_configuration_loader = ConfigLoader.from_configuration_type(
             PackageType(item_type)
         )
-        with item_configuration_filepath.open() as fp:
+        with open_file(item_configuration_filepath) as fp:
             item_configuration = item_configuration_loader.load(fp)
     except ValidationError as e:
         raise click.ClickException(
@@ -434,7 +439,9 @@ def validate_author_name(author: Optional[str] = None) -> str:
     return valid_author
 
 
-def is_fingerprint_correct(package_path: Path, item_config) -> bool:
+def is_fingerprint_correct(
+    package_path: Path, item_config: PackageConfiguration
+) -> bool:
     """
     Validate fingerprint of item before adding.
 
@@ -464,11 +471,13 @@ def register_item(ctx: Context, item_type: str, item_public_id: PublicId) -> Non
     )
     supported_items = get_items(ctx.agent_config, item_type)
     supported_items.add(item_public_id)
-    with open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as fp:
+    with open_file(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as fp:
         ctx.agent_loader.dump(ctx.agent_config, fp)
 
 
-def is_item_present_unified(ctx: Context, item_type: str, item_public_id: PublicId):
+def is_item_present_unified(
+    ctx: Context, item_type: str, item_public_id: PublicId
+) -> bool:
     """
     Check if item is present, either vendor or not.
 
@@ -652,16 +661,6 @@ def get_wallet_from_context(ctx: Context) -> Wallet:
     return wallet
 
 
-def get_wallet_from_agent_config(agent_config: AgentConfig) -> Wallet:
-    """Get wallet from agent_cofig provided."""
-    private_key_paths: Dict[str, Optional[str]] = {
-        config_pair[0]: config_pair[1]
-        for config_pair in agent_config.private_key_paths.read_all()
-    }
-    wallet = Wallet(private_key_paths)
-    return wallet
-
-
 def update_item_public_id_in_init(
     item_type: str, package_path: Path, item_id: PublicId
 ) -> None:
@@ -677,9 +676,9 @@ def update_item_public_id_in_init(
     if item_type != SKILL:
         return
     init_filepath = os.path.join(package_path, "__init__.py")
-    with open(init_filepath, "r") as f:
+    with open_file(init_filepath, "r") as f:
         file_content = f.readlines()
-    with open(init_filepath, "w") as f:
+    with open_file(init_filepath, "w") as f:
         for line in file_content:
             if PACKAGE_PUBLIC_ID_VAR_NAME in line:
                 f.write(
@@ -689,7 +688,9 @@ def update_item_public_id_in_init(
                 f.write(line)
 
 
-def update_references(ctx: Context, replacements: Dict[ComponentId, ComponentId]):
+def update_references(
+    ctx: Context, replacements: Dict[ComponentId, ComponentId]
+) -> None:
     """
     Update references across an AEA project.
 
@@ -760,7 +761,7 @@ def replace_all_import_statements(
     item_type: ComponentType,
     old_public_id: PublicId,
     new_public_id: PublicId,
-):
+) -> None:
     """
     Replace all import statements in Python modules of all the non-vendor packages.
 

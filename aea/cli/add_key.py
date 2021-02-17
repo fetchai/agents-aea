@@ -32,6 +32,7 @@ from aea.configurations.constants import (
 )
 from aea.crypto.helpers import try_validate_private_key_path
 from aea.crypto.registries import crypto_registry
+from aea.helpers.io import open_file
 
 
 key_file_argument = click.Path(
@@ -54,7 +55,9 @@ key_file_argument = click.Path(
 )
 @click.pass_context
 @check_aea_project
-def add_key(click_context, type_, file, connection):
+def add_key(
+    click_context: click.Context, type_: str, file: str, connection: bool
+) -> None:
     """Add a private key to the wallet of the agent."""
     _add_private_key(click_context, type_, file, connection)
 
@@ -85,7 +88,9 @@ def _add_private_key(
     _try_add_key(ctx, type_, file, connection)
 
 
-def _try_add_key(ctx: Context, type_: str, filepath: str, connection: bool = False):
+def _try_add_key(
+    ctx: Context, type_: str, filepath: str, connection: bool = False
+) -> None:
     try:
         if connection:
             ctx.agent_config.connection_private_key_paths.create(type_, filepath)
@@ -93,5 +98,5 @@ def _try_add_key(ctx: Context, type_: str, filepath: str, connection: bool = Fal
             ctx.agent_config.private_key_paths.create(type_, filepath)
     except ValueError as e:  # pragma: no cover
         raise click.ClickException(str(e))
-    with open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as fp:
+    with open_file(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as fp:
         ctx.agent_loader.dump(ctx.agent_config, fp)

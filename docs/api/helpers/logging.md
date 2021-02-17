@@ -25,7 +25,7 @@ This class is a logger adapter that prepends the agent name to log messages.
 #### `__`init`__`
 
 ```python
- | __init__(logger: Logger, agent_name: str)
+ | __init__(logger: Logger, agent_name: str) -> None
 ```
 
 Initialize the logger adapter.
@@ -56,7 +56,7 @@ Interface to endow subclasses with a logger.
 #### `__`init`__`
 
 ```python
- | __init__(logger: Optional[Logger] = None, default_logger_name: str = "aea")
+ | __init__(logger: Optional[Logger] = None, default_logger_name: str = "aea") -> None
 ```
 
 Initialize the logger.
@@ -81,7 +81,7 @@ Get the component logger.
 
 ```python
  | @logger.setter
- | logger(logger: Optional[Logger])
+ | logger(logger: Optional[Logger]) -> None
 ```
 
 Set the logger.

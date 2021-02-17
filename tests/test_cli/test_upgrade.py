@@ -18,11 +18,11 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains the tests for the `aea add connection` sub-command."""
+import filecmp
 import os
 import shutil
 import tempfile
 from contextlib import contextmanager
-from filecmp import dircmp
 from pathlib import Path
 from typing import List, Set, cast
 from unittest import mock
@@ -33,6 +33,7 @@ from click.exceptions import ClickException
 from click.testing import Result
 from packaging.version import Version
 
+import aea
 from aea import get_current_aea_version
 from aea.cli import cli
 from aea.cli.registry.utils import get_latest_version_available_in_registry
@@ -64,7 +65,7 @@ from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
 from packages.fetchai.skills.error import PUBLIC_ID as ERROR_SKILL_PUBLIC_ID
 
 from tests.common.mocks import RegexComparator
-from tests.common.utils import are_dirs_equal
+from tests.common.utils import are_dirs_equal, dircmp_recursive
 from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH, CliRunner
 
 
@@ -353,7 +354,7 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
         cls.run_cli_command(
             "--skip-consistency-check",
             "fetch",
-            "fetchai/generic_buyer:0.18.0",
+            "fetchai/generic_buyer:0.19.0",
             "--alias",
             cls.agent_name,
         )
@@ -435,7 +436,7 @@ class TestNonVendorProject(BaseAEATestCase, BaseTestCase):
         cls.change_directory(Path(".."))
         cls.agent_name = "generic_buyer_0.12.0"
         cls.run_cli_command(
-            "fetch", "fetchai/generic_buyer:0.18.0", "--alias", cls.agent_name
+            "fetch", "fetchai/generic_buyer:0.19.0", "--alias", cls.agent_name
         )
         cls.agents.add(cls.agent_name)
         cls.set_agent_context(cls.agent_name)
@@ -738,8 +739,8 @@ class TestUpgradeNonVendorDependencies(AEATestCaseEmpty):
 
     The test works as follows:
     - scaffold a package, one for each possible package type;
-    - add the protocol "fetchai/default:0.7.0" as dependency to each of them.
-    - add the skill "fetchai/error:0.7.0"; this will also add the default protocol.
+    - add the protocol "fetchai/default:0.11.0" as dependency to each of them.
+    - add the skill "fetchai/error:0.11.0"; this will also add the default protocol.
       add it also as dependency of non-vendor skill.
     - run 'aea upgrade'
     - check that the reference to "fetchai/default" in each scaffolded package
@@ -749,10 +750,10 @@ class TestUpgradeNonVendorDependencies(AEATestCaseEmpty):
     capture_log = True
     IS_EMPTY = True
     old_default_protocol_id = PublicId(
-        DefaultMessage.protocol_id.author, DefaultMessage.protocol_id.name, "0.7.0"
+        DefaultMessage.protocol_id.author, DefaultMessage.protocol_id.name, "0.11.0"
     )
     old_error_skill_id = PublicId(
-        ERROR_SKILL_PUBLIC_ID.author, ERROR_SKILL_PUBLIC_ID.name, "0.7.0"
+        ERROR_SKILL_PUBLIC_ID.author, ERROR_SKILL_PUBLIC_ID.name, "0.11.0"
     )
     old_aea_version_range = compute_specifier_from_version(Version("0.1.0"))
 
@@ -856,17 +857,17 @@ class TestUpdateReferences(AEATestCaseEmpty):
     In particular, 'default_routing', 'default_connection' and custom component configurations in AEA configuration.
 
     How the test works:
-    - add fetchai/error:0.7.0, that requires fetchai/default:0.7.0
+    - add fetchai/error:0.11.0, that requires fetchai/default:0.11.0
     - add fetchai/stub:0.15.0
-    - add 'fetchai/default:0.7.0: fetchai/stub:0.15.0' to default routing
+    - add 'fetchai/default:0.11.0: fetchai/stub:0.15.0' to default routing
     - add custom configuration to stub connection.
     - run 'aea upgrade'. This will upgrade `stub` connection and `error` skill, and in turn `default` protocol.
     """
 
     IS_EMPTY = True
 
-    OLD_DEFAULT_PROTOCOL_PUBLIC_ID = PublicId.from_str("fetchai/default:0.7.0")
-    OLD_ERROR_SKILL_PUBLIC_ID = PublicId.from_str("fetchai/error:0.7.0")
+    OLD_DEFAULT_PROTOCOL_PUBLIC_ID = PublicId.from_str("fetchai/default:0.11.0")
+    OLD_ERROR_SKILL_PUBLIC_ID = PublicId.from_str("fetchai/error:0.11.0")
     OLD_STUB_CONNECTION_PUBLIC_ID = PublicId.from_str("fetchai/stub:0.15.0")
 
     @classmethod
@@ -933,7 +934,7 @@ class TestUpdateReferences(AEATestCaseEmpty):
             "agent.default_connection",
             cwd=self._get_cwd(),
         )
-        assert result.stdout == "fetchai/stub:0.15.0\n"
+        assert result.stdout == "fetchai/stub:0.16.0\n"
 
     def test_custom_configuration_updated_correctly(self):
         """Test default routing has been updated correctly."""
@@ -1008,7 +1009,7 @@ class TestWrongAEAVersion(AEATestCaseEmpty):
         assert result.exit_code == 0
         mock_click_echo.assert_any_call("Starting project upgrade...")
         mock_click_echo.assert_any_call(
-            "Updating AEA version specifier from ==0.1.0 to >=0.9.0, <0.10.0."
+            "Updating AEA version specifier from ==0.1.0 to >=0.10.0, <0.11.0."
         )
 
         # test 'aea_version' of agent configuration is upgraded
@@ -1051,7 +1052,7 @@ class BaseTestUpgradeWithEject(AEATestCaseEmpty):
         cls.add_item("skill", str(cls.GENERIC_SELLER.public_id), local=False)
 
     @classmethod
-    def mock_get_latest_version_available_in_registry(cls, *args):
+    def mock_get_latest_version_available_in_registry(cls, *args, **kwargs):
         """Mock 'get_latest_version_available_in_registry' when called with generic_seller public key."""
         if (
             args[1] == str(cls.GENERIC_SELLER.package_type)
@@ -1059,7 +1060,7 @@ class BaseTestUpgradeWithEject(AEATestCaseEmpty):
         ):
             # return current version
             return cls.GENERIC_SELLER
-        return cls.unmocked(*args)
+        return cls.unmocked(*args, **kwargs)
 
     def _get_mock(self):
         """Get the mock of 'get_latest_version_available_in_registry'."""
@@ -1130,10 +1131,12 @@ class TestUpgradeWithEjectAccept(BaseTestUpgradeWithEject):
         assert ejected_package_path.is_dir()
 
 
+@pytest.mark.integration
 class BaseTestUpgradeProject(AEATestCaseEmpty):
     """Base test class for testing project upgrader."""
 
     OLD_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.19.0")
+    EXPECTED_NEW_AGENT_PUBLIC_ID = OLD_AGENT_PUBLIC_ID.to_latest()
     EXPECTED = "expected_agent"
 
     @classmethod
@@ -1143,7 +1146,8 @@ class BaseTestUpgradeProject(AEATestCaseEmpty):
         cls.run_cli_command(
             "--skip-consistency-check",
             "fetch",
-            str(cls.OLD_AGENT_PUBLIC_ID.to_latest()),
+            "--remote",
+            str(cls.EXPECTED_NEW_AGENT_PUBLIC_ID),
             "--alias",
             cls.EXPECTED,
         )
@@ -1166,7 +1170,7 @@ class TestUpgradeProjectWithNewerVersion(BaseTestUpgradeProject):
     def test_upgrade(self, mock_confirm, confirm):
         """Test upgrade."""
         mock_confirm.return_value = confirm
-        result = self.run_cli_command("upgrade", cwd=self._get_cwd())
+        result = self.run_cli_command("upgrade", "--remote", cwd=self._get_cwd())
         assert result.exit_code == 0
 
         mock_confirm.assert_any_call(
@@ -1176,7 +1180,17 @@ class TestUpgradeProjectWithNewerVersion(BaseTestUpgradeProject):
         )
 
         # compare with latest fetched agent.
-        assert dircmp(self.current_agent_context, self.EXPECTED)
+        ignore = [DEFAULT_AEA_CONFIG_FILE] + filecmp.DEFAULT_IGNORES
+        dircmp = filecmp.dircmp(
+            self.current_agent_context, self.EXPECTED, ignore=ignore
+        )
+        _left_only, _right_only, diff = dircmp_recursive(dircmp)
+        if confirm:
+            assert diff == _right_only == _left_only == set()
+        else:
+            assert diff == _right_only == set()
+            # temporary: due to change in deps
+            assert _left_only == {"vendor/fetchai/skills/error"}
 
 
 @mock.patch("aea.cli.upgrade.get_latest_version_available_in_registry")
@@ -1188,7 +1202,7 @@ class TestUpgradeProjectWithoutNewerVersion(BaseTestUpgradeProject):
         """Run the test."""
         fake_old_public_id = self.OLD_AGENT_PUBLIC_ID
         mock_get_latest_version.return_value = fake_old_public_id
-        result = self.run_cli_command("upgrade", cwd=self._get_cwd())
+        result = self.run_cli_command("upgrade", "--remote", cwd=self._get_cwd())
         assert result.exit_code == 0
 
         version_str = str(self.OLD_AGENT_PUBLIC_ID.version)
@@ -1197,4 +1211,46 @@ class TestUpgradeProjectWithoutNewerVersion(BaseTestUpgradeProject):
         )
 
         # compare with latest fetched agent.
-        assert dircmp(self.current_agent_context, self.EXPECTED)
+        ignore = [DEFAULT_AEA_CONFIG_FILE] + filecmp.DEFAULT_IGNORES
+        dircmp = filecmp.dircmp(
+            self.current_agent_context, self.EXPECTED, ignore=ignore
+        )
+        _left_only, _right_only, diff = dircmp_recursive(dircmp)
+        assert _left_only == {"vendor/fetchai/skills/error"}
+        assert diff == _right_only == set()
+
+
+@mock.patch.object(aea, "__version__", "0.8.0")
+class TestUpgradeAEACompatibility(BaseTestUpgradeProject):
+    """
+    Test 'aea upgrade' takes into account the current aea version.
+
+    The test works as follows:
+    """
+
+    OLD_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.19.0")
+    EXPECTED_NEW_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.19.0")
+
+    def test_upgrade(self):
+        """Test upgrade."""
+        result = self.run_cli_command("upgrade", "--remote", "-y", cwd=self._get_cwd())
+        assert result.exit_code == 0
+
+        # compare with latest fetched agent.
+        ignore = [DEFAULT_AEA_CONFIG_FILE] + filecmp.DEFAULT_IGNORES
+        dircmp = filecmp.dircmp(
+            self.current_agent_context, self.EXPECTED, ignore=ignore
+        )
+        _left_only, _right_only, diff = dircmp_recursive(dircmp)
+        assert diff == _left_only == _right_only == set()
+
+        # compare agent configuration files (except the name)
+        expected_content = (
+            Path(self.EXPECTED, DEFAULT_AEA_CONFIG_FILE).read_text().splitlines()[1:]
+        )
+        actual_content = (
+            Path(self.current_agent_context, DEFAULT_AEA_CONFIG_FILE)
+            .read_text()
+            .splitlines()[1:]
+        )
+        assert expected_content == actual_content

@@ -110,7 +110,9 @@ class MyAgent(Agent):
         output_file_path=OUTPUT_FILE,
         connection_id=StubConnection.connection_id,
     )
-    stub_connection = StubConnection(configuration=configuration, identity=identity)
+    stub_connection = StubConnection(
+        configuration=configuration, data_dir=".", identity=identity
+    )
 
     # Create our Agent
     my_agent = MyAgent(identity, [stub_connection])
@@ -250,7 +252,9 @@ def run():
         output_file_path=OUTPUT_FILE,
         connection_id=StubConnection.connection_id,
     )
-    stub_connection = StubConnection(configuration=configuration, identity=identity)
+    stub_connection = StubConnection(
+        configuration=configuration, data_dir=".", identity=identity
+    )
 
     # Create our Agent
     my_agent = MyAgent(identity, [stub_connection])

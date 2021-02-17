@@ -300,9 +300,21 @@ class TestResources:
         )
         self.resources.add_component(cast(Protocol, a_protocol))
         assert self.resources.get_protocol(a_protocol.public_id) == a_protocol
+        assert (
+            self.resources.get_protocol_by_specification_id(
+                a_protocol.protocol_specification_id
+            )
+            == a_protocol
+        )
         # restore state
         self.resources.remove_protocol(a_protocol.public_id)
         assert self.resources.get_protocol(a_protocol.public_id) is None
+        assert (
+            self.resources.get_protocol_by_specification_id(
+                a_protocol.protocol_specification_id
+            )
+            is None
+        )
 
     def test_get_all_protocols(self):
         """Test get all protocols."""
@@ -339,6 +351,7 @@ class TestResources:
         """Test that the 'add connection' and 'remove connection' methods work correctly."""
         a_connection = Connection.from_dir(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "oef"),
+            data_dir=MagicMock(),
             identity=Identity("name", "address"),
             crypto_store=MagicMock(),
         )
@@ -351,6 +364,7 @@ class TestResources:
         """Test get all connections."""
         a_connection = Connection.from_dir(
             Path(ROOT_DIR, "packages", "fetchai", "connections", "oef"),
+            data_dir=MagicMock(),
             identity=Identity("name", "address"),
             crypto_store=MagicMock(),
         )
@@ -514,7 +528,7 @@ class TestFilter:
 
         resources.add_connection(connection)
 
-        cls.aea = AEA(identity, wallet, resources=resources,)
+        cls.aea = AEA(identity, wallet, resources=resources, data_dir=MagicMock())
         cls.aea.setup()
 
     def test_handle_internal_messages(self):

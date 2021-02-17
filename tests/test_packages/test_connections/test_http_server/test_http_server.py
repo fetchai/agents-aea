@@ -24,7 +24,7 @@ import logging
 import os
 from traceback import print_exc
 from typing import Tuple, cast
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import aiohttp
 import pytest
@@ -123,7 +123,9 @@ class TestHTTPServer:
             restricted_to_protocols={HttpMessage.protocol_id},
         )
         self.http_connection = HTTPServerConnection(
-            configuration=self.configuration, identity=self.identity,
+            configuration=self.configuration,
+            data_dir=MagicMock(),
+            identity=self.identity,
         )
         self.loop = asyncio.get_event_loop()
         self.loop.run_until_complete(self.http_connection.connect())

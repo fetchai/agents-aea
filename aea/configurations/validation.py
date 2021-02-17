@@ -22,7 +22,7 @@ import json
 import os
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Iterator, List, Optional, Tuple
 
 import jsonschema
 from jsonschema import Draft4Validator
@@ -35,6 +35,7 @@ from aea.configurations.constants import AGENT
 from aea.configurations.data_types import ComponentId, ComponentType, PublicId
 from aea.helpers.base import dict_to_path_value
 from aea.helpers.env_vars import is_env_variable
+from aea.helpers.io import open_file
 
 
 _CUR_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
@@ -92,14 +93,14 @@ class ExtraPropertiesError(ValueError):
 class CustomTypeChecker(TypeChecker):
     """Custom type checker to handle env variables."""
 
-    def is_type(self, instance, type):  # pylint: disable=redefined-builtin
+    def is_type(self, instance, type) -> bool:  # type: ignore # pylint: disable=redefined-builtin
         """Check is instance of type."""
         if is_env_variable(instance):
             return True
         return super().is_type(instance, type)
 
 
-def ownAdditionalProperties(validator, aP, instance, schema):
+def ownAdditionalProperties(validator, aP, instance, schema) -> Iterator:  # type: ignore
     """Additioinal properties validator."""
     for _ in additionalProperties(validator, aP, instance, schema):
         raise ExtraPropertiesError(list(find_additional_properties(instance, schema)))
@@ -123,14 +124,14 @@ EnvVarsFriendlyDraft4Validator = extend(
 class ConfigValidator:
     """Configuration validator implementation."""
 
-    def __init__(self, schema_filename: str, env_vars_friendly: bool = False):
+    def __init__(self, schema_filename: str, env_vars_friendly: bool = False) -> None:
         """
         Initialize the parser for configuration files.
 
         :param schema_filename: the path to the JSON-schema file in 'aea/configurations/schemas'.
         """
         base_uri = Path(_SCHEMAS_DIR)
-        with (base_uri / schema_filename).open() as fp:
+        with open_file(base_uri / schema_filename) as fp:
             self._schema = json.load(fp)
         root_path = make_jsonschema_base_uri(base_uri)
         self._resolver = jsonschema.RefResolver(root_path, self._schema)
@@ -267,15 +268,18 @@ def validate_data_with_pattern(
 
     :return: list of str with error descriptions
     """
-    excludes = excludes or []
+    if excludes is None:
+        excludes_: List[Tuple[str]] = []
+    else:
+        excludes_ = excludes
     pattern_path_value = {
         tuple(path): value for path, value in dict_to_path_value(pattern)
     }
     data_path_value = {tuple(path): value for path, value in dict_to_path_value(data)}
     errors = []
 
-    def check_excludes(path):
-        for exclude in excludes:
+    def check_excludes(path: Tuple[str, ...]) -> bool:
+        for exclude in excludes_:
             if len(exclude) > len(path):  # pragma: nocover
                 continue
 

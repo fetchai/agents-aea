@@ -29,6 +29,7 @@ from aea.cli.utils.decorators import check_aea_project, clean_after, pass_ctx
 from aea.cli.utils.loggers import logger
 from aea.configurations.base import ProtocolSpecificationParseError, PublicId
 from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE, PROTOCOL
+from aea.helpers.io import open_file
 from aea.protocols.generator.base import ProtocolGenerator
 from aea.protocols.generator.common import load_protocol_specification
 
@@ -36,20 +37,22 @@ from aea.protocols.generator.common import load_protocol_specification
 @click.group()
 @click.pass_context
 @check_aea_project
-def generate(click_context: click.core.Context):  # pylint: disable=unused-argument
+def generate(
+    click_context: click.core.Context,  # pylint: disable=unused-argument
+) -> None:
     """Generate a package for the agent."""
 
 
 @generate.command()
 @click.argument("protocol_specification_path", type=str, required=True)
 @pass_ctx
-def protocol(ctx: Context, protocol_specification_path: str):
+def protocol(ctx: Context, protocol_specification_path: str) -> None:
     """Generate a protocol based on a specification and add it to the configuration file and agent."""
     _generate_item(ctx, PROTOCOL, protocol_specification_path)
 
 
 @clean_after
-def _generate_item(ctx: Context, item_type: str, specification_path: str):
+def _generate_item(ctx: Context, item_type: str, specification_path: str) -> None:
     """Generate an item based on a specification and add it to the configuration file and agent."""
     # Get existing items
     existing_id_list = getattr(ctx.agent_config, "{}s".format(item_type))
@@ -110,7 +113,8 @@ def _generate_item(ctx: Context, item_type: str, specification_path: str):
             PublicId(protocol_spec.author, protocol_spec.name, protocol_spec.version)
         )
         ctx.agent_loader.dump(
-            ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
+            ctx.agent_config,
+            open_file(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"),
         )
     except FileExistsError:
         raise click.ClickException(  # pragma: no cover

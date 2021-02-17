@@ -19,7 +19,7 @@
 
 """This package contains the ContractAPI and LedgerAPI dialogues for the simple oracle client skill."""
 
-from typing import Optional, Type
+from typing import Any, Optional, Type
 
 from aea.common import Address
 from aea.exceptions import enforce
@@ -83,7 +83,7 @@ class ContractApiDialogue(BaseContractApiDialogue):
     @property
     def terms(self) -> Terms:
         """Get the terms."""
-        if self._terms is None:
+        if self._terms is None:  # pragma: nocover
             raise ValueError("Terms not set!")
         return self._terms
 
@@ -97,7 +97,7 @@ class ContractApiDialogue(BaseContractApiDialogue):
 class ContractApiDialogues(Model, BaseContractApiDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -156,7 +156,7 @@ class LedgerApiDialogue(BaseLedgerApiDialogue):
     @property
     def associated_signing_dialogue(self) -> "SigningDialogue":
         """Get the associated signing dialogue."""
-        if self._associated_signing_dialogue is None:
+        if self._associated_signing_dialogue is None:  # pragma: nocover
             raise ValueError("Associated signing dialogue not set!")
         return self._associated_signing_dialogue
 
@@ -175,7 +175,7 @@ class LedgerApiDialogue(BaseLedgerApiDialogue):
 class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -235,7 +235,7 @@ class SigningDialogue(BaseSigningDialogue):
     @property
     def associated_contract_api_dialogue(self) -> ContractApiDialogue:
         """Get the associated contract api dialogue."""
-        if self._associated_contract_api_dialogue is None:
+        if self._associated_contract_api_dialogue is None:  # pragma: nocover
             raise ValueError("Associated contract api dialogue not set!")
         return self._associated_contract_api_dialogue
 
@@ -254,7 +254,7 @@ class SigningDialogue(BaseSigningDialogue):
 class SigningDialogues(Model, BaseSigningDialogues):
     """This class keeps track of all oef_search dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 

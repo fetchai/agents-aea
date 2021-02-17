@@ -6,7 +6,7 @@ The framework provides one default connection, called `stub`. It implements an I
 
 An `AEA` can interact with multiple connections at the same time via the <a href="../api/connections/base#connection-objects">`Multiplexer`</a>.
 
-<img src="../assets/multiplexer.jpg" alt="Multiplexer of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:50%;">
+<img src="../assets/multiplexer.png" alt="Multiplexer of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:50%;">
 
 It maintains an <a href="../api/multiplexer#inbox-objects">`InBox`</a> and <a href="../api/multiplexer#outbox-objects">`OutBox`</a>, which are, respectively, queues for incoming and outgoing envelopes and their contained messages.
 
@@ -43,7 +43,7 @@ The developer needs to implement four public coroutines:
 - The `receive` coroutine is continuously called by the AEA framework. It either returns `None` or an envelope. The `receive` coroutine must implement the logic of data being received by the agent and if necessary its translation into a relevant protocol.
 
 
-When developing your own connection you might benefit from inspecting the `fetchai/http_server:0.15.0` and `fetchai/http_client:0.16.0` connections to gain more familiarity and inspiration.
+When developing your own connection you might benefit from inspecting the `fetchai/http_server:0.16.0` and `fetchai/http_client:0.17.0` connections to gain more familiarity and inspiration.
 
 ### Configuration options
 

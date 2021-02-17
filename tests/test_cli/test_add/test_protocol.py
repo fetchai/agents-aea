@@ -32,7 +32,7 @@ from jsonschema import ValidationError
 import aea.configurations.base
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE, PublicId
-from aea.test_tools.test_cases import AEATestCaseEmpty
+from aea.test_tools.test_cases import AEATestCaseEmpty, AEATestCaseEmptyFlaky
 
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.gym.message import GymMessage
@@ -453,7 +453,7 @@ class TestAddProtocolFailsWhenDirectoryAlreadyExists:
             pass
 
 
-class TestAddProtocolFromRemoteRegistry(AEATestCaseEmpty):
+class TestAddProtocolFromRemoteRegistry(AEATestCaseEmptyFlaky):
     """Test case for add protocol from Registry command."""
 
     IS_LOCAL = False

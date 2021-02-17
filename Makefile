@@ -47,7 +47,7 @@ lint:
 
 .PHONY: pylint
 pylint:
-	pylint aea benchmark packages scripts examples/*
+	pylint -j4 aea benchmark packages scripts examples/*
 
 .PHONY: security
 security:
@@ -57,13 +57,14 @@ security:
 
 .PHONY: static
 static:
-	mypy aea benchmark examples packages scripts tests
+	mypy aea benchmark examples packages scripts --disallow-untyped-defs
+	mypy tests
 
 .PHONY: package_checks
 package_checks:
 	python scripts/generate_ipfs_hashes.py --check
 	python scripts/check_package_versions_in_docs.py
-	python scripts/check_package_dependencies.py
+	python scripts/check_packages.py
 
 .PHONY: docs
 docs:
@@ -74,7 +75,7 @@ common_checks: security misc_checks lint static docs
 
 .PHONY: test
 test:
-	pytest -rfE --doctest-modules aea packages/fetchai/protocols packages/fetchai/connections packages/fetchai/skills/confirmation_aw1 packages/fetchai/skills/confirmation_aw2 packages/fetchai/skills/confirmation_aw3 packages/fetchai/skills/generic_buyer packages/fetchai/skills/generic_seller packages/fetchai/skills/tac_control packages/fetchai/skills/tac_control_contract packages/fetchai/skills/tac_participation packages/fetchai/skills/tac_negotiation packages/fetchai/skills/simple_buyer packages/fetchai/skills/simple_data_request packages/fetchai/skills/simple_seller packages/fetchai/skills/simple_service_registration packages/fetchai/skills/simple_service_search tests/ --cov-report=html --cov-report=xml --cov-report=term-missing --cov-report=term --cov=aea --cov=packages/fetchai/protocols --cov=packages/fetchai/connections --cov=packages/fetchai/skills/confirmation_aw1 --cov=packages/fetchai/skills/confirmation_aw2 --cov=packages/fetchai/skills/confirmation_aw3 --cov=packages/fetchai/skills/generic_buyer --cov=packages/fetchai/skills/generic_seller --cov=packages/fetchai/skills/tac_control --cov=packages/fetchai/skills/tac_control_contract --cov=packages/fetchai/skills/tac_participation --cov=packages/fetchai/skills/tac_negotiation --cov=packages/fetchai/skills/simple_buyer --cov=packages/fetchai/skills/simple_data_request --cov=packages/fetchai/skills/simple_seller --cov=packages/fetchai/skills/simple_service_registration --cov=packages/fetchai/skills/simple_service_search --cov-config=.coveragerc
+	pytest -rfE --doctest-modules aea packages/fetchai/protocols packages/fetchai/connections packages/fetchai/skills/confirmation_aw1 packages/fetchai/skills/confirmation_aw2 packages/fetchai/skills/confirmation_aw3 packages/fetchai/skills/generic_buyer packages/fetchai/skills/generic_seller packages/fetchai/skills/tac_control packages/fetchai/skills/tac_control_contract packages/fetchai/skills/tac_participation packages/fetchai/skills/tac_negotiation packages/fetchai/skills/simple_buyer packages/fetchai/skills/simple_data_request packages/fetchai/skills/simple_seller packages/fetchai/skills/simple_service_registration packages/fetchai/skills/simple_service_search packages/fetchai/skills/coin_price packages/fetchai/skills/fetch_beacon packages/fetchai/skills/simple_oracle packages/fetchai/skills/simple_oracle_client tests/ --cov-report=html --cov-report=xml --cov-report=term-missing --cov-report=term --cov=aea --cov=packages/fetchai/protocols --cov=packages/fetchai/connections --cov=packages/fetchai/skills/confirmation_aw1 --cov=packages/fetchai/skills/confirmation_aw2 --cov=packages/fetchai/skills/confirmation_aw3 --cov=packages/fetchai/skills/generic_buyer --cov=packages/fetchai/skills/generic_seller --cov=packages/fetchai/skills/tac_control --cov=packages/fetchai/skills/tac_control_contract --cov=packages/fetchai/skills/tac_participation --cov=packages/fetchai/skills/tac_negotiation --cov=packages/fetchai/skills/simple_buyer --cov=packages/fetchai/skills/simple_data_request --cov=packages/fetchai/skills/simple_seller --cov=packages/fetchai/skills/simple_service_registration --cov=packages/fetchai/skills/simple_service_search --cov=packages/fetchai/skills/coin_price --cov=packages/fetchai/skills/fetch_beacon --cov=packages/fetchai/skills/simple_oracle --cov=packages/fetchai/skills/simple_oracle_client --cov-config=.coveragerc
 	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
 
 .PHONY: test-sub
@@ -84,7 +85,7 @@ test-sub:
 
 .PHONY: test-sub-p
 test-sub-p:
-	pytest -rfE --doctest-modules aea packages/fetchai/connections packages/fetchai/protocols packages/fetchai/skills/confirmation_aw1 packages/fetchai/skills/confirmation_aw2 packages/fetchai/skills/confirmation_aw3 packages/fetchai/skills/generic_buyer packages/fetchai/skills/generic_seller packages/fetchai/skills/tac_control packages/fetchai/skills/tac_control_contract packages/fetchai/skills/tac_participation packages/fetchai/skills/tac_negotiation packages/fetchai/skills/simple_buyer packages/fetchai/skills/simple_data_request packages/fetchai/skills/simple_seller packages/fetchai/skills/simple_service_registration packages/fetchai/skills/simple_service_search tests/test_packages/test_$(tdir) --cov=packages.fetchai.$(dir) --cov-report=html --cov-report=xml --cov-report=term-missing --cov-report=term  --cov-config=.coveragerc
+	pytest -rfE --doctest-modules aea packages/fetchai/connections packages/fetchai/protocols packages/fetchai/skills/confirmation_aw1 packages/fetchai/skills/confirmation_aw2 packages/fetchai/skills/confirmation_aw3 packages/fetchai/skills/generic_buyer packages/fetchai/skills/generic_seller packages/fetchai/skills/tac_control packages/fetchai/skills/tac_control_contract packages/fetchai/skills/tac_participation packages/fetchai/skills/tac_negotiation packages/fetchai/skills/simple_buyer packages/fetchai/skills/simple_data_request packages/fetchai/skills/simple_seller packages/fetchai/skills/simple_service_registration packages/fetchai/skills/simple_service_search packages/fetchai/skills/coin_price packages/fetchai/skills/fetch_beacon packages/fetchai/skills/simple_oracle packages/fetchai/skills/simple_oracle_client tests/test_packages/test_$(tdir) --cov=packages.fetchai.$(dir) --cov-report=html --cov-report=xml --cov-report=term-missing --cov-report=term  --cov-config=.coveragerc
 	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
 
 
@@ -130,9 +131,9 @@ new_env: clean
 		echo "In a virtual environment! Exit first: 'exit'.";\
 	fi
 protolint_install:
-	GO111MODULE=on GOPATH=~/go go get -u -v github.com/yoheimuta/protolint/cmd/protolint@v0.27.0 
+	GO111MODULE=on GOPATH=~/go go get -u -v github.com/yoheimuta/protolint/cmd/protolint@v0.27.0
 protolint:
-	PATH=${PATH}:${GOPATH}/bin/:~/go/bin protolint lint -config_path=./protolint.yaml -fix ./aea/mail ./packages/fetchai/protocols	
+	PATH=${PATH}:${GOPATH}/bin/:~/go/bin protolint lint -config_path=./protolint.yaml -fix ./aea/mail ./packages/fetchai/protocols
 protolint_install_win:
 	powershell -command '$$env:GO111MODULE="on"; go get -u -v github.com/yoheimuta/protolint/cmd/protolint@v0.27.0'
 protolint_win:

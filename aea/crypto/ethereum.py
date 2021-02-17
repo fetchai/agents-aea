@@ -18,27 +18,33 @@
 # ------------------------------------------------------------------------------
 
 """Ethereum module wrapping the public and private key cryptography and ledger api."""
-
 import json
 import logging
+import threading
 import time
 import warnings
 from pathlib import Path
-from typing import Any, BinaryIO, Callable, Dict, Optional, Tuple, Union, cast
+from typing import Any, BinaryIO, Callable, Dict, List, Optional, Tuple, Union, cast
 
+import ipfshttpclient  # noqa: F401 # pylint: disable=unused-import
+import web3._utils.request
 from eth_account import Account
 from eth_account._utils.signing import to_standard_signature_bytes
 from eth_account.datastructures import HexBytes, SignedTransaction
 from eth_account.messages import _hash_eip191_message, encode_defunct
 from eth_keys import keys
+from eth_typing import HexStr
+from lru import LRU  # type: ignore  # pylint: disable=no-name-in-module
 from web3 import HTTPProvider, Web3
 from web3.datastructures import AttributeDict
+from web3.types import TxData, TxParams, TxReceipt
 
 from aea.common import Address, JSONLike
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
 from aea.exceptions import enforce
 from aea.helpers import http_requests as requests
 from aea.helpers.base import try_decorator
+from aea.helpers.io import open_file
 
 
 _default_logger = logging.getLogger(__name__)
@@ -93,7 +99,7 @@ class AttributeDictTranslator:
     """Translator for AttributeDict."""
 
     @classmethod
-    def _remove_hexbytes(cls, value):
+    def _remove_hexbytes(cls, value: Any) -> Any:
         """Process value to remove hexbytes."""
         if value is None:
             return value
@@ -110,7 +116,7 @@ class AttributeDictTranslator:
         )
 
     @classmethod
-    def _add_hexbytes(cls, value):
+    def _add_hexbytes(cls, value: Any) -> Any:
         """Process value to add hexbytes."""
         if value is None:
             return value
@@ -131,7 +137,7 @@ class AttributeDictTranslator:
         )
 
     @classmethod
-    def _process_list(cls, li: list, callable_name: Callable):
+    def _process_list(cls, li: list, callable_name: Callable) -> List:
         """Simplify a list with process value."""
         return [callable_name(el) for el in li]
 
@@ -143,7 +149,7 @@ class AttributeDictTranslator:
         raise ValueError("Key must be string.")  # pragma: nocover
 
     @classmethod
-    def to_dict(cls, attr_dict: AttributeDict) -> JSONLike:
+    def to_dict(cls, attr_dict: Union[AttributeDict, TxReceipt, TxData]) -> JSONLike:
         """Simplify to dict."""
         if not isinstance(attr_dict, AttributeDict):
             raise ValueError("No AttributeDict provided.")  # pragma: nocover
@@ -208,7 +214,7 @@ class EthereumCrypto(Crypto[Account]):
         return self._address
 
     @classmethod
-    def load_private_key_from_path(cls, file_name) -> Account:
+    def load_private_key_from_path(cls, file_name: str) -> Account:
         """
         Load a private key in hex format from a file.
 
@@ -216,7 +222,7 @@ class EthereumCrypto(Crypto[Account]):
         :return: the Entity.
         """
         path = Path(file_name)
-        with open(path, "r") as key:
+        with open_file(path, "r") as key:
             data = key.read()
             account = Account.from_key(  # pylint: disable=no-value-for-parameter
                 private_key=data
@@ -410,7 +416,7 @@ class EthereumHelper(Helper):
         :param file_path: the file path to the interface
         :return: the interface
         """
-        with open(file_path, "r") as interface_file_ethereum:
+        with open_file(file_path, "r") as interface_file_ethereum:
             contract_interface = json.load(interface_file_ethereum)
         for key in [_ABI, _BYTECODE]:
             if key not in contract_interface:  # pragma: nocover
@@ -423,7 +429,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
 
     identifier = _ETHEREUM
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         """
         Initialize the Ethereum ledger APIs.
 
@@ -447,16 +453,19 @@ class EthereumApi(LedgerApi, EthereumHelper):
     @try_decorator("Unable to retrieve balance: {}", logger_method="warning")
     def _try_get_balance(self, address: Address) -> Optional[int]:
         """Get the balance of a given account."""
-        return self._api.eth.getBalance(address)  # pylint: disable=no-member
+        check_address = self._api.toChecksumAddress(address)
+        return self._api.eth.getBalance(check_address)  # pylint: disable=no-member
 
-    def get_state(self, callable_name: str, *args, **kwargs) -> Optional[JSONLike]:
+    def get_state(
+        self, callable_name: str, *args: Any, **kwargs: Any
+    ) -> Optional[JSONLike]:
         """Call a specified function on the ledger API."""
         response = self._try_get_state(callable_name, *args, **kwargs)
         return response
 
     @try_decorator("Unable to get state: {}", logger_method="warning")
     def _try_get_state(  # pylint: disable=unused-argument
-        self, callable_name: str, *args, **kwargs
+        self, callable_name: str, *args: Any, **kwargs: Any
     ) -> Optional[JSONLike]:
         """Try to call a function on the ledger API."""
 
@@ -483,7 +492,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         tx_nonce: str,
         chain_id: Optional[int] = None,
         gas_price: Optional[str] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Optional[JSONLike]:
         """
         Submit a transfer transaction to the ledger.
@@ -545,7 +554,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
     def _try_get_gas_estimate(self, transaction: JSONLike) -> Optional[int]:
         """Try get the gas estimate."""
         gas_estimate = self._api.eth.estimateGas(  # pylint: disable=no-member
-            transaction=AttributeDictTranslator.from_dict(transaction)
+            transaction=cast(TxParams, AttributeDictTranslator.from_dict(transaction))
         )
         return gas_estimate
 
@@ -598,7 +607,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :return: the tx receipt, if present
         """
         tx_receipt = self._api.eth.getTransactionReceipt(  # pylint: disable=no-member
-            tx_digest
+            cast(HexStr, tx_digest)
         )
         return AttributeDictTranslator.to_dict(tx_receipt)
 
@@ -620,7 +629,9 @@ class EthereumApi(LedgerApi, EthereumHelper):
         :param tx_digest: the transaction digest.
         :return: the tx, if found
         """
-        tx = self._api.eth.getTransaction(tx_digest)  # pylint: disable=no-member
+        tx = self._api.eth.getTransaction(
+            cast(HexStr, tx_digest)
+        )  # pylint: disable=no-member
         return AttributeDictTranslator.to_dict(tx)
 
     def get_contract_instance(
@@ -652,7 +663,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
         deployer_address: Address,
         value: int = 0,
         gas: int = 0,
-        **kwargs,
+        **kwargs: Any,
     ) -> Optional[JSONLike]:
         """
         Get the transaction to deploy the smart contract.
@@ -742,3 +753,44 @@ class EthereumFaucetApi(FaucetApi):
                     response.status_code, response_dict.get("message")
                 )
             )  # pragma: no cover
+
+
+class LruLockWrapper:
+    """Wrapper for LRU with threading.Lock."""
+
+    def __init__(self, lru: LRU) -> None:
+        """Init wrapper."""
+        self.lru = lru
+        self.lock = threading.Lock()
+
+    def __getitem__(self, *args: Any, **kwargs: Any) -> Any:
+        """Get item"""
+        with self.lock:
+            return self.lru.__getitem__(*args, **kwargs)
+
+    def __setitem__(self, *args: Any, **kwargs: Any) -> Any:
+        """Set item."""
+        with self.lock:
+            return self.lru.__setitem__(*args, **kwargs)
+
+    def __contains__(self, *args: Any, **kwargs: Any) -> Any:
+        """Contain item."""
+        with self.lock:
+            return self.lru.__contains__(*args, **kwargs)
+
+    def __delitem__(self, *args: Any, **kwargs: Any) -> Any:
+        """Del item."""
+        with self.lock:
+            return self.lru.__delitem__(*args, **kwargs)
+
+
+def set_wrapper_for_web3py_session_cache() -> None:
+    """Wrap web3py session cache with threading.Lock."""
+
+    # pylint: disable=protected-access
+    web3._utils.request._session_cache = LruLockWrapper(
+        web3._utils.request._session_cache
+    )
+
+
+set_wrapper_for_web3py_session_cache()

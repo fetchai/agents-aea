@@ -24,9 +24,10 @@ from typing import Dict, List
 from aea.configurations.base import AgentConfig
 from aea.configurations.loader import ConfigLoader
 from aea.exceptions import enforce
+from aea.helpers.io import open_file
 
 
-def format_items(items):
+def format_items(items: List[Dict]) -> str:
     """Format list of items (protocols/connections) to a string for CLI output."""
     list_str = ""
     for item in items:
@@ -51,7 +52,7 @@ def format_items(items):
 
 def retrieve_details(name: str, loader: ConfigLoader, config_filepath: str) -> Dict:
     """Return description of a protocol, skill, connection."""
-    with open(str(config_filepath)) as fp:
+    with open_file(str(config_filepath)) as fp:
         config = loader.load(fp)
     item_name = config.agent_name if isinstance(config, AgentConfig) else config.name
     enforce(item_name == name, "Item names do not match!")

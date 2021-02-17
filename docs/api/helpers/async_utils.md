@@ -25,7 +25,7 @@ Awaitable state.
 #### `__`init`__`
 
 ```python
- | __init__(initial_state: Any = None, states_enum: Optional[Container[Any]] = None)
+ | __init__(initial_state: Any = None, states_enum: Optional[Container[Any]] = None) -> None
 ```
 
 Init async state.
@@ -122,7 +122,7 @@ Used for periodic function run using asyncio.
 #### `__`init`__`
 
 ```python
- | __init__(callback: Callable, period: float, start_at: Optional[datetime.datetime] = None, exception_callback: Optional[Callable[[Callable, Exception], None]] = None, loop: Optional[AbstractEventLoop] = None)
+ | __init__(callback: Callable, period: float, start_at: Optional[datetime.datetime] = None, exception_callback: Optional[Callable[[Callable, Exception], None]] = None, loop: Optional[AbstractEventLoop] = None) -> None
 ```
 
 Init periodic caller.
@@ -222,7 +222,7 @@ Util to run thread with event loop and execute coroutines inside.
 #### `__`init`__`
 
 ```python
- | __init__(loop=None) -> None
+ | __init__(loop: Optional[AbstractEventLoop] = None) -> None
 ```
 
 Init threaded runner.
@@ -271,33 +271,6 @@ Run a coroutine inside the event loop.
 
 Stop event loop in thread.
 
-<a name="aea.helpers.async_utils.AwaitableProc"></a>
-## AwaitableProc Objects
-
-```python
-class AwaitableProc()
-```
-
-Async-friendly subprocess.Popen.
-
-<a name="aea.helpers.async_utils.AwaitableProc.__init__"></a>
-#### `__`init`__`
-
-```python
- | __init__(*args, **kwargs)
-```
-
-Initialise awaitable proc.
-
-<a name="aea.helpers.async_utils.AwaitableProc.start"></a>
-#### start
-
-```python
- | async start()
-```
-
-Start the subprocess.
-
 <a name="aea.helpers.async_utils.ItemGetter"></a>
 ## ItemGetter Objects
 
@@ -342,7 +315,7 @@ ItemGetter with handler passed.
 #### `__`init`__`
 
 ```python
- | __init__(getters: List[Tuple[Callable[[Any], None], Callable]])
+ | __init__(getters: List[Tuple[Callable[[Any], None], Callable]]) -> None
 ```
 
 Init HandlerItemGetter.
@@ -447,7 +420,7 @@ Stop runnable.
 #### start`_`and`_`wait`_`completed
 
 ```python
- | start_and_wait_completed(*args, **kwargs) -> Awaitable
+ | start_and_wait_completed(*args: Any, **kwargs: Any) -> Awaitable
 ```
 
 Alias for start and wait methods.

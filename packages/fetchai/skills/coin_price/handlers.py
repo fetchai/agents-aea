@@ -20,7 +20,7 @@
 """This package contains handlers for the coin_price skill."""
 
 import json
-from typing import Optional, cast
+from typing import Any, Optional, cast
 
 from aea.configurations.base import PublicId
 from aea.mail.base import EnvelopeContext
@@ -42,11 +42,10 @@ class HttpHandler(Handler):
 
     SUPPORTED_PROTOCOL = HttpMessage.protocol_id
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         """Initialize the handler."""
         super().__init__(**kwargs)
 
-        self.handled_message = None
         self._http_server_id = None  # type: Optional[PublicId]
 
     def setup(self) -> None:
@@ -80,7 +79,6 @@ class HttpHandler(Handler):
             self._handle_unidentified_dialogue(message)
             return
 
-        self.handled_message = message
         if (
             message.performative == HttpMessage.Performative.RESPONSE
             and message.status_code == 200
@@ -90,7 +88,7 @@ class HttpHandler(Handler):
             self._handle_request(message, http_dialogue)
         else:
             self.context.logger.info(
-                "got unexpected http message: code = " + str(message.status_code)
+                f"got unexpected http message: code = {message.status_code}"
             )
 
     def _handle_response(self, http_msg: HttpMessage) -> None:
@@ -110,11 +108,11 @@ class HttpHandler(Handler):
             self.context.logger.info("failed to get price: unexpected result")
         else:
             price = price_result.get(model.currency, None)
-            value = int(price * (10 ** model.decimals))
 
             if price is None:
                 self.context.logger.info("failed to get price: no price listed")
             else:
+                value = int(price * (10 ** model.decimals))
                 oracle_data = {
                     "value": value,
                     "decimals": model.decimals,
@@ -124,8 +122,9 @@ class HttpHandler(Handler):
                     f"{model.coin_id} price = {price} {model.currency}"
                 )
                 if self.context.prometheus_dialogues.enabled:
+                    metric_name = "num_retrievals"
                     self.context.behaviours.coin_price_behaviour.update_prometheus_metric(
-                        "num_retrievals", "inc", 1.0, {}
+                        metric_name, "inc", 1.0, {}
                     )
 
     def _handle_request(
@@ -148,7 +147,7 @@ class HttpHandler(Handler):
             if http_msg.method == "get":
                 self._handle_get(http_msg, http_dialogue)
             elif http_msg.method == "post":
-                self._handle_post(http_msg, http_dialogue)
+                self.context.logger.info("method 'post' is not supported.")
         else:
             self.context.logger.info("http server is not enabled.")
 
@@ -176,29 +175,10 @@ class HttpHandler(Handler):
         self.context.outbox.put_message(message=http_response, context=envelope_context)
 
         if self.context.prometheus_dialogues.enabled:
+            metric_name = "num_requests"
             self.context.behaviours.coin_price_behaviour.update_prometheus_metric(
-                "num_requests", "inc", 1.0, {}
+                metric_name, "inc", 1.0, {}
             )
-
-    def _handle_post(self, http_msg: HttpMessage, http_dialogue: HttpDialogue) -> None:
-        """
-        Handle a Http request of verb POST.
-
-        :param http_msg: the http message
-        :param http_dialogue: the http dialogue
-        :return: None
-        """
-        http_response = http_dialogue.reply(
-            performative=HttpMessage.Performative.RESPONSE,
-            target_message=http_msg,
-            version=http_msg.version,
-            status_code=200,
-            status_text="Success",
-            headers=http_msg.headers,
-            body=b"",
-        )
-        self.context.logger.info("responding with: {}".format(http_response))
-        self.context.outbox.put_message(message=http_response)
 
     def _handle_unidentified_dialogue(self, msg: Message) -> None:
         """
@@ -226,12 +206,6 @@ class PrometheusHandler(Handler):
 
     SUPPORTED_PROTOCOL = PrometheusMessage.protocol_id
 
-    def __init__(self, **kwargs):
-        """Initialize the handler."""
-        super().__init__(**kwargs)
-
-        self.handled_message = None
-
     def setup(self) -> None:
         """Set up the handler."""
         self.context.logger.info("setting up PrometheusHandler")
@@ -257,12 +231,11 @@ class PrometheusHandler(Handler):
             self._handle_unidentified_dialogue(message)
             return
 
-        self.handled_message = message
         if message.performative == PrometheusMessage.Performative.RESPONSE:
             self.context.logger.debug(
                 f"Prometheus response ({message.code}): {message.message}"
             )
-        else:
+        else:  # pragma: nocover
             self.context.logger.debug(
                 f"got unexpected prometheus message: Performative = {PrometheusMessage.Performative}"
             )

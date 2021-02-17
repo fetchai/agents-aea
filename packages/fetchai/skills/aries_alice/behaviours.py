@@ -20,7 +20,7 @@
 """This package contains the behaviour of a generic seller AEA."""
 
 import json
-from typing import Dict, cast
+from typing import Any, Dict, cast
 
 from aea.skills.behaviours import TickerBehaviour
 
@@ -42,7 +42,7 @@ DEFAULT_SERVICES_INTERVAL = 60.0
 class AliceBehaviour(TickerBehaviour):
     """This class implements a behaviour."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialise the behaviour."""
 
         services_interval = kwargs.pop(

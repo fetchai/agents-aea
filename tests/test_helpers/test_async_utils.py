@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests for AsyncFriendlyQueue."""
 import asyncio
+import time
 from concurrent.futures._base import CancelledError
 from contextlib import suppress
 from threading import Thread
@@ -26,7 +27,6 @@ import pytest
 
 from aea.helpers.async_utils import (
     AsyncState,
-    AwaitableProc,
     HandlerItemGetter,
     PeriodicCaller,
     Runnable,
@@ -240,17 +240,6 @@ async def test_handler_item_getter():
         handler, item = await asyncio.wait_for(getter.get(), timeout=1)
 
 
-@pytest.mark.asyncio
-async def test_libp2pconnection_awaitable_proc_cancelled():
-    """Test awaitable proc."""
-    proc = AwaitableProc(["sleep", "100"], shell=False)
-    proc_task = asyncio.ensure_future(proc.start())
-    await asyncio.sleep(0.1)
-    proc_task.cancel()
-    with suppress(asyncio.CancelledError):
-        await proc_task
-
-
 class RunAndExit(Runnable):
     """Test class."""
 
@@ -434,3 +423,16 @@ class TestRunnable:
         run.stop()
         run.stop()
         await run.wait_completed()
+
+    def test_stop_before_run(self):
+        """Test stop before run."""
+        # for pydocstyle
+        class TestRun(Runnable):
+            async def run(self):
+                await asyncio.sleep(0.1)
+
+        run = TestRun()
+        run.stop()
+        run.start()
+        time.sleep(1)
+        assert not run.is_running

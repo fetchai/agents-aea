@@ -19,7 +19,6 @@
 """This module contains tests for aea runtime."""
 import asyncio
 import os
-import time
 from pathlib import Path
 from typing import Type
 from unittest.mock import patch
@@ -80,11 +79,11 @@ class TestAsyncRuntime:
         ):
             self.runtime.start()
             wait_for_condition(lambda: self.runtime.is_running, timeout=20)
-            time.sleep(1)
-            assert self.runtime.is_stopped
+            # started and should be stopped after the first act called
+            wait_for_condition(lambda: self.runtime.is_stopped, timeout=20)
 
         with pytest.raises(ValueError, match="expected"):
-            self.runtime.wait_completed(timeout=10, sync=True)
+            self.runtime.wait_completed(timeout=20, sync=True)
 
     def test_double_start(self):
         """Test runtime double start do nothing."""
@@ -131,7 +130,7 @@ class TestThreadedRuntime(TestAsyncRuntime):
     def test_error_state(self):
         """Test runtime fails on start."""
         with patch.object(
-            self.runtime.main_loop, "start", side_effect=ValueError("oops")
+            self.runtime.agent_loop, "start", side_effect=ValueError("oops")
         ):
             with pytest.raises(ValueError, match="oops"):
                 self.runtime.start_and_wait_completed(sync=True)

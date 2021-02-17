@@ -20,7 +20,7 @@
 """This package contains a the behaviours."""
 
 import datetime
-from typing import Optional, cast
+from typing import Any, Optional, cast
 
 from aea.helpers.search.models import Description
 from aea.skills.base import Behaviour
@@ -38,7 +38,7 @@ from packages.fetchai.skills.tac_control.parameters import Parameters
 class TacBehaviour(Behaviour):
     """This class implements the TAC control behaviour."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         """Instantiate the behaviour."""
         super().__init__(**kwargs)
         self._registered_description = None  # type: Optional[Description]
@@ -173,7 +173,7 @@ class TacBehaviour(Behaviour):
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("unregistering agent from SOEF.")
 
-    def _start_tac(self, game: Game):
+    def _start_tac(self, game: Game) -> None:
         """Create a game and send the game configuration to every registered agent."""
         self.context.logger.info(
             "started competition:\n{}".format(game.holdings_summary)
@@ -217,7 +217,7 @@ class TacBehaviour(Behaviour):
                 "sending game data to '{}': {}".format(agent_address, str(tac_msg))
             )
 
-    def _cancel_tac(self, game: Game):
+    def _cancel_tac(self, game: Game) -> None:
         """Notify agents that the TAC is cancelled."""
         self.context.logger.info("notifying agents that TAC is cancelled.")
         tac_dialogues = cast(TacDialogues, self.context.tac_dialogues)

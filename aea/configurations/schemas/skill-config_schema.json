@@ -10,9 +10,18 @@
     "type",
     "license",
     "aea_version",
+    "fingerprint",
+    "fingerprint_ignore_patterns",
+    "connections",
     "protocols",
     "contracts",
-    "skills"
+    "skills",
+    "handlers",
+    "behaviours",
+    "models",
+    "dependencies",
+    "description",
+    "is_abstract"
   ],
   "properties": {
     "name": {

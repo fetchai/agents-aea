@@ -20,7 +20,7 @@
 """This module contains contract_api's message definition."""
 
 import logging
-from typing import Optional, Set, Tuple, cast
+from typing import Any, Optional, Set, Tuple, cast
 
 from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
@@ -46,7 +46,7 @@ DEFAULT_BODY_SIZE = 4
 class ContractApiMessage(Message):
     """A protocol for contract APIs requests and responses."""
 
-    protocol_id = PublicId.from_str("fetchai/contract_api:0.10.0")
+    protocol_id = PublicId.from_str("fetchai/contract_api:0.11.0")
     protocol_specification_id = PublicId.from_str("fetchai/contract_api:0.1.0")
 
     Kwargs = CustomKwargs
@@ -69,7 +69,7 @@ class ContractApiMessage(Message):
         RAW_TRANSACTION = "raw_transaction"
         STATE = "state"
 
-        def __str__(self):
+        def __str__(self) -> str:
             """Get the string representation."""
             return str(self.value)
 
@@ -110,7 +110,7 @@ class ContractApiMessage(Message):
         dialogue_reference: Tuple[str, str] = ("", ""),
         message_id: int = 1,
         target: int = 0,
-        **kwargs,
+        **kwargs: Any,
     ):
         """
         Initialise an instance of ContractApiMessage.

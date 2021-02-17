@@ -20,7 +20,7 @@
 """This module contains the strategy class (extended from the generic_seller skill)."""
 
 import json
-from typing import Dict
+from typing import Any, Dict
 
 from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 
@@ -28,7 +28,7 @@ from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 class Strategy(GenericStrategy):
     """This class defines a strategy for the agent."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize the strategy of the agent.
 

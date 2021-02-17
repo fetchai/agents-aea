@@ -16,7 +16,7 @@ Base class for a crypto object.
 #### `__`init`__`
 
 ```python
- | __init__(private_key_path: Optional[str] = None, **kwargs)
+ | __init__(private_key_path: Optional[str] = None, **kwargs: Any) -> None
 ```
 
 Initialize the crypto object.
@@ -413,7 +413,7 @@ the balance.
 
 ```python
  | @abstractmethod
- | get_state(callable_name: str, *args, **kwargs) -> Optional[JSONLike]
+ | get_state(callable_name: str, *args: Any, **kwargs: Any) -> Optional[JSONLike]
 ```
 
 Call a specified function on the underlying ledger API.
@@ -435,7 +435,7 @@ the ledger API response.
 
 ```python
  | @abstractmethod
- | get_transfer_transaction(sender_address: Address, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, **kwargs, ,) -> Optional[JSONLike]
+ | get_transfer_transaction(sender_address: Address, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, **kwargs: Any, ,) -> Optional[JSONLike]
 ```
 
 Submit a transfer transaction to the ledger.
@@ -528,7 +528,7 @@ the contract instance
 
 ```python
  | @abstractmethod
- | get_deploy_transaction(contract_interface: Dict[str, str], deployer_address: Address, **kwargs, ,) -> Optional[JSONLike]
+ | get_deploy_transaction(contract_interface: Dict[str, str], deployer_address: Address, **kwargs: Any, ,) -> Optional[JSONLike]
 ```
 
 Get the transaction to deploy the smart contract.

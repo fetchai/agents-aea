@@ -19,6 +19,8 @@
 
 """This module contains the strategy class."""
 
+from typing import Any
+
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.exceptions import enforce
 from aea.helpers.transaction.base import Terms
@@ -32,7 +34,7 @@ MAX_BLOCK_HEIGHT = 1000000000000000000
 class Strategy(Model):
     """This class defines a strategy for the agent."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize the strategy of the agent."""
         self._ledger_id = kwargs.pop("ledger_id", DEFAULT_LEDGER_ID)
         self._contract_address = kwargs.pop("contract_address", None)
@@ -82,7 +84,7 @@ class Strategy(Model):
     @property
     def contract_address(self) -> str:
         """Get the contract address."""
-        if self._contract_address is None:
+        if self._contract_address is None:  # pragma: nocover
             raise ValueError("Contract address not set!")
         return self._contract_address
 
@@ -95,12 +97,12 @@ class Strategy(Model):
     @property
     def erc20_address(self) -> str:
         """Get the erc20 address for token payment."""
-        if self._erc20_address is None:
+        if self._erc20_address is None:  # pragma: nocover
             raise ValueError("ERC20 address not set!")
         return self._erc20_address
 
     @erc20_address.setter
-    def erc20_address(self, erc20_address: str) -> None:
+    def erc20_address(self, erc20_address: str) -> None:  # pragma: nocover
         """Set the erc20 address for token payment."""
         enforce(self._erc20_address is None, "ERC20 address already set!")
         self._erc20_address = erc20_address

@@ -36,6 +36,7 @@ RELATIVE_PATH_STR_LEN = len(RELATIVE_PATH_STR)
 INDEX_FILE_PATH = Path("docs/index.md")
 
 WHITELIST_URL_TO_CODE = {
+    "https://dl.acm.org/doi/10.1145/3212734.3212736": 302,
     "http://soef.fetch.ai:9002": 405,
     "https://golang.org/dl/": 403,
     "https://www.wiley.com/en-gb/An+Introduction+to+MultiAgent+Systems%2C+2nd+Edition-p-9781119959519": 403,
@@ -56,8 +57,8 @@ def is_url_reachable(url: str) -> bool:
         response = requests.head(url, timeout=3)
         if response.status_code == 200:
             return True
-        if response.status_code in [403, 405]:
-            return WHITELIST_URL_TO_CODE.get(url, 404) in [403, 405]
+        if response.status_code in [403, 405, 302]:
+            return WHITELIST_URL_TO_CODE.get(url, 404) in [403, 405, 302]
         return False
     except Exception as e:  # pylint: disable=broad-except
         print(e)
@@ -142,7 +143,7 @@ def is_external_url(url: str) -> bool:
     return url.startswith("https://") or url.startswith("http://")
 
 
-def validate_external_url(url, file):
+def validate_external_url(url: str, file: Path) -> None:
     """
     Validate external URL.
 
@@ -204,7 +205,7 @@ def _checks_image(file: Path, regex: Pattern = IMAGE_PATTERN) -> None:
         raise ValueError("Image path={} in file={} not `.png` or `.jpg`!")
 
 
-def _checks_target_blank(file: Path):
+def _checks_target_blank(file: Path) -> None:
     """
     Check target blank.
 

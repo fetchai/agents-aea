@@ -39,7 +39,7 @@ None
 #### load`_`env`_`file
 
 ```python
-load_env_file(env_file: str)
+load_env_file(env_file: str) -> None
 ```
 
 Load the content of the environment file into the process environment.
@@ -122,7 +122,7 @@ attribute to implement a different behaviour.
 #### `__`init`__`
 
 ```python
- | __init__(seq)
+ | __init__(seq: Union[UserString, str]) -> None
 ```
 
 Initialize a regex constrained string.
@@ -162,7 +162,7 @@ ValueError: Value  does not match the regular expression re.compile('[a-zA-Z_][a
 
 ```python
 @contextlib.contextmanager
-cd(path)
+cd(path: PathLike) -> Generator
 ```
 
 Change working directory temporarily.
@@ -192,7 +192,7 @@ callable to write log with
 #### try`_`decorator
 
 ```python
-try_decorator(error_message: str, default_return=None, logger_method="error")
+try_decorator(error_message: str, default_return: Callable = None, logger_method: Any = "error") -> Callable
 ```
 
 Run function, log and return default value on exception.
@@ -218,7 +218,7 @@ Exception for retry decorator.
 #### retry`_`decorator
 
 ```python
-retry_decorator(number_of_retries: int, error_message: str, delay: float = 0, logger_method="error")
+retry_decorator(number_of_retries: int, error_message: str, delay: float = 0, logger_method: str = "error") -> Callable
 ```
 
 Run function with several attempts.
@@ -237,7 +237,7 @@ Does not support async or coroutines!
 
 ```python
 @contextlib.contextmanager
-exception_log_and_reraise(log_method: Callable, message: str)
+exception_log_and_reraise(log_method: Callable, message: str) -> Generator
 ```
 
 Run code in context to log and re raise exception.
@@ -325,7 +325,7 @@ Cached property from python3.8 functools.
 #### `__`init`__`
 
 ```python
- | __init__(func)
+ | __init__(func: Callable) -> None
 ```
 
 Init cached property.
@@ -334,7 +334,7 @@ Init cached property.
 #### `__`set`_`name`__`
 
 ```python
- | __set_name__(_, name)
+ | __set_name__(_: Any, name: Any) -> None
 ```
 
 Set name.
@@ -343,7 +343,7 @@ Set name.
 #### `__`get`__`
 
 ```python
- | __get__(instance, _=None)
+ | __get__(instance: Any, _: Optional[Any] = None) -> Any
 ```
 
 Get instance.
@@ -388,7 +388,7 @@ Certificate request for proof of representation.
 #### `__`init`__`
 
 ```python
- | __init__(public_key: str, identifier: SimpleIdOrStr, ledger_id: SimpleIdOrStr, not_before: str, not_after: str, save_path: str)
+ | __init__(public_key: str, identifier: SimpleIdOrStr, ledger_id: SimpleIdOrStr, not_before: str, not_after: str, save_path: str) -> None
 ```
 
 Initialize the certificate request.
@@ -493,7 +493,30 @@ Get the not_after field.
  | save_path() -> Path
 ```
 
-Get the save_path
+Get the save path for the certificate.
+
+Note: if the path is *not* absolute, then
+the actual save path might depend on the context.
+
+<a name="aea.helpers.base.CertRequest.get_absolute_save_path"></a>
+#### get`_`absolute`_`save`_`path
+
+```python
+ | get_absolute_save_path(path_prefix: Optional[PathLike] = None) -> Path
+```
+
+Get the absolute save path.
+
+If save_path is an absolute path, then the prefix is ignored.
+Otherwise, the path prefix is prepended.
+
+**Arguments**:
+
+- `path_prefix`: the (absolute) path to prepend to the save path.
+
+**Returns**:
+
+the actual save path.
 
 <a name="aea.helpers.base.CertRequest.public_key_or_identifier"></a>
 #### public`_`key`_`or`_`identifier
@@ -518,10 +541,18 @@ Get the message to sign.
 #### get`_`signature
 
 ```python
- | get_signature() -> str
+ | get_signature(path_prefix: Optional[PathLike] = None) -> str
 ```
 
 Get signature from save_path.
+
+**Arguments**:
+
+- `path_prefix`: the path prefix to be prependend to save_path. Defaults to cwd.
+
+**Returns**:
+
+the signature.
 
 <a name="aea.helpers.base.CertRequest.json"></a>
 #### json
@@ -547,7 +578,7 @@ Compute the JSON representation.
 #### `__`eq`__`
 
 ```python
- | __eq__(other)
+ | __eq__(other: Any) -> bool
 ```
 
 Check equality.
@@ -577,7 +608,7 @@ the specifier set
 #### decorator`_`with`_`optional`_`params
 
 ```python
-decorator_with_optional_params(decorator)
+decorator_with_optional_params(decorator: Callable) -> Callable
 ```
 
 Make a decorator usable either with or without parameters.
@@ -599,8 +630,26 @@ def myfunction():
 #### delete`_`directory`_`contents
 
 ```python
-delete_directory_contents(directory: Path)
+delete_directory_contents(directory: Path) -> None
 ```
 
 Delete the content of a directory, without deleting it.
+
+<a name="aea.helpers.base.prepend_if_not_absolute"></a>
+#### prepend`_`if`_`not`_`absolute
+
+```python
+prepend_if_not_absolute(path: PathLike, prefix: PathLike) -> PathLike
+```
+
+Prepend a path with a prefix, but only if not absolute
+
+**Arguments**:
+
+- `path`: the path to process.
+- `prefix`: the path prefix.
+
+**Returns**:
+
+the same path if absolute, else the prepended path.
 

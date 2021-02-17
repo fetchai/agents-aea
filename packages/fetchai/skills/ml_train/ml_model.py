@@ -21,6 +21,7 @@
 import threading
 from pathlib import Path
 from queue import Queue
+from typing import Any
 
 import tensorflow as tf
 
@@ -33,7 +34,7 @@ DEFAULT_MODEL_CONFIG_PATH = str(Path("..", "..", "model.config").resolve())
 class MLModel(Model):
     """This class defines a machine learning model."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize the machine learning model."""
         self._model_config_path = kwargs.pop(
             "model_config_path", DEFAULT_MODEL_CONFIG_PATH
@@ -47,7 +48,7 @@ class MLModel(Model):
         self._lock = threading.RLock()
         self._weights = None
 
-        self.data_queue = Queue()
+        self.data_queue: Queue = Queue()
         self.training_thread = threading.Thread(target=self.training_loop)
 
     def setup(self) -> None:
@@ -58,7 +59,7 @@ class MLModel(Model):
         """
         self.training_thread.start()
 
-    def training_loop(self):
+    def training_loop(self) -> None:
         """
         Start the training loop.
 
@@ -78,7 +79,7 @@ class MLModel(Model):
             self._set_weights(model.get_weights())
 
     @staticmethod
-    def _make_model():
+    def _make_model() -> Any:
         """Make the model."""
         model = tf.keras.Sequential(
             [
@@ -94,17 +95,17 @@ class MLModel(Model):
         )
         return model
 
-    def _get_weights(self):
+    def _get_weights(self) -> Any:
         """Get the weights, thread-safe."""
         with self._lock:
             return self._weights
 
-    def _set_weights(self, weights):
+    def _set_weights(self, weights: Any) -> None:
         """Set the weights, thread-safe."""
         with self._lock:
             self._weights = weights
 
-    def predict(self, *args, **kwargs):
+    def predict(self, *args: Any, **kwargs: Any) -> None:
         """Predict."""
         with self._lock:
             model = self._make_model()
@@ -112,7 +113,7 @@ class MLModel(Model):
             model.set_weights(weights)
             return model.predict(*args, **kwargs)
 
-    def evaluate(self, *args, **kwargs):
+    def evaluate(self, *args: Any, **kwargs: Any) -> None:
         """Predict."""
         with self._lock:
             model = self._make_model()
@@ -120,11 +121,11 @@ class MLModel(Model):
             model.set_weights(weights)
             return model.evaluate(*args, **kwargs)
 
-    def save(self):
+    def save(self) -> None:
         """Save the model weights."""
         raise NotImplementedError
 
-    def update(self, X, y, epochs):
+    def update(self, X: Any, y: Any, epochs: int) -> None:
         """Update the ML model."""
         self.data_queue.put((X, y, dict(epochs=epochs)))
 

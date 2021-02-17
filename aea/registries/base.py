@@ -22,7 +22,7 @@
 import copy
 from abc import ABC, abstractmethod
 from operator import itemgetter
-from typing import Dict, Generic, List, Optional, Set, Tuple, TypeVar, cast
+from typing import Any, Dict, Generic, List, Optional, Set, Tuple, TypeVar, cast
 
 from aea.components.base import Component
 from aea.configurations.base import ComponentId, ComponentType, PublicId
@@ -39,7 +39,7 @@ SkillComponentType = TypeVar("SkillComponentType", Handler, Behaviour, Model)
 class Registry(Generic[ItemId, Item], WithLogger, ABC):
     """This class implements an abstract registry."""
 
-    def __init__(self, agent_name: str = "standalone"):
+    def __init__(self, agent_name: str = "standalone") -> None:
         """
         Initialize the registry.
 
@@ -122,7 +122,7 @@ class PublicIdRegistry(Generic[Item], Registry[PublicId, Item]):
     points to the 'latest' version of a package.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the registry."""
         super().__init__()
         self._public_id_to_item: Dict[PublicId, Item] = {}
@@ -187,7 +187,7 @@ class PublicIdRegistry(Generic[Item], Registry[PublicId, Item]):
 class AgentComponentRegistry(Registry[ComponentId, Component]):
     """This class implements a simple dictionary-based registry for agent components."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Instantiate the registry.
 
@@ -329,7 +329,7 @@ class ComponentRegistry(
 ):
     """This class implements a generic registry for skill components."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Instantiate the registry.
 
@@ -517,7 +517,7 @@ class ComponentRegistry(
 class HandlerRegistry(ComponentRegistry[Handler]):
     """This class implements the handlers registry."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Instantiate the registry.
 

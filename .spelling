@@ -168,6 +168,7 @@ CosmWasm
 Shoham
 Yoti
 PowerShell
+deregisters
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id

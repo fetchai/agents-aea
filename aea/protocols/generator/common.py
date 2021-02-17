@@ -32,6 +32,7 @@ from aea.configurations.constants import (
     PACKAGES,
 )
 from aea.configurations.loader import ConfigLoader
+from aea.helpers.io import open_file
 
 
 SPECIFICATION_PRIMITIVE_TYPES = ["pt:bytes", "pt:int", "pt:float", "pt:bool", "pt:str"]
@@ -346,7 +347,9 @@ def load_protocol_specification(specification_path: str) -> ProtocolSpecificatio
     config_loader = ConfigLoader(
         "protocol-specification_schema.json", ProtocolSpecification
     )
-    protocol_spec = config_loader.load_protocol_specification(open(specification_path))
+    protocol_spec = config_loader.load_protocol_specification(
+        open_file(specification_path)
+    )
     return protocol_spec
 
 
@@ -364,7 +367,7 @@ def _create_protocol_file(
     """
     pathname = os.path.join(path_to_protocol_package, file_name)
 
-    with open(pathname, "w", newline="\n") as file:
+    with open_file(pathname, "w") as file:
         file.write(file_content)
 
 
@@ -394,7 +397,7 @@ def try_run_isort_formatting(path_to_protocol_package: str) -> None:
     )
 
 
-def try_run_protoc(path_to_generated_protocol_package, name) -> None:
+def try_run_protoc(path_to_generated_protocol_package: str, name: str) -> None:
     """
     Run 'protoc' protocol buffer compiler via subprocess.
 
@@ -418,7 +421,7 @@ def try_run_protoc(path_to_generated_protocol_package, name) -> None:
 
 
 def check_protobuf_using_protoc(
-    path_to_generated_protocol_package, name
+    path_to_generated_protocol_package: str, name: str
 ) -> Tuple[bool, str]:
     """
     Check whether a protocol buffer schema file is valid.

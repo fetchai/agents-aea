@@ -21,7 +21,7 @@
 import os
 from collections import OrderedDict
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import click
 from click import Context, Option, UsageError, option
@@ -29,12 +29,15 @@ from click import Context, Option, UsageError, option
 from aea.cli.utils.config import try_to_load_agent_config
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE
+from aea.helpers.io import open_file
 
 
 class ConnectionsOption(click.Option):
     """Click option for the --connections option in 'aea run'."""
 
-    def type_cast_value(self, ctx, value) -> Optional[List[PublicId]]:
+    def type_cast_value(
+        self, ctx: click.Context, value: str
+    ) -> Optional[List[PublicId]]:
         """
         Parse the list of string passed through command line.
 
@@ -48,7 +51,7 @@ class ConnectionsOption(click.Option):
             return None
         try:
 
-            def arg_strip(s):
+            def arg_strip(s: str) -> str:
                 return s.strip(" '\"")
 
             input_connection_ids = [
@@ -68,19 +71,21 @@ class ConnectionsOption(click.Option):
 class PublicIdParameter(click.ParamType):
     """Define a public id parameter for Click applications."""
 
-    def __init__(self, *args, **kwargs):  # pylint: disable=useless-super-delegation
+    def __init__(  # pylint: disable=useless-super-delegation
+        self, *args: Any, **kwargs: Any
+    ) -> None:
         """
         Initialize the Public Id parameter.
 
         Just forwards arguments to parent constructor.
         """
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)  # type: ignore
 
-    def get_metavar(self, param):
+    def get_metavar(self, param: Any) -> str:
         """Return the metavar default for this param if it provides one."""
         return "PUBLIC_ID"
 
-    def convert(self, value, param, ctx):
+    def convert(self, value: str, param: Any, ctx: Optional[click.Context]) -> PublicId:
         """Convert the value. This is not invoked for values that are `None` (the missing value)."""
         try:
             return PublicId.from_str(value)
@@ -91,24 +96,24 @@ class PublicIdParameter(click.ParamType):
 class AgentDirectory(click.Path):
     """A click.Path, but with further checks  applications."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the agent directory parameter."""
         super().__init__(
             exists=True, file_okay=False, dir_okay=True, readable=True, writable=False
         )
 
-    def get_metavar(self, param):
+    def get_metavar(self, param: Any) -> str:
         """Return the metavar default for this param if it provides one."""
         return "AGENT_DIRECTORY"  # pragma: no cover
 
-    def convert(self, value, param, ctx):
+    def convert(self, value: str, param: Any, ctx: click.Context) -> str:  # type: ignore
         """Convert the value. This is not invoked for values that are `None` (the missing value)."""
         cwd = os.getcwd()
         path = Path(value)
         try:
             # check that the target folder is an AEA project.
             os.chdir(path)
-            with open(DEFAULT_AEA_CONFIG_FILE, mode="r", encoding="utf-8") as fp:
+            with open_file(DEFAULT_AEA_CONFIG_FILE, mode="r", encoding="utf-8") as fp:
                 ctx.obj.agent_config = ctx.obj.agent_loader.load(fp)
             try_to_load_agent_config(ctx.obj)
             # everything ok - return the parameter to the command
@@ -124,10 +129,10 @@ class AgentDirectory(click.Path):
 def registry_flag(
     help_local: str = "Use only local registry.",
     help_remote: str = "Use ony remote registry.",
-):
+) -> Callable:
     """Choice of one flag between: '--local/--remote'."""
 
-    def wrapper(f):
+    def wrapper(f: Callable) -> Callable:
         f = option(
             "--local",
             is_flag=True,
@@ -148,7 +153,7 @@ def registry_flag(
     return wrapper
 
 
-def registry_path_option(f):
+def registry_path_option(f: Callable) -> Callable:
     """Add registry path aea option."""
     return option(
         "--registry-path",
@@ -161,7 +166,7 @@ def registry_path_option(f):
 class MutuallyExclusiveOption(Option):
     """Represent a mutually exclusive option."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Initialize the option."""
         self.mutually_exclusive = set(kwargs.pop("mutually_exclusive", []))
         help_ = kwargs.get("help", "")
@@ -173,7 +178,9 @@ class MutuallyExclusiveOption(Option):
             )
         super().__init__(*args, **kwargs)
 
-    def handle_parse_result(self, ctx: Context, opts: Dict[str, Any], args: List[Any]):
+    def handle_parse_result(
+        self, ctx: Context, opts: Dict[str, Any], args: List[Any]
+    ) -> Tuple[Any, List[str]]:
         """
         Handle parse result.
 

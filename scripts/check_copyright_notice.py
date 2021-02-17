@@ -71,16 +71,6 @@ def check_copyright(file: Path) -> bool:
     return re.match(header_regex, content) is not None
 
 
-def parse_args():
-    """Parse arguments."""
-    import argparse  # pylint: disable=import-outside-toplevel
-
-    parser = argparse.ArgumentParser("check_copyright_notice")
-    parser.add_argument(
-        "--directory", type=str, default=".", help="The path to the repository root."
-    )
-
-
 if __name__ == "__main__":
     python_files = itertools.chain(
         Path("aea").glob("**/*.py"),

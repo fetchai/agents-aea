@@ -18,11 +18,15 @@
 #
 # ------------------------------------------------------------------------------
 """
-Check that every package has existing dependencies.
+Run different checks on AEA packages.
+
+Namely:
+- Check that every package has existing dependencies
+- Check that every package has non-empty description
 
 Run this script from the root of the project directory:
 
-    python scripts/check_package_dependencies.py
+    python scripts/check_packages.py
 
 """
 import pprint
@@ -30,7 +34,7 @@ import sys
 from functools import partial
 from itertools import chain
 from pathlib import Path
-from typing import Dict, List, Set
+from typing import Any, Dict, Generator, List, Set
 
 import yaml
 
@@ -64,8 +68,8 @@ class DependencyNotFound(Exception):
         configuration_file: Path,
         expected_deps: Set[PackageId],
         missing_dependencies: Set[PackageId],
-        *args,
-    ):
+        *args: Any,
+    ) -> None:
         """
         Initialize DependencyNotFound exception.
 
@@ -80,7 +84,21 @@ class DependencyNotFound(Exception):
         self.missing_dependencies = missing_dependencies
 
 
-def find_all_configuration_files():
+class EmptyPackageDescription(Exception):
+    """Custom exception for empty description field."""
+
+    def __init__(self, configuration_file: Path, *args: Any,) -> None:
+        """
+        Initialize EmptyPackageDescription exception.
+
+        :param configuration_file: path to the checked file.
+        :param kwargs: super class args.
+        """
+        super().__init__(*args)
+        self.configuration_file = configuration_file
+
+
+def find_all_configuration_files() -> List:
     """Find all configuration files."""
     packages_dir = Path("packages")
     config_files = [
@@ -91,13 +109,13 @@ def find_all_configuration_files():
     return list(chain(config_files, default_config_file_paths()))
 
 
-def default_config_file_paths():
+def default_config_file_paths() -> Generator:
     """Get (generator) the default config file paths."""
     for item in DEFAULT_CONFIG_FILE_PATHS:
         yield item
 
 
-def get_public_id_from_yaml(configuration_file: Path):
+def get_public_id_from_yaml(configuration_file: Path) -> PublicId:
     """
     Get the public id from yaml.
 
@@ -131,7 +149,7 @@ def find_all_packages_ids() -> Set[PackageId]:
     return package_ids
 
 
-def handle_dependency_not_found(e: DependencyNotFound):
+def handle_dependency_not_found(e: DependencyNotFound) -> None:
     """Handle PackageIdNotFound errors."""
     sorted_expected = list(map(str, sorted(e.expected_dependencies)))
     sorted_missing = list(map(str, sorted(e.missing_dependencies)))
@@ -139,6 +157,14 @@ def handle_dependency_not_found(e: DependencyNotFound):
     print(f"Package {e.configuration_file}:")
     print(f"Expected: {pprint.pformat(sorted_expected)}")
     print(f"Missing: {pprint.pformat(sorted_missing)}")
+    print("=" * 50)
+
+
+def handle_empty_package_description(e: EmptyPackageDescription) -> None:
+    """Handle EmptyPackageDescription errors."""
+    print("=" * 50)
+    print(f"Package '{e.configuration_file}' has empty description field.")
+    print("=" * 50)
 
 
 def unified_yaml_load(configuration_file: Path) -> Dict:
@@ -159,7 +185,9 @@ def unified_yaml_load(configuration_file: Path) -> Dict:
         return list(data)[0]
 
 
-def check_dependencies(configuration_file: Path, all_packages_ids: Set[PackageId]):
+def check_dependencies(
+    configuration_file: Path, all_packages_ids: Set[PackageId]
+) -> None:
     """
     Check dependencies of configuration file.
 
@@ -169,10 +197,12 @@ def check_dependencies(configuration_file: Path, all_packages_ids: Set[PackageId
     """
     data = unified_yaml_load(configuration_file)
 
-    def _add_package_type(package_type, public_id_str):
+    def _add_package_type(package_type: PackageType, public_id_str: str) -> PackageId:
         return PackageId(package_type, PublicId.from_str(public_id_str))
 
-    def _get_package_ids(package_type, public_ids):
+    def _get_package_ids(
+        package_type: PackageType, public_ids: Set[PublicId]
+    ) -> Set[PackageId]:
         return set(map(partial(_add_package_type, package_type), public_ids))
 
     dependencies: Set[PackageId] = set.union(
@@ -187,6 +217,14 @@ def check_dependencies(configuration_file: Path, all_packages_ids: Set[PackageId
         raise DependencyNotFound(configuration_file, dependencies, diff)
 
 
+def check_description(configuration_file: Path) -> None:
+    """Check description field of a package is non-empty."""
+    yaml_object = unified_yaml_load(configuration_file)
+    description = yaml_object.get("description")
+    if description == "":
+        raise EmptyPackageDescription(configuration_file)
+
+
 if __name__ == "__main__":
     all_packages_ids_ = find_all_packages_ids()
     failed: bool = False
@@ -194,8 +232,12 @@ if __name__ == "__main__":
         try:
             print("Processing " + str(file))
             check_dependencies(file, all_packages_ids_)
+            check_description(file)
         except DependencyNotFound as e_:
             handle_dependency_not_found(e_)
+            failed = True
+        except EmptyPackageDescription as e_:
+            handle_empty_package_description(e_)
             failed = True
 
     if failed:

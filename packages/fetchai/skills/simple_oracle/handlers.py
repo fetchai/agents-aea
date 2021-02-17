@@ -127,8 +127,9 @@ class LedgerApiHandler(Handler):
             )
         )
         if self.context.prometheus_dialogues.enabled:
+            metric_name = "oracle_account_balance_ETH"
             self.context.behaviours.simple_oracle_behaviour.update_prometheus_metric(
-                "oracle_account_balance_ETH", "set", float(ledger_api_msg.balance), {}
+                metric_name, "set", float(ledger_api_msg.balance), {}
             )
 
     def _handle_transaction_digest(
@@ -202,15 +203,16 @@ class LedgerApiHandler(Handler):
                 strategy.is_oracle_role_granted = is_transaction_successful
                 if is_transaction_successful:
                     self.context.logger.info("Oracle role successfully granted!")
-                else:
+                else:  # pragma: nocover
                     self.context.logger.info("Failed to grant oracle role")
             elif transaction_label == "update":
                 self.context.logger.info("Oracle value successfully updated!")
                 if self.context.prometheus_dialogues.enabled:
+                    metric_name = "num_oracle_updates"
                     self.context.behaviours.simple_oracle_behaviour.update_prometheus_metric(
-                        "num_oracle_updates", "inc", 1.0, {}
+                        metric_name, "inc", 1.0, {}
                     )
-            else:
+            else:  # pragma: nocover
                 self.context.logger.error("unexpected transaction receipt!")
         else:
             self.context.logger.error(
@@ -499,12 +501,6 @@ class PrometheusHandler(Handler):
 
     SUPPORTED_PROTOCOL = PrometheusMessage.protocol_id
 
-    def __init__(self, **kwargs):
-        """Initialize the handler."""
-        super().__init__(**kwargs)
-
-        self.handled_message = None
-
     def setup(self) -> None:
         """Set up the handler."""
         if self.context.prometheus_dialogues.enabled:
@@ -531,12 +527,11 @@ class PrometheusHandler(Handler):
             self._handle_unidentified_dialogue(message)
             return
 
-        self.handled_message = message
         if message.performative == PrometheusMessage.Performative.RESPONSE:
             self.context.logger.debug(
                 f"Prometheus response ({message.code}): {message.message}"
             )
-        else:
+        else:  # pragma: nocover
             self.context.logger.debug(
                 f"got unexpected prometheus message: Performative = {PrometheusMessage.Performative}"
             )

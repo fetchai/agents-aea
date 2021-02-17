@@ -238,8 +238,7 @@ class TestStrategy(ConfirmationAW3TestCase):
         mock_handle.assert_any_call(self.counterparty)
 
         mock_logger.assert_any_call(
-            logging.INFO,
-            f"Successful trade with={self.counterparty}. Data acquired={data}!",
+            logging.INFO, f"Successful trade with={self.counterparty}.",
         )
 
         self.assert_quantity_in_outbox(1)

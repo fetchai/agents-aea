@@ -23,6 +23,8 @@ from typing import Dict
 import yaml
 from click import ClickException
 
+from aea.helpers.io import open_file
+
 
 def load_yaml(filepath: str) -> Dict:
     """
@@ -32,9 +34,10 @@ def load_yaml(filepath: str) -> Dict:
 
     :return: dict YAML content
     """
-    with open(filepath, "r") as f:
+    with open_file(filepath, "r") as f:
         try:
-            return yaml.safe_load(f)
+            result = yaml.safe_load(f)
+            return result if result is not None else {}
         except yaml.YAMLError as e:
             raise ClickException(
                 "Loading yaml config from {} failed: {}".format(filepath, e)

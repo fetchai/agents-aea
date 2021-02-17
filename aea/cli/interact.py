@@ -21,11 +21,11 @@
 
 import codecs
 import os
-from pathlib import Path
 from typing import Optional, TYPE_CHECKING, Type, Union
 
 import click
 
+from aea.cli.utils.constants import STUB_CONNECTION
 from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.exceptions import InterruptInputException
 from aea.common import Address
@@ -33,7 +33,6 @@ from aea.configurations.base import ConnectionConfig, PackageType, PublicId
 from aea.configurations.constants import (
     CONNECTIONS,
     DEFAULT_AEA_CONFIG_FILE,
-    DEFAULT_CONNECTION,
     DEFAULT_PROTOCOL,
     PROTOCOLS,
     SIGNING_PROTOCOL,
@@ -43,6 +42,7 @@ from aea.configurations.constants import (
 from aea.configurations.loader import ConfigLoader
 from aea.connections.base import Connection
 from aea.crypto.wallet import CryptoStore
+from aea.helpers.io import open_file
 from aea.identity.base import Identity
 from aea.mail.base import Envelope, Message
 from aea.multiplexer import InBox, Multiplexer, OutBox
@@ -67,13 +67,15 @@ if TYPE_CHECKING:  # pragma: nocover
 @click.command()
 @click.pass_context
 @check_aea_project
-def interact(click_context: click.core.Context):  # pylint: disable=unused-argument
+def interact(
+    click_context: click.core.Context,  # pylint: disable=unused-argument
+) -> None:
     """Interact with the running agent via the stub connection."""
     click.echo("Starting AEA interaction channel...")
     _run_interaction_channel()
 
 
-def _load_packages(agent_identity: Identity):
+def _load_packages(agent_identity: Identity) -> None:
     """Load packages in the current interpreter."""
     default_protocol_id = PublicId.from_str(DEFAULT_PROTOCOL)
     Protocol.from_dir(
@@ -96,22 +98,20 @@ def _load_packages(agent_identity: Identity):
             state_update_protocol_id.name,
         )
     )
-    default_connection_id = PublicId.from_str(DEFAULT_CONNECTION)
+    stub_connection_id = PublicId.from_str(STUB_CONNECTION)
     Connection.from_dir(
         os.path.join(
-            VENDOR,
-            default_connection_id.author,
-            CONNECTIONS,
-            default_connection_id.name,
+            VENDOR, stub_connection_id.author, CONNECTIONS, stub_connection_id.name,
         ),
         agent_identity,
         CryptoStore(),
+        os.getcwd(),
     )
 
 
-def _run_interaction_channel():
+def _run_interaction_channel() -> None:
     loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
-    agent_configuration = loader.load(Path(DEFAULT_AEA_CONFIG_FILE).open())
+    agent_configuration = loader.load(open_file(DEFAULT_AEA_CONFIG_FILE))
     agent_name = agent_configuration.name
 
     identity_stub = Identity(agent_name + "_interact", "interact")
@@ -139,7 +139,7 @@ def _run_interaction_channel():
     )
 
     stub_connection = StubConnection(
-        configuration=configuration, identity=identity_stub
+        configuration=configuration, data_dir=os.getcwd(), identity=identity_stub
     )
     multiplexer = Multiplexer([stub_connection])
     inbox = InBox(multiplexer)
@@ -197,7 +197,7 @@ def _process_envelopes(
         click.echo(_construct_message("sending", envelope, message_class))
 
 
-def _check_for_incoming_envelope(inbox: InBox, message_class: Type[Message]):
+def _check_for_incoming_envelope(inbox: InBox, message_class: Type[Message]) -> None:
     if not inbox.empty():
         envelope = inbox.get_nowait()
         if envelope is None:
@@ -209,7 +209,7 @@ def _check_for_incoming_envelope(inbox: InBox, message_class: Type[Message]):
 
 def _construct_message(
     action_name: str, envelope: Envelope, message_class: Type[Message]
-):
+) -> str:
     action_name = action_name.title()
     msg = (
         message_class.serializer.decode(envelope.message)

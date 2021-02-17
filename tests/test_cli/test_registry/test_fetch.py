@@ -34,7 +34,7 @@ def _raise_exception():
     raise Exception()
 
 
-@mock.patch("builtins.open", mock.mock_open())
+@mock.patch("aea.cli.registry.fetch.open_file", mock.mock_open())
 @mock.patch("aea.cli.utils.decorators._cast_ctx")
 @mock.patch("aea.cli.registry.fetch.PublicId", PublicIdMock)
 @mock.patch("aea.cli.registry.fetch.os.rename")

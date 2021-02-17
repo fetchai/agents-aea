@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 """This module contains test case classes based on pytest for AEA skill testing."""
 import asyncio
+import os
 from pathlib import Path
 from queue import Queue
 from types import SimpleNamespace
@@ -27,6 +28,7 @@ from aea.configurations.loader import ConfigLoaders, PackageType, SkillConfig
 from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import DEFAULT_CURRENCY_DENOMINATIONS
 from aea.exceptions import AEAEnforceError
+from aea.helpers.io import open_file
 from aea.identity.base import Identity
 from aea.mail.base import Address
 from aea.multiplexer import AsyncMultiplexer, Multiplexer, OutBox
@@ -91,14 +93,14 @@ class BaseSkillTestCase:
             self._skill.skill_context.decision_maker_message_queue.get_nowait()
             number -= 1
 
-    def assert_quantity_in_outbox(self, expected_quantity) -> None:
+    def assert_quantity_in_outbox(self, expected_quantity: int) -> None:
         """Assert the quantity of messages in the outbox."""
         quantity = self.get_quantity_in_outbox()
         assert (  # nosec
             quantity == expected_quantity
         ), f"Invalid number of messages in outbox. Expected {expected_quantity}. Found {quantity}."
 
-    def assert_quantity_in_decision_making_queue(self, expected_quantity) -> None:
+    def assert_quantity_in_decision_making_queue(self, expected_quantity: int) -> None:
         """Assert the quantity of messages in the decision maker queue."""
         quantity = self.get_quantity_in_decision_maker_inbox()
         assert (  # nosec
@@ -107,7 +109,7 @@ class BaseSkillTestCase:
 
     @staticmethod
     def message_has_attributes(
-        actual_message: Message, message_type: Type[Message], **kwargs,
+        actual_message: Message, message_type: Type[Message], **kwargs: Any,
     ) -> Tuple[bool, str]:
         """
         Evaluates whether a message's attributes match the expected attributes provided.
@@ -148,7 +150,7 @@ class BaseSkillTestCase:
         target: Optional[int] = None,
         to: Optional[Address] = None,
         sender: Address = COUNTERPARTY_ADDRESS,
-        **kwargs,
+        **kwargs: Any,
     ) -> Message:
         """
         Quickly create an incoming message with the provided attributes.
@@ -199,7 +201,7 @@ class BaseSkillTestCase:
         target: Optional[int] = None,
         to: Optional[Address] = None,
         sender: Optional[Address] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Message:
         """
         Quickly create an incoming message with the provided attributes for a dialogue.
@@ -423,7 +425,7 @@ class BaseSkillTestCase:
         return dialogue
 
     @classmethod
-    def setup(cls, **kwargs) -> None:
+    def setup(cls, **kwargs: Any) -> None:
         """Set up the skill test case."""
         identity = Identity("test_agent_name", "test_agent_address")
 
@@ -449,6 +451,7 @@ class BaseSkillTestCase:
             default_routing={},
             search_service_address="dummy_search_service_address",
             decision_maker_address="dummy_decision_maker_address",
+            data_dir=os.getcwd(),
         )
 
         # This enables pre-populating the 'shared_state' prior to loading the skill
@@ -459,7 +462,7 @@ class BaseSkillTestCase:
         skill_configuration_file_path: Path = Path(cls.path_to_skill, "skill.yaml")
         loader = ConfigLoaders.from_package_type(PackageType.SKILL)
 
-        with skill_configuration_file_path.open() as fp:
+        with open_file(skill_configuration_file_path) as fp:
             skill_config: SkillConfig = loader.load(fp)
 
         # This enables overriding the skill's config prior to loading

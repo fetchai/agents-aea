@@ -32,7 +32,7 @@ from jsonschema import ValidationError
 import aea.configurations.base
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE, PublicId
-from aea.test_tools.test_cases import AEATestCaseEmpty
+from aea.test_tools.test_cases import AEATestCaseEmpty, AEATestCaseEmptyFlaky
 
 from packages.fetchai.connections.http_client.connection import (
     PUBLIC_ID as HTTP_CLIENT_PUBLIC_ID,
@@ -476,7 +476,7 @@ class TestAddConnectionFailsWhenDirectoryAlreadyExists:
             pass
 
 
-class TestAddConnectionFromRemoteRegistry(AEATestCaseEmpty):
+class TestAddConnectionFromRemoteRegistry(AEATestCaseEmptyFlaky):
     """Test case for add connection from Registry command."""
 
     IS_LOCAL = False

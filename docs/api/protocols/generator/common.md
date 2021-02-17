@@ -88,7 +88,7 @@ None
 #### try`_`run`_`protoc
 
 ```python
-try_run_protoc(path_to_generated_protocol_package, name) -> None
+try_run_protoc(path_to_generated_protocol_package: str, name: str) -> None
 ```
 
 Run 'protoc' protocol buffer compiler via subprocess.
@@ -106,7 +106,7 @@ A completed process object.
 #### check`_`protobuf`_`using`_`protoc
 
 ```python
-check_protobuf_using_protoc(path_to_generated_protocol_package, name) -> Tuple[bool, str]
+check_protobuf_using_protoc(path_to_generated_protocol_package: str, name: str) -> Tuple[bool, str]
 ```
 
 Check whether a protocol buffer schema file is valid.

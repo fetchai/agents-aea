@@ -47,18 +47,18 @@ author: dummy_author
 version: 1.0.0
 description: dummy_aea agent description
 license: Apache-2.0
-aea_version: '>=0.9.0, <0.10.0'
+aea_version: '>=0.10.0, <0.11.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/local:0.14.0
+- fetchai/local:0.15.0
 contracts: []
 protocols:
-- fetchai/default:0.11.0
+- fetchai/default:0.12.0
 skills:
 - dummy_author/dummy:0.1.0
-- fetchai/error:0.11.0
-default_connection: fetchai/local:0.14.0
+- fetchai/error:0.12.0
+default_connection: fetchai/local:0.15.0
 default_ledger: cosmos
 logging_config:
   disable_existing_loggers: ${DISABLE_LOGS:bool}
@@ -246,7 +246,7 @@ def test_agent_attribute_get_overridables():
 def test_dump_config():
     """Test AgentConfigManager.dump_config."""
     agent_config_manager = AgentConfigManager.load(DUMMY_AEA, substitude_env_vars=False)
-    with patch("aea.configurations.manager.open", mock_open()), patch(
+    with patch("aea.configurations.manager.open_file", mock_open()), patch(
         "aea.configurations.loader.ConfigLoader.dump"
     ) as dump_mock:
         agent_config_manager.dump_config()

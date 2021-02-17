@@ -376,6 +376,7 @@ async def test_load_from_dir():
         ROOT_DIR + "/packages/fetchai/connections/stub",
         Identity("name", "address"),
         CryptoStore(),
+        os.getcwd(),
     )
 
 

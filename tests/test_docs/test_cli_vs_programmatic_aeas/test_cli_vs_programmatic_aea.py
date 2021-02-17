@@ -26,7 +26,7 @@ from random import uniform
 
 import pytest
 
-from aea.test_tools.test_cases import AEATestCaseMany
+from aea.test_tools.test_cases import AEATestCaseManyFlaky
 
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
@@ -48,18 +48,19 @@ PY_FILE = "test_docs/test_cli_vs_programmatic_aeas/programmatic_aea.py"
 DEST = "programmatic_aea.py"
 
 
-class TestCliVsProgrammaticAEA(AEATestCaseMany):
+def test_read_md_file():
+    """Compare the extracted code with the python file."""
+    doc_path = os.path.join(ROOT_DIR, MD_FILE)
+    code_blocks = extract_code_blocks(filepath=doc_path, filter_="python")
+    test_code_path = os.path.join(CUR_PATH, PY_FILE)
+    python_file = extract_python_code(test_code_path)
+    assert code_blocks[-1] == python_file, "Files must be exactly the same."
+
+
+class TestCliVsProgrammaticAEA(AEATestCaseManyFlaky):
     """This class contains the tests for the code-blocks in the build-aea-programmatically.md file."""
 
     capture_log: bool = True
-
-    def test_read_md_file(self):
-        """Compare the extracted code with the python file."""
-        doc_path = os.path.join(ROOT_DIR, MD_FILE)
-        code_blocks = extract_code_blocks(filepath=doc_path, filter_="python")
-        test_code_path = os.path.join(CUR_PATH, PY_FILE)
-        python_file = extract_python_code(test_code_path)
-        assert code_blocks[-1] == python_file, "Files must be exactly the same."
 
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_INTEGRATION)
     @pytest.mark.integration
@@ -67,7 +68,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         """Test the communication of the two agents."""
 
         weather_station = "weather_station"
-        self.fetch_agent("fetchai/weather_station:0.20.0", weather_station)
+        self.fetch_agent("fetchai/weather_station:0.21.0", weather_station)
         self.set_agent_context(weather_station)
         self.set_config(
             "vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx",
@@ -175,7 +176,9 @@ class TestCliVsProgrammaticAEA(AEATestCaseMany):
         """Inject location into the weather client strategy."""
         file = Path(dst_file_path)
         lines = file.read_text().splitlines()
-        line_insertion_position = 209  # line below: `strategy._is_ledger_tx = False`
+
+        target_line = "    strategy._is_ledger_tx = False"
+        line_insertion_position = lines.index(target_line) + 1
         lines.insert(
             line_insertion_position,
             "    from packages.fetchai.skills.generic_buyer.strategy import Location",

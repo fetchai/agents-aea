@@ -19,9 +19,6 @@
 
 """This package contains the behaviours of the agent."""
 
-from typing import cast
-
-from packages.fetchai.skills.confirmation_aw3.strategy import Strategy
 from packages.fetchai.skills.generic_buyer.behaviours import (
     GenericSearchBehaviour,
     GenericTransactionBehaviour,
@@ -29,17 +26,4 @@ from packages.fetchai.skills.generic_buyer.behaviours import (
 
 
 TransactionBehaviour = GenericTransactionBehaviour
-
-
-class SearchBehaviour(GenericSearchBehaviour):
-    """Search behaviour extension."""
-
-    def act(self) -> None:
-        """
-        Implement the act.
-
-        :return: None
-        """
-        strategy = cast(Strategy, self.context.strategy)
-        strategy.update_search_query_params()
-        super().act()
+SearchBehaviour = GenericSearchBehaviour

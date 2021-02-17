@@ -37,7 +37,7 @@
 """A module with config tools of the aea cli."""
 import os
 from pathlib import Path
-from typing import Dict, Set
+from typing import Any, Dict, Set
 
 import click
 import jsonschema
@@ -57,6 +57,7 @@ from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader, ConfigLoaders
 from aea.configurations.validation import ExtraPropertiesError
 from aea.exceptions import AEAEnforceError
+from aea.helpers.io import open_file
 
 
 def try_to_load_agent_config(
@@ -76,7 +77,7 @@ def try_to_load_agent_config(
 
     try:
         path = Path(os.path.join(agent_src_path, DEFAULT_AEA_CONFIG_FILE))
-        with path.open(mode="r", encoding="utf-8") as fp:
+        with open_file(path, mode="r", encoding="utf-8") as fp:
             ctx.agent_config = ctx.agent_loader.load(fp)
             ctx.agent_config.directory = Path(agent_src_path)
     except FileNotFoundError:
@@ -106,7 +107,7 @@ def _init_cli_config() -> None:
     conf_dir = os.path.dirname(CLI_CONFIG_PATH)
     if not os.path.exists(conf_dir):
         os.makedirs(conf_dir)
-    with open(CLI_CONFIG_PATH, "w+") as f:
+    with open_file(CLI_CONFIG_PATH, "w+") as f:
         yaml.dump({}, f, default_flow_style=False)
 
 
@@ -120,7 +121,7 @@ def update_cli_config(dict_conf: Dict) -> None:
     """
     config = get_or_create_cli_config()
     config.update(dict_conf)
-    with open(CLI_CONFIG_PATH, "w") as f:
+    with open_file(CLI_CONFIG_PATH, "w") as f:
         yaml.dump(config, f, default_flow_style=False)
 
 
@@ -137,7 +138,7 @@ def get_or_create_cli_config() -> Dict:
     return load_yaml(CLI_CONFIG_PATH)
 
 
-def set_cli_author(click_context) -> None:
+def set_cli_author(click_context: click.Context) -> None:
     """
     Set CLI author in the CLI Context.
 
@@ -167,7 +168,7 @@ def load_item_config(item_type: str, package_path: Path) -> PackageConfiguration
     configuration_file_name = _get_default_configuration_file_name_from_type(item_type)
     configuration_path = package_path / configuration_file_name
     configuration_loader = ConfigLoader.from_configuration_type(PackageType(item_type))
-    with configuration_path.open() as file_input:
+    with open_file(configuration_path) as file_input:
         item_config = configuration_loader.load(file_input)
     return item_config
 
@@ -194,7 +195,7 @@ def dump_item_config(
         configuration_loader.dump(package_configuration, file_output)  # type: ignore
 
 
-def update_item_config(item_type: str, package_path: Path, **kwargs) -> None:
+def update_item_config(item_type: str, package_path: Path, **kwargs: Any) -> None:
     """
     Update item config and item config file.
 
@@ -212,7 +213,7 @@ def update_item_config(item_type: str, package_path: Path, **kwargs) -> None:
         package_path, item_config.default_configuration_filename
     )
     loader = ConfigLoaders.from_package_type(item_type)
-    with open(config_filepath, "w") as f:
+    with open_file(config_filepath, "w") as f:
         loader.dump(item_config, f)
 
 

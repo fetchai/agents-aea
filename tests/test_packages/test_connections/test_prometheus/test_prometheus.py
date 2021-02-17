@@ -19,7 +19,7 @@
 """This module contains the tests of the prometheus connection module."""
 import asyncio
 from typing import cast
-from unittest.mock import Mock
+from unittest.mock import MagicMock, Mock
 
 import pytest
 
@@ -79,10 +79,10 @@ class TestPrometheusConnection:
             connection_id=PrometheusConnection.connection_id, port=9090,
         )
         self.agent_address = "my_address"
-        self.protocol_specification_id = PublicId.from_str("fetchai/prometheus:0.2.0")
+        self.protocol_specification_id = PublicId.from_str("fetchai/prometheus:0.3.0")
         identity = Identity("name", address=self.agent_address)
         self.prometheus_con = PrometheusConnection(
-            identity=identity, configuration=configuration
+            identity=identity, configuration=configuration, data_dir=MagicMock()
         )
         self.loop = asyncio.get_event_loop()
         self.prometheus_address = str(PrometheusConnection.connection_id)

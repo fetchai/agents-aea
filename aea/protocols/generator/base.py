@@ -188,7 +188,7 @@ class ProtocolGenerator:
             "Union",
             "cast",
         ]
-        import_str = "from typing import "
+        import_str = "from typing import Any, "
         for package in ordered_packages:
             if self.spec.typing_imports[package]:
                 import_str += "{}, ".format(package)
@@ -241,7 +241,7 @@ class ProtocolGenerator:
                 performative.upper(), performative
             )
         enum_str += "\n"
-        enum_str += self.indent + "def __str__(self):\n"
+        enum_str += self.indent + "def __str__(self) -> str:\n"
         self._change_indent(1)
         enum_str += self.indent + '"""Get the string representation."""\n'
         enum_str += self.indent + "return str(self.value)\n"
@@ -673,7 +673,7 @@ class ProtocolGenerator:
         cls_str += self.indent + 'dialogue_reference: Tuple[str, str] = ("", ""),\n'
         cls_str += self.indent + "message_id: int = 1,\n"
         cls_str += self.indent + "target: int = 0,\n"
-        cls_str += self.indent + "**kwargs,\n"
+        cls_str += self.indent + "**kwargs: Any,\n"
         self._change_indent(-1)
         cls_str += self.indent + "):\n"
         self._change_indent(1)
@@ -1962,7 +1962,9 @@ class ProtocolGenerator:
             protolint_base_cmd = "PATH=${PATH}:${GOPATH}/bin/:~/go/bin protolint"
 
         if call(f"{protolint_base_cmd} version", shell=True) != 0:  # nosec
-            raise ValueError("protolint is not installed!")
+            raise ValueError(
+                "protolint is not installed! Please install from https://github.com/yoheimuta/protolint."
+            )
 
         cmd = f'{protolint_base_cmd} lint -fix "{filepath}"'
         call(cmd, shell=True)  # nosec

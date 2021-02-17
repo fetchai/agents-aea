@@ -48,7 +48,7 @@ EXPIRATION_BLOCK = 1000000000000000
 class SimpleOracleBehaviour(TickerBehaviour):
     """This class implements a behaviour that deploys a Fetch oracle contract."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         """Initialise the behaviour."""
         update_interval = kwargs.pop(
             "update_interval", DEFAULT_UPDATE_INTERVAL
@@ -77,9 +77,10 @@ class SimpleOracleBehaviour(TickerBehaviour):
 
         if prom_dialogues.enabled:
             for metric in prom_dialogues.metrics:
-                self.context.logger.info("Adding Prometheus metric: " + metric["name"])
+                metric_name = metric["name"]
+                self.context.logger.info("Adding Prometheus metric: " + metric_name)
                 self.add_prometheus_metric(
-                    metric["name"],
+                    metric_name,
                     metric["type"],
                     metric["description"],
                     dict(metric["labels"]),
@@ -226,7 +227,7 @@ class SimpleOracleBehaviour(TickerBehaviour):
         )
         self.context.logger.info("requesting update transaction...")
 
-    def _get_balance(self):
+    def _get_balance(self) -> None:
         """
         Request balance of agent account by sending a message to the ledger API
 

@@ -25,7 +25,7 @@ Abstract definition of a connection.
 #### `__`init`__`
 
 ```python
- | __init__(configuration: ConnectionConfig, identity: Optional[Identity] = None, crypto_store: Optional[CryptoStore] = None, restricted_to_protocols: Optional[Set[PublicId]] = None, excluded_protocols: Optional[Set[PublicId]] = None, **kwargs, ,)
+ | __init__(configuration: ConnectionConfig, data_dir: str, identity: Optional[Identity] = None, crypto_store: Optional[CryptoStore] = None, restricted_to_protocols: Optional[Set[PublicId]] = None, excluded_protocols: Optional[Set[PublicId]] = None, **kwargs: Any, ,) -> None
 ```
 
 Initialize the connection.
@@ -36,6 +36,7 @@ parameters are None: connection_id, excluded_protocols or restricted_to_protocol
 **Arguments**:
 
 - `configuration`: the connection configuration.
+- `data_dir`: directory where to put local files.
 - `identity`: the identity object held by the agent.
 - `crypto_store`: the crypto store for encrypted communication.
 - `restricted_to_protocols`: the set of protocols ids of the only supported protocols for this connection.
@@ -80,6 +81,16 @@ Get the crypto store.
 ```
 
 Check if the connection has the crypto store.
+
+<a name="aea.connections.base.Connection.data_dir"></a>
+#### data`_`dir
+
+```python
+ | @property
+ | data_dir() -> str
+```
+
+Get the data directory.
 
 <a name="aea.connections.base.Connection.component_type"></a>
 #### component`_`type
@@ -131,12 +142,22 @@ Get the ids of the excluded protocols for this connection.
 
 Get the connection status.
 
+<a name="aea.connections.base.Connection.state"></a>
+#### state
+
+```python
+ | @state.setter
+ | state(value: ConnectionStates) -> None
+```
+
+Set the connection status.
+
 <a name="aea.connections.base.Connection.connect"></a>
 #### connect
 
 ```python
  | @abstractmethod
- | async connect()
+ | async connect() -> None
 ```
 
 Set up the connection.
@@ -146,7 +167,7 @@ Set up the connection.
 
 ```python
  | @abstractmethod
- | async disconnect()
+ | async disconnect() -> None
 ```
 
 Tear down the connection.
@@ -174,7 +195,7 @@ None
 
 ```python
  | @abstractmethod
- | async receive(*args, **kwargs) -> Optional["Envelope"]
+ | async receive(*args: Any, **kwargs: Any) -> Optional["Envelope"]
 ```
 
 Receive an envelope.
@@ -188,7 +209,7 @@ the received envelope, or None if an error occurred.
 
 ```python
  | @classmethod
- | from_dir(cls, directory: str, identity: Identity, crypto_store: CryptoStore, **kwargs) -> "Connection"
+ | from_dir(cls, directory: str, identity: Identity, crypto_store: CryptoStore, data_dir: str, **kwargs: Any, ,) -> "Connection"
 ```
 
 Load the connection from a directory.
@@ -198,6 +219,7 @@ Load the connection from a directory.
 - `directory`: the directory to the connection package.
 - `identity`: the identity object.
 - `crypto_store`: object to access the connection crypto objects.
+- `data_dir`: the assets directory.
 
 **Returns**:
 
@@ -208,7 +230,7 @@ the connection object.
 
 ```python
  | @classmethod
- | from_config(cls, configuration: ConnectionConfig, identity: Identity, crypto_store: CryptoStore, **kwargs, ,) -> "Connection"
+ | from_config(cls, configuration: ConnectionConfig, identity: Identity, crypto_store: CryptoStore, data_dir: str, **kwargs: Any, ,) -> "Connection"
 ```
 
 Load a connection from a configuration.
@@ -218,6 +240,7 @@ Load a connection from a configuration.
 - `configuration`: the connection configuration.
 - `identity`: the identity object.
 - `crypto_store`: object to access the connection crypto objects.
+- `data_dir`: the directory of the AEA project data.
 
 **Returns**:
 
@@ -252,4 +275,127 @@ Return is connecting state.
 ```
 
 Return is disconnected state.
+
+<a name="aea.connections.base.BaseSyncConnection"></a>
+## BaseSyncConnection Objects
+
+```python
+class BaseSyncConnection(Connection)
+```
+
+Base sync connection class to write connections with sync code.
+
+<a name="aea.connections.base.BaseSyncConnection.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(configuration: ConnectionConfig, data_dir: str, identity: Optional[Identity] = None, crypto_store: Optional[CryptoStore] = None, restricted_to_protocols: Optional[Set[PublicId]] = None, excluded_protocols: Optional[Set[PublicId]] = None, **kwargs: Any, ,) -> None
+```
+
+Initialize the connection.
+
+The configuration must be specified if and only if the following
+parameters are None: connection_id, excluded_protocols or restricted_to_protocols.
+
+**Arguments**:
+
+- `configuration`: the connection configuration.
+- `data_dir`: directory where to put local files.
+- `identity`: the identity object held by the agent.
+- `crypto_store`: the crypto store for encrypted communication.
+- `restricted_to_protocols`: the set of protocols ids of the only supported protocols for this connection.
+- `excluded_protocols`: the set of protocols ids that we want to exclude for this connection.
+
+<a name="aea.connections.base.BaseSyncConnection.put_envelope"></a>
+#### put`_`envelope
+
+```python
+ | put_envelope(envelope: Optional["Envelope"]) -> None
+```
+
+Put envelope in to the incoming queue.
+
+<a name="aea.connections.base.BaseSyncConnection.connect"></a>
+#### connect
+
+```python
+ | async connect() -> None
+```
+
+Connect connection.
+
+<a name="aea.connections.base.BaseSyncConnection.disconnect"></a>
+#### disconnect
+
+```python
+ | async disconnect() -> None
+```
+
+Disconnect connection.
+
+<a name="aea.connections.base.BaseSyncConnection.send"></a>
+#### send
+
+```python
+ | async send(envelope: "Envelope") -> None
+```
+
+Send envelope to connection.
+
+<a name="aea.connections.base.BaseSyncConnection.receive"></a>
+#### receive
+
+```python
+ | async receive(*args: Any, **kwargs: Any) -> Optional["Envelope"]
+```
+
+Get an envelope from the connection.
+
+<a name="aea.connections.base.BaseSyncConnection.start_main"></a>
+#### start`_`main
+
+```python
+ | start_main() -> None
+```
+
+Start main function of the connection.
+
+<a name="aea.connections.base.BaseSyncConnection.main"></a>
+#### main
+
+```python
+ | main() -> None
+```
+
+Run main body of the connection in dedicated thread.
+
+<a name="aea.connections.base.BaseSyncConnection.on_connect"></a>
+#### on`_`connect
+
+```python
+ | @abstractmethod
+ | on_connect() -> None
+```
+
+Run on connect method called.
+
+<a name="aea.connections.base.BaseSyncConnection.on_disconnect"></a>
+#### on`_`disconnect
+
+```python
+ | @abstractmethod
+ | on_disconnect() -> None
+```
+
+Run on discconnect method called.
+
+<a name="aea.connections.base.BaseSyncConnection.on_send"></a>
+#### on`_`send
+
+```python
+ | @abstractmethod
+ | on_send(envelope: "Envelope") -> None
+```
+
+Run on send method called.
 

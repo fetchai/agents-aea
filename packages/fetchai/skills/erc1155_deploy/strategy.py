@@ -20,7 +20,7 @@
 """This module contains the strategy class."""
 
 import random  # nosec
-from typing import List
+from typing import Any, List
 
 from aea.exceptions import enforce
 from aea.helpers.search.generic import (
@@ -53,7 +53,7 @@ DEFAULT_GAS = 5000000
 class Strategy(Model):
     """This class defines a strategy for the agent."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize the strategy of the agent."""
         ledger_id = kwargs.pop("ledger_id", None)
         self._token_type = kwargs.pop("token_type", DEFAULT_TOKEN_TYPE)
@@ -307,7 +307,7 @@ class Strategy(Model):
         return proposal
 
     def get_single_swap_terms(
-        self, proposal: Description, counterparty_address
+        self, proposal: Description, counterparty_address: str
     ) -> Terms:
         """Get the proposal."""
         terms = Terms(

@@ -19,6 +19,9 @@
 """This module contains the tests of the soef connection module."""
 import asyncio
 import os
+import shutil
+import tempfile
+from pathlib import Path
 from typing import Any, Callable
 from unittest.mock import MagicMock, patch
 
@@ -106,6 +109,7 @@ class TestSoefTokenStorage:
         """Set up."""
         self.crypto = make_crypto(DEFAULT_LEDGER)
         self.crypto2 = make_crypto(DEFAULT_LEDGER)
+        self.data_dir = tempfile.mkdtemp()
         identity = Identity("", address=self.crypto.address)
         self.oef_search_dialogues = OefSearchDialogues(self.crypto.address)
 
@@ -120,13 +124,14 @@ class TestSoefTokenStorage:
             connection_id=SOEFConnection.connection_id,
         )
         self.connection = SOEFConnection(
-            configuration=configuration, identity=identity,
+            configuration=configuration, data_dir=self.data_dir, identity=identity,
         )
 
     def teardown(self):
         """Tear down."""
         try:
             os.remove(self.token_storage_path)
+            shutil.rmtree(self.data_dir)
         except Exception as e:
             print(e)
 
@@ -145,13 +150,14 @@ class TestSoefTokenStorage:
         self.connection.channel.unique_page_address = "test"
         assert self.connection.channel._unique_page_address == "test"
         assert self.connection.channel.unique_page_address == "test"
-        with open(self.token_storage_path, "r") as f:
+        expected_token_storage_path = Path(self.data_dir) / self.token_storage_path
+        with expected_token_storage_path.open() as f:
             in_file = f.read()
         assert in_file == "test"
         self.connection.channel.unique_page_address = None
         assert self.connection.channel._unique_page_address is None
         assert self.connection.channel.unique_page_address is None
-        with open(self.token_storage_path, "r") as f:
+        with expected_token_storage_path.open() as f:
             in_file = f.read()
         assert in_file == self.connection.channel.NONE_UNIQUE_PAGE_ADDRESS
 
@@ -172,6 +178,7 @@ class TestSoef:
         self.crypto2 = make_crypto(DEFAULT_LEDGER)
         identity = Identity("", address=self.crypto.address)
         self.oef_search_dialogues = OefSearchDialogues(self.crypto.address)
+        self.data_dir = tempfile.mkdtemp()
 
         # create the connection and multiplexer objects
         configuration = ConnectionConfig(
@@ -182,10 +189,11 @@ class TestSoef:
             connection_id=SOEFConnection.connection_id,
         )
         self.connection = SOEFConnection(
-            configuration=configuration, identity=identity,
+            configuration=configuration, data_dir=self.data_dir, identity=identity,
         )
         self.connection2 = SOEFConnection(
             configuration=configuration,
+            data_dir=self.data_dir,
             identity=Identity("", address=self.crypto2.address),
         )
         self.loop = asyncio.get_event_loop()
@@ -633,6 +641,7 @@ class TestSoef:
                 make_async("<response><message>Goodbye!</message></response>"),
             ):
                 self.loop.run_until_complete(self.connection.disconnect())
+                shutil.rmtree(self.data_dir)
         except Exception:  # nosec
             pass
 
@@ -667,7 +676,7 @@ class TestSoef:
         )
         with pytest.raises(ValueError, match="Unsupported chain_identifier"):
             SOEFConnection(
-                configuration=configuration, identity=identity,
+                configuration=configuration, data_dir=MagicMock(), identity=identity,
             )
 
     def test_chain_identifier_ok(self):
@@ -683,7 +692,9 @@ class TestSoef:
             connection_id=SOEFConnection.connection_id,
             chain_identifier=chain_identifier,
         )
-        connection = SOEFConnection(configuration=configuration, identity=identity,)
+        connection = SOEFConnection(
+            configuration=configuration, data_dir=MagicMock(), identity=identity,
+        )
 
         assert connection.channel.chain_identifier == chain_identifier
 

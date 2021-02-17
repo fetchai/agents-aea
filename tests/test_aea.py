@@ -25,7 +25,7 @@ from pathlib import Path
 from threading import Thread
 from typing import Callable
 from unittest.case import TestCase
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -143,6 +143,7 @@ def test_double_start():
             assert not t.is_alive()
         finally:
             agent.stop()
+            t.join()
 
 
 def test_react():
@@ -391,6 +392,7 @@ def test_initialize_aea_programmatically_build_resources():
                 identity,
                 wallet,
                 resources=resources,
+                data_dir=MagicMock(),
                 default_connection=connection.public_id,
             )
 
@@ -466,12 +468,15 @@ def test_add_behaviour_dynamically():
     agent_name = "MyAgent"
     private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
     wallet = Wallet({DEFAULT_LEDGER: private_key_path})
+    data_dir = MagicMock()
     resources = Resources()
     identity = Identity(agent_name, address=wallet.addresses[DEFAULT_LEDGER])
     connection = _make_local_connection(identity.address, LocalNode())
     resources.add_connection(connection)
 
-    agent = AEA(identity, wallet, resources, default_connection=connection.public_id,)
+    agent = AEA(
+        identity, wallet, resources, data_dir, default_connection=connection.public_id,
+    )
     resources.add_component(
         Skill.from_dir(
             Path(CUR_PATH, "data", "dummy_skill"), agent_context=agent.context
@@ -538,6 +543,7 @@ class TestContextNamespace:
     def setup_class(cls):
         """Set the test up."""
         agent_name = "my_agent"
+        data_dir = MagicMock()
         private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
         wallet = Wallet({DEFAULT_LEDGER: private_key_path})
         identity = Identity(agent_name, address=wallet.addresses[DEFAULT_LEDGER])
@@ -545,7 +551,7 @@ class TestContextNamespace:
         resources = Resources()
         resources.add_connection(connection)
         cls.context_namespace = {"key1": 1, "key2": 2}
-        cls.agent = AEA(identity, wallet, resources, **cls.context_namespace)
+        cls.agent = AEA(identity, wallet, resources, data_dir, **cls.context_namespace)
 
         resources.add_component(
             Skill.from_dir(
@@ -649,7 +655,11 @@ class TestAeaExceptionPolicy:
 
         self.aea_tool.put_inbox(self.aea_tool.dummy_envelope())
         time.sleep(1)
-        assert self.handler_called >= 2
+        try:
+            assert self.handler_called >= 2
+        finally:
+            self.aea.stop()
+            t.join()
 
     def test_handle_propagate(self) -> None:
         """Test propagate policy on message handle."""
@@ -687,8 +697,12 @@ class TestAeaExceptionPolicy:
             self.aea_tool.put_inbox(self.aea_tool.dummy_envelope())
             self.aea_tool.put_inbox(self.aea_tool.dummy_envelope())
             time.sleep(1)
-        assert self.aea.is_running
-        assert patched.call_count == 2
+        try:
+            assert self.aea.is_running
+            assert patched.call_count == 2
+        finally:
+            self.aea.stop()
+            t.join()
 
     def test_act_propagate(self) -> None:
         """Test propagate policy on behaviour act."""
@@ -723,8 +737,12 @@ class TestAeaExceptionPolicy:
             t.start()
 
             time.sleep(1)
-        assert self.aea.is_running
-        assert patched.call_count > 1
+        try:
+            assert self.aea.is_running
+            assert patched.call_count > 1
+        finally:
+            self.aea.stop()
+            t.join()
 
     def test_act_bad_policy(self) -> None:
         """Test propagate policy on behaviour act."""
@@ -767,7 +785,7 @@ class BaseTimeExecutionCase(TestCase):
     def tearDown(self) -> None:
         """Tear down."""
         self.aea_tool.teardown()
-        self.aea_tool.aea.runtime.main_loop._teardown()
+        self.aea_tool.aea.runtime.agent_loop._teardown()
 
     def prepare(self, function: Callable) -> None:
         """Prepare aea_tool for testing.
@@ -806,7 +824,7 @@ class BaseTimeExecutionCase(TestCase):
         aea = builder.build()
         self.aea_tool = AeaTool(aea)
         self.envelope = AeaTool.dummy_envelope()
-        self.aea_tool.aea.runtime.main_loop._setup()
+        self.aea_tool.aea.runtime.agent_loop._setup()
 
     def test_long_handler_cancelled_by_timeout(self):
         """Test long function terminated by timeout."""
@@ -867,7 +885,7 @@ class HandleTimeoutExecutionCase(BaseTimeExecutionCase):
 
     def aea_action(self):
         """Spin react on AEA."""
-        self.aea_tool.aea.runtime.main_loop._execution_control(
+        self.aea_tool.aea.runtime.agent_loop._execution_control(
             self.aea_tool.handle_envelope, [self.envelope]
         )
 
@@ -877,6 +895,6 @@ class ActTimeoutExecutionCase(BaseTimeExecutionCase):
 
     def aea_action(self):
         """Spin act on AEA."""
-        self.aea_tool.aea.runtime.main_loop._execution_control(
+        self.aea_tool.aea.runtime.agent_loop._execution_control(
             self.behaviour.act_wrapper
         )

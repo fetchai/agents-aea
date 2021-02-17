@@ -7,7 +7,7 @@ This module contains a checker for PyPI version consistency.
 #### and`_`
 
 ```python
-and_(s1: SpecifierSet, s2: SpecifierSet)
+and_(s1: SpecifierSet, s2: SpecifierSet) -> SpecifierSet
 ```
 
 Do the and between two specifier sets.

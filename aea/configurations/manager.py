@@ -48,6 +48,7 @@ from aea.configurations.loader import ConfigLoader, load_component_configuration
 from aea.configurations.validation import SAME_MARK, filter_data
 from aea.exceptions import AEAException, enforce
 from aea.helpers.env_vars import apply_env_variables
+from aea.helpers.io import open_file
 from aea.helpers.storage.backends.base import JSON_TYPES
 from aea.helpers.yaml_utils import yaml_load_all
 
@@ -334,7 +335,7 @@ class AgentConfigManager:
         return self._get_agent_config_file_path(self.aea_project_directory)
 
     @classmethod
-    def _get_agent_config_file_path(cls, aea_project_path) -> Path:
+    def _get_agent_config_file_path(cls, aea_project_path: Union[str, Path]) -> Path:
         """Get agent config file path for aea project path."""
         return Path(aea_project_path) / DEFAULT_AEA_CONFIG_FILE
 
@@ -355,7 +356,7 @@ class AgentConfigManager:
 
     @classmethod
     def _load_config_data(cls, aea_project_path: Path) -> List[Dict]:
-        with cls._get_agent_config_file_path(aea_project_path).open() as fp:
+        with open_file(cls._get_agent_config_file_path(aea_project_path)) as fp:
             data = yaml_load_all(fp)
         return data
 
@@ -517,7 +518,7 @@ class AgentConfigManager:
         filtered_overrides = filter_data(agent_overridable, overrides)
         return filtered_overrides
 
-    def validate_current_config(self):
+    def validate_current_config(self) -> None:
         """Check is current config valid."""
         for component_id, obj in self.agent_config.component_configurations.items():
             component_configuration = self.load_component_configuration(component_id)
@@ -539,7 +540,7 @@ class AgentConfigManager:
         self.agent_config.validate_config_data(
             config_data, env_vars_friendly=self.env_vars_friendly
         )
-        with open(self.agent_config_file_path, "w") as file_pointer:
+        with open_file(self.agent_config_file_path, "w") as file_pointer:
             ConfigLoader.from_configuration_type(PackageType.AGENT).dump(
                 self.agent_config, file_pointer
             )

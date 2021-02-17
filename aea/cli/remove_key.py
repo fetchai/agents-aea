@@ -28,6 +28,7 @@ from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE
 from aea.crypto.registries import crypto_registry
+from aea.helpers.io import open_file
 
 
 @click.command()
@@ -42,7 +43,7 @@ from aea.crypto.registries import crypto_registry
 )
 @click.pass_context
 @check_aea_project
-def remove_key(click_context, type_, connection):
+def remove_key(click_context: click.Context, type_: str, connection: bool) -> None:
     """Remove a private key from the wallet of the agent."""
     _remove_private_key(click_context, type_, connection)
 
@@ -63,7 +64,7 @@ def _remove_private_key(
     _try_remove_key(ctx, type_, connection)
 
 
-def _try_remove_key(ctx: Context, type_: str, connection: bool = False):
+def _try_remove_key(ctx: Context, type_: str, connection: bool = False) -> None:
     private_keys = (
         ctx.agent_config.connection_private_key_paths
         if connection
@@ -76,5 +77,5 @@ def _try_remove_key(ctx: Context, type_: str, connection: bool = False):
         )
     private_keys.delete(type_)
     ctx.agent_loader.dump(
-        ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
+        ctx.agent_config, open_file(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
     )

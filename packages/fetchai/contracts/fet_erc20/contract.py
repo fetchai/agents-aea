@@ -30,7 +30,7 @@ from aea.crypto.ethereum import EthereumApi
 
 _default_logger = logging.getLogger("aea.packages.fetchai.contracts.fet_erc20.contract")
 
-PUBLIC_ID = PublicId.from_str("fetchai/fet_erc20:0.2.0")
+PUBLIC_ID = PublicId.from_str("fetchai/fet_erc20:0.3.0")
 
 
 class FetERC20(Contract):

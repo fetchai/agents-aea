@@ -51,6 +51,7 @@ from aea.configurations.constants import (  # noqa: F401  # pylint: disable=unus
     SCAFFOLD_PUBLIC_ID,
     SKILL,
 )
+from aea.helpers.io import open_file
 
 
 @click.group()
@@ -63,7 +64,7 @@ from aea.configurations.constants import (  # noqa: F401  # pylint: disable=unus
 @check_aea_project
 def scaffold(
     click_context: click.core.Context, with_symlinks: bool
-):  # pylint: disable=unused-argument
+) -> None:  # pylint: disable=unused-argument
     """Scaffold a package for the agent."""
     ctx = cast(Context, click_context.obj)
     ctx.set_config("with_symlinks", with_symlinks)
@@ -89,7 +90,7 @@ def contract(ctx: Context, contract_name: str) -> None:
 @click.argument("protocol_name", type=str, required=True)
 @click.option("-y", "--yes", is_flag=True, default=False)
 @pass_ctx
-def protocol(ctx: Context, protocol_name: str, yes: bool):
+def protocol(ctx: Context, protocol_name: str, yes: bool) -> None:
     """Add a protocol scaffolding to the configuration file and agent."""
     if yes or click.confirm(
         "We highly recommend auto-generating protocols with the aea generate command. Do you really want to continue scaffolding?"
@@ -102,21 +103,21 @@ def protocol(ctx: Context, protocol_name: str, yes: bool):
 @scaffold.command()
 @click.argument("skill_name", type=str, required=True)
 @pass_ctx
-def skill(ctx: Context, skill_name: str):
+def skill(ctx: Context, skill_name: str) -> None:
     """Add a skill scaffolding to the configuration file and agent."""
     scaffold_item(ctx, SKILL, skill_name)
 
 
 @scaffold.command()
 @pass_ctx
-def decision_maker_handler(ctx: Context):
+def decision_maker_handler(ctx: Context) -> None:
     """Add a decision maker scaffolding to the configuration file and agent."""
     _scaffold_dm_handler(ctx)
 
 
 @scaffold.command()
 @pass_ctx
-def error_handler(ctx: Context):
+def error_handler(ctx: Context) -> None:
     """Add an error scaffolding to the configuration file and agent."""
     _scaffold_error_handler(ctx)
 
@@ -171,18 +172,18 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
         logger.debug(f"Registering the {item_type} into {DEFAULT_AEA_CONFIG_FILE}")
         new_public_id = PublicId(author_name, item_name, DEFAULT_VERSION)
         existing_ids.add(new_public_id)
-        with open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as fp:
+        with open_file(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as fp:
             ctx.agent_loader.dump(ctx.agent_config, fp)
 
         # ensure the name in the yaml and the name of the folder are the same
         config_filepath = Path(
             ctx.cwd, item_type_plural, item_name, default_config_filename
         )
-        with config_filepath.open() as fp:
+        with open_file(config_filepath) as fp:
             config = loader.load(fp)
         config.name = item_name
         config.author = author_name
-        with config_filepath.open("w") as fp:
+        with open_file(config_filepath, "w") as fp:
             loader.dump(config, fp)
 
         # update 'PUBLIC_ID' variable with the right public id in connection.py!
@@ -214,7 +215,7 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
         raise click.ClickException(str(e))
 
 
-def _scaffold_dm_handler(ctx: Context):
+def _scaffold_dm_handler(ctx: Context) -> None:
     """Scaffold the decision maker handler."""
     _scaffold_non_package_item(
         ctx,
@@ -225,7 +226,7 @@ def _scaffold_dm_handler(ctx: Context):
     )
 
 
-def _scaffold_error_handler(ctx):
+def _scaffold_error_handler(ctx: Context) -> None:
     """Scaffold the error handler."""
     _scaffold_non_package_item(
         ctx, "error_handler", "error handler", "ErrorHandler", "error_handler"
@@ -234,7 +235,7 @@ def _scaffold_error_handler(ctx):
 
 def _scaffold_non_package_item(
     ctx: Context, item_type: str, type_name: str, class_name: str, aea_dir: str
-):
+) -> None:
     """
     Scaffold a non-package item (e.g. decision maker handler, or error handler).
 
@@ -273,7 +274,8 @@ def _scaffold_non_package_item(
             },
         )
         ctx.agent_loader.dump(
-            ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
+            ctx.agent_config,
+            open_file(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"),
         )
 
     except Exception as e:

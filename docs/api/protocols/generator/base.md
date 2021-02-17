@@ -101,3 +101,12 @@ If in "protobuf only" mode (protobuf_only is True), it only does a) and b).
 
 optional warning message.
 
+<a name="aea.protocols.generator.base.public_id_to_package_name"></a>
+#### public`_`id`_`to`_`package`_`name
+
+```python
+public_id_to_package_name(public_id: PublicId) -> str
+```
+
+Make package name string from public_id provided.
+

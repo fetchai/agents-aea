@@ -19,6 +19,8 @@
 
 """This package contains dialogues used by the fetch_beacon skill."""
 
+from typing import Any
+
 from aea.protocols.base import Address, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.skills.base import Model
@@ -33,7 +35,7 @@ HttpDialogue = BaseHttpDialogue
 class HttpDialogues(Model, BaseHttpDialogues):
     """This class keeps track of all http dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
