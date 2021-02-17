@@ -20,7 +20,7 @@
 """This package contains handlers for the fetch_beacon skill."""
 
 import json
-from typing import Any, cast
+from typing import Any, Optional, cast
 
 from vyper.utils import keccak256
 
@@ -67,7 +67,7 @@ class HttpHandler(Handler):
             and message.status_code == 200
         ):
             self._handle_response(message)
-        else:
+        else:  # pragma: nocover
             self.context.logger.info(
                 "got unexpected http response: code = " + str(message.status_code)
             )
@@ -88,18 +88,25 @@ class HttpHandler(Handler):
             .get("block", {})
             .get("header", {})
             .get("entropy", {})
-            .get("group_signature", {})
+            .get("group_signature", None)
         )
         block_hash = msg_body.get("result", {}).get("block_id", {}).get("hash", {})
-        block_height = int(
+        block_height_str = (
             msg_body.get("result", {})
             .get("block", {})
             .get("header", {})
-            .get("height", {})
+            .get("height", None)
         )
+
+        if block_height_str:
+            block_height = int(block_height_str)  # type: Optional[int]
+        else:
+            block_height = None
 
         if entropy is None:
             self.context.logger.info("entropy not present")
+        elif block_height is None:  # pragma: nocover
+            self.context.logger.info("block height not present")
         else:
             beacon_data = {
                 "entropy": keccak256(entropy.encode("utf-8")),

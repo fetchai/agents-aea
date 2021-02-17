@@ -85,7 +85,7 @@ class Strategy(Model):
     @property
     def oracle_contract_address(self) -> str:
         """Get the oracle contract address."""
-        if self._oracle_contract_address is None:
+        if self._oracle_contract_address is None:  # pragma: nocover
             raise ValueError("Oracle contract address not set!")
         return self._oracle_contract_address
 
@@ -101,7 +101,7 @@ class Strategy(Model):
     @property
     def client_contract_address(self) -> str:
         """Get the client contract address."""
-        if self._client_contract_address is None:
+        if self._client_contract_address is None:  # pragma: nocover
             raise ValueError("Oracle client contract address not set!")
         return self._client_contract_address
 
@@ -117,7 +117,7 @@ class Strategy(Model):
     @property
     def erc20_address(self) -> str:
         """Get the erc20 address for token payment."""
-        if self._erc20_address is None:
+        if self._erc20_address is None:  # pragma: nocover
             raise ValueError("ERC20 address not set!")
         return self._erc20_address
 
