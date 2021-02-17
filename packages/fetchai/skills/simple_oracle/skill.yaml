@@ -10,8 +10,8 @@ fingerprint:
   __init__.py: QmVbhUeRPEtr8vcz4cH65wC3Bo6K2TULjMh7VEpyQwzrPB
   behaviours.py: Qmetc4pV2fxPy2KmA1krSK3RRDTzerjRBDvyqZF2uYpxhA
   dialogues.py: QmbNySe3JTv59WCJuiMQiHsK8cV1rAXAvPCPuexnUiHzhG
-  handlers.py: QmRkFapc5wAM3UrbdRuJ6CWvAGN56dP2uW3mynGm3qpYh5
-  strategy.py: QmbQm8XFrRgXR83dXdedNFC4qCULvDnpCdGj7cA67GAATY
+  handlers.py: QmeDa4z9yRDZDhSGPi6yW51F94CKFTiaemdLhXgLjXFR6m
+  strategy.py: QmbPQ3qiA2wfUBeSy2eVATohm3Gmi4S63esRdZB2jn688q
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/oracle:0.4.0
