@@ -531,7 +531,7 @@ class PrometheusHandler(Handler):
             self.context.logger.debug(
                 f"Prometheus response ({message.code}): {message.message}"
             )
-        else:
+        else: # pragma: nocover
             self.context.logger.debug(
                 f"got unexpected prometheus message: Performative = {PrometheusMessage.Performative}"
             )

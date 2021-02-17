@@ -102,7 +102,7 @@ class Strategy(Model):
         return self._erc20_address
 
     @erc20_address.setter
-    def erc20_address(self, erc20_address: str) -> None:
+    def erc20_address(self, erc20_address: str) -> None: # pragma: nocover
         """Set the erc20 address for token payment."""
         enforce(self._erc20_address is None, "ERC20 address already set!")
         self._erc20_address = erc20_address

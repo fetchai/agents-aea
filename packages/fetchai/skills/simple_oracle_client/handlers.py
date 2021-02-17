@@ -198,13 +198,13 @@ class LedgerApiHandler(Handler):
                 strategy.is_oracle_transaction_approved = is_transaction_successful
                 if is_transaction_successful:
                     self.context.logger.info("Oracle client transactions approved!")
-                else:
+                else: # pragma: nocover
                     self.context.logger.info(
                         "Failed to approve oracle client transactions"
                     )
             elif transaction_label == "query":
                 self.context.logger.info("Oracle value successfully requested!")
-            else:
+            else: # pragma nocover
                 self.context.logger.error("unexpected transaction receipt!")
         else:
             self.context.logger.error(
