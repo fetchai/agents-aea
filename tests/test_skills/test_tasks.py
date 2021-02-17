@@ -22,7 +22,7 @@
 from unittest import TestCase, mock
 from unittest.mock import Mock, patch
 
-from aea.skills.tasks import Task, TaskManager, init_worker
+from aea.skills.tasks import Task, TaskManager
 
 
 def _raise_exception(self, *args, **kwargs):
@@ -78,11 +78,15 @@ class TaskTestCase(TestCase):
 class InitWorkerTestCase(TestCase):
     """Test case for init_worker method."""
 
-    @mock.patch("aea.skills.tasks.signal.signal")
-    def test_init_worker_positive(self, signal_mock):
+    @mock.patch("aea.skills.tasks.init_worker")
+    def test_init_worker_positive(self, init_worker_mock):
         """Test init_worker method positive result."""
-        init_worker()
-        signal_mock.assert_called_once()
+        task_manager = TaskManager(is_lazy_pool_start=False)
+        task_manager.start()
+        try:
+            init_worker_mock.assert_called()
+        finally:
+            task_manager.stop()
 
 
 class TaskManagerTestCase(TestCase):

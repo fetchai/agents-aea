@@ -11,11 +11,11 @@ fingerprint:
   __init__.py: QmdmhD1V3XsBLVVbmzzk5PB7ga233AWCEuBKaVD4Xh9kcQ
   behaviours.py: QmXTz299UwWMFLCzx58dynMRuXz7t4n6HeKyS4HeyE8H5E
   dialogues.py: QmUBxu95ZPgVv73RQ9fLauVDE4JmJCMZLwbmV6GgyQfzY1
-  handlers.py: QmaWisdbWNSRjsUCk3jUoVddq8W2hdJeWNEimHwroRUxvM
-  ml_model.py: Qmbu661HutCbiZmLhNjY4AQ2uTm8B3wpMCdqcQqYem2Nch
+  handlers.py: QmT9NP9Em8q6wrztbbAyVCrBZjfdjKcqxnRPskV911oK9B
+  ml_model.py: QmRthjC9yN31xhgpaPJdRycsjaa1YoXAQTfBHmCoJnJVpC
   model.json: QmdV2tGrRY6VQ5VLgUa4yqAhPDG6X8tYsWecypq8nox9Td
-  strategy.py: Qmc29qLtWrTAciEhGwBGT5m3HxcAChEGSA2wncZ4pUxiAz
-  tasks.py: Qmcdpqrh6VCaeDiCeHZA1rMuNcHqoDvxHx5cHgK3TTFnvs
+  strategy.py: QmaBCY1AocDrDbbtKbzKhwpCE8BMdd4gwhXaWvApgbnQk9
+  tasks.py: QmSbx16zRnDFHpVY7QQT25U15jKga9p7mxiMtEvSurSW1f
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/ledger:0.13.0

@@ -21,7 +21,7 @@ from multiprocessing.pool import AsyncResult
 
 import pytest
 
-from aea.skills.tasks import Task, TaskManager
+from aea.skills.tasks import Pool, Task, TaskManager
 
 
 class MyTask(Task):
@@ -116,15 +116,18 @@ class TestTaskManager:
         assert expected_task.execute_kwargs == expected_kwargs
 
         # the original instance is different than the one returned by the task manager.
-        with pytest.raises(ValueError):
-            result = my_task.result  # noqa
-        assert not my_task.is_executed
-        assert not my_task.setup_called
-        assert not my_task.execute_called
-        assert not my_task.teardown_called
-        assert my_task.execute_args is None
-        assert my_task.execute_kwargs is None
+        if Pool.__name__ != "ThreadPool":
+            with pytest.raises(ValueError):
+                result = my_task.result  # noqa
 
+            assert not my_task.is_executed
+            assert not my_task.setup_called
+            assert not my_task.execute_called
+            assert not my_task.teardown_called
+            assert my_task.execute_args is None
+            assert my_task.execute_kwargs is None
+
+    @pytest.mark.skip
     def test_task_manager_task_object_fails_when_not_pickable(self):
         """Test task manager with task object fails when the task is not pickable."""
         expected_args = [lambda x: x]
