@@ -89,7 +89,7 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
         self.run_install()
 
         process = self.run_agent()
-        is_running = self.is_running(process, timeout=30)
+        is_running = self.is_running(process)
         assert is_running, "AEA not running within timeout!"
 
         time.sleep(6)  # we wait a bit longer than the tick rate of the behaviour
