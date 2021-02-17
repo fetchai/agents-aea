@@ -16,14 +16,13 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the libp2p client connection."""
-
 import asyncio
 import logging
 import random
 import struct
 from asyncio import CancelledError
+from contextlib import suppress
 from pathlib import Path
 from typing import Any, List, Optional, Union, cast
 
@@ -74,6 +73,8 @@ class P2PLibp2pClientConnection(Connection):
     """
 
     connection_id = PUBLIC_ID
+
+    CONNECT_RETRIES = 3
 
     def __init__(self, **kwargs: Any) -> None:
         """Initialize a libp2p client connection."""
@@ -168,31 +169,68 @@ class P2PLibp2pClientConnection(Connection):
         try:
             # connect libp2p client
 
-            # connect the tcp socket
-            self._reader, self._writer = await asyncio.open_connection(
-                self.node_uri.host,
-                self.node_uri._port,  # pylint: disable=protected-access
-                loop=self.loop,
-            )
-
-            # send agent address to node
-            await self._setup_connection()
-
-            self.logger.info(
-                "Successfully connected to libp2p node {}".format(str(self.node_uri))
-            )
-
+            await self._perform_connection_to_node()
             # start receiving msgs
             self._in_queue = asyncio.Queue()
             self._process_messages_task = asyncio.ensure_future(
                 self._process_messages(), loop=self.loop
             )
             self.state = ConnectionStates.connected
-        except (CancelledError, Exception) as e:
+        except (CancelledError, Exception):
             self.state = ConnectionStates.disconnected
-            raise e
+            raise
+
+    async def _perform_connection_to_node(self) -> None:
+        """Connect to node with retries."""
+        for attempt in range(self.CONNECT_RETRIES):
+            if self.state not in [
+                ConnectionStates.connecting,
+                ConnectionStates.connected,
+            ]:
+                # do nothing if disconnected, or disconnecting
+                return  # pragma: nocover
+            try:
+                self.logger.info(
+                    "Connecting to libp2p node {}. Attempt {}".format(
+                        str(self.node_uri), attempt + 1
+                    )
+                )
+
+                # connect the tcp socket
+                self._reader, self._writer = await asyncio.open_connection(
+                    self.node_uri.host,
+                    self.node_uri._port,  # pylint: disable=protected-access
+                    loop=self.loop,
+                )
+
+                # send agent address to node
+                await self._setup_connection()
+
+                self.logger.info(
+                    "Successfully connected to libp2p node {}".format(
+                        str(self.node_uri)
+                    )
+                )
+                return
+            except Exception as e:  # pylint: disable=broad-except
+                if attempt == self.CONNECT_RETRIES - 1:
+                    self.logger.error(
+                        "Connection to  libp2p node {} failed: error: {}. It was the last attempt, exception will be raised".format(
+                            str(self.node_uri), str(e)
+                        )
+                    )
+                    self.state = ConnectionStates.disconnected
+                    raise
+                sleep_time = attempt * 2 + 1
+                self.logger.error(
+                    "Connection to  libp2p node {} failed: error: {}. Another attempt will be performed in {} seconds".format(
+                        str(self.node_uri), str(e), sleep_time
+                    )
+                )
+                await asyncio.sleep(sleep_time)
 
     async def _setup_connection(self) -> None:
+        """Set up connection to node over tcp connection."""
         record = AgentRecordPb()
         record.address = self.node_por.address
         record.public_key = self.node_por.public_key
@@ -237,10 +275,13 @@ class P2PLibp2pClientConnection(Connection):
         """
         if self.is_disconnected:  # pragma: nocover
             return
+
         if self._process_messages_task is None:
             raise ValueError("Message task is not set.")  # pragma: nocover
+
         if self._writer is None:
             raise ValueError("Writer is not set.")  # pragma: nocover
+
         self.state = ConnectionStates.disconnecting
         if self._process_messages_task is not None:
             self._process_messages_task.cancel()
@@ -248,9 +289,12 @@ class P2PLibp2pClientConnection(Connection):
             # self._process_messages_task = None # noqa: E800
 
         self.logger.debug("disconnecting libp2p client connection...")
-        self._writer.write_eof()
-        await self._writer.drain()
-        self._writer.close()
+
+        with suppress(Exception):
+            # supress if writer closed already
+            self._writer.write_eof()
+            await self._writer.drain()
+            self._writer.close()
 
         if self._in_queue is not None:
             self._in_queue.put_nowait(None)
@@ -290,7 +334,14 @@ class P2PLibp2pClientConnection(Connection):
         :return: None
         """
         self._ensure_valid_envelope_for_external_comms(envelope)
-        await self._send(envelope.encode())
+        try:
+            await self._send(envelope.encode())
+        except Exception:  # pylint: disable=broad-except
+            self.logger.exception(
+                "Exception raised on message send. Try reconnect and send again."
+            )
+            await self._perform_connection_to_node()
+            await self._send(envelope.encode())
 
     async def _process_messages(self) -> None:
         """
@@ -314,26 +365,34 @@ class P2PLibp2pClientConnection(Connection):
         self._writer.write(data)
         await self._writer.drain()
 
-    async def _receive(self) -> Optional[bytes]:
+    async def _read_message_from_reader(self) -> Optional[bytes]:
+        """Try to read message from reader."""
         if self._reader is None:
             raise ValueError("Reader is not set.")  # pragma: nocover
+
+        buf = await self._reader.readexactly(4)
+        if not buf:  # pragma: no cover
+            return None
+        size = struct.unpack("!I", buf)[0]
+        data = await self._reader.readexactly(size)
+        if not data:  # pragma: no cover
+            return None
+        return data
+
+    async def _receive(self) -> Optional[bytes]:
+        """Receive binary message."""
         try:
             self.logger.debug("Waiting for messages...")
-            buf = await self._reader.readexactly(4)
-            if not buf:  # pragma: no cover
-                return None
-            size = struct.unpack("!I", buf)[0]
-            data = await self._reader.readexactly(size)
-            if not data:  # pragma: no cover
-                return None
-            return data
+            return await self._read_message_from_reader()
         except ConnectionError as e:  # pragma: nocover
-            self.logger.info(f"Connection error: {e}")
-            return None
+            self.logger.error(f"Connection error: {e}. Try to reconnect and read again")
+            await self._perform_connection_to_node()
+            return await self._read_message_from_reader()
         except IncompleteReadError as e:  # pragma: no cover
-            self.logger.info(
+            self.logger.error(
                 "Connection disconnected while reading from node ({}/{})".format(
                     len(e.partial), e.expected
                 )
             )
-            return None
+            await self._perform_connection_to_node()
+            return await self._read_message_from_reader()
