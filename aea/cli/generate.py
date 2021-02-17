@@ -34,7 +34,12 @@ from aea.configurations.base import (
     ProtocolSpecificationParseError,
     PublicId,
 )
-from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE, PROTOCOL
+from aea.configurations.constants import (
+    DEFAULT_AEA_CONFIG_FILE,
+    PROTOCOL,
+    SUPPORTED_PROTOCOL_LANGUAGES,
+    PROTOCOL_LANGUAGE_PYTHON,
+)
 from aea.helpers.io import open_file
 from aea.protocols.generator.base import ProtocolGenerator
 
@@ -53,29 +58,37 @@ def generate(
 @click.option(
     "--l",
     "language",
-    type=str,
+    type=click.Choice(SUPPORTED_PROTOCOL_LANGUAGES),
     required=False,
-    default="python",
+    default=PROTOCOL_LANGUAGE_PYTHON,
     help="Specify the language in which to generate the protocol package.",
 )
 @pass_ctx
 def protocol(ctx: Context, protocol_specification_path: str, language: str) -> None:
     """Generate a protocol based on a specification and add it to the configuration file and agent."""
-    # Get existing items
-    existing_id_list = getattr(ctx.agent_config, "{}s".format(PROTOCOL))
-    existing_item_list = [public_id.name for public_id in existing_id_list]
-    item_type_plural = PROTOCOL + "s"
+    ctx.set_config("language", language)
+    _generate_protocol(ctx, protocol_specification_path)
+
+
+@clean_after
+def _generate_protocol(ctx: Context, protocol_specification_path: str) -> None:
+    """Generate a protocol based on a specification and add it to the configuration file and agent."""
+    protocol_plural = PROTOCOL + "s"
 
     # Create protocol generator (load, validate,
     # extract fields from protocol specification yaml file)
     try:
-        output_path = os.path.join(ctx.cwd, item_type_plural)
+        output_path = os.path.join(ctx.cwd, protocol_plural)
         protocol_generator = ProtocolGenerator(protocol_specification_path, output_path)
     except FileNotFoundError as e:
-        raise click.ClickException(str(e))  # pragma: no cover
+        raise click.ClickException(  # pragma: no cover
+            "Protocol is NOT generated. The following error happened while generating the protocol:\n"
+            + str(e)
+        )
     except yaml.YAMLError as e:
         raise click.ClickException(  # pragma: no cover
-            "Error in protocol specification yaml file:" + str(e)
+            "Protocol is NOT generated. The following error happened while generating the protocol:\n"
+            + "Error in protocol specification yaml file:" + str(e)
         )
     except ProtocolSpecificationParseError as e:
         raise click.ClickException(  # pragma: no cover
@@ -86,31 +99,32 @@ def protocol(ctx: Context, protocol_specification_path: str, language: str) -> N
         raise click.ClickException(str(e))
 
     # helpers
+    language = ctx.config.get("language")
+    existing_protocol_ids_list = getattr(ctx.agent_config, "{}s".format(PROTOCOL))
+    existing_protocol_name_list = [public_id.name for public_id in existing_protocol_ids_list]
     protocol_spec = protocol_generator.protocol_specification
     protocol_directory_path = os.path.join(
-        ctx.cwd, item_type_plural, protocol_spec.name
+        ctx.cwd, protocol_plural, protocol_spec.name
     )
     logger.debug(
         "{} already supported by the agent: {}".format(
-            item_type_plural, existing_item_list
+            protocol_plural, existing_protocol_name_list
         )
     )
 
-    # Check if we already have an item with the same name in the agent config
-    if protocol_spec.name in existing_item_list:
+    # Check if a protocol with the same name exists in the agent config
+    if protocol_spec.name in existing_protocol_name_list:
         raise click.ClickException(
-            "A {} with name '{}' already exists. Aborting...".format(
-                PROTOCOL, protocol_spec.name
-            )
+            "Protocol is NOT generated. The following error happened while generating the protocol:\n"
+            + f"A {PROTOCOL} with name '{protocol_spec.name}' already exists. Aborting..."
         )
 
-    # Check if we already have a directory with the same name in the resource
-    # directory (e.g. protocols) of the agent's directory
+    # Check if a directory with the same name as the protocol's exists
+    # in the protocols directory of the agent's directory
     if os.path.exists(protocol_directory_path):
         raise click.ClickException(
-            "A directory with name '{}' already exists. Aborting...".format(
-                protocol_spec.name
-            )
+            "Protocol is NOT generated. The following error happened while generating the protocol:\n"
+            + f"A directory with name '{protocol_spec.name}' already exists. Aborting..."
         )
 
     ctx.clean_paths.append(protocol_directory_path)
@@ -121,12 +135,10 @@ def protocol(ctx: Context, protocol_specification_path: str, language: str) -> N
         )
     )
 
-    if language == "python":
-        _generate_full_mode(ctx, protocol_generator, protocol_spec, existing_id_list)
+    if language == PROTOCOL_LANGUAGE_PYTHON:
+        _generate_full_mode(ctx, protocol_generator, protocol_spec, existing_protocol_ids_list, language)
     else:
-        _generate_protobuf_mode(
-            ctx, protocol_generator, protocol_spec, existing_id_list, language
-        )
+        _generate_protobuf_mode(ctx, protocol_generator, language)
 
 
 @clean_after
@@ -135,10 +147,11 @@ def _generate_full_mode(
     protocol_generator: ProtocolGenerator,
     protocol_spec: ProtocolSpecification,
     existing_id_list: Set[PublicId],
+    language: str,
 ) -> None:
     """Generate a protocol in 'full' mode, and add it to the configuration file and agent."""
     try:
-        warning_message = protocol_generator.generate()
+        warning_message = protocol_generator.generate(protobuf_only=False, language=language)
         if warning_message is not None:
             click.echo(warning_message)
 
@@ -169,10 +182,8 @@ def _generate_full_mode(
 
 @clean_after
 def _generate_protobuf_mode(
-    ctx: Context,
+    ctx: Context,  # pylint: disable=unused-argument
     protocol_generator: ProtocolGenerator,
-    protocol_spec: ProtocolSpecification,
-    existing_id_list: Set[PublicId],
     language: str,
 ) -> None:
     """Generate a protocol in 'protobuf' mode, and add it to the configuration file and agent."""
@@ -182,17 +193,6 @@ def _generate_protobuf_mode(
         )
         if warning_message is not None:
             click.echo(warning_message)
-
-        # Add the item to the configurations
-        logger.debug(
-            "Registering the {} into {}".format(PROTOCOL, DEFAULT_AEA_CONFIG_FILE)
-        )
-        existing_id_list.add(
-            PublicId(protocol_spec.author, protocol_spec.name, protocol_spec.version)
-        )
-        ctx.agent_loader.dump(
-            ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
-        )
     except FileExistsError:
         raise click.ClickException(  # pragma: no cover
             "A {} with this name already exists. Please choose a different name and try again.".format(

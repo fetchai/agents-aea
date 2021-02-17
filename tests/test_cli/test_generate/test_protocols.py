@@ -186,7 +186,7 @@ class TestGenerateProtocolFailsWhenDirectoryAlreadyExists:
 
         The expected message is: 'A protocol with name '{protocol_name}' already exists. Aborting...'
         """
-        s = "A directory with name '{}' already exists. Aborting...".format(
+        s = "Protocol is NOT generated. The following error happened while generating the protocol:\n" + "A directory with name '{}' already exists. Aborting...".format(
             self.protocol_name
         )
         assert self.result.exception.message == s
@@ -279,7 +279,7 @@ class TestGenerateProtocolFailsWhenProtocolAlreadyExists:
 
         The expected message is: 'A protocol with name '{protocol_name}' already exists. Aborting...'
         """
-        s = "A protocol with name 't_protocol' already exists. Aborting..."
+        s = "Protocol is NOT generated. The following error happened while generating the protocol:\n" + "A protocol with name 't_protocol' already exists. Aborting..."
         assert self.generate_result_2.exception.message == s
 
     def test_resource_directory_exists(self):

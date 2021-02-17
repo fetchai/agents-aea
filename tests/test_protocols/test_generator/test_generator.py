@@ -1118,6 +1118,28 @@ class ProtocolGeneratorTestCase(TestCase):
                 "aea.protocols.generator.base.load_protocol_specification",
                 return_value=p_spec_mock,
             ):
+                with mock.patch("aea.protocols.generator.base.validate", return_value=(True, "valid!")):
+                    with self.assertRaises(ProtocolSpecificationParseError) as cm:
+                        ProtocolGenerator(
+                            "some_path_to_protocol_specification", "some_path_to_output"
+                        )
+                        expected_msg = "Some error!"
+                        assert str(cm.exception) == expected_msg
+
+    @mock.patch(
+        "aea.protocols.generator.base.validate",
+        return_value=(False, "Some error!"),
+    )
+    def test_extract_negative_invalid_specification(self, mocked_validate):
+        """Negative test the 'extract' method: invalid protocol specification"""
+        with mock.patch("aea.protocols.generator.base.check_prerequisites"):
+            p_spec_mock = mock.MagicMock(ProtocolSpecification)
+            p_spec_mock.name = "some_name"
+            p_spec_mock.author = "some_author"
+            with mock.patch(
+                "aea.protocols.generator.base.load_protocol_specification",
+                return_value=p_spec_mock,
+            ):
                 with self.assertRaises(ProtocolSpecificationParseError) as cm:
                     ProtocolGenerator(
                         "some_path_to_protocol_specification", "some_path_to_output"
@@ -1135,14 +1157,15 @@ class ProtocolGeneratorTestCase(TestCase):
                 "aea.protocols.generator.base.load_protocol_specification",
                 return_value=p_spec_mock,
             ):
-                with mock.patch("aea.protocols.generator.base.extract"):
-                    protocol_generator = ProtocolGenerator(
-                        "some_path_to_protocol_specification", "some_path_to_output"
-                    )
-                    with self.assertRaises(ValueError) as cm:
-                        protocol_generator._change_indent(-1, "s")
-                        expected_msg = "Error: setting indent to be a negative number."
-                        assert str(cm.exception) == expected_msg
+                with mock.patch("aea.protocols.generator.base.validate", return_value=(True, "valid!")):
+                    with mock.patch("aea.protocols.generator.base.extract"):
+                        protocol_generator = ProtocolGenerator(
+                            "some_path_to_protocol_specification", "some_path_to_output"
+                        )
+                        with self.assertRaises(ValueError) as cm:
+                            protocol_generator._change_indent(-1, "s")
+                            expected_msg = "Error: setting indent to be a negative number."
+                            assert str(cm.exception) == expected_msg
 
     def test_change_indent_negative_decreasing_more_spaces_than_available(self):
         """Negative test for the '_change_indent' method: decreasing more spaces than available."""
@@ -1154,17 +1177,18 @@ class ProtocolGeneratorTestCase(TestCase):
                 "aea.protocols.generator.base.load_protocol_specification",
                 return_value=p_spec_mock,
             ):
-                with mock.patch("aea.protocols.generator.base.extract"):
-                    protocol_generator = ProtocolGenerator(
-                        "some_path_to_protocol_specification", "some_path_to_output"
-                    )
-                    protocol_generator.indent = "    "
-                    with self.assertRaises(ValueError) as cm:
-                        protocol_generator._change_indent(-2)
-                        expected_msg = (
-                            "Not enough spaces in the 'indent' variable to remove."
+                with mock.patch("aea.protocols.generator.base.validate",return_value=(True, "valid!")):
+                    with mock.patch("aea.protocols.generator.base.extract"):
+                        protocol_generator = ProtocolGenerator(
+                            "some_path_to_protocol_specification", "some_path_to_output"
                         )
-                        assert str(cm.exception) == expected_msg
+                        protocol_generator.indent = "    "
+                        with self.assertRaises(ValueError) as cm:
+                            protocol_generator._change_indent(-2)
+                            expected_msg = (
+                                "Not enough spaces in the 'indent' variable to remove."
+                            )
+                            assert str(cm.exception) == expected_msg
 
     def test_import_from_custom_types_module_no_custom_types(self):
         """Test the '_import_from_custom_types_module' method: no custom types."""
@@ -1176,12 +1200,13 @@ class ProtocolGeneratorTestCase(TestCase):
                 "aea.protocols.generator.base.load_protocol_specification",
                 return_value=p_spec_mock,
             ):
-                with mock.patch("aea.protocols.generator.base.extract"):
-                    protocol_generator = ProtocolGenerator(
-                        "some_path_to_protocol_specification", "some_path_to_output"
-                    )
-                    protocol_generator.spec.all_custom_types = []
-                    assert protocol_generator._import_from_custom_types_module() == ""
+                with mock.patch("aea.protocols.generator.base.validate", return_value=(True, "valid!")):
+                    with mock.patch("aea.protocols.generator.base.extract"):
+                        protocol_generator = ProtocolGenerator(
+                            "some_path_to_protocol_specification", "some_path_to_output"
+                        )
+                        protocol_generator.spec.all_custom_types = []
+                        assert protocol_generator._import_from_custom_types_module() == ""
 
     def test_protocol_buffer_schema_str(self):
         """Negative test for the '_protocol_buffer_schema_str' method: 1 line protobuf snippet."""
@@ -1197,31 +1222,32 @@ class ProtocolGeneratorTestCase(TestCase):
                 "aea.protocols.generator.base.load_protocol_specification",
                 return_value=p_spec_mock,
             ):
-                with mock.patch("aea.protocols.generator.base.extract"):
-                    protocol_generator = ProtocolGenerator(
-                        "some_path_to_protocol_specification", "some_path_to_output"
-                    )
-                    protocol_generator.spec.all_custom_types = ["SomeCustomType"]
-                    protocol_generator.protocol_specification.protobuf_snippets = {
-                        "ct:SomeCustomType": "bytes description = 1;"
-                    }
-                    proto_buff_schema_str = (
-                        protocol_generator._protocol_buffer_schema_str()
-                    )
-                    print(proto_buff_schema_str)
-                    expected = (
-                        'syntax = "proto3";\n\n'
-                        "package aea.some_author.some_protocol_name.v0_1_0;\n\n"
-                        "message SomeNameMessage{\n\n"
-                        "    // Custom Types\n"
-                        "    message SomeCustomType{\n"
-                        "        bytes description = 1;    }\n\n\n"
-                        "    // Performatives and contents\n\n"
-                        "    oneof performative{\n"
-                        "    }\n"
-                        "}\n"
-                    )
-                    assert proto_buff_schema_str == expected
+                with mock.patch("aea.protocols.generator.base.validate", return_value=(True, "valid!")):
+                    with mock.patch("aea.protocols.generator.base.extract"):
+                        protocol_generator = ProtocolGenerator(
+                            "some_path_to_protocol_specification", "some_path_to_output"
+                        )
+                        protocol_generator.spec.all_custom_types = ["SomeCustomType"]
+                        protocol_generator.protocol_specification.protobuf_snippets = {
+                            "ct:SomeCustomType": "bytes description = 1;"
+                        }
+                        proto_buff_schema_str = (
+                            protocol_generator._protocol_buffer_schema_str()
+                        )
+                        print(proto_buff_schema_str)
+                        expected = (
+                            'syntax = "proto3";\n\n'
+                            "package aea.some_author.some_protocol_name.v0_1_0;\n\n"
+                            "message SomeNameMessage{\n\n"
+                            "    // Custom Types\n"
+                            "    message SomeCustomType{\n"
+                            "        bytes description = 1;    }\n\n\n"
+                            "    // Performatives and contents\n\n"
+                            "    oneof performative{\n"
+                            "    }\n"
+                            "}\n"
+                        )
+                        assert proto_buff_schema_str == expected
 
     def test_generate_protobuf_only_mode_positive(self):
         """Positive test for the 'generate_protobuf_only_mode' method."""

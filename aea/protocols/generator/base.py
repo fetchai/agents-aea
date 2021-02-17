@@ -30,6 +30,10 @@ from typing import Optional, Tuple
 
 # pylint: skip-file
 from aea.configurations.base import ProtocolSpecificationParseError
+from aea.configurations.constants import (
+    SUPPORTED_PROTOCOL_LANGUAGES,
+    PROTOCOL_LANGUAGE_PYTHON,
+)
 from aea.configurations.data_types import PublicId
 from aea.protocols.generator.common import (
     CUSTOM_TYPES_DOT_PY_FILE_NAME,
@@ -1926,7 +1930,7 @@ class ProtocolGenerator:
         return init_str
 
     def generate_protobuf_only_mode(
-        self, language: str = "python", run_protolint: bool = True
+        self, language: str = PROTOCOL_LANGUAGE_PYTHON, run_protolint: bool = False
     ) -> str:
         """
         Run the generator in "protobuf only" mode:
@@ -1939,6 +1943,9 @@ class ProtocolGenerator:
 
         :return: None
         """
+        if language not in SUPPORTED_PROTOCOL_LANGUAGES:
+            raise ValueError(f"Unsupported language. Expected one of {SUPPORTED_PROTOCOL_LANGUAGES}. Found {language}.")
+
         # Create the output folder
         output_folder = Path(self.path_to_generated_protocol_package)
         if not output_folder.exists():
@@ -1953,12 +1960,12 @@ class ProtocolGenerator:
 
         # Try to compile protobuf schema file
         is_compiled, msg = compile_protobuf_using_protoc(
-            self.path_to_generated_protocol_package, self.protocol_specification.name
+            self.path_to_generated_protocol_package, self.protocol_specification.name, language
         )
         if not is_compiled:
             # Remove the generated folder and files
             shutil.rmtree(output_folder)
-            raise SyntaxError("Error in the protocol buffer schema code:\n" + msg)
+            raise SyntaxError("Error when trying to compile the protocol buffer schema file:\n" + msg)
 
         if run_protolint:
             self.run_protolint_for_file(
@@ -1968,18 +1975,19 @@ class ProtocolGenerator:
                 )
             )
 
-        # Run black formatting
-        try_run_black_formatting(self.path_to_generated_protocol_package)
+        if language == PROTOCOL_LANGUAGE_PYTHON:
+            # Run black formatting
+            try_run_black_formatting(self.path_to_generated_protocol_package)
 
-        # Run isort formatting
-        try_run_isort_formatting(self.path_to_generated_protocol_package)
+            # Run isort formatting
+            try_run_isort_formatting(self.path_to_generated_protocol_package)
 
-        # Warn if specification has custom types
-        incomplete_generation_warning_msg = (
+        # Warn about the protobuf mode
+        protobuf_mode_warning_msg = (
             "The generated protocol is incomplete. It only includes the protocol buffer definitions. "
             + "You must implement and add other definitions (e.g. messages, serialisation, dialogue, etc) to this package."
         )
-        return incomplete_generation_warning_msg
+        return protobuf_mode_warning_msg
 
     @staticmethod
     def run_protolint_for_file(filepath: str) -> None:
@@ -1997,7 +2005,7 @@ class ProtocolGenerator:
         cmd = f'{protolint_base_cmd} lint -fix "{filepath}"'
         call(cmd, shell=True)  # nosec
 
-    def generate_full_mode(self) -> Optional[str]:
+    def generate_full_mode(self, language: str) -> Optional[str]:
         """
         Run the generator in "full" mode:
 
@@ -2009,8 +2017,11 @@ class ProtocolGenerator:
 
         :return: optional warning message
         """
+        if language != PROTOCOL_LANGUAGE_PYTHON:
+            raise ValueError("Currently the framework supports full generation of protocols only in Python.")
+
         # Run protobuf only mode
-        self.generate_protobuf_only_mode()
+        self.generate_protobuf_only_mode(language=PROTOCOL_LANGUAGE_PYTHON)
 
         # Generate Python protocol package
         _create_protocol_file(
@@ -2067,7 +2078,7 @@ class ProtocolGenerator:
         return incomplete_generation_warning_msg
 
     def generate(
-        self, protobuf_only: bool = False, language: str = "python"
+        self, protobuf_only: bool = False, language: str = PROTOCOL_LANGUAGE_PYTHON
     ) -> Optional[str]:
         """
         Run the generator. If in "full" mode (protobuf_only is False), it:
@@ -2088,7 +2099,7 @@ class ProtocolGenerator:
         if protobuf_only:
             message = self.generate_protobuf_only_mode(language)  # type: Optional[str]
         else:
-            message = self.generate_full_mode()
+            message = self.generate_full_mode(language)
         return message
 
 
