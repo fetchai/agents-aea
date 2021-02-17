@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the handler for the 'ml_train' skill."""
-
 import pickle  # nosec
 from typing import Optional, cast
 
@@ -48,6 +47,7 @@ from packages.fetchai.skills.ml_train.dialogues import (
     SigningDialogues,
 )
 from packages.fetchai.skills.ml_train.strategy import Strategy
+from packages.fetchai.skills.ml_train.tasks import MLTrainTask
 
 
 DUMMY_DIGEST = "dummy_digest"
@@ -199,7 +199,11 @@ class MlTradeHandler(Handler):
                     ml_trade_msg.sender[-5:], data[0].shape, terms.values
                 )
             )
-            self.context.ml_model.update(data[0], data[1], 5)
+            self.context.task_manager.enqueue_task(
+                MLTrainTask(
+                    skill_context=self.context, train_data=data[:2], epochs_per_batch=5,
+                )
+            )
             self.context.strategy.is_searching = True
 
     def _handle_invalid(

@@ -16,10 +16,9 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the handler for the 'gym' skill."""
 
-from typing import Any, cast
+from typing import Any, Optional, cast
 
 from aea.protocols.base import Message
 from aea.skills.base import Handler
@@ -45,13 +44,13 @@ class GymHandler(Handler):
         nb_steps = kwargs.pop("nb_steps", DEFAULT_NB_STEPS)
         super().__init__(**kwargs)
         self.task = GymTask(self.context, nb_steps)
+        self._task_id: Optional[int] = None
 
     def setup(self) -> None:
         """Set up the handler."""
         self.context.logger.info("Gym handler: setup method called.")
         # launch the task
-        self.task.setup()
-        self.task.execute()
+        self._task_id = self.context.task_manager.enqueue_task(self.task)
 
     def handle(self, message: Message) -> None:
         """
