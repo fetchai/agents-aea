@@ -47,6 +47,9 @@ def _is_not_tensorflow_installed():
 class TestMLSkills(AEATestCaseManyFlaky):
     """Test that ml skills work."""
 
+    capture_log = True
+    cli_log_options = ["-v", "DEBUG"]
+
     @pytest.mark.flaky(
         reruns=MAX_FLAKY_RERUNS_INTEGRATION
     )  # cause possible network issues

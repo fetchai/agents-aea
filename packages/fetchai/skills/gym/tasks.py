@@ -20,7 +20,6 @@
 """This module contains the tasks for the 'gym' skill."""
 
 from queue import Queue
-from threading import Thread
 from typing import Any
 
 from aea.skills.base import SkillContext
@@ -40,9 +39,6 @@ class GymTask(Task):
         self._rl_agent = MyRLAgent(NB_GOODS, self.logger)
         self._proxy_env = ProxyEnv(skill_context)
         self.nb_steps = nb_steps
-        self._rl_agent_training_thread = Thread(
-            target=self._fit, args=[self._proxy_env, self.nb_steps]
-        )
         self.is_rl_agent_training = False
 
     def _fit(self, proxy_env: ProxyEnv, nb_steps: int) -> None:
@@ -81,10 +77,10 @@ class GymTask(Task):
         """Start training the RL agent."""
         self.logger.info("Training starting ...")
         self.is_rl_agent_training = True
-        self._rl_agent_training_thread.start()
+        self._fit(self._proxy_env, self.nb_steps)
 
     def _stop_training(self) -> None:
         """Stop training the RL agent."""
-        self.is_rl_agent_training = False
-        self._proxy_env.close()
-        self._rl_agent_training_thread.join()
+        if self.is_rl_agent_training:
+            self.is_rl_agent_training = False
+            self._proxy_env.close()
