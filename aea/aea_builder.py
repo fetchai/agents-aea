@@ -442,10 +442,18 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         dotted_path, class_name = decision_maker_handler_dotted_path.split(
             DOTTED_PATH_MODULE_ELEMENT_SEPARATOR
         )
-        if file_path is None:
-            module = import_module(dotted_path)
-        else:
-            module = load_module(dotted_path, file_path)
+        try:
+            if file_path is None:
+                module = import_module(dotted_path)
+            else:
+                module = load_module(dotted_path, file_path)
+        except Exception as e:  # pragma: nocover
+            self.logger.error(
+                "Could not locate decision maker handler for dotted path '{}' and file path '{}'. Error message: {}".format(
+                    dotted_path, file_path, e
+                )
+            )
+            raise  # log and re-raise because we should not build an agent from an. invalid configuration
 
         try:
             _class = getattr(module, class_name)
