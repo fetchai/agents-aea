@@ -19,7 +19,7 @@
 
 """This module contains the decision maker class."""
 
-from typing import Any, Dict, Optional, TYPE_CHECKING, cast
+from typing import Any, Dict
 
 from aea.common import Address
 from aea.crypto.wallet import Wallet
@@ -28,16 +28,6 @@ from aea.helpers.transaction.base import SignedMessage, SignedTransaction
 from aea.identity.base import Identity
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
-
-
-if TYPE_CHECKING:  # pragma: nocover
-    from packages.fetchai.protocols.signing.dialogues import (  # noqa: F401
-        SigningDialogue,
-    )
-    from packages.fetchai.protocols.signing.dialogues import (  # noqa: F401
-        SigningDialogues as BaseSigningDialogues,
-    )
-    from packages.fetchai.protocols.signing.message import SigningMessage  # noqa: F401
 
 
 class DecisionMakerHandler(BaseDecisionMakerHandler):
@@ -90,6 +80,9 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
                 **kwargs,
             )
 
+    signing_dialogue_class = SigningDialogue
+    signing_msg_class = SigningMessage
+
     def __init__(self, identity: Identity, wallet: Wallet) -> None:
         """
         Initialize the decision maker.
@@ -112,9 +105,7 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         :param message: the internal message
         :return: None
         """
-        from packages.fetchai.protocols.signing.message import SigningMessage
-
-        if isinstance(message, SigningMessage):
+        if isinstance(message, self.signing_msg_class):
             self._handle_signing_message(message)
         else:  # pragma: no cover
             self.logger.error(
@@ -130,12 +121,10 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         :param signing_msg: the transaction message
         :return: None
         """
-        from packages.fetchai.protocols.signing.dialogues import SigningDialogue
-
-        signing_dialogue = cast(
-            Optional[SigningDialogue], self.signing_dialogues.update(signing_msg)
-        )
-        if signing_dialogue is None:  # pragma: no cover
+        signing_dialogue = self.signing_dialogues.update(signing_msg)  # type: ignore
+        if signing_dialogue is None or not isinstance(
+            signing_dialogue, self.signing_dialogue_class
+        ):  # pragma: no cover
             self.logger.error(
                 "[{}]: Could not construct signing dialogue. Aborting!".format(
                     self.agent_name
@@ -143,12 +132,12 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
             )
             return
 
-        from packages.fetchai.protocols.signing.message import SigningMessage
-
-        # check if the transaction is acceptable and process it accordingly
-        if signing_msg.performative == SigningMessage.Performative.SIGN_MESSAGE:
+        if signing_msg.performative == self.signing_msg_class.Performative.SIGN_MESSAGE:
             self._handle_message_signing(signing_msg, signing_dialogue)
-        elif signing_msg.performative == SigningMessage.Performative.SIGN_TRANSACTION:
+        elif (
+            signing_msg.performative
+            == self.signing_msg_class.Performative.SIGN_TRANSACTION
+        ):
             self._handle_transaction_signing(signing_msg, signing_dialogue)
         else:  # pragma: no cover
             self.logger.error(
@@ -167,11 +156,9 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         :param signing_dialogue: the signing dialogue
         :return: None
         """
-        from packages.fetchai.protocols.signing.message import SigningMessage
-
-        performative = SigningMessage.Performative.ERROR
+        performative = self.signing_msg_class.Performative.ERROR
         kwargs = {
-            "error_code": SigningMessage.ErrorCode.UNSUCCESSFUL_MESSAGE_SIGNING,
+            "error_code": self.signing_msg_class.ErrorCode.UNSUCCESSFUL_MESSAGE_SIGNING,
         }  # type: Dict[str, Any]
         signed_message = self.wallet.sign_message(
             signing_msg.raw_message.ledger_id,
@@ -179,7 +166,7 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
             signing_msg.raw_message.is_deprecated_mode,
         )
         if signed_message is not None:
-            performative = SigningMessage.Performative.SIGNED_MESSAGE
+            performative = self.signing_msg_class.Performative.SIGNED_MESSAGE
             kwargs.pop("error_code")
             kwargs["signed_message"] = SignedMessage(
                 signing_msg.raw_message.ledger_id,
@@ -201,17 +188,15 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         :param signing_dialogue: the signing dialogue
         :return: None
         """
-        from packages.fetchai.protocols.signing.message import SigningMessage
-
-        performative = SigningMessage.Performative.ERROR
+        performative = self.signing_msg_class.Performative.ERROR
         kwargs = {
-            "error_code": SigningMessage.ErrorCode.UNSUCCESSFUL_TRANSACTION_SIGNING,
+            "error_code": self.signing_msg_class.ErrorCode.UNSUCCESSFUL_TRANSACTION_SIGNING,
         }  # type: Dict[str, Any]
         signed_tx = self.wallet.sign_transaction(
             signing_msg.raw_transaction.ledger_id, signing_msg.raw_transaction.body
         )
         if signed_tx is not None:
-            performative = SigningMessage.Performative.SIGNED_TRANSACTION
+            performative = self.signing_msg_class.Performative.SIGNED_TRANSACTION
             kwargs.pop("error_code")
             kwargs["signed_transaction"] = SignedTransaction(
                 signing_msg.raw_transaction.ledger_id, signed_tx

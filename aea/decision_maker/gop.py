@@ -22,7 +22,7 @@
 import copy
 import logging
 from enum import Enum
-from typing import Any, Dict, List, Optional, TYPE_CHECKING, cast
+from typing import Any, Dict, List, Optional, cast
 
 from aea.common import Address
 from aea.crypto.wallet import Wallet
@@ -38,25 +38,6 @@ from aea.helpers.transaction.base import SignedMessage, SignedTransaction, Terms
 from aea.identity.base import Identity
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
-
-
-if TYPE_CHECKING:  # pragma: nocover
-    from packages.fetchai.protocols.signing.dialogues import (  # noqa: F401
-        SigningDialogue,
-    )
-    from packages.fetchai.protocols.signing.dialogues import (  # noqa: F401
-        SigningDialogues as BaseSigningDialogues,
-    )
-    from packages.fetchai.protocols.signing.message import SigningMessage  # noqa: F401
-    from packages.fetchai.protocols.state_update.dialogues import (  # noqa: F401
-        StateUpdateDialogue,
-    )
-    from packages.fetchai.protocols.state_update.dialogues import (  # noqa: F401
-        StateUpdateDialogues as BaseStateUpdateDialogues,
-    )
-    from packages.fetchai.protocols.state_update.message import (  # noqa: F401
-        StateUpdateMessage,
-    )
 
 
 CurrencyHoldings = Dict[str, int]  # a map from identifier to quantity
@@ -515,11 +496,19 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
     )
     from packages.fetchai.protocols.signing.message import SigningMessage  # noqa: F811
     from packages.fetchai.protocols.state_update.dialogues import (  # noqa: F811
+        StateUpdateDialogue,
+    )
+    from packages.fetchai.protocols.state_update.dialogues import (  # noqa: F811
         StateUpdateDialogues as BaseStateUpdateDialogues,
     )
     from packages.fetchai.protocols.state_update.message import (  # noqa: F811
         StateUpdateMessage,
     )
+
+    signing_dialogues_class = SigningDialogue
+    signing_msg_class = SigningMessage
+    state_update_dialogue_class = StateUpdateDialogue
+    state_update_msg_class = StateUpdateMessage
 
     class SigningDialogues(BaseSigningDialogues):
         """This class keeps track of all oef_search dialogues."""
@@ -626,12 +615,9 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         :param message: the internal message
         :return: None
         """
-        from packages.fetchai.protocols.signing.message import SigningMessage
-        from packages.fetchai.protocols.state_update.message import StateUpdateMessage
-
-        if isinstance(message, SigningMessage):
+        if isinstance(message, self.signing_msg_class):
             self._handle_signing_message(message)
-        elif isinstance(message, StateUpdateMessage):
+        elif isinstance(message, self.state_update_msg_class):
             self._handle_state_update_message(message)
         else:  # pragma: no cover
             self.logger.error(
@@ -654,12 +640,10 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
                 )
             )
 
-        from packages.fetchai.protocols.signing.dialogues import SigningDialogue
-
-        signing_dialogue = cast(
-            Optional[SigningDialogue], self.signing_dialogues.update(signing_msg)
-        )
-        if signing_dialogue is None:  # pragma: no cover
+        signing_dialogue = self.signing_dialogues.update(signing_msg)
+        if signing_dialogue is None or not isinstance(
+            signing_dialogue, self.signing_dialogues_class
+        ):  # pragma: no cover
             self.logger.error(
                 "[{}]: Could not construct signing dialogue. Aborting!".format(
                     self.agent_name
@@ -667,12 +651,13 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
             )
             return
 
-        from packages.fetchai.protocols.signing.message import SigningMessage
-
         # check if the transaction is acceptable and process it accordingly
-        if signing_msg.performative == SigningMessage.Performative.SIGN_MESSAGE:
+        if signing_msg.performative == self.signing_msg_class.Performative.SIGN_MESSAGE:
             self._handle_message_signing(signing_msg, signing_dialogue)
-        elif signing_msg.performative == SigningMessage.Performative.SIGN_TRANSACTION:
+        elif (
+            signing_msg.performative
+            == self.signing_msg_class.Performative.SIGN_TRANSACTION
+        ):
             self._handle_transaction_signing(signing_msg, signing_dialogue)
         else:  # pragma: no cover
             self.logger.error(
@@ -691,11 +676,9 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         :param signing_dialogue: the signing dialogue
         :return: None
         """
-        from packages.fetchai.protocols.signing.message import SigningMessage
-
-        performative = SigningMessage.Performative.ERROR
+        performative = self.signing_msg_class.Performative.ERROR
         kwargs = {
-            "error_code": SigningMessage.ErrorCode.UNSUCCESSFUL_MESSAGE_SIGNING,
+            "error_code": self.signing_msg_class.ErrorCode.UNSUCCESSFUL_MESSAGE_SIGNING,
         }  # type: Dict[str, Any]
         if self._is_acceptable_for_signing(signing_msg):
             signed_message = self.wallet.sign_message(
@@ -704,7 +687,7 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
                 signing_msg.raw_message.is_deprecated_mode,
             )
             if signed_message is not None:
-                performative = SigningMessage.Performative.SIGNED_MESSAGE
+                performative = self.signing_msg_class.Performative.SIGNED_MESSAGE
                 kwargs.pop("error_code")
                 kwargs["signed_message"] = SignedMessage(
                     signing_msg.raw_message.ledger_id,
@@ -726,18 +709,16 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         :param signing_dialogue: the signing dialogue
         :return: None
         """
-        from packages.fetchai.protocols.signing.message import SigningMessage
-
-        performative = SigningMessage.Performative.ERROR
+        performative = self.signing_msg_class.Performative.ERROR
         kwargs = {
-            "error_code": SigningMessage.ErrorCode.UNSUCCESSFUL_TRANSACTION_SIGNING,
+            "error_code": self.signing_msg_class.ErrorCode.UNSUCCESSFUL_TRANSACTION_SIGNING,
         }  # type: Dict[str, Any]
         if self._is_acceptable_for_signing(signing_msg):
             signed_tx = self.wallet.sign_transaction(
                 signing_msg.raw_transaction.ledger_id, signing_msg.raw_transaction.body
             )
             if signed_tx is not None:
-                performative = SigningMessage.Performative.SIGNED_TRANSACTION
+                performative = self.signing_msg_class.Performative.SIGNED_TRANSACTION
                 kwargs.pop("error_code")
                 kwargs["signed_transaction"] = SignedTransaction(
                     signing_msg.raw_transaction.ledger_id, signed_tx
@@ -768,15 +749,10 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         :param state_update_message: the state update message
         :return: None
         """
-        from packages.fetchai.protocols.state_update.dialogues import (  # noqa: F811
-            StateUpdateDialogue,
-        )
-
-        state_update_dialogue = cast(
-            Optional[StateUpdateDialogue],
-            self.state_update_dialogues.update(state_update_msg),
-        )
-        if state_update_dialogue is None:  # pragma: no cover
+        state_update_dialogue = self.state_update_dialogues.update(state_update_msg)
+        if state_update_dialogue is None or not isinstance(
+            state_update_dialogue, self.state_update_dialogue_class
+        ):  # pragma: no cover
             self.logger.error(
                 "[{}]: Could not construct state_update dialogue. Aborting!".format(
                     self.agent_name
@@ -784,9 +760,10 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
             )
             return
 
-        from packages.fetchai.protocols.state_update.message import StateUpdateMessage
-
-        if state_update_msg.performative == StateUpdateMessage.Performative.INITIALIZE:
+        if (
+            state_update_msg.performative
+            == self.state_update_msg_class.Performative.INITIALIZE
+        ):
             self.logger.info(
                 "[{}]: Applying ownership_state and preferences initialization!".format(
                     self.agent_name
@@ -803,7 +780,10 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
             self.context.goal_pursuit_readiness.update(
                 GoalPursuitReadiness.Status.READY
             )
-        elif state_update_msg.performative == StateUpdateMessage.Performative.APPLY:
+        elif (
+            state_update_msg.performative
+            == self.state_update_msg_class.Performative.APPLY
+        ):
             self.logger.info("[{}]: Applying state update!".format(self.agent_name))
             self.context.ownership_state.apply_delta(
                 delta_amount_by_currency_id=state_update_msg.amount_by_currency_id,

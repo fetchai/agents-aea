@@ -147,6 +147,12 @@ class TestTacSkills(AEATestCaseManyFlaky):
             self.set_config("agent.default_ledger", FETCHAI)
             setting_path = "agent.default_routing"
             self.nested_set_config(setting_path, default_routing)
+            data = {
+                "dotted_path": "aea.decision_maker.gop:DecisionMakerHandler",
+                "file_path": None,
+            }
+            setting_path = "agent.decision_maker_handler"
+            self.nested_set_config(setting_path, data)
             self.run_install()
             diff = self.difference_to_fetched_agent(
                 "fetchai/tac_participant:0.21.0", agent_name
@@ -434,6 +440,12 @@ class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache):
                 True,
                 "bool",
             )
+            data = {
+                "dotted_path": "aea.decision_maker.gop:DecisionMakerHandler",
+                "file_path": None,
+            }
+            setting_path = "agent.decision_maker_handler"
+            self.nested_set_config(setting_path, data)
             self.run_install()
             diff = self.difference_to_fetched_agent(
                 "fetchai/tac_participant_contract:0.11.0", agent_name

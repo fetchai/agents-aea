@@ -26,6 +26,7 @@ import subprocess  # nosec
 import sys
 from collections import defaultdict
 from copy import deepcopy
+from importlib import import_module
 from pathlib import Path
 from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Type, Union, cast
 
@@ -428,7 +429,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         return self
 
     def set_decision_maker_handler(
-        self, decision_maker_handler_dotted_path: str, file_path: Path
+        self, decision_maker_handler_dotted_path: str, file_path: Optional[Path]
     ) -> "AEABuilder":
         """
         Set decision maker handler class.
@@ -441,7 +442,10 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         dotted_path, class_name = decision_maker_handler_dotted_path.split(
             DOTTED_PATH_MODULE_ELEMENT_SEPARATOR
         )
-        module = load_module(dotted_path, file_path)
+        if file_path is None:
+            module = import_module(dotted_path)
+        else:
+            module = load_module(dotted_path, file_path)
 
         try:
             _class = getattr(module, class_name)
