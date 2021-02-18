@@ -168,6 +168,11 @@ aea config set --type dict agent.default_routing \
   "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
   "fetchai/oef_search:0.13.0": "fetchai/soef:0.16.0"
 }'
+aea config set --type dict agent.decision_maker_handler \
+'{
+  "dotted_path": "aea.decision_maker.gop:DecisionMakerHandler",
+  "file_path": null
+}'
 aea install
 aea build
 ```
@@ -186,6 +191,11 @@ aea config set --type dict agent.default_routing \
 '{
   "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
   "fetchai/oef_search:0.13.0": "fetchai/soef:0.16.0"
+}'
+aea config set --type dict agent.decision_maker_handler \
+'{
+  "dotted_path": "aea.decision_maker.gop:DecisionMakerHandler",
+  "file_path": null
 }'
 aea install
 aea build

@@ -25,7 +25,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple, cast
 
 from aea.common import Address
-from aea.decision_maker.default import OwnershipState, Preferences
+from aea.decision_maker.gop import OwnershipState, Preferences
 from aea.exceptions import enforce
 from aea.helpers.search.generic import (
     AGENT_LOCATION_MODEL,

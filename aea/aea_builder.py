@@ -26,6 +26,7 @@ import subprocess  # nosec
 import sys
 from collections import defaultdict
 from copy import deepcopy
+from importlib import import_module
 from pathlib import Path
 from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Type, Union, cast
 
@@ -372,6 +373,8 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self._execution_timeout: Optional[float] = None
         self._max_reactions: Optional[int] = None
         self._decision_maker_handler_class: Optional[Type[DecisionMakerHandler]] = None
+        self._decision_maker_handler_dotted_path: Optional[str] = None
+        self._decision_maker_handler_file_path: Optional[str] = None
         self._error_handler_class: Optional[Type[AbstractErrorHandler]] = None
         self._skill_exception_policy: Optional[ExceptionPolicyEnum] = None
         self._connection_exception_policy: Optional[ExceptionPolicyEnum] = None
@@ -428,8 +431,8 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self._max_reactions = max_reactions
         return self
 
-    def set_decision_maker_handler(
-        self, decision_maker_handler_dotted_path: str, file_path: Path
+    def set_decision_maker_handler_paths(
+        self, decision_maker_handler_dotted_path: str, file_path: Optional[str]
     ) -> "AEABuilder":
         """
         Set decision maker handler class.
@@ -439,23 +442,56 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
         :return: self
         """
-        dotted_path, class_name = decision_maker_handler_dotted_path.split(
+        self._decision_maker_handler_dotted_path = decision_maker_handler_dotted_path
+        self._decision_maker_handler_file_path = file_path
+        return self
+
+    def _load_decision_maker_handler_class(
+        self,
+    ) -> Optional[Type[DecisionMakerHandler]]:
+        """
+        Load decision maker handler class.
+
+        :return: decision maker handler class
+        """
+        _class = self._get_decision_maker_handler_class()
+        if _class is not None and self._decision_maker_handler_dotted_path is not None:
+            raise ValueError(  # pragma: nocover
+                "DecisionMakerHandler class and dotted path set: can only set one!"
+            )
+        if _class is not None:
+            return _class  # pragma: nocover
+        if self._decision_maker_handler_dotted_path is None:
+            return None
+        dotted_path, class_name = self._decision_maker_handler_dotted_path.split(
             DOTTED_PATH_MODULE_ELEMENT_SEPARATOR
         )
-        module = load_module(dotted_path, file_path)
-
         try:
-            _class = getattr(module, class_name)
-            self._decision_maker_handler_class = _class
+            if self._decision_maker_handler_file_path is None:
+                module = import_module(dotted_path)
+            else:
+                module = load_module(
+                    dotted_path, Path(self._decision_maker_handler_file_path)
+                )
         except Exception as e:  # pragma: nocover
             self.logger.error(
-                "Could not locate decision maker handler for dotted path '{}', class name '{}' and file path '{}'. Error message: {}".format(
-                    dotted_path, class_name, file_path, e
+                "Could not locate decision maker handler for dotted path '{}' and file path '{}'. Error message: {}".format(
+                    dotted_path, self._decision_maker_handler_file_path, e
                 )
             )
             raise  # log and re-raise because we should not build an agent from an. invalid configuration
 
-        return self
+        try:
+            _class = getattr(module, class_name)
+        except Exception as e:  # pragma: nocover
+            self.logger.error(
+                "Could not locate decision maker handler for dotted path '{}', class name '{}' and file path '{}'. Error message: {}".format(
+                    dotted_path, class_name, self._decision_maker_handler_file_path, e
+                )
+            )
+            raise  # log and re-raise because we should not build an agent from an. invalid configuration
+
+        return _class
 
     def set_error_handler(
         self, error_handler_dotted_path: str, file_path: Path
@@ -1179,7 +1215,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             execution_timeout=self._get_execution_timeout(),
             max_reactions=self._get_max_reactions(),
             error_handler_class=self._get_error_handler_class(),
-            decision_maker_handler_class=self._get_decision_maker_handler_class(),
+            decision_maker_handler_class=self._load_decision_maker_handler_class(),
             skill_exception_policy=self._get_skill_exception_policy(),
             connection_exception_policy=self._get_connection_exception_policy(),
             currency_denominations=self._get_currency_denominations(),
@@ -1504,7 +1540,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         if agent_configuration.decision_maker_handler != {}:
             dotted_path = agent_configuration.decision_maker_handler["dotted_path"]
             file_path = agent_configuration.decision_maker_handler["file_path"]
-            self.set_decision_maker_handler(dotted_path, file_path)
+            self.set_decision_maker_handler_paths(dotted_path, file_path)
         if agent_configuration.error_handler != {}:
             dotted_path = agent_configuration.error_handler["dotted_path"]
             file_path = agent_configuration.error_handler["file_path"]
