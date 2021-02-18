@@ -111,11 +111,6 @@ def _generate_protocol(ctx: Context, protocol_specification_path: str) -> None:
     ]
     protocol_spec = protocol_generator.protocol_specification
     protocol_directory_path = os.path.join(ctx.cwd, protocol_plural, protocol_spec.name)
-    logger.debug(
-        "{} already supported by the agent: {}".format(
-            protocol_plural, existing_protocol_name_list
-        )
-    )
 
     # Check if a protocol with the same name exists in the agent config
     if protocol_spec.name in existing_protocol_name_list:

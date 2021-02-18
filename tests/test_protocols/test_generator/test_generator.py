@@ -1360,6 +1360,19 @@ class ProtocolGeneratorTestCase(TestCase):
         assert Path(path_to_protobuf_objc_headers).exists()
         assert Path(path_to_protobuf_objc_implementation).exists()
 
+    def test_generate_protobuf_only_mode_positive_js(self):
+        """Positive test for the 'generate_protobuf_only_mode' where language is JS."""
+        protocol_generator = ProtocolGenerator(PATH_TO_T_PROTOCOL_SPECIFICATION, self.t)
+        protocol_generator.generate_protobuf_only_mode(language="js")
+        path_to_protobuf_schema_file = os.path.join(
+            self.t, T_PROTOCOL_NAME, T_PROTOCOL_NAME + ".proto"
+        )
+        path_to_protobuf_js_implementation = os.path.join(
+            self.t, T_PROTOCOL_NAME, T_PROTOCOL_NAME + "_pb.js"
+        )
+        assert Path(path_to_protobuf_schema_file).exists()
+        assert Path(path_to_protobuf_js_implementation).exists()
+
     def test_generate_protobuf_only_mode_negative_incorrect_language(self):
         """Negative test for the 'generate_protobuf_only_mode' method: invalid language."""
         invalid_language = "wrong_language"
