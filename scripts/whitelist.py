@@ -252,3 +252,4 @@ MyScaffoldSyncConnection  # unused class (aea/connections/scaffold/connection.py
 run_count  # unused variable (aea/test_tools/test_cases.py:998)
 _.get_addresses  # unused method (aea/manager/project.py:284)
 _.get_connections_addresses  # unused method (aea/manager/project.py:289)
+_.check_protobuf_using_protoc  # unused function (aea/protocols/generator/common.py:420)

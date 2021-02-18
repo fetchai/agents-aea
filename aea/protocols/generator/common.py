@@ -30,6 +30,8 @@ from aea.configurations.constants import (
     DEFAULT_PROTOCOL_CONFIG_FILE,
     LIBPROTOC_VERSION,
     PACKAGES,
+    PROTOCOL_LANGUAGE_JS,
+    PROTOCOL_LANGUAGE_PYTHON,
 )
 from aea.configurations.loader import ConfigLoader
 from aea.helpers.io import open_file
@@ -397,21 +399,34 @@ def try_run_isort_formatting(path_to_protocol_package: str) -> None:
     )
 
 
-def try_run_protoc(path_to_generated_protocol_package: str, name: str) -> None:
+def try_run_protoc(
+    path_to_generated_protocol_package: str,
+    name: str,
+    language: str = PROTOCOL_LANGUAGE_PYTHON,
+) -> None:
     """
     Run 'protoc' protocol buffer compiler via subprocess.
 
     :param path_to_generated_protocol_package: path to the protocol buffer schema file.
     :param name: name of the protocol buffer schema file.
+    :param language: the target language in which to compile the protobuf schema file
 
     :return: A completed process object.
     """
+    # for closure-styled imports for JS, comment the first line and uncomment the second
+    js_commonjs_import_option = (
+        "import_style=commonjs,binary:" if language == PROTOCOL_LANGUAGE_JS else ""
+    )
+    # js_closure_import_option = "binary:" if language == PROTOCOL_LANGUAGE_JS else ""  # noqa: E800
+
+    language_part_of_the_command = f"--{language}_out={js_commonjs_import_option}{path_to_generated_protocol_package}"
+
     subprocess.run(  # nosec
         [
             "protoc",
-            "-I={}".format(path_to_generated_protocol_package),
-            "--python_out={}".format(path_to_generated_protocol_package),
-            "{}/{}.proto".format(path_to_generated_protocol_package, name),
+            f"-I={path_to_generated_protocol_package}",
+            language_part_of_the_command,
+            f"{path_to_generated_protocol_package}/{name}.proto",
         ],
         stderr=subprocess.PIPE,
         encoding="utf-8",
@@ -438,6 +453,30 @@ def check_protobuf_using_protoc(
         try_run_protoc(path_to_generated_protocol_package, name)
         os.remove(os.path.join(path_to_generated_protocol_package, name + "_pb2.py"))
         return True, "protobuf file is valid"
+    except subprocess.CalledProcessError as e:
+        pattern = name + ".proto:[0-9]+:[0-9]+: "
+        error_message = re.sub(pattern, "", e.stderr[:-1])
+        return False, error_message
+
+
+def compile_protobuf_using_protoc(
+    path_to_generated_protocol_package: str, name: str, language: str
+) -> Tuple[bool, str]:
+    """
+    Compile a protocol buffer schema file using protoc.
+
+    If successfully compiled, return True and a success message,
+    otherwise return False and the error thrown by the compiler.
+
+    :param path_to_generated_protocol_package: path to the protocol buffer schema file.
+    :param name: name of the protocol buffer schema file.
+    :param language: the target language in which to compile the protobuf schema file
+
+    :return: Boolean result and an accompanying message
+    """
+    try:
+        try_run_protoc(path_to_generated_protocol_package, name, language)
+        return True, "protobuf schema successfully compiled"
     except subprocess.CalledProcessError as e:
         pattern = name + ".proto:[0-9]+:[0-9]+: "
         error_message = re.sub(pattern, "", e.stderr[:-1])

@@ -41,6 +41,7 @@ from aea.protocols.generator.common import (
     _union_sub_type_to_protobuf_variable_name,
     check_prerequisites,
     check_protobuf_using_protoc,
+    compile_protobuf_using_protoc,
     is_installed,
     load_protocol_specification,
     try_run_black_formatting,
@@ -456,6 +457,30 @@ class TestCommon(TestCase):
     def test_check_protobuf_using_protoc_nagative(self, mocked_subprocess):
         """Negative test for the 'check_protobuf_using_protoc' method: protoc has some errors"""
         result, msg = check_protobuf_using_protoc("some_path", "name")
+        assert result is False
+        assert msg == "some_protoc_error"
+
+    @mock.patch("aea.protocols.generator.common.try_run_protoc")
+    def test_compile_protobuf_using_protoc_positive(self, mocked_try_run_protoc):
+        """Positive test for the 'compile_protobuf_using_protoc' method"""
+        protocol_name = "protocol_name"
+
+        result, msg = compile_protobuf_using_protoc(self.t, protocol_name, "python")
+
+        mocked_try_run_protoc.assert_called_once()
+        assert result is True
+        assert msg == "protobuf schema successfully compiled"
+
+    @mock.patch(
+        "subprocess.run",
+        side_effect=CalledProcessError(
+            1, "some_command", stderr="protocol_name.proto:12:45: some_protoc_error\n"
+        ),
+    )
+    def test_compile_protobuf_using_protoc_nagative(self, mocked_subprocess):
+        """Negative test for the 'check_protobuf_using_protoc' method: protoc has some errors"""
+        protocol_name = "protocol_name"
+        result, msg = compile_protobuf_using_protoc(self.t, protocol_name, "python")
         assert result is False
         assert msg == "some_protoc_error"
 
