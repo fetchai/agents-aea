@@ -371,7 +371,9 @@ class TestMultiAgentManagerAsyncMode(
             {
                 "agent_name": self.agent_name,
                 "public_id": str(self.project_public_id),
-                "addresses": {},
+                "addresses": self.manager.get_agent_alias(
+                    self.agent_name
+                ).get_addresses(),
                 "is_running": False,
             }
         ]
