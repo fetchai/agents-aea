@@ -16,12 +16,12 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains negative tests for Libp2p tcp client connection."""
-
+import asyncio
 import os
 import shutil
 import tempfile
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -171,3 +171,49 @@ class TestLibp2pClientConnectionNodeDisconnected:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
+
+
+done_future: asyncio.Future = asyncio.Future()
+done_future.set_result(None)
+
+
+@pytest.mark.asyncio
+async def test_connect_attempts():
+    """Test connect attempts."""
+    # test connects
+    con = _make_libp2p_client_connection(make_crypto(DEFAULT_LEDGER).public_key)
+    con.connect_retries = 2
+    with patch(
+        "asyncio.open_connection", side_effect=Exception("test exception on connect")
+    ) as open_connection_mock:
+        with pytest.raises(Exception, match="test exception on connect"):
+            await con.connect()
+        assert open_connection_mock.call_count == con.connect_retries
+
+
+@pytest.mark.asyncio
+async def test_reconnect_on_receive_fail():
+    """Test reconnect on receive fails."""
+    con = _make_libp2p_client_connection(make_crypto(DEFAULT_LEDGER).public_key)
+    mock_reader = Mock()
+    mock_reader.readexactly.side_effect = ConnectionError("oops")
+    con._reader = mock_reader
+    con._in_queue = Mock()
+    with patch.object(
+        con, "_perform_connection_to_node", return_value=done_future
+    ) as connect_mock:
+        assert await con._receive() is None
+        connect_mock.assert_called()
+
+
+@pytest.mark.asyncio
+async def test_reconnect_on_send_fail():
+    """Test reconnect on send fails."""
+    con = _make_libp2p_client_connection(make_crypto(DEFAULT_LEDGER).public_key)
+    # test reconnect on send fails
+    with patch.object(
+        con, "_perform_connection_to_node", return_value=done_future
+    ) as connect_mock, patch.object(con, "_ensure_valid_envelope_for_external_comms"):
+        with pytest.raises(ValueError, match="Writer is not set."):
+            await con.send(Mock())
+        connect_mock.assert_called()
