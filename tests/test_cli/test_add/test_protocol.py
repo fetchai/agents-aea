@@ -16,10 +16,9 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the tests for the `aea add protocol` sub-command."""
-
 import os
+import re
 import shutil
 import tempfile
 import unittest.mock
@@ -375,8 +374,10 @@ class TestAddProtocolFailsWhenConfigFileIsNotCompliant:
 
         The expected message is: 'Protocol configuration file not valid: ...'
         """
-        s = "Protocol configuration file not valid: test error message"
-        assert self.result.exception.message == s
+        assert re.match(
+            "Protocol configuration file '.*' not valid: test error message",
+            self.result.exception.message,
+        )
 
     @classmethod
     def teardown_class(cls):
