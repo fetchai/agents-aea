@@ -33,7 +33,7 @@ class SigningHandler(Handler):
 
 ## Custom `DecisionMaker`
 
-The framework implements a default <a href="../api/decision_maker/default#decisionmakerhandler-objects">`DecisionMakerHandler`</a> and an advanced decision maker <a href="../api/decision_maker/gop#decisionmakerhandler-objects">`DecisionMakerHandler`</a>. You can also implement your own and mount it.
+The framework implements a default <a href="../api/decision_maker/default#decisionmakerhandler-objects">`DecisionMakerHandler`</a> and an advanced <a href="../api/decision_maker/gop#decisionmakerhandler-objects">`DecisionMakerHandler`</a>. You can also implement your own and mount it.
 
 No further configuration is needed to use the default. To use the advanced decison maker handler, add the following configuration to the `aea-config.yaml` of your AEA (on page 1):
 

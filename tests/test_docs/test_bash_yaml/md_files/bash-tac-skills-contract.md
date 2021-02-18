@@ -67,6 +67,11 @@ aea config set --type dict agent.default_routing \
   "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
   "fetchai/oef_search:0.13.0": "fetchai/soef:0.16.0"
 }'
+aea config set --type dict agent.decision_maker_handler \
+'{
+  "dotted_path": "aea.decision_maker.gop:DecisionMakerHandler",
+  "file_path": null
+}'
 aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
 '[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
 aea generate-key ethereum
@@ -91,6 +96,11 @@ aea config set --type dict agent.default_routing \
   "fetchai/contract_api:0.11.0": "fetchai/ledger:0.13.0",
   "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
   "fetchai/oef_search:0.13.0": "fetchai/soef:0.16.0"
+}'
+aea config set --type dict agent.decision_maker_handler \
+'{
+  "dotted_path": "aea.decision_maker.gop:DecisionMakerHandler",
+  "file_path": null
 }'
 aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
 '[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
