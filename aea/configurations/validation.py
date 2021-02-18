@@ -193,13 +193,18 @@ class ConfigValidator:
         schema_file = _get_path_to_custom_config_schema_from_type(
             component_id.component_type
         )
-        cls(schema_file, env_vars_friendly=env_vars_friendly).validate(
-            dict(
-                type=str(component_id.component_type),
-                public_id=str(component_id.public_id),
-                **configuration,
+        try:
+            cls(schema_file, env_vars_friendly=env_vars_friendly).validate(
+                dict(
+                    type=str(component_id.component_type),
+                    public_id=str(component_id.public_id),
+                    **configuration,
+                )
             )
-        )
+        except Exception as e:
+            raise ValueError(
+                f"Configuration of component ({str(component_id.component_type)}, {component_id.public_id}) is not valid. {str(e)}"
+            )
 
     def validate(self, json_data: Dict) -> None:
         """
