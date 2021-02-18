@@ -74,12 +74,15 @@ class P2PLibp2pClientConnection(Connection):
 
     connection_id = PUBLIC_ID
 
-    CONNECT_RETRIES = 3
+    DEFAULT_CONNECT_RETRIES = 3
 
     def __init__(self, **kwargs: Any) -> None:
         """Initialize a libp2p client connection."""
         super().__init__(**kwargs)
 
+        self.connect_retries = self.configuration.config.get(
+            "connect_retries", self.DEFAULT_CONNECT_RETRIES
+        )
         ledger_id = self.configuration.config.get("ledger_id", DEFAULT_LEDGER)
         if ledger_id not in SUPPORTED_LEDGER_IDS:
             raise ValueError(  # pragma: nocover
@@ -182,7 +185,7 @@ class P2PLibp2pClientConnection(Connection):
 
     async def _perform_connection_to_node(self) -> None:
         """Connect to node with retries."""
-        for attempt in range(self.CONNECT_RETRIES):
+        for attempt in range(self.connect_retries):
             if self.state not in [
                 ConnectionStates.connecting,
                 ConnectionStates.connected,
@@ -213,7 +216,7 @@ class P2PLibp2pClientConnection(Connection):
                 )
                 return
             except Exception as e:  # pylint: disable=broad-except
-                if attempt == self.CONNECT_RETRIES - 1:
+                if attempt == self.connect_retries - 1:
                     self.logger.error(
                         "Connection to  libp2p node {} failed: error: {}. It was the last attempt, exception will be raised".format(
                             str(self.node_uri), str(e)
@@ -386,13 +389,15 @@ class P2PLibp2pClientConnection(Connection):
             return await self._read_message_from_reader()
         except ConnectionError as e:  # pragma: nocover
             self.logger.error(f"Connection error: {e}. Try to reconnect and read again")
-            await self._perform_connection_to_node()
-            return await self._read_message_from_reader()
         except IncompleteReadError as e:  # pragma: no cover
             self.logger.error(
                 "Connection disconnected while reading from node ({}/{})".format(
                     len(e.partial), e.expected
                 )
             )
+        try:
             await self._perform_connection_to_node()
             return await self._read_message_from_reader()
+        except Exception:  # pragma: no cover  # pylint: disable=broad-except
+            self.logger.exception("Failed to read with reconnect!")
+            return None
