@@ -75,6 +75,7 @@ from aea.configurations.manager import (
     find_component_directory_from_component_id,
 )
 from aea.configurations.pypi import is_satisfiable, merge_dependencies
+from aea.configurations.validation import ExtraPropertiesError
 from aea.crypto.helpers import private_key_verify_or_create
 from aea.crypto.ledger_apis import DEFAULT_CURRENCY_DENOMINATIONS
 from aea.crypto.wallet import Wallet
@@ -1436,10 +1437,14 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
                     DEFAULT_AEA_CONFIG_FILE
                 )
             )
-        except jsonschema.exceptions.ValidationError:  # pragma: nocover
+        except (
+            AEAValidationError,
+            jsonschema.exceptions.ValidationError,
+            ExtraPropertiesError,
+        ) as e:  # pragma: nocover
             raise AEAValidationError(
-                "Agent configuration file '{}' is invalid. Please check the documentation.".format(
-                    DEFAULT_AEA_CONFIG_FILE
+                "Agent configuration file '{}' is invalid: `{}`. Please check the documentation.".format(
+                    DEFAULT_AEA_CONFIG_FILE, str(e)
                 )
             )
 

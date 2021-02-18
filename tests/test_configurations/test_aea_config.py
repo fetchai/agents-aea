@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tests for the aea configurations."""
 import io
 from enum import Enum
@@ -39,6 +38,7 @@ from aea.configurations.base import (
     PublicId,
 )
 from aea.configurations.loader import ConfigLoader, ConfigLoaders
+from aea.exceptions import AEAValidationError
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.yaml_utils import yaml_load_all
 
@@ -149,13 +149,16 @@ class BaseConfigTestVariable(TestCase):
     def test_incorrect_value_passed(self) -> None:
         """Test validation error on incorrect values."""
         for incorrect_value in self.INCORRECT_VALUES:
-            with self.assertRaises(ValidationError):
+            with pytest.raises(
+                AEAValidationError,
+                match="The following errors occurred during validation:",
+            ):
                 self._make_configuration(incorrect_value)
 
     def _get_aea_value(self, aea: AEA) -> Any:
         """Get AEA attribute value.
 
-        :param aea: AEA isntance to get atribute value from.
+        :param aea: AEA instance to get attribute value from.
 
         :return: value of attribute.
         """
