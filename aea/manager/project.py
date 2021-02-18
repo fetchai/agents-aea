@@ -140,6 +140,7 @@ class AgentAlias(_Base):
         if not os.path.exists(self._data_dir):
             os.makedirs(self._data_dir)
         self._agent_config: AgentConfig = self._get_agent_config(project.path)
+        self._ensure_private_keys()
 
     def set_agent_config_from_data(self, json_data: List[Dict]) -> None:
         """
@@ -150,24 +151,27 @@ class AgentAlias(_Base):
         :return: None
         """
         self._agent_config = AEABuilder.loader.load_agent_config_from_json(json_data)
+        self._ensure_private_keys()
+
+    def _ensure_private_keys(self) -> None:
+        """Add proviate keys of not present in the config."""
+        builder = self._get_builder(self.agent_config, self.project.path)
+        default_ledger = builder.get_default_ledger()
+
+        if not self.agent_config.private_key_paths.read_all():
+            self.agent_config.private_key_paths.create(
+                default_ledger, self._create_private_key(default_ledger)
+            )
+
+        if not self.agent_config.connection_private_key_paths.read_all():
+            self.agent_config.connection_private_key_paths.create(
+                default_ledger, self._create_private_key(default_ledger)
+            )
 
     @property
     def builder(self) -> AEABuilder:
         """Get builder instance."""
         builder = self._get_builder(self.agent_config, self.project.path)
-        if not builder.private_key_paths:
-            # no keys, but create one for builder only
-            default_ledger = builder.get_default_ledger()
-            builder.add_private_key(
-                default_ledger, self._create_private_key(default_ledger)
-            )
-        if not builder.connection_private_key_paths:
-            default_ledger = builder.get_default_ledger()
-            builder.add_private_key(
-                default_ledger,
-                self._create_private_key(default_ledger, is_connection=True),
-                is_connection=True,
-            )
         builder.set_name(self.agent_name)
         builder.set_runtime_mode("threaded")
         builder.set_data_dir(self._data_dir)

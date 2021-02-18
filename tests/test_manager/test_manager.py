@@ -451,7 +451,7 @@ class TestMultiAgentManagerAsyncMode(
         assert os.path.exists(cert_path)
 
     def test_get_addresses(self, *args) -> None:
-        """Test get addr for agent alias."""
+        """Test get addresses for agent alias."""
         self.test_add_agent()
         agent_alias = self.manager.get_agent_alias(self.agent_name)
         keys = {
@@ -475,6 +475,13 @@ class TestMultiAgentManagerAsyncMode(
         assert len(agent_alias.get_connections_addresses()) == len(
             crypto_registry.supported_ids
         )
+
+    def test_addresses_autoadded(self, *args) -> None:
+        """Test addresses automatically added on creation."""
+        self.test_add_agent()
+        agent_alias = self.manager.get_agent_alias(self.agent_name)
+        assert len(agent_alias.get_addresses()) == 1
+        assert len(agent_alias.get_connections_addresses()) == 1
 
 
 class TestMultiAgentManagerThreadedMode(TestMultiAgentManagerAsyncMode):
