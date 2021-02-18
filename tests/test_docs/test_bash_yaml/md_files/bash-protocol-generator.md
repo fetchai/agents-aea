@@ -2,6 +2,9 @@
 aea generate protocol <path-to-protocol-specification>
 ```
 ``` bash
+aea generate protocol --l <language> <path-to-protocol-specification>
+```
+``` bash
 aea create my_aea
 cd my_aea
 ```
