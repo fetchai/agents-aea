@@ -165,7 +165,8 @@ class AgentAlias(_Base):
 
         if not self.agent_config.connection_private_key_paths.read_all():
             self.agent_config.connection_private_key_paths.create(
-                default_ledger, self._create_private_key(default_ledger, is_connection=True)
+                default_ledger,
+                self._create_private_key(default_ledger, is_connection=True),
             )
 
     @property
