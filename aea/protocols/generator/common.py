@@ -30,8 +30,8 @@ from aea.configurations.constants import (
     DEFAULT_PROTOCOL_CONFIG_FILE,
     LIBPROTOC_VERSION,
     PACKAGES,
-    PROTOCOL_LANGUAGE_PYTHON,
     PROTOCOL_LANGUAGE_JS,
+    PROTOCOL_LANGUAGE_PYTHON,
 )
 from aea.configurations.loader import ConfigLoader
 from aea.helpers.io import open_file
@@ -414,12 +414,12 @@ def try_run_protoc(
     :return: A completed process object.
     """
     # for closure-styled imports for JS, comment the first line and uncomment the second
-    js_commonjs_import_option = "import_style=commonjs,binary:" if language == PROTOCOL_LANGUAGE_JS else ""
-    # js_closure_import_option = "binary:" if language == PROTOCOL_LANGUAGE_JS else ""
-
-    language_part_of_the_command = (
-        f"--{language}_out={js_commonjs_import_option}{path_to_generated_protocol_package}"
+    js_commonjs_import_option = (
+        "import_style=commonjs,binary:" if language == PROTOCOL_LANGUAGE_JS else ""
     )
+    # js_closure_import_option = "binary:" if language == PROTOCOL_LANGUAGE_JS else ""  # noqa: E800
+
+    language_part_of_the_command = f"--{language}_out={js_commonjs_import_option}{path_to_generated_protocol_package}"
 
     subprocess.run(  # nosec
         [
