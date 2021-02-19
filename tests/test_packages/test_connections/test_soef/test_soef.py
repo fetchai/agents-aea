@@ -548,7 +548,9 @@ class TestSoef:
             await self.connection.channel._find_around_me_handle_request(
                 message_2, internal_dialogue_2, 1, {}
             )
-            with pytest.raises(SOEFException, match=r"`find_around_me` error: .*"):
+            with pytest.raises(
+                SOEFException, match=r".* `find_around_me` .*Exception: .*"
+            ):
                 await self.connection.channel._find_around_me_handle_request(
                     message_3, internal_dialogue_3, 1, {}
                 )
@@ -571,7 +573,7 @@ class TestSoef:
             self.connection.channel, "_request_text", make_async(resp_text)
         ):
             with pytest.raises(
-                SOEFException, match=r"`acknowledge` error: .*",
+                SOEFException, match=r"`acknowledge` .*Exception: .*",
             ):
                 await self.connection.channel._register_agent()
 
@@ -605,7 +607,7 @@ class TestSoef:
         with patch.object(
             self.connection.channel, "_request_text", make_async(resp_text)
         ):
-            with pytest.raises(SOEFException, match=r"`set_position` error: .*"):
+            with pytest.raises(SOEFException, match=r"`set_position`.*Exception: .*"):
                 await self.connection.channel._set_location(agent_location)
 
         resp_text = '<?xml version="1.0" encoding="UTF-8"?><response><success>1</success></response>'
@@ -622,7 +624,7 @@ class TestSoef:
             self.connection.channel, "_request_text", make_async(resp_text)
         ):
             with pytest.raises(
-                SOEFException, match=r"`set_personality_piece` error: .*"
+                SOEFException, match=r"`set_personality_piece` .*Exception: .*"
             ):
                 await self.connection.channel._set_personality_piece(1, 1)
 
@@ -652,7 +654,9 @@ class TestSoef:
         with patch.object(
             self.connection.channel, "_request_text", make_async(resp_text)
         ):
-            with pytest.raises(SOEFException, match=r"`set_personality_piece` error:"):
+            with pytest.raises(
+                SOEFException, match=r"`set_personality_piece`.*Exception:"
+            ):
                 await self.connection.channel._set_personality_piece(1, 1)
 
         resp_text = '<?xml version="1.0" encoding="UTF-8"?><response><success>1</success></response>'
