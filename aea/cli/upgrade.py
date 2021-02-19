@@ -564,7 +564,7 @@ class InteractiveEjectHelper:
             if len(dependencies_to_upgrade) == 0:
                 # if dependencies of the package are not going to be upgraded,
                 # no need to worry about its ejection.
-                continue
+                continue  # pragma: nocover
 
             # if we are here, it means we need to eject the package.
             answer = self._prompt(package_id, dependencies_to_upgrade)

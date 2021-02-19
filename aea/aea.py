@@ -153,7 +153,7 @@ class AEA(Agent):
                 "Resource's connections list is empty! Instantiating AEA without connections..."
             )
         elif bool(self.resources.get_all_connections()) and not bool(connections):
-            self.logger.warning(
+            self.logger.warning(  # pragma: nocover
                 "No connection left after filtering! Instantiating AEA without connections..."
             )
 
