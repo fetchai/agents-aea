@@ -22,10 +22,8 @@ import os
 import shutil
 
 # pylint: skip-file
-import sys
 from datetime import date
 from pathlib import Path
-from subprocess import call  # nosec
 from typing import Optional, Tuple
 
 # pylint: skip-file
@@ -53,12 +51,12 @@ from aea.protocols.generator.common import (
     _python_pt_or_ct_type_to_proto_type,
     _to_camel_case,
     _union_sub_type_to_protobuf_variable_name,
+    apply_protolint,
     check_prerequisites,
     compile_protobuf_using_protoc,
     load_protocol_specification,
     try_run_black_formatting,
     try_run_isort_formatting,
-    try_run_protoc,
 )
 from aea.protocols.generator.extract_specification import extract
 from aea.protocols.generator.validate import validate
@@ -1930,13 +1928,14 @@ class ProtocolGenerator:
         return init_str
 
     def generate_protobuf_only_mode(
-        self, language: str = PROTOCOL_LANGUAGE_PYTHON, run_protolint: bool = True
-    ) -> str:
+        self, language: str = PROTOCOL_LANGUAGE_PYTHON, run_protolint: bool = True,
+    ) -> Optional[str]:
         """
         Run the generator in "protobuf only" mode:
 
         a) validate the protocol specification.
         b) create the protocol buffer schema file.
+        c) create the protocol buffer implementation file via 'protoc'.
 
         :param language: the target language in which to generate the package.
         :param run_protolint: whether to run protolint or not.
@@ -1947,6 +1946,8 @@ class ProtocolGenerator:
             raise ValueError(
                 f"Unsupported language. Expected one of {SUPPORTED_PROTOCOL_LANGUAGES}. Found {language}."
             )
+
+        protobuf_output = None  # type: Optional[str]
 
         # Create the output folder
         output_folder = Path(self.path_to_generated_protocol_package)
@@ -1973,53 +1974,36 @@ class ProtocolGenerator:
                 "Error when trying to compile the protocol buffer schema file:\n" + msg
             )
 
+        # Run protolint
         if run_protolint:
-            self.run_protolint_for_file(
-                os.path.join(
-                    self.path_to_generated_protocol_package,
-                    "{}.proto".format(self.protocol_specification.name),
-                )
+            is_correctly_formatted, protolint_output = apply_protolint(
+                self.path_to_generated_protocol_package,
+                self.protocol_specification.name,
             )
+            if not is_correctly_formatted and protolint_output != "":
+                protobuf_output = (
+                    "Protolint warnings:\n" + protolint_output
+                )  # pragma: no cover
 
+        # Run black and isort formatting for python
         if language == PROTOCOL_LANGUAGE_PYTHON:
-            # Run black formatting
             try_run_black_formatting(self.path_to_generated_protocol_package)
-
-            # Run isort formatting
             try_run_isort_formatting(self.path_to_generated_protocol_package)
 
-        # Warn about the protobuf mode
-        protobuf_mode_warning_msg = (
-            "The generated protocol is incomplete. It only includes the protocol buffer definitions. "
-            + "You must implement and add other definitions (e.g. messages, serialisation, dialogue, etc) to this package."
-        )
-        return protobuf_mode_warning_msg
-
-    @staticmethod
-    def run_protolint_for_file(filepath: str) -> None:
-        """Perform protolint check for file."""
-        if sys.platform.startswith("win"):
-            protolint_base_cmd = "protolint"  # pragma: nocover
-        else:
-            protolint_base_cmd = "PATH=${PATH}:${GOPATH}/bin/:~/go/bin protolint"
-
-        if call(f"{protolint_base_cmd} version", shell=True) != 0:  # nosec
-            raise ValueError(
-                "protolint is not installed! Please install from https://github.com/yoheimuta/protolint."
-            )
-
-        cmd = f'{protolint_base_cmd} lint -fix "{filepath}"'
-        call(cmd, shell=True)  # nosec
+        return protobuf_output
 
     def generate_full_mode(self, language: str) -> Optional[str]:
         """
         Run the generator in "full" mode:
 
-        a) validates the protocol specification.
-        b) creates the protocol buffer schema file.
-        c) generates python modules.
-        d) applies black formatting
-        e) applies isort formatting
+        Runs the generator in protobuf only mode:
+            a) validate the protocol specification.
+            b) create the protocol buffer schema file.
+            c) create the protocol buffer implementation file via 'protoc'.
+        Additionally:
+        d) generates python modules.
+        e) applies black formatting
+        f) applies isort formatting
 
         :return: optional warning message
         """
@@ -2029,7 +2013,9 @@ class ProtocolGenerator:
             )
 
         # Run protobuf only mode
-        self.generate_protobuf_only_mode(language=PROTOCOL_LANGUAGE_PYTHON)
+        full_mode_output = self.generate_protobuf_only_mode(
+            language=PROTOCOL_LANGUAGE_PYTHON
+        )
 
         # Generate Python protocol package
         _create_protocol_file(
@@ -2066,11 +2052,6 @@ class ProtocolGenerator:
             self._serialization_class_str(),
         )
 
-        # Run protocol buffer compiler
-        try_run_protoc(
-            self.path_to_generated_protocol_package, self.protocol_specification.name
-        )
-
         # Run black formatting
         try_run_black_formatting(self.path_to_generated_protocol_package)
 
@@ -2078,26 +2059,23 @@ class ProtocolGenerator:
         try_run_isort_formatting(self.path_to_generated_protocol_package)
 
         # Warn if specification has custom types
-        incomplete_generation_warning_msg = None  # type: Optional[str]
         if len(self.spec.all_custom_types) > 0:
             incomplete_generation_warning_msg = "The generated protocol is incomplete, because the protocol specification contains the following custom types: {}. Update the generated '{}' file with the appropriate implementations of these custom types.".format(
                 self.spec.all_custom_types, CUSTOM_TYPES_DOT_PY_FILE_NAME
             )
-        return incomplete_generation_warning_msg
+            if full_mode_output is not None:
+                full_mode_output += (
+                    incomplete_generation_warning_msg  # pragma: no cover
+                )
+            else:
+                full_mode_output = incomplete_generation_warning_msg
+        return full_mode_output
 
     def generate(
         self, protobuf_only: bool = False, language: str = PROTOCOL_LANGUAGE_PYTHON
     ) -> Optional[str]:
         """
-        Run the generator. If in "full" mode (protobuf_only is False), it:
-
-        a) validates the protocol specification.
-        b) creates the protocol buffer schema file.
-        c) generates python modules.
-        d) applies black formatting
-        e) applies isort formatting
-
-        If in "protobuf only" mode (protobuf_only is True), it only does a) and b).
+        Run the generator either in "full" or "protobuf only" mode.
 
         :param protobuf_only: mode of running the generator.
         :param language: the target language in which to generate the protocol package.
@@ -2105,10 +2083,20 @@ class ProtocolGenerator:
         :return: optional warning message.
         """
         if protobuf_only:
-            message = self.generate_protobuf_only_mode(language)  # type: Optional[str]
+            output = self.generate_protobuf_only_mode(language)  # type: Optional[str]
+
+            # Warn about the protobuf only mode
+            protobuf_mode_warning_msg = (
+                "The generated protocol is incomplete. It only includes the protocol buffer definitions. "
+                + "You must implement and add other definitions (e.g. messages, serialisation, dialogue, etc) to this package."
+            )
+            if output is not None:
+                output += protobuf_mode_warning_msg
+            else:
+                output = protobuf_mode_warning_msg
         else:
-            message = self.generate_full_mode(language)
-        return message
+            output = self.generate_full_mode(language)
+        return output
 
 
 def public_id_to_package_name(public_id: PublicId) -> str:
