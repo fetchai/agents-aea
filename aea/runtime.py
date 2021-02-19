@@ -22,6 +22,7 @@ from asyncio.events import AbstractEventLoop
 from concurrent.futures._base import CancelledError
 from contextlib import suppress
 from enum import Enum
+from platform import system
 from typing import Dict, Optional, Type, cast
 
 from aea.abstract_agent import AbstractAgent
@@ -35,6 +36,12 @@ from aea.helpers.logging import WithLogger, get_logger
 from aea.helpers.storage.generic_storage import Storage
 from aea.multiplexer import AsyncMultiplexer
 from aea.skills.tasks import TaskManager
+
+
+if system() == "Windows":  # pragma: nocover # noqa
+    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())  # type: ignore
+    new_loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(new_loop)
 
 
 class RuntimeStates(Enum):
