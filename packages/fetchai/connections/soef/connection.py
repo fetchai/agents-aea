@@ -335,7 +335,7 @@ class SOEFChannel:
                 )
             except Exception:  # pylint: disable=broad-except  # pragma: nocover
                 self.logger.exception(
-                    "Exception accurred in  _find_around_me_processor"
+                    "Exception occurred in  _find_around_me_processor"
                 )
                 await self._send_error_response(
                     oef_message,
