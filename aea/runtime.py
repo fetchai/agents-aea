@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 """This module contains the implementation of runtime for economic agent (AEA)."""
 import asyncio
+from asyncio import DefaultEventLoopPolicy
 from asyncio.events import AbstractEventLoop
 from concurrent.futures._base import CancelledError
 from contextlib import suppress
@@ -38,10 +39,20 @@ from aea.multiplexer import AsyncMultiplexer
 from aea.skills.tasks import TaskManager
 
 
-if system() == "Windows":  # pragma: nocover # noqa
-    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())  # type: ignore  # pylint: disable=no-member
-    new_loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(new_loop)
+class AEAEventLoopPolicy(DefaultEventLoopPolicy):  # type: ignore
+    """AEA EventLoop policy."""
+
+    def new_event_loop(self) -> AbstractEventLoop:  # pragma: nocover
+        """Create the event loop."""
+        loop = super().new_event_loop()
+        if system() != "Windows":
+            return loop
+        if isinstance(loop, asyncio.ProactorEventLoop):  # type: ignore
+            return loop
+        return asyncio.ProactorEventLoop()  # type: ignore
+
+
+asyncio.set_event_loop_policy(AEAEventLoopPolicy())
 
 
 class RuntimeStates(Enum):
