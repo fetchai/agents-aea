@@ -507,7 +507,7 @@ def try_run_protolint(path_to_generated_protocol_package: str, name: str) -> Non
     )
 
     # Delete temporary configuration file
-    shutil.rmtree(temp_dir)
+    shutil.rmtree(temp_dir)  # pragma: no cover
 
 
 def check_protobuf_using_protoc(
