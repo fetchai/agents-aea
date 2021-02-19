@@ -24,11 +24,7 @@ import tempfile
 from pathlib import Path
 from subprocess import CalledProcessError  # nosec
 from unittest import TestCase, mock
-from unittest.mock import patch
 
-import pytest
-
-from aea.protocols.generator.base import ProtocolGenerator
 from aea.protocols.generator.common import (
     _camel_case_to_snake_case,
     _create_protocol_file,
@@ -39,6 +35,8 @@ from aea.protocols.generator.common import (
     _python_pt_or_ct_type_to_proto_type,
     _to_camel_case,
     _union_sub_type_to_protobuf_variable_name,
+    apply_protolint,
+    base_protolint_command,
     check_prerequisites,
     check_protobuf_using_protoc,
     compile_protobuf_using_protoc,
@@ -62,6 +60,11 @@ logging.basicConfig(level=logging.INFO)
 def isort_is_not_installed_side_effect(*args, **kwargs):
     """Isort not installed."""
     return not args[0] == "isort"
+
+
+def protolint_is_not_installed_side_effect(*args, **kwargs):
+    """Protolint not installed."""
+    return not args[0] == "protolint"
 
 
 def black_is_not_installed_side_effect(*args, **kwargs):
@@ -352,6 +355,13 @@ class TestCommon(TestCase):
         """Negative test for the 'is_installed' method: programme is not installed"""
         assert is_installed("some_programme") is False
 
+    def test_base_protolint_command(self):
+        """Tests the 'base_protolint_command' method"""
+        assert (
+            base_protolint_command() == "protolint"
+            or "PATH=${PATH}:${GOPATH}/bin/:~/go/bin protolint"
+        )
+
     @mock.patch("aea.protocols.generator.common.is_installed", return_value=True)
     def test_check_prerequisites_positive(self, mocked_is_installed):
         """Positive test for the 'check_prerequisites' method"""
@@ -379,6 +389,17 @@ class TestCommon(TestCase):
         self, mocked_is_installed
     ):
         """Negative test for the 'check_prerequisites' method: isort isn't installed"""
+        with self.assertRaises(FileNotFoundError):
+            check_prerequisites()
+
+    @mock.patch(
+        "aea.protocols.generator.common.is_installed",
+        side_effect=protolint_is_not_installed_side_effect,
+    )
+    def test_check_prerequisites_negative_protolint_is_not_installed(
+        self, mocked_is_installed
+    ):
+        """Negative test for the 'check_prerequisites' method: protolint isn't installed"""
         with self.assertRaises(FileNotFoundError):
             check_prerequisites()
 
@@ -434,6 +455,12 @@ class TestCommon(TestCase):
         try_run_protoc("some_path", "some_name")
         mocked_subprocess.assert_called_once()
 
+    @mock.patch("subprocess.run")
+    def test_try_run_protolint(self, mocked_subprocess):
+        """Test the 'try_run_protolint' method"""
+        try_run_protoc("some_path", "some_name")
+        mocked_subprocess.assert_called_once()
+
     @mock.patch("aea.protocols.generator.common.try_run_protoc")
     def test_check_protobuf_using_protoc_positive(self, mocked_try_run_protoc):
         """Positive test for the 'check_protobuf_using_protoc' method"""
@@ -484,6 +511,32 @@ class TestCommon(TestCase):
         assert result is False
         assert msg == "some_protoc_error"
 
+    @mock.patch("aea.protocols.generator.common.try_run_protolint")
+    def test_apply_protolint_positive(self, mocked_try_run_protoc):
+        """Positive test for the 'apply_protolint' method"""
+        protocol_name = "protocol_name"
+
+        result, msg = apply_protolint(self.t, protocol_name)
+
+        mocked_try_run_protoc.assert_called_once()
+        assert result is True
+        assert msg == "protolint has no output"
+
+    @mock.patch(
+        "subprocess.run",
+        side_effect=CalledProcessError(
+            1,
+            "some_command",
+            stderr="protocol_name.proto:12:45: some_protoc_error\nprotocol_name.proto:12:45: incorrect indentation style ...",
+        ),
+    )
+    def test_apply_protolint_nagative(self, mocked_subprocess):
+        """Negative test for the 'apply_protolint' method: protoc has some errors"""
+        protocol_name = "protocol_name"
+        result, msg = apply_protolint(self.t, protocol_name)
+        assert result is False
+        assert msg == "protocol_name.proto:12:45: some_protoc_error"
+
     @classmethod
     def teardown_class(cls):
         """Tear the test down."""
@@ -492,10 +545,3 @@ class TestCommon(TestCase):
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
-
-
-def test_protolint_not_found():
-    """Check exception raised if protolint not installed in system."""
-    with patch("aea.protocols.generator.base.call", return_value=1):
-        with pytest.raises(ValueError, match=r"protolint is not installed!"):
-            ProtocolGenerator.run_protolint_for_file("some_file")
