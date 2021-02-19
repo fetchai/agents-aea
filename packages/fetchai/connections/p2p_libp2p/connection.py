@@ -25,10 +25,13 @@ import shutil
 import subprocess  # nosec
 import tempfile
 from asyncio import AbstractEventLoop, CancelledError
+from asyncio.futures import Future
+from asyncio.tasks import FIRST_COMPLETED
+from contextlib import suppress
 from ipaddress import ip_address
 from pathlib import Path
 from socket import gethostbyname
-from typing import Any, IO, List, Optional, Sequence, cast
+from typing import Any, IO, List, Optional, Sequence, Set, cast
 
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_LEDGER
@@ -114,6 +117,47 @@ def _golang_module_run(
         logger.debug(cmd)
         proc = subprocess.Popen(  # nosec
             cmd,
+            cwd=path,
+            env=env,
+            stdout=log_file_desc,
+            stderr=log_file_desc,
+            shell=False,
+        )
+    except Exception as e:
+        logger.error(
+            "While executing go run . {} at {} : {}".format(path, args, str(e))
+        )
+        raise e
+
+    return proc
+
+
+async def _golang_module_run_async(
+    path: str,
+    name: str,
+    args: Sequence[str],
+    log_file_desc: IO[str],
+    logger: logging.Logger = _default_logger,
+) -> asyncio.subprocess.Process:
+    """
+    Runs a built module located at `path`.
+
+    :param path: the path to the go module.
+    :param name: the name of the module.
+    :param args: the args
+    :param log_file_desc: the file descriptor of the log file.
+    :param logger: the logger
+    """
+    cmd = [os.path.join(path, name)]
+
+    cmd.extend(args)
+
+    env = os.environ
+
+    try:
+        logger.debug(cmd)
+        proc = await asyncio.create_subprocess_exec(
+            *cmd,
             cwd=path,
             env=env,
             stdout=log_file_desc,
@@ -221,7 +265,7 @@ class Libp2pNode:
         self.pipe = None  # type: Optional[IPCChannel]
 
         self._loop = None  # type: Optional[AbstractEventLoop]
-        self.proc = None  # type: Optional[subprocess.Popen]
+        self.proc: Optional[asyncio.subprocess.Process] = None
         self._log_file_desc = None  # type: Optional[IO[str]]
 
         self._config = ""
@@ -294,14 +338,32 @@ class Libp2pNode:
 
         # run node
         self.logger.info("Starting libp2p node...")
-        self.proc = _golang_module_run(
+        self.proc = await _golang_module_run_async(
             self.source, LIBP2P_NODE_MODULE_NAME, [self.env_file], self._log_file_desc
         )
-
+        process_terminated_future = asyncio.ensure_future(self.proc.wait())
+        pipe_connected_future = asyncio.ensure_future(
+            self.pipe.connect(timeout=self._connection_timeout)
+        )
         self.logger.info("Connecting to libp2p node...")
 
         try:
-            connected = await self.pipe.connect(timeout=self._connection_timeout)
+            done: Set[Future]
+            done, _ = await asyncio.wait(
+                set([process_terminated_future, pipe_connected_future]),
+                return_when=FIRST_COMPLETED,
+            )
+            if process_terminated_future in done:
+                raise ConnectionError(
+                    f"Node process terminated unexpectedly. Exit code is: {self.proc.returncode}"
+                )
+
+            process_terminated_future.cancel()
+
+            with suppress(CancelledError):
+                await process_terminated_future
+
+            connected = await pipe_connected_future
             if not connected:
                 raise Exception("Couldn't connect to libp2p process within timeout")
         except Exception as e:
@@ -322,7 +384,7 @@ class Libp2pNode:
                     "Please check log file {} for more details.".format(self.log_file)
                 )
 
-            self.stop()
+            await self.stop()
             raise e
 
         self.logger.info("Successfully connected to libp2p node!")
@@ -424,7 +486,7 @@ class Libp2pNode:
 
         return error_msg if error_msg != "" else panic_msg
 
-    def stop(self) -> None:
+    async def stop(self) -> None:
         """
         Stop the node.
 
@@ -433,11 +495,12 @@ class Libp2pNode:
         # TOFIX(LR) wait is blocking and proc can ignore terminate
         if self.proc is not None:
             self.logger.debug("Terminating node process {}...".format(self.proc.pid))
-            self.proc.terminate()
+            if self.proc.returncode is not None:
+                self.proc.terminate()
             self.logger.debug(
                 "Waiting for node process {} to terminate...".format(self.proc.pid)
             )
-            self.proc.wait()
+            await self.proc.wait()
             if self._log_file_desc is None:
                 raise ValueError("log file descriptor is not set.")  # pragma: nocover
             self._log_file_desc.close()
@@ -654,7 +717,7 @@ class P2PLibp2pConnection(Connection):
         if self._receive_from_node_task is not None:
             self._receive_from_node_task.cancel()
             self._receive_from_node_task = None
-        self.node.stop()
+        await self.node.stop()
         if self.libp2p_workdir is not None:
             shutil.rmtree(Path(self.libp2p_workdir).parent)
         if self._in_queue is not None:
@@ -677,7 +740,7 @@ class P2PLibp2pConnection(Connection):
             data = await self._in_queue.get()
             if data is None:
                 self.logger.debug("Received None.")
-                self.node.stop()
+                await self.node.stop()
                 self.state = ConnectionStates.disconnected
                 return None
                 # TOFIX(LR) attempt restarting the node?
