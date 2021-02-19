@@ -342,7 +342,7 @@ def check_prerequisites() -> None:
         )
 
     # check protolint code formatter is installed
-    if not is_installed("protolint"):
+    if subprocess.call(f"{base_protolint_command()} version", shell=True) != 0:  # nosec
         raise FileNotFoundError(
             "Cannot find protolint protocol buffer schema file linter! To install, please follow this link: https://github.com/yoheimuta/protolint."
         )
