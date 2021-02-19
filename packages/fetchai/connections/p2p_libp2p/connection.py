@@ -22,10 +22,10 @@ import logging
 import os
 import platform
 import shutil
-import subprocess  # nosec
 import tempfile
 from asyncio import AbstractEventLoop, CancelledError
 from asyncio.futures import Future
+from asyncio.subprocess import Process
 from asyncio.tasks import FIRST_COMPLETED
 from contextlib import suppress
 from ipaddress import ip_address
@@ -91,54 +91,13 @@ def _ip_all_private_or_all_public(addrs: List[str]) -> bool:
     return True
 
 
-def _golang_module_run(
-    path: str,
-    name: str,
-    args: Sequence[str],
-    log_file_desc: IO[str],
-    logger: logging.Logger = _default_logger,
-) -> subprocess.Popen:
-    """
-    Runs a built module located at `path`.
-
-    :param path: the path to the go module.
-    :param name: the name of the module.
-    :param args: the args
-    :param log_file_desc: the file descriptor of the log file.
-    :param logger: the logger
-    """
-    cmd = [os.path.join(path, name)]
-
-    cmd.extend(args)
-
-    env = os.environ
-
-    try:
-        logger.debug(cmd)
-        proc = subprocess.Popen(  # nosec
-            cmd,
-            cwd=path,
-            env=env,
-            stdout=log_file_desc,
-            stderr=log_file_desc,
-            shell=False,
-        )
-    except Exception as e:
-        logger.error(
-            "While executing go run . {} at {} : {}".format(path, args, str(e))
-        )
-        raise e
-
-    return proc
-
-
 async def _golang_module_run_async(
     path: str,
     name: str,
     args: Sequence[str],
     log_file_desc: IO[str],
     logger: logging.Logger = _default_logger,
-) -> asyncio.subprocess.Process:
+) -> Process:
     """
     Runs a built module located at `path`.
 
@@ -265,7 +224,7 @@ class Libp2pNode:
         self.pipe = None  # type: Optional[IPCChannel]
 
         self._loop = None  # type: Optional[AbstractEventLoop]
-        self.proc: Optional[asyncio.subprocess.Process] = None
+        self.proc: Optional[Process] = None
         self._log_file_desc = None  # type: Optional[IO[str]]
 
         self._config = ""
@@ -350,7 +309,7 @@ class Libp2pNode:
         try:
             done: Set[Future]
             done, _ = await asyncio.wait(
-                set([process_terminated_future, pipe_connected_future]),
+                cast(List[Future], [process_terminated_future, pipe_connected_future]),
                 return_when=FIRST_COMPLETED,
             )
             if process_terminated_future in done:
@@ -495,12 +454,16 @@ class Libp2pNode:
         # TOFIX(LR) wait is blocking and proc can ignore terminate
         if self.proc is not None:
             self.logger.debug("Terminating node process {}...".format(self.proc.pid))
-            if self.proc.returncode is not None:
-                self.proc.terminate()
-            self.logger.debug(
-                "Waiting for node process {} to terminate...".format(self.proc.pid)
-            )
-            await self.proc.wait()
+            if self.proc.returncode is None:
+                with suppress(ProcessLookupError):
+                    self.proc.terminate()
+                    self.logger.debug(
+                        "Waiting for node process {} to terminate...".format(
+                            self.proc.pid
+                        )
+                    )
+                    await self.proc.wait()
+
             if self._log_file_desc is None:
                 raise ValueError("log file descriptor is not set.")  # pragma: nocover
             self._log_file_desc.close()
