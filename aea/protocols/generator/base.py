@@ -1981,9 +1981,7 @@ class ProtocolGenerator:
                 self.protocol_specification.name,
             )
             if not is_correctly_formatted and protolint_output != "":
-                protobuf_output = (
-                    "Protolint warnings:\n" + protolint_output
-                )  # pragma: no cover
+                protobuf_output = "Protolint warnings:\n" + protolint_output
 
         # Run black and isort formatting for python
         if language == PROTOCOL_LANGUAGE_PYTHON:
@@ -2064,9 +2062,7 @@ class ProtocolGenerator:
                 self.spec.all_custom_types, CUSTOM_TYPES_DOT_PY_FILE_NAME
             )
             if full_mode_output is not None:
-                full_mode_output += (
-                    incomplete_generation_warning_msg  # pragma: no cover
-                )
+                full_mode_output += incomplete_generation_warning_msg
             else:
                 full_mode_output = incomplete_generation_warning_msg
         return full_mode_output
