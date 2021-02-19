@@ -67,8 +67,8 @@ def make_multiplexer_and_dialogues() -> Tuple[
     # create the connection and multiplexer objects
     configuration = ConnectionConfig(
         api_key="TwiCIriSl0mLahw17pyqoA",
-        soef_addr="soef.fetch.ai",
-        soef_port=9002,
+        soef_addr="s-oef.fetch.ai",
+        soef_port=443,
         restricted_to_protocols={
             OefSearchMessage.protocol_specification_id,
             OefSearchMessage.protocol_id,

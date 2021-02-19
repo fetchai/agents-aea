@@ -117,8 +117,8 @@ class TestSoefTokenStorage:
         self.token_storage_path = "test.storage"
         configuration = ConnectionConfig(
             api_key="TwiCIriSl0mLahw17pyqoA",
-            soef_addr="soef.fetch.ai",
-            soef_port=9002,
+            soef_addr="s-oef.fetch.ai",
+            soef_port=443,
             token_storage_path=self.token_storage_path,
             restricted_to_protocols={OefSearchMessage.protocol_specification_id},
             connection_id=SOEFConnection.connection_id,
@@ -183,8 +183,8 @@ class TestSoef:
         # create the connection and multiplexer objects
         configuration = ConnectionConfig(
             api_key="TwiCIriSl0mLahw17pyqoA",
-            soef_addr="soef.fetch.ai",
-            soef_port=9002,
+            soef_addr="s-oef.fetch.ai",
+            soef_port=443,
             restricted_to_protocols={OefSearchMessage.protocol_specification_id},
             connection_id=SOEFConnection.connection_id,
         )
@@ -672,8 +672,8 @@ class TestSoef:
 
         configuration = ConnectionConfig(
             api_key="TwiCIriSl0mLahw17pyqoA",
-            soef_addr="soef.fetch.ai",
-            soef_port=9002,
+            soef_addr="s-oef.fetch.ai",
+            soef_port=443,
             restricted_to_protocols={OefSearchMessage.protocol_specification_id},
             connection_id=SOEFConnection.connection_id,
             chain_identifier=chain_identifier,
@@ -690,8 +690,8 @@ class TestSoef:
 
         configuration = ConnectionConfig(
             api_key="TwiCIriSl0mLahw17pyqoA",
-            soef_addr="soef.fetch.ai",
-            soef_port=9002,
+            soef_addr="s-oef.fetch.ai",
+            soef_port=443,
             restricted_to_protocols={OefSearchMessage.protocol_specification_id},
             connection_id=SOEFConnection.connection_id,
             chain_identifier=chain_identifier,
