@@ -165,6 +165,8 @@ class TestConnectionConfig:
 
         expected_config = ConnectionConfig.from_json(original_json)
         assert isinstance(expected_config, ConnectionConfig)
+        assert isinstance(expected_config.package_dependencies, set)
+        assert not expected_config.is_abstract_component
         expected_json = expected_config.json
         actual_config = ConnectionConfig.from_json(expected_json)
         actual_json = actual_config.json
