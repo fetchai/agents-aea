@@ -32,7 +32,7 @@ from aea.multiplexer import Multiplexer
 from packages.fetchai.connections.p2p_libp2p.connection import (
     LIBP2P_NODE_MODULE_NAME,
     P2PLibp2pConnection,
-    _golang_module_run,
+    _golang_module_run_async,
     _ip_all_private_or_all_public,
 )
 
@@ -56,11 +56,12 @@ class TestP2PLibp2pConnectionFailureGolangRun:
         cls.connection = _make_libp2p_connection(data_dir=cls.t)
         cls.wrong_path = tempfile.mkdtemp()
 
-    def test_wrong_path(self):
+    @pytest.mark.asyncio
+    async def test_wrong_path(self):
         """Test the wrong path."""
         log_file_desc = open("log", "a", 1)
         with pytest.raises(Exception):
-            _golang_module_run(
+            await _golang_module_run_async(
                 self.wrong_path, LIBP2P_NODE_MODULE_NAME, [], log_file_desc
             )
 
