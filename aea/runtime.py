@@ -39,7 +39,7 @@ from aea.skills.tasks import TaskManager
 
 
 if system() == "Windows":  # pragma: nocover # noqa
-    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())  # type: ignore
+    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())  # type: ignore  # pylint: disable=no-member
     new_loop = asyncio.new_event_loop()
     asyncio.set_event_loop(new_loop)
 
