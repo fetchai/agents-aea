@@ -393,8 +393,7 @@ class TestCommon(TestCase):
             check_prerequisites()
 
     @mock.patch(
-        "aea.protocols.generator.common.is_installed",
-        side_effect=protolint_is_not_installed_side_effect,
+        "aea.protocols.generator.common.subprocess.call", return_value=1,
     )
     def test_check_prerequisites_negative_protolint_is_not_installed(
         self, mocked_is_installed

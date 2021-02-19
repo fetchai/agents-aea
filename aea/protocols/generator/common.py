@@ -23,6 +23,8 @@ import re
 import shutil
 import subprocess  # nosec
 import sys
+import tempfile
+from pathlib import Path
 from typing import Tuple
 
 from aea.configurations.base import ProtocolSpecification
@@ -80,9 +82,18 @@ ISORT_CLI_ARGS = [
     "--quiet",
 ]
 
-PATH_TO_PROTOLINT_CONFIGURATION_FILE = os.path.join(
-    CURRENT_DIR, "..", "..", "..", "protolint.yaml"
-)
+PROTOLINT_CONFIGURATION_FILE_NAME = "protolint.yaml"
+PROTOLINT_CONFIGURATION = """lint:
+  rules:
+    remove:
+      - MESSAGE_NAMES_UPPER_CAMEL_CASE
+      - ENUM_FIELD_NAMES_ZERO_VALUE_END_WITH
+      - PACKAGE_NAME_LOWER_CASE
+      - REPEATED_FIELD_NAMES_PLURALIZED
+      - FIELD_NAMES_LOWER_SNAKE_CASE"""
+
+PROTOLINT_INDENTATION_ERROR_STR = "incorrect indentation style"
+PROTOLINT_ERROR_WHITELIST = [PROTOLINT_INDENTATION_ERROR_STR]
 
 
 def _to_camel_case(text: str) -> str:
@@ -473,10 +484,18 @@ def try_run_protolint(path_to_generated_protocol_package: str, name: str) -> Non
         path_to_generated_protocol_package, f"{name}.proto",
     )
 
-    cmd = f'{base_protolint_command()} lint -config_path={PATH_TO_PROTOLINT_CONFIGURATION_FILE} -fix "{path_to_proto_file}"'
+    # Dump protolint configuration into a temporary file
+    temp_dir = tempfile.mkdtemp()
+    path_to_configuration_in_tmp_file = Path(
+        temp_dir, PROTOLINT_CONFIGURATION_FILE_NAME
+    )
+    with open_file(path_to_configuration_in_tmp_file, "w") as file:
+        file.write(PROTOLINT_CONFIGURATION)
 
-    env = os.environ.copy()
-    env["PATH"] = "${PATH}:${GOPATH}/bin/:~/go/bin:"
+    # Protolint command
+    cmd = f'{base_protolint_command()} lint -config_path={path_to_configuration_in_tmp_file} -fix "{path_to_proto_file}"'
+
+    # Execute protolint command
     subprocess.run(  # nosec
         cmd,
         stderr=subprocess.PIPE,
@@ -486,6 +505,9 @@ def try_run_protolint(path_to_generated_protocol_package: str, name: str) -> Non
         env=os.environ.copy(),
         shell=True,
     )
+
+    # Delete temporary configuration file
+    shutil.rmtree(temp_dir)
 
 
 def check_protobuf_using_protoc(
@@ -553,9 +575,14 @@ def apply_protolint(path_to_proto_file: str, name: str) -> Tuple[bool, str]:
         try_run_protolint(path_to_proto_file, name)
         return True, "protolint has no output"
     except subprocess.CalledProcessError as e:
-        error_message = "\n".join(
-            line
-            for line in e.stderr.split("\n")
-            if "incorrect indentation style" not in line
-        )
+        lines_to_show = []
+        for line in e.stderr.split("\n"):
+            to_show = True
+            for whitelist_error_str in PROTOLINT_ERROR_WHITELIST:
+                if whitelist_error_str in line:
+                    to_show = False
+                    break
+            if to_show:
+                lines_to_show.append(line)
+        error_message = "\n".join(lines_to_show)
         return False, error_message
