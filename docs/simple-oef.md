@@ -14,7 +14,7 @@ The work-flow is:
 
 When an agent registers with the soef, it is issued with a _unique reference_ which is quoted in all subsequent transactions. This way, the soef knows who its talking to. The soef is transaction based, so it does not need a permanent connection to be maintained in order to work with it. If it does not hear from an agent for a period of time, that agent will be timed out and automatically unregistered. This period of time is typically about one hour, but you can see the soef's configuration at:
 
-<a href="http://soef.fetch.ai:9002" target="_blank">http://soef.fetch.ai:9002</a>
+<a href="https://s-oef.fetch.ai:443" target="_blank">https://s-oef.fetch.ai:443</a>
 
 Agents identify themselves in a number of ways. These include their address, their given name, their classification and their genus. They can also describe how they "look" in other ways, and specify the services that they provide. 
 
@@ -124,7 +124,7 @@ Positionless searches are performed using the `find_on_this_node` operation. Thi
 
 Some limits apply to the maximum number of filters, range and returned results. This may vary from soef instance to soef instance. You can see (and parse if required) these by getting the soef status at:
 
-<a href="http://soef.fetch.ai:9002" target="_blank">http://soef.fetch.ai:9002</a>
+<a href="httpe://s-oef.fetch.ai:443" target="_blank">https://s-oef.fetch.ai:443</a>
 
 The soef returns XML that includes information about all found agents. An example of that, unparsed, looks like this:
 

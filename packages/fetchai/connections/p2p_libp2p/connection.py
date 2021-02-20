@@ -149,6 +149,7 @@ class Libp2pNode:
         logger: logging.Logger = _default_logger,
         peer_registration_delay: Optional[float] = None,
         records_storage_path: Optional[str] = None,
+        connection_timeout: Optional[float] = None,
     ):
         """
         Initialize a p2p libp2p node.
@@ -166,6 +167,7 @@ class Libp2pNode:
         :param env_file: the env file path for the exchange of environment variables
         :param logger: the logger.
         :param peer_registration_delay: add artificial delay to agent registration in seconds
+        :param connection_timeout: the connection timeout of the node
         """
 
         self.record = agent_record
@@ -226,7 +228,9 @@ class Libp2pNode:
 
         self._config = ""
         self.logger = logger
-        self._connection_timeout = PIPE_CONN_TIMEOUT
+        self._connection_timeout = (
+            connection_timeout if connection_timeout is not None else PIPE_CONN_TIMEOUT
+        )
 
     async def start(self) -> None:
         """
@@ -484,6 +488,9 @@ class P2PLibp2pConnection(Connection):
         records_storage_path = self.configuration.config.get(
             "storage_path"
         )  # Optional[str]
+        node_connection_timeout: Optional[float] = self.configuration.config.get(
+            "node_connection_timeout"
+        )
         if (
             self.has_crypto_store
             and self.crypto_store.crypto_objects.get(ledger_id, None) is not None
@@ -587,6 +594,7 @@ class P2PLibp2pConnection(Connection):
             self.logger,
             delay,
             records_storage_path,
+            node_connection_timeout,
         )
 
         self._in_queue = None  # type: Optional[asyncio.Queue]
