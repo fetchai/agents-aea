@@ -346,7 +346,11 @@ class Libp2pNode:
         """
         if self.pipe is None:
             raise ValueError("pipe is not set.")  # pragma: nocover
-        return await self.pipe.read()
+        try:
+            return await self.pipe.read()
+        except Exception as e:
+            self.logger.exception(f"Failed to read. Exception: {e}")
+            return None
 
     def describe_configuration(self) -> None:
         """Print a message discribing the libp2p node configuration"""
