@@ -348,7 +348,7 @@ class Libp2pNode:
             raise ValueError("pipe is not set.")  # pragma: nocover
         try:
             return await self.pipe.read()
-        except Exception as e:
+        except Exception as e:  # pragma: nocover pylint: disable=broad-except
             self.logger.exception(f"Failed to read. Exception: {e}")
             return None
 
