@@ -59,9 +59,6 @@ LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT = 660  # time to download ~66Mb
 
 PIPE_CONN_TIMEOUT = 10.0
 
-# TOFIX(LR) not sure is needed
-LIBP2P = "libp2p"
-
 PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.15.0")
 
 SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
@@ -211,7 +208,7 @@ class Libp2pNode:
         # log file
         self.log_file = log_file if log_file is not None else LIBP2P_NODE_LOG_FILE
         if not Path(self.log_file).is_absolute():
-            self.log_file = os.path.join(data_dir, self.log_file)
+            self.log_file = os.path.join(data_dir, self.log_file)  # pragma: nocover
         # env file
         self.env_file = env_file if env_file is not None else LIBP2P_NODE_ENV_FILE
         if not Path(self.env_file).is_absolute():
@@ -248,7 +245,7 @@ class Libp2pNode:
 
         # setup config
         if os.path.exists(self.env_file):
-            os.remove(self.env_file)
+            os.remove(self.env_file)  # pragma: nocover
         self._config = ""
         with open(self.env_file, "a") as env_file:
             self._config += "AEA_AGENT_ADDR={}\n".format(self.address)
@@ -324,7 +321,7 @@ class Libp2pNode:
                     "Please check log file {} for more details.".format(self.log_file)
                 )
 
-            self.stop()
+            await self.stop()
             raise e
 
         self.logger.info("Successfully connected to libp2p node!")
@@ -426,13 +423,12 @@ class Libp2pNode:
 
         return error_msg if error_msg != "" else panic_msg
 
-    def stop(self) -> None:
+    async def stop(self) -> None:
         """
         Stop the node.
 
         :return: None
         """
-        # TOFIX(LR) wait is blocking and proc can ignore terminate
         if self.proc is not None:
             self.logger.debug("Terminating node process {}...".format(self.proc.pid))
             self.proc.terminate()
@@ -445,6 +441,11 @@ class Libp2pNode:
             self._log_file_desc.close()
         else:
             self.logger.debug("Called stop when process not set!")  # pragma: no cover
+        if self.pipe is not None:
+            await self.pipe.close()
+            self.pipe = None
+        else:
+            self.logger.debug("Called stop when pipe not set!")  # pragma: no cover
         if os.path.exists(self.env_file):
             os.remove(self.env_file)
 
@@ -605,16 +606,6 @@ class P2PLibp2pConnection(Connection):
         )
         return self.configuration.build_directory
 
-    @property
-    def libp2p_address(self) -> str:  # pragma: no cover
-        """The address used by the node."""
-        return self.node.pub
-
-    @property
-    def libp2p_address_id(self) -> str:  # pragma: no cover
-        """The identifier for the address."""
-        return LIBP2P
-
     async def connect(self) -> None:
         """
         Set up the connection.
@@ -650,7 +641,7 @@ class P2PLibp2pConnection(Connection):
         if self._receive_from_node_task is not None:
             self._receive_from_node_task.cancel()
             self._receive_from_node_task = None
-        self.node.stop()
+        await self.node.stop()
         if self._in_queue is not None:
             self._in_queue.put_nowait(None)
         else:
@@ -671,7 +662,7 @@ class P2PLibp2pConnection(Connection):
             data = await self._in_queue.get()
             if data is None:
                 self.logger.debug("Received None.")
-                self.node.stop()
+                await self.node.stop()
                 self.state = ConnectionStates.disconnected
                 return None
                 # TOFIX(LR) attempt restarting the node?
