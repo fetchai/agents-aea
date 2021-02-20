@@ -168,7 +168,7 @@ class TestLibp2pConnectionPublicDHTRelay:
         for i in range(len(PUBLIC_DHT_MADDRS)):
             multiplexers = []
             try:
-                temp_dir_1 = os.path.join(self.t, f"dir_{i}_1")
+                temp_dir_1 = os.path.join(self.t, f"dir_{i}__")
                 os.mkdir(temp_dir_1)
                 connection1 = _make_libp2p_connection(
                     port=DEFAULT_PORT + 1,
@@ -186,7 +186,7 @@ class TestLibp2pConnectionPublicDHTRelay:
                     if j == i:
                         continue
 
-                    temp_dir_2 = os.path.join(self.t, f"dir_{i}_{j}_2")
+                    temp_dir_2 = os.path.join(self.t, f"dir_{i}_{j}")
                     os.mkdir(temp_dir_2)
                     connection2 = _make_libp2p_connection(
                         port=DEFAULT_PORT + 2,
@@ -341,7 +341,7 @@ class TestLibp2pConnectionPublicDHTDelegate:
         for i in range(len(PUBLIC_DHT_DELEGATE_URIS)):
             multiplexers = []
             try:
-                temp_dir_1 = os.path.join(self.t, f"dir_{i}_1")
+                temp_dir_1 = os.path.join(self.t, f"dir_{i}__")
                 os.mkdir(temp_dir_1)
                 connection1 = _make_libp2p_client_connection(
                     peer_public_key=PUBLIC_DHT_PUBLIC_KEYS[i],
@@ -358,7 +358,7 @@ class TestLibp2pConnectionPublicDHTDelegate:
                     if j == i:
                         continue
 
-                    temp_dir_2 = os.path.join(self.t, f"dir_{j}_2")
+                    temp_dir_2 = os.path.join(self.t, f"dir_{i}_{j}")
                     os.mkdir(temp_dir_2)
                     connection2 = _make_libp2p_client_connection(
                         peer_public_key=PUBLIC_DHT_PUBLIC_KEYS[j],

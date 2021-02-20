@@ -45,7 +45,7 @@ from tests.conftest import (
 DEFAULT_PORT = 10234
 
 
-@pytest.mark.flaky(reruns=0)
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_INTEGRATION)
 class BaseTestLibp2pRelay:
     """Base test class for libp2p connection relay."""
 
