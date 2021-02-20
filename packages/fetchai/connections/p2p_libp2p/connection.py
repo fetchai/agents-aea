@@ -21,9 +21,7 @@ import asyncio
 import logging
 import os
 import platform
-import shutil
 import subprocess  # nosec
-import tempfile
 from asyncio import AbstractEventLoop, CancelledError
 from ipaddress import ip_address
 from pathlib import Path
@@ -199,7 +197,7 @@ class Libp2pNode:
             self.records_storage_path is not None
             and not Path(self.records_storage_path).is_absolute()
         ):
-            self.records_storage_path = os.path.join(
+            self.records_storage_path = os.path.join(  # pragma: nocover
                 data_dir, self.records_storage_path
             )
 
@@ -458,8 +456,6 @@ class P2PLibp2pConnection(Connection):
 
     def __init__(self, **kwargs: Any) -> None:
         """Initialize a p2p libp2p connection."""
-
-        # we put it here so below we can access the address
         super().__init__(**kwargs)
         ledger_id = self.configuration.config.get("ledger_id", DEFAULT_LEDGER)
         if ledger_id not in SUPPORTED_LEDGER_IDS:
@@ -468,26 +464,26 @@ class P2PLibp2pConnection(Connection):
                     ledger_id, SUPPORTED_LEDGER_IDS
                 )
             )
-        libp2p_local_uri = self.configuration.config.get("local_uri")  # Optional[str]
-        libp2p_public_uri = self.configuration.config.get("public_uri")  # Optional[str]
-        libp2p_delegate_uri = self.configuration.config.get(
+        libp2p_local_uri: Optional[str] = self.configuration.config.get("local_uri")
+        libp2p_public_uri: Optional[str] = self.configuration.config.get("public_uri")
+        libp2p_delegate_uri: Optional[str] = self.configuration.config.get(
             "delegate_uri"
-        )  # Optional[str]
-        libp2p_monitoring_uri = self.configuration.config.get(
+        )
+        libp2p_monitoring_uri: Optional[str] = self.configuration.config.get(
             "monitoring_uri"
-        )  # Optional[str]
+        )
         libp2p_entry_peers = self.configuration.config.get("entry_peers")
         if libp2p_entry_peers is None:
             libp2p_entry_peers = []
         libp2p_entry_peers = list(cast(List, libp2p_entry_peers))
-        log_file = self.configuration.config.get("log_file")  # Optional[str]
-        env_file = self.configuration.config.get("env_file")  # Optional[str]
-        peer_registration_delay = self.configuration.config.get(
+        log_file: Optional[str] = self.configuration.config.get("log_file")
+        env_file: Optional[str] = self.configuration.config.get("env_file")
+        peer_registration_delay: Optional[str] = self.configuration.config.get(
             "peer_registration_delay"
-        )  # Optional[str]
-        records_storage_path = self.configuration.config.get(
+        )
+        records_storage_path: Optional[str] = self.configuration.config.get(
             "storage_path"
-        )  # Optional[str]
+        )
         node_connection_timeout: Optional[float] = self.configuration.config.get(
             "node_connection_timeout"
         )
@@ -571,13 +567,8 @@ class P2PLibp2pConnection(Connection):
 
         # libp2p local node
         self.logger.debug("Public key used by libp2p node: {}".format(key.public_key))
-        temp_dir = tempfile.mkdtemp()
-        self.libp2p_workdir = os.path.join(temp_dir, "libp2p_workdir")
 
-        self._check_node_built()
-        module_dir = self.configuration.build_directory
-        if module_dir is None:
-            raise ValueError("Build directory not set on configuration.")
+        module_dir = self._check_node_built()
         self.node = Libp2pNode(
             agent_record,
             key,
@@ -600,21 +591,19 @@ class P2PLibp2pConnection(Connection):
         self._in_queue = None  # type: Optional[asyncio.Queue]
         self._receive_from_node_task = None  # type: Optional[asyncio.Future]
 
-    def _check_node_built(self) -> None:
-        """Check node built and move it to workdir."""
-        enforce(
-            bool(self.configuration.build_directory),
-            "Connection Configuration build directory is not set!",
-        )
+    def _check_node_built(self) -> str:
+        """Check node built."""
+        if self.configuration.build_directory is None:
+            raise ValueError("Connection Configuration build directory is not set!")
 
         libp2p_node_module_path = os.path.join(
-            cast(str, self.configuration.build_directory), LIBP2P_NODE_MODULE_NAME
+            self.configuration.build_directory, LIBP2P_NODE_MODULE_NAME
         )
         enforce(
             os.path.exists(libp2p_node_module_path),
             f"Module {LIBP2P_NODE_MODULE_NAME} is not present in {self.configuration.build_directory}, please call the `aea build` command first!",
         )
-        shutil.copy(libp2p_node_module_path, self.libp2p_workdir)
+        return self.configuration.build_directory
 
     @property
     def libp2p_address(self) -> str:  # pragma: no cover
@@ -634,7 +623,6 @@ class P2PLibp2pConnection(Connection):
         """
         if self.is_connected:
             return  # pragma: nocover
-        self.state = ConnectionStates.connecting
         try:
             # start libp2p node
             self.state = ConnectionStates.connecting
@@ -663,8 +651,6 @@ class P2PLibp2pConnection(Connection):
             self._receive_from_node_task.cancel()
             self._receive_from_node_task = None
         self.node.stop()
-        if self.libp2p_workdir is not None:
-            shutil.rmtree(Path(self.libp2p_workdir).parent)
         if self._in_queue is not None:
             self._in_queue.put_nowait(None)
         else:

@@ -65,20 +65,24 @@ AEA_LIBP2P_LAUNCH_TIMEOUT = 20
 class TestLibp2pConnectionPublicDHTRelay:
     """Test that public DHT's relay service is working properly"""
 
-    @classmethod
-    def setup_class(cls):
+    def setup(self):
         """Set the test up"""
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
+        self.cwd = os.getcwd()
+        self.t = tempfile.mkdtemp()
+        os.chdir(self.t)
 
-        cls.log_files = []
+        self.log_files = []
 
     def test_connectivity(self):
         """Test connectivity."""
-        for maddr in PUBLIC_DHT_MADDRS:
+        for i, maddr in enumerate(PUBLIC_DHT_MADDRS):
+            temp_dir = os.path.join(self.t, f"dir_{i}")
+            os.mkdir(temp_dir)
             connection = _make_libp2p_connection(
-                DEFAULT_PORT + 1, relay=False, entry_peers=[maddr], data_dir=self.t
+                port=DEFAULT_PORT + 1,
+                relay=False,
+                entry_peers=[maddr],
+                data_dir=temp_dir,
             )
             multiplexer = Multiplexer([connection])
             self.log_files.append(connection.node.log_file)
@@ -95,19 +99,29 @@ class TestLibp2pConnectionPublicDHTRelay:
 
     def test_communication_direct(self):
         """Test communication direct."""
-        for maddr in PUBLIC_DHT_MADDRS:
+        for i, maddr in enumerate(PUBLIC_DHT_MADDRS):
             multiplexers = []
             try:
+                temp_dir_1 = os.path.join(self.t, f"dir_{i}_1")
+                os.mkdir(temp_dir_1)
                 connection1 = _make_libp2p_connection(
-                    DEFAULT_PORT + 1, relay=False, entry_peers=[maddr], data_dir=self.t
+                    port=DEFAULT_PORT + 1,
+                    relay=False,
+                    entry_peers=[maddr],
+                    data_dir=temp_dir_1,
                 )
                 multiplexer1 = Multiplexer([connection1])
                 self.log_files.append(connection1.node.log_file)
                 multiplexer1.connect()
                 multiplexers.append(multiplexer1)
 
+                temp_dir_2 = os.path.join(self.t, f"dir_{i}_2")
+                os.mkdir(temp_dir_2)
                 connection2 = _make_libp2p_connection(
-                    DEFAULT_PORT + 2, relay=False, entry_peers=[maddr], data_dir=self.t
+                    port=DEFAULT_PORT + 2,
+                    relay=False,
+                    entry_peers=[maddr],
+                    data_dir=temp_dir_2,
                 )
                 multiplexer2 = Multiplexer([connection2])
                 self.log_files.append(connection2.node.log_file)
@@ -154,11 +168,13 @@ class TestLibp2pConnectionPublicDHTRelay:
         for i in range(len(PUBLIC_DHT_MADDRS)):
             multiplexers = []
             try:
+                temp_dir_1 = os.path.join(self.t, f"dir_{i}_1")
+                os.mkdir(temp_dir_1)
                 connection1 = _make_libp2p_connection(
-                    DEFAULT_PORT + 1,
+                    port=DEFAULT_PORT + 1,
                     relay=False,
                     entry_peers=[PUBLIC_DHT_MADDRS[i]],
-                    data_dir=self.t,
+                    data_dir=temp_dir_1,
                 )
                 multiplexer1 = Multiplexer([connection1])
                 self.log_files.append(connection1.node.log_file)
@@ -170,11 +186,13 @@ class TestLibp2pConnectionPublicDHTRelay:
                     if j == i:
                         continue
 
+                    temp_dir_2 = os.path.join(self.t, f"dir_{i}_{j}_2")
+                    os.mkdir(temp_dir_2)
                     connection2 = _make_libp2p_connection(
-                        DEFAULT_PORT + 2,
+                        port=DEFAULT_PORT + 2,
                         relay=False,
                         entry_peers=[PUBLIC_DHT_MADDRS[j]],
-                        data_dir=self.t,
+                        data_dir=temp_dir_2,
                     )
                     multiplexer2 = Multiplexer([connection2])
                     self.log_files.append(connection2.node.log_file)
@@ -215,12 +233,11 @@ class TestLibp2pConnectionPublicDHTRelay:
                 for mux in multiplexers:
                     mux.disconnect()
 
-    @classmethod
-    def teardown_class(cls):
+    def teardown(self):
         """Tear down the test"""
-        os.chdir(cls.cwd)
+        os.chdir(self.cwd)
         try:
-            shutil.rmtree(cls.t)
+            shutil.rmtree(self.t)
         except (OSError, IOError):
             pass
 
@@ -240,8 +257,10 @@ class TestLibp2pConnectionPublicDHTDelegate:
         for i in range(len(PUBLIC_DHT_DELEGATE_URIS)):
             uri = PUBLIC_DHT_DELEGATE_URIS[i]
             peer_public_key = PUBLIC_DHT_PUBLIC_KEYS[i]
+            temp_dir = os.path.join(self.t, f"dir_{i}")
+            os.mkdir(temp_dir)
             connection = _make_libp2p_client_connection(
-                peer_public_key, uri=uri, data_dir=self.t
+                peer_public_key=peer_public_key, uri=uri, data_dir=temp_dir
             )
             multiplexer = Multiplexer([connection])
 
@@ -256,21 +275,25 @@ class TestLibp2pConnectionPublicDHTDelegate:
                 multiplexer.disconnect()
 
     def test_communication_direct(self):
-        """Test communication direct."""
+        """Test communication direct (i.e. both clients registered to same peer)."""
         for i in range(len(PUBLIC_DHT_DELEGATE_URIS)):
             uri = PUBLIC_DHT_DELEGATE_URIS[i]
             peer_public_key = PUBLIC_DHT_PUBLIC_KEYS[i]
             multiplexers = []
             try:
+                temp_dir_1 = os.path.join(self.t, f"dir_{i}_1")
+                os.mkdir(temp_dir_1)
                 connection1 = _make_libp2p_client_connection(
-                    peer_public_key, uri=uri, data_dir=self.t
+                    peer_public_key=peer_public_key, uri=uri, data_dir=temp_dir_1
                 )
                 multiplexer1 = Multiplexer([connection1])
                 multiplexer1.connect()
                 multiplexers.append(multiplexer1)
 
+                temp_dir_2 = os.path.join(self.t, f"dir_{i}_2")
+                os.mkdir(temp_dir_2)
                 connection2 = _make_libp2p_client_connection(
-                    peer_public_key, uri=uri, data_dir=self.t
+                    peer_public_key=peer_public_key, uri=uri, data_dir=temp_dir_2
                 )
                 multiplexer2 = Multiplexer([connection2])
                 multiplexer2.connect()
@@ -310,7 +333,7 @@ class TestLibp2pConnectionPublicDHTDelegate:
                     mux.disconnect()
 
     def test_communication_indirect(self):
-        """Test communication indirect."""
+        """Test communication indirect (i.e. clients registered to different peers)."""
         assert (
             len(PUBLIC_DHT_DELEGATE_URIS) > 1
         ), "Test requires at least 2 public dht node"
@@ -318,10 +341,12 @@ class TestLibp2pConnectionPublicDHTDelegate:
         for i in range(len(PUBLIC_DHT_DELEGATE_URIS)):
             multiplexers = []
             try:
+                temp_dir_1 = os.path.join(self.t, f"dir_{i}_1")
+                os.mkdir(temp_dir_1)
                 connection1 = _make_libp2p_client_connection(
-                    PUBLIC_DHT_PUBLIC_KEYS[i],
+                    peer_public_key=PUBLIC_DHT_PUBLIC_KEYS[i],
                     uri=PUBLIC_DHT_DELEGATE_URIS[i],
-                    data_dir=self.t,
+                    data_dir=temp_dir_1,
                 )
                 multiplexer1 = Multiplexer([connection1])
                 multiplexer1.connect()
@@ -333,10 +358,12 @@ class TestLibp2pConnectionPublicDHTDelegate:
                     if j == i:
                         continue
 
+                    temp_dir_2 = os.path.join(self.t, f"dir_{j}_2")
+                    os.mkdir(temp_dir_2)
                     connection2 = _make_libp2p_client_connection(
-                        PUBLIC_DHT_PUBLIC_KEYS[j],
+                        peer_public_key=PUBLIC_DHT_PUBLIC_KEYS[j],
                         uri=PUBLIC_DHT_DELEGATE_URIS[j],
-                        data_dir=self.t,
+                        data_dir=temp_dir_2,
                     )
                     multiplexer2 = Multiplexer([connection2])
                     multiplexer2.connect()
@@ -437,12 +464,6 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseEmpty):
             process
         ), "AEA wasn't successfully terminated."
 
-    @classmethod
-    def teardown_class(cls):
-        """Tear down the test"""
-        cls.terminate_agents()
-        super(TestLibp2pConnectionPublicDHTRelayAEACli, cls).teardown_class()
-
 
 @pytest.mark.integration
 class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseEmpty):
@@ -494,9 +515,3 @@ class TestLibp2pConnectionPublicDHTDelegateAEACli(AEATestCaseEmpty):
         assert self.is_successfully_terminated(
             process
         ), "AEA wasn't successfully terminated."
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear down the test"""
-        cls.terminate_agents()
-        super(TestLibp2pConnectionPublicDHTDelegateAEACli, cls).teardown_class()

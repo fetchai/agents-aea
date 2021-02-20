@@ -327,7 +327,7 @@ class SOEFChannel:
                 GeneratorExit,
             ):  # pylint: disable=try-except-raise
                 return
-            except SOEFException:
+            except SOEFException:  # pragma: nocover
                 await self._send_error_response(
                     oef_message,
                     oef_search_dialogue,

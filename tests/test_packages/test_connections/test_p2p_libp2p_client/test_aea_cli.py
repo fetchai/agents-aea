@@ -18,6 +18,8 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains AEA cli tests for Libp2p tcp client connection."""
+import os
+
 from aea.helpers.base import CertRequest
 from aea.multiplexer import Multiplexer
 from aea.test_tools.test_cases import AEATestCaseEmpty
@@ -49,7 +51,10 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
         """Set up the test class."""
         super(TestP2PLibp2pClientConnectionAEARunning, cls).setup_class()
 
+        temp_dir = os.path.join(cls.t, "temp_dir_node")
+        os.mkdir(temp_dir)
         cls.node_connection = _make_libp2p_connection(
+            data_dir=temp_dir,
             delegate_host=DEFAULT_HOST,
             delegate_port=DEFAULT_DELEGATE_PORT,
             delegate=True,

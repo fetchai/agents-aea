@@ -53,7 +53,9 @@ class TestP2PLibp2pConnectionFailureGolangRun:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-        cls.connection = _make_libp2p_connection(data_dir=cls.t)
+        temp_dir = os.path.join(cls.t, "temp_dir")
+        os.mkdir(temp_dir)
+        cls.connection = _make_libp2p_connection(data_dir=temp_dir)
         cls.wrong_path = tempfile.mkdtemp()
 
     def test_wrong_path(self):
@@ -93,7 +95,9 @@ class TestP2PLibp2pConnectionFailureNodeDisconnect:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-        cls.connection = _make_libp2p_connection(data_dir=cls.t)
+        temp_dir = os.path.join(cls.t, "temp_dir")
+        os.mkdir(temp_dir)
+        cls.connection = _make_libp2p_connection(data_dir=temp_dir)
 
     def test_node_disconnect(self):
         """Test node disconnect."""
@@ -184,34 +188,36 @@ def test_libp2pconnection_mixed_ip_address():
     assert _ip_all_private_or_all_public(["fetch.ai", "acn.fetch.ai"]) is True
 
 
-@patch.object(P2PLibp2pConnection, "_check_node_built")
-def test_libp2pconnection_node_config_registration_delay(_mock, change_directory):
+def test_libp2pconnection_node_config_registration_delay():
     """Test node registration delay configuration"""
     host = "localhost"
     port = "10000"
 
-    _make_libp2p_connection(port, host, data_dir=change_directory)
-    with pytest.raises(ValueError):
-        _make_libp2p_connection(
-            port,
-            host,
-            data_dir=change_directory,
-            peer_registration_delay="must_be_float",
-        )
+    with tempfile.TemporaryDirectory() as data_dir:
+        _make_libp2p_connection(port=port, host=host, data_dir=data_dir)
+    with tempfile.TemporaryDirectory() as data_dir:
+        with pytest.raises(ValueError):
+            _make_libp2p_connection(
+                port=port,
+                host=host,
+                data_dir=data_dir,
+                peer_registration_delay="must_be_float",
+            )
 
 
-@patch.object(P2PLibp2pConnection, "_check_node_built")
-def test_build_dir_not_set(_mock, change_directory):
+def test_build_dir_not_set():
     """Test build dir not set."""
     host = "localhost"
     port = "10000"
-
-    con = _make_libp2p_connection(port, host, data_dir=change_directory)
-    con.configuration.build_directory = None
-    with pytest.raises(ValueError, match="Build directory not set on configuration."):
-        P2PLibp2pConnection(
-            configuration=con.configuration,
-            data_dir=change_directory,
-            identity=con._identity,
-            crypto_store=con.crypto_store,
-        )
+    with tempfile.TemporaryDirectory() as data_dir:
+        con = _make_libp2p_connection(port=port, host=host, data_dir=data_dir)
+        con.configuration.build_directory = None
+        with pytest.raises(
+            ValueError, match="Connection Configuration build directory is not set!"
+        ):
+            P2PLibp2pConnection(
+                configuration=con.configuration,
+                data_dir=data_dir,
+                identity=con._identity,
+                crypto_store=con.crypto_store,
+            )
