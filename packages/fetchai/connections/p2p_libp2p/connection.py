@@ -662,10 +662,7 @@ class P2PLibp2pConnection(Connection):
             data = await self._in_queue.get()
             if data is None:
                 self.logger.debug("Received None.")
-                await self.node.stop()
-                self.state = ConnectionStates.disconnected
                 return None
-                # TOFIX(LR) attempt restarting the node?
             self.logger.debug("Received data: {}".format(data))
             return Envelope.decode(data)
         except CancelledError:  # pragma: no cover
