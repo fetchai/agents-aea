@@ -173,7 +173,7 @@ This is a simple demo that introduces you to the main components of an AEA.
 The fastest way to have your first AEA is to fetch one that already exists!
 
 ``` bash
-aea fetch fetchai/my_first_aea:0.19.0
+aea fetch fetchai/my_first_aea:0.20.0
 cd my_first_aea
 ```
 
@@ -232,7 +232,7 @@ recipient_aea,sender_aea,fetchai/default:0.12.0,\x08\x01\x12\x011*\x07\n\x05hell
 
 ### Run the AEA
 
-Run the AEA with the default `fetchai/stub:0.16.0` connection.
+Run the AEA with the default `fetchai/stub:0.17.0` connection.
 
 ``` bash
 aea run
