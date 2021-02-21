@@ -10,5 +10,5 @@ RUN apk add --no-cache go
 RUN pip install --upgrade pip pipenv
 RUN pip install aea[all] --upgrade --force-reinstall
 
-RUN wget https://raw.githubusercontent.com/fetchai/agents-aea/master/Pipfile
+RUN wget https://raw.githubusercontent.com/fetchai/agents-aea/main/Pipfile
 RUN pipenv install -d --deploy --skip-lock --system

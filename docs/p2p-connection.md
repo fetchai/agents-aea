@@ -121,9 +121,9 @@ To learn more about how to configure your `fetchai/p2p_libp2p:0.16.0` connection
 
 You can run the peer node in standalone mode, that is, as a Go process with no dependency to the agents framework. 
 To facilitate the deployment, we provide a script
- <a href="https://github.com/fetchai/agents-aea/blob/master/scripts/acn/run_acn_node_standalone.py" target="_blank">`run_acn_node_standalone.py`</a>
+ <a href="https://github.com/fetchai/agents-aea/blob/main/scripts/acn/run_acn_node_standalone.py" target="_blank">`run_acn_node_standalone.py`</a>
  and a corresponding 
- <a href="https://github.com/fetchai/agents-aea/blob/master/scripts/acn/Dockerfile" target="_blank">Dockerfile</a>.
+ <a href="https://github.com/fetchai/agents-aea/blob/main/scripts/acn/Dockerfile" target="_blank">Dockerfile</a>.
 
 First, you need to build the node's binary (`libp2p_node`) either:
 

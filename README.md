@@ -12,7 +12,7 @@
   <a>
     <img alt="PyPI - Wheel" src="https://img.shields.io/pypi/wheel/aea">
   </a>
-  <a href="https://github.com/fetchai/agents-aea/blob/master/LICENSE">
+  <a href="https://github.com/fetchai/agents-aea/blob/main/LICENSE">
     <img alt="License" src="https://img.shields.io/pypi/l/aea"> 
   </a>
   <a href="https://pypi.org/project/aea/">
@@ -24,7 +24,7 @@
 </p>
 <p align="center">
   <a href="https://github.com/fetchai/agents-aea/workflows/AEA%20framework%20sanity%20checks%20and%20tests">
-    <img alt="AEA framework sanity checks and tests" src="https://github.com/fetchai/agents-aea/workflows/AEA%20framework%20sanity%20checks%20and%20tests/badge.svg?branch=master">
+    <img alt="AEA framework sanity checks and tests" src="https://github.com/fetchai/agents-aea/workflows/AEA%20framework%20sanity%20checks%20and%20tests/badge.svg?branch=main">
   </a>
   <a href="">
     <img alt="Codecov" src="https://img.shields.io/codecov/c/github/fetchai/agents-aea">
@@ -125,7 +125,7 @@ You can have more control on the installed dependencies by leveraging the setupt
 
 The following dependency is **only relevant if you intend to contribute** to the repository:
 
-- All Pull Requests should be opened against the `develop` branch. Do **not** open a Pull Request against `master`!
+- All Pull Requests should be opened against the `develop` branch. Do **not** open a Pull Request against `main`!
 
 - The project uses [Google Protocol Buffers](https://developers.google.com/protocol-buffers/) compiler for message serialization. A guide on how to install it is found [here](https://fetchai.github.io/oef-sdk-python/user/install.html#protobuf-compiler).
 

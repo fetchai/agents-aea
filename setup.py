@@ -98,7 +98,7 @@ def parse_readme():
         readme = f.read()
 
     # replace relative links of images
-    raw_url_root = "https://raw.githubusercontent.com/fetchai/agents-aea/master/"
+    raw_url_root = "https://raw.githubusercontent.com/fetchai/agents-aea/main/"
     replacement = raw_url_root + r"\g<0>"
     readme = re.sub(r"(?<=<img src=\")(/.*)(?=\")", replacement, readme, re.DOTALL)
 

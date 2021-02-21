@@ -269,7 +269,7 @@ func BTCPubKeyFromEthereumPublicKey(publicKey string) (*btcec.PublicKey, error) 
 
 // ConvertStrEncodedSignatureToDER
 // References:
-//  - https://github.com/fetchai/agents-aea/blob/master/aea/crypto/cosmos.py#L258
+//  - https://github.com/fetchai/agents-aea/blob/main/aea/crypto/cosmos.py#L258
 //  - https://github.com/btcsuite/btcd/blob/master/btcec/signature.go#L47
 func ConvertStrEncodedSignatureToDER(signature []byte) []byte {
 	rb := signature[:len(signature)/2]
@@ -289,7 +289,7 @@ func ConvertStrEncodedSignatureToDER(signature []byte) []byte {
 
 // ConvertDEREncodedSignatureToStr
 // References:
-//  - https://github.com/fetchai/agents-aea/blob/master/aea/crypto/cosmos.py#L258
+//  - https://github.com/fetchai/agents-aea/blob/main/aea/crypto/cosmos.py#L258
 //  - https://github.com/btcsuite/btcd/blob/master/btcec/signature.go#L47
 func ConvertDEREncodedSignatureToStr(signature []byte) ([]byte, error) {
 	sig, err := btcec.ParseDERSignature(signature, btcec.S256())
@@ -455,7 +455,7 @@ func KeyPairFromFetchAIKey(key string) (crypto.PrivKey, crypto.PubKey, error) {
 }
 
 // AgentAddressFromPublicKey get wallet address from public key associated with ledgerId
-// format from: https://github.com/fetchai/agents-aea/blob/master/aea/crypto/cosmos.py#L120
+// format from: https://github.com/fetchai/agents-aea/blob/main/aea/crypto/cosmos.py#L120
 func AgentAddressFromPublicKey(ledgerId string, publicKey string) (string, error) {
 	if addressFromPublicKey, found := addressFromPublicKeyTable[ledgerId]; found {
 		return addressFromPublicKey(publicKey)
@@ -474,7 +474,7 @@ func CosmosAddressFromPublicKey(publicKey string) (string, error) {
 }
 
 // cosmosAddressFromPublicKeyWithPrefix get wallet address from hex encoded secp256k1 public key
-// format from: https://github.com/fetchai/agents-aea/blob/master/aea/crypto/cosmos.py#L120
+// format from: https://github.com/fetchai/agents-aea/blob/main/aea/crypto/cosmos.py#L120
 func cosmosAddressFromPublicKeyWithPrefix(prefix string, publicKey string) (string, error) {
 	var addr string
 	var err error
@@ -504,7 +504,7 @@ func cosmosAddressFromPublicKeyWithPrefix(prefix string, publicKey string) (stri
 
 // EthereumAddressFromPublicKey get wallet address from hex encoded secp256k1 public key
 // references:
-//  - https://github.com/fetchai/agents-aea/blob/master/aea/crypto/ethereum.py#L330
+//  - https://github.com/fetchai/agents-aea/blob/main/aea/crypto/ethereum.py#L330
 //  - https://github.com/ethereum/go-ethereum/blob/master/crypto/crypto.go#L263
 func EthereumAddressFromPublicKey(publicKey string) (string, error) {
 	var addr string

@@ -49,7 +49,7 @@ Describe in short the main changes with the new release.
 _Put an `x` in the boxes that apply._
 
 - [ ] I have read the [CONTRIBUTING](../CONTRIBUTING.md) doc
-- [ ] I am making a pull request against the `master` branch (left side), from `develop`
+- [ ] I am making a pull request against the `main` branch (left side), from `develop`
 - [ ] Lint and unit tests pass locally
 - [ ] I have checked the fingerprint hashes are correct by running (`scripts/generate_ipfs_hashes.py`)
 - [ ] I have regenerated the latest API docs
