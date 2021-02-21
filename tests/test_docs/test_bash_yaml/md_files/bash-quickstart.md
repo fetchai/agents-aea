@@ -69,6 +69,9 @@ aea create my_first_aea
 cd my_first_aea
 ```
 ``` bash
+aea add connection fetchai/stub:0.17.0
+```
+``` bash
 aea add skill fetchai/echo:0.14.0
 ```
 ``` bash

@@ -65,14 +65,14 @@ Custom type checker to handle env variables.
 
 Check is instance of type.
 
-<a name="aea.configurations.validation.ownAdditionalProperties"></a>
-#### ownAdditionalProperties
+<a name="aea.configurations.validation.own_additional_properties"></a>
+#### own`_`additional`_`properties
 
 ```python
-ownAdditionalProperties(validator, aP, instance, schema) -> Iterator
+own_additional_properties(validator, aP, instance, schema) -> Iterator
 ```
 
-Additioinal properties validator.
+Additional properties validator.
 
 <a name="aea.configurations.validation.ConfigValidator"></a>
 ## ConfigValidator Objects

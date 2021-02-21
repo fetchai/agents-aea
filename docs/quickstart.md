@@ -189,9 +189,16 @@ aea create my_first_aea
 cd my_first_aea
 ```
 <br>
+<b>Add the stub connection</b>
+<br>
+Second, add the stub connection to the project.
+``` bash
+aea add connection fetchai/stub:0.17.0
+```
+<br>
 <b>Add the echo skill</b>
 <br>
-Second, add the echo skill to the project.
+Third, add the echo skill to the project.
 ``` bash
 aea add skill fetchai/echo:0.14.0
 ```
@@ -232,7 +239,7 @@ recipient_aea,sender_aea,fetchai/default:0.12.0,\x08\x01\x12\x011*\x07\n\x05hell
 
 ### Run the AEA
 
-Run the AEA with the default `fetchai/stub:0.17.0` connection.
+Run the AEA.
 
 ``` bash
 aea run
