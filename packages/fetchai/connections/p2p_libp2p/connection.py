@@ -446,7 +446,10 @@ class Libp2pNode:
         else:
             self.logger.debug("Called stop when process not set!")  # pragma: no cover
         if self.pipe is not None:
-            await self.pipe.close()
+            try:
+                await self.pipe.close()
+            except Exception as e:  # pragma: nocover pylint: disable=broad-except
+                self.logger.exception((f"Failure during pipe closing. Exception: {e}"))
             self.pipe = None
         else:
             self.logger.debug("Called stop when pipe not set!")  # pragma: no cover
