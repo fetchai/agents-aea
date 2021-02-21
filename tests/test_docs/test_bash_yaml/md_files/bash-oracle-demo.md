@@ -1,5 +1,5 @@
 ``` bash
-aea fetch fetchai/coin_price_oracle:0.5.0
+aea fetch fetchai/coin_price_oracle:0.6.0
 cd coin_price_oracle
 aea install
 aea build
@@ -9,11 +9,11 @@ aea create coin_price_oracle
 cd coin_price_oracle
 aea add connection fetchai/http_client:0.17.0
 aea add connection fetchai/ledger:0.13.0
-aea add connection fetchai/p2p_libp2p:0.15.0
-aea add skill fetchai/coin_price:0.4.0
-aea add skill fetchai/simple_oracle:0.4.0
+aea add connection fetchai/p2p_libp2p:0.16.0
+aea add skill fetchai/coin_price:0.5.0
+aea add skill fetchai/simple_oracle:0.5.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.15.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.16.0
 ```
 ``` bash
 aea config set --type dict agent.default_routing \
@@ -40,7 +40,7 @@ aea add-key fetchai fetchai_connection_private_key.txt --connection
 aea issue-certificates
 ```
 ``` bash
-aea fetch fetchai/coin_price_oracle_client:0.2.0
+aea fetch fetchai/coin_price_oracle_client:0.3.0
 cd coin_price_oracle_client
 aea install
 ```
@@ -49,7 +49,7 @@ aea create coin_price_oracle
 cd coin_price_oracle
 aea add connection fetchai/http_client:0.17.0
 aea add connection fetchai/ledger:0.13.0
-aea add skill fetchai/simple_oracle_client:0.3.0
+aea add skill fetchai/simple_oracle_client:0.4.0
 aea install
 aea config set agent.default_connection fetchai/ledger:0.13.0
 ```

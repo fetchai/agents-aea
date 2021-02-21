@@ -124,7 +124,7 @@ Positionless searches are performed using the `find_on_this_node` operation. Thi
 
 Some limits apply to the maximum number of filters, range and returned results. This may vary from soef instance to soef instance. You can see (and parse if required) these by getting the soef status at:
 
-<a href="httpe://s-oef.fetch.ai:443" target="_blank">https://s-oef.fetch.ai:443</a>
+<a href="https://s-oef.fetch.ai:443" target="_blank">https://s-oef.fetch.ai:443</a>
 
 The soef returns XML that includes information about all found agents. An example of that, unparsed, looks like this:
 

@@ -52,7 +52,7 @@ class TestWeatherSkills(AEATestCaseManyFlaky):
 
         default_routing = {
             "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
-            "fetchai/oef_search:0.13.0": "fetchai/soef:0.16.0",
+            "fetchai/oef_search:0.13.0": "fetchai/soef:0.17.0",
         }
 
         # generate random location
@@ -63,12 +63,12 @@ class TestWeatherSkills(AEATestCaseManyFlaky):
 
         # prepare agent one (weather station)
         self.set_agent_context(weather_station_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.15.0")
-        self.add_item("connection", "fetchai/soef:0.16.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.15.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.16.0")
+        self.add_item("connection", "fetchai/soef:0.17.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.16.0")
         self.add_item("connection", "fetchai/ledger:0.13.0")
         self.add_item("skill", "fetchai/weather_station:0.19.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.15.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.16.0")
         dotted_path = (
             "vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx"
         )
@@ -98,12 +98,12 @@ class TestWeatherSkills(AEATestCaseManyFlaky):
 
         # prepare agent two (weather client)
         self.set_agent_context(weather_client_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.15.0")
-        self.add_item("connection", "fetchai/soef:0.16.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.15.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.16.0")
+        self.add_item("connection", "fetchai/soef:0.17.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.16.0")
         self.add_item("connection", "fetchai/ledger:0.13.0")
         self.add_item("skill", "fetchai/weather_client:0.19.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.15.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.16.0")
         dotted_path = (
             "vendor.fetchai.skills.weather_client.models.strategy.args.is_ledger_tx"
         )
@@ -222,7 +222,7 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseManyFlaky):
 
         default_routing = {
             "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
-            "fetchai/oef_search:0.13.0": "fetchai/soef:0.16.0",
+            "fetchai/oef_search:0.13.0": "fetchai/soef:0.17.0",
         }
 
         # generate random location
@@ -233,9 +233,9 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseManyFlaky):
 
         # add packages for agent one
         self.set_agent_context(weather_station_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.15.0")
-        self.add_item("connection", "fetchai/soef:0.16.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.15.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.16.0")
+        self.add_item("connection", "fetchai/soef:0.17.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.16.0")
         self.add_item("connection", "fetchai/ledger:0.13.0")
         self.add_item("skill", "fetchai/weather_station:0.19.0")
         setting_path = "agent.default_routing"
@@ -243,7 +243,7 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseManyFlaky):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/weather_station:0.21.0", weather_station_aea_name
+            "fetchai/weather_station:0.22.0", weather_station_aea_name
         )
         assert (
             diff == []
@@ -270,9 +270,9 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseManyFlaky):
 
         # add packages for agent two
         self.set_agent_context(weather_client_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.15.0")
-        self.add_item("connection", "fetchai/soef:0.16.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.15.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.16.0")
+        self.add_item("connection", "fetchai/soef:0.17.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.16.0")
         self.add_item("connection", "fetchai/ledger:0.13.0")
         self.add_item("skill", "fetchai/weather_client:0.19.0")
         setting_path = "agent.default_routing"
@@ -280,7 +280,7 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseManyFlaky):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/weather_client:0.22.0", weather_client_aea_name
+            "fetchai/weather_client:0.23.0", weather_client_aea_name
         )
         assert (
             diff == []

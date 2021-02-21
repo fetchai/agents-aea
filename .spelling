@@ -169,6 +169,7 @@ Shoham
 Yoti
 PowerShell
 deregisters
+plugin
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id
@@ -181,3 +182,7 @@ v0.2.x
  - docs/questions-and-answers.md
 state_update
 txt
+ - docs/protocol-generator.md
+java
+javascript
+protoc
