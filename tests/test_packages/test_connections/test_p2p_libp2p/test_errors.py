@@ -193,7 +193,9 @@ def test_libp2pconnection_node_config_registration_delay():
     port = "10000"
 
     with tempfile.TemporaryDirectory() as data_dir:
-        _make_libp2p_connection(port=port, host=host, data_dir=data_dir)
+        _make_libp2p_connection(
+            port=port, host=host, data_dir=data_dir, build_directory=data_dir
+        )
     with tempfile.TemporaryDirectory() as data_dir:
         with pytest.raises(ValueError):
             _make_libp2p_connection(
@@ -201,6 +203,7 @@ def test_libp2pconnection_node_config_registration_delay():
                 host=host,
                 data_dir=data_dir,
                 peer_registration_delay="must_be_float",
+                build_directory=data_dir,
             )
 
 
@@ -209,7 +212,9 @@ def test_build_dir_not_set():
     host = "localhost"
     port = "10000"
     with tempfile.TemporaryDirectory() as data_dir:
-        con = _make_libp2p_connection(port=port, host=host, data_dir=data_dir)
+        con = _make_libp2p_connection(
+            port=port, host=host, data_dir=data_dir, build_directory=data_dir
+        )
         con.configuration.build_directory = None
         with pytest.raises(
             ValueError, match="Connection Configuration build directory is not set!"
