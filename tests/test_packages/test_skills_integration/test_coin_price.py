@@ -19,6 +19,7 @@
 
 """This test module contains the integration test for the coin price skill."""
 
+import time
 from pathlib import Path
 from typing import Dict
 
@@ -59,8 +60,7 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
         self.add_item("connection", "fetchai/http_client:0.17.0")
         self.add_item("connection", "fetchai/http_server:0.16.0")
         self.add_item("connection", "fetchai/prometheus:0.3.0")
-        self.remove_item("connection", "fetchai/stub:0.16.0")
-        self.add_item("skill", "fetchai/coin_price:0.4.0")
+        self.add_item("skill", "fetchai/coin_price:0.5.0")
         self.set_config("agent.default_connection", "fetchai/http_server:0.16.0")
 
         default_routing = {
@@ -80,7 +80,7 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
         )
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/coin_price_feed:0.5.0", coin_price_feed_aea_name
+            "fetchai/coin_price_feed:0.6.0", coin_price_feed_aea_name
         )
         assert (
             diff == []
@@ -91,6 +91,8 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
         process = self.run_agent()
         is_running = self.is_running(process)
         assert is_running, "AEA not running within timeout!"
+
+        time.sleep(6)  # we wait a bit longer than the tick rate of the behaviour
 
         response = requests.get("http://127.0.0.1:8000/price")
         assert response.status_code == 200, "Failed to get response code 200"

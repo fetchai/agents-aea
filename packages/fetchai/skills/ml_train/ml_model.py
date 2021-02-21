@@ -49,7 +49,6 @@ class MLModel(Model):
         self._weights = None
 
         self.data_queue: Queue = Queue()
-        self.training_thread = threading.Thread(target=self.training_loop)
 
     def setup(self) -> None:
         """
@@ -57,7 +56,6 @@ class MLModel(Model):
 
         :return: None
         """
-        self.training_thread.start()
 
     def training_loop(self) -> None:
         """
@@ -135,5 +133,3 @@ class MLModel(Model):
 
         :return: None
         """
-        self.data_queue.put(None)
-        self.training_thread.join()

@@ -270,6 +270,18 @@ def test_run_multiple_connections(connection_ids):
 
     result = runner.invoke(
         cli,
+        [
+            *CLI_LOG_OPTION,
+            "add",
+            "--local",
+            "connection",
+            str(STUB_CONNECTION_PUBLIC_ID),
+        ],
+    )
+    assert result.exit_code == 0
+
+    result = runner.invoke(
+        cli,
         [*CLI_LOG_OPTION, "add", "--local", "connection", str(HTTP_ClIENT_PUBLIC_ID)],
     )
     assert result.exit_code == 0
@@ -876,7 +888,7 @@ class TestRunFailsWhenConfigurationFileInvalid:
 
     def test_log_error_message(self):
         """Test that the log error message is fixed."""
-        s = "Agent configuration file '{}' is invalid. Please check the documentation.".format(
+        s = "Agent configuration file '{}' is invalid: `ExtraPropertiesError: properties not expected: invalid_attribute`. Please check the documentation.".format(
             DEFAULT_AEA_CONFIG_FILE
         )
         assert self.result.exception.message == s

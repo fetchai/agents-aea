@@ -25,7 +25,7 @@ import mistune
 import pytest
 import yaml
 
-from aea.test_tools.test_cases import AEATestCaseMany
+from aea.test_tools.test_cases import AEATestCaseManyFlaky
 
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
@@ -116,7 +116,7 @@ ORM_SELLER_STRATEGY_PATH = Path(
 
 
 @pytest.mark.integration
-class TestOrmIntegrationDocs(AEATestCaseMany):
+class TestOrmIntegrationDocs(AEATestCaseManyFlaky):
     """This class contains the tests for the orm-integration.md guide."""
 
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_INTEGRATION)
@@ -128,7 +128,7 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
 
         default_routing = {
             "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
-            "fetchai/oef_search:0.13.0": "fetchai/soef:0.16.0",
+            "fetchai/oef_search:0.13.0": "fetchai/soef:0.17.0",
         }
 
         # generate random location
@@ -139,9 +139,9 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
 
         # Setup seller
         self.set_agent_context(seller_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.15.0")
-        self.add_item("connection", "fetchai/soef:0.16.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.15.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.16.0")
+        self.add_item("connection", "fetchai/soef:0.17.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.16.0")
         self.add_item("connection", "fetchai/ledger:0.13.0")
         self.add_item("skill", "fetchai/thermometer:0.19.0")
         setting_path = "agent.default_routing"
@@ -186,9 +186,9 @@ class TestOrmIntegrationDocs(AEATestCaseMany):
 
         # Setup Buyer
         self.set_agent_context(buyer_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.15.0")
-        self.add_item("connection", "fetchai/soef:0.16.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.15.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.16.0")
+        self.add_item("connection", "fetchai/soef:0.17.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.16.0")
         self.add_item("connection", "fetchai/ledger:0.13.0")
         self.add_item("skill", "fetchai/thermometer_client:0.19.0")
         setting_path = "agent.default_routing"

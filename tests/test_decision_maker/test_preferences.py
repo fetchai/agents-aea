@@ -23,7 +23,7 @@ import copy
 
 import pytest
 
-from aea.decision_maker.default import OwnershipState, Preferences
+from aea.decision_maker.gop import OwnershipState, Preferences
 from aea.helpers.transaction.base import Terms
 
 from tests.conftest import ETHEREUM

@@ -31,7 +31,6 @@ from packages.fetchai.skills.fetch_beacon.dialogues import HttpDialogues
 
 
 DEFAULT_URL = ""
-DEFAULT_PUBLISH_INTERVAL = 3600
 
 
 class FetchBeaconBehaviour(TickerBehaviour):

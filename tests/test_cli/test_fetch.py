@@ -32,7 +32,11 @@ from aea.cli.fetch import _is_version_correct, fetch_agent_locally
 from aea.cli.utils.context import Context
 from aea.configurations.base import PublicId
 from aea.helpers.base import cd
-from aea.test_tools.test_cases import AEATestCaseMany, BaseAEATestCase
+from aea.test_tools.test_cases import (
+    AEATestCaseMany,
+    AEATestCaseManyFlaky,
+    BaseAEATestCase,
+)
 
 from tests.conftest import (
     CLI_LOG_OPTION,
@@ -173,7 +177,7 @@ class IsVersionCorrectTestCase(TestCase):
         self.assertFalse(result)
 
 
-class TestFetchFromRemoteRegistry(AEATestCaseMany):
+class TestFetchFromRemoteRegistry(AEATestCaseManyFlaky):
     """Test case for fetch agent command from Registry."""
 
     @pytest.mark.integration
@@ -186,7 +190,7 @@ class TestFetchFromRemoteRegistry(AEATestCaseMany):
         assert "my_first_aea" in os.listdir(self.t)
 
 
-class TestFetchMixedModeFallsBackCorrectly(AEATestCaseMany):
+class TestFetchMixedModeFallsBackCorrectly(AEATestCaseManyFlaky):
     """Test fetch command when registry fetch fails falls back to local fetch."""
 
     @pytest.mark.integration

@@ -84,7 +84,7 @@ class Strategy(Model):
     @property
     def contract_address(self) -> str:
         """Get the contract address."""
-        if self._contract_address is None:
+        if self._contract_address is None:  # pragma: nocover
             raise ValueError("Contract address not set!")
         return self._contract_address
 
@@ -97,12 +97,12 @@ class Strategy(Model):
     @property
     def erc20_address(self) -> str:
         """Get the erc20 address for token payment."""
-        if self._erc20_address is None:
+        if self._erc20_address is None:  # pragma: nocover
             raise ValueError("ERC20 address not set!")
         return self._erc20_address
 
     @erc20_address.setter
-    def erc20_address(self, erc20_address: str) -> None:
+    def erc20_address(self, erc20_address: str) -> None:  # pragma: nocover
         """Set the erc20 address for token payment."""
         enforce(self._erc20_address is None, "ERC20 address already set!")
         self._erc20_address = erc20_address

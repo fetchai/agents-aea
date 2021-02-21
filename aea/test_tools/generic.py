@@ -34,6 +34,7 @@ from aea.configurations.base import (
 from aea.configurations.manager import handle_dotted_path
 from aea.exceptions import enforce
 from aea.helpers.file_io import write_envelope
+from aea.helpers.io import open_file
 from aea.helpers.yaml_utils import yaml_dump, yaml_dump_all
 from aea.mail.base import Envelope
 from aea.test_tools.constants import DEFAULT_AUTHOR
@@ -194,7 +195,7 @@ def nested_set_config(
         dotted_path, author
     )
 
-    with config_file_path.open() as fp:
+    with open_file(config_file_path) as fp:
         config = config_loader.load(fp)
 
     _nested_set(config, settings_keys, value)
@@ -202,8 +203,8 @@ def nested_set_config(
     if config.package_type == PackageType.AGENT:
         json_data = config.ordered_json
         component_configurations = json_data.pop("component_configurations")
-        with config_file_path.open("w") as fp:
+        with open_file(config_file_path, "w") as fp:
             yaml_dump_all([json_data] + component_configurations, fp)
     else:
-        with config_file_path.open("w") as fp:
+        with open_file(config_file_path, "w") as fp:
             yaml_dump(config.ordered_json, fp)

@@ -68,7 +68,7 @@ from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.soef")
 
-PUBLIC_ID = PublicId.from_str("fetchai/soef:0.16.0")
+PUBLIC_ID = PublicId.from_str("fetchai/soef:0.17.0")
 
 NOT_SPECIFIED = object()
 
@@ -228,6 +228,7 @@ class SOEFChannel:
         chain_identifier: Optional[str] = None,
         token_storage_path: Optional[str] = None,
         logger: logging.Logger = _default_logger,
+        connection_check_timeout: float = 15,
     ):
         """
         Initialize.
@@ -237,6 +238,7 @@ class SOEFChannel:
         :param soef_addr: the SOEF IP address.
         :param soef_port: the SOEF port.
         :param chain_identifier: supported chain id
+        :param connection_check_timeout: timeout to check network connection on connect
         """
         if chain_identifier is not None and not any(
             regex.match(chain_identifier) for regex in self.SUPPORTED_CHAIN_IDENTIFIERS
@@ -249,14 +251,15 @@ class SOEFChannel:
         self.api_key = api_key
         self.soef_addr = soef_addr
         self.soef_port = soef_port
-        self.base_url = "http://{}:{}".format(soef_addr, soef_port)
+        self.base_url = "https://{}:{}".format(soef_addr, soef_port)
         self.oef_search_dialogues = OefSearchDialogues()
+        self.connection_check_timeout = connection_check_timeout
 
         self._token_storage_path = token_storage_path
         if self._token_storage_path is not None:
             if not Path(self._token_storage_path).is_absolute():
-                self._token_storage_path = os.path.abspath(
-                    os.path.join(data_dir, self._token_storage_path)
+                self._token_storage_path = os.path.join(
+                    data_dir, self._token_storage_path
                 )
             Path(self._token_storage_path).touch()
         self.declared_name = uuid4().hex
@@ -324,9 +327,15 @@ class SOEFChannel:
                 GeneratorExit,
             ):  # pylint: disable=try-except-raise
                 return
+            except SOEFException:  # pragma: nocover
+                await self._send_error_response(
+                    oef_message,
+                    oef_search_dialogue,
+                    oef_error_operation=OefSearchMessage.OefErrorOperation.OTHER,
+                )
             except Exception:  # pylint: disable=broad-except  # pragma: nocover
                 self.logger.exception(
-                    "Exception occoured in  _find_around_me_processor"
+                    "Exception occurred in  _find_around_me_processor"
                 )
                 await self._send_error_response(
                     oef_message,
@@ -655,12 +664,14 @@ class SOEFChannel:
             enforce(root.tag == "response", "Not a response")
             if check_success:
                 el = root.find("./success")
-                enforce(el is not None, "No success element")
+                enforce(el is not None, "Bad response, no success value present")
                 enforce(str(el.text).strip() == "1", "Success is not 1")
             self.logger.debug(f"`{command}` SUCCESS!")
             return response_text
         except Exception as e:
-            raise SOEFException.error(f"`{command}` error: {response_text}: {[e]}")
+            raise SOEFException.error(
+                f"Command: `{command}` Params: `{params}` Response: `{response_text}` Exception: {[e]}"
+            ) from e
 
     async def _set_service_key(self, key: str, value: Union[str, int, float]) -> None:
         """
@@ -971,9 +982,21 @@ class SOEFChannel:
                 await self._ping_periodic_task
             self._ping_periodic_task = None
 
+    async def _check_server_reachable(self) -> None:
+        """Check network connection is ok."""
+        await asyncio.wait_for(
+            self._request_text(
+                "get", self.base_url, timeout=self.connection_check_timeout
+            ),
+            timeout=self.connection_check_timeout,
+        )
+
     async def connect(self) -> None:
         """Connect channel set queues and executor pool."""
         self._loop = asyncio.get_event_loop()
+
+        await self._check_server_reachable()
+
         self.in_queue = asyncio.Queue()
         self._find_around_me_queue = asyncio.Queue()
         self._unregister_lock = asyncio.Lock()
@@ -1139,6 +1162,7 @@ class SOEFConnection(Connection):
     """The SOEFConnection connects the Simple OEF to the mailbox."""
 
     connection_id = PUBLIC_ID
+    DEFAULT_CONNECTION_CHECK_TIMEOUT: float = 15
 
     def __init__(self, **kwargs: Any) -> None:
         """Initialize."""
@@ -1150,6 +1174,12 @@ class SOEFConnection(Connection):
 
         super().__init__(**kwargs)
         api_key = cast(str, self.configuration.config.get("api_key"))
+        connection_check_timeout = cast(
+            float,
+            self.configuration.config.get(
+                "connection_check_timeout", self.DEFAULT_CONNECTION_CHECK_TIMEOUT
+            ),
+        )
         soef_addr = cast(str, self.configuration.config.get("soef_addr"))
         soef_port = cast(int, self.configuration.config.get("soef_port"))
         chain_identifier = cast(str, self.configuration.config.get("chain_identifier"))
@@ -1170,6 +1200,7 @@ class SOEFConnection(Connection):
             data_dir=self.data_dir,
             chain_identifier=chain_identifier,
             token_storage_path=token_storage_path,
+            connection_check_timeout=connection_check_timeout,
         )
 
     async def connect(self) -> None:

@@ -23,7 +23,7 @@ import os
 import struct
 import sys
 import time
-from typing import cast
+from typing import List, Tuple, Union, cast
 
 import click
 
@@ -104,7 +104,13 @@ class TestHandler(Handler):
         self.context.outbox.put(make_envelope(message.to, message.sender, response_msg))
 
 
-def run(duration, runtime_mode, runner_mode, start_messages, num_of_agents):
+def run(
+    duration: int,
+    runtime_mode: str,
+    runner_mode: str,
+    start_messages: int,
+    num_of_agents: int,
+) -> List[Tuple[str, Union[int, float]]]:
     """Test multiagent message exchange."""
     # pylint: disable=import-outside-toplevel,unused-import
     # import manually due to some lazy imports in decision_maker
@@ -201,8 +207,13 @@ def run(duration, runtime_mode, runner_mode, start_messages, num_of_agents):
 @click.option("--num_of_agents", default=2, help="Amount of agents to run.")
 @click.option("--number_of_runs", default=10, help="How many times run test.")
 def main(
-    duration, runtime_mode, runner_mode, start_messages, num_of_agents, number_of_runs
-):
+    duration: int,
+    runtime_mode: str,
+    runner_mode: str,
+    start_messages: int,
+    num_of_agents: int,
+    number_of_runs: int,
+) -> None:
     """Run test."""
     click.echo("Start test with options:")
     click.echo(f"* Duration: {duration} seconds")

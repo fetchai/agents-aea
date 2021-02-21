@@ -287,11 +287,11 @@ Set agent max reaction in one react.
 
 self
 
-<a name="aea.aea_builder.AEABuilder.set_decision_maker_handler"></a>
-#### set`_`decision`_`maker`_`handler
+<a name="aea.aea_builder.AEABuilder.set_decision_maker_handler_paths"></a>
+#### set`_`decision`_`maker`_`handler`_`paths
 
 ```python
- | set_decision_maker_handler(decision_maker_handler_dotted_path: str, file_path: Path) -> "AEABuilder"
+ | set_decision_maker_handler_paths(decision_maker_handler_dotted_path: str, file_path: Optional[str]) -> "AEABuilder"
 ```
 
 Set decision maker handler class.

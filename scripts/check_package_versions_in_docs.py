@@ -29,7 +29,7 @@ import re
 import sys
 from itertools import chain
 from pathlib import Path
-from typing import Callable, Dict, List, Set
+from typing import Any, Callable, Dict, Generator, List, Match, Pattern, Set
 
 import yaml
 
@@ -70,7 +70,9 @@ This regex matches strings of the form:
 class PackageIdNotFound(Exception):
     """Custom exception for package id not found."""
 
-    def __init__(self, file: Path, package_id: PackageId, match_obj, *args):
+    def __init__(
+        self, file: Path, package_id: PackageId, match_obj: Any, *args: Any
+    ) -> None:
         """
         Initialize PackageIdNotFound exception.
 
@@ -97,7 +99,7 @@ CONFIG_FILE_NAMES = [
 ]  # type: List[str]
 
 
-def default_config_file_paths():
+def default_config_file_paths() -> Generator:
     """Get (generator) the default config file paths."""
     for item in DEFAULT_CONFIG_FILE_PATHS:
         yield item
@@ -121,7 +123,7 @@ def unified_yaml_load(configuration_file: Path) -> Dict:
         return list(data)[0]
 
 
-def get_public_id_from_yaml(configuration_file: Path):
+def get_public_id_from_yaml(configuration_file: Path) -> PublicId:
     """
     Get the public id from yaml.
 
@@ -165,8 +167,10 @@ ALL_PACKAGE_IDS: Set[PackageId] = find_all_packages_ids()
 
 
 def _checks(
-    file: Path, regex, extract_package_id_from_match: Callable[["re.Match"], PackageId],
-):
+    file: Path,
+    regex: Pattern,
+    extract_package_id_from_match: Callable[["re.Match"], PackageId],
+) -> None:
     matches = regex.finditer(file.read_text())
     for match in matches:
         package_id = extract_package_id_from_match(match)
@@ -177,7 +181,7 @@ def _checks(
         print(str(package_id), "OK!")
 
 
-def check_add_commands(file: Path):
+def check_add_commands(file: Path) -> None:
     """
     Check that 'aea add' commands of the documentation file contains known package ids.
 
@@ -186,7 +190,7 @@ def check_add_commands(file: Path):
     :raises PackageIdNotFound: if some package id is not found in packages/
     """
 
-    def extract_package_id(match):
+    def extract_package_id(match: Match) -> PackageId:
         package_type, package = match.group(1), match.group(2)
         package_id = PackageId(PackageType(package_type), PublicId.from_str(package))
         return package_id
@@ -194,7 +198,7 @@ def check_add_commands(file: Path):
     _checks(file, ADD_COMMAND_IN_DOCS, extract_package_id)
 
 
-def check_fetch_commands(file: Path):
+def check_fetch_commands(file: Path) -> None:
     """
     Check that 'aea fetch' commands of the documentation file contains known package ids.
 
@@ -203,7 +207,7 @@ def check_fetch_commands(file: Path):
     :raises PackageIdNotFound: if some package id is not found in packages/
     """
 
-    def extract_package_id(match):
+    def extract_package_id(match: Match) -> PackageId:
         package_public_id = match.group(1)
         package_id = PackageId(PackageType.AGENT, PublicId.from_str(package_public_id))
         return package_id
@@ -211,7 +215,7 @@ def check_fetch_commands(file: Path):
     _checks(file, FETCH_COMMAND_IN_DOCS, extract_package_id)
 
 
-def check_file(file: Path):
+def check_file(file: Path) -> None:
     """
     Check documentation file.
 
@@ -223,7 +227,7 @@ def check_file(file: Path):
     check_fetch_commands(file)
 
 
-def handle_package_not_found(e: PackageIdNotFound):
+def handle_package_not_found(e: PackageIdNotFound) -> None:
     """Handle PackageIdNotFound errors."""
     print("=" * 50)
     print("Package {} not found.".format(e.package_id))

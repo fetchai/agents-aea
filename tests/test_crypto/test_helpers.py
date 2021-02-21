@@ -30,11 +30,13 @@ from aea.crypto.ethereum import EthereumCrypto
 from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import (
     create_private_key,
+    get_wallet_from_agent_config,
     make_certificate,
     private_key_verify_or_create,
     try_generate_testnet_wealth,
     try_validate_private_key_path,
 )
+from aea.crypto.wallet import Wallet
 from aea.helpers import http_requests as requests
 
 from tests.conftest import (
@@ -181,3 +183,10 @@ def test_make_certificate():
             b"message",
             os.path.join(tmp_dir, "test.txt"),
         )
+
+
+def test_get_wallet_from_agent_config():
+    """Test get_wallet_from_agent_config."""
+    agent_conf = AgentConfigMock()
+    wallet = get_wallet_from_agent_config(agent_conf)
+    assert isinstance(wallet, Wallet)

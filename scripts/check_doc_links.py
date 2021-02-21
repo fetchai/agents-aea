@@ -37,7 +37,7 @@ INDEX_FILE_PATH = Path("docs/index.md")
 
 WHITELIST_URL_TO_CODE = {
     "https://dl.acm.org/doi/10.1145/3212734.3212736": 302,
-    "http://soef.fetch.ai:9002": 405,
+    "https://s-oef.fetch.ai:443": 405,
     "https://golang.org/dl/": 403,
     "https://www.wiley.com/en-gb/An+Introduction+to+MultiAgent+Systems%2C+2nd+Edition-p-9781119959519": 403,
     "https://colab.research.google.com": 403,
@@ -143,7 +143,7 @@ def is_external_url(url: str) -> bool:
     return url.startswith("https://") or url.startswith("http://")
 
 
-def validate_external_url(url, file):
+def validate_external_url(url: str, file: Path) -> None:
     """
     Validate external URL.
 
@@ -205,7 +205,7 @@ def _checks_image(file: Path, regex: Pattern = IMAGE_PATTERN) -> None:
         raise ValueError("Image path={} in file={} not `.png` or `.jpg`!")
 
 
-def _checks_target_blank(file: Path):
+def _checks_target_blank(file: Path) -> None:
     """
     Check target blank.
 

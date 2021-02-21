@@ -17,10 +17,11 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the stub connection."""
-
 import asyncio
 import logging
+import os
 import re
+import typing
 from asyncio import CancelledError
 from asyncio.tasks import Task
 from concurrent.futures.thread import ThreadPoolExecutor
@@ -43,7 +44,7 @@ INPUT_FILE_KEY = "input_file"
 OUTPUT_FILE_KEY = "output_file"
 SEPARATOR = b","
 
-PUBLIC_ID = PublicId.from_str("fetchai/stub:0.16.0")
+PUBLIC_ID = PublicId.from_str("fetchai/stub:0.17.0")
 
 
 class StubConnection(Connection):
@@ -91,13 +92,20 @@ class StubConnection(Connection):
         output_file: str = self.configuration.config.get(
             OUTPUT_FILE_KEY, DEFAULT_OUTPUT_FILE_NAME
         )
+        if not Path(input_file).is_absolute():
+            input_file = os.path.join(self.data_dir, input_file)
+        if not Path(output_file).is_absolute():
+            output_file = os.path.join(self.data_dir, output_file)
         input_file_path = Path(input_file)
         output_file_path = Path(output_file)
         if not input_file_path.exists():
             input_file_path.touch()
 
-        self.input_file = open(input_file_path, "rb+")
-        self.output_file = open(output_file_path, "wb+")
+        self.input_file_path = input_file_path
+        self.output_file_path = output_file_path
+
+        self.input_file: Optional[typing.IO] = None
+        self.output_file: Optional[typing.IO] = None
 
         self.in_queue = None  # type: Optional[asyncio.Queue]
 
@@ -105,6 +113,19 @@ class StubConnection(Connection):
         self._write_pool = ThreadPoolExecutor(
             max_workers=1, thread_name_prefix="stub_connection_writer_"
         )  # sequential write only! but threaded!
+
+    def _open_files(self) -> None:
+        """Open file to read and write."""
+        self.input_file = open(self.input_file_path, "rb+")
+        self.output_file = open(self.output_file_path, "wb+")
+
+    def _close_files(self) -> None:
+        """Close opened files."""
+        if self.input_file:
+            self.input_file.close()
+
+        if self.output_file:
+            self.output_file.close()
 
     async def _file_read_and_trunc(self, delay: float = 0.001) -> AsyncIterable[bytes]:
         """
@@ -114,7 +135,12 @@ class StubConnection(Connection):
 
         :return: async generator return file read bytes.
         """
+        if not self.input_file:  # pragma: nocover
+            raise ValueError("Input file not opened! Call Connection.connect first.")
+
         while True:
+            if self.input_file.closed:  # pragma: nocover
+                return
             with lock_file(self.input_file):
                 data = self.input_file.read()
                 if data:
@@ -178,6 +204,7 @@ class StubConnection(Connection):
 
         with self._connect_context():
             self.in_queue = asyncio.Queue()
+            self._open_files()
             self._read_envelopes_task = self.loop.create_task(self.read_envelopes())
 
     async def _stop_read_envelopes(self) -> None:
@@ -217,6 +244,7 @@ class StubConnection(Connection):
         await self._stop_read_envelopes()
         self._write_pool.shutdown(wait=False)
         self.in_queue.put_nowait(None)
+        self._close_files()
         self.state = ConnectionStates.disconnected
 
     async def send(self, envelope: Envelope) -> None:
@@ -227,6 +255,11 @@ class StubConnection(Connection):
         """
         self._ensure_connected()
         self._ensure_valid_envelope_for_external_comms(envelope)
+        if not self.output_file:  # pragma: nocover
+            raise ValueError(
+                "output_file file not opened! Call Connection.connect first."
+            )
+
         await self.loop.run_in_executor(
             self._write_pool,
             write_envelope,

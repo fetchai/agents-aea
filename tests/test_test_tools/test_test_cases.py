@@ -30,8 +30,14 @@ from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue
 from aea.test_tools.exceptions import AEATestingException
-from aea.test_tools.test_cases import AEATestCase, AEATestCaseEmpty
+from aea.test_tools.test_cases import (
+    AEATestCase,
+    AEATestCaseEmpty,
+    AEATestCaseEmptyFlaky,
+    AEATestCaseManyFlaky,
+)
 
+from packages.fetchai.connections.stub.connection import PUBLIC_ID as STUB_CONNECTION_ID
 from packages.fetchai.protocols.default.dialogues import (
     DefaultDialogue,
     DefaultDialogues,
@@ -55,6 +61,7 @@ class TestConfigCases(AEATestCaseEmpty):
     def setup_class(cls):
         """Setup class."""
         super(TestConfigCases, cls).setup_class()
+        cls.add_item("connection", str(STUB_CONNECTION_ID))
         cls.add_item("skill", str(ERROR_SKILL_PUBLIC_ID))
 
     def test_agent_nested_set_agent_crudcollection(self):
@@ -325,6 +332,7 @@ class TestSendReceiveEnvelopesSkill(AEATestCaseEmpty):
 
     def test_send_receive_envelope(self):
         """Run the echo skill sequence."""
+        self.add_item("connection", str(STUB_CONNECTION_ID))
         self.add_item("skill", str(ECHO_SKILL_PUBLIC_ID))
 
         process = self.run_agent()
@@ -369,3 +377,31 @@ class TestInvoke(AEATestCaseEmpty):
         result = self.invoke("--version")
         assert result.exit_code == 0
         assert f"aea, version {aea.__version__}" in result.stdout
+
+
+class TestFlakyMany(AEATestCaseManyFlaky):
+    """Test that flaky tests are properly rerun."""
+
+    @pytest.mark.flaky(reruns=1)
+    def test_fail_on_first_run(self):
+        """Test failure on first run leads to second run."""
+        file = os.path.join(self.t, "test_file")
+        if self.run_count == 1:
+            open(file, "a").close()
+            raise AssertionError("Expected error to trigger rerun!")
+        assert self.run_count == 2, "Should only be rerun once!"
+        assert not os.path.isfile(file), "File should not exist"
+
+
+class TestFlakyEmpty(AEATestCaseEmptyFlaky):
+    """Test that flaky tests are properly rerun."""
+
+    @pytest.mark.flaky(reruns=1)
+    def test_fail_on_first_run(self):
+        """Test failure on first run leads to second run."""
+        file = os.path.join(self.t, "test_file")
+        if self.run_count == 1:
+            open(file, "a").close()
+            raise AssertionError("Expected error to trigger rerun!")
+        assert self.run_count == 2, "Should only be rerun once!"
+        assert not os.path.isfile(file), "File should not exist"

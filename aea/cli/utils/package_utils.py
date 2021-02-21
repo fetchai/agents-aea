@@ -64,11 +64,15 @@ from aea.configurations.constants import (
 from aea.configurations.loader import ConfigLoader
 from aea.configurations.manager import AgentConfigManager
 from aea.configurations.utils import replace_component_ids
-from aea.crypto.helpers import private_key_verify_or_create
+from aea.crypto.helpers import (
+    get_wallet_from_agent_config,
+    private_key_verify_or_create,
+)
 from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS, LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.exceptions import AEAEnforceError
 from aea.helpers.base import compute_specifier_from_version, recursive_update
+from aea.helpers.io import open_file
 from aea.helpers.sym_link import create_symlink
 
 
@@ -321,7 +325,7 @@ def find_item_locally(
         item_configuration_loader = ConfigLoader.from_configuration_type(
             PackageType(item_type)
         )
-        with item_configuration_filepath.open() as fp:
+        with open_file(item_configuration_filepath) as fp:
             item_configuration = item_configuration_loader.load(fp)
     except ValidationError as e:
         raise click.ClickException(
@@ -372,7 +376,7 @@ def find_item_in_distribution(  # pylint: disable=unused-argument
         item_configuration_loader = ConfigLoader.from_configuration_type(
             PackageType(item_type)
         )
-        with item_configuration_filepath.open() as fp:
+        with open_file(item_configuration_filepath) as fp:
             item_configuration = item_configuration_loader.load(fp)
     except ValidationError as e:
         raise click.ClickException(
@@ -467,7 +471,7 @@ def register_item(ctx: Context, item_type: str, item_public_id: PublicId) -> Non
     )
     supported_items = get_items(ctx.agent_config, item_type)
     supported_items.add(item_public_id)
-    with open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as fp:
+    with open_file(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as fp:
         ctx.agent_loader.dump(ctx.agent_config, fp)
 
 
@@ -657,16 +661,6 @@ def get_wallet_from_context(ctx: Context) -> Wallet:
     return wallet
 
 
-def get_wallet_from_agent_config(agent_config: AgentConfig) -> Wallet:
-    """Get wallet from agent_cofig provided."""
-    private_key_paths: Dict[str, Optional[str]] = {
-        config_pair[0]: config_pair[1]
-        for config_pair in agent_config.private_key_paths.read_all()
-    }
-    wallet = Wallet(private_key_paths)
-    return wallet
-
-
 def update_item_public_id_in_init(
     item_type: str, package_path: Path, item_id: PublicId
 ) -> None:
@@ -682,9 +676,9 @@ def update_item_public_id_in_init(
     if item_type != SKILL:
         return
     init_filepath = os.path.join(package_path, "__init__.py")
-    with open(init_filepath, "r") as f:
+    with open_file(init_filepath, "r") as f:
         file_content = f.readlines()
-    with open(init_filepath, "w") as f:
+    with open_file(init_filepath, "w") as f:
         for line in file_content:
             if PACKAGE_PUBLIC_ID_VAR_NAME in line:
                 f.write(

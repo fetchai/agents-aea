@@ -28,6 +28,7 @@ import pytest
 
 from aea.configurations.base import PublicId
 from aea.crypto.helpers import create_private_key
+from aea.crypto.registries import crypto_registry
 from aea.manager import MultiAgentManager
 
 from packages.fetchai.connections.stub.connection import StubConnection
@@ -370,6 +371,9 @@ class TestMultiAgentManagerAsyncMode(
             {
                 "agent_name": self.agent_name,
                 "public_id": str(self.project_public_id),
+                "addresses": self.manager.get_agent_alias(
+                    self.agent_name
+                ).get_addresses(),
                 "is_running": False,
             }
         ]
@@ -448,6 +452,39 @@ class TestMultiAgentManagerAsyncMode(
         agent_alias.issue_certificates()
 
         assert os.path.exists(cert_path)
+
+    def test_get_addresses(self, *args) -> None:
+        """Test get addresses for agent alias."""
+        self.test_add_agent()
+        agent_alias = self.manager.get_agent_alias(self.agent_name)
+        keys = {
+            name: agent_alias._create_private_key(
+                ledger=name, replace=True, is_connection=False
+            )
+            for name in crypto_registry.supported_ids
+        }
+
+        connection_keys = {
+            name: agent_alias._create_private_key(
+                ledger=name, replace=True, is_connection=True
+            )
+            for name in crypto_registry.supported_ids
+        }
+        agent_alias.set_overrides(
+            {"private_key_paths": keys, "connection_private_key_paths": connection_keys}
+        )
+
+        assert len(agent_alias.get_addresses()) == len(crypto_registry.supported_ids)
+        assert len(agent_alias.get_connections_addresses()) == len(
+            crypto_registry.supported_ids
+        )
+
+    def test_addresses_autoadded(self, *args) -> None:
+        """Test addresses automatically added on creation."""
+        self.test_add_agent()
+        agent_alias = self.manager.get_agent_alias(self.agent_name)
+        assert len(agent_alias.get_addresses()) == 1
+        assert len(agent_alias.get_connections_addresses()) == 1
 
 
 class TestMultiAgentManagerThreadedMode(TestMultiAgentManagerAsyncMode):

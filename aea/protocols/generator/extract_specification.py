@@ -29,7 +29,6 @@ from aea.protocols.generator.common import (
     SPECIFICATION_PRIMITIVE_TYPES,
     _get_sub_types_of_compositional_types,
 )
-from aea.protocols.generator.validate import validate
 
 
 def _ct_specification_type_to_python_type(specification_type: str) -> str:
@@ -186,11 +185,6 @@ def extract(
     :param protocol_specification: a protocol specification
     :return: a Pythonic protocol specification
     """
-    # check the specification is valid
-    result_bool, result_msg = validate(protocol_specification)
-    if not result_bool:
-        raise ProtocolSpecificationParseError(result_msg)
-
     spec = PythonicProtocolSpecification()
 
     all_performatives_set = set()

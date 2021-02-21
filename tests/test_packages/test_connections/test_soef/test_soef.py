@@ -117,8 +117,8 @@ class TestSoefTokenStorage:
         self.token_storage_path = "test.storage"
         configuration = ConnectionConfig(
             api_key="TwiCIriSl0mLahw17pyqoA",
-            soef_addr="soef.fetch.ai",
-            soef_port=9002,
+            soef_addr="s-oef.fetch.ai",
+            soef_port=443,
             token_storage_path=self.token_storage_path,
             restricted_to_protocols={OefSearchMessage.protocol_specification_id},
             connection_id=SOEFConnection.connection_id,
@@ -183,8 +183,8 @@ class TestSoef:
         # create the connection and multiplexer objects
         configuration = ConnectionConfig(
             api_key="TwiCIriSl0mLahw17pyqoA",
-            soef_addr="soef.fetch.ai",
-            soef_port=9002,
+            soef_addr="s-oef.fetch.ai",
+            soef_port=443,
             restricted_to_protocols={OefSearchMessage.protocol_specification_id},
             connection_id=SOEFConnection.connection_id,
         )
@@ -548,7 +548,9 @@ class TestSoef:
             await self.connection.channel._find_around_me_handle_request(
                 message_2, internal_dialogue_2, 1, {}
             )
-            with pytest.raises(SOEFException, match=r"`find_around_me` error: .*"):
+            with pytest.raises(
+                SOEFException, match=r".* `find_around_me` .*Exception: .*"
+            ):
                 await self.connection.channel._find_around_me_handle_request(
                     message_3, internal_dialogue_3, 1, {}
                 )
@@ -571,7 +573,7 @@ class TestSoef:
             self.connection.channel, "_request_text", make_async(resp_text)
         ):
             with pytest.raises(
-                SOEFException, match=r"`acknowledge` error: .*",
+                SOEFException, match=r"`acknowledge` .*Exception: .*",
             ):
                 await self.connection.channel._register_agent()
 
@@ -605,7 +607,7 @@ class TestSoef:
         with patch.object(
             self.connection.channel, "_request_text", make_async(resp_text)
         ):
-            with pytest.raises(SOEFException, match=r"`set_position` error: .*"):
+            with pytest.raises(SOEFException, match=r"`set_position`.*Exception: .*"):
                 await self.connection.channel._set_location(agent_location)
 
         resp_text = '<?xml version="1.0" encoding="UTF-8"?><response><success>1</success></response>'
@@ -622,7 +624,7 @@ class TestSoef:
             self.connection.channel, "_request_text", make_async(resp_text)
         ):
             with pytest.raises(
-                SOEFException, match=r"`set_personality_piece` error: .*"
+                SOEFException, match=r"`set_personality_piece` .*Exception: .*"
             ):
                 await self.connection.channel._set_personality_piece(1, 1)
 
@@ -652,7 +654,9 @@ class TestSoef:
         with patch.object(
             self.connection.channel, "_request_text", make_async(resp_text)
         ):
-            with pytest.raises(SOEFException, match=r"`set_personality_piece` error:"):
+            with pytest.raises(
+                SOEFException, match=r"`set_personality_piece`.*Exception:"
+            ):
                 await self.connection.channel._set_personality_piece(1, 1)
 
         resp_text = '<?xml version="1.0" encoding="UTF-8"?><response><success>1</success></response>'
@@ -668,8 +672,8 @@ class TestSoef:
 
         configuration = ConnectionConfig(
             api_key="TwiCIriSl0mLahw17pyqoA",
-            soef_addr="soef.fetch.ai",
-            soef_port=9002,
+            soef_addr="s-oef.fetch.ai",
+            soef_port=443,
             restricted_to_protocols={OefSearchMessage.protocol_specification_id},
             connection_id=SOEFConnection.connection_id,
             chain_identifier=chain_identifier,
@@ -686,8 +690,8 @@ class TestSoef:
 
         configuration = ConnectionConfig(
             api_key="TwiCIriSl0mLahw17pyqoA",
-            soef_addr="soef.fetch.ai",
-            soef_port=9002,
+            soef_addr="s-oef.fetch.ai",
+            soef_port=443,
             restricted_to_protocols={OefSearchMessage.protocol_specification_id},
             connection_id=SOEFConnection.connection_id,
             chain_identifier=chain_identifier,

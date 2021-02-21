@@ -1,17 +1,17 @@
 name: coin_price
 author: fetchai
-version: 0.4.0
+version: 0.5.0
 type: skill
 description: Retrieve coin price from an API
 license: Apache-2.0
 aea_version: '>=0.10.0, <0.11.0'
 fingerprint:
   README.md: QmXZiNqpNgQmBbTu9SSaKxZzPo6CFETGm5RumVbpKcBvU7
-  __init__.py: Qma5QFNiJWV7JvU9mVjtHMGtJt9ZrdpTZx42YgUME1iHm1
-  behaviours.py: QmWk8rXzVw5x9K9VFU6Dmuf495s6QwCtsv5pMvnRPQ4TYs
+  __init__.py: QmPtt3Qw4R1M1Mn8PGDdudWWfM7pPpKCCVaoxPyfNVpmuu
+  behaviours.py: QmX6bG6MS4XQcJgFq7TtjDrwJVKSh62vLLnbYnMaxzy4M5
   coin_api_spec.yaml: QmP9pN1roizqYWbhiQstntAQFBQdBuVq5mj9CYcA9nD3Q6
   dialogues.py: QmVgQG5emDJWCbsxGk3szej9H7Jg4hj91BRb2AUsmXRGuq
-  handlers.py: QmVdtjBtgJDgvdtnyWuFAwx9vj38gTxAqhcbj738fA3Wfc
+  handlers.py: QmUz6MguLWwSqP5NgNPWm6sQwQbohpBFvpqSNa2sbZcJeM
   models.py: QmdDm5YKR7XvtcXn7qASipXg8AHt8hvDYL3g1HYCSsH6Dq
 fingerprint_ignore_patterns: []
 contracts: []

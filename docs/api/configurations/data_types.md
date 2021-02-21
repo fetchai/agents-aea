@@ -775,7 +775,7 @@ These fields will be forwarded to the 'pip' command.
 #### `__`init`__`
 
 ```python
- | __init__(name: Union[PyPIPackageName, str], version: Union[str, SpecifierSet] = "", index: Optional[Union[str, Url]] = None, git: Optional[Union[str, Url]] = None, ref: Optional[Union[GitRef, str]] = None) -> None
+ | __init__(name: Union[PyPIPackageName, str], version: Union[str, SpecifierSet] = "", index: Optional[str] = None, git: Optional[str] = None, ref: Optional[Union[GitRef, str]] = None) -> None
 ```
 
 Initialize a PyPI dependency.

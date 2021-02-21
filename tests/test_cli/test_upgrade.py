@@ -354,7 +354,7 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
         cls.run_cli_command(
             "--skip-consistency-check",
             "fetch",
-            "fetchai/generic_buyer:0.19.0",
+            "fetchai/generic_buyer:0.20.0",
             "--alias",
             cls.agent_name,
         )
@@ -436,7 +436,7 @@ class TestNonVendorProject(BaseAEATestCase, BaseTestCase):
         cls.change_directory(Path(".."))
         cls.agent_name = "generic_buyer_0.12.0"
         cls.run_cli_command(
-            "fetch", "fetchai/generic_buyer:0.19.0", "--alias", cls.agent_name
+            "fetch", "fetchai/generic_buyer:0.20.0", "--alias", cls.agent_name
         )
         cls.agents.add(cls.agent_name)
         cls.set_agent_context(cls.agent_name)
@@ -739,8 +739,8 @@ class TestUpgradeNonVendorDependencies(AEATestCaseEmpty):
 
     The test works as follows:
     - scaffold a package, one for each possible package type;
-    - add the protocol "fetchai/default:0.7.0" as dependency to each of them.
-    - add the skill "fetchai/error:0.7.0"; this will also add the default protocol.
+    - add the protocol "fetchai/default:0.11.0" as dependency to each of them.
+    - add the skill "fetchai/error:0.11.0"; this will also add the default protocol.
       add it also as dependency of non-vendor skill.
     - run 'aea upgrade'
     - check that the reference to "fetchai/default" in each scaffolded package
@@ -750,10 +750,10 @@ class TestUpgradeNonVendorDependencies(AEATestCaseEmpty):
     capture_log = True
     IS_EMPTY = True
     old_default_protocol_id = PublicId(
-        DefaultMessage.protocol_id.author, DefaultMessage.protocol_id.name, "0.7.0"
+        DefaultMessage.protocol_id.author, DefaultMessage.protocol_id.name, "0.11.0"
     )
     old_error_skill_id = PublicId(
-        ERROR_SKILL_PUBLIC_ID.author, ERROR_SKILL_PUBLIC_ID.name, "0.7.0"
+        ERROR_SKILL_PUBLIC_ID.author, ERROR_SKILL_PUBLIC_ID.name, "0.11.0"
     )
     old_aea_version_range = compute_specifier_from_version(Version("0.1.0"))
 
@@ -857,18 +857,18 @@ class TestUpdateReferences(AEATestCaseEmpty):
     In particular, 'default_routing', 'default_connection' and custom component configurations in AEA configuration.
 
     How the test works:
-    - add fetchai/error:0.7.0, that requires fetchai/default:0.7.0
-    - add fetchai/stub:0.16.0
-    - add 'fetchai/default:0.7.0: fetchai/stub:0.16.0' to default routing
+    - add fetchai/error:0.11.0, that requires fetchai/default:0.11.0
+    - add fetchai/stub:0.15.0
+    - add 'fetchai/default:0.11.0: fetchai/stub:0.15.0' to default routing
     - add custom configuration to stub connection.
     - run 'aea upgrade'. This will upgrade `stub` connection and `error` skill, and in turn `default` protocol.
     """
 
     IS_EMPTY = True
 
-    OLD_DEFAULT_PROTOCOL_PUBLIC_ID = PublicId.from_str("fetchai/default:0.7.0")
-    OLD_ERROR_SKILL_PUBLIC_ID = PublicId.from_str("fetchai/error:0.7.0")
-    OLD_STUB_CONNECTION_PUBLIC_ID = PublicId.from_str("fetchai/stub:0.16.0")
+    OLD_DEFAULT_PROTOCOL_PUBLIC_ID = PublicId.from_str("fetchai/default:0.11.0")
+    OLD_ERROR_SKILL_PUBLIC_ID = PublicId.from_str("fetchai/error:0.11.0")
+    OLD_STUB_CONNECTION_PUBLIC_ID = PublicId.from_str("fetchai/stub:0.15.0")
 
     @classmethod
     def setup_class(cls):
@@ -934,7 +934,7 @@ class TestUpdateReferences(AEATestCaseEmpty):
             "agent.default_connection",
             cwd=self._get_cwd(),
         )
-        assert result.stdout == "fetchai/stub:0.16.0\n"
+        assert result.stdout == "fetchai/stub:0.17.0\n"
 
     def test_custom_configuration_updated_correctly(self):
         """Test default routing has been updated correctly."""
@@ -1037,7 +1037,7 @@ class BaseTestUpgradeWithEject(AEATestCaseEmpty):
     IS_EMPTY = True
 
     GENERIC_SELLER = ComponentId(
-        ComponentType.SKILL, PublicId.from_str("fetchai/generic_seller:0.18.0")
+        ComponentType.SKILL, PublicId.from_str("fetchai/generic_seller:0.19.0")
     )
     unmocked = get_latest_version_available_in_registry
 
@@ -1095,7 +1095,7 @@ class TestUpgradeWithEjectAbort(BaseTestUpgradeWithEject):
     EXPECTED_CLICK_ECHO_CALLS = ["Abort."]
     EXPECTED_CLICK_CONFIRM_CALLS = [
         RegexComparator(
-            r"Skill fetchai/generic_seller:0.18.0 prevents the upgrade of the following vendor packages:.*as there isn't a compatible version available on the AEA registry\. Would you like to eject it\?"
+            r"Skill fetchai/generic_seller:0.19.0 prevents the upgrade of the following vendor packages:.*as there isn't a compatible version available on the AEA registry\. Would you like to eject it\?"
         )
     ]
 
@@ -1107,14 +1107,14 @@ class TestUpgradeWithEjectAccept(BaseTestUpgradeWithEject):
     CONFIRM_OUTPUT = [True, True]
 
     EXPECTED_CLICK_ECHO_CALLS = [
-        "Ejecting (skill, fetchai/generic_seller:0.18.0)...",
-        "Ejecting item skill fetchai/generic_seller:0.18.0",
+        "Ejecting (skill, fetchai/generic_seller:0.19.0)...",
+        "Ejecting item skill fetchai/generic_seller:0.19.0",
         "Fingerprinting skill components of 'default_author/generic_seller:0.1.0' ...",
-        "Successfully ejected skill fetchai/generic_seller:0.18.0 to ./skills/generic_seller as default_author/generic_seller:0.1.0.",
+        "Successfully ejected skill fetchai/generic_seller:0.19.0 to ./skills/generic_seller as default_author/generic_seller:0.1.0.",
     ]
     EXPECTED_CLICK_CONFIRM_CALLS = [
         RegexComparator(
-            "Skill fetchai/generic_seller:0.18.0 prevents the upgrade of the following vendor packages:"
+            "Skill fetchai/generic_seller:0.19.0 prevents the upgrade of the following vendor packages:"
         ),
         RegexComparator(
             "as there isn't a compatible version available on the AEA registry. Would you like to eject it?"
@@ -1185,7 +1185,12 @@ class TestUpgradeProjectWithNewerVersion(BaseTestUpgradeProject):
             self.current_agent_context, self.EXPECTED, ignore=ignore
         )
         _left_only, _right_only, diff = dircmp_recursive(dircmp)
-        assert diff == _left_only == _right_only == set()
+        if confirm:
+            assert diff == _right_only == _left_only == set()
+        else:
+            assert diff == _right_only == set()
+            # temporary: due to change in deps
+            assert _left_only == {"vendor/fetchai/skills/error"}
 
 
 @mock.patch("aea.cli.upgrade.get_latest_version_available_in_registry")
@@ -1207,7 +1212,12 @@ class TestUpgradeProjectWithoutNewerVersion(BaseTestUpgradeProject):
 
         # compare with latest fetched agent.
         ignore = [DEFAULT_AEA_CONFIG_FILE] + filecmp.DEFAULT_IGNORES
-        assert are_dirs_equal(self.current_agent_context, self.EXPECTED, ignore=ignore)
+        dircmp = filecmp.dircmp(
+            self.current_agent_context, self.EXPECTED, ignore=ignore
+        )
+        _left_only, _right_only, diff = dircmp_recursive(dircmp)
+        assert _left_only == {"vendor/fetchai/skills/error"}
+        assert diff == _right_only == set()
 
 
 @mock.patch.object(aea, "__version__", "0.8.0")

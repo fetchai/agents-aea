@@ -165,6 +165,8 @@ class TestConnectionConfig:
 
         expected_config = ConnectionConfig.from_json(original_json)
         assert isinstance(expected_config, ConnectionConfig)
+        assert isinstance(expected_config.package_dependencies, set)
+        assert not expected_config.is_abstract_component
         expected_json = expected_config.json
         actual_config = ConnectionConfig.from_json(expected_json)
         actual_json = actual_config.json
@@ -753,7 +755,9 @@ def test_component_id_same_prefix():
 
 def test_component_configuration_load_file_not_found():
     """Test Component.load when a file is not found."""
-    with mock.patch("builtins.open", side_effect=FileNotFoundError):
+    with mock.patch(
+        "aea.configurations.loader.open_file", side_effect=FileNotFoundError
+    ):
         with pytest.raises(FileNotFoundError):
             load_component_configuration(
                 ComponentType.PROTOCOL, mock.MagicMock(spec=Path)

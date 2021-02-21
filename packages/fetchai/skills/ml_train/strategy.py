@@ -226,3 +226,6 @@ class Strategy(Model):
             fee_by_currency_id={proposal.values["currency_id"]: self._max_buyer_tx_fee},
         )
         return terms
+
+    def update_search_query_params(self) -> None:
+        """Update search query params."""

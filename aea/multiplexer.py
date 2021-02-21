@@ -276,7 +276,8 @@ class AsyncMultiplexer(Runnable, WithLogger):
         :return: None
         :raise AEAEnforceError: if an inconsistency is found.
         """
-        enforce(len(self.connections) > 0, "List of connections cannot be empty.")
+        if len(self.connections) == 0:
+            self.logger.debug("List of connections is empty.")
 
         enforce(
             len(set(c.connection_id for c in self.connections))
@@ -286,7 +287,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
 
     def _set_default_connection_if_none(self) -> None:
         """Set the default connection if it is none."""
-        if self._default_connection is None:
+        if self._default_connection is None and bool(self.connections):
             self._default_connection = self.connections[0]
 
     async def connect(self) -> None:
@@ -566,7 +567,11 @@ class AsyncMultiplexer(Runnable, WithLogger):
         else:
             connection = self._id_to_connection[connection_id]
 
-        connection = cast(Connection, connection)
+        if connection is None:
+            self.logger.warning(
+                f"Dropping envelope, no connection available for sending: {envelope}"
+            )
+            return
 
         if not self._is_connection_supported_protocol(connection, envelope_protocol_id):
             return

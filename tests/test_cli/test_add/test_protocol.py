@@ -16,10 +16,9 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the tests for the `aea add protocol` sub-command."""
-
 import os
+import re
 import shutil
 import tempfile
 import unittest.mock
@@ -32,7 +31,7 @@ from jsonschema import ValidationError
 import aea.configurations.base
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_PROTOCOL_CONFIG_FILE, PublicId
-from aea.test_tools.test_cases import AEATestCaseEmpty
+from aea.test_tools.test_cases import AEATestCaseEmpty, AEATestCaseEmptyFlaky
 
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.gym.message import GymMessage
@@ -375,8 +374,10 @@ class TestAddProtocolFailsWhenConfigFileIsNotCompliant:
 
         The expected message is: 'Protocol configuration file not valid: ...'
         """
-        s = "Protocol configuration file not valid: test error message"
-        assert self.result.exception.message == s
+        assert re.match(
+            "Protocol configuration file '.*' not valid: test error message",
+            self.result.exception.message,
+        )
 
     @classmethod
     def teardown_class(cls):
@@ -453,7 +454,7 @@ class TestAddProtocolFailsWhenDirectoryAlreadyExists:
             pass
 
 
-class TestAddProtocolFromRemoteRegistry(AEATestCaseEmpty):
+class TestAddProtocolFromRemoteRegistry(AEATestCaseEmptyFlaky):
     """Test case for add protocol from Registry command."""
 
     IS_LOCAL = False

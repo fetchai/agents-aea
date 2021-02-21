@@ -30,7 +30,11 @@ import yaml
 import aea
 from aea.configurations.base import PackageType, ProtocolSpecification
 from aea.configurations.loader import ConfigLoader
-from aea.configurations.validation import OwnDraft4Validator, make_jsonschema_base_uri
+from aea.configurations.validation import (
+    ConfigValidator,
+    OwnDraft4Validator,
+    make_jsonschema_base_uri,
+)
 from aea.protocols.generator.common import load_protocol_specification
 
 from tests.conftest import protocol_specification_files
@@ -58,7 +62,7 @@ def test_config_loader_dump_component():
     config_loader = ConfigLoader.from_configuration_type(PackageType.PROTOCOL)
     configuration = MagicMock()
     with mock.patch.object(aea.configurations.loader, "yaml_dump"), mock.patch.object(
-        OwnDraft4Validator, "validate"
+        ConfigValidator, "_validate"
     ), mock.patch("builtins.open"):
         config_loader.dump(configuration, open("foo"))
 
@@ -69,7 +73,7 @@ def test_config_loader_dump_agent_config():
     configuration = MagicMock(ordered_json={"component_configurations": []})
     with mock.patch.object(
         aea.configurations.loader, "yaml_dump_all"
-    ), mock.patch.object(OwnDraft4Validator, "validate"), mock.patch("builtins.open"):
+    ), mock.patch.object(ConfigValidator, "_validate"), mock.patch("builtins.open"):
         config_loader.dump(configuration, open("foo"))
 
 
@@ -89,10 +93,14 @@ def test_load_protocol_specification_only_first_part():
         license="",
         aea_version="0.1.0",
         speech_acts={"example": {}},
+        protocol_specification_id="test/test:0.1.0",
+        description="some",
     )
     with mock.patch.object(
         yaml, "safe_load_all", return_value=[valid_protocol_specification]
-    ), mock.patch("builtins.open"), mock.patch.object(OwnDraft4Validator, "validate"):
+    ), mock.patch("aea.protocols.generator.common.open_file"), mock.patch.object(
+        OwnDraft4Validator, "validate"
+    ):
         load_protocol_specification("foo")
 
 
@@ -105,12 +113,16 @@ def test_load_protocol_specification_two_parts():
         license="",
         aea_version="0.1.0",
         speech_acts={"example": {}},
+        protocol_specification_id="test/test:0.1.0",
+        description="some",
     )
     with mock.patch.object(
         yaml,
         "safe_load_all",
         return_value=[valid_protocol_specification, valid_protocol_specification],
-    ), mock.patch("builtins.open"), mock.patch.object(OwnDraft4Validator, "validate"):
+    ), mock.patch("aea.protocols.generator.common.open_file"), mock.patch.object(
+        OwnDraft4Validator, "validate"
+    ):
         load_protocol_specification("foo")
 
 
@@ -122,5 +134,5 @@ def test_load_protocol_specification_too_many_parts():
     ):
         with mock.patch.object(
             yaml, "safe_load_all", return_value=[{}] * 4
-        ), mock.patch("builtins.open"):
+        ), mock.patch("aea.protocols.generator.common.open_file"):
             load_protocol_specification("foo")

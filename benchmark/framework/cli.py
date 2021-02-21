@@ -19,7 +19,7 @@
 """Cli implementation for performance tests suits."""
 import ast
 import inspect
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
 import click
 from click.core import Argument, Command, Context, Option, Parameter
@@ -32,7 +32,7 @@ from .report_printer import PerformanceReport, ReportPrinter
 class DefaultArgumentsMultiple(Argument):
     """Multiple arguments with default value."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Create MultipleArguments instance."""
         kwargs["nargs"] = -1
         default = kwargs.pop("default", tuple())
@@ -77,9 +77,9 @@ class TestCli:
     def __init__(
         self,
         func: Callable,
-        executor_class=Executor,
-        report_printer_class=ReportPrinter,
-    ):
+        executor_class: Type[Executor] = Executor,
+        report_printer_class: Type[ReportPrinter] = ReportPrinter,
+    ) -> None:
         """
         Make performance client.
 
@@ -220,7 +220,7 @@ class TestCli:
         command = self._make_command()
         command()
 
-    def _command_callback(self, **params) -> None:
+    def _command_callback(self, **params: Any) -> None:
         """
         Run test on command.
 

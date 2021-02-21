@@ -58,7 +58,6 @@ from aea.cli.utils.package_utils import (
 )
 from aea.configurations.base import ComponentId, ComponentType, PublicId
 from aea.configurations.constants import (
-    DEFAULT_CONNECTION,
     DEFAULT_LEDGER,
     DEFAULT_PROTOCOL,
     LEDGER_CONNECTION,
@@ -165,7 +164,7 @@ class PublicIdParameterTestCase(TestCase):
 @mock.patch("aea.cli.utils.config.os.path.dirname", return_value="dir-name")
 @mock.patch("aea.cli.utils.config.os.path.exists", return_value=False)
 @mock.patch("aea.cli.utils.config.os.makedirs")
-@mock.patch("builtins.open")
+@mock.patch("aea.cli.utils.click_utils.open_file")
 class InitConfigFolderTestCase(TestCase):
     """Test case for _init_cli_config method."""
 
@@ -181,7 +180,7 @@ class InitConfigFolderTestCase(TestCase):
 
 @mock.patch("aea.cli.utils.config.get_or_create_cli_config")
 @mock.patch("aea.cli.utils.generic.yaml.dump")
-@mock.patch("builtins.open", mock.mock_open())
+@mock.patch("aea.cli.utils.click_utils.open_file", mock.mock_open())
 class UpdateCLIConfigTestCase(TestCase):
     """Test case for update_cli_config method."""
 
@@ -200,7 +199,7 @@ def _raise_file_not_found_error(*args):
     raise FileNotFoundError()
 
 
-@mock.patch("builtins.open", mock.mock_open())
+@mock.patch("aea.cli.utils.click_utils.open_file", mock.mock_open())
 class GetOrCreateCLIConfigTestCase(TestCase):
     """Test case for read_cli_config method."""
 
@@ -305,7 +304,7 @@ class FindItemLocallyTestCase(TestCase):
         self.assertIn("configuration file not valid", cm.exception.message)
 
     @mock.patch("aea.cli.utils.package_utils.Path.exists", return_value=True)
-    @mock.patch("aea.cli.utils.package_utils.Path.open", mock.mock_open())
+    @mock.patch("aea.cli.utils.package_utils.open_file", mock.mock_open())
     @mock.patch(
         "aea.cli.utils.package_utils.ConfigLoader.from_configuration_type",
         return_value=ConfigLoaderMock(),
@@ -347,7 +346,7 @@ class FindItemInDistributionTestCase(TestCase):
         self.assertIn("Cannot find skill", cm.exception.message)
 
     @mock.patch("aea.cli.utils.package_utils.Path.exists", return_value=True)
-    @mock.patch("aea.cli.utils.package_utils.Path.open", mock.mock_open())
+    @mock.patch("aea.cli.utils.package_utils.open_file", mock.mock_open())
     @mock.patch(
         "aea.cli.utils.package_utils.ConfigLoader.from_configuration_type",
         return_value=ConfigLoaderMock(),
@@ -472,7 +471,7 @@ def test_is_item_present_unified(mock_, vendor):
         (PublicId.from_str("author/package:latest"), False),
         (PublicId.from_str("fetchai/oef:0.1.0"), False),
         (PublicId.from_str("fetchai/oef:latest"), False),
-        (PublicId.from_str(DEFAULT_CONNECTION), False),
+        (PublicId.from_str("fetchai/stub:latest"), False),
         (PublicId.from_str(DEFAULT_PROTOCOL), False),
     ],
 )

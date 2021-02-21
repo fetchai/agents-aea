@@ -20,7 +20,7 @@ import inspect
 from collections import namedtuple
 from datetime import datetime
 from statistics import mean, stdev
-from typing import Any, List, Optional, Tuple
+from typing import Any, Callable, List, Optional, Tuple, cast
 
 from .executor import ExecReport
 from .func_details import BaseFuncDetails
@@ -29,7 +29,7 @@ from .func_details import BaseFuncDetails
 class ContextPrinter:
     """Printer for test execution context: function, arguments, execution aprameters."""
 
-    def __init__(self, func_details: BaseFuncDetails, executor_params: dict):
+    def __init__(self, func_details: BaseFuncDetails, executor_params: dict) -> None:
         """
         Make performance report printer instance.
 
@@ -39,7 +39,7 @@ class ContextPrinter:
         self.func_details = func_details
         self.executor_params = executor_params
 
-    def print_context_information(self):
+    def print_context_information(self) -> None:
         """Print details about tested function and execution parameters."""
         self._print_executor_details()
         self._print_func_details()
@@ -128,7 +128,9 @@ class PerformanceReport:
         for name, unit in [("cpu", "%"), ("mem", "kb")]:
             for func in [min, max, mean]:
                 resources.append(
-                    self._make_resource(f"{name} {func.__name__}", unit, name, func)
+                    self._make_resource(
+                        f"{name} {func.__name__}", unit, name, cast(Callable, func)
+                    )
                 )
 
         return resources
@@ -138,7 +140,7 @@ class PerformanceReport:
         name: str,
         unit: str,
         attr_name: str,
-        aggr_function: Optional["function"],  # noqa
+        aggr_function: Optional[Callable],  # noqa
     ) -> ResourceRecord:
         """
         Make ResourceRecord.
@@ -154,7 +156,9 @@ class PerformanceReport:
             name, unit, *self._count_resource(attr_name, aggr_function)
         )
 
-    def _count_resource(self, attr_name, aggr_function=None) -> Tuple[float, float]:
+    def _count_resource(
+        self, attr_name: str, aggr_function: Optional[Callable] = None
+    ) -> Tuple[float, float]:
         """
         Calculate resources from exec reports.
 

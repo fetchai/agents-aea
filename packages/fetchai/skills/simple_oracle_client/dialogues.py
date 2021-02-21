@@ -83,7 +83,7 @@ class ContractApiDialogue(BaseContractApiDialogue):
     @property
     def terms(self) -> Terms:
         """Get the terms."""
-        if self._terms is None:
+        if self._terms is None:  # pragma: nocover
             raise ValueError("Terms not set!")
         return self._terms
 
@@ -156,7 +156,7 @@ class LedgerApiDialogue(BaseLedgerApiDialogue):
     @property
     def associated_signing_dialogue(self) -> "SigningDialogue":
         """Get the associated signing dialogue."""
-        if self._associated_signing_dialogue is None:
+        if self._associated_signing_dialogue is None:  # pragma: nocover
             raise ValueError("Associated signing dialogue not set!")
         return self._associated_signing_dialogue
 
@@ -235,7 +235,7 @@ class SigningDialogue(BaseSigningDialogue):
     @property
     def associated_contract_api_dialogue(self) -> ContractApiDialogue:
         """Get the associated contract api dialogue."""
-        if self._associated_contract_api_dialogue is None:
+        if self._associated_contract_api_dialogue is None:  # pragma: nocover
             raise ValueError("Associated contract api dialogue not set!")
         return self._associated_contract_api_dialogue
 

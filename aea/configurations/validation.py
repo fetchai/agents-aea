@@ -33,8 +33,10 @@ from jsonschema.validators import extend
 
 from aea.configurations.constants import AGENT
 from aea.configurations.data_types import ComponentId, ComponentType, PublicId
+from aea.exceptions import AEAValidationError
 from aea.helpers.base import dict_to_path_value
 from aea.helpers.env_vars import is_env_variable
+from aea.helpers.io import open_file
 
 
 _CUR_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
@@ -99,8 +101,8 @@ class CustomTypeChecker(TypeChecker):
         return super().is_type(instance, type)
 
 
-def ownAdditionalProperties(validator, aP, instance, schema) -> Iterator:  # type: ignore
-    """Additioinal properties validator."""
+def own_additional_properties(validator, aP, instance, schema) -> Iterator:  # type: ignore
+    """Additional properties validator."""
     for _ in additionalProperties(validator, aP, instance, schema):
         raise ExtraPropertiesError(list(find_additional_properties(instance, schema)))
     return iter(())
@@ -108,7 +110,7 @@ def ownAdditionalProperties(validator, aP, instance, schema) -> Iterator:  # typ
 
 OwnDraft4Validator = extend(
     validator=Draft4Validator,
-    validators={"additionalProperties": ownAdditionalProperties},
+    validators={"additionalProperties": own_additional_properties},
 )
 
 
@@ -130,7 +132,7 @@ class ConfigValidator:
         :param schema_filename: the path to the JSON-schema file in 'aea/configurations/schemas'.
         """
         base_uri = Path(_SCHEMAS_DIR)
-        with (base_uri / schema_filename).open() as fp:
+        with open_file(base_uri / schema_filename) as fp:
             self._schema = json.load(fp)
         root_path = make_jsonschema_base_uri(base_uri)
         self._resolver = jsonschema.RefResolver(root_path, self._schema)
@@ -199,10 +201,10 @@ class ConfigValidator:
                     **configuration,
                 )
             )
-        except (ExtraPropertiesError, jsonschema.ValidationError) as e:
+        except Exception as e:
             raise ValueError(
-                f"Configuration of component {component_id} is not valid. {e}"
-            ) from e
+                f"Configuration of component ({str(component_id.component_type)}, {component_id.public_id}) is not valid. {str(e)}"
+            )
 
     def validate(self, json_data: Dict) -> None:
         """
@@ -220,9 +222,27 @@ class ConfigValidator:
             )
 
             # validate agent config
-            self._validator.validate(instance=json_data_copy)
+            self._validate(json_data_copy)
         else:
-            self._validator.validate(instance=json_data)
+            self._validate(json_data)
+
+    def _validate(self, instance: Dict) -> None:
+        """Validate an instance using the current validator."""
+        errors: List[jsonschema.ValidationError] = list(
+            self._validator.iter_errors(instance=instance)
+        )
+        if len(errors) > 0:
+            error_msg = self._build_message_from_errors(errors)
+            raise AEAValidationError(f"{error_msg}")
+
+    @staticmethod
+    def _build_message_from_errors(errors: List[jsonschema.ValidationError]) -> str:
+        """Build an error message from validation errors."""
+        path = lambda error: ".".join(list(error.path))  # noqa # type: ignore
+        result = [f"{path(error)}: {error.message}" for error in errors]
+        return "The following errors occurred during validation:\n - " + "\n - ".join(
+            result
+        )
 
     def validate_agent_components_configuration(
         self, component_configurations: Dict

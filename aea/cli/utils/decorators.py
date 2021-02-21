@@ -39,8 +39,9 @@ from aea.configurations.base import (
 )
 from aea.configurations.constants import VENDOR
 from aea.configurations.loader import ConfigLoaders
-from aea.exceptions import AEAException, enforce
+from aea.exceptions import AEAException, AEAValidationError, enforce
 from aea.helpers.base import decorator_with_optional_params
+from aea.helpers.io import open_file
 
 
 pass_ctx = click.make_pass_decorator(Context)
@@ -97,12 +98,12 @@ def _validate_config_consistency(ctx: Context, check_aea_version: bool = True) -
 
         # load the configuration file.
         try:
-            with configuration_file_path.open("r") as fp:
+            with open_file(configuration_file_path, "r") as fp:
                 package_configuration = loader.load(fp)
-        except ValidationError as e:
+        except (AEAValidationError, ValidationError) as e:
             raise ValueError(
-                "{} configuration file not valid: {}".format(
-                    item_type.value.capitalize(), str(e)
+                "{} configuration file '{}' not valid: {}".format(
+                    item_type.value.capitalize(), configuration_file_path, str(e)
                 )
             )
 

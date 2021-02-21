@@ -37,3 +37,12 @@ Load a component from a directory.
 
 the component instance.
 
+<a name="aea.components.loader.AEAPackageNotFound"></a>
+## AEAPackageNotFound Objects
+
+```python
+class AEAPackageNotFound(Exception)
+```
+
+Exception when failed to import package, cause not exists.
+

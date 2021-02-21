@@ -28,6 +28,7 @@ from aea.configurations.loader import ConfigLoaders, PackageType, SkillConfig
 from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import DEFAULT_CURRENCY_DENOMINATIONS
 from aea.exceptions import AEAEnforceError
+from aea.helpers.io import open_file
 from aea.identity.base import Identity
 from aea.mail.base import Address
 from aea.multiplexer import AsyncMultiplexer, Multiplexer, OutBox
@@ -461,7 +462,7 @@ class BaseSkillTestCase:
         skill_configuration_file_path: Path = Path(cls.path_to_skill, "skill.yaml")
         loader = ConfigLoaders.from_package_type(PackageType.SKILL)
 
-        with skill_configuration_file_path.open() as fp:
+        with open_file(skill_configuration_file_path) as fp:
             skill_config: SkillConfig = loader.load(fp)
 
         # This enables overriding the skill's config prior to loading

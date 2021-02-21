@@ -37,7 +37,6 @@ import aea
 from aea.cli.core import cli
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.connections.base import ConnectionStates
-from aea.exceptions import AEAEnforceError
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.identity.base import Identity
 from aea.mail.base import AEAConnectionError, Envelope, EnvelopeContext
@@ -48,6 +47,7 @@ from packages.fetchai.connections.local.connection import LocalNode
 from packages.fetchai.connections.p2p_libp2p.connection import (
     PUBLIC_ID as P2P_PUBLIC_ID,
 )
+from packages.fetchai.connections.stub.connection import PUBLIC_ID as STUB_CONNECTION_ID
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
 
@@ -353,6 +353,30 @@ async def test_send_envelope_with_non_registered_connection():
 
     with pytest.raises(AEAConnectionError, match="No connection registered with id:.*"):
         await multiplexer._send(envelope)
+
+    multiplexer.disconnect()
+
+
+@pytest.mark.asyncio
+async def test_send_envelope_when_no_connection():
+    """Test that sending an envelope with no connection logs a warning."""
+    multiplexer = Multiplexer([], protocols=[DefaultProtocolMock])
+    multiplexer.connect()
+
+    envelope = Envelope(
+        to="",
+        sender="",
+        protocol_specification_id=DefaultMessage.protocol_specification_id,
+        message=b"",
+    )
+
+    with unittest.mock.patch.object(
+        multiplexer.logger, "warning"
+    ) as mock_logger_warning:
+        await multiplexer._send(envelope)
+        mock_logger_warning.assert_called_with(
+            f"Dropping envelope, no connection available for sending: {envelope}"
+        )
 
     multiplexer.disconnect()
 
@@ -675,8 +699,9 @@ def test_multiplexer_setup():
     connection_3 = _make_dummy_connection()
     connections = [connection_1, connection_2, connection_3]
     multiplexer = Multiplexer([])
-    with pytest.raises(AEAEnforceError):
+    with unittest.mock.patch.object(multiplexer.logger, "debug") as mock_logger_debug:
         multiplexer._connection_consistency_checks()
+        mock_logger_debug.assert_called_with("List of connections is empty.")
     multiplexer._setup(connections, default_routing=None)
     multiplexer._connection_consistency_checks()
 
@@ -849,8 +874,38 @@ class TestMultiplexerDisconnectsOnTermination:  # pylint: disable=attribute-defi
             [EOF], timeout=20,
         )
 
-    def test_multiplexer_disconnected_on_termination_after_connected(self):
+    def test_multiplexer_disconnected_on_termination_after_connected_no_connection(
+        self,
+    ):
         """Test multiplexer disconnected properly on termination after connected."""
+        self.proc = PexpectWrapper(  # nosec
+            [sys.executable, "-m", "aea.cli", "-v", "DEBUG", "run"],
+            env=os.environ,
+            maxread=10000,
+            encoding="utf-8",
+            logfile=sys.stdout,
+        )
+
+        self.proc.expect_all(
+            ["Start processing messages..."], timeout=20,
+        )
+        self.proc.control_c()
+        self.proc.expect_all(
+            ["Multiplexer disconnecting...", "Multiplexer disconnected.", EOF],
+            timeout=20,
+        )
+
+    def test_multiplexer_disconnected_on_termination_after_connected_one_connection(
+        self,
+    ):
+        """Test multiplexer disconnected properly on termination after connected."""
+
+        result = self.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "--local", "connection", str(STUB_CONNECTION_ID)],
+        )
+        assert result.exit_code == 0, result.stdout_bytes
+
         self.proc = PexpectWrapper(  # nosec
             [sys.executable, "-m", "aea.cli", "-v", "DEBUG", "run"],
             env=os.environ,
