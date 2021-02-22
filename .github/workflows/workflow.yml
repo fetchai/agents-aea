@@ -32,6 +32,11 @@ jobs:
           # we vendorize main "cosmos.py" module in fetchai crypto plugin package
           diff plugins/aea-crypto-cosmos/aea_crypto_cosmos/cosmos.py plugins/aea-crypto-fetchai/aea_crypto_fetchai/_cosmos.py
 
+          # check diff between plugins' LICENSE and main LICENSE
+          diff LICENSE plugins/aea-crypto-cosmos/LICENSE
+          diff LICENSE plugins/aea-crypto-ethereum/LICENSE
+          diff LICENSE plugins/aea-crypto-fetchai/LICENSE
+
   common_checks_2:
     continue-on-error: False
     runs-on: ubuntu-latest
