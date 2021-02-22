@@ -22,12 +22,14 @@ from pathlib import Path
 from typing import Dict, List
 
 
-FETCHAI = "fetchai"
+_FETCHAI_IDENTIFIER = "fetchai"
+_ETHEREUM_IDENTIFIER = "ethereum"
+_COSMOS_IDENTIFIER = "cosmos"
 DEFAULT_PROTOCOL = "fetchai/default:latest"
 SIGNING_PROTOCOL = "fetchai/signing:latest"
 STATE_UPDATE_PROTOCOL = "fetchai/state_update:latest"
 LEDGER_CONNECTION = "fetchai/ledger:latest"
-DEFAULT_LEDGER = FETCHAI
+DEFAULT_LEDGER = _FETCHAI_IDENTIFIER
 PRIVATE_KEY_PATH_SCHEMA = "{}_private_key.txt"
 DEFAULT_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(DEFAULT_LEDGER)
 DEFAULT_LICENSE = "Apache-2.0"
@@ -87,6 +89,14 @@ CONFIG_FILE_TO_PACKAGE_TYPE = {
     DEFAULT_AEA_CONFIG_FILE: AGENT,
 }  # type: Dict[str, str]
 
+CRYPTO_PLUGIN_GROUP = "aea.cryptos"
+LEDGER_APIS_PLUGIN_GROUP = "aea.ledger_apis"
+FAUCET_APIS_PLUGIN_GROUP = "aea.faucet_apis"
+ALLOWED_GROUPS = {
+    CRYPTO_PLUGIN_GROUP,
+    LEDGER_APIS_PLUGIN_GROUP,
+    FAUCET_APIS_PLUGIN_GROUP,
+}
 AEA_MANAGER_DATA_DIRNAME = "data"
 LAUNCH_SUCCEED_MESSAGE = "Start processing messages..."
 

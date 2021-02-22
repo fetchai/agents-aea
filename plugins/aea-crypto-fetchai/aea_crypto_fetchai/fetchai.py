@@ -20,7 +20,12 @@
 
 from typing import Any
 
-from aea.crypto.cosmos import CosmosCrypto, CosmosFaucetApi, CosmosHelper, _CosmosApi
+from aea_crypto_fetchai._cosmos import (
+    CosmosCrypto,
+    CosmosFaucetApi,
+    CosmosHelper,
+    _CosmosApi,
+)
 
 
 _FETCHAI = "fetchai"

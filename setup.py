@@ -24,35 +24,16 @@ from typing import Dict
 from setuptools import find_packages, setup  # type: ignore
 
 PACKAGE_NAME = "aea"
+here = os.path.abspath(os.path.dirname(__file__))
 
 
 def get_all_extras() -> Dict:
-
-    cosmos_ledger_deps = ["ecdsa==0.15", "bech32==1.2.0"]
-
-    fetch_ledger_deps = cosmos_ledger_deps
-
-    ethereum_ledger_deps = [
-        "web3==5.12.0",
-        "ipfshttpclient==0.6.1",
-        "eth-account==0.5.2",
-        "eth-keys==0.3.3",
-        "eth-typing==2.2.2",
-        "lru-dict==1.1.6",
-    ]
-
-    crypto_deps = [
-        *fetch_ledger_deps,
-        *ethereum_ledger_deps,
-        *cosmos_ledger_deps,
-    ]
 
     cli_deps = [
         "click",
         "pyyaml>=4.2b1",
         "jsonschema>=3.0.0",
         "packaging>=20.3",
-        *crypto_deps,
     ]
 
     cli_gui = ["flask", "connexion[swagger-ui]>=2.4.0", *cli_deps]
@@ -60,10 +41,6 @@ def get_all_extras() -> Dict:
     extras = {
         "cli": cli_deps,
         "cli_gui": cli_gui,
-        "fetch": fetch_ledger_deps,
-        "ethereum": ethereum_ledger_deps,
-        "cosmos": cosmos_ledger_deps,
-        "crypto": crypto_deps,
         "test_tools": cli_deps,
     }
 
@@ -75,7 +52,6 @@ def get_all_extras() -> Dict:
 all_extras = get_all_extras()
 
 base_deps = [
-    *all_extras.get("crypto", []),
     "base58>=1.0.3",
     "jsonschema>=3.0.0",
     "packaging>=20.3",
@@ -85,6 +61,7 @@ base_deps = [
     "pyyaml>=4.2b1",
     "requests>=2.22.0",
     "python-dotenv>=0.14.0",
+    "ecdsa>=0.16"
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))

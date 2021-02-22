@@ -23,6 +23,10 @@ from queue import Queue
 from typing import Optional, cast
 from unittest import mock
 
+from aea_crypto_cosmos import CosmosCrypto
+from aea_crypto_ethereum import EthereumCrypto
+from aea_crypto_fetchai import FetchAICrypto
+
 import aea
 import aea.decision_maker.gop
 from aea.crypto.wallet import Wallet
@@ -43,11 +47,8 @@ from packages.fetchai.protocols.state_update.dialogues import (
 from packages.fetchai.protocols.state_update.message import StateUpdateMessage
 
 from tests.conftest import (
-    COSMOS,
     COSMOS_PRIVATE_KEY_PATH,
-    ETHEREUM,
     ETHEREUM_PRIVATE_KEY_PATH,
-    FETCHAI,
     FETCHAI_PRIVATE_KEY_PATH,
 )
 from tests.test_decision_maker.test_default import (
@@ -134,14 +135,16 @@ class TestDecisionMaker:
         cls._patch_logger()
         cls.wallet = Wallet(
             {
-                COSMOS: COSMOS_PRIVATE_KEY_PATH,
-                ETHEREUM: ETHEREUM_PRIVATE_KEY_PATH,
-                FETCHAI: FETCHAI_PRIVATE_KEY_PATH,
+                CosmosCrypto.identifier: COSMOS_PRIVATE_KEY_PATH,
+                EthereumCrypto.identifier: ETHEREUM_PRIVATE_KEY_PATH,
+                FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_PATH,
             }
         )
         cls.agent_name = "test"
         cls.identity = Identity(
-            cls.agent_name, addresses=cls.wallet.addresses, default_address_key=FETCHAI,
+            cls.agent_name,
+            addresses=cls.wallet.addresses,
+            default_address_key=FetchAICrypto.identifier,
         )
         cls.decision_maker_handler = DecisionMakerHandler(
             identity=cls.identity, wallet=cls.wallet
@@ -151,7 +154,7 @@ class TestDecisionMaker:
         cls.tx_sender_addr = "agent_1"
         cls.tx_counterparty_addr = "pk"
         cls.info = {"some_info_key": "some_info_value"}
-        cls.ledger_id = FETCHAI
+        cls.ledger_id = FetchAICrypto.identifier
 
         cls.decision_maker.start()
 

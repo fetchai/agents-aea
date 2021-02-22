@@ -25,22 +25,16 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
-from web3._utils.request import _session_cache as session_cache
-
-from aea.crypto.ethereum import (
+from aea_crypto_ethereum import (
     AttributeDictTranslator,
     EthereumApi,
     EthereumCrypto,
     EthereumFaucetApi,
     LruLockWrapper,
 )
+from web3._utils.request import _session_cache as session_cache
 
-from tests.conftest import (
-    DEFAULT_GANACHE_CHAIN_ID,
-    ETHEREUM_PRIVATE_KEY_PATH,
-    MAX_FLAKY_RERUNS,
-    ROOT_DIR,
-)
+from tests.conftest import DEFAULT_GANACHE_CHAIN_ID, MAX_FLAKY_RERUNS, ROOT_DIR
 
 
 def test_attribute_dict_translator():
@@ -57,11 +51,11 @@ def test_attribute_dict_translator():
     assert AttributeDictTranslator.to_dict(res) == di
 
 
-def test_creation():
+def test_creation(ethereum_private_key_file):
     """Test the creation of the crypto_objects."""
     assert EthereumCrypto(), "Managed to initialise the eth_account"
     assert EthereumCrypto(
-        ETHEREUM_PRIVATE_KEY_PATH
+        ethereum_private_key_file
     ), "Managed to load the eth private key"
 
 
@@ -85,9 +79,9 @@ def test_derive_address():
     assert account.address == address, "Address derivation incorrect"
 
 
-def test_sign_and_recover_message():
+def test_sign_and_recover_message(ethereum_private_key_file):
     """Test the signing and the recovery function for the eth_crypto."""
-    account = EthereumCrypto(ETHEREUM_PRIVATE_KEY_PATH)
+    account = EthereumCrypto(ethereum_private_key_file)
     sign_bytes = account.sign_message(message=b"hello")
     assert len(sign_bytes) > 0, "The len(signature) must not be 0"
     recovered_addresses = EthereumApi.recover_message(
@@ -99,9 +93,9 @@ def test_sign_and_recover_message():
     ), "Failed to recover the correct address."
 
 
-def test_sign_and_recover_message_deprecated():
+def test_sign_and_recover_message_deprecated(ethereum_private_key_file):
     """Test the signing and the recovery function for the eth_crypto."""
-    account = EthereumCrypto(ETHEREUM_PRIVATE_KEY_PATH)
+    account = EthereumCrypto(ethereum_private_key_file)
     message = b"hello"
     message_hash = hashlib.sha256(message).digest()
     sign_bytes = account.sign_message(message=message_hash, is_deprecated_mode=True)
@@ -115,9 +109,9 @@ def test_sign_and_recover_message_deprecated():
     ), "Failed to recover the correct address."
 
 
-def test_sign_and_recover_message_public_key():
+def test_sign_and_recover_message_public_key(ethereum_private_key_file):
     """Test the signing and the recovery function for the eth_crypto."""
-    account = EthereumCrypto(ETHEREUM_PRIVATE_KEY_PATH)
+    account = EthereumCrypto(ethereum_private_key_file)
     sign_bytes = account.sign_message(message=b"hello")
     assert len(sign_bytes) > 0, "The len(signature) must not be 0"
     recovered_public_keys = EthereumApi.recover_public_keys_from_message(
@@ -137,9 +131,9 @@ def test_get_hash():
     assert expected_hash == hash_
 
 
-def test_dump_positive():
+def test_dump_positive(ethereum_private_key_file):
     """Test dump."""
-    account = EthereumCrypto(ETHEREUM_PRIVATE_KEY_PATH)
+    account = EthereumCrypto(ethereum_private_key_file)
     account.dump(MagicMock())
 
 
@@ -164,13 +158,13 @@ def test_validate_address():
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
-def test_get_balance(ethereum_testnet_config, ganache):
+def test_get_balance(ethereum_testnet_config, ganache, ethereum_private_key_file):
     """Test the balance is zero for a new account."""
     ethereum_api = EthereumApi(**ethereum_testnet_config)
     ec = EthereumCrypto()
     balance = ethereum_api.get_balance(ec.address)
     assert balance == 0, "New account has a positive balance."
-    ec = EthereumCrypto(private_key_path=ETHEREUM_PRIVATE_KEY_PATH)
+    ec = EthereumCrypto(private_key_path=ethereum_private_key_file)
     balance = ethereum_api.get_balance(ec.address)
     assert balance > 0, "Existing account has no balance."
 
@@ -192,10 +186,10 @@ def test_get_state(ethereum_testnet_config, ganache):
 @pytest.mark.integration
 @pytest.mark.ledger
 def test_construct_sign_and_submit_transfer_transaction(
-    ethereum_testnet_config, ganache
+    ethereum_testnet_config, ganache, ethereum_private_key_file
 ):
     """Test the construction, signing and submitting of a transfer transaction."""
-    account = EthereumCrypto(private_key_path=ETHEREUM_PRIVATE_KEY_PATH)
+    account = EthereumCrypto(private_key_path=ethereum_private_key_file)
     ec2 = EthereumCrypto()
     ethereum_api = EthereumApi(**ethereum_testnet_config)
 
@@ -254,24 +248,6 @@ def test_get_wealth_positive(caplog):
         assert (
             "Invalid URL" in caplog.text
         ), f"Cannot find message in output: {caplog.text}"
-
-
-@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
-@pytest.mark.integration
-@pytest.mark.ledger
-def test_get_contract_instance(erc1155_contract, ethereum_testnet_config):
-    """Test the get contract instance method."""
-    contract, contract_address = erc1155_contract
-    ethereum_api = EthereumApi(**ethereum_testnet_config)
-    interface = {"abi": [], "bytecode": b""}
-    instance = ethereum_api.get_contract_instance(
-        contract_interface=interface, contract_address=contract_address,
-    )
-    assert str(type(instance)) == "<class 'web3._utils.datatypes.Contract'>"
-    instance = ethereum_api.get_contract_instance(contract_interface=interface,)
-    assert (
-        str(type(instance)) == "<class 'web3._utils.datatypes.PropertyCheckingFactory'>"
-    )
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)

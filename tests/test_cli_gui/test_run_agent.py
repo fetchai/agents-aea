@@ -32,7 +32,6 @@ from aea.cli.create import create_aea
 from aea.cli.utils.context import Context
 from aea.test_tools.constants import DEFAULT_AUTHOR
 
-from packages.fetchai.connections.local.connection import PUBLIC_ID as LOCAL_PUBLIC_ID
 from packages.fetchai.connections.stub.connection import (
     PUBLIC_ID as STUB_CONNECTION_PUBLIC_ID,
 )
@@ -68,15 +67,6 @@ def test_create_and_run_agent():
                 "api/agent/" + agent_id + "/connection",
                 content_type="application/json",
                 data=json.dumps(str(STUB_CONNECTION_PUBLIC_ID)),
-            )
-            assert response_add.status_code == 201
-
-        # Add the local connection
-        with patch("aea.cli_gui.app_context.local", True):
-            response_add = app.post(
-                "api/agent/" + agent_id + "/connection",
-                content_type="application/json",
-                data=json.dumps(str(LOCAL_PUBLIC_ID)),
             )
             assert response_add.status_code == 201
 

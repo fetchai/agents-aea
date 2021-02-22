@@ -22,11 +22,10 @@
 import copy
 
 import pytest
+from aea_crypto_ethereum import EthereumCrypto
 
 from aea.decision_maker.gop import OwnershipState, Preferences
 from aea.helpers.transaction.base import Terms
-
-from tests.conftest import ETHEREUM
 
 
 def test_preferences_properties():
@@ -151,7 +150,7 @@ def test_score_diff_from_transaction():
         exchange_params_by_currency_id=exchange_params,
     )
     terms = Terms(
-        ledger_id=ETHEREUM,
+        ledger_id=EthereumCrypto.identifier,
         sender_address="agent_1",
         counterparty_address="pk",
         amount_by_currency_id={"FET": -20},
@@ -184,7 +183,7 @@ def test_is_utility_enhancing_uninitialized():
     ownership_state = OwnershipState()
     preferences = Preferences()
     terms = Terms(
-        ledger_id=ETHEREUM,
+        ledger_id=EthereumCrypto.identifier,
         sender_address="agent_1",
         counterparty_address="pk",
         amount_by_currency_id={"FET": -20},

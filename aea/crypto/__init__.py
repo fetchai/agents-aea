@@ -19,39 +19,8 @@
 
 """This module contains the crypto modules."""
 
-from aea.crypto.cosmos import CosmosCrypto
-from aea.crypto.ethereum import EthereumCrypto
-from aea.crypto.fetchai import FetchAICrypto
-from aea.crypto.registries import register_crypto  # noqa
-from aea.crypto.registries import register_faucet_api, register_ledger_api
-
-
-register_crypto(
-    id_=FetchAICrypto.identifier, entry_point="aea.crypto.fetchai:FetchAICrypto"
-)
-register_crypto(
-    id_=EthereumCrypto.identifier, entry_point="aea.crypto.ethereum:EthereumCrypto"
-)
-register_crypto(
-    id_=CosmosCrypto.identifier, entry_point="aea.crypto.cosmos:CosmosCrypto"
-)
-
-register_faucet_api(
-    id_=FetchAICrypto.identifier, entry_point="aea.crypto.fetchai:FetchAIFaucetApi"
-)
-register_faucet_api(
-    id_=EthereumCrypto.identifier, entry_point="aea.crypto.ethereum:EthereumFaucetApi"
-)
-register_faucet_api(
-    id_=CosmosCrypto.identifier, entry_point="aea.crypto.cosmos:CosmosFaucetApi"
-)
-
-register_ledger_api(
-    id_=FetchAICrypto.identifier, entry_point="aea.crypto.fetchai:FetchAIApi",
-)
-register_ledger_api(
-    id_=EthereumCrypto.identifier, entry_point="aea.crypto.ethereum:EthereumApi"
-)
-register_ledger_api(
-    id_=CosmosCrypto.identifier, entry_point="aea.crypto.cosmos:CosmosApi",
+from aea.crypto.registries import (  # noqa
+    register_crypto,
+    register_faucet_api,
+    register_ledger_api,
 )

@@ -24,6 +24,8 @@ from pathlib import Path
 from typing import Dict, cast
 
 import pytest
+from aea_crypto_ethereum import EthereumCrypto
+from aea_crypto_fetchai import FetchAICrypto
 
 from aea.configurations.base import ComponentType, ContractConfig
 from aea.configurations.loader import load_component_configuration
@@ -35,10 +37,8 @@ from aea.crypto.registries import (
 )
 
 from tests.conftest import (
-    ETHEREUM,
     ETHEREUM_ADDRESS_ONE,
     ETHEREUM_ADDRESS_TWO,
-    FETCHAI,
     FETCHAI_TESTNET_CONFIG,
     MAX_FLAKY_RERUNS,
     ROOT_DIR,
@@ -46,7 +46,7 @@ from tests.conftest import (
 
 
 crypto = [
-    (ETHEREUM,),
+    (EthereumCrypto.identifier,),
 ]
 
 
@@ -249,10 +249,12 @@ class TestCosmWasmContract:
 
     def setup(self):
         """Setup."""
-        self.ledger_api = ledger_apis_registry.make(FETCHAI, **FETCHAI_TESTNET_CONFIG)
-        self.faucet_api = faucet_apis_registry.make(FETCHAI)
-        self.deployer_crypto = crypto_registry.make(FETCHAI)
-        self.item_owner_crypto = crypto_registry.make(FETCHAI)
+        self.ledger_api = ledger_apis_registry.make(
+            FetchAICrypto.identifier, **FETCHAI_TESTNET_CONFIG
+        )
+        self.faucet_api = faucet_apis_registry.make(FetchAICrypto.identifier)
+        self.deployer_crypto = crypto_registry.make(FetchAICrypto.identifier)
+        self.item_owner_crypto = crypto_registry.make(FetchAICrypto.identifier)
 
         # Test tokens IDs
         self.token_ids_a = [
