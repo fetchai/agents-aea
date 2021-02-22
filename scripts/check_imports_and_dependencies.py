@@ -40,6 +40,7 @@ from aea.crypto.registries import (  # noqa # pylint: disable=wrong-import-posit
 )
 
 
+IGNORE: Set[str] = {"pkg_resources"}
 DEP_NAME_RE = re.compile(r"(^[^=><\[]+)", re.I)  # type: ignore
 
 
@@ -248,7 +249,8 @@ class CheckTool:
                 package = _find_dependency_for_module(
                     sections_dependencies.get(section, {}), pyfile
                 )
-                sections_imports_packages[section][module] = package
+                if module not in IGNORE:
+                    sections_imports_packages[section][module] = package
 
         all_dependencies_set = set(
             sum((list(i.keys()) for _, i in sections_dependencies.items()), [])

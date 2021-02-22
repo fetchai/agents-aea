@@ -68,7 +68,10 @@ class TestFreeze:
         """Assert that the exit code is equal to zero (i.e. success)."""
         assert self.result.exit_code == 0
         """Test that the command has printed the correct output."""
-        assert self.result.output == """protobuf\nvyper==0.1.0b12\n"""
+        assert (
+            self.result.output
+            == """aea_crypto_cosmos\naea_crypto_ethereum\naea_crypto_fetchai\nprotobuf\nvyper==0.1.0b12\n"""
+        )
 
     def teardown(self):
         """Tear the test down."""

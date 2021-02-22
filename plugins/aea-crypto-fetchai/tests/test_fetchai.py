@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2019 Fetch.AI Limited
+#   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,22 +17,33 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the tests of the ethereum module."""
+"""This module contains the tests of the fetchai module."""
 import json
 import logging
+import shutil
+import tempfile
 import time
+from pathlib import Path
 from unittest import mock
 from unittest.mock import MagicMock, call
 
 import pytest
+from aea_crypto_fetchai import FetchAIApi, FetchAICrypto, FetchAIFaucetApi
 
-from aea.crypto.fetchai import FetchAIApi, FetchAICrypto, FetchAIFaucetApi
+from tests.conftest import FETCHAI_TESTNET_CONFIG, MAX_FLAKY_RERUNS
 
-from tests.conftest import (
-    FETCHAI_PRIVATE_KEY_PATH,
-    FETCHAI_TESTNET_CONFIG,
-    MAX_FLAKY_RERUNS,
-)
+
+@pytest.fixture
+def fetchai_private_key_file():
+    """Pytest fixture to create a temporary FetchAI private key file."""
+    crypto = FetchAICrypto()
+    temp_dir = Path(tempfile.mkdtemp())
+    try:
+        temp_file = temp_dir / "private.key"
+        temp_file.write_text(crypto.private_key)
+        yield str(temp_file)
+    finally:
+        shutil.rmtree(temp_dir)
 
 
 class MockRequestsResponse:
@@ -53,11 +64,11 @@ class MockRequestsResponse:
         return self._data
 
 
-def test_creation():
+def test_creation(fetchai_private_key_file):
     """Test the creation of the crypto_objects."""
     assert FetchAICrypto(), "Did not manage to initialise the crypto module"
     assert FetchAICrypto(
-        FETCHAI_PRIVATE_KEY_PATH
+        fetchai_private_key_file
     ), "Did not manage to load the cosmos private key"
 
 
@@ -74,9 +85,9 @@ def test_initialization():
     ), "After creation the public key must no be None"
 
 
-def test_sign_and_recover_message():
+def test_sign_and_recover_message(fetchai_private_key_file):
     """Test the signing and the recovery of a message."""
-    account = FetchAICrypto(FETCHAI_PRIVATE_KEY_PATH)
+    account = FetchAICrypto(fetchai_private_key_file)
     sign_bytes = account.sign_message(message=b"hello")
     assert len(sign_bytes) > 0, "The len(signature) must not be 0"
     recovered_addresses = FetchAIApi.recover_message(
@@ -94,9 +105,9 @@ def test_get_hash():
     assert expected_hash == hash_
 
 
-def test_dump_positive():
+def test_dump_positive(fetchai_private_key_file):
     """Test dump."""
-    account = FetchAICrypto(FETCHAI_PRIVATE_KEY_PATH)
+    account = FetchAICrypto(fetchai_private_key_file)
     account.dump(MagicMock())
 
 
@@ -244,8 +255,8 @@ def test_get_wealth_positive(caplog):
 
 
 @pytest.mark.ledger
-@mock.patch("aea.helpers.http_requests.get")
-@mock.patch("aea.helpers.http_requests.post")
+@mock.patch("aea_crypto_fetchai._cosmos.requests.get")
+@mock.patch("aea_crypto_fetchai._cosmos.requests.post")
 def test_successful_faucet_operation(mock_post, mock_get):
     """Test successful faucet operation."""
     address = "a normal cosmos address would be here"
@@ -281,8 +292,8 @@ def test_successful_faucet_operation(mock_post, mock_get):
 
 
 @pytest.mark.ledger
-@mock.patch("aea.helpers.http_requests.get")
-@mock.patch("aea.helpers.http_requests.post")
+@mock.patch("aea_crypto_fetchai._cosmos.requests.get")
+@mock.patch("aea_crypto_fetchai._cosmos.requests.post")
 def test_successful_realistic_faucet_operation(mock_post, mock_get):
     """Test successful realistic faucet operation."""
     address = "a normal cosmos address would be here"
@@ -613,7 +624,7 @@ def test_get_contract_instance():
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
-@mock.patch("aea.crypto.fetchai.FetchAIApi._execute_shell_command")
+@mock.patch("aea_crypto_fetchai.FetchAIApi._execute_shell_command")
 def test_get_contract_address(mock_api_call):
     """Test the get_contract_address method used for interaction with CosmWasm contracts."""
 
@@ -637,7 +648,7 @@ def test_get_contract_address(mock_api_call):
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
-@mock.patch("aea.crypto.fetchai.FetchAIApi._execute_shell_command")
+@mock.patch("aea_crypto_fetchai.FetchAIApi._execute_shell_command")
 def test_get_last_code_id(mock_api_call):
     """Test the get_last_code_id method used for interaction with CosmWasm contracts."""
 

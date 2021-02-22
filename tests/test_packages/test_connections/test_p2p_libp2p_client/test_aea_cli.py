@@ -20,6 +20,8 @@
 """This test module contains AEA cli tests for Libp2p tcp client connection."""
 import os
 
+from aea_crypto_fetchai import FetchAICrypto
+
 from aea.helpers.base import CertRequest
 from aea.multiplexer import Multiplexer
 from aea.test_tools.test_cases import AEATestCaseEmpty
@@ -92,7 +94,7 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
             [
                 CertRequest(
                     identifier="acn",
-                    ledger_id="fetchai",
+                    ledger_id=FetchAICrypto.identifier,
                     not_after="2022-01-01",
                     not_before="2021-01-01",
                     public_key=self.node_connection.node.pub,
