@@ -145,7 +145,7 @@ def test_helper_get_code_id():
                             {
                                 "type": "message",
                                 "attributes": [
-                                    {"key": "action", "value": "MsgStoreCode"},
+                                    {"key": "action", "value": "store-code"},
                                     {"key": "module", "value": "wasm"},
                                     {
                                         "key": "signer",
