@@ -22,7 +22,8 @@ import logging
 import signal
 import threading
 from abc import abstractmethod
-from multiprocessing.pool import AsyncResult, Pool
+from multiprocessing.pool import AsyncResult
+from multiprocessing.pool import ThreadPool as Pool
 from typing import Any, Callable, Dict, Optional, Sequence, cast
 
 from aea.helpers.logging import WithLogger
@@ -109,12 +110,14 @@ def init_worker() -> None:
     """
     Initialize a worker.
 
-    Disable the SIGINT handler.
+    Disable the SIGINT handler of process pool is using.
     Related to a well-known bug: https://bugs.python.org/issue8296
 
     :return: None
     """
-    signal.signal(signal.SIGINT, signal.SIG_IGN)
+    if Pool.__class__.__name__ == "Pool":  # pragma: nocover
+        # Process worker
+        signal.signal(signal.SIGINT, signal.SIG_IGN)
 
 
 class TaskManager(WithLogger):
@@ -122,7 +125,7 @@ class TaskManager(WithLogger):
 
     def __init__(
         self,
-        nb_workers: int = 1,
+        nb_workers: int = 2,
         is_lazy_pool_start: bool = True,
         logger: Optional[logging.Logger] = None,
     ) -> None:
@@ -186,6 +189,8 @@ class TaskManager(WithLogger):
                 func, args=args, kwds=kwds if kwds is not None else {}
             )
             self._results_by_task_id[task_id] = async_result
+            if self._logger:  # pragma: nocover
+                self._logger.info(f"Task <{func}{args}> set. Task id is {task_id}")
             return task_id
 
     def get_task_result(self, task_id: int) -> AsyncResult:

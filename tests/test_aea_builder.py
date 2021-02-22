@@ -466,14 +466,40 @@ def test_component_add_bad_dep():
         builder.add_component_instance(a_protocol)
 
 
-def test_set_from_config():
+def test_set_from_config_default():
     """Test set configuration from config loaded."""
     builder = AEABuilder()
     agent_configuration = Mock()
     agent_configuration.default_connection = "test/test:0.1.0"
+    agent_configuration.decision_maker_handler = {}
+    agent_configuration.error_handler = {}
+    agent_configuration.skill_exception_policy = ExceptionPolicyEnum.just_log
+    agent_configuration.connection_exception_policy = ExceptionPolicyEnum.just_log
+    agent_configuration._default_connection = None
+    agent_configuration.connection_private_key_paths_dict = {"fetchai": None}
+    agent_configuration.ledger_apis_dict = {"fetchai": None}
+    agent_configuration.private_key_paths_dict = {"fetchai": None}
+    agent_configuration.protocols = (
+        agent_configuration.connections
+    ) = agent_configuration.contracts = agent_configuration.skills = []
+
+    builder.set_from_configuration(agent_configuration, aea_project_path="/anydir")
+    assert builder._decision_maker_handler_class is None
+    assert builder._decision_maker_handler_dotted_path is None
+    assert builder._decision_maker_handler_file_path is None
+    assert builder._load_decision_maker_handler_class() is None
+
+
+def test_set_from_config_custom():
+    """Test set configuration from config loaded."""
+    dm_dotted_path = f"aea.decision_maker.default{DOTTED_PATH_MODULE_ELEMENT_SEPARATOR}DecisionMakerHandler"
+    dm_file_path = ROOT_DIR + "/aea/decision_maker/default.py"
+    builder = AEABuilder()
+    agent_configuration = Mock()
+    agent_configuration.default_connection = "test/test:0.1.0"
     agent_configuration.decision_maker_handler = {
-        "dotted_path": f"aea.decision_maker.default{DOTTED_PATH_MODULE_ELEMENT_SEPARATOR}DecisionMakerHandler",
-        "file_path": ROOT_DIR + "/aea/decision_maker/default.py",
+        "dotted_path": dm_dotted_path,
+        "file_path": dm_file_path,
     }
     agent_configuration.error_handler = {
         "dotted_path": f"aea.error_handler.default{DOTTED_PATH_MODULE_ELEMENT_SEPARATOR}ErrorHandler",
@@ -490,7 +516,17 @@ def test_set_from_config():
     ) = agent_configuration.contracts = agent_configuration.skills = []
 
     builder.set_from_configuration(agent_configuration, aea_project_path="/anydir")
-    assert builder._decision_maker_handler_class is not None
+    assert builder._decision_maker_handler_class is None
+    assert builder._decision_maker_handler_dotted_path == dm_dotted_path
+    assert builder._decision_maker_handler_file_path == dm_file_path
+    assert builder._load_decision_maker_handler_class() is not None
+    builder.reset(is_full_reset=True)
+    agent_configuration.decision_maker_handler = {
+        "dotted_path": dm_dotted_path,
+        "file_path": None,
+    }
+    builder.set_from_configuration(agent_configuration, aea_project_path="/anydir")
+    assert builder._load_decision_maker_handler_class() is not None
 
 
 def test_load_abstract_component():
@@ -586,7 +622,7 @@ class TestFromAEAProjectWithCustomConnectionConfig(AEATestCaseEmpty):
 
     def test_from_project(self):
         """Test builder set from project dir."""
-        self.add_item("connection", "fetchai/stub:0.16.0")
+        self.add_item("connection", "fetchai/stub:0.17.0")
         self.expected_input_file = "custom_input_file"
         self.expected_output_file = "custom_output_file"
         self._add_stub_connection_config()

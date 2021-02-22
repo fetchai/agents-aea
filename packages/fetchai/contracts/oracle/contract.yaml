@@ -8,7 +8,7 @@ aea_version: '>=0.10.0, <0.11.0'
 fingerprint:
   README.md: QmWgKLF6Fe4tESTdhStxYJrEVKP2xSthd2fcMm2LSfkygL
   __init__.py: QmRmf3Q5F6nQMrTEt59suBNw6zfgTVQX68E7CAuKmCnhAM
-  contract.py: QmSPAbYyxHCTrVJor5pPYcDAWpLxoE2yR3hAouQsM67d8g
+  contract.py: QmR42ZvxA7hTop34Mv19rmAHeJRwLKvEx5YSF4G9HBmago
   contracts/FetchOracle.sol: QmadnUCtsVobBGMxiWAkqMptC9acSMBGj5x4Z4V2UhnFx8
 fingerprint_ignore_patterns:
 - build/*
@@ -16,6 +16,6 @@ class_name: FetchOracleContract
 contract_interface_paths:
   ethereum: build/FetchOracle.json
 dependencies:
+  ethereum_crypto: {}
   vyper:
     version: <1.0.0,>=0.2.7
-  ethereum_crypto: {}

@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests of the soef connection module."""
-
 import logging
 import time
 import urllib
@@ -57,7 +56,9 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
-def make_multiplexer_and_dialogues() -> Tuple[Multiplexer, OefSearchDialogues, Crypto]:
+def make_multiplexer_and_dialogues() -> Tuple[
+    Multiplexer, OefSearchDialogues, Crypto, SOEFConnection
+]:
     """Return multplexer, dialogues and crypto instances."""
     crypto = make_crypto(DEFAULT_LEDGER)
     identity = Identity("", address=crypto.address)
@@ -66,8 +67,8 @@ def make_multiplexer_and_dialogues() -> Tuple[Multiplexer, OefSearchDialogues, C
     # create the connection and multiplexer objects
     configuration = ConnectionConfig(
         api_key="TwiCIriSl0mLahw17pyqoA",
-        soef_addr="soef.fetch.ai",
-        soef_port=9002,
+        soef_addr="s-oef.fetch.ai",
+        soef_port=443,
         restricted_to_protocols={
             OefSearchMessage.protocol_specification_id,
             OefSearchMessage.protocol_id,
@@ -78,7 +79,7 @@ def make_multiplexer_and_dialogues() -> Tuple[Multiplexer, OefSearchDialogues, C
         configuration=configuration, data_dir=MagicMock(), identity=identity,
     )
     multiplexer = Multiplexer([soef_connection])
-    return multiplexer, oef_search_dialogues, crypto
+    return multiplexer, oef_search_dialogues, crypto, soef_connection
 
 
 class Instance:
@@ -91,6 +92,7 @@ class Instance:
             self.multiplexer,
             self.oef_search_dialogues,
             self.crypto,
+            self.connection,
         ) = make_multiplexer_and_dialogues()
         self.thread = Thread(target=self.multiplexer.connect)
 
@@ -132,6 +134,12 @@ class Instance:
             )
         )
         self.multiplexer.put(envelope)
+
+    def wait_registered(self) -> None:
+        """Wait connection gets unique_page_address."""
+        wait_for_condition(
+            lambda: self.connection.channel.unique_page_address, timeout=10
+        )
 
     def register_personality_pieces(
         self, piece: str = "genus", value: str = "service"
@@ -226,7 +234,9 @@ class TestRealNetwork:
         try:
             agent.start()
             agent2.start()
-
+            agent.wait_registered()
+            agent2.wait_registered()
+            time.sleep(2)
             # find agents near me
             radius = 0.1
             close_to_my_service = Constraint(

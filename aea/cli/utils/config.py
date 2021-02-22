@@ -56,7 +56,7 @@ from aea.configurations.base import (
 from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader, ConfigLoaders
 from aea.configurations.validation import ExtraPropertiesError
-from aea.exceptions import AEAEnforceError
+from aea.exceptions import AEAEnforceError, AEAValidationError
 from aea.helpers.io import open_file
 
 
@@ -87,11 +87,15 @@ def try_to_load_agent_config(
                     DEFAULT_AEA_CONFIG_FILE
                 )
             )
-    except (jsonschema.exceptions.ValidationError, ExtraPropertiesError):
+    except (
+        jsonschema.exceptions.ValidationError,
+        ExtraPropertiesError,
+        AEAValidationError,
+    ) as e:
         if is_exit_on_except:
             raise click.ClickException(
-                "Agent configuration file '{}' is invalid. Please check the documentation.".format(
-                    DEFAULT_AEA_CONFIG_FILE
+                "Agent configuration file '{}' is invalid: `{}`. Please check the documentation.".format(
+                    DEFAULT_AEA_CONFIG_FILE, str(e)
                 )
             )
     except AEAEnforceError as e:

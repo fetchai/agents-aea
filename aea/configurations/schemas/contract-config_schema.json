@@ -10,7 +10,12 @@
     "type",
     "license",
     "aea_version",
-    "class_name"
+    "fingerprint",
+    "fingerprint_ignore_patterns",
+    "class_name",
+    "description",
+    "contract_interface_paths",
+    "dependencies"
   ],
   "properties": {
     "name": {

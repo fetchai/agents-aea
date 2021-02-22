@@ -32,7 +32,6 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Any, BinaryIO, Collection, Dict, List, Optional, Tuple, cast
 
-import requests
 from bech32 import bech32_decode, bech32_encode, convertbits
 from ecdsa import SECP256k1, SigningKey, VerifyingKey
 from ecdsa.util import sigencode_string_canonize
@@ -40,12 +39,12 @@ from ecdsa.util import sigencode_string_canonize
 from aea.common import Address, JSONLike
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
 from aea.exceptions import AEAEnforceError
+from aea.helpers import http_requests as requests
 from aea.helpers.base import try_decorator
 from aea.helpers.io import open_file
 
 
 _default_logger = logging.getLogger(__name__)
-DEFAULT_TIMEOUT = 60.0
 
 _COSMOS = "cosmos"
 TESTNET_NAME = "testnet"
@@ -460,7 +459,7 @@ class _CosmosApi(LedgerApi):
         """Try get the balance of a given account."""
         balance = None  # type: Optional[int]
         url = self.network_address + f"/bank/balances/{address}"
-        response = requests.get(url=url, timeout=DEFAULT_TIMEOUT)
+        response = requests.get(url=url)
         if response.status_code == 200:
             result = response.json()["result"]
             if len(result) == 0:
@@ -494,7 +493,7 @@ class _CosmosApi(LedgerApi):
         result: Optional[JSONLike] = None
         query = "/".join(args)
         url = self.network_address + f"/{callable_name}/{query}"
-        response = requests.get(url=url, timeout=DEFAULT_TIMEOUT)
+        response = requests.get(url=url)
         if response.status_code == 200:
             result = response.json()
         return result
@@ -887,7 +886,7 @@ class _CosmosApi(LedgerApi):
         """
         result: Tuple[Optional[int], Optional[int]] = (None, None)
         url = self.network_address + f"/auth/accounts/{address}"
-        response = requests.get(url=url, timeout=DEFAULT_TIMEOUT)
+        response = requests.get(url=url)
         if response.status_code == 200:
             result = (
                 int(response.json()["result"]["value"]["account_number"]),
@@ -948,7 +947,7 @@ class _CosmosApi(LedgerApi):
         """
         tx_digest = None  # type: Optional[str]
         url = self.network_address + "/txs"
-        response = requests.post(url=url, json=tx_signed, timeout=DEFAULT_TIMEOUT)
+        response = requests.post(url=url, json=tx_signed)
         if response.status_code == 200:
             tx_digest = response.json()["txhash"]
         else:  # pragma: nocover
@@ -978,7 +977,7 @@ class _CosmosApi(LedgerApi):
         """
         result: Optional[JSONLike] = None
         url = self.network_address + f"/txs/{tx_digest}"
-        response = requests.get(url=url, timeout=DEFAULT_TIMEOUT)
+        response = requests.get(url=url)
         if response.status_code == 200:
             result = response.json()
         return result
@@ -1147,9 +1146,7 @@ class CosmosFaucetApi(FaucetApi):
         :return: None on failure, otherwise the request uid
         """
         uri = cls._faucet_request_uri(url)
-        response = requests.post(
-            url=uri, data={"Address": address}, timeout=DEFAULT_TIMEOUT
-        )
+        response = requests.post(url=uri, data={"Address": address})
 
         uid = None
         if response.status_code == 200:
@@ -1179,9 +1176,7 @@ class CosmosFaucetApi(FaucetApi):
         :param url: the url
         :return: None on failure otherwise a CosmosFaucetStatus for the specified uid
         """
-        response = requests.get(
-            cls._faucet_status_uri(uid, url), timeout=DEFAULT_TIMEOUT
-        )
+        response = requests.get(cls._faucet_status_uri(uid, url))
         if response.status_code != 200:  # pragma: nocover
             _default_logger.warning(
                 "Response: {}, Text: {}".format(response.status_code, response.text)

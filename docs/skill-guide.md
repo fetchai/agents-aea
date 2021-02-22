@@ -338,6 +338,7 @@ license: Apache-2.0
 aea_version: '>=0.10.0, <0.11.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
+connections: []
 contracts: []
 protocols:
 - fetchai/oef_search:0.13.0
@@ -364,6 +365,7 @@ models:
     args: {}
     class_name: OefSearchDialogues
 dependencies: {}
+is_abstract: false
 ```
 
 Ensure, you replace the author field with your author name! (Run `aea init` to set or check the author name.)
@@ -423,14 +425,14 @@ This adds the protocol to our AEA and makes it available on the path `packages.f
 
 At this point we need to add the SOEF and P2P connections to allow the AEA to communicate with the SOEF node and other AEAs, install the AEA's dependencies, and configure the AEA:
 ``` bash
-aea add connection fetchai/soef:0.16.0
-aea add connection fetchai/p2p_libp2p:0.15.0
+aea add connection fetchai/soef:0.17.0
+aea add connection fetchai/p2p_libp2p:0.16.0
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.15.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.16.0
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/oef_search:0.13.0": "fetchai/soef:0.16.0"
+  "fetchai/oef_search:0.13.0": "fetchai/soef:0.17.0"
 }'
 ```
 
@@ -442,7 +444,7 @@ In order for this AEA to find another AEA when searching, the second AEA (let's 
 
 From a different terminal window, we fetch a finished service provider AEA and install its Python dependencies:
 ``` bash
-aea fetch fetchai/simple_service_registration:0.20.0 && cd simple_service_registration && aea install && aea build
+aea fetch fetchai/simple_service_registration:0.21.0 && cd simple_service_registration && aea install && aea build
 ```
 
 This AEA will simply register a location service on the <a href="../simple-oef">SOEF search node</a> so we can search for it.
@@ -469,7 +471,7 @@ Then we run the AEA:
 aea run
 ```
 
-Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.15.0 -u public_uri` to retrieve the address.) This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the `simple_service_registration` (service provider) AEA.
+Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.16.0 -u public_uri` to retrieve the address.) This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the `simple_service_registration` (service provider) AEA.
 
 <details><summary>Click here to see full code and guide for this AEA</summary>
 <p>
@@ -855,6 +857,7 @@ fingerprint:
   handlers.py: QmViyyV5KvR3kkLEMpvDfqH5QtHowTbnpDxRYnKABpVvpC
   strategy.py: Qmdp6LCPZSnnyfM4EdRDTGZPqwxiJ3A1jsc3oF2Hv4m5Mv
 fingerprint_ignore_patterns: []
+connections: []
 contracts: []
 protocols:
 - fetchai/oef_search:0.13.0
@@ -882,6 +885,7 @@ models:
         value: generic_service
     class_name: Strategy
 dependencies: {}
+is_abstract: false
 ```
 </p>
 </details>

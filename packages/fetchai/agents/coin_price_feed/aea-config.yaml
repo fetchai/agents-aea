@@ -1,6 +1,6 @@
 agent_name: coin_price_feed
 author: fetchai
-version: 0.5.0
+version: 0.6.0
 license: Apache-2.0
 description: An AEA providing a coin price feed.
 aea_version: '>=0.10.0, <0.11.0'
@@ -18,7 +18,7 @@ protocols:
 - fetchai/signing:0.10.0
 - fetchai/state_update:0.10.0
 skills:
-- fetchai/coin_price:0.4.0
+- fetchai/coin_price:0.5.0
 default_connection: fetchai/http_server:0.16.0
 default_ledger: fetchai
 default_routing:
@@ -36,7 +36,7 @@ type: connection
 config:
   api_spec_path: vendor/fetchai/skills/coin_price/coin_api_spec.yaml
 ---
-public_id: fetchai/coin_price:0.4.0
+public_id: fetchai/coin_price:0.5.0
 type: skill
 models:
   coin_price_model:

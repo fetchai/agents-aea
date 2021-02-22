@@ -8,7 +8,7 @@ aea_version: '>=0.10.0, <0.11.0'
 fingerprint:
   README.md: QmdksAfBj3gVPH8zmzpHjjpXsf1gtAY6z6gjrfYfiicLrr
   __init__.py: QmeJ8x6NiZjVLFbUTgpPPCMzQscqjHNBDExapiezpakksR
-  contract.py: QmfXX6Fc7889BhMS1chqizieyBYWMVrEK61dzJrH8M7Aae
+  contract.py: QmfE8LoqptRqECBwrk8WpjM93DargiQtvSE3XVHkxMTqD6
 fingerprint_ignore_patterns:
 - build/*
 class_name: FetERC20

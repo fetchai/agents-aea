@@ -236,7 +236,7 @@ FETCHAI_TESTNET_CONFIG = {"address": FETCHAI_DEFAULT_ADDRESS}
 # common public ids used in the tests
 UNKNOWN_PROTOCOL_PUBLIC_ID = PublicId("unknown_author", "unknown_protocol", "0.1.0")
 UNKNOWN_CONNECTION_PUBLIC_ID = PublicId("unknown_author", "unknown_connection", "0.1.0")
-MY_FIRST_AEA_PUBLIC_ID = PublicId.from_str("fetchai/my_first_aea:0.19.0")
+MY_FIRST_AEA_PUBLIC_ID = PublicId.from_str("fetchai/my_first_aea:0.20.0")
 
 DUMMY_SKILL_PATH = os.path.join(CUR_PATH, "data", "dummy_skill", SKILL_YAML)
 
@@ -824,6 +824,7 @@ def _process_cert(key: Crypto, cert: CertRequest, path_prefix: str):
 
 
 def _make_libp2p_connection(
+    data_dir: str,
     port: int = 10234,
     host: str = "127.0.0.1",
     relay: bool = True,
@@ -834,10 +835,11 @@ def _make_libp2p_connection(
     node_key_file: Optional[str] = None,
     agent_key: Optional[Crypto] = None,
     build_directory: Optional[str] = None,
-    data_dir: str = ".",
     peer_registration_delay: str = "0.0",
 ) -> P2PLibp2pConnection:
-    log_file = "libp2p_node_{}.log".format(port)
+    if not os.path.isdir(data_dir) or not os.path.exists(data_dir):
+        raise ValueError("Data dir must be directory and exist!")
+    log_file = os.path.join(data_dir, "libp2p_node_{}.log".format(port))
     if os.path.exists(log_file):
         os.remove(log_file)
     key = agent_key
@@ -849,7 +851,7 @@ def _make_libp2p_connection(
         conn_crypto_store = CryptoStore({DEFAULT_LEDGER: node_key_file})
     else:
         node_key = make_crypto(DEFAULT_LEDGER)
-        node_key_path = f"./{node_key.public_key}.txt"
+        node_key_path = os.path.join(data_dir, f"{node_key.public_key}.txt")
         with open(node_key_path, "wb") as f:
             node_key.dump(f)
         conn_crypto_store = CryptoStore({DEFAULT_LEDGER: node_key_path})
@@ -913,12 +915,14 @@ def _make_libp2p_connection(
 
 def _make_libp2p_client_connection(
     peer_public_key: str,
+    data_dir: str,
     node_port: int = 11234,
     node_host: str = "127.0.0.1",
     uri: Optional[str] = None,
     ledger_api_id: Union[SimpleId, str] = DEFAULT_LEDGER,
-    data_dir: str = ".",
 ) -> P2PLibp2pClientConnection:
+    if not os.path.isdir(data_dir) or not os.path.exists(data_dir):
+        raise ValueError("Data dir must be directory and exist!")
     crypto = make_crypto(ledger_api_id)
     identity = Identity("", address=crypto.address)
     cert_request = CertRequest(

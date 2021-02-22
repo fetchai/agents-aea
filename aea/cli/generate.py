@@ -20,18 +20,28 @@
 """Implementation of the 'aea generate' subcommand."""
 
 import os
+from typing import Set
 
 import click
+import yaml
 
 from aea.cli.fingerprint import fingerprint_item
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project, clean_after, pass_ctx
 from aea.cli.utils.loggers import logger
-from aea.configurations.base import ProtocolSpecificationParseError, PublicId
-from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE, PROTOCOL
+from aea.configurations.base import (
+    ProtocolSpecification,
+    ProtocolSpecificationParseError,
+    PublicId,
+)
+from aea.configurations.constants import (
+    DEFAULT_AEA_CONFIG_FILE,
+    PROTOCOL,
+    PROTOCOL_LANGUAGE_PYTHON,
+    SUPPORTED_PROTOCOL_LANGUAGES,
+)
 from aea.helpers.io import open_file
 from aea.protocols.generator.base import ProtocolGenerator
-from aea.protocols.generator.common import load_protocol_specification
 
 
 @click.group()
@@ -45,69 +55,113 @@ def generate(
 
 @generate.command()
 @click.argument("protocol_specification_path", type=str, required=True)
+@click.option(
+    "--l",
+    "language",
+    type=click.Choice(SUPPORTED_PROTOCOL_LANGUAGES),
+    required=False,
+    default=PROTOCOL_LANGUAGE_PYTHON,
+    help="Specify the language in which to generate the protocol package.",
+)
 @pass_ctx
-def protocol(ctx: Context, protocol_specification_path: str) -> None:
+def protocol(ctx: Context, protocol_specification_path: str, language: str) -> None:
     """Generate a protocol based on a specification and add it to the configuration file and agent."""
-    _generate_item(ctx, PROTOCOL, protocol_specification_path)
+    ctx.set_config("language", language)
+    _generate_protocol(ctx, protocol_specification_path)
 
 
 @clean_after
-def _generate_item(ctx: Context, item_type: str, specification_path: str) -> None:
-    """Generate an item based on a specification and add it to the configuration file and agent."""
-    # Get existing items
-    existing_id_list = getattr(ctx.agent_config, "{}s".format(item_type))
-    existing_item_list = [public_id.name for public_id in existing_id_list]
+def _generate_protocol(ctx: Context, protocol_specification_path: str) -> None:
+    """Generate a protocol based on a specification and add it to the configuration file and agent."""
+    protocol_plural = PROTOCOL + "s"
 
-    item_type_plural = item_type + "s"
-
-    # Load item specification yaml file
+    # Create protocol generator (load, validate,
+    # extract fields from protocol specification yaml file)
     try:
-        protocol_spec = load_protocol_specification(specification_path)
-    except Exception as e:
-        raise click.ClickException(str(e))
-
-    protocol_directory_path = os.path.join(
-        ctx.cwd, item_type_plural, protocol_spec.name
-    )
-
-    # Check if we already have an item with the same name in the agent config
-    logger.debug(
-        "{} already supported by the agent: {}".format(
-            item_type_plural, existing_item_list
+        output_path = os.path.join(ctx.cwd, protocol_plural)
+        protocol_generator = ProtocolGenerator(protocol_specification_path, output_path)
+    except FileNotFoundError as e:
+        raise click.ClickException(  # pragma: no cover
+            "Protocol is NOT generated. The following error happened while generating the protocol:\n"
+            + str(e)
         )
-    )
-    if protocol_spec.name in existing_item_list:
+    except yaml.YAMLError as e:
+        raise click.ClickException(  # pragma: no cover
+            "Protocol is NOT generated. The following error happened while generating the protocol:\n"
+            + "Yaml error in the protocol specification file:"
+            + str(e)
+        )
+    except ProtocolSpecificationParseError as e:
+        raise click.ClickException(  # pragma: no cover
+            "Protocol is NOT generated. The following error happened while generating the protocol:\n"
+            + "Error while parsing the protocol specification: "
+            + str(e)
+        )
+    except Exception as e:  # pragma: no cover
+        raise click.ClickException(  # pragma: no cover
+            "Protocol is NOT generated. The following error happened while generating the protocol:\n"
+            + str(e)
+        )
+
+    # helpers
+    language = ctx.config.get("language")
+    existing_protocol_ids_list = getattr(ctx.agent_config, "{}s".format(PROTOCOL))
+    existing_protocol_name_list = [
+        public_id.name for public_id in existing_protocol_ids_list
+    ]
+    protocol_spec = protocol_generator.protocol_specification
+    protocol_directory_path = os.path.join(ctx.cwd, protocol_plural, protocol_spec.name)
+
+    # Check if a protocol with the same name exists in the agent config
+    if protocol_spec.name in existing_protocol_name_list:
         raise click.ClickException(
-            "A {} with name '{}' already exists. Aborting...".format(
-                item_type, protocol_spec.name
-            )
+            "Protocol is NOT generated. The following error happened while generating the protocol:\n"
+            + f"A {PROTOCOL} with name '{protocol_spec.name}' already exists. Aborting..."
         )
-    # Check if we already have a directory with the same name in the resource directory (e.g. protocols) of the agent's directory
+
+    # Check if a directory with the same name as the protocol's exists
+    # in the protocols directory of the agent's directory
     if os.path.exists(protocol_directory_path):
         raise click.ClickException(
-            "A directory with name '{}' already exists. Aborting...".format(
-                protocol_spec.name
-            )
+            "Protocol is NOT generated. The following error happened while generating the protocol:\n"
+            + f"A directory with name '{protocol_spec.name}' already exists. Aborting..."
         )
 
     ctx.clean_paths.append(protocol_directory_path)
-    try:
-        agent_name = ctx.agent_config.agent_name
-        click.echo(
-            "Generating {} '{}' and adding it to the agent '{}'...".format(
-                item_type, protocol_spec.name, agent_name
-            )
+    agent_name = ctx.agent_config.agent_name
+    click.echo(
+        "Generating {} '{}' and adding it to the agent '{}'...".format(
+            PROTOCOL, protocol_spec.name, agent_name
         )
+    )
 
-        output_path = os.path.join(ctx.cwd, item_type_plural)
-        protocol_generator = ProtocolGenerator(specification_path, output_path)
-        warning_message = protocol_generator.generate()
+    if language == PROTOCOL_LANGUAGE_PYTHON:
+        _generate_full_mode(
+            ctx, protocol_generator, protocol_spec, existing_protocol_ids_list, language
+        )
+    else:
+        _generate_protobuf_mode(ctx, protocol_generator, language)
+
+
+@clean_after
+def _generate_full_mode(
+    ctx: Context,
+    protocol_generator: ProtocolGenerator,
+    protocol_spec: ProtocolSpecification,
+    existing_id_list: Set[PublicId],
+    language: str,
+) -> None:
+    """Generate a protocol in 'full' mode, and add it to the configuration file and agent."""
+    try:
+        warning_message = protocol_generator.generate(
+            protobuf_only=False, language=language
+        )
         if warning_message is not None:
             click.echo(warning_message)
 
         # Add the item to the configurations
         logger.debug(
-            "Registering the {} into {}".format(item_type, DEFAULT_AEA_CONFIG_FILE)
+            "Registering the {} into {}".format(PROTOCOL, DEFAULT_AEA_CONFIG_FILE)
         )
         existing_id_list.add(
             PublicId(protocol_spec.author, protocol_spec.name, protocol_spec.version)
@@ -119,13 +173,8 @@ def _generate_item(ctx: Context, item_type: str, specification_path: str) -> Non
     except FileExistsError:
         raise click.ClickException(  # pragma: no cover
             "A {} with this name already exists. Please choose a different name and try again.".format(
-                item_type
+                PROTOCOL
             )
-        )
-    except ProtocolSpecificationParseError as e:
-        raise click.ClickException(  # pragma: no cover
-            "The following error happened while parsing the protocol specification: "
-            + str(e)
         )
     except Exception as e:
         raise click.ClickException(
@@ -133,3 +182,27 @@ def _generate_item(ctx: Context, item_type: str, specification_path: str) -> Non
             + str(e)
         )
     fingerprint_item(ctx, PROTOCOL, protocol_spec.public_id)
+
+
+@clean_after
+def _generate_protobuf_mode(
+    ctx: Context,  # pylint: disable=unused-argument
+    protocol_generator: ProtocolGenerator,
+    language: str,
+) -> None:
+    """Generate a protocol in 'protobuf' mode, and add it to the configuration file and agent."""
+    try:
+        warning_message = protocol_generator.generate(
+            protobuf_only=True, language=language
+        )
+        if warning_message is not None:
+            click.echo(warning_message)
+    except FileExistsError:  # pragma: no cover
+        raise click.ClickException(  # pragma: no cover
+            f"A {PROTOCOL} with this name already exists. Please choose a different name and try again."
+        )
+    except Exception as e:  # pragma: no cover
+        raise click.ClickException(  # pragma: no cover
+            "Protocol is NOT generated. The following error happened while generating the protocol:\n"
+            + str(e)
+        )

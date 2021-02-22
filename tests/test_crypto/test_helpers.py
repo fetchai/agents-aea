@@ -30,11 +30,13 @@ from fetchai_crypto import FetchAICrypto
 
 from aea.crypto.helpers import (
     create_private_key,
+    get_wallet_from_agent_config,
     make_certificate,
     private_key_verify_or_create,
     try_generate_testnet_wealth,
     try_validate_private_key_path,
 )
+from aea.crypto.wallet import Wallet
 
 from tests.conftest import (
     COSMOS_PRIVATE_KEY_FILE,
@@ -98,7 +100,7 @@ class TestHelperFile:
         """Test generate wealth for ethereum."""
         address = "my_address"
         result = ResponseMock(status_code=500)
-        with patch("requests.get", return_value=result):
+        with patch("ethereum_crypto.requests.get", return_value=result):
             with caplog.at_level(
                 logging.DEBUG, logger="ethereum_crypto._default_logger"
             ):
@@ -113,7 +115,7 @@ class TestHelperFile:
         """Test generate wealth for ethereum."""
         address = "my_address"
         result = ResponseMock(status_code=200)
-        with patch("requests.get", return_value=result):
+        with patch("ethereum_crypto.requests.get", return_value=result):
             with caplog.at_level(
                 logging.DEBUG, logger="ethereum_crypto._default_logger"
             ):
@@ -178,3 +180,10 @@ def test_make_certificate():
             b"message",
             os.path.join(tmp_dir, "test.txt"),
         )
+
+
+def test_get_wallet_from_agent_config():
+    """Test get_wallet_from_agent_config."""
+    agent_conf = AgentConfigMock()
+    wallet = get_wallet_from_agent_config(agent_conf)
+    assert isinstance(wallet, Wallet)

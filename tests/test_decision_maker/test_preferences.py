@@ -24,7 +24,7 @@ import copy
 import pytest
 from ethereum_crypto import EthereumCrypto
 
-from aea.decision_maker.default import OwnershipState, Preferences
+from aea.decision_maker.gop import OwnershipState, Preferences
 from aea.helpers.transaction.base import Terms
 
 

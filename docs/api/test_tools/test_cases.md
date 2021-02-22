@@ -683,16 +683,6 @@ Set up the test class.
 
 Teardown the test.
 
-<a name="aea.test_tools.test_cases.UseOef"></a>
-## UseOef Objects
-
-```python
-@pytest.mark.integration
-class UseOef()
-```
-
-Inherit from this class to launch an OEF node.
-
 <a name="aea.test_tools.test_cases.AEATestCaseEmpty"></a>
 ## AEATestCaseEmpty Objects
 
@@ -724,6 +714,39 @@ Set up the test class.
 
 Teardown the test class.
 
+<a name="aea.test_tools.test_cases.AEATestCaseEmptyFlaky"></a>
+## AEATestCaseEmptyFlaky Objects
+
+```python
+class AEATestCaseEmptyFlaky(AEATestCaseEmpty)
+```
+
+Test case for a default AEA project.
+
+This test case will create a default AEA project.
+
+Use for flaky tests with the flaky decorator.
+
+<a name="aea.test_tools.test_cases.AEATestCaseEmptyFlaky.setup_class"></a>
+#### setup`_`class
+
+```python
+ | @classmethod
+ | setup_class(cls) -> None
+```
+
+Set up the test class.
+
+<a name="aea.test_tools.test_cases.AEATestCaseEmptyFlaky.teardown_class"></a>
+#### teardown`_`class
+
+```python
+ | @classmethod
+ | teardown_class(cls) -> None
+```
+
+Teardown the test class.
+
 <a name="aea.test_tools.test_cases.AEATestCaseMany"></a>
 ## AEATestCaseMany Objects
 
@@ -744,6 +767,37 @@ Test case for many AEA projects.
 Set up the test class.
 
 <a name="aea.test_tools.test_cases.AEATestCaseMany.teardown_class"></a>
+#### teardown`_`class
+
+```python
+ | @classmethod
+ | teardown_class(cls) -> None
+```
+
+Teardown the test class.
+
+<a name="aea.test_tools.test_cases.AEATestCaseManyFlaky"></a>
+## AEATestCaseManyFlaky Objects
+
+```python
+class AEATestCaseManyFlaky(AEATestCaseMany)
+```
+
+Test case for many AEA projects which are flaky.
+
+Use for flaky tests with the flaky decorator.
+
+<a name="aea.test_tools.test_cases.AEATestCaseManyFlaky.setup_class"></a>
+#### setup`_`class
+
+```python
+ | @classmethod
+ | setup_class(cls) -> None
+```
+
+Set up the test class.
+
+<a name="aea.test_tools.test_cases.AEATestCaseManyFlaky.teardown_class"></a>
 #### teardown`_`class
 
 ```python

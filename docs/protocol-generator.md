@@ -17,16 +17,43 @@ where `<path-to-protocol-specification>` is the path to a <a href="../protocol-g
 
 If there are no errors, this command will generate the protocol and place it in your AEA project. The name of the protocol's directory will match the protocol name given in the specification. The author will match the registered author in the CLI. The generator currently produces the following files (assuming the name of the protocol in the specification is `sample`):
 
-* `message.py`: defines messages valid under the `sample` protocol 
-* `serialisation.py`: defines how messages are serialised/deserialised 
-* `__init__.py`: makes the directory a package
-* `protocol.yaml`: contains package information about the `sample` protocol 
-* `sample.proto` protocol buffer schema file
-* `sample_pb2.py`: the generated protocol buffer implementation
-* `custom_types.py`: stub implementations for custom types (created only if the specification contains custom types)
+1. `message.py`: defines messages valid under the `sample` protocol 
+2. `serialisation.py`: defines how messages are serialised/deserialised 
+3. `__init__.py`: makes the directory a package
+4. `protocol.yaml`: contains package information about the `sample` protocol 
+5. `sample.proto` protocol buffer schema file
+6. `sample_pb2.py`: the generated protocol buffer implementation
+7. `custom_types.py`: stub implementations for custom types (created only if the specification contains custom types)
+
+### Full mode vs Protobuf Only mode
+
+Currently, the generator can operate in _full mode_ for Python, creating a complete protocol package (files 1 to 7 above) from a protocol specification. The generator also has a _protobuf only mode_ which only creates the protocol buffer schema and implementation files (files 5 and 6 above). The languages supported in the _protobuf only mode_ and their respective ids are below:
+
+* go: `go`
+* c++: `cpp`
+* java: `java`
+* c&#35;: `csharp`
+* ruby: `ruby`
+* objective-c: `objc`
+* javascript: `js`
+
+To use the generator in protobuf only mode for any of the above languages:
+
+``` bash
+aea generate protocol --l <language> <path-to-protocol-specification>
+```
+
+where `<language>` is a language id.
+
+The protocol buffer compiler requires a plugin to generate Go code. Install it with:
+
+<div class="admonition note">
+  <p class="admonition-title">Note</p>
+  <p>Note the protocol buffer compiler <code>protoc</code> that the generator uses requires a plugin to produce <code>go</code> code. Follow <a href="../protocol-generator/#protocol-specification">this instruction</a>.</p>
+</div>
 
 ## Protocol Specification
-A protocol can be described in a YAML file. As such, it needs to follow the <a href="https://pyyaml.org/wiki/PyYAMLDocumentation" target="_blank">YAML format</a>. The following is an example protocol specification:
+A protocol can be described in a YAML file. This is called a _protocol specification_. The following is an example protocol specification:
 
 ``` yaml
 ---
@@ -65,7 +92,7 @@ keep_terminal_state_dialogues: true
 ...
 ```
 
-Each protocol specification YAML file must have a minimum of one, and a maximum of three YAML documents (each YAML document is enclosed within --- and ...). 
+Each protocol specification must follow the <a href="https://pyyaml.org/wiki/PyYAMLDocumentation" target="_blank">YAML format</a>, and have a minimum of one and a maximum of three YAML documents (each YAML document is enclosed within --- and ...). 
 
 ### Basic Protocol Detail and Messages Syntax
 

@@ -69,7 +69,7 @@ message Envelope{
  where <code>content</code> is replaced with the protocol specific content (see <a href="../protocol-generator">here</a> for details).
 </li>
 
-<li> It MUST implement protocols according to their specification (see <a href="../protocol-generator">here</a> for details).
+<li> It MUST implement protocols according to their specification (see <a href="../protocol-generator/#full-mode-vs-protobuf-only-mode">here</a> for details).
 
 <li> It SHOULD implement the <code>fetchai/default:0.12.0</code> protocol which satisfies the following protobuf schema:
 

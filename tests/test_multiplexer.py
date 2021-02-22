@@ -357,6 +357,30 @@ async def test_send_envelope_with_non_registered_connection():
     multiplexer.disconnect()
 
 
+@pytest.mark.asyncio
+async def test_send_envelope_when_no_connection():
+    """Test that sending an envelope with no connection logs a warning."""
+    multiplexer = Multiplexer([], protocols=[DefaultProtocolMock])
+    multiplexer.connect()
+
+    envelope = Envelope(
+        to="",
+        sender="",
+        protocol_specification_id=DefaultMessage.protocol_specification_id,
+        message=b"",
+    )
+
+    with unittest.mock.patch.object(
+        multiplexer.logger, "warning"
+    ) as mock_logger_warning:
+        await multiplexer._send(envelope)
+        mock_logger_warning.assert_called_with(
+            f"Dropping envelope, no connection available for sending: {envelope}"
+        )
+
+    multiplexer.disconnect()
+
+
 def test_send_envelope_error_is_logged_by_send_loop():
     """Test that the AEAConnectionError in the '_send' method is logged by the '_send_loop'."""
     connection = _make_dummy_connection()

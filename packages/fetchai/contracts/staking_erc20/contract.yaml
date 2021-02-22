@@ -9,7 +9,7 @@ aea_version: '>=0.10.0, <0.11.0'
 fingerprint:
   README.md: QmR5xGpZ8gZkUyWxz6EBkVpsYGuULcN13yNEALoxmDTx6t
   __init__.py: QmWzYodbomKRhKchtYUW9yzRzEPiv2M68rB4FAS7M1WzYj
-  contract.py: Qmf1LiA9Zok5MXW7RZQcMiXQoptqKHkSJUwF8P8SzRZiio
+  contract.py: Qmduy7XHLxP7LytWE1DxE1jwCxT2YraVc1pD1X4nGT6eB7
 fingerprint_ignore_patterns:
 - build/*
 class_name: StakingERC20

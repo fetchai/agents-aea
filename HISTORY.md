@@ -1,5 +1,23 @@
 # Release History
 
+## 0.10.1 (2020-02-21)
+
+- Changes default URL of `soef` connection to https
+- Improves teardown, retry and edge case handling of `p2p_libp2p` and `p2p_libp2p_client` connections
+- Adds auto-generation of private keys to `MultiAgentManager`
+- Exposes address getters on `MultiAgentManager`
+- Improves package validation error messages
+- Simplifies default `DecisionMakerHandler` and extracts advanced features in separate class
+- Fixes task manager and its usage in skills
+- Adds support for multi-language protocol stub generation
+- Adds `data_dir` usage to additional connections
+- Adds IO helper function for consistent file usage
+- Extends release helper scripts
+- Removes stub connection as default connection
+- Adds support for AEA usage without connections
+- Multiple docs updates based on user feedback
+- Multiple additional tests and test stability fixes
+
 ## 0.10.0 (2020-02-11)
 
 - Removes error skill from agents which do not need it

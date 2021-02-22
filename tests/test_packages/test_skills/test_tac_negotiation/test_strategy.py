@@ -23,7 +23,7 @@ from unittest.mock import patch
 
 import pytest
 
-from aea.decision_maker.default import OwnershipState
+from aea.decision_maker.gop import OwnershipState
 from aea.exceptions import AEAEnforceError
 from aea.helpers.search.models import (
     Attribute,
