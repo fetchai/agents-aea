@@ -183,15 +183,15 @@ The following steps are **only relevant if you intend to contribute** to the rep
 
 ### Go Development
 
-The `fetchai/p2p_libp2p` package is partially developed in Go.
+- The `fetchai/p2p_libp2p` package is partially developed in Go.
 
 - To install Go visit the [Golang site](https://golang.org/doc/install).
 
 - We use [`golines`](https://github.com/segmentio/golines) and [`golangci-lint`](https://golangci-lint.run) for linting.
 
-- To run tests, use `go test -p 1 -timeout 0 -count 1 -v ./...` from the root directory of the package.
+- To run tests, use `go test -p 1 -timeout 0 -count 1 -v ./...` from the root directory of the package. If you experience installation or build issues run `go clean -modcache`.
 
-### Documentation
+### Documentation
 
 - To start a live-reloading docs server on localhost: `mkdocs serve`. To amend the docs, create a new documentation file in `docs/` and add a reference to it in `mkdocs.yml`.
 
