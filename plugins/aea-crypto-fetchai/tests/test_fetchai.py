@@ -255,8 +255,8 @@ def test_get_wealth_positive(caplog):
 
 
 @pytest.mark.ledger
-@mock.patch("requests.get")
-@mock.patch("requests.post")
+@mock.patch("aea_crypto_fetchai._cosmos.requests.get")
+@mock.patch("aea_crypto_fetchai._cosmos.requests.post")
 def test_successful_faucet_operation(mock_post, mock_get):
     """Test successful faucet operation."""
     address = "a normal cosmos address would be here"
@@ -292,8 +292,8 @@ def test_successful_faucet_operation(mock_post, mock_get):
 
 
 @pytest.mark.ledger
-@mock.patch("requests.get")
-@mock.patch("requests.post")
+@mock.patch("aea_crypto_fetchai._cosmos.requests.get")
+@mock.patch("aea_crypto_fetchai._cosmos.requests.post")
 def test_successful_realistic_faucet_operation(mock_post, mock_get):
     """Test successful realistic faucet operation."""
     address = "a normal cosmos address would be here"
