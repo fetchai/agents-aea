@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - develop
-      - master
+      - main
   pull_request:
 
 jobs:
@@ -130,7 +130,7 @@ jobs:
     continue-on-error: False
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: github.base_ref == 'master'
+    if: github.base_ref == 'main'
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-python@master

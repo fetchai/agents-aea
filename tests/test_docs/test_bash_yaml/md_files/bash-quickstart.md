@@ -5,7 +5,7 @@ python3 --version
 sudo apt-get install python3.7-dev
 ```
 ``` bash
-curl https://raw.githubusercontent.com/fetchai/agents-aea/master/scripts/install.sh --output install.sh
+curl https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.sh --output install.sh
 chmod +x install.sh
 ./install.sh
 ```

@@ -106,13 +106,13 @@ h := $(shell git rev-parse --abbrev-ref HEAD)
 
 .PHONY: release_check
 release:
-	if [ "$h" = "master" ];\
+	if [ "$h" = "main" ];\
 	then\
-		echo "Please ensure everything is merged into master & tagged there";\
+		echo "Please ensure everything is merged into main & tagged there";\
 		pip install twine;\
 		twine upload dist/*;\
 	else\
-		echo "Please change to master branch for release.";\
+		echo "Please change to main branch for release.";\
 	fi
 
 v := $(shell pip -V | grep virtualenvs)

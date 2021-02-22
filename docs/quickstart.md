@@ -45,14 +45,14 @@ We provide a script to automatically install all framework dependencies and the 
 On MacOS or Ubuntu run:
 
 ``` bash
-curl https://raw.githubusercontent.com/fetchai/agents-aea/master/scripts/install.sh --output install.sh
+curl https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.sh --output install.sh
 chmod +x install.sh
 ./install.sh
 ```
 
 On Windows:
 
-Download `https://raw.githubusercontent.com/fetchai/agents-aea/master/scripts/install.ps1`, then run `install.ps1` with the PowerShell terminal.
+Download `https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.ps1`, then run `install.ps1` with the PowerShell terminal.
 
 
 ### Option 3: Using Docker

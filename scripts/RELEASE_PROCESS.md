@@ -1,5 +1,5 @@
 
-# Release Process from develop to master
+# Release Process from develop to main
 
 1. Make sure all tests pass, coverage is at 100% and the local branch is in a clean state (nothing to commit). Make sure you have a clean develop virtual environment.
 
@@ -17,11 +17,11 @@
 
 8. Run spell checker `./scripts/spell-check.sh`. Commit if required.
 
-9. Open PRs and merge into master.
+9. Open PRs and merge into main.
 
-10. Tag version on master.
+10. Tag version on main.
 
-11. Pull master, make a clean environment and create distributions: `python setup.py sdist bdist_wheel`.
+11. Pull main, make a clean environment and create distributions: `python setup.py sdist bdist_wheel`.
 
 12. Publish to PyPI with twine: `twine upload dist/*`. Optionally, publish to Test-PyPI with twine:
 `twine upload --repository-url https://test.pypi.org/legacy/ dist/*`.

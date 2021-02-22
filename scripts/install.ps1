@@ -1,6 +1,6 @@
 # usage
-# from cmd: @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/fetchai/agents-aea/master/scripts/install.ps1'))"
-# from powershell: iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/fetchai/agents-aea/master/scripts/install.ps1'))
+# from cmd: @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.ps1'))"
+# from powershell: iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.ps1'))
 
 function install_python {
 	echo "Installing python"

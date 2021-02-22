@@ -9,7 +9,7 @@ For deployment, we recommend you use <a href="https://www.docker.com/" target="_
 
 First, we fetch a directory containing a Dockerfile and some dependencies:
 ``` bash
-svn export https://github.com/fetchai/agents-aea/branches/master/deploy-image
+svn export https://github.com/fetchai/agents-aea/branches/main/deploy-image
 cd deploy-image
 rm -rf scripts
 svn export https://github.com/fetchai/docker-images/branches/master/scripts

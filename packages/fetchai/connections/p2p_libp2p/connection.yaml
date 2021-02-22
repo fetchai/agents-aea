@@ -36,7 +36,7 @@ fingerprint:
   go.mod: QmT2LQXkSen6Th4QLS2RU3tRVxJSLjdZTxRULUcnQFXfEL
   go.sum: QmZc6oiDqQhB6ZKVojN26JxoTNH1QetyuYd9zjSksQnTFt
   libp2p_node.go: QmZFR2bdi1EjFmPkjwtYeA19kSQKPtcGoNVafQnZRWotaN
-  utils/utils.go: QmYRdoKyZTDy4j5RwePioxndzxNzskQghzsv4Q6Rfo5G5H
+  utils/utils.go: QmawKkyn8nZtmgULM7vYWfHqMD4o49TQZGF4arwVxyYeCL
 fingerprint_ignore_patterns: []
 build_entrypoint: check_dependencies.py
 connections: []
