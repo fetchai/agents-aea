@@ -50,7 +50,6 @@ DEFAULT_PACKAGES = {
 
 IGNORE_NAMES = {r"^__init__\.py$", r"^__version__\.py$", r"^py\.typed$", r"^.*_pb2.py$"}
 IGNORE_PREFIXES = {
-    Path("aea", "cli_gui"),
     Path("aea", "cli"),
     Path("aea", "connections", "scaffold"),
     Path("aea", "contracts", "scaffold"),

@@ -55,11 +55,8 @@ def get_all_extras() -> Dict:
         *crypto_deps,
     ]
 
-    cli_gui = ["flask", "connexion[swagger-ui]>=2.4.0", *cli_deps]
-
     extras = {
         "cli": cli_deps,
-        "cli_gui": cli_gui,
         "fetch": fetch_ledger_deps,
         "ethereum": ethereum_ledger_deps,
         "cosmos": cosmos_ledger_deps,
