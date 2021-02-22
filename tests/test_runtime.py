@@ -58,6 +58,7 @@ class TestAsyncRuntime:
                 "connections": self.agent.runtime.multiplexer.connections
             },
         )
+        self.agent._runtime = self.runtime
 
     def teardown(self):
         """Tear down."""
@@ -78,7 +79,9 @@ class TestAsyncRuntime:
             behaviour, "act", side_effect=_StopRuntime(reraise=ValueError("expected"))
         ):
             self.runtime.start()
-            wait_for_condition(lambda: self.runtime.is_running, timeout=20)
+            wait_for_condition(
+                lambda: self.runtime.is_running or self.runtime.is_stopped, timeout=20
+            )
             # started and should be stopped after the first act called
             wait_for_condition(lambda: self.runtime.is_stopped, timeout=20)
 

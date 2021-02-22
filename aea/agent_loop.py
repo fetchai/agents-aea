@@ -16,19 +16,18 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
 """This module contains the implementation of an agent loop using asyncio."""
 import asyncio
 import datetime
 from abc import ABC, abstractmethod
 from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop
+from asyncio.queues import Queue
 from asyncio.tasks import Task
 from contextlib import suppress
 from enum import Enum
 from functools import partial
-from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
 
 from aea.abstract_agent import AbstractAgent
 from aea.configurations.constants import LAUNCH_SUCCEED_MESSAGE
@@ -91,6 +90,18 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
         """Get current main loop state."""
         return self._state.get()
 
+    async def wait_state(
+        self, state_or_states: Union[Any, Sequence[Any]]
+    ) -> Tuple[Any, Any]:
+        """Wait state to be set.
+
+        :param state_or_states: state or list of states.
+
+        :return: tuple of previous state and new state.
+        """
+
+        return await self._state.wait(state_or_states)
+
     @property
     def is_running(self) -> bool:
         """Get running state of the loop."""
@@ -112,7 +123,7 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
 
     async def run(self) -> None:
         """Run agent loop."""
-        self.logger.debug("agent loop started")
+        self.logger.debug("agent loop starting...")
         self._state.set(AgentLoopStates.starting)
         self._setup()
         self._set_tasks()
@@ -149,6 +160,11 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
                 continue  #  pragma: nocover
             task.cancel()
 
+    @property
+    @abstractmethod
+    def skill2skill_queue(self) -> Queue:
+        """Get skill to skill message queue."""
+
 
 class AsyncAgentLoop(BaseAgentLoop):
     """Asyncio based agent loop suitable only for AEA."""
@@ -171,6 +187,18 @@ class AsyncAgentLoop(BaseAgentLoop):
         self._agent: AbstractAgent = self._agent
 
         self._periodic_tasks: Dict[Callable, PeriodicCaller] = {}
+        self._skill2skill_message_queue: Optional[asyncio.Queue] = None
+
+    def _setup(self) -> None:
+        self._skill2skill_message_queue = asyncio.Queue()
+        super()._setup()
+
+    @property
+    def skill2skill_queue(self) -> Queue:
+        """Get skill to skill message queue."""
+        if not self._skill2skill_message_queue:
+            raise ValueError("_skill2skill_message_queue is not set!")
+        return self._skill2skill_message_queue
 
     def _periodic_task_exception_callback(  # pylint: disable=unused-argument
         self, task_callable: Callable, exc: Exception

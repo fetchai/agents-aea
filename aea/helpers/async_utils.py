@@ -153,6 +153,7 @@ class AsyncState:
         """Wait state to be set.
 
         :param state_or_states: state or list of states.
+
         :return: tuple of previous state and new state.
         """
         states = ensure_list(state_or_states)
@@ -453,7 +454,7 @@ class Runnable(ABC):
         """
         if loop and threaded:
             raise ValueError(
-                "You can not set a loop in threaded mode. A separate loop will be created in each thread."
+                "You can not set a loop in threaded mode. A dedicated loop will be created for each thread."
             )
         self._loop = loop
         self._threaded = threaded
