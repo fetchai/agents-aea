@@ -15,4 +15,5 @@ fingerprint_ignore_patterns:
 class_name: StakingERC20
 contract_interface_paths:
   ethereum: build/staking_erc20.json
-dependencies: {}
+dependencies:
+  ethereum_crypto: {}

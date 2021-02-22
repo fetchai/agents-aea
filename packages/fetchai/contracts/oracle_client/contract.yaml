@@ -15,4 +15,5 @@ fingerprint_ignore_patterns:
 class_name: FetchOracleClientContract
 contract_interface_paths:
   ethereum: build/FetchOracleTestClient.json
-dependencies: {}
+dependencies:
+  ethereum_crypto: {}

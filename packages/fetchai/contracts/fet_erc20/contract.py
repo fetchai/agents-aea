@@ -21,7 +21,7 @@
 
 import logging
 
-from ethereum_crypto import EthereumCrypto
+from ethereum_crypto import EthereumApi
 
 from aea.common import Address
 from aea.configurations.base import PublicId
@@ -60,7 +60,7 @@ class FetERC20(Contract):
         :param gas: the gas limit for the transaction.
         :return: None
         """
-        if ledger_api.identifier == EthereumCrypto.identifier:
+        if ledger_api.identifier == EthereumApi.identifier:
             nonce = ledger_api.api.eth.getTransactionCount(from_address)
             instance = cls.get_instance(ledger_api, contract_address)
             function = instance.functions.approve
@@ -97,7 +97,7 @@ class FetERC20(Contract):
         :param gas: the gas limit for the transaction.
         :return: None
         """
-        if ledger_api.identifier == EthereumCrypto.identifier:
+        if ledger_api.identifier == EthereumApi.identifier:
             nonce = ledger_api.api.eth.getTransactionCount(from_address)
             instance = cls.get_instance(ledger_api, contract_address)
             function = instance.functions.transfer

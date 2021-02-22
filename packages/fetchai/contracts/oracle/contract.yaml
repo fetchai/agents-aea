@@ -18,3 +18,4 @@ contract_interface_paths:
 dependencies:
   vyper:
     version: <1.0.0,>=0.2.7
+  ethereum_crypto: {}

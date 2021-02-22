@@ -21,7 +21,7 @@
 
 import logging
 
-from ethereum_crypto import EthereumCrypto
+from ethereum_crypto import EthereumApi
 
 from aea.common import Address, JSONLike
 from aea.configurations.base import PublicId
@@ -53,7 +53,7 @@ class StakingERC20(Contract):
         :param address: the address
         :return: the balance in a dictionary - {"balance": {token_id: int, balance: int}}
         """
-        if ledger_api.identifier == EthereumCrypto.identifier:
+        if ledger_api.identifier == EthereumApi.identifier:
             instance = cls.get_instance(ledger_api, contract_address)
             result = instance.functions.getStakeForUser(address).call()
             return {"stake": result[0]}
