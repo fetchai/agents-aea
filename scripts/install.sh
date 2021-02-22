@@ -101,7 +101,7 @@ function ensure_brew(){
 	if [[ $? -ne 0 ]];
 	then
 		echo "Installing homebrew. Please pay attention, it can ask for the password and aggree to install xcode tools."
-		/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/main/install.sh)"
+		/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 		if [[ $? -eq 0 ]];
 		then
 			echo "Homebrew was installed!"
