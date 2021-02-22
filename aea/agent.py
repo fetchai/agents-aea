@@ -22,15 +22,17 @@ import datetime
 import logging
 from asyncio import AbstractEventLoop
 from logging import Logger
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, cast
 
 from aea.abstract_agent import AbstractAgent
+from aea.agent_loop import BaseAgentLoop
 from aea.connections.base import Connection
 from aea.exceptions import AEAException
 from aea.helpers.logging import WithLogger
 from aea.identity.base import Identity
 from aea.mail.base import Envelope
-from aea.multiplexer import InBox, OutBox
+from aea.multiplexer import AsyncMultiplexer, InBox, OutBox
+from aea.protocols.base import Message
 from aea.runtime import AsyncRuntime, BaseRuntime, RuntimeStates, ThreadedRuntime
 
 
@@ -105,7 +107,7 @@ class Agent(AbstractAgent, WithLogger):
             multiplexer_options=multiplexer_options,
         )
         self._inbox = InBox(self.runtime.multiplexer)
-        self._outbox = OutBox(self.runtime.multiplexer)
+        self._outbox = SkillOutBox(self.runtime.multiplexer, self.runtime.agent_loop)
 
     def _get_runtime_class(self) -> Type[BaseRuntime]:
         """Get runtime class based on runtime mode."""
@@ -273,7 +275,10 @@ class Agent(AbstractAgent, WithLogger):
 
         :return: List of tuples of callables: handler and coroutine to get a message
         """
-        return [(self.handle_envelope, self.inbox.async_get)]
+        return [
+            (self.handle_envelope, self.inbox.async_get),
+            (self.handle_envelope, self.runtime.agent_loop.skill2skill_queue.get),
+        ]
 
     def exception_handler(
         self, exception: Exception, function: Callable
@@ -290,3 +295,37 @@ class Agent(AbstractAgent, WithLogger):
             f"Exception {repr(exception)} raised during {repr(function)} call."
         )
         return True
+
+
+class SkillOutBox(OutBox):
+    """OutBox implemenation with skill-to-skill messages support."""
+
+    def __init__(
+        self, multiplexer: AsyncMultiplexer, agent_loop: BaseAgentLoop
+    ) -> None:
+        """Init the outbox instance."""
+        super().__init__(multiplexer)
+        self._agent_loop = agent_loop
+        self.logger = multiplexer.logger
+
+    def put(self, envelope: Envelope) -> None:
+        """
+        Put an envelope into the queue.
+
+        :param envelope: the envelope.
+        :return: None
+        """
+        if not isinstance(envelope.message, Message):
+            raise ValueError(
+                "Only Message type allowed in envelope message field when putting into outbox."
+            )
+        message = cast(Message, envelope.message)
+        if not message.has_to:  # pragma: nocover
+            raise ValueError("Provided message has message.to not set.")
+        if not message.has_sender:  # pragma: nocover
+            raise ValueError("Provided message has message.sender not set.")
+
+        if envelope.context and envelope.context.skill_id:
+            self._agent_loop.skill2skill_queue.put_nowait(envelope)
+        else:
+            super().put(envelope)

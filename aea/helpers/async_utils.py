@@ -153,6 +153,7 @@ class AsyncState:
         """Wait state to be set.
 
         :param state_or_states: state or list of states.
+
         :return: tuple of previous state and new state.
         """
         states = ensure_list(state_or_states)
