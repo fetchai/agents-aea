@@ -191,7 +191,7 @@ The following steps are **only relevant if you intend to contribute** to the rep
 
 - To run tests, use `go test -p 1 -timeout 0 -count 1 -v ./...` from the root directory of the package. If you experience installation or build issues run `go clean -modcache`.
 
-### Documentation
+### Documentation
 
 - To start a live-reloading docs server on localhost: `mkdocs serve`. To amend the docs, create a new documentation file in `docs/` and add a reference to it in `mkdocs.yml`.
 
