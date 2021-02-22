@@ -12,7 +12,7 @@ First, we fetch a directory containing a Dockerfile and some dependencies:
 svn export https://github.com/fetchai/agents-aea/branches/main/deploy-image
 cd deploy-image
 rm -rf scripts
-svn export https://github.com/fetchai/docker-images/branches/main/scripts
+svn export https://github.com/fetchai/docker-images/branches/master/scripts
 cd ..
 ```
 
