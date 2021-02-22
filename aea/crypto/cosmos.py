@@ -597,7 +597,7 @@ class _CosmosApi(LedgerApi):
         :return: the unsigned CosmWasm contract deploy message
         """
         store_msg = {
-            "type": "wasm/store-code",
+            "type": "wasm/MsgStoreCode",
             "value": {
                 "sender": deployer_address,
                 "wasm_byte_code": contract_interface[_BYTECODE],
@@ -639,14 +639,21 @@ class _CosmosApi(LedgerApi):
         :param chain_id: the Chain ID of the CosmWasm transaction. Default is 1 (i.e. mainnet).
         :return: the unsigned CosmWasm InitMsg
         """
+
+        if amount == 0:
+            init_funds = []
+        else:
+            init_funds = [{"amount": str(amount), "denom": denom}]
+
+
         instantiate_msg = {
-            "type": "wasm/instantiate",
+            "type": "wasm/MsgInstantiateContract",
             "value": {
                 "sender": deployer_address,
                 "code_id": str(code_id),
                 "label": label,
                 "init_msg": init_msg,
-                "init_funds": [{"denom": denom, "amount": str(amount)}],
+                "init_funds": init_funds,
             },
         }
         tx = self._get_transaction(
@@ -691,13 +698,19 @@ class _CosmosApi(LedgerApi):
         )
         if account_number is None or sequence is None:
             return None
+
+        if amount == 0:
+            sent_funds = []
+        else:
+            sent_funds = [{"amount": str(amount), "denom": denom}]
+
         execute_msg = {
-            "type": "wasm/execute",
+            "type": "wasm/MsgExecuteContract",
             "value": {
                 "sender": sender_address,
                 "contract": contract_address,
                 "msg": handle_msg,
-                "sent_funds": [{"amount": str(amount), "denom": denom}],
+                "sent_funds": sent_funds,
             },
         }
         tx = self._get_transaction(
@@ -919,7 +932,7 @@ class _CosmosApi(LedgerApi):
         """Check whether it is a cosmwasm tx."""
         try:
             _type = cast(dict, tx_signed.get("value", {})).get("msg", [])[0]["type"]
-            result = _type in ["wasm/store-code", "wasm/instantiate", "wasm/execute"]
+            result = _type in ["wasm/MsgStoreCode", "wasm/MsgInstantiateContract", "wasm/MsgExecuteContract"]
         except (KeyError, IndexError):  # pragma: nocover
             result = False
         return result

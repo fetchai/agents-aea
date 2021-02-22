@@ -396,7 +396,7 @@ def test_format_cosmwasm():
         "memo": "",
         "msgs": [
             {
-                "type": "wasm/execute",
+                "type": "wasm/MsgExecuteContract",
                 "value": {
                     "sender": "cosmos14xjnl2mwwfz6pztpwzj6s89npxr0e3lhxl52nv",
                     "contract": "cosmos1xzlgeyuuyqje79ma6vllregprkmgwgav5zshcm",
@@ -459,7 +459,7 @@ def test_get_storage_transaction_cosmwasm():
     assert "memo" in deploy_transaction
     assert "msgs" in deploy_transaction and len(deploy_transaction["msgs"]) == 1
     msg = deploy_transaction["msgs"][0]
-    assert "type" in msg and msg["type"] == "wasm/store-code"
+    assert "type" in msg and msg["type"] == "wasm/MsgStoreCode"
     assert (
         "value" in msg
         and msg["value"]["sender"] == deployer_address
@@ -501,7 +501,7 @@ def test_get_init_transaction_cosmwasm():
     assert "memo" in deploy_transaction
     assert "msgs" in deploy_transaction and len(deploy_transaction["msgs"]) == 1
     msg = deploy_transaction["msgs"][0]
-    assert "type" in msg and msg["type"] == "wasm/instantiate"
+    assert "type" in msg and msg["type"] == "wasm/MsgInstantiateContract"
     assert (
         "value" in msg
         and msg["value"]["sender"] == deployer_address
@@ -539,7 +539,7 @@ def test_get_handle_transaction_cosmwasm():
     assert "memo" in handle_transaction
     assert "msgs" in handle_transaction and len(handle_transaction["msgs"]) == 1
     msg = handle_transaction["msgs"][0]
-    assert "type" in msg and msg["type"] == "wasm/execute"
+    assert "type" in msg and msg["type"] == "wasm/MsgExecuteContract"
     assert (
         "value" in msg
         and msg["value"]["sender"] == sender_address
@@ -593,7 +593,7 @@ def test_try_execute_wasm_transaction():
 def test_send_signed_transaction_wasm_transaction():
     """Test the send_signed_transaction method for a wasm transaction."""
     cosmos_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
-    tx_signed = {"value": {"msg": [{"type": "wasm/store-code"}]}}
+    tx_signed = {"value": {"msg": [{"type": "wasm/MsgStoreCode"}]}}
     with mock.patch.object(
         cosmos_api, "_try_execute_wasm_transaction", return_value="digest"
     ):
