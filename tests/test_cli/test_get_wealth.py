@@ -20,7 +20,7 @@
 
 from unittest import TestCase, mock
 
-from fetchai_crypto import FetchAICrypto
+from aea_crypto_fetchai import FetchAICrypto
 
 from aea.cli import cli
 from aea.cli.get_wealth import _try_get_wealth

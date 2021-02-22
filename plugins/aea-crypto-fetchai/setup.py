@@ -18,7 +18,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Setup script for "fetchai_crypto" package."""
+"""Setup script for "aea_crypto_fetchai" package."""
 
 import os
 
@@ -29,17 +29,17 @@ here = os.path.abspath(os.path.dirname(__file__))
 plugin_dir = os.path.abspath(os.path.join(here, ".."))
 
 setup(
-    name="fetchai_crypto",
+    name="aea_crypto_fetchai",
     version="0.1.0",
     author="Fetch.AI Limited",
     license="Apache-2.0",
     description="Python package wrapping the public and private key cryptography and ledger API of Fetch.AI.",
-    packages=find_packages(include=["fetchai_crypto*"]),
+    packages=find_packages(include=["aea_crypto_fetchai*"]),
     install_requires=["aea>=0.10.0,<0.11.0", "ecdsa>=0.16", "bech32==1.2.0"],
     tests_require=["pytest"],
     entry_points={
-        "aea.cryptos": ["fetchai = fetchai_crypto:FetchAICrypto"],
-        "aea.ledger_apis": ["fetchai = fetchai_crypto:FetchAIApi"],
-        "aea.faucet_apis": ["fetchai = fetchai_crypto:FetchAIFaucetApi"],
+        "aea.cryptos": ["fetchai = aea_crypto_fetchai:FetchAICrypto"],
+        "aea.ledger_apis": ["fetchai = aea_crypto_fetchai:FetchAIApi"],
+        "aea.faucet_apis": ["fetchai = aea_crypto_fetchai:FetchAIFaucetApi"],
     },
 )

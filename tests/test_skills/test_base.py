@@ -25,8 +25,8 @@ from unittest import TestCase, mock
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
-from ethereum_crypto import EthereumCrypto
-from fetchai_crypto import FetchAICrypto
+from aea_crypto_ethereum import EthereumCrypto
+from aea_crypto_fetchai import FetchAICrypto
 
 import aea
 from aea.aea import AEA

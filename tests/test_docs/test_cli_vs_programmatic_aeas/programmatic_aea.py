@@ -24,7 +24,7 @@ import os
 import sys
 from typing import cast
 
-from fetchai_crypto import FetchAICrypto
+from aea_crypto_fetchai import FetchAICrypto
 
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder

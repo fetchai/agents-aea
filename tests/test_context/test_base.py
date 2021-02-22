@@ -20,7 +20,7 @@
 """This module contains a test for aea.context."""
 import os
 
-from fetchai_crypto import FetchAICrypto
+from aea_crypto_fetchai import FetchAICrypto
 
 from aea.context.base import AgentContext
 from aea.identity.base import Identity

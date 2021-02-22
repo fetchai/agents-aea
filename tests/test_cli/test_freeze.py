@@ -70,7 +70,7 @@ class TestFreeze:
         """Test that the command has printed the correct output."""
         assert (
             self.result.output
-            == """cosmos_crypto\nethereum_crypto\nfetchai_crypto\nprotobuf\nvyper==0.1.0b12\n"""
+            == """aea_crypto_cosmos\naea_crypto_ethereum\naea_crypto_fetchai\nprotobuf\nvyper==0.1.0b12\n"""
         )
 
     def teardown(self):

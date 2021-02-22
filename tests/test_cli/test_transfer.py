@@ -23,9 +23,9 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
+from aea_crypto_cosmos import CosmosCrypto
+from aea_crypto_fetchai import FetchAICrypto
 from click.exceptions import ClickException
-from cosmos_crypto import CosmosCrypto
-from fetchai_crypto import FetchAICrypto
 
 from aea.cli.transfer import wait_tx_settled
 from aea.cli.utils.package_utils import try_get_balance

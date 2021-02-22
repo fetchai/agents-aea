@@ -21,7 +21,7 @@
 
 from typing import Optional
 
-from cosmos_crypto import CosmosApi, CosmosCrypto
+from aea_crypto_cosmos import CosmosApi, CosmosCrypto
 
 from aea.crypto.base import Crypto
 from aea.crypto.registries import make_crypto, make_ledger_api

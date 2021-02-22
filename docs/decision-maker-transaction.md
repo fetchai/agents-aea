@@ -8,7 +8,7 @@ import time
 from threading import Thread
 from typing import Optional, cast
 
-from fetchai_crypto import FetchAICrypto
+from aea_crypto_fetchai import FetchAICrypto
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import PublicId, SkillConfig
@@ -302,7 +302,7 @@ import time
 from threading import Thread
 from typing import Optional, cast
 
-from fetchai_crypto import FetchAICrypto
+from aea_crypto_fetchai import FetchAICrypto
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import PublicId, SkillConfig

@@ -22,7 +22,7 @@ from threading import Thread
 Then, import the application specific libraries.
 
 ``` python
-from fetchai_crypto import FetchAICrypto
+from aea_crypto_fetchai import FetchAICrypto
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
@@ -178,7 +178,7 @@ import os
 import time
 from threading import Thread
 
-from fetchai_crypto import FetchAICrypto
+from aea_crypto_fetchai import FetchAICrypto
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig

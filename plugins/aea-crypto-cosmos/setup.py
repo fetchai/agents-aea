@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
@@ -17,19 +18,22 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Conftest module for Pytest."""
-import inspect
-import os
+"""Setup script for "aea_crypto_cosmos" package."""
 
-from cosmos_crypto import CosmosCrypto
+from setuptools import find_packages, setup
 
 
-CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
-ROOT_DIR = os.path.join(CUR_PATH, "..")
-MAX_FLAKY_RERUNS = 3
-COSMOS = CosmosCrypto.identifier
-
-COSMOS_DEFAULT_ADDRESS = "INVALID_URL"
-COSMOS_DEFAULT_CURRENCY_DENOM = "INVALID_CURRENCY_DENOM"
-COSMOS_DEFAULT_CHAIN_ID = "INVALID_CHAIN_ID"
-COSMOS_TESTNET_CONFIG = {"address": COSMOS_DEFAULT_ADDRESS}
+setup(
+    name="aea_crypto_cosmos",
+    version="0.1.0",
+    author="Fetch.AI Limited",
+    license="Apache-2.0",
+    description="Python package wrapping the public and private key cryptography and ledger api of Cosmos.",
+    packages=find_packages(include=["aea_crypto_cosmos*"]),
+    install_requires=["aea>=0.10.0,<0.11.0", "ecdsa>=0.16", "bech32==1.2.0"],
+    entry_points={
+        "aea.cryptos": ["cosmos = aea_crypto_cosmos:CosmosCrypto"],
+        "aea.ledger_apis": ["cosmos = aea_crypto_cosmos:CosmosApi"],
+        "aea.faucet_apis": ["cosmos = aea_crypto_cosmos:CosmosFaucetApi"],
+    },
+)

@@ -22,7 +22,7 @@
 import json
 import os
 
-from ethereum_crypto.ethereum import EthereumCrypto as Ethereum
+from aea_crypto_ethereum.ethereum import EthereumCrypto as Ethereum
 
 from aea.test_tools.test_cases import AEATestCaseEmpty
 

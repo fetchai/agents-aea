@@ -24,8 +24,8 @@ import shutil
 import tempfile
 from pathlib import Path
 
-from ethereum_crypto import EthereumCrypto
-from fetchai_crypto import FetchAICrypto
+from aea_crypto_ethereum import EthereumCrypto
+from aea_crypto_fetchai import FetchAICrypto
 
 from aea.cli import cli
 from aea.crypto.registries import make_crypto

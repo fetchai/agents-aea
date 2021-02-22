@@ -28,7 +28,7 @@ from unittest import mock
 from unittest.mock import MagicMock, call
 
 import pytest
-from fetchai_crypto import FetchAIApi, FetchAICrypto, FetchAIFaucetApi
+from aea_crypto_fetchai import FetchAIApi, FetchAICrypto, FetchAIFaucetApi
 
 from tests.conftest import FETCHAI_TESTNET_CONFIG, MAX_FLAKY_RERUNS
 
@@ -624,7 +624,7 @@ def test_get_contract_instance():
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
-@mock.patch("fetchai_crypto.FetchAIApi._execute_shell_command")
+@mock.patch("aea_crypto_fetchai.FetchAIApi._execute_shell_command")
 def test_get_contract_address(mock_api_call):
     """Test the get_contract_address method used for interaction with CosmWasm contracts."""
 
@@ -648,7 +648,7 @@ def test_get_contract_address(mock_api_call):
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
-@mock.patch("fetchai_crypto.FetchAIApi._execute_shell_command")
+@mock.patch("aea_crypto_fetchai.FetchAIApi._execute_shell_command")
 def test_get_last_code_id(mock_api_call):
     """Test the get_last_code_id method used for interaction with CosmWasm contracts."""
 

@@ -30,7 +30,7 @@ jobs:
         run: |
           # these two files should not be different;
           # we vendorize main "cosmos.py" module in fetchai crypto plugin package
-          diff plugins/cosmos-crypto/cosmos_crypto/cosmos.py plugins/fetchai-crypto/fetchai_crypto/_cosmos.py
+          diff plugins/aea-crypto-cosmos/aea_crypto_cosmos/cosmos.py plugins/aea-crypto-fetchai/aea_crypto_fetchai/_cosmos.py
 
   common_checks_2:
     continue-on-error: False

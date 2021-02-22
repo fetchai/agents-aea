@@ -22,7 +22,7 @@ from typing import Type
 from unittest.mock import patch
 
 import pytest
-from cosmos_crypto import CosmosCrypto
+from aea_crypto_cosmos import CosmosCrypto
 
 from aea.common import Address
 from aea.helpers.transaction.base import (

@@ -22,7 +22,7 @@
 import copy
 
 import pytest
-from ethereum_crypto import EthereumCrypto
+from aea_crypto_ethereum import EthereumCrypto
 
 from aea.decision_maker.gop import OwnershipState, Preferences
 from aea.helpers.transaction.base import Terms

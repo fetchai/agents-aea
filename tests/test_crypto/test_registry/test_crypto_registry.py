@@ -24,9 +24,9 @@ import string
 from unittest import mock
 
 import pytest
-from cosmos_crypto import CosmosCrypto
-from ethereum_crypto import EthereumCrypto
-from fetchai_crypto import FetchAICrypto
+from aea_crypto_cosmos import CosmosCrypto
+from aea_crypto_ethereum import EthereumCrypto
+from aea_crypto_fetchai import FetchAICrypto
 
 import aea.crypto
 from aea.crypto.registries.base import EntryPoint
@@ -44,32 +44,32 @@ forbidden_special_characters = "".join(
 
 def test_make_fetchai():
     """Test the 'make' method for 'fetchai' crypto."""
-    fetchai_crypto = aea.crypto.registries.make_crypto(FetchAICrypto.identifier)
+    aea_crypto_fetchai = aea.crypto.registries.make_crypto(FetchAICrypto.identifier)
 
     # calling 'make' again will give a different object.
-    fetchai_crypto_1 = aea.crypto.registries.make_crypto(FetchAICrypto.identifier)
-    assert type(fetchai_crypto) == type(fetchai_crypto_1)
-    assert fetchai_crypto.address != fetchai_crypto_1
+    aea_crypto_fetchai_1 = aea.crypto.registries.make_crypto(FetchAICrypto.identifier)
+    assert type(aea_crypto_fetchai) == type(aea_crypto_fetchai_1)
+    assert aea_crypto_fetchai.address != aea_crypto_fetchai_1
 
 
 def test_make_ethereum():
     """Test the 'make' method for 'ethereum' crypto."""
-    ethereum_crypto = aea.crypto.registries.make_crypto(EthereumCrypto.identifier)
+    aea_crypto_ethereum = aea.crypto.registries.make_crypto(EthereumCrypto.identifier)
 
     # calling 'make' again will give a different object.
-    ethereum_crypto_1 = aea.crypto.registries.make_crypto(EthereumCrypto.identifier)
-    assert type(ethereum_crypto) == type(ethereum_crypto_1)
-    assert ethereum_crypto.address != ethereum_crypto_1.address
+    aea_crypto_ethereum_1 = aea.crypto.registries.make_crypto(EthereumCrypto.identifier)
+    assert type(aea_crypto_ethereum) == type(aea_crypto_ethereum_1)
+    assert aea_crypto_ethereum.address != aea_crypto_ethereum_1.address
 
 
 def test_make_cosmos():
     """Test the 'make' method for 'cosmos' crypto."""
-    cosmos_crypto = aea.crypto.registries.make_crypto(CosmosCrypto.identifier)
+    aea_crypto_cosmos = aea.crypto.registries.make_crypto(CosmosCrypto.identifier)
 
     # calling 'make' again will give a different object.
-    cosmos_crypto_1 = aea.crypto.registries.make_crypto(CosmosCrypto.identifier)
-    assert type(cosmos_crypto) == type(cosmos_crypto_1)
-    assert cosmos_crypto.address != cosmos_crypto_1.address
+    aea_crypto_cosmos_1 = aea.crypto.registries.make_crypto(CosmosCrypto.identifier)
+    assert type(aea_crypto_cosmos) == type(aea_crypto_cosmos_1)
+    assert aea_crypto_cosmos.address != aea_crypto_cosmos_1.address
 
 
 def test_register_custom_crypto():

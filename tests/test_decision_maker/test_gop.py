@@ -23,9 +23,9 @@ from queue import Queue
 from typing import Optional, cast
 from unittest import mock
 
-from cosmos_crypto import CosmosCrypto
-from ethereum_crypto import EthereumCrypto
-from fetchai_crypto import FetchAICrypto
+from aea_crypto_cosmos import CosmosCrypto
+from aea_crypto_ethereum import EthereumCrypto
+from aea_crypto_fetchai import FetchAICrypto
 
 import aea
 import aea.decision_maker.gop

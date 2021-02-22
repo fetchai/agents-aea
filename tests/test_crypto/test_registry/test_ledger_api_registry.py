@@ -22,8 +22,8 @@
 import logging
 
 import pytest
-from ethereum_crypto import EthereumCrypto
-from fetchai_crypto import FetchAICrypto
+from aea_crypto_ethereum import EthereumCrypto
+from aea_crypto_fetchai import FetchAICrypto
 
 import aea.crypto
 

@@ -22,7 +22,7 @@
 import logging
 from typing import Any, Dict
 
-from ethereum_crypto import EthereumApi
+from aea_crypto_ethereum import EthereumApi
 from vyper.utils import keccak256
 
 from aea.common import Address, JSONLike

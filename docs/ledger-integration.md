@@ -22,7 +22,7 @@ These three classes have their own registries, which allow the developer to impo
 from aea.crypto.registries import crypto_registry, make_crypto, register_crypto
 
 # by default we can use the native cryptos
-fetchai_crypto = make_crypto("fetchai")
+aea_crypto_fetchai = make_crypto("fetchai")
 
 # we can check what cryptos are registered
 crypto_registry.supported_ids

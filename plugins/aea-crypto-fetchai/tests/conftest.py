@@ -17,4 +17,20 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Tests for the cosmos_crypto package."""
+"""Conftest module for Pytest."""
+import inspect
+import os
+
+from aea_crypto_fetchai import FetchAICrypto
+
+
+CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
+ROOT_DIR = os.path.join(CUR_PATH, "..")
+MAX_FLAKY_RERUNS = 3
+FETCHAI = FetchAICrypto.identifier
+
+
+FETCHAI_DEFAULT_ADDRESS = "https://rest-agent-land.fetch.ai"
+FETCHAI_DEFAULT_CURRENCY_DENOM = "atestfet"
+FETCHAI_DEFAULT_CHAIN_ID = "agent-land"
+FETCHAI_TESTNET_CONFIG = {"address": FETCHAI_DEFAULT_ADDRESS}

@@ -64,7 +64,7 @@ class TestLedgerIntegration(BasePythonMarkdownDocs):
 
     def _assert(self, locals_, *mocks):
         """Assert code outputs."""
-        self._assert_isinstance("fetchai_crypto", "FetchAICrypto", locals_)
+        self._assert_isinstance("aea_crypto_fetchai", "FetchAICrypto", locals_)
         self._assert_isinstance("fetchai_ledger_api", "FetchAIApi", locals_)
         self._assert_isinstance("fetchai_faucet_api", "FetchAIFaucetApi", locals_)
         self._assert_isinstance("my_ledger_crypto", MagicMock, locals_)

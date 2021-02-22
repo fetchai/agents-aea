@@ -17,11 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""
-Python package wrapping the public and private key cryptography and ledger api.
-
-The module '_cosmos.py' must be the same of "cosmos_crypto.cosmos".
-"""
-
-from .fetchai import *  # noqa isort:skip
-from .fetchai import _FETCH, _FETCHAI  # noqa isort:skip
+"""Tests for the aea_crypto_cosmos package."""

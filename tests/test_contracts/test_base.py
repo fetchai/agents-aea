@@ -27,8 +27,8 @@ from unittest.mock import patch
 
 import pytest
 import web3
-from ethereum_crypto import EthereumCrypto
-from fetchai_crypto import FetchAICrypto
+from aea_crypto_ethereum import EthereumCrypto
+from aea_crypto_fetchai import FetchAICrypto
 
 from aea.configurations.base import ComponentType, ContractConfig
 from aea.configurations.loader import load_component_configuration
@@ -147,7 +147,7 @@ def test_get_deploy_transaction_ethereum(
     dummy_contract, ganache_addr, ganache_port, ganache
 ):
     """Tests the deploy transaction classmethod for ethereum."""
-    ethereum_crypto = crypto_registry.make(EthereumCrypto.identifier)
+    aea_crypto_ethereum = crypto_registry.make(EthereumCrypto.identifier)
     ledger_api = ledger_apis_registry.make(
         EthereumCrypto.identifier, address=make_uri(ganache_addr, ganache_port)
     )
@@ -156,7 +156,7 @@ def test_get_deploy_transaction_ethereum(
         return_value={"data": "0xstub"},
     ):
         deploy_tx = dummy_contract.get_deploy_transaction(
-            ledger_api, ethereum_crypto.address
+            ledger_api, aea_crypto_ethereum.address
         )
     assert deploy_tx is not None and len(deploy_tx) == 6
     assert all(
@@ -176,12 +176,12 @@ def test_get_instance_no_address_cosmwasm(dummy_contract):
 
 def test_get_deploy_transaction_cosmwasm(dummy_contract):
     """Tests the deploy transaction classmethod for fetchai."""
-    fetchai_crypto = crypto_registry.make(FetchAICrypto.identifier)
+    aea_crypto_fetchai = crypto_registry.make(FetchAICrypto.identifier)
     ledger_api = ledger_apis_registry.make(
         FetchAICrypto.identifier, address=FETCHAI_DEFAULT_ADDRESS,
     )
     deploy_tx = dummy_contract.get_deploy_transaction(
-        ledger_api, fetchai_crypto.address
+        ledger_api, aea_crypto_fetchai.address
     )
     assert deploy_tx is not None and len(deploy_tx) == 6
     assert all(

@@ -25,8 +25,8 @@ import tempfile
 from unittest.mock import Mock
 
 import pytest
-from ethereum_crypto import EthereumCrypto
-from fetchai_crypto import FetchAICrypto
+from aea_crypto_ethereum import EthereumCrypto
+from aea_crypto_fetchai import FetchAICrypto
 
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer

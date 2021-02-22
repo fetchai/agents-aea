@@ -21,7 +21,7 @@ from unittest import mock
 
 import base58
 import pytest
-from fetchai_crypto import FetchAICrypto
+from aea_crypto_fetchai import FetchAICrypto
 
 from aea.test_tools.test_cases import AEATestCaseEmpty
 

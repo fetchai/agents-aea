@@ -19,7 +19,7 @@
 """This module contains the tests of the ethereum module."""
 
 import pytest
-from ethereum_crypto import EthereumApi
+from aea_crypto_ethereum import EthereumApi
 
 from tests.conftest import MAX_FLAKY_RERUNS
 

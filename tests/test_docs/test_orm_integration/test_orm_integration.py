@@ -24,7 +24,7 @@ from random import uniform
 import mistune
 import pytest
 import yaml
-from fetchai_crypto import FetchAICrypto
+from aea_crypto_fetchai import FetchAICrypto
 
 from aea.test_tools.test_cases import AEATestCaseManyFlaky
 

@@ -24,7 +24,7 @@ from typing import cast
 from unittest.mock import MagicMock, patch
 
 import pytest
-from ethereum_crypto import EthereumCrypto
+from aea_crypto_ethereum import EthereumCrypto
 
 from aea.common import Address
 from aea.helpers.transaction.base import RawMessage, RawTransaction, State

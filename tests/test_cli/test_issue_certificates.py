@@ -24,8 +24,8 @@ from pathlib import Path
 from typing import List
 
 import pytest
-from ethereum_crypto import EthereumCrypto
-from fetchai_crypto import FetchAICrypto
+from aea_crypto_ethereum import EthereumCrypto
+from aea_crypto_fetchai import FetchAICrypto
 
 from aea.cli.utils.config import dump_item_config
 from aea.helpers.base import CertRequest
