@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package aea;
+
+import "google/protobuf/struct.proto";
+
+
+message DialogueMessage {
+  int32 message_id = 1;
+  string dialogue_starter_reference = 2;
+  string dialogue_responder_reference = 3;
+  int32 target = 4;
+  bytes content = 5;
+}
+
+message Message {
+  oneof message {
+    google.protobuf.Struct body = 1;
+    DialogueMessage dialogue_message = 2;
+  }
+}
+
+message Envelope{
+  string to = 1;
+  string sender = 2;
+  string protocol_id = 3;
+  bytes message = 4;
+  string uri = 5;
+}
