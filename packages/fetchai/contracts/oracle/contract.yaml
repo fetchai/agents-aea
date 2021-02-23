@@ -16,6 +16,7 @@ class_name: FetchOracleContract
 contract_interface_paths:
   ethereum: build/FetchOracle.json
 dependencies:
-  aea_crypto_ethereum: {}
+  aea_crypto_ethereum:
+    version: <0.2.0,>=0.1.0
   vyper:
     version: <1.0.0,>=0.2.7
