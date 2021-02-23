@@ -456,6 +456,10 @@ jobs:
         tox -e py3.7-cov -- --ignore=tests/test_docs --ignore=tests/test_examples --ignore=tests/test_packages/test_contracts --ignore=tests/test_packages/test_skills_integration --ignore=plugins -m 'not unstable'
         tox -e plugins-py3.7-cov -- --cov-append -m 'not unstable'
       continue-on-error: true
+    - name: Coverage report
+      run: |
+        coverage xml
+        coverage report
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
