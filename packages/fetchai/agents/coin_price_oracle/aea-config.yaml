@@ -32,6 +32,7 @@ default_routing:
   fetchai/ledger_api:0.10.0: fetchai/ledger:0.13.0
   fetchai/prometheus:0.3.0: fetchai/prometheus:0.3.0
 connection_private_key_paths: {}
+dependencies: {}
 private_key_paths: {}
 logging_config:
   disable_existing_loggers: false
