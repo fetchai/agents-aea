@@ -32,9 +32,17 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Any, BinaryIO, Collection, Dict, List, Optional, Tuple, cast
 
-from bech32 import bech32_decode, bech32_encode, convertbits
-from ecdsa import SECP256k1, SigningKey, VerifyingKey
-from ecdsa.util import sigencode_string_canonize
+from bech32 import (  # pylint: disable=wrong-import-order
+    bech32_decode,
+    bech32_encode,
+    convertbits,
+)
+from ecdsa import (  # pylint: disable=wrong-import-order
+    SECP256k1,
+    SigningKey,
+    VerifyingKey,
+)
+from ecdsa.util import sigencode_string_canonize  # pylint: disable=wrong-import-order
 
 from aea.common import Address, JSONLike
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi

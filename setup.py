@@ -36,11 +36,8 @@ def get_all_extras() -> Dict:
         "packaging>=20.3",
     ]
 
-    cli_gui = ["flask", "connexion[swagger-ui]>=2.4.0", *cli_deps]
-
     extras = {
         "cli": cli_deps,
-        "cli_gui": cli_gui,
         "test_tools": cli_deps,
     }
 
