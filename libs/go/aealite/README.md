@@ -6,6 +6,7 @@ AEALite is a lightweight implementation of an AEA library in Golang.
 ## Usage example
 
 ``` golang
+package main
 
 import (
 	"log"
