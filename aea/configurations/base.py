@@ -1304,7 +1304,6 @@ class AgentConfig(PackageConfiguration):
                 "logging_config": self.logging_config,
                 "registry_path": self.registry_path,
                 "component_configurations": self.component_configurations_json(),
-                "dependencies": self.dependencies,
             }
         )  # type: Dict[str, Any]
 
@@ -1336,7 +1335,8 @@ class AgentConfig(PackageConfiguration):
             config["data_dir"] = self.data_dir
         if self.currency_denominations != {}:
             config["currency_denominations"] = self.currency_denominations
-
+        if self.dependencies != {}:
+            config["dependencies"] = dependencies_to_json(self.dependencies)
         return config
 
     @classmethod
@@ -1385,7 +1385,7 @@ class AgentConfig(PackageConfiguration):
 
         agent_config = instance
 
-        #  parse private keys
+        # Parse private keys
         for crypto_id, path in obj.get("private_key_paths", {}).items():
             agent_config.private_key_paths.create(crypto_id, path)
 

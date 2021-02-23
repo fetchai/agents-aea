@@ -16,8 +16,7 @@
     "contracts",
     "default_connection",
     "protocols",
-    "skills",
-    "dependencies"
+    "skills"
   ],
   "properties": {
     "aea_version": {
