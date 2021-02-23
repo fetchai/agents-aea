@@ -42,8 +42,6 @@ from aea.mail.base import Envelope
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p")
 
-LIBP2P_NODE_MODULE = str(os.path.abspath(os.path.dirname(__file__)))
-
 LIBP2P_NODE_MODULE_NAME = "libp2p_node"
 
 if platform.system() == "Windows":  # pragma: nocover

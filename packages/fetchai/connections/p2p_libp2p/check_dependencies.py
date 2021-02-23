@@ -28,6 +28,7 @@ import sys
 import tempfile
 from distutils.dir_util import copy_tree
 from itertools import islice
+from pathlib import Path
 from subprocess import Popen, TimeoutExpired  # nosec
 from typing import Iterable, List, Optional, Pattern, Tuple
 
@@ -39,7 +40,6 @@ try:
     # pylint: disable=unused-import,ungrouped-imports
     from .connection import (  # type: ignore
         LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT,
-        LIBP2P_NODE_MODULE,
         LIBP2P_NODE_MODULE_NAME,
     )
 except ImportError:  # pragma: nocover
@@ -47,7 +47,6 @@ except ImportError:  # pragma: nocover
     # pylint: disable=unused-import,ungrouped-imports
     from connection import (  # type: ignore
         LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT,
-        LIBP2P_NODE_MODULE,
         LIBP2P_NODE_MODULE_NAME,
     )
 
@@ -217,8 +216,11 @@ def _golang_module_build(
 
 def build_node(build_dir: str) -> None:
     """Build node placed inside build_dir."""
+    path = str(os.path.abspath(os.path.dirname(__file__)))
+    path = str(Path(path).parent.parent.parent.parent)
+    source_code_dir = str(Path(path, "libs/go/libp2p_node"))
     with tempfile.TemporaryDirectory() as dirname:
-        copy_tree(LIBP2P_NODE_MODULE, dirname)
+        copy_tree(source_code_dir, dirname)
         err_str = _golang_module_build(dirname)
         if err_str:  # pragma: nocover
             raise Exception(f"Node build failed: {err_str}")
