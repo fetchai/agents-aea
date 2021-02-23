@@ -126,12 +126,12 @@ new_env: clean
 	then\
 		pipenv --rm;\
 		pipenv --python 3.7;\
-	    pipenv install --dev --skip-lock;\
-	    pipenv run pip uninstall typing -y;\
-	    pipenv run pip install -e .[all];\
-    	pipenv run pip install --no-deps file:plugins/aea-crypto-ethereum;\
-    	pipenv run pip install --no-deps file:plugins/aea-crypto-cosmos;\
-    	pipenv run pip install --no-deps file:plugins/aea-crypto-fetchai;\
+		pipenv install --dev --skip-lock;\
+		pipenv run pip uninstall typing -y;\
+		pipenv run pip install -e .[all];\
+		pipenv run pip install --no-deps file:plugins/aea-crypto-ethereum;\
+		pipenv run pip install --no-deps file:plugins/aea-crypto-cosmos;\
+		pipenv run pip install --no-deps file:plugins/aea-crypto-fetchai;\
 		echo "Enter virtual environment with all development dependencies now: 'pipenv shell'.";\
 	else\
 		echo "In a virtual environment! Exit first: 'exit'.";\
