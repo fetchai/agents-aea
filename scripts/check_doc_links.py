@@ -43,6 +43,15 @@ WHITELIST_URL_TO_CODE = {
     "https://colab.research.google.com": 403,
 }
 
+IGNORE = {
+    "https://pypi.org/project/aea-crypto-fetchai/",
+    "https://pypi.org/project/aea-crypto-ethereum/",
+    "https://pypi.org/project/aea-crypto-cosmos/",
+    "https://github.com/fetchai/agents-aea/tree/main/plugins/aea-crypto-fetchai",
+    "https://github.com/fetchai/agents-aea/tree/main/plugins/aea-crypto-ethereum",
+    "https://github.com/fetchai/agents-aea/tree/main/plugins/aea-crypto-cosmos",
+}
+
 
 def is_url_reachable(url: str) -> bool:
     """
@@ -52,6 +61,8 @@ def is_url_reachable(url: str) -> bool:
     :return: bool
     """
     if url.startswith("http://localhost") or url.startswith("http://127.0.0.1"):
+        return True
+    if url in IGNORE:
         return True
     try:
         response = requests.head(url, timeout=3)
