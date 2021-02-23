@@ -47,6 +47,7 @@ def _import_module_mock(arg):
 
 # we mock only if the import is from dummy import path like "some.dotted.path".
 @mock.patch("importlib.import_module", side_effect=_import_module_mock)
+@mock.patch("setuptools.setup")
 class TestLedgerIntegration(BasePythonMarkdownDocs):
     """Test the ledger integration code snippets."""
 
