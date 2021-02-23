@@ -38,7 +38,7 @@ logging_config:                                 # The logging configurations the
   disable_existing_loggers: false
   version: 1
 registry_path: ../packages                      # The path to the local package registry (must be a directory path and point to a directory called `packages`)
-dependencies: {}                                # The python dependencies the package relies on.
+dependencies: {}                                # The python dependencies the AEA relies on (e.g. plugins).
 ```
 
 The `aea-config.yaml` can be extended with a number of optional fields:
