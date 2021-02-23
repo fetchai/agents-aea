@@ -19,6 +19,11 @@ Copy the packages directory into your local working directory:
 svn export https://github.com/fetchai/agents-aea.git/trunk/packages
 ```
 
+Also, install `aea-crypto-fetchai` plug-in:
+```bash
+pip install aea-crypto-fetchai
+```
+
 ## Demo instructions
 
 If you want to create the weather station AEA step by step you can follow this guide <a href='/weather-skills/'>here</a>

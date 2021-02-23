@@ -1304,7 +1304,7 @@ class AgentConfig(PackageConfiguration):
                 "logging_config": self.logging_config,
                 "registry_path": self.registry_path,
                 "component_configurations": self.component_configurations_json(),
-                "dependencies": dependencies_to_json(self.dependencies)
+                "dependencies": dependencies_to_json(self.dependencies),
             }
         )  # type: Dict[str, Any]
 

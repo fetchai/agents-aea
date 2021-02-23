@@ -1,6 +1,9 @@
 ``` bash
 svn export https://github.com/fetchai/agents-aea.git/trunk/packages
 ```
+```bash
+pip install aea-crypto-fetchai
+```
 ``` bash
 aea fetch fetchai/weather_station:0.22.0
 cd weather_station
