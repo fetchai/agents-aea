@@ -16,7 +16,8 @@
     "contracts",
     "default_connection",
     "protocols",
-    "skills"
+    "skills",
+    "dependencies"
   ],
   "properties": {
     "aea_version": {
@@ -151,6 +152,9 @@
     },
     "data_dir": {
       "type": "string"
+    },
+    "dependencies": {
+      "$ref": "definitions.json#/definitions/dependencies"
     }
   }
 }

@@ -24,3 +24,4 @@ logging_config:
 private_key_paths: {}
 registry_path: ../../packages
 data_dir: .
+dependencies: {}
