@@ -28,9 +28,13 @@ default_routing:
   fetchai/http:0.12.0: fetchai/http_client:0.17.0
   fetchai/ledger_api:0.10.0: fetchai/ledger:0.13.0
 connection_private_key_paths: {}
-dependencies: {}
 private_key_paths: {}
 logging_config:
   disable_existing_loggers: false
   version: 1
 registry_path: ../packages
+dependencies:
+  aea-crypto-ethereum:
+    version: <0.2.0,>=0.1.0
+  aea-crypto-fetchai:
+    version: <0.2.0,>=0.1.0

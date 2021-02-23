@@ -20,9 +20,11 @@ default_connection: fetchai/http_client:0.17.0
 default_ledger: fetchai
 default_routing: {}
 connection_private_key_paths: {}
-dependencies: {}
 private_key_paths: {}
 logging_config:
   disable_existing_loggers: false
   version: 1
 registry_path: ../packages
+dependencies:
+  aea-crypto-fetchai:
+    version: <0.2.0,>=0.1.0

@@ -9,6 +9,11 @@ Get the packages directory from the AEA repository:
 svn export https://github.com/fetchai/agents-aea.git/trunk/packages
 ```
 
+Also, install `aea-crypto-fetchai` plug-in:
+```bash
+pip install aea-crypto-fetchai
+```
+
 ## Imports
 
 First, import the necessary common Python libraries and classes.

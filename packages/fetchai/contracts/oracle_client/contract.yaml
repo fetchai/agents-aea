@@ -16,5 +16,5 @@ class_name: FetchOracleClientContract
 contract_interface_paths:
   ethereum: build/FetchOracleTestClient.json
 dependencies:
-  aea_crypto_ethereum:
+  aea-crypto-ethereum:
     version: <0.2.0,>=0.1.0

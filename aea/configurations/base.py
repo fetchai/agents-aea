@@ -1304,6 +1304,7 @@ class AgentConfig(PackageConfiguration):
                 "logging_config": self.logging_config,
                 "registry_path": self.registry_path,
                 "component_configurations": self.component_configurations_json(),
+                "dependencies": dependencies_to_json(self.dependencies),
             }
         )  # type: Dict[str, Any]
 
@@ -1335,8 +1336,7 @@ class AgentConfig(PackageConfiguration):
             config["data_dir"] = self.data_dir
         if self.currency_denominations != {}:
             config["currency_denominations"] = self.currency_denominations
-        if self.dependencies != {}:
-            config["dependencies"] = dependencies_to_json(self.dependencies)
+
         return config
 
     @classmethod
