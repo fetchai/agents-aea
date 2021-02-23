@@ -418,6 +418,10 @@ class TestLibp2pConnectionPublicDHTRelayAEACli(AEATestCaseEmpty):
     @libp2p_log_on_failure
     def test_connectivity(self):
         """Test connectivity."""
+        shutil.copytree(
+            os.path.join(self.old_cwd, "libs", "go", "libp2p_node"),
+            os.path.join(self.t, "libp2p_node"),
+        )
         self.log_files = []
         self.conn_key_file = os.path.join(
             os.path.abspath(os.getcwd()), "./conn_key.txt"

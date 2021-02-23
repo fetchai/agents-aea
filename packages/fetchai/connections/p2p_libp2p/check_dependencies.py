@@ -33,6 +33,7 @@ from subprocess import Popen, TimeoutExpired  # nosec
 from typing import Iterable, List, Optional, Pattern, Tuple
 
 from aea.helpers.base import ensure_dir
+from aea.helpers.github import download as download_from_github
 
 
 try:
@@ -214,13 +215,42 @@ def _golang_module_build(
     return None
 
 
+def search_for_source_code() -> str:
+    """
+    Search for the source directory.
+
+    We search along the whole path to the file, looking into potential directories along it.
+    """
+    path = str(os.path.abspath(os.path.dirname(__file__)))
+    FILE = "libp2p_node.go"
+    POTENTIAL_DIRS = [str(Path("libs", "go", "libp2p_node")), "libp2p_node"]
+    source_code_dir = ""
+    is_root = False
+    done = False
+    while not is_root and not done:
+        path = str(Path(path).parent)
+        for dir_ in POTENTIAL_DIRS:
+            full_path = str(Path(path, dir_, FILE))
+            if os.path.isfile(full_path):
+                source_code_dir = str(Path(path, dir_))
+                done = True
+        is_root = path == "."
+    return source_code_dir
+
+
 def build_node(build_dir: str) -> None:
     """Build node placed inside build_dir."""
-    path = str(os.path.abspath(os.path.dirname(__file__)))
-    path = str(Path(path).parent.parent.parent.parent)
-    source_code_dir = str(Path(path, "libs/go/libp2p_node"))
+    GITHUB_URL = "https://github.com/fetchai/agents-aea/tree/main/libs/go/libp2p_node"
+    source_code_dir = search_for_source_code()
     with tempfile.TemporaryDirectory() as dirname:
-        copy_tree(source_code_dir, dirname)
+        if source_code_dir == "":
+            downloaded_files = download_from_github(GITHUB_URL, output_dir=str(dirname))
+            if downloaded_files == 0:
+                raise Exception(
+                    f"{LIBP2P_NODE_MODULE_NAME} build unsuccessful! Could not find source code."
+                )
+        else:
+            copy_tree(source_code_dir, dirname)
         err_str = _golang_module_build(dirname)
         if err_str:  # pragma: nocover
             raise Exception(f"Node build failed: {err_str}")

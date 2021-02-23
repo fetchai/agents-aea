@@ -21,6 +21,7 @@
 
 import json
 import os
+import shutil
 
 from aea_crypto_ethereum.ethereum import EthereumCrypto as Ethereum
 
@@ -49,6 +50,10 @@ class TestP2PLibp2pConnectionAEARunningDefaultConfigNode(AEATestCaseEmpty):
         super(TestP2PLibp2pConnectionAEARunningDefaultConfigNode, cls).setup_class()
         cls.conn_key_file = os.path.join(os.path.abspath(os.getcwd()), "./conn_key.txt")
         cls.log_files = []
+        shutil.copytree(
+            os.path.join(cls.old_cwd, "libs", "go", "libp2p_node"),
+            os.path.join(cls.t, "libp2p_node"),
+        )
 
     @libp2p_log_on_failure
     def test_agent(self):
@@ -102,6 +107,10 @@ class TestP2PLibp2pConnectionAEARunningEthereumConfigNode(AEATestCaseEmpty):
         super(TestP2PLibp2pConnectionAEARunningEthereumConfigNode, cls).setup_class()
         cls.conn_key_file = os.path.join(os.path.abspath(os.getcwd()), "./conn_key.txt")
         cls.log_files = []
+        shutil.copytree(
+            os.path.join(cls.old_cwd, "libs", "go", "libp2p_node"),
+            os.path.join(cls.t, "libp2p_node"),
+        )
 
     @libp2p_log_on_failure
     def test_agent(self):
@@ -174,6 +183,10 @@ class TestP2PLibp2pConnectionAEARunningFullNode(AEATestCaseEmpty):
         super(TestP2PLibp2pConnectionAEARunningFullNode, cls).setup_class()
         cls.conn_key_file = os.path.join(os.path.abspath(os.getcwd()), "./conn_key.txt")
         cls.log_files = []
+        shutil.copytree(
+            os.path.join(cls.old_cwd, "libs", "go", "libp2p_node"),
+            os.path.join(cls.t, "libp2p_node"),
+        )
 
     @libp2p_log_on_failure
     def test_agent(self):

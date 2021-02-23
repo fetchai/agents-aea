@@ -10,7 +10,7 @@ aea_version: '>=0.10.0, <0.11.0'
 fingerprint:
   README.md: QmdndN3dGED4R1sRGZQDHexumriqZeryreMDf64vrCTXvj
   __init__.py: QmYQuLNyQ8WTjgRYAoKAzoJEb7ocKXvM2hTyK4hsGch5D6
-  check_dependencies.py: QmevdXtnybPzHNsm5M7DZPbLuaBv5LBNY43MLA7tuxTwvh
+  check_dependencies.py: QmcCabUXybT7oZ1QkoWLGLdcg6ARxwLxSgDL9fbDEZRGKp
   connection.py: QmbNXvaKVVx7ybShYb1cgVnVo2RsSuHYXvAux36JTx7jam
 fingerprint_ignore_patterns: []
 build_entrypoint: check_dependencies.py
