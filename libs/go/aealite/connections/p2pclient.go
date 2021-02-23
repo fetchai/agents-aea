@@ -18,14 +18,18 @@
 * ------------------------------------------------------------------------------
  */
 
-package aea
+package connections
 
 import (
 	"errors"
+	"log"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
+	protocols "aealite/protocols"
+	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 	proto "google.golang.org/protobuf/proto"
 )
@@ -39,45 +43,68 @@ var logger zerolog.Logger = zerolog.New(zerolog.ConsoleWriter{
 	Str("package", "P2PClientApi").
 	Logger()
 
-type Socket interface {
-	Connect() error
-	Read() ([]byte, error)
-	Write(data []byte) error
-	Close() error
+type P2PClientConfig struct {
+	host string
+	port uint16
 }
 
 type P2PClientApi struct {
 	client_config *P2PClientConfig
-	agent_record  *AgentRecord
+	agent_record  *protocols.AgentRecord
 
 	socket    Socket
-	out_queue chan *Envelope
+	out_queue chan *protocols.Envelope
 
-	closing   bool
-	connected bool
+	closing     bool
+	connected   bool
+	initialised bool
 }
 
-func (client *P2PClientApi) Init() error {
+func (client *P2PClientApi) InitFromEnv() error {
 	zerolog.TimeFieldFormat = time.RFC3339Nano
 
 	if client.connected {
 		return nil
 	}
 	client.connected = false
+	client.initialised = false
+
+	env_file := os.Args[1]
+	logger.Debug().Msgf("env_file: %s", env_file)
+	err := godotenv.Overload(env_file)
+	if err != nil {
+		log.Fatal("Error loading env file")
+	}
+	address := os.Getenv("AEA_ADDRESS")
+	public_key := os.Getenv("AEA_PUBLIC_KEY")
+	agent_record := &protocols.AgentRecord{Address: address, PublicKey: public_key}
+	agent_record.ServiceId = os.Getenv("AEA_P2P_POR_SERVICE_ID")
+	agent_record.LedgerId = os.Getenv("AEA_P2P_POR_LEDGER_ID")
+	agent_record.PeerPublicKey = os.Getenv("AEA_P2P_POR_PEER_PUBKEY")
+	agent_record.Signature = os.Getenv("AEA_P2P_POR_SIGNATURE")
+	client.agent_record = agent_record
+	host := os.Getenv("AEA_P2P_DELEGATE_HOST")
+	port := os.Getenv("AEA_P2P_DELEGATE_PORT")
+	port_conv, err := strconv.ParseUint(port, 10, 16)
+	if err != nil {
+		panic(err)
+	}
+	client.client_config = &P2PClientConfig{host: host, port: uint16(port_conv)}
 
 	client.socket = NewSocket(client.client_config.host, client.client_config.port)
+	client.initialised = true
 	return nil
 }
 
-func (client *P2PClientApi) Put(envelope *Envelope) error {
+func (client *P2PClientApi) Put(envelope *protocols.Envelope) error {
 	return write_envelope(client.socket, envelope)
 }
 
-func (client *P2PClientApi) Get() *Envelope {
+func (client *P2PClientApi) Get() *protocols.Envelope {
 	return <-client.out_queue
 }
 
-func (client *P2PClientApi) Queue() <-chan *Envelope {
+func (client *P2PClientApi) Queue() <-chan *protocols.Envelope {
 	return client.out_queue
 }
 
@@ -85,11 +112,21 @@ func (client *P2PClientApi) Connected() bool {
 	return client.connected
 }
 
-func (client *P2PClientApi) Stop() {
+func (client *P2PClientApi) Initialised() bool {
+	return client.initialised
+}
+
+func (client *P2PClientApi) Disconnect() error {
 	client.closing = true
-	client.stop()
+	err := client.stop()
+	if err != nil {
+		logger.Error().Str("err", err.Error()).
+			Msg("error while disconnecting P2PClientApi")
+		return err
+	}
 	close(client.out_queue)
 	client.connected = false
+	return nil
 }
 
 func (client *P2PClientApi) Connect() error {
@@ -104,13 +141,17 @@ func (client *P2PClientApi) Connect() error {
 	if err != nil {
 		logger.Error().Str("err", err.Error()).
 			Msg("while registering to p2p node")
-		client.stop()
+		err_ := client.stop()
+		if err_ != nil {
+			logger.Error().Str("err", err_.Error()).
+				Msg("while handling other error")
+		}
 		return err
 	}
 	logger.Info().Msg("successfully registered on node")
 
 	client.closing = false
-	client.out_queue = make(chan *Envelope, 10)
+	client.out_queue = make(chan *protocols.Envelope, 10)
 	go client.listen_for_envelopes()
 	logger.Info().Msg("connected to p2p node")
 
@@ -120,10 +161,10 @@ func (client *P2PClientApi) Connect() error {
 }
 
 func (client *P2PClientApi) register() error {
-	registration := &Register{Record: client.agent_record}
-	msg := &AcnMessage{
-		Version: CurrentVersion,
-		Payload: &AcnMessage_Register{Register: registration},
+	registration := &protocols.Register{Record: client.agent_record}
+	msg := &protocols.AcnMessage{
+		Version: protocols.ACNProtocolVersion,
+		Payload: &protocols.AcnMessage_Register{Register: registration},
 	}
 
 	buf, err := proto.Marshal(msg)
@@ -142,7 +183,7 @@ func (client *P2PClientApi) register() error {
 		logger.Error().Str("err", err.Error()).Msg("while receiving data")
 		return err
 	}
-	response := &AcnMessage{}
+	response := &protocols.AcnMessage{}
 	err = proto.Unmarshal(data, response)
 	if err != nil {
 		logger.Error().Str("err", err.Error()).Msgf("while deserializing response msg")
@@ -150,16 +191,16 @@ func (client *P2PClientApi) register() error {
 	}
 
 	// Get Status message
-	var status *Status
+	var status *protocols.Status
 	switch pl := response.Payload.(type) {
-	case *AcnMessage_Status:
+	case *protocols.AcnMessage_Status:
 		status = pl.Status
 	default:
 		logger.Error().Str("err", err.Error()).Msgf("response not a status msg")
 		return err
 	}
 
-	if status.Code != Status_SUCCESS {
+	if status.Code != protocols.Status_SUCCESS {
 		return errors.New("as registration failed: " + strings.Join(status.Msgs, ":"))
 	}
 	return nil
@@ -172,7 +213,10 @@ func (client *P2PClientApi) listen_for_envelopes() {
 			logger.Error().Str("err", err.Error()).Msg("while receiving envelope")
 			logger.Info().Msg("disconnecting")
 			if !client.closing {
-				client.stop()
+				err_ := client.stop()
+				if err_ != nil {
+					logger.Error().Str("err", err_.Error()).Msg("while handling other error")
+				}
 			}
 			return
 		}
@@ -190,11 +234,11 @@ func (client *P2PClientApi) listen_for_envelopes() {
 	}
 }
 
-func (client *P2PClientApi) stop() {
-	client.socket.Close()
+func (client *P2PClientApi) stop() error {
+	return client.socket.Disconnect()
 }
 
-func write_envelope(socket Socket, envelope *Envelope) error {
+func write_envelope(socket Socket, envelope *protocols.Envelope) error {
 	data, err := proto.Marshal(envelope)
 	if err != nil {
 		logger.Error().Str("err", err.Error()).Msgf("while serializing envelope: %s", envelope)
@@ -203,8 +247,8 @@ func write_envelope(socket Socket, envelope *Envelope) error {
 	return socket.Write(data)
 }
 
-func read_envelope(socket Socket) (*Envelope, error) {
-	envelope := &Envelope{}
+func read_envelope(socket Socket) (*protocols.Envelope, error) {
+	envelope := &protocols.Envelope{}
 	data, err := socket.Read()
 	if err != nil {
 		logger.Error().Str("err", err.Error()).Msg("while receiving data")

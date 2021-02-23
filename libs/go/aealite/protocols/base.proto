@@ -1,6 +1,8 @@
 syntax = "proto3";
 
-package aea;
+package aea.base.v0_1_0;
+
+option go_package = "aealite/protocols";
 
 import "google/protobuf/struct.proto";
 

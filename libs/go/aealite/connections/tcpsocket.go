@@ -18,7 +18,7 @@
 * ------------------------------------------------------------------------------
  */
 
-package aea
+package connections
 
 import (
 	"encoding/binary"
@@ -66,7 +66,7 @@ func (sock *TCPSocketChannel) Write(data []byte) error {
 	return err
 }
 
-func (sock *TCPSocketChannel) Close() error {
+func (sock *TCPSocketChannel) Disconnect() error {
 	return sock.conn.Close()
 }
 

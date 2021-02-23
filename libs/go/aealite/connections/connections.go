@@ -18,21 +18,24 @@
 * ------------------------------------------------------------------------------
  */
 
-package aea
+package connections
 
-const (
-	DefaultLedger  = "fetchai"
-	CurrentVersion = "0.1.0"
+import (
+	protocols "aealite/protocols"
 )
 
-type P2PClientConfig struct {
-	host string
-	port uint16
+type Socket interface {
+	Connect() error
+	Read() ([]byte, error)
+	Write(data []byte) error
+	Disconnect() error
 }
 
-type AgentIdentity struct {
-	LedgerId   string
-	Address    string
-	PublicKey  string
-	PrivateKey string
+type Connection interface {
+	InitFromEnv() error
+	Connect() error
+	Get() *protocols.Envelope
+	Put(envelope *protocols.Envelope) error
+	Disconnect() error
+	Initialised() bool
 }
