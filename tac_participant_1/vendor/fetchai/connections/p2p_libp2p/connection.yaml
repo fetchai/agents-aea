@@ -1,0 +1,62 @@
+name: p2p_libp2p
+author: fetchai
+version: 0.15.0
+type: connection
+description: The p2p libp2p connection implements an interface to standalone golang
+  go-libp2p node that can exchange aea envelopes with other agents connected to the
+  same DHT.
+license: Apache-2.0
+aea_version: '>=0.10.0, <0.11.0'
+fingerprint:
+  README.md: QmYZ6pgwSM6Ch1Zaty2c6fJomPYNaqGFacKirog3H19QzT
+  __init__.py: QmYQuLNyQ8WTjgRYAoKAzoJEb7ocKXvM2hTyK4hsGch5D6
+  aea/api.go: QmWNxQQyiaNer92gczQv81efwZYmJMuXCsQWkSt5rdDg5P
+  aea/envelope.pb.go: QmRfUNGpCeVJfsW3H1MzCN4pwDWgumfyWufVFp6xvUjjug
+  aea/envelope.proto: QmVuvesmfgzj5aKnbFoCocoGEv3T9MR7u6KWn7CT5yfjGi
+  aea/pipe_unix.go: QmSzbAexrSUSA9ZE6VT6MmcWF5MhEcmceQjAbnfRoK7Ruv
+  aea/pipe_windows.go: QmdYpfjgdgFbA6Pothg65NYM45ubfpZeKr8cVQoqbFzgUK
+  check_dependencies.py: QmVFwyoFn8Xmi428GxENASE8o1oALANaXRY3Uwb3TQ2EqH
+  connection.py: QmNbKsh7hL9yDYyfGQ3RwUM5Av7BzNqsnt7repFsFqL3Th
+  dht/dhtclient/dhtclient.go: QmNTFZHMRVNqD8RgWSLdW9jQYLDY6dvm9JennNYmnRkfXD
+  dht/dhtclient/dhtclient_test.go: QmS9SiLAojXYobqV9m5yeRpyPzt6JcSbQD78RNvSp6LPx6
+  dht/dhtclient/options.go: QmaoJiavHescgx98inQjVUipPFRvcFFrodrScZ3fvrXJ4z
+  dht/dhtnode/dhtnode.go: QmbyhgbCSAbQ1QsDw7FM7Nt5sZcvhbupA1jv5faxutbV7N
+  dht/dhtnode/message.pb.go: QmYT92e2BzAqS4VHmvDeVPs2ymToysmT9rtfwMBMtRg8nn
+  dht/dhtnode/message.proto: QmbgFcGVbxx4CP53cefW7JhXLYha6meSYqZ9hZJgBpcinF
+  dht/dhtnode/streams.go: Qmc2JcyiU4wHsgDj6aUunMAp4c5yMzo2ixeqRZHSW5PVwo
+  dht/dhtnode/utils.go: QmcHGWgCXh1mtZCL9S9yQ2qjgKB2AbsYiG5sajrSBjCGuF
+  dht/dhtpeer/benchmarks_test.go: QmX2KWsaFaVd9KGjvgYNgkLtgnu1CUhBPtTe9abKYndq4C
+  dht/dhtpeer/dhtpeer.go: QmSpGiD8qjdnup8Ad4rMh8Gs1rrcndygHNpFKB7GESCgJo
+  dht/dhtpeer/dhtpeer_test.go: QmSZh5hmzVHuYDcCXX7knEXveK4ykcZ37W1dKTBcxff3yR
+  dht/dhtpeer/options.go: QmRbB1dnA5TEeJZQpKBJQoxFNHSPLRiEtwtkK6ZJDZdjAX
+  dht/dhttests/dhttests.go: QmWTwAqXy4xPBWx49dvg91pBfaeyh79bgbh4yYc3u6kGhg
+  dht/monitoring/file.go: QmfSw8prwiuxqcaTrEkWAL4dZYi7EzWGA4ZCgPgQ99ZnGN
+  dht/monitoring/prometheus.go: QmQvXjEozVPMvRjda5WGRAU5b7cfUcRZUACQkTESG7Aewu
+  dht/monitoring/service.go: QmT47y2LHZECYcoE2uJ9QCGh3Kq8ePhYedo8dQE7X7v6YV
+  go.mod: QmT2LQXkSen6Th4QLS2RU3tRVxJSLjdZTxRULUcnQFXfEL
+  go.sum: QmZc6oiDqQhB6ZKVojN26JxoTNH1QetyuYd9zjSksQnTFt
+  libp2p_node.go: QmZFR2bdi1EjFmPkjwtYeA19kSQKPtcGoNVafQnZRWotaN
+  utils/utils.go: QmYRdoKyZTDy4j5RwePioxndzxNzskQghzsv4Q6Rfo5G5H
+fingerprint_ignore_patterns: []
+build_entrypoint: check_dependencies.py
+connections: []
+protocols: []
+class_name: P2PLibp2pConnection
+config:
+  delegate_uri: 127.0.0.1:11000
+  entry_peers: []
+  ledger_id: fetchai
+  local_uri: 127.0.0.1:9000
+  log_file: libp2p_node.log
+  public_uri: 127.0.0.1:9000
+cert_requests:
+- identifier: acn
+  ledger_id: fetchai
+  not_after: '2022-01-01'
+  not_before: '2021-01-01'
+  public_key: fetchai
+  save_path: .certs/conn_cert.txt
+excluded_protocols: []
+restricted_to_protocols: []
+dependencies: {}
+is_abstract: false

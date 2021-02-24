@@ -1,0 +1,27 @@
+name: erc1155
+author: fetchai
+version: 0.16.0
+type: contract
+description: The erc1155 contract implements an ERC1155 contract package.
+license: Apache-2.0
+aea_version: '>=0.10.0, <0.11.0'
+fingerprint:
+  README.md: QmbM3Jrh5fFuRR3rfyF3FxiriwGGJ2Q6Bob7LrVQWcHscu
+  __init__.py: QmVadErLF2u6xuTP4tnTGcMCvhh34V9VDZm53r7Z4Uts9Z
+  build/Migrations.json: QmfFYYWoq1L1Ni6YPBWWoRPvCZKBLZ7qzN3UDX537mCeuE
+  build/erc1155.json: Qma5n7au2NDCg1nLwYfYnmFNwWChFuXtu65w5DV7wAZRvw
+  build/erc1155.wasm: QmdVxYWSKWoNQV5E8mPXkXn9TJM5AnNme6tsKDPWHp7kQD
+  contract.py: QmVegcgReJVH2S369GjMRrarBRp1ukATXHFWjnZFsW6thA
+  contracts/Migrations.sol: QmbW34mYrj3uLteyHf3S46pnp9bnwovtCXHbdBHfzMkSZx
+  contracts/erc1155.vy: QmXwob8G1uX7fDvtuuKW139LALWtQmGw2vvaTRBVAWRxTx
+  migrations/1_initial_migration.js: QmcxaWKQ2yPkQBmnpXmcuxPZQUMuUudmPmX3We8Z9vtAf7
+  migrations/2_deploy_contracts.js: QmeLraUZBgtJK5KAhsf4Bb5S9amcYugfMJsjbhZgfmEfuP
+fingerprint_ignore_patterns: []
+class_name: ERC1155Contract
+contract_interface_paths:
+  cosmos: build/erc1155.wasm
+  ethereum: build/erc1155.json
+  fetchai: build/erc1155.wasm
+dependencies:
+  vyper:
+    version: ==0.1.0b12

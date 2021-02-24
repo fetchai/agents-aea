@@ -1,0 +1,78 @@
+name: tac_control
+author: fetchai
+version: 0.16.0
+type: skill
+description: The tac control skill implements the logic for an AEA to control an instance
+  of the TAC.
+license: Apache-2.0
+aea_version: '>=0.10.0, <0.11.0'
+fingerprint:
+  README.md: QmPakq2qYHCenyWKfqQHRLWdF7uo6eG24GTprsBfrkyny2
+  __init__.py: QmU8CpgDfC656T6gBxPFtm78WAfdmDqDVheygmZmg6ohYP
+  behaviours.py: QmXo9VLXrCYSifskLkoLayDu6bvbUPmfpDLFmBq27gz6Zk
+  dialogues.py: QmWtk1w7Guw4auZaHUzr5trznBfhMGJKkwfguKBLZLLnvM
+  game.py: QmfLo38zSkPgwD115waFvXhEhuY3oVTYAZFGb4492o2XN8
+  handlers.py: Qmedq4uRwnFvp8qo9y2tiPAxqknQS7WC8nqy89LEvv2ARw
+  helpers.py: QmdgSxjFPGr19Ptw4gLKLD4mvgZurzitwF9MzTNy1cZF2P
+  parameters.py: Qmb6rSHw8d4gxH3rMFuRqajW5W8NnjnWTwrmBSuNyZkK9w
+fingerprint_ignore_patterns: []
+connections: []
+contracts:
+- fetchai/erc1155:0.16.0
+protocols:
+- fetchai/default:0.12.0
+- fetchai/oef_search:0.13.0
+- fetchai/tac:0.13.0
+skills: []
+behaviours:
+  tac:
+    args: {}
+    class_name: TacBehaviour
+handlers:
+  oef:
+    args: {}
+    class_name: OefSearchHandler
+  tac:
+    args: {}
+    class_name: TacHandler
+models:
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
+  game:
+    args: {}
+    class_name: Game
+  oef_search_dialogues:
+    args: {}
+    class_name: OefSearchDialogues
+  parameters:
+    args:
+      base_good_endowment: 2
+      competition_timeout: 180
+      currency_ids: []
+      good_ids: []
+      inactivity_timeout: 60
+      item_setup_timeout: 0
+      location:
+        latitude: 51.5194
+        longitude: 0.127
+      lower_bound_factor: 1
+      min_nb_agents: 2
+      money_endowment: 2000000
+      nb_currencies: 1
+      nb_goods: 9
+      registration_start_time: 01 01 2020  00:01
+      registration_timeout: 60
+      service_data:
+        key: tac
+        value: v1
+      tx_fee: 1
+      upper_bound_factor: 1
+      whitelist: []
+    class_name: Parameters
+  tac_dialogues:
+    args: {}
+    class_name: TacDialogues
+dependencies:
+  numpy: {}
+is_abstract: false

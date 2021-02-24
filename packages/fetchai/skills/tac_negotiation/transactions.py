@@ -263,7 +263,7 @@ class Transactions(Model):
 
     def ownership_state_after_locks(
         self, is_seller: bool
-    ) -> OwnershipState:  # pragma: no cover
+    ) -> OwnershipState:
         """
         Apply all the locks to the current ownership state of the agent.
 

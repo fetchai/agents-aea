@@ -1,0 +1,35 @@
+name: ledger
+author: fetchai
+version: 0.13.0
+type: connection
+description: A connection to interact with any ledger API and contract API.
+license: Apache-2.0
+aea_version: '>=0.10.0, <0.11.0'
+fingerprint:
+  README.md: QmauUFgWKe2d3duCD7WXMaTWHpHHcxJC2F8bXSubWjNZoH
+  __init__.py: QmZvYZ5ECcWwqiNGh8qNTg735wu51HqaLxTSifUxkQ4KGj
+  base.py: QmaaHNFo54WR31pXoNfa9uUwVVoUJq7tErHVGKteYq9VwP
+  connection.py: QmcGNhecKgZeVuG8KGuyb21Uwj6qc57cquSmtf5TSK5m7c
+  contract_dispatcher.py: QmXBc36BQxkAtoynGJfnrdxL9XPx9Y8VKpnbdPP1tWbnDC
+  ledger_dispatcher.py: QmdDcNxESF8DFx2GpiCTTq8XfzT9BYDuAofAcMwtuqP4U1
+fingerprint_ignore_patterns: []
+connections: []
+protocols:
+- fetchai/contract_api:0.11.0
+- fetchai/ledger_api:0.10.0
+class_name: LedgerConnection
+config:
+  ledger_apis:
+    ethereum:
+      address: http://127.0.0.1:8545
+      gas_price: 50
+    fetchai:
+      address: https://rest-agent-land.fetch.ai:443
+      denom: atestfet
+      chain_id: agent-land
+excluded_protocols: []
+restricted_to_protocols:
+- fetchai/contract_api:0.11.0
+- fetchai/ledger_api:0.10.0
+dependencies: {}
+is_abstract: false

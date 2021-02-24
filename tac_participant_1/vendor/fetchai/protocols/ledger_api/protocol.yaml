@@ -1,0 +1,20 @@
+name: ledger_api
+author: fetchai
+version: 0.10.0
+protocol_specification_id: fetchai/ledger_api:0.1.0
+type: protocol
+description: A protocol for ledger APIs requests and responses.
+license: Apache-2.0
+aea_version: '>=0.10.0, <0.11.0'
+fingerprint:
+  README.md: Qmdy7giRsmfizsirx9G8YFVR5g9HVDoAxuHrypsebNP8oG
+  __init__.py: QmRWoVtn2moDouQ7gsdMKxNp3Pi5Z2EFLzhCkvowLZgt6i
+  custom_types.py: Qmdfsci1kM664Wcaw7g6JjhLfY71hsq2fVLG4Z2xb31S7s
+  dialogues.py: QmRKQLnkoJ5PsSoS9r3MCLnQ4E1ordxETkJcgcuXrjSx92
+  ledger_api.proto: QmSdA4Lo2vCrP6vqhLz7Kp7NL9sy6mxPqaq7JFZXaqbvz5
+  ledger_api_pb2.py: QmYmwCDqF8msxXpk6fkj42ACqcgoweY6sFMCgXm5QUDMvh
+  message.py: QmP3qHV9myCYDQ1ftAybGGMW1FE8Udo1VBNZTceRPkk9GL
+  serialization.py: QmefYH5vyu8RJBx1rcAoYgszhc5t3xXuFWEvLQPs1JtKrJ
+fingerprint_ignore_patterns: []
+dependencies:
+  protobuf: {}

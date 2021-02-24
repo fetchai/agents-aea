@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import cast
 from unittest.mock import PropertyMock, patch
 
+from aea.decision_maker.gop import GoalPursuitReadiness, OwnershipState, Preferences
 from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
 from aea.test_tools.test_skill import BaseSkillTestCase
 
@@ -49,13 +50,21 @@ class TestSkillBehaviour(BaseSkillTestCase):
     @classmethod
     def setup(cls):
         """Setup the test class."""
-        super().setup()
+        tac_dm_context_kwargs = {
+            "goal_pursuit_readiness": GoalPursuitReadiness(),
+            "ownership_state": OwnershipState(),
+            "preferences": Preferences(),
+        }
+        super().setup(dm_context_kwargs=tac_dm_context_kwargs)
         cls.tac_negotiation = cast(
             GoodsRegisterAndSearchBehaviour,
             cls._skill.skill_context.behaviours.tac_negotiation,
         )
         cls.oef_search_dialogues = cast(
             OefSearchDialogues, cls._skill.skill_context.oef_search_dialogues
+        )
+        cls.goal_pursuit_readiness = (
+            cls._skill.skill_context.decision_maker_handler_context.goal_pursuit_readiness
         )
         cls.strategy = cast(Strategy, cls._skill.skill_context.strategy)
         cls.logger = cls._skill.skill_context.logger
@@ -93,19 +102,58 @@ class TestSkillBehaviour(BaseSkillTestCase):
         self.assert_quantity_in_outbox(0)
         assert self.skill.skill_context.is_active is False
 
-    def test_register_agent(self):
-        """Test the _register_agent method of the negotiation behaviour."""
+    def test_act_ii(self):
+        """Test the act method of the negotiation behaviour where goal_pursuit_readiness is not ready."""
+        # setup
+        self.skill.skill_context._agent_context._shared_state = {
+            "is_game_finished": False
+        }
+        self.goal_pursuit_readiness._status = GoalPursuitReadiness.Status.NOT_READY
+
+        # operation
+        self.tac_negotiation.act()
+
+        # after
+        self.assert_quantity_in_outbox(0)
+
+    def test_act_iii(self):
+        """Test the act method of the negotiation behaviour where is_registered is False."""
+        # setup
+        self.skill.skill_context._agent_context._shared_state = {
+            "is_game_finished": False
+        }
+        self.goal_pursuit_readiness._status = GoalPursuitReadiness.Status.READY
+
+        searching_for_types = [(True, "sellers"), (False, "buyers")]
+        no_searches = len(searching_for_types)
+
         # operation
         with patch.object(
             self.strategy,
             "get_location_description",
             return_value=self.mocked_description,
         ):
-            with patch.object(self.logger, "log") as mock_logger:
-                self.tac_negotiation._register_agent()
+            with patch.object(
+                self.strategy,
+                "get_register_service_description",
+                return_value=self.mocked_description,
+            ):
+                with patch.object(
+                    self.strategy,
+                    "get_location_and_service_query",
+                    return_value=self.mocked_query,
+                ):
+                    with patch.object(
+                        type(self.strategy),
+                        "searching_for_types",
+                        new_callable=PropertyMock,
+                        return_value=searching_for_types,
+                    ):
+                        with patch.object(self.logger, "log") as mock_logger:
+                            self.tac_negotiation.act()
 
         # after
-        self.assert_quantity_in_outbox(1)
+        self.assert_quantity_in_outbox(no_searches+2)
 
         # _register_agent
         has_attributes, error_str = self.message_has_attributes(
@@ -119,20 +167,6 @@ class TestSkillBehaviour(BaseSkillTestCase):
         assert has_attributes, error_str
 
         mock_logger.assert_any_call(logging.INFO, "registering agent on SOEF.")
-
-    def test_register_service(self):
-        """Test the _register_service method of the negotiation behaviour."""
-        # operation
-        with patch.object(
-            self.strategy,
-            "get_register_service_description",
-            return_value=self.mocked_description,
-        ):
-            with patch.object(self.logger, "log") as mock_logger:
-                self.tac_negotiation._register_service()
-
-        # after
-        self.assert_quantity_in_outbox(1)
 
         # _register_service
         mock_logger.assert_any_call(
@@ -149,9 +183,42 @@ class TestSkillBehaviour(BaseSkillTestCase):
         )
         assert has_attributes, error_str
 
-    def test_search_services(self):
-        """Test the _search_services method of the negotiation behaviour."""
+        assert self.tac_negotiation.is_registered is True
+
+        # _search_services
+        for search in searching_for_types:
+            message = self.get_message_from_outbox()
+            has_attributes, error_str = self.message_has_attributes(
+                actual_message=message,
+                message_type=OefSearchMessage,
+                performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+                to=self.skill.skill_context.search_service_address,
+                sender=self.sender,
+                query=self.mocked_query,
+            )
+            assert has_attributes, error_str
+
+            assert (
+                cast(
+                    OefSearchDialogue, self.oef_search_dialogues.get_dialogue(message)
+                ).is_seller_search
+                == search[0]
+            )
+
+            mock_logger.assert_any_call(
+                logging.INFO,
+                f"searching for {search[1]}, search_id={message.dialogue_reference}.",
+            )
+
+    def test_act_iv(self):
+        """Test the act method of the negotiation behaviour where is_registered is True."""
         # setup
+        self.skill.skill_context._agent_context._shared_state = {
+            "is_game_finished": False
+        }
+        self.goal_pursuit_readiness._status = GoalPursuitReadiness.Status.READY
+        self.tac_negotiation.is_registered = True
+
         searching_for_types = [(True, "sellers"), (False, "buyers")]
         no_searches = len(searching_for_types)
 
@@ -168,7 +235,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
                 return_value=searching_for_types,
             ):
                 with patch.object(self.logger, "log") as mock_logger:
-                    self.tac_negotiation._search_services()
+                    self.tac_negotiation.act()
 
         # after
         self.assert_quantity_in_outbox(no_searches)
@@ -197,6 +264,111 @@ class TestSkillBehaviour(BaseSkillTestCase):
                 logging.INFO,
                 f"searching for {search[1]}, search_id={message.dialogue_reference}.",
             )
+
+    # def test_register_agent(self):
+    #     """Test the _register_agent method of the negotiation behaviour."""
+    #     # operation
+    #     with patch.object(
+    #         self.strategy,
+    #         "get_location_description",
+    #         return_value=self.mocked_description,
+    #     ):
+    #         with patch.object(self.logger, "log") as mock_logger:
+    #             self.tac_negotiation._register_agent()
+    #
+    #     # after
+    #     self.assert_quantity_in_outbox(1)
+    #
+    #     # _register_agent
+    #     has_attributes, error_str = self.message_has_attributes(
+    #         actual_message=self.get_message_from_outbox(),
+    #         message_type=OefSearchMessage,
+    #         performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+    #         to=self.skill.skill_context.search_service_address,
+    #         sender=self.sender,
+    #         service_description=self.mocked_description,
+    #     )
+    #     assert has_attributes, error_str
+    #
+    #     mock_logger.assert_any_call(logging.INFO, "registering agent on SOEF.")
+    #
+    # def test_register_service(self):
+    #     """Test the _register_service method of the negotiation behaviour."""
+    #     # operation
+    #     with patch.object(
+    #         self.strategy,
+    #         "get_register_service_description",
+    #         return_value=self.mocked_description,
+    #     ):
+    #         with patch.object(self.logger, "log") as mock_logger:
+    #             self.tac_negotiation._register_service()
+    #
+    #     # after
+    #     self.assert_quantity_in_outbox(1)
+    #
+    #     # _register_service
+    #     mock_logger.assert_any_call(
+    #         logging.DEBUG,
+    #         f"updating service directory as {self.strategy.registering_as}.",
+    #     )
+    #     has_attributes, error_str = self.message_has_attributes(
+    #         actual_message=self.get_message_from_outbox(),
+    #         message_type=OefSearchMessage,
+    #         performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+    #         to=self.skill.skill_context.search_service_address,
+    #         sender=self.sender,
+    #         service_description=self.mocked_description,
+    #     )
+    #     assert has_attributes, error_str
+    #
+    # def test_search_services(self):
+    #     """Test the _search_services method of the negotiation behaviour."""
+    #     # setup
+    #     searching_for_types = [(True, "sellers"), (False, "buyers")]
+    #     no_searches = len(searching_for_types)
+    #
+    #     # operation
+    #     with patch.object(
+    #         self.strategy,
+    #         "get_location_and_service_query",
+    #         return_value=self.mocked_query,
+    #     ):
+    #         with patch.object(
+    #             type(self.strategy),
+    #             "searching_for_types",
+    #             new_callable=PropertyMock,
+    #             return_value=searching_for_types,
+    #         ):
+    #             with patch.object(self.logger, "log") as mock_logger:
+    #                 self.tac_negotiation._search_services()
+    #
+    #     # after
+    #     self.assert_quantity_in_outbox(no_searches)
+    #
+    #     # _search_services
+    #     for search in searching_for_types:
+    #         message = self.get_message_from_outbox()
+    #         has_attributes, error_str = self.message_has_attributes(
+    #             actual_message=message,
+    #             message_type=OefSearchMessage,
+    #             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+    #             to=self.skill.skill_context.search_service_address,
+    #             sender=self.sender,
+    #             query=self.mocked_query,
+    #         )
+    #         assert has_attributes, error_str
+    #
+    #         assert (
+    #             cast(
+    #                 OefSearchDialogue, self.oef_search_dialogues.get_dialogue(message)
+    #             ).is_seller_search
+    #             == search[0]
+    #         )
+    #
+    #         mock_logger.assert_any_call(
+    #             logging.INFO,
+    #             f"searching for {search[1]}, search_id={message.dialogue_reference}.",
+    #         )
 
     def test_teardown_i(self):
         """Test the teardown method of the negotiation behaviour."""

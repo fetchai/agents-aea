@@ -1,0 +1,92 @@
+name: tac_negotiation
+author: fetchai
+version: 0.19.0
+type: skill
+description: The tac negotiation skill implements the logic for an AEA to do fipa
+  negotiation in the TAC.
+license: Apache-2.0
+aea_version: '>=0.10.0, <0.11.0'
+fingerprint:
+  README.md: QmdpJypf1uoDBW54DC2req7bst1Hw548piYmMKUaPPVHeB
+  __init__.py: QmR9EfPhrVo4WkrcSvFZtyVo2Nrg4eTD9bQmjvBddmqiQR
+  behaviours.py: QmbCrtakduaJ8cwdG8LLYvb5mNPZqCoEwHrQxKMBcAWvrf
+  dialogues.py: QmR51qGJxrrN4pULumrqvSuiVHB9QUGxjHSoEYdBMi7MqX
+  handlers.py: QmTmAmpiSJRDpMktXxfstympp2bYqEPcUVtnMXP4Gc9iWM
+  helpers.py: QmTJbGL8V6CLhbVhLekqKkHbu7cJMfBcv8DtWLSpkKP5tk
+  strategy.py: QmeRJNpcmdd1xvLdv9YpAizQz6wb68BjFrK5SfzVFFUy9A
+  transactions.py: QmWsPySEnCD3VgWTNxhbEm7vytceFvTDWPmAFeTunnf7eJ
+fingerprint_ignore_patterns: []
+connections:
+- fetchai/ledger:0.13.0
+contracts:
+- fetchai/erc1155:0.16.0
+protocols:
+- fetchai/contract_api:0.11.0
+- fetchai/default:0.12.0
+- fetchai/fipa:0.13.0
+- fetchai/ledger_api:0.10.0
+- fetchai/oef_search:0.13.0
+- fetchai/signing:0.10.0
+skills:
+- fetchai/tac_participation:0.17.0
+behaviours:
+  clean_up:
+    args:
+      tick_interval: 5.0
+    class_name: TransactionCleanUpBehaviour
+  tac_negotiation:
+    args:
+      search_interval: 5.0
+    class_name: GoodsRegisterAndSearchBehaviour
+handlers:
+  contract_api:
+    args: {}
+    class_name: ContractApiHandler
+  fipa:
+    args: {}
+    class_name: FipaNegotiationHandler
+  ledger_api:
+    args: {}
+    class_name: LedgerApiHandler
+  oef:
+    args: {}
+    class_name: OefSearchHandler
+  signing:
+    args: {}
+    class_name: SigningHandler
+models:
+  contract_api_dialogues:
+    args: {}
+    class_name: ContractApiDialogues
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
+  fipa_dialogues:
+    args: {}
+    class_name: FipaDialogues
+  ledger_api_dialogues:
+    args: {}
+    class_name: LedgerApiDialogues
+  oef_search_dialogues:
+    args: {}
+    class_name: OefSearchDialogues
+  signing_dialogues:
+    args: {}
+    class_name: SigningDialogues
+  strategy:
+    args:
+      is_contract_tx: false
+      location:
+        latitude: 51.5194
+        longitude: 0.127
+      register_as: both
+      search_for: both
+      search_radius: 5.0
+      service_key: tac_service
+    class_name: Strategy
+  transactions:
+    args:
+      pending_transaction_timeout: 30
+    class_name: Transactions
+dependencies: {}
+is_abstract: false
