@@ -434,9 +434,9 @@ class BaseSkillTestCase:
             asyncio.Queue()
         )
         cls._outbox = OutBox(cast(Multiplexer, cls._multiplexer))
-        _shared_state = cast(Dict[str, Any], kwargs.pop("shared_state", None))
+        _shared_state = cast(Optional[Dict[str, Any]], kwargs.pop("shared_state", None))
         _skill_config_overrides = cast(
-            Dict[str, Any], kwargs.pop("config_overrides", None)
+            Optional[Dict[str, Any]], kwargs.pop("config_overrides", None)
         )
         _dm_context_kwargs = cast(
             Dict[str, Any], kwargs.pop("dm_context_kwargs", dict())

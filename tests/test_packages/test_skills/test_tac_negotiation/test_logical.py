@@ -112,7 +112,6 @@ class TestLogical(BaseSkillTestCase):
         goods_score = logarithmic_utility(
             preferences.utility_params_by_good_id,
             ownership_state.quantities_by_good_id,
-            100,
         )
         money_score = linear_utility(
             preferences.exchange_params_by_currency_id,

@@ -431,11 +431,11 @@ class TestStrategy(BaseSkillTestCase):
         mock_get_proposal.assert_any_call(mocked_query, is_seller=is_seller)
         assert actual_proposal == expected_proposal
 
-    def test_generate_candidate_proposals_seller(self):
+    def test_generate_candidate_proposals_i(self):
         """Test the _generate_candidate_proposals method of the Strategy class where role is seller."""
         # setup
-        expected_proposed_prices = [463, 411, 1578, 584, 1101, 1244, 1234, 2025, 982]
         is_searching_for_sellers = True
+        expected_proposed_prices = [463, 411, 1578, 584, 1101, 1244, 1234, 2025, 982]
 
         # operation
         with patch.object(
@@ -475,7 +475,7 @@ class TestStrategy(BaseSkillTestCase):
             assert actual_proposals[index].values["fee"] == 0
             assert actual_proposals[index].values["nonce"] == str(index + 1)
 
-    def test_generate_candidate_proposals_buyer(self):
+    def test_generate_candidate_proposals_ii(self):
         """Test the _generate_candidate_proposals method of the Strategy class where role is buyer."""
         # setup
         expected_proposed_prices = [457, 406, 1561, 577, 1088, 1231, 1220, 2004, 971]
@@ -518,6 +518,96 @@ class TestStrategy(BaseSkillTestCase):
             )
             assert actual_proposals[index].values["fee"] == 0
             assert actual_proposals[index].values["nonce"] == str(index + 1)
+
+    def test_generate_candidate_proposals_iii(self):
+        """Test the _generate_candidate_proposals method of the Strategy class where is_seller and quantity is 0."""
+        # setup
+        is_searching_for_sellers = True
+        expected_proposed_price = 982
+
+        mocked_good_quantities = [1, 0, 0, 1, 0, 1, 0, 1, 6]
+        mocked_quantities_by_good_id = dict(
+            zip(self.mocked_good_ids, mocked_good_quantities)
+        )
+        self.mocked_ownership_state._amount_by_currency_id = None
+        self.mocked_ownership_state._quantities_by_good_id = None
+        self.mocked_ownership_state.set(
+            self.mocked_amount_by_currency_id, mocked_quantities_by_good_id
+        )
+
+        # operation
+        with patch.object(
+            self.skill.skill_context.transactions,
+            "ownership_state_after_locks",
+            return_value=self.mocked_ownership_state,
+        ) as mock_ownership:
+            actual_proposals = self.strategy._generate_candidate_proposals(
+                is_searching_for_sellers
+            )
+
+        # after
+        mock_ownership.assert_any_call(is_seller=is_searching_for_sellers)
+
+        assert type(actual_proposals) == list
+        assert len(actual_proposals) == 1
+        actual_proposal = actual_proposals[0]
+
+        assert type(actual_proposal) == Description
+        assert actual_proposal.values[self.mocked_good_ids[8]] == 1
+        for good_id_index in range(8):
+            assert actual_proposal.values[self.mocked_good_ids[good_id_index]] == 0
+        assert actual_proposal.values["currency_id"] == self.mocked_currency_id
+        assert actual_proposal.values["ledger_id"] == self.ledger_id
+        assert actual_proposal.values["price"] == expected_proposed_price
+        assert actual_proposal.values["fee"] == 0
+        assert actual_proposal.values["nonce"] == "1"
+
+    def test_generate_candidate_proposals_iv(self):
+        """Test the _generate_candidate_proposals method of the Strategy class where proposed price is 0."""
+        # setup
+        is_searching_for_sellers = True
+
+        mocked_good_quantities = [2, 0, 0, 1, 0, 1, 0, 1, 0]
+        mocked_quantities_by_good_id = dict(
+            zip(self.mocked_good_ids, mocked_good_quantities)
+        )
+        self.mocked_ownership_state._amount_by_currency_id = None
+        self.mocked_ownership_state._quantities_by_good_id = None
+        self.mocked_ownership_state.set(
+            self.mocked_amount_by_currency_id, mocked_quantities_by_good_id
+        )
+
+        utility_params_by_good_id = {
+            "13": -100.0,
+            "14": 43700.0,
+            "15": 163200.0,
+            "16": 59800.0,
+            "17": 114900.0,
+            "18": 128700.00000000001,
+            "19": 126400.00000000001,
+            "20": 211500.0,
+            "21": 103500.0,
+        }
+        self.mocked_preferences._exchange_params_by_currency_id = None
+        self.mocked_preferences._utility_params_by_good_id = None
+        self.mocked_preferences.set(
+            exchange_params_by_currency_id=self.exchange_params_by_currency_id,
+            utility_params_by_good_id=utility_params_by_good_id,
+        )
+
+        # operation
+        with patch.object(
+            self.skill.skill_context.transactions,
+            "ownership_state_after_locks",
+            return_value=self.mocked_ownership_state,
+        ) as mock_ownership:
+            actual_proposals = self.strategy._generate_candidate_proposals(
+                is_searching_for_sellers
+            )
+
+        # after
+        mock_ownership.assert_any_call(is_seller=is_searching_for_sellers)
+        assert actual_proposals == []
 
     def test_is_profitable_transaction_not_affordable(self):
         """Test the is_profitable_transaction method of the Strategy class where is_affordable_transaction is False."""
