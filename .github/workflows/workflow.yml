@@ -36,6 +36,10 @@ jobs:
           diff LICENSE plugins/aea-crypto-cosmos/LICENSE
           diff LICENSE plugins/aea-crypto-ethereum/LICENSE
           diff LICENSE plugins/aea-crypto-fetchai/LICENSE
+      - name: Check go code consistency
+        run: |
+          # check diff between go code in libs and packages
+          diff libs/go/libp2p_node packages/fetchai/connections/p2p_libp2p/libp2p_node -r
 
   common_checks_2:
     continue-on-error: False
@@ -74,7 +78,7 @@ jobs:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         with:
           version: v1.28
-          working-directory: packages/fetchai/connections/p2p_libp2p/
+          working-directory: libs/go/libp2p_node
 
   common_checks_3:
     continue-on-error: False
@@ -419,7 +423,7 @@ jobs:
         go-version: '^1.14.0'
     - if: matrix.python-version == '3.6'
       name: Golang unit tests
-      working-directory: ./packages/fetchai/connections/p2p_libp2p
+      working-directory: ./libs/go/libp2p_node
       run: go test -p 1 -timeout 0 -count 1 -v ./...
 
   coverage_checks:
