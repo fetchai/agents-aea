@@ -93,8 +93,7 @@ nav:
         - Installation: 'cli-how-to.md'
         - Commands: 'cli-commands.md'
         - File structure: 'package-imports.md'
-        - Generating wealth: 'wealth.md' 
-      - GUI: 'cli-gui.md'
+        - Generating wealth: 'wealth.md'
     - Benchmarks:
       - Performance benchmark: 'performance-benchmark.md'
     - API:

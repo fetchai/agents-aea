@@ -21,15 +21,15 @@ import json
 from random import uniform
 
 import pytest
+from aea_crypto_ethereum import EthereumCrypto
+from aea_crypto_fetchai import FetchAICrypto
 
 from aea.test_tools.test_cases import AEATestCaseManyFlaky
 
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
 from tests.conftest import (
-    ETHEREUM,
     ETHEREUM_PRIVATE_KEY_FILE,
-    FETCHAI,
     FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
     FUNDED_ETH_PRIVATE_KEY_2,
     FUNDED_ETH_PRIVATE_KEY_3,
@@ -74,7 +74,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseManyFlaky, UseGanache):
         self.add_item("connection", "fetchai/ledger:0.13.0")
         self.add_item("connection", "fetchai/soef:0.17.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.16.0")
-        self.set_config("agent.default_ledger", ETHEREUM)
+        self.set_config("agent.default_ledger", EthereumCrypto.identifier)
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.add_item("skill", "fetchai/erc1155_deploy:0.22.0")
@@ -86,14 +86,18 @@ class TestERCSkillsEthereumLedger(AEATestCaseManyFlaky, UseGanache):
             diff == []
         ), "Difference between created and fetched project for files={}".format(diff)
 
-        self.generate_private_key(ETHEREUM)
-        self.add_private_key(ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE)
+        self.generate_private_key(EthereumCrypto.identifier)
+        self.add_private_key(EthereumCrypto.identifier, ETHEREUM_PRIVATE_KEY_FILE)
         self.replace_private_key_in_file(
             FUNDED_ETH_PRIVATE_KEY_3, ETHEREUM_PRIVATE_KEY_FILE
         )
-        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
+        self.generate_private_key(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        )
         self.add_private_key(
-            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+            connection=True,
         )
         self.replace_private_key_in_file(
             NON_FUNDED_FETCHAI_PRIVATE_KEY_1, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
@@ -105,10 +109,10 @@ class TestERCSkillsEthereumLedger(AEATestCaseManyFlaky, UseGanache):
             [
                 {
                     "identifier": "acn",
-                    "ledger_id": ETHEREUM,
+                    "ledger_id": EthereumCrypto.identifier,
                     "not_after": "2022-01-01",
                     "not_before": "2021-01-01",
-                    "public_key": FETCHAI,
+                    "public_key": FetchAICrypto.identifier,
                     "save_path": ".certs/conn_cert.txt",
                 }
             ]
@@ -128,7 +132,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseManyFlaky, UseGanache):
         self.add_item("connection", "fetchai/ledger:0.13.0")
         self.add_item("connection", "fetchai/soef:0.17.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.16.0")
-        self.set_config("agent.default_ledger", ETHEREUM)
+        self.set_config("agent.default_ledger", EthereumCrypto.identifier)
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.add_item("skill", "fetchai/erc1155_client:0.21.0")
@@ -140,14 +144,18 @@ class TestERCSkillsEthereumLedger(AEATestCaseManyFlaky, UseGanache):
             diff == []
         ), "Difference between created and fetched project for files={}".format(diff)
 
-        self.generate_private_key(ETHEREUM)
-        self.add_private_key(ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE)
+        self.generate_private_key(EthereumCrypto.identifier)
+        self.add_private_key(EthereumCrypto.identifier, ETHEREUM_PRIVATE_KEY_FILE)
         self.replace_private_key_in_file(
             FUNDED_ETH_PRIVATE_KEY_2, ETHEREUM_PRIVATE_KEY_FILE
         )
-        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
+        self.generate_private_key(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        )
         self.add_private_key(
-            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+            connection=True,
         )
         setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
         self.set_config(setting_path, "ethereum")
@@ -158,10 +166,10 @@ class TestERCSkillsEthereumLedger(AEATestCaseManyFlaky, UseGanache):
             [
                 {
                     "identifier": "acn",
-                    "ledger_id": ETHEREUM,
+                    "ledger_id": EthereumCrypto.identifier,
                     "not_after": "2022-01-01",
                     "not_before": "2021-01-01",
-                    "public_key": FETCHAI,
+                    "public_key": FetchAICrypto.identifier,
                     "save_path": ".certs/conn_cert.txt",
                 }
             ]

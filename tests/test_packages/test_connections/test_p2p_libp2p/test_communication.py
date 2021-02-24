@@ -25,9 +25,10 @@ import tempfile
 from unittest.mock import Mock
 
 import pytest
+from aea_crypto_ethereum import EthereumCrypto
+from aea_crypto_fetchai import FetchAICrypto
 
-from aea.crypto.ethereum import EthereumCrypto
-from aea.crypto.fetchai import FetchAICrypto
+from aea.crypto.registries import make_crypto
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 
@@ -84,9 +85,8 @@ class TestP2PLibp2pConnectionConnectDisconnect:
         """Test connect then disconnect."""
         temp_dir = os.path.join(self.t, "temp_dir")
         os.mkdir(temp_dir)
-        connection = _make_libp2p_connection(
-            data_dir=temp_dir, agent_key=EthereumCrypto()
-        )
+        crypto = make_crypto(EthereumCrypto.identifier)
+        connection = _make_libp2p_connection(data_dir=temp_dir, agent_key=crypto)
 
         assert connection.is_connected is False
         try:
@@ -123,11 +123,14 @@ class TestP2PLibp2pConnectionEchoEnvelope:
         cls.log_files = []
         cls.multiplexers = []
 
+        aea_crypto_fetchai = make_crypto(FetchAICrypto.identifier)
+        aea_crypto_ethereum = make_crypto(EthereumCrypto.identifier)
+
         try:
             temp_dir_1 = os.path.join(cls.t, "temp_dir_1")
             os.mkdir(temp_dir_1)
             cls.connection1 = _make_libp2p_connection(
-                data_dir=temp_dir_1, agent_key=FetchAICrypto(), port=DEFAULT_PORT + 1
+                data_dir=temp_dir_1, agent_key=aea_crypto_fetchai, port=DEFAULT_PORT + 1
             )
             cls.multiplexer1 = Multiplexer(
                 [cls.connection1], protocols=[MockDefaultMessageProtocol]
@@ -144,7 +147,7 @@ class TestP2PLibp2pConnectionEchoEnvelope:
                 data_dir=temp_dir_2,
                 port=DEFAULT_PORT + 2,
                 entry_peers=[genesis_peer],
-                agent_key=EthereumCrypto(),
+                agent_key=aea_crypto_ethereum,
             )
             cls.multiplexer2 = Multiplexer(
                 [cls.connection2], protocols=[MockDefaultMessageProtocol]

@@ -21,6 +21,7 @@ from unittest import TestCase, mock
 from unittest.mock import MagicMock
 
 import pytest
+from aea_crypto_fetchai import FetchAICrypto
 
 from aea.cli import cli
 from aea.cli.generate_wealth import _try_generate_wealth
@@ -30,7 +31,6 @@ from tests.conftest import (
     CLI_LOG_OPTION,
     COSMOS_ADDRESS_ONE,
     CliRunner,
-    FETCHAI,
     MAX_FLAKY_RERUNS_INTEGRATION,
 )
 from tests.test_cli.tools_for_testing import ContextMock
@@ -71,7 +71,7 @@ class GenerateWealthCommandTestCase(TestCase):
                 "--skip-consistency-check",
                 "generate-wealth",
                 "--sync",
-                FETCHAI,
+                FetchAICrypto.identifier,
             ],
             standalone_mode=False,
         )

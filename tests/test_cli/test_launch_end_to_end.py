@@ -23,11 +23,12 @@ import sys
 import uuid
 
 import pytest
+from aea_crypto_fetchai import FetchAICrypto
 
 from aea.test_tools.test_cases import AEATestCaseMany
 
 from tests.common.pexpect_popen import PexpectWrapper
-from tests.conftest import FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+from tests.conftest import FETCHAI_PRIVATE_KEY_FILE_CONNECTION
 
 
 class TestLaunchEndToEnd(AEATestCaseMany):
@@ -144,9 +145,13 @@ class TestLaunchEndToEnd(AEATestCaseMany):
             "build", cwd=search_agent_name,
         )
         self.set_agent_context(registration_agent_name)
-        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
+        self.generate_private_key(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        )
         self.add_private_key(
-            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+            connection=True,
         )
         self.generate_private_key()
         self.add_private_key()
@@ -155,9 +160,13 @@ class TestLaunchEndToEnd(AEATestCaseMany):
             "issue-certificates", cwd=registration_agent_name,
         )
         self.set_agent_context(search_agent_name)
-        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
+        self.generate_private_key(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        )
         self.add_private_key(
-            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+            connection=True,
         )
         self.generate_private_key()
         self.add_private_key()

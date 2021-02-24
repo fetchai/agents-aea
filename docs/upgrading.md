@@ -4,6 +4,38 @@ The primary tool for upgrading AEA projects is the `aea upgrade` command in the 
 
 Below we describe the additional manual steps required to upgrade between different versions:
 
+## `v0.10.1` to `v0.11.0`
+
+Agent configuration files have a new optional field, `dependencies`, 
+analogous to `dependencies` field in other AEA packages.
+The default value is the empty object `{}`.
+The field will be made mandatory in the next release.
+
+Crypto modules have been extracted and released as independent plug-ins, released on PyPI.
+In particular:
+
+- Fetch.ai crypto classes have been released in the `aea-crypto-fetchai` package;
+- Ethereum crypto classes have been released in the `aea-crypto-ethereum` package;
+- Cosmos crypto classes have been released in the `aea-crypto-cosmos` package.
+
+If an AEA project, or an AEA package, makes use of crypto functionalities, 
+it will be needed to add the above packages as PyPI dependencies with version
+specifiers `<0.2.0,>=0.1.0`, i.e.:
+```yaml
+dependencies:
+  aea-crypto-cosmos:
+    version: <0.2.0,>=0.1.0
+  aea-crypto-ethereum:
+    version: <0.2.0,>=0.1.0
+  aea-crypto-fetchai:
+    version: <0.2.0,>=0.1.0
+```
+The version specifier sets are important, as these plug-ins, at version `0.1.0`, 
+depend on a specific range of the `aea` package.
+
+Then, running `aea install` inside the AEA project should install them in
+the current Python environment.
+
 ## `v0.10.0` to `v0.10.1`
 
 No backwards incompatible changes for skill and connection development.

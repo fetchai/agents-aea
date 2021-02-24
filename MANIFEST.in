@@ -4,5 +4,6 @@ recursive-include aea *.json *.yaml *.proto *.ico *png *.html *.js *.css *.md *.
 recursive-include docs *
 recursive-include examples *
 recursive-include packages *
+recursive-include plugins *
 recursive-include scripts *
 recursive-include tests *

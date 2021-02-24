@@ -20,11 +20,10 @@
 """This module contains the tests for the identity module."""
 
 import pytest
+from aea_crypto_fetchai import FetchAICrypto
 
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.identity.base import Identity
-
-from tests.conftest import FETCHAI
 
 
 def test_init_identity_positive():
@@ -35,11 +34,17 @@ def test_init_identity_positive():
     )
     assert Identity(
         "some_name",
-        addresses={DEFAULT_LEDGER: "some_address", FETCHAI: "some_address"},
+        addresses={
+            DEFAULT_LEDGER: "some_address",
+            FetchAICrypto.identifier: "some_address",
+        },
     )
     assert Identity(
         "some_name",
-        addresses={DEFAULT_LEDGER: "some_address", FETCHAI: "some_address"},
+        addresses={
+            DEFAULT_LEDGER: "some_address",
+            FetchAICrypto.identifier: "some_address",
+        },
         default_address_key=DEFAULT_LEDGER,
     )
 
@@ -51,7 +56,7 @@ def test_init_identity_negative():
     with pytest.raises(KeyError):
         Identity(
             name,
-            addresses={DEFAULT_LEDGER: address_1, FETCHAI: address_1},
+            addresses={DEFAULT_LEDGER: address_1, FetchAICrypto.identifier: address_1},
             default_address_key="wrong_key",
         )
     with pytest.raises(ValueError):

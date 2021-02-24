@@ -68,7 +68,7 @@ from aea.crypto.helpers import (
     get_wallet_from_agent_config,
     private_key_verify_or_create,
 )
-from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS, LedgerApis
+from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.exceptions import AEAEnforceError
 from aea.helpers.base import compute_specifier_from_version, recursive_update
@@ -635,7 +635,7 @@ def try_get_balance(  # pylint: disable=unused-argument
     :retun: token balance.
     """
     try:
-        if type_ not in DEFAULT_LEDGER_CONFIGS:  # pragma: no cover
+        if not LedgerApis.has_ledger(type_):  # pragma: no cover
             raise ValueError("No ledger api config for {} available.".format(type_))
         address = wallet.addresses.get(type_)
         if address is None:  # pragma: no cover
