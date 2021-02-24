@@ -97,7 +97,7 @@ def download(repo_url: str, flatten: bool = False, output_dir: str = "./") -> in
         opener = urllib.request.build_opener()
         opener.addheaders = [("User-agent", "Mozilla/5.0")]
         urllib.request.install_opener(opener)
-        response = urllib.request.urlretrieve(api_url)
+        response = urllib.request.urlretrieve(api_url)  # nosec
     except KeyboardInterrupt:
         _default_logger.warning("Got interrupted")
         return 0
@@ -123,7 +123,7 @@ def download(repo_url: str, flatten: bool = False, output_dir: str = "./") -> in
                 opener = urllib.request.build_opener()
                 opener.addheaders = [("User-agent", "Mozilla/5.0")]
                 urllib.request.install_opener(opener)
-                urllib.request.urlretrieve(
+                urllib.request.urlretrieve(  # nosec
                     data["download_url"], os.path.join(dir_out, data["name"])
                 )
                 _default_logger.info("Downloaded: {}".format(data["name"]))
@@ -154,7 +154,7 @@ def download(repo_url: str, flatten: bool = False, output_dir: str = "./") -> in
                     opener.addheaders = [("User-agent", "Mozilla/5.0")]
                     urllib.request.install_opener(opener)
                     # download the file
-                    urllib.request.urlretrieve(file_url, path)
+                    urllib.request.urlretrieve(file_url, path)  # nosec
                     _default_logger.info("Downloaded: {}".format(file_name))
 
                 except KeyboardInterrupt:

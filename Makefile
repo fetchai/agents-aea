@@ -51,8 +51,14 @@ pylint:
 
 .PHONY: security
 security:
-	bandit -r aea benchmark examples packages plugins
-	bandit -s B101 -r tests scripts
+	bandit -r aea benchmark examples packages \
+        plugins/aea-crypto-fetchai/aea_crypto_fetchai \
+        plugins/aea-crypto-ethereum/aea_crypto_ethereum \
+        plugins/aea-crypto-cosmos/aea_crypto_cosmos
+	bandit -s B101 -r tests scripts \
+        plugins/aea-crypto-fetchai/tests \
+        plugins/aea-crypto-ethereum/tests \
+        plugins/aea-crypto-cosmos/tests
 	safety check -i 37524 -i 38038 -i 37776 -i 38039
 
 .PHONY: static
