@@ -39,7 +39,7 @@ def _create_url(url: str) -> Tuple[Optional[str], Optional[str]]:
     :return: tuple of api url and download urls
     """
     repo_only_url = re.compile(
-        r"https:\/\/github\.com\/[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}\/[a-zA-Z0-9]+"
+        r"https:\/\/github\.com\/[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}\/[a-zA-Z0-9-]+/?$"
     )
     re_branch = re.compile("/(tree|blob)/(.+?)/")
 
