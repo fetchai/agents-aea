@@ -44,7 +44,9 @@ _default_logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p
 
 LIBP2P_NODE_MODULE_NAME = "libp2p_node"
 
-LIBP2P_NODE_MODULE = str(os.path.join(os.path.abspath(os.path.dirname(__file__)), LIBP2P_NODE_MODULE_NAME))
+LIBP2P_NODE_MODULE = str(
+    os.path.join(os.path.abspath(os.path.dirname(__file__)), LIBP2P_NODE_MODULE_NAME)
+)
 
 if platform.system() == "Windows":  # pragma: nocover
     LIBP2P_NODE_MODULE_NAME += ".exe"
