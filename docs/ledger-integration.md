@@ -1,20 +1,72 @@
 In this section, we show you how to integrate the AEA with the Fetch.ai and third-party ledgers.
 
-At the moment, the framework natively supports the following three ledgers:
+## Ledger support
 
-- Fetch.ai
-- Ethereum
-- Cosmos
-
-However, support for additional ledgers can be added to the framework at runtime.
-
-For a ledger to be considered `supported` in the framework, three abstract base classes need to be implemented:
+For a ledger to be considered _supported_ in the framework, three abstract base classes need to be implemented:
 
 - the <a href="../api/crypto/base#aea.crypto.base.LedgerApi">`LedgerApi`</a> class wraps the API to talk to the ledger and its helper methods
 - the <a href="../api/crypto/base#aea.crypto.base.Crypto">`Crypto`</a> class wraps the API to perform cryptographic operations for the relevant ledger
 - the <a href="../api/crypto/base#aea.crypto.base.FaucetApi">`FaucetApi`</a> class wraps the API to talk to a faucet on a testnet
 
-These three classes have their own registries, which allow the developer to import the relevant object where needed:
+These three classes have their own registries, which allow the developer to import the relevant object where needed.
+
+## Ledger plug-in architecture
+
+The AEA framework provides a plug-in mechanism to support ledger functionalities in 
+an easily extendible way. At import time, the framework will load
+all the crypto plug-ins available in the current Python environment.
+
+A _crypto plug-in_ is a Python package which declares some specific
+<a href="https://setuptools.readthedocs.io/en/latest/pkg_resources.html#entry-points">
+`setuptools` "entry points"</a> in its `setup.py` script.
+In particular, there are three types of entry points the framework looks up:
+
+- `aea.ledger_apis`, which points to instantiable classes implementing the `LedgerApi` interface;
+- `aea.cryptos`, which points to instantiable classes implementing the `Crypto` interface;
+- `aea.faucet_apis`, which points to instantiable classes implementing the `FaucetApi` interface.
+
+This is an example of `setup.py` script for a ledger plug-in `aea-crypto-myledger`:
+
+```python
+# sample ./setup.py file
+from setuptools import setup
+
+setup(
+    name="aea-crypto-myledger",
+    packages=["aea_crypto_myledger"],
+    # plugins must depend on 'aea'  
+    install_requires=["aea"], # add other dependencies...
+    # the following makes a plugin available to aea
+    entry_points={
+        "aea.cryptos": ["myledger = aea_crypto_myledger:MyLedgerCrypto"],
+        "aea.ledger_apis": ["myledger = aea_crypto_myledger:MyLedgerApi"],
+        "aea.faucet_apis": ["myledger = aea_crypto_myledger:MyLedgerFaucetApi"],
+    },
+    # PyPI classifier for AEA plugins
+    classifiers=["Framework :: AEA"],
+)
+```
+
+By convention, such plug-in packages should be named `aea-crypto-${LEDGER_ID}`,
+and the importable package name `aea_crypto_${LEDGER_ID}`.
+In the example above, the package name is `aea-crypto-myledger`,
+and the importable package name is `aea_crypto_myledger`.
+
+You can search for AEA ledger plug-ins on PyPI:
+<a href=https://pypi.org/search/?q=aea-crypto>href=https://pypi.org/search/?q=aea-crypto</a>
+
+## Maintained plug-ins
+
+At the moment, the framework natively supports the following three ledgers:
+
+- Fetch.ai: <a href="https://pypi.org/project/aea-crypto-fetchai/">PyPI package: `aea-crypto-fetchai`</a>, and <a href="https://github.com/fetchai/agents-aea/tree/main/plugins/aea-crypto-fetchai">source code</a>.
+- Ethereum: <a href="https://pypi.org/project/aea-crypto-ethereum/">PyPI package: `aea-crypto-ethereum`</a>, and <a href="https://github.com/fetchai/agents-aea/tree/main/plugins/aea-crypto-ethereum">source code</a>.
+- Cosmos: <a href="https://pypi.org/project/aea-crypto-cosmos/">PyPI package: `aea-crypto-cosmos`</a>, and <a href="https://github.com/fetchai/agents-aea/tree/main/plugins/aea-crypto-cosmos">source code</a>.
+
+However, support for additional ledgers can be added to the framework at runtime.
+
+
+## Examples
 
 - Examples of how to interact with the crypto registry:
 
@@ -22,7 +74,7 @@ These three classes have their own registries, which allow the developer to impo
 from aea.crypto.registries import crypto_registry, make_crypto, register_crypto
 
 # by default we can use the native cryptos
-aea_crypto_fetchai = make_crypto("fetchai")
+fetchai_crypto = make_crypto("fetchai")
 
 # we can check what cryptos are registered
 crypto_registry.supported_ids

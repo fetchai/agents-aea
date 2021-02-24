@@ -55,6 +55,11 @@ logging_config:
       level: DEBUG
       propagate: false
 registry_path: ../packages
+dependencies:
+  aea-crypto-ethereum:
+    version: <0.2.0,>=0.1.0
+  aea-crypto-fetchai:
+    version: <0.2.0,>=0.1.0
 ---
 public_id: fetchai/simple_buyer:0.6.0
 type: skill

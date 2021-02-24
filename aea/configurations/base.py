@@ -1136,6 +1136,7 @@ class AgentConfig(PackageConfiguration):
         storage_uri: Optional[str] = None,
         data_dir: Optional[str] = None,
         component_configurations: Optional[Dict[ComponentId, Dict]] = None,
+        dependencies: Optional[Dependencies] = None,
     ) -> None:
         """Instantiate the agent configuration object."""
         super().__init__(
@@ -1198,6 +1199,7 @@ class AgentConfig(PackageConfiguration):
         self.component_configurations = (
             component_configurations if component_configurations is not None else {}
         )
+        self.dependencies = dependencies or {}
 
     @property
     def component_configurations(self) -> Dict[ComponentId, Dict]:
@@ -1302,6 +1304,7 @@ class AgentConfig(PackageConfiguration):
                 "logging_config": self.logging_config,
                 "registry_path": self.registry_path,
                 "component_configurations": self.component_configurations_json(),
+                "dependencies": dependencies_to_json(self.dependencies),
             }
         )  # type: Dict[str, Any]
 
@@ -1374,12 +1377,15 @@ class AgentConfig(PackageConfiguration):
             storage_uri=cast(str, obj.get("storage_uri")),
             data_dir=cast(str, obj.get("data_dir")),
             component_configurations=None,
+            dependencies=cast(
+                Dependencies, dependencies_from_json(obj.get("dependencies", {}))
+            ),
         )
         instance = cast(AgentConfig, cls._apply_params_to_instance(params, instance))
 
         agent_config = instance
 
-        #  parse private keys
+        # Parse private keys
         for crypto_id, path in obj.get("private_key_paths", {}).items():
             agent_config.private_key_paths.create(crypto_id, path)
 

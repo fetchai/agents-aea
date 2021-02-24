@@ -31,3 +31,4 @@ default_routing:
   fetchai/http:0.12.0: fetchai/http_client:0.17.0
   fetchai/oef_search:0.13.0: fetchai/soef:0.17.0
 connection_private_key_paths: {}
+dependencies: {}

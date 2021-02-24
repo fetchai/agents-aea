@@ -29,6 +29,7 @@ connection_private_key_paths:
    cosmos: cosmos_private_key.txt
    ethereum: ethereum_private_key.txt
 registry_path: ../../packages
+dependencies: {}
 ---
 public_id: dummy_author/dummy:0.1.0
 type: skill

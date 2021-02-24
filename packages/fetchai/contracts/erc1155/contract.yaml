@@ -23,8 +23,11 @@ contract_interface_paths:
   ethereum: build/erc1155.json
   fetchai: build/erc1155.wasm
 dependencies:
-  aea_crypto_cosmos: {}
-  aea_crypto_ethereum: {}
-  aea_crypto_fetchai: {}
+  aea-crypto-cosmos:
+    version: <0.2.0,>=0.1.0
+  aea-crypto-ethereum:
+    version: <0.2.0,>=0.1.0
+  aea-crypto-fetchai:
+    version: <0.2.0,>=0.1.0
   vyper:
     version: ==0.1.0b12
