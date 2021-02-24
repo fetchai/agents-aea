@@ -17,15 +17,14 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Fetch folders from Github URLs. Borrows from https://github.com/sdushantha/gitdir/blob/master/gitdir/gitdir.py"""
-
 import json
 import logging
 import os
 import re
 import urllib.request
 from typing import Optional, Tuple
+from urllib.request import urlopen
 
 
 _default_logger = logging.getLogger(__name__)
@@ -38,32 +37,37 @@ def _create_url(url: str) -> Tuple[Optional[str], Optional[str]]:
     :param url: the url to download from.
     :return: tuple of api url and download urls
     """
-    repo_only_url = re.compile(
-        r"https:\/\/github\.com\/[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}\/[a-zA-Z0-9-]+/?$"
+    repo_url_re = re.compile(
+        r"https:\/\/github\.com\/(?P<repo_name>[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}\/[a-zA-Z0-9-]+)(/tree/(?P<branch_and_path>.+)|/?)?"
     )
-    re_branch = re.compile("/(tree|blob)/(.+?)/")
 
-    # Check if the given url is a url to a GitHub repo. If it is, tell the
-    # user to use 'git clone' to download it
-    if re.match(repo_only_url, url):
+    matched = re.match(repo_url_re, url)
+    if not matched:
+        raise ValueError("Bad url!")
+
+    repo_name = matched.groupdict().get("repo_name")
+    branch_and_path = matched.groupdict().get("branch_and_path")
+
+    if not branch_and_path:
         _default_logger.warning(
             "The given URL is a complete repository. Use 'git clone' to download the repository."
         )
         return None, None
 
-    # extract the branch name from the given url (e.g master)
-    branch = re_branch.search(url)
+    response = urlopen(f"https://api.github.com/repos/{repo_name}/branches").read()
+    branches = [i["name"] for i in json.loads(response)]
+
+    branch = None
+    for branch in branches:
+        if branch_and_path.startswith(branch):
+            break
+
     if branch is None:
         _default_logger.warning("Cannot extract branch from URL.")
         return None, None
-    download_dirs = url[branch.end() :]
-    api_url = (
-        url[: branch.start()].replace("github.com", "api.github.com/repos", 1)
-        + "/contents/"
-        + download_dirs
-        + "?ref="
-        + branch.group(2)
-    )
+
+    download_dirs = branch_and_path[len(branch) + 1 :]
+    api_url = f"https://api.github.com/repos/{repo_name}/contents/{download_dirs}/?ref={branch}"
     return api_url, download_dirs
 
 

@@ -39,5 +39,18 @@ def test_download():
             assert "aea.png" in os.listdir("./data"), os.listdir("./data")
 
 
+def test_download_slash_in_branch():
+    """Test github repo dir downloaded."""
+    with tempfile.TemporaryDirectory() as temp_dir:
+        with cd(temp_dir):
+            total_files = download(
+                "https://github.com/fetchai/agents-aea/tree/feature/move_go_code/data"
+            )
+            assert total_files >= 2
+            assert "data" in os.listdir("./"), os.listdir("./")
+            assert os.listdir("./data"), os.listdir("./data")
+            assert "aea.png" in os.listdir("./data"), os.listdir("./data")
+
+
 if __name__ == "__main__":
     pytest.main([__file__])
