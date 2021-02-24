@@ -57,35 +57,35 @@ func TestAgent(t *testing.T) {
 		t.Fatal("Failed to initialise agent", err)
 	}
 
-	if agent.Identity == nil {
-		t.Fatal("AgentIdentity not set on Agent")
+	if agent.Wallet == nil {
+		t.Fatal("Wallet not set on Agent")
 	}
 
-	if agent.Identity.LedgerId != ledger_id {
-		t.Fatal("AgentIdentity.LedgerId not set")
+	if agent.Wallet.LedgerId != ledger_id {
+		t.Fatal("Wallet.LedgerId not set")
 	}
 
-	if agent.Identity.Address != address {
-		t.Fatal("AgentIdentity.Address not set")
+	if agent.Wallet.Address != address {
+		t.Fatal("Wallet.Address not set")
 	}
 
-	if agent.Identity.PublicKey != public_key {
-		t.Fatal("AgentIdentity.PublicKey not set")
+	if agent.Wallet.PublicKey != public_key {
+		t.Fatal("Wallet.PublicKey not set")
 	}
 
-	if agent.Identity.PrivateKey != private_key {
-		t.Fatal("AgentIdentity.PrivateKey not set")
+	if agent.Wallet.PrivateKey != private_key {
+		t.Fatal("Wallet.PrivateKey not set")
 	}
 
 	if !agent.connection.Initialised() {
 		t.Fatal("connection not initialised")
 	}
 
-	// err = agent.Start()
+	err = agent.Start()
 
-	// if err != nil {
-	// 	t.Fatal("Failed to start agent", err)
-	// }
+	if err != nil {
+		t.Fatal("Failed to start agent", err)
+	}
 
-	// agent.Stop()
+	agent.Stop()
 }

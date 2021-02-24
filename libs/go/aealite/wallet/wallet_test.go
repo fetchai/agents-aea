@@ -18,7 +18,7 @@
 * ------------------------------------------------------------------------------
  */
 
-package identity
+package wallet
 
 import (
 	"os"
@@ -36,32 +36,32 @@ var (
 	private_key = "6d8d2b87d987641e2ca3f1991c1cccf08a118759e81fabdbf7e8484f27af015e"
 )
 
-// TestIdentity
-func TestIdentity(t *testing.T) {
+// TestWallet
+func TestWallet(t *testing.T) {
 	os.Args = []string{"cmd", EnvTestFile}
 
-	identity := AgentIdentity{}
+	wallet := Wallet{}
 
 	// initialise
-	err := identity.InitFromEnv()
+	err := wallet.InitFromEnv()
 
 	if err != nil {
-		t.Fatal("Failed to initialise identity", err)
+		t.Fatal("Failed to initialise wallet", err)
 	}
 
-	if identity.LedgerId != ledger_id {
-		t.Fatal("AgentIdentity.LedgerId not set")
+	if wallet.LedgerId != ledger_id {
+		t.Fatal("Wallet.LedgerId not set")
 	}
 
-	if identity.Address != address {
-		t.Fatal("AgentIdentity.Address not set")
+	if wallet.Address != address {
+		t.Fatal("Wallet.Address not set")
 	}
 
-	if identity.PublicKey != public_key {
-		t.Fatal("AgentIdentity.PublicKey not set")
+	if wallet.PublicKey != public_key {
+		t.Fatal("Wallet.PublicKey not set")
 	}
 
-	if identity.PrivateKey != private_key {
-		t.Fatal("AgentIdentity.PrivateKey not set")
+	if wallet.PrivateKey != private_key {
+		t.Fatal("Wallet.PrivateKey not set")
 	}
 }

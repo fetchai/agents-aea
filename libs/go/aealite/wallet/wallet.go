@@ -18,9 +18,10 @@
 * ------------------------------------------------------------------------------
  */
 
-package identity
+package wallet
 
 import (
+	"log"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -33,17 +34,17 @@ var logger zerolog.Logger = zerolog.New(zerolog.ConsoleWriter{
 	TimeFormat: "15:04:05.000",
 }).
 	With().Timestamp().
-	Str("package", "AgentIdentity").
+	Str("package", "Wallet").
 	Logger()
 
-type AgentIdentity struct {
+type Wallet struct {
 	LedgerId   string
 	Address    string
 	PublicKey  string
 	PrivateKey string
 }
 
-func (agent_id *AgentIdentity) InitFromEnv() error {
+func (wallet *Wallet) InitFromEnv() error {
 	env_file := os.Args[1]
 	logger.Debug().Msgf("env_file: %s", env_file)
 	err := godotenv.Overload(env_file)
@@ -52,9 +53,29 @@ func (agent_id *AgentIdentity) InitFromEnv() error {
 			Msg("Error loading env file")
 		return err
 	}
-	agent_id.LedgerId = os.Getenv("AEA_LEDGER_ID")
-	agent_id.Address = os.Getenv("AEA_ADDRESS")
-	agent_id.PublicKey = os.Getenv("AEA_PUBLIC_KEY")
-	agent_id.PrivateKey = os.Getenv("AEA_PRIVATE_KEY")
+	wallet.LedgerId = os.Getenv("AEA_LEDGER_ID")
+	// todo: make useful with all three supported ledgers
+	wallet.Address = os.Getenv("AEA_ADDRESS")
+	wallet.PublicKey = os.Getenv("AEA_PUBLIC_KEY")
+	wallet.PrivateKey = os.Getenv("AEA_PRIVATE_KEY")
+	if wallet.PrivateKey == "" {
+		log.Fatal("No private key provided")
+	}
+	public_key, err := FetchAIPublicKeyFromFetchAIPrivateKey(wallet.PrivateKey)
+	if err != nil {
+		log.Fatal("Could not derive public key")
+	}
+	if (wallet.PublicKey != "") && (public_key != wallet.PublicKey) {
+		log.Fatal("Derived and provided public_key don't match.")
+	}
+	wallet.PublicKey = public_key
+	address, err := FetchAIAddressFromPublicKey(wallet.PublicKey)
+	if err != nil {
+		log.Fatal("Could not derive address")
+	}
+	if (wallet.Address != "") && (address != wallet.Address) {
+		log.Fatal("Derived and provided address don't match.")
+	}
+	wallet.Address = address
 	return nil
 }

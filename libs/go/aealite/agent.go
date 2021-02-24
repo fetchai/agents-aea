@@ -24,8 +24,8 @@ import (
 	"log"
 
 	connections "aealite/connections"
-	identity "aealite/identity"
 	protocols "aealite/protocols"
+	wallet "aealite/wallet"
 )
 
 const (
@@ -33,7 +33,7 @@ const (
 )
 
 type Agent struct {
-	Identity   *identity.AgentIdentity
+	Wallet     *wallet.Wallet
 	connection connections.Connection
 }
 
@@ -41,8 +41,8 @@ func (agent *Agent) InitFromEnv() error {
 	if agent.connection == nil {
 		log.Fatal("Must set connection on agent before calling InitFromEnv().")
 	}
-	agent.Identity = &identity.AgentIdentity{}
-	err := agent.Identity.InitFromEnv()
+	agent.Wallet = &wallet.Wallet{}
+	err := agent.Wallet.InitFromEnv()
 	if err != nil {
 		log.Fatal("Error initialising identity.")
 	}

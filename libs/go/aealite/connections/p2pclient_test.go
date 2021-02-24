@@ -35,7 +35,7 @@ var (
 	por_service_id      = "acn"
 	por_ledger_id       = "fetchai"
 	por_peer_public_key = "0217a59bd805c310aca4febe0e99ce22ee3712ae085dc1e5630430b1e15a584bb7"
-	por_signature       = "61767a48664c2f666a4d69647677654a4a4b6a74425569714a322b3661445571384d6f4e524269396e44492f6c576c65495833667452663653783555576d78635330535730334956726631694b545841357a654130673d3d"
+	por_signature       = "avzHfL/fjMidvweJJKjtBUiqJ2+6aDUq8MoNRBi9nDI/lWleIX3ftRf6Sx5UWmxcS0SW03IVrf1iKTXA5zeA0g=="
 	delegate_host       = "acn.fetch.ai"
 	delegate_port       = uint16(11000)
 )

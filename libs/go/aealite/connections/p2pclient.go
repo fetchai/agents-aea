@@ -29,6 +29,7 @@ import (
 	"time"
 
 	protocols "aealite/protocols"
+	wallet "aealite/wallet"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 	proto "google.golang.org/protobuf/proto"
@@ -82,6 +83,18 @@ func (client *P2PClientApi) InitFromEnv() error {
 	agent_record.LedgerId = os.Getenv("AEA_P2P_POR_LEDGER_ID")
 	agent_record.PeerPublicKey = os.Getenv("AEA_P2P_POR_PEER_PUBKEY")
 	agent_record.Signature = os.Getenv("AEA_P2P_POR_SIGNATURE")
+	ok, err := wallet.VerifyLedgerSignature(
+		agent_record.LedgerId,
+		[]byte(agent_record.PeerPublicKey),
+		agent_record.Signature,
+		agent_record.PublicKey,
+	)
+	if err != nil {
+		log.Fatal("Could not verify signature." + err.Error())
+	}
+	if !ok {
+		log.Fatal("Invalid signature.")
+	}
 	client.agent_record = agent_record
 	host := os.Getenv("AEA_P2P_DELEGATE_HOST")
 	port := os.Getenv("AEA_P2P_DELEGATE_PORT")
@@ -201,7 +214,9 @@ func (client *P2PClientApi) register() error {
 	}
 
 	if status.Code != protocols.Status_SUCCESS {
-		return errors.New("as registration failed: " + strings.Join(status.Msgs, ":"))
+		return errors.New(
+			"as registration failed: " + status.String() + strings.Join(status.Msgs, ":"),
+		)
 	}
 	return nil
 }
