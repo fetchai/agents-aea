@@ -25,6 +25,7 @@ from unittest import TestCase, mock
 from unittest.mock import MagicMock
 
 import pytest
+from aea_crypto_fetchai import FetchAICrypto
 from click import BadParameter, ClickException, UsageError
 from jsonschema import ValidationError
 from yaml import YAMLError
@@ -62,13 +63,11 @@ from aea.configurations.constants import (
     DEFAULT_PROTOCOL,
     LEDGER_CONNECTION,
 )
-from aea.crypto.fetchai import DEFAULT_CHAIN_ID
-from aea.crypto.ledger_apis import LedgerApis
+from aea.crypto.ledger_apis import FETCHAI_DEFAULT_CHAIN_ID, LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.helpers.base import cd
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
-from tests.conftest import FETCHAI
 from tests.test_cli.tools_for_testing import (
     ConfigLoaderMock,
     ContextMock,
@@ -406,11 +405,11 @@ class TryGetBalanceTestCase(TestCase):
     def test_try_get_balance_positive(self):
         """Test for try_get_balance method positive result."""
         agent_config = mock.Mock()
-        agent_config.default_ledger_config = FETCHAI
+        agent_config.default_ledger_config = FetchAICrypto.identifier
 
         wallet_mock = mock.Mock()
-        wallet_mock.addresses = {FETCHAI: "some-adress"}
-        try_get_balance(agent_config, wallet_mock, FETCHAI)
+        wallet_mock.addresses = {FetchAICrypto.identifier: "some-adress"}
+        try_get_balance(agent_config, wallet_mock, FetchAICrypto.identifier)
 
 
 @mock.patch("aea.cli.utils.generic.os.path.exists", return_value=True)
@@ -523,7 +522,7 @@ def test_override_ledger_configurations_positive():
         LedgerApis.ledger_api_configs = old_configurations
         assert (
             LedgerApis.ledger_api_configs[DEFAULT_LEDGER]["chain_id"]
-            == DEFAULT_CHAIN_ID
+            == FETCHAI_DEFAULT_CHAIN_ID
         )
 
 

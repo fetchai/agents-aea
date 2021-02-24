@@ -35,3 +35,4 @@ connection_private_key_paths:
   fetchai: fetchai_private_key.txt
 registry_path: ../../packages
 default_routing: {}
+dependencies: {}

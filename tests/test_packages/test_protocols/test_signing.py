@@ -22,6 +22,7 @@ from typing import Type
 from unittest.mock import patch
 
 import pytest
+from aea_crypto_cosmos import CosmosCrypto
 
 from aea.common import Address
 from aea.helpers.transaction.base import (
@@ -43,8 +44,6 @@ from packages.fetchai.protocols.signing.dialogues import (
 )
 from packages.fetchai.protocols.signing.message import SigningMessage
 
-from tests.conftest import COSMOS
-
 
 class TestSigningMessage:
     """Test the signing message module."""
@@ -52,7 +51,7 @@ class TestSigningMessage:
     @classmethod
     def setup_class(cls):
         """Setup class for test case."""
-        cls.ledger_id = COSMOS
+        cls.ledger_id = CosmosCrypto.identifier
         cls.terms = Terms(
             ledger_id=cls.ledger_id,
             sender_address="address1",

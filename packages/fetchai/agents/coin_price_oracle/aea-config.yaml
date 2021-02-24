@@ -37,6 +37,11 @@ logging_config:
   disable_existing_loggers: false
   version: 1
 registry_path: ../packages
+dependencies:
+  aea-crypto-ethereum:
+    version: <0.2.0,>=0.1.0
+  aea-crypto-fetchai:
+    version: <0.2.0,>=0.1.0
 ---
 public_id: fetchai/coin_price:0.5.0
 type: skill
