@@ -459,8 +459,8 @@ jobs:
       continue-on-error: true
     - name: Coverage report
       run: |
-        coverage xml
-        coverage report
+        coverage xml -i
+        coverage report -i
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
