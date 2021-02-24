@@ -45,8 +45,6 @@ GoodHoldings = Dict[str, int]  # a map from identifier to quantity
 UtilityParams = Dict[str, float]  # a map from identifier to quantity
 ExchangeParams = Dict[str, float]  # a map from identifier to quantity
 
-QUANTITY_SHIFT = 100
-
 _default_logger = logging.getLogger(__name__)
 
 
@@ -288,7 +286,6 @@ class Preferences(BasePreferences):
         """Instantiate an agent preference object."""
         self._exchange_params_by_currency_id = None  # type: Optional[ExchangeParams]
         self._utility_params_by_good_id = None  # type: Optional[UtilityParams]
-        self._quantity_shift = QUANTITY_SHIFT
 
     def set(  # pylint: disable=arguments-differ
         self,
@@ -348,7 +345,7 @@ class Preferences(BasePreferences):
         """
         enforce(self.is_initialized, "Preferences params not set!")
         result = logarithmic_utility(
-            self.utility_params_by_good_id, quantities_by_good_id, self._quantity_shift
+            self.utility_params_by_good_id, quantities_by_good_id,
         )
         return result
 

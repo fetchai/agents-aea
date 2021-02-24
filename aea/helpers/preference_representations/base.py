@@ -28,20 +28,22 @@ from aea.exceptions import enforce
 def logarithmic_utility(
     utility_params_by_good_id: Dict[str, float],
     quantities_by_good_id: Dict[str, int],
-    quantity_shift: int = 1,
+    quantity_shift: int = 100,
 ) -> float:
     """
     Compute agent's utility given her utility function params and a good bundle.
 
     :param utility_params_by_good_id: utility params by good identifier
     :param quantities_by_good_id: quantities by good identifier
-    :param quantity_shift: a non-negative factor to shift the quantities in the utility function (to ensure the natural logarithm can be used on the entire range of quantities)
+    :param quantity_shift: a non-negative factor to shift the quantities in the utility function (to
+    ensure the natural logarithm can be used on the entire range of quantities)
     :return: utility value
     """
     enforce(
         quantity_shift >= 0,
         "The quantity_shift argument must be a non-negative integer.",
     )
+
     goodwise_utility = [
         utility_params_by_good_id[good_id] * math.log(quantity + quantity_shift)
         if quantity + quantity_shift > 0

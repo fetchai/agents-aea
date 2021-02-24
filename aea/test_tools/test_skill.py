@@ -434,16 +434,20 @@ class BaseSkillTestCase:
             asyncio.Queue()
         )
         cls._outbox = OutBox(cast(Multiplexer, cls._multiplexer))
-        _shared_state = cast(Dict[str, Any], kwargs.pop("shared_state", dict()))
+        _shared_state = cast(Optional[Dict[str, Any]], kwargs.pop("shared_state", None))
         _skill_config_overrides = cast(
-            Dict[str, Any], kwargs.pop("config_overrides", dict())
+            Optional[Dict[str, Any]], kwargs.pop("config_overrides", None)
         )
+        _dm_context_kwargs = cast(
+            Dict[str, Any], kwargs.pop("dm_context_kwargs", dict())
+        )
+
         agent_context = AgentContext(
             identity=identity,
             connection_status=cls._multiplexer.connection_status,
             outbox=cls._outbox,
             decision_maker_message_queue=Queue(),
-            decision_maker_handler_context=SimpleNamespace(),
+            decision_maker_handler_context=SimpleNamespace(**_dm_context_kwargs),
             task_manager=TaskManager(),
             default_ledger_id=identity.default_address_key,
             currency_denominations=DEFAULT_CURRENCY_DENOMINATIONS,
@@ -454,8 +458,8 @@ class BaseSkillTestCase:
             data_dir=os.getcwd(),
         )
 
-        # This enables pre-populating the 'shared_state' prior to loading the skill
-        if _shared_state != dict():
+        # Pre-populate the 'shared_state' prior to loading the skill
+        if _shared_state is not None:
             for key, value in _shared_state.items():
                 agent_context.shared_state[key] = value
 
@@ -465,8 +469,8 @@ class BaseSkillTestCase:
         with open_file(skill_configuration_file_path) as fp:
             skill_config: SkillConfig = loader.load(fp)
 
-        # This enables overriding the skill's config prior to loading
-        if _skill_config_overrides != {}:
+        # Override skill's config prior to loading
+        if _skill_config_overrides is not None:
             skill_config.update(_skill_config_overrides)
 
         skill_config.directory = cls.path_to_skill
