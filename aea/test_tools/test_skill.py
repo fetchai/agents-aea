@@ -27,9 +27,6 @@ from typing import Any, Dict, Optional, Tuple, Type, cast
 from aea.configurations.loader import ConfigLoaders, PackageType, SkillConfig
 from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import DEFAULT_CURRENCY_DENOMINATIONS
-from aea.crypto.wallet import Wallet
-from aea.decision_maker.base import DecisionMakerHandler as BaseDecisionMakerHandler
-from aea.decision_maker.default import DecisionMakerHandler as DefaultDecisionMakerHandler
 from aea.exceptions import AEAEnforceError
 from aea.helpers.io import open_file
 from aea.identity.base import Identity

@@ -110,10 +110,13 @@ class TestLogical(BaseSkillTestCase):
     def _calculate_score(preferences, ownership_state):
         """Calculate the score given a preferences and an ownership_state object."""
         goods_score = logarithmic_utility(
-            preferences.utility_params_by_good_id, ownership_state.quantities_by_good_id, 100
+            preferences.utility_params_by_good_id,
+            ownership_state.quantities_by_good_id,
+            100,
         )
         money_score = linear_utility(
-            preferences.exchange_params_by_currency_id, ownership_state.amount_by_currency_id
+            preferences.exchange_params_by_currency_id,
+            ownership_state.amount_by_currency_id,
         )
         return goods_score + money_score
 
@@ -135,7 +138,9 @@ class TestLogical(BaseSkillTestCase):
         # after
         mock_ownership.assert_any_call(is_seller=is_searching_for_sellers)
 
-        current_score = self._calculate_score(self.mocked_preferences, self.mocked_ownership_state)
+        current_score = self._calculate_score(
+            self.mocked_preferences, self.mocked_ownership_state
+        )
         for proposal in actual_proposals:
             # applying proposal on a new ownership_state
             terms = self.strategy.terms_from_proposal(
@@ -147,7 +152,9 @@ class TestLogical(BaseSkillTestCase):
             )
 
             # new score
-            new_score = self._calculate_score(self.mocked_preferences, new_ownership_state)
+            new_score = self._calculate_score(
+                self.mocked_preferences, new_ownership_state
+            )
 
             assert new_score >= current_score
 
@@ -169,7 +176,9 @@ class TestLogical(BaseSkillTestCase):
         # after
         mock_ownership.assert_any_call(is_seller=is_searching_for_sellers)
 
-        current_score = self._calculate_score(self.mocked_preferences, self.mocked_ownership_state)
+        current_score = self._calculate_score(
+            self.mocked_preferences, self.mocked_ownership_state
+        )
         for proposal in actual_proposals:
             # applying proposal on a new ownership_state
             terms = self.strategy.terms_from_proposal(
@@ -181,6 +190,8 @@ class TestLogical(BaseSkillTestCase):
             )
 
             # new score
-            new_score = self._calculate_score(self.mocked_preferences, new_ownership_state)
+            new_score = self._calculate_score(
+                self.mocked_preferences, new_ownership_state
+            )
 
             assert new_score >= current_score

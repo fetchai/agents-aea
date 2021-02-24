@@ -34,7 +34,6 @@ from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_ADDRESS
 
 from packages.fetchai.skills.tac_negotiation.dialogues import FipaDialogue
 from packages.fetchai.skills.tac_negotiation.transactions import Transactions
-from packages.fetchai.skills.tac_negotiation.strategy import Strategy
 
 from tests.conftest import ROOT_DIR
 

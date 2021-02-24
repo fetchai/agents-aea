@@ -212,7 +212,10 @@ class TestStrategy(BaseSkillTestCase):
         """Test the get_own_service_description method of the Strategy class where is_supply is True."""
         # setup
         is_supply = True
-        mocked_supplied_quantities_by_good_id = {good_id: quantity-1 for good_id, quantity in self.mocked_quantities_by_good_id.items()}
+        mocked_supplied_quantities_by_good_id = {
+            good_id: quantity - 1
+            for good_id, quantity in self.mocked_quantities_by_good_id.items()
+        }
         expected_description = build_goods_description(
             mocked_supplied_quantities_by_good_id,
             self.mocked_currency_id,
@@ -236,7 +239,9 @@ class TestStrategy(BaseSkillTestCase):
         """Test the get_own_service_description method of the Strategy class where is_supply is False."""
         # setup
         is_supply = False
-        mocked_demanded_quantities_by_good_id = {good_id: 1 for good_id in self.mocked_quantities_by_good_id.keys()}
+        mocked_demanded_quantities_by_good_id = {
+            good_id: 1 for good_id in self.mocked_quantities_by_good_id.keys()
+        }
         expected_description = build_goods_description(
             mocked_demanded_quantities_by_good_id,
             self.mocked_currency_id,
@@ -453,12 +458,22 @@ class TestStrategy(BaseSkillTestCase):
             assert actual_proposals[index].values[self.mocked_good_ids[index]] == 1
             for good_id_index in range(9):
                 if index != good_id_index:
-                    assert actual_proposals[index].values[self.mocked_good_ids[good_id_index]] == 0
-            assert actual_proposals[index].values['currency_id'] == self.mocked_currency_id
-            assert actual_proposals[index].values['ledger_id'] == self.ledger_id
-            assert actual_proposals[index].values['price'] == expected_proposed_prices[index]
-            assert actual_proposals[index].values['fee'] == 0
-            assert actual_proposals[index].values['nonce'] == str(index+1)
+                    assert (
+                        actual_proposals[index].values[
+                            self.mocked_good_ids[good_id_index]
+                        ]
+                        == 0
+                    )
+            assert (
+                actual_proposals[index].values["currency_id"] == self.mocked_currency_id
+            )
+            assert actual_proposals[index].values["ledger_id"] == self.ledger_id
+            assert (
+                actual_proposals[index].values["price"]
+                == expected_proposed_prices[index]
+            )
+            assert actual_proposals[index].values["fee"] == 0
+            assert actual_proposals[index].values["nonce"] == str(index + 1)
 
     def test_generate_candidate_proposals_buyer(self):
         """Test the _generate_candidate_proposals method of the Strategy class where role is buyer."""
@@ -487,12 +502,22 @@ class TestStrategy(BaseSkillTestCase):
             assert actual_proposals[index].values[self.mocked_good_ids[index]] == 1
             for good_id_index in range(9):
                 if index != good_id_index:
-                    assert actual_proposals[index].values[self.mocked_good_ids[good_id_index]] == 0
-            assert actual_proposals[index].values['currency_id'] == self.mocked_currency_id
-            assert actual_proposals[index].values['ledger_id'] == self.ledger_id
-            assert actual_proposals[index].values['price'] == expected_proposed_prices[index]
-            assert actual_proposals[index].values['fee'] == 0
-            assert actual_proposals[index].values['nonce'] == str(index+1)
+                    assert (
+                        actual_proposals[index].values[
+                            self.mocked_good_ids[good_id_index]
+                        ]
+                        == 0
+                    )
+            assert (
+                actual_proposals[index].values["currency_id"] == self.mocked_currency_id
+            )
+            assert actual_proposals[index].values["ledger_id"] == self.ledger_id
+            assert (
+                actual_proposals[index].values["price"]
+                == expected_proposed_prices[index]
+            )
+            assert actual_proposals[index].values["fee"] == 0
+            assert actual_proposals[index].values["nonce"] == str(index + 1)
 
     def test_is_profitable_transaction_not_affordable(self):
         """Test the is_profitable_transaction method of the Strategy class where is_affordable_transaction is False."""

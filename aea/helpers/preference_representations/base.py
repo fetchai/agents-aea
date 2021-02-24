@@ -22,12 +22,9 @@
 import math
 from typing import Dict
 
-from aea.exceptions import enforce
-
 
 def logarithmic_utility(
-    utility_params_by_good_id: Dict[str, float],
-    quantities_by_good_id: Dict[str, int],
+    utility_params_by_good_id: Dict[str, float], quantities_by_good_id: Dict[str, int],
 ) -> float:
     """
     Compute agent's utility given her utility function params and a good bundle.
