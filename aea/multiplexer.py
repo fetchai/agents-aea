@@ -690,6 +690,9 @@ class AsyncMultiplexer(Runnable, WithLogger):
 class Multiplexer(AsyncMultiplexer):
     """Transit sync multiplexer for compatibility."""
 
+    _thread_was_started: bool
+    _is_connected: bool
+
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         """
         Initialize the connection multiplexer.
@@ -702,6 +705,10 @@ class Multiplexer(AsyncMultiplexer):
         """
         super().__init__(*args, **kwargs)
         self._sync_lock = threading.Lock()
+        self._init()
+
+    def _init(self) -> None:
+        """Set initial variables."""
         self._thread_was_started = False
         self._is_connected = False
 
@@ -748,7 +755,12 @@ class Multiplexer(AsyncMultiplexer):
             if self._thread_runner.is_alive() and self._thread_was_started:
                 self._thread_runner.stop()
                 self.logger.debug("Thread stopped")
+
             self.logger.debug("Disconnected")
+
+            # reset thread runner and init variables
+            self._init()
+            self.set_loop(self._loop)
 
     def put(self, envelope: Envelope) -> None:  # type: ignore  # cause overrides coroutine
         """

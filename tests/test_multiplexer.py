@@ -943,3 +943,36 @@ def test_multiplexer_setup_replaces_connections():
     m._setup([MagicMock()], MagicMock())
     assert len(m._id_to_connection) == 1
     assert len(m._connections) == 1
+
+
+def test_connect_after_disconnect_sync():
+    """Test connect-disconnect-connect again for threaded multiplexer."""
+    multiplexer = Multiplexer([_make_dummy_connection()])
+
+    assert not multiplexer.connection_status.is_connected
+    multiplexer.connect()
+    assert multiplexer.connection_status.is_connected
+    multiplexer.disconnect()
+    assert not multiplexer.connection_status.is_connected
+
+    multiplexer.connect()
+    assert multiplexer.connection_status.is_connected
+    multiplexer.disconnect()
+    assert not multiplexer.connection_status.is_connected
+
+
+@pytest.mark.asyncio
+async def test_connect_after_disconnect_async():
+    """Test connect-disconnect-connect again for async multiplexer."""
+    multiplexer = AsyncMultiplexer([_make_dummy_connection()])
+
+    assert not multiplexer.connection_status.is_connected
+    await multiplexer.connect()
+    assert multiplexer.connection_status.is_connected
+    await multiplexer.disconnect()
+    assert not multiplexer.connection_status.is_connected
+
+    await multiplexer.connect()
+    assert multiplexer.connection_status.is_connected
+    await multiplexer.disconnect()
+    assert not multiplexer.connection_status.is_connected
