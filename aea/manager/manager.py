@@ -138,13 +138,20 @@ class MultiAgentManager:
         working_dir: str,
         mode: str = "async",
         registry_path: str = DEFAULT_REGISTRY_NAME,
+        auto_add_remove_project: bool = False,
     ) -> None:
         """
         Initialize manager.
 
         :param working_dir: directory to store base agents.
+        :param mode: str. async or threaded
+        :param registry_path: str. path to the local packages registry
+        :param auto_add_remove_project: bool. add/remove project on the first agent add/last agent remove
+
+        :return: None
         """
         self.working_dir = working_dir
+        self._auto_add_remove_project = auto_add_remove_project
         self._save_path = os.path.join(self.working_dir, self.SAVE_FILENAME)
 
         self.registry_path = registry_path
@@ -332,6 +339,7 @@ class MultiAgentManager:
         registry, and then from remote registry in case of failure).
 
         :param public_id: the public if of the agent project.
+
         :param local: whether or not to fetch from local registry.
         :param remote: whether or not to fetch from remote registry.
         :param restore: bool flag for restoring already fetched agent.
@@ -392,6 +400,9 @@ class MultiAgentManager:
         agent_name: Optional[str] = None,
         agent_overrides: Optional[dict] = None,
         component_overrides: Optional[List[dict]] = None,
+        local: bool = False,
+        remote: bool = False,
+        restore: bool = False,
     ) -> "MultiAgentManager":
         """
         Create new agent configuration based on project with config overrides applied.
@@ -404,6 +415,10 @@ class MultiAgentManager:
         :param component_overrides: overrides for component section.
         :param config: agent config (used for agent re-creation).
 
+        :param local: whether or not to fetch from local registry.
+        :param remote: whether or not to fetch from remote registry.
+        :param restore: bool flag for restoring already fetched agent.
+
         :return: manager
         """
         agent_name = agent_name or public_id.name
@@ -411,10 +426,14 @@ class MultiAgentManager:
         if agent_name in self._agents:
             raise ValueError(f"Agent with name {agent_name} already exists!")
 
-        if public_id not in self._projects:
-            raise ValueError(f"{public_id} project is not added!")
+        project = self._projects.get(public_id, None)
 
-        project = self._projects[public_id]
+        if project is None and self._auto_add_remove_project:
+            self.add_project(public_id, local, remote, restore)
+            project = self._projects.get(public_id, None)
+
+        if project is None:
+            raise ValueError(f"{public_id} project is not added!")
 
         agent_alias = AgentAlias(
             project=project,
@@ -540,6 +559,11 @@ class MultiAgentManager:
 
         agent_alias = self._agents.pop(agent_name)
         agent_alias.remove_from_project()
+        project: Project = agent_alias.project
+
+        if not project.agents and self._auto_add_remove_project:
+            self.remove_project(project.public_id, keep_files=False)
+
         return self
 
     def start_agent(self, agent_name: str) -> "MultiAgentManager":

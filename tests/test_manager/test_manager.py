@@ -21,6 +21,7 @@ import asyncio
 import os
 from contextlib import suppress
 from shutil import rmtree
+from tempfile import TemporaryDirectory
 from unittest.case import TestCase
 from unittest.mock import Mock, patch
 
@@ -35,7 +36,7 @@ from packages.fetchai.connections.stub.connection import StubConnection
 from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
 
 from tests.common.utils import wait_for_condition
-from tests.conftest import MY_FIRST_AEA_PUBLIC_ID
+from tests.conftest import MY_FIRST_AEA_PUBLIC_ID, PACKAGES_DIR
 
 
 @patch("aea.aea_builder.AEABuilder.install_pypi_dependencies")
@@ -491,3 +492,30 @@ class TestMultiAgentManagerThreadedMode(TestMultiAgentManagerAsyncMode):
     """Tests for MultiAgentManager in threaded mode."""
 
     MODE = "threaded"
+
+
+def test_project_auto_added_removed():
+    """Check project auto added and auto removed on agent added/removed."""
+    agent_name = "test_agent"
+    with TemporaryDirectory() as tmp_dir, patch(
+        "aea.manager.project.Project.build"
+    ), patch("aea.manager.project.Project.install_pypi_dependencies"):
+        manager = MultiAgentManager(
+            tmp_dir,
+            mode="async",
+            registry_path=PACKAGES_DIR,
+            auto_add_remove_project=True,
+        )
+        try:
+            manager.start_manager()
+            assert not manager.list_projects()
+            manager.add_agent(
+                PublicId("fetchai", "my_first_aea"), agent_name, local=True
+            )
+            assert manager.list_projects()
+            assert manager.list_agents()
+            manager.remove_agent(agent_name)
+            assert not manager.list_agents()
+            assert not manager.list_projects()
+        finally:
+            manager.stop_manager()
