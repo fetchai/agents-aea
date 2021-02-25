@@ -2007,7 +2007,7 @@ class TestOefSearchHandler(BaseSkillTestCase):
             message_type=OefSearchMessage,
             dialogue_reference=incorrect_dialogue_reference,
             performative=OefSearchMessage.Performative.SEARCH_RESULT,
-            to=self.self_address + "_" + str(self.skill.skill_context.skill_id),
+            to=str(self.skill.skill_context.skill_id),
         )
 
         # operation
@@ -2031,7 +2031,7 @@ class TestOefSearchHandler(BaseSkillTestCase):
             self.build_incoming_message_for_skill_dialogue(
                 dialogue=oef_dialogue,
                 performative=OefSearchMessage.Performative.OEF_ERROR,
-                to=self.self_address + "_" + str(self.skill.skill_context.skill_id),
+                to=str(self.skill.skill_context.skill_id),
                 oef_error_operation=OefSearchMessage.OefErrorOperation.SEARCH_SERVICES,
             ),
         )
@@ -2063,7 +2063,7 @@ class TestOefSearchHandler(BaseSkillTestCase):
             self.build_incoming_message_for_skill_dialogue(
                 dialogue=oef_dialogue,
                 performative=OefSearchMessage.Performative.SEARCH_RESULT,
-                to=self.self_address + "_" + str(self.skill.skill_context.skill_id),
+                to=str(self.skill.skill_context.skill_id),
                 agents=tuple(self.found_agents),
             ),
         )
@@ -2116,7 +2116,7 @@ class TestOefSearchHandler(BaseSkillTestCase):
             self.build_incoming_message_for_skill_dialogue(
                 dialogue=oef_dialogue,
                 performative=OefSearchMessage.Performative.SEARCH_RESULT,
-                to=self.self_address + "_" + str(self.skill.skill_context.skill_id),
+                to=str(self.skill.skill_context.skill_id),
                 agents=tuple(),
             ),
         )
@@ -2142,7 +2142,7 @@ class TestOefSearchHandler(BaseSkillTestCase):
             message_type=OefSearchMessage,
             dialogue_reference=("1", ""),
             performative=invalid_performative,
-            to=self.self_address + "_" + str(self.skill.skill_context.skill_id),
+            to=str(self.skill.skill_context.skill_id),
             service_description="some_service_description",
         )
 

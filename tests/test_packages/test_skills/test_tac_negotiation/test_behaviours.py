@@ -73,11 +73,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         cls.mocked_query = Query(
             [Constraint("tac_service", ConstraintType("==", "both"))]
         )
-        cls.sender = (
-            cls._skill.skill_context.agent_address
-            + "_"
-            + str(cls._skill.skill_context.skill_id)
-        )
+        cls.sender = str(cls._skill.skill_context.skill_id)
 
     def test_init(self):
         """Test the __init__ method of the negotiation behaviour."""

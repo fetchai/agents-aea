@@ -271,12 +271,7 @@ class TestDialogues(BaseSkillTestCase):
             query=self.query,
         )
         assert dialogue.role == OefSearchDialogue.Role.AGENT
-        assert (
-            dialogue.self_address
-            == self.skill.skill_context.agent_address
-            + "_"
-            + str(self.skill.skill_context.skill_id)
-        )
+        assert dialogue.self_address == str(self.skill.skill_context.skill_id)
 
     def test_signing_dialogue(self):
         """Test the SigningDialogue class."""
