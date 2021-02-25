@@ -37,6 +37,8 @@ from tests.test_packages.test_skills.test_simple_data_request.intermediate_class
 class TestHttpRequestBehaviour(SimpleDataRequestTestCase):
     """Test http_request behaviour of http_request."""
 
+    is_agent_to_agent_messages = False
+
     @classmethod
     def setup(cls):
         """Setup the test class."""
@@ -75,7 +77,7 @@ class TestHttpRequestBehaviour(SimpleDataRequestTestCase):
             message_type=HttpMessage,
             performative=HttpMessage.Performative.REQUEST,
             to=str(HTTP_CLIENT_PUBLIC_ID),
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             method=self.mocked_method,
             url=self.mocked_url,
             headers="",

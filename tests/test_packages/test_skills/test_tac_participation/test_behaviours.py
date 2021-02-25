@@ -45,6 +45,7 @@ class TestTacSearchBehaviour(BaseSkillTestCase):
     """Test tac behaviour of tac participation."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "tac_participation")
+    is_agent_to_agent_messages = True
 
     @classmethod
     def setup(cls):
@@ -95,9 +96,7 @@ class TestTacSearchBehaviour(BaseSkillTestCase):
             message_type=OefSearchMessage,
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             to=self.skill.skill_context.search_service_address,
-            sender=self.skill.skill_context.agent_address
-            + "_"
-            + str(self.skill.skill_context.skill_id),
+            sender=str(self.skill.skill_context.skill_id),
             query=mocked_query,
         )
         assert has_attributes, error_str

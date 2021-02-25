@@ -263,6 +263,7 @@ class TestHttpHandler(ConfirmationAW3TestCase):
     """Test http handler of confirmation aw3."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "confirmation_aw3")
+    is_agent_to_agent_messages = False
 
     @classmethod
     def setup(cls):

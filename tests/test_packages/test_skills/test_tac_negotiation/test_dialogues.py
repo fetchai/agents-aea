@@ -195,7 +195,7 @@ class TestDialogues(BaseSkillTestCase):
             kwargs=Kwargs({"some_key": "some_value"}),
         )
         assert dialogue.role == ContractApiDialogue.Role.AGENT
-        assert dialogue.self_address == self.skill.skill_context.agent_address
+        assert dialogue.self_address == str(self.skill.skill_context.skill_id)
 
     def test_default_dialogues(self):
         """Test the DefaultDialogues class."""
@@ -243,7 +243,7 @@ class TestDialogues(BaseSkillTestCase):
             address="some_address",
         )
         assert dialogue.role == LedgerApiDialogue.Role.AGENT
-        assert dialogue.self_address == self.skill.skill_context.agent_address
+        assert dialogue.self_address == str(self.skill.skill_context.skill_id)
 
     def test_oef_search_dialogue(self):
         """Test the OefSearchDialogue class."""

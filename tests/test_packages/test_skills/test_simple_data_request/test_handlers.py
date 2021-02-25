@@ -38,6 +38,8 @@ from tests.test_packages.test_skills.test_simple_data_request.intermediate_class
 class TestHttpHandler(SimpleDataRequestTestCase):
     """Test http handler of simple_data_request."""
 
+    is_agent_to_agent_messages = False
+
     @classmethod
     def setup(cls):
         """Setup the test class."""

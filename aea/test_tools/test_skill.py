@@ -45,6 +45,7 @@ class BaseSkillTestCase:
     """A class to test a skill."""
 
     path_to_skill: Path = Path(".")
+    is_agent_to_agent_messages: bool = True
     _skill: Skill
     _multiplexer: AsyncMultiplexer
     _outbox: OutBox
@@ -150,6 +151,7 @@ class BaseSkillTestCase:
         target: Optional[int] = None,
         to: Optional[Address] = None,
         sender: Address = COUNTERPARTY_ADDRESS,
+        is_agent_to_agent_messages: Optional[bool] = None,
         **kwargs: Any,
     ) -> Message:
         """
@@ -168,6 +170,8 @@ class BaseSkillTestCase:
 
         :return: the created incoming message
         """
+        if is_agent_to_agent_messages is None:
+            is_agent_to_agent_messages = self.is_agent_to_agent_messages
         message_attributes = dict()  # type: Dict[str, Any]
 
         default_dialogue_reference = Dialogues.new_self_initiated_dialogue_reference()
@@ -186,9 +190,12 @@ class BaseSkillTestCase:
 
         incoming_message = message_type(**message_attributes)
         incoming_message.sender = sender
-        incoming_message.to = (
-            self.skill.skill_context.agent_address if to is None else to
+        default_to = (
+            self.skill.skill_context.agent_address
+            if is_agent_to_agent_messages
+            else str(self.skill.public_id)
         )
+        incoming_message.to = default_to if to is None else to
         return incoming_message
 
     def build_incoming_message_for_skill_dialogue(
@@ -333,6 +340,7 @@ class BaseSkillTestCase:
         dialogues: Dialogues,
         messages: Tuple[DialogueMessage, ...],
         counterparty: Address = COUNTERPARTY_ADDRESS,
+        is_agent_to_agent_messages: Optional[bool] = None,
     ) -> Dialogue:
         """
         Quickly create a dialogue.
@@ -347,9 +355,12 @@ class BaseSkillTestCase:
         :param dialogues: a dialogues class
         :param counterparty: the message_id
         :param messages: the dialogue_reference
+        :param is_agent_to_agent_messages: whether the dialogue is between agents or components
 
         :return: the created incoming message
         """
+        if is_agent_to_agent_messages is None:
+            is_agent_to_agent_messages = self.is_agent_to_agent_messages
         if len(messages) == 0:
             raise AEAEnforceError("the list of messages must be positive.")
 
@@ -363,14 +374,20 @@ class BaseSkillTestCase:
 
         if is_incoming:  # first message from the opponent
             dialogue_reference = dialogues.new_self_initiated_dialogue_reference()
+            default_to = (
+                self.skill.skill_context.agent_address
+                if is_agent_to_agent_messages
+                else str(self.skill.public_id)
+            )
             message = self.build_incoming_message(
                 message_type=dialogues.message_class,
                 dialogue_reference=dialogue_reference,
                 message_id=Dialogue.STARTING_MESSAGE_ID,
                 target=target or Dialogue.STARTING_TARGET,
                 performative=performative,
-                to=self.skill.skill_context.agent_address,
+                to=default_to,
                 sender=counterparty,
+                is_agent_to_agent_messages=is_agent_to_agent_messages,
                 **contents,
             )
             dialogue = cast(Dialogue, dialogues.update(message))
@@ -402,14 +419,20 @@ class BaseSkillTestCase:
                 )
                 message_id = dialogue.get_incoming_next_message_id()
 
+                default_to = (
+                    self.skill.skill_context.agent_address
+                    if is_agent_to_agent_messages
+                    else str(self.skill.public_id)
+                )
                 message = self.build_incoming_message(
                     message_type=dialogues.message_class,
                     dialogue_reference=dialogue_reference,
                     message_id=message_id,
                     target=target,
                     performative=performative,
-                    to=self.skill.skill_context.agent_address,
+                    to=default_to,
                     sender=counterparty,
+                    is_agent_to_agent_messages=is_agent_to_agent_messages,
                     **contents,
                 )
                 dialogue = cast(Dialogue, dialogues.update(message))

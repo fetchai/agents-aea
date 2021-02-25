@@ -89,7 +89,7 @@ class TestSearchBehaviour(ConfirmationAW3TestCase):
             message_type=OefSearchMessage,
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             to=self.skill.skill_context.search_service_address,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             query=mock_query,
         )
         assert has_attributes, error_str
