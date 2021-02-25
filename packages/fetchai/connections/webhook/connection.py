@@ -29,7 +29,7 @@ from aiohttp import web  # type: ignore
 from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
-from aea.mail.base import Envelope, EnvelopeContext
+from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 
@@ -89,6 +89,7 @@ class WebhookChannel:
         webhook_port: int,
         webhook_url_path: str,
         connection_id: PublicId,
+        target_skill_id: PublicId,
         logger: logging.Logger = _default_logger,
     ):
         """
@@ -105,6 +106,7 @@ class WebhookChannel:
         self.webhook_address = webhook_address
         self.webhook_port = webhook_port
         self.webhook_url_path = webhook_url_path
+        self.target_skill_id = target_skill_id
 
         self.webhook_site = None  # type: Optional[web.TCPSite]
         self.runner = None  # type: Optional[web.AppRunner]
@@ -197,9 +199,8 @@ class WebhookChannel:
         payload_bytes = await request.read()
         version = str(request.version[0]) + "." + str(request.version[1])
 
-        context = EnvelopeContext(connection_id=WebhookConnection.connection_id)
         http_message, _ = self._dialogues.create(
-            counterparty=self.agent_address,
+            counterparty=str(self.target_skill_id),
             performative=HttpMessage.Performative.REQUEST,
             method=request.method,
             url=str(request.url),
@@ -208,10 +209,7 @@ class WebhookChannel:
             body=payload_bytes if payload_bytes is not None else b"",
         )
         envelope = Envelope(
-            to=http_message.to,
-            sender=http_message.sender,
-            context=context,
-            message=http_message,
+            to=http_message.to, sender=http_message.sender, message=http_message,
         )
         return envelope
 
@@ -227,16 +225,28 @@ class WebhookConnection(Connection):
         webhook_address = cast(str, self.configuration.config.get("webhook_address"))
         webhook_port = cast(int, self.configuration.config.get("webhook_port"))
         webhook_url_path = cast(str, self.configuration.config.get("webhook_url_path"))
-        if webhook_address is None or webhook_port is None or webhook_url_path is None:
+        target_skill_id_ = cast(
+            Optional[str], self.configuration.config.get("target_skill_id")
+        )
+        if (
+            webhook_address is None
+            or webhook_port is None
+            or webhook_url_path is None
+            or target_skill_id_ is None
+        ):
             raise ValueError(  # pragma: nocover
-                "webhook_address, webhook_port and webhook_url_path must be set!"
+                "webhook_address, webhook_port, webhook_url_path and target_skill_id must be set!"
             )
+        target_skill_id = PublicId.try_from_str(target_skill_id_)
+        if target_skill_id is None:
+            raise ValueError("Provided target_skill_id is not a valid public id.")
         self.channel = WebhookChannel(
             agent_address=self.address,
             webhook_address=webhook_address,
             webhook_port=webhook_port,
             webhook_url_path=webhook_url_path,
             connection_id=self.connection_id,
+            target_skill_id=target_skill_id,
             logger=self.logger,
         )
 

@@ -23,7 +23,6 @@ import json
 from typing import Any, Optional, cast
 
 from aea.configurations.base import PublicId
-from aea.mail.base import EnvelopeContext
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
@@ -171,8 +170,7 @@ class HttpHandler(Handler):
             ),
         )
         self.context.logger.info("responding with: {}".format(http_response))
-        envelope_context = EnvelopeContext(connection_id=self._http_server_id)
-        self.context.outbox.put_message(message=http_response, context=envelope_context)
+        self.context.outbox.put_message(message=http_response)
 
         if self.context.prometheus_dialogues.enabled:
             metric_name = "num_requests"

@@ -84,6 +84,7 @@ class TestWebhookConnection:
         """Initialise the class."""
         self.host = get_host()
         self.port = get_unused_tcp_port()
+        self.target_skill_id = "some_author/some_skill:0.1.0"
         self.identity = Identity("", address="some string")
         self.path = "/webhooks/topic/{topic}/"
         self.loop = asyncio.get_event_loop()
@@ -92,12 +93,13 @@ class TestWebhookConnection:
             webhook_address=self.host,
             webhook_port=self.port,
             webhook_url_path=self.path,
+            target_skill_id=self.target_skill_id,
             connection_id=WebhookConnection.connection_id,
         )
         self.webhook_connection = WebhookConnection(
             configuration=configuration, data_dir=MagicMock(), identity=self.identity,
         )
-        self.dialogues = HttpDialogues(self.identity.address)
+        self.skill_dialogues = HttpDialogues(self.target_skill_id)
 
     async def test_initialization(self):
         """Test the initialisation of the class."""
@@ -138,7 +140,7 @@ class TestWebhookConnection:
         assert envelope
 
         message = cast(HttpMessage, envelope.message)
-        dialogue = self.dialogues.update(message)
+        dialogue = self.skill_dialogues.update(message)
         assert dialogue is not None
         assert message.method.upper() == "POST"
         assert message.body.decode("utf-8") == json.dumps(payload)

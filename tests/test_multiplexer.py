@@ -351,8 +351,13 @@ async def test_send_envelope_with_non_registered_connection():
         context=EnvelopeContext(connection_id=UNKNOWN_CONNECTION_PUBLIC_ID),
     )
 
-    with pytest.raises(AEAConnectionError, match="No connection registered with id:.*"):
+    with unittest.mock.patch.object(
+        multiplexer.logger, "warning"
+    ) as mock_logger_warning:
         await multiplexer._send(envelope)
+        mock_logger_warning.assert_called_with(
+            f"Dropping envelope, no connection available for sending: {envelope}"
+        )
 
     multiplexer.disconnect()
 
@@ -400,7 +405,7 @@ def test_send_envelope_error_is_logged_by_send_loop():
         multiplexer.put(envelope)
         time.sleep(0.1)
         mock_logger_error.assert_called_with(
-            "No connection registered with id: {}.".format(fake_connection_id)
+            "No connection registered with id: {}".format(fake_connection_id)
         )
 
     multiplexer.disconnect()
@@ -683,6 +688,39 @@ async def test_default_route_applied(caplog):
             await multiplexer.disconnect()
 
             assert "Using default routing:" in caplog.text
+
+
+@pytest.mark.asyncio
+async def test_connection_id_in_to_field_detected(caplog):
+    """Test to field is parsed correctly and used for routing."""
+    logger = logging.getLogger("aea.multiplexer")
+    with caplog.at_level(logging.DEBUG, logger="aea.multiplexer"):
+        connection_1 = _make_dummy_connection()
+        connections = [connection_1]
+        multiplexer = AsyncMultiplexer(
+            connections, loop=asyncio.get_event_loop(), protocols=[DefaultProtocolMock]
+        )
+        multiplexer.logger = logger
+        envelope = Envelope(
+            to=str(connection_1.connection_id),
+            sender="",
+            protocol_specification_id=DefaultMessage.protocol_specification_id,
+            message=b"",
+            context=EnvelopeContext(),
+        )
+        try:
+            await multiplexer.connect()
+            inbox = InBox(multiplexer)
+            outbox = InBox(multiplexer)
+
+            assert inbox.empty()
+            assert outbox.empty()
+            multiplexer.put(envelope)
+            await outbox.async_get()
+        finally:
+            await multiplexer.disconnect()
+
+            assert "Using envelope `to` field as connection_id:" in caplog.text
 
 
 def test_multiplexer_setup():

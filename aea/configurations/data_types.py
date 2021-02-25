@@ -322,6 +322,21 @@ class PublicId(JSONSerializable):
         return PublicId(username, package_name, version)
 
     @classmethod
+    def try_from_str(cls, public_id_string: str) -> Optional["PublicId"]:
+        """
+        Safely try to get public id from string.
+
+        :param public_id_string: the public id in string format.
+        :return: the public id object or None
+        """
+        result: Optional[PublicId] = None
+        try:
+            result = cls.from_str(public_id_string)
+        except ValueError:
+            pass
+        return result
+
+    @classmethod
     def from_uri_path(cls, public_id_uri_path: str) -> "PublicId":
         """
         Initialize the public id from the string.
@@ -482,7 +497,7 @@ class PackageId:
     @classmethod
     def from_uri_path(cls, package_id_uri_path: str) -> "PackageId":
         """
-        Initialize the public id from the string.
+        Initialize the package id from the string.
 
         >>> str(PackageId.from_uri_path("skill/author/package_name/0.1.0"))
         '(skill, author/package_name:0.1.0)'
@@ -493,8 +508,8 @@ class PackageId:
         ...
         ValueError: Input 'very/bad/formatted:input' is not well formatted.
 
-        :param public_id_uri_path: the public id in uri path string format.
-        :return: the public id object.
+        :param package_id_uri_path: the package id in uri path string format.
+        :return: the package id object.
         :raises ValueError: if the string in input is not well formatted.
         """
         if not re.match(cls.PACKAGE_ID_URI_REGEX, package_id_uri_path):
