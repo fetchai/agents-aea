@@ -166,6 +166,7 @@ class BaseSkillTestCase:
         :param performative: the performative
         :param to: the 'to' address
         :param sender: the 'sender' address
+        :param is_agent_to_agent_messages: whether the dialogue is between agents or components
         :param kwargs: other attributes
 
         :return: the created incoming message

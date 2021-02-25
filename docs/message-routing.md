@@ -1,12 +1,14 @@
 
 Message routing can be split up into the routing of incoming and outgoing `Messages`.
 
+It is important to keep in mind that <a href="../interaction-protocol">interaction protocols</a> can be maintained between agents (agent to agent) and between components of the AEA (component to component). In the former case, the `to`/`sender` fields of the `Envelope` are agent addresses, in the latter case they are component public ids.
+
 ## Incoming `Messages`
 
 - `Connections` receive or create `Envelopes` which they deposit in the `InBox`
 - the `AgentLoop` picks `Envelopes` off the `InBox`
 - the `AEA` tries to decode the message; errors are handled by the `ErrorHandler`
-- `Messages` are dispatched based on two rules:
+- `Messages` are dispatched based on three rules:
 
 	1. checks if `to` field can be interpreted as `skill_id`, if so uses that together with the `protocol_id` to dispatch to the protocol's `Handler` in the specified `Skill`, else
 	2. checks if `EnvelopeContext` esits and specifies a `Skill`, if so uses that together with the `protocol_id` to dispatch to the protocol's `Handler` in the specified `Skill`, else
