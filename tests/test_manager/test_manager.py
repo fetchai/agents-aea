@@ -19,7 +19,9 @@
 """This module contains tests for aea manager."""
 import asyncio
 import os
+import re
 from contextlib import suppress
+from pathlib import Path
 from shutil import rmtree
 from tempfile import TemporaryDirectory
 from unittest.case import TestCase
@@ -517,5 +519,82 @@ def test_project_auto_added_removed():
             manager.remove_agent(agent_name)
             assert not manager.list_agents()
             assert not manager.list_projects()
+        finally:
+            manager.stop_manager()
+
+
+def test_handle_error_on_load_state():
+    """Check project auto added and auto removed on agent added/removed."""
+    agent_name = "test_agent"
+    with TemporaryDirectory() as tmp_dir:
+        manager = MultiAgentManager(
+            tmp_dir,
+            mode="async",
+            registry_path=PACKAGES_DIR,
+            auto_add_remove_project=True,
+        )
+        try:
+            state_loaded, *_ = manager.start_manager()
+            assert not state_loaded
+            assert not manager.list_projects()
+            manager.add_agent(
+                PublicId("fetchai", "my_first_aea"), agent_name, local=True
+            )
+            assert manager.list_projects()
+            manager._save_state()
+        finally:
+            manager.stop_manager(cleanup=False)
+
+        # check loaded well
+        manager = MultiAgentManager(
+            tmp_dir,
+            mode="async",
+            registry_path=PACKAGES_DIR,
+            auto_add_remove_project=False,
+        )
+        try:
+            state_loaded, loaded_ok, *_ = manager.start_manager()
+            assert state_loaded
+            assert len(loaded_ok) == 1
+            assert manager.list_projects()
+            assert manager.list_agents()
+        finally:
+            manager.stop_manager(cleanup=False)
+
+        config_file = (
+            Path(tmp_dir) / "fetchai/my_first_aea/vendor/fetchai/skills/echo/skill.yaml"
+        )
+        config_yaml = config_file.read_text()
+        new_version = "'>=0.0.1, <0.0.2'"
+        new_config = re.sub(
+            r"'>=[0-9]+.[0-9]+.[0-9]+, <[0-9]+.[0-9]+.[0-9]+'",
+            new_version,
+            config_yaml,
+        )
+        assert new_version in new_config
+        config_file.write_text(new_config)
+        # check load fails
+        manager = MultiAgentManager(
+            tmp_dir,
+            mode="async",
+            registry_path=PACKAGES_DIR,
+            auto_add_remove_project=False,
+        )
+        try:
+            state_loaded, loaded_ok, load_failed = manager.start_manager()
+            assert state_loaded
+            assert len(loaded_ok) == 0
+            assert len(load_failed) == 1
+            assert isinstance(load_failed[0][0], PublicId)
+            assert isinstance(load_failed[0][1], list)
+            assert len(load_failed[0][1]) == 1
+            assert isinstance(load_failed[0][1][0], dict)
+            assert isinstance(load_failed[0][2], Exception)
+            assert re.match(
+                "Failed to load project: fetchai/my_first_aea:latest Error: The CLI version is .*, but package fetchai/echo:0.14.0 requires version <0.0.2,>=0.0.1",
+                str(load_failed[0][2]),
+            )
+            assert not manager.list_projects()
+            assert not manager.list_agents()
         finally:
             manager.stop_manager()

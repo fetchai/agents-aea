@@ -21,6 +21,7 @@ import os
 from copy import deepcopy
 from pathlib import Path
 from shutil import rmtree
+from tempfile import TemporaryDirectory
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 from aea.aea import AEA
@@ -41,7 +42,9 @@ class _Base:
     @classmethod
     def _get_agent_config(cls, path: Union[Path, str]) -> AgentConfig:
         """Get agent config instance."""
-        return AEABuilder.try_to_load_agent_configuration_file(path)
+        agent_config = AEABuilder.try_to_load_agent_configuration_file(path)
+        agent_config.check_aea_version()
+        return agent_config
 
     @classmethod
     def _get_builder(
@@ -125,6 +128,22 @@ class Project(_Base):
     def builder(self) -> AEABuilder:
         """Get builder instance."""
         return self._get_builder(self._get_agent_config(self.path), self.path)
+
+    def check(self) -> None:
+        """Check project is ok with builder.build."""
+        builder = self.builder
+        with TemporaryDirectory() as tmp_dir:
+            key_file = str(Path(tmp_dir) / "key_file")
+            default_ledger = builder.get_default_ledger()
+            create_private_key(default_ledger, key_file)
+            if not builder.private_key_paths:
+                # no keys, but create one for builder only
+                builder.add_private_key(default_ledger, key_file)
+            if not builder.connection_private_key_paths:
+                builder.add_private_key(
+                    default_ledger, key_file, is_connection=True,
+                )
+            builder.build()
 
 
 class AgentAlias(_Base):
