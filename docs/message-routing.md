@@ -11,7 +11,7 @@ It is important to keep in mind that <a href="../interaction-protocol">interacti
 - `Messages` are dispatched based on three rules:
 
 	1. checks if `to` field can be interpreted as `skill_id`, if so uses that together with the `protocol_id` to dispatch to the protocol's `Handler` in the specified `Skill`, else
-	2. checks if `EnvelopeContext` esits and specifies a `Skill`, if so uses that together with the `protocol_id` to dispatch to the protocol's `Handler` in the specified `Skill`, else
+	2. checks if `EnvelopeContext` exists and specifies a `Skill`, if so uses that together with the `protocol_id` to dispatch to the protocol's `Handler` in the specified `Skill`, else
 	3. uses the `protocol_id` to dispatch to the protocol's `Handler` in all skills supporting the protocol.
 
 ## Outgoing `Messages`
