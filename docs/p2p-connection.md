@@ -33,7 +33,7 @@ aea run --connections fetchai/p2p_libp2p:0.16.0
 Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.16.0 -u public_uri` to retrieve the address.)
 This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the genesis AEA.
 
-### Create and run another AEA
+### Create and run another AEA
 
 Create a second AEA:
 

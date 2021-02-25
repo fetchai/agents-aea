@@ -1104,6 +1104,7 @@ class AgentConfig(PackageConfiguration):
         ("private_key_paths",),
         ("connection_private_key_paths",),
         ("default_routing",),
+        ("dependencies",),
         ("logging_config",),
     ]
 
