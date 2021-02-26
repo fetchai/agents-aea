@@ -130,7 +130,7 @@ class Project(_Base):
         return self._get_builder(self._get_agent_config(self.path), self.path)
 
     def check(self) -> None:
-        """Check project is ok with builder.build."""
+        """Check we can still construct an AEA from the project with builder.build."""
         builder = self.builder
         with TemporaryDirectory() as tmp_dir:
             key_file = str(Path(tmp_dir) / "key_file")
