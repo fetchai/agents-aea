@@ -533,7 +533,7 @@ class HTTPServerConnection(Connection):
         if host is None or port is None or target_skill_id_ is None:  # pragma: nocover
             raise ValueError("host and port and target_skill_id must be set!")
         target_skill_id = PublicId.try_from_str(target_skill_id_)
-        if target_skill_id is None:
+        if target_skill_id is None:  # pragma: nocover
             raise ValueError("Provided target_skill_id is not a valid public id.")
         api_spec_path = cast(
             Optional[str], self.configuration.config.get("api_spec_path")

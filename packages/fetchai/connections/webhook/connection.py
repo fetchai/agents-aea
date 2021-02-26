@@ -238,7 +238,7 @@ class WebhookConnection(Connection):
                 "webhook_address, webhook_port, webhook_url_path and target_skill_id must be set!"
             )
         target_skill_id = PublicId.try_from_str(target_skill_id_)
-        if target_skill_id is None:
+        if target_skill_id is None:  # pragma: nocover
             raise ValueError("Provided target_skill_id is not a valid public id.")
         self.channel = WebhookChannel(
             agent_address=self.address,
