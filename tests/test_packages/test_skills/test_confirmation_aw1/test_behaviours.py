@@ -53,6 +53,7 @@ class TestTransactionBehaviour(BaseSkillTestCase):
     """Test transaction behaviour of confirmation aw1."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "confirmation_aw1")
+    is_agent_to_agent_messages = False
 
     @classmethod
     def setup(cls):
@@ -92,7 +93,7 @@ class TestTransactionBehaviour(BaseSkillTestCase):
             message_type=LedgerApiMessage,
             performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
             to=LEDGER_API_ADDRESS,
-            sender=self_.skill.skill_context.agent_address,
+            sender=str(self_.skill.skill_context.skill_id),
             terms=register_dialogue.terms,
         )
         assert has_attributes, error_str
@@ -121,6 +122,7 @@ class TestTransactionBehaviour(BaseSkillTestCase):
             self_.prepare_skill_dialogue(
                 dialogues=self_.register_dialogues,
                 messages=self_.list_of_registration_messages,
+                is_agent_to_agent_messages=True,
             ),
         )
         register_dialogue.terms = Terms(

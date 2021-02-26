@@ -482,10 +482,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
                     )
                     return None
                 self.logger.debug("Sending envelope {}".format(str(envelope)))
-                try:
-                    await self._send(envelope)
-                except AEAConnectionError as e:
-                    self.logger.error(str(e))
+                await self._send(envelope)
 
         except asyncio.CancelledError:
             self.logger.debug("Sending loop cancelled.")
@@ -538,34 +535,39 @@ class AsyncMultiplexer(Runnable, WithLogger):
         :param envelope: the envelope to send.
         :return: None
         :raises ValueError: if the connection id provided is not valid.
-        :raises AEAConnectionError: if the connection id provided is not valid.
         """
         connection_id = None  # type: Optional[PublicId]
         envelope_context = envelope.context
-        # first, try to route by context
-        if envelope_context is not None:
-            connection_id = envelope_context.connection_id
-
+        to_as_public_id = envelope.to_as_public_id
         envelope_protocol_id = self._get_protocol_id_for_envelope(envelope)
 
-        # second, try to route by default routing
+        # first, try to route by to field
+        if to_as_public_id is not None:
+            connection_id = to_as_public_id
+            self.logger.debug(
+                "Using envelope `to` field as connection_id: {}".format(connection_id)
+            )
+
+        # second, try to route by envelope context connection id
+        if connection_id is None and envelope_context is not None:
+            connection_id = envelope_context.connection_id
+            self.logger.debug(
+                "Using envelope context connection_id: {}".format(connection_id)
+            )
+
+        # third, try to route by default routing
         if connection_id is None and envelope_protocol_id in self.default_routing:
             connection_id = self.default_routing[envelope_protocol_id]
             self.logger.debug("Using default routing: {}".format(connection_id))
 
-        if connection_id is not None and connection_id not in self._id_to_connection:
-            raise AEAConnectionError(
-                "No connection registered with id: {}.".format(connection_id)
-            )
-
-        # third, if no other option route by default connection
+        # fourth, if no other option route by default connection
         if connection_id is None:
             self.logger.debug(
                 "Using default connection: {}".format(self.default_connection)
             )
             connection = self.default_connection
         else:
-            connection = self._id_to_connection[connection_id]
+            connection = self._get_connection(connection_id)
 
         if connection is None:
             self.logger.warning(
@@ -580,6 +582,17 @@ class AsyncMultiplexer(Runnable, WithLogger):
             await connection.send(envelope)
         except Exception as e:  # pylint: disable=broad-except
             self._handle_exception(self._send, e)
+
+    def _get_connection(self, connection_id: PublicId) -> Optional[Connection]:
+        """Check if the connection id is registered."""
+        conn_ = self._id_to_connection.get(connection_id, None)
+        if conn_ is not None:
+            return conn_
+        for id_, conn_ in self._id_to_connection.items():
+            if id_.same_prefix(connection_id):
+                return conn_
+        self.logger.error(f"No connection registered with id: {connection_id}")
+        return None
 
     def _is_connection_supported_protocol(
         self, connection: Connection, protocol_id: PublicId

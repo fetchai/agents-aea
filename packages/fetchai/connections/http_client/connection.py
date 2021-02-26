@@ -25,7 +25,7 @@ from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop
 from asyncio.tasks import Task
 from traceback import format_exc
-from typing import Any, Dict, Optional, Set, Tuple, Type, Union, cast
+from typing import Any, Dict, Optional, Set, Tuple, Union, cast
 
 import aiohttp
 import certifi  # pylint: disable=wrong-import-order
@@ -35,9 +35,8 @@ from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
 from aea.exceptions import enforce
-from aea.mail.base import Envelope, EnvelopeContext, Message
+from aea.mail.base import Envelope, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
-from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 
 from packages.fetchai.protocols.http.dialogues import HttpDialogue as BaseHttpDialogue
 from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
@@ -71,44 +70,7 @@ def headers_to_string(headers: Dict) -> str:
     return msg.as_string()
 
 
-class HttpDialogue(BaseHttpDialogue):
-    """The dialogue class maintains state of a dialogue and manages it."""
-
-    def __init__(
-        self,
-        dialogue_label: BaseDialogueLabel,
-        self_address: Address,
-        role: BaseDialogue.Role,
-        message_class: Type[HttpMessage] = HttpMessage,
-    ) -> None:
-        """
-        Initialize a dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param self_address: the address of the entity for whom this dialogue is maintained
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: None
-        """
-        BaseHttpDialogue.__init__(
-            self,
-            dialogue_label=dialogue_label,
-            self_address=self_address,
-            role=role,
-            message_class=message_class,
-        )
-        self._envelope_context = None  # type: Optional[EnvelopeContext]
-
-    @property
-    def envelope_context(self) -> Optional[EnvelopeContext]:
-        """Get envelope_context."""
-        return self._envelope_context
-
-    @envelope_context.setter
-    def envelope_context(self, envelope_context: Optional[EnvelopeContext]) -> None:
-        """Set envelope_context."""
-        enforce(self._envelope_context is None, "envelope_context already set!")
-        self._envelope_context = envelope_context
+HttpDialogue = BaseHttpDialogue
 
 
 class HttpDialogues(BaseHttpDialogues):
@@ -201,8 +163,6 @@ class HTTPClientAsyncChannel:
         """
         message = cast(HttpMessage, envelope.message)
         dialogue = cast(Optional[HttpDialogue], self._dialogues.update(message))
-        if dialogue is not None:
-            dialogue.envelope_context = envelope.context
         return message, dialogue
 
     async def _http_request_task(self, request_envelope: Envelope) -> None:
@@ -383,10 +343,7 @@ class HTTPClientAsyncChannel:
             version="",
         )
         envelope = Envelope(
-            to=http_message.to,
-            sender=http_message.sender,
-            context=dialogue.envelope_context,
-            message=http_message,
+            to=http_message.to, sender=http_message.sender, message=http_message,
         )
         return envelope
 

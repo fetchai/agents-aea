@@ -375,7 +375,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             message_type=LedgerApiMessage,
             performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
             to=LEDGER_API_ADDRESS,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             terms=fipa_dialogue.terms,
         )
         assert has_attributes, error_str
@@ -522,6 +522,7 @@ class TestGenericOefSearchHandler(BaseSkillTestCase):
     """Test oef search handler of generic buyer."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "generic_buyer")
+    is_agent_to_agent_messages = False
 
     @classmethod
     def setup(cls):
@@ -773,6 +774,7 @@ class TestGenericSigningHandler(BaseSkillTestCase):
     """Test signing handler of generic buyer."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "generic_buyer")
+    is_agent_to_agent_messages = False
 
     @classmethod
     def setup(cls):
@@ -942,7 +944,7 @@ class TestGenericSigningHandler(BaseSkillTestCase):
             message_type=LedgerApiMessage,
             performative=LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
             to=LEDGER_API_ADDRESS,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             signed_transaction=incoming_message.signed_transaction,
         )
         assert has_attributes, error_str
@@ -958,6 +960,7 @@ class TestGenericSigningHandler(BaseSkillTestCase):
                 dialogues=self.fipa_dialogues,
                 messages=self.list_of_fipa_messages[:4],
                 counterparty=COUNTERPARTY_ADDRESS,
+                is_agent_to_agent_messages=True,
             ),
         )
 
@@ -1049,6 +1052,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
     """Test ledger_api handler of generic buyer."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "generic_buyer")
+    is_agent_to_agent_messages = False
 
     @classmethod
     def setup(cls):
@@ -1249,7 +1253,9 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         fipa_dialogue = cast(
             FipaDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.fipa_dialogues, messages=self.list_of_fipa_messages[:4],
+                dialogues=self.fipa_dialogues,
+                messages=self.list_of_fipa_messages[:4],
+                is_agent_to_agent_messages=True,
             ),
         )
         ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
@@ -1327,7 +1333,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             message_type=LedgerApiMessage,
             performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
             to=incoming_message.sender,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             transaction_digest=self.transaction_digest,
         )
         assert has_attributes, error_str
@@ -1350,7 +1356,9 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         fipa_dialogue = cast(
             FipaDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.fipa_dialogues, messages=self.list_of_fipa_messages[:4],
+                dialogues=self.fipa_dialogues,
+                messages=self.list_of_fipa_messages[:4],
+                is_agent_to_agent_messages=True,
             ),
         )
         ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
@@ -1403,7 +1411,9 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         fipa_dialogue = cast(
             FipaDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.fipa_dialogues, messages=self.list_of_fipa_messages[:4],
+                dialogues=self.fipa_dialogues,
+                messages=self.list_of_fipa_messages[:4],
+                is_agent_to_agent_messages=True,
             ),
         )
         ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
@@ -1448,7 +1458,9 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         fipa_dialogue = cast(
             FipaDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.fipa_dialogues, messages=self.list_of_fipa_messages[:4],
+                dialogues=self.fipa_dialogues,
+                messages=self.list_of_fipa_messages[:4],
+                is_agent_to_agent_messages=True,
             ),
         )
         ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
@@ -1519,7 +1531,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             performative=invalid_performative,
             ledger_id="some_ledger_id",
             address="some_address",
-            to=self.skill.skill_context.agent_address,
+            to=str(self.skill.public_id),
         )
 
         # operation

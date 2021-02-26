@@ -40,6 +40,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
     """Test behaviours of generic seller."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "generic_seller")
+    is_agent_to_agent_messages = False
 
     @classmethod
     def setup(cls):
@@ -70,7 +71,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             message_type=OefSearchMessage,
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             to=self.skill.skill_context.search_service_address,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             service_description=service_description,
         )
         assert has_attributes, error_str
@@ -108,7 +109,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             message_type=LedgerApiMessage,
             performative=LedgerApiMessage.Performative.GET_BALANCE,
             to=LEDGER_API_ADDRESS,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             ledger_id=self.strategy.ledger_id,
             address=self.skill.skill_context.agent_address,
         )
@@ -196,7 +197,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             message_type=OefSearchMessage,
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             to=self.skill.skill_context.search_service_address,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             service_description=mocked_description_1,
         )
         assert has_attributes, error_str
@@ -208,7 +209,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             message_type=OefSearchMessage,
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             to=self.skill.skill_context.search_service_address,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             service_description=mocked_description_2,
         )
         assert has_attributes, error_str
