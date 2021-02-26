@@ -22,7 +22,6 @@
 import json
 from typing import Any, Dict, Optional, cast
 
-from aea.mail.base import EnvelopeContext
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.connections.http_client.connection import PUBLIC_ID
@@ -58,11 +57,9 @@ class FetchBeaconBehaviour(TickerBehaviour):
         # context
         http_dialogues = cast(HttpDialogues, self.context.http_dialogues)
 
-        counterparty_address = str(PUBLIC_ID)
-
         # http request message
         request_http_message, _ = http_dialogues.create(
-            counterparty=counterparty_address,
+            counterparty=str(PUBLIC_ID),
             performative=HttpMessage.Performative.REQUEST,
             method=method,
             url=url,
@@ -72,10 +69,7 @@ class FetchBeaconBehaviour(TickerBehaviour):
         )
 
         # send message
-        envelope_context = EnvelopeContext(skill_id=self.context.skill_id)
-        self.context.outbox.put_message(
-            message=request_http_message, context=envelope_context
-        )
+        self.context.outbox.put_message(message=request_http_message)
 
     def setup(self) -> None:
         """

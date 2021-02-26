@@ -74,6 +74,10 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
             "vendor.fetchai.connections.http_server.config.api_spec_path", API_SPEC_PATH
         )
         self.set_config(
+            "vendor.fetchai.connections.http_server.config.target_skill_id",
+            "fetchai/coin_price:0.5.0",
+        )
+        self.set_config(
             "vendor.fetchai.skills.coin_price.models.coin_price_model.args.use_http_server",
             True,
             type_="bool",

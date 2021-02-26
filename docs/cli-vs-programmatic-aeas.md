@@ -45,7 +45,7 @@ aea config set vendor.fetchai.skills.weather_station.models.strategy.args.is_led
 ```
 The `is_ledger_tx` will prevent the AEA to communicate with a ledger.
 
-### Add keys
+### Add keys
 
 Add a private key for the weather station.
 ``` bash

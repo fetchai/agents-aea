@@ -467,6 +467,11 @@ class PublicIdTestCase(TestCase):
         assert PublicId.is_valid_str("author/name:0.1.0")
         assert not PublicId.is_valid_str("author!name:0.1.0")
 
+    def test_try_from_str(self):
+        """Test is_valid_str method."""
+        assert PublicId.try_from_str("author/name:0.1.0")
+        assert not PublicId.try_from_str("author!name:0.1.0")
+
 
 class AgentConfigTestCase(TestCase):
     """Test case for AgentConfig class."""

@@ -82,6 +82,7 @@ class TestLedgerApiHandler(BaseSkillTestCase):
     """Test ledger_api handler of simple_oracle skill."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "simple_oracle")
+    is_agent_to_agent_messages = False
 
     @classmethod
     def setup(cls, **kwargs):
@@ -464,6 +465,7 @@ class TestContractApiHandler(BaseSkillTestCase):
     """Test contract_api handler of simple oracle."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "simple_oracle")
+    is_agent_to_agent_messages = False
 
     @classmethod
     def setup(cls):
@@ -630,6 +632,7 @@ class TestSigningHandler(BaseSkillTestCase):
     """Test signing handler of simple oracle."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "simple_oracle")
+    is_agent_to_agent_messages = False
 
     @classmethod
     def setup(cls):
@@ -730,7 +733,7 @@ class TestSigningHandler(BaseSkillTestCase):
             message_type=LedgerApiMessage,
             performative=LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
             to=str(LEDGER_CONNECTION_PUBLIC_ID),
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             signed_transaction=incoming_message.signed_transaction,
         )
         assert has_attributes, error_str
@@ -807,6 +810,7 @@ class TestPrometheusHandler(BaseSkillTestCase):
     """Test prometheus handler of simple_oracle skill."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "simple_oracle")
+    is_agent_to_agent_messages = False
 
     @classmethod
     def setup(cls, **kwargs):

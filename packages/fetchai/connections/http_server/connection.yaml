@@ -9,7 +9,7 @@ aea_version: '>=0.10.0, <0.11.0'
 fingerprint:
   README.md: QmZE5uA8v9yG9EBTobSwWDZHqC5rx64zSuN2X6F1ZiCZVL
   __init__.py: Qmb6JEAkJeb5JweqrSGiGoQp1vGXqddjGgb9WMkm2phTgA
-  connection.py: QmbPvXKHnTgDSkbCCXZTvvVnyyCUNwYZE7EJBjnKhvtE5H
+  connection.py: QmTK1vNBdcceWjHd4BmMYPzEYhgBCfsSkwWkFiHxYJpW95
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
@@ -19,6 +19,7 @@ config:
   api_spec_path: null
   host: 127.0.0.1
   port: 8000
+  target_skill_id: null
 excluded_protocols: []
 restricted_to_protocols:
 - fetchai/http:0.12.0

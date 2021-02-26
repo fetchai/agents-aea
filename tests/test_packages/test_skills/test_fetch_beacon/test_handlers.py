@@ -40,6 +40,7 @@ class TestHttpHandler(BaseSkillTestCase):
     """Test http handler of fetch_beacon skill."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "fetch_beacon")
+    is_agent_to_agent_messages = False
 
     @classmethod
     def setup(cls, **kwargs):

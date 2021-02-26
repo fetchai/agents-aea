@@ -103,7 +103,7 @@ def test_register_custom_crypto():
 
 
 def test_cannot_register_crypto_twice():
-    """Test we cannot register a crytpo twice."""
+    """Test we cannot register a crypto twice."""
     aea.crypto.registries.register_crypto(
         "my_custom_crypto", entry_point="tests.data.custom_crypto:CustomCrypto"
     )

@@ -82,7 +82,7 @@ class TestSearchBehaviour(BaseSkillTestCase):
             message_type=LedgerApiMessage,
             performative=LedgerApiMessage.Performative.GET_BALANCE,
             to=str(LEDGER_PUBLIC_ID),
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.public_id),
             ledger_id=FETCHAI,
             address=self.skill.skill_context.agent_address,
         )
@@ -117,7 +117,7 @@ class TestSearchBehaviour(BaseSkillTestCase):
             message_type=OefSearchMessage,
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             to=self.skill.skill_context.search_service_address,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.public_id),
             query=self.skill.skill_context.strategy.get_location_and_service_query(),
         )
         assert has_attributes, error_str
@@ -205,7 +205,7 @@ class TestTransactionBehaviour(BaseSkillTestCase):
             message_type=LedgerApiMessage,
             performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
             to=LEDGER_API_ADDRESS,
-            sender=self_.skill.skill_context.agent_address,
+            sender=str(self_.skill.public_id),
             terms=fipa_dialogue.terms,
         )
         assert has_attributes, error_str

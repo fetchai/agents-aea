@@ -422,6 +422,11 @@ class Envelope:
         return self._context
 
     @property
+    def to_as_public_id(self) -> Optional[PublicId]:
+        """Get to as public id."""
+        return PublicId.try_from_str(self.to)
+
+    @property
     def skill_id(self) -> Optional[PublicId]:
         """
         Get the skill id from an envelope context, if set.

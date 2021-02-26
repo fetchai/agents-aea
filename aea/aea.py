@@ -297,7 +297,7 @@ class AEA(Agent):
             return None, []  # Tuple[Optional[Message], List[Handler]]
 
         handlers = self.filter.get_active_handlers(
-            protocol.public_id, envelope.skill_id
+            protocol.public_id, envelope.to_as_public_id or envelope.skill_id
         )
 
         if len(handlers) == 0:
