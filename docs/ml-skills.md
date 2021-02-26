@@ -79,6 +79,10 @@ aea add connection fetchai/p2p_libp2p:0.16.0
 aea add connection fetchai/soef:0.17.0
 aea add connection fetchai/ledger:0.13.0
 aea add skill fetchai/ml_data_provider:0.19.0
+aea config set --type dict agent.dependencies \
+'{
+  "aea-crypto-fetchai": {"version": "<0.2.0,>=0.1.0"}
+}'
 aea config set agent.default_connection fetchai/p2p_libp2p:0.16.0
 aea config set --type dict agent.default_routing \
 '{
@@ -113,6 +117,10 @@ aea add connection fetchai/p2p_libp2p:0.16.0
 aea add connection fetchai/soef:0.17.0
 aea add connection fetchai/ledger:0.13.0
 aea add skill fetchai/ml_train:0.21.0
+aea config set --type dict agent.dependencies \
+'{
+  "aea-crypto-fetchai": {"version": "<0.2.0,>=0.1.0"}
+}'
 aea config set agent.default_connection fetchai/p2p_libp2p:0.16.0
 aea config set --type dict agent.default_routing \
 '{
