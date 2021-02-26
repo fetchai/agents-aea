@@ -21,8 +21,12 @@
 package connections
 
 import (
+	"context"
 	"errors"
+	"fmt"
 	"log"
+	"math"
+	"math/rand"
 	"os"
 	"strconv"
 	"strings"
@@ -35,6 +39,8 @@ import (
 	proto "google.golang.org/protobuf/proto"
 )
 
+const retry_attempts = 5
+
 var logger zerolog.Logger = zerolog.New(zerolog.ConsoleWriter{
 	Out:        os.Stdout,
 	NoColor:    false,
@@ -43,6 +49,18 @@ var logger zerolog.Logger = zerolog.New(zerolog.ConsoleWriter{
 	With().Timestamp().
 	Str("package", "P2PClientApi").
 	Logger()
+
+var (
+	DefaultAttempts      = uint(10)
+	DefaultOnRetry       = func(n uint, err error) {}
+	DefaultRetryIf       = IsRecoverable
+	DefaultDelay         = 500 * time.Millisecond
+	DefaultMaxJitter     = 100 * time.Millisecond
+	DefaultDelayType     = CombineDelay(BackOffDelay, RandomDelay)
+	DefaultLastErrorOnly = false
+	DefaultContext       = context.Background()
+	MaxDelay             = 1000 * time.Millisecond
+)
 
 type P2PClientConfig struct {
 	host string
@@ -150,10 +168,10 @@ func (client *P2PClientApi) Connect() error {
 		return err
 	}
 
-	err = client.register()
+	err = client.register_with_retry()
 	if err != nil {
 		logger.Error().Str("err", err.Error()).
-			Msg("while registering to p2p node")
+			Msg("while registering with retry to p2p node")
 		err_ := client.stop()
 		if err_ != nil {
 			logger.Error().Str("err", err_.Error()).
@@ -171,6 +189,56 @@ func (client *P2PClientApi) Connect() error {
 	client.connected = true
 
 	return nil
+}
+
+func (client *P2PClientApi) register_with_retry() error {
+	var n uint
+
+	//default
+	config := &Config{
+		attempts:      DefaultAttempts,
+		delay:         DefaultDelay,
+		maxJitter:     DefaultMaxJitter,
+		onRetry:       DefaultOnRetry,
+		retryIf:       DefaultRetryIf,
+		delayType:     DefaultDelayType,
+		lastErrorOnly: DefaultLastErrorOnly,
+		context:       DefaultContext,
+	}
+
+	var errorLog = make(Error, 1)
+	context_ := context.Background()
+
+	lastErrIndex := n
+	for n < retry_attempts {
+		err := client.register()
+
+		if err != nil {
+			errorLog[lastErrIndex] = unpackUnrecoverable(err)
+
+			// if this is last attempt - don't wait
+			if n == retry_attempts-1 {
+				break
+			}
+
+			delayTime := config.delayType(n, err, config)
+			if config.maxDelay > 0 && delayTime > config.maxDelay {
+				delayTime = config.maxDelay
+			}
+
+			select {
+			case <-time.After(delayTime):
+			case <-context_.Done():
+				return context_.Err()
+			}
+
+		} else {
+			return nil
+		}
+
+		n++
+	}
+	return errorLog
 }
 
 func (client *P2PClientApi) register() error {
@@ -214,9 +282,12 @@ func (client *P2PClientApi) register() error {
 	}
 
 	if status.Code != protocols.Status_SUCCESS {
-		return errors.New(
-			"as registration failed: " + status.String() + strings.Join(status.Msgs, ":"),
+		err_msg := fmt.Sprintf(
+			"registration to peer failed: %s %s",
+			status.Code.String(),
+			strings.Join(status.Msgs, ":"),
 		)
+		return errors.New(err_msg)
 	}
 	return nil
 }
@@ -271,4 +342,124 @@ func read_envelope(socket Socket) (*protocols.Envelope, error) {
 	}
 	err = proto.Unmarshal(data, envelope)
 	return envelope, err
+}
+
+// Error type represents list of errors in retry
+type Error []error
+
+// Error method return string representation of Error
+// Implements error interface
+func (e Error) Error() string {
+	logWithNumber := make([]string, lenWithoutNil(e))
+	for i, l := range e {
+		if l != nil {
+			logWithNumber[i] = fmt.Sprintf("#%d: %s", i+1, l.Error())
+		}
+	}
+
+	return fmt.Sprintf("All attempts fail:\n%s", strings.Join(logWithNumber, "\n"))
+}
+
+func lenWithoutNil(e Error) (count int) {
+	for _, v := range e {
+		if v != nil {
+			count++
+		}
+	}
+
+	return
+}
+
+// WrappedErrors returns the list of errors that this Error is wrapping.
+func (e Error) WrappedErrors() []error {
+	return e
+}
+
+type unrecoverableError struct {
+	error
+}
+
+// Unrecoverable wraps an error in `unrecoverableError` struct
+func Unrecoverable(err error) error {
+	return unrecoverableError{err}
+}
+
+// IsRecoverable checks if error is an instance of `unrecoverableError`
+func IsRecoverable(err error) bool {
+	_, isUnrecoverable := err.(unrecoverableError)
+	return !isUnrecoverable
+}
+
+func unpackUnrecoverable(err error) error {
+	if unrecoverable, isUnrecoverable := err.(unrecoverableError); isUnrecoverable {
+		return unrecoverable.error
+	}
+
+	return err
+}
+
+// DelayTypeFunc is called to return the next delay to wait after the retriable function fails on `err` after `n` attempts.
+type DelayTypeFunc func(n uint, err error, config *Config) time.Duration
+
+// Function signature of retry if function
+type RetryIfFunc func(error) bool
+
+// Function signature of OnRetry function
+// n = count of attempts
+type OnRetryFunc func(n uint, err error)
+
+type Config struct {
+	attempts      uint
+	delay         time.Duration
+	maxDelay      time.Duration
+	maxJitter     time.Duration
+	onRetry       OnRetryFunc
+	retryIf       RetryIfFunc
+	delayType     DelayTypeFunc
+	lastErrorOnly bool
+	context       context.Context
+
+	maxBackOffN uint
+}
+
+// CombineDelay is a DelayType the combines all of the specified delays into a new DelayTypeFunc
+func CombineDelay(delays ...DelayTypeFunc) DelayTypeFunc {
+	const maxInt64 = uint64(math.MaxInt64)
+
+	return func(n uint, err error, config *Config) time.Duration {
+		var total uint64
+		for _, delay := range delays {
+			total += uint64(delay(n, err, config))
+			if total > maxInt64 {
+				total = maxInt64
+			}
+		}
+
+		return time.Duration(total)
+	}
+}
+
+// BackOffDelay is a DelayType which increases delay between consecutive retries
+func BackOffDelay(n uint, _ error, config *Config) time.Duration {
+	// 1 << 63 would overflow signed int64 (time.Duration), thus 62.
+	const max uint = 62
+
+	if config.maxBackOffN == 0 {
+		if config.delay <= 0 {
+			config.delay = 1
+		}
+
+		config.maxBackOffN = max - uint(math.Floor(math.Log2(float64(config.delay))))
+	}
+
+	if n > config.maxBackOffN {
+		n = config.maxBackOffN
+	}
+
+	return config.delay << n
+}
+
+// RandomDelay is a DelayType which picks a random delay up to config.maxJitter
+func RandomDelay(_ uint, _ error, config *Config) time.Duration {
+	return time.Duration(rand.Int63n(int64(config.maxJitter)))
 }

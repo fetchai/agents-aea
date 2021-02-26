@@ -25,6 +25,7 @@ import (
 	"testing"
 
 	connections "aealite/connections"
+	protocols "aealite/protocols"
 )
 
 const (
@@ -32,10 +33,12 @@ const (
 )
 
 var (
-	ledger_id   = "fetchai"
-	address     = "fetch1x9v67meyfq4pkgy2n2yf6797cfkul327kpclqr"
-	public_key  = "02ac514ba70de60ed5c30f90e3acdfc958ecb416d9676706bf013228abfb2c2816"
-	private_key = "6d8d2b87d987641e2ca3f1991c1cccf08a118759e81fabdbf7e8484f27af015e"
+	ledger_id        = "fetchai"
+	address          = "fetch1x9v67meyfq4pkgy2n2yf6797cfkul327kpclqr"
+	public_key       = "02ac514ba70de60ed5c30f90e3acdfc958ecb416d9676706bf013228abfb2c2816"
+	private_key      = "6d8d2b87d987641e2ca3f1991c1cccf08a118759e81fabdbf7e8484f27af015e"
+	test_protocol_id = "test_protocol_id"
+	test_message     = []byte{0x00}
 )
 
 // TestAgent apis
@@ -85,6 +88,29 @@ func TestAgent(t *testing.T) {
 
 	if err != nil {
 		t.Fatal("Failed to start agent", err)
+	}
+
+	out_envelope := &protocols.Envelope{
+		To:         agent.Address(),
+		Sender:     agent.Address(),
+		ProtocolId: test_protocol_id,
+		Message:    test_message,
+	}
+
+	err = agent.Put(out_envelope)
+
+	if err != nil {
+		t.Fatal("Failed to send envelope", err)
+	}
+
+	in_envelope := agent.Get()
+
+	if in_envelope == nil {
+		t.Fatal("Failed to get envelope")
+	}
+
+	if (in_envelope.Sender != out_envelope.Sender) || (in_envelope.To != out_envelope.To) {
+		t.Fatal("Envelopes don't match")
 	}
 
 	agent.Stop()

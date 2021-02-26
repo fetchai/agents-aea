@@ -104,4 +104,24 @@ func TestP2PClientApiInit(t *testing.T) {
 	if client.connected {
 		t.Fatal("client connected")
 	}
+
+	err = client.Connect()
+
+	if err != nil {
+		t.Fatal("client connect failed")
+	}
+
+	if !client.connected {
+		t.Fatal("client not connected")
+	}
+
+	err = client.Disconnect()
+
+	if err != nil {
+		t.Fatal("client disconnect failed")
+	}
+
+	if client.connected {
+		t.Fatal("client connected")
+	}
 }

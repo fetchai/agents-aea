@@ -53,6 +53,10 @@ func (agent *Agent) InitFromEnv() error {
 	return nil
 }
 
+func (agent *Agent) Address() string {
+	return agent.Wallet.Address
+}
+
 func (agent *Agent) Start() error {
 	return agent.connection.Connect()
 }
