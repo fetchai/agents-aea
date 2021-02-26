@@ -289,6 +289,14 @@ class PackageConfiguration(Configuration, ABC):
         )
         self._aea_version = new_aea_version
 
+    def check_aea_version(self) -> None:
+        """
+        Check that the AEA version matches the specifier set.
+
+        :raises ValueError if the version of the aea framework falls within a specifier.
+        """
+        _check_aea_version(self)
+
     @property
     def directory(self) -> Optional[Path]:
         """Get the path to the configuration file associated to this file, if any."""
@@ -508,14 +516,6 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         _compare_fingerprints(
             self, directory, False, self.component_type.to_package_type()
         )
-
-    def check_aea_version(self) -> None:
-        """
-        Check that the AEA version matches the specifier set.
-
-        :raises ValueError if the version of the aea framework falls within a specifier.
-        """
-        _check_aea_version(self)
 
     def check_public_id_consistency(self, directory: Path) -> None:
         """
@@ -1766,17 +1766,29 @@ def _compare_fingerprints(
         )
 
 
+class AEAVersionError(ValueError):
+    """Special Exception for version error."""
+
+    def __init__(
+        self, package_id: PublicId, aea_version_specifiers: SpecifierSet
+    ) -> None:
+        """Init exception."""
+        self.package_id = package_id
+        self.aea_version_specifiers = aea_version_specifiers
+        self.current_aea_version = Version(__aea_version__)
+        super().__init__(
+            f"The CLI version is {self.current_aea_version}, but package {self.package_id} requires version {self.aea_version_specifiers}"
+        )
+
+
 def _check_aea_version(package_configuration: PackageConfiguration) -> None:
     """Check the package configuration version against the version of the framework."""
     current_aea_version = Version(__aea_version__)
     version_specifiers = package_configuration.aea_version_specifiers
     if current_aea_version not in version_specifiers:
-        raise ValueError(
-            "The CLI version is {}, but package {} requires version {}".format(
-                current_aea_version,
-                package_configuration.public_id,
-                package_configuration.aea_version_specifiers,
-            )
+        raise AEAVersionError(
+            package_configuration.public_id,
+            package_configuration.aea_version_specifiers,
         )
 
 
