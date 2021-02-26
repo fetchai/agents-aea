@@ -21,7 +21,6 @@ import os
 from copy import deepcopy
 from pathlib import Path
 from shutil import rmtree
-from tempfile import TemporaryDirectory
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 from aea.aea import AEA
@@ -131,19 +130,7 @@ class Project(_Base):
 
     def check(self) -> None:
         """Check we can still construct an AEA from the project with builder.build."""
-        builder = self.builder
-        with TemporaryDirectory() as tmp_dir:
-            key_file = str(Path(tmp_dir) / "key_file")
-            default_ledger = builder.get_default_ledger()
-            create_private_key(default_ledger, key_file)
-            if not builder.private_key_paths:
-                # no keys, but create one for builder only
-                builder.add_private_key(default_ledger, key_file)
-            if not builder.connection_private_key_paths:
-                builder.add_private_key(
-                    default_ledger, key_file, is_connection=True,
-                )
-            builder.build()
+        _ = self.builder
 
 
 class AgentAlias(_Base):
