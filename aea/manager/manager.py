@@ -184,6 +184,13 @@ class MultiAgentManager:
         self._event: Optional[asyncio.Event] = None
 
         self._error_callbacks: List[Callable[[str, BaseException], None]] = []
+        self._last_start_status: Optional[
+            Tuple[
+                bool,
+                Dict[PublicId, List[Dict]],
+                List[Tuple[PublicId, List[Dict], Exception]],
+            ]
+        ] = None
 
         if mode not in self.MODES:
             raise ValueError(
@@ -260,9 +267,7 @@ class MultiAgentManager:
 
     def start_manager(
         self, local: bool = False, remote: bool = False
-    ) -> Tuple[
-        bool, Dict[PublicId, List[Dict]], List[Tuple[PublicId, List[Dict], Exception]],
-    ]:
+    ) -> "MultiAgentManager":
         """
         Start manager.
 
@@ -276,19 +281,28 @@ class MultiAgentManager:
         :return: the MultiAgentManager instance.
         """
         if self._is_running:
-            return False, {}, []
+            return self
 
         self._ensure_working_dir()
-        was_loaded, loaded_ok, failed_to_load = self._load_state(
-            local=local, remote=remote
-        )
+        self._last_start_status = self._load_state(local=local, remote=remote)
 
         self._started_event.clear()
         self._is_running = True
         self._thread = Thread(target=self._run_thread, daemon=True)
         self._thread.start()
         self._started_event.wait(self.DEFAULT_TIMEOUT_FOR_BLOCKING_OPERATIONS)
-        return was_loaded, loaded_ok, failed_to_load
+        return self
+
+    @property
+    def last_start_status(
+        self,
+    ) -> Tuple[
+        bool, Dict[PublicId, List[Dict]], List[Tuple[PublicId, List[Dict], Exception]],
+    ]:
+        """Get status of the last agents start loading state."""
+        if self._last_start_status is None:
+            raise ValueError("Manager was not started")
+        return self._last_start_status
 
     def stop_manager(
         self, cleanup: bool = True, save: bool = False

@@ -533,8 +533,13 @@ def test_handle_error_on_load_state():
             registry_path=PACKAGES_DIR,
             auto_add_remove_project=True,
         )
+
+        with pytest.raises(ValueError, match="Manager was not started"):
+            manager.last_start_status
+
         try:
-            state_loaded, *_ = manager.start_manager()
+            manager.start_manager()
+            state_loaded, *_ = manager.last_start_status
             assert not state_loaded
             assert not manager.list_projects()
             manager.add_agent(
@@ -553,7 +558,8 @@ def test_handle_error_on_load_state():
             auto_add_remove_project=False,
         )
         try:
-            state_loaded, loaded_ok, *_ = manager.start_manager()
+            manager.start_manager()
+            state_loaded, loaded_ok, *_ = manager.last_start_status
             assert state_loaded
             assert len(loaded_ok) == 1
             assert manager.list_projects()
@@ -581,7 +587,8 @@ def test_handle_error_on_load_state():
             auto_add_remove_project=False,
         )
         try:
-            state_loaded, loaded_ok, load_failed = manager.start_manager()
+            manager.start_manager()
+            state_loaded, loaded_ok, load_failed = manager.last_start_status
             assert state_loaded
             assert len(loaded_ok) == 0
             assert len(load_failed) == 1
