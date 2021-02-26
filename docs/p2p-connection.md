@@ -2,6 +2,12 @@ The `fetchai/p2p_libp2p:0.16.0` connection allows AEAs to create a peer-to-peer 
 
 ## Local demo
 
+First, make sure you have installed the crypto plugin
+of the target test-net. E.g. for Fetch.AI:
+``` bash
+pip install aea-crypto-fetchai
+```
+
 ### Create and run the genesis AEA
 
 Create one AEA as follows:

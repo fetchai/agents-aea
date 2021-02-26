@@ -10,6 +10,8 @@ The more you describe your AEA, the easier it is for others to find it using spe
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
+
+
 ## Step 1: Setup
 
 We will first create an AEA and add a scaffold skill, which we call `my_search`.
