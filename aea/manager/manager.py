@@ -379,6 +379,10 @@ class MultiAgentManager:
             is_restore=restore,
         )
 
+        if not restore:
+            project.install_pypi_dependencies()
+            project.build()
+
         try:
             project.check()
         except Exception as e:
@@ -386,10 +390,6 @@ class MultiAgentManager:
             raise ProjectCheckError(
                 f"Failed to load project: {public_id} Error: {str(e)}", e
             )
-
-        if not restore:
-            project.install_pypi_dependencies()
-            project.build()
 
         self._projects[public_id] = project
         return self
