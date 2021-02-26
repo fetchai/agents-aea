@@ -211,6 +211,7 @@ class AEA(Agent):
             data_dir,
             storage_callable=lambda: self.runtime.storage,
             build_dir=self.get_build_dir(),
+            send_to_skill=self.runtime.agent_loop.send_to_skill,
             **kwargs,
         )
         self._execution_timeout = execution_timeout

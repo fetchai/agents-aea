@@ -929,13 +929,15 @@ def test_skill2skill_message():
 
     with run_in_thread(agent.start, timeout=20, on_exit=agent.stop):
         wait_for_condition(lambda: agent.is_running, timeout=20)
-        agent.outbox.put(envelope)
         default_protocol_public_id = DefaultMessage.protocol_id
         handler = agent.resources.get_handler(
             default_protocol_public_id, DUMMY_SKILL_PUBLIC_ID
         )
 
         assert handler is not None, "Handler is not set."
+
+        # send an envelope to itself
+        handler.context.send_to_skill(envelope)
 
         wait_for_condition(
             lambda: len(handler.handled_messages) == 1,

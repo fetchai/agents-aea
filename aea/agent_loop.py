@@ -16,6 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This module contains the implementation of an agent loop using asyncio."""
 import asyncio
 import datetime
@@ -27,7 +28,7 @@ from asyncio.tasks import Task
 from contextlib import suppress
 from enum import Enum
 from functools import partial
-from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union, cast
 
 from aea.abstract_agent import AbstractAgent
 from aea.configurations.constants import LAUNCH_SUCCEED_MESSAGE
@@ -40,6 +41,8 @@ from aea.helpers.async_utils import (
 )
 from aea.helpers.exec_timeout import ExecTimeoutThreadGuard, TimeoutException
 from aea.helpers.logging import WithLogger, get_logger
+from aea.mail.base import Envelope, EnvelopeContext
+from aea.protocols.base import Message
 
 
 class AgentLoopException(AEAException):
@@ -160,6 +163,14 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
                 continue  #  pragma: nocover
             task.cancel()
 
+    @abstractmethod
+    def send_to_skill(
+        self,
+        message_or_envelope: Union[Message, Envelope],
+        context: Optional[EnvelopeContext] = None,
+    ) -> None:
+        """Send message or envelope to another skill."""
+
     @property
     @abstractmethod
     def skill2skill_queue(self) -> Queue:
@@ -199,6 +210,34 @@ class AsyncAgentLoop(BaseAgentLoop):
         if not self._skill2skill_message_queue:
             raise ValueError("_skill2skill_message_queue is not set!")
         return self._skill2skill_message_queue
+
+    def send_to_skill(
+        self,
+        message_or_envelope: Union[Message, Envelope],
+        context: Optional[EnvelopeContext] = None,
+    ) -> None:
+        """Send message or envelope to another skill."""
+        if self._skill2skill_message_queue is None:
+            raise ValueError("AgentLoop is not started yet!")
+
+        if isinstance(message_or_envelope, Envelope):
+            envelope = message_or_envelope
+            message = cast(Message, envelope.message)
+        elif isinstance(message_or_envelope, Message):
+            envelope = Envelope(
+                to=message.to, sender=message.sender, message=message, context=context,
+            )
+        else:
+            raise ValueError(
+                f"Unsupported message or envelope type: {type(message_or_envelope)}"
+            )
+
+        if not message.has_to:  # pragma: nocover
+            raise ValueError("Provided message has message.to not set.")
+        if not message.has_sender:  # pragma: nocover
+            raise ValueError("Provided message has message.sender not set.")
+
+        self._skill2skill_message_queue.put_nowait(envelope)
 
     def _periodic_task_exception_callback(  # pylint: disable=unused-argument
         self, task_callable: Callable, exc: Exception

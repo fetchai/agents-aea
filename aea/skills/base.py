@@ -27,7 +27,7 @@ from logging import Logger
 from pathlib import Path
 from queue import Queue
 from types import SimpleNamespace
-from typing import Any, Dict, Optional, Sequence, Set, Tuple, Type, cast
+from typing import Any, Dict, Optional, Sequence, Set, Tuple, Type, Union, cast
 
 from aea.common import Address
 from aea.components.base import Component, load_aea_package
@@ -51,6 +51,7 @@ from aea.exceptions import (
 from aea.helpers.base import _get_aea_logger_name_prefix, load_module
 from aea.helpers.logging import AgentLoggerAdapter
 from aea.helpers.storage.generic_storage import Storage
+from aea.mail.base import Envelope, EnvelopeContext
 from aea.multiplexer import MultiplexerStatus, OutBox
 from aea.protocols.base import Message
 from aea.skills.tasks import TaskManager
@@ -251,6 +252,16 @@ class SkillContext:
     def __getattr__(self, item: Any) -> Any:
         """Get attribute."""
         return super().__getattribute__(item)  # pragma: no cover
+
+    def send_to_skill(
+        self,
+        message_or_envelope: Union[Message, Envelope],
+        context: Optional[EnvelopeContext] = None,
+    ) -> None:
+        """Send message or envelope to another skill."""
+        if self._agent_context is None:  # pragma: nocover
+            raise ValueError("agent context was not set!")
+        self._agent_context.send_to_skill(message_or_envelope, context)
 
 
 class SkillComponent(ABC):
