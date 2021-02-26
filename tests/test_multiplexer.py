@@ -497,6 +497,15 @@ def test_autoset_default_connection():
     assert multiplexer._default_connection == connections[0]
 
 
+def test__get_connection():
+    """Test the method _get_connection."""
+    connection_1 = _make_dummy_connection()
+    connections = [connection_1]
+    multiplexer = Multiplexer(connections)
+    conn_ = multiplexer._get_connection(connection_1.connection_id.to_any())
+    assert conn_ == connection_1
+
+
 @pytest.mark.asyncio
 async def test_disconnect_when_not_connected():
     """Test disconnect when not connected."""
