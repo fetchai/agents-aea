@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the implementation of an agent loop using asyncio."""
 import asyncio
 import datetime
@@ -217,7 +216,7 @@ class AsyncAgentLoop(BaseAgentLoop):
     @property
     def skill2skill_queue(self) -> Queue:
         """Get skill to skill message queue."""
-        if not self._skill2skill_message_queue:
+        if not self._skill2skill_message_queue:  # pragma: nocover
             raise ValueError("_skill2skill_message_queue is not set!")
         return self._skill2skill_message_queue
 
@@ -234,13 +233,11 @@ class AsyncAgentLoop(BaseAgentLoop):
 
         :return: None
         """
-        if self._skill2skill_message_queue is None:
-            raise ValueError("AgentLoop is not started yet!")
-
         if isinstance(message_or_envelope, Envelope):
             envelope = message_or_envelope
             message = cast(Message, envelope.message)
         elif isinstance(message_or_envelope, Message):
+            message = message_or_envelope
             envelope = Envelope(
                 to=message.to, sender=message.sender, message=message, context=context,
             )
@@ -254,7 +251,7 @@ class AsyncAgentLoop(BaseAgentLoop):
         if not message.has_sender:  # pragma: nocover
             raise ValueError("Provided message has message.sender not set.")
 
-        self._skill2skill_message_queue.put_nowait(envelope)
+        self.skill2skill_queue.put_nowait(envelope)
 
     def _periodic_task_exception_callback(  # pylint: disable=unused-argument
         self, task_callable: Callable, exc: Exception

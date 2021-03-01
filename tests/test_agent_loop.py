@@ -21,7 +21,7 @@ import asyncio
 import datetime
 import logging
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Type
-from unittest.mock import MagicMock, Mock
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
@@ -30,12 +30,14 @@ from aea.agent_loop import AgentLoopStates, AsyncAgentLoop, BaseAgentLoop, SyncA
 from aea.exceptions import AEAActException
 from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
 from aea.helpers.exception_policy import ExceptionPolicyEnum
-from aea.mail.base import Envelope
+from aea.mail.base import Envelope, EnvelopeContext
 from aea.protocols.base import Message
 from aea.registries.filter import Filter
 from aea.registries.resources import Resources
 from aea.skills.base import Behaviour, Handler, SkillContext
 from aea.skills.behaviours import TickerBehaviour
+
+from packages.fetchai.protocols.default.message import DefaultMessage
 
 from tests.common.utils import wait_for_condition, wait_for_condition_async
 
@@ -319,6 +321,40 @@ class TestAsyncAgentLoop:
         await asyncio.wait_for(
             agent_loop._state.wait(AgentLoopStates.stopped), timeout=10
         )
+
+    @pytest.mark.asyncio
+    async def test_send_to_skill(self):
+        """Test loop stoped."""
+        agent = self.FAKE_AGENT_CLASS()
+        agent_loop = self.AGENT_LOOP_CLASS(agent)
+        agent_loop.start()
+        await asyncio.wait_for(
+            agent_loop._state.wait(AgentLoopStates.started), timeout=10
+        )
+
+        msg = DefaultMessage(performative=DefaultMessage.Performative.BYTES)
+        msg.to = "to"
+        msg.sender = "sender"
+        envelope = Envelope(
+            to=msg.to,
+            sender=msg.sender,
+            message=msg,
+            context=EnvelopeContext(connection_id="some_con"),
+        )
+        try:
+            with pytest.raises(
+                ValueError, match="Unsupported message or envelope type:"
+            ):
+                agent_loop.send_to_skill("something")
+
+            with patch.object(agent_loop, "_skill2skill_message_queue"):
+                agent_loop.send_to_skill(msg)
+                agent_loop.send_to_skill(envelope)
+        finally:
+            agent_loop.stop()
+            await asyncio.wait_for(
+                agent_loop._state.wait(AgentLoopStates.stopped), timeout=10
+            )
 
 
 class TestSyncAgentLoop:

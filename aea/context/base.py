@@ -103,7 +103,7 @@ class AgentContext:
 
         :return: None
         """
-        if self._send_to_skill is None:
+        if self._send_to_skill is None:  # pragma: nocover
             raise ValueError("Send to skill feature is not supported")
         return self._send_to_skill(message_or_envelope, context)
 
