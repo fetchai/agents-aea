@@ -9,6 +9,11 @@ Get the packages directory from the AEA repository:
 svn export https://github.com/fetchai/agents-aea.git/trunk/packages
 ```
 
+Also, install `aea-crypto-fetchai` plug-in:
+```bash
+pip install aea-crypto-fetchai
+```
+
 ## Imports
 
 First, import the necessary common Python libraries and classes.
@@ -22,9 +27,10 @@ from threading import Thread
 Then, import the application specific libraries.
 
 ``` python
+from aea_crypto_fetchai import FetchAICrypto
+
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
-from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA, create_private_key
 from aea.helpers.file_io import write_with_lock
 from aea.skills.base import Skill
@@ -177,9 +183,10 @@ import os
 import time
 from threading import Thread
 
+from aea_crypto_fetchai import FetchAICrypto
+
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
-from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA, create_private_key
 from aea.helpers.file_io import write_with_lock
 from aea.skills.base import Skill

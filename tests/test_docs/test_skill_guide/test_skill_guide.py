@@ -25,6 +25,7 @@ from pathlib import Path
 from random import uniform
 
 import pytest
+from aea_crypto_fetchai import FetchAICrypto
 
 from aea import AEA_DIR
 from aea.configurations.base import DEFAULT_VERSION
@@ -34,7 +35,6 @@ from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_ME
 
 from tests.conftest import (
     AUTHOR,
-    FETCHAI,
     FETCHAI_PRIVATE_KEY_FILE,
     FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
     MAX_FLAKY_RERUNS_INTEGRATION,
@@ -77,25 +77,29 @@ class TestBuildSkill(AEATestCaseManyFlaky):
 
         simple_service_registration_aea = "simple_service_registration"
         self.fetch_agent(
-            "fetchai/simple_service_registration:0.20.0",
+            "fetchai/simple_service_registration:0.21.0",
             simple_service_registration_aea,
         )
         self.set_agent_context(simple_service_registration_aea)
         # add non-funded key
-        self.generate_private_key(FETCHAI)
-        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.generate_private_key(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        )
+        self.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+            connection=True,
         )
         self.replace_private_key_in_file(
             NON_FUNDED_FETCHAI_PRIVATE_KEY_1, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
         )
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.set_config(setting_path, FETCHAI)
+        self.set_config(setting_path, FetchAICrypto.identifier)
 
         default_routing = {
-            "fetchai/oef_search:0.13.0": "fetchai/soef:0.16.0",
+            "fetchai/oef_search:0.13.0": "fetchai/soef:0.17.0",
         }
 
         # replace location
@@ -108,9 +112,9 @@ class TestBuildSkill(AEATestCaseManyFlaky):
         skill_name = "my_search"
         skill_id = AUTHOR + "/" + skill_name + ":" + DEFAULT_VERSION
         self.scaffold_item("skill", skill_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.15.0")
-        self.add_item("connection", "fetchai/soef:0.16.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.15.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.16.0")
+        self.add_item("connection", "fetchai/soef:0.17.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.16.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
 
@@ -151,15 +155,19 @@ class TestBuildSkill(AEATestCaseManyFlaky):
         self.fingerprint_item("skill", skill_id)
 
         # add keys
-        self.generate_private_key(FETCHAI)
-        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.generate_private_key(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        )
+        self.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+            connection=True,
         )
 
         # fund key
-        self.generate_wealth(FETCHAI)
+        self.generate_wealth(FetchAICrypto.identifier)
 
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"

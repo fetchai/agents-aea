@@ -189,7 +189,7 @@ class TaskManager(WithLogger):
                 func, args=args, kwds=kwds if kwds is not None else {}
             )
             self._results_by_task_id[task_id] = async_result
-            if self._logger:
+            if self._logger:  # pragma: nocover
                 self._logger.info(f"Task <{func}{args}> set. Task id is {task_id}")
             return task_id
 

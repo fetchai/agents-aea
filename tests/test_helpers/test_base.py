@@ -51,6 +51,7 @@ from aea.helpers.base import (
     load_env_file,
     load_module,
     locate,
+    prepend_if_not_absolute,
     reachable_nodes,
     recursive_update,
     retry_decorator,
@@ -674,3 +675,14 @@ class TestDeleteDirectoryContents:
     def teardown(self):
         """Tear down the test."""
         shutil.rmtree(str(self.root), ignore_errors=True)
+
+
+def test_prepend_if_not_absolute():
+    """Test the prepend_if_not_absolute method."""
+    path = "path"
+    prefix = "prefix"
+    res = prepend_if_not_absolute(path, prefix)
+    assert res == Path(prefix, path)
+    abs_path = os.path.abspath(path)
+    res = prepend_if_not_absolute(abs_path, prefix)
+    assert res == abs_path

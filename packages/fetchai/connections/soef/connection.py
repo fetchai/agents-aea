@@ -30,7 +30,7 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import suppress
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Type, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Union, cast
 from urllib import parse
 from uuid import uuid4
 
@@ -48,10 +48,9 @@ from aea.helpers.search.models import (
     Location,
     Query,
 )
-from aea.mail.base import Envelope, EnvelopeContext
+from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
-from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 
 from packages.fetchai.protocols.oef_search.custom_types import (
     AgentsInfo,
@@ -68,7 +67,7 @@ from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.soef")
 
-PUBLIC_ID = PublicId.from_str("fetchai/soef:0.16.0")
+PUBLIC_ID = PublicId.from_str("fetchai/soef:0.17.0")
 
 NOT_SPECIFIED = object()
 
@@ -132,44 +131,7 @@ class SOEFException(Exception):
         return cls(msg)
 
 
-class OefSearchDialogue(BaseOefSearchDialogue):
-    """The dialogue class maintains state of a dialogue and manages it."""
-
-    def __init__(
-        self,
-        dialogue_label: BaseDialogueLabel,
-        self_address: Address,
-        role: BaseDialogue.Role,
-        message_class: Type[OefSearchMessage] = OefSearchMessage,
-    ) -> None:
-        """
-        Initialize a dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param self_address: the address of the entity for whom this dialogue is maintained
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: None
-        """
-        BaseOefSearchDialogue.__init__(
-            self,
-            dialogue_label=dialogue_label,
-            self_address=self_address,
-            role=role,
-            message_class=message_class,
-        )
-        self._envelope_context = None  # type: Optional[EnvelopeContext]
-
-    @property
-    def envelope_context(self) -> Optional[EnvelopeContext]:
-        """Get envelope_context."""
-        return self._envelope_context
-
-    @envelope_context.setter
-    def envelope_context(self, envelope_context: Optional[EnvelopeContext]) -> None:
-        """Set envelope_context."""
-        enforce(self._envelope_context is None, "envelope_context already set!")
-        self._envelope_context = envelope_context
+OefSearchDialogue = BaseOefSearchDialogue
 
 
 class OefSearchDialogues(BaseOefSearchDialogues):
@@ -228,6 +190,7 @@ class SOEFChannel:
         chain_identifier: Optional[str] = None,
         token_storage_path: Optional[str] = None,
         logger: logging.Logger = _default_logger,
+        connection_check_timeout: float = 15,
     ):
         """
         Initialize.
@@ -237,6 +200,7 @@ class SOEFChannel:
         :param soef_addr: the SOEF IP address.
         :param soef_port: the SOEF port.
         :param chain_identifier: supported chain id
+        :param connection_check_timeout: timeout to check network connection on connect
         """
         if chain_identifier is not None and not any(
             regex.match(chain_identifier) for regex in self.SUPPORTED_CHAIN_IDENTIFIERS
@@ -249,8 +213,9 @@ class SOEFChannel:
         self.api_key = api_key
         self.soef_addr = soef_addr
         self.soef_port = soef_port
-        self.base_url = "http://{}:{}".format(soef_addr, soef_port)
+        self.base_url = "https://{}:{}".format(soef_addr, soef_port)
         self.oef_search_dialogues = OefSearchDialogues()
+        self.connection_check_timeout = connection_check_timeout
 
         self._token_storage_path = token_storage_path
         if self._token_storage_path is not None:
@@ -324,9 +289,15 @@ class SOEFChannel:
                 GeneratorExit,
             ):  # pylint: disable=try-except-raise
                 return
+            except SOEFException:  # pragma: nocover
+                await self._send_error_response(
+                    oef_message,
+                    oef_search_dialogue,
+                    oef_error_operation=OefSearchMessage.OefErrorOperation.OTHER,
+                )
             except Exception:  # pylint: disable=broad-except  # pragma: nocover
                 self.logger.exception(
-                    "Exception occoured in  _find_around_me_processor"
+                    "Exception occurred in  _find_around_me_processor"
                 )
                 await self._send_error_response(
                     oef_message,
@@ -446,7 +417,6 @@ class SOEFChannel:
             raise ValueError(
                 "Could not create dialogue for message={}".format(oef_message)
             )
-        oef_search_dialogue.envelope_context = envelope.context
 
         err_ops = OefSearchMessage.OefErrorOperation
         oef_error_operation = err_ops.OTHER
@@ -574,12 +544,7 @@ class SOEFChannel:
                 }
             ),
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            message=message,
-            context=oef_search_dialogue.envelope_context,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         await self.in_queue.put(envelope)
 
     async def _ping_command(self) -> None:
@@ -655,12 +620,14 @@ class SOEFChannel:
             enforce(root.tag == "response", "Not a response")
             if check_success:
                 el = root.find("./success")
-                enforce(el is not None, "No success element")
+                enforce(el is not None, "Bad response, no success value present")
                 enforce(str(el.text).strip() == "1", "Success is not 1")
             self.logger.debug(f"`{command}` SUCCESS!")
             return response_text
         except Exception as e:
-            raise SOEFException.error(f"`{command}` error: {response_text}: {[e]}")
+            raise SOEFException.error(
+                f"Command: `{command}` Params: `{params}` Response: `{response_text}` Exception: {[e]}"
+            ) from e
 
     async def _set_service_key(self, key: str, value: Union[str, int, float]) -> None:
         """
@@ -893,12 +860,7 @@ class SOEFChannel:
             target_message=oef_search_message,
             oef_error_operation=oef_error_operation,
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            message=message,
-            context=oef_search_dialogue.envelope_context,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         await self.in_queue.put(envelope)
 
     async def unregister_service(  # pylint: disable=unused-argument
@@ -971,9 +933,21 @@ class SOEFChannel:
                 await self._ping_periodic_task
             self._ping_periodic_task = None
 
+    async def _check_server_reachable(self) -> None:
+        """Check network connection is ok."""
+        await asyncio.wait_for(
+            self._request_text(
+                "get", self.base_url, timeout=self.connection_check_timeout
+            ),
+            timeout=self.connection_check_timeout,
+        )
+
     async def connect(self) -> None:
         """Connect channel set queues and executor pool."""
         self._loop = asyncio.get_event_loop()
+
+        await self._check_server_reachable()
+
         self.in_queue = asyncio.Queue()
         self._find_around_me_queue = asyncio.Queue()
         self._unregister_lock = asyncio.Lock()
@@ -1126,12 +1100,7 @@ class SOEFChannel:
             agents=tuple(agents.keys()),
             agents_info=AgentsInfo(agents),
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            message=message,
-            context=oef_search_dialogue.envelope_context,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         await self.in_queue.put(envelope)
 
 
@@ -1139,6 +1108,7 @@ class SOEFConnection(Connection):
     """The SOEFConnection connects the Simple OEF to the mailbox."""
 
     connection_id = PUBLIC_ID
+    DEFAULT_CONNECTION_CHECK_TIMEOUT: float = 15
 
     def __init__(self, **kwargs: Any) -> None:
         """Initialize."""
@@ -1150,6 +1120,12 @@ class SOEFConnection(Connection):
 
         super().__init__(**kwargs)
         api_key = cast(str, self.configuration.config.get("api_key"))
+        connection_check_timeout = cast(
+            float,
+            self.configuration.config.get(
+                "connection_check_timeout", self.DEFAULT_CONNECTION_CHECK_TIMEOUT
+            ),
+        )
         soef_addr = cast(str, self.configuration.config.get("soef_addr"))
         soef_port = cast(int, self.configuration.config.get("soef_port"))
         chain_identifier = cast(str, self.configuration.config.get("chain_identifier"))
@@ -1170,6 +1146,7 @@ class SOEFConnection(Connection):
             data_dir=self.data_dir,
             chain_identifier=chain_identifier,
             token_storage_path=token_storage_path,
+            connection_check_timeout=connection_check_timeout,
         )
 
     async def connect(self) -> None:

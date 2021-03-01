@@ -21,13 +21,13 @@ aea_version: '>=0.10.0, <0.11.0'                  # AEA framework version(s) com
 fingerprint: {}                                 # Fingerprint of AEA project components.
 fingerprint_ignore_patterns: []                 # Ignore pattern for the fingerprinting tool.
 connections:                                    # The list of connection public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX)
-- fetchai/stub:0.16.0
+- fetchai/stub:0.17.0
 contracts: []                                   # The list of contract public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX).
 protocols:                                      # The list of protocol public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX).
 - fetchai/default:0.12.0
 skills:                                         # The list of skill public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX).
 - fetchai/error:0.12.0
-default_connection: fetchai/p2p_libp2p:0.15.0    # The default connection used for envelopes sent by the AEA (must satisfy PUBLIC_ID_REGEX).
+default_connection: fetchai/p2p_libp2p:0.16.0    # The default connection used for envelopes sent by the AEA (must satisfy PUBLIC_ID_REGEX).
 default_ledger: fetchai                         # The default ledger identifier the AEA project uses (must satisfy LEDGER_ID_REGEX)
 default_routing: {}                             # The default routing scheme applied to envelopes sent by the AEA, it maps from protocol public ids to connection public ids (both keys and values must satisfy PUBLIC_ID_REGEX)
 connection_private_key_paths:                   # The private key paths the AEA project uses for its connections (keys must satisfy LEDGER_ID_REGEX, values must be file paths)
@@ -38,6 +38,7 @@ logging_config:                                 # The logging configurations the
   disable_existing_loggers: false
   version: 1
 registry_path: ../packages                      # The path to the local package registry (must be a directory path and point to a directory called `packages`)
+dependencies: {}                                # The python dependencies the AEA relies on (e.g. plugins).
 ```
 
 The `aea-config.yaml` can be extended with a number of optional fields:

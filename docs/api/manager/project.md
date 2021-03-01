@@ -230,3 +230,29 @@ Get agent configuration manager instance for the config.
 
 Get all overridables for this agent alias's config.
 
+<a name="aea.manager.project.AgentAlias.get_addresses"></a>
+#### get`_`addresses
+
+```python
+ | get_addresses() -> Dict[str, str]
+```
+
+Get addresses from private keys.
+
+**Returns**:
+
+dict with crypto id str as key and address str as value
+
+<a name="aea.manager.project.AgentAlias.get_connections_addresses"></a>
+#### get`_`connections`_`addresses
+
+```python
+ | get_connections_addresses() -> Dict[str, str]
+```
+
+Get connections addresses from connections private keys.
+
+**Returns**:
+
+dict with crypto id str as key and address str as value
+

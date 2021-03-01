@@ -148,7 +148,7 @@ class TestDialogues(BaseSkillTestCase):
             address="some_address",
         )
         assert dialogue.role == LedgerApiDialogue.Role.AGENT
-        assert dialogue.self_address == self.skill.skill_context.agent_address
+        assert dialogue.self_address == str(self.skill.skill_context.skill_id)
 
     def test_oef_search_dialogues(self):
         """Test the OefSearchDialogues class."""
@@ -158,4 +158,4 @@ class TestDialogues(BaseSkillTestCase):
             query="some_query",
         )
         assert dialogue.role == OefSearchDialogue.Role.AGENT
-        assert dialogue.self_address == self.skill.skill_context.agent_address
+        assert dialogue.self_address == str(self.skill.skill_context.skill_id)

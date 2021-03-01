@@ -93,8 +93,7 @@ nav:
         - Installation: 'cli-how-to.md'
         - Commands: 'cli-commands.md'
         - File structure: 'package-imports.md'
-        - Generating wealth: 'wealth.md' 
-      - GUI: 'cli-gui.md'
+        - Generating wealth: 'wealth.md'
     - Benchmarks:
       - Performance benchmark: 'performance-benchmark.md'
     - API:
@@ -123,7 +122,6 @@ nav:
         - Validation: 'api/configurations/validation.md'
       - Connections:
         - Base: 'api/connections/base.md'
-        - Stub Connection: 'api/connections/stub/connection.md'
       - Context: 'api/context/base.md'
       - Contracts:
         - Base: 'api/contracts/base.md'
@@ -140,6 +138,7 @@ nav:
       - Decision Maker:
         - Base: 'api/decision_maker/base.md'
         - Default: 'api/decision_maker/default.md'
+        - GOP: 'api/decision_maker/gop.md'
       - Error Handler:
         - Base: 'api/error_handler/base.md'
         - Default: 'api/error_handler/default.md'
@@ -158,6 +157,7 @@ nav:
         - File Lock: 'api/helpers/file_lock.md'
         - HttpRequests: 'api/helpers/http_requests.md'
         - Install Dependency: 'api/helpers/install_dependency.md'
+        - IO: 'api/helpers/io.md'
         - IPFS:
           - Base: 'api/helpers/ipfs/base.md'
         - Logging: 'api/helpers/logging.md'

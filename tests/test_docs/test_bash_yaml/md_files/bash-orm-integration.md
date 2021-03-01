@@ -1,5 +1,5 @@
 ``` bash
-aea fetch fetchai/thermometer_aea:0.19.0 --alias my_thermometer_aea
+aea fetch fetchai/thermometer_aea:0.20.0 --alias my_thermometer_aea
 cd my_thermometer_aea
 aea install
 aea build
@@ -7,21 +7,25 @@ aea build
 ``` bash
 aea create my_thermometer_aea
 cd my_thermometer_aea
-aea add connection fetchai/p2p_libp2p:0.15.0
-aea add connection fetchai/soef:0.16.0
+aea add connection fetchai/p2p_libp2p:0.16.0
+aea add connection fetchai/soef:0.17.0
 aea add connection fetchai/ledger:0.13.0
 aea add skill fetchai/thermometer:0.19.0
-aea install
-aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.15.0
+aea config set --type dict agent.dependencies \
+'{
+  "aea-crypto-fetchai": {"version": "<0.2.0,>=0.1.0"}
+}'
+aea config set agent.default_connection fetchai/p2p_libp2p:0.16.0
 aea config set --type dict agent.default_routing \
 '{
   "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
-  "fetchai/oef_search:0.13.0": "fetchai/soef:0.16.0"
+  "fetchai/oef_search:0.13.0": "fetchai/soef:0.17.0"
 }'
+aea install
+aea build
 ```
 ``` bash
-aea fetch fetchai/thermometer_client:0.20.0 --alias my_thermometer_client
+aea fetch fetchai/thermometer_client:0.21.0 --alias my_thermometer_client
 cd my_thermometer_client
 aea install
 aea build
@@ -29,18 +33,22 @@ aea build
 ``` bash
 aea create my_thermometer_client
 cd my_thermometer_client
-aea add connection fetchai/p2p_libp2p:0.15.0
-aea add connection fetchai/soef:0.16.0
+aea add connection fetchai/p2p_libp2p:0.16.0
+aea add connection fetchai/soef:0.17.0
 aea add connection fetchai/ledger:0.13.0
 aea add skill fetchai/thermometer_client:0.19.0
-aea install
-aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.15.0
+aea config set --type dict agent.dependencies \
+'{
+  "aea-crypto-fetchai": {"version": "<0.2.0,>=0.1.0"}
+}'
+aea config set agent.default_connection fetchai/p2p_libp2p:0.16.0
 aea config set --type dict agent.default_routing \
 '{
   "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
-  "fetchai/oef_search:0.13.0": "fetchai/soef:0.16.0"
+  "fetchai/oef_search:0.13.0": "fetchai/soef:0.17.0"
 }'
+aea install
+aea build
 ```
 ``` bash
 aea generate-key fetchai
@@ -145,7 +153,7 @@ models:
 ```
 ``` yaml
 ---
-public_id: fetchai/p2p_libp2p:0.15.0
+public_id: fetchai/p2p_libp2p:0.16.0
 type: connection
 config:
   delegate_uri: 127.0.0.1:11001

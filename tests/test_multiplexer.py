@@ -351,8 +351,37 @@ async def test_send_envelope_with_non_registered_connection():
         context=EnvelopeContext(connection_id=UNKNOWN_CONNECTION_PUBLIC_ID),
     )
 
-    with pytest.raises(AEAConnectionError, match="No connection registered with id:.*"):
+    with unittest.mock.patch.object(
+        multiplexer.logger, "warning"
+    ) as mock_logger_warning:
         await multiplexer._send(envelope)
+        mock_logger_warning.assert_called_with(
+            f"Dropping envelope, no connection available for sending: {envelope}"
+        )
+
+    multiplexer.disconnect()
+
+
+@pytest.mark.asyncio
+async def test_send_envelope_when_no_connection():
+    """Test that sending an envelope with no connection logs a warning."""
+    multiplexer = Multiplexer([], protocols=[DefaultProtocolMock])
+    multiplexer.connect()
+
+    envelope = Envelope(
+        to="",
+        sender="",
+        protocol_specification_id=DefaultMessage.protocol_specification_id,
+        message=b"",
+    )
+
+    with unittest.mock.patch.object(
+        multiplexer.logger, "warning"
+    ) as mock_logger_warning:
+        await multiplexer._send(envelope)
+        mock_logger_warning.assert_called_with(
+            f"Dropping envelope, no connection available for sending: {envelope}"
+        )
 
     multiplexer.disconnect()
 
@@ -376,7 +405,7 @@ def test_send_envelope_error_is_logged_by_send_loop():
         multiplexer.put(envelope)
         time.sleep(0.1)
         mock_logger_error.assert_called_with(
-            "No connection registered with id: {}.".format(fake_connection_id)
+            "No connection registered with id: {}".format(fake_connection_id)
         )
 
     multiplexer.disconnect()
@@ -466,6 +495,15 @@ def test_autoset_default_connection():
     multiplexer._default_connection = None
     multiplexer._set_default_connection_if_none()
     assert multiplexer._default_connection == connections[0]
+
+
+def test__get_connection():
+    """Test the method _get_connection."""
+    connection_1 = _make_dummy_connection()
+    connections = [connection_1]
+    multiplexer = Multiplexer(connections)
+    conn_ = multiplexer._get_connection(connection_1.connection_id.to_any())
+    assert conn_ == connection_1
 
 
 @pytest.mark.asyncio
@@ -659,6 +697,39 @@ async def test_default_route_applied(caplog):
             await multiplexer.disconnect()
 
             assert "Using default routing:" in caplog.text
+
+
+@pytest.mark.asyncio
+async def test_connection_id_in_to_field_detected(caplog):
+    """Test to field is parsed correctly and used for routing."""
+    logger = logging.getLogger("aea.multiplexer")
+    with caplog.at_level(logging.DEBUG, logger="aea.multiplexer"):
+        connection_1 = _make_dummy_connection()
+        connections = [connection_1]
+        multiplexer = AsyncMultiplexer(
+            connections, loop=asyncio.get_event_loop(), protocols=[DefaultProtocolMock]
+        )
+        multiplexer.logger = logger
+        envelope = Envelope(
+            to=str(connection_1.connection_id),
+            sender="",
+            protocol_specification_id=DefaultMessage.protocol_specification_id,
+            message=b"",
+            context=EnvelopeContext(),
+        )
+        try:
+            await multiplexer.connect()
+            inbox = InBox(multiplexer)
+            outbox = InBox(multiplexer)
+
+            assert inbox.empty()
+            assert outbox.empty()
+            multiplexer.put(envelope)
+            await outbox.async_get()
+        finally:
+            await multiplexer.disconnect()
+
+            assert "Using envelope `to` field as connection_id:" in caplog.text
 
 
 def test_multiplexer_setup():
@@ -919,3 +990,36 @@ def test_multiplexer_setup_replaces_connections():
     m._setup([MagicMock()], MagicMock())
     assert len(m._id_to_connection) == 1
     assert len(m._connections) == 1
+
+
+def test_connect_after_disconnect_sync():
+    """Test connect-disconnect-connect again for threaded multiplexer."""
+    multiplexer = Multiplexer([_make_dummy_connection()])
+
+    assert not multiplexer.connection_status.is_connected
+    multiplexer.connect()
+    assert multiplexer.connection_status.is_connected
+    multiplexer.disconnect()
+    assert not multiplexer.connection_status.is_connected
+
+    multiplexer.connect()
+    assert multiplexer.connection_status.is_connected
+    multiplexer.disconnect()
+    assert not multiplexer.connection_status.is_connected
+
+
+@pytest.mark.asyncio
+async def test_connect_after_disconnect_async():
+    """Test connect-disconnect-connect again for async multiplexer."""
+    multiplexer = AsyncMultiplexer([_make_dummy_connection()])
+
+    assert not multiplexer.connection_status.is_connected
+    await multiplexer.connect()
+    assert multiplexer.connection_status.is_connected
+    await multiplexer.disconnect()
+    assert not multiplexer.connection_status.is_connected
+
+    await multiplexer.connect()
+    assert multiplexer.connection_status.is_connected
+    await multiplexer.disconnect()
+    assert not multiplexer.connection_status.is_connected

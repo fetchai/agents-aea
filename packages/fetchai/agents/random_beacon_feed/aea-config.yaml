@@ -1,6 +1,6 @@
 agent_name: random_beacon_feed
 author: fetchai
-version: 0.2.0
+version: 0.3.0
 license: Apache-2.0
 description: An agent that retrieves the Fetch.ai decentralised random beacon value.
 aea_version: '>=0.10.0, <0.11.0'
@@ -15,7 +15,7 @@ protocols:
 - fetchai/signing:0.10.0
 - fetchai/state_update:0.10.0
 skills:
-- fetchai/fetch_beacon:0.4.0
+- fetchai/fetch_beacon:0.5.0
 default_connection: fetchai/http_client:0.17.0
 default_ledger: fetchai
 default_routing: {}
@@ -25,3 +25,6 @@ logging_config:
   disable_existing_loggers: false
   version: 1
 registry_path: ../packages
+dependencies:
+  aea-crypto-fetchai:
+    version: <0.2.0,>=0.1.0

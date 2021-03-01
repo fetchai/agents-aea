@@ -51,6 +51,10 @@ class AEAInstantiationException(AEAException):
     """Class for exceptions that are raised for instantiation errors of AEA packages."""
 
 
+class AEAPluginError(AEAException):
+    """Class for exceptions that are raised for wrong plugin setup of the working set."""
+
+
 class AEAEnforceError(AEAException):
     """Class for enforcement errors."""
 

@@ -165,6 +165,8 @@ class TestConnectionConfig:
 
         expected_config = ConnectionConfig.from_json(original_json)
         assert isinstance(expected_config, ConnectionConfig)
+        assert isinstance(expected_config.package_dependencies, set)
+        assert not expected_config.is_abstract_component
         expected_json = expected_config.json
         actual_config = ConnectionConfig.from_json(expected_json)
         actual_json = actual_config.json
@@ -464,6 +466,11 @@ class PublicIdTestCase(TestCase):
         """Test is_valid_str method."""
         assert PublicId.is_valid_str("author/name:0.1.0")
         assert not PublicId.is_valid_str("author!name:0.1.0")
+
+    def test_try_from_str(self):
+        """Test is_valid_str method."""
+        assert PublicId.try_from_str("author/name:0.1.0")
+        assert not PublicId.try_from_str("author!name:0.1.0")
 
 
 class AgentConfigTestCase(TestCase):

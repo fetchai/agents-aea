@@ -1,6 +1,12 @@
-The `fetchai/p2p_libp2p:0.15.0` connection allows AEAs to create a peer-to-peer communication network. In particular, the connection creates an overlay network which maps agents' public keys to IP addresses.
+The `fetchai/p2p_libp2p:0.16.0` connection allows AEAs to create a peer-to-peer communication network. In particular, the connection creates an overlay network which maps agents' public keys to IP addresses.
 
 ## Local demo
+
+First, make sure you have installed the crypto plugin
+of the target test-net. E.g. for Fetch.AI:
+``` bash
+pip install aea-crypto-fetchai
+```
 
 ### Create and run the genesis AEA
 
@@ -9,8 +15,8 @@ Create one AEA as follows:
 ``` bash
 aea create my_genesis_aea
 cd my_genesis_aea
-aea add connection fetchai/p2p_libp2p:0.15.0
-aea config set agent.default_connection fetchai/p2p_libp2p:0.15.0
+aea add connection fetchai/p2p_libp2p:0.16.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.16.0
 aea build
 ```
 
@@ -27,21 +33,21 @@ aea issue-certificates
 Run the AEA:
 
 ``` bash
-aea run --connections fetchai/p2p_libp2p:0.15.0
+aea run --connections fetchai/p2p_libp2p:0.16.0
 ```
 
-Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.15.0 -u public_uri` to retrieve the address.)
+Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.16.0 -u public_uri` to retrieve the address.)
 This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the genesis AEA.
 
-### Create and run another AEA
+### Create and run another AEA
 
 Create a second AEA:
 
 ``` bash
 aea create my_other_aea
 cd my_other_aea
-aea add connection fetchai/p2p_libp2p:0.15.0
-aea config set agent.default_connection fetchai/p2p_libp2p:0.15.0
+aea add connection fetchai/p2p_libp2p:0.16.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.16.0
 aea build
 ```
 
@@ -72,7 +78,7 @@ Here `SOME_ADDRESS` needs to be replaced with the list of multi addresses displa
 Run the AEA:
 
 ``` bash
-aea run --connections fetchai/p2p_libp2p:0.15.0
+aea run --connections fetchai/p2p_libp2p:0.16.0
 ```
 
 You can inspect the `libp2p_node.log` log files of the AEA to see how they discover each other.
@@ -100,7 +106,7 @@ You can connect to the deployed public test network by adding one or multiple of
 In particular, by modifying the configuration by specifying an override in `aea-config.yaml` such that:
 ``` yaml
 ---
-public_id: fetchai/p2p_libp2p:0.15.0
+public_id: fetchai/p2p_libp2p:0.16.0
 type: connection
 config:
   delegate_uri: null
@@ -115,15 +121,15 @@ Note, this configuration change must be made for all of the agents which are att
 ## Configuring the `connection.yaml` entries:
 
 
-To learn more about how to configure your `fetchai/p2p_libp2p:0.15.0` connection consult the `README.md` supplied with the connection package.
+To learn more about how to configure your `fetchai/p2p_libp2p:0.16.0` connection consult the `README.md` supplied with the connection package.
 
 ## Running Go peer standalone
 
 You can run the peer node in standalone mode, that is, as a Go process with no dependency to the agents framework. 
 To facilitate the deployment, we provide a script
- <a href="https://github.com/fetchai/agents-aea/blob/master/scripts/acn/run_acn_node_standalone.py" target="_blank">`run_acn_node_standalone.py`</a>
+ <a href="https://github.com/fetchai/agents-aea/blob/main/scripts/acn/run_acn_node_standalone.py" target="_blank">`run_acn_node_standalone.py`</a>
  and a corresponding 
- <a href="https://github.com/fetchai/agents-aea/blob/master/scripts/acn/Dockerfile" target="_blank">Dockerfile</a>.
+ <a href="https://github.com/fetchai/agents-aea/blob/main/scripts/acn/Dockerfile" target="_blank">Dockerfile</a>.
 
 First, you need to build the node's binary (`libp2p_node`) either:
 

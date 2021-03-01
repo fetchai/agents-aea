@@ -35,7 +35,7 @@ class SigningHandler(Handler):
 
 The framework implements a default <a href="../api/decision_maker/default#decisionmakerhandler-objects">`DecisionMakerHandler`</a> and an advanced <a href="../api/decision_maker/gop#decisionmakerhandler-objects">`DecisionMakerHandler`</a>. You can also implement your own and mount it.
 
-No further configuration is needed to use the default. To use the advanced decison maker handler, add the following configuration to the `aea-config.yaml` of your AEA (on page 1):
+No further configuration is needed to use the default. To use the advanced decision maker handler, add the following configuration to the `aea-config.yaml` of your AEA (on page 1):
 
 ``` yaml
 decision_maker_handler:
@@ -43,7 +43,7 @@ decision_maker_handler:
    file_path: null
 ```
 
-The easiest way to add a custom decision maker hanndler is to run the following command to scaffold a custom `DecisionMakerHandler`:
+The easiest way to add a custom decision maker handler is to run the following command to scaffold a custom `DecisionMakerHandler`:
 
 ``` bash
 aea scaffold decision-maker-handler

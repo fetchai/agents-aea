@@ -63,15 +63,10 @@ class TestDialogues(BaseSkillTestCase):
             query="some_query",
         )
         assert dialogue.role == OefSearchDialogue.Role.AGENT
-        assert (
-            dialogue.self_address
-            == self.skill.skill_context.agent_address
-            + "_"
-            + str(self.skill.skill_context.skill_id)
-        )
+        assert dialogue.self_address == str(self.skill.skill_context.skill_id)
 
-    def test_default_dialogues(self):
-        """Test the DefaultDialogues class."""
+    def test_state_update_dialogues(self):
+        """Test the StateUpdateDialogues class."""
         _, dialogue = self.state_update_dialogues.create(
             counterparty=COUNTERPARTY_ADDRESS,
             performative=StateUpdateMessage.Performative.INITIALIZE,
@@ -81,12 +76,7 @@ class TestDialogues(BaseSkillTestCase):
             quantities_by_good_id={"some_good_id": 5},
         )
         assert dialogue.role == StateUpdateDialogue.Role.SKILL
-        assert (
-            dialogue.self_address
-            == self.skill.skill_context.agent_address
-            + "_"
-            + str(self.skill.skill_context.skill_id)
-        )
+        assert dialogue.self_address == str(self.skill.skill_context.skill_id)
 
     def test_tac_dialogues(self):
         """Test the TacDialogues class."""

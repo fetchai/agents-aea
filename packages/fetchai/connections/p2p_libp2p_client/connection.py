@@ -55,7 +55,7 @@ _default_logger = logging.getLogger(
     "aea.packages.fetchai.connections.p2p_libp2p_client"
 )
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_client:0.12.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_client:0.13.0")
 
 SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 
@@ -251,7 +251,19 @@ class P2PLibp2pClientConnection(Connection):
         buf = msg.SerializeToString()
         await self._send(buf)
 
-        buf = await self._receive()
+        self.logger.debug("Waiting for registration message...")
+        try:
+            buf = await self._read_message_from_reader()
+        except ConnectionError as e:  # pragma: nocover
+            self.logger.error(f"Connection error: {e}.")
+            raise e
+        except IncompleteReadError as e:  # pragma: no cover
+            self.logger.error(
+                "Connection disconnected while reading from node ({}/{})".format(
+                    len(e.partial), e.expected
+                )
+            )
+            raise e
         if buf is None:  # pragma: nocover
             raise ConnectionError(
                 "Error on connection setup. Incoming buffer is empty!"
@@ -317,10 +329,7 @@ class P2PLibp2pClientConnection(Connection):
             data = await self._in_queue.get()
             if data is None:  # pragma: no cover
                 self.logger.debug("Received None.")
-                if not self.is_disconnected:
-                    await self.disconnect()
                 return None
-                # TOFIX(LR) attempt restarting the node?
             self.logger.debug("Received data: {}".format(data))
             return Envelope.decode(data)
         except CancelledError:  # pragma: no cover

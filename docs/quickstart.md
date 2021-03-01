@@ -45,14 +45,14 @@ We provide a script to automatically install all framework dependencies and the 
 On MacOS or Ubuntu run:
 
 ``` bash
-curl https://raw.githubusercontent.com/fetchai/agents-aea/master/scripts/install.sh --output install.sh
+curl https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.sh --output install.sh
 chmod +x install.sh
 ./install.sh
 ```
 
 On Windows:
 
-Download `https://raw.githubusercontent.com/fetchai/agents-aea/master/scripts/install.ps1`, then run `install.ps1` with the PowerShell terminal.
+Download `https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.ps1`, then run `install.ps1` with the PowerShell terminal.
 
 
 ### Option 3: Using Docker
@@ -156,7 +156,7 @@ Confirm password:
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.10.0
+v0.10.1
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
@@ -173,7 +173,7 @@ This is a simple demo that introduces you to the main components of an AEA.
 The fastest way to have your first AEA is to fetch one that already exists!
 
 ``` bash
-aea fetch fetchai/my_first_aea:0.19.0
+aea fetch fetchai/my_first_aea:0.20.0
 cd my_first_aea
 ```
 
@@ -189,9 +189,16 @@ aea create my_first_aea
 cd my_first_aea
 ```
 <br>
+<b>Add the stub connection</b>
+<br>
+Second, add the stub connection to the project.
+``` bash
+aea add connection fetchai/stub:0.17.0
+```
+<br>
 <b>Add the echo skill</b>
 <br>
-Second, add the echo skill to the project.
+Third, add the echo skill to the project.
 ``` bash
 aea add skill fetchai/echo:0.14.0
 ```
@@ -232,7 +239,7 @@ recipient_aea,sender_aea,fetchai/default:0.12.0,\x08\x01\x12\x011*\x07\n\x05hell
 
 ### Run the AEA
 
-Run the AEA with the default `fetchai/stub:0.16.0` connection.
+Run the AEA.
 
 ``` bash
 aea run
@@ -247,7 +254,7 @@ You will see the echo skill running in the terminal window (an output similar to
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.10.0
+v0.10.1
 
 Starting AEA 'my_first_aea' in 'async' mode ...
 info: Echo Handler: setup method called.

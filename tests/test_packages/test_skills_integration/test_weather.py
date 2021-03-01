@@ -21,13 +21,13 @@
 from random import uniform
 
 import pytest
+from aea_crypto_fetchai import FetchAICrypto
 
 from aea.test_tools.test_cases import AEATestCaseManyFlaky
 
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
 from tests.conftest import (
-    FETCHAI,
     FETCHAI_PRIVATE_KEY_FILE,
     FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
     MAX_FLAKY_RERUNS_INTEGRATION,
@@ -52,7 +52,7 @@ class TestWeatherSkills(AEATestCaseManyFlaky):
 
         default_routing = {
             "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
-            "fetchai/oef_search:0.13.0": "fetchai/soef:0.16.0",
+            "fetchai/oef_search:0.13.0": "fetchai/soef:0.17.0",
         }
 
         # generate random location
@@ -63,12 +63,18 @@ class TestWeatherSkills(AEATestCaseManyFlaky):
 
         # prepare agent one (weather station)
         self.set_agent_context(weather_station_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.15.0")
-        self.add_item("connection", "fetchai/soef:0.16.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.15.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.16.0")
+        self.add_item("connection", "fetchai/soef:0.17.0")
+        self.set_config(
+            "agent.dependencies",
+            '{\
+            "aea-crypto-fetchai": {"version": "<0.2.0,>=0.1.0"}\
+        }',
+            type_="dict",
+        )
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.16.0")
         self.add_item("connection", "fetchai/ledger:0.13.0")
         self.add_item("skill", "fetchai/weather_station:0.19.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.15.0")
         dotted_path = (
             "vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx"
         )
@@ -78,17 +84,21 @@ class TestWeatherSkills(AEATestCaseManyFlaky):
         self.run_install()
 
         # add keys
-        self.generate_private_key(FETCHAI)
-        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.generate_private_key(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        )
+        self.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+            connection=True,
         )
         self.replace_private_key_in_file(
             NON_FUNDED_FETCHAI_PRIVATE_KEY_1, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
         )
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.set_config(setting_path, FETCHAI)
+        self.set_config(setting_path, FetchAICrypto.identifier)
 
         # replace location
         setting_path = (
@@ -98,12 +108,19 @@ class TestWeatherSkills(AEATestCaseManyFlaky):
 
         # prepare agent two (weather client)
         self.set_agent_context(weather_client_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.15.0")
-        self.add_item("connection", "fetchai/soef:0.16.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.15.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.16.0")
+        self.add_item("connection", "fetchai/soef:0.17.0")
+        self.set_config(
+            "agent.dependencies",
+            '{\
+            "aea-crypto-fetchai": {"version": "<0.2.0,>=0.1.0"}\
+        }',
+            type_="dict",
+        )
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.16.0")
         self.add_item("connection", "fetchai/ledger:0.13.0")
         self.add_item("skill", "fetchai/weather_client:0.19.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.15.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.16.0")
         dotted_path = (
             "vendor.fetchai.skills.weather_client.models.strategy.args.is_ledger_tx"
         )
@@ -113,11 +130,15 @@ class TestWeatherSkills(AEATestCaseManyFlaky):
         self.run_install()
 
         # add keys
-        self.generate_private_key(FETCHAI)
-        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.generate_private_key(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        )
+        self.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+            connection=True,
         )
 
         # set p2p configs
@@ -222,7 +243,7 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseManyFlaky):
 
         default_routing = {
             "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
-            "fetchai/oef_search:0.13.0": "fetchai/soef:0.16.0",
+            "fetchai/oef_search:0.13.0": "fetchai/soef:0.17.0",
         }
 
         # generate random location
@@ -233,9 +254,16 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseManyFlaky):
 
         # add packages for agent one
         self.set_agent_context(weather_station_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.15.0")
-        self.add_item("connection", "fetchai/soef:0.16.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.15.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.16.0")
+        self.add_item("connection", "fetchai/soef:0.17.0")
+        self.set_config(
+            "agent.dependencies",
+            '{\
+            "aea-crypto-fetchai": {"version": "<0.2.0,>=0.1.0"}\
+        }',
+            type_="dict",
+        )
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.16.0")
         self.add_item("connection", "fetchai/ledger:0.13.0")
         self.add_item("skill", "fetchai/weather_station:0.19.0")
         setting_path = "agent.default_routing"
@@ -243,24 +271,28 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseManyFlaky):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/weather_station:0.21.0", weather_station_aea_name
+            "fetchai/weather_station:0.22.0", weather_station_aea_name
         )
         assert (
             diff == []
         ), "Difference between created and fetched project for files={}".format(diff)
 
         # add keys
-        self.generate_private_key(FETCHAI)
-        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.generate_private_key(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        )
+        self.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+            connection=True,
         )
         self.replace_private_key_in_file(
             NON_FUNDED_FETCHAI_PRIVATE_KEY_1, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
         )
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.set_config(setting_path, FETCHAI)
+        self.set_config(setting_path, FetchAICrypto.identifier)
 
         # replace location
         setting_path = (
@@ -270,9 +302,16 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseManyFlaky):
 
         # add packages for agent two
         self.set_agent_context(weather_client_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.15.0")
-        self.add_item("connection", "fetchai/soef:0.16.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.15.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.16.0")
+        self.add_item("connection", "fetchai/soef:0.17.0")
+        self.set_config(
+            "agent.dependencies",
+            '{\
+            "aea-crypto-fetchai": {"version": "<0.2.0,>=0.1.0"}\
+        }',
+            type_="dict",
+        )
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.16.0")
         self.add_item("connection", "fetchai/ledger:0.13.0")
         self.add_item("skill", "fetchai/weather_client:0.19.0")
         setting_path = "agent.default_routing"
@@ -280,22 +319,26 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseManyFlaky):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/weather_client:0.22.0", weather_client_aea_name
+            "fetchai/weather_client:0.23.0", weather_client_aea_name
         )
         assert (
             diff == []
         ), "Difference between created and fetched project for files={}".format(diff)
 
         # add keys
-        self.generate_private_key(FETCHAI)
-        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.generate_private_key(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        )
+        self.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+            connection=True,
         )
 
         # fund key
-        self.generate_wealth(FETCHAI)
+        self.generate_wealth(FetchAICrypto.identifier)
 
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"

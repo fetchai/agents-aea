@@ -12,7 +12,7 @@
   <a>
     <img alt="PyPI - Wheel" src="https://img.shields.io/pypi/wheel/aea">
   </a>
-  <a href="https://github.com/fetchai/agents-aea/blob/master/LICENSE">
+  <a href="https://github.com/fetchai/agents-aea/blob/main/LICENSE">
     <img alt="License" src="https://img.shields.io/pypi/l/aea"> 
   </a>
   <a href="https://pypi.org/project/aea/">
@@ -24,7 +24,7 @@
 </p>
 <p align="center">
   <a href="https://github.com/fetchai/agents-aea/workflows/AEA%20framework%20sanity%20checks%20and%20tests">
-    <img alt="AEA framework sanity checks and tests" src="https://github.com/fetchai/agents-aea/workflows/AEA%20framework%20sanity%20checks%20and%20tests/badge.svg?branch=master">
+    <img alt="AEA framework sanity checks and tests" src="https://github.com/fetchai/agents-aea/workflows/AEA%20framework%20sanity%20checks%20and%20tests/badge.svg?branch=main">
   </a>
   <a href="">
     <img alt="Codecov" src="https://img.shields.io/codecov/c/github/fetchai/agents-aea">
@@ -125,7 +125,7 @@ You can have more control on the installed dependencies by leveraging the setupt
 
 The following dependency is **only relevant if you intend to contribute** to the repository:
 
-- All Pull Requests should be opened against the `develop` branch. Do **not** open a Pull Request against `master`!
+- All Pull Requests should be opened against the `develop` branch. Do **not** open a Pull Request against `main`!
 
 - The project uses [Google Protocol Buffers](https://developers.google.com/protocol-buffers/) compiler for message serialization. A guide on how to install it is found [here](https://fetchai.github.io/oef-sdk-python/user/install.html#protobuf-compiler).
 
@@ -183,15 +183,15 @@ The following steps are **only relevant if you intend to contribute** to the rep
 
 ### Go Development
 
-The `fetchai/p2p_libp2p` package is partially developed in Go.
+- The `fetchai/p2p_libp2p` package is partially developed in Go.
 
 - To install Go visit the [Golang site](https://golang.org/doc/install).
 
 - We use [`golines`](https://github.com/segmentio/golines) and [`golangci-lint`](https://golangci-lint.run) for linting.
 
-- To run tests, use `go test -p 1 -timeout 0 -count 1 -v ./...` from the root directory of the package.
+- To run tests, use `go test -p 1 -timeout 0 -count 1 -v ./...` from the root directory of the package. If you experience installation or build issues run `go clean -modcache`.
 
-### Documentation
+### Documentation
 
 - To start a live-reloading docs server on localhost: `mkdocs serve`. To amend the docs, create a new documentation file in `docs/` and add a reference to it in `mkdocs.yml`.
 

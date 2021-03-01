@@ -24,9 +24,10 @@ import time
 from threading import Thread
 from typing import Optional, cast
 
+from aea_crypto_fetchai import FetchAICrypto
+
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import PublicId, SkillConfig
-from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import create_private_key
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet

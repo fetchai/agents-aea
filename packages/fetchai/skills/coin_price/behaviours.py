@@ -22,7 +22,6 @@
 import json
 from typing import Any, Dict, cast
 
-from aea.mail.base import EnvelopeContext
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.connections.http_client.connection import (
@@ -76,12 +75,7 @@ class CoinPriceBehaviour(TickerBehaviour):
         )
 
         # send message
-        envelope_context = EnvelopeContext(
-            skill_id=self.context.skill_id, connection_id=HTTP_CLIENT_ID
-        )
-        self.context.outbox.put_message(
-            message=request_http_message, context=envelope_context
-        )
+        self.context.outbox.put_message(message=request_http_message)
 
     def add_prometheus_metric(
         self,
@@ -114,10 +108,7 @@ class CoinPriceBehaviour(TickerBehaviour):
         )
 
         # send message
-        envelope_context = EnvelopeContext(
-            skill_id=self.context.skill_id, connection_id=PROM_CONNECTION_ID
-        )
-        self.context.outbox.put_message(message=message, context=envelope_context)
+        self.context.outbox.put_message(message=message)
 
     def update_prometheus_metric(
         self, metric_name: str, update_func: str, value: float, labels: Dict[str, str],
@@ -146,10 +137,7 @@ class CoinPriceBehaviour(TickerBehaviour):
         )
 
         # send message
-        envelope_context = EnvelopeContext(
-            skill_id=self.context.skill_id, connection_id=PROM_CONNECTION_ID
-        )
-        self.context.outbox.put_message(message=message, context=envelope_context)
+        self.context.outbox.put_message(message=message)
 
     def setup(self) -> None:
         """

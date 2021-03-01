@@ -5,7 +5,7 @@ python3 --version
 sudo apt-get install python3.7-dev
 ```
 ``` bash
-curl https://raw.githubusercontent.com/fetchai/agents-aea/master/scripts/install.sh --output install.sh
+curl https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.sh --output install.sh
 chmod +x install.sh
 ./install.sh
 ```
@@ -56,17 +56,20 @@ Confirm password:
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.10.0
+v0.10.1
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
 ``` bash
-aea fetch fetchai/my_first_aea:0.19.0
+aea fetch fetchai/my_first_aea:0.20.0
 cd my_first_aea
 ```
 ``` bash
 aea create my_first_aea
 cd my_first_aea
+```
+``` bash
+aea add connection fetchai/stub:0.17.0
 ```
 ``` bash
 aea add skill fetchai/echo:0.14.0
@@ -81,7 +84,7 @@ recipient_aea,sender_aea,fetchai/default:0.12.0,\x08\x01\x12\x011*\x07\n\x05hell
 aea run
 ```
 ``` bash
-aea run --connections fetchai/stub:0.16.0
+aea run --connections fetchai/stub:0.17.0
 ```
 ``` bash
     _     _____     _
@@ -90,7 +93,7 @@ aea run --connections fetchai/stub:0.16.0
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.10.0
+v0.10.1
 
 Starting AEA 'my_first_aea' in 'async' mode ...
 info: Echo Handler: setup method called.
