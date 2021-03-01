@@ -96,7 +96,8 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
     async def wait_state(
         self, state_or_states: Union[Any, Sequence[Any]]
     ) -> Tuple[Any, Any]:
-        """Wait state to be set.
+        """
+        Wait state to be set.
 
         :param state_or_states: state or list of states.
 
@@ -115,7 +116,7 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
         self._loop: AbstractEventLoop = loop
 
     def _setup(self) -> None:  # pylint: disable=no-self-use
-        """Set up loop before started."""
+        """Set up agent loop before started."""
         # start and stop methods are classmethods cause one instance shared across muiltiple threads
         ExecTimeoutThreadGuard.start()
 
@@ -169,7 +170,14 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
         message_or_envelope: Union[Message, Envelope],
         context: Optional[EnvelopeContext] = None,
     ) -> None:
-        """Send message or envelope to another skill."""
+        """
+        Send message or envelope to another skill.
+
+        :param message_or_envelope: envelope to send to another skill.
+        if message passed it will be wrapped into envelope with optional envelope context.
+
+        :return: None
+        """
 
     @property
     @abstractmethod
@@ -193,6 +201,7 @@ class AsyncAgentLoop(BaseAgentLoop):
 
         :param agent: AEA instance
         :param loop: asyncio loop to use. optional
+        :param threaded: is a new thread to be started for the agent loop
         """
         super().__init__(agent=agent, loop=loop, threaded=threaded)
         self._agent: AbstractAgent = self._agent
@@ -201,6 +210,7 @@ class AsyncAgentLoop(BaseAgentLoop):
         self._skill2skill_message_queue: Optional[asyncio.Queue] = None
 
     def _setup(self) -> None:
+        """Set up agent loop before started."""
         self._skill2skill_message_queue = asyncio.Queue()
         super()._setup()
 
@@ -216,7 +226,14 @@ class AsyncAgentLoop(BaseAgentLoop):
         message_or_envelope: Union[Message, Envelope],
         context: Optional[EnvelopeContext] = None,
     ) -> None:
-        """Send message or envelope to another skill."""
+        """
+        Send message or envelope to another skill.
+
+        :param message_or_envelope: envelope to send to another skill.
+        if message passed it will be wrapped into envelope with optional envelope context.
+
+        :return: None
+        """
         if self._skill2skill_message_queue is None:
             raise ValueError("AgentLoop is not started yet!")
 

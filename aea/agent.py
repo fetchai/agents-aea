@@ -275,7 +275,6 @@ class Agent(AbstractAgent, WithLogger):
         """
         return [
             (self.handle_envelope, self.inbox.async_get),
-            (self.handle_envelope, self.runtime.agent_loop.skill2skill_queue.get),
         ]
 
     def exception_handler(

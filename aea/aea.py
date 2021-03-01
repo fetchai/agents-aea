@@ -394,6 +394,7 @@ class AEA(Agent):
         """
         return super().get_message_handlers() + [
             (self.filter.handle_internal_message, self.filter.get_internal_message,),
+            (self.handle_envelope, self.runtime.agent_loop.skill2skill_queue.get),
         ]
 
     def exception_handler(self, exception: Exception, function: Callable) -> bool:

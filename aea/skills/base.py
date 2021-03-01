@@ -258,7 +258,14 @@ class SkillContext:
         message_or_envelope: Union[Message, Envelope],
         context: Optional[EnvelopeContext] = None,
     ) -> None:
-        """Send message or envelope to another skill."""
+        """
+        Send message or envelope to another skill.
+
+        :param message_or_envelope: envelope to send to another skill.
+        if message passed it will be wrapped into envelope with optional envelope context.
+
+        :return: None
+        """
         if self._agent_context is None:  # pragma: nocover
             raise ValueError("agent context was not set!")
         self._agent_context.send_to_skill(message_or_envelope, context)

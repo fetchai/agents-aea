@@ -35,6 +35,7 @@ from aea.configurations.base import SkillConfig
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
 from aea.crypto.wallet import Wallet
 from aea.exceptions import AEAActException, AEAException, AEAHandleException
+from aea.helpers.base import cd
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.identity.base import Identity
 from aea.mail.base import Envelope, EnvelopeContext
@@ -902,45 +903,49 @@ class ActTimeoutExecutionCase(BaseTimeExecutionCase):
 
 def test_skill2skill_message():
     """Tests message can be sent directly to any skill."""
-    agent_name = "MyAgent"
-    private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
-    builder = AEABuilder()
-    builder.set_name(agent_name)
-    builder.add_private_key(DEFAULT_LEDGER, private_key_path)
-    builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
-    builder.add_connection(Path(ROOT_DIR, "packages", "fetchai", "connections", "stub"))
-    agent = builder.build()
+    with tempfile.TemporaryDirectory() as dir_name:
+        with cd(dir_name):
+            agent_name = "MyAgent"
+            private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
+            builder = AEABuilder(registry_dir=Path(ROOT_DIR, "packages"))
+            builder.set_name(agent_name)
+            builder.add_private_key(DEFAULT_LEDGER, private_key_path)
+            builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
+            builder.add_connection(
+                Path(ROOT_DIR, "packages", "fetchai", "connections", "stub")
+            )
+            agent = builder.build()
 
-    msg = DefaultMessage(
-        dialogue_reference=("", ""),
-        message_id=1,
-        target=0,
-        performative=DefaultMessage.Performative.BYTES,
-        content=b"hello",
-    )
-    msg.to = agent.identity.address
-    msg.sender = agent.identity.address
-    envelope = Envelope(
-        to=msg.to,
-        sender=msg.sender,
-        message=msg,
-        context=EnvelopeContext(skill_id=DUMMY_SKILL_PUBLIC_ID),
-    )
+            msg = DefaultMessage(
+                dialogue_reference=("", ""),
+                message_id=1,
+                target=0,
+                performative=DefaultMessage.Performative.BYTES,
+                content=b"hello",
+            )
+            msg.to = agent.identity.address
+            msg.sender = agent.identity.address
+            envelope = Envelope(
+                to=msg.to,
+                sender=msg.sender,
+                message=msg,
+                context=EnvelopeContext(skill_id=DUMMY_SKILL_PUBLIC_ID),
+            )
 
-    with run_in_thread(agent.start, timeout=20, on_exit=agent.stop):
-        wait_for_condition(lambda: agent.is_running, timeout=20)
-        default_protocol_public_id = DefaultMessage.protocol_id
-        handler = agent.resources.get_handler(
-            default_protocol_public_id, DUMMY_SKILL_PUBLIC_ID
-        )
+            with run_in_thread(agent.start, timeout=20, on_exit=agent.stop):
+                wait_for_condition(lambda: agent.is_running, timeout=20)
+                default_protocol_public_id = DefaultMessage.protocol_id
+                handler = agent.resources.get_handler(
+                    default_protocol_public_id, DUMMY_SKILL_PUBLIC_ID
+                )
 
-        assert handler is not None, "Handler is not set."
+                assert handler is not None, "Handler is not set."
 
-        # send an envelope to itself
-        handler.context.send_to_skill(envelope)
+                # send an envelope to itself
+                handler.context.send_to_skill(envelope)
 
-        wait_for_condition(
-            lambda: len(handler.handled_messages) == 1,
-            timeout=5,
-            error_msg="The message is not inside the handled_messages.",
-        )
+                wait_for_condition(
+                    lambda: len(handler.handled_messages) == 1,
+                    timeout=5,
+                    error_msg="The message is not inside the handled_messages.",
+                )
