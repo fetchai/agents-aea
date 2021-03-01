@@ -330,7 +330,7 @@ async def test_unsupported_protocol(ledger_apis_connection: LedgerConnection):
     """Test fail on protocol not supported."""
     envelope = Envelope(
         to=str(ledger_apis_connection.connection_id),
-        sender="test",
+        sender="test/skill:0.1.0",
         protocol_specification_id=PublicId.from_str("author/package_name:0.1.0"),
         message=b"message",
     )

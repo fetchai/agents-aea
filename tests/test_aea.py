@@ -38,7 +38,7 @@ from aea.exceptions import AEAActException, AEAException, AEAHandleException
 from aea.helpers.base import cd
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.identity.base import Identity
-from aea.mail.base import Envelope, EnvelopeContext
+from aea.mail.base import Envelope
 from aea.protocols.base import Protocol
 from aea.registries.resources import Resources
 from aea.runtime import RuntimeStates
@@ -923,14 +923,9 @@ def test_skill2skill_message():
                 performative=DefaultMessage.Performative.BYTES,
                 content=b"hello",
             )
-            msg.to = agent.identity.address
-            msg.sender = agent.identity.address
-            envelope = Envelope(
-                to=msg.to,
-                sender=msg.sender,
-                message=msg,
-                context=EnvelopeContext(skill_id=DUMMY_SKILL_PUBLIC_ID),
-            )
+            msg.to = str(DUMMY_SKILL_PUBLIC_ID)
+            msg.sender = "some_author/some_skill:0.1.0"
+            envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
 
             with run_in_thread(agent.start, timeout=20, on_exit=agent.stop):
                 wait_for_condition(lambda: agent.is_running, timeout=20)

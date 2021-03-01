@@ -107,11 +107,12 @@ class TestSoefTokenStorage:
 
     def setup(self):
         """Set up."""
+        self.skill_id = "some_author/some_skill:0.1.0"
         self.crypto = make_crypto(DEFAULT_LEDGER)
         self.crypto2 = make_crypto(DEFAULT_LEDGER)
         self.data_dir = tempfile.mkdtemp()
         identity = Identity("", address=self.crypto.address)
-        self.oef_search_dialogues = OefSearchDialogues(self.crypto.address)
+        self.oef_search_dialogues = OefSearchDialogues(self.skill_id)
 
         # create the connection and multiplexer objects
         self.token_storage_path = "test.storage"
@@ -174,10 +175,11 @@ class TestSoef:
 
     def setup(self):
         """Set up."""
+        self.skill_id = "some_author/some_skill:0.1.0"
         self.crypto = make_crypto(DEFAULT_LEDGER)
         self.crypto2 = make_crypto(DEFAULT_LEDGER)
         identity = Identity("", address=self.crypto.address)
-        self.oef_search_dialogues = OefSearchDialogues(self.crypto.address)
+        self.oef_search_dialogues = OefSearchDialogues(self.skill_id)
         self.data_dir = tempfile.mkdtemp()
 
         # create the connection and multiplexer objects
@@ -402,7 +404,7 @@ class TestSoef:
             service_description=service_description,
         )
         message.to = str(SOEFConnection.connection_id.to_any())
-        message.sender = self.crypto.address
+        message.sender = self.skill_id
         envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         with pytest.raises(ValueError):
             await self.connection.send(envelope)

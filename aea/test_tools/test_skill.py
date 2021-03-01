@@ -38,7 +38,8 @@ from aea.skills.base import Skill
 from aea.skills.tasks import TaskManager
 
 
-COUNTERPARTY_ADDRESS = "counterparty"
+COUNTERPARTY_AGENT_ADDRESS = "counterparty"
+COUNTERPARTY_SKILL_ADDRESS = "some_author/some_skill:0.1.0"
 
 
 class BaseSkillTestCase:
@@ -150,7 +151,7 @@ class BaseSkillTestCase:
         message_id: Optional[int] = None,
         target: Optional[int] = None,
         to: Optional[Address] = None,
-        sender: Address = COUNTERPARTY_ADDRESS,
+        sender: Optional[Address] = None,
         is_agent_to_agent_messages: Optional[bool] = None,
         **kwargs: Any,
     ) -> Message:
@@ -171,6 +172,12 @@ class BaseSkillTestCase:
 
         :return: the created incoming message
         """
+        if sender is None:
+            sender = (
+                COUNTERPARTY_AGENT_ADDRESS
+                if is_agent_to_agent_messages
+                else COUNTERPARTY_SKILL_ADDRESS
+            )
         if is_agent_to_agent_messages is None:
             is_agent_to_agent_messages = self.is_agent_to_agent_messages
         message_attributes = dict()  # type: Dict[str, Any]
@@ -340,7 +347,7 @@ class BaseSkillTestCase:
         self,
         dialogues: Dialogues,
         messages: Tuple[DialogueMessage, ...],
-        counterparty: Address = COUNTERPARTY_ADDRESS,
+        counterparty: Optional[Address] = None,
         is_agent_to_agent_messages: Optional[bool] = None,
     ) -> Dialogue:
         """
@@ -360,6 +367,12 @@ class BaseSkillTestCase:
 
         :return: the created incoming message
         """
+        if counterparty is None:
+            counterparty = (
+                COUNTERPARTY_AGENT_ADDRESS
+                if is_agent_to_agent_messages
+                else COUNTERPARTY_SKILL_ADDRESS
+            )
         if is_agent_to_agent_messages is None:
             is_agent_to_agent_messages = self.is_agent_to_agent_messages
         if len(messages) == 0:
@@ -477,7 +490,7 @@ class BaseSkillTestCase:
             currency_denominations=DEFAULT_CURRENCY_DENOMINATIONS,
             default_connection=None,
             default_routing={},
-            search_service_address="dummy_search_service_address",
+            search_service_address="dummy_author/dummy_search_skill:0.1.0",
             decision_maker_address="dummy_decision_maker_address",
             data_dir=os.getcwd(),
         )

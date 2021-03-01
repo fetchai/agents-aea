@@ -38,6 +38,16 @@ from aea.skills.base import Behaviour, Handler, Model, Skill
 class Resources:
     """This class implements the object that holds the resources of an AEA."""
 
+    __slots__ = (
+        "_agent_name",
+        "_component_registry",
+        "_specification_to_protocol_id",
+        "_handler_registry",
+        "_behaviour_registry",
+        "_model_registry",
+        "_registries",
+    )
+
     def __init__(self, agent_name: str = "standalone") -> None:
         """
         Instantiate the resources.

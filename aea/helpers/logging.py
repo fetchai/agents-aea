@@ -51,6 +51,8 @@ class AgentLoggerAdapter(LoggerAdapter):
 class WithLogger:
     """Interface to endow subclasses with a logger."""
 
+    __slots__ = ("_logger", "_default_logger_name")
+
     def __init__(
         self, logger: Optional[Logger] = None, default_logger_name: str = "aea",
     ) -> None:

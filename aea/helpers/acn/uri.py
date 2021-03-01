@@ -26,6 +26,8 @@ from typing import Optional
 class Uri:
     """Holds a node address in format "host:port"."""
 
+    __slots__ = ("_host", "_port")
+
     def __init__(
         self,
         uri: Optional[str] = None,
