@@ -78,7 +78,7 @@ aea add skill fetchai/echo:0.14.0
 TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE,
 ```
 ``` bash
-recipient_aea,sender_aea,fetchai/default:0.12.0,\x08\x01\x12\x011*\x07\n\x05hello,
+recipient_aea,sender_aea,fetchai/default:0.1.0,\x08\x01\x12\x011*\x07\n\x05hello,
 ```
 ``` bash
 aea run
@@ -115,7 +115,7 @@ info: Echo Behaviour: act method called.
 info: Echo Behaviour: act method called.
 ```
 ``` bash
-echo 'my_first_aea,sender_aea,fetchai/default:0.12.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,' >> input_file
+echo 'my_first_aea,sender_aea,fetchai/default:0.1.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,' >> input_file
 ```
 ``` bash
 info: Echo Behaviour: act method called.
