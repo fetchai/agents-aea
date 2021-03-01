@@ -16,19 +16,18 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
 """This module contains the implementation of an agent loop using asyncio."""
 import asyncio
 import datetime
 from abc import ABC, abstractmethod
 from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop
+from asyncio.queues import Queue
 from asyncio.tasks import Task
 from contextlib import suppress
 from enum import Enum
 from functools import partial
-from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union, cast
 
 from aea.abstract_agent import AbstractAgent
 from aea.configurations.constants import LAUNCH_SUCCEED_MESSAGE
@@ -41,6 +40,8 @@ from aea.helpers.async_utils import (
 )
 from aea.helpers.exec_timeout import ExecTimeoutThreadGuard, TimeoutException
 from aea.helpers.logging import WithLogger, get_logger
+from aea.mail.base import Envelope, EnvelopeContext
+from aea.protocols.base import Message
 
 
 class AgentLoopException(AEAException):
@@ -91,6 +92,19 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
         """Get current main loop state."""
         return self._state.get()
 
+    async def wait_state(
+        self, state_or_states: Union[Any, Sequence[Any]]
+    ) -> Tuple[Any, Any]:
+        """
+        Wait state to be set.
+
+        :param state_or_states: state or list of states.
+
+        :return: tuple of previous state and new state.
+        """
+
+        return await self._state.wait(state_or_states)
+
     @property
     def is_running(self) -> bool:
         """Get running state of the loop."""
@@ -101,7 +115,7 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
         self._loop: AbstractEventLoop = loop
 
     def _setup(self) -> None:  # pylint: disable=no-self-use
-        """Set up loop before started."""
+        """Set up agent loop before started."""
         # start and stop methods are classmethods cause one instance shared across muiltiple threads
         ExecTimeoutThreadGuard.start()
 
@@ -112,7 +126,7 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
 
     async def run(self) -> None:
         """Run agent loop."""
-        self.logger.debug("agent loop started")
+        self.logger.debug("agent loop starting...")
         self._state.set(AgentLoopStates.starting)
         self._setup()
         self._set_tasks()
@@ -149,6 +163,26 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
                 continue  #  pragma: nocover
             task.cancel()
 
+    @abstractmethod
+    def send_to_skill(
+        self,
+        message_or_envelope: Union[Message, Envelope],
+        context: Optional[EnvelopeContext] = None,
+    ) -> None:
+        """
+        Send message or envelope to another skill.
+
+        :param message_or_envelope: envelope to send to another skill.
+        if message passed it will be wrapped into envelope with optional envelope context.
+
+        :return: None
+        """
+
+    @property
+    @abstractmethod
+    def skill2skill_queue(self) -> Queue:
+        """Get skill to skill message queue."""
+
 
 class AsyncAgentLoop(BaseAgentLoop):
     """Asyncio based agent loop suitable only for AEA."""
@@ -166,11 +200,58 @@ class AsyncAgentLoop(BaseAgentLoop):
 
         :param agent: AEA instance
         :param loop: asyncio loop to use. optional
+        :param threaded: is a new thread to be started for the agent loop
         """
         super().__init__(agent=agent, loop=loop, threaded=threaded)
         self._agent: AbstractAgent = self._agent
 
         self._periodic_tasks: Dict[Callable, PeriodicCaller] = {}
+        self._skill2skill_message_queue: Optional[asyncio.Queue] = None
+
+    def _setup(self) -> None:
+        """Set up agent loop before started."""
+        self._skill2skill_message_queue = asyncio.Queue()
+        super()._setup()
+
+    @property
+    def skill2skill_queue(self) -> Queue:
+        """Get skill to skill message queue."""
+        if not self._skill2skill_message_queue:  # pragma: nocover
+            raise ValueError("_skill2skill_message_queue is not set!")
+        return self._skill2skill_message_queue
+
+    def send_to_skill(
+        self,
+        message_or_envelope: Union[Message, Envelope],
+        context: Optional[EnvelopeContext] = None,
+    ) -> None:
+        """
+        Send message or envelope to another skill.
+
+        :param message_or_envelope: envelope to send to another skill.
+        if message passed it will be wrapped into envelope with optional envelope context.
+
+        :return: None
+        """
+        if isinstance(message_or_envelope, Envelope):
+            envelope = message_or_envelope
+            message = cast(Message, envelope.message)
+        elif isinstance(message_or_envelope, Message):
+            message = message_or_envelope
+            envelope = Envelope(
+                to=message.to, sender=message.sender, message=message, context=context,
+            )
+        else:
+            raise ValueError(
+                f"Unsupported message or envelope type: {type(message_or_envelope)}"
+            )
+
+        if not message.has_to:  # pragma: nocover
+            raise ValueError("Provided message has message.to not set.")
+        if not message.has_sender:  # pragma: nocover
+            raise ValueError("Provided message has message.sender not set.")
+
+        self.skill2skill_queue.put_nowait(envelope)
 
     def _periodic_task_exception_callback(  # pylint: disable=unused-argument
         self, task_callable: Callable, exc: Exception

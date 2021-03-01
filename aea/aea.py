@@ -211,6 +211,7 @@ class AEA(Agent):
             data_dir,
             storage_callable=lambda: self.runtime.storage,
             build_dir=self.get_build_dir(),
+            send_to_skill=self.runtime.agent_loop.send_to_skill,
             **kwargs,
         )
         self._execution_timeout = execution_timeout
@@ -396,6 +397,7 @@ class AEA(Agent):
         """
         return super().get_message_handlers() + [
             (self.filter.handle_internal_message, self.filter.get_internal_message,),
+            (self.handle_envelope, self.runtime.agent_loop.skill2skill_queue.get),
         ]
 
     def exception_handler(self, exception: Exception, function: Callable) -> bool:
