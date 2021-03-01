@@ -44,7 +44,8 @@ from aea.helpers.async_friendly_queue import AsyncFriendlyQueue
 from aea.helpers.async_utils import AsyncState, Runnable, ThreadedAsyncRunner
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import WithLogger, get_logger
-from aea.mail.base import AEAConnectionError, Empty, Envelope, EnvelopeContext
+from aea.mail.base import AEAConnectionError, Empty, Envelope
+from aea.mail.common import EnvelopeContext
 from aea.protocols.base import Message, Protocol
 
 
@@ -509,13 +510,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
                     connection = task_to_connection.pop(task)
                     envelope = task.result()
                     if envelope is not None:
-                        if not envelope.is_component_to_component_message:
-                            if envelope.context is None:
-                                envelope.context = EnvelopeContext(
-                                    connection_id=connection.public_id
-                                )
-                            else:
-                                envelope.context.connection_id = connection.public_id
+                        self._set_context_on_envelope(envelope, connection)
                         self.in_queue.put_nowait(envelope)
 
                     # reinstantiate receiving task, but only if the connection is still up.
@@ -706,6 +701,21 @@ class AsyncMultiplexer(Runnable, WithLogger):
 
         for c in connections:
             self.add_connection(c, c.public_id == default_connection)
+
+    @staticmethod
+    def _set_context_on_envelope(envelope: Envelope, connection: Connection) -> None:
+        """
+        Updat the envelope context.
+
+        :param envelope: the envelope to be updated
+        :param connection: the connection
+        """
+        if envelope.is_component_to_component_message:
+            return
+        if envelope.context is None:
+            envelope.context = EnvelopeContext(connection_id=connection.public_id)
+        else:
+            envelope.context.connection_id = connection.public_id
 
 
 class Multiplexer(AsyncMultiplexer):

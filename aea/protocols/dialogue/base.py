@@ -703,7 +703,7 @@ class Dialogue(metaclass=_DialogueMeta):
                 )
 
         if target_message is None:
-            raise AEAEnforceError("No target message found!")
+            raise ValueError("No target message found!")
         enforce(
             self._has_message_id(target),  # type: ignore
             "The target message does not exist in this dialogue.",
@@ -721,7 +721,11 @@ class Dialogue(metaclass=_DialogueMeta):
 
         self._update(reply)
 
-        reply.envelope_context = target_message.envelope_context
+        reply.envelope_context = (
+            target_message.envelope_context.copy_without_uri()
+            if target_message.envelope_context is not None
+            else None
+        )
 
         return reply
 

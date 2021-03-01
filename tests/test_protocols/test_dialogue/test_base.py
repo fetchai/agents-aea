@@ -525,6 +525,17 @@ class TestDialogueBase:
         assert str(cm.value) == "Cannot reply in an empty dialogue!"
         assert self.dialogue.is_empty
 
+    def test_reply_negative_target_does_not_exist(self):
+        """Negative test for the 'reply' method: target is not in the dialogue."""
+        self.dialogue._update(self.valid_message_1_by_self)
+        with pytest.raises(ValueError) as cm:
+            self.dialogue.reply(
+                target=10,
+                performative=DefaultMessage.Performative.BYTES,
+                content=b"Hello Back",
+            )
+        assert str(cm.value) == "No target message found!"
+
     def test_reply_negative_target_message_target_mismatch(self):
         """Negative test for the 'reply' method: target message and target provided but do not match."""
         self.dialogue._update(self.valid_message_1_by_self)

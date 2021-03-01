@@ -35,6 +35,8 @@ Address = str
 class RawTransaction:
     """This class represents an instance of RawTransaction."""
 
+    __slots__ = ("_ledger_id", "_body")
+
     def __init__(self, ledger_id: str, body: JSONLike,) -> None:
         """Initialise an instance of RawTransaction."""
         self._ledger_id = ledger_id
@@ -111,6 +113,8 @@ class RawTransaction:
 
 class RawMessage:
     """This class represents an instance of RawMessage."""
+
+    __slots__ = ("_ledger_id", "_body", "_is_deprecated_mode")
 
     def __init__(
         self, ledger_id: str, body: bytes, is_deprecated_mode: bool = False,
@@ -206,6 +210,8 @@ class RawMessage:
 class SignedTransaction:
     """This class represents an instance of SignedTransaction."""
 
+    __slots__ = ("_ledger_id", "_body")
+
     def __init__(self, ledger_id: str, body: JSONLike,) -> None:
         """Initialise an instance of SignedTransaction."""
         self._ledger_id = ledger_id
@@ -284,6 +290,8 @@ class SignedTransaction:
 
 class SignedMessage:
     """This class represents an instance of RawMessage."""
+
+    __slots__ = ("_ledger_id", "_body", "_is_deprecated_mode")
 
     def __init__(
         self, ledger_id: str, body: str, is_deprecated_mode: bool = False,
@@ -379,6 +387,8 @@ class SignedMessage:
 class State:
     """This class represents an instance of State."""
 
+    __slots__ = ("_ledger_id", "_body")
+
     def __init__(self, ledger_id: str, body: JSONLike) -> None:
         """Initialise an instance of State."""
         self._ledger_id = ledger_id
@@ -446,6 +456,24 @@ class State:
 
 class Terms:
     """Class to represent the terms of a multi-currency & multi-token ledger transaction."""
+
+    __slots__ = (
+        "_ledger_id",
+        "_sender_address",
+        "_counterparty_address",
+        "_amount_by_currency_id",
+        "_quantities_by_good_id",
+        "_is_sender_payable_tx_fee",
+        "_nonce",
+        "_fee_by_currency_id",
+        "_is_strict",
+        "_kwargs",
+        "_good_ids",
+        "_sender_supplied_quantities",
+        "_counterparty_supplied_quantities",
+        "_sender_hash",
+        "_counterparty_hash",
+    )
 
     def __init__(
         self,
@@ -942,6 +970,8 @@ class Terms:
 class TransactionDigest:
     """This class represents an instance of TransactionDigest."""
 
+    __slots__ = ("_ledger_id", "_body")
+
     def __init__(self, ledger_id: str, body: str) -> None:
         """Initialise an instance of TransactionDigest."""
         self._ledger_id = ledger_id
@@ -1021,6 +1051,8 @@ class TransactionDigest:
 
 class TransactionReceipt:
     """This class represents an instance of TransactionReceipt."""
+
+    __slots__ = ("_ledger_id", "_receipt", "_transaction")
 
     def __init__(
         self, ledger_id: str, receipt: JSONLike, transaction: JSONLike
