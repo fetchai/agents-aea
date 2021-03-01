@@ -62,6 +62,15 @@ DEFAULT_CURRENCY_DENOM = "uatom"
 DEFAULT_CHAIN_ID = "cosmoshub-3"
 _BYTECODE = "wasm_byte_code"
 DEFAULT_CLI_COMMAND = "wasmcli"
+DEFAULT_COSMWASM_VERSIONS = "<0.10"
+MESSAGE_FORMAT_BY_VERSION = {
+    "store": {"<0.10": "wasm/store-code", ">=0.10": "wasm/MsgStoreCode"},
+    "instantiate": {
+        "<0.10": "wasm/instantiate",
+        ">=0.10": "wasm/MsgInstantiateContract",
+    },
+    "execute": {"<0.10": "wasm/execute", ">=0.10": "wasm/MsgExecuteContract"},
+}
 
 
 class CosmosHelper(Helper):
@@ -448,6 +457,9 @@ class _CosmosApi(LedgerApi):
         self.denom = kwargs.pop("denom", DEFAULT_CURRENCY_DENOM)
         self.chain_id = kwargs.pop("chain_id", DEFAULT_CHAIN_ID)
         self.cli_command = kwargs.pop("cli_command", DEFAULT_CLI_COMMAND)
+        self.cosmwasm_versions = kwargs.pop(
+            "cosmwasm_version", DEFAULT_COSMWASM_VERSIONS
+        )
 
     @property
     def api(self) -> Any:
@@ -593,6 +605,8 @@ class _CosmosApi(LedgerApi):
         tx_fee: int = 0,
         gas: int = 0,
         memo: str = "",
+        source: str = "",
+        builder: str = "",
     ) -> Optional[JSONLike]:
         """
         Create a CosmWasm bytecode deployment transaction.
@@ -605,12 +619,12 @@ class _CosmosApi(LedgerApi):
         :return: the unsigned CosmWasm contract deploy message
         """
         store_msg = {
-            "type": "wasm/store-code",
+            "type": MESSAGE_FORMAT_BY_VERSION["store"][self.cosmwasm_versions],
             "value": {
                 "sender": deployer_address,
                 "wasm_byte_code": contract_interface[_BYTECODE],
-                "source": "",
-                "builder": "",
+                "source": source,
+                "builder": builder,
             },
         }
         tx = self._get_transaction(
@@ -637,24 +651,31 @@ class _CosmosApi(LedgerApi):
         Create a CosmWasm InitMsg transaction.
 
         :param deployer_address: the deployer address of the message initiator.
+        :param denom: the name of the denomination of the contract funds
+        :param chain_id: the Chain ID of the CosmWasm transaction.
+        :param account_number: the account number of the deployer.
+        :param sequence: the sequence of the deployer.
         :param amount: Contract's initial funds amount
         :param code_id: the ID of contract bytecode.
         :param init_msg: the InitMsg containing parameters for contract constructor.
+        :param label: the label name of the contract.
+        :param tx_fee: the tx fee accepted.
         :param gas: Maximum amount of gas to be used on executing command.
-        :param denom: the name of the denomination of the contract funds
-        :param label: the label name of the contract
         :param memo: any string comment.
-        :param chain_id: the Chain ID of the CosmWasm transaction. Default is 1 (i.e. mainnet).
         :return: the unsigned CosmWasm InitMsg
         """
+        if self.cosmwasm_versions != DEFAULT_COSMWASM_VERSIONS and amount == 0:
+            init_funds = []
+        else:
+            init_funds = [{"amount": str(amount), "denom": denom}]
         instantiate_msg = {
-            "type": "wasm/instantiate",
+            "type": MESSAGE_FORMAT_BY_VERSION["instantiate"][self.cosmwasm_versions],
             "value": {
                 "sender": deployer_address,
                 "code_id": str(code_id),
                 "label": label,
                 "init_msg": init_msg,
-                "init_funds": [{"denom": denom, "amount": str(amount)}],
+                "init_funds": init_funds,
             },
         }
         tx = self._get_transaction(
@@ -687,6 +708,9 @@ class _CosmosApi(LedgerApi):
         :param sender_address: the sender address of the message initiator.
         :param contract_address: the address of the smart contract.
         :param handle_msg: HandleMsg in JSON format.
+        :param amount: Funds amount sent with transaction.
+        :param tx_fee: the tx fee accepted.
+        :param denom: the name of the denomination of the contract funds
         :param gas: Maximum amount of gas to be used on executing command.
         :param memo: any string comment.
         :param chain_id: the Chain ID of the CosmWasm transaction. Default is 1 (i.e. mainnet).
@@ -699,13 +723,17 @@ class _CosmosApi(LedgerApi):
         )
         if account_number is None or sequence is None:
             return None
+        if self.cosmwasm_versions != DEFAULT_COSMWASM_VERSIONS and amount == 0:
+            sent_funds = []
+        else:
+            sent_funds = [{"amount": str(amount), "denom": denom}]
         execute_msg = {
-            "type": "wasm/execute",
+            "type": MESSAGE_FORMAT_BY_VERSION["execute"][self.cosmwasm_versions],
             "value": {
                 "sender": sender_address,
                 "contract": contract_address,
                 "msg": handle_msg,
-                "sent_funds": [{"amount": str(amount), "denom": denom}],
+                "sent_funds": sent_funds,
             },
         }
         tx = self._get_transaction(
@@ -922,12 +950,14 @@ class _CosmosApi(LedgerApi):
             tx_digest = None
         return tx_digest
 
-    @staticmethod
-    def is_cosmwasm_transaction(tx_signed: JSONLike) -> bool:
+    def is_cosmwasm_transaction(self, tx_signed: JSONLike) -> bool:
         """Check whether it is a cosmwasm tx."""
         try:
             _type = cast(dict, tx_signed.get("value", {})).get("msg", [])[0]["type"]
-            result = _type in ["wasm/store-code", "wasm/instantiate", "wasm/execute"]
+            result = _type in [
+                value[self.cosmwasm_versions]
+                for value in MESSAGE_FORMAT_BY_VERSION.values()
+            ]
         except (KeyError, IndexError):  # pragma: nocover
             result = False
         return result
