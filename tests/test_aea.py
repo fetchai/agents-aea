@@ -35,9 +35,10 @@ from aea.configurations.base import SkillConfig
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
 from aea.crypto.wallet import Wallet
 from aea.exceptions import AEAActException, AEAException, AEAHandleException
+from aea.helpers.base import cd
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.identity.base import Identity
-from aea.mail.base import Envelope
+from aea.mail.base import Envelope, EnvelopeContext
 from aea.protocols.base import Protocol
 from aea.registries.resources import Resources
 from aea.runtime import RuntimeStates
@@ -259,7 +260,7 @@ def test_handle():
                 protocol_specification_id=DefaultMessage.protocol_specification_id,
                 message=b"",
             )
-            aea.outbox._multiplexer.put(envelope)
+            aea.runtime.multiplexer.put(envelope)
             wait_for_condition(
                 lambda: error_handler.decoding_error_count == 1, timeout=1,
             )
@@ -288,7 +289,7 @@ def test_handle():
                 message=encoded_msg,
             )
             # send envelope via localnode back to agent/bypass `outbox` put consistency checks
-            aea.outbox._multiplexer.put(envelope)
+            aea.runtime.multiplexer.put(envelope)
             wait_for_condition(
                 lambda: len(dummy_handler.handled_messages) == 1, timeout=1,
             )
@@ -898,3 +899,53 @@ class ActTimeoutExecutionCase(BaseTimeExecutionCase):
         self.aea_tool.aea.runtime.agent_loop._execution_control(
             self.behaviour.act_wrapper
         )
+
+
+def test_skill2skill_message():
+    """Tests message can be sent directly to any skill."""
+    with tempfile.TemporaryDirectory() as dir_name:
+        with cd(dir_name):
+            agent_name = "MyAgent"
+            private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
+            builder = AEABuilder(registry_dir=Path(ROOT_DIR, "packages"))
+            builder.set_name(agent_name)
+            builder.add_private_key(DEFAULT_LEDGER, private_key_path)
+            builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
+            builder.add_connection(
+                Path(ROOT_DIR, "packages", "fetchai", "connections", "stub")
+            )
+            agent = builder.build()
+
+            msg = DefaultMessage(
+                dialogue_reference=("", ""),
+                message_id=1,
+                target=0,
+                performative=DefaultMessage.Performative.BYTES,
+                content=b"hello",
+            )
+            msg.to = agent.identity.address
+            msg.sender = agent.identity.address
+            envelope = Envelope(
+                to=msg.to,
+                sender=msg.sender,
+                message=msg,
+                context=EnvelopeContext(skill_id=DUMMY_SKILL_PUBLIC_ID),
+            )
+
+            with run_in_thread(agent.start, timeout=20, on_exit=agent.stop):
+                wait_for_condition(lambda: agent.is_running, timeout=20)
+                default_protocol_public_id = DefaultMessage.protocol_id
+                handler = agent.resources.get_handler(
+                    default_protocol_public_id, DUMMY_SKILL_PUBLIC_ID
+                )
+
+                assert handler is not None, "Handler is not set."
+
+                # send an envelope to itself
+                handler.context.send_to_skill(envelope)
+
+                wait_for_condition(
+                    lambda: len(handler.handled_messages) == 1,
+                    timeout=5,
+                    error_msg="The message is not inside the handled_messages.",
+                )
