@@ -460,6 +460,11 @@ class _CosmosApi(LedgerApi):
         self.cosmwasm_versions = kwargs.pop(
             "cosmwasm_version", DEFAULT_COSMWASM_VERSIONS
         )
+        valid_specifiers = list(MESSAGE_FORMAT_BY_VERSION["instantiate"].keys())
+        if self.cosmwasm_versions not in valid_specifiers:
+            raise ValueError(
+                f"Valid CosmWasm version specifiers: {valid_specifiers}. Received invalid specifier={self.cosmwasm_versions}!"
+            )
 
     @property
     def api(self) -> Any:
