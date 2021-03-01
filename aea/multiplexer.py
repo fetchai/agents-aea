@@ -506,12 +506,19 @@ class AsyncMultiplexer(Runnable, WithLogger):
 
                 # process completed receiving tasks.
                 for task in done:
+                    connection = task_to_connection.pop(task)
                     envelope = task.result()
                     if envelope is not None:
+                        if not envelope.is_component_to_component_message:
+                            if envelope.context is None:
+                                envelope.context = EnvelopeContext(
+                                    connection_id=connection.public_id
+                                )
+                            else:
+                                envelope.context.connection_id = connection.public_id
                         self.in_queue.put_nowait(envelope)
 
                     # reinstantiate receiving task, but only if the connection is still up.
-                    connection = task_to_connection.pop(task)
                     if connection.is_connected:
                         new_task = asyncio.ensure_future(connection.receive())
                         task_to_connection[new_task] = connection
@@ -570,6 +577,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
             connection = self._get_connection(connection_id)
 
         if connection is None:
+            # we don't raise on dropping envelope as this can be a configuration issue only!
             self.logger.warning(
                 f"Dropping envelope, no connection available for sending: {envelope}"
             )

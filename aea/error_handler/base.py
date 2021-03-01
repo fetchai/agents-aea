@@ -49,9 +49,9 @@ class AbstractErrorHandler(ABC):
 
     @classmethod
     @abstractmethod
-    def send_unsupported_skill(cls, envelope: Envelope, logger: Logger) -> None:
+    def send_unsupported_handler(cls, envelope: Envelope, logger: Logger) -> None:
         """
-        Handle the received envelope in case the skill is not supported.
+        Handle the received envelope in case the handler is not supported.
 
         :param envelope: the envelope
         :return: None

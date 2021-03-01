@@ -59,19 +59,14 @@ class ErrorHandler(AbstractErrorHandler):
         )
 
     @classmethod
-    def send_unsupported_skill(cls, envelope: Envelope, logger: Logger) -> None:
+    def send_unsupported_handler(cls, envelope: Envelope, logger: Logger) -> None:
         """
-        Handle the received envelope in case the skill is not supported.
+        Handle the received envelope in case the handler is not supported.
 
         :param envelope: the envelope
         :return: None
         """
         cls.unsupported_skill_count += 1
-        if envelope.skill_id is None:
-            logger.warning(
-                f"Cannot handle envelope: no active handler registered for the protocol_specification_id='{envelope.protocol_specification_id}'. Sender={envelope.sender}, to={envelope.sender}."
-            )
-        else:
-            logger.warning(
-                f"Cannot handle envelope: no active handler registered for the protocol_specification_id='{envelope.protocol_specification_id}' and skill_id='{envelope.skill_id}'. Sender={envelope.sender}, to={envelope.sender}."
-            )
+        logger.warning(
+            f"Cannot handle envelope: no active handler registered for the protocol_specification_id='{envelope.protocol_specification_id}'. Sender={envelope.sender}, to={envelope.sender}."
+        )

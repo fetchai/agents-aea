@@ -20,12 +20,11 @@
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Optional, Tuple, Union
+from typing import Any, Optional, Union
 from urllib.parse import urlparse
 
 from aea.common import Address
-from aea.configurations.base import PackageId, PublicId
-from aea.configurations.constants import CONNECTION, SKILL
+from aea.configurations.base import PublicId
 from aea.exceptions import enforce
 from aea.mail import base_pb2
 from aea.protocols.base import Message
@@ -45,6 +44,8 @@ class Empty(Exception):
 class URI:
     """URI following RFC3986."""
 
+    __slots__ = "_uri_raw"
+
     def __init__(self, uri_raw: str) -> None:
         """
         Initialize the URI.
@@ -54,171 +55,120 @@ class URI:
         :param uri_raw: the raw form uri
         :raises ValueError: if uri_raw is not RFC3986 compliant
         """
-        self.uri_raw = uri_raw
-        parsed = urlparse(uri_raw)
-        self._scheme = parsed.scheme
-        self._netloc = parsed.netloc
-        self._path = parsed.path
-        self._params = parsed.params
-        self._query = parsed.query
-        self._fragment = parsed.fragment
-        self._username = parsed.username
-        self._password = parsed.password
-        self._host = parsed.hostname
-        self._port = parsed.port
+        self._uri_raw = uri_raw
 
     @property
     def scheme(self) -> str:
         """Get the scheme."""
-        return self._scheme
+        parsed = urlparse(self._uri_raw)
+        return parsed.scheme
 
     @property
     def netloc(self) -> str:
         """Get the netloc."""
-        return self._netloc
+        parsed = urlparse(self._uri_raw)
+        return parsed.netloc
 
     @property
     def path(self) -> str:
         """Get the path."""
-        return self._path
+        parsed = urlparse(self._uri_raw)
+        return parsed.path
 
     @property
     def params(self) -> str:
         """Get the params."""
-        return self._params
+        parsed = urlparse(self._uri_raw)
+        return parsed.params
 
     @property
     def query(self) -> str:
         """Get the query."""
-        return self._query
+        parsed = urlparse(self._uri_raw)
+        return parsed.query
 
     @property
     def fragment(self) -> str:
         """Get the fragment."""
-        return self._fragment
+        parsed = urlparse(self._uri_raw)
+        return parsed.fragment
 
     @property
     def username(self) -> Optional[str]:
         """Get the username."""
-        return self._username
+        parsed = urlparse(self._uri_raw)
+        return parsed.username
 
     @property
     def password(self) -> Optional[str]:
         """Get the password."""
-        return self._password
+        parsed = urlparse(self._uri_raw)
+        return parsed.password
 
     @property
     def host(self) -> Optional[str]:
         """Get the host."""
-        return self._host
+        parsed = urlparse(self._uri_raw)
+        return parsed.hostname
 
     @property
     def port(self) -> Optional[int]:
         """Get the port."""
-        return self._port
+        parsed = urlparse(self._uri_raw)
+        return parsed.port
 
     def __str__(self) -> str:
         """Get string representation."""
-        return self.uri_raw
+        return self._uri_raw
 
     def __eq__(self, other: Any) -> bool:
         """Compare with another object."""
-        return (
-            isinstance(other, URI)
-            and self.scheme == other.scheme
-            and self.netloc == other.netloc
-            and self.path == other.path
-            and self.params == other.params
-            and self.query == other.query
-            and self.fragment == other.fragment
-            and self.username == other.username
-            and self.password == other.password
-            and self.host == other.host
-            and self.port == other.port
-        )
+        return isinstance(other, URI) and str(self) == str(other)
 
 
 class EnvelopeContext:
-    """Extra information for the handling of an envelope."""
+    """Contains context information of an envelope."""
+
+    __slots__ = ("_connection_id", "_uri")
 
     def __init__(
-        self,
-        connection_id: Optional[PublicId] = None,
-        skill_id: Optional[PublicId] = None,
-        uri: Optional[URI] = None,
+        self, connection_id: Optional[PublicId] = None, uri: Optional[URI] = None,
     ) -> None:
         """
         Initialize the envelope context.
 
         :param connection_id: the connection id used for routing the outgoing envelope in the multiplexer.
-        :param skill_id: the skill id used for routing the incoming envelope in the AEA.
         :param uri: the URI sent with the envelope.
         """
-        skill_id_from_uri, connection_id_from_uri = (
-            self._get_public_ids_from_uri(uri) if uri is not None else (None, None)
-        )
-        if connection_id_from_uri and connection_id:
-            raise ValueError("Cannot define connection_id explicitly and in URI.")
-        self._connection_id = connection_id or connection_id_from_uri
-        if skill_id_from_uri and skill_id:
-            raise ValueError("Cannot define skill_id explicitly and in URI.")
-        self._skill_id = skill_id or skill_id_from_uri
-        self.uri = uri
+        self._connection_id = connection_id
+        self._uri = uri
+
+    @property
+    def uri(self) -> Optional[URI]:
+        """Get the URI."""
+        return self._uri
 
     @property
     def connection_id(self) -> Optional[PublicId]:
-        """Get the connection id."""
+        """Get the connection id to route the envelope."""
         return self._connection_id
 
-    @property
-    def skill_id(self) -> Optional[PublicId]:
-        """Get the skill id."""
-        return self._skill_id
-
-    @property
-    def uri_raw(self) -> str:
-        """Get uri in string format."""
-        return str(self.uri) if self.uri is not None else ""
-
-    @staticmethod
-    def _get_public_ids_from_uri(
-        uri: URI,
-    ) -> Tuple[Optional[PublicId], Optional[PublicId]]:
-        """
-        Try get skill and connection id from uri.
-
-        :param uri: the uri
-        :return: (skill_id if present in uri, connection if present in uri)
-        """
-        skill_id = None
-        connection_id = None
-        try:
-            package_id = PackageId.from_uri_path(uri.path)
-            package_type = str(package_id.package_type)
-            if package_type == SKILL:
-                skill_id = package_id.public_id
-            elif package_type == CONNECTION:
-                connection_id = package_id.public_id
-            else:
-                raise ValueError(
-                    f"Invalid package type {package_type} in uri for envelope context."
-                )
-        except ValueError as e:
-            _default_logger.debug(
-                f"URI - {uri.path} - not a valid package_id id. Error: {e}"
-            )
-        return (skill_id, connection_id)
+    @connection_id.setter
+    def connection_id(self, connection_id: PublicId) -> None:
+        """Set the 'via' connection id."""
+        if self._connection_id is not None:
+            raise ValueError("connection_id already set!")
+        self._connection_id = connection_id
 
     def __str__(self) -> str:
         """Get the string representation."""
-        return f"EnvelopeContext(connection_id={self.connection_id}, skill_id={self.skill_id}, uri_raw={self.uri_raw})"
+        return f"EnvelopeContext(connection_id={self.connection_id}, uri={self.uri})"
 
     def __eq__(self, other: Any) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, EnvelopeContext)
             and self.connection_id == other.connection_id
-            and self.skill_id == other.skill_id
             and self.uri == other.uri
         )
 
@@ -260,8 +210,8 @@ class ProtobufEnvelopeSerializer(EnvelopeSerializer):
         envelope_pb.sender = envelope.sender
         envelope_pb.protocol_id = str(envelope.protocol_specification_id)
         envelope_pb.message = envelope.message_bytes
-        if envelope.context is not None and envelope.context.uri_raw != "":
-            envelope_pb.uri = envelope.context.uri_raw
+        if envelope.context is not None and envelope.context.uri is not None:
+            envelope_pb.uri = str(envelope.context.uri)
 
         envelope_bytes = envelope_pb.SerializeToString()
         return envelope_bytes
@@ -313,6 +263,8 @@ class Envelope:
     """The top level message class for agent to agent communication."""
 
     default_serializer = DefaultEnvelopeSerializer()
+
+    __slots__ = ("_to", "_sender", "_protocol_specification_id", "_message", "_context")
 
     def __init__(
         self,
@@ -368,7 +320,12 @@ class Envelope:
 
         self._protocol_specification_id: PublicId = protocol_specification_id
         self._message = message
-        self._context = context if context is not None else EnvelopeContext()
+        if self.is_component_to_component_message:
+            enforce(
+                context is None,
+                "EnvelopeContext must be None for component to component messages.",
+            )
+        self._context = context
 
     @property
     def to(self) -> Address:
@@ -417,38 +374,19 @@ class Envelope:
         return self._message
 
     @property
-    def context(self) -> EnvelopeContext:
+    def context(self) -> Optional[EnvelopeContext]:
         """Get the envelope context."""
         return self._context
+
+    @context.setter
+    def context(self, context: EnvelopeContext) -> None:
+        """Get the envelope context."""
+        self._context = context
 
     @property
     def to_as_public_id(self) -> Optional[PublicId]:
         """Get to as public id."""
         return PublicId.try_from_str(self.to)
-
-    @property
-    def skill_id(self) -> Optional[PublicId]:
-        """
-        Get the skill id from an envelope context, if set.
-
-        :return: skill id
-        """
-        skill_id = None  # Optional[PublicId]
-        if self.context is not None:
-            skill_id = self.context.skill_id
-        return skill_id
-
-    @property
-    def connection_id(self) -> Optional[PublicId]:
-        """
-        Get the connection id from an envelope context, if set.
-
-        :return: connection id
-        """
-        connection_id = None  # Optional[PublicId]
-        if self.context is not None:
-            connection_id = self.context.connection_id
-        return connection_id
 
     @property
     def is_sender_public_id(self) -> bool:
@@ -460,8 +398,12 @@ class Envelope:
         """Check if to is a public id."""
         return PublicId.is_valid_str(self.to)
 
-    @staticmethod
-    def _check_consistency(message: Message, to: str, sender: str) -> Message:
+    @property
+    def is_component_to_component_message(self) -> bool:
+        """Whether or not the message contained is component to component."""
+        return self.is_to_public_id and self.is_sender_public_id
+
+    def _check_consistency(self, message: Message, to: str, sender: str) -> Message:
         """Check consistency of sender and to."""
         if message.has_to:
             enforce(
@@ -476,6 +418,10 @@ class Envelope:
             )
         else:
             message.sender = sender
+        enforce(
+            self.is_to_public_id == self.is_sender_public_id,
+            "To and sender must either both be agent addresses or both be public ids of AEA components.",
+        )
         return message
 
     def __eq__(self, other: Any) -> bool:

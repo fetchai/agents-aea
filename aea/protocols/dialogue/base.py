@@ -689,7 +689,10 @@ class Dialogue(metaclass=_DialogueMeta):
         if last_message is None:
             raise ValueError("Cannot reply in an empty dialogue!")
 
-        if target_message is None and target is None:
+        if target_message is None and target is not None:
+            target_message = self.get_message_by_id(target)
+        elif target_message is None and target is None:
+            target_message = last_message
             target = last_message.message_id
         elif target_message is not None and target is None:
             target = target_message.message_id
@@ -699,6 +702,8 @@ class Dialogue(metaclass=_DialogueMeta):
                     "The provided target and target_message do not match."
                 )
 
+        if target_message is None:
+            raise AEAEnforceError("No target message found!")
         enforce(
             self._has_message_id(target),  # type: ignore
             "The target message does not exist in this dialogue.",
@@ -715,6 +720,8 @@ class Dialogue(metaclass=_DialogueMeta):
         reply.to = self.dialogue_label.dialogue_opponent_addr
 
         self._update(reply)
+
+        reply.envelope_context = target_message.envelope_context
 
         return reply
 

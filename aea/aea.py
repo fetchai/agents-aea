@@ -297,11 +297,11 @@ class AEA(Agent):
             return None, []  # Tuple[Optional[Message], List[Handler]]
 
         handlers = self.filter.get_active_handlers(
-            protocol.public_id, envelope.to_as_public_id or envelope.skill_id
+            protocol.public_id, envelope.to_as_public_id
         )
 
         if len(handlers) == 0:
-            handler.send_unsupported_skill(envelope, self.logger)
+            handler.send_unsupported_handler(envelope, self.logger)
             return None, []
 
         if isinstance(envelope.message, Message):
@@ -337,6 +337,9 @@ class AEA(Agent):
 
         if msg is None:
             return
+
+        if envelope.context is not None:
+            msg.envelope_context = envelope.context
 
         for handler in handlers:
             handler.handle_wrapper(msg)
