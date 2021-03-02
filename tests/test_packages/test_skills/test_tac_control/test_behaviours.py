@@ -29,7 +29,7 @@ import pytest
 from aea.helpers.search.models import Description
 from aea.mail.base import Address
 from aea.protocols.dialogue.base import DialogueMessage
-from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_ADDRESS
+from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_AGENT_ADDRESS
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.tac.message import TacMessage
@@ -92,7 +92,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             message_type=OefSearchMessage,
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             to=self.skill.skill_context.search_service_address,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             service_description=self.mocked_description,
         )
         assert has_attributes, error_str
@@ -136,7 +136,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             message_type=OefSearchMessage,
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             to=self.skill.skill_context.search_service_address,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             service_description=self.mocked_description,
         )
         assert has_attributes, error_str
@@ -157,7 +157,9 @@ class TestSkillBehaviour(BaseSkillTestCase):
         datetime_mock.now.return_value = mocked_now_time
 
         self.parameters._min_nb_agents = 2
-        self.game._registration.register_agent(COUNTERPARTY_ADDRESS, self.agent_1_name)
+        self.game._registration.register_agent(
+            COUNTERPARTY_AGENT_ADDRESS, self.agent_1_name
+        )
 
         self.prepare_skill_dialogue(
             self.tac_dialogues,
@@ -193,7 +195,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             actual_message=self.get_message_from_outbox(),
             message_type=TacMessage,
             performative=TacMessage.Performative.CANCELLED,
-            to=COUNTERPARTY_ADDRESS,
+            to=COUNTERPARTY_AGENT_ADDRESS,
             sender=self.skill.skill_context.agent_address,
         )
         assert has_attributes, error_str
@@ -207,7 +209,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             message_type=OefSearchMessage,
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             to=self.skill.skill_context.search_service_address,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             service_description=self.mocked_description,
         )
         assert has_attributes, error_str
@@ -225,7 +227,9 @@ class TestSkillBehaviour(BaseSkillTestCase):
         datetime_mock.now.return_value = mocked_now_time
 
         self.parameters._min_nb_agents = 2
-        self.game._registration.register_agent(COUNTERPARTY_ADDRESS, self.agent_1_name)
+        self.game._registration.register_agent(
+            COUNTERPARTY_AGENT_ADDRESS, self.agent_1_name
+        )
 
         # operation
         with patch("datetime.datetime", new=datetime_mock):
@@ -250,7 +254,9 @@ class TestSkillBehaviour(BaseSkillTestCase):
         datetime_mock.now.return_value = mocked_now_time
 
         self.parameters._min_nb_agents = 2
-        self.game._registration.register_agent(COUNTERPARTY_ADDRESS, self.agent_1_name)
+        self.game._registration.register_agent(
+            self.skill.skill_context.agent_address, self.agent_1_name
+        )
 
         dialogue = self.prepare_skill_dialogue(
             self.tac_dialogues,
@@ -273,7 +279,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             ):
                 with patch.object(self.tac_behaviour.context.logger, "log"):
                     with pytest.raises(
-                        ValueError, match="Error when retrieving last message."
+                        ValueError, match="Error when retrieving dialogue."
                     ):
                         self.tac_behaviour.act()
 
@@ -386,7 +392,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             message_type=OefSearchMessage,
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             to=self.skill.skill_context.search_service_address,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             service_description=self.mocked_description,
         )
         assert has_attributes, error_str
@@ -592,7 +598,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             message_type=OefSearchMessage,
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             to=self.skill.skill_context.search_service_address,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             service_description=self.mocked_description,
         )
         assert has_attributes, error_str
@@ -606,7 +612,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             message_type=OefSearchMessage,
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             to=self.skill.skill_context.search_service_address,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             service_description=mocked_location_description,
         )
         assert has_attributes, error_str

@@ -172,14 +172,14 @@ class BaseSkillTestCase:
 
         :return: the created incoming message
         """
+        if is_agent_to_agent_messages is None:
+            is_agent_to_agent_messages = self.is_agent_to_agent_messages
         if sender is None:
             sender = (
                 COUNTERPARTY_AGENT_ADDRESS
                 if is_agent_to_agent_messages
                 else COUNTERPARTY_SKILL_ADDRESS
             )
-        if is_agent_to_agent_messages is None:
-            is_agent_to_agent_messages = self.is_agent_to_agent_messages
         message_attributes = dict()  # type: Dict[str, Any]
 
         default_dialogue_reference = Dialogues.new_self_initiated_dialogue_reference()
@@ -367,14 +367,14 @@ class BaseSkillTestCase:
 
         :return: the created incoming message
         """
+        if is_agent_to_agent_messages is None:
+            is_agent_to_agent_messages = self.is_agent_to_agent_messages
         if counterparty is None:
             counterparty = (
                 COUNTERPARTY_AGENT_ADDRESS
                 if is_agent_to_agent_messages
                 else COUNTERPARTY_SKILL_ADDRESS
             )
-        if is_agent_to_agent_messages is None:
-            is_agent_to_agent_messages = self.is_agent_to_agent_messages
         if len(messages) == 0:
             raise AEAEnforceError("the list of messages must be positive.")
 

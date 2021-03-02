@@ -45,7 +45,7 @@ from aea.helpers.transaction.base import (
     TransactionReceipt,
 )
 from aea.protocols.dialogue.base import DialogueMessage, DialogueStats
-from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_ADDRESS
+from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_AGENT_ADDRESS
 
 from packages.fetchai.protocols.contract_api.custom_types import Kwargs
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
@@ -109,7 +109,7 @@ class TestFipaHandler(BaseSkillTestCase):
 
         cls.dialogue_stats = cls.fipa_dialogues.dialogue_stats
         cls.ledger_id = "some_ledger_id"
-        cls.counterprty_address = COUNTERPARTY_ADDRESS
+        cls.counterprty_address = COUNTERPARTY_AGENT_ADDRESS
         cls.amount_by_currency_id = {"1": 50}
         cls.quantities_by_good_id = {"2": -10}
         cls.nonce = "some_nonce"
@@ -2195,7 +2195,7 @@ class TestContractApiHandler(BaseSkillTestCase):
         cls.body = {"some_key": "some_value"}
         cls.body_bytes = b"some_body"
         cls.nonce = "some_nonce"
-        cls.counterprty_address = COUNTERPARTY_ADDRESS
+        cls.counterprty_address = COUNTERPARTY_AGENT_ADDRESS
         cls.amount_by_currency_id = {"1": 50}
         cls.quantities_by_good_id = {"2": -10}
         cls.terms = Terms(

@@ -21,7 +21,7 @@
 from pathlib import Path
 from typing import cast
 
-from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_ADDRESS
+from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_AGENT_ADDRESS
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.state_update.message import StateUpdateMessage
@@ -58,7 +58,7 @@ class TestDialogues(BaseSkillTestCase):
     def test_oef_search_dialogues(self):
         """Test the OefSearchDialogues class."""
         _, dialogue = self.oef_search_dialogues.create(
-            counterparty=COUNTERPARTY_ADDRESS,
+            counterparty=COUNTERPARTY_AGENT_ADDRESS,
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             query="some_query",
         )
@@ -68,7 +68,7 @@ class TestDialogues(BaseSkillTestCase):
     def test_state_update_dialogues(self):
         """Test the StateUpdateDialogues class."""
         _, dialogue = self.state_update_dialogues.create(
-            counterparty=COUNTERPARTY_ADDRESS,
+            counterparty=COUNTERPARTY_AGENT_ADDRESS,
             performative=StateUpdateMessage.Performative.INITIALIZE,
             exchange_params_by_currency_id={"some_currency_id": 1.0},
             utility_params_by_good_id={"some_good_id": 2.0},
@@ -81,7 +81,7 @@ class TestDialogues(BaseSkillTestCase):
     def test_tac_dialogues(self):
         """Test the TacDialogues class."""
         _, dialogue = self.tac_dialogues.create(
-            counterparty=COUNTERPARTY_ADDRESS,
+            counterparty=COUNTERPARTY_AGENT_ADDRESS,
             performative=TacMessage.Performative.REGISTER,
             agent_name="some_agent_name",
         )

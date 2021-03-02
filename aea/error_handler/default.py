@@ -29,7 +29,7 @@ class ErrorHandler(AbstractErrorHandler):
     """Error handler class for handling problematic envelopes."""
 
     unsupported_protocol_count = 0
-    unsupported_skill_count = 0
+    no_active_handler_count = 0
     decoding_error_count = 0
 
     @classmethod
@@ -46,27 +46,34 @@ class ErrorHandler(AbstractErrorHandler):
         )
 
     @classmethod
-    def send_decoding_error(cls, envelope: Envelope, logger: Logger) -> None:
+    def send_decoding_error(
+        cls, envelope: Envelope, exception: Exception, logger: Logger
+    ) -> None:
         """
         Handle a decoding error.
 
         :param envelope: the envelope
+        :param exception: the exception raised during decoding
+        :param logger: the logger
         :return: None
         """
         cls.decoding_error_count += 1
         logger.warning(
-            f"Decoding error for envelope: {envelope}. Protocol_specification_id='{envelope.protocol_specification_id}' and message are inconsistent. Sender={envelope.sender}, to={envelope.sender}."
+            f"Decoding error for envelope: {envelope}. Protocol_specification_id='{envelope.protocol_specification_id}' and message are inconsistent. Sender={envelope.sender}, to={envelope.sender}. Exception={exception}."
         )
 
     @classmethod
-    def send_unsupported_handler(cls, envelope: Envelope, logger: Logger) -> None:
+    def send_no_active_handler(
+        cls, envelope: Envelope, reason: str, logger: Logger
+    ) -> None:
         """
         Handle the received envelope in case the handler is not supported.
 
         :param envelope: the envelope
+        :param reason: the reason for the failure
         :return: None
         """
-        cls.unsupported_skill_count += 1
+        cls.no_active_handler_count += 1
         logger.warning(
-            f"Cannot handle envelope: no active handler registered for the protocol_specification_id='{envelope.protocol_specification_id}'. Sender={envelope.sender}, to={envelope.sender}."
+            f"Cannot handle envelope: {reason}. Sender={envelope.sender}, to={envelope.sender}."
         )

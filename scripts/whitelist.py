@@ -242,3 +242,4 @@ _.check_protobuf_using_protoc  # unused function (aea/protocols/generator/common
 _.last_start_status  # unused property (aea/manager/manager.py:296)
 from_uri_path  # unused method (aea/configurations/data_types.py:339)
 from_uri_path  # unused method (aea/configurations/data_types.py:497)
+no_active_handler_count  # unused attribute (aea/error_handler/default.py:76)

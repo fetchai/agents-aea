@@ -39,20 +39,28 @@ class AbstractErrorHandler(ABC):
 
     @classmethod
     @abstractmethod
-    def send_decoding_error(cls, envelope: Envelope, logger: Logger) -> None:
+    def send_decoding_error(
+        cls, envelope: Envelope, exception: Exception, logger: Logger
+    ) -> None:
         """
         Handle a decoding error.
 
         :param envelope: the envelope
+        :param exception: the exception raised during decoding
+        :param logger: the logger
         :return: None
         """
 
     @classmethod
     @abstractmethod
-    def send_unsupported_handler(cls, envelope: Envelope, logger: Logger) -> None:
+    def send_no_active_handler(
+        cls, envelope: Envelope, reason: str, logger: Logger
+    ) -> None:
         """
         Handle the received envelope in case the handler is not supported.
 
         :param envelope: the envelope
+        :param reason: the reason for the failure
+        :param logger: the logger
         :return: None
         """
