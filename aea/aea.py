@@ -346,9 +346,6 @@ class AEA(Agent):
         if msg is None:
             return
 
-        if envelope.context is not None:
-            msg.envelope_context = envelope.context
-
         for handler in handlers:
             handler.handle_wrapper(msg)
 

@@ -32,7 +32,6 @@ from aea.components.base import Component, load_aea_package
 from aea.configurations.base import ComponentType, ProtocolConfig, PublicId
 from aea.configurations.loader import load_component_configuration
 from aea.exceptions import AEAComponentLoadException, enforce
-from aea.mail.common import EnvelopeContext
 
 
 _default_logger = logging.getLogger(__name__)
@@ -49,7 +48,7 @@ class Message:
     protocol_specification_id = None  # type: PublicId
     serializer = None  # type: Type["Serializer"]
 
-    __slots__ = ("_slots", "_to", "_sender", "_envelope_context")
+    __slots__ = ("_slots", "_to", "_sender")
 
     class Performative(Enum):
         """Performatives for the base message."""
@@ -79,7 +78,6 @@ class Message:
 
         self._to: Optional[Address] = None
         self._sender: Optional[Address] = None
-        self._envelope_context: Optional[EnvelopeContext] = None
 
         self._update_slots_from_dict(copy(_body) if _body else {})
         self._update_slots_from_dict(kwargs)
@@ -295,16 +293,6 @@ class Message:
             and self.is_set("target")
             and self.is_set("dialogue_reference")
         )
-
-    @property
-    def envelope_context(self) -> Optional[EnvelopeContext]:
-        """Get envelope context."""
-        return self._envelope_context
-
-    @envelope_context.setter
-    def envelope_context(self, envelope_context: EnvelopeContext) -> None:
-        """Get envelope context."""
-        self._envelope_context = envelope_context
 
 
 class Encoder(ABC):

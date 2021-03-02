@@ -284,49 +284,12 @@ def test_envelope_context_connection_id():
     assert envelope_context.connection_id == connection_id
 
 
-def test_envelope_context_provided_twice():
-    """Test the envelope context cannot be provided twice."""
-    envelope_context = EnvelopeContext(
-        connection_id=PublicId.from_str("author/connection_name:0.1.0")
-    )
-    message = DefaultMessage(DefaultMessage.Performative.BYTES, content=b"message")
-    message.envelope_context = envelope_context
-    with pytest.raises(
-        ValueError,
-        match="Context cannot both be explicitly provided and specified on message!",
-    ):
-        Envelope(
-            to="to",
-            sender="sender",
-            protocol_specification_id=PublicId("author", "name", "0.1.0"),
-            message=message,
-            context=envelope_context,
-        )
-
-
-def test_envelope_context_set_from_message():
-    """Test the property Envelope context is being set from the message."""
-    envelope_context = EnvelopeContext(
-        connection_id=PublicId.from_str("author/connection_name:0.1.0")
-    )
-    message = DefaultMessage(DefaultMessage.Performative.BYTES, content=b"message")
-    message.envelope_context = envelope_context
-    envelope = Envelope(
-        to="to",
-        sender="sender",
-        protocol_specification_id=PublicId("author", "name", "0.1.0"),
-        message=message,
-    )
-    assert envelope.context == envelope_context
-
-
 def test_envelope_context_is_None_for_c2c():
     """Test the Envelope context is None for c2c."""
     envelope_context = EnvelopeContext(
         connection_id=PublicId.from_str("author/connection_name:0.1.0")
     )
     message = DefaultMessage(DefaultMessage.Performative.BYTES, content=b"message")
-    message.envelope_context = envelope_context
     with pytest.raises(
         AEAEnforceError,
         match="EnvelopeContext must be None for component to component messages.",
@@ -336,17 +299,19 @@ def test_envelope_context_is_None_for_c2c():
             sender="some_author/some_name:0.1.0",
             protocol_specification_id=PublicId("author", "name", "0.1.0"),
             message=message,
+            context=envelope_context,
         )
 
 
-def test_envelope_context_copy_without_url():
-    """Test the property EnvelopeContext.copy_without_uri method."""
-    connection_id = PublicId("author", "skill_name", "0.1.0")
-    uri = URI("some/uri")
-    envelope_context = EnvelopeContext(connection_id, uri)
-    copied = envelope_context.copy_without_uri()
-    assert copied.uri is None
-    assert copied.connection_id == envelope_context.connection_id
+def test_envelope_to_as_public_id():
+    """Test the Envelope to_as_public_id method."""
+    env = Envelope(
+        to="some_author/some_name:0.1.0",
+        sender="some_author/some_name:0.1.0",
+        protocol_specification_id=PublicId("author", "name", "0.1.0"),
+        message=b"message",
+    )
+    assert env.to_as_public_id is not None
 
 
 def test_envelope_constructor():

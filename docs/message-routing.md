@@ -6,7 +6,7 @@ It is important to keep in mind that <a href="../interaction-protocol">interacti
 ## Incoming `Messages`
 
 - `Connections` receive or create `Envelopes` which they deposit in the `InBox`
-- for agent-to-agent communication only, the `Multiplexer` sets an `EnvelopeContext` which specifies the `connection_id` via which the `Envelope` was received.
+- for agent-to-agent communication only, the `Multiplexer` keeps track of the `connection_id` via which the `Envelope` was received.
 - the `AgentLoop` picks `Envelopes` off the `InBox`
 - the `AEA` tries to decode the message; errors are handled by the `ErrorHandler`
 - `Messages` are dispatched based on two rules:
@@ -24,12 +24,14 @@ It is important to keep in mind that <a href="../interaction-protocol">interacti
 
 - `Skills` deposit `Messages` in `OutBox`
 - `OutBox` constructs an `Envelope` from the `Message`
-- `Multiplexer` assigns messages to relevant `Connection` based on four rules:
+- `Multiplexer` assigns messages to relevant `Connection` based on the following rules:
 
-	1. checks if `to` field can be interpreted as `connection_id`, if so uses that else
-	2. checks if `EnvelopeContext` exists and specifies a `Connection`, if so uses that else
-	3. checks if default routing is specified for the `protocol_id` referenced in the `Envelope`, if so uses that else
-	4. sends to default `Connection`.
+	1. Component to component messages are routed by their `component_id`
+	2. Agent to agent messages, are routed following four rules:
+		1. checks if `EnvelopeContext` exists and specifies a `Connection`, if so uses that else
+		2. checks which connection handled the last message from `sender`, if present uses that else
+		3. checks if default routing is specified for the `protocol_id` referenced in the `Envelope`, if so uses that else
+		4. sends to default `Connection`.
 
 - `Connections` can process `Envelopes` directly or encode them for transport to another agent.
 

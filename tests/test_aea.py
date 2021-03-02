@@ -29,7 +29,7 @@ from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
 
-import aea
+import aea  # noqa: F401
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
@@ -333,7 +333,7 @@ def test_initialize_aea_programmatically():
             message=expected_message,
         )
 
-        with run_in_thread(an_aea.start, timeout=5, on_exit=aea.stop):
+        with run_in_thread(an_aea.start, timeout=5, on_exit=an_aea.stop):
             wait_for_condition(lambda: an_aea.is_running, timeout=10)
             an_aea.outbox.put(envelope)
 
@@ -403,7 +403,7 @@ def test_initialize_aea_programmatically_build_resources():
                 agent_context=an_aea.context,
             )
             dummy_skill = Skill.from_dir(
-                str(Path(CUR_PATH, "data", "dummy_skill")), agent_context=aea.context
+                str(Path(CUR_PATH, "data", "dummy_skill")), agent_context=an_aea.context
             )
             resources.add_skill(dummy_skill)
             resources.add_skill(error_skill)
@@ -418,7 +418,7 @@ def test_initialize_aea_programmatically_build_resources():
             expected_message.to = agent_name
             expected_message.sender = agent_name
 
-            with run_in_thread(an_aea.start, timeout=5, on_exit=aea.stop):
+            with run_in_thread(an_aea.start, timeout=5, on_exit=an_aea.stop):
                 wait_for_condition(lambda: an_aea.is_running, timeout=10)
                 an_aea.outbox.put(
                     Envelope(
@@ -515,7 +515,7 @@ def test_no_handlers_registered():
     builder.add_private_key(DEFAULT_LEDGER, private_key_path)
     an_aea = builder.build()
 
-    with patch.object(aea.logger, "warning") as mock_logger:
+    with patch.object(an_aea.logger, "warning") as mock_logger:
         msg = DefaultMessage(
             dialogue_reference=("", ""),
             message_id=1,
@@ -525,7 +525,7 @@ def test_no_handlers_registered():
         )
         msg.to = an_aea.identity.address
         envelope = Envelope(
-            to=aea.identity.address, sender=aea.identity.address, message=msg,
+            to=an_aea.identity.address, sender=an_aea.identity.address, message=msg,
         )
         with patch(
             "aea.registries.filter.Filter.get_active_handlers",
@@ -825,8 +825,8 @@ class BaseTimeExecutionCase(TestCase):
         skill_context._skill = test_skill  # weird hack
 
         builder.add_component_instance(test_skill)
-        aea = builder.build()
-        self.aea_tool = AeaTool(aea)
+        my_aea = builder.build()
+        self.aea_tool = AeaTool(my_aea)
         self.envelope = AeaTool.dummy_envelope()
         self.aea_tool.aea.runtime.agent_loop._setup()
 

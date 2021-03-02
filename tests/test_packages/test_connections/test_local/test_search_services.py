@@ -31,8 +31,7 @@ from aea.helpers.search.models import (
     Description,
     Query,
 )
-from aea.mail.base import Envelope, Message
-from aea.mail.common import EnvelopeContext
+from aea.mail.base import Envelope, EnvelopeContext, Message
 from aea.multiplexer import InBox, Multiplexer
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 

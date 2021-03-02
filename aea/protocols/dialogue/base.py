@@ -721,12 +721,6 @@ class Dialogue(metaclass=_DialogueMeta):
 
         self._update(reply)
 
-        reply.envelope_context = (
-            target_message.envelope_context.copy_without_uri()
-            if target_message.envelope_context is not None
-            else None
-        )
-
         return reply
 
     def _validate_next_message(self, message: Message) -> Tuple[bool, str]:

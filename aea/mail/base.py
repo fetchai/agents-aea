@@ -21,16 +21,148 @@
 import logging
 from abc import ABC, abstractmethod
 from typing import Any, Optional, Union
+from urllib.parse import urlparse
 
 from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.exceptions import enforce
 from aea.mail import base_pb2
-from aea.mail.common import EnvelopeContext, URI
 from aea.protocols.base import Message
 
 
 _default_logger = logging.getLogger(__name__)
+
+
+class URI:
+    """URI following RFC3986."""
+
+    __slots__ = ("_uri_raw",)
+
+    def __init__(self, uri_raw: str) -> None:
+        """
+        Initialize the URI.
+
+        Must follow: https://tools.ietf.org/html/rfc3986.html
+
+        :param uri_raw: the raw form uri
+        :raises ValueError: if uri_raw is not RFC3986 compliant
+        """
+        self._uri_raw = uri_raw
+
+    @property
+    def scheme(self) -> str:
+        """Get the scheme."""
+        parsed = urlparse(self._uri_raw)
+        return parsed.scheme
+
+    @property
+    def netloc(self) -> str:
+        """Get the netloc."""
+        parsed = urlparse(self._uri_raw)
+        return parsed.netloc
+
+    @property
+    def path(self) -> str:
+        """Get the path."""
+        parsed = urlparse(self._uri_raw)
+        return parsed.path
+
+    @property
+    def params(self) -> str:
+        """Get the params."""
+        parsed = urlparse(self._uri_raw)
+        return parsed.params
+
+    @property
+    def query(self) -> str:
+        """Get the query."""
+        parsed = urlparse(self._uri_raw)
+        return parsed.query
+
+    @property
+    def fragment(self) -> str:
+        """Get the fragment."""
+        parsed = urlparse(self._uri_raw)
+        return parsed.fragment
+
+    @property
+    def username(self) -> Optional[str]:
+        """Get the username."""
+        parsed = urlparse(self._uri_raw)
+        return parsed.username
+
+    @property
+    def password(self) -> Optional[str]:
+        """Get the password."""
+        parsed = urlparse(self._uri_raw)
+        return parsed.password
+
+    @property
+    def host(self) -> Optional[str]:
+        """Get the host."""
+        parsed = urlparse(self._uri_raw)
+        return parsed.hostname
+
+    @property
+    def port(self) -> Optional[int]:
+        """Get the port."""
+        parsed = urlparse(self._uri_raw)
+        return parsed.port
+
+    def __str__(self) -> str:
+        """Get string representation."""
+        return self._uri_raw
+
+    def __eq__(self, other: Any) -> bool:
+        """Compare with another object."""
+        return isinstance(other, URI) and str(self) == str(other)
+
+
+class EnvelopeContext:
+    """Contains context information of an envelope."""
+
+    __slots__ = ("_connection_id", "_uri")
+
+    def __init__(
+        self, connection_id: Optional[PublicId] = None, uri: Optional[URI] = None,
+    ) -> None:
+        """
+        Initialize the envelope context.
+
+        :param connection_id: the connection id used for routing the outgoing envelope in the multiplexer.
+        :param uri: the URI sent with the envelope.
+        """
+        self._connection_id = connection_id
+        self._uri = uri
+
+    @property
+    def uri(self) -> Optional[URI]:
+        """Get the URI."""
+        return self._uri
+
+    @property
+    def connection_id(self) -> Optional[PublicId]:
+        """Get the connection id to route the envelope."""
+        return self._connection_id
+
+    @connection_id.setter
+    def connection_id(self, connection_id: PublicId) -> None:
+        """Set the 'via' connection id."""
+        if self._connection_id is not None:
+            raise ValueError("connection_id already set!")  # pragma: nocover
+        self._connection_id = connection_id
+
+    def __str__(self) -> str:
+        """Get the string representation."""
+        return f"EnvelopeContext(connection_id={self.connection_id}, uri={self.uri})"
+
+    def __eq__(self, other: Any) -> bool:
+        """Compare with another object."""
+        return (
+            isinstance(other, EnvelopeContext)
+            and self.connection_id == other.connection_id
+            and self.uri == other.uri
+        )
 
 
 class AEAConnectionError(Exception):
@@ -162,12 +294,6 @@ class Envelope:
 
         if isinstance(message, Message):
             message = self._check_consistency(message, to, sender)
-            if message.envelope_context is not None and context is not None:
-                raise ValueError(
-                    "Context cannot both be explicitly provided and specified on message!"
-                )
-            if message.envelope_context is not None:
-                context = message.envelope_context
 
         self._to = to
         self._sender = sender
@@ -256,11 +382,6 @@ class Envelope:
     def context(self) -> Optional[EnvelopeContext]:
         """Get the envelope context."""
         return self._context
-
-    @context.setter
-    def context(self, context: EnvelopeContext) -> None:
-        """Get the envelope context."""
-        self._context = context
 
     @property
     def to_as_public_id(self) -> Optional[PublicId]:

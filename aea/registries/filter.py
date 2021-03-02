@@ -31,8 +31,6 @@ from aea.skills.base import Behaviour, Handler
 class Filter(WithLogger):
     """This class implements the filter of an AEA."""
 
-    __slots__ = ("_resources", "_decision_maker_out_queue")
-
     def __init__(
         self, resources: Resources, decision_maker_out_queue: AsyncFriendlyQueue
     ) -> None:

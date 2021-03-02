@@ -97,7 +97,7 @@ class TestHTTPClientConnect:
         self.address = get_host()
         self.port = get_unused_tcp_port()
         self.agent_identity = Identity("name", address="some string")
-        self.agent_address = self.agent_identity.address
+        self.client_skill_id = "some/skill:0.1.0"
         configuration = ConnectionConfig(
             host=self.address,
             port=self.port,
@@ -109,7 +109,7 @@ class TestHTTPClientConnect:
             identity=self.agent_identity,
         )
         self.connection_address = str(HTTPClientConnection.connection_id)
-        self.http_dialogs = HttpDialogues(self.agent_address)
+        self.http_dialogs = HttpDialogues(self.client_skill_id)
 
     @pytest.mark.asyncio
     async def test_initialization(self):
@@ -146,7 +146,7 @@ class TestHTTPClientConnect:
         )
         request_envelope = Envelope(
             to=self.connection_address,
-            sender=self.agent_address,
+            sender=self.client_skill_id,
             protocol_specification_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=request_http_message,
         )
@@ -207,7 +207,7 @@ class TestHTTPClientConnect:
         )
         request_envelope = Envelope(
             to=self.connection_address,
-            sender=self.agent_address,
+            sender=self.client_skill_id,
             protocol_specification_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=request_http_message,
         )
@@ -252,7 +252,7 @@ class TestHTTPClientConnect:
         )
         request_envelope = Envelope(
             to=self.connection_address,
-            sender=self.agent_address,
+            sender=self.client_skill_id,
             message=request_http_message,
         )
 
@@ -298,7 +298,7 @@ class TestHTTPClientConnect:
             version="",
         )
         incorrect_http_message.to = self.connection_address
-        incorrect_http_message.sender = self.agent_address
+        incorrect_http_message.sender = self.client_skill_id
 
         # the incorrect message cannot be sent into a dialogue, so this is omitted.
 
@@ -330,7 +330,7 @@ class TestHTTPClientConnect:
         )
         request_envelope = Envelope(
             to=self.connection_address,
-            sender=self.agent_address,
+            sender=self.client_skill_id,
             message=request_http_message,
         )
 
