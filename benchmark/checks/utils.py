@@ -70,11 +70,15 @@ def wait_for_condition(
             raise TimeoutError(error_msg)
 
 
-def make_agent(agent_name: str = "my_agent", runtime_mode: str = "threaded") -> AEA:
+def make_agent(
+    agent_name: str = "my_agent",
+    runtime_mode: str = "threaded",
+    resources: Optional[Resources] = None,
+) -> AEA:
     """Make AEA instance."""
     wallet = Wallet({DEFAULT_LEDGER: None})
     identity = Identity(agent_name, address=agent_name)
-    resources = Resources()
+    resources = resources or Resources()
     datadir = os.getcwd()
     agent_context = MagicMock()
     agent_context.agent_name = agent_name
@@ -159,11 +163,13 @@ class GeneratorConnection(Connection):
         return envelope
 
     @classmethod
-    def make(cls) -> "GeneratorConnection":
+    def make(cls,) -> "GeneratorConnection":
         """Construct connection instance."""
         configuration = ConnectionConfig(connection_id=cls.connection_id,)
         test_connection = cls(
-            configuration=configuration, identity=Identity("name", "address")
+            configuration=configuration,
+            identity=Identity("name", "address"),
+            data_dir=".tmp",
         )
         return test_connection
 
