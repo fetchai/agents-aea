@@ -262,3 +262,11 @@ async def test_reconnect_on_read_failed():
 
     assert node.pipe.read.call_count == 2
     restart_mock.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_max_restarts():
+    """Test node max restarts exception."""
+    node = Libp2pNode(Mock(), Mock(), "tmp", "tmp", max_restarts=0)
+    with pytest.raises(ValueError, match="Max restarts attempts reached:"):
+        await node.restart()
