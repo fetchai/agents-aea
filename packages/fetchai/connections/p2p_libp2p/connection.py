@@ -371,7 +371,9 @@ class Libp2pNode:
             try:
                 return await self.pipe.read()
             except Exception:  # pragma: nocover pylint: disable=broad-except
-                self.logger.exception(f"Failed to read after node restart. Exception: {e}.")
+                self.logger.exception(
+                    f"Failed to read after node restart. Exception: {e}."
+                )
                 return None
 
     def describe_configuration(self) -> None:
