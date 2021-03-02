@@ -197,7 +197,10 @@ First, run the deployer AEA:
 aea run
 ```
 
-Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.16.0 -u public_uri` to retrieve the address.)
+Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of this address. 
+
+Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.16.0 -u public_uri` to retrieve the address. The output will be something like `/dns4/127.0.0.1/tcp/9000/p2p/16Uiu2HAm2JPsUX1Su59YVDXJQizYkNSe8JCusqRpLeeTbvY76fE5`.
+
 This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the deployer.
 
 This AEA then performs the following steps:
