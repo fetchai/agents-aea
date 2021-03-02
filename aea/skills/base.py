@@ -427,70 +427,7 @@ class Behaviour(AbstractBehaviour, ABC):
         :param skill_context: the skill context
         :return: a list of Behaviour.
         """
-        behaviours = {}  # type: Dict[str, "Behaviour"]
-        if behaviour_configs == {}:
-            return behaviours
-        behaviour_names = set(
-            config.class_name for _, config in behaviour_configs.items()
-        )
-        behaviour_module = load_module("behaviours", Path(path))
-        classes = inspect.getmembers(behaviour_module, inspect.isclass)
-        behaviours_classes = list(
-            filter(
-                lambda x: any(
-                    re.match(behaviour, x[0]) for behaviour in behaviour_names
-                )
-                and not str.startswith(x[1].__module__, "aea.")
-                and not str.startswith(
-                    x[1].__module__,
-                    f"packages.{skill_context.skill_id.author}.skills.{skill_context.skill_id.name}",
-                ),
-                classes,
-            )
-        )
-
-        name_to_class = dict(behaviours_classes)
-        _print_warning_message_for_non_declared_skill_components(
-            skill_context,
-            set(name_to_class.keys()),
-            {
-                behaviour_config.class_name
-                for behaviour_config in behaviour_configs.values()
-            },
-            "behaviours",
-            path,
-        )
-
-        for behaviour_id, behaviour_config in behaviour_configs.items():
-            behaviour_class_name = cast(str, behaviour_config.class_name)
-            skill_context.logger.debug(
-                "Processing behaviour {}".format(behaviour_class_name)
-            )
-            if not behaviour_id.isidentifier():
-                raise AEAComponentLoadException(  # pragma: nocover
-                    f"'{behaviour_id}' is not a valid identifier."
-                )
-            behaviour_class = name_to_class.get(behaviour_class_name, None)
-            if behaviour_class is None:
-                skill_context.logger.warning(
-                    "Behaviour '{}' cannot be found.".format(behaviour_class_name)
-                )
-            else:
-                try:
-                    behaviour = behaviour_class(
-                        name=behaviour_id,
-                        configuration=behaviour_config,
-                        skill_context=skill_context,
-                        **dict(behaviour_config.args),
-                    )
-                except Exception as e:  # pylint: disable=broad-except # pragma: nocover
-                    e_str = parse_exception(e)
-                    raise AEAInstantiationException(
-                        f"An error occured during instantiation of behaviour {skill_context.skill_id}/{behaviour_config.class_name}:\n{e_str}"
-                    )
-                behaviours[behaviour_id] = behaviour
-
-        return behaviours
+        return _parse_module(path, behaviour_configs, skill_context, "behaviour")
 
 
 class Handler(SkillComponent, ABC):
@@ -534,62 +471,7 @@ class Handler(SkillComponent, ABC):
         :param skill_context: the skill context
         :return: an handler, or None if the parsing fails.
         """
-        handlers = {}  # type: Dict[str, "Handler"]
-        if handler_configs == {}:
-            return handlers
-        handler_names = set(config.class_name for _, config in handler_configs.items())
-        handler_module = load_module("handlers", Path(path))
-        classes = inspect.getmembers(handler_module, inspect.isclass)
-        handler_classes = list(
-            filter(
-                lambda x: any(re.match(handler, x[0]) for handler in handler_names)
-                and not str.startswith(x[1].__module__, "aea.")
-                and not str.startswith(
-                    x[1].__module__,
-                    f"packages.{skill_context.skill_id.author}.skills.{skill_context.skill_id.name}",
-                ),
-                classes,
-            )
-        )
-
-        name_to_class = dict(handler_classes)
-        _print_warning_message_for_non_declared_skill_components(
-            skill_context,
-            set(name_to_class.keys()),
-            {handler_config.class_name for handler_config in handler_configs.values()},
-            "handlers",
-            path,
-        )
-        for handler_id, handler_config in handler_configs.items():
-            handler_class_name = cast(str, handler_config.class_name)
-            skill_context.logger.debug(
-                "Processing handler {}".format(handler_class_name)
-            )
-            if not handler_id.isidentifier():
-                raise AEAComponentLoadException(  # pragma: nocover
-                    f"'{handler_id}' is not a valid identifier."
-                )
-            handler_class = name_to_class.get(handler_class_name, None)
-            if handler_class is None:
-                skill_context.logger.warning(
-                    "Handler '{}' cannot be found.".format(handler_class_name)
-                )
-            else:
-                try:
-                    handler = handler_class(
-                        name=handler_id,
-                        configuration=handler_config,
-                        skill_context=skill_context,
-                        **dict(handler_config.args),
-                    )
-                except Exception as e:  # pylint: disable=broad-except # pragma: nocover
-                    e_str = parse_exception(e)
-                    raise AEAInstantiationException(
-                        f"An error occured during instantiation of handler {skill_context.skill_id}/{handler_config.class_name}:\n{e_str}"
-                    )
-                handlers[handler_id] = handler
-
-        return handlers
+        return _parse_module(path, handler_configs, skill_context, "handler")
 
 
 class Model(SkillComponent, ABC):
@@ -639,7 +521,7 @@ class Model(SkillComponent, ABC):
         skill_context: SkillContext,
     ) -> Dict[str, "Model"]:
         """
-        Parse the tasks module.
+        Parse the model module.
 
         :param path: path to the Python skill module.
         :param model_configs: a list of model configurations.
@@ -895,6 +777,74 @@ class Skill(Component):
         skill.models.update(model_instances)
 
         return skill
+
+
+def _parse_module(
+    path: str,
+    component_configs: Dict[str, SkillComponentConfiguration],
+    skill_context: SkillContext,
+    component_type_name: str,
+) -> Dict[str, Any]:
+    components: Dict[str, Any] = {}
+    component_type_name_plural = component_type_name + "s"
+    if component_configs == {}:
+        return components
+    component_names = set(config.class_name for _, config in component_configs.items())
+    component_module = load_module(component_type_name_plural, Path(path))
+    classes = inspect.getmembers(component_module, inspect.isclass)
+    component_classes = list(
+        filter(
+            lambda x: any(re.match(component, x[0]) for component in component_names)
+            and not str.startswith(x[1].__module__, "aea.")
+            and not str.startswith(
+                x[1].__module__,
+                f"packages.{skill_context.skill_id.author}.skills.{skill_context.skill_id.name}",
+            ),
+            classes,
+        )
+    )
+
+    name_to_class = dict(component_classes)
+    _print_warning_message_for_non_declared_skill_components(
+        skill_context,
+        set(name_to_class.keys()),
+        {
+            component_config.class_name
+            for component_config in component_configs.values()
+        },
+        component_type_name_plural,
+        path,
+    )
+    for component_id, component_config in component_configs.items():
+        component_class_name = cast(str, component_config.class_name)
+        skill_context.logger.debug(
+            f"Processing {component_type_name} {component_class_name}"
+        )
+        if not component_id.isidentifier():
+            raise AEAComponentLoadException(  # pragma: nocover
+                f"'{component_id}' is not a valid identifier."
+            )
+        component_class = name_to_class.get(component_class_name, None)
+        if component_class is None:
+            skill_context.logger.warning(
+                f"{component_type_name.capitalize()} '{component_class_name}' cannot be found."
+            )
+        else:
+            try:
+                component = component_class(
+                    name=component_id,
+                    configuration=component_config,
+                    skill_context=skill_context,
+                    **dict(component_config.args),
+                )
+            except Exception as e:  # pylint: disable=broad-except # pragma: nocover
+                e_str = parse_exception(e)
+                raise AEAInstantiationException(
+                    f"An error occured during instantiation of component {skill_context.skill_id}/{component_config.class_name}:\n{e_str}"
+                )
+            components[component_id] = component
+
+    return components
 
 
 def _print_warning_message_for_non_declared_skill_components(
