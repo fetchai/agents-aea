@@ -35,7 +35,7 @@ from aea.helpers.transaction.base import (
     TransactionReceipt,
 )
 from aea.protocols.dialogue.base import DialogueMessage
-from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_ADDRESS
+from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_AGENT_ADDRESS
 
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
@@ -172,11 +172,11 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         incoming_message = cast(FipaMessage, incoming_message)
         mock_logger.assert_any_call(
             logging.INFO,
-            f"received proposal={incoming_message.proposal.values} from sender={COUNTERPARTY_ADDRESS[-5:]}",
+            f"received proposal={incoming_message.proposal.values} from sender={COUNTERPARTY_AGENT_ADDRESS[-5:]}",
         )
         mock_logger.assert_any_call(
             logging.INFO,
-            f"accepting the proposal from sender={COUNTERPARTY_ADDRESS[-5:]}",
+            f"accepting the proposal from sender={COUNTERPARTY_AGENT_ADDRESS[-5:]}",
         )
 
         self.assert_quantity_in_outbox(1)
@@ -228,11 +228,11 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         incoming_message = cast(FipaMessage, incoming_message)
         mock_logger.assert_any_call(
             logging.INFO,
-            f"received proposal={incoming_message.proposal.values} from sender={COUNTERPARTY_ADDRESS[-5:]}",
+            f"received proposal={incoming_message.proposal.values} from sender={COUNTERPARTY_AGENT_ADDRESS[-5:]}",
         )
         mock_logger.assert_any_call(
             logging.INFO,
-            f"declining the proposal from sender={COUNTERPARTY_ADDRESS[-5:]}",
+            f"declining the proposal from sender={COUNTERPARTY_AGENT_ADDRESS[-5:]}",
         )
 
         self.assert_quantity_in_outbox(1)
@@ -272,7 +272,8 @@ class TestGenericFipaHandler(BaseSkillTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO, f"received DECLINE from sender={COUNTERPARTY_ADDRESS[-5:]}"
+            logging.INFO,
+            f"received DECLINE from sender={COUNTERPARTY_AGENT_ADDRESS[-5:]}",
         )
 
         for (
@@ -310,7 +311,8 @@ class TestGenericFipaHandler(BaseSkillTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO, f"received DECLINE from sender={COUNTERPARTY_ADDRESS[-5:]}"
+            logging.INFO,
+            f"received DECLINE from sender={COUNTERPARTY_AGENT_ADDRESS[-5:]}",
         )
 
         for (
@@ -360,7 +362,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         # after
         mock_logger_handler.assert_any_call(
             logging.INFO,
-            f"received MATCH_ACCEPT_W_INFORM from sender={COUNTERPARTY_ADDRESS[-5:]} with info={incoming_message.info}",
+            f"received MATCH_ACCEPT_W_INFORM from sender={COUNTERPARTY_AGENT_ADDRESS[-5:]} with info={incoming_message.info}",
         )
 
         # operation
@@ -404,7 +406,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         # after
         mock_logger.assert_any_call(
             logging.INFO,
-            f"received MATCH_ACCEPT_W_INFORM from sender={COUNTERPARTY_ADDRESS[-5:]} with info={incoming_message.info}",
+            f"received MATCH_ACCEPT_W_INFORM from sender={COUNTERPARTY_AGENT_ADDRESS[-5:]} with info={incoming_message.info}",
         )
 
         self.assert_quantity_in_outbox(1)
@@ -421,7 +423,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
 
         mock_logger.assert_any_call(
             logging.INFO,
-            f"informing counterparty={COUNTERPARTY_ADDRESS[-5:]} of payment.",
+            f"informing counterparty={COUNTERPARTY_AGENT_ADDRESS[-5:]} of payment.",
         )
 
     def test_handle_inform_with_data(self):
@@ -448,7 +450,8 @@ class TestGenericFipaHandler(BaseSkillTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO, f"received INFORM from sender={COUNTERPARTY_ADDRESS[-5:]}"
+            logging.INFO,
+            f"received INFORM from sender={COUNTERPARTY_AGENT_ADDRESS[-5:]}",
         )
         mock_logger.assert_any_call(
             logging.INFO, "received the following data={'data_name': 'data'}"
@@ -485,11 +488,13 @@ class TestGenericFipaHandler(BaseSkillTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO, f"received INFORM from sender={COUNTERPARTY_ADDRESS[-5:]}"
+            logging.INFO,
+            f"received INFORM from sender={COUNTERPARTY_AGENT_ADDRESS[-5:]}",
         )
 
         mock_logger.assert_any_call(
-            logging.INFO, f"received no data from sender={COUNTERPARTY_ADDRESS[-5:]}"
+            logging.INFO,
+            f"received no data from sender={COUNTERPARTY_AGENT_ADDRESS[-5:]}",
         )
 
     def test_handle_invalid(self):
@@ -959,7 +964,7 @@ class TestGenericSigningHandler(BaseSkillTestCase):
             self.prepare_skill_dialogue(
                 dialogues=self.fipa_dialogues,
                 messages=self.list_of_fipa_messages[:4],
-                counterparty=COUNTERPARTY_ADDRESS,
+                counterparty=COUNTERPARTY_AGENT_ADDRESS,
                 is_agent_to_agent_messages=True,
             ),
         )
@@ -1391,7 +1396,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             actual_message=self.get_message_from_outbox(),
             message_type=FipaMessage,
             performative=FipaMessage.Performative.INFORM,
-            to=COUNTERPARTY_ADDRESS,
+            to=COUNTERPARTY_AGENT_ADDRESS,
             sender=self.skill.skill_context.agent_address,
             info={"transaction_digest": self.transaction_digest.body},
         )

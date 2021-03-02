@@ -223,6 +223,8 @@ class PublicId(JSONSerializable):
     True
     """
 
+    __slots__ = ("_author", "_name", "_package_version")
+
     AUTHOR_REGEX = fr"[a-zA-Z_][a-zA-Z0-9_]{{0,{STRING_LENGTH_LIMIT - 1}}}"
     PACKAGE_NAME_REGEX = fr"[a-zA-Z_][a-zA-Z0-9_]{{0,{STRING_LENGTH_LIMIT  - 1}}}"
     VERSION_NUMBER_PART_REGEX = r"(0|[1-9]\d*)"
@@ -452,6 +454,8 @@ class PackageId:
         PACKAGE_TYPE_REGEX, PublicId.PUBLIC_ID_URI_REGEX[1:-1]
     )
 
+    __slots__ = ("_package_type", "_public_id")
+
     def __init__(
         self, package_type: Union[PackageType, str], public_id: PublicId
     ) -> None:
@@ -655,6 +659,8 @@ class Dependency:
     These fields will be forwarded to the 'pip' command.
     """
 
+    __slots__ = ("_name", "_version", "_index", "_git", "_ref")
+
     def __init__(
         self,
         name: Union[PyPIPackageName, str],
@@ -788,6 +794,8 @@ We cannot have two items with the same package name since the keys of a YAML obj
 
 class CRUDCollection(Generic[T]):
     """Interface of a CRUD collection."""
+
+    __slots__ = ("_items_by_id",)
 
     def __init__(self) -> None:
         """Instantiate a CRUD collection."""

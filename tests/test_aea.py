@@ -25,10 +25,11 @@ from pathlib import Path
 from threading import Thread
 from typing import Callable
 from unittest.case import TestCase
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
 
+import aea  # noqa: F401
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
@@ -38,7 +39,7 @@ from aea.exceptions import AEAActException, AEAException, AEAHandleException
 from aea.helpers.base import cd
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.identity.base import Identity
-from aea.mail.base import Envelope, EnvelopeContext
+from aea.mail.base import Envelope
 from aea.protocols.base import Protocol
 from aea.registries.resources import Resources
 from aea.runtime import RuntimeStates
@@ -217,10 +218,10 @@ def test_handle():
         local_connection_id = OEFLocalConnection.connection_id
         builder.set_default_connection(local_connection_id)
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
-        aea = builder.build(connection_ids=[local_connection_id])
+        an_aea = builder.build(connection_ids=[local_connection_id])
         # This is a temporary workaround to feed the local node to the OEF Local connection
         # TODO remove it.
-        local_connection = aea.resources.get_connection(local_connection_id)
+        local_connection = an_aea.resources.get_connection(local_connection_id)
         local_connection._local_node = node
 
         msg = DefaultMessage(
@@ -230,39 +231,39 @@ def test_handle():
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        msg.to = aea.identity.address
-        msg.sender = aea.identity.address
+        msg.to = an_aea.identity.address
+        msg.sender = an_aea.identity.address
 
         encoded_msg = DefaultSerializer.encode(msg)
 
         # reset counts on error handler
-        error_handler = aea._get_error_handler()
+        error_handler = an_aea._get_error_handler()
         error_handler.unsupported_protocol_count = 0
         error_handler.unsupported_skill_count = 0
         error_handler.decoding_error_count = 0
-        with run_in_thread(aea.start, timeout=5):
-            wait_for_condition(lambda: aea.is_running, timeout=10)
-            dummy_skill = aea.resources.get_skill(DUMMY_SKILL_PUBLIC_ID)
+        with run_in_thread(an_aea.start, timeout=5):
+            wait_for_condition(lambda: an_aea.is_running, timeout=10)
+            dummy_skill = an_aea.resources.get_skill(DUMMY_SKILL_PUBLIC_ID)
             dummy_handler = dummy_skill.skill_context.handlers.dummy
             # UNSUPPORTED PROTOCOL
             envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
             envelope._protocol_specification_id = UNKNOWN_PROTOCOL_PUBLIC_ID
             # send envelope via localnode back to agent/bypass `outbox` put consistency checks
-            aea.outbox.put(envelope)
+            an_aea.outbox.put(envelope)
             wait_for_condition(
-                lambda: error_handler.unsupported_protocol_count == 1, timeout=1,
+                lambda: error_handler.unsupported_protocol_count == 1, timeout=2,
             )
 
             # DECODING ERROR
             envelope = Envelope(
-                to=aea.identity.address,
-                sender=aea.identity.address,
+                to=an_aea.identity.address,
+                sender=an_aea.identity.address,
                 protocol_specification_id=DefaultMessage.protocol_specification_id,
                 message=b"",
             )
-            aea.runtime.multiplexer.put(envelope)
+            an_aea.runtime.multiplexer.put(envelope)
             wait_for_condition(
-                lambda: error_handler.decoding_error_count == 1, timeout=1,
+                lambda: error_handler.decoding_error_count == 1, timeout=2,
             )
 
             #   UNSUPPORTED SKILL
@@ -272,13 +273,13 @@ def test_handle():
                 dialogue_reference=(str(0), ""),
                 target=0,
             )
-            msg.to = aea.identity.address
-            msg.sender = aea.identity.address
+            msg.to = an_aea.identity.address
+            msg.sender = an_aea.identity.address
             envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
             # send envelope via localnode back to agent/bypass `outbox` put consistency checks
-            aea.outbox.put(envelope)
+            an_aea.outbox.put(envelope)
             wait_for_condition(
-                lambda: error_handler.unsupported_skill_count == 1, timeout=2,
+                lambda: error_handler.no_active_handler_count == 1, timeout=2,
             )
 
             #   DECODING OK
@@ -289,11 +290,11 @@ def test_handle():
                 message=encoded_msg,
             )
             # send envelope via localnode back to agent/bypass `outbox` put consistency checks
-            aea.runtime.multiplexer.put(envelope)
+            an_aea.runtime.multiplexer.put(envelope)
             wait_for_condition(
-                lambda: len(dummy_handler.handled_messages) == 1, timeout=1,
+                lambda: len(dummy_handler.handled_messages) == 1, timeout=3,
             )
-            aea.stop()
+            an_aea.stop()
 
 
 def test_initialize_aea_programmatically():
@@ -313,8 +314,8 @@ def test_initialize_aea_programmatically():
         local_connection_id = OEFLocalConnection.connection_id
         builder.set_default_connection(local_connection_id)
         builder.add_skill(Path(CUR_PATH, "data", "dummy_skill"))
-        aea = builder.build(connection_ids=[local_connection_id])
-        local_connection = aea.resources.get_connection(local_connection_id)
+        an_aea = builder.build(connection_ids=[local_connection_id])
+        local_connection = an_aea.resources.get_connection(local_connection_id)
         local_connection._local_node = node
 
         expected_message = DefaultMessage(
@@ -324,21 +325,21 @@ def test_initialize_aea_programmatically():
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        expected_message.to = aea.identity.address
-        expected_message.sender = aea.identity.address
+        expected_message.to = an_aea.identity.address
+        expected_message.sender = an_aea.identity.address
         envelope = Envelope(
             to=expected_message.to,
             sender=expected_message.sender,
             message=expected_message,
         )
 
-        with run_in_thread(aea.start, timeout=5, on_exit=aea.stop):
-            wait_for_condition(lambda: aea.is_running, timeout=10)
-            aea.outbox.put(envelope)
+        with run_in_thread(an_aea.start, timeout=5, on_exit=an_aea.stop):
+            wait_for_condition(lambda: an_aea.is_running, timeout=10)
+            an_aea.outbox.put(envelope)
 
             dummy_skill_id = DUMMY_SKILL_PUBLIC_ID
             dummy_behaviour_name = "dummy"
-            dummy_behaviour = aea.resources.get_behaviour(
+            dummy_behaviour = an_aea.resources.get_behaviour(
                 dummy_skill_id, dummy_behaviour_name
             )
             wait_for_condition(lambda: dummy_behaviour is not None, timeout=10)
@@ -347,17 +348,17 @@ def test_initialize_aea_programmatically():
             # TODO the previous code caused an error:
             #      _pickle.PicklingError: Can't pickle <class 'tasks.DummyTask'>: import of module 'tasks' failed
             dummy_task = DummyTask()
-            task_id = aea.enqueue_task(dummy_task)
-            async_result = aea.get_task_result(task_id)
+            task_id = an_aea.enqueue_task(dummy_task)
+            async_result = an_aea.get_task_result(task_id)
             expected_dummy_task = async_result.get(10.0)
             wait_for_condition(
                 lambda: expected_dummy_task.nb_execute_called > 0, timeout=10
             )
 
-            dummy_handler = aea.resources.get_handler(
+            dummy_handler = an_aea.resources.get_handler(
                 DefaultMessage.protocol_id, dummy_skill_id
             )
-            dummy_handler_alt = aea.resources._handler_registry.fetch(
+            dummy_handler_alt = an_aea.resources._handler_registry.fetch(
                 (dummy_skill_id, "dummy")
             )
             wait_for_condition(lambda: dummy_handler == dummy_handler_alt, timeout=10)
@@ -389,7 +390,7 @@ def test_initialize_aea_programmatically_build_resources():
             resources.add_protocol(default_protocol)
             resources.add_connection(connection)
 
-            aea = AEA(
+            an_aea = AEA(
                 identity,
                 wallet,
                 resources=resources,
@@ -399,10 +400,10 @@ def test_initialize_aea_programmatically_build_resources():
 
             error_skill = Skill.from_dir(
                 str(Path("packages", "fetchai", "skills", "error")),
-                agent_context=aea.context,
+                agent_context=an_aea.context,
             )
             dummy_skill = Skill.from_dir(
-                str(Path(CUR_PATH, "data", "dummy_skill")), agent_context=aea.context
+                str(Path(CUR_PATH, "data", "dummy_skill")), agent_context=an_aea.context
             )
             resources.add_skill(dummy_skill)
             resources.add_skill(error_skill)
@@ -417,9 +418,9 @@ def test_initialize_aea_programmatically_build_resources():
             expected_message.to = agent_name
             expected_message.sender = agent_name
 
-            with run_in_thread(aea.start, timeout=5, on_exit=aea.stop):
-                wait_for_condition(lambda: aea.is_running, timeout=10)
-                aea.outbox.put(
+            with run_in_thread(an_aea.start, timeout=5, on_exit=an_aea.stop):
+                wait_for_condition(lambda: an_aea.is_running, timeout=10)
+                an_aea.outbox.put(
                     Envelope(
                         to=agent_name, sender=agent_name, message=expected_message,
                     )
@@ -427,7 +428,7 @@ def test_initialize_aea_programmatically_build_resources():
 
                 dummy_skill_id = DUMMY_SKILL_PUBLIC_ID
                 dummy_behaviour_name = "dummy"
-                dummy_behaviour = aea.resources.get_behaviour(
+                dummy_behaviour = an_aea.resources.get_behaviour(
                     dummy_skill_id, dummy_behaviour_name
                 )
                 wait_for_condition(lambda: dummy_behaviour is not None, timeout=10)
@@ -436,17 +437,17 @@ def test_initialize_aea_programmatically_build_resources():
                 )
 
                 dummy_task = DummyTask()
-                task_id = aea.enqueue_task(dummy_task)
-                async_result = aea.get_task_result(task_id)
+                task_id = an_aea.enqueue_task(dummy_task)
+                async_result = an_aea.get_task_result(task_id)
                 expected_dummy_task = async_result.get(10.0)
                 wait_for_condition(
                     lambda: expected_dummy_task.nb_execute_called > 0, timeout=10
                 )
                 dummy_handler_name = "dummy"
-                dummy_handler = aea.resources._handler_registry.fetch(
+                dummy_handler = an_aea.resources._handler_registry.fetch(
                     (dummy_skill_id, dummy_handler_name)
                 )
-                dummy_handler_alt = aea.resources.get_handler(
+                dummy_handler_alt = an_aea.resources.get_handler(
                     DefaultMessage.protocol_id, dummy_skill_id
                 )
                 wait_for_condition(
@@ -512,9 +513,9 @@ def test_no_handlers_registered():
     private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
     builder.set_name(agent_name)
     builder.add_private_key(DEFAULT_LEDGER, private_key_path)
-    aea = builder.build()
+    an_aea = builder.build()
 
-    with patch.object(aea.logger, "warning") as mock_logger:
+    with patch.object(an_aea.logger, "warning") as mock_logger:
         msg = DefaultMessage(
             dialogue_reference=("", ""),
             message_id=1,
@@ -522,18 +523,20 @@ def test_no_handlers_registered():
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        msg.to = aea.identity.address
+        msg.to = an_aea.identity.address
         envelope = Envelope(
-            to=aea.identity.address, sender=aea.identity.address, message=msg,
+            to=an_aea.identity.address, sender=an_aea.identity.address, message=msg,
         )
-        with patch.object(
-            aea.filter, "get_active_handlers", return_value=[]
-        ), patch.object(
-            aea.runtime.multiplexer, "put",
+        with patch(
+            "aea.registries.filter.Filter.get_active_handlers",
+            new_callable=PropertyMock,
         ):
-            aea.handle_envelope(envelope)
+            with patch.object(
+                an_aea.runtime.multiplexer, "put",
+            ):
+                an_aea.handle_envelope(envelope)
         mock_logger.assert_any_call(
-            f"Cannot handle envelope: no active handler registered for the protocol_specification_id='{DefaultMessage.protocol_specification_id}'. Sender={envelope.sender}, to={envelope.sender}."
+            f"Cannot handle envelope: no active handler for protocol={msg.protocol_id}. Sender={envelope.sender}, to={envelope.sender}."
         )
 
 
@@ -822,8 +825,8 @@ class BaseTimeExecutionCase(TestCase):
         skill_context._skill = test_skill  # weird hack
 
         builder.add_component_instance(test_skill)
-        aea = builder.build()
-        self.aea_tool = AeaTool(aea)
+        my_aea = builder.build()
+        self.aea_tool = AeaTool(my_aea)
         self.envelope = AeaTool.dummy_envelope()
         self.aea_tool.aea.runtime.agent_loop._setup()
 
@@ -923,14 +926,9 @@ def test_skill2skill_message():
                 performative=DefaultMessage.Performative.BYTES,
                 content=b"hello",
             )
-            msg.to = agent.identity.address
-            msg.sender = agent.identity.address
-            envelope = Envelope(
-                to=msg.to,
-                sender=msg.sender,
-                message=msg,
-                context=EnvelopeContext(skill_id=DUMMY_SKILL_PUBLIC_ID),
-            )
+            msg.to = str(DUMMY_SKILL_PUBLIC_ID)
+            msg.sender = "some_author/some_skill:0.1.0"
+            envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
 
             with run_in_thread(agent.start, timeout=20, on_exit=agent.stop):
                 wait_for_condition(lambda: agent.is_running, timeout=20)

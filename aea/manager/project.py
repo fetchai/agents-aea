@@ -74,6 +74,8 @@ class _Base:
 class Project(_Base):
     """Agent project representation."""
 
+    __slots__ = ("public_id", "path", "agents")
+
     def __init__(self, public_id: PublicId, path: str) -> None:
         """Init project with public_id and project's path."""
         self.public_id: PublicId = public_id
@@ -135,6 +137,8 @@ class Project(_Base):
 
 class AgentAlias(_Base):
     """Agent alias representation."""
+
+    __slots__ = ("project", "agent_name", "_data_dir", "_agent_config")
 
     def __init__(
         self, project: Project, agent_name: str, data_dir: str,

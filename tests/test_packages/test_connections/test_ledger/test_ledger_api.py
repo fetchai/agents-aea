@@ -73,6 +73,8 @@ ledger_ids = pytest.mark.parametrize(
     ],
 )
 
+SOME_SKILL_ID = "some/skill:0.1.0"
+
 
 class LedgerApiDialogues(BaseLedgerApiDialogues):
     """The dialogues class keeps track of all ledger_api dialogues."""
@@ -122,7 +124,7 @@ async def test_get_balance(
     else:
         config = ethereum_testnet_config
 
-    ledger_api_dialogues = LedgerApiDialogues(address)
+    ledger_api_dialogues = LedgerApiDialogues(SOME_SKILL_ID)
     request, ledger_api_dialogue = ledger_api_dialogues.create(
         counterparty=str(ledger_apis_connection.connection_id),
         performative=LedgerApiMessage.Performative.GET_BALANCE,
@@ -173,7 +175,7 @@ async def test_get_state(
     args = ("latest",)
     kwargs = Kwargs({})
 
-    ledger_api_dialogues = LedgerApiDialogues(address)
+    ledger_api_dialogues = LedgerApiDialogues(SOME_SKILL_ID)
     request, ledger_api_dialogue = ledger_api_dialogues.create(
         counterparty=str(ledger_apis_connection.connection_id),
         performative=LedgerApiMessage.Performative.GET_STATE,
@@ -217,7 +219,7 @@ async def test_send_signed_transaction_ethereum(
         EthereumCrypto.identifier, private_key_path=ETHEREUM_PRIVATE_KEY_PATH
     )
     crypto2 = make_crypto(EthereumCrypto.identifier)
-    ledger_api_dialogues = LedgerApiDialogues(crypto1.address)
+    ledger_api_dialogues = LedgerApiDialogues(SOME_SKILL_ID)
 
     amount = 40000
     fee = 30000
@@ -330,7 +332,7 @@ async def test_unsupported_protocol(ledger_apis_connection: LedgerConnection):
     """Test fail on protocol not supported."""
     envelope = Envelope(
         to=str(ledger_apis_connection.connection_id),
-        sender="test",
+        sender="test/skill:0.1.0",
         protocol_specification_id=PublicId.from_str("author/package_name:0.1.0"),
         message=b"message",
     )

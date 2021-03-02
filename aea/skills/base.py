@@ -746,6 +746,8 @@ def _check_duplicate_classes(name_class_pairs: Sequence[Tuple[str, Type]]) -> No
 class Skill(Component):
     """This class implements a skill."""
 
+    __slots__ = ("_skill_context", "_handlers", "_behaviours", "_models")
+
     def __init__(
         self,
         configuration: SkillConfig,
@@ -767,7 +769,6 @@ class Skill(Component):
         if kwargs is not None:
             pass
         super().__init__(configuration)
-        self.config = configuration
         self._skill_context = (
             skill_context if skill_context is not None else SkillContext()
         )

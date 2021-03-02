@@ -148,6 +148,8 @@ class ProtocolSpecificationParseError(Exception):
 class Configuration(JSONSerializable, ABC):
     """Configuration class."""
 
+    __slots__ = ("_key_order",)
+
     def __init__(self) -> None:
         """Initialize a configuration object."""
         # a list of keys that remembers the key order of the configuration file.
@@ -204,6 +206,19 @@ class PackageConfiguration(Configuration, ABC):
     - skills
     - contracts
     """
+
+    __slots__ = (
+        "_name",
+        "_author",
+        "version",
+        "license",
+        "fingerprint",
+        "fingerprint_ignore_patterns",
+        "build_entrypoint",
+        "_aea_version",
+        "_aea_version_specifiers",
+        "_directory",
+    )
 
     default_configuration_filename: str
     package_type: PackageType
@@ -438,6 +453,8 @@ class ComponentConfiguration(PackageConfiguration, ABC):
 
     package_type: PackageType
 
+    __slots__ = ("pypi_dependencies", "_build_directory")
+
     def __init__(
         self,
         name: SimpleIdOrStr,
@@ -539,6 +556,19 @@ class ConnectionConfig(ComponentConfiguration):
 
     FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(
         ["config", "cert_requests", "is_abstract", "build_directory"]
+    )
+
+    __slots__ = (
+        "class_name",
+        "protocols",
+        "connections",
+        "restricted_to_protocols",
+        "excluded_protocols",
+        "dependencies",
+        "description",
+        "config",
+        "is_abstract",
+        "cert_requests",
     )
 
     def __init__(
@@ -729,6 +759,8 @@ class ProtocolConfig(ComponentConfiguration):
     schema = "protocol-config_schema.json"
     FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset()
 
+    __slots__ = ("dependencies", "description", "protocol_specification_id")
+
     def __init__(
         self,
         name: SimpleIdOrStr,
@@ -824,6 +856,8 @@ class ProtocolConfig(ComponentConfiguration):
 class SkillComponentConfiguration:
     """This class represent a skill component configuration."""
 
+    __slots__ = ("class_name", "args")
+
     def __init__(self, class_name: str, **args: Any) -> None:
         """
         Initialize a skill component configuration.
@@ -887,6 +921,19 @@ class SkillConfig(ComponentConfiguration):
         ["behaviours", "handlers", "models"]
     )
     NESTED_FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(["args"])
+
+    __slots__ = (
+        "connections",
+        "protocols",
+        "contracts",
+        "skills",
+        "dependencies",
+        "description",
+        "handlers",
+        "behaviours",
+        "models",
+        "is_abstract",
+    )
 
     def __init__(
         self,
@@ -1108,6 +1155,36 @@ class AgentConfig(PackageConfiguration):
         ("dependencies",),
         ("logging_config",),
     ]
+
+    __slots__ = (
+        "agent_name",
+        "registry_path",
+        "description",
+        "private_key_paths",
+        "connection_private_key_paths",
+        "logging_config",
+        "default_ledger",
+        "currency_denominations",
+        "default_connection",
+        "connections",
+        "protocols",
+        "skills",
+        "contracts",
+        "period",
+        "execution_timeout",
+        "max_reactions",
+        "skill_exception_policy",
+        "connection_exception_policy",
+        "error_handler",
+        "decision_maker_handler",
+        "default_routing",
+        "loop_mode",
+        "runtime_mode",
+        "storage_uri",
+        "data_dir",
+        "_component_configurations",
+        "dependencies",
+    )
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -1471,6 +1548,8 @@ class AgentConfig(PackageConfiguration):
 class SpeechActContentConfig(Configuration):
     """Handle a speech_act content configuration."""
 
+    __slots__ = ("args",)
+
     def __init__(self, **args: Any) -> None:
         """Initialize a speech_act content configuration."""
         super().__init__()
@@ -1489,6 +1568,8 @@ class SpeechActContentConfig(Configuration):
 
 class ProtocolSpecification(ProtocolConfig):
     """Handle protocol specification."""
+
+    __slots__ = ("speech_acts", "_protobuf_snippets", "_dialogue_config")
 
     def __init__(
         self,
@@ -1593,6 +1674,13 @@ class ContractConfig(ComponentConfiguration):
     schema = "contract-config_schema.json"
 
     FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(["build_directory"])
+
+    __slots__ = (
+        "dependencies",
+        "description",
+        "contract_interface_paths",
+        "class_name",
+    )
 
     def __init__(
         self,

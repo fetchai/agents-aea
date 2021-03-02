@@ -82,7 +82,7 @@ class TestSkillTestCase(BaseSkillTestCase):
         assert self.skill.skill_context.agent_name == "test_agent_name"
         assert (
             self.skill.skill_context.search_service_address
-            == "dummy_search_service_address"
+            == "dummy_author/dummy_search_skill:0.1.0"
         )
         assert (
             self.skill.skill_context.decision_maker_address

@@ -26,7 +26,7 @@ from unittest.mock import PropertyMock, patch
 import pytest
 
 from aea.protocols.dialogue.base import DialogueMessage, Dialogues
-from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_ADDRESS
+from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_AGENT_ADDRESS
 
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
@@ -74,7 +74,7 @@ class TestTacHandler(BaseSkillTestCase):
                     "quantities_by_good_id": {"G1": 10},
                     "utility_params_by_good_id": {"G1": 1.0},
                     "fee_by_currency_id": {"FET": 1},
-                    "agent_addr_to_name": {COUNTERPARTY_ADDRESS: "some_name"},
+                    "agent_addr_to_name": {COUNTERPARTY_AGENT_ADDRESS: "some_name"},
                     "currency_id_to_name": {"FET": "FETCH"},
                     "good_id_to_name": {"G1": "Good_1"},
                     "version_id": "v1",
@@ -167,7 +167,7 @@ class TestTacHandler(BaseSkillTestCase):
             actual_message=self.get_message_from_outbox(),
             message_type=TacMessage,
             performative=TacMessage.Performative.TAC_ERROR,
-            to=COUNTERPARTY_ADDRESS,
+            to=COUNTERPARTY_AGENT_ADDRESS,
             sender=self.skill.skill_context.agent_address,
             target=incoming_message.message_id,
             error_code=TacMessage.ErrorCode.AGENT_NAME_NOT_IN_WHITELIST,
@@ -178,7 +178,9 @@ class TestTacHandler(BaseSkillTestCase):
         """Test the _on_register method of the tac handler where the agent address of the sender is already registered."""
         # setup
         self.game._phase = Phase.GAME_REGISTRATION
-        self.game._registration.register_agent(COUNTERPARTY_ADDRESS, self.agent_name)
+        self.game._registration.register_agent(
+            COUNTERPARTY_AGENT_ADDRESS, self.agent_name
+        )
 
         incoming_message = self.build_incoming_message(
             message_type=TacMessage,
@@ -200,7 +202,7 @@ class TestTacHandler(BaseSkillTestCase):
             actual_message=self.get_message_from_outbox(),
             message_type=TacMessage,
             performative=TacMessage.Performative.TAC_ERROR,
-            to=COUNTERPARTY_ADDRESS,
+            to=COUNTERPARTY_AGENT_ADDRESS,
             sender=self.skill.skill_context.agent_address,
             target=incoming_message.message_id,
             error_code=TacMessage.ErrorCode.AGENT_ADDR_ALREADY_REGISTERED,
@@ -234,7 +236,7 @@ class TestTacHandler(BaseSkillTestCase):
             actual_message=self.get_message_from_outbox(),
             message_type=TacMessage,
             performative=TacMessage.Performative.TAC_ERROR,
-            to=COUNTERPARTY_ADDRESS,
+            to=COUNTERPARTY_AGENT_ADDRESS,
             sender=self.skill.skill_context.agent_address,
             target=incoming_message.message_id,
             error_code=TacMessage.ErrorCode.AGENT_NAME_ALREADY_REGISTERED,
@@ -306,14 +308,14 @@ class TestTacHandler(BaseSkillTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.WARNING, f"agent not registered: '{COUNTERPARTY_ADDRESS}'"
+            logging.WARNING, f"agent not registered: '{COUNTERPARTY_AGENT_ADDRESS}'"
         )
         self.assert_quantity_in_outbox(1)
         has_attributes, error_str = self.message_has_attributes(
             actual_message=self.get_message_from_outbox(),
             message_type=TacMessage,
             performative=TacMessage.Performative.TAC_ERROR,
-            to=COUNTERPARTY_ADDRESS,
+            to=COUNTERPARTY_AGENT_ADDRESS,
             sender=self.skill.skill_context.agent_address,
             target=incoming_message.message_id,
             error_code=TacMessage.ErrorCode.AGENT_NOT_REGISTERED,
@@ -324,7 +326,9 @@ class TestTacHandler(BaseSkillTestCase):
         """Test the _on_unregister method of the tac handler: successful."""
         # setup
         self.game._phase = Phase.GAME_REGISTRATION
-        self.game._registration.register_agent(COUNTERPARTY_ADDRESS, self.agent_name)
+        self.game._registration.register_agent(
+            COUNTERPARTY_AGENT_ADDRESS, self.agent_name
+        )
         self.game._registration.register_agent("address_2", "name_2")
         self.game._conf = Configuration(
             "v1",
@@ -366,7 +370,7 @@ class TestTacHandler(BaseSkillTestCase):
             performative=TacMessage.Performative.TRANSACTION,
             transaction_id="some_id",
             ledger_id="some_ledger",
-            sender_address=COUNTERPARTY_ADDRESS,
+            sender_address=COUNTERPARTY_AGENT_ADDRESS,
             counterparty_address=self.skill.skill_context.agent_address,
             amount_by_currency_id={"FET": 1},
             fee_by_currency_id={"FET": 2},
@@ -391,7 +395,7 @@ class TestTacHandler(BaseSkillTestCase):
         # setup
         self.game._phase = Phase.GAME
 
-        tac_participant_sender = COUNTERPARTY_ADDRESS
+        tac_participant_sender = COUNTERPARTY_AGENT_ADDRESS
         tac_participant_counterparty = "counterparties_counterparty"
 
         counterparty_dialogue = self.prepare_skill_dialogue(
@@ -500,7 +504,7 @@ class TestTacHandler(BaseSkillTestCase):
         # setup
         self.game._phase = Phase.GAME
 
-        tac_participant_sender = COUNTERPARTY_ADDRESS
+        tac_participant_sender = COUNTERPARTY_AGENT_ADDRESS
         tac_participant_counterparty = "counterparties_counterparty"
 
         self_dialogue = self.prepare_skill_dialogue(
@@ -589,7 +593,7 @@ class TestTacHandler(BaseSkillTestCase):
         # setup
         self.game._phase = Phase.GAME
 
-        tac_participant_sender = COUNTERPARTY_ADDRESS
+        tac_participant_sender = COUNTERPARTY_AGENT_ADDRESS
         tac_participant_counterparty = "counterparties_counterparty"
 
         counterparty_dialogue = self.prepare_skill_dialogue(
@@ -683,7 +687,7 @@ class TestTacHandler(BaseSkillTestCase):
         # setup
         self.game._phase = Phase.GAME
 
-        tac_participant_sender = COUNTERPARTY_ADDRESS
+        tac_participant_sender = COUNTERPARTY_AGENT_ADDRESS
         tac_participant_counterparty = "counterparties_counterparty"
 
         self_dialogue = self.prepare_skill_dialogue(
@@ -784,6 +788,7 @@ class TestOefSearchHandler(BaseSkillTestCase):
     """Test oef search handler of tac control."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "tac_control")
+    is_agent_to_agent_messages = False
 
     @classmethod
     def setup(cls):

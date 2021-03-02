@@ -25,7 +25,7 @@ from typing import cast
 from unittest.mock import Mock, patch
 
 from aea.helpers.search.models import Description
-from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_ADDRESS
+from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_AGENT_ADDRESS
 
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.skills.tac_control_contract.behaviours import (
@@ -198,7 +198,9 @@ class TestSkillBehaviour(BaseSkillTestCase):
         mocked_now = self._mock_time("00:05")
 
         self.parameters._min_nb_agents = 2
-        self.game._registration.register_agent(COUNTERPARTY_ADDRESS, self.agent_1_name)
+        self.game._registration.register_agent(
+            COUNTERPARTY_AGENT_ADDRESS, self.agent_1_name
+        )
 
         # operation
         with patch("datetime.datetime", new=mocked_now):

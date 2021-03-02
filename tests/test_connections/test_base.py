@@ -112,26 +112,14 @@ def test_ensure_valid_envelope_for_external_comms_negative_cases():
     protocol_specification_id = PublicId("author", "name", "0.1.0")
     wrong_sender = wrong_to = "author/name:0.1.0"
     envelope_wrong_sender = Envelope(
-        to="to",
+        to=wrong_to,
         sender=wrong_sender,
         protocol_specification_id=protocol_specification_id,
         message=b"",
     )
     with pytest.raises(
         AEAEnforceError,
-        match=f"Sender field of envelope is public id, needs to be address. Found={wrong_to}",
-    ):
-        Connection._ensure_valid_envelope_for_external_comms(envelope_wrong_sender)
-
-    envelope_wrong_sender = Envelope(
-        to=wrong_to,
-        sender="sender",
-        protocol_specification_id=protocol_specification_id,
-        message=b"",
-    )
-    with pytest.raises(
-        AEAEnforceError,
-        match=f"To field of envelope is public id, needs to be address. Found={wrong_sender}",
+        match=f"Sender and to field of envelope is public id, needs to be address. Found: sender={wrong_sender}, to={wrong_to}",
     ):
         Connection._ensure_valid_envelope_for_external_comms(envelope_wrong_sender)
 
