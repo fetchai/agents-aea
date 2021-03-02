@@ -263,7 +263,7 @@ def test_handle():
             )
             an_aea.runtime.multiplexer.put(envelope)
             wait_for_condition(
-                lambda: error_handler.decoding_error_count == 1, timeout=2,
+                lambda: error_handler.decoding_error_count == 1, timeout=5,
             )
 
             #   UNSUPPORTED SKILL
@@ -279,7 +279,7 @@ def test_handle():
             # send envelope via localnode back to agent/bypass `outbox` put consistency checks
             an_aea.outbox.put(envelope)
             wait_for_condition(
-                lambda: error_handler.no_active_handler_count == 1, timeout=2,
+                lambda: error_handler.no_active_handler_count == 1, timeout=5,
             )
 
             #   DECODING OK
@@ -292,7 +292,7 @@ def test_handle():
             # send envelope via localnode back to agent/bypass `outbox` put consistency checks
             an_aea.runtime.multiplexer.put(envelope)
             wait_for_condition(
-                lambda: len(dummy_handler.handled_messages) == 1, timeout=3,
+                lambda: len(dummy_handler.handled_messages) == 1, timeout=5,
             )
             an_aea.stop()
 
