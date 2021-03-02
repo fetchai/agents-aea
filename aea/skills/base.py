@@ -22,12 +22,13 @@ import inspect
 import logging
 import queue
 import re
+import types
 from abc import ABC, abstractmethod
 from logging import Logger
 from pathlib import Path
 from queue import Queue
 from types import SimpleNamespace
-from typing import Any, Dict, Optional, Sequence, Set, Tuple, Type, Union, cast
+from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, Type, Union, cast
 
 from aea.common import Address
 from aea.components.base import Component, load_aea_package
@@ -46,9 +47,15 @@ from aea.exceptions import (
     AEAHandleException,
     AEAInstantiationException,
     _StopRuntime,
+    enforce,
     parse_exception,
 )
-from aea.helpers.base import _get_aea_logger_name_prefix, load_module
+from aea.helpers.base import (
+    _get_aea_logger_name_prefix,
+    defaultdict_recursive,
+    defaultdict_to_dict_recursive,
+    load_module,
+)
 from aea.helpers.logging import AgentLoggerAdapter
 from aea.helpers.storage.generic_storage import Storage
 from aea.mail.base import Envelope, EnvelopeContext
@@ -56,6 +63,22 @@ from aea.multiplexer import MultiplexerStatus, OutBox
 from aea.protocols.base import Message
 from aea.skills.tasks import TaskManager
 
+
+_ConfigurationsIndexedByTypeAndName = Dict[
+    Type["SkillComponent"], Dict[str, SkillComponentConfiguration]
+]
+"""
+The first index spans across skill component types: Handler, Behaviour and Model.
+The second index maps names of components to component configurations.
+"""
+
+_ComponentsIndexedByTypeAndName = Dict[
+    Type["SkillComponent"], Dict[str, "SkillComponent"]
+]
+"""
+As '_ConfigurationsIndexedByTypeAndName', but with instances of components
+rather than configurations.
+"""
 
 _default_logger = logging.getLogger(__name__)
 
@@ -875,3 +898,150 @@ def _print_warning_message_for_non_declared_skill_components(
                 class_name, item_type, skill_path
             )
         )
+
+
+class _SkillComponentLoader:
+    """This class implements the loading policy for skill components."""
+
+    def __init__(
+        self, configuration: SkillConfig, skill_context: SkillContext, **kwargs: Any
+    ):
+        """Initialize the helper class."""
+        enforce(
+            configuration.directory is not None,
+            "Configuration not associated to directory.",
+        )
+        self.configuration = configuration
+        self.skill_directory = cast(Path, configuration.directory)
+        self.skill_context = skill_context
+        self.kwargs = kwargs
+
+        self.skill_dotted_path = f"packages.{self.skill_context.skill_id.author}.skills.{self.skill_context.skill_id.name}"
+
+    def run(self) -> Skill:
+        load_aea_package(self.configuration)
+        python_modules: Set[Path] = self._get_python_modules()
+        component_classes_by_path: Dict[Path, Set[Type]] = self._load_component_classes(
+            python_modules
+        )
+        declared_component_classes: Dict[
+            Optional[Path], _ConfigurationsIndexedByTypeAndName
+        ] = self._get_declared_component_classes()
+        components = self._get_component_instances(
+            component_classes_by_path, declared_component_classes
+        )
+        return self._instantiate_skill(components)
+
+    def _instantiate_skill(self, components: _ComponentsIndexedByTypeAndName) -> Skill:
+        skill = Skill(self.configuration, self.skill_context, **self.kwargs)
+        skill.handlers.update(components[Handler])
+        skill.behaviours.update(components[Behaviour])
+        skill.models.update(components[Model])
+        return skill
+
+    def _get_python_modules(self) -> Set[Path]:
+        """
+        Get all the Python modules of the skill package.
+
+        We ignore '__pycache__' Python modules as they are not relevant.
+
+        :return: a set of paths pointing to all the Python modules in the skill.
+        """
+        ignore_regex = "__pycache__*"
+        all_python_modules = self.skill_directory.rglob("*.py")
+        module_paths: Set[Path] = set(
+            map(
+                Path,
+                filter(
+                    lambda x: not re.match(ignore_regex, x.name), all_python_modules
+                ),
+            )
+        )
+        return module_paths
+
+    def _compute_module_dotted_path(self, module_path: Path):
+        """Compute the dotted path for a skill module."""
+        # parts[1:] because we need to remove the name of the root directory
+        suffix = ".".join(module_path.parts[1:])
+        prefix = self.skill_dotted_path
+        return prefix + "." + suffix
+
+    def _filter_classes(
+        self, classes: List[Tuple[str, Type]]
+    ) -> List[Tuple[str, Type]]:
+        """
+        Filter classes of skill components.
+
+        :param classes: a list of pairs (class name, class object)
+        :return: a list of the same kind, but filtered with only skill component classes.
+        """
+        filtered_classes = list(
+            filter(
+                lambda name_and_class: issubclass(
+                    name_and_class[1], (Handler, Behaviour, Model)
+                )
+                and not str.startswith(name_and_class[1].__module__, "aea.")
+                and not str.startswith(
+                    name_and_class[1].__module__, self.skill_dotted_path
+                ),
+                classes,
+            )
+        )
+        return filtered_classes
+
+    def _load_component_classes(self, module_paths: Set[Path]) -> Dict[Path, Set[Type]]:
+        """
+        Load component classes from Python modules.
+
+        :param module_paths: a set of paths to Python modules.
+        :return: a mapping from path to skill component classes in that module
+          (containing potential duplicates). Skill components in one path
+          are
+        """
+        module_to_classes: Dict[Path, Set[Type]] = {}
+        for module_path in module_paths:
+            self.skill_context.logger.debug(f"Trying to load module {module_path}")
+            module_dotted_path: str = self._compute_module_dotted_path(module_path)
+            component_module: types.ModuleType = load_module(
+                module_dotted_path, Path(module_path)
+            )
+            classes: List[Tuple[str, Type]] = inspect.getmembers(
+                component_module, inspect.isclass
+            )
+            filtered_classes: List[Tuple[str, Type]] = self._filter_classes(classes)
+            module_to_classes[module_path] = {x[1] for x in filtered_classes}
+        return module_to_classes
+
+    def _get_declared_component_classes(
+        self,
+    ) -> Dict[Optional[Path], _ConfigurationsIndexedByTypeAndName]:
+        handlers_by_id = dict(self.configuration.handlers.read_all())
+        behaviours_by_id = dict(self.configuration.behaviours.read_all())
+        models_by_id = dict(self.configuration.models.read_all())
+
+        result: Dict[
+            Optional[Path], _ConfigurationsIndexedByTypeAndName
+        ] = defaultdict_recursive(3)
+        for component_type, components_by_id in [
+            (Handler, handlers_by_id),
+            (Behaviour, behaviours_by_id),
+            (Model, models_by_id),
+        ]:
+            for component_id, component_config in components_by_id.items():
+                result[component_config.file_path][component_type][
+                    component_id
+                ] = component_config
+        result = defaultdict_to_dict_recursive(result)
+        return result
+
+    def _get_component_instances(
+        self,
+        component_classes_by_path: Dict[Path, Set[Type]],
+        declared_component_classes: Dict[
+            Optional[Path], _ConfigurationsIndexedByTypeAndName
+        ],
+    ) -> _ComponentsIndexedByTypeAndName:
+        """Instantiate classes declared in configuration files."""
+        result: _ComponentsIndexedByTypeAndName = defaultdict_recursive(2)
+        # TODO
+        return result

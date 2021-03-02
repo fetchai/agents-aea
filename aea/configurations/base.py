@@ -835,7 +835,7 @@ class SkillComponentConfiguration:
         :param args: keyword arguments.
         """
         self.class_name = class_name
-        self.file_path = file_path
+        self.file_path: Optional[Path] = Path(file_path) if file_path else None
         self.args = args
 
     @property
@@ -843,7 +843,7 @@ class SkillComponentConfiguration:
         """Return the JSON representation."""
         result = {"class_name": self.class_name, "args": self.args}
         if self.file_path is not None:
-            result["file_path"] = self.file_path
+            result["file_path"] = str(self.file_path)
         return result
 
     @classmethod
