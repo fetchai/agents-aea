@@ -588,7 +588,8 @@ class AsyncMultiplexer(Runnable, WithLogger):
                 "Using envelope `to` field as connection_id: {}".format(connection_id)
             )
             enforce(
-                connection_id is not None, "Cannot be None by envelope construction"
+                connection_id is not None,
+                "Connection id cannot be None by envelope construction.",
             )
             return connection_id
 

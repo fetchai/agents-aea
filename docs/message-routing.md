@@ -27,7 +27,7 @@ It is important to keep in mind that <a href="../interaction-protocol">interacti
 - `Multiplexer` assigns messages to relevant `Connection` based on the following rules:
 
 	1. Component to component messages are routed by their `component_id`
-	2. Agent to agent messages, are routed following four rules:
+	2. Agent to agent messages are routed following four rules:
 		1. checks if `EnvelopeContext` exists and specifies a `Connection`, if so uses that else
 		2. checks which connection handled the last message from `sender`, if present uses that else
 		3. checks if default routing is specified for the `protocol_id` referenced in the `Envelope`, if so uses that else

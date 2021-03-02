@@ -70,6 +70,8 @@ from tests.conftest import (
 
 logger = logging.getLogger(__name__)
 
+SOME_SKILL_ID = "some/skill:0.1.0"
+
 
 class OefSearchDialogues(BaseOefSearchDialogues):
     """This class keeps track of all oef_search dialogues."""
@@ -150,7 +152,7 @@ class TestOEF(UseOef):
                 [self.connection], protocols=[FipaMessage, DefaultMessage]
             )
             self.multiplexer.connect()
-            self.oef_search_dialogues = OefSearchDialogues(FETCHAI_ADDRESS_ONE)
+            self.oef_search_dialogues = OefSearchDialogues(SOME_SKILL_ID)
 
         def test_search_services_with_query_without_model(self):
             """Test that a search services request can be sent correctly.
@@ -273,7 +275,7 @@ class TestOEF(UseOef):
                 [cls.connection], protocols=[FipaMessage, DefaultMessage]
             )
             cls.multiplexer.connect()
-            cls.oef_search_dialogues = OefSearchDialogues(FETCHAI_ADDRESS_ONE)
+            cls.oef_search_dialogues = OefSearchDialogues(SOME_SKILL_ID)
 
         def test_register_service(self):
             """Test that a register service request works correctly."""
@@ -345,7 +347,7 @@ class TestOEF(UseOef):
                 [cls.connection], protocols=[FipaMessage, DefaultMessage]
             )
             cls.multiplexer.connect()
-            cls.oef_search_dialogues = OefSearchDialogues(FETCHAI_ADDRESS_ONE)
+            cls.oef_search_dialogues = OefSearchDialogues(SOME_SKILL_ID)
 
             cls.foo_datamodel = DataModel(
                 "foo", [Attribute("bar", int, True, "A bar attribute.")]
@@ -769,7 +771,7 @@ class TestFIPA(UseOef):
             query=query,
         )
         oef_search_msg.to = str(oef_connection.connection_id)
-        oef_search_msg.sender = "agent"
+        oef_search_msg.sender = SOME_SKILL_ID
         dialogue = dialogues.update(oef_search_msg)
         assert dialogue is not None
         oef_channel.oef_msg_id_to_dialogue[oef_channel.oef_msg_id] = dialogue
@@ -788,7 +790,7 @@ class TestFIPA(UseOef):
         """Test the send method."""
         envelope = Envelope(
             to=str(self.connection1.connection_id),
-            sender="me",
+            sender=SOME_SKILL_ID,
             protocol_specification_id=DefaultMessage.protocol_specification_id,
             message=b"Hello",
         )
@@ -964,14 +966,14 @@ class TestSendWithOEF(UseOef):
                 address=FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
             )
             await oef_connection.connect()
-            oef_search_dialogues = OefSearchDialogues(FETCHAI_ADDRESS_ONE)
+            oef_search_dialogues = OefSearchDialogues(SOME_SKILL_ID)
             msg = OefSearchMessage(
                 performative=OefSearchMessage.Performative.OEF_ERROR,
                 dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
                 oef_error_operation=OefSearchMessage.OefErrorOperation.SEARCH_SERVICES,
             )
             msg.to = str(oef_connection.connection_id)
-            msg.sender = FETCHAI_ADDRESS_ONE
+            msg.sender = SOME_SKILL_ID
             envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
             with caplog.at_level(logging.DEBUG, "aea.packages.fetchai.connections.oef"):
                 await oef_connection.send(envelope)
