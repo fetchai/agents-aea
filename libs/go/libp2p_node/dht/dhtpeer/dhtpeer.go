@@ -770,10 +770,15 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 			break
 		}
 
+		// adding wait group to ensure sync reading
+		var wg sync.WaitGroup
+
 		// route envelope
 		dhtPeer.goroutines.Add(1)
+		wg.Add(1)
 		go func() {
 			defer dhtPeer.goroutines.Done()
+			defer wg.Done()
 			if envel.Sender != addr {
 				err = errors.New("Sender (" + envel.Sender + ") must match registered address")
 				lerror(err).Str("addr", addr).
@@ -787,6 +792,7 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 				}
 			}
 		}()
+		wg.Wait()
 	}
 
 	// Remove connection from map
