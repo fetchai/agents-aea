@@ -888,18 +888,21 @@ def test_set_default_connection_and_routing():
 
     builder.set_default_connection(public_id=good_connection.public_id)
     with pytest.raises(
-        ValueError, match="Connection bad/connection:0.1.0 is not registered!"
+        ValueError,
+        match="Connection bad/connection:0.1.0 specified as `default_connection` is not a project dependency!",
     ):
         builder.set_default_connection(public_id=bad_connection.public_id)
 
     builder.set_default_routing({good_protocol.public_id: good_connection.public_id})
 
     with pytest.raises(
-        ValueError, match="Connection bad/connection:0.1.0 is not registered!"
+        ValueError,
+        match="Connection bad/connection:0.1.0 specified in `default_routing` is not a project dependency!",
     ):
         builder.set_default_routing({good_protocol.public_id: bad_connection.public_id})
 
     with pytest.raises(
-        ValueError, match="Protocol bad/protocol:0.1.0 is not supported!"
+        ValueError,
+        match="Protocol bad/protocol:0.1.0 specified in `default_routing` is not a project dependency!",
     ):
         builder.set_default_routing({bad_protocol.public_id: good_connection.public_id})

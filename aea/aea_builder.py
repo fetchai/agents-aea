@@ -565,12 +565,16 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
                 ComponentId("protocol", protocol_id)
                 not in self._package_dependency_manager.protocols
             ):
-                raise ValueError(f"Protocol {protocol_id} is not supported!")
+                raise ValueError(
+                    f"Protocol {protocol_id} specified in `default_routing` is not a project dependency!"
+                )
             if (
                 ComponentId("connection", connection_id)
                 not in self._package_dependency_manager.connections
             ):
-                raise ValueError(f"Connection {connection_id} is not registered!")
+                raise ValueError(
+                    f"Connection {connection_id} specified in `default_routing` is not a project dependency!"
+                )
 
         self._default_routing = default_routing  # pragma: nocover
         return self
@@ -726,7 +730,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             and ComponentId("connection", public_id)
             not in self._package_dependency_manager.connections
         ):
-            raise ValueError(f"Connection {public_id} is not registered!")
+            raise ValueError(
+                f"Connection {public_id} specified as `default_connection` is not a project dependency!"
+            )
         self._default_connection = public_id
         return self
 
