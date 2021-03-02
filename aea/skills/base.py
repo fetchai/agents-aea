@@ -427,7 +427,7 @@ class Behaviour(AbstractBehaviour, ABC):
         :param skill_context: the skill context
         :return: a list of Behaviour.
         """
-        return _parse_module(path, behaviour_configs, skill_context, "behaviour")
+        return _parse_module(path, behaviour_configs, skill_context, Behaviour)
 
 
 class Handler(SkillComponent, ABC):
@@ -471,7 +471,7 @@ class Handler(SkillComponent, ABC):
         :param skill_context: the skill context
         :return: an handler, or None if the parsing fails.
         """
-        return _parse_module(path, handler_configs, skill_context, "handler")
+        return _parse_module(path, handler_configs, skill_context, Handler)
 
 
 class Model(SkillComponent, ABC):
@@ -783,9 +783,10 @@ def _parse_module(
     path: str,
     component_configs: Dict[str, SkillComponentConfiguration],
     skill_context: SkillContext,
-    component_type_name: str,
+    component_class: Type,
 ) -> Dict[str, Any]:
     components: Dict[str, Any] = {}
+    component_type_name = component_class.__name__.lower()
     component_type_name_plural = component_type_name + "s"
     if component_configs == {}:
         return components
@@ -795,6 +796,7 @@ def _parse_module(
     component_classes = list(
         filter(
             lambda x: any(re.match(component, x[0]) for component in component_names)
+            and issubclass(x[1], component_class)
             and not str.startswith(x[1].__module__, "aea.")
             and not str.startswith(
                 x[1].__module__,
