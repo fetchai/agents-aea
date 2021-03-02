@@ -330,6 +330,11 @@ class Libp2pNode:
         self.multiaddrs = self.get_libp2p_node_multiaddrs()
         self.describe_configuration()
 
+    async def restart(self) -> None:
+        """Perform node restart."""
+        await self.stop()
+        await self.start()
+
     async def write(self, data: bytes) -> None:
         """
         Write to the writer stream.
@@ -338,7 +343,15 @@ class Libp2pNode:
         """
         if self.pipe is None:
             raise ValueError("pipe is not set.")  # pragma: nocover
-        await self.pipe.write(data)
+
+        try:
+            await self.pipe.write(data)
+        except Exception:  # pylint: disable=broad-except
+            self.logger.exception(
+                "Exception raised on message write. Try reconnect to node and write again."
+            )
+            await self.restart()
+            await self.pipe.write(data)
 
     async def read(self) -> Optional[bytes]:
         """
@@ -351,8 +364,15 @@ class Libp2pNode:
         try:
             return await self.pipe.read()
         except Exception as e:  # pragma: nocover pylint: disable=broad-except
-            self.logger.exception(f"Failed to read. Exception: {e}")
-            return None
+            self.logger.exception(
+                f"Failed to read. Exception: {e}. Try reconnect to node and read again."
+            )
+            await self.restart()
+            try:
+                return await self.pipe.read()
+            except Exception:  # pragma: nocover pylint: disable=broad-except
+                self.logger.exception(f"Failed to read. Exception: {e}.")
+                return None
 
     def describe_configuration(self) -> None:
         """Print a message discribing the libp2p node configuration"""

@@ -632,3 +632,39 @@ def test_libp2pconnection_uri():
     uri = Uri(host="127.0.0.1")
     uri = Uri(host="127.0.0.1", port=10000)
     assert uri.host == "127.0.0.1" and uri.port == 10000
+
+
+@pytest.mark.asyncio
+class TestP2PLibp2pNodeRestart:
+    """Test node restart."""
+
+    def setup(self):
+        """Set the test up"""
+        self.cwd = os.getcwd()
+        self.t = tempfile.mkdtemp()
+        os.chdir(self.t)
+
+    @pytest.mark.asyncio
+    async def test_node_restart(self):
+        """Test node restart works."""
+        temp_dir = os.path.join(self.t, "temp_dir")
+        os.mkdir(temp_dir)
+        connection = _make_libp2p_connection(data_dir=temp_dir)
+        try:
+            await connection.node.start()
+            pipe = connection.node.pipe
+            assert pipe is not None
+            await connection.node.restart()
+            new_pipe = connection.node.pipe
+            assert new_pipe is not None
+            assert new_pipe is not pipe
+        finally:
+            await connection.node.stop()
+
+    def teardown(self):
+        """Tear down the test"""
+        os.chdir(self.cwd)
+        try:
+            shutil.rmtree(self.t)
+        except (OSError, IOError):
+            pass
