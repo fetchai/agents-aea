@@ -147,6 +147,7 @@ class Libp2pNode:
         peer_registration_delay: Optional[float] = None,
         records_storage_path: Optional[str] = None,
         connection_timeout: Optional[float] = None,
+        max_restarts: int = 5,
     ):
         """
         Initialize a p2p libp2p node.
@@ -165,6 +166,7 @@ class Libp2pNode:
         :param logger: the logger.
         :param peer_registration_delay: add artificial delay to agent registration in seconds
         :param connection_timeout: the connection timeout of the node
+        :param max_restarts: amount of node restarts during operation
         """
 
         self.record = agent_record
@@ -228,6 +230,8 @@ class Libp2pNode:
         self._connection_timeout = (
             connection_timeout if connection_timeout is not None else PIPE_CONN_TIMEOUT
         )
+        self._max_restarts = max_restarts
+        self._restart_counter: int = 0
 
     async def start(self) -> None:
         """
@@ -330,6 +334,14 @@ class Libp2pNode:
         self.multiaddrs = self.get_libp2p_node_multiaddrs()
         self.describe_configuration()
 
+    async def restart(self) -> None:
+        """Perform node restart."""
+        if self._restart_counter >= self._max_restarts:
+            raise ValueError(f"Max restarts attempts reached: {self._max_restarts}")
+        await self.stop()
+        await self.start()
+        self._restart_counter += 1
+
     async def write(self, data: bytes) -> None:
         """
         Write to the writer stream.
@@ -338,7 +350,15 @@ class Libp2pNode:
         """
         if self.pipe is None:
             raise ValueError("pipe is not set.")  # pragma: nocover
-        await self.pipe.write(data)
+
+        try:
+            await self.pipe.write(data)
+        except Exception:  # pylint: disable=broad-except
+            self.logger.exception(
+                "Exception raised on message write. Try reconnect to node and write again."
+            )
+            await self.restart()
+            await self.pipe.write(data)
 
     async def read(self) -> Optional[bytes]:
         """
@@ -351,8 +371,17 @@ class Libp2pNode:
         try:
             return await self.pipe.read()
         except Exception as e:  # pragma: nocover pylint: disable=broad-except
-            self.logger.exception(f"Failed to read. Exception: {e}")
-            return None
+            self.logger.exception(
+                f"Failed to read. Exception: {e}. Try reconnect to node and read again."
+            )
+            await self.restart()
+            try:
+                return await self.pipe.read()
+            except Exception:  # pragma: nocover pylint: disable=broad-except
+                self.logger.exception(
+                    f"Failed to read after node restart. Exception: {e}."
+                )
+                return None
 
     def describe_configuration(self) -> None:
         """Print a message discribing the libp2p node configuration"""
@@ -463,6 +492,7 @@ class P2PLibp2pConnection(Connection):
     """A libp2p p2p node connection."""
 
     connection_id = PUBLIC_ID
+    DEFAULT_MAX_RESTARTS = 5
 
     def __init__(self, **kwargs: Any) -> None:
         """Initialize a p2p libp2p connection."""
@@ -596,6 +626,9 @@ class P2PLibp2pConnection(Connection):
             delay,
             records_storage_path,
             node_connection_timeout,
+            max_restarts=self.configuration.config.get(
+                "max_node_restarts", self.DEFAULT_MAX_RESTARTS
+            ),
         )
 
         self._in_queue = None  # type: Optional[asyncio.Queue]
