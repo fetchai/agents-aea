@@ -45,6 +45,7 @@ class TestHttpHandler(BaseSkillTestCase):
     """Test http handler of coin_price skill."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "coin_price")
+    is_agent_to_agent_messages = False
 
     @classmethod
     def setup(cls, **kwargs):
@@ -313,6 +314,7 @@ class TestPrometheusHandler(BaseSkillTestCase):
     """Test prometheus handler of coin_price skill."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "coin_price")
+    is_agent_to_agent_messages = False
 
     @classmethod
     def setup(cls, **kwargs):

@@ -47,6 +47,7 @@ class TestServiceSearchBehaviour(BaseSkillTestCase):
     path_to_skill = Path(
         ROOT_DIR, "packages", "fetchai", "skills", "simple_service_search"
     )
+    is_agent_to_agent_messages = False
 
     @classmethod
     def setup(cls):
@@ -90,7 +91,7 @@ class TestServiceSearchBehaviour(BaseSkillTestCase):
             message_type=OefSearchMessage,
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             to=self.skill.skill_context.search_service_address,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             query=self.query,
         )
         assert has_attributes, error_str

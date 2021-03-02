@@ -57,4 +57,4 @@ class TestDialogues(BaseSkillTestCase):
             service_description=self.mocked_description,
         )
         assert dialogue.role == OefSearchDialogue.Role.AGENT
-        assert dialogue.self_address == self.skill.skill_context.agent_address
+        assert dialogue.self_address == str(self.skill.skill_context.skill_id)

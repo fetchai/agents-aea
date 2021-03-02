@@ -114,10 +114,12 @@ class TestHTTPServer:
         )
         self.connection_id = HTTPServerConnection.connection_id
         self.protocol_id = HttpMessage.protocol_id
+        self.target_skill_id = "some_author/some_skill:0.1.0"
 
         self.configuration = ConnectionConfig(
             host=self.host,
             port=self.port,
+            target_skill_id=self.target_skill_id,
             api_spec_path=self.api_spec_path,
             connection_id=HTTPServerConnection.connection_id,
             restricted_to_protocols={HttpMessage.protocol_id},
@@ -130,7 +132,7 @@ class TestHTTPServer:
         self.loop = asyncio.get_event_loop()
         self.loop.run_until_complete(self.http_connection.connect())
         self.connection_address = str(HTTPServerConnection.connection_id)
-        self._dialogues = HttpDialogues(self.agent_address)
+        self._dialogues = HttpDialogues(self.target_skill_id)
         self.original_timeout = self.http_connection.channel.RESPONSE_TIMEOUT
 
     @pytest.mark.asyncio
@@ -387,7 +389,7 @@ class TestHTTPServer:
             body=b"",
         )
         message.to = str(HTTPServerConnection.connection_id)
-        message.sender = "from_key"
+        message.sender = self.target_skill_id
         envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         await self.http_connection.send(envelope)
 

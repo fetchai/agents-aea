@@ -41,6 +41,7 @@ class TestServiceRegistrationBehaviour(BaseSkillTestCase):
     path_to_skill = Path(
         ROOT_DIR, "packages", "fetchai", "skills", "simple_service_registration"
     )
+    is_agent_to_agent_messages = False
 
     @classmethod
     def setup(cls):
@@ -80,7 +81,7 @@ class TestServiceRegistrationBehaviour(BaseSkillTestCase):
             message_type=OefSearchMessage,
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             to=self.skill.skill_context.search_service_address,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             service_description=self.mocked_description_1,
         )
         assert has_attributes, error_str
@@ -93,7 +94,7 @@ class TestServiceRegistrationBehaviour(BaseSkillTestCase):
             message_type=OefSearchMessage,
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             to=self.skill.skill_context.search_service_address,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             service_description=self.mocked_description_2,
         )
         assert has_attributes, error_str
@@ -130,7 +131,7 @@ class TestServiceRegistrationBehaviour(BaseSkillTestCase):
             message_type=OefSearchMessage,
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             to=self.skill.skill_context.search_service_address,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             service_description=self.mocked_description_2,
         )
         assert has_attributes, error_str
@@ -143,7 +144,7 @@ class TestServiceRegistrationBehaviour(BaseSkillTestCase):
             message_type=OefSearchMessage,
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             to=self.skill.skill_context.search_service_address,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             service_description=self.mocked_description_1,
         )
         assert has_attributes, error_str

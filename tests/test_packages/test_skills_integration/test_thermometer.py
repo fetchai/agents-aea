@@ -66,6 +66,13 @@ class TestThermometerSkill(AEATestCaseManyFlaky):
         self.set_agent_context(thermometer_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.16.0")
         self.add_item("connection", "fetchai/soef:0.17.0")
+        self.set_config(
+            "agent.dependencies",
+            '{\
+            "aea-crypto-fetchai": {"version": "<0.2.0,>=0.1.0"}\
+        }',
+            type_="dict",
+        )
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.16.0")
         self.add_item("connection", "fetchai/ledger:0.13.0")
         self.add_item("skill", "fetchai/thermometer:0.19.0")
@@ -102,6 +109,13 @@ class TestThermometerSkill(AEATestCaseManyFlaky):
         self.set_agent_context(thermometer_client_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.16.0")
         self.add_item("connection", "fetchai/soef:0.17.0")
+        self.set_config(
+            "agent.dependencies",
+            '{\
+            "aea-crypto-fetchai": {"version": "<0.2.0,>=0.1.0"}\
+        }',
+            type_="dict",
+        )
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.16.0")
         self.add_item("connection", "fetchai/ledger:0.13.0")
         self.add_item("skill", "fetchai/thermometer_client:0.19.0")
@@ -248,6 +262,13 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseManyFlaky):
         self.set_agent_context(thermometer_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.16.0")
         self.add_item("connection", "fetchai/soef:0.17.0")
+        self.set_config(
+            "agent.dependencies",
+            '{\
+            "aea-crypto-fetchai": {"version": "<0.2.0,>=0.1.0"}\
+        }',
+            type_="dict",
+        )
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.16.0")
         self.add_item("connection", "fetchai/ledger:0.13.0")
         self.add_item("skill", "fetchai/thermometer:0.19.0")
@@ -287,6 +308,13 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseManyFlaky):
         self.set_agent_context(thermometer_client_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.16.0")
         self.add_item("connection", "fetchai/soef:0.17.0")
+        self.set_config(
+            "agent.dependencies",
+            '{\
+            "aea-crypto-fetchai": {"version": "<0.2.0,>=0.1.0"}\
+        }',
+            type_="dict",
+        )
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.16.0")
         self.add_item("connection", "fetchai/ledger:0.13.0")
         self.add_item("skill", "fetchai/thermometer_client:0.19.0")

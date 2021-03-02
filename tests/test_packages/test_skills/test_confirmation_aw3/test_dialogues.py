@@ -61,4 +61,4 @@ class TestDialogues(ConfirmationAW3TestCase):
             body=b"some_body",
         )
         assert dialogue.role == HttpDialogue.Role.CLIENT
-        assert dialogue.self_address == self.skill.skill_context.agent_address
+        assert dialogue.self_address == str(self.skill.skill_context.skill_id)

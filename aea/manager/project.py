@@ -41,7 +41,9 @@ class _Base:
     @classmethod
     def _get_agent_config(cls, path: Union[Path, str]) -> AgentConfig:
         """Get agent config instance."""
-        return AEABuilder.try_to_load_agent_configuration_file(path)
+        agent_config = AEABuilder.try_to_load_agent_configuration_file(path)
+        agent_config.check_aea_version()
+        return agent_config
 
     @classmethod
     def _get_builder(
@@ -125,6 +127,10 @@ class Project(_Base):
     def builder(self) -> AEABuilder:
         """Get builder instance."""
         return self._get_builder(self._get_agent_config(self.path), self.path)
+
+    def check(self) -> None:
+        """Check we can still construct an AEA from the project with builder.build."""
+        _ = self.builder
 
 
 class AgentAlias(_Base):
