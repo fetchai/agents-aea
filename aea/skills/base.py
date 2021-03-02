@@ -785,6 +785,18 @@ def _parse_module(
     skill_context: SkillContext,
     component_class: Type,
 ) -> Dict[str, Any]:
+    """
+    Parse a module to find skill component classes, and instantiate them.
+
+    This is a private framework function,
+     used in SkillComponentClass.parse_module.
+
+    :param path: path to the Python module.
+    :param component_configs: the component configurations.
+    :param skill_context: the skill context.
+    :param component_class: the class of the skill components to be loaded.
+    :return: A mapping from skill component name to the skill component instance.
+    """
     components: Dict[str, Any] = {}
     component_type_name = component_class.__name__.lower()
     component_type_name_plural = component_type_name + "s"
