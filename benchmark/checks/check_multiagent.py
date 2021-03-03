@@ -28,6 +28,7 @@ from typing import List, Tuple, Union, cast
 import click
 
 from aea.configurations.base import ConnectionConfig
+from aea.identity.base import Identity
 from aea.protocols.base import Message
 from aea.registries.resources import Resources
 from aea.runner import AEARunner
@@ -125,19 +126,23 @@ def run(
 
     for i in range(num_of_agents):
         resources = Resources()
+        agent_name = f"agent{i}"
+        identity = Identity(agent_name, address=agent_name)
         connection = OEFLocalConnection(
             local_node,
             configuration=ConnectionConfig(
                 connection_id=OEFLocalConnection.connection_id,
             ),
-            identity="some",
+            identity=identity,
             data_dir="tmp",
         )
         resources.add_connection(connection)
         agent = make_agent(
-            agent_name=f"agent{i}", runtime_mode=runtime_mode, resources=resources
+            agent_name=agent_name,
+            runtime_mode=runtime_mode,
+            resources=resources,
+            identity=identity,
         )
-        connection._identity = agent.identity  # pylint: disable=protected-access
         skill = make_skill(agent, handlers={"test": TestHandler})
         agent.resources.add_skill(skill)
         agents.append(agent)

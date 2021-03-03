@@ -30,6 +30,7 @@ import click
 from aea.aea import AEA
 from aea.common import Address
 from aea.configurations.base import ConnectionConfig
+from aea.identity.base import Identity
 from aea.protocols.base import Message, Protocol
 from aea.protocols.dialogue.base import Dialogue
 from aea.registries.resources import Resources
@@ -155,22 +156,26 @@ def run(
     agents = []
     skills = {}
     handler_name = "httpingpong"
+
     for i in range(num_of_agents):
         agent_name = f"agent{i}"
+        identity = Identity(agent_name, address=agent_name)
         resources = Resources()
         connection = OEFLocalConnection(
             local_node,
             configuration=ConnectionConfig(
                 connection_id=OEFLocalConnection.connection_id,
             ),
-            identity=agent_name,
+            identity=identity,
             data_dir="tmp",
         )
         resources.add_connection(connection)
         agent = make_agent(
-            agent_name=agent_name, runtime_mode=runtime_mode, resources=resources
+            agent_name=agent_name,
+            runtime_mode=runtime_mode,
+            resources=resources,
+            identity=identity,
         )
-        connection._identity = agent.identity  # pylint: disable=protected-access
         skill = make_skill(agent, handlers={handler_name: HttpPingPongHandler})
         agent.resources.add_skill(skill)
         agents.append(agent)

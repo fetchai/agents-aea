@@ -74,10 +74,11 @@ def make_agent(
     agent_name: str = "my_agent",
     runtime_mode: str = "threaded",
     resources: Optional[Resources] = None,
+    identity: Optional[Identity] = None,
 ) -> AEA:
     """Make AEA instance."""
     wallet = Wallet({DEFAULT_LEDGER: None})
-    identity = Identity(agent_name, address=agent_name)
+    identity = identity or Identity(agent_name, address=agent_name)
     resources = resources or Resources()
     datadir = os.getcwd()
     agent_context = MagicMock()
