@@ -34,6 +34,8 @@ Description = BaseDescription
 class AgentsInfo:
     """This class represents an instance of AgentsInfo."""
 
+    __slots__ = ("_body",)
+
     def __init__(self, body: Dict[str, Dict[str, Any]]):
         """Initialise an instance of AgentsInfo."""
         self._body = body
