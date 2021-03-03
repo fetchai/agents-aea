@@ -20,7 +20,7 @@
 """This test module contains AEA cli tests for Libp2p tcp client connection."""
 import os
 
-from aea_crypto_fetchai import FetchAICrypto
+from aea_ledger_fetchai import FetchAICrypto
 
 from aea.helpers.base import CertRequest
 from aea.multiplexer import Multiplexer

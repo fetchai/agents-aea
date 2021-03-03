@@ -8,7 +8,7 @@ aea_version: '>=0.10.0, <0.11.0'
 fingerprint:
   README.md: QmUBEziYn29b61higYFNsSxtnKcSNq7CRFpsQ68WjmTCcN
   __init__.py: QmRmf3Q5F6nQMrTEt59suBNw6zfgTVQX68E7CAuKmCnhAM
-  contract.py: QmbZtYGdtGwx6CyFY7ZVP2eAyeyhuECLs4MTnDPurKv21s
+  contract.py: QmTYFF3zKuqCXds43CL9KKDvcqvUyd9LPt6WZ5jyYwMhdN
   contracts/FetchOracleTestClient.sol: QmWpUJ4aBrNreiyuXe6EgfSfE7T7hWz3xHDdT7fFye3WCG
 fingerprint_ignore_patterns:
 - build/*
@@ -16,5 +16,5 @@ class_name: FetchOracleClientContract
 contract_interface_paths:
   ethereum: build/FetchOracleTestClient.json
 dependencies:
-  aea-crypto-ethereum:
+  aea-ledger-ethereum:
     version: <0.2.0,>=0.1.0

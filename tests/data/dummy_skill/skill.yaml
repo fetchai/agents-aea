@@ -24,6 +24,7 @@ behaviours:
       behaviour_arg_1: 1
       behaviour_arg_2: '2'
     class_name: DummyBehaviour
+    file_path: path/to/module.py
 handlers:
   dummy:
     args:

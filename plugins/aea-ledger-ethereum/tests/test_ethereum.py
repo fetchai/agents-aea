@@ -25,7 +25,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
-from aea_crypto_ethereum import (
+from aea_ledger_ethereum import (
     AttributeDictTranslator,
     EthereumApi,
     EthereumCrypto,

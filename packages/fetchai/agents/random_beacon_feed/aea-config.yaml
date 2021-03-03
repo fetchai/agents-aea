@@ -26,5 +26,5 @@ logging_config:
   version: 1
 registry_path: ../packages
 dependencies:
-  aea-crypto-fetchai:
+  aea-ledger-fetchai:
     version: <0.2.0,>=0.1.0

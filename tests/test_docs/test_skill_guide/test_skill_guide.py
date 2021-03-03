@@ -25,7 +25,7 @@ from pathlib import Path
 from random import uniform
 
 import pytest
-from aea_crypto_fetchai import FetchAICrypto
+from aea_ledger_fetchai import FetchAICrypto
 
 from aea import AEA_DIR
 from aea.configurations.base import DEFAULT_VERSION

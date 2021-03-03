@@ -21,7 +21,7 @@
 
 import logging
 
-from aea_crypto_fetchai import FetchAICrypto
+from aea_ledger_fetchai import FetchAICrypto
 
 from aea.crypto.helpers import create_private_key, try_generate_testnet_wealth
 from aea.crypto.ledger_apis import LedgerApis

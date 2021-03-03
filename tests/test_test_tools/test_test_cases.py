@@ -23,7 +23,7 @@ import time
 from pathlib import Path
 
 import pytest
-from aea_crypto_fetchai import FetchAICrypto
+from aea_ledger_fetchai import FetchAICrypto
 
 import aea
 from aea.configurations.base import AgentConfig

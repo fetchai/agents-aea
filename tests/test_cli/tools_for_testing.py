@@ -20,8 +20,8 @@
 from typing import List
 from unittest.mock import Mock
 
-from aea_crypto_cosmos import CosmosCrypto
-from aea_crypto_ethereum import EthereumCrypto
+from aea_ledger_cosmos import CosmosCrypto
+from aea_ledger_ethereum import EthereumCrypto
 from click import ClickException
 from packaging.specifiers import SpecifierSet
 

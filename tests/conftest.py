@@ -49,9 +49,9 @@ from unittest.mock import MagicMock, patch
 import docker as docker
 import gym
 import pytest
-from aea_crypto_cosmos import CosmosCrypto
-from aea_crypto_ethereum import EthereumCrypto
-from aea_crypto_fetchai import FetchAICrypto
+from aea_ledger_cosmos import CosmosCrypto
+from aea_ledger_ethereum import EthereumCrypto
+from aea_ledger_fetchai import FetchAICrypto
 
 from aea import AEA_DIR
 from aea.aea import AEA
