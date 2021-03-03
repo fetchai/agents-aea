@@ -33,7 +33,7 @@ from tests.conftest import ROOT_DIR
 
 API_SPEC_PATH = str(
     Path(
-        ROOT_DIR, "packages", "fetchai", "skills", "coin_price", "coin_api_spec.yaml"
+        ROOT_DIR, "packages", "fetchai", "skills", "advanced_data_request", "api_spec.yaml"
     ).absolute()
 )
 
@@ -60,7 +60,7 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
         self.add_item("connection", "fetchai/http_client:0.17.0")
         self.add_item("connection", "fetchai/http_server:0.16.0")
         self.add_item("connection", "fetchai/prometheus:0.3.0")
-        self.add_item("skill", "fetchai/coin_price:0.5.0")
+        self.add_item("skill", "fetchai/advanced_data_request:0.5.0")
         self.set_config("agent.default_connection", "fetchai/http_server:0.16.0")
 
         default_routing = {
@@ -75,12 +75,22 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
         )
         self.set_config(
             "vendor.fetchai.connections.http_server.config.target_skill_id",
-            "fetchai/coin_price:0.5.0",
+            "fetchai/advanced_data_request:0.5.0",
         )
         self.set_config(
-            "vendor.fetchai.skills.coin_price.models.coin_price_model.args.use_http_server",
+            "vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.use_http_server",
             True,
             type_="bool",
+        )
+        self.set_config(
+            "vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.url",
+            "https://api.coingecko.com/api/v3/simple/price?ids=fetch-ai&vs_currencies=usd",
+            type_="str",
+        )
+        self.set_config(
+            "vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.outputs",
+            '[{"name": "price", "json_path": "[fetch-ai][usd]"}]',
+            type_="list",
         )
 
         diff = self.difference_to_fetched_agent(
@@ -98,17 +108,16 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
 
         time.sleep(6)  # we wait a bit longer than the tick rate of the behaviour
 
-        response = requests.get("http://127.0.0.1:8000/price")
+        response = requests.get("http://127.0.0.1:8000/data")
         assert response.status_code == 200, "Failed to get response code 200"
-        coin_price = response.content.decode("utf-8")
-        assert "value" in coin_price, "Response does not contain 'value'"
-        assert "decimals" in coin_price, "Response does not contain 'decimals'"
+        coin_price = response.json()
+        assert "price" in coin_price, "Response does not contain 'price'"
 
         response = requests.get("http://127.0.0.1:8000")
         assert response.status_code == 404
         assert response.content == b"", "Get request should not work without valid path"
 
-        response = requests.post("http://127.0.0.1:8000/price")
+        response = requests.post("http://127.0.0.1:8000/data")
         assert response.status_code == 404
         assert response.content == b"", "Post not allowed"
 

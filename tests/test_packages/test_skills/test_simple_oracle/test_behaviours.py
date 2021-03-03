@@ -198,7 +198,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         strategy.contract_address = DEFAULT_ADDRESS
         strategy.is_contract_deployed = True
         strategy.is_oracle_role_granted = True
-        self.simple_oracle_behaviour.context.shared_state["oracle_data"] = {
+        self.simple_oracle_behaviour.context.shared_state["observation"] = {
             "some_key": "some_value"
         }
         self.simple_oracle_behaviour.context.agent_addresses[

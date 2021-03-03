@@ -16,7 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This module contains the tests of the behaviour classes of the coin price skill."""
+"""This module contains the tests of the behaviour classes of the advanced data request skill."""
 
 from pathlib import Path
 from typing import cast
@@ -25,27 +25,30 @@ from aea.test_tools.test_skill import BaseSkillTestCase
 
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.prometheus.message import PrometheusMessage
-from packages.fetchai.skills.coin_price.behaviours import CoinPriceBehaviour
+from packages.fetchai.skills.advanced_data_request.behaviours import AdvancedDataRequestBehaviour
+from packages.fetchai.skills.advanced_data_request.models import AdvancedDataRequestModel
 
 from tests.conftest import ROOT_DIR
 
 
 class TestSkillBehaviour(BaseSkillTestCase):
-    """Test behaviours of coin price."""
+    """Test behaviours of advanced data request."""
 
-    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "coin_price")
+    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "advanced_data_request")
 
     @classmethod
     def setup(cls, **kwargs):
         """Setup the test class."""
         super().setup()
-        cls.coin_price_behaviour = cast(
-            CoinPriceBehaviour, cls._skill.skill_context.behaviours.coin_price_behaviour
+        cls.advanced_data_request_behaviour = cast(
+            AdvancedDataRequestBehaviour, cls._skill.skill_context.behaviours.advanced_data_request_behaviour
         )
+        cls.advanced_data_request_model = cast(AdvancedDataRequestModel, cls.advanced_data_request_behaviour.context.advanced_data_request_model)
+        cls.advanced_data_request_model.url = "some_url"
 
     def test_send_http_request_message(self):
-        """Test the send_http_request_message method of the coin_price behaviour."""
-        self.coin_price_behaviour.send_http_request_message("GET", "some_url")
+        """Test the send_http_request_message method of the advanced_data_request behaviour."""
+        self.advanced_data_request_behaviour.send_http_request_message()
         self.assert_quantity_in_outbox(1)
         msg = cast(HttpMessage, self.get_message_from_outbox())
         has_attributes, error_str = self.message_has_attributes(
@@ -57,8 +60,8 @@ class TestSkillBehaviour(BaseSkillTestCase):
         assert has_attributes, error_str
 
     def test_add_prometheus_metric(self):
-        """Test the send_http_request_message method of the coin_price behaviour."""
-        self.coin_price_behaviour.add_prometheus_metric(
+        """Test the add_prometheus_metric method of the advanced_data_request behaviour."""
+        self.advanced_data_request_behaviour.add_prometheus_metric(
             "some_metric", "Gauge", "some_description", {"label_key": "label_value"}
         )
         self.assert_quantity_in_outbox(1)
@@ -75,8 +78,8 @@ class TestSkillBehaviour(BaseSkillTestCase):
         assert has_attributes, error_str
 
     def test_update_prometheus_metric(self):
-        """Test the test_update_prometheus_metric method of the coin_price behaviour."""
-        self.coin_price_behaviour.update_prometheus_metric(
+        """Test the update_prometheus_metric method of the advanced_data_request behaviour."""
+        self.advanced_data_request_behaviour.update_prometheus_metric(
             "some_metric", "set", 0.0, {"label_key": "label_value"}
         )
         self.assert_quantity_in_outbox(1)
@@ -94,7 +97,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
 
     def test_setup(self):
         """Test that the setup method puts two messages (prometheus metrics) in the outbox by default."""
-        self.coin_price_behaviour.setup()
+        self.advanced_data_request_behaviour.setup()
         self.assert_quantity_in_outbox(2)
 
         msg = cast(PrometheusMessage, self.get_message_from_outbox())
@@ -118,26 +121,21 @@ class TestSkillBehaviour(BaseSkillTestCase):
         assert has_attributes, error_str
 
     def test_act(self):
-        """Test that the act method of the coin_price behaviour puts one message (http request) in the outbox."""
-        self.coin_price_behaviour.act()
+        """Test that the act method of the advanced_data_request behaviour puts one message (http request) in the outbox."""
+
+        self.advanced_data_request_behaviour.act()
         self.assert_quantity_in_outbox(1)
-
-        url = self.coin_price_behaviour.context.coin_price_model.url
-        coin_id = self.coin_price_behaviour.context.coin_price_model.coin_id
-        currency = self.coin_price_behaviour.context.coin_price_model.currency
-
-        query_url = url + f"simple/price?ids={coin_id}&vs_currencies={currency}"
 
         msg = cast(HttpMessage, self.get_message_from_outbox())
         has_attributes, error_str = self.message_has_attributes(
             actual_message=msg,
             message_type=HttpMessage,
             performative=HttpMessage.Performative.REQUEST,
-            url=query_url,
+            url=self.advanced_data_request_model.url,
         )
         assert has_attributes, error_str
 
     def test_teardown(self):
-        """Test that the teardown method of the coin_price behaviour leaves no messages in the outbox."""
-        assert self.coin_price_behaviour.teardown() is None
+        """Test that the teardown method of the advanced_data_request behaviour leaves no messages in the outbox."""
+        assert self.advanced_data_request_behaviour.teardown() is None
         self.assert_quantity_in_outbox(0)

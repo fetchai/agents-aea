@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""The tests module contains the tests of the packages/skills/coin_price dir."""
+"""The tests module contains the tests of the packages/skills/advanced_data_request dir."""
