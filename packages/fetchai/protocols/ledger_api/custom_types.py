@@ -43,6 +43,8 @@ TransactionReceipt = BaseTransactionReceipt
 class Kwargs:
     """This class represents an instance of Kwargs."""
 
+    __slots__ = ("_body",)
+
     def __init__(
         self, body: JSONLike,
     ):
