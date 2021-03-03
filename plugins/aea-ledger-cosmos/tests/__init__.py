@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Tests for the aea_crypto_fetchai package."""
+"""Tests for the aea_ledger_cosmos package."""

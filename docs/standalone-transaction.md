@@ -1,8 +1,8 @@
 In this guide, we will generate some wealth for the Fetch.ai testnet and create a standalone transaction. After the completion of the transaction, we get the transaction digest. With this we can search for the transaction on the <a href='https://explore-agent-land.fetch.ai/' target="_blank">block explorer</a>
 
-This guide requires the `aea-crypto-fetchai` plug-in installed in your Python environment:
+This guide requires the `aea-ledger-fetchai` plug-in installed in your Python environment:
 ```bash
-pip install aea-crypto-fetchai
+pip install aea-ledger-fetchai
 ```
 
 First, import the python and application specific libraries and set the static variables.
@@ -10,7 +10,7 @@ First, import the python and application specific libraries and set the static v
 ``` python
 import logging
 
-from aea_crypto_fetchai import FetchAICrypto
+from aea_ledger_fetchai import FetchAICrypto
 
 from aea.crypto.helpers import create_private_key, try_generate_testnet_wealth
 from aea.crypto.ledger_apis import LedgerApis
@@ -92,7 +92,7 @@ Finally, we create a transaction that sends the funds to the `wallet_2`
 ``` python
 import logging
 
-from aea_crypto_fetchai import FetchAICrypto
+from aea_ledger_fetchai import FetchAICrypto
 
 from aea.crypto.helpers import create_private_key, try_generate_testnet_wealth
 from aea.crypto.ledger_apis import LedgerApis

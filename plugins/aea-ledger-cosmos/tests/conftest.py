@@ -17,4 +17,19 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Tests for the aea_crypto_ethereum package."""
+"""Conftest module for Pytest."""
+import inspect
+import os
+
+from aea_ledger_cosmos import CosmosCrypto
+
+
+CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
+ROOT_DIR = os.path.join(CUR_PATH, "..")
+MAX_FLAKY_RERUNS = 3
+COSMOS = CosmosCrypto.identifier
+
+COSMOS_DEFAULT_ADDRESS = "INVALID_URL"
+COSMOS_DEFAULT_CURRENCY_DENOM = "INVALID_CURRENCY_DENOM"
+COSMOS_DEFAULT_CHAIN_ID = "INVALID_CHAIN_ID"
+COSMOS_TESTNET_CONFIG = {"address": COSMOS_DEFAULT_ADDRESS}

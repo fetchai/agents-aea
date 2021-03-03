@@ -14,20 +14,20 @@ The field will be made mandatory in the next release.
 Crypto modules have been extracted and released as independent plug-ins, released on PyPI.
 In particular:
 
-- Fetch.ai crypto classes have been released in the `aea-crypto-fetchai` package;
-- Ethereum crypto classes have been released in the `aea-crypto-ethereum` package;
-- Cosmos crypto classes have been released in the `aea-crypto-cosmos` package.
+- Fetch.ai crypto classes have been released in the `aea-ledger-fetchai` package;
+- Ethereum crypto classes have been released in the `aea-ledger-ethereum` package;
+- Cosmos crypto classes have been released in the `aea-ledger-cosmos` package.
 
 If an AEA project, or an AEA package, makes use of crypto functionalities, 
 it will be needed to add the above packages as PyPI dependencies with version
 specifiers `<0.2.0,>=0.1.0`, i.e.:
 ```yaml
 dependencies:
-  aea-crypto-cosmos:
+  aea-ledger-cosmos:
     version: <0.2.0,>=0.1.0
-  aea-crypto-ethereum:
+  aea-ledger-ethereum:
     version: <0.2.0,>=0.1.0
-  aea-crypto-fetchai:
+  aea-ledger-fetchai:
     version: <0.2.0,>=0.1.0
 ```
 The version specifier sets are important, as these plug-ins, at version `0.1.0`, 

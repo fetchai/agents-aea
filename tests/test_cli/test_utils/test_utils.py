@@ -25,7 +25,7 @@ from unittest import TestCase, mock
 from unittest.mock import MagicMock
 
 import pytest
-from aea_crypto_fetchai import FetchAICrypto
+from aea_ledger_fetchai import FetchAICrypto
 from click import BadParameter, ClickException, UsageError
 from jsonschema import ValidationError
 from yaml import YAMLError

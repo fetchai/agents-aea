@@ -24,9 +24,9 @@ from tempfile import TemporaryDirectory
 from unittest.mock import mock_open, patch
 
 import pytest
-from aea_crypto_cosmos import CosmosCrypto
-from aea_crypto_ethereum import EthereumCrypto
-from aea_crypto_fetchai import FetchAICrypto
+from aea_ledger_cosmos import CosmosCrypto
+from aea_ledger_ethereum import EthereumCrypto
+from aea_ledger_fetchai import FetchAICrypto
 
 from aea.crypto.helpers import (
     create_private_key,
@@ -88,7 +88,7 @@ class TestHelperFile:
         """Test generate wealth for ethereum."""
         address = "my_address"
         with caplog.at_level(
-            logging.DEBUG, logger="aea_crypto_ethereum._default_logger"
+            logging.DEBUG, logger="aea_ledger_ethereum._default_logger"
         ):
             try_generate_testnet_wealth(
                 identifier=EthereumCrypto.identifier, address=address
@@ -102,9 +102,9 @@ class TestHelperFile:
         """Test generate wealth for ethereum."""
         address = "my_address"
         result = ResponseMock(status_code=500)
-        with patch("aea_crypto_ethereum.requests.get", return_value=result):
+        with patch("aea_ledger_ethereum.requests.get", return_value=result):
             with caplog.at_level(
-                logging.DEBUG, logger="aea_crypto_ethereum._default_logger"
+                logging.DEBUG, logger="aea_ledger_ethereum._default_logger"
             ):
                 try_generate_testnet_wealth(
                     identifier=EthereumCrypto.identifier,
@@ -117,9 +117,9 @@ class TestHelperFile:
         """Test generate wealth for ethereum."""
         address = "my_address"
         result = ResponseMock(status_code=200)
-        with patch("aea_crypto_ethereum.requests.get", return_value=result):
+        with patch("aea_ledger_ethereum.requests.get", return_value=result):
             with caplog.at_level(
-                logging.DEBUG, logger="aea_crypto_ethereum._default_logger"
+                logging.DEBUG, logger="aea_ledger_ethereum._default_logger"
             ):
                 try_generate_testnet_wealth(
                     identifier=EthereumCrypto.identifier,
@@ -127,8 +127,8 @@ class TestHelperFile:
                     url="correct_url",
                 )
 
-    @patch("aea_crypto_ethereum.requests.post", return_value=ResponseMock())
-    @patch("aea_crypto_ethereum.json.loads", return_value={"error_message": ""})
+    @patch("aea_ledger_ethereum.requests.post", return_value=ResponseMock())
+    @patch("aea_ledger_ethereum.json.loads", return_value={"error_message": ""})
     def test_try_generate_testnet_wealth_error_resp_ethereum(self, *mocks):
         """Test try_generate_testnet_wealth error_resp."""
         try_generate_testnet_wealth(EthereumCrypto.identifier, "address")

@@ -25,8 +25,8 @@ from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
-from aea_crypto_cosmos import CosmosApi, CosmosCrypto, CosmosHelper
-from aea_crypto_cosmos.cosmos import _default_logger as cosmos_logger
+from aea_ledger_cosmos import CosmosApi, CosmosCrypto, CosmosHelper
+from aea_ledger_cosmos.cosmos import _default_logger as cosmos_logger
 
 from tests.conftest import COSMOS_TESTNET_CONFIG, ROOT_DIR
 
