@@ -20,9 +20,9 @@
 """This module contains tests for decision_maker."""
 
 import pytest
-from aea_crypto_cosmos import CosmosCrypto
-from aea_crypto_ethereum import EthereumCrypto
-from aea_crypto_fetchai import FetchAICrypto
+from aea_ledger_cosmos import CosmosCrypto
+from aea_ledger_ethereum import EthereumCrypto
+from aea_ledger_fetchai import FetchAICrypto
 
 from aea.configurations.base import PublicId
 from aea.crypto.registries import make_crypto, make_ledger_api

@@ -30,7 +30,7 @@ from aea.decision_maker.gop import GoalPursuitReadiness, OwnershipState, Prefere
 from aea.exceptions import AEAEnforceError
 from aea.helpers.transaction.base import Terms
 from aea.protocols.dialogue.base import DialogueLabel
-from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_ADDRESS
+from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_AGENT_ADDRESS
 
 from packages.fetchai.skills.tac_negotiation.dialogues import FipaDialogue
 from packages.fetchai.skills.tac_negotiation.transactions import Transactions
@@ -74,7 +74,9 @@ class TestTransactions(BaseSkillTestCase):
             fee_by_currency_id={"1": 1},
         )
         cls.dialogue_label = DialogueLabel(
-            ("", ""), COUNTERPARTY_ADDRESS, cls._skill.skill_context.agent_address,
+            ("", ""),
+            COUNTERPARTY_AGENT_ADDRESS,
+            cls._skill.skill_context.agent_address,
         )
         cls.proposal_id = 5
         cls.transaction_id = "some_transaction_id"

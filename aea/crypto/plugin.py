@@ -47,6 +47,8 @@ _from_group_to_register_callable = {
 class Plugin:
     """Class that implements an AEA plugin."""
 
+    __slots__ = ("_group", "_entry_point")
+
     def __init__(self, group: str, entry_point: EntryPoint):
         """
         Initialize the plugin.

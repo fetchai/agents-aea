@@ -34,7 +34,7 @@ from aea.helpers.transaction.base import (
     TransactionReceipt,
 )
 from aea.protocols.dialogue.base import DialogueMessage
-from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_ADDRESS
+from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_AGENT_ADDRESS
 
 from packages.fetchai.protocols.contract_api.custom_types import Kwargs, State
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
@@ -821,7 +821,7 @@ class TestSigningHandler(BaseSkillTestCase):
             self.prepare_skill_dialogue(
                 dialogues=self.register_dialogues,
                 messages=self.list_of_registration_messages[:1],
-                counterparty=COUNTERPARTY_ADDRESS,
+                counterparty=COUNTERPARTY_AGENT_ADDRESS,
                 is_agent_to_agent_messages=True,
             ),
         )
@@ -1235,7 +1235,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             actual_message=message,
             message_type=RegisterMessage,
             performative=RegisterMessage.Performative.SUCCESS,
-            to=COUNTERPARTY_ADDRESS,
+            to=COUNTERPARTY_AGENT_ADDRESS,
             sender=self.skill.skill_context.agent_address,
             info={"transaction_digest": last_outgoing_message.transaction_digest.body},
         )

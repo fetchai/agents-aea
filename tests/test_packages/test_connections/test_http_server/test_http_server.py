@@ -133,7 +133,7 @@ class TestHTTPServer:
         self.loop.run_until_complete(self.http_connection.connect())
         self.connection_address = str(HTTPServerConnection.connection_id)
         self._dialogues = HttpDialogues(self.target_skill_id)
-        self.original_timeout = self.http_connection.channel.RESPONSE_TIMEOUT
+        self.original_timeout = self.http_connection.channel.timeout_window
 
     @pytest.mark.asyncio
     async def test_http_connection_disconnect_channel(self):
@@ -216,7 +216,7 @@ class TestHTTPServer:
     @pytest.mark.asyncio
     async def test_bad_performative_get_timeout_error(self):
         """Test send get request w/ 200 response."""
-        self.http_connection.channel.RESPONSE_TIMEOUT = 3
+        self.http_connection.channel.timeout_window = 3
         request_task = self.loop.create_task(self.request("get", "/pets"))
         envelope = await asyncio.wait_for(self.http_connection.receive(), timeout=10)
         assert envelope
@@ -259,7 +259,7 @@ class TestHTTPServer:
     @pytest.mark.asyncio
     async def test_late_message_get_timeout_error(self):
         """Test send get request w/ 200 response."""
-        self.http_connection.channel.RESPONSE_TIMEOUT = 1
+        self.http_connection.channel.timeout_window = 1
         request_task = self.loop.create_task(self.request("get", "/pets"))
         envelope = await asyncio.wait_for(self.http_connection.receive(), timeout=10)
         assert envelope
@@ -353,8 +353,14 @@ class TestHTTPServer:
     async def test_get_408(self):
         """Test send post request w/ 404 response."""
         await self.http_connection.connect()
-        self.http_connection.channel.RESPONSE_TIMEOUT = 0.1
-        response = await self.request("get", "/pets")
+        self.http_connection.channel.timeout_window = 0.1
+        with patch.object(
+            self.http_connection.channel.logger, "warning"
+        ) as mock_logger:
+            response = await self.request("get", "/pets")
+            mock_logger.assert_any_call(
+                RegexComparator("Request timed out! Request=.*")
+            )
 
         assert (
             response.status == 408
@@ -365,7 +371,7 @@ class TestHTTPServer:
     @pytest.mark.asyncio
     async def test_post_408(self):
         """Test send post request w/ 404 response."""
-        self.http_connection.channel.RESPONSE_TIMEOUT = 0.1
+        self.http_connection.channel.timeout_window = 0.1
         response = await self.request("post", "/pets", data="somedata")
 
         assert (
@@ -445,7 +451,7 @@ class TestHTTPServer:
     def teardown(self):
         """Teardown the test case."""
         self.loop.run_until_complete(self.http_connection.disconnect())
-        self.http_connection.channel.RESPONSE_TIMEOUT = self.original_timeout
+        self.http_connection.channel.timeout_window = self.original_timeout
 
 
 def test_bad_api_spec():

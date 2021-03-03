@@ -20,7 +20,7 @@
 """This module contains tests for decision_maker."""
 
 import pytest
-from aea_crypto_ethereum import EthereumCrypto
+from aea_ledger_ethereum import EthereumCrypto
 
 from aea.decision_maker.gop import OwnershipState
 from aea.helpers.transaction.base import Terms

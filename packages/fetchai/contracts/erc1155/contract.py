@@ -23,9 +23,9 @@ import logging
 import random
 from typing import Dict, List, Optional, cast
 
-from aea_crypto_cosmos import CosmosApi
-from aea_crypto_ethereum import EthereumApi
-from aea_crypto_fetchai import FetchAIApi
+from aea_ledger_cosmos import CosmosApi
+from aea_ledger_ethereum import EthereumApi
+from aea_ledger_fetchai import FetchAIApi
 from vyper.utils import keccak256
 
 from aea.common import Address, JSONLike

@@ -32,7 +32,7 @@ from aea.helpers.search.models import (
     Query,
 )
 from aea.helpers.transaction.base import Terms
-from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_ADDRESS
+from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_AGENT_ADDRESS
 
 from packages.fetchai.skills.generic_seller.strategy import (
     AGENT_LOCATION_MODEL,
@@ -143,7 +143,7 @@ class TestGenericStrategy(BaseSkillTestCase):
         total_price = len(self.data_for_sale) * self.unit_price
         sale_quantity = len(self.data_for_sale)
         tx_nonce = LedgerApis.generate_tx_nonce(
-            identifier=self.ledger_id, seller=seller, client=COUNTERPARTY_ADDRESS,
+            identifier=self.ledger_id, seller=seller, client=COUNTERPARTY_AGENT_ADDRESS,
         )
         query = Query(
             [Constraint("seller_service", ConstraintType("==", "some_service"))]
@@ -163,7 +163,7 @@ class TestGenericStrategy(BaseSkillTestCase):
         expected_terms = Terms(
             ledger_id=self.ledger_id,
             sender_address=seller,
-            counterparty_address=COUNTERPARTY_ADDRESS,
+            counterparty_address=COUNTERPARTY_AGENT_ADDRESS,
             amount_by_currency_id={self.currency_id: total_price},
             quantities_by_good_id={self.service_id: -sale_quantity},
             is_sender_payable_tx_fee=False,
@@ -173,7 +173,7 @@ class TestGenericStrategy(BaseSkillTestCase):
 
         # operation
         proposal, terms, data = self.strategy.generate_proposal_terms_and_data(
-            query, COUNTERPARTY_ADDRESS
+            query, COUNTERPARTY_AGENT_ADDRESS
         )
 
         # after

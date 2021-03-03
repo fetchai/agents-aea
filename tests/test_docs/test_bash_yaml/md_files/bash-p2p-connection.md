@@ -1,5 +1,5 @@
 ``` bash
-pip install aea-crypto-fetchai
+pip install aea-ledger-fetchai
 ```
 ``` bash
 aea create my_genesis_aea

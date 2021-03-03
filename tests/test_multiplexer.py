@@ -544,8 +544,7 @@ async def test_inbox_outbox():
     msg = DefaultMessage(performative=DefaultMessage.Performative.BYTES, content=b"",)
     msg.to = "to"
     msg.sender = "sender"
-    context = EnvelopeContext(connection_id=connection_1.connection_id)
-    envelope = Envelope(to="to", sender="sender", message=msg, context=context,)
+    envelope = Envelope(to="to", sender="sender", message=msg,)
     try:
         await multiplexer.connect()
         inbox = InBox(multiplexer)
@@ -561,7 +560,7 @@ async def test_inbox_outbox():
         assert inbox.empty()
         assert outbox.empty()
 
-        outbox.put_message(msg, context=context)
+        outbox.put_message(msg)
         await inbox.async_wait()
         received = inbox.get_nowait()
         assert received == envelope
@@ -579,8 +578,7 @@ async def test_threaded_mode():
     msg = DefaultMessage(performative=DefaultMessage.Performative.BYTES, content=b"",)
     msg.to = "to"
     msg.sender = "sender"
-    context = EnvelopeContext(connection_id=connection_1.connection_id)
-    envelope = Envelope(to="to", sender="sender", message=msg, context=context,)
+    envelope = Envelope(to="to", sender="sender", message=msg)
     try:
         await multiplexer.connect()
         await asyncio.sleep(0.5)
@@ -597,7 +595,7 @@ async def test_threaded_mode():
         assert inbox.empty()
         assert outbox.empty()
 
-        outbox.put_message(msg, context=context)
+        outbox.put_message(msg)
         await inbox.async_wait()
         received = inbox.get_nowait()
         assert received == envelope
@@ -712,10 +710,9 @@ async def test_connection_id_in_to_field_detected(caplog):
         multiplexer.logger = logger
         envelope = Envelope(
             to=str(connection_1.connection_id),
-            sender="",
+            sender="some_author/some_skill:0.1.0",
             protocol_specification_id=DefaultMessage.protocol_specification_id,
             message=b"",
-            context=EnvelopeContext(),
         )
         try:
             await multiplexer.connect()

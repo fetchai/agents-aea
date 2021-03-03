@@ -19,9 +19,9 @@ Copy the packages directory into your local working directory:
 svn export https://github.com/fetchai/agents-aea.git/trunk/packages
 ```
 
-Also, install `aea-crypto-fetchai` plug-in:
+Also, install `aea-ledger-fetchai` plug-in:
 ```bash
-pip install aea-crypto-fetchai
+pip install aea-ledger-fetchai
 ```
 
 ## Demo instructions
@@ -85,7 +85,7 @@ import os
 import sys
 from typing import cast
 
-from aea_crypto_fetchai import FetchAICrypto
+from aea_ledger_fetchai import FetchAICrypto
 
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder

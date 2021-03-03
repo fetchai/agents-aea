@@ -26,7 +26,7 @@ from unittest.mock import patch
 import pytest
 
 from aea.protocols.dialogue.base import DialogueMessage
-from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_ADDRESS
+from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_AGENT_ADDRESS
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.state_update.message import StateUpdateMessage
@@ -325,7 +325,7 @@ class TestTacHandler(BaseSkillTestCase):
         cls.quantities_by_good_id = {"2": 10}
         cls.utility_params_by_good_id = {"2": 1.0}
         cls.fee_by_currency_id = {"1": 1}
-        cls.agent_addr_to_name = {COUNTERPARTY_ADDRESS: "some_name"}
+        cls.agent_addr_to_name = {COUNTERPARTY_AGENT_ADDRESS: "some_name"}
         cls.currency_id_to_name = {"1": "FETCH"}
         cls.good_id_to_name = {"2": "Good_1"}
         cls.version_id = "v1"
@@ -374,7 +374,7 @@ class TestTacHandler(BaseSkillTestCase):
             ),
         )
 
-        cls.game._expected_controller_addr = COUNTERPARTY_ADDRESS
+        cls.game._expected_controller_addr = COUNTERPARTY_AGENT_ADDRESS
 
     def test_setup(self):
         """Test the setup method of the tac handler."""
@@ -911,7 +911,7 @@ class TestTacHandler(BaseSkillTestCase):
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=tac_dialogue,
             performative=TacMessage.Performative.UNREGISTER,
-            sender=COUNTERPARTY_ADDRESS,
+            sender=COUNTERPARTY_AGENT_ADDRESS,
         )
 
         # operation

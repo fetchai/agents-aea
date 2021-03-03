@@ -30,12 +30,12 @@ jobs:
         run: |
           # these two files should not be different;
           # we vendorize main "cosmos.py" module in fetchai crypto plugin package
-          diff plugins/aea-crypto-cosmos/aea_crypto_cosmos/cosmos.py plugins/aea-crypto-fetchai/aea_crypto_fetchai/_cosmos.py
+          diff plugins/aea-ledger-cosmos/aea_ledger_cosmos/cosmos.py plugins/aea-ledger-fetchai/aea_ledger_fetchai/_cosmos.py
 
           # check diff between plugins' LICENSE and main LICENSE
-          diff LICENSE plugins/aea-crypto-cosmos/LICENSE
-          diff LICENSE plugins/aea-crypto-ethereum/LICENSE
-          diff LICENSE plugins/aea-crypto-fetchai/LICENSE
+          diff LICENSE plugins/aea-ledger-cosmos/LICENSE
+          diff LICENSE plugins/aea-ledger-ethereum/LICENSE
+          diff LICENSE plugins/aea-ledger-fetchai/LICENSE
       - name: Check go code consistency
         run: |
           # check diff between go code in libs and packages

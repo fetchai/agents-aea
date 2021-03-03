@@ -42,6 +42,8 @@ _default_logger = logging.getLogger(__name__)
 class Component(ABC, WithLogger):
     """Abstract class for an agent component."""
 
+    __slots__ = ("_configuration", "_directory", "_is_vendor")
+
     def __init__(
         self,
         configuration: Optional[ComponentConfiguration] = None,

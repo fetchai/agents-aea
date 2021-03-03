@@ -28,6 +28,15 @@ from aea.helpers.base import CertRequest
 class AgentRecord:
     """Agent Proof-of-Representation to representative."""
 
+    __slots__ = (
+        "_address",
+        "_representative_public_key",
+        "_message",
+        "_signature",
+        "_ledger_id",
+        "_public_key",
+    )
+
     def __init__(
         self,
         address: str,

@@ -25,8 +25,8 @@ from unittest import TestCase, mock
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
-from aea_crypto_ethereum import EthereumCrypto
-from aea_crypto_fetchai import FetchAICrypto
+from aea_ledger_ethereum import EthereumCrypto
+from aea_ledger_fetchai import FetchAICrypto
 
 import aea
 from aea.aea import AEA
@@ -184,6 +184,13 @@ class BaseTestSkillContext:
     def test_namespace(self):
         """Test the 'namespace' property getter."""
         assert isinstance(self.skill_context.namespace, SimpleNamespace)
+
+    def test_send_to_skill(self):
+        """Test the send_to_skill method."""
+        with unittest.mock.patch.object(
+            self.my_aea.context, "_send_to_skill", return_value=None
+        ):
+            self.skill_context.send_to_skill("envelope", "context")
 
     @classmethod
     def teardown_class(cls):

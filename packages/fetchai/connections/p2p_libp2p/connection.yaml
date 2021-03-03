@@ -11,7 +11,7 @@ fingerprint:
   README.md: QmdndN3dGED4R1sRGZQDHexumriqZeryreMDf64vrCTXvj
   __init__.py: QmYQuLNyQ8WTjgRYAoKAzoJEb7ocKXvM2hTyK4hsGch5D6
   check_dependencies.py: QmP14nkQ8senwzdPdrZJLsA6EQ7zaKKEaLGDELhT42gp1P
-  connection.py: QmQUZHbE8D8UMByXK4ZMTPaziweEPzA2wwcqZLGfNr6L2g
+  connection.py: QmfUTr6kKcFXtJiLnnWq3yF9QqtWauuRArKAZV3noLGgMi
   libp2p_node/aea/api.go: QmWNxQQyiaNer92gczQv81efwZYmJMuXCsQWkSt5rdDg5P
   libp2p_node/aea/envelope.pb.go: QmRfUNGpCeVJfsW3H1MzCN4pwDWgumfyWufVFp6xvUjjug
   libp2p_node/aea/envelope.proto: QmVuvesmfgzj5aKnbFoCocoGEv3T9MR7u6KWn7CT5yfjGi
@@ -48,6 +48,7 @@ config:
   ledger_id: fetchai
   local_uri: 127.0.0.1:9000
   log_file: libp2p_node.log
+  max_node_restarts: 5
   public_uri: 127.0.0.1:9000
 cert_requests:
 - identifier: acn
