@@ -185,6 +185,13 @@ class BaseTestSkillContext:
         """Test the 'namespace' property getter."""
         assert isinstance(self.skill_context.namespace, SimpleNamespace)
 
+    def test_send_to_skill(self):
+        """Test the send_to_skill method."""
+        with unittest.mock.patch.object(
+            self.my_aea.context, "_send_to_skill", return_value=None
+        ):
+            self.skill_context.send_to_skill("envelope", "context")
+
     @classmethod
     def teardown_class(cls):
         """Test teardown."""

@@ -62,7 +62,8 @@ def make_multiplexer_and_dialogues() -> Tuple[
     """Return multplexer, dialogues and crypto instances."""
     crypto = make_crypto(DEFAULT_LEDGER)
     identity = Identity("", address=crypto.address)
-    oef_search_dialogues = OefSearchDialogues(crypto.address)
+    skill_id = "some/skill:0.1.0"
+    oef_search_dialogues = OefSearchDialogues(skill_id)
 
     # create the connection and multiplexer objects
     configuration = ConnectionConfig(
@@ -338,7 +339,7 @@ class TestRealNetwork:
                 service_description=service_description,
             )
             envelope = Envelope(
-                to=message.to, sender=agent.crypto.address, message=message,
+                to=message.to, sender="some/skill:0.1.0", message=message,
             )
             logger.info("Pinging")
             agent.multiplexer.put(envelope)

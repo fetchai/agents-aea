@@ -34,6 +34,26 @@ from aea.skills.tasks import TaskManager
 class AgentContext:
     """Provide read access to relevant objects of the agent for the skills."""
 
+    __slots__ = (
+        "_shared_state",
+        "_identity",
+        "_connection_status",
+        "_outbox",
+        "_decision_maker_message_queue",
+        "_decision_maker_handler_context",
+        "_task_manager",
+        "_search_service_address",
+        "_decision_maker_address",
+        "_default_ledger_id",
+        "_currency_denominations",
+        "_default_connection",
+        "_default_routing",
+        "_storage_callable",
+        "_data_dir",
+        "_namespace",
+        "_send_to_skill",
+    )
+
     def __init__(
         self,
         identity: Identity,

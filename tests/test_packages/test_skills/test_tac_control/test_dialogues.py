@@ -21,7 +21,7 @@
 from pathlib import Path
 from typing import cast
 
-from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_ADDRESS
+from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_AGENT_ADDRESS
 
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
@@ -58,7 +58,7 @@ class TestTacDialogues(BaseSkillTestCase):
     def test_default_dialogues(self):
         """Test the DefaultDialogues class."""
         _, dialogue = self.default_dialogues.create(
-            counterparty=COUNTERPARTY_ADDRESS,
+            counterparty=COUNTERPARTY_AGENT_ADDRESS,
             performative=DefaultMessage.Performative.BYTES,
             content=b"some_content",
         )
@@ -68,17 +68,17 @@ class TestTacDialogues(BaseSkillTestCase):
     def test_oef_search_dialogues(self):
         """Test the OefSearchDialogues class."""
         _, dialogue = self.oef_search_dialogues.create(
-            counterparty=COUNTERPARTY_ADDRESS,
+            counterparty=COUNTERPARTY_AGENT_ADDRESS,
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             query="some_query",
         )
         assert dialogue.role == OefSearchDialogue.Role.AGENT
-        assert dialogue.self_address == self.skill.skill_context.agent_address
+        assert dialogue.self_address == str(self.skill.skill_context.skill_id)
 
     def test_tac_dialogues(self):
         """Test the TacDialogues class."""
         _, dialogue = self.tac_dialogues.create(
-            counterparty=COUNTERPARTY_ADDRESS,
+            counterparty=COUNTERPARTY_AGENT_ADDRESS,
             performative=TacMessage.Performative.REGISTER,
             agent_name="some_agent_name",
         )

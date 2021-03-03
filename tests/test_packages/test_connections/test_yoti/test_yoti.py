@@ -36,6 +36,9 @@ from packages.fetchai.protocols.yoti.dialogues import YotiDialogues as BaseYotiD
 from packages.fetchai.protocols.yoti.message import YotiMessage
 
 
+SKILL_ID = "some/skill:0.1.0"
+
+
 class FakeYotiClientOk:
     """Test yoti client."""
 
@@ -91,7 +94,7 @@ class YotiDialogues(BaseYotiDialogues):
 
         BaseYotiDialogues.__init__(
             self,
-            self_address="agent",
+            self_address=SKILL_ID,
             role_from_first_message=role_from_first_message,
             **kwargs,
         )
@@ -120,7 +123,7 @@ async def test_yoti_profile_ok():
             token=str(uuid4()),
             dotted_path="",
         )
-        envelope = Envelope(to=str(con.connection_id), sender="agent", message=message)
+        envelope = Envelope(to=str(con.connection_id), sender=SKILL_ID, message=message)
         await con.send(envelope)
         resp_envelope = await asyncio.wait_for(con.receive(), timeout=1)
         assert (
@@ -135,7 +138,7 @@ async def test_yoti_profile_ok():
             dotted_path="a",
             args=("1",),
         )
-        envelope = Envelope(to=str(con.connection_id), sender="agent", message=message)
+        envelope = Envelope(to=str(con.connection_id), sender=SKILL_ID, message=message)
         await con.send(envelope)
         resp_envelope = await asyncio.wait_for(con.receive(), timeout=1)
         assert (
@@ -165,7 +168,7 @@ async def test_yoti_profile_error_on_handle():
             token=str(uuid4()),
             dotted_path="",
         )
-        envelope = Envelope(to=str(con.connection_id), sender="agent", message=message)
+        envelope = Envelope(to=str(con.connection_id), sender=SKILL_ID, message=message)
         await con.send(envelope)
         resp_envelope = await asyncio.wait_for(con.receive(), timeout=1)
         assert (
@@ -204,7 +207,7 @@ class TestMisc:
             args=tuple(),
         )
         self.envelope = Envelope(
-            to=str(self.con.connection_id), sender="agent", message=self.message
+            to=str(self.con.connection_id), sender=SKILL_ID, message=self.message
         )
 
     def test_yoti_no_response_from_handler(self):

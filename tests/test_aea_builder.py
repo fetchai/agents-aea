@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains tests for aea/aea_builder.py."""
 import os
 import re
@@ -48,6 +47,7 @@ from aea.configurations.constants import (
     DEFAULT_PRIVATE_KEY_FILE,
     DOTTED_PATH_MODULE_ELEMENT_SEPARATOR,
 )
+from aea.configurations.data_types import PublicId
 from aea.configurations.loader import load_component_configuration
 from aea.contracts.base import Contract
 from aea.exceptions import AEAEnforceError, AEAException
@@ -437,9 +437,9 @@ def test_process_connection_ids_bad_default_connection():
         ValueError,
         match=r"Default connection not a dependency. Please add it and retry.",
     ):
-        builder.set_default_connection(
-            ConnectionConfig("conn", "author", "0.1.0").public_id
-        )
+        builder._default_connection = ConnectionConfig(
+            "conn", "author", "0.1.0"
+        ).public_id
         builder._process_connection_ids([connection.public_id])
 
 
@@ -471,6 +471,7 @@ def test_set_from_config_default():
     builder = AEABuilder()
     agent_configuration = Mock()
     agent_configuration.default_connection = "test/test:0.1.0"
+    agent_configuration.default_routing = {}
     agent_configuration.decision_maker_handler = {}
     agent_configuration.error_handler = {}
     agent_configuration.skill_exception_policy = ExceptionPolicyEnum.just_log
@@ -483,7 +484,8 @@ def test_set_from_config_default():
         agent_configuration.connections
     ) = agent_configuration.contracts = agent_configuration.skills = []
 
-    builder.set_from_configuration(agent_configuration, aea_project_path="/anydir")
+    with patch.object(builder, "set_default_connection"):
+        builder.set_from_configuration(agent_configuration, aea_project_path="/anydir")
     assert builder._decision_maker_handler_class is None
     assert builder._decision_maker_handler_dotted_path is None
     assert builder._decision_maker_handler_file_path is None
@@ -497,6 +499,7 @@ def test_set_from_config_custom():
     builder = AEABuilder()
     agent_configuration = Mock()
     agent_configuration.default_connection = "test/test:0.1.0"
+    agent_configuration.default_routing = {}
     agent_configuration.decision_maker_handler = {
         "dotted_path": dm_dotted_path,
         "file_path": dm_file_path,
@@ -515,18 +518,19 @@ def test_set_from_config_custom():
         agent_configuration.connections
     ) = agent_configuration.contracts = agent_configuration.skills = []
 
-    builder.set_from_configuration(agent_configuration, aea_project_path="/anydir")
-    assert builder._decision_maker_handler_class is None
-    assert builder._decision_maker_handler_dotted_path == dm_dotted_path
-    assert builder._decision_maker_handler_file_path == dm_file_path
-    assert builder._load_decision_maker_handler_class() is not None
-    builder.reset(is_full_reset=True)
-    agent_configuration.decision_maker_handler = {
-        "dotted_path": dm_dotted_path,
-        "file_path": None,
-    }
-    builder.set_from_configuration(agent_configuration, aea_project_path="/anydir")
-    assert builder._load_decision_maker_handler_class() is not None
+    with patch.object(builder, "set_default_connection"):
+        builder.set_from_configuration(agent_configuration, aea_project_path="/anydir")
+        assert builder._decision_maker_handler_class is None
+        assert builder._decision_maker_handler_dotted_path == dm_dotted_path
+        assert builder._decision_maker_handler_file_path == dm_file_path
+        assert builder._load_decision_maker_handler_class() is not None
+        builder.reset(is_full_reset=True)
+        agent_configuration.decision_maker_handler = {
+            "dotted_path": dm_dotted_path,
+            "file_path": None,
+        }
+        builder.set_from_configuration(agent_configuration, aea_project_path="/anydir")
+        assert builder._load_decision_maker_handler_class() is not None
 
 
 def test_load_abstract_component():
@@ -864,3 +868,41 @@ class TestBuildEntrypoint(AEATestCaseEmpty):
         with cd(self._get_cwd()), pytest.raises(AEAException, match=match):
             self.script_path.write_text("")
             self.builder.call_all_build_entrypoints()
+
+
+def test_set_default_connection_and_routing():
+    """Test checks on default connection and routing set."""
+    builder = AEABuilder()
+    builder._package_dependency_manager = Mock()
+    good_connection = ComponentId(
+        "connection", PublicId.from_str("good/connection:0.1.0")
+    )
+    bad_connection = ComponentId(
+        "connection", PublicId.from_str("bad/connection:0.1.0")
+    )
+    good_protocol = ComponentId("protocol", PublicId.from_str("good/protocol:0.1.0"))
+    bad_protocol = ComponentId("protocol", PublicId.from_str("bad/protocol:0.1.0"))
+
+    builder._package_dependency_manager.connections = [good_connection]
+    builder._package_dependency_manager.protocols = [good_protocol]
+
+    builder.set_default_connection(public_id=good_connection.public_id)
+    with pytest.raises(
+        ValueError,
+        match="Connection bad/connection:0.1.0 specified as `default_connection` is not a project dependency!",
+    ):
+        builder.set_default_connection(public_id=bad_connection.public_id)
+
+    builder.set_default_routing({good_protocol.public_id: good_connection.public_id})
+
+    with pytest.raises(
+        ValueError,
+        match="Connection bad/connection:0.1.0 specified in `default_routing` is not a project dependency!",
+    ):
+        builder.set_default_routing({good_protocol.public_id: bad_connection.public_id})
+
+    with pytest.raises(
+        ValueError,
+        match="Protocol bad/protocol:0.1.0 specified in `default_routing` is not a project dependency!",
+    ):
+        builder.set_default_routing({bad_protocol.public_id: good_connection.public_id})
