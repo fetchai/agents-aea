@@ -10,7 +10,7 @@ fingerprint:
   behaviours.py: QmWKg1GfJpuJSoCkEKW1zUskkNo4Rsoan1AD2cXpe2E93C
   dummy.py: QmeV6FBPAkmQC49gATSmU1aq8S1SKPv7cm2zSH8cnuqoLT
   dummy_subpackage/__init__.py: QmfDrbsUewXFcF3afdhCnzsZYrzDTUbQH69MHPnEpzp5qP
-  dummy_subpackage/foo.py: QmYJvc2VGES86RDhgd4Rp6vKgL9QvvozKRDpBYLx7bzXQS
+  dummy_subpackage/foo.py: Qmf7qb7yzJBQdXFBKjU3Cp61uuawcoEM6ZSgKDz73w9n2A
   handlers.py: QmYchfGvDXD5CxDHt6kChNsNbRxTcqViQTn65R7p8VJ4fu
   tasks.py: Qmegg4QsYSqSZN3q2zuRiBAToQ2LEiWrAPtUo7rCMrxjGJ
 fingerprint_ignore_patterns: []
@@ -24,7 +24,12 @@ behaviours:
       behaviour_arg_1: 1
       behaviour_arg_2: '2'
     class_name: DummyBehaviour
-    file_path: path/to/module.py
+  dummy_behaviour_same_classname:
+    args:
+      behaviour_arg_1: 1
+      behaviour_arg_2: '2'
+    class_name: DummyBehaviour
+    file_path: dummy_subpackage/foo.py
 handlers:
   dummy:
     args:

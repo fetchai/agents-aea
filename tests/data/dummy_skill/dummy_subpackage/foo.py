@@ -18,8 +18,32 @@
 # ------------------------------------------------------------------------------
 
 """This module is in a skill sub-package (for testing purposes)."""
+from aea.skills.base import Behaviour
 
 
 def bar():
     """A bar function."""
     return 42
+
+
+class DummyBehaviour(Behaviour):
+    """Dummy behaviour."""
+
+    def __init__(self, **kwargs):
+        """Initialize the echo behaviour."""
+        super().__init__(**kwargs)
+        self.kwargs = kwargs
+
+    def setup(self) -> None:
+        """
+        Implement the setup.
+
+        :return: None
+        """
+        pass
+
+    def act(self) -> None:
+        """Act according to the behaviour."""
+
+    def teardown(self) -> None:
+        """Teardown the behaviour."""

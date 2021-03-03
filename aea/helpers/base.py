@@ -924,25 +924,3 @@ def prepend_if_not_absolute(path: PathLike, prefix: PathLike) -> PathLike:
     :return: the same path if absolute, else the prepended path.
     """
     return path if Path(path).is_absolute() else Path(prefix) / path
-
-
-def defaultdict_recursive(nb_nested_dicts: int) -> defaultdict:
-    """Instantiate a defaultdict with nested dictionaries."""
-    enforce(
-        nb_nested_dicts >= 1, "Number of nested dictionaries must be greater than one."
-    )
-    result = dict
-    for _ in range(nb_nested_dicts):
-        result = defaultdict(lambda: result)
-    return result
-
-
-def defaultdict_to_dict_recursive(obj: Dict[Any, Any]):
-    """Transform 'defaultdict' to native dictionary, recursively."""
-    result = {}
-    for key, value in obj.items():
-        if isinstance(value, (dict, defaultdict)):
-            result[key] = defaultdict_to_dict_recursive(value)
-        else:
-            result[key] = value
-    return result
