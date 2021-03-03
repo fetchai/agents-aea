@@ -25,8 +25,8 @@ import tempfile
 from unittest.mock import Mock
 
 import pytest
-from aea_crypto_ethereum import EthereumCrypto
-from aea_crypto_fetchai import FetchAICrypto
+from aea_ledger_ethereum import EthereumCrypto
+from aea_ledger_fetchai import FetchAICrypto
 
 from aea.crypto.registries import make_crypto
 from aea.mail.base import Envelope
@@ -123,14 +123,14 @@ class TestP2PLibp2pConnectionEchoEnvelope:
         cls.log_files = []
         cls.multiplexers = []
 
-        aea_crypto_fetchai = make_crypto(FetchAICrypto.identifier)
-        aea_crypto_ethereum = make_crypto(EthereumCrypto.identifier)
+        aea_ledger_fetchai = make_crypto(FetchAICrypto.identifier)
+        aea_ledger_ethereum = make_crypto(EthereumCrypto.identifier)
 
         try:
             temp_dir_1 = os.path.join(cls.t, "temp_dir_1")
             os.mkdir(temp_dir_1)
             cls.connection1 = _make_libp2p_connection(
-                data_dir=temp_dir_1, agent_key=aea_crypto_fetchai, port=DEFAULT_PORT + 1
+                data_dir=temp_dir_1, agent_key=aea_ledger_fetchai, port=DEFAULT_PORT + 1
             )
             cls.multiplexer1 = Multiplexer(
                 [cls.connection1], protocols=[MockDefaultMessageProtocol]
@@ -147,7 +147,7 @@ class TestP2PLibp2pConnectionEchoEnvelope:
                 data_dir=temp_dir_2,
                 port=DEFAULT_PORT + 2,
                 entry_peers=[genesis_peer],
-                agent_key=aea_crypto_ethereum,
+                agent_key=aea_ledger_ethereum,
             )
             cls.multiplexer2 = Multiplexer(
                 [cls.connection2], protocols=[MockDefaultMessageProtocol]

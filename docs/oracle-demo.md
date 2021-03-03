@@ -40,8 +40,8 @@ aea add skill fetchai/coin_price:0.5.0
 aea add skill fetchai/simple_oracle:0.5.0
 aea config set --type dict agent.dependencies \
 '{
-  "aea-crypto-fetchai": {"version": "<0.2.0,>=0.1.0"},
-  "aea-crypto-ethereum": {"version": "<0.2.0,>=0.1.0"}
+  "aea-ledger-fetchai": {"version": "<0.2.0,>=0.1.0"},
+  "aea-ledger-ethereum": {"version": "<0.2.0,>=0.1.0"}
 }'
 aea config set agent.default_connection fetchai/p2p_libp2p:0.16.0
 aea install
@@ -108,8 +108,8 @@ aea add connection fetchai/ledger:0.13.0
 aea add skill fetchai/simple_oracle_client:0.4.0
 aea config set --type dict agent.dependencies \
 '{
-  "aea-crypto-fetchai": {"version": "<0.2.0,>=0.1.0"},
-  "aea-crypto-ethereum": {"version": "<0.2.0,>=0.1.0"}
+  "aea-ledger-fetchai": {"version": "<0.2.0,>=0.1.0"},
+  "aea-ledger-ethereum": {"version": "<0.2.0,>=0.1.0"}
 }'
 aea config set agent.default_connection fetchai/ledger:0.13.0
 aea install

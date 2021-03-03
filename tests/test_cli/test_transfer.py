@@ -23,8 +23,8 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-from aea_crypto_cosmos import CosmosCrypto
-from aea_crypto_fetchai import FetchAICrypto
+from aea_ledger_cosmos import CosmosCrypto
+from aea_ledger_fetchai import FetchAICrypto
 from click.exceptions import ClickException
 
 from aea.cli.transfer import wait_tx_settled

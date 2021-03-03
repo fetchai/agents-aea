@@ -20,7 +20,7 @@
 import os
 from unittest.mock import Mock
 
-from aea_crypto_fetchai import FetchAICrypto
+from aea_ledger_fetchai import FetchAICrypto
 
 from aea.context.base import AgentContext
 from aea.identity.base import Identity

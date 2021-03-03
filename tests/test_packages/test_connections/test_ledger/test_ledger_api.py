@@ -25,8 +25,8 @@ from typing import cast
 from unittest.mock import Mock, patch
 
 import pytest
-from aea_crypto_ethereum import EthereumCrypto
-from aea_crypto_fetchai import FetchAICrypto
+from aea_ledger_ethereum import EthereumCrypto
+from aea_ledger_fetchai import FetchAICrypto
 
 from aea.common import Address
 from aea.configurations.base import PublicId

@@ -18,23 +18,23 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Setup script for "aea_crypto_cosmos" package."""
+"""Setup script for "aea_ledger_cosmos" package."""
 
 from setuptools import find_packages, setup
 
 
 setup(
-    name="aea_crypto_cosmos",
+    name="aea_ledger_cosmos",
     version="0.1.0",
     author="Fetch.AI Limited",
     license="Apache-2.0",
     description="Python package wrapping the public and private key cryptography and ledger api of Cosmos.",
-    packages=find_packages(include=["aea_crypto_cosmos*"]),
+    packages=find_packages(include=["aea_ledger_cosmos*"]),
     install_requires=["aea>=0.10.0,<0.11.0", "ecdsa>=0.15", "bech32==1.2.0"],
     entry_points={
-        "aea.cryptos": ["cosmos = aea_crypto_cosmos:CosmosCrypto"],
-        "aea.ledger_apis": ["cosmos = aea_crypto_cosmos:CosmosApi"],
-        "aea.faucet_apis": ["cosmos = aea_crypto_cosmos:CosmosFaucetApi"],
+        "aea.cryptos": ["cosmos = aea_ledger_cosmos:CosmosCrypto"],
+        "aea.ledger_apis": ["cosmos = aea_ledger_cosmos:CosmosApi"],
+        "aea.faucet_apis": ["cosmos = aea_ledger_cosmos:CosmosFaucetApi"],
     },
     classifiers=[
         "Environment :: Console",

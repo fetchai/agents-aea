@@ -20,7 +20,7 @@
 
 from typing import Any
 
-from aea_crypto_fetchai._cosmos import (
+from aea_ledger_fetchai._cosmos import (
     CosmosCrypto,
     CosmosFaucetApi,
     CosmosHelper,
