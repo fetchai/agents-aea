@@ -43,12 +43,31 @@ var (
 		"cosmos":   CosmosAddressFromPublicKey,
 		"ethereum": EthereumAddressFromPublicKey,
 	}
+	publicKeyFromPrivateKeyTable = map[string]func(string) (string, error){
+		"fetchai": FetchAIPublicKeyFromPrivateKey,
+	}
 	verifyLedgerSignatureTable = map[string]func([]byte, string, string) (bool, error){
 		"fetchai":  VerifyFetchAISignatureBTC,
 		"cosmos":   VerifyFetchAISignatureBTC,
 		"ethereum": VerifyEthereumSignatureETH,
 	}
 )
+
+// AddressFromPublicKey get wallet address from public key associated with ledgerId
+func AddressFromPublicKey(ledgerId string, publicKey string) (string, error) {
+	if addressFromPublicKey, found := addressFromPublicKeyTable[ledgerId]; found {
+		return addressFromPublicKey(publicKey)
+	}
+	return "", errors.New("Unsupported ledger " + ledgerId + "for AddressFromPublicKey")
+}
+
+// PublicKeyFromPrivateKey get public key from private key associated with ledgerId
+func PublicKeyFromPrivateKey(ledgerId string, privateKey string) (string, error) {
+	if publicKeyFromPrivateKey, found := publicKeyFromPrivateKeyTable[ledgerId]; found {
+		return publicKeyFromPrivateKey(privateKey)
+	}
+	return "", errors.New("Unsupported ledger " + ledgerId + "for PublicKeyFromPrivateKey")
+}
 
 // PubKeyFromFetchAIPublicKey create libp2p public key from fetchai hex encoded secp256k1 key
 func PubKeyFromFetchAIPublicKey(publicKey string) (crypto.PubKey, error) {
@@ -268,15 +287,6 @@ func KeyPairFromFetchAIKey(key string) (crypto.PrivKey, crypto.PubKey, error) {
 	return prvKey, pubKey, nil
 }
 
-// AgentAddressFromPublicKey get wallet address from public key associated with ledgerId
-// format from: https://github.com/fetchai/agents-aea/blob/main/aea/crypto/cosmos.py#L120
-func AgentAddressFromPublicKey(ledgerId string, publicKey string) (string, error) {
-	if addressFromPublicKey, found := addressFromPublicKeyTable[ledgerId]; found {
-		return addressFromPublicKey(publicKey)
-	}
-	return "", errors.New("Unsupported ledger " + ledgerId)
-}
-
 // FetchAIAddressFromPublicKey get wallet address from hex encoded secp256k1 public key
 func FetchAIAddressFromPublicKey(publicKey string) (string, error) {
 	return cosmosAddressFromPublicKeyWithPrefix("fetch", publicKey)
@@ -377,7 +387,7 @@ func BTCPubKeyFromUncompressedHex(publicKey string) (*btcec.PublicKey, error) {
 	return btcec.ParsePubKey(pubBytes, btcec.S256())
 }
 
-func FetchAIPublicKeyFromFetchAIPrivateKey(privateKey string) (string, error) {
+func FetchAIPublicKeyFromPrivateKey(privateKey string) (string, error) {
 	pkBytes, err := hex.DecodeString(privateKey)
 	if err != nil {
 		return "", err

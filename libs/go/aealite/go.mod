@@ -1,4 +1,4 @@
-module aealite
+module github.com/fetchai/agents-aea/libs/go/aealite
 
 go 1.14
 

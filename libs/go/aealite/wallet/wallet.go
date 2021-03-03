@@ -54,24 +54,26 @@ func (wallet *Wallet) InitFromEnv() error {
 		return err
 	}
 	wallet.LedgerId = os.Getenv("AEA_LEDGER_ID")
-	// todo: make useful with all three supported ledgers
+	if wallet.LedgerId == "" {
+		log.Fatal("No AEA_LEDGER_ID provided in env file.")
+	}
 	wallet.Address = os.Getenv("AEA_ADDRESS")
 	wallet.PublicKey = os.Getenv("AEA_PUBLIC_KEY")
 	wallet.PrivateKey = os.Getenv("AEA_PRIVATE_KEY")
 	if wallet.PrivateKey == "" {
-		log.Fatal("No private key provided")
+		log.Fatal("No AEA_PRIVATE_KEY provided in env file.")
 	}
-	public_key, err := FetchAIPublicKeyFromFetchAIPrivateKey(wallet.PrivateKey)
+	public_key, err := PublicKeyFromPrivateKey(wallet.LedgerId, wallet.PrivateKey)
 	if err != nil {
-		log.Fatal("Could not derive public key")
+		log.Fatal("Could not derive public key.")
 	}
 	if (wallet.PublicKey != "") && (public_key != wallet.PublicKey) {
 		log.Fatal("Derived and provided public_key don't match.")
 	}
 	wallet.PublicKey = public_key
-	address, err := FetchAIAddressFromPublicKey(wallet.PublicKey)
+	address, err := AddressFromPublicKey(wallet.LedgerId, wallet.PublicKey)
 	if err != nil {
-		log.Fatal("Could not derive address")
+		log.Fatal("Could not derive address.")
 	}
 	if (wallet.Address != "") && (address != wallet.Address) {
 		log.Fatal("Derived and provided address don't match.")
