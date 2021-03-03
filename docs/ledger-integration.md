@@ -25,43 +25,43 @@ In particular, there are three types of entry points the framework looks up:
 - `aea.cryptos`, which points to instantiable classes implementing the `Crypto` interface;
 - `aea.faucet_apis`, which points to instantiable classes implementing the `FaucetApi` interface.
 
-This is an example of `setup.py` script for a ledger plug-in `aea-crypto-myledger`:
+This is an example of `setup.py` script for a ledger plug-in `aea-ledger-myledger`:
 
 ```python
 # sample ./setup.py file
 from setuptools import setup
 
 setup(
-    name="aea-crypto-myledger",
-    packages=["aea_crypto_myledger"],
+    name="aea-ledger-myledger",
+    packages=["aea_ledger_myledger"],
     # plugins must depend on 'aea'  
     install_requires=["aea"], # add other dependencies...
     # the following makes a plugin available to aea
     entry_points={
-        "aea.cryptos": ["myledger = aea_crypto_myledger:MyLedgerCrypto"],
-        "aea.ledger_apis": ["myledger = aea_crypto_myledger:MyLedgerApi"],
-        "aea.faucet_apis": ["myledger = aea_crypto_myledger:MyLedgerFaucetApi"],
+        "aea.cryptos": ["myledger = aea_ledger_myledger:MyLedgerCrypto"],
+        "aea.ledger_apis": ["myledger = aea_ledger_myledger:MyLedgerApi"],
+        "aea.faucet_apis": ["myledger = aea_ledger_myledger:MyLedgerFaucetApi"],
     },
     # PyPI classifier for AEA plugins
     classifiers=["Framework :: AEA"],
 )
 ```
 
-By convention, such plug-in packages should be named `aea-crypto-${LEDGER_ID}`,
-and the importable package name `aea_crypto_${LEDGER_ID}`.
-In the example above, the package name is `aea-crypto-myledger`,
-and the importable package name is `aea_crypto_myledger`.
+By convention, such plug-in packages should be named `aea-ledger-${LEDGER_ID}`,
+and the importable package name `aea_ledger_${LEDGER_ID}`.
+In the example above, the package name is `aea-ledger-myledger`,
+and the importable package name is `aea_ledger_myledger`.
 
 You can search for AEA ledger plug-ins on PyPI:
-<a href=https://pypi.org/search/?q=aea-crypto>href=https://pypi.org/search/?q=aea-crypto</a>
+<a href=https://pypi.org/search/?q=aea-ledger>href=https://pypi.org/search/?q=aea-ledger</a>
 
 ## Maintained plug-ins
 
 At the moment, the framework natively supports the following three ledgers:
 
-- Fetch.ai: <a href="https://pypi.org/project/aea-crypto-fetchai/">PyPI package: `aea-crypto-fetchai`</a>, and <a href="https://github.com/fetchai/agents-aea/tree/main/plugins/aea-crypto-fetchai">source code</a>.
-- Ethereum: <a href="https://pypi.org/project/aea-crypto-ethereum/">PyPI package: `aea-crypto-ethereum`</a>, and <a href="https://github.com/fetchai/agents-aea/tree/main/plugins/aea-crypto-ethereum">source code</a>.
-- Cosmos: <a href="https://pypi.org/project/aea-crypto-cosmos/">PyPI package: `aea-crypto-cosmos`</a>, and <a href="https://github.com/fetchai/agents-aea/tree/main/plugins/aea-crypto-cosmos">source code</a>.
+- Fetch.ai: <a href="https://pypi.org/project/aea-ledger-fetchai/">PyPI package: `aea-ledger-fetchai`</a>, and <a href="https://github.com/fetchai/agents-aea/tree/main/plugins/aea-ledger-fetchai">source code</a>.
+- Ethereum: <a href="https://pypi.org/project/aea-ledger-ethereum/">PyPI package: `aea-ledger-ethereum`</a>, and <a href="https://github.com/fetchai/agents-aea/tree/main/plugins/aea-ledger-ethereum">source code</a>.
+- Cosmos: <a href="https://pypi.org/project/aea-ledger-cosmos/">PyPI package: `aea-ledger-cosmos`</a>, and <a href="https://github.com/fetchai/agents-aea/tree/main/plugins/aea-ledger-cosmos">source code</a>.
 
 However, support for additional ledgers can be added to the framework at runtime.
 

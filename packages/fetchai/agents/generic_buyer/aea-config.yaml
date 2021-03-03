@@ -32,5 +32,5 @@ default_routing:
   fetchai/oef_search:0.13.0: fetchai/soef:0.17.0
 connection_private_key_paths: {}
 dependencies:
-  aea-crypto-fetchai:
+  aea-ledger-fetchai:
     version: <0.2.0,>=0.1.0

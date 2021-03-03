@@ -22,9 +22,9 @@
 from unittest import TestCase
 
 import pytest
-from aea_crypto_cosmos import CosmosCrypto
-from aea_crypto_ethereum import EthereumCrypto
-from aea_crypto_fetchai import FetchAICrypto
+from aea_ledger_cosmos import CosmosCrypto
+from aea_ledger_ethereum import EthereumCrypto
+from aea_ledger_fetchai import FetchAICrypto
 
 from aea.crypto.wallet import Wallet
 from aea.exceptions import AEAException

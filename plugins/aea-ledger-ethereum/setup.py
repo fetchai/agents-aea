@@ -18,29 +18,28 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Setup script for "aea_crypto_fetchai" package."""
-
-import os
+"""Setup script for "aea_ledger_ethereum" package."""
 
 from setuptools import find_packages, setup
 
 
-here = os.path.abspath(os.path.dirname(__file__))
-plugin_dir = os.path.abspath(os.path.join(here, ".."))
-
 setup(
-    name="aea_crypto_fetchai",
+    name="aea_ledger_ethereum",
     version="0.1.0",
     author="Fetch.AI Limited",
     license="Apache-2.0",
-    description="Python package wrapping the public and private key cryptography and ledger API of Fetch.AI.",
-    packages=find_packages(include=["aea_crypto_fetchai*"]),
-    install_requires=["aea>=0.10.0,<0.11.0", "ecdsa>=0.15", "bech32==1.2.0"],
-    tests_require=["pytest"],
+    description="Python package wrapping the public and private key cryptography and ledger api of Ethereum.",
+    packages=find_packages(include=["aea_ledger_ethereum*"]),
+    install_requires=[
+        "aea>=0.10.0,<0.11.0",
+        "web3==5.12.0",
+        "ipfshttpclient==0.6.1",
+        "eth-account==0.5.2",
+    ],
     entry_points={
-        "aea.cryptos": ["fetchai = aea_crypto_fetchai:FetchAICrypto"],
-        "aea.ledger_apis": ["fetchai = aea_crypto_fetchai:FetchAIApi"],
-        "aea.faucet_apis": ["fetchai = aea_crypto_fetchai:FetchAIFaucetApi"],
+        "aea.cryptos": ["ethereum = aea_ledger_ethereum:EthereumCrypto"],
+        "aea.ledger_apis": ["ethereum = aea_ledger_ethereum:EthereumApi"],
+        "aea.faucet_apis": ["ethereum = aea_ledger_ethereum:EthereumFaucetApi"],
     },
     classifiers=[
         "Environment :: Console",
