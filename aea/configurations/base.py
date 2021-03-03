@@ -856,9 +856,11 @@ class ProtocolConfig(ComponentConfiguration):
 class SkillComponentConfiguration:
     """This class represent a skill component configuration."""
 
-    __slots__ = ("class_name", "args")
+    __slots__ = ("class_name", "file_path", "args")
 
-    def __init__(self, class_name: str, **args: Any) -> None:
+    def __init__(
+        self, class_name: str, file_path: Optional[str] = None, **args: Any
+    ) -> None:
         """
         Initialize a skill component configuration.
 
@@ -867,12 +869,16 @@ class SkillComponentConfiguration:
         :param args: keyword arguments.
         """
         self.class_name = class_name
+        self.file_path: Optional[Path] = Path(file_path) if file_path else None
         self.args = args
 
     @property
     def json(self) -> Dict:
         """Return the JSON representation."""
-        return {"class_name": self.class_name, "args": self.args}
+        result = {"class_name": self.class_name, "args": self.args}
+        if self.file_path is not None:
+            result["file_path"] = str(self.file_path)
+        return result
 
     @classmethod
     def from_json(cls, obj: Dict) -> "SkillComponentConfiguration":
@@ -886,8 +892,8 @@ class SkillComponentConfiguration:
         """Initialize from a JSON object."""
         obj = {**(instance.json if instance else {}), **copy(obj)}
         class_name = cast(str, obj.get("class_name"))
-        params = dict(class_name=class_name, **obj.get("args", {}))
-
+        file_path = cast(Optional[str], obj.get("file_path"))
+        params = dict(class_name=class_name, file_path=file_path, **obj.get("args", {}))
         instance = cast(
             SkillComponentConfiguration, cls._apply_params_to_instance(params, instance)
         )

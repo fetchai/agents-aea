@@ -87,13 +87,13 @@
       }
     },
     "handlers": {
-      "$ref": "#/definitions/handlers"
+      "$ref": "#/definitions/skill_component_list"
     },
     "behaviours": {
-      "$ref": "#/definitions/behaviours"
+      "$ref": "#/definitions/skill_component_list"
     },
     "models": {
-      "$ref": "#/definitions/models"
+      "$ref": "#/definitions/skill_component_list"
     },
     "dependencies": {
       "$ref": "definitions.json#/definitions/dependencies"
@@ -106,37 +106,16 @@
     }
   },
   "definitions": {
-    "handlers": {
+    "skill_component_list": {
       "type": "object",
-      "additionalProperties": false,
-      "uniqueItems": true,
       "patternProperties": {
         "^[^\\d\\W]\\w*\\Z": {
-          "$ref": "#/definitions/handler"
+          "$ref": "#/definitions/skill_component_configuration"
         }
       }
     },
-    "behaviours": {
+    "skill_component_configuration": {
       "type": "object",
-      "uniqueItems": true,
-      "patternProperties": {
-        "^[^\\d\\W]\\w*\\Z": {
-          "$ref": "#/definitions/behaviour"
-        }
-      }
-    },
-    "models": {
-      "type": "object",
-      "uniqueItems": true,
-      "patternProperties": {
-        "^[^\\d\\W]\\w*\\Z": {
-          "$ref": "#/definitions/model"
-        }
-      }
-    },
-    "behaviour": {
-      "type": "object",
-      "additionalProperties": false,
       "required": [
         "class_name"
       ],
@@ -146,36 +125,9 @@
         },
         "args": {
           "type": "object"
-        }
-      }
-    },
-    "handler": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "class_name"
-      ],
-      "properties": {
-        "class_name": {
-          "type": "string"
         },
-        "args": {
-          "type": "object"
-        }
-      }
-    },
-    "model": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "class_name"
-      ],
-      "properties": {
-        "class_name": {
+        "file_path": {
           "type": "string"
-        },
-        "args": {
-          "type": "object"
         }
       }
     }

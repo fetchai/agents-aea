@@ -181,7 +181,7 @@ class TestConfigGet:
         assert result.exit_code == 0
         assert (
             result.output
-            == '{"dummy": {"args": {"behaviour_arg_1": 1, "behaviour_arg_2": "2"}, "class_name": "DummyBehaviour"}}\n'
+            == '{"dummy": {"args": {"behaviour_arg_1": 1, "behaviour_arg_2": "2"}, "class_name": "DummyBehaviour", "file_path": "path/to/module.py"}}\n'
         )
 
     def test_get_list(self):
