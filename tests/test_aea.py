@@ -30,7 +30,7 @@ from unittest.mock import MagicMock, PropertyMock, patch
 import pytest
 
 import aea  # noqa: F401
-from aea.aea import AEA
+from aea.aea import AEA, DefaultErrorHandler
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
@@ -236,11 +236,19 @@ def test_handle():
 
         encoded_msg = DefaultSerializer.encode(msg)
 
-        # reset counts on error handler
-        error_handler = an_aea._get_error_handler()
-        error_handler.unsupported_protocol_count = 0
-        error_handler.unsupported_skill_count = 0
-        error_handler.decoding_error_count = 0
+        # isolate error handler class for this test
+        error_handler_class = type(
+            "error_handler_new_class",
+            (DefaultErrorHandler,),
+            dict(
+                unsupported_protocol_count=0,
+                unsupported_skill_count=0,
+                decoding_error_count=0,
+                no_active_handler_count=0,
+            ),
+        )
+        error_handler = an_aea._error_handler_class = error_handler_class
+
         with run_in_thread(an_aea.start, timeout=5):
             wait_for_condition(lambda: an_aea.is_running, timeout=10)
             dummy_skill = an_aea.resources.get_skill(DUMMY_SKILL_PUBLIC_ID)
@@ -249,6 +257,7 @@ def test_handle():
             envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
             envelope._protocol_specification_id = UNKNOWN_PROTOCOL_PUBLIC_ID
             # send envelope via localnode back to agent/bypass `outbox` put consistency checks
+            assert error_handler.unsupported_protocol_count == 0
             an_aea.outbox.put(envelope)
             wait_for_condition(
                 lambda: error_handler.unsupported_protocol_count == 1, timeout=2,
@@ -261,6 +270,7 @@ def test_handle():
                 protocol_specification_id=DefaultMessage.protocol_specification_id,
                 message=b"",
             )
+            assert error_handler.decoding_error_count == 0
             an_aea.runtime.multiplexer.put(envelope)
             wait_for_condition(
                 lambda: error_handler.decoding_error_count == 1, timeout=2,
@@ -277,6 +287,7 @@ def test_handle():
             msg.sender = an_aea.identity.address
             envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
             # send envelope via localnode back to agent/bypass `outbox` put consistency checks
+            assert error_handler.no_active_handler_count == 0
             an_aea.outbox.put(envelope)
             wait_for_condition(
                 lambda: error_handler.no_active_handler_count == 1, timeout=2,
@@ -290,6 +301,7 @@ def test_handle():
                 message=encoded_msg,
             )
             # send envelope via localnode back to agent/bypass `outbox` put consistency checks
+            assert len(dummy_handler.handled_messages) == 0
             an_aea.runtime.multiplexer.put(envelope)
             wait_for_condition(
                 lambda: len(dummy_handler.handled_messages) == 1, timeout=3,
