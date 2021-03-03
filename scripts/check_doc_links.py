@@ -44,12 +44,12 @@ WHITELIST_URL_TO_CODE = {
 }
 
 IGNORE = {
-    "https://pypi.org/project/aea-crypto-fetchai/",
-    "https://pypi.org/project/aea-crypto-ethereum/",
-    "https://pypi.org/project/aea-crypto-cosmos/",
-    "https://github.com/fetchai/agents-aea/tree/main/plugins/aea-crypto-fetchai",
-    "https://github.com/fetchai/agents-aea/tree/main/plugins/aea-crypto-ethereum",
-    "https://github.com/fetchai/agents-aea/tree/main/plugins/aea-crypto-cosmos",
+    "https://pypi.org/project/aea-ledger-fetchai/",
+    "https://pypi.org/project/aea-ledger-ethereum/",
+    "https://pypi.org/project/aea-ledger-cosmos/",
+    "https://github.com/fetchai/agents-aea/tree/main/plugins/aea-ledger-fetchai",
+    "https://github.com/fetchai/agents-aea/tree/main/plugins/aea-ledger-ethereum",
+    "https://github.com/fetchai/agents-aea/tree/main/plugins/aea-ledger-cosmos",
 }
 
 

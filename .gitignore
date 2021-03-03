@@ -127,5 +127,5 @@ output_file
 packages/fetchai/connections/p2p_libp2p/libp2p_node/libp2p_node
 
 !tests/data/dummy_contract/build
-!plugins/aea-crypto-ethereum/tests/data/dummy_contract/build
-!plugins/aea-crypto-cosmos/tests/data/dummy_contract/build
+!plugins/aea-ledger-ethereum/tests/data/dummy_contract/build
+!plugins/aea-ledger-cosmos/tests/data/dummy_contract/build

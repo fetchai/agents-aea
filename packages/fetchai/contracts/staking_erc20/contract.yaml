@@ -9,12 +9,12 @@ aea_version: '>=0.10.0, <0.11.0'
 fingerprint:
   README.md: QmR5xGpZ8gZkUyWxz6EBkVpsYGuULcN13yNEALoxmDTx6t
   __init__.py: QmWzYodbomKRhKchtYUW9yzRzEPiv2M68rB4FAS7M1WzYj
-  contract.py: Qmf919FbYLXjo552ekJMLJZ7ESxqpMY5GAxNoBzQ3qzXJp
+  contract.py: QmZKMWugav8XLQEveE3o9nx9ffLP7YNGkFdYnWbdPXz5wf
 fingerprint_ignore_patterns:
 - build/*
 class_name: StakingERC20
 contract_interface_paths:
   ethereum: build/staking_erc20.json
 dependencies:
-  aea-crypto-ethereum:
+  aea-ledger-ethereum:
     version: <0.2.0,>=0.1.0

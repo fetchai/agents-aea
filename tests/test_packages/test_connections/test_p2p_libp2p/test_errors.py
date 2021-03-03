@@ -20,6 +20,8 @@
 import os
 import shutil
 import tempfile
+from asyncio.futures import Future
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -30,6 +32,7 @@ from aea.multiplexer import Multiplexer
 
 from packages.fetchai.connections.p2p_libp2p.connection import (
     LIBP2P_NODE_MODULE_NAME,
+    Libp2pNode,
     P2PLibp2pConnection,
     _golang_module_run,
     _ip_all_private_or_all_public,
@@ -225,3 +228,45 @@ def test_build_dir_not_set():
                 identity=con._identity,
                 crypto_store=con.crypto_store,
             )
+
+
+@pytest.mark.asyncio
+async def test_reconnect_on_write_failed():
+    """Test node restart on write fail."""
+    node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
+    node.pipe = Mock()
+    node.pipe.write = Mock(side_effect=Exception("expected"))
+    f = Future()
+    f.set_result(None)
+    with patch.object(node, "restart", return_value=f) as restart_mock, pytest.raises(
+        Exception, match="expected"
+    ):
+        await node.write(b"some_data")
+
+    assert node.pipe.write.call_count == 2
+    restart_mock.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_reconnect_on_read_failed():
+    """Test node restart on read fail."""
+    node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
+    node.pipe = Mock()
+    node.pipe.read = Mock(side_effect=Exception("expected"))
+    f = Future()
+    f.set_result(None)
+    with patch.object(node, "restart", return_value=f) as restart_mock:
+        result = await node.read()
+
+    assert result is None
+
+    assert node.pipe.read.call_count == 2
+    restart_mock.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_max_restarts():
+    """Test node max restarts exception."""
+    node = Libp2pNode(Mock(), Mock(), "tmp", "tmp", max_restarts=0)
+    with pytest.raises(ValueError, match="Max restarts attempts reached:"):
+        await node.restart()

@@ -334,6 +334,8 @@ class Protocol(Component):
     It includes a serializer to encode/decode a message.
     """
 
+    __slots__ = ("_message_class",)
+
     def __init__(
         self, configuration: ProtocolConfig, message_class: Type[Message], **kwargs: Any
     ) -> None:

@@ -38,9 +38,9 @@ logging_config:
   version: 1
 registry_path: ../packages
 dependencies:
-  aea-crypto-ethereum:
+  aea-ledger-ethereum:
     version: <0.2.0,>=0.1.0
-  aea-crypto-fetchai:
+  aea-ledger-fetchai:
     version: <0.2.0,>=0.1.0
 ---
 public_id: fetchai/advanced_data_request:0.5.0

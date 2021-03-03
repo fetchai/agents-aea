@@ -55,6 +55,8 @@ PUBLIC_ID = PublicId.from_str("fetchai/local:0.15.0")
 
 
 OefSearchDialogue = BaseOefSearchDialogue
+OEF_LOCAL_NODE_SEARCH_ADDRESS = "oef_local_node_search"
+OEF_LOCAL_NODE_ADDRESS = "oef_local_node"
 
 
 class OefSearchDialogues(BaseOefSearchDialogues):
@@ -81,7 +83,7 @@ class OefSearchDialogues(BaseOefSearchDialogues):
 
         BaseOefSearchDialogues.__init__(
             self,
-            self_address=str(OEFLocalConnection.connection_id),
+            self_address=OEF_LOCAL_NODE_SEARCH_ADDRESS,
             role_from_first_message=role_from_first_message,
             dialogue_class=OefSearchDialogue,
         )
@@ -252,9 +254,7 @@ class LocalNode:
                 error_data={},
             )
             error_envelope = Envelope(
-                to=envelope.sender,
-                sender=str(OEFLocalConnection.connection_id),
-                message=msg,
+                to=envelope.sender, sender=OEF_LOCAL_NODE_ADDRESS, message=msg,
             )
             await self._send(error_envelope)
             return

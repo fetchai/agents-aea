@@ -21,7 +21,7 @@
 
 import logging
 
-from aea_crypto_ethereum import EthereumApi
+from aea_ledger_ethereum import EthereumApi
 
 from aea.common import Address
 from aea.configurations.base import PublicId

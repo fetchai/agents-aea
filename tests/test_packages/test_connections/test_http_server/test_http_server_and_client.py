@@ -97,6 +97,7 @@ class TestClientServer:
     def setup_client(self):
         """Set up client connection."""
         self.client_agent_address = "client_agent_address"
+        self.client_agent_skill_id = "some/skill:0.1.0"
         self.client_agent_identity = Identity(
             "agent running client", address=self.client_agent_address
         )
@@ -125,7 +126,7 @@ class TestClientServer:
             return HttpDialogue.Role.CLIENT
 
         self._client_dialogues = HttpDialogues(
-            self.client_agent_address, role_from_first_message=role_from_first_message
+            self.client_agent_skill_id, role_from_first_message=role_from_first_message
         )
 
     def setup(self):

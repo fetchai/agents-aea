@@ -44,7 +44,7 @@ class PrometheusDialogues(Model, BasePrometheusDialogues):
 
         BasePrometheusDialogues.__init__(
             self,
-            self_address=self.context.agent_address,
+            self_address=str(self.skill_id),
             role_from_first_message=role_from_first_message,
         )
 ```
@@ -101,10 +101,7 @@ def add_prometheus_metric(
     )
 
     # send message
-    envelope_context = EnvelopeContext(
-        skill_id=self.context.skill_id, connection_id=PROM_CONNECTION_ID
-    )
-    self.context.outbox.put_message(message=message, context=envelope_context)
+    self.context.outbox.put_message(message=message)
 ```
 where `PROM_CONNECTION_ID` should be imported to your skill as follows:
 ``` python
@@ -142,10 +139,7 @@ def update_prometheus_metric(
     )
 
     # send message
-    envelope_context = EnvelopeContext(
-        skill_id=self.context.skill_id, connection_id=PROM_CONNECTION_ID
-    )
-    self.context.outbox.put_message(message=message, context=envelope_context)
+    self.context.outbox.put_message(message=message)
 ```
 
 Initialize the metrics from the configuration file in the behaviour setup:

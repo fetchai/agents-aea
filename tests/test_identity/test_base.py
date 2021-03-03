@@ -20,7 +20,7 @@
 """This module contains the tests for the identity module."""
 
 import pytest
-from aea_crypto_fetchai import FetchAICrypto
+from aea_ledger_fetchai import FetchAICrypto
 
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.identity.base import Identity

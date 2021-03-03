@@ -21,7 +21,7 @@ from unittest import TestCase, mock
 from unittest.mock import MagicMock
 
 import pytest
-from aea_crypto_fetchai import FetchAICrypto
+from aea_ledger_fetchai import FetchAICrypto
 
 from aea.cli import cli
 from aea.cli.generate_wealth import _try_generate_wealth
