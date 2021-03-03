@@ -51,8 +51,15 @@ models:
       url: https://api.coingecko.com/api/v3/simple/price?ids=fetch-ai&vs_currencies=usd
       method: GET
       outputs:
-      - name: "price"
-        json_path: "[fetch-ai][usd]"
+      - name: price
+        json_path: "fetch-ai.usd"
+---
+public_id: fetchai/simple_oracle:0.5.0
+type: skill
+models:
+  strategy:
+    args:
+      oracle_value_name: price
 ---
 public_id: fetchai/p2p_libp2p:0.16.0
 type: connection

@@ -20,9 +20,7 @@
 """This package contains handlers for the advanced_data_request skill."""
 
 import json
-from typing import Any, Optional, cast
-from jsonpath_ng import parse
-from jsonpath_ng.lexer import JsonPathLexerError
+from typing import Any, Dict, Optional, cast
 
 from aea.configurations.base import PublicId
 from aea.protocols.base import Message
@@ -36,6 +34,16 @@ from packages.fetchai.skills.advanced_data_request.dialogues import (
     PrometheusDialogue,
     PrometheusDialogues,
 )
+
+
+def find(dotted_path: str, data: Dict[str, Any]) -> Optional[Any]:
+    """Find entry at dotted_path in data"""
+
+    keys = dotted_path.split(".")
+    value = data
+    for key in keys:
+        value = value.get(key, {})
+    return None if value == {} else value
 
 
 class HttpHandler(Handler):
@@ -106,20 +114,26 @@ class HttpHandler(Handler):
 
         observation = {}
         for output in model.outputs:
-            path = output["json_path"]
+            json_path = output["json_path"]
 
             # find desired output data in msg_body
-            try:
-                jsonpath_expression = parse(path)
-                match = jsonpath_expression.find(msg_body)
-            except JsonPathLexerError as e:
-                self.context.logger.warning(f"Unable to parse http response: {e}")
+            value = find(json_path, msg_body)
 
-            if match:
-                value = int(match[0].value*10**model.decimals)
-                observation[output["name"]] = {"value": value, "decimals": model.decimals}
+            # if value is a numeric type, store it as fixed-point with number of decimals
+            if isinstance(value, (int, float)):
+                int_value = int(value * 10 ** model.decimals)
+                observation[output["name"]] = {
+                    "value": int_value,
+                    "decimals": model.decimals,
+                }
+            elif isinstance(value, str):
+                observation[output["name"]] = {
+                    "value": value,
+                }
             else:
-                self.context.logger.warning(f"Output {output['name']} not found in response.")
+                self.context.logger.warning(
+                    f"No valid output for {output['name']} found in response."
+                )
 
         self.context.shared_state["observation"] = observation
         self.context.logger.info(f"Observation: {observation}")

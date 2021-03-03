@@ -33,7 +33,12 @@ from tests.conftest import ROOT_DIR
 
 API_SPEC_PATH = str(
     Path(
-        ROOT_DIR, "packages", "fetchai", "skills", "advanced_data_request", "api_spec.yaml"
+        ROOT_DIR,
+        "packages",
+        "fetchai",
+        "skills",
+        "advanced_data_request",
+        "api_spec.yaml",
     ).absolute()
 )
 
@@ -89,7 +94,7 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
         )
         self.set_config(
             "vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.outputs",
-            '[{"name": "price", "json_path": "[fetch-ai][usd]"}]',
+            '[{"name": "price", "json_path": "fetch-ai.usd"}]',
             type_="list",
         )
 

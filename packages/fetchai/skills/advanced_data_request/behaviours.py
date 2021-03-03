@@ -36,7 +36,9 @@ from packages.fetchai.skills.advanced_data_request.dialogues import (
     HttpDialogues,
     PrometheusDialogues,
 )
-from packages.fetchai.skills.advanced_data_request.models import AdvancedDataRequestModel
+from packages.fetchai.skills.advanced_data_request.models import (
+    AdvancedDataRequestModel,
+)
 
 
 class AdvancedDataRequestBehaviour(TickerBehaviour):
@@ -50,6 +52,7 @@ class AdvancedDataRequestBehaviour(TickerBehaviour):
     def send_http_request_message(self) -> None:
         """
         Send an http request message.
+
         :return: None
         """
 

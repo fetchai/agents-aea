@@ -82,7 +82,7 @@ class TestOracleSkills(AEATestCaseManyFlaky, UseGanache):
             "vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.outputs",
             '[{"name": "price", "json_path": "[fetch-ai][usd]"}]',
             type_="list",
-        )        
+        )
 
         # set erc20 address
         _, erc20_address = erc20_contract

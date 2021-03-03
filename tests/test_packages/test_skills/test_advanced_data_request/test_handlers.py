@@ -35,8 +35,13 @@ from packages.fetchai.skills.advanced_data_request.dialogues import (
     HttpDialogues,
     PrometheusDialogues,
 )
-from packages.fetchai.skills.advanced_data_request.handlers import HttpHandler, PrometheusHandler
-from packages.fetchai.skills.advanced_data_request.models import AdvancedDataRequestModel
+from packages.fetchai.skills.advanced_data_request.handlers import (
+    HttpHandler,
+    PrometheusHandler,
+)
+from packages.fetchai.skills.advanced_data_request.models import (
+    AdvancedDataRequestModel,
+)
 
 from tests.conftest import ROOT_DIR
 
@@ -44,7 +49,9 @@ from tests.conftest import ROOT_DIR
 class TestHttpHandler(BaseSkillTestCase):
     """Test http handler of advanced_data_request skill."""
 
-    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "advanced_data_request")
+    path_to_skill = Path(
+        ROOT_DIR, "packages", "fetchai", "skills", "advanced_data_request"
+    )
     is_agent_to_agent_messages = False
 
     @classmethod
@@ -55,11 +62,15 @@ class TestHttpHandler(BaseSkillTestCase):
         cls.logger = cls._skill.skill_context.logger
 
         cls.advanced_data_request_model = cast(
-            AdvancedDataRequestModel, cls._skill.skill_context.advanced_data_request_model
+            AdvancedDataRequestModel,
+            cls._skill.skill_context.advanced_data_request_model,
         )
 
         cls.advanced_data_request_model.url = "http://some-url"
-        cls.advanced_data_request_model.outputs = [{"name": "output1", "json_path": "[in1][in2]"}, {"name": "output2", "json_path": "[id]"}]
+        cls.advanced_data_request_model.outputs = [
+            {"name": "output1", "json_path": "in1.in2"},
+            {"name": "output2", "json_path": "id"},
+        ]
 
         cls.http_dialogues = cast(
             HttpDialogues, cls._skill.skill_context.http_dialogues
@@ -111,7 +122,10 @@ class TestHttpHandler(BaseSkillTestCase):
         self.http_handler.handle(incoming_message)
 
         # check that data was correctly entered into shared state
-        observation = {"output1": {"value": 1.0}, "output2": {"value": "XXX"}}
+        observation = {
+            "output1": {"value": 100000, "decimals": 5},
+            "output2": {"value": "XXX"},
+        }
         assert self.http_handler.context.shared_state["observation"] == observation
 
         # check that outbox contains update_prometheus metric message
@@ -168,7 +182,7 @@ class TestHttpHandler(BaseSkillTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.WARNING, "Output output1 not found in response.",
+            logging.WARNING, "No valid output for output1 found in response.",
         )
 
     def test_handle_response_missing_output(self):
@@ -191,11 +205,13 @@ class TestHttpHandler(BaseSkillTestCase):
         with patch.object(self.logger, "log") as mock_logger:
             self.http_handler.handle(incoming_message)
 
-        assert self.http_handler.context.shared_state["observation"] == {"output2": {"value": "XXX"}}
+        assert self.http_handler.context.shared_state["observation"] == {
+            "output2": {"value": "XXX"}
+        }
 
         # after
         mock_logger.assert_any_call(
-            logging.WARNING, "Output output1 not found in response.",
+            logging.WARNING, "No valid output for output1 found in response.",
         )
         mock_logger.assert_any_call(
             logging.INFO, "Observation: {'output2': {'value': 'XXX'}}",
@@ -319,7 +335,9 @@ class TestHttpHandler(BaseSkillTestCase):
 class TestPrometheusHandler(BaseSkillTestCase):
     """Test prometheus handler of advanced_data_request skill."""
 
-    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "advanced_data_request")
+    path_to_skill = Path(
+        ROOT_DIR, "packages", "fetchai", "skills", "advanced_data_request"
+    )
     is_agent_to_agent_messages = False
 
     @classmethod
@@ -332,7 +350,8 @@ class TestPrometheusHandler(BaseSkillTestCase):
         cls.logger = cls._skill.skill_context.logger
 
         cls.advanced_data_request_model = cast(
-            AdvancedDataRequestModel, cls._skill.skill_context.advanced_data_request_model
+            AdvancedDataRequestModel,
+            cls._skill.skill_context.advanced_data_request_model,
         )
 
         cls.prometheus_dialogues = cast(

@@ -115,8 +115,9 @@ class SimpleOracleBehaviour(TickerBehaviour):
             self.context.logger.info("Publishing oracle value")
 
             # add expiration block
-            update_args = observation.copy()
+            update_args = observation[strategy.oracle_value_name]
             update_args["expiration_block"] = EXPIRATION_BLOCK
+            self.context.logger.info(f"Update args: {update_args}")
             self._request_update_transaction(update_args)
 
     def _request_contract_deploy_transaction(self) -> None:

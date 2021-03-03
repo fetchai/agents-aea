@@ -25,8 +25,12 @@ from aea.test_tools.test_skill import BaseSkillTestCase
 
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.prometheus.message import PrometheusMessage
-from packages.fetchai.skills.advanced_data_request.behaviours import AdvancedDataRequestBehaviour
-from packages.fetchai.skills.advanced_data_request.models import AdvancedDataRequestModel
+from packages.fetchai.skills.advanced_data_request.behaviours import (
+    AdvancedDataRequestBehaviour,
+)
+from packages.fetchai.skills.advanced_data_request.models import (
+    AdvancedDataRequestModel,
+)
 
 from tests.conftest import ROOT_DIR
 
@@ -34,16 +38,22 @@ from tests.conftest import ROOT_DIR
 class TestSkillBehaviour(BaseSkillTestCase):
     """Test behaviours of advanced data request."""
 
-    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "advanced_data_request")
+    path_to_skill = Path(
+        ROOT_DIR, "packages", "fetchai", "skills", "advanced_data_request"
+    )
 
     @classmethod
     def setup(cls, **kwargs):
         """Setup the test class."""
         super().setup()
         cls.advanced_data_request_behaviour = cast(
-            AdvancedDataRequestBehaviour, cls._skill.skill_context.behaviours.advanced_data_request_behaviour
+            AdvancedDataRequestBehaviour,
+            cls._skill.skill_context.behaviours.advanced_data_request_behaviour,
         )
-        cls.advanced_data_request_model = cast(AdvancedDataRequestModel, cls.advanced_data_request_behaviour.context.advanced_data_request_model)
+        cls.advanced_data_request_model = cast(
+            AdvancedDataRequestModel,
+            cls.advanced_data_request_behaviour.context.advanced_data_request_model,
+        )
         cls.advanced_data_request_model.url = "some_url"
 
     def test_send_http_request_message(self):

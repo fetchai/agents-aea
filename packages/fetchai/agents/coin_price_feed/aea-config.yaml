@@ -47,5 +47,5 @@ models:
       method: GET
       outputs:
       - name: "price"
-        json_path: "[fetch-ai][usd]"
+        json_path: "fetch-ai.usd"
       use_http_server: true

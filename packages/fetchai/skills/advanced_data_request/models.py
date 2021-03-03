@@ -31,6 +31,7 @@ DEFAULT_OUTPUTS = None
 DEFAULT_DECIMALS = 5
 DEFAULT_USE_HTTP_SERVER = False
 
+
 class AdvancedDataRequestModel(Model):
     """This class models the AdvancedDataRequest skill."""
 
