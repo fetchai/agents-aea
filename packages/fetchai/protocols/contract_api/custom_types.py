@@ -19,10 +19,11 @@
 
 """This module contains class representations corresponding to every custom type in the protocol specification."""
 
-import pickle  # nosec
-from typing import Any, Dict
+from typing import Any
 
+from aea.common import JSONLike
 from aea.exceptions import enforce
+from aea.helpers.serializers import DictProtobufStructSerializer
 from aea.helpers.transaction.base import RawMessage as BaseRawMessage
 from aea.helpers.transaction.base import RawTransaction as BaseRawTransaction
 from aea.helpers.transaction.base import State as BaseState
@@ -37,7 +38,7 @@ class Kwargs:
     """This class represents an instance of Kwargs."""
 
     def __init__(
-        self, body: Dict[str, Any],
+        self, body: JSONLike,
     ):
         """Initialise an instance of RawTransaction."""
         self._body = body
@@ -45,8 +46,6 @@ class Kwargs:
 
     def _check_consistency(self) -> None:
         """Check consistency of the object."""
-        if self._body is None:
-            raise ValueError("body must not be None")
         enforce(
             isinstance(self._body, dict)
             and all([isinstance(key, str) for key in self._body.keys()]),
@@ -54,12 +53,12 @@ class Kwargs:
         )
 
     @property
-    def body(self) -> Dict[str, Any]:
+    def body(self) -> JSONLike:
         """Get the body."""
         return self._body
 
     @staticmethod
-    def encode(kwargs_protobuf_object, kwargs_object: "Kwargs") -> None:
+    def encode(kwargs_protobuf_object: Any, kwargs_object: "Kwargs") -> None:
         """
         Encode an instance of this class into the protocol buffer object.
 
@@ -69,11 +68,12 @@ class Kwargs:
         :param kwargs_object: an instance of this class to be encoded in the protocol buffer object.
         :return: None
         """
-        kwargs_bytes = pickle.dumps(kwargs_object)  # nosec
-        kwargs_protobuf_object.kwargs = kwargs_bytes
+        kwargs_protobuf_object.kwargs = DictProtobufStructSerializer.encode(
+            kwargs_object.body
+        )
 
     @classmethod
-    def decode(cls, kwargs_protobuf_object) -> "Kwargs":
+    def decode(cls, kwargs_protobuf_object: Any) -> "Kwargs":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -82,13 +82,13 @@ class Kwargs:
         :param kwargs_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :return: A new instance of this class that matches the protocol buffer object in the 'kwargs_protobuf_object' argument.
         """
-        kwargs = pickle.loads(kwargs_protobuf_object.kwargs)  # nosec
-        return kwargs
+        kwargs = DictProtobufStructSerializer.decode(kwargs_protobuf_object.kwargs)
+        return cls(kwargs)
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Check equality."""
         return isinstance(other, Kwargs) and self.body == other.body
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get string representation."""
         return "Kwargs: body={}".format(self.body)

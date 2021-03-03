@@ -26,7 +26,7 @@ import pytest
 from aea.exceptions import AEAEnforceError
 from aea.helpers.transaction.base import Terms
 from aea.protocols.dialogue.base import DialogueLabel
-from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_NAME
+from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_AGENT_ADDRESS
 
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
@@ -71,7 +71,7 @@ class TestDialogues(BaseSkillTestCase):
     def test_default_dialogues(self):
         """Test the DefaultDialogues class."""
         _, dialogue = self.default_dialogues.create(
-            counterparty=COUNTERPARTY_NAME,
+            counterparty=COUNTERPARTY_AGENT_ADDRESS,
             performative=DefaultMessage.Performative.BYTES,
             content=b"some_content",
         )
@@ -82,7 +82,9 @@ class TestDialogues(BaseSkillTestCase):
         """Test the FipaDialogue class."""
         fipa_dialogue = FipaDialogue(
             DialogueLabel(
-                ("", ""), COUNTERPARTY_NAME, self.skill.skill_context.agent_address,
+                ("", ""),
+                COUNTERPARTY_AGENT_ADDRESS,
+                self.skill.skill_context.agent_address,
             ),
             self.skill.skill_context.agent_address,
             role=DefaultDialogue.Role.AGENT,
@@ -107,7 +109,7 @@ class TestDialogues(BaseSkillTestCase):
     def test_fipa_dialogues(self):
         """Test the FipaDialogues class."""
         _, dialogue = self.fipa_dialogues.create(
-            counterparty=COUNTERPARTY_NAME,
+            counterparty=COUNTERPARTY_AGENT_ADDRESS,
             performative=FipaMessage.Performative.CFP,
             query="some_query",
         )
@@ -118,7 +120,9 @@ class TestDialogues(BaseSkillTestCase):
         """Test the LedgerApiDialogue class."""
         ledger_api_dialogue = LedgerApiDialogue(
             DialogueLabel(
-                ("", ""), COUNTERPARTY_NAME, self.skill.skill_context.agent_address,
+                ("", ""),
+                COUNTERPARTY_AGENT_ADDRESS,
+                self.skill.skill_context.agent_address,
             ),
             self.skill.skill_context.agent_address,
             role=LedgerApiDialogue.Role.AGENT,
@@ -129,7 +133,9 @@ class TestDialogues(BaseSkillTestCase):
             assert ledger_api_dialogue.associated_fipa_dialogue
         fipa_dialogue = FipaDialogue(
             DialogueLabel(
-                ("", ""), COUNTERPARTY_NAME, self.skill.skill_context.agent_address,
+                ("", ""),
+                COUNTERPARTY_AGENT_ADDRESS,
+                self.skill.skill_context.agent_address,
             ),
             self.skill.skill_context.agent_address,
             role=FipaDialogue.Role.BUYER,
@@ -142,21 +148,20 @@ class TestDialogues(BaseSkillTestCase):
     def test_ledger_api_dialogues(self):
         """Test the LedgerApiDialogues class."""
         _, dialogue = self.ledger_api_dialogues.create(
-            counterparty=COUNTERPARTY_NAME,
+            counterparty=COUNTERPARTY_AGENT_ADDRESS,
             performative=LedgerApiMessage.Performative.GET_BALANCE,
             ledger_id="some_ledger_id",
             address="some_address",
         )
         assert dialogue.role == LedgerApiDialogue.Role.AGENT
-        assert dialogue.self_address == self.skill.skill_context.agent_address
+        assert dialogue.self_address == str(self.skill.skill_context.skill_id)
 
     def test_oef_search_dialogues(self):
         """Test the OefSearchDialogues class."""
         _, dialogue = self.oef_search_dialogues.create(
-            counterparty=COUNTERPARTY_NAME,
+            counterparty=COUNTERPARTY_AGENT_ADDRESS,
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-            ledger_id="some_ledger_id",
             query="some_query",
         )
         assert dialogue.role == OefSearchDialogue.Role.AGENT
-        assert dialogue.self_address == self.skill.skill_context.agent_address
+        assert dialogue.self_address == str(self.skill.skill_context.skill_id)

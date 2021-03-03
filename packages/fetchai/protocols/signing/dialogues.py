@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2020 fetchai
+#   Copyright 2021 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -110,6 +110,8 @@ class SigningDialogues(Dialogues, ABC):
     END_STATES = frozenset(
         {SigningDialogue.EndState.SUCCESSFUL, SigningDialogue.EndState.FAILED}
     )
+
+    _keep_terminal_state_dialogues = False
 
     def __init__(
         self,

@@ -19,6 +19,8 @@
 
 """This module contains the strategy class."""
 
+from typing import Any, Dict, List, Tuple
+
 from aea.common import Address
 from aea.exceptions import enforce
 from aea.helpers.search.generic import SIMPLE_SERVICE_MODEL
@@ -38,6 +40,8 @@ DEFAULT_IS_LEDGER_TX = True
 DEFAULT_MAX_UNIT_PRICE = 5
 DEFAULT_MAX_TX_FEE = 2
 DEFAULT_SERVICE_ID = "generic_service"
+DEFAULT_MIN_QUANTITY = 1
+DEFAULT_MAX_QUANTITY = 100
 
 DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
 DEFAULT_SEARCH_QUERY = {
@@ -53,7 +57,7 @@ DEFAULT_MAX_NEGOTIATIONS = 2
 class GenericStrategy(Model):
     """This class defines a strategy for the agent."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize the strategy of the agent.
 
@@ -64,6 +68,8 @@ class GenericStrategy(Model):
         self._is_ledger_tx = kwargs.pop("is_ledger_tx", DEFAULT_IS_LEDGER_TX)
 
         self._max_unit_price = kwargs.pop("max_unit_price", DEFAULT_MAX_UNIT_PRICE)
+        self._min_quantity = kwargs.pop("min_quantity", DEFAULT_MIN_QUANTITY)
+        self._max_quantity = kwargs.pop("max_quantity", DEFAULT_MAX_QUANTITY)
         self._max_tx_fee = kwargs.pop("max_tx_fee", DEFAULT_MAX_TX_FEE)
         self._service_id = kwargs.pop("service_id", DEFAULT_SERVICE_ID)
 
@@ -77,6 +83,7 @@ class GenericStrategy(Model):
         self._max_negotiations = kwargs.pop(
             "max_negotiations", DEFAULT_MAX_NEGOTIATIONS
         )
+        self._is_stop_searching_on_result = kwargs.pop("stop_searching_on_result", True)
 
         super().__init__(**kwargs)
         self._ledger_id = (
@@ -101,6 +108,11 @@ class GenericStrategy(Model):
     def is_ledger_tx(self) -> bool:
         """Check whether or not tx are settled on a ledger."""
         return self._is_ledger_tx
+
+    @property
+    def is_stop_searching_on_result(self) -> bool:
+        """Check if search is stopped on result."""
+        return self._is_stop_searching_on_result
 
     @property
     def is_searching(self) -> bool:
@@ -184,6 +196,9 @@ class GenericStrategy(Model):
                 ]
             )
             and proposal.values["ledger_id"] == self.ledger_id
+            and proposal.values["price"] > 0
+            and proposal.values["quantity"] >= self._min_quantity
+            and proposal.values["quantity"] <= self._max_quantity
             and proposal.values["price"]
             <= proposal.values["quantity"] * self._max_unit_price
             and proposal.values["currency_id"] == self._currency_id
@@ -205,6 +220,20 @@ class GenericStrategy(Model):
         else:
             result = True
         return result
+
+    def get_acceptable_counterparties(
+        self, counterparties: Tuple[str, ...]
+    ) -> Tuple[str, ...]:
+        """
+        Process counterparties and drop unacceptable ones.
+
+        :return: list of counterparties
+        """
+        valid_counterparties: List[str] = []
+        for idx, counterparty in enumerate(counterparties):
+            if idx < self.max_negotiations:
+                valid_counterparties.append(counterparty)
+        return tuple(valid_counterparties)
 
     def terms_from_proposal(
         self, proposal: Description, counterparty_address: Address
@@ -231,3 +260,23 @@ class GenericStrategy(Model):
             fee_by_currency_id={proposal.values["currency_id"]: self._max_tx_fee},
         )
         return terms
+
+    def successful_trade_with_counterparty(
+        self, counterparty: str, data: Dict[str, str]
+    ) -> None:
+        """
+        Do something on successful trade.
+
+        :param counterparty: the counterparty address
+        :param data: the data
+        :return: False
+        """
+        pass
+
+    def update_search_query_params(self) -> None:
+        """
+        Update agent location and query for search.
+
+        :return: None
+        """
+        pass

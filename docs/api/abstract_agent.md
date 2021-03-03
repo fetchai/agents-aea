@@ -22,6 +22,16 @@ This class provides an abstract base  interface for an agent.
 
 Get agent's name.
 
+<a name="aea.abstract_agent.AbstractAgent.storage_uri"></a>
+#### storage`_`uri
+
+```python
+ | @abstractproperty
+ | storage_uri() -> Optional[str]
+```
+
+Return storage uri.
+
 <a name="aea.abstract_agent.AbstractAgent.start"></a>
 #### start
 
@@ -123,30 +133,6 @@ Get handlers with message getters.
 **Returns**:
 
 List of tuples of callables: handler and coroutine to get a message
-
-<a name="aea.abstract_agent.AbstractAgent.get_multiplexer_setup_options"></a>
-#### get`_`multiplexer`_`setup`_`options
-
-```python
- | @abstractmethod
- | get_multiplexer_setup_options() -> Optional[Dict]
-```
-
-Get options to pass to Multiplexer.setup.
-
-**Returns**:
-
-dict of kwargs
-
-<a name="aea.abstract_agent.AbstractAgent.connections"></a>
-#### connections
-
-```python
- | @abstractproperty
- | connections() -> List[Connection]
-```
-
-Return list of connections.
 
 <a name="aea.abstract_agent.AbstractAgent.exception_handler"></a>
 #### exception`_`handler

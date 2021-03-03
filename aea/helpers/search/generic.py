@@ -31,9 +31,11 @@ SUPPORTED_TYPES = {"str": str, "int": int, "float": float, "bool": bool}
 class GenericDataModel(DataModel):  # pylint: disable=too-few-public-methods
     """Generic data model."""
 
-    def __init__(self, data_model_name: str, data_model_attributes: Dict[str, Any]):
+    def __init__(
+        self, data_model_name: str, data_model_attributes: Dict[str, Any]
+    ) -> None:
         """Initialise the dataModel."""
-        self.attributes = []  # type: List[Attribute]
+        attributes = []  # type: List[Attribute]
         for values in data_model_attributes.values():
             enforce(
                 values["type"] in SUPPORTED_TYPES.keys(),
@@ -44,7 +46,7 @@ class GenericDataModel(DataModel):  # pylint: disable=too-few-public-methods
                 isinstance(values["is_required"], bool),
                 "Wrong type for is_required. Must be bool!",
             )
-            self.attributes.append(
+            attributes.append(
                 Attribute(
                     name=values["name"],  # type: ignore
                     type_=SUPPORTED_TYPES[values["type"]],
@@ -52,7 +54,7 @@ class GenericDataModel(DataModel):  # pylint: disable=too-few-public-methods
                 )
             )
 
-        super().__init__(data_model_name, self.attributes)
+        super().__init__(data_model_name, attributes)
 
 
 AGENT_LOCATION_MODEL = DataModel(

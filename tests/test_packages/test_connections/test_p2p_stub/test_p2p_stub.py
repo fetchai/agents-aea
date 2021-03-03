@@ -23,6 +23,7 @@ import os
 import shutil
 import tempfile
 from pathlib import Path
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -48,9 +49,7 @@ def make_test_envelope(to_="any", sender_="sender") -> Envelope:
     )
     msg.to = to_
     msg.sender = sender_
-    envelope = Envelope(
-        to=to_, sender=sender_, protocol_id=DefaultMessage.protocol_id, message=msg,
-    )
+    envelope = Envelope(to=to_, sender=sender_, message=msg,)
     return envelope
 
 
@@ -71,10 +70,10 @@ class Testp2pStubConnectionReception:
         self.identity1 = Identity("test", "con1")
         self.identity2 = Identity("test", "con2")
         self.connection1 = P2PStubConnection(
-            configuration=configuration, identity=self.identity1
+            configuration=configuration, data_dir=MagicMock(), identity=self.identity1
         )
         self.connection2 = P2PStubConnection(
-            configuration=configuration, identity=self.identity2
+            configuration=configuration, data_dir=MagicMock(), identity=self.identity2
         )
         os.chdir(self.tmpdir)
 

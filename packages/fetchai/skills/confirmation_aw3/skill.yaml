@@ -1,0 +1,143 @@
+name: confirmation_aw3
+author: fetchai
+version: 0.4.0
+type: skill
+description: This skill purchases information from other agents as specified in its
+  configuration. It is the confirmation buyer for Agent World 3.
+license: Apache-2.0
+aea_version: '>=0.10.0, <0.11.0'
+fingerprint:
+  README.md: QmNecTgkCBTBCsNB4B5o3YVwdAC3xozJodg8NiAWMT1zyf
+  __init__.py: QmRPhsSBgrqGNNnPCfofj7Mk1Ny3zd9GvoGQ7EcrQ3KG3i
+  behaviours.py: QmQrKth2VZDAXnA5ZQXqrrPWd91JRm2sD6KoHxsTtrio2y
+  dialogues.py: QmTfx5ZgmWbuWpgA93cn9YB2JuY2QoF62WapXnyprW3SBf
+  handlers.py: QmXU5wYz7mkDYmtPbsunGhseGxRUBbp5N8TxAbvdeuvjDF
+  registration_db.py: QmfA5gSnTsFvKUzYfpyrptURvAC8KVMUk7DM4wU6xvbmV8
+  strategy.py: Qme59vQevFQwWcVesHAmUmuQLNK8HKE81s1rM9P7FcQ3dK
+fingerprint_ignore_patterns: []
+connections:
+- fetchai/http_client:0.17.0
+- fetchai/ledger:0.13.0
+contracts: []
+protocols:
+- fetchai/default:0.12.0
+- fetchai/fipa:0.13.0
+- fetchai/ledger_api:0.10.0
+- fetchai/oef_search:0.13.0
+- fetchai/signing:0.10.0
+skills:
+- fetchai/generic_buyer:0.20.0
+behaviours:
+  search:
+    args:
+      search_interval: 1800
+    class_name: SearchBehaviour
+  transaction:
+    args:
+      max_processing: 420
+      transaction_interval: 2
+    class_name: TransactionBehaviour
+handlers:
+  default_handler:
+    args: {}
+    class_name: DefaultHandler
+  fipa:
+    args: {}
+    class_name: FipaHandler
+  http_handler:
+    args: {}
+    class_name: HttpHandler
+  ledger_api:
+    args: {}
+    class_name: LedgerApiHandler
+  oef_search:
+    args: {}
+    class_name: OefSearchHandler
+  signing:
+    args: {}
+    class_name: SigningHandler
+models:
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
+  fipa_dialogues:
+    args: {}
+    class_name: FipaDialogues
+  http_dialogues:
+    args: {}
+    class_name: HttpDialogues
+  ledger_api_dialogues:
+    args: {}
+    class_name: LedgerApiDialogues
+  oef_search_dialogues:
+    args: {}
+    class_name: OefSearchDialogues
+  registration_db:
+    args:
+      custom_path: path_to_db
+    class_name: RegistrationDB
+  signing_dialogues:
+    args: {}
+    class_name: SigningDialogues
+  strategy:
+    args:
+      aw1_aea: null
+      is_ledger_tx: true
+      leaderboard_token: null
+      leaderboard_url: null
+      locations:
+        berlin:
+          latitude: 52.52
+          longitude: 13.405
+        london:
+          latitude: 51.5074
+          longitude: -0.1278
+        san_francisco:
+          latitude: 37.7749
+          longitude: -122.4194
+        shanghai:
+          latitude: 31.2304
+          longitude: 121.4737
+        rome:
+          latitude: 41.9028
+          longitude: 12.4964
+        rio_de_janeiro:
+          latitude: -22.9068
+          longitude: -43.1729
+        sydney:
+          latitude: -33.8688
+          longitude: 151.2093
+        delhi:
+          latitude: 28.7041
+          longitude: 77.1025
+        tokyo:
+          latitude: 35.6762
+          longitude: 139.6503
+        mexico_city:
+          latitude: 19.4326
+          longitude: -99.1332
+        cairo:
+          latitude: 30.0444
+          longitude: 31.2357
+        kinshasa:
+          latitude: -4.4419
+          longitude: 15.2663
+      max_negotiations: 1
+      max_quantity: 100
+      max_tx_fee: 1
+      max_unit_price: 20
+      min_quantity: 1
+      search_queries:
+        weather:
+          constraint_type: ==
+          search_key: seller_service
+          search_value: weather_data
+        mobility:
+          constraint_type: ==
+          search_key: seller_service
+          search_value: mobility_data
+      search_radius: 50.0
+      stop_searching_on_result: false
+    class_name: Strategy
+dependencies: {}
+is_abstract: false

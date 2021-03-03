@@ -10,7 +10,12 @@
     "type",
     "license",
     "aea_version",
-    "class_name"
+    "fingerprint",
+    "fingerprint_ignore_patterns",
+    "class_name",
+    "description",
+    "contract_interface_paths",
+    "dependencies"
   ],
   "properties": {
     "name": {
@@ -36,6 +41,12 @@
     },
     "fingerprint_ignore_patterns": {
       "$ref": "definitions.json#/definitions/fingerprint_ignore_patterns"
+    },
+    "build_entrypoint": {
+      "$ref": "definitions.json#/definitions/build_entrypoint"
+    },
+    "build_directory": {
+      "$ref": "definitions.json#/definitions/build_directory"
     },
     "dependencies": {
       "$ref": "definitions.json#/definitions/dependencies"

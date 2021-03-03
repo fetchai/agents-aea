@@ -19,8 +19,9 @@
 
 """This module contains the scaffold contract definition."""
 
-from typing import Any, Dict
+from typing import Any
 
+from aea.common import JSONLike
 from aea.configurations.base import PublicId
 from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
@@ -33,8 +34,8 @@ class MyScaffoldContract(Contract):
 
     @classmethod
     def get_raw_transaction(
-        cls, ledger_api: LedgerApi, contract_address: str, **kwargs
-    ) -> Dict[str, Any]:
+        cls, ledger_api: LedgerApi, contract_address: str, **kwargs: Any
+    ) -> JSONLike:
         """
         Handler method for the 'GET_RAW_TRANSACTION' requests.
 
@@ -49,8 +50,8 @@ class MyScaffoldContract(Contract):
 
     @classmethod
     def get_raw_message(
-        cls, ledger_api: LedgerApi, contract_address: str, **kwargs
-    ) -> Dict[str, Any]:
+        cls, ledger_api: LedgerApi, contract_address: str, **kwargs: Any
+    ) -> bytes:
         """
         Handler method for the 'GET_RAW_MESSAGE' requests.
 
@@ -65,8 +66,8 @@ class MyScaffoldContract(Contract):
 
     @classmethod
     def get_state(
-        cls, ledger_api: LedgerApi, contract_address: str, **kwargs
-    ) -> Dict[str, Any]:
+        cls, ledger_api: LedgerApi, contract_address: str, **kwargs: Any
+    ) -> JSONLike:
         """
         Handler method for the 'GET_STATE' requests.
 

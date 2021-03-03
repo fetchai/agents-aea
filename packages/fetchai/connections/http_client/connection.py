@@ -16,28 +16,27 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """HTTP client connection and channel."""
-
 import asyncio
-import json
+import email
 import logging
+import ssl
 from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop
 from asyncio.tasks import Task
 from traceback import format_exc
-from typing import Any, Optional, Set, Tuple, Type, Union, cast
+from typing import Any, Dict, Optional, Set, Tuple, Union, cast
 
 import aiohttp
+import certifi  # pylint: disable=wrong-import-order
 from aiohttp.client_reqrep import ClientResponse
 
 from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
 from aea.exceptions import enforce
-from aea.mail.base import Envelope, EnvelopeContext, Message
+from aea.mail.base import Envelope, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
-from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 
 from packages.fetchai.protocols.http.dialogues import HttpDialogue as BaseHttpDialogue
 from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
@@ -48,53 +47,30 @@ SUCCESS = 200
 NOT_FOUND = 404
 REQUEST_TIMEOUT = 408
 SERVER_ERROR = 500
-PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.11.0")
+PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.17.0")
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.http_client")
 
 RequestId = str
 
+ssl_context = ssl.create_default_context(cafile=certifi.where())
 
-class HttpDialogue(BaseHttpDialogue):
-    """The dialogue class maintains state of a dialogue and manages it."""
 
-    __slots__ = ("_envelope_context",)
+def headers_to_string(headers: Dict) -> str:
+    """
+    Convert headers to string.
 
-    def __init__(
-        self,
-        dialogue_label: BaseDialogueLabel,
-        self_address: Address,
-        role: BaseDialogue.Role,
-        message_class: Type[HttpMessage] = HttpMessage,
-    ) -> None:
-        """
-        Initialize a dialogue.
+    :param headers: dict
 
-        :param dialogue_label: the identifier of the dialogue
-        :param self_address: the address of the entity for whom this dialogue is maintained
-        :param role: the role of the agent this dialogue is maintained for
+    :return: str
+    """
+    msg = email.message.Message()
+    for name, value in headers.items():
+        msg.add_header(name, value)
+    return msg.as_string()
 
-        :return: None
-        """
-        BaseHttpDialogue.__init__(
-            self,
-            dialogue_label=dialogue_label,
-            self_address=self_address,
-            role=role,
-            message_class=message_class,
-        )
-        self._envelope_context = None  # type: Optional[EnvelopeContext]
 
-    @property
-    def envelope_context(self) -> Optional[EnvelopeContext]:
-        """Get envelope_context."""
-        return self._envelope_context
-
-    @envelope_context.setter
-    def envelope_context(self, envelope_context: Optional[EnvelopeContext]) -> None:
-        """Set envelope_context."""
-        enforce(self._envelope_context is None, "envelope_context already set!")
-        self._envelope_context = envelope_context
+HttpDialogue = BaseHttpDialogue
 
 
 class HttpDialogues(BaseHttpDialogues):
@@ -136,13 +112,7 @@ class HTTPClientAsyncChannel:
     )
 
     def __init__(
-        self,
-        agent_address: Address,
-        address: str,
-        port: int,
-        connection_id: PublicId,
-        excluded_protocols: Optional[Set[PublicId]] = None,
-        restricted_to_protocols: Optional[Set[PublicId]] = None,
+        self, agent_address: Address, address: str, port: int, connection_id: PublicId,
     ):
         """
         Initialize an http client channel.
@@ -157,19 +127,17 @@ class HTTPClientAsyncChannel:
         self.address = address
         self.port = port
         self.connection_id = connection_id
-        self.restricted_to_protocols = restricted_to_protocols
         self._dialogues = HttpDialogues()
 
         self._in_queue = None  # type: Optional[asyncio.Queue]  # pragma: no cover
         self._loop = (
             None
         )  # type: Optional[asyncio.AbstractEventLoop]  # pragma: no cover
-        self.excluded_protocols = excluded_protocols
         self.is_stopped = True
         self._tasks: Set[Task] = set()
 
         self.logger = _default_logger
-        self.logger.info("Initialised the HTTP client channel")
+        self.logger.debug("Initialised the HTTP client channel")
 
     async def connect(self, loop: AbstractEventLoop) -> None:
         """
@@ -195,8 +163,6 @@ class HTTPClientAsyncChannel:
         """
         message = cast(HttpMessage, envelope.message)
         dialogue = cast(Optional[HttpDialogue], self._dialogues.update(message))
-        if dialogue is not None:
-            dialogue.envelope_context = envelope.context
         return message, dialogue
 
     async def _http_request_task(self, request_envelope: Envelope) -> None:
@@ -235,7 +201,7 @@ class HTTPClientAsyncChannel:
                 else b"",
                 dialogue=dialogue,
             )
-        except Exception:  # pragma: nocover # pylint: disable=broad-except
+        except Exception:  # pylint: disable=broad-except
             envelope = self.to_envelope(
                 request_http_message,
                 status_code=self.DEFAULT_EXCEPTION_CODE,
@@ -259,12 +225,19 @@ class HTTPClientAsyncChannel:
         :return: aiohttp.ClientResponse
         """
         try:
+            if request_http_message.is_set("headers") and request_http_message.headers:
+                headers: Optional[dict] = dict(
+                    email.message_from_string(request_http_message.headers).items()
+                )
+            else:
+                headers = None
             async with aiohttp.ClientSession() as session:
                 async with session.request(
                     method=request_http_message.method,
                     url=request_http_message.url,
-                    headers=request_http_message.headers,
+                    headers=headers,
                     data=request_http_message.body,
+                    ssl=ssl_context,
                 ) as resp:
                     await resp.read()
                 return resp
@@ -293,14 +266,6 @@ class HTTPClientAsyncChannel:
 
         if request_envelope is None:
             return
-
-        if request_envelope.protocol_id in (self.excluded_protocols or []):
-            self.logger.error(
-                "This envelope cannot be sent with the http client connection: protocol_id={}".format(
-                    request_envelope.protocol_id
-                )
-            )
-            raise ValueError("Cannot send message.")
 
         enforce(
             isinstance(request_envelope.message, HttpMessage),
@@ -372,17 +337,13 @@ class HTTPClientAsyncChannel:
             performative=HttpMessage.Performative.RESPONSE,
             target_message=http_request_message,
             status_code=status_code,
-            headers=json.dumps(dict(headers.items())),
+            headers=headers_to_string(headers),
             status_text=status_text,
             body=body,
             version="",
         )
         envelope = Envelope(
-            to=http_message.to,
-            sender=http_message.sender,
-            protocol_id=http_message.protocol_id,
-            context=dialogue.envelope_context,
-            message=http_message,
+            to=http_message.to, sender=http_message.sender, message=http_message,
         )
         return envelope
 
@@ -415,7 +376,7 @@ class HTTPClientConnection(Connection):
 
     connection_id = PUBLIC_ID
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize a HTTP client connection."""
         super().__init__(**kwargs)
         host = cast(str, self.configuration.config.get("host"))
@@ -423,11 +384,7 @@ class HTTPClientConnection(Connection):
         if host is None or port is None:  # pragma: nocover
             raise ValueError("host and port must be set!")
         self.channel = HTTPClientAsyncChannel(
-            self.address,
-            host,
-            port,
-            connection_id=self.connection_id,
-            excluded_protocols=self.excluded_protocols,
+            self.address, host, port, connection_id=self.connection_id,
         )
 
     async def connect(self) -> None:
@@ -451,9 +408,9 @@ class HTTPClientConnection(Connection):
         """
         if self.is_disconnected:
             return  # pragma: nocover
-        self._state.set(ConnectionStates.disconnecting)
+        self.state = ConnectionStates.disconnecting
         await self.channel.disconnect()
-        self._state.set(ConnectionStates.disconnected)
+        self.state = ConnectionStates.disconnected
 
     async def send(self, envelope: "Envelope") -> None:
         """
@@ -465,7 +422,9 @@ class HTTPClientConnection(Connection):
         self._ensure_connected()
         self.channel.send(envelope)
 
-    async def receive(self, *args, **kwargs) -> Optional[Union["Envelope", None]]:
+    async def receive(
+        self, *args: Any, **kwargs: Any
+    ) -> Optional[Union["Envelope", None]]:
         """
         Receive an envelope.
 

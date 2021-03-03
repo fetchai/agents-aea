@@ -20,7 +20,7 @@
 """This module contains the strategy class."""
 
 import random  # nosec
-from typing import List
+from typing import Any, List
 
 from aea.exceptions import enforce
 from aea.helpers.search.generic import (
@@ -47,12 +47,13 @@ DEFAULT_TO_SUPPLY = 0
 DEFAULT_VALUE = 0
 DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
 DEFAULT_SERVICE_DATA = {"key": "seller_service", "value": "erc1155_contract"}
+DEFAULT_GAS = 5000000
 
 
 class Strategy(Model):
     """This class defines a strategy for the agent."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize the strategy of the agent."""
         ledger_id = kwargs.pop("ledger_id", None)
         self._token_type = kwargs.pop("token_type", DEFAULT_TOKEN_TYPE)
@@ -97,6 +98,7 @@ class Strategy(Model):
         self._simple_service_data = {
             self._set_service_data["key"]: self._set_service_data["value"]
         }
+        self._gas = kwargs.pop("gas", DEFAULT_GAS)
 
         super().__init__(**kwargs)
         self._ledger_id = (
@@ -188,6 +190,11 @@ class Strategy(Model):
             "Only allowed to switch to true.",
         )
         self._is_tokens_minted = is_tokens_minted
+
+    @property
+    def gas(self) -> int:
+        """Get gas."""
+        return self._gas
 
     def get_location_description(self) -> Description:
         """
@@ -300,7 +307,7 @@ class Strategy(Model):
         return proposal
 
     def get_single_swap_terms(
-        self, proposal: Description, counterparty_address
+        self, proposal: Description, counterparty_address: str
     ) -> Terms:
         """Get the proposal."""
         terms = Terms(

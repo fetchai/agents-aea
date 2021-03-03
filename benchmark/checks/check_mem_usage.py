@@ -20,6 +20,7 @@
 """Memory usage check."""
 import time
 from threading import Thread
+from typing import List, Tuple, Union
 
 import click
 
@@ -55,7 +56,7 @@ class TestHandler(Handler):
         self.context.outbox.put(make_envelope(message.to, message.sender))
 
 
-def run(duration, runtime_mode):
+def run(duration: int, runtime_mode: str) -> List[Tuple[str, Union[int, float]]]:
     """Check memory usage."""
     # pylint: disable=import-outside-toplevel,unused-import
     # import manually due to some lazy imports in decision_maker
@@ -91,7 +92,7 @@ def run(duration, runtime_mode):
     "--runtime_mode", default="async", help="Runtime mode: async or threaded."
 )
 @click.option("--number_of_runs", default=10, help="How many times run test.")
-def main(duration, runtime_mode, number_of_runs):
+def main(duration: int, runtime_mode: str, number_of_runs: int) -> None:
     """Run test."""
     click.echo("Start test with options:")
     click.echo(f"* Duration: {duration} seconds")

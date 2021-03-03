@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+//package libp2p_node.aea;
+package aea;
+
+message Envelope{
+    string to = 1;
+    string sender = 2;
+    string protocol_id = 3;
+    bytes message = 4;
+    string uri = 5;
+}

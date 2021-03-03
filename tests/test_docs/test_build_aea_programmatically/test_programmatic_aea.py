@@ -40,9 +40,9 @@ class TestProgrammaticAEA(BaseAEATestCase):
     @classmethod
     def setup_class(cls):
         """Setup the test class."""
-        BaseAEATestCase.setup_class()
+        super().setup_class()
         doc_path = os.path.join(ROOT_DIR, MD_FILE)
-        cls.code_blocks = extract_code_blocks(filepath=doc_path, filter="python")
+        cls.code_blocks = extract_code_blocks(filepath=doc_path, filter_="python")
         test_code_path = os.path.join(CUR_PATH, PY_FILE)
         cls.python_file = extract_python_code(test_code_path)
 
@@ -59,7 +59,7 @@ class TestProgrammaticAEA(BaseAEATestCase):
         assert os.path.exists(Path(self.t, "output_file"))
         assert os.path.exists(Path(self.t, DEFAULT_PRIVATE_KEY_FILE))
 
-        message_text_1 = b"other_agent,my_aea,fetchai/default:0.8.0,"
+        message_text_1 = b"other_agent,my_aea,fetchai/default:0.1.0,"
         message_text_2 = b"hello,"
         path = os.path.join(self.t, "output_file")
         msg = Path(path).read_bytes()

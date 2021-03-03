@@ -1,0 +1,97 @@
+name: confirmation_aw2
+author: fetchai
+version: 0.6.0
+type: skill
+description: This skill purchases information from other agents as specified in its
+  configuration. It is the confirmation buyer for Agent World 2.
+license: Apache-2.0
+aea_version: '>=0.10.0, <0.11.0'
+fingerprint:
+  README.md: QmQtVnRU5nNhxkaVKX6Go5G4X5dVcocLGM5uynZ1wzHCKK
+  __init__.py: QmcREaxZroc7A6xgD8EbNaEdEWAabcuaLpY6THRemaQaja
+  behaviours.py: QmWRRAXwJf7mEcV4L2DdG43zkyg55PBViiLnpy1Chj28xn
+  dialogues.py: QmcUgBjxeytE5aAx3VvPyna5EcBuqck9KazG3HygCWjawv
+  handlers.py: QmVeJuN78rMn3kWFbntfBUk6v88DYBW88ZQZ129KZo84wp
+  registration_db.py: QmeyU39ChnomuFefPLdGftSKYs9N6oohQwHUmY54TKHEWW
+  strategy.py: QmbaB7NXSvZRZtAVyba1ANEkrKuSfA3NbPkxU4mDwf3Msh
+fingerprint_ignore_patterns: []
+connections:
+- fetchai/ledger:0.13.0
+contracts: []
+protocols:
+- fetchai/default:0.12.0
+- fetchai/fipa:0.13.0
+- fetchai/ledger_api:0.10.0
+- fetchai/oef_search:0.13.0
+- fetchai/signing:0.10.0
+skills:
+- fetchai/generic_buyer:0.20.0
+behaviours:
+  search:
+    args:
+      search_interval: 5
+    class_name: SearchBehaviour
+  transaction:
+    args:
+      max_processing: 420
+      transaction_interval: 2
+    class_name: TransactionBehaviour
+handlers:
+  default_handler:
+    args: {}
+    class_name: DefaultHandler
+  fipa:
+    args: {}
+    class_name: FipaHandler
+  ledger_api:
+    args: {}
+    class_name: LedgerApiHandler
+  oef_search:
+    args: {}
+    class_name: OefSearchHandler
+  signing:
+    args: {}
+    class_name: SigningHandler
+models:
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
+  fipa_dialogues:
+    args: {}
+    class_name: FipaDialogues
+  ledger_api_dialogues:
+    args: {}
+    class_name: LedgerApiDialogues
+  oef_search_dialogues:
+    args: {}
+    class_name: OefSearchDialogues
+  registration_db:
+    args:
+      custom_path: path_to_db
+    class_name: RegistrationDB
+  signing_dialogues:
+    args: {}
+    class_name: SigningDialogues
+  strategy:
+    args:
+      aw1_aea: null
+      is_ledger_tx: true
+      location:
+        latitude: 51.5194
+        longitude: 0.127
+      max_negotiations: 1
+      max_quantity: 100
+      max_tx_fee: 1
+      max_unit_price: 20
+      minimum_hours_between_txs: 4
+      minimum_minutes_since_last_attempt: 2
+      search_query:
+        constraint_type: ==
+        search_key: seller_service
+        search_value: weather_data
+      search_radius: 50.0
+      service_id: weather_data
+      stop_searching_on_result: false
+    class_name: Strategy
+dependencies: {}
+is_abstract: false

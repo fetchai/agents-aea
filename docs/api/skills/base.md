@@ -16,7 +16,7 @@ This class implements the context of a skill.
 #### `__`init`__`
 
 ```python
- | __init__(agent_context: Optional[AgentContext] = None, skill: Optional["Skill"] = None)
+ | __init__(agent_context: Optional[AgentContext] = None, skill: Optional["Skill"] = None) -> None
 ```
 
 Initialize a skill context.
@@ -173,6 +173,16 @@ Get connection status.
 
 Get outbox.
 
+<a name="aea.skills.base.SkillContext.storage"></a>
+#### storage
+
+```python
+ | @property
+ | storage() -> Optional[Storage]
+```
+
+Get optional storage for agent.
+
 <a name="aea.skills.base.SkillContext.message_in_queue"></a>
 #### message`_`in`_`queue
 
@@ -212,6 +222,26 @@ Get decision maker handler context.
 ```
 
 Get behaviours of the skill.
+
+<a name="aea.skills.base.SkillContext.default_ledger_id"></a>
+#### default`_`ledger`_`id
+
+```python
+ | @property
+ | default_ledger_id() -> str
+```
+
+Get the default ledger id.
+
+<a name="aea.skills.base.SkillContext.currency_denominations"></a>
+#### currency`_`denominations
+
+```python
+ | @property
+ | currency_denominations() -> Dict[str, str]
+```
+
+Get a dictionary mapping ledger ids to currency denominations.
 
 <a name="aea.skills.base.SkillContext.search_service_address"></a>
 #### search`_`service`_`address
@@ -267,7 +297,7 @@ Get the agent context namespace.
 #### `__`getattr`__`
 
 ```python
- | __getattr__(item) -> Any
+ | __getattr__(item: Any) -> Any
 ```
 
 Get attribute.
@@ -285,7 +315,7 @@ This class defines an abstract interface for skill component classes.
 #### `__`init`__`
 
 ```python
- | __init__(name: str, skill_context: SkillContext, configuration: Optional[SkillComponentConfiguration] = None, **kwargs, ,)
+ | __init__(name: str, skill_context: SkillContext, configuration: Optional[SkillComponentConfiguration] = None, **kwargs: Any, ,) -> None
 ```
 
 Initialize a skill component.
@@ -380,7 +410,7 @@ None
 ```python
  | @classmethod
  | @abstractmethod
- | parse_module(cls, path: str, configs: Dict[str, SkillComponentConfiguration], skill_context: SkillContext)
+ | parse_module(cls, path: str, configs: Dict[str, SkillComponentConfiguration], skill_context: SkillContext) -> dict
 ```
 
 Parse the component module.
@@ -505,6 +535,15 @@ Implement the reaction to a message.
 
 None
 
+<a name="aea.skills.base.Handler.handle_wrapper"></a>
+#### handle`_`wrapper
+
+```python
+ | handle_wrapper(message: Message) -> None
+```
+
+Wrap the call of the handler. This method must be called only by the framework.
+
 <a name="aea.skills.base.Handler.parse_module"></a>
 #### parse`_`module
 
@@ -533,6 +572,26 @@ class Model(SkillComponent,  ABC)
 ```
 
 This class implements an abstract model.
+
+<a name="aea.skills.base.Model.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(name: str, skill_context: SkillContext, configuration: Optional[SkillComponentConfiguration] = None, keep_terminal_state_dialogues: Optional[bool] = None, **kwargs: Any, ,) -> None
+```
+
+Initialize a model.
+
+**Arguments**:
+
+- `name`: the name of the component.
+- `configuration`: the configuration for the component.
+- `skill_context`: the skill context.
+- `keep_terminal_state_dialogues`: specify do dialogues in terminal state should stay or not
+
+**Returns**:
+
+None
 
 <a name="aea.skills.base.Model.setup"></a>
 #### setup
@@ -585,7 +644,7 @@ This class implements a skill.
 #### `__`init`__`
 
 ```python
- | __init__(configuration: SkillConfig, skill_context: Optional[SkillContext] = None, handlers: Optional[Dict[str, Handler]] = None, behaviours: Optional[Dict[str, Behaviour]] = None, models: Optional[Dict[str, Model]] = None, **kwargs, ,)
+ | __init__(configuration: SkillConfig, skill_context: Optional[SkillContext] = None, handlers: Optional[Dict[str, Handler]] = None, behaviours: Optional[Dict[str, Behaviour]] = None, models: Optional[Dict[str, Model]] = None, **kwargs: Any, ,)
 ```
 
 Initialize a skill.
@@ -643,7 +702,7 @@ Get the handlers.
 
 ```python
  | @classmethod
- | from_dir(cls, directory: str, agent_context: AgentContext, **kwargs) -> "Skill"
+ | from_dir(cls, directory: str, agent_context: AgentContext, **kwargs: Any) -> "Skill"
 ```
 
 Load the skill from a directory.
@@ -675,7 +734,7 @@ logger provided by the skill context.
 
 ```python
  | @logger.setter
- | logger(*args) -> None
+ | logger(*args: str) -> None
 ```
 
 Set the logger.
@@ -685,7 +744,7 @@ Set the logger.
 
 ```python
  | @classmethod
- | from_config(cls, configuration: SkillConfig, agent_context: AgentContext, **kwargs) -> "Skill"
+ | from_config(cls, configuration: SkillConfig, agent_context: AgentContext, **kwargs: Any) -> "Skill"
 ```
 
 Load the skill from configuration.

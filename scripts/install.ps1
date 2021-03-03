@@ -1,6 +1,6 @@
 # usage
-# from cmd: @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/fetchai/agents-aea/master/scripts/install.ps1'))"
-# from powershell: iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/fetchai/agents-aea/master/scripts/install.ps1'))
+# from cmd: @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.ps1'))"
+# from powershell: iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.ps1'))
 
 function install_python {
 	echo "Installing python"
@@ -10,9 +10,24 @@ function install_python {
 
 }
 
+function install_build_tools {
+	$output=pip install wheel --force --no-cache-dir 2>&1 |out-string;
+	$output=pip wheel cytoolz --no-cache-dir 2>&1 |out-string;
+    if ($LastExitCode -ne 0) {
+    	echo "Installing visual studio build tools"
+	    Invoke-WebRequest https://download.microsoft.com/download/5/f/7/5f7acaeb-8363-451f-9425-68a90f98b238/visualcppbuildtools_full.exe -OutFile visualcppbuildtools_full.exe
+	    ./visualcppbuildtools_full.exe /NoRestart /Passive | Out-Null
+	    rm ./visualcppbuildtools_full.exe
+	} else{
+		echo "Visual studio build tools are already installed"
+
+	}
+
+}
+
 function install_aea {
 	echo "Install aea"
-    $output=pip install aea[all] 2>&1 |out-string;
+    $output=pip install aea[all]==0.10.1 --force --no-cache-dir 2>&1 |out-string;
     if ($LastExitCode -ne 0) {
         echo $output
         echo "AEA install failed!"
@@ -48,6 +63,7 @@ function check_python {
 function main{
     refresh-path
     check_python
+    install_build_tools
     refresh-path
     install_aea
     pause

@@ -16,30 +16,28 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the base message and serialization definition."""
 import importlib
 import inspect
 import logging
 import re
 from abc import ABC, abstractmethod
+from base64 import b64decode, b64encode
 from copy import copy
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple, Type, cast
-
-from google.protobuf.struct_pb2 import Struct
+from typing import Any, Dict, Optional, Set, Tuple, Type, cast
 
 from aea.components.base import Component, load_aea_package
 from aea.configurations.base import ComponentType, ProtocolConfig, PublicId
 from aea.configurations.loader import load_component_configuration
-from aea.exceptions import enforce
-from aea.mail.base_pb2 import DialogueMessage
-from aea.mail.base_pb2 import Message as ProtobufMessage
+from aea.exceptions import AEAComponentLoadException, enforce
 
 
 _default_logger = logging.getLogger(__name__)
 
+MAX_PRINT_INNER = 600
+MAX_PRINT_OUTER = 2000
 Address = str
 
 
@@ -47,31 +45,75 @@ class Message:
     """This class implements a message."""
 
     protocol_id = None  # type: PublicId
+    protocol_specification_id = None  # type: PublicId
     serializer = None  # type: Type["Serializer"]
+
+    __slots__ = ("_slots", "_to", "_sender")
 
     class Performative(Enum):
         """Performatives for the base message."""
 
-        def __str__(self):
+        def __str__(self) -> str:
             """Get the string representation."""
             return str(self.value)
 
-    def __init__(self, _body: Optional[Dict] = None, **kwargs):
+    class _SlotsCls:  # pylint: disable=too-few-public-methods
+        __slots__: Tuple[str, ...] = (
+            "performative",
+            "dialogue_reference",
+            "message_id",
+            "target",
+        )
+
+    _performatives: Set[str] = set()
+
+    def __init__(self, _body: Optional[Dict] = None, **kwargs: Any) -> None:
         """
         Initialize a Message object.
 
         :param body: the dictionary of values to hold.
         :param kwargs: any additional value to add to the body. It will overwrite the body values.
         """
+        self._slots = self._SlotsCls()
+
         self._to: Optional[Address] = None
         self._sender: Optional[Address] = None
-        self.__body: Dict[str, Any] = copy(_body) if _body else {}
-        self.__body.update(kwargs)
+
+        self._update_slots_from_dict(copy(_body) if _body else {})
+        self._update_slots_from_dict(kwargs)
 
         try:
             self._is_consistent()
         except Exception as e:  # pylint: disable=broad-except
             _default_logger.error(e)
+
+    def json(self) -> dict:
+        """Get json friendly str representation of the message."""
+        return {
+            "to": self._to,
+            "sender": self._sender,
+            "body": b64encode(self.encode()).decode("utf-8"),
+        }
+
+    @classmethod
+    def from_json(cls, data: dict) -> "Message":
+        """Construct message instance from json data."""
+        try:
+            instance = cls.decode(b64decode(data["body"]))
+            sender = data["sender"]
+            if sender:
+                instance.sender = sender
+            to = data["to"]
+            if to:
+                instance.to = to
+            return instance
+        except KeyError:  # pragma: nocover
+            raise ValueError(f"Message representation is invalid: {data}")
+
+    @property
+    def valid_performatives(self) -> Set[str]:
+        """Get valid performatives."""
+        return self._performatives
 
     @property
     def has_sender(self) -> bool:
@@ -125,17 +167,20 @@ class Message:
 
         :return: the body
         """
-        return self.__body
+        return {
+            key: self.get(key) for key in self._SlotsCls.__slots__ if self.is_set(key)
+        }
 
     @_body.setter
     def _body(self, body: Dict) -> None:
         """
-        Set the body of hte message.
+        Set the body of the message.
 
         :param body: the body.
         :return: None
         """
-        self.__body = body
+        self._slots = self._SlotsCls()  # new instsance to clean up all data
+        self._update_slots_from_dict(body)
 
     @property
     def dialogue_reference(self) -> Tuple[str, str]:
@@ -173,49 +218,65 @@ class Message:
         :param value: the value.
         :return: None
         """
-        self._body[key] = value
+        try:
+            setattr(self._slots, key, value)
+        except AttributeError as e:  # pragma: nocover
+            raise ValueError(f"Field `{key}` is not supported {e}")
 
     def get(self, key: str) -> Optional[Any]:
         """Get value for key."""
-        return self._body.get(key, None)
+        return getattr(self._slots, key, None)
 
     def is_set(self, key: str) -> bool:
         """Check value is set for key."""
-        return key in self._body
+        return hasattr(self._slots, key)
+
+    def _update_slots_from_dict(self, data: dict) -> None:
+        """Update slots value with data from dict."""
+        for key, value in data.items():
+            self.set(key, value)
 
     def _is_consistent(self) -> bool:  # pylint: disable=no-self-use
         """Check that the data is consistent."""
         return True
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, Message)
             and self._sender == other._sender
             and self._to == other._to
-            # and self.dialogue_reference == other.dialogue_reference  # noqa: E800
-            # and self.message_id == other.message_id  # noqa: E800
-            # and self.target == other.target  # noqa: E800
-            # and self.performative == other.performative  # noqa: E800
             and self._body == other._body
         )
 
-    def __str__(self):
-        """Get the string representation of the message."""
-        return (
-            "Message(sender={},to={},".format(self._sender, self._to)
-            + ",".join(
-                map(
-                    lambda key_value: str(key_value[0]) + "=" + str(key_value[1]),
-                    self._body.items(),
-                )
+    def __repr__(self) -> str:
+        """Get the representation of the message."""
+        body = ",".join(
+            map(
+                lambda key_value: f"{str(key_value[0])}={str(key_value[1])}",
+                self._body.items(),
             )
-            + ")"
         )
+        return f"Message(sender={self._sender},to={self._to},{body})"
+
+    def __str__(self) -> str:
+        """Get the string representation of the message. Abbreviated to prevent spamming of logs."""
+        body = ",".join(
+            map(
+                lambda key_value: f"{str(key_value[0])[:MAX_PRINT_INNER]}={str(key_value[1])[:MAX_PRINT_INNER]}",
+                self._body.items(),
+            )
+        )
+        return f"Message(sender={self._sender},to={self._to},{body})"[:MAX_PRINT_OUTER]
 
     def encode(self) -> bytes:
         """Encode the message."""
         return self.serializer.encode(self)
+
+    @classmethod
+    def decode(cls, data: bytes) -> "Message":
+        """Decode the message."""
+        return cls.serializer.decode(data)
 
     @property
     def has_dialogue_info(self) -> bool:
@@ -266,90 +327,6 @@ class Serializer(Encoder, Decoder, ABC):
     """The implementations of this class defines a serialization layer for a protocol."""
 
 
-class ProtobufSerializer(Serializer):
-    """
-    Default Protobuf serializer.
-
-    It assumes that the Message contains a JSON-serializable body.
-    """
-
-    @staticmethod
-    def encode(msg: Message) -> bytes:
-        """
-        Encode a message into bytes using Protobuf.
-
-        - if one of message_id, target and dialogue_reference are not defined,
-          serialize only the message body/
-        - otherwise, extract those fields from the body and instantiate
-          a Message struct.
-        """
-        message_pb = ProtobufMessage()
-        if msg.has_dialogue_info:
-            dialogue_message_pb = DialogueMessage()
-            dialogue_message_pb.message_id = msg.message_id
-            dialogue_message_pb.dialogue_starter_reference = msg.dialogue_reference[0]
-            dialogue_message_pb.dialogue_responder_reference = msg.dialogue_reference[1]
-            dialogue_message_pb.target = msg.target
-
-            new_body = copy(msg._body)  # pylint: disable=protected-access
-            new_body.pop("message_id")
-            new_body.pop("dialogue_reference")
-            new_body.pop("target")
-
-            body_json = Struct()
-            body_json.update(new_body)  # pylint: disable=no-member
-
-            dialogue_message_pb.content = (  # pylint: disable=no-member
-                body_json.SerializeToString()
-            )
-            message_pb.dialogue_message.CopyFrom(  # pylint: disable=no-member
-                dialogue_message_pb
-            )
-        else:
-            body_json = Struct()
-            body_json.update(msg._body)  # pylint: disable=no-member,protected-access
-            message_pb.body.CopyFrom(body_json)  # pylint: disable=no-member
-
-        return message_pb.SerializeToString()
-
-    @staticmethod
-    def decode(obj: bytes) -> Message:
-        """
-        Decode bytes into a message using Protobuf.
-
-        First, try to parse the input as a Protobuf 'Message';
-        if it fails, parse the bytes as struct.
-        """
-        message_pb = ProtobufMessage()
-        message_pb.ParseFromString(obj)
-        message_type = message_pb.WhichOneof("message")
-        if message_type == "body":
-            body = dict(message_pb.body)  # pylint: disable=no-member
-            msg = Message(_body=body)
-            return msg
-        if message_type == "dialogue_message":
-            dialogue_message_pb = (
-                message_pb.dialogue_message  # pylint: disable=no-member
-            )
-            message_id = dialogue_message_pb.message_id
-            target = dialogue_message_pb.target
-            dialogue_starter_reference = dialogue_message_pb.dialogue_starter_reference
-            dialogue_responder_reference = (
-                dialogue_message_pb.dialogue_responder_reference
-            )
-            body_json = Struct()
-            body_json.ParseFromString(dialogue_message_pb.content)
-            body = dict(body_json)
-            body["message_id"] = message_id
-            body["target"] = target
-            body["dialogue_reference"] = (
-                dialogue_starter_reference,
-                dialogue_responder_reference,
-            )
-            return Message(_body=body)
-        raise ValueError("Message type not recognized.")  # pragma: nocover
-
-
 class Protocol(Component):
     """
     This class implements a specifications for a protocol.
@@ -357,9 +334,11 @@ class Protocol(Component):
     It includes a serializer to encode/decode a message.
     """
 
+    __slots__ = ("_message_class",)
+
     def __init__(
-        self, configuration: ProtocolConfig, message_class: Type[Message], **kwargs
-    ):
+        self, configuration: ProtocolConfig, message_class: Type[Message], **kwargs: Any
+    ) -> None:
         """
         Initialize the protocol manager.
 
@@ -367,7 +346,6 @@ class Protocol(Component):
         :param message_class: the message class.
         """
         super().__init__(configuration, **kwargs)
-
         self._message_class = message_class
 
     @property
@@ -376,7 +354,7 @@ class Protocol(Component):
         return self._message_class.serializer
 
     @classmethod
-    def from_dir(cls, directory: str, **kwargs) -> "Protocol":
+    def from_dir(cls, directory: str, **kwargs: Any) -> "Protocol":
         """
         Load the protocol from a directory.
 
@@ -391,7 +369,7 @@ class Protocol(Component):
         return Protocol.from_config(configuration, **kwargs)
 
     @classmethod
-    def from_config(cls, configuration: ProtocolConfig, **kwargs) -> "Protocol":
+    def from_config(cls, configuration: ProtocolConfig, **kwargs: Any) -> "Protocol":
         """
         Load the protocol from configuration.
 
@@ -409,26 +387,37 @@ class Protocol(Component):
             word.capitalize() for word in configuration.name.split("_")
         )
         message_classes = list(
-            filter(
-                lambda x: re.match("{}Message".format(name_camel_case), x[0]), classes
-            )
+            filter(lambda x: re.match(f"{name_camel_case}Message", x[0]), classes)
         )
-        enforce(len(message_classes) == 1, "Not exactly one message class detected.")
+        if len(message_classes) != 1:  # pragma: nocover
+            raise AEAComponentLoadException("Not exactly one message class detected.")
         message_class = message_classes[0][1]
         class_module = importlib.import_module(
             configuration.prefix_import_path + ".serialization"
         )
         classes = inspect.getmembers(class_module, inspect.isclass)
         serializer_classes = list(
-            filter(
-                lambda x: re.match("{}Serializer".format(name_camel_case), x[0]),
-                classes,
+            filter(lambda x: re.match(f"{name_camel_case}Serializer", x[0]), classes,)
+        )
+        if len(serializer_classes) != 1:  # pragma: nocover
+            raise AEAComponentLoadException(
+                "Not exactly one serializer class detected."
             )
-        )
-        enforce(
-            len(serializer_classes) == 1, "Not exactly one serializer class detected."
-        )
         serialize_class = serializer_classes[0][1]
         message_class.serializer = serialize_class
 
         return Protocol(configuration, message_class, **kwargs)
+
+    @property
+    def protocol_id(self) -> PublicId:
+        """Get protocol id."""
+        return cast(ProtocolConfig, self._configuration).public_id
+
+    @property
+    def protocol_specification_id(self) -> PublicId:
+        """Get protocol specification id."""
+        return cast(ProtocolConfig, self._configuration).protocol_specification_id
+
+    def __repr__(self) -> str:
+        """Get str repr of the protocol."""
+        return f"Protocol({self.protocol_id})"

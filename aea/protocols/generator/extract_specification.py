@@ -29,7 +29,6 @@ from aea.protocols.generator.common import (
     SPECIFICATION_PRIMITIVE_TYPES,
     _get_sub_types_of_compositional_types,
 )
-from aea.protocols.generator.validate import validate
 
 
 def _ct_specification_type_to_python_type(specification_type: str) -> str:
@@ -164,6 +163,7 @@ class PythonicProtocolSpecification:  # pylint: disable=too-few-public-methods
         self.terminal_performatives = list()  # type: List[str]
         self.roles = list()  # type: List[str]
         self.end_states = list()  # type: List[str]
+        self.keep_terminal_state_dialogues = False  # type: bool
 
         self.typing_imports = {
             "Set": True,
@@ -185,11 +185,6 @@ def extract(
     :param protocol_specification: a protocol specification
     :return: a Pythonic protocol specification
     """
-    # check the specification is valid
-    result_bool, result_msg = validate(protocol_specification)
-    if not result_bool:
-        raise ProtocolSpecificationParseError(result_msg)
-
     spec = PythonicProtocolSpecification()
 
     all_performatives_set = set()
@@ -257,5 +252,11 @@ def extract(
         spec.roles = sorted(roles_set)
         spec.end_states = cast(
             List[str], protocol_specification.dialogue_config["end_states"]
+        )
+        spec.keep_terminal_state_dialogues = cast(
+            bool,
+            protocol_specification.dialogue_config.get(
+                "keep_terminal_state_dialogues", False
+            ),
         )
     return spec

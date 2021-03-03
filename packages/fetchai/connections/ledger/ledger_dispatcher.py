@@ -19,11 +19,11 @@
 """This module contains the implementation of the ledger API request dispatcher."""
 import logging
 import time
-from typing import cast
+from typing import Any, cast
 
 from aea.connections.base import ConnectionStates
 from aea.crypto.base import LedgerApi
-from aea.helpers.transaction.base import RawTransaction, TransactionDigest
+from aea.helpers.transaction.base import RawTransaction, State, TransactionDigest
 from aea.protocols.base import Address, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import Dialogues as BaseDialogues
@@ -45,7 +45,7 @@ _default_logger = logging.getLogger(
 class LedgerApiDialogues(BaseLedgerApiDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -75,7 +75,7 @@ class LedgerApiDialogues(BaseLedgerApiDialogues):
 class LedgerApiRequestDispatcher(RequestDispatcher):
     """Implement ledger API request dispatcher."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Initialize the dispatcher."""
         logger = kwargs.pop("logger", None)
         logger = logger if logger is not None else _default_logger
@@ -130,6 +130,33 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
                     performative=LedgerApiMessage.Performative.BALANCE,
                     target_message=message,
                     balance=balance,
+                    ledger_id=message.ledger_id,
+                ),
+            )
+        return response
+
+    def get_state(
+        self, api: LedgerApi, message: LedgerApiMessage, dialogue: LedgerApiDialogue,
+    ) -> LedgerApiMessage:
+        """
+        Send the request 'get_state'.
+
+        :param api: the API object.
+        :param message: the Ledger API message
+        :return: None
+        """
+        result = api.get_state(message.callable, *message.args, **message.kwargs.body)
+        if result is None:  # pragma: nocover
+            response = self.get_error_message(
+                ValueError("Failed to get state"), api, message, dialogue
+            )
+        else:
+            response = cast(
+                LedgerApiMessage,
+                dialogue.reply(
+                    performative=LedgerApiMessage.Performative.STATE,
+                    target_message=message,
+                    state=State(message.ledger_id, result),
                     ledger_id=message.ledger_id,
                 ),
             )
@@ -191,7 +218,8 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
             transaction_receipt = api.get_transaction_receipt(
                 message.transaction_digest.body
             )
-            is_settled = api.is_transaction_settled(transaction_receipt)
+            if transaction_receipt is not None:
+                is_settled = api.is_transaction_settled(transaction_receipt)
             attempts += 1
         attempts = 0
         transaction = api.get_transaction(message.transaction_digest.body)
@@ -216,7 +244,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
             )
         elif transaction is None:  # pragma: nocover
             response = self.get_error_message(
-                ValueError("No tx returned"), api, message, dialogue
+                ValueError("No transaction returned"), api, message, dialogue
             )
         else:
             response = cast(

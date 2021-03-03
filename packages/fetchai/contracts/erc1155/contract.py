@@ -19,26 +19,25 @@
 
 """This module contains the erc1155 contract definition."""
 
-import json
 import logging
 import random
-from typing import Any, Dict, List, Optional, cast
+from typing import Dict, List, Optional, cast
 
+from aea_crypto_cosmos import CosmosApi
+from aea_crypto_ethereum import EthereumApi
+from aea_crypto_fetchai import FetchAIApi
 from vyper.utils import keccak256
 
-from aea.common import Address
+from aea.common import Address, JSONLike
 from aea.configurations.base import PublicId
 from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
-from aea.crypto.cosmos import CosmosApi
-from aea.crypto.ethereum import EthereumApi
-from aea.crypto.fetchai import FetchAIApi
 
 
 _default_logger = logging.getLogger("aea.packages.fetchai.contracts.erc1155.contract")
 MAX_UINT_256 = 2 ^ 256 - 1
 
-PUBLIC_ID = PublicId.from_str("fetchai/erc1155:0.12.0")
+PUBLIC_ID = PublicId.from_str("fetchai/erc1155:0.16.0")
 
 
 class ERC1155Contract(Contract):
@@ -86,7 +85,7 @@ class ERC1155Contract(Contract):
         token_ids: List[int],
         data: Optional[bytes] = b"",
         gas: int = 300000,
-    ) -> Dict[str, Any]:
+    ) -> JSONLike:
         """
         Get the transaction to create a batch of tokens.
 
@@ -110,7 +109,7 @@ class ERC1155Contract(Contract):
                     "nonce": nonce,
                 }
             )
-            tx = cls._try_estimate_gas(ledger_api, tx)
+            tx = ledger_api.update_with_gas_estimate(tx)
             return tx
         if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
             tokens = []
@@ -136,7 +135,7 @@ class ERC1155Contract(Contract):
         token_id: int,
         data: Optional[bytes] = b"",
         gas: int = 300000,
-    ) -> Dict[str, Any]:
+    ) -> JSONLike:
         """
         Get the transaction to create a single token.
 
@@ -160,7 +159,7 @@ class ERC1155Contract(Contract):
                     "nonce": nonce,
                 }
             )
-            tx = cls._try_estimate_gas(ledger_api, tx)
+            tx = ledger_api.update_with_gas_estimate(tx)
             return tx
         if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
             msg = {
@@ -188,7 +187,7 @@ class ERC1155Contract(Contract):
         mint_quantities: List[int],
         data: Optional[bytes] = b"",
         gas: int = 500000,
-    ) -> Dict[str, Any]:
+    ) -> JSONLike:
         """
         Get the transaction to mint a batch of tokens.
 
@@ -215,7 +214,7 @@ class ERC1155Contract(Contract):
                     "nonce": nonce,
                 }
             )
-            tx = cls._try_estimate_gas(ledger_api, tx)
+            tx = ledger_api.update_with_gas_estimate(tx)
             return tx
         if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
             tokens = []
@@ -282,7 +281,7 @@ class ERC1155Contract(Contract):
         mint_quantity: int,
         data: Optional[bytes] = b"",
         gas: int = 300000,
-    ) -> Dict[str, Any]:
+    ) -> JSONLike:
         """
         Get the transaction to mint a single token.
 
@@ -308,7 +307,7 @@ class ERC1155Contract(Contract):
                     "nonce": nonce,
                 }
             )
-            tx = cls._try_estimate_gas(ledger_api, tx)
+            tx = ledger_api.update_with_gas_estimate(tx)
             return tx
         if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
             msg = {
@@ -333,7 +332,7 @@ class ERC1155Contract(Contract):
         contract_address: Address,
         agent_address: Address,
         token_id: int,
-    ) -> Dict[str, Dict[int, int]]:
+    ) -> JSONLike:
         """
         Get the balance for a specific token id.
 
@@ -350,11 +349,14 @@ class ERC1155Contract(Contract):
             return {"balance": result}
         if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
             cosmos_api = cast(CosmosApi, ledger_api)
-            msg = {"balance": {"address": str(agent_address), "id": str(token_id)}}
-            query_res = cosmos_api.try_execute_wasm_query(contract_address, msg)
-            query_json_res = json.loads(query_res)
+            msg: JSONLike = {
+                "balance": {"address": str(agent_address), "id": str(token_id)}
+            }
+            query_res = cosmos_api.execute_contract_query(contract_address, msg)
+            if query_res is None:
+                raise ValueError("call to contract returned None")
             # Convert {"balance": balance: str} balances to Dict[token_id: int, balance: int]
-            result = {token_id: int(query_json_res["balance"])}
+            result = {token_id: int(cast(str, query_res["balance"]))}
             return {"balance": result}
         raise NotImplementedError
 
@@ -373,7 +375,7 @@ class ERC1155Contract(Contract):
         signature: str,
         data: Optional[bytes] = b"",
         gas: int = 2818111,
-    ) -> Dict[str, Any]:
+    ) -> JSONLike:
         """
         Get the transaction for a trustless trade between two agents for a single token.
 
@@ -414,7 +416,7 @@ class ERC1155Contract(Contract):
                     "nonce": nonce,
                 }
             )
-            tx = cls._try_estimate_gas(ledger_api, tx)
+            tx = ledger_api.update_with_gas_estimate(tx)
             return tx
         raise NotImplementedError
 
@@ -425,7 +427,7 @@ class ERC1155Contract(Contract):
         contract_address: Address,
         agent_address: Address,
         token_ids: List[int],
-    ) -> Dict[str, Dict[int, int]]:
+    ) -> JSONLike:
         """
         Get the balances for a batch of specific token ids.
 
@@ -447,15 +449,18 @@ class ERC1155Contract(Contract):
             for token_id in token_ids:
                 tokens.append({"address": agent_address, "id": str(token_id)})
 
-            msg = {"balance_batch": {"addresses": tokens}}
+            msg: JSONLike = {"balance_batch": {"addresses": tokens}}
 
             cosmos_api = cast(CosmosApi, ledger_api)
-            query_res = cosmos_api.try_execute_wasm_query(contract_address, msg)
-            query_json_res = json.loads(query_res)
+            query_res = cosmos_api.execute_contract_query(contract_address, msg)
             # Convert List[balances: str] balances to Dict[token_id: int, balance: int]
+            if query_res is None:
+                raise ValueError("call to contract returned None")
             result = {
                 token_id: int(balance)
-                for token_id, balance in zip(token_ids, query_json_res["balances"])
+                for token_id, balance in zip(
+                    token_ids, cast(List[str], query_res["balances"])
+                )
             }
             return {"balances": result}
         raise NotImplementedError
@@ -475,7 +480,7 @@ class ERC1155Contract(Contract):
         signature: str,
         data: Optional[bytes] = b"",
         gas: int = 2818111,
-    ) -> str:
+    ) -> JSONLike:
         """
         Get the transaction for a trustless trade between two agents for a batch of tokens.
 
@@ -516,6 +521,7 @@ class ERC1155Contract(Contract):
                     "nonce": nonce,
                 }
             )
+            tx = ledger_api.update_with_gas_estimate(tx)
             return tx
         raise NotImplementedError
 
@@ -628,7 +634,7 @@ class ERC1155Contract(Contract):
         trade_nonce: int,
     ) -> bytes:
         """
-        Get the hash for a trustless trade between two agents for a single token.
+        Get the hash for a trustless trade between two agents for a batch of tokens.
 
         :param ledger_api: the ledger API
         :param contract_address: the address of the contract
@@ -743,55 +749,4 @@ class ERC1155Contract(Contract):
             while instance.functions.is_nonce_used(agent_address, trade_nonce).call():
                 trade_nonce = random.randrange(0, MAX_UINT_256)  # nosec
             return {"trade_nonce": trade_nonce}
-        raise NotImplementedError
-
-    @staticmethod
-    def _try_estimate_gas(ledger_api: LedgerApi, tx: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Attempts to update the transaction with a gas estimate.
-
-        :param ledger_api: the ledger API
-        :param tx: the transaction
-        :return: the transaction (potentially updated)
-        """
-        try:
-            # try estimate the gas and update the transaction dict
-            gas_estimate = ledger_api.api.eth.estimateGas(transaction=tx)
-            _default_logger.debug(
-                "[ERC1155Contract]: gas estimate: {}".format(gas_estimate)
-            )
-            tx["gas"] = gas_estimate
-        except Exception as e:  # pylint: disable=broad-except
-            _default_logger.debug(
-                "[ERC1155Contract]: Error when trying to estimate gas: {}".format(e)
-            )
-        return tx
-
-    @staticmethod
-    def get_last_code_id(ledger_api: LedgerApi) -> int:
-        """
-        Uses wasmcli to get ID of latest deployed .wasm bytecode
-
-        :param ledger_api: the ledger API
-
-        :return: code id of last deployed .wasm bytecode
-        """
-        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
-            cosmos_api = cast(CosmosApi, ledger_api)
-            return cosmos_api.get_last_code_id()
-        raise NotImplementedError
-
-    @staticmethod
-    def get_contract_address(ledger_api: LedgerApi, code_id: int) -> str:
-        """
-        Uses wasmcli to get contract address of latest initialised contract by its ID
-
-        :param ledger_api: the ledger API
-        :param code_id: the ID of stored contract CosmWasm
-
-        :return: contract address of last initialised contract
-        """
-        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
-            cosmos_api = cast(CosmosApi, ledger_api)
-            return cosmos_api.get_contract_address(code_id)
         raise NotImplementedError

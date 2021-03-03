@@ -16,7 +16,7 @@ Abstract definition of a contract.
 #### `__`init`__`
 
 ```python
- | __init__(contract_config: ContractConfig, **kwargs)
+ | __init__(contract_config: ContractConfig, **kwargs: Any) -> None
 ```
 
 Initialize the contract.
@@ -69,7 +69,7 @@ the contract instance
 
 ```python
  | @classmethod
- | from_dir(cls, directory: str, **kwargs) -> "Contract"
+ | from_dir(cls, directory: str, **kwargs: Any) -> "Contract"
 ```
 
 Load the protocol from a directory.
@@ -87,7 +87,7 @@ the contract object.
 
 ```python
  | @classmethod
- | from_config(cls, configuration: ContractConfig, **kwargs) -> "Contract"
+ | from_config(cls, configuration: ContractConfig, **kwargs: Any) -> "Contract"
 ```
 
 Load contract from configuration.
@@ -105,7 +105,7 @@ the contract object.
 
 ```python
  | @classmethod
- | get_deploy_transaction(cls, ledger_api: LedgerApi, deployer_address: str, **kwargs) -> Dict[str, Any]
+ | get_deploy_transaction(cls, ledger_api: LedgerApi, deployer_address: str, **kwargs: Any) -> Optional[JSONLike]
 ```
 
 Handler method for the 'GET_DEPLOY_TRANSACTION' requests.
@@ -128,7 +128,7 @@ the tx
 
 ```python
  | @classmethod
- | get_raw_transaction(cls, ledger_api: LedgerApi, contract_address: str, **kwargs) -> Dict[str, Any]
+ | get_raw_transaction(cls, ledger_api: LedgerApi, contract_address: str, **kwargs: Any) -> Optional[JSONLike]
 ```
 
 Handler method for the 'GET_RAW_TRANSACTION' requests.
@@ -150,7 +150,7 @@ the tx
 
 ```python
  | @classmethod
- | get_raw_message(cls, ledger_api: LedgerApi, contract_address: str, **kwargs) -> Dict[str, Any]
+ | get_raw_message(cls, ledger_api: LedgerApi, contract_address: str, **kwargs: Any) -> Optional[bytes]
 ```
 
 Handler method for the 'GET_RAW_MESSAGE' requests.
@@ -172,7 +172,7 @@ the tx
 
 ```python
  | @classmethod
- | get_state(cls, ledger_api: LedgerApi, contract_address: str, **kwargs) -> Dict[str, Any]
+ | get_state(cls, ledger_api: LedgerApi, contract_address: str, **kwargs: Any) -> Optional[JSONLike]
 ```
 
 Handler method for the 'GET_STATE' requests.

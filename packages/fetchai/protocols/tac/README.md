@@ -2,7 +2,7 @@
 
 ## Description
 
-This is a protocol for participating in a Trading Agent Competition (TAC). 
+This is a protocol for participating in a Trading Agent Competition (TAC).
 
 ## Specification
 
@@ -10,11 +10,12 @@ This is a protocol for participating in a Trading Agent Competition (TAC).
 ---
 name: tac
 author: fetchai
-version: 0.9.0
+version: 0.13.0
 description: The tac protocol implements the messages an AEA needs to participate
   in the TAC.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.10.0, <0.11.0'
+protocol_specification_id: fetchai/tac:0.1.0
 speech_acts:
   register:
     agent_name: pt:str
@@ -69,16 +70,17 @@ ct:ErrorCode: |
 ---
 initiation: [register]
 reply:
-  register: [tac_error, game_data, cancelled]
+  register: [tac_error, game_data, cancelled, unregister]
   unregister: [tac_error]
   transaction: [transaction, transaction_confirmation, tac_error, cancelled]
   cancelled: []
   game_data: [transaction, transaction_confirmation, cancelled]
   transaction_confirmation: [transaction, transaction_confirmation, cancelled]
   tac_error: [transaction, transaction_confirmation, cancelled]
-termination: [cancelled, tac_error]
+termination: [cancelled]
 roles: {participant, controller}
 end_states: [successful, failed]
+keep_terminal_state_dialogues: true
 ...
 ```
 

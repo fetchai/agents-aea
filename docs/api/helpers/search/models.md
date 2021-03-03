@@ -16,7 +16,7 @@ Data structure to represent locations (i.e. a pair of latitude and longitude).
 #### `__`init`__`
 
 ```python
- | __init__(latitude: float, longitude: float)
+ | __init__(latitude: float, longitude: float) -> None
 ```
 
 Initialize a location.
@@ -54,7 +54,7 @@ Get the distance to another location.
 #### `__`eq`__`
 
 ```python
- | __eq__(other)
+ | __eq__(other: Any) -> bool
 ```
 
 Compare equality of two locations.
@@ -63,10 +63,41 @@ Compare equality of two locations.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get the string representation of the data model.
+
+<a name="aea.helpers.search.models.Location.encode"></a>
+#### encode
+
+```python
+ | encode() -> models_pb2.Query.Location
+```
+
+Encode an instance of this class into a protocol buffer object.
+
+**Returns**:
+
+the matching protocol buffer object
+
+<a name="aea.helpers.search.models.Location.decode"></a>
+#### decode
+
+```python
+ | @classmethod
+ | decode(cls, location_pb: Any) -> "Location"
+```
+
+Decode a protocol buffer object that corresponds with this class into an instance of this class.
+
+**Arguments**:
+
+- `location_pb`: the protocol buffer object corresponding with this class.
+
+**Returns**:
+
+A new instance of this class matching the protocol buffer object
 
 <a name="aea.helpers.search.models.AttributeInconsistencyException"></a>
 ## AttributeInconsistencyException Objects
@@ -93,7 +124,7 @@ Implements an attribute for an OEF data model.
 #### `__`init`__`
 
 ```python
- | __init__(name: str, type_: Type[ATTRIBUTE_TYPES], is_required: bool, description: str = "")
+ | __init__(name: str, type_: Type[ATTRIBUTE_TYPES], is_required: bool, description: str = "") -> None
 ```
 
 Initialize an attribute.
@@ -101,7 +132,7 @@ Initialize an attribute.
 **Arguments**:
 
 - `name`: the name of the attribute.
-- `type`: the type of the attribute.
+- `type_`: the type of the attribute.
 - `is_required`: whether the attribute is required by the data model.
 - `description`: an (optional) human-readable description for the attribute.
 
@@ -109,7 +140,7 @@ Initialize an attribute.
 #### `__`eq`__`
 
 ```python
- | __eq__(other)
+ | __eq__(other: Any) -> bool
 ```
 
 Compare with another object.
@@ -118,10 +149,41 @@ Compare with another object.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get the string representation of the data model.
+
+<a name="aea.helpers.search.models.Attribute.encode"></a>
+#### encode
+
+```python
+ | encode() -> models_pb2.Query.Attribute
+```
+
+Encode an instance of this class into a protocol buffer object.
+
+**Returns**:
+
+the matching protocol buffer object
+
+<a name="aea.helpers.search.models.Attribute.decode"></a>
+#### decode
+
+```python
+ | @classmethod
+ | decode(cls, attribute_pb: models_pb2.Query.Attribute) -> "Attribute"
+```
+
+Decode a protocol buffer object that corresponds with this class into an instance of this class.
+
+**Arguments**:
+
+- `attribute_pb`: the protocol buffer object corresponding with this class.
+
+**Returns**:
+
+A new instance of this class matching the protocol buffer object
 
 <a name="aea.helpers.search.models.DataModel"></a>
 ## DataModel Objects
@@ -136,7 +198,7 @@ Implements an OEF data model.
 #### `__`init`__`
 
 ```python
- | __init__(name: str, attributes: List[Attribute], description: str = "")
+ | __init__(name: str, attributes: List[Attribute], description: str = "") -> None
 ```
 
 Initialize a data model.
@@ -150,7 +212,7 @@ Initialize a data model.
 #### `__`eq`__`
 
 ```python
- | __eq__(other) -> bool
+ | __eq__(other: Any) -> bool
 ```
 
 Compare with another object.
@@ -159,10 +221,41 @@ Compare with another object.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get the string representation of the data model.
+
+<a name="aea.helpers.search.models.DataModel.encode"></a>
+#### encode
+
+```python
+ | encode() -> models_pb2.Query.DataModel
+```
+
+Encode an instance of this class into a protocol buffer object.
+
+**Returns**:
+
+the matching protocol buffer object
+
+<a name="aea.helpers.search.models.DataModel.decode"></a>
+#### decode
+
+```python
+ | @classmethod
+ | decode(cls, data_model_pb: Any) -> "DataModel"
+```
+
+Decode a protocol buffer object that corresponds with this class into an instance of this class.
+
+**Arguments**:
+
+- `data_model_pb`: the protocol buffer object corresponding with this class.
+
+**Returns**:
+
+A new instance of this class matching the protocol buffer object
 
 <a name="aea.helpers.search.models.generate_data_model"></a>
 #### generate`_`data`_`model
@@ -198,7 +291,7 @@ Implements an OEF description.
 #### `__`init`__`
 
 ```python
- | __init__(values: Mapping[str, ATTRIBUTE_TYPES], data_model: Optional[DataModel] = None, data_model_name: str = "")
+ | __init__(values: Mapping[str, ATTRIBUTE_TYPES], data_model: Optional[DataModel] = None, data_model_name: str = "") -> None
 ```
 
 Initialize the description object.
@@ -223,7 +316,7 @@ Get the values.
 #### `__`eq`__`
 
 ```python
- | __eq__(other) -> bool
+ | __eq__(other: Any) -> bool
 ```
 
 Compare with another object.
@@ -232,7 +325,7 @@ Compare with another object.
 #### `__`iter`__`
 
 ```python
- | __iter__()
+ | __iter__() -> Iterator
 ```
 
 Create an iterator.
@@ -241,7 +334,7 @@ Create an iterator.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get the string representation of the description.
@@ -251,17 +344,18 @@ Get the string representation of the description.
 
 ```python
  | @classmethod
- | encode(cls, description_protobuf_object, description_object: "Description") -> None
+ | encode(cls, description_pb: Any, description: "Description") -> None
 ```
 
 Encode an instance of this class into the protocol buffer object.
 
-The protocol buffer object in the description_protobuf_object argument must be matched with the instance of this class in the 'description_object' argument.
+The protocol buffer object in the description_protobuf_object argument must be matched
+with the instance of this class in the 'description_object' argument.
 
 **Arguments**:
 
-- `description_protobuf_object`: the protocol buffer object whose type corresponds with this class.
-- `description_object`: an instance of this class to be encoded in the protocol buffer object.
+- `description_pb`: the protocol buffer object whose type corresponds with this class.
+- `description`: an instance of this class to be encoded in the protocol buffer object.
 
 **Returns**:
 
@@ -272,16 +366,17 @@ None
 
 ```python
  | @classmethod
- | decode(cls, description_protobuf_object) -> "Description"
+ | decode(cls, description_pb: Any) -> "Description"
 ```
 
 Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
-A new instance of this class must be created that matches the protocol buffer object in the 'description_protobuf_object' argument.
+A new instance of this class must be created that matches the protocol
+buffer object in the 'description_protobuf_object' argument.
 
 **Arguments**:
 
-- `description_protobuf_object`: the protocol buffer object whose type corresponds with this class.
+- `description_pb`: the protocol buffer object whose type corresponds with this class.
 
 **Returns**:
 
@@ -300,7 +395,7 @@ Types of constraint.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get the string representation.
@@ -326,21 +421,21 @@ Used with the Constraint class, this class allows to specify constraint over att
   >>> not_equal_london = ConstraintType("!=", "London")
   >>> less_than_pi = ConstraintType("<", 3.14)
   >>> within_range = ConstraintType("within", (-10.0, 10.0))
-  >>> in_a_set = ConstraintType("in", [1, 2, 3])
-  >>> not_in_a_set = ConstraintType("not_in", {"C", "Java", "Python"})
+  >>> in_a_set = ConstraintType("in", (1, 2, 3))
+  >>> not_in_a_set = ConstraintType("not_in", ("C", "Java", "Python"))
 
 <a name="aea.helpers.search.models.ConstraintType.__init__"></a>
 #### `__`init`__`
 
 ```python
- | __init__(type_: Union[ConstraintTypes, str], value: Any)
+ | __init__(type_: Union[ConstraintTypes, str], value: Any) -> None
 ```
 
 Initialize a constraint type.
 
 **Arguments**:
 
-- `type`: the type of the constraint.
+- `type_`: the type of the constraint.
 | Either an instance of the ConstraintTypes enum,
 | or a string representation associated with the type.
 - `value`: the value that defines the constraint.
@@ -353,7 +448,7 @@ Initialize a constraint type.
 #### check`_`validity
 
 ```python
- | check_validity()
+ | check_validity() -> bool
 ```
 
 Check the validity of the input provided.
@@ -443,7 +538,7 @@ True if the value satisfy the constraint, False otherwise.
 #### `__`eq`__`
 
 ```python
- | __eq__(other)
+ | __eq__(other: Any) -> bool
 ```
 
 Check equality with another object.
@@ -452,10 +547,42 @@ Check equality with another object.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get the string representation of the constraint type.
+
+<a name="aea.helpers.search.models.ConstraintType.encode"></a>
+#### encode
+
+```python
+ | encode() -> Optional[Any]
+```
+
+Encode an instance of this class into a protocol buffer object.
+
+**Returns**:
+
+the matching protocol buffer object
+
+<a name="aea.helpers.search.models.ConstraintType.decode"></a>
+#### decode
+
+```python
+ | @classmethod
+ | decode(cls, constraint_type_pb: Any, category: str) -> "ConstraintType"
+```
+
+Decode a protocol buffer object that corresponds with this class into an instance of this class.
+
+**Arguments**:
+
+- `constraint_type_pb`: the protocol buffer object corresponding with this class.
+- `category`: the category of the constraint ('relation', 'set', 'range', 'distance).
+
+**Returns**:
+
+A new instance of this class matching the protocol buffer object
 
 <a name="aea.helpers.search.models.ConstraintExpr"></a>
 ## ConstraintExpr Objects
@@ -533,7 +660,7 @@ Implementation of the 'And' constraint expression.
 #### `__`init`__`
 
 ```python
- | __init__(constraints: List[ConstraintExpr])
+ | __init__(constraints: List[ConstraintExpr]) -> None
 ```
 
 Initialize an 'And' expression.
@@ -580,7 +707,7 @@ Check whether the constraint expression is valid wrt a data model.
 #### check`_`validity
 
 ```python
- | check_validity()
+ | check_validity() -> None
 ```
 
 Check whether the Constraint Expression satisfies some basic requirements.
@@ -595,10 +722,41 @@ Check whether the Constraint Expression satisfies some basic requirements.
 #### `__`eq`__`
 
 ```python
- | __eq__(other)
+ | __eq__(other: Any) -> bool
 ```
 
 Compare with another object.
+
+<a name="aea.helpers.search.models.And.encode"></a>
+#### encode
+
+```python
+ | encode() -> models_pb2.Query.ConstraintExpr.And
+```
+
+Encode an instance of this class into a protocol buffer object.
+
+**Returns**:
+
+the matching protocol buffer object
+
+<a name="aea.helpers.search.models.And.decode"></a>
+#### decode
+
+```python
+ | @classmethod
+ | decode(cls, and_pb: Any) -> "And"
+```
+
+Decode a protocol buffer object that corresponds with this class into an instance of this class.
+
+**Arguments**:
+
+- `and_pb`: the protocol buffer object corresponding with this class.
+
+**Returns**:
+
+A new instance of this class matching the protocol buffer object
 
 <a name="aea.helpers.search.models.Or"></a>
 ## Or Objects
@@ -613,7 +771,7 @@ Implementation of the 'Or' constraint expression.
 #### `__`init`__`
 
 ```python
- | __init__(constraints: List[ConstraintExpr])
+ | __init__(constraints: List[ConstraintExpr]) -> None
 ```
 
 Initialize an 'Or' expression.
@@ -660,7 +818,7 @@ Check whether the constraint expression is valid wrt a data model.
 #### check`_`validity
 
 ```python
- | check_validity()
+ | check_validity() -> None
 ```
 
 Check whether the Constraint Expression satisfies some basic requirements.
@@ -675,10 +833,41 @@ Check whether the Constraint Expression satisfies some basic requirements.
 #### `__`eq`__`
 
 ```python
- | __eq__(other)
+ | __eq__(other: Any) -> bool
 ```
 
 Compare with another object.
+
+<a name="aea.helpers.search.models.Or.encode"></a>
+#### encode
+
+```python
+ | encode() -> models_pb2.Query.ConstraintExpr.Or
+```
+
+Encode an instance of this class into a protocol buffer object.
+
+**Returns**:
+
+the matching protocol buffer object
+
+<a name="aea.helpers.search.models.Or.decode"></a>
+#### decode
+
+```python
+ | @classmethod
+ | decode(cls, or_pb: Any) -> "Or"
+```
+
+Decode a protocol buffer object that corresponds with this class into an instance of this class.
+
+**Arguments**:
+
+- `or_pb`: the protocol buffer object corresponding with this class.
+
+**Returns**:
+
+A new instance of this class matching the protocol buffer object
 
 <a name="aea.helpers.search.models.Not"></a>
 ## Not Objects
@@ -693,7 +882,7 @@ Implementation of the 'Not' constraint expression.
 #### `__`init`__`
 
 ```python
- | __init__(constraint: ConstraintExpr)
+ | __init__(constraint: ConstraintExpr) -> None
 ```
 
 Initialize a 'Not' expression.
@@ -740,10 +929,41 @@ Check whether the constraint expression is valid wrt a data model.
 #### `__`eq`__`
 
 ```python
- | __eq__(other)
+ | __eq__(other: Any) -> bool
 ```
 
 Compare with another object.
+
+<a name="aea.helpers.search.models.Not.encode"></a>
+#### encode
+
+```python
+ | encode() -> models_pb2.Query.ConstraintExpr.Not
+```
+
+Encode an instance of this class into a protocol buffer object.
+
+**Returns**:
+
+the matching protocol buffer object
+
+<a name="aea.helpers.search.models.Not.decode"></a>
+#### decode
+
+```python
+ | @classmethod
+ | decode(cls, not_pb: Any) -> "Not"
+```
+
+Decode a protocol buffer object that corresponds with this class into an instance of this class.
+
+**Arguments**:
+
+- `not_pb`: the protocol buffer object corresponding with this class.
+
+**Returns**:
+
+A new instance of this class matching the protocol buffer object
 
 <a name="aea.helpers.search.models.Constraint"></a>
 ## Constraint Objects
@@ -758,7 +978,7 @@ The atomic component of a constraint expression.
 #### `__`init`__`
 
 ```python
- | __init__(attribute_name: str, constraint_type: ConstraintType)
+ | __init__(attribute_name: str, constraint_type: ConstraintType) -> None
 ```
 
 Initialize a constraint.
@@ -791,7 +1011,7 @@ Examples:
 >>> attr_genre   = Attribute("genre",  str, True, "The genre of the book.")
 >>> c1 = Constraint("author", ConstraintType("==", "Stephen King"))
 >>> c2 = Constraint("year", ConstraintType(">", 1990))
->>> c3 = Constraint("genre", ConstraintType("in", {"horror", "science_fiction"}))
+>>> c3 = Constraint("genre", ConstraintType("in", ("horror", "science_fiction")))
 >>> book_1 = Description({"author": "Stephen King",  "year": 1991, "genre": "horror"})
 >>> book_2 = Description({"author": "George Orwell", "year": 1948, "genre": "horror"})
 
@@ -841,7 +1061,7 @@ Check whether the constraint expression is valid wrt a data model.
 #### `__`eq`__`
 
 ```python
- | __eq__(other)
+ | __eq__(other: Any) -> bool
 ```
 
 Compare with another object.
@@ -850,10 +1070,41 @@ Compare with another object.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get the string representation of the constraint.
+
+<a name="aea.helpers.search.models.Constraint.encode"></a>
+#### encode
+
+```python
+ | encode() -> models_pb2.Query.ConstraintExpr.Constraint
+```
+
+Encode an instance of this class into a protocol buffer object.
+
+**Returns**:
+
+the matching protocol buffer object
+
+<a name="aea.helpers.search.models.Constraint.decode"></a>
+#### decode
+
+```python
+ | @classmethod
+ | decode(cls, constraint_pb: Any) -> "Constraint"
+```
+
+Decode a protocol buffer object that corresponds with this class into an instance of this class.
+
+**Arguments**:
+
+- `constraint_pb`: the protocol buffer object corresponding with this class.
+
+**Returns**:
+
+A new instance of this class matching the protocol buffer object
 
 <a name="aea.helpers.search.models.Query"></a>
 ## Query Objects
@@ -901,7 +1152,7 @@ True if the description satisfies all the constraints, False otherwise.
 #### is`_`valid
 
 ```python
- | is_valid(data_model: DataModel) -> bool
+ | is_valid(data_model: Optional[DataModel]) -> bool
 ```
 
 Given a data model, check whether the query is valid for that data model.
@@ -914,7 +1165,7 @@ Given a data model, check whether the query is valid for that data model.
 #### check`_`validity
 
 ```python
- | check_validity()
+ | check_validity() -> None
 ```
 
 Check whether the` object is valid.
@@ -929,7 +1180,7 @@ Check whether the` object is valid.
 #### `__`eq`__`
 
 ```python
- | __eq__(other)
+ | __eq__(other: Any) -> bool
 ```
 
 Compare with another object.
@@ -938,7 +1189,7 @@ Compare with another object.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get the string representation of the constraint.
@@ -948,17 +1199,18 @@ Get the string representation of the constraint.
 
 ```python
  | @classmethod
- | encode(cls, query_protobuf_object, query_object: "Query") -> None
+ | encode(cls, query_pb: Any, query: "Query") -> None
 ```
 
 Encode an instance of this class into the protocol buffer object.
 
-The protocol buffer object in the query_protobuf_object argument must be matched with the instance of this class in the 'query_object' argument.
+The protocol buffer object in the query_protobuf_object argument must be matched
+with the instance of this class in the 'query_object' argument.
 
 **Arguments**:
 
-- `query_protobuf_object`: the protocol buffer object whose type corresponds with this class.
-- `query_object`: an instance of this class to be encoded in the protocol buffer object.
+- `query_pb`: the protocol buffer object wrapping an object that corresponds with this class.
+- `query`: an instance of this class to be encoded in the protocol buffer object.
 
 **Returns**:
 
@@ -969,16 +1221,17 @@ None
 
 ```python
  | @classmethod
- | decode(cls, query_protobuf_object) -> "Query"
+ | decode(cls, query_pb: Any) -> "Query"
 ```
 
 Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
-A new instance of this class must be created that matches the protocol buffer object in the 'query_protobuf_object' argument.
+A new instance of this class must be created that matches the protocol
+buffer object in the 'query_protobuf_object' argument.
 
 **Arguments**:
 
-- `query_protobuf_object`: the protocol buffer object whose type corresponds with this class.
+- `query_pb`: the protocol buffer object whose type corresponds with this class.
 
 **Returns**:
 

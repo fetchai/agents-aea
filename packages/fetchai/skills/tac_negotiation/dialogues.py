@@ -23,7 +23,7 @@ This module contains the classes required for dialogue management.
 - Dialogues: The dialogues class keeps track of all dialogues.
 """
 
-from typing import Optional, Type, cast
+from typing import Any, Optional, Type, cast
 
 from aea.common import Address
 from aea.exceptions import enforce
@@ -151,7 +151,7 @@ class FipaDialogue(BaseFipaDialogue):
 class FipaDialogues(Model, BaseFipaDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -170,15 +170,15 @@ class FipaDialogues(Model, BaseFipaDialogues):
             """
             fipa_message = cast(FipaMessage, message)
             if fipa_message.performative != FipaMessage.Performative.CFP:
-                raise ValueError("First message must be a CFP!")
+                raise ValueError("First message must be a CFP!")  # pragma: nocover
             query = fipa_message.query
             if query.model is None:
-                raise ValueError("Query must have a data model!")
+                raise ValueError("Query must have a data model!")  # pragma: nocover
             if query.model.name not in [
                 SUPPLY_DATAMODEL_NAME,
                 DEMAND_DATAMODEL_NAME,
             ]:
-                raise ValueError(
+                raise ValueError(  # pragma: nocover
                     "Query data model name must be in [{},{}]".format(
                         SUPPLY_DATAMODEL_NAME, DEMAND_DATAMODEL_NAME
                     )
@@ -198,6 +198,7 @@ class FipaDialogues(Model, BaseFipaDialogues):
             self,
             self_address=self.context.agent_address,
             role_from_first_message=role_from_first_message,
+            dialogue_class=FipaDialogue,
         )
 
 
@@ -249,7 +250,7 @@ class ContractApiDialogue(BaseContractApiDialogue):
 class ContractApiDialogues(Model, BaseContractApiDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -270,7 +271,7 @@ class ContractApiDialogues(Model, BaseContractApiDialogues):
 
         BaseContractApiDialogues.__init__(
             self,
-            self_address=self.context.agent_address,
+            self_address=str(self.skill_id),
             role_from_first_message=role_from_first_message,
             dialogue_class=ContractApiDialogue,
         )
@@ -282,7 +283,7 @@ DefaultDialogue = BaseDefaultDialogue
 class DefaultDialogues(Model, BaseDefaultDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -358,7 +359,7 @@ class LedgerApiDialogue(BaseLedgerApiDialogue):
 class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -379,7 +380,7 @@ class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
 
         BaseLedgerApiDialogues.__init__(
             self,
-            self_address=self.context.agent_address,
+            self_address=str(self.skill_id),
             role_from_first_message=role_from_first_message,
             dialogue_class=LedgerApiDialogue,
         )
@@ -430,7 +431,7 @@ class OefSearchDialogue(BaseOefSearchDialogue):
 class OefSearchDialogues(Model, BaseOefSearchDialogues):
     """This class keeps track of all oef_search dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -452,7 +453,7 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
 
         BaseOefSearchDialogues.__init__(
             self,
-            self_address=self.context.agent_address + "_" + str(self.context.skill_id),
+            self_address=str(self.skill_id),
             role_from_first_message=role_from_first_message,
             dialogue_class=OefSearchDialogue,
         )
@@ -506,7 +507,7 @@ class SigningDialogue(BaseSigningDialogue):
 class SigningDialogues(Model, BaseSigningDialogues):
     """This class keeps track of all oef_search dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -528,6 +529,6 @@ class SigningDialogues(Model, BaseSigningDialogues):
 
         BaseSigningDialogues.__init__(
             self,
-            self_address=str(self.context.skill_id),
+            self_address=str(self.skill_id),
             role_from_first_message=role_from_first_message,
         )

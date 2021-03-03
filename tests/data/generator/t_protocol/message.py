@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2020 fetchai
+#   Copyright 2021 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 """This module contains t_protocol's message definition."""
 
 import logging
-from typing import Dict, FrozenSet, Optional, Set, Tuple, Union, cast
+from typing import Any, Dict, FrozenSet, Optional, Set, Tuple, Union, cast
 
 from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
@@ -38,6 +38,9 @@ class TProtocolMessage(Message):
     """A protocol for testing purposes."""
 
     protocol_id = PublicId.from_str("fetchai/t_protocol:0.1.0")
+    protocol_specification_id = PublicId.from_str(
+        "some_author/some_protocol_name:0.1.0"
+    )
 
     DataModel = CustomDataModel
 
@@ -52,9 +55,66 @@ class TProtocolMessage(Message):
         PERFORMATIVE_PMT = "performative_pmt"
         PERFORMATIVE_PT = "performative_pt"
 
-        def __str__(self):
+        def __str__(self) -> str:
             """Get the string representation."""
             return str(self.value)
+
+    _performatives = {
+        "performative_ct",
+        "performative_empty_contents",
+        "performative_mt",
+        "performative_o",
+        "performative_pct",
+        "performative_pmt",
+        "performative_pt",
+    }
+    __slots__: Tuple[str, ...] = tuple()
+
+    class _SlotsCls:
+        __slots__ = (
+            "content_bool",
+            "content_bytes",
+            "content_ct",
+            "content_dict_bool_bool",
+            "content_dict_bool_bytes",
+            "content_dict_bool_float",
+            "content_dict_bool_int",
+            "content_dict_bool_str",
+            "content_dict_int_bool",
+            "content_dict_int_bytes",
+            "content_dict_int_float",
+            "content_dict_int_int",
+            "content_dict_int_str",
+            "content_dict_str_bool",
+            "content_dict_str_bytes",
+            "content_dict_str_float",
+            "content_dict_str_int",
+            "content_dict_str_str",
+            "content_float",
+            "content_int",
+            "content_list_bool",
+            "content_list_bytes",
+            "content_list_float",
+            "content_list_int",
+            "content_list_str",
+            "content_o_bool",
+            "content_o_ct",
+            "content_o_dict_str_int",
+            "content_o_list_bytes",
+            "content_o_set_int",
+            "content_set_bool",
+            "content_set_bytes",
+            "content_set_float",
+            "content_set_int",
+            "content_set_str",
+            "content_str",
+            "content_union_1",
+            "content_union_2",
+            "dialogue_reference",
+            "message_id",
+            "performative",
+            "target",
+        )
 
     def __init__(
         self,
@@ -62,7 +122,7 @@ class TProtocolMessage(Message):
         dialogue_reference: Tuple[str, str] = ("", ""),
         message_id: int = 1,
         target: int = 0,
-        **kwargs,
+        **kwargs: Any,
     ):
         """
         Initialise an instance of TProtocolMessage.
@@ -72,15 +132,6 @@ class TProtocolMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        self._performatives = {
-            "performative_ct",
-            "performative_empty_contents",
-            "performative_mt",
-            "performative_o",
-            "performative_pct",
-            "performative_pmt",
-            "performative_pt",
-        }
         super().__init__(
             dialogue_reference=dialogue_reference,
             message_id=message_id,
@@ -1155,13 +1206,6 @@ class TProtocolMessage(Message):
                     self.target == 0,
                     "Invalid 'target'. Expected 0 (because 'message_id' is 1). Found {}.".format(
                         self.target
-                    ),
-                )
-            else:
-                enforce(
-                    0 < self.target < self.message_id,
-                    "Invalid 'target'. Expected an integer between 1 and {} inclusive. Found {}.".format(
-                        self.message_id - 1, self.target,
                     ),
                 )
         except (AEAEnforceError, ValueError, KeyError) as e:

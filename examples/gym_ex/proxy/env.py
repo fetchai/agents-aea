@@ -41,6 +41,9 @@ sys.modules["packages.fetchai.protocols.gym"] = locate(  # isort:skip
 )
 
 
+from packages.fetchai.connections.gym.connection import (  # noqa: E402  # pylint: disable=wrong-import-position
+    PUBLIC_ID as GYM_CONNECTION_PUBLIC_ID,
+)
 from packages.fetchai.protocols.gym.dialogues import (  # noqa: E402  # pylint: disable=wrong-import-position
     GymDialogue as BaseGymDialogue,
 )
@@ -60,8 +63,6 @@ Reward = float
 Done = bool
 Info = dict
 Feedback = Tuple[Observation, Reward, Done, Info]
-
-DEFAULT_GYM = "gym"
 
 GymDialogue = BaseGymDialogue
 
@@ -93,15 +94,14 @@ class ProxyEnv(gym.Env):
         super().__init__()
         self._queue: Queue = Queue()
         self._action_counter: int = 0
-        self.gym_address = "fetchai/gym:0.10.0"
+        self.gym_address = str(GYM_CONNECTION_PUBLIC_ID)
         self._agent = ProxyAgent(
             name="proxy", gym_env=gym_env, proxy_env_queue=self._queue
         )
-        self._agent_address = self._agent.identity.address
         self._agent_thread = Thread(target=self._agent.start)
         self._active_dialogue = None  # type: Optional[GymDialogue]
-        self.agent_address = "proxy"
-        self.gym_dialogues = GymDialogues(self.agent_address, role_from_first_message)
+        self.gym_skill = "fetchai/gym:0.1.0"
+        self.gym_dialogues = GymDialogues(self.gym_skill, role_from_first_message)
 
     @property
     def active_dialogue(self) -> GymDialogue:
@@ -234,7 +234,10 @@ class ProxyEnv(gym.Env):
         :return: a message received as a response to the action performed in apply_action.
         """
         if envelope is not None:
-            if envelope.protocol_id == GymMessage.protocol_id:
+            if (
+                envelope.protocol_specification_id
+                == GymMessage.protocol_specification_id
+            ):
                 gym_msg = cast(GymMessage, envelope.message)
                 gym_dialogue = self.gym_dialogues.update(gym_msg)
                 if not gym_dialogue:
@@ -251,7 +254,11 @@ class ProxyEnv(gym.Env):
                         gym_msg.performative
                     )
                 )
-            raise ValueError("Unknown protocol_id: {}".format(envelope.protocol_id))
+            raise ValueError(
+                "Unknown protocol_specification_id: {}".format(
+                    envelope.protocol_specification_id
+                )
+            )
         raise ValueError("Missing envelope.")
 
     def _decode_status(self, envelope: Envelope) -> None:
@@ -263,7 +270,10 @@ class ProxyEnv(gym.Env):
         :return: a message received as a response to the action performed in apply_action.
         """
         if envelope is not None:
-            if envelope.protocol_id == GymMessage.protocol_id:
+            if (
+                envelope.protocol_specification_id
+                == GymMessage.protocol_specification_id
+            ):
                 gym_msg = cast(GymMessage, envelope.message)
                 gym_dialogue = self.gym_dialogues.update(gym_msg)
                 if not gym_dialogue:
@@ -281,7 +291,9 @@ class ProxyEnv(gym.Env):
                         gym_msg.performative
                     )
                 )
-            raise ValueError("Unknown protocol_id: {}".format(envelope.protocol_id))
+            raise ValueError(
+                "Unknown protocol_id: {}".format(envelope.protocol_specification_id)
+            )
         raise ValueError("Missing envelope.")
 
     @staticmethod

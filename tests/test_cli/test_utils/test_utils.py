@@ -25,14 +25,16 @@ from unittest import TestCase, mock
 from unittest.mock import MagicMock
 
 import pytest
-from click import BadParameter, ClickException
+from aea_crypto_fetchai import FetchAICrypto
+from click import BadParameter, ClickException, UsageError
 from jsonschema import ValidationError
 from yaml import YAMLError
 
-from aea.cli.utils.click_utils import PublicIdParameter
+from aea.cli.utils.click_utils import MutuallyExclusiveOption, PublicIdParameter
 from aea.cli.utils.config import (
     _init_cli_config,
     get_or_create_cli_config,
+    set_cli_author,
     update_cli_config,
 )
 from aea.cli.utils.context import Context
@@ -43,6 +45,7 @@ from aea.cli.utils.package_utils import (
     _override_ledger_configurations,
     find_item_in_distribution,
     find_item_locally,
+    get_dotted_package_path_unified,
     get_package_path_unified,
     get_wallet_from_context,
     is_distributed_item,
@@ -56,19 +59,15 @@ from aea.cli.utils.package_utils import (
 )
 from aea.configurations.base import ComponentId, ComponentType, PublicId
 from aea.configurations.constants import (
-    DEFAULT_CONNECTION,
     DEFAULT_LEDGER,
     DEFAULT_PROTOCOL,
-    DEFAULT_SKILL,
     LEDGER_CONNECTION,
 )
-from aea.crypto.fetchai import DEFAULT_CHAIN_ID
-from aea.crypto.ledger_apis import LedgerApis
+from aea.crypto.ledger_apis import FETCHAI_DEFAULT_CHAIN_ID, LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.helpers.base import cd
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
-from tests.conftest import FETCHAI
 from tests.test_cli.tools_for_testing import (
     ConfigLoaderMock,
     ContextMock,
@@ -164,7 +163,7 @@ class PublicIdParameterTestCase(TestCase):
 @mock.patch("aea.cli.utils.config.os.path.dirname", return_value="dir-name")
 @mock.patch("aea.cli.utils.config.os.path.exists", return_value=False)
 @mock.patch("aea.cli.utils.config.os.makedirs")
-@mock.patch("builtins.open")
+@mock.patch("aea.cli.utils.click_utils.open_file")
 class InitConfigFolderTestCase(TestCase):
     """Test case for _init_cli_config method."""
 
@@ -180,7 +179,7 @@ class InitConfigFolderTestCase(TestCase):
 
 @mock.patch("aea.cli.utils.config.get_or_create_cli_config")
 @mock.patch("aea.cli.utils.generic.yaml.dump")
-@mock.patch("builtins.open", mock.mock_open())
+@mock.patch("aea.cli.utils.click_utils.open_file", mock.mock_open())
 class UpdateCLIConfigTestCase(TestCase):
     """Test case for update_cli_config method."""
 
@@ -199,7 +198,7 @@ def _raise_file_not_found_error(*args):
     raise FileNotFoundError()
 
 
-@mock.patch("builtins.open", mock.mock_open())
+@mock.patch("aea.cli.utils.click_utils.open_file", mock.mock_open())
 class GetOrCreateCLIConfigTestCase(TestCase):
     """Test case for read_cli_config method."""
 
@@ -297,21 +296,21 @@ class FindItemLocallyTestCase(TestCase):
     )
     def test_find_item_locally_bad_config(self, *mocks):
         """Test find_item_locally for bad config result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.10.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.14.0")
         with self.assertRaises(ClickException) as cm:
             find_item_locally(ContextMock(), "skill", public_id)
 
         self.assertIn("configuration file not valid", cm.exception.message)
 
     @mock.patch("aea.cli.utils.package_utils.Path.exists", return_value=True)
-    @mock.patch("aea.cli.utils.package_utils.Path.open", mock.mock_open())
+    @mock.patch("aea.cli.utils.package_utils.open_file", mock.mock_open())
     @mock.patch(
         "aea.cli.utils.package_utils.ConfigLoader.from_configuration_type",
         return_value=ConfigLoaderMock(),
     )
     def test_find_item_locally_cant_find(self, from_conftype_mock, *mocks):
         """Test find_item_locally for can't find result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.10.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.14.0")
         with self.assertRaises(ClickException) as cm:
             find_item_locally(ContextMock(), "skill", public_id)
 
@@ -330,7 +329,7 @@ class FindItemInDistributionTestCase(TestCase):
     )
     def testfind_item_in_distribution_bad_config(self, *mocks):
         """Test find_item_in_distribution for bad config result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.10.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.14.0")
         with self.assertRaises(ClickException) as cm:
             find_item_in_distribution(ContextMock(), "skill", public_id)
 
@@ -339,21 +338,21 @@ class FindItemInDistributionTestCase(TestCase):
     @mock.patch("aea.cli.utils.package_utils.Path.exists", return_value=False)
     def testfind_item_in_distribution_not_found(self, *mocks):
         """Test find_item_in_distribution for not found result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.10.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.14.0")
         with self.assertRaises(ClickException) as cm:
             find_item_in_distribution(ContextMock(), "skill", public_id)
 
         self.assertIn("Cannot find skill", cm.exception.message)
 
     @mock.patch("aea.cli.utils.package_utils.Path.exists", return_value=True)
-    @mock.patch("aea.cli.utils.package_utils.Path.open", mock.mock_open())
+    @mock.patch("aea.cli.utils.package_utils.open_file", mock.mock_open())
     @mock.patch(
         "aea.cli.utils.package_utils.ConfigLoader.from_configuration_type",
         return_value=ConfigLoaderMock(),
     )
     def testfind_item_in_distribution_cant_find(self, from_conftype_mock, *mocks):
         """Test find_item_locally for can't find result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.10.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.14.0")
         with self.assertRaises(ClickException) as cm:
             find_item_in_distribution(ContextMock(), "skill", public_id)
 
@@ -406,11 +405,11 @@ class TryGetBalanceTestCase(TestCase):
     def test_try_get_balance_positive(self):
         """Test for try_get_balance method positive result."""
         agent_config = mock.Mock()
-        agent_config.default_ledger_config = FETCHAI
+        agent_config.default_ledger_config = FetchAICrypto.identifier
 
         wallet_mock = mock.Mock()
-        wallet_mock.addresses = {FETCHAI: "some-adress"}
-        try_get_balance(agent_config, wallet_mock, FETCHAI)
+        wallet_mock.addresses = {FetchAICrypto.identifier: "some-adress"}
+        try_get_balance(agent_config, wallet_mock, FetchAICrypto.identifier)
 
 
 @mock.patch("aea.cli.utils.generic.os.path.exists", return_value=True)
@@ -432,7 +431,23 @@ def test_get_package_path_unified(mock_present, mock_path, vendor):
     mock_present.return_value = vendor
     public_id_mock = mock.MagicMock(author="some_author")
     result = get_package_path_unified(
-        contex_mock, "some_component_type", public_id_mock
+        ".", contex_mock.agent_config, "some_component_type", public_id_mock
+    )
+    assert result == "some_path"
+
+
+@mock.patch("aea.cli.utils.package_utils.get_package_path", return_value="some_path")
+@mock.patch("aea.cli.utils.package_utils.is_item_present")
+@pytest.mark.parametrize("vendor", [True, False])
+def test_get_dotted_package_path_unified(mock_present, mock_path, vendor):
+    """Test 'get_package_path_unified'."""
+    contex_mock = mock.MagicMock()
+    contex_mock.cwd = "."
+    contex_mock.agent_config.author = "some_author" if vendor else "another_author"
+    mock_present.return_value = vendor
+    public_id_mock = mock.MagicMock(author="some_author")
+    result = get_dotted_package_path_unified(
+        ".", contex_mock.agent_config, "some_component_type", public_id_mock
     )
     assert result == "some_path"
 
@@ -455,9 +470,8 @@ def test_is_item_present_unified(mock_, vendor):
         (PublicId.from_str("author/package:latest"), False),
         (PublicId.from_str("fetchai/oef:0.1.0"), False),
         (PublicId.from_str("fetchai/oef:latest"), False),
-        (DEFAULT_CONNECTION, False),
-        (DEFAULT_SKILL, False),
-        (DEFAULT_PROTOCOL, False),
+        (PublicId.from_str("fetchai/stub:latest"), False),
+        (PublicId.from_str(DEFAULT_PROTOCOL), False),
     ],
 )
 def test_is_distributed_item(public_id, expected_outcome):
@@ -490,7 +504,7 @@ def test_override_ledger_configurations_positive():
     new_chain_id = "some_chain"
     agent_config = MagicMock()
     agent_config.component_configurations = {
-        ComponentId(ComponentType.CONNECTION, LEDGER_CONNECTION): {
+        ComponentId(ComponentType.CONNECTION, PublicId.from_str(LEDGER_CONNECTION)): {
             "config": {"ledger_apis": {DEFAULT_LEDGER: {"chain_id": new_chain_id}}}
         }
     }
@@ -508,5 +522,36 @@ def test_override_ledger_configurations_positive():
         LedgerApis.ledger_api_configs = old_configurations
         assert (
             LedgerApis.ledger_api_configs[DEFAULT_LEDGER]["chain_id"]
-            == DEFAULT_CHAIN_ID
+            == FETCHAI_DEFAULT_CHAIN_ID
         )
+
+
+def test_mutually_exclusive_usage_error():
+    """Test MutuallyExclusiveOption.handle_parse_result."""
+    opt = MutuallyExclusiveOption(["--arg1"], mutually_exclusive=["arg2"])
+    with pytest.raises(
+        UsageError,
+        match=f"Illegal usage: `arg1` is mutually exclusive with arguments `{', '.join(['arg2'])}`.",
+    ):
+        opt.handle_parse_result(MagicMock(), {"arg1": None, "arg2": None}, [])
+
+
+@mock.patch("aea.cli.utils.config.get_or_create_cli_config", return_value={})
+def test_set_cli_author_negative(*_mocks):
+    """Test set_cli_author, negative case."""
+    with pytest.raises(
+        ClickException,
+        match="The AEA configurations are not initialized. Use `aea init` before continuing.",
+    ):
+        set_cli_author(MagicMock())
+
+
+@mock.patch(
+    "aea.cli.utils.config.get_or_create_cli_config",
+    return_value=dict(author="some_author"),
+)
+def test_set_cli_author_positive(*_mocks):
+    """Test set_cli_author, positive case."""
+    context_mock = MagicMock()
+    set_cli_author(context_mock)
+    context_mock.obj.set_config.assert_called_with("cli_author", "some_author")

@@ -1,0 +1,114 @@
+{{- range $key, $spec := .Values }}
+{{- if eq $key "acnnodes" }}
+{{- if $spec.enabled }}
+{{- range $spec.config }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: acn-node-{{ .p2pport }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: acn-node-{{ .p2pport }}
+  serviceName: acn-node-{{ .p2pport }}
+  template:
+    metadata:
+      labels:
+        app: acn-node-{{ .p2pport }}
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '8080'
+        prometheus.io/path: '/metrics'
+    spec:
+      initContainers:
+      - name: check-entry-peer
+        image: subfuzion/netcat
+        imagePullPolicy: IfNotPresent
+        command:
+        - sh
+        - -c
+        - if [ -z "${LATEST_ENTRY_PEER_HOST}" ]; then exit 0; fi; until nc -w 2 -zv
+          ${LATEST_ENTRY_PEER_HOST} ${LATEST_ENTRY_PEER_PORT}; do echo waiting for
+          ${LATEST_ENTRY_PEER_HOST}:${LATEST_ENTRY_PEER_PORT} ; sleep 2; done;
+        env:
+        - name: LATEST_ENTRY_PEER_HOST
+          value: {{ $.Values.dns.publicdnsname }}
+        - name: LATEST_ENTRY_PEER_PORT
+          value: "{{ $.Values.acnnodes.bootstrap.p2pport }}"
+      containers:
+      - name: acn-node 
+        image: {{ $.Values.acnnodes.image }}
+        imagePullPolicy: IfNotPresent
+        args: ["--config-from-env"]
+        env:
+          - name: AEA_P2P_ID
+            valueFrom:
+              secretKeyRef:
+                key: priv-key
+                name: node-priv-key-{{ .p2pport }}
+          - name: AEA_P2P_URI_PUBLIC
+            value: {{ $.Values.dns.publicdnsname }}:{{ .p2pport }}
+          - name: AEA_P2P_URI
+            value: 127.0.0.1:9000
+          - name: AEA_P2P_DELEGATE_URI
+            value: 127.0.0.1:11000
+          - name: AEA_P2P_URI_MONITORING
+            value: 127.0.0.1:8080
+          - name: AEA_P2P_ENTRY_URIS
+            value: /dns4/{{ $.Values.dns.publicdnsname }}/tcp/{{ $.Values.acnnodes.bootstrap.p2pport }}/p2p/{{ $.Values.acnnodes.bootstrap.peerid }}
+          - name: ACN_LOG_FILE
+            value: /acn_data/libp2p_node_{{ .p2pport }}.log
+          - name: AEA_P2P_CFG_REGISTRATION_DELAY
+            value: "3.0"
+          - name: AEA_P2P_CFG_STORAGE_PATH
+            value: /acn_data/agents_record_store_{{ .peerid }}
+
+        {{- if $.Values.acnnodes.resources }}
+        resources: {{- toYaml $.Values.acnnodes.resources | nindent 10 }}
+        {{- end }}
+        ports:
+        - containerPort: 9000
+        - containerPort: 11000
+        - containerPort: 8080
+        volumeMounts:
+        - mountPath: /acn_data
+          name: acn-data
+
+  volumeClaimTemplates:
+  - kind: PersistentVolumeClaim
+    apiVersion: v1 
+    metadata:
+      name: acn-data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 20Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: acn-node-{{ .p2pport }}
+spec:
+  selector:
+    app: acn-node-{{ .p2pport }}
+  ports:
+    - name: tcp-libp2p
+      protocol: TCP
+      port: {{ .p2pport }}
+      targetPort: 9000
+    - name: tcp-delegate
+      protocol: TCP
+      port: {{ .delegateport }}
+      targetPort: 11000
+    - name: tcp-monitoring
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

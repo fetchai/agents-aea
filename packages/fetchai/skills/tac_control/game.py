@@ -23,7 +23,7 @@ import copy
 import datetime
 import pprint
 from enum import Enum
-from typing import Dict, List, Optional, cast
+from typing import Any, Dict, List, Optional, cast
 
 from aea.common import Address
 from aea.crypto.ledger_apis import LedgerApis
@@ -155,7 +155,7 @@ class Configuration:
         enforce(self._contract_address is None, "Contract_address already set!")
         self._contract_address = contract_address
 
-    def _check_consistency(self):
+    def _check_consistency(self) -> None:
         """
         Check the consistency of the game configuration.
 
@@ -247,7 +247,7 @@ class Initialization:
         """Get theoretical equilibrium currency holdings (a benchmark)."""
         return self._agent_addr_to_eq_currency_holdings
 
-    def _check_consistency(self):
+    def _check_consistency(self) -> None:
         """
         Check the consistency of the game configuration.
 
@@ -437,11 +437,11 @@ class Transaction(Terms):
         )
         return transaction
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Compare to another object."""
         return (
             isinstance(other, Transaction)
-            and super.__eq__()
+            and super().__eq__(other)
             and self.sender_signature == other.sender_signature
             and self.counterparty_signature == other.counterparty_signature
         )
@@ -608,7 +608,7 @@ class AgentState:
         elif self.agent_address == tx.counterparty_address:
             # settling the transaction for the counterparty
             for currency_id, amount in tx.amount_by_currency_id.items():
-                new_amount_by_currency_id[currency_id] += amount
+                new_amount_by_currency_id[currency_id] -= amount
 
         self._amount_by_currency_id = new_amount_by_currency_id
 
@@ -620,7 +620,7 @@ class AgentState:
                 new_quantities_by_good_id[good_id] -= quantity
         self._quantities_by_good_id = new_quantities_by_good_id
 
-    def __copy__(self):
+    def __copy__(self) -> "AgentState":
         """Copy the object."""
         return AgentState(
             self.agent_address,
@@ -630,7 +630,7 @@ class AgentState:
             self.utility_params_by_good_id,
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """From object to string."""
         return "AgentState{}".format(
             pprint.pformat(
@@ -644,7 +644,7 @@ class AgentState:
             )
         )
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Compare equality of two instances of the class."""
         return (
             isinstance(other, AgentState)
@@ -660,7 +660,7 @@ class AgentState:
 class Transactions:
     """Class managing the transactions."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Instantiate the transaction class."""
         self._confirmed = {}  # type: Dict[datetime.datetime, Transaction]
         self._confirmed_per_agent = (
@@ -699,7 +699,7 @@ class Transactions:
 class Registration:
     """Class managing the registration of the game."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Instantiate the registration class."""
         self._agent_addr_to_name = {}  # type: Dict[str, str]
 
@@ -736,7 +736,7 @@ class Registration:
 class Game(Model):
     """A class to manage a TAC instance."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Instantiate the search class."""
         super().__init__(**kwargs)
         self._phase = Phase.PRE_GAME
@@ -798,19 +798,19 @@ class Game(Model):
         """Get the transactions."""
         return self._transactions
 
-    def create(self):
+    def create(self) -> None:
         """Create a game."""
         enforce(self.phase != Phase.GAME, "A game phase is already active.")
         self._phase = Phase.GAME_SETUP
         self._generate()
 
     @property
-    def is_allowed_to_mint(self):
+    def is_allowed_to_mint(self) -> bool:
         """Get is allowed to mint."""
         return self._is_allowed_to_mint
 
     @is_allowed_to_mint.setter
-    def is_allowed_to_mint(self, is_allowed_to_mint: bool):
+    def is_allowed_to_mint(self, is_allowed_to_mint: bool) -> None:
         """Get is allowed to mint."""
         self._is_allowed_to_mint = is_allowed_to_mint
 
@@ -825,7 +825,7 @@ class Game(Model):
             break
         return result
 
-    def _generate(self):
+    def _generate(self) -> None:
         """Generate a TAC game."""
         parameters = cast(Parameters, self.context.parameters)
 
@@ -970,15 +970,18 @@ class Game(Model):
         result = result + "Equilibrium money allocation: \n"
         for (
             agent_addr,
-            eq_allocation,
+            eq_allocations,
         ) in self.initialization.agent_addr_to_eq_currency_holdings.items():
-            result = (
-                result
-                + self.conf.agent_addr_to_name[agent_addr]
-                + " "
-                + str(eq_allocation)
-                + "\n"
-            )
+            result = result + "- " + self.conf.agent_addr_to_name[agent_addr] + ":\n"
+            for currency_id, quantity in eq_allocations.items():
+                result = (
+                    result
+                    + "    "
+                    + self.conf.currency_id_to_name[currency_id]
+                    + ": "
+                    + str(quantity)
+                    + "\n"
+                )
         result = result + "\n"
         return result
 

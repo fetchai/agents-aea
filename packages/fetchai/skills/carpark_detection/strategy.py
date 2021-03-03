@@ -20,7 +20,7 @@
 """This module contains the strategy class."""
 
 import os
-from typing import Dict
+from typing import Any, Dict
 
 from aea.exceptions import enforce
 
@@ -35,7 +35,7 @@ DEFAULT_DB_REL_DIR = "temp_files_placeholder"
 class Strategy(GenericStrategy):
     """This class defines a strategy for the agent."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize the strategy of the agent.
 

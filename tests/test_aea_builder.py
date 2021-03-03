@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains tests for aea/aea_builder.py."""
 import os
 import re
@@ -25,7 +24,8 @@ from importlib import import_module
 from pathlib import Path
 from textwrap import dedent, indent
 from typing import Collection
-from unittest.mock import Mock, patch
+from unittest import mock
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 import yaml
@@ -42,14 +42,18 @@ from aea.configurations.base import (
     ProtocolConfig,
     SkillConfig,
 )
-from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
+from aea.configurations.constants import (
+    DEFAULT_LEDGER,
+    DEFAULT_PRIVATE_KEY_FILE,
+    DOTTED_PATH_MODULE_ELEMENT_SEPARATOR,
+)
+from aea.configurations.data_types import PublicId
 from aea.configurations.loader import load_component_configuration
 from aea.contracts.base import Contract
 from aea.exceptions import AEAEnforceError, AEAException
 from aea.helpers.base import cd
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.install_dependency import run_install_subprocess
-from aea.helpers.yaml_utils import yaml_load_all
 from aea.protocols.base import Protocol
 from aea.registries.resources import Resources
 from aea.skills.base import Skill
@@ -62,6 +66,7 @@ from packages.fetchai.connections.stub.connection import StubConnection
 from packages.fetchai.protocols.default import DefaultMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
+from tests.common.mocks import RegexComparator
 from tests.conftest import (
     CUR_PATH,
     DEFAULT_PRIVATE_KEY_PATH,
@@ -106,7 +111,7 @@ def test_add_package_already_existing():
     builder.add_component(ComponentType.PROTOCOL, fipa_package_path)
 
     expected_message = re.escape(
-        "Component 'fetchai/fipa:0.9.0' of type 'protocol' already added."
+        "Component 'fetchai/fipa:0.13.0' of type 'protocol' already added."
     )
     with pytest.raises(AEAException, match=expected_message):
         builder.add_component(ComponentType.PROTOCOL, fipa_package_path)
@@ -432,9 +437,9 @@ def test_process_connection_ids_bad_default_connection():
         ValueError,
         match=r"Default connection not a dependency. Please add it and retry.",
     ):
-        builder.set_default_connection(
-            ConnectionConfig("conn", "author", "0.1.0").public_id
-        )
+        builder._default_connection = ConnectionConfig(
+            "conn", "author", "0.1.0"
+        ).public_id
         builder._process_connection_ids([connection.public_id])
 
 
@@ -461,28 +466,47 @@ def test_component_add_bad_dep():
         builder.add_component_instance(a_protocol)
 
 
-def test_find_component_failed():
-    """Test fail on compomnent not found."""
-    builder = AEABuilder()
-    builder.set_name("aea_1")
-    builder.add_private_key("fetchai")
-    a_protocol = Protocol(
-        ProtocolConfig("a_protocol", "author", "0.1.0"), DefaultMessage
-    )
-    with pytest.raises(ValueError, match=r"Package .* not found"):
-        builder.find_component_directory_from_component_id(
-            Path("/some_dir"), a_protocol.component_id
-        )
-
-
-def test_set_from_config():
+def test_set_from_config_default():
     """Test set configuration from config loaded."""
     builder = AEABuilder()
     agent_configuration = Mock()
     agent_configuration.default_connection = "test/test:0.1.0"
+    agent_configuration.default_routing = {}
+    agent_configuration.decision_maker_handler = {}
+    agent_configuration.error_handler = {}
+    agent_configuration.skill_exception_policy = ExceptionPolicyEnum.just_log
+    agent_configuration.connection_exception_policy = ExceptionPolicyEnum.just_log
+    agent_configuration._default_connection = None
+    agent_configuration.connection_private_key_paths_dict = {"fetchai": None}
+    agent_configuration.ledger_apis_dict = {"fetchai": None}
+    agent_configuration.private_key_paths_dict = {"fetchai": None}
+    agent_configuration.protocols = (
+        agent_configuration.connections
+    ) = agent_configuration.contracts = agent_configuration.skills = []
+
+    with patch.object(builder, "set_default_connection"):
+        builder.set_from_configuration(agent_configuration, aea_project_path="/anydir")
+    assert builder._decision_maker_handler_class is None
+    assert builder._decision_maker_handler_dotted_path is None
+    assert builder._decision_maker_handler_file_path is None
+    assert builder._load_decision_maker_handler_class() is None
+
+
+def test_set_from_config_custom():
+    """Test set configuration from config loaded."""
+    dm_dotted_path = f"aea.decision_maker.default{DOTTED_PATH_MODULE_ELEMENT_SEPARATOR}DecisionMakerHandler"
+    dm_file_path = ROOT_DIR + "/aea/decision_maker/default.py"
+    builder = AEABuilder()
+    agent_configuration = Mock()
+    agent_configuration.default_connection = "test/test:0.1.0"
+    agent_configuration.default_routing = {}
     agent_configuration.decision_maker_handler = {
-        "dotted_path": "aea.decision_maker.default:DecisionMakerHandler",
-        "file_path": ROOT_DIR + "/aea/decision_maker/default.py",
+        "dotted_path": dm_dotted_path,
+        "file_path": dm_file_path,
+    }
+    agent_configuration.error_handler = {
+        "dotted_path": f"aea.error_handler.default{DOTTED_PATH_MODULE_ELEMENT_SEPARATOR}ErrorHandler",
+        "file_path": ROOT_DIR + "/aea/error_handler/default.py",
     }
     agent_configuration.skill_exception_policy = ExceptionPolicyEnum.just_log
     agent_configuration.connection_exception_policy = ExceptionPolicyEnum.just_log
@@ -494,8 +518,19 @@ def test_set_from_config():
         agent_configuration.connections
     ) = agent_configuration.contracts = agent_configuration.skills = []
 
-    builder.set_from_configuration(agent_configuration, aea_project_path="/anydir")
-    assert builder._decision_maker_handler_class is not None
+    with patch.object(builder, "set_default_connection"):
+        builder.set_from_configuration(agent_configuration, aea_project_path="/anydir")
+        assert builder._decision_maker_handler_class is None
+        assert builder._decision_maker_handler_dotted_path == dm_dotted_path
+        assert builder._decision_maker_handler_file_path == dm_file_path
+        assert builder._load_decision_maker_handler_class() is not None
+        builder.reset(is_full_reset=True)
+        agent_configuration.decision_maker_handler = {
+            "dotted_path": dm_dotted_path,
+            "file_path": None,
+        }
+        builder.set_from_configuration(agent_configuration, aea_project_path="/anydir")
+        assert builder._load_decision_maker_handler_class() is not None
 
 
 def test_load_abstract_component():
@@ -548,10 +583,10 @@ def test__build_identity_from_wallet():
     with pytest.raises(ValueError):
         builder._build_identity_from_wallet(wallet)
 
-    wallet.addresses = {builder._get_default_ledger(): "addr1"}
+    wallet.addresses = {builder.get_default_ledger(): "addr1"}
     builder._build_identity_from_wallet(wallet)
 
-    wallet.addresses = {builder._get_default_ledger(): "addr1", "fetchai": "addr2"}
+    wallet.addresses = {builder.get_default_ledger(): "addr1", "fetchai": "addr2"}
     builder._build_identity_from_wallet(wallet)
 
 
@@ -591,6 +626,7 @@ class TestFromAEAProjectWithCustomConnectionConfig(AEATestCaseEmpty):
 
     def test_from_project(self):
         """Test builder set from project dir."""
+        self.add_item("connection", "fetchai/stub:0.17.0")
         self.expected_input_file = "custom_input_file"
         self.expected_output_file = "custom_output_file"
         self._add_stub_connection_config()
@@ -644,8 +680,11 @@ class TestFromAEAProjectWithCustomSkillConfig(AEATestCase):
         self.new_handler_args = {"handler_arg_1": 42}
         self.new_model_args = {"model_arg_1": 42}
         self._add_dummy_skill_config()
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
         builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
+
         with cd(self._get_cwd()):
+            builder.call_all_build_entrypoints()
             aea = builder.build()
 
         dummy_skill = aea.resources.get_skill(DUMMY_SKILL_PUBLIC_ID)
@@ -655,13 +694,6 @@ class TestFromAEAProjectWithCustomSkillConfig(AEATestCase):
         assert dummy_handler.config == {"handler_arg_1": 42, "handler_arg_2": "2"}
         dummy_model = dummy_skill.models["dummy"]
         assert dummy_model.config == {"model_arg_1": 42, "model_arg_2": "2"}
-
-    def test_from_json(self):
-        """Test load project from json file with path specified."""
-        with open(Path(self._get_cwd(), DEFAULT_AEA_CONFIG_FILE), "r") as fp:
-            json_config = yaml_load_all(fp)
-
-        AEABuilder.from_config_json(json_config, Path(self._get_cwd()))
 
 
 class TestFromAEAProjectMakeSkillAbstract(AEATestCase):
@@ -689,8 +721,10 @@ class TestFromAEAProjectMakeSkillAbstract(AEATestCase):
     def test_from_project(self):
         """Test builder set from project dir."""
         self._add_dummy_skill_config()
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
         builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
         with cd(self._get_cwd()):
+            builder.call_all_build_entrypoints()
             aea = builder.build()
 
         dummy_skill = aea.resources.get_skill(DUMMY_SKILL_PUBLIC_ID)
@@ -773,3 +807,102 @@ class TestExtraDeps(AEATestCaseEmpty):
             raise Exception("should not be raised")
         except ModuleNotFoundError:
             pass
+
+
+class TestBuildEntrypoint(AEATestCaseEmpty):
+    """Test build entrypoint."""
+
+    def setup(self):
+        """Set up the test."""
+        self.builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
+        self.component_id = "component_id"
+        # add project-wide build entrypoint
+        self.script_path = Path("script.py")
+        self.builder._build_entrypoint = str(self.script_path)
+
+    def test_build_positive_aea(self):
+        """Test build project-wide entrypoint, positive."""
+        with cd(self._get_cwd()):
+            self.script_path.write_text("")
+            with patch.object(self.builder.logger, "info") as info_mock:
+                self.builder.call_all_build_entrypoints()
+
+        info_mock.assert_any_call("Building AEA package...")
+        info_mock.assert_any_call(RegexComparator("Running command '.*script.py .*'"))
+
+    def test_build_positive_package(self):
+        """Test build package entrypoint, positive."""
+        with cd(self._get_cwd()):
+            self.script_path.write_text("")
+            # add mock configuration build entrypoint
+            with patch.object(self.builder, "_package_dependency_manager") as _mock_mgr:
+                mock_config = MagicMock(
+                    component_id=self.component_id,
+                    build_entrypoint=str(self.script_path),
+                    directory=".",
+                    build_directory="test",
+                )
+                mock_values = MagicMock(return_value=[mock_config])
+                _mock_mgr._dependencies = MagicMock(values=mock_values)
+
+                with patch.object(self.builder.logger, "info") as info_mock:
+                    self.builder.call_all_build_entrypoints()
+
+        info_mock.assert_any_call(f"Building package {self.component_id}...")
+        info_mock.assert_any_call(RegexComparator("Running command '.*script.py .*'"))
+
+    def test_build_negative_syntax_error(self):
+        """Test build, negative due to a syntax error in the script."""
+        match = r"The Python script at 'script.py' has a syntax error: invalid syntax \(<unknown>, line 1\): syntax\+\.error\n"
+        with cd(self._get_cwd()), pytest.raises(AEAException, match=match):
+            self.script_path.write_text("syntax+.error")
+            self.builder.call_all_build_entrypoints()
+
+    @mock.patch(
+        "aea.aea_builder.AEABuilder._run_in_subprocess",
+        return_value=("", "some error.", 1),
+    )
+    def test_build_negative_subprocess(self, *_mocks):
+        """Test build, negative due to script error at runtime."""
+        match = "An error occurred while running command '.*script.py .+':\nsome error."
+        with cd(self._get_cwd()), pytest.raises(AEAException, match=match):
+            self.script_path.write_text("")
+            self.builder.call_all_build_entrypoints()
+
+
+def test_set_default_connection_and_routing():
+    """Test checks on default connection and routing set."""
+    builder = AEABuilder()
+    builder._package_dependency_manager = Mock()
+    good_connection = ComponentId(
+        "connection", PublicId.from_str("good/connection:0.1.0")
+    )
+    bad_connection = ComponentId(
+        "connection", PublicId.from_str("bad/connection:0.1.0")
+    )
+    good_protocol = ComponentId("protocol", PublicId.from_str("good/protocol:0.1.0"))
+    bad_protocol = ComponentId("protocol", PublicId.from_str("bad/protocol:0.1.0"))
+
+    builder._package_dependency_manager.connections = [good_connection]
+    builder._package_dependency_manager.protocols = [good_protocol]
+
+    builder.set_default_connection(public_id=good_connection.public_id)
+    with pytest.raises(
+        ValueError,
+        match="Connection bad/connection:0.1.0 specified as `default_connection` is not a project dependency!",
+    ):
+        builder.set_default_connection(public_id=bad_connection.public_id)
+
+    builder.set_default_routing({good_protocol.public_id: good_connection.public_id})
+
+    with pytest.raises(
+        ValueError,
+        match="Connection bad/connection:0.1.0 specified in `default_routing` is not a project dependency!",
+    ):
+        builder.set_default_routing({good_protocol.public_id: bad_connection.public_id})
+
+    with pytest.raises(
+        ValueError,
+        match="Protocol bad/protocol:0.1.0 specified in `default_routing` is not a project dependency!",
+    ):
+        builder.set_default_routing({bad_protocol.public_id: good_connection.public_id})

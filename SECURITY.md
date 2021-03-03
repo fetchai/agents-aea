@@ -6,10 +6,10 @@ This document outlines security procedures and general policies for the `aea` pr
 
 The following table shows which versions of `aea` are currently being supported with security updates.
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 0.3.x   | :white_check_mark: |
-| < 0.3.0 | :x:                |
+| Version   | Supported          |
+| --------- | ------------------ |
+| `0.10.x`   | :white_check_mark: |
+| `< 0.10.0` | :x:                |
 
 ## Reporting a Vulnerability
 
@@ -17,7 +17,7 @@ The `aea` team and community take all security bugs in `aea` seriously. Thank yo
 
 Report security bugs by emailing `developer@fetch.ai`.
 
-The lead maintainer will acknowledge your email within 48 hours, and will send a more detailed response within 48 hours indicating the next steps in handling your report. After the initial reply to your report, the security team will endeavor to keep you informed of the progress towards a fix and full announcement, and may ask for additional information or guidance.
+The lead maintainer will acknowledge your email within 48 hours, and will send a more detailed response within 48 hours indicating the next steps in handling your report. After the initial reply to your report, the security team will endeavour to keep you informed of the progress towards a fix and full announcement, and may ask for additional information or guidance.
 
 Report security bugs in third-party modules to the person or team maintaining the module.
 

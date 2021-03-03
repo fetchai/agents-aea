@@ -26,7 +26,7 @@ from aea.aea import AEA
 from aea.aea_builder import AEABuilder
 from aea.components.base import Component
 from aea.configurations.base import SkillConfig
-from aea.crypto.fetchai import FetchAICrypto
+from aea.configurations.constants import _FETCHAI_IDENTIFIER
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.skills.base import Handler, Skill, SkillContext
@@ -69,7 +69,7 @@ class AEATestWrapper:
 
         builder.set_name(name or self.name)
 
-        builder.add_private_key(FetchAICrypto.identifier, private_key_path=None)
+        builder.add_private_key(_FETCHAI_IDENTIFIER, private_key_path=None)
 
         for component in components:
             builder.add_component_instance(component)
@@ -149,7 +149,6 @@ class AEATestWrapper:
 
         :param to: the address of the receiver.
         :param sender: the address of the sender.
-        :param protocol_id: the protocol id.
         :param message: the protocol-specific message.
 
         :return: Envelope
@@ -158,7 +157,7 @@ class AEATestWrapper:
         return Envelope(
             to=to,
             sender=sender,
-            protocol_id=DefaultMessage.protocol_id,
+            protocol_specification_id=DefaultMessage.protocol_specification_id,
             message=DefaultSerializer().encode(message),
         )
 
@@ -210,7 +209,7 @@ class AEATestWrapper:
         """Contenxt manager enter."""
         self.start_loop()
 
-    def __exit__(  # pylint: disable=useless-return
+    def __exit__(  # type: ignore # pylint: disable=useless-return
         self, exc_type=None, exc=None, traceback=None
     ) -> None:
         """
@@ -263,9 +262,7 @@ class AEATestWrapper:
         self._fake_connection = FakeConnection(
             envelope, inbox_num, connection_id="fake_connection"
         )
-        self.aea._connections.append(  # pylint: disable=protected-access
-            self._fake_connection
-        )
+        self.aea.runtime.multiplexer.add_connection(self._fake_connection)
 
     def is_messages_in_fake_connection(self) -> bool:
         """

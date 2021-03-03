@@ -34,10 +34,7 @@ from packages.fetchai.protocols.state_update.dialogues import (
 from packages.fetchai.protocols.state_update.dialogues import (
     StateUpdateDialogues as BaseStateUpdateDialogues,
 )
-from packages.fetchai.protocols.state_update.message import (
-    StateUpdateMessage,
-    _default_logger,
-)
+from packages.fetchai.protocols.state_update.message import StateUpdateMessage
 
 
 class TestStateUpdateMessage:
@@ -64,7 +61,9 @@ class TestStateUpdateMessage:
             quantities_by_good_id=good_change,
         )
         assert stum._is_consistent()
-        assert len(stum.valid_performatives) == 2
+        assert len(stum.valid_performatives) == 3
+        stum = StateUpdateMessage(performative=StateUpdateMessage.Performative.END,)
+        assert stum._is_consistent()
 
     def test_message_inconsistency(self):
         """Test for an error in consistency of a message."""
@@ -72,16 +71,15 @@ class TestStateUpdateMessage:
         good_endowment = {"a_good": 2}
         exchange_params = {"UNKNOWN": 10.0}
         utility_params = {"a_good": 20.0}
-        tx_fee = 10
-        stum = StateUpdateMessage(
-            performative=StateUpdateMessage.Performative.INITIALIZE,
-            amount_by_currency_id=currency_endowment,
-            quantities_by_good_id=good_endowment,
-            exchange_params_by_currency_id=exchange_params,
-            utility_params_by_good_id=utility_params,
-            tx_fee=tx_fee,
-        )
-        assert not stum._is_consistent()
+        with pytest.raises(ValueError, match="Field .* is not supported"):
+            StateUpdateMessage(
+                performative=StateUpdateMessage.Performative.INITIALIZE,
+                amount_by_currency_id=currency_endowment,
+                quantities_by_good_id=good_endowment,
+                exchange_params_by_currency_id=exchange_params,
+                utility_params_by_good_id=utility_params,
+                non_exists_field="some value",
+            )
 
 
 class TestSerialization:
@@ -114,7 +112,16 @@ class TestSerialization:
             quantities_by_good_id=good_change,
         )
         assert msg._is_consistent()
-        assert len(msg.valid_performatives) == 2
+        assert len(msg.valid_performatives) == 3
+        encoded_msg = msg.serializer.encode(msg)
+        decoded_msg = msg.serializer.decode(encoded_msg)
+        assert msg == decoded_msg
+
+    def test_serialization_end(self):
+        """Test serialization of end message."""
+        msg = StateUpdateMessage(performative=StateUpdateMessage.Performative.END,)
+        assert msg._is_consistent()
+        assert len(msg.valid_performatives) == 3
         encoded_msg = msg.serializer.encode(msg)
         decoded_msg = msg.serializer.decode(encoded_msg)
         assert msg == decoded_msg
@@ -148,30 +155,6 @@ def test_performative_str():
     """Test performative __str__."""
     assert str(StateUpdateMessage.Performative.INITIALIZE) == "initialize"
     assert str(StateUpdateMessage.Performative.APPLY) == "apply"
-
-
-def test_light_protocol_rule_3_target_less_than_message_id():
-    """Test that if message_id is not 1, target must be > message_id"""
-    with patch.object(_default_logger, "error") as mock_logger:
-        currency_endowment = {"FET": 100}
-        good_endowment = {"a_good": 2}
-        exchange_params = {"FET": 10.0}
-        utility_params = {"a_good": 20.0}
-        message_id = 2
-        target = 2
-        assert StateUpdateMessage(
-            message_id=message_id,
-            target=target,
-            performative=StateUpdateMessage.Performative.INITIALIZE,
-            amount_by_currency_id=currency_endowment,
-            quantities_by_good_id=good_endowment,
-            exchange_params_by_currency_id=exchange_params,
-            utility_params_by_good_id=utility_params,
-        )
-
-        mock_logger.assert_any_call(
-            f"Invalid 'target'. Expected an integer between 1 and {message_id - 1} inclusive. Found {target}."
-        )
 
 
 def test_dialogues():

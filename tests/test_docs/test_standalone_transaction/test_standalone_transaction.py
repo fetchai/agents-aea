@@ -57,10 +57,10 @@ class TestStandaloneTransaction(BaseAEATestCase):
     @classmethod
     def setup_class(cls):
         """Setup the test class."""
-        BaseAEATestCase.setup_class()
+        super().setup_class()
         cls._patch_logger()
         doc_path = os.path.join(ROOT_DIR, MD_FILE)
-        cls.code_blocks = extract_code_blocks(filepath=doc_path, filter="python")
+        cls.code_blocks = extract_code_blocks(filepath=doc_path, filter_="python")
         test_code_path = os.path.join(CUR_PATH, PY_FILE)
         cls.python_file = extract_python_code(test_code_path)
 

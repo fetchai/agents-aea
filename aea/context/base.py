@@ -16,22 +16,43 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the agent context class."""
-
 from queue import Queue
 from types import SimpleNamespace
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, Optional, Union
 
 from aea.common import Address
 from aea.configurations.base import PublicId
+from aea.helpers.storage.generic_storage import Storage
 from aea.identity.base import Identity
+from aea.mail.base import Envelope, EnvelopeContext
 from aea.multiplexer import MultiplexerStatus, OutBox
+from aea.protocols.base import Message
 from aea.skills.tasks import TaskManager
 
 
 class AgentContext:
     """Provide read access to relevant objects of the agent for the skills."""
+
+    __slots__ = (
+        "_shared_state",
+        "_identity",
+        "_connection_status",
+        "_outbox",
+        "_decision_maker_message_queue",
+        "_decision_maker_handler_context",
+        "_task_manager",
+        "_search_service_address",
+        "_decision_maker_address",
+        "_default_ledger_id",
+        "_currency_denominations",
+        "_default_connection",
+        "_default_routing",
+        "_storage_callable",
+        "_data_dir",
+        "_namespace",
+        "_send_to_skill",
+    )
 
     def __init__(
         self,
@@ -47,8 +68,11 @@ class AgentContext:
         default_routing: Dict[PublicId, PublicId],
         search_service_address: Address,
         decision_maker_address: Address,
-        **kwargs
-    ):
+        data_dir: str,
+        storage_callable: Callable[[], Optional[Storage]] = lambda: None,
+        send_to_skill: Optional[Callable] = None,
+        **kwargs: Any
+    ) -> None:
         """
         Initialize an agent context.
 
@@ -64,6 +88,8 @@ class AgentContext:
         :param default_routing: the default routing
         :param search_service_address: the address of the search service
         :param decision_maker_address: the address of the decision maker
+        :param data_dir: directory where to put local files.
+        :param storage_callable: function that returns optional storage attached to agent.
         :param kwargs: keyword arguments to be attached in the agent context namespace.
         """
         self._shared_state = {}  # type: Dict[str, Any]
@@ -79,7 +105,37 @@ class AgentContext:
         self._currency_denominations = currency_denominations
         self._default_connection = default_connection
         self._default_routing = default_routing
+        self._storage_callable = storage_callable
+        self._data_dir = data_dir
         self._namespace = SimpleNamespace(**kwargs)
+        self._send_to_skill = send_to_skill
+
+    def send_to_skill(
+        self,
+        message_or_envelope: Union[Message, Envelope],
+        context: Optional[EnvelopeContext] = None,
+    ) -> None:
+        """
+        Send message or envelope to another skill.
+
+        :param message_or_envelope: envelope to send to another skill.
+        if message passed it will be wrapped into envelope with optional envelope context.
+
+        :return: None
+        """
+        if self._send_to_skill is None:  # pragma: nocover
+            raise ValueError("Send to skill feature is not supported")
+        return self._send_to_skill(message_or_envelope, context)
+
+    @property
+    def storage(self) -> Optional[Storage]:
+        """Return storage instance if enabled in AEA."""
+        return self._storage_callable()
+
+    @property
+    def data_dir(self) -> str:
+        """Return assets directory."""
+        return self._data_dir
 
     @property
     def shared_state(self) -> Dict[str, Any]:

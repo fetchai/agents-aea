@@ -26,6 +26,7 @@ import tempfile
 from pathlib import Path
 from unittest import mock
 
+import click
 import pytest
 import yaml
 from jsonschema import ValidationError
@@ -38,7 +39,7 @@ from aea.configurations.base import (
     DEFAULT_SKILL_CONFIG_FILE,
     PublicId,
 )
-from aea.test_tools.test_cases import AEATestCaseEmpty
+from aea.test_tools.test_cases import AEATestCaseEmpty, AEATestCaseEmptyFlaky
 
 from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_PUBLIC_ID
 from packages.fetchai.skills.erc1155_client import PUBLIC_ID as ERC1155_CLIENT_PUBLIC_ID
@@ -84,9 +85,15 @@ class TestAddSkillFailsWhenSkillAlreadyExists:
             [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
             standalone_mode=False,
         )
-        # this also by default adds the oef skill and error skill
+        # this also by default adds the stub connection
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
+        cls.result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "--local", "skill", str(cls.skill_id)],
+            standalone_mode=False,
+        )
+        assert result.exit_code == 0
 
         # add the error skill again
         cls.result = cls.runner.invoke(
@@ -164,7 +171,7 @@ class TestAddSkillFailsWhenSkillWithSameAuthorAndNameButDifferentVersion:
             [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
             standalone_mode=False,
         )
-        # this also by default adds the oef skill and error skill
+        # this also by default adds the stub connection
         assert result.exit_code == 0
         os.chdir(cls.agent_name)
         cls.result = cls.runner.invoke(
@@ -480,7 +487,7 @@ class TestAddSkillWithContractsDeps(AEATestCaseEmpty):
         assert contract_dependency_name in contracts_folders
 
 
-class TestAddSkillFromRemoteRegistry(AEATestCaseEmpty):
+class TestAddSkillFromRemoteRegistry(AEATestCaseEmptyFlaky):
     """Test case for add skill from Registry command."""
 
     IS_LOCAL = False
@@ -490,7 +497,7 @@ class TestAddSkillFromRemoteRegistry(AEATestCaseEmpty):
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_add_skill_from_remote_registry_positive(self):
         """Test add skill from Registry positive result."""
-        self.add_item("skill", str(ECHO_PUBLIC_ID), local=self.IS_LOCAL)
+        self.add_item("skill", str(ECHO_PUBLIC_ID.to_latest()), local=self.IS_LOCAL)
 
         items_path = os.path.join(self.agent_name, "vendor", "fetchai", "skills")
         items_folders = os.listdir(items_path)
@@ -504,6 +511,48 @@ class TestAddSkillWithLatestVersion(AEATestCaseEmpty):
     def test_add_skill_latest_version(self):
         """Test add skill with latest version."""
         self.add_item("skill", str(ECHO_PUBLIC_ID.to_latest()), local=True)
+
+        items_path = os.path.join(self.agent_name, "vendor", "fetchai", "skills")
+        items_folders = os.listdir(items_path)
+        item_name = "echo"
+        assert item_name in items_folders
+
+
+class TestAddSkillMixedModeFallsBack(AEATestCaseEmpty):
+    """Test add skill in mixed mode that fails with local falls back to remote registry."""
+
+    IS_EMPTY = True
+
+    @mock.patch(
+        "aea.cli.add.find_item_locally_or_distributed",
+        side_effect=click.ClickException(""),
+    )
+    def test_add_skill_remote_mode_negative_local_positive_remote(self, *_mocks):
+        """Test add skill mixed mode."""
+        self.run_cli_command(
+            "add", "skill", str(ECHO_PUBLIC_ID.to_latest()), cwd=self._get_cwd()
+        )
+
+        items_path = os.path.join(self.agent_name, "vendor", "fetchai", "skills")
+        items_folders = os.listdir(items_path)
+        item_name = "echo"
+        assert item_name in items_folders
+
+
+class TestAddSkillRemoteMode(AEATestCaseEmpty):
+    """Test case for add skill, --remote mode."""
+
+    IS_EMPTY = True
+
+    def test_add_skill_remote_mode(self):
+        """Test add skill mixed mode."""
+        self.run_cli_command(
+            "add",
+            "--remote",
+            "skill",
+            str(ECHO_PUBLIC_ID.to_latest()),
+            cwd=self._get_cwd(),
+        )
 
         items_path = os.path.join(self.agent_name, "vendor", "fetchai", "skills")
         items_folders = os.listdir(items_path)

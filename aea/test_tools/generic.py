@@ -22,7 +22,6 @@ from collections import OrderedDict
 from pathlib import Path
 from typing import Any, Dict, List, cast
 
-from aea.cli.utils.config import handle_dotted_path
 from aea.configurations.base import (
     CRUDCollection,
     ComponentConfiguration,
@@ -32,8 +31,10 @@ from aea.configurations.base import (
     SkillConfig,
     dependencies_from_json,
 )
+from aea.configurations.manager import handle_dotted_path
 from aea.exceptions import enforce
 from aea.helpers.file_io import write_envelope
+from aea.helpers.io import open_file
 from aea.helpers.yaml_utils import yaml_dump, yaml_dump_all
 from aea.mail.base import Envelope
 from aea.test_tools.constants import DEFAULT_AUTHOR
@@ -52,7 +53,7 @@ def write_envelope_to_file(envelope: Envelope, file_path: str) -> None:
         write_envelope(envelope, f)
 
 
-def read_envelope_from_file(file_path: str):
+def read_envelope_from_file(file_path: str) -> Envelope:
     """
     Read an envelope from a file.
 
@@ -66,13 +67,22 @@ def read_envelope_from_file(file_path: str):
 
     enforce(len(lines) == 2, "Did not find two lines.")
     line = lines[0] + lines[1]
-    to_b, sender_b, protocol_id_b, message, end = line.strip().split(b",", maxsplit=4)
+    to_b, sender_b, protocol_specification_id_b, message, end = line.strip().split(
+        b",", maxsplit=4
+    )
     to = to_b.decode("utf-8")
     sender = sender_b.decode("utf-8")
-    protocol_id = PublicId.from_str(protocol_id_b.decode("utf-8"))
+    protocol_specification_id = PublicId.from_str(
+        protocol_specification_id_b.decode("utf-8")
+    )
     enforce(end in [b"", b"\n"], "Envelope improperly formatted.")
 
-    return Envelope(to=to, sender=sender, protocol_id=protocol_id, message=message,)
+    return Envelope(
+        to=to,
+        sender=sender,
+        protocol_specification_id=protocol_specification_id,
+        message=message,
+    )
 
 
 def _nested_set(
@@ -185,7 +195,7 @@ def nested_set_config(
         dotted_path, author
     )
 
-    with config_file_path.open() as fp:
+    with open_file(config_file_path) as fp:
         config = config_loader.load(fp)
 
     _nested_set(config, settings_keys, value)
@@ -193,8 +203,8 @@ def nested_set_config(
     if config.package_type == PackageType.AGENT:
         json_data = config.ordered_json
         component_configurations = json_data.pop("component_configurations")
-        yaml_dump_all(
-            [json_data] + component_configurations, config_file_path.open("w")
-        )
+        with open_file(config_file_path, "w") as fp:
+            yaml_dump_all([json_data] + component_configurations, fp)
     else:
-        yaml_dump(config.ordered_json, config_file_path.open("w"))
+        with open_file(config_file_path, "w") as fp:
+            yaml_dump(config.ordered_json, fp)

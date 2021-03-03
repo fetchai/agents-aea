@@ -16,7 +16,7 @@ Abstract class for an agent component.
 #### `__`init`__`
 
 ```python
- | __init__(configuration: Optional[ComponentConfiguration] = None, is_vendor: bool = False, **kwargs, ,)
+ | __init__(configuration: Optional[ComponentConfiguration] = None, is_vendor: bool = False, **kwargs: Any, ,) -> None
 ```
 
 Initialize a package.
@@ -51,7 +51,7 @@ Get whether the component is vendorized or not.
 
 ```python
  | @property
- | prefix_import_path()
+ | prefix_import_path() -> str
 ```
 
 Get the prefix import path for this component.
@@ -105,6 +105,16 @@ Get the directory. Raise error if it has not been set yet.
 ```
 
 Set the directory. Raise error if already set.
+
+<a name="aea.components.base.Component.build_directory"></a>
+#### build`_`directory
+
+```python
+ | @property
+ | build_directory() -> Optional[str]
+```
+
+Get build directory for the component.
 
 <a name="aea.components.base.load_aea_package"></a>
 #### load`_`aea`_`package

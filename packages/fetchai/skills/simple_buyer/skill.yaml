@@ -1,0 +1,86 @@
+name: simple_buyer
+author: fetchai
+version: 0.6.0
+type: skill
+description: This skill purchases information from other agents as specified in its
+  configuration.
+license: Apache-2.0
+aea_version: '>=0.10.0, <0.11.0'
+fingerprint:
+  README.md: QmedLNAAofsr7WC4DqeU3qZNVwSQvPeqNHqdeLeua5qhDW
+  __init__.py: QmPnrGn4pviuTcEAprZRjpRL4uqLkasdf4mpBMobQcSME3
+  behaviours.py: QmWRRAXwJf7mEcV4L2DdG43zkyg55PBViiLnpy1Chj28xn
+  dialogues.py: QmcUgBjxeytE5aAx3VvPyna5EcBuqck9KazG3HygCWjawv
+  handlers.py: QmYx8WzeR2aCg2b2uiR1K2NHLn8DKhzAahLXoFnrXyDoDz
+  strategy.py: QmZVALhDnpEdxLhk3HLAmTs3JdEr9tk1QTS33ZsVnxkLXZ
+fingerprint_ignore_patterns: []
+connections:
+- fetchai/ledger:0.13.0
+contracts: []
+protocols:
+- fetchai/default:0.12.0
+- fetchai/fipa:0.13.0
+- fetchai/ledger_api:0.10.0
+- fetchai/oef_search:0.13.0
+- fetchai/signing:0.10.0
+skills:
+- fetchai/generic_buyer:0.20.0
+behaviours:
+  search:
+    args:
+      search_interval: 5
+    class_name: SearchBehaviour
+  transaction:
+    args:
+      max_processing: 420
+      transaction_interval: 2
+    class_name: TransactionBehaviour
+handlers:
+  fipa:
+    args: {}
+    class_name: FipaHandler
+  ledger_api:
+    args: {}
+    class_name: LedgerApiHandler
+  oef_search:
+    args: {}
+    class_name: OefSearchHandler
+  signing:
+    args: {}
+    class_name: SigningHandler
+models:
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
+  fipa_dialogues:
+    args: {}
+    class_name: FipaDialogues
+  ledger_api_dialogues:
+    args: {}
+    class_name: LedgerApiDialogues
+  oef_search_dialogues:
+    args: {}
+    class_name: OefSearchDialogues
+  signing_dialogues:
+    args: {}
+    class_name: SigningDialogues
+  strategy:
+    args:
+      is_ledger_tx: true
+      location:
+        latitude: 51.5194
+        longitude: 0.127
+      max_negotiations: 1
+      max_quantity: 100
+      max_tx_fee: 1
+      max_unit_price: 20
+      min_quantity: 1
+      search_query:
+        constraint_type: ==
+        search_key: seller_service
+        search_value: weather_data
+      search_radius: 50.0
+      service_id: weather_data
+    class_name: Strategy
+dependencies: {}
+is_abstract: false

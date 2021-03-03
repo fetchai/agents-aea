@@ -25,7 +25,7 @@ Performatives for the state_update protocol.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get the string representation.
@@ -34,7 +34,7 @@ Get the string representation.
 #### `__`init`__`
 
 ```python
- | __init__(performative: Performative, dialogue_reference: Tuple[str, str] = ("", ""), message_id: int = 1, target: int = 0, **kwargs, ,)
+ | __init__(performative: Performative, dialogue_reference: Tuple[str, str] = ("", ""), message_id: int = 1, target: int = 0, **kwargs: Any, ,)
 ```
 
 Initialise an instance of StateUpdateMessage.

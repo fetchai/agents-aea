@@ -1,38 +1,43 @@
 name: ml_train
 author: fetchai
-version: 0.14.0
+version: 0.21.0
 type: skill
 description: The ml train and predict skill implements a simple skill which buys training
   data, trains a model and sells predictions.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.10.0, <0.11.0'
 fingerprint:
-  README.md: QmeHcYRhDJi6gqAHpK29UJz3doiyaicoqeTrPddqM3gh64
-  __init__.py: QmUxSdyeP7Bv84fqopbtWyyym3EqgtYZYfuQKQyWZ33UG6
-  behaviours.py: QmQiBzKV5rEFpMQbSjfjzAJ7SqwwGmso6TozWkjdytucLR
-  dialogues.py: QmVLXHVwXXLnK4zJzPBVhxzgu7ZmohRZ7oj3yG1LPFrmhx
-  handlers.py: QmZkTRL3YCGLTJ9mYUonr19rWMiyD2WCAEypTXM7tbP2aY
-  ml_model.py: QmTfshn6dFnz9gKXZt7aJJczRH14bN7nk6TybwFpzkEPnk
+  README.md: QmUk1XEpYnxte5GKZjSvJY2LJPpVzzP6zLvnxT2Y1g9f4m
+  __init__.py: QmeLaUbi14uzwqmoP1g4yo68UoQLFyJZNKsLW55R8xBDHr
+  behaviours.py: QmXTz299UwWMFLCzx58dynMRuXz7t4n6HeKyS4HeyE8H5E
+  dialogues.py: Qmd1XwQY6mHSSi99qPCTSg9DMz1Z6DQhHUSWfCoaDWbmQW
+  handlers.py: QmT9NP9Em8q6wrztbbAyVCrBZjfdjKcqxnRPskV911oK9B
+  ml_model.py: QmRthjC9yN31xhgpaPJdRycsjaa1YoXAQTfBHmCoJnJVpC
   model.json: QmdV2tGrRY6VQ5VLgUa4yqAhPDG6X8tYsWecypq8nox9Td
-  strategy.py: QmPiuoPn8nUBnsx7FVuDjXbHB71TQEeezqW6HZanvAkszb
-  tasks.py: QmahJRCf6V61FsqrKgMMUyJ8F7PRd6C2bjunZg2XtM9fpF
+  strategy.py: QmaBCY1AocDrDbbtKbzKhwpCE8BMdd4gwhXaWvApgbnQk9
+  tasks.py: QmSbx16zRnDFHpVY7QQT25U15jKga9p7mxiMtEvSurSW1f
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.8.0
+- fetchai/ledger:0.13.0
 contracts: []
 protocols:
-- fetchai/default:0.8.0
-- fetchai/ledger_api:0.6.0
-- fetchai/ml_trade:0.8.0
-- fetchai/oef_search:0.9.0
-- fetchai/signing:0.6.0
+- fetchai/default:0.12.0
+- fetchai/ledger_api:0.10.0
+- fetchai/ml_trade:0.12.0
+- fetchai/oef_search:0.13.0
+- fetchai/signing:0.10.0
 skills:
-- fetchai/generic_buyer:0.14.0
+- fetchai/generic_buyer:0.20.0
 behaviours:
   search:
     args:
       search_interval: 10
     class_name: SearchBehaviour
+  transaction:
+    args:
+      max_processing: 420
+      transaction_interval: 2
+    class_name: TransactionBehaviour
 handlers:
   ledger_api:
     args: {}
@@ -73,16 +78,17 @@ models:
         latitude: 51.5194
         longitude: 0.127
       max_buyer_tx_fee: 20
-      max_negotiations: 1
+      max_negotiations: 2
       max_unit_price: 70
       search_query:
         constraint_type: ==
         search_key: dataset_id
         search_value: fmnist
       search_radius: 5.0
+      service_id: data_service
     class_name: Strategy
 dependencies:
   numpy: {}
   tensorflow:
-    version: ==1.14.0
+    version: ~=2.4.0
 is_abstract: false

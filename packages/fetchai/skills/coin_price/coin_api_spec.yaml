@@ -1,0 +1,20 @@
+openapi: "3.0.0"
+info:
+  version: 0.1.0
+  title: coin_price_api
+paths:
+  /price:
+    get:
+      summary: Coin price
+      operationId: price
+      responses:
+        '200':
+          description: A JSON response including the coin price
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: The coin price was not found.
+        default:
+          description: Unexpected error

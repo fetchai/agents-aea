@@ -46,7 +46,7 @@ class IPCChannelClient(ABC):
     """Multi-platform interprocess communication channel for the client side."""
 
     @abstractmethod
-    async def connect(self, timeout=PIPE_CONN_TIMEOUT) -> bool:
+    async def connect(self, timeout: float = PIPE_CONN_TIMEOUT) -> bool:
         """
         Connect to communication channel
 
@@ -113,7 +113,7 @@ class PosixNamedPipeProtocol:
         out_path: str,
         logger: logging.Logger = _default_logger,
         loop: Optional[AbstractEventLoop] = None,
-    ):
+    ) -> None:
         """
         Initialize a new posix named pipe.
 
@@ -159,12 +159,12 @@ class PosixNamedPipeProtocol:
 
         try:
             self._out = os.open(self._out_path, os.O_WRONLY | os.O_NONBLOCK)
-        except OSError as e:
+        except OSError as e:  # pragma: no cover
             if e.errno == errno.ENXIO:
                 self.logger.debug("Sleeping for {}...".format(self._connection_timeout))
                 await asyncio.sleep(self._connection_timeout)
                 return await self.connect(timeout)
-            raise e  # pragma: no cover
+            raise e
 
         # setup reader
         enforce(
@@ -256,7 +256,7 @@ class TCPSocketProtocol:
         writer: asyncio.StreamWriter,
         logger: logging.Logger = _default_logger,
         loop: Optional[AbstractEventLoop] = None,
-    ):
+    ) -> None:
         """
         Initialize the tcp socket protocol.
 
@@ -313,6 +313,10 @@ class TCPSocketProtocol:
         self._writer.write_eof()
         await self._writer.drain()
         self._writer.close()
+        wait_closed = getattr(self._writer, "wait_closed", None)
+        if wait_closed:
+            # in py3.6 writer does not have the coroutine
+            await wait_closed()  #  pragma: nocover
 
 
 class TCPSocketChannel(IPCChannel):
@@ -322,7 +326,7 @@ class TCPSocketChannel(IPCChannel):
         self,
         logger: logging.Logger = _default_logger,
         loop: Optional[AbstractEventLoop] = None,
-    ):
+    ) -> None:
         """Initialize tcp socket interprocess communication channel."""
         self.logger = logger
         self._loop = loop
@@ -367,7 +371,7 @@ class TCPSocketChannel(IPCChannel):
 
     async def _handle_connection(
         self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
-    ):
+    ) -> None:
         """Handle connection."""
         if self._connected is None:
             raise ValueError("Connected is None!")  # pragma: nocover
@@ -420,7 +424,7 @@ class PosixNamedPipeChannel(IPCChannel):
         self,
         logger: logging.Logger = _default_logger,
         loop: Optional[AbstractEventLoop] = None,
-    ):
+    ) -> None:
         """Initialize posix named pipe interprocess communication channel."""
         self.logger = logger
         self._loop = loop
@@ -498,7 +502,7 @@ class TCPSocketChannelClient(IPCChannelClient):
         out_path: str,
         logger: logging.Logger = _default_logger,
         loop: Optional[AbstractEventLoop] = None,
-    ):
+    ) -> None:
         """
         Initialize a tcp socket communication channel client.
 
@@ -586,7 +590,7 @@ class PosixNamedPipeChannelClient(IPCChannelClient):
         out_path: str,
         logger: logging.Logger = _default_logger,
         loop: Optional[AbstractEventLoop] = None,
-    ):
+    ) -> None:
         """
         Initialize a posix named pipe communication channel client.
 
@@ -657,7 +661,7 @@ def make_ipc_channel(
         return PosixNamedPipeChannel(logger=logger, loop=loop)
     if os.name == "nt":  # pragma: nocover
         return TCPSocketChannel(logger=logger, loop=loop)
-    raise Exception(  # pragma: nocover
+    raise NotImplementedError(  # pragma: nocover
         "make ipc channel is not supported on platform {}".format(os.name)
     )
 
@@ -681,6 +685,6 @@ def make_ipc_channel_client(
         return PosixNamedPipeChannelClient(in_path, out_path, logger=logger, loop=loop)
     if os.name == "nt":  # pragma: nocover
         return TCPSocketChannelClient(in_path, out_path, logger=logger, loop=loop)
-    raise Exception(  # pragma: nocover
+    raise NotImplementedError(  # pragma: nocover
         "make ip channel client is not supported on platform {}".format(os.name)
     )

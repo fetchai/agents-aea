@@ -1,26 +1,43 @@
 name: p2p_libp2p_client
 author: fetchai
-version: 0.9.0
+version: 0.13.0
 type: connection
 description: The libp2p client connection implements a tcp connection to a running
   libp2p node as a traffic delegate to send/receive envelopes to/from agents in the
   DHT.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.10.0, <0.11.0'
 fingerprint:
-  README.md: QmYo5C3vMjX46hmtcfTw3nLtAsuAmvG85vDGGJFzFMYkWu
+  README.md: QmTEB62Rz2cpu1tPKaBXynHNfr4aRWEFSqrhWK7quFu5LU
   __init__.py: QmT1FEHkPGMHV5oiVEfQHHr25N2qdZxydSNRJabJvYiTgf
-  connection.py: QmcnEJAga8o1mbfZYJSTZFEnDb8LVixaqeHvdQspt5EqbP
+  acn_message.proto: QmQtqmAqRM6KhYyfXGPYbYLBLuwfTRwTbvt5Rmt1ghS33J
+  acn_message_pb2.py: QmRmTieVDVaRoiynFx9YJbXEf41JfTTWdqTWuRYWFpM8iw
+  connection.py: Qmev8rx2LgtKysuFzW5KrxDgrT98o3uuimUPCHsqKwMvYn
 fingerprint_ignore_patterns: []
 connections: []
 protocols: []
 class_name: P2PLibp2pClientConnection
 config:
+  connect_retries: 3
   ledger_id: fetchai
   nodes:
-  - uri: agents-p2p-dht.sandbox.fetch-ai.com:11000
-  - uri: agents-p2p-dht.sandbox.fetch-ai.com:11001
-  - uri: agents-p2p-dht.sandbox.fetch-ai.com:11002
+  - uri: acn.fetch.ai:11000
+    public_key: 0217a59bd805c310aca4febe0e99ce22ee3712ae085dc1e5630430b1e15a584bb7
+  - uri: acn.fetch.ai:11001
+    public_key: 03fa7cfae1037cba5218f0f5743802eced8de3247c55ecebaae46c7d3679e3f91d
+cert_requests:
+- identifier: acn
+  ledger_id: fetchai
+  not_after: '2022-01-01'
+  not_before: '2021-01-01'
+  public_key: 0217a59bd805c310aca4febe0e99ce22ee3712ae085dc1e5630430b1e15a584bb7
+  save_path: .certs/acn_fetch_ai_11000.txt
+- identifier: acn
+  ledger_id: fetchai
+  not_after: '2022-01-01'
+  not_before: '2021-01-01'
+  public_key: 03fa7cfae1037cba5218f0f5743802eced8de3247c55ecebaae46c7d3679e3f91d
+  save_path: .certs/acn_fetch_ai_11001.txt
 excluded_protocols: []
 restricted_to_protocols: []
 dependencies: {}

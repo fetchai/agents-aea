@@ -4,13 +4,14 @@ version: 0.1.0
 type: skill
 description: Raise an exception, at some point.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.10.0, <0.11.0'
 fingerprint:
   __init__.py: Qmf9TBWb5EEKPZivLtG4T1sE7jeriA24NYSF1BZKL8ntJE
   behaviours.py: QmbvxUwe8dCoj87ozw6YDrPTC17fDLXjAi7ydhJdK3c1aY
   handlers.py: Qmf8XuXNDzqHNdo7Q18y9wCFujrtk6Tx1zaADsQ5MuzNRg
   tasks.py: QmfJznzp11PWpBzpEaftq3h2BYHfXbnoitdMcFQsLCqZnL
 fingerprint_ignore_patterns: []
+build_entrypoint: path/to/script.py
 contracts: []
 protocols: []
 skills: []

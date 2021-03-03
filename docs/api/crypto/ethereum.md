@@ -3,6 +3,64 @@
 
 Ethereum module wrapping the public and private key cryptography and ledger api.
 
+<a name="aea.crypto.ethereum.SignedTransactionTranslator"></a>
+## SignedTransactionTranslator Objects
+
+```python
+class SignedTransactionTranslator()
+```
+
+Translator for SignedTransaction.
+
+<a name="aea.crypto.ethereum.SignedTransactionTranslator.to_dict"></a>
+#### to`_`dict
+
+```python
+ | @staticmethod
+ | to_dict(signed_transaction: SignedTransaction) -> Dict[str, Union[str, int]]
+```
+
+Write SignedTransaction to dict.
+
+<a name="aea.crypto.ethereum.SignedTransactionTranslator.from_dict"></a>
+#### from`_`dict
+
+```python
+ | @staticmethod
+ | from_dict(signed_transaction_dict: JSONLike) -> SignedTransaction
+```
+
+Get SignedTransaction from dict.
+
+<a name="aea.crypto.ethereum.AttributeDictTranslator"></a>
+## AttributeDictTranslator Objects
+
+```python
+class AttributeDictTranslator()
+```
+
+Translator for AttributeDict.
+
+<a name="aea.crypto.ethereum.AttributeDictTranslator.to_dict"></a>
+#### to`_`dict
+
+```python
+ | @classmethod
+ | to_dict(cls, attr_dict: Union[AttributeDict, TxReceipt, TxData]) -> JSONLike
+```
+
+Simplify to dict.
+
+<a name="aea.crypto.ethereum.AttributeDictTranslator.from_dict"></a>
+#### from`_`dict
+
+```python
+ | @classmethod
+ | from_dict(cls, di: JSONLike) -> AttributeDict
+```
+
+Get back attribute dict.
+
 <a name="aea.crypto.ethereum.EthereumCrypto"></a>
 ## EthereumCrypto Objects
 
@@ -72,7 +130,7 @@ a display_address str
 
 ```python
  | @classmethod
- | load_private_key_from_path(cls, file_name) -> Account
+ | load_private_key_from_path(cls, file_name: str) -> Account
 ```
 
 Load a private key in hex format from a file.
@@ -107,7 +165,7 @@ signature of the message in string form
 #### sign`_`transaction
 
 ```python
- | sign_transaction(transaction: Any) -> Any
+ | sign_transaction(transaction: JSONLike) -> JSONLike
 ```
 
 Sign a transaction in bytes string form.
@@ -161,7 +219,7 @@ Helper class usable as Mixin for EthereumApi or as standalone class.
 
 ```python
  | @staticmethod
- | is_transaction_settled(tx_receipt: Any) -> bool
+ | is_transaction_settled(tx_receipt: JSONLike) -> bool
 ```
 
 Check whether a transaction is settled or not.
@@ -179,7 +237,7 @@ True if the transaction has been settled, False o/w.
 
 ```python
  | @staticmethod
- | is_transaction_valid(tx: Any, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
+ | is_transaction_valid(tx: dict, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
 ```
 
 Check whether a transaction is valid or not.
@@ -253,6 +311,26 @@ Recover the addresses from the hash.
 
 the recovered addresses
 
+<a name="aea.crypto.ethereum.EthereumHelper.recover_public_keys_from_message"></a>
+#### recover`_`public`_`keys`_`from`_`message
+
+```python
+ | @classmethod
+ | recover_public_keys_from_message(cls, message: bytes, signature: str, is_deprecated_mode: bool = False) -> Tuple[str, ...]
+```
+
+Get the public key used to produce the `signature` of the `message`
+
+**Arguments**:
+
+- `message`: raw bytes used to produce signature
+- `signature`: signature of the message
+- `is_deprecated_mode`: if the deprecated signing was used
+
+**Returns**:
+
+the recovered public keys
+
 <a name="aea.crypto.ethereum.EthereumHelper.get_hash"></a>
 #### get`_`hash
 
@@ -271,6 +349,24 @@ Get the hash of a message.
 
 the hash of the message.
 
+<a name="aea.crypto.ethereum.EthereumHelper.load_contract_interface"></a>
+#### load`_`contract`_`interface
+
+```python
+ | @classmethod
+ | load_contract_interface(cls, file_path: Path) -> Dict[str, str]
+```
+
+Load contract interface.
+
+**Arguments**:
+
+- `file_path`: the file path to the interface
+
+**Returns**:
+
+the interface
+
 <a name="aea.crypto.ethereum.EthereumApi"></a>
 ## EthereumApi Objects
 
@@ -284,7 +380,7 @@ Class to interact with the Ethereum Web3 APIs.
 #### `__`init`__`
 
 ```python
- | __init__(**kwargs)
+ | __init__(**kwargs: Any)
 ```
 
 Initialize the Ethereum ledger APIs.
@@ -312,11 +408,20 @@ Get the underlying API object.
 
 Get the balance of a given account.
 
+<a name="aea.crypto.ethereum.EthereumApi.get_state"></a>
+#### get`_`state
+
+```python
+ | get_state(callable_name: str, *args: Any, **kwargs: Any) -> Optional[JSONLike]
+```
+
+Call a specified function on the ledger API.
+
 <a name="aea.crypto.ethereum.EthereumApi.get_transfer_transaction"></a>
 #### get`_`transfer`_`transaction
 
 ```python
- | get_transfer_transaction(sender_address: Address, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, chain_id: Optional[int] = None, gas_price: Optional[str] = None, **kwargs, ,) -> Optional[Any]
+ | get_transfer_transaction(sender_address: Address, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, chain_id: Optional[int] = None, gas_price: Optional[str] = None, **kwargs: Any, ,) -> Optional[JSONLike]
 ```
 
 Submit a transfer transaction to the ledger.
@@ -335,11 +440,28 @@ Submit a transfer transaction to the ledger.
 
 the transfer transaction
 
+<a name="aea.crypto.ethereum.EthereumApi.update_with_gas_estimate"></a>
+#### update`_`with`_`gas`_`estimate
+
+```python
+ | update_with_gas_estimate(transaction: JSONLike) -> JSONLike
+```
+
+Attempts to update the transaction with a gas estimate
+
+**Arguments**:
+
+- `transaction`: the transaction
+
+**Returns**:
+
+the updated transaction
+
 <a name="aea.crypto.ethereum.EthereumApi.send_signed_transaction"></a>
 #### send`_`signed`_`transaction
 
 ```python
- | send_signed_transaction(tx_signed: Any) -> Optional[str]
+ | send_signed_transaction(tx_signed: JSONLike) -> Optional[str]
 ```
 
 Send a signed transaction and wait for confirmation.
@@ -356,7 +478,7 @@ tx_digest, if present
 #### get`_`transaction`_`receipt
 
 ```python
- | get_transaction_receipt(tx_digest: str) -> Optional[Any]
+ | get_transaction_receipt(tx_digest: str) -> Optional[JSONLike]
 ```
 
 Get the transaction receipt for a transaction digest.
@@ -373,7 +495,7 @@ the tx receipt, if present
 #### get`_`transaction
 
 ```python
- | get_transaction(tx_digest: str) -> Optional[Any]
+ | get_transaction(tx_digest: str) -> Optional[JSONLike]
 ```
 
 Get the transaction for a transaction digest.
@@ -408,7 +530,7 @@ the contract instance
 #### get`_`deploy`_`transaction
 
 ```python
- | get_deploy_transaction(contract_interface: Dict[str, str], deployer_address: Address, value: int = 0, gas: int = 0, **kwargs, ,) -> Dict[str, Any]
+ | get_deploy_transaction(contract_interface: Dict[str, str], deployer_address: Address, value: int = 0, gas: int = 0, **kwargs: Any, ,) -> Optional[JSONLike]
 ```
 
 Get the transaction to deploy the smart contract.
@@ -420,23 +542,6 @@ Get the transaction to deploy the smart contract.
 - `value`: value to send to contract (ETH in Wei)
 - `gas`: the gas to be used
 :returns tx: the transaction dictionary.
-
-<a name="aea.crypto.ethereum.EthereumApi.try_estimate_gas"></a>
-#### try`_`estimate`_`gas
-
-```python
- | try_estimate_gas(tx: Dict[str, Any]) -> Dict[str, Any]
-```
-
-Attempts to update the transaction with a gas estimate.
-
-**Arguments**:
-
-- `tx`: the transaction
-
-**Returns**:
-
-the transaction (potentially updated)
 
 <a name="aea.crypto.ethereum.EthereumApi.is_valid_address"></a>
 #### is`_`valid`_`address
@@ -465,7 +570,7 @@ Ethereum testnet faucet API.
 #### get`_`wealth
 
 ```python
- | get_wealth(address: Address) -> None
+ | get_wealth(address: Address, url: Optional[str] = None) -> None
 ```
 
 Get wealth from the faucet for the provided address.
@@ -473,8 +578,72 @@ Get wealth from the faucet for the provided address.
 **Arguments**:
 
 - `address`: the address.
+- `url`: the url
 
 **Returns**:
 
 None
+
+<a name="aea.crypto.ethereum.LruLockWrapper"></a>
+## LruLockWrapper Objects
+
+```python
+class LruLockWrapper()
+```
+
+Wrapper for LRU with threading.Lock.
+
+<a name="aea.crypto.ethereum.LruLockWrapper.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(lru: LRU) -> None
+```
+
+Init wrapper.
+
+<a name="aea.crypto.ethereum.LruLockWrapper.__getitem__"></a>
+#### `__`getitem`__`
+
+```python
+ | __getitem__(*args: Any, **kwargs: Any) -> Any
+```
+
+Get item
+
+<a name="aea.crypto.ethereum.LruLockWrapper.__setitem__"></a>
+#### `__`setitem`__`
+
+```python
+ | __setitem__(*args: Any, **kwargs: Any) -> Any
+```
+
+Set item.
+
+<a name="aea.crypto.ethereum.LruLockWrapper.__contains__"></a>
+#### `__`contains`__`
+
+```python
+ | __contains__(*args: Any, **kwargs: Any) -> Any
+```
+
+Contain item.
+
+<a name="aea.crypto.ethereum.LruLockWrapper.__delitem__"></a>
+#### `__`delitem`__`
+
+```python
+ | __delitem__(*args: Any, **kwargs: Any) -> Any
+```
+
+Del item.
+
+<a name="aea.crypto.ethereum.set_wrapper_for_web3py_session_cache"></a>
+#### set`_`wrapper`_`for`_`web3py`_`session`_`cache
+
+```python
+set_wrapper_for_web3py_session_cache() -> None
+```
+
+Wrap web3py session cache with threading.Lock.
 

@@ -19,7 +19,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 First, fetch the gym AEA:
 ``` bash
-aea fetch fetchai/gym_aea:0.13.0 --alias my_gym_aea
+aea fetch fetchai/gym_aea:0.18.0 --alias my_gym_aea
 cd my_gym_aea
 aea install
 ```
@@ -36,17 +36,17 @@ cd my_gym_aea
 
 ### Add the gym skill
 ``` bash
-aea add skill fetchai/gym:0.10.0
+aea add skill fetchai/gym:0.15.0
 ```
 
 ### Set gym connection as default
 ``` bash
-aea config set agent.default_connection fetchai/gym:0.8.0
+aea config set agent.default_connection fetchai/gym:0.12.0
 ```
 
 ### Install the skill dependencies
 
-To install the `gym` package, a dependency of the gym skill, from Pypi run
+To install the `gym` package, a dependency of the gym skill, from PyPI run
 ``` bash
 aea install
 ```
@@ -62,7 +62,7 @@ mkdir gyms
 cp -a ../examples/gym_ex/gyms/. gyms/
 ```
 
-#### Update the connection config
+#### Update the connection configuration
 ``` bash
 aea config set vendor.fetchai.connections.gym.config.env 'gyms.env.BanditNArmedRandom'
 ```
@@ -119,7 +119,7 @@ The `GymTask` is responsible for training the RL agent. In particular, `MyRLAgen
 
 In this particular skill, which chiefly serves for demonstration purposes, we implement a very basic RL agent. The agent trains a model of price of `n` goods: it aims to discover the most likely price of each good. To this end, the agent randomly selects one of the `n` goods on each training step and then chooses as an `action` the price which it deems is most likely accepted. Each good is represented by an id and the possible price range `[1,100]` divided into 100 integer bins. For each price bin, a `PriceBandit` is created which models the likelihood of this price. In particular, a price bandit maintains a <a href="https://en.wikipedia.org/wiki/Beta_distribution" target="_blank">beta distribution</a>. The beta distribution is initialized to the uniform distribution. Each time the price associated with a given `PriceBandit` is accepted or rejected the distribution maintained by the `PriceBandit` is updated. For each good, the agent can therefore over time learn which price is most likely.
 
-<img src="../assets/gym-skill.png" alt="Gym skill illustration" class="center" style="display: block; margin-left: auto; margin-right: auto;width:50%;">
+<img src="../assets/gym-skill.jpg" alt="Gym skill illustration" class="center" style="display: block; margin-left: auto; margin-right: auto;width:80%;">
 
 The illustration shows how the RL agent only interacts with the proxy environment by sending it `action (A)` and receiving `observation (O)`, `reward (R)`, `done (D)` and  `info (I)`.
 

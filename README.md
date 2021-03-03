@@ -12,7 +12,7 @@
   <a>
     <img alt="PyPI - Wheel" src="https://img.shields.io/pypi/wheel/aea">
   </a>
-  <a href="https://github.com/fetchai/agents-aea/blob/master/LICENSE">
+  <a href="https://github.com/fetchai/agents-aea/blob/main/LICENSE">
     <img alt="License" src="https://img.shields.io/pypi/l/aea"> 
   </a>
   <a href="https://pypi.org/project/aea/">
@@ -24,7 +24,7 @@
 </p>
 <p align="center">
   <a href="https://github.com/fetchai/agents-aea/workflows/AEA%20framework%20sanity%20checks%20and%20tests">
-    <img alt="AEA framework sanity checks and tests" src="https://github.com/fetchai/agents-aea/workflows/AEA%20framework%20sanity%20checks%20and%20tests/badge.svg?branch=master">
+    <img alt="AEA framework sanity checks and tests" src="https://github.com/fetchai/agents-aea/workflows/AEA%20framework%20sanity%20checks%20and%20tests/badge.svg?branch=main">
   </a>
   <a href="">
     <img alt="Codecov" src="https://img.shields.io/codecov/c/github/fetchai/agents-aea">
@@ -73,6 +73,18 @@ A framework for autonomous economic agent (AEA) development
   </a>
 </p>
 
+## Alternatively: Use `pipx` (CLI usage only)
+
+1. Install [pipx](https://github.com/pipxproject/pipx)
+
+2. Install the package from [PyPI](https://pypi.org/project/aea/):
+
+       pipx install aea[all]
+
+3. Run AEA CLI e.g.:
+
+       aea --help
+
 ## Alternatively: Install from Source
 
 This approach is not recommended!
@@ -82,6 +94,10 @@ This approach is not recommended!
 This repository contains submodules. Clone with recursive strategy:
 
     git clone https://github.com/fetchai/agents-aea.git --recursive && cd agents-aea
+
+- To fetch/update submodules (for existing local repo):
+
+      git submodule sync --recursive && git submodule update --init --recursive
 
 ### Dependencies
 
@@ -109,11 +125,41 @@ You can have more control on the installed dependencies by leveraging the setupt
 
 The following dependency is **only relevant if you intend to contribute** to the repository:
 
+- All Pull Requests should be opened against the `develop` branch. Do **not** open a Pull Request against `main`!
+
 - The project uses [Google Protocol Buffers](https://developers.google.com/protocol-buffers/) compiler for message serialization. A guide on how to install it is found [here](https://fetchai.github.io/oef-sdk-python/user/install.html#protobuf-compiler).
 
 The following steps are **only relevant if you intend to contribute** to the repository. They are **not required** for agent development.
 
-- To install development dependencies (here optionally skipping `Pipfile.lock` creation):
+### Recommended commands
+
+- The simplest way to get setup for development on the framework is to run the following:
+
+      make new_env
+      pipenv shell
+
+- For linting and static analysis use:
+
+      make lint
+      make static
+      make pylint
+      make security
+
+- For checking packages integrity:
+
+      make package_checks
+
+- For testing `aea.{SUBMODULE}` with `tests/test_{TESTMODULE}` use:
+
+      make dir={SUBMODULE} tdir={TESTMODULE} test-sub
+
+  e.g.
+
+      make dir=cli tdir=cli test-sub
+
+### Alternative commands
+
+- To install development dependencies manually (here optionally skipping `Pipfile.lock` creation):
 
       pipenv install --dev --skip-lock
 
@@ -125,40 +171,31 @@ The following steps are **only relevant if you intend to contribute** to the rep
 
       pip install -e ".[all]"
 
-- To run tests:
+- To run tests: `tox -e py3.7` or `make test`. To only test specific modules try `make dir=PATH_TO_MODULE tdir=PATH_TO_TESTS test-sub` where  (e.g. `make dir=cli tdir=cli test-sub`).
 
-      tox -e py3.7
+- To run linters (code style checks) and code formatters: `tox -e flake8` and `tox -e black` and ` tox -e isort` or `make lint`
 
-- To run linters (code style checks):
+- To run static type checks: `tox -e mypy` or `make static`
 
-      tox -e flake8
-      tox -e pylint
+- To run `pylint`: `tox -e pylint` or `make pylint`
 
-- To run static type checks:
+- To run security checks: `tox -e bandit` and `tox -e safety` or `make security`
 
-      tox -e mypy
+### Go Development
 
-- To run black code formatter:
+- The `fetchai/p2p_libp2p` package is partially developed in Go.
 
-      tox -e black
+- To install Go visit the [Golang site](https://golang.org/doc/install).
 
-- To run isort code formatter:
+- We use [`golines`](https://github.com/segmentio/golines) and [`golangci-lint`](https://golangci-lint.run) for linting.
 
-      tox -e isort
+- To run tests, use `go test -p 1 -timeout 0 -count 1 -v ./...` from the root directory of the package. If you experience installation or build issues run `go clean -modcache`.
 
-- To run bandit security checks:
+### Documentation
 
-      tox -e bandit
+- To start a live-reloading docs server on localhost: `mkdocs serve`. To amend the docs, create a new documentation file in `docs/` and add a reference to it in `mkdocs.yml`.
 
-- To start a live-reloading docs server on localhost
-	
-      mkdocs serve
-
-- To amend the docs, create a new documentation file in `docs/` and add a reference to it in `mkdocs.yml`.
-
-- To fetch/update submodules:
-
-      git submodule sync --recursive && git submodule update --init --recursive
+- To run demos against local packages use flag `--local` in `aea` CLI commands.
 
 ## Cite
 
@@ -167,7 +204,7 @@ consider to cite it with the following BibTex entry:
 
 ```
 @misc{agents-aea,
-  Author = {Marco Favorito and David Minarsch and Ali Hosseini and Aristotelis Triantafyllidis and Diarmid Campbell and Oleg Panasevych and Kevin Chen and Yuri Turchenkov and Lokman Rahmani and Jiří Vestfál},
+  Author = {Marco Favorito and David Minarsch and Ali Hosseini and Aristotelis Triantafyllidis and Diarmid Campbell and Oleg Panasevych and Kevin Chen and Yuri Turchenkov and Lokman Rahmani and Jiří Vestfál and James Riehl},
   Title = {Autonomous Economic Agent (AEA) Framework},
   Year = {2019},
 }

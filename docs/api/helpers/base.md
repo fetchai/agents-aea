@@ -10,7 +10,7 @@ Miscellaneous helpers.
 locate(path: str) -> Any
 ```
 
-Locate an object by name or dotted path, importing as necessary.
+Locate an object by name or dotted save_path, importing as necessary.
 
 <a name="aea.helpers.base.load_module"></a>
 #### load`_`module
@@ -23,7 +23,7 @@ Load a module.
 
 **Arguments**:
 
-- `dotted_path`: the dotted path of the package/module.
+- `dotted_path`: the dotted save_path of the package/module.
 - `filepath`: the file to the package/module.
 
 **Returns**:
@@ -39,14 +39,14 @@ None
 #### load`_`env`_`file
 
 ```python
-load_env_file(env_file: str)
+load_env_file(env_file: str) -> None
 ```
 
 Load the content of the environment file into the process environment.
 
 **Arguments**:
 
-- `env_file`: path to the env file.
+- `env_file`: save_path to the env file.
 
 **Returns**:
 
@@ -122,17 +122,47 @@ attribute to implement a different behaviour.
 #### `__`init`__`
 
 ```python
- | __init__(seq)
+ | __init__(seq: Union[UserString, str]) -> None
 ```
 
 Initialize a regex constrained string.
+
+<a name="aea.helpers.base.SimpleId"></a>
+## SimpleId Objects
+
+```python
+class SimpleId(RegexConstrainedString)
+```
+
+A simple identifier.
+
+The allowed strings are all the strings that:
+- have at least length 1
+- have at most length 128
+- the first character must be between a-z,A-Z or underscore
+- the other characters must be either the above or digits.
+
+Examples of allowed strings:
+>>> SimpleId("an_identifier")
+'an_identifier'
+
+Examples of not allowed strings:
+>>> SimpleId("0an_identifier")
+Traceback (most recent call last):
+...
+ValueError: Value 0an_identifier does not match the regular expression re.compile('[a-zA-Z_][a-zA-Z0-9_]{0,127}')
+
+>>> SimpleId("")
+Traceback (most recent call last):
+...
+ValueError: Value  does not match the regular expression re.compile('[a-zA-Z_][a-zA-Z0-9_]{0,127}')
 
 <a name="aea.helpers.base.cd"></a>
 #### cd
 
 ```python
 @contextlib.contextmanager
-cd(path)
+cd(path: PathLike) -> Generator
 ```
 
 Change working directory temporarily.
@@ -162,7 +192,7 @@ callable to write log with
 #### try`_`decorator
 
 ```python
-try_decorator(error_message: str, default_return=None, logger_method="error")
+try_decorator(error_message: str, default_return: Callable = None, logger_method: Any = "error") -> Callable
 ```
 
 Run function, log and return default value on exception.
@@ -188,7 +218,7 @@ Exception for retry decorator.
 #### retry`_`decorator
 
 ```python
-retry_decorator(number_of_retries: int, error_message: str, delay: float = 0, logger_method="error")
+retry_decorator(number_of_retries: int, error_message: str, delay: float = 0, logger_method: str = "error") -> Callable
 ```
 
 Run function with several attempts.
@@ -207,7 +237,7 @@ Does not support async or coroutines!
 
 ```python
 @contextlib.contextmanager
-exception_log_and_reraise(log_method: Callable, message: str)
+exception_log_and_reraise(log_method: Callable, message: str) -> Generator
 ```
 
 Run code in context to log and re raise exception.
@@ -221,7 +251,7 @@ Run code in context to log and re raise exception.
 #### recursive`_`update
 
 ```python
-recursive_update(to_update: Dict, new_values: Dict) -> None
+recursive_update(to_update: Dict, new_values: Dict, allow_new_values: bool = False) -> None
 ```
 
 Update a dictionary by replacing conflicts with the new values.
@@ -263,4 +293,363 @@ the topological order for the graph (as a sequence of nodes)
 **Raises**:
 
 - `ValueError`: if the graph contains a cycle.
+
+<a name="aea.helpers.base.reachable_nodes"></a>
+#### reachable`_`nodes
+
+```python
+reachable_nodes(adjacency_list: Dict[T, Set[T]], starting_nodes: Set[T]) -> Dict[T, Set[T]]
+```
+
+Find the reachable subgraph induced by a set of starting nodes.
+
+**Arguments**:
+
+- `adjacency_list`: the adjacency list of the full graph.
+- `starting_nodes`: the starting nodes of the new graph.
+
+**Returns**:
+
+the adjacency list of the subgraph.
+
+<a name="aea.helpers.base.cached_property"></a>
+## cached`_`property Objects
+
+```python
+class cached_property()
+```
+
+Cached property from python3.8 functools.
+
+<a name="aea.helpers.base.cached_property.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(func: Callable) -> None
+```
+
+Init cached property.
+
+<a name="aea.helpers.base.cached_property.__set_name__"></a>
+#### `__`set`_`name`__`
+
+```python
+ | __set_name__(_: Any, name: Any) -> None
+```
+
+Set name.
+
+<a name="aea.helpers.base.cached_property.__get__"></a>
+#### `__`get`__`
+
+```python
+ | __get__(instance: Any, _: Optional[Any] = None) -> Any
+```
+
+Get instance.
+
+<a name="aea.helpers.base.ensure_dir"></a>
+#### ensure`_`dir
+
+```python
+ensure_dir(dir_path: str) -> None
+```
+
+Check if dir_path is a directory or create it.
+
+<a name="aea.helpers.base.dict_to_path_value"></a>
+#### dict`_`to`_`path`_`value
+
+```python
+dict_to_path_value(data: Mapping, path: Optional[List] = None) -> Iterable[Tuple[List[str], Any]]
+```
+
+Convert dict to sequence of terminal path build of  keys and value.
+
+<a name="aea.helpers.base.parse_datetime_from_str"></a>
+#### parse`_`datetime`_`from`_`str
+
+```python
+parse_datetime_from_str(date_string: str) -> datetime.datetime
+```
+
+Parse datetime from string.
+
+<a name="aea.helpers.base.CertRequest"></a>
+## CertRequest Objects
+
+```python
+class CertRequest()
+```
+
+Certificate request for proof of representation.
+
+<a name="aea.helpers.base.CertRequest.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(public_key: str, identifier: SimpleIdOrStr, ledger_id: SimpleIdOrStr, not_before: str, not_after: str, save_path: str) -> None
+```
+
+Initialize the certificate request.
+
+**Arguments**:
+
+- `public_key`: the public key, or the key id.
+- `identifier`: certificate identifier.
+- `not_before`: specify the lower bound for certificate validity.
+If it is a string, it must follow the format: 'YYYY-MM-DD'. It
+will be interpreted as timezone UTC.
+- `not_before`: specify the lower bound for certificate validity.
+if it is a string, it must follow the format: 'YYYY-MM-DD' It
+will be interpreted as timezone UTC-0.
+- `save_path`: the save_path where to save the certificate.
+
+<a name="aea.helpers.base.CertRequest.public_key"></a>
+#### public`_`key
+
+```python
+ | @property
+ | public_key() -> Optional[str]
+```
+
+Get the public key.
+
+<a name="aea.helpers.base.CertRequest.ledger_id"></a>
+#### ledger`_`id
+
+```python
+ | @property
+ | ledger_id() -> str
+```
+
+Get the ledger id.
+
+<a name="aea.helpers.base.CertRequest.key_identifier"></a>
+#### key`_`identifier
+
+```python
+ | @property
+ | key_identifier() -> Optional[str]
+```
+
+Get the key identifier.
+
+<a name="aea.helpers.base.CertRequest.identifier"></a>
+#### identifier
+
+```python
+ | @property
+ | identifier() -> str
+```
+
+Get the identifier.
+
+<a name="aea.helpers.base.CertRequest.not_before_string"></a>
+#### not`_`before`_`string
+
+```python
+ | @property
+ | not_before_string() -> str
+```
+
+Get the not_before field as string.
+
+<a name="aea.helpers.base.CertRequest.not_after_string"></a>
+#### not`_`after`_`string
+
+```python
+ | @property
+ | not_after_string() -> str
+```
+
+Get the not_after field as string.
+
+<a name="aea.helpers.base.CertRequest.not_before"></a>
+#### not`_`before
+
+```python
+ | @property
+ | not_before() -> datetime.datetime
+```
+
+Get the not_before field.
+
+<a name="aea.helpers.base.CertRequest.not_after"></a>
+#### not`_`after
+
+```python
+ | @property
+ | not_after() -> datetime.datetime
+```
+
+Get the not_after field.
+
+<a name="aea.helpers.base.CertRequest.save_path"></a>
+#### save`_`path
+
+```python
+ | @property
+ | save_path() -> Path
+```
+
+Get the save path for the certificate.
+
+Note: if the path is *not* absolute, then
+the actual save path might depend on the context.
+
+<a name="aea.helpers.base.CertRequest.get_absolute_save_path"></a>
+#### get`_`absolute`_`save`_`path
+
+```python
+ | get_absolute_save_path(path_prefix: Optional[PathLike] = None) -> Path
+```
+
+Get the absolute save path.
+
+If save_path is an absolute path, then the prefix is ignored.
+Otherwise, the path prefix is prepended.
+
+**Arguments**:
+
+- `path_prefix`: the (absolute) path to prepend to the save path.
+
+**Returns**:
+
+the actual save path.
+
+<a name="aea.helpers.base.CertRequest.public_key_or_identifier"></a>
+#### public`_`key`_`or`_`identifier
+
+```python
+ | @property
+ | public_key_or_identifier() -> str
+```
+
+Get the public key or identifier.
+
+<a name="aea.helpers.base.CertRequest.get_message"></a>
+#### get`_`message
+
+```python
+ | get_message(public_key: str) -> bytes
+```
+
+Get the message to sign.
+
+<a name="aea.helpers.base.CertRequest.get_signature"></a>
+#### get`_`signature
+
+```python
+ | get_signature(path_prefix: Optional[PathLike] = None) -> str
+```
+
+Get signature from save_path.
+
+**Arguments**:
+
+- `path_prefix`: the path prefix to be prependend to save_path. Defaults to cwd.
+
+**Returns**:
+
+the signature.
+
+<a name="aea.helpers.base.CertRequest.json"></a>
+#### json
+
+```python
+ | @property
+ | json() -> Dict
+```
+
+Compute the JSON representation.
+
+<a name="aea.helpers.base.CertRequest.from_json"></a>
+#### from`_`json
+
+```python
+ | @classmethod
+ | from_json(cls, obj: Dict) -> "CertRequest"
+```
+
+Compute the JSON representation.
+
+<a name="aea.helpers.base.CertRequest.__eq__"></a>
+#### `__`eq`__`
+
+```python
+ | __eq__(other: Any) -> bool
+```
+
+Check equality.
+
+<a name="aea.helpers.base.compute_specifier_from_version"></a>
+#### compute`_`specifier`_`from`_`version
+
+```python
+compute_specifier_from_version(version: Version) -> str
+```
+
+Compute the specifier set from a version, by varying only on the patch number.
+
+I.e. from "{major}.{minor}.{patch}", return
+
+">={major}.{minor}.0, <{major}.{minor + 1}.0"
+
+**Arguments**:
+
+- `version`: the version
+
+**Returns**:
+
+the specifier set
+
+<a name="aea.helpers.base.decorator_with_optional_params"></a>
+#### decorator`_`with`_`optional`_`params
+
+```python
+decorator_with_optional_params(decorator: Callable) -> Callable
+```
+
+Make a decorator usable either with or without parameters.
+
+In other words, if a decorator "mydecorator" is decorated with this decorator,
+It can be used both as:
+
+@mydecorator
+def myfunction():
+    ...
+
+or as:
+
+@mydecorator(arg1, kwarg1="value")
+def myfunction():
+    ...
+
+<a name="aea.helpers.base.delete_directory_contents"></a>
+#### delete`_`directory`_`contents
+
+```python
+delete_directory_contents(directory: Path) -> None
+```
+
+Delete the content of a directory, without deleting it.
+
+<a name="aea.helpers.base.prepend_if_not_absolute"></a>
+#### prepend`_`if`_`not`_`absolute
+
+```python
+prepend_if_not_absolute(path: PathLike, prefix: PathLike) -> PathLike
+```
+
+Prepend a path with a prefix, but only if not absolute
+
+**Arguments**:
+
+- `path`: the path to process.
+- `prefix`: the path prefix.
+
+**Returns**:
+
+the same path if absolute, else the prepended path.
 

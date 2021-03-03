@@ -20,6 +20,19 @@ Check whether a programme is installed on the system.
 
 True if installed, False otherwise
 
+<a name="aea.protocols.generator.common.base_protolint_command"></a>
+#### base`_`protolint`_`command
+
+```python
+base_protolint_command() -> str
+```
+
+Return the base protolint command.
+
+**Returns**:
+
+The base protolint command
+
 <a name="aea.protocols.generator.common.check_prerequisites"></a>
 #### check`_`prerequisites
 
@@ -88,10 +101,29 @@ None
 #### try`_`run`_`protoc
 
 ```python
-try_run_protoc(path_to_generated_protocol_package, name) -> None
+try_run_protoc(path_to_generated_protocol_package: str, name: str, language: str = PROTOCOL_LANGUAGE_PYTHON) -> None
 ```
 
 Run 'protoc' protocol buffer compiler via subprocess.
+
+**Arguments**:
+
+- `path_to_generated_protocol_package`: path to the protocol buffer schema file.
+- `name`: name of the protocol buffer schema file.
+- `language`: the target language in which to compile the protobuf schema file
+
+**Returns**:
+
+A completed process object.
+
+<a name="aea.protocols.generator.common.try_run_protolint"></a>
+#### try`_`run`_`protolint
+
+```python
+try_run_protolint(path_to_generated_protocol_package: str, name: str) -> None
+```
+
+Run 'protolint' linter via subprocess.
 
 **Arguments**:
 
@@ -106,7 +138,7 @@ A completed process object.
 #### check`_`protobuf`_`using`_`protoc
 
 ```python
-check_protobuf_using_protoc(path_to_generated_protocol_package, name) -> Tuple[bool, str]
+check_protobuf_using_protoc(path_to_generated_protocol_package: str, name: str) -> Tuple[bool, str]
 ```
 
 Check whether a protocol buffer schema file is valid.
@@ -117,6 +149,50 @@ If valid, return True and a 'protobuf file is valid' message, otherwise return F
 **Arguments**:
 
 - `path_to_generated_protocol_package`: path to the protocol buffer schema file.
+- `name`: name of the protocol buffer schema file.
+
+**Returns**:
+
+Boolean result and an accompanying message
+
+<a name="aea.protocols.generator.common.compile_protobuf_using_protoc"></a>
+#### compile`_`protobuf`_`using`_`protoc
+
+```python
+compile_protobuf_using_protoc(path_to_generated_protocol_package: str, name: str, language: str) -> Tuple[bool, str]
+```
+
+Compile a protocol buffer schema file using protoc.
+
+If successfully compiled, return True and a success message,
+otherwise return False and the error thrown by the compiler.
+
+**Arguments**:
+
+- `path_to_generated_protocol_package`: path to the protocol buffer schema file.
+- `name`: name of the protocol buffer schema file.
+- `language`: the target language in which to compile the protobuf schema file
+
+**Returns**:
+
+Boolean result and an accompanying message
+
+<a name="aea.protocols.generator.common.apply_protolint"></a>
+#### apply`_`protolint
+
+```python
+apply_protolint(path_to_proto_file: str, name: str) -> Tuple[bool, str]
+```
+
+Apply protolint linter to a protocol buffer schema file.
+
+If no output, return True and a success message,
+otherwise return False and the output shown by the linter
+(minus the indentation suggestions which are automatically fixed by protolint).
+
+**Arguments**:
+
+- `path_to_proto_file`: path to the protocol buffer schema file.
 - `name`: name of the protocol buffer schema file.
 
 **Returns**:

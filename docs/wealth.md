@@ -1,6 +1,17 @@
 
 To fund an AEA for testing on a test-net you need to request some test tokens from a faucet.
 
+First, make sure you have installed the crypto plugin
+of the target test-net. E.g. for Fetch.AI:
+``` bash
+pip install aea-crypto-fetchai
+```
+
+And for Ethereum:
+``` bash
+pip install aea-crypto-ethereum
+```
+
 Add a private key to the agent
 ``` bash
 aea generate-key fetchai
@@ -29,7 +40,7 @@ or
 aea get-address ethereum
 ```
 
-This will print the address to the console. Copy the address into the clipboard and request test tokens from the faucet <a href="https://explore-testnet.fetch.ai/tokentap" target="_blank">here for Fetch.ai</a> or <a href="https://faucet.metamask.io/" target="_blank">here for Ethereum</a>. It will take a while for the tokens to become available.
+This will print the address to the console. Copy the address into the clipboard and request test tokens from the faucet <a href="https://explore-agent-land.fetch.ai" target="_blank">here for Fetch.ai</a> or <a href="https://faucet.metamask.io/" target="_blank">here for Ethereum</a>. It will take a while for the tokens to become available.
 
 Second, after some time, check the wealth associated with the address:
 ``` bash
@@ -40,9 +51,9 @@ or
 aea get-wealth ethereum
 ```
 
-## Using the cli
+## Using the CLI
 
-Simply generate wealth via the cli:
+Simply generate wealth via the CLI:
 ``` bash
 aea generate-wealth fetchai
 ```

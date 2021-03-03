@@ -17,12 +17,12 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests of the soef connection module."""
-
 import logging
 import time
 import urllib
 from threading import Thread
 from typing import Any, Dict, Optional, Tuple, cast
+from unittest.mock import MagicMock
 from urllib.parse import urlencode
 
 import pytest
@@ -56,23 +56,31 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
-def make_multiplexer_and_dialogues() -> Tuple[Multiplexer, OefSearchDialogues, Crypto]:
+def make_multiplexer_and_dialogues() -> Tuple[
+    Multiplexer, OefSearchDialogues, Crypto, SOEFConnection
+]:
     """Return multplexer, dialogues and crypto instances."""
     crypto = make_crypto(DEFAULT_LEDGER)
     identity = Identity("", address=crypto.address)
-    oef_search_dialogues = OefSearchDialogues(crypto.address)
+    skill_id = "some/skill:0.1.0"
+    oef_search_dialogues = OefSearchDialogues(skill_id)
 
     # create the connection and multiplexer objects
     configuration = ConnectionConfig(
         api_key="TwiCIriSl0mLahw17pyqoA",
-        soef_addr="soef.fetch.ai",
-        soef_port=9002,
-        restricted_to_protocols={OefSearchMessage.protocol_id},
+        soef_addr="s-oef.fetch.ai",
+        soef_port=443,
+        restricted_to_protocols={
+            OefSearchMessage.protocol_specification_id,
+            OefSearchMessage.protocol_id,
+        },
         connection_id=SOEFConnection.connection_id,
     )
-    soef_connection = SOEFConnection(configuration=configuration, identity=identity,)
+    soef_connection = SOEFConnection(
+        configuration=configuration, data_dir=MagicMock(), identity=identity,
+    )
     multiplexer = Multiplexer([soef_connection])
-    return multiplexer, oef_search_dialogues, crypto
+    return multiplexer, oef_search_dialogues, crypto, soef_connection
 
 
 class Instance:
@@ -85,6 +93,7 @@ class Instance:
             self.multiplexer,
             self.oef_search_dialogues,
             self.crypto,
+            self.connection,
         ) = make_multiplexer_and_dialogues()
         self.thread = Thread(target=self.multiplexer.connect)
 
@@ -119,18 +128,19 @@ class Instance:
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         logger.info(
             "Registering agent at location=({},{}) by agent={}".format(
                 self.location.latitude, self.location.longitude, self.crypto.address,
             )
         )
         self.multiplexer.put(envelope)
+
+    def wait_registered(self) -> None:
+        """Wait connection gets unique_page_address."""
+        wait_for_condition(
+            lambda: self.connection.channel.unique_page_address, timeout=10
+        )
 
     def register_personality_pieces(
         self, piece: str = "genus", value: str = "service"
@@ -145,12 +155,7 @@ class Instance:
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         logger.info("Registering agent personality")
         self.multiplexer.put(envelope)
 
@@ -165,12 +170,7 @@ class Instance:
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         logger.info("Registering agent service key")
         self.multiplexer.put(envelope)
 
@@ -182,10 +182,7 @@ class Instance:
             query=query,
         )
         search_envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
+            to=message.to, sender=message.sender, message=message,
         )
         logger.info(f"Searching for agents with query: {query}")
         self.multiplexer.put(search_envelope)
@@ -218,12 +215,7 @@ class Instance:
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         logger.info(f"Send generic command {command} {parameters}")
         self.multiplexer.put(envelope)
 
@@ -243,7 +235,9 @@ class TestRealNetwork:
         try:
             agent.start()
             agent2.start()
-
+            agent.wait_registered()
+            agent2.wait_registered()
+            time.sleep(2)
             # find agents near me
             radius = 0.1
             close_to_my_service = Constraint(
@@ -345,10 +339,7 @@ class TestRealNetwork:
                 service_description=service_description,
             )
             envelope = Envelope(
-                to=message.to,
-                sender=agent.crypto.address,
-                protocol_id=message.protocol_id,
-                message=message,
+                to=message.to, sender="some/skill:0.1.0", message=message,
             )
             logger.info("Pinging")
             agent.multiplexer.put(envelope)
@@ -407,12 +398,7 @@ class TestRealNetwork:
                 counterparty=str(SOEFConnection.connection_id.to_any()),
             )
 
-            envelope = Envelope(
-                to=message.to,
-                sender=message.sender,
-                protocol_id=message.protocol_id,
-                message=message,
-            )
+            envelope = Envelope(to=message.to, sender=message.sender, message=message,)
             agent1.multiplexer.put(envelope)
 
             envelope = agent1.get()

@@ -24,7 +24,7 @@ import logging
 import os
 from traceback import print_exc
 from typing import Tuple, cast
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import aiohttp
 import pytest
@@ -46,12 +46,7 @@ from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpD
 from packages.fetchai.protocols.http.message import HttpMessage
 
 from tests.common.mocks import RegexComparator
-from tests.conftest import (
-    ROOT_DIR,
-    UNKNOWN_PROTOCOL_PUBLIC_ID,
-    get_host,
-    get_unused_tcp_port,
-)
+from tests.conftest import ROOT_DIR, get_host, get_unused_tcp_port
 
 
 logger = logging.getLogger(__name__)
@@ -119,21 +114,25 @@ class TestHTTPServer:
         )
         self.connection_id = HTTPServerConnection.connection_id
         self.protocol_id = HttpMessage.protocol_id
+        self.target_skill_id = "some_author/some_skill:0.1.0"
 
         self.configuration = ConnectionConfig(
             host=self.host,
             port=self.port,
+            target_skill_id=self.target_skill_id,
             api_spec_path=self.api_spec_path,
             connection_id=HTTPServerConnection.connection_id,
-            restricted_to_protocols=set([self.protocol_id]),
+            restricted_to_protocols={HttpMessage.protocol_id},
         )
         self.http_connection = HTTPServerConnection(
-            configuration=self.configuration, identity=self.identity,
+            configuration=self.configuration,
+            data_dir=MagicMock(),
+            identity=self.identity,
         )
         self.loop = asyncio.get_event_loop()
         self.loop.run_until_complete(self.http_connection.connect())
         self.connection_address = str(HTTPServerConnection.connection_id)
-        self._dialogues = HttpDialogues(self.agent_address)
+        self._dialogues = HttpDialogues(self.target_skill_id)
         self.original_timeout = self.http_connection.channel.RESPONSE_TIMEOUT
 
     @pytest.mark.asyncio
@@ -168,7 +167,6 @@ class TestHTTPServer:
         response_envelope = Envelope(
             to=envelope.sender,
             sender=envelope.to,
-            protocol_id=envelope.protocol_id,
             context=envelope.context,
             message=message,
         )
@@ -202,7 +200,6 @@ class TestHTTPServer:
         response_envelope = Envelope(
             to=envelope.sender,
             sender=envelope.to,
-            protocol_id=envelope.protocol_id,
             context=envelope.context,
             message=message,
         )
@@ -242,7 +239,6 @@ class TestHTTPServer:
         response_envelope = Envelope(
             to=incorrect_message.to,
             sender=envelope.to,
-            protocol_id=envelope.protocol_id,
             context=envelope.context,
             message=incorrect_message,
         )
@@ -280,7 +276,6 @@ class TestHTTPServer:
         response_envelope = Envelope(
             to=message.to,
             sender=envelope.to,
-            protocol_id=envelope.protocol_id,
             context=envelope.context,
             message=message,
         )
@@ -319,7 +314,6 @@ class TestHTTPServer:
         response_envelope = Envelope(
             to=message.to,
             sender=envelope.to,
-            protocol_id=envelope.protocol_id,
             context=envelope.context,
             message=message,
         )
@@ -395,13 +389,8 @@ class TestHTTPServer:
             body=b"",
         )
         message.to = str(HTTPServerConnection.connection_id)
-        message.sender = "from_key"
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-        )
+        message.sender = self.target_skill_id
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         await self.http_connection.send(envelope)
 
     @pytest.mark.asyncio
@@ -443,7 +432,6 @@ class TestHTTPServer:
         response_envelope = Envelope(
             to=message.to,
             sender=envelope.to,
-            protocol_id=envelope.protocol_id,
             context=envelope.context,
             message=message,
         )
@@ -453,35 +441,6 @@ class TestHTTPServer:
             response = await asyncio.wait_for(request_task, timeout=20,)
 
         assert response and response.status == 500 and response.reason == "Server Error"
-
-    @pytest.mark.asyncio
-    async def test_send_envelope_restricted_to_protocols_fail(self):
-        """Test fail on send if envelope protocol not supported."""
-        message = HttpMessage(
-            performative=HttpMessage.Performative.RESPONSE,
-            dialogue_reference=("", ""),
-            target=1,
-            message_id=2,
-            version="1.0",
-            headers="",
-            status_code=200,
-            status_text="Success",
-            body=b"Response body",
-        )
-        envelope = Envelope(
-            to="receiver",
-            sender="sender",
-            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
-            message=message,
-        )
-
-        with patch.object(
-            self.http_connection.channel,
-            "restricted_to_protocols",
-            new=[HttpMessage.protocol_id],
-        ):
-            with pytest.raises(ValueError):
-                await self.http_connection.send(envelope)
 
     def teardown(self):
         """Teardown the test case."""

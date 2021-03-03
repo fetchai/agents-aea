@@ -33,20 +33,16 @@ import jsonschema
 import pytest
 import yaml
 from jsonschema import Draft4Validator
+from packaging.version import Version
 
 import aea
 from aea.cli import cli
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
-from aea.configurations.constants import DEFAULT_CONNECTION
+from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE
 from aea.configurations.loader import ConfigLoader, make_jsonschema_base_uri
 
-from packages.fetchai.connections.stub.connection import (
-    PUBLIC_ID as STUB_CONNECTION_PUBLIC_ID,
-)
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.signing.message import SigningMessage
 from packages.fetchai.protocols.state_update.message import StateUpdateMessage
-from packages.fetchai.skills.error import PUBLIC_ID as ERROR_SKILL_PUBLIC_ID
 
 from tests.conftest import (
     AGENT_CONFIGURATION_SCHEMA,
@@ -134,7 +130,15 @@ class TestCreate:
 
     def test_aea_version_is_correct(self):
         """Check that the aea version in the configuration file is correct, i.e. the same of the installed package."""
-        assert self.agent_config["aea_version"] == aea.__version__
+        expected_aea_version = Version(aea.__version__)
+        version_no_micro = Version(
+            f"{expected_aea_version.major}.{expected_aea_version.minor}.0"
+        )
+        version_next_minor = Version(
+            f"{expected_aea_version.major}.{expected_aea_version.minor + 1}.0"
+        )
+        version_range = f">={version_no_micro}, <{version_next_minor}"
+        assert self.agent_config["aea_version"] == version_range
 
     def test_agent_name_is_correct(self):
         """Check that the agent name in the configuration file is correct."""
@@ -144,15 +148,13 @@ class TestCreate:
         """Check that the 'authors' field in the config file is the empty string."""
         assert self.agent_config["author"] == AUTHOR
 
-    def test_connections_contains_only_stub(self):
+    def test_connections_contains_nothing(self):
         """Check that the 'connections' list contains only the 'stub' connection."""
-        assert self.agent_config["connections"] == [str(STUB_CONNECTION_PUBLIC_ID)]
+        assert self.agent_config["connections"] == []
 
-    def test_default_connection_field_is_stub(self):
-        """Check that the 'default_connection' is the 'stub' connection."""
-        assert self.agent_config["default_connection"] == str(
-            DEFAULT_CONNECTION.to_any()
-        )
+    def test_default_connection_field_is_empty(self):
+        """Check that the 'default_connection' is not specified."""
+        assert self.agent_config["default_connection"] is None
 
     def test_license_field_is_empty_string(self):
         """Check that the 'license' is the empty string."""
@@ -168,13 +170,9 @@ class TestCreate:
             str(StateUpdateMessage.protocol_id),
         ]
 
-    def test_skills_field_is_not_empty_list(self):
+    def test_skills_field_is_empty_list(self):
         """Check that the 'skills' field is a list with the 'error' skill."""
-        assert self.agent_config["skills"] == [str(ERROR_SKILL_PUBLIC_ID)]
-
-    def test_connections_field_is_not_empty_list(self):
-        """Check that the 'connections' field is a list with the 'error' skill."""
-        assert self.agent_config["skills"] == [str(ERROR_SKILL_PUBLIC_ID)]
+        assert self.agent_config["skills"] == []
 
     def test_version_field_is_equal_to_0_1_0(self):
         """Check that the 'version' field is equal to the string '0.1.0'."""
@@ -194,25 +192,6 @@ class TestCreate:
         for package_dir in (vendor_dir / "fetchai").iterdir():
             assert (package_dir / "__init__.py").exists()
 
-    def test_vendor_connections_contains_stub_connection(self):
-        """Check that the vendor connections directory contains the stub directory."""
-        stub_connection_dirpath = Path(
-            self.agent_name, "vendor", "fetchai", "connections", "stub"
-        )
-        assert stub_connection_dirpath.exists()
-        assert stub_connection_dirpath.is_dir()
-
-    def test_stub_connection_directory_is_equal_to_library_stub_connection(self):
-        """Check that the stub connection directory is equal to the package's one (aea.connections.stub)."""
-        stub_connection_dirpath = Path(
-            self.agent_name, "vendor", "fetchai", "connections", "stub"
-        )
-        comparison = filecmp.dircmp(
-            str(stub_connection_dirpath),
-            str(Path(ROOT_DIR, "packages", "fetchai", "connections", "stub")),
-        )
-        assert comparison.diff_files == []
-
     def test_vendor_protocols_contains_default_protocol(self):
         """Check that the vendor protocols directory contains the default protocol."""
         stub_connection_dirpath = Path(
@@ -229,25 +208,6 @@ class TestCreate:
         comparison = filecmp.dircmp(
             str(default_protocol_dirpath),
             str(Path(ROOT_DIR, "packages", "fetchai", "protocols", "default")),
-        )
-        assert comparison.diff_files == []
-
-    def test_vendor_skills_contains_error_skill(self):
-        """Check that the vendor skills directory contains the error skill."""
-        error_skill_dirpath = Path(
-            self.agent_name, "vendor", "fetchai", "skills", "error"
-        )
-        assert error_skill_dirpath.exists()
-        assert error_skill_dirpath.is_dir()
-
-    def test_error_skill_is_equal_to_library_error_skill(self):
-        """Check that the error skill directory is equal to the package's one (aea.skills.error)."""
-        default_protocol_dirpath = Path(
-            self.agent_name, "vendor", "fetchai", "skills", "error"
-        )
-        comparison = filecmp.dircmp(
-            str(default_protocol_dirpath),
-            str(Path(ROOT_DIR, "packages", "fetchai", "skills", "error")),
         )
         assert comparison.diff_files == []
 

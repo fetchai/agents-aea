@@ -24,7 +24,7 @@ from unittest import TestCase, mock
 import pytest
 
 from aea.cli import cli
-from aea.test_tools.test_cases import AEATestCaseEmpty
+from aea.test_tools.test_cases import AEATestCaseEmptyFlaky
 
 from packages.fetchai.contracts.erc1155.contract import PUBLIC_ID as ERC1155_PUBLIC_ID
 
@@ -57,7 +57,7 @@ class AddContractCommandTestCase(TestCase):
         self.assertEqual(result.exit_code, 0)
 
 
-class TestAddContractFromRemoteRegistry(AEATestCaseEmpty):
+class TestAddContractFromRemoteRegistry(AEATestCaseEmptyFlaky):
     """Test case for add contract from Registry command."""
 
     IS_LOCAL = False
@@ -77,7 +77,7 @@ class TestAddContractFromRemoteRegistry(AEATestCaseEmpty):
         assert item_name in items_folders
 
 
-class TestAddContractWithLatestVersion(AEATestCaseEmpty):
+class TestAddContractWithLatestVersion(AEATestCaseEmptyFlaky):
     """Test case for add contract with latest version."""
 
     IS_LOCAL = True

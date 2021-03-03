@@ -13,6 +13,7 @@
     "private_key_paths",
     "default_ledger",
     "connections",
+    "contracts",
     "default_connection",
     "protocols",
     "skills"
@@ -38,6 +39,12 @@
     },
     "fingerprint_ignore_patterns": {
       "$ref": "definitions.json#/definitions/fingerprint_ignore_patterns"
+    },
+    "build_entrypoint": {
+      "$ref": "definitions.json#/definitions/build_entrypoint"
+    },
+    "build_directory": {
+      "$ref": "definitions.json#/definitions/build_directory"
     },
     "registry_path": {
       "type": "string"
@@ -81,7 +88,7 @@
       }
     },
     "default_connection": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "protocols": {
       "type": "array",
@@ -97,11 +104,11 @@
         "$ref": "definitions.json#/definitions/public_id"
       }
     },
-    "logging_config": {
-      "type": "object"
-    },
     "description": {
       "$ref": "definitions.json#/definitions/description"
+    },
+    "logging_config" : {
+      "$ref": "definitions.json#/definitions/logging_config"
     },
     "period": {
       "$ref": "definitions.json#/definitions/period"
@@ -113,6 +120,9 @@
       "$ref": "definitions.json#/definitions/max_reactions"
     },
     "decision_maker_handler": {
+      "type": "object"
+    },
+    "error_handler": {
       "type": "object"
     },
     "skill_exception_policy": {
@@ -135,6 +145,15 @@
     },
     "runtime_mode": {
       "$ref": "definitions.json#/definitions/runtime_mode"
+    },
+    "storage_uri": {
+      "$ref": "definitions.json#/definitions/storage_uri"
+    },
+    "data_dir": {
+      "type": "string"
+    },
+    "dependencies": {
+      "$ref": "definitions.json#/definitions/dependencies"
     }
   }
 }

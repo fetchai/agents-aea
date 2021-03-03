@@ -24,6 +24,8 @@ This module contains the classes required for dialogue management.
 - Dialogues: The dialogues class keeps track of all dialogues.
 """
 
+from typing import Any
+
 from aea.protocols.base import Address, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.skills.base import Model
@@ -50,7 +52,7 @@ DefaultDialogue = BaseDefaultDialogue
 class DefaultDialogues(Model, BaseDefaultDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -82,7 +84,7 @@ HttpDialogue = BaseHttpDialogue
 class HttpDialogues(Model, BaseHttpDialogues):
     """This class keeps track of all http dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -104,7 +106,7 @@ class HttpDialogues(Model, BaseHttpDialogues):
 
         BaseHttpDialogues.__init__(
             self,
-            self_address=self.context.agent_address,
+            self_address=str(self.skill_id),
             role_from_first_message=role_from_first_message,
         )
 
@@ -115,7 +117,7 @@ OefSearchDialogue = BaseOefSearchDialogue
 class OefSearchDialogues(Model, BaseOefSearchDialogues):
     """This class keeps track of all oef_search dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 

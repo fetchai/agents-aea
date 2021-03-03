@@ -17,17 +17,23 @@
 #
 # ------------------------------------------------------------------------------
 """Module with package utils of the aea cli."""
-
 import os
 import re
 import shutil
+import sys
 from pathlib import Path
-from typing import Dict, Optional, Set, Tuple
+from typing import Any, Dict, Optional, Set, Tuple
 
 import click
 from jsonschema import ValidationError
 
-from aea import AEA_DIR
+from aea import AEA_DIR, get_current_aea_version
+from aea.cli.fingerprint import fingerprint_item
+from aea.cli.utils.config import (
+    dump_item_config,
+    get_non_vendor_package_path,
+    load_item_config,
+)
 from aea.cli.utils.constants import NOT_PERMITTED_AUTHORS
 from aea.cli.utils.context import Context
 from aea.cli.utils.loggers import logger
@@ -36,27 +42,46 @@ from aea.configurations.base import (
     ComponentConfiguration,
     ComponentId,
     ComponentType,
-    DEFAULT_AEA_CONFIG_FILE,
-    PACKAGE_PUBLIC_ID_VAR_NAME,
+    PackageConfiguration,
     PackageType,
     PublicId,
     _compute_fingerprint,
     _get_default_configuration_file_name_from_type,
 )
-from aea.configurations.constants import DISTRIBUTED_PACKAGES, LEDGER_CONNECTION
+from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE
+from aea.configurations.constants import (
+    DISTRIBUTED_PACKAGES as DISTRIBUTED_PACKAGES_STR,
+)
+from aea.configurations.constants import (
+    IMPORT_TEMPLATE_1,
+    IMPORT_TEMPLATE_2,
+    LEDGER_CONNECTION,
+    PACKAGES,
+    PACKAGE_PUBLIC_ID_VAR_NAME,
+    SKILL,
+    VENDOR,
+)
 from aea.configurations.loader import ConfigLoader
-from aea.crypto.helpers import verify_or_create_private_keys
-from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS, LedgerApis
+from aea.configurations.manager import AgentConfigManager
+from aea.configurations.utils import replace_component_ids
+from aea.crypto.helpers import (
+    get_wallet_from_agent_config,
+    private_key_verify_or_create,
+)
+from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
 from aea.exceptions import AEAEnforceError
-from aea.helpers.base import recursive_update
+from aea.helpers.base import compute_specifier_from_version, recursive_update
+from aea.helpers.io import open_file
+from aea.helpers.sym_link import create_symlink
 
 
+DISTRIBUTED_PACKAGES = [PublicId.from_str(dp) for dp in DISTRIBUTED_PACKAGES_STR]
 ROOT = Path(".")
 
 
 def verify_or_create_private_keys_ctx(
-    ctx: Context, aea_project_path: Path = ROOT, exit_on_error: bool = True,
+    ctx: Context, aea_project_path: Path = ROOT, exit_on_error: bool = False,
 ) -> None:
     """
     Verify or create private keys with ctx provided.
@@ -64,14 +89,23 @@ def verify_or_create_private_keys_ctx(
     :param ctx: Context
     """
     try:
-        agent_config = verify_or_create_private_keys(aea_project_path, exit_on_error)
+        AgentConfigManager.verify_or_create_private_keys(
+            aea_project_path,
+            private_key_helper=private_key_verify_or_create,
+            substitude_env_vars=False,
+        ).dump_config()
+        agent_config = AgentConfigManager.verify_or_create_private_keys(
+            aea_project_path, private_key_helper=private_key_verify_or_create
+        ).agent_config
         if ctx is not None:
             ctx.agent_config = agent_config
     except ValueError as e:  # pragma: nocover
-        click.ClickException(str(e))
+        if exit_on_error:
+            sys.exit(1)
+        raise click.ClickException(str(e))
 
 
-def validate_package_name(package_name: str):
+def validate_package_name(package_name: str) -> None:
     """Check that the package name matches the pattern r"[a-zA-Z_][a-zA-Z0-9_]*".
 
     >>> validate_package_name("this_is_a_good_package_name")
@@ -150,19 +184,20 @@ def try_get_item_target_path(
     """
     target_path = os.path.join(path, author_name, item_type_plural, item_name)
     if os.path.exists(target_path):
+        path_ = Path(target_path)
         raise click.ClickException(
-            'Item "{}" already exists in target folder.'.format(item_name)
+            f'Item "{path_.name}" already exists in target folder "{path_.parent}".'
         )
     return target_path
 
 
 def get_package_path(
-    ctx: Context, item_type: str, public_id: PublicId, is_vendor: bool = True
+    project_directory: str, item_type: str, public_id: PublicId, is_vendor: bool = True
 ) -> str:
     """
     Get a vendorized path for a package.
 
-    :param ctx: context.
+    :param project_directory: path to search packages
     :param item_type: item type.
     :param public_id: item public ID.
     :param is_vendor: flag for vendorized path (True by defaut).
@@ -172,12 +207,21 @@ def get_package_path(
     item_type_plural = item_type + "s"
     if is_vendor:
         return os.path.join(
-            ctx.cwd, "vendor", public_id.author, item_type_plural, public_id.name
+            project_directory,
+            VENDOR,
+            public_id.author,
+            item_type_plural,
+            public_id.name,
         )
-    return os.path.join(ctx.cwd, item_type_plural, public_id.name)
+    return os.path.join(project_directory, item_type_plural, public_id.name)
 
 
-def get_package_path_unified(ctx: Context, item_type: str, public_id: PublicId) -> str:
+def get_package_path_unified(
+    project_directory: str,
+    agent_config: AgentConfig,
+    item_type: str,
+    public_id: PublicId,
+) -> str:
     """
     Get a path for a package, either vendor or not.
 
@@ -186,18 +230,38 @@ def get_package_path_unified(ctx: Context, item_type: str, public_id: PublicId) 
       just look into vendor/
     - Otherwise, first look into local packages, then into vendor/.
 
-    :param ctx: context.
+    :param project_directory: directory to look for packages.
     :param item_type: item type.
     :param public_id: item public ID.
 
     :return: vendorized estenation path for package.
     """
-    vendor_path = get_package_path(ctx, item_type, public_id, is_vendor=True)
-    if ctx.agent_config.author != public_id.author or not is_item_present(
-        ctx, item_type, public_id, is_vendor=False
+    vendor_path = get_package_path(
+        project_directory, item_type, public_id, is_vendor=True
+    )
+    if agent_config.author != public_id.author or not is_item_present(
+        project_directory, agent_config, item_type, public_id, is_vendor=False
     ):
         return vendor_path
-    return get_package_path(ctx, item_type, public_id, is_vendor=False)
+    return get_package_path(project_directory, item_type, public_id, is_vendor=False)
+
+
+def get_dotted_package_path_unified(
+    project_directory: str, agent_config: AgentConfig, *args: Any
+) -> str:
+    """
+    Get a *dotted* path for a package, either vendor or not.
+
+    :param project_directory: base dir for package lookup.
+    :param agent_config: AgentConfig.
+    :param args: arguments for 'get_package_path_unified'
+
+    :return: the dotted path to the package.
+    """
+    path = get_package_path_unified(project_directory, agent_config, *args)
+    path_relative_to_cwd = Path(path).relative_to(Path(project_directory))
+    relative_path_str = str(path_relative_to_cwd).replace(os.sep, ".")
+    return relative_path_str
 
 
 def copy_package_directory(src: Path, dst: str) -> Path:
@@ -215,7 +279,7 @@ def copy_package_directory(src: Path, dst: str) -> Path:
     logger.debug("Copying modules. src={} dst={}".format(src_path, dst))
     try:
         shutil.copytree(src_path, dst)
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-except
         raise click.ClickException(str(e))
 
     items_folder = os.path.split(dst)[0]
@@ -261,9 +325,8 @@ def find_item_locally(
         item_configuration_loader = ConfigLoader.from_configuration_type(
             PackageType(item_type)
         )
-        item_configuration = item_configuration_loader.load(
-            item_configuration_filepath.open()
-        )
+        with open_file(item_configuration_filepath) as fp:
+            item_configuration = item_configuration_loader.load(fp)
     except ValidationError as e:
         raise click.ClickException(
             "{} configuration file not valid: {}".format(item_type.capitalize(), str(e))
@@ -284,7 +347,7 @@ def find_item_locally(
 
 
 def find_item_in_distribution(  # pylint: disable=unused-argument
-    ctx, item_type, item_public_id: PublicId
+    ctx: Context, item_type: str, item_public_id: PublicId
 ) -> Path:
     """
     Find an item in the AEA directory.
@@ -313,9 +376,8 @@ def find_item_in_distribution(  # pylint: disable=unused-argument
         item_configuration_loader = ConfigLoader.from_configuration_type(
             PackageType(item_type)
         )
-        item_configuration = item_configuration_loader.load(
-            item_configuration_filepath.open()
-        )
+        with open_file(item_configuration_filepath) as fp:
+            item_configuration = item_configuration_loader.load(fp)
     except ValidationError as e:
         raise click.ClickException(
             "{} configuration file not valid: {}".format(item_type.capitalize(), str(e))
@@ -377,7 +439,9 @@ def validate_author_name(author: Optional[str] = None) -> str:
     return valid_author
 
 
-def is_fingerprint_correct(package_path: Path, item_config) -> bool:
+def is_fingerprint_correct(
+    package_path: Path, item_config: PackageConfiguration
+) -> bool:
     """
     Validate fingerprint of item before adding.
 
@@ -407,12 +471,13 @@ def register_item(ctx: Context, item_type: str, item_public_id: PublicId) -> Non
     )
     supported_items = get_items(ctx.agent_config, item_type)
     supported_items.add(item_public_id)
-    ctx.agent_loader.dump(
-        ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
-    )
+    with open_file(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as fp:
+        ctx.agent_loader.dump(ctx.agent_config, fp)
 
 
-def is_item_present_unified(ctx: Context, item_type: str, item_public_id: PublicId):
+def is_item_present_unified(
+    ctx: Context, item_type: str, item_public_id: PublicId
+) -> bool:
     """
     Check if item is present, either vendor or not.
 
@@ -426,45 +491,62 @@ def is_item_present_unified(ctx: Context, item_type: str, item_public_id: Public
     :param item_public_id: PublicId of an item.
     :return: True if the item is present, False otherwise.
     """
-    is_in_vendor = is_item_present(ctx, item_type, item_public_id, is_vendor=True)
+    is_in_vendor = is_item_present(
+        ctx.cwd, ctx.agent_config, item_type, item_public_id, is_vendor=True
+    )
     if item_public_id.author != ctx.agent_config.author:
         return is_in_vendor
     return is_in_vendor or is_item_present(
-        ctx, item_type, item_public_id, is_vendor=False
+        ctx.cwd, ctx.agent_config, item_type, item_public_id, is_vendor=False
     )
 
 
 def is_item_present(
-    ctx: Context, item_type: str, item_public_id: PublicId, is_vendor: bool = True
+    path: str,
+    agent_config: AgentConfig,
+    item_type: str,
+    item_public_id: PublicId,
+    is_vendor: bool = True,
+    with_version: bool = False,
 ) -> bool:
     """
     Check if item is already present in AEA.
 
-    :param ctx: context object.
+    Optionally, consider the check also with the version.
+
+    :param path: path to look for packages.
+    :param agent_config: agent config
     :param item_type: type of an item.
     :param item_public_id: PublicId of an item.
-    :param is_vendor: flag for vendorized path (True by defaut).
+    :param is_vendor: flag for vendorized path (True by default).
+    :param with_version: if true, consider also the package version.
 
     :return: boolean is item present.
     """
-    # check item presence only by author/package_name pair, without version.
-
-    item_path = get_package_path(ctx, item_type, item_public_id, is_vendor=is_vendor)
-    registered_item_public_id = get_item_public_id_by_author_name(
-        ctx.agent_config, item_type, item_public_id.author, item_public_id.name
+    item_path = Path(
+        get_package_path(path, item_type, item_public_id, is_vendor=is_vendor)
     )
-    is_item_registered = registered_item_public_id is not None
+    registered_item_public_id = get_item_public_id_by_author_name(
+        agent_config, item_type, item_public_id.author, item_public_id.name
+    )
+    is_item_registered_no_version = registered_item_public_id is not None
+    does_path_exist = Path(item_path).exists()
+    if item_public_id.package_version.is_latest or not with_version:
+        return is_item_registered_no_version and does_path_exist
 
-    return is_item_registered and Path(item_path).exists()
+    # the following makes sense because public id is not latest
+    component_id = ComponentId(ComponentType(item_type), item_public_id)
+    component_is_registered = component_id in agent_config.package_dependencies
+    return component_is_registered and does_path_exist
 
 
 def get_item_id_present(
-    ctx: Context, item_type: str, item_public_id: PublicId
+    agent_config: AgentConfig, item_type: str, item_public_id: PublicId
 ) -> PublicId:
     """
     Get the item present in AEA.
 
-    :param ctx: context object.
+    :param agent_config: AgentConfig.
     :param item_type: type of an item.
     :param item_public_id: PublicId of an item.
 
@@ -472,7 +554,7 @@ def get_item_id_present(
     :raises: AEAEnforceError
     """
     registered_item_public_id = get_item_public_id_by_author_name(
-        ctx.agent_config, item_type, item_public_id.author, item_public_id.name
+        agent_config, item_type, item_public_id.author, item_public_id.name
     )
     if registered_item_public_id is None:
         raise AEAEnforceError("Cannot find item.")  # pragma: nocover
@@ -525,12 +607,18 @@ def is_distributed_item(item_public_id: PublicId) -> bool:
 
 def _override_ledger_configurations(agent_config: AgentConfig) -> None:
     """Override LedgerApis configurations with agent override configurations."""
-    ledger_component_id = ComponentId(ComponentType.CONNECTION, LEDGER_CONNECTION)
-    if ledger_component_id not in agent_config.component_configurations:
+    ledger_component_id = ComponentId(
+        ComponentType.CONNECTION, PublicId.from_str(LEDGER_CONNECTION)
+    )
+    prefix_to_component_configuration = {
+        key.component_prefix: value
+        for key, value in agent_config.component_configurations.items()
+    }
+    if ledger_component_id.component_prefix not in prefix_to_component_configuration:
         return
-    ledger_apis_config = agent_config.component_configurations[ledger_component_id][
-        "config"
-    ].get("ledger_apis", {})
+    ledger_apis_config = prefix_to_component_configuration[
+        ledger_component_id.component_prefix
+    ]["config"].get("ledger_apis", {})
     recursive_update(LedgerApis.ledger_api_configs, ledger_apis_config)
 
 
@@ -547,7 +635,7 @@ def try_get_balance(  # pylint: disable=unused-argument
     :retun: token balance.
     """
     try:
-        if type_ not in DEFAULT_LEDGER_CONFIGS:  # pragma: no cover
+        if not LedgerApis.has_ledger(type_):  # pragma: no cover
             raise ValueError("No ledger api config for {} available.".format(type_))
         address = wallet.addresses.get(type_)
         if address is None:  # pragma: no cover
@@ -573,16 +661,6 @@ def get_wallet_from_context(ctx: Context) -> Wallet:
     return wallet
 
 
-def get_wallet_from_agent_config(agent_config: AgentConfig) -> Wallet:
-    """Get wallet from agent_cofig provided."""
-    private_key_paths: Dict[str, Optional[str]] = {
-        config_pair[0]: config_pair[1]
-        for config_pair in agent_config.private_key_paths.read_all()
-    }
-    wallet = Wallet(private_key_paths)
-    return wallet
-
-
 def update_item_public_id_in_init(
     item_type: str, package_path: Path, item_id: PublicId
 ) -> None:
@@ -595,12 +673,12 @@ def update_item_public_id_in_init(
 
     :return: None
     """
-    if item_type != "skill":
+    if item_type != SKILL:
         return
     init_filepath = os.path.join(package_path, "__init__.py")
-    with open(init_filepath, "r") as f:
+    with open_file(init_filepath, "r") as f:
         file_content = f.readlines()
-    with open(init_filepath, "w") as f:
+    with open_file(init_filepath, "w") as f:
         for line in file_content:
             if PACKAGE_PUBLIC_ID_VAR_NAME in line:
                 f.write(
@@ -608,3 +686,138 @@ def update_item_public_id_in_init(
                 )
             else:
                 f.write(line)
+
+
+def update_references(
+    ctx: Context, replacements: Dict[ComponentId, ComponentId]
+) -> None:
+    """
+    Update references across an AEA project.
+
+    Caveat: the update is done in a sequential manner. There is no check
+    of multiple updates, due to the occurrence of transitive relations.
+    E.g. replacements as {c1: c2, c2: c3} might lead to c1 replaced with c3
+      instead of c2.
+
+    :param ctx: the context.
+    :param replacements: mapping from old component ids to new component ids.
+    :return: None.
+    """
+    # preprocess replacement so to index them by component type
+    replacements_by_type: Dict[ComponentType, Dict[PublicId, PublicId]] = {}
+    for old, new in replacements.items():
+        replacements_by_type.setdefault(old.component_type, {})[
+            old.public_id
+        ] = new.public_id
+
+    aea_project_root = Path(ctx.cwd)
+    # update agent configuration
+    agent_config = load_item_config(PackageType.AGENT.value, aea_project_root)
+    replace_component_ids(agent_config, replacements_by_type)
+    dump_item_config(agent_config, aea_project_root)
+
+    # update every (non-vendor) AEA package.
+    for package_path in get_non_vendor_package_path(aea_project_root):
+        package_type = PackageType(package_path.parent.name[:-1])
+        package_config = load_item_config(package_type.value, package_path)
+        replace_component_ids(package_config, replacements_by_type)
+        dump_item_config(package_config, package_path)
+
+
+def create_symlink_vendor_to_local(
+    ctx: Context, item_type: str, public_id: PublicId
+) -> None:
+    """
+    Creates a symlink from the vendor to the local folder.
+
+    :param ctx: click context
+    :param item_type: item type
+    :param public_id: public_id of the item
+
+    :return: None
+    """
+    vendor_path_str = get_package_path(ctx.cwd, item_type, public_id, is_vendor=True)
+    local_path = get_package_path(ctx.cwd, item_type, public_id, is_vendor=False)
+    vendor_path = Path(vendor_path_str)
+    if not os.path.exists(vendor_path.parent):
+        os.makedirs(vendor_path.parent)
+    create_symlink(vendor_path, Path(local_path), Path(ctx.cwd))
+
+
+def create_symlink_packages_to_vendor(ctx: Context) -> None:
+    """
+    Creates a symlink from a local packages to the vendor folder.
+
+    :param ctx: click context
+
+    :return: None
+    """
+    if not os.path.exists(PACKAGES):
+        create_symlink(Path(PACKAGES), Path(VENDOR), Path(ctx.cwd))
+
+
+def replace_all_import_statements(
+    aea_project_path: Path,
+    item_type: ComponentType,
+    old_public_id: PublicId,
+    new_public_id: PublicId,
+) -> None:
+    """
+    Replace all import statements in Python modules of all the non-vendor packages.
+
+    The function looks for two patterns:
+    - from packages.<author>.<item_type_plural>.<name>
+    - import packages.<author>.<item_type_plural>.<name>
+
+    :param aea_project_path: path to the AEA project.
+    :param item_type: the item type.
+    :param old_public_id: the old public id.
+    :param new_public_id: the new public id.
+    :return: None
+    """
+    old_formats = dict(
+        author=old_public_id.author, type=item_type.to_plural(), name=old_public_id.name
+    )
+    new_formats = dict(
+        author=new_public_id.author, type=item_type.to_plural(), name=new_public_id.name
+    )
+    old_import_1 = IMPORT_TEMPLATE_1.format(**old_formats)
+    old_import_2 = IMPORT_TEMPLATE_2.format(**old_formats)
+    new_import_1 = IMPORT_TEMPLATE_1.format(**new_formats)
+    new_import_2 = IMPORT_TEMPLATE_2.format(**new_formats)
+
+    pattern_1 = re.compile(rf"^{old_import_1}", re.MULTILINE)
+    pattern_2 = re.compile(rf"^{old_import_2}", re.MULTILINE)
+
+    for package_path in get_non_vendor_package_path(aea_project_path):
+        for python_module in package_path.rglob("*.py"):
+            content = python_module.read_text()
+            content = pattern_1.sub(new_import_1, content)
+            content = pattern_2.sub(new_import_2, content)
+            python_module.write_text(content)
+
+
+def fingerprint_all(ctx: Context) -> None:
+    """
+    Fingerprint all non-vendor packages.
+
+    :param ctx: the CLI context.
+    :return: None
+    """
+    aea_project_path = Path(ctx.cwd)
+    for package_path in get_non_vendor_package_path(aea_project_path):
+        item_type = package_path.parent.name[:-1]
+        config = load_item_config(item_type, package_path)
+        fingerprint_item(ctx, item_type, config.public_id)
+
+
+def update_aea_version_range(package_configuration: PackageConfiguration) -> None:
+    """Update 'aea_version' range."""
+    version = get_current_aea_version()
+    if not package_configuration.aea_version_specifiers.contains(version):
+        new_aea_version = compute_specifier_from_version(version)
+        old_aea_version = package_configuration.aea_version
+        click.echo(
+            f"Updating AEA version specifier from {old_aea_version} to {new_aea_version}."
+        )
+        package_configuration.aea_version = new_aea_version

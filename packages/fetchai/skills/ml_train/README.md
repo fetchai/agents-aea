@@ -8,14 +8,15 @@ This skill is part of the Fetch.ai ML skill demo. It finds an agent which sells 
 
 ## Behaviours
 
-* search: searches for ML data selling service on soef 
+* `search`: searches for ML data selling service on the sOEF
+* `transaction`: sequentially processes transactions' settlements on a blockchain
 
 ## Handlers
 
-* ml_trade: handles ml_trade messages for negotiating the terms of trade
-* ledger_api: handles ledger_api messages for payment
-* oef_search: handles oef_search messages to manage the sellers it finds
-* signing: handles signing messages for transaction signing by the decision maker
+* `ml_trade`: handles `ml_trade` messages for negotiating the terms of trade
+* `ledger_api`: handles `ledger_api` messages for interacting with a ledger
+* `oef_search`: handles `oef_search` messages to manage the sellers found
+* `signing`: handles `signing` messages for transaction signing by the decision maker
 
 
 ## Links

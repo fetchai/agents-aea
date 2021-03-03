@@ -19,8 +19,9 @@
 
 """This package contains the strategy model."""
 
-from typing import Dict, Optional, Tuple, cast
+from typing import Any, Dict, List, Optional, Tuple, cast
 
+from aea.common import JSONLike
 from aea.crypto.ledger_apis import LedgerApis
 from aea.helpers.transaction.base import Terms
 from aea.skills.base import Model
@@ -45,7 +46,7 @@ DEFAULT_OVERRIDE = False
 class Strategy(Model):
     """This class is the strategy model."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize the strategy of the agent.
 
@@ -63,6 +64,7 @@ class Strategy(Model):
         self._override_staking_check = kwargs.pop(
             "override_staking_check", DEFAULT_OVERRIDE
         )
+        self._awx_aeas: List[str] = kwargs.pop("awx_aeas", [])
         super().__init__(**kwargs)
         self._is_ready_to_register = False
         self._is_registered = False
@@ -95,6 +97,18 @@ class Strategy(Model):
         """Get the ledger on which the contract is deployed."""
         return self._contract_callable
 
+    @property
+    def awx_aeas(self) -> List[str]:
+        """Get list of AWx AEAs."""
+        return self._awx_aeas
+
+    @property
+    def all_registered_aeas(self) -> List[str]:
+        """Get all the registered AEAs."""
+        registration_db = cast(RegistrationDB, self.context.registration_db)
+        all_registered = registration_db.get_all_registered()
+        return all_registered
+
     def lock_registration_temporarily(self, address: str, info: Dict[str, str]) -> None:
         """Lock this address for registration."""
         self._in_process_registrations.update({address: info})
@@ -121,6 +135,12 @@ class Strategy(Model):
         self.context.logger.info(
             f"registration info did not pass staking checks = {info}"
         )
+
+    def get_developer_handle(self, address: str) -> str:
+        """Get developer handle."""
+        registration_db = cast(RegistrationDB, self.context.registration_db)
+        handle = registration_db.get_developer_handle(address)
+        return handle
 
     def valid_registration(
         self, registration_info: Dict[str, str], sender: str
@@ -158,6 +178,8 @@ class Strategy(Model):
             "fetchai",
         ):
             return (False, 1, "ethereum address and signature do not match!")
+        if registration_info["developer_handle"] in ("", None):
+            return (False, 1, "missing developer_handle!")
         if sender in self._in_process_registrations:
             return (False, 1, "registration in process for this address!")
         registration_db = cast(RegistrationDB, self.context.registration_db)
@@ -208,7 +230,7 @@ class Strategy(Model):
         return terms
 
     @staticmethod
-    def get_kwargs(info: Dict[str, str]) -> Dict[str, str]:
+    def get_kwargs(info: Dict[str, str]) -> JSONLike:
         """
         Get the kwargs for the contract state call.
 
@@ -217,7 +239,7 @@ class Strategy(Model):
         counterparty = info["ethereum_address"]
         return {"address": counterparty}
 
-    def has_staked(self, state: Dict[str, str]) -> bool:
+    def has_staked(self, state: JSONLike) -> bool:
         """
         Check if the agent has staked.
 
@@ -225,5 +247,5 @@ class Strategy(Model):
         """
         if self._override_staking_check:
             return True
-        result = int(state.get("stake", "0")) > 0
+        result = int(cast(str, state.get("stake", "0"))) > 0
         return result

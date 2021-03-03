@@ -16,27 +16,30 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
 """This module contains the tests for the base classes for the skills."""
 import unittest.mock
 from pathlib import Path
 from queue import Queue
 from types import SimpleNamespace
 from unittest import TestCase, mock
-from unittest.mock import MagicMock, Mock
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
+from aea_crypto_ethereum import EthereumCrypto
+from aea_crypto_fetchai import FetchAICrypto
 
 import aea
 from aea.aea import AEA
+from aea.common import Address
 from aea.configurations.base import PublicId, SkillComponentConfiguration, SkillConfig
 from aea.crypto.wallet import Wallet
-from aea.decision_maker.default import GoalPursuitReadiness, OwnershipState, Preferences
-from aea.exceptions import AEAException
+from aea.decision_maker.gop import DecisionMakerHandler as GOPDecisionMakerHandler
+from aea.decision_maker.gop import GoalPursuitReadiness, OwnershipState, Preferences
+from aea.exceptions import AEAException, AEAHandleException, _StopRuntime
 from aea.identity.base import Identity
 from aea.multiplexer import MultiplexerStatus
 from aea.protocols.base import Message
+from aea.protocols.dialogue.base import Dialogue, Dialogues
 from aea.registries.resources import Resources
 from aea.skills.base import (
     Behaviour,
@@ -50,30 +53,41 @@ from aea.skills.base import (
 )
 
 from tests.conftest import (
-    ETHEREUM,
     ETHEREUM_PRIVATE_KEY_PATH,
-    FETCHAI,
     FETCHAI_PRIVATE_KEY_PATH,
     ROOT_DIR,
     _make_dummy_connection,
 )
 
 
-class TestSkillContext:
+class BaseTestSkillContext:
     """Test the skill context."""
 
     @classmethod
-    def setup_class(cls):
+    def setup_class(cls, decision_maker_handler_class=None):
         """Test the initialisation of the AEA."""
         cls.wallet = Wallet(
-            {FETCHAI: FETCHAI_PRIVATE_KEY_PATH, ETHEREUM: ETHEREUM_PRIVATE_KEY_PATH}
+            {
+                FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_PATH,
+                EthereumCrypto.identifier: ETHEREUM_PRIVATE_KEY_PATH,
+            }
         )
         cls.connection = _make_dummy_connection()
+        resources = Resources()
+        resources.add_connection(cls.connection)
         cls.identity = Identity(
-            "name", addresses=cls.wallet.addresses, default_address_key=FETCHAI,
+            "name",
+            addresses=cls.wallet.addresses,
+            default_address_key=FetchAICrypto.identifier,
         )
-        cls.my_aea = AEA(cls.identity, cls.wallet, resources=Resources())
-        cls.my_aea.resources.add_connection(cls.connection)
+        cls.my_aea = AEA(
+            cls.identity,
+            cls.wallet,
+            data_dir=MagicMock(),
+            resources=resources,
+            decision_maker_handler_class=decision_maker_handler_class,
+        )
+
         cls.skill_context = SkillContext(
             cls.my_aea.context, skill=MagicMock(contracts={})
         )
@@ -98,25 +112,15 @@ class TestSkillContext:
         """Test the decision maker's queue."""
         assert isinstance(self.skill_context.decision_maker_message_queue, Queue)
 
-    def test_agent_ownership_state(self):
-        """Test the ownership state."""
+    def test_decision_maker_handler_context(self):
+        """Test the decision_maker_handler_context."""
         assert isinstance(
-            self.skill_context.decision_maker_handler_context.ownership_state,
-            OwnershipState,
+            self.skill_context.decision_maker_handler_context, SimpleNamespace,
         )
 
-    def test_agent_preferences(self):
-        """Test the agents_preferences."""
-        assert isinstance(
-            self.skill_context.decision_maker_handler_context.preferences, Preferences
-        )
-
-    def test_agent_is_ready_to_pursuit_goals(self):
-        """Test if the agent is ready to pursuit his goals."""
-        assert isinstance(
-            self.skill_context.decision_maker_handler_context.goal_pursuit_readiness,
-            GoalPursuitReadiness,
-        )
+    def test_storage(self):
+        """Test the agent's storage."""
+        assert self.skill_context.storage is None
 
     def test_message_in_queue(self):
         """Test the 'message_in_queue' property."""
@@ -163,14 +167,68 @@ class TestSkillContext:
             == self.my_aea.context.decision_maker_address
         )
 
+    def test_default_ledger_id(self):
+        """Test 'default_ledger_id' property getter."""
+        assert (
+            self.skill_context.default_ledger_id
+            == self.my_aea.context.default_ledger_id
+        )
+
+    def test_currency_denominations(self):
+        """Test 'currency_denominations' property getter."""
+        assert (
+            self.skill_context.currency_denominations
+            == self.my_aea.context.currency_denominations
+        )
+
     def test_namespace(self):
         """Test the 'namespace' property getter."""
         assert isinstance(self.skill_context.namespace, SimpleNamespace)
+
+    def test_send_to_skill(self):
+        """Test the send_to_skill method."""
+        with unittest.mock.patch.object(
+            self.my_aea.context, "_send_to_skill", return_value=None
+        ):
+            self.skill_context.send_to_skill("envelope", "context")
 
     @classmethod
     def teardown_class(cls):
         """Test teardown."""
         pass
+
+
+class TestSkillContextDefault(BaseTestSkillContext):
+    """Test skill context with default dm."""
+
+
+class TestSkillContextGOP(BaseTestSkillContext):
+    """Test skill context with GOP dm."""
+
+    @classmethod
+    def setup_class(cls, decision_maker_handler_class=GOPDecisionMakerHandler):
+        """Setup test class."""
+        super().setup_class(decision_maker_handler_class)
+
+    def test_agent_ownership_state(self):
+        """Test the ownership state."""
+        assert isinstance(
+            self.skill_context.decision_maker_handler_context.ownership_state,
+            OwnershipState,
+        )
+
+    def test_agent_preferences(self):
+        """Test the agents_preferences."""
+        assert isinstance(
+            self.skill_context.decision_maker_handler_context.preferences, Preferences
+        )
+
+    def test_agent_is_ready_to_pursuit_goals(self):
+        """Test if the agent is ready to pursuit his goals."""
+        assert isinstance(
+            self.skill_context.decision_maker_handler_context.goal_pursuit_readiness,
+            GoalPursuitReadiness,
+        )
 
 
 class SkillContextTestCase(TestCase):
@@ -535,3 +593,129 @@ class TestSkillProgrammatic:
     def test_models(self):
         """Test the handlers getter on skill context."""
         assert getattr(self.skill.skill_context, self.model_name, None) == self.model
+
+
+class TestHandlerHandleExceptions:
+    """Test exceptions in the handle wrapper."""
+
+    @classmethod
+    def setup_class(cls):
+        """Setup test class."""
+
+        class StandardExceptionHandler(Handler):
+            def setup(self):
+                pass
+
+            def handle(self, message: Message):
+                raise ValueError("expected")
+
+            def teardown(self):
+                pass
+
+        cls.handler = StandardExceptionHandler(skill_context=mock.Mock(), name="name")
+
+    def test_handler_standard_exception(self):
+        """Test the handler exception."""
+        with pytest.raises(AEAHandleException):
+            with pytest.raises(ValueError):
+                self.handler.handle_wrapper("msg")
+
+    def test_handler_stop_exception(self):
+        """Test the handler exception."""
+        with pytest.raises(_StopRuntime):
+            with mock.patch.object(self.handler, "handle", side_effect=_StopRuntime()):
+                self.handler.handle_wrapper("msg")
+
+
+class DefaultDialogues(Model, Dialogues):
+    """The dialogues class keeps track of all dialogues."""
+
+    def __init__(self, **kwargs) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+        Model.__init__(self, **kwargs)
+
+        def role_from_first_message(  # pylint: disable=unused-argument
+            message: Message, receiver_address: Address
+        ) -> Dialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return 1  # type: ignore
+
+        Dialogues.__init__(
+            self,
+            self_address=self.context.agent_name,
+            end_states=[Mock()],  # type: ignore
+            message_class=Message,
+            dialogue_class=Dialogue,
+            role_from_first_message=role_from_first_message,
+        )
+
+
+def test_model_dialogues_keep_terminal_dialogues_option():
+    """Test Model Dialogues class."""
+    dialogues = DefaultDialogues(name="test", skill_context=Mock())
+    assert (
+        DefaultDialogues._keep_terminal_state_dialogues
+        == dialogues.is_keep_dialogues_in_terminal_state
+    )
+
+    dialogues = DefaultDialogues(
+        name="test", skill_context=Mock(), keep_terminal_state_dialogues=True
+    )
+    assert dialogues.is_keep_dialogues_in_terminal_state is True
+    assert (
+        DefaultDialogues._keep_terminal_state_dialogues
+        == Dialogues._keep_terminal_state_dialogues
+    )
+
+    dialogues = DefaultDialogues(
+        name="test", skill_context=Mock(), keep_terminal_state_dialogues=False
+    )
+    assert dialogues.is_keep_dialogues_in_terminal_state is False
+    assert (
+        DefaultDialogues._keep_terminal_state_dialogues
+        == Dialogues._keep_terminal_state_dialogues
+    )
+
+
+def test_setup_teardown_methods():
+    """Test skill etup/teardown methods with proper super() calls."""
+
+    def role_from_first_message(  # pylint: disable=unused-argument
+        message: Message, receiver_address: Address
+    ) -> Dialogue.Role:
+        return None  # type: ignore
+
+    class Test(Model, Dialogues):
+        def __init__(self, name, skill_context):
+            Model.__init__(self, name, skill_context)
+            Dialogues.__init__(
+                self, "addr", MagicMock(), Message, Dialogue, role_from_first_message
+            )
+
+        def setup(self) -> None:
+            super().setup()
+
+        def teardown(self) -> None:
+            super().teardown()
+
+    skill_context = MagicMock()
+    skill_context.skill_id = PublicId("test", "test", "1.0.1")
+    t = Test(name="test", skill_context=skill_context)
+
+    with patch.object(t._dialogues_storage, "setup") as mock_setup, patch.object(
+        t._dialogues_storage, "teardown"
+    ) as mock_teardown:
+        t.setup()
+        t.teardown()
+
+    mock_setup.assert_called_once()
+    mock_teardown.assert_called_once()

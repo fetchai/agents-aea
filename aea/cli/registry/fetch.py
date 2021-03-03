@@ -19,16 +19,27 @@
 """Methods for CLI fetch functionality."""
 import os
 import shutil
-from typing import Optional
+from pathlib import Path
+from typing import Optional, cast
 
 import click
+from click.exceptions import ClickException
 
 from aea.cli.add import add_item
 from aea.cli.registry.utils import download_file, extract, request_api
 from aea.cli.utils.config import try_to_load_agent_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import clean_after
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
+from aea.common import JSONLike
+from aea.configurations.base import PublicId
+from aea.configurations.constants import (
+    CONNECTION,
+    CONTRACT,
+    DEFAULT_AEA_CONFIG_FILE,
+    PROTOCOL,
+    SKILL,
+)
+from aea.helpers.io import open_file
 
 
 @clean_after
@@ -48,15 +59,21 @@ def fetch_agent(
     :return: None
     """
     author, name, version = public_id.author, public_id.name, public_id.version
-    api_path = "/agents/{}/{}/{}".format(author, name, version)
-    resp = request_api("GET", api_path)
-    file_url = resp["file"]
-
-    filepath = download_file(file_url, ctx.cwd)
 
     folder_name = target_dir or (name if alias is None else alias)
     aea_folder = os.path.join(ctx.cwd, folder_name)
+    if os.path.exists(aea_folder):
+        path = Path(aea_folder)
+        raise ClickException(
+            f'Item "{path.name}" already exists in target folder "{path.parent}".'
+        )
+
     ctx.clean_paths.append(aea_folder)
+
+    api_path = f"/agents/{author}/{name}/{version}"
+    resp = cast(JSONLike, request_api("GET", api_path))
+    file_url = cast(str, resp["file"])
+    filepath = download_file(file_url, ctx.cwd)
 
     extract(filepath, ctx.cwd)
 
@@ -70,12 +87,11 @@ def fetch_agent(
 
     if alias is not None:
         ctx.agent_config.agent_name = alias
-        ctx.agent_loader.dump(
-            ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
-        )
+        with open_file(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as fp:
+            ctx.agent_loader.dump(ctx.agent_config, fp)
 
     click.echo("Fetching dependencies...")
-    for item_type in ("connection", "contract", "skill", "protocol"):
+    for item_type in (CONNECTION, CONTRACT, SKILL, PROTOCOL):
         item_type_plural = item_type + "s"
 
         # initialize fetched agent with empty folders for custom packages
@@ -88,9 +104,7 @@ def fetch_agent(
                 add_item(ctx, item_type, item_public_id)
             except Exception as e:
                 raise click.ClickException(
-                    'Unable to fetch dependency for agent "{}", aborting. {}'.format(
-                        name, e
-                    )
+                    f'Unable to fetch dependency for agent "{name}", aborting. {e}'
                 )
     click.echo("Dependencies successfully fetched.")
-    click.echo("Agent {} successfully fetched to {}.".format(name, aea_folder))
+    click.echo(f"Agent {name} successfully fetched to {aea_folder}.")

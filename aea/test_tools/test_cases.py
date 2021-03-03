@@ -33,22 +33,29 @@ from filecmp import dircmp
 from io import TextIOWrapper
 from pathlib import Path
 from threading import Thread
-from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple
 
-import pytest
 import yaml
 
 from aea.cli import cli
-from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE, PackageType
+from aea.configurations.base import (
+    AgentConfig,
+    PackageType,
+    _get_default_configuration_file_name_from_type,
+)
 from aea.configurations.constants import (
+    DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_INPUT_FILE_NAME,
     DEFAULT_LEDGER,
     DEFAULT_OUTPUT_FILE_NAME,
     DEFAULT_PRIVATE_KEY_FILE,
+    DEFAULT_REGISTRY_NAME,
+    LAUNCH_SUCCEED_MESSAGE,
 )
-from aea.configurations.loader import ConfigLoader
+from aea.configurations.loader import ConfigLoader, ConfigLoaders
 from aea.exceptions import enforce
 from aea.helpers.base import cd, send_control_c, win_popen_kwargs
+from aea.helpers.io import open_file
 from aea.mail.base import Envelope
 from aea.test_tools.click_testing import CliRunner, Result
 from aea.test_tools.constants import DEFAULT_AUTHOR
@@ -59,8 +66,6 @@ from aea.test_tools.generic import (
     write_envelope_to_file,
 )
 
-from tests.conftest import ROOT_DIR
-
 
 _default_logger = logging.getLogger(__name__)
 
@@ -68,10 +73,9 @@ CLI_LOG_OPTION = ["-v", "OFF"]
 
 DEFAULT_PROCESS_TIMEOUT = 120
 DEFAULT_LAUNCH_TIMEOUT = 10
-LAUNCH_SUCCEED_MESSAGE = ("Start processing messages...",)
 
 
-class BaseAEATestCase(ABC):
+class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
     """Base class for AEA test cases."""
 
     runner: CliRunner  # CLI runner
@@ -79,9 +83,10 @@ class BaseAEATestCase(ABC):
     author: str = DEFAULT_AUTHOR  # author
     subprocesses: List[subprocess.Popen] = []  # list of launched subprocesses
     threads: List[Thread] = []  # list of started threads
-    packages_dir_path: Path = Path("packages")
+    packages_dir_path: Path = Path(DEFAULT_REGISTRY_NAME)
+    package_registry_src: Path = Path(".")
     use_packages_dir: bool = True
-    package_registry_src: Path = Path(ROOT_DIR, "packages")
+    package_registry_src_rel: Path = Path(os.getcwd(), packages_dir_path)
     old_cwd: Path  # current working directory path
     t: Path  # temporary directory path
     current_agent_context: str = ""  # the name of the current agent
@@ -91,19 +96,22 @@ class BaseAEATestCase(ABC):
     _is_teardown_class_called: bool = False
     capture_log: bool = False
     cli_log_options: List[str] = []
+    method_list: List[str] = []
 
     @classmethod
-    def set_agent_context(cls, agent_name: str):
+    def set_agent_context(cls, agent_name: str) -> None:
         """Set the current agent context."""
         cls.current_agent_context = agent_name
 
     @classmethod
-    def unset_agent_context(cls):
+    def unset_agent_context(cls) -> None:
         """Unset the current agent context."""
         cls.current_agent_context = ""
 
     @classmethod
-    def set_config(cls, dotted_path: str, value: Any, type_: str = "str") -> Result:
+    def set_config(
+        cls, dotted_path: str, value: Any, type_: Optional[str] = None
+    ) -> Result:
         """
         Set a config.
 
@@ -115,6 +123,9 @@ class BaseAEATestCase(ABC):
 
         :return: Result
         """
+        if type_ is None:
+            type_ = type(value).__name__
+
         return cls.run_cli_command(
             "config",
             "set",
@@ -148,22 +159,27 @@ class BaseAEATestCase(ABC):
             cls.run_cli_command("config", "set", path, value, cwd=cls._get_cwd())
 
     @classmethod
-    def run_cli_command(cls, *args: str, cwd: str = ".") -> Result:
+    def run_cli_command(cls, *args: str, cwd: str = ".", **kwargs: str) -> Result:
         """
         Run AEA CLI command.
 
         :param args: CLI args
         :param cwd: the working directory from where to run the command.
+        :param kwargs: other keyword arguments to click.CLIRunner.invoke.
         :raises AEATestingException: if command fails.
 
         :return: Result
         """
         with cd(cwd):
             result = cls.runner.invoke(
-                cli, [*CLI_LOG_OPTION, *args], standalone_mode=False
+                cli,
+                [*CLI_LOG_OPTION, *args],
+                standalone_mode=False,
+                catch_exceptions=False,
+                **kwargs,
             )
             cls.last_cli_runner_result = result
-            if result.exit_code != 0:
+            if result.exit_code != 0:  # pragma: nocover
                 raise AEATestingException(
                     "Failed to execute AEA CLI command with args {}.\n"
                     "Exit code: {}\nException: {}".format(
@@ -210,7 +226,7 @@ class BaseAEATestCase(ABC):
         return process
 
     @classmethod
-    def start_thread(cls, target: Callable, **kwargs) -> Thread:
+    def start_thread(cls, target: Callable, **kwargs: subprocess.Popen) -> Thread:
         """
         Start python Thread.
 
@@ -280,13 +296,13 @@ class BaseAEATestCase(ABC):
         """
         # for pydocstyle
         def is_allowed_diff_in_agent_config(
-            path_to_fetched_aea, path_to_manually_created_aea
+            path_to_fetched_aea: str, path_to_manually_created_aea: str
         ) -> Tuple[bool, Dict[str, str], Dict[str, str]]:
-            with open(
+            with open_file(
                 os.path.join(path_to_fetched_aea, "aea-config.yaml"), "r"
             ) as file:
                 content1 = list(yaml.safe_load_all(file))[0]  # only load first page
-            with open(
+            with open_file(
                 os.path.join(path_to_manually_created_aea, "aea-config.yaml"), "r"
             ) as file:
                 content2 = list(yaml.safe_load_all(file))[0]
@@ -301,6 +317,7 @@ class BaseAEATestCase(ABC):
                 "description",
                 "version",
                 "registry_path",
+                "dependencies",  # temporary
             ]
             result = all([key in allowed_diff_keys for key in content1.keys()])
             result = result and all(
@@ -316,7 +333,7 @@ class BaseAEATestCase(ABC):
         fetched_agent_name = agent_name
         path_to_fetched_aea = os.path.join(new_cwd, fetched_agent_name)
         registry_tmp_dir = os.path.join(new_cwd, cls.packages_dir_path)
-        shutil.copytree(str(cls.package_registry_src), str(registry_tmp_dir))
+        shutil.copytree(str(cls.package_registry_src_rel), str(registry_tmp_dir))
         with cd(new_cwd):
             cls.run_cli_command(
                 "fetch", "--local", public_id, "--alias", fetched_agent_name
@@ -395,7 +412,7 @@ class BaseAEATestCase(ABC):
 
     @classmethod
     def terminate_agents(
-        cls, *subprocesses: subprocess.Popen, timeout: int = 10,
+        cls, *subprocesses: subprocess.Popen, timeout: int = 20,
     ) -> None:
         """
         Terminate agent subprocesses.
@@ -415,7 +432,7 @@ class BaseAEATestCase(ABC):
             process.wait(timeout=timeout)
 
     @classmethod
-    def is_successfully_terminated(cls, *subprocesses: subprocess.Popen):
+    def is_successfully_terminated(cls, *subprocesses: subprocess.Popen) -> bool:
         """Check if all subprocesses terminated successfully."""
         if not subprocesses:
             subprocesses = tuple(cls.subprocesses)
@@ -424,7 +441,7 @@ class BaseAEATestCase(ABC):
         return all_terminated
 
     @classmethod
-    def initialize_aea(cls, author) -> None:
+    def initialize_aea(cls, author: str) -> None:
         """
         Initialize AEA locally with author name.
 
@@ -466,7 +483,9 @@ class BaseAEATestCase(ABC):
         return cls.run_cli_command(*cli_args, cwd=cls._get_cwd())
 
     @classmethod
-    def scaffold_item(cls, item_type: str, name: str) -> Result:
+    def scaffold_item(
+        cls, item_type: str, name: str, skip_consistency_check: bool = False
+    ) -> Result:
         """
         Scaffold an item for the agent.
 
@@ -474,10 +493,18 @@ class BaseAEATestCase(ABC):
 
         :param item_type: str item type.
         :param name: name of the item.
+        :param skip_consistency_check: if True, skip consistency check.
 
         :return: Result
         """
-        return cls.run_cli_command("scaffold", item_type, name, cwd=cls._get_cwd())
+        flags = ["-s"] if skip_consistency_check else []
+        if item_type == "protocol":
+            return cls.run_cli_command(
+                *flags, "scaffold", item_type, "-y", name, cwd=cls._get_cwd()
+            )
+        return cls.run_cli_command(
+            *flags, "scaffold", item_type, name, cwd=cls._get_cwd()
+        )
 
     @classmethod
     def fingerprint_item(cls, item_type: str, public_id: str) -> Result:
@@ -498,7 +525,7 @@ class BaseAEATestCase(ABC):
     @classmethod
     def eject_item(cls, item_type: str, public_id: str) -> Result:
         """
-        Eject an item in the agent.
+        Eject an item in the agent in quiet mode (i.e. no interaction).
 
         Run from agent's directory.
 
@@ -507,7 +534,7 @@ class BaseAEATestCase(ABC):
 
         :return: None
         """
-        cli_args = ["eject", item_type, public_id]
+        cli_args = ["eject", "--quiet", item_type, public_id]
         return cls.run_cli_command(*cli_args, cwd=cls._get_cwd())
 
     @classmethod
@@ -571,6 +598,23 @@ class BaseAEATestCase(ABC):
         )
 
     @classmethod
+    def remove_private_key(
+        cls, ledger_api_id: str = DEFAULT_LEDGER, connection: bool = False,
+    ) -> Result:
+        """
+        Remove private key with CLI command.
+
+        Run from agent's directory.
+
+        :param ledger_api_id: ledger API ID.
+        :param connection: whether or not the private key filepath is for a connection.
+
+        :return: Result
+        """
+        args = ["remove-key", ledger_api_id] + (["--connection"] if connection else [])
+        return cls.run_cli_command(*args, cwd=cls._get_cwd())
+
+    @classmethod
     def replace_private_key_in_file(
         cls, private_key: str, private_key_filepath: str = DEFAULT_PRIVATE_KEY_FILE
     ) -> None:
@@ -584,7 +628,7 @@ class BaseAEATestCase(ABC):
         :raises: exception if file does not exist
         """
         with cd(cls._get_cwd()):  # pragma: nocover
-            with open(private_key_filepath, "wt") as f:
+            with open_file(private_key_filepath, "wt") as f:
                 f.write(private_key)
 
     @classmethod
@@ -643,7 +687,7 @@ class BaseAEATestCase(ABC):
         os.chdir(Path(path))
 
     @classmethod
-    def _terminate_subprocesses(cls):
+    def _terminate_subprocesses(cls) -> None:
         """Terminate all launched subprocesses."""
         for process in cls.subprocesses:
             if not process.returncode == 0:
@@ -654,27 +698,31 @@ class BaseAEATestCase(ABC):
         cls.subprocesses = []
 
     @classmethod
-    def _join_threads(cls):
+    def _join_threads(cls) -> None:
         """Join all started threads."""
         for thread in cls.threads:
             thread.join()
         cls.threads = []
 
     @classmethod
-    def _read_out(cls, process: subprocess.Popen):  # pragma: nocover # runs in thread!
+    def _read_out(
+        cls, process: subprocess.Popen
+    ) -> None:  # pragma: nocover # runs in thread!
         for line in TextIOWrapper(process.stdout, encoding="utf-8"):
             cls._log_capture("stdout", process.pid, line)
             cls.stdout[process.pid] += line
 
     @classmethod
-    def _read_err(cls, process: subprocess.Popen):  # pragma: nocover # runs in thread!
+    def _read_err(
+        cls, process: subprocess.Popen
+    ) -> None:  # pragma: nocover # runs in thread!
         if process.stderr is not None:
             for line in TextIOWrapper(process.stderr, encoding="utf-8"):
                 cls._log_capture("stderr", process.pid, line)
                 cls.stderr[process.pid] += line
 
     @classmethod
-    def _log_capture(cls, name, pid, line):  # pragma: nocover
+    def _log_capture(cls, name: str, pid: int, line: str) -> None:  # pragma: nocover
         if not cls.capture_log:
             return
         sys.stdout.write(f"[{pid}]{name}>{line}")
@@ -710,7 +758,7 @@ class BaseAEATestCase(ABC):
         return str(cls.t / cls.current_agent_context)
 
     @classmethod
-    def send_envelope_to_agent(cls, envelope: Envelope, agent: str):
+    def send_envelope_to_agent(cls, envelope: Envelope, agent: str) -> None:
         """Send an envelope to an agent, using the stub connection."""
         # check added cause sometimes fails on win with permission error
         dir_path = Path(cls.t / agent)
@@ -772,7 +820,7 @@ class BaseAEATestCase(ABC):
     @classmethod
     def is_running(
         cls, process: subprocess.Popen, timeout: int = DEFAULT_LAUNCH_TIMEOUT
-    ):
+    ) -> bool:
         """
         Check if the AEA is launched and running (ready to process messages).
 
@@ -780,14 +828,46 @@ class BaseAEATestCase(ABC):
         :param timeout: the timeout to wait for launch to complete
         """
         missing_strings = cls.missing_from_output(
-            process, LAUNCH_SUCCEED_MESSAGE, timeout, is_terminating=False
+            process, (LAUNCH_SUCCEED_MESSAGE,), timeout, is_terminating=False
         )
 
         return missing_strings == []
 
     @classmethod
-    def setup_class(cls):
+    def invoke(cls, *args: str) -> Result:
+        """Call the cli command."""
+        with cd(cls._get_cwd()):
+            result = cls.runner.invoke(
+                cli, args, standalone_mode=False, catch_exceptions=False
+            )
+        return result
+
+    @classmethod
+    def load_agent_config(cls, agent_name: str) -> AgentConfig:
+        """Load agent configuration."""
+        if agent_name not in cls.agents:
+            raise AEATestingException(
+                f"Cannot find agent '{agent_name}' in the current test case."
+            )
+        loader = ConfigLoaders.from_package_type(PackageType.AGENT)
+        config_file_name = _get_default_configuration_file_name_from_type(
+            PackageType.AGENT
+        )
+        configuration_file_path = Path(cls.t, agent_name, config_file_name)
+        with open_file(configuration_file_path) as file_input:
+            agent_config = loader.load(file_input)
+        return agent_config
+
+    @classmethod
+    def setup_class(cls) -> None:
         """Set up the test class."""
+        cls.method_list = [
+            func
+            for func in dir(cls)
+            if callable(getattr(cls, func))
+            and not func.startswith("__")
+            and func.startswith("test_")
+        ]
         cls.runner = CliRunner()
         cls.old_cwd = Path(os.getcwd())
         cls.subprocesses = []
@@ -796,9 +876,9 @@ class BaseAEATestCase(ABC):
         cls.t = Path(tempfile.mkdtemp())
         cls.change_directory(cls.t)
 
+        cls.package_registry_src = cls.old_cwd / cls.package_registry_src_rel
         if cls.use_packages_dir:
             registry_tmp_dir = cls.t / cls.packages_dir_path
-            cls.package_registry_src = cls.old_cwd / cls.packages_dir_path
             shutil.copytree(str(cls.package_registry_src), str(registry_tmp_dir))
 
         cls.initialize_aea(cls.author)
@@ -806,7 +886,7 @@ class BaseAEATestCase(ABC):
         cls.stderr = {}
 
     @classmethod
-    def teardown_class(cls):
+    def teardown_class(cls) -> None:
         """Teardown the test."""
         cls.change_directory(cls.old_cwd)
         cls.terminate_agents(*cls.subprocesses)
@@ -814,11 +894,10 @@ class BaseAEATestCase(ABC):
         cls._join_threads()
         cls.unset_agent_context()
         cls.last_cli_runner_result = None
-        cls.packages_dir_path = Path("packages")
+        cls.packages_dir_path = Path(DEFAULT_REGISTRY_NAME)
         cls.use_packages_dir = True
         cls.agents = set()
         cls.current_agent_context = ""
-        cls.package_registry_src = Path(ROOT_DIR, "packages")
         cls.stdout = {}
         cls.stderr = {}
 
@@ -828,15 +907,6 @@ class BaseAEATestCase(ABC):
         cls._is_teardown_class_called = True
 
 
-@pytest.mark.integration
-class UseOef:  # pylint: disable=too-few-public-methods
-    """Inherit from this class to launch an OEF node."""
-
-    @pytest.fixture(autouse=True)
-    def _start_oef_node(self, network_node):
-        """Start an oef node."""
-
-
 class AEATestCaseEmpty(BaseAEATestCase):
     """
     Test case for a default AEA project.
@@ -844,30 +914,85 @@ class AEATestCaseEmpty(BaseAEATestCase):
     This test case will create a default AEA project.
     """
 
+    agent_name = ""
     IS_LOCAL = True
     IS_EMPTY = False
 
     @classmethod
-    def setup_class(cls):
+    def setup_class(cls) -> None:
         """Set up the test class."""
         super(AEATestCaseEmpty, cls).setup_class()
         cls.agent_name = "agent-" + "".join(random.choices(string.ascii_lowercase, k=5))
         cls.create_agents(cls.agent_name, is_local=cls.IS_LOCAL, is_empty=cls.IS_EMPTY)
         cls.set_agent_context(cls.agent_name)
 
+    @classmethod
+    def teardown_class(cls) -> None:
+        """Teardown the test class."""
+        super(AEATestCaseEmpty, cls).teardown_class()
+        cls.agent_name = ""
+
+
+class AEATestCaseEmptyFlaky(AEATestCaseEmpty):
+    """
+    Test case for a default AEA project.
+
+    This test case will create a default AEA project.
+
+    Use for flaky tests with the flaky decorator.
+    """
+
+    run_count: int = 0
+
+    @classmethod
+    def setup_class(cls) -> None:
+        """Set up the test class."""
+        super(AEATestCaseEmptyFlaky, cls).setup_class()
+        if len(cls.method_list) > 1:  # pragma: nocover
+            raise ValueError(f"{cls.__name__} can only contain one test method!")
+        cls.run_count += 1
+
+    @classmethod
+    def teardown_class(cls) -> None:
+        """Teardown the test class."""
+        super(AEATestCaseEmptyFlaky, cls).teardown_class()
+
 
 class AEATestCaseMany(BaseAEATestCase):
     """Test case for many AEA projects."""
 
     @classmethod
-    def setup_class(cls):
+    def setup_class(cls) -> None:
         """Set up the test class."""
         super(AEATestCaseMany, cls).setup_class()
 
     @classmethod
-    def teardown_class(cls):
+    def teardown_class(cls) -> None:
         """Teardown the test class."""
         super(AEATestCaseMany, cls).teardown_class()
+
+
+class AEATestCaseManyFlaky(AEATestCaseMany):
+    """
+    Test case for many AEA projects which are flaky.
+
+    Use for flaky tests with the flaky decorator.
+    """
+
+    run_count: int = 0
+
+    @classmethod
+    def setup_class(cls) -> None:
+        """Set up the test class."""
+        super(AEATestCaseManyFlaky, cls).setup_class()
+        if len(cls.method_list) > 1:  # pragma: nocover
+            raise ValueError(f"{cls.__name__} can only contain one test method!")
+        cls.run_count += 1
+
+    @classmethod
+    def teardown_class(cls) -> None:
+        """Teardown the test class."""
+        super(AEATestCaseManyFlaky, cls).teardown_class()
 
 
 class AEATestCase(BaseAEATestCase):
@@ -878,13 +1003,14 @@ class AEATestCase(BaseAEATestCase):
     it is assumed the project is inside the current working directory.
     """
 
-    path_to_aea: Union[Path, str] = Path(".")
-    packages_dir_path: Path = Path("..", "packages")
-    agent_configuration: AgentConfig
+    agent_name = ""
+    path_to_aea: Path = Path(".")
+    packages_dir_path: Path = Path("..", DEFAULT_REGISTRY_NAME)
+    agent_configuration: Optional[AgentConfig] = None
     t: Path  # temporary directory path
 
     @classmethod
-    def setup_class(cls):
+    def setup_class(cls) -> None:
         """Set up the test class."""
         # make paths absolute
         cls.path_to_aea = cls.path_to_aea.absolute()
@@ -906,8 +1032,9 @@ class AEATestCase(BaseAEATestCase):
         cls.set_agent_context(cls.agent_name)
 
     @classmethod
-    def teardown_class(cls):
+    def teardown_class(cls) -> None:
         """Teardown the test class."""
+        cls.agent_name = ""
         cls.path_to_aea = Path(".")
         cls.agent_configuration = None
         super(AEATestCase, cls).teardown_class()

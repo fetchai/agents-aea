@@ -24,7 +24,7 @@ This module contains the classes required for dialogue management.
 - Dialogues: The dialogues class keeps track of all dialogues.
 """
 
-from typing import Dict, Optional, Type
+from typing import Any, Dict, Optional, Type
 
 from aea.common import Address
 from aea.exceptions import AEAEnforceError, enforce
@@ -64,7 +64,7 @@ DefaultDialogue = BaseDefaultDialogue
 class DefaultDialogues(Model, BaseDefaultDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -138,7 +138,7 @@ class FipaDialogue(BaseFipaDialogue):
 class FipaDialogues(Model, BaseFipaDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -212,7 +212,7 @@ class LedgerApiDialogue(BaseLedgerApiDialogue):
 class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -233,7 +233,7 @@ class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
 
         BaseLedgerApiDialogues.__init__(
             self,
-            self_address=self.context.agent_address,
+            self_address=str(self.skill_id),
             role_from_first_message=role_from_first_message,
             dialogue_class=LedgerApiDialogue,
         )
@@ -245,7 +245,7 @@ OefSearchDialogue = BaseOefSearchDialogue
 class OefSearchDialogues(Model, BaseOefSearchDialogues):
     """This class keeps track of all oef_search dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -267,6 +267,6 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
 
         BaseOefSearchDialogues.__init__(
             self,
-            self_address=self.context.agent_address,
+            self_address=str(self.skill_id),
             role_from_first_message=role_from_first_message,
         )

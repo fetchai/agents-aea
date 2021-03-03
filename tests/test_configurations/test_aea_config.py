@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tests for the aea configurations."""
 import io
 from enum import Enum
@@ -39,6 +38,7 @@ from aea.configurations.base import (
     PublicId,
 )
 from aea.configurations.loader import ConfigLoader, ConfigLoaders
+from aea.exceptions import AEAValidationError
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.yaml_utils import yaml_load_all
 
@@ -61,13 +61,14 @@ connections: []
 contracts: []
 protocols: []
 skills: []
-default_connection: fetchai/stub:0.12.0
+default_connection: null
 default_ledger: cosmos
 private_key_paths:
     cosmos: tests/data/cosmos_private_key.txt
 connection_private_key_paths:
     cosmos: tests/data/cosmos_private_key.txt
 registry_path: ../packages
+dependencies: {}
 """
 )
 
@@ -149,13 +150,16 @@ class BaseConfigTestVariable(TestCase):
     def test_incorrect_value_passed(self) -> None:
         """Test validation error on incorrect values."""
         for incorrect_value in self.INCORRECT_VALUES:
-            with self.assertRaises(ValidationError):
+            with pytest.raises(
+                AEAValidationError,
+                match="The following errors occurred during validation:",
+            ):
                 self._make_configuration(incorrect_value)
 
     def _get_aea_value(self, aea: AEA) -> Any:
         """Get AEA attribute value.
 
-        :param aea: AEA isntance to get atribute value from.
+        :param aea: AEA instance to get attribute value from.
 
         :return: value of attribute.
         """
@@ -250,6 +254,18 @@ class TestSkillExceptionPolicyConfigVariable(BaseConfigTestVariable):
     REQUIRED = False
     AEA_ATTR_NAME = "_skills_exception_policy"
     AEA_DEFAULT_VALUE = ExceptionPolicyEnum.propagate
+
+
+class TestStorageUriConfigVariable(BaseConfigTestVariable):
+    """Test `storage_uri` aea config option."""
+
+    OPTION_NAME = "storage_uri"
+    CONFIG_ATTR_NAME = "storage_uri"
+    GOOD_VALUES = ["sqlite://test"]  # type: ignore
+    INCORRECT_VALUES = [None, -1]
+    REQUIRED = False
+    AEA_ATTR_NAME = "_storage_uri"
+    AEA_DEFAULT_VALUE = None
 
 
 class TestConnectionExceptionPolicyConfigVariable(BaseConfigTestVariable):
@@ -428,6 +444,7 @@ def test_agent_configuration_dump_multipage_fails_bad_component_configuration():
     ] = "not in specs!"
     fp = io.StringIO()
     with pytest.raises(
-        ValueError, match="Configuration of component .* is not valid..*'BAD FIELD'"
+        ValueError,
+        match="Configuration of component .* is not valid. ExtraPropertiesError: properties not expected: BAD FIELD",
     ):
         loader.dump(agent_config, fp)

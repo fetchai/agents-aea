@@ -16,15 +16,15 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tests for Envelope of mail.base.py."""
-import time
 import unittest.mock
 
 import pytest
 
 import aea
 from aea.configurations.base import PublicId
+from aea.exceptions import AEAEnforceError
+from aea.mail import base_pb2
 from aea.mail.base import Envelope, EnvelopeContext, ProtobufEnvelopeSerializer, URI
 from aea.multiplexer import InBox, Multiplexer, OutBox
 from aea.protocols.base import Message
@@ -32,11 +32,8 @@ from aea.protocols.base import Message
 from packages.fetchai.connections.local.connection import LocalNode
 from packages.fetchai.protocols.default.message import DefaultMessage
 
-from tests.conftest import (
-    UNKNOWN_PROTOCOL_PUBLIC_ID,
-    _make_dummy_connection,
-    _make_local_connection,
-)
+from tests.common.utils import wait_for_condition
+from tests.conftest import _make_dummy_connection, _make_local_connection
 
 
 def test_uri():
@@ -67,34 +64,23 @@ def test_envelope_initialisation():
     """Testing the envelope initialisation."""
     agent_address = "Agent0"
     receiver_address = "Agent1"
-    msg = Message(content="hello")
-    msg.to = receiver_address
-    assert Envelope(
-        to=receiver_address,
-        sender=agent_address,
-        protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
-        message=msg,
-    ), "Cannot generate a new envelope"
-
-    envelope = Envelope(
-        to=receiver_address,
-        sender=agent_address,
-        protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
-        message=msg,
+    msg = DefaultMessage(
+        performative=DefaultMessage.Performative.BYTES, content="hello"
     )
+    msg.to = receiver_address
+
+    envelope = Envelope(to=receiver_address, sender=agent_address, message=msg,)
+
+    assert envelope, "Cannot generate a new envelope"
 
     envelope.to = "ChangedAgent"
     envelope.sender = "ChangedSender"
-    envelope.protocol_id = "my_changed_protocol"
     envelope.message = b"HelloWorld"
 
     assert envelope.to == "ChangedAgent", "Cannot set to value on Envelope"
     assert envelope.sender == "ChangedSender", "Cannot set sender value on Envelope"
-    assert (
-        envelope.protocol_id == "my_changed_protocol"
-    ), "Cannot set protocol_id on Envelope "
     assert envelope.message == b"HelloWorld", "Cannot set message on Envelope"
-    assert envelope.context.uri_raw is not None
+    assert envelope.context is None
     assert not envelope.is_sender_public_id
     assert not envelope.is_to_public_id
 
@@ -110,15 +96,12 @@ def test_inbox_nowait():
     """Tests the inbox without waiting."""
     agent_address = "Agent0"
     receiver_address = "Agent1"
-    msg = Message(content="hello")
+    msg = DefaultMessage(
+        performative=DefaultMessage.Performative.BYTES, content="hello"
+    )
     msg.to = receiver_address
     multiplexer = Multiplexer([_make_dummy_connection()])
-    envelope = Envelope(
-        to=receiver_address,
-        sender=agent_address,
-        protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
-        message=msg,
-    )
+    envelope = Envelope(to=receiver_address, sender=agent_address, message=msg,)
     multiplexer.in_queue.put(envelope)
     inbox = InBox(multiplexer)
     assert (
@@ -130,15 +113,12 @@ def test_inbox_get():
     """Tests for a envelope on the in queue."""
     agent_address = "Agent0"
     receiver_address = "Agent1"
-    msg = Message(content="hello")
+    msg = DefaultMessage(
+        performative=DefaultMessage.Performative.BYTES, content="hello"
+    )
     msg.to = receiver_address
     multiplexer = Multiplexer([_make_dummy_connection()])
-    envelope = Envelope(
-        to=receiver_address,
-        sender=agent_address,
-        protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
-        message=msg,
-    )
+    envelope = Envelope(to=receiver_address, sender=agent_address, message=msg,)
     multiplexer.in_queue.put(envelope)
     inbox = InBox(multiplexer)
 
@@ -183,15 +163,11 @@ def test_outbox_put():
     outbox = OutBox(multiplexer)
     inbox = InBox(multiplexer)
     multiplexer.connect()
-    envelope = Envelope(
-        to=receiver_address,
-        sender=agent_address,
-        protocol_id=DefaultMessage.protocol_id,
-        message=msg,
-    )
+    envelope = Envelope(to=receiver_address, sender=agent_address, message=msg,)
     outbox.put(envelope)
-    time.sleep(0.5)
-    assert not inbox.empty(), "Inbox must not be empty after putting an envelope"
+    wait_for_condition(
+        lambda: inbox.empty(), 15, "Inbox must not be empty after putting an envelope"
+    )
     multiplexer.disconnect()
 
 
@@ -213,9 +189,13 @@ def test_outbox_put_message():
     outbox = OutBox(multiplexer)
     inbox = InBox(multiplexer)
     multiplexer.connect()
+    wait_for_condition(
+        lambda: multiplexer.is_connected, 15, "Multiplexer is not connected"
+    )
     outbox.put_message(msg)
-    time.sleep(0.5)
-    assert not inbox.empty(), "Inbox will not be empty after putting a message."
+    wait_for_condition(
+        lambda: inbox.empty(), 15, "Inbox must not be empty after putting a message"
+    )
     multiplexer.disconnect()
 
 
@@ -242,6 +222,18 @@ def test_multiplexer():
         multiplexer.disconnect()
 
 
+def test_envelope_fails_on_message_empty_protocol_specification_id():
+    """Check message.protocol_specification_id."""
+
+    class BadMessage(Message):
+        protocol_id = "some/some:0.1.0"
+
+    message = BadMessage()
+
+    with pytest.raises(ValueError):
+        Envelope(message=message, to="1", sender="1")
+
+
 def test_protobuf_envelope_serializer():
     """Test Protobuf envelope serializer."""
     serializer = ProtobufEnvelopeSerializer()
@@ -250,7 +242,7 @@ def test_protobuf_envelope_serializer():
     expected_envelope = Envelope(
         to="to",
         sender="sender",
-        protocol_id=PublicId("author", "name", "0.1.0"),
+        protocol_specification_id=PublicId("author", "name", "0.1.0"),
         message=b"message",
         context=envelope_context,
     )
@@ -265,7 +257,7 @@ def test_envelope_serialization():
     expected_envelope = Envelope(
         to="to",
         sender="sender",
-        protocol_id=PublicId("author", "name", "0.1.0"),
+        protocol_specification_id=PublicId("author", "name", "0.1.0"),
         message=b"message",
     )
     encoded_envelope = expected_envelope.encode()
@@ -277,103 +269,98 @@ def test_envelope_serialization():
 def test_envelope_message_bytes():
     """Test the property Envelope.message_bytes."""
     message = DefaultMessage(DefaultMessage.Performative.BYTES, content=b"message")
-    envelope = Envelope(
-        to="to",
-        sender="sender",
-        protocol_id=PublicId("author", "name", "0.1.0"),
-        message=message,
-    )
+    envelope = Envelope(to="to", sender="sender", message=message,)
 
     expected_message_bytes = message.encode()
     actual_message_bytes = envelope.message_bytes
     assert expected_message_bytes == actual_message_bytes
 
 
-def test_envelope_skill_id():
-    """Test the property Envelope.skill_id."""
-    envelope_context = EnvelopeContext(uri=URI("skill/author/skill_name/0.1.0"))
-    envelope = Envelope(
-        to="to",
-        sender="sender",
-        protocol_id=PublicId("author", "name", "0.1.0"),
-        message=b"message",
-        context=envelope_context,
-    )
-
-    assert envelope.skill_id == PublicId("author", "skill_name", "0.1.0")
+def test_envelope_context_connection_id():
+    """Test the property EnvelopeContext.connection_id."""
+    connection_id = PublicId("author", "skill_name", "0.1.0")
+    envelope_context = EnvelopeContext()
+    envelope_context.connection_id = connection_id
+    assert envelope_context.connection_id == connection_id
 
 
-def test_envelope_connection_id():
-    """Test the property Envelope.connection_id."""
+def test_envelope_context_is_None_for_c2c():
+    """Test the Envelope context is None for c2c."""
     envelope_context = EnvelopeContext(
-        uri=URI("connection/author/connection_name/0.1.0")
+        connection_id=PublicId.from_str("author/connection_name:0.1.0")
     )
+    message = DefaultMessage(DefaultMessage.Performative.BYTES, content=b"message")
+    with pytest.raises(
+        AEAEnforceError,
+        match="EnvelopeContext must be None for component to component messages.",
+    ):
+        Envelope(
+            to="some_author/some_name:0.1.0",
+            sender="some_author/some_name:0.1.0",
+            protocol_specification_id=PublicId("author", "name", "0.1.0"),
+            message=message,
+            context=envelope_context,
+        )
+
+
+def test_envelope_to_as_public_id():
+    """Test the Envelope to_as_public_id method."""
+    env = Envelope(
+        to="some_author/some_name:0.1.0",
+        sender="some_author/some_name:0.1.0",
+        protocol_specification_id=PublicId("author", "name", "0.1.0"),
+        message=b"message",
+    )
+    assert env.to_as_public_id is not None
+
+
+def test_envelope_constructor():
+    """Test Envelope constructor checks."""
+    Envelope(
+        to="to",
+        sender="sender",
+        message=DefaultMessage(performative=DefaultMessage.Performative.BYTES),
+    )
+    Envelope(
+        to="to",
+        sender="sender",
+        message=b"",
+        protocol_specification_id=DefaultMessage.protocol_specification_id,
+    )
+
+    with pytest.raises(
+        AEAEnforceError, match="message should be a type of Message or bytes!"
+    ):
+        Envelope(to="to", sender="sender", message=123)
+
+    with pytest.raises(
+        Exception,
+        match=r"Message is bytes object, protocol_specification_id must be provided!",
+    ):
+        Envelope(to="asd", sender="asdasd", message=b"sdfdf")
+
+
+def test_envelope_context_repr():
+    """Check repr for EnvelopeContext."""
+    assert str(EnvelopeContext(1, 2)) == "EnvelopeContext(connection_id=1, uri=2)"
+
+
+def test_envelope_specification_id_translated():
+    """Test protocol id to protocol specification id translation and back."""
+    protocol_specification_id = PublicId("author", "specification", "0.1.0")
+
     envelope = Envelope(
         to="to",
         sender="sender",
-        protocol_id=PublicId("author", "name", "0.1.0"),
-        message=b"message",
-        context=envelope_context,
+        protocol_specification_id=protocol_specification_id,
+        message=b"",
     )
 
-    assert envelope.connection_id == PublicId("author", "connection_name", "0.1.0")
+    assert envelope.protocol_specification_id == protocol_specification_id
 
+    envelope_bytes = envelope.encode()
+    envelope_pb = base_pb2.Envelope()
+    envelope_pb.ParseFromString(envelope_bytes)
 
-def test_envelope_skill_id_raises_value_error():
-    """Test the property Envelope.skill_id raises ValueError if the URI is not a package id.."""
-    with unittest.mock.patch.object(
-        aea.mail.base._default_logger, "debug"
-    ) as mock_logger_method:
-        bad_uri = "skill/author/skill_name/bad_version"
-        envelope_context = EnvelopeContext(uri=URI(bad_uri))
-        envelope = Envelope(
-            to="to",
-            sender="sender",
-            protocol_id=PublicId("author", "name", "0.1.0"),
-            message=b"message",
-            context=envelope_context,
-        )
-
-        assert envelope.skill_id is None
-        mock_logger_method.assert_called_with(
-            f"URI - {bad_uri} - not a valid package_id id. Error: Input '{bad_uri}' is not well formatted."
-        )
-
-
-def test_envelope_skill_id_raises_value_error_wrong_package_type():
-    """Test the property Envelope.skill_id raises ValueError if the URI is not a valid package type."""
-    with unittest.mock.patch.object(
-        aea.mail.base._default_logger, "debug"
-    ) as mock_logger_method:
-        invalid_uri = "protocol/author/skill_name/0.1.0"
-        envelope_context = EnvelopeContext(uri=URI(invalid_uri))
-        envelope = Envelope(
-            to="to",
-            sender="sender",
-            protocol_id=PublicId("author", "name", "0.1.0"),
-            message=b"message",
-            context=envelope_context,
-        )
-
-        assert envelope.skill_id is None
-        mock_logger_method.assert_called_with(
-            f"URI - {invalid_uri} - not a valid package_id id. Error: Invalid package type protocol in uri for envelope context."
-        )
-
-
-def test_envelope_context_raises_with_public_id_specified_twice():
-    """Test the EnvelopeContext constructor, negative"""
-    with pytest.raises(
-        ValueError, match="Cannot define connection_id explicitly and in URI."
-    ):
-        EnvelopeContext(
-            uri=URI("connection/author/connection_name/0.1.0"),
-            connection_id=PublicId("author", "connection_name", "0.1.0"),
-        )
-    with pytest.raises(
-        ValueError, match="Cannot define skill_id explicitly and in URI."
-    ):
-        EnvelopeContext(
-            uri=URI("skill/author/skill_name/0.1.0"),
-            skill_id=PublicId("author", "skill_name", "0.1.0"),
-        )
+    new_envelope = Envelope.decode(envelope_bytes)
+    assert new_envelope.protocol_specification_id == envelope.protocol_specification_id

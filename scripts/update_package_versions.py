@@ -29,13 +29,13 @@ Run this script from the root of the project directory:
 import argparse
 import operator
 import os
-import pprint
 import re
+import shutil
 import subprocess  # nosec
 import sys
 from collections import Counter
 from pathlib import Path
-from typing import Dict, List, Optional, Pattern, Set
+from typing import Any, Dict, List, Optional, Pattern, Set
 
 import semver
 import yaml
@@ -73,7 +73,7 @@ def get_protocol_specification_header_regex(public_id: PublicId) -> Pattern:
     )
 
 
-def check_positive(value):
+def check_positive(value: Any) -> int:
     """Check value is an int."""
     try:
         ivalue = int(value)
@@ -83,7 +83,7 @@ def check_positive(value):
     return ivalue
 
 
-def parse_arguments():
+def parse_arguments() -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -372,8 +372,8 @@ def process_packages(
     conflicts = {p.public_id for p in all_package_ids_to_update}.intersection(
         ambiguous_public_ids
     )
-    print(f"Ambiguous public ids: {pprint.pformat(ambiguous_public_ids)}")
-    print(f"Conflicts with public ids to update: {pprint.pformat(conflicts)}",)
+    print(f"Ambiguous public ids: {ambiguous_public_ids}")
+    print(f"Conflicts with public ids to update: {conflicts}",)
 
     print("*" * 100)
     print("Start processing.")
@@ -453,7 +453,9 @@ def _can_disambiguate_from_context(
     return None
 
 
-def _ask_to_user(lines, line, idx, old_string, type_):
+def _ask_to_user(
+    lines: List[str], line: str, idx: int, old_string: str, type_: str
+) -> str:
     print("=" * 50)
     above_rows = lines[idx - arguments.context : idx]
     below_rows = lines[idx + 1 : idx + arguments.context]
@@ -464,7 +466,9 @@ def _ask_to_user(lines, line, idx, old_string, type_):
     return answer
 
 
-def _ask_to_user_and_replace_if_allowed(content, old_string, new_string, type_) -> str:
+def _ask_to_user_and_replace_if_allowed(
+    content: str, old_string: str, new_string: str, type_: str
+) -> str:
     """
     Ask to user if the line should be replaced or not, If the script arguments allow that.
 
@@ -496,7 +500,9 @@ def _ask_to_user_and_replace_if_allowed(content, old_string, new_string, type_) 
     return "".join(lines)
 
 
-def replace_aea_fetch_statements(content, old_string, new_string, type_) -> str:
+def replace_aea_fetch_statements(
+    content: str, old_string: str, new_string: str, type_: str
+) -> str:
     """Replace statements of the type: 'aea fetch <old_string>'."""
     if type_ == "agents":
         content = re.sub(
@@ -505,7 +511,9 @@ def replace_aea_fetch_statements(content, old_string, new_string, type_) -> str:
     return content
 
 
-def replace_aea_add_statements(content, old_string, new_string, type_) -> str:
+def replace_aea_add_statements(
+    content: str, old_string: str, new_string: str, type_: str
+) -> str:
     """Replace statements of the type: 'aea add <type> <old_string>'."""
     if type_ != "agents":
         content = re.sub(
@@ -516,7 +524,9 @@ def replace_aea_add_statements(content, old_string, new_string, type_) -> str:
     return content
 
 
-def replace_type_and_public_id_occurrences(line, old_string, new_string, type_) -> str:
+def replace_type_and_public_id_occurrences(
+    line: str, old_string: str, new_string: str, type_: str
+) -> str:
     """Replace the public id whenever the type and the id occur in the same row, and NOT when other type names occur."""
     if re.match(f"{type_}.*{old_string}", line) and all(
         _type not in line for _type in TYPES.difference({type_})
@@ -526,7 +536,7 @@ def replace_type_and_public_id_occurrences(line, old_string, new_string, type_) 
 
 
 def replace_in_yamls(
-    content, old_public_id: PublicId, new_public_id: PublicId, type_
+    content: str, old_public_id: PublicId, new_public_id: PublicId, type_: str
 ) -> str:
     """
     Replace the public id in configuration files (also nested in .md files).
@@ -586,7 +596,7 @@ def replace_in_protocol_readme(
     return content
 
 
-def file_should_be_processed(content: str, old_public_id: PublicId):
+def file_should_be_processed(content: str, old_public_id: PublicId) -> bool:
     """Check if the file should be processed."""
     old_string = str(old_public_id)
     return (
@@ -671,12 +681,21 @@ def run_once() -> bool:
     return True
 
 
+def check_if_svn_installed() -> None:
+    """Check if svn is installed."""
+    res = shutil.which("svn")
+    if res is None:
+        print("Install svn first!")
+        sys.exit(1)
+
+
 if __name__ == "__main__":
     """
     First, check all hashes are up to date, exit if not.
     Then, run the bumping algo, re-hashing upon each bump.
     """
     arguments = parse_arguments()
+    check_if_svn_installed()
     run_hashing()
     check_if_running_allowed()
     while run_once():

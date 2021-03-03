@@ -9,13 +9,11 @@ RUN apk add --no-cache gcc musl-dev python3-dev libffi-dev openssl-dev
 RUN apk add --update --no-cache py3-numpy py3-scipy py3-pillow
 ENV PYTHONPATH "$PYTHONPATH:/usr/lib/python3.7/site-packages"
 
-RUN pip install --upgrade pip
-# other oef dependences
-RUN pip install protobuf colorlog graphviz
-RUN pip install aea[all] --upgrade --force-reinstall
-
 # golang
 RUN apk add --no-cache go
+
+RUN pip install --upgrade pip
+RUN pip install --upgrade --force-reinstall aea[all]==0.10.1
 
 # COPY ./packages /home/packages # enable to add packages dir
 WORKDIR home

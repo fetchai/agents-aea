@@ -16,7 +16,7 @@ This class represents an instance of RawTransaction.
 #### `__`init`__`
 
 ```python
- | __init__(ledger_id: str, body: Any)
+ | __init__(ledger_id: str, body: JSONLike) -> None
 ```
 
 Initialise an instance of RawTransaction.
@@ -36,7 +36,7 @@ Get the id of the ledger on which the terms are to be settled.
 
 ```python
  | @property
- | body()
+ | body() -> JSONLike
 ```
 
 Get the body.
@@ -46,7 +46,7 @@ Get the body.
 
 ```python
  | @staticmethod
- | encode(raw_transaction_protobuf_object, raw_transaction_object: "RawTransaction") -> None
+ | encode(raw_transaction_protobuf_object: Any, raw_transaction_object: "RawTransaction") -> None
 ```
 
 Encode an instance of this class into the protocol buffer object.
@@ -67,7 +67,7 @@ None
 
 ```python
  | @classmethod
- | decode(cls, raw_transaction_protobuf_object) -> "RawTransaction"
+ | decode(cls, raw_transaction_protobuf_object: Any) -> "RawTransaction"
 ```
 
 Decode a protocol buffer object that corresponds with this class into an instance of this class.
@@ -86,7 +86,7 @@ A new instance of this class that matches the protocol buffer object in the 'raw
 #### `__`eq`__`
 
 ```python
- | __eq__(other)
+ | __eq__(other: Any) -> bool
 ```
 
 Check equality.
@@ -95,7 +95,7 @@ Check equality.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get string representation.
@@ -113,7 +113,7 @@ This class represents an instance of RawMessage.
 #### `__`init`__`
 
 ```python
- | __init__(ledger_id: str, body: bytes, is_deprecated_mode: bool = False)
+ | __init__(ledger_id: str, body: bytes, is_deprecated_mode: bool = False) -> None
 ```
 
 Initialise an instance of RawMessage.
@@ -133,7 +133,7 @@ Get the id of the ledger on which the terms are to be settled.
 
 ```python
  | @property
- | body()
+ | body() -> bytes
 ```
 
 Get the body.
@@ -143,7 +143,7 @@ Get the body.
 
 ```python
  | @property
- | is_deprecated_mode()
+ | is_deprecated_mode() -> bool
 ```
 
 Get the is_deprecated_mode.
@@ -153,7 +153,7 @@ Get the is_deprecated_mode.
 
 ```python
  | @staticmethod
- | encode(raw_message_protobuf_object, raw_message_object: "RawMessage") -> None
+ | encode(raw_message_protobuf_object: Any, raw_message_object: "RawMessage") -> None
 ```
 
 Encode an instance of this class into the protocol buffer object.
@@ -174,7 +174,7 @@ None
 
 ```python
  | @classmethod
- | decode(cls, raw_message_protobuf_object) -> "RawMessage"
+ | decode(cls, raw_message_protobuf_object: Any) -> "RawMessage"
 ```
 
 Decode a protocol buffer object that corresponds with this class into an instance of this class.
@@ -193,7 +193,7 @@ A new instance of this class that matches the protocol buffer object in the 'raw
 #### `__`eq`__`
 
 ```python
- | __eq__(other)
+ | __eq__(other: Any) -> bool
 ```
 
 Check equality.
@@ -202,7 +202,7 @@ Check equality.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get string representation.
@@ -220,7 +220,7 @@ This class represents an instance of SignedTransaction.
 #### `__`init`__`
 
 ```python
- | __init__(ledger_id: str, body: Any)
+ | __init__(ledger_id: str, body: JSONLike) -> None
 ```
 
 Initialise an instance of SignedTransaction.
@@ -240,7 +240,7 @@ Get the id of the ledger on which the terms are to be settled.
 
 ```python
  | @property
- | body()
+ | body() -> JSONLike
 ```
 
 Get the body.
@@ -250,7 +250,7 @@ Get the body.
 
 ```python
  | @staticmethod
- | encode(signed_transaction_protobuf_object, signed_transaction_object: "SignedTransaction") -> None
+ | encode(signed_transaction_protobuf_object: Any, signed_transaction_object: "SignedTransaction") -> None
 ```
 
 Encode an instance of this class into the protocol buffer object.
@@ -271,7 +271,7 @@ None
 
 ```python
  | @classmethod
- | decode(cls, signed_transaction_protobuf_object) -> "SignedTransaction"
+ | decode(cls, signed_transaction_protobuf_object: Any) -> "SignedTransaction"
 ```
 
 Decode a protocol buffer object that corresponds with this class into an instance of this class.
@@ -290,7 +290,7 @@ A new instance of this class that matches the protocol buffer object in the 'sig
 #### `__`eq`__`
 
 ```python
- | __eq__(other)
+ | __eq__(other: Any) -> bool
 ```
 
 Check equality.
@@ -299,7 +299,7 @@ Check equality.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get string representation.
@@ -317,7 +317,7 @@ This class represents an instance of RawMessage.
 #### `__`init`__`
 
 ```python
- | __init__(ledger_id: str, body: str, is_deprecated_mode: bool = False)
+ | __init__(ledger_id: str, body: str, is_deprecated_mode: bool = False) -> None
 ```
 
 Initialise an instance of SignedMessage.
@@ -337,7 +337,7 @@ Get the id of the ledger on which the terms are to be settled.
 
 ```python
  | @property
- | body()
+ | body() -> str
 ```
 
 Get the body.
@@ -347,7 +347,7 @@ Get the body.
 
 ```python
  | @property
- | is_deprecated_mode()
+ | is_deprecated_mode() -> bool
 ```
 
 Get the is_deprecated_mode.
@@ -357,7 +357,7 @@ Get the is_deprecated_mode.
 
 ```python
  | @staticmethod
- | encode(signed_message_protobuf_object, signed_message_object: "SignedMessage") -> None
+ | encode(signed_message_protobuf_object: Any, signed_message_object: "SignedMessage") -> None
 ```
 
 Encode an instance of this class into the protocol buffer object.
@@ -378,7 +378,7 @@ None
 
 ```python
  | @classmethod
- | decode(cls, signed_message_protobuf_object) -> "SignedMessage"
+ | decode(cls, signed_message_protobuf_object: Any) -> "SignedMessage"
 ```
 
 Decode a protocol buffer object that corresponds with this class into an instance of this class.
@@ -397,7 +397,7 @@ A new instance of this class that matches the protocol buffer object in the 'sig
 #### `__`eq`__`
 
 ```python
- | __eq__(other)
+ | __eq__(other: Any) -> bool
 ```
 
 Check equality.
@@ -406,7 +406,7 @@ Check equality.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get string representation.
@@ -424,7 +424,7 @@ This class represents an instance of State.
 #### `__`init`__`
 
 ```python
- | __init__(ledger_id: str, body: bytes)
+ | __init__(ledger_id: str, body: JSONLike) -> None
 ```
 
 Initialise an instance of State.
@@ -444,7 +444,7 @@ Get the id of the ledger on which the terms are to be settled.
 
 ```python
  | @property
- | body()
+ | body() -> JSONLike
 ```
 
 Get the body.
@@ -454,7 +454,7 @@ Get the body.
 
 ```python
  | @staticmethod
- | encode(state_protobuf_object, state_object: "State") -> None
+ | encode(state_protobuf_object: Any, state_object: "State") -> None
 ```
 
 Encode an instance of this class into the protocol buffer object.
@@ -475,7 +475,7 @@ None
 
 ```python
  | @classmethod
- | decode(cls, state_protobuf_object) -> "State"
+ | decode(cls, state_protobuf_object: Any) -> "State"
 ```
 
 Decode a protocol buffer object that corresponds with this class into an instance of this class.
@@ -494,7 +494,7 @@ A new instance of this class that matches the protocol buffer object in the 'sta
 #### `__`eq`__`
 
 ```python
- | __eq__(other)
+ | __eq__(other: Any) -> bool
 ```
 
 Check equality.
@@ -503,7 +503,7 @@ Check equality.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get string representation.
@@ -521,7 +521,7 @@ Class to represent the terms of a multi-currency & multi-token ledger transactio
 #### `__`init`__`
 
 ```python
- | __init__(ledger_id: str, sender_address: Address, counterparty_address: Address, amount_by_currency_id: Dict[str, int], quantities_by_good_id: Dict[str, int], nonce: str, is_sender_payable_tx_fee: bool = True, fee_by_currency_id: Optional[Dict[str, int]] = None, is_strict: bool = False, **kwargs, ,)
+ | __init__(ledger_id: str, sender_address: Address, counterparty_address: Address, amount_by_currency_id: Dict[str, int], quantities_by_good_id: Dict[str, int], nonce: str, is_sender_payable_tx_fee: bool = True, fee_by_currency_id: Optional[Dict[str, int]] = None, is_strict: bool = False, **kwargs: Any, ,) -> None
 ```
 
 Instantiate terms of a transaction.
@@ -803,10 +803,20 @@ Get fee by currency.
 
 ```python
  | @property
- | kwargs() -> Dict[str, Any]
+ | kwargs() -> JSONLike
 ```
 
 Get the kwargs.
+
+<a name="aea.helpers.transaction.base.Terms.is_strict"></a>
+#### is`_`strict
+
+```python
+ | @property
+ | is_strict() -> bool
+```
+
+Get is_strict.
 
 <a name="aea.helpers.transaction.base.Terms.get_hash"></a>
 #### get`_`hash
@@ -838,7 +848,7 @@ the hash
 
 ```python
  | @staticmethod
- | encode(terms_protobuf_object, terms_object: "Terms") -> None
+ | encode(terms_protobuf_object: Any, terms_object: "Terms") -> None
 ```
 
 Encode an instance of this class into the protocol buffer object.
@@ -859,7 +869,7 @@ None
 
 ```python
  | @classmethod
- | decode(cls, terms_protobuf_object) -> "Terms"
+ | decode(cls, terms_protobuf_object: Any) -> "Terms"
 ```
 
 Decode a protocol buffer object that corresponds with this class into an instance of this class.
@@ -878,7 +888,7 @@ A new instance of this class that matches the protocol buffer object in the 'ter
 #### `__`eq`__`
 
 ```python
- | __eq__(other)
+ | __eq__(other: Any) -> bool
 ```
 
 Check equality.
@@ -887,7 +897,7 @@ Check equality.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get string representation.
@@ -905,7 +915,7 @@ This class represents an instance of TransactionDigest.
 #### `__`init`__`
 
 ```python
- | __init__(ledger_id: str, body: Any)
+ | __init__(ledger_id: str, body: str) -> None
 ```
 
 Initialise an instance of TransactionDigest.
@@ -925,7 +935,7 @@ Get the id of the ledger on which the terms are to be settled.
 
 ```python
  | @property
- | body() -> Any
+ | body() -> str
 ```
 
 Get the receipt.
@@ -935,7 +945,7 @@ Get the receipt.
 
 ```python
  | @staticmethod
- | encode(transaction_digest_protobuf_object, transaction_digest_object: "TransactionDigest") -> None
+ | encode(transaction_digest_protobuf_object: Any, transaction_digest_object: "TransactionDigest") -> None
 ```
 
 Encode an instance of this class into the protocol buffer object.
@@ -956,7 +966,7 @@ None
 
 ```python
  | @classmethod
- | decode(cls, transaction_digest_protobuf_object) -> "TransactionDigest"
+ | decode(cls, transaction_digest_protobuf_object: Any) -> "TransactionDigest"
 ```
 
 Decode a protocol buffer object that corresponds with this class into an instance of this class.
@@ -975,7 +985,7 @@ A new instance of this class that matches the protocol buffer object in the 'tra
 #### `__`eq`__`
 
 ```python
- | __eq__(other)
+ | __eq__(other: Any) -> bool
 ```
 
 Check equality.
@@ -984,7 +994,7 @@ Check equality.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get string representation.
@@ -1002,7 +1012,7 @@ This class represents an instance of TransactionReceipt.
 #### `__`init`__`
 
 ```python
- | __init__(ledger_id: str, receipt: Any, transaction: Any)
+ | __init__(ledger_id: str, receipt: JSONLike, transaction: JSONLike) -> None
 ```
 
 Initialise an instance of TransactionReceipt.
@@ -1022,7 +1032,7 @@ Get the id of the ledger on which the terms are to be settled.
 
 ```python
  | @property
- | receipt() -> Any
+ | receipt() -> JSONLike
 ```
 
 Get the receipt.
@@ -1032,7 +1042,7 @@ Get the receipt.
 
 ```python
  | @property
- | transaction() -> Any
+ | transaction() -> JSONLike
 ```
 
 Get the transaction.
@@ -1042,7 +1052,7 @@ Get the transaction.
 
 ```python
  | @staticmethod
- | encode(transaction_receipt_protobuf_object, transaction_receipt_object: "TransactionReceipt") -> None
+ | encode(transaction_receipt_protobuf_object: Any, transaction_receipt_object: "TransactionReceipt") -> None
 ```
 
 Encode an instance of this class into the protocol buffer object.
@@ -1063,7 +1073,7 @@ None
 
 ```python
  | @classmethod
- | decode(cls, transaction_receipt_protobuf_object) -> "TransactionReceipt"
+ | decode(cls, transaction_receipt_protobuf_object: Any) -> "TransactionReceipt"
 ```
 
 Decode a protocol buffer object that corresponds with this class into an instance of this class.
@@ -1082,7 +1092,7 @@ A new instance of this class that matches the protocol buffer object in the 'tra
 #### `__`eq`__`
 
 ```python
- | __eq__(other)
+ | __eq__(other: Any) -> bool
 ```
 
 Check equality.
@@ -1091,7 +1101,7 @@ Check equality.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get string representation.

@@ -26,9 +26,18 @@ import click
 
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
-from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA, try_validate_private_key_path
+from aea.configurations.constants import (
+    DEFAULT_AEA_CONFIG_FILE,
+    PRIVATE_KEY_PATH_SCHEMA,
+)
+from aea.crypto.helpers import try_validate_private_key_path
 from aea.crypto.registries import crypto_registry
+from aea.helpers.io import open_file
+
+
+key_file_argument = click.Path(
+    exists=True, file_okay=True, dir_okay=False, readable=True
+)
 
 
 @click.command()
@@ -39,18 +48,17 @@ from aea.crypto.registries import crypto_registry
     required=True,
 )
 @click.argument(
-    "file",
-    metavar="FILE",
-    type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True),
-    required=False,
+    "file", metavar="FILE", type=key_file_argument, required=False,
 )
 @click.option(
     "--connection", is_flag=True, help="For adding a private key for connections."
 )
 @click.pass_context
 @check_aea_project
-def add_key(click_context, type_, file, connection):
-    """Add a private key to the wallet."""
+def add_key(
+    click_context: click.Context, type_: str, file: str, connection: bool
+) -> None:
+    """Add a private key to the wallet of the agent."""
     _add_private_key(click_context, type_, file, connection)
 
 
@@ -73,11 +81,16 @@ def _add_private_key(
     ctx = cast(Context, click_context.obj)
     if file is None:
         file = PRIVATE_KEY_PATH_SCHEMA.format(type_)
+
+    key_file_argument.convert(file, None, click_context)
+
     try_validate_private_key_path(type_, file)
     _try_add_key(ctx, type_, file, connection)
 
 
-def _try_add_key(ctx: Context, type_: str, filepath: str, connection: bool = False):
+def _try_add_key(
+    ctx: Context, type_: str, filepath: str, connection: bool = False
+) -> None:
     try:
         if connection:
             ctx.agent_config.connection_private_key_paths.create(type_, filepath)
@@ -85,6 +98,5 @@ def _try_add_key(ctx: Context, type_: str, filepath: str, connection: bool = Fal
             ctx.agent_config.private_key_paths.create(type_, filepath)
     except ValueError as e:  # pragma: no cover
         raise click.ClickException(str(e))
-    ctx.agent_loader.dump(
-        ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
-    )
+    with open_file(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as fp:
+        ctx.agent_loader.dump(ctx.agent_config, fp)

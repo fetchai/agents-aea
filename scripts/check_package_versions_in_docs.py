@@ -29,11 +29,19 @@ import re
 import sys
 from itertools import chain
 from pathlib import Path
-from typing import Callable, Dict, List, Set
+from typing import Any, Callable, Dict, Generator, List, Match, Pattern, Set
 
 import yaml
 
 from aea.configurations.base import ComponentType, PackageId, PackageType, PublicId
+from aea.configurations.constants import (
+    AGENTS,
+    DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_CONNECTION_CONFIG_FILE,
+    DEFAULT_CONTRACT_CONFIG_FILE,
+    DEFAULT_PROTOCOL_CONFIG_FILE,
+    DEFAULT_SKILL_CONFIG_FILE,
+)
 
 
 PUBLIC_ID_REGEX = PublicId.PUBLIC_ID_REGEX[1:-1]
@@ -62,7 +70,9 @@ This regex matches strings of the form:
 class PackageIdNotFound(Exception):
     """Custom exception for package id not found."""
 
-    def __init__(self, file: Path, package_id: PackageId, match_obj, *args):
+    def __init__(
+        self, file: Path, package_id: PackageId, match_obj: Any, *args: Any
+    ) -> None:
         """
         Initialize PackageIdNotFound exception.
 
@@ -80,7 +90,16 @@ class PackageIdNotFound(Exception):
 DEFAULT_CONFIG_FILE_PATHS = []  # type: List[Path]
 
 
-def default_config_file_paths():
+CONFIG_FILE_NAMES = [
+    DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_SKILL_CONFIG_FILE,
+    DEFAULT_CONNECTION_CONFIG_FILE,
+    DEFAULT_CONTRACT_CONFIG_FILE,
+    DEFAULT_PROTOCOL_CONFIG_FILE,
+]  # type: List[str]
+
+
+def default_config_file_paths() -> Generator:
     """Get (generator) the default config file paths."""
     for item in DEFAULT_CONFIG_FILE_PATHS:
         yield item
@@ -95,7 +114,7 @@ def unified_yaml_load(configuration_file: Path) -> Dict:
     """
     package_type = configuration_file.parent.parent.name
     with configuration_file.open() as fp:
-        if package_type != "agents":
+        if package_type != AGENTS:
             return yaml.safe_load(fp)
         # when it is an agent configuration file,
         # we are interested only in the first page of the YAML,
@@ -104,17 +123,25 @@ def unified_yaml_load(configuration_file: Path) -> Dict:
         return list(data)[0]
 
 
-def get_public_id_from_yaml(configuration_file: Path):
+def get_public_id_from_yaml(configuration_file: Path) -> PublicId:
     """
     Get the public id from yaml.
 
     :param configuration_file: the path to the config yaml
     """
     data = unified_yaml_load(configuration_file)
-    author = data["author"]
+    author = data.get("author", None)
+    if not author:
+        raise KeyError(f"No author field in {str(configuration_file)}")
     # handle the case when it's a package or agent config file.
-    name = data["name"] if "name" in data else data["agent_name"]
-    version = data["version"]
+    try:
+        name = data["name"] if "name" in data else data["agent_name"]
+    except KeyError:
+        print(f"No name or agent_name field in {str(configuration_file)}")
+        raise
+    version = data.get("version", None)
+    if not version:
+        raise KeyError(f"No version field in {str(configuration_file)}")
     return PublicId(author, name, version)
 
 
@@ -122,9 +149,12 @@ def find_all_packages_ids() -> Set[PackageId]:
     """Find all packages ids."""
     package_ids: Set[PackageId] = set()
     packages_dir = Path("packages")
-    for configuration_file in chain(
-        packages_dir.glob("*/*/*/*.yaml"), default_config_file_paths()
-    ):
+    config_files = [
+        path
+        for path in packages_dir.glob("*/*/*/*.yaml")
+        if any([file in str(path) for file in CONFIG_FILE_NAMES])
+    ]
+    for configuration_file in chain(config_files, default_config_file_paths()):
         package_type = PackageType(configuration_file.parts[-3][:-1])
         package_public_id = get_public_id_from_yaml(configuration_file)
         package_id = PackageId(package_type, package_public_id)
@@ -137,8 +167,10 @@ ALL_PACKAGE_IDS: Set[PackageId] = find_all_packages_ids()
 
 
 def _checks(
-    file: Path, regex, extract_package_id_from_match: Callable[["re.Match"], PackageId],
-):
+    file: Path,
+    regex: Pattern,
+    extract_package_id_from_match: Callable[["re.Match"], PackageId],
+) -> None:
     matches = regex.finditer(file.read_text())
     for match in matches:
         package_id = extract_package_id_from_match(match)
@@ -149,7 +181,7 @@ def _checks(
         print(str(package_id), "OK!")
 
 
-def check_add_commands(file: Path):
+def check_add_commands(file: Path) -> None:
     """
     Check that 'aea add' commands of the documentation file contains known package ids.
 
@@ -158,7 +190,7 @@ def check_add_commands(file: Path):
     :raises PackageIdNotFound: if some package id is not found in packages/
     """
 
-    def extract_package_id(match):
+    def extract_package_id(match: Match) -> PackageId:
         package_type, package = match.group(1), match.group(2)
         package_id = PackageId(PackageType(package_type), PublicId.from_str(package))
         return package_id
@@ -166,7 +198,7 @@ def check_add_commands(file: Path):
     _checks(file, ADD_COMMAND_IN_DOCS, extract_package_id)
 
 
-def check_fetch_commands(file: Path):
+def check_fetch_commands(file: Path) -> None:
     """
     Check that 'aea fetch' commands of the documentation file contains known package ids.
 
@@ -175,7 +207,7 @@ def check_fetch_commands(file: Path):
     :raises PackageIdNotFound: if some package id is not found in packages/
     """
 
-    def extract_package_id(match):
+    def extract_package_id(match: Match) -> PackageId:
         package_public_id = match.group(1)
         package_id = PackageId(PackageType.AGENT, PublicId.from_str(package_public_id))
         return package_id
@@ -183,7 +215,7 @@ def check_fetch_commands(file: Path):
     _checks(file, FETCH_COMMAND_IN_DOCS, extract_package_id)
 
 
-def check_file(file: Path):
+def check_file(file: Path) -> None:
     """
     Check documentation file.
 
@@ -195,7 +227,7 @@ def check_file(file: Path):
     check_fetch_commands(file)
 
 
-def handle_package_not_found(e: PackageIdNotFound):
+def handle_package_not_found(e: PackageIdNotFound) -> None:
     """Handle PackageIdNotFound errors."""
     print("=" * 50)
     print("Package {} not found.".format(e.package_id))

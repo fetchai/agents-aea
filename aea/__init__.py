@@ -22,6 +22,8 @@
 import inspect
 import os
 
+from packaging.version import Version
+
 import aea.crypto  # triggers registry population
 from aea.__version__ import (
     __author__,
@@ -32,6 +34,14 @@ from aea.__version__ import (
     __url__,
     __version__,
 )
+from aea.crypto.plugin import load_all_plugins
 
 
 AEA_DIR = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
+
+load_all_plugins()
+
+
+def get_current_aea_version() -> Version:
+    """Get current version."""
+    return Version(__version__)

@@ -8,12 +8,19 @@
     "author",
     "version",
     "type",
+    "description",
     "license",
     "aea_version",
+    "fingerprint",
+    "fingerprint_ignore_patterns",
     "class_name",
     "config",
     "connections",
-    "protocols"
+    "protocols",
+    "restricted_to_protocols",
+    "excluded_protocols",
+    "dependencies",
+    "is_abstract"
   ],
   "properties": {
     "name": {
@@ -39,6 +46,12 @@
     },
     "fingerprint_ignore_patterns": {
       "$ref": "definitions.json#/definitions/fingerprint_ignore_patterns"
+    },
+    "build_entrypoint": {
+      "$ref": "definitions.json#/definitions/build_entrypoint"
+    },
+    "build_directory": {
+      "$ref": "definitions.json#/definitions/build_directory"
     },
     "class_name": {
       "type": "string"
@@ -84,6 +97,9 @@
     },
     "is_abstract": {
       "$ref": "skill-config_schema.json#/properties/is_abstract"
+    },
+    "cert_requests": {
+      "$ref": "definitions.json#/definitions/cert_requests"
     }
   }
 }

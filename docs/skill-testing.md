@@ -9,6 +9,19 @@ Let us assume you want to test the `my_behaviour` behaviour of a `CustomSkill` s
 You can create a `TestMyBehaviour` class which inherits `BaseSkillTestCase` as below:
 
 ``` python
+import asyncio
+
+from asyncio import Queue
+from pathlib import Path
+from types import SimpleNamespace
+from typing import cast
+
+from aea.configurations.constants import DEFAULT_LEDGER
+from aea.context.base import AgentContext
+from aea.crypto.ledger_apis import DEFAULT_CURRENCY_DENOMINATIONS
+from aea.identity.base import Identity
+from aea.multiplexer import AsyncMultiplexer, OutBox, Multiplexer
+from aea.skills.tasks import TaskManager
 from aea.test_tools.test_skill import BaseSkillTestCase
 
 class TestMyBehaviour(BaseSkillTestCase):
@@ -58,10 +71,13 @@ agent_context = AgentContext(
     decision_maker_message_queue=Queue(),
     decision_maker_handler_context=SimpleNamespace(),
     task_manager=TaskManager(),
+    default_ledger_id=DEFAULT_LEDGER,
+    currency_denominations={},
     default_connection=None,
     default_routing={},
     search_service_address="dummy_search_service_address",
     decision_maker_address="dummy_decision_maker_address",
+    data_dir="."
 )
 ```
 
@@ -88,6 +104,9 @@ There are a number of methods that `BaseSkillTestCase` offers to make testing sk
 You can check the output of your skill's `logger` by mocking it using `unittest.mock` before executing a part of your skill as such:
 
 ``` python
+import logging
+from unittest import mock
+
 with mock.patch.object(self.my_behaviour.context.logger, "log") as mock_logger:
     self.my_behaviour.act()
 
@@ -98,6 +117,6 @@ In the above, we mock the logger before running `my_behaviour`'s `act()` method 
 
 ## Next steps
 
-You can consult the `fetchai/generic_buyer` and `fetchai/generic_seller` skills and their associated tests <a href="https://github.com/fetchai/agents-aea/tree/master/tests/test_packages/test_skills" target="_blank">here</a> to study how `BaseSkillTestCase` can help you in testing your skills.
+You can consult the `fetchai/generic_buyer` and `fetchai/generic_seller` skills and their associated tests <a href="https://github.com/fetchai/agents-aea/tree/main/tests/test_packages/test_skills" target="_blank">here</a> to study how `BaseSkillTestCase` can help you in testing your skills.
 
 You can also refer to the API to study the different methods `BaseSkillTestCase` makes available to make testing your skills easier. 

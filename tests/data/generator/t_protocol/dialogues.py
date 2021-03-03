@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2020 fetchai
+#   Copyright 2021 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -47,7 +47,6 @@ class TProtocolDialogue(Dialogue):
         {
             TProtocolMessage.Performative.PERFORMATIVE_MT,
             TProtocolMessage.Performative.PERFORMATIVE_O,
-            TProtocolMessage.Performative.PERFORMATIVE_EMPTY_CONTENTS,
         }
     )
     VALID_REPLIES = {
@@ -126,6 +125,8 @@ class TProtocolDialogues(Dialogues, ABC):
             TProtocolDialogue.EndState.END_STATE_3,
         }
     )
+
+    _keep_terminal_state_dialogues = True
 
     def __init__(
         self,

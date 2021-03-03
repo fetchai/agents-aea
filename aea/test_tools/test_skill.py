@@ -17,16 +17,18 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains test case classes based on pytest for AEA skill testing."""
-
 import asyncio
+import os
 from pathlib import Path
 from queue import Queue
 from types import SimpleNamespace
-from typing import Any, Dict, Optional, Tuple, Type, Union, cast
+from typing import Any, Dict, Optional, Tuple, Type, cast
 
+from aea.configurations.loader import ConfigLoaders, PackageType, SkillConfig
 from aea.context.base import AgentContext
 from aea.crypto.ledger_apis import DEFAULT_CURRENCY_DENOMINATIONS
 from aea.exceptions import AEAEnforceError
+from aea.helpers.io import open_file
 from aea.identity.base import Identity
 from aea.mail.base import Address
 from aea.multiplexer import AsyncMultiplexer, Multiplexer, OutBox
@@ -36,13 +38,15 @@ from aea.skills.base import Skill
 from aea.skills.tasks import TaskManager
 
 
-COUNTERPARTY_NAME = "counterparty"
+COUNTERPARTY_AGENT_ADDRESS = "counterparty"
+COUNTERPARTY_SKILL_ADDRESS = "some_author/some_skill:0.1.0"
 
 
 class BaseSkillTestCase:
     """A class to test a skill."""
 
-    path_to_skill: Union[Path, str] = Path(".")
+    path_to_skill: Path = Path(".")
+    is_agent_to_agent_messages: bool = True
     _skill: Skill
     _multiplexer: AsyncMultiplexer
     _outbox: OutBox
@@ -67,6 +71,12 @@ class BaseSkillTestCase:
         envelope = self._multiplexer.out_queue.get_nowait()
         return envelope.message
 
+    def drop_messages_from_outbox(self, number: int = 1) -> None:
+        """Dismiss the first 'number' number of message from outbox."""
+        while (not self._outbox.empty()) and number != 0:
+            self._multiplexer.out_queue.get_nowait()
+            number -= 1
+
     def get_quantity_in_decision_maker_inbox(self) -> int:
         """Get the quantity of messages in the decision maker inbox."""
         return self._skill.skill_context.decision_maker_message_queue.qsize()
@@ -77,14 +87,22 @@ class BaseSkillTestCase:
             return None
         return self._skill.skill_context.decision_maker_message_queue.get_nowait()
 
-    def assert_quantity_in_outbox(self, expected_quantity) -> None:
+    def drop_messages_from_decision_maker_inbox(self, number: int = 1) -> None:
+        """Dismiss the first 'number' number of message from decision maker inbox."""
+        while (
+            not self._skill.skill_context.decision_maker_message_queue.empty()
+        ) and number != 0:
+            self._skill.skill_context.decision_maker_message_queue.get_nowait()
+            number -= 1
+
+    def assert_quantity_in_outbox(self, expected_quantity: int) -> None:
         """Assert the quantity of messages in the outbox."""
         quantity = self.get_quantity_in_outbox()
         assert (  # nosec
             quantity == expected_quantity
         ), f"Invalid number of messages in outbox. Expected {expected_quantity}. Found {quantity}."
 
-    def assert_quantity_in_decision_making_queue(self, expected_quantity) -> None:
+    def assert_quantity_in_decision_making_queue(self, expected_quantity: int) -> None:
         """Assert the quantity of messages in the decision maker queue."""
         quantity = self.get_quantity_in_decision_maker_inbox()
         assert (  # nosec
@@ -93,7 +111,7 @@ class BaseSkillTestCase:
 
     @staticmethod
     def message_has_attributes(
-        actual_message: Message, message_type: Type[Message], **kwargs,
+        actual_message: Message, message_type: Type[Message], **kwargs: Any,
     ) -> Tuple[bool, str]:
         """
         Evaluates whether a message's attributes match the expected attributes provided.
@@ -133,8 +151,9 @@ class BaseSkillTestCase:
         message_id: Optional[int] = None,
         target: Optional[int] = None,
         to: Optional[Address] = None,
-        sender: Address = COUNTERPARTY_NAME,
-        **kwargs,
+        sender: Optional[Address] = None,
+        is_agent_to_agent_messages: Optional[bool] = None,
+        **kwargs: Any,
     ) -> Message:
         """
         Quickly create an incoming message with the provided attributes.
@@ -148,10 +167,19 @@ class BaseSkillTestCase:
         :param performative: the performative
         :param to: the 'to' address
         :param sender: the 'sender' address
+        :param is_agent_to_agent_messages: whether the dialogue is between agents or components
         :param kwargs: other attributes
 
         :return: the created incoming message
         """
+        if is_agent_to_agent_messages is None:
+            is_agent_to_agent_messages = self.is_agent_to_agent_messages
+        if sender is None:
+            sender = (
+                COUNTERPARTY_AGENT_ADDRESS
+                if is_agent_to_agent_messages
+                else COUNTERPARTY_SKILL_ADDRESS
+            )
         message_attributes = dict()  # type: Dict[str, Any]
 
         default_dialogue_reference = Dialogues.new_self_initiated_dialogue_reference()
@@ -170,10 +198,12 @@ class BaseSkillTestCase:
 
         incoming_message = message_type(**message_attributes)
         incoming_message.sender = sender
-        incoming_message.to = (
-            self.skill.skill_context.agent_address if to is None else to
+        default_to = (
+            self.skill.skill_context.agent_address
+            if is_agent_to_agent_messages
+            else str(self.skill.public_id)
         )
-
+        incoming_message.to = default_to if to is None else to
         return incoming_message
 
     def build_incoming_message_for_skill_dialogue(
@@ -186,7 +216,7 @@ class BaseSkillTestCase:
         target: Optional[int] = None,
         to: Optional[Address] = None,
         sender: Optional[Address] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Message:
         """
         Quickly create an incoming message with the provided attributes for a dialogue.
@@ -227,7 +257,7 @@ class BaseSkillTestCase:
         message_id = (
             message_id
             if message_id is not None
-            else dialogue.last_message.message_id + 1
+            else dialogue.get_incoming_next_message_id()
         )
         target = target if target is not None else dialogue.last_message.message_id
         to = to if to is not None else dialogue.self_address
@@ -247,13 +277,12 @@ class BaseSkillTestCase:
             sender=sender,
             **kwargs,
         )
-
         return incoming_message
 
     @staticmethod
     def _provide_unspecified_fields(
-        message: DialogueMessage, last_is_incoming: Optional[bool], message_id: int
-    ) -> Tuple[bool, int]:
+        message: DialogueMessage, last_is_incoming: Optional[bool]
+    ) -> Tuple[bool, Optional[int]]:
         """
         Specifies values (an interpretation) for the unspecified fields of a DialogueMessage.
 
@@ -262,14 +291,13 @@ class BaseSkillTestCase:
 
         :param message: the DialogueMessage
         :param last_is_incoming: the is_incoming value of the previous DialogueMessage
-        :param message_id: the message_id of this DialogueMessage
 
         :return: the is_incoming and target values
         """
         default_is_incoming = not last_is_incoming
         is_incoming = default_is_incoming if message[2] is None else message[2]
 
-        default_target = message_id - 1
+        default_target = None
         target = default_target if message[3] is None else message[3]
         return is_incoming, target
 
@@ -297,7 +325,7 @@ class BaseSkillTestCase:
 
     def _extract_message_fields(
         self, message: DialogueMessage, index: int, last_is_incoming: bool,
-    ) -> Tuple[Message.Performative, Dict, int, bool, int]:
+    ) -> Tuple[Message.Performative, Dict, int, bool, Optional[int]]:
         """
         Extracts message attributes from a dialogue message.
 
@@ -311,7 +339,7 @@ class BaseSkillTestCase:
         contents = message[1]
         message_id = index + 1
         is_incoming, target = self._provide_unspecified_fields(
-            message, last_is_incoming=last_is_incoming, message_id=message_id,
+            message, last_is_incoming=last_is_incoming
         )
         return performative, contents, message_id, is_incoming, target
 
@@ -319,7 +347,8 @@ class BaseSkillTestCase:
         self,
         dialogues: Dialogues,
         messages: Tuple[DialogueMessage, ...],
-        counterparty: Address = COUNTERPARTY_NAME,
+        counterparty: Optional[Address] = None,
+        is_agent_to_agent_messages: Optional[bool] = None,
     ) -> Dialogue:
         """
         Quickly create a dialogue.
@@ -334,9 +363,18 @@ class BaseSkillTestCase:
         :param dialogues: a dialogues class
         :param counterparty: the message_id
         :param messages: the dialogue_reference
+        :param is_agent_to_agent_messages: whether the dialogue is between agents or components
 
         :return: the created incoming message
         """
+        if is_agent_to_agent_messages is None:
+            is_agent_to_agent_messages = self.is_agent_to_agent_messages
+        if counterparty is None:
+            counterparty = (
+                COUNTERPARTY_AGENT_ADDRESS
+                if is_agent_to_agent_messages
+                else COUNTERPARTY_SKILL_ADDRESS
+            )
         if len(messages) == 0:
             raise AEAEnforceError("the list of messages must be positive.")
 
@@ -350,14 +388,20 @@ class BaseSkillTestCase:
 
         if is_incoming:  # first message from the opponent
             dialogue_reference = dialogues.new_self_initiated_dialogue_reference()
+            default_to = (
+                self.skill.skill_context.agent_address
+                if is_agent_to_agent_messages
+                else str(self.skill.public_id)
+            )
             message = self.build_incoming_message(
                 message_type=dialogues.message_class,
                 dialogue_reference=dialogue_reference,
-                message_id=message_id,
-                target=target,
+                message_id=Dialogue.STARTING_MESSAGE_ID,
+                target=target or Dialogue.STARTING_TARGET,
                 performative=performative,
-                to=self.skill.skill_context.agent_address,
+                to=default_to,
                 sender=counterparty,
+                is_agent_to_agent_messages=is_agent_to_agent_messages,
                 **contents,
             )
             dialogue = cast(Dialogue, dialogues.update(message))
@@ -380,9 +424,19 @@ class BaseSkillTestCase:
                 is_incoming,
                 target,
             ) = self._extract_message_fields(dialogue_message, idx + 1, is_incoming)
+            if target is None:
+                target = cast(Message, dialogue.last_message).message_id
+
             if is_incoming:  # messages from the opponent
                 dialogue_reference = self._non_initial_incoming_message_dialogue_reference(
                     dialogue
+                )
+                message_id = dialogue.get_incoming_next_message_id()
+
+                default_to = (
+                    self.skill.skill_context.agent_address
+                    if is_agent_to_agent_messages
+                    else str(self.skill.public_id)
                 )
                 message = self.build_incoming_message(
                     message_type=dialogues.message_class,
@@ -390,8 +444,9 @@ class BaseSkillTestCase:
                     message_id=message_id,
                     target=target,
                     performative=performative,
-                    to=self.skill.skill_context.agent_address,
+                    to=default_to,
                     sender=counterparty,
+                    is_agent_to_agent_messages=is_agent_to_agent_messages,
                     **contents,
                 )
                 dialogue = cast(Dialogue, dialogues.update(message))
@@ -407,7 +462,7 @@ class BaseSkillTestCase:
         return dialogue
 
     @classmethod
-    def setup(cls) -> None:
+    def setup(cls, **kwargs: Any) -> None:
         """Set up the skill test case."""
         identity = Identity("test_agent_name", "test_agent_address")
 
@@ -416,20 +471,45 @@ class BaseSkillTestCase:
             asyncio.Queue()
         )
         cls._outbox = OutBox(cast(Multiplexer, cls._multiplexer))
+        _shared_state = cast(Optional[Dict[str, Any]], kwargs.pop("shared_state", None))
+        _skill_config_overrides = cast(
+            Optional[Dict[str, Any]], kwargs.pop("config_overrides", None)
+        )
+        _dm_context_kwargs = cast(
+            Dict[str, Any], kwargs.pop("dm_context_kwargs", dict())
+        )
 
         agent_context = AgentContext(
             identity=identity,
             connection_status=cls._multiplexer.connection_status,
             outbox=cls._outbox,
             decision_maker_message_queue=Queue(),
-            decision_maker_handler_context=SimpleNamespace(),
+            decision_maker_handler_context=SimpleNamespace(**_dm_context_kwargs),
             task_manager=TaskManager(),
             default_ledger_id=identity.default_address_key,
             currency_denominations=DEFAULT_CURRENCY_DENOMINATIONS,
             default_connection=None,
             default_routing={},
-            search_service_address="dummy_search_service_address",
+            search_service_address="dummy_author/dummy_search_skill:0.1.0",
             decision_maker_address="dummy_decision_maker_address",
+            data_dir=os.getcwd(),
         )
 
-        cls._skill = Skill.from_dir(str(cls.path_to_skill), agent_context)
+        # Pre-populate the 'shared_state' prior to loading the skill
+        if _shared_state is not None:
+            for key, value in _shared_state.items():
+                agent_context.shared_state[key] = value
+
+        skill_configuration_file_path: Path = Path(cls.path_to_skill, "skill.yaml")
+        loader = ConfigLoaders.from_package_type(PackageType.SKILL)
+
+        with open_file(skill_configuration_file_path) as fp:
+            skill_config: SkillConfig = loader.load(fp)
+
+        # Override skill's config prior to loading
+        if _skill_config_overrides is not None:
+            skill_config.update(_skill_config_overrides)
+
+        skill_config.directory = cls.path_to_skill
+
+        cls._skill = Skill.from_config(skill_config, agent_context)

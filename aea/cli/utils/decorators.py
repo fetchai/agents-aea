@@ -23,7 +23,7 @@ import os
 import shutil
 from functools import update_wrapper
 from pathlib import Path
-from typing import Callable, Dict, Union, cast
+from typing import Any, Callable, Dict, Tuple, Union, cast
 
 import click
 from jsonschema import ValidationError
@@ -37,22 +37,30 @@ from aea.configurations.base import (
     _compare_fingerprints,
     _get_default_configuration_file_name_from_type,
 )
+from aea.configurations.constants import VENDOR
 from aea.configurations.loader import ConfigLoaders
-from aea.exceptions import AEAException, enforce
+from aea.exceptions import AEAException, AEAValidationError, enforce
+from aea.helpers.base import decorator_with_optional_params
+from aea.helpers.io import open_file
 
 
 pass_ctx = click.make_pass_decorator(Context)
 
 
-def _validate_config_consistency(ctx: Context):
+def _validate_config_consistency(ctx: Context, check_aea_version: bool = True) -> None:
     """
     Validate fingerprints for every agent component.
 
     :param ctx: the context
+    :param check_aea_version: whether it should check also the AEA version.
     :raise ValueError: if there is a missing configuration file.
                        or if the configuration file is not valid.
                        or if the fingerprints do not match
     """
+
+    if check_aea_version:
+        _check_aea_version(ctx.agent_config)
+
     packages_public_ids_to_types = dict(
         [
             *map(lambda x: (x, PackageType.PROTOCOL), ctx.agent_config.protocols),
@@ -72,7 +80,7 @@ def _validate_config_consistency(ctx: Context):
             is_vendor = False
             if not package_directory.exists():
                 package_directory = Path(
-                    "vendor", public_id.author, item_type.to_plural(), public_id.name
+                    VENDOR, public_id.author, item_type.to_plural(), public_id.name
                 )
                 is_vendor = True
             # we fail if none of the two alternative works.
@@ -90,33 +98,36 @@ def _validate_config_consistency(ctx: Context):
 
         # load the configuration file.
         try:
-            package_configuration = loader.load(configuration_file_path.open("r"))
-        except ValidationError as e:
+            with open_file(configuration_file_path, "r") as fp:
+                package_configuration = loader.load(fp)
+        except (AEAValidationError, ValidationError) as e:
             raise ValueError(
-                "{} configuration file not valid: {}".format(
-                    item_type.value.capitalize(), str(e)
+                "{} configuration file '{}' not valid: {}".format(
+                    item_type.value.capitalize(), configuration_file_path, str(e)
                 )
             )
 
-        _check_aea_version(package_configuration)
+        if check_aea_version:
+            _check_aea_version(package_configuration)
         _compare_fingerprints(
             package_configuration, package_directory, is_vendor, item_type
         )
 
 
-def _check_aea_project(args):
+def _check_aea_project(args: Tuple[Any, ...], check_aea_version: bool = True) -> None:
     try:
         click_context = args[0]
         ctx = cast(Context, click_context.obj)
         try_to_load_agent_config(ctx)
         skip_consistency_check = ctx.config["skip_consistency_check"]
         if not skip_consistency_check:
-            _validate_config_consistency(ctx)
-    except Exception as e:
+            _validate_config_consistency(ctx, check_aea_version=check_aea_version)
+    except Exception as e:  # pylint: disable=broad-except
         raise click.ClickException(str(e))
 
 
-def check_aea_project(f):
+@decorator_with_optional_params
+def check_aea_project(f: Callable, check_aea_version: bool = True) -> Callable:
     """
     Check the consistency of the project as a decorator.
 
@@ -124,8 +135,8 @@ def check_aea_project(f):
     - iterate over all the agent packages and check for consistency.
     """
 
-    def wrapper(*args, **kwargs):
-        _check_aea_project(args)
+    def wrapper(*args: Any, **kwargs: Any) -> Callable:
+        _check_aea_project(args, check_aea_version=check_aea_version)
         return f(*args, **kwargs)
 
     return update_wrapper(wrapper, f)
@@ -172,7 +183,9 @@ def clean_after(func: Callable) -> Callable:
     :return: decorated method.
     """
 
-    def wrapper(context: Union[Context, click.core.Context], *args, **kwargs):
+    def wrapper(
+        context: Union[Context, click.core.Context], *args: Any, **kwargs: Any
+    ) -> Callable:
         """
         Call a source method, remove dirs listed in ctx.clean_paths if ClickException is raised.
 

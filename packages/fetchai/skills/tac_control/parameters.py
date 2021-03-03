@@ -20,7 +20,7 @@
 """This package contains a class representing the game parameters."""
 
 import datetime
-from typing import Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional, Set
 
 from aea.exceptions import AEAEnforceError, enforce
 from aea.helpers.search.models import Location
@@ -38,6 +38,7 @@ DEFAULT_MONEY_ENDOWMENT = 200
 DEFAULT_NB_GOODS = 9  # ERC1155 vyper contract only accepts 10 tokens per mint/create
 DEFAULT_NB_CURRENCIES = 1
 DEFAULT_TX_FEE = 1
+DEFAULT_GAS = 5000000
 DEFAULT_BASE_GOOD_ENDOWMENT = 2
 DEFAULT_LOWER_BOUND_FACTOR = 1
 DEFAULT_UPPER_BOUND_FACTOR = 1
@@ -53,7 +54,7 @@ DEFAULT_SERVICE_DATA = {"key": "tac", "value": "v1"}
 class Parameters(Model):
     """This class contains the parameters of the game."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Instantiate the parameter class."""
         ledger_id = kwargs.pop("ledger_id", None)
         self._contract_address = kwargs.pop(
@@ -72,6 +73,7 @@ class Parameters(Model):
             "nb_currencies", DEFAULT_NB_CURRENCIES
         )  # type: int
         self._tx_fee = kwargs.pop("tx_fee", DEFAULT_TX_FEE)  # type: int
+        self._gas = kwargs.pop("gas", DEFAULT_GAS)  # type: int
         self._base_good_endowment = kwargs.pop(
             "base_good_endowment", DEFAULT_BASE_GOOD_ENDOWMENT
         )  # type: int
@@ -237,6 +239,11 @@ class Parameters(Model):
         return self._tx_fee
 
     @property
+    def gas(self) -> int:
+        """Gas for TAC contract operations."""
+        return self._gas
+
+    @property
     def base_good_endowment(self) -> int:
         """Minimum endowment of each agent for each good."""
         return self._base_good_endowment
@@ -272,7 +279,7 @@ class Parameters(Model):
         return self._end_time
 
     @property
-    def inactivity_timeout(self):
+    def inactivity_timeout(self) -> int:
         """Timeout of agent inactivity from controller perspective (no received transactions)."""
         return self._inactivity_timeout
 

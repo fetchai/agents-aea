@@ -16,13 +16,12 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Abstract module wrapping the public and private key cryptography and ledger api."""
-
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import Any, BinaryIO, Dict, Generic, Optional, Tuple, TypeVar
 
-from aea.common import Address
+from aea.common import Address, JSONLike
 
 
 EntityClass = TypeVar("EntityClass")
@@ -34,8 +33,8 @@ class Crypto(Generic[EntityClass], ABC):
     identifier = "base"
 
     def __init__(
-        self, private_key_path: Optional[str] = None, **kwargs
-    ):  # pylint: disable=unused-argument
+        self, private_key_path: Optional[str] = None, **kwargs: Any
+    ) -> None:  # pylint: disable=unused-argument
         """
         Initialize the crypto object.
 
@@ -48,6 +47,7 @@ class Crypto(Generic[EntityClass], ABC):
                 If not None, the path will be processed by 'load_private_key_from_path()'.
         :param kwargs: keyword arguments.
         """
+        self._kwargs = kwargs
         self._entity = (
             self.generate_private_key()
             if private_key_path is None
@@ -120,9 +120,9 @@ class Crypto(Generic[EntityClass], ABC):
         """
 
     @abstractmethod
-    def sign_transaction(self, transaction: Any) -> Any:
+    def sign_transaction(self, transaction: JSONLike) -> JSONLike:
         """
-        Sign a transaction in bytes string form.
+        Sign a transaction in dict form.
 
         :param transaction: the transaction to be signed
         :return: signed transaction
@@ -143,7 +143,7 @@ class Helper(ABC):
 
     @staticmethod
     @abstractmethod
-    def is_transaction_settled(tx_receipt: Any) -> bool:
+    def is_transaction_settled(tx_receipt: JSONLike) -> bool:
         """
         Check whether a transaction is settled or not.
 
@@ -154,7 +154,7 @@ class Helper(ABC):
     @staticmethod
     @abstractmethod
     def is_transaction_valid(
-        tx: Any, seller: Address, client: Address, tx_nonce: str, amount: int,
+        tx: JSONLike, seller: Address, client: Address, tx_nonce: str, amount: int,
     ) -> bool:
         """
         Check whether a transaction is valid or not.
@@ -202,6 +202,20 @@ class Helper(ABC):
         :return: the recovered addresses
         """
 
+    @classmethod
+    @abstractmethod
+    def recover_public_keys_from_message(
+        cls, message: bytes, signature: str, is_deprecated_mode: bool = False
+    ) -> Tuple[str, ...]:
+        """
+        Get the public key used to produce the `signature` of the `message`
+
+        :param message: raw bytes used to produce signature
+        :param signature: signature of the message
+        :param is_deprecated_mode: if the deprecated signing was used
+        :return: the recovered public keys
+        """
+
     @staticmethod
     @abstractmethod
     def get_hash(message: bytes) -> str:
@@ -219,6 +233,16 @@ class Helper(ABC):
         Check if the address is valid.
 
         :param address: the address to validate
+        """
+
+    @classmethod
+    @abstractmethod
+    def load_contract_interface(cls, file_path: Path) -> Dict[str, str]:
+        """
+        Load contract interface.
+
+        :param file_path: the file path to the interface
+        :return: the interface
         """
 
 
@@ -249,6 +273,21 @@ class LedgerApi(Helper, ABC):
         """
 
     @abstractmethod
+    def get_state(
+        self, callable_name: str, *args: Any, **kwargs: Any
+    ) -> Optional[JSONLike]:
+        """
+        Call a specified function on the underlying ledger API.
+
+        This usually takes the form of a web request to be waited synchronously.
+
+        :param callable_name: the name of the API function to be called.
+        :param args: the positional arguments for the API function.
+        :param kwargs: the keyword arguments for the API function.
+        :return: the ledger API response.
+        """
+
+    @abstractmethod
     def get_transfer_transaction(
         self,
         sender_address: Address,
@@ -256,8 +295,8 @@ class LedgerApi(Helper, ABC):
         amount: int,
         tx_fee: int,
         tx_nonce: str,
-        **kwargs,
-    ) -> Optional[Any]:
+        **kwargs: Any,
+    ) -> Optional[JSONLike]:
         """
         Submit a transfer transaction to the ledger.
 
@@ -270,7 +309,7 @@ class LedgerApi(Helper, ABC):
         """
 
     @abstractmethod
-    def send_signed_transaction(self, tx_signed: Any) -> Optional[str]:
+    def send_signed_transaction(self, tx_signed: JSONLike) -> Optional[str]:
         """
         Send a signed transaction and wait for confirmation.
 
@@ -280,7 +319,7 @@ class LedgerApi(Helper, ABC):
         """
 
     @abstractmethod
-    def get_transaction_receipt(self, tx_digest: str) -> Optional[Any]:
+    def get_transaction_receipt(self, tx_digest: str) -> Optional[JSONLike]:
         """
         Get the transaction receipt for a transaction digest.
 
@@ -289,7 +328,7 @@ class LedgerApi(Helper, ABC):
         """
 
     @abstractmethod
-    def get_transaction(self, tx_digest: str) -> Optional[Any]:
+    def get_transaction(self, tx_digest: str) -> Optional[JSONLike]:
         """
         Get the transaction for a transaction digest.
 
@@ -311,14 +350,26 @@ class LedgerApi(Helper, ABC):
 
     @abstractmethod
     def get_deploy_transaction(
-        self, contract_interface: Dict[str, str], deployer_address: Address, **kwargs,
-    ) -> Dict[str, Any]:
+        self,
+        contract_interface: Dict[str, str],
+        deployer_address: Address,
+        **kwargs: Any,
+    ) -> Optional[JSONLike]:
         """
         Get the transaction to deploy the smart contract.
 
         :param contract_interface: the contract interface.
         :param deployer_address: The address that will deploy the contract.
         :returns tx: the transaction dictionary.
+        """
+
+    @abstractmethod
+    def update_with_gas_estimate(self, transaction: JSONLike) -> JSONLike:
+        """
+        Attempts to update the transaction with a gas estimate
+
+        :param transaction: the transaction
+        :return: the updated transaction
         """
 
 
@@ -329,10 +380,11 @@ class FaucetApi(ABC):
     network_name = "testnet"  # type: str
 
     @abstractmethod
-    def get_wealth(self, address: Address) -> None:
+    def get_wealth(self, address: Address, url: Optional[str] = None) -> None:
         """
         Get wealth from the faucet for the provided address.
 
         :param address: the address.
+        :param url: the url
         :return: None
         """

@@ -16,27 +16,89 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
+# pylint: disable=no-member
 """Useful classes for the OEF search."""
 
 import logging
-import pickle  # nosec
 from abc import ABC, abstractmethod
 from copy import deepcopy
 from enum import Enum
 from math import asin, cos, radians, sin, sqrt
-from typing import Any, Dict, List, Mapping, Optional, Tuple, Type, Union, cast
+from typing import (
+    Any,
+    Dict,
+    Iterator,
+    List,
+    Mapping,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 
+import aea.helpers.search.models_pb2 as models_pb2
 from aea.exceptions import enforce
 
 
 _default_logger = logging.getLogger(__name__)
 
+proto_value = {
+    "string": "string",
+    "double": "double",
+    "boolean": "boolean",
+    "integer": "integer",
+    "location": "location",
+}
+
+proto_range_pairs = {
+    "string": "string_pair",
+    "integer": "integer_pair",
+    "double": "double_pair",
+    "location": "location_pair",
+}
+
+proto_set_values = {
+    "string": "string",
+    "double": "double",
+    "boolean": "boolean",
+    "integer": "integer",
+    "location": "location",
+}
+
+proto_constraint = {
+    "set": "set_",
+    "range": "range_",
+    "relation": "relation",
+    "distance": "distance",
+}
+
+proto_expression = {
+    "or": "or_",
+    "and": "and_",
+    "not": "not_",
+    "constraint": "constraint",
+}
+
+CONSTRAINT_CATEGORY_RELATION = "relation"
+CONSTRAINT_CATEGORY_RANGE = "range"
+CONSTRAINT_CATEGORY_SET = "set"
+CONSTRAINT_CATEGORY_DISTANCE = "distance"
+
+CONSTRAINT_CATEGORIES = [
+    CONSTRAINT_CATEGORY_RELATION,
+    CONSTRAINT_CATEGORY_RANGE,
+    CONSTRAINT_CATEGORY_SET,
+    CONSTRAINT_CATEGORY_DISTANCE,
+]
+
 
 class Location:
     """Data structure to represent locations (i.e. a pair of latitude and longitude)."""
 
-    def __init__(self, latitude: float, longitude: float):
+    __slots__ = ("latitude", "longitude")
+
+    def __init__(self, latitude: float, longitude: float) -> None:
         """
         Initialize a location.
 
@@ -49,7 +111,7 @@ class Location:
     @property
     def tuple(self) -> Tuple[float, float]:
         """Get the tuple representation of a location."""
-        return (self.latitude, self.longitude)
+        return self.latitude, self.longitude
 
     def distance(self, other: "Location") -> float:
         """
@@ -60,17 +122,40 @@ class Location:
         """
         return haversine(self.latitude, self.longitude, other.latitude, other.longitude)
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Compare equality of two locations."""
         if not isinstance(other, Location):
             return False  # pragma: nocover
         return self.latitude == other.latitude and self.longitude == other.longitude
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get the string representation of the data model."""
         return "Location(latitude={},longitude={})".format(
             self.latitude, self.longitude
         )
+
+    def encode(self) -> models_pb2.Query.Location:  # type: ignore
+        """
+        Encode an instance of this class into a protocol buffer object.
+
+        :return: the matching protocol buffer object
+        """
+        location_pb = models_pb2.Query.Location()  # type: ignore
+        location_pb.lat = self.latitude
+        location_pb.lon = self.longitude
+        return location_pb
+
+    @classmethod
+    def decode(cls, location_pb: Any) -> "Location":
+        """
+        Decode a protocol buffer object that corresponds with this class into an instance of this class.
+
+        :param location_pb: the protocol buffer object corresponding with this class.
+        :return: A new instance of this class matching the protocol buffer object
+        """
+        latitude = location_pb.lat
+        longitude = location_pb.lon
+        return cls(latitude, longitude)
 
 
 """
@@ -94,18 +179,28 @@ class AttributeInconsistencyException(Exception):
 class Attribute:
     """Implements an attribute for an OEF data model."""
 
+    _attribute_type_to_pb = {
+        bool: models_pb2.Query.Attribute.BOOL,  # type: ignore
+        int: models_pb2.Query.Attribute.INT,  # type: ignore
+        float: models_pb2.Query.Attribute.DOUBLE,  # type: ignore
+        str: models_pb2.Query.Attribute.STRING,  # type: ignore
+        Location: models_pb2.Query.Attribute.LOCATION,  # type: ignore
+    }
+
+    __slots__ = ("name", "type", "is_required", "description")
+
     def __init__(
         self,
         name: str,
         type_: Type[ATTRIBUTE_TYPES],
         is_required: bool,
         description: str = "",
-    ):
+    ) -> None:
         """
         Initialize an attribute.
 
         :param name: the name of the attribute.
-        :param type: the type of the attribute.
+        :param type_: the type of the attribute.
         :param is_required: whether the attribute is required by the data model.
         :param description: an (optional) human-readable description for the attribute.
         """
@@ -114,7 +209,7 @@ class Attribute:
         self.is_required = is_required
         self.description = description
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, Attribute)
@@ -123,32 +218,70 @@ class Attribute:
             and self.is_required == other.is_required
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get the string representation of the data model."""
         return "Attribute(name={},type={},is_required={})".format(
             self.name, self.type, self.is_required
+        )
+
+    def encode(self) -> models_pb2.Query.Attribute:  # type: ignore
+        """
+        Encode an instance of this class into a protocol buffer object.
+
+        :return: the matching protocol buffer object
+        """
+        attribute = models_pb2.Query.Attribute()  # type: ignore
+        attribute.name = self.name
+        attribute.type = self._attribute_type_to_pb[self.type]
+        attribute.required = self.is_required
+        if self.description is not None:
+            attribute.description = self.description
+        return attribute
+
+    @classmethod
+    def decode(cls, attribute_pb: models_pb2.Query.Attribute) -> "Attribute":  # type: ignore
+        """
+        Decode a protocol buffer object that corresponds with this class into an instance of this class.
+
+        :param attribute_pb: the protocol buffer object corresponding with this class.
+        :return: A new instance of this class matching the protocol buffer object
+        """
+        _pb_to_attribute_type = {v: k for k, v in cls._attribute_type_to_pb.items()}
+        return cls(
+            attribute_pb.name,
+            _pb_to_attribute_type[attribute_pb.type],
+            attribute_pb.required,
+            attribute_pb.description if attribute_pb.description else None,
         )
 
 
 class DataModel:
     """Implements an OEF data model."""
 
-    def __init__(self, name: str, attributes: List[Attribute], description: str = ""):
+    __slots__ = ("name", "attributes", "description")
+
+    def __init__(
+        self, name: str, attributes: List[Attribute], description: str = ""
+    ) -> None:
         """
         Initialize a data model.
 
         :param name: the name of the data model.
-        :param attributes:  the attributes of the data model.
+        :param attributes: the attributes of the data model.
         """
         self.name: str = name
         self.attributes = sorted(
             attributes, key=lambda x: x.name
         )  # type: List[Attribute]
         self._check_validity()
-        self.attributes_by_name = {a.name: a for a in self.attributes}
         self.description = description
 
-    def _check_validity(self):
+    @property
+    def attributes_by_name(self) -> Dict[str, Attribute]:
+        """Get the attributes by name."""
+        return {a.name: a for a in self.attributes}
+
+    def _check_validity(self) -> None:
         # check if there are duplicated attribute names
         attribute_names = [attribute.name for attribute in self.attributes]
         if len(attribute_names) != len(set(attribute_names)):
@@ -158,7 +291,7 @@ class DataModel:
                 )
             )
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, DataModel)
@@ -166,11 +299,37 @@ class DataModel:
             and self.attributes == other.attributes
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get the string representation of the data model."""
         return "DataModel(name={},attributes={},description={})".format(
             self.name, {a.name: str(a) for a in self.attributes}, self.description
         )
+
+    def encode(self) -> models_pb2.Query.DataModel:  # type: ignore
+        """
+        Encode an instance of this class into a protocol buffer object.
+
+        :return: the matching protocol buffer object
+        """
+        model = models_pb2.Query.DataModel()  # type: ignore
+        model.name = self.name
+        model.attributes.extend([attr.encode() for attr in self.attributes])
+        if self.description is not None:
+            model.description = self.description
+        return model
+
+    @classmethod
+    def decode(cls, data_model_pb: Any) -> "DataModel":
+        """
+        Decode a protocol buffer object that corresponds with this class into an instance of this class.
+
+        :param data_model_pb: the protocol buffer object corresponding with this class.
+        :return: A new instance of this class matching the protocol buffer object
+        """
+        name = data_model_pb.name
+        attributes = [Attribute.decode(attr_pb) for attr_pb in data_model_pb.attributes]
+        description = data_model_pb.description
+        return cls(name, attributes, description)
 
 
 def generate_data_model(
@@ -195,12 +354,14 @@ def generate_data_model(
 class Description:
     """Implements an OEF description."""
 
+    __slots__ = ("_values", "data_model")
+
     def __init__(
         self,
         values: Mapping[str, ATTRIBUTE_TYPES],
         data_model: Optional[DataModel] = None,
         data_model_name: str = "",
-    ):
+    ) -> None:
         """
         Initialize the description object.
 
@@ -221,7 +382,7 @@ class Description:
         """Get the values."""
         return cast(Dict, self._values)
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, Description)
@@ -229,11 +390,11 @@ class Description:
             and self.data_model == other.data_model
         )
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator:
         """Create an iterator."""
         return iter(self.values)
 
-    def _check_consistency(self):
+    def _check_consistency(self) -> None:
         """
         Check the consistency of the values of this description.
 
@@ -271,6 +432,9 @@ class Description:
                 ),
                 None,
             )
+            if attribute is None:  # pragma: nocover
+                # looks like this check is redundant, cause checks done above for all attributes
+                raise ValueError("Attribute {} not found!".format(key))
             if not isinstance(value, attribute.type):
                 # values does not match type in data model
                 raise AttributeInconsistencyException(
@@ -286,42 +450,124 @@ class Description:
                     )
                 )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get the string representation of the description."""
         return "Description(values={},data_model={})".format(
             self._values, self.data_model
         )
 
+    @staticmethod
+    def _to_key_value_pb(key: str, value: ATTRIBUTE_TYPES) -> models_pb2.Query.KeyValue:  # type: ignore
+        """
+        From a (key, attribute value) pair to the associated Protobuf object.
+
+        :param key: the key of the attribute.
+        :param value: the value of the attribute.
+
+        :return: the associated Protobuf object.
+        """
+
+        kv = models_pb2.Query.KeyValue()  # type: ignore
+        kv.key = key
+        if type(value) == bool:  # pylint: disable=unidiomatic-typecheck
+            kv.value.boolean = value
+        elif type(value) == int:  # pylint: disable=unidiomatic-typecheck
+            kv.value.integer = value
+        elif type(value) == float:  # pylint: disable=unidiomatic-typecheck
+            kv.value.double = value
+        elif type(value) == str:  # pylint: disable=unidiomatic-typecheck
+            kv.value.string = value
+        elif type(value) == Location:  # pylint: disable=unidiomatic-typecheck
+            kv.value.location.CopyFrom(value.encode())  # type: ignore
+
+        return kv
+
+    def _encode(self) -> models_pb2.Query.Instance:  # type: ignore
+        """
+        Encode an instance of this class into a protocol buffer object.
+
+        :return: the matching protocol buffer object
+        """
+        instance = models_pb2.Query.Instance()  # type: ignore
+        instance.model.CopyFrom(self.data_model.encode())
+        instance.values.extend(
+            [self._to_key_value_pb(key, value) for key, value in self.values.items()]
+        )
+        return instance
+
     @classmethod
-    def encode(
-        cls, description_protobuf_object, description_object: "Description"
-    ) -> None:
+    def encode(cls, description_pb: Any, description: "Description") -> None:
         """
         Encode an instance of this class into the protocol buffer object.
 
-        The protocol buffer object in the description_protobuf_object argument must be matched with the instance of this class in the 'description_object' argument.
+        The protocol buffer object in the description_protobuf_object argument must be matched
+        with the instance of this class in the 'description_object' argument.
 
-        :param description_protobuf_object: the protocol buffer object whose type corresponds with this class.
-        :param description_object: an instance of this class to be encoded in the protocol buffer object.
+        :param description_pb: the protocol buffer object whose type corresponds with this class.
+        :param description: an instance of this class to be encoded in the protocol buffer object.
+
         :return: None
         """
-        description_from_message_bytes = pickle.dumps(description_object)  # nosec
-        description_protobuf_object.description = description_from_message_bytes
+        description_bytes_pb = description._encode()  # pylint: disable=protected-access
+        description_bytes_bytes = description_bytes_pb.SerializeToString()
+        description_pb.description_bytes = description_bytes_bytes
+
+    @staticmethod
+    def _extract_value(value: models_pb2.Query.Value) -> ATTRIBUTE_TYPES:  # type: ignore
+        """
+        From a Protobuf query value object to attribute type.
+
+        :param value: an instance of models_pb2.Query.Value.
+        :return: the associated attribute type.
+        """
+        value_case = value.WhichOneof("value")
+
+        if value_case == proto_value["string"]:
+            result = value.string
+        elif value_case == proto_value["boolean"]:
+            result = bool(value.boolean)
+        elif value_case == proto_value["integer"]:
+            result = value.integer
+        elif value_case == proto_value["double"]:
+            result = value.double
+        elif value_case == proto_value["location"]:
+            result = Location.decode(value.location)
+        else:
+            raise ValueError(  # pragma: nocover
+                f"Incorrect value. Expected either of {list(proto_value.values())}. Found {value_case}."
+            )
+
+        return result
 
     @classmethod
-    def decode(cls, description_protobuf_object) -> "Description":
+    def _decode(cls, description_pb: Any) -> "Description":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
-        A new instance of this class must be created that matches the protocol buffer object in the 'description_protobuf_object' argument.
+        :param description_pb: the protocol buffer object corresponding with this class.
+        :return: A new instance of this class matching the protocol buffer object
+        """
+        model = DataModel.decode(description_pb.model)
+        values = {
+            attr.key: cls._extract_value(attr.value) for attr in description_pb.values
+        }
+        return cls(values, model)
 
-        :param description_protobuf_object: the protocol buffer object whose type corresponds with this class.
+    @classmethod
+    def decode(cls, description_pb: Any) -> "Description":
+        """
+        Decode a protocol buffer object that corresponds with this class into an instance of this class.
+
+        A new instance of this class must be created that matches the protocol
+        buffer object in the 'description_protobuf_object' argument.
+
+        :param description_pb: the protocol buffer object whose type corresponds with this class.
         :return: A new instance of this class that matches the protocol buffer object in the 'description_protobuf_object' argument.
         """
-        service_description = pickle.loads(  # nosec
-            description_protobuf_object.description
-        )
-        return service_description
+        description_bytes_pb = models_pb2.Query.Instance()  # type: ignore
+        description_bytes_pb.ParseFromString(description_pb.description_bytes)
+        description = cls._decode(description_bytes_pb)
+        return description
 
 
 class ConstraintTypes(Enum):
@@ -338,7 +584,7 @@ class ConstraintTypes(Enum):
     NOT_IN = "not_in"
     DISTANCE = "distance"
 
-    def __str__(self):  # pragma: nocover
+    def __str__(self) -> str:  # pragma: nocover
         """Get the string representation."""
         return str(self.value)
 
@@ -358,16 +604,18 @@ class ConstraintType:
         >>> not_equal_london = ConstraintType("!=", "London")
         >>> less_than_pi = ConstraintType("<", 3.14)
         >>> within_range = ConstraintType("within", (-10.0, 10.0))
-        >>> in_a_set = ConstraintType("in", [1, 2, 3])
-        >>> not_in_a_set = ConstraintType("not_in", {"C", "Java", "Python"})
+        >>> in_a_set = ConstraintType("in", (1, 2, 3))
+        >>> not_in_a_set = ConstraintType("not_in", ("C", "Java", "Python"))
 
     """
 
-    def __init__(self, type_: Union[ConstraintTypes, str], value: Any):
+    __slots__ = ("type", "value")
+
+    def __init__(self, type_: Union[ConstraintTypes, str], value: Any) -> None:
         """
         Initialize a constraint type.
 
-        :param type: the type of the constraint.
+        :param type_: the type of the constraint.
                    | Either an instance of the ConstraintTypes enum,
                    | or a string representation associated with the type.
         :param value: the value that defines the constraint.
@@ -377,7 +625,7 @@ class ConstraintType:
         self.value = value
         enforce(self.check_validity(), "ConstraintType initialization inconsistent.")
 
-    def check_validity(self):
+    def check_validity(self) -> bool:
         """
         Check the validity of the input provided.
 
@@ -416,9 +664,10 @@ class ConstraintType:
                     f"Expected one of type in (int, float, str), got {self.value}",
                 )
             elif self.type == ConstraintTypes.WITHIN:
+                allowed_sub_types = (int, float, str)
                 enforce(
-                    isinstance(self.value, (list, tuple)),
-                    f"Expected one of type in (list, tuple), got {self.value}",
+                    isinstance(self.value, tuple),
+                    f"Expected tuple, got {type(self.value)}",
                 )
                 enforce(
                     len(self.value) == 2, f"Expected length=2, got {len(self.value)}"
@@ -429,10 +678,18 @@ class ConstraintType:
                 enforce(
                     isinstance(self.value[1], type(self.value[0])), "Invalid types."
                 )
+                enforce(
+                    isinstance(self.value[0], allowed_sub_types),
+                    f"Invalid type for first element. Expected either of {allowed_sub_types}. Found {type(self.value[0])}.",
+                )
+                enforce(
+                    isinstance(self.value[1], allowed_sub_types),
+                    f"Invalid type for second element. Expected either of {allowed_sub_types}. Found {type(self.value[1])}.",
+                )
             elif self.type == ConstraintTypes.IN:
                 enforce(
-                    isinstance(self.value, (list, tuple, set)),
-                    f"Expected one of type in (list, tuple, set), got {self.value}",
+                    isinstance(self.value, tuple),
+                    f"Expected tuple, got {type(self.value)}",
                 )
                 if len(self.value) > 0:
                     _type = type(next(iter(self.value)))
@@ -442,8 +699,8 @@ class ConstraintType:
                     )
             elif self.type == ConstraintTypes.NOT_IN:
                 enforce(
-                    isinstance(self.value, (list, tuple, set)),
-                    f"Expected one of type in (list, tuple, set), got {self.value}",
+                    isinstance(self.value, tuple),
+                    f"Expected tuple, got {type(self.value)}",
                 )
                 if len(self.value) > 0:
                     _type = type(next(iter(self.value)))
@@ -453,8 +710,8 @@ class ConstraintType:
                     )
             elif self.type == ConstraintTypes.DISTANCE:
                 enforce(
-                    isinstance(self.value, (list, tuple)),
-                    f"Expected one of type in (list, tuple), got {self.value}",
+                    isinstance(self.value, tuple),
+                    f"Expected tuple, got {type(self.value)}",
                 )
                 enforce(
                     len(self.value) == 2, f"Expected length=2, got {len(self.value)}"
@@ -529,17 +786,17 @@ class ConstraintType:
         :raises ValueError: if the constraint type is not recognized.
         """
         if self.type == ConstraintTypes.EQUAL:
-            return self.value == value
+            return value == self.value
         if self.type == ConstraintTypes.NOT_EQUAL:
-            return self.value != value
+            return value != self.value
         if self.type == ConstraintTypes.LESS_THAN:
-            return self.value < value
+            return value < self.value
         if self.type == ConstraintTypes.LESS_THAN_EQ:
-            return self.value <= value
+            return value <= self.value
         if self.type == ConstraintTypes.GREATER_THAN:
-            return self.value > value
+            return value > self.value
         if self.type == ConstraintTypes.GREATER_THAN_EQ:
-            return self.value >= value
+            return value >= self.value
         if self.type == ConstraintTypes.WITHIN:
             low = self.value[0]
             high = self.value[1]
@@ -556,7 +813,7 @@ class ConstraintType:
             return location.distance(value) <= distance
         raise ValueError("Constraint type not recognized.")  # pragma: nocover
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Check equality with another object."""
         return (
             isinstance(other, ConstraintType)
@@ -564,9 +821,224 @@ class ConstraintType:
             and self.type == other.type
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get the string representation of the constraint type."""
         return "ConstraintType(value={},type={})".format(self.value, self.type)
+
+    def encode(self) -> Optional[Any]:
+        """
+        Encode an instance of this class into a protocol buffer object.
+
+        :return: the matching protocol buffer object
+        """
+        encoding: Optional[Any] = None
+
+        if (
+            self.type == ConstraintTypes.EQUAL
+            or self.type == ConstraintTypes.NOT_EQUAL
+            or self.type == ConstraintTypes.LESS_THAN
+            or self.type == ConstraintTypes.LESS_THAN_EQ
+            or self.type == ConstraintTypes.GREATER_THAN
+            or self.type == ConstraintTypes.GREATER_THAN_EQ
+        ):
+            relation = models_pb2.Query.Relation()  # type: ignore
+
+            if self.type == ConstraintTypes.EQUAL:
+                relation.operator = models_pb2.Query.Relation.EQ  # type: ignore
+            elif self.type == ConstraintTypes.NOT_EQUAL:
+                relation.operator = models_pb2.Query.Relation.NOTEQ  # type: ignore
+            elif self.type == ConstraintTypes.LESS_THAN:
+                relation.operator = models_pb2.Query.Relation.LT  # type: ignore
+            elif self.type == ConstraintTypes.LESS_THAN_EQ:
+                relation.operator = models_pb2.Query.Relation.LTEQ  # type: ignore
+            elif self.type == ConstraintTypes.GREATER_THAN:
+                relation.operator = models_pb2.Query.Relation.GT  # type: ignore
+            elif self.type == ConstraintTypes.GREATER_THAN_EQ:
+                relation.operator = models_pb2.Query.Relation.GTEQ  # type: ignore
+
+            query_value = models_pb2.Query.Value()  # type: ignore
+
+            if isinstance(self.value, bool):
+                query_value.boolean = self.value
+            elif isinstance(self.value, int):
+                query_value.integer = self.value
+            elif isinstance(self.value, float):
+                query_value.double = self.value
+            elif isinstance(self.value, str):
+                query_value.string = self.value
+            relation.value.CopyFrom(query_value)
+
+            encoding = relation
+
+        elif self.type == ConstraintTypes.WITHIN:
+            range_ = models_pb2.Query.Range()  # type: ignore
+
+            if type(self.value[0]) == str:  # pylint: disable=unidiomatic-typecheck
+                values = models_pb2.Query.StringPair()  # type: ignore
+                values.first = self.value[0]
+                values.second = self.value[1]
+                range_.string_pair.CopyFrom(values)
+            elif type(self.value[0]) == int:  # pylint: disable=unidiomatic-typecheck
+                values = models_pb2.Query.IntPair()  # type: ignore
+                values.first = self.value[0]
+                values.second = self.value[1]
+                range_.integer_pair.CopyFrom(values)
+            elif type(self.value[0]) == float:  # pylint: disable=unidiomatic-typecheck
+                values = models_pb2.Query.DoublePair()  # type: ignore
+                values.first = self.value[0]
+                values.second = self.value[1]
+                range_.double_pair.CopyFrom(values)
+            encoding = range_
+
+        elif self.type == ConstraintTypes.IN or self.type == ConstraintTypes.NOT_IN:
+            set_ = models_pb2.Query.Set()  # type: ignore
+
+            if self.type == ConstraintTypes.IN:
+                set_.operator = models_pb2.Query.Set.IN  # type: ignore
+            elif self.type == ConstraintTypes.NOT_IN:
+                set_.operator = models_pb2.Query.Set.NOTIN  # type: ignore
+
+            value_type = type(self.value[0]) if len(self.value) > 0 else str
+
+            if value_type == str:
+                values = models_pb2.Query.Set.Values.Strings()  # type: ignore
+                values.values.extend(self.value)
+                set_.values.string.CopyFrom(values)
+            elif value_type == bool:
+                values = models_pb2.Query.Set.Values.Bools()  # type: ignore
+                values.values.extend(self.value)
+                set_.values.boolean.CopyFrom(values)
+            elif value_type == int:
+                values = models_pb2.Query.Set.Values.Ints()  # type: ignore
+                values.values.extend(self.value)
+                set_.values.integer.CopyFrom(values)
+            elif value_type == float:
+                values = models_pb2.Query.Set.Values.Doubles()  # type: ignore
+                values.values.extend(self.value)
+                set_.values.double.CopyFrom(values)
+            elif value_type == Location:
+                values = models_pb2.Query.Set.Values.Locations()  # type: ignore
+                values.values.extend([value.encode() for value in self.value])
+                set_.values.location.CopyFrom(values)
+
+            encoding = set_
+
+        elif self.type == ConstraintTypes.DISTANCE:
+            distance_pb = models_pb2.Query.Distance()  # type: ignore
+            distance_pb.distance = self.value[1]
+            distance_pb.center.CopyFrom(self.value[0].encode())
+
+            encoding = distance_pb
+
+        return encoding
+
+    @classmethod
+    def decode(cls, constraint_type_pb: Any, category: str) -> "ConstraintType":
+        """
+        Decode a protocol buffer object that corresponds with this class into an instance of this class.
+
+        :param constraint_type_pb: the protocol buffer object corresponding with this class.
+        :param category: the category of the constraint ('relation', 'set', 'range', 'distance).
+
+        :return: A new instance of this class matching the protocol buffer object
+        """
+        decoding: ConstraintType
+
+        relation_type_from_pb = {
+            models_pb2.Query.Relation.Operator.GTEQ: ConstraintTypes.GREATER_THAN_EQ,  # type: ignore
+            models_pb2.Query.Relation.Operator.GT: ConstraintTypes.GREATER_THAN,  # type: ignore
+            models_pb2.Query.Relation.Operator.LTEQ: ConstraintTypes.LESS_THAN_EQ,  # type: ignore
+            models_pb2.Query.Relation.Operator.LT: ConstraintTypes.LESS_THAN,  # type: ignore
+            models_pb2.Query.Relation.Operator.NOTEQ: ConstraintTypes.NOT_EQUAL,  # type: ignore
+            models_pb2.Query.Relation.Operator.EQ: ConstraintTypes.EQUAL,  # type: ignore
+        }
+        set_type_from_pb = {
+            models_pb2.Query.Set.Operator.IN: ConstraintTypes.IN,  # type: ignore
+            models_pb2.Query.Set.Operator.NOTIN: ConstraintTypes.NOT_IN,  # type: ignore
+        }
+
+        if category == CONSTRAINT_CATEGORY_RELATION:
+            relation_enum = relation_type_from_pb[constraint_type_pb.operator]
+            value_case = constraint_type_pb.value.WhichOneof("value")
+            if value_case == proto_value["string"]:
+                decoding = ConstraintType(
+                    relation_enum, constraint_type_pb.value.string
+                )
+            elif value_case == proto_value["boolean"]:
+                decoding = ConstraintType(
+                    relation_enum, constraint_type_pb.value.boolean
+                )
+            elif value_case == proto_value["integer"]:
+                decoding = ConstraintType(
+                    relation_enum, constraint_type_pb.value.integer
+                )
+            elif value_case == proto_value["double"]:
+                decoding = ConstraintType(
+                    relation_enum, constraint_type_pb.value.double
+                )
+        elif category == CONSTRAINT_CATEGORY_RANGE:
+            range_enum = ConstraintTypes.WITHIN
+            range_case = constraint_type_pb.WhichOneof("pair")
+            if range_case == proto_range_pairs["string"]:
+                decoding = ConstraintType(
+                    range_enum,
+                    (
+                        constraint_type_pb.string_pair.first,
+                        constraint_type_pb.string_pair.second,
+                    ),
+                )
+            elif range_case == proto_range_pairs["integer"]:
+                decoding = ConstraintType(
+                    range_enum,
+                    (
+                        constraint_type_pb.integer_pair.first,
+                        constraint_type_pb.integer_pair.second,
+                    ),
+                )
+            elif range_case == proto_range_pairs["double"]:
+                decoding = ConstraintType(
+                    range_enum,
+                    (
+                        constraint_type_pb.double_pair.first,
+                        constraint_type_pb.double_pair.second,
+                    ),
+                )
+        elif category == CONSTRAINT_CATEGORY_SET:
+            set_enum = set_type_from_pb[constraint_type_pb.operator]
+            value_case = constraint_type_pb.values.WhichOneof("values")
+            if value_case == proto_set_values["string"]:
+                decoding = ConstraintType(
+                    set_enum, tuple(constraint_type_pb.values.string.values),
+                )
+            elif value_case == proto_set_values["boolean"]:
+                decoding = ConstraintType(
+                    set_enum, tuple(constraint_type_pb.values.boolean.values),
+                )
+            elif value_case == proto_set_values["integer"]:
+                decoding = ConstraintType(
+                    set_enum, tuple(constraint_type_pb.values.integer.values),
+                )
+            elif value_case == proto_set_values["double"]:
+                decoding = ConstraintType(
+                    set_enum, tuple(constraint_type_pb.values.double.values),
+                )
+            elif value_case == proto_set_values["location"]:
+                locations = [
+                    Location.decode(loc)
+                    for loc in constraint_type_pb.values.location.values
+                ]
+                location_tuple = tuple(locations)
+                decoding = ConstraintType(set_enum, location_tuple)
+        elif category == CONSTRAINT_CATEGORY_DISTANCE:
+            distance_enum = ConstraintTypes.DISTANCE
+            center = Location.decode(constraint_type_pb.center)
+            distance = constraint_type_pb.distance
+            decoding = ConstraintType(distance_enum, (center, distance))
+        else:
+            raise ValueError(
+                f"Incorrect category. Expected either of {CONSTRAINT_CATEGORIES}. Found {category}."
+            )
+        return decoding
 
 
 class ConstraintExpr(ABC):
@@ -602,17 +1074,71 @@ class ConstraintExpr(ABC):
         """
         return None
 
+    @staticmethod
+    def _encode(expression: Any) -> models_pb2.Query.ConstraintExpr:  # type: ignore
+        """
+        Encode an instance of this class into a protocol buffer object.
+
+        :return: the matching protocol buffer object
+        """
+        constraint_expression_pb = models_pb2.Query.ConstraintExpr()  # type: ignore
+        expression_pb = expression.encode()
+        if isinstance(expression, And):
+            constraint_expression_pb.and_.CopyFrom(expression_pb)
+        elif isinstance(expression, Or):
+            constraint_expression_pb.or_.CopyFrom(expression_pb)
+        elif isinstance(expression, Not):
+            constraint_expression_pb.not_.CopyFrom(expression_pb)
+        elif isinstance(expression, Constraint):
+            constraint_expression_pb.constraint.CopyFrom(expression_pb)
+        else:
+            raise ValueError(
+                f"Invalid expression type. Expected either of 'And', 'Or', 'Not', 'Constraint'. Found {type(expression)}."
+            )
+
+        return constraint_expression_pb
+
+    @staticmethod
+    def _decode(constraint_expression_pb: Any) -> "ConstraintExpr":
+        """
+        Decode a protocol buffer object that corresponds with this class into an instance of this class.
+
+        :param constraint_expression_pb: the protocol buffer object corresponding with this class.
+        :return: A new instance of this class matching the protocol buffer object
+        """
+        expression = constraint_expression_pb.WhichOneof("expression")
+
+        result: Optional[Union[And, Or, Not, Constraint]] = None
+
+        if expression == proto_expression["and"]:
+            result = And.decode(constraint_expression_pb.and_)
+        elif expression == proto_expression["or"]:
+            result = Or.decode(constraint_expression_pb.or_)
+        elif expression == proto_expression["not"]:
+            result = Not.decode(constraint_expression_pb.not_)
+        elif expression == proto_expression["constraint"]:
+            result = Constraint.decode(constraint_expression_pb.constraint)
+        else:  # pragma: nocover
+            raise ValueError(
+                f"Incorrect argument. Expected either of {list(proto_expression.keys())}. Found {expression}."
+            )
+
+        return result
+
 
 class And(ConstraintExpr):
     """Implementation of the 'And' constraint expression."""
 
-    def __init__(self, constraints: List[ConstraintExpr]):
+    __slots__ = ("constraints",)
+
+    def __init__(self, constraints: List[ConstraintExpr]) -> None:
         """
         Initialize an 'And' expression.
 
         :param constraints: the list of constraints expression (in conjunction).
         """
         self.constraints = constraints
+        self.check_validity()
 
     def check(self, description: Description) -> bool:
         """
@@ -621,7 +1147,7 @@ class And(ConstraintExpr):
         :param description: the description to check.
         :return: True if the description satisfy the constraint expression, False otherwise.
         """
-        return all(expr.check(description) for expr in self.constraints)
+        return all(expression.check(description) for expression in self.constraints)
 
     def is_valid(self, data_model: DataModel) -> bool:
         """
@@ -632,7 +1158,7 @@ class And(ConstraintExpr):
         """
         return all(constraint.is_valid(data_model) for constraint in self.constraints)
 
-    def check_validity(self):
+    def check_validity(self) -> None:
         """
         Check whether the Constraint Expression satisfies some basic requirements.
 
@@ -647,21 +1173,48 @@ class And(ConstraintExpr):
         for constraint in self.constraints:
             constraint.check_validity()
 
-    def __eq__(self, other):  # pragma: nocover
+    def __eq__(self, other: Any) -> bool:  # pragma: nocover
         """Compare with another object."""
         return isinstance(other, And) and self.constraints == other.constraints
+
+    def encode(self) -> models_pb2.Query.ConstraintExpr.And:  # type: ignore
+        """
+        Encode an instance of this class into a protocol buffer object.
+
+        :return: the matching protocol buffer object
+        """
+        and_pb = models_pb2.Query.ConstraintExpr.And()  # type: ignore
+        constraint_expression_pbs = [
+            ConstraintExpr._encode(constraint) for constraint in self.constraints
+        ]
+        and_pb.expression.extend(constraint_expression_pbs)
+        return and_pb
+
+    @classmethod
+    def decode(cls, and_pb: Any) -> "And":
+        """
+        Decode a protocol buffer object that corresponds with this class into an instance of this class.
+
+        :param and_pb: the protocol buffer object corresponding with this class.
+        :return: A new instance of this class matching the protocol buffer object
+        """
+        expression = [cls._decode(c) for c in and_pb.expression]
+        return cls(expression)
 
 
 class Or(ConstraintExpr):
     """Implementation of the 'Or' constraint expression."""
 
-    def __init__(self, constraints: List[ConstraintExpr]):
+    __slots__ = ("constraints",)
+
+    def __init__(self, constraints: List[ConstraintExpr]) -> None:
         """
         Initialize an 'Or' expression.
 
         :param constraints: the list of constraints expressions (in disjunction).
         """
         self.constraints = constraints
+        self.check_validity()
 
     def check(self, description: Description) -> bool:
         """
@@ -670,7 +1223,7 @@ class Or(ConstraintExpr):
         :param description: the description to check.
         :return: True if the description satisfy the constraint expression, False otherwise.
         """
-        return any(expr.check(description) for expr in self.constraints)
+        return any(expression.check(description) for expression in self.constraints)
 
     def is_valid(self, data_model: DataModel) -> bool:
         """
@@ -681,7 +1234,7 @@ class Or(ConstraintExpr):
         """
         return all(constraint.is_valid(data_model) for constraint in self.constraints)
 
-    def check_validity(self):
+    def check_validity(self) -> None:
         """
         Check whether the Constraint Expression satisfies some basic requirements.
 
@@ -696,15 +1249,41 @@ class Or(ConstraintExpr):
         for constraint in self.constraints:
             constraint.check_validity()
 
-    def __eq__(self, other):  # pragma: nocover
+    def __eq__(self, other: Any) -> bool:  # pragma: nocover
         """Compare with another object."""
         return isinstance(other, Or) and self.constraints == other.constraints
+
+    def encode(self) -> models_pb2.Query.ConstraintExpr.Or:  # type: ignore
+        """
+        Encode an instance of this class into a protocol buffer object.
+
+        :return: the matching protocol buffer object
+        """
+        or_pb = models_pb2.Query.ConstraintExpr.Or()  # type: ignore
+        constraint_expression_pbs = [
+            ConstraintExpr._encode(constraint) for constraint in self.constraints
+        ]
+        or_pb.expression.extend(constraint_expression_pbs)
+        return or_pb
+
+    @classmethod
+    def decode(cls, or_pb: Any) -> "Or":
+        """
+        Decode a protocol buffer object that corresponds with this class into an instance of this class.
+
+        :param or_pb: the protocol buffer object corresponding with this class.
+        :return: A new instance of this class matching the protocol buffer object
+        """
+        expression = [ConstraintExpr._decode(c) for c in or_pb.expression]
+        return cls(expression)
 
 
 class Not(ConstraintExpr):
     """Implementation of the 'Not' constraint expression."""
 
-    def __init__(self, constraint: ConstraintExpr):
+    __slots__ = ("constraint",)
+
+    def __init__(self, constraint: ConstraintExpr) -> None:
         """
         Initialize a 'Not' expression.
 
@@ -730,15 +1309,39 @@ class Not(ConstraintExpr):
         """
         return self.constraint.is_valid(data_model)
 
-    def __eq__(self, other):  # pragma: nocover
+    def __eq__(self, other: Any) -> bool:  # pragma: nocover
         """Compare with another object."""
         return isinstance(other, Not) and self.constraint == other.constraint
+
+    def encode(self) -> models_pb2.Query.ConstraintExpr.Not:  # type: ignore
+        """
+        Encode an instance of this class into a protocol buffer object.
+
+        :return: the matching protocol buffer object
+        """
+        not_pb = models_pb2.Query.ConstraintExpr.Not()  # type: ignore
+        constraint_expression_pb = ConstraintExpr._encode(self.constraint)
+        not_pb.expression.CopyFrom(constraint_expression_pb)
+        return not_pb
+
+    @classmethod
+    def decode(cls, not_pb: Any) -> "Not":
+        """
+        Decode a protocol buffer object that corresponds with this class into an instance of this class.
+
+        :param not_pb: the protocol buffer object corresponding with this class.
+        :return: A new instance of this class matching the protocol buffer object
+        """
+        expression = ConstraintExpr._decode(not_pb.expression)
+        return cls(expression)
 
 
 class Constraint(ConstraintExpr):
     """The atomic component of a constraint expression."""
 
-    def __init__(self, attribute_name: str, constraint_type: ConstraintType):
+    __slots__ = ("attribute_name", "constraint_type")
+
+    def __init__(self, attribute_name: str, constraint_type: ConstraintType) -> None:
         """
         Initialize a constraint.
 
@@ -761,7 +1364,7 @@ class Constraint(ConstraintExpr):
             >>> attr_genre   = Attribute("genre",  str, True, "The genre of the book.")
             >>> c1 = Constraint("author", ConstraintType("==", "Stephen King"))
             >>> c2 = Constraint("year", ConstraintType(">", 1990))
-            >>> c3 = Constraint("genre", ConstraintType("in", {"horror", "science_fiction"}))
+            >>> c3 = Constraint("genre", ConstraintType("in", ("horror", "science_fiction")))
             >>> book_1 = Description({"author": "Stephen King",  "year": 1991, "genre": "horror"})
             >>> book_2 = Description({"author": "George Orwell", "year": 1948, "genre": "horror"})
 
@@ -826,7 +1429,7 @@ class Constraint(ConstraintExpr):
         attribute = data_model.attributes_by_name[self.attribute_name]
         return self.constraint_type.is_valid(attribute)
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, Constraint)
@@ -834,15 +1437,74 @@ class Constraint(ConstraintExpr):
             and self.constraint_type == other.constraint_type
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get the string representation of the constraint."""
         return "Constraint(attribute_name={},constraint_type={})".format(
             self.attribute_name, self.constraint_type
         )
 
+    def encode(self) -> models_pb2.Query.ConstraintExpr.Constraint:  # type: ignore
+        """
+        Encode an instance of this class into a protocol buffer object.
+
+        :return: the matching protocol buffer object
+        """
+        constraint = models_pb2.Query.ConstraintExpr.Constraint()  # type: ignore
+        constraint.attribute_name = self.attribute_name
+
+        if (
+            self.constraint_type.type == ConstraintTypes.EQUAL
+            or self.constraint_type.type == ConstraintTypes.NOT_EQUAL
+            or self.constraint_type.type == ConstraintTypes.LESS_THAN
+            or self.constraint_type.type == ConstraintTypes.LESS_THAN_EQ
+            or self.constraint_type.type == ConstraintTypes.GREATER_THAN
+            or self.constraint_type.type == ConstraintTypes.GREATER_THAN_EQ
+        ):
+            constraint.relation.CopyFrom(self.constraint_type.encode())
+        elif self.constraint_type.type == ConstraintTypes.WITHIN:
+            constraint.range_.CopyFrom(self.constraint_type.encode())
+        elif (
+            self.constraint_type.type == ConstraintTypes.IN
+            or self.constraint_type.type == ConstraintTypes.NOT_IN
+        ):
+            constraint.set_.CopyFrom(self.constraint_type.encode())
+        elif self.constraint_type.type == ConstraintTypes.DISTANCE:
+            constraint.distance.CopyFrom(self.constraint_type.encode())
+        else:  # pragma: nocover
+            raise ValueError(
+                f"Incorrect constraint type. Expected a ConstraintTypes. Found {self.constraint_type.type}."
+            )
+        return constraint
+
+    @classmethod
+    def decode(cls, constraint_pb: Any) -> "Constraint":
+        """
+        Decode a protocol buffer object that corresponds with this class into an instance of this class.
+
+        :param constraint_pb: the protocol buffer object corresponding with this class.
+        :return: A new instance of this class matching the protocol buffer object
+        """
+        constraint_case = constraint_pb.WhichOneof("constraint")
+        if constraint_case == proto_constraint["relation"]:
+            constraint_type = ConstraintType.decode(constraint_pb.relation, "relation")
+        elif constraint_case == proto_constraint["set"]:
+            constraint_type = ConstraintType.decode(constraint_pb.set_, "set")
+        elif constraint_case == proto_constraint["range"]:
+            constraint_type = ConstraintType.decode(constraint_pb.range_, "range")
+        elif constraint_case == proto_constraint["distance"]:
+            constraint_type = ConstraintType.decode(constraint_pb.distance, "distance")
+        else:
+            raise ValueError(  # pragma: nocover
+                f"Incorrect argument. Expected either of ['relation', 'set_', 'range_', 'distance']. Found {constraint_case}."
+            )
+
+        return cls(constraint_pb.attribute_name, constraint_type)
+
 
 class Query:
     """This class lets you build a query for the OEF."""
+
+    __slots__ = ("constraints", "model")
 
     def __init__(
         self, constraints: List[ConstraintExpr], model: Optional[DataModel] = None
@@ -868,7 +1530,7 @@ class Query:
         """
         return all(c.check(description) for c in self.constraints)
 
-    def is_valid(self, data_model: DataModel) -> bool:
+    def is_valid(self, data_model: Optional[DataModel]) -> bool:
         """
         Given a data model, check whether the query is valid for that data model.
 
@@ -879,7 +1541,7 @@ class Query:
 
         return all(c.is_valid(data_model) for c in self.constraints)
 
-    def check_validity(self):
+    def check_validity(self) -> None:
         """
         Check whether the` object is valid.
 
@@ -904,7 +1566,7 @@ class Query:
                 "for the given data model.".format(type(self).__name__)
             )
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Compare with another object."""
         return (
             isinstance(other, Query)
@@ -912,37 +1574,76 @@ class Query:
             and self.model == other.model
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get the string representation of the constraint."""
         return "Query(constraints={},model={})".format(
             [str(c) for c in self.constraints], self.model
         )
 
+    def _encode(self) -> models_pb2.Query.Model:  # type: ignore
+        """
+        Encode an instance of this class into a protocol buffer object.
+
+        :return: the matching protocol buffer object
+        """
+        query = models_pb2.Query.Model()  # type: ignore
+        constraint_expression_pbs = [
+            ConstraintExpr._encode(constraint)  # pylint: disable=protected-access
+            for constraint in self.constraints
+        ]
+        query.constraints.extend(constraint_expression_pbs)
+
+        if self.model is not None:
+            query.model.CopyFrom(self.model.encode())
+        return query
+
     @classmethod
-    def encode(cls, query_protobuf_object, query_object: "Query") -> None:
+    def encode(cls, query_pb: Any, query: "Query") -> None:
         """
         Encode an instance of this class into the protocol buffer object.
 
-        The protocol buffer object in the query_protobuf_object argument must be matched with the instance of this class in the 'query_object' argument.
+        The protocol buffer object in the query_protobuf_object argument must be matched
+        with the instance of this class in the 'query_object' argument.
 
-        :param query_protobuf_object: the protocol buffer object whose type corresponds with this class.
-        :param query_object: an instance of this class to be encoded in the protocol buffer object.
+        :param query_pb: the protocol buffer object wrapping an object that corresponds with this class.
+        :param query: an instance of this class to be encoded in the protocol buffer object.
+
         :return: None
         """
-        query_bytes = pickle.dumps(query_object)  # nosec
-        query_protobuf_object.query_bytes = query_bytes
+        query_bytes_pb = query._encode()  # pylint: disable=protected-access
+        query_bytes_bytes = query_bytes_pb.SerializeToString()
+        query_pb.query_bytes = query_bytes_bytes
 
     @classmethod
-    def decode(cls, query_protobuf_object) -> "Query":
+    def _decode(cls, query_pb: Any) -> "Query":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
-        A new instance of this class must be created that matches the protocol buffer object in the 'query_protobuf_object' argument.
+        :param query_pb: the protocol buffer object corresponding with this class.
+        :return: A new instance of this class matching the protocol buffer object
+        """
+        constraints = [
+            ConstraintExpr._decode(c)  # pylint: disable=protected-access
+            for c in query_pb.constraints
+        ]
+        data_model = DataModel.decode(query_pb.model)
 
-        :param query_protobuf_object: the protocol buffer object whose type corresponds with this class.
+        return cls(constraints, data_model if query_pb.HasField("model") else None,)
+
+    @classmethod
+    def decode(cls, query_pb: Any) -> "Query":
+        """
+        Decode a protocol buffer object that corresponds with this class into an instance of this class.
+
+        A new instance of this class must be created that matches the protocol
+        buffer object in the 'query_protobuf_object' argument.
+
+        :param query_pb: the protocol buffer object whose type corresponds with this class.
         :return: A new instance of this class that matches the protocol buffer object in the 'query_protobuf_object' argument.
         """
-        query = pickle.loads(query_protobuf_object.query_bytes)  # nosec
+        query_bytes_pb = models_pb2.Query.Model()  # type: ignore
+        query_bytes_pb.ParseFromString(query_pb.query_bytes)
+        query = cls._decode(query_bytes_pb)
         return query
 
 
@@ -957,12 +1658,11 @@ def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     :return: the Haversine distance.
     """
     lat1, lon1, lat2, lon2, = map(radians, [lat1, lon1, lat2, lon2])
-    # average earth radius
-    R = 6372.8
+    earth_radius = 6372.8  # average earth radius
     dlat = lat2 - lat1
     dlon = lon2 - lon1
     sin_lat_squared = sin(dlat * 0.5) * sin(dlat * 0.5)
     sin_lon_squared = sin(dlon * 0.5) * sin(dlon * 0.5)
     computation = asin(sqrt(sin_lat_squared + sin_lon_squared * cos(lat1) * cos(lat2)))
-    d = 2 * R * computation
-    return d
+    distance = 2 * earth_radius * computation
+    return distance

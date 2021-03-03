@@ -21,9 +21,9 @@
 
 import datetime
 from collections import defaultdict, deque
-from typing import Deque, Dict, List, Tuple, cast
+from typing import Any, Deque, Dict, List, Tuple, cast
 
-from aea.decision_maker.default import OwnershipState
+from aea.decision_maker.gop import OwnershipState
 from aea.exceptions import enforce
 from aea.helpers.transaction.base import Terms
 from aea.protocols.dialogue.base import DialogueLabel
@@ -38,7 +38,7 @@ MessageId = int
 class Transactions(Model):
     """Class to handle pending transaction proposals/acceptances and locked transactions."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize the transactions."""
         self._pending_transaction_timeout = kwargs.pop(
             "pending_transaction_timeout", 30
@@ -124,8 +124,8 @@ class Transactions(Model):
 
             # check the next transaction, if present
             if len(queue) == 0:
-                break
-            next_date, next_item = queue[0]
+                break  # pragma: no cover
+            next_date, next_item = queue[0]  # pragma: no cover
 
     def add_pending_proposal(
         self, dialogue_label: DialogueLabel, proposal_id: int, terms: Terms,

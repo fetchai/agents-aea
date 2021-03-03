@@ -16,44 +16,14 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Module with generic utils of the aea cli."""
-
 import os
-from typing import Dict, List
+from typing import Dict
 
 import yaml
 from click import ClickException
 
-
-def get_parent_object(obj: Dict, dotted_path: List[str]):
-    """
-    Given a nested dictionary, return the object denoted by the dotted path (if any).
-
-    In particular if dotted_path = [], it returns the same object.
-
-    :param obj: the dictionary.
-    :param dotted_path: the path to the object.
-    :return: the target dictionary
-    :raise ValueError: if the path is not valid.
-    """
-    index = 0
-    current_object = obj
-    while index < len(dotted_path):
-        current_attribute_name = dotted_path[index]
-        current_object = current_object.get(current_attribute_name, None)
-        # if the dictionary does not have the key we want, fail.
-        if current_object is None:
-            raise ValueError(f"Cannot get attribute '{current_attribute_name}'.")
-        if not isinstance(current_object, dict):
-            raise ValueError(
-                f"Attribute '{current_attribute_name}' is not a dictionary."
-            )
-        index += 1
-    # if we are not at the last step and the attribute value is not a dictionary, fail.
-    if isinstance(current_object, dict):
-        return current_object
-    raise ValueError("The target object is not a dictionary.")  # pragma: nocover
+from aea.helpers.io import open_file
 
 
 def load_yaml(filepath: str) -> Dict:
@@ -64,9 +34,10 @@ def load_yaml(filepath: str) -> Dict:
 
     :return: dict YAML content
     """
-    with open(filepath, "r") as f:
+    with open_file(filepath, "r") as f:
         try:
-            return yaml.safe_load(f)
+            result = yaml.safe_load(f)
+            return result if result is not None else {}
         except yaml.YAMLError as e:
             raise ClickException(
                 "Loading yaml config from {} failed: {}".format(filepath, e)

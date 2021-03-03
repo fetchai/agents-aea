@@ -31,11 +31,16 @@ from aea.helpers.search.models import (
     Description,
     Query,
 )
-from aea.mail.base import Envelope, Message
+from aea.mail.base import Envelope, EnvelopeContext, Message
 from aea.multiplexer import InBox, Multiplexer
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 
-from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
+from packages.fetchai.connections.local.connection import (
+    LocalNode,
+    OEFLocalConnection,
+    OEF_LOCAL_NODE_ADDRESS,
+    OEF_LOCAL_NODE_SEARCH_ADDRESS,
+)
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogues
 from packages.fetchai.protocols.fipa.message import FipaMessage
@@ -109,7 +114,7 @@ class TestNoValidDialogue:
             dialogue_reference=self.dialogues.new_self_initiated_dialogue_reference(),
             query=query,
         )
-        search_services_request.to = str(OEFLocalConnection.connection_id)
+        search_services_request.to = OEF_LOCAL_NODE_SEARCH_ADDRESS
 
         # the incorrect message cannot be sent into a dialogue, so this is omitted.
 
@@ -117,7 +122,6 @@ class TestNoValidDialogue:
         envelope = Envelope(
             to=search_services_request.to,
             sender=search_services_request.sender,
-            protocol_id=search_services_request.protocol_id,
             message=search_services_request,
         )
         with unittest.mock.patch.object(
@@ -157,21 +161,23 @@ class TestEmptySearch:
     def test_empty_search_result(self):
         """Test that at the beginning, the search request returns an empty search result."""
         search_services_request, sending_dialogue = self.dialogues.create(
-            counterparty=str(OEFLocalConnection.connection_id),
+            counterparty=OEF_LOCAL_NODE_SEARCH_ADDRESS,
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             query=Query(constraints=[], model=None),
         )
         envelope = Envelope(
             to=search_services_request.to,
             sender=search_services_request.sender,
-            protocol_id=search_services_request.protocol_id,
             message=search_services_request,
         )
         self.multiplexer.put(envelope)
 
         # check the result
         response_envelope = self.multiplexer.get(block=True, timeout=2.0)
-        assert response_envelope.protocol_id == OefSearchMessage.protocol_id
+        assert (
+            response_envelope.protocol_specification_id
+            == OefSearchMessage.protocol_specification_id
+        )
         search_result = cast(OefSearchMessage, response_envelope.message)
         response_dialogue = self.dialogues.update(search_result)
         assert response_dialogue == sending_dialogue
@@ -188,40 +194,38 @@ class TestEmptySearch:
 class TestSimpleSearchResult:
     """Test that a simple search result return the expected result."""
 
-    @classmethod
-    def setup_class(cls):
+    def setup(self):
         """Set up the test."""
-        cls.node = LocalNode()
-        cls.node.start()
+        self.node = LocalNode()
+        self.node.start()
 
-        cls.address_1 = "address"
-        cls.multiplexer = Multiplexer(
-            [_make_local_connection(cls.address_1, cls.node,)]
+        self.address_1 = "address"
+        self.multiplexer = Multiplexer(
+            [_make_local_connection(self.address_1, self.node,)]
         )
 
-        cls.multiplexer.connect()
+        self.multiplexer.connect()
 
         # register a service.
-        cls.dialogues = OefSearchDialogues(cls.address_1)
-        cls.data_model = DataModel(
+        self.dialogues = OefSearchDialogues(self.address_1)
+        self.data_model = DataModel(
             "foobar",
             attributes=[Attribute("foo", int, True), Attribute("bar", str, True)],
         )
         service_description = Description(
-            {"foo": 1, "bar": "baz"}, data_model=cls.data_model
+            {"foo": 1, "bar": "baz"}, data_model=self.data_model
         )
-        register_service_request, cls.sending_dialogue = cls.dialogues.create(
-            counterparty=str(OEFLocalConnection.connection_id),
+        register_service_request, self.sending_dialogue = self.dialogues.create(
+            counterparty=OEF_LOCAL_NODE_SEARCH_ADDRESS,
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
         envelope = Envelope(
             to=register_service_request.to,
             sender=register_service_request.sender,
-            protocol_id=register_service_request.protocol_id,
             message=register_service_request,
         )
-        cls.multiplexer.put(envelope)
+        self.multiplexer.put(envelope)
 
     @pytest.mark.flaky(
         reruns=MAX_FLAKY_RERUNS
@@ -230,32 +234,33 @@ class TestSimpleSearchResult:
         """Test that the search result contains one entry after a successful registration."""
         # build and send the request
         search_services_request, sending_dialogue = self.dialogues.create(
-            counterparty=str(OEFLocalConnection.connection_id),
+            counterparty=OEF_LOCAL_NODE_SEARCH_ADDRESS,
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             query=Query(constraints=[], model=self.data_model),
         )
         envelope = Envelope(
             to=search_services_request.to,
             sender=search_services_request.sender,
-            protocol_id=search_services_request.protocol_id,
             message=search_services_request,
         )
         self.multiplexer.put(envelope)
 
         # check the result
         response_envelope = self.multiplexer.get(block=True, timeout=2.0)
-        assert response_envelope.protocol_id == OefSearchMessage.protocol_id
+        assert (
+            response_envelope.protocol_specification_id
+            == OefSearchMessage.protocol_specification_id
+        )
         search_result = cast(OefSearchMessage, response_envelope.message)
         response_dialogue = self.dialogues.update(search_result)
         assert response_dialogue == sending_dialogue
         assert search_result.performative == OefSearchMessage.Performative.SEARCH_RESULT
         assert search_result.agents == (self.address_1,)
 
-    @classmethod
-    def teardown_class(cls):
+    def teardown(self):
         """Teardown the test."""
-        cls.multiplexer.disconnect()
-        cls.node.stop()
+        self.multiplexer.disconnect()
+        self.node.stop()
 
 
 class TestUnregister:
@@ -289,41 +294,53 @@ class TestUnregister:
             {"foo": 1, "bar": "baz"}, data_model=data_model
         )
         msg, sending_dialogue = self.dialogues.create(
-            counterparty=str(OEFLocalConnection.connection_id),
+            counterparty=OEF_LOCAL_NODE_SEARCH_ADDRESS,
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             service_description=service_description,
         )
         envelope = Envelope(
-            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
+            to=msg.to,
+            sender=msg.sender,
+            message=msg,
+            context=EnvelopeContext(connection_id=OEFLocalConnection.connection_id),
         )
         self.multiplexer1.put(envelope)
 
         # check the result
         response_envelope = self.multiplexer1.get(block=True, timeout=5.0)
-        assert response_envelope.protocol_id == OefSearchMessage.protocol_id
+        assert (
+            response_envelope.protocol_specification_id
+            == OefSearchMessage.protocol_specification_id
+        )
         response = cast(OefSearchMessage, response_envelope.message)
         response_dialogue = self.dialogues.update(response)
         assert response_dialogue == sending_dialogue
         assert response.performative == OefSearchMessage.Performative.OEF_ERROR
 
         msg, sending_dialogue = self.dialogues.create(
-            counterparty=str(OEFLocalConnection.connection_id),
+            counterparty=OEF_LOCAL_NODE_SEARCH_ADDRESS,
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
         envelope = Envelope(
-            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
+            to=msg.to,
+            sender=msg.sender,
+            message=msg,
+            context=EnvelopeContext(connection_id=OEFLocalConnection.connection_id),
         )
         self.multiplexer1.put(envelope)
 
         # Search for the registered service
         msg, sending_dialogue = self.dialogues.create(
-            counterparty=str(OEFLocalConnection.connection_id),
+            counterparty=OEF_LOCAL_NODE_SEARCH_ADDRESS,
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             query=Query([Constraint("foo", ConstraintType("==", 1))]),
         )
         envelope = Envelope(
-            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
+            to=msg.to,
+            sender=msg.sender,
+            message=msg,
+            context=EnvelopeContext(connection_id=OEFLocalConnection.connection_id),
         )
         self.multiplexer1.put(envelope)
         # check the result
@@ -336,24 +353,30 @@ class TestUnregister:
 
         # unregister the service
         msg, sending_dialogue = self.dialogues.create(
-            counterparty=str(OEFLocalConnection.connection_id),
+            counterparty=OEF_LOCAL_NODE_SEARCH_ADDRESS,
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             service_description=service_description,
         )
         envelope = Envelope(
-            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
+            to=msg.to,
+            sender=msg.sender,
+            message=msg,
+            context=EnvelopeContext(connection_id=OEFLocalConnection.connection_id),
         )
         self.multiplexer1.put(envelope)
 
         # the same query returns empty
         # Search for the register agent
         msg, sending_dialogue = self.dialogues.create(
-            counterparty=str(OEFLocalConnection.connection_id),
+            counterparty=OEF_LOCAL_NODE_SEARCH_ADDRESS,
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             query=Query([Constraint("foo", ConstraintType("==", 1))]),
         )
         envelope = Envelope(
-            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
+            to=msg.to,
+            sender=msg.sender,
+            message=msg,
+            context=EnvelopeContext(connection_id=OEFLocalConnection.connection_id),
         )
         self.multiplexer1.put(envelope)
         # check the result
@@ -403,12 +426,15 @@ class TestAgentMessage:
     async def test_messages(self):
         """Test that at the beginning, the search request returns an empty search result."""
         msg, sending_dialogue = self.dialogues.create(
-            counterparty=str(OEFLocalConnection.connection_id),
+            counterparty="some_agent",
             performative=FipaMessage.Performative.CFP,
             query=Query([Constraint("something", ConstraintType(">", 1))]),
         )
         envelope = Envelope(
-            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
+            to=msg.to,
+            sender=msg.sender,
+            message=msg,
+            context=EnvelopeContext(connection_id=OEFLocalConnection.connection_id),
         )
         with pytest.raises(ConnectionError):
             await _make_local_connection(self.address_1, self.node,).send(envelope)
@@ -419,15 +445,16 @@ class TestAgentMessage:
             performative=FipaMessage.Performative.CFP,
             query=Query([Constraint("something", ConstraintType(">", 1))]),
         )
-        envelope = Envelope(
-            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
-        )
+        envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
         self.multiplexer1.put(envelope)
 
         # check the result
         response_envelope = self.multiplexer1.get(block=True, timeout=5.0)
-        assert response_envelope.protocol_id == DefaultMessage.protocol_id
-        assert response_envelope.sender == str(OEFLocalConnection.connection_id)
+        assert (
+            response_envelope.protocol_specification_id
+            == DefaultMessage.protocol_specification_id
+        )
+        assert response_envelope.sender == OEF_LOCAL_NODE_ADDRESS
         result = response_envelope.message
         assert result.performative == DefaultMessage.Performative.ERROR
 
@@ -469,15 +496,15 @@ class TestFilteredSearchResult:
             {"foo": 1, "bar": "baz"}, data_model=cls.data_model_foobar
         )
         register_service_request, sending_dialogue = cls.dialogues1.create(
-            counterparty=str(OEFLocalConnection.connection_id),
+            counterparty=OEF_LOCAL_NODE_SEARCH_ADDRESS,
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
         envelope = Envelope(
             to=register_service_request.to,
             sender=register_service_request.sender,
-            protocol_id=register_service_request.protocol_id,
             message=register_service_request,
+            context=EnvelopeContext(connection_id=OEFLocalConnection.connection_id),
         )
         cls.multiplexer1.put(envelope)
         wait_for_condition(lambda: len(cls.node.services) == 1, timeout=10)
@@ -491,15 +518,15 @@ class TestFilteredSearchResult:
             {"foo": 1, "bar": "baz"}, data_model=cls.data_model_barfoo
         )
         register_service_request, sending_dialogue = cls.dialogues2.create(
-            counterparty=str(OEFLocalConnection.connection_id),
+            counterparty=OEF_LOCAL_NODE_SEARCH_ADDRESS,
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
         envelope = Envelope(
             to=register_service_request.to,
             sender=register_service_request.sender,
-            protocol_id=register_service_request.protocol_id,
             message=register_service_request,
+            context=EnvelopeContext(connection_id=OEFLocalConnection.connection_id),
         )
 
         cls.multiplexer2.put(envelope)
@@ -514,12 +541,15 @@ class TestFilteredSearchResult:
             {"foo": 1, "bar": "baz"}, data_model=data_model
         )
         msg, sending_dialogue = cls.dialogues1.create(
-            counterparty=str(OEFLocalConnection.connection_id),
+            counterparty=OEF_LOCAL_NODE_SEARCH_ADDRESS,
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             service_description=service_description,
         )
         envelope = Envelope(
-            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
+            to=msg.to,
+            sender=msg.sender,
+            message=msg,
+            context=EnvelopeContext(connection_id=OEFLocalConnection.connection_id),
         )
         cls.multiplexer1.put(envelope)
         # ensure one service stays registered
@@ -529,15 +559,15 @@ class TestFilteredSearchResult:
         """Test that the search result contains only the entries matching the query."""
         # build and send the request
         search_services_request, sending_dialogue = self.dialogues1.create(
-            counterparty=str(OEFLocalConnection.connection_id),
+            counterparty=OEF_LOCAL_NODE_SEARCH_ADDRESS,
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             query=Query(constraints=[], model=self.data_model_barfoo),
         )
         envelope = Envelope(
             to=search_services_request.to,
             sender=search_services_request.sender,
-            protocol_id=search_services_request.protocol_id,
             message=search_services_request,
+            context=EnvelopeContext(connection_id=OEFLocalConnection.connection_id),
         )
         self.multiplexer1.put(envelope)
 

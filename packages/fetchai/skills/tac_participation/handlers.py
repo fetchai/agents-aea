@@ -391,7 +391,7 @@ class TacHandler(Handler):
         game = cast(Game, self.context.game)
         if game.phase.value != Phase.GAME.value:
             self.context.logger.warning(
-                "we do not expect a tranasaction in game phase={}, received msg={}".format(
+                "we do not expect a transaction in game phase={}, received msg={}".format(
                     game.phase.value, tac_msg
                 )
             )

@@ -16,40 +16,89 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Implementation of the 'aea fetch' subcommand."""
-
 import os
 from distutils.dir_util import copy_tree
+from pathlib import Path
 from typing import Optional, cast
 
 import click
 
 from aea.cli.add import add_item
 from aea.cli.registry.fetch import fetch_agent
-from aea.cli.utils.click_utils import PublicIdParameter
+from aea.cli.utils.click_utils import PublicIdParameter, registry_flag
 from aea.cli.utils.config import try_to_load_agent_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import clean_after
+from aea.cli.utils.loggers import logger
 from aea.cli.utils.package_utils import try_get_item_source_path
-from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE, PublicId
-from aea.configurations.constants import DEFAULT_REGISTRY_PATH
+from aea.configurations.base import PublicId
+from aea.configurations.constants import (
+    AGENTS,
+    CONNECTION,
+    CONTRACT,
+    DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_REGISTRY_NAME,
+    PROTOCOL,
+    SKILL,
+)
+from aea.exceptions import enforce
+from aea.helpers.io import open_file
 
 
 @click.command(name="fetch")
-@click.option("--local", is_flag=True, help="For fetching agent from local folder.")
+@registry_flag(
+    help_local="For fetching agent from local folder.",
+    help_remote="For fetching agent from remote registry.",
+)
 @click.option(
     "--alias", type=str, required=False, help="Provide a local alias for the agent.",
 )
 @click.argument("public-id", type=PublicIdParameter(), required=True)
 @click.pass_context
-def fetch(click_context, public_id, alias, local):
-    """Fetch Agent from Registry."""
+def fetch(
+    click_context: click.Context,
+    public_id: PublicId,
+    alias: str,
+    local: bool,
+    remote: bool,
+) -> None:
+    """Fetch an agent from the registry."""
     ctx = cast(Context, click_context.obj)
-    if local:
-        fetch_agent_locally(ctx, public_id, alias)
+    do_fetch(ctx, public_id, local, remote, alias)
+
+
+def do_fetch(
+    ctx: Context,
+    public_id: PublicId,
+    local: bool,
+    remote: bool,
+    alias: Optional[str] = None,
+    target_dir: Optional[str] = None,
+) -> None:
+    """
+    Run the Fetch command.
+
+    :param ctx: the CLI context.
+    :param public_id: the public id.
+    :param local: whether to fetch from local
+    :param remote whether to fetch from remote
+    :param alias: the agent alias.
+    :param target_dir: the target directory, in case fetching locally.
+    :return: None
+    """
+    enforce(
+        not (local and remote), "'local' and 'remote' options are mutually exclusive."
+    )
+    is_mixed = not local and not remote
+    ctx.set_config("is_local", local and not remote)
+    ctx.set_config("is_mixed", is_mixed)
+    if remote:
+        fetch_agent(ctx, public_id, alias=alias, target_dir=target_dir)
+    elif local:
+        fetch_agent_locally(ctx, public_id, alias=alias, target_dir=target_dir)
     else:
-        fetch_agent(ctx, public_id, alias)
+        fetch_mixed(ctx, public_id, alias=alias, target_dir=target_dir)
 
 
 def _is_version_correct(ctx: Context, agent_public_id: PublicId) -> bool:
@@ -84,12 +133,15 @@ def fetch_agent_locally(
     :return: None
     """
     packages_path = (
-        DEFAULT_REGISTRY_PATH if ctx.registry_path is None else ctx.registry_path
+        DEFAULT_REGISTRY_NAME if ctx.registry_path is None else ctx.registry_path
     )
     source_path = try_get_item_source_path(
-        packages_path, public_id.author, "agents", public_id.name
+        packages_path, public_id.author, AGENTS, public_id.name
     )
-
+    enforce(
+        ctx.config.get("is_local") is True or ctx.config.get("is_mixed") is True,
+        "Please use `ctx.set_config('is_local', True)` or `ctx.set_config('is_mixed', True)` to fetch agent and all components locally.",
+    )
     try_to_load_agent_config(ctx, agent_src_path=source_path)
     if not _is_version_correct(ctx, public_id):
         raise click.ClickException(
@@ -101,8 +153,9 @@ def fetch_agent_locally(
     folder_name = target_dir or (public_id.name if alias is None else alias)
     target_path = os.path.join(ctx.cwd, folder_name)
     if os.path.exists(target_path):
+        path = Path(target_path)
         raise click.ClickException(
-            'Item "{}" already exists in target folder.'.format(public_id.name)
+            f'Item "{path.name}" already exists in target folder "{path.parent}".'
         )
     if target_dir is not None:
         os.makedirs(target_path)  # pragma: nocover
@@ -116,10 +169,10 @@ def fetch_agent_locally(
     if alias is not None:
         ctx.agent_config.agent_name = alias
         ctx.agent_loader.dump(
-            ctx.agent_config, open(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w")
+            ctx.agent_config,
+            open_file(os.path.join(ctx.cwd, DEFAULT_AEA_CONFIG_FILE), "w"),
         )
 
-    # add dependencies
     _fetch_agent_deps(ctx)
     click.echo("Agent {} successfully fetched.".format(public_id.name))
 
@@ -131,19 +184,34 @@ def _fetch_agent_deps(ctx: Context) -> None:
     :param ctx: context object.
 
     :return: None
-    :raises: ClickException re-raises if occures in add_item call.
+    :raises: ClickException re-raises if occurs in add_item call.
     """
-    ctx.set_config("is_local", True)
-
-    for item_type in ("protocol", "contract", "connection", "skill"):
+    for item_type in (PROTOCOL, CONTRACT, CONNECTION, SKILL):
         item_type_plural = "{}s".format(item_type)
         required_items = getattr(ctx.agent_config, item_type_plural)
         for item_id in required_items:
-            try:
-                add_item(ctx, item_type, item_id)
-            except click.ClickException as e:
-                raise click.ClickException(
-                    "Failed to add {} dependency {}: {}".format(
-                        item_type, item_id, str(e)
-                    )
-                )
+            add_item(ctx, item_type, item_id)
+
+
+def fetch_mixed(
+    ctx: Context,
+    public_id: PublicId,
+    alias: Optional[str] = None,
+    target_dir: Optional[str] = None,
+) -> None:
+    """
+    Fetch an agent in mixed mode.
+
+    :param ctx: the Context.
+    :param public_id: the public id.
+    :param alias: the alias to the agent.
+    :param target_dir: the target directory.
+    :return: None
+    """
+    try:
+        fetch_agent_locally(ctx, public_id, alias=alias, target_dir=target_dir)
+    except click.ClickException as e:
+        logger.debug(
+            f"Fetch from local registry failed (reason={str(e)}), trying remote registry..."
+        )
+        fetch_agent(ctx, public_id, alias=alias, target_dir=target_dir)

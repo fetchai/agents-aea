@@ -27,6 +27,7 @@ import subprocess  # nosec
 import time
 from threading import Thread
 from typing import Optional
+from unittest.mock import MagicMock
 
 import pytest
 import yaml
@@ -105,7 +106,9 @@ class TestAEAToACA:
             connection_id=HTTPClientConnection.connection_id,
         )
         http_client_connection = HTTPClientConnection(
-            configuration=configuration, identity=self.aea_identity
+            configuration=configuration,
+            data_dir=MagicMock(),
+            identity=self.aea_identity,
         )
         http_client_connection.loop = asyncio.get_event_loop()
 
@@ -125,10 +128,7 @@ class TestAEAToACA:
         )
         request_http_message.to = "ACA"
         request_envelope = Envelope(
-            to="ACA",
-            sender="AEA",
-            protocol_id=HttpMessage.protocol_id,
-            message=request_http_message,
+            to="ACA", sender="AEA", message=request_http_message,
         )
 
         try:
@@ -172,19 +172,20 @@ class TestAEAToACA:
             address=wallet.addresses.get(DEFAULT_LEDGER),
             default_address_key=DEFAULT_LEDGER,
         )
+        data_dir = MagicMock()
         configuration = ConnectionConfig(
             host=self.aca_admin_address,
             port=self.aca_admin_port,
             connection_id=HTTPClientConnection.connection_id,
         )
         http_client_connection = HTTPClientConnection(
-            configuration=configuration, identity=identity,
+            configuration=configuration, data_dir=MagicMock(), identity=identity,
         )
         resources = Resources()
         resources.add_connection(http_client_connection)
 
         # create AEA
-        aea = AEA(identity, wallet, resources)
+        aea = AEA(identity, wallet, resources, data_dir)
 
         # Add http protocol to AEA resources
         http_protocol_configuration = ProtocolConfig.from_json(
@@ -220,10 +221,7 @@ class TestAEAToACA:
         )
         request_http_message.to = "ACA"
         request_envelope = Envelope(
-            to="ACA",
-            sender="AEA",
-            protocol_id=HttpMessage.protocol_id,
-            message=request_http_message,
+            to="ACA", sender="AEA", message=request_http_message,
         )
 
         # add a simple skill with handler

@@ -23,21 +23,31 @@ import time
 from pathlib import Path
 
 import pytest
+from aea_crypto_fetchai import FetchAICrypto
 
+import aea
+from aea.configurations.base import AgentConfig
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue
 from aea.test_tools.exceptions import AEATestingException
-from aea.test_tools.test_cases import AEATestCase, AEATestCaseEmpty
+from aea.test_tools.test_cases import (
+    AEATestCase,
+    AEATestCaseEmpty,
+    AEATestCaseEmptyFlaky,
+    AEATestCaseManyFlaky,
+)
 
+from packages.fetchai.connections.stub.connection import PUBLIC_ID as STUB_CONNECTION_ID
 from packages.fetchai.protocols.default.dialogues import (
     DefaultDialogue,
     DefaultDialogues,
 )
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
+from packages.fetchai.skills.error import PUBLIC_ID as ERROR_SKILL_PUBLIC_ID
 
-from tests.conftest import FETCHAI, MY_FIRST_AEA_PUBLIC_ID
+from tests.conftest import MY_FIRST_AEA_PUBLIC_ID
 from tests.test_cli import test_generate_wealth, test_interact
 
 
@@ -47,6 +57,13 @@ TestInteractCommand = test_interact.TestInteractCommand
 
 class TestConfigCases(AEATestCaseEmpty):
     """Test config set/get."""
+
+    @classmethod
+    def setup_class(cls):
+        """Setup class."""
+        super(TestConfigCases, cls).setup_class()
+        cls.add_item("connection", str(STUB_CONNECTION_ID))
+        cls.add_item("skill", str(ERROR_SKILL_PUBLIC_ID))
 
     def test_agent_nested_set_agent_crudcollection(self):
         """Test agent test nested set from path."""
@@ -113,15 +130,15 @@ class TestConfigCases(AEATestCaseEmpty):
 
     def test_agent_set(self):
         """Test agent test set from path."""
-        value = "testvalue"
+        value = True
         key_name = "agent.logging_config.disable_existing_loggers"
         self.set_config(key_name, value)
         result = self.run_cli_command("config", "get", key_name, cwd=self._get_cwd())
-        assert value in str(result.stdout_bytes)
+        assert str(value) in str(result.stdout_bytes)
 
     def test_agent_get_exception(self):
         """Test agent test get non exists key."""
-        with pytest.raises(AEATestingException, match=".*bad_key.*"):
+        with pytest.raises(Exception, match=".*bad_key.*"):
             self.run_cli_command("config", "get", "agent.bad_key", cwd=self._get_cwd())
 
 
@@ -157,7 +174,7 @@ class TestGenericCases(AEATestCaseEmpty):
             called = True
 
         thread = self.start_thread(fn)
-        thread.join(10)
+        thread.join()
         assert called
 
     def test_fetch_and_delete(self):
@@ -220,6 +237,24 @@ class TestGenericCases(AEATestCaseEmpty):
             assert f.read() == "hi"
 
 
+class TestLoadAgentConfig(AEATestCaseEmpty):
+    """Test function 'load_agent_config'."""
+
+    def test_load_agent_config(self):
+        """Test load_agent_config."""
+        agent_config = self.load_agent_config(self.agent_name)
+        assert isinstance(agent_config, AgentConfig)
+
+    def test_load_agent_config_when_agent_name_not_exists(self):
+        """Test load_agent_config with a wrong agent name."""
+        wrong_agent_name = "non-existing-agent-name"
+        with pytest.raises(
+            AEATestingException,
+            match=f"Cannot find agent '{wrong_agent_name}' in the current test case.",
+        ):
+            self.load_agent_config(wrong_agent_name)
+
+
 class TestAddAndEjectComponent(AEATestCaseEmpty):
     """Test add/reject components."""
 
@@ -258,6 +293,9 @@ class TestGenerateAndAddKey(AEATestCaseEmpty):
         result = self.add_private_key("cosmos", "cosmos_private_key.txt")
         assert result.exit_code == 0
 
+        result = self.remove_private_key("cosmos")
+        assert result.exit_code == 0
+
 
 class TestGetWealth(AEATestCaseEmpty):
     """Test get_wealth."""
@@ -265,7 +303,7 @@ class TestGetWealth(AEATestCaseEmpty):
     def test_get_wealth(self):
         """Test get_wealth."""
         # just call it, network related and quite unstable
-        self.get_wealth(FETCHAI)
+        self.get_wealth(FetchAICrypto.identifier)
 
 
 class TestAEA(AEATestCase):
@@ -281,12 +319,21 @@ class TestAEA(AEATestCase):
         result = self.fingerprint_item("skill", "fetchai/skill1:0.1.0")
         assert result.exit_code == 0
 
+    def test_scaffold_and_fingerprint_protocol(self):
+        """Test component scaffold and fingerprint protocol."""
+        result = self.scaffold_item("protocol", "protocol1")
+        assert result.exit_code == 0
+
+        result = self.fingerprint_item("protocol", "fetchai/protocol1:0.1.0")
+        assert result.exit_code == 0
+
 
 class TestSendReceiveEnvelopesSkill(AEATestCaseEmpty):
     """Test that we can communicate with agent via stub connection."""
 
     def test_send_receive_envelope(self):
         """Run the echo skill sequence."""
+        self.add_item("connection", str(STUB_CONNECTION_ID))
         self.add_item("skill", str(ECHO_SKILL_PUBLIC_ID))
 
         process = self.run_agent()
@@ -311,7 +358,7 @@ class TestSendReceiveEnvelopesSkill(AEATestCaseEmpty):
         sent_envelope = Envelope(
             to=self.agent_name,
             sender=sender,
-            protocol_id=message.protocol_id,
+            protocol_specification_id=message.protocol_specification_id,
             message=message,
         )
 
@@ -321,3 +368,41 @@ class TestSendReceiveEnvelopesSkill(AEATestCaseEmpty):
         received_envelope = self.read_envelope_from_agent(self.agent_name)
         received_message = DefaultMessage.serializer.decode(received_envelope.message)
         assert sent_envelope.message.content == received_message.content
+
+
+class TestInvoke(AEATestCaseEmpty):
+    """Test invoke method."""
+
+    def test_invoke(self):
+        """Test invoke method."""
+        result = self.invoke("--version")
+        assert result.exit_code == 0
+        assert f"aea, version {aea.__version__}" in result.stdout
+
+
+class TestFlakyMany(AEATestCaseManyFlaky):
+    """Test that flaky tests are properly rerun."""
+
+    @pytest.mark.flaky(reruns=1)
+    def test_fail_on_first_run(self):
+        """Test failure on first run leads to second run."""
+        file = os.path.join(self.t, "test_file")
+        if self.run_count == 1:
+            open(file, "a").close()
+            raise AssertionError("Expected error to trigger rerun!")
+        assert self.run_count == 2, "Should only be rerun once!"
+        assert not os.path.isfile(file), "File should not exist"
+
+
+class TestFlakyEmpty(AEATestCaseEmptyFlaky):
+    """Test that flaky tests are properly rerun."""
+
+    @pytest.mark.flaky(reruns=1)
+    def test_fail_on_first_run(self):
+        """Test failure on first run leads to second run."""
+        file = os.path.join(self.t, "test_file")
+        if self.run_count == 1:
+            open(file, "a").close()
+            raise AssertionError("Expected error to trigger rerun!")
+        assert self.run_count == 2, "Should only be rerun once!"
+        assert not os.path.isfile(file), "File should not exist"

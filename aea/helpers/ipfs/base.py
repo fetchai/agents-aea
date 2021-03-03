@@ -25,6 +25,7 @@ import re
 
 import base58
 
+from aea.helpers.io import open_file
 from aea.helpers.ipfs.pb import merkledag_pb2, unixfs_pb2
 
 
@@ -43,17 +44,17 @@ def _dos2unix(file_content: bytes) -> bytes:
     return re.sub(b"\r\n", b"\n", file_content, flags=re.M)
 
 
-def _is_text(file_path) -> bool:
+def _is_text(file_path: str) -> bool:
     """Check if a file can be read as text or not."""
     try:
-        with open(file_path, "r") as f:
+        with open_file(file_path, "r") as f:
             f.read()
         return True
     except UnicodeDecodeError:
         return False
 
 
-def _read(file_path) -> bytes:
+def _read(file_path: str) -> bytes:
     """Read a file, replacing Windows line endings if it is a text file."""
     is_text = _is_text(file_path)
     with open(file_path, "rb") as file:

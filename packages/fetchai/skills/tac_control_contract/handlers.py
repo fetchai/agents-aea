@@ -158,7 +158,7 @@ class ContractApiHandler(Handler):
         :param contract_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
-            "received ledger_api error message={} in dialogue={}.".format(
+            "received contract_api error message={} in dialogue={}.".format(
                 contract_api_msg, contract_api_dialogue
             )
         )
@@ -421,9 +421,14 @@ class LedgerApiHandler(Handler):
                 contract_api_dialogue.callable
                 == ContractApiDialogue.Callable.GET_DEPLOY_TRANSACTION
             ):
-                contract_address = ledger_api_msg.transaction_receipt.receipt.get(
-                    "contractAddress", None
+                contract_address = cast(
+                    Optional[str],
+                    ledger_api_msg.transaction_receipt.receipt.get(
+                        "contractAddress", None
+                    ),
                 )
+                if contract_address is None:
+                    raise ValueError("No contract address found.")  # pragma: nocover
                 parameters.contract_address = contract_address
                 game.phase = Phase.CONTRACT_DEPLOYED
                 self.context.logger.info("contract deployed.")

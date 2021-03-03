@@ -19,9 +19,8 @@
 
 """This package contains a scaffold of a behaviour."""
 
-from typing import cast
+from typing import Any, cast
 
-from aea.mail.base import EnvelopeContext
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
@@ -39,7 +38,7 @@ DEFAULT_REGISTER_AND_SEARCH_INTERVAL = 5.0
 class GoodsRegisterAndSearchBehaviour(TickerBehaviour):
     """This class implements the goods register and search behaviour."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         """Initialize the search behaviour."""
         search_interval = cast(
             float, kwargs.pop("search_interval", DEFAULT_REGISTER_AND_SEARCH_INTERVAL)
@@ -105,10 +104,7 @@ class GoodsRegisterAndSearchBehaviour(TickerBehaviour):
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=description,
         )
-        envelope_context = EnvelopeContext(skill_id=self.context.skill_id)
-        self.context.outbox.put_message(
-            message=oef_search_msg, context=envelope_context
-        )
+        self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("registering agent on SOEF.")
 
     def _register_service(self) -> None:
@@ -135,10 +131,7 @@ class GoodsRegisterAndSearchBehaviour(TickerBehaviour):
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=description,
         )
-        envelope_context = EnvelopeContext(skill_id=self.context.skill_id)
-        self.context.outbox.put_message(
-            message=oef_search_msg, context=envelope_context
-        )
+        self.context.outbox.put_message(message=oef_search_msg)
 
     def _unregister_service(self) -> None:
         """
@@ -161,10 +154,7 @@ class GoodsRegisterAndSearchBehaviour(TickerBehaviour):
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             service_description=description,
         )
-        envelope_context = EnvelopeContext(skill_id=self.context.skill_id)
-        self.context.outbox.put_message(
-            message=oef_search_msg, context=envelope_context
-        )
+        self.context.outbox.put_message(message=oef_search_msg)
 
     def _unregister_agent(self) -> None:
         """
@@ -182,10 +172,7 @@ class GoodsRegisterAndSearchBehaviour(TickerBehaviour):
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             service_description=description,
         )
-        envelope_context = EnvelopeContext(skill_id=self.context.skill_id)
-        self.context.outbox.put_message(
-            message=oef_search_msg, context=envelope_context
-        )
+        self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("unregistering agent from SOEF.")
 
     def _search_services(self) -> None:
@@ -212,10 +199,7 @@ class GoodsRegisterAndSearchBehaviour(TickerBehaviour):
             )
             oef_search_dialogue = cast(OefSearchDialogue, oef_search_dialogue)
             oef_search_dialogue.is_seller_search = is_seller_search
-            envelope_context = EnvelopeContext(skill_id=self.context.skill_id)
-            self.context.outbox.put_message(
-                message=oef_search_msg, context=envelope_context
-            )
+            self.context.outbox.put_message(message=oef_search_msg)
             self.context.logger.info(
                 "searching for {}, search_id={}.".format(
                     searching_for, oef_search_msg.dialogue_reference

@@ -1,13 +1,13 @@
 name: thermometer
 author: fetchai
-version: 0.14.0
+version: 0.19.0
 type: skill
 description: The thermometer skill implements the functionality to sell data.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.10.0, <0.11.0'
 fingerprint:
-  README.md: QmUH2RCKZZ3sKBptXtYZaFJTsJFyk5P1aeTNYYV1YPRNxP
-  __init__.py: QmUrcaEk6kVeb6Mir6F2Eo4Qur7yTCfU1mgr4cMTrdvoCj
+  README.md: QmdmXfMJB3eGNJYE71MbfdtZPWLDiWKwW4SLhxjmcH45H1
+  __init__.py: QmUnXLePKeF5Ur2y9h8jQWzZS6sXGDstWobNQBwtoC7Tfh
   behaviours.py: QmWgXU9qgahXwMKNqLLfDiGNYJozSXv2SVMkoPDQncC7ok
   dialogues.py: QmPXfUWDxnHDaHQqsgtVhJ2v9dEgGWLtvEHKFvvFcDXGms
   handlers.py: QmNujxh4FtecTar5coHTJyY3BnVnsseuARSpyTLUDmFmfX
@@ -16,12 +16,12 @@ fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/default:0.8.0
-- fetchai/fipa:0.9.0
-- fetchai/ledger_api:0.6.0
-- fetchai/oef_search:0.9.0
+- fetchai/default:0.12.0
+- fetchai/fipa:0.13.0
+- fetchai/ledger_api:0.10.0
+- fetchai/oef_search:0.13.0
 skills:
-- fetchai/generic_seller:0.15.0
+- fetchai/generic_seller:0.20.0
 behaviours:
   service_registration:
     args:
@@ -52,6 +52,9 @@ models:
     class_name: OefSearchDialogues
   strategy:
     args:
+      classification:
+        piece: classification
+        value: seller
       data_for_sale:
         temperature: 26
       has_data_source: false
@@ -59,6 +62,9 @@ models:
       location:
         latitude: 51.5194
         longitude: 0.127
+      personality_data:
+        piece: genus
+        value: data
       service_data:
         key: seller_service
         value: thermometer_data

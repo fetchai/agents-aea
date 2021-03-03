@@ -19,7 +19,7 @@
 
 """This package contains the behaviour of a erc1155 deploy skill AEA."""
 
-from typing import cast
+from typing import Any, cast
 
 from aea.skills.behaviours import TickerBehaviour
 
@@ -45,7 +45,7 @@ LEDGER_API_ADDRESS = str(LEDGER_CONNECTION_PUBLIC_ID)
 class ServiceRegistrationBehaviour(TickerBehaviour):
     """This class implements a behaviour."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialise the behaviour."""
         services_interval = kwargs.pop(
             "services_interval", DEFAULT_SERVICES_INTERVAL
@@ -137,7 +137,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
             contract_id=strategy.contract_id,
             callable="get_deploy_transaction",
             kwargs=ContractApiMessage.Kwargs(
-                {"deployer_address": self.context.agent_address}
+                {"deployer_address": self.context.agent_address, "gas": strategy.gas}
             ),
         )
         contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue,)
@@ -167,6 +167,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                 {
                     "deployer_address": self.context.agent_address,
                     "token_ids": strategy.token_ids,
+                    "gas": strategy.gas,
                 }
             ),
         )
@@ -199,6 +200,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
                     "recipient_address": self.context.agent_address,
                     "token_ids": strategy.token_ids,
                     "mint_quantities": strategy.mint_quantities,
+                    "gas": strategy.gas,
                 }
             ),
         )

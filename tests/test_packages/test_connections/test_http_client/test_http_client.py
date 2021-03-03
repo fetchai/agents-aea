@@ -20,7 +20,8 @@
 import asyncio
 import logging
 from asyncio import CancelledError
-from unittest.mock import Mock, patch
+from typing import cast
+from unittest.mock import MagicMock, Mock, patch
 
 import aiohttp
 import pytest
@@ -96,17 +97,19 @@ class TestHTTPClientConnect:
         self.address = get_host()
         self.port = get_unused_tcp_port()
         self.agent_identity = Identity("name", address="some string")
-        self.agent_address = self.agent_identity.address
+        self.client_skill_id = "some/skill:0.1.0"
         configuration = ConnectionConfig(
             host=self.address,
             port=self.port,
             connection_id=HTTPClientConnection.connection_id,
         )
         self.http_client_connection = HTTPClientConnection(
-            configuration=configuration, identity=self.agent_identity
+            configuration=configuration,
+            data_dir=MagicMock(),
+            identity=self.agent_identity,
         )
         self.connection_address = str(HTTPClientConnection.connection_id)
-        self.http_dialogs = HttpDialogues(self.agent_address)
+        self.http_dialogs = HttpDialogues(self.client_skill_id)
 
     @pytest.mark.asyncio
     async def test_initialization(self):
@@ -143,8 +146,8 @@ class TestHTTPClientConnect:
         )
         request_envelope = Envelope(
             to=self.connection_address,
-            sender=self.agent_address,
-            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
+            sender=self.client_skill_id,
+            protocol_specification_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=request_http_message,
         )
 
@@ -172,34 +175,6 @@ class TestHTTPClientConnect:
         """Test channel.send error if not conencted."""
         with pytest.raises(ValueError):
             self.http_client_connection.channel.send(Mock())
-
-    @pytest.mark.asyncio
-    async def test_send_envelope_excluded_protocol_fail(self):
-        """Test send error if protocol not supported."""
-        request_http_message, _ = self.http_dialogs.create(
-            counterparty=self.connection_address,
-            performative=HttpMessage.Performative.REQUEST,
-            method="get",
-            url="bad url",
-            headers="",
-            version="",
-            body=b"",
-        )
-        request_envelope = Envelope(
-            to=self.connection_address,
-            sender=self.agent_address,
-            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
-            message=request_http_message,
-        )
-        await self.http_client_connection.connect()
-
-        with patch.object(
-            self.http_client_connection.channel,
-            "excluded_protocols",
-            new=[UNKNOWN_PROTOCOL_PUBLIC_ID],
-        ):
-            with pytest.raises(ValueError):
-                await self.http_client_connection.send(request_envelope)
 
     @pytest.mark.asyncio
     async def test_send_empty_envelope_skip(self):
@@ -232,8 +207,8 @@ class TestHTTPClientConnect:
         )
         request_envelope = Envelope(
             to=self.connection_address,
-            sender=self.agent_address,
-            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
+            sender=self.client_skill_id,
+            protocol_specification_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=request_http_message,
         )
 
@@ -277,8 +252,7 @@ class TestHTTPClientConnect:
         )
         request_envelope = Envelope(
             to=self.connection_address,
-            sender=self.agent_address,
-            protocol_id=request_http_message.protocol_id,
+            sender=self.client_skill_id,
             message=request_http_message,
         )
 
@@ -324,14 +298,13 @@ class TestHTTPClientConnect:
             version="",
         )
         incorrect_http_message.to = self.connection_address
-        incorrect_http_message.sender = self.agent_address
+        incorrect_http_message.sender = self.client_skill_id
 
         # the incorrect message cannot be sent into a dialogue, so this is omitted.
 
         envelope = Envelope(
             to=incorrect_http_message.to,
             sender=incorrect_http_message.sender,
-            protocol_id=incorrect_http_message.protocol_id,
             message=incorrect_http_message,
         )
         with patch.object(
@@ -341,3 +314,37 @@ class TestHTTPClientConnect:
             mock_logger.assert_any_call(
                 AnyStringWith("Could not create dialogue for message=")
             )
+
+    @pytest.mark.asyncio
+    async def test_http_send_exception(self):
+        """Test request is ok cause mocked."""
+        await self.http_client_connection.connect()
+        request_http_message, sending_dialogue = self.http_dialogs.create(
+            counterparty=self.connection_address,
+            performative=HttpMessage.Performative.REQUEST,
+            method="get",
+            url="https://not-a-google.com",
+            headers="",
+            version="",
+            body=b"",
+        )
+        request_envelope = Envelope(
+            to=self.connection_address,
+            sender=self.client_skill_id,
+            message=request_http_message,
+        )
+
+        with patch.object(
+            aiohttp.ClientSession,
+            "request",
+            side_effect=asyncio.TimeoutError("expected exception"),
+        ):
+            await self.http_client_connection.send(envelope=request_envelope)
+            envelope = await asyncio.wait_for(
+                self.http_client_connection.receive(), timeout=10
+            )
+
+        assert envelope
+        message = cast(HttpMessage, envelope.message)
+        assert message.performative == HttpMessage.Performative.RESPONSE
+        assert b"expected exception" in message.body

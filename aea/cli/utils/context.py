@@ -18,9 +18,9 @@
 # ------------------------------------------------------------------------------
 
 """A module with context tools of the aea cli."""
-
+import os
 from pathlib import Path
-from typing import Dict, List, Optional, cast
+from typing import Any, Dict, List, Optional, cast
 
 from aea.cli.utils.loggers import logger
 from aea.configurations.base import (
@@ -30,7 +30,16 @@ from aea.configurations.base import (
     PublicId,
     _get_default_configuration_file_name_from_type,
 )
+from aea.configurations.constants import (
+    CONNECTION,
+    CONTRACT,
+    DEFAULT_AEA_CONFIG_FILE,
+    PROTOCOL,
+    SKILL,
+    VENDOR,
+)
 from aea.configurations.loader import ConfigLoader
+from aea.helpers.io import open_file
 
 
 class Context:
@@ -43,7 +52,7 @@ class Context:
         cwd: str = ".",
         verbosity: str = "INFO",
         registry_path: Optional[str] = None,
-    ):
+    ) -> None:
         """Init the context."""
         self.config = dict()  # type: Dict
         self.cwd = cwd
@@ -76,7 +85,7 @@ class Context:
         """Get the contract loader."""
         return ConfigLoader.from_configuration_type(PackageType.CONTRACT)
 
-    def set_config(self, key, value) -> None:
+    def set_config(self, key: str, value: Any) -> None:
         """
         Set a config.
 
@@ -88,14 +97,14 @@ class Context:
         logger.debug("  config[{}] = {}".format(key, value))
 
     @staticmethod
-    def _get_item_dependencies(item_type, public_id: PublicId) -> Dependencies:
+    def _get_item_dependencies(item_type: str, public_id: PublicId) -> Dependencies:
         """Get the dependencies from item type and public id."""
         item_type_plural = item_type + "s"
         default_config_file_name = _get_default_configuration_file_name_from_type(
             item_type
         )
         path = Path(
-            "vendor",
+            VENDOR,
             public_id.author,
             item_type_plural,
             public_id.name,
@@ -104,7 +113,8 @@ class Context:
         if not path.exists():
             path = Path(item_type_plural, public_id.name, default_config_file_name)
         config_loader = ConfigLoader.from_configuration_type(item_type)
-        config = config_loader.load(path.open())
+        with open_file(path) as fp:
+            config = config_loader.load(fp)
         deps = cast(Dependencies, config.dependencies)
         return deps
 
@@ -114,18 +124,24 @@ class Context:
         :return a list of dependency version specification. e.g. ["gym >= 1.0.0"]
         """
         dependencies = {}  # type: Dependencies
+
+        dependencies.update(self.agent_config.dependencies)
+
         for protocol_id in self.agent_config.protocols:
-            dependencies.update(self._get_item_dependencies("protocol", protocol_id))
+            dependencies.update(self._get_item_dependencies(PROTOCOL, protocol_id))
 
         for connection_id in self.agent_config.connections:
-            dependencies.update(
-                self._get_item_dependencies("connection", connection_id)
-            )
+            dependencies.update(self._get_item_dependencies(CONNECTION, connection_id))
 
         for skill_id in self.agent_config.skills:
-            dependencies.update(self._get_item_dependencies("skill", skill_id))
+            dependencies.update(self._get_item_dependencies(SKILL, skill_id))
 
         for contract_id in self.agent_config.contracts:
-            dependencies.update(self._get_item_dependencies("contract", contract_id))
+            dependencies.update(self._get_item_dependencies(CONTRACT, contract_id))
 
         return dependencies
+
+    def dump_agent_config(self) -> None:
+        """Dump the current agent configuration."""
+        with open(os.path.join(self.cwd, DEFAULT_AEA_CONFIG_FILE), "w") as f:
+            self.agent_loader.dump(self.agent_config, f)

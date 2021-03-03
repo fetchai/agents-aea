@@ -21,7 +21,7 @@ It includes:
 #### `__`init`__`
 
 ```python
- | __init__(name: str, address: Optional[str] = None, addresses: Optional[Dict[str, Address]] = None, default_address_key: str = DEFAULT_ADDRESS_KEY)
+ | __init__(name: str, address: Optional[str] = None, addresses: Optional[Dict[str, Address]] = None, default_address_key: str = DEFAULT_LEDGER) -> None
 ```
 
 Instantiate the identity.
@@ -32,6 +32,16 @@ Instantiate the identity.
 - `address`: the default address of the agent.
 - `addresses`: the addresses of the agent.
 - `default_address_key`: the key for the default address.
+
+<a name="aea.identity.base.Identity.default_address_key"></a>
+#### default`_`address`_`key
+
+```python
+ | @property
+ | default_address_key() -> str
+```
+
+Get the default address key.
 
 <a name="aea.identity.base.Identity.name"></a>
 #### name

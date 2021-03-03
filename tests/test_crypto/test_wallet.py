@@ -21,12 +21,11 @@
 
 from unittest import TestCase
 
-import eth_account
 import pytest
+from aea_crypto_cosmos import CosmosCrypto
+from aea_crypto_ethereum import EthereumCrypto
+from aea_crypto_fetchai import FetchAICrypto
 
-from aea.crypto.cosmos import CosmosCrypto
-from aea.crypto.ethereum import EthereumCrypto
-from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.wallet import Wallet
 from aea.exceptions import AEAException
 
@@ -165,9 +164,7 @@ class WalletTestCase(TestCase):
             EthereumCrypto.identifier,
             transaction={"gasPrice": 50, "nonce": 10, "gas": 10},
         )
-        assert (
-            type(signed_transaction) == eth_account.datastructures.SignedTransaction
-        ), "No signed transaction returned"
+        assert type(signed_transaction) == dict, "No signed transaction returned"
 
     def test_wallet_sign_transaction_negative(self):
         """Test Wallet.sign_transaction negative result."""

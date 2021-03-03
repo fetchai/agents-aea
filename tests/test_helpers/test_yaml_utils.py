@@ -18,13 +18,9 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests for the yaml utils module."""
 import io
-import os
 import random
 import string
 from collections import OrderedDict
-from textwrap import dedent
-
-import pytest
 
 from aea.helpers.yaml_utils import (
     _AEAYamlLoader,
@@ -67,66 +63,3 @@ def _generate_random_string(n: int = 100):
     return "".join(
         random.choice(string.ascii_uppercase + string.digits) for _ in range(n)  # nosec
     )
-
-
-def test_resolve_env_variable_with_default():
-    """Test that the AEAYamlLoader resolves env default variable correctly."""
-    random_variable_name = _generate_random_string()
-    variable_value = "my_variable_default"
-    variable_key = "my_variable"
-    yaml_file = dedent(
-        f"""
-    {variable_key}: ${{{random_variable_name}:{variable_value}}}
-    """
-    )
-    stream = io.StringIO(yaml_file)
-    yaml_obj = yaml_load(stream)
-    assert yaml_obj[variable_key] == variable_value
-
-
-def test_resolve_env_variable_without_default_positive():
-    """Test that the AEAYamlLoader resolves env variable without default correctly."""
-    random_variable_name = _generate_random_string()
-    variable_value = "my_value"
-    variable_key = "my_variable"
-    os.environ[random_variable_name] = variable_value
-    try:
-        yaml_file = dedent(
-            f"""
-        {variable_key}: ${{{random_variable_name}}}
-        """
-        )
-        stream = io.StringIO(yaml_file)
-        yaml_obj = yaml_load(stream)
-    finally:
-        os.environ.pop(random_variable_name)
-    assert yaml_obj[variable_key] == variable_value
-
-
-def test_resolve_env_variable_without_default_negative():
-    """Test that the AEAYamlLoader resolves unspecified env variable without default correctly."""
-    random_variable_name = _generate_random_string()
-    variable_key = "my_variable"
-    yaml_file = dedent(
-        f"""
-    {variable_key}: ${{{random_variable_name}}}
-    """
-    )
-    stream = io.StringIO(yaml_file)
-    yaml_obj = yaml_load(stream)
-    assert yaml_obj[variable_key] == ""
-
-
-def test_resolve_env_variable_fails():
-    """Test the case when resolving the environment variable fails."""
-    with pytest.raises(
-        ValueError, match="Cannot resolve environment variable 'some:wrong:variable'."
-    ):
-        wrong_var = "some:wrong:variable"
-        yaml_file = dedent(
-            f"""
-            some_variable_name: ${{{wrong_var}}}
-            """
-        )
-        stream = io.StringIO(yaml_file)
-        yaml_load(stream)

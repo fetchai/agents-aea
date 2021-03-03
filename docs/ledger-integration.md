@@ -1,19 +1,72 @@
 In this section, we show you how to integrate the AEA with the Fetch.ai and third-party ledgers.
 
-The framework currently natively supports two ledgers:
+## Ledger support
 
-- Fetch.ai
-- Ethereum
+For a ledger to be considered _supported_ in the framework, three abstract base classes need to be implemented:
+
+- the <a href="../api/crypto/base#aea.crypto.base.LedgerApi">`LedgerApi`</a> class wraps the API to talk to the ledger and its helper methods
+- the <a href="../api/crypto/base#aea.crypto.base.Crypto">`Crypto`</a> class wraps the API to perform cryptographic operations for the relevant ledger
+- the <a href="../api/crypto/base#aea.crypto.base.FaucetApi">`FaucetApi`</a> class wraps the API to talk to a faucet on a testnet
+
+These three classes have their own registries, which allow the developer to import the relevant object where needed.
+
+## Ledger plug-in architecture
+
+The AEA framework provides a plug-in mechanism to support ledger functionalities in 
+an easily extendible way. At import time, the framework will load
+all the crypto plug-ins available in the current Python environment.
+
+A _crypto plug-in_ is a Python package which declares some specific
+<a href="https://setuptools.readthedocs.io/en/latest/pkg_resources.html#entry-points">
+`setuptools` "entry points"</a> in its `setup.py` script.
+In particular, there are three types of entry points the framework looks up:
+
+- `aea.ledger_apis`, which points to instantiable classes implementing the `LedgerApi` interface;
+- `aea.cryptos`, which points to instantiable classes implementing the `Crypto` interface;
+- `aea.faucet_apis`, which points to instantiable classes implementing the `FaucetApi` interface.
+
+This is an example of `setup.py` script for a ledger plug-in `aea-crypto-myledger`:
+
+```python
+# sample ./setup.py file
+from setuptools import setup
+
+setup(
+    name="aea-crypto-myledger",
+    packages=["aea_crypto_myledger"],
+    # plugins must depend on 'aea'  
+    install_requires=["aea"], # add other dependencies...
+    # the following makes a plugin available to aea
+    entry_points={
+        "aea.cryptos": ["myledger = aea_crypto_myledger:MyLedgerCrypto"],
+        "aea.ledger_apis": ["myledger = aea_crypto_myledger:MyLedgerApi"],
+        "aea.faucet_apis": ["myledger = aea_crypto_myledger:MyLedgerFaucetApi"],
+    },
+    # PyPI classifier for AEA plugins
+    classifiers=["Framework :: AEA"],
+)
+```
+
+By convention, such plug-in packages should be named `aea-crypto-${LEDGER_ID}`,
+and the importable package name `aea_crypto_${LEDGER_ID}`.
+In the example above, the package name is `aea-crypto-myledger`,
+and the importable package name is `aea_crypto_myledger`.
+
+You can search for AEA ledger plug-ins on PyPI:
+<a href=https://pypi.org/search/?q=aea-crypto>href=https://pypi.org/search/?q=aea-crypto</a>
+
+## Maintained plug-ins
+
+At the moment, the framework natively supports the following three ledgers:
+
+- Fetch.ai: <a href="https://pypi.org/project/aea-crypto-fetchai/">PyPI package: `aea-crypto-fetchai`</a>, and <a href="https://github.com/fetchai/agents-aea/tree/main/plugins/aea-crypto-fetchai">source code</a>.
+- Ethereum: <a href="https://pypi.org/project/aea-crypto-ethereum/">PyPI package: `aea-crypto-ethereum`</a>, and <a href="https://github.com/fetchai/agents-aea/tree/main/plugins/aea-crypto-ethereum">source code</a>.
+- Cosmos: <a href="https://pypi.org/project/aea-crypto-cosmos/">PyPI package: `aea-crypto-cosmos`</a>, and <a href="https://github.com/fetchai/agents-aea/tree/main/plugins/aea-crypto-cosmos">source code</a>.
 
 However, support for additional ledgers can be added to the framework at runtime.
 
-For a ledger to be considered `supported` in the framework, three abstract base classes need to be implemented:
 
-- the <a href="../api/crypto/base#aea.crypto.base.LedgerApi">`LedgerApi`</a> class wraps the api to talk to the ledger and its helper methods
-- the <a href="../api/crypto/base#aea.crypto.base.Crypto">`Crypto`</a> class wraps the api to perform cryptographic operations for the relevant ledger
-- the <a href="../api/crypto/base#aea.crypto.base.FaucetApi">`FaucetApi`</a> class wraps the api to talk to a faucet on a testnet
-
-These three classes have their own registries, which allow the developer to import the relevant object where needed:
+## Examples
 
 - Examples of how to interact with the crypto registry:
 
@@ -33,7 +86,7 @@ register_crypto(id_="my_ledger_id", entry_point="some.dotted.path:MyLedgerCrypto
 my_ledger_crypto = make_crypto("my_ledger_id")
 ```
 
-- Examples of how to interact with the ledger api registry:
+- Examples of how to interact with the ledger API registry:
 
 ``` python
 from aea.crypto.registries import ledger_apis_registry, make_ledger_api, register_ledger_api
@@ -52,13 +105,13 @@ register_ledger_api(id_="my_ledger_id", entry_point="some.dotted.path:MyLedgerAp
 my_ledger_api = make_ledger_api("my_ledger_id")
 ```
 
-- Examples of how to interact with the faucet api registry:
+- Examples of how to interact with the faucet API registry:
 
 ``` python
 from aea.crypto.registries import faucet_apis_registry, make_faucet_api, register_faucet_api
 
 # by default we can use the native faucet apis
-CONFIG = {"network": "testnet"}
+CONFIG = dict(poll_interval=1.0)
 fetchai_faucet_api = make_faucet_api("fetchai", **CONFIG)
 
 # we can check what faucet apis are registered
@@ -74,3 +127,73 @@ my_faucet_api = make_faucet_api("my_ledger_id")
 The framework wraps all `LedgerApi` classes and exposes them in the <a href="../api/crypto/ledger_apis#aea.crypto.base.LedgerApis">`LedgerApis` classes. The framework also wraps the crypto APIs to create identities on both ledgers and exposes them in the `Wallet`.
 
 The separation between the `Crypto` and `LedgerApi` is fundamental to the framework design. In particular, the object which holds the private key is separated from the object which interacts with the ledger. This design pattern is repeated throughout the framework: the decision maker is the only entity with access to the AEA's `Wallet` whilst `LedgerApis` are accessible by all skills.
+
+## Agent Land - Fetch.ai testnet for agents
+
+Agent Land is our stable, public testnet for the Fetch Ledger v2. As such, most developers will be interacting with this testnet. This is specifically designed and supported for AEA development.
+
+
+| Parameter      | Value                                                                      |
+| -------------- | -------------------------------------------------------------------------- |
+| Chain ID       | agent-land                                                                 |
+| Denomination   | atestfet                                                                   |
+| Decimals       | 18                                                                         |
+| Version        | v0.2.x                                                                     |
+| RPC Endpoint   | https://rpc-agent-land.fetch.ai:443                            |
+| REST Endpoint  | https://rest-agent-land.fetch.ai:443                            |
+| Block Explorer | <a href="https://explore-agent-land.fetch.ai" target="_blank">https://explore-agent-land.fetch.ai</a> |
+| Token Faucet   | Use block explorer                                                         |
+
+You can access more details on <a href="https://github.com/fetchai/networks-agentland" target="_blank">GitHub</a>.
+
+The configurations can be specified for the `fetchai/ledger:0.13.0` connection.
+
+## CosmWasm supporting chains
+
+The Fetch.ai networks use <a href="https://docs.cosmwasm.com" target="_blank">CosmWasm</a> for smart contract support.
+
+Currently, to use the smart contract functionality of the Fetch.ai network you have to install a CLI tool which is used by the AEA framework to perform some necessary actions for the smart contract functionality on-chain.
+
+1. Install Rust using the following command:
+
+``` bash 
+curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh
+```
+
+2. Update the configuration for Rust:
+
+``` bash
+rustup default stable
+cargo version
+# If this is lower than 1.44.1+, update with:
+# rustup update stable
+
+rustup target list --installed
+rustup target add wasm32-unknown-unknown
+```
+
+3. Install `fetchd`:
+
+``` bash
+git clone https://github.com/fetchai/fetchd.git
+cd fetchd
+git checkout release/v0.2.x
+make install
+
+# Check if fetchcli is properly installed
+fetchcli version
+# Version should be >=0.2.5
+```
+
+4. Configure `fetchcli`:
+
+``` bash
+fetchcli config chain-id agent-land
+fetchcli config trust-node false
+fetchcli config node https://rpc-agent-land.fetch.ai:443
+fetchcli config output json
+fetchcli config indent true
+fetchcli config broadcast-mode block
+```
+
+Now `fetchcli` will be ready for use on your system.

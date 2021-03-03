@@ -10,10 +10,11 @@ This is a protocol for trading data for training and prediction purposes.
 ---
 name: ml_trade
 author: fetchai
-version: 0.8.0
+version: 0.12.0
 description: A protocol for trading data for training and prediction purposes.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.10.0, <0.11.0'
+protocol_specification_id: fetchai/ml_trade:0.1.0
 speech_acts:
   cfp:
     query: ct:Query
@@ -28,15 +29,9 @@ speech_acts:
 ...
 ---
 ct:Query: |
-  message Nothing {
-  }
-  oneof query{
-      bytes bytes = 1;
-      Nothing nothing = 2;
-      bytes query_bytes = 3;
-  }
+  bytes query_bytes = 1;
 ct:Description: |
-  bytes description = 1;
+  bytes description_bytes = 1;
 ...
 ---
 initiation: [cfp]
@@ -48,6 +43,7 @@ reply:
 termination: [data]
 roles: {seller, buyer}
 end_states: [successful]
+keep_terminal_state_dialogues: true
 ...
 ```
 

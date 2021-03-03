@@ -17,8 +17,11 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests of the soef connection module."""
-
 import asyncio
+import os
+import shutil
+import tempfile
+from pathlib import Path
 from typing import Any, Callable
 from unittest.mock import MagicMock, patch
 
@@ -28,6 +31,7 @@ from aea.common import Address
 from aea.configurations.base import ConnectionConfig
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.crypto.registries import make_crypto
+from aea.exceptions import AEAEnforceError
 from aea.helpers.search.models import (
     Attribute,
     Constraint,
@@ -98,6 +102,67 @@ class OefSearchDialogues(BaseOefSearchDialogues):
         )
 
 
+class TestSoefTokenStorage:
+    """Set of unit tests for soef connection token storage."""
+
+    def setup(self):
+        """Set up."""
+        self.skill_id = "some_author/some_skill:0.1.0"
+        self.crypto = make_crypto(DEFAULT_LEDGER)
+        self.crypto2 = make_crypto(DEFAULT_LEDGER)
+        self.data_dir = tempfile.mkdtemp()
+        identity = Identity("", address=self.crypto.address)
+        self.oef_search_dialogues = OefSearchDialogues(self.skill_id)
+
+        # create the connection and multiplexer objects
+        self.token_storage_path = "test.storage"
+        configuration = ConnectionConfig(
+            api_key="TwiCIriSl0mLahw17pyqoA",
+            soef_addr="s-oef.fetch.ai",
+            soef_port=443,
+            token_storage_path=self.token_storage_path,
+            restricted_to_protocols={OefSearchMessage.protocol_specification_id},
+            connection_id=SOEFConnection.connection_id,
+        )
+        self.connection = SOEFConnection(
+            configuration=configuration, data_dir=self.data_dir, identity=identity,
+        )
+
+    def teardown(self):
+        """Tear down."""
+        try:
+            os.remove(self.token_storage_path)
+            shutil.rmtree(self.data_dir)
+        except Exception as e:
+            print(e)
+
+    def test_unique_page_address_default_no_file(self):
+        """Test unique page address does not raise if file not found."""
+        assert self.connection.channel.unique_page_address is None
+
+    def test_unique_page_address_default_file(self):
+        """Test unique page address is None by default for new file."""
+        with open(self.token_storage_path, "w"):
+            os.utime(self.token_storage_path, None)
+        assert self.connection.channel.unique_page_address is None
+
+    def test_unique_page_address_set_and_get(self):
+        """Test unique page address set and get including None."""
+        self.connection.channel.unique_page_address = "test"
+        assert self.connection.channel._unique_page_address == "test"
+        assert self.connection.channel.unique_page_address == "test"
+        expected_token_storage_path = Path(self.data_dir) / self.token_storage_path
+        with expected_token_storage_path.open() as f:
+            in_file = f.read()
+        assert in_file == "test"
+        self.connection.channel.unique_page_address = None
+        assert self.connection.channel._unique_page_address is None
+        assert self.connection.channel.unique_page_address is None
+        with expected_token_storage_path.open() as f:
+            in_file = f.read()
+        assert in_file == self.connection.channel.NONE_UNIQUE_PAGE_ADDRESS
+
+
 class TestSoef:
     """Set of unit tests for soef connection."""
 
@@ -110,30 +175,33 @@ class TestSoef:
 
     def setup(self):
         """Set up."""
+        self.skill_id = "some_author/some_skill:0.1.0"
         self.crypto = make_crypto(DEFAULT_LEDGER)
         self.crypto2 = make_crypto(DEFAULT_LEDGER)
         identity = Identity("", address=self.crypto.address)
-        self.oef_search_dialogues = OefSearchDialogues(self.crypto.address)
+        self.oef_search_dialogues = OefSearchDialogues(self.skill_id)
+        self.data_dir = tempfile.mkdtemp()
 
         # create the connection and multiplexer objects
         configuration = ConnectionConfig(
             api_key="TwiCIriSl0mLahw17pyqoA",
-            soef_addr="soef.fetch.ai",
-            soef_port=9002,
-            restricted_to_protocols={OefSearchMessage.protocol_id},
+            soef_addr="s-oef.fetch.ai",
+            soef_port=443,
+            restricted_to_protocols={OefSearchMessage.protocol_specification_id},
             connection_id=SOEFConnection.connection_id,
         )
         self.connection = SOEFConnection(
-            configuration=configuration, identity=identity,
+            configuration=configuration, data_dir=self.data_dir, identity=identity,
         )
-        self.connection.channel.unique_page_address = "some addr"
         self.connection2 = SOEFConnection(
             configuration=configuration,
+            data_dir=self.data_dir,
             identity=Identity("", address=self.crypto2.address),
         )
         self.loop = asyncio.get_event_loop()
         self.loop.run_until_complete(self.connection.connect())
         self.loop.run_until_complete(self.connection2.connect())
+        self.connection.channel.unique_page_address = "some_addr"
 
     @pytest.mark.asyncio
     async def test_set_service_key(self):
@@ -147,12 +215,7 @@ class TestSoef:
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
 
         with patch.object(
             self.connection.channel,
@@ -177,12 +240,7 @@ class TestSoef:
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
 
         with patch.object(
             self.connection.channel,
@@ -223,12 +281,7 @@ class TestSoef:
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
 
         with patch.object(
             self.connection.channel,
@@ -264,12 +317,7 @@ class TestSoef:
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         await self.connection.send(envelope)
 
         expected_envelope = await asyncio.wait_for(self.connection.receive(), timeout=1)
@@ -295,12 +343,7 @@ class TestSoef:
             performative=OefSearchMessage.Performative.UNREGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         with patch.object(
             self.connection.channel,
             "_request_text",
@@ -322,12 +365,7 @@ class TestSoef:
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         with patch.object(
             self.connection.channel,
             "_request_text",
@@ -339,30 +377,17 @@ class TestSoef:
             await asyncio.wait_for(self.connection.receive(), timeout=1)
 
     @pytest.mark.asyncio
-    async def test_send_excluded_protocol(self):
-        """Test fail on unsupported protocol."""
-        envelope = Envelope(
-            to="soef",
-            sender=self.crypto.address,
-            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
-            message=b"some msg",
-        )
-        self.connection.channel.excluded_protocols = [UNKNOWN_PROTOCOL_PUBLIC_ID]
-        with pytest.raises(
-            ValueError, match=r"Cannot send message, invalid protocol:.*"
-        ):
-            await self.connection.send(envelope)
-
-    @pytest.mark.asyncio
     async def test_bad_message(self):
         """Test fail on bad message."""
         envelope = Envelope(
             to="soef",
             sender=self.crypto.address,
-            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
+            protocol_specification_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=b"some msg",
         )
-        with pytest.raises(ValueError):
+        with pytest.raises(
+            AEAEnforceError, match=r"Message not of type OefSearchMessage"
+        ):
             await self.connection.send(envelope)
 
     @pytest.mark.asyncio
@@ -379,13 +404,8 @@ class TestSoef:
             service_description=service_description,
         )
         message.to = str(SOEFConnection.connection_id.to_any())
-        message.sender = self.crypto.address
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-        )
+        message.sender = self.skill_id
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         with pytest.raises(ValueError):
             await self.connection.send(envelope)
 
@@ -399,12 +419,7 @@ class TestSoef:
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             query=closeness_query,
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
 
         with patch.object(
             self.connection.channel,
@@ -446,12 +461,7 @@ class TestSoef:
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             query=closeness_query,
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
 
         with patch.object(
             self.connection.channel,
@@ -534,14 +544,16 @@ class TestSoef:
                 wrap_future(self.search_fail_response),
             ],
         ):
-            await self.connection.channel._find_around_me_handle_requet(
+            await self.connection.channel._find_around_me_handle_request(
                 message_1, internal_dialogue_1, 1, {}
             )
-            await self.connection.channel._find_around_me_handle_requet(
+            await self.connection.channel._find_around_me_handle_request(
                 message_2, internal_dialogue_2, 1, {}
             )
-            with pytest.raises(SOEFException, match=r"`find_around_me` error: .*"):
-                await self.connection.channel._find_around_me_handle_requet(
+            with pytest.raises(
+                SOEFException, match=r".* `find_around_me` .*Exception: .*"
+            ):
+                await self.connection.channel._find_around_me_handle_request(
                     message_3, internal_dialogue_3, 1, {}
                 )
 
@@ -563,7 +575,7 @@ class TestSoef:
             self.connection.channel, "_request_text", make_async(resp_text)
         ):
             with pytest.raises(
-                SOEFException, match=r"`acknowledge` error: .*",
+                SOEFException, match=r"`acknowledge` .*Exception: .*",
             ):
                 await self.connection.channel._register_agent()
 
@@ -586,7 +598,7 @@ class TestSoef:
     @pytest.mark.asyncio
     async def test_request(self):
         """Test internal method request_text."""
-        with patch("requests.request"):
+        with patch("aea.helpers.http_requests.request"):
             await self.connection.channel._request_text("get", "http://not-exists.com")
 
     @pytest.mark.asyncio
@@ -597,7 +609,7 @@ class TestSoef:
         with patch.object(
             self.connection.channel, "_request_text", make_async(resp_text)
         ):
-            with pytest.raises(SOEFException, match=r"`set_position` error: .*"):
+            with pytest.raises(SOEFException, match=r"`set_position`.*Exception: .*"):
                 await self.connection.channel._set_location(agent_location)
 
         resp_text = '<?xml version="1.0" encoding="UTF-8"?><response><success>1</success></response>'
@@ -614,7 +626,7 @@ class TestSoef:
             self.connection.channel, "_request_text", make_async(resp_text)
         ):
             with pytest.raises(
-                SOEFException, match=r"`set_personality_piece` error: .*"
+                SOEFException, match=r"`set_personality_piece` .*Exception: .*"
             ):
                 await self.connection.channel._set_personality_piece(1, 1)
 
@@ -633,6 +645,7 @@ class TestSoef:
                 make_async("<response><message>Goodbye!</message></response>"),
             ):
                 self.loop.run_until_complete(self.connection.disconnect())
+                shutil.rmtree(self.data_dir)
         except Exception:  # nosec
             pass
 
@@ -643,7 +656,9 @@ class TestSoef:
         with patch.object(
             self.connection.channel, "_request_text", make_async(resp_text)
         ):
-            with pytest.raises(SOEFException, match=r"`set_personality_piece` error:"):
+            with pytest.raises(
+                SOEFException, match=r"`set_personality_piece`.*Exception:"
+            ):
                 await self.connection.channel._set_personality_piece(1, 1)
 
         resp_text = '<?xml version="1.0" encoding="UTF-8"?><response><success>1</success></response>'
@@ -659,15 +674,15 @@ class TestSoef:
 
         configuration = ConnectionConfig(
             api_key="TwiCIriSl0mLahw17pyqoA",
-            soef_addr="soef.fetch.ai",
-            soef_port=9002,
-            restricted_to_protocols={OefSearchMessage.protocol_id},
+            soef_addr="s-oef.fetch.ai",
+            soef_port=443,
+            restricted_to_protocols={OefSearchMessage.protocol_specification_id},
             connection_id=SOEFConnection.connection_id,
             chain_identifier=chain_identifier,
         )
         with pytest.raises(ValueError, match="Unsupported chain_identifier"):
             SOEFConnection(
-                configuration=configuration, identity=identity,
+                configuration=configuration, data_dir=MagicMock(), identity=identity,
             )
 
     def test_chain_identifier_ok(self):
@@ -677,13 +692,15 @@ class TestSoef:
 
         configuration = ConnectionConfig(
             api_key="TwiCIriSl0mLahw17pyqoA",
-            soef_addr="soef.fetch.ai",
-            soef_port=9002,
-            restricted_to_protocols={OefSearchMessage.protocol_id},
+            soef_addr="s-oef.fetch.ai",
+            soef_port=443,
+            restricted_to_protocols={OefSearchMessage.protocol_specification_id},
             connection_id=SOEFConnection.connection_id,
             chain_identifier=chain_identifier,
         )
-        connection = SOEFConnection(configuration=configuration, identity=identity,)
+        connection = SOEFConnection(
+            configuration=configuration, data_dir=MagicMock(), identity=identity,
+        )
 
         assert connection.channel.chain_identifier == chain_identifier
 
@@ -696,12 +713,7 @@ class TestSoef:
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             service_description=service_description,
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
 
         with patch.object(
             self.connection.channel,

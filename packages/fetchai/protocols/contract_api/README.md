@@ -10,10 +10,11 @@ This is a protocol for contract APIs' requests and responses.
 ---
 name: contract_api
 author: fetchai
-version: 0.7.0
+version: 0.11.0
 description: A protocol for contract APIs requests and responses.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.10.0, <0.11.0'
+protocol_specification_id: fetchai/contract_api:0.1.0
 speech_acts:
   get_deploy_transaction:
     ledger_id: pt:str
@@ -70,9 +71,10 @@ reply:
   raw_message: []
   state: []
   error: []
-termination: [state, raw_transaction, raw_message]
+termination: [state, raw_transaction, raw_message, error]
 roles: {agent, ledger}
 end_states: [successful, failed]
+keep_terminal_state_dialogues: false
 ...
 ```
 

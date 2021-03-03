@@ -27,7 +27,7 @@ from aea.cli.utils.config import update_cli_config
 from aea.cli.utils.package_utils import validate_author_name
 
 
-@click.command(name="register", help="Register a new Registry account.")
+@click.command(name="register", help="Create a new registry account.")
 @click.option("--username", type=str, required=True, prompt=True)
 @click.option("--email", type=str, required=True, prompt=True)
 @click.option("--password", type=str, required=True, prompt=True, hide_input=True)
@@ -37,8 +37,8 @@ from aea.cli.utils.package_utils import validate_author_name
 @click.option("--no-subscribe", is_flag=True, help="For developers subscription.")
 def register(
     username: str, email: str, password: str, confirm_password: str, no_subscribe: bool
-):
-    """Register a new Registry account CLI command."""
+) -> None:
+    """Create a new registry account."""
     do_register(username, email, password, confirm_password, no_subscribe)
 
 

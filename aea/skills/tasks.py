@@ -22,7 +22,8 @@ import logging
 import signal
 import threading
 from abc import abstractmethod
-from multiprocessing.pool import AsyncResult, Pool
+from multiprocessing.pool import AsyncResult
+from multiprocessing.pool import ThreadPool as Pool
 from typing import Any, Callable, Dict, Optional, Sequence, cast
 
 from aea.helpers.logging import WithLogger
@@ -31,7 +32,7 @@ from aea.helpers.logging import WithLogger
 class Task(WithLogger):
     """This class implements an abstract task."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize a task."""
         super().__init__(**kwargs)
         self._is_executed = False
@@ -39,7 +40,7 @@ class Task(WithLogger):
         self._result = None
         self.config = kwargs
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args: Any, **kwargs: Any) -> "Task":
         """
         Execute the task.
 
@@ -54,7 +55,6 @@ class Task(WithLogger):
         self.setup()
         try:
             self._result = self.execute(*args, **kwargs)
-            return self
         except Exception as e:  # pylint: disable=broad-except
             self.logger.debug(
                 "Got exception of type {} with message '{}' while executing task.".format(
@@ -64,6 +64,7 @@ class Task(WithLogger):
         finally:
             self._is_executed = True
             self.teardown()
+        return self
 
     @property
     def is_executed(self) -> bool:
@@ -90,7 +91,7 @@ class Task(WithLogger):
         """
 
     @abstractmethod
-    def execute(self, *args, **kwargs) -> None:
+    def execute(self, *args: Any, **kwargs: Any) -> None:
         """
         Run the task logic.
 
@@ -109,12 +110,14 @@ def init_worker() -> None:
     """
     Initialize a worker.
 
-    Disable the SIGINT handler.
+    Disable the SIGINT handler of process pool is using.
     Related to a well-known bug: https://bugs.python.org/issue8296
 
     :return: None
     """
-    signal.signal(signal.SIGINT, signal.SIG_IGN)
+    if Pool.__class__.__name__ == "Pool":  # pragma: nocover
+        # Process worker
+        signal.signal(signal.SIGINT, signal.SIG_IGN)
 
 
 class TaskManager(WithLogger):
@@ -122,10 +125,10 @@ class TaskManager(WithLogger):
 
     def __init__(
         self,
-        nb_workers: int = 1,
+        nb_workers: int = 2,
         is_lazy_pool_start: bool = True,
         logger: Optional[logging.Logger] = None,
-    ):
+    ) -> None:
         """
         Initialize the task manager.
 
@@ -186,6 +189,8 @@ class TaskManager(WithLogger):
                 func, args=args, kwds=kwds if kwds is not None else {}
             )
             self._results_by_task_id[task_id] = async_result
+            if self._logger:  # pragma: nocover
+                self._logger.info(f"Task <{func}{args}> set. Task id is {task_id}")
             return task_id
 
     def get_task_result(self, task_id: int) -> AsyncResult:

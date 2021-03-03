@@ -19,7 +19,7 @@
 
 """This package contains a class representing the game."""
 from enum import Enum
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from aea.common import Address
 from aea.exceptions import AEAEnforceError, enforce
@@ -127,7 +127,7 @@ class Configuration:
         return list(self._agent_addr_to_name.keys())
 
     @property
-    def agent_names(self):
+    def agent_names(self) -> List[str]:
         """List of agent names."""
         return list(self._agent_addr_to_name.values())
 
@@ -146,7 +146,7 @@ class Configuration:
         """Get the controller address."""
         return self._controller_addr
 
-    def _check_consistency(self):
+    def _check_consistency(self) -> None:
         """
         Check the consistency of the game configuration.
 
@@ -179,14 +179,16 @@ class Configuration:
 class Game(Model):
     """This class deals with the game."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         """Instantiate the game class."""
-        self._expected_version_id = kwargs.pop("expected_version_id", "")  # type: str
         self._expected_controller_addr = kwargs.pop(
             "expected_controller_addr", None
         )  # type: Optional[str]
 
         self._search_query = kwargs.pop("search_query", DEFAULT_SEARCH_QUERY)
+        if "search_value" not in self._search_query:  # pragma: nocover
+            raise ValueError("search_value not found in search_query")
+        self._expected_version_id = self._search_query["search_value"]
         location = kwargs.pop("location", DEFAULT_LOCATION)
         self._agent_location = Location(
             latitude=location["latitude"], longitude=location["longitude"]
@@ -297,7 +299,7 @@ class Game(Model):
         )
         enforce(
             tac_message.version_id == self.expected_version_id,
-            "TacMessage for unexpected game.",
+            f"TacMessage for unexpected game, expected={self.expected_version_id}, found={tac_message.version_id}",
         )
         self._conf = Configuration(
             tac_message.version_id,
@@ -307,7 +309,7 @@ class Game(Model):
             controller_addr,
         )
 
-    def update_expected_controller_addr(self, controller_addr: Address):
+    def update_expected_controller_addr(self, controller_addr: Address) -> None:
         """
         Overwrite the expected controller pbk.
 

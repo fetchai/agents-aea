@@ -22,9 +22,22 @@ import queue
 import threading
 from asyncio.events import AbstractEventLoop
 from concurrent.futures._base import CancelledError
+from concurrent.futures._base import TimeoutError as FuturesTimeoutError
 from contextlib import suppress
-from typing import Callable, Collection, Dict, List, Optional, Sequence, Tuple, cast
+from typing import (
+    Any,
+    Callable,
+    Collection,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    Union,
+    cast,
+)
 
+from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
 from aea.exceptions import enforce
@@ -33,13 +46,13 @@ from aea.helpers.async_utils import AsyncState, Runnable, ThreadedAsyncRunner
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.logging import WithLogger, get_logger
 from aea.mail.base import AEAConnectionError, Empty, Envelope, EnvelopeContext
-from aea.protocols.base import Message
+from aea.protocols.base import Message, Protocol
 
 
 class MultiplexerStatus(AsyncState):
     """The connection status class."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the connection status."""
         super().__init__(
             initial_state=ConnectionStates.disconnected, states_enum=ConnectionStates
@@ -69,6 +82,8 @@ class MultiplexerStatus(AsyncState):
 class AsyncMultiplexer(Runnable, WithLogger):
     """This class can handle multiple connections at once."""
 
+    DISCONNECT_TIMEOUT = 5
+
     def __init__(
         self,
         connections: Optional[Sequence[Connection]] = None,
@@ -77,7 +92,10 @@ class AsyncMultiplexer(Runnable, WithLogger):
         exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
         threaded: bool = False,
         agent_name: str = "standalone",
-    ):
+        default_routing: Optional[Dict[PublicId, PublicId]] = None,
+        default_connection: Optional[PublicId] = None,
+        protocols: Optional[List[Union[Protocol, Message]]] = None,
+    ) -> None:
         """
         Initialize the connection multiplexer.
 
@@ -92,22 +110,91 @@ class AsyncMultiplexer(Runnable, WithLogger):
         logger = get_logger(__name__, agent_name)
         WithLogger.__init__(self, logger=logger)
         Runnable.__init__(self, loop=loop, threaded=threaded)
+
         self._connections: List[Connection] = []
         self._id_to_connection: Dict[PublicId, Connection] = {}
         self._default_connection: Optional[Connection] = None
-        self._initialize_connections_if_any(connections, default_connection_index)
+
+        connections = connections or []
+        if not default_connection and connections:
+            enforce(
+                len(connections) - 1 >= default_connection_index,
+                "default_connection_index os out of connections range!",
+            )
+            default_connection = connections[default_connection_index].connection_id
+
+        if default_connection:
+            enforce(
+                bool(
+                    [
+                        i.connection_id.same_prefix(default_connection)
+                        for i in connections
+                    ]
+                ),
+                f"Default connection {default_connection} does not present in connections list!",
+            )
+
+        self._default_routing = {}  # type: Dict[PublicId, PublicId]
+
+        self._setup(connections or [], default_routing, default_connection)
 
         self._connection_status = MultiplexerStatus()
+        self._specification_id_to_protocol_id = {
+            p.protocol_specification_id: p.protocol_id for p in protocols or []
+        }
+        self._routing_helper: Dict[Address, PublicId] = {}
 
         self._in_queue = AsyncFriendlyQueue()  # type: AsyncFriendlyQueue
         self._out_queue = None  # type: Optional[asyncio.Queue]
 
         self._recv_loop_task = None  # type: Optional[asyncio.Task]
         self._send_loop_task = None  # type: Optional[asyncio.Task]
-        self._default_routing = {}  # type: Dict[PublicId, PublicId]
+
         self._loop: asyncio.AbstractEventLoop = loop if loop is not None else asyncio.new_event_loop()
         self._lock: asyncio.Lock = asyncio.Lock(loop=self._loop)
         self.set_loop(self._loop)
+
+    @property
+    def default_connection(self) -> Optional[Connection]:
+        """Get the default connection."""
+        return self._default_connection
+
+    @property
+    def in_queue(self) -> AsyncFriendlyQueue:
+        """Get the in queue."""
+        return self._in_queue
+
+    @property
+    def out_queue(self) -> asyncio.Queue:
+        """Get the out queue."""
+        if self._out_queue is None:  # pragma: nocover
+            raise ValueError("Accessing out queue before loop is started.")
+        return self._out_queue
+
+    @property
+    def connections(self) -> Tuple[Connection, ...]:
+        """Get the connections."""
+        return tuple(self._connections)
+
+    @property
+    def is_connected(self) -> bool:
+        """Check whether the multiplexer is processing envelopes."""
+        return self.connection_status.is_connected
+
+    @property
+    def default_routing(self) -> Dict[PublicId, PublicId]:
+        """Get the default routing."""
+        return self._default_routing
+
+    @default_routing.setter
+    def default_routing(self, default_routing: Dict[PublicId, PublicId]) -> None:
+        """Set the default routing."""
+        self._default_routing = default_routing
+
+    @property
+    def connection_status(self) -> MultiplexerStatus:
+        """Get the connection status."""
+        return self._connection_status
 
     async def run(self) -> None:
         """Run multiplexer connect and recv/send tasks."""
@@ -122,10 +209,21 @@ class AsyncMultiplexer(Runnable, WithLogger):
         finally:
             await self.disconnect()
 
-    @property
-    def default_connection(self) -> Optional[Connection]:
-        """Get the default connection."""
-        return self._default_connection
+    def _get_protocol_id_for_envelope(self, envelope: Envelope) -> PublicId:
+        """Get protocol id for envelope."""
+        if isinstance(envelope.message, Message):
+            return cast(Message, envelope.message).protocol_id
+
+        protocol_id = self._specification_id_to_protocol_id.get(
+            envelope.protocol_specification_id
+        )
+
+        if not protocol_id:
+            raise ValueError(
+                f"Can not resolve protocol id for {envelope}, pass protocols supported to multipelxer instance {self._specification_id_to_protocol_id}"
+            )
+
+        return protocol_id
 
     def set_loop(self, loop: AbstractEventLoop) -> None:
         """
@@ -136,17 +234,6 @@ class AsyncMultiplexer(Runnable, WithLogger):
         """
         self._loop = loop
         self._lock = asyncio.Lock(loop=self._loop)
-
-    def _initialize_connections_if_any(
-        self, connections: Optional[Sequence[Connection]], default_connection_index: int
-    ):
-        if connections is not None and len(connections) > 0:
-            enforce(
-                (0 <= default_connection_index <= len(connections) - 1),
-                "Default connection index out of range.",
-            )
-            for idx, connection in enumerate(connections):
-                self.add_connection(connection, idx == default_connection_index)
 
     def _handle_exception(self, fn: Callable, exc: Exception) -> None:
         """
@@ -184,14 +271,15 @@ class AsyncMultiplexer(Runnable, WithLogger):
         if is_default:
             self._default_connection = connection
 
-    def _connection_consistency_checks(self):
+    def _connection_consistency_checks(self) -> None:
         """
         Do some consistency checks on the multiplexer connections.
 
         :return: None
         :raise AEAEnforceError: if an inconsistency is found.
         """
-        enforce(len(self.connections) > 0, "List of connections cannot be empty.")
+        if len(self.connections) == 0:
+            self.logger.debug("List of connections is empty.")
 
         enforce(
             len(set(c.connection_id for c in self.connections))
@@ -199,47 +287,10 @@ class AsyncMultiplexer(Runnable, WithLogger):
             "Connection names must be unique.",
         )
 
-    def _set_default_connection_if_none(self):
+    def _set_default_connection_if_none(self) -> None:
         """Set the default connection if it is none."""
-        if self._default_connection is None:
+        if self._default_connection is None and bool(self.connections):
             self._default_connection = self.connections[0]
-
-    @property
-    def in_queue(self) -> AsyncFriendlyQueue:
-        """Get the in queue."""
-        return self._in_queue
-
-    @property
-    def out_queue(self) -> asyncio.Queue:
-        """Get the out queue."""
-        if self._out_queue is None:  # pragma: nocover
-            raise ValueError("Accessing out queue before loop is started.")
-        return self._out_queue
-
-    @property
-    def connections(self) -> Tuple[Connection, ...]:
-        """Get the connections."""
-        return tuple(self._connections)
-
-    @property
-    def is_connected(self) -> bool:
-        """Check whether the multiplexer is processing envelopes."""
-        return self.connection_status.is_connected
-
-    @property
-    def default_routing(self) -> Dict[PublicId, PublicId]:
-        """Get the default routing."""
-        return self._default_routing
-
-    @default_routing.setter
-    def default_routing(self, default_routing: Dict[PublicId, PublicId]):
-        """Set the default routing."""
-        self._default_routing = default_routing
-
-    @property
-    def connection_status(self) -> MultiplexerStatus:
-        """Get the connection status."""
-        return self._connection_status
 
     async def connect(self) -> None:
         """Connect the multiplexer."""
@@ -380,7 +431,13 @@ class AsyncMultiplexer(Runnable, WithLogger):
         self.logger.debug("Tear the multiplexer connections down.")
         for connection_id, connection in self._id_to_connection.items():
             try:
-                await asyncio.wait_for(self._disconnect_one(connection_id), timeout=5)
+                await asyncio.wait_for(
+                    self._disconnect_one(connection_id), timeout=self.DISCONNECT_TIMEOUT
+                )
+            except FuturesTimeoutError:
+                self.logger.debug(  # pragma: nocover
+                    f"Disconnection of `{connection_id}` timed out."
+                )
             except Exception as e:  # pylint: disable=broad-except
                 self.logger.exception(
                     "Error while disconnecting {}: {}".format(
@@ -427,16 +484,13 @@ class AsyncMultiplexer(Runnable, WithLogger):
                     )
                     return None
                 self.logger.debug("Sending envelope {}".format(str(envelope)))
-                try:
-                    await self._send(envelope)
-                except AEAConnectionError as e:
-                    self.logger.error(str(e))
+                await self._send(envelope)
 
         except asyncio.CancelledError:
             self.logger.debug("Sending loop cancelled.")
             raise
         except Exception as e:  # pylint: disable=broad-except  # pragma: nocover
-            self.logger.error("Error in the sending loop: {}".format(str(e)))
+            self.logger.exception("Error in the sending loop: {}".format(str(e)))
             raise
 
     async def _receiving_loop(self) -> None:
@@ -454,12 +508,13 @@ class AsyncMultiplexer(Runnable, WithLogger):
 
                 # process completed receiving tasks.
                 for task in done:
+                    connection = task_to_connection.pop(task)
                     envelope = task.result()
                     if envelope is not None:
+                        self._update_routing_helper(envelope, connection)
                         self.in_queue.put_nowait(envelope)
 
                     # reinstantiate receiving task, but only if the connection is still up.
-                    connection = task_to_connection.pop(task)
                     if connection.is_connected:
                         new_task = asyncio.ensure_future(connection.receive())
                         task_to_connection[new_task] = connection
@@ -483,49 +538,124 @@ class AsyncMultiplexer(Runnable, WithLogger):
         :param envelope: the envelope to send.
         :return: None
         :raises ValueError: if the connection id provided is not valid.
-        :raises AEAConnectionError: if the connection id provided is not valid.
         """
-        connection_id = None  # type: Optional[PublicId]
-        envelope_context = envelope.context
-        # first, try to route by context
-        if envelope_context is not None:
-            connection_id = envelope_context.connection_id
+        envelope_protocol_id = self._get_protocol_id_for_envelope(envelope)
+        connection_id = self._get_connection_id_from_envelope(
+            envelope, envelope_protocol_id
+        )
 
-        # second, try to route by default routing
-        if connection_id is None and envelope.protocol_id in self.default_routing:
-            connection_id = self.default_routing[envelope.protocol_id]
-            self.logger.debug("Using default routing: {}".format(connection_id))
+        connection = (
+            self._get_connection(connection_id) if connection_id is not None else None
+        )
 
-        if connection_id is not None and connection_id not in self._id_to_connection:
-            raise AEAConnectionError(
-                "No connection registered with id: {}.".format(connection_id)
-            )
-
-        # third, if no other option route by default connection
-        if connection_id is None:
-            self.logger.debug(
-                "Using default connection: {}".format(self.default_connection)
-            )
-            connection = self.default_connection
-        else:
-            connection = self._id_to_connection[connection_id]
-
-        connection = cast(Connection, connection)
-        if (
-            len(connection.restricted_to_protocols) > 0
-            and envelope.protocol_id not in connection.restricted_to_protocols
-        ):
+        if connection is None:
+            # we don't raise on dropping envelope as this can be a configuration issue only!
             self.logger.warning(
-                "Connection {} cannot handle protocol {}. Cannot send the envelope.".format(
-                    connection.connection_id, envelope.protocol_id
-                )
+                f"Dropping envelope, no connection available for sending: {envelope}"
             )
+            return
+
+        if not self._is_connection_supported_protocol(connection, envelope_protocol_id):
             return
 
         try:
             await connection.send(envelope)
         except Exception as e:  # pylint: disable=broad-except
             self._handle_exception(self._send, e)
+
+    def _get_connection_id_from_envelope(
+        self, envelope: Envelope, envelope_protocol_id: PublicId
+    ) -> Optional[PublicId]:
+        """
+        Get the connection id from an envelope.
+
+        Applies the following rules:
+        - component to component messages are routed by their component id
+        - agent to agent messages, are routed following four rules:
+            * first, try to route by envelope context connection id
+            * second, try to route by routing helper
+            * third, try to route by default routing
+            * forth, using default connection
+
+        :param envelope: the Envelope
+        :param envelope_protocol_id: the protocol id of the message contained in the envelope
+        :return: public id if found
+        """
+        # component to component messages are routed by their component id
+        if envelope.is_component_to_component_message:
+            connection_id = envelope.to_as_public_id
+            self.logger.debug(
+                "Using envelope `to` field as connection_id: {}".format(connection_id)
+            )
+            enforce(
+                connection_id is not None,
+                "Connection id cannot be None by envelope construction.",
+            )
+            return connection_id
+
+        # agent to agent messages, are routed following four rules:
+        # first, try to route by envelope context connection id
+        if envelope.context is not None and envelope.context.connection_id is not None:
+            connection_id = envelope.context.connection_id
+            self.logger.debug(
+                "Using envelope context connection_id: {}".format(connection_id)
+            )
+            return connection_id
+
+        # second, try to route by routing helper
+        if envelope.to in self._routing_helper:
+            connection_id = self._routing_helper[envelope.to]
+            self.logger.debug(
+                "Using routing helper with connection_id: {}".format(connection_id)
+            )
+            return connection_id
+
+        # third, try to route by default routing
+        if envelope_protocol_id in self.default_routing:
+            connection_id = self.default_routing[envelope_protocol_id]
+            self.logger.debug("Using default routing: {}".format(connection_id))
+            return connection_id
+
+        # forth, using default connection
+        connection_id = (
+            self.default_connection.connection_id
+            if self.default_connection is not None
+            else None
+        )
+        self.logger.debug("Using default connection: {}".format(connection_id))
+        return connection_id
+
+    def _get_connection(self, connection_id: PublicId) -> Optional[Connection]:
+        """Check if the connection id is registered."""
+        conn_ = self._id_to_connection.get(connection_id, None)
+        if conn_ is not None:
+            return conn_
+        for id_, conn_ in self._id_to_connection.items():
+            if id_.same_prefix(connection_id):
+                return conn_
+        self.logger.error(f"No connection registered with id: {connection_id}")
+        return None
+
+    def _is_connection_supported_protocol(
+        self, connection: Connection, protocol_id: PublicId
+    ) -> bool:
+        """Check protocol id is supported by the connection."""
+        if protocol_id in connection.excluded_protocols:
+            self.logger.warning(
+                f"Connection {connection.connection_id} does not support protocol {protocol_id}. It is explicitly excluded."
+            )
+            return False
+
+        if (
+            connection.restricted_to_protocols
+            and protocol_id not in connection.restricted_to_protocols
+        ):
+            self.logger.warning(
+                f"Connection {connection.connection_id} does not support protocol {protocol_id}. The connection is restricted to protocols in {connection.restricted_to_protocols}."
+            )
+            return False
+
+        return True
 
     def get(
         self, block: bool = False, timeout: Optional[float] = None
@@ -588,7 +718,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
         else:
             self.out_queue.put_nowait(envelope)
 
-    def setup(
+    def _setup(
         self,
         connections: Collection[Connection],
         default_routing: Optional[Dict[PublicId, PublicId]] = None,
@@ -603,15 +733,37 @@ class AsyncMultiplexer(Runnable, WithLogger):
         :return: None.
         """
         self.default_routing = default_routing or {}
+
+        # replace connections
         self._connections = []
+        self._id_to_connection = {}
+
         for c in connections:
             self.add_connection(c, c.public_id == default_connection)
+
+    def _update_routing_helper(
+        self, envelope: Envelope, connection: Connection
+    ) -> None:
+        """
+        Update the routing helper.
+
+        Saves the source (connection) of an agent-to-agent envelope.
+
+        :param envelope: the envelope to be updated
+        :param connection: the connection
+        """
+        if envelope.is_component_to_component_message:
+            return
+        self._routing_helper[envelope.sender] = connection.public_id
 
 
 class Multiplexer(AsyncMultiplexer):
     """Transit sync multiplexer for compatibility."""
 
-    def __init__(self, *args, **kwargs):
+    _thread_was_started: bool
+    _is_connected: bool
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """
         Initialize the connection multiplexer.
 
@@ -623,6 +775,10 @@ class Multiplexer(AsyncMultiplexer):
         """
         super().__init__(*args, **kwargs)
         self._sync_lock = threading.Lock()
+        self._init()
+
+    def _init(self) -> None:
+        """Set initial variables."""
         self._thread_was_started = False
         self._is_connected = False
 
@@ -669,7 +825,12 @@ class Multiplexer(AsyncMultiplexer):
             if self._thread_runner.is_alive() and self._thread_was_started:
                 self._thread_runner.stop()
                 self.logger.debug("Thread stopped")
+
             self.logger.debug("Disconnected")
+
+            # reset thread runner and init variables
+            self._init()
+            self.set_loop(self._loop)
 
     def put(self, envelope: Envelope) -> None:  # type: ignore  # cause overrides coroutine
         """
@@ -687,7 +848,7 @@ class Multiplexer(AsyncMultiplexer):
 class InBox:
     """A queue from where you can only consume envelopes."""
 
-    def __init__(self, multiplexer: AsyncMultiplexer):
+    def __init__(self, multiplexer: AsyncMultiplexer) -> None:
         """
         Initialize the inbox.
 
@@ -720,11 +881,7 @@ class InBox:
         if envelope is None:  # pragma: nocover
             raise Empty()
 
-        self._multiplexer.logger.debug(
-            "Incoming envelope: to='{}' sender='{}' protocol_id='{}' message='{!r}'".format(
-                envelope.to, envelope.sender, envelope.protocol_id, envelope.message
-            )
-        )
+        self._multiplexer.logger.debug(f"Incoming {envelope}")
         return envelope
 
     def get_nowait(self) -> Optional[Envelope]:
@@ -752,11 +909,7 @@ class InBox:
         if envelope is None:  # pragma: nocover
             raise Empty()
 
-        self._multiplexer.logger.debug(
-            "Incoming envelope: to='{}' sender='{}' protocol_id='{}' message='{!r}'".format(
-                envelope.to, envelope.sender, envelope.protocol_id, envelope.message
-            )
-        )
+        self._multiplexer.logger.debug(f"Incoming envelope: {envelope}")
         return envelope
 
     async def async_wait(self) -> None:
@@ -774,7 +927,7 @@ class InBox:
 class OutBox:
     """A queue from where you can only enqueue envelopes."""
 
-    def __init__(self, multiplexer: AsyncMultiplexer):
+    def __init__(self, multiplexer: AsyncMultiplexer) -> None:
         """
         Initialize the outbox.
 
@@ -798,15 +951,7 @@ class OutBox:
         :param envelope: the envelope.
         :return: None
         """
-        self._multiplexer.logger.debug(
-            "Put an envelope in the queue: to='{}' sender='{}' protocol_id='{}' message='{!r}' context='{}'.".format(
-                envelope.to,
-                envelope.sender,
-                envelope.protocol_id,
-                envelope.message,
-                envelope.context,
-            )
-        )
+        self._multiplexer.logger.debug(f"Put an envelope in the queue: {envelope}.")
         if not isinstance(envelope.message, Message):
             raise ValueError(
                 "Only Message type allowed in envelope message field when putting into outbox."
@@ -837,10 +982,6 @@ class OutBox:
         if not message.has_sender:
             raise ValueError("Provided message has message.sender not set.")
         envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-            context=context,
+            to=message.to, sender=message.sender, message=message, context=context,
         )
         self.put(envelope)

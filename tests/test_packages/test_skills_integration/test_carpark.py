@@ -22,25 +22,24 @@
 from random import uniform
 
 import pytest
+from aea_crypto_fetchai import FetchAICrypto
 
-from aea.test_tools.test_cases import AEATestCaseMany
+from aea.test_tools.test_cases import AEATestCaseManyFlaky
 
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
 from tests.conftest import (
-    COSMOS,
-    COSMOS_PRIVATE_KEY_FILE_CONNECTION,
-    FETCHAI,
     FETCHAI_PRIVATE_KEY_FILE,
+    FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
     MAX_FLAKY_RERUNS_INTEGRATION,
-    NON_FUNDED_COSMOS_PRIVATE_KEY_1,
+    NON_FUNDED_FETCHAI_PRIVATE_KEY_1,
     NON_GENESIS_CONFIG,
     wait_for_localhost_ports_to_close,
 )
 
 
 @pytest.mark.integration
-class TestCarPark(AEATestCaseMany):
+class TestCarPark(AEATestCaseManyFlaky):
     """Test that carpark skills work."""
 
     @pytest.mark.flaky(
@@ -53,8 +52,8 @@ class TestCarPark(AEATestCaseMany):
         self.create_agents(carpark_aea_name, carpark_client_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.6.0": "fetchai/ledger:0.8.0",
-            "fetchai/oef_search:0.9.0": "fetchai/soef:0.11.0",
+            "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
+            "fetchai/oef_search:0.13.0": "fetchai/soef:0.17.0",
         }
 
         # generate random location
@@ -65,12 +64,11 @@ class TestCarPark(AEATestCaseMany):
 
         # Setup agent one
         self.set_agent_context(carpark_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/soef:0.11.0")
-        self.remove_item("connection", "fetchai/stub:0.12.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/ledger:0.8.0")
-        self.add_item("skill", "fetchai/carpark_detection:0.14.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.16.0")
+        self.add_item("connection", "fetchai/soef:0.17.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.16.0")
+        self.add_item("connection", "fetchai/ledger:0.13.0")
+        self.add_item("skill", "fetchai/carpark_detection:0.19.0")
         setting_path = (
             "vendor.fetchai.skills.carpark_detection.models.strategy.args.is_ledger_tx"
         )
@@ -80,33 +78,35 @@ class TestCarPark(AEATestCaseMany):
         self.run_install()
 
         # add keys
-        self.generate_private_key(FETCHAI)
-        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.generate_private_key(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        )
+        self.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+            connection=True,
         )
         self.replace_private_key_in_file(
-            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
+            NON_FUNDED_FETCHAI_PRIVATE_KEY_1, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
         )
-
-        setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.set_config(setting_path, COSMOS)
 
         # replace location
         setting_path = (
             "vendor.fetchai.skills.carpark_detection.models.strategy.args.location"
         )
         self.nested_set_config(setting_path, location)
+        self.run_cli_command("build", cwd=self._get_cwd())
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
         # Setup agent two
         self.set_agent_context(carpark_client_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/soef:0.11.0")
-        self.remove_item("connection", "fetchai/stub:0.12.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/ledger:0.8.0")
-        self.add_item("skill", "fetchai/carpark_client:0.14.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.16.0")
+        self.add_item("connection", "fetchai/soef:0.17.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.16.0")
+        self.add_item("connection", "fetchai/ledger:0.13.0")
+        self.add_item("skill", "fetchai/carpark_client:0.20.0")
         setting_path = (
             "vendor.fetchai.skills.carpark_client.models.strategy.args.is_ledger_tx"
         )
@@ -116,11 +116,15 @@ class TestCarPark(AEATestCaseMany):
         self.run_install()
 
         # add keys
-        self.generate_private_key(FETCHAI)
-        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.generate_private_key(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        )
+        self.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+            connection=True,
         )
 
         # set p2p configs
@@ -132,21 +136,21 @@ class TestCarPark(AEATestCaseMany):
             "vendor.fetchai.skills.carpark_client.models.strategy.args.location"
         )
         self.nested_set_config(setting_path, location)
+        self.run_cli_command("build", cwd=self._get_cwd())
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
         # Fire the sub-processes and the threads.
         self.set_agent_context(carpark_aea_name)
         carpark_aea_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            carpark_aea_process, check_strings, timeout=240, is_terminating=False
+            carpark_aea_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -156,15 +160,13 @@ class TestCarPark(AEATestCaseMany):
         carpark_client_aea_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            carpark_client_aea_process, check_strings, timeout=240, is_terminating=False
+            carpark_client_aea_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -215,7 +217,7 @@ class TestCarPark(AEATestCaseMany):
 
 
 @pytest.mark.integration
-class TestCarParkFetchaiLedger(AEATestCaseMany):
+class TestCarParkFetchaiLedger(AEATestCaseManyFlaky):
     """Test that carpark skills work."""
 
     @pytest.mark.flaky(
@@ -228,8 +230,8 @@ class TestCarParkFetchaiLedger(AEATestCaseMany):
         self.create_agents(carpark_aea_name, carpark_client_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.6.0": "fetchai/ledger:0.8.0",
-            "fetchai/oef_search:0.9.0": "fetchai/soef:0.11.0",
+            "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
+            "fetchai/oef_search:0.13.0": "fetchai/soef:0.17.0",
         }
 
         # generate random location
@@ -240,72 +242,77 @@ class TestCarParkFetchaiLedger(AEATestCaseMany):
 
         # Setup agent one
         self.set_agent_context(carpark_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/soef:0.11.0")
-        self.remove_item("connection", "fetchai/stub:0.12.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/ledger:0.8.0")
-        self.add_item("skill", "fetchai/carpark_detection:0.14.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.16.0")
+        self.add_item("connection", "fetchai/soef:0.17.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.16.0")
+        self.add_item("connection", "fetchai/ledger:0.13.0")
+        self.add_item("skill", "fetchai/carpark_detection:0.19.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/car_detector:0.15.0", carpark_aea_name
+            "fetchai/car_detector:0.22.0", carpark_aea_name
         )
         assert (
             diff == []
         ), "Difference between created and fetched project for files={}".format(diff)
 
         # add keys
-        self.generate_private_key(FETCHAI)
-        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.generate_private_key(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        )
+        self.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+            connection=True,
         )
         self.replace_private_key_in_file(
-            NON_FUNDED_COSMOS_PRIVATE_KEY_1, COSMOS_PRIVATE_KEY_FILE_CONNECTION
+            NON_FUNDED_FETCHAI_PRIVATE_KEY_1, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
         )
-
-        setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.set_config(setting_path, COSMOS)
 
         # replace location
         setting_path = (
             "vendor.fetchai.skills.carpark_detection.models.strategy.args.location"
         )
         self.nested_set_config(setting_path, location)
+        self.run_cli_command("build", cwd=self._get_cwd())
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
         # Setup agent two
         self.set_agent_context(carpark_client_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/soef:0.11.0")
-        self.remove_item("connection", "fetchai/stub:0.12.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.12.0")
-        self.add_item("connection", "fetchai/ledger:0.8.0")
-        self.add_item("skill", "fetchai/carpark_client:0.14.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.16.0")
+        self.add_item("connection", "fetchai/soef:0.17.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.16.0")
+        self.add_item("connection", "fetchai/ledger:0.13.0")
+        self.add_item("skill", "fetchai/carpark_client:0.20.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/car_data_buyer:0.15.0", carpark_client_aea_name
+            "fetchai/car_data_buyer:0.23.0", carpark_client_aea_name
         )
         assert (
             diff == []
         ), "Difference between created and fetched project for files={}".format(diff)
 
         # add keys
-        self.generate_private_key(FETCHAI)
-        self.generate_private_key(COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.generate_private_key(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        )
+        self.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            COSMOS, COSMOS_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+            connection=True,
         )
 
         # fund key
-        self.generate_wealth(FETCHAI)
+        self.generate_wealth(FetchAICrypto.identifier)
 
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
@@ -316,21 +323,21 @@ class TestCarParkFetchaiLedger(AEATestCaseMany):
             "vendor.fetchai.skills.carpark_client.models.strategy.args.location"
         )
         self.nested_set_config(setting_path, location)
+        self.run_cli_command("build", cwd=self._get_cwd())
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
         # Fire the sub-processes and the threads.
         self.set_agent_context(carpark_aea_name)
         carpark_aea_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            carpark_aea_process, check_strings, timeout=240, is_terminating=False
+            carpark_aea_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -340,15 +347,13 @@ class TestCarParkFetchaiLedger(AEATestCaseMany):
         carpark_client_aea_process = self.run_agent()
 
         check_strings = (
-            "Downloading golang dependencies. This may take a while...",
-            "Finished downloading golang dependencies.",
             "Starting libp2p node...",
             "Connecting to libp2p node...",
             "Successfully connected to libp2p node!",
             LIBP2P_SUCCESS_MESSAGE,
         )
         missing_strings = self.missing_from_output(
-            carpark_client_aea_process, check_strings, timeout=240, is_terminating=False
+            carpark_client_aea_process, check_strings, timeout=30, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -368,7 +373,7 @@ class TestCarParkFetchaiLedger(AEATestCaseMany):
             "transaction confirmed, sending data=",
         )
         missing_strings = self.missing_from_output(
-            carpark_aea_process, check_strings, timeout=240, is_terminating=False
+            carpark_aea_process, check_strings, timeout=120, is_terminating=False
         )
         assert (
             missing_strings == []
@@ -380,7 +385,7 @@ class TestCarParkFetchaiLedger(AEATestCaseMany):
             "received proposal=",
             "accepting the proposal from sender=",
             "received MATCH_ACCEPT_W_INFORM from sender=",
-            "requesting transfer transaction from ledger api...",
+            "requesting transfer transaction from ledger api for message=",
             "received raw transaction=",
             "proposing the transaction to the decision maker. Waiting for confirmation ...",
             "transaction signing was successful.",

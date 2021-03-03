@@ -16,11 +16,10 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Implementation of the 'aea run' subcommand."""
-
+from contextlib import contextmanager
 from pathlib import Path
-from typing import List, Optional, cast
+from typing import Generator, List, Optional, cast
 
 import click
 
@@ -33,8 +32,13 @@ from aea.cli.utils.constants import AEA_LOGO, REQUIREMENTS
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.configurations.base import PublicId
-from aea.exceptions import AEAPackageLoadingError
+from aea.connections.base import Connection
+from aea.contracts.base import Contract
 from aea.helpers.base import load_env_file
+from aea.helpers.profiling import Profiling
+from aea.protocols.base import Message, Protocol
+from aea.protocols.dialogue.base import Dialogue
+from aea.skills.base import Behaviour, Handler, Model, Skill
 
 
 @click.command()
@@ -62,14 +66,66 @@ from aea.helpers.base import load_env_file
     default=False,
     help="Install all the dependencies before running the agent.",
 )
+@click.option(
+    "--profiling",
+    "profiling",
+    required=False,
+    default=0,
+    help="Enable profiling, print profiling every amount of seconds",
+)
 @click.pass_context
 @check_aea_project
 def run(
-    click_context, connection_ids: List[PublicId], env_file: str, is_install_deps: bool
-):
+    click_context: click.Context,
+    connection_ids: List[PublicId],
+    env_file: str,
+    is_install_deps: bool,
+    profiling: int,
+) -> None:
     """Run the agent."""
     ctx = cast(Context, click_context.obj)
+    profiling = int(profiling)
+    if profiling > 0:
+        with _profiling_context(period=profiling):
+            run_aea(ctx, connection_ids, env_file, is_install_deps)
+            return
     run_aea(ctx, connection_ids, env_file, is_install_deps)
+
+
+@contextmanager
+def _profiling_context(period: int) -> Generator:
+    """Start profiling context."""
+    OBJECTS_INSTANCES = [
+        Message,
+        Dialogue,
+        Handler,
+        Model,
+        Behaviour,
+        Skill,
+        Connection,
+        Contract,
+        Protocol,
+    ]
+    OBJECTS_CREATED = [Message, Dialogue]
+
+    profiler = Profiling(
+        period=period,
+        objects_instances_to_count=OBJECTS_INSTANCES,
+        objects_created_to_count=OBJECTS_CREATED,
+    )
+    profiler.start()
+    try:
+        yield None
+    except Exception:  # pylint: disable=try-except-raise # pragma: nocover
+        raise
+    finally:
+        profiler.stop()
+        profiler.wait_completed(sync=True, timeout=10)
+        # hack to address faulty garbage collection output being printed
+        import os  # pylint: disable=import-outside-toplevel
+        import sys  # pylint: disable=import-outside-toplevel
+
+        sys.stderr = open(os.devnull, "w")
 
 
 def run_aea(
@@ -129,7 +185,5 @@ def _build_aea(
         )
         aea = builder.build(connection_ids=connection_ids)
         return aea
-    except AEAPackageLoadingError as e:  # pragma: nocover
-        raise click.ClickException("Package loading error: {}".format(str(e)))
     except Exception as e:
         raise click.ClickException(str(e))

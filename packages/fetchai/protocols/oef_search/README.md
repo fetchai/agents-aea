@@ -2,7 +2,7 @@
 
 ## Description
 
-This is a protocol for interacting with an OEF search service. 
+This is a protocol for interacting with an OEF search service.
 It allows for registering of agents and services, and searching of agents and services using a query language.
 
 ## Specification
@@ -11,10 +11,11 @@ It allows for registering of agents and services, and searching of agents and se
 ---
 name: oef_search
 author: fetchai
-version: 0.9.0
+version: 0.13.0
 description: A protocol for interacting with an OEF search service.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.10.0, <0.11.0'
+protocol_specification_id: fetchai/oef_search:0.1.0
 speech_acts:
   register_service:
     service_description: ct:Description
@@ -32,15 +33,9 @@ speech_acts:
 ...
 ---
 ct:Query: |
-  message Nothing {
-  }
-  oneof query{
-      bytes bytes = 1;
-      Nothing nothing = 2;
-      bytes query_bytes = 3;
-  }
+  bytes query_bytes = 1;
 ct:Description: |
-  bytes description = 1;
+  bytes description_bytes = 1;
 ct:AgentsInfo: |
   bytes agents_info = 1;
 ct:OefErrorOperation: |
@@ -64,6 +59,7 @@ reply:
 termination: [oef_error, search_result, success]
 roles: {agent, oef_node}
 end_states: [successful, failed]
+keep_terminal_state_dialogues: false
 ...
 ```
 

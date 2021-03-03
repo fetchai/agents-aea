@@ -16,12 +16,9 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Helper functions related to YAML loading/dumping."""
-import os
-import re
 from collections import OrderedDict
-from typing import Any, Dict, List, Match, Optional, Sequence, TextIO, cast
+from typing import Any, Dict, List, Optional, Sequence, TextIO
 
 import yaml
 from yaml import MappingNode
@@ -39,10 +36,7 @@ class _AEAYamlLoader(yaml.SafeLoader):
     the public functions of the module 'yaml_load' and 'yaml_load_all'.
     """
 
-    envvar_matcher = re.compile(r"\${([^}^{]+)\}")
-    envvar_key = "!envvar"
-
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """
         Initialize the AEAYamlLoader.
 
@@ -52,43 +46,13 @@ class _AEAYamlLoader(yaml.SafeLoader):
         _AEAYamlLoader.add_constructor(
             yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, self._construct_mapping
         )
-        _AEAYamlLoader.add_constructor(self.envvar_key, self._envvar_constructor)
-        self._add_implicit_resolver_if_not_present_already()
-
-    def _add_implicit_resolver_if_not_present_already(self) -> None:
-        """Add implicit resolver for environment variables, if not present already."""
-        if self.envvar_key not in dict(self.yaml_implicit_resolvers.get(None, [])):
-            _AEAYamlLoader.add_implicit_resolver(
-                self.envvar_key, self.envvar_matcher, None
-            )
 
     @staticmethod
-    def _construct_mapping(loader: "_AEAYamlLoader", node: MappingNode):
+    def _construct_mapping(loader: "_AEAYamlLoader", node: MappingNode) -> OrderedDict:
         """Construct a YAML mapping with OrderedDict."""
         object_pairs_hook = OrderedDict
         loader.flatten_mapping(node)
         return object_pairs_hook(loader.construct_pairs(node))
-
-    @staticmethod
-    def _envvar_constructor(_loader: "_AEAYamlLoader", node: MappingNode) -> str:
-        """Extract the matched value, expand env variable, and replace the match."""
-        node_value = node.value
-        match = _AEAYamlLoader.envvar_matcher.match(node_value)
-        match = cast(Match[str], match)
-        env_var = match.group()[2:-1]
-
-        # check for defaults
-        var_split = env_var.split(":")
-        if len(var_split) == 2:
-            var_name, default_value = var_split
-        elif len(var_split) == 1:
-            var_name, default_value = var_split[0], ""
-        else:
-            raise ValueError(f"Cannot resolve environment variable '{env_var}'.")
-        var_name = var_name.strip()
-        default_value = default_value.strip()
-        var_value = os.getenv(var_name, default_value)
-        return var_value + node_value[match.end() :]
 
 
 class _AEAYamlDumper(yaml.SafeDumper):
@@ -102,7 +66,7 @@ class _AEAYamlDumper(yaml.SafeDumper):
     the public functions of the module 'yaml_dump' and 'yaml_dump_all'.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """
         Initialize the AEAYamlDumper.
 
@@ -126,7 +90,8 @@ def yaml_load(stream: TextIO) -> Dict[str, Any]:
     :param stream: file pointer to the input file.
     :return: the dictionary object with the YAML file content.
     """
-    return yaml.load(stream, Loader=_AEAYamlLoader)  # nosec
+    result = yaml.load(stream, Loader=_AEAYamlLoader)  # nosec
+    return result if result is not None else {}
 
 
 def yaml_load_all(stream: TextIO) -> List[Dict[str, Any]]:

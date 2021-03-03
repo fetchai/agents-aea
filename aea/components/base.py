@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains definitions of agent components."""
 import importlib.util
 import logging
@@ -24,7 +23,7 @@ import sys
 import types
 from abc import ABC
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from aea.configurations.base import (
     ComponentConfiguration,
@@ -32,6 +31,7 @@ from aea.configurations.base import (
     ComponentType,
     PublicId,
 )
+from aea.configurations.constants import PACKAGES
 from aea.exceptions import AEAEnforceError
 from aea.helpers.logging import WithLogger
 
@@ -42,12 +42,14 @@ _default_logger = logging.getLogger(__name__)
 class Component(ABC, WithLogger):
     """Abstract class for an agent component."""
 
+    __slots__ = ("_configuration", "_directory", "_is_vendor")
+
     def __init__(
         self,
         configuration: Optional[ComponentConfiguration] = None,
         is_vendor: bool = False,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         """
         Initialize a package.
 
@@ -70,7 +72,7 @@ class Component(ABC, WithLogger):
         return self._is_vendor
 
     @property
-    def prefix_import_path(self):
+    def prefix_import_path(self) -> str:
         """Get the prefix import path for this component."""
         return self.configuration.prefix_import_path
 
@@ -105,6 +107,11 @@ class Component(ABC, WithLogger):
             raise ValueError("Directory already set.")
         self._directory = path
 
+    @property
+    def build_directory(self) -> Optional[str]:
+        """Get build directory for the component."""
+        return self.configuration.build_directory
+
 
 def load_aea_package(configuration: ComponentConfiguration) -> None:
     """
@@ -120,7 +127,7 @@ def load_aea_package(configuration: ComponentConfiguration) -> None:
         raise AEAEnforceError("configuration directory does not exists.")
 
     # patch sys.modules with dummy modules
-    prefix_root = "packages"
+    prefix_root = PACKAGES
     prefix_author = prefix_root + f".{configuration.author}"
     prefix_pkg_type = prefix_author + f".{configuration.component_type.to_plural()}"
     prefix_pkg = prefix_pkg_type + f".{configuration.name}"

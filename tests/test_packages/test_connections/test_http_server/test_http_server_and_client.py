@@ -18,9 +18,11 @@
 # ------------------------------------------------------------------------------
 """Tests for the HTTP Client and Server connections together."""
 import asyncio
+import email
 import logging
 import urllib
-from typing import cast
+from typing import Dict, Optional, cast
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -31,7 +33,10 @@ from aea.mail.base import Envelope, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 
 from packages.fetchai.connections.http_client.connection import HTTPClientConnection
-from packages.fetchai.connections.http_server.connection import HTTPServerConnection
+from packages.fetchai.connections.http_server.connection import (
+    HTTPServerConnection,
+    headers_to_string,
+)
 from packages.fetchai.protocols.http.dialogues import HttpDialogue, HttpDialogues
 from packages.fetchai.protocols.http.message import HttpMessage
 
@@ -39,6 +44,8 @@ from tests.conftest import get_host, get_unused_tcp_port
 
 
 logger = logging.getLogger(__name__)
+
+SKILL_ID_STR = "some_author/some_skill:0.1.0"
 
 
 class TestClientServer:
@@ -54,16 +61,19 @@ class TestClientServer:
         self.port = get_unused_tcp_port()
         self.connection_id = HTTPServerConnection.connection_id
         self.protocol_id = HttpMessage.protocol_id
+        self.target_skill_id = SKILL_ID_STR
 
         self.configuration = ConnectionConfig(
             host=self.host,
             port=self.port,
+            target_skill_id=self.target_skill_id,
             api_spec_path=None,  # do not filter on API spec
             connection_id=HTTPServerConnection.connection_id,
-            restricted_to_protocols=set([self.protocol_id]),
         )
         self.server = HTTPServerConnection(
-            configuration=self.configuration, identity=self.server_agent_identity,
+            configuration=self.configuration,
+            data_dir=MagicMock(),
+            identity=self.server_agent_identity,
         )
         self.loop = asyncio.get_event_loop()
         self.loop.run_until_complete(self.server.connect())
@@ -80,13 +90,14 @@ class TestClientServer:
             """
             return HttpDialogue.Role.SERVER
 
-        self._server_dialogues = HttpDialogues(
-            self.server_agent_address, role_from_first_message=role_from_first_message
+        self._skill_dialogues = HttpDialogues(
+            SKILL_ID_STR, role_from_first_message=role_from_first_message
         )
 
     def setup_client(self):
         """Set up client connection."""
         self.client_agent_address = "client_agent_address"
+        self.client_agent_skill_id = "some/skill:0.1.0"
         self.client_agent_identity = Identity(
             "agent running client", address=self.client_agent_address
         )
@@ -96,7 +107,9 @@ class TestClientServer:
             connection_id=HTTPClientConnection.connection_id,
         )
         self.client = HTTPClientConnection(
-            configuration=configuration, identity=self.client_agent_identity
+            configuration=configuration,
+            data_dir=MagicMock(),
+            identity=self.client_agent_identity,
         )
         self.loop.run_until_complete(self.client.connect())
 
@@ -113,7 +126,7 @@ class TestClientServer:
             return HttpDialogue.Role.CLIENT
 
         self._client_dialogues = HttpDialogues(
-            self.client_agent_address, role_from_first_message=role_from_first_message
+            self.client_agent_skill_id, role_from_first_message=role_from_first_message
         )
 
     def setup(self):
@@ -122,7 +135,11 @@ class TestClientServer:
         self.setup_client()
 
     def _make_request(
-        self, path: str, method: str = "get", headers: str = "", body: bytes = b""
+        self,
+        path: str,
+        method: str = "get",
+        headers: Optional[Dict] = None,
+        body: bytes = b"",
     ) -> Envelope:
         """Make request envelope."""
         request_http_message, _ = self._client_dialogues.create(
@@ -130,14 +147,13 @@ class TestClientServer:
             performative=HttpMessage.Performative.REQUEST,
             method=method,
             url=f"http://{self.host}:{self.port}{path}",
-            headers="",
+            headers=headers_to_string(headers) if headers else "",
             version="",
             body=b"",
         )
         request_envelope = Envelope(
             to=request_http_message.to,
             sender=request_http_message.sender,
-            protocol_id=request_http_message.protocol_id,
             message=request_http_message,
         )
         return request_envelope
@@ -147,7 +163,7 @@ class TestClientServer:
     ) -> Envelope:
         """Make response envelope."""
         incoming_message = cast(HttpMessage, request_envelope.message)
-        dialogue = self._server_dialogues.update(incoming_message)
+        dialogue = self._skill_dialogues.update(incoming_message)
         assert dialogue is not None
         message = dialogue.reply(
             target_message=incoming_message,
@@ -161,7 +177,6 @@ class TestClientServer:
         response_envelope = Envelope(
             to=message.to,
             sender=message.sender,
-            protocol_id=message.protocol_id,
             context=request_envelope.context,
             message=message,
         )
@@ -206,6 +221,37 @@ class TestClientServer:
         await self.server.send(initial_response)
         response = await asyncio.wait_for(self.client.receive(), timeout=5)
 
+        assert (
+            initial_request.message.dialogue_reference[0]
+            == response.message.dialogue_reference[0]
+        )
+
+    @pytest.mark.asyncio
+    async def test_headers(self):
+        """Test client and server with url query."""
+        headers = {"key1": "value1", "key2": "value2"}
+        path = "/test"
+        initial_request = self._make_request(path, "GET", headers=headers)
+        await self.client.send(initial_request)
+
+        request = await asyncio.wait_for(self.server.receive(), timeout=5)
+        parsed_headers = dict(
+            email.message_from_string(
+                cast(HttpMessage, request.message).headers
+            ).items()
+        )
+        assert parsed_headers.items() >= headers.items()
+
+        initial_response = self._make_response(request)
+        await self.server.send(initial_response)
+
+        response = await asyncio.wait_for(self.client.receive(), timeout=5)
+        parsed_headers = dict(
+            email.message_from_string(
+                cast(HttpMessage, response.message).headers
+            ).items()
+        )
+        assert parsed_headers.items() >= headers.items()
         assert (
             initial_request.message.dialogue_reference[0]
             == response.message.dialogue_reference[0]

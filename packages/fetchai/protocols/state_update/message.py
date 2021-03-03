@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2020 fetchai
+#   Copyright 2021 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 """This module contains state_update's message definition."""
 
 import logging
-from typing import Dict, Set, Tuple, cast
+from typing import Any, Dict, Set, Tuple, cast
 
 from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
@@ -37,17 +37,34 @@ DEFAULT_BODY_SIZE = 4
 class StateUpdateMessage(Message):
     """A protocol for state updates to the decision maker state."""
 
-    protocol_id = PublicId.from_str("fetchai/state_update:0.6.0")
+    protocol_id = PublicId.from_str("fetchai/state_update:0.10.0")
+    protocol_specification_id = PublicId.from_str("fetchai/state_update:0.1.0")
 
     class Performative(Message.Performative):
         """Performatives for the state_update protocol."""
 
         APPLY = "apply"
+        END = "end"
         INITIALIZE = "initialize"
 
-        def __str__(self):
+        def __str__(self) -> str:
             """Get the string representation."""
             return str(self.value)
+
+    _performatives = {"apply", "end", "initialize"}
+    __slots__: Tuple[str, ...] = tuple()
+
+    class _SlotsCls:
+        __slots__ = (
+            "amount_by_currency_id",
+            "dialogue_reference",
+            "exchange_params_by_currency_id",
+            "message_id",
+            "performative",
+            "quantities_by_good_id",
+            "target",
+            "utility_params_by_good_id",
+        )
 
     def __init__(
         self,
@@ -55,7 +72,7 @@ class StateUpdateMessage(Message):
         dialogue_reference: Tuple[str, str] = ("", ""),
         message_id: int = 1,
         target: int = 0,
-        **kwargs,
+        **kwargs: Any,
     ):
         """
         Initialise an instance of StateUpdateMessage.
@@ -65,7 +82,6 @@ class StateUpdateMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        self._performatives = {"apply", "initialize"}
         super().__init__(
             dialogue_reference=dialogue_reference,
             message_id=message_id,
@@ -321,6 +337,8 @@ class StateUpdateMessage(Message):
                             type(value_of_quantities_by_good_id)
                         ),
                     )
+            elif self.performative == StateUpdateMessage.Performative.END:
+                expected_nb_of_contents = 0
 
             # Check correct content count
             enforce(
@@ -336,13 +354,6 @@ class StateUpdateMessage(Message):
                     self.target == 0,
                     "Invalid 'target'. Expected 0 (because 'message_id' is 1). Found {}.".format(
                         self.target
-                    ),
-                )
-            else:
-                enforce(
-                    0 < self.target < self.message_id,
-                    "Invalid 'target'. Expected an integer between 1 and {} inclusive. Found {}.".format(
-                        self.message_id - 1, self.target,
                     ),
                 )
         except (AEAEnforceError, ValueError, KeyError) as e:

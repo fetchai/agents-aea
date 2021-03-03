@@ -25,9 +25,6 @@ from aea.common import Address
 from aea.configurations.constants import DEFAULT_LEDGER
 
 
-DEFAULT_ADDRESS_KEY = DEFAULT_LEDGER
-
-
 class Identity:
     """
     The identity holds the public elements identifying an agent.
@@ -38,13 +35,15 @@ class Identity:
     - the addresses, a map from address identifier to address (can be a single key-value pair)
     """
 
+    __slots__ = ("_name", "_address", "_addresses", "_default_address_key")
+
     def __init__(
         self,
         name: str,
         address: Optional[str] = None,
         addresses: Optional[Dict[str, Address]] = None,
-        default_address_key: str = DEFAULT_ADDRESS_KEY,
-    ):
+        default_address_key: str = DEFAULT_LEDGER,
+    ) -> None:
         """
         Instantiate the identity.
 

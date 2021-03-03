@@ -1,6 +1,6 @@
 AEAs are more than just agents.
 
-<img src="../assets/aea-vs-agent-vs-multiplexer.png" alt="AEA vs Agent vs Multiplexer" class="center" style="display: block; margin-left: auto; margin-right: auto;width:100%;">
+<img src="../assets/aea-vs-agent-vs-multiplexer.jpg" alt="AEA vs Agent vs Multiplexer" class="center" style="display: block; margin-left: auto; margin-right: auto;width:100%;">
 
 In this guide we show some of the differences in terms of code.
 
@@ -39,7 +39,7 @@ Such a lightweight agent can be used to implement simple logic.
 
 ## Code an `Agent`
 
-We define our `Agent` which simply receives envelopes, prints the sender address and protocol_id and returns it unopened.
+We define our `Agent` which simply receives envelopes, prints the sender address and `protocol_id` and returns it unopened.
 ``` python
 INPUT_FILE = "input_file"
 OUTPUT_FILE = "output_file"
@@ -68,7 +68,11 @@ class MyAgent(Agent):
         :return: None
         """
         print("React called for tick {}".format(self.tick))
-        if envelope is not None and envelope.protocol_id == DefaultMessage.protocol_id:
+        if (
+            envelope is not None
+            and envelope.protocol_specification_id
+            == DefaultMessage.protocol_specification_id
+        ):
             sender = envelope.sender
             receiver = envelope.to
             envelope.to = sender
@@ -77,8 +81,8 @@ class MyAgent(Agent):
             envelope.message.sender = receiver
             envelope.message.to = sender
             print(
-                "Received envelope from {} with protocol_id={}".format(
-                    sender, envelope.protocol_id
+                "Received envelope from {} with protocol_specification_id={}".format(
+                    sender, envelope.protocol_specification_id
                 )
             )
             self.outbox.put(envelope)
@@ -106,7 +110,9 @@ class MyAgent(Agent):
         output_file_path=OUTPUT_FILE,
         connection_id=StubConnection.connection_id,
     )
-    stub_connection = StubConnection(configuration=configuration, identity=identity)
+    stub_connection = StubConnection(
+        configuration=configuration, data_dir=".", identity=identity
+    )
 
     # Create our Agent
     my_agent = MyAgent(identity, [stub_connection])
@@ -128,7 +134,7 @@ We run the agent from a different thread so that we can still use the main threa
 We use the input and output text files to send an envelope to our agent and receive a response
 ``` python
         # Create a message inside an envelope and get the stub connection to pass it into the agent
-        message_text = b"my_agent,other_agent,fetchai/default:0.8.0,\x12\r\x08\x01*\t*\x07\n\x05hello,"
+        message_text = b"my_agent,other_agent,fetchai/default:0.1.0,\x12\r\x08\x01*\t*\x07\n\x05hello,"
 
         with open(INPUT_FILE, "wb") as f:
             write_with_lock(f, message_text)
@@ -204,7 +210,11 @@ class MyAgent(Agent):
         :return: None
         """
         print("React called for tick {}".format(self.tick))
-        if envelope is not None and envelope.protocol_id == DefaultMessage.protocol_id:
+        if (
+            envelope is not None
+            and envelope.protocol_specification_id
+            == DefaultMessage.protocol_specification_id
+        ):
             sender = envelope.sender
             receiver = envelope.to
             envelope.to = sender
@@ -213,8 +223,8 @@ class MyAgent(Agent):
             envelope.message.sender = receiver
             envelope.message.to = sender
             print(
-                "Received envelope from {} with protocol_id={}".format(
-                    sender, envelope.protocol_id
+                "Received envelope from {} with protocol_specification_id={}".format(
+                    sender, envelope.protocol_specification_id
                 )
             )
             self.outbox.put(envelope)
@@ -242,7 +252,9 @@ def run():
         output_file_path=OUTPUT_FILE,
         connection_id=StubConnection.connection_id,
     )
-    stub_connection = StubConnection(configuration=configuration, identity=identity)
+    stub_connection = StubConnection(
+        configuration=configuration, data_dir=".", identity=identity
+    )
 
     # Create our Agent
     my_agent = MyAgent(identity, [stub_connection])
@@ -256,7 +268,7 @@ def run():
         time.sleep(3)
 
         # Create a message inside an envelope and get the stub connection to pass it into the agent
-        message_text = b"my_agent,other_agent,fetchai/default:0.8.0,\x12\r\x08\x01*\t*\x07\n\x05hello,"
+        message_text = b"my_agent,other_agent,fetchai/default:0.1.0,\x12\r\x08\x01*\t*\x07\n\x05hello,"
 
         with open(INPUT_FILE, "wb") as f:
             write_with_lock(f, message_text)

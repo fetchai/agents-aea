@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2020 fetchai
+#   Copyright 2021 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 """This module contains fipa's message definition."""
 
 import logging
-from typing import Dict, Set, Tuple, cast
+from typing import Any, Dict, Set, Tuple, cast
 
 from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
@@ -40,7 +40,8 @@ DEFAULT_BODY_SIZE = 4
 class FipaMessage(Message):
     """A protocol for FIPA ACL."""
 
-    protocol_id = PublicId.from_str("fetchai/fipa:0.9.0")
+    protocol_id = PublicId.from_str("fetchai/fipa:0.13.0")
+    protocol_specification_id = PublicId.from_str("fetchai/fipa:0.1.0")
 
     Description = CustomDescription
 
@@ -53,14 +54,39 @@ class FipaMessage(Message):
         ACCEPT_W_INFORM = "accept_w_inform"
         CFP = "cfp"
         DECLINE = "decline"
+        END = "end"
         INFORM = "inform"
         MATCH_ACCEPT = "match_accept"
         MATCH_ACCEPT_W_INFORM = "match_accept_w_inform"
         PROPOSE = "propose"
 
-        def __str__(self):
+        def __str__(self) -> str:
             """Get the string representation."""
             return str(self.value)
+
+    _performatives = {
+        "accept",
+        "accept_w_inform",
+        "cfp",
+        "decline",
+        "end",
+        "inform",
+        "match_accept",
+        "match_accept_w_inform",
+        "propose",
+    }
+    __slots__: Tuple[str, ...] = tuple()
+
+    class _SlotsCls:
+        __slots__ = (
+            "dialogue_reference",
+            "info",
+            "message_id",
+            "performative",
+            "proposal",
+            "query",
+            "target",
+        )
 
     def __init__(
         self,
@@ -68,7 +94,7 @@ class FipaMessage(Message):
         dialogue_reference: Tuple[str, str] = ("", ""),
         message_id: int = 1,
         target: int = 0,
-        **kwargs,
+        **kwargs: Any,
     ):
         """
         Initialise an instance of FipaMessage.
@@ -78,16 +104,6 @@ class FipaMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        self._performatives = {
-            "accept",
-            "accept_w_inform",
-            "cfp",
-            "decline",
-            "inform",
-            "match_accept",
-            "match_accept_w_inform",
-            "propose",
-        }
         super().__init__(
             dialogue_reference=dialogue_reference,
             message_id=message_id,
@@ -274,6 +290,8 @@ class FipaMessage(Message):
                 expected_nb_of_contents = 0
             elif self.performative == FipaMessage.Performative.MATCH_ACCEPT:
                 expected_nb_of_contents = 0
+            elif self.performative == FipaMessage.Performative.END:
+                expected_nb_of_contents = 0
 
             # Check correct content count
             enforce(
@@ -289,13 +307,6 @@ class FipaMessage(Message):
                     self.target == 0,
                     "Invalid 'target'. Expected 0 (because 'message_id' is 1). Found {}.".format(
                         self.target
-                    ),
-                )
-            else:
-                enforce(
-                    0 < self.target < self.message_id,
-                    "Invalid 'target'. Expected an integer between 1 and {} inclusive. Found {}.".format(
-                        self.message_id - 1, self.target,
                     ),
                 )
         except (AEAEnforceError, ValueError, KeyError) as e:

@@ -23,13 +23,14 @@ import logging
 import os
 import unittest.mock
 from threading import Thread
+from unittest.mock import MagicMock
 
 from aea.aea import AEA
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
-from aea.mail.base import Envelope, EnvelopeContext
+from aea.mail.base import Envelope
 from aea.multiplexer import InBox, Multiplexer
 from aea.registries.resources import Resources
 from aea.skills.base import SkillContext
@@ -74,21 +75,23 @@ class TestSkillError:
         private_key_path = os.path.join(CUR_PATH, "data", DEFAULT_PRIVATE_KEY_FILE)
         self.wallet = Wallet({DEFAULT_LEDGER: private_key_path})
         self.agent_name = "Agent0"
+        self.data_dir = MagicMock()
 
         self.connection = _make_dummy_connection()
         self.identity = Identity(
             self.agent_name, address=self.wallet.addresses[DEFAULT_LEDGER]
         )
         self.address = self.identity.address
-
+        resources = Resources()
+        resources.add_connection(self.connection)
         self.my_aea = AEA(
             self.identity,
             self.wallet,
+            resources=resources,
+            data_dir=self.data_dir,
             period=0.1,
-            resources=Resources(),
             default_connection=self.connection.public_id,
         )
-        self.my_aea.resources.add_connection(self.connection)
 
         self.my_aea._inbox = InboxWithHistory(self.my_aea.runtime.multiplexer)
         self.skill_context = SkillContext(self.my_aea._context)
@@ -126,12 +129,7 @@ class TestSkillError:
             performative=FipaMessage.Performative.ACCEPT,
         )
         msg.to = self.address
-        envelope = Envelope(
-            to=msg.to,
-            sender=self.address,
-            protocol_id=FipaMessage.protocol_id,
-            message=msg,
-        )
+        envelope = Envelope(to=msg.to, sender=self.address, message=msg,)
 
         self.my_error_handler.send_unsupported_protocol(envelope)
 
@@ -151,12 +149,7 @@ class TestSkillError:
             performative=FipaMessage.Performative.ACCEPT,
         )
         msg.to = self.address
-        envelope = Envelope(
-            to=msg.to,
-            sender=self.address,
-            protocol_id=DefaultMessage.protocol_id,
-            message=msg,
-        )
+        envelope = Envelope(to=msg.to, sender=self.address, message=msg,)
 
         self.my_error_handler.send_decoding_error(envelope)
         wait_for_condition(lambda: len(self.my_aea._inbox._history) >= 1, timeout=5)
@@ -176,9 +169,7 @@ class TestSkillError:
         )
         msg.to = self.address
         msg.sender = self.address
-        envelope = Envelope(
-            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
-        )
+        envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
 
         self.my_error_handler.send_unsupported_skill(envelope=envelope)
 
@@ -191,14 +182,9 @@ class TestSkillError:
 
     def test_error_unsupported_skill_when_skill_id_is_none(self):
         """Test the 'send_unsupported_skill' when the skill id in the envelope is None."""
-        skill_id = PublicId.from_str("author/skill:0.1.0")
         protocol_id = PublicId.from_str("author/name:0.1.0")
         envelope = Envelope(
-            to="",
-            sender="",
-            protocol_id=protocol_id,
-            message=b"",
-            context=EnvelopeContext(skill_id=skill_id),
+            to="", sender="", protocol_specification_id=protocol_id, message=b"",
         )
         with unittest.mock.patch.object(self.skill_context.outbox, "put_message"):
             with unittest.mock.patch.object(
@@ -206,7 +192,7 @@ class TestSkillError:
             ) as mock_logger_warning:
                 self.my_error_handler.send_unsupported_skill(envelope)
                 mock_logger_warning.assert_called_with(
-                    f"Cannot handle envelope: no active handler registered for the protocol_id='{protocol_id}' and skill_id='{skill_id}'."
+                    f"Cannot handle envelope: no active handler registered for the protocol_specification_id='{protocol_id}'."
                 )
 
     def teardown(self):

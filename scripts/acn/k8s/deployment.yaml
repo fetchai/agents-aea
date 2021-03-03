@@ -1,0 +1,101 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ph-deployment-name-here
+  namespace: ph-deployment-namespace-here
+spec:
+  selector:
+    app: ph-deployment-name-here
+  ports:
+    - name: tcp-libp2p
+      protocol: TCP
+      port: ph-node-port-number-here
+      targetPort: 9000
+    - name: tcp-delegate
+      protocol: TCP
+      port: ph-node-delegate-port-number-here
+      targetPort: 11000
+    - name: tcp-monitoring
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ph-deployment-name-here
+  namespace: ph-deployment-namespace-here
+  labels:
+    app: ph-deployment-name-here
+spec:
+  serviceName: ph-deployment-name-here
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ph-deployment-name-here 
+  template:
+    metadata:
+      labels:
+        app: ph-deployment-name-here
+
+    spec:
+      terminationGracePeriodSeconds: 10
+      initContainers:
+      - name: check-entry-peer
+        image: subfuzion/netcat
+        command: ['sh', '-c', 
+          'if [ -z "${LATEST_ENTRY_PEER_HOST}" ]; then exit 0; fi; until nc -w 2 -zv ${LATEST_ENTRY_PEER_HOST} ${LATEST_ENTRY_PEER_PORT}; do echo waiting for ${LATEST_ENTRY_PEER_HOST}:${LATEST_ENTRY_PEER_PORT} ; sleep 2; done;']
+        env:
+          - name: LATEST_ENTRY_PEER_HOST
+            value: ph-latest-entry-peer-host-here
+          - name: LATEST_ENTRY_PEER_PORT
+            value: ph-latest-entry-peer-port-here
+     
+      containers:
+      - image: ph-gcr-image-with-tag-here
+        name: acn-node
+        args: ["--config-from-env"]
+        ports:
+        - containerPort: ph-node-port-number-here
+        - containerPort: ph-node-delegate-port-number-here
+
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "150m"
+          limits:
+            memory: "4000Mi"
+            cpu: "2000m"
+        volumeMounts:
+        - name: acn-data
+          mountPath: /acn_data
+        
+        env:
+          - name: AEA_P2P_ID 
+            valueFrom:
+              secretKeyRef:
+                name: ph-node-priv-key-name-here
+                key: priv-key
+          - name: AEA_P2P_URI_PUBLIC
+            value: ph-node-external-uri-here
+          - name: AEA_P2P_URI
+            value: ph-node-local-uri-here
+          - name: AEA_P2P_DELEGATE_URI
+            value: ph-node-delegate-uri-here
+          - name: AEA_P2P_URI_MONITORING
+            value: ph-node-monitoring-uri-here
+          - name: AEA_P2P_ENTRY_URIS
+            value: ph-node-entry-peers-list-here
+          - name: ACN_LOG_FILE
+            value: ph-node-log-file-path-here
+
+      restartPolicy: Always
+
+  volumeClaimTemplates:
+  - metadata:
+      name: acn-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 2Gi

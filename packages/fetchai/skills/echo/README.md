@@ -6,11 +6,11 @@ This skill sends back the contents of any message it receives.
 
 ## Behaviours 
 
-* echo: outputs messages
+* `echo`: outputs messages
 
 ## Handlers
 
-* echo: handles default messages for echoing back the contents of any message received
+* `echo`: handles `default` messages for echoing back the contents of any message received
 
 ## Links
 

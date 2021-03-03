@@ -23,9 +23,10 @@ import os
 import time
 from threading import Thread
 
+from aea_crypto_fetchai import FetchAICrypto
+
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
-from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA, create_private_key
 from aea.helpers.file_io import write_with_lock
 from aea.skills.base import Skill
@@ -56,6 +57,9 @@ def run():
     builder.set_name("my_aea")
 
     builder.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
+
+    # Add the stub connection (assuming it is present in the local directory 'packages')
+    builder.add_connection("./packages/fetchai/connections/stub")
 
     # Add the echo skill (assuming it is present in the local directory 'packages')
     builder.add_skill("./packages/fetchai/skills/echo")
@@ -101,7 +105,7 @@ def run():
         time.sleep(4)
 
         # Create a message inside an envelope and get the stub connection to pass it on to the echo skill
-        message_text = b"my_aea,other_agent,fetchai/default:0.8.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,"
+        message_text = b"my_aea,other_agent,fetchai/default:0.1.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,"
         with open(INPUT_FILE, "wb") as f:
             write_with_lock(f, message_text)
             print(b"input message: " + message_text)

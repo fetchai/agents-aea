@@ -58,7 +58,7 @@ class ExecutorExceptionPolicies(Enum):
 class AbstractExecutorTask(ABC):
     """Abstract task class to create Task classes."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Init task."""
         self._future: Optional[TaskAwaitable] = None
 
@@ -73,7 +73,7 @@ class AbstractExecutorTask(ABC):
         self._future = future
 
     @abstractmethod
-    def start(self):
+    def start(self) -> Tuple[Callable, Sequence[Any]]:
         """Implement start task function here."""
 
     @abstractmethod
@@ -147,7 +147,7 @@ class AbstractMultipleExecutor(ABC):  # pragma: nocover
     def __init__(
         self,
         tasks: Sequence[AbstractExecutorTask],
-        task_fail_policy=ExecutorExceptionPolicies.propagate,
+        task_fail_policy: ExecutorExceptionPolicies = ExecutorExceptionPolicies.propagate,
     ) -> None:
         """
         Init executor.
@@ -170,7 +170,6 @@ class AbstractMultipleExecutor(ABC):  # pragma: nocover
 
     def start(self) -> None:
         """Start tasks."""
-        self._is_running = True
         self._start_tasks()
         self._loop.run_until_complete(self._wait_tasks_complete())
         self._is_running = False
@@ -184,7 +183,7 @@ class AbstractMultipleExecutor(ABC):  # pragma: nocover
 
         if not self._loop.is_running():
             self._loop.run_until_complete(
-                self._wait_tasks_complete(skip_exceptions=True)
+                self._wait_tasks_complete(skip_exceptions=True, on_stop=True)
             )
 
         if self._executor_pool:
@@ -197,15 +196,20 @@ class AbstractMultipleExecutor(ABC):  # pragma: nocover
             task.future = future
             self._future_task[future] = task
 
-    async def _wait_tasks_complete(self, skip_exceptions: bool = False) -> None:
+    async def _wait_tasks_complete(
+        self, skip_exceptions: bool = False, on_stop: bool = False
+    ) -> None:
         """
         Wait tasks execution to complete.
 
         :param skip_exceptions: skip exceptions if raised in tasks
         """
+        if not on_stop:
+            self._is_running = True
+
         pending = cast(Set[asyncio.futures.Future], set(self._future_task.keys()))
 
-        async def wait_future(future):
+        async def wait_future(future: asyncio.futures.Future) -> None:
             try:
                 await future
             except KeyboardInterrupt:  # pragma: nocover
@@ -215,7 +219,9 @@ class AbstractMultipleExecutor(ABC):  # pragma: nocover
             except Exception as e:  # pylint: disable=broad-except  # handle any exception with own code.
                 _default_logger.exception("Exception in task!")
                 if not skip_exceptions:
-                    await self._handle_exception(self._future_task[future], e)
+                    await self._handle_exception(
+                        self._future_task[cast(TaskAwaitable, future)], e
+                    )
 
         while pending:
             done, pending = await asyncio.wait(pending, return_when=FIRST_EXCEPTION)
@@ -245,7 +251,7 @@ class AbstractMultipleExecutor(ABC):  # pragma: nocover
                 "Stopping executor according to fail policy cause exception raised in task"
             )
             self.stop()
-            await self._wait_tasks_complete(skip_exceptions=True)
+            await self._wait_tasks_complete(skip_exceptions=True, on_stop=True)
         else:  # pragma: nocover
             raise ValueError(f"Unknown fail policy: {self._task_fail_policy}")
 
@@ -349,7 +355,9 @@ class AbstractMultipleRunner:  # pragma: nocover
     SUPPORTED_MODES: Dict[str, Type[AbstractMultipleExecutor]] = {}
 
     def __init__(
-        self, mode: str, fail_policy=ExecutorExceptionPolicies.propagate
+        self,
+        mode: str,
+        fail_policy: ExecutorExceptionPolicies = ExecutorExceptionPolicies.propagate,
     ) -> None:
         """
         Init with selected executor mode.
@@ -383,7 +391,7 @@ class AbstractMultipleRunner:  # pragma: nocover
         else:
             self._executor.start()
 
-    def stop(self, timeout: float = 0) -> None:
+    def stop(self, timeout: Optional[float] = None) -> None:
         """
         Stop agents.
 
@@ -413,22 +421,22 @@ class AbstractMultipleRunner:  # pragma: nocover
         """Make tasks to run with executor."""
 
     @property
-    def num_failed(self):  # pragma: nocover
+    def num_failed(self) -> int:  # pragma: nocover
         """Return number of failed tasks."""
         return self._executor.num_failed
 
     @property
-    def failed(self):  # pragma: nocover
+    def failed(self) -> Sequence[Task]:  # pragma: nocover
         """Return sequence failed tasks."""
         return [i.id for i in self._executor.failed_tasks]
 
     @property
-    def not_failed(self):  # pragma: nocover
+    def not_failed(self) -> Sequence[Task]:  # pragma: nocover
         """Return sequence successful tasks."""
         return [i.id for i in self._executor.not_failed_tasks]
 
-    def join_thread(self) -> None:  # pragma: nocover
-        """Join thread if running in thread mode."""
+    def try_join_thread(self) -> None:  # pragma: nocover
+        """Try to join thread if running in thread mode."""
         if self._thread is None:
             raise ValueError("Not started in thread mode.")
         # do not block with join, helpful to catch Keyboardiinterrupted exception

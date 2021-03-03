@@ -26,17 +26,17 @@ from aea.cli.registry.settings import AUTH_TOKEN_KEY
 from aea.cli.utils.config import update_cli_config
 
 
-@click.command(name="login", help="Login to Registry account.")
+@click.command(name="login", help="Login to the registry account.")
 @click.argument("username", type=str, required=True)
 @click.option("--password", type=str, required=True, prompt=True, hide_input=True)
-def login(username, password):
-    """Login to Registry account."""
+def login(username: str, password: str) -> None:
+    """Login to the registry account."""
     do_login(username, password)
 
 
-def do_login(username: str, password: str):
+def do_login(username: str, password: str) -> None:
     """
-    Login to Registry account and save auth token in config.
+    Login to the registry account and save auth token in config.
 
     :param username: str username.
     :param password: str password.

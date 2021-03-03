@@ -68,7 +68,8 @@ class TestEchoSkill(AEATestCaseEmpty):
 
     def test_echo(self):
         """Run the echo skill sequence."""
-        self.add_item("skill", "fetchai/echo:0.10.0")
+        self.add_item("connection", "fetchai/stub:0.17.0")
+        self.add_item("skill", "fetchai/echo:0.14.0")
 
         process = self.run_agent()
         is_running = self.is_running(process)
@@ -83,12 +84,7 @@ class TestEchoSkill(AEATestCaseEmpty):
             dialogue_reference=default_dialogues.new_self_initiated_dialogue_reference(),
             content=message_content,
         )
-        sent_envelope = Envelope(
-            to=self.agent_name,
-            sender=sender,
-            protocol_id=message.protocol_id,
-            message=message,
-        )
+        sent_envelope = Envelope(to=self.agent_name, sender=sender, message=message,)
 
         self.send_envelope_to_agent(sent_envelope, self.agent_name)
 
@@ -96,7 +92,10 @@ class TestEchoSkill(AEATestCaseEmpty):
         received_envelope = self.read_envelope_from_agent(self.agent_name)
 
         assert sent_envelope.sender == received_envelope.to
-        assert sent_envelope.protocol_id == received_envelope.protocol_id
+        assert (
+            sent_envelope.protocol_specification_id
+            == received_envelope.protocol_specification_id
+        )
         msg = DefaultMessage.serializer.decode(received_envelope.message)
         assert sent_envelope.message.content == msg.content
 

@@ -1,0 +1,117 @@
+agent_name: confirmation_aea_aw2
+author: fetchai
+version: 0.8.0
+description: This agent purchases information from other agents as specified in its
+  configuration. It acts as the confirmation AEA in Agent World 2.
+license: Apache-2.0
+aea_version: '>=0.10.0, <0.11.0'
+fingerprint: {}
+fingerprint_ignore_patterns: []
+connections:
+- fetchai/ledger:0.13.0
+- fetchai/p2p_libp2p:0.16.0
+- fetchai/soef:0.17.0
+contracts: []
+protocols:
+- fetchai/default:0.12.0
+- fetchai/ledger_api:0.10.0
+- fetchai/oef_search:0.13.0
+- fetchai/signing:0.10.0
+- fetchai/state_update:0.10.0
+skills:
+- fetchai/confirmation_aw2:0.6.0
+- fetchai/generic_buyer:0.20.0
+default_connection: fetchai/p2p_libp2p:0.16.0
+default_ledger: fetchai
+default_routing:
+  fetchai/ledger_api:0.10.0: fetchai/ledger:0.13.0
+  fetchai/oef_search:0.13.0: fetchai/soef:0.17.0
+connection_private_key_paths: {}
+private_key_paths: {}
+logging_config:
+  disable_existing_loggers: false
+  version: 1
+  formatters:
+    standard:
+      format: '[%(levelname)s]: %(message)s'
+    extra:
+      format: '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+  handlers:
+    logfile:
+      class: logging.FileHandler
+      formatter: extra
+      level: NOTSET
+      filename: all.log
+    logfile_error:
+      class: logging.FileHandler
+      formatter: extra
+      level: ERROR
+      filename: error.log
+    console:
+      class: logging.StreamHandler
+      formatter: standard
+      level: INFO
+  loggers:
+    aea:
+      handlers:
+      - logfile
+      - logfile_error
+      - console
+      level: DEBUG
+      propagate: false
+registry_path: ../packages
+dependencies:
+  aea-crypto-ethereum:
+    version: <0.2.0,>=0.1.0
+  aea-crypto-fetchai:
+    version: <0.2.0,>=0.1.0
+---
+public_id: fetchai/p2p_libp2p:0.16.0
+type: connection
+config:
+  delegate_uri: null
+  public_uri: null
+  entry_peers:
+  - /dns4/acn.fetch.ai/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW
+---
+public_id: fetchai/soef:0.17.0
+type: connection
+config:
+  chain_identifier: fetchai_v2_testnet_incentivised
+  token_storage_path: /data/soef_key.txt
+---
+public_id: fetchai/ledger:0.13.0
+type: connection
+config:
+  ledger_apis:
+    ethereum:
+      address: null
+    fetchai:
+      address: https://rest-agentworld.prod.fetch-ai.com:443
+      chain_id: agentworld-1
+---
+public_id: fetchai/confirmation_aw2:0.6.0
+type: skill
+behaviours:
+  search:
+    args:
+      search_interval: 30
+models:
+  registration_db:
+    args:
+      custom_path: /data/registration.db
+  strategy:
+    args:
+      aw1_aea: null
+      location:
+        latitude: 51.5194
+        longitude: 0.127
+      max_tx_fee: 1
+      max_unit_price: 20
+      mininum_hours_between_txs: 4
+      search_query:
+        constraint_type: ==
+        search_key: seller_service
+        search_value: weather_data
+      search_radius: 50.0
+      service_id: weather_data

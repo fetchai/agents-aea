@@ -30,8 +30,8 @@ from aea.cli.utils.decorators import check_aea_project
 @click.command()
 @click.pass_context
 @check_aea_project
-def freeze(click_context):
-    """Get the dependencies."""
+def freeze(click_context: click.Context) -> None:
+    """Get the dependencies of the agent."""
     deps = _get_deps(click_context)
     for dependency in deps:
         click.echo(dependency)

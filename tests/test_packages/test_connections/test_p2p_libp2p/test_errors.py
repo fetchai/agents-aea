@@ -16,13 +16,12 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains Negative tests for Libp2p connection."""
-
-import asyncio
 import os
 import shutil
 import tempfile
+from asyncio.futures import Future
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -32,60 +31,18 @@ from aea.identity.base import Identity
 from aea.multiplexer import Multiplexer
 
 from packages.fetchai.connections.p2p_libp2p.connection import (
-    AwaitableProc,
     LIBP2P_NODE_MODULE_NAME,
+    Libp2pNode,
     P2PLibp2pConnection,
-    _golang_module_build_async,
     _golang_module_run,
     _ip_all_private_or_all_public,
 )
 
-from tests.conftest import COSMOS, _make_libp2p_connection
+from tests.conftest import DEFAULT_LEDGER, _make_libp2p_connection
 
 
 DEFAULT_PORT = 10234
 DEFAULT_NET_SIZE = 4
-
-
-@pytest.mark.asyncio
-class TestP2PLibp2pConnectionFailureGolangBuild:
-    """Test that golang build async fails if timeout exceeded or wrong path"""
-
-    @classmethod
-    def setup_class(cls):
-        """Set the test up"""
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
-
-        cls.connection = _make_libp2p_connection()
-        cls.wrong_path = tempfile.mkdtemp()
-
-    @pytest.mark.asyncio
-    async def test_timeout(self):
-        """Test the timeout."""
-        log_file_desc = open("log", "a", 1)
-        with pytest.raises(Exception):
-            await _golang_module_build_async(
-                self.connection.node.source, log_file_desc, timeout=0
-            )
-
-    @pytest.mark.asyncio
-    async def test_wrong_path(self):
-        """Test the wrong path."""
-        self.connection.node.source = self.wrong_path
-        with pytest.raises(Exception):
-            await self.connection.connect()
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear down the test"""
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-            shutil.rmtree(cls.wrong_path)
-        except (OSError, IOError):
-            pass
 
 
 class TestP2PLibp2pConnectionFailureGolangRun:
@@ -98,7 +55,9 @@ class TestP2PLibp2pConnectionFailureGolangRun:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-        cls.connection = _make_libp2p_connection()
+        temp_dir = os.path.join(cls.t, "temp_dir")
+        os.mkdir(temp_dir)
+        cls.connection = _make_libp2p_connection(data_dir=temp_dir)
         cls.wrong_path = tempfile.mkdtemp()
 
     def test_wrong_path(self):
@@ -138,7 +97,9 @@ class TestP2PLibp2pConnectionFailureNodeDisconnect:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-        cls.connection = _make_libp2p_connection()
+        temp_dir = os.path.join(cls.t, "temp_dir")
+        os.mkdir(temp_dir)
+        cls.connection = _make_libp2p_connection(data_dir=temp_dir)
 
     def test_node_disconnect(self):
         """Test node disconnect."""
@@ -167,7 +128,7 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection:
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
-        crypto = make_crypto(COSMOS)
+        crypto = make_crypto(DEFAULT_LEDGER)
         cls.identity = Identity("", address=crypto.address)
         cls.host = "localhost"
         cls.port = "10000"
@@ -186,9 +147,12 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection:
             entry_peers=None,
             log_file=None,
             connection_id=P2PLibp2pConnection.connection_id,
+            build_directory=self.t,
         )
         with pytest.raises(ValueError):
-            P2PLibp2pConnection(configuration=configuration, identity=self.identity)
+            P2PLibp2pConnection(
+                configuration=configuration, data_dir=self.t, identity=self.identity
+            )
 
     def test_local_uri_provided_when_public_uri_provided(self):
         """Test local uri provided when public uri provided."""
@@ -198,9 +162,12 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection:
             entry_peers=None,
             log_file=None,
             connection_id=P2PLibp2pConnection.connection_id,
+            build_directory=self.t,
         )
         with pytest.raises(ValueError):
-            P2PLibp2pConnection(configuration=configuration, identity=self.identity)
+            P2PLibp2pConnection(
+                configuration=configuration, data_dir=self.t, identity=self.identity
+            )
 
     @classmethod
     def teardown_class(cls):
@@ -212,13 +179,6 @@ class TestP2PLibp2pConnectionFailureSetupNewConnection:
             pass
 
 
-def test_libp2pconnection_awaitable_proc_cancelled():
-    """Test awaitable proc cancelled."""
-    proc = AwaitableProc(["sleep", "100"], shell=False)
-    proc_task = asyncio.ensure_future(proc.start())
-    proc_task.cancel()
-
-
 def test_libp2pconnection_mixed_ip_address():
     """Test correct public uri ip and entry peers ips configuration."""
     assert _ip_all_private_or_all_public([]) is True
@@ -227,9 +187,86 @@ def test_libp2pconnection_mixed_ip_address():
     assert _ip_all_private_or_all_public(["10.0.0.1", "127.0.0.1"]) is False
     assert _ip_all_private_or_all_public(["fetch.ai", "127.0.0.1"]) is False
     assert _ip_all_private_or_all_public(["104.26.2.97", "127.0.0.1"]) is False
-    assert (
-        _ip_all_private_or_all_public(
-            ["fetch.ai", "agents-p2p-dht.sandbox.fetch-ai.com"]
+    assert _ip_all_private_or_all_public(["fetch.ai", "acn.fetch.ai"]) is True
+
+
+def test_libp2pconnection_node_config_registration_delay():
+    """Test node registration delay configuration"""
+    host = "localhost"
+    port = "10000"
+
+    with tempfile.TemporaryDirectory() as data_dir:
+        _make_libp2p_connection(
+            port=port, host=host, data_dir=data_dir, build_directory=data_dir
         )
-        is True
-    )
+    with tempfile.TemporaryDirectory() as data_dir:
+        with pytest.raises(ValueError):
+            _make_libp2p_connection(
+                port=port,
+                host=host,
+                data_dir=data_dir,
+                peer_registration_delay="must_be_float",
+                build_directory=data_dir,
+            )
+
+
+def test_build_dir_not_set():
+    """Test build dir not set."""
+    host = "localhost"
+    port = "10000"
+    with tempfile.TemporaryDirectory() as data_dir:
+        con = _make_libp2p_connection(
+            port=port, host=host, data_dir=data_dir, build_directory=data_dir
+        )
+        con.configuration.build_directory = None
+        with pytest.raises(
+            ValueError, match="Connection Configuration build directory is not set!"
+        ):
+            P2PLibp2pConnection(
+                configuration=con.configuration,
+                data_dir=data_dir,
+                identity=con._identity,
+                crypto_store=con.crypto_store,
+            )
+
+
+@pytest.mark.asyncio
+async def test_reconnect_on_write_failed():
+    """Test node restart on write fail."""
+    node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
+    node.pipe = Mock()
+    node.pipe.write = Mock(side_effect=Exception("expected"))
+    f = Future()
+    f.set_result(None)
+    with patch.object(node, "restart", return_value=f) as restart_mock, pytest.raises(
+        Exception, match="expected"
+    ):
+        await node.write(b"some_data")
+
+    assert node.pipe.write.call_count == 2
+    restart_mock.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_reconnect_on_read_failed():
+    """Test node restart on read fail."""
+    node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
+    node.pipe = Mock()
+    node.pipe.read = Mock(side_effect=Exception("expected"))
+    f = Future()
+    f.set_result(None)
+    with patch.object(node, "restart", return_value=f) as restart_mock:
+        result = await node.read()
+
+    assert result is None
+
+    assert node.pipe.read.call_count == 2
+    restart_mock.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_max_restarts():
+    """Test node max restarts exception."""
+    node = Libp2pNode(Mock(), Mock(), "tmp", "tmp", max_restarts=0)
+    with pytest.raises(ValueError, match="Max restarts attempts reached:"):
+        await node.restart()

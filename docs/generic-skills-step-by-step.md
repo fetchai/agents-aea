@@ -1,4 +1,4 @@
-This guide is a step-by-step introduction to building an AEA that represents static, and dynamic data to be advertised on the <a href="../oef-ledger">Open Economic Framework</a>.
+This guide is a step-by-step introduction to building AEAs that advertise their static and dynamic data, find other AEAs with required data, negotiate terms of trade, and carry out trades via ledger transactions.
 
 If you simply want to run the resulting AEAs <a href="../generic-skills">go here</a>.
 
@@ -36,21 +36,21 @@ this assigns all devices coming out of the hidraw subsystem in the kernel to the
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
-## Reference (Optional)
+## Reference code (Optional)
 
-This step-by-step guide recreates two AEAs already developed by Fetch.ai. You can get the finished AEAs to compare your code against by following the next steps:
+This step-by-step guide goes through the creation of two AEAs which are already developed by Fetch.ai. You can get the finished AEAs, and compare your code against them, by following the next steps:
 
 ``` bash
-aea fetch fetchai/generic_seller:0.12.0
+aea fetch fetchai/generic_seller:0.19.0
 cd generic_seller
-aea eject skill fetchai/generic_seller:0.15.0
+aea eject skill fetchai/generic_seller:0.20.0
 cd ..
 ```
 
 ``` bash
-aea fetch fetchai/generic_buyer:0.12.0
+aea fetch fetchai/generic_buyer:0.20.0
 cd generic_buyer
-aea eject skill fetchai/generic_buyer:0.14.0
+aea eject skill fetchai/generic_buyer:0.20.0
 cd ..
 ```
 
@@ -76,7 +76,7 @@ Our newly created AEA is inside the current working directory. Let’s create ou
 aea scaffold skill generic_seller
 ```
 
-This command will create the correct structure for a new skill inside our AEA project You can locate the newly created skill inside the skills folder (`my_generic_seller/skills/generic_seller/`) and it must contain the following files:
+The `scaffold skill` command creates the correct structure for a new skill inside our AEA project. You can locate the newly created skill under the "skills" folder (`my_generic_seller/skills/generic_seller/`), and it must contain the following files:
 
 - `__init__.py`
 - `behaviours.py`
@@ -86,12 +86,12 @@ This command will create the correct structure for a new skill inside our AEA pr
 
 ### Step 2: Create the behaviour
 
-A <a href="../api/skills/base#behaviour-objects">`Behaviour`</a> class contains the business logic specific to actions initiated by the AEA rather than reactions to other events.
+A <a href="../api/skills/base#behaviour-objects">`Behaviour`</a> class contains the business logic specific to actions initiated by the AEA, rather than reactions to other events.
 
-Open the `behaviours.py` file (`my_generic_seller/skills/generic_seller/behaviours.py`) and add the following code (replacing the stub code already present in the file):
+Open the `behaviours.py` file (`my_generic_seller/skills/generic_seller/behaviours.py`) and replace the stub code with the following:
 
 ``` python
-from typing import cast
+from typing import Any, cast
 
 from aea.skills.behaviours import TickerBehaviour
 
@@ -114,7 +114,7 @@ LEDGER_API_ADDRESS = str(LEDGER_CONNECTION_PUBLIC_ID)
 class GenericServiceRegistrationBehaviour(TickerBehaviour):
     """This class implements a behaviour."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         """Initialise the behaviour."""
         services_interval = kwargs.pop(
             "services_interval", DEFAULT_SERVICES_INTERVAL
@@ -140,7 +140,7 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
             )
             self.context.outbox.put_message(message=ledger_api_msg)
         self._register_agent()
-        self._register_service()
+        self._register_service_personality_classification()
 
     def act(self) -> None:
         """
@@ -178,23 +178,28 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("registering agent on SOEF.")
 
-    def _register_service(self) -> None:
+    def _register_service_personality_classification(self) -> None:
         """
-        Register the agent's service.
+        Register the agent's service, personality and classification.
 
         :return: None
         """
         strategy = cast(GenericStrategy, self.context.strategy)
-        description = strategy.get_register_service_description()
+        descriptions = [
+            strategy.get_register_service_description(),
+            strategy.get_register_personality_description(),
+            strategy.get_register_classification_description(),
+        ]
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
-        oef_search_msg, _ = oef_search_dialogues.create(
-            counterparty=self.context.search_service_address,
-            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            service_description=description,
-        )
-        self.context.outbox.put_message(message=oef_search_msg)
+        for description in descriptions:
+            oef_search_msg, _ = oef_search_dialogues.create(
+                counterparty=self.context.search_service_address,
+                performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+                service_description=description,
+            )
+            self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("registering service on SOEF.")
 
     def _unregister_service(self) -> None:
@@ -236,17 +241,15 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         self.context.logger.info("unregistering agent from SOEF.")
 ```
 
-This <a href="../api/skills/behaviours#tickerbehaviour-objects">`TickerBehaviour`</a> registers and de-register our AEA’s service on the <a href="../simple-oef">SOEF search node</a> at regular tick intervals (here 60 seconds). By registering, the AEA becomes discoverable to possible clients.
+This <a href="../api/skills/behaviours#tickerbehaviour-objects">`TickerBehaviour`</a> registers (see `setup` method) and deregisters (see `teardown` method) our AEA’s service on the <a href="../simple-oef">SOEF search node</a> at regular tick intervals (here 60 seconds). By registering, the AEA becomes discoverable to other AEAs.
 
-The act method unregisters and registers the AEA to the <a href="../simple-oef">SOEF search node</a> on each tick. Finally, the teardown method unregisters the AEA and reports your balances.
-
-At setup we are sending a message to the ledger connection to check the account balance for the AEA's address on the configured ledger.
+In `setup`, prior to registrations, we send a message to the ledger connection to check the account balance for the AEA's address on the configured ledger.
 
 ### Step 3: Create the handler
 
-So far, we have tasked the AEA with sending register/unregister requests to the <a href="../simple-oef">SOEF search node</a>. However, we have at present no way of handling the responses sent to the AEA by the <a href="../simple-oef">SOEF search node</a> or messages sent from any other AEA.
+So far, we have tasked the AEA with sending register/unregister requests to the <a href="../simple-oef">SOEF search node</a>. However at present, the AEA has no way of handling the responses it receives from the search node, or in fact messages sent by any other AEA.
 
-We have to specify the logic to negotiate with another AEA based on the strategy we want our AEA to follow. The following diagram illustrates the negotiation flow, up to the agreement between a seller_AEA and a buyer_AEA.
+We have to specify the logic to negotiate with another AEA based on the strategy we want our AEA to follow. The following diagram illustrates the negotiation flow that we want this AEA to use, as well as interactions with a search node and the blockchain between a `seller_AEA` and a `buyer_AEA`.
 
 <div class="mermaid">
     sequenceDiagram
@@ -288,9 +291,9 @@ We have to specify the logic to negotiate with another AEA based on the strategy
 
 </div>
 
-In the context of our generic use-case, the `my_generic_seller` AEA is the seller.
+In our case, `my_generic_seller` is the `Seller_AEA` in the above figure.
 
-Let us now implement a <a href="../api/skills/base#handler-objects">`Handler`</a> to deal with the incoming messages. Open the `handlers.py` file (`my_generic_seller/skills/generic_seller/handlers.py`) and add the following code (replacing the stub code already present in the file):
+Let us now implement a <a href="../api/skills/base#handler-objects">`Handler`</a> to deal with incoming messages. Open the `handlers.py` file (`my_generic_seller/skills/generic_seller/handlers.py`) and replace the stub code with the following:
 
 ``` python
 from typing import Optional, cast
@@ -368,11 +371,11 @@ class GenericFipaHandler(Handler):
         """
         pass
 ```
-The code above is logic for handling `FipaMessages` received by the `my_generic_seller` AEA. We use `FipaDialogues` (more on this below in <a href="../generic-skills-step-by-step/#step-5-create-the-dialogues">this</a> section) to keep track of the dialogue state between the `my_generic_seller` AEA and the `my_generic_buyer` AEA.
+The code above contains the logic for handling `FipaMessages` received by the `my_generic_seller` AEA. We use `FipaDialogues` (more on this <a href="../generic-skills-step-by-step/#step-5-create-the-dialogues">below</a>) to keep track of the progress of the negotiation dialogue between the `my_generic_seller` AEA and the `my_generic_buyer` AEA.
 
-First, we check if the message is registered to an existing dialogue or if we have to create a new dialogue. The second part matches messages with their handler based on the message's performative. We are going to implement each case in a different function.
+In the above `handle` method, we first check if a received message belongs to an existing dialogue or if we have to create a new dialogue (the `recover dialogue` part). Once this is done, we break down the AEA's response to each type of negotiation message, as indicated by the message's performative (the `handle message` part). Therefore, we implement the AEA's response to each negotiation message type in a different handler function.
 
-Below the unused `teardown` function, we continue by adding the following code:
+Below the unused `teardown` function, we continue by adding the following function:
 
 ``` python
     def _handle_unidentified_dialogue(self, fipa_msg: FipaMessage) -> None:
@@ -397,7 +400,7 @@ Below the unused `teardown` function, we continue by adding the following code:
 
 The above code handles an unidentified dialogue by responding to the sender with a `DefaultMessage` containing the appropriate error information.
 
-The next code block handles the `CFP` message, paste the code below the `_handle_unidentified_dialogue` function:
+The next code block handles `CFP` (call-for-proposal) negotiation messages. Paste the following code below the `_handle_unidentified_dialogue` function:
 
 ``` python
     def _handle_cfp(self, fipa_msg: FipaMessage, fipa_dialogue: FipaDialogue) -> None:
@@ -441,7 +444,7 @@ The next code block handles the `CFP` message, paste the code below the `_handle
             self.context.outbox.put_message(message=decline_msg)
 ```
 
-The above code will respond with a `PROPOSE` message to the buyer if the CFP matches the supplied services and our strategy otherwise it will respond with a `DECLINE` message.
+The above code sends a `PROPOSE` message back to the buyer as a response to its `CFP` if the requested services match our seller agent's supplied services, otherwise it will respond with a `DECLINE` message.
 
 The next code-block  handles the decline message we receive from the buyer. Add the following code below the `_handle_cfp`function:
 
@@ -468,7 +471,7 @@ The next code-block  handles the decline message we receive from the buyer. Add 
             FipaDialogue.EndState.DECLINED_PROPOSE, fipa_dialogue.is_self_initiated
         )
 ```
-If we receive a decline message from the buyer we close the dialogue and terminate this conversation with the `my_generic_buyer`.
+If we receive a decline message from the buyer we close the dialogue and terminate this conversation with `my_generic_buyer`.
 
 Alternatively, we might receive an `ACCEPT` message. In order to handle this option add the following code below the `_handle_decline` function:
 
@@ -501,9 +504,9 @@ Alternatively, we might receive an `ACCEPT` message. In order to handle this opt
         )
         self.context.outbox.put_message(message=match_accept_msg)
 ```
-When the `my_generic_buyer` accepts the `Proposal` we send it, and therefores sends us an `ACCEPT` message, we have to respond with another message (`MATCH_ACCEPT_W_INFORM` ) to inform the buyer about the address we would like it to send the funds to.
+When `my_generic_buyer` accepts the `Proposal` we send it and sends an `ACCEPT` message, we have to respond with another message (`MATCH_ACCEPT_W_INFORM`) to match the acceptance of the terms of trade and to inform the buyer of the address we would like it to send the funds to. 
 
-Lastly, we handle the `INFORM` message, which the buyer uses to inform us that it has sent the funds to the provided address. Add the following code:
+Lastly, we must handle an `INFORM` message, which the buyer uses to inform us that it has indeed sent the funds to the provided address. Add the following code at the end of the file:
 
 ``` python
     def _handle_inform(
@@ -572,7 +575,7 @@ Lastly, we handle the `INFORM` message, which the buyer uses to inform us that i
                 )
             )
 ```
-We are checking the inform message. If it contains the transaction digest we verify that transaction matches the proposal that the buyer accepted. If the transaction is valid and we received the funds then we send the data to the buyer.  Otherwise we do not send the data.
+In the above code, we check the `INFORM` message. If it contains a transaction digest, then we verify that the transaction matches the proposal the buyer accepted. If the transaction is valid and we received the funds then we send the data to the buyer. Otherwise, we do not send the data.
 
 The remaining handlers are as follows:
 ``` python
@@ -835,11 +838,11 @@ class GenericOefSearchHandler(Handler):
         )
 ```
 
-The `GenericLedgerApiHandler` deals with `LedgerApiMessages` from the ledger connection. The `GenericOefSearchHandler` handles `OefSearchMessages` from the soef connection.
+The `GenericLedgerApiHandler` deals with `LedgerApiMessages` from the ledger connection and the `GenericOefSearchHandler` handles `OefSearchMessages` from the SOEF connection.
 
 ### Step 4: Create the strategy
 
-Next, we are going to create the strategy that we want our `my_generic_seller` AEA to follow. Rename the `my_model.py` file (`my_generic_seller/skills/generic_seller/my_model.py`) to `strategy.py` and copy and paste the following code (replacing the stub code already present in the file):
+Next, we are going to create the strategy that we want our `my_generic_seller` AEA to follow. Rename the `my_model.py` file (`my_generic_seller/skills/generic_seller/my_model.py`) to `strategy.py` and replace the stub code with the following:
 
 ``` python
 import uuid
@@ -850,6 +853,7 @@ from aea.crypto.ledger_apis import LedgerApis
 from aea.exceptions import enforce
 from aea.helpers.search.generic import (
     AGENT_LOCATION_MODEL,
+    AGENT_PERSONALITY_MODEL,
     AGENT_REMOVE_SERVICE_MODEL,
     AGENT_SET_SERVICE_MODEL,
     SIMPLE_SERVICE_MODEL,
@@ -866,6 +870,8 @@ DEFAULT_SERVICE_ID = "generic_service"
 
 DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
 DEFAULT_SERVICE_DATA = {"key": "seller_service", "value": "generic_service"}
+DEFAULT_PERSONALITY_DATA = {"piece": "genus", "value": "data"}
+DEFAULT_CLASSIFICATION = {"piece": "classification", "value": "seller"}
 
 DEFAULT_HAS_DATA_SOURCE = False
 DEFAULT_DATA_FOR_SALE = {
@@ -876,7 +882,7 @@ DEFAULT_DATA_FOR_SALE = {
 class GenericStrategy(Model):
     """This class defines a strategy for the agent."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize the strategy of the agent.
 
@@ -898,6 +904,22 @@ class GenericStrategy(Model):
                 latitude=location["latitude"], longitude=location["longitude"]
             )
         }
+        self._set_personality_data = kwargs.pop(
+            "personality_data", DEFAULT_PERSONALITY_DATA
+        )
+        enforce(
+            len(self._set_personality_data) == 2
+            and "piece" in self._set_personality_data
+            and "value" in self._set_personality_data,
+            "personality_data must contain keys `key` and `value`",
+        )
+        self._set_classification = kwargs.pop("classification", DEFAULT_CLASSIFICATION)
+        enforce(
+            len(self._set_classification) == 2
+            and "piece" in self._set_classification
+            and "value" in self._set_classification,
+            "classification must contain keys `key` and `value`",
+        )
         self._set_service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
         enforce(
             len(self._set_service_data) == 2
@@ -931,19 +953,21 @@ class GenericStrategy(Model):
             self.context.agent_addresses.get(self._ledger_id, None) is not None,
             "Wallet does not contain cryptos for provided ledger id.",
         )
-
-        if self._has_data_source:
-            self._data_for_sale = self.collect_from_data_source()  # pragma: nocover
-        else:
-            self._data_for_sale = data_for_sale
-        self._sale_quantity = len(data_for_sale)
+        self._data_for_sale = data_for_sale
 ```
 
-We initialise the strategy class. We are trying to read the strategy variables from the yaml file. If this is not possible we specified some default values.
+In the above code snippet, we initialise the strategy class by trying to read the variables specific to the strategy from a YAML configuration file. If any variable is not provided, some default values will be used.
 
-The following properties and methods deal with different aspects of the strategy. Add them under the initialization of the class:
+The following properties and methods deal with different aspects of the strategy. They should be relatively self-descriptive. Add them under the initialization of the strategy class:
 
 ``` python
+    @property
+    def data_for_sale(self) -> Dict[str, str]:
+        """Get the data for sale."""
+        if self._has_data_source:
+            return self.collect_from_data_source()  # pragma: nocover
+        return self._data_for_sale
+
     @property
     def ledger_id(self) -> str:
         """Get the ledger id."""
@@ -973,6 +997,28 @@ The following properties and methods deal with different aspects of the strategy
         """
         description = Description(
             self._set_service_data, data_model=AGENT_SET_SERVICE_MODEL,
+        )
+        return description
+
+    def get_register_personality_description(self) -> Description:
+        """
+        Get the register personality description.
+
+        :return: a description of the personality
+        """
+        description = Description(
+            self._set_personality_data, data_model=AGENT_PERSONALITY_MODEL,
+        )
+        return description
+
+    def get_register_classification_description(self) -> Description:
+        """
+        Get the register classification description.
+
+        :return: a description of the classification
+        """
+        description = Description(
+            self._set_classification, data_model=AGENT_PERSONALITY_MODEL,
         )
         return description
 
@@ -1017,8 +1063,10 @@ The following properties and methods deal with different aspects of the strategy
         :param counterparty_address: the counterparty of the proposal.
         :return: a tuple of proposal, terms and the weather data
         """
+        data_for_sale = self.data_for_sale
+        sale_quantity = len(data_for_sale)
         seller_address = self.context.agent_addresses[self.ledger_id]
-        total_price = self._sale_quantity * self._unit_price
+        total_price = sale_quantity * self._unit_price
         if self.is_ledger_tx:
             tx_nonce = LedgerApis.generate_tx_nonce(
                 identifier=self.ledger_id,
@@ -1033,7 +1081,7 @@ The following properties and methods deal with different aspects of the strategy
                 "price": total_price,
                 "currency_id": self._currency_id,
                 "service_id": self._service_id,
-                "quantity": self._sale_quantity,
+                "quantity": sale_quantity,
                 "tx_nonce": tx_nonce,
             }
         )
@@ -1042,26 +1090,26 @@ The following properties and methods deal with different aspects of the strategy
             sender_address=seller_address,
             counterparty_address=counterparty_address,
             amount_by_currency_id={self._currency_id: total_price},
-            quantities_by_good_id={self._service_id: -self._sale_quantity},
+            quantities_by_good_id={self._service_id: -sale_quantity},
             is_sender_payable_tx_fee=False,
             nonce=tx_nonce,
             fee_by_currency_id={self._currency_id: 0},
         )
-        return proposal, terms, self._data_for_sale
+        return proposal, terms, data_for_sale
 
     def collect_from_data_source(self) -> Dict[str, str]:
         """Implement the logic to communicate with the sensor."""
         raise NotImplementedError
 ```
 
-Before the creation of the actual proposal, we have to check if the sale generates value for us or a loss. If it is a loss, we abort and warn the developer. The helper private function `collect_from_data_source`, is where we read data from our sensor or in case we do not have a sensor use some default data provided.
+The helper private function `collect_from_data_source` is where we read data from a sensor or if there are no sensor we use some default data provided (see the `data_for_sale` property).
 
 ### Step 5: Create the dialogues
 
-When we are negotiating with other AEAs we would like to keep track of the state of these negotiations. To this end we create a new file in the skill folder (`my_generic_seller/skills/generic_seller/`) and name it `dialogues.py`. Inside this file add the following code:
+To keep track of the structure and progress of interactions, including negotiations with a buyer AEA and interactions with search nodes and ledgers, we use dialogues. Create a new file in the skill folder (`my_generic_seller/skills/generic_seller/`) and name it `dialogues.py`. Inside this file add the following code:
 
 ``` python
-from typing import Dict, Optional, Type
+from typing import Any, Dict, Optional, Type
 
 from aea.common import Address
 from aea.exceptions import AEAEnforceError, enforce
@@ -1101,7 +1149,7 @@ DefaultDialogue = BaseDefaultDialogue
 class DefaultDialogues(Model, BaseDefaultDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -1175,7 +1223,7 @@ class FipaDialogue(BaseFipaDialogue):
 class FipaDialogues(Model, BaseFipaDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -1249,7 +1297,7 @@ class LedgerApiDialogue(BaseLedgerApiDialogue):
 class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -1270,7 +1318,7 @@ class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
 
         BaseLedgerApiDialogues.__init__(
             self,
-            self_address=self.context.agent_address,
+            self_address=str(self.skill_id),
             role_from_first_message=role_from_first_message,
             dialogue_class=LedgerApiDialogue,
         )
@@ -1282,7 +1330,7 @@ OefSearchDialogue = BaseOefSearchDialogue
 class OefSearchDialogues(Model, BaseOefSearchDialogues):
     """This class keeps track of all oef_search dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -1304,18 +1352,18 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
 
         BaseOefSearchDialogues.__init__(
             self,
-            self_address=self.context.agent_address,
+            self_address=str(self.skill_id),
             role_from_first_message=role_from_first_message,
         )
 ```
 
-The `FipaDialogues` class stores dialogue with each `my_generic_buyer` (and other AEAs) and exposes a number of helpful methods to manage them. This helps us match messages to a dialogue, access previous messages and enable us to identify possible communications problems between the `my_generic_seller` AEA and the `my_generic_buyer` AEA. It also keeps track of the data that we offer for sale during the proposal phase.
+The `FipaDialogues` class contains negotiation dialogues with each `my_generic_buyer` AEA (and other AEAs) and exposes a number of helpful methods to manage them. This helps us match messages to the dialogues they belong to, access previous messages and enable us to identify possible communications problems between the `my_generic_seller` AEA and the `my_generic_buyer` AEA. It also keeps track of the data that we offer for sale during the proposal phase.
 
-The `FipaDialogues` class extends `BaseFipaDialogues`, which itself derives from the base <a href="../api/helpers/dialogue/base#dialogues-objects">`Dialogues`</a> class. Similarly, the `FipaDialogue` class extends `BaseFipaDialogue`, which itself derives from the base <a href="../api/helpers/dialogue/base#dialogue-objects">`Dialogue`</a> class. To learn more about dialogues have a look <a href="../protocol">here</a>.
+The `FipaDialogues` class extends `BaseFipaDialogues`, which itself derives from the base <a href="../api/protocols/dialogue/base#dialogues-objects">`Dialogues`</a> class. Similarly, the `FipaDialogue` class extends `BaseFipaDialogue` which itself derives from the base <a href="../api/protocols/dialogue/base#dialogue-objects">`Dialogue`</a> class. To learn more about dialogues have a look <a href="../protocol">here</a>.
 
 ### Step 6: Update the YAML files
 
-Since we made so many changes to our AEA we have to update the `skill.yaml` (at `my_generic_seller/skills/generic_seller/skill.yaml`). Make sure that your `skill.yaml` matches with the following code
+Since we made so many changes to our AEA we have to update the `skill.yaml` (at `my_generic_seller/skills/generic_seller/skill.yaml`). Make sure you update your `skill.yaml` with the following configuration:
 
 ``` yaml
 name: generic_seller
@@ -1325,20 +1373,23 @@ type: skill
 description: The weather station skill implements the functionality to sell weather
   data.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.10.0, <0.11.0'
 fingerprint:
-  __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
-  behaviours.py: QmcFahpL4DZ1rsTNEK1BT3e5T8TEJJg2hP4ytkzdqKuJnZ
-  dialogues.py: QmRmoFp9xi1p1THVBYym9xEwW88KgkBHgz45LgrYbBecQw
-  handlers.py: QmT4nvKikWXfGAEdRS8Qn8w89Gbh5zPb4EDB6EwPVP2YDJ
-  strategy.py: QmP69kCtcovLD2Z7quESuNxVEyNuiZgqqbwozp6wAbvBCd
+  README.md: QmPb5kHYZyhUN87EKmuahyGqDGgqVdGPyfC1KpGC3xfmcP
+  __init__.py: QmTSEedzQySy2nzRCY3F66CBSX52f8s3pWHZTejX4hKC9h
+  behaviours.py: QmS9sPCv2yBnhWsmHeaCptpApMtYZipbR39TXixeGK64Ks
+  dialogues.py: QmdTW8q1xQ7ajFVsWmuV62ypoT5J2b6Hkyz52LFaWuMEtd
+  handlers.py: QmQnQhSaHPUYaJut8bMe2LHEqiZqokMSVfCthVaqrvPbdi
+  strategy.py: QmYTUsfv64eRQDevCfMUDQPx2GCtiMLFdacN4sS1E4Fdfx
 fingerprint_ignore_patterns: []
+connections:
+- fetchai/ledger:0.13.0
 contracts: []
 protocols:
-- fetchai/default:0.8.0
-- fetchai/fipa:0.9.0
-- fetchai/ledger_api:0.6.0
-- fetchai/oef_search:0.9.0
+- fetchai/default:0.12.0
+- fetchai/fipa:0.13.0
+- fetchai/ledger_api:0.10.0
+- fetchai/oef_search:0.13.0
 skills: []
 behaviours:
   service_registration:
@@ -1370,12 +1421,10 @@ models:
     class_name: OefSearchDialogues
   strategy:
     args:
-      currency_id: FET
       data_for_sale:
         generic: data
       has_data_source: false
       is_ledger_tx: true
-      ledger_id: fetchai
       location:
         latitude: 51.5194
         longitude: 0.127
@@ -1388,7 +1437,7 @@ models:
 dependencies: {}
 ```
 
-We must pay attention to the models and in particular the strategy’s variables. Here we can change the price we would like to sell each reading for or the currency we would like to transact with. Lastly, the dependencies are the third party packages we need to install in order to get readings from the sensor.
+We must pay attention to the models and in particular the strategy’s variables. Here we can change the price we would like to sell each data reading for, or the currency we would like to transact with. Lastly, the dependencies are the third party packages we need to install in order to get readings from the sensor.
 
 Finally, we fingerprint our new skill:
 
@@ -1410,13 +1459,13 @@ aea create my_generic_buyer
 cd my_generic_buyer
 ```
 
-Our newly created AEA is inside the current working directory. Let’s create our new skill that will handle the purchase of the data. Type the following command:
+Our newly created AEA is inside the current working directory. Let’s create a new skill for purchasing data. Type the following command:
 
 ``` bash
 aea scaffold skill generic_buyer
 ```
 
-This command will create the correct structure for a new skill inside our AEA project You can locate the newly created skill inside the skills folder (`my_generic_buyer/skills/generic_buyer/`) and it must contain the following files:
+This command creates the correct structure for a new skill inside our AEA project. You can locate the newly created skill under the skills folder (`my_generic_buyer/skills/generic_buyer/`) and it must contain the following files:
 
 - `__init__.py`
 - `behaviours.py`
@@ -1426,13 +1475,12 @@ This command will create the correct structure for a new skill inside our AEA pr
 
 ### Step 2: Create the behaviour
 
-A <a href="../api/skills/base#behaviour-objects">`Behaviour`</a> class contains the business logic specific to actions initiated by the AEA rather than reactions to other events.
-
-Open the `behaviours.py` (`my_generic_buyer/skills/generic_buyer/behaviours.py`) and add the following code (replacing the stub code already present in the file):
+Open the `behaviours.py` file (`my_generic_buyer/skills/generic_buyer/behaviours.py`) and replace the stub code with the following:
 
 ``` python
-from typing import cast
+from typing import Any, List, Optional, Set, cast
 
+from aea.protocols.dialogue.base import DialogueLabel
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.connections.ledger.base import (
@@ -1441,12 +1489,16 @@ from packages.fetchai.connections.ledger.base import (
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.generic_buyer.dialogues import (
+    FipaDialogue,
+    LedgerApiDialogue,
     LedgerApiDialogues,
     OefSearchDialogues,
 )
 from packages.fetchai.skills.generic_buyer.strategy import GenericStrategy
 
 
+DEFAULT_MAX_PROCESSING = 120
+DEFAULT_TX_INTERVAL = 2.0
 DEFAULT_SEARCH_INTERVAL = 5.0
 LEDGER_API_ADDRESS = str(LEDGER_CONNECTION_PUBLIC_ID)
 
@@ -1454,7 +1506,7 @@ LEDGER_API_ADDRESS = str(LEDGER_CONNECTION_PUBLIC_ID)
 class GenericSearchBehaviour(TickerBehaviour):
     """This class implements a search behaviour."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         """Initialize the search behaviour."""
         search_interval = cast(
             float, kwargs.pop("search_interval", DEFAULT_SEARCH_INTERVAL)
@@ -1485,17 +1537,28 @@ class GenericSearchBehaviour(TickerBehaviour):
         :return: None
         """
         strategy = cast(GenericStrategy, self.context.strategy)
-        if strategy.is_searching:
-            query = strategy.get_location_and_service_query()
-            oef_search_dialogues = cast(
-                OefSearchDialogues, self.context.oef_search_dialogues
+        if not strategy.is_searching:
+            return
+        transaction_behaviour = cast(
+            GenericTransactionBehaviour, self.context.behaviours.transaction
+        )
+        remaining_transactions_count = len(transaction_behaviour.waiting)
+        if remaining_transactions_count > 0:
+            self.context.logger.info(
+                f"Transaction behaviour has {remaining_transactions_count} transactions remaining. Skipping search!"
             )
-            oef_search_msg, _ = oef_search_dialogues.create(
-                counterparty=self.context.search_service_address,
-                performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-                query=query,
-            )
-            self.context.outbox.put_message(message=oef_search_msg)
+            return
+        strategy.update_search_query_params()
+        query = strategy.get_location_and_service_query()
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
+        )
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
+            performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+            query=query,
+        )
+        self.context.outbox.put_message(message=oef_search_msg)
 
     def teardown(self) -> None:
         """
@@ -1504,21 +1567,128 @@ class GenericSearchBehaviour(TickerBehaviour):
         :return: None
         """
         pass
+
+
+class GenericTransactionBehaviour(TickerBehaviour):
+    """A behaviour to sequentially submit transactions to the blockchain."""
+
+    def __init__(self, **kwargs: Any):
+        """Initialize the transaction behaviour."""
+        tx_interval = cast(
+            float, kwargs.pop("transaction_interval", DEFAULT_TX_INTERVAL)
+        )
+        self.max_processing = cast(
+            float, kwargs.pop("max_processing", DEFAULT_MAX_PROCESSING)
+        )
+        self.processing_time = 0.0
+        self.waiting: List[FipaDialogue] = []
+        self.processing: Optional[LedgerApiDialogue] = None
+        self.timedout: Set[DialogueLabel] = set()
+        super().__init__(tick_interval=tx_interval, **kwargs)
+
+    def setup(self) -> None:
+        """Setup behaviour."""
+        pass
+
+    def act(self) -> None:
+        """
+        Implement the act.
+
+        :return: None
+        """
+        if self.processing is not None:
+            if self.processing_time <= self.max_processing:
+                # already processing
+                self.processing_time += self.tick_interval
+                return
+            self._timeout_processing()
+        if len(self.waiting) == 0:
+            # nothing to process
+            return
+        self._start_processing()
+
+    def _start_processing(self) -> None:
+        """Process the next transaction."""
+        fipa_dialogue = self.waiting.pop(0)
+        self.context.logger.info(
+            f"Processing transaction, {len(self.waiting)} transactions remaining"
+        )
+        ledger_api_dialogues = cast(
+            LedgerApiDialogues, self.context.ledger_api_dialogues
+        )
+        ledger_api_msg, ledger_api_dialogue = ledger_api_dialogues.create(
+            counterparty=LEDGER_API_ADDRESS,
+            performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
+            terms=fipa_dialogue.terms,
+        )
+        ledger_api_dialogue = cast(LedgerApiDialogue, ledger_api_dialogue)
+        ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
+        self.processing_time = 0.0
+        self.processing = ledger_api_dialogue
+        self.context.logger.info(
+            f"requesting transfer transaction from ledger api for message={ledger_api_msg}..."
+        )
+        self.context.outbox.put_message(message=ledger_api_msg)
+
+    def teardown(self) -> None:
+        """Teardown behaviour."""
+        pass
+
+    def _timeout_processing(self) -> None:
+        """Timeout processing."""
+        if self.processing is None:
+            return
+        self.timedout.add(self.processing.dialogue_label)
+        self.waiting.append(self.processing.associated_fipa_dialogue)
+        self.processing_time = 0.0
+        self.processing = None
+
+    def finish_processing(self, ledger_api_dialogue: LedgerApiDialogue) -> None:
+        """
+        Finish processing.
+
+        :param ledger_api_dialogue: the ledger api dialogue
+        """
+        if self.processing == ledger_api_dialogue:
+            self.processing_time = 0.0
+            self.processing = None
+            return
+        if ledger_api_dialogue.dialogue_label not in self.timedout:
+            raise ValueError(
+                f"Non-matching dialogues in transaction behaviour: {self.processing} and {ledger_api_dialogue}"
+            )
+        self.timedout.remove(ledger_api_dialogue.dialogue_label)
+        self.context.logger.debug(
+            f"Timeout dialogue in transaction processing: {ledger_api_dialogue}"
+        )
+        # don't reset, as another might be processing
+
+    def failed_processing(self, ledger_api_dialogue: LedgerApiDialogue) -> None:
+        """
+        Failed processing.
+
+        Currently, we retry processing indefinitely.
+
+        :param ledger_api_dialogue: the ledger api dialogue
+        """
+        self.finish_processing(ledger_api_dialogue)
+        self.waiting.append(ledger_api_dialogue.associated_fipa_dialogue)
 ```
 
-This <a href="../api/skills/behaviours#tickerbehaviour-objects">`TickerBehaviour`</a> will search on  the <a href="../simple-oef">SOEF search node</a> with a specific query at regular tick intervals.
+This <a href="../api/skills/behaviours#tickerbehaviour-objects">`TickerBehaviour`</a> will send a search query to the <a href="../simple-oef">SOEF search node</a> at regular tick intervals.
 
 ### Step 3: Create the handler
 
-So far, we have tasked the AEA with sending search queries to the <a href="../simple-oef">SOEF search node</a>. However, we have at present no way of handling the responses sent to the AEA by the <a href="../simple-oef">SOEF search node</a> or messages sent by other agent.
+So far, the AEA is tasked with sending search queries to the <a href="../simple-oef">SOEF search node</a>. However, currently the AEA has no way of handling the responses it receives from the SOEF or messages from other agents.
 
-Let us now implement a <a href="../api/skills/base#handler-objects">`Handler`</a> to deal with the incoming messages. Open the `handlers.py` file (`my_generic_buyer/skills/generic_buyer/handlers.py`) and add the following code (replacing the stub code already present in the file):
+Let us now implement <a href="../api/skills/base#handler-objects">`Handlers`</a> to deal with the expected incoming messages. Open the `handlers.py` file (`my_generic_buyer/skills/generic_buyer/handlers.py`) and add the following code (replacing the stub code already present in the file):
 
 ``` python
 import pprint
 from typing import Optional, cast
 
 from aea.configurations.base import PublicId
+from aea.crypto.ledger_apis import LedgerApis
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
@@ -1530,6 +1700,7 @@ from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.signing.message import SigningMessage
+from packages.fetchai.skills.generic_buyer.behaviours import GenericTransactionBehaviour
 from packages.fetchai.skills.generic_buyer.dialogues import (
     DefaultDialogues,
     FipaDialogue,
@@ -1596,7 +1767,7 @@ class GenericFipaHandler(Handler):
         """
         pass
 ```
-You will see that we are following similar logic to the `generic_seller` when we develop the `generic_buyer`’s side of the negotiation. First, we create a new dialogue and we store it in the dialogues class. Then we are checking what kind of message we received. So lets start creating our handlers:
+You will see that we are following similar logic to the `generic_seller` when we develop the `generic_buyer`’s side of the negotiation. First, we create a new dialogue and store it in the dialogues class. Then we are checking what kind of message we received by checking its performative. So lets start creating our handlers:
 
 ``` python
     def _handle_unidentified_dialogue(self, fipa_msg: FipaMessage) -> None:
@@ -1618,7 +1789,7 @@ You will see that we are following similar logic to the `generic_seller` when we
         )
         self.context.outbox.put_message(message=default_msg)
 ```
-The above code handles the unidentified dialogues. And responds with an error message to the sender. Next we will handle the `PROPOSE` message that we receive from the `my_generic_seller` AEA:
+The above code handles messages referencing unidentified dialogues and responds with an error message to the sender. Next we will handle the `PROPOSE` message received from the `my_generic_seller` AEA:
 
 ``` python
     def _handle_propose(
@@ -1658,12 +1829,12 @@ The above code handles the unidentified dialogues. And responds with an error me
             )
             self.context.outbox.put_message(message=decline_msg)
 ```
-When we receive a proposal we have to check if we have the funds to complete the transaction and if the proposal is acceptable based on our strategy. If the proposal is not affordable or acceptable we respond with a `DECLINE` message. Otherwise, we send an `ACCEPT` message to the seller.
+When we receive a proposal, we have to check if we have the funds to complete the transaction and if the proposal is acceptable based on our strategy. If the proposal is not affordable or acceptable, we respond with a `DECLINE` message. Otherwise, we send an `ACCEPT` message to the seller.
 
-The next code-block handles the `DECLINE` message that we may receive from the buyer on our `CFP`message or our `ACCEPT` message:
+The next code-block handles the `DECLINE` message that we may receive from the seller as a response to our `CFP` or `ACCEPT` messages:
 
 ``` python
-    def _handle_decline(
+	def _handle_decline(
         self,
         fipa_msg: FipaMessage,
         fipa_dialogue: FipaDialogue,
@@ -1680,18 +1851,25 @@ The next code-block handles the `DECLINE` message that we may receive from the b
         self.context.logger.info(
             "received DECLINE from sender={}".format(fipa_msg.sender[-5:])
         )
-        if fipa_msg.target == 1:
+        target_message = fipa_dialogue.get_message_by_id(fipa_msg.target)
+
+        if not target_message:
+            raise ValueError("Can not find target message!")  # pragma: nocover
+
+        declined_performative = target_message.performative
+
+        if declined_performative == FipaMessage.Performative.CFP:
             fipa_dialogues.dialogue_stats.add_dialogue_endstate(
                 FipaDialogue.EndState.DECLINED_CFP, fipa_dialogue.is_self_initiated
             )
-        elif fipa_msg.target == 3:
+        if declined_performative == FipaMessage.Performative.ACCEPT:
             fipa_dialogues.dialogue_stats.add_dialogue_endstate(
                 FipaDialogue.EndState.DECLINED_ACCEPT, fipa_dialogue.is_self_initiated
             )
 ```
-The above code terminates each dialogue with the specific AEA and stores the step. For example, if the `target == 1` we know that the seller declined our `CFP` message.
+The above code terminates each dialogue with the specific AEA and stores the state of the terminated dialogue (whether it was terminated after a `CFP` or an `ACCEPT`). 
 
-In case we do not receive any `DECLINE` message that means that the `my_generic_seller` AEA want to move on with the sale, in that case, it will send a `MATCH_ACCEPT` message. In order to handle this we add the following code:
+If `my_generic_seller` AEA wants to move on with the sale, it will send a `MATCH_ACCEPT` message. In order to handle this we add the following code:
 
 ``` python
     def _handle_match_accept(
@@ -1716,21 +1894,11 @@ In case we do not receive any `DECLINE` message that means that the `my_generic_
                 fipa_dialogue.terms.counterparty_address = (  # pragma: nocover
                     transfer_address
                 )
-            ledger_api_dialogues = cast(
-                LedgerApiDialogues, self.context.ledger_api_dialogues
+
+            tx_behaviour = cast(
+                GenericTransactionBehaviour, self.context.behaviours.transaction
             )
-            ledger_api_msg, ledger_api_dialogue = ledger_api_dialogues.create(
-                counterparty=LEDGER_API_ADDRESS,
-                performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
-                terms=fipa_dialogue.terms,
-            )
-            ledger_api_dialogue = cast(LedgerApiDialogue, ledger_api_dialogue)
-            ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
-            fipa_dialogue.associated_ledger_api_dialogue = ledger_api_dialogue
-            self.context.outbox.put_message(message=ledger_api_msg)
-            self.context.logger.info(
-                "requesting transfer transaction from ledger api..."
-            )
+            tx_behaviour.waiting.append(fipa_dialogue)
         else:
             inform_msg = fipa_dialogue.reply(
                 performative=FipaMessage.Performative.INFORM,
@@ -1742,9 +1910,9 @@ In case we do not receive any `DECLINE` message that means that the `my_generic_
                 "informing counterparty={} of payment.".format(fipa_msg.sender[-5:])
             )
 ```
-The first thing we are checking is if we enabled our AEA to transact with a ledger. If we can transact with a ledger we generate a `LedgerApiMessage` of performative `GET_RAW_TRANSACTION` and send it to the ledger connection. The ledger connection will construct a raw transaction for us, using the relevant ledger api.
+The first thing we are checking is if we enabled our AEA to transact with a ledger. If so, we add this negotiation to the queue of transactions to be processed. If not, we simulate non-ledger payment by sending an inform to the seller that the payment is done (say via bank transfer).
 
-Lastly, we need to handle the `INFORM` message. This is the message that will have our data:
+Lastly, we need to handle `INFORM` messages. This is the message that will have our data:
 
 ``` python
     def _handle_inform(
@@ -1766,12 +1934,13 @@ Lastly, we need to handle the `INFORM` message. This is the message that will ha
         )
         if len(fipa_msg.info.keys()) >= 1:
             data = fipa_msg.info
-            self.context.logger.info(
-                "received the following data={}".format(pprint.pformat(data))
-            )
+            data_string = pprint.pformat(data)[:1000]
+            self.context.logger.info(f"received the following data={data_string}")
             fipa_dialogues.dialogue_stats.add_dialogue_endstate(
                 FipaDialogue.EndState.SUCCESSFUL, fipa_dialogue.is_self_initiated
             )
+            strategy = cast(GenericStrategy, self.context.strategy)
+            strategy.successful_trade_with_counterparty(fipa_msg.sender, data)
         else:
             self.context.logger.info(
                 "received no data from sender={}".format(fipa_msg.sender[-5:])
@@ -1793,9 +1962,8 @@ Lastly, we need to handle the `INFORM` message. This is the message that will ha
             )
         )
 ```
-The main difference between the `generic_buyer` and the `generic_seller` skill `handlers.py` file is that in this one we create more than one handler.
 
-The reason is that we receive messages not only from the `my_generic_seller` AEA but also from the `DecisionMaker` and the <a href="../simple-oef">SOEF search node</a>. We need one handler for each type of protocol we use.
+We now need to add handlers for messages received from the `DecisionMaker` and the <a href="../simple-oef">SOEF search node</a>. We need one handler for each type of protocol we use.
 
 To handle the messages in the `oef_search` protocol used by the <a href="../simple-oef">SOEF search node</a> we add the following code in the same file (`my_generic_buyer/skills/generic_buyer/handlers.py`):
 
@@ -1887,19 +2055,24 @@ class GenericOefSearchHandler(Handler):
                 f"found no agents in dialogue={oef_search_dialogue}, continue searching."
             )
             return
-
-        self.context.logger.info(
-            "found agents={}, stopping search.".format(
-                list(map(lambda x: x[-5:], oef_search_msg.agents)),
-            )
-        )
         strategy = cast(GenericStrategy, self.context.strategy)
-        strategy.is_searching = False  # stopping search
+        if strategy.is_stop_searching_on_result:
+            self.context.logger.info(
+                "found agents={}, stopping search.".format(
+                    list(map(lambda x: x[-5:], oef_search_msg.agents)),
+                )
+            )
+            strategy.is_searching = False  # stopping search
+        else:
+            self.context.logger.info(
+                "found agents={}.".format(
+                    list(map(lambda x: x[-5:], oef_search_msg.agents)),
+                )
+            )
         query = strategy.get_service_query()
         fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
-        for idx, counterparty in enumerate(oef_search_msg.agents):
-            if idx >= strategy.max_negotiations:
-                continue
+        counterparties = strategy.get_acceptable_counterparties(oef_search_msg.agents)
+        for counterparty in counterparties:
             cfp_msg, _ = fipa_dialogues.create(
                 counterparty=counterparty,
                 performative=FipaMessage.Performative.CFP,
@@ -1928,7 +2101,7 @@ class GenericOefSearchHandler(Handler):
 ```
 When we receive a message from the <a href="../simple-oef">SOEF search node</a> of a type `OefSearchMessage.Performative.SEARCH_RESULT`, we are passing the details to the relevant handler method. In the `_handle_search` function we are checking that the response contains some agents and we stop the search if it does. We pick our first agent and we send a `CFP` message.
 
-The last handlers we need are the `GenericSigningHandler` and the `GenericLedgerApiHandler`. This handler will handle the `SigningMessages` that we receive from the `DecisionMaker`. The `GenericLedgerApiHandler` will handle the `LedgerApiMessages` that we receive from the ledger connection.
+The last handlers we need are the `GenericSigningHandler` and the `GenericLedgerApiHandler`. These handlers are responsible for `SigningMessages` that we receive from the `DecisionMaker`, and `LedgerApiMessages` that we receive from the ledger connection, respectively.
 
 ``` python
 class GenericSigningHandler(Handler):
@@ -1997,8 +2170,7 @@ class GenericSigningHandler(Handler):
         :return: None
         """
         self.context.logger.info("transaction signing was successful.")
-        fipa_dialogue = signing_dialogue.associated_fipa_dialogue
-        ledger_api_dialogue = fipa_dialogue.associated_ledger_api_dialogue
+        ledger_api_dialogue = signing_dialogue.associated_ledger_api_dialogue
         last_ledger_api_msg = ledger_api_dialogue.last_incoming_message
         if last_ledger_api_msg is None:
             raise ValueError("Could not retrieve last message in ledger api dialogue")
@@ -2025,6 +2197,19 @@ class GenericSigningHandler(Handler):
                 signing_msg.error_code, signing_dialogue
             )
         )
+        signing_msg_ = cast(
+            Optional[SigningMessage], signing_dialogue.last_outgoing_message
+        )
+        if (
+            signing_msg_ is not None
+            and signing_msg_.performative
+            == SigningMessage.Performative.SIGN_TRANSACTION
+        ):
+            tx_behaviour = cast(
+                GenericTransactionBehaviour, self.context.behaviours.transaction
+            )
+            ledger_api_dialogue = signing_dialogue.associated_ledger_api_dialogue
+            tx_behaviour.failed_processing(ledger_api_dialogue)
 
     def _handle_invalid(
         self, signing_msg: SigningMessage, signing_dialogue: SigningDialogue
@@ -2084,6 +2269,11 @@ class GenericLedgerApiHandler(Handler):
             == LedgerApiMessage.Performative.TRANSACTION_DIGEST
         ):
             self._handle_transaction_digest(ledger_api_msg, ledger_api_dialogue)
+        elif (
+            ledger_api_msg.performative
+            == LedgerApiMessage.Performative.TRANSACTION_RECEIPT
+        ):
+            self._handle_transaction_receipt(ledger_api_msg, ledger_api_dialogue)
         elif ledger_api_msg.performative == LedgerApiMessage.Performative.ERROR:
             self._handle_error(ledger_api_msg, ledger_api_dialogue)
         else:
@@ -2126,7 +2316,7 @@ class GenericLedgerApiHandler(Handler):
             strategy.is_searching = True
         else:
             self.context.logger.warning(
-                "you have no starting balance on {} ledger!".format(strategy.ledger_id)
+                f"you have no starting balance on {strategy.ledger_id} ledger! Stopping skill {self.skill_id}."
             )
             self.context.is_active = False
 
@@ -2148,9 +2338,7 @@ class GenericLedgerApiHandler(Handler):
             terms=ledger_api_dialogue.associated_fipa_dialogue.terms,
         )
         signing_dialogue = cast(SigningDialogue, signing_dialogue)
-        signing_dialogue.associated_fipa_dialogue = (
-            ledger_api_dialogue.associated_fipa_dialogue
-        )
+        signing_dialogue.associated_ledger_api_dialogue = ledger_api_dialogue
         self.context.decision_maker_message_queue.put_nowait(signing_msg)
         self.context.logger.info(
             "proposing the transaction to the decision maker. Waiting for confirmation ..."
@@ -2165,26 +2353,65 @@ class GenericLedgerApiHandler(Handler):
         :param ledger_api_message: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
-        fipa_dialogue = ledger_api_dialogue.associated_fipa_dialogue
         self.context.logger.info(
             "transaction was successfully submitted. Transaction digest={}".format(
                 ledger_api_msg.transaction_digest
             )
         )
-        fipa_msg = cast(Optional[FipaMessage], fipa_dialogue.last_incoming_message)
-        if fipa_msg is None:
-            raise ValueError("Could not retrieve fipa message")
-        inform_msg = fipa_dialogue.reply(
-            performative=FipaMessage.Performative.INFORM,
-            target_message=fipa_msg,
-            info={"transaction_digest": ledger_api_msg.transaction_digest.body},
+        ledger_api_msg_ = ledger_api_dialogue.reply(
+            performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
+            target_message=ledger_api_msg,
+            transaction_digest=ledger_api_msg.transaction_digest,
         )
-        self.context.outbox.put_message(message=inform_msg)
-        self.context.logger.info(
-            "informing counterparty={} of transaction digest.".format(
-                fipa_dialogue.dialogue_label.dialogue_opponent_addr[-5:],
+        self.context.logger.info("checking transaction is settled.")
+        self.context.outbox.put_message(message=ledger_api_msg_)
+
+    def _handle_transaction_receipt(
+        self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
+    ) -> None:
+        """
+        Handle a message of balance performative.
+
+        :param ledger_api_message: the ledger api message
+        :param ledger_api_dialogue: the ledger api dialogue
+        """
+        fipa_dialogue = ledger_api_dialogue.associated_fipa_dialogue
+        is_settled = LedgerApis.is_transaction_settled(
+            fipa_dialogue.terms.ledger_id, ledger_api_msg.transaction_receipt.receipt
+        )
+        tx_behaviour = cast(
+            GenericTransactionBehaviour, self.context.behaviours.transaction
+        )
+        if is_settled:
+            tx_behaviour.finish_processing(ledger_api_dialogue)
+            ledger_api_msg_ = cast(
+                Optional[LedgerApiMessage], ledger_api_dialogue.last_outgoing_message
             )
-        )
+            if ledger_api_msg_ is None:
+                raise ValueError(  # pragma: nocover
+                    "Could not retrieve last ledger_api message"
+                )
+            fipa_msg = cast(Optional[FipaMessage], fipa_dialogue.last_incoming_message)
+            if fipa_msg is None:
+                raise ValueError("Could not retrieve last fipa message")
+            inform_msg = fipa_dialogue.reply(
+                performative=FipaMessage.Performative.INFORM,
+                target_message=fipa_msg,
+                info={"transaction_digest": ledger_api_msg_.transaction_digest.body},
+            )
+            self.context.outbox.put_message(message=inform_msg)
+            self.context.logger.info(
+                "transaction confirmed, informing counterparty={} of transaction digest.".format(
+                    fipa_dialogue.dialogue_label.dialogue_opponent_addr[-5:],
+                )
+            )
+        else:
+            tx_behaviour.failed_processing(ledger_api_dialogue)
+            self.context.logger.info(
+                "transaction_receipt={} not settled or not valid, aborting".format(
+                    ledger_api_msg.transaction_receipt
+                )
+            )
 
     def _handle_error(
         self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
@@ -2200,6 +2427,18 @@ class GenericLedgerApiHandler(Handler):
                 ledger_api_msg, ledger_api_dialogue
             )
         )
+        ledger_api_msg_ = cast(
+            Optional[LedgerApiMessage], ledger_api_dialogue.last_outgoing_message
+        )
+        if (
+            ledger_api_msg_ is not None
+            and ledger_api_msg_.performative
+            != LedgerApiMessage.Performative.GET_BALANCE
+        ):
+            tx_behaviour = cast(
+                GenericTransactionBehaviour, self.context.behaviours.transaction
+            )
+            tx_behaviour.failed_processing(ledger_api_dialogue)
 
     def _handle_invalid(
         self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
@@ -2219,9 +2458,11 @@ class GenericLedgerApiHandler(Handler):
 
 ### Step 4: Create the strategy
 
-We are going to create the strategy that we want our AEA to follow. Rename the `my_model.py` file (in `my_generic_buyer/skills/generic_buyer/`) to `strategy.py` and paste the following code (replacing the stub code already present in the file):
+We are going to create the strategy that we want our AEA to follow. Rename the `my_model.py` file (in `my_generic_buyer/skills/generic_buyer/`) to `strategy.py` and replace the stub code with the following:
 
 ``` python
+from typing import Any, Dict, List, Tuple
+
 from aea.common import Address
 from aea.exceptions import enforce
 from aea.helpers.search.generic import SIMPLE_SERVICE_MODEL
@@ -2241,6 +2482,8 @@ DEFAULT_IS_LEDGER_TX = True
 DEFAULT_MAX_UNIT_PRICE = 5
 DEFAULT_MAX_TX_FEE = 2
 DEFAULT_SERVICE_ID = "generic_service"
+DEFAULT_MIN_QUANTITY = 1
+DEFAULT_MAX_QUANTITY = 100
 
 DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
 DEFAULT_SEARCH_QUERY = {
@@ -2256,7 +2499,7 @@ DEFAULT_MAX_NEGOTIATIONS = 2
 class GenericStrategy(Model):
     """This class defines a strategy for the agent."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize the strategy of the agent.
 
@@ -2267,6 +2510,8 @@ class GenericStrategy(Model):
         self._is_ledger_tx = kwargs.pop("is_ledger_tx", DEFAULT_IS_LEDGER_TX)
 
         self._max_unit_price = kwargs.pop("max_unit_price", DEFAULT_MAX_UNIT_PRICE)
+        self._min_quantity = kwargs.pop("min_quantity", DEFAULT_MIN_QUANTITY)
+        self._max_quantity = kwargs.pop("max_quantity", DEFAULT_MAX_QUANTITY)
         self._max_tx_fee = kwargs.pop("max_tx_fee", DEFAULT_MAX_TX_FEE)
         self._service_id = kwargs.pop("service_id", DEFAULT_SERVICE_ID)
 
@@ -2280,6 +2525,7 @@ class GenericStrategy(Model):
         self._max_negotiations = kwargs.pop(
             "max_negotiations", DEFAULT_MAX_NEGOTIATIONS
         )
+        self._is_stop_searching_on_result = kwargs.pop("stop_searching_on_result", True)
 
         super().__init__(**kwargs)
         self._ledger_id = (
@@ -2296,7 +2542,7 @@ class GenericStrategy(Model):
         self._balance = 0
 ```
 
-We initialize the strategy class by trying to read the strategy variables from the YAML file. If this is not possible we specified some default values. The following two methods are related to the oef search service, add them under the initialization of the class:
+Similar to the seller AEA, we initialize the strategy class by trying to read the strategy variables from the YAML file, and if not possible, use some default values. In the following snippet, the two methods after the properties are related to the OEF search service. Add this snippet under the initialization of the strategy class:
 
 ``` python
     @property
@@ -2308,6 +2554,11 @@ We initialize the strategy class by trying to read the strategy variables from t
     def is_ledger_tx(self) -> bool:
         """Check whether or not tx are settled on a ledger."""
         return self._is_ledger_tx
+
+    @property
+    def is_stop_searching_on_result(self) -> bool:
+        """Check if search is stopped on result."""
+        return self._is_stop_searching_on_result
 
     @property
     def is_searching(self) -> bool:
@@ -2371,7 +2622,7 @@ We initialize the strategy class by trying to read the strategy variables from t
         return query
 ```
 
-The following code block checks if the proposal that we received is acceptable based on the strategy:
+The following code block checks if the proposal that we received is acceptable according to a strategy:
 
 ``` python
     def is_acceptable_proposal(self, proposal: Description) -> bool:
@@ -2395,6 +2646,9 @@ The following code block checks if the proposal that we received is acceptable b
                 ]
             )
             and proposal.values["ledger_id"] == self.ledger_id
+            and proposal.values["price"] > 0
+            and proposal.values["quantity"] >= self._min_quantity
+            and proposal.values["quantity"] <= self._max_quantity
             and proposal.values["price"]
             <= proposal.values["quantity"] * self._max_unit_price
             and proposal.values["currency_id"] == self._currency_id
@@ -2405,7 +2659,7 @@ The following code block checks if the proposal that we received is acceptable b
         return result
 ```
 
-The `is_affordable_proposal` method checks if we can afford the transaction based on the funds we have in our wallet on the ledger.
+The `is_affordable_proposal` method in the following code block checks if we can afford the transaction based on the funds we have in our wallet on the ledger. The rest of the methods are self-explanatory. 
 
 ``` python
     def is_affordable_proposal(self, proposal: Description) -> bool:
@@ -2420,6 +2674,20 @@ The `is_affordable_proposal` method checks if we can afford the transaction base
         else:
             result = True
         return result
+
+    def get_acceptable_counterparties(
+        self, counterparties: Tuple[str, ...]
+    ) -> Tuple[str, ...]:
+        """
+        Process counterparties and drop unacceptable ones.
+
+        :return: list of counterparties
+        """
+        valid_counterparties: List[str] = []
+        for idx, counterparty in enumerate(counterparties):
+            if idx < self.max_negotiations:
+                valid_counterparties.append(counterparty)
+        return tuple(valid_counterparties)
 
     def terms_from_proposal(
         self, proposal: Description, counterparty_address: Address
@@ -2446,14 +2714,34 @@ The `is_affordable_proposal` method checks if we can afford the transaction base
             fee_by_currency_id={proposal.values["currency_id"]: self._max_tx_fee},
         )
         return terms
+
+    def successful_trade_with_counterparty(
+        self, counterparty: str, data: Dict[str, str]
+    ) -> None:
+        """
+        Do something on successful trade.
+
+        :param counterparty: the counterparty address
+        :param data: the data
+        :return: False
+        """
+        pass
+
+    def update_search_query_params(self) -> None:
+        """
+        Update agent location and query for search.
+
+        :return: None
+        """
+        pass
 ```
 
 ### Step 5: Create the dialogues
 
-As mentioned, when we are negotiating with other AEA we would like to keep track of these negotiations for various reasons. Create a new file and name it `dialogues.py` (in `my_generic_buyer/skills/generic_buyer/`). Inside this file add the following code:
+As mentioned during the creation of the seller AEA, we should keep track of the various interactions an AEA has with others and this is done via dialogues. Create a new file and name it `dialogues.py` (in `my_generic_buyer/skills/generic_buyer/`). Inside this file add the following code:
 
 ``` python
-from typing import Optional, Type
+from typing import Any, Optional, Type
 
 from aea.common import Address
 from aea.exceptions import AEAEnforceError, enforce
@@ -2500,7 +2788,7 @@ DefaultDialogue = BaseDefaultDialogue
 class DefaultDialogues(Model, BaseDefaultDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -2558,7 +2846,6 @@ class FipaDialogue(BaseFipaDialogue):
             message_class=message_class,
         )
         self._terms = None  # type: Optional[Terms]
-        self._associated_ledger_api_dialogue = None  # type: Optional[LedgerApiDialogue]
 
     @property
     def terms(self) -> Terms:
@@ -2573,29 +2860,11 @@ class FipaDialogue(BaseFipaDialogue):
         enforce(self._terms is None, "Terms already set!")
         self._terms = terms
 
-    @property
-    def associated_ledger_api_dialogue(self) -> "LedgerApiDialogue":
-        """Get associated_ledger_api_dialogue."""
-        if self._associated_ledger_api_dialogue is None:
-            raise AEAEnforceError("LedgerApiDialogue not set!")
-        return self._associated_ledger_api_dialogue
-
-    @associated_ledger_api_dialogue.setter
-    def associated_ledger_api_dialogue(
-        self, ledger_api_dialogue: "LedgerApiDialogue"
-    ) -> None:
-        """Set associated_ledger_api_dialogue"""
-        enforce(
-            self._associated_ledger_api_dialogue is None,
-            "LedgerApiDialogue already set!",
-        )
-        self._associated_ledger_api_dialogue = ledger_api_dialogue
-
 
 class FipaDialogues(Model, BaseFipaDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -2669,7 +2938,7 @@ class LedgerApiDialogue(BaseLedgerApiDialogue):
 class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -2690,7 +2959,7 @@ class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
 
         BaseLedgerApiDialogues.__init__(
             self,
-            self_address=self.context.agent_address,
+            self_address=str(self.skill_id),
             role_from_first_message=role_from_first_message,
             dialogue_class=LedgerApiDialogue,
         )
@@ -2702,7 +2971,7 @@ OefSearchDialogue = BaseOefSearchDialogue
 class OefSearchDialogues(Model, BaseOefSearchDialogues):
     """This class keeps track of all oef_search dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -2724,7 +2993,7 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
 
         BaseOefSearchDialogues.__init__(
             self,
-            self_address=self.context.agent_address,
+            self_address=str(self.skill_id),
             role_from_first_message=role_from_first_message,
         )
 
@@ -2757,26 +3026,31 @@ class SigningDialogue(BaseSigningDialogue):
             role=role,
             message_class=message_class,
         )
-        self._associated_fipa_dialogue = None  # type: Optional[FipaDialogue]
+        self._associated_ledger_api_dialogue = None  # type: Optional[LedgerApiDialogue]
 
     @property
-    def associated_fipa_dialogue(self) -> FipaDialogue:
-        """Get associated_fipa_dialogue."""
-        if self._associated_fipa_dialogue is None:
-            raise AEAEnforceError("FipaDialogue not set!")
-        return self._associated_fipa_dialogue
+    def associated_ledger_api_dialogue(self) -> LedgerApiDialogue:
+        """Get associated_ledger_api_dialogue."""
+        if self._associated_ledger_api_dialogue is None:
+            raise AEAEnforceError("LedgerApiDialogue not set!")
+        return self._associated_ledger_api_dialogue
 
-    @associated_fipa_dialogue.setter
-    def associated_fipa_dialogue(self, fipa_dialogue: FipaDialogue) -> None:
-        """Set associated_fipa_dialogue"""
-        enforce(self._associated_fipa_dialogue is None, "FipaDialogue already set!")
-        self._associated_fipa_dialogue = fipa_dialogue
+    @associated_ledger_api_dialogue.setter
+    def associated_ledger_api_dialogue(
+        self, ledger_api_dialogue: LedgerApiDialogue
+    ) -> None:
+        """Set associated_ledger_api_dialogue"""
+        enforce(
+            self._associated_ledger_api_dialogue is None,
+            "LedgerApiDialogue already set!",
+        )
+        self._associated_ledger_api_dialogue = ledger_api_dialogue
 
 
 class SigningDialogues(Model, BaseSigningDialogues):
     """This class keeps track of all oef_search dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -2804,13 +3078,11 @@ class SigningDialogues(Model, BaseSigningDialogues):
         )
 ```
 
-The dialogues class stores dialogue with each AEA and other AEA components so we can have access to previous messages and enable us to identify possible communications problems between the `my_generic_seller` AEA and the `my_generic_buyer` AEA.
+The various dialogues classes in the above code snippet store dialogues with other AEAs, services and components, (e.g. SOEF search node via the `fetchai/soef` connection, ledgers via the `fetchai/ledger` connection and the decision maker). They expose useful methods to manipulate these interactions, access previous messages, and enable us to identify possible communications problems between `my_generic_seller` and `my_generic_buyer` AEAs.
 
 ### Step 6: Update the YAML files
 
-Since we made so many changes to our AEA we have to update the `skill.yaml` to contain our newly created scripts and the details that will be used from the strategy.
-
-First, we update the `skill.yaml`. Make sure that your `skill.yaml` matches with the following code:
+After making so many changes to our skill, we have to update the `skill.yaml` configuration file so it reflects our newly created classes, and contains the values used by the strategy. Make sure `skill.yaml` contains the following configuration:
 
 ``` yaml
 name: generic_buyer
@@ -2819,27 +3091,35 @@ version: 0.1.0
 type: skill
 description: The weather client skill implements the skill to purchase weather data.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.10.0, <0.11.0'
 fingerprint:
-  __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
-  behaviours.py: QmUBQvZkoCcik71vqRZGP4JJBgFP2kj8o7C24dfkAphitP
-  dialogues.py: Qmf3McwyT5wMv3BzoN1L3ssqZzEq19LShEjQueiKqvADcX
-  handlers.py: QmQVmi3GnuYJ5VM4trYjUeJyFHVfrUeMGDsRmtNCuntKA8
-  strategy.py: QmQHQsjAsPiox5zMtMHhdhhhHt4rKq3cs3bqnwjgGSFp6n
+  README.md: QmTR91jm7WfJpmabisy74NR5mc35YXjDU1zQAUKZeHRw8L
+  __init__.py: QmU5vrC8FipyjfS5biNa6qDWdp4aeH5h4YTtbFDmCg8Chj
+  behaviours.py: QmNwvSjEz4kzM3gWtnKbZVFJc2Z85Nb748CWAK4C4Sa4nT
+  dialogues.py: QmNen91qQDWy4bNBKrB3LabAP5iRf29B8iwYss4NB13iNU
+  handlers.py: QmZfudXXbdiREiViuwPZDXoQQyXT2ySQHdF7psQsohZXQy
+  strategy.py: QmcrwaEWvKHDCNti8QjRhB4utJBJn5L8GpD27Uy9zHwKhY
 fingerprint_ignore_patterns: []
+connections:
+- fetchai/ledger:0.13.0
 contracts: []
 protocols:
-- fetchai/default:0.8.0
-- fetchai/fipa:0.9.0
-- fetchai/ledger_api:0.6.0
-- fetchai/oef_search:0.9.0
-- fetchai/signing:0.6.0
+- fetchai/default:0.12.0
+- fetchai/fipa:0.13.0
+- fetchai/ledger_api:0.10.0
+- fetchai/oef_search:0.13.0
+- fetchai/signing:0.10.0
 skills: []
 behaviours:
   search:
     args:
       search_interval: 5
     class_name: GenericSearchBehaviour
+  transaction:
+    args:
+      max_processing: 420
+      transaction_interval: 2
+    class_name: GenericTransactionBehaviour
 handlers:
   fipa:
     args: {}
@@ -2871,25 +3151,25 @@ models:
     class_name: SigningDialogues
   strategy:
     args:
-      currency_id: FET
       is_ledger_tx: true
-      ledger_id: fetchai
       location:
         latitude: 51.5194
         longitude: 0.127
       max_negotiations: 1
       max_tx_fee: 1
       max_unit_price: 20
+      min_quantity: 1
       search_query:
         constraint_type: ==
         search_key: seller_service
         search_value: generic_service
       search_radius: 5.0
       service_id: generic_service
+      stop_searching_on_result: true
     class_name: GenericStrategy
 dependencies: {}
 ```
-We must pay attention to the models and the strategy’s variables. Here we can change the price we would like to buy each reading at or the currency we would like to transact with.
+We must pay attention to the models and the strategy’s variables. Here we can change the price we would like to buy each reading at, the maximum transaction fee we are prepared to pay, and so on. 
 
 Finally, we fingerprint our new skill:
 
@@ -2901,46 +3181,39 @@ This will hash each file and save the hash in the fingerprint. This way, in the 
 
 ## Run the AEAs
 
-<!-- <details><summary>Additional steps for Raspberry Pi only!</summary>
-
-<div class="admonition note">
-  <p class="admonition-title">Note</p>
-  <p>If you are using the Raspberry Pi, make sure that your thermometer sensor is connected to the Raspberry Pi's USB port.</p>
-</div>
-
-You can change the end-point's address and port by modifying the connection's yaml file (`*vendor/fetchai/connections/oef/connection.yaml`)
-
-Under config locate:
-
-``` yaml
-addr: ${OEF_ADDR: 127.0.0.1}
-```
-and replace it with your IP (the IP of the machine that runs the <a href="../oef-ledger">OEF search and communication node</a> image.)
-
-</details> -->
-
 ### Create private keys
 
-Create the private key for each AEA:
-
+For each AEA, create a private key:
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
-aea add-key fetchai fetchai_private_key.txt --connection
 ```
 
-### Update the AEA configs
+Next, create a private key to secure the AEA's communications:
+``` bash
+aea generate-key fetchai fetchai_connection_private_key.txt
+aea add-key fetchai fetchai_connection_private_key.txt --connection
+```
 
-Both in `my_generic_seller/aea-config.yaml` and `my_generic_buyer/aea-config.yaml`, and
-``` yaml
-default_routing:
-  fetchai/ledger_api:0.6.0: fetchai/ledger:0.8.0
-  fetchai/oef_search:0.9.0: fetchai/soef:0.11.0
+Finally, certify the key for use by the connections that request that:
+``` bash
+aea issue-certificates
+```
+
+### Update the AEA configurations
+
+In both AEAs run:
+``` bash
+aea config set --type dict agent.default_routing \
+'{
+  "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
+  "fetchai/oef_search:0.13.0": "fetchai/soef:0.17.0"
+}'
 ```
 
 ### Fund the buyer AEA
 
-Create some wealth for your buyer on the Fetch.ai testnet. (It takes a while).
+Create some wealth for your buyer on the Fetch.ai testnet (this operation might take a while).
 
 ``` bash
 aea generate-wealth fetchai --sync
@@ -2951,12 +3224,13 @@ aea generate-wealth fetchai --sync
 Add the remaining packages for the seller AEA, then run it:
 
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.12.0
-aea add connection fetchai/soef:0.11.0
-aea add connection fetchai/ledger:0.8.0
-aea add protocol fetchai/fipa:0.9.0
+aea add connection fetchai/p2p_libp2p:0.16.0
+aea add connection fetchai/soef:0.17.0
+aea add connection fetchai/ledger:0.13.0
+aea add protocol fetchai/fipa:0.13.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
+aea build
+aea config set agent.default_connection fetchai/p2p_libp2p:0.16.0
 aea run
 ```
 
@@ -2967,24 +3241,27 @@ Once you see a message of the form `To join its network use multiaddr: ['SOME_AD
 Add the remaining packages for the buyer AEA:
 
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.12.0
-aea add connection fetchai/soef:0.11.0
-aea add connection fetchai/ledger:0.8.0
-aea add protocol fetchai/fipa:0.9.0
-aea add protocol fetchai/signing:0.6.0
+aea add connection fetchai/p2p_libp2p:0.16.0
+aea add connection fetchai/soef:0.17.0
+aea add connection fetchai/ledger:0.13.0
+aea add protocol fetchai/fipa:0.13.0
+aea add protocol fetchai/signing:0.10.0
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
+aea build
+aea config set agent.default_connection fetchai/p2p_libp2p:0.16.0
 ```
 
-Then, update the configuration of the buyer AEA's p2p connection (in `vendor/fetchai/connections/p2p_libp2p/connection.yaml`) replace the following:
+Then, update the configuration of the buyer AEA's P2P connection:
 
-``` yaml
-config:
-  delegate_uri: 127.0.0.1:11001
-  entry_peers: ['SOME_ADDRESS']
-  local_uri: 127.0.0.1:9001
-  log_file: libp2p_node.log
-  public_uri: 127.0.0.1:9001
+``` bash
+aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
+'{
+  "delegate_uri": "127.0.0.1:11001",
+  "entry_peers": ["SOME_ADDRESS"],
+  "local_uri": "127.0.0.1:9001",
+  "log_file": "libp2p_node.log",
+  "public_uri": "127.0.0.1:9001"
+}'
 ```
 
 where `SOME_ADDRESS` is replaced accordingly.
@@ -3009,8 +3286,10 @@ aea delete my_generic_buyer
 
 You have completed the "Getting Started" series. Congratulations!
 
+The following guide provides some hints on <a href="../development-setup">AEA development setup</a>.
+
 ### Recommended
 
-We recommend you build your own AEA next. There are many helpful guides on here and a developer community on <a href="https://fetch-ai.slack.com" target="_blank">Slack</a>. Speak to you there!
+We recommend you build your own AEA next. There are many helpful guides and demos in the documentation, and a developer community on <a href="https://discord.com/invite/btedfjPJTj" target="_blank">Discord</a>. Speak to you there!
 
 <br />

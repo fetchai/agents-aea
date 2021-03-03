@@ -17,20 +17,25 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the tests of the messages module."""
+"""This module contains the tests of the protocols base module."""
 
 import os
 import shutil
 import tempfile
+from copy import copy
 from enum import Enum
 from pathlib import Path
 from typing import Callable, List, Tuple, Type
+from unittest.mock import Mock
 
 import pytest
+from google.protobuf.struct_pb2 import Struct
 
 from aea.exceptions import AEAEnforceError
 from aea.mail.base import Envelope
-from aea.protocols.base import Message, ProtobufSerializer, Protocol
+from aea.mail.base_pb2 import DialogueMessage as Pb2DialogueMessage
+from aea.mail.base_pb2 import Message as ProtobufMessage
+from aea.protocols.base import Message, Protocol, Serializer
 from aea.protocols.dialogue.base import Dialogue, DialogueLabel
 
 from packages.fetchai.protocols.default.dialogues import (
@@ -93,6 +98,22 @@ DIALOGUE_CLASSES: List[Tuple[Type, Type, Enum, Callable]] = [
 ]
 
 
+class TMessage(Message):
+    """Message class for tests."""
+
+    class _SlotsCls:
+        __slots__ = (
+            "body_1",
+            "body_2",
+            "kwarg",
+            "content",
+            "performative",
+            "dialogue_reference",
+            "message_id",
+            "target",
+        )
+
+
 class TestMessageProperties:
     """Test that the base serializations work."""
 
@@ -101,7 +122,7 @@ class TestMessageProperties:
         """Setup test."""
         cls.body = {"body_1": "1", "body_2": "2"}
         cls.kwarg = 1
-        cls.message = Message(cls.body, kwarg=cls.kwarg)
+        cls.message = TMessage(cls.body, kwarg=cls.kwarg)
 
     def test_message_properties(self):
         """Test message properties."""
@@ -120,6 +141,95 @@ class TestMessageProperties:
             str(self.message)
             == "Message(sender=sender,to=to,body_1=1,body_2=2,kwarg=1)"
         )
+        assert (
+            repr(self.message)
+            == "Message(sender=sender,to=to,body_1=1,body_2=2,kwarg=1)"
+        )
+        assert self.message.valid_performatives == set()
+
+
+class ExampleProtobufSerializer(Serializer):
+    """
+    Example Protobuf serializer.
+
+    It assumes that the Message contains a JSON-serializable body.
+    """
+
+    @staticmethod
+    def encode(msg: Message) -> bytes:
+        """
+        Encode a message into bytes using Protobuf.
+
+        - if one of message_id, target and dialogue_reference are not defined,
+          serialize only the message body/
+        - otherwise, extract those fields from the body and instantiate
+          a Message struct.
+        """
+        message_pb = ProtobufMessage()
+        if msg.has_dialogue_info:
+            dialogue_message_pb = Pb2DialogueMessage()
+            dialogue_message_pb.message_id = msg.message_id
+            dialogue_message_pb.dialogue_starter_reference = msg.dialogue_reference[0]
+            dialogue_message_pb.dialogue_responder_reference = msg.dialogue_reference[1]
+            dialogue_message_pb.target = msg.target
+
+            new_body = copy(msg._body)  # pylint: disable=protected-access
+            new_body.pop("message_id")
+            new_body.pop("dialogue_reference")
+            new_body.pop("target")
+
+            body_json = Struct()
+            body_json.update(new_body)  # pylint: disable=no-member
+
+            dialogue_message_pb.content = (  # pylint: disable=no-member
+                body_json.SerializeToString()
+            )
+            message_pb.dialogue_message.CopyFrom(  # pylint: disable=no-member
+                dialogue_message_pb
+            )
+        else:
+            body_json = Struct()
+            body_json.update(msg._body)  # pylint: disable=no-member,protected-access
+            message_pb.body.CopyFrom(body_json)  # pylint: disable=no-member
+
+        return message_pb.SerializeToString()
+
+    @staticmethod
+    def decode(obj: bytes) -> Message:
+        """
+        Decode bytes into a message using Protobuf.
+
+        First, try to parse the input as a Protobuf 'Message';
+        if it fails, parse the bytes as struct.
+        """
+        message_pb = ProtobufMessage()
+        message_pb.ParseFromString(obj)
+        message_type = message_pb.WhichOneof("message")
+        if message_type == "body":
+            body = dict(message_pb.body)  # pylint: disable=no-member
+            msg = TMessage(_body=body)
+            return msg
+        if message_type == "dialogue_message":
+            dialogue_message_pb = (
+                message_pb.dialogue_message  # pylint: disable=no-member
+            )
+            message_id = dialogue_message_pb.message_id
+            target = dialogue_message_pb.target
+            dialogue_starter_reference = dialogue_message_pb.dialogue_starter_reference
+            dialogue_responder_reference = (
+                dialogue_message_pb.dialogue_responder_reference
+            )
+            body_json = Struct()
+            body_json.ParseFromString(dialogue_message_pb.content)
+            body = dict(body_json)
+            body["message_id"] = message_id
+            body["target"] = target
+            body["dialogue_reference"] = (
+                dialogue_starter_reference,
+                dialogue_responder_reference,
+            )
+            return TMessage(_body=body)
+        raise ValueError("Message type not recognized.")  # pragma: nocover
 
 
 class TestBaseSerializations:
@@ -128,9 +238,9 @@ class TestBaseSerializations:
     @classmethod
     def setup_class(cls):
         """Set up the use case."""
-        cls.message = Message(content="hello")
-        cls.message2 = Message(_body={"content": "hello"})
-        cls.message3 = Message(
+        cls.message = TMessage(content="hello")
+        cls.message2 = TMessage(_body={"content": "hello"})
+        cls.message3 = TMessage(
             message_id=1,
             target=0,
             dialogue_reference=("", ""),
@@ -139,11 +249,11 @@ class TestBaseSerializations:
 
     def test_default_protobuf_serialization(self):
         """Test that the default Protobuf serialization works."""
-        message_bytes = ProtobufSerializer().encode(self.message)
+        message_bytes = ExampleProtobufSerializer().encode(self.message)
         envelope = Envelope(
             to="receiver",
             sender="sender",
-            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
+            protocol_specification_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=message_bytes,
         )
         envelope_bytes = envelope.encode()
@@ -152,17 +262,17 @@ class TestBaseSerializations:
         actual_envelope = envelope
         assert expected_envelope == actual_envelope
 
-        expected_msg = ProtobufSerializer().decode(expected_envelope.message)
+        expected_msg = ExampleProtobufSerializer().decode(expected_envelope.message)
         actual_msg = self.message
         assert expected_msg == actual_msg
 
     def test_default_protobuf_serialization_with_dialogue_info(self):
         """Test that the default Protobuf serialization with dialogue info works."""
-        message_bytes = ProtobufSerializer().encode(self.message3)
+        message_bytes = ExampleProtobufSerializer().encode(self.message3)
         envelope = Envelope(
             to="receiver",
             sender="sender",
-            protocol_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
+            protocol_specification_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=message_bytes,
         )
         envelope_bytes = envelope.encode()
@@ -171,22 +281,38 @@ class TestBaseSerializations:
         actual_envelope = envelope
         assert expected_envelope == actual_envelope
 
-        expected_msg = ProtobufSerializer().decode(expected_envelope.message)
+        expected_msg = ExampleProtobufSerializer().decode(expected_envelope.message)
         actual_msg = self.message3
         assert expected_msg == actual_msg
 
     def test_set(self):
         """Test that the set method works."""
-        key, value = "temporary_key", "temporary_value"
+        self.message._body = {}  # clean values
+        key, value = "content", "temporary_value"
         assert self.message.get(key) is None
         self.message.set(key, value)
         assert self.message.get(key) == value
 
     def test_body_setter(self):
         """Test the body setter."""
-        m_dict = {"Hello": "World"}
+        m_dict = {"content": "data"}
         self.message2._body = m_dict
-        assert "Hello" in self.message2._body.keys()
+        assert self.message2._body == m_dict
+
+
+class TestMessageEncode:
+    """Test the 'Protocol.from_dir' method."""
+
+    def test_encode(self):
+        """Test encode on message."""
+
+        class TTMessage(TMessage):
+            """Test class extended."""
+
+            serializer = ExampleProtobufSerializer
+
+        msg = TTMessage({"body_1": "1", "body_2": "2"})
+        msg.encode()
 
 
 class TestProtocolFromDir:
@@ -207,6 +333,9 @@ class TestProtocolFromDir:
         )
         assert str(default_protocol.public_id) == str(
             DefaultMessage.protocol_id
+        ), "Protocol not loaded correctly."
+        assert str(default_protocol.protocol_specification_id) == str(
+            DefaultMessage.protocol_specification_id
         ), "Protocol not loaded correctly."
         assert default_protocol.serializer is not None
 
@@ -275,3 +404,11 @@ def test_dialogues(dialogues_classes):
     """Test dialogues initialization."""
     dialogue_class, dialogues_class, _, role_from_first_message = dialogues_classes
     dialogues_class("agent_address", role_from_first_message, dialogue_class)
+
+
+def test_protocol_repr():
+    """Test protocol repr."""
+    config_mock = Mock()
+    config_mock.public_id = UNKNOWN_PROTOCOL_PUBLIC_ID
+    protocol = Protocol(config_mock, message_class=Message)
+    assert repr(protocol) == f"Protocol({UNKNOWN_PROTOCOL_PUBLIC_ID})"

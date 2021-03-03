@@ -65,10 +65,12 @@ class ErrorHandler(Handler):
         """
         self.context.logger.warning(
             "Unsupported protocol: {}. You might want to add a handler for this protocol.".format(
-                envelope.protocol_id
+                envelope.protocol_specification_id
             )
         )
-        encoded_protocol_id = base64.b85encode(str.encode(str(envelope.protocol_id)))
+        encoded_protocol_specification_id = base64.b85encode(
+            str.encode(str(envelope.protocol_specification_id))
+        )
         encoded_envelope = base64.b85encode(envelope.encode())
         reply = DefaultMessage(
             dialogue_reference=("", ""),
@@ -78,7 +80,7 @@ class ErrorHandler(Handler):
             error_code=DefaultMessage.ErrorCode.UNSUPPORTED_PROTOCOL,
             error_msg="Unsupported protocol.",
             error_data={
-                "protocol_id": encoded_protocol_id,
+                "protocol_id": encoded_protocol_specification_id,
                 "envelope": encoded_envelope,
             },
         )
@@ -94,8 +96,8 @@ class ErrorHandler(Handler):
         :return: None
         """
         self.context.logger.warning(
-            "Decoding error for envelope: {}. Protocol_id='{}' and message='{!r}' are inconsistent.".format(
-                envelope, envelope.protocol_id, envelope.message
+            "Decoding error for envelope: {}. protocol_specification_id='{}' and message='{!r}' are inconsistent.".format(
+                envelope, envelope.protocol_specification_id, envelope.message
             )
         )
         encoded_envelope = base64.b85encode(envelope.encode())
@@ -119,18 +121,11 @@ class ErrorHandler(Handler):
         :param envelope: the envelope
         :return: None
         """
-        if envelope.skill_id is None:
-            self.context.logger.warning(
-                "Cannot handle envelope: no active handler registered for the protocol_id='{}'.".format(
-                    envelope.protocol_id
-                )
+        self.context.logger.warning(
+            "Cannot handle envelope: no active handler registered for the protocol_specification_id='{}'.".format(
+                envelope.protocol_specification_id
             )
-        else:
-            self.context.logger.warning(
-                "Cannot handle envelope: no active handler registered for the protocol_id='{}' and skill_id='{}'.".format(
-                    envelope.protocol_id, envelope.skill_id
-                )
-            )
+        )
         encoded_envelope = base64.b85encode(envelope.encode())
         reply = DefaultMessage(
             dialogue_reference=("", ""),

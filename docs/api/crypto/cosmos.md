@@ -17,25 +17,61 @@ Helper class usable as Mixin for CosmosApi or as standalone class.
 
 ```python
  | @staticmethod
- | is_transaction_settled(tx_receipt: Any) -> bool
+ | is_transaction_settled(tx_receipt: JSONLike) -> bool
 ```
 
 Check whether a transaction is settled or not.
 
 **Arguments**:
 
-- `tx_digest`: the digest associated to the transaction.
+- `tx_receipt`: the receipt of the transaction.
 
 **Returns**:
 
 True if the transaction has been settled, False o/w.
+
+<a name="aea.crypto.cosmos.CosmosHelper.get_code_id"></a>
+#### get`_`code`_`id
+
+```python
+ | @staticmethod
+ | get_code_id(tx_receipt: JSONLike) -> Optional[int]
+```
+
+Retrieve the `code_id` from a transaction receipt.
+
+**Arguments**:
+
+- `tx_receipt`: the receipt of the transaction.
+
+**Returns**:
+
+the code id, if present
+
+<a name="aea.crypto.cosmos.CosmosHelper.get_contract_address"></a>
+#### get`_`contract`_`address
+
+```python
+ | @staticmethod
+ | get_contract_address(tx_receipt: JSONLike) -> Optional[str]
+```
+
+Retrieve the `contract_address` from a transaction receipt.
+
+**Arguments**:
+
+- `tx_receipt`: the receipt of the transaction.
+
+**Returns**:
+
+the contract address, if present
 
 <a name="aea.crypto.cosmos.CosmosHelper.is_transaction_valid"></a>
 #### is`_`transaction`_`valid
 
 ```python
  | @staticmethod
- | is_transaction_valid(tx: Any, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
+ | is_transaction_valid(tx: JSONLike, seller: Address, client: Address, tx_nonce: str, amount: int) -> bool
 ```
 
 Check whether a transaction is valid or not.
@@ -109,6 +145,26 @@ Recover the addresses from the hash.
 
 the recovered addresses
 
+<a name="aea.crypto.cosmos.CosmosHelper.recover_public_keys_from_message"></a>
+#### recover`_`public`_`keys`_`from`_`message
+
+```python
+ | @classmethod
+ | recover_public_keys_from_message(cls, message: bytes, signature: str, is_deprecated_mode: bool = False) -> Tuple[str, ...]
+```
+
+Get the public key used to produce the `signature` of the `message`
+
+**Arguments**:
+
+- `message`: raw bytes used to produce signature
+- `signature`: signature of the message
+- `is_deprecated_mode`: if the deprecated signing was used
+
+**Returns**:
+
+the recovered public keys
+
 <a name="aea.crypto.cosmos.CosmosHelper.get_hash"></a>
 #### get`_`hash
 
@@ -141,6 +197,24 @@ Check if the address is valid.
 
 - `address`: the address to validate
 
+<a name="aea.crypto.cosmos.CosmosHelper.load_contract_interface"></a>
+#### load`_`contract`_`interface
+
+```python
+ | @classmethod
+ | load_contract_interface(cls, file_path: Path) -> Dict[str, str]
+```
+
+Load contract interface.
+
+**Arguments**:
+
+- `file_path`: the file path to the interface
+
+**Returns**:
+
+the interface
+
 <a name="aea.crypto.cosmos.CosmosCrypto"></a>
 ## CosmosCrypto Objects
 
@@ -154,7 +228,7 @@ Class wrapping the Account Generation from Ethereum ledger.
 #### `__`init`__`
 
 ```python
- | __init__(private_key_path: Optional[str] = None)
+ | __init__(private_key_path: Optional[str] = None) -> None
 ```
 
 Instantiate an ethereum crypto object.
@@ -210,7 +284,7 @@ a display_address str
 
 ```python
  | @classmethod
- | load_private_key_from_path(cls, file_name) -> SigningKey
+ | load_private_key_from_path(cls, file_name: str) -> SigningKey
 ```
 
 Load a private key in hex format from a file.
@@ -241,51 +315,11 @@ Sign a message in bytes string form.
 
 signature of the message in string form
 
-<a name="aea.crypto.cosmos.CosmosCrypto.format_default_transaction"></a>
-#### format`_`default`_`transaction
-
-```python
- | @staticmethod
- | format_default_transaction(transaction: Any, signature: str, base64_pbk: str) -> Any
-```
-
-Format default CosmosSDK transaction and add signature.
-
-**Arguments**:
-
-- `transaction`: the transaction to be formatted
-- `signature`: the transaction signature
-- `base64_pbk`: the base64 formatted public key
-
-**Returns**:
-
-formatted transaction with signature
-
-<a name="aea.crypto.cosmos.CosmosCrypto.format_wasm_transaction"></a>
-#### format`_`wasm`_`transaction
-
-```python
- | @staticmethod
- | format_wasm_transaction(transaction: Any, signature: str, base64_pbk: str) -> Any
-```
-
-Format CosmWasm transaction and add signature.
-
-**Arguments**:
-
-- `transaction`: the transaction to be formatted
-- `signature`: the transaction signature
-- `base64_pbk`: the base64 formatted public key
-
-**Returns**:
-
-formatted transaction with signature
-
 <a name="aea.crypto.cosmos.CosmosCrypto.sign_transaction"></a>
 #### sign`_`transaction
 
 ```python
- | sign_transaction(transaction: Any) -> Any
+ | sign_transaction(transaction: JSONLike) -> JSONLike
 ```
 
 Sign a transaction in bytes string form.
@@ -338,7 +372,7 @@ Class to interact with the Cosmos SDK via a HTTP APIs.
 #### `__`init`__`
 
 ```python
- | __init__(**kwargs)
+ | __init__(**kwargs: Any) -> None
 ```
 
 Initialize the Cosmos ledger APIs.
@@ -348,7 +382,7 @@ Initialize the Cosmos ledger APIs.
 
 ```python
  | @property
- | api() -> None
+ | api() -> Any
 ```
 
 Get the underlying API object.
@@ -362,57 +396,42 @@ Get the underlying API object.
 
 Get the balance of a given account.
 
+<a name="aea.crypto.cosmos._CosmosApi.get_state"></a>
+#### get`_`state
+
+```python
+ | get_state(callable_name: str, *args: Any, **kwargs: Any) -> Optional[JSONLike]
+```
+
+Call a specified function on the ledger API.
+
+Based on the cosmos REST
+API specification, which takes a path (strings separated by '/'). The
+convention here is to define the root of the path (txs, blocks, etc.)
+as the callable_name and the rest of the path as args.
+
 <a name="aea.crypto.cosmos._CosmosApi.get_deploy_transaction"></a>
 #### get`_`deploy`_`transaction
 
 ```python
- | get_deploy_transaction(contract_interface: Dict[str, str], deployer_address: Address, tx_fee: int = 0, gas: int = 80000, denom: Optional[str] = None, memo: str = "", chain_id: Optional[str] = None, **kwargs, ,) -> Dict[str, Any]
+ | get_deploy_transaction(contract_interface: Dict[str, str], deployer_address: Address, **kwargs: Any, ,) -> Optional[JSONLike]
 ```
 
-Create a CosmWasm bytecode deployment transaction.
+Get the transaction to deploy the smart contract.
+
+Dispatches to _get_storage_transaction and _get_init_transaction based on kwargs.
 
 **Arguments**:
 
-- `sender_address`: the sender address of the message initiator.
-- `filename`: the path to wasm bytecode file.
-- `gas`: Maximum amount of gas to be used on executing command.
-- `memo`: Any string comment.
-- `chain_id`: the Chain ID of the CosmWasm transaction. Default is 1 (i.e. mainnet).
-
-**Returns**:
-
-the unsigned CosmWasm contract deploy message
-
-<a name="aea.crypto.cosmos._CosmosApi.get_init_transaction"></a>
-#### get`_`init`_`transaction
-
-```python
- | get_init_transaction(deployer_address: Address, code_id: int, init_msg: Any, amount: int, tx_fee: int, gas: int = 80000, denom: Optional[str] = None, label: str = "", memo: str = "", chain_id: Optional[str] = None) -> Optional[Any]
-```
-
-Create a CosmWasm InitMsg transaction.
-
-**Arguments**:
-
-- `deployer_address`: the deployer address of the message initiator.
-- `amount`: Contract's initial funds amount
-- `code_id`: the ID of contract bytecode.
-- `init_msg`: the InitMsg containing parameters for contract constructor.
-- `gas`: Maximum amount of gas to be used on executing command.
-- `denom`: the name of the denomination of the contract funds
-- `label`: the label name of the contract
-- `memo`: Any string comment.
-- `chain_id`: the Chain ID of the CosmWasm transaction. Default is 1 (i.e. mainnet).
-
-**Returns**:
-
-the unsigned CosmWasm InitMsg
+- `contract_interface`: the contract interface.
+- `deployer_address`: The address that will deploy the contract.
+:returns tx: the transaction dictionary.
 
 <a name="aea.crypto.cosmos._CosmosApi.get_handle_transaction"></a>
 #### get`_`handle`_`transaction
 
 ```python
- | get_handle_transaction(sender_address: Address, contract_address: Address, handle_msg: Any, amount: int, tx_fee: int, denom: Optional[str] = None, gas: int = 80000, memo: str = "", chain_id: Optional[str] = None) -> Optional[Any]
+ | get_handle_transaction(sender_address: Address, contract_address: Address, handle_msg: Any, amount: int, tx_fee: int, denom: Optional[str] = None, gas: int = 0, memo: str = "", chain_id: Optional[str] = None) -> Optional[JSONLike]
 ```
 
 Create a CosmWasm HandleMsg transaction.
@@ -423,45 +442,18 @@ Create a CosmWasm HandleMsg transaction.
 - `contract_address`: the address of the smart contract.
 - `handle_msg`: HandleMsg in JSON format.
 - `gas`: Maximum amount of gas to be used on executing command.
-- `memo`: Any string comment.
+- `memo`: any string comment.
 - `chain_id`: the Chain ID of the CosmWasm transaction. Default is 1 (i.e. mainnet).
 
 **Returns**:
 
 the unsigned CosmWasm HandleMsg
 
-<a name="aea.crypto.cosmos._CosmosApi.try_execute_wasm_transaction"></a>
-#### try`_`execute`_`wasm`_`transaction
+<a name="aea.crypto.cosmos._CosmosApi.execute_contract_query"></a>
+#### execute`_`contract`_`query
 
 ```python
- | @staticmethod
- | @try_decorator(
- |         "Encountered exception when trying to execute wasm transaction: {}",
- |         logger_method=_default_logger.warning,
- |     )
- | try_execute_wasm_transaction(tx_signed: Any, signed_tx_filename: str = "tx.signed") -> Optional[str]
-```
-
-Execute a CosmWasm Transaction. QueryMsg doesn't require signing.
-
-**Arguments**:
-
-- `tx_signed`: the signed transaction.
-
-**Returns**:
-
-the transaction digest
-
-<a name="aea.crypto.cosmos._CosmosApi.try_execute_wasm_query"></a>
-#### try`_`execute`_`wasm`_`query
-
-```python
- | @staticmethod
- | @try_decorator(
- |         "Encountered exception when trying to execute wasm query: {}",
- |         logger_method=_default_logger.warning,
- |     )
- | try_execute_wasm_query(contract_address: Address, query_msg: Any) -> Optional[str]
+ | execute_contract_query(contract_address: Address, query_msg: JSONLike) -> Optional[JSONLike]
 ```
 
 Execute a CosmWasm QueryMsg. QueryMsg doesn't require signing.
@@ -479,7 +471,7 @@ the message receipt
 #### get`_`transfer`_`transaction
 
 ```python
- | get_transfer_transaction(sender_address: Address, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, denom: Optional[str] = None, gas: int = 80000, memo: str = "", chain_id: Optional[str] = None, **kwargs, ,) -> Optional[Any]
+ | get_transfer_transaction(sender_address: Address, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, denom: Optional[str] = None, gas: int = 80000, memo: str = "", chain_id: Optional[str] = None, **kwargs: Any, ,) -> Optional[JSONLike]
 ```
 
 Submit a transfer transaction to the ledger.
@@ -504,7 +496,7 @@ the transfer transaction
 #### send`_`signed`_`transaction
 
 ```python
- | send_signed_transaction(tx_signed: Any) -> Optional[str]
+ | send_signed_transaction(tx_signed: JSONLike) -> Optional[str]
 ```
 
 Send a signed transaction and wait for confirmation.
@@ -522,7 +514,7 @@ tx_digest, if present
 
 ```python
  | @staticmethod
- | is_cosmwasm_transaction(tx_signed: Any) -> bool
+ | is_cosmwasm_transaction(tx_signed: JSONLike) -> bool
 ```
 
 Check whether it is a cosmwasm tx.
@@ -532,7 +524,7 @@ Check whether it is a cosmwasm tx.
 
 ```python
  | @staticmethod
- | is_transfer_transaction(tx_signed: Any) -> bool
+ | is_transfer_transaction(tx_signed: JSONLike) -> bool
 ```
 
 Check whether it is a transfer tx.
@@ -541,7 +533,7 @@ Check whether it is a transfer tx.
 #### get`_`transaction`_`receipt
 
 ```python
- | get_transaction_receipt(tx_digest: str) -> Optional[Any]
+ | get_transaction_receipt(tx_digest: str) -> Optional[JSONLike]
 ```
 
 Get the transaction receipt for a transaction digest.
@@ -558,7 +550,7 @@ the tx receipt, if present
 #### get`_`transaction
 
 ```python
- | get_transaction(tx_digest: str) -> Optional[Any]
+ | get_transaction(tx_digest: str) -> Optional[JSONLike]
 ```
 
 Get the transaction for a transaction digest.
@@ -602,11 +594,11 @@ Get ID of latest deployed .wasm bytecode.
 
 code id of last deployed .wasm bytecode
 
-<a name="aea.crypto.cosmos._CosmosApi.get_contract_address"></a>
-#### get`_`contract`_`address
+<a name="aea.crypto.cosmos._CosmosApi.get_last_contract_address"></a>
+#### get`_`last`_`contract`_`address
 
 ```python
- | get_contract_address(code_id: int) -> str
+ | get_last_contract_address(code_id: int) -> str
 ```
 
 Get contract address of latest initialised contract by its ID.
@@ -618,6 +610,23 @@ Get contract address of latest initialised contract by its ID.
 **Returns**:
 
 contract address of last initialised contract
+
+<a name="aea.crypto.cosmos._CosmosApi.update_with_gas_estimate"></a>
+#### update`_`with`_`gas`_`estimate
+
+```python
+ | update_with_gas_estimate(transaction: JSONLike) -> JSONLike
+```
+
+Attempts to update the transaction with a gas estimate
+
+**Arguments**:
+
+- `transaction`: the transaction
+
+**Returns**:
+
+the updated transaction
 
 <a name="aea.crypto.cosmos.CosmosApi"></a>
 ## CosmosApi Objects
@@ -641,7 +650,7 @@ Cosmos testnet faucet API.
 #### `__`init`__`
 
 ```python
- | __init__(poll_interval=None)
+ | __init__(poll_interval: Optional[float] = None)
 ```
 
 Initialize CosmosFaucetApi.
@@ -650,7 +659,7 @@ Initialize CosmosFaucetApi.
 #### get`_`wealth
 
 ```python
- | get_wealth(address: Address) -> None
+ | get_wealth(address: Address, url: Optional[str] = None) -> None
 ```
 
 Get wealth from the faucet for the provided address.
@@ -658,6 +667,7 @@ Get wealth from the faucet for the provided address.
 **Arguments**:
 
 - `address`: the address.
+- `url`: the url
 
 **Returns**:
 

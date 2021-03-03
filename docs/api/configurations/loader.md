@@ -3,23 +3,6 @@
 
 Implementation of the parser for configuration file.
 
-<a name="aea.configurations.loader.make_jsonschema_base_uri"></a>
-#### make`_`jsonschema`_`base`_`uri
-
-```python
-make_jsonschema_base_uri(base_uri_path: Path) -> str
-```
-
-Make the JSONSchema base URI, cross-platform.
-
-**Arguments**:
-
-- `base_uri_path`: the path to the base directory.
-
-**Returns**:
-
-the string in URI form.
-
 <a name="aea.configurations.loader.BaseConfigLoader"></a>
 ## BaseConfigLoader Objects
 
@@ -33,21 +16,21 @@ Base class for configuration loader classes.
 #### `__`init`__`
 
 ```python
- | __init__(schema_filename: str)
+ | __init__(schema_filename: str) -> None
 ```
 
-Initialize the base configuration loader.
+Initialize the parser for configuration files.
 
 **Arguments**:
 
-- `schema_filename`: the path to the schema.
+- `schema_filename`: the path to the JSON-schema file in 'aea/configurations/schemas'.
 
 <a name="aea.configurations.loader.BaseConfigLoader.validator"></a>
 #### validator
 
 ```python
  | @property
- | validator() -> Draft4Validator
+ | validator() -> ConfigValidator
 ```
 
 Get the json schema validator.
@@ -96,7 +79,7 @@ Parsing, serialization and validation for package configuration files.
 #### `__`init`__`
 
 ```python
- | __init__(schema_filename: str, configuration_class: Type[T])
+ | __init__(schema_filename: str, configuration_class: Type[T]) -> None
 ```
 
 Initialize the parser for configuration files.
@@ -120,7 +103,7 @@ Get the configuration class of the loader.
 #### load`_`protocol`_`specification
 
 ```python
- | load_protocol_specification(file_pointer: TextIO) -> T
+ | load_protocol_specification(file_pointer: TextIO) -> ProtocolSpecification
 ```
 
 Load an agent configuration file.
@@ -133,23 +116,6 @@ Load an agent configuration file.
 
 the configuration object.
 :raises
-
-<a name="aea.configurations.loader.ConfigLoader.validate"></a>
-#### validate
-
-```python
- | validate(json_data: Dict) -> None
-```
-
-Validate a JSON object against the right JSON schema.
-
-**Arguments**:
-
-- `json_data`: the JSON data.
-
-**Returns**:
-
-None.
 
 <a name="aea.configurations.loader.ConfigLoader.load"></a>
 #### load
@@ -200,7 +166,7 @@ Get the configuration loader from the type.
 #### load`_`agent`_`config`_`from`_`json
 
 ```python
- | load_agent_config_from_json(configuration_json: List[Dict]) -> AgentConfig
+ | load_agent_config_from_json(configuration_json: List[Dict], validate: bool = True) -> AgentConfig
 ```
 
 Load agent configuration from configuration json data.
@@ -212,31 +178,6 @@ Load agent configuration from configuration json data.
 **Returns**:
 
 AgentConfig instance
-
-<a name="aea.configurations.loader.ConfigLoader.validate_component_configuration"></a>
-#### validate`_`component`_`configuration
-
-```python
- | @staticmethod
- | validate_component_configuration(component_id: ComponentId, configuration: Dict) -> None
-```
-
-Validate the component configuration of an agent configuration file.
-
-This check is to detect inconsistencies in the specified fields.
-
-**Arguments**:
-
-- `component_id`: the component id.
-- `configuration`: the configuration dictionary.
-
-**Returns**:
-
-None
-
-**Raises**:
-
-- `ValueError`: if the configuration is not valid.
 
 <a name="aea.configurations.loader.ConfigLoaders"></a>
 ## ConfigLoaders Objects
@@ -265,7 +206,7 @@ Get a config loader from the configuration type.
 #### load`_`component`_`configuration
 
 ```python
-load_component_configuration(component_type: ComponentType, directory: Path, skip_consistency_check: bool = False) -> "ComponentConfiguration"
+load_component_configuration(component_type: ComponentType, directory: Path, skip_consistency_check: bool = False) -> ComponentConfiguration
 ```
 
 Load configuration and check that it is consistent against the directory.
@@ -273,6 +214,25 @@ Load configuration and check that it is consistent against the directory.
 **Arguments**:
 
 - `component_type`: the component type.
+- `directory`: the root of the package
+- `skip_consistency_check`: if True, the consistency check are skipped.
+
+**Returns**:
+
+the configuration object.
+
+<a name="aea.configurations.loader.load_package_configuration"></a>
+#### load`_`package`_`configuration
+
+```python
+load_package_configuration(package_type: PackageType, directory: Path, skip_consistency_check: bool = False) -> PackageConfiguration
+```
+
+Load configuration and check that it is consistent against the directory.
+
+**Arguments**:
+
+- `package_type`: the package type.
 - `directory`: the root of the package
 - `skip_consistency_check`: if True, the consistency check are skipped.
 

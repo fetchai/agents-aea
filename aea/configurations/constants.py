@@ -18,28 +18,103 @@
 # ------------------------------------------------------------------------------
 
 """Module to declare constants."""
-
-from typing import List
-
-from aea.configurations.base import DEFAULT_LICENSE as DL
-from aea.configurations.base import DEFAULT_REGISTRY_PATH as DRP
-from aea.configurations.base import PublicId
-from aea.crypto.fetchai import FetchAICrypto
-from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA
+from pathlib import Path
+from typing import Dict, List
 
 
-DEFAULT_CONNECTION = PublicId.from_str("fetchai/stub:latest")
-DEFAULT_PROTOCOL = PublicId.from_str("fetchai/default:latest")
-SIGNING_PROTOCOL = PublicId.from_str("fetchai/signing:latest")
-STATE_UPDATE_PROTOCOL = PublicId.from_str("fetchai/state_update:latest")
-DEFAULT_SKILL = PublicId.from_str("fetchai/error:latest")
-LEDGER_CONNECTION = PublicId.from_str("fetchai/ledger:latest")
-DEFAULT_LEDGER = FetchAICrypto.identifier
+_FETCHAI_IDENTIFIER = "fetchai"
+_ETHEREUM_IDENTIFIER = "ethereum"
+_COSMOS_IDENTIFIER = "cosmos"
+DEFAULT_PROTOCOL = "fetchai/default:latest"
+SIGNING_PROTOCOL = "fetchai/signing:latest"
+STATE_UPDATE_PROTOCOL = "fetchai/state_update:latest"
+LEDGER_CONNECTION = "fetchai/ledger:latest"
+DEFAULT_LEDGER = _FETCHAI_IDENTIFIER
+PRIVATE_KEY_PATH_SCHEMA = "{}_private_key.txt"
 DEFAULT_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(DEFAULT_LEDGER)
-DEFAULT_REGISTRY_PATH = DRP
-DEFAULT_LICENSE = DL
-DISTRIBUTED_PACKAGES = []  # type: List[PublicId]
+DEFAULT_LICENSE = "Apache-2.0"
+DISTRIBUTED_PACKAGES: List[str] = []
 DEFAULT_SEARCH_SERVICE_ADDRESS = "fetchai/soef:any"
 DEFAULT_INPUT_FILE_NAME = "./input_file"
 DEFAULT_OUTPUT_FILE_NAME = "./output_file"
 SCAFFOLD_PUBLIC_ID = "fetchai/scaffold:0.1.0"
+PACKAGES = "packages"
+DEFAULT_REGISTRY_NAME = PACKAGES
+DEFAULT_REGISTRY_PATH = Path("./", DEFAULT_REGISTRY_NAME)
+VENDOR = "vendor"
+AGENT = "agent"
+AGENTS = "agents"
+CONNECTION = "connection"
+CONNECTIONS = "connections"
+CONTRACT = "contract"
+CONTRACTS = "contracts"
+PROTOCOL = "protocol"
+PROTOCOLS = "protocols"
+SKILL = "skill"
+SKILLS = "skills"
+DEFAULT_README_FILE = "README.md"
+DEFAULT_VERSION = "0.1.0"
+DEFAULT_AEA_CONFIG_FILE = "aea-config.yaml"
+DEFAULT_SKILL_CONFIG_FILE = "skill.yaml"
+DEFAULT_CONNECTION_CONFIG_FILE = "connection.yaml"
+DEFAULT_CONTRACT_CONFIG_FILE = "contract.yaml"
+DEFAULT_PROTOCOL_CONFIG_FILE = "protocol.yaml"
+PACKAGE_PUBLIC_ID_VAR_NAME = "PUBLIC_ID"
+DEFAULT_FINGERPRINT_IGNORE_PATTERNS = [
+    ".DS_Store",
+    "*__pycache__/*",
+    "*__pycache__",
+    "*.pyc",
+    DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_PROTOCOL_CONFIG_FILE,
+    DEFAULT_CONNECTION_CONFIG_FILE,
+    DEFAULT_SKILL_CONFIG_FILE,
+    DEFAULT_CONTRACT_CONFIG_FILE,
+]
+DEFAULT_PYPI_INDEX_URL = "https://pypi.org/simple"
+DEFAULT_GIT_REF = "master"
+DEFAULT_LOGGING_CONFIG = {"version": 1, "disable_existing_loggers": False}
+IMPORT_TEMPLATE_1 = "from packages.{author}.{type}.{name}"
+IMPORT_TEMPLATE_2 = "import packages.{author}.{type}.{name}"
+DEFAULT_ENV_DOTFILE = ".env"
+DOTTED_PATH_MODULE_ELEMENT_SEPARATOR = ":"
+LIBPROTOC_VERSION = "libprotoc 3.11.4"
+DEFAULT_BUILD_DIR_NAME = ".build"
+
+CONFIG_FILE_TO_PACKAGE_TYPE = {
+    DEFAULT_SKILL_CONFIG_FILE: SKILL,
+    DEFAULT_PROTOCOL_CONFIG_FILE: PROTOCOL,
+    DEFAULT_CONNECTION_CONFIG_FILE: CONNECTION,
+    DEFAULT_CONTRACT_CONFIG_FILE: CONTRACT,
+    DEFAULT_AEA_CONFIG_FILE: AGENT,
+}  # type: Dict[str, str]
+
+CRYPTO_PLUGIN_GROUP = "aea.cryptos"
+LEDGER_APIS_PLUGIN_GROUP = "aea.ledger_apis"
+FAUCET_APIS_PLUGIN_GROUP = "aea.faucet_apis"
+ALLOWED_GROUPS = {
+    CRYPTO_PLUGIN_GROUP,
+    LEDGER_APIS_PLUGIN_GROUP,
+    FAUCET_APIS_PLUGIN_GROUP,
+}
+AEA_MANAGER_DATA_DIRNAME = "data"
+LAUNCH_SUCCEED_MESSAGE = "Start processing messages..."
+
+PROTOCOL_LANGUAGE_PYTHON = "python"
+PROTOCOL_LANGUAGE_GO = "go"
+PROTOCOL_LANGUAGE_CPP = "cpp"
+PROTOCOL_LANGUAGE_JAVA = "java"
+PROTOCOL_LANGUAGE_CSHARP = "csharp"
+PROTOCOL_LANGUAGE_RUBY = "ruby"
+PROTOCOL_LANGUAGE_OBJC = "objc"
+PROTOCOL_LANGUAGE_JS = "js"
+SUPPORTED_PROTOCOL_LANGUAGES = [
+    PROTOCOL_LANGUAGE_PYTHON,
+    PROTOCOL_LANGUAGE_GO,
+    PROTOCOL_LANGUAGE_CPP,
+    PROTOCOL_LANGUAGE_JAVA,
+    PROTOCOL_LANGUAGE_CSHARP,
+    PROTOCOL_LANGUAGE_RUBY,
+    PROTOCOL_LANGUAGE_OBJC,
+    PROTOCOL_LANGUAGE_JS,
+]

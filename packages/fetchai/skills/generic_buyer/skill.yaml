@@ -1,33 +1,38 @@
 name: generic_buyer
 author: fetchai
-version: 0.14.0
+version: 0.20.0
 type: skill
 description: The weather client skill implements the skill to purchase weather data.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.10.0, <0.11.0'
 fingerprint:
-  README.md: QmTR91jm7WfJpmabisy74NR5mc35YXjDU1zQAUKZeHRw8L
-  __init__.py: QmYXbKNvRktjrh8KAt8dBE7uV8zumGBZAAm2rqoNMpnjKB
-  behaviours.py: QmahzTqjJjHBzVucyGCece62enLiuaVsYMnQqknHH4smsz
-  dialogues.py: QmYbM1M6dHomS7fvf23rnYjayLKAMdnVR6MZURM1mxqpQ7
-  handlers.py: QmUERxGkQ53RxUnxGPo3aVDjfkGguhWhMvNZZiLni1ZWRp
-  strategy.py: QmeRCGJ49AMpHPhnenJkvhRbX9auqcWcCsb7zHjvMdHsrg
+  README.md: Qmd7hF4eNgxUoGaxkPEKVPQNxpLG2aG4DvovSLKkwKxVYt
+  __init__.py: QmfCiqVgkNfovpb25fJpe6H3nvnkfrz5zSuVBig6TsZAHa
+  behaviours.py: QmcWXsrsZTejfTJTnjLwUScm7eHk9WFG9RtEiwrP5i1Dc1
+  dialogues.py: QmW1MrCxY1dYVTL3UbWiBWwHuh988qdiNeB5fwmyNase2G
+  handlers.py: QmYUjPBz85G2Ey5zB9HUqGGDbihY9Fn4TkE6TLLy1b1URN
+  strategy.py: QmY1mnx2KCNqHQjZv4P6GiwXkHXWezfcJxJsbV2VuTtWnF
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.8.0
+- fetchai/ledger:0.13.0
 contracts: []
 protocols:
-- fetchai/default:0.8.0
-- fetchai/fipa:0.9.0
-- fetchai/ledger_api:0.6.0
-- fetchai/oef_search:0.9.0
-- fetchai/signing:0.6.0
+- fetchai/default:0.12.0
+- fetchai/fipa:0.13.0
+- fetchai/ledger_api:0.10.0
+- fetchai/oef_search:0.13.0
+- fetchai/signing:0.10.0
 skills: []
 behaviours:
   search:
     args:
       search_interval: 5
     class_name: GenericSearchBehaviour
+  transaction:
+    args:
+      max_processing: 420
+      transaction_interval: 2
+    class_name: GenericTransactionBehaviour
 handlers:
   fipa:
     args: {}
@@ -64,14 +69,17 @@ models:
         latitude: 51.5194
         longitude: 0.127
       max_negotiations: 1
+      max_quantity: 100
       max_tx_fee: 1
       max_unit_price: 20
+      min_quantity: 1
       search_query:
         constraint_type: ==
         search_key: seller_service
         search_value: generic_service
       search_radius: 5.0
       service_id: generic_service
+      stop_searching_on_result: true
     class_name: GenericStrategy
 dependencies: {}
 is_abstract: true

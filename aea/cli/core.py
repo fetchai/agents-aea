@@ -17,14 +17,15 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Core definitions for the AEA command-line tool."""
+from typing import Optional
 
 import click
 
 import aea
 from aea.cli.add import add
 from aea.cli.add_key import add_key
+from aea.cli.build import build
 from aea.cli.config import config
 from aea.cli.create import create
 from aea.cli.delete import delete
@@ -41,28 +42,30 @@ from aea.cli.get_wealth import get_wealth
 from aea.cli.init import init
 from aea.cli.install import install
 from aea.cli.interact import interact
+from aea.cli.issue_certificates import issue_certificates
 from aea.cli.launch import launch
 from aea.cli.list import list_command as _list
+from aea.cli.local_registry_sync import local_registry_sync
 from aea.cli.login import login
 from aea.cli.logout import logout
 from aea.cli.publish import publish
 from aea.cli.push import push
 from aea.cli.register import register
 from aea.cli.remove import remove
+from aea.cli.remove_key import remove_key
 from aea.cli.reset_password import reset_password
 from aea.cli.run import run
 from aea.cli.scaffold import scaffold
 from aea.cli.search import search
 from aea.cli.transfer import transfer
 from aea.cli.upgrade import upgrade
-from aea.cli.utils.config import get_or_create_cli_config
-from aea.cli.utils.constants import AUTHOR_KEY
+from aea.cli.utils.click_utils import registry_path_option
 from aea.cli.utils.context import Context
 from aea.cli.utils.loggers import logger, simple_verbosity_option
 from aea.helpers.win32 import enable_ctrl_c_support
 
 
-@click.group(name="aea")
+@click.group(name="aea")  # type: ignore
 @click.version_option(aea.__version__, prog_name="aea")
 @simple_verbosity_option(logger, default="INFO")
 @click.option(
@@ -72,52 +75,29 @@ from aea.helpers.win32 import enable_ctrl_c_support
     is_flag=True,
     required=False,
     default=False,
-    help="Skip consistency check.",
+    help="Skip consistency checks of agent during command execution.",
 )
+@registry_path_option
 @click.pass_context
-def cli(click_context, skip_consistency_check: bool) -> None:
-    """Command-line tool for setting up an Autonomous Economic Agent."""
+def cli(
+    click_context: click.Context,
+    skip_consistency_check: bool,
+    registry_path: Optional[str],
+) -> None:
+    """Command-line tool for setting up an Autonomous Economic Agent (AEA)."""
     verbosity_option = click_context.meta.pop("verbosity")
     click_context.obj = Context(cwd=".", verbosity=verbosity_option)
+    click_context.obj.registry_path = registry_path
     click_context.obj.set_config("skip_consistency_check", skip_consistency_check)
 
     # enables CTRL+C support on windows!
     enable_ctrl_c_support()
 
 
-@cli.command()
-@click.option("-p", "--port", default=8080)
-@click.option("--local", is_flag=True, help="For using local folder.")
-@click.pass_context
-def gui(  # pylint: disable=unused-argument
-    click_context, port, local
-):  # pragma: no cover
-    """Run the CLI GUI."""
-    _init_gui()
-    import aea.cli_gui  # pylint: disable=import-outside-toplevel,redefined-outer-name
-
-    click.echo("Running the GUI.....(press Ctrl+C to exit)")
-    aea.cli_gui.run(port)
-
-
-def _init_gui() -> None:
-    """
-    Initialize GUI before start.
-
-    :return: None
-    :raisees: ClickException if author is not set up.
-    """
-    config_ = get_or_create_cli_config()
-    author = config_.get(AUTHOR_KEY, None)
-    if author is None:
-        raise click.ClickException(
-            "Author is not set up. Please run 'aea init' and then restart."
-        )
-
-
 cli.add_command(_list)
 cli.add_command(add_key)
 cli.add_command(add)
+cli.add_command(build)
 cli.add_command(create)
 cli.add_command(config)
 cli.add_command(delete)
@@ -134,6 +114,7 @@ cli.add_command(get_wealth)
 cli.add_command(init)
 cli.add_command(install)
 cli.add_command(interact)
+cli.add_command(issue_certificates)
 cli.add_command(launch)
 cli.add_command(login)
 cli.add_command(logout)
@@ -141,9 +122,11 @@ cli.add_command(publish)
 cli.add_command(push)
 cli.add_command(register)
 cli.add_command(remove)
+cli.add_command(remove_key)
 cli.add_command(reset_password)
 cli.add_command(run)
 cli.add_command(scaffold)
 cli.add_command(search)
+cli.add_command(local_registry_sync)
 cli.add_command(transfer)
 cli.add_command(upgrade)

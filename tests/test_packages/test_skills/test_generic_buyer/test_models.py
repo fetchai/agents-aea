@@ -23,7 +23,7 @@ from pathlib import Path
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.helpers.search.models import Constraint, ConstraintType, Description, Query
 from aea.helpers.transaction.base import Terms
-from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_NAME
+from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_AGENT_ADDRESS
 
 from packages.fetchai.skills.generic_buyer.strategy import (
     GenericStrategy,
@@ -198,7 +198,7 @@ class TestGenericStrategy(BaseSkillTestCase):
         terms = Terms(
             ledger_id=self.ledger_id,
             sender_address=self.skill.skill_context.agent_address,
-            counterparty_address=COUNTERPARTY_NAME,
+            counterparty_address=COUNTERPARTY_AGENT_ADDRESS,
             amount_by_currency_id={self.currency_id: -150},
             quantities_by_good_id={self.service_id: 10},
             is_sender_payable_tx_fee=True,
@@ -206,5 +206,6 @@ class TestGenericStrategy(BaseSkillTestCase):
             fee_by_currency_id={self.currency_id: self.max_tx_fee},
         )
         assert (
-            self.strategy.terms_from_proposal(description, COUNTERPARTY_NAME) == terms
+            self.strategy.terms_from_proposal(description, COUNTERPARTY_AGENT_ADDRESS)
+            == terms
         )

@@ -10,9 +10,18 @@
     "type",
     "license",
     "aea_version",
+    "fingerprint",
+    "fingerprint_ignore_patterns",
+    "connections",
     "protocols",
     "contracts",
-    "skills"
+    "skills",
+    "handlers",
+    "behaviours",
+    "models",
+    "dependencies",
+    "description",
+    "is_abstract"
   ],
   "properties": {
     "name": {
@@ -38,6 +47,12 @@
     },
     "fingerprint_ignore_patterns": {
       "$ref": "definitions.json#/definitions/fingerprint_ignore_patterns"
+    },
+    "build_entrypoint": {
+      "$ref": "definitions.json#/definitions/build_entrypoint"
+    },
+    "build_directory": {
+      "$ref": "definitions.json#/definitions/build_directory"
     },
     "connections": {
       "type": "array",

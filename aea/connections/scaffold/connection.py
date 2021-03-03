@@ -16,39 +16,42 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Scaffold connection and channel."""
+from typing import Any, Optional
 
-from typing import Optional
-
-from aea.configurations.base import ConnectionConfig, PublicId
-from aea.connections.base import Connection
-from aea.crypto.wallet import CryptoStore
-from aea.identity.base import Identity
+from aea.configurations.base import PublicId
+from aea.connections.base import BaseSyncConnection, Connection
 from aea.mail.base import Envelope
 
 
-class MyScaffoldConnection(Connection):
+"""
+Choose one of the possible implementations:
+
+Sync (inherited from BaseSyncConnection) or Async (inherited from Connection) connection and remove unused one.
+"""
+
+CONNECTION_ID = PublicId.from_str("fetchai/scaffold:0.1.0")
+
+
+class MyScaffoldAsyncConnection(Connection):
     """Proxy to the functionality of the SDK or API."""
 
-    connection_id = PublicId.from_str("fetchai/scaffold:0.1.0")
+    connection_id = CONNECTION_ID
 
-    def __init__(
-        self,
-        configuration: ConnectionConfig,
-        identity: Optional[Identity] = None,
-        crypto_store: Optional[CryptoStore] = None,
-    ):
+    def __init__(self, **kwargs: Any) -> None:
         """
-        Initialize a connection to an SDK or API.
+        Initialize the connection.
+
+        The configuration must be specified if and only if the following
+        parameters are None: connection_id, excluded_protocols or restricted_to_protocols.
 
         :param configuration: the connection configuration.
-        :param crypto_store: object to access the connection crypto objects.
-        :param identity: the identity object.
+        :param identity: the identity object held by the agent.
+        :param crypto_store: the crypto store for encrypted communication.
+        :param restricted_to_protocols: the set of protocols ids of the only supported protocols for this connection.
+        :param excluded_protocols: the set of protocols ids that we want to exclude for this connection.
         """
-        super().__init__(  # pragma: no cover
-            configuration=configuration, crypto_store=crypto_store, identity=identity
-        )
+        super().__init__(**kwargs)  # pragma: no cover
 
     async def connect(self) -> None:
         """
@@ -66,7 +69,7 @@ class MyScaffoldConnection(Connection):
         """
         raise NotImplementedError  # pragma: no cover
 
-    async def send(self, envelope: "Envelope") -> None:
+    async def send(self, envelope: Envelope) -> None:
         """
         Send an envelope.
 
@@ -75,10 +78,85 @@ class MyScaffoldConnection(Connection):
         """
         raise NotImplementedError  # pragma: no cover
 
-    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
+    async def receive(self, *args: Any, **kwargs: Any) -> Optional[Envelope]:
         """
         Receive an envelope. Blocking.
 
         :return: the envelope received, or None.
+        """
+        raise NotImplementedError  # pragma: no cover
+
+
+class MyScaffoldSyncConnection(BaseSyncConnection):
+    """Proxy to the functionality of the SDK or API."""
+
+    MAX_WORKER_THREADS = 5
+
+    connection_id = CONNECTION_ID
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:  # pragma: no cover
+        """
+        Initialize the connection.
+
+        The configuration must be specified if and only if the following
+        parameters are None: connection_id, excluded_protocols or restricted_to_protocols.
+
+        :param configuration: the connection configuration.
+        :param identity: the identity object held by the agent.
+        :param crypto_store: the crypto store for encrypted communication.
+        :param restricted_to_protocols: the set of protocols ids of the only supported protocols for this connection.
+        :param excluded_protocols: the set of protocols ids that we want to exclude for this connection.
+        """
+        super().__init__(*args, **kwargs)
+        raise NotImplementedError
+
+    def main(self) -> None:
+        """
+        Run syncrhonous code in background.
+
+        SyncConnection `main()` usage:
+        The idea of the `main` method in the sync connection
+        is to provide for a way to actively generate messages by the connection via the `put_envelope` method.
+
+        A simple example is the generation of a message every second:
+        ```
+        while self.is_connected:
+            envelope = make_envelope_for_current_time()
+            self.put_enevelope(envelope)
+            time.sleep(1)
+        ```
+        In this case, the connection will generate a message every second
+        regardless of envelopes sent to the connection by the agent.
+        For instance, this way one can implement periodically polling some internet resources
+        and generate envelopes for the agent if some updates are available.
+        Another example is the case where there is some framework that runs blocking
+        code and provides a callback on some internal event.
+        This blocking code can be executed in the main function and new envelopse
+        can be created in the event callback.
+        """
+        raise NotImplementedError  # pragma: no cover
+
+    def on_send(self, envelope: Envelope) -> None:
+        """
+        Send an envelope.
+
+        :param envelope: the envelope to send.
+        :return: None.
+        """
+        raise NotImplementedError  # pragma: no cover
+
+    def on_connect(self) -> None:
+        """
+        Tear down the connection.
+
+        Connection status set automatically.
+        """
+        raise NotImplementedError  # pragma: no cover
+
+    def on_disconnect(self) -> None:
+        """
+        Tear down the connection.
+
+        Connection status set automatically.
         """
         raise NotImplementedError  # pragma: no cover

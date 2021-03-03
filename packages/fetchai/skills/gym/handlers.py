@@ -16,10 +16,9 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the handler for the 'gym' skill."""
 
-from typing import cast
+from typing import Any, Optional, cast
 
 from aea.protocols.base import Message
 from aea.skills.base import Handler
@@ -40,18 +39,18 @@ class GymHandler(Handler):
 
     SUPPORTED_PROTOCOL = GymMessage.protocol_id
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         """Initialize the handler."""
         nb_steps = kwargs.pop("nb_steps", DEFAULT_NB_STEPS)
         super().__init__(**kwargs)
         self.task = GymTask(self.context, nb_steps)
+        self._task_id: Optional[int] = None
 
     def setup(self) -> None:
         """Set up the handler."""
         self.context.logger.info("Gym handler: setup method called.")
         # launch the task
-        self.task.setup()
-        self.task.execute()
+        self._task_id = self.context.task_manager.enqueue_task(self.task)
 
     def handle(self, message: Message) -> None:
         """
@@ -144,4 +143,9 @@ class GymHandler(Handler):
         :return: None
         """
         self.context.logger.info("Gym handler: teardown method called.")
+        if self._task_id is None:
+            return  # pragma: nocover
         self.task.teardown()
+        result = self.context.task_manager.get_task_result(self._task_id)
+        if not result.successful():
+            self.context.logger.warning("Task not successful!")

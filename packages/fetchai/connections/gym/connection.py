@@ -24,7 +24,7 @@ import logging
 from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop
 from concurrent.futures.thread import ThreadPoolExecutor
-from typing import Optional, Tuple, Union, cast
+from typing import Any, Callable, Dict, Optional, Tuple, Union, cast
 
 import gym
 
@@ -43,13 +43,13 @@ from packages.fetchai.protocols.gym.message import GymMessage
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.gym")
 
-PUBLIC_ID = PublicId.from_str("fetchai/gym:0.10.0")
+PUBLIC_ID = PublicId.from_str("fetchai/gym:0.14.0")
 
 
 class GymDialogues(BaseGymDialogues):
     """The dialogues class keeps track of all gym dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -133,11 +133,15 @@ class GymChannel:
         """
         sender = envelope.sender
         self.logger.debug("Processing message from {}: {}".format(sender, envelope))
-        if envelope.protocol_id != GymMessage.protocol_id:
+        if envelope.protocol_specification_id != GymMessage.protocol_specification_id:
             raise ValueError("This protocol is not valid for gym.")
         await self.handle_gym_message(envelope)
 
-    async def _run_in_executor(self, fn, *args):
+    async def _run_in_executor(
+        self, fn: Callable, *args: Any
+    ) -> Tuple[Any, float, bool, Dict]:
+        if self._loop is None:  # pragma: nocover
+            raise ValueError("Loop not set!")
         return await self._loop.run_in_executor(self._threaded_pool, fn, *args)
 
     async def handle_gym_message(self, envelope: Envelope) -> None:
@@ -185,9 +189,7 @@ class GymChannel:
         elif gym_message.performative == GymMessage.Performative.CLOSE:
             await self._run_in_executor(self.gym_env.close)
             return
-        envelope = Envelope(
-            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
-        )
+        envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
         await self._send(envelope)
 
     async def _send(self, envelope: Envelope) -> None:
@@ -218,7 +220,7 @@ class GymConnection(Connection):
 
     connection_id = PUBLIC_ID
 
-    def __init__(self, gym_env: Optional[gym.Env] = None, **kwargs):
+    def __init__(self, gym_env: Optional[gym.Env] = None, **kwargs: Any) -> None:
         """
         Initialize a connection to a local gym environment.
 
@@ -257,9 +259,9 @@ class GymConnection(Connection):
         if self.is_disconnected:  # pragma: nocover
             return
 
-        self._state.set(ConnectionStates.disconnecting)
+        self.state = ConnectionStates.disconnecting
         await self.channel.disconnect()
-        self._state.set(ConnectionStates.disconnected)
+        self.state = ConnectionStates.disconnected
 
     async def send(self, envelope: Envelope) -> None:
         """
@@ -271,7 +273,7 @@ class GymConnection(Connection):
         self._ensure_connected()
         await self.channel.send(envelope)
 
-    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
+    async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """Receive an envelope."""
         self._ensure_connected()
         try:

@@ -16,14 +16,13 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the tests for the OEF communication using an OEF."""
-
 import asyncio
 import logging
 import sys
 import time
 import unittest
+import warnings
 from contextlib import suppress
 from typing import cast
 from unittest import mock
@@ -50,7 +49,6 @@ from aea.mail.base_pb2 import Message as ProtobufMessage
 from aea.multiplexer import Multiplexer
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
-from aea.test_tools.test_cases import UseOef
 
 from packages.fetchai.connections.oef.connection import OEFObjectTranslator
 from packages.fetchai.protocols.default.message import DefaultMessage
@@ -62,6 +60,7 @@ from packages.fetchai.protocols.oef_search.dialogues import (
 )
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
+from tests.common.utils import UseOef
 from tests.conftest import (
     FETCHAI_ADDRESS_ONE,
     FETCHAI_ADDRESS_TWO,
@@ -70,6 +69,8 @@ from tests.conftest import (
 
 
 logger = logging.getLogger(__name__)
+
+SOME_SKILL_ID = "some/skill:0.1.0"
 
 
 class OefSearchDialogues(BaseOefSearchDialogues):
@@ -110,7 +111,9 @@ class TestDefault(UseOef):
         cls.connection = _make_oef_connection(
             FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
         )
-        cls.multiplexer = Multiplexer([cls.connection])
+        cls.multiplexer = Multiplexer(
+            [cls.connection], protocols=[FipaMessage, DefaultMessage]
+        )
         cls.multiplexer.connect()
 
     def test_send_message(self):
@@ -123,12 +126,7 @@ class TestDefault(UseOef):
             content=b"hello",
         )
         self.multiplexer.put(
-            Envelope(
-                to=FETCHAI_ADDRESS_ONE,
-                sender=FETCHAI_ADDRESS_ONE,
-                protocol_id=DefaultMessage.protocol_id,
-                message=msg,
-            )
+            Envelope(to=FETCHAI_ADDRESS_ONE, sender=FETCHAI_ADDRESS_ONE, message=msg,)
         )
         recv_msg = self.multiplexer.get(block=True, timeout=3.0)
         assert recv_msg is not None
@@ -150,9 +148,11 @@ class TestOEF(UseOef):
             self.connection = _make_oef_connection(
                 FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
             )
-            self.multiplexer = Multiplexer([self.connection])
+            self.multiplexer = Multiplexer(
+                [self.connection], protocols=[FipaMessage, DefaultMessage]
+            )
             self.multiplexer.connect()
-            self.oef_search_dialogues = OefSearchDialogues(FETCHAI_ADDRESS_ONE)
+            self.oef_search_dialogues = OefSearchDialogues(SOME_SKILL_ID)
 
         def test_search_services_with_query_without_model(self):
             """Test that a search services request can be sent correctly.
@@ -171,7 +171,6 @@ class TestOEF(UseOef):
                 Envelope(
                     to=oef_search_request.to,
                     sender=oef_search_request.sender,
-                    protocol_id=oef_search_request.protocol_id,
                     message=oef_search_request,
                 )
             )
@@ -205,7 +204,6 @@ class TestOEF(UseOef):
                 Envelope(
                     to=oef_search_request.to,
                     sender=oef_search_request.sender,
-                    protocol_id=oef_search_request.protocol_id,
                     message=oef_search_request,
                 )
             )
@@ -246,7 +244,6 @@ class TestOEF(UseOef):
                 Envelope(
                     to=oef_search_request.to,
                     sender=oef_search_request.sender,
-                    protocol_id=oef_search_request.protocol_id,
                     message=oef_search_request,
                 )
             )
@@ -274,9 +271,11 @@ class TestOEF(UseOef):
             cls.connection = _make_oef_connection(
                 FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
             )
-            cls.multiplexer = Multiplexer([cls.connection])
+            cls.multiplexer = Multiplexer(
+                [cls.connection], protocols=[FipaMessage, DefaultMessage]
+            )
             cls.multiplexer.connect()
-            cls.oef_search_dialogues = OefSearchDialogues(FETCHAI_ADDRESS_ONE)
+            cls.oef_search_dialogues = OefSearchDialogues(SOME_SKILL_ID)
 
         def test_register_service(self):
             """Test that a register service request works correctly."""
@@ -293,7 +292,6 @@ class TestOEF(UseOef):
                 Envelope(
                     to=oef_search_registration.to,
                     sender=oef_search_registration.sender,
-                    protocol_id=OefSearchMessage.protocol_id,
                     message=oef_search_registration,
                 )
             )
@@ -310,7 +308,6 @@ class TestOEF(UseOef):
                 Envelope(
                     to=oef_search_request.to,
                     sender=oef_search_request.sender,
-                    protocol_id=oef_search_request.protocol_id,
                     message=oef_search_request,
                 )
             )
@@ -346,9 +343,11 @@ class TestOEF(UseOef):
             cls.connection = _make_oef_connection(
                 FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
             )
-            cls.multiplexer = Multiplexer([cls.connection])
+            cls.multiplexer = Multiplexer(
+                [cls.connection], protocols=[FipaMessage, DefaultMessage]
+            )
             cls.multiplexer.connect()
-            cls.oef_search_dialogues = OefSearchDialogues(FETCHAI_ADDRESS_ONE)
+            cls.oef_search_dialogues = OefSearchDialogues(SOME_SKILL_ID)
 
             cls.foo_datamodel = DataModel(
                 "foo", [Attribute("bar", int, True, "A bar attribute.")]
@@ -364,7 +363,6 @@ class TestOEF(UseOef):
                 Envelope(
                     to=oef_search_registration.to,
                     sender=oef_search_registration.sender,
-                    protocol_id=oef_search_registration.protocol_id,
                     message=oef_search_registration,
                 )
             )
@@ -383,7 +381,6 @@ class TestOEF(UseOef):
                 Envelope(
                     to=oef_search_request.to,
                     sender=oef_search_request.sender,
-                    protocol_id=oef_search_request.protocol_id,
                     message=oef_search_request,
                 )
             )
@@ -416,7 +413,6 @@ class TestOEF(UseOef):
                 Envelope(
                     to=oef_search_deregistration.to,
                     sender=oef_search_deregistration.sender,
-                    protocol_id=oef_search_deregistration.protocol_id,
                     message=oef_search_deregistration,
                 )
             )
@@ -435,7 +431,6 @@ class TestOEF(UseOef):
                 Envelope(
                     to=oef_search_request.to,
                     sender=oef_search_request.sender,
-                    protocol_id=oef_search_request.protocol_id,
                     message=oef_search_request,
                 )
             )
@@ -468,8 +463,12 @@ class TestFIPA(UseOef):
         cls.connection2 = _make_oef_connection(
             FETCHAI_ADDRESS_TWO, oef_addr="127.0.0.1", oef_port=10000,
         )
-        cls.multiplexer1 = Multiplexer([cls.connection1])
-        cls.multiplexer2 = Multiplexer([cls.connection2])
+        cls.multiplexer1 = Multiplexer(
+            [cls.connection1], protocols=[FipaMessage, DefaultMessage]
+        )
+        cls.multiplexer2 = Multiplexer(
+            [cls.connection2], protocols=[FipaMessage, DefaultMessage]
+        )
         cls.multiplexer1.connect()
         cls.multiplexer2.connect()
 
@@ -485,12 +484,7 @@ class TestFIPA(UseOef):
         cfp_message.to = FETCHAI_ADDRESS_TWO
         cfp_message.sender = FETCHAI_ADDRESS_ONE
         self.multiplexer1.put(
-            Envelope(
-                to=cfp_message.to,
-                sender=cfp_message.sender,
-                protocol_id=cfp_message.protocol_id,
-                message=cfp_message,
-            )
+            Envelope(to=cfp_message.to, sender=cfp_message.sender, message=cfp_message,)
         )
         envelope = self.multiplexer2.get(block=True, timeout=5.0)
         expected_cfp_message = FipaMessage.serializer.decode(envelope.message)
@@ -508,12 +502,7 @@ class TestFIPA(UseOef):
         cfp_none.to = FETCHAI_ADDRESS_TWO
         cfp_none.sender = FETCHAI_ADDRESS_ONE
         self.multiplexer1.put(
-            Envelope(
-                to=cfp_none.to,
-                sender=cfp_none.sender,
-                protocol_id=cfp_none.protocol_id,
-                message=cfp_none,
-            )
+            Envelope(to=cfp_none.to, sender=cfp_none.sender, message=cfp_none,)
         )
         envelope = self.multiplexer2.get(block=True, timeout=5.0)
         expected_cfp_none = FipaMessage.serializer.decode(envelope.message)
@@ -534,10 +523,7 @@ class TestFIPA(UseOef):
         propose_empty.sender = FETCHAI_ADDRESS_ONE
         self.multiplexer1.put(
             Envelope(
-                to=propose_empty.to,
-                sender=propose_empty.sender,
-                protocol_id=propose_empty.protocol_id,
-                message=propose_empty,
+                to=propose_empty.to, sender=propose_empty.sender, message=propose_empty,
             )
         )
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
@@ -562,7 +548,6 @@ class TestFIPA(UseOef):
             Envelope(
                 to=propose_descriptions.to,
                 sender=propose_descriptions.sender,
-                protocol_id=propose_descriptions.protocol_id,
                 message=propose_descriptions,
             )
         )
@@ -583,12 +568,7 @@ class TestFIPA(UseOef):
         accept.to = FETCHAI_ADDRESS_TWO
         accept.sender = FETCHAI_ADDRESS_ONE
         self.multiplexer1.put(
-            Envelope(
-                to=accept.to,
-                sender=accept.sender,
-                protocol_id=FipaMessage.protocol_id,
-                message=accept,
-            )
+            Envelope(to=accept.to, sender=accept.sender, message=accept,)
         )
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         expected_accept = FipaMessage.serializer.decode(envelope.message)
@@ -609,10 +589,7 @@ class TestFIPA(UseOef):
         match_accept.sender = FETCHAI_ADDRESS_ONE
         self.multiplexer1.put(
             Envelope(
-                to=match_accept.to,
-                sender=match_accept.sender,
-                protocol_id=match_accept.protocol_id,
-                message=match_accept,
+                to=match_accept.to, sender=match_accept.sender, message=match_accept,
             )
         )
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
@@ -632,12 +609,7 @@ class TestFIPA(UseOef):
         decline.to = FETCHAI_ADDRESS_TWO
         decline.sender = FETCHAI_ADDRESS_ONE
         self.multiplexer1.put(
-            Envelope(
-                to=decline.to,
-                sender=decline.sender,
-                protocol_id=decline.protocol_id,
-                message=decline,
-            )
+            Envelope(to=decline.to, sender=decline.sender, message=decline,)
         )
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         expected_decline = FipaMessage.serializer.decode(envelope.message)
@@ -660,7 +632,6 @@ class TestFIPA(UseOef):
             Envelope(
                 to=match_accept_w_inform.to,
                 sender=match_accept_w_inform.sender,
-                protocol_id=match_accept_w_inform.protocol_id,
                 message=match_accept_w_inform,
             )
         )
@@ -685,7 +656,6 @@ class TestFIPA(UseOef):
             Envelope(
                 to=accept_w_inform.to,
                 sender=accept_w_inform.sender,
-                protocol_id=accept_w_inform.protocol_id,
                 message=accept_w_inform,
             )
         )
@@ -708,12 +678,7 @@ class TestFIPA(UseOef):
         inform.to = FETCHAI_ADDRESS_TWO
         inform.sender = FETCHAI_ADDRESS_ONE
         self.multiplexer1.put(
-            Envelope(
-                to=inform.to,
-                sender=inform.sender,
-                protocol_id=inform.protocol_id,
-                message=inform,
-            )
+            Envelope(to=inform.to, sender=inform.sender, message=inform,)
         )
         envelope = self.multiplexer2.get(block=True, timeout=2.0)
         returned_inform = FipaMessage.serializer.decode(envelope.message)
@@ -760,19 +725,19 @@ class TestFIPA(UseOef):
             ) as mock_performative_enum:
                 mock_performative_enum.CFP.value = "unknown"
                 FipaMessage.serializer.encode(msg), "Raises Value Error"
-        with pytest.raises(EOFError):
-            cfp_msg = FipaMessage(
-                message_id=1,
-                dialogue_reference=(str(0), ""),
-                target=0,
-                performative=FipaMessage.Performative.CFP,
-                query=Query([Constraint("something", ConstraintType(">", 1))]),
-            )
-            cfp_msg.set("query", "hello")
-            fipa_bytes = _encode_fipa_cfp(cfp_msg)
+        # with pytest.raises(EOFError):  # noqa: E800
+        #     cfp_msg = FipaMessage(  # noqa: E800
+        #         message_id=1,  # noqa: E800
+        #         dialogue_reference=(str(0), ""),  # noqa: E800
+        #         target=0,  # noqa: E800
+        #         performative=FipaMessage.Performative.CFP,  # noqa: E800
+        #         query=Query([Constraint("something", ConstraintType(">", 1))]),  # noqa: E800
+        #     )  # noqa: E800
+        #     cfp_msg.set("query", "hello")  # noqa: E800
+        #     fipa_bytes = _encode_fipa_cfp(cfp_msg)  # noqa: E800
 
-            # The encoded message is not a valid FIPA message.
-            FipaMessage.serializer.decode(fipa_bytes)
+        #     # The encoded message is not a valid FIPA message.  # noqa: E800
+        #     FipaMessage.serializer.decode(fipa_bytes)  # noqa: E800
         with pytest.raises(ValueError):
             cfp_msg = FipaMessage(
                 message_id=1,
@@ -806,7 +771,7 @@ class TestFIPA(UseOef):
             query=query,
         )
         oef_search_msg.to = str(oef_connection.connection_id)
-        oef_search_msg.sender = "agent"
+        oef_search_msg.sender = SOME_SKILL_ID
         dialogue = dialogues.update(oef_search_msg)
         assert dialogue is not None
         oef_channel.oef_msg_id_to_dialogue[oef_channel.oef_msg_id] = dialogue
@@ -825,8 +790,8 @@ class TestFIPA(UseOef):
         """Test the send method."""
         envelope = Envelope(
             to=str(self.connection1.connection_id),
-            sender="me",
-            protocol_id=DefaultMessage.protocol_id,
+            sender=SOME_SKILL_ID,
+            protocol_specification_id=DefaultMessage.protocol_specification_id,
             message=b"Hello",
         )
         self.multiplexer1.put(envelope)
@@ -848,7 +813,7 @@ class TestOefConnection(UseOef):
         connection = _make_oef_connection(
             FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
         )
-        multiplexer = Multiplexer([connection])
+        multiplexer = Multiplexer([connection], protocols=[FipaMessage, DefaultMessage])
         multiplexer.connect()
         multiplexer.disconnect()
 
@@ -906,12 +871,12 @@ class TestOefConstraint:
         m_constr = self.obj_transaltor.from_oef_constraint_type(with_in)
         assert m_constraint == m_constr
         assert with_in._value[0] <= 10 <= with_in._value[1]
-        m_constraint = ConstraintType("in", [1, 2, 3])
+        m_constraint = ConstraintType("in", (1, 2, 3))
         in_set = self.obj_transaltor.to_oef_constraint_type(m_constraint)
         m_constr = self.obj_transaltor.from_oef_constraint_type(in_set)
         assert m_constraint == m_constr
         assert 2 in in_set._value
-        m_constraint = ConstraintType("not_in", {"C", "Java", "Python"})
+        m_constraint = ConstraintType("not_in", ("C", "Java", "Python"))
         not_in = self.obj_transaltor.to_oef_constraint_type(m_constraint)
         m_constr = self.obj_transaltor.from_oef_constraint_type(not_in)
         assert m_constraint == m_constr
@@ -995,47 +960,48 @@ class TestSendWithOEF(UseOef):
     @pytest.mark.asyncio
     async def test_send_oef_message(self, pytestconfig, caplog):
         """Test the send oef message."""
-        oef_connection = _make_oef_connection(
-            address=FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
-        )
-        await oef_connection.connect()
-        oef_search_dialogues = OefSearchDialogues(FETCHAI_ADDRESS_ONE)
-        msg = OefSearchMessage(
-            performative=OefSearchMessage.Performative.OEF_ERROR,
-            dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
-            oef_error_operation=OefSearchMessage.OefErrorOperation.SEARCH_SERVICES,
-        )
-        msg.to = str(oef_connection.connection_id)
-        msg.sender = FETCHAI_ADDRESS_ONE
-        envelope = Envelope(
-            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
-        )
-        with caplog.at_level(logging.DEBUG, "aea.packages.fetchai.connections.oef"):
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            oef_connection = _make_oef_connection(
+                address=FETCHAI_ADDRESS_ONE, oef_addr="127.0.0.1", oef_port=10000,
+            )
+            await oef_connection.connect()
+            oef_search_dialogues = OefSearchDialogues(SOME_SKILL_ID)
+            msg = OefSearchMessage(
+                performative=OefSearchMessage.Performative.OEF_ERROR,
+                dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
+                oef_error_operation=OefSearchMessage.OefErrorOperation.SEARCH_SERVICES,
+            )
+            msg.to = str(oef_connection.connection_id)
+            msg.sender = SOME_SKILL_ID
+            envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
+            with caplog.at_level(logging.DEBUG, "aea.packages.fetchai.connections.oef"):
+                await oef_connection.send(envelope)
+                assert "Could not create dialogue for message=" in caplog.text
+
+            data_model = DataModel("foobar", attributes=[Attribute("foo", str, True)])
+            query = Query(
+                constraints=[Constraint("foo", ConstraintType("==", "bar"))],
+                model=data_model,
+            )
+
+            msg, sending_dialogue = oef_search_dialogues.create(
+                counterparty=str(oef_connection.connection_id),
+                performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+                query=query,
+            )
+            envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
             await oef_connection.send(envelope)
-            assert "Could not create dialogue for message=" in caplog.text
-
-        data_model = DataModel("foobar", attributes=[Attribute("foo", str, True)])
-        query = Query(
-            constraints=[Constraint("foo", ConstraintType("==", "bar"))],
-            model=data_model,
-        )
-
-        msg, sending_dialogue = oef_search_dialogues.create(
-            counterparty=str(oef_connection.connection_id),
-            performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-            query=query,
-        )
-        envelope = Envelope(
-            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
-        )
-        await oef_connection.send(envelope)
-        envelope = await oef_connection.receive()
-        search_result = envelope.message
-        response_dialogue = oef_search_dialogues.update(search_result)
-        assert search_result.performative == OefSearchMessage.Performative.SEARCH_RESULT
-        assert sending_dialogue == response_dialogue
-        await asyncio.sleep(2.0)
-        await oef_connection.disconnect()
+            envelope = await oef_connection.receive()
+            search_result = envelope.message
+            response_dialogue = oef_search_dialogues.update(search_result)
+            assert (
+                search_result.performative
+                == OefSearchMessage.Performative.SEARCH_RESULT
+            )
+            assert sending_dialogue == response_dialogue
+            await asyncio.sleep(2.0)
+            await oef_connection.disconnect()
 
     @pytest.mark.asyncio
     async def test_cancelled_receive(self, pytestconfig, caplog):

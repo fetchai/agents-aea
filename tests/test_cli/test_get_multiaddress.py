@@ -21,6 +21,7 @@ from unittest import mock
 
 import base58
 import pytest
+from aea_crypto_fetchai import FetchAICrypto
 
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
@@ -28,19 +29,17 @@ from packages.fetchai.connections.stub.connection import (
     PUBLIC_ID as STUB_CONNECTION_PUBLIC_ID,
 )
 
-from tests.conftest import FETCHAI
-
 
 class TestGetMultiAddressCommandPositive(AEATestCaseEmpty):
     """Test case for CLI get-multiaddress command."""
 
     def test_run(self, *mocks):
         """Run the test."""
-        self.generate_private_key(FETCHAI)
-        self.add_private_key(FETCHAI, connection=False)
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.add_private_key(FetchAICrypto.identifier, connection=False)
 
         result = self.run_cli_command(
-            "get-multiaddress", FETCHAI, cwd=self.current_agent_context
+            "get-multiaddress", FetchAICrypto.identifier, cwd=self.current_agent_context
         )
 
         assert result.exit_code == 0
@@ -53,11 +52,14 @@ class TestGetMultiAddressCommandConnectionPositive(AEATestCaseEmpty):
 
     def test_run(self, *mocks):
         """Run the test."""
-        self.generate_private_key(FETCHAI)
-        self.add_private_key(FETCHAI, connection=True)
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.add_private_key(FetchAICrypto.identifier, connection=True)
 
         result = self.run_cli_command(
-            "get-multiaddress", FETCHAI, "--connection", cwd=self.current_agent_context
+            "get-multiaddress",
+            FetchAICrypto.identifier,
+            "--connection",
+            cwd=self.current_agent_context,
         )
 
         assert result.exit_code == 0
@@ -70,8 +72,9 @@ class TestGetMultiAddressCommandConnectionIdPositive(AEATestCaseEmpty):
 
     def test_run(self, *mocks):
         """Run the test."""
-        self.generate_private_key(FETCHAI)
-        self.add_private_key(FETCHAI, connection=True)
+        self.add_item("connection", str(STUB_CONNECTION_PUBLIC_ID))
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.add_private_key(FetchAICrypto.identifier, connection=True)
 
         self.nested_set_config(
             "vendor.fetchai.connections.stub.config",
@@ -80,7 +83,7 @@ class TestGetMultiAddressCommandConnectionIdPositive(AEATestCaseEmpty):
 
         result = self.run_cli_command(
             "get-multiaddress",
-            FETCHAI,
+            FetchAICrypto.identifier,
             "--connection",
             "--connection-id",
             str(STUB_CONNECTION_PUBLIC_ID),
@@ -104,8 +107,9 @@ class TestGetMultiAddressCommandConnectionIdURIPositive(AEATestCaseEmpty):
 
     def test_run(self, *mocks):
         """Run the test."""
-        self.generate_private_key(FETCHAI)
-        self.add_private_key(FETCHAI, connection=True)
+        self.add_item("connection", str(STUB_CONNECTION_PUBLIC_ID))
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.add_private_key(FetchAICrypto.identifier, connection=True)
 
         self.nested_set_config(
             "vendor.fetchai.connections.stub.config", {"public_uri": "127.0.0.1:10000"}
@@ -113,7 +117,7 @@ class TestGetMultiAddressCommandConnectionIdURIPositive(AEATestCaseEmpty):
 
         result = self.run_cli_command(
             "get-multiaddress",
-            FETCHAI,
+            FetchAICrypto.identifier,
             "--connection",
             "--connection-id",
             str(STUB_CONNECTION_PUBLIC_ID),
@@ -135,11 +139,14 @@ class TestGetMultiAddressCommandConnectionNegative(AEATestCaseEmpty):
 
     def test_run(self, *mocks):
         """Run the test."""
-        self.generate_private_key(FETCHAI)
-        self.add_private_key(FETCHAI, connection=True)
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.add_private_key(FetchAICrypto.identifier, connection=True)
 
         result = self.run_cli_command(
-            "get-multiaddress", FETCHAI, "--connection", cwd=self.current_agent_context
+            "get-multiaddress",
+            FetchAICrypto.identifier,
+            "--connection",
+            cwd=self.current_agent_context,
         )
 
         assert result.exit_code == 0
@@ -155,10 +162,14 @@ class TestGetMultiAddressCommandNegativeMissingKey(AEATestCaseEmpty):
         # this will cause exception because no key is added to the AEA project.
         with pytest.raises(
             Exception,
-            match="Cannot find '{}'. Please check private_key_path.".format(FETCHAI),
+            match="Cannot find '{}'. Please check private_key_path.".format(
+                FetchAICrypto.identifier
+            ),
         ):
             self.run_cli_command(
-                "get-multiaddress", FETCHAI, cwd=self.current_agent_context
+                "get-multiaddress",
+                FetchAICrypto.identifier,
+                cwd=self.current_agent_context,
             )
 
 
@@ -171,13 +182,15 @@ class TestGetMultiAddressCommandNegativePeerId(AEATestCaseEmpty):
     )
     def test_run(self, *mocks):
         """Run the test."""
-        self.generate_private_key(FETCHAI)
-        self.add_private_key(FETCHAI, connection=False)
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.add_private_key(FetchAICrypto.identifier, connection=False)
 
         # this will cause exception because no key is added to the AEA project.
         with pytest.raises(Exception, match="test error"):
             self.run_cli_command(
-                "get-multiaddress", FETCHAI, cwd=self.current_agent_context
+                "get-multiaddress",
+                FetchAICrypto.identifier,
+                cwd=self.current_agent_context,
             )
 
 
@@ -186,17 +199,18 @@ class TestGetMultiAddressCommandNegativeBadHostField(AEATestCaseEmpty):
 
     def test_run(self, *mocks):
         """Run the test."""
-        self.generate_private_key(FETCHAI)
-        self.add_private_key(FETCHAI, connection=True)
+        self.add_item("connection", str(STUB_CONNECTION_PUBLIC_ID))
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.add_private_key(FetchAICrypto.identifier, connection=True)
 
         # this will cause exception because no host configuration is in stub connection by default.
         with pytest.raises(
             Exception,
-            match="Host field 'some_host' not present in connection configuration fetchai/stub:0.12.0",
+            match="Host field 'some_host' not present in connection configuration fetchai/stub:0.17.0",
         ):
             self.run_cli_command(
                 "get-multiaddress",
-                FETCHAI,
+                FetchAICrypto.identifier,
                 "--connection",
                 "--connection-id",
                 str(STUB_CONNECTION_PUBLIC_ID),
@@ -213,8 +227,9 @@ class TestGetMultiAddressCommandNegativeBadPortField(AEATestCaseEmpty):
 
     def test_run(self, *mocks):
         """Run the test."""
-        self.generate_private_key(FETCHAI)
-        self.add_private_key(FETCHAI, connection=True)
+        self.add_item("connection", str(STUB_CONNECTION_PUBLIC_ID))
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.add_private_key(FetchAICrypto.identifier, connection=True)
 
         self.nested_set_config(
             "vendor.fetchai.connections.stub.config", {"host": "127.0.0.1"}
@@ -223,11 +238,11 @@ class TestGetMultiAddressCommandNegativeBadPortField(AEATestCaseEmpty):
         # this will cause exception because no port configuration is in stub connection by default.
         with pytest.raises(
             Exception,
-            match="Port field 'some_port' not present in connection configuration fetchai/stub:0.12.0",
+            match="Port field 'some_port' not present in connection configuration fetchai/stub:0.17.0",
         ):
             self.run_cli_command(
                 "get-multiaddress",
-                FETCHAI,
+                FetchAICrypto.identifier,
                 "--connection",
                 "--connection-id",
                 str(STUB_CONNECTION_PUBLIC_ID),
@@ -244,8 +259,8 @@ class TestGetMultiAddressCommandNegativeBadConnectionId(AEATestCaseEmpty):
 
     def test_run(self, *mocks):
         """Run the test."""
-        self.generate_private_key(FETCHAI)
-        self.add_private_key(FETCHAI, connection=True)
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.add_private_key(FetchAICrypto.identifier, connection=True)
 
         # this will cause exception because a bad public id is provided.
         connection_id = "some_author/some_connection:0.1.0"
@@ -255,7 +270,7 @@ class TestGetMultiAddressCommandNegativeBadConnectionId(AEATestCaseEmpty):
         ):
             self.run_cli_command(
                 "get-multiaddress",
-                FETCHAI,
+                FetchAICrypto.identifier,
                 "--connection",
                 "--connection-id",
                 connection_id,
@@ -272,8 +287,9 @@ class TestGetMultiAddressCommandNegativeFullMultiaddrComputation(AEATestCaseEmpt
     )
     def test_run(self, *mocks):
         """Run the test."""
-        self.generate_private_key(FETCHAI)
-        self.add_private_key(FETCHAI, connection=True)
+        self.add_item("connection", str(STUB_CONNECTION_PUBLIC_ID))
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.add_private_key(FetchAICrypto.identifier, connection=True)
 
         self.nested_set_config(
             "vendor.fetchai.connections.stub.config",
@@ -287,7 +303,7 @@ class TestGetMultiAddressCommandNegativeFullMultiaddrComputation(AEATestCaseEmpt
         ):
             self.run_cli_command(
                 "get-multiaddress",
-                FETCHAI,
+                FetchAICrypto.identifier,
                 "--connection",
                 "--connection-id",
                 str(STUB_CONNECTION_PUBLIC_ID),
@@ -304,8 +320,9 @@ class TestGetMultiAddressCommandNegativeOnlyHostSpecified(AEATestCaseEmpty):
 
     def test_run(self, *mocks):
         """Run the test."""
-        self.generate_private_key(FETCHAI)
-        self.add_private_key(FETCHAI, connection=True)
+        self.add_item("connection", str(STUB_CONNECTION_PUBLIC_ID))
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.add_private_key(FetchAICrypto.identifier, connection=True)
 
         # this will cause exception because only the host, and not the port, are specified.
         with pytest.raises(
@@ -314,7 +331,7 @@ class TestGetMultiAddressCommandNegativeOnlyHostSpecified(AEATestCaseEmpty):
         ):
             self.run_cli_command(
                 "get-multiaddress",
-                FETCHAI,
+                FetchAICrypto.identifier,
                 "--connection",
                 "--connection-id",
                 str(STUB_CONNECTION_PUBLIC_ID),
@@ -329,17 +346,18 @@ class TestGetMultiAddressCommandNegativeUriNotExisting(AEATestCaseEmpty):
 
     def test_run(self, *mocks):
         """Run the test."""
-        self.generate_private_key(FETCHAI)
-        self.add_private_key(FETCHAI, connection=True)
+        self.add_item("connection", str(STUB_CONNECTION_PUBLIC_ID))
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.add_private_key(FetchAICrypto.identifier, connection=True)
 
         # this will cause exception because only the host, and not the port, are specified.
         with pytest.raises(
             Exception,
-            match="URI field 'some_uri' not present in connection configuration fetchai/stub:0.12.0",
+            match="URI field 'some_uri' not present in connection configuration fetchai/stub:0.17.0",
         ):
             self.run_cli_command(
                 "get-multiaddress",
-                FETCHAI,
+                FetchAICrypto.identifier,
                 "--connection",
                 "--connection-id",
                 str(STUB_CONNECTION_PUBLIC_ID),
@@ -354,8 +372,9 @@ class TestGetMultiAddressCommandNegativeBadUri(AEATestCaseEmpty):
 
     def test_run(self, *mocks):
         """Run the test."""
-        self.generate_private_key(FETCHAI)
-        self.add_private_key(FETCHAI, connection=True)
+        self.add_item("connection", str(STUB_CONNECTION_PUBLIC_ID))
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.add_private_key(FetchAICrypto.identifier, connection=True)
 
         self.nested_set_config(
             "vendor.fetchai.connections.stub.config",
@@ -369,7 +388,7 @@ class TestGetMultiAddressCommandNegativeBadUri(AEATestCaseEmpty):
         ):
             self.run_cli_command(
                 "get-multiaddress",
-                FETCHAI,
+                FetchAICrypto.identifier,
                 "--connection",
                 "--connection-id",
                 str(STUB_CONNECTION_PUBLIC_ID),

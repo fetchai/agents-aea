@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2020 fetchai
+#   Copyright 2021 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -89,6 +89,8 @@ class MlTradeDialogues(Dialogues, ABC):
     """This class keeps track of all ml_trade dialogues."""
 
     END_STATES = frozenset({MlTradeDialogue.EndState.SUCCESSFUL})
+
+    _keep_terminal_state_dialogues = True
 
     def __init__(
         self,

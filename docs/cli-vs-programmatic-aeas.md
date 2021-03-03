@@ -7,9 +7,9 @@ The buyer of weather data (managed programmatically).
 
 ## Discussion
 
-The scope of the specific demo is to demonstrate how a CLI based AEA can interact with a programmatically managed AEA. In order 
-to achieve this we are going to use the weather station skills. 
-This demo does not utilize a smart contract or a ledger interaction. 
+The scope of the specific demo is to demonstrate how a CLI based AEA can interact with a programmatically managed AEA. In order
+to achieve this we are going to use the weather station skills.
+This demo does not utilize a smart contract or a ledger interaction.
 
 ## Get required packages
 
@@ -17,6 +17,11 @@ Copy the packages directory into your local working directory:
 
 ``` bash
 svn export https://github.com/fetchai/agents-aea.git/trunk/packages
+```
+
+Also, install `aea-crypto-fetchai` plug-in:
+```bash
+pip install aea-crypto-fetchai
 ```
 
 ## Demo instructions
@@ -28,11 +33,11 @@ If you want to create the weather station AEA step by step you can follow this g
 Fetch the weather station AEA with the following command :
 
 ``` bash
-aea fetch fetchai/weather_station:0.15.0
+aea fetch fetchai/weather_station:0.22.0
 cd weather_station
 ```
 
-### Update the AEA configs
+### Update the AEA configurations
 
 In the terminal change the configuration:
 ``` bash
@@ -40,13 +45,23 @@ aea config set vendor.fetchai.skills.weather_station.models.strategy.args.is_led
 ```
 The `is_ledger_tx` will prevent the AEA to communicate with a ledger.
 
-### Add keys
+### Add keys
 
-Add keys for the weather station.
+Add a private key for the weather station.
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
-aea add-key fetchai fetchai_private_key.txt --connection
+```
+
+Next, create a private key used to secure the AEA's communications:
+``` bash
+aea generate-key fetchai fetchai_connection_private_key.txt
+aea add-key fetchai fetchai_connection_private_key.txt --connection
+```
+
+Finally, certify the key for use by the connections that request that:
+``` bash
+aea issue-certificates
 ```
 
 ### Run the weather station AEA
@@ -70,16 +85,24 @@ import os
 import sys
 from typing import cast
 
+from aea_crypto_fetchai import FetchAICrypto
+
 from aea.aea import AEA
+from aea.aea_builder import AEABuilder
 from aea.configurations.base import ConnectionConfig
-from aea.crypto.fetchai import FetchAICrypto
-from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA, create_private_key
+from aea.crypto.helpers import (
+    PRIVATE_KEY_PATH_SCHEMA,
+    create_private_key,
+    make_certificate,
+)
 from aea.crypto.wallet import Wallet
+from aea.helpers.base import CertRequest
 from aea.identity.base import Identity
 from aea.protocols.base import Protocol
 from aea.registries.resources import Resources
 from aea.skills.base import Skill
 
+import packages.fetchai.connections.p2p_libp2p.connection
 from packages.fetchai.connections.ledger.connection import LedgerConnection
 from packages.fetchai.connections.p2p_libp2p.connection import P2PLibp2pConnection
 from packages.fetchai.connections.soef.connection import SOEFConnection
@@ -89,8 +112,8 @@ from packages.fetchai.skills.weather_client.strategy import Strategy
 
 
 API_KEY = "TwiCIriSl0mLahw17pyqoA"
-SOEF_ADDR = "soef.fetch.ai"
-SOEF_PORT = 9002
+SOEF_ADDR = "s-oef.fetch.ai"
+SOEF_PORT = 443
 ENTRY_PEER_ADDRESS = (
     "/dns4/127.0.0.1/tcp/9000/p2p/16Uiu2HAmLBCAqHL8SuFosyDhAKYsLKXBZBWXBsB9oFw2qU4Kckun"
 )
@@ -122,6 +145,7 @@ def run():
         "my_aea", address=wallet.addresses.get(FetchAICrypto.identifier)
     )
     resources = Resources()
+    data_dir = os.getcwd()
 
     # specify the default routing for some protocols
     default_routing = {
@@ -130,14 +154,10 @@ def run():
     }
     default_connection = P2PLibp2pConnection.connection_id
 
-    # create the AEA
-    my_aea = AEA(
-        identity,
-        wallet,
-        resources,
-        default_connection=default_connection,
-        default_routing=default_routing,
+    state_update_protocol = Protocol.from_dir(
+        os.path.join(os.getcwd(), "packages", "fetchai", "protocols", "state_update")
     )
+    resources.add_protocol(state_update_protocol)
 
     # Add the default protocol (which is part of the AEA distribution)
     default_protocol = Protocol.from_dir(
@@ -172,11 +192,25 @@ def run():
     # Add the LedgerAPI connection
     configuration = ConnectionConfig(connection_id=LedgerConnection.connection_id)
     ledger_api_connection = LedgerConnection(
-        configuration=configuration, identity=identity
+        configuration=configuration, data_dir=data_dir, identity=identity
     )
     resources.add_connection(ledger_api_connection)
 
     # Add the P2P connection
+    cert_path = ".certs/conn_cert.txt"
+    cert_request = CertRequest(
+        identifier="acn",
+        ledger_id=FetchAICrypto.identifier,
+        not_after="2022-01-01",
+        not_before="2021-01-01",
+        public_key="fetchai",
+        save_path=cert_path,
+    )
+    public_key = wallet.connection_cryptos.public_keys.get(FetchAICrypto.identifier)
+    message = cert_request.get_message(public_key)
+    make_certificate(
+        FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE, message, cert_path
+    )
     configuration = ConnectionConfig(
         connection_id=P2PLibp2pConnection.connection_id,
         delegate_uri="127.0.0.1:11001",
@@ -184,9 +218,19 @@ def run():
         local_uri="127.0.0.1:9001",
         log_file="libp2p_node.log",
         public_uri="127.0.0.1:9001",
+        build_directory=os.getcwd(),
+        build_entrypoint="check_dependencies.py",
+        cert_requests=[cert_request],
     )
+    configuration.directory = os.path.dirname(
+        packages.fetchai.connections.p2p_libp2p.connection.__file__
+    )
+
+    AEABuilder.run_build_for_component_configuration(configuration)
+
     p2p_connection = P2PLibp2pConnection(
         configuration=configuration,
+        data_dir=data_dir,
         identity=identity,
         crypto_store=wallet.connection_cryptos,
     )
@@ -200,9 +244,20 @@ def run():
         restricted_to_protocols={OefSearchMessage.protocol_id},
         connection_id=SOEFConnection.connection_id,
     )
-    soef_connection = SOEFConnection(configuration=configuration, identity=identity)
+    soef_connection = SOEFConnection(
+        configuration=configuration, data_dir=data_dir, identity=identity
+    )
     resources.add_connection(soef_connection)
 
+    # create the AEA
+    my_aea = AEA(
+        identity,
+        wallet,
+        resources,
+        data_dir,
+        default_connection=default_connection,
+        default_routing=default_routing,
+    )
     # Add the error and weather_client skills
     error_skill = Skill.from_dir(
         os.path.join(ROOT_DIR, "packages", "fetchai", "skills", "error"),

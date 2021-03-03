@@ -23,6 +23,7 @@ from typing import cast
 
 import pytest
 
+from aea.decision_maker.gop import GoalPursuitReadiness, OwnershipState, Preferences
 from aea.exceptions import AEAEnforceError
 from aea.mail.base import Address
 from aea.protocols.base import Message
@@ -43,13 +44,45 @@ class TestSkillTestCase(BaseSkillTestCase):
 
     path_to_skill = Path(ROOT_DIR, "tests", "data", "dummy_skill")
 
+    @classmethod
+    def setup(cls):
+        """Setup the test class."""
+        cls.behaviour_arg_1 = 2
+        cls.behaviour_arg_2 = "3"
+
+        config_overrides = {
+            "behaviours": {
+                "dummy": {
+                    "args": {
+                        "behaviour_arg_1": cls.behaviour_arg_1,
+                        "behaviour_arg_2": cls.behaviour_arg_2,
+                    }
+                }
+            },
+        }
+        cls.shared_state_key = "some_shared_state_key"
+        cls.shared_state_value = "some_shared_state_value"
+        cls.shared_state = {cls.shared_state_key: cls.shared_state_value}
+
+        tac_dm_context_kwargs = {
+            "goal_pursuit_readiness": GoalPursuitReadiness(),
+            "ownership_state": OwnershipState(),
+            "preferences": Preferences(),
+        }
+
+        super().setup(
+            config_overrides=config_overrides,
+            shared_state=cls.shared_state,
+            dm_context_kwargs=tac_dm_context_kwargs,
+        )
+
     def test_setup(self):
         """Test the setup() class method."""
         assert self.skill.skill_context.agent_address == "test_agent_address"
         assert self.skill.skill_context.agent_name == "test_agent_name"
         assert (
             self.skill.skill_context.search_service_address
-            == "dummy_search_service_address"
+            == "dummy_author/dummy_search_skill:0.1.0"
         )
         assert (
             self.skill.skill_context.decision_maker_address
@@ -60,6 +93,37 @@ class TestSkillTestCase(BaseSkillTestCase):
         assert "dummy_internal" in self.skill.handlers.keys()
         assert "dummy" in self.skill.models.keys()
 
+        assert (
+            self.skill.skill_context._agent_context.shared_state[self.shared_state_key]
+            == self.shared_state_value
+        )
+
+        assert (
+            self.skill.skill_context.behaviours.dummy.kwargs["behaviour_arg_1"]
+            == self.behaviour_arg_1
+        )
+        assert (
+            self.skill.skill_context.behaviours.dummy.kwargs["behaviour_arg_2"]
+            == self.behaviour_arg_2
+        )
+
+        assert (
+            type(
+                self.skill.skill_context.decision_maker_handler_context.goal_pursuit_readiness
+            )
+            == GoalPursuitReadiness
+        )
+        assert (
+            type(
+                self.skill.skill_context.decision_maker_handler_context.ownership_state
+            )
+            == OwnershipState
+        )
+        assert (
+            type(self.skill.skill_context.decision_maker_handler_context.preferences)
+            == Preferences
+        )
+
     def test_properties(self):
         """Test the properties."""
         assert isinstance(self.skill, Skill)
@@ -69,7 +133,9 @@ class TestSkillTestCase(BaseSkillTestCase):
         """Test the get_quantity_in_outbox method."""
         assert self.get_quantity_in_outbox() == 0
 
-        dummy_message = Message(dummy="dummy")
+        dummy_message = DefaultMessage(
+            performative=DefaultMessage.Performative.BYTES, content="dummy"
+        )
         dummy_message.to = "some_to"
         dummy_message.sender = "some_sender"
         self.skill.skill_context.outbox.put_message(dummy_message)
@@ -80,12 +146,16 @@ class TestSkillTestCase(BaseSkillTestCase):
         """Test the get_message_from_outbox method."""
         assert self.get_message_from_outbox() is None
 
-        dummy_message_1 = Message(dummy_1="dummy_1")
+        dummy_message_1 = DefaultMessage(
+            performative=DefaultMessage.Performative.BYTES, content="dummy_1"
+        )
         dummy_message_1.to = "some_to_1"
         dummy_message_1.sender = "some_sender_1"
         self.skill.skill_context.outbox.put_message(dummy_message_1)
 
-        dummy_message_2 = Message(dummy_2="dummy_2")
+        dummy_message_2 = DefaultMessage(
+            performative=DefaultMessage.Performative.BYTES, content="dummy_2"
+        )
         dummy_message_2.to = "some_to_2"
         dummy_message_2.sender = "some_sender_2"
         self.skill.skill_context.outbox.put_message(dummy_message_2)
@@ -93,11 +163,47 @@ class TestSkillTestCase(BaseSkillTestCase):
         assert self.get_message_from_outbox() == dummy_message_1
         assert self.get_message_from_outbox() == dummy_message_2
 
+    def test_drop_messages_from_outbox(self):
+        """Test the drop_messages_from_outbox method."""
+        assert self.get_quantity_in_outbox() == 0
+        self.drop_messages_from_outbox(5)
+        assert self.get_quantity_in_outbox() == 0
+
+        dummy_message_1 = DefaultMessage(
+            performative=DefaultMessage.Performative.BYTES, content="dummy_2"
+        )
+        dummy_message_1.to = "some_to_1"
+        dummy_message_1.sender = "some_sender_1"
+        self.skill.skill_context.outbox.put_message(dummy_message_1)
+
+        dummy_message_2 = DefaultMessage(
+            performative=DefaultMessage.Performative.BYTES, content="dummy_2"
+        )
+        dummy_message_2.to = "some_to_2"
+        dummy_message_2.sender = "some_sender_2"
+        self.skill.skill_context.outbox.put_message(dummy_message_2)
+
+        dummy_message_3 = DefaultMessage(
+            performative=DefaultMessage.Performative.BYTES, content="dummy_2"
+        )
+        dummy_message_3.to = "some_to_3"
+        dummy_message_3.sender = "some_sender_3"
+        self.skill.skill_context.outbox.put_message(dummy_message_3)
+
+        assert self.get_quantity_in_outbox() == 3
+
+        self.drop_messages_from_outbox(2)
+
+        assert self.get_quantity_in_outbox() == 1
+        assert self.get_message_from_outbox() == dummy_message_3
+
     def test_get_quantity_in_decision_maker_inbox(self):
         """Test the get_quantity_in_decision_maker_inbox method."""
         assert self.get_quantity_in_decision_maker_inbox() == 0
 
-        dummy_message = Message(dummy="dummy")
+        dummy_message = DefaultMessage(
+            performative=DefaultMessage.Performative.BYTES, content="dummy"
+        )
         dummy_message.to = "some_to"
         dummy_message.sender = "some_sender"
         self.skill.skill_context.decision_maker_message_queue.put(dummy_message)
@@ -108,18 +214,50 @@ class TestSkillTestCase(BaseSkillTestCase):
         """Test the get_message_from_decision_maker_inbox method."""
         assert self.get_message_from_decision_maker_inbox() is None
 
-        dummy_message_1 = Message(dummy_1="dummy_1")
+        dummy_message_1 = DefaultMessage(
+            performative=DefaultMessage.Performative.BYTES, content="dummy_1"
+        )
         dummy_message_1.to = "some_to_1"
         dummy_message_1.sender = "some_sender_1"
         self.skill.skill_context.decision_maker_message_queue.put(dummy_message_1)
 
-        dummy_message_2 = Message(dummy_2="dummy_2")
+        dummy_message_2 = DefaultMessage(
+            performative=DefaultMessage.Performative.BYTES, content="dummy_2"
+        )
         dummy_message_2.to = "some_to_2"
         dummy_message_2.sender = "some_sender_2"
         self.skill.skill_context.decision_maker_message_queue.put(dummy_message_2)
 
         assert self.get_message_from_decision_maker_inbox() == dummy_message_1
         assert self.get_message_from_decision_maker_inbox() == dummy_message_2
+
+    def test_drop_messages_from_decision_maker_inbox(self):
+        """Test the drop_messages_from_decision_maker_inbox method."""
+        assert self.get_quantity_in_decision_maker_inbox() == 0
+        self.drop_messages_from_decision_maker_inbox(5)
+        assert self.get_quantity_in_decision_maker_inbox() == 0
+
+        dummy_message_1 = Message()
+        dummy_message_1.to = "some_to_1"
+        dummy_message_1.sender = "some_sender_1"
+        self.skill.skill_context.decision_maker_message_queue.put(dummy_message_1)
+
+        dummy_message_2 = Message()
+        dummy_message_2.to = "some_to_2"
+        dummy_message_2.sender = "some_sender_2"
+        self.skill.skill_context.decision_maker_message_queue.put(dummy_message_2)
+
+        dummy_message_3 = Message()
+        dummy_message_3.to = "some_to_3"
+        dummy_message_3.sender = "some_sender_3"
+        self.skill.skill_context.decision_maker_message_queue.put(dummy_message_3)
+
+        assert self.get_quantity_in_decision_maker_inbox() == 3
+
+        self.drop_messages_from_decision_maker_inbox(2)
+
+        assert self.get_quantity_in_decision_maker_inbox() == 1
+        assert self.get_message_from_decision_maker_inbox() == dummy_message_3
 
     def test_assert_quantity_in_outbox(self):
         """Test the assert_quantity_in_outbox method."""
@@ -129,7 +267,9 @@ class TestSkillTestCase(BaseSkillTestCase):
         ):
             self.assert_quantity_in_outbox(1)
 
-        dummy_message = Message(dummy="dummy")
+        dummy_message = DefaultMessage(
+            performative=DefaultMessage.Performative.BYTES, content="dummy"
+        )
         dummy_message.to = "some_to"
         dummy_message.sender = "some_sender"
         self.skill.skill_context.outbox.put_message(dummy_message)
@@ -144,7 +284,9 @@ class TestSkillTestCase(BaseSkillTestCase):
         ):
             self.assert_quantity_in_decision_making_queue(1)
 
-        dummy_message = Message(dummy_1="dummy_1")
+        dummy_message = DefaultMessage(
+            performative=DefaultMessage.Performative.BYTES, content="dummy_1"
+        )
         dummy_message.to = "some_to_1"
         dummy_message.sender = "some_sender_1"
         self.skill.skill_context.decision_maker_message_queue.put(dummy_message)
@@ -281,7 +423,7 @@ class TestSkillTestCase(BaseSkillTestCase):
         fipa_dialogues = FipaDialogues(
             self_address=self.skill.skill_context.agent_address
         )
-        _, dialogue = fipa_dialogues.create(
+        base_msg, dialogue = fipa_dialogues.create(
             counterparty="some_counterparty",
             performative=FipaMessage.Performative.CFP,
             query="some_query",
@@ -299,8 +441,8 @@ class TestSkillTestCase(BaseSkillTestCase):
             incoming_message.dialogue_reference
             == dialogue.dialogue_label.dialogue_reference
         )
-        assert incoming_message.message_id == 2
-        assert incoming_message.target == 1
+        assert incoming_message.message_id != base_msg.message_id
+        assert incoming_message.target == base_msg.message_id
         assert incoming_message.performative == performative
         assert incoming_message.proposal == proposal
         assert incoming_message.sender == dialogue.dialogue_label.dialogue_opponent_addr
@@ -342,17 +484,17 @@ class TestSkillTestCase(BaseSkillTestCase):
         )
 
         is_incoming, target = self._provide_unspecified_fields(
-            dialogue_message_unspecified, last_is_incoming=False, message_id=2
+            dialogue_message_unspecified, last_is_incoming=False
         )
         assert is_incoming is True
-        assert target == 1
+        assert target is None
 
         dialogue_message_specified = DialogueMessage(
             FipaMessage.Performative.ACCEPT, {}, False, 4
         )
 
         is_incoming, target = self._provide_unspecified_fields(
-            dialogue_message_specified, last_is_incoming=True, message_id=7
+            dialogue_message_specified, last_is_incoming=True
         )
         assert is_incoming is False
         assert target == 4
@@ -447,8 +589,8 @@ class TestSkillTestCase(BaseSkillTestCase):
         assert dialogue.is_self_initiated
         assert len(dialogue._outgoing_messages) == 4
         assert len(dialogue._incoming_messages) == 4
-        assert dialogue._get_message(4).proposal == "some_counter_proposal_2"
-        assert dialogue._get_message(8).info == "some_info"
+        assert dialogue._incoming_messages[1].proposal == "some_counter_proposal_2"
+        assert dialogue._incoming_messages[3].info == "some_info"
 
     def test_prepare_skill_dialogue_valid_opponent_initiated(self):
         """Positive test for prepare_skill_dialogue method with a valid dialogue initiated by the opponent."""
@@ -491,8 +633,8 @@ class TestSkillTestCase(BaseSkillTestCase):
         assert not dialogue.is_self_initiated
         assert len(dialogue._outgoing_messages) == 4
         assert len(dialogue._incoming_messages) == 4
-        assert dialogue._get_message(4).proposal == "some_counter_proposal_2"
-        assert dialogue._get_message(8).info == "some_info"
+        assert dialogue._outgoing_messages[1].proposal == "some_counter_proposal_2"
+        assert dialogue._outgoing_messages[-1].info == "some_info"
 
     def test_negative_prepare_skill_dialogue_invalid_opponent_initiated(self):
         """Negative test for prepare_skill_dialogue method with an invalid dialogue initiated by the opponent."""
@@ -560,7 +702,7 @@ class TestSkillTestCase(BaseSkillTestCase):
         )
 
         with pytest.raises(
-            AEAEnforceError, match="Cannot update the dialogue with message number 2"
+            AEAEnforceError, match="Cannot update the dialogue with message number .*"
         ):
             self.prepare_skill_dialogue(
                 fipa_dialogues, dialogue_messages, "counterparty",

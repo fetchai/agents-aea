@@ -25,7 +25,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple, cast
 
 from aea.common import Address
-from aea.decision_maker.default import OwnershipState, Preferences
+from aea.decision_maker.gop import OwnershipState, Preferences
 from aea.exceptions import enforce
 from aea.helpers.search.generic import (
     AGENT_LOCATION_MODEL,
@@ -79,7 +79,7 @@ class Strategy(Model):
         BUYERS = "buyers"
         BOTH = "both"
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize the strategy of the agent.
 
@@ -324,10 +324,10 @@ class Strategy(Model):
         proposals = []
         for proposal in candidate_proposals:
             if not query.check(proposal):
-                continue
+                continue  # pragma: nocover
             proposals.append(proposal)
         if not proposals:
-            return None
+            return None  # pragma: nocover
         return random.choice(proposals)  # nosec
 
     def get_proposal_for_query(
@@ -344,17 +344,17 @@ class Strategy(Model):
         is_seller = role == FipaDialogue.Role.SELLER
 
         own_service_description = self.get_own_service_description(is_supply=is_seller,)
-        if not query.check(own_service_description):
+        if not query.check(own_service_description):  # pragma: nocover
             self.context.logger.debug("current holdings do not satisfy CFP query.")
             return None
         proposal_description = self._get_proposal_for_query(query, is_seller=is_seller)
         if proposal_description is None:
-            self.context.logger.debug(
+            self.context.logger.debug(  # pragma: nocover
                 "current strategy does not generate proposal that satisfies CFP query."
             )
         return proposal_description
 
-    def _generate_candidate_proposals(self, is_seller: bool):
+    def _generate_candidate_proposals(self, is_seller: bool) -> List[Description]:
         """
         Generate proposals from the agent in the role of seller/buyer.
 

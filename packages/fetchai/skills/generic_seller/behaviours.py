@@ -19,7 +19,7 @@
 
 """This package contains the behaviour of a generic seller AEA."""
 
-from typing import cast
+from typing import Any, cast
 
 from aea.skills.behaviours import TickerBehaviour
 
@@ -42,7 +42,7 @@ LEDGER_API_ADDRESS = str(LEDGER_CONNECTION_PUBLIC_ID)
 class GenericServiceRegistrationBehaviour(TickerBehaviour):
     """This class implements a behaviour."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         """Initialise the behaviour."""
         services_interval = kwargs.pop(
             "services_interval", DEFAULT_SERVICES_INTERVAL
@@ -68,7 +68,7 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
             )
             self.context.outbox.put_message(message=ledger_api_msg)
         self._register_agent()
-        self._register_service()
+        self._register_service_personality_classification()
 
     def act(self) -> None:
         """
@@ -106,23 +106,28 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("registering agent on SOEF.")
 
-    def _register_service(self) -> None:
+    def _register_service_personality_classification(self) -> None:
         """
-        Register the agent's service.
+        Register the agent's service, personality and classification.
 
         :return: None
         """
         strategy = cast(GenericStrategy, self.context.strategy)
-        description = strategy.get_register_service_description()
+        descriptions = [
+            strategy.get_register_service_description(),
+            strategy.get_register_personality_description(),
+            strategy.get_register_classification_description(),
+        ]
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
-        oef_search_msg, _ = oef_search_dialogues.create(
-            counterparty=self.context.search_service_address,
-            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            service_description=description,
-        )
-        self.context.outbox.put_message(message=oef_search_msg)
+        for description in descriptions:
+            oef_search_msg, _ = oef_search_dialogues.create(
+                counterparty=self.context.search_service_address,
+                performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+                service_description=description,
+            )
+            self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("registering service on SOEF.")
 
     def _unregister_service(self) -> None:

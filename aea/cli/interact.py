@@ -21,28 +21,28 @@
 
 import codecs
 import os
-from pathlib import Path
 from typing import Optional, TYPE_CHECKING, Type, Union
 
 import click
 
+from aea.cli.utils.constants import STUB_CONNECTION
 from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.exceptions import InterruptInputException
 from aea.common import Address
-from aea.configurations.base import (
-    ConnectionConfig,
-    DEFAULT_AEA_CONFIG_FILE,
-    PackageType,
-)
+from aea.configurations.base import ConnectionConfig, PackageType, PublicId
 from aea.configurations.constants import (
-    DEFAULT_CONNECTION,
+    CONNECTIONS,
+    DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_PROTOCOL,
+    PROTOCOLS,
     SIGNING_PROTOCOL,
     STATE_UPDATE_PROTOCOL,
+    VENDOR,
 )
 from aea.configurations.loader import ConfigLoader
 from aea.connections.base import Connection
 from aea.crypto.wallet import CryptoStore
+from aea.helpers.io import open_file
 from aea.identity.base import Identity
 from aea.mail.base import Envelope, Message
 from aea.multiplexer import InBox, Multiplexer, OutBox
@@ -67,44 +67,51 @@ if TYPE_CHECKING:  # pragma: nocover
 @click.command()
 @click.pass_context
 @check_aea_project
-def interact(click_context: click.core.Context):  # pylint: disable=unused-argument
-    """Interact with a running AEA via the stub connection."""
+def interact(
+    click_context: click.core.Context,  # pylint: disable=unused-argument
+) -> None:
+    """Interact with the running agent via the stub connection."""
     click.echo("Starting AEA interaction channel...")
     _run_interaction_channel()
 
 
-def _load_packages(agent_identity: Identity):
+def _load_packages(agent_identity: Identity) -> None:
     """Load packages in the current interpreter."""
+    default_protocol_id = PublicId.from_str(DEFAULT_PROTOCOL)
     Protocol.from_dir(
         os.path.join(
-            "vendor", DEFAULT_PROTOCOL.author, "protocols", DEFAULT_PROTOCOL.name
+            VENDOR, default_protocol_id.author, PROTOCOLS, default_protocol_id.name
         )
     )
+    signing_protocol_id = PublicId.from_str(SIGNING_PROTOCOL)
     Protocol.from_dir(
         os.path.join(
-            "vendor", SIGNING_PROTOCOL.author, "protocols", SIGNING_PROTOCOL.name
+            VENDOR, signing_protocol_id.author, PROTOCOLS, signing_protocol_id.name
         )
     )
+    state_update_protocol_id = PublicId.from_str(STATE_UPDATE_PROTOCOL)
     Protocol.from_dir(
         os.path.join(
-            "vendor",
-            STATE_UPDATE_PROTOCOL.author,
-            "protocols",
-            STATE_UPDATE_PROTOCOL.name,
+            VENDOR,
+            state_update_protocol_id.author,
+            PROTOCOLS,
+            state_update_protocol_id.name,
         )
     )
+    stub_connection_id = PublicId.from_str(STUB_CONNECTION)
     Connection.from_dir(
         os.path.join(
-            "vendor", DEFAULT_CONNECTION.author, "connections", DEFAULT_CONNECTION.name
+            VENDOR, stub_connection_id.author, CONNECTIONS, stub_connection_id.name,
         ),
         agent_identity,
         CryptoStore(),
+        os.getcwd(),
     )
 
 
-def _run_interaction_channel():
+def _run_interaction_channel() -> None:
     loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
-    agent_configuration = loader.load(Path(DEFAULT_AEA_CONFIG_FILE).open())
+    agent_configuration = loader.load(open_file(DEFAULT_AEA_CONFIG_FILE))
     agent_name = agent_configuration.name
 
     identity_stub = Identity(agent_name + "_interact", "interact")
@@ -132,7 +139,7 @@ def _run_interaction_channel():
     )
 
     stub_connection = StubConnection(
-        configuration=configuration, identity=identity_stub
+        configuration=configuration, data_dir=os.getcwd(), identity=identity_stub
     )
     multiplexer = Multiplexer([stub_connection])
     inbox = InBox(multiplexer)
@@ -190,7 +197,7 @@ def _process_envelopes(
         click.echo(_construct_message("sending", envelope, message_class))
 
 
-def _check_for_incoming_envelope(inbox: InBox, message_class: Type[Message]):
+def _check_for_incoming_envelope(inbox: InBox, message_class: Type[Message]) -> None:
     if not inbox.empty():
         envelope = inbox.get_nowait()
         if envelope is None:
@@ -202,7 +209,7 @@ def _check_for_incoming_envelope(inbox: InBox, message_class: Type[Message]):
 
 def _construct_message(
     action_name: str, envelope: Envelope, message_class: Type[Message]
-):
+) -> str:
     action_name = action_name.title()
     msg = (
         message_class.serializer.decode(envelope.message)
@@ -211,8 +218,12 @@ def _construct_message(
     )
     message = (
         "\n{} envelope:\nto: "
-        "{}\nsender: {}\nprotocol_id: {}\nmessage: {}\n".format(
-            action_name, envelope.to, envelope.sender, envelope.protocol_id, msg,
+        "{}\nsender: {}\nprotocol_specification_id: {}\nmessage: {}\n".format(
+            action_name,
+            envelope.to,
+            envelope.sender,
+            envelope.protocol_specification_id,
+            msg,
         )
     )
     return message
@@ -240,13 +251,11 @@ def _try_construct_envelope(
         msg, _ = dialogues.create(
             counterparty=agent_name, performative=performative, content=message,
         )
-        envelope = Envelope(
-            to=msg.to, sender=msg.sender, protocol_id=msg.protocol_id, message=msg,
-        )
+        envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
     except InterruptInputException:
         click.echo("Interrupting input, checking inbox ...")
-    except KeyboardInterrupt as e:
-        raise e
+    except KeyboardInterrupt:
+        raise
     except BaseException as e:  # pylint: disable=broad-except # pragma: no cover
         click.echo(e)
     return envelope

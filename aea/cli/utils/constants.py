@@ -16,57 +16,44 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Module with constants of the aea cli."""
-
 import os
 from pathlib import Path
-from typing import Dict
 
-from aea.configurations.base import (
-    DEFAULT_CONNECTION_CONFIG_FILE,
-    DEFAULT_CONTRACT_CONFIG_FILE,
-    DEFAULT_PROTOCOL_CONFIG_FILE,
-    DEFAULT_SKILL_CONFIG_FILE,
+from aea.configurations.constants import (
+    CONNECTION,
+    CONNECTIONS,
+    CONTRACT,
+    CONTRACTS,
+    PACKAGES,
+    PROTOCOL,
+    PROTOCOLS,
+    SKILL,
+    SKILLS,
+    VENDOR,
 )
+from aea.helpers.constants import FROM_STRING_TO_TYPE
 
 
 AEA_DIR = str(Path("."))
 
-ITEM_TYPES = ("connection", "contract", "protocol", "skill")
+ITEM_TYPES = (CONNECTION, CONTRACT, PROTOCOL, SKILL)
 
 AEA_LOGO = "    _     _____     _    \r\n   / \\   | ____|   / \\   \r\n  / _ \\  |  _|    / _ \\  \r\n / ___ \\ | |___  / ___ \\ \r\n/_/   \\_\\|_____|/_/   \\_\\\r\n                         \r\n"
 AUTHOR_KEY = "author"
 CLI_CONFIG_PATH = os.path.join(os.path.expanduser("~"), ".aea", "cli_config.yaml")
 NOT_PERMITTED_AUTHORS = [
-    "skills",
-    "connections",
-    "protocols",
-    "contracts",
-    "vendor",
-    "packages",
+    CONNECTIONS,
+    CONTRACTS,
+    PROTOCOLS,
+    SKILLS,
+    VENDOR,
+    PACKAGES,
     "aea",
 ]
 
 
-FROM_STRING_TO_TYPE = dict(
-    str=str, int=int, bool=bool, float=float, dict=dict, list=list
-)
-
-ALLOWED_PATH_ROOTS = [
-    "agent",
-    "skills",
-    "protocols",
-    "connections",
-    "contracts",
-    "vendor",
-]
-RESOURCE_TYPE_TO_CONFIG_FILE = {
-    "skills": DEFAULT_SKILL_CONFIG_FILE,
-    "protocols": DEFAULT_PROTOCOL_CONFIG_FILE,
-    "connections": DEFAULT_CONNECTION_CONFIG_FILE,
-    "contracts": DEFAULT_CONTRACT_CONFIG_FILE,
-}  # type: Dict[str, str]
-FALSE_EQUIVALENTS = ["f", "false", "False"]
+CONFIG_SUPPORTED_KEY_TYPES = list(FROM_STRING_TO_TYPE.keys())
 
 REQUIREMENTS = "requirements.txt"
+STUB_CONNECTION = "fetchai/stub:latest"

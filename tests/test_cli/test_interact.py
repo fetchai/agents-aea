@@ -28,15 +28,16 @@ from aea.cli.interact import (
 )
 from aea.helpers.base import send_control_c
 from aea.mail.base import Envelope
-from aea.test_tools.test_cases import AEATestCaseEmpty, AEATestCaseMany
+from aea.test_tools.test_cases import AEATestCaseEmptyFlaky, AEATestCaseManyFlaky
 
+from packages.fetchai.connections.stub.connection import PUBLIC_ID as STUB_CONNECTION_ID
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
 
 from tests.conftest import MAX_FLAKY_RERUNS
 
 
-class TestInteractCommand(AEATestCaseMany):
+class TestInteractCommand(AEATestCaseManyFlaky):
     """Test that interact command work."""
 
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
@@ -47,6 +48,7 @@ class TestInteractCommand(AEATestCaseMany):
 
         # prepare agent
         self.set_agent_context(agent_name)
+        self.add_item("connection", str(STUB_CONNECTION_ID))
         self.run_install()
 
         agent_process = self.run_agent()
@@ -75,7 +77,7 @@ class ConstructMessageTestCase(TestCase):
         envelope = mock.Mock()
         envelope.to = "receiver"
         envelope.sender = "sender"
-        envelope.protocol_id = "protocol-id"
+        envelope.protocol_specification_id = "protocol-id"
 
         envelope.message = "Message"
         message_class = DefaultMessage
@@ -87,7 +89,7 @@ class ConstructMessageTestCase(TestCase):
                 "\nAction envelope:"
                 "\nto: receiver"
                 "\nsender: sender"
-                "\nprotocol_id: protocol-id"
+                "\nprotocol_specification_id: protocol-id"
                 "\nmessage: Message\n"
             )
             self.assertEqual(result, expected_result)
@@ -98,7 +100,7 @@ class ConstructMessageTestCase(TestCase):
                 "\nAction envelope:"
                 "\nto: receiver"
                 "\nsender: sender"
-                "\nprotocol_id: protocol-id"
+                "\nprotocol_specification_id: protocol-id"
                 "\nmessage: Decoded message\n"
             )
             self.assertEqual(result, expected_result)
@@ -119,7 +121,7 @@ class TryConstructEnvelopeTestCase(TestCase):
     def test__try_construct_envelope_positive(self, *mocks):
         """Test _try_construct_envelope for positive result."""
         dialogues_mock = mock.Mock()
-        msg_mock = mock.Mock()
+        msg_mock = mock.Mock(spec=DefaultMessage)
         msg_mock.to = "to"
         msg_mock.sender = "sender"
         dialogues_mock.create.return_value = msg_mock, None
@@ -203,12 +205,14 @@ class ProcessEnvelopesTestCase(TestCase):
             _process_envelopes(agent_name, inbox, outbox, dialogues, message_class)
 
 
-class TestInteractEcho(AEATestCaseEmpty):
+class TestInteractEcho(AEATestCaseEmptyFlaky):
     """Test 'aea interact' with the echo skill."""
 
     @pytest.mark.integration
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # can be flaky on Windows
     def test_interact(self):
         """Test the 'aea interact' command with the echo skill."""
+        self.add_item("connection", str(STUB_CONNECTION_ID))
         self.add_item("skill", str(ECHO_SKILL_PUBLIC_ID))
         self.run_agent()
         process = self.run_interaction()
@@ -217,7 +221,7 @@ class TestInteractEcho(AEATestCaseEmpty):
             process,
             [
                 "Starting AEA interaction channel...",
-                "Provide message of protocol 'fetchai/default:0.8.0' for performative bytes",
+                f"Provide message of protocol '{str(DefaultMessage.protocol_id)}' for performative bytes",
             ],
             timeout=10,
             is_terminating=False,
@@ -233,9 +237,12 @@ class TestInteractEcho(AEATestCaseEmpty):
                 "Sending envelope:",
                 f"to: {self.agent_name}",
                 f"sender: {self.agent_name}_interact",
-                "protocol_id: fetchai/default:0.8.0",
-                "message_id=1,target=0,performative=bytes,content=b'hello')",
-                "Provide message of protocol 'fetchai/default:0.8.0' for performative bytes:",
+                f"protocol_specification_id: {str(DefaultMessage.protocol_specification_id)}",
+                "message_id=1",
+                "target=0",
+                "performative=bytes",
+                "content=b'hello'",
+                f"Provide message of protocol '{str(DefaultMessage.protocol_id)}' for performative bytes:",
             ],
             timeout=10,
             is_terminating=False,
@@ -251,9 +258,12 @@ class TestInteractEcho(AEATestCaseEmpty):
                 "Received envelope:",
                 f"to: {self.agent_name}_interact",
                 f"sender: {self.agent_name}",
-                "protocol_id: fetchai/default:0.8.0",
-                "message_id=2,target=1,performative=bytes,content=b'hello')",
-                "Provide message of protocol 'fetchai/default:0.8.0' for performative bytes:",
+                f"protocol_specification_id: {str(DefaultMessage.protocol_specification_id)}",
+                "message_id=-1",
+                "target=1",
+                "performative=bytes",
+                "content=b'hello'",
+                f"Provide message of protocol '{str(DefaultMessage.protocol_id)}' for performative bytes:",
             ],
             timeout=10,
             is_terminating=False,
@@ -267,7 +277,7 @@ class TestInteractEcho(AEATestCaseEmpty):
             [
                 "Interrupting input, checking inbox ...",
                 "Received no new envelope!",
-                "Provide message of protocol 'fetchai/default:0.8.0' for performative bytes:",
+                f"Provide message of protocol '{str(DefaultMessage.protocol_id)}' for performative bytes:",
             ],
             timeout=10,
             is_terminating=False,

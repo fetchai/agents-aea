@@ -25,7 +25,7 @@ Performatives for the base message.
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
 Get the string representation.
@@ -34,7 +34,7 @@ Get the string representation.
 #### `__`init`__`
 
 ```python
- | __init__(_body: Optional[Dict] = None, **kwargs)
+ | __init__(_body: Optional[Dict] = None, **kwargs: Any) -> None
 ```
 
 Initialize a Message object.
@@ -43,6 +43,35 @@ Initialize a Message object.
 
 - `body`: the dictionary of values to hold.
 - `kwargs`: any additional value to add to the body. It will overwrite the body values.
+
+<a name="aea.protocols.base.Message.json"></a>
+#### json
+
+```python
+ | json() -> dict
+```
+
+Get json friendly str representation of the message.
+
+<a name="aea.protocols.base.Message.from_json"></a>
+#### from`_`json
+
+```python
+ | @classmethod
+ | from_json(cls, data: dict) -> "Message"
+```
+
+Construct message instance from json data.
+
+<a name="aea.protocols.base.Message.valid_performatives"></a>
+#### valid`_`performatives
+
+```python
+ | @property
+ | valid_performatives() -> Set[str]
+```
+
+Get valid performatives.
 
 <a name="aea.protocols.base.Message.has_sender"></a>
 #### has`_`sender
@@ -186,19 +215,28 @@ Check value is set for key.
 #### `__`eq`__`
 
 ```python
- | __eq__(other)
+ | __eq__(other: Any) -> bool
 ```
 
 Compare with another object.
+
+<a name="aea.protocols.base.Message.__repr__"></a>
+#### `__`repr`__`
+
+```python
+ | __repr__() -> str
+```
+
+Get the representation of the message.
 
 <a name="aea.protocols.base.Message.__str__"></a>
 #### `__`str`__`
 
 ```python
- | __str__()
+ | __str__() -> str
 ```
 
-Get the string representation of the message.
+Get the string representation of the message. Abbreviated to prevent spamming of logs.
 
 <a name="aea.protocols.base.Message.encode"></a>
 #### encode
@@ -208,6 +246,16 @@ Get the string representation of the message.
 ```
 
 Encode the message.
+
+<a name="aea.protocols.base.Message.decode"></a>
+#### decode
+
+```python
+ | @classmethod
+ | decode(cls, data: bytes) -> "Message"
+```
+
+Decode the message.
 
 <a name="aea.protocols.base.Message.has_dialogue_info"></a>
 #### has`_`dialogue`_`info
@@ -291,45 +339,6 @@ class Serializer(Encoder,  Decoder,  ABC)
 
 The implementations of this class defines a serialization layer for a protocol.
 
-<a name="aea.protocols.base.ProtobufSerializer"></a>
-## ProtobufSerializer Objects
-
-```python
-class ProtobufSerializer(Serializer)
-```
-
-Default Protobuf serializer.
-
-It assumes that the Message contains a JSON-serializable body.
-
-<a name="aea.protocols.base.ProtobufSerializer.encode"></a>
-#### encode
-
-```python
- | @staticmethod
- | encode(msg: Message) -> bytes
-```
-
-Encode a message into bytes using Protobuf.
-
-- if one of message_id, target and dialogue_reference are not defined,
-  serialize only the message body/
-- otherwise, extract those fields from the body and instantiate
-  a Message struct.
-
-<a name="aea.protocols.base.ProtobufSerializer.decode"></a>
-#### decode
-
-```python
- | @staticmethod
- | decode(obj: bytes) -> Message
-```
-
-Decode bytes into a message using Protobuf.
-
-First, try to parse the input as a Protobuf 'Message';
-if it fails, parse the bytes as struct.
-
 <a name="aea.protocols.base.Protocol"></a>
 ## Protocol Objects
 
@@ -345,7 +354,7 @@ It includes a serializer to encode/decode a message.
 #### `__`init`__`
 
 ```python
- | __init__(configuration: ProtocolConfig, message_class: Type[Message], **kwargs)
+ | __init__(configuration: ProtocolConfig, message_class: Type[Message], **kwargs: Any) -> None
 ```
 
 Initialize the protocol manager.
@@ -370,7 +379,7 @@ Get the serializer.
 
 ```python
  | @classmethod
- | from_dir(cls, directory: str, **kwargs) -> "Protocol"
+ | from_dir(cls, directory: str, **kwargs: Any) -> "Protocol"
 ```
 
 Load the protocol from a directory.
@@ -388,7 +397,7 @@ the protocol object.
 
 ```python
  | @classmethod
- | from_config(cls, configuration: ProtocolConfig, **kwargs) -> "Protocol"
+ | from_config(cls, configuration: ProtocolConfig, **kwargs: Any) -> "Protocol"
 ```
 
 Load the protocol from configuration.
@@ -400,4 +409,33 @@ Load the protocol from configuration.
 **Returns**:
 
 the protocol object.
+
+<a name="aea.protocols.base.Protocol.protocol_id"></a>
+#### protocol`_`id
+
+```python
+ | @property
+ | protocol_id() -> PublicId
+```
+
+Get protocol id.
+
+<a name="aea.protocols.base.Protocol.protocol_specification_id"></a>
+#### protocol`_`specification`_`id
+
+```python
+ | @property
+ | protocol_specification_id() -> PublicId
+```
+
+Get protocol specification id.
+
+<a name="aea.protocols.base.Protocol.__repr__"></a>
+#### `__`repr`__`
+
+```python
+ | __repr__() -> str
+```
+
+Get str repr of the protocol.
 

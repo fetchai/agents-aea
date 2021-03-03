@@ -1,28 +1,36 @@
 name: confirmation_aw1
 author: fetchai
-version: 0.1.0
+version: 0.7.0
 type: skill
 description: The confirmation_aw1 skill is a skill to confirm registration for Agent
   World 1.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.10.0, <0.11.0'
 fingerprint:
-  __init__.py: QmSRjWPGDeLsKZYQoBKLRG59WS7b7RYMrPNcNxDSaBFxCW
-  dialogues.py: QmdMjuAT8h7ZUSfqMVkF88Hnz1kc6advg8oVg8QB7xGPw1
-  handlers.py: QmVmTJCyEqPn2BR6ucPCe7nV3t8N9cYwoASKSxoJYkr9Wp
-  registration_db.py: QmfUXubG3ZRbTmMDs7AKjC3zKg9mRhxuTi1CtfU1DMcNsL
-  strategy.py: Qma26LVujewf4BGs6DZkrRg5uwRfBBnWEBy1nSSjt1ntfV
+  README.md: QmWEG3A5xRL3yf65UHfrKhUwazR5bjpxSiuuBGMYX7t7Co
+  __init__.py: QmT9yGNhjKF65pg2DksF3LWLtQDQaW7GBREw3c9yt7DbB9
+  behaviours.py: QmRF2y4UQSRGB7qWGCT45EP1Geb2m94HuHob56GH74px1T
+  dialogues.py: QmeGHEfroVjrzKzvUn9h436bHWZgGZWwmndTxkUuHbfAAM
+  handlers.py: QmdXRMnghbx1LZD8vPBEiSEnUJnkU7fHwf5mB9R4kfNzhX
+  registration_db.py: Qmcx3ewGYrVJtsG6wSUUSEMYVRxATykrX7i1hHGSuRudRK
+  strategy.py: QmYmmE267cWU9GSocNKwmamsqGfH1veR1Mxfd6K5Hc31Ft
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.8.0
+- fetchai/ledger:0.13.0
 contracts:
-- fetchai/staking_erc20:0.1.0
+- fetchai/staking_erc20:0.4.0
 protocols:
-- fetchai/ledger_api:0.6.0
-- fetchai/register:0.1.0
-- fetchai/signing:0.6.0
+- fetchai/default:0.12.0
+- fetchai/ledger_api:0.10.0
+- fetchai/register:0.5.0
+- fetchai/signing:0.10.0
 skills: []
-behaviours: {}
+behaviours:
+  transaction:
+    args:
+      max_processing: 420
+      transaction_interval: 2
+    class_name: TransactionBehaviour
 handlers:
   contract_api:
     args: {}
@@ -40,6 +48,9 @@ models:
   contract_api_dialogues:
     args: {}
     class_name: ContractApiDialogues
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
   ledger_api_dialogues:
     args: {}
     class_name: LedgerApiDialogues
@@ -55,6 +66,7 @@ models:
     class_name: SigningDialogues
   strategy:
     args:
+      awx_aeas: []
       fetchai_staking_contract_address: '0x351bac612b50e87b46e4b10a282f632d41397de2'
       override_staking_check: false
       token_denomination: atestfet

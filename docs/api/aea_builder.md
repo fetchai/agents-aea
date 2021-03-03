@@ -16,7 +16,7 @@ Class to manage dependencies of agent packages.
 #### `__`init`__`
 
 ```python
- | __init__()
+ | __init__() -> None
 ```
 
 Initialize the dependency graph.
@@ -111,7 +111,7 @@ None
 #### remove`_`component
 
 ```python
- | remove_component(component_id: ComponentId)
+ | remove_component(component_id: ComponentId) -> None
 ```
 
 Remove a component.
@@ -204,7 +204,7 @@ my_aea_2 = builder.builder()
 #### `__`init`__`
 
 ```python
- | __init__(with_default_packages: bool = True, registry_dir: str = "packages")
+ | __init__(with_default_packages: bool = True, registry_dir: str = DEFAULT_REGISTRY_NAME, build_dir_root: Optional[str] = None) -> None
 ```
 
 Initialize the builder.
@@ -287,11 +287,11 @@ Set agent max reaction in one react.
 
 self
 
-<a name="aea.aea_builder.AEABuilder.set_decision_maker_handler"></a>
-#### set`_`decision`_`maker`_`handler
+<a name="aea.aea_builder.AEABuilder.set_decision_maker_handler_paths"></a>
+#### set`_`decision`_`maker`_`handler`_`paths
 
 ```python
- | set_decision_maker_handler(decision_maker_handler_dotted_path: str, file_path: Path) -> "AEABuilder"
+ | set_decision_maker_handler_paths(decision_maker_handler_dotted_path: str, file_path: Optional[str]) -> "AEABuilder"
 ```
 
 Set decision maker handler class.
@@ -300,6 +300,24 @@ Set decision maker handler class.
 
 - `decision_maker_handler_dotted_path`: the dotted path to the decision maker handler
 - `file_path`: the file path to the file which contains the decision maker handler
+
+**Returns**:
+
+self
+
+<a name="aea.aea_builder.AEABuilder.set_error_handler"></a>
+#### set`_`error`_`handler
+
+```python
+ | set_error_handler(error_handler_dotted_path: str, file_path: Path) -> "AEABuilder"
+```
+
+Set error handler class.
+
+**Arguments**:
+
+- `error_handler_dotted_path`: the dotted path to the error handler
+- `file_path`: the file path to the file which contains the error handler
 
 **Returns**:
 
@@ -392,6 +410,59 @@ Set the runtime mode.
 
 self
 
+<a name="aea.aea_builder.AEABuilder.set_storage_uri"></a>
+#### set`_`storage`_`uri
+
+```python
+ | set_storage_uri(storage_uri: Optional[str]) -> "AEABuilder"
+```
+
+Set the storage uri.
+
+:param storage uri:  storage uri
+
+**Returns**:
+
+self
+
+<a name="aea.aea_builder.AEABuilder.set_data_dir"></a>
+#### set`_`data`_`dir
+
+```python
+ | set_data_dir(data_dir: Optional[str]) -> "AEABuilder"
+```
+
+Set the data directory.
+
+**Arguments**:
+
+- `data_dir`: path to directory where to store data.
+
+**Returns**:
+
+self
+
+<a name="aea.aea_builder.AEABuilder.set_logging_config"></a>
+#### set`_`logging`_`config
+
+```python
+ | set_logging_config(logging_config: Dict) -> "AEABuilder"
+```
+
+Set the logging configurations.
+
+The dictionary must satisfy the following schema:
+
+https://docs.python.org/3/library/logging.config.html#logging-config-dictschema
+
+**Arguments**:
+
+- `logging_config`: the logging configurations.
+
+**Returns**:
+
+self
+
 <a name="aea.aea_builder.AEABuilder.set_search_service_address"></a>
 #### set`_`search`_`service`_`address
 
@@ -430,7 +501,7 @@ the AEABuilder
 #### set`_`default`_`connection
 
 ```python
- | set_default_connection(public_id: PublicId) -> "AEABuilder"
+ | set_default_connection(public_id: Optional[PublicId] = None) -> "AEABuilder"
 ```
 
 Set the default connection.
@@ -505,7 +576,7 @@ Get the connection private key paths.
 #### set`_`default`_`ledger
 
 ```python
- | set_default_ledger(identifier: str) -> "AEABuilder"
+ | set_default_ledger(identifier: Optional[str]) -> "AEABuilder"
 ```
 
 Set a default ledger API to use.
@@ -513,6 +584,40 @@ Set a default ledger API to use.
 **Arguments**:
 
 - `identifier`: the identifier of the ledger api
+
+**Returns**:
+
+the AEABuilder
+
+<a name="aea.aea_builder.AEABuilder.set_build_entrypoint"></a>
+#### set`_`build`_`entrypoint
+
+```python
+ | set_build_entrypoint(build_entrypoint: Optional[str]) -> "AEABuilder"
+```
+
+Set build entrypoint.
+
+**Arguments**:
+
+- `build_entrypoint`: path to the builder script.
+
+**Returns**:
+
+the AEABuilder
+
+<a name="aea.aea_builder.AEABuilder.set_currency_denominations"></a>
+#### set`_`currency`_`denominations
+
+```python
+ | set_currency_denominations(currency_denominations: Dict[str, str]) -> "AEABuilder"
+```
+
+Set the mapping from ledger ids to currency denomincations.
+
+**Arguments**:
+
+- `currency_denominations`: the mapping
 
 **Returns**:
 
@@ -556,7 +661,9 @@ Please, pay attention, all dependencies have to be already loaded.
 Notice also that this will make the call to 'build()' non re-entrant.
 You will have to `reset()` the builder before calling `build()` again.
 
-:params component: Component instance already initialized.
+**Arguments**:
+
+- `component`: Component instance already initialized.
 
 <a name="aea.aea_builder.AEABuilder.set_context_namespace"></a>
 #### set`_`context`_`namespace
@@ -720,6 +827,34 @@ Remove protocol.
 
 the AEABuilder
 
+<a name="aea.aea_builder.AEABuilder.call_all_build_entrypoints"></a>
+#### call`_`all`_`build`_`entrypoints
+
+```python
+ | call_all_build_entrypoints() -> None
+```
+
+Call all the build entrypoints.
+
+<a name="aea.aea_builder.AEABuilder.get_build_root_directory"></a>
+#### get`_`build`_`root`_`directory
+
+```python
+ | get_build_root_directory() -> str
+```
+
+Get build directory root.
+
+<a name="aea.aea_builder.AEABuilder.run_build_for_component_configuration"></a>
+#### run`_`build`_`for`_`component`_`configuration
+
+```python
+ | @classmethod
+ | run_build_for_component_configuration(cls, config: ComponentConfiguration, logger: Optional[logging.Logger] = None) -> None
+```
+
+Run a build entrypoint script for component configuration.
+
 <a name="aea.aea_builder.AEABuilder.install_pypi_dependencies"></a>
 #### install`_`pypi`_`dependencies
 
@@ -757,15 +892,28 @@ the AEA object.
 
 - `ValueError`: if we cannot
 
-<a name="aea.aea_builder.AEABuilder.find_component_directory_from_component_id"></a>
-#### find`_`component`_`directory`_`from`_`component`_`id
+<a name="aea.aea_builder.AEABuilder.get_default_ledger"></a>
+#### get`_`default`_`ledger
 
 ```python
- | @staticmethod
- | find_component_directory_from_component_id(aea_project_directory: Path, component_id: ComponentId) -> Path
+ | get_default_ledger() -> str
 ```
 
-Find a component directory from component id.
+Return default ledger.
+
+**Returns**:
+
+the default ledger identifier.
+
+<a name="aea.aea_builder.AEABuilder.try_to_load_agent_configuration_file"></a>
+#### try`_`to`_`load`_`agent`_`configuration`_`file
+
+```python
+ | @classmethod
+ | try_to_load_agent_configuration_file(cls, aea_project_path: Union[str, Path]) -> AgentConfig
+```
+
+Try to load the agent configuration file..
 
 <a name="aea.aea_builder.AEABuilder.set_from_configuration"></a>
 #### set`_`from`_`configuration
@@ -776,11 +924,10 @@ Find a component directory from component id.
 
 Set builder variables from AgentConfig.
 
-:params agent_configuration: AgentConfig to get values from.
-:params aea_project_path: PathLike root directory of the agent project.
-
 **Arguments**:
 
+- `agent_configuration`: AgentConfig to get values from.
+- `aea_project_path`: PathLike root directory of the agent project.
 - `skip_consistency_check`: if True, the consistency check are skipped.
 
 **Returns**:
@@ -792,7 +939,7 @@ None
 
 ```python
  | @classmethod
- | from_aea_project(cls, aea_project_path: PathLike, skip_consistency_check: bool = False) -> "AEABuilder"
+ | from_aea_project(cls, aea_project_path: PathLike, skip_consistency_check: bool = False, create_keys: bool = True) -> "AEABuilder"
 ```
 
 Construct the builder from an AEA project.
@@ -808,30 +955,11 @@ Construct the builder from an AEA project.
 
 - `aea_project_path`: path to the AEA project.
 - `skip_consistency_check`: if True, the consistency check are skipped.
+- `create_keys`: if True, create keys, otherwise just verify
 
 **Returns**:
 
 an AEABuilder.
-
-<a name="aea.aea_builder.AEABuilder.from_config_json"></a>
-#### from`_`config`_`json
-
-```python
- | @classmethod
- | from_config_json(cls, json_data: List[Dict], aea_project_path: PathLike, skip_consistency_check: bool = False) -> "AEABuilder"
-```
-
-Load agent configuration for alreaady provided json data.
-
-**Arguments**:
-
-- `json_data`: list of dicts with agent configuration
-- `aea_project_path`: path to project root
-- `skip_consistency_check`: skip consistency check on configs load.
-
-**Returns**:
-
-AEABuilder instance
 
 <a name="aea.aea_builder.AEABuilder.get_configuration_file_path"></a>
 #### get`_`configuration`_`file`_`path

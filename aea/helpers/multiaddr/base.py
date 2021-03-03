@@ -75,17 +75,17 @@ if ENABLE_INLINING:
     )
 
 
-def _pad_scalar(scalar):
+def _pad_scalar(scalar: bytes) -> bytes:
     """Pad scalar."""
     return (ZERO * (KEY_SIZE - len(scalar))) + scalar
 
 
-def _pad_hex(hexed):
+def _pad_hex(hexed: str) -> str:
     """Pad odd-length hex strings."""
     return hexed if not len(hexed) & 1 else "0" + hexed
 
 
-def _hex_to_bytes(hexed):
+def _hex_to_bytes(hexed: str) -> bytes:
     """Hex to bytes."""
     return _pad_scalar(unhexlify(_pad_hex(hexed)))
 
@@ -99,7 +99,7 @@ class MultiAddr:
         port: int,
         public_key: Optional[str] = None,
         multihash_id: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Initialize a multiaddress.
 
@@ -127,7 +127,7 @@ class MultiAddr:
         elif multihash_id is not None:
             try:
                 multihash.decode(base58.b58decode(multihash_id))
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-except
                 raise ValueError(
                     "Malformed multihash '{}': {}".format(multihash_id, str(e))
                 )

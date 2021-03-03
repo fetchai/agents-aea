@@ -25,6 +25,8 @@ from typing import cast
 from unittest.mock import Mock, patch
 
 import pytest
+from aea_crypto_ethereum import EthereumCrypto
+from aea_crypto_fetchai import FetchAICrypto
 
 from aea.common import Address
 from aea.configurations.base import PublicId
@@ -46,6 +48,7 @@ from packages.fetchai.connections.ledger.connection import LedgerConnection
 from packages.fetchai.connections.ledger.ledger_dispatcher import (
     LedgerApiRequestDispatcher,
 )
+from packages.fetchai.protocols.ledger_api.custom_types import Kwargs
 from packages.fetchai.protocols.ledger_api.dialogues import LedgerApiDialogue
 from packages.fetchai.protocols.ledger_api.dialogues import (
     LedgerApiDialogues as BaseLedgerApiDialogues,
@@ -53,11 +56,7 @@ from packages.fetchai.protocols.ledger_api.dialogues import (
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 
 from tests.conftest import (
-    ETHEREUM,
-    ETHEREUM_ADDRESS_ONE,
     ETHEREUM_PRIVATE_KEY_PATH,
-    ETHEREUM_TESTNET_CONFIG,
-    FETCHAI,
     FETCHAI_ADDRESS_ONE,
     FETCHAI_TESTNET_CONFIG,
 )
@@ -67,12 +66,14 @@ logger = logging.getLogger(__name__)
 
 
 ledger_ids = pytest.mark.parametrize(
-    "ledger_id,address,config",
+    "ledger_id,address",
     [
-        (FETCHAI, FETCHAI_ADDRESS_ONE, FETCHAI_TESTNET_CONFIG),
-        (ETHEREUM, ETHEREUM_ADDRESS_ONE, ETHEREUM_TESTNET_CONFIG),
+        (FetchAICrypto.identifier, FETCHAI_ADDRESS_ONE),
+        (EthereumCrypto.identifier, EthereumCrypto(ETHEREUM_PRIVATE_KEY_PATH).address),
     ],
 )
+
+SOME_SKILL_ID = "some/skill:0.1.0"
 
 
 class LedgerApiDialogues(BaseLedgerApiDialogues):
@@ -108,24 +109,29 @@ class LedgerApiDialogues(BaseLedgerApiDialogues):
 @pytest.mark.asyncio
 @ledger_ids
 async def test_get_balance(
-    ledger_id, address, config, ledger_apis_connection: Connection
+    ledger_id,
+    address,
+    ledger_apis_connection: Connection,
+    update_default_ethereum_ledger_api,
+    ethereum_testnet_config,
+    ganache,
 ):
     """Test get balance."""
     import aea  # noqa # to load registries
 
-    ledger_api_dialogues = LedgerApiDialogues(address)
+    if ledger_id == FetchAICrypto.identifier:
+        config = FETCHAI_TESTNET_CONFIG
+    else:
+        config = ethereum_testnet_config
+
+    ledger_api_dialogues = LedgerApiDialogues(SOME_SKILL_ID)
     request, ledger_api_dialogue = ledger_api_dialogues.create(
         counterparty=str(ledger_apis_connection.connection_id),
         performative=LedgerApiMessage.Performative.GET_BALANCE,
         ledger_id=ledger_id,
         address=address,
     )
-    envelope = Envelope(
-        to=request.to,
-        sender=request.sender,
-        protocol_id=request.protocol_id,
-        message=request,
-    )
+    envelope = Envelope(to=request.to, sender=request.sender, message=request,)
 
     await ledger_apis_connection.send(envelope)
     await asyncio.sleep(0.01)
@@ -145,13 +151,75 @@ async def test_get_balance(
 @pytest.mark.integration
 @pytest.mark.ledger
 @pytest.mark.asyncio
-async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connection):
+@ledger_ids
+async def test_get_state(
+    ledger_id,
+    address,
+    ledger_apis_connection: Connection,
+    update_default_ethereum_ledger_api,
+    ethereum_testnet_config,
+    ganache,
+):
+    """Test get state."""
+    import aea  # noqa # to load registries
+
+    if ledger_id == FetchAICrypto.identifier:
+        config = FETCHAI_TESTNET_CONFIG
+    else:
+        config = ethereum_testnet_config
+
+    if "ethereum" in ledger_id:
+        callable_name = "getBlock"
+    else:
+        callable_name = "blocks"
+    args = ("latest",)
+    kwargs = Kwargs({})
+
+    ledger_api_dialogues = LedgerApiDialogues(SOME_SKILL_ID)
+    request, ledger_api_dialogue = ledger_api_dialogues.create(
+        counterparty=str(ledger_apis_connection.connection_id),
+        performative=LedgerApiMessage.Performative.GET_STATE,
+        ledger_id=ledger_id,
+        callable=callable_name,
+        args=args,
+        kwargs=kwargs,
+    )
+    envelope = Envelope(to=request.to, sender=request.sender, message=request,)
+
+    await ledger_apis_connection.send(envelope)
+    await asyncio.sleep(0.01)
+    response = await ledger_apis_connection.receive()
+
+    assert response is not None
+    assert type(response.message) == LedgerApiMessage
+    response_msg = cast(LedgerApiMessage, response.message)
+    response_dialogue = ledger_api_dialogues.update(response_msg)
+    assert response_dialogue == ledger_api_dialogue
+
+    assert (
+        response_msg.performative == LedgerApiMessage.Performative.STATE
+    ), response_msg
+    actual_block = response_msg.state.body
+    expected_block = make_ledger_api(ledger_id, **config).get_state(
+        callable_name, *args
+    )
+    assert actual_block == expected_block
+
+
+@pytest.mark.integration
+@pytest.mark.ledger
+@pytest.mark.asyncio
+async def test_send_signed_transaction_ethereum(
+    ledger_apis_connection: Connection, update_default_ethereum_ledger_api, ganache
+):
     """Test send signed transaction with Ethereum APIs."""
     import aea  # noqa # to load registries
 
-    crypto1 = make_crypto(ETHEREUM, private_key_path=ETHEREUM_PRIVATE_KEY_PATH)
-    crypto2 = make_crypto(ETHEREUM)
-    ledger_api_dialogues = LedgerApiDialogues(crypto1.address)
+    crypto1 = make_crypto(
+        EthereumCrypto.identifier, private_key_path=ETHEREUM_PRIVATE_KEY_PATH
+    )
+    crypto2 = make_crypto(EthereumCrypto.identifier)
+    ledger_api_dialogues = LedgerApiDialogues(SOME_SKILL_ID)
 
     amount = 40000
     fee = 30000
@@ -160,7 +228,7 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
         counterparty=str(ledger_apis_connection.connection_id),
         performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
         terms=Terms(
-            ledger_id=ETHEREUM,
+            ledger_id=EthereumCrypto.identifier,
             sender_address=crypto1.address,
             counterparty_address=crypto2.address,
             amount_by_currency_id={"ETH": -amount},
@@ -172,12 +240,7 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
         ),
     )
     request = cast(LedgerApiMessage, request)
-    envelope = Envelope(
-        to=request.to,
-        sender=request.sender,
-        protocol_id=request.protocol_id,
-        message=request,
-    )
+    envelope = Envelope(to=request.to, sender=request.sender, message=request,)
     await ledger_apis_connection.send(envelope)
     await asyncio.sleep(0.01)
     response = await ledger_apis_connection.receive()
@@ -199,15 +262,12 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
         ledger_api_dialogue.reply(
             performative=LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
             target_message=response_message,
-            signed_transaction=SignedTransaction(ETHEREUM, signed_transaction),
+            signed_transaction=SignedTransaction(
+                EthereumCrypto.identifier, signed_transaction
+            ),
         ),
     )
-    envelope = Envelope(
-        to=request.to,
-        sender=request.sender,
-        protocol_id=request.protocol_id,
-        message=request,
-    )
+    envelope = Envelope(to=request.to, sender=request.sender, message=request,)
     await ledger_apis_connection.send(envelope)
     await asyncio.sleep(0.01)
     response = await ledger_apis_connection.receive()
@@ -240,12 +300,7 @@ async def test_send_signed_transaction_ethereum(ledger_apis_connection: Connecti
             transaction_digest=response_message.transaction_digest,
         ),
     )
-    envelope = Envelope(
-        to=request.to,
-        sender=request.sender,
-        protocol_id=request.protocol_id,
-        message=request,
-    )
+    envelope = Envelope(to=request.to, sender=request.sender, message=request,)
     await ledger_apis_connection.send(envelope)
     await asyncio.sleep(0.01)
     response = await ledger_apis_connection.receive()
@@ -277,8 +332,8 @@ async def test_unsupported_protocol(ledger_apis_connection: LedgerConnection):
     """Test fail on protocol not supported."""
     envelope = Envelope(
         to=str(ledger_apis_connection.connection_id),
-        sender="test",
-        protocol_id=PublicId.from_str("author/package_name:0.1.0"),
+        sender="test/skill:0.1.0",
+        protocol_specification_id=PublicId.from_str("author/package_name:0.1.0"),
         message=b"message",
     )
     with pytest.raises(ValueError):
@@ -302,7 +357,7 @@ async def test_no_balance():
     message = LedgerApiMessage(
         performative=LedgerApiMessage.Performative.GET_BALANCE,
         dialogue_reference=dispatcher.dialogues.new_self_initiated_dialogue_reference(),
-        ledger_id=ETHEREUM,
+        ledger_id=EthereumCrypto.identifier,
         address="test",
     )
     message.to = dispatcher.dialogues.self_address
@@ -324,7 +379,7 @@ async def test_no_raw_tx():
         performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
         dialogue_reference=dispatcher.dialogues.new_self_initiated_dialogue_reference(),
         terms=Terms(
-            ledger_id=ETHEREUM,
+            ledger_id=EthereumCrypto.identifier,
             sender_address="1111",
             counterparty_address="22222",
             amount_by_currency_id={"ETH": -1},

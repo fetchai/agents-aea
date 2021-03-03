@@ -23,18 +23,32 @@ This module contains the classes required for dialogue management.
 - Dialogue: The dialogue class maintains state of a dialogue and manages it.
 - Dialogues: The dialogues class keeps track of all dialogues.
 """
-
-import itertools
+import inspect
 import secrets
 import sys
-from collections import namedtuple
+from collections import defaultdict, namedtuple
 from enum import Enum
 from inspect import signature
-from typing import Callable, Dict, FrozenSet, List, Optional, Set, Tuple, Type, cast
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    FrozenSet,
+    Iterable,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+    cast,
+)
 
 from aea.common import Address
 from aea.exceptions import AEAEnforceError, enforce
+from aea.helpers.base import cached_property
+from aea.helpers.storage.generic_storage import SyncCollection
 from aea.protocols.base import Message
+from aea.skills.base import SkillComponent
 
 
 if sys.version_info[0] < 3 or (sys.version_info[0] == 3 and sys.version_info[1] < 7):
@@ -114,7 +128,7 @@ class DialogueLabel:
         """Get the address of the dialogue starter."""
         return self._dialogue_starter_addr
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Check for equality between two DialogueLabel objects."""
         if isinstance(other, DialogueLabel):
             return hash(self) == hash(other)
@@ -162,7 +176,7 @@ class DialogueLabel:
         )
         return dialogue_label
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get the string representation."""
         return "{}_{}_{}_{}".format(
             self.dialogue_starter_reference,
@@ -196,10 +210,10 @@ class _DialogueMeta(type):
     Creates classlevvel Rules instance
     """
 
-    def __new__(cls, name: str, bases: Tuple[Type], dct: Dict):
+    def __new__(cls, name: str, bases: Tuple[Type], dct: Dict) -> "_DialogueMeta":
         """Construct a new type."""
         # apply empty slots if no slots defined.
-        dct["__slots__"] = dct.get("__slots__", tuple())
+        # temporary disable dct["__slots__"] = dct.get("__slots__", tuple())
 
         # set class level `_rules`
         dialogue_cls: Type[Dialogue] = super().__new__(cls, name, bases, dct)
@@ -232,6 +246,9 @@ class Dialogue(metaclass=_DialogueMeta):
         "_message_class",
         "_outgoing_messages",
         "_incoming_messages",
+        "_terminal_state_callbacks",
+        "_last_message_id",
+        "_ordered_message_ids",
     )
 
     class Rules:
@@ -303,14 +320,14 @@ class Dialogue(metaclass=_DialogueMeta):
     class Role(Enum):
         """This class defines the agent's role in a dialogue."""
 
-        def __str__(self):
+        def __str__(self) -> str:
             """Get the string representation."""
             return str(self.value)
 
     class EndState(Enum):
         """This class defines the end states of a dialogue."""
 
-        def __str__(self):
+        def __str__(self) -> str:
             """Get the string representation."""
             return str(self.value)
 
@@ -344,6 +361,76 @@ class Dialogue(metaclass=_DialogueMeta):
             "Message class provided not a subclass of `Message`.",
         )
         self._message_class = message_class
+        self._terminal_state_callbacks: Set[Callable[["Dialogue"], None]] = set()
+        self._last_message_id: Optional[int] = None
+        self._ordered_message_ids: List[int] = []
+
+    def add_terminal_state_callback(self, fn: Callable[["Dialogue"], None]) -> None:
+        """
+        Add callback to be called on dialogue reach terminal state.
+
+        :param fn: callable to be called with one argument: Dialogue
+        :return: None
+        """
+        self._terminal_state_callbacks.add(fn)
+
+    def __eq__(self, other: Any) -> bool:
+        """Compare two dialogues."""
+        return (
+            type(self) == type(other)  # pylint: disable=unidiomatic-typecheck
+            and self.dialogue_label == other.dialogue_label
+            and self.message_class == other.message_class
+            and self._incoming_messages == other._incoming_messages
+            and self._outgoing_messages == other._outgoing_messages
+            and self._ordered_message_ids == other._ordered_message_ids
+            and self.role == other.role
+            and self.self_address == other.self_address
+        )
+
+    def json(self) -> dict:
+        """Get json representation of the dialogue."""
+        data = {
+            "dialogue_label": self._dialogue_label.json,
+            "self_address": self.self_address,
+            "role": self._role.value,
+            "incoming_messages": [i.json() for i in self._incoming_messages],
+            "outgoing_messages": [i.json() for i in self._outgoing_messages],
+            "last_message_id": self._last_message_id,
+            "ordered_message_ids": self._ordered_message_ids,
+        }
+        return data
+
+    @classmethod
+    def from_json(cls, message_class: Type[Message], data: dict) -> "Dialogue":
+        """
+        Create a dialogue instance with all messages from json data.
+
+        :param message_class: type of message used with this dialogue
+        :param data: dict with data exported with Dialogue.to_json() method
+
+        :return: Dialogue instance
+        """
+        try:
+            obj = cls(
+                dialogue_label=DialogueLabel.from_json(data["dialogue_label"]),
+                message_class=message_class,
+                self_address=Address(data["self_address"]),
+                role=cls.Role(data["role"]),
+            )
+            obj._incoming_messages = [  # pylint: disable=protected-access
+                message_class.from_json(i) for i in data["incoming_messages"]
+            ]
+            obj._outgoing_messages = [  # pylint: disable=protected-access
+                message_class.from_json(i) for i in data["outgoing_messages"]
+            ]
+            last_message_id = int(data["last_message_id"])
+            obj._last_message_id = last_message_id  # pylint: disable=protected-access
+            obj._ordered_message_ids = [  # pylint: disable=protected-access
+                int(el) for el in data["ordered_message_ids"]
+            ]
+            return obj
+        except KeyError:  # pragma: nocover
+            raise ValueError(f"Dialogue representation is invalid: {data}")
 
     @property
     def dialogue_label(self) -> DialogueLabel:
@@ -451,23 +538,15 @@ class Dialogue(metaclass=_DialogueMeta):
 
         :return: the last message if it exists, None otherwise
         """
-        last_message = None  # type: Optional[Message]
-        if (
-            self.last_incoming_message is not None
-            and self.last_outgoing_message is not None
-        ):
-            last_message = (
-                self.last_outgoing_message
-                if self.last_outgoing_message.message_id
-                > self.last_incoming_message.message_id
-                else self.last_incoming_message
-            )
-        elif self.last_incoming_message is not None:
-            last_message = self.last_incoming_message
-        elif self.last_outgoing_message is not None:
-            last_message = self.last_outgoing_message
+        if self._last_message_id is None:
+            return None
 
-        return last_message
+        if (
+            self.last_incoming_message
+            and self.last_incoming_message.message_id == self._last_message_id
+        ):
+            return self.last_incoming_message
+        return self.last_outgoing_message
 
     @property
     def is_empty(self) -> bool:
@@ -508,23 +587,6 @@ class Dialogue(metaclass=_DialogueMeta):
         """
         return not self._is_message_by_self(message)
 
-    def _try_get_message(self, message_id: int) -> Optional[Message]:
-        """
-        Try to get the message whose id is 'message_id'.
-
-        :param message_id: the id of the message
-        :return: the message if it exists, None otherwise
-        """
-        result = None  # type: Optional[Message]
-        list_of_all_messages = itertools.chain(
-            self._outgoing_messages, self._incoming_messages
-        )
-        for message in list_of_all_messages:
-            if message.message_id == message_id:
-                result = message
-                break
-        return result
-
     def _get_message(self, message_id: int) -> Message:
         """
         Get the message whose id is 'message_id'.
@@ -533,7 +595,7 @@ class Dialogue(metaclass=_DialogueMeta):
         :return: the message
         :raises: AssertionError if message is not present
         """
-        message = self._try_get_message(message_id)
+        message = self.get_message_by_id(message_id)
         if message is None:
             raise ValueError("Message not present.")
         return message
@@ -545,10 +607,7 @@ class Dialogue(metaclass=_DialogueMeta):
         :param message_id: the message id
         :return: True if message with that id exists in this dialogue, False otherwise
         """
-        if self.is_empty:
-            return False
-
-        return self.STARTING_MESSAGE_ID <= message_id <= self.last_message.message_id  # type: ignore
+        return self.get_message_by_id(message_id) is not None
 
     def _update(self, message: Message) -> None:
         """
@@ -585,6 +644,13 @@ class Dialogue(metaclass=_DialogueMeta):
         else:
             self._incoming_messages.append(message)
 
+        self._last_message_id = message.message_id
+        self._ordered_message_ids.append(message.message_id)
+
+        if message.performative in self.rules.terminal_performatives:
+            for fn in self._terminal_state_callbacks:
+                fn(self)
+
     def _is_belonging_to_dialogue(self, message: Message) -> bool:
         """
         Check if the message is belonging to the dialogue.
@@ -615,7 +681,7 @@ class Dialogue(metaclass=_DialogueMeta):
         performative: Message.Performative,
         target_message: Optional[Message] = None,
         target: Optional[int] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Message:
         """
         Reply to the 'target_message' in this dialogue with a message with 'performative', and contents from kwargs.
@@ -633,7 +699,10 @@ class Dialogue(metaclass=_DialogueMeta):
         if last_message is None:
             raise ValueError("Cannot reply in an empty dialogue!")
 
-        if target_message is None and target is None:
+        if target_message is None and target is not None:
+            target_message = self.get_message_by_id(target)
+        elif target_message is None and target is None:
+            target_message = last_message
             target = last_message.message_id
         elif target_message is not None and target is None:
             target = target_message.message_id
@@ -643,6 +712,8 @@ class Dialogue(metaclass=_DialogueMeta):
                     "The provided target and target_message do not match."
                 )
 
+        if target_message is None:
+            raise ValueError("No target message found!")
         enforce(
             self._has_message_id(target),  # type: ignore
             "The target message does not exist in this dialogue.",
@@ -650,7 +721,7 @@ class Dialogue(metaclass=_DialogueMeta):
 
         reply = self._message_class(
             dialogue_reference=self.dialogue_label.dialogue_reference,
-            message_id=last_message.message_id + 1,
+            message_id=self.get_outgoing_next_message_id(),
             target=target,
             performative=performative,
             **kwargs,
@@ -678,13 +749,6 @@ class Dialogue(metaclass=_DialogueMeta):
         is_basic_validated, msg_basic_validation = self._basic_validation(message)
         if not is_basic_validated:
             return False, msg_basic_validation
-
-        (
-            result_additional_validation,
-            msg_additional_validation,
-        ) = self._additional_validation(message)
-        if not result_additional_validation:
-            return False, msg_additional_validation
 
         result_is_valid, msg_is_valid = self._custom_validation(message)
         if not result_is_valid:
@@ -722,7 +786,6 @@ class Dialogue(metaclass=_DialogueMeta):
         """
         dialogue_reference = message.dialogue_reference
         message_id = message.message_id
-        target = message.target
         performative = message.performative
 
         if dialogue_reference[0] != self.dialogue_label.dialogue_reference[0]:
@@ -741,13 +804,9 @@ class Dialogue(metaclass=_DialogueMeta):
                 ),
             )
 
-        if target != Dialogue.STARTING_TARGET:
-            return (
-                False,
-                "Invalid target. Expected {}. Found {}.".format(
-                    Dialogue.STARTING_TARGET, target
-                ),
-            )
+        err = self._validate_message_target(message)
+        if err:
+            return False, err
 
         if performative not in self.rules.initial_performatives:
             return (
@@ -775,9 +834,6 @@ class Dialogue(metaclass=_DialogueMeta):
         :return: Boolean result, and associated message.
         """
         dialogue_reference = message.dialogue_reference
-        message_id = message.message_id
-        target = message.target
-        performative = message.performative
 
         if dialogue_reference[0] != self.dialogue_label.dialogue_reference[0]:
             return (
@@ -787,66 +843,128 @@ class Dialogue(metaclass=_DialogueMeta):
                 ),
             )
 
-        last_message_id = self.last_message.message_id  # type: ignore
-        if message_id != last_message_id + 1:
-            return (
-                False,
-                "Invalid message_id. Expected {}. Found {}.".format(
-                    last_message_id + 1, message_id
-                ),
-            )
-        if target < 1:
-            return (
-                False,
-                "Invalid target. Expected a value greater than or equal to 1. Found {}.".format(
-                    target
-                ),
-            )
-        if last_message_id < target:
-            return (
-                False,
-                "Invalid target. Expected a value less than or equal to {}. Found {}.".format(
-                    last_message_id, target
-                ),
-            )
+        err = self._validate_message_id(message)
+        if err:
+            return False, err
 
-        target_message = self._get_message(target)
-        target_performative = target_message.performative
-        if performative not in self.rules.get_valid_replies(target_performative):
-            return (
-                False,
-                "Invalid performative. Expected one of {}. Found {}.".format(
-                    self.rules.get_valid_replies(target_performative), performative
-                ),
-            )
+        err = self._validate_message_target(message)
+        if err:
+            return False, err
 
         return True, "The non-initial message passes basic validation."
 
-    def _additional_validation(self, message: Message) -> Tuple[bool, str]:
-        """
-        Check whether 'message' is a valid next message in the dialogue, according to additional rules.
+    def _validate_message_target(self, message: Message) -> Optional[str]:
+        """Check message target corresponds to messages in the dialogue, if not return error string."""
+        target = message.target
+        performative = message.performative
 
-        These rules are designed to be less fundamental than basic rules and subject to change.
-        Currently the following is enforced:
+        if message.message_id == self.STARTING_MESSAGE_ID:
+            # for initial message!
+            if target == self.STARTING_TARGET:
+                # no need to check in details
+                return None
+            return "Invalid target. Expected 0. Found {}.".format(target)
 
-         - A message targets the message strictly before it in the dialogue
+        if (
+            message.message_id != self.STARTING_MESSAGE_ID
+            and target == self.STARTING_TARGET
+        ):
+            return "Invalid target. Expected a non-zero integer. Found {}.".format(
+                target
+            )
 
-        :param message: the message to be validated
-        :return: Boolean result, and associated message.
-        """
+        # quick target check.
+        latest_ids: List[int] = []
+
+        if self.last_incoming_message:
+            latest_ids.append(abs(self.last_incoming_message.message_id))
+
+        if self.last_outgoing_message:
+            latest_ids.append(abs(self.last_outgoing_message.message_id))
+
+        if abs(target) > max(latest_ids):
+            return "Invalid target. Expected a value less than or equal to abs({}). Found abs({}).".format(
+                max(latest_ids), abs(target)
+            )
+
+        # detailed target check
+        target_message = self.get_message_by_id(target)
+
+        if not target_message:
+            return "Invalid target {}. target_message can not be found.".format(
+                target
+            )  # pragma: nocover
+
+        target_performative = target_message.performative
+        if performative not in self.rules.get_valid_replies(target_performative):
+            return "Invalid performative. Expected one of {}. Found {}.".format(
+                self.rules.get_valid_replies(target_performative), performative
+            )
+
+        return None
+
+    def _validate_message_id(self, message: Message) -> Optional[str]:
+        """Check message id corresponds to message id sequences, if not return error string."""
+        is_outgoing = message.to != self.self_address
+
+        # This assumes that messages sent by the opponent are sent in the right order.
+        if is_outgoing:
+            next_message_id = self.get_outgoing_next_message_id()
+        else:
+            next_message_id = self.get_incoming_next_message_id()
+
+        # we know what is the next message id for incoming and outgoing!
+        if message.message_id != next_message_id:
+            return "Invalid message_id. Expected {}. Found {}.".format(
+                next_message_id, message.message_id
+            )
+
+        return None
+
+    def get_message_by_id(self, message_id: int) -> Optional[Message]:
+        """Get message by id, if not presents return None."""
         if self.is_empty:
-            return True, "The message passes additional validation."
+            return None
 
-        last_target = self.last_message.target  # type: ignore
-        if message.target == last_target + 1:
-            return True, "The message passes additional validation."
+        if message_id == 0:
+            raise ValueError("message_id == 0 is invalid!")  # pragma: nocover
 
-        return (
-            False,
-            "Invalid target. Expected {}. Found {}.".format(
-                last_target + 1, message.target
-            ),
-        )
+        if bool(message_id > 0) == self.is_self_initiated:
+            messages_list = self._outgoing_messages
+        else:
+            messages_list = self._incoming_messages
+
+        if len(messages_list) == 0:
+            return None
+
+        if abs(message_id) > abs(messages_list[-1].message_id):
+            return None
+
+        return messages_list[abs(message_id) - 1]
+
+    def get_outgoing_next_message_id(self) -> int:
+        """Get next outgoing message id."""
+        next_message_id = Dialogue.STARTING_MESSAGE_ID
+
+        if self.last_outgoing_message:
+            next_message_id = abs(self.last_outgoing_message.message_id) + 1
+
+        if not self.is_self_initiated:
+            next_message_id = 0 - next_message_id
+
+        return next_message_id
+
+    def get_incoming_next_message_id(self) -> int:
+        """Get next incoming message id."""
+        next_message_id = Dialogue.STARTING_MESSAGE_ID
+
+        if self.last_incoming_message:
+            next_message_id = abs(self.last_incoming_message.message_id) + 1
+
+        if self.is_self_initiated:
+            next_message_id = 0 - next_message_id
+
+        return next_message_id
 
     def _update_dialogue_label(self, final_dialogue_label: DialogueLabel) -> None:
         """
@@ -876,37 +994,19 @@ class Dialogue(metaclass=_DialogueMeta):
         """
         return True, "The message passes custom validation."
 
-    @staticmethod
-    def _interleave(list_1, list_2) -> List:
-        all_elements = [
-            element
-            for element in itertools.chain(*itertools.zip_longest(list_1, list_2))
-            if element is not None
-        ]
-
-        return all_elements
-
     def __str__(self) -> str:
         """
         Get the string representation.
 
         :return: The string representation of the dialogue
         """
-        representation = "Dialogue Label: " + str(self.dialogue_label) + "\n"
+        representation = f"Dialogue Label:\n{self.dialogue_label}\nMessages:\n"
 
-        if self.is_self_initiated:
-            all_messages = self._interleave(
-                self._outgoing_messages, self._incoming_messages
-            )
-        else:
-            all_messages = self._interleave(
-                self._incoming_messages, self._outgoing_messages
-            )
-
-        for msg in all_messages:
-            representation += str(msg.performative) + "( )\n"
-
-        representation = representation[:-1]
+        for msg_id in self._ordered_message_ids:
+            msg = self.get_message_by_id(msg_id)
+            if msg is None:  # pragma: nocover
+                raise ValueError("Dialogue inconsistent! Missing message.")
+            representation += f"message_id={msg.message_id}, target={msg.target}, performative={msg.performative}\n"
         return representation
 
 
@@ -955,8 +1055,454 @@ class DialogueStats:
             self._other_initiated[end_state] += 1
 
 
+def find_caller_object(object_type: Type) -> Any:
+    """Find caller object of certain type in the call stack."""
+    caller_object = None
+    for frame_info in inspect.stack():
+        frame_self = frame_info.frame.f_locals.get("self", None)
+        if not frame_self:
+            continue
+
+        if not isinstance(frame_self, object_type):
+            continue
+        caller_object = frame_self
+    return caller_object
+
+
+class BasicDialoguesStorage:
+    """Dialogues state storage."""
+
+    def __init__(self, dialogues: "Dialogues") -> None:
+        """Init dialogues storage."""
+        self._dialogues_by_dialogue_label = {}  # type: Dict[DialogueLabel, Dialogue]
+        self._dialogue_by_address = defaultdict(
+            list
+        )  # type: Dict[Address, List[Dialogue]]
+        self._incomplete_to_complete_dialogue_labels = (
+            {}
+        )  # type: Dict[DialogueLabel, DialogueLabel]
+        self._dialogues = dialogues
+        self._terminal_state_dialogues_labels: Set[DialogueLabel] = set()
+
+    @property
+    def dialogues_in_terminal_state(self) -> List["Dialogue"]:
+        """Get all dialogues in terminal state."""
+        return list(
+            filter(
+                None,
+                [
+                    self._dialogues_by_dialogue_label.get(i)
+                    for i in self._terminal_state_dialogues_labels
+                ],
+            )
+        )
+
+    @property
+    def dialogues_in_active_state(self) -> List["Dialogue"]:
+        """Get all dialogues in active state."""
+        active_dialogues = (
+            set(self._dialogues_by_dialogue_label.keys())
+            - self._terminal_state_dialogues_labels
+        )
+        return list(
+            filter(
+                None,
+                [self._dialogues_by_dialogue_label.get(i) for i in active_dialogues],
+            )
+        )
+
+    @property
+    def is_terminal_dialogues_kept(self) -> bool:
+        """Return True if dialogues should stay after terminal state."""
+        return self._dialogues.is_keep_dialogues_in_terminal_state
+
+    def dialogue_terminal_state_callback(self, dialogue: "Dialogue") -> None:
+        """Method to be called on dialogue terminal state reached."""
+        if self.is_terminal_dialogues_kept:
+            self._terminal_state_dialogues_labels.add(dialogue.dialogue_label)
+        else:
+            self.remove(dialogue.dialogue_label)
+
+    def setup(self) -> None:
+        """Set up dialogue storage."""
+
+    def teardown(self) -> None:
+        """Tear down dialogue storage."""
+
+    def add(self, dialogue: Dialogue) -> None:
+        """
+        Add dialogue to storage.
+
+        :param dialogue: dialogue to add.
+        :return: None
+        """
+        dialogue.add_terminal_state_callback(self.dialogue_terminal_state_callback)
+        self._dialogues_by_dialogue_label[dialogue.dialogue_label] = dialogue
+        self._dialogue_by_address[
+            dialogue.dialogue_label.dialogue_opponent_addr
+        ].append(dialogue)
+
+    def _add_terminal_state_dialogue(self, dialogue: Dialogue) -> None:
+        """
+        Add terminal state dialogue to storage.
+
+        :param dialogue: dialogue to add.
+        :return: None
+        """
+        self.add(dialogue)
+        self._terminal_state_dialogues_labels.add(dialogue.dialogue_label)
+
+    def remove(self, dialogue_label: DialogueLabel) -> None:
+        """
+        Remove dialogue from storage by it's label.
+
+        :param dialogue_label: label of the dialogue to remove
+        :return: None
+        """
+        dialogue = self._dialogues_by_dialogue_label.pop(dialogue_label, None)
+
+        self._incomplete_to_complete_dialogue_labels.pop(dialogue_label, None)
+
+        if dialogue_label in self._terminal_state_dialogues_labels:
+            self._terminal_state_dialogues_labels.remove(dialogue_label)
+
+        if dialogue:
+            self._dialogue_by_address[dialogue_label.dialogue_opponent_addr].remove(
+                dialogue
+            )
+
+    def get(self, dialogue_label: DialogueLabel) -> Optional[Dialogue]:
+        """
+        Get dialogue stored by it's label.
+
+        :param dialogue_label: label of the dialogue
+        :return: dialogue if presents or None
+        """
+        return self._dialogues_by_dialogue_label.get(dialogue_label, None)
+
+    def get_dialogues_with_counterparty(self, counterparty: Address) -> List[Dialogue]:
+        """
+        Get the dialogues by address.
+
+        :param counterparty: the counterparty
+        :return: The dialogues with the counterparty.
+        """
+        return self._dialogue_by_address.get(counterparty, [])
+
+    def is_in_incomplete(self, dialogue_label: DialogueLabel) -> bool:
+        """Check dialogue label presents in list of incomplete."""
+        return dialogue_label in self._incomplete_to_complete_dialogue_labels
+
+    def set_incomplete_dialogue(
+        self,
+        incomplete_dialogue_label: DialogueLabel,
+        complete_dialogue_label: DialogueLabel,
+    ) -> None:
+        """Set incomplete dialogue label."""
+        self._incomplete_to_complete_dialogue_labels[
+            incomplete_dialogue_label
+        ] = complete_dialogue_label
+
+    def is_dialogue_present(self, dialogue_label: DialogueLabel) -> bool:
+        """Check dialogue with label specified presents in storage."""
+        return dialogue_label in self._dialogues_by_dialogue_label
+
+    def get_latest_label(self, dialogue_label: DialogueLabel) -> DialogueLabel:
+        """Get latest label for dialogue."""
+        return self._incomplete_to_complete_dialogue_labels.get(
+            dialogue_label, dialogue_label
+        )
+
+
+class PersistDialoguesStorage(BasicDialoguesStorage):
+    """
+    Persist dialogues storage.
+
+    Uses generic storage to load/save dialogues data on setup/teardown.
+    """
+
+    INCOMPLETE_DIALOGUES_OBJECT_NAME = "incomplete_dialogues"
+    TERMINAL_STATE_DIALOGUES_COLLECTTION_SUFFIX = "_terminal"
+
+    def __init__(self, dialogues: "Dialogues") -> None:
+        """Init dialogues storage."""
+        super().__init__(dialogues)
+
+        self._skill_component: Optional[SkillComponent] = self.get_skill_component()
+
+    @staticmethod
+    def get_skill_component() -> Optional[SkillComponent]:
+        """Get skill component dialogues storage constructed for."""
+        caller_object = find_caller_object(SkillComponent)
+        if not caller_object:  # pragma: nocover
+            return None
+        return caller_object
+
+    def _get_collection_name(self) -> Optional[str]:
+        """Generate collection name based on the dialogues class name and skill component."""
+        if not self._skill_component:  # pragma: nocover
+            return None
+        return "_".join(
+            [
+                self._skill_component.skill_id.author,
+                self._skill_component.skill_id.name,
+                self._skill_component.name,
+                self._skill_component.__class__.__name__,
+                self._dialogues.__class__.__name__,
+            ]
+        )
+
+    def _get_collection_instance(self, col_name: str) -> Optional[SyncCollection]:
+        """Get sync collection if generic storage available."""
+        if (
+            not self._skill_component or not self._skill_component.context.storage
+        ):  # pragma: nocover
+            return None
+        return self._skill_component.context.storage.get_sync_collection(col_name)
+
+    @cached_property
+    def _terminal_dialogues_collection(self) -> Optional[SyncCollection]:
+        col_name = self._get_collection_name()
+        if not col_name:
+            return None
+        col_name = f"{col_name}{self.TERMINAL_STATE_DIALOGUES_COLLECTTION_SUFFIX}"
+        return self._get_collection_instance(col_name)
+
+    @cached_property
+    def _active_dialogues_collection(self) -> Optional[SyncCollection]:
+        col_name = self._get_collection_name()
+        if not col_name:
+            return None
+        return self._get_collection_instance(col_name)
+
+    def _dump(self) -> None:
+        """Dump dialogues storage to the generic storage."""
+        if (
+            not self._active_dialogues_collection
+            or not self._terminal_dialogues_collection
+        ):
+            return  # pragma: nocover
+
+        self._dump_incomplete_dialogues_labels(self._active_dialogues_collection)
+        self._dump_dialogues(
+            self.dialogues_in_active_state, self._active_dialogues_collection
+        )
+        self._dump_dialogues(
+            self.dialogues_in_terminal_state, self._terminal_dialogues_collection
+        )
+
+    def _dump_incomplete_dialogues_labels(self, collection: SyncCollection) -> None:
+        """Dump incomplete labels."""
+        collection.put(
+            self.INCOMPLETE_DIALOGUES_OBJECT_NAME,
+            self._incomplete_dialogues_labels_to_json(),
+        )
+
+    def _load_incomplete_dialogues_labels(self, collection: SyncCollection) -> None:
+        """Load and set incomplete dialogue labels."""
+        incomplete_dialogues_data = collection.get(
+            self.INCOMPLETE_DIALOGUES_OBJECT_NAME
+        )
+        if incomplete_dialogues_data is not None:
+            incomplete_dialogues_data = cast(List, incomplete_dialogues_data)
+            self._set_incomplete_dialogues_labels_from_json(incomplete_dialogues_data)
+
+    def _load_dialogues(self, collection: SyncCollection) -> Iterable[Dialogue]:
+        """Load dialogues from collection."""
+        if not collection:  # pragma: nocover
+            return
+        for label, dialogue_data in collection.list():
+            if label == self.INCOMPLETE_DIALOGUES_OBJECT_NAME:
+                continue
+            dialogue_data = cast(Dict, dialogue_data)
+            yield self._dialogue_from_json(dialogue_data)
+
+    def _dialogue_from_json(self, dialogue_data: dict) -> "Dialogue":
+        return self._dialogues.dialogue_class.from_json(
+            self._dialogues.message_class, dialogue_data
+        )
+
+    @staticmethod
+    def _dump_dialogues(
+        dialogues: Iterable[Dialogue], collection: SyncCollection
+    ) -> None:
+        """Dump dialogues to collection."""
+        for dialogue in dialogues:
+            collection.put(str(dialogue.dialogue_label), dialogue.json())
+
+    def _load(self) -> None:
+        """Dump dialogues and incomplete dialogues labels from the generic storage."""
+        if (
+            not self._active_dialogues_collection
+            or not self._terminal_dialogues_collection
+        ):
+            return  # pragma: nocover
+
+        self._load_incomplete_dialogues_labels(self._active_dialogues_collection)
+        self._load_active_dialogues()
+        self._load_terminated_dialogues()
+
+    def _load_active_dialogues(self) -> None:
+        """Load active dialogues from storage."""
+        for dialogue in self._load_dialogues(self._active_dialogues_collection):
+            self.add(dialogue)
+
+    def _load_terminated_dialogues(self) -> None:
+        """Load terminated dialogues from storage."""
+        for dialogue in self._load_dialogues(self._terminal_dialogues_collection):
+            self._add_terminal_state_dialogue(dialogue)
+
+    def _incomplete_dialogues_labels_to_json(self) -> List:
+        """Dump incomplete_to_complete_dialogue_labels to json friendly dict."""
+        return [
+            [k.json, v.json]
+            for k, v in self._incomplete_to_complete_dialogue_labels.items()
+        ]
+
+    def _set_incomplete_dialogues_labels_from_json(self, data: List) -> None:
+        """Set incomplete_to_complete_dialogue_labels from json friendly dict."""
+        self._incomplete_to_complete_dialogue_labels = {
+            DialogueLabel.from_json(k): DialogueLabel.from_json(v) for k, v in data
+        }
+
+    def setup(self) -> None:
+        """Set up dialogue storage."""
+        if not self._skill_component:  # pragma: nocover
+            return
+        self._load()
+
+    def teardown(self) -> None:
+        """Tear down dialogue storage."""
+        if not self._skill_component:  # pragma: nocover
+            return
+        self._dump()
+
+    def remove(self, dialogue_label: DialogueLabel) -> None:
+        """Remove dialogue from memory and persistent storage."""
+        if dialogue_label in self._terminal_state_dialogues_labels:
+            collection = self._terminal_dialogues_collection
+        else:
+            collection = self._active_dialogues_collection
+
+        super().remove(dialogue_label)
+
+        if collection:
+            collection.remove(str(dialogue_label))
+
+
+class PersistDialoguesStorageWithOffloading(PersistDialoguesStorage):
+    """Dialogue Storage with dialogues offloading."""
+
+    def dialogue_terminal_state_callback(self, dialogue: "Dialogue") -> None:
+        """Call on dialogue reaches terminal staste."""
+        if (
+            not self.is_terminal_dialogues_kept
+            or not self._terminal_dialogues_collection
+        ):  # pragma: nocover
+            super().dialogue_terminal_state_callback(dialogue)
+            return
+
+        # do offloading
+        # push to storage
+        self._terminal_dialogues_collection.put(
+            str(dialogue.dialogue_label), dialogue.json()
+        )
+        # remove from memory
+        self.remove(dialogue.dialogue_label)
+
+    def get(self, dialogue_label: DialogueLabel) -> Optional[Dialogue]:
+        """Try to get dialogue by label from memory or persists storage."""
+        dialogue = super().get(dialogue_label)
+        if dialogue:
+            return dialogue
+
+        dialogue = self._get_dialogue_from_collection(
+            dialogue_label, self._terminal_dialogues_collection
+        )
+        if dialogue:
+            # get dialogue from terminal state collection and cache it
+            self._add_terminal_state_dialogue(dialogue)
+            return dialogue
+        return None
+
+    def _get_dialogue_from_collection(
+        self, dialogue_label: "DialogueLabel", collection: SyncCollection
+    ) -> Optional[Dialogue]:
+        """
+        Get dialogue by label from collection.
+
+        :param dialogue_label: label for lookup
+        :param collection: collection with dialogues
+        :return: dialogue if exists
+        """
+        if not collection:
+            return None
+        dialogue_data = collection.get(str(dialogue_label))
+        if not dialogue_data:
+            return None
+        dialogue_data = cast(Dict, dialogue_data)
+        return self._dialogue_from_json(dialogue_data)
+
+    def _load_terminated_dialogues(self) -> None:
+        """Skip terminated dialogues loading, cause it's offloaded."""
+
+    def _get_dialogues_by_address_from_collection(
+        self, address: Address, collection: SyncCollection
+    ) -> List["Dialogue"]:
+        """
+        Get all dialogues with opponent address from specified collection.
+
+        :param address: address for lookup.
+        :param: collection: collection to get dialogues from.
+
+        :return: list of dialogues
+        """
+        if not collection:
+            return []
+
+        return [
+            self._dialogue_from_json(cast(Dict, i[1]))
+            for i in collection.find("dialogue_label.dialogue_opponent_addr", address)
+        ]
+
+    def get_dialogues_with_counterparty(self, counterparty: Address) -> List[Dialogue]:
+        """
+        Get the dialogues by address.
+
+        :param counterparty: the counterparty
+        :return: The dialogues with the counterparty.
+        """
+        dialogues = (
+            self._get_dialogues_by_address_from_collection(
+                counterparty, self._active_dialogues_collection
+            )
+            + self._get_dialogues_by_address_from_collection(
+                counterparty, self._terminal_dialogues_collection
+            )
+            + super().get_dialogues_with_counterparty(counterparty)
+        )
+        return self._unique_dialogues_by_label(dialogues)
+
+    @staticmethod
+    def _unique_dialogues_by_label(dialogues: List[Dialogue]) -> List[Dialogue]:
+        """Filter list of dialogues by unique dialogue label."""
+        return list(
+            {dialogue.dialogue_label: dialogue for dialogue in dialogues}.values()
+        )
+
+    @property
+    def dialogues_in_terminal_state(self) -> List["Dialogue"]:
+        """Get all dialogues in terminal state."""
+        dialogues = super().dialogues_in_terminal_state + list(
+            self._load_dialogues(self._terminal_dialogues_collection)
+        )
+        return self._unique_dialogues_by_label(dialogues)
+
+
 class Dialogues:
     """The dialogues class keeps track of all dialogues for an agent."""
+
+    _keep_terminal_state_dialogues = False
 
     def __init__(
         self,
@@ -965,21 +1511,24 @@ class Dialogues:
         message_class: Type[Message],
         dialogue_class: Type[Dialogue],
         role_from_first_message: Callable[[Message, Address], Dialogue.Role],
+        keep_terminal_state_dialogues: Optional[bool] = None,
     ) -> None:
         """
         Initialize dialogues.
 
         :param self_address: the address of the entity for whom dialogues are maintained
         :param end_states: the list of dialogue endstates
+        :param keep_terminal_state_dialogues: specify do dialogues in terminal state should stay or not
+
         :return: None
         """
-        self._dialogues_by_dialogue_label = {}  # type: Dict[DialogueLabel, Dialogue]
-        self._dialogue_by_address = {}  # type: Dict[Address, List[Dialogue]]
-        self._incomplete_to_complete_dialogue_labels = (
-            {}
-        )  # type: Dict[DialogueLabel, DialogueLabel]
+
+        self._dialogues_storage = PersistDialoguesStorageWithOffloading(self)
         self._self_address = self_address
         self._dialogue_stats = DialogueStats(end_states)
+
+        if keep_terminal_state_dialogues is not None:
+            self._keep_terminal_state_dialogues = keep_terminal_state_dialogues
 
         enforce(
             issubclass(message_class, Message),
@@ -1028,9 +1577,9 @@ class Dialogues:
         self._role_from_first_message = role_from_first_message
 
     @property
-    def dialogues(self) -> Dict[DialogueLabel, Dialogue]:
-        """Get dictionary of dialogues in which the agent engages."""
-        return self._dialogues_by_dialogue_label
+    def is_keep_dialogues_in_terminal_state(self) -> bool:
+        """Is requrired to keep dialogues in terminal state."""
+        return self._keep_terminal_state_dialogues
 
     @property
     def self_address(self) -> Address:
@@ -1072,7 +1621,7 @@ class Dialogues:
         :param counterparty: the counterparty
         :return: The dialogues with the counterparty.
         """
-        return self._dialogue_by_address.get(counterparty, [])
+        return self._dialogues_storage.get_dialogues_with_counterparty(counterparty)
 
     def _is_message_by_self(self, message: Message) -> bool:
         """
@@ -1114,7 +1663,7 @@ class Dialogues:
         return cls._generate_dialogue_nonce(), Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
 
     def create(
-        self, counterparty: Address, performative: Message.Performative, **kwargs,
+        self, counterparty: Address, performative: Message.Performative, **kwargs: Any,
     ) -> Tuple[Message, Dialogue]:
         """
         Create a dialogue with 'counterparty', with an initial message whose performative is 'performative' and contents are from 'kwargs'.
@@ -1185,9 +1734,9 @@ class Dialogues:
         try:
             dialogue._update(initial_message)  # pylint: disable=protected-access
         except InvalidDialogueMessage as e:
-            self._dialogues_by_dialogue_label.pop(dialogue.dialogue_label)
-            raise SyntaxError(
-                "Cannot create a dialogue with the specified performative and contents."
+            self._dialogues_storage.remove(dialogue.dialogue_label)
+            raise ValueError(
+                f"Cannot create a dialogue with the specified performative and contents. {e}"
             ) from e
         return dialogue
 
@@ -1223,12 +1772,13 @@ class Dialogues:
         is_new_dialogue = (
             dialogue_reference[0] != Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
             and dialogue_reference[1] == Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
-            and message.message_id == 1
+            and message.message_id == Dialogue.STARTING_MESSAGE_ID
         )
         is_incomplete_label_and_non_initial_msg = (
             dialogue_reference[0] != Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
             and dialogue_reference[1] == Dialogue.UNASSIGNED_DIALOGUE_REFERENCE
-            and message.message_id > 1
+            and message.message_id
+            not in (Dialogue.STARTING_MESSAGE_ID, Dialogue.STARTING_TARGET)
         )
 
         if is_invalid_label:
@@ -1257,11 +1807,10 @@ class Dialogues:
                 if (
                     is_new_dialogue
                 ):  # remove the newly created dialogue if the initial message is invalid
-                    self._dialogues_by_dialogue_label.pop(dialogue.dialogue_label)
+                    self._dialogues_storage.remove(dialogue.dialogue_label)
         else:
             # couldn't find the dialogue referenced by the message
             result = None
-
         return result
 
     def _complete_dialogue_reference(self, message: Message) -> None:
@@ -1287,12 +1836,13 @@ class Dialogues:
             incomplete_dialogue_reference, message.sender, self.self_address,
         )
 
-        if (
-            incomplete_dialogue_label in self.dialogues
-            and incomplete_dialogue_label
-            not in self._incomplete_to_complete_dialogue_labels
-        ):
-            dialogue = self.dialogues.pop(incomplete_dialogue_label)
+        if self._dialogues_storage.is_dialogue_present(
+            incomplete_dialogue_label
+        ) and not self._dialogues_storage.is_in_incomplete(incomplete_dialogue_label):
+            dialogue = self._dialogues_storage.get(incomplete_dialogue_label)
+            if not dialogue:  # pragma: nocover
+                raise ValueError("no dialogue found")
+            self._dialogues_storage.remove(incomplete_dialogue_label)
             final_dialogue_label = DialogueLabel(
                 complete_dialogue_reference,
                 incomplete_dialogue_label.dialogue_opponent_addr,
@@ -1301,10 +1851,10 @@ class Dialogues:
             dialogue._update_dialogue_label(  # pylint: disable=protected-access
                 final_dialogue_label
             )
-            self.dialogues.update({dialogue.dialogue_label: dialogue})
-            self._incomplete_to_complete_dialogue_labels[
-                incomplete_dialogue_label
-            ] = final_dialogue_label
+            self._dialogues_storage.add(dialogue)
+            self._dialogues_storage.set_incomplete_dialogue(
+                incomplete_dialogue_label, final_dialogue_label
+            )
 
     def get_dialogue(self, message: Message) -> Optional[Dialogue]:
         """
@@ -1331,10 +1881,10 @@ class Dialogues:
             other_initiated_dialogue_label
         )
 
-        self_initiated_dialogue = self._get_dialogue_from_label(
+        self_initiated_dialogue = self.get_dialogue_from_label(
             self_initiated_dialogue_label
         )
-        other_initiated_dialogue = self._get_dialogue_from_label(
+        other_initiated_dialogue = self.get_dialogue_from_label(
             other_initiated_dialogue_label
         )
 
@@ -1348,12 +1898,9 @@ class Dialogues:
         :param dialogue_label: the dialogue label
         :return dialogue_label: the dialogue label
         """
-        result = self._incomplete_to_complete_dialogue_labels.get(
-            dialogue_label, dialogue_label
-        )
-        return result
+        return self._dialogues_storage.get_latest_label(dialogue_label)
 
-    def _get_dialogue_from_label(
+    def get_dialogue_from_label(
         self, dialogue_label: DialogueLabel
     ) -> Optional[Dialogue]:
         """
@@ -1362,8 +1909,7 @@ class Dialogues:
         :param dialogue_label: the dialogue label
         :return: the dialogue if present
         """
-        result = self.dialogues.get(dialogue_label, None)
-        return result
+        return self._dialogues_storage.get(dialogue_label)
 
     def _create_self_initiated(
         self,
@@ -1441,19 +1987,18 @@ class Dialogues:
         :return: the created dialogue
         """
         enforce(
-            incomplete_dialogue_label
-            not in self._incomplete_to_complete_dialogue_labels,
+            not self._dialogues_storage.is_in_incomplete(incomplete_dialogue_label),
             "Incomplete dialogue label already present.",
         )
         if complete_dialogue_label is None:
             dialogue_label = incomplete_dialogue_label
         else:
-            self._incomplete_to_complete_dialogue_labels[
-                incomplete_dialogue_label
-            ] = complete_dialogue_label
+            self._dialogues_storage.set_incomplete_dialogue(
+                incomplete_dialogue_label, complete_dialogue_label
+            )
             dialogue_label = complete_dialogue_label
         enforce(
-            dialogue_label not in self.dialogues,
+            not self._dialogues_storage.is_dialogue_present(dialogue_label),
             "Dialogue label already present in dialogues.",
         )
         dialogue = self._dialogue_class(
@@ -1462,15 +2007,7 @@ class Dialogues:
             self_address=self.self_address,
             role=role,
         )
-        self.dialogues.update({dialogue_label: dialogue})
-        if (
-            self._dialogue_by_address.get(dialogue_label.dialogue_opponent_addr, None)
-            is None
-        ):
-            self._dialogue_by_address[dialogue_label.dialogue_opponent_addr] = []
-        self._dialogue_by_address[dialogue_label.dialogue_opponent_addr].append(
-            dialogue
-        )
+        self._dialogues_storage.add(dialogue)
         return dialogue
 
     @staticmethod
@@ -1481,3 +2018,17 @@ class Dialogues:
         :return: the next nonce
         """
         return secrets.token_hex(DialogueLabel.NONCE_BYTES_NB)
+
+    def setup(self) -> None:
+        """Set  up."""
+        self._dialogues_storage.setup()
+        super_obj = super()
+        if hasattr(super_obj, "setup"):  # pragma: nocover
+            super_obj.setup()  # type: ignore  # pylint: disable=no-member
+
+    def teardown(self) -> None:
+        """Tear down."""
+        self._dialogues_storage.teardown()
+        super_obj = super()
+        if hasattr(super_obj, "teardown"):  # pragma: nocover
+            super_obj.teardown()  # type: ignore  # pylint: disable=no-member

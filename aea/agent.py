@@ -46,6 +46,10 @@ class Agent(AbstractAgent, WithLogger):
     }
     DEFAULT_RUNTIME: str = "threaded"
 
+    _runtime: BaseRuntime
+    _inbox: InBox
+    _outbox: OutBox
+
     def __init__(
         self,
         identity: Identity,
@@ -54,6 +58,7 @@ class Agent(AbstractAgent, WithLogger):
         period: float = 1.0,
         loop_mode: Optional[str] = None,
         runtime_mode: Optional[str] = None,
+        storage_uri: Optional[str] = None,
         logger: Logger = _default_logger,
     ) -> None:
         """
@@ -65,32 +70,55 @@ class Agent(AbstractAgent, WithLogger):
         :param period: period to call agent's act
         :param loop_mode: loop_mode to choose agent run loop.
         :param runtime_mode: runtime mode to up agent.
+        :param storage_uri: optional uri to set generic storage
 
         :return: None
         """
         WithLogger.__init__(self, logger=logger)
-        self._connections = connections
         self._identity = identity
         self._period = period
         self._tick = 0
         self._runtime_mode = runtime_mode or self.DEFAULT_RUNTIME
-        runtime_cls = self._get_runtime_class()
-        self._runtime: BaseRuntime = runtime_cls(
-            agent=self, loop_mode=loop_mode, loop=loop
+        self._storage_uri = storage_uri
+
+        runtime_class = self._get_runtime_class()
+
+        self._set_runtime_and_mail_boxes(
+            runtime_class=runtime_class,
+            loop_mode=loop_mode,
+            loop=loop,
+            multiplexer_options={"connections": connections},
         )
 
+    def _set_runtime_and_mail_boxes(
+        self,
+        runtime_class: Type[BaseRuntime],
+        multiplexer_options: Dict,
+        loop_mode: Optional[str] = None,
+        loop: Optional[AbstractEventLoop] = None,
+    ) -> None:
+        """Set the runtime and inbox and outbox."""
+        self._runtime = runtime_class(
+            agent=self,
+            loop_mode=loop_mode,
+            loop=loop,
+            multiplexer_options=multiplexer_options,
+        )
         self._inbox = InBox(self.runtime.multiplexer)
         self._outbox = OutBox(self.runtime.multiplexer)
 
-    @property
-    def connections(self) -> List[Connection]:
-        """Return list of connections."""
-        return self._connections
+    def _get_runtime_class(self) -> Type[BaseRuntime]:
+        """Get runtime class based on runtime mode."""
+        if self._runtime_mode not in self.RUNTIMES:
+            raise ValueError(
+                f"Runtime `{self._runtime_mode} is not supported. valid are: `{list(self.RUNTIMES.keys())}`"
+            )
+        return self.RUNTIMES[self._runtime_mode]
 
     @property
-    def active_connections(self) -> List[Connection]:
-        """Return list of active connections."""
-        return self._connections
+    def storage_uri(self) -> Optional[str]:
+        """Return storage uri."""
+        return self._storage_uri
 
     @property
     def is_running(self) -> bool:
@@ -101,22 +129,6 @@ class Agent(AbstractAgent, WithLogger):
     def is_stopped(self) -> bool:
         """Get running state of the runtime and agent."""
         return self.runtime.is_stopped
-
-    def _get_runtime_class(self) -> Type[BaseRuntime]:
-        """Get runtime class based on runtime mode."""
-        if self._runtime_mode not in self.RUNTIMES:
-            raise ValueError(
-                f"Runtime `{self._runtime_mode} is not supported. valid are: `{list(self.RUNTIMES.keys())}`"
-            )
-        return self.RUNTIMES[self._runtime_mode]
-
-    def get_multiplexer_setup_options(self) -> Optional[Dict]:
-        """
-        Get options to pass to Multiplexer.setup.
-
-        :return: dict of kwargs
-        """
-        return {"connections": self.active_connections}
 
     @property
     def identity(self) -> Identity:
@@ -130,6 +142,8 @@ class Agent(AbstractAgent, WithLogger):
 
         The inbox contains Envelopes from the Multiplexer.
         The agent can pick these messages for processing.
+
+        :return: InBox instance
         """
         return self._inbox
 
@@ -140,6 +154,8 @@ class Agent(AbstractAgent, WithLogger):
 
         The outbox contains Envelopes for the Multiplexer.
         Envelopes placed in the Outbox are processed by the Multiplexer.
+
+        :return: OutBox instance
         """
         return self._outbox
 
@@ -157,14 +173,14 @@ class Agent(AbstractAgent, WithLogger):
         """
         return self._tick
 
-    def handle_envelope(self, envelope: Envelope) -> None:  # pragma: nocover
+    @property
+    def state(self) -> RuntimeStates:
         """
-        Handle an envelope.
+        Get state of the agent's runtime.
 
-        :param envelope: the envelope to handle.
-        :return: None
+        :return: RuntimeStates
         """
-        raise NotImplementedError
+        return self.runtime.state
 
     @property
     def period(self) -> float:
@@ -176,24 +192,22 @@ class Agent(AbstractAgent, WithLogger):
         """Get the runtime."""
         return self._runtime
 
+    def setup(self) -> None:
+        """
+        Set up the agent.
+
+        :return: None
+        """
+        raise NotImplementedError  # pragma: nocover
+
     def start(self) -> None:
         """
         Start the agent.
 
         Performs the following:
 
-        - calls connect() on the multiplexer (unless in debug mode), and
-        - calls setup(), and
-        - calls start() on the liveness, and
-        - enters the agent main loop.
-
-        While the liveness of the agent is not stopped it continues to loop over:
-
-        - increment the tick,
-        - call to act(),
-        - sleep for specified timeout,
-        - call to react(),
-        - call to update().
+        - calls start() on runtime.
+        - waits for runtime to complete running (blocking)
 
         :return: None
         """
@@ -204,29 +218,44 @@ class Agent(AbstractAgent, WithLogger):
         else:  #  pragma: nocover
             raise AEAException("Failed to start runtime! Was it already started?")
 
+    def handle_envelope(self, envelope: Envelope) -> None:
+        """
+        Handle an envelope.
+
+        :param envelope: the envelope to handle.
+        :return: None
+        """
+        raise NotImplementedError  # pragma: nocover
+
+    def act(self) -> None:
+        """
+        Perform actions on period.
+
+        :return: None
+        """
+        raise NotImplementedError  # pragma: nocover
+
     def stop(self) -> None:
         """
         Stop the agent.
 
         Performs the following:
 
-        - calls stop() on the liveness, and
-        - calls teardown(), and
-        - calls disconnect() on the multiplexer.
+        - calls stop() on runtime
+        - waits for runtime to stop (blocking)
 
         :return: None
         """
         self.runtime.stop()
         self.runtime.wait_completed(sync=True)
 
-    @property
-    def state(self) -> RuntimeStates:
+    def teardown(self) -> None:
         """
-        Get state of the agent's runtime.
+        Tear down the agent.
 
-        :return: RuntimeStates
+        :return: None
         """
-        return self._runtime.state
+        raise NotImplementedError  # pragma: nocover
 
     def get_periodic_tasks(
         self,
@@ -244,7 +273,9 @@ class Agent(AbstractAgent, WithLogger):
 
         :return: List of tuples of callables: handler and coroutine to get a message
         """
-        return [(self.handle_envelope, self.inbox.async_get)]
+        return [
+            (self.handle_envelope, self.inbox.async_get),
+        ]
 
     def exception_handler(
         self, exception: Exception, function: Callable

@@ -16,47 +16,69 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Miscellaneous helpers."""
-
 import builtins
 import contextlib
+import datetime
 import importlib.util
 import logging
 import os
 import platform
 import re
+import shutil
 import signal
 import subprocess  # nosec
 import sys
 import time
 import types
 from collections import OrderedDict, UserString, defaultdict, deque
+from collections.abc import Mapping
 from copy import copy
 from functools import wraps
+from importlib.machinery import ModuleSpec
 from pathlib import Path
-from typing import Any, Callable, Deque, Dict, List, Set, TypeVar, Union
+from threading import RLock
+from typing import (
+    Any,
+    Callable,
+    Deque,
+    Dict,
+    Generator,
+    Iterable,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    TypeVar,
+    Union,
+    cast,
+)
 
 from dotenv import load_dotenv
+from packaging.version import Version
+
+from aea.common import PathLike
+from aea.exceptions import enforce
 
 
 STRING_LENGTH_LIMIT = 128
+ISO_8601_DATE_FORMAT = "%Y-%m-%d"
 
 _default_logger = logging.getLogger(__name__)
 
 
-def _get_module(spec):
+def _get_module(spec: ModuleSpec) -> Optional[types.ModuleType]:
     """Try to execute a module. Return None if the attempt fail."""
     try:
         module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
+        spec.loader.exec_module(module)  # type: ignore
         return module
     except Exception:  # pylint: disable=broad-except
         return None
 
 
 def locate(path: str) -> Any:
-    """Locate an object by name or dotted path, importing as necessary."""
+    """Locate an object by name or dotted save_path, importing as necessary."""
     parts = [part for part in path.split(".") if part]
     module, n = None, 0
     while n < len(parts):
@@ -92,7 +114,7 @@ def load_module(dotted_path: str, filepath: Path) -> types.ModuleType:
     """
     Load a module.
 
-    :param dotted_path: the dotted path of the package/module.
+    :param dotted_path: the dotted save_path of the package/module.
     :param filepath: the file to the package/module.
     :return: None
     :raises ValueError: if the filepath provided is not a module.
@@ -104,11 +126,11 @@ def load_module(dotted_path: str, filepath: Path) -> types.ModuleType:
     return module
 
 
-def load_env_file(env_file: str):
+def load_env_file(env_file: str) -> None:
     """
     Load the content of the environment file into the process environment.
 
-    :param env_file: path to the env file.
+    :param env_file: save_path to the env file.
     :return: None.
     """
     load_dotenv(dotenv_path=Path(env_file), override=False)
@@ -186,14 +208,14 @@ class RegexConstrainedString(UserString):
 
     REGEX = re.compile(".*", flags=re.DOTALL)
 
-    def __init__(self, seq):
+    def __init__(self, seq: Union[UserString, str]) -> None:
         """Initialize a regex constrained string."""
         super().__init__(seq)
 
         if not self.REGEX.match(self.data):
             self._handle_no_match()
 
-    def _handle_no_match(self):
+    def _handle_no_match(self) -> None:
         raise ValueError(
             "Value {data} does not match the regular expression {regex}".format(
                 data=self.data, regex=self.REGEX
@@ -234,7 +256,7 @@ SimpleIdOrStr = Union[SimpleId, str]
 
 
 @contextlib.contextmanager
-def cd(path):  # pragma: nocover
+def cd(path: PathLike) -> Generator:  # pragma: nocover
     """Change working directory temporarily."""
     old_path = os.getcwd()
     os.chdir(path)
@@ -264,7 +286,9 @@ def get_logger_method(fn: Callable, logger_method: Union[str, Callable]) -> Call
     return getattr(logger_, logger_method)
 
 
-def try_decorator(error_message: str, default_return=None, logger_method="error"):
+def try_decorator(
+    error_message: str, default_return: Callable = None, logger_method: Any = "error"
+) -> Callable:
     """
     Run function, log and return default value on exception.
 
@@ -276,16 +300,16 @@ def try_decorator(error_message: str, default_return=None, logger_method="error"
     """
 
     # for pydocstyle
-    def decorator(fn):
+    def decorator(fn: Callable) -> Callable:
         @wraps(fn)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Callable:
             try:
                 return fn(*args, **kwargs)
             except Exception as e:  # pylint: disable=broad-except  # pragma: no cover  # generic code
                 if error_message:
                     log = get_logger_method(fn, logger_method)
                     log(error_message.format(e))
-                return default_return
+                return cast(Callable, default_return)
 
         return wrapper
 
@@ -297,8 +321,11 @@ class MaxRetriesError(Exception):
 
 
 def retry_decorator(
-    number_of_retries: int, error_message: str, delay: float = 0, logger_method="error"
-):
+    number_of_retries: int,
+    error_message: str,
+    delay: float = 0,
+    logger_method: str = "error",
+) -> Callable:
     """
     Run function with several attempts.
 
@@ -311,9 +338,9 @@ def retry_decorator(
     """
 
     # for pydocstyle
-    def decorator(fn):
+    def decorator(fn: Callable) -> Callable:
         @wraps(fn)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Callable:
             log = get_logger_method(fn, logger_method)
             for retry in range(number_of_retries):
                 try:
@@ -331,7 +358,7 @@ def retry_decorator(
 
 
 @contextlib.contextmanager
-def exception_log_and_reraise(log_method: Callable, message: str):
+def exception_log_and_reraise(log_method: Callable, message: str) -> Generator:
     """
     Run code in context to log and re raise exception.
 
@@ -355,7 +382,9 @@ def _is_dict_like(obj: Any) -> bool:
     return type(obj) in {dict, OrderedDict}
 
 
-def recursive_update(to_update: Dict, new_values: Dict) -> None:
+def recursive_update(
+    to_update: Dict, new_values: Dict, allow_new_values: bool = False,
+) -> None:
     """
     Update a dictionary by replacing conflicts with the new values.
 
@@ -372,10 +401,14 @@ def recursive_update(to_update: Dict, new_values: Dict) -> None:
     :return: None
     """
     for key, value in new_values.items():
-        if key not in to_update:
+        if (not allow_new_values) and key not in to_update:
             raise ValueError(
                 f"Key '{key}' is not contained in the dictionary to update."
             )
+
+        if key not in to_update and allow_new_values:
+            to_update[key] = value
+            continue
 
         value_to_update = to_update[key]
         value_type = type(value)
@@ -385,13 +418,14 @@ def recursive_update(to_update: Dict, new_values: Dict) -> None:
             not both_are_dict
             and value_type != value_to_update_type
             and value is not None
+            and value_to_update is not None
         ):
             raise ValueError(
                 f"Trying to replace value '{value_to_update}' with value '{value}' which is of different type."
             )
 
         if both_are_dict:
-            recursive_update(value_to_update, value)
+            recursive_update(value_to_update, value, allow_new_values)
         else:
             to_update[key] = value
 
@@ -400,13 +434,13 @@ def _get_aea_logger_name_prefix(module_name: str, agent_name: str) -> str:
     """
     Get the logger name prefix.
 
-    It consists of a dotted path with:
+    It consists of a dotted save_path with:
     - the name of the package, 'aea';
     - the agent name;
-    - the rest of the dotted path.
+    - the rest of the dotted save_path.
 
-    >>> _get_aea_logger_name_prefix("aea.path.to.package", "myagent")
-    'aea.myagent.path.to.package'
+    >>> _get_aea_logger_name_prefix("aea.save_path.to.package", "myagent")
+    'aea.myagent.save_path.to.package'
 
     :param module_name: the module name.
     :param agent_name: the agent name.
@@ -463,3 +497,430 @@ def find_topological_order(adjacency_list: Dict[T, Set[T]]) -> List[T]:
         raise ValueError("Graph has at least one cycle.")
 
     return order
+
+
+def reachable_nodes(
+    adjacency_list: Dict[T, Set[T]], starting_nodes: Set[T]
+) -> Dict[T, Set[T]]:
+    """
+    Find the reachable subgraph induced by a set of starting nodes.
+
+    :param adjacency_list: the adjacency list of the full graph.
+    :param starting_nodes: the starting nodes of the new graph.
+    :return: the adjacency list of the subgraph.
+    """
+    all_nodes = set()
+    for node, nodes in adjacency_list.items():
+        all_nodes.add(node)
+        all_nodes.update(nodes)
+    enforce(
+        all(s in all_nodes for s in starting_nodes),
+        f"These starting nodes are not in the set of nodes: {starting_nodes.difference(all_nodes)}",
+    )
+    visited: Set[T] = set()
+    result: Dict[T, Set[T]] = {start_node: set() for start_node in starting_nodes}
+    queue: Deque[T] = deque()
+    queue.extend(starting_nodes)
+    while len(queue) > 0:
+        current = queue.pop()
+        if current in visited or current not in adjacency_list:
+            continue
+        successors = adjacency_list.get(current, set())
+        result.setdefault(current, set()).update(successors)
+        queue.extendleft(successors)
+        visited.add(current)
+    return result
+
+
+_NOT_FOUND = object()
+
+
+# copied from python3.8 functools
+class cached_property:  # pragma: nocover
+    """Cached property from python3.8 functools."""
+
+    def __init__(self, func: Callable) -> None:
+        """Init cached property."""
+        self.func = func
+        self.attrname = None
+        self.__doc__ = func.__doc__
+        self.lock = RLock()
+
+    def __set_name__(self, _: Any, name: Any) -> None:
+        """Set name."""
+        if self.attrname is None:
+            self.attrname = name
+        elif name != self.attrname:
+            raise TypeError(
+                "Cannot assign the same cached_property to two different names "
+                f"({self.attrname!r} and {name!r})."
+            )
+
+    def __get__(self, instance: Any, _: Optional[Any] = None) -> Any:
+        """Get instance."""
+        if instance is None:
+            return self
+        if self.attrname is None:
+            raise TypeError(
+                "Cannot use cached_property instance without calling __set_name__ on it."
+            )
+        try:
+            cache = instance.__dict__
+        except AttributeError:  # not all objects have __dict__ (e.g. class defines slots)
+            msg = (
+                f"No '__dict__' attribute on {type(instance).__name__!r} "
+                f"instance to cache {self.attrname!r} property."
+            )
+            raise TypeError(msg) from None
+        val = cache.get(self.attrname, _NOT_FOUND)
+        if val is _NOT_FOUND:
+            with self.lock:
+                # check if another thread filled cache while we awaited lock
+                val = cache.get(self.attrname, _NOT_FOUND)
+                if val is _NOT_FOUND:
+                    val = self.func(instance)
+                    try:
+                        cache[self.attrname] = val
+                    except TypeError:
+                        msg = (
+                            f"The '__dict__' attribute on {type(instance).__name__!r} instance "
+                            f"does not support item assignment for caching {self.attrname!r} property."
+                        )
+                        raise TypeError(msg) from None
+        return val
+
+
+def ensure_dir(dir_path: str) -> None:
+    """Check if dir_path is a directory or create it."""
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+    else:
+        enforce(os.path.isdir(dir_path), f"{dir_path} is not a directory!")
+
+
+def dict_to_path_value(
+    data: Mapping, path: Optional[List] = None
+) -> Iterable[Tuple[List[str], Any]]:
+    """Convert dict to sequence of terminal path build of  keys and value."""
+    path = path or []
+    for key, value in data.items():
+        if isinstance(value, Mapping) and value:
+            # terminal value
+            for p, v in dict_to_path_value(value, path + [key]):
+                yield p, v
+        else:
+            yield path + [key], value
+
+
+def parse_datetime_from_str(date_string: str) -> datetime.datetime:
+    """Parse datetime from string."""
+    result = datetime.datetime.strptime(date_string, ISO_8601_DATE_FORMAT)
+    result = result.replace(tzinfo=datetime.timezone.utc)
+    return result
+
+
+class CertRequest:
+    """Certificate request for proof of representation."""
+
+    def __init__(
+        self,
+        public_key: str,
+        identifier: SimpleIdOrStr,
+        ledger_id: SimpleIdOrStr,
+        not_before: str,
+        not_after: str,
+        save_path: str,
+    ) -> None:
+        """
+        Initialize the certificate request.
+
+        :param public_key: the public key, or the key id.
+        :param identifier: certificate identifier.
+        :param not_before: specify the lower bound for certificate validity.
+          If it is a string, it must follow the format: 'YYYY-MM-DD'. It
+          will be interpreted as timezone UTC.
+        :param not_before: specify the lower bound for certificate validity.
+          if it is a string, it must follow the format: 'YYYY-MM-DD' It
+          will be interpreted as timezone UTC-0.
+        :param save_path: the save_path where to save the certificate.
+        """
+        self._key_identifier: Optional[str] = None
+        self._public_key: Optional[str] = None
+        self._identifier = str(SimpleId(identifier))
+        self._ledger_id = str(SimpleId(ledger_id))
+        self._not_before_string = not_before
+        self._not_after_string = not_after
+        self._not_before = self._parse_datetime(not_before)
+        self._not_after = self._parse_datetime(not_after)
+        self._save_path = Path(save_path)
+
+        self._parse_public_key(public_key)
+        self._check_validation_boundaries()
+
+    @classmethod
+    def _parse_datetime(cls, obj: Union[str, datetime.datetime]) -> datetime.datetime:
+        """
+        Parse datetime string.
+
+        It is expected to follow ISO 8601.
+
+        :param obj: the input to parse.
+        :return: a datetime.datetime instance.
+        """
+        result = (
+            parse_datetime_from_str(obj)  # type: ignore
+            if isinstance(obj, str)
+            else obj
+        )
+        enforce(result.microsecond == 0, "Microsecond field not allowed.")
+        return result
+
+    def _check_validation_boundaries(self) -> None:
+        """
+        Check the validation boundaries are consistent.
+
+        Namely, that not_before < not_after.
+        """
+        enforce(
+            self._not_before < self._not_after,
+            f"Inconsistent certificate validity period: 'not_before' field '{self._not_before_string}' is not before than 'not_after' field '{self._not_after_string}'",
+            ValueError,
+        )
+
+    def _parse_public_key(self, public_key_str: str) -> None:
+        """
+        Parse public key from string.
+
+        It first tries to parse it as an identifier,
+        and in case of failure as a sequence of hexadecimals, starting with "0x".
+        """
+        with contextlib.suppress(ValueError):
+            # if this raises ValueError, we don't return
+            self._key_identifier = str(SimpleId(public_key_str))
+            return
+
+        with contextlib.suppress(ValueError):
+            # this raises ValueError if the input is not a valid hexadecimal string.
+            int(public_key_str, 16)
+            self._public_key = public_key_str
+            return
+
+        enforce(
+            False,
+            f"Public key field '{public_key_str}' is neither a valid identifier nor an address.",
+            exception_class=ValueError,
+        )
+
+    @property
+    def public_key(self) -> Optional[str]:
+        """Get the public key."""
+        return self._public_key
+
+    @property
+    def ledger_id(self) -> str:
+        """Get the ledger id."""
+        return self._ledger_id
+
+    @property
+    def key_identifier(self) -> Optional[str]:
+        """Get the key identifier."""
+        return self._key_identifier
+
+    @property
+    def identifier(self) -> str:
+        """Get the identifier."""
+        return self._identifier
+
+    @property
+    def not_before_string(self) -> str:
+        """Get the not_before field as string."""
+        return self._not_before_string
+
+    @property
+    def not_after_string(self) -> str:
+        """Get the not_after field as string."""
+        return self._not_after_string
+
+    @property
+    def not_before(self) -> datetime.datetime:
+        """Get the not_before field."""
+        return self._not_before
+
+    @property
+    def not_after(self) -> datetime.datetime:
+        """Get the not_after field."""
+        return self._not_after
+
+    @property
+    def save_path(self) -> Path:
+        """
+        Get the save path for the certificate.
+
+        Note: if the path is *not* absolute, then
+        the actual save path might depend on the context.
+        """
+        return self._save_path
+
+    def get_absolute_save_path(self, path_prefix: Optional[PathLike] = None) -> Path:
+        """
+        Get the absolute save path.
+
+        If save_path is an absolute path, then the prefix is ignored.
+        Otherwise, the path prefix is prepended.
+
+        :param path_prefix: the (absolute) path to prepend to the save path.
+        :return: the actual save path.
+        """
+        path_prefix = (
+            Path(path_prefix).absolute() if path_prefix is not None else Path.cwd()
+        )
+        return (
+            self.save_path
+            if self.save_path.is_absolute()
+            else path_prefix / self.save_path
+        )
+
+    @property
+    def public_key_or_identifier(self) -> str:
+        """Get the public key or identifier."""
+        if (self.public_key is None and self.key_identifier is None) or (
+            self.public_key is not None and self.key_identifier is not None
+        ):
+            raise ValueError(  # pragma: nocover
+                "Exactly one of key_identifier or public_key can be specified."
+            )
+        if self.public_key is not None:
+            result = self.public_key
+        elif self.key_identifier is not None:
+            result = self.key_identifier
+        return result
+
+    def get_message(self, public_key: str) -> bytes:  # pylint: disable=no-self-use
+        """Get the message to sign."""
+        message = public_key.encode("ascii")
+        # + self.identifier.encode("ascii")  # noqa: E800
+        # + self.not_before_string.encode("ascii")  # noqa: E800
+        # + self.not_after_string.encode("ascii")  # noqa: E800
+        return message
+
+    def get_signature(self, path_prefix: Optional[PathLike] = None) -> str:
+        """
+        Get signature from save_path.
+
+        :param path_prefix: the path prefix to be prependend to save_path. Defaults to cwd.
+        :return: the signature.
+        """
+        save_path = self.get_absolute_save_path(path_prefix)
+        if not Path(save_path).is_file():
+            raise Exception(  # pragma: no cover
+                f"cert_request 'save_path' field {save_path} is not a file. "
+                "Please ensure that 'issue-certificates' command is called beforehand."
+            )
+        signature = bytes.fromhex(Path(save_path).read_bytes().decode("ascii")).decode(
+            "ascii"
+        )
+        return signature
+
+    @property
+    def json(self) -> Dict:
+        """Compute the JSON representation."""
+        result = dict(
+            identifier=self.identifier,
+            ledger_id=self.ledger_id,
+            not_before=self._not_before_string,
+            not_after=self._not_after_string,
+            public_key=self.public_key_or_identifier,
+            save_path=str(self.save_path),
+        )
+        return result
+
+    @classmethod
+    def from_json(cls, obj: Dict) -> "CertRequest":
+        """Compute the JSON representation."""
+        return cls(**obj)
+
+    def __eq__(self, other: Any) -> bool:
+        """Check equality."""
+        return (
+            isinstance(other, CertRequest)
+            and self.identifier == other.identifier
+            and self.ledger_id == other.ledger_id
+            and self.public_key == other.public_key
+            and self.key_identifier == other.key_identifier
+            and self.not_after == other.not_after
+            and self.not_before == other.not_before
+            and self.save_path == other.save_path
+        )
+
+
+def compute_specifier_from_version(version: Version) -> str:
+    """
+    Compute the specifier set from a version, by varying only on the patch number.
+
+    I.e. from "{major}.{minor}.{patch}", return
+
+    ">={major}.{minor}.0, <{major}.{minor + 1}.0"
+
+    :param version: the version
+    :return: the specifier set
+    """
+    new_major = version.major
+    new_minor_low = version.minor
+    new_minor_high = new_minor_low + 1
+    lower_bound = Version(f"{new_major}.{new_minor_low}.0")
+    upper_bound = Version(f"{new_major}.{new_minor_high}.0")
+    specifier_set = f">={lower_bound}, <{upper_bound}"
+    return specifier_set
+
+
+def decorator_with_optional_params(decorator: Callable) -> Callable:
+    """
+    Make a decorator usable either with or without parameters.
+
+    In other words, if a decorator "mydecorator" is decorated with this decorator,
+    It can be used both as:
+
+    @mydecorator
+    def myfunction():
+        ...
+
+    or as:
+
+    @mydecorator(arg1, kwarg1="value")
+    def myfunction():
+        ...
+
+    """
+
+    @wraps(decorator)
+    def new_decorator(*args: Any, **kwargs: Any) -> Callable:
+        if len(args) == 1 and len(kwargs) == 0 and callable(args[0]):
+            return decorator(args[0])
+
+        def final_decorator(real_function: Callable) -> Callable:
+            return decorator(real_function, *args, **kwargs)
+
+        return final_decorator
+
+    return new_decorator
+
+
+def delete_directory_contents(directory: Path) -> None:
+    """Delete the content of a directory, without deleting it."""
+    enforce(directory.is_dir(), f"Path '{directory}' must be a directory.")
+    for filename in directory.iterdir():
+        if filename.is_file() or filename.is_symlink():
+            filename.unlink()
+        elif filename.is_dir():
+            shutil.rmtree(str(filename), ignore_errors=False)
+
+
+def prepend_if_not_absolute(path: PathLike, prefix: PathLike) -> PathLike:
+    """
+    Prepend a path with a prefix, but only if not absolute
+
+    :param path: the path to process.
+    :param prefix: the path prefix.
+    :return: the same path if absolute, else the prepended path.
+    """
+    return path if Path(path).is_absolute() else Path(prefix) / path

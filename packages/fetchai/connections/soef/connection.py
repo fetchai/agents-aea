@@ -16,11 +16,12 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""Extension to the Simple OEF and OEF Python SDK."""
 
+"""Extension to the Simple OEF and OEF Python SDK."""
 import asyncio
 import copy
 import logging
+import os
 import re
 import urllib
 from asyncio import CancelledError
@@ -28,17 +29,18 @@ from concurrent.futures._base import CancelledError as ConcurrentCancelledError
 from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import suppress
 from enum import Enum
-from typing import Callable, Dict, List, Optional, Set, Type, Union, cast
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Union, cast
 from urllib import parse
 from uuid import uuid4
 
-import requests
 from defusedxml import ElementTree as ET  # pylint: disable=wrong-import-order
 
 from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
 from aea.exceptions import enforce
+from aea.helpers import http_requests as requests
 from aea.helpers.search.models import (
     Constraint,
     ConstraintTypes,
@@ -46,10 +48,9 @@ from aea.helpers.search.models import (
     Location,
     Query,
 )
-from aea.mail.base import Envelope, EnvelopeContext
+from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
-from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 
 from packages.fetchai.protocols.oef_search.custom_types import (
     AgentsInfo,
@@ -66,7 +67,7 @@ from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.soef")
 
-PUBLIC_ID = PublicId.from_str("fetchai/soef:0.11.0")
+PUBLIC_ID = PublicId.from_str("fetchai/soef:0.17.0")
 
 NOT_SPECIFIED = object()
 
@@ -130,46 +131,7 @@ class SOEFException(Exception):
         return cls(msg)
 
 
-class OefSearchDialogue(BaseOefSearchDialogue):
-    """The dialogue class maintains state of a dialogue and manages it."""
-
-    __slots__ = ("_envelope_context",)
-
-    def __init__(
-        self,
-        dialogue_label: BaseDialogueLabel,
-        self_address: Address,
-        role: BaseDialogue.Role,
-        message_class: Type[OefSearchMessage] = OefSearchMessage,
-    ) -> None:
-        """
-        Initialize a dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param self_address: the address of the entity for whom this dialogue is maintained
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: None
-        """
-        BaseOefSearchDialogue.__init__(
-            self,
-            dialogue_label=dialogue_label,
-            self_address=self_address,
-            role=role,
-            message_class=message_class,
-        )
-        self._envelope_context = None  # type: Optional[EnvelopeContext]
-
-    @property
-    def envelope_context(self) -> Optional[EnvelopeContext]:
-        """Get envelope_context."""
-        return self._envelope_context
-
-    @envelope_context.setter
-    def envelope_context(self, envelope_context: Optional[EnvelopeContext]) -> None:
-        """Set envelope_context."""
-        enforce(self._envelope_context is None, "envelope_context already set!")
-        self._envelope_context = envelope_context
+OefSearchDialogue = BaseOefSearchDialogue
 
 
 class OefSearchDialogues(BaseOefSearchDialogues):
@@ -213,6 +175,7 @@ class SOEFChannel:
     ]
 
     DEFAULT_PERSONALITY_PIECES = ["architecture,agentframework"]
+    NONE_UNIQUE_PAGE_ADDRESS = ""
 
     PING_PERIOD = 30 * 60  # 30 minutes
     FIND_AROUND_ME_REQUEST_DELAY = 2  # seconds
@@ -223,10 +186,11 @@ class SOEFChannel:
         api_key: str,
         soef_addr: str,
         soef_port: int,
-        excluded_protocols: Set[PublicId],
-        restricted_to_protocols: Set[PublicId],
+        data_dir: str,
         chain_identifier: Optional[str] = None,
+        token_storage_path: Optional[str] = None,
         logger: logging.Logger = _default_logger,
+        connection_check_timeout: float = 15,
     ):
         """
         Initialize.
@@ -235,9 +199,8 @@ class SOEFChannel:
         :param api_key: the SOEF API key.
         :param soef_addr: the SOEF IP address.
         :param soef_port: the SOEF port.
-        :param excluded_protocols: the protocol ids excluded
-        :param restricted_to_protocols: the protocol ids restricted to
         :param chain_identifier: supported chain id
+        :param connection_check_timeout: timeout to check network connection on connect
         """
         if chain_identifier is not None and not any(
             regex.match(chain_identifier) for regex in self.SUPPORTED_CHAIN_IDENTIFIERS
@@ -250,13 +213,19 @@ class SOEFChannel:
         self.api_key = api_key
         self.soef_addr = soef_addr
         self.soef_port = soef_port
-        self.base_url = "http://{}:{}".format(soef_addr, soef_port)
-        self.excluded_protocols = excluded_protocols
-        self.restricted_to_protocols = restricted_to_protocols
+        self.base_url = "https://{}:{}".format(soef_addr, soef_port)
         self.oef_search_dialogues = OefSearchDialogues()
+        self.connection_check_timeout = connection_check_timeout
 
+        self._token_storage_path = token_storage_path
+        if self._token_storage_path is not None:
+            if not Path(self._token_storage_path).is_absolute():
+                self._token_storage_path = os.path.join(
+                    data_dir, self._token_storage_path
+                )
+            Path(self._token_storage_path).touch()
         self.declared_name = uuid4().hex
-        self.unique_page_address = None  # type: Optional[str]
+        self._unique_page_address = None  # type: Optional[str]
         self.agent_location = None  # type: Optional[Location]
         self.in_queue = None  # type: Optional[asyncio.Queue]
         self._executor_pool: Optional[ThreadPoolExecutor] = None
@@ -268,13 +237,49 @@ class SOEFChannel:
         self.logger = logger
         self._unregister_lock: Optional[asyncio.Lock] = None
 
+    @property
+    def unique_page_address(self) -> Optional[str]:
+        """Get unique page address."""
+        if self._unique_page_address is None:
+            # check if we have it in storage
+            self._unique_page_address = self._get_unique_page_address_from_storage()
+        return self._unique_page_address
+
+    @unique_page_address.setter
+    def unique_page_address(self, unique_page_address: Optional[str]) -> None:
+        """Set the unique page address."""
+        self._unique_page_address = unique_page_address
+        self._set_unique_page_address_to_storage(unique_page_address)
+
+    def _get_unique_page_address_from_storage(self) -> Optional[str]:
+        """Get the unique page address from storage."""
+        if self._token_storage_path is None:
+            return None
+        with open(self._token_storage_path, "r") as f:
+            result = f.read().strip()
+        unique_page_address = (
+            result if result != self.NONE_UNIQUE_PAGE_ADDRESS else None
+        )
+        return unique_page_address
+
+    def _set_unique_page_address_to_storage(
+        self, unique_page_address: Optional[str]
+    ) -> None:
+        """Set the unique page address to storage."""
+        if self._token_storage_path is None:
+            return
+        if unique_page_address is None:
+            unique_page_address = self.NONE_UNIQUE_PAGE_ADDRESS
+        with open(self._token_storage_path, "w") as f:
+            f.write(unique_page_address)
+
     async def _find_around_me_processor(self) -> None:
         """Process find me around requests in background task."""
         while self._find_around_me_queue is not None:
             try:
                 task = await self._find_around_me_queue.get()
                 oef_message, oef_search_dialogue, radius, params = task
-                await self._find_around_me_handle_requet(
+                await self._find_around_me_handle_request(
                     oef_message, oef_search_dialogue, radius, params
                 )
                 await asyncio.sleep(self.FIND_AROUND_ME_REQUEST_DELAY)
@@ -284,9 +289,15 @@ class SOEFChannel:
                 GeneratorExit,
             ):  # pylint: disable=try-except-raise
                 return
+            except SOEFException:  # pragma: nocover
+                await self._send_error_response(
+                    oef_message,
+                    oef_search_dialogue,
+                    oef_error_operation=OefSearchMessage.OefErrorOperation.OTHER,
+                )
             except Exception:  # pylint: disable=broad-except  # pragma: nocover
                 self.logger.exception(
-                    "Exception occoured in  _find_around_me_processor"
+                    "Exception occurred in  _find_around_me_processor"
                 )
                 await self._send_error_response(
                     oef_message,
@@ -370,28 +381,6 @@ class SOEFChannel:
             return {}
         return {"skfilter": filters}
 
-    def _check_protocol_valid(self, envelope: Envelope) -> None:
-        """
-        Check protocol is supported and raises ValueError if not.
-
-        :param envelope: envelope to check protocol of
-        :return: None
-        """
-        is_in_excluded = envelope.protocol_id in (self.excluded_protocols or [])
-        is_in_restricted = not self.restricted_to_protocols or envelope.protocol_id in (
-            self.restricted_to_protocols or []
-        )
-
-        if is_in_excluded or not is_in_restricted:
-            self.logger.error(
-                "This envelope cannot be sent with the soef connection: protocol_id={}".format(
-                    envelope.protocol_id
-                )
-            )
-            raise ValueError(
-                "Cannot send message, invalid protocol: {}".format(envelope.protocol_id)
-            )
-
     async def send(self, envelope: Envelope) -> None:
         """
         Send message handler.
@@ -399,13 +388,12 @@ class SOEFChannel:
         :param envelope: the envelope.
         :return: None
         """
-        self._check_protocol_valid(envelope)
         await self.process_envelope(envelope)
 
-    async def _request_text(self, *args, **kwargs) -> str:
+    async def _request_text(self, *args: Any, **kwargs: Any) -> str:
         """Perform and http request and return text of response."""
-        # pydocstyle fix. cause black reformat.
-        def _do_request():
+
+        def _do_request() -> str:
             return requests.request(*args, **kwargs).text
 
         return await self.loop.run_in_executor(self._executor_pool, _do_request)
@@ -429,7 +417,6 @@ class SOEFChannel:
             raise ValueError(
                 "Could not create dialogue for message={}".format(oef_message)
             )
-        oef_search_dialogue.envelope_context = envelope.context
 
         err_ops = OefSearchMessage.OefErrorOperation
         oef_error_operation = err_ops.OTHER
@@ -557,13 +544,7 @@ class SOEFChannel:
                 }
             ),
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-            context=oef_search_dialogue.envelope_context,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         await self.in_queue.put(envelope)
 
     async def _ping_command(self) -> None:
@@ -584,7 +565,7 @@ class SOEFChannel:
                     await self._ping_command()
                 except asyncio.CancelledError:  # pylint: disable=try-except-raise
                     raise
-                except Exception:  # pylint: disable=broad-except
+                except Exception:  # pylint: disable=broad-except  # pragma: nocover
                     self.logger.exception("Error on periodic ping command!")
                 await asyncio.sleep(period)
 
@@ -611,12 +592,19 @@ class SOEFChannel:
         await self._set_service_key(key, value)
 
     async def _generic_oef_command(
-        self, command, params=None, unique_page_address=None, check_success=True
+        self,
+        command: str,
+        params: Optional[Dict[str, Union[str, List[str]]]] = None,
+        unique_page_address: Optional[str] = None,
+        check_success: bool = True,
     ) -> str:
         """
         Set service key from service description.
 
-        :param service_description: Service description
+        :param command: the command
+        :param params: the parameters of the command
+        :param unique_page_address: the unique page address
+        :param check_success: whether or not to check for success
         :return: response text
         """
         params = params or {}
@@ -632,12 +620,14 @@ class SOEFChannel:
             enforce(root.tag == "response", "Not a response")
             if check_success:
                 el = root.find("./success")
-                enforce(el is not None, "No success element")
+                enforce(el is not None, "Bad response, no success value present")
                 enforce(str(el.text).strip() == "1", "Success is not 1")
             self.logger.debug(f"`{command}` SUCCESS!")
             return response_text
         except Exception as e:
-            raise SOEFException.error(f"`{command}` error: {response_text}: {[e]}")
+            raise SOEFException.error(
+                f"Command: `{command}` Params: `{params}` Response: `{response_text}` Exception: {[e]}"
+            ) from e
 
     async def _set_service_key(self, key: str, value: Union[str, int, float]) -> None:
         """
@@ -647,7 +637,9 @@ class SOEFChannel:
         :param value: value to set
         :return None:
         """
-        await self._generic_oef_command("set_service_key", {"key": key, "value": value})
+        await self._generic_oef_command(
+            "set_service_key", {"key": key, "value": str(value)}
+        )
 
     async def _remove_service_key_handler(
         self,
@@ -743,15 +735,15 @@ class SOEFChannel:
         """
         latitude = agent_location.latitude
         longitude = agent_location.longitude
-        params = {
+        params: Dict[str, Union[str, List[str]]] = {
             "longitude": str(longitude),
             "latitude": str(latitude),
         }
         await self._generic_oef_command("set_position", params)
         if disclosure_accuracy:
+            params = {"accuracy": disclosure_accuracy}
             await self._generic_oef_command(
-                "set_find_position_disclosure_accuracy",
-                {"accuracy": disclosure_accuracy},
+                "set_find_position_disclosure_accuracy", params,
             )
 
         self.agent_location = agent_location
@@ -777,14 +769,14 @@ class SOEFChannel:
 
         await self._set_personality_piece(piece, value)
 
-    async def _set_personality_piece(self, piece: str, value: str):
+    async def _set_personality_piece(self, piece: str, value: str) -> None:
         """
         Set the personality piece.
 
         :param piece: the piece to be set
         :param value: the value to be set
         """
-        params = {
+        params: Dict[str, Union[str, List[str]]] = {
             "piece": piece,
             "value": value,
         }
@@ -804,7 +796,7 @@ class SOEFChannel:
         """
         self.logger.debug("Applying to SOEF lobby with address={}".format(self.address))
         url = parse.urljoin(self.base_url, "register")
-        params = {
+        params: Dict[str, Union[str, List[str]]] = {
             "api_key": self.api_key,
             "chain_identifier": self.chain_identifier,
             "address": self.address,
@@ -838,6 +830,10 @@ class SOEFChannel:
 
         await self._set_personality_piece("architecture", "agentframework")
 
+        self.start_periodic_ping_task()
+
+    def start_periodic_ping_task(self) -> None:
+        """Start the periodic ping task."""
         if self._loop and not self._ping_periodic_task:
             self._ping_periodic_task = self._loop.create_task(
                 self._ping_periodic(self.PING_PERIOD)
@@ -864,13 +860,7 @@ class SOEFChannel:
             target_message=oef_search_message,
             oef_error_operation=oef_error_operation,
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-            context=oef_search_dialogue.envelope_context,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         await self.in_queue.put(envelope)
 
     async def unregister_service(  # pylint: disable=unused-argument
@@ -928,10 +918,10 @@ class SOEFChannel:
                 response = await asyncio.shield(task)
             finally:
                 response = await task
-                enforce(
-                    "<response><message>Goodbye!</message></response>" in response,
-                    "No Goodbye response.",
-                )
+                if (
+                    "<response><message>Goodbye!</message></response>" not in response
+                ):  # pragma: nocover
+                    self.logger.debug(f"No Goodbye response. Response={response}")
                 self.unique_page_address = None
 
     async def _stop_periodic_ping_task(self) -> None:
@@ -943,9 +933,21 @@ class SOEFChannel:
                 await self._ping_periodic_task
             self._ping_periodic_task = None
 
+    async def _check_server_reachable(self) -> None:
+        """Check network connection is ok."""
+        await asyncio.wait_for(
+            self._request_text(
+                "get", self.base_url, timeout=self.connection_check_timeout
+            ),
+            timeout=self.connection_check_timeout,
+        )
+
     async def connect(self) -> None:
         """Connect channel set queues and executor pool."""
         self._loop = asyncio.get_event_loop()
+
+        await self._check_server_reachable()
+
         self.in_queue = asyncio.Queue()
         self._find_around_me_queue = asyncio.Queue()
         self._unregister_lock = asyncio.Lock()
@@ -953,6 +955,8 @@ class SOEFChannel:
         self._find_around_me_processor_task = self._loop.create_task(
             self._find_around_me_processor()
         )
+        # make sure we first unregister, in case of improper previous termination
+        await self._unregister_agent()
 
     async def disconnect(self) -> None:
         """
@@ -1038,7 +1042,7 @@ class SOEFChannel:
             (oef_message, oef_search_dialogue, radius, params)
         )
 
-    async def _find_around_me_handle_requet(
+    async def _find_around_me_handle_request(
         self,
         oef_message: OefSearchMessage,
         oef_search_dialogue: OefSearchDialogue,
@@ -1096,13 +1100,7 @@ class SOEFChannel:
             agents=tuple(agents.keys()),
             agents_info=AgentsInfo(agents),
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            protocol_id=message.protocol_id,
-            message=message,
-            context=oef_search_dialogue.envelope_context,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         await self.in_queue.put(envelope)
 
 
@@ -1110,8 +1108,9 @@ class SOEFConnection(Connection):
     """The SOEFConnection connects the Simple OEF to the mailbox."""
 
     connection_id = PUBLIC_ID
+    DEFAULT_CONNECTION_CHECK_TIMEOUT: float = 15
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize."""
         if kwargs.get("configuration") is None:  # pragma: nocover
             kwargs["excluded_protocols"] = kwargs.get("excluded_protocols") or []
@@ -1121,9 +1120,18 @@ class SOEFConnection(Connection):
 
         super().__init__(**kwargs)
         api_key = cast(str, self.configuration.config.get("api_key"))
+        connection_check_timeout = cast(
+            float,
+            self.configuration.config.get(
+                "connection_check_timeout", self.DEFAULT_CONNECTION_CHECK_TIMEOUT
+            ),
+        )
         soef_addr = cast(str, self.configuration.config.get("soef_addr"))
         soef_port = cast(int, self.configuration.config.get("soef_port"))
         chain_identifier = cast(str, self.configuration.config.get("chain_identifier"))
+        token_storage_path = cast(
+            Optional[str], self.configuration.config.get("token_storage_path")
+        )
         if api_key is None or soef_addr is None or soef_port is None:  # pragma: nocover
             raise ValueError("api_key, soef_addr and soef_port must be set!")
 
@@ -1135,9 +1143,10 @@ class SOEFConnection(Connection):
             self.api_key,
             self.soef_addr,
             self.soef_port,
-            self.excluded_protocols,
-            self.restricted_to_protocols,
+            data_dir=self.data_dir,
             chain_identifier=chain_identifier,
+            token_storage_path=token_storage_path,
+            connection_check_timeout=connection_check_timeout,
         )
 
     async def connect(self) -> None:
@@ -1168,11 +1177,11 @@ class SOEFConnection(Connection):
             return
         if self.in_queue is None:
             raise ValueError("In queue not set.")  # pragma: nocover
-        self._state.set(ConnectionStates.disconnecting)
+        self.state = ConnectionStates.disconnecting
         await self.channel.disconnect()
-        self._state.set(ConnectionStates.disconnected)
+        self.state = ConnectionStates.disconnected
 
-    async def receive(self, *args, **kwargs) -> Optional["Envelope"]:
+    async def receive(self, *args: Any, **kwargs: Any) -> Optional["Envelope"]:
         """
         Receive an envelope. Blocking.
 

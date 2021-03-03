@@ -22,6 +22,7 @@ from typing import Type
 from unittest.mock import patch
 
 import pytest
+from aea_crypto_cosmos import CosmosCrypto
 
 from aea.common import Address
 from aea.helpers.transaction.base import (
@@ -43,8 +44,6 @@ from packages.fetchai.protocols.signing.dialogues import (
 )
 from packages.fetchai.protocols.signing.message import SigningMessage
 
-from tests.conftest import COSMOS
-
 
 class TestSigningMessage:
     """Test the signing message module."""
@@ -52,7 +51,7 @@ class TestSigningMessage:
     @classmethod
     def setup_class(cls):
         """Setup class for test case."""
-        cls.ledger_id = COSMOS
+        cls.ledger_id = CosmosCrypto.identifier
         cls.terms = Terms(
             ledger_id=cls.ledger_id,
             sender_address="address1",
@@ -68,7 +67,7 @@ class TestSigningMessage:
         tx_msg = SigningMessage(
             performative=SigningMessage.Performative.SIGN_TRANSACTION,
             terms=self.terms,
-            raw_transaction=RawTransaction(self.ledger_id, "transaction"),
+            raw_transaction=RawTransaction(self.ledger_id, {"tx": "transaction"}),
         )
         assert tx_msg._is_consistent()
         encoded_tx_msg = tx_msg.encode()
@@ -80,7 +79,7 @@ class TestSigningMessage:
         tx_msg = SigningMessage(
             performative=SigningMessage.Performative.SIGN_MESSAGE,
             terms=self.terms,
-            raw_message=RawMessage(self.ledger_id, "message"),
+            raw_message=RawMessage(self.ledger_id, b"message"),
         )
         assert tx_msg._is_consistent()
         encoded_tx_msg = tx_msg.encode()
@@ -93,7 +92,7 @@ class TestSigningMessage:
             performative=SigningMessage.Performative.SIGNED_TRANSACTION,
             message_id=2,
             target=1,
-            signed_transaction=SignedTransaction(self.ledger_id, "signature"),
+            signed_transaction=SignedTransaction(self.ledger_id, {"sig": "signature"}),
         )
         assert tx_msg._is_consistent()
         encoded_tx_msg = tx_msg.encode()
@@ -173,7 +172,7 @@ def test_dialogues():
             is_sender_payable_tx_fee=True,
             nonce="transaction nonce",
         ),
-        raw_transaction=RawTransaction("ledger_id", "transaction"),
+        raw_transaction=RawTransaction("ledger_id", {"tx": "transaction"}),
     )
     assert dialogue is not None
 

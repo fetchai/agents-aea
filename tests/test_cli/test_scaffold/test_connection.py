@@ -16,10 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the tests for the `aea scaffold connection` sub-command."""
-
-import filecmp
 import json
 import os
 import shutil
@@ -31,7 +28,6 @@ import jsonschema
 import yaml
 from jsonschema import Draft4Validator, ValidationError
 
-from aea import AEA_DIR
 from aea.cli import cli
 from aea.configurations.base import DEFAULT_CONNECTION_CONFIG_FILE
 from aea.configurations.loader import make_jsonschema_base_uri
@@ -98,8 +94,7 @@ class TestScaffoldConnection:
         p = Path(
             self.t, self.agent_name, "connections", self.resource_name, "connection.py"
         )
-        original = Path(AEA_DIR, "connections", "scaffold", "connection.py")
-        assert filecmp.cmp(p, original)
+        assert p.exists()
 
     def test_resource_folder_contains_configuration_file(self):
         """Test that the resource folder contains a good configuration file."""
@@ -112,6 +107,100 @@ class TestScaffoldConnection:
         )
         config_file = yaml.safe_load(open(p))
         self.validator.validate(instance=config_file)
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
+
+
+class TestScaffoldConnectionWithSymlinks:
+    """Test that the command 'aea scaffold connection' works correctly in correct preconditions with the `--with-symlinks` flag."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.runner = CliRunner()
+        cls.agent_name = "myagent"
+        cls.resource_name = "myresource"
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
+
+        cls.schema = json.load(open(CONNECTION_CONFIGURATION_SCHEMA))
+        cls.resolver = jsonschema.RefResolver(
+            make_jsonschema_base_uri(Path(CONFIGURATION_SCHEMA_DIR).absolute()),
+            cls.schema,
+        )
+        cls.validator = Draft4Validator(cls.schema, resolver=cls.resolver)
+
+        os.chdir(cls.t)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
+        assert result.exit_code == 0
+
+        result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
+        )
+        assert result.exit_code == 0
+        os.chdir(cls.agent_name)
+        # scaffold connection
+        cls.result = cls.runner.invoke(
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "scaffold",
+                "--with-symlinks",
+                "connection",
+                cls.resource_name,
+            ],
+            standalone_mode=False,
+        )
+
+    def test_exit_code_equal_to_0(self):
+        """Test that the exit code is equal to 0."""
+        assert self.result.exit_code == 0
+
+    def test_resource_folder_contains_module_connection(self):
+        """Test that the resource folder contains scaffold connection.py module."""
+        p = Path(
+            self.t, self.agent_name, "connections", self.resource_name, "connection.py"
+        )
+        assert p.exists()
+
+    def test_resource_folder_contains_configuration_file(self):
+        """Test that the resource folder contains a good configuration file."""
+        p = Path(
+            self.t,
+            self.agent_name,
+            "connections",
+            self.resource_name,
+            DEFAULT_CONNECTION_CONFIG_FILE,
+        )
+        config_file = yaml.safe_load(open(p))
+        self.validator.validate(instance=config_file)
+
+    def test_symlinks_exist(self):
+        """Test that the symlinks where created."""
+        packages = "packages"
+        assert os.path.islink(packages)
+        assert os.readlink(packages) == "vendor"
+        vendor_package = Path("vendor", AUTHOR, "connections", self.resource_name)
+        non_vendor_package = Path("connections", self.resource_name)
+        assert os.path.islink(vendor_package)
+        assert os.readlink(str(vendor_package)) == os.path.join(
+            "..", "..", "..", non_vendor_package
+        )
 
     @classmethod
     def teardown_class(cls):

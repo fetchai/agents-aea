@@ -63,12 +63,7 @@ async def test_connection_twice_return_none():
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        expected_envelope = Envelope(
-            to=address,
-            sender=address,
-            protocol_id=DefaultMessage.protocol_id,
-            message=message,
-        )
+        expected_envelope = Envelope(to=address, sender=address, message=message,)
         await connection.send(expected_envelope)
         actual_envelope = await connection.receive()
 
@@ -121,12 +116,7 @@ def test_communication():
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-        envelope = Envelope(
-            to="multiplexer2",
-            sender="multiplexer1",
-            protocol_id=DefaultMessage.protocol_id,
-            message=msg,
-        )
+        envelope = Envelope(to="multiplexer2", sender="multiplexer1", message=msg,)
         multiplexer1.put(envelope)
 
         msg = FipaMessage(
@@ -136,12 +126,7 @@ def test_communication():
             target=0,
             query=Query([Constraint("something", ConstraintType(">", 1))]),
         )
-        envelope = Envelope(
-            to="multiplexer2",
-            sender="multiplexer1",
-            protocol_id=FipaMessage.protocol_id,
-            message=msg,
-        )
+        envelope = Envelope(to="multiplexer2", sender="multiplexer1", message=msg,)
         multiplexer1.put(envelope)
 
         msg = FipaMessage(
@@ -152,12 +137,7 @@ def test_communication():
             proposal=Description({}),
         )
 
-        envelope = Envelope(
-            to="multiplexer2",
-            sender="multiplexer1",
-            protocol_id=FipaMessage.protocol_id,
-            message=msg,
-        )
+        envelope = Envelope(to="multiplexer2", sender="multiplexer1", message=msg,)
         multiplexer1.put(envelope)
 
         msg = FipaMessage(
@@ -166,12 +146,7 @@ def test_communication():
             message_id=1,
             target=0,
         )
-        envelope = Envelope(
-            to="multiplexer2",
-            sender="multiplexer1",
-            protocol_id=FipaMessage.protocol_id,
-            message=msg,
-        )
+        envelope = Envelope(to="multiplexer2", sender="multiplexer1", message=msg,)
         multiplexer1.put(envelope)
 
         msg = FipaMessage(
@@ -180,33 +155,39 @@ def test_communication():
             message_id=1,
             target=0,
         )
-        envelope = Envelope(
-            to="multiplexer2",
-            sender="multiplexer1",
-            protocol_id=FipaMessage.protocol_id,
-            message=msg,
-        )
+        envelope = Envelope(to="multiplexer2", sender="multiplexer1", message=msg,)
         multiplexer1.put(envelope)
 
         envelope = multiplexer2.get(block=True, timeout=1.0)
         msg = envelope.message
-        assert envelope.protocol_id == DefaultMessage.protocol_id
+        assert (
+            envelope.protocol_specification_id
+            == DefaultMessage.protocol_specification_id
+        )
         assert msg.content == b"hello"
         envelope = multiplexer2.get(block=True, timeout=1.0)
         msg = envelope.message
-        assert envelope.protocol_id == FipaMessage.protocol_id
+        assert (
+            envelope.protocol_specification_id == FipaMessage.protocol_specification_id
+        )
         assert msg.performative == FipaMessage.Performative.CFP
         envelope = multiplexer2.get(block=True, timeout=1.0)
         msg = envelope.message
-        assert envelope.protocol_id == FipaMessage.protocol_id
+        assert (
+            envelope.protocol_specification_id == FipaMessage.protocol_specification_id
+        )
         assert msg.performative == FipaMessage.Performative.PROPOSE
         envelope = multiplexer2.get(block=True, timeout=1.0)
         msg = envelope.message
-        assert envelope.protocol_id == FipaMessage.protocol_id
+        assert (
+            envelope.protocol_specification_id == FipaMessage.protocol_specification_id
+        )
         assert msg.performative == FipaMessage.Performative.ACCEPT
         envelope = multiplexer2.get(block=True, timeout=1.0)
         msg = envelope.message
-        assert envelope.protocol_id == FipaMessage.protocol_id
+        assert (
+            envelope.protocol_specification_id == FipaMessage.protocol_specification_id
+        )
         assert msg.performative == FipaMessage.Performative.DECLINE
         multiplexer1.disconnect()
         multiplexer2.disconnect()
@@ -223,3 +204,10 @@ async def test_connecting_to_node_with_same_key():
         assert ret is not None and isinstance(ret, asyncio.Queue)
         ret = await node.connect(address, my_queue)
         assert ret is None
+
+
+def test_stop_before_start():
+    """Test stop called before start."""
+    node = LocalNode()
+    with pytest.raises(ValueError, match="Connection not started!"):
+        node.stop()

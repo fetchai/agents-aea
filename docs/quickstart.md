@@ -1,26 +1,103 @@
-If you want to create Autonomous Economic Agents (AEAs) that can act independently of constant user input and autonomously execute actions to achieve their objective,
-you can use the Fetch.ai AEA framework.
+If you want to create Autonomous Economic Agents (AEAs) that can act independently of constant user input and autonomously execute actions to achieve their objective, you can use the AEA framework.
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/mwkAUh-_uxA" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
-This example will take you through the simplest AEA in order to make you familiar with the framework basics.
+This example will take you through a simple AEA to familiarise you with the framework's basics.
 
 ## System Requirements
 
 The AEA framework can be used on `Windows`, `Ubuntu/Debian` and `MacOS`.
 
 You need <a href="https://www.python.org/downloads/" target="_blank">Python 3.6</a> or higher as well as <a href="https://golang.org/dl/" target="_blank">Go 1.14.2</a> or higher installed.
+​
+### Option 1: Manual system preparation
+
+Install a compatible Python and Go version on your system (see <a href="https://realpython.com/installing-python/" target="_blank">this external resource</a> for a comprehensive guide).
+
+The following hints can help:
+
+- To install Go, follow the
+ official guide, depending on your platform <a href="https://golang.org/doc/install" target="_blank">here</a>
+
+- Python is already included by default on 
+many Linux distributions (e.g. Ubuntu), as well as MacOS.
+To check you have the right version, open a terminal and run: 
+``` bash
+python3 --version
+```
+
+- To install Python on Windows machines, 
+you can download a specific release <a href="https://www.python.org/downloads/" target="_blank">here</a>.
+
+- Ubuntu/Debian systems only: install Python headers,
+  depending on the Python version you have installed on your machine.
+  E.g. for Python 3.7: 
+``` bash
+sudo apt-get install python3.7-dev
+```
+
+- Windows users: install <a href="https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019" target="_blank">tools for Visual Studio</a>.
+
+### Option 2: Automated install script
+
+We provide a script to automatically install all framework dependencies and the framework itself. This means that if you follow this option, you can skip the `installation` step below.
+
+On MacOS or Ubuntu run:
+
+``` bash
+curl https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.sh --output install.sh
+chmod +x install.sh
+./install.sh
+```
+
+On Windows:
+
+Download `https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.ps1`, then run `install.ps1` with the PowerShell terminal.
+
+
+### Option 3: Using Docker
+​
+We also provide a Docker image with all the needed dependencies.
+
+<details><summary>Docker approach</summary>
+
+To use the image you will first have to pull it and than run it with your current local directory mounted as a docker volume. This allows you to keep your agents local while working on them from within the docker container.
+
+To pull:
+
+``` bash
+docker pull fetchai/aea-user:latest
+```
+
+To run the image on Linux and MacOs:
+
+``` bash
+docker run -it -v $(pwd):/agents --workdir=/agents fetchai/aea-user:latest 
+```
+
+And on Windows:
+
+``` bash
+docker run -it -v %cd%:/agents --workdir=/agents fetchai/aea-user:latest 
+```
+
+Once successfully logged into the docker container, 
+you can follow the rest of the guide the same way as if not using docker.
+​
+</details>
 
 ## Preliminaries
 
-Create and enter into a new working directory.
+We have created a  <a href="https://github.com/fetchai/agents-template" target="_blank">template repo for AEA development</a> here which you can optionally fork and use immediately.
+
+Alternatively, create and enter into a new working directory:
 
 ``` bash
 mkdir my_aea_projects/
 cd my_aea_projects/
 ```
 
-We highly recommend using a virtual environment to ensure consistency across dependencies.
+Unless you are using the docker image, we highly recommend using a virtual environment to ensure consistency across dependencies.
 
 Check that you have <a href="https://github.com/pypa/pipenv" target="_blank">`pipenv`</a>.
 
@@ -36,6 +113,8 @@ Once installed, create a new environment and open it (here we use Python 3.7 but
 touch Pipfile && pipenv --python 3.7 && pipenv shell
 ```
 
+For more guidance on setting up a development environment check out <a href="../development-setup">this guide</a>.
+
 ## Installation
 
 The following installs the entire AEA package which also includes a <a href="../cli-commands">command-line interface (CLI)</a>.
@@ -49,36 +128,7 @@ If you are using `zsh` rather than `bash` type
 pip install 'aea[all]'
 ```
 
-### Known issues
-
-If the installation steps fail, it might be a dependency issue.
-
-The following hints can help:
-
-- Ubuntu/Debian systems only: install Python headers,
-  depending on the Python version you have installed on your machine.
-  E.g. for Python 3.7: 
-``` bash
-sudo apt-get install python3.7-dev
-```
-
-- Windows users: install <a href="https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019" target="_blank">tools for Visual Studio</a>.
-
-- To install Go, follow the
- official guide, depending on your platform: 
- [https://golang.org/doc/install](https://golang.org/doc/install)
-
-- Python is already included by default on 
-many Linux distributions (e.g. Ubuntu), as well as MacOS.
-To check you have the right version, open a terminal and run: 
-```
-python3 --version
-```
-
-- To install Python on Windows machines, 
-you can download a specific release 
-[here](https://www.python.org/downloads/).
-
+If the installation steps fail, it might be a dependency issue. Make sure you have followed all the relevant system specific steps above under `System Requirements`.
 
 ## Setup author name
 
@@ -91,7 +141,7 @@ aea init
 
 This is your unique author name in the Fetch.ai ecosystem.
 
-You should see a similar output (with your input replacing the sample input):
+You should see a similar output (with your input instead of the sample username and email):
 ``` bash
 Do you have a Registry account? [y/N]: n
 Create a new account on the Registry now:
@@ -106,7 +156,7 @@ Confirm password:
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.7.0
+v0.10.1
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
@@ -118,12 +168,12 @@ AEA configurations successfully initialized: {'author': 'fetchai'}
 
 ## Echo skill demo
 
-The echo skill demo is a simple demo that introduces you to the main business logic components of an AEA. The <a href="https://aea-registry.fetch.ai/details/skill/fetchai/echo/latest" target="_blank">echo skill</a> simply echoes received messages back to the sender.
+This is a simple demo that introduces you to the main components of an AEA. 
 
-The fastest way to create your first AEA is to fetch it!
+The fastest way to have your first AEA is to fetch one that already exists!
 
 ``` bash
-aea fetch fetchai/my_first_aea:0.14.0
+aea fetch fetchai/my_first_aea:0.20.0
 cd my_first_aea
 ```
 
@@ -139,24 +189,37 @@ aea create my_first_aea
 cd my_first_aea
 ```
 <br>
+<b>Add the stub connection</b>
+<br>
+Second, add the stub connection to the project.
+``` bash
+aea add connection fetchai/stub:0.17.0
+```
+<br>
 <b>Add the echo skill</b>
 <br>
-Second, add the echo skill to the project.
+Third, add the echo skill to the project.
 ``` bash
-aea add skill fetchai/echo:0.10.0
+aea add skill fetchai/echo:0.14.0
 ```
-This copies the `fetchai/echo:0.10.0` skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill `fetchai/echo:0.10.0` consists of the name of the author of the skill, followed by the skill name and its version.
+This copies the `fetchai/echo:0.14.0` skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill `fetchai/echo:0.14.0` consists of the name of the author of the skill, followed by the skill name and its version.
 </details>
 
-## Communication via envelopes and messages
+### Echo skill
 
-AEAs use envelopes containing messages for communication. To learn more check out the next section in the getting started series.
+Just like humans, AEAs can have _skills_ to achieve their tasks. As an agent developer, you can create skills to add to your own AEAs. You can also choose to publish your skills so others add them to their AEAs. More details on skills can be found on <a href="../skill/"> this page </a>.
 
-## Usage of the stub connection
+The above agent has an <a href="https://aea-registry.fetch.ai/details/skill/fetchai/echo/latest" target="_blank">echo skill</a>, fetched from <a href="https://aea-registry.fetch.ai" target="_blank">the registry</a>, which simply echoes any messages it receives back to its sender.
 
-In this demo we use a stub connection to send envelopes to and receive envelopes from the AEA.
+### Communication via envelopes and messages
 
-The stub connection is already added to the AEA by default.
+AEAs use envelopes containing messages for communication. To learn more, check out the <a href="../core-components-1/">next section</a>.
+
+### Stub connection
+
+Besides skills, AEAs may have one or more _connections_ enabling them to interface with entities in the outside world. For example, an HTTP client connection allows an AEA to communicate with HTTP servers. To read more about connections see <a href="../connection/">this page</a>.
+
+In this demo we use a stub connection (`fetchai/stub0.15.0`) to send envelopes to and receive envelopes from the AEA.
 
 A stub connection provides an I/O reader and writer. It uses two files for communication: one for incoming envelopes and the other for outgoing envelopes.
 
@@ -171,24 +234,18 @@ TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE,
 For example:
 
 ``` bash
-recipient_aea,sender_aea,fetchai/default:0.8.0,\x08\x01\x12\x011*\x07\n\x05hello,
+recipient_aea,sender_aea,fetchai/default:0.1.0,\x08\x01\x12\x011*\x07\n\x05hello,
 ```
 
-## Run the AEA
+### Run the AEA
 
-Run the AEA with the default `fetchai/stub:0.12.0` connection.
+Run the AEA.
 
 ``` bash
 aea run
 ```
 
-or
-
-``` bash
-aea run --connections fetchai/stub:0.12.0
-```
-
-You will see the echo skill running in the terminal window.
+You will see the echo skill running in the terminal window (an output similar to the one below).
 
 ``` bash
     _     _____     _
@@ -197,7 +254,7 @@ You will see the echo skill running in the terminal window.
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.7.0
+v0.10.1
 
 Starting AEA 'my_first_aea' in 'async' mode ...
 info: Echo Handler: setup method called.
@@ -209,18 +266,20 @@ info: Echo Behaviour: act method called.
 ...
 ```
 
-The framework first calls the `setup` method on the `Handler`, and `Behaviour` code in that order; after which it repeatedly calls the Behaviour method `act`. This is the main agent loop in action.
+The framework first calls the `setup` methods in the skill's `Handler` and `Behaviour` classes in that order; after which it repeatedly calls the `act` method of `Behaviour` class. This is the main agent loop in action.
 
-### Add a message to the input file
+#### Add a message to the input file
 
-From a different terminal and same directory, we send the AEA a message wrapped in an envelop using the CLI interact command:
+From a different terminal and same directory, you can send the AEA a message wrapped in an envelop using the CLI's `interact` command:
 
 ``` bash
 cd my_first_aea
 aea interact
 ```
 
-You can now send the AEA messages via an interactive tool by typing `hello` into the prompt and hitting enter twice (once to send, once more to check for a response). You will see the `Echo Handler` dealing with the envelope and contained message (your dialogue reference will be different):
+You can now send messages to this AEA via an interactive tool by typing anything into the prompt and hitting enter twice (once to send the message and once more to check for a response). 
+
+Let us send `hello` to this AEA (type `hello` and press enter twice). In the original terminal, you will see the `Echo Handler` dealing with this envelope and its contained message. You should see an output similar to the one below but with a different `dialogue_reference`.
 
 ``` bash
 info: Echo Behaviour: act method called.
@@ -231,17 +290,17 @@ info: Echo Behaviour: act method called.
 
 <details><summary>Manual approach</summary>
 
-Optionally, from a different terminal and same directory (i.e. the `my_first_aea` project), we send the AEA a message wrapped in an envelope via the input file.
+Optionally, from a different terminal and same directory (i.e. the `my_first_aea` project), you can send the AEA a message wrapped in an envelope via the input file.
 
 ``` bash
-echo 'my_first_aea,sender_aea,fetchai/default:0.8.0,\x08\x01\x12\x011*\x07\n\x05hello,' >> input_file
+echo 'my_first_aea,sender_aea,fetchai/default:0.1.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,' >> input_file
 ```
 
 You will see the `Echo Handler` dealing with the envelope and responding with the same message to the `output_file`, and also decoding the Base64 encrypted message in this case.
 
 ``` bash
 info: Echo Behaviour: act method called.
-info: Echo Handler: message=Message(dialogue_reference=('1', '') message_id=1 target=0 performative=bytes content=b'hello'), sender=sender_aea
+Echo Handler: message=Message(sender=sender_aea,to=my_first_aea,content=b'hello',dialogue_reference=('1', ''),message_id=1,performative=bytes,target=0), sender=sender_aea
 info: Echo Behaviour: act method called.
 info: Echo Behaviour: act method called.
 ```
@@ -250,11 +309,11 @@ Note, due to the dialogue reference having to be incremented, you can only send 
 
 </details>
 
-## Stop the AEA
+### Stop the AEA
 
-Stop the AEA by pressing `CTRL C`
+You can stop an AEA by pressing `CTRL C`.
 
-You should see the AEA being interrupted and then calling the `teardown()` methods:
+Once you do, you should see the AEA being interrupted and then calling the `teardown()` methods:
 
 ``` bash
 info: Echo Behaviour: act method called.
@@ -265,7 +324,7 @@ info: Echo Handler: teardown method called.
 info: Echo Behaviour: teardown method called.
 ```
 
-## Write a test for the AEA
+### Write a test for the AEA
 
 We can write an end-to-end test for the AEA utilising helper classes provided by the framework.
 
@@ -273,7 +332,8 @@ We can write an end-to-end test for the AEA utilising helper classes provided by
 
 The following test class replicates the preceding demo and tests it's correct behaviour. The `AEATestCase` classes are a tool for AEA developers to write useful end-to-end tests of their AEAs.
 
-First, get the packages directory from the AEA repository:
+First, get the packages directory from the AEA repository (execute from the working directory which contains the `my_first_aea` folder):
+
 ``` bash
 svn export https://github.com/fetchai/agents-aea.git/trunk/packages
 ```
@@ -284,8 +344,12 @@ Then write the test:
 import signal
 import time
 
+from aea.common import Address
 from aea.mail.base import Envelope
-from packages.fetchai.protocols.default.dialogues import DefaultDialogues
+from aea.protocols.base import Message
+from aea.protocols.dialogue.base import Dialogue
+
+from packages.fetchai.protocols.default.dialogues import DefaultDialogue, DefaultDialogues
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.default.serialization import DefaultSerializer
 from aea.test_tools.test_cases import AEATestCase
@@ -302,7 +366,11 @@ class TestEchoSkill(AEATestCase):
 
         # add sending and receiving envelope from input/output files
         sender_aea = "sender_aea"
-        dialogues = DefaultDialogues(sender_aea)
+        def role_from_first_message(
+            message: Message, receiver_address: Address
+        ) -> Dialogue.Role:
+            return DefaultDialogue.Role.AGENT
+        dialogues = DefaultDialogues(sender_aea, role_from_first_message)
         message_content = b"hello"
         message = DefaultMessage(
             performative=DefaultMessage.Performative.BYTES,
@@ -348,13 +416,13 @@ Place the above code into a file `test.py` in your AEA project directory (the sa
 
 To run, execute the following:
 
-``` python
+``` bash
 pytest test.py
 ```
 
 </details>
 
-## Delete the AEA
+### Delete the AEA
 
 Delete the AEA from the parent directory (`cd ..` to go to the parent directory).
 
@@ -364,9 +432,9 @@ aea delete my_first_aea
 
 ## Next steps
 
-To gain an understanding of the core components of the framework, please continue to the next step of 'Getting Started':
+To gain an understanding of the core components of the framework, please continue to the next page:
 
-- <a href="../core-components-1/">Core components</a>
+- <a href="../core-components-1/">Core components - Part 1</a>
 
 For more demos, use cases or step by step guides, please check the following:
 

@@ -50,7 +50,7 @@ This diagram shows the communication between the various entities during the reg
 
 ### Transaction communication
 
-This diagram shows the communication between two AEAs and the controller. In this case, we have an AEA in the role of the seller, referred to as Seller_Agent. We also have an AEA in the role of the biyer, referred to as Buyer_Agent. During a given TAC, an AEA can be in both roles simultaneously in different bilateral interactions.
+This diagram shows the communication between two AEAs and the controller. In this case, we have an AEA in the role of the seller, referred to as `Seller_Agent`. We also have an AEA in the role of the buyer, referred to as `Buyer_Agent`. During a given TAC, an AEA can be in both roles simultaneously in different bilateral interactions.
 
 <div class="mermaid">
     sequenceDiagram
@@ -100,9 +100,10 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 In the root directory, fetch the controller AEA:
 ``` bash
-aea fetch fetchai/tac_controller:0.12.0
+aea fetch fetchai/tac_controller:0.20.0
 cd tac_controller
 aea install
+aea build
 ```
 
 <details><summary>Alternatively, create from scratch.</summary>
@@ -112,19 +113,22 @@ The following steps create the controller from scratch:
 ``` bash
 aea create tac_controller
 cd tac_controller
-aea add connection fetchai/p2p_libp2p:0.12.0
-aea add connection fetchai/soef:0.11.0
-aea add connection fetchai/ledger:0.8.0
-aea add skill fetchai/tac_control:0.10.0
-aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
+aea add connection fetchai/p2p_libp2p:0.16.0
+aea add connection fetchai/soef:0.17.0
+aea add connection fetchai/ledger:0.13.0
+aea add skill fetchai/tac_control:0.16.0
+aea config set --type dict agent.dependencies \
+'{
+  "aea-crypto-fetchai": {"version": "<0.2.0,>=0.1.0"}
+}'
+aea config set agent.default_connection fetchai/p2p_libp2p:0.16.0
 aea config set agent.default_ledger fetchai
-```
-
-In `tac_controller/aea-config.yaml` add 
-``` yaml
-default_routing:
-  fetchai/oef_search:0.9.0: fetchai/soef:0.11.0
+aea config set --type dict agent.default_routing \
+'{
+  "fetchai/oef_search:0.13.0": "fetchai/soef:0.17.0"
+}'
+aea install
+aea build
 ```
 
 </p>
@@ -134,10 +138,14 @@ default_routing:
 
 In a separate terminal, in the root directory, fetch at least two participants:
 ``` bash
-aea fetch fetchai/tac_participant:0.13.0 --alias tac_participant_one
-aea fetch fetchai/tac_participant:0.13.0 --alias tac_participant_two
-cd tac_participant_two
+aea fetch fetchai/tac_participant:0.22.0 --alias tac_participant_one
+cd tac_participant_one
 aea install
+aea build
+cd ..
+aea fetch fetchai/tac_participant:0.22.0 --alias tac_participant_two
+cd tac_participant_two
+aea build
 ```
 
 <details><summary>Alternatively, create from scratch.</summary>
@@ -152,41 +160,57 @@ aea create tac_participant_two
 Build participant one:
 ``` bash
 cd tac_participant_one
-aea add connection fetchai/p2p_libp2p:0.12.0
-aea add connection fetchai/soef:0.11.0
-aea add connection fetchai/ledger:0.8.0
-aea add skill fetchai/tac_participation:0.11.0
-aea add skill fetchai/tac_negotiation:0.12.0
-aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
+aea add connection fetchai/p2p_libp2p:0.16.0
+aea add connection fetchai/soef:0.17.0
+aea add connection fetchai/ledger:0.13.0
+aea add skill fetchai/tac_participation:0.17.0
+aea add skill fetchai/tac_negotiation:0.20.0
+aea config set --type dict agent.dependencies \
+'{
+  "aea-crypto-fetchai": {"version": "<0.2.0,>=0.1.0"}
+}'
+aea config set agent.default_connection fetchai/p2p_libp2p:0.16.0
 aea config set agent.default_ledger fetchai
-```
-
-In `tac_participant_one/aea-config.yaml` add 
-``` yaml
-default_routing:
-  fetchai/ledger_api:0.6.0: fetchai/ledger:0.8.0
-  fetchai/oef_search:0.9.0: fetchai/soef:0.11.0
+aea config set --type dict agent.default_routing \
+'{
+  "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
+  "fetchai/oef_search:0.13.0": "fetchai/soef:0.17.0"
+}'
+aea config set --type dict agent.decision_maker_handler \
+'{
+  "dotted_path": "aea.decision_maker.gop:DecisionMakerHandler",
+  "file_path": null
+}'
+aea install
+aea build
 ```
 
 Then, build participant two:
 ``` bash
 cd tac_participant_two
-aea add connection fetchai/p2p_libp2p:0.12.0
-aea add connection fetchai/soef:0.11.0
-aea add connection fetchai/ledger:0.8.0
-aea add skill fetchai/tac_participation:0.11.0
-aea add skill fetchai/tac_negotiation:0.12.0
-aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
+aea add connection fetchai/p2p_libp2p:0.16.0
+aea add connection fetchai/soef:0.17.0
+aea add connection fetchai/ledger:0.13.0
+aea add skill fetchai/tac_participation:0.17.0
+aea add skill fetchai/tac_negotiation:0.20.0
+aea config set --type dict agent.dependencies \
+'{
+  "aea-crypto-fetchai": {"version": "<0.2.0,>=0.1.0"}
+}'
+aea config set agent.default_connection fetchai/p2p_libp2p:0.16.0
 aea config set agent.default_ledger fetchai
-```
-
-In `tac_participant_two/aea-config.yaml` add 
-``` yaml
-default_routing:
-  fetchai/ledger_api:0.6.0: fetchai/ledger:0.8.0
-  fetchai/oef_search:0.9.0: fetchai/soef:0.11.0
+aea config set --type dict agent.default_routing \
+'{
+  "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
+  "fetchai/oef_search:0.13.0": "fetchai/soef:0.17.0"
+}'
+aea config set --type dict agent.decision_maker_handler \
+'{
+  "dotted_path": "aea.decision_maker.gop:DecisionMakerHandler",
+  "file_path": null
+}'
+aea install
+aea build
 ```
 
 </p>
@@ -198,7 +222,17 @@ Create the private key for the AEA for Fetch.ai `AgentLand`:
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
-aea add-key fetchai fetchai_private_key.txt --connection
+```
+
+Next, create a private key used to secure the AEA's communications:
+``` bash
+aea generate-key fetchai fetchai_connection_private_key.txt
+aea add-key fetchai fetchai_connection_private_key.txt --connection
+```
+
+Finally, certify the key for use by the connections that request that:
+``` bash
+aea issue-certificates
 ```
 
 ### Update the game parameters in the controller
@@ -210,7 +244,12 @@ aea config get vendor.fetchai.skills.tac_control.models.parameters.args.registra
 aea config set vendor.fetchai.skills.tac_control.models.parameters.args.registration_start_time '01 01 2020  00:01'
 ```
 
-### Update the connection params
+To set the registration time, you may find handy the following command:
+``` bash
+aea config set vendor.fetchai.skills.tac_control.models.parameters.args.registration_start_time "$(date -d "2 minutes" +'%d %m %Y %H:%M')"
+```
+
+### Update the connection parameters
 
 Briefly run the controller AEA:
 
@@ -218,15 +257,13 @@ Briefly run the controller AEA:
 aea run
 ```
 
-Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address.
+Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.16.0 -u public_uri` to retrieve the address.)
 
-Then, update the configuration of the weather client AEA's p2p connection (in `aea-config.yaml`) add the following:
+<!-- Then, update the configuration of the participants AEA's p2p connection by appending the following YAML text at the end of the `aea-config.yaml` file:
 
 ``` yaml
 ---
-name: p2p_libp2p
-author: fetchai
-version: 0.12.0
+public_id: fetchai/p2p_libp2p:0.16.0
 type: connection
 config:
   delegate_uri: 127.0.0.1:11001
@@ -238,9 +275,7 @@ config:
 
 ``` yaml
 ---
-name: p2p_libp2p
-author: fetchai
-version: 0.12.0
+public_id: fetchai/p2p_libp2p:0.16.0
 type: connection
 config:
   delegate_uri: 127.0.0.1:11002
@@ -250,17 +285,50 @@ config:
   public_uri: 127.0.0.1:9002
 ```
 
-where `SOME_ADDRESS` is replaced accordingly.
+where `SOME_ADDRESS` is replaced with the appropriate value.
+-->
+
+Then, in the participant one, run this command (replace `SOME_ADDRESS` with the correct value as described above):
+``` bash
+aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
+'{
+  "delegate_uri": "127.0.0.1:11001",
+  "entry_peers": ["SOME_ADDRESS"],
+  "local_uri": "127.0.0.1:9001",
+  "log_file": "libp2p_node.log",
+  "public_uri": "127.0.0.1:9001"
+}'
+```
+
+Do the same in participant two (beware of the different port numbers):
+``` bash
+aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
+'{
+  "delegate_uri": "127.0.0.1:11002",
+  "entry_peers": ["SOME_ADDRESS"],
+  "local_uri": "127.0.0.1:9002",
+  "log_file": "libp2p_node.log",
+  "public_uri": "127.0.0.1:9002"
+}'
+```
+
+This allows the TAC participants to connect to the same local agent communication network as the TAC controller.
+
 
 ### Run the AEAs
+
+First, launch the `tac_controller`:
+``` bash
+aea run
+```
 
 The CLI tool supports the launch of several agents
 at once.
 
 For example, assuming you followed the tutorial, you
-can launch all the TAC agents as follows from the root directory:
+can launch both the TAC agents as follows from the root directory:
 ``` bash
-aea launch tac_controller tac_participant_one tac_participant_two
+aea launch tac_participant_one tac_participant_two
 ```
 
 You may want to try `--multithreaded`

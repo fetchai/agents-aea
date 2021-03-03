@@ -17,13 +17,19 @@
 #
 # ------------------------------------------------------------------------------
 """Tools used for CLI registry testing."""
-
 from typing import List
 from unittest.mock import Mock
 
+from aea_crypto_cosmos import CosmosCrypto
+from aea_crypto_ethereum import EthereumCrypto
 from click import ClickException
+from packaging.specifiers import SpecifierSet
 
-from tests.conftest import AUTHOR, COSMOS, ETHEREUM
+import aea
+from aea.configurations.base import PackageVersion
+from aea.configurations.constants import DEFAULT_LEDGER
+
+from tests.conftest import AUTHOR
 from tests.test_cli.constants import DEFAULT_TESTING_VERSION
 
 
@@ -37,6 +43,9 @@ class AgentConfigMock:
 
     def __init__(self, *args, **kwargs):
         """Init the AgentConfigMock object."""
+        self.aea_version_specifiers: SpecifierSet = kwargs.get(
+            "aea_version_specifier", SpecifierSet(f"=={aea.__version__}")
+        )
         self.connections: List[str] = kwargs.get("connections", [])
         self.contracts: List[str] = kwargs.get("contracts", [])
         self.description: str = kwargs.get("description", "")
@@ -48,17 +57,29 @@ class AgentConfigMock:
         private_key_paths = kwargs.get("private_key_paths", [])
         self.private_key_paths = Mock()
         self.private_key_paths.read_all = Mock(return_value=private_key_paths)
+        self.private_key_paths.read = Mock(
+            return_value=private_key_paths[0][1] if private_key_paths else None
+        )
         connection_private_key_paths = kwargs.get("connection_private_key_paths", [])
         self.connection_private_key_paths = Mock()
         self.connection_private_key_paths.read_all = Mock(
             return_value=connection_private_key_paths
         )
-        self.get = lambda x: getattr(self, x, None)
+        self.get = lambda x, default=None: getattr(self, x, default)
         self.component_configurations = {}
         self.package_dependencies = set()
+        self.config: dict = {}
+        self.default_ledger = DEFAULT_LEDGER
 
     registry_path = "registry"
     name = "name"
+
+
+class FaultyAgentConfigMock:
+    """A Class to mock Agent config with missing attributes."""
+
+    def __init__(self, *args, **kwargs):
+        """Init faulty agent config."""
 
 
 class ContextMock:
@@ -70,12 +91,13 @@ class ContextMock:
         """Init the ContextMock object."""
         self.invoke = Mock()
         self.agent_config = AgentConfigMock(*args, **kwargs)
-        self.config = self.agent_config
+        self.config: dict = {}
         self.connection_loader = ConfigLoaderMock()
         self.agent_loader = ConfigLoaderMock()
         self.clean_paths: List = []
         self.obj = self
         self.registry_path = ""
+        self.cwd = "cwd"
 
     def set_config(self, key, value):
         """Set config."""
@@ -99,6 +121,11 @@ class PublicIdMock:
         author, name, version = public_id.replace(":", "/").split("/")
         return cls(author, name, version)
 
+    @property
+    def package_version(self) -> PackageVersion:
+        """Get package version."""
+        return PackageVersion(self.version)
+
 
 class AEAConfMock:
     """A class to mock AgentConfig."""
@@ -109,8 +136,8 @@ class AEAConfMock:
         self.version = DEFAULT_TESTING_VERSION
         self.ledger_apis = Mock()
         ledger_apis = (
-            (COSMOS, "value"),
-            (ETHEREUM, "value"),
+            (CosmosCrypto.identifier, "value"),
+            (EthereumCrypto.identifier, "value"),
         )
         self.ledger_apis.read_all = Mock(return_value=ledger_apis)
         ledger_api_config = {"host": "host", "port": "port", "address": "address"}

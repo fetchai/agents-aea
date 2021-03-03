@@ -21,7 +21,7 @@ import logging
 import os
 import shutil
 import tempfile
-from unittest import TestCase, mock
+from unittest import TestCase
 
 from aea.configurations.base import ProtocolSpecificationParseError
 from aea.protocols.generator.common import load_protocol_specification
@@ -493,7 +493,6 @@ class TestExtractSpecification(TestCase):
         assert spec.terminal_performatives == [
             "PERFORMATIVE_MT",
             "PERFORMATIVE_O",
-            "PERFORMATIVE_EMPTY_CONTENTS",
         ]
         assert spec.roles == ["role_1", "role_2"]
         assert spec.end_states == ["end_state_1", "end_state_2", "end_state_3"]
@@ -506,21 +505,6 @@ class TestExtractSpecification(TestCase):
             "Union": True,
             "Optional": True,
         }
-
-    @mock.patch(
-        "aea.protocols.generator.extract_specification.validate",
-        return_value=(False, "Some error!"),
-    )
-    def test_extract_negative_invalid_specification(self, mocked_validate):
-        """Negative test the 'extract' method: invalid protocol specification"""
-        protocol_specification = load_protocol_specification(
-            PATH_TO_T_PROTOCOL_SPECIFICATION
-        )
-
-        with self.assertRaises(ProtocolSpecificationParseError) as cm:
-            extract(protocol_specification)
-            expected_msg = "Some error!"
-            assert str(cm.exception) == expected_msg
 
     @classmethod
     def teardown_class(cls):

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2020 fetchai
+#   Copyright 2021 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 """This module contains default's message definition."""
 
 import logging
-from typing import Dict, Set, Tuple, cast
+from typing import Any, Dict, Set, Tuple, cast
 
 from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
@@ -37,7 +37,8 @@ DEFAULT_BODY_SIZE = 4
 class DefaultMessage(Message):
     """A protocol for exchanging any bytes message."""
 
-    protocol_id = PublicId.from_str("fetchai/default:0.8.0")
+    protocol_id = PublicId.from_str("fetchai/default:0.12.0")
+    protocol_specification_id = PublicId.from_str("fetchai/default:0.1.0")
 
     ErrorCode = CustomErrorCode
 
@@ -45,11 +46,27 @@ class DefaultMessage(Message):
         """Performatives for the default protocol."""
 
         BYTES = "bytes"
+        END = "end"
         ERROR = "error"
 
-        def __str__(self):
+        def __str__(self) -> str:
             """Get the string representation."""
             return str(self.value)
+
+    _performatives = {"bytes", "end", "error"}
+    __slots__: Tuple[str, ...] = tuple()
+
+    class _SlotsCls:
+        __slots__ = (
+            "content",
+            "dialogue_reference",
+            "error_code",
+            "error_data",
+            "error_msg",
+            "message_id",
+            "performative",
+            "target",
+        )
 
     def __init__(
         self,
@@ -57,7 +74,7 @@ class DefaultMessage(Message):
         dialogue_reference: Tuple[str, str] = ("", ""),
         message_id: int = 1,
         target: int = 0,
-        **kwargs,
+        **kwargs: Any,
     ):
         """
         Initialise an instance of DefaultMessage.
@@ -67,7 +84,6 @@ class DefaultMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        self._performatives = {"bytes", "error"}
         super().__init__(
             dialogue_reference=dialogue_reference,
             message_id=message_id,
@@ -216,6 +232,8 @@ class DefaultMessage(Message):
                             type(value_of_error_data)
                         ),
                     )
+            elif self.performative == DefaultMessage.Performative.END:
+                expected_nb_of_contents = 0
 
             # Check correct content count
             enforce(
@@ -231,13 +249,6 @@ class DefaultMessage(Message):
                     self.target == 0,
                     "Invalid 'target'. Expected 0 (because 'message_id' is 1). Found {}.".format(
                         self.target
-                    ),
-                )
-            else:
-                enforce(
-                    0 < self.target < self.message_id,
-                    "Invalid 'target'. Expected an integer between 1 and {} inclusive. Found {}.".format(
-                        self.message_id - 1, self.target,
                     ),
                 )
         except (AEAEnforceError, ValueError, KeyError) as e:

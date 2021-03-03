@@ -16,21 +16,21 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
 """This module contains the implementation of an agent loop using asyncio."""
 import asyncio
 import datetime
 from abc import ABC, abstractmethod
 from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop
+from asyncio.queues import Queue
 from asyncio.tasks import Task
 from contextlib import suppress
 from enum import Enum
 from functools import partial
-from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union, cast
 
 from aea.abstract_agent import AbstractAgent
+from aea.configurations.constants import LAUNCH_SUCCEED_MESSAGE
 from aea.exceptions import AEAException
 from aea.helpers.async_utils import (
     AsyncState,
@@ -40,6 +40,8 @@ from aea.helpers.async_utils import (
 )
 from aea.helpers.exec_timeout import ExecTimeoutThreadGuard, TimeoutException
 from aea.helpers.logging import WithLogger, get_logger
+from aea.mail.base import Envelope, EnvelopeContext
+from aea.protocols.base import Message
 
 
 class AgentLoopException(AEAException):
@@ -64,12 +66,12 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
         self,
         agent: AbstractAgent,
         loop: Optional[AbstractEventLoop] = None,
-        threaded=False,
+        threaded: bool = False,
     ) -> None:
         """Init loop.
 
-        :params agent: Agent or AEA to run.
-        :params loop: optional asyncio event loop. if not specified a new loop will be created.
+        :param agent: Agent or AEA to run.
+        :param loop: optional asyncio event loop. if not specified a new loop will be created.
         """
         logger = get_logger(__name__, agent.name)
         WithLogger.__init__(self, logger)
@@ -85,23 +87,46 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
         """Get agent."""
         return self._agent
 
+    @property
+    def state(self) -> AgentLoopStates:
+        """Get current main loop state."""
+        return self._state.get()
+
+    async def wait_state(
+        self, state_or_states: Union[Any, Sequence[Any]]
+    ) -> Tuple[Any, Any]:
+        """
+        Wait state to be set.
+
+        :param state_or_states: state or list of states.
+
+        :return: tuple of previous state and new state.
+        """
+
+        return await self._state.wait(state_or_states)
+
+    @property
+    def is_running(self) -> bool:
+        """Get running state of the loop."""
+        return self._state.get() == AgentLoopStates.started
+
     def set_loop(self, loop: AbstractEventLoop) -> None:
         """Set event loop and all event loopp related objects."""
         self._loop: AbstractEventLoop = loop
 
     def _setup(self) -> None:  # pylint: disable=no-self-use
-        """Set up loop before started."""
+        """Set up agent loop before started."""
         # start and stop methods are classmethods cause one instance shared across muiltiple threads
         ExecTimeoutThreadGuard.start()
 
-    def _teardown(self):  # pylint: disable=no-self-use
+    def _teardown(self) -> None:  # pylint: disable=no-self-use
         """Tear down loop on stop."""
         # start and stop methods are classmethods cause one instance shared across muiltiple threads
         ExecTimeoutThreadGuard.stop()
 
     async def run(self) -> None:
         """Run agent loop."""
-        self.logger.debug("agent loop started")
+        self.logger.debug("agent loop starting...")
         self._state.set(AgentLoopStates.starting)
         self._setup()
         self._set_tasks()
@@ -138,15 +163,25 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
                 continue  #  pragma: nocover
             task.cancel()
 
-    @property
-    def state(self) -> AgentLoopStates:
-        """Get current main loop state."""
-        return self._state.get()
+    @abstractmethod
+    def send_to_skill(
+        self,
+        message_or_envelope: Union[Message, Envelope],
+        context: Optional[EnvelopeContext] = None,
+    ) -> None:
+        """
+        Send message or envelope to another skill.
+
+        :param message_or_envelope: envelope to send to another skill.
+        if message passed it will be wrapped into envelope with optional envelope context.
+
+        :return: None
+        """
 
     @property
-    def is_running(self) -> bool:
-        """Get running state of the loop."""
-        return self._state.get() == AgentLoopStates.started
+    @abstractmethod
+    def skill2skill_queue(self) -> Queue:
+        """Get skill to skill message queue."""
 
 
 class AsyncAgentLoop(BaseAgentLoop):
@@ -155,20 +190,70 @@ class AsyncAgentLoop(BaseAgentLoop):
     NEW_BEHAVIOURS_PROCESS_SLEEP = 1  # check new behaviours registered every second.
 
     def __init__(
-        self, agent: AbstractAgent, loop: AbstractEventLoop = None, threaded=False
-    ):
+        self,
+        agent: AbstractAgent,
+        loop: AbstractEventLoop = None,
+        threaded: bool = False,
+    ) -> None:
         """
         Init agent loop.
 
         :param agent: AEA instance
         :param loop: asyncio loop to use. optional
+        :param threaded: is a new thread to be started for the agent loop
         """
         super().__init__(agent=agent, loop=loop, threaded=threaded)
         self._agent: AbstractAgent = self._agent
 
         self._periodic_tasks: Dict[Callable, PeriodicCaller] = {}
+        self._skill2skill_message_queue: Optional[asyncio.Queue] = None
 
-    def _periodic_task_exception_callback(
+    def _setup(self) -> None:
+        """Set up agent loop before started."""
+        self._skill2skill_message_queue = asyncio.Queue()
+        super()._setup()
+
+    @property
+    def skill2skill_queue(self) -> Queue:
+        """Get skill to skill message queue."""
+        if not self._skill2skill_message_queue:  # pragma: nocover
+            raise ValueError("_skill2skill_message_queue is not set!")
+        return self._skill2skill_message_queue
+
+    def send_to_skill(
+        self,
+        message_or_envelope: Union[Message, Envelope],
+        context: Optional[EnvelopeContext] = None,
+    ) -> None:
+        """
+        Send message or envelope to another skill.
+
+        :param message_or_envelope: envelope to send to another skill.
+        if message passed it will be wrapped into envelope with optional envelope context.
+
+        :return: None
+        """
+        if isinstance(message_or_envelope, Envelope):
+            envelope = message_or_envelope
+            message = cast(Message, envelope.message)
+        elif isinstance(message_or_envelope, Message):
+            message = message_or_envelope
+            envelope = Envelope(
+                to=message.to, sender=message.sender, message=message, context=context,
+            )
+        else:
+            raise ValueError(
+                f"Unsupported message or envelope type: {type(message_or_envelope)}"
+            )
+
+        if not message.has_to:  # pragma: nocover
+            raise ValueError("Provided message has message.to not set.")
+        if not message.has_sender:  # pragma: nocover
+            raise ValueError("Provided message has message.sender not set.")
+
+        self.skill2skill_queue.put_nowait(envelope)
+
+    def _periodic_task_exception_callback(  # pylint: disable=unused-argument
         self, task_callable: Callable, exc: Exception
     ) -> None:
         """
@@ -179,9 +264,6 @@ class AsyncAgentLoop(BaseAgentLoop):
 
         :return: None
         """
-        self.logger.exception(
-            f"Loop: Exception: `{exc}` occured during `{task_callable}` processing"
-        )
         self._exceptions.append(exc)
 
     def _execution_control(
@@ -311,7 +393,7 @@ class AsyncAgentLoop(BaseAgentLoop):
 
     async def _process_messages(self, getter: HandlerItemGetter) -> None:
         """Process message from ItemGetter."""
-        self.logger.info("Start processing messages...")
+        self.logger.info(LAUNCH_SUCCEED_MESSAGE)
         self._state.set(AgentLoopStates.started)
         while self.is_running:
             handler, item = await getter.get()

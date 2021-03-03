@@ -56,7 +56,7 @@ the token balance
 
 ```python
  | @classmethod
- | get_transfer_transaction(cls, identifier: str, sender_address: str, destination_address: str, amount: int, tx_fee: int, tx_nonce: str, **kwargs, ,) -> Optional[Any]
+ | get_transfer_transaction(cls, identifier: str, sender_address: str, destination_address: str, amount: int, tx_fee: int, tx_nonce: str, **kwargs: Any, ,) -> Optional[Any]
 ```
 
 Get a transaction to transfer from self to destination.

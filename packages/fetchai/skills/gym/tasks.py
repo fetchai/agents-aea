@@ -20,7 +20,7 @@
 """This module contains the tasks for the 'gym' skill."""
 
 from queue import Queue
-from threading import Thread
+from typing import Any
 
 from aea.skills.base import SkillContext
 from aea.skills.tasks import Task
@@ -39,12 +39,9 @@ class GymTask(Task):
         self._rl_agent = MyRLAgent(NB_GOODS, self.logger)
         self._proxy_env = ProxyEnv(skill_context)
         self.nb_steps = nb_steps
-        self._rl_agent_training_thread = Thread(
-            target=self._fit, args=[self._proxy_env, self.nb_steps]
-        )
         self.is_rl_agent_training = False
 
-    def _fit(self, proxy_env: ProxyEnv, nb_steps: int):
+    def _fit(self, proxy_env: ProxyEnv, nb_steps: int) -> None:
         """Fit the RL agent."""
         self._rl_agent.fit(proxy_env, nb_steps)
         self.logger.info("Training finished. You can exit now via CTRL+C.")
@@ -63,7 +60,7 @@ class GymTask(Task):
         """Set up the task."""
         self.logger.info("Gym task: setup method called.")
 
-    def execute(self, *args, **kwargs) -> None:
+    def execute(self, *args: Any, **kwargs: Any) -> None:
         """Execute the task."""
         if not self._proxy_env.is_rl_agent_trained and not self.is_rl_agent_training:
             self._start_training()
@@ -80,10 +77,10 @@ class GymTask(Task):
         """Start training the RL agent."""
         self.logger.info("Training starting ...")
         self.is_rl_agent_training = True
-        self._rl_agent_training_thread.start()
+        self._fit(self._proxy_env, self.nb_steps)
 
     def _stop_training(self) -> None:
         """Stop training the RL agent."""
-        self.is_rl_agent_training = False
-        self._proxy_env.close()
-        self._rl_agent_training_thread.join()
+        if self.is_rl_agent_training:
+            self.is_rl_agent_training = False
+            self._proxy_env.close()

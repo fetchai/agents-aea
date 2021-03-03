@@ -22,10 +22,11 @@
 import copy
 from abc import ABC, abstractmethod
 from operator import itemgetter
-from typing import Dict, Generic, List, Optional, Set, Tuple, TypeVar, cast
+from typing import Any, Dict, Generic, List, Optional, Set, Tuple, TypeVar, cast
 
 from aea.components.base import Component
 from aea.configurations.base import ComponentId, ComponentType, PublicId
+from aea.exceptions import AEASetupError, AEATeardownError, parse_exception
 from aea.helpers.logging import WithLogger, get_logger
 from aea.skills.base import Behaviour, Handler, Model
 
@@ -38,7 +39,7 @@ SkillComponentType = TypeVar("SkillComponentType", Handler, Behaviour, Model)
 class Registry(Generic[ItemId, Item], WithLogger, ABC):
     """This class implements an abstract registry."""
 
-    def __init__(self, agent_name: str = "standalone"):
+    def __init__(self, agent_name: str = "standalone") -> None:
         """
         Initialize the registry.
 
@@ -62,12 +63,12 @@ class Registry(Generic[ItemId, Item], WithLogger, ABC):
         """
 
     @abstractmethod
-    def unregister(self, item_id: ItemId) -> None:
+    def unregister(self, item_id: ItemId) -> Optional[Item]:
         """
         Unregister an item.
 
         :param item_id: the public id of the item.
-        :return: None
+        :return: the item
         :raises: ValueError if no item registered with that item id.
         """
 
@@ -121,7 +122,9 @@ class PublicIdRegistry(Generic[Item], Registry[PublicId, Item]):
     points to the 'latest' version of a package.
     """
 
-    def __init__(self):
+    __slots__ = ("_public_id_to_item",)
+
+    def __init__(self) -> None:
         """Initialize the registry."""
         super().__init__()
         self._public_id_to_item: Dict[PublicId, Item] = {}
@@ -140,11 +143,12 @@ class PublicIdRegistry(Generic[Item], Registry[PublicId, Item]):
 
     def unregister(  # pylint: disable=arguments-differ
         self, public_id: PublicId
-    ) -> None:
+    ) -> Item:
         """Unregister an item."""
         if public_id not in self._public_id_to_item:
             raise ValueError(f"No item registered with item id '{public_id}'")
-        self._public_id_to_item.pop(public_id)
+        item = self._public_id_to_item.pop(public_id)
+        return item
 
     def fetch(  # pylint: disable=arguments-differ
         self, public_id: PublicId
@@ -185,7 +189,9 @@ class PublicIdRegistry(Generic[Item], Registry[PublicId, Item]):
 class AgentComponentRegistry(Registry[ComponentId, Component]):
     """This class implements a simple dictionary-based registry for agent components."""
 
-    def __init__(self, **kwargs) -> None:
+    __slots__ = ("_components_by_type", "_registered_keys")
+
+    def __init__(self, **kwargs: Any) -> None:
         """
         Instantiate the registry.
 
@@ -235,12 +241,12 @@ class AgentComponentRegistry(Registry[ComponentId, Component]):
         ] = component
         self._registered_keys.add(component_id)
 
-    def _unregister(self, component_id: ComponentId) -> None:
+    def _unregister(self, component_id: ComponentId) -> Optional[Component]:
         """
         Do the actual unregistration.
 
         :param component_id: the component id
-        :return: None
+        :return: the item
         """
         item = self._components_by_type.get(component_id.component_type, {}).pop(
             component_id.public_id, None
@@ -250,20 +256,22 @@ class AgentComponentRegistry(Registry[ComponentId, Component]):
             self.logger.debug(
                 "Component '{}' has been removed.".format(item.component_id)
             )
+        return item
 
     def unregister(  # pylint: disable=arguments-differ
         self, component_id: ComponentId
-    ) -> None:
+    ) -> Optional[Component]:
         """
         Unregister a component.
 
         :param component_id: the ComponentId
+        :return: the item
         """
         if component_id not in self._registered_keys:
             raise ValueError(
                 "No item registered with item id '{}'".format(component_id)
             )
-        self._unregister(component_id)
+        return self._unregister(component_id)
 
     def fetch(  # pylint: disable=arguments-differ
         self, component_id: ComponentId
@@ -325,7 +333,9 @@ class ComponentRegistry(
 ):
     """This class implements a generic registry for skill components."""
 
-    def __init__(self, **kwargs) -> None:
+    __slots__ = ("_items", "_dynamically_added")
+
+    def __init__(self, **kwargs: Any) -> None:
         """
         Instantiate the registry.
 
@@ -372,15 +382,15 @@ class ComponentRegistry(
         if is_dynamically_added:
             self._dynamically_added.setdefault(skill_id, set()).add(item_name)
 
-    def unregister(self, item_id: Tuple[PublicId, str]) -> None:
+    def unregister(self, item_id: Tuple[PublicId, str]) -> Optional[SkillComponentType]:
         """
         Unregister a item.
 
         :param item_id: a pair (skill id, item name).
-        :return: None
+        :return: skill component
         :raises: ValueError if no item registered with that item id.
         """
-        self._unregister_from_main_index(item_id)
+        return self._unregister_from_main_index(item_id)
 
     def _unregister_from_main_index(
         self, item_id: Tuple[PublicId, str]
@@ -471,7 +481,12 @@ class ComponentRegistry(
                         item.name, item.skill_id
                     )
                 )
-                item.setup()
+                try:
+                    item.setup()
+                except Exception as e:  # pragma: nocover # pylint: disable=broad-except
+                    e_str = parse_exception(e)
+                    e_str = f"An error occurred while setting up item {item.skill_id}/{type(item).__name__}:\n{e_str}"
+                    raise AEASetupError(e_str)
             else:
                 self.logger.debug(
                     "Ignoring setup() of component {} of skill {}, because the skill is not active.".format(
@@ -487,14 +502,18 @@ class ComponentRegistry(
         """
         for name_to_items in self._items.fetch_all():
             for _, item in name_to_items.items():
+                self.logger.debug(
+                    "Calling teardown() of component {} of skill {}".format(
+                        item.name, item.skill_id
+                    )
+                )
                 try:
                     item.teardown()
                 except Exception as e:  # pragma: nocover # pylint: disable=broad-except
-                    self.logger.warning(
-                        "An error occurred while tearing down item {}/{}: {}".format(
-                            item.skill_id, type(item).__name__, str(e)
-                        )
-                    )
+                    e_str = parse_exception(e)
+                    e_str = f"An error occurred while tearing down item {item.skill_id}/{type(item).__name__}:\n{str(e_str)}"
+                    e = AEATeardownError(e_str)
+                    self.logger.error(str(e))
         _dynamically_added = copy.deepcopy(self._dynamically_added)
         for skill_id, items_names in _dynamically_added.items():
             for item_name in items_names:
@@ -504,7 +523,9 @@ class ComponentRegistry(
 class HandlerRegistry(ComponentRegistry[Handler]):
     """This class implements the handlers registry."""
 
-    def __init__(self, **kwargs) -> None:
+    __slots__ = ("_items_by_protocol_and_skill",)
+
+    def __init__(self, **kwargs: Any) -> None:
         """
         Instantiate the registry.
 
@@ -563,7 +584,7 @@ class HandlerRegistry(ComponentRegistry[Handler]):
         registry.register(skill_id, item)
         super().register(item_id, item, is_dynamically_added=is_dynamically_added)
 
-    def unregister(self, item_id: Tuple[PublicId, str]) -> None:
+    def unregister(self, item_id: Tuple[PublicId, str]) -> Handler:
         """
         Unregister a item.
 
@@ -582,6 +603,7 @@ class HandlerRegistry(ComponentRegistry[Handler]):
         protocol_handlers_by_skill.unregister(skill_id)
         if len(protocol_handlers_by_skill.ids()) == 0:
             self._items_by_protocol_and_skill.unregister(protocol_id)
+        return handler
 
     def unregister_by_skill(self, skill_id: PublicId) -> None:
         """Unregister all the components by skill."""

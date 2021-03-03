@@ -16,7 +16,7 @@ queue.Queue with async_get method.
 #### `__`init`__`
 
 ```python
- | __init__(*args, **kwargs)
+ | __init__(*args: Any, **kwargs: Any) -> None
 ```
 
 Init queue.
@@ -25,7 +25,7 @@ Init queue.
 #### put
 
 ```python
- | put(item: Any, *args, **kwargs) -> None
+ | put(item: Any, *args: Any, **kwargs: Any) -> None
 ```
 
 Put an item into the queue.
@@ -39,7 +39,7 @@ Put an item into the queue.
 #### get
 
 ```python
- | get(*args, **kwargs) -> Any
+ | get(*args: Any, **kwargs: Any) -> Any
 ```
 
 Get an item into the queue.

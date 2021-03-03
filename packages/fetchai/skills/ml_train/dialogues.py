@@ -28,10 +28,11 @@ This module contains the classes required for dialogue management.
 - MlTradeDialogues: The dialogues class keeps track of all dialogues of type ml_trade.
 """
 
-from typing import Optional, Type
+from typing import Any, Dict, Optional, Type
 
 from aea.common import Address
 from aea.exceptions import AEAEnforceError, enforce
+from aea.helpers.transaction.base import Terms
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
@@ -56,6 +57,7 @@ from packages.fetchai.protocols.ml_trade.dialogues import (
 from packages.fetchai.protocols.ml_trade.dialogues import (
     MlTradeDialogues as BaseMlTradeDialogues,
 )
+from packages.fetchai.protocols.ml_trade.message import MlTradeMessage
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogue as BaseOefSearchDialogue,
 )
@@ -77,7 +79,7 @@ DefaultDialogue = BaseDefaultDialogue
 class DefaultDialogues(Model, BaseDefaultDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -103,13 +105,53 @@ class DefaultDialogues(Model, BaseDefaultDialogues):
         )
 
 
-MlTradeDialogue = BaseMlTradeDialogue
+class MlTradeDialogue(BaseMlTradeDialogue):
+    """The dialogue class maintains state of a dialogue and manages it."""
+
+    def __init__(
+        self,
+        dialogue_label: BaseDialogueLabel,
+        self_address: Address,
+        role: BaseDialogue.Role,
+        message_class: Type[MlTradeMessage] = MlTradeMessage,
+    ) -> None:
+        """
+        Initialize a dialogue.
+
+        :param dialogue_label: the identifier of the dialogue
+        :param self_address: the address of the entity for whom this dialogue is maintained
+        :param role: the role of the agent this dialogue is maintained for
+
+        :return: None
+        """
+        BaseMlTradeDialogue.__init__(
+            self,
+            dialogue_label=dialogue_label,
+            self_address=self_address,
+            role=role,
+            message_class=message_class,
+        )
+        self.data_for_sale = None  # type: Optional[Dict[str, str]]
+        self._terms = None  # type: Optional[Terms]
+
+    @property
+    def terms(self) -> Terms:
+        """Get terms."""
+        if self._terms is None:
+            raise AEAEnforceError("Terms not set!")
+        return self._terms
+
+    @terms.setter
+    def terms(self, terms: Terms) -> None:
+        """Set terms."""
+        enforce(self._terms is None, "Terms already set!")
+        self._terms = terms
 
 
 class MlTradeDialogues(Model, BaseMlTradeDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -182,7 +224,7 @@ class LedgerApiDialogue(BaseLedgerApiDialogue):
 class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -203,7 +245,7 @@ class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
 
         BaseLedgerApiDialogues.__init__(
             self,
-            self_address=self.context.agent_address,
+            self_address=str(self.skill_id),
             role_from_first_message=role_from_first_message,
             dialogue_class=LedgerApiDialogue,
         )
@@ -215,7 +257,7 @@ OefSearchDialogue = BaseOefSearchDialogue
 class OefSearchDialogues(Model, BaseOefSearchDialogues):
     """This class keeps track of all oef_search dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -237,7 +279,7 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
 
         BaseOefSearchDialogues.__init__(
             self,
-            self_address=self.context.agent_address,
+            self_address=str(self.skill_id),
             role_from_first_message=role_from_first_message,
         )
 
@@ -292,7 +334,7 @@ class SigningDialogue(BaseSigningDialogue):
 class SigningDialogues(Model, BaseSigningDialogues):
     """This class keeps track of all oef_search dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 

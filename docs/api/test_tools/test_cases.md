@@ -17,7 +17,7 @@ Base class for AEA test cases.
 
 ```python
  | @classmethod
- | set_agent_context(cls, agent_name: str)
+ | set_agent_context(cls, agent_name: str) -> None
 ```
 
 Set the current agent context.
@@ -27,7 +27,7 @@ Set the current agent context.
 
 ```python
  | @classmethod
- | unset_agent_context(cls)
+ | unset_agent_context(cls) -> None
 ```
 
 Unset the current agent context.
@@ -37,7 +37,7 @@ Unset the current agent context.
 
 ```python
  | @classmethod
- | set_config(cls, dotted_path: str, value: Any, type_: str = "str") -> Result
+ | set_config(cls, dotted_path: str, value: Any, type_: Optional[str] = None) -> Result
 ```
 
 Set a config.
@@ -85,7 +85,7 @@ None
 
 ```python
  | @classmethod
- | run_cli_command(cls, *args: str, *, cwd: str = ".") -> Result
+ | run_cli_command(cls, *args: str, *, cwd: str = ".", **kwargs: str) -> Result
 ```
 
 Run AEA CLI command.
@@ -94,6 +94,7 @@ Run AEA CLI command.
 
 - `args`: CLI args
 - `cwd`: the working directory from where to run the command.
+- `kwargs`: other keyword arguments to click.CLIRunner.invoke.
 
 **Raises**:
 
@@ -126,7 +127,7 @@ subprocess object.
 
 ```python
  | @classmethod
- | start_thread(cls, target: Callable, **kwargs) -> Thread
+ | start_thread(cls, target: Callable, **kwargs: subprocess.Popen) -> Thread
 ```
 
 Start python Thread.
@@ -262,7 +263,7 @@ subprocess object.
 
 ```python
  | @classmethod
- | terminate_agents(cls, *subprocesses: subprocess.Popen, *, timeout: int = 10) -> None
+ | terminate_agents(cls, *subprocesses: subprocess.Popen, *, timeout: int = 20) -> None
 ```
 
 Terminate agent subprocesses.
@@ -279,7 +280,7 @@ Run from agent's directory.
 
 ```python
  | @classmethod
- | is_successfully_terminated(cls, *subprocesses: subprocess.Popen)
+ | is_successfully_terminated(cls, *subprocesses: subprocess.Popen) -> bool
 ```
 
 Check if all subprocesses terminated successfully.
@@ -289,7 +290,7 @@ Check if all subprocesses terminated successfully.
 
 ```python
  | @classmethod
- | initialize_aea(cls, author) -> None
+ | initialize_aea(cls, author: str) -> None
 ```
 
 Initialize AEA locally with author name.
@@ -346,7 +347,7 @@ Result
 
 ```python
  | @classmethod
- | scaffold_item(cls, item_type: str, name: str) -> Result
+ | scaffold_item(cls, item_type: str, name: str, skip_consistency_check: bool = False) -> Result
 ```
 
 Scaffold an item for the agent.
@@ -357,6 +358,7 @@ Run from agent's directory.
 
 - `item_type`: str item type.
 - `name`: name of the item.
+- `skip_consistency_check`: if True, skip consistency check.
 
 **Returns**:
 
@@ -391,7 +393,7 @@ Result
  | eject_item(cls, item_type: str, public_id: str) -> Result
 ```
 
-Eject an item in the agent.
+Eject an item in the agent in quiet mode (i.e. no interaction).
 
 Run from agent's directory.
 
@@ -457,6 +459,27 @@ Run from agent's directory.
 
 - `ledger_api_id`: ledger API ID.
 - `private_key_filepath`: private key filepath.
+- `connection`: whether or not the private key filepath is for a connection.
+
+**Returns**:
+
+Result
+
+<a name="aea.test_tools.test_cases.BaseAEATestCase.remove_private_key"></a>
+#### remove`_`private`_`key
+
+```python
+ | @classmethod
+ | remove_private_key(cls, ledger_api_id: str = DEFAULT_LEDGER, connection: bool = False) -> Result
+```
+
+Remove private key with CLI command.
+
+Run from agent's directory.
+
+**Arguments**:
+
+- `ledger_api_id`: ledger API ID.
 - `connection`: whether or not the private key filepath is for a connection.
 
 **Returns**:
@@ -565,7 +588,7 @@ None
 
 ```python
  | @classmethod
- | send_envelope_to_agent(cls, envelope: Envelope, agent: str)
+ | send_envelope_to_agent(cls, envelope: Envelope, agent: str) -> None
 ```
 
 Send an envelope to an agent, using the stub connection.
@@ -610,7 +633,7 @@ list of missed strings.
 
 ```python
  | @classmethod
- | is_running(cls, process: subprocess.Popen, timeout: int = DEFAULT_LAUNCH_TIMEOUT)
+ | is_running(cls, process: subprocess.Popen, timeout: int = DEFAULT_LAUNCH_TIMEOUT) -> bool
 ```
 
 Check if the AEA is launched and running (ready to process messages).
@@ -620,12 +643,32 @@ Check if the AEA is launched and running (ready to process messages).
 - `process`: agent subprocess.
 - `timeout`: the timeout to wait for launch to complete
 
+<a name="aea.test_tools.test_cases.BaseAEATestCase.invoke"></a>
+#### invoke
+
+```python
+ | @classmethod
+ | invoke(cls, *args: str) -> Result
+```
+
+Call the cli command.
+
+<a name="aea.test_tools.test_cases.BaseAEATestCase.load_agent_config"></a>
+#### load`_`agent`_`config
+
+```python
+ | @classmethod
+ | load_agent_config(cls, agent_name: str) -> AgentConfig
+```
+
+Load agent configuration.
+
 <a name="aea.test_tools.test_cases.BaseAEATestCase.setup_class"></a>
 #### setup`_`class
 
 ```python
  | @classmethod
- | setup_class(cls)
+ | setup_class(cls) -> None
 ```
 
 Set up the test class.
@@ -635,20 +678,10 @@ Set up the test class.
 
 ```python
  | @classmethod
- | teardown_class(cls)
+ | teardown_class(cls) -> None
 ```
 
 Teardown the test.
-
-<a name="aea.test_tools.test_cases.UseOef"></a>
-## UseOef Objects
-
-```python
-@pytest.mark.integration
-class UseOef()
-```
-
-Inherit from this class to launch an OEF node.
 
 <a name="aea.test_tools.test_cases.AEATestCaseEmpty"></a>
 ## AEATestCaseEmpty Objects
@@ -666,10 +699,53 @@ This test case will create a default AEA project.
 
 ```python
  | @classmethod
- | setup_class(cls)
+ | setup_class(cls) -> None
 ```
 
 Set up the test class.
+
+<a name="aea.test_tools.test_cases.AEATestCaseEmpty.teardown_class"></a>
+#### teardown`_`class
+
+```python
+ | @classmethod
+ | teardown_class(cls) -> None
+```
+
+Teardown the test class.
+
+<a name="aea.test_tools.test_cases.AEATestCaseEmptyFlaky"></a>
+## AEATestCaseEmptyFlaky Objects
+
+```python
+class AEATestCaseEmptyFlaky(AEATestCaseEmpty)
+```
+
+Test case for a default AEA project.
+
+This test case will create a default AEA project.
+
+Use for flaky tests with the flaky decorator.
+
+<a name="aea.test_tools.test_cases.AEATestCaseEmptyFlaky.setup_class"></a>
+#### setup`_`class
+
+```python
+ | @classmethod
+ | setup_class(cls) -> None
+```
+
+Set up the test class.
+
+<a name="aea.test_tools.test_cases.AEATestCaseEmptyFlaky.teardown_class"></a>
+#### teardown`_`class
+
+```python
+ | @classmethod
+ | teardown_class(cls) -> None
+```
+
+Teardown the test class.
 
 <a name="aea.test_tools.test_cases.AEATestCaseMany"></a>
 ## AEATestCaseMany Objects
@@ -685,7 +761,7 @@ Test case for many AEA projects.
 
 ```python
  | @classmethod
- | setup_class(cls)
+ | setup_class(cls) -> None
 ```
 
 Set up the test class.
@@ -695,7 +771,38 @@ Set up the test class.
 
 ```python
  | @classmethod
- | teardown_class(cls)
+ | teardown_class(cls) -> None
+```
+
+Teardown the test class.
+
+<a name="aea.test_tools.test_cases.AEATestCaseManyFlaky"></a>
+## AEATestCaseManyFlaky Objects
+
+```python
+class AEATestCaseManyFlaky(AEATestCaseMany)
+```
+
+Test case for many AEA projects which are flaky.
+
+Use for flaky tests with the flaky decorator.
+
+<a name="aea.test_tools.test_cases.AEATestCaseManyFlaky.setup_class"></a>
+#### setup`_`class
+
+```python
+ | @classmethod
+ | setup_class(cls) -> None
+```
+
+Set up the test class.
+
+<a name="aea.test_tools.test_cases.AEATestCaseManyFlaky.teardown_class"></a>
+#### teardown`_`class
+
+```python
+ | @classmethod
+ | teardown_class(cls) -> None
 ```
 
 Teardown the test class.
@@ -717,7 +824,7 @@ it is assumed the project is inside the current working directory.
 
 ```python
  | @classmethod
- | setup_class(cls)
+ | setup_class(cls) -> None
 ```
 
 Set up the test class.
@@ -727,7 +834,7 @@ Set up the test class.
 
 ```python
  | @classmethod
- | teardown_class(cls)
+ | teardown_class(cls) -> None
 ```
 
 Teardown the test class.

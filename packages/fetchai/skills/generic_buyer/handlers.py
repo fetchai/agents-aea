@@ -23,6 +23,7 @@ import pprint
 from typing import Optional, cast
 
 from aea.configurations.base import PublicId
+from aea.crypto.ledger_apis import LedgerApis
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
@@ -34,6 +35,7 @@ from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.signing.message import SigningMessage
+from packages.fetchai.skills.generic_buyer.behaviours import GenericTransactionBehaviour
 from packages.fetchai.skills.generic_buyer.dialogues import (
     DefaultDialogues,
     FipaDialogue,
@@ -173,11 +175,18 @@ class GenericFipaHandler(Handler):
         self.context.logger.info(
             "received DECLINE from sender={}".format(fipa_msg.sender[-5:])
         )
-        if fipa_msg.target == 1:
+        target_message = fipa_dialogue.get_message_by_id(fipa_msg.target)
+
+        if not target_message:
+            raise ValueError("Can not find target message!")  # pragma: nocover
+
+        declined_performative = target_message.performative
+
+        if declined_performative == FipaMessage.Performative.CFP:
             fipa_dialogues.dialogue_stats.add_dialogue_endstate(
                 FipaDialogue.EndState.DECLINED_CFP, fipa_dialogue.is_self_initiated
             )
-        elif fipa_msg.target == 3:
+        if declined_performative == FipaMessage.Performative.ACCEPT:
             fipa_dialogues.dialogue_stats.add_dialogue_endstate(
                 FipaDialogue.EndState.DECLINED_ACCEPT, fipa_dialogue.is_self_initiated
             )
@@ -204,21 +213,11 @@ class GenericFipaHandler(Handler):
                 fipa_dialogue.terms.counterparty_address = (  # pragma: nocover
                     transfer_address
                 )
-            ledger_api_dialogues = cast(
-                LedgerApiDialogues, self.context.ledger_api_dialogues
+
+            tx_behaviour = cast(
+                GenericTransactionBehaviour, self.context.behaviours.transaction
             )
-            ledger_api_msg, ledger_api_dialogue = ledger_api_dialogues.create(
-                counterparty=LEDGER_API_ADDRESS,
-                performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
-                terms=fipa_dialogue.terms,
-            )
-            ledger_api_dialogue = cast(LedgerApiDialogue, ledger_api_dialogue)
-            ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
-            fipa_dialogue.associated_ledger_api_dialogue = ledger_api_dialogue
-            self.context.outbox.put_message(message=ledger_api_msg)
-            self.context.logger.info(
-                "requesting transfer transaction from ledger api..."
-            )
+            tx_behaviour.waiting.append(fipa_dialogue)
         else:
             inform_msg = fipa_dialogue.reply(
                 performative=FipaMessage.Performative.INFORM,
@@ -249,12 +248,13 @@ class GenericFipaHandler(Handler):
         )
         if len(fipa_msg.info.keys()) >= 1:
             data = fipa_msg.info
-            self.context.logger.info(
-                "received the following data={}".format(pprint.pformat(data))
-            )
+            data_string = pprint.pformat(data)[:1000]
+            self.context.logger.info(f"received the following data={data_string}")
             fipa_dialogues.dialogue_stats.add_dialogue_endstate(
                 FipaDialogue.EndState.SUCCESSFUL, fipa_dialogue.is_self_initiated
             )
+            strategy = cast(GenericStrategy, self.context.strategy)
+            strategy.successful_trade_with_counterparty(fipa_msg.sender, data)
         else:
             self.context.logger.info(
                 "received no data from sender={}".format(fipa_msg.sender[-5:])
@@ -364,19 +364,24 @@ class GenericOefSearchHandler(Handler):
                 f"found no agents in dialogue={oef_search_dialogue}, continue searching."
             )
             return
-
-        self.context.logger.info(
-            "found agents={}, stopping search.".format(
-                list(map(lambda x: x[-5:], oef_search_msg.agents)),
-            )
-        )
         strategy = cast(GenericStrategy, self.context.strategy)
-        strategy.is_searching = False  # stopping search
+        if strategy.is_stop_searching_on_result:
+            self.context.logger.info(
+                "found agents={}, stopping search.".format(
+                    list(map(lambda x: x[-5:], oef_search_msg.agents)),
+                )
+            )
+            strategy.is_searching = False  # stopping search
+        else:
+            self.context.logger.info(
+                "found agents={}.".format(
+                    list(map(lambda x: x[-5:], oef_search_msg.agents)),
+                )
+            )
         query = strategy.get_service_query()
         fipa_dialogues = cast(FipaDialogues, self.context.fipa_dialogues)
-        for idx, counterparty in enumerate(oef_search_msg.agents):
-            if idx >= strategy.max_negotiations:
-                continue
+        counterparties = strategy.get_acceptable_counterparties(oef_search_msg.agents)
+        for counterparty in counterparties:
             cfp_msg, _ = fipa_dialogues.create(
                 counterparty=counterparty,
                 performative=FipaMessage.Performative.CFP,
@@ -470,8 +475,7 @@ class GenericSigningHandler(Handler):
         :return: None
         """
         self.context.logger.info("transaction signing was successful.")
-        fipa_dialogue = signing_dialogue.associated_fipa_dialogue
-        ledger_api_dialogue = fipa_dialogue.associated_ledger_api_dialogue
+        ledger_api_dialogue = signing_dialogue.associated_ledger_api_dialogue
         last_ledger_api_msg = ledger_api_dialogue.last_incoming_message
         if last_ledger_api_msg is None:
             raise ValueError("Could not retrieve last message in ledger api dialogue")
@@ -498,6 +502,19 @@ class GenericSigningHandler(Handler):
                 signing_msg.error_code, signing_dialogue
             )
         )
+        signing_msg_ = cast(
+            Optional[SigningMessage], signing_dialogue.last_outgoing_message
+        )
+        if (
+            signing_msg_ is not None
+            and signing_msg_.performative
+            == SigningMessage.Performative.SIGN_TRANSACTION
+        ):
+            tx_behaviour = cast(
+                GenericTransactionBehaviour, self.context.behaviours.transaction
+            )
+            ledger_api_dialogue = signing_dialogue.associated_ledger_api_dialogue
+            tx_behaviour.failed_processing(ledger_api_dialogue)
 
     def _handle_invalid(
         self, signing_msg: SigningMessage, signing_dialogue: SigningDialogue
@@ -557,6 +574,11 @@ class GenericLedgerApiHandler(Handler):
             == LedgerApiMessage.Performative.TRANSACTION_DIGEST
         ):
             self._handle_transaction_digest(ledger_api_msg, ledger_api_dialogue)
+        elif (
+            ledger_api_msg.performative
+            == LedgerApiMessage.Performative.TRANSACTION_RECEIPT
+        ):
+            self._handle_transaction_receipt(ledger_api_msg, ledger_api_dialogue)
         elif ledger_api_msg.performative == LedgerApiMessage.Performative.ERROR:
             self._handle_error(ledger_api_msg, ledger_api_dialogue)
         else:
@@ -599,7 +621,7 @@ class GenericLedgerApiHandler(Handler):
             strategy.is_searching = True
         else:
             self.context.logger.warning(
-                "you have no starting balance on {} ledger!".format(strategy.ledger_id)
+                f"you have no starting balance on {strategy.ledger_id} ledger! Stopping skill {self.skill_id}."
             )
             self.context.is_active = False
 
@@ -621,9 +643,7 @@ class GenericLedgerApiHandler(Handler):
             terms=ledger_api_dialogue.associated_fipa_dialogue.terms,
         )
         signing_dialogue = cast(SigningDialogue, signing_dialogue)
-        signing_dialogue.associated_fipa_dialogue = (
-            ledger_api_dialogue.associated_fipa_dialogue
-        )
+        signing_dialogue.associated_ledger_api_dialogue = ledger_api_dialogue
         self.context.decision_maker_message_queue.put_nowait(signing_msg)
         self.context.logger.info(
             "proposing the transaction to the decision maker. Waiting for confirmation ..."
@@ -638,26 +658,65 @@ class GenericLedgerApiHandler(Handler):
         :param ledger_api_message: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
-        fipa_dialogue = ledger_api_dialogue.associated_fipa_dialogue
         self.context.logger.info(
             "transaction was successfully submitted. Transaction digest={}".format(
                 ledger_api_msg.transaction_digest
             )
         )
-        fipa_msg = cast(Optional[FipaMessage], fipa_dialogue.last_incoming_message)
-        if fipa_msg is None:
-            raise ValueError("Could not retrieve fipa message")
-        inform_msg = fipa_dialogue.reply(
-            performative=FipaMessage.Performative.INFORM,
-            target_message=fipa_msg,
-            info={"transaction_digest": ledger_api_msg.transaction_digest.body},
+        ledger_api_msg_ = ledger_api_dialogue.reply(
+            performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
+            target_message=ledger_api_msg,
+            transaction_digest=ledger_api_msg.transaction_digest,
         )
-        self.context.outbox.put_message(message=inform_msg)
-        self.context.logger.info(
-            "informing counterparty={} of transaction digest.".format(
-                fipa_dialogue.dialogue_label.dialogue_opponent_addr[-5:],
+        self.context.logger.info("checking transaction is settled.")
+        self.context.outbox.put_message(message=ledger_api_msg_)
+
+    def _handle_transaction_receipt(
+        self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
+    ) -> None:
+        """
+        Handle a message of balance performative.
+
+        :param ledger_api_message: the ledger api message
+        :param ledger_api_dialogue: the ledger api dialogue
+        """
+        fipa_dialogue = ledger_api_dialogue.associated_fipa_dialogue
+        is_settled = LedgerApis.is_transaction_settled(
+            fipa_dialogue.terms.ledger_id, ledger_api_msg.transaction_receipt.receipt
+        )
+        tx_behaviour = cast(
+            GenericTransactionBehaviour, self.context.behaviours.transaction
+        )
+        if is_settled:
+            tx_behaviour.finish_processing(ledger_api_dialogue)
+            ledger_api_msg_ = cast(
+                Optional[LedgerApiMessage], ledger_api_dialogue.last_outgoing_message
             )
-        )
+            if ledger_api_msg_ is None:
+                raise ValueError(  # pragma: nocover
+                    "Could not retrieve last ledger_api message"
+                )
+            fipa_msg = cast(Optional[FipaMessage], fipa_dialogue.last_incoming_message)
+            if fipa_msg is None:
+                raise ValueError("Could not retrieve last fipa message")
+            inform_msg = fipa_dialogue.reply(
+                performative=FipaMessage.Performative.INFORM,
+                target_message=fipa_msg,
+                info={"transaction_digest": ledger_api_msg_.transaction_digest.body},
+            )
+            self.context.outbox.put_message(message=inform_msg)
+            self.context.logger.info(
+                "transaction confirmed, informing counterparty={} of transaction digest.".format(
+                    fipa_dialogue.dialogue_label.dialogue_opponent_addr[-5:],
+                )
+            )
+        else:
+            tx_behaviour.failed_processing(ledger_api_dialogue)
+            self.context.logger.info(
+                "transaction_receipt={} not settled or not valid, aborting".format(
+                    ledger_api_msg.transaction_receipt
+                )
+            )
 
     def _handle_error(
         self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
@@ -673,6 +732,18 @@ class GenericLedgerApiHandler(Handler):
                 ledger_api_msg, ledger_api_dialogue
             )
         )
+        ledger_api_msg_ = cast(
+            Optional[LedgerApiMessage], ledger_api_dialogue.last_outgoing_message
+        )
+        if (
+            ledger_api_msg_ is not None
+            and ledger_api_msg_.performative
+            != LedgerApiMessage.Performative.GET_BALANCE
+        ):
+            tx_behaviour = cast(
+                GenericTransactionBehaviour, self.context.behaviours.transaction
+            )
+            tx_behaviour.failed_processing(ledger_api_dialogue)
 
     def _handle_invalid(
         self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue

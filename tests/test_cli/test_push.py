@@ -24,11 +24,13 @@ import pytest
 from click import ClickException
 
 from aea.cli import cli
-from aea.cli.push import _check_package_public_id, _save_item_locally
+from aea.cli.push import _save_item_locally, check_package_public_id
 from aea.cli.utils.constants import ITEM_TYPES
 from aea.configurations.base import PublicId
 from aea.test_tools.constants import DEFAULT_AUTHOR
 from aea.test_tools.test_cases import AEATestCaseEmpty
+
+from packages.fetchai.skills.echo import PUBLIC_ID
 
 from tests.conftest import AUTHOR, CLI_LOG_OPTION, CliRunner
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
@@ -40,7 +42,7 @@ class SaveItemLocallyTestCase(TestCase):
 
     @mock.patch("aea.cli.push.try_get_item_target_path", return_value="target")
     @mock.patch("aea.cli.push.try_get_item_source_path", return_value="source")
-    @mock.patch("aea.cli.push._check_package_public_id", return_value=None)
+    @mock.patch("aea.cli.push.check_package_public_id", return_value=None)
     def test_save_item_locally_positive(
         self,
         _check_package_public_id_mock,
@@ -68,8 +70,38 @@ class SaveItemLocallyTestCase(TestCase):
         copy_tree_mock.assert_called_once_with("source", "target")
 
 
+@mock.patch("aea.cli.push.copytree")
+class TestPushLocally(AEATestCaseEmpty):
+    """Test case for clu push --local."""
+
+    ITEM_PUBLIC_ID = PUBLIC_ID
+    ITEM_TYPE = "skill"
+
+    @classmethod
+    def setup_class(cls):
+        """Set up test case."""
+        super(TestPushLocally, cls).setup_class()
+        cls.add_item(cls.ITEM_TYPE, str(cls.ITEM_PUBLIC_ID), local=True)
+
+    def test_vendor_ok(
+        self, copy_tree_mock,
+    ):
+        """Test ok for vendor's item."""
+        self.invoke("push", "--local", "skill", "fetchai/echo")
+        copy_tree_mock.assert_called_once()
+
+    def test_fail_no_item(
+        self, *mocks,
+    ):
+        """Test fail, item_noit_exists ."""
+        with pytest.raises(
+            ClickException, match='Item "not_exists" not found in source folder.'
+        ):
+            self.invoke("push", "--local", "skill", "fetchai/not_exists")
+
+
 @mock.patch(
-    "aea.cli.push.load_yaml",
+    "aea.cli.registry.push.load_yaml",
     return_value={"author": AUTHOR, "name": "name", "version": "0.1.0"},
 )
 class CheckPackagePublicIdTestCase(TestCase):
@@ -77,14 +109,14 @@ class CheckPackagePublicIdTestCase(TestCase):
 
     def test__check_package_public_id_positive(self, *mocks):
         """Test for _check_package_public_id positive result."""
-        _check_package_public_id(
+        check_package_public_id(
             "source-path", "item-type", PublicId.from_str(f"{AUTHOR}/name:0.1.0"),
         )
 
     def test__check_package_public_id_negative(self, *mocks):
         """Test for _check_package_public_id negative result."""
         with self.assertRaises(ClickException):
-            _check_package_public_id(
+            check_package_public_id(
                 "source-path", "item-type", PublicId.from_str(f"{AUTHOR}/name:0.1.1"),
             )
 
@@ -237,3 +269,52 @@ class TestPushLocallyWithLatest(AEATestCaseEmpty):
         assert path_to_pushed_package.exists()
         comparison = filecmp.dircmp(path_to_pushed_package, path_to_current_package)
         assert comparison.diff_files == []
+
+
+@mock.patch("aea.cli.utils.config.try_to_load_agent_config")
+@mock.patch("aea.cli.utils.decorators._check_aea_project")
+@mock.patch("os.path.exists")
+class TestPushVersionsMismatch(TestCase):
+    """Test that the command 'aea push contract' works as expected."""
+
+    def setUp(self):
+        """Set the test up."""
+        self.runner = CliRunner()
+
+    def test_push_local_version_check_failed(self, *mocks):
+        """Test push contract command positive result."""
+        with mock.patch(
+            "aea.cli.registry.push.load_component_public_id",
+            return_value=PublicId("author", "name", "1000.0.0"),
+        ):
+            with pytest.raises(
+                ClickException, match="Version, name or author does not match."
+            ):
+                self.runner.invoke(
+                    cli,
+                    [
+                        *CLI_LOG_OPTION,
+                        "push",
+                        "--local",
+                        "contract",
+                        "author/name:0.1.0",
+                    ],
+                    standalone_mode=False,
+                    catch_exceptions=False,
+                )
+
+    def test_push_remote_version_check_failed(self, *mocks):
+        """Test push contract command positive result."""
+        with mock.patch(
+            "aea.cli.registry.push.load_component_public_id",
+            return_value=PublicId("author", "name", "1000.0.0"),
+        ):
+            with pytest.raises(
+                ClickException, match="Version, name or author does not match."
+            ):
+                self.runner.invoke(
+                    cli,
+                    [*CLI_LOG_OPTION, "push", "contract", "author/name:0.1.0"],
+                    standalone_mode=False,
+                    catch_exceptions=False,
+                )

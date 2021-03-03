@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2020 fetchai
+#   Copyright 2021 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -38,9 +38,7 @@ class TacDialogue(Dialogue):
     """The tac dialogue class maintains state of a dialogue and manages it."""
 
     INITIAL_PERFORMATIVES = frozenset({TacMessage.Performative.REGISTER})
-    TERMINAL_PERFORMATIVES = frozenset(
-        {TacMessage.Performative.CANCELLED, TacMessage.Performative.TAC_ERROR}
-    )
+    TERMINAL_PERFORMATIVES = frozenset({TacMessage.Performative.CANCELLED})
     VALID_REPLIES = {
         TacMessage.Performative.CANCELLED: frozenset(),
         TacMessage.Performative.GAME_DATA: frozenset(
@@ -55,6 +53,7 @@ class TacDialogue(Dialogue):
                 TacMessage.Performative.TAC_ERROR,
                 TacMessage.Performative.GAME_DATA,
                 TacMessage.Performative.CANCELLED,
+                TacMessage.Performative.UNREGISTER,
             }
         ),
         TacMessage.Performative.TAC_ERROR: frozenset(
@@ -126,6 +125,8 @@ class TacDialogues(Dialogues, ABC):
     END_STATES = frozenset(
         {TacDialogue.EndState.SUCCESSFUL, TacDialogue.EndState.FAILED}
     )
+
+    _keep_terminal_state_dialogues = True
 
     def __init__(
         self,

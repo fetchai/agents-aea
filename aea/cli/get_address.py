@@ -38,14 +38,14 @@ from aea.crypto.registries import crypto_registry
 )
 @click.pass_context
 @check_aea_project
-def get_address(click_context, type_):
-    """Get the address associated with the private key."""
+def get_address(click_context: click.Context, type_: str) -> None:
+    """Get the address associated with a private key of the agent."""
     ctx = cast(Context, click_context.obj)
     address = _try_get_address(ctx, type_)
     click.echo(address)
 
 
-def _try_get_address(ctx: Context, type_: str):
+def _try_get_address(ctx: Context, type_: str) -> str:
     """
     Try to get address.
 

@@ -35,8 +35,11 @@ from aea.protocols.generator.common import (
     _python_pt_or_ct_type_to_proto_type,
     _to_camel_case,
     _union_sub_type_to_protobuf_variable_name,
+    apply_protolint,
+    base_protolint_command,
     check_prerequisites,
     check_protobuf_using_protoc,
+    compile_protobuf_using_protoc,
     is_installed,
     load_protocol_specification,
     try_run_black_formatting,
@@ -57,6 +60,11 @@ logging.basicConfig(level=logging.INFO)
 def isort_is_not_installed_side_effect(*args, **kwargs):
     """Isort not installed."""
     return not args[0] == "isort"
+
+
+def protolint_is_not_installed_side_effect(*args, **kwargs):
+    """Protolint not installed."""
+    return not args[0] == "protolint"
 
 
 def black_is_not_installed_side_effect(*args, **kwargs):
@@ -347,6 +355,13 @@ class TestCommon(TestCase):
         """Negative test for the 'is_installed' method: programme is not installed"""
         assert is_installed("some_programme") is False
 
+    def test_base_protolint_command(self):
+        """Tests the 'base_protolint_command' method"""
+        assert (
+            base_protolint_command() == "protolint"
+            or "PATH=${PATH}:${GOPATH}/bin/:~/go/bin protolint"
+        )
+
     @mock.patch("aea.protocols.generator.common.is_installed", return_value=True)
     def test_check_prerequisites_positive(self, mocked_is_installed):
         """Positive test for the 'check_prerequisites' method"""
@@ -378,6 +393,16 @@ class TestCommon(TestCase):
             check_prerequisites()
 
     @mock.patch(
+        "aea.protocols.generator.common.subprocess.call", return_value=1,
+    )
+    def test_check_prerequisites_negative_protolint_is_not_installed(
+        self, mocked_is_installed
+    ):
+        """Negative test for the 'check_prerequisites' method: protolint isn't installed"""
+        with self.assertRaises(FileNotFoundError):
+            check_prerequisites()
+
+    @mock.patch(
         "aea.protocols.generator.common.is_installed",
         side_effect=protoc_is_not_installed_side_effect,
     )
@@ -395,7 +420,7 @@ class TestCommon(TestCase):
         assert spec.version == "0.1.0"
         assert spec.author == "fetchai"
         assert spec.license == "Apache-2.0"
-        assert spec.aea_version == ">=0.7.0, <0.8.0"
+        assert spec.aea_version == ">=0.10.0, <0.11.0"
         assert spec.description == "A protocol for testing purposes."
         assert spec.speech_acts is not None
         assert spec.protobuf_snippets is not None and spec.protobuf_snippets != ""
@@ -429,6 +454,12 @@ class TestCommon(TestCase):
         try_run_protoc("some_path", "some_name")
         mocked_subprocess.assert_called_once()
 
+    @mock.patch("subprocess.run")
+    def test_try_run_protolint(self, mocked_subprocess):
+        """Test the 'try_run_protolint' method"""
+        try_run_protoc("some_path", "some_name")
+        mocked_subprocess.assert_called_once()
+
     @mock.patch("aea.protocols.generator.common.try_run_protoc")
     def test_check_protobuf_using_protoc_positive(self, mocked_try_run_protoc):
         """Positive test for the 'check_protobuf_using_protoc' method"""
@@ -454,6 +485,56 @@ class TestCommon(TestCase):
         result, msg = check_protobuf_using_protoc("some_path", "name")
         assert result is False
         assert msg == "some_protoc_error"
+
+    @mock.patch("aea.protocols.generator.common.try_run_protoc")
+    def test_compile_protobuf_using_protoc_positive(self, mocked_try_run_protoc):
+        """Positive test for the 'compile_protobuf_using_protoc' method"""
+        protocol_name = "protocol_name"
+
+        result, msg = compile_protobuf_using_protoc(self.t, protocol_name, "python")
+
+        mocked_try_run_protoc.assert_called_once()
+        assert result is True
+        assert msg == "protobuf schema successfully compiled"
+
+    @mock.patch(
+        "subprocess.run",
+        side_effect=CalledProcessError(
+            1, "some_command", stderr="protocol_name.proto:12:45: some_protoc_error\n"
+        ),
+    )
+    def test_compile_protobuf_using_protoc_nagative(self, mocked_subprocess):
+        """Negative test for the 'check_protobuf_using_protoc' method: protoc has some errors"""
+        protocol_name = "protocol_name"
+        result, msg = compile_protobuf_using_protoc(self.t, protocol_name, "python")
+        assert result is False
+        assert msg == "some_protoc_error"
+
+    @mock.patch("aea.protocols.generator.common.try_run_protolint")
+    def test_apply_protolint_positive(self, mocked_try_run_protoc):
+        """Positive test for the 'apply_protolint' method"""
+        protocol_name = "protocol_name"
+
+        result, msg = apply_protolint(self.t, protocol_name)
+
+        mocked_try_run_protoc.assert_called_once()
+        assert result is True
+        assert msg == "protolint has no output"
+
+    @mock.patch(
+        "subprocess.run",
+        side_effect=CalledProcessError(
+            1,
+            "some_command",
+            stderr="protocol_name.proto:12:45: some_protoc_error\nprotocol_name.proto:12:45: incorrect indentation style ...",
+        ),
+    )
+    def test_apply_protolint_nagative(self, mocked_subprocess):
+        """Negative test for the 'apply_protolint' method: protoc has some errors"""
+        protocol_name = "protocol_name"
+        result, msg = apply_protolint(self.t, protocol_name)
+        assert result is False
+        assert msg == "protocol_name.proto:12:45: some_protoc_error"
 
     @classmethod
     def teardown_class(cls):

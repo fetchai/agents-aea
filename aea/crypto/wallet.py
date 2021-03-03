@@ -22,6 +22,7 @@
 import logging
 from typing import Any, Dict, Optional, cast
 
+from aea.common import JSONLike
 from aea.crypto.base import Crypto
 from aea.crypto.registries import make_crypto
 
@@ -31,6 +32,8 @@ _default_logger = logging.getLogger(__name__)
 
 class CryptoStore:
     """Utility class to store and retrieve crypto objects."""
+
+    __slots__ = ("_crypto_objects", "_public_keys", "_addresses", "_private_keys")
 
     def __init__(
         self, crypto_id_to_path: Optional[Dict[str, Optional[str]]] = None
@@ -157,7 +160,7 @@ class Wallet:
             signature = crypto_object.sign_message(message, is_deprecated_mode)
         return signature
 
-    def sign_transaction(self, crypto_id: str, transaction: Any) -> Optional[Any]:
+    def sign_transaction(self, crypto_id: str, transaction: Any) -> Optional[JSONLike]:
         """
         Sign a tx.
 

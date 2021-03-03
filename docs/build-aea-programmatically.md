@@ -1,12 +1,17 @@
 
 These instructions detail the Python code you need for running an AEA outside the `cli` tool, using the code interface.
 
-## Preperation
+## Preparation
 
 Get the packages directory from the AEA repository:
 
 ``` bash
 svn export https://github.com/fetchai/agents-aea.git/trunk/packages
+```
+
+Also, install `aea-crypto-fetchai` plug-in:
+```bash
+pip install aea-crypto-fetchai
 ```
 
 ## Imports
@@ -22,9 +27,10 @@ from threading import Thread
 Then, import the application specific libraries.
 
 ``` python
+from aea_crypto_fetchai import FetchAICrypto
+
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
-from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA, create_private_key
 from aea.helpers.file_io import write_with_lock
 from aea.skills.base import Skill
@@ -56,7 +62,7 @@ We will use the stub connection to pass envelopes in and out of the AEA. Ensure 
 ```
 
 ## Initialise the AEA
-We use the <a href="../api/aea_builder#aeabuilder-objects">`AEABuilder`</a> to readily build an AEA. By default, the `AEABuilder` adds the `fetchai/default:0.8.0` protocol, the `fetchai/stub:0.12.0` connection and the `fetchai/error:0.8.0` skill.
+We use the <a href="../api/aea_builder#aeabuilder-objects">`AEABuilder`</a> to readily build an AEA. By default, the `AEABuilder` adds the `fetchai/default:0.12.0`, `fetchai/state_update:0.10.0` and `fetchai/signing:0.10.0` protocols.
 ``` python
     # Instantiate the builder and build the AEA
     # By default, the default protocol, error skill and stub connection are added
@@ -68,6 +74,12 @@ We set the name, add the private key for the AEA to use and set the ledger confi
     builder.set_name("my_aea")
 
     builder.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
+```
+
+Next, we add the `fetchai/stub:0.15.0` connection which will read/write messages from file:
+``` python
+    # Add the stub connection (assuming it is present in the local directory 'packages')
+    builder.add_connection("./packages/fetchai/connections/stub")
 ```
 
 Next, we add the echo skill which will bounce our messages back to us. We first need to place the echo skill into a relevant directory (see path), either by downloading the `packages` directory from the AEA repo or by getting the package from the registry.
@@ -130,7 +142,7 @@ We run the AEA from a different thread so that we can still use the main thread 
 We use the input and output text files to send an envelope to our AEA and receive a response (from the echo skill)
 ``` python
         # Create a message inside an envelope and get the stub connection to pass it on to the echo skill
-        message_text = b"my_aea,other_agent,fetchai/default:0.8.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,"
+        message_text = b"my_aea,other_agent,fetchai/default:0.1.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,"
         with open(INPUT_FILE, "wb") as f:
             write_with_lock(f, message_text)
             print(b"input message: " + message_text)
@@ -156,8 +168,8 @@ Finally stop our AEA and wait for it to finish
 ## Running the AEA
 If you now run this python script file, you should see this output:
 
-    input message: my_aea,other_agent,fetchai/default:0.8.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,
-    output message: other_agent,my_aea,fetchai/default:0.8.0,...\x05hello
+    input message: my_aea,other_agent,fetchai/default:0.12.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,
+    output message: other_agent,my_aea,fetchai/default:0.12.0,...\x05hello
 
 
 ## Entire code listing
@@ -171,9 +183,10 @@ import os
 import time
 from threading import Thread
 
+from aea_crypto_fetchai import FetchAICrypto
+
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
-from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import PRIVATE_KEY_PATH_SCHEMA, create_private_key
 from aea.helpers.file_io import write_with_lock
 from aea.skills.base import Skill
@@ -204,6 +217,9 @@ def run():
     builder.set_name("my_aea")
 
     builder.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
+
+    # Add the stub connection (assuming it is present in the local directory 'packages')
+    builder.add_connection("./packages/fetchai/connections/stub")
 
     # Add the echo skill (assuming it is present in the local directory 'packages')
     builder.add_skill("./packages/fetchai/skills/echo")
@@ -249,7 +265,7 @@ def run():
         time.sleep(4)
 
         # Create a message inside an envelope and get the stub connection to pass it on to the echo skill
-        message_text = b"my_aea,other_agent,fetchai/default:0.8.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,"
+        message_text = b"my_aea,other_agent,fetchai/default:0.1.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,"
         with open(INPUT_FILE, "wb") as f:
             write_with_lock(f, message_text)
             print(b"input message: " + message_text)

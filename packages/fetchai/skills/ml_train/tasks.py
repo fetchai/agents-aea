@@ -19,9 +19,10 @@
 
 """This module contains the tasks for the 'ml_train' skill."""
 
-from typing import Tuple
+from typing import Any, Tuple
 
 import numpy as np
+import tensorflow as tf
 from tensorflow import keras
 
 from aea.skills.base import SkillContext
@@ -35,7 +36,6 @@ class MLTrainTask(Task):
         self,
         skill_context: SkillContext,
         train_data: Tuple[np.ndarray, np.ndarray],
-        model: keras.Model,
         epochs_per_batch: int = 10,
         batch_size: int = 32,
     ):
@@ -43,7 +43,7 @@ class MLTrainTask(Task):
         super().__init__(logger=skill_context.logger)
         self.train_x, self.train_y = train_data
 
-        self.model = model
+        self.model = self._make_model()
         self.epochs_per_batch = epochs_per_batch
         self.batch_size = batch_size
 
@@ -51,7 +51,24 @@ class MLTrainTask(Task):
         """Set up the task."""
         self.logger.info("ML Train task: setup method called.")
 
-    def execute(self, *args, **kwargs) -> keras.Model:
+    @staticmethod
+    def _make_model() -> Any:
+        """Make the model."""
+        model = tf.keras.Sequential(
+            [
+                tf.keras.layers.Flatten(input_shape=(28, 28)),
+                tf.keras.layers.Dense(128, activation="relu"),
+                tf.keras.layers.Dense(10, activation="softmax"),
+            ]
+        )
+        model.compile(
+            optimizer="adam",
+            loss="sparse_categorical_crossentropy",
+            metrics=["accuracy"],
+        )
+        return model
+
+    def execute(self, *args: Any, **kwargs: Any) -> keras.Model:
         """Execute the task."""
         self.logger.info("Start training with {} rows".format(self.train_x.shape[0]))
         self.model.fit(self.train_x, self.train_y, epochs=self.epochs_per_batch)

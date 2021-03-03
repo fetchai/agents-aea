@@ -19,23 +19,28 @@
 """This test module contains the tests for commands in aea.cli.get_address module."""
 
 from unittest import TestCase, mock
+from unittest.mock import MagicMock
+
+from aea_crypto_fetchai import FetchAICrypto
 
 from aea.cli import cli
 from aea.cli.get_address import _try_get_address
 
-from tests.conftest import CLI_LOG_OPTION, CliRunner, FETCHAI
+from tests.conftest import CLI_LOG_OPTION, COSMOS_ADDRESS_ONE, CliRunner
 from tests.test_cli.tools_for_testing import ContextMock
 
 
 class GetAddressTestCase(TestCase):
     """Test case for _get_address method."""
 
-    @mock.patch("aea.cli.utils.package_utils.Wallet")
-    @mock.patch("aea.cli.utils.package_utils.verify_or_create_private_keys_ctx")
+    @mock.patch(
+        "aea.cli.get_address.get_wallet_from_context",
+        return_value=MagicMock(addresses={"cosmos": COSMOS_ADDRESS_ONE}),
+    )
     def test__get_address_positive(self, *mocks):
         """Test for _get_address method positive result."""
         ctx = ContextMock()
-        _try_get_address(ctx, "type")
+        _try_get_address(ctx, "cosmos")
 
 
 @mock.patch("aea.cli.utils.decorators.try_to_load_agent_config")
@@ -53,7 +58,12 @@ class GetAddressCommandTestCase(TestCase):
         """Test for CLI get_address positive result."""
         result = self.runner.invoke(
             cli,
-            [*CLI_LOG_OPTION, "--skip-consistency-check", "get-address", FETCHAI],
+            [
+                *CLI_LOG_OPTION,
+                "--skip-consistency-check",
+                "get-address",
+                FetchAICrypto.identifier,
+            ],
             standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)

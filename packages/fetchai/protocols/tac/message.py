@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2020 fetchai
+#   Copyright 2021 fetchai
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 """This module contains tac's message definition."""
 
 import logging
-from typing import Dict, Optional, Set, Tuple, cast
+from typing import Any, Dict, Optional, Set, Tuple, cast
 
 from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
@@ -37,7 +37,8 @@ DEFAULT_BODY_SIZE = 4
 class TacMessage(Message):
     """The tac protocol implements the messages an AEA needs to participate in the TAC."""
 
-    protocol_id = PublicId.from_str("fetchai/tac:0.9.0")
+    protocol_id = PublicId.from_str("fetchai/tac:0.13.0")
+    protocol_specification_id = PublicId.from_str("fetchai/tac:0.1.0")
 
     ErrorCode = CustomErrorCode
 
@@ -52,9 +53,47 @@ class TacMessage(Message):
         TRANSACTION_CONFIRMATION = "transaction_confirmation"
         UNREGISTER = "unregister"
 
-        def __str__(self):
+        def __str__(self) -> str:
             """Get the string representation."""
             return str(self.value)
+
+    _performatives = {
+        "cancelled",
+        "game_data",
+        "register",
+        "tac_error",
+        "transaction",
+        "transaction_confirmation",
+        "unregister",
+    }
+    __slots__: Tuple[str, ...] = tuple()
+
+    class _SlotsCls:
+        __slots__ = (
+            "agent_addr_to_name",
+            "agent_name",
+            "amount_by_currency_id",
+            "counterparty_address",
+            "counterparty_signature",
+            "currency_id_to_name",
+            "dialogue_reference",
+            "error_code",
+            "exchange_params_by_currency_id",
+            "fee_by_currency_id",
+            "good_id_to_name",
+            "info",
+            "ledger_id",
+            "message_id",
+            "nonce",
+            "performative",
+            "quantities_by_good_id",
+            "sender_address",
+            "sender_signature",
+            "target",
+            "transaction_id",
+            "utility_params_by_good_id",
+            "version_id",
+        )
 
     def __init__(
         self,
@@ -62,7 +101,7 @@ class TacMessage(Message):
         dialogue_reference: Tuple[str, str] = ("", ""),
         message_id: int = 1,
         target: int = 0,
-        **kwargs,
+        **kwargs: Any,
     ):
         """
         Initialise an instance of TacMessage.
@@ -72,15 +111,6 @@ class TacMessage(Message):
         :param target: the message target.
         :param performative: the message performative.
         """
-        self._performatives = {
-            "cancelled",
-            "game_data",
-            "register",
-            "tac_error",
-            "transaction",
-            "transaction_confirmation",
-            "unregister",
-        }
         super().__init__(
             dialogue_reference=dialogue_reference,
             message_id=message_id,
@@ -731,13 +761,6 @@ class TacMessage(Message):
                     self.target == 0,
                     "Invalid 'target'. Expected 0 (because 'message_id' is 1). Found {}.".format(
                         self.target
-                    ),
-                )
-            else:
-                enforce(
-                    0 < self.target < self.message_id,
-                    "Invalid 'target'. Expected an integer between 1 and {} inclusive. Found {}.".format(
-                        self.message_id - 1, self.target,
                     ),
                 )
         except (AEAEnforceError, ValueError, KeyError) as e:

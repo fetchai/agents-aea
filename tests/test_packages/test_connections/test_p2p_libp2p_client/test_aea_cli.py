@@ -18,6 +18,11 @@
 # ------------------------------------------------------------------------------
 
 """This test module contains AEA cli tests for Libp2p tcp client connection."""
+import os
+
+from aea_crypto_fetchai import FetchAICrypto
+
+from aea.helpers.base import CertRequest
 from aea.multiplexer import Multiplexer
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
@@ -48,7 +53,10 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
         """Set up the test class."""
         super(TestP2PLibp2pClientConnectionAEARunning, cls).setup_class()
 
+        temp_dir = os.path.join(cls.t, "temp_dir_node")
+        os.mkdir(temp_dir)
         cls.node_connection = _make_libp2p_connection(
+            data_dir=temp_dir,
             delegate_host=DEFAULT_HOST,
             delegate_port=DEFAULT_DELEGATE_PORT,
             delegate=True,
@@ -64,12 +72,37 @@ class TestP2PLibp2pClientConnectionAEARunning(AEATestCaseEmpty):
 
     def test_connection(self):
         """Test the connection can be used in an aea."""
+        self.generate_private_key()
+        self.add_private_key()
         self.add_item("connection", str(PUBLIC_ID))
-        config_path = "vendor.fetchai.connections.p2p_libp2p_client.config"
+        conn_path = "vendor.fetchai.connections.p2p_libp2p_client"
         self.nested_set_config(
-            config_path,
-            {"nodes": [{"uri": "{}:{}".format(DEFAULT_HOST, DEFAULT_DELEGATE_PORT)}]},
+            conn_path + ".config",
+            {
+                "nodes": [
+                    {
+                        "uri": "{}:{}".format(DEFAULT_HOST, DEFAULT_DELEGATE_PORT),
+                        "public_key": self.node_connection.node.pub,
+                    }
+                ]
+            },
         )
+
+        # generate certificates for connection
+        self.nested_set_config(
+            conn_path + ".cert_requests",
+            [
+                CertRequest(
+                    identifier="acn",
+                    ledger_id=FetchAICrypto.identifier,
+                    not_after="2022-01-01",
+                    not_before="2021-01-01",
+                    public_key=self.node_connection.node.pub,
+                    save_path="./cli_test_cert.txt",
+                )
+            ],
+        )
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
 
         process = self.run_agent()
         is_running = self.is_running(process, timeout=DEFAULT_LAUNCH_TIMEOUT)

@@ -22,7 +22,7 @@ from abc import ABC, abstractmethod
 from asyncio import Task
 from concurrent.futures._base import Executor
 from logging import Logger
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional, Union
 
 from aea.configurations.base import PublicId
 from aea.crypto.base import LedgerApi
@@ -33,7 +33,7 @@ from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue, Dialogues
 
 
-CONNECTION_ID = PublicId.from_str("fetchai/ledger:0.8.0")
+CONNECTION_ID = PublicId.from_str("fetchai/ledger:0.13.0")
 
 
 class RequestDispatcher(ABC):
@@ -75,7 +75,7 @@ class RequestDispatcher(ABC):
         api: LedgerApi,
         message: Message,
         dialogue: Dialogue,
-    ):
+    ) -> Union[Message, Task]:
         """
         Run a function in executor.
 

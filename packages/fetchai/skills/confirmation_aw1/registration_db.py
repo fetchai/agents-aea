@@ -22,7 +22,7 @@
 import logging
 import os
 import sqlite3
-from typing import Tuple
+from typing import Any, List, Tuple
 
 from aea.skills.base import Model
 
@@ -35,8 +35,8 @@ _default_logger = logging.getLogger(
 class RegistrationDB(Model):
     """Communicate between the database and the python objects."""
 
-    def __init__(self, **kwargs):
-        """Initialise the Detection Database Communication class."""
+    def __init__(self, **kwargs: Any) -> None:
+        """Initialise the class."""
         custom_path = kwargs.pop("custom_path", None)
         super().__init__(**kwargs)
         this_dir = os.getcwd()
@@ -45,6 +45,8 @@ class RegistrationDB(Model):
             if custom_path is None
             else custom_path
         )
+        if not os.path.exists(os.path.dirname(os.path.abspath(self.db_path))):
+            raise ValueError(f"Path={self.db_path} not valid!")  # pragma: nocover
         self._initialise_backend()
 
     def _initialise_backend(self) -> None:
@@ -65,7 +67,7 @@ class RegistrationDB(Model):
         fetchai_signature: str,
         developer_handle: str,
         tweet: str,
-    ):
+    ) -> None:
         """Record a registration."""
         command = "INSERT OR REPLACE INTO registered_table(address, ethereum_address, ethereum_signature, fetchai_signature, developer_handle, tweet) values(?, ?, ?, ?, ?, ?)"
         variables = (
@@ -85,12 +87,59 @@ class RegistrationDB(Model):
         result = self._execute_single_sql(command, variables)
         return len(result) != 0
 
+    def get_developer_handle(self, address: str) -> str:
+        """Get developer handle relating to an address."""
+        command = "SELECT developer_handle FROM registered_table WHERE address=?"
+        variables = (address,)
+        result = self._execute_single_sql(command, variables)
+        if len(result[0]) != 1:
+            raise ValueError(
+                f"More than one developer_handle found for address={address}."
+            )
+        return result[0][0]
+
+    def get_ethereum_address(
+        self, address: str, developer_handle: str
+    ) -> str:  # pragma: no cover
+        """Get ethereum address relating to an address (hacky for backwards compatibility)."""
+        command = "SELECT ethereum_address FROM registered_table WHERE address=?"
+        variables = (address,)
+        result = self._execute_single_sql(command, variables)
+        if len(result) != 0 and len(result[0]) != 1:
+            raise ValueError(
+                f"More than one ethereum_address found for address={address}."
+            )
+        if len(result) != 0 and (result[0][0] != "" or developer_handle == ""):
+            return result[0][0]
+        command = (
+            "SELECT ethereum_address FROM registered_table WHERE developer_handle=?"
+        )
+        variables = (developer_handle,)
+        result = self._execute_single_sql(command, variables)
+        if len(result) == 0:
+            raise ValueError(
+                f"No ethereum_address found for address={address} and developer_handle={developer_handle}."
+            )
+        if len(result[0]) != 1:
+            raise ValueError(
+                f"More than one ethereum_address found for developer_handle={developer_handle}."
+            )
+        return result[0][0]
+
+    def get_all_registered(self) -> List[str]:
+        """Get all registered AW-1 AEAs."""
+        command = "SELECT address FROM registered_table"
+        variables = ()
+        results = self._execute_single_sql(command, variables)
+        registered = [result[0] for result in results]
+        return registered
+
     def _execute_single_sql(
         self,
         command: str,
         variables: Tuple[str, ...] = (),
         print_exceptions: bool = True,
-    ):
+    ) -> List[Tuple[str, ...]]:
         """Query the database - all the other functions use this under the hood."""
         conn = None
         ret = []

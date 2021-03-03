@@ -27,6 +27,7 @@ This module contains the classes required for dialogue management.
 - TacDialogue: The dialogue class maintains state of a dialogue of type tac and manages it.
 - TacDialogues: The dialogues class keeps track of all dialogues of type tac.
 """
+from typing import Any
 
 from aea.protocols.base import Address, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
@@ -54,7 +55,7 @@ OefSearchDialogue = BaseOefSearchDialogue
 class OefSearchDialogues(Model, BaseOefSearchDialogues):
     """This class keeps track of all oef_search dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -76,7 +77,7 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
 
         BaseOefSearchDialogues.__init__(
             self,
-            self_address=self.context.agent_address + "_" + str(self.context.skill_id),
+            self_address=str(self.skill_id),
             role_from_first_message=role_from_first_message,
         )
 
@@ -87,7 +88,7 @@ StateUpdateDialogue = BaseStateUpdateDialogue
 class StateUpdateDialogues(Model, BaseStateUpdateDialogues):
     """This class keeps track of all state_update dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -109,7 +110,7 @@ class StateUpdateDialogues(Model, BaseStateUpdateDialogues):
 
         BaseStateUpdateDialogues.__init__(
             self,
-            self_address=self.context.agent_address + "_" + str(self.context.skill_id),
+            self_address=str(self.skill_id),
             role_from_first_message=role_from_first_message,
         )
 
@@ -120,7 +121,7 @@ TacDialogue = BaseTacDialogue
 class TacDialogues(Model, BaseTacDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 

@@ -15,6 +15,15 @@
     },
     "config": {
       "type": "object"
+    },
+    "is_abstract": {
+      "$ref": "connection-config_schema.json#/properties/is_abstract"
+    },
+    "cert_requests": {
+      "$ref": "connection-config_schema.json#/properties/cert_requests"
+    },
+    "build_directory": {
+      "$ref": "definitions.json#/definitions/build_directory"
     }
   }
 }

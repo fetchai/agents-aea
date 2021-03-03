@@ -32,22 +32,33 @@ from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import pass_ctx
 from aea.cli.utils.formatting import format_items, retrieve_details
 from aea.cli.utils.loggers import logger
-from aea.configurations.base import (
+from aea.common import JSONLike
+from aea.configurations.constants import (
+    AGENT,
+    AGENTS,
+    CONNECTION,
+    CONNECTIONS,
+    CONTRACT,
+    CONTRACTS,
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_CONTRACT_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
+    DEFAULT_REGISTRY_PATH,
     DEFAULT_SKILL_CONFIG_FILE,
+    PROTOCOL,
+    PROTOCOLS,
+    SKILL,
+    SKILLS,
 )
-from aea.configurations.constants import DEFAULT_REGISTRY_PATH
 from aea.configurations.loader import ConfigLoader
 
 
 @click.group()
 @click.option("--local", is_flag=True, help="For local search.")
 @click.pass_context
-def search(click_context, local):
-    """Search for components in the registry.
+def search(click_context: click.Context, local: bool) -> None:
+    """Search for packages in the registry.
 
     If called from an agent directory, it will check
 
@@ -64,9 +75,9 @@ def search(click_context, local):
 @click.option("--query", default="", help="Query string to search Connections by name.")
 @click.option("--page", type=int, default=1, help="Page number to display.")
 @pass_ctx
-def connections(ctx: Context, query, page):
+def connections(ctx: Context, query: str, page: int) -> None:
     """Search for Connections."""
-    item_type = "connection"
+    item_type = CONNECTION
     _output_search_results(item_type, *search_items(ctx, item_type, query, page), page)
 
 
@@ -74,9 +85,9 @@ def connections(ctx: Context, query, page):
 @click.option("--query", default="", help="Query string to search Contracts by name.")
 @click.option("--page", type=int, default=1, help="Page number to display.")
 @pass_ctx
-def contracts(ctx: Context, query, page):
+def contracts(ctx: Context, query: str, page: int) -> None:
     """Search for Contracts."""
-    item_type = "contract"
+    item_type = CONTRACT
     _output_search_results(item_type, *search_items(ctx, item_type, query, page), page)
 
 
@@ -84,9 +95,9 @@ def contracts(ctx: Context, query, page):
 @click.option("--query", default="", help="Query string to search Protocols by name.")
 @click.option("--page", type=int, default=1, help="Page number to display.")
 @pass_ctx
-def protocols(ctx: Context, query, page):
+def protocols(ctx: Context, query: str, page: int) -> None:
     """Search for Protocols."""
-    item_type = "protocol"
+    item_type = PROTOCOL
     _output_search_results(item_type, *search_items(ctx, item_type, query, page), page)
 
 
@@ -94,9 +105,9 @@ def protocols(ctx: Context, query, page):
 @click.option("--query", default="", help="Query string to search Skills by name.")
 @click.option("--page", type=int, default=1, help="Page number to display.")
 @pass_ctx
-def skills(ctx: Context, query, page):
+def skills(ctx: Context, query: str, page: int) -> None:
     """Search for Skills."""
-    item_type = "skill"
+    item_type = SKILL
     _output_search_results(item_type, *search_items(ctx, item_type, query, page), page)
 
 
@@ -104,9 +115,9 @@ def skills(ctx: Context, query, page):
 @click.option("--query", default="", help="Query string to search Agents by name.")
 @click.option("--page", type=int, default=1, help="Page number to display.")
 @pass_ctx
-def agents(ctx: Context, query, page):
+def agents(ctx: Context, query: str, page: int) -> None:
     """Search for Agents."""
-    item_type = "agent"
+    item_type = AGENT
     _output_search_results(item_type, *search_items(ctx, item_type, query, page), page)
 
 
@@ -133,7 +144,7 @@ def setup_search_ctx(ctx: Context, local: bool) -> None:
         logger.debug("Using registry {}".format(registry_directory))
 
 
-def _is_invalid_item(name, dir_path, config_path):
+def _is_invalid_item(name: str, dir_path: Path, config_path: Path) -> bool:
     """Return true if this protocol, connection or skill should not be returned in the list."""
     return (
         name == "scaffold"
@@ -148,7 +159,7 @@ def _get_details_from_dir(
     sub_dir_glob_pattern: str,
     config_filename: str,
     results: List[Dict],
-):
+) -> None:
     for dir_path in Path(root_path).glob(sub_dir_glob_pattern + "/*/"):
         config_path = dir_path / config_filename
 
@@ -159,44 +170,41 @@ def _get_details_from_dir(
         results.append(details)
 
 
-def _search_items_locally(ctx, item_type_plural):
+def _search_items_locally(ctx: Context, item_type_plural: str) -> List[Dict]:
     registry = cast(str, ctx.config.get("registry_directory"))
     result = []  # type: List[Dict]
     configs = {
-        "agents": {"loader": ctx.agent_loader, "config_file": DEFAULT_AEA_CONFIG_FILE},
-        "connections": {
+        AGENTS: {"loader": ctx.agent_loader, "config_file": DEFAULT_AEA_CONFIG_FILE},
+        CONNECTIONS: {
             "loader": ctx.connection_loader,
             "config_file": DEFAULT_CONNECTION_CONFIG_FILE,
         },
-        "contracts": {
+        CONTRACTS: {
             "loader": ctx.contract_loader,
             "config_file": DEFAULT_CONTRACT_CONFIG_FILE,
         },
-        "protocols": {
+        PROTOCOLS: {
             "loader": ctx.protocol_loader,
             "config_file": DEFAULT_PROTOCOL_CONFIG_FILE,
         },
-        "skills": {
-            "loader": ctx.skill_loader,
-            "config_file": DEFAULT_SKILL_CONFIG_FILE,
-        },
+        SKILLS: {"loader": ctx.skill_loader, "config_file": DEFAULT_SKILL_CONFIG_FILE},
     }
-    if item_type_plural != "agents":
+    if item_type_plural != AGENTS:
         # look in aea distribution for default packages
         _get_details_from_dir(
-            configs[item_type_plural]["loader"],
+            cast(ConfigLoader, configs[item_type_plural]["loader"]),
             AEA_DIR,
             item_type_plural,
-            configs[item_type_plural]["config_file"],
+            cast(str, configs[item_type_plural]["config_file"]),
             result,
         )
 
     # look in packages dir for all other packages
     _get_details_from_dir(
-        configs[item_type_plural]["loader"],
+        cast(ConfigLoader, configs[item_type_plural]["loader"]),
         registry,
         "*/{}".format(item_type_plural),
-        configs[item_type_plural]["config_file"],
+        cast(str, configs[item_type_plural]["config_file"]),
         result,
     )
 
@@ -205,7 +213,7 @@ def _search_items_locally(ctx, item_type_plural):
 
 def search_items(
     ctx: Context, item_type: str, query: str, page: int
-) -> Tuple[List, int]:
+) -> Tuple[List[Dict], int]:
     """
     Search items by query and click.echo results.
 
@@ -221,13 +229,16 @@ def search_items(
         results = _search_items_locally(ctx, item_type_plural)
         count = len(results)
     else:
-        resp = request_api(
-            "GET",
-            "/{}".format(item_type_plural),
-            params={"search": query, "page": page},
+        resp = cast(
+            JSONLike,
+            request_api(
+                "GET",
+                "/{}".format(item_type_plural),
+                params={"search": query, "page": page},
+            ),
         )
-        results = resp["results"]
-        count = resp["count"]
+        results = cast(List[Dict], resp["results"])
+        count = cast(int, resp["count"])
     return results, count
 
 

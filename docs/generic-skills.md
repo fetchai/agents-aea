@@ -1,20 +1,19 @@
-The AEA generic buyer and seller skills demonstrate an interaction between two AEAs.
+The AEA generic buyer and seller skills demonstrate an interaction between two AEAs:
 
-* The provider of a service in the form of data for sale.
-* The buyer of a service.
+* An AEA that provides a (data selling) service.
+* An AEA that demands this service.
 
 ## Discussion
 
-The scope of the specific demo is to demonstrate how to create an easy configurable AEA. The seller AEA will sell the service specified in the `skill.yaml` file and deliver it upon payment by the buyer. Adding a database or hardware sensor for loading the data is out of the scope of this demo.
+The scope of this guide is demonstrating how to create easily configurable AEAs. The buyer AEA finds the seller, negotiates the terms of trade, and if successful purchases the data by sending payment. The seller AEA sells the service specified in its `skill.yaml` file, delivering it to the buyer upon receiving payment. 
 
-As a result, the AEA can provide data that are listed in the `skill.yaml` file. This demo does not utilize a smart contract. We interact with a ledger only to complete a transaction. This demo assumes the buyer
-trusts the seller AEA to send the data upon successful payment.
+Note that these agents do not utilize a smart contract but interact with a ledger to complete a transaction. Moreover, in this setup, the buyer agent has to trust the seller to send the data upon successful payment.
 
-Moreover, this example provides a way to customise the skill code and connect a database or sensor. You can modify the `has_data_source` variable in `skill.yaml` file of the generic_seller skill to True. Then you have to implement the method `collect_from_data_source(self)` inside the strategy.py file.
+The corresponding packages can be customised to allow for a database or sensor to be defined from which data is loaded. This is done by first modifying the `has_data_source` variable in `skill.yaml` file of the `generic_seller` skill to `True`. Then you have to provide an implementation for the `collect_from_data_source(self)` method in the `strategy.py` file. More detailed instructions is beyond the scope of this guide.
 
 ## Communication
 
-This diagram shows the communication between the various entities as data is successfully sold by the seller AEA to the buyer. 
+The following diagram shows the communication between various entities in this interaction.
 
 <div class="mermaid">
     sequenceDiagram
@@ -59,9 +58,10 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 First, fetch the seller AEA:
 ``` bash
-aea fetch fetchai/generic_seller:0.12.0 --alias my_seller_aea
+aea fetch fetchai/generic_seller:0.19.0 --alias my_seller_aea
 cd my_seller_aea
 aea install
+aea build
 ```
 
 <details><summary>Alternatively, create from scratch.</summary>
@@ -71,19 +71,22 @@ The following steps create the seller from scratch:
 ``` bash
 aea create my_seller_aea
 cd my_seller_aea
-aea add connection fetchai/p2p_libp2p:0.12.0
-aea add connection fetchai/soef:0.11.0
-aea add connection fetchai/ledger:0.8.0
-aea add skill fetchai/generic_seller:0.15.0
+aea add connection fetchai/p2p_libp2p:0.16.0
+aea add connection fetchai/soef:0.17.0
+aea add connection fetchai/ledger:0.13.0
+aea add skill fetchai/generic_seller:0.20.0
+aea config set --type dict agent.dependencies \
+'{
+  "aea-crypto-fetchai": {"version": "<0.2.0,>=0.1.0"}
+}'
+aea config set agent.default_connection fetchai/p2p_libp2p:0.16.0
+aea config set --type dict agent.default_routing \
+'{
+  "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
+  "fetchai/oef_search:0.13.0": "fetchai/soef:0.17.0"
+}'
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
-```
-
-In `my_seller_aea/aea-config.yaml` add 
-``` yaml
-default_routing:
-  fetchai/ledger_api:0.6.0: fetchai/ledger:0.8.0
-  fetchai/oef_search:0.9.0: fetchai/soef:0.11.0
+aea build
 ```
 
 </p>
@@ -91,11 +94,12 @@ default_routing:
 
 ### Create the buyer AEA
 
-Then, fetch the buyer AEA:
+Then, in another terminal fetch the buyer AEA:
 ``` bash
-aea fetch fetchai/generic_buyer:0.12.0 --alias my_buyer_aea
+aea fetch fetchai/generic_buyer:0.20.0 --alias my_buyer_aea
 cd my_buyer_aea
 aea install
+aea build
 ```
 
 <details><summary>Alternatively, create from scratch.</summary>
@@ -105,19 +109,22 @@ The following steps create the buyer from scratch:
 ``` bash
 aea create my_buyer_aea
 cd my_buyer_aea
-aea add connection fetchai/p2p_libp2p:0.12.0
-aea add connection fetchai/soef:0.11.0
-aea add connection fetchai/ledger:0.8.0
-aea add skill fetchai/generic_buyer:0.14.0
+aea add connection fetchai/p2p_libp2p:0.16.0
+aea add connection fetchai/soef:0.17.0
+aea add connection fetchai/ledger:0.13.0
+aea add skill fetchai/generic_buyer:0.20.0
+aea config set --type dict agent.dependencies \
+'{
+  "aea-crypto-fetchai": {"version": "<0.2.0,>=0.1.0"}
+}'
+aea config set agent.default_connection fetchai/p2p_libp2p:0.16.0
+aea config set --type dict agent.default_routing \
+'{
+  "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
+  "fetchai/oef_search:0.13.0": "fetchai/soef:0.17.0"
+}'
 aea install
-aea config set agent.default_connection fetchai/p2p_libp2p:0.12.0
-```
-
-In `my_buyer_aea/aea-config.yaml` add 
-``` yaml
-default_routing:
-  fetchai/ledger_api:0.6.0: fetchai/ledger:0.8.0
-  fetchai/oef_search:0.9.0: fetchai/soef:0.11.0
+aea build
 ```
 
 </p>
@@ -126,22 +133,31 @@ default_routing:
 
 ### Add keys for the seller AEA
 
-First, create the private key for the seller AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `AgentLand` use:
+Create the private key for the seller AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `AgentLand` use:
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
-aea add-key fetchai fetchai_private_key.txt --connection
+```
+
+Next, create a private key used to secure the AEA's communications:
+``` bash
+aea generate-key fetchai fetchai_connection_private_key.txt
+aea add-key fetchai fetchai_connection_private_key.txt --connection
+```
+
+Finally, certify the key for use by the connections that request that:
+``` bash
+aea issue-certificates
 ```
 
 ### Add keys and generate wealth for the buyer AEA
 
-The buyer needs to have some wealth to purchase the service from the seller.
+The buyer needs to have some wealth to purchase the data from the seller.
 
 First, create the private key for the buyer AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `AgentLand` use:
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
-aea add-key fetchai fetchai_private_key.txt --connection
 ```
 
 Then, create some wealth for your buyer based on the network you want to transact with. On the Fetch.ai `AgentLand` network:
@@ -149,11 +165,24 @@ Then, create some wealth for your buyer based on the network you want to transac
 aea generate-wealth fetchai
 ```
 
-### Update the skill configs
+Next, create a private key used to secure the AEA's communications:
+``` bash
+aea generate-key fetchai fetchai_connection_private_key.txt
+aea add-key fetchai fetchai_connection_private_key.txt --connection
+```
 
-The default skill configs assume that the transaction is settled against the fetchai ledger.
+Finally, certify the key for use by the connections that request that:
+``` bash
+aea issue-certificates
+```
 
-In `my_seller_aea/vendor/fetchai/skills/generi_seller/skill.yaml` the `data_for_sale` is the data the seller AEA is offering for sale.
+### Update the skill configurations
+
+The default skill configurations assume that the transaction is settled against the Fetch.ai ledger.
+
+In the generic seller's skill configuration file (`my_seller_aea/vendor/fetchai/skills/generi_seller/skill.yaml`) the `data_for_sale` is the data the seller AEA is offering for sale. In the following case, this is a one item dictionary where key is `generic` and value is `data`.
+
+Furthermore, the `service_data` is used to register the seller's service in the <a href="../simple-oef">SOEF search node</a> and make your agent discoverable. 
 ``` yaml
 models:
   ...
@@ -175,9 +204,8 @@ models:
       unit_price: 10
     class_name: GenericStrategy
 ```
-The `data_model`, `data_model_name` and the `service_data` are used to register the service in the <a href="../simple-oef">SOEF search node</a> and make your agent discoverable. The name of each `data_model` attribute must be a key in the `service_data` dictionary.
 
-In the generic buyer skill config (`my_buyer_aea/vendor/fetchai/skills/generic_buyer/skill.yaml`) defines the `search_query`, which has to match the `service_data` of the seller.
+The generic buyer skill configuration file (`my_buyer_aea/vendor/fetchai/skills/generic_buyer/skill.yaml`) includes the `search_query` which has to match the `service_data` of the seller.
 
 ``` yaml
 models:
@@ -202,9 +230,9 @@ models:
     class_name: GenericStrategy
 ```
 
-### Update the skill configs
+### Update the skill configurations
 
-Both skills are abstract skills, make them instantiatable:
+Both skills are abstract skills, make them instantiable:
 
 ``` bash
 cd my_seller_aea
@@ -218,30 +246,47 @@ aea config set vendor.fetchai.skills.generic_buyer.is_abstract false --type bool
 
 ## Run the AEAs
 
-Run both AEAs from their respective terminals.
-
 First, run the seller AEA:
 
 ``` bash
 aea run
 ```
 
-Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address.
+Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of this address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.16.0 -u public_uri` to retrieve the address.)
+This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the seller.
 
-Then, update the configuration of the buyer AEA's p2p connection (in `vendor/fetchai/connections/p2p_libp2p/connection.yaml`) replace the following:
+<!-- Then, in the buyer, update the configuration of the buyer AEA's p2p connection by appending the following YAML text at the end of the `aea-config.yaml` file:
 
 ``` yaml
+---
+public_id: fetchai/p2p_libp2p:0.16.0
+type: connection
 config:
   delegate_uri: 127.0.0.1:11001
-  entry_peers: ['SOME_ADDRESS']
+  entry_peers:
+  - SOME_ADDRESS
   local_uri: 127.0.0.1:9001
   log_file: libp2p_node.log
   public_uri: 127.0.0.1:9001
 ```
 
-where `SOME_ADDRESS` is replaced accordingly.
+where `SOME_ADDRESS` is replaced with the appropriate value.
+-->
+
+Then, configure the buyer to connect to this same local ACN by running the following command in the buyer terminal, replacing `SOME_ADDRESS` with the value you noted above:
+``` bash
+aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
+'{
+  "delegate_uri": "127.0.0.1:11001",
+  "entry_peers": ["SOME_ADDRESS"],
+  "local_uri": "127.0.0.1:9001",
+  "log_file": "libp2p_node.log",
+  "public_uri": "127.0.0.1:9001"
+}'
+```
 
 Then run the buyer AEA:
+
 ``` bash
 aea run
 ```
@@ -249,7 +294,9 @@ aea run
 You will see that the AEAs negotiate and then transact using the Fetch.ai testnet.
 
 ## Delete the AEAs
-When you're done, go up a level and delete the AEAs.
+
+When you're done, stop the agents (`CTRL+C`), go up a level and delete the AEAs.
+
 ``` bash 
 cd ..
 aea delete my_seller_aea

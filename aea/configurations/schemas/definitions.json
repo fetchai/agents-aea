@@ -72,10 +72,7 @@
       "pattern": "^(([1-9][0-9]*!)?(0|[1-9][0-9]*)(\\.(0|[1-9][0-9]*))*((a|b|rc)(0|[1-9][0-9]*))?(\\.post(0|[1-9][0-9]*))?(\\.dev(0|[1-9][0-9]*))?)(, *(( *(~=|==|>=|<=|!=|<|>) *)([1-9][0-9]*!)?(0|[1-9][0-9]*)(\\.(0|[1-9][0-9]*))*((a|b|rc)(0|[1-9][0-9]*))?(\\.post(0|[1-9][0-9]*))?(\\.dev(0|[1-9][0-9]*))?))*$"
     },
     "fingerprint": {
-      "oneOf": [
-        {"type": "string"},
-        {"type": "object"}
-      ]
+      "type": "object"
     },
     "public_id": {
       "type": "string",
@@ -105,6 +102,12 @@
       "items": {
         "$ref": "definitions.json#/definitions/ignore_pattern"
       }
+    },
+    "build_entrypoint": {
+      "type": "string"
+    },
+    "build_directory": {
+      "type": "string"
     },
     "ledger_id": {
       "type": "string",
@@ -141,6 +144,66 @@
     "runtime_mode": {
       "type": "string",
       "enum": ["async", "threaded"]
+    },
+    "storage_uri": {
+      "type": "string"
+    },
+    "keep_terminal_state_dialogues": {
+      "type": "boolean"
+    },
+    "logging_config": {
+    	"type": "object",
+    	"additionalProperties": true,
+        "properties": {
+        	"disable_existing_loggers": {
+              "type": ["boolean", "null"]
+            },
+            "version": {
+              "type": "number"
+            },
+            "handlers": {"type": "object"},
+            "formatters": {"type": "object"},
+            "loggers": {"type": "object"}
+        }
+    },
+    "cert_requests": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "definitions.json#/definitions/cert_request"
+      }
+    },
+    "cert_request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "public_key",
+        "identifier",
+        "ledger_id",
+        "not_before",
+        "not_after",
+        "save_path"
+      ],
+      "properties": {
+        "public_key": {
+          "type": "string"
+        },
+        "identifier": {
+          "$ref": "definitions.json#/definitions/resource_name"
+        },
+        "ledger_id": {
+          "$ref": "definitions.json#/definitions/ledger_id"
+        },
+        "not_before": {
+          "type": "string"
+        },
+        "not_after": {
+          "type": "string"
+        },
+        "save_path": {
+          "type": "string"
+        }
+      }
     }
   }
 }

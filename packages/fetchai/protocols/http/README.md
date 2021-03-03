@@ -10,10 +10,11 @@ This is a protocol for interacting with a client/server via HTTP requests and re
 ---
 name: http
 author: fetchai
-version: 0.8.0
+version: 0.12.0
 description: A protocol for HTTP requests and responses.
 license: Apache-2.0
-aea_version: '>=0.7.0, <0.8.0'
+aea_version: '>=0.10.0, <0.11.0'
+protocol_specification_id: fetchai/http:0.1.0
 speech_acts:
   request:
     method: pt:str
@@ -36,6 +37,7 @@ reply:
 termination: [response]
 roles: {client, server}
 end_states: [successful]
+keep_terminal_state_dialogues: false
 ...
 ```
 

@@ -19,13 +19,13 @@
 
 """This module contains class representations corresponding to every custom type in the protocol specification."""
 
-import pickle  # nosec
 from enum import Enum
 from typing import Any, Dict
 
 from aea.exceptions import enforce
 from aea.helpers.search.models import Description as BaseDescription
 from aea.helpers.search.models import Query as BaseQuery
+from aea.helpers.serializers import DictProtobufStructSerializer
 
 
 Description = BaseDescription
@@ -60,7 +60,9 @@ class AgentsInfo:
         return self._body.get(agent_address, {})
 
     @staticmethod
-    def encode(agents_info_protobuf_object, agents_info_object: "AgentsInfo") -> None:
+    def encode(
+        agents_info_protobuf_object: Any, agents_info_object: "AgentsInfo"
+    ) -> None:
         """
         Encode an instance of this class into the protocol buffer object.
 
@@ -70,11 +72,12 @@ class AgentsInfo:
         :param agents_info_object: an instance of this class to be encoded in the protocol buffer object.
         :return: None
         """
-        agents_info_bytes = pickle.dumps(agents_info_object)  # nosec
-        agents_info_protobuf_object.agents_info = agents_info_bytes
+        agents_info_protobuf_object.agents_info = DictProtobufStructSerializer.encode(
+            agents_info_object.body
+        )
 
     @classmethod
-    def decode(cls, agents_info_protobuf_object) -> "AgentsInfo":
+    def decode(cls, agents_info_protobuf_object: Any) -> "AgentsInfo":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 
@@ -83,12 +86,12 @@ class AgentsInfo:
         :param agents_info_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :return: A new instance of this class that matches the protocol buffer object in the 'agents_info_protobuf_object' argument.
         """
-        agents_info_object = pickle.loads(  # nosec
+        body = DictProtobufStructSerializer.decode(
             agents_info_protobuf_object.agents_info
         )
-        return agents_info_object
+        return cls(body)
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Compare with another object."""
         if not isinstance(other, AgentsInfo):
             return False  # pragma: nocover
@@ -105,13 +108,13 @@ class OefErrorOperation(Enum):
 
     OTHER = 10000
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get string representation."""
         return str(self.value)
 
     @staticmethod
     def encode(
-        oef_error_operation_protobuf_object,
+        oef_error_operation_protobuf_object: Any,
         oef_error_operation_object: "OefErrorOperation",
     ) -> None:
         """
@@ -127,7 +130,7 @@ class OefErrorOperation(Enum):
         oef_error_operation_protobuf_object.oef_error = oef_error_operation_object.value
 
     @classmethod
-    def decode(cls, oef_error_operation_protobuf_object) -> "OefErrorOperation":
+    def decode(cls, oef_error_operation_protobuf_object: Any) -> "OefErrorOperation":
         """
         Decode a protocol buffer object that corresponds with this class into an instance of this class.
 

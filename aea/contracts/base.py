@@ -24,12 +24,14 @@ import re
 from pathlib import Path
 from typing import Any, Dict, Optional, cast
 
+from aea.common import JSONLike
 from aea.components.base import Component, load_aea_package
 from aea.configurations.base import ComponentType, ContractConfig, PublicId
+from aea.configurations.constants import CONTRACTS
 from aea.configurations.loader import load_component_configuration
 from aea.crypto.base import LedgerApi
-from aea.crypto.registries import Registry
-from aea.exceptions import AEAException, enforce
+from aea.crypto.registries import Registry, ledger_apis_registry, make_ledger_api_cls
+from aea.exceptions import AEAComponentLoadException, AEAException
 from aea.helpers.base import load_module
 
 
@@ -43,7 +45,7 @@ class Contract(Component):
     contract_id = None  # type: PublicId
     contract_interface: Any = None
 
-    def __init__(self, contract_config: ContractConfig, **kwargs):
+    def __init__(self, contract_config: ContractConfig, **kwargs: Any) -> None:
         """
         Initialize the contract.
 
@@ -81,7 +83,7 @@ class Contract(Component):
         return instance
 
     @classmethod
-    def from_dir(cls, directory: str, **kwargs) -> "Contract":
+    def from_dir(cls, directory: str, **kwargs: Any) -> "Contract":
         """
         Load the protocol from a directory.
 
@@ -96,7 +98,7 @@ class Contract(Component):
         return Contract.from_config(configuration, **kwargs)
 
     @classmethod
-    def from_config(cls, configuration: ContractConfig, **kwargs) -> "Contract":
+    def from_config(cls, configuration: ContractConfig, **kwargs: Any) -> "Contract":
         """
         Load contract from configuration.
 
@@ -107,7 +109,7 @@ class Contract(Component):
             raise ValueError("Configuration must be associated with a directory.")
         directory = configuration.directory
         load_aea_package(configuration)
-        contract_module = load_module("contracts", directory / "contract.py")
+        contract_module = load_module(CONTRACTS, directory / "contract.py")
         classes = inspect.getmembers(contract_module, inspect.isclass)
         contract_class_name = cast(str, configuration.class_name)
         contract_classes = list(
@@ -116,10 +118,10 @@ class Contract(Component):
         name_to_class = dict(contract_classes)
         _default_logger.debug(f"Processing contract {contract_class_name}")
         contract_class = name_to_class.get(contract_class_name, None)
-        enforce(
-            contract_class is not None,
-            f"Contract class '{contract_class_name}' not found.",
-        )
+        if contract_class is None:
+            raise AEAComponentLoadException(
+                f"Contract class '{contract_class_name}' not found."
+            )
 
         _try_to_register_contract(configuration)
         contract = contract_registry.make(str(configuration.public_id), **kwargs)
@@ -127,8 +129,8 @@ class Contract(Component):
 
     @classmethod
     def get_deploy_transaction(
-        cls, ledger_api: LedgerApi, deployer_address: str, **kwargs
-    ) -> Dict[str, Any]:
+        cls, ledger_api: LedgerApi, deployer_address: str, **kwargs: Any
+    ) -> Optional[JSONLike]:
         """
         Handler method for the 'GET_DEPLOY_TRANSACTION' requests.
 
@@ -148,8 +150,8 @@ class Contract(Component):
 
     @classmethod
     def get_raw_transaction(
-        cls, ledger_api: LedgerApi, contract_address: str, **kwargs
-    ) -> Dict[str, Any]:
+        cls, ledger_api: LedgerApi, contract_address: str, **kwargs: Any
+    ) -> Optional[JSONLike]:
         """
         Handler method for the 'GET_RAW_TRANSACTION' requests.
 
@@ -164,8 +166,8 @@ class Contract(Component):
 
     @classmethod
     def get_raw_message(
-        cls, ledger_api: LedgerApi, contract_address: str, **kwargs
-    ) -> Dict[str, Any]:
+        cls, ledger_api: LedgerApi, contract_address: str, **kwargs: Any
+    ) -> Optional[bytes]:
         """
         Handler method for the 'GET_RAW_MESSAGE' requests.
 
@@ -180,8 +182,8 @@ class Contract(Component):
 
     @classmethod
     def get_state(
-        cls, ledger_api: LedgerApi, contract_address: str, **kwargs
-    ) -> Dict[str, Any]:
+        cls, ledger_api: LedgerApi, contract_address: str, **kwargs: Any
+    ) -> Optional[JSONLike]:
         """
         Handler method for the 'GET_STATE' requests.
 
@@ -195,7 +197,7 @@ class Contract(Component):
         raise NotImplementedError
 
 
-def _try_to_register_contract(configuration: ContractConfig):
+def _try_to_register_contract(configuration: ContractConfig) -> None:
     """Register a contract to the registry."""
     if str(configuration.public_id) in contract_registry.specs:  # pragma: nocover
         _default_logger.warning(
@@ -205,11 +207,12 @@ def _try_to_register_contract(configuration: ContractConfig):
     _default_logger.debug(
         f"Registering contract {configuration.public_id}"
     )  # pragma: nocover
+    contract_interfaces = _load_contract_interfaces(configuration)
     try:  # pragma: nocover
         contract_registry.register(
             id_=str(configuration.public_id),
             entry_point=f"{configuration.prefix_import_path}.contract:{configuration.class_name}",
-            class_kwargs={"contract_interface": configuration.contract_interfaces},
+            class_kwargs={"contract_interface": contract_interfaces},
             contract_config=configuration,
         )
     except AEAException as e:  # pragma: nocover
@@ -219,3 +222,22 @@ def _try_to_register_contract(configuration: ContractConfig):
             )
         else:
             raise e
+
+
+def _load_contract_interfaces(
+    configuration: ContractConfig,
+) -> Dict[str, Dict[str, str]]:
+    """Get the contract interfaces."""
+    if configuration.directory is None:  # pragma: nocover
+        raise ValueError("Set contract configuration directory before calling.")
+    contract_interfaces = {}  # type: Dict[str, Dict[str, str]]
+    for identifier, path in configuration.contract_interface_paths.items():
+        full_path = Path(configuration.directory, path)
+        if identifier not in ledger_apis_registry.supported_ids:
+            raise ValueError(  # pragma: nocover
+                "No ledger api registered for identifier {}."
+            )
+        ledger_api = make_ledger_api_cls(identifier)
+        contract_interface = ledger_api.load_contract_interface(full_path)
+        contract_interfaces[identifier] = contract_interface
+    return contract_interfaces
