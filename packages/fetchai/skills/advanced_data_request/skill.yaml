@@ -1,0 +1,61 @@
+name: advanced_data_request
+author: fetchai
+version: 0.5.0
+type: skill
+description: Retrieve data from an API
+license: Apache-2.0
+aea_version: '>=0.10.0, <0.11.0'
+fingerprint:
+  README.md: QmZXYRsrgcTPFLZwDAFKkhpCRzMArscyCejHAdcfS4HpTZ
+  __init__.py: QmUCvcrSHxukuyssnVzZ83gW6siu4RyFKyqumTKXBZ8F41
+  api_spec.yaml: QmUPhCYr6tWDMysdMCQxT67oAKRdMbGpgqDfAA5wpei12s
+  behaviours.py: QmXL1zvH9gTMqdFtRPzTQ1CrNu2BZUtotW8K3MHeK7vFK2
+  dialogues.py: QmdYcNTCowajkMMCccYpNL83KRYm4v2WE2FguT3my7nqBw
+  handlers.py: QmXMvtcYZmVPozoKdYNEm1XfsSzSAt1vr8XSJovEfVYnR4
+  models.py: QmQbhK39eL3pTcfNsGbKab5jqtG94UtfHhk4zA737qs7ZK
+fingerprint_ignore_patterns: []
+contracts: []
+protocols:
+- fetchai/http:0.12.0
+- fetchai/prometheus:0.3.0
+skills: []
+behaviours:
+  advanced_data_request_behaviour:
+    args:
+      tick_interval: 5
+    class_name: AdvancedDataRequestBehaviour
+handlers:
+  http:
+    args: {}
+    class_name: HttpHandler
+  prometheus:
+    args: {}
+    class_name: PrometheusHandler
+models:
+  advanced_data_request_model:
+    args:
+      body: ''
+      method: null
+      outputs: []
+      url: null
+      use_http_server: false
+    class_name: AdvancedDataRequestModel
+  http_dialogues:
+    args: {}
+    class_name: HttpDialogues
+  prometheus_dialogues:
+    args:
+      enabled: true
+      metrics:
+      - name: num_retrievals
+        type: Gauge
+        description: Number of data retrievals
+        labels: {}
+      - name: num_requests
+        type: Gauge
+        description: Number of data requests served
+        labels: {}
+    class_name: PrometheusDialogues
+dependencies: {}
+is_abstract: false
+connections: []

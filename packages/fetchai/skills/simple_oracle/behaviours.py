@@ -41,6 +41,7 @@ from packages.fetchai.skills.simple_oracle.strategy import Strategy
 
 
 DEFAULT_UPDATE_INTERVAL = 5
+DEFAULT_DECIMALS = 5
 EXPIRATION_BLOCK = 1000000000000000
 
 
@@ -106,15 +107,15 @@ class SimpleOracleBehaviour(TickerBehaviour):
             self._request_grant_role_transaction()
             return
 
-        # Check for entropy value from fetch oracle skill
-        oracle_data = self.context.shared_state.get("oracle_data", None)
-        if oracle_data is None:
+        # Check for observation from data collecting skill
+        observation = self.context.shared_state.get("observation", None)
+        if observation is None:
             self.context.logger.info("No oracle value to publish")
         else:
             self.context.logger.info("Publishing oracle value")
 
             # add expiration block
-            update_args = oracle_data.copy()
+            update_args = observation.copy()
             update_args["expiration_block"] = EXPIRATION_BLOCK
             self._request_update_transaction(update_args)
 

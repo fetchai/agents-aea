@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a model for the CoinPrice skill"""
+"""This package contains a model for the AdvancedDataRequest skill"""
 
 from typing import Any
 
@@ -25,14 +25,14 @@ from aea.skills.base import Model
 
 
 DEFAULT_URL = ""
-DEFAULT_COIN_ID = "fetch-ai"
-DEFAULT_CURRENCY = "usd"
+DEFAULT_METHOD = "GET"
+DEFAULT_BODY = None
+DEFAULT_OUTPUTS = None
 DEFAULT_DECIMALS = 5
 DEFAULT_USE_HTTP_SERVER = False
 
-
-class CoinPriceModel(Model):
-    """This class models the CoinPrice skill."""
+class AdvancedDataRequestModel(Model):
+    """This class models the AdvancedDataRequest skill."""
 
     def __init__(self, **kwargs: Any) -> None:
         """
@@ -42,8 +42,9 @@ class CoinPriceModel(Model):
         """
 
         self.url = kwargs.pop("url", DEFAULT_URL)
-        self.coin_id = kwargs.pop("coin_id", DEFAULT_COIN_ID)
-        self.currency = kwargs.pop("currency", DEFAULT_CURRENCY)
+        self.method = kwargs.pop("method", DEFAULT_METHOD)
+        self.body = kwargs.pop("body", DEFAULT_BODY)
+        self.outputs = kwargs.pop("outputs", DEFAULT_OUTPUTS)
         self.decimals = kwargs.pop("decimals", DEFAULT_DECIMALS)
         self.use_http_server = kwargs.pop("use_http_server", DEFAULT_USE_HTTP_SERVER)
 

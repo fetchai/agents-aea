@@ -17,9 +17,9 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the implementation of the CoinPrice skill."""
+"""This module contains the implementation of the AdvancedDataRequest skill."""
 
 from aea.configurations.base import PublicId
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/coin_price:0.5.0")
+PUBLIC_ID = PublicId.from_str("fetchai/advanced_data_request:0.5.0")
