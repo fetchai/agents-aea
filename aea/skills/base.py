@@ -24,12 +24,12 @@ import queue
 import re
 import types
 from abc import ABC, abstractmethod
-from collections import defaultdict
+from copy import copy
 from logging import Logger
 from pathlib import Path
 from queue import Queue
 from types import SimpleNamespace
-from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, Type, Union, cast
+from typing import Any, Dict, List, Optional, Set, Tuple, Type, Union, cast
 
 from aea.common import Address
 from aea.components.base import Component, load_aea_package
@@ -44,7 +44,6 @@ from aea.context.base import AgentContext
 from aea.exceptions import (
     AEAActException,
     AEAComponentLoadException,
-    AEAException,
     AEAHandleException,
     AEAInstantiationException,
     _StopRuntime,
@@ -531,101 +530,7 @@ class Model(SkillComponent, ABC):
         :param skill_context: the skill context
         :return: a list of Model.
         """
-        instances = {}  # type: Dict[str, "Model"]
-        if model_configs == {}:
-            return instances
-        models = []
-
-        model_names = set(config.class_name for _, config in model_configs.items())
-
-        # get all Python modules except the standard ones
-        ignore_regex = "|".join(["handlers.py", "behaviours.py", "tasks.py", "__.*"])
-        all_python_modules = Path(path).glob("*.py")
-        module_paths = set(
-            map(
-                str,
-                filter(
-                    lambda x: not re.match(ignore_regex, x.name), all_python_modules
-                ),
-            )
-        )
-
-        for module_path in module_paths:
-            skill_context.logger.debug("Trying to load module {}".format(module_path))
-            module_name = module_path.replace(".py", "")
-            model_module = load_module(module_name, Path(module_path))
-            classes = inspect.getmembers(model_module, inspect.isclass)
-            filtered_classes = list(
-                filter(
-                    lambda x: any(re.match(model, x[0]) for model in model_names)
-                    and issubclass(x[1], Model)
-                    and not str.startswith(x[1].__module__, "aea.")
-                    and not str.startswith(
-                        x[1].__module__,
-                        f"packages.{skill_context.skill_id.author}.skills.{skill_context.skill_id.name}",
-                    ),
-                    classes,
-                )
-            )
-            models.extend(filtered_classes)
-
-        _check_duplicate_classes(models)
-        name_to_class = dict(models)
-        _print_warning_message_for_non_declared_skill_components(
-            skill_context,
-            set(name_to_class.keys()),
-            {model_config.class_name for model_config in model_configs.values()},
-            "models",
-            path,
-        )
-        for model_id, model_config in model_configs.items():
-            model_class_name = model_config.class_name
-            skill_context.logger.debug(
-                "Processing model id={}, class={}".format(model_id, model_class_name)
-            )
-            if not model_id.isidentifier():
-                raise AEAComponentLoadException(  # pragma: nocover
-                    f"'{model_id}' is not a valid identifier."
-                )
-            model = name_to_class.get(model_class_name, None)
-            if model is None:
-                skill_context.logger.warning(
-                    "Model '{}' cannot be found.".format(model_class_name)
-                )
-            else:
-                try:
-                    model_instance = model(
-                        name=model_id,
-                        skill_context=skill_context,
-                        configuration=model_config,
-                        **dict(model_config.args),
-                    )
-                except Exception as e:  # pylint: disable=broad-except # pragma: nocover
-                    e_str = parse_exception(e)
-                    raise AEAInstantiationException(
-                        f"An error occured during instantiation of model {skill_context.skill_id}/{model_config.class_name}:\n{e_str}"
-                    )
-                instances[model_id] = model_instance
-                setattr(skill_context, model_id, model_instance)
-        return instances
-
-
-def _check_duplicate_classes(name_class_pairs: Sequence[Tuple[str, Type]]) -> None:
-    """
-    Given a sequence of pairs (class_name, class_obj), check whether there are duplicates in the class names.
-
-    :param name_class_pairs: the sequence of pairs (class_name, class_obj)
-    :return: None
-    :raises AEAException: if there are more than one definition of the same class.
-    """
-    names_to_path: Dict[str, str] = {}
-    for class_name, class_obj in name_class_pairs:
-        module_path = class_obj.__module__
-        if class_name in names_to_path:
-            raise AEAException(
-                f"Model '{class_name}' present both in {names_to_path[class_name]} and {module_path}. Remove one of them."
-            )
-        names_to_path[class_name] = module_path
+        return _parse_module(path, model_configs, skill_context, Model)
 
 
 class Skill(Component):
@@ -864,26 +769,13 @@ def _print_warning_message_for_non_declared_skill_components(
 
 _SKILL_COMPONENT_TYPES = Type[Union[Handler, Behaviour, Model]]
 
-_ConfigurationsHelperIndex = Dict[
-    str,
-    Dict[
-        _SKILL_COMPONENT_TYPES,
-        Dict[Optional[Path], Tuple[str, SkillComponentConfiguration]],
-    ],
-]
-"""
-The first level indexes by name. The second level by skill component
-type: Handler, Behaviour and Model. The third level by path.
-The values are the pairs (skill_component_id, configuration).
-"""
-
 _ComponentsHelperIndex = Dict[_SKILL_COMPONENT_TYPES, Dict[str, SkillComponent]]
 """
 Helper index to store component instances.
 """
 
 
-class _SkillComponentLoadingItem:
+class _SkillComponentLoadingItem:  # pylint: disable=too-few-public-methods
     """Class to represent a triple (component name, component configuration, component class)."""
 
     def __init__(
@@ -919,9 +811,12 @@ class _SkillComponentLoader:
         self.skill_dotted_path = f"packages.{self.configuration.public_id.author}.skills.{self.configuration.public_id.name}"
 
     def load_skill(self) -> Skill:
+        """Load the skill."""
         load_aea_package(self.configuration)
         python_modules: Set[Path] = self._get_python_modules()
-        declared_component_classes: _ConfigurationsHelperIndex = self._get_declared_skill_component_configurations()
+        declared_component_classes: Dict[
+            _SKILL_COMPONENT_TYPES, Dict[str, SkillComponentConfiguration]
+        ] = self._get_declared_skill_component_configurations()
         component_classes_by_path: Dict[
             Path, Set[Type[SkillComponent]]
         ] = self._load_component_classes(python_modules)
@@ -1012,7 +907,7 @@ class _SkillComponentLoader:
 
     def _get_declared_skill_component_configurations(
         self,
-    ) -> _ConfigurationsHelperIndex:
+    ) -> Dict[_SKILL_COMPONENT_TYPES, Dict[str, SkillComponentConfiguration]]:
         """
         Get all the declared skill component configurations.
 
@@ -1027,45 +922,17 @@ class _SkillComponentLoader:
         behaviours_by_id = dict(self.configuration.behaviours.read_all())
         models_by_id = dict(self.configuration.models.read_all())
 
-        result: _ConfigurationsHelperIndex = {}
+        result: Dict[
+            _SKILL_COMPONENT_TYPES, Dict[str, SkillComponentConfiguration]
+        ] = {}
         for component_type, components_by_id in [
             (Handler, handlers_by_id),
             (Behaviour, behaviours_by_id),
             (Model, models_by_id),
         ]:
             for component_id, component_config in components_by_id.items():
-                last_level_dict = result.setdefault(
-                    component_config.class_name, {}
-                ).setdefault(component_type, {})  # type: ignore
-                # note: the following works also when file_path is None (unspecified).
-                if component_config.file_path in last_level_dict:
-                    existing_component_id = last_level_dict[component_config.file_path][
-                        0
-                    ]
-                    enforce(
-                        False,
-                        self._get_same_name_same_path_error_message(
-                            component_id,
-                            existing_component_id,
-                            component_config.class_name,
-                            str(component_config.file_path),
-                        ),
-                    )
-                last_level_dict[component_config.file_path] = (
-                    component_id,
-                    component_config,
-                )
+                result.setdefault(component_type, {})[component_id] = component_config  # type: ignore
         return result
-
-    def _get_same_name_same_path_error_message(
-        self, component_id_1: str, component_id_2: str, name: str, path: str
-    ) -> str:
-        """
-        Get error message for when two components have the same class names and the same file paths.
-
-        Only used by '_get_declared_skill_component_configurations'.
-        """
-        return f"Skill component configurations for skill {self.configuration.public_id} is not correct. The components {component_id_1} and {component_id_2} have the same class name '{name}' and file path '{path}'. Please change either class name, or move one of the two component in another module."
 
     def _get_component_instances(
         self, component_loading_items: List[_SkillComponentLoadingItem],
@@ -1106,25 +973,17 @@ class _SkillComponentLoader:
             Type[Union[Handler, Behaviour, Model]], parent_skill_component_types[0]
         )
 
-    def _get_skill_component_classes_by_type(
-        self, classes: Set[Type[SkillComponent]]
-    ) -> Dict[_SKILL_COMPONENT_TYPES, Set[Type[SkillComponent]]]:
-        """Get a mapping from types to sets of classes."""
-        result: Dict[_SKILL_COMPONENT_TYPES, Set[Type[SkillComponent]]] = defaultdict(set)
-        for class_ in classes:
-            type_ = self._get_skill_component_type(class_)
-            result[type_].add(class_)
-        return dict(result)
-
     def _match_class_and_configurations(
         self,
         component_classes_by_path: Dict[Path, Set[Type[SkillComponent]]],
-        declared_component_classes: _ConfigurationsHelperIndex,
+        declared_component_classes: Dict[
+            _SKILL_COMPONENT_TYPES, Dict[str, SkillComponentConfiguration]
+        ],
     ) -> List[_SkillComponentLoadingItem]:
         """
-        Match skill component type to its configuration.
+        Match skill component classes to their configurations.
 
-        Given a class of a skill component, we can disambiguate it in these ways:
+        Given a class of a skill component, we can disambiguate it in three ways:
         - by its name
         - by its type (one of 'Handler', 'Behaviour', 'Model')
         - whether the user has set the 'file_path' field.
@@ -1136,183 +995,76 @@ class _SkillComponentLoader:
         :return: None
         """
         result: List[_SkillComponentLoadingItem] = []
-        component_classes_by_name_and_path: Dict[
-            str, Dict[Path, Type[SkillComponent]]
+
+        class_index: Dict[
+            str, Dict[_SKILL_COMPONENT_TYPES, Set[Type[SkillComponent]]]
         ] = {}
-        component_classnames_to_classes: Dict[
-            str, Set[Type[SkillComponent]]
-        ] = defaultdict(set)
-        component_classnames_to_paths: Dict[str, Set[Path]] = defaultdict(set)
-        component_classnames_and_types_to_paths: Dict[
-            str, Dict[_SKILL_COMPONENT_TYPES, Set[Path]]
+        used_classes = set()
+        not_resolved_configurations: Dict[
+            Tuple[_SKILL_COMPONENT_TYPES, str], SkillComponentConfiguration
         ] = {}
 
         # populate indexes
-        for path, component_classes in component_classes_by_path.items():
-            for component_class in component_classes:
-                component_classname = component_class.__name__
+        for _path, component_classes in component_classes_by_path.items():
+            for _component_class in component_classes:
+                component_classname = _component_class.__name__
+                type_ = self._get_skill_component_type(_component_class)
+                class_index.setdefault(component_classname, {}).setdefault(
+                    type_, set()
+                ).add(_component_class)
 
-                component_classes_by_name_and_path.setdefault(component_classname, {})[
-                    path
-                ] = component_class
-
-                component_classnames_to_paths[component_classname].add(path)
-
-                component_classnames_to_classes[component_classname].add(
-                    component_class
-                )
-
-                type_ = self._get_skill_component_type(component_class)
-                component_classnames_and_types_to_paths.setdefault(
-                    component_classname, {}
-                ).setdefault(type_, set()).add(path)
-
-        # star matching class names with their configuration.
-        loaded_classnames = set(component_classnames_to_paths.keys())
-        for classname in loaded_classnames:
-
-            if classname not in declared_component_classes:
-                # we don't care about classes whose class name
-                # does not appear in the configuration,
-                # as it won't be loaded and can't be in conflict
-                # with any other.
-                continue
-
-            paths = component_classnames_to_paths[classname]
-            if len(paths) == 1:
-                # done - this classname is present in only one module.
-                path = list(paths)[0]
-                skill_component_class = component_classes_by_name_and_path[classname][
-                    path
-                ]
-                type_ = list(component_classnames_and_types_to_paths[classname].keys())[
-                    0
-                ]
-                component_by_path = declared_component_classes[classname][type_]
-                (
-                    skill_component_id,
-                    skill_component_configuration,
-                ) = component_by_path.get(path, component_by_path[None])
-                result.append(
-                    _SkillComponentLoadingItem(
-                        skill_component_id,
-                        skill_component_configuration,
-                        skill_component_class,
-                        type_,
+        for component_type, by_id in declared_component_classes.items():
+            for component_id, component_config in by_id.items():
+                path = component_config.file_path
+                class_name = component_config.class_name
+                if path is not None:
+                    classes_in_path = component_classes_by_path[path]
+                    component_class_or_none: Optional[Type[SkillComponent]] = next(
+                        (x for x in classes_in_path if x.__name__ == class_name), None
                     )
-                )
-                continue
-
-            # if here, it means we found two components with the same class name,
-            # in different modules. we need to check if we can disambiguate by type.
-
-            classes = component_classnames_to_classes[classname]
-            # a mapping from {Handler, Behaviour, Model} to the actual class.
-            classes_by_type = self._get_skill_component_classes_by_type(classes)
-
-            paths_by_types = component_classnames_and_types_to_paths[classname]
-            ambiguous_types: Dict[_SKILL_COMPONENT_TYPES, Set[Path]] = {}
-
-            for type_, paths in paths_by_types.items():
-                if len(paths) > 1:
-                    # ambiguous, cannot resolve
-                    ambiguous_types[type_] = paths
-                    continue
+                    enforce(
+                        component_class_or_none is not None,
+                        f"Cannot find component '{component_id}' of type '{component_type.__name__}' of skill '{self.configuration.public_id}' in module {path}",
+                    )
+                    component_class = cast(
+                        Type[SkillComponent], component_class_or_none
+                    )
+                    used_classes.add(component_class)
+                    result.append(
+                        _SkillComponentLoadingItem(
+                            component_id,
+                            component_config,
+                            component_class,
+                            component_type,
+                        )
+                    )
                 else:
-                    # done - we can disambiguate the classes by type.
-                    # the following instructions are legal because of the previous ambiguity checks
-                    skill_component_class = list(classes_by_type[type_])[0]
-                    path = list(paths_by_types[type_])[0]
-                    component_by_path = declared_component_classes[classname][type_]
-                    (
-                        skill_component_id,
-                        skill_component_configuration,
-                    ) = component_by_path.get(path, component_by_path[None])
-                    result.append(
-                        _SkillComponentLoadingItem(
-                            skill_component_id,
-                            skill_component_configuration,
-                            skill_component_class,
-                            type_,
-                        )
-                    )
+                    # process the configuration at the end of the loop
+                    not_resolved_configurations[
+                        (component_type, component_id)
+                    ] = component_config
+
+        for (component_type, component_id), component_config in copy(
+            not_resolved_configurations
+        ).items():
+            class_name = component_config.class_name
+            if class_name not in class_index:
                 continue
-
-            # If here, it means there are classes with the same name
-            # and the same type, but in different modules.
-            # Read the configurations to see if we can disambiguate them.
-            for class_type, _ in ambiguous_types.items():
-                classes_to_be_matched: Set[Type[SkillComponent]] = classes_by_type[
-                    class_type
-                ]
-
-                enforce(classname in declared_component_classes.keys(), "")
-                enforce(class_type in declared_component_classes[classname].keys(), "")
-                configurations_by_path = declared_component_classes[classname][
-                    class_type
-                ]
-
-                resolved_classes: Set[Type[SkillComponent]] = set()
-                resolved_configurations: Set[
-                    Tuple[str, SkillComponentConfiguration]
-                ] = set()
-
-                for (
-                    declared_path,
-                    (skill_component_id, skill_component_configuration),
-                ) in configurations_by_path.items():
-                    if declared_path is None:
-                        # this will be resolved by exclusion, if possible
-                        continue
-
-                    matched_class = component_classes_by_name_and_path[classname][
-                        declared_path
-                    ]
-                    resolved_classes.add(matched_class)
-                    resolved_configurations.add(
-                        (skill_component_id, skill_component_configuration)
-                    )
-                    result.append(
-                        _SkillComponentLoadingItem(
-                            skill_component_id,
-                            skill_component_configuration,
-                            matched_class,
-                            class_type,
-                        )
-                    )
-
-                unresolved_configurations = set(
-                    configurations_by_path.values()
-                ).difference(resolved_configurations)
-                unresolved_classes = classes_to_be_matched.difference(resolved_classes)
-                if len(unresolved_configurations) == 0:
-                    continue
-
-                enforce(
-                    len(unresolved_configurations) == 1,
-                    f"Got more than one unresolved configuration with same class name and type: {' '.join([id_ for id_, _ in unresolved_configurations])}",
+            classes = class_index[class_name][component_type]
+            not_used_classes = classes.difference(used_classes)
+            enforce(
+                not_used_classes != 0,
+                f"Cannot find class of skill {self.configuration.public_id} for component configuration {component_id} of type {component_type.__name__}.",
+            )
+            enforce(
+                len(not_used_classes) == 1,
+                f"Cannot resolve ambiguity in skill {self.configuration.public_id} of the following classes for component '{component_id}' of type '{component_type.__name__}': {' '.join([c.__name__ for c in not_used_classes])}",
+            )
+            not_used_class = list(not_used_classes)[0]
+            result.append(
+                _SkillComponentLoadingItem(
+                    component_id, component_config, not_used_class, component_type
                 )
-                unresolved_configuration_id, unresolved_configuration = list(
-                    unresolved_configurations
-                )[0]
-
-                enforce(
-                    len(unresolved_classes) != 0,
-                    f"Cannot find class for configuration {unresolved_configuration_id}",
-                )
-                enforce(
-                    len(unresolved_classes) == 1,
-                    f"Cannot resolve ambiguity of the following classes for component '{unresolved_configuration_id}': {' '.join([c.__name__ for c in unresolved_classes])}",
-                )
-                unresolved_class = list(unresolved_classes)[0]
-
-                result.append(
-                    _SkillComponentLoadingItem(
-                        unresolved_configuration_id,
-                        unresolved_configuration,
-                        unresolved_class,
-                        class_type,
-                    )
-                )
-
+            )
+            used_classes.add(not_used_class)
         return result

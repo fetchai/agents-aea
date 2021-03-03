@@ -35,7 +35,7 @@ from aea.configurations.base import PublicId, SkillComponentConfiguration, Skill
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.gop import DecisionMakerHandler as GOPDecisionMakerHandler
 from aea.decision_maker.gop import GoalPursuitReadiness, OwnershipState, Preferences
-from aea.exceptions import AEAException, AEAHandleException, _StopRuntime
+from aea.exceptions import AEAHandleException, _StopRuntime
 from aea.identity.base import Identity
 from aea.multiplexer import MultiplexerStatus
 from aea.protocols.base import Message
@@ -48,7 +48,6 @@ from aea.skills.base import (
     Skill,
     SkillComponent,
     SkillContext,
-    _check_duplicate_classes,
     _print_warning_message_for_non_declared_skill_components,
 )
 
@@ -452,7 +451,7 @@ def test_model_parse_module_missing_class():
     skill_context = SkillContext(
         skill=MagicMock(skill_id=PublicId.from_str("author/name:0.1.0"))
     )
-    dummy_models_path = Path(ROOT_DIR, "tests", "data", "dummy_skill")
+    dummy_models_path = Path(ROOT_DIR, "tests", "data", "dummy_skill", "dummy.py")
     with unittest.mock.patch.object(
         aea.skills.base._default_logger, "warning"
     ) as mock_logger_warning:
@@ -466,20 +465,6 @@ def test_model_parse_module_missing_class():
         )
         mock_logger_warning.assert_called_with("Model 'UnknownModel' cannot be found.")
         assert "dummy_model" in models_by_id
-
-
-def test_check_duplicate_classes():
-    """Test check duplicate classes."""
-    with pytest.raises(
-        AEAException,
-        match="Model 'ModelClass' present both in path_1 and path_2. Remove one of them.",
-    ):
-        _check_duplicate_classes(
-            [
-                ("ModelClass", MagicMock(__module__="path_1")),
-                ("ModelClass", MagicMock(__module__="path_2")),
-            ]
-        )
 
 
 def test_print_warning_message_for_non_declared_skill_components():
