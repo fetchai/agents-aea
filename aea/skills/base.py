@@ -808,6 +808,9 @@ class _SkillComponentLoader:
         self.skill_context = skill_context
         self.kwargs = kwargs
 
+        self._all_component_names: Set[str] = set()
+
+        self.skill = Skill(self.configuration, self.skill_context, **self.kwargs)
         self.skill_dotted_path = f"packages.{self.configuration.public_id.author}.skills.{self.configuration.public_id.name}"
 
     def load_skill(self) -> Skill:
@@ -817,23 +820,30 @@ class _SkillComponentLoader:
         declared_component_classes: Dict[
             _SKILL_COMPONENT_TYPES, Dict[str, SkillComponentConfiguration]
         ] = self._get_declared_skill_component_configurations()
+        self._all_component_names = {
+            config.class_name
+            for _, types_ in declared_component_classes.items()
+            for _, config in types_.items()
+        }
         component_classes_by_path: Dict[
-            Path, Set[Type[SkillComponent]]
+            Path, Set[Tuple[str, Type[SkillComponent]]]
         ] = self._load_component_classes(python_modules)
         component_loading_items = self._match_class_and_configurations(
             component_classes_by_path, declared_component_classes
         )
         components = self._get_component_instances(component_loading_items)
-        return self._instantiate_skill(components)
+        self._update_skill(components)
+        return self.skill
 
-    def _instantiate_skill(self, components: _ComponentsHelperIndex) -> Skill:
-        skill = Skill(self.configuration, self.skill_context, **self.kwargs)
-        skill.handlers.update(cast(Dict[str, Handler], components.get(Handler, {})))
-        skill.behaviours.update(
+    def _update_skill(self, components: _ComponentsHelperIndex) -> None:
+        self.skill.handlers.update(
+            cast(Dict[str, Handler], components.get(Handler, {}))
+        )
+        self.skill.behaviours.update(
             cast(Dict[str, Behaviour], components.get(Behaviour, {}))
         )
-        skill.models.update(cast(Dict[str, Model], components.get(Model, {})))
-        return skill
+        self.skill.models.update(cast(Dict[str, Model], components.get(Model, {})))
+        self.skill._set_models_on_context()  # pylint: disable=protected-access
 
     def _get_python_modules(self) -> Set[Path]:
         """
@@ -855,11 +865,11 @@ class _SkillComponentLoader:
         )
         return module_paths
 
-    def _compute_module_dotted_path(self, module_path: Path) -> str:
+    @classmethod
+    def _compute_module_dotted_path(cls, module_path: Path) -> str:
         """Compute the dotted path for a skill module."""
         suffix = ".".join(module_path.with_name(module_path.stem).parts)
-        prefix = self.skill_dotted_path
-        return prefix + "." + suffix
+        return suffix
 
     def _filter_classes(
         self, classes: List[Tuple[str, Type]]
@@ -871,16 +881,23 @@ class _SkillComponentLoader:
         :return: a list of the same kind, but filtered with only skill component classes.
         """
         filtered_classes = filter(
-            lambda name_and_class: issubclass(name_and_class[1], SkillComponent)
+            lambda name_and_class: any(
+                re.match(component, name_and_class[0])
+                for component in self._all_component_names
+            )
+            and issubclass(name_and_class[1], SkillComponent)
             and not str.startswith(name_and_class[1].__module__, "aea.")
-            and str.startswith(name_and_class[1].__module__, self.skill_dotted_path),
+            and not str.startswith(
+                name_and_class[1].__module__, self.skill_dotted_path
+            ),
             classes,
         )
-        return cast(List[Tuple[str, Type[SkillComponent]]], list(filtered_classes))
+        classes = list(filtered_classes)
+        return cast(List[Tuple[str, Type[SkillComponent]]], classes)
 
     def _load_component_classes(
         self, module_paths: Set[Path]
-    ) -> Dict[Path, Set[Type[SkillComponent]]]:
+    ) -> Dict[Path, Set[Tuple[str, Type[SkillComponent]]]]:
         """
         Load component classes from Python modules.
 
@@ -889,7 +906,7 @@ class _SkillComponentLoader:
           (containing potential duplicates). Skill components in one path
           are
         """
-        module_to_classes: Dict[Path, Set[Type[SkillComponent]]] = {}
+        module_to_classes: Dict[Path, Set[Tuple[str, Type[SkillComponent]]]] = {}
         for module_path in module_paths:
             self.skill_context.logger.debug(f"Trying to load module {module_path}")
             module_dotted_path: str = self._compute_module_dotted_path(module_path)
@@ -902,7 +919,7 @@ class _SkillComponentLoader:
             filtered_classes: List[
                 Tuple[str, Type[SkillComponent]]
             ] = self._filter_classes(classes)
-            module_to_classes[module_path] = {x[1] for x in filtered_classes}
+            module_to_classes[module_path] = set(filtered_classes)
         return module_to_classes
 
     def _get_declared_skill_component_configurations(
@@ -910,11 +927,6 @@ class _SkillComponentLoader:
     ) -> Dict[_SKILL_COMPONENT_TYPES, Dict[str, SkillComponentConfiguration]]:
         """
         Get all the declared skill component configurations.
-
-        Do also consistency checks: If two skill component configurations have
-          the same class_name and skill component type:
-          - they must not have both file_path=None
-          - they must not have the same file_path.
 
         :return:
         """
@@ -954,9 +966,9 @@ class _SkillComponentLoader:
             result.setdefault(item.type_, {})[item.name] = instance
         return result
 
-    @staticmethod
+    @classmethod
     def _get_skill_component_type(
-        skill_component_type: Type[SkillComponent],
+        cls, skill_component_type: Type[SkillComponent],
     ) -> Type[Union[Handler, Behaviour, Model]]:
         """Get the concrete skill component type."""
         parent_skill_component_types = list(
@@ -975,7 +987,7 @@ class _SkillComponentLoader:
 
     def _match_class_and_configurations(
         self,
-        component_classes_by_path: Dict[Path, Set[Type[SkillComponent]]],
+        component_classes_by_path: Dict[Path, Set[Tuple[str, Type[SkillComponent]]]],
         declared_component_classes: Dict[
             _SKILL_COMPONENT_TYPES, Dict[str, SkillComponentConfiguration]
         ],
@@ -1006,8 +1018,7 @@ class _SkillComponentLoader:
 
         # populate indexes
         for _path, component_classes in component_classes_by_path.items():
-            for _component_class in component_classes:
-                component_classname = _component_class.__name__
+            for (component_classname, _component_class) in component_classes:
                 type_ = self._get_skill_component_type(_component_class)
                 class_index.setdefault(component_classname, {}).setdefault(
                     type_, set()
@@ -1020,11 +1031,16 @@ class _SkillComponentLoader:
                 if path is not None:
                     classes_in_path = component_classes_by_path[path]
                     component_class_or_none: Optional[Type[SkillComponent]] = next(
-                        (x for x in classes_in_path if x.__name__ == class_name), None
+                        (
+                            actual_class
+                            for actual_class_name, actual_class in classes_in_path
+                            if actual_class_name == class_name
+                        ),
+                        None,
                     )
                     enforce(
                         component_class_or_none is not None,
-                        f"Cannot find component '{component_id}' of type '{component_type.__name__}' of skill '{self.configuration.public_id}' in module {path}",
+                        f"Cannot find component '{component_id}' of type '{self._type_to_str(component_type)}' of skill '{self.configuration.public_id}' in module {path}",
                     )
                     component_class = cast(
                         Type[SkillComponent], component_class_or_none
@@ -1048,17 +1064,23 @@ class _SkillComponentLoader:
             not_resolved_configurations
         ).items():
             class_name = component_config.class_name
-            if class_name not in class_index:
-                continue
-            classes = class_index[class_name][component_type]
+            classes_by_type = class_index.get(class_name, {})
+            enforce(
+                class_name in class_index and component_type in classes_by_type,
+                self._get_error_message_prefix()
+                + f"Cannot find class '{class_name}' for skill component '{component_id}' of type '{self._type_to_str(component_type)}'",
+            )
+            classes = classes_by_type[component_type]
             not_used_classes = classes.difference(used_classes)
             enforce(
                 not_used_classes != 0,
-                f"Cannot find class of skill {self.configuration.public_id} for component configuration {component_id} of type {component_type.__name__}.",
+                f"Cannot find class of skill '{self.configuration.public_id}' for component configuration '{component_id}' of type '{self._type_to_str(component_type)}'.",
             )
             enforce(
                 len(not_used_classes) == 1,
-                f"Cannot resolve ambiguity in skill {self.configuration.public_id} of the following classes for component '{component_id}' of type '{component_type.__name__}': {' '.join([c.__name__ for c in not_used_classes])}",
+                self._get_error_message_ambiguous_classes(
+                    class_name, not_used_classes, component_type, component_id
+                ),
             )
             not_used_class = list(not_used_classes)[0]
             result.append(
@@ -1067,4 +1089,23 @@ class _SkillComponentLoader:
                 )
             )
             used_classes.add(not_used_class)
+
         return result
+
+    @classmethod
+    def _type_to_str(cls, component_type: _SKILL_COMPONENT_TYPES) -> str:
+        """Get the string of a component type."""
+        return component_type.__name__.lower()
+
+    def _get_error_message_prefix(self) -> str:
+        """Get error message prefix."""
+        return f"Error while loading skill '{self.configuration.public_id}': "
+
+    def _get_error_message_ambiguous_classes(
+        self,
+        class_name: str,
+        not_used_classes: Set,
+        component_type: _SKILL_COMPONENT_TYPES,
+        component_id: str,
+    ) -> str:
+        return f"{self._get_error_message_prefix()}found many classes with name '{class_name}' for component '{component_id}' of type '{self._type_to_str(component_type)}' in the following modules: {', '.join([c.__module__ for c in not_used_classes])}"
