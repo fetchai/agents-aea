@@ -1040,7 +1040,8 @@ class _SkillComponentLoader:
                     )
                     enforce(
                         component_class_or_none is not None,
-                        f"Cannot find component '{component_id}' of type '{self._type_to_str(component_type)}' of skill '{self.configuration.public_id}' in module {path}",
+                        self._get_error_message_prefix()
+                        + f"Cannot find class '{class_name}' for component '{component_id}' of type '{self._type_to_str(component_type)}' of skill '{self.configuration.public_id}' in module {path}",
                     )
                     component_class = cast(
                         Type[SkillComponent], component_class_or_none
