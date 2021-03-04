@@ -97,7 +97,6 @@ def test_run():
         ],
     )
     assert result.exit_code == 0
-
     try:
         process = PexpectWrapper(  # nosec
             [sys.executable, "-m", "aea.cli", "run"],

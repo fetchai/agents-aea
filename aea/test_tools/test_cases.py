@@ -73,6 +73,7 @@ CLI_LOG_OPTION = ["-v", "OFF"]
 
 DEFAULT_PROCESS_TIMEOUT = 120
 DEFAULT_LAUNCH_TIMEOUT = 10
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 
 class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
@@ -197,12 +198,11 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
 
         :return: subprocess object.
         """
-        kwargs = dict(
-            stdout=subprocess.PIPE,
-            stdin=subprocess.PIPE,
-            env=os.environ.copy(),
-            cwd=cwd,
-        )
+        env = os.environ.copy()
+        # add project root to python path to sure external python process can use it
+        env["PYTHONPATH"] = f"{ROOT_DIR}:{env.get('PYTHONPATH', '')}"
+        kwargs = dict(stdout=subprocess.PIPE, stdin=subprocess.PIPE, env=env, cwd=cwd,)
+
         kwargs.update(win_popen_kwargs())
 
         process = subprocess.Popen(  # type: ignore # nosec # mypy fails on **kwargs

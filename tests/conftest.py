@@ -114,7 +114,7 @@ logger = logging.getLogger(__name__)
 CliRunner = ImportedCliRunner
 
 CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
-ROOT_DIR = os.path.join(CUR_PATH, "..")
+ROOT_DIR = os.path.abspath(os.path.join(CUR_PATH, ".."))
 CLI_LOG_OPTION = ["-v", "OFF"]
 
 AUTHOR = DEFAULT_AUTHOR
