@@ -1135,7 +1135,7 @@ class TestUpgradeWithEjectAccept(BaseTestUpgradeWithEject):
 class BaseTestUpgradeProject(AEATestCaseEmpty):
     """Base test class for testing project upgrader."""
 
-    OLD_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.20.0")
+    OLD_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.19.0")
     EXPECTED_NEW_AGENT_PUBLIC_ID = OLD_AGENT_PUBLIC_ID.to_latest()
     EXPECTED = "expected_agent"
 
@@ -1162,6 +1162,7 @@ class BaseTestUpgradeProject(AEATestCaseEmpty):
         shutil.rmtree(self.current_agent_context)
 
 
+@mock.patch.object(aea, "__version__", "0.10.0")
 @mock.patch("click.confirm")
 class TestUpgradeProjectWithNewerVersion(BaseTestUpgradeProject):
     """Test upgrade project with newer version available."""
@@ -1228,8 +1229,8 @@ class TestUpgradeAEACompatibility(BaseTestUpgradeProject):
     The test works as follows:
     """
 
-    OLD_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.20.0")
-    EXPECTED_NEW_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.20.0")
+    OLD_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.19.0")
+    EXPECTED_NEW_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.19.0")
 
     def test_upgrade(self):
         """Test upgrade."""
