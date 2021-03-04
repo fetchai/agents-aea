@@ -6,21 +6,33 @@ Below we describe the additional manual steps required to upgrade between differ
 
 ## `v0.10.1` to `v0.11.0`
 
-Agent configuration files have a new optional field, `dependencies`, 
-analogous to `dependencies` field in other AEA packages.
-The default value is the empty object `{}`.
-The field will be made mandatory in the next release.
+Take special care when upgrading to `v0.11.0`. We introduced several breaking changes in preparation for `v1`!
 
-Crypto modules have been extracted and released as independent plug-ins, released on PyPI.
-In particular:
+### CLI GUI
+
+We removed the CLI GUI. It was not used by anyone as far as we know and needs to be significantly improved. Soon we will release the AEA Manager App to make up for this.
+
+### Message routing
+
+Routing has been completely revised and simplified. The new message routing logic is described <a href="../message-routing/">here</a>.
+
+When upgrading take the following steps:
+
+- For agent-to-agent communication: ensure the default routing and default connection are correctly defined and that the dialogues used specify the agent's address as the `self_address`. This is most likely already the case. Only in some edge cases will you need to use an `EnvelopeContext` to target a connection different from the one specified in the `default_routing` map.
+
+- For component-to-component communication: there is now only one single way to route component to component (skill to skill, skill to connection, connection to skill) messages, this is by specifying the component id in string form in the `sender`/`to` field. The `EnvelopeContext` can no longer be used, messages are routed based on their target (`to` field). Ensure that dialogues in skills set the `skill_id` as the `self_address` (in connections the need to set the `connection_id`).
+
+### Agent configuration and ledger plugins
+
+Agent configuration files have a new optional field, `dependencies`,  analogous to `dependencies` field in other AEA packages. The default value is the empty object `{}`. The field will be made mandatory in the next release.
+
+Crypto modules have been extracted and released as independent plug-ins, released on PyPI. In particular:
 
 - Fetch.ai crypto classes have been released in the `aea-ledger-fetchai` package;
 - Ethereum crypto classes have been released in the `aea-ledger-ethereum` package;
 - Cosmos crypto classes have been released in the `aea-ledger-cosmos` package.
 
-If an AEA project, or an AEA package, makes use of crypto functionalities, 
-it will be needed to add the above packages as PyPI dependencies with version
-specifiers `<0.2.0,>=0.1.0`, i.e.:
+If an AEA project, or an AEA package, makes use of crypto functionalities,  it will be needed to add the above packages as PyPI dependencies with version specifiers `<0.2.0,>=0.1.0`, i.e.:
 ```yaml
 dependencies:
   aea-ledger-cosmos:
@@ -30,11 +42,11 @@ dependencies:
   aea-ledger-fetchai:
     version: <0.2.0,>=0.1.0
 ```
-The version specifier sets are important, as these plug-ins, at version `0.1.0`, 
-depend on a specific range of the `aea` package.
+The version specifier sets are important, as these plug-ins, at version `0.1.0`,  depend on a specific range of the `aea` package.
 
-Then, running `aea install` inside the AEA project should install them in
-the current Python environment.
+Then, running `aea install` inside the AEA project should install them in the current Python environment.
+
+For more, read the <a href="../ledger-integration">guide on ledger plugins</a>.
 
 ## `v0.10.0` to `v0.10.1`
 
