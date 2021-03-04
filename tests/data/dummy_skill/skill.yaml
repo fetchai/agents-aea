@@ -10,13 +10,15 @@ fingerprint:
   behaviours.py: QmWKg1GfJpuJSoCkEKW1zUskkNo4Rsoan1AD2cXpe2E93C
   dummy.py: QmeV6FBPAkmQC49gATSmU1aq8S1SKPv7cm2zSH8cnuqoLT
   dummy_subpackage/__init__.py: QmfDrbsUewXFcF3afdhCnzsZYrzDTUbQH69MHPnEpzp5qP
-  dummy_subpackage/foo.py: Qmf7qb7yzJBQdXFBKjU3Cp61uuawcoEM6ZSgKDz73w9n2A
+  dummy_subpackage/foo.py: QmNrarFAJ1KDopGVz5Co8YtnRj6Q7CP29x7ywUMjnMr6KV
   handlers.py: QmYchfGvDXD5CxDHt6kChNsNbRxTcqViQTn65R7p8VJ4fu
   tasks.py: Qmegg4QsYSqSZN3q2zuRiBAToQ2LEiWrAPtUo7rCMrxjGJ
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
 - fetchai/default:0.12.0
+- fetchai/signing:0.10.0
+- fetchai/state_update:0.10.0
 skills: []
 behaviours:
   dummy:
@@ -31,6 +33,12 @@ behaviours:
     class_name: DummyBehaviour
     file_path: dummy_subpackage/foo.py
 handlers:
+  another_dummy_handler:
+    args:
+      handler_arg_1: 1
+      handler_arg_2: '2'
+    class_name: DummyStateUpdateHandler
+    file_path: dummy_subpackage/foo.py
   dummy:
     args:
       handler_arg_1: 1

@@ -18,7 +18,10 @@
 # ------------------------------------------------------------------------------
 
 """This module is in a skill sub-package (for testing purposes)."""
-from aea.skills.base import Behaviour
+from aea.protocols.base import Message
+from aea.skills.base import Behaviour, Handler
+
+from packages.fetchai.protocols.state_update import StateUpdateMessage
 
 
 def bar():
@@ -30,7 +33,7 @@ class DummyBehaviour(Behaviour):
     """Dummy behaviour."""
 
     def __init__(self, **kwargs):
-        """Initialize the echo behaviour."""
+        """Initialize the dummy behaviour."""
         super().__init__(**kwargs)
         self.kwargs = kwargs
 
@@ -47,3 +50,37 @@ class DummyBehaviour(Behaviour):
 
     def teardown(self) -> None:
         """Teardown the behaviour."""
+
+
+class DummyStateUpdateHandler(Handler):
+    """Dummy handler."""
+
+    SUPPORTED_PROTOCOL = StateUpdateMessage.protocol_id
+
+    def __init__(self, **kwargs):
+        """Initialize the handler."""
+        super().__init__(**kwargs)
+        self.kwargs = kwargs
+
+    def setup(self) -> None:
+        """
+        Implement the setup.
+
+        :return: None
+        """
+        pass
+
+    def handle(self, message: Message) -> None:
+        """
+        Handle message.
+
+        :param message: the message
+        :return: None
+        """
+
+    def teardown(self) -> None:
+        """
+        Teardown the handler.
+
+        :return: None
+        """
