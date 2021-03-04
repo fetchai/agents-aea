@@ -430,7 +430,7 @@ def _bump_protocol_specification_id_if_needed(package_path: Path) -> None:
     old_configuration: ProtocolConfig = cast(
         ProtocolConfig,
         load_component_configuration(
-            ComponentType.PROTOCOL, downloaded_package_directory
+            ComponentType.PROTOCOL, downloaded_package_directory, skip_consistency_check=True
         ),
     )
 
