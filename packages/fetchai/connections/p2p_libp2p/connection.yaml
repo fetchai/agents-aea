@@ -6,7 +6,7 @@ description: The p2p libp2p connection implements an interface to standalone gol
   go-libp2p node that can exchange aea envelopes with other agents connected to the
   same DHT.
 license: Apache-2.0
-aea_version: '>=0.10.0, <0.11.0'
+aea_version: '>=0.11.0, <0.12.0'
 fingerprint:
   README.md: QmdndN3dGED4R1sRGZQDHexumriqZeryreMDf64vrCTXvj
   __init__.py: QmYQuLNyQ8WTjgRYAoKAzoJEb7ocKXvM2hTyK4hsGch5D6

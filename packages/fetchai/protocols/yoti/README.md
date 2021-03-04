@@ -14,7 +14,7 @@ version: 0.1.0
 protocol_specification_id: fetchai/yoti:0.1.0
 description: A protocol for communication between yoti skills and yoti connection.
 license: Apache-2.0
-aea_version: '>=0.10.0, <0.11.0'
+aea_version: '>=0.11.0, <0.12.0'
 speech_acts:
   get_profile:
     token: pt:str

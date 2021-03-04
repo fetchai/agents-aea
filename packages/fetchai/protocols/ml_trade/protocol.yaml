@@ -5,9 +5,9 @@ protocol_specification_id: fetchai/ml_trade:0.1.0
 type: protocol
 description: A protocol for trading data for training and prediction purposes.
 license: Apache-2.0
-aea_version: '>=0.10.0, <0.11.0'
+aea_version: '>=0.11.0, <0.12.0'
 fingerprint:
-  README.md: QmU1Wviggw9eBPr9uCusYUE17sqASigvoVQ6dDvHdMPNB8
+  README.md: QmTHhwyHyNJY9izhXKmcteQJdhdoLgFtktsdS2WR8jGm1s
   __init__.py: QmRnYbHxrQvb86cdheENeUhP7PswboKgugHaVMpcdPzaqR
   custom_types.py: QmPa6mxbN8WShsniQxJACfzAPRjGzYLbUFGoVU4N9DewUw
   dialogues.py: QmUZ3BiJYY2bNiqrvwPZyNsjZ3v9Rvj8EW1UkH52XxjAqd

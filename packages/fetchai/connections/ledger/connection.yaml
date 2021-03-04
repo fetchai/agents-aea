@@ -4,7 +4,7 @@ version: 0.13.0
 type: connection
 description: A connection to interact with any ledger API and contract API.
 license: Apache-2.0
-aea_version: '>=0.10.0, <0.11.0'
+aea_version: '>=0.11.0, <0.12.0'
 fingerprint:
   README.md: QmauUFgWKe2d3duCD7WXMaTWHpHHcxJC2F8bXSubWjNZoH
   __init__.py: QmZvYZ5ECcWwqiNGh8qNTg735wu51HqaLxTSifUxkQ4KGj

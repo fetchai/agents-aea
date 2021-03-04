@@ -5,7 +5,7 @@ type: connection
 description: The stub connection implements a connection stub which reads/writes messages
   from/to file.
 license: Apache-2.0
-aea_version: '>=0.10.0, <0.11.0'
+aea_version: '>=0.11.0, <0.12.0'
 fingerprint:
   README.md: QmaFgMnBonnhYszWyyu3Sesi8hh1MqStrXgEsTDKdiWGrP
   __init__.py: QmWwepN9Fy9gHAp39vUGFSLdnB9JZjdyE3STnbowSUhJkC

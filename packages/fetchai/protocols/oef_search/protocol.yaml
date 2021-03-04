@@ -5,9 +5,9 @@ protocol_specification_id: fetchai/oef_search:0.1.0
 type: protocol
 description: A protocol for interacting with an OEF search service.
 license: Apache-2.0
-aea_version: '>=0.10.0, <0.11.0'
+aea_version: '>=0.11.0, <0.12.0'
 fingerprint:
-  README.md: QmNn6MicPxYKVhKdsPyKvLGKkpr9FPWNRDVaga3xmHqZTN
+  README.md: QmWJ1AJWUqdkeimtKAYgkZ8U1LPyFJx8TdinymYC33b3bY
   __init__.py: QmZLjUfh8xW6dLaUgHZmTpX82giavcPQHwSKyx8X6ao3Xx
   custom_types.py: Qmddg9WmPzedoJnfNPDuDx8R67ZZnrSZQruSGg8kgAf6tm
   dialogues.py: QmSs2nefhrSMXE13QUT9U1q3JVSjzr3dPgsHBqYkCw2fUB

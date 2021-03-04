@@ -5,9 +5,9 @@ protocol_specification_id: fetchai/register:0.1.0
 type: protocol
 description: A protocol for communication between two AEAs for registration.
 license: Apache-2.0
-aea_version: '>=0.10.0, <0.11.0'
+aea_version: '>=0.11.0, <0.12.0'
 fingerprint:
-  README.md: QmbJtWp4pZoQszyrXdZDmBY9Wb11paccuT9zG4XwRyqR7C
+  README.md: QmQ1jbRaTuXG26dAAu7UsPfkHhF12m1DceSJ9TEbP4QfjJ
   __init__.py: QmZgAVL7zheA4UnmaYBBaFetMyhFBVyTvcLF5HMvTicGvF
   dialogues.py: QmfBmUxThNF1Qgz4bSrvPPPVYqxvdRtaMuXpQUQ5XVTPQC
   message.py: QmbH2ae2e7MgEdAQ2JEshzzdet6qrRyCWk2dSAS7Y7JAtE

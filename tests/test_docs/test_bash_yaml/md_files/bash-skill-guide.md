@@ -67,7 +67,7 @@ version: 0.1.0
 type: skill
 description: A simple search skill utilising the SOEF search node.
 license: Apache-2.0
-aea_version: '>=0.10.0, <0.11.0'
+aea_version: '>=0.11.0, <0.12.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections: []
@@ -106,7 +106,7 @@ version: 0.4.0
 type: skill
 description: The simple service registration skills is a skill to register a service.
 license: Apache-2.0
-aea_version: '>=0.10.0, <0.11.0'
+aea_version: '>=0.11.0, <0.12.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmRr1oe3zWKyPcktzKP4BiKqjCqmKjEDdLUQhn1JzNm4nD

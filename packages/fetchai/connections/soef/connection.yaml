@@ -4,7 +4,7 @@ version: 0.17.0
 type: connection
 description: The soef connection provides a connection api to the simple OEF.
 license: Apache-2.0
-aea_version: '>=0.10.0, <0.11.0'
+aea_version: '>=0.11.0, <0.12.0'
 fingerprint:
   README.md: QmRQ5pNYrQr7TvVJfQiWT4cu55UXiceUWpDhJgRgNWPLg3
   __init__.py: Qmd5VBGFJHXFe1H45XoUh5mMSYBwvLSViJuGFeMgbPdQts

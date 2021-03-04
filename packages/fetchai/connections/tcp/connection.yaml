@@ -4,7 +4,7 @@ version: 0.13.0
 type: connection
 description: The tcp connection implements a tcp server and client.
 license: Apache-2.0
-aea_version: '>=0.10.0, <0.11.0'
+aea_version: '>=0.11.0, <0.12.0'
 fingerprint:
   README.md: QmdEgxCE1gjyUCqPTyybAUn3v5s87mkot3qTt9Z7W6jjkU
   __init__.py: QmTxAtQ9ffraStxxLAkvmWxyGhoV3jE16Sw6SJ9xzTthLb

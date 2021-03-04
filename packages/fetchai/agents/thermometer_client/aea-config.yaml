@@ -3,7 +3,7 @@ author: fetchai
 version: 0.21.0
 description: An AEA that purchases thermometer data.
 license: Apache-2.0
-aea_version: '>=0.10.0, <0.11.0'
+aea_version: '>=0.11.0, <0.12.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:

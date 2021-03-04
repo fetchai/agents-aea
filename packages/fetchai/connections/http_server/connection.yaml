@@ -5,7 +5,7 @@ type: connection
 description: The HTTP server connection that wraps http server implementing a RESTful
   API specification.
 license: Apache-2.0
-aea_version: '>=0.10.0, <0.11.0'
+aea_version: '>=0.11.0, <0.12.0'
 fingerprint:
   README.md: QmZE5uA8v9yG9EBTobSwWDZHqC5rx64zSuN2X6F1ZiCZVL
   __init__.py: Qmb6JEAkJeb5JweqrSGiGoQp1vGXqddjGgb9WMkm2phTgA

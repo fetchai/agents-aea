@@ -4,7 +4,7 @@ version: 0.14.0
 type: connection
 description: The gym connection wraps an OpenAI gym.
 license: Apache-2.0
-aea_version: '>=0.10.0, <0.11.0'
+aea_version: '>=0.11.0, <0.12.0'
 fingerprint:
   README.md: QmdecZnD6npawp6gQ7tmoz4FQ7Fvgkqh4eUtRno61EJSxY
   __init__.py: QmWwxj1hGGZNteCvRtZxwtY9PuEKsrWsEmMWCKwiYCdvRR

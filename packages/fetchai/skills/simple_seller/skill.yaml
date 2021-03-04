@@ -5,7 +5,7 @@ type: skill
 description: The simple_seller skill extends the generic_seller skill and sells data
   from the shared state of the AEA.
 license: Apache-2.0
-aea_version: '>=0.10.0, <0.11.0'
+aea_version: '>=0.11.0, <0.12.0'
 fingerprint:
   README.md: QmfKe4D4dyoN9hrJhQFJgDd9myNEqqU6SrZHYqYFAZ8y6Y
   __init__.py: QmXU9TLY4PJWANW21qZS9CQD1sqamLF286pHHRu8pW4p2h

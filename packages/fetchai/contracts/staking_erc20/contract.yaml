@@ -5,7 +5,7 @@ type: contract
 description: The staking_erc20 contract contains the main staking contract of Fetch.ai
   for Ethereum mainnet.
 license: Apache-2.0
-aea_version: '>=0.10.0, <0.11.0'
+aea_version: '>=0.11.0, <0.12.0'
 fingerprint:
   README.md: QmR5xGpZ8gZkUyWxz6EBkVpsYGuULcN13yNEALoxmDTx6t
   __init__.py: QmWzYodbomKRhKchtYUW9yzRzEPiv2M68rB4FAS7M1WzYj
