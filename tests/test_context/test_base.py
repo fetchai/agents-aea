@@ -16,21 +16,21 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains a test for aea.context."""
 import os
+from unittest.mock import Mock
+
+from aea_ledger_fetchai import FetchAICrypto
 
 from aea.context.base import AgentContext
 from aea.identity.base import Identity
-
-from tests.conftest import FETCHAI
 
 
 def test_agent_context():
     """Test the agent context."""
     agent_name = "name"
     address = "address"
-    addresses = {FETCHAI: address}
+    addresses = {FetchAICrypto.identifier: address}
     identity = Identity(agent_name, addresses)
     connection_status = "connection_status_stub"
     outbox = "outbox_stub"
@@ -46,6 +46,8 @@ def test_agent_context():
     default_ledger_id = "fetchai"
     currency_denominations = {}
     data_dir = os.getcwd()
+
+    send_to_skill = Mock()
 
     def storage_callable_():
         pass
@@ -65,8 +67,10 @@ def test_agent_context():
         decision_maker_address=decision_maker_address,
         storage_callable=storage_callable_,
         data_dir=data_dir,
+        send_to_skill=send_to_skill,
         **kwargs
     )
+
     assert ac.data_dir == data_dir
     assert ac.shared_state == {}
     assert ac.identity == identity
@@ -86,3 +90,6 @@ def test_agent_context():
     assert ac.namespace.some_key == value
     assert ac.decision_maker_address == decision_maker_address
     assert ac.storage == storage_callable_()
+
+    ac.send_to_skill("test")
+    send_to_skill.assert_called()

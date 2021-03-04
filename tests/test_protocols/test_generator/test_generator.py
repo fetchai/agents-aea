@@ -33,7 +33,10 @@ from aea.configurations.base import (
 )
 from aea.configurations.constants import SUPPORTED_PROTOCOL_LANGUAGES
 from aea.configurations.data_types import PublicId
-from aea.protocols.generator.base import ProtocolGenerator
+from aea.protocols.generator.base import (
+    CUSTOM_TYPES_DOT_PY_FILE_NAME,
+    ProtocolGenerator,
+)
 from aea.protocols.generator.common import _to_camel_case
 
 from tests.conftest import ROOT_DIR, match_files
@@ -1083,6 +1086,16 @@ class ProtocolGeneratorTestCase(TestCase):
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
+    def _mock_config(self):
+        return """lint:
+          rules:
+            remove:
+              - MESSAGE_NAMES_UPPER_CAMEL_CASE
+              - ENUM_FIELD_NAMES_ZERO_VALUE_END_WITH
+              - PACKAGE_NAME_LOWER_CASE
+              - REPEATED_FIELD_NAMES_PLURALIZED
+              - FIELD_NAMES_LOWER_SNAKE_CASE"""
+
     @mock.patch(
         "aea.protocols.generator.base.check_prerequisites",
         side_effect=FileNotFoundError("Some error!"),
@@ -1404,6 +1417,17 @@ class ProtocolGeneratorTestCase(TestCase):
         )
         assert not Path(path_to_protobuf_file).exists()
 
+    @mock.patch(
+        "aea.protocols.generator.base.apply_protolint",
+        return_value=(False, "error line 1\nerror line 2"),
+    )
+    def test_generate_protobuf_only_mode_protolint_error(self, mocked_apply_protolint):
+        """Positive test for the 'generate_protobuf_only_mode' where protolint has some error."""
+        protocol_generator = ProtocolGenerator(PATH_TO_T_PROTOCOL_SPECIFICATION, self.t)
+        output = protocol_generator.generate_protobuf_only_mode()
+        expected_output = "Protolint warnings:\n" + "error line 1\nerror line 2"
+        assert output == expected_output
+
     def test_generate_full_mode_negative_incorrect_language(self):
         """Negative test for the 'generate_protobuf_only_mode' method: invalid language."""
         invalid_language = "wrong_language"
@@ -1412,6 +1436,24 @@ class ProtocolGeneratorTestCase(TestCase):
             protocol_generator.generate_full_mode(language=invalid_language)
             expected_msg = f"Unsupported language. Expected 'python' because currently the framework supports full generation of protocols only in Python. Found {invalid_language}."
             assert str(cm.exception) == expected_msg
+
+    @mock.patch(
+        "aea.protocols.generator.base.apply_protolint",
+        return_value=(False, "error line 1\nerror line 2"),
+    )
+    def test_generate_full_mode_protolint_error(self, mocked_apply_protolint):
+        """Positive test for the 'generate_full_mode' where protolint has some error."""
+        protocol_generator = ProtocolGenerator(PATH_TO_T_PROTOCOL_SPECIFICATION, self.t)
+        output = protocol_generator.generate_full_mode("python")
+        expected_output = (
+            "Protolint warnings:\n"
+            + "error line 1\nerror line 2"
+            + "The generated protocol is incomplete, because the protocol specification contains the following custom types: "
+            + "{}. Update the generated '{}' file with the appropriate implementations of these custom types.".format(
+                protocol_generator.spec.all_custom_types, CUSTOM_TYPES_DOT_PY_FILE_NAME
+            )
+        )
+        assert output == expected_output
 
     @mock.patch(
         "aea.protocols.generator.base.ProtocolGenerator.generate_protobuf_only_mode"

@@ -24,10 +24,11 @@ import os
 import sys
 from typing import cast
 
+from aea_ledger_fetchai import FetchAICrypto
+
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import ConnectionConfig
-from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import (
     PRIVATE_KEY_PATH_SCHEMA,
     create_private_key,

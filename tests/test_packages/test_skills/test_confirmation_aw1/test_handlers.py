@@ -34,7 +34,7 @@ from aea.helpers.transaction.base import (
     TransactionReceipt,
 )
 from aea.protocols.dialogue.base import DialogueMessage
-from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_ADDRESS
+from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_AGENT_ADDRESS
 
 from packages.fetchai.protocols.contract_api.custom_types import Kwargs, State
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
@@ -176,7 +176,7 @@ class TestAW1RegistrationHandler(BaseSkillTestCase):
             message_type=ContractApiMessage,
             performative=ContractApiMessage.Performative.GET_STATE,
             to=LEDGER_API_ADDRESS,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             contract_id=self.strategy.contract_id,
             contract_address=self.strategy.contract_address,
             callable=self.strategy.contract_callable,
@@ -279,6 +279,7 @@ class TestContractApiHandler(BaseSkillTestCase):
     """Test contract_api handler of confirmation aw1."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "confirmation_aw1")
+    is_agent_to_agent_messages = False
 
     @classmethod
     def setup(cls):
@@ -373,6 +374,7 @@ class TestContractApiHandler(BaseSkillTestCase):
             self.prepare_skill_dialogue(
                 dialogues=self.register_dialogues,
                 messages=self.list_of_registration_messages[:1],
+                is_agent_to_agent_messages=True,
             ),
         )
 
@@ -423,6 +425,7 @@ class TestContractApiHandler(BaseSkillTestCase):
             self.prepare_skill_dialogue(
                 dialogues=self.register_dialogues,
                 messages=self.list_of_registration_messages[:1],
+                is_agent_to_agent_messages=True,
             ),
         )
 
@@ -482,6 +485,7 @@ class TestContractApiHandler(BaseSkillTestCase):
             self.prepare_skill_dialogue(
                 dialogues=self.register_dialogues,
                 messages=self.list_of_registration_messages[:1],
+                is_agent_to_agent_messages=True,
             ),
         )
         register_dialogue._incoming_messages = []
@@ -520,6 +524,7 @@ class TestContractApiHandler(BaseSkillTestCase):
             self.prepare_skill_dialogue(
                 dialogues=self.register_dialogues,
                 messages=self.list_of_registration_messages[:1],
+                is_agent_to_agent_messages=True,
             ),
         )
 
@@ -563,6 +568,7 @@ class TestContractApiHandler(BaseSkillTestCase):
             self.prepare_skill_dialogue(
                 dialogues=self.register_dialogues,
                 messages=self.list_of_registration_messages[:1],
+                is_agent_to_agent_messages=True,
             ),
         )
         register_dialogue._incoming_messages = []
@@ -631,6 +637,7 @@ class TestSigningHandler(BaseSkillTestCase):
     """Test signing handler of confirmation aw1."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "confirmation_aw1")
+    is_agent_to_agent_messages = False
 
     @classmethod
     def setup(cls):
@@ -799,7 +806,7 @@ class TestSigningHandler(BaseSkillTestCase):
             message_type=LedgerApiMessage,
             performative=LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
             to=LEDGER_API_ADDRESS,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             signed_transaction=incoming_message.signed_transaction,
         )
         assert has_attributes, error_str
@@ -814,7 +821,8 @@ class TestSigningHandler(BaseSkillTestCase):
             self.prepare_skill_dialogue(
                 dialogues=self.register_dialogues,
                 messages=self.list_of_registration_messages[:1],
-                counterparty=COUNTERPARTY_ADDRESS,
+                counterparty=COUNTERPARTY_AGENT_ADDRESS,
+                is_agent_to_agent_messages=True,
             ),
         )
 
@@ -898,6 +906,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
     """Test ledger_api handler of confirmation aw1."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "confirmation_aw1")
+    is_agent_to_agent_messages = False
 
     @classmethod
     def setup(cls):
@@ -1058,6 +1067,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             self.prepare_skill_dialogue(
                 dialogues=self.register_dialogues,
                 messages=self.list_of_registration_messages[:1],
+                is_agent_to_agent_messages=True,
             ),
         )
         register_dialogue.terms = self.terms
@@ -1150,7 +1160,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             message_type=LedgerApiMessage,
             performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
             to=incoming_message.sender,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             transaction_digest=self.transaction_digest,
         )
         assert has_attributes, error_str
@@ -1167,6 +1177,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             self.prepare_skill_dialogue(
                 dialogues=self.register_dialogues,
                 messages=self.list_of_registration_messages[:1],
+                is_agent_to_agent_messages=True,
             ),
         )
         register_dialogue.terms = self.terms
@@ -1224,7 +1235,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             actual_message=message,
             message_type=RegisterMessage,
             performative=RegisterMessage.Performative.SUCCESS,
-            to=COUNTERPARTY_ADDRESS,
+            to=COUNTERPARTY_AGENT_ADDRESS,
             sender=self.skill.skill_context.agent_address,
             info={"transaction_digest": last_outgoing_message.transaction_digest.body},
         )
@@ -1246,6 +1257,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             self.prepare_skill_dialogue(
                 dialogues=self.register_dialogues,
                 messages=self.list_of_registration_messages[:1],
+                is_agent_to_agent_messages=True,
             ),
         )
         register_dialogue.terms = self.terms
@@ -1294,6 +1306,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             self.prepare_skill_dialogue(
                 dialogues=self.register_dialogues,
                 messages=self.list_of_registration_messages[:1],
+                is_agent_to_agent_messages=True,
             ),
         )
         register_dialogue.terms = self.terms
@@ -1381,7 +1394,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             performative=invalid_performative,
             ledger_id="some_ledger_id",
             address="some_address",
-            to=self.skill.skill_context.agent_address,
+            to=str(self.skill.skill_context.skill_id),
         )
 
         # operation

@@ -2,17 +2,17 @@ This guide demonstrates how to configure an AEA to interact with a database usin
 
 ## Discussion
 
-Object-relational-mapping (ORM) is the idea of being able to write SQL queries, using the object-oriented paradigm of your preferred programming language. The scope of the specific demo is to demonstrate how to create an easy configurable AEA that reads data from a database using ORMs.
+Object-relational-mapping (ORM) is the idea of being able to write SQL queries, using the object-oriented paradigm of your preferred programming language. The scope of this guide is to demonstrate how you can create an easily configurable AEA that reads data from a database using ORMs.
 
 - We assume, that you followed the guide for the <a href="../thermometer-skills/"> thermometer-skills. </a>
-- We assume, that we have a database `genericdb.db` with table name `data`. This table contains the following columns `timestamp` and `thermometer`
+- We assume, that we have a database `genericdb.db` with table name `data`. This table contains the following columns `timestamp` and `thermometer`.
 - We assume, that we have a hardware thermometer sensor that adds the readings in the `genericdb` database (although you can follow the guide without having access to a sensor).
 
 Since the AEA framework enables us to use third-party libraries hosted on PyPI we can directly reference the external dependencies. The `aea install` command will install each dependency that the specific AEA needs and which is listed in the skill's YAML file. 
 
 ## Communication
 
-This diagram shows the communication between the various entities as data is successfully sold by the seller AEA to the buyer. 
+This diagram shows the communication between the various entities in the case where the thermometer data is successfully sold by the seller AEA to the buyer. 
 
 <div class="mermaid">
     sequenceDiagram
@@ -53,13 +53,13 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 ## Demo instructions
 
-A demo to run a scenario with a true ledger transaction on Fetch.ai `testnet` network or Ethereum `ropsten` network. This demo assumes the buyer trusts the seller AEA to send the data upon successful payment.
+This demo involves a true ledger transaction on Fetch.ai's `testnet` network or Ethereum's `ropsten`. This demo assumes the buyer trusts the seller AEA to send the data upon successful payment.
 
 ### Create the seller AEA
 
-First, fetch the seller AEA, which will provide data:
+First, fetch the seller AEA which provides thermometer data:
 ``` bash
-aea fetch fetchai/thermometer_aea:0.20.0 --alias my_thermometer_aea
+aea fetch fetchai/thermometer_aea:0.21.0 --alias my_thermometer_aea
 cd my_thermometer_aea
 aea install
 aea build
@@ -72,18 +72,22 @@ The following steps create the seller from scratch:
 ``` bash
 aea create my_thermometer_aea
 cd my_thermometer_aea
-aea add connection fetchai/p2p_libp2p:0.16.0
-aea add connection fetchai/soef:0.17.0
-aea add connection fetchai/ledger:0.13.0
-aea add skill fetchai/thermometer:0.19.0
-aea install
-aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.16.0
+aea add connection fetchai/p2p_libp2p:0.17.0
+aea add connection fetchai/soef:0.18.0
+aea add connection fetchai/ledger:0.14.0
+aea add skill fetchai/thermometer:0.20.0
+aea config set --type dict agent.dependencies \
+'{
+  "aea-ledger-fetchai": {"version": "<0.2.0,>=0.1.0"}
+}'
+aea config set agent.default_connection fetchai/p2p_libp2p:0.17.0
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
-  "fetchai/oef_search:0.13.0": "fetchai/soef:0.17.0"
+  "fetchai/ledger_api:0.11.0": "fetchai/ledger:0.14.0",
+  "fetchai/oef_search:0.14.0": "fetchai/soef:0.18.0"
 }'
+aea install
+aea build
 ```
 
 </p>
@@ -92,9 +96,9 @@ aea config set --type dict agent.default_routing \
 
 ### Create the buyer client
 
-In another terminal, fetch the AEA that will query the seller AEA.
+In another terminal, fetch the buyer AEA:
 ``` bash
-aea fetch fetchai/thermometer_client:0.21.0 --alias my_thermometer_client
+aea fetch fetchai/thermometer_client:0.22.0 --alias my_thermometer_client
 cd my_thermometer_client
 aea install
 aea build
@@ -107,27 +111,31 @@ The following steps create the car data client from scratch:
 ``` bash
 aea create my_thermometer_client
 cd my_thermometer_client
-aea add connection fetchai/p2p_libp2p:0.16.0
-aea add connection fetchai/soef:0.17.0
-aea add connection fetchai/ledger:0.13.0
-aea add skill fetchai/thermometer_client:0.19.0
-aea install
-aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.16.0
+aea add connection fetchai/p2p_libp2p:0.17.0
+aea add connection fetchai/soef:0.18.0
+aea add connection fetchai/ledger:0.14.0
+aea add skill fetchai/thermometer_client:0.20.0
+aea config set --type dict agent.dependencies \
+'{
+  "aea-ledger-fetchai": {"version": "<0.2.0,>=0.1.0"}
+}'
+aea config set agent.default_connection fetchai/p2p_libp2p:0.17.0
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
-  "fetchai/oef_search:0.13.0": "fetchai/soef:0.17.0"
+  "fetchai/ledger_api:0.11.0": "fetchai/ledger:0.14.0",
+  "fetchai/oef_search:0.14.0": "fetchai/soef:0.18.0"
 }'
+aea install
+aea build
 ```
 
 </p>
 </details>
 
 
-### Add keys for the thermometer AEA
+### Add keys for the seller AEA
 
-First, create the private key for the thermometer AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `AgentLand` use:
+First, create the private key for the seller AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `AgentLand` use:
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
@@ -144,17 +152,17 @@ Finally, certify the key for use by the connections that request that:
 aea issue-certificates
 ```
 
-### Add keys and generate wealth for the thermometer client AEA
+### Add keys and generate wealth for the buyer AEA
 
-The thermometer client needs to have some wealth to purchase the thermometer information.
+The buyer needs to have some wealth to purchase the thermometer data.
 
-First, create the private key for the thermometer client AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai use:
+First, create the private key for the buyer AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai use:
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai fetchai_private_key.txt
 ```
 
-Then, create some wealth for your car data buyer based on the network you want to transact with. On the Fetch.ai `AgentLand` network:
+Then, create some wealth for the buyer based on the network you want to transact with. On the Fetch.ai `AgentLand` network:
 ``` bash
 aea generate-wealth fetchai
 ```
@@ -165,9 +173,9 @@ aea generate-key fetchai fetchai_connection_private_key.txt
 aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
 
-Then, create some wealth for your thermometer client based on the network you want to transact with. On the Fetch.ai `testnet` network:
+Finally, certify the key for use by the connections that request that:
 ``` bash
-aea generate-key fetchai
+aea issue-certificates
 ```
 
 
@@ -197,7 +205,7 @@ models:
 dependencies:
   SQLAlchemy: {}
 ```
-The `data_model` and the `service_data` are used to register the service in the <a href="../simple-oef">SOEF search node</a> and make your agent discoverable. The name of each attribute must be a key in the `service_data` dictionary.
+The `service_data` is used to register the service in the <a href="../simple-oef">SOEF search node</a> and make your agent discoverable.
 
 In `my_thermometer_client/vendor/fetchai/skills/thermometer_client/skill.yaml`) ensure you have matching data.
 
@@ -234,14 +242,14 @@ aea install
 Before being able to modify a package we need to eject it from vendor:
 
 ``` bash
-aea eject skill fetchai/thermometer:0.19.0
+aea eject skill fetchai/thermometer:0.20.0
 ```
 
 This will move the package to your `skills` directory and reset the version to `0.1.0` and the author to your author handle.
 
-Open the `strategy.py` (in `my_thermometer_aea/skills/thermometer/strategy.py`) with your IDE and modify the following.
+Open `strategy.py` (in `my_thermometer_aea/skills/thermometer/strategy.py`) and make the following modifications:
 
-Import the newly installed library to your strategy.
+Import the newly installed `sqlalchemy` library in your strategy.
 ``` python
 import sqlalchemy as db
 ```
@@ -265,7 +273,7 @@ class Strategy(GenericStrategy):
         super().__init__(**kwargs)
 ``` 
 
-At the end of the file modify the `collect_from_data_source` function : 
+At the end of the file modify the `collect_from_data_source` function: 
 ``` python
     def collect_from_data_source(self) -> Dict[str, str]:
         """Implement the logic to collect data."""
@@ -275,7 +283,7 @@ At the end of the file modify the `collect_from_data_source` function :
         data_points = result_proxy.fetchall()
         return {"data": json.dumps(list(map(tuple, data_points)))}
 ```
-Also, create two new functions, one that will create a connection with the database, and another one will populate the database with some fake data:
+Also, create two new functions, one that creates a connection with the database, and another that populates the database with some fake data. This is needed in the case you do not have access to an actual thermometer sensor that inserts data in the database.
 
 ``` python
     def create_database_and_table(self):
@@ -309,22 +317,20 @@ aea fingerprint skill {YOUR_AUTHOR_HANDLE}/thermometer:0.1.0
 
 ### Run both AEAs
 
-Run both AEAs from their respective terminals.
-
-First, run the thermometer AEA:
+First, run the thermometer (seller) AEA:
 
 ``` bash
 aea run
 ```
 
-Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.16.0 -u public_uri` to retrieve the address.)
+Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of this address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.17.0 -u public_uri` to retrieve the address.)
 This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the thermometer AEA.
 
 <!-- Then, in the thermometer client, update the configuration of the thermometer client, AEA's p2p connection by appending the following YAML text at the end of the `aea-config.yaml` file:
 
 ``` yaml
 ---
-public_id: fetchai/p2p_libp2p:0.16.0
+public_id: fetchai/p2p_libp2p:0.17.0
 type: connection
 config:
   delegate_uri: 127.0.0.1:11001
@@ -338,7 +344,7 @@ config:
 where `SOME_ADDRESS` is replaced with the appropriate value.
 -->
 
-Then, in the thermometer client, run this command (replace `SOME_ADDRESS` with the correct value as described above):
+Then, configure the thermometer client (buyer) to connect to this same local ACN by running the following command in the buyer terminal, replacing `SOME_ADDRESS` with the value you noted above:
 ``` bash
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 '{
@@ -349,7 +355,6 @@ aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
   "public_uri": "127.0.0.1:9001"
 }'
 ```
-This allows the thermometer client to connect to the same local agent communication network as the thermometer.
 
 Then run the thermometer client AEA:
 ``` bash
@@ -360,7 +365,7 @@ You will see that the AEAs negotiate and then transact using the configured test
 
 ## Delete the AEAs
 
-When you're done, go up a level and delete the AEAs.
+When you're done, stop the agents (`CTRL+C`), go up a level and delete the AEAs.
 ``` bash 
 cd ..
 aea delete my_thermometer_aea

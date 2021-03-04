@@ -1,16 +1,16 @@
 name: tac_control
 author: fetchai
-version: 0.16.0
+version: 0.17.0
 type: skill
 description: The tac control skill implements the logic for an AEA to control an instance
   of the TAC.
 license: Apache-2.0
-aea_version: '>=0.10.0, <0.11.0'
+aea_version: '>=0.11.0, <0.12.0'
 fingerprint:
   README.md: QmPakq2qYHCenyWKfqQHRLWdF7uo6eG24GTprsBfrkyny2
-  __init__.py: QmU8CpgDfC656T6gBxPFtm78WAfdmDqDVheygmZmg6ohYP
-  behaviours.py: QmXo9VLXrCYSifskLkoLayDu6bvbUPmfpDLFmBq27gz6Zk
-  dialogues.py: QmWtk1w7Guw4auZaHUzr5trznBfhMGJKkwfguKBLZLLnvM
+  __init__.py: QmUrVVRoiGuWHPLhV1aFkTqkKspxwP6bTMVDWZaPFFJGCC
+  behaviours.py: QmRjE2BzYjr2UtbpCfesWkRcpqb3v7ifqbqUr7yoZGPNSK
+  dialogues.py: QmbQt96MAo8f4xjZKHLwRpiu1jDkyRV6k6FfK16zGkcMid
   game.py: QmfLo38zSkPgwD115waFvXhEhuY3oVTYAZFGb4492o2XN8
   handlers.py: Qmedq4uRwnFvp8qo9y2tiPAxqknQS7WC8nqy89LEvv2ARw
   helpers.py: QmdgSxjFPGr19Ptw4gLKLD4mvgZurzitwF9MzTNy1cZF2P
@@ -18,11 +18,11 @@ fingerprint:
 fingerprint_ignore_patterns: []
 connections: []
 contracts:
-- fetchai/erc1155:0.16.0
+- fetchai/erc1155:0.17.0
 protocols:
-- fetchai/default:0.12.0
-- fetchai/oef_search:0.13.0
-- fetchai/tac:0.13.0
+- fetchai/default:0.13.0
+- fetchai/oef_search:0.14.0
+- fetchai/tac:0.14.0
 skills: []
 behaviours:
   tac:

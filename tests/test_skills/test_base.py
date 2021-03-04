@@ -25,6 +25,8 @@ from unittest import TestCase, mock
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
+from aea_ledger_ethereum import EthereumCrypto
+from aea_ledger_fetchai import FetchAICrypto
 
 import aea
 from aea.aea import AEA
@@ -33,7 +35,7 @@ from aea.configurations.base import PublicId, SkillComponentConfiguration, Skill
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.gop import DecisionMakerHandler as GOPDecisionMakerHandler
 from aea.decision_maker.gop import GoalPursuitReadiness, OwnershipState, Preferences
-from aea.exceptions import AEAException, AEAHandleException, _StopRuntime
+from aea.exceptions import AEAHandleException, _StopRuntime
 from aea.identity.base import Identity
 from aea.multiplexer import MultiplexerStatus
 from aea.protocols.base import Message
@@ -46,14 +48,11 @@ from aea.skills.base import (
     Skill,
     SkillComponent,
     SkillContext,
-    _check_duplicate_classes,
     _print_warning_message_for_non_declared_skill_components,
 )
 
 from tests.conftest import (
-    ETHEREUM,
     ETHEREUM_PRIVATE_KEY_PATH,
-    FETCHAI,
     FETCHAI_PRIVATE_KEY_PATH,
     ROOT_DIR,
     _make_dummy_connection,
@@ -67,13 +66,18 @@ class BaseTestSkillContext:
     def setup_class(cls, decision_maker_handler_class=None):
         """Test the initialisation of the AEA."""
         cls.wallet = Wallet(
-            {FETCHAI: FETCHAI_PRIVATE_KEY_PATH, ETHEREUM: ETHEREUM_PRIVATE_KEY_PATH}
+            {
+                FetchAICrypto.identifier: FETCHAI_PRIVATE_KEY_PATH,
+                EthereumCrypto.identifier: ETHEREUM_PRIVATE_KEY_PATH,
+            }
         )
         cls.connection = _make_dummy_connection()
         resources = Resources()
         resources.add_connection(cls.connection)
         cls.identity = Identity(
-            "name", addresses=cls.wallet.addresses, default_address_key=FETCHAI,
+            "name",
+            addresses=cls.wallet.addresses,
+            default_address_key=FetchAICrypto.identifier,
         )
         cls.my_aea = AEA(
             cls.identity,
@@ -179,6 +183,13 @@ class BaseTestSkillContext:
     def test_namespace(self):
         """Test the 'namespace' property getter."""
         assert isinstance(self.skill_context.namespace, SimpleNamespace)
+
+    def test_send_to_skill(self):
+        """Test the send_to_skill method."""
+        with unittest.mock.patch.object(
+            self.my_aea.context, "_send_to_skill", return_value=None
+        ):
+            self.skill_context.send_to_skill("envelope", "context")
 
     @classmethod
     def teardown_class(cls):
@@ -440,7 +451,7 @@ def test_model_parse_module_missing_class():
     skill_context = SkillContext(
         skill=MagicMock(skill_id=PublicId.from_str("author/name:0.1.0"))
     )
-    dummy_models_path = Path(ROOT_DIR, "tests", "data", "dummy_skill")
+    dummy_models_path = Path(ROOT_DIR, "tests", "data", "dummy_skill", "dummy.py")
     with unittest.mock.patch.object(
         aea.skills.base._default_logger, "warning"
     ) as mock_logger_warning:
@@ -454,20 +465,6 @@ def test_model_parse_module_missing_class():
         )
         mock_logger_warning.assert_called_with("Model 'UnknownModel' cannot be found.")
         assert "dummy_model" in models_by_id
-
-
-def test_check_duplicate_classes():
-    """Test check duplicate classes."""
-    with pytest.raises(
-        AEAException,
-        match="Model 'ModelClass' present both in path_1 and path_2. Remove one of them.",
-    ):
-        _check_duplicate_classes(
-            [
-                ("ModelClass", MagicMock(__module__="path_1")),
-                ("ModelClass", MagicMock(__module__="path_2")),
-            ]
-        )
 
 
 def test_print_warning_message_for_non_declared_skill_components():

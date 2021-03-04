@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains the tests for the `aea config` sub-command."""
+import json
 import os
 import shutil
 import tempfile
@@ -179,10 +180,20 @@ class TestConfigGet:
             standalone_mode=False,
         )
         assert result.exit_code == 0
-        assert (
-            result.output
-            == '{"dummy": {"args": {"behaviour_arg_1": 1, "behaviour_arg_2": "2"}, "class_name": "DummyBehaviour"}}\n'
-        )
+
+        actual_object = json.loads(result.output)
+        expected_object = {
+            "dummy": {
+                "args": {"behaviour_arg_1": 1, "behaviour_arg_2": "2"},
+                "class_name": "DummyBehaviour",
+            },
+            "dummy_behaviour_same_classname": {
+                "args": {"behaviour_arg_1": 1, "behaviour_arg_2": "2"},
+                "class_name": "DummyBehaviour",
+                "file_path": "dummy_subpackage/foo.py",
+            },
+        }
+        assert actual_object == expected_object
 
     def test_get_list(self):
         """Test that getting the 'dummy' skill behaviours works."""

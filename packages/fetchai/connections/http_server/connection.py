@@ -48,7 +48,7 @@ from werkzeug.datastructures import (  # pylint: disable=wrong-import-order
 from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
-from aea.mail.base import Envelope, EnvelopeContext, Message, URI
+from aea.mail.base import Envelope, Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.protocols.dialogue.base import DialogueLabel
 
@@ -65,7 +65,7 @@ SERVER_ERROR = 500
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.http_server")
 
 RequestId = DialogueLabel
-PUBLIC_ID = PublicId.from_str("fetchai/http_server:0.16.0")
+PUBLIC_ID = PublicId.from_str("fetchai/http_server:0.17.0")
 
 
 class HttpDialogues(BaseHttpDialogues):
@@ -166,22 +166,19 @@ class Request(OpenAPIRequest):
         return request
 
     def to_envelope_and_set_id(
-        self, connection_id: PublicId, agent_address: str, dialogues: HttpDialogues,
+        self, dialogues: HttpDialogues, target_skill_id: PublicId,
     ) -> Envelope:
         """
         Process incoming API request by packaging into Envelope and sending it in-queue.
 
-        :param connection_id: id of the connection
-        :param agent_address: agent's address
         :param dialogue_reference: new dialog refernece for envelope
+        :param target_skill_id: the target skill id
 
         :return: envelope
         """
         url = self.full_url_pattern
-        uri = URI(self.full_url_pattern)
-        context = EnvelopeContext(connection_id=connection_id, uri=uri)
         http_message, http_dialogue = dialogues.create(
-            counterparty=agent_address,
+            counterparty=str(target_skill_id),
             performative=HttpMessage.Performative.REQUEST,
             method=self.method,
             url=url,
@@ -192,10 +189,7 @@ class Request(OpenAPIRequest):
         dialogue = cast(HttpDialogue, http_dialogue)
         self.id = dialogue.incomplete_dialogue_label
         envelope = Envelope(
-            to=http_message.to,
-            sender=http_message.sender,
-            context=context,
-            message=http_message,
+            to=http_message.to, sender=http_message.sender, message=http_message,
         )
         return envelope
 
@@ -349,16 +343,17 @@ class BaseAsyncChannel(ABC):
 class HTTPChannel(BaseAsyncChannel):
     """A wrapper for an RESTful API with an internal HTTPServer."""
 
-    RESPONSE_TIMEOUT = 300
+    RESPONSE_TIMEOUT = 5.0
 
     def __init__(
         self,
         address: Address,
         host: str,
         port: int,
+        target_skill_id: PublicId,
         api_spec_path: Optional[str],
         connection_id: PublicId,
-        timeout_window: float = 5.0,
+        timeout_window: float = RESPONSE_TIMEOUT,
         logger: logging.Logger = _default_logger,
     ):
         """
@@ -367,6 +362,7 @@ class HTTPChannel(BaseAsyncChannel):
         :param address: the address of the agent.
         :param host: RESTful API hostname / IP address
         :param port: RESTful API port number
+        :param target_skill_id: the skill id which handles the requests
         :param api_spec_path: Directory API path and filename of the API spec YAML source file.
         :param connection_id: public id of connection using this chanel.
         :param restricted_to_protocols: set of restricted protocols
@@ -375,6 +371,7 @@ class HTTPChannel(BaseAsyncChannel):
         super().__init__(address=address, connection_id=connection_id)
         self.host = host
         self.port = port
+        self.target_skill_id = target_skill_id
         self.server_address = "http://{}:{}".format(self.host, self.port)
 
         self._api_spec = APISpec(api_spec_path, self.server_address, logger)
@@ -435,7 +432,7 @@ class HTTPChannel(BaseAsyncChannel):
         try:
             # turn request into envelope
             envelope = request.to_envelope_and_set_id(
-                self.connection_id, self.address, dialogues=self._dialogues,
+                self._dialogues, self.target_skill_id
             )
 
             self.pending_requests[request.id] = Future()
@@ -445,12 +442,15 @@ class HTTPChannel(BaseAsyncChannel):
             # wait for response envelope within given timeout window (self.timeout_window) to appear in dispatch_ready_envelopes
 
             response_message = await asyncio.wait_for(
-                self.pending_requests[request.id], timeout=self.RESPONSE_TIMEOUT,
+                self.pending_requests[request.id], timeout=self.timeout_window,
             )
 
             return Response.from_message(response_message)
 
         except asyncio.TimeoutError:
+            self.logger.warning(
+                f"Request timed out! Request={request} not handled as a result. Ensure requests (protocol_id={HttpMessage.protocol_id}) are handled by a skill!"
+            )
             return Response(status=REQUEST_TIMEOUT, reason="Request Timeout")
         except FuturesCancelledError:
             return Response(  # pragma: nocover
@@ -528,10 +528,16 @@ class HTTPServerConnection(Connection):
     def __init__(self, **kwargs: Any) -> None:
         """Initialize a HTTP server connection."""
         super().__init__(**kwargs)
-        host = cast(str, self.configuration.config.get("host"))
-        port = cast(int, self.configuration.config.get("port"))
-        if host is None or port is None:  # pragma: nocover
-            raise ValueError("host and port must be set!")
+        host = cast(Optional[str], self.configuration.config.get("host"))
+        port = cast(Optional[int], self.configuration.config.get("port"))
+        target_skill_id_ = cast(
+            Optional[str], self.configuration.config.get("target_skill_id")
+        )
+        if host is None or port is None or target_skill_id_ is None:  # pragma: nocover
+            raise ValueError("host and port and target_skill_id must be set!")
+        target_skill_id = PublicId.try_from_str(target_skill_id_)
+        if target_skill_id is None:  # pragma: nocover
+            raise ValueError("Provided target_skill_id is not a valid public id.")
         api_spec_path = cast(
             Optional[str], self.configuration.config.get("api_spec_path")
         )
@@ -539,6 +545,7 @@ class HTTPServerConnection(Connection):
             self.address,
             host,
             port,
+            target_skill_id,
             api_spec_path,
             connection_id=self.connection_id,
             logger=self.logger,

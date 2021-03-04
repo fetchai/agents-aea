@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package aea.fetchai.default.v0_1_0;
+
+message DefaultMessage{
+
+  // Custom Types
+  message ErrorCode{
+    enum ErrorCodeEnum {
+      UNSUPPORTED_PROTOCOL = 0;
+      DECODING_ERROR = 1;
+      INVALID_MESSAGE = 2;
+      UNSUPPORTED_SKILL = 3;
+      INVALID_DIALOGUE = 4;
+    }
+    ErrorCodeEnum error_code = 1;
+  }
+
+
+  // Performatives and contents
+  message Bytes_Performative{
+    bytes content = 1;
+  }
+
+  message Error_Performative{
+    ErrorCode error_code = 1;
+    string error_msg = 2;
+    map<string, bytes> error_data = 3;
+  }
+
+  message End_Performative{
+  }
+
+
+  oneof performative{
+    Bytes_Performative bytes = 5;
+    End_Performative end = 6;
+    Error_Performative error = 7;
+  }
+}

@@ -33,6 +33,8 @@ _default_logger = logging.getLogger(__name__)
 class CryptoStore:
     """Utility class to store and retrieve crypto objects."""
 
+    __slots__ = ("_crypto_objects", "_public_keys", "_addresses", "_private_keys")
+
     def __init__(
         self, crypto_id_to_path: Optional[Dict[str, Optional[str]]] = None
     ) -> None:

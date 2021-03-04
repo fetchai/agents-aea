@@ -21,13 +21,13 @@
 from random import uniform
 
 import pytest
+from aea_ledger_fetchai import FetchAICrypto
 
 from aea.test_tools.test_cases import AEATestCaseManyFlaky
 
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
 from tests.conftest import (
-    FETCHAI,
     FETCHAI_PRIVATE_KEY_FILE,
     FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
     MAX_FLAKY_RERUNS_INTEGRATION,
@@ -53,8 +53,8 @@ class TestGenericSkills(AEATestCaseManyFlaky):
         self.create_agents(seller_aea_name, buyer_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
-            "fetchai/oef_search:0.13.0": "fetchai/soef:0.17.0",
+            "fetchai/ledger_api:0.11.0": "fetchai/ledger:0.14.0",
+            "fetchai/oef_search:0.14.0": "fetchai/soef:0.18.0",
         }
 
         # generate random location
@@ -65,11 +65,11 @@ class TestGenericSkills(AEATestCaseManyFlaky):
 
         # prepare seller agent
         self.set_agent_context(seller_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.16.0")
-        self.add_item("connection", "fetchai/soef:0.17.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.16.0")
-        self.add_item("connection", "fetchai/ledger:0.13.0")
-        self.add_item("skill", "fetchai/generic_seller:0.20.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.17.0")
+        self.add_item("connection", "fetchai/soef:0.18.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.17.0")
+        self.add_item("connection", "fetchai/ledger:0.14.0")
+        self.add_item("skill", "fetchai/generic_seller:0.21.0")
         setting_path = (
             "vendor.fetchai.skills.generic_seller.models.strategy.args.is_ledger_tx"
         )
@@ -79,11 +79,15 @@ class TestGenericSkills(AEATestCaseManyFlaky):
         self.run_install()
 
         # add keys
-        self.generate_private_key(FETCHAI)
-        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.generate_private_key(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        )
+        self.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+            connection=True,
         )
         self.replace_private_key_in_file(
             NON_FUNDED_FETCHAI_PRIVATE_KEY_1, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
@@ -103,11 +107,11 @@ class TestGenericSkills(AEATestCaseManyFlaky):
 
         # prepare buyer agent
         self.set_agent_context(buyer_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.16.0")
-        self.add_item("connection", "fetchai/soef:0.17.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.16.0")
-        self.add_item("connection", "fetchai/ledger:0.13.0")
-        self.add_item("skill", "fetchai/generic_buyer:0.20.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.17.0")
+        self.add_item("connection", "fetchai/soef:0.18.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.17.0")
+        self.add_item("connection", "fetchai/ledger:0.14.0")
+        self.add_item("skill", "fetchai/generic_buyer:0.21.0")
         setting_path = (
             "vendor.fetchai.skills.generic_buyer.models.strategy.args.is_ledger_tx"
         )
@@ -117,11 +121,15 @@ class TestGenericSkills(AEATestCaseManyFlaky):
         self.run_install()
 
         # add keys
-        self.generate_private_key(FETCHAI)
-        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.generate_private_key(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        )
+        self.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+            connection=True,
         )
 
         # set p2p configs
@@ -231,8 +239,8 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseManyFlaky):
         self.create_agents(seller_aea_name, buyer_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
-            "fetchai/oef_search:0.13.0": "fetchai/soef:0.17.0",
+            "fetchai/ledger_api:0.11.0": "fetchai/ledger:0.14.0",
+            "fetchai/oef_search:0.14.0": "fetchai/soef:0.18.0",
         }
 
         # generate random location
@@ -243,28 +251,32 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseManyFlaky):
 
         # prepare seller agent
         self.set_agent_context(seller_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.16.0")
-        self.add_item("connection", "fetchai/soef:0.17.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.16.0")
-        self.add_item("connection", "fetchai/ledger:0.13.0")
-        self.add_item("skill", "fetchai/generic_seller:0.20.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.17.0")
+        self.add_item("connection", "fetchai/soef:0.18.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.17.0")
+        self.add_item("connection", "fetchai/ledger:0.14.0")
+        self.add_item("skill", "fetchai/generic_seller:0.21.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/generic_seller:0.19.0", seller_aea_name
+            "fetchai/generic_seller:0.20.0", seller_aea_name
         )
         assert (
             diff == []
         ), "Difference between created and fetched project for files={}".format(diff)
 
         # add keys
-        self.generate_private_key(FETCHAI)
-        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.generate_private_key(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        )
+        self.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+            connection=True,
         )
         self.replace_private_key_in_file(
             NON_FUNDED_FETCHAI_PRIVATE_KEY_1, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
@@ -284,17 +296,17 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseManyFlaky):
 
         # prepare buyer agent
         self.set_agent_context(buyer_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.16.0")
-        self.add_item("connection", "fetchai/soef:0.17.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.16.0")
-        self.add_item("connection", "fetchai/ledger:0.13.0")
-        self.add_item("skill", "fetchai/generic_buyer:0.20.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.17.0")
+        self.add_item("connection", "fetchai/soef:0.18.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.17.0")
+        self.add_item("connection", "fetchai/ledger:0.14.0")
+        self.add_item("skill", "fetchai/generic_buyer:0.21.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/generic_buyer:0.20.0", buyer_aea_name
+            "fetchai/generic_buyer:0.21.0", buyer_aea_name
         )
         assert (
             diff == []
@@ -304,15 +316,19 @@ class TestGenericSkillsFetchaiLedger(AEATestCaseManyFlaky):
         self.set_config(setting_path, False, "bool")
 
         # add keys
-        self.generate_private_key(FETCHAI)
-        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.generate_private_key(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        )
+        self.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+            connection=True,
         )
 
         # fund key
-        self.generate_wealth(FETCHAI)
+        self.generate_wealth(FetchAICrypto.identifier)
 
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"

@@ -48,6 +48,7 @@ class TestOefSearchHandler(BaseSkillTestCase):
     path_to_skill = Path(
         ROOT_DIR, "packages", "fetchai", "skills", "simple_service_search"
     )
+    is_agent_to_agent_messages = False
 
     @classmethod
     def setup(cls):

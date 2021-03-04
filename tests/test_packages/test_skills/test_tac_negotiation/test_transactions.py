@@ -26,10 +26,11 @@ from unittest.mock import Mock, patch
 
 import pytest
 
+from aea.decision_maker.gop import GoalPursuitReadiness, OwnershipState, Preferences
 from aea.exceptions import AEAEnforceError
 from aea.helpers.transaction.base import Terms
 from aea.protocols.dialogue.base import DialogueLabel
-from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_ADDRESS
+from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_AGENT_ADDRESS
 
 from packages.fetchai.skills.tac_negotiation.dialogues import FipaDialogue
 from packages.fetchai.skills.tac_negotiation.transactions import Transactions
@@ -45,7 +46,12 @@ class TestTransactions(BaseSkillTestCase):
     @classmethod
     def setup(cls):
         """Setup the test class."""
-        super().setup()
+        tac_dm_context_kwargs = {
+            "goal_pursuit_readiness": GoalPursuitReadiness(),
+            "ownership_state": OwnershipState(),
+            "preferences": Preferences(),
+        }
+        super().setup(dm_context_kwargs=tac_dm_context_kwargs)
         cls.pending_transaction_timeout = 30
         cls.transactions = Transactions(
             pending_transaction_timeout=cls.pending_transaction_timeout,
@@ -68,7 +74,9 @@ class TestTransactions(BaseSkillTestCase):
             fee_by_currency_id={"1": 1},
         )
         cls.dialogue_label = DialogueLabel(
-            ("", ""), COUNTERPARTY_ADDRESS, cls._skill.skill_context.agent_address,
+            ("", ""),
+            COUNTERPARTY_AGENT_ADDRESS,
+            cls._skill.skill_context.agent_address,
         )
         cls.proposal_id = 5
         cls.transaction_id = "some_transaction_id"
@@ -472,4 +480,22 @@ class TestTransactions(BaseSkillTestCase):
 
     def test_ownership_state_after_locks(self):
         """Test the ownership_state_after_locks method of the Transactions class."""
-        # ToDo
+        # setup
+        is_seller = True
+        self.transactions._locked_txs_as_seller[self.transaction_id] = self.terms
+        expected_apply_transactions_argument = [self.terms]
+        expected_ownership_state = OwnershipState()
+
+        # operation
+        with patch.object(
+            self.skill.skill_context.decision_maker_handler_context.ownership_state,
+            "apply_transactions",
+            return_value=expected_ownership_state,
+        ) as mock_apply_transactions:
+            actual_ownership_states = self.transactions.ownership_state_after_locks(
+                is_seller
+            )
+
+        # after
+        mock_apply_transactions.assert_any_call(expected_apply_transactions_argument)
+        assert actual_ownership_states == expected_ownership_state

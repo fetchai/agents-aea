@@ -94,6 +94,8 @@ TacDialogues = BaseTacDialogues
 class ContractApiDialogue(BaseContractApiDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
 
+    __slots__ = ("_terms", "_callable")
+
     class Callable(Enum):
         """Contract callable."""
 
@@ -180,7 +182,7 @@ class ContractApiDialogues(Model, BaseContractApiDialogues):
 
         BaseContractApiDialogues.__init__(
             self,
-            self_address=self.context.agent_address,
+            self_address=str(self.skill_id),
             role_from_first_message=role_from_first_message,
             dialogue_class=ContractApiDialogue,
         )
@@ -188,6 +190,8 @@ class ContractApiDialogues(Model, BaseContractApiDialogues):
 
 class SigningDialogue(BaseSigningDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
+
+    __slots__ = ("_associated_contract_api_dialogue",)
 
     def __init__(
         self,
@@ -269,6 +273,8 @@ class SigningDialogues(Model, BaseSigningDialogues):
 class LedgerApiDialogue(BaseLedgerApiDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
 
+    __slots__ = ("_associated_signing_dialogue",)
+
     def __init__(
         self,
         dialogue_label: BaseDialogueLabel,
@@ -337,7 +343,7 @@ class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
 
         BaseLedgerApiDialogues.__init__(
             self,
-            self_address=self.context.agent_address,
+            self_address=str(self.skill_id),
             role_from_first_message=role_from_first_message,
             dialogue_class=LedgerApiDialogue,
         )

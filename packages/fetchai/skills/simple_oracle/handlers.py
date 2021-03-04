@@ -23,7 +23,6 @@ from typing import Optional, cast
 
 from aea.configurations.base import PublicId
 from aea.crypto.ledger_apis import LedgerApis
-from aea.mail.base import EnvelopeContext
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
@@ -151,10 +150,7 @@ class LedgerApiHandler(Handler):
             target_message=ledger_api_msg,
             transaction_digest=ledger_api_msg.transaction_digest,
         )
-        envelope_context = EnvelopeContext(
-            skill_id=self.context.skill_id, connection_id=LEDGER_API_ADDRESS
-        )
-        self.context.outbox.put_message(message=msg, context=envelope_context)
+        self.context.outbox.put_message(message=msg)
         self.context.logger.info("requesting transaction receipt.")
 
     def _handle_transaction_receipt(
@@ -455,12 +451,7 @@ class SigningHandler(Handler):
         )
         ledger_api_dialogue = cast(LedgerApiDialogue, ledger_api_dialogue)
         ledger_api_dialogue.associated_signing_dialogue = signing_dialogue
-        envelope_context = EnvelopeContext(
-            skill_id=self.context.skill_id, connection_id=LEDGER_API_ADDRESS
-        )
-        self.context.outbox.put_message(
-            message=ledger_api_msg, context=envelope_context
-        )
+        self.context.outbox.put_message(message=ledger_api_msg)
         self.context.logger.info("sending transaction to ledger.")
 
     def _handle_error(

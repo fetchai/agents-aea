@@ -33,10 +33,10 @@ def test_scaffold_send_unsupported_protocol_raises_not_implemented_error():
 def test_scaffold_send_decoding_error_raises_not_implemented_error():
     """Test 'send_decoding_error' raises not implemented error."""
     with pytest.raises(NotImplementedError):
-        ErrorHandler.send_decoding_error(None, None)
+        ErrorHandler.send_decoding_error(None, None, None)
 
 
-def test_scaffold_send_unsupported_skill_raises_not_implemented_error():
-    """Test 'send_unsupported_skill' raises not implemented error."""
+def test_scaffold_send_no_active_handler_raises_not_implemented_error():
+    """Test 'send_no_active_handler' raises not implemented error."""
     with pytest.raises(NotImplementedError):
-        ErrorHandler.send_unsupported_skill(None, None)
+        ErrorHandler.send_no_active_handler(None, None, None)

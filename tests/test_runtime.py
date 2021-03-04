@@ -58,6 +58,7 @@ class TestAsyncRuntime:
                 "connections": self.agent.runtime.multiplexer.connections
             },
         )
+        self.agent._runtime = self.runtime
 
     def teardown(self):
         """Tear down."""
@@ -71,17 +72,21 @@ class TestAsyncRuntime:
         self.runtime.stop()
         self.runtime.wait_completed(sync=True)
 
-    def test_stop_with_stopped_exception(self):
+    @pytest.mark.asyncio
+    async def test_stop_with_stopped_exception(self):
         """Test runtime stopped by stopruntime exception."""
         behaviour = self.agent.resources.get_behaviour(DUMMY_SKILL_PUBLIC_ID, "dummy")
         with patch.object(
             behaviour, "act", side_effect=_StopRuntime(reraise=ValueError("expected"))
         ):
             self.runtime.start()
-            wait_for_condition(lambda: self.runtime.is_running, timeout=20)
-            # started and should be stopped after the first act called
-            wait_for_condition(lambda: self.runtime.is_stopped, timeout=20)
-
+            await asyncio.wait_for(
+                self.runtime._state.wait(RuntimeStates.running), timeout=10
+            )
+            await asyncio.wait_for(
+                self.runtime._state.wait([RuntimeStates.stopped, RuntimeStates.error]),
+                timeout=10,
+            )
         with pytest.raises(ValueError, match="expected"):
             self.runtime.wait_completed(timeout=20, sync=True)
 

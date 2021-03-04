@@ -1,6 +1,6 @@
 #!/bin/bash
 REPO=https://github.com/fetchai/agents-aea.git
-BRANCH=master
+BRANCH=main
 TMP_DIR=$(mktemp -d -t bench-XXXXXXXXXX)
 git clone --branch $BRANCH $REPO $TMP_DIR
 
@@ -12,7 +12,7 @@ pip install pipenv
 # this is to install benchmark dependencies
 pipenv install --dev --skip-lock
 # this is to install the AEA in the Pipenv virtual env
-pipenv run pip install --upgrade aea[all]=="0.10.1"
+pipenv run pip install --upgrade aea[all]=="0.11.0"
 
 chmod +x benchmark/checks/run_benchmark.sh
 echo "Start the experiments."

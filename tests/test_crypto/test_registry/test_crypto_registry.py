@@ -24,15 +24,14 @@ import string
 from unittest import mock
 
 import pytest
+from aea_ledger_cosmos import CosmosCrypto
+from aea_ledger_ethereum import EthereumCrypto
+from aea_ledger_fetchai import FetchAICrypto
 
 import aea.crypto
-from aea.crypto.cosmos import CosmosCrypto
-from aea.crypto.ethereum import EthereumCrypto
-from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.registries.base import EntryPoint
 from aea.exceptions import AEAException
 
-from tests.conftest import COSMOS, ETHEREUM, FETCHAI
 from tests.data.custom_crypto import CustomCrypto
 
 
@@ -45,38 +44,32 @@ forbidden_special_characters = "".join(
 
 def test_make_fetchai():
     """Test the 'make' method for 'fetchai' crypto."""
-    fetchai_crypto = aea.crypto.registries.make_crypto(FETCHAI)
-
-    assert type(fetchai_crypto) == FetchAICrypto
+    aea_ledger_fetchai = aea.crypto.registries.make_crypto(FetchAICrypto.identifier)
 
     # calling 'make' again will give a different object.
-    fetchai_crypto_1 = aea.crypto.registries.make_crypto(FETCHAI)
-    assert type(fetchai_crypto) == type(fetchai_crypto_1)
-    assert fetchai_crypto.address != fetchai_crypto_1
+    aea_ledger_fetchai_1 = aea.crypto.registries.make_crypto(FetchAICrypto.identifier)
+    assert type(aea_ledger_fetchai) == type(aea_ledger_fetchai_1)
+    assert aea_ledger_fetchai.address != aea_ledger_fetchai_1
 
 
 def test_make_ethereum():
     """Test the 'make' method for 'ethereum' crypto."""
-    ethereum_crypto = aea.crypto.registries.make_crypto(ETHEREUM)
-
-    assert type(ethereum_crypto) == EthereumCrypto
+    aea_ledger_ethereum = aea.crypto.registries.make_crypto(EthereumCrypto.identifier)
 
     # calling 'make' again will give a different object.
-    ethereum_crypto_1 = aea.crypto.registries.make_crypto(ETHEREUM)
-    assert type(ethereum_crypto) == type(ethereum_crypto_1)
-    assert ethereum_crypto.address != ethereum_crypto_1.address
+    aea_ledger_ethereum_1 = aea.crypto.registries.make_crypto(EthereumCrypto.identifier)
+    assert type(aea_ledger_ethereum) == type(aea_ledger_ethereum_1)
+    assert aea_ledger_ethereum.address != aea_ledger_ethereum_1.address
 
 
 def test_make_cosmos():
     """Test the 'make' method for 'cosmos' crypto."""
-    cosmos_crypto = aea.crypto.registries.make_crypto(COSMOS)
-
-    assert type(cosmos_crypto) == CosmosCrypto
+    aea_ledger_cosmos = aea.crypto.registries.make_crypto(CosmosCrypto.identifier)
 
     # calling 'make' again will give a different object.
-    cosmos_crypto_1 = aea.crypto.registries.make_crypto(COSMOS)
-    assert type(cosmos_crypto) == type(cosmos_crypto_1)
-    assert cosmos_crypto.address != cosmos_crypto_1.address
+    aea_ledger_cosmos_1 = aea.crypto.registries.make_crypto(CosmosCrypto.identifier)
+    assert type(aea_ledger_cosmos) == type(aea_ledger_cosmos_1)
+    assert aea_ledger_cosmos.address != aea_ledger_cosmos_1.address
 
 
 def test_register_custom_crypto():
@@ -110,7 +103,7 @@ def test_register_custom_crypto():
 
 
 def test_cannot_register_crypto_twice():
-    """Test we cannot register a crytpo twice."""
+    """Test we cannot register a crypto twice."""
     aea.crypto.registries.register_crypto(
         "my_custom_crypto", entry_point="tests.data.custom_crypto:CustomCrypto"
     )

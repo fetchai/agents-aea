@@ -1,6 +1,6 @@
 ## Description
 
-The HTTP server connection allows you to run a server inside a connection which accepts requests from clients. The HTTP server connection validates requests it receives against the provided OpenAPI file. It translates each valid request into an envelope, sends the envelope to the agent and if it receives, within a timeout window, a valid response envelope, serves the response to the client.
+The HTTP server connection allows you to run a server inside a connection which accepts requests from clients. The HTTP server connection validates requests it receives against a provided OpenAPI file. It translates each valid request into an envelope and sends it to the agent. If it receives a valid response envelope from the agent within a timeout window, the connection translates the response envelope into an HTTP response and serves it to the client.
 
 ## Steps
 
@@ -11,16 +11,16 @@ aea create my_aea
 cd my_aea
 ```
 
-Add the http server connection package
+Add the http server connection package:
 
 ``` bash
-aea add connection fetchai/http_server:0.16.0
+aea add connection fetchai/http_server:0.17.0
 ```
 
 Update the default connection:
 
 ``` bash
-aea config set agent.default_connection fetchai/http_server:0.16.0
+aea config set agent.default_connection fetchai/http_server:0.17.0
 ```
 
 Modify the `api_spec_path`:
@@ -43,12 +43,12 @@ Write and add your skill:
 aea scaffold skill http_echo
 ```
 
-We will implement a simple http echo skill (modelled after the standard echo skill) which prints out the content of received messages and responds with success.
+You can implement a simple http echo skill (modelled after the standard echo skill) which prints out the content of received messages and responds with success.
 
 
-First, we delete the `my_model.py` and `behaviour.py` (in `my_aea/skills/http_echo/`). The server will be purely reactive, so we only require the `handlers.py` file. We update the `skill.yaml` accordingly, so set `models: {}` and `behaviours: {}`.
+First, delete the `my_model.py` and `behaviour.py` files (in `my_aea/skills/http_echo/`). The server will be purely reactive, so you only need the `handlers.py` file. Update `skill.yaml` accordingly, so set `models: {}` and `behaviours: {}`.
 
-Next we implement a basic handler which prints the received envelopes and responds:
+Next implement a basic handler which prints the received envelopes and responds:
 
 ``` python
 import json
@@ -155,7 +155,7 @@ class HttpHandler(Handler):
         pass
 ```
 
-We also need to update the `skill.yaml` accordingly:
+And update the `skill.yaml` accordingly:
 
 ``` yaml
 handlers:
@@ -164,18 +164,17 @@ handlers:
     class_name: HttpHandler
 ```
 
-Finally, we run the fingerprinter:
+Finally, run the fingerprinter (note, you will have to replace the author name with your author handle):
 ``` bash
-aea fingerprint skill fetchai/http_echo:0.14.0
+aea fingerprint skill fetchai/http_echo:0.15.0
 ```
-Note, you will have to replace the author name with your author handle.
 
-We can now run the AEA:
+You can now run the AEA:
 ``` bash
 aea run
 ```
 
-In a separate terminal, we can create a client and communicate with the server:
+In a separate terminal, you can create a client and communicate with the server:
 ``` python
 import requests
 

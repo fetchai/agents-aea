@@ -41,16 +41,16 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 This step-by-step guide goes through the creation of two AEAs which are already developed by Fetch.ai. You can get the finished AEAs, and compare your code against them, by following the next steps:
 
 ``` bash
-aea fetch fetchai/generic_seller:0.19.0
+aea fetch fetchai/generic_seller:0.20.0
 cd generic_seller
-aea eject skill fetchai/generic_seller:0.20.0
+aea eject skill fetchai/generic_seller:0.21.0
 cd ..
 ```
 
 ``` bash
-aea fetch fetchai/generic_buyer:0.20.0
+aea fetch fetchai/generic_buyer:0.21.0
 cd generic_buyer
-aea eject skill fetchai/generic_buyer:0.20.0
+aea eject skill fetchai/generic_buyer:0.21.0
 cd ..
 ```
 
@@ -1178,6 +1178,8 @@ class DefaultDialogues(Model, BaseDefaultDialogues):
 class FipaDialogue(BaseFipaDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
 
+    __slots__ = ("data_for_sale", "_terms")
+
     def __init__(
         self,
         dialogue_label: BaseDialogueLabel,
@@ -1251,6 +1253,8 @@ class FipaDialogues(Model, BaseFipaDialogues):
 class LedgerApiDialogue(BaseLedgerApiDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
 
+    __slots__ = ("_associated_fipa_dialogue",)
+
     def __init__(
         self,
         dialogue_label: BaseDialogueLabel,
@@ -1314,7 +1318,7 @@ class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
 
         BaseLedgerApiDialogues.__init__(
             self,
-            self_address=self.context.agent_address,
+            self_address=str(self.skill_id),
             role_from_first_message=role_from_first_message,
             dialogue_class=LedgerApiDialogue,
         )
@@ -1348,7 +1352,7 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
 
         BaseOefSearchDialogues.__init__(
             self,
-            self_address=self.context.agent_address,
+            self_address=str(self.skill_id),
             role_from_first_message=role_from_first_message,
         )
 ```
@@ -1369,7 +1373,7 @@ type: skill
 description: The weather station skill implements the functionality to sell weather
   data.
 license: Apache-2.0
-aea_version: '>=0.10.0, <0.11.0'
+aea_version: '>=0.11.0, <0.12.0'
 fingerprint:
   README.md: QmPb5kHYZyhUN87EKmuahyGqDGgqVdGPyfC1KpGC3xfmcP
   __init__.py: QmTSEedzQySy2nzRCY3F66CBSX52f8s3pWHZTejX4hKC9h
@@ -1379,13 +1383,13 @@ fingerprint:
   strategy.py: QmYTUsfv64eRQDevCfMUDQPx2GCtiMLFdacN4sS1E4Fdfx
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.13.0
+- fetchai/ledger:0.14.0
 contracts: []
 protocols:
-- fetchai/default:0.12.0
-- fetchai/fipa:0.13.0
-- fetchai/ledger_api:0.10.0
-- fetchai/oef_search:0.13.0
+- fetchai/default:0.13.0
+- fetchai/fipa:0.14.0
+- fetchai/ledger_api:0.11.0
+- fetchai/oef_search:0.14.0
 skills: []
 behaviours:
   service_registration:
@@ -2737,6 +2741,7 @@ The `is_affordable_proposal` method in the following code block checks if we can
 As mentioned during the creation of the seller AEA, we should keep track of the various interactions an AEA has with others and this is done via dialogues. Create a new file and name it `dialogues.py` (in `my_generic_buyer/skills/generic_buyer/`). Inside this file add the following code:
 
 ``` python
+
 from typing import Any, Optional, Type
 
 from aea.common import Address
@@ -2813,6 +2818,11 @@ class DefaultDialogues(Model, BaseDefaultDialogues):
 class FipaDialogue(BaseFipaDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
 
+    __slots__ = (
+        "_terms",
+        "_associated_ledger_api_dialogue",
+    )
+
     def __init__(
         self,
         dialogue_label: BaseDialogueLabel,
@@ -2885,6 +2895,8 @@ class FipaDialogues(Model, BaseFipaDialogues):
 class LedgerApiDialogue(BaseLedgerApiDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
 
+    __slots__ = ("_associated_fipa_dialogue",)
+
     def __init__(
         self,
         dialogue_label: BaseDialogueLabel,
@@ -2948,7 +2960,7 @@ class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
 
         BaseLedgerApiDialogues.__init__(
             self,
-            self_address=self.context.agent_address,
+            self_address=str(self.skill_id),
             role_from_first_message=role_from_first_message,
             dialogue_class=LedgerApiDialogue,
         )
@@ -2982,13 +2994,15 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
 
         BaseOefSearchDialogues.__init__(
             self,
-            self_address=self.context.agent_address,
+            self_address=str(self.skill_id),
             role_from_first_message=role_from_first_message,
         )
 
 
 class SigningDialogue(BaseSigningDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
+
+    __slots__ = ("_associated_ledger_api_dialogue",)
 
     def __init__(
         self,
@@ -3078,7 +3092,7 @@ version: 0.1.0
 type: skill
 description: The weather client skill implements the skill to purchase weather data.
 license: Apache-2.0
-aea_version: '>=0.10.0, <0.11.0'
+aea_version: '>=0.11.0, <0.12.0'
 fingerprint:
   README.md: QmTR91jm7WfJpmabisy74NR5mc35YXjDU1zQAUKZeHRw8L
   __init__.py: QmU5vrC8FipyjfS5biNa6qDWdp4aeH5h4YTtbFDmCg8Chj
@@ -3088,14 +3102,14 @@ fingerprint:
   strategy.py: QmcrwaEWvKHDCNti8QjRhB4utJBJn5L8GpD27Uy9zHwKhY
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.13.0
+- fetchai/ledger:0.14.0
 contracts: []
 protocols:
-- fetchai/default:0.12.0
-- fetchai/fipa:0.13.0
-- fetchai/ledger_api:0.10.0
-- fetchai/oef_search:0.13.0
-- fetchai/signing:0.10.0
+- fetchai/default:0.13.0
+- fetchai/fipa:0.14.0
+- fetchai/ledger_api:0.11.0
+- fetchai/oef_search:0.14.0
+- fetchai/signing:0.11.0
 skills: []
 behaviours:
   search:
@@ -3193,8 +3207,8 @@ In both AEAs run:
 ``` bash
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
-  "fetchai/oef_search:0.13.0": "fetchai/soef:0.17.0"
+  "fetchai/ledger_api:0.11.0": "fetchai/ledger:0.14.0",
+  "fetchai/oef_search:0.14.0": "fetchai/soef:0.18.0"
 }'
 ```
 
@@ -3211,13 +3225,13 @@ aea generate-wealth fetchai --sync
 Add the remaining packages for the seller AEA, then run it:
 
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.16.0
-aea add connection fetchai/soef:0.17.0
-aea add connection fetchai/ledger:0.13.0
-aea add protocol fetchai/fipa:0.13.0
+aea add connection fetchai/p2p_libp2p:0.17.0
+aea add connection fetchai/soef:0.18.0
+aea add connection fetchai/ledger:0.14.0
+aea add protocol fetchai/fipa:0.14.0
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.16.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.17.0
 aea run
 ```
 
@@ -3228,14 +3242,14 @@ Once you see a message of the form `To join its network use multiaddr: ['SOME_AD
 Add the remaining packages for the buyer AEA:
 
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.16.0
-aea add connection fetchai/soef:0.17.0
-aea add connection fetchai/ledger:0.13.0
-aea add protocol fetchai/fipa:0.13.0
-aea add protocol fetchai/signing:0.10.0
+aea add connection fetchai/p2p_libp2p:0.17.0
+aea add connection fetchai/soef:0.18.0
+aea add connection fetchai/ledger:0.14.0
+aea add protocol fetchai/fipa:0.14.0
+aea add protocol fetchai/signing:0.11.0
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.16.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.17.0
 ```
 
 Then, update the configuration of the buyer AEA's P2P connection:

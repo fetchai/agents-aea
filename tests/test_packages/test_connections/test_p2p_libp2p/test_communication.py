@@ -25,9 +25,10 @@ import tempfile
 from unittest.mock import Mock
 
 import pytest
+from aea_ledger_ethereum import EthereumCrypto
+from aea_ledger_fetchai import FetchAICrypto
 
-from aea.crypto.ethereum import EthereumCrypto
-from aea.crypto.fetchai import FetchAICrypto
+from aea.crypto.registries import make_crypto
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 
@@ -84,9 +85,8 @@ class TestP2PLibp2pConnectionConnectDisconnect:
         """Test connect then disconnect."""
         temp_dir = os.path.join(self.t, "temp_dir")
         os.mkdir(temp_dir)
-        connection = _make_libp2p_connection(
-            data_dir=temp_dir, agent_key=EthereumCrypto()
-        )
+        crypto = make_crypto(EthereumCrypto.identifier)
+        connection = _make_libp2p_connection(data_dir=temp_dir, agent_key=crypto)
 
         assert connection.is_connected is False
         try:
@@ -123,11 +123,14 @@ class TestP2PLibp2pConnectionEchoEnvelope:
         cls.log_files = []
         cls.multiplexers = []
 
+        aea_ledger_fetchai = make_crypto(FetchAICrypto.identifier)
+        aea_ledger_ethereum = make_crypto(EthereumCrypto.identifier)
+
         try:
             temp_dir_1 = os.path.join(cls.t, "temp_dir_1")
             os.mkdir(temp_dir_1)
             cls.connection1 = _make_libp2p_connection(
-                data_dir=temp_dir_1, agent_key=FetchAICrypto(), port=DEFAULT_PORT + 1
+                data_dir=temp_dir_1, agent_key=aea_ledger_fetchai, port=DEFAULT_PORT + 1
             )
             cls.multiplexer1 = Multiplexer(
                 [cls.connection1], protocols=[MockDefaultMessageProtocol]
@@ -144,7 +147,7 @@ class TestP2PLibp2pConnectionEchoEnvelope:
                 data_dir=temp_dir_2,
                 port=DEFAULT_PORT + 2,
                 entry_peers=[genesis_peer],
-                agent_key=EthereumCrypto(),
+                agent_key=aea_ledger_ethereum,
             )
             cls.multiplexer2 = Multiplexer(
                 [cls.connection2], protocols=[MockDefaultMessageProtocol]
@@ -629,3 +632,39 @@ def test_libp2pconnection_uri():
     uri = Uri(host="127.0.0.1")
     uri = Uri(host="127.0.0.1", port=10000)
     assert uri.host == "127.0.0.1" and uri.port == 10000
+
+
+@pytest.mark.asyncio
+class TestP2PLibp2pNodeRestart:
+    """Test node restart."""
+
+    def setup(self):
+        """Set the test up"""
+        self.cwd = os.getcwd()
+        self.t = tempfile.mkdtemp()
+        os.chdir(self.t)
+
+    @pytest.mark.asyncio
+    async def test_node_restart(self):
+        """Test node restart works."""
+        temp_dir = os.path.join(self.t, "temp_dir")
+        os.mkdir(temp_dir)
+        connection = _make_libp2p_connection(data_dir=temp_dir)
+        try:
+            await connection.node.start()
+            pipe = connection.node.pipe
+            assert pipe is not None
+            await connection.node.restart()
+            new_pipe = connection.node.pipe
+            assert new_pipe is not None
+            assert new_pipe is not pipe
+        finally:
+            await connection.node.stop()
+
+    def teardown(self):
+        """Tear down the test"""
+        os.chdir(self.cwd)
+        try:
+            shutil.rmtree(self.t)
+        except (OSError, IOError):
+            pass

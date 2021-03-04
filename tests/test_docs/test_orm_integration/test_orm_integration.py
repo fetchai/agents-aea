@@ -24,13 +24,13 @@ from random import uniform
 import mistune
 import pytest
 import yaml
+from aea_ledger_fetchai import FetchAICrypto
 
 from aea.test_tools.test_cases import AEATestCaseManyFlaky
 
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
 from tests.conftest import (
-    FETCHAI,
     FETCHAI_PRIVATE_KEY_FILE,
     FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
     MAX_FLAKY_RERUNS_INTEGRATION,
@@ -127,8 +127,8 @@ class TestOrmIntegrationDocs(AEATestCaseManyFlaky):
         self.create_agents(seller_aea_name, buyer_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
-            "fetchai/oef_search:0.13.0": "fetchai/soef:0.17.0",
+            "fetchai/ledger_api:0.11.0": "fetchai/ledger:0.14.0",
+            "fetchai/oef_search:0.14.0": "fetchai/soef:0.18.0",
         }
 
         # generate random location
@@ -139,15 +139,15 @@ class TestOrmIntegrationDocs(AEATestCaseManyFlaky):
 
         # Setup seller
         self.set_agent_context(seller_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.16.0")
-        self.add_item("connection", "fetchai/soef:0.17.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.16.0")
-        self.add_item("connection", "fetchai/ledger:0.13.0")
-        self.add_item("skill", "fetchai/thermometer:0.19.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.17.0")
+        self.add_item("connection", "fetchai/soef:0.18.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.17.0")
+        self.add_item("connection", "fetchai/ledger:0.14.0")
+        self.add_item("skill", "fetchai/thermometer:0.20.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         # ejecting changes author and version!
-        self.eject_item("skill", "fetchai/thermometer:0.19.0")
+        self.eject_item("skill", "fetchai/thermometer:0.20.0")
         seller_skill_config_replacement = yaml.safe_load(seller_strategy_replacement)
         self.nested_set_config(
             "skills.thermometer.models.strategy.args",
@@ -168,17 +168,21 @@ class TestOrmIntegrationDocs(AEATestCaseManyFlaky):
         self.run_install()
 
         # add keys
-        self.generate_private_key(FETCHAI)
-        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.generate_private_key(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        )
+        self.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+            connection=True,
         )
         self.replace_private_key_in_file(
             NON_FUNDED_FETCHAI_PRIVATE_KEY_1, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
         )
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.set_config(setting_path, FETCHAI)
+        self.set_config(setting_path, FetchAICrypto.identifier)
 
         # replace location
         setting_path = "skills.thermometer.models.strategy.args.location"
@@ -186,11 +190,11 @@ class TestOrmIntegrationDocs(AEATestCaseManyFlaky):
 
         # Setup Buyer
         self.set_agent_context(buyer_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.16.0")
-        self.add_item("connection", "fetchai/soef:0.17.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.16.0")
-        self.add_item("connection", "fetchai/ledger:0.13.0")
-        self.add_item("skill", "fetchai/thermometer_client:0.19.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.17.0")
+        self.add_item("connection", "fetchai/soef:0.18.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.17.0")
+        self.add_item("connection", "fetchai/ledger:0.14.0")
+        self.add_item("skill", "fetchai/thermometer_client:0.20.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         buyer_skill_config_replacement = yaml.safe_load(buyer_strategy_replacement)
@@ -201,15 +205,19 @@ class TestOrmIntegrationDocs(AEATestCaseManyFlaky):
         self.run_install()
 
         # add keys
-        self.generate_private_key(FETCHAI)
-        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.generate_private_key(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        )
+        self.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+            connection=True,
         )
 
         # fund key
-        self.generate_wealth(FETCHAI)
+        self.generate_wealth(FetchAICrypto.identifier)
 
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"

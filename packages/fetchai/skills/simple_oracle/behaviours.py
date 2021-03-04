@@ -21,7 +21,6 @@
 
 from typing import Any, Dict, cast
 
-from aea.mail.base import EnvelopeContext
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.connections.ledger.base import CONNECTION_ID as LEDGER_API_ADDRESS
@@ -147,12 +146,7 @@ class SimpleOracleBehaviour(TickerBehaviour):
         )
         contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue,)
         contract_api_dialogue.terms = strategy.get_deploy_terms()
-        envelope_context = EnvelopeContext(
-            skill_id=self.context.skill_id, connection_id=LEDGER_API_ADDRESS
-        )
-        self.context.outbox.put_message(
-            message=contract_api_msg, context=envelope_context
-        )
+        self.context.outbox.put_message(message=contract_api_msg)
         self.context.logger.info("requesting contract deployment transaction...")
 
     def _request_grant_role_transaction(self) -> None:
@@ -182,12 +176,7 @@ class SimpleOracleBehaviour(TickerBehaviour):
         )
         contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
         contract_api_dialogue.terms = strategy.get_grant_role_terms()
-        envelope_context = EnvelopeContext(
-            skill_id=self.context.skill_id, connection_id=LEDGER_API_ADDRESS
-        )
-        self.context.outbox.put_message(
-            message=contract_api_msg, context=envelope_context
-        )
+        self.context.outbox.put_message(message=contract_api_msg)
         self.context.logger.info("requesting grant role transaction...")
 
     def _request_update_transaction(self, update_args: Dict[str, Any]) -> None:
@@ -219,12 +208,7 @@ class SimpleOracleBehaviour(TickerBehaviour):
         )
         contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
         contract_api_dialogue.terms = strategy.get_update_terms()
-        envelope_context = EnvelopeContext(
-            skill_id=self.context.skill_id, connection_id=LEDGER_API_ADDRESS
-        )
-        self.context.outbox.put_message(
-            message=contract_api_msg, context=envelope_context
-        )
+        self.context.outbox.put_message(message=contract_api_msg)
         self.context.logger.info("requesting update transaction...")
 
     def _get_balance(self) -> None:
@@ -243,12 +227,7 @@ class SimpleOracleBehaviour(TickerBehaviour):
             ledger_id=strategy.ledger_id,
             address=cast(str, self.context.agent_addresses.get(strategy.ledger_id)),
         )
-        envelope_context = EnvelopeContext(
-            skill_id=self.context.skill_id, connection_id=LEDGER_API_ADDRESS
-        )
-        self.context.outbox.put_message(
-            message=ledger_api_msg, context=envelope_context
-        )
+        self.context.outbox.put_message(message=ledger_api_msg)
 
     def add_prometheus_metric(
         self,
@@ -281,10 +260,7 @@ class SimpleOracleBehaviour(TickerBehaviour):
         )
 
         # send message
-        envelope_context = EnvelopeContext(
-            skill_id=self.context.skill_id, connection_id=PROM_CONNECTION_ID
-        )
-        self.context.outbox.put_message(message=message, context=envelope_context)
+        self.context.outbox.put_message(message=message)
 
     def update_prometheus_metric(
         self, metric_name: str, update_func: str, value: float, labels: Dict[str, str],
@@ -313,10 +289,7 @@ class SimpleOracleBehaviour(TickerBehaviour):
         )
 
         # send message
-        envelope_context = EnvelopeContext(
-            skill_id=self.context.skill_id, connection_id=PROM_CONNECTION_ID
-        )
-        self.context.outbox.put_message(message=message, context=envelope_context)
+        self.context.outbox.put_message(message=message)
 
     def teardown(self) -> None:
         """

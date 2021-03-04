@@ -45,7 +45,7 @@ from aea.helpers.transaction.base import (
     TransactionReceipt,
 )
 from aea.protocols.dialogue.base import DialogueMessage, DialogueStats
-from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_ADDRESS
+from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_AGENT_ADDRESS
 
 from packages.fetchai.protocols.contract_api.custom_types import Kwargs
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
@@ -109,7 +109,7 @@ class TestFipaHandler(BaseSkillTestCase):
 
         cls.dialogue_stats = cls.fipa_dialogues.dialogue_stats
         cls.ledger_id = "some_ledger_id"
-        cls.counterprty_address = COUNTERPARTY_ADDRESS
+        cls.counterprty_address = COUNTERPARTY_AGENT_ADDRESS
         cls.amount_by_currency_id = {"1": 50}
         cls.quantities_by_good_id = {"2": -10}
         cls.nonce = "some_nonce"
@@ -566,6 +566,7 @@ class TestFipaHandler(BaseSkillTestCase):
             self.prepare_skill_dialogue(
                 dialogues=self.fipa_dialogues,
                 messages=self.list_of_messages_other_initiated[:2],
+                is_agent_to_agent_messages=True,
             ),
         )
         fipa_dialogue._terms = self.terms
@@ -624,7 +625,7 @@ class TestFipaHandler(BaseSkillTestCase):
             message_type=ContractApiMessage,
             performative=ContractApiMessage.Performative.GET_RAW_MESSAGE,
             to=LEDGER_API_ADDRESS,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             ledger_id=self.ledger_id,
             contract_id=self.contract_id,
             contract_address=self.contract_address,
@@ -854,7 +855,7 @@ class TestFipaHandler(BaseSkillTestCase):
             message_type=ContractApiMessage,
             performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
             to=LEDGER_API_ADDRESS,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             ledger_id=self.ledger_id,
             contract_id=self.contract_id,
             contract_address=self.contract_address,
@@ -947,6 +948,7 @@ class TestSigningHandler(BaseSkillTestCase):
     """Test signing handler of tac negotiation."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "tac_negotiation")
+    is_agent_to_agent_messages = False
 
     @classmethod
     def setup(cls):
@@ -1093,6 +1095,7 @@ class TestSigningHandler(BaseSkillTestCase):
             self.prepare_skill_dialogue(
                 dialogues=self.fipa_dialogues,
                 messages=self.list_of_other_initiated_fipa_messages[:3],
+                is_agent_to_agent_messages=True,
             ),
         )
 
@@ -1161,6 +1164,7 @@ class TestSigningHandler(BaseSkillTestCase):
             self.prepare_skill_dialogue(
                 dialogues=self.fipa_dialogues,
                 messages=self.list_of_self_initiated_fipa_messages[:4],
+                is_agent_to_agent_messages=True,
             ),
         )
         fipa_dialogue.counterparty_signature = self.counterparty_signature
@@ -1216,6 +1220,7 @@ class TestSigningHandler(BaseSkillTestCase):
             self.prepare_skill_dialogue(
                 dialogues=self.fipa_dialogues,
                 messages=self.list_of_self_initiated_fipa_messages[:3],
+                is_agent_to_agent_messages=True,
             ),
         )
 
@@ -1262,6 +1267,7 @@ class TestSigningHandler(BaseSkillTestCase):
             self.prepare_skill_dialogue(
                 dialogues=self.fipa_dialogues,
                 messages=self.list_of_self_initiated_fipa_messages[:1],
+                is_agent_to_agent_messages=True,
             ),
         )
         fipa_dialogue._incoming_messages = []
@@ -1309,6 +1315,7 @@ class TestSigningHandler(BaseSkillTestCase):
             self.prepare_skill_dialogue(
                 dialogues=self.fipa_dialogues,
                 messages=self.list_of_other_initiated_fipa_messages[:3],
+                is_agent_to_agent_messages=True,
             ),
         )
 
@@ -1372,6 +1379,7 @@ class TestSigningHandler(BaseSkillTestCase):
             self.prepare_skill_dialogue(
                 dialogues=self.fipa_dialogues,
                 messages=self.list_of_self_initiated_fipa_messages[:4],
+                is_agent_to_agent_messages=True,
             ),
         )
 
@@ -1414,7 +1422,7 @@ class TestSigningHandler(BaseSkillTestCase):
             message_type=LedgerApiMessage,
             performative=LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
             to=LEDGER_API_ADDRESS,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             signed_transaction=incoming_message.signed_transaction,
         )
         assert has_attributes, error_str
@@ -1441,6 +1449,7 @@ class TestSigningHandler(BaseSkillTestCase):
             self.prepare_skill_dialogue(
                 dialogues=self.fipa_dialogues,
                 messages=self.list_of_self_initiated_fipa_messages[:3],
+                is_agent_to_agent_messages=True,
             ),
         )
 
@@ -1489,6 +1498,7 @@ class TestSigningHandler(BaseSkillTestCase):
             self.prepare_skill_dialogue(
                 dialogues=self.fipa_dialogues,
                 messages=self.list_of_self_initiated_fipa_messages[:3],
+                is_agent_to_agent_messages=True,
             ),
         )
         fipa_dialogue._incoming_messages = []
@@ -1638,6 +1648,7 @@ class TestLedgerApiHandler(BaseSkillTestCase):
     """Test ledger_api handler of tac negotiation."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "tac_negotiation")
+    is_agent_to_agent_messages = False
 
     @classmethod
     def setup(cls):
@@ -1802,7 +1813,7 @@ class TestLedgerApiHandler(BaseSkillTestCase):
             performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
             target=incoming_message.message_id,
             to=LEDGER_API_ADDRESS,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             transaction_digest=incoming_message.transaction_digest,
         )
         assert has_attributes, error_str
@@ -1907,7 +1918,7 @@ class TestLedgerApiHandler(BaseSkillTestCase):
             performative=invalid_performative,
             ledger_id="some_ledger_id",
             address=self.address,
-            to=self.skill.skill_context.agent_address,
+            to=str(self.skill.skill_context.skill_id),
         )
 
         # operation
@@ -1930,6 +1941,7 @@ class TestOefSearchHandler(BaseSkillTestCase):
     """Test oef search handler of tac negotiation."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "tac_negotiation")
+    is_agent_to_agent_messages = False
 
     @classmethod
     def setup(cls):
@@ -1995,7 +2007,7 @@ class TestOefSearchHandler(BaseSkillTestCase):
             message_type=OefSearchMessage,
             dialogue_reference=incorrect_dialogue_reference,
             performative=OefSearchMessage.Performative.SEARCH_RESULT,
-            to=self.self_address + "_" + str(self.skill.skill_context.skill_id),
+            to=str(self.skill.skill_context.skill_id),
         )
 
         # operation
@@ -2019,7 +2031,7 @@ class TestOefSearchHandler(BaseSkillTestCase):
             self.build_incoming_message_for_skill_dialogue(
                 dialogue=oef_dialogue,
                 performative=OefSearchMessage.Performative.OEF_ERROR,
-                to=self.self_address + "_" + str(self.skill.skill_context.skill_id),
+                to=str(self.skill.skill_context.skill_id),
                 oef_error_operation=OefSearchMessage.OefErrorOperation.SEARCH_SERVICES,
             ),
         )
@@ -2051,7 +2063,7 @@ class TestOefSearchHandler(BaseSkillTestCase):
             self.build_incoming_message_for_skill_dialogue(
                 dialogue=oef_dialogue,
                 performative=OefSearchMessage.Performative.SEARCH_RESULT,
-                to=self.self_address + "_" + str(self.skill.skill_context.skill_id),
+                to=str(self.skill.skill_context.skill_id),
                 agents=tuple(self.found_agents),
             ),
         )
@@ -2104,7 +2116,7 @@ class TestOefSearchHandler(BaseSkillTestCase):
             self.build_incoming_message_for_skill_dialogue(
                 dialogue=oef_dialogue,
                 performative=OefSearchMessage.Performative.SEARCH_RESULT,
-                to=self.self_address + "_" + str(self.skill.skill_context.skill_id),
+                to=str(self.skill.skill_context.skill_id),
                 agents=tuple(),
             ),
         )
@@ -2130,7 +2142,7 @@ class TestOefSearchHandler(BaseSkillTestCase):
             message_type=OefSearchMessage,
             dialogue_reference=("1", ""),
             performative=invalid_performative,
-            to=self.self_address + "_" + str(self.skill.skill_context.skill_id),
+            to=str(self.skill.skill_context.skill_id),
             service_description="some_service_description",
         )
 
@@ -2154,6 +2166,7 @@ class TestContractApiHandler(BaseSkillTestCase):
     """Test contract_api handler of tac negotiation."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "tac_negotiation")
+    is_agent_to_agent_messages = False
 
     @classmethod
     def setup(cls):
@@ -2182,7 +2195,7 @@ class TestContractApiHandler(BaseSkillTestCase):
         cls.body = {"some_key": "some_value"}
         cls.body_bytes = b"some_body"
         cls.nonce = "some_nonce"
-        cls.counterprty_address = COUNTERPARTY_ADDRESS
+        cls.counterprty_address = COUNTERPARTY_AGENT_ADDRESS
         cls.amount_by_currency_id = {"1": 50}
         cls.quantities_by_good_id = {"2": -10}
         cls.terms = Terms(

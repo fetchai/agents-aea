@@ -25,6 +25,8 @@ from unittest import TestCase, mock
 
 import pytest
 import yaml
+from aea_ledger_ethereum import EthereumCrypto
+from aea_ledger_fetchai import FetchAICrypto
 from click.exceptions import BadParameter
 
 import aea
@@ -37,9 +39,7 @@ from tests.conftest import (
     CLI_LOG_OPTION,
     CUR_PATH,
     CliRunner,
-    ETHEREUM,
     ETHEREUM_PRIVATE_KEY_FILE,
-    FETCHAI,
     FETCHAI_PRIVATE_KEY_FILE,
     ROOT_DIR,
 )
@@ -79,7 +79,13 @@ class TestAddFetchKey:
         )
 
         cls.result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add-key", FETCHAI, FETCHAI_PRIVATE_KEY_FILE],
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "add-key",
+                FetchAICrypto.identifier,
+                FETCHAI_PRIVATE_KEY_FILE,
+            ],
         )
 
     def test_return_code(self):
@@ -91,7 +97,7 @@ class TestAddFetchKey:
         f = open(Path(self.agent_folder, DEFAULT_AEA_CONFIG_FILE))
         expected_json = yaml.safe_load(f)
         config = AgentConfig.from_json(expected_json)
-        private_key_path = config.private_key_paths.read(FETCHAI)
+        private_key_path = config.private_key_paths.read(FetchAICrypto.identifier)
         assert private_key_path == FETCHAI_PRIVATE_KEY_FILE
         assert len(config.private_key_paths.read_all()) == 1
 
@@ -135,7 +141,13 @@ class TestAddEthereumhKey:
         )
 
         cls.result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add-key", ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE],
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "add-key",
+                EthereumCrypto.identifier,
+                ETHEREUM_PRIVATE_KEY_FILE,
+            ],
         )
 
     def test_return_code(self):
@@ -147,7 +159,7 @@ class TestAddEthereumhKey:
         f = open(Path(self.agent_folder, DEFAULT_AEA_CONFIG_FILE))
         expected_json = yaml.safe_load(f)
         config = AgentConfig.from_json(expected_json)
-        private_key_path = config.private_key_paths.read(ETHEREUM)
+        private_key_path = config.private_key_paths.read(EthereumCrypto.identifier)
         assert private_key_path == ETHEREUM_PRIVATE_KEY_FILE
         assert len(config.private_key_paths.read_all()) == 1
 
@@ -197,19 +209,31 @@ class TestAddManyKeys:
     def test_add_many_keys(self, pytestconfig):
         """Test that the keys are added correctly."""
 
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "add-key", FETCHAI],)
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier],
+        )
         assert result.exit_code == 0
         result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add-key", ETHEREUM, ETHEREUM_PRIVATE_KEY_FILE],
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "add-key",
+                EthereumCrypto.identifier,
+                ETHEREUM_PRIVATE_KEY_FILE,
+            ],
         )
         assert result.exit_code == 0
 
         f = open(Path(self.agent_folder, DEFAULT_AEA_CONFIG_FILE))
         expected_json = yaml.safe_load(f)
         config = AgentConfig.from_json(expected_json)
-        private_key_path_ethereum = config.private_key_paths.read(FETCHAI)
+        private_key_path_ethereum = config.private_key_paths.read(
+            FetchAICrypto.identifier
+        )
         assert private_key_path_ethereum == FETCHAI_PRIVATE_KEY_FILE
-        private_key_path_ethereum = config.private_key_paths.read(ETHEREUM)
+        private_key_path_ethereum = config.private_key_paths.read(
+            EthereumCrypto.identifier
+        )
         assert private_key_path_ethereum == ETHEREUM_PRIVATE_KEY_FILE
         assert len(config.private_key_paths.read_all()) == 2
 
@@ -253,7 +277,9 @@ def test_add_key_fails_bad_key():
             pvk_file = "this_is_not_a_key.txt"
             Path(pvk_file).touch()
 
-            result = runner.invoke(cli, [*CLI_LOG_OPTION, "add-key", FETCHAI, pvk_file])
+            result = runner.invoke(
+                cli, [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier, pvk_file]
+            )
             assert result.exit_code == 1
             error_message = "Invalid length of private key, received 0, expected 32"
             mock_logger_error.assert_called_with(
@@ -293,7 +319,9 @@ def test_add_key_fails_bad_ledger_id():
         os.chdir(Path(tmpdir, agent_name))
 
         # generate a private key file
-        result = runner.invoke(cli, [*CLI_LOG_OPTION, "generate-key", FETCHAI])
+        result = runner.invoke(
+            cli, [*CLI_LOG_OPTION, "generate-key", FetchAICrypto.identifier]
+        )
         assert result.exit_code == 0
         assert Path(FETCHAI_PRIVATE_KEY_FILE).exists()
         bad_ledger_id = "this_is_a_bad_ledger_id"
@@ -353,7 +381,7 @@ class AddKeyCommandTestCase(TestCase):
                 *CLI_LOG_OPTION,
                 "--skip-consistency-check",
                 "add-key",
-                FETCHAI,
+                FetchAICrypto.identifier,
                 filepath,
             ],
             standalone_mode=False,
@@ -380,7 +408,7 @@ class CheckFileNotExistsTestCase(TestCase):
                     *CLI_LOG_OPTION,
                     "--skip-consistency-check",
                     "add-key",
-                    FETCHAI,
+                    FetchAICrypto.identifier,
                     "somefile",
                 ],
                 standalone_mode=False,
@@ -392,7 +420,12 @@ class CheckFileNotExistsTestCase(TestCase):
         with pytest.raises(BadParameter, match=r"File '.*' does not exist."):
             self.runner.invoke(
                 cli,
-                [*CLI_LOG_OPTION, "--skip-consistency-check", "add-key", FETCHAI],
+                [
+                    *CLI_LOG_OPTION,
+                    "--skip-consistency-check",
+                    "add-key",
+                    FetchAICrypto.identifier,
+                ],
                 standalone_mode=False,
                 catch_exceptions=False,
             )

@@ -208,6 +208,16 @@ Initialize a data model.
 - `name`: the name of the data model.
 - `attributes`: the attributes of the data model.
 
+<a name="aea.helpers.search.models.DataModel.attributes_by_name"></a>
+#### attributes`_`by`_`name
+
+```python
+ | @property
+ | attributes_by_name() -> Dict[str, Attribute]
+```
+
+Get the attributes by name.
+
 <a name="aea.helpers.search.models.DataModel.__eq__"></a>
 #### `__`eq`__`
 

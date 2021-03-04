@@ -1,26 +1,26 @@
 agent_name: aries_alice
 author: fetchai
-version: 0.21.0
+version: 0.22.0
 description: An AEA representing Alice in the Aries demo.
 license: Apache-2.0
-aea_version: '>=0.10.0, <0.11.0'
+aea_version: '>=0.11.0, <0.12.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/http_client:0.17.0
-- fetchai/p2p_libp2p:0.16.0
-- fetchai/soef:0.17.0
-- fetchai/webhook:0.13.0
+- fetchai/http_client:0.18.0
+- fetchai/p2p_libp2p:0.17.0
+- fetchai/soef:0.18.0
+- fetchai/webhook:0.14.0
 contracts: []
 protocols:
-- fetchai/default:0.12.0
-- fetchai/http:0.12.0
-- fetchai/oef_search:0.13.0
-- fetchai/signing:0.10.0
-- fetchai/state_update:0.10.0
+- fetchai/default:0.13.0
+- fetchai/http:0.13.0
+- fetchai/oef_search:0.14.0
+- fetchai/signing:0.11.0
+- fetchai/state_update:0.11.0
 skills:
-- fetchai/aries_alice:0.16.0
-default_connection: fetchai/p2p_libp2p:0.16.0
+- fetchai/aries_alice:0.17.0
+default_connection: fetchai/p2p_libp2p:0.17.0
 default_ledger: fetchai
 logging_config:
   disable_existing_loggers: false
@@ -28,6 +28,7 @@ logging_config:
 private_key_paths: {}
 registry_path: ../packages
 default_routing:
-  fetchai/http:0.12.0: fetchai/http_client:0.17.0
-  fetchai/oef_search:0.13.0: fetchai/soef:0.17.0
+  fetchai/http:0.13.0: fetchai/http_client:0.18.0
+  fetchai/oef_search:0.14.0: fetchai/soef:0.18.0
 connection_private_key_paths: {}
+dependencies: {}

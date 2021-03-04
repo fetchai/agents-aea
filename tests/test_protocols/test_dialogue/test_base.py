@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tests for the dialogue/base.py module."""
 import re
 import sys
@@ -525,6 +524,17 @@ class TestDialogueBase:
         assert str(cm.value) == "Cannot reply in an empty dialogue!"
         assert self.dialogue.is_empty
 
+    def test_reply_negative_target_does_not_exist(self):
+        """Negative test for the 'reply' method: target is not in the dialogue."""
+        self.dialogue._update(self.valid_message_1_by_self)
+        with pytest.raises(ValueError) as cm:
+            self.dialogue.reply(
+                target=10,
+                performative=DefaultMessage.Performative.BYTES,
+                content=b"Hello Back",
+            )
+        assert str(cm.value) == "No target message found!"
+
     def test_reply_negative_target_message_target_mismatch(self):
         """Negative test for the 'reply' method: target message and target provided but do not match."""
         self.dialogue._update(self.valid_message_1_by_self)
@@ -611,12 +621,16 @@ class TestDialogueBase:
     def test_is_valid_next_message_negative_is_valid_fails(self):
         """Negative test for the 'validate_next_message' method: is_valid method fails"""
 
-        def failing_custom_validation(message: Message) -> Tuple[bool, str]:
+        def failing_custom_validation(self, message: Message) -> Tuple[bool, str]:
             return False, "some reason"
 
-        self.dialogue._custom_validation = failing_custom_validation
+        with patch.object(
+            self.dialogue.__class__, "_custom_validation", failing_custom_validation
+        ):
+            result, msg = self.dialogue._validate_next_message(
+                self.valid_message_1_by_self
+            )
 
-        result, msg = self.dialogue._validate_next_message(self.valid_message_1_by_self)
         assert result is False
         assert msg == "some reason"
 

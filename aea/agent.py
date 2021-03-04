@@ -273,7 +273,9 @@ class Agent(AbstractAgent, WithLogger):
 
         :return: List of tuples of callables: handler and coroutine to get a message
         """
-        return [(self.handle_envelope, self.inbox.async_get)]
+        return [
+            (self.handle_envelope, self.inbox.async_get),
+        ]
 
     def exception_handler(
         self, exception: Exception, function: Callable

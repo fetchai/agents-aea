@@ -24,7 +24,7 @@ from asyncio import AbstractEventLoop, CancelledError
 from concurrent.futures.thread import ThreadPoolExecutor
 from itertools import cycle
 from logging import Logger
-from typing import Any, Callable, Dict, List, Optional, Type, cast
+from typing import Any, Callable, Dict, List, Optional, cast
 
 import oef
 from oef.agents import OEFAgent
@@ -35,10 +35,9 @@ from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
 from aea.exceptions import enforce
-from aea.mail.base import Envelope, EnvelopeContext
+from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
-from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 
 from packages.fetchai.connections.oef.object_translator import OEFObjectTranslator
 from packages.fetchai.protocols.default.message import DefaultMessage
@@ -60,43 +59,9 @@ RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
 STUB_MESSAGE_ID = 0
 STUB_DIALOGUE_ID = 0
 DEFAULT_OEF = "oef"
-PUBLIC_ID = PublicId.from_str("fetchai/oef:0.16.0")
+PUBLIC_ID = PublicId.from_str("fetchai/oef:0.17.0")
 
-
-class OefSearchDialogue(BaseOefSearchDialogue):
-    """The dialogue class maintains state of a dialogue and manages it."""
-
-    def __init__(
-        self,
-        dialogue_label: BaseDialogueLabel,
-        self_address: Address,
-        role: BaseDialogue.Role,
-        message_class: Type[OefSearchMessage] = OefSearchMessage,
-    ) -> None:
-        """
-        Initialize a dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param self_address: the address of the entity for whom this dialogue is maintained
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: None
-        """
-        BaseOefSearchDialogue.__init__(
-            self, dialogue_label=dialogue_label, self_address=self_address, role=role
-        )
-        self._envelope_context = None  # type: Optional[EnvelopeContext]
-
-    @property
-    def envelope_context(self) -> Optional[EnvelopeContext]:
-        """Get envelope_context."""
-        return self._envelope_context
-
-    @envelope_context.setter
-    def envelope_context(self, envelope_context: Optional[EnvelopeContext]) -> None:
-        """Set envelope_context."""
-        enforce(self._envelope_context is None, "envelope_context already set!")
-        self._envelope_context = envelope_context
+OefSearchDialogue = BaseOefSearchDialogue
 
 
 class OefSearchDialogues(BaseOefSearchDialogues):
@@ -320,12 +285,7 @@ class OEFChannel(OEFAgent):
             target_message=last_msg,
             agents=tuple(agents),
         )
-        envelope = Envelope(
-            to=msg.to,
-            sender=msg.sender,
-            message=msg,
-            context=oef_search_dialogue.envelope_context,
-        )
+        envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
         asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop)
 
     def on_oef_error(
@@ -358,12 +318,7 @@ class OEFChannel(OEFAgent):
             target_message=last_msg,
             oef_error_operation=operation,
         )
-        envelope = Envelope(
-            to=msg.to,
-            sender=msg.sender,
-            message=msg,
-            context=oef_search_dialogue.envelope_context,
-        )
+        envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
         asyncio.run_coroutine_threadsafe(self.in_queue.put(envelope), self.loop)
 
     def on_dialogue_error(  # pylint: disable=unused-argument
@@ -431,7 +386,6 @@ class OEFChannel(OEFAgent):
                 "Could not create dialogue for message={}".format(oef_message)
             )  # pragma: nocover
             return  # pragma: nocover
-        oef_search_dialogue.envelope_context = envelope.context
         self.oef_msg_id += 1
         self.oef_msg_id_to_dialogue[self.oef_msg_id] = oef_search_dialogue
         if oef_message.performative == OefSearchMessage.Performative.REGISTER_SERVICE:

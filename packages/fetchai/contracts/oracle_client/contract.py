@@ -21,14 +21,15 @@
 
 import logging
 
+from aea_ledger_ethereum import EthereumApi
+
 from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
-from aea.crypto.ethereum import EthereumApi
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/oracle_client:0.3.0")
+PUBLIC_ID = PublicId.from_str("fetchai/oracle_client:0.4.0")
 
 _default_logger = logging.getLogger(
     "aea.packages.fetchai.contracts.oracle_client.contract"
