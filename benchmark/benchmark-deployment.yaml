@@ -1,4 +1,4 @@
-apiVersion: apps/v1beta2
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: benchmark
@@ -19,8 +19,8 @@ spec:
         value: agent
         effect: NoSchedule
       nodeSelector:
-        type: agent-test
-      
+        # type: agent-test
+        kubernetes.io/os: linux
       initContainers:
       - name: python
         image: python:3.8-buster
@@ -39,14 +39,14 @@ spec:
           mountPath: /usr/share/nginx/html
         - name: benchmark-script
           mountPath: /app
-          
+
       volumes:
       - name: benchmark-data
         persistentVolumeClaim:
           claimName: benchmark-vol
       - name: benchmark-script
-        configMap:
-          name: run-benchmark
+        persistentVolumeClaim:
+          claimName: benchmark-scripts-vol
 
 ---
 apiVersion: v1
@@ -59,3 +59,14 @@ spec:
   resources:
     requests:
       storage: 10Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: benchmark-scripts-vol
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
