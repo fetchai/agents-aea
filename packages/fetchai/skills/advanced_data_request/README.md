@@ -10,4 +10,4 @@ This skill is used to get specific data from an API, which can either be shared 
 
 ## Handlers
 
-* `http`: handles incoming `http` messages, retrieves the data from the appropriate response, stores it in shared state under the key: `oracle_data`, and responds to requests satisfying the API specification listed in `api_spec.yaml`.
+* `http`: handles incoming `http` messages, retrieves the data from the appropriate response, stores it in shared state under the key: `observation`, and responds to requests satisfying the API specification listed in `api_spec.yaml`.
