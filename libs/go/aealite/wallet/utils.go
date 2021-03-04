@@ -104,7 +104,10 @@ func BTCPubKeyFromEthereumPublicKey(publicKey string) (*btcec.PublicKey, error) 
 // References:
 //  - https://github.com/fetchai/agents-aea/blob/main/aea/crypto/cosmos.py#L258
 //  - https://github.com/btcsuite/btcd/blob/master/btcec/signature.go#L47
-func ConvertStrEncodedSignatureToDER(signature []byte) []byte {
+func ConvertStrEncodedSignatureToDER(signature []byte) ([]byte, error) {
+	if signature == nil {
+		return []byte{}, errors.New("No signature provided.")
+	}
 	rb := signature[:len(signature)/2]
 	sb := signature[len(signature)/2:]
 	length := 6 + len(rb) + len(sb)
@@ -117,7 +120,7 @@ func ConvertStrEncodedSignatureToDER(signature []byte) []byte {
 	sigDER[offset] = 0x02
 	sigDER[offset+1] = byte(len(sb))
 	copy(sigDER[offset+2:], sb)
-	return sigDER
+	return sigDER, nil
 }
 
 // ConvertDEREncodedSignatureToStr
@@ -139,8 +142,10 @@ func ParseFetchAISignature(signature string) (*btcec.Signature, error) {
 	if err != nil {
 		return nil, err
 	}
-	sigDER := ConvertStrEncodedSignatureToDER(sigBytes)
-
+	sigDER, err := ConvertStrEncodedSignatureToDER(sigBytes)
+	if err != nil {
+		return nil, err
+	}
 	// Parse
 	sigBTC, err := btcec.ParseSignature(sigDER, btcec.S256())
 	return sigBTC, err
@@ -197,7 +202,10 @@ func VerifyFetchAISignatureLibp2p(message []byte, signature string, pubkey strin
 	if err != nil {
 		return false, err
 	}
-	sigDER := ConvertStrEncodedSignatureToDER(sigBytes)
+	sigDER, err := ConvertStrEncodedSignatureToDER(sigBytes)
+	if err != nil {
+		return false, err
+	}
 
 	// verify signature
 	return verifyKey.Verify(message, sigDER)
