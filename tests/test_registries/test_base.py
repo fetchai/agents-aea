@@ -52,6 +52,7 @@ from packages.fetchai.contracts.erc1155.contract import PUBLIC_ID as ERC1155_PUB
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.signing.message import SigningMessage
+from packages.fetchai.protocols.state_update import StateUpdateMessage
 from packages.fetchai.skills.error import PUBLIC_ID as ERROR_SKILL_PUBLIC_ID
 
 from tests.conftest import CUR_PATH, ROOT_DIR, _make_dummy_connection
@@ -232,6 +233,16 @@ class TestResources:
             )
         )
         cls.resources.add_component(
+            Protocol.from_dir(
+                Path(ROOT_DIR, "packages", "fetchai", "protocols", "signing")
+            )
+        )
+        cls.resources.add_component(
+            Protocol.from_dir(
+                Path(ROOT_DIR, "packages", "fetchai", "protocols", "state_update")
+            )
+        )
+        cls.resources.add_component(
             Skill.from_dir(
                 Path(CUR_PATH, "data", "dummy_skill"),
                 agent_context=MagicMock(agent_name="name"),
@@ -251,7 +262,7 @@ class TestResources:
 
     def test_unregister_handler(self):
         """Test that the unregister of handlers work correctly."""
-        assert len(self.resources.get_all_handlers()) == 3
+        assert len(self.resources.get_all_handlers()) == 4
 
         # unregister the error handler and test that it has been actually unregistered.
         # TODO shouldn't we prevent the unregistration of this?
@@ -291,7 +302,7 @@ class TestResources:
         self.resources._handler_registry.register(
             (self.dummy_skill_public_id, "dummy"), dummy_handler
         )
-        assert len(self.resources.get_all_handlers()) == 3
+        assert len(self.resources.get_all_handlers()) == 4
 
     def test_add_and_remove_protocol(self):
         """Test that the 'add protocol' and 'remove protocol' method work correctly."""
@@ -319,9 +330,13 @@ class TestResources:
     def test_get_all_protocols(self):
         """Test get all protocols."""
         all_protocols = self.resources.get_all_protocols()
-        assert len(all_protocols) == 1
+        assert len(all_protocols) == 3
 
-        expected_pids = {DefaultMessage.protocol_id}
+        expected_pids = {
+            DefaultMessage.protocol_id,
+            SigningMessage.protocol_id,
+            StateUpdateMessage.protocol_id,
+        }
         actual_pids = {p.public_id for p in all_protocols}
         assert expected_pids == actual_pids
 
@@ -398,7 +413,7 @@ class TestResources:
     def test_get_behaviours(self):
         """Test get handlers."""
         dummy_behaviours = self.resources.get_behaviours(self.dummy_skill_public_id)
-        assert len(dummy_behaviours) == 1
+        assert len(dummy_behaviours) == 2
 
     def test_add_component_raises_error(self):
         """Test add component with unknown component type."""
@@ -425,14 +440,14 @@ class TestResources:
         dummy_behaviour = self.resources.get_behaviour(
             self.dummy_skill_public_id, "dummy"
         )
-        assert len(self.resources.get_all_behaviours()) == 1
+        assert len(self.resources.get_all_behaviours()) == 2
         assert dummy_behaviour is not None
 
         self.resources._behaviour_registry.unregister(
             (self.dummy_skill_public_id, "dummy")
         )
         assert self.resources.get_behaviour(self.dummy_skill_public_id, "dummy") is None
-        assert len(self.resources.get_all_behaviours()) == 0
+        assert len(self.resources.get_all_behaviours()) == 1
 
         self.resources._behaviour_registry.register(
             (self.dummy_skill_public_id, "dummy"), dummy_behaviour

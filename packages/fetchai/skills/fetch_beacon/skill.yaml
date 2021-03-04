@@ -8,28 +8,27 @@ aea_version: '>=0.10.0, <0.11.0'
 fingerprint:
   README.md: QmWDGoCDEiYqf9tztY327hH4kY914erKvxkyG26EYPcUeT
   __init__.py: QmX7NSy3BE9StBmG62F6hKcWN4bxLphLrbkS9ozzkhnZe4
-  behaviours.py: QmYemV7YwWK3XiQmTv9J51WGEdN5Smmq64149pFQNtsYNw
-  dialogues.py: QmaUcgtKK9FNH6Wn4q34yYfbBzjmdnRMyUwSxgt81XbZrA
-  handlers.py: QmQfS2QFn1F4ggNZySy1Timcuxq7r8Dz5H1vVj7PueqtqE
+  behaviours.py: QmaoPrU5vN5Fb6hEqeADnTqmjoFpFFRKyn6WLrfYKEDdbd
+  dialogues.py: QmYeNrtBzvbqHZN8K2tuuMrJwTRaZYczCQzCZLNAVzrbVK
+  handlers.py: Qmf5XLmL7bqicPJj3AHziduXLo7PHQhZ3nqCXys86QorAG
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/http:0.12.0
+- fetchai/ledger_api:0.10.0
 skills: []
 behaviours:
   fetch_beacon_behaviour:
     args:
-      beacon_url: https://rpc-beaconworld.fetch.ai/block
       tick_interval: 5
     class_name: FetchBeaconBehaviour
 handlers:
-  http:
+  ledger_api:
     args: {}
-    class_name: HttpHandler
+    class_name: LedgerApiHandler
 models:
-  http_dialogues:
+  ledger_api_dialogues:
     args: {}
-    class_name: HttpDialogues
+    class_name: LedgerApiDialogues
 dependencies: {}
 is_abstract: false
 connections: []

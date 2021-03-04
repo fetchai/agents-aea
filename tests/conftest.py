@@ -117,6 +117,11 @@ CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ign
 ROOT_DIR = os.path.join(CUR_PATH, "..")
 CLI_LOG_OPTION = ["-v", "OFF"]
 
+# set PYTHONPATH so all spawned processes can have access to current python code
+os.environ["PYTHONPATH"] = ":".join(
+    filter(None, [os.path.abspath(ROOT_DIR), os.environ.get("PYTHONPATH")])
+)
+
 AUTHOR = DEFAULT_AUTHOR
 CONFIGURATION_SCHEMA_DIR = os.path.join(AEA_DIR, "configurations", "schemas")
 AGENT_CONFIGURATION_SCHEMA = os.path.join(

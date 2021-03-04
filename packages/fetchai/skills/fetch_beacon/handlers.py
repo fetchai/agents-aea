@@ -19,31 +19,29 @@
 
 """This package contains handlers for the fetch_beacon skill."""
 
-import json
-from typing import Any, Optional, cast
+from typing import Optional, cast, Dict, Any
 
 from vyper.utils import keccak256
 
+from aea.configurations.base import PublicId
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
-from packages.fetchai.protocols.http.message import HttpMessage
-from packages.fetchai.skills.fetch_beacon.dialogues import HttpDialogue, HttpDialogues
+from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
+from packages.fetchai.skills.fetch_beacon.dialogues import (
+    LedgerApiDialogue,
+    LedgerApiDialogues,
+)
 
 
-class HttpHandler(Handler):
-    """This class provides a simple http handler."""
+class LedgerApiHandler(Handler):
+    """Implement the ledger api handler."""
 
-    SUPPORTED_PROTOCOL = HttpMessage.protocol_id
-
-    def __init__(self, **kwargs: Any) -> None:
-        """Initialize the handler."""
-        super().__init__(**kwargs)
-        self.received_http_count = 0
+    SUPPORTED_PROTOCOL = LedgerApiMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
-        """Set up the handler."""
-        self.context.logger.info("setting up HttpHandler")
+        """Implement the setup for the handler."""
+        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -53,49 +51,66 @@ class HttpHandler(Handler):
         :return: None
         """
 
-        message = cast(HttpMessage, message)
+        self.context.logger.info("Handling ledger api msg")
+
+        ledger_api_msg = cast(LedgerApiMessage, message)
 
         # recover dialogue
-        http_dialogues = cast(HttpDialogues, self.context.http_dialogues)
-        http_dialogue = cast(HttpDialogue, http_dialogues.update(message))
-        if http_dialogue is None:
-            self._handle_unidentified_dialogue(message)
+        ledger_api_dialogues = cast(
+            LedgerApiDialogues, self.context.ledger_api_dialogues
+        )
+        ledger_api_dialogue = cast(
+            Optional[LedgerApiDialogue], ledger_api_dialogues.update(ledger_api_msg)
+        )
+        if ledger_api_dialogue is None:
+            self._handle_unidentified_dialogue(ledger_api_msg)
             return
 
-        if (
-            message.performative == HttpMessage.Performative.RESPONSE
-            and message.status_code == 200
-        ):
-            self._handle_response(message)
-        else:  # pragma: nocover
-            self.context.logger.info(
-                "got unexpected http response: code = " + str(message.status_code)
-            )
+        # handle message
+        if ledger_api_msg.performative is LedgerApiMessage.Performative.STATE:
+            self._handle_state(ledger_api_msg)
+        else:
+            self._handle_invalid(ledger_api_msg, ledger_api_dialogue)
 
-    def _handle_response(self, message: HttpMessage) -> None:
+    def teardown(self) -> None:
         """
-        Handle an http response.
+        Implement the handler teardown.
 
-        :param msg: the http message to be handled
         :return: None
         """
+        pass
 
-        msg_body = json.loads(message.body)
+    def _handle_unidentified_dialogue(self, ledger_api_msg: LedgerApiMessage) -> None:
+        """
+        Handle an unidentified dialogue.
+
+        :param msg: the message
+        """
+        self.context.logger.info(
+            "received invalid ledger_api message={}, unidentified dialogue.".format(
+                ledger_api_msg
+            )
+        )
+
+    def _handle_state(self, ledger_api_msg: LedgerApiMessage) -> None:
+        """
+        Handle a message of state performative.
+
+        :param ledger_api_message: the ledger api message
+        """
+
+        block_info = ledger_api_msg.state.body # type: Dict[str, Any]
 
         # get entropy and block data
         entropy = (
-            msg_body.get("result", {})
-            .get("block", {})
+            block_info.get("block", {})
             .get("header", {})
             .get("entropy", {})
             .get("group_signature", None)
         )
-        block_hash = msg_body.get("result", {}).get("block_id", {}).get("hash", {})
+        block_hash = block_info.get("block_id", {}).get("hash", {})
         block_height_str = (
-            msg_body.get("result", {})
-            .get("block", {})
-            .get("header", {})
-            .get("height", None)
+            block_info.get("block", {}).get("header", {}).get("height", None)
         )
 
         if block_height_str:
@@ -117,24 +132,34 @@ class HttpHandler(Handler):
                 "Beacon info: "
                 + str({"block_height": block_height, "entropy": entropy})
             )
-            self.context.shared_state["oracle_data"] = beacon_data
+            self.context.shared_state["observation"] = {"beacon": beacon_data}
 
-    def _handle_unidentified_dialogue(self, msg: Message) -> None:
+    def _handle_error(
+        self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
+    ) -> None:
         """
-        Handle an unidentified dialogue.
+        Handle a message of error performative.
 
-        :param msg: the unidentified message to be handled
-        :return: None
+        :param ledger_api_message: the ledger api message
+        :param ledger_api_dialogue: the ledger api dialogue
         """
-
         self.context.logger.info(
-            "received invalid message={}, unidentified dialogue.".format(msg)
+            "received ledger_api error message={} in dialogue={}.".format(
+                ledger_api_msg, ledger_api_dialogue
+            )
         )
 
-    def teardown(self) -> None:
+    def _handle_invalid(
+        self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
+    ) -> None:
         """
-        Teardown the handler.
+        Handle a message of invalid performative.
 
-        :return: None
+        :param ledger_api_message: the ledger api message
+        :param ledger_api_dialogue: the ledger api dialogue
         """
-        self.context.logger.info("tearing down HttpHandler")
+        self.context.logger.warning(
+            "cannot handle ledger_api message of performative={} in dialogue={}.".format(
+                ledger_api_msg.performative, ledger_api_dialogue,
+            )
+        )

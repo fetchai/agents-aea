@@ -12,7 +12,7 @@ An AEA, in technical terms, must satisfy the following requirements:
 ``` proto
 syntax = "proto3";
 
-package aea;
+package aea.base.v0_1_0;
 
 message Envelope{
   string to = 1;
@@ -38,7 +38,7 @@ The format for the above fields are as follows:
 ``` proto
 syntax = "proto3";
 
-package aea;
+package aea.base.v0_1_0;
 
 import "google/protobuf/struct.proto";
 
