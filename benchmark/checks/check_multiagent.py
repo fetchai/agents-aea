@@ -28,7 +28,9 @@ from typing import List, Tuple, Union, cast
 import click
 
 from aea.configurations.base import ConnectionConfig
+from aea.identity.base import Identity
 from aea.protocols.base import Message
+from aea.registries.resources import Resources
 from aea.runner import AEARunner
 from aea.skills.base import Handler
 from benchmark.checks.utils import get_mem_usage_in_mb  # noqa: I100
@@ -123,15 +125,24 @@ def run(
     skills = []
 
     for i in range(num_of_agents):
-        agent = make_agent(agent_name=f"agent{i}", runtime_mode=runtime_mode)
+        resources = Resources()
+        agent_name = f"agent{i}"
+        identity = Identity(agent_name, address=agent_name)
         connection = OEFLocalConnection(
             local_node,
             configuration=ConnectionConfig(
                 connection_id=OEFLocalConnection.connection_id,
             ),
-            identity=agent.identity,
+            identity=identity,
+            data_dir="tmp",
         )
-        agent.resources.add_connection(connection)
+        resources.add_connection(connection)
+        agent = make_agent(
+            agent_name=agent_name,
+            runtime_mode=runtime_mode,
+            resources=resources,
+            identity=identity,
+        )
         skill = make_skill(agent, handlers={"test": TestHandler})
         agent.resources.add_skill(skill)
         agents.append(agent)
@@ -156,7 +167,7 @@ def run(
     mem_usage = get_mem_usage_in_mb()
 
     local_node.stop()
-    runner.stop()
+    runner.stop(timeout=5)
 
     total_messages = sum(
         [cast(TestHandler, skill.handlers["test"]).count for skill in skills]

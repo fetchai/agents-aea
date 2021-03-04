@@ -21,7 +21,7 @@
 from random import uniform
 
 import pytest
-from aea_crypto_fetchai import FetchAICrypto
+from aea_ledger_fetchai import FetchAICrypto
 
 from aea.test_tools.test_cases import AEATestCaseManyFlaky
 
@@ -69,7 +69,7 @@ class TestThermometerSkill(AEATestCaseManyFlaky):
         self.set_config(
             "agent.dependencies",
             '{\
-            "aea-crypto-fetchai": {"version": "<0.2.0,>=0.1.0"}\
+            "aea-ledger-fetchai": {"version": "<0.2.0,>=0.1.0"}\
         }',
             type_="dict",
         )
@@ -112,7 +112,7 @@ class TestThermometerSkill(AEATestCaseManyFlaky):
         self.set_config(
             "agent.dependencies",
             '{\
-            "aea-crypto-fetchai": {"version": "<0.2.0,>=0.1.0"}\
+            "aea-ledger-fetchai": {"version": "<0.2.0,>=0.1.0"}\
         }',
             type_="dict",
         )
@@ -265,7 +265,7 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseManyFlaky):
         self.set_config(
             "agent.dependencies",
             '{\
-            "aea-crypto-fetchai": {"version": "<0.2.0,>=0.1.0"}\
+            "aea-ledger-fetchai": {"version": "<0.2.0,>=0.1.0"}\
         }',
             type_="dict",
         )
@@ -311,7 +311,7 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseManyFlaky):
         self.set_config(
             "agent.dependencies",
             '{\
-            "aea-crypto-fetchai": {"version": "<0.2.0,>=0.1.0"}\
+            "aea-ledger-fetchai": {"version": "<0.2.0,>=0.1.0"}\
         }',
             type_="dict",
         )

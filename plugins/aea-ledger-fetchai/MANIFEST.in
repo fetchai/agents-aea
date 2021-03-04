@@ -1,4 +1,4 @@
 include README.md LICENSE HISTORY.md
 
-recursive-include aea_crypto_ethereum
+recursive-include aea_ledger_fetchai
 recursive-include tests *

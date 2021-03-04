@@ -31,7 +31,7 @@ from typing import Callable
 
 import docker
 import pytest
-from aea_crypto_ethereum import EthereumCrypto
+from aea_ledger_ethereum import EthereumCrypto
 
 from aea.configurations.constants import PRIVATE_KEY_PATH_SCHEMA
 

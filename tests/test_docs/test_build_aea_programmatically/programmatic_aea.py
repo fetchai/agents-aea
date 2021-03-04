@@ -23,7 +23,7 @@ import os
 import time
 from threading import Thread
 
-from aea_crypto_fetchai import FetchAICrypto
+from aea_ledger_fetchai import FetchAICrypto
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig

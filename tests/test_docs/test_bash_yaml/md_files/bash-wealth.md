@@ -1,8 +1,8 @@
 ``` bash
-pip install aea-crypto-fetchai
+pip install aea-ledger-fetchai
 ```
 ``` bash
-pip install aea-crypto-ethereum
+pip install aea-ledger-ethereum
 ```
 ``` bash
 aea generate-key fetchai

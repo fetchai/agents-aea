@@ -17,11 +17,20 @@
 #
 # ------------------------------------------------------------------------------
 
-"""
-Python package wrapping the public and private key cryptography and ledger api.
+"""Conftest module for Pytest."""
+import inspect
+import os
 
-The module '_cosmos.py' must be the same of "aea_crypto_cosmos.cosmos".
-"""
+from aea_ledger_fetchai import FetchAICrypto
 
-from .fetchai import *  # noqa isort:skip
-from .fetchai import _FETCH, _FETCHAI  # noqa isort:skip
+
+CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
+ROOT_DIR = os.path.join(CUR_PATH, "..")
+MAX_FLAKY_RERUNS = 3
+FETCHAI = FetchAICrypto.identifier
+
+
+FETCHAI_DEFAULT_ADDRESS = "https://rest-agent-land.fetch.ai"
+FETCHAI_DEFAULT_CURRENCY_DENOM = "atestfet"
+FETCHAI_DEFAULT_CHAIN_ID = "agent-land"
+FETCHAI_TESTNET_CONFIG = {"address": FETCHAI_DEFAULT_ADDRESS}
