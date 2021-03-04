@@ -38,7 +38,6 @@ handlers:
       handler_arg_1: 1
       handler_arg_2: '2'
     class_name: DummyStateUpdateHandler
-    file_path: dummy_subpackage/foo.py
   dummy:
     args:
       handler_arg_1: 1
