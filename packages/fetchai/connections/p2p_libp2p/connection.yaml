@@ -1,6 +1,6 @@
 name: p2p_libp2p
 author: fetchai
-version: 0.16.0
+version: 0.17.0
 type: connection
 description: The p2p libp2p connection implements an interface to standalone golang
   go-libp2p node that can exchange aea envelopes with other agents connected to the
@@ -8,10 +8,10 @@ description: The p2p libp2p connection implements an interface to standalone gol
 license: Apache-2.0
 aea_version: '>=0.11.0, <0.12.0'
 fingerprint:
-  README.md: QmdndN3dGED4R1sRGZQDHexumriqZeryreMDf64vrCTXvj
+  README.md: QmSgasboHjEEGWjHStZA6zLowFSRgbJ4BUuqFa5WCv8fdv
   __init__.py: QmYQuLNyQ8WTjgRYAoKAzoJEb7ocKXvM2hTyK4hsGch5D6
   check_dependencies.py: QmP14nkQ8senwzdPdrZJLsA6EQ7zaKKEaLGDELhT42gp1P
-  connection.py: QmfUTr6kKcFXtJiLnnWq3yF9QqtWauuRArKAZV3noLGgMi
+  connection.py: QmPfagZmKiK9LwqnrC8XLd7QhukHQpna5CjwaNGgWxa6N3
   libp2p_node/aea/api.go: QmWNxQQyiaNer92gczQv81efwZYmJMuXCsQWkSt5rdDg5P
   libp2p_node/aea/envelope.pb.go: QmRfUNGpCeVJfsW3H1MzCN4pwDWgumfyWufVFp6xvUjjug
   libp2p_node/aea/envelope.proto: QmVuvesmfgzj5aKnbFoCocoGEv3T9MR7u6KWn7CT5yfjGi

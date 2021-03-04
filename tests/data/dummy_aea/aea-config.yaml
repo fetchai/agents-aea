@@ -7,20 +7,20 @@ aea_version: '>=0.11.0, <0.12.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/local:0.15.0
-- fetchai/p2p_libp2p:0.16.0
+- fetchai/local:0.16.0
+- fetchai/p2p_libp2p:0.17.0
 contracts:
-- fetchai/erc1155:0.16.0
+- fetchai/erc1155:0.17.0
 protocols:
-- fetchai/default:0.12.0
-- fetchai/fipa:0.13.0
-- fetchai/oef_search:0.13.0
-- fetchai/signing:0.10.0
-- fetchai/state_update:0.10.0
+- fetchai/default:0.13.0
+- fetchai/fipa:0.14.0
+- fetchai/oef_search:0.14.0
+- fetchai/signing:0.11.0
+- fetchai/state_update:0.11.0
 skills:
 - dummy_author/dummy:0.1.0
-- fetchai/error:0.12.0
-default_connection: fetchai/local:0.15.0
+- fetchai/error:0.13.0
+default_connection: fetchai/local:0.16.0
 default_ledger: fetchai
 logging_config:
   disable_existing_loggers: false

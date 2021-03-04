@@ -43,7 +43,7 @@ The developer needs to implement four public coroutines:
 - The `receive` coroutine is continuously called by the AEA framework. It either returns `None` or an envelope. The `receive` coroutine must implement the logic of data being received by the agent and if necessary its translation into a relevant protocol.
 
 
-When developing your own connection you might benefit from inspecting the `fetchai/http_server:0.16.0` and `fetchai/http_client:0.17.0` connections to gain more familiarity and inspiration.
+When developing your own connection you might benefit from inspecting the `fetchai/http_server:0.17.0` and `fetchai/http_client:0.18.0` connections to gain more familiarity and inspiration.
 
 ### Configuration options
 

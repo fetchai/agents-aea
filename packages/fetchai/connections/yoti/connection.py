@@ -82,7 +82,7 @@ class YotiConnection(BaseSyncConnection):
 
     MAX_WORKER_THREADS = 5
 
-    connection_id = PublicId.from_str("fetchai/yoti:0.1.0")
+    connection_id = PublicId.from_str("fetchai/yoti:0.2.0")
 
     def __init__(self, **kwargs: Any) -> None:
         """
