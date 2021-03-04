@@ -398,7 +398,7 @@ class TestResources:
     def test_get_behaviours(self):
         """Test get handlers."""
         dummy_behaviours = self.resources.get_behaviours(self.dummy_skill_public_id)
-        assert len(dummy_behaviours) == 1
+        assert len(dummy_behaviours) == 2
 
     def test_add_component_raises_error(self):
         """Test add component with unknown component type."""
@@ -425,14 +425,14 @@ class TestResources:
         dummy_behaviour = self.resources.get_behaviour(
             self.dummy_skill_public_id, "dummy"
         )
-        assert len(self.resources.get_all_behaviours()) == 1
+        assert len(self.resources.get_all_behaviours()) == 2
         assert dummy_behaviour is not None
 
         self.resources._behaviour_registry.unregister(
             (self.dummy_skill_public_id, "dummy")
         )
         assert self.resources.get_behaviour(self.dummy_skill_public_id, "dummy") is None
-        assert len(self.resources.get_all_behaviours()) == 0
+        assert len(self.resources.get_all_behaviours()) == 1
 
         self.resources._behaviour_registry.register(
             (self.dummy_skill_public_id, "dummy"), dummy_behaviour
