@@ -29,8 +29,6 @@ from pexpect.popen_spawn import PopenSpawn  # type: ignore
 
 from aea.helpers.base import send_control_c
 
-from tests.conftest import ROOT_DIR
-
 
 class PexpectWrapper(PopenSpawn):
     """Utility class to make aea cli test easier."""
@@ -39,12 +37,6 @@ class PexpectWrapper(PopenSpawn):
         """Init pexpect.spawn."""
         if platform.system() != "Windows":
             kwargs["preexec_fn"] = os.setsid
-
-        # add project root to python path to have access to repo code
-        if "env" in kwargs:
-            kwargs["env"][
-                "PYTHONPATH"
-            ] = f"{ROOT_DIR}:{kwargs['env'].get('PYTHONPATH', '')}"
 
         super().__init__(*args, **kwargs)
 
