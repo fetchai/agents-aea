@@ -35,7 +35,7 @@ models:
   advanced_data_request_model:
     args:
       body: ''
-      method: null
+      method: GET
       outputs: []
       url: null
       use_http_server: false

@@ -50,7 +50,7 @@ class PrometheusDialogues(Model, BasePrometheusDialogues):
 ```
 </details>
 
-Then configure your metrics in the `skill.yaml` file. For example (from the `coin_price` skill):
+Then configure your metrics in the `skill.yaml` file. For example (from the `advanced_data_request` skill):
 ``` yaml
 models:
   prometheus_dialogues:
@@ -156,10 +156,10 @@ def setup(self) -> None:
 ```
 
 Then call the `update_prometheus_metric` function from the appropriate places.
-For example, the following code in `handlers.py` for the `coin_price` skill updates the number of http requests served:
+For example, the following code in `handlers.py` for the `advanced_data_request` skill updates the number of http requests served:
 ``` python
 if self.context.prometheus_dialogues.enabled:
-    self.context.behaviours.coin_price_behaviour.update_prometheus_metric(
+    self.context.behaviours.advanced_data_request_behaviour.update_prometheus_metric(
         "num_requests", "inc", 1.0, {}
     )
 ```

@@ -44,8 +44,7 @@ models:
   advanced_data_request_model:
     args:
       url: https://api.coingecko.com/api/v3/simple/price?ids=fetch-ai&vs_currencies=usd
-      method: GET
       outputs:
-      - name: "price"
+      - name: price
         json_path: "fetch-ai.usd"
       use_http_server: true

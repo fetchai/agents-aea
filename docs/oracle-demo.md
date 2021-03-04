@@ -36,7 +36,7 @@ cd coin_price_oracle
 aea add connection fetchai/http_client:0.17.0
 aea add connection fetchai/ledger:0.13.0
 aea add connection fetchai/p2p_libp2p:0.16.0
-aea add skill fetchai/coin_price:0.5.0
+aea add skill fetchai/advanced_data_request:0.5.0
 aea add skill fetchai/simple_oracle:0.5.0
 aea config set --type dict agent.dependencies \
 '{
