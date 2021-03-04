@@ -20,7 +20,7 @@ When upgrading take the following steps:
 
 - For agent-to-agent communication: ensure the default routing and default connection are correctly defined and that the dialogues used specify the agent's address as the `self_address`. This is most likely already the case. Only in some edge cases will you need to use an `EnvelopeContext` to target a connection different from the one specified in the `default_routing` map.
 
-- For component-to-component communication: there is now only one single way to route component to component (skill to skill, skill to connection, connection to skill) messages, this is by specifying the component id in string form in the `sender`/`to` field. The `EnvelopeContext` can no longer be used, messages are routed based on their target (`to` field). Ensure that dialogues in skills set the `skill_id` as the `self_address` (in connections the need to set the `connection_id`).
+- For component-to-component communication: there is now only one single way to route component to component (skill to skill, skill to connection, connection to skill) messages, this is by specifying the component id in string form in the `sender`/`to` field. The `EnvelopeContext` can no longer be used, messages are routed based on their target (`to` field). Ensure that dialogues in skills set the `skill_id` as the `self_address` (in connections they need to set the `connection_id`).
 
 ### Agent configuration and ledger plugins
 
@@ -32,7 +32,7 @@ Crypto modules have been extracted and released as independent plug-ins, release
 - Ethereum crypto classes have been released in the `aea-ledger-ethereum` package;
 - Cosmos crypto classes have been released in the `aea-ledger-cosmos` package.
 
-If an AEA project, or an AEA package, makes use of crypto functionalities,  it will be needed to add the above packages as PyPI dependencies with version specifiers `<0.2.0,>=0.1.0`, i.e.:
+If an AEA project, or an AEA package, makes use of crypto functionalities, it will be needed to add the above packages as PyPI dependencies with version specifiers `<0.2.0,>=0.1.0`, i.e.:
 ```yaml
 dependencies:
   aea-ledger-cosmos:
@@ -42,7 +42,7 @@ dependencies:
   aea-ledger-fetchai:
     version: <0.2.0,>=0.1.0
 ```
-The version specifier sets are important, as these plug-ins, at version `0.1.0`,  depend on a specific range of the `aea` package.
+The version specifier sets are important, as these plug-ins, at version `0.1.0`, depend on a specific range of the `aea` package.
 
 Then, running `aea install` inside the AEA project should install them in the current Python environment.
 
@@ -58,7 +58,7 @@ Skill development sees no backward incompatible changes.
 
 Connection development requires updating the keyword arguments of the constructor: the new `data_dir` argument must be defined.
 
-Protocol specifications now need to contain a `protocol_specification_id` in addition to the public id. The `protocol_specification_id` is used for identifying Envelopes during transport. By being able to set the id independently of the protocol id backwards compatibility in the specification (and therefore wire format) can be maintained even when the Python implementation changes.
+Protocol specifications now need to contain a `protocol_specification_id` in addition to the public id. The `protocol_specification_id` is used for identifying Envelopes during transport. By being able to set the id independently of the protocol id, backwards compatibility in the specification (and therefore wire format) can be maintained even when the Python implementation changes.
 
 Please update to the latest packages by running `aea upgrade` and then re-generating your own protocols.
 
