@@ -696,8 +696,8 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         contract_api_dialogue = cast(
             ContractApiDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.signing_dialogues,
-                messages=self.list_of_signing_messages[:4],
+                dialogues=self.contract_api_dialogues,
+                messages=self.list_of_contract_api_messages[:4],
             ),
         )
 
@@ -749,8 +749,8 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         contract_api_dialogue = cast(
             ContractApiDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.signing_dialogues,
-                messages=self.list_of_signing_messages[:4],
+                dialogues=self.contract_api_dialogues,
+                messages=self.list_of_contract_api_messages[:4],
             ),
         )
 
@@ -801,8 +801,8 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         contract_api_dialogue = cast(
             ContractApiDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.signing_dialogues,
-                messages=self.list_of_signing_messages[:4],
+                dialogues=self.contract_api_dialogues,
+                messages=self.list_of_contract_api_messages[:4],
             ),
         )
 
@@ -860,8 +860,8 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         contract_api_dialogue = cast(
             ContractApiDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.signing_dialogues,
-                messages=self.list_of_signing_messages[:4],
+                dialogues=self.contract_api_dialogues,
+                messages=self.list_of_contract_api_messages[:4],
             ),
         )
 
@@ -917,8 +917,8 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         contract_api_dialogue = cast(
             ContractApiDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.signing_dialogues,
-                messages=self.list_of_signing_messages[:4],
+                dialogues=self.contract_api_dialogues,
+                messages=self.list_of_contract_api_messages[:4],
             ),
         )
 
