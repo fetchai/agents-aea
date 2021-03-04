@@ -73,6 +73,8 @@ from packages.fetchai.protocols.signing.message import SigningMessage
 class ContractApiDialogue(BaseContractApiDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
 
+    __slots__ = ("_terms", "_associated_fipa_dialogue")
+
     def __init__(
         self,
         dialogue_label: BaseDialogueLabel,
@@ -292,6 +294,8 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
 
 class SigningDialogue(BaseSigningDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
+
+    __slots__ = ("_associated_contract_api_dialogue",)
 
     def __init__(
         self,

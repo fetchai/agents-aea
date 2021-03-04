@@ -206,15 +206,11 @@ class _DialogueMeta(type):
     """
     Metaclass for Dialogue.
 
-    Adds slot support forevery subclass
-    Creates classlevvel Rules instance
+    Creates class level Rules instance to share among instances
     """
 
     def __new__(cls, name: str, bases: Tuple[Type], dct: Dict) -> "_DialogueMeta":
         """Construct a new type."""
-        # apply empty slots if no slots defined.
-        # temporary disable dct["__slots__"] = dct.get("__slots__", tuple())
-
         # set class level `_rules`
         dialogue_cls: Type[Dialogue] = super().__new__(cls, name, bases, dct)
         dialogue_cls._rules = dialogue_cls.Rules(

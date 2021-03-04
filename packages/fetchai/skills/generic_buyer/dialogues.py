@@ -286,7 +286,7 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
 class SigningDialogue(BaseSigningDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
 
-    __slots__ = ("_associated_fipa_dialogue",)
+    __slots__ = ("_associated_ledger_api_dialogue",)
 
     def __init__(
         self,
