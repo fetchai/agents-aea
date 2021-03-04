@@ -877,7 +877,7 @@ class SkillComponentConfiguration:
         """Return the JSON representation."""
         result = {"class_name": self.class_name, "args": self.args}
         if self.file_path is not None:
-            result["file_path"] = str(self.file_path)
+            result["file_path"] = str(self.file_path.as_posix())
         return result
 
     @classmethod

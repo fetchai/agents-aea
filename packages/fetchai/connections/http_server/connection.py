@@ -343,7 +343,7 @@ class BaseAsyncChannel(ABC):
 class HTTPChannel(BaseAsyncChannel):
     """A wrapper for an RESTful API with an internal HTTPServer."""
 
-    RESPONSE_TIMEOUT = 300
+    RESPONSE_TIMEOUT = 5.0
 
     def __init__(
         self,
@@ -353,7 +353,7 @@ class HTTPChannel(BaseAsyncChannel):
         target_skill_id: PublicId,
         api_spec_path: Optional[str],
         connection_id: PublicId,
-        timeout_window: float = 5.0,
+        timeout_window: float = RESPONSE_TIMEOUT,
         logger: logging.Logger = _default_logger,
     ):
         """
@@ -442,12 +442,15 @@ class HTTPChannel(BaseAsyncChannel):
             # wait for response envelope within given timeout window (self.timeout_window) to appear in dispatch_ready_envelopes
 
             response_message = await asyncio.wait_for(
-                self.pending_requests[request.id], timeout=self.RESPONSE_TIMEOUT,
+                self.pending_requests[request.id], timeout=self.timeout_window,
             )
 
             return Response.from_message(response_message)
 
         except asyncio.TimeoutError:
+            self.logger.warning(
+                f"Request timed out! Request={request} not handled as a result. Ensure requests (protocol_id={HttpMessage.protocol_id}) are handled by a skill!"
+            )
             return Response(status=REQUEST_TIMEOUT, reason="Request Timeout")
         except FuturesCancelledError:
             return Response(  # pragma: nocover
