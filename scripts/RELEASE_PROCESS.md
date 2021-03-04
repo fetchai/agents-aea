@@ -26,10 +26,12 @@
 12. Publish to PyPI with twine: `twine upload dist/*`. Optionally, publish to Test-PyPI with twine:
 `twine upload --repository-url https://test.pypi.org/legacy/ dist/*`.
 
-13. Make clean environment and install release from PyPI: `pip install aea[all] --no-cache`.
+13. Repeat 11. & 12. for each plugin.
 
-14. Release packages into registry: `python scripts/deploy_to_registry.py`.
+14. Make clean environment and install release from PyPI: `pip install aea[all] --no-cache`.
 
-15. Create and push Docker images `user-image` and `deploy-image`.
+15. Release packages into registry: `python scripts/deploy_to_registry.py`.
+
+16. Create and push Docker images `user-image` and `deploy-image`.
 
 If something goes wrong and only needs a small fix do `LAST_VERSION.post1` as version, apply fixes, push again to PyPI.
