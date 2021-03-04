@@ -47,6 +47,16 @@ aea config set agent.default_connection fetchai/p2p_libp2p:0.16.0
 aea install
 ```
 
+Set the URL for the data request skill:
+```bash
+aea config set --type str vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.url "https://api.coingecko.com/api/v3/simple/price?ids=fetch-ai&vs_currencies=usd"
+```
+
+Specify the name and json path of the data to fetch from the API:
+```bash
+aea config set --type list vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.outputs '[{"name": "price", "json_path": "fetch-ai.usd"}]'
+```
+
 Then update the agent configuration with the default routing and cert requests:
 ``` bash
 aea config set --type dict agent.default_routing \
