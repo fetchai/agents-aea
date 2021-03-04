@@ -1046,6 +1046,14 @@ class _SkillComponentLoader:
                     component_class = cast(
                         Type[SkillComponent], component_class_or_none
                     )
+                    actual_component_type = self._get_skill_component_type(
+                        component_class
+                    )
+                    enforce(
+                        actual_component_type == component_type,
+                        self._get_error_message_prefix()
+                        + f"Found class '{class_name}' for component '{component_id}' of type '{self._type_to_str(component_type)}' of skill '{self.configuration.public_id}' in module {path}, but the expected type was {self._type_to_str(component_type)}, found {self._type_to_str(actual_component_type)} ",
+                    )
                     used_classes.add(component_class)
                     result.append(
                         _SkillComponentLoadingItem(
