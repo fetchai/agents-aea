@@ -100,6 +100,15 @@ Remove project, do cleanup.
 
 Get builder instance.
 
+<a name="aea.manager.project.Project.check"></a>
+#### check
+
+```python
+ | check() -> None
+```
+
+Check we can still construct an AEA from the project with builder.build.
+
 <a name="aea.manager.project.AgentAlias"></a>
 ## AgentAlias Objects
 

@@ -32,15 +32,15 @@ class TestGymSkill(AEATestCaseEmpty):
 
     def test_gym(self):
         """Run the gym skill sequence."""
-        self.add_item("skill", "fetchai/gym:0.15.0")
+        self.add_item("skill", "fetchai/gym:0.16.0")
         self.run_install()
 
         # change default connection
         setting_path = "agent.default_connection"
-        self.set_config(setting_path, "fetchai/gym:0.14.0")
+        self.set_config(setting_path, "fetchai/gym:0.15.0")
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/gym_aea:0.18.0", self.agent_name
+            "fetchai/gym_aea:0.19.0", self.agent_name
         )
         assert (
             diff == []

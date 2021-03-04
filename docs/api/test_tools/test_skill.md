@@ -118,7 +118,7 @@ boolean result of the evaluation and accompanied message
 #### build`_`incoming`_`message
 
 ```python
- | build_incoming_message(message_type: Type[Message], performative: Message.Performative, dialogue_reference: Optional[Tuple[str, str]] = None, message_id: Optional[int] = None, target: Optional[int] = None, to: Optional[Address] = None, sender: Address = COUNTERPARTY_ADDRESS, **kwargs: Any, ,) -> Message
+ | build_incoming_message(message_type: Type[Message], performative: Message.Performative, dialogue_reference: Optional[Tuple[str, str]] = None, message_id: Optional[int] = None, target: Optional[int] = None, to: Optional[Address] = None, sender: Optional[Address] = None, is_agent_to_agent_messages: Optional[bool] = None, **kwargs: Any, ,) -> Message
 ```
 
 Quickly create an incoming message with the provided attributes.
@@ -134,6 +134,7 @@ For any attribute not provided, the corresponding default value in message is us
 - `performative`: the performative
 - `to`: the 'to' address
 - `sender`: the 'sender' address
+- `is_agent_to_agent_messages`: whether the dialogue is between agents or components
 - `kwargs`: other attributes
 
 **Returns**:
@@ -176,7 +177,7 @@ the created incoming message
 #### prepare`_`skill`_`dialogue
 
 ```python
- | prepare_skill_dialogue(dialogues: Dialogues, messages: Tuple[DialogueMessage, ...], counterparty: Address = COUNTERPARTY_ADDRESS) -> Dialogue
+ | prepare_skill_dialogue(dialogues: Dialogues, messages: Tuple[DialogueMessage, ...], counterparty: Optional[Address] = None, is_agent_to_agent_messages: Optional[bool] = None) -> Dialogue
 ```
 
 Quickly create a dialogue.
@@ -193,6 +194,7 @@ for any other message, it is the index of the message before it in the tuple of 
 - `dialogues`: a dialogues class
 - `counterparty`: the message_id
 - `messages`: the dialogue_reference
+- `is_agent_to_agent_messages`: whether the dialogue is between agents or components
 
 **Returns**:
 

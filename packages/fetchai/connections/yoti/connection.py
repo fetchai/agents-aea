@@ -35,7 +35,7 @@ from packages.fetchai.protocols.yoti.dialogues import YotiDialogues as BaseYotiD
 from packages.fetchai.protocols.yoti.message import YotiMessage
 
 
-CONNECTION_ID = PublicId.from_str("fetchai/yoti:0.1.0")
+PUBLIC_ID = PublicId.from_str("fetchai/yoti:0.2.0")
 
 
 def rgetattr(obj: Any, attr: str, *args: Any) -> Any:
@@ -71,7 +71,7 @@ class YotiDialogues(BaseYotiDialogues):
 
         BaseYotiDialogues.__init__(
             self,
-            self_address=str(CONNECTION_ID),
+            self_address=str(PUBLIC_ID),
             role_from_first_message=role_from_first_message,
             **kwargs,
         )
@@ -82,7 +82,7 @@ class YotiConnection(BaseSyncConnection):
 
     MAX_WORKER_THREADS = 5
 
-    connection_id = PublicId.from_str("fetchai/yoti:0.1.0")
+    connection_id = PUBLIC_ID
 
     def __init__(self, **kwargs: Any) -> None:
         """

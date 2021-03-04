@@ -225,7 +225,7 @@ class TestLoadFailedCauseImportedPackageNotFound(AEATestCaseEmpty):
             )
             handlers_file.write_text(file_data)
             with cd("./vendor/fetchai"):
-                self.run_cli_command("fingerprint", "skill", "fetchai/echo:0.14.0")
+                self.run_cli_command("fingerprint", "skill", "fetchai/echo:0.15.0")
             agent_context = Mock()
             agent_context.agent_name = self.agent_name
             configuration = cast(

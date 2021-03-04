@@ -12,7 +12,7 @@ pip install pipenv
 # this is to install benchmark dependencies
 pipenv install --dev --skip-lock
 # this is to install the AEA in the Pipenv virtual env
-pipenv run pip install --upgrade aea[all]=="0.10.1"
+pipenv run pip install --upgrade aea[all]=="0.11.0"
 
 chmod +x benchmark/checks/run_benchmark.sh
 echo "Start the experiments."

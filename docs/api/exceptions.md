@@ -66,6 +66,15 @@ class AEAInstantiationException(AEAException)
 
 Class for exceptions that are raised for instantiation errors of AEA packages.
 
+<a name="aea.exceptions.AEAPluginError"></a>
+## AEAPluginError Objects
+
+```python
+class AEAPluginError(AEAException)
+```
+
+Class for exceptions that are raised for wrong plugin setup of the working set.
+
 <a name="aea.exceptions.AEAEnforceError"></a>
 ## AEAEnforceError Objects
 
