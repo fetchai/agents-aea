@@ -59,7 +59,7 @@ security:
         plugins/aea-ledger-fetchai/tests \
         plugins/aea-ledger-ethereum/tests \
         plugins/aea-ledger-cosmos/tests
-	safety check -i 37524 -i 38038 -i 37776 -i 38039
+	safety check -i 37524 -i 38038 -i 37776 -i 38039 -i 39621
 
 .PHONY: static
 static:

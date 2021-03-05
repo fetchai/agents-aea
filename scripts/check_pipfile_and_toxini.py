@@ -46,7 +46,7 @@ def get_deps_in_pipfile(file: str = "Pipfile") -> Dict[str, str]:
             try:
                 package, version = line.split(" = ")
                 result[package] = version.strip("\n").strip('"')
-            except Exception:
+            except Exception:  # nosec # pylint: disable=broad-except
                 pass
 
     return result
