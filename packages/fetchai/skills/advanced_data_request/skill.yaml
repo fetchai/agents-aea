@@ -1,18 +1,18 @@
 name: advanced_data_request
 author: fetchai
-version: 0.6.0
+version: 0.1.0
 type: skill
 description: Retrieve data from an API
 license: Apache-2.0
 aea_version: '>=0.11.0, <0.12.0'
 fingerprint:
   README.md: QmQEKGxJfUy6vg3aPg6jRNHQ4vzr4rUHYVac5eYG5C6Uxb
-  __init__.py: QmNSVkkJ7bBMwErMJzjZd3LSS3eXpxEfS7WaucBYtH9Zpv
+  __init__.py: QmPA83WQrVNtbNqawynoRAt4sBh8smZnzseKdqKPtZ9EUn
   api_spec.yaml: QmUPhCYr6tWDMysdMCQxT67oAKRdMbGpgqDfAA5wpei12s
   behaviours.py: QmZ3NMvZPHuxqxisew8UM7z6ti4STti3YAAXm42NSMUiG5
   dialogues.py: QmdYcNTCowajkMMCccYpNL83KRYm4v2WE2FguT3my7nqBw
   handlers.py: Qmc89nrQCoA8yQLxc9kCSVnyAksZWZcGrm7CSecnBVhiWB
-  models.py: QmT9uoFxTXu7wvTWtJ4eZzVouVFkGCV493V2muoS7LZDwd
+  models.py: QmdLHMPYgFZJfTvM8jQCT57xSe3z25h7miVrVcweVuymfi
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
@@ -34,10 +34,10 @@ handlers:
 models:
   advanced_data_request_model:
     args:
-      body: ""
+      body: ''
       method: GET
       outputs: []
-      url: ""
+      url: ''
       use_http_server: false
     class_name: AdvancedDataRequestModel
   http_dialogues:
