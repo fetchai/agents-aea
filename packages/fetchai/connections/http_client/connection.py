@@ -25,11 +25,12 @@ from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop
 from asyncio.tasks import Task
 from traceback import format_exc
-from typing import Any, Dict, Optional, Set, Tuple, Union, cast
+from typing import Any, Optional, Set, Tuple, Union, cast
 
 import aiohttp
 import certifi  # pylint: disable=wrong-import-order
 from aiohttp.client_reqrep import ClientResponse
+from multidict import CIMultiDict, CIMultiDictProxy
 
 from aea.common import Address
 from aea.configurations.base import PublicId
@@ -56,7 +57,7 @@ RequestId = str
 ssl_context = ssl.create_default_context(cafile=certifi.where())
 
 
-def headers_to_string(headers: Dict) -> str:
+def headers_to_string(headers: CIMultiDictProxy[str]) -> str:
     """
     Convert headers to string.
 
@@ -205,7 +206,7 @@ class HTTPClientAsyncChannel:
             envelope = self.to_envelope(
                 request_http_message,
                 status_code=self.DEFAULT_EXCEPTION_CODE,
-                headers={},
+                headers=CIMultiDictProxy(CIMultiDict()),
                 status_text="HTTPConnection request error.",
                 body=format_exc().encode("utf-8"),
                 dialogue=dialogue,
@@ -317,7 +318,7 @@ class HTTPClientAsyncChannel:
     def to_envelope(
         http_request_message: HttpMessage,
         status_code: int,
-        headers: dict,
+        headers: CIMultiDictProxy[str],
         status_text: Optional[Any],
         body: bytes,
         dialogue: HttpDialogue,
