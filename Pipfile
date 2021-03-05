@@ -9,7 +9,7 @@ verify_ssl = true
 name = "test-pypi"
 
 [dev-packages]
-aiohttp = "==3.6.2"
+aiohttp = "==3.7.4"
 aioprometheus = "==20.0.1"
 bandit = "==1.7.0"
 bech32 = "==1.2.0"
