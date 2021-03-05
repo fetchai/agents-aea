@@ -65,7 +65,7 @@ class AdvancedDataRequestModel(Model):
         msg = []
         if not isinstance(self.url, str):
             msg.append("'url' must be provided as a string")
-        if not self.method in HTTP_REQUEST_METHODS:
+        if self.method not in HTTP_REQUEST_METHODS:
             msg.append(f"'method' must be one of {HTTP_REQUEST_METHODS}")
         if not isinstance(self.body, str):
             msg.append("'body' must be provided as a string")
