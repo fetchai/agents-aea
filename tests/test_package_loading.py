@@ -33,9 +33,6 @@ def test_loading():
     skill_directory = os.path.join(CUR_PATH, "data", "dummy_skill")
 
     prefixes = [
-        "packages",
-        "packages.dummy_author",
-        "packages.dummy_author.skills",
         "packages.dummy_author.skills.dummy",
         "packages.dummy_author.skills.dummy.dummy_subpackage",
     ]

@@ -20,7 +20,6 @@
 import importlib.util
 import logging
 import sys
-import types
 from abc import ABC
 from pathlib import Path
 from typing import Any, Optional
@@ -131,9 +130,6 @@ def load_aea_package(configuration: ComponentConfiguration) -> None:
     prefix_author = prefix_root + f".{configuration.author}"
     prefix_pkg_type = prefix_author + f".{configuration.component_type.to_plural()}"
     prefix_pkg = prefix_pkg_type + f".{configuration.name}"
-    sys.modules[prefix_root] = types.ModuleType(prefix_root)
-    sys.modules[prefix_author] = types.ModuleType(prefix_author)
-    sys.modules[prefix_pkg_type] = types.ModuleType(prefix_pkg_type)
 
     for subpackage_init_file in dir_.rglob("__init__.py"):
         parent_dir = subpackage_init_file.parent
