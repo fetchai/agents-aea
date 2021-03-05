@@ -8,13 +8,15 @@ aea_version: '>=0.11.0, <0.12.0'
 fingerprint:
   README.md: QmWDGoCDEiYqf9tztY327hH4kY914erKvxkyG26EYPcUeT
   __init__.py: QmNXqSYzEP7FsApBDx62eesWmkP1RQdqPmzEfca7aFG5xi
-  behaviours.py: QmaoPrU5vN5Fb6hEqeADnTqmjoFpFFRKyn6WLrfYKEDdbd
-  dialogues.py: QmZY55efs56SiC4omaAJmu7PPTJLhjPpVaUSVHHAuihTFr
-  handlers.py: QmPoNBhka6qu7xMMC8gCxMdPQooX1QhnVFjvQ8E8mQ7fCJ
+  behaviours.py: QmeCdxLKfvBahJRrCSzUQag9JzGMib7iREpPZ8DFGxMsR1
+  dialogues.py: QmTy9rEFAVKdLQq9qZJCgPbRqvokZBx3DmSQFvfkuqb4jn
+  handlers.py: QmQUfbVMFYEL4SskqCZuc6EYkEuEZ8fAmJ8vkWmpjxSZM7
 fingerprint_ignore_patterns: []
+connections:
+- fetchai/ledger:0.14.0
 contracts: []
 protocols:
-- fetchai/ledger_api:0.10.0
+- fetchai/ledger_api:0.11.0
 skills: []
 behaviours:
   fetch_beacon_behaviour:
@@ -31,4 +33,3 @@ models:
     class_name: LedgerApiDialogues
 dependencies: {}
 is_abstract: false
-connections: []

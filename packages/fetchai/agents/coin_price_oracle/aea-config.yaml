@@ -51,7 +51,7 @@ models:
       url: https://api.coingecko.com/api/v3/simple/price?ids=fetch-ai&vs_currencies=usd
       outputs:
       - name: price
-        json_path: "fetch-ai.usd"
+        json_path: fetch-ai.usd
 ---
 public_id: fetchai/simple_oracle:0.6.0
 type: skill
