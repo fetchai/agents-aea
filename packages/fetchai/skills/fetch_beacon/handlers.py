@@ -99,6 +99,8 @@ class LedgerApiHandler(Handler):
         :param ledger_api_message: the ledger api message
         """
 
+        self.context.logger.debug(f"Handling ledger API message: {ledger_api_msg}")
+
         block_info = ledger_api_msg.state.body  # type: Dict[str, Any]
 
         # get entropy and block data

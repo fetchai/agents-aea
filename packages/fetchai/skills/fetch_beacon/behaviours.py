@@ -29,9 +29,6 @@ from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.skills.fetch_beacon.dialogues import LedgerApiDialogues
 
 
-DEFAULT_LEDGER_ID = "fetchai"
-
-
 class FetchBeaconBehaviour(TickerBehaviour):
     """This class provides a simple beacon fetch behaviour."""
 

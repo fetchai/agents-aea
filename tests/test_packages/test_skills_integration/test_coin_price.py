@@ -65,7 +65,7 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
         self.add_item("connection", "fetchai/http_client:0.18.0")
         self.add_item("connection", "fetchai/http_server:0.17.0")
         self.add_item("connection", "fetchai/prometheus:0.4.0")
-        self.add_item("skill", "fetchai/advanced_data_request:0.6.0")
+        self.add_item("skill", "fetchai/advanced_data_request:0.1.0")
         self.set_config("agent.default_connection", "fetchai/http_server:0.17.0")
 
         default_routing = {
@@ -80,7 +80,7 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
         )
         self.set_config(
             "vendor.fetchai.connections.http_server.config.target_skill_id",
-            "fetchai/advanced_data_request:0.6.0",
+            "fetchai/advanced_data_request:0.1.0",
         )
         self.set_config(
             "vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.use_http_server",

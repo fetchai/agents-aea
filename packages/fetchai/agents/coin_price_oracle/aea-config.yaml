@@ -22,7 +22,7 @@ protocols:
 - fetchai/signing:0.11.0
 - fetchai/state_update:0.11.0
 skills:
-- fetchai/advanced_data_request:0.6.0
+- fetchai/advanced_data_request:0.1.0
 - fetchai/simple_oracle:0.6.0
 default_connection: fetchai/p2p_libp2p:0.17.0
 default_ledger: ethereum
@@ -43,7 +43,7 @@ dependencies:
   aea-ledger-fetchai:
     version: <0.2.0,>=0.1.0
 ---
-public_id: fetchai/advanced_data_request:0.6.0
+public_id: fetchai/advanced_data_request:0.1.0
 type: skill
 models:
   advanced_data_request_model:

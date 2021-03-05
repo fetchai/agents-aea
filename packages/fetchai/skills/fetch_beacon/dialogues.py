@@ -38,8 +38,6 @@ from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 class LedgerApiDialogue(BaseLedgerApiDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
 
-    __slots__ = ("_associated_signing_dialogue", "_associated_transaction_type")
-
     def __init__(
         self,
         dialogue_label: BaseDialogueLabel,

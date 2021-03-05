@@ -18,7 +18,7 @@ protocols:
 - fetchai/signing:0.11.0
 - fetchai/state_update:0.11.0
 skills:
-- fetchai/advanced_data_request:0.6.0
+- fetchai/advanced_data_request:0.1.0
 default_connection: fetchai/http_server:0.17.0
 default_ledger: fetchai
 default_routing:
@@ -36,9 +36,9 @@ public_id: fetchai/http_server:0.17.0
 type: connection
 config:
   api_spec_path: vendor/fetchai/skills/advanced_data_request/api_spec.yaml
-  target_skill_id: fetchai/advanced_data_request:0.6.0
+  target_skill_id: fetchai/advanced_data_request:0.1.0
 ---
-public_id: fetchai/advanced_data_request:0.6.0
+public_id: fetchai/advanced_data_request:0.1.0
 type: skill
 models:
   advanced_data_request_model:

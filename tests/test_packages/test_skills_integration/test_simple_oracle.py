@@ -68,7 +68,7 @@ class TestOracleSkills(AEATestCaseManyFlaky, UseGanache):
         self.set_config("agent.default_ledger", EthereumCrypto.identifier)
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
-        self.add_item("skill", "fetchai/advanced_data_request:0.6.0")
+        self.add_item("skill", "fetchai/advanced_data_request:0.1.0")
         self.add_item("contract", "fetchai/oracle:0.5.0")
         self.add_item("skill", "fetchai/simple_oracle:0.6.0")
 
