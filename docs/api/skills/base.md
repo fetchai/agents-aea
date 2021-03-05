@@ -302,6 +302,24 @@ Get the agent context namespace.
 
 Get attribute.
 
+<a name="aea.skills.base.SkillContext.send_to_skill"></a>
+#### send`_`to`_`skill
+
+```python
+ | send_to_skill(message_or_envelope: Union[Message, Envelope], context: Optional[EnvelopeContext] = None) -> None
+```
+
+Send message or envelope to another skill.
+
+**Arguments**:
+
+- `message_or_envelope`: envelope to send to another skill.
+if message passed it will be wrapped into envelope with optional envelope context.
+
+**Returns**:
+
+None
+
 <a name="aea.skills.base.SkillComponent"></a>
 ## SkillComponent Objects
 
@@ -619,7 +637,7 @@ Tear the class down.
  | parse_module(cls, path: str, model_configs: Dict[str, SkillComponentConfiguration], skill_context: SkillContext) -> Dict[str, "Model"]
 ```
 
-Parse the tasks module.
+Parse the model module.
 
 **Arguments**:
 
@@ -757,4 +775,49 @@ Load the skill from configuration.
 **Returns**:
 
 the skill.
+
+<a name="aea.skills.base._SkillComponentLoadingItem"></a>
+## `_`SkillComponentLoadingItem Objects
+
+```python
+class _SkillComponentLoadingItem()
+```
+
+Class to represent a triple (component name, component configuration, component class).
+
+<a name="aea.skills.base._SkillComponentLoadingItem.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(name: str, config: SkillComponentConfiguration, class_: Type[SkillComponent], type_: _SKILL_COMPONENT_TYPES)
+```
+
+Initialize the item.
+
+<a name="aea.skills.base._SkillComponentLoader"></a>
+## `_`SkillComponentLoader Objects
+
+```python
+class _SkillComponentLoader()
+```
+
+This class implements the loading policy for skill components.
+
+<a name="aea.skills.base._SkillComponentLoader.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(configuration: SkillConfig, skill_context: SkillContext, **kwargs: Any)
+```
+
+Initialize the helper class.
+
+<a name="aea.skills.base._SkillComponentLoader.load_skill"></a>
+#### load`_`skill
+
+```python
+ | load_skill() -> Skill
+```
+
+Load the skill.
 

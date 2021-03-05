@@ -1,9 +1,9 @@
-<a name="aea.crypto.ethereum"></a>
-# aea.crypto.ethereum
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum"></a>
+# plugins.aea-ledger-ethereum.aea`_`ledger`_`ethereum.ethereum
 
 Ethereum module wrapping the public and private key cryptography and ledger api.
 
-<a name="aea.crypto.ethereum.SignedTransactionTranslator"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.SignedTransactionTranslator"></a>
 ## SignedTransactionTranslator Objects
 
 ```python
@@ -12,7 +12,7 @@ class SignedTransactionTranslator()
 
 Translator for SignedTransaction.
 
-<a name="aea.crypto.ethereum.SignedTransactionTranslator.to_dict"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.SignedTransactionTranslator.to_dict"></a>
 #### to`_`dict
 
 ```python
@@ -22,7 +22,7 @@ Translator for SignedTransaction.
 
 Write SignedTransaction to dict.
 
-<a name="aea.crypto.ethereum.SignedTransactionTranslator.from_dict"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.SignedTransactionTranslator.from_dict"></a>
 #### from`_`dict
 
 ```python
@@ -32,7 +32,7 @@ Write SignedTransaction to dict.
 
 Get SignedTransaction from dict.
 
-<a name="aea.crypto.ethereum.AttributeDictTranslator"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.AttributeDictTranslator"></a>
 ## AttributeDictTranslator Objects
 
 ```python
@@ -41,7 +41,7 @@ class AttributeDictTranslator()
 
 Translator for AttributeDict.
 
-<a name="aea.crypto.ethereum.AttributeDictTranslator.to_dict"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.AttributeDictTranslator.to_dict"></a>
 #### to`_`dict
 
 ```python
@@ -51,7 +51,7 @@ Translator for AttributeDict.
 
 Simplify to dict.
 
-<a name="aea.crypto.ethereum.AttributeDictTranslator.from_dict"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.AttributeDictTranslator.from_dict"></a>
 #### from`_`dict
 
 ```python
@@ -61,7 +61,7 @@ Simplify to dict.
 
 Get back attribute dict.
 
-<a name="aea.crypto.ethereum.EthereumCrypto"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto"></a>
 ## EthereumCrypto Objects
 
 ```python
@@ -70,7 +70,7 @@ class EthereumCrypto(Crypto[Account])
 
 Class wrapping the Account Generation from Ethereum ledger.
 
-<a name="aea.crypto.ethereum.EthereumCrypto.__init__"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -83,7 +83,7 @@ Instantiate an ethereum crypto object.
 
 - `private_key_path`: the private key path of the agent
 
-<a name="aea.crypto.ethereum.EthereumCrypto.private_key"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.private_key"></a>
 #### private`_`key
 
 ```python
@@ -97,7 +97,7 @@ Return a private key.
 
 a private key string
 
-<a name="aea.crypto.ethereum.EthereumCrypto.public_key"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.public_key"></a>
 #### public`_`key
 
 ```python
@@ -111,7 +111,7 @@ Return a public key in hex format.
 
 a public key string in hex format
 
-<a name="aea.crypto.ethereum.EthereumCrypto.address"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.address"></a>
 #### address
 
 ```python
@@ -125,7 +125,7 @@ Return the address for the key pair.
 
 a display_address str
 
-<a name="aea.crypto.ethereum.EthereumCrypto.load_private_key_from_path"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.load_private_key_from_path"></a>
 #### load`_`private`_`key`_`from`_`path
 
 ```python
@@ -143,7 +143,7 @@ Load a private key in hex format from a file.
 
 the Entity.
 
-<a name="aea.crypto.ethereum.EthereumCrypto.sign_message"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.sign_message"></a>
 #### sign`_`message
 
 ```python
@@ -161,7 +161,7 @@ Sign a message in bytes string form.
 
 signature of the message in string form
 
-<a name="aea.crypto.ethereum.EthereumCrypto.sign_transaction"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.sign_transaction"></a>
 #### sign`_`transaction
 
 ```python
@@ -178,7 +178,7 @@ Sign a transaction in bytes string form.
 
 signed transaction
 
-<a name="aea.crypto.ethereum.EthereumCrypto.generate_private_key"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.generate_private_key"></a>
 #### generate`_`private`_`key
 
 ```python
@@ -188,7 +188,7 @@ signed transaction
 
 Generate a key pair for ethereum network.
 
-<a name="aea.crypto.ethereum.EthereumCrypto.dump"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.dump"></a>
 #### dump
 
 ```python
@@ -205,7 +205,7 @@ Serialize crypto object as binary stream to `fp` (a `.write()`-supporting file-l
 
 None
 
-<a name="aea.crypto.ethereum.EthereumHelper"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper"></a>
 ## EthereumHelper Objects
 
 ```python
@@ -214,7 +214,7 @@ class EthereumHelper(Helper)
 
 Helper class usable as Mixin for EthereumApi or as standalone class.
 
-<a name="aea.crypto.ethereum.EthereumHelper.is_transaction_settled"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper.is_transaction_settled"></a>
 #### is`_`transaction`_`settled
 
 ```python
@@ -232,7 +232,7 @@ Check whether a transaction is settled or not.
 
 True if the transaction has been settled, False o/w.
 
-<a name="aea.crypto.ethereum.EthereumHelper.is_transaction_valid"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper.is_transaction_valid"></a>
 #### is`_`transaction`_`valid
 
 ```python
@@ -254,7 +254,7 @@ Check whether a transaction is valid or not.
 
 True if the random_message is equals to tx['input']
 
-<a name="aea.crypto.ethereum.EthereumHelper.generate_tx_nonce"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper.generate_tx_nonce"></a>
 #### generate`_`tx`_`nonce
 
 ```python
@@ -273,7 +273,7 @@ Generate a unique hash to distinguish txs with the same terms.
 
 return the hash in hex.
 
-<a name="aea.crypto.ethereum.EthereumHelper.get_address_from_public_key"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper.get_address_from_public_key"></a>
 #### get`_`address`_`from`_`public`_`key
 
 ```python
@@ -291,7 +291,7 @@ Get the address from the public key.
 
 str
 
-<a name="aea.crypto.ethereum.EthereumHelper.recover_message"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper.recover_message"></a>
 #### recover`_`message
 
 ```python
@@ -311,7 +311,7 @@ Recover the addresses from the hash.
 
 the recovered addresses
 
-<a name="aea.crypto.ethereum.EthereumHelper.recover_public_keys_from_message"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper.recover_public_keys_from_message"></a>
 #### recover`_`public`_`keys`_`from`_`message
 
 ```python
@@ -331,7 +331,7 @@ Get the public key used to produce the `signature` of the `message`
 
 the recovered public keys
 
-<a name="aea.crypto.ethereum.EthereumHelper.get_hash"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper.get_hash"></a>
 #### get`_`hash
 
 ```python
@@ -349,7 +349,7 @@ Get the hash of a message.
 
 the hash of the message.
 
-<a name="aea.crypto.ethereum.EthereumHelper.load_contract_interface"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper.load_contract_interface"></a>
 #### load`_`contract`_`interface
 
 ```python
@@ -367,7 +367,7 @@ Load contract interface.
 
 the interface
 
-<a name="aea.crypto.ethereum.EthereumApi"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi"></a>
 ## EthereumApi Objects
 
 ```python
@@ -376,7 +376,7 @@ class EthereumApi(LedgerApi,  EthereumHelper)
 
 Class to interact with the Ethereum Web3 APIs.
 
-<a name="aea.crypto.ethereum.EthereumApi.__init__"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -389,7 +389,7 @@ Initialize the Ethereum ledger APIs.
 
 - `address`: the endpoint for Web3 APIs.
 
-<a name="aea.crypto.ethereum.EthereumApi.api"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.api"></a>
 #### api
 
 ```python
@@ -399,7 +399,7 @@ Initialize the Ethereum ledger APIs.
 
 Get the underlying API object.
 
-<a name="aea.crypto.ethereum.EthereumApi.get_balance"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.get_balance"></a>
 #### get`_`balance
 
 ```python
@@ -408,7 +408,7 @@ Get the underlying API object.
 
 Get the balance of a given account.
 
-<a name="aea.crypto.ethereum.EthereumApi.get_state"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.get_state"></a>
 #### get`_`state
 
 ```python
@@ -417,7 +417,7 @@ Get the balance of a given account.
 
 Call a specified function on the ledger API.
 
-<a name="aea.crypto.ethereum.EthereumApi.get_transfer_transaction"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.get_transfer_transaction"></a>
 #### get`_`transfer`_`transaction
 
 ```python
@@ -440,7 +440,7 @@ Submit a transfer transaction to the ledger.
 
 the transfer transaction
 
-<a name="aea.crypto.ethereum.EthereumApi.update_with_gas_estimate"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.update_with_gas_estimate"></a>
 #### update`_`with`_`gas`_`estimate
 
 ```python
@@ -457,7 +457,7 @@ Attempts to update the transaction with a gas estimate
 
 the updated transaction
 
-<a name="aea.crypto.ethereum.EthereumApi.send_signed_transaction"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.send_signed_transaction"></a>
 #### send`_`signed`_`transaction
 
 ```python
@@ -474,7 +474,7 @@ Send a signed transaction and wait for confirmation.
 
 tx_digest, if present
 
-<a name="aea.crypto.ethereum.EthereumApi.get_transaction_receipt"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.get_transaction_receipt"></a>
 #### get`_`transaction`_`receipt
 
 ```python
@@ -491,7 +491,7 @@ Get the transaction receipt for a transaction digest.
 
 the tx receipt, if present
 
-<a name="aea.crypto.ethereum.EthereumApi.get_transaction"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.get_transaction"></a>
 #### get`_`transaction
 
 ```python
@@ -508,7 +508,7 @@ Get the transaction for a transaction digest.
 
 the tx, if present
 
-<a name="aea.crypto.ethereum.EthereumApi.get_contract_instance"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.get_contract_instance"></a>
 #### get`_`contract`_`instance
 
 ```python
@@ -526,7 +526,7 @@ Get the instance of a contract.
 
 the contract instance
 
-<a name="aea.crypto.ethereum.EthereumApi.get_deploy_transaction"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.get_deploy_transaction"></a>
 #### get`_`deploy`_`transaction
 
 ```python
@@ -543,7 +543,7 @@ Get the transaction to deploy the smart contract.
 - `gas`: the gas to be used
 :returns tx: the transaction dictionary.
 
-<a name="aea.crypto.ethereum.EthereumApi.is_valid_address"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.is_valid_address"></a>
 #### is`_`valid`_`address
 
 ```python
@@ -557,7 +557,7 @@ Check if the address is valid.
 
 - `address`: the address to validate
 
-<a name="aea.crypto.ethereum.EthereumFaucetApi"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumFaucetApi"></a>
 ## EthereumFaucetApi Objects
 
 ```python
@@ -566,7 +566,7 @@ class EthereumFaucetApi(FaucetApi)
 
 Ethereum testnet faucet API.
 
-<a name="aea.crypto.ethereum.EthereumFaucetApi.get_wealth"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumFaucetApi.get_wealth"></a>
 #### get`_`wealth
 
 ```python
@@ -584,7 +584,7 @@ Get wealth from the faucet for the provided address.
 
 None
 
-<a name="aea.crypto.ethereum.LruLockWrapper"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.LruLockWrapper"></a>
 ## LruLockWrapper Objects
 
 ```python
@@ -593,7 +593,7 @@ class LruLockWrapper()
 
 Wrapper for LRU with threading.Lock.
 
-<a name="aea.crypto.ethereum.LruLockWrapper.__init__"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.LruLockWrapper.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -602,7 +602,7 @@ Wrapper for LRU with threading.Lock.
 
 Init wrapper.
 
-<a name="aea.crypto.ethereum.LruLockWrapper.__getitem__"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.LruLockWrapper.__getitem__"></a>
 #### `__`getitem`__`
 
 ```python
@@ -611,7 +611,7 @@ Init wrapper.
 
 Get item
 
-<a name="aea.crypto.ethereum.LruLockWrapper.__setitem__"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.LruLockWrapper.__setitem__"></a>
 #### `__`setitem`__`
 
 ```python
@@ -620,7 +620,7 @@ Get item
 
 Set item.
 
-<a name="aea.crypto.ethereum.LruLockWrapper.__contains__"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.LruLockWrapper.__contains__"></a>
 #### `__`contains`__`
 
 ```python
@@ -629,7 +629,7 @@ Set item.
 
 Contain item.
 
-<a name="aea.crypto.ethereum.LruLockWrapper.__delitem__"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.LruLockWrapper.__delitem__"></a>
 #### `__`delitem`__`
 
 ```python
@@ -638,7 +638,7 @@ Contain item.
 
 Del item.
 
-<a name="aea.crypto.ethereum.set_wrapper_for_web3py_session_cache"></a>
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.set_wrapper_for_web3py_session_cache"></a>
 #### set`_`wrapper`_`for`_`web3py`_`session`_`cache
 
 ```python

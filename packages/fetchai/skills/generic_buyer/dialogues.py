@@ -102,6 +102,11 @@ class DefaultDialogues(Model, BaseDefaultDialogues):
 class FipaDialogue(BaseFipaDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
 
+    __slots__ = (
+        "_terms",
+        "_associated_ledger_api_dialogue",
+    )
+
     def __init__(
         self,
         dialogue_label: BaseDialogueLabel,
@@ -173,6 +178,8 @@ class FipaDialogues(Model, BaseFipaDialogues):
 
 class LedgerApiDialogue(BaseLedgerApiDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
+
+    __slots__ = ("_associated_fipa_dialogue",)
 
     def __init__(
         self,
@@ -278,6 +285,8 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
 
 class SigningDialogue(BaseSigningDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
+
+    __slots__ = ("_associated_ledger_api_dialogue",)
 
     def __init__(
         self,

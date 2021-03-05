@@ -156,7 +156,7 @@ Confirm password:
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.10.1
+v0.11.0
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
@@ -173,7 +173,7 @@ This is a simple demo that introduces you to the main components of an AEA.
 The fastest way to have your first AEA is to fetch one that already exists!
 
 ``` bash
-aea fetch fetchai/my_first_aea:0.20.0
+aea fetch fetchai/my_first_aea:0.21.0
 cd my_first_aea
 ```
 
@@ -193,16 +193,16 @@ cd my_first_aea
 <br>
 Second, add the stub connection to the project.
 ``` bash
-aea add connection fetchai/stub:0.17.0
+aea add connection fetchai/stub:0.18.0
 ```
 <br>
 <b>Add the echo skill</b>
 <br>
 Third, add the echo skill to the project.
 ``` bash
-aea add skill fetchai/echo:0.14.0
+aea add skill fetchai/echo:0.15.0
 ```
-This copies the `fetchai/echo:0.14.0` skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill `fetchai/echo:0.14.0` consists of the name of the author of the skill, followed by the skill name and its version.
+This copies the `fetchai/echo:0.15.0` skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill `fetchai/echo:0.15.0` consists of the name of the author of the skill, followed by the skill name and its version.
 </details>
 
 ### Echo skill
@@ -237,6 +237,12 @@ For example:
 recipient_aea,sender_aea,fetchai/default:0.1.0,\x08\x01\x12\x011*\x07\n\x05hello,
 ```
 
+### Install AEA dependencies
+
+``` bash
+aea install
+```
+
 ### Run the AEA
 
 Run the AEA.
@@ -254,7 +260,7 @@ You will see the echo skill running in the terminal window (an output similar to
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.10.1
+v0.11.0
 
 Starting AEA 'my_first_aea' in 'async' mode ...
 info: Echo Handler: setup method called.

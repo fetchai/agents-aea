@@ -7,13 +7,13 @@ fingerprint:
   __init__.py: QmWwxj1hGGZNteCvRtZxwtY9PuEKsrWsEmMWCKwiYCdvRR
   connection.py: QmPgSzbkwRE9CJ6sve7gvS62M3VdcBMfTozHdSgCnb7FPY
 fingerprint_ignore_patterns: []
-aea_version: '>=0.10.0, <0.11.0'
+aea_version: '>=0.11.0, <0.12.0'
 description: "The gym connection wraps an OpenAI gym."
 class_name: GymConnection
 connections: []
 protocols:
-- fetchai/gym:0.12.0
-restricted_to_protocols: ["fetchai/gym:0.12.0"]
+- fetchai/gym:0.13.0
+restricted_to_protocols: ["fetchai/gym:0.13.0"]
 excluded_protocols: []
 config:
   env: 'gyms.env.BanditNArmedRandom'

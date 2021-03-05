@@ -108,6 +108,8 @@ class DefaultDialogues(Model, BaseDefaultDialogues):
 class MlTradeDialogue(BaseMlTradeDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
 
+    __slots__ = ("data_for_sale", "_terms")
+
     def __init__(
         self,
         dialogue_label: BaseDialogueLabel,
@@ -179,6 +181,8 @@ class MlTradeDialogues(Model, BaseMlTradeDialogues):
 
 class LedgerApiDialogue(BaseLedgerApiDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
+
+    __slots__ = ("_associated_ml_trade_dialogue",)
 
     def __init__(
         self,
@@ -286,6 +290,8 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
 
 class SigningDialogue(BaseSigningDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
+
+    __slots__ = ("_associated_ledger_api_dialogue",)
 
     def __init__(
         self,

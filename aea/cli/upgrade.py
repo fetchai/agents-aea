@@ -511,12 +511,15 @@ class InteractiveEjectHelper:
         Stores the result in 'item_to_new_version'.
         """
         for package_id in self.adjacency_list.keys():
-            new_item = get_latest_version_available_in_registry(
-                self.ctx,
-                str(package_id.package_type),
-                package_id.public_id.to_latest(),
-                aea_version=self._current_aea_version,
-            )
+            try:
+                new_item = get_latest_version_available_in_registry(
+                    self.ctx,
+                    str(package_id.package_type),
+                    package_id.public_id.to_latest(),
+                    aea_version=self._current_aea_version,
+                )
+            except click.ClickException:
+                continue
             if package_id.public_id.version == new_item.version:
                 continue
             new_version = new_item.version

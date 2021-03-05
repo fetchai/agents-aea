@@ -169,8 +169,7 @@ class _DialogueMeta(type)
 
 Metaclass for Dialogue.
 
-Adds slot support forevery subclass
-Creates classlevvel Rules instance
+Creates class level Rules instance to share among instances
 
 <a name="aea.protocols.dialogue.base._DialogueMeta.__new__"></a>
 #### `__`new`__`
@@ -422,7 +421,7 @@ The incomplete dialogue label
  | dialogue_labels() -> Set[DialogueLabel]
 ```
 
-Get the dialogue labels (incomplete and complete, if it exists)
+Get the dialogue labels (incomplete and complete, if it exists).
 
 **Returns**:
 

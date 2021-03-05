@@ -499,10 +499,11 @@ def test_add_behaviour_dynamically():
     for skill in resources.get_all_skills():
         skill.skill_context.set_agent_context(agent.context)
 
+    dummy_skill_id = DUMMY_SKILL_PUBLIC_ID
+    old_nb_behaviours = len(agent.resources.get_behaviours(dummy_skill_id))
     with run_in_thread(agent.start, timeout=5, on_exit=agent.stop):
         wait_for_condition(lambda: agent.is_running, timeout=10)
 
-        dummy_skill_id = DUMMY_SKILL_PUBLIC_ID
         dummy_skill = agent.resources.get_skill(dummy_skill_id)
 
         wait_for_condition(lambda: dummy_skill is not None, timeout=10)
@@ -514,7 +515,9 @@ def test_add_behaviour_dynamically():
 
         wait_for_condition(lambda: new_behaviour.nb_act_called > 0, timeout=10)
         wait_for_condition(
-            lambda: len(agent.resources.get_behaviours(dummy_skill_id)) == 2, timeout=10
+            lambda: len(agent.resources.get_behaviours(dummy_skill_id))
+            == old_nb_behaviours + 1,
+            timeout=10,
         )
 
 

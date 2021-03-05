@@ -894,6 +894,7 @@ class SkillComponentConfiguration:
         class_name = cast(str, obj.get("class_name"))
         file_path = cast(Optional[str], obj.get("file_path"))
         params = dict(class_name=class_name, file_path=file_path, **obj.get("args", {}))
+
         instance = cast(
             SkillComponentConfiguration, cls._apply_params_to_instance(params, instance)
         )

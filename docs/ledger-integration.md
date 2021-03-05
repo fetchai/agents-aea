@@ -17,7 +17,7 @@ an easily extendible way. At import time, the framework will load
 all the crypto plug-ins available in the current Python environment.
 
 A _crypto plug-in_ is a Python package which declares some specific
-<a href="https://setuptools.readthedocs.io/en/latest/pkg_resources.html#entry-points">
+<a href="https://setuptools.readthedocs.io/en/latest/pkg_resources.html#entry-points" target="_blank">
 `setuptools` "entry points"</a> in its `setup.py` script.
 In particular, there are three types of entry points the framework looks up:
 
@@ -53,15 +53,15 @@ In the example above, the package name is `aea-ledger-myledger`,
 and the importable package name is `aea_ledger_myledger`.
 
 You can search for AEA ledger plug-ins on PyPI:
-<a href=https://pypi.org/search/?q=aea-ledger>href=https://pypi.org/search/?q=aea-ledger</a>
+<a href="https://pypi.org/search/?q=aea-ledger" target="_blank">https://pypi.org/search/?q=aea-ledger</a>
 
 ## Maintained plug-ins
 
 At the moment, the framework natively supports the following three ledgers:
 
-- Fetch.ai: <a href="https://pypi.org/project/aea-ledger-fetchai/">PyPI package: `aea-ledger-fetchai`</a>, and <a href="https://github.com/fetchai/agents-aea/tree/main/plugins/aea-ledger-fetchai">source code</a>.
-- Ethereum: <a href="https://pypi.org/project/aea-ledger-ethereum/">PyPI package: `aea-ledger-ethereum`</a>, and <a href="https://github.com/fetchai/agents-aea/tree/main/plugins/aea-ledger-ethereum">source code</a>.
-- Cosmos: <a href="https://pypi.org/project/aea-ledger-cosmos/">PyPI package: `aea-ledger-cosmos`</a>, and <a href="https://github.com/fetchai/agents-aea/tree/main/plugins/aea-ledger-cosmos">source code</a>.
+- Fetch.ai: <a href="https://pypi.org/project/aea-ledger-fetchai/" target="_blank">PyPI package: `aea-ledger-fetchai`</a>, and <a href="https://github.com/fetchai/agents-aea/tree/main/plugins/aea-ledger-fetchai" target="_blank">source code</a>.
+- Ethereum: <a href="https://pypi.org/project/aea-ledger-ethereum/" target="_blank">PyPI package: `aea-ledger-ethereum`</a>, and <a href="https://github.com/fetchai/agents-aea/tree/main/plugins/aea-ledger-ethereum" target="_blank">source code</a>.
+- Cosmos: <a href="https://pypi.org/project/aea-ledger-cosmos/" target="_blank">PyPI package: `aea-ledger-cosmos`</a>, and <a href="https://github.com/fetchai/agents-aea/tree/main/plugins/aea-ledger-cosmos" target="_blank">source code</a>.
 
 However, support for additional ledgers can be added to the framework at runtime.
 
@@ -124,7 +124,7 @@ register_faucet_api(id_="my_ledger_id", entry_point="some.dotted.path:MyLedgerFa
 my_faucet_api = make_faucet_api("my_ledger_id")
 ```
 
-The framework wraps all `LedgerApi` classes and exposes them in the <a href="../api/crypto/ledger_apis#aea.crypto.base.LedgerApis">`LedgerApis` classes. The framework also wraps the crypto APIs to create identities on both ledgers and exposes them in the `Wallet`.
+The framework wraps all `LedgerApi` classes and exposes them in the <a href="../api/crypto/ledger_apis#aea.crypto.base.LedgerApis">`LedgerApis`</a> classes. The framework also wraps the crypto APIs to create identities on both ledgers and exposes them in the `Wallet`.
 
 The separation between the `Crypto` and `LedgerApi` is fundamental to the framework design. In particular, the object which holds the private key is separated from the object which interacts with the ledger. This design pattern is repeated throughout the framework: the decision maker is the only entity with access to the AEA's `Wallet` whilst `LedgerApis` are accessible by all skills.
 
@@ -146,7 +146,7 @@ Agent Land is our stable, public testnet for the Fetch Ledger v2. As such, most 
 
 You can access more details on <a href="https://github.com/fetchai/networks-agentland" target="_blank">GitHub</a>.
 
-The configurations can be specified for the `fetchai/ledger:0.13.0` connection.
+The configurations can be specified for the `fetchai/ledger:0.14.0` connection.
 
 ## CosmWasm supporting chains
 

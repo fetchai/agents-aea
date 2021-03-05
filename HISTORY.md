@@ -1,5 +1,30 @@
 # Release History
 
+## 0.11.0 (2020-03-04)
+
+- Adds slots usage in frequently used framework objects, including `Dialogue`
+- Fixes a bug in `aea upgrade` command where eject prompt was not offered
+- Refactors skill component configurations to allow for skill components (`Handler`, `Behaviour`, `Model`) to be placed anywhere in a skill
+- Extends skill component configuration to specify optional `file_path` field
+- Extracts all ledger specific functionality in plugins
+- Improves error logging in http server connection
+- Updates `Development - Use case` documentation
+- Adds restart support to `p2p_libp2p` connection on read/write failure
+- Adds validation of default routing and default connection configuration
+- Refactors and significantly simplifies routing between components
+- Limits usage of `EnvelopeContext`
+- Adds support for new CosmWasm message format in ledger plugins
+- Adds project loading checks and optional auto removal in `MultiAgentManager`
+- Adds support for reuse of threaded `Multiplexer`
+- Fixes bug in TAC which caused agents to make suboptimal trades
+- Adds support to specify dependencies on `aea-config.yaml` level
+- Improves release scripts
+- Adds lightweight Golang AEALite library
+- Adds support for skill-to-skill messages
+- Removes CLI GUI
+- Multiple docs updates based on user feedback
+- Multiple additional tests and test stability fixes
+
 ## 0.10.1 (2020-02-21)
 
 - Changes default URL of `soef` connection to https

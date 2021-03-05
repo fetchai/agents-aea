@@ -71,7 +71,7 @@ class TestTacSkills(AEATestCaseManyFlaky):
         )
 
         default_routing = {
-            "fetchai/oef_search:0.13.0": "fetchai/soef:0.17.0",
+            "fetchai/oef_search:0.14.0": "fetchai/soef:0.18.0",
         }
 
         # generate random location
@@ -85,17 +85,17 @@ class TestTacSkills(AEATestCaseManyFlaky):
 
         # prepare tac controller for test
         self.set_agent_context(tac_controller_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.16.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.16.0")
-        self.add_item("connection", "fetchai/soef:0.17.0")
-        self.add_item("skill", "fetchai/tac_control:0.16.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.17.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.17.0")
+        self.add_item("connection", "fetchai/soef:0.18.0")
+        self.add_item("skill", "fetchai/tac_control:0.17.0")
         self.set_config("agent.default_ledger", FetchAICrypto.identifier)
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/tac_controller:0.20.0", tac_controller_name
+            "fetchai/tac_controller:0.21.0", tac_controller_name
         )
         assert (
             diff == []
@@ -132,8 +132,8 @@ class TestTacSkills(AEATestCaseManyFlaky):
         self.nested_set_config(setting_path, data)
 
         default_routing = {
-            "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
-            "fetchai/oef_search:0.13.0": "fetchai/soef:0.17.0",
+            "fetchai/ledger_api:0.11.0": "fetchai/ledger:0.14.0",
+            "fetchai/oef_search:0.14.0": "fetchai/soef:0.18.0",
         }
 
         # prepare agents for test
@@ -142,12 +142,12 @@ class TestTacSkills(AEATestCaseManyFlaky):
             (tac_aea_two, NON_GENESIS_CONFIG_TWO),
         ):
             self.set_agent_context(agent_name)
-            self.add_item("connection", "fetchai/p2p_libp2p:0.16.0")
-            self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.16.0")
-            self.add_item("connection", "fetchai/soef:0.17.0")
-            self.add_item("connection", "fetchai/ledger:0.13.0")
-            self.add_item("skill", "fetchai/tac_participation:0.17.0")
-            self.add_item("skill", "fetchai/tac_negotiation:0.20.0")
+            self.add_item("connection", "fetchai/p2p_libp2p:0.17.0")
+            self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.17.0")
+            self.add_item("connection", "fetchai/soef:0.18.0")
+            self.add_item("connection", "fetchai/ledger:0.14.0")
+            self.add_item("skill", "fetchai/tac_participation:0.18.0")
+            self.add_item("skill", "fetchai/tac_negotiation:0.21.0")
             self.set_config("agent.default_ledger", FetchAICrypto.identifier)
             setting_path = "agent.default_routing"
             self.nested_set_config(setting_path, default_routing)
@@ -159,7 +159,7 @@ class TestTacSkills(AEATestCaseManyFlaky):
             self.nested_set_config(setting_path, data)
             self.run_install()
             diff = self.difference_to_fetched_agent(
-                "fetchai/tac_participant:0.22.0", agent_name
+                "fetchai/tac_participant:0.23.0", agent_name
             )
             assert (
                 diff == []
@@ -341,9 +341,9 @@ class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache):
         )
 
         default_routing = {
-            "fetchai/contract_api:0.11.0": "fetchai/ledger:0.13.0",
-            "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
-            "fetchai/oef_search:0.13.0": "fetchai/soef:0.17.0",
+            "fetchai/contract_api:0.12.0": "fetchai/ledger:0.14.0",
+            "fetchai/ledger_api:0.11.0": "fetchai/ledger:0.14.0",
+            "fetchai/oef_search:0.14.0": "fetchai/soef:0.18.0",
         }
 
         # generate random location
@@ -357,18 +357,18 @@ class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache):
 
         # prepare tac controller for test
         self.set_agent_context(tac_controller_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.16.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.16.0")
-        self.add_item("connection", "fetchai/soef:0.17.0")
-        self.add_item("connection", "fetchai/ledger:0.13.0")
-        self.add_item("skill", "fetchai/tac_control_contract:0.18.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.17.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.17.0")
+        self.add_item("connection", "fetchai/soef:0.18.0")
+        self.add_item("connection", "fetchai/ledger:0.14.0")
+        self.add_item("skill", "fetchai/tac_control_contract:0.19.0")
         self.set_config("agent.default_ledger", EthereumCrypto.identifier)
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/tac_controller_contract:0.22.0", tac_controller_name
+            "fetchai/tac_controller_contract:0.23.0", tac_controller_name
         )
         assert (
             diff == []
@@ -422,9 +422,9 @@ class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache):
         self.nested_set_config(setting_path, data)
 
         default_routing = {
-            "fetchai/contract_api:0.11.0": "fetchai/ledger:0.13.0",
-            "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
-            "fetchai/oef_search:0.13.0": "fetchai/soef:0.17.0",
+            "fetchai/contract_api:0.12.0": "fetchai/ledger:0.14.0",
+            "fetchai/ledger_api:0.11.0": "fetchai/ledger:0.14.0",
+            "fetchai/oef_search:0.14.0": "fetchai/soef:0.18.0",
         }
 
         # prepare agents for test
@@ -433,12 +433,12 @@ class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache):
             (tac_aea_two, NON_GENESIS_CONFIG_TWO, FUNDED_ETH_PRIVATE_KEY_3),
         ):
             self.set_agent_context(agent_name)
-            self.add_item("connection", "fetchai/p2p_libp2p:0.16.0")
-            self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.16.0")
-            self.add_item("connection", "fetchai/soef:0.17.0")
-            self.add_item("connection", "fetchai/ledger:0.13.0")
-            self.add_item("skill", "fetchai/tac_participation:0.17.0")
-            self.add_item("skill", "fetchai/tac_negotiation:0.20.0")
+            self.add_item("connection", "fetchai/p2p_libp2p:0.17.0")
+            self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.17.0")
+            self.add_item("connection", "fetchai/soef:0.18.0")
+            self.add_item("connection", "fetchai/ledger:0.14.0")
+            self.add_item("skill", "fetchai/tac_participation:0.18.0")
+            self.add_item("skill", "fetchai/tac_negotiation:0.21.0")
             self.set_config("agent.default_ledger", EthereumCrypto.identifier)
             setting_path = "agent.default_routing"
             self.nested_set_config(setting_path, default_routing)
@@ -460,7 +460,7 @@ class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache):
             self.nested_set_config(setting_path, data)
             self.run_install()
             diff = self.difference_to_fetched_agent(
-                "fetchai/tac_participant_contract:0.12.0", agent_name
+                "fetchai/tac_participant_contract:0.13.0", agent_name
             )
             assert (
                 diff == []
@@ -645,8 +645,8 @@ class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache):
             "received match_accept_w_inform from",
             "sending propose to",
             "sending accept to",
-            "requesting batch transaction hash, sending get_raw_message to fetchai/erc1155:0.16.0, message=",
-            "requesting batch atomic swap transaction, sending get_raw_transaction to fetchai/erc1155:0.16.0, message=",
+            "requesting batch transaction hash, sending get_raw_message to fetchai/erc1155:0.17.0, message=",
+            "requesting batch atomic swap transaction, sending get_raw_transaction to fetchai/erc1155:0.17.0, message=",
             "received raw transaction=",
             "received raw message=",
             "proposing the transaction to the decision maker. Waiting for confirmation ...",
@@ -678,8 +678,8 @@ class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache):
             "received match_accept_w_inform from",
             "sending propose to",
             "sending accept to",
-            "requesting batch transaction hash, sending get_raw_message to fetchai/erc1155:0.16.0, message=",
-            "requesting batch atomic swap transaction, sending get_raw_transaction to fetchai/erc1155:0.16.0, message=",
+            "requesting batch transaction hash, sending get_raw_message to fetchai/erc1155:0.17.0, message=",
+            "requesting batch atomic swap transaction, sending get_raw_transaction to fetchai/erc1155:0.17.0, message=",
             "received raw transaction=",
             "received raw message=",
             "proposing the transaction to the decision maker. Waiting for confirmation ...",

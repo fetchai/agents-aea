@@ -64,6 +64,23 @@ Get agent.
 
 Get current main loop state.
 
+<a name="aea.agent_loop.BaseAgentLoop.wait_state"></a>
+#### wait`_`state
+
+```python
+ | async wait_state(state_or_states: Union[Any, Sequence[Any]]) -> Tuple[Any, Any]
+```
+
+Wait state to be set.
+
+**Arguments**:
+
+- `state_or_states`: state or list of states.
+
+**Returns**:
+
+tuple of previous state and new state.
+
 <a name="aea.agent_loop.BaseAgentLoop.is_running"></a>
 #### is`_`running
 
@@ -92,6 +109,36 @@ Set event loop and all event loopp related objects.
 
 Run agent loop.
 
+<a name="aea.agent_loop.BaseAgentLoop.send_to_skill"></a>
+#### send`_`to`_`skill
+
+```python
+ | @abstractmethod
+ | send_to_skill(message_or_envelope: Union[Message, Envelope], context: Optional[EnvelopeContext] = None) -> None
+```
+
+Send message or envelope to another skill.
+
+**Arguments**:
+
+- `message_or_envelope`: envelope to send to another skill.
+if message passed it will be wrapped into envelope with optional envelope context.
+
+**Returns**:
+
+None
+
+<a name="aea.agent_loop.BaseAgentLoop.skill2skill_queue"></a>
+#### skill2skill`_`queue
+
+```python
+ | @property
+ | @abstractmethod
+ | skill2skill_queue() -> Queue
+```
+
+Get skill to skill message queue.
+
 <a name="aea.agent_loop.AsyncAgentLoop"></a>
 ## AsyncAgentLoop Objects
 
@@ -114,4 +161,33 @@ Init agent loop.
 
 - `agent`: AEA instance
 - `loop`: asyncio loop to use. optional
+- `threaded`: is a new thread to be started for the agent loop
+
+<a name="aea.agent_loop.AsyncAgentLoop.skill2skill_queue"></a>
+#### skill2skill`_`queue
+
+```python
+ | @property
+ | skill2skill_queue() -> Queue
+```
+
+Get skill to skill message queue.
+
+<a name="aea.agent_loop.AsyncAgentLoop.send_to_skill"></a>
+#### send`_`to`_`skill
+
+```python
+ | send_to_skill(message_or_envelope: Union[Message, Envelope], context: Optional[EnvelopeContext] = None) -> None
+```
+
+Send message or envelope to another skill.
+
+**Arguments**:
+
+- `message_or_envelope`: envelope to send to another skill.
+if message passed it will be wrapped into envelope with optional envelope context.
+
+**Returns**:
+
+None
 
