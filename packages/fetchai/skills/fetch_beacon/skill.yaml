@@ -7,25 +7,14 @@ license: Apache-2.0
 aea_version: '>=0.11.0, <0.12.0'
 fingerprint:
   README.md: QmWDGoCDEiYqf9tztY327hH4kY914erKvxkyG26EYPcUeT
-<<<<<<< HEAD
-  __init__.py: QmX7NSy3BE9StBmG62F6hKcWN4bxLphLrbkS9ozzkhnZe4
+  __init__.py: QmNXqSYzEP7FsApBDx62eesWmkP1RQdqPmzEfca7aFG5xi
   behaviours.py: QmaoPrU5vN5Fb6hEqeADnTqmjoFpFFRKyn6WLrfYKEDdbd
-  dialogues.py: QmYeNrtBzvbqHZN8K2tuuMrJwTRaZYczCQzCZLNAVzrbVK
-  handlers.py: Qmf5XLmL7bqicPJj3AHziduXLo7PHQhZ3nqCXys86QorAG
+  dialogues.py: QmZY55efs56SiC4omaAJmu7PPTJLhjPpVaUSVHHAuihTFr
+  handlers.py: QmPoNBhka6qu7xMMC8gCxMdPQooX1QhnVFjvQ8E8mQ7fCJ
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
 - fetchai/ledger_api:0.10.0
-=======
-  __init__.py: QmNXqSYzEP7FsApBDx62eesWmkP1RQdqPmzEfca7aFG5xi
-  behaviours.py: QmYemV7YwWK3XiQmTv9J51WGEdN5Smmq64149pFQNtsYNw
-  dialogues.py: QmaUcgtKK9FNH6Wn4q34yYfbBzjmdnRMyUwSxgt81XbZrA
-  handlers.py: QmQfS2QFn1F4ggNZySy1Timcuxq7r8Dz5H1vVj7PueqtqE
-fingerprint_ignore_patterns: []
-contracts: []
-protocols:
-- fetchai/http:0.13.0
->>>>>>> 78ee64f9641aa63b04c7f6c0895869c429c335e1
 skills: []
 behaviours:
   fetch_beacon_behaviour:
