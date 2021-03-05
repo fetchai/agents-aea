@@ -33,11 +33,12 @@ from aea.cli.utils.constants import AUTHOR_KEY
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import clean_after
 from aea.cli.utils.loggers import logger
-from aea.configurations.base import AgentConfig, PublicId
+from aea.configurations.base import AgentConfig, PublicId, dependencies_from_json
 from aea.configurations.constants import (
     CONNECTIONS,
     CONTRACTS,
     DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_DEPENDENCIES,
     DEFAULT_LEDGER,
     DEFAULT_LICENSE,
     DEFAULT_PROTOCOL,
@@ -181,6 +182,7 @@ def _create_agent_config(ctx: Context, agent_name: str, set_author: str) -> Agen
         description="",
         default_ledger=DEFAULT_LEDGER,
         default_connection=None,
+        dependencies=dependencies_from_json(DEFAULT_DEPENDENCIES),
     )
 
     with open_file(

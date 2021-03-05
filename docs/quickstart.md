@@ -237,6 +237,12 @@ For example:
 recipient_aea,sender_aea,fetchai/default:0.1.0,\x08\x01\x12\x011*\x07\n\x05hello,
 ```
 
+### Install AEA dependencies
+
+``` bash
+aea install
+```
+
 ### Run the AEA
 
 Run the AEA.

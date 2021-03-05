@@ -7,6 +7,8 @@ pip install aea-ledger-fetchai
 ``` bash
 aea fetch fetchai/weather_station:0.23.0
 cd weather_station
+aea install
+aea build
 ```
 ``` bash
 aea config set vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx False --type bool

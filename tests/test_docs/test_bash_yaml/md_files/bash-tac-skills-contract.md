@@ -38,17 +38,17 @@ aea add-key ethereum ethereum_private_key.txt
 ``` bash
 aea fetch fetchai/tac_participant:0.23.0 --alias tac_participant_one
 cd tac_participant_one
-aea generate-key ethereum
-aea add-key ethereum ethereum_private_key.txt
 aea install
 aea build
+aea generate-key ethereum
+aea add-key ethereum ethereum_private_key.txt
 cd ..
 aea fetch fetchai/tac_participant:0.23.0 --alias tac_participant_two
 cd tac_participant_two
-aea generate-key ethereum
-aea add-key ethereum ethereum_private_key.txt
 aea install
 aea build
+aea generate-key ethereum
+aea add-key ethereum ethereum_private_key.txt
 ```
 ``` bash
 aea create tac_participant_one
@@ -84,10 +84,10 @@ aea config set --type dict agent.decision_maker_handler \
 }'
 aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
 '[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
-aea generate-key ethereum
-aea add-key ethereum ethereum_private_key.txt
 aea install
 aea build
+aea generate-key ethereum
+aea add-key ethereum ethereum_private_key.txt
 ```
 ``` bash
 cd tac_participant_two
@@ -119,10 +119,10 @@ aea config set --type dict agent.decision_maker_handler \
 }'
 aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
 '[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
-aea generate-key ethereum
-aea add-key ethereum ethereum_private_key.txt
 aea install
 aea build
+aea generate-key ethereum
+aea add-key ethereum ethereum_private_key.txt
 ```
 ``` bash
 aea generate-key fetchai fetchai_connection_private_key.txt

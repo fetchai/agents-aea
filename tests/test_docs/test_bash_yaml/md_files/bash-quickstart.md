@@ -81,10 +81,10 @@ TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE,
 recipient_aea,sender_aea,fetchai/default:0.1.0,\x08\x01\x12\x011*\x07\n\x05hello,
 ```
 ``` bash
-aea run
+aea install
 ```
 ``` bash
-aea run --connections fetchai/stub:0.18.0
+aea run
 ```
 ``` bash
     _     _____     _
