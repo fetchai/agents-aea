@@ -345,6 +345,24 @@ the public id object.
 
 - `ValueError`: if the string in input is not well formatted.
 
+<a name="aea.configurations.data_types.PublicId.try_from_str"></a>
+#### try`_`from`_`str
+
+```python
+ | @classmethod
+ | try_from_str(cls, public_id_string: str) -> Optional["PublicId"]
+```
+
+Safely try to get public id from string.
+
+**Arguments**:
+
+- `public_id_string`: the public id in string format.
+
+**Returns**:
+
+the public id object or None
+
 <a name="aea.configurations.data_types.PublicId.from_uri_path"></a>
 #### from`_`uri`_`path
 
@@ -559,7 +577,7 @@ Get the package identifier without the version.
  | from_uri_path(cls, package_id_uri_path: str) -> "PackageId"
 ```
 
-Initialize the public id from the string.
+Initialize the package id from the string.
 
 >>> str(PackageId.from_uri_path("skill/author/package_name/0.1.0"))
 '(skill, author/package_name:0.1.0)'
@@ -572,11 +590,11 @@ ValueError: Input 'very/bad/formatted:input' is not well formatted.
 
 **Arguments**:
 
-- `public_id_uri_path`: the public id in uri path string format.
+- `package_id_uri_path`: the package id in uri path string format.
 
 **Returns**:
 
-the public id object.
+the package id object.
 
 **Raises**:
 

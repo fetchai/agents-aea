@@ -16,7 +16,7 @@ It is important to keep in mind that <a href="../interaction-protocol">interacti
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>
-  <p>For agent-to-agent communication it is advisable to have a single skill implement a given protocol. Skills can then forward the messages via skill-to-skill communication to other skills where required. Otherwise, received agent-to-agent messages will be forwarded to all skills implementing a handler for the specified protocol and the developer needs to take care to handle them apropriately (e.g. avoid multiple replies to a single message).
+  <p>For agent-to-agent communication it is advisable to have a single skill implement a given protocol. Skills can then forward the messages via skill-to-skill communication to other skills where required. Otherwise, received agent-to-agent messages will be forwarded to all skills implementing a handler for the specified protocol and the developer needs to take care to handle them appropriately (e.g. avoid multiple replies to a single message).
 </p>
 </div>
 
@@ -37,6 +37,6 @@ It is important to keep in mind that <a href="../interaction-protocol">interacti
 
 ## Usage of the `EnvelopeContext`
 
-The `EnvelopeContext` is used to maintain agent-to-agent communication only and is managed almost entirely by the framework. The developer can set the `EnvelopeContext` explicitly for the first message in a dialogue to achieve targetted routing to connections (see 2. for outgoing messages). This is relevant when the same agent can be reached via multiple connections.
+The `EnvelopeContext` is used to maintain agent-to-agent communication only and is managed almost entirely by the framework. The developer can set the `EnvelopeContext` explicitly for the first message in a dialogue to achieve targeted routing to connections (see 2. for outgoing messages). This is relevant when the same agent can be reached via multiple connections.
 
 The `EnvelopeContext` is not sent to another agent.

@@ -1,9 +1,9 @@
-<a name="aea.crypto.cosmos"></a>
-# aea.crypto.cosmos
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos"></a>
+# plugins.aea-ledger-cosmos.aea`_`ledger`_`cosmos.cosmos
 
 Cosmos module wrapping the public and private key cryptography and ledger api.
 
-<a name="aea.crypto.cosmos.CosmosHelper"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosHelper"></a>
 ## CosmosHelper Objects
 
 ```python
@@ -12,7 +12,7 @@ class CosmosHelper(Helper)
 
 Helper class usable as Mixin for CosmosApi or as standalone class.
 
-<a name="aea.crypto.cosmos.CosmosHelper.is_transaction_settled"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosHelper.is_transaction_settled"></a>
 #### is`_`transaction`_`settled
 
 ```python
@@ -30,7 +30,7 @@ Check whether a transaction is settled or not.
 
 True if the transaction has been settled, False o/w.
 
-<a name="aea.crypto.cosmos.CosmosHelper.get_code_id"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosHelper.get_code_id"></a>
 #### get`_`code`_`id
 
 ```python
@@ -48,7 +48,7 @@ Retrieve the `code_id` from a transaction receipt.
 
 the code id, if present
 
-<a name="aea.crypto.cosmos.CosmosHelper.get_contract_address"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosHelper.get_contract_address"></a>
 #### get`_`contract`_`address
 
 ```python
@@ -66,7 +66,7 @@ Retrieve the `contract_address` from a transaction receipt.
 
 the contract address, if present
 
-<a name="aea.crypto.cosmos.CosmosHelper.is_transaction_valid"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosHelper.is_transaction_valid"></a>
 #### is`_`transaction`_`valid
 
 ```python
@@ -88,7 +88,7 @@ Check whether a transaction is valid or not.
 
 True if the random_message is equals to tx['input']
 
-<a name="aea.crypto.cosmos.CosmosHelper.generate_tx_nonce"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosHelper.generate_tx_nonce"></a>
 #### generate`_`tx`_`nonce
 
 ```python
@@ -107,7 +107,7 @@ Generate a unique hash to distinguish txs with the same terms.
 
 return the hash in hex.
 
-<a name="aea.crypto.cosmos.CosmosHelper.get_address_from_public_key"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosHelper.get_address_from_public_key"></a>
 #### get`_`address`_`from`_`public`_`key
 
 ```python
@@ -125,7 +125,7 @@ Get the address from the public key.
 
 str
 
-<a name="aea.crypto.cosmos.CosmosHelper.recover_message"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosHelper.recover_message"></a>
 #### recover`_`message
 
 ```python
@@ -145,7 +145,7 @@ Recover the addresses from the hash.
 
 the recovered addresses
 
-<a name="aea.crypto.cosmos.CosmosHelper.recover_public_keys_from_message"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosHelper.recover_public_keys_from_message"></a>
 #### recover`_`public`_`keys`_`from`_`message
 
 ```python
@@ -165,7 +165,7 @@ Get the public key used to produce the `signature` of the `message`
 
 the recovered public keys
 
-<a name="aea.crypto.cosmos.CosmosHelper.get_hash"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosHelper.get_hash"></a>
 #### get`_`hash
 
 ```python
@@ -183,7 +183,7 @@ Get the hash of a message.
 
 the hash of the message.
 
-<a name="aea.crypto.cosmos.CosmosHelper.is_valid_address"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosHelper.is_valid_address"></a>
 #### is`_`valid`_`address
 
 ```python
@@ -197,7 +197,7 @@ Check if the address is valid.
 
 - `address`: the address to validate
 
-<a name="aea.crypto.cosmos.CosmosHelper.load_contract_interface"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosHelper.load_contract_interface"></a>
 #### load`_`contract`_`interface
 
 ```python
@@ -215,7 +215,7 @@ Load contract interface.
 
 the interface
 
-<a name="aea.crypto.cosmos.CosmosCrypto"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosCrypto"></a>
 ## CosmosCrypto Objects
 
 ```python
@@ -224,7 +224,7 @@ class CosmosCrypto(Crypto[SigningKey])
 
 Class wrapping the Account Generation from Ethereum ledger.
 
-<a name="aea.crypto.cosmos.CosmosCrypto.__init__"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosCrypto.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -237,7 +237,7 @@ Instantiate an ethereum crypto object.
 
 - `private_key_path`: the private key path of the agent
 
-<a name="aea.crypto.cosmos.CosmosCrypto.private_key"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosCrypto.private_key"></a>
 #### private`_`key
 
 ```python
@@ -251,7 +251,7 @@ Return a private key.
 
 a private key string
 
-<a name="aea.crypto.cosmos.CosmosCrypto.public_key"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosCrypto.public_key"></a>
 #### public`_`key
 
 ```python
@@ -265,7 +265,7 @@ Return a public key in hex format.
 
 a public key string in hex format
 
-<a name="aea.crypto.cosmos.CosmosCrypto.address"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosCrypto.address"></a>
 #### address
 
 ```python
@@ -279,7 +279,7 @@ Return the address for the key pair.
 
 a display_address str
 
-<a name="aea.crypto.cosmos.CosmosCrypto.load_private_key_from_path"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosCrypto.load_private_key_from_path"></a>
 #### load`_`private`_`key`_`from`_`path
 
 ```python
@@ -297,7 +297,7 @@ Load a private key in hex format from a file.
 
 the Entity.
 
-<a name="aea.crypto.cosmos.CosmosCrypto.sign_message"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosCrypto.sign_message"></a>
 #### sign`_`message
 
 ```python
@@ -315,7 +315,7 @@ Sign a message in bytes string form.
 
 signature of the message in string form
 
-<a name="aea.crypto.cosmos.CosmosCrypto.sign_transaction"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosCrypto.sign_transaction"></a>
 #### sign`_`transaction
 
 ```python
@@ -332,7 +332,7 @@ Sign a transaction in bytes string form.
 
 signed transaction
 
-<a name="aea.crypto.cosmos.CosmosCrypto.generate_private_key"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosCrypto.generate_private_key"></a>
 #### generate`_`private`_`key
 
 ```python
@@ -342,7 +342,7 @@ signed transaction
 
 Generate a key pair for cosmos network.
 
-<a name="aea.crypto.cosmos.CosmosCrypto.dump"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosCrypto.dump"></a>
 #### dump
 
 ```python
@@ -359,7 +359,7 @@ Serialize crypto object as binary stream to `fp` (a `.write()`-supporting file-l
 
 None
 
-<a name="aea.crypto.cosmos._CosmosApi"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos._CosmosApi"></a>
 ## `_`CosmosApi Objects
 
 ```python
@@ -368,7 +368,7 @@ class _CosmosApi(LedgerApi)
 
 Class to interact with the Cosmos SDK via a HTTP APIs.
 
-<a name="aea.crypto.cosmos._CosmosApi.__init__"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos._CosmosApi.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -377,7 +377,7 @@ Class to interact with the Cosmos SDK via a HTTP APIs.
 
 Initialize the Cosmos ledger APIs.
 
-<a name="aea.crypto.cosmos._CosmosApi.api"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos._CosmosApi.api"></a>
 #### api
 
 ```python
@@ -387,7 +387,7 @@ Initialize the Cosmos ledger APIs.
 
 Get the underlying API object.
 
-<a name="aea.crypto.cosmos._CosmosApi.get_balance"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos._CosmosApi.get_balance"></a>
 #### get`_`balance
 
 ```python
@@ -396,7 +396,7 @@ Get the underlying API object.
 
 Get the balance of a given account.
 
-<a name="aea.crypto.cosmos._CosmosApi.get_state"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos._CosmosApi.get_state"></a>
 #### get`_`state
 
 ```python
@@ -410,7 +410,7 @@ API specification, which takes a path (strings separated by '/'). The
 convention here is to define the root of the path (txs, blocks, etc.)
 as the callable_name and the rest of the path as args.
 
-<a name="aea.crypto.cosmos._CosmosApi.get_deploy_transaction"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos._CosmosApi.get_deploy_transaction"></a>
 #### get`_`deploy`_`transaction
 
 ```python
@@ -427,7 +427,7 @@ Dispatches to _get_storage_transaction and _get_init_transaction based on kwargs
 - `deployer_address`: The address that will deploy the contract.
 :returns tx: the transaction dictionary.
 
-<a name="aea.crypto.cosmos._CosmosApi.get_handle_transaction"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos._CosmosApi.get_handle_transaction"></a>
 #### get`_`handle`_`transaction
 
 ```python
@@ -441,6 +441,9 @@ Create a CosmWasm HandleMsg transaction.
 - `sender_address`: the sender address of the message initiator.
 - `contract_address`: the address of the smart contract.
 - `handle_msg`: HandleMsg in JSON format.
+- `amount`: Funds amount sent with transaction.
+- `tx_fee`: the tx fee accepted.
+- `denom`: the name of the denomination of the contract funds
 - `gas`: Maximum amount of gas to be used on executing command.
 - `memo`: any string comment.
 - `chain_id`: the Chain ID of the CosmWasm transaction. Default is 1 (i.e. mainnet).
@@ -449,7 +452,7 @@ Create a CosmWasm HandleMsg transaction.
 
 the unsigned CosmWasm HandleMsg
 
-<a name="aea.crypto.cosmos._CosmosApi.execute_contract_query"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos._CosmosApi.execute_contract_query"></a>
 #### execute`_`contract`_`query
 
 ```python
@@ -467,7 +470,7 @@ Execute a CosmWasm QueryMsg. QueryMsg doesn't require signing.
 
 the message receipt
 
-<a name="aea.crypto.cosmos._CosmosApi.get_transfer_transaction"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos._CosmosApi.get_transfer_transaction"></a>
 #### get`_`transfer`_`transaction
 
 ```python
@@ -492,7 +495,7 @@ Submit a transfer transaction to the ledger.
 
 the transfer transaction
 
-<a name="aea.crypto.cosmos._CosmosApi.send_signed_transaction"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos._CosmosApi.send_signed_transaction"></a>
 #### send`_`signed`_`transaction
 
 ```python
@@ -509,17 +512,16 @@ Send a signed transaction and wait for confirmation.
 
 tx_digest, if present
 
-<a name="aea.crypto.cosmos._CosmosApi.is_cosmwasm_transaction"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos._CosmosApi.is_cosmwasm_transaction"></a>
 #### is`_`cosmwasm`_`transaction
 
 ```python
- | @staticmethod
  | is_cosmwasm_transaction(tx_signed: JSONLike) -> bool
 ```
 
 Check whether it is a cosmwasm tx.
 
-<a name="aea.crypto.cosmos._CosmosApi.is_transfer_transaction"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos._CosmosApi.is_transfer_transaction"></a>
 #### is`_`transfer`_`transaction
 
 ```python
@@ -529,7 +531,7 @@ Check whether it is a cosmwasm tx.
 
 Check whether it is a transfer tx.
 
-<a name="aea.crypto.cosmos._CosmosApi.get_transaction_receipt"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos._CosmosApi.get_transaction_receipt"></a>
 #### get`_`transaction`_`receipt
 
 ```python
@@ -546,7 +548,7 @@ Get the transaction receipt for a transaction digest.
 
 the tx receipt, if present
 
-<a name="aea.crypto.cosmos._CosmosApi.get_transaction"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos._CosmosApi.get_transaction"></a>
 #### get`_`transaction
 
 ```python
@@ -563,7 +565,7 @@ Get the transaction for a transaction digest.
 
 the tx, if present
 
-<a name="aea.crypto.cosmos._CosmosApi.get_contract_instance"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos._CosmosApi.get_contract_instance"></a>
 #### get`_`contract`_`instance
 
 ```python
@@ -581,7 +583,7 @@ Get the instance of a contract.
 
 the contract instance
 
-<a name="aea.crypto.cosmos._CosmosApi.get_last_code_id"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos._CosmosApi.get_last_code_id"></a>
 #### get`_`last`_`code`_`id
 
 ```python
@@ -594,7 +596,7 @@ Get ID of latest deployed .wasm bytecode.
 
 code id of last deployed .wasm bytecode
 
-<a name="aea.crypto.cosmos._CosmosApi.get_last_contract_address"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos._CosmosApi.get_last_contract_address"></a>
 #### get`_`last`_`contract`_`address
 
 ```python
@@ -611,7 +613,7 @@ Get contract address of latest initialised contract by its ID.
 
 contract address of last initialised contract
 
-<a name="aea.crypto.cosmos._CosmosApi.update_with_gas_estimate"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos._CosmosApi.update_with_gas_estimate"></a>
 #### update`_`with`_`gas`_`estimate
 
 ```python
@@ -628,7 +630,7 @@ Attempts to update the transaction with a gas estimate
 
 the updated transaction
 
-<a name="aea.crypto.cosmos.CosmosApi"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosApi"></a>
 ## CosmosApi Objects
 
 ```python
@@ -637,7 +639,7 @@ class CosmosApi(_CosmosApi,  CosmosHelper)
 
 Class to interact with the Cosmos SDK via a HTTP APIs.
 
-<a name="aea.crypto.cosmos.CosmosFaucetApi"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosFaucetApi"></a>
 ## CosmosFaucetApi Objects
 
 ```python
@@ -646,7 +648,7 @@ class CosmosFaucetApi(FaucetApi)
 
 Cosmos testnet faucet API.
 
-<a name="aea.crypto.cosmos.CosmosFaucetApi.__init__"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosFaucetApi.__init__"></a>
 #### `__`init`__`
 
 ```python
@@ -655,7 +657,7 @@ Cosmos testnet faucet API.
 
 Initialize CosmosFaucetApi.
 
-<a name="aea.crypto.cosmos.CosmosFaucetApi.get_wealth"></a>
+<a name="plugins.aea-ledger-cosmos.aea_ledger_cosmos.cosmos.CosmosFaucetApi.get_wealth"></a>
 #### get`_`wealth
 
 ```python

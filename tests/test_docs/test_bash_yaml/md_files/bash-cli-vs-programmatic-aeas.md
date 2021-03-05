@@ -5,7 +5,7 @@ svn export https://github.com/fetchai/agents-aea.git/trunk/packages
 pip install aea-ledger-fetchai
 ```
 ``` bash
-aea fetch fetchai/weather_station:0.22.0
+aea fetch fetchai/weather_station:0.23.0
 cd weather_station
 ```
 ``` bash

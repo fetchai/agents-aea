@@ -1,29 +1,29 @@
 agent_name: coin_price_feed
 author: fetchai
-version: 0.6.0
+version: 0.7.0
 license: Apache-2.0
 description: An AEA providing a coin price feed.
-aea_version: '>=0.10.0, <0.11.0'
+aea_version: '>=0.11.0, <0.12.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/http_client:0.17.0
-- fetchai/http_server:0.16.0
-- fetchai/prometheus:0.3.0
+- fetchai/http_client:0.18.0
+- fetchai/http_server:0.17.0
+- fetchai/prometheus:0.4.0
 contracts: []
 protocols:
-- fetchai/default:0.12.0
-- fetchai/http:0.12.0
-- fetchai/prometheus:0.3.0
-- fetchai/signing:0.10.0
-- fetchai/state_update:0.10.0
+- fetchai/default:0.13.0
+- fetchai/http:0.13.0
+- fetchai/prometheus:0.4.0
+- fetchai/signing:0.11.0
+- fetchai/state_update:0.11.0
 skills:
-- fetchai/advanced_data_request:0.5.0
-default_connection: fetchai/http_server:0.16.0
+- fetchai/advanced_data_request:0.6.0
+default_connection: fetchai/http_server:0.17.0
 default_ledger: fetchai
 default_routing:
-  fetchai/http:0.12.0: fetchai/http_client:0.17.0
-  fetchai/prometheus:0.3.0: fetchai/prometheus:0.3.0
+  fetchai/http:0.13.0: fetchai/http_client:0.18.0
+  fetchai/prometheus:0.4.0: fetchai/prometheus:0.4.0
 connection_private_key_paths: {}
 dependencies: {}
 private_key_paths: {}
@@ -32,13 +32,13 @@ logging_config:
   version: 1
 registry_path: ../packages
 ---
-public_id: fetchai/http_server:0.16.0
+public_id: fetchai/http_server:0.17.0
 type: connection
 config:
   api_spec_path: vendor/fetchai/skills/advanced_data_request/api_spec.yaml
-  target_skill_id: fetchai/advanced_data_request:0.5.0
+  target_skill_id: fetchai/advanced_data_request:0.6.0
 ---
-public_id: fetchai/advanced_data_request:0.5.0
+public_id: fetchai/advanced_data_request:0.6.0
 type: skill
 models:
   advanced_data_request_model:

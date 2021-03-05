@@ -7,7 +7,7 @@ Preference representation helpers.
 #### logarithmic`_`utility
 
 ```python
-logarithmic_utility(utility_params_by_good_id: Dict[str, float], quantities_by_good_id: Dict[str, int], quantity_shift: int = 1) -> float
+logarithmic_utility(utility_params_by_good_id: Dict[str, float], quantities_by_good_id: Dict[str, int], quantity_shift: int = 100) -> float
 ```
 
 Compute agent's utility given her utility function params and a good bundle.
@@ -16,7 +16,8 @@ Compute agent's utility given her utility function params and a good bundle.
 
 - `utility_params_by_good_id`: utility params by good identifier
 - `quantities_by_good_id`: quantities by good identifier
-- `quantity_shift`: a non-negative factor to shift the quantities in the utility function (to ensure the natural logarithm can be used on the entire range of quantities)
+- `quantity_shift`: a non-negative factor to shift the quantities in the utility function (to
+ensure the natural logarithm can be used on the entire range of quantities)
 
 **Returns**:
 

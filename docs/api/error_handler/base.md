@@ -38,7 +38,7 @@ None
 ```python
  | @classmethod
  | @abstractmethod
- | send_decoding_error(cls, envelope: Envelope, logger: Logger) -> None
+ | send_decoding_error(cls, envelope: Envelope, exception: Exception, logger: Logger) -> None
 ```
 
 Handle a decoding error.
@@ -46,25 +46,29 @@ Handle a decoding error.
 **Arguments**:
 
 - `envelope`: the envelope
+- `exception`: the exception raised during decoding
+- `logger`: the logger
 
 **Returns**:
 
 None
 
-<a name="aea.error_handler.base.AbstractErrorHandler.send_unsupported_skill"></a>
-#### send`_`unsupported`_`skill
+<a name="aea.error_handler.base.AbstractErrorHandler.send_no_active_handler"></a>
+#### send`_`no`_`active`_`handler
 
 ```python
  | @classmethod
  | @abstractmethod
- | send_unsupported_skill(cls, envelope: Envelope, logger: Logger) -> None
+ | send_no_active_handler(cls, envelope: Envelope, reason: str, logger: Logger) -> None
 ```
 
-Handle the received envelope in case the skill is not supported.
+Handle the received envelope in case the handler is not supported.
 
 **Arguments**:
 
 - `envelope`: the envelope
+- `reason`: the reason for the failure
+- `logger`: the logger
 
 **Returns**:
 
