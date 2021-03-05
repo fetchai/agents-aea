@@ -132,8 +132,7 @@ new_env: clean
 	then\
 		pipenv --rm;\
 		pipenv --python 3.7;\
-		pipenv install --dev --skip-lock;\
-		pipenv run pip uninstall typing -y;\
+		pipenv install --dev --skip-lock --clear;\
 		pipenv run pip install -e .[all];\
 		pipenv run pip install --no-deps file:plugins/aea-ledger-ethereum;\
 		pipenv run pip install --no-deps file:plugins/aea-ledger-cosmos;\
