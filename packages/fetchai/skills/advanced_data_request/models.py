@@ -31,6 +31,8 @@ DEFAULT_OUTPUTS = None
 DEFAULT_DECIMALS = 5
 DEFAULT_USE_HTTP_SERVER = False
 
+HTTP_REQUEST_METHODS = {"GET", "PUT", "POST", "PATCH", "DELETE"}
+
 
 class AdvancedDataRequestModel(Model):
     """This class models the AdvancedDataRequest skill."""
@@ -62,8 +64,8 @@ class AdvancedDataRequestModel(Model):
         msg = []
         if not isinstance(self.url, str):
             msg.append("'url' must be provided as a string")
-        if not isinstance(self.method, str):
-            msg.append("'method' must be provided as a string")
+        if not self.method in HTTP_REQUEST_METHODS:
+            msg.append(f"'method' must be one of {HTTP_REQUEST_METHODS}")
         if not isinstance(self.body, bytes):
             msg.append("'body' must be provided as a byte string")
         if not isinstance(self.outputs, list):
