@@ -19,6 +19,7 @@ aea config set --type dict agent.dependencies \
 }'
 aea config set agent.default_connection fetchai/p2p_libp2p:0.17.0
 aea install
+aea build
 ```
 ``` bash
 aea config set --type dict agent.default_routing \
@@ -48,6 +49,7 @@ aea issue-certificates
 aea fetch fetchai/coin_price_oracle_client:0.4.0
 cd coin_price_oracle_client
 aea install
+aea build
 ```
 ``` bash
 aea create coin_price_oracle_client
@@ -62,6 +64,7 @@ aea config set --type dict agent.dependencies \
 }'
 aea config set agent.default_connection fetchai/ledger:0.14.0
 aea install
+aea build
 ```
 ``` bash
 aea config set --type dict agent.default_routing \

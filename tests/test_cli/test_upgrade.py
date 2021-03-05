@@ -1187,7 +1187,16 @@ class TestUpgradeProjectWithNewerVersion(BaseTestUpgradeProject):
         )
         _left_only, _right_only, diff = dircmp_recursive(dircmp)
         if confirm:
-            assert diff == _right_only == _left_only == set()
+            # temporary: due to change in deps
+            assert _right_only == {"vendor/fetchai/connections/p2p_libp2p/libp2p_node"}
+            assert _left_only == {
+                "vendor/fetchai/connections/p2p_libp2p/go.sum",
+                "vendor/fetchai/connections/p2p_libp2p/libp2p_node.go",
+                "vendor/fetchai/connections/p2p_libp2p/utils",
+                "vendor/fetchai/connections/p2p_libp2p/aea",
+                "vendor/fetchai/connections/p2p_libp2p/dht",
+                "vendor/fetchai/connections/p2p_libp2p/go.mod",
+            }
         else:
             assert diff == _right_only == set()
             # temporary: due to change in deps

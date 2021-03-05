@@ -259,35 +259,6 @@ aea run
 
 Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.17.0 -u public_uri` to retrieve the address.)
 
-<!-- Then, update the configuration of the participants AEA's p2p connection by appending the following YAML text at the end of the `aea-config.yaml` file:
-
-``` yaml
----
-public_id: fetchai/p2p_libp2p:0.17.0
-type: connection
-config:
-  delegate_uri: 127.0.0.1:11001
-  entry_peers: ['SOME_ADDRESS']
-  local_uri: 127.0.0.1:9001
-  log_file: libp2p_node.log
-  public_uri: 127.0.0.1:9001
-```
-
-``` yaml
----
-public_id: fetchai/p2p_libp2p:0.17.0
-type: connection
-config:
-  delegate_uri: 127.0.0.1:11002
-  entry_peers: ['SOME_ADDRESS']
-  local_uri: 127.0.0.1:9002
-  log_file: libp2p_node.log
-  public_uri: 127.0.0.1:9002
-```
-
-where `SOME_ADDRESS` is replaced with the appropriate value.
--->
-
 Then, in the participant one, run this command (replace `SOME_ADDRESS` with the correct value as described above):
 ``` bash
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \

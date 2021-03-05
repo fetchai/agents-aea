@@ -50,7 +50,7 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
-        "Framework :: AEA" "Topic :: Communications",
+        "Topic :: Communications",
         "Topic :: Internet",
         "Topic :: Software Development",
     ],
