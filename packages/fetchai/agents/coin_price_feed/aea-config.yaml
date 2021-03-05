@@ -18,7 +18,7 @@ protocols:
 - fetchai/signing:0.11.0
 - fetchai/state_update:0.11.0
 skills:
-- fetchai/coin_price:0.6.0
+- fetchai/advanced_data_request:0.1.0
 default_connection: fetchai/http_server:0.17.0
 default_ledger: fetchai
 default_routing:
@@ -37,12 +37,16 @@ dependencies:
 public_id: fetchai/http_server:0.17.0
 type: connection
 config:
-  api_spec_path: vendor/fetchai/skills/coin_price/coin_api_spec.yaml
-  target_skill_id: fetchai/coin_price:0.6.0
+  api_spec_path: vendor/fetchai/skills/advanced_data_request/api_spec.yaml
+  target_skill_id: fetchai/advanced_data_request:0.1.0
 ---
-public_id: fetchai/coin_price:0.6.0
+public_id: fetchai/advanced_data_request:0.1.0
 type: skill
 models:
-  coin_price_model:
+  advanced_data_request_model:
     args:
+      url: https://api.coingecko.com/api/v3/simple/price?ids=fetch-ai&vs_currencies=usd
+      outputs:
+      - name: price
+        json_path: "fetch-ai.usd"
       use_http_server: true

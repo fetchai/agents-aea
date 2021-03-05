@@ -68,9 +68,21 @@ class TestOracleSkills(AEATestCaseManyFlaky, UseGanache):
         self.set_config("agent.default_ledger", EthereumCrypto.identifier)
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
-        self.add_item("skill", "fetchai/coin_price:0.6.0")
+        self.add_item("skill", "fetchai/advanced_data_request:0.1.0")
         self.add_item("contract", "fetchai/oracle:0.5.0")
         self.add_item("skill", "fetchai/simple_oracle:0.6.0")
+
+        # set up data request skill to fetch coin price
+        self.set_config(
+            "vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.url",
+            "https://api.coingecko.com/api/v3/simple/price?ids=fetch-ai&vs_currencies=usd",
+            type_="str",
+        )
+        self.set_config(
+            "vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.outputs",
+            '[{"name": "price", "json_path": "fetch-ai.usd"}]',
+            type_="list",
+        )
 
         # set erc20 address
         _, erc20_address = erc20_contract
@@ -84,6 +96,10 @@ class TestOracleSkills(AEATestCaseManyFlaky, UseGanache):
             "vendor.fetchai.skills.simple_oracle.models.strategy.args.contract_address"
         )
         self.set_config(setting_path, oracle_address)
+        setting_path = (
+            "vendor.fetchai.skills.simple_oracle.models.strategy.args.oracle_value_name"
+        )
+        self.set_config(setting_path, "price")
 
         diff = self.difference_to_fetched_agent(
             "fetchai/coin_price_oracle:0.7.0", oracle_agent_name
@@ -178,11 +194,11 @@ class TestOracleSkills(AEATestCaseManyFlaky, UseGanache):
 
         check_strings = (
             "setting up HttpHandler",
-            "setting up CoinPriceBehaviour",
+            "setting up AdvancedDataRequestBehaviour",
             "Setting up Fetch oracle contract...",
-            "Fetching price of fetch-ai in usd from https://api.coingecko.com/api/v3/",
+            "Fetching data from https://api.coingecko.com/api/v3/simple/price?ids=fetch-ai&vs_currencies=usd",
             "received raw transaction=",
-            "fetch-ai price =",
+            "Observation: {'price': {'value': ",
             "transaction was successfully submitted. Transaction digest=",
             "requesting transaction receipt.",
             "transaction was successfully settled. Transaction receipt=",

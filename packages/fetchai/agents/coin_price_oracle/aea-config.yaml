@@ -22,7 +22,7 @@ protocols:
 - fetchai/signing:0.11.0
 - fetchai/state_update:0.11.0
 skills:
-- fetchai/coin_price:0.6.0
+- fetchai/advanced_data_request:0.1.0
 - fetchai/simple_oracle:0.6.0
 default_connection: fetchai/p2p_libp2p:0.17.0
 default_ledger: ethereum
@@ -43,12 +43,22 @@ dependencies:
   aea-ledger-fetchai:
     version: <0.2.0,>=0.1.0
 ---
-public_id: fetchai/coin_price:0.6.0
+public_id: fetchai/advanced_data_request:0.1.0
 type: skill
 models:
-  coin_price_model:
+  advanced_data_request_model:
     args:
-      url: https://api.coingecko.com/api/v3/
+      url: https://api.coingecko.com/api/v3/simple/price?ids=fetch-ai&vs_currencies=usd
+      outputs:
+      - name: price
+        json_path: "fetch-ai.usd"
+---
+public_id: fetchai/simple_oracle:0.6.0
+type: skill
+models:
+  strategy:
+    args:
+      oracle_value_name: price
 ---
 public_id: fetchai/p2p_libp2p:0.17.0
 type: connection

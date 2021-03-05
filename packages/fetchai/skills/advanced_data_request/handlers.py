@@ -17,10 +17,10 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains handlers for the coin_price skill."""
+"""This package contains handlers for the advanced_data_request skill."""
 
 import json
-from typing import Any, Optional, cast
+from typing import Any, Dict, Optional, cast
 
 from aea.configurations.base import PublicId
 from aea.protocols.base import Message
@@ -28,12 +28,22 @@ from aea.skills.base import Handler
 
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.prometheus.message import PrometheusMessage
-from packages.fetchai.skills.coin_price.dialogues import (
+from packages.fetchai.skills.advanced_data_request.dialogues import (
     HttpDialogue,
     HttpDialogues,
     PrometheusDialogue,
     PrometheusDialogues,
 )
+
+
+def find(dotted_path: str, data: Dict[str, Any]) -> Optional[Any]:
+    """Find entry at dotted_path in data"""
+
+    keys = dotted_path.split(".")
+    value = data
+    for key in keys:
+        value = value.get(key, {})
+    return None if value == {} else value
 
 
 class HttpHandler(Handler):
@@ -53,7 +63,7 @@ class HttpHandler(Handler):
 
         # skill can be used with or without http server
         if (
-            self.context.coin_price_model.use_http_server
+            self.context.advanced_data_request_model.use_http_server
         ):  # pylint: disable=import-outside-toplevel
             from packages.fetchai.connections.http_server.connection import (
                 PUBLIC_ID as HTTP_SERVER_ID,
@@ -98,33 +108,40 @@ class HttpHandler(Handler):
         :return: None
         """
 
-        model = self.context.coin_price_model
+        model = self.context.advanced_data_request_model
 
         msg_body = json.loads(http_msg.body)
-        price_result = msg_body.get(model.coin_id, None)
 
-        if price_result is None:
-            self.context.logger.info("failed to get price: unexpected result")
-        else:
-            price = price_result.get(model.currency, None)
+        observation = {}
+        for output in model.outputs:
+            json_path = output["json_path"]
 
-            if price is None:
-                self.context.logger.info("failed to get price: no price listed")
-            else:
-                value = int(price * (10 ** model.decimals))
-                oracle_data = {
-                    "value": value,
+            # find desired output data in msg_body
+            value = find(json_path, msg_body)
+
+            # if value is a numeric type, store it as fixed-point with number of decimals
+            if isinstance(value, (int, float)):
+                int_value = int(value * 10 ** model.decimals)
+                observation[output["name"]] = {
+                    "value": int_value,
                     "decimals": model.decimals,
                 }
-                self.context.shared_state["oracle_data"] = oracle_data
-                self.context.logger.info(
-                    f"{model.coin_id} price = {price} {model.currency}"
+            elif isinstance(value, str):
+                observation[output["name"]] = {
+                    "value": value,
+                }
+            else:
+                self.context.logger.warning(
+                    f"No valid output for {output['name']} found in response."
                 )
-                if self.context.prometheus_dialogues.enabled:
-                    metric_name = "num_retrievals"
-                    self.context.behaviours.coin_price_behaviour.update_prometheus_metric(
-                        metric_name, "inc", 1.0, {}
-                    )
+
+        self.context.shared_state["observation"] = observation
+        self.context.logger.info(f"Observation: {observation}")
+        if observation and self.context.prometheus_dialogues.enabled:
+            metric_name = "num_retrievals"
+            self.context.behaviours.advanced_data_request_behaviour.update_prometheus_metric(
+                metric_name, "inc", 1.0, {}
+            )
 
     def _handle_request(
         self, http_msg: HttpMessage, http_dialogue: HttpDialogue
@@ -165,7 +182,7 @@ class HttpHandler(Handler):
             status_code=200,
             status_text="Success",
             headers=http_msg.headers,
-            body=json.dumps(self.context.shared_state.get("oracle_data", "")).encode(
+            body=json.dumps(self.context.shared_state.get("observation", "")).encode(
                 "utf-8"
             ),
         )
@@ -174,7 +191,7 @@ class HttpHandler(Handler):
 
         if self.context.prometheus_dialogues.enabled:
             metric_name = "num_requests"
-            self.context.behaviours.coin_price_behaviour.update_prometheus_metric(
+            self.context.behaviours.advanced_data_request_behaviour.update_prometheus_metric(
                 metric_name, "inc", 1.0, {}
             )
 
