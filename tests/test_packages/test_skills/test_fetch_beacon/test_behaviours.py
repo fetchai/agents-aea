@@ -23,10 +23,14 @@ from typing import cast
 
 from aea.test_tools.test_skill import BaseSkillTestCase
 
-from packages.fetchai.protocols.http.message import HttpMessage
+from packages.fetchai.protocols.ledger_api.custom_types import Kwargs
+from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.skills.fetch_beacon.behaviours import FetchBeaconBehaviour
 
 from tests.conftest import ROOT_DIR
+
+
+LEDGER_ID = "fetchai"
 
 
 class TestSkillBehaviour(BaseSkillTestCase):
@@ -43,17 +47,21 @@ class TestSkillBehaviour(BaseSkillTestCase):
             cls._skill.skill_context.behaviours.fetch_beacon_behaviour,
         )
 
-    def test_send_http_request_message(self):
-        """Test the send_http_request_message method of the fetch_beacon behaviour."""
-        self.fetch_beacon_behaviour.send_http_request_message("GET", "some_url")
+    def test__get_random_beacon(self):
+        """Test that the _get_random_beacon function sends the right message to the ledger_api."""
+
+        self.fetch_beacon_behaviour._get_random_beacon()
         self.assert_quantity_in_outbox(1)
-        msg = cast(HttpMessage, self.get_message_from_outbox())
+
+        msg = cast(LedgerApiMessage, self.get_message_from_outbox())
         has_attributes, error_str = self.message_has_attributes(
             actual_message=msg,
-            message_type=HttpMessage,
-            performative=HttpMessage.Performative.REQUEST,
-            method="GET",
-            url="some_url",
+            message_type=LedgerApiMessage,
+            performative=LedgerApiMessage.Performative.GET_STATE,
+            ledger_id=LEDGER_ID,
+            callable="blocks",
+            args=("latest",),
+            kwargs=Kwargs({}),
         )
         assert has_attributes, error_str
 
@@ -66,13 +74,15 @@ class TestSkillBehaviour(BaseSkillTestCase):
         """Test that the act method of the fetch_beacon behaviour puts the correct message in the outbox."""
         self.fetch_beacon_behaviour.act()
         self.assert_quantity_in_outbox(1)
-        msg = cast(HttpMessage, self.get_message_from_outbox())
+        msg = cast(LedgerApiMessage, self.get_message_from_outbox())
         has_attributes, error_str = self.message_has_attributes(
             actual_message=msg,
-            message_type=HttpMessage,
-            performative=HttpMessage.Performative.REQUEST,
-            method="GET",
-            url=self.fetch_beacon_behaviour.beacon_url,
+            message_type=LedgerApiMessage,
+            performative=LedgerApiMessage.Performative.GET_STATE,
+            ledger_id=LEDGER_ID,
+            callable="blocks",
+            args=("latest",),
+            kwargs=Kwargs({}),
         )
         assert has_attributes, error_str
 

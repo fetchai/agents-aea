@@ -9,6 +9,7 @@ verify_ssl = true
 name = "test-pypi"
 
 [dev-packages]
+# we fix exact versions as it's sufficient to have at least one set of compatible dependencies
 aiohttp = "==3.6.2"
 aioprometheus = "==20.0.1"
 bandit = "==1.7.0"
@@ -28,7 +29,7 @@ flake8-isort = "==4.0.0"
 gym = "==0.15.6"
 ipfshttpclient = "==0.6.1"
 liccheck = "==0.4.3"
-markdown = ">=3.2.1"
+markdown = "==3.2.1"
 matplotlib = "==3.2.1"
 memory-profiler = "==0.57.0"
 mistune = "==2.0.0a4"
@@ -38,10 +39,12 @@ mkdocs-mermaid-plugin = {git = "https://github.com/pugong/mkdocs-mermaid-plugin.
 mypy = "==0.761"
 numpy = "==1.18.1"
 oef = "==0.8.1"
-openapi-core = "==0.13.7"
+openapi-core = "==0.13.2"
 openapi-spec-validator = "==0.2.8"
+packaging = "==20.4"
 pexpect = "==4.8.0"
 psutil = "==5.7.0"
+pydoc-markdown = "==3.3.0"
 pydocstyle = "==3.0.0"
 pygments = "==2.5.2"
 pylint = "==2.6.0"
@@ -49,6 +52,7 @@ pymdown-extensions = "==6.3"
 pytest = "==5.4.3"
 pytest-asyncio = "==0.12.0"
 pytest-cov = "==2.9.0"
+pytest-custom-exit-code = "==0.3.0"
 pytest-randomly = "==3.4.0"
 pytest-rerunfailures = "==9.0"
 requests = ">=2.22.0"
@@ -60,7 +64,7 @@ vyper = "==0.1.0b12"
 isort = "==5.7.0"
 web3 = "==5.12.0"
 yoti = "==2.14.0"
-pytest-custom-exit-code = "==0.3.0"
 
 [packages]
 # we don't specify dependencies for the library here for intallation as per: https://pipenv-fork.readthedocs.io/en/latest/advanced.html#pipfile-vs-setuppy
+# aea and plugin dependencies are specified in setup.py
