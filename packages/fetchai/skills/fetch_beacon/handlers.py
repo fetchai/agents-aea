@@ -69,6 +69,8 @@ class LedgerApiHandler(Handler):
         # handle message
         if ledger_api_msg.performative is LedgerApiMessage.Performative.STATE:
             self._handle_state(ledger_api_msg)
+        elif ledger_api_msg.performative == LedgerApiMessage.Performative.ERROR:
+            self._handle_error(ledger_api_msg, ledger_api_dialogue)
         else:
             self._handle_invalid(ledger_api_msg, ledger_api_dialogue)
 
@@ -118,9 +120,9 @@ class LedgerApiHandler(Handler):
         if block_height_str:
             block_height = int(block_height_str)  # type: Optional[int]
         else:
-            block_height = None
+            block_height = None  #  pragma: nocover
 
-        if entropy is None:
+        if entropy is None:  # pragma: nocover
             self.context.logger.info("entropy not present")
         elif block_height is None:  # pragma: nocover
             self.context.logger.info("block height not present")
