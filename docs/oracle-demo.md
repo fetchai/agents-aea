@@ -36,7 +36,7 @@ cd coin_price_oracle
 aea add connection fetchai/http_client:0.18.0
 aea add connection fetchai/ledger:0.14.0
 aea add connection fetchai/p2p_libp2p:0.17.0
-aea add skill fetchai/coin_price:0.6.0
+aea add skill fetchai/advanced_data_request:0.1.0
 aea add skill fetchai/simple_oracle:0.6.0
 aea config set --type dict agent.dependencies \
 '{
@@ -46,6 +46,16 @@ aea config set --type dict agent.dependencies \
 aea config set agent.default_connection fetchai/p2p_libp2p:0.17.0
 aea install
 aea build
+```
+
+Set the URL for the data request skill:
+```bash
+aea config set --type str vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.url "https://api.coingecko.com/api/v3/simple/price?ids=fetch-ai&vs_currencies=usd"
+```
+
+Specify the name and json path of the data to fetch from the API:
+```bash
+aea config set --type list vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.outputs '[{"name": "price", "json_path": "fetch-ai.usd"}]'
 ```
 
 Then update the agent configuration with the default routing and cert requests:
