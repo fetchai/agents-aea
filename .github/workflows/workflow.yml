@@ -175,6 +175,7 @@ jobs:
         run: tox -e check_api_docs
       - name: Check spelling
         run: tox -e spell_check
+
   dependencies_checks:
     continue-on-error: False
     runs-on: ubuntu-latest
@@ -184,12 +185,16 @@ jobs:
       - uses: actions/setup-python@master
         with:
           python-version: 3.6
+      - name: Check Pipfile and tox.ini consistency
+        run : |
+          python ./scripts/check_pipfile_and_toxini.py
       - name: Install current aea
         run: |
           pip install -e .[all]
-      - name: Check dependecnies and imports
+      - name: Check aea dependenices and imports
         run: |
           python ./scripts/check_imports_and_dependencies.py
+
   protolint:
     continue-on-error: False
     runs-on: ubuntu-latest
@@ -211,6 +216,7 @@ jobs:
       - name: Protolint check
         run: |
           make protolint
+
   integration_checks:
     continue-on-error: True
     needs:
