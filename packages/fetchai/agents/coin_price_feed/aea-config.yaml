@@ -46,5 +46,5 @@ models:
       url: https://api.coingecko.com/api/v3/simple/price?ids=fetch-ai&vs_currencies=usd
       outputs:
       - name: price
-        json_path: "fetch-ai.usd"
+        json_path: fetch-ai.usd
       use_http_server: true
