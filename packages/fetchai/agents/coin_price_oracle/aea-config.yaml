@@ -53,7 +53,7 @@ models:
       - name: price
         json_path: "fetch-ai.usd"
 ---
-public_id: fetchai/simple_oracle:0.5.0
+public_id: fetchai/simple_oracle:0.6.0
 type: skill
 models:
   strategy:
