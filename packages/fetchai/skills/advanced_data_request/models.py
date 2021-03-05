@@ -19,12 +19,12 @@
 
 """This package contains a model for the AdvancedDataRequest skill"""
 
-from typing import Any, Dict, List
+from typing import Any
 
 from aea.skills.base import Model
 
 
-DEFAULT_URL = ""
+DEFAULT_URL = None
 DEFAULT_METHOD = "GET"
 DEFAULT_BODY = b""
 DEFAULT_OUTPUTS = None
