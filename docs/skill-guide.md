@@ -366,7 +366,9 @@ models:
   oef_search_dialogues:
     args: {}
     class_name: OefSearchDialogues
-dependencies: {}
+dependencies:
+  aea-ledger-fetchai:
+    version: <0.2.0,>=0.1.0
 is_abstract: false
 ```
 
@@ -886,7 +888,9 @@ models:
         key: seller_service
         value: generic_service
     class_name: Strategy
-dependencies: {}
+dependencies:
+  aea-ledger-fetchai:
+    version: <0.2.0,>=0.1.0
 is_abstract: false
 ```
 </p>

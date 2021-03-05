@@ -124,7 +124,7 @@ register_faucet_api(id_="my_ledger_id", entry_point="some.dotted.path:MyLedgerFa
 my_faucet_api = make_faucet_api("my_ledger_id")
 ```
 
-The framework wraps all `LedgerApi` classes and exposes them in the <a href="../api/crypto/ledger_apis#aea.crypto.base.LedgerApis">`LedgerApis` classes. The framework also wraps the crypto APIs to create identities on both ledgers and exposes them in the `Wallet`.
+The framework wraps all `LedgerApi` classes and exposes them in the <a href="../api/crypto/ledger_apis#aea.crypto.base.LedgerApis">`LedgerApis`</a> classes. The framework also wraps the crypto APIs to create identities on both ledgers and exposes them in the `Wallet`.
 
 The separation between the `Crypto` and `LedgerApi` is fundamental to the framework design. In particular, the object which holds the private key is separated from the object which interacts with the ledger. This design pattern is repeated throughout the framework: the decision maker is the only entity with access to the AEA's `Wallet` whilst `LedgerApis` are accessible by all skills.
 

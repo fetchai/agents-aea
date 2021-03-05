@@ -111,6 +111,8 @@ class _DependenciesManager:
         )  # type: Dict[Tuple[ComponentType, str, str], Set[ComponentId]]
         self._inverse_dependency_graph = {}  # type: Dict[ComponentId, Set[ComponentId]]
 
+        self.agent_pypi_dependencies: Dependencies = {}
+
     @property
     def all_dependencies(self) -> Set[ComponentId]:
         """Get all dependencies."""
@@ -235,6 +237,9 @@ class _DependenciesManager:
             all_pypi_dependencies = merge_dependencies(
                 all_pypi_dependencies, configuration.pypi_dependencies
             )
+        all_pypi_dependencies = merge_dependencies(
+            all_pypi_dependencies, self.agent_pypi_dependencies
+        )
         return all_pypi_dependencies
 
     def install_dependencies(self) -> None:
@@ -895,6 +900,16 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
     ) -> "AEABuilder":  # pragma: nocover
         """Set the context namespace."""
         self._context_namespace = context_namespace
+        return self
+
+    def set_agent_pypi_dependencies(self, dependencies: Dependencies) -> "AEABuilder":
+        """
+        Set agent PyPI dependencies.
+
+        :param dependencies: PyPI dependencies for the agent.
+        :return: the AEABuilder.
+        """
+        self._package_dependency_manager.agent_pypi_dependencies = dependencies
         return self
 
     def remove_component(self, component_id: ComponentId) -> "AEABuilder":
@@ -1629,6 +1644,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
         self.set_default_connection(agent_configuration.default_connection)
         self.set_default_routing(agent_configuration.default_routing)
+        self.set_agent_pypi_dependencies(agent_configuration.dependencies)
 
     @staticmethod
     def _find_import_order(

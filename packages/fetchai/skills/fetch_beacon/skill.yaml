@@ -12,9 +12,11 @@ fingerprint:
   dialogues.py: QmTy9rEFAVKdLQq9qZJCgPbRqvokZBx3DmSQFvfkuqb4jn
   handlers.py: QmQUfbVMFYEL4SskqCZuc6EYkEuEZ8fAmJ8vkWmpjxSZM7
 fingerprint_ignore_patterns: []
+connections:
+- fetchai/ledger:0.14.0
 contracts: []
 protocols:
-- fetchai/ledger_api:0.10.0
+- fetchai/ledger_api:0.11.0
 skills: []
 behaviours:
   fetch_beacon_behaviour:
@@ -29,6 +31,7 @@ models:
   ledger_api_dialogues:
     args: {}
     class_name: LedgerApiDialogues
-dependencies: {}
+dependencies:
+  vyper:
+    version: ==0.1.0b12
 is_abstract: false
-connections: []

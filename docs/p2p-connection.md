@@ -17,6 +17,7 @@ aea create my_genesis_aea
 cd my_genesis_aea
 aea add connection fetchai/p2p_libp2p:0.17.0
 aea config set agent.default_connection fetchai/p2p_libp2p:0.17.0
+aea install
 aea build
 ```
 
@@ -48,6 +49,7 @@ aea create my_other_aea
 cd my_other_aea
 aea add connection fetchai/p2p_libp2p:0.17.0
 aea config set agent.default_connection fetchai/p2p_libp2p:0.17.0
+aea install
 aea build
 ```
 

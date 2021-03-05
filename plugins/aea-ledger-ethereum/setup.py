@@ -58,6 +58,5 @@ setup(
         "Topic :: Communications",
         "Topic :: Internet",
         "Topic :: Software Development",
-        "Framework :: AEA",
     ],
 )

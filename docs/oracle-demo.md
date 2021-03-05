@@ -45,6 +45,7 @@ aea config set --type dict agent.dependencies \
 }'
 aea config set agent.default_connection fetchai/p2p_libp2p:0.17.0
 aea install
+aea build
 ```
 
 Set the URL for the data request skill:
@@ -123,6 +124,7 @@ aea config set --type dict agent.dependencies \
 }'
 aea config set agent.default_connection fetchai/ledger:0.14.0
 aea install
+aea build
 ```
 
 Then update the agent configuration with the default routing:

@@ -25,12 +25,14 @@ default_routing:
   fetchai/http:0.13.0: fetchai/http_client:0.18.0
   fetchai/prometheus:0.4.0: fetchai/prometheus:0.4.0
 connection_private_key_paths: {}
-dependencies: {}
 private_key_paths: {}
 logging_config:
   disable_existing_loggers: false
   version: 1
 registry_path: ../packages
+dependencies:
+  aea-ledger-fetchai:
+    version: <0.2.0,>=0.1.0
 ---
 public_id: fetchai/http_server:0.17.0
 type: connection
