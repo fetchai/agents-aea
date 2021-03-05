@@ -518,7 +518,7 @@ class InteractiveEjectHelper:
                     package_id.public_id.to_latest(),
                     aea_version=self._current_aea_version,
                 )
-            except click.ClickException:
+            except click.ClickException:  # pragma: nocover
                 continue
             if package_id.public_id.version == new_item.version:
                 continue
