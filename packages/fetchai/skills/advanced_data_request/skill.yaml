@@ -34,10 +34,10 @@ handlers:
 models:
   advanced_data_request_model:
     args:
-      body: ''
+      body: ""
       method: GET
       outputs: []
-      url: null
+      url: ""
       use_http_server: false
     class_name: AdvancedDataRequestModel
   http_dialogues:

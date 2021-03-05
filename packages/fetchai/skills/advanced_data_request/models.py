@@ -24,9 +24,9 @@ from typing import Any
 from aea.skills.base import Model
 
 
-DEFAULT_URL = None
+DEFAULT_URL = ""
 DEFAULT_METHOD = "GET"
-DEFAULT_BODY = b""
+DEFAULT_BODY = ""
 DEFAULT_OUTPUTS = None
 DEFAULT_DECIMALS = 5
 DEFAULT_USE_HTTP_SERVER = False
@@ -48,6 +48,7 @@ class AdvancedDataRequestModel(Model):
         self.method = kwargs.pop("method", DEFAULT_METHOD)
         self.body = kwargs.pop("body", DEFAULT_BODY)
         self.outputs = kwargs.pop("outputs", DEFAULT_OUTPUTS)
+        self.decimals = kwargs.pop("decimals", DEFAULT_DECIMALS)
         self.use_http_server = kwargs.pop("use_http_server", DEFAULT_USE_HTTP_SERVER)
 
         Model.__init__(self, **kwargs)
@@ -66,8 +67,8 @@ class AdvancedDataRequestModel(Model):
             msg.append("'url' must be provided as a string")
         if not self.method in HTTP_REQUEST_METHODS:
             msg.append(f"'method' must be one of {HTTP_REQUEST_METHODS}")
-        if not isinstance(self.body, bytes):
-            msg.append("'body' must be provided as a byte string")
+        if not isinstance(self.body, str):
+            msg.append("'body' must be provided as a string")
         if not isinstance(self.outputs, list):
             msg.append("outputs must be provided as a list")
         else:
@@ -79,6 +80,8 @@ class AdvancedDataRequestModel(Model):
                         msg.append(f"output {ind} must include key 'name'")
                     if "json_path" not in output:
                         msg.append(f"output {ind} must include key 'json_path'")
+        if not isinstance(self.decimals, int):
+            msg.append("'decimals' must be provided as an integer")
         if not isinstance(self.use_http_server, bool):
             msg.append("'use_http_server' must be provided as a bool")
 
