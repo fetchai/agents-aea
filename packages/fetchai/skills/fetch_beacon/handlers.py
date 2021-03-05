@@ -19,7 +19,7 @@
 
 """This package contains handlers for the fetch_beacon skill."""
 
-from typing import Optional, cast, Dict, Any
+from typing import Any, Dict, Optional, cast
 
 from vyper.utils import keccak256
 
@@ -99,7 +99,7 @@ class LedgerApiHandler(Handler):
         :param ledger_api_message: the ledger api message
         """
 
-        block_info = ledger_api_msg.state.body # type: Dict[str, Any]
+        block_info = ledger_api_msg.state.body  # type: Dict[str, Any]
 
         # get entropy and block data
         entropy = (
