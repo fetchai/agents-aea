@@ -43,7 +43,7 @@ WHITELIST_URL_TO_CODE = {
     "https://colab.research.google.com": 403,
 }
 
-IGNORE = {}
+IGNORE: Set[str] = set()
 
 
 def is_url_reachable(url: str) -> bool:
