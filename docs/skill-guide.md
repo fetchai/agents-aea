@@ -448,7 +448,7 @@ In order for this AEA to find another AEA when searching, the second AEA (let's 
 
 From a different terminal window, we fetch a finished service provider AEA and install its Python dependencies:
 ``` bash
-aea fetch fetchai/simple_service_registration:0.22.0 && cd simple_service_registration && aea install && aea build
+aea fetch fetchai/simple_service_registration:0.23.0 && cd simple_service_registration && aea install && aea build
 ```
 
 This AEA will simply register a location service on the <a href="../simple-oef">SOEF search node</a> so we can search for it.

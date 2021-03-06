@@ -304,9 +304,9 @@ class TestUpgradeSharedDependencies(AEATestCaseEmpty):
     """
 
     IS_EMPTY = True
-    OLD_SOEF_ID = PublicId.from_str("fetchai/soef:0.11.0")
-    OLD_OEF_SEARCH_ID = PublicId.from_str("fetchai/oef_search:0.9.0")
-    OLD_OEF_ID = PublicId.from_str("fetchai/oef:0.12.0")
+    OLD_SOEF_ID = PublicId.from_str("fetchai/soef:0.16.0")
+    OLD_OEF_SEARCH_ID = PublicId.from_str("fetchai/oef_search:0.13.0")
+    OLD_OEF_ID = PublicId.from_str("fetchai/oef:0.16.0")
 
     @classmethod
     def setup_class(cls):
@@ -739,8 +739,8 @@ class TestUpgradeNonVendorDependencies(AEATestCaseEmpty):
 
     The test works as follows:
     - scaffold a package, one for each possible package type;
-    - add the protocol "fetchai/default:0.11.0" as dependency to each of them.
-    - add the skill "fetchai/error:0.11.0"; this will also add the default protocol.
+    - add the protocol "fetchai/default:0.12.0" as dependency to each of them.
+    - add the skill "fetchai/error:0.12.0"; this will also add the default protocol.
       add it also as dependency of non-vendor skill.
     - run 'aea upgrade'
     - check that the reference to "fetchai/default" in each scaffolded package
@@ -750,10 +750,10 @@ class TestUpgradeNonVendorDependencies(AEATestCaseEmpty):
     capture_log = True
     IS_EMPTY = True
     old_default_protocol_id = PublicId(
-        DefaultMessage.protocol_id.author, DefaultMessage.protocol_id.name, "0.11.0"
+        DefaultMessage.protocol_id.author, DefaultMessage.protocol_id.name, "0.12.0"
     )
     old_error_skill_id = PublicId(
-        ERROR_SKILL_PUBLIC_ID.author, ERROR_SKILL_PUBLIC_ID.name, "0.11.0"
+        ERROR_SKILL_PUBLIC_ID.author, ERROR_SKILL_PUBLIC_ID.name, "0.12.0"
     )
     old_aea_version_range = compute_specifier_from_version(Version("0.1.0"))
 
@@ -857,18 +857,18 @@ class TestUpdateReferences(AEATestCaseEmpty):
     In particular, 'default_routing', 'default_connection' and custom component configurations in AEA configuration.
 
     How the test works:
-    - add fetchai/error:0.11.0, that requires fetchai/default:0.11.0
-    - add fetchai/stub:0.15.0
-    - add 'fetchai/default:0.11.0: fetchai/stub:0.15.0' to default routing
+    - add fetchai/error:0.12.0, that requires fetchai/default:0.12.0
+    - add fetchai/stub:0.16.0
+    - add 'fetchai/default:0.12.0: fetchai/stub:0.16.0' to default routing
     - add custom configuration to stub connection.
     - run 'aea upgrade'. This will upgrade `stub` connection and `error` skill, and in turn `default` protocol.
     """
 
     IS_EMPTY = True
 
-    OLD_DEFAULT_PROTOCOL_PUBLIC_ID = PublicId.from_str("fetchai/default:0.11.0")
-    OLD_ERROR_SKILL_PUBLIC_ID = PublicId.from_str("fetchai/error:0.11.0")
-    OLD_STUB_CONNECTION_PUBLIC_ID = PublicId.from_str("fetchai/stub:0.15.0")
+    OLD_DEFAULT_PROTOCOL_PUBLIC_ID = PublicId.from_str("fetchai/default:0.12.0")
+    OLD_ERROR_SKILL_PUBLIC_ID = PublicId.from_str("fetchai/error:0.12.0")
+    OLD_STUB_CONNECTION_PUBLIC_ID = PublicId.from_str("fetchai/stub:0.16.0")
 
     @classmethod
     def setup_class(cls):
@@ -985,7 +985,7 @@ class TestWrongAEAVersion(AEATestCaseEmpty):
         super().setup_class()
 
         # this is an old version of the package, just to trigger an upgrade.
-        cls.add_item("protocol", "fetchai/default:0.10.0", local=False)
+        cls.add_item("protocol", "fetchai/default:0.12.0", local=False)
 
         # change aea version of the AEA project
         agent_config = cls.load_agent_config(cls.current_agent_context)
@@ -1135,7 +1135,7 @@ class TestUpgradeWithEjectAccept(BaseTestUpgradeWithEject):
 class BaseTestUpgradeProject(AEATestCaseEmpty):
     """Base test class for testing project upgrader."""
 
-    OLD_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.19.0")
+    OLD_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.21.0")
     EXPECTED_NEW_AGENT_PUBLIC_ID = OLD_AGENT_PUBLIC_ID.to_latest()
     EXPECTED = "expected_agent"
 
@@ -1162,7 +1162,7 @@ class BaseTestUpgradeProject(AEATestCaseEmpty):
         shutil.rmtree(self.current_agent_context)
 
 
-@mock.patch.object(aea, "__version__", "0.10.0")
+@mock.patch.object(aea, "__version__", "0.11.0")
 @mock.patch("click.confirm")
 class TestUpgradeProjectWithNewerVersion(BaseTestUpgradeProject):
     """Test upgrade project with newer version available."""
@@ -1186,21 +1186,7 @@ class TestUpgradeProjectWithNewerVersion(BaseTestUpgradeProject):
             self.current_agent_context, self.EXPECTED, ignore=ignore
         )
         _left_only, _right_only, diff = dircmp_recursive(dircmp)
-        if confirm:
-            # temporary: due to change in deps
-            assert _right_only == {"vendor/fetchai/connections/p2p_libp2p/libp2p_node"}
-            assert _left_only == {
-                "vendor/fetchai/connections/p2p_libp2p/go.sum",
-                "vendor/fetchai/connections/p2p_libp2p/libp2p_node.go",
-                "vendor/fetchai/connections/p2p_libp2p/utils",
-                "vendor/fetchai/connections/p2p_libp2p/aea",
-                "vendor/fetchai/connections/p2p_libp2p/dht",
-                "vendor/fetchai/connections/p2p_libp2p/go.mod",
-            }
-        else:
-            assert diff == _right_only == set()
-            # temporary: due to change in deps
-            assert _left_only == {"vendor/fetchai/skills/error"}
+        assert diff == _right_only == _left_only == set()
 
 
 @mock.patch("aea.cli.upgrade.get_latest_version_available_in_registry")
@@ -1226,11 +1212,10 @@ class TestUpgradeProjectWithoutNewerVersion(BaseTestUpgradeProject):
             self.current_agent_context, self.EXPECTED, ignore=ignore
         )
         _left_only, _right_only, diff = dircmp_recursive(dircmp)
-        assert _left_only == {"vendor/fetchai/skills/error"}
-        assert diff == _right_only == set()
+        assert diff == _right_only == _left_only == set()
 
 
-@mock.patch.object(aea, "__version__", "0.8.0")
+@mock.patch.object(aea, "__version__", "0.10.0")
 class TestUpgradeAEACompatibility(BaseTestUpgradeProject):
     """
     Test 'aea upgrade' takes into account the current aea version.
@@ -1238,8 +1223,8 @@ class TestUpgradeAEACompatibility(BaseTestUpgradeProject):
     The test works as follows:
     """
 
-    OLD_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.19.0")
-    EXPECTED_NEW_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.19.0")
+    OLD_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.21.0")
+    EXPECTED_NEW_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.22.0")
 
     def test_upgrade(self):
         """Test upgrade."""

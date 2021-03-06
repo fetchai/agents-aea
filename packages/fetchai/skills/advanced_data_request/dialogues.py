@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains dialogues used by the coin_price skill."""
+"""This package contains dialogues used by the advanced_data_request skill."""
 
 from typing import Any
 

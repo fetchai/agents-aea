@@ -29,6 +29,7 @@ from aea.skills.base import Model
 
 DEFAULT_LEDGER_ID = DEFAULT_LEDGER
 MAX_BLOCK_HEIGHT = 1000000000000000000
+DEFAULT_ORACLE_VALUE_NAME = "oracle_value"
 
 
 class Strategy(Model):
@@ -45,6 +46,9 @@ class Strategy(Model):
         self._default_gas_deploy = kwargs.pop("default_gas_deploy", 0)
         self._default_gas_grant_role = kwargs.pop("default_gas_grant_role", 0)
         self._default_gas_update = kwargs.pop("default_gas_update", 0)
+        self._oracle_value_name = kwargs.pop(
+            "oracle_value_name", DEFAULT_ORACLE_VALUE_NAME
+        )
 
         super().__init__(**kwargs)
 
@@ -80,6 +84,11 @@ class Strategy(Model):
     def default_gas_update(self) -> str:
         """Get the default gas for updating value."""
         return self._default_gas_update
+
+    @property
+    def oracle_value_name(self) -> str:
+        """Get the name of the oracle value."""
+        return self._oracle_value_name
 
     @property
     def contract_address(self) -> str:

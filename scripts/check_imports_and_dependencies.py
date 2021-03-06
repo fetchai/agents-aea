@@ -158,7 +158,8 @@ class CheckTool:
         for crypto_id in crypto_registry.supported_ids:  # type: ignore
             if crypto_id == "fetchai":
                 crypto_id = "fetch"
-            sections_dependencies.pop(crypto_id)
+            if crypto_id in sections_dependencies:
+                sections_dependencies.pop(crypto_id)
         sections_dependencies["base"] = base
 
         return cls.sections_dependencies_add_files(sections_dependencies)
