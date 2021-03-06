@@ -23,7 +23,6 @@ import uuid
 from typing import Any, Tuple
 
 import numpy as np
-from tensorflow import keras
 
 from aea.exceptions import enforce
 from aea.helpers.search.generic import (
@@ -112,6 +111,8 @@ class Strategy(Model):
         self._currency_id = currency_id
         # loading ML dataset
         # (this could be parametrized)
+        from tensorflow import keras  # pylint: disable=import-outside-toplevel
+
         (
             (self.train_x, self.train_y),
             (self.test_x, self.test_y),

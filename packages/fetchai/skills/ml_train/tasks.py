@@ -22,8 +22,6 @@
 from typing import Any, Tuple
 
 import numpy as np
-import tensorflow as tf
-from tensorflow import keras
 
 from aea.skills.base import SkillContext
 from aea.skills.tasks import Task
@@ -31,6 +29,8 @@ from aea.skills.tasks import Task
 
 class MLTrainTask(Task):
     """ML train task."""
+
+    from tensorflow import keras  # pylint: disable=import-outside-toplevel
 
     def __init__(
         self,
@@ -54,6 +54,8 @@ class MLTrainTask(Task):
     @staticmethod
     def _make_model() -> Any:
         """Make the model."""
+        import tensorflow as tf  # pylint: disable=import-outside-toplevel
+
         model = tf.keras.Sequential(
             [
                 tf.keras.layers.Flatten(input_shape=(28, 28)),
