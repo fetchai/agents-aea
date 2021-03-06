@@ -173,7 +173,7 @@ This is a simple demo that introduces you to the main components of an AEA.
 The fastest way to have your first AEA is to fetch one that already exists!
 
 ``` bash
-aea fetch fetchai/my_first_aea:0.21.0
+aea fetch fetchai/my_first_aea:0.22.0
 cd my_first_aea
 ```
 
