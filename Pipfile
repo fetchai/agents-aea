@@ -37,7 +37,7 @@ mkdocs = "==1.1"
 mkdocs-material = "==4.6.3"
 mkdocs-mermaid-plugin = {git = "https://github.com/pugong/mkdocs-mermaid-plugin.git"}
 mypy = "==0.761"
-numpy = "==1.18.1"
+numpy = "==1.19.2"
 oef = "==0.8.1"
 openapi-core = "==0.13.2"
 openapi-spec-validator = "==0.2.8"
