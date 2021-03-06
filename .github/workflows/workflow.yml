@@ -25,6 +25,7 @@ jobs:
           sudo apt-get autoclean
           pip install pipenv
       - name: Pipenv lock
+        run: pipenv install --dev --skip-lock --clear
         run: pipenv lock
       - name: Check plugin consistency
         run: |
