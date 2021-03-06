@@ -318,7 +318,7 @@ class HTTPClientAsyncChannel:
     def to_envelope(
         http_request_message: HttpMessage,
         status_code: int,
-        headers: CIMultiDictProxy[str],
+        headers: CIMultiDictProxy,
         status_text: Optional[Any],
         body: bytes,
         dialogue: HttpDialogue,
