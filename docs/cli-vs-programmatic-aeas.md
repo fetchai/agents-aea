@@ -35,6 +35,8 @@ Fetch the weather station AEA with the following command :
 ``` bash
 aea fetch fetchai/weather_station:0.23.0
 cd weather_station
+aea install
+aea build
 ```
 
 ### Update the AEA configurations

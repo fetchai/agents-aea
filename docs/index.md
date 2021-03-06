@@ -8,13 +8,9 @@ We define an autonomous economic agent or AEA as:
 
 > An intelligent agent acting on an owner's behalf, with limited or no interference, and whose goal is to generate economic value for its owner.
 
-<!-- In short, "software that generates economic value for you". -->
-
 <iframe width="560" height="315" src="https://www.youtube.com/embed/xpJA4IT5X88" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 An AEA represents an individual, organisation or object and looks after its interests. AEAs act independently of constant input from their owner and autonomously execute actions to achieve their prescribed goals. Their purpose is to create economic value for you, their owner, in clearly defined domains. AEAs have a wide range of <a href="app-areas">application areas</a> and we provide <a href="demos">demo guides</a> to highlight examples of their use cases.
-
-<!-- Autonomous Economic Agents are digital entities that run complex dynamic decision-making algorithms for application owners and clients. -->
 
 ### What is not an AEA
 

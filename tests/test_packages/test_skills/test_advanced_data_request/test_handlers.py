@@ -31,20 +31,27 @@ from packages.fetchai.connections.http_server.connection import (
 )
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.prometheus.message import PrometheusMessage
-from packages.fetchai.skills.coin_price.dialogues import (
+from packages.fetchai.skills.advanced_data_request.dialogues import (
     HttpDialogues,
     PrometheusDialogues,
 )
-from packages.fetchai.skills.coin_price.handlers import HttpHandler, PrometheusHandler
-from packages.fetchai.skills.coin_price.models import CoinPriceModel
+from packages.fetchai.skills.advanced_data_request.handlers import (
+    HttpHandler,
+    PrometheusHandler,
+)
+from packages.fetchai.skills.advanced_data_request.models import (
+    AdvancedDataRequestModel,
+)
 
 from tests.conftest import ROOT_DIR
 
 
 class TestHttpHandler(BaseSkillTestCase):
-    """Test http handler of coin_price skill."""
+    """Test http handler of advanced_data_request skill."""
 
-    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "coin_price")
+    path_to_skill = Path(
+        ROOT_DIR, "packages", "fetchai", "skills", "advanced_data_request"
+    )
     is_agent_to_agent_messages = False
 
     @classmethod
@@ -54,9 +61,16 @@ class TestHttpHandler(BaseSkillTestCase):
         cls.http_handler = cast(HttpHandler, cls._skill.skill_context.handlers.http)
         cls.logger = cls._skill.skill_context.logger
 
-        cls.coin_price_model = cast(
-            CoinPriceModel, cls._skill.skill_context.coin_price_model
+        cls.advanced_data_request_model = cast(
+            AdvancedDataRequestModel,
+            cls._skill.skill_context.advanced_data_request_model,
         )
+
+        cls.advanced_data_request_model.url = "http://some-url"
+        cls.advanced_data_request_model.outputs = [
+            {"name": "output1", "json_path": "in1.in2"},
+            {"name": "output2", "json_path": "id"},
+        ]
 
         cls.http_dialogues = cast(
             HttpDialogues, cls._skill.skill_context.http_dialogues
@@ -82,14 +96,14 @@ class TestHttpHandler(BaseSkillTestCase):
 
     def test_setup_with_http_server(self):
         """Test the setup method of the http handler."""
-        self.coin_price_model.use_http_server = True
+        self.advanced_data_request_model.use_http_server = True
         assert self.http_handler.setup() is None
 
         assert self.http_handler._http_server_id == HTTP_SERVER_ID
         self.assert_quantity_in_outbox(0)
 
     def test_handle_response(self):
-        """Test the _handle_response method of the http handler to a valid coin price response."""
+        """Test the _handle_response method of the http handler to a valid response."""
         # setup
         http_dialogue = self.prepare_skill_dialogue(
             dialogues=self.http_dialogues, messages=self.list_of_messages[:1],
@@ -101,15 +115,18 @@ class TestHttpHandler(BaseSkillTestCase):
             status_code=200,
             status_text="",
             headers="",
-            body=b'{"fetch-ai":{"usd":100.00}}',
+            body=b'{"in1": {"in2": 1.0}, "id": "XXX"}',
         )
 
         # handle message
         self.http_handler.handle(incoming_message)
 
         # check that data was correctly entered into shared state
-        oracle_data = {"value": 10000000, "decimals": self.coin_price_model.decimals}
-        assert self.http_handler.context.shared_state["oracle_data"] == oracle_data
+        observation = {
+            "output1": {"value": 100000, "decimals": 5},
+            "output2": {"value": "XXX"},
+        }
+        assert self.http_handler.context.shared_state["observation"] == observation
 
         # check that outbox contains update_prometheus metric message
         self.assert_quantity_in_outbox(1)
@@ -161,15 +178,15 @@ class TestHttpHandler(BaseSkillTestCase):
         with patch.object(self.logger, "log") as mock_logger:
             self.http_handler.handle(incoming_message)
 
-        assert "oracle_data" not in self.http_handler.context.shared_state
+        assert self.http_handler.context.shared_state["observation"] == {}
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO, "failed to get price: unexpected result",
+            logging.WARNING, "No valid output for output1 found in response.",
         )
 
-    def test_handle_response_no_price(self):
-        """Test the _handle_response method of the http handler to a response with no price."""
+    def test_handle_response_missing_output(self):
+        """Test the _handle_response method of the http handler to a response with a missing output."""
         # setup
         http_dialogue = self.prepare_skill_dialogue(
             dialogues=self.http_dialogues, messages=self.list_of_messages[:1],
@@ -181,18 +198,23 @@ class TestHttpHandler(BaseSkillTestCase):
             status_code=200,
             status_text="",
             headers="",
-            body=b'{"fetch-ai":{}}',
+            body=b'{"in1": {}, "id": "XXX"}',
         )
 
         # handle message with logging
         with patch.object(self.logger, "log") as mock_logger:
             self.http_handler.handle(incoming_message)
 
-        assert "oracle_data" not in self.http_handler.context.shared_state
+        assert self.http_handler.context.shared_state["observation"] == {
+            "output2": {"value": "XXX"}
+        }
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO, "failed to get price: no price listed",
+            logging.WARNING, "No valid output for output1 found in response.",
+        )
+        mock_logger.assert_any_call(
+            logging.INFO, "Observation: {'output2': {'value': 'XXX'}}",
         )
 
     def test_handle_response_bad_response_code(self):
@@ -208,14 +230,14 @@ class TestHttpHandler(BaseSkillTestCase):
             status_code=999,
             status_text="",
             headers="",
-            body=b'{"fetch-ai":{}}',
+            body=b'{"in1": {"in2": 1.0}, "id": "XXX"}',
         )
 
         # handle message with logging
         with patch.object(self.logger, "log") as mock_logger:
             self.http_handler.handle(incoming_message)
 
-        assert "oracle_data" not in self.http_handler.context.shared_state
+        assert "observation" not in self.http_handler.context.shared_state
 
         # after
         mock_logger.assert_any_call(
@@ -311,9 +333,11 @@ class TestHttpHandler(BaseSkillTestCase):
 
 
 class TestPrometheusHandler(BaseSkillTestCase):
-    """Test prometheus handler of coin_price skill."""
+    """Test prometheus handler of advanced_data_request skill."""
 
-    path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "coin_price")
+    path_to_skill = Path(
+        ROOT_DIR, "packages", "fetchai", "skills", "advanced_data_request"
+    )
     is_agent_to_agent_messages = False
 
     @classmethod
@@ -325,8 +349,9 @@ class TestPrometheusHandler(BaseSkillTestCase):
         )
         cls.logger = cls._skill.skill_context.logger
 
-        cls.coin_price_model = cast(
-            CoinPriceModel, cls._skill.skill_context.coin_price_model
+        cls.advanced_data_request_model = cast(
+            AdvancedDataRequestModel,
+            cls._skill.skill_context.advanced_data_request_model,
         )
 
         cls.prometheus_dialogues = cast(
@@ -351,7 +376,7 @@ class TestPrometheusHandler(BaseSkillTestCase):
         self.assert_quantity_in_outbox(0)
 
     def test_handle_response(self):
-        """Test the _handle_response method of the prometheus handler to a valid coin price response."""
+        """Test the _handle_response method of the prometheus handler to a valid response."""
         # setup
         prometheus_dialogue = self.prepare_skill_dialogue(
             dialogues=self.prometheus_dialogues, messages=self.list_of_messages[:1],

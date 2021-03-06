@@ -20,7 +20,7 @@ aea config set --type dict agent.default_routing \
 }'
 ```
 ``` bash
-aea fetch fetchai/simple_service_registration:0.22.0 && cd simple_service_registration && aea install && aea build
+aea fetch fetchai/simple_service_registration:0.23.0 && cd simple_service_registration && aea install && aea build
 ```
 ``` bash
 aea generate-key fetchai
@@ -96,7 +96,9 @@ models:
   oef_search_dialogues:
     args: {}
     class_name: OefSearchDialogues
-dependencies: {}
+dependencies:
+  aea-ledger-fetchai:
+    version: <0.2.0,>=0.1.0
 is_abstract: false
 ```
 ``` yaml
@@ -141,6 +143,8 @@ models:
         key: seller_service
         value: generic_service
     class_name: Strategy
-dependencies: {}
+dependencies:
+  aea-ledger-fetchai:
+    version: <0.2.0,>=0.1.0
 is_abstract: false
 ```

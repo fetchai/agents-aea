@@ -326,24 +326,6 @@ aea run
 Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of this address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.17.0 -u public_uri` to retrieve the address.)
 This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the thermometer AEA.
 
-<!-- Then, in the thermometer client, update the configuration of the thermometer client, AEA's p2p connection by appending the following YAML text at the end of the `aea-config.yaml` file:
-
-``` yaml
----
-public_id: fetchai/p2p_libp2p:0.17.0
-type: connection
-config:
-  delegate_uri: 127.0.0.1:11001
-  entry_peers:
-  - SOME_ADDRESS
-  local_uri: 127.0.0.1:9001
-  log_file: libp2p_node.log
-  public_uri: 127.0.0.1:9001
-```
-
-where `SOME_ADDRESS` is replaced with the appropriate value.
--->
-
 Then, configure the thermometer client (buyer) to connect to this same local ACN by running the following command in the buyer terminal, replacing `SOME_ADDRESS` with the value you noted above:
 ``` bash
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \

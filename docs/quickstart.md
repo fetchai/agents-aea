@@ -156,7 +156,7 @@ Confirm password:
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.11.0
+v0.11.1
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
@@ -173,7 +173,7 @@ This is a simple demo that introduces you to the main components of an AEA.
 The fastest way to have your first AEA is to fetch one that already exists!
 
 ``` bash
-aea fetch fetchai/my_first_aea:0.21.0
+aea fetch fetchai/my_first_aea:0.22.0
 cd my_first_aea
 ```
 
@@ -237,6 +237,12 @@ For example:
 recipient_aea,sender_aea,fetchai/default:0.1.0,\x08\x01\x12\x011*\x07\n\x05hello,
 ```
 
+### Install AEA dependencies
+
+``` bash
+aea install
+```
+
 ### Run the AEA
 
 Run the AEA.
@@ -254,7 +260,7 @@ You will see the echo skill running in the terminal window (an output similar to
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.11.0
+v0.11.1
 
 Starting AEA 'my_first_aea' in 'async' mode ...
 info: Echo Handler: setup method called.
