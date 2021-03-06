@@ -43,14 +43,7 @@ WHITELIST_URL_TO_CODE = {
     "https://colab.research.google.com": 403,
 }
 
-IGNORE = {
-    "https://pypi.org/project/aea-ledger-fetchai/",
-    "https://pypi.org/project/aea-ledger-ethereum/",
-    "https://pypi.org/project/aea-ledger-cosmos/",
-    "https://github.com/fetchai/agents-aea/tree/main/plugins/aea-ledger-fetchai",
-    "https://github.com/fetchai/agents-aea/tree/main/plugins/aea-ledger-ethereum",
-    "https://github.com/fetchai/agents-aea/tree/main/plugins/aea-ledger-cosmos",
-}
+IGNORE: Set[str] = set()
 
 
 def is_url_reachable(url: str) -> bool:

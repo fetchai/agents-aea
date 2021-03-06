@@ -55,7 +55,7 @@ class AdvancedDataRequestModel(Model):
 
         self._validate_config()
 
-    def _validate_config(self) -> None:
+    def _validate_config(self) -> None:  # pragma: nocover
         """
         Ensure the configuration settings are all valid
 
