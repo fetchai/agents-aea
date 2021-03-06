@@ -30,8 +30,6 @@ from aea.skills.tasks import Task
 class MLTrainTask(Task):
     """ML train task."""
 
-    from tensorflow import keras  # pylint: disable=import-outside-toplevel
-
     def __init__(
         self,
         skill_context: SkillContext,
@@ -70,7 +68,7 @@ class MLTrainTask(Task):
         )
         return model
 
-    def execute(self, *args: Any, **kwargs: Any) -> keras.Model:
+    def execute(self, *args: Any, **kwargs: Any) -> Any:
         """Execute the task."""
         self.logger.info("Start training with {} rows".format(self.train_x.shape[0]))
         self.model.fit(self.train_x, self.train_y, epochs=self.epochs_per_batch)
