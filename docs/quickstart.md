@@ -163,7 +163,7 @@ AEA configurations successfully initialized: {'author': 'fetchai'}
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>
-  <p>If you would rather not create an account on the registry at this point, then run `aea init --local` instead.</p>
+  <p>If you would rather not create an account on the registry at this point, then run <code>aea init --local</code> instead.</p>
 </div>
 
 ## Echo skill demo
@@ -202,7 +202,7 @@ Third, add the echo skill to the project.
 ``` bash
 aea add skill fetchai/echo:0.15.0
 ```
-This copies the `fetchai/echo:0.15.0` skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill `fetchai/echo:0.15.0` consists of the name of the author of the skill, followed by the skill name and its version.
+This copies the <code>fetchai/echo:0.15.0</code> skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill <code>fetchai/echo:0.15.0</code> consists of the name of the author of the skill, followed by the skill name and its version.
 </details>
 
 ### Echo skill
@@ -296,13 +296,13 @@ info: Echo Behaviour: act method called.
 
 <details><summary>Manual approach</summary>
 
-Optionally, from a different terminal and same directory (i.e. the `my_first_aea` project), you can send the AEA a message wrapped in an envelope via the input file.
+Optionally, from a different terminal and same directory (i.e. the <code>my_first_aea</code> project), you can send the AEA a message wrapped in an envelope via the input file.
 
 ``` bash
 echo 'my_first_aea,sender_aea,fetchai/default:0.1.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,' >> input_file
 ```
 
-You will see the `Echo Handler` dealing with the envelope and responding with the same message to the `output_file`, and also decoding the Base64 encrypted message in this case.
+You will see the <code>Echo Handler</code> dealing with the envelope and responding with the same message to the <code>output_file</code>, and also decoding the Base64 encrypted message in this case.
 
 ``` bash
 info: Echo Behaviour: act method called.
@@ -311,7 +311,7 @@ info: Echo Behaviour: act method called.
 info: Echo Behaviour: act method called.
 ```
 
-Note, due to the dialogue reference having to be incremented, you can only send the above envelope once! This approach does not work in conjunction with the `aea interact` command.
+Note, due to the dialogue reference having to be incremented, you can only send the above envelope once! This approach does not work in conjunction with the <code>aea interact</code> command.
 
 </details>
 
@@ -336,9 +336,9 @@ We can write an end-to-end test for the AEA utilising helper classes provided by
 
 <details><summary>Writing tests</summary>
 
-The following test class replicates the preceding demo and tests it's correct behaviour. The `AEATestCase` classes are a tool for AEA developers to write useful end-to-end tests of their AEAs.
+The following test class replicates the preceding demo and tests it's correct behaviour. The <code>AEATestCase</code> classes are a tool for AEA developers to write useful end-to-end tests of their AEAs.
 
-First, get the packages directory from the AEA repository (execute from the working directory which contains the `my_first_aea` folder):
+First, get the packages directory from the AEA repository (execute from the working directory which contains the <code>my_first_aea</code> folder):
 
 ``` bash
 svn export https://github.com/fetchai/agents-aea.git/trunk/packages
@@ -418,7 +418,7 @@ class TestEchoSkill(AEATestCase):
 
 ```
 
-Place the above code into a file `test.py` in your AEA project directory (the same level as the `aea-config.yaml` file).
+Place the above code into a file <code>test.py</code> in your AEA project directory (the same level as the <code>aea-config.yaml</code> file).
 
 To run, execute the following:
 
