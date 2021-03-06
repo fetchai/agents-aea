@@ -70,7 +70,7 @@ class LedgerApiHandler(Handler):
         if ledger_api_msg.performative is LedgerApiMessage.Performative.STATE:
             self._handle_state(ledger_api_msg)
         elif ledger_api_msg.performative == LedgerApiMessage.Performative.ERROR:
-            self._handle_error(ledger_api_msg, ledger_api_dialogue)
+            self._handle_error(ledger_api_msg, ledger_api_dialogue)  # pragma: nocover
         else:
             self._handle_invalid(ledger_api_msg, ledger_api_dialogue)
 
@@ -147,7 +147,7 @@ class LedgerApiHandler(Handler):
         :param ledger_api_message: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
-        self.context.logger.info(
+        self.context.logger.info(  # pragma: nocover
             "received ledger_api error message={} in dialogue={}.".format(
                 ledger_api_msg, ledger_api_dialogue
             )
