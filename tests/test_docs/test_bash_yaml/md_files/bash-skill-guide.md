@@ -20,7 +20,7 @@ aea config set --type dict agent.default_routing \
 }'
 ```
 ``` bash
-aea fetch fetchai/simple_service_registration:0.22.0 && cd simple_service_registration && aea install && aea build
+aea fetch fetchai/simple_service_registration:0.23.0 && cd simple_service_registration && aea install && aea build
 ```
 ``` bash
 aea generate-key fetchai

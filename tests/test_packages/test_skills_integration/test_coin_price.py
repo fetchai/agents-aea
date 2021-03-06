@@ -62,14 +62,14 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
 
         coin_price_feed_aea_name = self.agent_name
 
-        self.add_item("connection", "fetchai/http_client:0.18.0")
-        self.add_item("connection", "fetchai/http_server:0.17.0")
+        self.add_item("connection", "fetchai/http_client:0.19.0")
+        self.add_item("connection", "fetchai/http_server:0.18.0")
         self.add_item("connection", "fetchai/prometheus:0.4.0")
         self.add_item("skill", "fetchai/advanced_data_request:0.1.0")
-        self.set_config("agent.default_connection", "fetchai/http_server:0.17.0")
+        self.set_config("agent.default_connection", "fetchai/http_server:0.18.0")
 
         default_routing = {
-            "fetchai/http:0.13.0": "fetchai/http_client:0.18.0",
+            "fetchai/http:0.13.0": "fetchai/http_client:0.19.0",
             "fetchai/prometheus:0.4.0": "fetchai/prometheus:0.4.0",
         }
         setting_path = "agent.default_routing"
@@ -99,7 +99,7 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
         )
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/coin_price_feed:0.7.0", coin_price_feed_aea_name
+            "fetchai/coin_price_feed:0.8.0", coin_price_feed_aea_name
         )
         assert (
             diff == []

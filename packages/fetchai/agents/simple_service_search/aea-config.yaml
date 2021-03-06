@@ -1,6 +1,6 @@
 agent_name: simple_service_search
 author: fetchai
-version: 0.6.0
+version: 0.7.0
 description: A simple example of service search.
 license: Apache-2.0
 aea_version: '>=0.11.0, <0.12.0'

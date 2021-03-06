@@ -4,6 +4,10 @@ The primary tool for upgrading AEA projects is the `aea upgrade` command in the 
 
 Below we describe the additional manual steps required to upgrade between different versions:
 
+## `v0.11.0` to `v0.11.1`
+
+No backwards incompatible changes.
+
 ## `v0.10.1` to `v0.11.0`
 
 Take special care when upgrading to `v0.11.0`. We introduced several breaking changes in preparation for `v1`!
