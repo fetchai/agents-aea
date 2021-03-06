@@ -57,7 +57,7 @@ RequestId = str
 ssl_context = ssl.create_default_context(cafile=certifi.where())
 
 
-def headers_to_string(headers: CIMultiDictProxy[str]) -> str:
+def headers_to_string(headers: CIMultiDictProxy) -> str:
     """
     Convert headers to string.
 
