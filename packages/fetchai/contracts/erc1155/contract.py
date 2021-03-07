@@ -23,10 +23,9 @@ import logging
 import random
 from typing import Dict, List, Optional, cast
 
-from aea_crypto_cosmos import CosmosApi
-from aea_crypto_ethereum import EthereumApi
-from aea_crypto_fetchai import FetchAIApi
-from vyper.utils import keccak256
+from aea_ledger_cosmos import CosmosApi
+from aea_ledger_ethereum import EthereumApi
+from aea_ledger_fetchai import FetchAIApi
 
 from aea.common import Address, JSONLike
 from aea.configurations.base import PublicId
@@ -37,7 +36,12 @@ from aea.crypto.base import LedgerApi
 _default_logger = logging.getLogger("aea.packages.fetchai.contracts.erc1155.contract")
 MAX_UINT_256 = 2 ^ 256 - 1
 
-PUBLIC_ID = PublicId.from_str("fetchai/erc1155:0.16.0")
+PUBLIC_ID = PublicId.from_str("fetchai/erc1155:0.17.0")
+
+
+def keccak256(input_: bytes) -> bytes:
+    """Compute hash."""
+    return bytes(bytearray.fromhex(EthereumApi.get_hash(input_)[2:]))
 
 
 class ERC1155Contract(Contract):

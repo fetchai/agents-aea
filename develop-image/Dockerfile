@@ -61,6 +61,7 @@ COPY . /build
 RUN sudo make clean
 
 RUN pipenv --python python3.7
+RUN pipenv run pip3 install --upgrade pip
 RUN pipenv install --dev --skip-lock
 RUN pipenv run pip3 install .[all]
 

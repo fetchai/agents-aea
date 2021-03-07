@@ -25,7 +25,7 @@ from typing import cast
 from unittest.mock import Mock, patch
 
 from aea.helpers.search.models import Description
-from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_ADDRESS
+from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_AGENT_ADDRESS
 
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.skills.tac_control_contract.behaviours import (
@@ -126,7 +126,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             message_type=ContractApiMessage,
             performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
             to=LEDGER_API_ADDRESS,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             ledger_id=self.parameters.ledger_id,
             contract_id=self.parameters.contract_id,
             callable=ContractApiDialogue.Callable.GET_DEPLOY_TRANSACTION.value,
@@ -198,7 +198,9 @@ class TestSkillBehaviour(BaseSkillTestCase):
         mocked_now = self._mock_time("00:05")
 
         self.parameters._min_nb_agents = 2
-        self.game._registration.register_agent(COUNTERPARTY_ADDRESS, self.agent_1_name)
+        self.game._registration.register_agent(
+            COUNTERPARTY_AGENT_ADDRESS, self.agent_1_name
+        )
 
         # operation
         with patch("datetime.datetime", new=mocked_now):
@@ -292,7 +294,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             message_type=ContractApiMessage,
             performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
             to=LEDGER_API_ADDRESS,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             ledger_id=self.parameters.ledger_id,
             contract_id=self.parameters.contract_id,
             contract_address=self.parameters.contract_address,
@@ -360,7 +362,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             message_type=ContractApiMessage,
             performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
             to=LEDGER_API_ADDRESS,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             ledger_id=self.parameters.ledger_id,
             contract_id=self.parameters.contract_id,
             contract_address=self.parameters.contract_address,
@@ -459,7 +461,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             message_type=ContractApiMessage,
             performative=ContractApiMessage.Performative.GET_RAW_TRANSACTION,
             to=LEDGER_API_ADDRESS,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             ledger_id=self.parameters.ledger_id,
             contract_id=self.parameters.contract_id,
             contract_address=self.parameters.contract_address,

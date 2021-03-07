@@ -35,6 +35,8 @@ class Identity:
     - the addresses, a map from address identifier to address (can be a single key-value pair)
     """
 
+    __slots__ = ("_name", "_address", "_addresses", "_default_address_key")
+
     def __init__(
         self,
         name: str,

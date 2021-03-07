@@ -25,17 +25,27 @@ jobs:
           sudo apt-get autoclean
           pip install pipenv
       - name: Pipenv lock
-        run: pipenv lock
+        run: |
+          pipenv install --dev --skip-lock --clear
+          pipenv run pip install -e .[all]
+          pipenv run pip install --no-deps file:plugins/aea-ledger-ethereum
+          pipenv run pip install --no-deps file:plugins/aea-ledger-cosmos
+          pipenv run pip install --no-deps file:plugins/aea-ledger-fetchai
+          pipenv lock
       - name: Check plugin consistency
         run: |
           # these two files should not be different;
           # we vendorize main "cosmos.py" module in fetchai crypto plugin package
-          diff plugins/aea-crypto-cosmos/aea_crypto_cosmos/cosmos.py plugins/aea-crypto-fetchai/aea_crypto_fetchai/_cosmos.py
+          diff plugins/aea-ledger-cosmos/aea_ledger_cosmos/cosmos.py plugins/aea-ledger-fetchai/aea_ledger_fetchai/_cosmos.py
 
           # check diff between plugins' LICENSE and main LICENSE
-          diff LICENSE plugins/aea-crypto-cosmos/LICENSE
-          diff LICENSE plugins/aea-crypto-ethereum/LICENSE
-          diff LICENSE plugins/aea-crypto-fetchai/LICENSE
+          diff LICENSE plugins/aea-ledger-cosmos/LICENSE
+          diff LICENSE plugins/aea-ledger-ethereum/LICENSE
+          diff LICENSE plugins/aea-ledger-fetchai/LICENSE
+      - name: Check go code consistency
+        run: |
+          # check diff between go code in libs and packages
+          diff libs/go/libp2p_node packages/fetchai/connections/p2p_libp2p/libp2p_node -r
 
   common_checks_2:
     continue-on-error: False
@@ -68,13 +78,20 @@ jobs:
         run: tox -e vulture
       - name: Static type check
         run: tox -e mypy
-      - name: Golang code style check
+      - name: Golang code style check (libp2p_node)
         uses: golangci/golangci-lint-action@v1
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         with:
           version: v1.28
-          working-directory: packages/fetchai/connections/p2p_libp2p/
+          working-directory: libs/go/libp2p_node
+      - name: Golang code style check (aealite)
+        uses: golangci/golangci-lint-action@v1
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+        with:
+          version: v1.28
+          working-directory: libs/go/aealite
 
   common_checks_3:
     continue-on-error: False
@@ -164,6 +181,7 @@ jobs:
         run: tox -e check_api_docs
       - name: Check spelling
         run: tox -e spell_check
+
   dependencies_checks:
     continue-on-error: False
     runs-on: ubuntu-latest
@@ -173,12 +191,16 @@ jobs:
       - uses: actions/setup-python@master
         with:
           python-version: 3.6
+      - name: Check Pipfile and tox.ini consistency
+        run : |
+          python ./scripts/check_pipfile_and_toxini.py
       - name: Install current aea
         run: |
           pip install -e .[all]
-      - name: Check dependecnies and imports
+      - name: Check aea dependenices and imports
         run: |
           python ./scripts/check_imports_and_dependencies.py
+
   protolint:
     continue-on-error: False
     runs-on: ubuntu-latest
@@ -200,6 +222,7 @@ jobs:
       - name: Protolint check
         run: |
           make protolint
+
   integration_checks:
     continue-on-error: True
     needs:
@@ -363,7 +386,7 @@ jobs:
         tox -e py${{ matrix.python_version }} -- -m 'not integration and not unstable'
     - name: Plugin tests
       run: |
-        tox -e plugins-py${{ matrix.python_version }} -- --cov-append -m 'not integration and not unstable'
+        tox -e plugins-py${{ matrix.python_version }} -- -m 'not integration and not unstable'
 
   platform_checks_sync_aea_loop:
     continue-on-error: True
@@ -418,8 +441,12 @@ jobs:
       with:
         go-version: '^1.14.0'
     - if: matrix.python-version == '3.6'
-      name: Golang unit tests
-      working-directory: ./packages/fetchai/connections/p2p_libp2p
+      name: Golang unit tests (libp2p_node)
+      working-directory: ./libs/go/libp2p_node
+      run: go test -p 1 -timeout 0 -count 1 -v ./...
+    - if: matrix.python-version == '3.6'
+      name: Golang unit tests (aealite)
+      working-directory: ./libs/go/aealite
       run: go test -p 1 -timeout 0 -count 1 -v ./...
 
   coverage_checks:

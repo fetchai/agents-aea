@@ -22,8 +22,6 @@
 from typing import Any, Tuple
 
 import numpy as np
-import tensorflow as tf
-from tensorflow import keras
 
 from aea.skills.base import SkillContext
 from aea.skills.tasks import Task
@@ -54,6 +52,8 @@ class MLTrainTask(Task):
     @staticmethod
     def _make_model() -> Any:
         """Make the model."""
+        import tensorflow as tf  # pylint: disable=import-outside-toplevel
+
         model = tf.keras.Sequential(
             [
                 tf.keras.layers.Flatten(input_shape=(28, 28)),
@@ -68,7 +68,7 @@ class MLTrainTask(Task):
         )
         return model
 
-    def execute(self, *args: Any, **kwargs: Any) -> keras.Model:
+    def execute(self, *args: Any, **kwargs: Any) -> Any:
         """Execute the task."""
         self.logger.info("Start training with {} rows".format(self.train_x.shape[0]))
         self.model.fit(self.train_x, self.train_y, epochs=self.epochs_per_batch)

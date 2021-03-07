@@ -65,6 +65,7 @@ class TestContractApiHandler(BaseSkillTestCase):
     path_to_skill = Path(
         ROOT_DIR, "packages", "fetchai", "skills", "tac_control_contract"
     )
+    is_agent_to_agent_messages = False
 
     @classmethod
     def setup(cls):
@@ -245,6 +246,7 @@ class TestSigningHandler(BaseSkillTestCase):
     path_to_skill = Path(
         ROOT_DIR, "packages", "fetchai", "skills", "tac_control_contract"
     )
+    is_agent_to_agent_messages = False
 
     @classmethod
     def setup(cls):
@@ -345,7 +347,7 @@ class TestSigningHandler(BaseSkillTestCase):
             message_type=LedgerApiMessage,
             performative=LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
             to=LEDGER_API_ADDRESS,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             signed_transaction=incoming_message.signed_transaction,
         )
         assert has_attributes, error_str
@@ -424,6 +426,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
     path_to_skill = Path(
         ROOT_DIR, "packages", "fetchai", "skills", "tac_control_contract"
     )
+    is_agent_to_agent_messages = False
 
     @classmethod
     def setup(cls):
@@ -616,7 +619,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             message_type=LedgerApiMessage,
             performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
             to=LEDGER_API_ADDRESS,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             transaction_digest=incoming_message.transaction_digest,
         )
         assert has_attributes, error_str
@@ -693,8 +696,8 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         contract_api_dialogue = cast(
             ContractApiDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.signing_dialogues,
-                messages=self.list_of_signing_messages[:4],
+                dialogues=self.contract_api_dialogues,
+                messages=self.list_of_contract_api_messages[:4],
             ),
         )
 
@@ -746,8 +749,8 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         contract_api_dialogue = cast(
             ContractApiDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.signing_dialogues,
-                messages=self.list_of_signing_messages[:4],
+                dialogues=self.contract_api_dialogues,
+                messages=self.list_of_contract_api_messages[:4],
             ),
         )
 
@@ -798,8 +801,8 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         contract_api_dialogue = cast(
             ContractApiDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.signing_dialogues,
-                messages=self.list_of_signing_messages[:4],
+                dialogues=self.contract_api_dialogues,
+                messages=self.list_of_contract_api_messages[:4],
             ),
         )
 
@@ -857,8 +860,8 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         contract_api_dialogue = cast(
             ContractApiDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.signing_dialogues,
-                messages=self.list_of_signing_messages[:4],
+                dialogues=self.contract_api_dialogues,
+                messages=self.list_of_contract_api_messages[:4],
             ),
         )
 
@@ -914,8 +917,8 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         contract_api_dialogue = cast(
             ContractApiDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.signing_dialogues,
-                messages=self.list_of_signing_messages[:4],
+                dialogues=self.contract_api_dialogues,
+                messages=self.list_of_contract_api_messages[:4],
             ),
         )
 
@@ -977,7 +980,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             performative=invalid_performative,
             ledger_id="some_ledger_id",
             address="some_address",
-            to=self.skill.skill_context.agent_address,
+            to=str(self.skill.skill_context.skill_id),
         )
 
         # operation

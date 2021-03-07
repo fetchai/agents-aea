@@ -30,7 +30,7 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import suppress
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Type, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Union, cast
 from urllib import parse
 from uuid import uuid4
 
@@ -48,10 +48,9 @@ from aea.helpers.search.models import (
     Location,
     Query,
 )
-from aea.mail.base import Envelope, EnvelopeContext
+from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
-from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 
 from packages.fetchai.protocols.oef_search.custom_types import (
     AgentsInfo,
@@ -68,7 +67,7 @@ from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.soef")
 
-PUBLIC_ID = PublicId.from_str("fetchai/soef:0.17.0")
+PUBLIC_ID = PublicId.from_str("fetchai/soef:0.18.0")
 
 NOT_SPECIFIED = object()
 
@@ -132,44 +131,7 @@ class SOEFException(Exception):
         return cls(msg)
 
 
-class OefSearchDialogue(BaseOefSearchDialogue):
-    """The dialogue class maintains state of a dialogue and manages it."""
-
-    def __init__(
-        self,
-        dialogue_label: BaseDialogueLabel,
-        self_address: Address,
-        role: BaseDialogue.Role,
-        message_class: Type[OefSearchMessage] = OefSearchMessage,
-    ) -> None:
-        """
-        Initialize a dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param self_address: the address of the entity for whom this dialogue is maintained
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: None
-        """
-        BaseOefSearchDialogue.__init__(
-            self,
-            dialogue_label=dialogue_label,
-            self_address=self_address,
-            role=role,
-            message_class=message_class,
-        )
-        self._envelope_context = None  # type: Optional[EnvelopeContext]
-
-    @property
-    def envelope_context(self) -> Optional[EnvelopeContext]:
-        """Get envelope_context."""
-        return self._envelope_context
-
-    @envelope_context.setter
-    def envelope_context(self, envelope_context: Optional[EnvelopeContext]) -> None:
-        """Set envelope_context."""
-        enforce(self._envelope_context is None, "envelope_context already set!")
-        self._envelope_context = envelope_context
+OefSearchDialogue = BaseOefSearchDialogue
 
 
 class OefSearchDialogues(BaseOefSearchDialogues):
@@ -455,7 +417,6 @@ class SOEFChannel:
             raise ValueError(
                 "Could not create dialogue for message={}".format(oef_message)
             )
-        oef_search_dialogue.envelope_context = envelope.context
 
         err_ops = OefSearchMessage.OefErrorOperation
         oef_error_operation = err_ops.OTHER
@@ -583,12 +544,7 @@ class SOEFChannel:
                 }
             ),
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            message=message,
-            context=oef_search_dialogue.envelope_context,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         await self.in_queue.put(envelope)
 
     async def _ping_command(self) -> None:
@@ -904,12 +860,7 @@ class SOEFChannel:
             target_message=oef_search_message,
             oef_error_operation=oef_error_operation,
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            message=message,
-            context=oef_search_dialogue.envelope_context,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         await self.in_queue.put(envelope)
 
     async def unregister_service(  # pylint: disable=unused-argument
@@ -1149,12 +1100,7 @@ class SOEFChannel:
             agents=tuple(agents.keys()),
             agents_info=AgentsInfo(agents),
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            message=message,
-            context=oef_search_dialogue.envelope_context,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         await self.in_queue.put(envelope)
 
 

@@ -25,7 +25,7 @@ from pathlib import Path
 from random import uniform
 
 import pytest
-from aea_crypto_fetchai import FetchAICrypto
+from aea_ledger_fetchai import FetchAICrypto
 
 from aea.test_tools.test_cases import AEATestCaseManyFlaky
 
@@ -68,7 +68,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseManyFlaky):
         """Test the communication of the two agents."""
 
         weather_station = "weather_station"
-        self.fetch_agent("fetchai/weather_station:0.22.0", weather_station)
+        self.fetch_agent("fetchai/weather_station:0.23.0", weather_station)
         self.set_agent_context(weather_station)
         self.set_config(
             "vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx",

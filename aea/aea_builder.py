@@ -111,6 +111,8 @@ class _DependenciesManager:
         )  # type: Dict[Tuple[ComponentType, str, str], Set[ComponentId]]
         self._inverse_dependency_graph = {}  # type: Dict[ComponentId, Set[ComponentId]]
 
+        self.agent_pypi_dependencies: Dependencies = {}
+
     @property
     def all_dependencies(self) -> Set[ComponentId]:
         """Get all dependencies."""
@@ -235,6 +237,9 @@ class _DependenciesManager:
             all_pypi_dependencies = merge_dependencies(
                 all_pypi_dependencies, configuration.pypi_dependencies
             )
+        all_pypi_dependencies = merge_dependencies(
+            all_pypi_dependencies, self.agent_pypi_dependencies
+        )
         return all_pypi_dependencies
 
     def install_dependencies(self) -> None:
@@ -560,6 +565,22 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
         :return: self
         """
+        for protocol_id, connection_id in default_routing.items():
+            if (
+                ComponentId("protocol", protocol_id)
+                not in self._package_dependency_manager.protocols
+            ):
+                raise ValueError(
+                    f"Protocol {protocol_id} specified in `default_routing` is not a project dependency!"
+                )
+            if (
+                ComponentId("connection", connection_id)
+                not in self._package_dependency_manager.connections
+            ):
+                raise ValueError(
+                    f"Connection {connection_id} specified in `default_routing` is not a project dependency!"
+                )
+
         self._default_routing = default_routing  # pragma: nocover
         return self
 
@@ -709,6 +730,14 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :param public_id: the public id of the default connection package.
         :return: the AEABuilder
         """
+        if (
+            public_id
+            and ComponentId("connection", public_id)
+            not in self._package_dependency_manager.connections
+        ):
+            raise ValueError(
+                f"Connection {public_id} specified as `default_connection` is not a project dependency!"
+            )
         self._default_connection = public_id
         return self
 
@@ -871,6 +900,16 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
     ) -> "AEABuilder":  # pragma: nocover
         """Set the context namespace."""
         self._context_namespace = context_namespace
+        return self
+
+    def set_agent_pypi_dependencies(self, dependencies: Dependencies) -> "AEABuilder":
+        """
+        Set agent PyPI dependencies.
+
+        :param dependencies: PyPI dependencies for the agent.
+        :return: the AEABuilder.
+        """
+        self._package_dependency_manager.agent_pypi_dependencies = dependencies
         return self
 
     def remove_component(self, component_id: ComponentId) -> "AEABuilder":
@@ -1542,10 +1581,11 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self.set_default_ledger(agent_configuration.default_ledger)
         self.set_build_entrypoint(agent_configuration.build_entrypoint)
         self.set_currency_denominations(agent_configuration.currency_denominations)
-        self.set_default_connection(agent_configuration.default_connection)
+
         self.set_period(agent_configuration.period)
         self.set_execution_timeout(agent_configuration.execution_timeout)
         self.set_max_reactions(agent_configuration.max_reactions)
+
         if agent_configuration.decision_maker_handler != {}:
             dotted_path = agent_configuration.decision_maker_handler["dotted_path"]
             file_path = agent_configuration.decision_maker_handler["file_path"]
@@ -1562,7 +1602,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             self.set_connection_exception_policy(
                 ExceptionPolicyEnum(agent_configuration.connection_exception_policy)
             )
-        self.set_default_routing(agent_configuration.default_routing)
+
         self.set_loop_mode(agent_configuration.loop_mode)
         self.set_runtime_mode(agent_configuration.runtime_mode)
         self.set_storage_uri(agent_configuration.storage_uri)
@@ -1601,6 +1641,10 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self._custom_component_configurations = (
             agent_configuration.component_configurations
         )
+
+        self.set_default_connection(agent_configuration.default_connection)
+        self.set_default_routing(agent_configuration.default_routing)
+        self.set_agent_pypi_dependencies(agent_configuration.dependencies)
 
     @staticmethod
     def _find_import_order(

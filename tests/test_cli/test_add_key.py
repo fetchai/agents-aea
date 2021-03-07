@@ -25,8 +25,8 @@ from unittest import TestCase, mock
 
 import pytest
 import yaml
-from aea_crypto_ethereum import EthereumCrypto
-from aea_crypto_fetchai import FetchAICrypto
+from aea_ledger_ethereum import EthereumCrypto
+from aea_ledger_fetchai import FetchAICrypto
 from click.exceptions import BadParameter
 
 import aea

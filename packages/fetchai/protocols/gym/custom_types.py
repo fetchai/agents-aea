@@ -26,6 +26,8 @@ from typing import Any
 class AnyObject:
     """This class represents an instance of AnyObject."""
 
+    __slots__ = ("any",)
+
     def __init__(self, _any: Any):
         """Initialise an instance of AnyObject."""
         self.any = _any

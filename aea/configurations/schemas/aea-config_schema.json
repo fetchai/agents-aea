@@ -151,6 +151,9 @@
     },
     "data_dir": {
       "type": "string"
+    },
+    "dependencies": {
+      "$ref": "definitions.json#/definitions/dependencies"
     }
   }
 }

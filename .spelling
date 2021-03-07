@@ -170,6 +170,9 @@ Yoti
 PowerShell
 deregisters
 plugin
+Fetch.AI
+AEALite
+Pipfile
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id

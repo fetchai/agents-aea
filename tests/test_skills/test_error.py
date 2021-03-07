@@ -30,7 +30,7 @@ from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
 from aea.crypto.wallet import Wallet
 from aea.identity.base import Identity
-from aea.mail.base import Envelope, EnvelopeContext
+from aea.mail.base import Envelope
 from aea.multiplexer import InBox, Multiplexer
 from aea.registries.resources import Resources
 from aea.skills.base import SkillContext
@@ -182,14 +182,9 @@ class TestSkillError:
 
     def test_error_unsupported_skill_when_skill_id_is_none(self):
         """Test the 'send_unsupported_skill' when the skill id in the envelope is None."""
-        skill_id = PublicId.from_str("author/skill:0.1.0")
         protocol_id = PublicId.from_str("author/name:0.1.0")
         envelope = Envelope(
-            to="",
-            sender="",
-            protocol_specification_id=protocol_id,
-            message=b"",
-            context=EnvelopeContext(skill_id=skill_id),
+            to="", sender="", protocol_specification_id=protocol_id, message=b"",
         )
         with unittest.mock.patch.object(self.skill_context.outbox, "put_message"):
             with unittest.mock.patch.object(
@@ -197,7 +192,7 @@ class TestSkillError:
             ) as mock_logger_warning:
                 self.my_error_handler.send_unsupported_skill(envelope)
                 mock_logger_warning.assert_called_with(
-                    f"Cannot handle envelope: no active handler registered for the protocol_specification_id='{protocol_id}' and skill_id='{skill_id}'."
+                    f"Cannot handle envelope: no active handler registered for the protocol_specification_id='{protocol_id}'."
                 )
 
     def teardown(self):

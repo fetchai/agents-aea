@@ -19,18 +19,14 @@
 
 """This package contains the behaviour to get the Fetch random beacon."""
 
-import json
-from typing import Any, Dict, Optional, cast
+from typing import Any, cast
 
-from aea.mail.base import EnvelopeContext
 from aea.skills.behaviours import TickerBehaviour
 
-from packages.fetchai.connections.http_client.connection import PUBLIC_ID
-from packages.fetchai.protocols.http.message import HttpMessage
-from packages.fetchai.skills.fetch_beacon.dialogues import HttpDialogues
-
-
-DEFAULT_URL = ""
+from packages.fetchai.connections.ledger.base import CONNECTION_ID as LEDGER_API_ADDRESS
+from packages.fetchai.protocols.ledger_api.custom_types import Kwargs
+from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
+from packages.fetchai.skills.fetch_beacon.dialogues import LedgerApiDialogues
 
 
 class FetchBeaconBehaviour(TickerBehaviour):
@@ -40,42 +36,25 @@ class FetchBeaconBehaviour(TickerBehaviour):
         """Initialize the beacon fetch behaviour."""
 
         super().__init__(**kwargs)
-        self.beacon_url = kwargs.pop("beacon_url", DEFAULT_URL)
 
-    def send_http_request_message(
-        self, method: str, url: str, content: Optional[Dict] = None
-    ) -> None:
+    def _get_random_beacon(self) -> None:
         """
-        Send an http request message.
-
-        :param method: the http request method (i.e. 'GET' or 'POST').
-        :param url: the url to send the message to.
-        :param content: the payload.
+        Request the latest random beacon value by sending a message to the ledger API
 
         :return: None
         """
-
-        # context
-        http_dialogues = cast(HttpDialogues, self.context.http_dialogues)
-
-        counterparty_address = str(PUBLIC_ID)
-
-        # http request message
-        request_http_message, _ = http_dialogues.create(
-            counterparty=counterparty_address,
-            performative=HttpMessage.Performative.REQUEST,
-            method=method,
-            url=url,
-            headers="",
-            version="",
-            body=b"" if content is None else json.dumps(content).encode("utf-8"),
+        ledger_api_dialogues = cast(
+            LedgerApiDialogues, self.context.ledger_api_dialogues
         )
-
-        # send message
-        envelope_context = EnvelopeContext(skill_id=self.context.skill_id)
-        self.context.outbox.put_message(
-            message=request_http_message, context=envelope_context
+        ledger_api_msg, _ = ledger_api_dialogues.create(
+            counterparty=str(LEDGER_API_ADDRESS),
+            performative=LedgerApiMessage.Performative.GET_STATE,
+            ledger_id=self.context.default_ledger_id,
+            callable="blocks",
+            args=("latest",),
+            kwargs=Kwargs({}),
         )
+        self.context.outbox.put_message(message=ledger_api_msg)
 
     def setup(self) -> None:
         """
@@ -92,10 +71,8 @@ class FetchBeaconBehaviour(TickerBehaviour):
         :return: None
         """
 
-        self.send_http_request_message("GET", self.beacon_url)
-        self.context.logger.info(
-            "Fetching random beacon from {}...".format(self.beacon_url)
-        )
+        self.context.logger.info("Fetching random beacon value...")
+        self._get_random_beacon()
 
     def teardown(self) -> None:
         """

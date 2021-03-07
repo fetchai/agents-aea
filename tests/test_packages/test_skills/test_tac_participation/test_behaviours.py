@@ -27,7 +27,7 @@ import pytest
 
 from aea.helpers.transaction.base import Terms
 from aea.protocols.dialogue.base import DialogueMessage
-from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_ADDRESS
+from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_AGENT_ADDRESS
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.tac.message import TacMessage
@@ -45,6 +45,7 @@ class TestTacSearchBehaviour(BaseSkillTestCase):
     """Test tac behaviour of tac participation."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "tac_participation")
+    is_agent_to_agent_messages = True
 
     @classmethod
     def setup(cls):
@@ -95,9 +96,7 @@ class TestTacSearchBehaviour(BaseSkillTestCase):
             message_type=OefSearchMessage,
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             to=self.skill.skill_context.search_service_address,
-            sender=self.skill.skill_context.agent_address
-            + "_"
-            + str(self.skill.skill_context.skill_id),
+            sender=str(self.skill.skill_context.skill_id),
             query=mocked_query,
         )
         assert has_attributes, error_str
@@ -142,7 +141,9 @@ class TestTransactionProcessBehaviour(BaseSkillTestCase):
                     "quantities_by_good_id": {"2": 10},
                     "utility_params_by_good_id": {"2": 1.0},
                     "fee_by_currency_id": {"1": 1},
-                    "agent_addr_to_name": {COUNTERPARTY_ADDRESS: "some_agent_name"},
+                    "agent_addr_to_name": {
+                        COUNTERPARTY_AGENT_ADDRESS: "some_agent_name"
+                    },
                     "currency_id_to_name": {"1": "FETCH"},
                     "good_id_to_name": {"2": "Good_1"},
                     "version_id": "v1",
@@ -239,7 +240,7 @@ class TestTransactionProcessBehaviour(BaseSkillTestCase):
                 actual_message=message,
                 message_type=TacMessage,
                 performative=TacMessage.Performative.TRANSACTION,
-                to=COUNTERPARTY_ADDRESS,
+                to=COUNTERPARTY_AGENT_ADDRESS,
                 sender=self.skill.skill_context.agent_address,
                 transaction_id=self.tx_ids[count],
                 ledger_id=self.terms[count].ledger_id,

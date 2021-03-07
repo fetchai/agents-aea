@@ -49,9 +49,9 @@ from unittest.mock import MagicMock, patch
 import docker as docker
 import gym
 import pytest
-from aea_crypto_cosmos import CosmosCrypto
-from aea_crypto_ethereum import EthereumCrypto
-from aea_crypto_fetchai import FetchAICrypto
+from aea_ledger_cosmos import CosmosCrypto
+from aea_ledger_ethereum import EthereumCrypto
+from aea_ledger_fetchai import FetchAICrypto
 
 from aea import AEA_DIR
 from aea.aea import AEA
@@ -116,6 +116,11 @@ CliRunner = ImportedCliRunner
 CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 ROOT_DIR = os.path.join(CUR_PATH, "..")
 CLI_LOG_OPTION = ["-v", "OFF"]
+
+# set PYTHONPATH so all spawned processes can have access to current python code
+os.environ["PYTHONPATH"] = ":".join(
+    filter(None, [os.path.abspath(ROOT_DIR), os.environ.get("PYTHONPATH")])
+)
 
 AUTHOR = DEFAULT_AUTHOR
 CONFIGURATION_SCHEMA_DIR = os.path.join(AEA_DIR, "configurations", "schemas")
@@ -236,7 +241,7 @@ FETCHAI_TESTNET_CONFIG = {"address": FETCHAI_DEFAULT_ADDRESS}
 # common public ids used in the tests
 UNKNOWN_PROTOCOL_PUBLIC_ID = PublicId("unknown_author", "unknown_protocol", "0.1.0")
 UNKNOWN_CONNECTION_PUBLIC_ID = PublicId("unknown_author", "unknown_connection", "0.1.0")
-MY_FIRST_AEA_PUBLIC_ID = PublicId.from_str("fetchai/my_first_aea:0.20.0")
+MY_FIRST_AEA_PUBLIC_ID = PublicId.from_str("fetchai/my_first_aea:0.22.0")
 
 DUMMY_SKILL_PATH = os.path.join(CUR_PATH, "data", "dummy_skill", SKILL_YAML)
 

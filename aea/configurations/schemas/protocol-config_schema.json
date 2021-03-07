@@ -13,7 +13,8 @@
     "fingerprint",
     "fingerprint_ignore_patterns",
     "description",
-    "dependencies"
+    "dependencies",
+    "protocol_specification_id"
   ],
   "properties": {
     "name": {

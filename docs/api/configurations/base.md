@@ -198,6 +198,17 @@ Get the 'aea_version' attribute.
 
 Set the 'aea_version' attribute.
 
+<a name="aea.configurations.base.PackageConfiguration.check_aea_version"></a>
+#### check`_`aea`_`version
+
+```python
+ | check_aea_version() -> None
+```
+
+Check that the AEA version matches the specifier set.
+
+:raises ValueError if the version of the aea framework falls within a specifier.
+
 <a name="aea.configurations.base.PackageConfiguration.directory"></a>
 #### directory
 
@@ -415,17 +426,6 @@ Check that the fingerprint are correct against a directory path.
 - the argument is not a valid package directory
 - the fingerprints do not match.
 
-<a name="aea.configurations.base.ComponentConfiguration.check_aea_version"></a>
-#### check`_`aea`_`version
-
-```python
- | check_aea_version() -> None
-```
-
-Check that the AEA version matches the specifier set.
-
-:raises ValueError if the version of the aea framework falls within a specifier.
-
 <a name="aea.configurations.base.ComponentConfiguration.check_public_id_consistency"></a>
 #### check`_`public`_`id`_`consistency
 
@@ -528,7 +528,7 @@ This class represent a skill component configuration.
 #### `__`init`__`
 
 ```python
- | __init__(class_name: str, **args: Any) -> None
+ | __init__(class_name: str, file_path: Optional[str] = None, **args: Any) -> None
 ```
 
 Initialize a skill component configuration.
@@ -629,7 +629,7 @@ Class to represent the agent configuration file.
 #### `__`init`__`
 
 ```python
- | __init__(agent_name: SimpleIdOrStr, author: SimpleIdOrStr, version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, build_entrypoint: Optional[str] = None, registry_path: str = DEFAULT_REGISTRY_NAME, description: str = "", logging_config: Optional[Dict] = None, period: Optional[float] = None, execution_timeout: Optional[float] = None, max_reactions: Optional[int] = None, error_handler: Optional[Dict] = None, decision_maker_handler: Optional[Dict] = None, skill_exception_policy: Optional[str] = None, connection_exception_policy: Optional[str] = None, default_ledger: Optional[str] = None, currency_denominations: Optional[Dict[str, str]] = None, default_connection: Optional[str] = None, default_routing: Optional[Dict[str, str]] = None, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None, storage_uri: Optional[str] = None, data_dir: Optional[str] = None, component_configurations: Optional[Dict[ComponentId, Dict]] = None) -> None
+ | __init__(agent_name: SimpleIdOrStr, author: SimpleIdOrStr, version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, build_entrypoint: Optional[str] = None, registry_path: str = DEFAULT_REGISTRY_NAME, description: str = "", logging_config: Optional[Dict] = None, period: Optional[float] = None, execution_timeout: Optional[float] = None, max_reactions: Optional[int] = None, error_handler: Optional[Dict] = None, decision_maker_handler: Optional[Dict] = None, skill_exception_policy: Optional[str] = None, connection_exception_policy: Optional[str] = None, default_ledger: Optional[str] = None, currency_denominations: Optional[Dict[str, str]] = None, default_connection: Optional[str] = None, default_routing: Optional[Dict[str, str]] = None, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None, storage_uri: Optional[str] = None, data_dir: Optional[str] = None, component_configurations: Optional[Dict[ComponentId, Dict]] = None, dependencies: Optional[Dependencies] = None) -> None
 ```
 
 Instantiate the agent configuration object.
@@ -866,4 +866,22 @@ Initialize a protocol configuration object.
 ```
 
 Return the JSON representation.
+
+<a name="aea.configurations.base.AEAVersionError"></a>
+## AEAVersionError Objects
+
+```python
+class AEAVersionError(ValueError)
+```
+
+Special Exception for version error.
+
+<a name="aea.configurations.base.AEAVersionError.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(package_id: PublicId, aea_version_specifiers: SpecifierSet) -> None
+```
+
+Init exception.
 

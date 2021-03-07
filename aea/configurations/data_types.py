@@ -223,6 +223,8 @@ class PublicId(JSONSerializable):
     True
     """
 
+    __slots__ = ("_author", "_name", "_package_version")
+
     AUTHOR_REGEX = fr"[a-zA-Z_][a-zA-Z0-9_]{{0,{STRING_LENGTH_LIMIT - 1}}}"
     PACKAGE_NAME_REGEX = fr"[a-zA-Z_][a-zA-Z0-9_]{{0,{STRING_LENGTH_LIMIT  - 1}}}"
     VERSION_NUMBER_PART_REGEX = r"(0|[1-9]\d*)"
@@ -320,6 +322,21 @@ class PublicId(JSONSerializable):
         package_name = match.group(2)
         version = match.group(3)[1:] if ":" in public_id_string else None
         return PublicId(username, package_name, version)
+
+    @classmethod
+    def try_from_str(cls, public_id_string: str) -> Optional["PublicId"]:
+        """
+        Safely try to get public id from string.
+
+        :param public_id_string: the public id in string format.
+        :return: the public id object or None
+        """
+        result: Optional[PublicId] = None
+        try:
+            result = cls.from_str(public_id_string)
+        except ValueError:
+            pass
+        return result
 
     @classmethod
     def from_uri_path(cls, public_id_uri_path: str) -> "PublicId":
@@ -437,6 +454,8 @@ class PackageId:
         PACKAGE_TYPE_REGEX, PublicId.PUBLIC_ID_URI_REGEX[1:-1]
     )
 
+    __slots__ = ("_package_type", "_public_id")
+
     def __init__(
         self, package_type: Union[PackageType, str], public_id: PublicId
     ) -> None:
@@ -482,7 +501,7 @@ class PackageId:
     @classmethod
     def from_uri_path(cls, package_id_uri_path: str) -> "PackageId":
         """
-        Initialize the public id from the string.
+        Initialize the package id from the string.
 
         >>> str(PackageId.from_uri_path("skill/author/package_name/0.1.0"))
         '(skill, author/package_name:0.1.0)'
@@ -493,8 +512,8 @@ class PackageId:
         ...
         ValueError: Input 'very/bad/formatted:input' is not well formatted.
 
-        :param public_id_uri_path: the public id in uri path string format.
-        :return: the public id object.
+        :param package_id_uri_path: the package id in uri path string format.
+        :return: the package id object.
         :raises ValueError: if the string in input is not well formatted.
         """
         if not re.match(cls.PACKAGE_ID_URI_REGEX, package_id_uri_path):
@@ -640,6 +659,8 @@ class Dependency:
     These fields will be forwarded to the 'pip' command.
     """
 
+    __slots__ = ("_name", "_version", "_index", "_git", "_ref")
+
     def __init__(
         self,
         name: Union[PyPIPackageName, str],
@@ -773,6 +794,8 @@ We cannot have two items with the same package name since the keys of a YAML obj
 
 class CRUDCollection(Generic[T]):
     """Interface of a CRUD collection."""
+
+    __slots__ = ("_items_by_id",)
 
     def __init__(self) -> None:
         """Instantiate a CRUD collection."""

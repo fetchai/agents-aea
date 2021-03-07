@@ -88,7 +88,8 @@ class TestGymConnection:
         )
         self.loop = asyncio.get_event_loop()
         self.gym_address = str(GymConnection.connection_id)
-        self.dialogues = GymDialogues(self.agent_address)
+        self.skill_id = "some/skill:0.1.0"
+        self.dialogues = GymDialogues(self.skill_id)
 
     def teardown(self):
         """Clean up after tests."""
@@ -107,7 +108,7 @@ class TestGymConnection:
         await self.gym_con.connect()
         envelope = Envelope(
             to=self.gym_address,
-            sender=self.agent_address,
+            sender=self.skill_id,
             protocol_specification_id=UNKNOWN_PROTOCOL_PUBLIC_ID,
             message=b"hello",
         )
@@ -187,7 +188,7 @@ class TestGymConnection:
             dialogue_reference=self.dialogues.new_self_initiated_dialogue_reference(),
         )
         incorrect_msg.to = self.gym_address
-        incorrect_msg.sender = self.agent_address
+        incorrect_msg.sender = self.skill_id
 
         # the incorrect message cannot be sent into a dialogue, so this is omitted.
 

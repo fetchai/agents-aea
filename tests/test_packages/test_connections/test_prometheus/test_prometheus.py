@@ -78,15 +78,16 @@ class TestPrometheusConnection:
         configuration = ConnectionConfig(
             connection_id=PrometheusConnection.connection_id, port=9090,
         )
+        self.some_skill = "some/skill:0.1.0"
         self.agent_address = "my_address"
-        self.protocol_specification_id = PublicId.from_str("fetchai/prometheus:0.3.0")
+        self.protocol_specification_id = PublicId.from_str("fetchai/prometheus:0.4.0")
         identity = Identity("name", address=self.agent_address)
         self.prometheus_con = PrometheusConnection(
             identity=identity, configuration=configuration, data_dir=MagicMock()
         )
         self.loop = asyncio.get_event_loop()
         self.prometheus_address = str(PrometheusConnection.connection_id)
-        self.dialogues = PrometheusDialogues(self.agent_address)
+        self.dialogues = PrometheusDialogues(self.some_skill)
 
     async def send_add_metric(self, title: str, metric_type: str) -> None:
         """Send an add_metric message."""
@@ -213,7 +214,7 @@ class TestPrometheusConnection:
             PrometheusMessage.Performative.RESPONSE, code=0, message=""
         )
         envelope = Envelope(
-            to=self.prometheus_address, sender=self.agent_address, message=msg,
+            to=self.prometheus_address, sender=self.some_skill, message=msg,
         )
         await self.prometheus_con.channel.send(envelope)
 
@@ -228,7 +229,7 @@ class TestPrometheusConnection:
                 labels={},
             )
             envelope = Envelope(
-                to=self.prometheus_address, sender=self.agent_address, message=msg,
+                to=self.prometheus_address, sender=self.some_skill, message=msg,
             )
             envelope._protocol_specification_id = "bad_id"
             await self.prometheus_con.channel.send(envelope)

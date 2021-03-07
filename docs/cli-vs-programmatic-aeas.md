@@ -19,6 +19,11 @@ Copy the packages directory into your local working directory:
 svn export https://github.com/fetchai/agents-aea.git/trunk/packages
 ```
 
+Also, install `aea-ledger-fetchai` plug-in:
+```bash
+pip install aea-ledger-fetchai
+```
+
 ## Demo instructions
 
 If you want to create the weather station AEA step by step you can follow this guide <a href='/weather-skills/'>here</a>
@@ -28,8 +33,10 @@ If you want to create the weather station AEA step by step you can follow this g
 Fetch the weather station AEA with the following command :
 
 ``` bash
-aea fetch fetchai/weather_station:0.22.0
+aea fetch fetchai/weather_station:0.23.0
 cd weather_station
+aea install
+aea build
 ```
 
 ### Update the AEA configurations
@@ -40,7 +47,7 @@ aea config set vendor.fetchai.skills.weather_station.models.strategy.args.is_led
 ```
 The `is_ledger_tx` will prevent the AEA to communicate with a ledger.
 
-### Add keys
+### Add keys
 
 Add a private key for the weather station.
 ``` bash
@@ -80,7 +87,7 @@ import os
 import sys
 from typing import cast
 
-from aea_crypto_fetchai import FetchAICrypto
+from aea_ledger_fetchai import FetchAICrypto
 
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder

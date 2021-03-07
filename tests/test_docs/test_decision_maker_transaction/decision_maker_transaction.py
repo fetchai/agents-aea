@@ -24,7 +24,7 @@ import time
 from threading import Thread
 from typing import Optional, cast
 
-from aea_crypto_fetchai import FetchAICrypto
+from aea_ledger_fetchai import FetchAICrypto
 
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import PublicId, SkillConfig

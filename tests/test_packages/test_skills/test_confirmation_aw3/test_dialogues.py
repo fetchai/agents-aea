@@ -21,7 +21,7 @@
 from pathlib import Path
 from typing import cast
 
-from aea.test_tools.test_skill import COUNTERPARTY_ADDRESS
+from aea.test_tools.test_skill import COUNTERPARTY_AGENT_ADDRESS
 
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.skills.confirmation_aw3.dialogues import (
@@ -52,7 +52,7 @@ class TestDialogues(ConfirmationAW3TestCase):
     def test_http_dialogues(self):
         """Test the HttpDialogues class."""
         _, dialogue = self.http_dialogues.create(
-            counterparty=COUNTERPARTY_ADDRESS,
+            counterparty=COUNTERPARTY_AGENT_ADDRESS,
             performative=HttpMessage.Performative.REQUEST,
             method="some_method",
             url="some_url",
@@ -61,4 +61,4 @@ class TestDialogues(ConfirmationAW3TestCase):
             body=b"some_body",
         )
         assert dialogue.role == HttpDialogue.Role.CLIENT
-        assert dialogue.self_address == self.skill.skill_context.agent_address
+        assert dialogue.self_address == str(self.skill.skill_context.skill_id)

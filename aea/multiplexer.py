@@ -37,6 +37,7 @@ from typing import (
     cast,
 )
 
+from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
 from aea.exceptions import enforce
@@ -141,6 +142,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
         self._specification_id_to_protocol_id = {
             p.protocol_specification_id: p.protocol_id for p in protocols or []
         }
+        self._routing_helper: Dict[Address, PublicId] = {}
 
         self._in_queue = AsyncFriendlyQueue()  # type: AsyncFriendlyQueue
         self._out_queue = None  # type: Optional[asyncio.Queue]
@@ -482,10 +484,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
                     )
                     return None
                 self.logger.debug("Sending envelope {}".format(str(envelope)))
-                try:
-                    await self._send(envelope)
-                except AEAConnectionError as e:
-                    self.logger.error(str(e))
+                await self._send(envelope)
 
         except asyncio.CancelledError:
             self.logger.debug("Sending loop cancelled.")
@@ -509,12 +508,13 @@ class AsyncMultiplexer(Runnable, WithLogger):
 
                 # process completed receiving tasks.
                 for task in done:
+                    connection = task_to_connection.pop(task)
                     envelope = task.result()
                     if envelope is not None:
+                        self._update_routing_helper(envelope, connection)
                         self.in_queue.put_nowait(envelope)
 
                     # reinstantiate receiving task, but only if the connection is still up.
-                    connection = task_to_connection.pop(task)
                     if connection.is_connected:
                         new_task = asyncio.ensure_future(connection.receive())
                         task_to_connection[new_task] = connection
@@ -538,36 +538,18 @@ class AsyncMultiplexer(Runnable, WithLogger):
         :param envelope: the envelope to send.
         :return: None
         :raises ValueError: if the connection id provided is not valid.
-        :raises AEAConnectionError: if the connection id provided is not valid.
         """
-        connection_id = None  # type: Optional[PublicId]
-        envelope_context = envelope.context
-        # first, try to route by context
-        if envelope_context is not None:
-            connection_id = envelope_context.connection_id
-
         envelope_protocol_id = self._get_protocol_id_for_envelope(envelope)
+        connection_id = self._get_connection_id_from_envelope(
+            envelope, envelope_protocol_id
+        )
 
-        # second, try to route by default routing
-        if connection_id is None and envelope_protocol_id in self.default_routing:
-            connection_id = self.default_routing[envelope_protocol_id]
-            self.logger.debug("Using default routing: {}".format(connection_id))
-
-        if connection_id is not None and connection_id not in self._id_to_connection:
-            raise AEAConnectionError(
-                "No connection registered with id: {}.".format(connection_id)
-            )
-
-        # third, if no other option route by default connection
-        if connection_id is None:
-            self.logger.debug(
-                "Using default connection: {}".format(self.default_connection)
-            )
-            connection = self.default_connection
-        else:
-            connection = self._id_to_connection[connection_id]
+        connection = (
+            self._get_connection(connection_id) if connection_id is not None else None
+        )
 
         if connection is None:
+            # we don't raise on dropping envelope as this can be a configuration issue only!
             self.logger.warning(
                 f"Dropping envelope, no connection available for sending: {envelope}"
             )
@@ -580,6 +562,79 @@ class AsyncMultiplexer(Runnable, WithLogger):
             await connection.send(envelope)
         except Exception as e:  # pylint: disable=broad-except
             self._handle_exception(self._send, e)
+
+    def _get_connection_id_from_envelope(
+        self, envelope: Envelope, envelope_protocol_id: PublicId
+    ) -> Optional[PublicId]:
+        """
+        Get the connection id from an envelope.
+
+        Applies the following rules:
+        - component to component messages are routed by their component id
+        - agent to agent messages, are routed following four rules:
+            * first, try to route by envelope context connection id
+            * second, try to route by routing helper
+            * third, try to route by default routing
+            * forth, using default connection
+
+        :param envelope: the Envelope
+        :param envelope_protocol_id: the protocol id of the message contained in the envelope
+        :return: public id if found
+        """
+        # component to component messages are routed by their component id
+        if envelope.is_component_to_component_message:
+            connection_id = envelope.to_as_public_id
+            self.logger.debug(
+                "Using envelope `to` field as connection_id: {}".format(connection_id)
+            )
+            enforce(
+                connection_id is not None,
+                "Connection id cannot be None by envelope construction.",
+            )
+            return connection_id
+
+        # agent to agent messages, are routed following four rules:
+        # first, try to route by envelope context connection id
+        if envelope.context is not None and envelope.context.connection_id is not None:
+            connection_id = envelope.context.connection_id
+            self.logger.debug(
+                "Using envelope context connection_id: {}".format(connection_id)
+            )
+            return connection_id
+
+        # second, try to route by routing helper
+        if envelope.to in self._routing_helper:
+            connection_id = self._routing_helper[envelope.to]
+            self.logger.debug(
+                "Using routing helper with connection_id: {}".format(connection_id)
+            )
+            return connection_id
+
+        # third, try to route by default routing
+        if envelope_protocol_id in self.default_routing:
+            connection_id = self.default_routing[envelope_protocol_id]
+            self.logger.debug("Using default routing: {}".format(connection_id))
+            return connection_id
+
+        # forth, using default connection
+        connection_id = (
+            self.default_connection.connection_id
+            if self.default_connection is not None
+            else None
+        )
+        self.logger.debug("Using default connection: {}".format(connection_id))
+        return connection_id
+
+    def _get_connection(self, connection_id: PublicId) -> Optional[Connection]:
+        """Check if the connection id is registered."""
+        conn_ = self._id_to_connection.get(connection_id, None)
+        if conn_ is not None:
+            return conn_
+        for id_, conn_ in self._id_to_connection.items():
+            if id_.same_prefix(connection_id):
+                return conn_
+        self.logger.error(f"No connection registered with id: {connection_id}")
+        return None
 
     def _is_connection_supported_protocol(
         self, connection: Connection, protocol_id: PublicId
@@ -686,9 +741,27 @@ class AsyncMultiplexer(Runnable, WithLogger):
         for c in connections:
             self.add_connection(c, c.public_id == default_connection)
 
+    def _update_routing_helper(
+        self, envelope: Envelope, connection: Connection
+    ) -> None:
+        """
+        Update the routing helper.
+
+        Saves the source (connection) of an agent-to-agent envelope.
+
+        :param envelope: the envelope to be updated
+        :param connection: the connection
+        """
+        if envelope.is_component_to_component_message:
+            return
+        self._routing_helper[envelope.sender] = connection.public_id
+
 
 class Multiplexer(AsyncMultiplexer):
     """Transit sync multiplexer for compatibility."""
+
+    _thread_was_started: bool
+    _is_connected: bool
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         """
@@ -702,6 +775,10 @@ class Multiplexer(AsyncMultiplexer):
         """
         super().__init__(*args, **kwargs)
         self._sync_lock = threading.Lock()
+        self._init()
+
+    def _init(self) -> None:
+        """Set initial variables."""
         self._thread_was_started = False
         self._is_connected = False
 
@@ -748,7 +825,12 @@ class Multiplexer(AsyncMultiplexer):
             if self._thread_runner.is_alive() and self._thread_was_started:
                 self._thread_runner.stop()
                 self.logger.debug("Thread stopped")
+
             self.logger.debug("Disconnected")
+
+            # reset thread runner and init variables
+            self._init()
+            self.set_loop(self._loop)
 
     def put(self, envelope: Envelope) -> None:  # type: ignore  # cause overrides coroutine
         """

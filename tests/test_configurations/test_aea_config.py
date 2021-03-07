@@ -68,6 +68,7 @@ private_key_paths:
 connection_private_key_paths:
     cosmos: tests/data/cosmos_private_key.txt
 registry_path: ../packages
+dependencies: {}
 """
 )
 

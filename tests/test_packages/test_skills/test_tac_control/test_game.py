@@ -1015,12 +1015,12 @@ class TestGame(BaseSkillTestCase):
             "    good_1: 1\n"
             "    good_2: 2\n"
             "    currency_1: 10\n"
-            "    score: 12.34\n"
+            "    score: 21.55\n"
             "- agent_name_2:\n"
             "    good_1: 1\n"
             "    good_2: 2\n"
             "    currency_1: 10\n"
-            "    score: 12.34\n\n"
+            "    score: 21.55\n\n"
         )
 
         # operation
