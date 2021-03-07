@@ -21,7 +21,7 @@
 
 from typing import Any, Dict, Optional, cast
 
-from vyper.utils import keccak256
+from aea_ledger_ethereum import EthereumApi
 
 from aea.configurations.base import PublicId
 from aea.protocols.base import Message
@@ -32,6 +32,11 @@ from packages.fetchai.skills.fetch_beacon.dialogues import (
     LedgerApiDialogue,
     LedgerApiDialogues,
 )
+
+
+def keccak256(input_: bytes) -> bytes:
+    """Compute hash."""
+    return bytes(bytearray.fromhex(EthereumApi.get_hash(input_)[2:]))
 
 
 class LedgerApiHandler(Handler):

@@ -23,7 +23,6 @@ import logging
 from typing import Any, Dict
 
 from aea_ledger_ethereum import EthereumApi
-from vyper.utils import keccak256
 
 from aea.common import Address, JSONLike
 from aea.configurations.base import PublicId
@@ -32,6 +31,13 @@ from aea.crypto.base import LedgerApi
 
 
 PUBLIC_ID = PublicId.from_str("fetchai/oracle:0.5.0")
+
+
+def keccak256(input_: bytes) -> bytes:
+    """Compute hash."""
+    return bytes(bytearray.fromhex(EthereumApi.get_hash(input_)[2:]))
+
+
 CONTRACT_ROLE = keccak256(b"ORACLE_ROLE")
 
 _default_logger = logging.getLogger("aea.packages.fetchai.contracts.oracle.contract")
