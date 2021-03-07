@@ -76,6 +76,10 @@ models:
       oracle_value_name: null
       update_function: updateOracleValue
     class_name: Strategy
-dependencies: {}
+dependencies:
+  aea-ledger-ethereum:
+    version: <0.2.0,>=0.1.0
+  aea-ledger-fetchai:
+    version: <0.2.0,>=0.1.0
 is_abstract: false
 connections: []

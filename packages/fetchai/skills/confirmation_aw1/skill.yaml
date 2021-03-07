@@ -72,5 +72,9 @@ models:
       token_denomination: atestfet
       token_dispense_amount: 100000
     class_name: Strategy
-dependencies: {}
+dependencies:
+  aea-ledger-ethereum:
+    version: <0.2.0,>=0.1.0
+  aea-ledger-fetchai:
+    version: <0.2.0,>=0.1.0
 is_abstract: false

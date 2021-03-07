@@ -92,6 +92,8 @@ models:
       value: 0
     class_name: Strategy
 dependencies:
+  aea-ledger-ethereum:
+    version: <0.2.0,>=0.1.0
   vyper:
     version: ==0.1.0b12
 is_abstract: false

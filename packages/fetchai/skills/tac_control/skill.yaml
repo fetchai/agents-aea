@@ -74,5 +74,9 @@ models:
     args: {}
     class_name: TacDialogues
 dependencies:
+  aea-ledger-ethereum:
+    version: <0.2.0,>=0.1.0
+  aea-ledger-fetchai:
+    version: <0.2.0,>=0.1.0
   numpy: {}
 is_abstract: false
