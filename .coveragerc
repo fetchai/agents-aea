@@ -9,9 +9,3 @@ omit =
     packages/fetchai/skills/gym/*
     packages/fetchai/skills/http_echo/*
     packages/fetchai/skills/registration_aw1/*
-
-source =
-    aea/*
-    packages/fetchai/connections/*
-    packages/fetchai/protocols/*
-    packages/fetchai/skills/*
