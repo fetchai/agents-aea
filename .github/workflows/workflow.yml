@@ -25,7 +25,13 @@ jobs:
           sudo apt-get autoclean
           pip install pipenv
       - name: Pipenv lock
-        run: pipenv lock
+        run: |
+          pipenv install --dev --skip-lock --clear
+          pipenv run pip install -e .[all]
+          pipenv run pip install --no-deps file:plugins/aea-ledger-ethereum
+          pipenv run pip install --no-deps file:plugins/aea-ledger-cosmos
+          pipenv run pip install --no-deps file:plugins/aea-ledger-fetchai
+          pipenv lock
       - name: Check plugin consistency
         run: |
           # these two files should not be different;
@@ -380,7 +386,7 @@ jobs:
         tox -e py${{ matrix.python_version }} -- -m 'not integration and not unstable'
     - name: Plugin tests
       run: |
-        tox -e plugins-py${{ matrix.python_version }} -- --cov-append -m 'not integration and not unstable'
+        tox -e plugins-py${{ matrix.python_version }} -- -m 'not integration and not unstable'
 
   platform_checks_sync_aea_loop:
     continue-on-error: True

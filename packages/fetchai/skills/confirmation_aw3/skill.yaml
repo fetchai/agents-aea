@@ -139,5 +139,7 @@ models:
       search_radius: 50.0
       stop_searching_on_result: false
     class_name: Strategy
-dependencies: {}
+dependencies:
+  aea-ledger-fetchai:
+    version: <0.2.0,>=0.1.0
 is_abstract: false

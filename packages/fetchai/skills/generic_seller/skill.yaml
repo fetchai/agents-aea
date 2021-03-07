@@ -72,5 +72,7 @@ models:
       service_id: generic_service
       unit_price: 10
     class_name: GenericStrategy
-dependencies: {}
+dependencies:
+  aea-ledger-fetchai:
+    version: <0.2.0,>=0.1.0
 is_abstract: true
