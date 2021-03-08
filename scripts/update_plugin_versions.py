@@ -234,7 +234,8 @@ def parse_args() -> argparse.Namespace:
     return arguments_
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """Run the script."""
     arguments = parse_args()
     current_versions_by_name: Dict[str, Version] = get_plugin_names_and_versions()
     new_versions_by_name: Dict[str, Version] = dict(
@@ -256,17 +257,17 @@ if __name__ == "__main__":
 
     have_updated_specifier_set = False
 
-    for plugin_name, new_version in new_versions_by_name.items():
-        old_version = current_versions_by_name[plugin_name]
+    for current_plugin_name, new_version in new_versions_by_name.items():
+        old_version = current_versions_by_name[current_plugin_name]
         print(
-            f"Processing {plugin_name}, old_version={old_version}, new_version={new_version}"
+            f"Processing {current_plugin_name}, old_version={old_version}, new_version={new_version}"
         )
         if new_version == old_version:
             print("Skipping, as old and new versions are equal.")
             continue
 
         have_updated_specifier_set = (
-            process_plugin(plugin_name, old_version, new_version)
+            process_plugin(current_plugin_name, old_version, new_version)
             or have_updated_specifier_set
         )
 
@@ -279,3 +280,7 @@ if __name__ == "__main__":
         print("Updating hashes and fingerprints.")
         return_code = update_hashes()
     exit_with_message("Done!", exit_code=return_code)
+
+
+if __name__ == "__main__":
+    main()
