@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 """This module contains the basic tests for the skill tasks pickling to pass task to the worker processes."""
 import logging
-import pickle
+import pickle  # nosec
 from multiprocessing.pool import Pool
 from unittest.mock import Mock
 
@@ -39,7 +39,7 @@ class TestMlTrainTaskPickle:
     def test_skill_pickle_locally(self):
         """Test pickle and unpickle task locally."""
         data = pickle.dumps(self.task)
-        task2: MLTrainTask = pickle.loads(data)
+        task2: MLTrainTask = pickle.loads(data)  # nosec
         assert self.task.train_x.tolist() == task2.train_x.tolist()
         assert self.task.train_y.tolist() == task2.train_y.tolist()
 
