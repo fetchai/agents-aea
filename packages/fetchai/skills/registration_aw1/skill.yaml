@@ -49,5 +49,7 @@ models:
       tweet: PUT_THE_LINK_TO_YOUR_TWEET_HERE
       whitelist: []
     class_name: Strategy
-dependencies: {}
+dependencies:
+  aea-ledger-ethereum:
+    version: <0.2.0,>=0.1.0
 is_abstract: false

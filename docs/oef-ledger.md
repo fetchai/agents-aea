@@ -34,56 +34,6 @@ A <a href="../simple-oef">simple OEF (sOEF) node</a> allows agents to discover e
 
 For two agents to be able to find each other, at least one must register itself on the sOEF and the other must query the sOEF node for it. Detailed documentation is provided <a href="../simple-oef">here</a>.
 
-<!-- <details><summary>Click here for a local development alternative (deprecated).</summary>
-<p>
-
-For local development, you can use an `OEF search and communication node`. This node consists of two parts. A `search node` part enables agents to register their services and search and discover other agents' services. A `communication node` part enables agents to communicate with each other.
-
-For two agents to be able to find each other, at least one must register as a service and the other must query the `OEF search node` for this service. For an example of such an interaction see <a href="../skill-guide" target="_blank">this guide</a>.
-
-Agents can receive messages from other agents if they are both connected to the same `OEF communication node`.
-
-Currently, you need to run your own `OEF search and communication node` for local development and testing. To start an `OEF search and communication node` follow the <a href="../quickstart/#preliminaries">Preliminaries</a> sections from the AEA quick start. Then run:
-
-``` bash
-python scripts/oef/launch.py -c ./scripts/oef/launch_config.json
-```
-
-When it is live you will see the sentence 'A thing of beauty is a joy forever...'.
-
-To view the `OEF search and communication node` logs for debugging, navigate to `data/oef-logs`.
-
-To connect to an `OEF search and communication node` an AEA uses the `OEFConnection` connection package (`fetchai/oef:0.17.0`).
-
-If you experience any problems launching the `OEF search and communication node` then consult <a href="https://docs.google.com/document/d/1x_hFwEIXHlr_JCkuIv-izxSz0tN-7kSmSc-g32ImL1U/edit?usp=sharing" target="_blank">this</a> guide.
-
-### Installing docker
-
-<div class="admonition note">
-  <p class="admonition-title">Note</p>
-  <p>For the purpose of the quickstart only, you can skip installation of docker.</p>
-</div>
-
-At some point, you will need <a href="https://www.docker.com/" target="_blank">Docker</a> installed on your machine
-(e.g. to run an <a href="../oef-ledger">OEF search and communication node</a>.
-
-### Download the scripts and examples directories
-
-<div class="admonition note">
-  <p class="admonition-title">Note</p>
-  <p>For the purpose of the quickstart only, you can skip downloading the scripts and examples directories.</p>
-</div>
-
-Download folders containing examples and scripts:
-``` bash
-svn export https://github.com/fetchai/agents-aea.git/trunk/examples
-svn export https://github.com/fetchai/agents-aea.git/trunk/scripts
-```
-You can install the `svn` command with (`brew install subversion` or `sudo apt-get install subversion`).
-
-</p>
-</details> -->
-
 ## Ledgers
 
 Ledgers enable AEAs to store transactions, for example involving the transfer of funds to each other, or the execution of smart contracts. They optionally ensure the truth and integrity of agent to agent interactions.

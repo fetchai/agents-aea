@@ -1,3 +1,5 @@
+This guide explains how to run an AEA inside a Raspberry Pi.
+
 ## Prerequisites
 
 * <a href="https://thepihut.com/products/raspberry-pi-4-model-b?gclid=EAIaIQobChMImcuwvcfh4wIVirHtCh3szg2EEAAYASAAEgJQ_fD_BwE" target="_blank">Raspberry Pi 4</a> (You can also use Raspberry Pi3 b or Raspberry Pi3 b+)

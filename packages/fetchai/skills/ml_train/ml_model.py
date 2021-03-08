@@ -23,8 +23,6 @@ from pathlib import Path
 from queue import Queue
 from typing import Any
 
-import tensorflow as tf
-
 from aea.skills.base import Model
 
 
@@ -79,6 +77,8 @@ class MLModel(Model):
     @staticmethod
     def _make_model() -> Any:
         """Make the model."""
+        import tensorflow as tf  # pylint: disable=import-outside-toplevel
+
         model = tf.keras.Sequential(
             [
                 tf.keras.layers.Flatten(input_shape=(28, 28)),

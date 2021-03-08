@@ -2,7 +2,7 @@ AEAs can create and update prometheus metrics for remote monitoring by sending m
 
 To see this working in an agent, fetch and run the `coin_price_feed` agent and check `localhost:9090/metrics` to see the latest values of the metrics `num_retrievals` and `num_requests`:
 ``` bash
-aea fetch fetchai/coin_price_feed:0.7.0
+aea fetch fetchai/coin_price_feed:0.8.0
 cd coin_price_feed
 aea install
 aea build
@@ -50,7 +50,7 @@ class PrometheusDialogues(Model, BasePrometheusDialogues):
 ```
 </details>
 
-Then configure your metrics in the `skill.yaml` file. For example (from the `coin_price` skill):
+Then configure your metrics in the `skill.yaml` file. For example (from the `advanced_data_request` skill):
 ``` yaml
 models:
   prometheus_dialogues:
@@ -156,10 +156,10 @@ def setup(self) -> None:
 ```
 
 Then call the `update_prometheus_metric` function from the appropriate places.
-For example, the following code in `handlers.py` for the `coin_price` skill updates the number of http requests served:
+For example, the following code in `handlers.py` for the `advanced_data_request` skill updates the number of http requests served:
 ``` python
 if self.context.prometheus_dialogues.enabled:
-    self.context.behaviours.coin_price_behaviour.update_prometheus_metric(
+    self.context.behaviours.advanced_data_request_behaviour.update_prometheus_metric(
         "num_requests", "inc", 1.0, {}
     )
 ```

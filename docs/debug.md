@@ -28,7 +28,7 @@ For more guidance on how to use `pdb` check out <a href="https://docs.python.org
             "name": "aea run",
             "type": "python",
             "request": "launch",
-            "program": "PATH_TO_VIRTUAL_ENV_PACKAGES/aea/cli/__main__.py",
+            "program": "PATH_TO_VIRTUAL_ENV/bin/aea",
             "args": ["-v","DEBUG","--skip-consistency-check","run"],
             "cwd": "CWD",
             "console": "integratedTerminal"
@@ -36,4 +36,4 @@ For more guidance on how to use `pdb` check out <a href="https://docs.python.org
     ]
 }
 ```
-where `PATH_TO_VIRTUAL_ENV_PACKAGES` should be replaced with the path to the virtual environment's packages and `CWD` with the working directory for the agent to debug (where the `aea-config.yaml` file is).
+where `PATH_TO_VIRTUAL_ENV` should be replaced with the path to the virtual environment and `CWD` with the working directory for the agent to debug (where the `aea-config.yaml` file is).

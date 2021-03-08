@@ -1,6 +1,6 @@
 agent_name: simple_service_search
 author: fetchai
-version: 0.6.0
+version: 0.7.0
 description: A simple example of service search.
 license: Apache-2.0
 aea_version: '>=0.11.0, <0.12.0'
@@ -28,4 +28,6 @@ registry_path: ../packages
 default_routing:
   fetchai/oef_search:0.14.0: fetchai/soef:0.18.0
 connection_private_key_paths: {}
-dependencies: {}
+dependencies:
+  aea-ledger-fetchai:
+    version: <0.2.0,>=0.1.0

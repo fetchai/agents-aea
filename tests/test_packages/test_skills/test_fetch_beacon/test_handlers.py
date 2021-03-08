@@ -18,26 +18,35 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests of the handler classes of the simple_data_request skill."""
 
-import json
 import logging
 from pathlib import Path
 from typing import cast
 from unittest.mock import patch
 
-from vyper.utils import keccak256
+from aea_ledger_ethereum import EthereumApi
 
 from aea.protocols.dialogue.base import DialogueMessage
 from aea.test_tools.test_skill import BaseSkillTestCase
 
-from packages.fetchai.protocols.http.message import HttpMessage
-from packages.fetchai.skills.fetch_beacon.dialogues import HttpDialogues
-from packages.fetchai.skills.fetch_beacon.handlers import HttpHandler
+from packages.fetchai.protocols.ledger_api.custom_types import State
+from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
+from packages.fetchai.skills.fetch_beacon.behaviours import FetchBeaconBehaviour
+from packages.fetchai.skills.fetch_beacon.dialogues import LedgerApiDialogues
+from packages.fetchai.skills.fetch_beacon.handlers import LedgerApiHandler
 
 from tests.conftest import ROOT_DIR
 
 
-class TestHttpHandler(BaseSkillTestCase):
-    """Test http handler of fetch_beacon skill."""
+def keccak256(input_: bytes) -> bytes:
+    """Compute hash."""
+    return bytes(bytearray.fromhex(EthereumApi.get_hash(input_)[2:]))
+
+
+LEDGER_ID = "fetchai"
+
+
+class TestLedgerApiHandler(BaseSkillTestCase):
+    """Test ledger_api handler of fetch_beacon skill."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "fetch_beacon")
     is_agent_to_agent_messages = False
@@ -46,62 +55,88 @@ class TestHttpHandler(BaseSkillTestCase):
     def setup(cls, **kwargs):
         """Setup the test class."""
         super().setup(**kwargs)
-        cls.http_handler = cast(HttpHandler, cls._skill.skill_context.handlers.http)
+        cls.ledger_api_handler = cast(
+            LedgerApiHandler, cls._skill.skill_context.handlers.ledger_api
+        )
         cls.logger = cls._skill.skill_context.logger
-
-        cls.http_dialogues = cast(
-            HttpDialogues, cls._skill.skill_context.http_dialogues
+        cls.fetch_beacon_behaviour = cast(
+            FetchBeaconBehaviour,
+            cls._skill.skill_context.behaviours.fetch_beacon_behaviour,
+        )
+        cls.ledger_api_dialogues = cast(
+            LedgerApiDialogues, cls._skill.skill_context.ledger_api_dialogues
         )
 
-        cls.list_of_messages = (
+        cls.list_of_ledger_api_messages = (
             DialogueMessage(
-                HttpMessage.Performative.REQUEST,
+                LedgerApiMessage.Performative.GET_STATE,
                 {
-                    "method": "get",
-                    "url": "some_url",
-                    "headers": "",
-                    "version": "",
-                    "body": b"",
+                    "ledger_id": LEDGER_ID,
+                    "callable": "blocks",
+                    "args": ("latest",),
+                    "kwargs": LedgerApiMessage.Kwargs({}),
                 },
+            ),
+            DialogueMessage(
+                LedgerApiMessage.Performative.GET_BALANCE,
+                {"ledger_id": LEDGER_ID, "address": "some_eth_address"},
             ),
         )
 
     def test_setup(self):
-        """Test the setup method of the http handler."""
-        assert self.http_handler.setup() is None
+        """Test the setup method of the ledger_api handler."""
+        assert self.ledger_api_handler.setup() is None
         self.assert_quantity_in_outbox(0)
 
-    def test_handle_response(self):
-        """Test the _handle_response method of the http handler to a valid fetch beacon response."""
+    def test_handle__handle_unidentified_dialogue(self):
+        """Test handling an unidentified dialogoue"""
         # setup
-        http_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.http_dialogues, messages=self.list_of_messages[:1],
+        incorrect_dialogue_reference = ("", "")
+        incoming_message = self.build_incoming_message(
+            message_type=LedgerApiMessage,
+            dialogue_reference=incorrect_dialogue_reference,
+            performative=LedgerApiMessage.Performative.GET_STATE,
+            ledger_id=LEDGER_ID,
+            callable="blocks",
+            args=("latest",),
+            kwargs=LedgerApiMessage.Kwargs({}),
         )
 
-        test_response = {
-            "result": {
-                "block_id": {"hash": "00000000"},
-                "block": {
-                    "header": {
-                        "height": "1",
-                        "entropy": {"group_signature": "SIGNATURE"},
-                    }
-                },
-            }
-        }
+        # operation
+        with patch.object(self.ledger_api_handler.context.logger, "log") as mock_logger:
+            self.ledger_api_handler.handle(incoming_message)
 
+        # after
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received invalid ledger_api message={incoming_message}, unidentified dialogue.",
+        )
+
+        self.assert_quantity_in_outbox(0)
+
+    def test__handle_state(self):
+        """Test handling a state"""
+
+        # setup
+        test_state = {
+            "block_id": {"hash": "00000000"},
+            "block": {
+                "header": {"height": "1", "entropy": {"group_signature": "SIGNATURE"}}
+            },
+        }
+        dialogue = self.prepare_skill_dialogue(
+            self.ledger_api_dialogues, self.list_of_ledger_api_messages[:1]
+        )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
-            dialogue=http_dialogue,
-            performative=HttpMessage.Performative.RESPONSE,
-            version="",
-            status_code=200,
-            status_text="",
-            headers="",
-            body=json.dumps(test_response).encode("utf-8"),
+            dialogue=dialogue,
+            performative=LedgerApiMessage.Performative.STATE,
+            ledger_id=LEDGER_ID,
+            state=State(LEDGER_ID, test_state),
         )
 
         # handle message
-        self.http_handler.handle(incoming_message)
+        with patch.object(self.ledger_api_handler.context.logger, "log") as mock_logger:
+            self.ledger_api_handler.handle(incoming_message)
 
         # check that data was correctly entered into shared state
         beacon_data = {
@@ -109,66 +144,44 @@ class TestHttpHandler(BaseSkillTestCase):
             "block_hash": bytes.fromhex("00000000"),
             "block_height": 1,
         }
-        assert self.http_handler.context.shared_state["oracle_data"] == beacon_data
-
-        # check that outbox is empty
-        self.assert_quantity_in_outbox(0)
-
-    def test_handle_response_invalid_body(self):
-        """Test the _handle_response method of the http handler to an unexpected response."""
-        # setup
-        http_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.http_dialogues, messages=self.list_of_messages[:1],
-        )
-        incoming_message = self.build_incoming_message_for_skill_dialogue(
-            dialogue=http_dialogue,
-            performative=HttpMessage.Performative.RESPONSE,
-            version="",
-            status_code=200,
-            status_text="",
-            headers="",
-            body=b"{}",
-        )
-
-        # handle message with logging
-        with patch.object(self.logger, "log") as mock_logger:
-            self.http_handler.handle(incoming_message)
-
-        assert "oracle_data" not in self.http_handler.context.shared_state
-
-        # after
-        mock_logger.assert_any_call(
-            logging.INFO, "entropy not present",
-        )
-
-    def test_handle__handle_unidentified_dialogue(self):
-        """Test handling an unidentified dialogoue"""
-        # setup
-        incorrect_dialogue_reference = ("", "")
-        incoming_message = self.build_incoming_message(
-            message_type=HttpMessage,
-            dialogue_reference=incorrect_dialogue_reference,
-            performative=HttpMessage.Performative.RESPONSE,
-            version="",
-            status_code=200,
-            status_text="",
-            headers="",
-            body=b"{}",
-        )
-
-        # operation
-        with patch.object(self.http_handler.context.logger, "log") as mock_logger:
-            self.http_handler.handle(incoming_message)
+        assert self.ledger_api_handler.context.shared_state["observation"] == {
+            "beacon": beacon_data
+        }
 
         # after
         mock_logger.assert_any_call(
             logging.INFO,
-            f"received invalid message={incoming_message}, unidentified dialogue.",
+            "Beacon info: " + str({"block_height": 1, "entropy": "SIGNATURE"}),
+        )
+
+        self.assert_quantity_in_outbox(0)
+
+    def test__handle_invalid(self):
+        """Test handling an invalid performative"""
+        # setup
+        dialogue = self.prepare_skill_dialogue(
+            self.ledger_api_dialogues, self.list_of_ledger_api_messages[1:]
+        )
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
+            dialogue=dialogue,
+            performative=LedgerApiMessage.Performative.BALANCE,
+            ledger_id=LEDGER_ID,
+            balance=0,
+        )
+
+        # operation
+        with patch.object(self.ledger_api_handler.context.logger, "log") as mock_logger:
+            self.ledger_api_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.WARNING,
+            f"cannot handle ledger_api message of performative={incoming_message.performative} in dialogue={dialogue}.",
         )
 
         self.assert_quantity_in_outbox(0)
 
     def test_teardown(self):
-        """Test the teardown method of the http handler."""
-        assert self.http_handler.teardown() is None
+        """Test the teardown method of the ledger_api handler."""
+        assert self.ledger_api_handler.teardown() is None
         self.assert_quantity_in_outbox(0)

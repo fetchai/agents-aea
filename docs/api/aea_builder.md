@@ -674,6 +674,23 @@ You will have to `reset()` the builder before calling `build()` again.
 
 Set the context namespace.
 
+<a name="aea.aea_builder.AEABuilder.set_agent_pypi_dependencies"></a>
+#### set`_`agent`_`pypi`_`dependencies
+
+```python
+ | set_agent_pypi_dependencies(dependencies: Dependencies) -> "AEABuilder"
+```
+
+Set agent PyPI dependencies.
+
+**Arguments**:
+
+- `dependencies`: PyPI dependencies for the agent.
+
+**Returns**:
+
+the AEABuilder.
+
 <a name="aea.aea_builder.AEABuilder.remove_component"></a>
 #### remove`_`component
 

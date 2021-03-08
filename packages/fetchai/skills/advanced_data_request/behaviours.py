@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contains a behaviour for fetching a coin price from an API."""
+"""This package contains a behaviour for fetching data from an API."""
 
 import json
 from typing import Any, Dict, cast
@@ -32,43 +32,41 @@ from packages.fetchai.connections.prometheus.connection import (
 )
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.prometheus.message import PrometheusMessage
-from packages.fetchai.skills.coin_price.dialogues import (
+from packages.fetchai.skills.advanced_data_request.dialogues import (
     HttpDialogues,
     PrometheusDialogues,
 )
-from packages.fetchai.skills.coin_price.models import CoinPriceModel
+from packages.fetchai.skills.advanced_data_request.models import (
+    AdvancedDataRequestModel,
+)
 
 
-class CoinPriceBehaviour(TickerBehaviour):
-    """This class provides a simple behaviour to fetch a coin price."""
+class AdvancedDataRequestBehaviour(TickerBehaviour):
+    """This class provides a simple behaviour to fetch data."""
 
     def __init__(self, **kwargs: Any):
-        """Initialize the coin price behaviour."""
+        """Initialize the advanced data request behaviour."""
 
         super().__init__(**kwargs)
 
-    def send_http_request_message(
-        self, method: str, url: str, content: Dict = None
-    ) -> None:
+    def send_http_request_message(self) -> None:
         """
         Send an http request message.
-
-        :param method: the http request method (i.e. 'GET' or 'POST').
-        :param url: the url to send the message to.
-        :param content: the payload.
 
         :return: None
         """
 
         # context
         http_dialogues = cast(HttpDialogues, self.context.http_dialogues)
+        model = cast(AdvancedDataRequestModel, self.context.advanced_data_request_model)
+        content = model.body
 
         # http request message
         request_http_message, _ = http_dialogues.create(
             counterparty=str(HTTP_CLIENT_ID),
             performative=HttpMessage.Performative.REQUEST,
-            method=method,
-            url=url,
+            method=model.method,
+            url=model.url,
             headers="",
             version="",
             body=b"" if content is None else json.dumps(content).encode("utf-8"),
@@ -145,7 +143,7 @@ class CoinPriceBehaviour(TickerBehaviour):
 
         :return: None
         """
-        self.context.logger.info("setting up CoinPriceBehaviour")
+        self.context.logger.info("setting up AdvancedDataRequestBehaviour")
 
         prom_dialogues = cast(PrometheusDialogues, self.context.prometheus_dialogues)
 
@@ -166,15 +164,9 @@ class CoinPriceBehaviour(TickerBehaviour):
 
         :return: None
         """
-        model = cast(CoinPriceModel, self.context.coin_price_model)
-
-        self.context.logger.info(
-            f"Fetching price of {model.coin_id} in {model.currency} from {model.url}"
-        )
-
-        url = f"{model.url}simple/price?ids={model.coin_id}&vs_currencies={model.currency}"
-
-        self.send_http_request_message("GET", url)
+        model = cast(AdvancedDataRequestModel, self.context.advanced_data_request_model)
+        self.context.logger.info(f"Fetching data from {model.url}")
+        self.send_http_request_message()
 
     def teardown(self) -> None:
         """
@@ -182,4 +174,4 @@ class CoinPriceBehaviour(TickerBehaviour):
 
         :return: None
         """
-        self.context.logger.info("tearing down CoinPriceBehaviour")
+        self.context.logger.info("tearing down AdvancedDataRequestBehaviour")

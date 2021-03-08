@@ -12,10 +12,10 @@ fingerprint:
   behaviours.py: QmXTz299UwWMFLCzx58dynMRuXz7t4n6HeKyS4HeyE8H5E
   dialogues.py: QmUpSz6RH7QvRjDx2JvyHeZuta2xeU27ddoeJApWRxHmbw
   handlers.py: QmT9NP9Em8q6wrztbbAyVCrBZjfdjKcqxnRPskV911oK9B
-  ml_model.py: QmRthjC9yN31xhgpaPJdRycsjaa1YoXAQTfBHmCoJnJVpC
+  ml_model.py: QmeZtzLKy41XpSMTVGy6X4EjxS9PEM3ADyNP7ctqm2iFsB
   model.json: QmdV2tGrRY6VQ5VLgUa4yqAhPDG6X8tYsWecypq8nox9Td
   strategy.py: QmaBCY1AocDrDbbtKbzKhwpCE8BMdd4gwhXaWvApgbnQk9
-  tasks.py: QmQi1MYcZvq2GsJs1AsnpdNcaMJn4iD6t4s6TZnr5Mrqic
+  tasks.py: QmYX9anr7yhERjHYYZVVcfnDJK9jdTegndU1ggqCXiLdRM
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/ledger:0.14.0
@@ -88,6 +88,8 @@ models:
       service_id: data_service
     class_name: Strategy
 dependencies:
+  aea-ledger-fetchai:
+    version: <0.2.0,>=0.1.0
   numpy: {}
   tensorflow:
     version: ~=2.4.0

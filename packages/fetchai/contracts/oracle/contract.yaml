@@ -8,7 +8,7 @@ aea_version: '>=0.11.0, <0.12.0'
 fingerprint:
   README.md: QmWgKLF6Fe4tESTdhStxYJrEVKP2xSthd2fcMm2LSfkygL
   __init__.py: QmRmf3Q5F6nQMrTEt59suBNw6zfgTVQX68E7CAuKmCnhAM
-  contract.py: QmZyyDotwHpuGXwCQVTCKJ6Fi1XwCHhPQbhWTX791bF195
+  contract.py: QmSTxgeSfzxa2n85Uujjxn3193tbtiasMLV3zxeS8dZh4e
   contracts/FetchOracle.sol: QmadnUCtsVobBGMxiWAkqMptC9acSMBGj5x4Z4V2UhnFx8
 fingerprint_ignore_patterns:
 - build/*
@@ -18,5 +18,3 @@ contract_interface_paths:
 dependencies:
   aea-ledger-ethereum:
     version: <0.2.0,>=0.1.0
-  vyper:
-    version: <1.0.0,>=0.2.7

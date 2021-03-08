@@ -906,3 +906,16 @@ def test_set_default_connection_and_routing():
         match="Protocol bad/protocol:0.1.0 specified in `default_routing` is not a project dependency!",
     ):
         builder.set_default_routing({bad_protocol.public_id: good_connection.public_id})
+
+
+def test_builder_pypi_dependencies():
+    """Test getter for PyPI dependencies."""
+    dummy_aea_path = Path(CUR_PATH, "data", "dummy_aea")
+    builder = AEABuilder.from_aea_project(dummy_aea_path)
+    dependencies = builder._package_dependency_manager.pypi_dependencies
+    assert set(dependencies.keys()) == {
+        "protobuf",
+        "aea-ledger-fetchai",
+        "aea-ledger-ethereum",
+        "aea-ledger-cosmos",
+    }
