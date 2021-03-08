@@ -15,7 +15,7 @@ fingerprint:
   ml_model.py: QmRthjC9yN31xhgpaPJdRycsjaa1YoXAQTfBHmCoJnJVpC
   model.json: QmdV2tGrRY6VQ5VLgUa4yqAhPDG6X8tYsWecypq8nox9Td
   strategy.py: QmaBCY1AocDrDbbtKbzKhwpCE8BMdd4gwhXaWvApgbnQk9
-  tasks.py: QmSbx16zRnDFHpVY7QQT25U15jKga9p7mxiMtEvSurSW1f
+  tasks.py: QmQi1MYcZvq2GsJs1AsnpdNcaMJn4iD6t4s6TZnr5Mrqic
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/ledger:0.14.0

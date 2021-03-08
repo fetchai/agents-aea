@@ -22,8 +22,7 @@ import logging
 import signal
 import threading
 from abc import abstractmethod
-from multiprocessing.pool import AsyncResult
-from multiprocessing.pool import ThreadPool as Pool
+from multiprocessing.pool import AsyncResult, Pool
 from typing import Any, Callable, Dict, Optional, Sequence, cast
 
 from aea.helpers.logging import WithLogger
@@ -40,7 +39,7 @@ class Task(WithLogger):
         self._result = None
         self.config = kwargs
 
-    def __call__(self, *args: Any, **kwargs: Any) -> "Task":
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
         """
         Execute the task.
 
@@ -64,7 +63,7 @@ class Task(WithLogger):
         finally:
             self._is_executed = True
             self.teardown()
-        return self
+        return self._result
 
     @property
     def is_executed(self) -> bool:
@@ -91,7 +90,7 @@ class Task(WithLogger):
         """
 
     @abstractmethod
-    def execute(self, *args: Any, **kwargs: Any) -> None:
+    def execute(self, *args: Any, **kwargs: Any) -> Any:
         """
         Run the task logic.
 
