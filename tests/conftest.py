@@ -30,6 +30,7 @@ import sys
 import tempfile
 import threading
 import time
+from contextlib import contextmanager
 from functools import WRAPPER_ASSIGNMENTS, wraps
 from pathlib import Path
 from types import FunctionType, MethodType
@@ -116,11 +117,6 @@ CliRunner = ImportedCliRunner
 CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
 ROOT_DIR = os.path.join(CUR_PATH, "..")
 CLI_LOG_OPTION = ["-v", "OFF"]
-
-# set PYTHONPATH so all spawned processes can have access to current python code
-os.environ["PYTHONPATH"] = ":".join(
-    filter(None, [os.path.abspath(ROOT_DIR), os.environ.get("PYTHONPATH")])
-)
 
 AUTHOR = DEFAULT_AUTHOR
 CONFIGURATION_SCHEMA_DIR = os.path.join(AEA_DIR, "configurations", "schemas")
@@ -365,6 +361,20 @@ protocol_specification_files = [
     os.path.join(PROTOCOL_SPECS_PREF_2, "sample_specification.yaml",),
     os.path.join(PROTOCOL_SPECS_PREF_2, "sample_specification_no_custom_types.yaml",),
 ]
+
+
+@contextmanager
+def project_root_pythonpath():
+    """Set pythonpath to project root."""
+    old_python_path = os.environ.get("PYTHONPATH", None)
+    os.environ["PYTHONPATH"] = ":".join(
+        filter(None, [os.path.abspath(ROOT_DIR), old_python_path])
+    )
+    yield
+    if old_python_path is None:
+        os.environ.pop("PYTHONPATH")
+    else:
+        os.environ["PYTHONPATH"] = old_python_path
 
 
 def match_files(fname1: str, fname2: str) -> Tuple[bool, str]:
