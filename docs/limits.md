@@ -209,6 +209,16 @@ This syntax would allow for unbounded positive/negative/both, or arbitrary bound
 
 Currently, the developer has to specify a custom type to implement any constraints on primitive types.
 
+#### Subprotocols & multi-party interactions
+
+Protocols can be allowed to depend on each other. ...
+
+Similarly, protocols might have multiple parties.
+
+Turn function function that specifies who's turn it is at any given point in the dialogue.
+Then the current Fipa setup is a specific case of turn-taking where the turn shifts after a player sends a single move (unique-reply). But generally, it does not have to be like this. Players could be allowed to send multiple messages until the turn shifts, or until they send specific speech-acts (multiple-replies).
+
+
 #### Framework internal messages
 
 The activation/deactivation of skills and addition/removal of components is implemented in a "passive" way - the skill posts a request in its skill context queue (in the case of new behaviours), or it just sets a flag (in case of activation/deactivation of skills).
