@@ -38,7 +38,7 @@ from lru import LRU  # type: ignore  # pylint: disable=no-name-in-module
 from web3 import HTTPProvider, Web3
 from web3.datastructures import AttributeDict
 from web3.gas_strategies.rpc import rpc_gas_price_strategy
-from web3.types import TxData, TxParams, TxReceipt
+from web3.types import TxData, TxParams, TxReceipt, Wei
 
 from aea.common import Address, JSONLike
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
@@ -55,13 +55,14 @@ TESTNET_NAME = "ganache"
 DEFAULT_ADDRESS = "http://127.0.0.1:8545"
 DEFAULT_CHAIN_ID = 1337
 DEFAULT_CURRENCY_DENOM = "wei"
+ETH_GASSTATION_URL = "https://ethgasstation.info/api/ethgasAPI.json"
 _ABI = "abi"
 _BYTECODE = "bytecode"
 
 
 def get_gas_price_strategy(
     gas_price_strategy: Optional[str] = None, api_key: Optional[str] = None
-) -> Callable:
+) -> Callable[[Web3, TxParams], Wei]:
     """Get the gas price strategy."""
     supported_gas_price_modes = ["safeLow", "average", "fast", "fastest"]
     if gas_price_strategy is None:
@@ -72,7 +73,7 @@ def get_gas_price_strategy(
 
     if gas_price_strategy not in supported_gas_price_modes:
         _default_logger.debug(
-            "Gas price strategy `{gas_price_strategy}` not in list of supported modes: {supported_gas_price_modes}. Falling back to `rpc_gas_price_strategy`."
+            f"Gas price strategy `{gas_price_strategy}` not in list of supported modes: {supported_gas_price_modes}. Falling back to `rpc_gas_price_strategy`."
         )
         return rpc_gas_price_strategy
 
@@ -82,25 +83,25 @@ def get_gas_price_strategy(
         )
         return rpc_gas_price_strategy
 
-    def gas_station_gas_price_strategy(web3: Web3, transaction_params: TxParams) -> int:
+    def gas_station_gas_price_strategy(  # pylint: disable=redefined-outer-name,unused-argument
+        web3: Web3, transaction_params: TxParams
+    ) -> Wei:
         """
-        Get gas price from ethgasstation api.
+        Get gas price from Eth Gas Station api.
 
         Visit `https://docs.ethgasstation.info/gas-price` for documentation.
         """
-        response = requests.get(
-            "https://ethgasstation.info/api/ethgasAPI.json?api-key={api_key}"
-        )
+        response = requests.get(f"{ETH_GASSTATION_URL}?api-key={api_key}")
         if response.status_code != 200:
-            raise ValueError(
-                "Gas station API response: {response.status_code}, {response.text}"
+            raise ValueError(  # pragma: nocover
+                f"Gas station API response: {response.status_code}, {response.text}"
             )
-        response_dict = json.loads(response.text)
+        response_dict = response.json()
         _default_logger.debug("Gas station API response: {}".format(response_dict))
         result = response_dict.get(gas_price_strategy, None)
-        if type(result) not in [int, float]:
-            raise ValueError("Invalid return value for `{gas_price_strategy}`!")
-        gwei_result = result / 10
+        if type(result) not in [int, float]:  # pragma: nocover
+            raise ValueError(f"Invalid return value for `{gas_price_strategy}`!")
+        gwei_result = result / 10  # adjustment (see api documentation)
         wei_result = web3.toWei(gwei_result, "gwei")
         return wei_result
 
@@ -563,7 +564,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
             else gas_price
         )
         if gas_price is None:
-            return transaction
+            return transaction  # pragma: nocover
         nonce = self._try_get_transaction_count(sender_address)
         if nonce is None:
             return transaction
@@ -587,8 +588,13 @@ class EthereumApi(LedgerApi, EthereumHelper):
         gas_price_strategy_callable = get_gas_price_strategy(
             gas_price_strategy, self._gas_price_api_key
         )
-        self._api.eth.setGasPriceStrategy(gas_price_strategy_callable)
-        gas_price = self._api.eth.generateGasPrice()
+        prior_strategy = self._api.eth.gasPriceStrategy
+        try:
+            self._api.eth.setGasPriceStrategy(gas_price_strategy_callable)
+            gas_price = self._api.eth.generateGasPrice()
+        finally:
+            if prior_strategy is not None:
+                self._api.eth.setGasPriceStrategy(prior_strategy)  # pragma: nocover
         return gas_price
 
     @try_decorator("Unable to retrieve transaction count: {}", logger_method="warning")
@@ -756,7 +762,7 @@ class EthereumApi(LedgerApi, EthereumHelper):
             else gas_price
         )
         if gas_price is None:
-            return transaction
+            return transaction  # pragma: nocover
         instance = self.get_contract_instance(contract_interface)
         data = instance.constructor(**kwargs).buildTransaction().get("data", "0x")
         transaction = {
