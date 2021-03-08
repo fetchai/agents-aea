@@ -20,6 +20,51 @@ Although one could reengineer the project to allow for this, it does introduce a
 
 ### Potential extensions, considered yet not decided:
 
+#### Alternative skill design
+
+For very simple skills, the splitting of skills into `Behaviour`, `Handler`, `Model` and `Task` classes can add unnecceasy complexity to the framework and counterintuitive responsibility split. The splitting also implies the framework needs to introduce the `SkillContext` object to allow for access to data across the skill.
+
+Hence, for some usecases it would be useful to have a single `Skill` class with abstract methods `setup`, `act`, `handle` and `teardown`. Then the developer can decide how to split up their code.
+
+```
+class SkillTemplate(SimpleSkill):
+
+    def setup():
+        # setup handlers...
+        # setup behaviours...
+        # setup tasks...
+
+    def handle(envelope: Envelope):
+        # should the skill be in charge of validating the envelope or the framework?
+
+    def act():
+        for b in behaviours:
+            b.act()
+    
+    def teardown():
+        # teardown handlers...
+        # teardown behaviours...
+        # teardown tasks...
+```
+
+Alternatively, we could use decorators to let a developer define whether a function is part of a handler or behaviour. That way, a single file with a number of functions could implement a skill. (Behind the scenes this would utilise a number of virtual Behaviour, Handler etc. provided by the framework).
+
+The downside of this approach is that it does not advocate for much modularity on the skill level. Part of the role of a framework is to propose a common way to do things. The above approach can cause for a larger degree of heterogeneity in the skill design which makes it harder for developers to understand each others' code.
+
+The separation between all four base classes does exist both in convention *and* at the code level. Handlers deal with external events (messages), behaviours deal with scheduled events (ticks), models represent data and tasks are used to manage long-running business logic.
+
+By adopting strong convention around skill development we allow for the framework to take a more active role in providing guarantees. E.g. handlers' and behaviours' execution can be limited to avoid them being blocking, models can be persisted and recreated, tasks can be executed with different task backends. The opinionated approach is thought to allow for better scaling.
+
+#### Further modularity for skill level code
+
+Currently we have three levels of modularity:
+
+- PyPi packages
+- our packages: protocols, contracts, connections and skills
+- plugins
+
+We could have a fourth: common behaviours, handlers, shared classes exposed as modules which can then speed up skill development.
+
 #### "promise" pattern:
 
 - Given the asynchronous nature of the framework, it is often hard to implement reactions to specific messages, without making a "fat" handler.
@@ -171,6 +216,21 @@ The activation/deactivation of skills and addition/removal of components is impl
 One could consider that a skill can send requests to the framework, via the internal protocol, to modify its resources or its status. The Decision Maker or the Filter can be the components that take such actions.
 
 This is a further small but meaningful step toward an actor-based model for agent internals.
+
+
+#### Ledger transaction management
+
+Currently, the framework does not manage any aspect of submitting multiple transactions to the ledgers. This responsibility is left to skills. Additionally, the ledger apis/contract apis take the ledger as a reference to determine the nonce for a transaction. If a new transaction is sent before a previous transaction has been processed then the nonce will not be incremented correctly for the second transaction. This can lead to submissions of multiple transactions with the same nonce, and therefore failure of subsequent transactions.
+
+A naive approach would involve manually incrementing the nonce and then submitting transactions into the pool with the correct nonce for eventual inclusion. The problem with this approach is that any failure of a transaction will cause non of the subsequent transactions to be processed for some ledgers (https://ethereum.stackexchange.com/questions/2808/what-happens-when-a-transaction-nonce-is-too-high). To recover from a tx failure not only the failed transaction would need to be handled, but potentially also all subsequent transactions. It is easy to see that logic required to recover from a transaction failure early in a sequence can be arbitrarily complex (involving potentially new negotiations between agents, new signatures having to be generated etc.).
+
+A further problem with the naive approach is that it (imperfectly) replicates the ledger state (wrt to (subset of state of) a specific account).
+
+A simple solution looks as follows: each time a transaction is constructed (requiring a new nonce) the transaction construction is queued until all previous transactions have been included in the ledger or failed. This way, at any one time the agent has only at most one transaction pending with the ledger. Benefits: simple to understand and maintain, tx only enter the mempool when they are ready for inclusion which has privacy benefits over submitting a whole sequence of tx at once. Downside: at most one transaction per block.
+
+This approach is currently used and implemented across all the reference skills.
+
+Related, the topic of latency in txs. State channels provide a solution. E.g. https://github.com/perun-network/go-perun. There could also be an interesting overlap with our protocols here.
 
 ## ACN
 
