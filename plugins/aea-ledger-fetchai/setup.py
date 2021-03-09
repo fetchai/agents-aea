@@ -29,7 +29,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 plugin_dir = os.path.abspath(os.path.join(here, ".."))
 
 setup(
-    name="aea_ledger_fetchai",
+    name="aea-ledger-fetchai",
     version="0.1.0",
     author="Fetch.AI Limited",
     license="Apache-2.0",
