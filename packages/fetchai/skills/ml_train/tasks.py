@@ -19,12 +19,14 @@
 
 """This module contains the tasks for the 'ml_train' skill."""
 
-from typing import Any, Tuple
+from typing import Any, Optional, Tuple, cast
 
 import numpy as np
 
 from aea.skills.base import SkillContext
 from aea.skills.tasks import Task
+
+from packages.fetchai.skills.ml_train.ml_model import MLModel
 
 
 class MLTrainTask(Task):
@@ -35,46 +37,34 @@ class MLTrainTask(Task):
         skill_context: SkillContext,
         train_data: Tuple[np.ndarray, np.ndarray],
         epochs_per_batch: int = 10,
-        batch_size: int = 32,
+        weights: Optional[int] = None,
     ):
         """Initialize the task."""
         super().__init__(logger=skill_context.logger)
-        self.train_x, self.train_y = train_data
 
-        self.model = self._make_model()
+        self.train_x, self.train_y = train_data
+        self.weights = weights
         self.epochs_per_batch = epochs_per_batch
-        self.batch_size = batch_size
+
+        self.ml_model = cast(MLModel, skill_context.ml_model)
 
     def setup(self) -> None:
         """Set up the task."""
         self.logger.info("ML Train task: setup method called.")
 
-    @staticmethod
-    def _make_model() -> Any:
-        """Make the model."""
-        import tensorflow as tf  # pylint: disable=import-outside-toplevel
-
-        model = tf.keras.Sequential(
-            [
-                tf.keras.layers.Flatten(input_shape=(28, 28)),
-                tf.keras.layers.Dense(128, activation="relu"),
-                tf.keras.layers.Dense(10, activation="softmax"),
-            ]
-        )
-        model.compile(
-            optimizer="adam",
-            loss="sparse_categorical_crossentropy",
-            metrics=["accuracy"],
-        )
-        return model
-
     def execute(self, *args: Any, **kwargs: Any) -> Any:
         """Execute the task."""
         self.logger.info("Start training with {} rows".format(self.train_x.shape[0]))
-        self.model.fit(self.train_x, self.train_y, epochs=self.epochs_per_batch)
-        loss, acc = self.model.evaluate(self.train_x, self.train_y, verbose=2)
+
+        model = self.ml_model.make_model(self.weights)
+
+        model.fit(self.train_x, self.train_y, epochs=self.epochs_per_batch)
+        new_weights = model.get_weights()
+
+        loss, acc = model.evaluate(self.train_x, self.train_y, verbose=2)
         self.logger.info("Loss: {}, Acc: {}".format(loss, acc))
-        return self.model
+
+        return new_weights
 
     def teardown(self) -> None:
         """Teardown the task."""

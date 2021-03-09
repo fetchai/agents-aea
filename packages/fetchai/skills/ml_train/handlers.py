@@ -201,7 +201,7 @@ class MlTradeHandler(Handler):
             )
             self.context.task_manager.enqueue_task(
                 MLTrainTask(
-                    skill_context=self.context, train_data=data[:2], epochs_per_batch=5,
+                    skill_context=self.context, train_data=data[:2],
                 )
             )
             self.context.strategy.is_searching = True

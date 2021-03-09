@@ -61,8 +61,8 @@ class MLModel(Model):
 
         :return: None
         """
-        model = self._make_model()
-        self._set_weights(model.get_weights())
+        model = self.make_model()
+        self.set_weights(model.get_weights())
         while True:
             data = self.data_queue.get()
             if data is None:
@@ -72,11 +72,11 @@ class MLModel(Model):
             model.fit(X, y, **kwargs)
             loss, acc = model.evaluate(X, y, verbose=2)
             self.context.logger.info("Loss: {}, Acc: {}".format(loss, acc))
-            self._set_weights(model.get_weights())
+            self.set_weights(model.get_weights())
 
     @staticmethod
-    def _make_model() -> Any:
-        """Make the model."""
+    def _make_raw_model() -> Any:
+        """Make a raw model."""
         import tensorflow as tf  # pylint: disable=import-outside-toplevel
 
         model = tf.keras.Sequential(
@@ -93,39 +93,38 @@ class MLModel(Model):
         )
         return model
 
-    def _get_weights(self) -> Any:
+    def _reconstruct_model_with_weights(self, weights) -> Any:
+        """Reconstruct the model with input weights."""
+        model = MLModel._make_raw_model()
+        model.set_weights(weights)
+        self.set_weights(weights)
+        return model
+
+    def make_model(self, weights) -> Any:
+        if weights is None:
+            model = self._make_raw_model()
+        else:
+            model = self._reconstruct_model_with_weights(weights)
+
+        return model
+
+    def get_weights(self) -> Any:
         """Get the weights, thread-safe."""
         with self._lock:
             return self._weights
 
-    def _set_weights(self, weights: Any) -> None:
+    def set_weights(self, weights: Any) -> None:
         """Set the weights, thread-safe."""
         with self._lock:
             self._weights = weights
 
-    def predict(self, *args: Any, **kwargs: Any) -> None:
-        """Predict."""
-        with self._lock:
-            model = self._make_model()
-            weights = self._get_weights()
-            model.set_weights(weights)
-            return model.predict(*args, **kwargs)
-
     def evaluate(self, *args: Any, **kwargs: Any) -> None:
         """Predict."""
         with self._lock:
-            model = self._make_model()
-            weights = self._get_weights()
+            model = self.make_model()
+            weights = self.get_weights()
             model.set_weights(weights)
             return model.evaluate(*args, **kwargs)
-
-    def save(self) -> None:
-        """Save the model weights."""
-        raise NotImplementedError
-
-    def update(self, X: Any, y: Any, epochs: int) -> None:
-        """Update the ML model."""
-        self.data_queue.put((X, y, dict(epochs=epochs)))
 
     def teardown(self) -> None:
         """
