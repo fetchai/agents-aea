@@ -219,6 +219,11 @@ Turn function function that specifies who's turn it is at any given point in the
 Then the current Fipa setup is a specific case of turn-taking where the turn shifts after a player sends a single move (unique-reply). But generally, it does not have to be like this. Players could be allowed to send multiple messages until the turn shifts, or until they send specific speech-acts (multiple-replies).
 
 
+#### Timouts in protocols
+
+Protocols currently do not implement the concept of timeouts. We leave it to the skill developer to implement any time-specific protocol rules.
+
+
 #### Framework internal messages
 
 The activation/deactivation of skills and addition/removal of components is implemented in a "passive" way - the skill posts a request in its skill context queue (in the case of new behaviours), or it just sets a flag (in case of activation/deactivation of skills).
@@ -241,6 +246,22 @@ A simple solution looks as follows: each time a transaction is constructed (requ
 This approach is currently used and implemented across all the reference skills.
 
 Related, the topic of latency in txs. State channels provide a solution. E.g. https://github.com/perun-network/go-perun. There could also be an interesting overlap with our protocols here.
+
+
+#### Unsolved problems in Multiplexer - Agentloop interplay
+
+Problem 1: connection generates too many messages, that not consumed in short time
+Solution: Can be solved by slowing down connections receive method called, controlled by inbox messages amount
+Side effects: Most of the connections should have an internal queue cause there is no synchronization between internal logic and multiplexer connection.receive calls.
+
+
+Problem 2: long time send method (cause send retries logic in connection)
+Timeouts on send? Parallel send?
+
+
+Problem 3: too many messages are produced by a skill.
+So only one solution, is to raise an exception on outbox is full. Message can be delegated to task manager? Stored somewhere internally to be handled in the future.
+
 
 ## ACN
 

@@ -1,14 +1,16 @@
 A <a href="../api/connections/base#connection-objects">`Connection`</a> wraps an SDK or API and provides an interface to network, ledgers and other services. As such a connection is concerned with I/O bound and continuously connected operations. Where necessary, a connection is responsible for translating between the framework specific <a href="../protocol">protocol</a> (an <a href="../api/mail/base#envelope-objects">`Envelope`</a> with its contained <a href="../api/protocols/base#message-objects">`Message`</a>) and the external service or third-party protocol (e.g. `HTTP`).
 
+There are two types: wrapper and transport connection. The transport connection is responsible to delivering AEA envelopes. 
+
 The messages constructed or received by a connection are eventually processed by one or several <a href="../skill">skills</a> which deal with handling and generating messages related to a specific business objective.
 
 The framework provides one default connection, called `stub`. It implements an I/O reader and writer to send messages to the agent from a local file. Additional connections can be added as packages.
 
-An `AEA` can interact with multiple connections at the same time via the <a href="../api/connections/base#connection-objects">`Multiplexer`</a>.
+An `AEA` can interact with multiple connections at the same time via the <a href="../api/connections/base#connection-objects">`Multiplexer`</a>. Connections are passive in terms of multiplexer interactions (its methods are called by the Multiplexer), but they can run their own async or threaded tasks.
 
 <img src="../assets/multiplexer.png" alt="Multiplexer of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:50%;">
 
-It maintains an <a href="../api/multiplexer#inbox-objects">`InBox`</a> and <a href="../api/multiplexer#outbox-objects">`OutBox`</a>, which are, respectively, queues for incoming and outgoing envelopes and their contained messages.
+The `Multiplexer` maintains an <a href="../api/multiplexer#inbox-objects">`InBox`</a> and <a href="../api/multiplexer#outbox-objects">`OutBox`</a>, which are, respectively, queues for incoming and outgoing envelopes and their contained messages.
 
 ## Configuration
 
@@ -28,7 +30,7 @@ This will scaffold a connection package called `my_new_connection` with three fi
 * `connection.py`, containing the scaffolded connection class
 * `connection.yaml`, containing the scaffolded configuration file
 
-### Primary methods to develop
+### Primary methods to develop - async connection interface
 
 The scaffolded `connection.py` file contains a single class inherited from the <a href="../api/connections/base#connection-objects">`Connection`</a> base class.
 
@@ -44,6 +46,32 @@ The developer needs to implement four public coroutines:
 
 
 When developing your own connection you might benefit from inspecting the `fetchai/http_server:0.18.0` and `fetchai/http_client:0.19.0` connections to gain more familiarity and inspiration.
+
+### Primary methods to develop - sync connection interface
+
+TBD
+
+
+Use executors to execute sync code from async in executors/threads. Limited by the amount of workers.
+
+There are two primary types of connections:
+* reactive - that produce messages only on incoming message (http like, produce response on request)
+* active: like p2p (can generate messages regardless on incoming messages), http_server, yoti, ledger
+
+For reactive connections we can provide a special kind of connection that converts all the async methods to callbacks:
+* on_connect
+* on_disconnect
+* on_send
+
+All of these methods will be executed in the executor pool without any user attention.
+
+Every method can create a message by putting it into the thread/async friendly queue that will be consumed by the Multiplexer.
+
+For active connections it looks a bit more complicated and depends on library to use: We need on_receive. In general it can look like the reactive one except we use one background thread for the on_connect method to run some code constantly (polling some library for new messages?). The interaction will be performed the same way, by putting messages into the queue.
+
+Anyway, the developer has to pay attention to timeouts inside callbacks (pool is limited).
+In case of spawning threads or using background thread in active connection, should handle thread close by on_disconnect callback.
+
 
 ### Configuration options
 
