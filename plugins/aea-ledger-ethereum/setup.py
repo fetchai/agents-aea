@@ -24,7 +24,7 @@ from setuptools import find_packages, setup
 
 
 setup(
-    name="aea_ledger_ethereum",
+    name="aea-ledger-ethereum",
     version="0.1.0",
     author="Fetch.AI Limited",
     license="Apache-2.0",

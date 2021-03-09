@@ -36,7 +36,7 @@ Crypto modules have been extracted and released as independent plug-ins, release
 - Ethereum crypto classes have been released in the `aea-ledger-ethereum` package;
 - Cosmos crypto classes have been released in the `aea-ledger-cosmos` package.
 
-If an AEA project, or an AEA package, makes use of crypto functionalities, it will be needed to add the above packages as PyPI dependencies with version specifiers `<0.2.0,>=0.1.0`, i.e.:
+If an AEA project, or an AEA package, makes use of crypto functionalities, it will be needed to add the above packages as PyPI dependencies with version specifiers ranging from the latest minor and the latest minor + 1 (excluded). E.g. if the latest version if `0.1.0`, the version specifier should be `<0.2.0,>=0.1.0`:
 ```yaml
 dependencies:
   aea-ledger-cosmos:
