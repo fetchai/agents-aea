@@ -19,7 +19,7 @@
 
 """This module contains the strategy class."""
 
-from typing import Any
+from typing import Any, Optional
 
 from aea.exceptions import enforce
 from aea.helpers.search.generic import SIMPLE_DATA_MODEL
@@ -85,6 +85,9 @@ class Strategy(Model):
         self._tx_id = 0
         self._balance = 0
 
+        self._current_task_id = None  # type: Optional[int]
+        self._weights = None  # type: Optional[Any]
+
     @property
     def ledger_id(self) -> str:
         """Get the ledger id."""
@@ -120,6 +123,26 @@ class Strategy(Model):
     def balance(self, balance: int) -> None:
         """Set the balance."""
         self._balance = balance
+
+    @property
+    def current_task_id(self) -> Optional[int]:
+        """Get the current_task_id."""
+        return self._current_task_id
+
+    @current_task_id.setter
+    def current_task_id(self, task_id: int) -> None:
+        """Set the current_task_id."""
+        self._current_task_id = task_id
+
+    @property
+    def weights(self) -> Optional[Any]:
+        """Get the weights."""
+        return self._weights
+
+    @weights.setter
+    def weights(self, weights: Any) -> None:
+        """Set the weights."""
+        self._weights = weights
 
     def get_next_transaction_id(self) -> str:
         """

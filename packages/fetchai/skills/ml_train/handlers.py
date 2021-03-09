@@ -184,6 +184,7 @@ class MlTradeHandler(Handler):
         :param ml_trade_msg: the ml trade message
         :return: None
         """
+        strategy = cast(Strategy, self.context.strategy)
         terms = ml_trade_msg.terms
         payload = ml_trade_msg.payload
         data = pickle.loads(payload)  # nosec
@@ -199,11 +200,12 @@ class MlTradeHandler(Handler):
                     ml_trade_msg.sender[-5:], data[0].shape, terms.values
                 )
             )
-            self.context.task_manager.enqueue_task(
+            ml_task_id = self.context.task_manager.enqueue_task(
                 MLTrainTask(
-                    skill_context=self.context, train_data=data[:2],
+                    train_data=data[:2], epochs_per_batch=5, weights=strategy.weights
                 )
             )
+            self.context.strategy.current_task_id = ml_task_id
             self.context.strategy.is_searching = True
 
     def _handle_invalid(
