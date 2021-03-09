@@ -4,7 +4,7 @@ echo "Performance report for $DATE"
 echo -e "-----------------------------\n"
 
 AGENTS=10
-NUM_RUNS=100
+NUM_RUNS=10
 MESSAGES=100
 RUNNER_MODE=threaded
 
