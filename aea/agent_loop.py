@@ -145,7 +145,7 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
 
     async def _gather_tasks(self) -> None:
         """Wait till first task exception."""
-        await asyncio.gather(*self._tasks, loop=self._loop)
+        await asyncio.gather(*self._tasks)
 
     @abstractmethod
     def _set_tasks(self) -> None:  # pragma: nocover
@@ -205,7 +205,7 @@ class AsyncAgentLoop(BaseAgentLoop):
     def _setup(self) -> None:
         """Set up agent loop before started."""
         super()._setup()
-        self._skill2skill_message_queue = asyncio.Queue(loop=self._loop)
+        self._skill2skill_message_queue = asyncio.Queue()
 
     @property
     def skill2skill_queue(self) -> Queue:
@@ -408,7 +408,7 @@ class AsyncAgentLoop(BaseAgentLoop):
         self.logger.info(LAUNCH_SUCCEED_MESSAGE)
         self._state.set(AgentLoopStates.started)
 
-        await asyncio.gather(*coros, loop=self._loop)
+        await asyncio.gather(*coros)
 
     async def _task_register_periodic_tasks(self) -> None:
         """Process new behaviours added to skills in runtime."""
