@@ -61,6 +61,7 @@ class SearchBehaviour(GenericSearchBehaviour):
                 return
 
             strategy.weights = result.get()
+            strategy.current_task_id = None
 
         super().act()
 

@@ -26,7 +26,6 @@ from typing import Tuple, cast
 from unittest.mock import patch
 
 import numpy as np
-import pytest
 
 from aea.helpers.search.models import Description
 from aea.protocols.dialogue.base import DialogueMessage
@@ -107,10 +106,10 @@ class TestLogical(BaseSkillTestCase):
 
     def test_ml(self):
         """Test ml."""
-        pytest.skip()
-
         # setup
-        payload = pickle.dumps(self.produce_data(self.batch_size))
+        self.skill.skill_context.task_manager.start()
+        data = self.produce_data(self.batch_size)
+        payload = pickle.dumps(data)
 
         ml_dialogue = self.prepare_skill_dialogue(
             dialogues=self.ml_dialogues, messages=self.list_of_messages[:3],
@@ -129,5 +128,7 @@ class TestLogical(BaseSkillTestCase):
         # after
         mock_logger.assert_any_call(
             logging.INFO,
-            f"got an Accept from {COUNTERPARTY_AGENT_ADDRESS[-5:]}: {self.terms.values}",
+            f"received data message from {COUNTERPARTY_AGENT_ADDRESS[-5:]}: data shape={data[0].shape}, terms={self.terms.values}",
         )
+
+        self.skill.skill_context.task_manager.stop()
