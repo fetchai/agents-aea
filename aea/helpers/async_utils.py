@@ -18,15 +18,12 @@
 # ------------------------------------------------------------------------------
 """This module contains the misc utils for async code."""
 import asyncio
-import collections
 import datetime
 import logging
 import time
 from abc import ABC, abstractmethod
-from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop, TimerHandle
 from asyncio.futures import Future
-from asyncio.tasks import FIRST_COMPLETED
 from collections.abc import Iterable
 from contextlib import contextmanager, suppress
 from threading import Thread
@@ -359,73 +356,6 @@ class ThreadedAsyncRunner(Thread):
         _default_logger.debug("Wait thread to join...")
         self.join(10)
         _default_logger.debug("Stopped.")
-
-
-class ItemGetter:
-    """Virtual queue like object to get items from getters function."""
-
-    def __init__(self, getters: List[Callable]) -> None:
-        """
-        Init ItemGetter.
-
-        :param getters: List of couroutines to be awaited.
-        """
-        if not getters:  # pragma: nocover
-            raise ValueError("getters list can not be empty!")
-        self._getters = getters
-        self._items: collections.deque = collections.deque()
-
-    async def get(self) -> Any:
-        """Get item."""
-        if not self._items:
-            await self._wait()
-        return self._items.pop()
-
-    async def _wait(self) -> None:
-        """Populate cache queue with items."""
-        loop = asyncio.get_event_loop()
-        try:
-            tasks = [loop.create_task(getter()) for getter in self._getters]
-            done, _ = await asyncio.wait(tasks, return_when=FIRST_COMPLETED)
-            for task in done:
-                self._items.append(await task)
-        finally:
-            for task in tasks:
-                if task.done():
-                    continue
-                task.cancel()
-                with suppress(CancelledError):
-                    await task
-
-
-class HandlerItemGetter(ItemGetter):
-    """ItemGetter with handler passed."""
-
-    @staticmethod
-    def _make_getter(handler: Callable[[Any], None], getter: Callable) -> Callable:
-        """
-        Create getter for handler and item getter function.
-
-        :param handler: callable with one position argument.
-        :param getter: a couroutine to await for item
-
-        :return: callable to return handler and item from getter.
-        """
-        # for pydocstyle
-        async def _getter() -> Tuple[Callable, Any]:
-            return handler, await getter()
-
-        return _getter
-
-    def __init__(self, getters: List[Tuple[Callable[[Any], None], Callable]]) -> None:
-        """
-        Init HandlerItemGetter.
-
-        :param getters: List of tuples of handler and couroutine to be awaiteed for an item.
-        """
-        super().__init__(
-            [self._make_getter(handler, getter) for handler, getter in getters]
-        )
 
 
 ready_future: Future = Future()

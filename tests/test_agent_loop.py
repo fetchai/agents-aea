@@ -299,12 +299,14 @@ class TestAsyncAgentLoop:
         behaviour = FailBehaviour.make(tick_interval)
         agent = self.FAKE_AGENT_CLASS(behaviours=[behaviour])
         agent_loop = self.AGENT_LOOP_CLASS(agent, threaded=True)
-
+        agent.runtime.agent_loop = agent_loop
         agent._skills_exception_policy = ExceptionPolicyEnum.propagate
+
         with pytest.raises(AEAActException):
             with pytest.raises(ValueError, match="expected!"):
                 agent_loop.start()
-                agent_loop.wait_completed(sync=True)
+                await agent_loop.wait_completed()
+
         agent_loop.stop()
         agent_loop.wait_completed(sync=True)
 
