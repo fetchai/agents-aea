@@ -12,4 +12,6 @@ RUN pip install aea[all] --upgrade --force-reinstall
 
 RUN wget https://raw.githubusercontent.com/fetchai/agents-aea/main/Pipfile
 RUN pipenv install -d --deploy --skip-lock --system
-RUN pip install aea-ledger-fetchai
+RUN pip install--no-deps  aea-ledger-fetchai
+RUN pip install--no-deps  aea-ledger-cosmos
+RUN pip install--no-deps  aea-ledger-ethereum
