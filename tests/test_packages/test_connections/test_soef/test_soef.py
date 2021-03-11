@@ -46,7 +46,13 @@ from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 
-from packages.fetchai.connections.soef.connection import SOEFConnection, SOEFException
+from packages.fetchai.connections.soef.connection import (
+    SOEFConnection,
+    SOEFException,
+    SOEFNetworkConnectionError,
+    SOEFServerBadResponseError,
+    requests,
+)
 from packages.fetchai.protocols.oef_search.dialogues import OefSearchDialogue
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogues as BaseOefSearchDialogues,
@@ -596,10 +602,72 @@ class TestSoef:
             assert self.connection.channel._ping_periodic_task is not None
 
     @pytest.mark.asyncio
-    async def test_request(self):
-        """Test internal method request_text."""
-        with patch("aea.helpers.http_requests.request"):
+    async def test_check_server_reachable(self):
+        """Test server can not be reached."""
+        resp = MagicMock()
+        resp.status_code = 200
+        resp.text = "<a></a>"
+
+        async def slow_request(*args, **kwargs):
+            await asyncio.sleep(10)
+
+        with patch.object(
+            self.connection.channel, "_request_text", slow_request
+        ), patch.object(self.connection.channel, "connection_check_timeout", 0.01):
+            with pytest.raises(
+                SOEFNetworkConnectionError,
+                match="<SOEF Network Connection Error: Server can not be reached!. Check internet connection!>",
+            ):
+                await self.connection.channel._check_server_reachable()
+
+    @pytest.mark.asyncio
+    async def test_request_text_ok(self):
+        """Test internal method request_text works ok."""
+        resp = MagicMock()
+        resp.status_code = 200
+        resp.text = "<a></a>"
+        with patch("aea.helpers.http_requests.request", return_value=resp):
             await self.connection.channel._request_text("get", "http://not-exists.com")
+
+    @pytest.mark.asyncio
+    async def test_request_text_fail(self):
+        """Test internal method request_text fails."""
+        resp = MagicMock()
+        resp.status_code = 400
+        resp.text = "<a></a>"
+        with pytest.raises(
+            SOEFServerBadResponseError,
+            match="<SOEF Server Bad Response Error: Bad server response: code 400 when 2XX expected.",
+        ):
+            with patch("aea.helpers.http_requests.request", return_value=resp):
+                await self.connection.channel._request_text(
+                    "get", "http://not-exists.com"
+                )
+
+        resp.status_code = 200
+        resp.text = ""
+        with pytest.raises(
+            SOEFServerBadResponseError,
+            match="<SOEF Server Bad Response Error: Bad server response: empty response.>",
+        ):
+            with patch("aea.helpers.http_requests.request", return_value=resp):
+                await self.connection.channel._request_text(
+                    "get", "http://not-exists.com"
+                )
+
+        resp.status_code = 200
+        resp.text = ""
+        with pytest.raises(
+            SOEFNetworkConnectionError,
+            match="SOEF Network Connection Error:.*expected!",
+        ):
+            with patch(
+                "aea.helpers.http_requests.request",
+                side_effect=requests.ConnectionError("expected!"),
+            ):
+                await self.connection.channel._request_text(
+                    "get", "http://not-exists.com"
+                )
 
     @pytest.mark.asyncio
     async def test_set_location(self):
