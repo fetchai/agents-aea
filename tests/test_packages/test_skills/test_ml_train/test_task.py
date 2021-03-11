@@ -18,8 +18,8 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests of the task class of the ml_train skill."""
 import logging
-from pathlib import Path
 import sys
+from pathlib import Path
 from typing import Tuple
 from unittest.mock import patch
 
