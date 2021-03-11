@@ -20,9 +20,11 @@
 """This module contains the class to connect to an Oracle contract."""
 
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, cast
 
+from aea_ledger_cosmos import CosmosApi
 from aea_ledger_ethereum import EthereumApi
+from aea_ledger_fetchai import FetchAIApi
 from vyper.utils import keccak256
 
 from aea.common import Address, JSONLike
@@ -71,6 +73,18 @@ class FetchOracleContract(Contract):
             )
             tx = ledger_api.update_with_gas_estimate(tx)
             return tx
+        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+            msg = {
+                "grant_role": {
+                    "role": "DELEGATE_ROLE",
+                    "address": oracle_address,
+                }
+            }
+            cosmos_api = cast(CosmosApi, ledger_api)
+            tx = cosmos_api.get_handle_transaction(
+                contract_address, msg, amount=0, tx_fee=0, gas=gas
+            )
+            return tx
         raise NotImplementedError
 
     @classmethod
@@ -106,5 +120,16 @@ class FetchOracleContract(Contract):
                 }
             )
             tx = ledger_api.update_with_gas_estimate(tx)
+            return tx
+        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+            msg = {
+                "update_oracle_value": {
+                    "value": 1,
+                }
+            }
+            cosmos_api = cast(CosmosApi, ledger_api)
+            tx = cosmos_api.get_handle_transaction(
+                contract_address, msg, amount=0, tx_fee=0, gas=gas
+            )
             return tx
         raise NotImplementedError

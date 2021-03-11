@@ -140,8 +140,8 @@ class SimpleOracleBehaviour(TickerBehaviour):
             kwargs=ContractApiMessage.Kwargs(
                 {
                     "deployer_address": self.context.agent_address,
-                    "ERC20Address": strategy.erc20_address,
-                    "initialFee": strategy.initial_fee_deploy,
+                    # "ERC20Address": strategy.erc20_address,
+                    # "initialFee": strategy.initial_fee_deploy,
                     "gas": strategy.default_gas_deploy,
                 }
             ),
