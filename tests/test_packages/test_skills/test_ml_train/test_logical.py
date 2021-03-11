@@ -26,6 +26,7 @@ from typing import Tuple, cast
 from unittest.mock import patch
 
 import numpy as np
+import pytest
 
 from aea.helpers.search.models import Description
 from aea.protocols.dialogue.base import DialogueMessage
@@ -106,6 +107,7 @@ class TestLogical(BaseSkillTestCase):
 
     def test_ml(self):
         """Test ml."""
+        pytest.skip()
         # setup
         self.skill.skill_context.task_manager.start()
         data = self.produce_data(self.batch_size)

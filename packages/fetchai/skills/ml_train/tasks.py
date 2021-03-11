@@ -70,7 +70,7 @@ class MLTrainTask(Task):
 
     def execute(self, *args: Any, **kwargs: Any) -> Any:
         """Execute the task."""
-        self.logger.info("Start training with {} rows".format(self.train_x.shape[0]))
+        self.logger.info(f"Start training with {self.train_x.shape[0]} rows")
 
         model = self.make_model()
 

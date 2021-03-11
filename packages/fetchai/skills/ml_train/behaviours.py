@@ -57,10 +57,14 @@ class SearchBehaviour(GenericSearchBehaviour):
         if strategy.current_task_id is not None:
             result = self.context.task_manager.get_task_result(strategy.current_task_id)
 
+            if not result.ready():
+                return
+
             if not result.successful():
                 return
 
-            strategy.weights = result.get()
+            ml_task = result.get()
+            strategy.weights = ml_task.result
             strategy.current_task_id = None
 
         super().act()

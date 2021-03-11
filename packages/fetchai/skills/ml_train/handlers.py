@@ -142,7 +142,7 @@ class MlTradeHandler(Handler):
         strategy = cast(Strategy, self.context.strategy)
         acceptable = strategy.is_acceptable_terms(terms)
         affordable = strategy.is_affordable_terms(terms)
-        if not acceptable and affordable:
+        if not (acceptable and affordable):
             self.context.logger.info(
                 "rejecting, terms are not acceptable and/or affordable"
             )
@@ -155,7 +155,7 @@ class MlTradeHandler(Handler):
             )
             terms_ = strategy.terms_from_proposal(ml_trade_msg.terms)
             ml_trade_dialogue.terms = terms_
-            _ledger_api_msg, ledger_api_dialogue = ledger_api_dialogues.create(
+            _, ledger_api_dialogue = ledger_api_dialogues.create(
                 counterparty=LEDGER_API_ADDRESS,
                 performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
                 terms=terms_,

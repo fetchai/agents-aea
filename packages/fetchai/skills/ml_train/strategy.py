@@ -19,7 +19,9 @@
 
 """This module contains the strategy class."""
 
-from typing import Any, Optional
+from typing import Any, List, Optional
+
+import numpy as np
 
 from aea.exceptions import enforce
 from aea.helpers.search.generic import SIMPLE_DATA_MODEL
@@ -135,12 +137,12 @@ class Strategy(Model):
         self._current_task_id = task_id
 
     @property
-    def weights(self) -> Optional[Any]:
+    def weights(self) -> Optional[List[np.ndarray]]:
         """Get the weights."""
         return self._weights
 
     @weights.setter
-    def weights(self, weights: Any) -> None:
+    def weights(self, weights: List[np.ndarray]) -> None:
         """Set the weights."""
         self._weights = weights
 
@@ -249,6 +251,3 @@ class Strategy(Model):
             fee_by_currency_id={proposal.values["currency_id"]: self._max_buyer_tx_fee},
         )
         return terms
-
-    def update_search_query_params(self) -> None:
-        """Update search query params."""
