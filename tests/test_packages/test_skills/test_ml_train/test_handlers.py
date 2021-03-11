@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests of the handler classes of the ml_train skill."""
 import logging
-import pickle
+import pickle  # nosec
 import uuid
 from pathlib import Path
 from typing import Tuple, cast
