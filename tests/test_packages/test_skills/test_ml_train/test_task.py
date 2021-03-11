@@ -19,10 +19,12 @@
 """This module contains the tests of the task class of the ml_train skill."""
 import logging
 from pathlib import Path
+import sys
 from typing import Tuple
 from unittest.mock import patch
 
 import numpy as np
+import pytest
 import tensorflow as tf
 
 from aea.test_tools.test_skill import BaseSkillTestCase
@@ -81,6 +83,10 @@ class TestTask(BaseSkillTestCase):
             logging.INFO, "ML Train task: setup method called.", ()
         )
 
+    @pytest.mark.skipif(
+        sys.version_info >= (3, 9),
+        reason="This test uses tensorflow which at the time of writing this test does not support python version 3.9 yet.",
+    )
     def test_make_model_i(self):
         """Test the make_model method of the MLTrainTask class where weights is None."""
         # operation
@@ -91,6 +97,10 @@ class TestTask(BaseSkillTestCase):
         assert isinstance(model, tf.keras.Sequential)
         mock_set_weights.assert_not_called()
 
+    @pytest.mark.skipif(
+        sys.version_info >= (3, 9),
+        reason="This test uses tensorflow which at the time of writing this test does not support python version 3.9 yet.",
+    )
     def test_make_model_ii(self):
         """Test the make_model method of the MLTrainTask class where weights is NOT None."""
         # before
