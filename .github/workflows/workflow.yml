@@ -486,7 +486,7 @@ jobs:
       continue-on-error: true
     - name: Show full coverage report
       run: |
-        coverage report -m
+        coverage report -m -i
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
