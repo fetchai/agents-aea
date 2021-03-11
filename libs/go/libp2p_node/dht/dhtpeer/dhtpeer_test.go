@@ -22,6 +22,8 @@ package dhtpeer
 
 import (
 	"context"
+	"fmt"
+	"log"
 	"math/rand"
 	"net"
 	"strconv"
@@ -804,8 +806,9 @@ func TestMessageOrderingWithDelegateClient(t *testing.T) {
 
 	ensureAddressAnnounced(peer1, peer2)
 
+	max := 100
 	i := 0
-	for x := 0; x < 10; x++ {
+	for x := 0; x < max; x++ {
 		envelope := &aea.Envelope{
 			To:      AgentsTestAddresses[0],
 			Sender:  AgentsTestAddresses[2],
@@ -817,6 +820,7 @@ func TestMessageOrderingWithDelegateClient(t *testing.T) {
 		}
 		i++
 		t.Log("Sending Envelope : ", envelope)
+		// time.Sleep(100 * time.Millisecond)
 
 		envelope1 := &aea.Envelope{
 			To:      AgentsTestAddresses[1],
@@ -829,20 +833,26 @@ func TestMessageOrderingWithDelegateClient(t *testing.T) {
 		}
 		i++
 		t.Log("Sending Envelope : ", envelope1)
+		// time.Sleep(100 * time.Millisecond)
 	}
 
-	for x := 0; x < 10; x++ {
-		// res := <-rxPeer1
-		expectEnvelope(t, rxPeer1)
-		// t.Log("<-- Received Envelope : ", res)
-		// time.Sleep(1 * time.Second)
+	// go func() {
+	ii := 0
+	for x := 0; x < max; x++ {
+		expectEnvelopeOrdered(t, rxPeer1, ii)
+		ii++
+		ii++
 	}
+	// }()
 
-	for x := 0; x < 10; x++ {
-		// res := <-rxPeer2
-		expectEnvelope(t, rxPeer2)
-		// t.Log("<-- Received Envelope : ", res)
+	// go func() {
+	iii := 0
+	for x := 0; x < max; x++ {
+		iii++
+		expectEnvelopeOrdered(t, rxPeer2, iii)
+		iii++
 	}
+	// }()
 
 }
 
@@ -1806,6 +1816,20 @@ func expectEnvelope(t *testing.T, rx chan *aea.Envelope) {
 	select {
 	case envel := <-rx:
 		t.Log("Received envelope", envel)
+	case <-timeout:
+		t.Error("Failed to receive envelope before timeout")
+	}
+}
+
+func expectEnvelopeOrdered(t *testing.T, rx chan *aea.Envelope, counter int) {
+	timeout := time.After(EnvelopeDeliveryTimeout)
+	select {
+	case envel := <-rx:
+		t.Log("Received envelope", envel)
+		message, _ := strconv.Atoi(string(envel.Message))
+		if message != counter {
+			log.Fatal(fmt.Sprintf("Expected counter %d received counter %d", counter, message))
+		}
 	case <-timeout:
 		t.Error("Failed to receive envelope before timeout")
 	}
