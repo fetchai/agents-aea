@@ -19,7 +19,7 @@
 
 """This module contains the tasks for the 'ml_train' skill."""
 
-from typing import Any, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 
 import numpy as np
 
@@ -33,7 +33,7 @@ class MLTrainTask(Task):
         self,
         train_data: Tuple[np.ndarray, np.ndarray],
         epochs_per_batch: int = 10,
-        weights: Optional[Any] = None,
+        weights: Optional[List[np.ndarray]] = None,
     ):
         """Initialize the task."""
         super().__init__()
