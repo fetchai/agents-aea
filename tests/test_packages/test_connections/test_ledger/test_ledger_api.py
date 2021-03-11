@@ -72,6 +72,7 @@ ledger_ids = pytest.mark.parametrize(
         (EthereumCrypto.identifier, EthereumCrypto(ETHEREUM_PRIVATE_KEY_PATH).address),
     ],
 )
+gas_price_strategies = pytest.mark.parametrize("gas_price_strategy", [None, "average"],)
 
 SOME_SKILL_ID = "some/skill:0.1.0"
 
@@ -209,8 +210,12 @@ async def test_get_state(
 @pytest.mark.integration
 @pytest.mark.ledger
 @pytest.mark.asyncio
+@gas_price_strategies
 async def test_send_signed_transaction_ethereum(
-    ledger_apis_connection: Connection, update_default_ethereum_ledger_api, ganache
+    gas_price_strategy,
+    ledger_apis_connection: Connection,
+    update_default_ethereum_ledger_api,
+    ganache,
 ):
     """Test send signed transaction with Ethereum APIs."""
     import aea  # noqa # to load registries
@@ -237,6 +242,7 @@ async def test_send_signed_transaction_ethereum(
             nonce="",
             fee_by_currency_id={"ETH": fee},
             chain_id=3,
+            gas_price_strategy=gas_price_strategy,
         ),
     )
     request = cast(LedgerApiMessage, request)
