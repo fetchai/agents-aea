@@ -605,7 +605,10 @@ class SOEFChannel:
             while self.unique_page_address:
                 try:
                     await self._ping_command()
-                except asyncio.CancelledError:  # pylint: disable=try-except-raise
+                except (
+                    asyncio.CancelledError,
+                    ConcurrentCancelledError,
+                ):  # pragma: nocover  # pylint: disable=try-except-raise
                     raise
                 except Exception:  # pylint: disable=broad-except  # pragma: nocover
                     self.logger.exception("Error on periodic ping command!")
@@ -687,6 +690,11 @@ class SOEFChannel:
             parsed_text = self._parse_soef_response(response_text, check_success)
             self.logger.debug(f"`{command}` SUCCESS!")
             return parsed_text
+        except (
+            asyncio.CancelledError,
+            ConcurrentCancelledError,
+        ):  # pragma: nocover  # pylint: disable=try-except-raise
+            raise
         except Exception as e:
             raise SOEFException.error(
                 f"Command: `{command}` Params: `{params}` Response: `{response_text}` Exception: {[e]}"
