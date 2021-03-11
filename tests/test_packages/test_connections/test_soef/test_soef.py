@@ -811,7 +811,9 @@ class TestSoef:
                 wrap_future(resp_text3),
             ],
         ):
-            with patch.object(self.connection.channel, "_ping_command",) as mocked_ping:
+            with patch.object(
+                self.connection.channel, "_ping_command", return_value=wrap_future(None)
+            ) as mocked_ping:
                 await self.connection.channel._register_agent()
 
                 assert self.connection.channel._ping_periodic_task is not None

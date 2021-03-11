@@ -591,7 +591,7 @@ class SOEFChannel:
 
     async def _ping_command(self) -> None:
         """Perform ping on registered agent."""
-        await self._generic_oef_command("ping", {})
+        await self._generic_oef_command("ping", {}, check_success=False)
 
     async def _ping_periodic(self, period: float = 30 * 60) -> None:
         """
@@ -602,7 +602,7 @@ class SOEFChannel:
         :return: None
         """
         with suppress(asyncio.CancelledError):
-            while True:
+            while self.unique_page_address:
                 try:
                     await self._ping_command()
                 except asyncio.CancelledError:  # pylint: disable=try-except-raise
@@ -679,6 +679,7 @@ class SOEFChannel:
             self.base_url, unique_page_address or self.unique_page_address
         )
 
+        response_text = ""
         try:
             response_text = await self._request_text(
                 "get", url=url, params={"command": command, **params}
