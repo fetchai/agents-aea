@@ -16,10 +16,13 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tasks for the 'ml_train' skill."""
+<<<<<<< HEAD
 
 from typing import Any, List, Optional, Tuple
+=======
+from typing import Any, Tuple
+>>>>>>> a19ac2041d38baee10bc84083828f89879de1025
 
 import numpy as np
 
@@ -70,6 +73,7 @@ class MLTrainTask(Task):
 
     def execute(self, *args: Any, **kwargs: Any) -> Any:
         """Execute the task."""
+<<<<<<< HEAD
         self.logger.info(f"Start training with {self.train_x.shape[0]} rows")
 
         model = self.make_model()
@@ -81,6 +85,14 @@ class MLTrainTask(Task):
         self.logger.info("Loss: {}, Acc: {}".format(loss, acc))
 
         return new_weights
+=======
+        self.logger.info("Start training with {} rows".format(self.train_x.shape[0]))
+        model = self._make_model()
+        model.fit(self.train_x, self.train_y, epochs=self.epochs_per_batch)
+        loss, acc = model.evaluate(self.train_x, self.train_y, verbose=2)
+        self.logger.info("Loss: {}, Acc: {}".format(loss, acc))
+        return loss, acc
+>>>>>>> a19ac2041d38baee10bc84083828f89879de1025
 
     def teardown(self) -> None:
         """Teardown the task."""

@@ -362,11 +362,8 @@ def test_initialize_aea_programmatically():
             dummy_task = DummyTask()
             task_id = an_aea.enqueue_task(dummy_task)
             async_result = an_aea.get_task_result(task_id)
-            expected_dummy_task = async_result.get(10.0)
-            wait_for_condition(
-                lambda: expected_dummy_task.nb_execute_called > 0, timeout=10
-            )
-
+            expected_result = async_result.get(10.0)
+            assert expected_result == 1
             dummy_handler = an_aea.resources.get_handler(
                 DefaultMessage.protocol_id, dummy_skill_id
             )
@@ -451,10 +448,9 @@ def test_initialize_aea_programmatically_build_resources():
                 dummy_task = DummyTask()
                 task_id = an_aea.enqueue_task(dummy_task)
                 async_result = an_aea.get_task_result(task_id)
-                expected_dummy_task = async_result.get(10.0)
-                wait_for_condition(
-                    lambda: expected_dummy_task.nb_execute_called > 0, timeout=10
-                )
+                expected_result = async_result.get(10.0)
+                assert expected_result == 1
+
                 dummy_handler_name = "dummy"
                 dummy_handler = an_aea.resources._handler_registry.fetch(
                     (dummy_skill_id, dummy_handler_name)

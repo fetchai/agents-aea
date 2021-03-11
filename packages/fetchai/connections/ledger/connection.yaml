@@ -22,7 +22,7 @@ config:
   ledger_apis:
     ethereum:
       address: http://127.0.0.1:8545
-      gas_price: 50
+      gas_price_api_key: null
     fetchai:
       address: https://rest-agent-land.fetch.ai:443
       denom: atestfet

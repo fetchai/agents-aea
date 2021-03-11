@@ -12,7 +12,7 @@ fingerprint:
   dummy_subpackage/__init__.py: QmfDrbsUewXFcF3afdhCnzsZYrzDTUbQH69MHPnEpzp5qP
   dummy_subpackage/foo.py: QmNrarFAJ1KDopGVz5Co8YtnRj6Q7CP29x7ywUMjnMr6KV
   handlers.py: QmYchfGvDXD5CxDHt6kChNsNbRxTcqViQTn65R7p8VJ4fu
-  tasks.py: Qmegg4QsYSqSZN3q2zuRiBAToQ2LEiWrAPtUo7rCMrxjGJ
+  tasks.py: Qmb1T8irsgmXE5vWi6davaESTzJv8Z9DmNmHhDqvfPQUEZ
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
