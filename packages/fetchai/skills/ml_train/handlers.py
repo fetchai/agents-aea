@@ -460,7 +460,9 @@ class LedgerApiHandler(Handler):
         signing_dialogues = cast(SigningDialogues, self.context.signing_dialogues)
         last_msg = cast(LedgerApiMessage, ledger_api_dialogue.last_outgoing_message)
         if last_msg is None:
-            raise ValueError("Could not retrive last outgoing ledger_api_msg.")
+            raise ValueError(  # pragma: nocover
+                "Could not retrive last outgoing ledger_api_msg."
+            )
         signing_msg, signing_dialogue = signing_dialogues.create(
             counterparty=self.context.decision_maker_address,
             performative=SigningMessage.Performative.SIGN_TRANSACTION,
