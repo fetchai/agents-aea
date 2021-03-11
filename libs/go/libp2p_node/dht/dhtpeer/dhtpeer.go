@@ -143,6 +143,11 @@ type DHTPeer struct {
 	closing    chan struct{}
 	goroutines *sync.WaitGroup
 	logger     zerolog.Logger
+
+	// syncMessages map[string]*sync.WaitGroup
+	nextEnvelope map[string](chan *aea.Envelope)
+	syncMessages map[string](chan *aea.Envelope)
+	syncCounter  map[string]int
 }
 
 // New creates a new DHTPeer
@@ -157,7 +162,9 @@ func New(opts ...Option) (*DHTPeer, error) {
 	dhtPeer.tcpAddressesLock = sync.RWMutex{}
 	dhtPeer.agentRecordsLock = sync.RWMutex{}
 	dhtPeer.persistentStoragePath = defaultPersistentStoragePath
-
+	dhtPeer.nextEnvelope = make(map[string](chan *aea.Envelope))
+	dhtPeer.syncMessages = make(map[string](chan *aea.Envelope))
+	dhtPeer.syncCounter = make(map[string]int)
 	for _, opt := range opts {
 		if err := opt(dhtPeer); err != nil {
 			return nil, err
@@ -754,6 +761,18 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 	for {
 		// read envelopes
 		envel, err := utils.ReadEnvelopeConn(conn)
+		pair := envel.To + envel.Sender
+		// initializing pairwise channel queues and counter maps
+		if _, ok := dhtPeer.syncCounter[pair]; !ok {
+			dhtPeer.syncCounter[pair] = 0
+		}
+		if _, ok := dhtPeer.nextEnvelope[pair]; !ok {
+			dhtPeer.nextEnvelope[pair] = make(chan *aea.Envelope, 10)
+		}
+		if _, ok := dhtPeer.syncMessages[pair]; !ok {
+			dhtPeer.syncMessages[pair] = make(chan *aea.Envelope, 10)
+		}
+		dhtPeer.syncMessages[pair] <- envel
 		if err != nil {
 			if err == io.EOF {
 				linfo().Str(
@@ -769,17 +788,46 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 			nbrConns.Dec()
 			break
 		}
-
 		// route envelope
 		dhtPeer.goroutines.Add(1)
+
 		go func() {
 			defer dhtPeer.goroutines.Done()
+
 			if envel.Sender != addr {
 				err = errors.New("Sender (" + envel.Sender + ") must match registered address")
 				lerror(err).Str("addr", addr).
 					Msg("while routing delegate client envelope")
 			} else {
+				// checking if a previous message for the pair is under processing
+				e := envel
+				if dhtPeer.syncCounter[pair] > 0 {
+					dhtPeer.syncCounter[pair]++
+					// fmt.Println("SYCN <<<-------- ", string(envel.Message))
+					// dhtPeer.syncMessages[pair] <- envel
+					e = <-dhtPeer.nextEnvelope[pair]
+					// fmt.Println("NEXT <<<-------- ", string(e.Message))
+					// decrementing counter of currently processed messages
+					dhtPeer.syncCounter[pair]--
+				}
+				dhtPeer.syncCounter[pair]++
+				envel = e
+				// fmt.Println("PROCESSING <<<-------- ", string(envel.Message))
 				err := dhtPeer.RouteEnvelope(envel)
+				fmt.Println("PROCESSED <<<-------- ", string(envel.Message))
+				// acknowledge the processed message to unblock
+				if dhtPeer.syncCounter[pair] > 0 {
+					dhtPeer.syncCounter[pair]--
+					if dhtPeer.syncCounter[pair] > 0 {
+						e := envel
+						e = <-dhtPeer.syncMessages[pair]
+						dhtPeer.nextEnvelope[pair] <- e
+					} else {
+						<-dhtPeer.syncMessages[pair]
+					}
+				} else {
+					<-dhtPeer.syncMessages[pair]
+				}
 				if err != nil {
 					lerror(err).Str("addr", addr).
 						Msg("while routing delegate client envelope")
@@ -826,7 +874,6 @@ func (dhtPeer *DHTPeer) RouteEnvelope(envel *aea.Envelope) error {
 	routeCount.Inc()
 	routeCountAll.Inc()
 	start := timer.NewTimer()
-
 	println("-> Routing envelope:", envel.String())
 
 	// get sender agent envelRec
