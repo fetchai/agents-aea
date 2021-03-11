@@ -579,7 +579,10 @@ func (dhtPeer *DHTPeer) Close() []error {
 	errappend(err)
 
 	//linfo().Msg("Stopping DHTPeer: waiting for goroutines to cancel...")
-	//dhtPeer.goroutines.Wait()
+	// dhtPeer.goroutines.Wait()
+	for _, channel := range dhtPeer.syncMessages {
+		close(channel)
+	}
 
 	return status
 }
@@ -814,9 +817,6 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 			// send back! error
 			fmt.Println("CHANNEL FULL, DISCARDING <<<-------- ", string(envel.Message))
 		}
-	}
-	for _, channel := range dhtPeer.syncMessages {
-		close(channel)
 	}
 
 	// Remove connection from map
