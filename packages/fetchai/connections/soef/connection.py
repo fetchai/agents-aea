@@ -650,15 +650,15 @@ class SOEFChannel:
             ) from e
 
         if root.tag != "response":
-            raise SOEFServerBadResponseError("Not a response")
+            raise SOEFServerBadResponseError("Not a valid response. Expected `root.tag = response`, received `root.tag = {root.tag}`")
         if check_success:
             el = root.find("./success")
             if el is None:
                 raise SOEFServerBadResponseError(
-                    "Bad response, no success value present"
+                    "Bad response, no success value present. Found = {response_text}."
                 )
             if str(el.text).strip() != "1":
-                raise SOEFServerBadResponseError("Request was not succesfull")
+                raise SOEFServerBadResponseError("Request was not successful. Found = {response_text}")
         return root
 
     async def _generic_oef_command(
@@ -1017,7 +1017,7 @@ class SOEFChannel:
                 timeout=self.connection_check_timeout,
             )
         except asyncio.TimeoutError:
-            raise SOEFNetworkConnectionError("Server can not be reached!")
+            raise SOEFNetworkConnectionError("Server can not be reached within timeout = {self.connection_check_timeout}!")
 
     async def connect(self) -> None:
         """Connect channel set queues and executor pool."""
