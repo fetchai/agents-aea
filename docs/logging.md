@@ -75,4 +75,66 @@ logging_config:
 This configuration will set up a logger with name `aea`. It prints both on console and on file with a format specified by the `standard` formatter.
 
 
+## Streaming to browser
+
+It is possible to configure the AEA to stream logs to a browser.
+
+First, add the following configuration to your AEA:
+
+``` yaml
+logging_config:
+  version: 1
+  disable_existing_loggers: false
+  formatters:
+    standard:
+      format: '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+  handlers:
+    http:
+      class: logging.handlers.HTTPHandler
+      formatter: standard
+      level: INFO
+      host: localhost:5000
+      url: /stream
+      method: POST
+  loggers:
+    aea:
+      handlers:
+      - http
+      level: INFO
+      propagate: false
+```
+
+Second, create a log server:
+
+``` python
+# -*- coding: utf-8 -*-
+"""A simple flask server to serve logs."""
+
+from flask import Flask, request
+
+
+def create_app():
+    """Create Flask app for streaming logs."""
+    app = Flask(__name__)
+
+    @app.route('/')
+    def index():
+        return {}, 200
+
+    @app.route('/stream', methods=["POST"])
+    def stream():
+        print(dict(request.form))
+        return {}, 200
+
+    app.run()
+
+
+if __name__ == "__main__":
+    create_app()
+```
+
+Save the script in a file called `server.py`, install flask with `pip install flask` and run the server with `python server.py`.
+
+Third, run your AEA and visit `localhost:5000` in your browser.
+
 <br />
