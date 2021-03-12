@@ -42,9 +42,6 @@ class TestTask(BaseSkillTestCase):
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "ml_train")
 
-    if sys.version_info.major == 3 and sys.version_info.minor < 9:
-        import tensorflow as tf  # pylint: disable=import-outside-toplevel
-
     @classmethod
     def setup(cls):
         """Setup the test class."""
@@ -64,7 +61,9 @@ class TestTask(BaseSkillTestCase):
     @staticmethod
     def produce_data(batch_size) -> Tuple:
         """Prodice the data."""
-        ((train_x, train_y), _) = TestTask.tf.keras.datasets.fashion_mnist.load_data()
+        import tensorflow as tf  # pylint: disable=import-outside-toplevel
+
+        ((train_x, train_y), _) = tf.keras.datasets.fashion_mnist.load_data()
 
         idx = np.arange(train_x.shape[0])
         mask = np.zeros_like(idx, dtype=bool)
@@ -87,16 +86,22 @@ class TestTask(BaseSkillTestCase):
 
     def test_make_model_i(self):
         """Test the make_model method of the MLTrainTask class where weights is None."""
+        # setup
+        import tensorflow as tf  # pylint: disable=import-outside-toplevel
+
         # operation
         with patch("tensorflow.keras.Sequential.set_weights") as mock_set_weights:
             model = self.task.make_model()
 
         # after
-        assert isinstance(model, self.tf.keras.Sequential)
+        assert isinstance(model, tf.keras.Sequential)
         mock_set_weights.assert_not_called()
 
     def test_make_model_ii(self):
         """Test the make_model method of the MLTrainTask class where weights is NOT None."""
+        # setup
+        import tensorflow as tf  # pylint: disable=import-outside-toplevel
+
         # before
         self.task.weights = []
 
@@ -105,7 +110,7 @@ class TestTask(BaseSkillTestCase):
             model = self.task.make_model()
 
         # after
-        assert isinstance(model, self.tf.keras.Sequential)
+        assert isinstance(model, tf.keras.Sequential)
         mock_set_weights.assert_any_call(self.task.weights)
 
     def test_execute(self):
