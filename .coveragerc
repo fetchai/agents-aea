@@ -10,8 +10,6 @@ omit =
     packages/fetchai/skills/erc1155_deploy/*
     packages/fetchai/skills/gym/*
     packages/fetchai/skills/http_echo/*
-    packages/fetchai/skills/ml_data_provider/*
-    packages/fetchai/skills/ml_train/*
     packages/fetchai/skills/registration_aw1/*
     packages/fetchai/skills/thermometer/*
     packages/fetchai/skills/weather_station/*
