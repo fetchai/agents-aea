@@ -40,9 +40,10 @@ from tests.conftest import ROOT_DIR
 class TestTask(BaseSkillTestCase):
     """Test Task of ml_train."""
 
-    import tensorflow as tf  # pylint: disable=import-outside-toplevel
-
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "ml_train")
+
+    if sys.version_info.major == 3 and sys.version_info.minor < 9:
+        import tensorflow as tf  # pylint: disable=import-outside-toplevel
 
     @classmethod
     def setup(cls):
@@ -91,7 +92,7 @@ class TestTask(BaseSkillTestCase):
             model = self.task.make_model()
 
         # after
-        assert isinstance(model, TestTask.tf.keras.Sequential)
+        assert isinstance(model, self.tf.keras.Sequential)
         mock_set_weights.assert_not_called()
 
     def test_make_model_ii(self):
@@ -104,7 +105,7 @@ class TestTask(BaseSkillTestCase):
             model = self.task.make_model()
 
         # after
-        assert isinstance(model, TestTask.tf.keras.Sequential)
+        assert isinstance(model, self.tf.keras.Sequential)
         mock_set_weights.assert_any_call(self.task.weights)
 
     def test_execute(self):
