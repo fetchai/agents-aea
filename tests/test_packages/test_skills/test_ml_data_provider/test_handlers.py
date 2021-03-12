@@ -315,6 +315,10 @@ class TestMlTradeHandler(BaseSkillTestCase):
         self.assert_quantity_in_outbox(0)
 
 
+@pytest.mark.skipif(
+    sys.version_info >= (3, 9),
+    reason="These tests use tensorflow which, at the time of writing, does not yet support python version 3.9.",
+)
 class TestLedgerApiHandler(BaseSkillTestCase):
     """Test ledger_api handler of ml_data_provider."""
 
@@ -470,6 +474,10 @@ class TestLedgerApiHandler(BaseSkillTestCase):
         self.assert_quantity_in_outbox(0)
 
 
+@pytest.mark.skipif(
+    sys.version_info >= (3, 9),
+    reason="These tests use tensorflow which, at the time of writing, does not yet support python version 3.9.",
+)
 class TestOefSearchHandler(BaseSkillTestCase):
     """Test oef search handler of ml_data_provider."""
 
