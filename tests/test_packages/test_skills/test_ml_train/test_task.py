@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests of the task class of the ml_train skill."""
-import logging
+
 import sys
 from pathlib import Path
 from typing import Tuple
@@ -34,6 +34,10 @@ from packages.fetchai.skills.ml_train.tasks import MLTrainTask
 from tests.conftest import ROOT_DIR
 
 
+@pytest.mark.skipif(
+    sys.version_info >= (3, 9),
+    reason="These tests use tensorflow which, at the time of writing, does not yet support python version 3.9.",
+)
 class TestTask(BaseSkillTestCase):
     """Test Task of ml_train."""
 
@@ -75,18 +79,12 @@ class TestTask(BaseSkillTestCase):
     def test_setup(self):
         """Test the setup method of the MLTrainTask class."""
         # operation
-        with patch.object(self.logger, "_log") as mock_logger:
+        with patch.object(self.logger, "info") as mock_logger:
             self.task.setup()
 
         # after
-        mock_logger.assert_any_call(
-            logging.INFO, "ML Train task: setup method called.", ()
-        )
+        mock_logger.assert_any_call("ML Train task: setup method called.")
 
-    @pytest.mark.skipif(
-        sys.version_info >= (3, 9),
-        reason="This test uses tensorflow which at the time of writing this test does not support python version 3.9 yet.",
-    )
     def test_make_model_i(self):
         """Test the make_model method of the MLTrainTask class where weights is None."""
         # operation
@@ -97,10 +95,6 @@ class TestTask(BaseSkillTestCase):
         assert isinstance(model, tf.keras.Sequential)
         mock_set_weights.assert_not_called()
 
-    @pytest.mark.skipif(
-        sys.version_info >= (3, 9),
-        reason="This test uses tensorflow which at the time of writing this test does not support python version 3.9 yet.",
-    )
     def test_make_model_ii(self):
         """Test the make_model method of the MLTrainTask class where weights is NOT None."""
         # before
@@ -122,7 +116,7 @@ class TestTask(BaseSkillTestCase):
         mocked_acc = "0.8"
 
         # operation
-        with patch.object(self.logger, "_log") as mock_logger:
+        with patch.object(self.logger, "info") as mock_logger:
             with patch("tensorflow.keras.Sequential.fit") as mock_fit:
                 with patch(
                     "tensorflow.keras.Sequential.get_weights",
@@ -144,21 +138,17 @@ class TestTask(BaseSkillTestCase):
         )
 
         mock_logger.assert_any_call(
-            logging.INFO, f"Start training with {self.task.train_x.shape[0]} rows", ()
+            f"Start training with {self.task.train_x.shape[0]} rows"
         )
-        mock_logger.assert_any_call(
-            logging.INFO, f"Loss: {mocked_loss}, Acc: {mocked_acc}", ()
-        )
+        mock_logger.assert_any_call(f"Loss: {mocked_loss}, Acc: {mocked_acc}")
 
         assert actual_new_weights == mocked_new_weights
 
     def test_teardown(self):
         """Test the teardown method of the MLTrainTask class."""
         # operation
-        with patch.object(self.logger, "_log") as mock_logger:
+        with patch.object(self.logger, "info") as mock_logger:
             self.task.teardown()
 
         # after
-        mock_logger.assert_any_call(
-            logging.INFO, "ML Train task: teardown method called.", ()
-        )
+        mock_logger.assert_any_call("ML Train task: teardown method called.")
