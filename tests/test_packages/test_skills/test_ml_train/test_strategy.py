@@ -101,6 +101,8 @@ class TestStrategy(BaseSkillTestCase):
         self.strategy.weights = []
         assert self.strategy.weights == []
 
+        assert self.strategy.data == []
+
     def test_get_next_transaction_id(self):
         """Test the get_next_transaction_id method of the Strategy class."""
         tx_id = self.strategy.get_next_transaction_id()

@@ -47,7 +47,6 @@ from packages.fetchai.skills.ml_train.dialogues import (
     SigningDialogues,
 )
 from packages.fetchai.skills.ml_train.strategy import Strategy
-from packages.fetchai.skills.ml_train.tasks import MLTrainTask
 
 
 DUMMY_DIGEST = "dummy_digest"
@@ -200,13 +199,8 @@ class MlTradeHandler(Handler):
                     ml_trade_msg.sender[-5:], data[0].shape, terms.values
                 )
             )
-            ml_task_id = self.context.task_manager.enqueue_task(
-                MLTrainTask(
-                    train_data=data[:2], epochs_per_batch=5, weights=strategy.weights
-                )
-            )
-            self.context.strategy.current_task_id = ml_task_id
-            self.context.strategy.is_searching = True
+            strategy.data.append(data)
+            strategy.is_searching = True
 
     def _handle_invalid(
         self, ml_trade_msg: MlTradeMessage, ml_trade_dialogue: MlTradeDialogue

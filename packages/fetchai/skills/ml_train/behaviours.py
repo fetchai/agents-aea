@@ -35,6 +35,7 @@ from packages.fetchai.skills.ml_train.dialogues import (
     MlTradeDialogue,
 )
 from packages.fetchai.skills.ml_train.strategy import Strategy
+from packages.fetchai.skills.ml_train.tasks import MLTrainTask
 
 
 DEFAULT_MAX_PROCESSING = 120
@@ -66,6 +67,16 @@ class SearchBehaviour(GenericSearchBehaviour):
             ml_task = result.get()
             strategy.weights = ml_task.result
             strategy.current_task_id = None
+
+        if len(strategy.data) > 0:
+            data = strategy.data.pop(0)
+            ml_task_id = self.context.task_manager.enqueue_task(
+                MLTrainTask(
+                    train_data=data[:2], epochs_per_batch=5, weights=strategy.weights
+                )
+            )
+            strategy.current_task_id = ml_task_id
+            return
 
         super().act()
 

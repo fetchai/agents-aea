@@ -167,7 +167,7 @@ class TestMlTradeHandler(BaseSkillTestCase):
         )
         assert has_attributes, error_str
 
-    def test_handle_propose_not_affordable_nor_acceptable(self):
+    def test_handle_terms_not_affordable_nor_acceptable(self):
         """Test the _handle_propose method of the ml_trade handler where terms is not affordable nor acceptable."""
         # setup
         ml_dialogue = self.prepare_skill_dialogue(
@@ -319,13 +319,11 @@ class TestMlTradeHandler(BaseSkillTestCase):
         y_sample = train_y[mask]
         return x_sample, y_sample
 
-    def test_handle_inform_with_data(self):
+    def test_handle_data_with_data(self):
         """Test the _handle_data method of the ml_trade handler where data is NOT None."""
         # setup
         data = self.produce_data(self.batch_size)
         payload = pickle.dumps(data)
-
-        mocked_task_id = 1
 
         ml_dialogue = cast(
             MlTradeDialogue,
@@ -341,21 +339,20 @@ class TestMlTradeHandler(BaseSkillTestCase):
         )
 
         # operation
-        with patch.object(
-            self.task_manager, "enqueue_task", return_value=mocked_task_id
-        ):
-            with patch.object(self.logger, "log") as mock_logger:
-                self.ml_handler.handle(incoming_message)
+        with patch.object(self.logger, "log") as mock_logger:
+            self.ml_handler.handle(incoming_message)
 
         # after
         mock_logger.assert_any_call(
             logging.INFO,
             f"received data message from {COUNTERPARTY_AGENT_ADDRESS[-5:]}: data shape={data[0].shape}, terms={self.terms.values}",
         )
-        assert self.strategy.current_task_id == mocked_task_id
+        assert len(self.strategy.data[0]) == len(data)
+        assert np.array_equal(self.strategy.data[0][0], data[0]) is True
+        assert np.array_equal(self.strategy.data[0][1], data[1]) is True
         assert self.strategy.is_searching is True
 
-    def test_handle_inform_without_data(self):
+    def test_handle_data_without_data(self):
         """Test the _handle_data method of the ml_trade handler where data IS None."""
         # setup
         data = None

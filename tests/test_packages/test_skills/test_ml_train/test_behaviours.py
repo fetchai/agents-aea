@@ -147,6 +147,27 @@ class TestSearchBehaviour(BaseSkillTestCase):
         assert self.strategy._weights == "some_weights"
         mock_generic_act.assert_called_once()
 
+    def test_act_data_exists(self):
+        """Test the act method of the search behaviour where no task is running and there is strategy.data is not empty."""
+        # setup
+        self.strategy._current_task_id = None
+
+        mocked_data = ([], [])
+        self.strategy.data = [mocked_data]
+
+        mocked_task_id = 1
+
+        # operation
+        with patch.object(
+            self.task_manager, "enqueue_task", return_value=mocked_task_id
+        ) as mocked_enqueue_task:
+            self.search_behaviour.act()
+
+        # after
+        assert self.strategy.data == []
+        mocked_enqueue_task.assert_called_once()
+        assert self.strategy._current_task_id == mocked_task_id
+
     @classmethod
     def teardown(cls):
         """Tears down the test class."""

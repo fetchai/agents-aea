@@ -25,7 +25,6 @@ from unittest.mock import patch
 
 import numpy as np
 import pytest
-import tensorflow as tf
 
 from aea.test_tools.test_skill import BaseSkillTestCase
 
@@ -40,6 +39,8 @@ from tests.conftest import ROOT_DIR
 )
 class TestTask(BaseSkillTestCase):
     """Test Task of ml_train."""
+
+    import tensorflow as tf  # pylint: disable=import-outside-toplevel
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "ml_train")
 
@@ -62,9 +63,7 @@ class TestTask(BaseSkillTestCase):
     @staticmethod
     def produce_data(batch_size) -> Tuple:
         """Prodice the data."""
-        from tensorflow import keras  # pylint: disable=import-outside-toplevel
-
-        ((train_x, train_y), _) = keras.datasets.fashion_mnist.load_data()
+        ((train_x, train_y), _) = TestTask.tf.keras.datasets.fashion_mnist.load_data()
 
         idx = np.arange(train_x.shape[0])
         mask = np.zeros_like(idx, dtype=bool)
@@ -92,7 +91,7 @@ class TestTask(BaseSkillTestCase):
             model = self.task.make_model()
 
         # after
-        assert isinstance(model, tf.keras.Sequential)
+        assert isinstance(model, TestTask.tf.keras.Sequential)
         mock_set_weights.assert_not_called()
 
     def test_make_model_ii(self):
@@ -105,7 +104,7 @@ class TestTask(BaseSkillTestCase):
             model = self.task.make_model()
 
         # after
-        assert isinstance(model, tf.keras.Sequential)
+        assert isinstance(model, TestTask.tf.keras.Sequential)
         mock_set_weights.assert_any_call(self.task.weights)
 
     def test_execute(self):

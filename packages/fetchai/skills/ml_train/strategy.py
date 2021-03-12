@@ -89,6 +89,7 @@ class Strategy(Model):
 
         self._current_task_id = None  # type: Optional[int]
         self._weights = None  # type: Optional[Any]
+        self.data = []  # type: List[Any]
 
     @property
     def ledger_id(self) -> str:
