@@ -47,7 +47,6 @@ from packages.fetchai.skills.ml_train.dialogues import (
     SigningDialogues,
 )
 from packages.fetchai.skills.ml_train.strategy import Strategy
-from packages.fetchai.skills.ml_train.tasks import MLTrainTask
 
 
 DUMMY_DIGEST = "dummy_digest"
@@ -142,7 +141,7 @@ class MlTradeHandler(Handler):
         strategy = cast(Strategy, self.context.strategy)
         acceptable = strategy.is_acceptable_terms(terms)
         affordable = strategy.is_affordable_terms(terms)
-        if not acceptable and affordable:
+        if not (acceptable and affordable):
             self.context.logger.info(
                 "rejecting, terms are not acceptable and/or affordable"
             )
@@ -155,7 +154,7 @@ class MlTradeHandler(Handler):
             )
             terms_ = strategy.terms_from_proposal(ml_trade_msg.terms)
             ml_trade_dialogue.terms = terms_
-            _ledger_api_msg, ledger_api_dialogue = ledger_api_dialogues.create(
+            _, ledger_api_dialogue = ledger_api_dialogues.create(
                 counterparty=LEDGER_API_ADDRESS,
                 performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
                 terms=terms_,
@@ -184,6 +183,7 @@ class MlTradeHandler(Handler):
         :param ml_trade_msg: the ml trade message
         :return: None
         """
+        strategy = cast(Strategy, self.context.strategy)
         terms = ml_trade_msg.terms
         payload = ml_trade_msg.payload
         data = pickle.loads(payload)  # nosec
@@ -199,12 +199,8 @@ class MlTradeHandler(Handler):
                     ml_trade_msg.sender[-5:], data[0].shape, terms.values
                 )
             )
-            self.context.task_manager.enqueue_task(
-                MLTrainTask(
-                    skill_context=self.context, train_data=data[:2], epochs_per_batch=5,
-                )
-            )
-            self.context.strategy.is_searching = True
+            strategy.data.append(data)
+            strategy.is_searching = True
 
     def _handle_invalid(
         self, ml_trade_msg: MlTradeMessage, ml_trade_dialogue: MlTradeDialogue
@@ -458,7 +454,9 @@ class LedgerApiHandler(Handler):
         signing_dialogues = cast(SigningDialogues, self.context.signing_dialogues)
         last_msg = cast(LedgerApiMessage, ledger_api_dialogue.last_outgoing_message)
         if last_msg is None:
-            raise ValueError("Could not retrive last outgoing ledger_api_msg.")
+            raise ValueError(  # pragma: nocover
+                "Could not retrive last outgoing ledger_api_msg."
+            )
         signing_msg, signing_dialogue = signing_dialogues.create(
             counterparty=self.context.decision_maker_address,
             performative=SigningMessage.Performative.SIGN_TRANSACTION,
