@@ -616,7 +616,7 @@ class TestSoef:
         ), patch.object(self.connection.channel, "connection_check_timeout", 0.01):
             with pytest.raises(
                 SOEFNetworkConnectionError,
-                match="<SOEF Network Connection Error: Server can not be reached!. Check internet connection!>",
+                match="<SOEF Network Connection Error: Server can not be reached within timeout =",
             ):
                 await self.connection.channel._check_server_reachable()
 
@@ -648,7 +648,7 @@ class TestSoef:
         resp.text = ""
         with pytest.raises(
             SOEFServerBadResponseError,
-            match="<SOEF Server Bad Response Error: Bad server response: empty response.>",
+            match="SOEF Server Bad Response Error: Bad server response: empty response. Request data:",
         ):
             with patch("aea.helpers.http_requests.request", return_value=resp):
                 await self.connection.channel._request_text(
