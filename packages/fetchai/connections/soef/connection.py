@@ -433,10 +433,12 @@ class SOEFChannel:
 
         if response.status_code < 200 or response.status_code >= 300:
             raise SOEFServerBadResponseError(
-                f"Bad server response: code {response.status_code} when 2XX expected."
+                f"Bad server response: code {response.status_code} when 2XX expected. Request data: ({args}, {kwargs}) Response content: `{response.text}`"
             )
         if not response.text:
-            raise SOEFServerBadResponseError("Bad server response: empty response")
+            raise SOEFServerBadResponseError(
+                f"Bad server response: empty response. Request data: ({args}, {kwargs})"
+            )
 
         return response.text
 
