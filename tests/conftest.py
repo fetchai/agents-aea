@@ -721,7 +721,7 @@ def reset_aea_cli_config() -> None:
 def get_unused_tcp_port():
     """Get an unused TCP port."""
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(("", 0))
+    s.bind(("127.0.0.1", 0))
     s.listen(1)
     port = s.getsockname()[1]
     s.close()
