@@ -20,7 +20,7 @@ jobs:
           python-version: 3.6
       - name: Install dependencies (ubuntu-latest)
         run: |
-          sudo apt-get update --fix-missing
+          sudo apt-get update --fix-missing --allow-releaseinfo-change
           sudo apt-get autoremove
           sudo apt-get autoclean
           pip install pipenv
@@ -61,7 +61,7 @@ jobs:
           go-version: '^1.14.0'
       - name: Install dependencies (ubuntu-latest)
         run: |
-          sudo apt-get update --fix-missing
+          sudo apt-get update --fix-missing --allow-releaseinfo-change
           sudo apt-get autoremove
           sudo apt-get autoclean
           pip install tox
@@ -104,7 +104,7 @@ jobs:
           python-version: 3.6
       - name: Install dependencies (ubuntu-latest)
         run: |
-          sudo apt-get update --fix-missing
+          sudo apt-get update --fix-missing --allow-releaseinfo-change
           sudo apt-get autoremove
           sudo apt-get autoclean
           pip install tox
@@ -123,7 +123,7 @@ jobs:
           python-version: 3.6
       - name: Install dependencies (ubuntu-latest)
         run: |
-          sudo apt-get update --fix-missing
+          sudo apt-get update --fix-missing --allow-releaseinfo-change
           sudo apt-get autoremove
           sudo apt-get autoclean
           pip install tox
@@ -169,7 +169,7 @@ jobs:
           node-version: 12.x
       - name: Install dependencies (ubuntu-latest)
         run: |
-          sudo apt-get update --fix-missing
+          sudo apt-get update --fix-missing --allow-releaseinfo-change
           sudo apt-get autoremove
           sudo apt-get autoclean
           pip install tox
@@ -215,7 +215,7 @@ jobs:
           go-version: '^1.14.0'
       - name: Install protolint (ubuntu-latest)
         run: |
-          sudo apt-get update --fix-missing
+          sudo apt-get update --fix-missing --allow-releaseinfo-change
           sudo apt-get autoremove
           sudo apt-get autoclean
           make protolint_install
@@ -272,7 +272,7 @@ jobs:
           python-version: 3.8
       - name: Install dependencies (ubuntu-latest)
         run: |
-          sudo apt-get update --fix-missing
+          sudo apt-get update --fix-missing --allow-releaseinfo-change
           sudo apt-get autoremove
           sudo apt-get autoclean
           pip install tox
@@ -336,7 +336,7 @@ jobs:
     - if: matrix.os == 'ubuntu-latest'
       name: Install dependencies (ubuntu-latest)
       run: |
-        sudo apt-get update --fix-missing
+        sudo apt-get update --fix-missing --allow-releaseinfo-change
         sudo apt-get autoremove
         sudo apt-get autoclean
         pip install tox
@@ -407,7 +407,7 @@ jobs:
         go-version: '^1.14.0'
     - name: Install dependencies (ubuntu-latest)
       run: |
-        sudo apt-get update --fix-missing
+        sudo apt-get update --fix-missing --allow-releaseinfo-change
         sudo apt-get autoremove
         sudo apt-get autoclean
         pip install tox
@@ -468,7 +468,7 @@ jobs:
         go-version: '^1.14.0'
     - name: Install dependencies (ubuntu-latest)
       run: |
-        sudo apt-get update --fix-missing
+        sudo apt-get update --fix-missing --allow-releaseinfo-change
         sudo apt-get autoremove
         sudo apt-get autoclean
         pip install tox
