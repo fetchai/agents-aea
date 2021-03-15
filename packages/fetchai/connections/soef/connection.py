@@ -644,7 +644,7 @@ class SOEFChannel:
     ) -> ElementTree:
         try:
             root = ElementTree.fromstring(response_text)
-        except ElementTree.ParseError as e:
+        except ElementTree.ParseError as e:  # pragma: nocover
             raise SOEFServerBadResponseError(
                 f"Failed to parse xml from the response: Error {e}. Text: {response_text}"
             ) from e
@@ -660,7 +660,7 @@ class SOEFChannel:
                     "Bad response, no success value present. Found = {response_text}."
                 )
             if str(el.text).strip() != "1":
-                raise SOEFServerBadResponseError(
+                raise SOEFServerBadResponseError(  # pragma: nocover
                     "Request was not successful. Found = {response_text}"
                 )
         return root
