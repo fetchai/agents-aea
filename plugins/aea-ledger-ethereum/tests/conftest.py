@@ -188,7 +188,7 @@ def ganache_configuration(ethereum_private_key_file):
 @pytest.mark.integration
 @pytest.mark.ledger
 @pytest.fixture(scope="session")
-# @action_for_platform("Linux", skip=False)
+@action_for_platform("Linux", skip=False)
 def ganache(
     ganache_configuration,
     ganache_addr,
