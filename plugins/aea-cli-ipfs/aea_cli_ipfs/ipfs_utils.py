@@ -20,7 +20,7 @@
 import os
 import shutil
 import signal
-import subprocess
+import subprocess  # nosec
 import time
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -123,7 +123,7 @@ class IPFSTool:
         except ipfshttpclient.exceptions.ErrorResponse as e:
             raise RemoveError(f"Error on {hash_id} remove: {str(e)}") from e
 
-    def download(self, hash_id: str, target_dir: str, fix_path=True) -> None:
+    def download(self, hash_id: str, target_dir: str, fix_path: bool = True) -> None:
         """
         Download dir by it's hash.
 
@@ -160,7 +160,7 @@ class IPFSTool:
                 "can not publish within timeout, check internet connection!"
             )
 
-    def chec_ipfs_node_running(self):
+    def chec_ipfs_node_running(self) -> None:
         """Check ipfs node running."""
         try:
             self.client.id()

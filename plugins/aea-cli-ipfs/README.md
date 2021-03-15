@@ -7,13 +7,13 @@ IPFS command to publish and download directories.
 Make sure you have `aea` installed.
 
 Then, install the plug-in:
-```
+``` bash
 pip install aea-cli-ipfs
 ```
 
 Now you should be able to run `aea ipfs`.
 
-```
+``` bash
 Usage: aea ipfs [OPTIONS] COMMAND [ARGS]...
 
   IPFS Commands

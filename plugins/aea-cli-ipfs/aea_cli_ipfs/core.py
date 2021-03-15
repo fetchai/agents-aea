@@ -46,7 +46,9 @@ def ipfs(click_context: click.Context) -> None:
 )
 @click.option("-p", "--publish", is_flag=True)
 @click.pass_context
-def add(click_context: click.Context, dir_path: Optional[str], publish=False) -> None:
+def add(
+    click_context: click.Context, dir_path: Optional[str], publish: bool = False
+) -> None:
     """Add directory to ipfs, if not directory specified the current one will be added."""
     dir_path = dir_path or os.getcwd()
     ipfs_tool = click_context.obj
