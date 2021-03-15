@@ -789,7 +789,7 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 		// initializing pairwise channel queues and one go routine per pair
 		pair := envel.To + envel.Sender
 		if _, ok := dhtPeer.syncMessages[pair]; !ok {
-			dhtPeer.syncMessages[pair] = make(chan *aea.Envelope, 100)
+			dhtPeer.syncMessages[pair] = make(chan *aea.Envelope, 1000)
 
 			// route envelope
 			dhtPeer.goroutines.Add(1)
@@ -797,9 +797,7 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 				defer dhtPeer.goroutines.Done()
 
 				for e := range dhtPeer.syncMessages[pair] {
-					fmt.Println("PROCESSING <<<-------- ", string(e.Message))
 					err := dhtPeer.RouteEnvelope(e)
-					fmt.Println("PROCESSED <<<-------- ", string(e.Message))
 					if err != nil {
 						lerror(err).Str("addr", addr).
 							Msg("while routing delegate client envelope")
@@ -809,10 +807,8 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 			}()
 		}
 		// add to queue (nonblocking - buffered queue)
-		fmt.Println("ATTEMPTING ADDING TO QUEUE <<<-------- ", string(envel.Message))
 		select {
 		case dhtPeer.syncMessages[pair] <- envel:
-			fmt.Println("ADDED TO QUEUE <<<-------- ", string(envel.Message))
 		default:
 			// send back! error
 			fmt.Println("CHANNEL FULL, DISCARDING <<<-------- ", string(envel.Message))
