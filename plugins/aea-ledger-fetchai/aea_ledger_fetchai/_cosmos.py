@@ -91,7 +91,7 @@ class CosmosHelper(Helper):
             code = tx_receipt.get("code", None)
             is_successful = code is None
             if not is_successful:
-                _default_logger.warning(
+                _default_logger.warning(  # pragma: nocover
                     f"Transaction not settled. Raw log: {tx_receipt.get('raw_log')}"
                 )
         return is_successful
@@ -457,13 +457,13 @@ class _CosmosApi(LedgerApi):
         self.denom = kwargs.pop("denom", DEFAULT_CURRENCY_DENOM)
         self.chain_id = kwargs.pop("chain_id", DEFAULT_CHAIN_ID)
         self.cli_command = kwargs.pop("cli_command", DEFAULT_CLI_COMMAND)
-        self.cosmwasm_versions = kwargs.pop(
+        self.cosmwasm_version = kwargs.pop(
             "cosmwasm_version", DEFAULT_COSMWASM_VERSIONS
         )
         valid_specifiers = list(MESSAGE_FORMAT_BY_VERSION["instantiate"].keys())
-        if self.cosmwasm_versions not in valid_specifiers:
-            raise ValueError(
-                f"Valid CosmWasm version specifiers: {valid_specifiers}. Received invalid specifier={self.cosmwasm_versions}!"
+        if self.cosmwasm_version not in valid_specifiers:
+            raise ValueError(  # pragma: nocover
+                f"Valid CosmWasm version specifiers: {valid_specifiers}. Received invalid specifier={self.cosmwasm_version}!"
             )
 
     @property
@@ -550,7 +550,7 @@ class _CosmosApi(LedgerApi):
             deployer_address
         )
         if account_number is None or sequence is None:
-            return None
+            return None  # pragma: nocover
         label = kwargs.pop("label", None)
         code_id = kwargs.pop("code_id", None)
         amount = kwargs.pop("amount", None)
@@ -624,7 +624,7 @@ class _CosmosApi(LedgerApi):
         :return: the unsigned CosmWasm contract deploy message
         """
         store_msg = {
-            "type": MESSAGE_FORMAT_BY_VERSION["store"][self.cosmwasm_versions],
+            "type": MESSAGE_FORMAT_BY_VERSION["store"][self.cosmwasm_version],
             "value": {
                 "sender": deployer_address,
                 "wasm_byte_code": contract_interface[_BYTECODE],
@@ -669,12 +669,12 @@ class _CosmosApi(LedgerApi):
         :param memo: any string comment.
         :return: the unsigned CosmWasm InitMsg
         """
-        if self.cosmwasm_versions != DEFAULT_COSMWASM_VERSIONS and amount == 0:
+        if self.cosmwasm_version != DEFAULT_COSMWASM_VERSIONS and amount == 0:
             init_funds = []
         else:
             init_funds = [{"amount": str(amount), "denom": denom}]
         instantiate_msg = {
-            "type": MESSAGE_FORMAT_BY_VERSION["instantiate"][self.cosmwasm_versions],
+            "type": MESSAGE_FORMAT_BY_VERSION["instantiate"][self.cosmwasm_version],
             "value": {
                 "sender": deployer_address,
                 "code_id": str(code_id),
@@ -727,13 +727,13 @@ class _CosmosApi(LedgerApi):
             sender_address
         )
         if account_number is None or sequence is None:
-            return None
-        if self.cosmwasm_versions != DEFAULT_COSMWASM_VERSIONS and amount == 0:
+            return None  # pragma: nocover
+        if self.cosmwasm_version != DEFAULT_COSMWASM_VERSIONS and amount == 0:
             sent_funds = []
         else:
             sent_funds = [{"amount": str(amount), "denom": denom}]
         execute_msg = {
-            "type": MESSAGE_FORMAT_BY_VERSION["execute"][self.cosmwasm_versions],
+            "type": MESSAGE_FORMAT_BY_VERSION["execute"][self.cosmwasm_version],
             "value": {
                 "sender": sender_address,
                 "contract": contract_address,
@@ -854,7 +854,7 @@ class _CosmosApi(LedgerApi):
             sender_address
         )
         if account_number is None or sequence is None:
-            return None
+            return None  # pragma: nocover
         transfer_msg = {
             "type": "cosmos-sdk/MsgSend",
             "value": {
@@ -960,7 +960,7 @@ class _CosmosApi(LedgerApi):
         try:
             _type = cast(dict, tx_signed.get("value", {})).get("msg", [])[0]["type"]
             result = _type in [
-                value[self.cosmwasm_versions]
+                value[self.cosmwasm_version]
                 for value in MESSAGE_FORMAT_BY_VERSION.values()
             ]
         except (KeyError, IndexError):  # pragma: nocover

@@ -255,7 +255,7 @@ class TaskManager(WithLogger):
             self.logger.debug("Pool was already started!")
             return
         pool_cls = self.POOL_MODES.get(self._pool_mode)
-        if not pool_cls:  # nocover
+        if not pool_cls:  # pragma: nocover
             raise ValueError(f"Mode: `{self._pool_mode}` is not supported")
         self._pool = pool_cls(self._nb_workers, initializer=init_worker)
 

@@ -729,6 +729,42 @@ async def test_connection_id_in_to_field_detected(caplog):
             assert "Using envelope `to` field as connection_id:" in caplog.text
 
 
+@pytest.mark.asyncio
+async def test_routing_helper_applied(caplog):
+    """Test the routing helper is used for routing."""
+    logger = logging.getLogger("aea.multiplexer")
+    with caplog.at_level(logging.DEBUG, logger="aea.multiplexer"):
+        connection_1 = _make_dummy_connection()
+        connections = [connection_1]
+        multiplexer = AsyncMultiplexer(
+            connections, loop=asyncio.get_event_loop(), protocols=[DefaultProtocolMock]
+        )
+        multiplexer.logger = logger
+        envelope = Envelope(
+            to="test",
+            sender="",
+            protocol_specification_id=DefaultMessage.protocol_specification_id,
+            message=b"",
+        )
+        multiplexer._routing_helper[envelope.to] = connection_1.connection_id
+        try:
+            await multiplexer.connect()
+            inbox = InBox(multiplexer)
+            outbox = InBox(multiplexer)
+
+            assert inbox.empty()
+            assert outbox.empty()
+            multiplexer.put(envelope)
+            await outbox.async_get()
+        finally:
+            await multiplexer.disconnect()
+
+            assert (
+                f"Using routing helper with connection_id: {connection_1.connection_id}"
+                in caplog.text
+            )
+
+
 def test_multiplexer_setup():
     """Test multiplexer setup to set connections."""
     node = LocalNode()
