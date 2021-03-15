@@ -33,7 +33,7 @@ setup(
     description="CLI extension for AEA framework wrapping IPFS functionality.",
     packages=["aea_cli_ipfs"],
     entry_points={"aea.cli": ["ipfs_cli_command = aea_cli_ipfs.core:ipfs"]},
-    install_requires=["aea>=0.11.0, ipfshttpclient>=0.6.1"],
+    install_requires=["aea>=0.11.0, <0.12.0", "ipfshttpclient>=0.6.1"],
     classifiers=[
         "Environment :: Console",
         "Environment :: Web Environment",
