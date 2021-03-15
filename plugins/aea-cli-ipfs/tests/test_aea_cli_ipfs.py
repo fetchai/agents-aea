@@ -29,10 +29,8 @@ from click.testing import CliRunner
 
 from aea.cli.core import cli
 
-from tests.conftest import ROOT_DIR
 
-
-sys.path.append(os.path.join(ROOT_DIR, "plugins", "aea-cli-ipfs"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 
 cli.add_command("ipfs", ipfs)
