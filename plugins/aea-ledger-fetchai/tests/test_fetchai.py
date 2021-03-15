@@ -30,7 +30,7 @@ from unittest.mock import MagicMock, call
 import pytest
 from aea_ledger_fetchai import FetchAIApi, FetchAICrypto, FetchAIFaucetApi
 
-from tests.conftest import FETCHAI_TESTNET_CONFIG, MAX_FLAKY_RERUNS
+from tests.conftest import FETCHAI_TESTNET_CONFIG, MAX_FLAKY_RERUNS, ROOT_DIR
 
 
 @pytest.fixture
@@ -685,3 +685,151 @@ def test_execute_shell_command(mock_api_call):
 
     res = json.loads(cosmos_api._execute_shell_command(["test", "command"]))
     assert res == {"SOME": "RESULT"}
+
+
+def test_helper_get_code_id():
+    """Test CosmosHelper.is_transaction_settled."""
+    assert (
+        FetchAIApi.get_code_id(
+            {
+                "logs": [
+                    {
+                        "msg_index": 0,
+                        "log": "",
+                        "events": [
+                            {
+                                "type": "message",
+                                "attributes": [
+                                    {"key": "action", "value": "store-code"},
+                                    {"key": "module", "value": "wasm"},
+                                    {
+                                        "key": "signer",
+                                        "value": "fetch1pa7q6urt98dfe2rsvfaefj8zhh792sdfuzym2t",
+                                    },
+                                    {"key": "code_id", "value": "631"},
+                                ],
+                            }
+                        ],
+                    }
+                ]
+            }
+        )
+        == 631
+    )
+
+
+def test_helper_get_contract_address():
+    """Test CosmosHelper.is_transaction_settled."""
+    assert (
+        FetchAIApi.get_contract_address(
+            {
+                "logs": [
+                    {
+                        "msg_index": 0,
+                        "log": "",
+                        "events": [
+                            {
+                                "type": "message",
+                                "attributes": [
+                                    {"key": "action", "value": "instantiate"},
+                                    {"key": "module", "value": "wasm"},
+                                    {
+                                        "key": "signer",
+                                        "value": "fetch1pa7q6urt98dfe2rsvfaefj8zhh792sdfuzym2t",
+                                    },
+                                    {"key": "code_id", "value": "631"},
+                                    {
+                                        "key": "contract_address",
+                                        "value": "fetch1lhd5t8jdjn0n4q27hsah6c0907nxrswcp5l4nw",
+                                    },
+                                ],
+                            }
+                        ],
+                    }
+                ]
+            }
+        )
+        == "fetch1lhd5t8jdjn0n4q27hsah6c0907nxrswcp5l4nw"
+    )
+
+
+def test_load_contract_interface():
+    """Test the load_contract_interface method."""
+    path = Path(ROOT_DIR, "tests", "data", "dummy_contract", "build", "some.wasm")
+    result = FetchAIApi.load_contract_interface(path)
+    assert "wasm_byte_code" in result
+
+
+@pytest.mark.integration
+@pytest.mark.ledger
+def test_construct_transfer_transaction_both_versions():
+    """Test the construction of a transfer transaction for both versions."""
+    account = FetchAICrypto()
+    fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
+
+    transfer_transaction = fetchai_api._get_init_transaction(
+        deployer_address=account.address,
+        denom="atestfet",
+        chain_id="cosmoshub-3",
+        account_number=1,
+        sequence=1,
+        amount=0,
+        code_id=200,
+        init_msg={},
+        label="something",
+    )
+    assert (
+        isinstance(transfer_transaction, dict) and len(transfer_transaction) == 6
+    ), "Incorrect transfer_transaction constructed."
+    assert len(transfer_transaction["msgs"][0]["value"]["init_funds"]) == 1
+    fetchai_api.cosmwasm_version = ">=0.10"
+    transfer_transaction = fetchai_api._get_init_transaction(
+        deployer_address=account.address,
+        denom="atestfet",
+        chain_id="cosmoshub-3",
+        account_number=1,
+        sequence=1,
+        amount=0,
+        code_id=200,
+        init_msg={},
+        label="something",
+    )
+    assert (
+        isinstance(transfer_transaction, dict) and len(transfer_transaction) == 6
+    ), "Incorrect transfer_transaction constructed."
+    assert len(transfer_transaction["msgs"][0]["value"]["init_funds"]) == 0
+
+
+@pytest.mark.integration
+@pytest.mark.ledger
+def test_construct_handle_transaction_both_versions():
+    """Test the construction of a handle transaction for both versions."""
+    account = FetchAICrypto()
+    account2 = FetchAICrypto()
+    fetchai_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
+
+    transaction = fetchai_api.get_handle_transaction(
+        sender_address=account.address,
+        contract_address=account2.address,
+        handle_msg={},
+        amount=0,
+        tx_fee=100,
+        denom="atestfet",
+    )
+    assert (
+        isinstance(transaction, dict) and len(transaction) == 6
+    ), "Incorrect transfer_transaction constructed."
+    assert len(transaction["msgs"][0]["value"]["sent_funds"]) == 1
+    fetchai_api.cosmwasm_version = ">=0.10"
+    transaction = fetchai_api.get_handle_transaction(
+        sender_address=account.address,
+        contract_address=account2.address,
+        handle_msg={},
+        amount=0,
+        tx_fee=100,
+        denom="atestfet",
+    )
+    assert (
+        isinstance(transaction, dict) and len(transaction) == 6
+    ), "Incorrect transfer_transaction constructed."
+    assert len(transaction["msgs"][0]["value"]["sent_funds"]) == 0
