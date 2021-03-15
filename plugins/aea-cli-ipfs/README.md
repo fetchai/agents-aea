@@ -8,7 +8,7 @@ Make sure you have `aea` installed.
 
 Then, install the plug-in:
 ```
-pip install .
+pip install aea-cli-ipfs
 ```
 
 Now you should be able to run `aea ipfs`.
@@ -57,4 +57,3 @@ Options:
   --help  Show this message and exit.
 
 ```
-

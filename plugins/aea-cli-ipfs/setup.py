@@ -1,7 +1,8 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2020 Fetch.AI Limited
+#   Copyright 2018-2021 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,4 +18,17 @@
 #
 # ------------------------------------------------------------------------------
 
-"""An example of CLI plug-in for the AEA CLI tool."""
+
+"""Setup script for the plug-in."""
+
+
+from setuptools import setup  # type: ignore
+
+
+setup(
+    name="aea-cli-ipfs",
+    version="0.1.0",
+    packages=["aea_cli_ipfs"],
+    entry_points={"aea.cli": ["ipfs_cli_command = aea_cli_ipfs.core:ipfs"]},
+    install_requires=["ipfshttpclient>=0.6.1"],
+)

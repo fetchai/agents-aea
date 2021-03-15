@@ -105,7 +105,9 @@ class IPFSTool:
 
         :return: dir name published, hash, list of items processed
         """
-        response = self.client.add(dir_path, recursive=True, wrap_with_directory=True)
+        response = self.client.add(
+            dir_path, pin=True, recursive=True, wrap_with_directory=True
+        )
         return response[-2]["Name"], response[-1]["Hash"], response[:-1]
 
     def remove(self, hash_id: str) -> Dict:

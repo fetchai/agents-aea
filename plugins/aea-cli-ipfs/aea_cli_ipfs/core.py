@@ -21,7 +21,7 @@ import os
 from typing import Optional
 
 import click
-from ipfs_cli_command.ipfs_utils import IPFSTool, NodeError, PublishError, RemoveError
+from aea_cli_ipfs.ipfs_utils import IPFSTool, NodeError, PublishError, RemoveError
 
 
 @click.group()
@@ -51,35 +51,35 @@ def add(click_context: click.Context, dir_path: Optional[str], publish=False) ->
     dir_path = dir_path or os.getcwd()
     ipfs_tool = click_context.obj
     click.echo(f"Starting processing: {dir_path}")
-    name, hash_id, _ = ipfs_tool.add(dir_path)
-    click.echo(f"Added: `{name}`, hash id is {hash_id}")
+    name, hash_, _ = ipfs_tool.add(dir_path)
+    click.echo(f"Added: `{name}`, hash is {hash_}")
     if publish:
         click.echo("Publishing...")
         try:
-            response = ipfs_tool.publish(hash_id)
+            response = ipfs_tool.publish(hash_)
             click.echo(f"Published to {', '.join(response.keys())}")
         except PublishError as e:
-            raise click.ClickException(str(e)) from e
+            raise click.ClickException(f"Publish failed: {str(e)}") from e
 
 
 @ipfs.command()
 @click.argument(
-    "hash_id", metavar="hash_id", type=str, required=True,
+    "hash_", metavar="hash", type=str, required=True,
 )
 @click.pass_context
-def remove(click_context: click.Context, hash_id: str) -> None:
+def remove(click_context: click.Context, hash_: str) -> None:
     """Remove a directory from ipfs by it's hash."""
     ipfs_tool = click_context.obj
     try:
-        ipfs_tool.remove(hash_id)
-        click.echo(f"{hash_id} was removed successfully")
+        ipfs_tool.remove(hash_)
+        click.echo(f"{hash_} was removed successfully")
     except RemoveError as e:
-        raise click.ClickException(str(e)) from e
+        raise click.ClickException(f"Remove error: {str(e)}") from e
 
 
 @ipfs.command()
 @click.argument(
-    "hash_id", metavar="hash_id", type=str, required=True,
+    "hash_", metavar="hash", type=str, required=True,
 )
 @click.argument(
     "target_dir",
@@ -88,11 +88,11 @@ def remove(click_context: click.Context, hash_id: str) -> None:
 )
 @click.pass_context
 def download(
-    click_context: click.Context, hash_id: str, target_dir: Optional[str]
+    click_context: click.Context, hash_: str, target_dir: Optional[str]
 ) -> None:
     """Download directory by it's hash, if not target directory specified will use current one."""
     target_dir = target_dir or os.getcwd()
     ipfs_tool = click_context.obj
-    click.echo(f"Download {hash_id} to {target_dir}")
-    ipfs_tool.download(hash_id, target_dir)
+    click.echo(f"Download {hash_} to {target_dir}")
+    ipfs_tool.download(hash_, target_dir)
     click.echo("Download complete!")

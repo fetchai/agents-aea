@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
@@ -18,17 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-
-"""Setup script for the plug-in."""
-
-
-from setuptools import setup  # type: ignore
-
-
-setup(
-    name="aea-cli-ipfs-command",
-    version="0.1.0",
-    packages=["ipfs_cli_command"],
-    entry_points={"aea.cli": ["ipfs_cli_command = ipfs_cli_command.core:ipfs"]},
-    install_requires=["ipfshttpclient>=0.6.1"],
-)
+"""Tests for aea plugins."""
