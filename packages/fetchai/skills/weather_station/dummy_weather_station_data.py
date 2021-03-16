@@ -27,6 +27,8 @@ import sqlite3
 import time
 from typing import Dict, Union
 
+from aea.exceptions import enforce
+
 
 _default_logger = logging.getLogger(
     "aea.packages.fetchai.skills.weather_station.dummy_weather_station_data"
@@ -117,9 +119,9 @@ class Forecast:
     def generate(self, number_of_entries: int) -> None:
         """Generate weather data."""
         # some arbitrary max number to prevent arbitrarily large entries
-        assert number_of_entries <= 1000000
+        enforce(number_of_entries <= 1000000, "number_of_entries is too high!")
 
-        for _ in range(number_of_entries):
+        for _ in range(number_of_entries):  # nosec
             dict_of_data = {
                 "abs_pressure": random.randrange(1022, 1025, 1),
                 "delay": random.randint(2, 7),
