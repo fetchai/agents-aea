@@ -41,10 +41,11 @@ class Strategy(GenericStrategy):
         """
         temper = Temper()
         retries = 0
+        degrees = {}
         while retries < MAX_RETRIES:
             results = temper.read()
             if "internal temperature" in results[0].keys():
-                degrees = {"thermometer_data": str(results)}
+                degrees = {"thermometer_data": str(results[0]["internal temperature"])}
                 break
             self.context.logger.debug("Couldn't read the sensor I am re-trying.")
             time.sleep(0.5)

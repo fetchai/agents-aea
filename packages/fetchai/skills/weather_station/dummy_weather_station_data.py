@@ -114,9 +114,12 @@ class Forecast:
         con_.commit()
         con_.close()
 
-    def generate(self) -> None:
+    def generate(self, number_of_entries: int) -> None:
         """Generate weather data."""
-        while True:  # nosec
+        # some arbitrary max number to prevent arbitrarily large entries
+        assert number_of_entries <= 1000000
+
+        for _ in range(number_of_entries):
             dict_of_data = {
                 "abs_pressure": random.randrange(1022, 1025, 1),
                 "delay": random.randint(2, 7),
@@ -136,4 +139,4 @@ class Forecast:
 
 if __name__ == "__main__":
     a = Forecast()
-    a.generate()
+    a.generate(59)
