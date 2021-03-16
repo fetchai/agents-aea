@@ -18,6 +18,8 @@
 # ------------------------------------------------------------------------------
 """Core components for `ipfs cli command`."""
 import os
+import time
+from contextlib import suppress
 from typing import Optional
 
 import click
@@ -33,7 +35,29 @@ def ipfs(click_context: click.Context) -> None:
     try:
         ipfs_tool.chec_ipfs_node_running()
     except NodeError as e:
-        raise click.ClickException(f"Error connecting to node: {e}")
+        click.echo("Can not connect to the local ipfs node. Starting own one.")
+        ipfs_tool.daemon.start()
+        for _ in range(10):
+            with suppress(NodeError):  # pragma: nocover
+                ipfs_tool.chec_ipfs_node_running()
+                click.echo("ipfs node started.")
+                break
+            time.sleep(1)
+        else:
+            raise click.ClickException(
+                "Failed to connect or start ipfs node! Please check ipfs is installed or launched!"
+            ) from e
+
+
+@ipfs.resultcallback()
+@click.pass_context
+def process_result(click_context: click.Context, *_) -> None:
+    """Tear down command group."""
+    ipfs_tool = click_context.obj
+    if ipfs_tool.daemon.is_started():  # pragma: nocover
+        click.echo("Stopping ipfs node launched to execute the command.")
+        ipfs_tool.daemon.stop()
+        click.echo("Daemon stopped.")
 
 
 @ipfs.command()
@@ -59,7 +83,7 @@ def add(
         click.echo("Publishing...")
         try:
             response = ipfs_tool.publish(hash_)
-            click.echo(f"Published to {', '.join(response.keys())}")
+            click.echo(f"Published to {response['Name']}")
         except PublishError as e:
             raise click.ClickException(f"Publish failed: {str(e)}") from e
 

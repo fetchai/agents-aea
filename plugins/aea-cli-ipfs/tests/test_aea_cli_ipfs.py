@@ -16,21 +16,25 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""Tests for aea clie ipfs plugin."""
+"""Tests for aea cli ipfs plugin."""
 import os
 import sys
 from unittest.mock import patch
 
 import click
-import ipfshttpclient
+import ipfshttpclient  # type: ignore
 import pytest
-from aea_cli_ipfs.core import PublishError, ipfs  # type: ignore
 from click.testing import CliRunner
 
 from aea.cli.core import cli
 
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+
+from aea_cli_ipfs.core import (  # noqa # type: ignore  # pylint: disable=wrong-import-position
+    PublishError,
+    ipfs,
+)
 
 
 cli.add_command("ipfs", ipfs)
@@ -72,7 +76,7 @@ def test_ipfs_add():
             )
 
 
-def test_node_not_alive():
+def test_node_not_alive_can_not_be_started():
     """Test error on node connection failed"""
     runner = CliRunner()
     with patch(
@@ -80,9 +84,12 @@ def test_node_not_alive():
         side_effect=ipfshttpclient.exceptions.CommunicationError(
             original=Exception("oops")
         ),
-    ):
+    ), patch("time.sleep"), patch("subprocess.Popen"):
 
-        with pytest.raises(click.ClickException, match="Error connecting to node"):
+        with pytest.raises(
+            click.ClickException,
+            match="Failed to connect or start ipfs node! Please check ipfs is installed or launched!",
+        ):
             runner.invoke(
                 cli,
                 ["ipfs", "add", "-p"],
@@ -92,7 +99,7 @@ def test_node_not_alive():
 
 
 @patch("ipfshttpclient.Client.id")
-def test_ipfs_download(*patches):
+def test_ipfs_download(*_):
     """Test aea ipfs download."""
     runner = CliRunner()
     with patch("ipfshttpclient.Client.get") as ipfs_get, patch("os.rmdir"), patch(
@@ -106,7 +113,7 @@ def test_ipfs_download(*patches):
 
 
 @patch("ipfshttpclient.Client.id")
-def test_ipfs_remove(*patches):
+def test_ipfs_remove(*_):
     """Test aea ipfs remove."""
     runner = CliRunner()
     with patch("ipfshttpclient.Client.pin.rm") as ipfs_rm:

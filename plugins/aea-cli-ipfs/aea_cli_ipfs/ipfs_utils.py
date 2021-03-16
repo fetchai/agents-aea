@@ -21,11 +21,10 @@ import os
 import shutil
 import signal
 import subprocess  # nosec
-import time
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
-import ipfshttpclient
+import ipfshttpclient  # type: ignore
 
 
 class IPFSDaemon:
@@ -35,32 +34,22 @@ class IPFSDaemon:
     :raises Exception: if IPFS is not installed.
     """
 
-    def __init__(self, timeout: float = 15.0):
+    def __init__(self):
         """Initialise IPFS daemon."""
         # check we have ipfs
-        self.timeout = timeout
-        res = shutil.which("ipfs")
-        if res is None:
-            raise Exception("Please install IPFS first!")
-        process = subprocess.Popen(  # nosec
-            ["ipfs", "--version"], stdout=subprocess.PIPE, env=os.environ.copy(),
-        )
-        output, _ = process.communicate()
-        if b"0.6.0" not in output:
-            raise Exception(
-                "Please ensure you have version 0.6.0 of IPFS daemon installed."
-            )
         self.process = None  # type: Optional[subprocess.Popen]
 
-    def __enter__(self) -> None:
+    def is_started(self) -> bool:
+        """Check daemon was started."""
+        return bool(self.process)
+
+    def start(self) -> None:
         """Run the ipfs daemon."""
         self.process = subprocess.Popen(  # nosec
             ["ipfs", "daemon"], stdout=subprocess.PIPE, env=os.environ.copy(),
         )
-        print("Waiting for {} seconds the IPFS daemon to be up.".format(self.timeout))
-        time.sleep(self.timeout)
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:  # type: ignore
+    def stop(self) -> None:  # pragma: nocover
         """Terminate the ipfs daemon."""
         if self.process is None:
             return
@@ -94,6 +83,7 @@ class IPFSTool:
         :param client_options: dict, options for ipfshttpclient instance.
         """
         self.client = ipfshttpclient.Client(**(client_options or {}))
+        self.daemon = IPFSDaemon()
 
     def add(self, dir_path: str) -> Tuple[str, str, List]:
         """
@@ -133,14 +123,15 @@ class IPFSTool:
 
         :return: None
         """
-        if not os.path.exists(target_dir):
+        if not os.path.exists(target_dir):  # pragma: nocover
             os.makedirs(target_dir, exist_ok=True)
         self.client.get(hash_id, target_dir)
 
         downloaded_path = str(Path(target_dir) / hash_id)
 
         if fix_path:
-            # self.client.get creates result with hash name  and content, but we want content in the target dir
+            # self.client.get creates result with hash name
+            # and content, but we want content in the target dir
             for each_file in Path(downloaded_path).iterdir():  # grabs all files
                 shutil.move(str(each_file), target_dir)
         os.rmdir(downloaded_path)
@@ -155,10 +146,10 @@ class IPFSTool:
         """
         try:
             return self.client.name.publish(hash_id)
-        except ipfshttpclient.exceptions.TimeoutError:
+        except ipfshttpclient.exceptions.TimeoutError as e:  # pragma: nocover
             raise PublishError(
                 "can not publish within timeout, check internet connection!"
-            )
+            ) from e
 
     def chec_ipfs_node_running(self) -> None:
         """Check ipfs node running."""
