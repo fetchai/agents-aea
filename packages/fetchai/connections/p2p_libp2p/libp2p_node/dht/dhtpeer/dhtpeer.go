@@ -143,6 +143,9 @@ type DHTPeer struct {
 	closing    chan struct{}
 	goroutines *sync.WaitGroup
 	logger     zerolog.Logger
+
+	// syncMessages map[string]*sync.WaitGroup
+	syncMessages map[string](chan *aea.Envelope)
 }
 
 // New creates a new DHTPeer
@@ -157,7 +160,7 @@ func New(opts ...Option) (*DHTPeer, error) {
 	dhtPeer.tcpAddressesLock = sync.RWMutex{}
 	dhtPeer.agentRecordsLock = sync.RWMutex{}
 	dhtPeer.persistentStoragePath = defaultPersistentStoragePath
-
+	dhtPeer.syncMessages = make(map[string](chan *aea.Envelope))
 	for _, opt := range opts {
 		if err := opt(dhtPeer); err != nil {
 			return nil, err
@@ -396,7 +399,11 @@ func formatPersistentStorageLine(record *dhtnode.AgentRecord) []byte {
 
 func (dhtPeer *DHTPeer) initAgentRecordPersistentStorage() (int, error) {
 	var err error
-	dhtPeer.storage, err = os.OpenFile(dhtPeer.persistentStoragePath, os.O_APPEND|os.O_RDWR|os.O_CREATE, 0600)
+	dhtPeer.storage, err = os.OpenFile(
+		dhtPeer.persistentStoragePath,
+		os.O_APPEND|os.O_RDWR|os.O_CREATE,
+		0600,
+	)
 	if err != nil {
 		return 0, err
 	}
@@ -572,7 +579,10 @@ func (dhtPeer *DHTPeer) Close() []error {
 	errappend(err)
 
 	//linfo().Msg("Stopping DHTPeer: waiting for goroutines to cancel...")
-	//dhtPeer.goroutines.Wait()
+	// dhtPeer.goroutines.Wait()
+	for _, channel := range dhtPeer.syncMessages {
+		close(channel)
+	}
 
 	return status
 }
@@ -769,24 +779,40 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 			nbrConns.Dec()
 			break
 		}
+		if envel.Sender != addr {
+			err = errors.New("Sender (" + envel.Sender + ") must match registered address")
+			lerror(err).Str("addr", addr).
+				Msg("while routing delegate client envelope")
+			continue
+		}
 
-		// route envelope
-		dhtPeer.goroutines.Add(1)
-		go func() {
-			defer dhtPeer.goroutines.Done()
-			if envel.Sender != addr {
-				err = errors.New("Sender (" + envel.Sender + ") must match registered address")
-				lerror(err).Str("addr", addr).
-					Msg("while routing delegate client envelope")
-			} else {
-				err := dhtPeer.RouteEnvelope(envel)
-				if err != nil {
-					lerror(err).Str("addr", addr).
-						Msg("while routing delegate client envelope")
-					// TODO() send error back
+		// initializing pairwise channel queues and one go routine per pair
+		pair := envel.To + envel.Sender
+		if _, ok := dhtPeer.syncMessages[pair]; !ok {
+			dhtPeer.syncMessages[pair] = make(chan *aea.Envelope, 1000)
+
+			// route envelope
+			dhtPeer.goroutines.Add(1)
+			go func() {
+				defer dhtPeer.goroutines.Done()
+
+				for e := range dhtPeer.syncMessages[pair] {
+					err := dhtPeer.RouteEnvelope(e)
+					if err != nil {
+						lerror(err).Str("addr", addr).
+							Msg("while routing delegate client envelope")
+						// TODO() send error back
+					}
 				}
-			}
-		}()
+			}()
+		}
+		// add to queue (nonblocking - buffered queue)
+		select {
+		case dhtPeer.syncMessages[pair] <- envel:
+		default:
+			// send back! error
+			fmt.Println("CHANNEL FULL, DISCARDING <<<-------- ", string(envel.Message))
+		}
 	}
 
 	// Remove connection from map
@@ -826,7 +852,6 @@ func (dhtPeer *DHTPeer) RouteEnvelope(envel *aea.Envelope) error {
 	routeCount.Inc()
 	routeCountAll.Inc()
 	start := timer.NewTimer()
-
 	println("-> Routing envelope:", envel.String())
 
 	// get sender agent envelRec

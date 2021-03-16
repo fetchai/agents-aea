@@ -61,6 +61,9 @@ base_deps = [
     "ecdsa>=0.15"
 ]
 
+if os.name == "nt":
+    base_deps.append("pywin32>=300")
+
 here = os.path.abspath(os.path.dirname(__file__))
 about: Dict[str, str] = {}
 with open(os.path.join(here, PACKAGE_NAME, "__version__.py"), "r") as f:
