@@ -503,10 +503,12 @@ def test_set_from_config_custom():
     agent_configuration.decision_maker_handler = {
         "dotted_path": dm_dotted_path,
         "file_path": dm_file_path,
+        "config": {},
     }
     agent_configuration.error_handler = {
         "dotted_path": f"aea.error_handler.default{DOTTED_PATH_MODULE_ELEMENT_SEPARATOR}ErrorHandler",
         "file_path": ROOT_DIR + "/aea/error_handler/default.py",
+        "config": {},
     }
     agent_configuration.skill_exception_policy = ExceptionPolicyEnum.just_log
     agent_configuration.connection_exception_policy = ExceptionPolicyEnum.just_log

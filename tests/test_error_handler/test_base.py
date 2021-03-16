@@ -29,7 +29,7 @@ _default_logger = logging.getLogger(__name__)
 
 def test_send_unsupported_protocol():
     """Test the send_unsupported_protocol method."""
-    handler = ErrorHandler
+    handler = ErrorHandler()
     envelope_mock = Mock()
     envelope_mock.protocol_specification_id = "1"
     envelope_mock.sender = "2"
@@ -45,7 +45,7 @@ def test_send_unsupported_protocol():
 
 def test_send_decoding_error():
     """Test the send_decoding_error method."""
-    handler = ErrorHandler
+    handler = ErrorHandler()
     envelope_mock = Mock()
     envelope_mock.protocol_specification_id = "1"
     envelope_mock.sender = "2"
@@ -62,7 +62,7 @@ def test_send_decoding_error():
 
 def test_send_no_active_handler_1():
     """Test the send_no_active_handler method."""
-    handler = ErrorHandler
+    handler = ErrorHandler()
     envelope_mock = Mock()
     envelope_mock.protocol_specification_id = "1"
     envelope_mock.sender = "2"
@@ -80,7 +80,7 @@ def test_send_no_active_handler_1():
 
 def test_send_no_active_handler_2():
     """Test the send_no_active_handler method."""
-    handler = ErrorHandler
+    handler = ErrorHandler()
     envelope_mock = Mock()
     envelope_mock.protocol_id = "1"
     envelope_mock.sender = "2"
