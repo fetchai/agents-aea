@@ -915,7 +915,6 @@ def test_builder_pypi_dependencies():
     dependencies = builder._package_dependency_manager.pypi_dependencies
     assert set(dependencies.keys()) == {
         "protobuf",
-        "vyper",
         "aea-ledger-fetchai",
         "aea-ledger-ethereum",
         "aea-ledger-cosmos",

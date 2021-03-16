@@ -25,11 +25,12 @@ from asyncio import CancelledError
 from asyncio.events import AbstractEventLoop
 from asyncio.tasks import Task
 from traceback import format_exc
-from typing import Any, Dict, Optional, Set, Tuple, Union, cast
+from typing import Any, Optional, Set, Tuple, Union, cast
 
 import aiohttp
 import certifi  # pylint: disable=wrong-import-order
 from aiohttp.client_reqrep import ClientResponse
+from multidict import CIMultiDict, CIMultiDictProxy
 
 from aea.common import Address
 from aea.configurations.base import PublicId
@@ -47,7 +48,7 @@ SUCCESS = 200
 NOT_FOUND = 404
 REQUEST_TIMEOUT = 408
 SERVER_ERROR = 500
-PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.18.0")
+PUBLIC_ID = PublicId.from_str("fetchai/http_client:0.19.0")
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.http_client")
 
@@ -56,7 +57,7 @@ RequestId = str
 ssl_context = ssl.create_default_context(cafile=certifi.where())
 
 
-def headers_to_string(headers: Dict) -> str:
+def headers_to_string(headers: CIMultiDictProxy) -> str:
     """
     Convert headers to string.
 
@@ -205,7 +206,7 @@ class HTTPClientAsyncChannel:
             envelope = self.to_envelope(
                 request_http_message,
                 status_code=self.DEFAULT_EXCEPTION_CODE,
-                headers={},
+                headers=CIMultiDictProxy(CIMultiDict()),
                 status_text="HTTPConnection request error.",
                 body=format_exc().encode("utf-8"),
                 dialogue=dialogue,
@@ -317,7 +318,7 @@ class HTTPClientAsyncChannel:
     def to_envelope(
         http_request_message: HttpMessage,
         status_code: int,
-        headers: dict,
+        headers: CIMultiDictProxy,
         status_text: Optional[Any],
         body: bytes,
         dialogue: HttpDialogue,

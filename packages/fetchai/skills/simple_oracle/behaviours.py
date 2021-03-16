@@ -137,14 +137,7 @@ class SimpleOracleBehaviour(TickerBehaviour):
             ledger_id=strategy.ledger_id,
             contract_id=str(CONTRACT_PUBLIC_ID),
             callable="get_deploy_transaction",
-            kwargs=ContractApiMessage.Kwargs(
-                {
-                    "deployer_address": self.context.agent_address,
-                    # "ERC20Address": strategy.erc20_address,
-                    # "initialFee": strategy.initial_fee_deploy,
-                    "gas": strategy.default_gas_deploy,
-                }
-            ),
+            kwargs=strategy.get_deploy_kwargs(),
         )
         contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue,)
         contract_api_dialogue.terms = strategy.get_deploy_terms()

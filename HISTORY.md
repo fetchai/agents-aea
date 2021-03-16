@@ -1,5 +1,19 @@
 # Release History
 
+## 0.11.1 (2020-03-06)
+
+- Bumps `aiohttp` to `>=3.7.4` to address a CVE affecting `http_server`, `http_client` and `webhook` connections
+- Adds script to ensure Pipfile and `tox.ini` dependencies align
+- Enforces presence of `protocol_specification_id` in `protocol.yaml`
+- Adds support for installation of agent-level PyPI dependencies in `AEABuilder`
+- Sets default ledger plugin during `aea create`
+- Updates various agent packages with missing ledger plugin dependencies
+- Bumps various development dependencies
+- Renames `coin_price` skill to `advanced_data_request` skill and generalises it
+- Updates `fetch_beacon` skill to use `ledger` connection
+- Multiple docs updates to fix order of CLI commands with respect to installing dependencies
+- Multiple additional tests and test stability fixes
+
 ## 0.11.0 (2020-03-04)
 
 - Adds slots usage in frequently used framework objects, including `Dialogue`

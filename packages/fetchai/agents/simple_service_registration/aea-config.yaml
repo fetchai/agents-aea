@@ -1,6 +1,6 @@
 agent_name: simple_service_registration
 author: fetchai
-version: 0.22.0
+version: 0.23.0
 description: A simple example of service registration.
 license: Apache-2.0
 aea_version: '>=0.11.0, <0.12.0'

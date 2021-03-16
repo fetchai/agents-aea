@@ -21,7 +21,7 @@
 
 from typing import Any, Dict, Optional, cast
 
-from vyper.utils import keccak256
+from aea_ledger_ethereum import EthereumApi
 
 from aea.configurations.base import PublicId
 from aea.protocols.base import Message
@@ -32,6 +32,11 @@ from packages.fetchai.skills.fetch_beacon.dialogues import (
     LedgerApiDialogue,
     LedgerApiDialogues,
 )
+
+
+def keccak256(input_: bytes) -> bytes:
+    """Compute hash."""
+    return bytes(bytearray.fromhex(EthereumApi.get_hash(input_)[2:]))
 
 
 class LedgerApiHandler(Handler):
@@ -69,6 +74,8 @@ class LedgerApiHandler(Handler):
         # handle message
         if ledger_api_msg.performative is LedgerApiMessage.Performative.STATE:
             self._handle_state(ledger_api_msg)
+        elif ledger_api_msg.performative == LedgerApiMessage.Performative.ERROR:
+            self._handle_error(ledger_api_msg, ledger_api_dialogue)  # pragma: nocover
         else:
             self._handle_invalid(ledger_api_msg, ledger_api_dialogue)
 
@@ -118,9 +125,9 @@ class LedgerApiHandler(Handler):
         if block_height_str:
             block_height = int(block_height_str)  # type: Optional[int]
         else:
-            block_height = None
+            block_height = None  #  pragma: nocover
 
-        if entropy is None:
+        if entropy is None:  # pragma: nocover
             self.context.logger.info("entropy not present")
         elif block_height is None:  # pragma: nocover
             self.context.logger.info("block height not present")
@@ -145,7 +152,7 @@ class LedgerApiHandler(Handler):
         :param ledger_api_message: the ledger api message
         :param ledger_api_dialogue: the ledger api dialogue
         """
-        self.context.logger.info(
+        self.context.logger.info(  # pragma: nocover
             "received ledger_api error message={} in dialogue={}.".format(
                 ledger_api_msg, ledger_api_dialogue
             )

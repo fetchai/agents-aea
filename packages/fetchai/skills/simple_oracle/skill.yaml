@@ -8,10 +8,10 @@ aea_version: '>=0.11.0, <0.12.0'
 fingerprint:
   README.md: QmcvyraEedZd5PEnmbijkkcsDrQQKDVJxPDUXVrwP3Ni3J
   __init__.py: QmZXoRFUzSr1muZEyJYUeHQjWZp6jPmYTeHTsXJ47fXnV6
-  behaviours.py: Qmea3paWLmXV3i5zNjvQVPLK5ycF6P9zDjxGR5RDNaarL8
+  behaviours.py: QmcjcRbiAfV87yGg35FtEVy64v4qbvJRy3nepMhMttpJda
   dialogues.py: QmVCJ1WoW4xEDrYs56VbTvMiKu1YST7T3DrTjhAyYoBFJa
-  handlers.py: QmZgXkCbzzBFGxe9vu3jJyWojg1SZDpBuW97XduXaG1MPT
-  strategy.py: QmdycLa71UeUGghbBSrXD6g2viZn7BK2njiwTRLPkNLAe4
+  handlers.py: QmTWk3rxs2KMb8C2mEJAyUHxNvN3WnWnFutzBUimQSxXiF
+  strategy.py: QmYLWNmhGWjMyNJv6MyahKxFjtaxo8MsE49GevJTbq8gSC
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/oracle:0.5.0
@@ -65,17 +65,21 @@ models:
     class_name: SigningDialogues
   strategy:
     args:
-      contract_address: null
+      contract_address: fetch1m4hdk6ca0p3czd4k6wfanhkswjelw8qr6ww03u
       default_gas_deploy: 10000000
       default_gas_grant_role: 10000000
       default_gas_update: 15000000
       erc20_address: '0x0000000000000000000000000000000000000000'
       initial_fee_deploy: 1000000000000
-      is_oracle_role_granted: false
+      is_oracle_role_granted: true
       ledger_id: fetchai
       oracle_value_name: null
       update_function: updateOracleValue
     class_name: Strategy
-dependencies: {}
+dependencies:
+  aea-ledger-ethereum:
+    version: <0.2.0,>=0.1.0
+  aea-ledger-fetchai:
+    version: <0.2.0,>=0.1.0
 is_abstract: false
 connections: []

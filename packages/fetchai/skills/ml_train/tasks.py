@@ -16,14 +16,10 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tasks for the 'ml_train' skill."""
-
 from typing import Any, Tuple
 
 import numpy as np
-import tensorflow as tf
-from tensorflow import keras
 
 from aea.skills.base import SkillContext
 from aea.skills.tasks import Task
@@ -43,7 +39,6 @@ class MLTrainTask(Task):
         super().__init__(logger=skill_context.logger)
         self.train_x, self.train_y = train_data
 
-        self.model = self._make_model()
         self.epochs_per_batch = epochs_per_batch
         self.batch_size = batch_size
 
@@ -54,6 +49,8 @@ class MLTrainTask(Task):
     @staticmethod
     def _make_model() -> Any:
         """Make the model."""
+        import tensorflow as tf  # pylint: disable=import-outside-toplevel
+
         model = tf.keras.Sequential(
             [
                 tf.keras.layers.Flatten(input_shape=(28, 28)),
@@ -68,13 +65,14 @@ class MLTrainTask(Task):
         )
         return model
 
-    def execute(self, *args: Any, **kwargs: Any) -> keras.Model:
+    def execute(self, *args: Any, **kwargs: Any) -> Any:
         """Execute the task."""
         self.logger.info("Start training with {} rows".format(self.train_x.shape[0]))
-        self.model.fit(self.train_x, self.train_y, epochs=self.epochs_per_batch)
-        loss, acc = self.model.evaluate(self.train_x, self.train_y, verbose=2)
+        model = self._make_model()
+        model.fit(self.train_x, self.train_y, epochs=self.epochs_per_batch)
+        loss, acc = model.evaluate(self.train_x, self.train_y, verbose=2)
         self.logger.info("Loss: {}, Acc: {}".format(loss, acc))
-        return self.model
+        return loss, acc
 
     def teardown(self) -> None:
         """Teardown the task."""

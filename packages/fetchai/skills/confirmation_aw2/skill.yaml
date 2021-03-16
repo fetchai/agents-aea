@@ -93,5 +93,7 @@ models:
       service_id: weather_data
       stop_searching_on_result: false
     class_name: Strategy
-dependencies: {}
+dependencies:
+  aea-ledger-fetchai:
+    version: <0.2.0,>=0.1.0
 is_abstract: false

@@ -39,9 +39,10 @@ class DummyTask(Task):
         """
         pass
 
-    def execute(self, *args, **kwargs) -> None:
+    def execute(self, *args, **kwargs) -> int:
         """Execute the task."""
         self.nb_execute_called += 1
+        return self.nb_execute_called
 
     def teardown(self) -> None:
         """Teardown the task."""

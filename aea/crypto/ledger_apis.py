@@ -193,6 +193,23 @@ class LedgerApis:
         return tx
 
     @staticmethod
+    def get_contract_address(identifier: str, tx_receipt: Any) -> Optional[Address]:
+        """
+        Get the contract address from a transaction receipt.
+
+        :param identifier: the identifier of the ledger
+        :param tx_receipt: the transaction digest
+        :return: the contract address if successful
+        """
+        enforce(
+            identifier in ledger_apis_registry.supported_ids,
+            "Not a registered ledger api identifier.",
+        )
+        api_class = make_ledger_api_cls(identifier)
+        address = api_class.get_contract_address(tx_receipt)
+        return address
+
+    @staticmethod
     def is_transaction_settled(identifier: str, tx_receipt: Any) -> bool:
         """
         Check whether the transaction is settled and correct.

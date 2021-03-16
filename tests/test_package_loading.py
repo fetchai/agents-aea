@@ -16,11 +16,12 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains tests for AEA package loading."""
 import os
 import sys
 from unittest.mock import Mock
+
+import pytest
 
 from aea.skills.base import Skill
 
@@ -50,3 +51,19 @@ def test_loading():
     )
 
     assert bar() == 42
+
+    import packages  # type: ignore
+    import packages.dummy_author  # type: ignore
+    import packages.dummy_author.skills  # type: ignore
+    import packages.dummy_author.skills.dummy  # type: ignore
+
+    with pytest.raises(
+        ModuleNotFoundError, match="No module named 'packages.dummy_author.connections'"
+    ):
+        import packages.dummy_author.connections  # type: ignore
+
+    with pytest.raises(
+        ModuleNotFoundError,
+        match="No module named 'packages.dummy_author.skills.not_exists_skill'",
+    ):
+        import packages.dummy_author.skills.not_exists_skill  # type: ignore # noqa # flake8: noqa

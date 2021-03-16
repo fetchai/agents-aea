@@ -4,6 +4,10 @@ The primary tool for upgrading AEA projects is the `aea upgrade` command in the 
 
 Below we describe the additional manual steps required to upgrade between different versions:
 
+## `v0.11.0` to `v0.11.1`
+
+No backwards incompatible changes.
+
 ## `v0.10.1` to `v0.11.0`
 
 Take special care when upgrading to `v0.11.0`. We introduced several breaking changes in preparation for `v1`!
@@ -32,7 +36,7 @@ Crypto modules have been extracted and released as independent plug-ins, release
 - Ethereum crypto classes have been released in the `aea-ledger-ethereum` package;
 - Cosmos crypto classes have been released in the `aea-ledger-cosmos` package.
 
-If an AEA project, or an AEA package, makes use of crypto functionalities, it will be needed to add the above packages as PyPI dependencies with version specifiers `<0.2.0,>=0.1.0`, i.e.:
+If an AEA project, or an AEA package, makes use of crypto functionalities, it will be needed to add the above packages as PyPI dependencies with version specifiers ranging from the latest minor and the latest minor + 1 (excluded). E.g. if the latest version if `0.1.0`, the version specifier should be `<0.2.0,>=0.1.0`:
 ```yaml
 dependencies:
   aea-ledger-cosmos:
