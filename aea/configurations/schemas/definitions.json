@@ -172,7 +172,7 @@
       "required": [
         "dotted_path",
         "file_path",
-        "config",
+        "config"
       ],
       "properties": {
         "dotted_path": {
