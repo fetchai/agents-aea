@@ -34,8 +34,8 @@ from aea.launcher import AEALauncher
 
 @click.command()
 @click.argument("agents", nargs=-1, type=AgentDirectory())
-@click.argument(
-    "password", metavar="PASSWORD", type=str, default=None, required=False,
+@click.option(
+    "--password", metavar="PASSWORD", type=str, default=None, required=False,
 )
 @click.option("--multithreaded", is_flag=True)
 @click.pass_context
