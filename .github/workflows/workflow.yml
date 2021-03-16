@@ -203,7 +203,7 @@ jobs:
           pip install -e .[all]
       - name: Check aea dependenices and imports
         run: |
-          python ./scripts/check_imports_and_dependencies.py
+          tox -e dependencies_check
 
   protolint:
     continue-on-error: False
