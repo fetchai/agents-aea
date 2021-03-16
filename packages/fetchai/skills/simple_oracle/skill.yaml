@@ -65,13 +65,13 @@ models:
     class_name: SigningDialogues
   strategy:
     args:
-      contract_address: fetch1m4hdk6ca0p3czd4k6wfanhkswjelw8qr6ww03u
+      contract_address: null
       default_gas_deploy: 10000000
       default_gas_grant_role: 10000000
       default_gas_update: 15000000
       erc20_address: '0x0000000000000000000000000000000000000000'
       initial_fee_deploy: 1000000000000
-      is_oracle_role_granted: true
+      is_oracle_role_granted: false
       ledger_id: fetchai
       oracle_value_name: null
       update_function: updateOracleValue
