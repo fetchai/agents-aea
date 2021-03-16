@@ -20,7 +20,7 @@
 import os
 import time
 from contextlib import suppress
-from typing import Optional
+from typing import Any, Optional
 
 import click
 from aea_cli_ipfs.ipfs_utils import (
@@ -57,7 +57,7 @@ def ipfs(click_context: click.Context) -> None:
 
 @ipfs.resultcallback()
 @click.pass_context
-def process_result(click_context: click.Context, *_) -> None:
+def process_result(click_context: click.Context, *_: Any) -> None:
     """Tear down command group."""
     ipfs_tool = click_context.obj
     if ipfs_tool.daemon.is_started():  # pragma: nocover
