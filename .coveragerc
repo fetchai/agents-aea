@@ -11,6 +11,4 @@ omit =
     packages/fetchai/skills/gym/*
     packages/fetchai/skills/http_echo/*
     packages/fetchai/skills/registration_aw1/*
-    packages/fetchai/skills/thermometer/*
-    packages/fetchai/skills/weather_station/*
     plugins/aea-ledger-cosmos/aea_ledger_cosmos/cosmos.py
