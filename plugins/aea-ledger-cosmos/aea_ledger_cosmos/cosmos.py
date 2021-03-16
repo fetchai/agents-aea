@@ -449,7 +449,7 @@ class CosmosCrypto(Crypto[SigningKey]):
         :param password: the password to decrypt.
         :return: json string containing encrypted private key.
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pylint: disable=W0223
 
     @classmethod
     def decrypt(cls, keyfile_json: str, password: str) -> str:
@@ -460,7 +460,7 @@ class CosmosCrypto(Crypto[SigningKey]):
         :param password: the password to decrypt.
         :return: the raw private key.
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pylint: disable=W0223
 
 
 class _CosmosApi(LedgerApi):
