@@ -43,8 +43,7 @@ def test_multiaddr_consistency():
 
     tmpdir = tempfile.mkdtemp()
     key_file = tmpdir + "/key"
-    with open(key_file, "wb+") as k:
-        key.dump(k)
+    key.dump(key_file)
 
     key2 = make_crypto(DEFAULT_LEDGER, private_key_path=key_file)
     maddr2 = MultiAddr(HOST, PORT, key2.public_key)

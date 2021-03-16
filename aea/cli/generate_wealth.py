@@ -51,11 +51,15 @@ def generate_wealth(
 ) -> None:
     """Generate wealth for the agent on a test network."""
     ctx = cast(Context, click_context.obj)
-    _try_generate_wealth(ctx, type_, url, password, sync)
+    _try_generate_wealth(ctx, type_, url, sync, password)
 
 
 def _try_generate_wealth(
-    ctx: Context, type_: str, url: Optional[str], password: Optional[str], sync: bool
+    ctx: Context,
+    type_: str,
+    url: Optional[str],
+    sync: bool = False,
+    password: Optional[str] = None,
 ) -> None:
     """
     Try generate wealth for the provided network identifier.
@@ -63,8 +67,8 @@ def _try_generate_wealth(
     :param ctx: the click context
     :param type_: the network type
     :param url: the url
-    :param password: the password to encrypt/decrypt the private key.
     :param sync: whether to sync or not
+    :param password: the password to encrypt/decrypt the private key.
     :return: None
     """
     wallet = get_wallet_from_context(ctx, password=password)

@@ -101,12 +101,21 @@ class CustomCrypto(Crypto):
         """
         pass
 
-    def dump(self, private_key_file: str, password: Optional[str] = None) -> None:
+    def encrypt(self, password: str) -> str:
         """
-        Dump private key to file.
+        Encrypt the private key and return in json.
 
-        :param private_key_file: the file where the key is stored.
-        :param password: the password to encrypt/decrypt the private key.
-        :return: None
+        :param private_key: the raw private key.
+        :param password: the password to decrypt.
+        :return: json string containing encrypted private key.
         """
-        pass
+
+    @classmethod
+    def decrypt(cls, keyfile_json: str, password: str) -> str:
+        """
+        Decrypt the private key and return in raw form.
+
+        :param keyfile_json: json string containing encrypted private key.
+        :param password: the password to decrypt.
+        :return: the raw private key.
+        """

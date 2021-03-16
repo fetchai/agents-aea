@@ -47,15 +47,15 @@ DEFAULT_SETTLE_TIMEOUT = 60
     required=True,
 )
 @click.argument(
-    "password", metavar="PASSWORD", type=str, default=None, required=False,
-)
-@click.argument(
     "address", type=str, required=True,
 )
 @click.argument(
     "amount", type=int, required=True,
 )
 @click.argument("fee", type=int, required=False, default=100)
+@click.argument(
+    "password", metavar="PASSWORD", type=str, default=None, required=False,
+)
 @click.option("-y", "--yes", type=bool, is_flag=True, default=False)
 @click.option("--settle-timeout", type=int, default=DEFAULT_SETTLE_TIMEOUT)
 @click.option("--sync", type=bool, is_flag=True, default=False)
@@ -64,10 +64,10 @@ DEFAULT_SETTLE_TIMEOUT = 60
 def transfer(
     click_context: click.Context,
     type_: str,
-    password: str,
     address: str,
     amount: int,
     fee: int,
+    password: str,
     yes: bool,
     settle_timeout: int,
     sync: bool,
