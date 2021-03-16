@@ -18,17 +18,12 @@
 # ------------------------------------------------------------------------------
 """This module contains tests for aea/components/loader.py"""
 from pathlib import Path
-from typing import cast
 from unittest import mock
-from unittest.mock import Mock
 
 import pytest
-from click.exceptions import ClickException
 
 from aea.components.loader import load_component_from_config
-from aea.configurations.base import ProtocolConfig, SkillConfig
-from aea.configurations.data_types import ComponentType
-from aea.configurations.loader import load_component_configuration
+from aea.configurations.base import ProtocolConfig
 from aea.exceptions import (
     AEAComponentLoadException,
     AEAInstantiationException,
@@ -37,6 +32,8 @@ from aea.exceptions import (
 from aea.helpers.base import cd
 from aea.protocols.base import Protocol
 from aea.test_tools.test_cases import AEATestCaseEmpty
+
+from tests.common.pexpect_popen import PexpectWrapper
 
 
 @pytest.fixture(scope="module")
@@ -226,17 +223,8 @@ class TestLoadFailedCauseImportedPackageNotFound(AEATestCaseEmpty):
             handlers_file.write_text(file_data)
             with cd("./vendor/fetchai"):
                 self.run_cli_command("fingerprint", "skill", "fetchai/echo:0.15.0")
-            agent_context = Mock()
-            agent_context.agent_name = self.agent_name
-            configuration = cast(
-                SkillConfig,
-                load_component_configuration(ComponentType.SKILL, Path(echo_dir)),
+
+            proc = PexpectWrapper.aea_cli(["run"], cwd=self._get_cwd())
+            proc.expect_all(
+                ["No AEA package found with author name", "not_exist_protocol"]
             )
-            configuration.directory = Path(echo_dir)
-            with pytest.raises(
-                ClickException,
-                match=r"Package loading error: An error occurred while loading skill fetchai/echo:.*\nTraceback",
-            ) as e:
-                self.run_cli_command("run", cwd=self._get_cwd())
-            assert "No AEA package found with author name" in str(e)
-            assert "not_exist_protocol" in str(e)
