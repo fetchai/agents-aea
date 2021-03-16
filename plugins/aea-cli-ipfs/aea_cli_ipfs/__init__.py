@@ -1,8 +1,7 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2021 Fetch.AI Limited
+#   Copyright 2018-2020 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,17 +16,4 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
-"""Setup script for the plug-in."""
-
-
-from setuptools import setup
-
-
-setup(
-    name="aea-cli-example",
-    version="0.1.0",
-    packages=["cli_plugin_example"],
-    entry_points={"aea.cli": ["print_hello = cli_plugin_example.core:print_hello"]},
-)
+"""IPFS CLI plug-in for the AEA CLI tool."""
