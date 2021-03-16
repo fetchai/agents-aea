@@ -19,6 +19,7 @@
 """This module contains the abstract error handler class."""
 from abc import ABC, abstractmethod
 from logging import Logger
+from typing import Any
 
 from aea.mail.base import Envelope
 
@@ -26,9 +27,12 @@ from aea.mail.base import Envelope
 class AbstractErrorHandler(ABC):
     """Error handler class for handling problematic envelopes."""
 
-    @classmethod
+    def __init__(self, **kwargs: Any):
+        """Instantiate error handler."""
+        self.config = kwargs
+
     @abstractmethod
-    def send_unsupported_protocol(cls, envelope: Envelope, logger: Logger) -> None:
+    def send_unsupported_protocol(self, envelope: Envelope, logger: Logger) -> None:
         """
         Handle the received envelope in case the protocol is not supported.
 
@@ -37,10 +41,9 @@ class AbstractErrorHandler(ABC):
         :return: None
         """
 
-    @classmethod
     @abstractmethod
     def send_decoding_error(
-        cls, envelope: Envelope, exception: Exception, logger: Logger
+        self, envelope: Envelope, exception: Exception, logger: Logger
     ) -> None:
         """
         Handle a decoding error.
@@ -51,10 +54,9 @@ class AbstractErrorHandler(ABC):
         :return: None
         """
 
-    @classmethod
     @abstractmethod
     def send_no_active_handler(
-        cls, envelope: Envelope, reason: str, logger: Logger
+        self, envelope: Envelope, reason: str, logger: Logger
     ) -> None:
         """
         Handle the received envelope in case the handler is not supported.

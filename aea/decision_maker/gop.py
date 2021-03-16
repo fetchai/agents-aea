@@ -583,18 +583,20 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
                 **kwargs,
             )
 
-    def __init__(self, identity: Identity, wallet: Wallet) -> None:
+    def __init__(self, identity: Identity, wallet: Wallet, **kwargs: Any) -> None:
         """
         Initialize the decision maker.
 
         :param identity: the identity
         :param wallet: the wallet
         """
-        kwargs = {
-            "goal_pursuit_readiness": GoalPursuitReadiness(),
-            "ownership_state": OwnershipState(),
-            "preferences": Preferences(),
-        }
+        kwargs.update(
+            {
+                "goal_pursuit_readiness": GoalPursuitReadiness(),
+                "ownership_state": OwnershipState(),
+                "preferences": Preferences(),
+            }
+        )
         super().__init__(
             identity=identity, wallet=wallet, **kwargs,
         )

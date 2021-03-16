@@ -83,14 +83,13 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
     signing_dialogue_class = SigningDialogue
     signing_msg_class = SigningMessage
 
-    def __init__(self, identity: Identity, wallet: Wallet) -> None:
+    def __init__(self, identity: Identity, wallet: Wallet, **kwargs: Any) -> None:
         """
         Initialize the decision maker.
 
         :param identity: the identity
         :param wallet: the wallet
         """
-        kwargs: Dict[str, Any] = {}
         super().__init__(
             identity=identity, wallet=wallet, **kwargs,
         )
