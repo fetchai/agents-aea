@@ -23,7 +23,13 @@ from contextlib import suppress
 from typing import Optional
 
 import click
-from aea_cli_ipfs.ipfs_utils import IPFSTool, NodeError, PublishError, RemoveError
+from aea_cli_ipfs.ipfs_utils import (
+    DownloadError,
+    IPFSTool,
+    NodeError,
+    PublishError,
+    RemoveError,
+)
 
 
 @click.group()
@@ -69,15 +75,19 @@ def process_result(click_context: click.Context, *_) -> None:
     required=False,
 )
 @click.option("-p", "--publish", is_flag=True)
+@click.option("--no-pin", is_flag=True)
 @click.pass_context
 def add(
-    click_context: click.Context, dir_path: Optional[str], publish: bool = False
+    click_context: click.Context,
+    dir_path: Optional[str],
+    publish: bool = False,
+    no_pin: bool = False,
 ) -> None:
     """Add directory to ipfs, if not directory specified the current one will be added."""
     dir_path = dir_path or os.getcwd()
     ipfs_tool = click_context.obj
     click.echo(f"Starting processing: {dir_path}")
-    name, hash_, _ = ipfs_tool.add(dir_path)
+    name, hash_, _ = ipfs_tool.add(dir_path, pin=(not no_pin))
     click.echo(f"Added: `{name}`, hash is {hash_}")
     if publish:
         click.echo("Publishing...")
@@ -120,5 +130,8 @@ def download(
     target_dir = target_dir or os.getcwd()
     ipfs_tool = click_context.obj
     click.echo(f"Download {hash_} to {target_dir}")
-    ipfs_tool.download(hash_, target_dir)
-    click.echo("Download complete!")
+    try:
+        ipfs_tool.download(hash_, target_dir)
+        click.echo("Download complete!")
+    except DownloadError as e:  # pragma: nocover
+        raise click.ClickException(str(e)) from e

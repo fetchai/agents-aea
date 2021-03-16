@@ -1,4 +1,4 @@
-# CLI Plug-in
+# AEA CLI IPFS Plug-in
 
 IPFS command to publish and download directories.
 

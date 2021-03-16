@@ -61,16 +61,24 @@ class IPFSDaemon:
             self.process.wait(2)
 
 
-class RemoveError(Exception):
+class BaseIPFSToolException(Exception):
+    """Base ipfs tool exception."""
+
+
+class RemoveError(BaseIPFSToolException):
     """Exception on remove."""
 
 
-class PublishError(Exception):
+class PublishError(BaseIPFSToolException):
     """Exception on publish."""
 
 
-class NodeError(Exception):
+class NodeError(BaseIPFSToolException):
     """Exception for node connection check."""
+
+
+class DownloadError(BaseIPFSToolException):
+    """Exception on download failed."""
 
 
 class IPFSTool:
@@ -85,18 +93,19 @@ class IPFSTool:
         self.client = ipfshttpclient.Client(**(client_options or {}))
         self.daemon = IPFSDaemon()
 
-    def add(self, dir_path: str) -> Tuple[str, str, List]:
+    def add(self, dir_path: str, pin: bool = True) -> Tuple[str, str, List]:
         """
         Add directory to ipfs.
 
         It wraps into directory.
 
-        :param dir_path: str, path to dir to publush
+        :param dir_path: str, path to dir to publish
+        :param pin: bool, pin object or not
 
         :return: dir name published, hash, list of items processed
         """
         response = self.client.add(
-            dir_path, pin=True, recursive=True, wrap_with_directory=True
+            dir_path, pin=pin, recursive=True, wrap_with_directory=True
         )
         return response[-2]["Name"], response[-1]["Hash"], response[:-1]
 
@@ -125,6 +134,10 @@ class IPFSTool:
         """
         if not os.path.exists(target_dir):  # pragma: nocover
             os.makedirs(target_dir, exist_ok=True)
+
+        if os.path.exists(os.path.join(target_dir, hash_id)):  # pragma: nocover
+            raise DownloadError(f"{hash_id} was already downloaded to {target_dir}")
+
         self.client.get(hash_id, target_dir)
 
         downloaded_path = str(Path(target_dir) / hash_id)
@@ -132,8 +145,12 @@ class IPFSTool:
         if fix_path:
             # self.client.get creates result with hash name
             # and content, but we want content in the target dir
-            for each_file in Path(downloaded_path).iterdir():  # grabs all files
-                shutil.move(str(each_file), target_dir)
+            try:
+                for each_file in Path(downloaded_path).iterdir():  # grabs all files
+                    shutil.move(str(each_file), target_dir)
+            except shutil.Error as e:  # pragma: nocover
+                raise DownloadError(f"error on move files {str(e)}") from e
+
         os.rmdir(downloaded_path)
 
     def publish(self, hash_id: str) -> Dict:
