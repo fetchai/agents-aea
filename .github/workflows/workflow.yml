@@ -195,6 +195,9 @@ jobs:
       - uses: actions/setup-python@master
         with:
           python-version: ${{ matrix.python_version }}
+      - name: Install tox
+        run : |
+          pip install tox
       - name: Check Pipfile and tox.ini consistency
         run : |
           python ./scripts/check_pipfile_and_toxini.py
