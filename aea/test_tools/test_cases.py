@@ -317,7 +317,6 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
                 "description",
                 "version",
                 "registry_path",
-                "dependencies",  # temporary
             ]
             result = all([key in allowed_diff_keys for key in content1.keys()])
             result = result and all(
