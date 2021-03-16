@@ -1102,7 +1102,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         stderr = res.stderr.decode("utf-8")
         return stdout, stderr, code
 
-    def _build_wallet(self, data_directory: str) -> Wallet:
+    def _build_wallet(
+        self, data_directory: str, password: Optional[str] = None
+    ) -> Wallet:
         """
         Build the wallet.
 
@@ -1111,6 +1113,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         the path is not an absolute path.
 
         :param data_directory: the path prefix to be prepended to each private key path.
+        :param password: the password to encrypt/decrypt the private key.
         :return: the wallet instance.
         """
 
@@ -1128,7 +1131,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         connection_private_key_paths = _prepend_if_not_none(
             self.connection_private_key_paths
         )
-        wallet = Wallet(private_key_paths, connection_private_key_paths)
+        wallet = Wallet(
+            private_key_paths, connection_private_key_paths, password=password
+        )
         return wallet
 
     def _build_identity_from_wallet(self, wallet: Wallet) -> Identity:
@@ -1221,7 +1226,11 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         """Install components extra dependecies."""
         self._package_dependency_manager.install_dependencies()
 
-    def build(self, connection_ids: Optional[Collection[PublicId]] = None,) -> AEA:
+    def build(
+        self,
+        connection_ids: Optional[Collection[PublicId]] = None,
+        password: Optional[str] = None,
+    ) -> AEA:
         """
         Build the AEA.
 
@@ -1233,13 +1242,14 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         via 'add_component_instance' and the private keys.
 
         :param connection_ids: select only these connections to run the AEA.
+        :param password: the password to encrypt/decrypt the private key.
         :return: the AEA object.
         :raises ValueError: if we cannot
         """
         datadir = self._get_data_dir()
         self._check_we_can_build()
         logging.config.dictConfig(self._logging_config)
-        wallet = self._build_wallet(datadir)
+        wallet = self._build_wallet(datadir, password=password)
         identity = self._build_identity_from_wallet(wallet)
         resources = Resources(identity.name)
         self._load_and_add_components(ComponentType.PROTOCOL, resources, identity.name)

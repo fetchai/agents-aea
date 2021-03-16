@@ -37,20 +37,24 @@ _ = PRIVATE_KEY_PATH_SCHEMA  # some modules expect this here
 
 
 def try_validate_private_key_path(
-    ledger_id: str, private_key_path: str, exit_on_error: bool = True
+    ledger_id: str,
+    private_key_path: str,
+    password: Optional[str] = None,
+    exit_on_error: bool = True,
 ) -> None:
     """
     Try validate a private key path.
 
     :param ledger_id: one of 'fetchai', 'ethereum'
     :param private_key_path: the path to the private key.
+    :param password: the password to encrypt/decrypt the private key.
     :return: None
     :raises: ValueError if the identifier is invalid.
     """
     try:
         # to validate the file, we just try to create a crypto object
         # with private_key_path as parameter
-        make_crypto(ledger_id, private_key_path=private_key_path)
+        make_crypto(ledger_id, private_key_path=private_key_path, password=password)
     except Exception as e:  # pylint: disable=broad-except  # thats ok, will exit or reraise
         error_msg = "This is not a valid private key file: '{}'\n Exception: '{}'".format(
             private_key_path, e
@@ -63,18 +67,20 @@ def try_validate_private_key_path(
             raise
 
 
-def create_private_key(ledger_id: str, private_key_file: str) -> None:
+def create_private_key(
+    ledger_id: str, private_key_file: str, password: Optional[str] = None
+) -> None:
     """
     Create a private key for the specified ledger identifier.
 
     :param ledger_id: the ledger identifier.
     :param private_key_file: the private key file.
+    :param password: the password to encrypt/decrypt the private key.
     :return: None
     :raises: ValueError if the identifier is invalid.
     """
     crypto = make_crypto(ledger_id)
-    with open(private_key_file, "wb") as fp:
-        crypto.dump(fp)
+    crypto.dump(private_key_file, password)
 
 
 def try_generate_testnet_wealth(
@@ -95,13 +101,18 @@ def try_generate_testnet_wealth(
 
 
 def private_key_verify_or_create(
-    aea_conf: AgentConfig, aea_project_path: Path, create_keys: bool = True
+    aea_conf: AgentConfig,
+    aea_project_path: Path,
+    create_keys: bool = True,
+    password: Optional[str] = None,
 ) -> None:
     """
     Check key or create if none present.
 
     :param aea_conf: AgentConfig
     :param aea_project_path: Path, where project placed.
+    :param create_keys: whether or not to create keys.
+    :param password: the password to encrypt/decrypt the private key.
 
     :return: None
     """
@@ -133,6 +144,7 @@ def private_key_verify_or_create(
                     create_private_key(
                         identifier,
                         private_key_file=str(aea_project_path / private_key_path),
+                        password=password,
                     )
                     aea_conf.private_key_paths.update(identifier, private_key_path)
         else:
@@ -140,6 +152,7 @@ def private_key_verify_or_create(
                 try_validate_private_key_path(
                     identifier,
                     str(aea_project_path / config_private_key_path),
+                    password=password,
                     exit_on_error=False,  # do not exit process
                 )
             except FileNotFoundError:  # pragma: no cover
@@ -151,18 +164,41 @@ def private_key_verify_or_create(
 
 
 def make_certificate(
-    ledger_id: str, crypto_private_key_path: str, message: bytes, output_path: str
+    ledger_id: str,
+    crypto_private_key_path: str,
+    message: bytes,
+    output_path: str,
+    password: Optional[str] = None,
 ) -> str:
-    """Create certificate."""
-    crypto = crypto_registry.make(ledger_id, private_key_path=crypto_private_key_path)
+    """
+    Create certificate.
+
+    :param ledger_id: the ledger id
+    :param crypto_private_key_path: the path to the private key.
+    :param message: the message to be signed.
+    :param output_path: the location where to save the certificate.
+    :param password: the password to encrypt/decrypt the private keys.
+    :return: the signature/certificate
+    """
+    crypto = crypto_registry.make(
+        ledger_id, private_key_path=crypto_private_key_path, password=password
+    )
     signature = crypto.sign_message(message).encode("ascii").hex()
     ensure_dir(os.path.dirname(output_path))
     Path(output_path).write_bytes(signature.encode("ascii"))
     return signature
 
 
-def get_wallet_from_agent_config(agent_config: AgentConfig) -> Wallet:
-    """Get wallet from agent_cofig provided."""
+def get_wallet_from_agent_config(
+    agent_config: AgentConfig, password: Optional[str] = None
+) -> Wallet:
+    """
+    Get wallet from agent_cofig provided.
+
+    :param agent_config: the agent configuration object
+    :param password: the password to encrypt/decrypt the private keys.
+    :return: wallet
+    """
     private_key_paths: Dict[str, Optional[str]] = {
         config_pair[0]: config_pair[1]
         for config_pair in agent_config.private_key_paths.read_all()
@@ -171,5 +207,5 @@ def get_wallet_from_agent_config(agent_config: AgentConfig) -> Wallet:
         config_pair[0]: config_pair[1]
         for config_pair in agent_config.connection_private_key_paths.read_all()
     }
-    wallet = Wallet(private_key_paths, connections_private_key_paths)
+    wallet = Wallet(private_key_paths, connections_private_key_paths, password=password)
     return wallet

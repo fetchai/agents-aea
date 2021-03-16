@@ -30,7 +30,7 @@ import tempfile
 import time
 from collections import namedtuple
 from pathlib import Path
-from typing import Any, BinaryIO, Collection, Dict, List, Optional, Tuple, cast
+from typing import Any, Collection, Dict, List, Optional, Tuple, cast
 
 from bech32 import (  # pylint: disable=wrong-import-order
     bech32_decode,
@@ -275,13 +275,16 @@ class CosmosCrypto(Crypto[SigningKey]):
     identifier = _COSMOS
     helper = CosmosHelper
 
-    def __init__(self, private_key_path: Optional[str] = None) -> None:
+    def __init__(
+        self, private_key_path: Optional[str] = None, password: Optional[str] = None
+    ) -> None:
         """
         Instantiate an ethereum crypto object.
 
         :param private_key_path: the private key path of the agent
+        :param password: the password to encrypt/decrypt the private key.
         """
-        super().__init__(private_key_path=private_key_path)
+        super().__init__(private_key_path=private_key_path, password=password)
         self._public_key = self.entity.get_verifying_key().to_string("compressed").hex()
         self._address = self.helper.get_address_from_public_key(self.public_key)
 
@@ -313,17 +316,20 @@ class CosmosCrypto(Crypto[SigningKey]):
         return self._address
 
     @classmethod
-    def load_private_key_from_path(cls, file_name: str) -> SigningKey:
+    def load_private_key_from_path(
+        cls, file_name: str, password: Optional[str] = None
+    ) -> SigningKey:
         """
         Load a private key in hex format from a file.
 
         :param file_name: the path to the hex file.
+        :param password: the password to encrypt/decrypt the private key.
         :return: the Entity.
         """
-        path = Path(file_name)
-        with open_file(path, "r") as key:
-            data = key.read()
-            signing_key = SigningKey.from_string(bytes.fromhex(data), curve=SECP256k1)
+        private_key = cls.load(file_name, password)
+        signing_key = SigningKey.from_string(
+            bytes.fromhex(private_key), curve=SECP256k1
+        )
         return signing_key
 
     def sign_message(  # pylint: disable=unused-argument
@@ -435,14 +441,26 @@ class CosmosCrypto(Crypto[SigningKey]):
         signing_key = SigningKey.generate(curve=SECP256k1)
         return signing_key
 
-    def dump(self, fp: BinaryIO) -> None:
+    def encrypt(self, password: str) -> str:
         """
-        Serialize crypto object as binary stream to `fp` (a `.write()`-supporting file-like object).
+        Encrypt the private key and return in json.
 
-        :param fp: the output file pointer. Must be set in binary mode (mode='wb')
-        :return: None
+        :param private_key: the raw private key.
+        :param password: the password to decrypt.
+        :return: json string containing encrypted private key.
         """
-        fp.write(self.private_key.encode("utf-8"))
+        raise NotImplementedError
+
+    @classmethod
+    def decrypt(cls, keyfile_json: str, password: str) -> str:
+        """
+        Decrypt the private key and return in raw form.
+
+        :param keyfile_json: json string containing encrypted private key.
+        :param password: the password to decrypt.
+        :return: the raw private key.
+        """
+        raise NotImplementedError
 
 
 class _CosmosApi(LedgerApi):

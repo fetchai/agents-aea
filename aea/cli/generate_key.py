@@ -42,17 +42,23 @@ from aea.crypto.registries import crypto_registry
     type=click.Path(exists=False, file_okay=True, dir_okay=False, readable=True),
     required=False,
 )
-def generate_key(type_: str, file: str) -> None:
+@click.argument(
+    "password", metavar="PASSWORD", type=str, default=None, required=False,
+)
+def generate_key(type_: str, file: str, password: str) -> None:
     """Generate a private key and place it in a file."""
-    _generate_private_key(type_, file)
+    _generate_private_key(type_, file, password)
 
 
-def _generate_private_key(type_: str, file: Optional[str] = None) -> None:
+def _generate_private_key(
+    type_: str, file: Optional[str] = None, password: Optional[str] = None
+) -> None:
     """
     Generate private key.
 
     :param type_: type.
     :param file: path to file.
+    :param password: the password to encrypt/decrypt the private key.
 
     :return: None
     """
@@ -64,7 +70,7 @@ def _generate_private_key(type_: str, file: Optional[str] = None) -> None:
             PRIVATE_KEY_PATH_SCHEMA.format(type__) if file is None else file
         )
         if _can_write(private_key_file):
-            create_private_key(type__, private_key_file)
+            create_private_key(type__, private_key_file, password)
 
 
 def _can_write(path: str) -> bool:

@@ -81,21 +81,30 @@ ROOT = Path(".")
 
 
 def verify_or_create_private_keys_ctx(
-    ctx: Context, aea_project_path: Path = ROOT, exit_on_error: bool = False,
+    ctx: Context,
+    aea_project_path: Path = ROOT,
+    exit_on_error: bool = False,
+    password: Optional[str] = None,
 ) -> None:
     """
     Verify or create private keys with ctx provided.
 
     :param ctx: Context
+    :param aea_project_path: the path to the aea project
+    :param exit_on_error: whether or not to exit on error
+    :param password: the password to encrypt/decrypt the private key.
     """
     try:
         AgentConfigManager.verify_or_create_private_keys(
             aea_project_path,
             private_key_helper=private_key_verify_or_create,
             substitude_env_vars=False,
+            password=password,
         ).dump_config()
         agent_config = AgentConfigManager.verify_or_create_private_keys(
-            aea_project_path, private_key_helper=private_key_verify_or_create
+            aea_project_path,
+            private_key_helper=private_key_verify_or_create,
+            password=password,
         ).agent_config
         if ctx is not None:
             ctx.agent_config = agent_config
@@ -648,7 +657,7 @@ def try_get_balance(  # pylint: disable=unused-argument
         raise click.ClickException(str(e))
 
 
-def get_wallet_from_context(ctx: Context) -> Wallet:
+def get_wallet_from_context(ctx: Context, password: Optional[str] = None) -> Wallet:
     """
     Get wallet from current click Context.
 
@@ -656,8 +665,8 @@ def get_wallet_from_context(ctx: Context) -> Wallet:
 
     :return: wallet
     """
-    verify_or_create_private_keys_ctx(ctx=ctx)
-    wallet = get_wallet_from_agent_config(ctx.agent_config)
+    verify_or_create_private_keys_ctx(ctx=ctx, password=password)
+    wallet = get_wallet_from_agent_config(ctx.agent_config, password=password)
     return wallet
 
 

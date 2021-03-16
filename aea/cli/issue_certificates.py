@@ -36,19 +36,23 @@ from aea.helpers.base import CertRequest, prepend_if_not_absolute
 
 
 @click.command()
+@click.argument(
+    "password", metavar="PASSWORD", type=str, default=None, required=False,
+)
 @click.pass_context
 @check_aea_project
-def issue_certificates(click_context: click.Context) -> None:
+def issue_certificates(click_context: click.Context, password: str) -> None:
     """Issue certificates for connections that require them."""
     ctx = cast(Context, click_context.obj)
     agent_config_manager = AgentConfigManager.load(ctx.cwd)
-    issue_certificates_(ctx.cwd, agent_config_manager)
+    issue_certificates_(ctx.cwd, agent_config_manager, password)
 
 
 def issue_certificates_(
     project_directory: str,
     agent_config_manager: AgentConfigManager,
     path_prefix: Optional[str] = None,
+    password: Optional[str] = None,
 ) -> None:
     """
     Issue certificates for connections that require them.
@@ -56,6 +60,7 @@ def issue_certificates_(
     :param project_directory: the directory of the project.
     :param agent_config_manager: the agent configuration manager.
     :param path_prefix: the path prefix for "save_path". Defaults to project directory.
+    :param password: the password to encrypt/decrypt the private key.
     :return: None
     """
     path_prefix = path_prefix or project_directory
@@ -64,7 +69,7 @@ def issue_certificates_(
             project_directory, agent_config_manager, connection_id
         )
         _process_connection(
-            path_prefix, agent_config_manager, cert_requests, connection_id,
+            path_prefix, agent_config_manager, cert_requests, connection_id, password
         )
 
     click.echo("All certificates have been issued.")
@@ -103,6 +108,7 @@ def _process_certificate(
     agent_config: AgentConfig,
     cert_request: CertRequest,
     connection_id: PublicId,
+    password: Optional[str] = None,
 ) -> None:
     """Process a single certificate request."""
     ledger_id = cert_request.ledger_id
@@ -139,7 +145,11 @@ def _process_certificate(
         crypto_private_key_path, path_prefix
     )
     cert = make_certificate(
-        ledger_id, str(absolute_crypto_private_key_path), message, str(output_path),
+        ledger_id,
+        str(absolute_crypto_private_key_path),
+        message,
+        str(output_path),
+        password=password,
     )
     click.echo(f"Generated signature: '{cert}'")
     click.echo(
@@ -152,8 +162,9 @@ def _process_connection(
     agent_config_manager: AgentConfigManager,
     cert_requests: List[CertRequest],
     connection_id: PublicId,
+    password: Optional[str] = None,
 ) -> None:
-
+    """Process a single connection."""
     if len(cert_requests) == 0:
         logger.debug("No certificates to process.")
         return
@@ -164,5 +175,9 @@ def _process_connection(
             f"Issuing certificate '{cert_request.identifier}' for connection {connection_id}..."
         )
         _process_certificate(
-            path_prefix, agent_config_manager.agent_config, cert_request, connection_id,
+            path_prefix,
+            agent_config_manager.agent_config,
+            cert_request,
+            connection_id,
+            password,
         )

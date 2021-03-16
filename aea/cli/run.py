@@ -42,6 +42,9 @@ from aea.skills.base import Behaviour, Handler, Model, Skill
 
 
 @click.command()
+@click.argument(
+    "password", metavar="PASSWORD", type=str, default=None, required=False,
+)
 @click.option(
     "--connections",
     "connection_ids",
@@ -81,6 +84,7 @@ def run(
     env_file: str,
     is_install_deps: bool,
     profiling: int,
+    password: str,
 ) -> None:
     """Run the agent."""
     ctx = cast(Context, click_context.obj)
@@ -89,7 +93,7 @@ def run(
         with _profiling_context(period=profiling):
             run_aea(ctx, connection_ids, env_file, is_install_deps)
             return
-    run_aea(ctx, connection_ids, env_file, is_install_deps)
+    run_aea(ctx, connection_ids, env_file, is_install_deps, password)
 
 
 @contextmanager
@@ -129,7 +133,11 @@ def _profiling_context(period: int) -> Generator:
 
 
 def run_aea(
-    ctx: Context, connection_ids: List[PublicId], env_file: str, is_install_deps: bool,
+    ctx: Context,
+    connection_ids: List[PublicId],
+    env_file: str,
+    is_install_deps: bool,
+    password: Optional[str] = None,
 ) -> None:
     """
     Prepare and run an agent.
@@ -138,13 +146,14 @@ def run_aea(
     :param connection_ids: list of connections public IDs.
     :param env_file: a path to env file.
     :param is_install_deps: bool flag is install deps.
+    :param password: the password to encrypt/decrypt the private key.
 
     :return: None
     :raises: ClickException if any Exception occures.
     """
     skip_consistency_check = ctx.config["skip_consistency_check"]
     _prepare_environment(ctx, env_file, is_install_deps)
-    aea = _build_aea(connection_ids, skip_consistency_check)
+    aea = _build_aea(connection_ids, skip_consistency_check, password)
 
     click.echo(AEA_LOGO + "v" + __version__ + "\n")
     click.echo(
@@ -177,13 +186,16 @@ def _prepare_environment(ctx: Context, env_file: str, is_install_deps: bool) -> 
 
 
 def _build_aea(
-    connection_ids: Optional[List[PublicId]], skip_consistency_check: bool
+    connection_ids: Optional[List[PublicId]],
+    skip_consistency_check: bool,
+    password: Optional[str] = None,
 ) -> AEA:
+    """Build the AEA."""
     try:
         builder = AEABuilder.from_aea_project(
             Path("."), skip_consistency_check=skip_consistency_check
         )
-        aea = builder.build(connection_ids=connection_ids)
+        aea = builder.build(connection_ids=connection_ids, password=password)
         return aea
     except Exception as e:
         raise click.ClickException(str(e))

@@ -38,21 +38,24 @@ from aea.crypto.registries import faucet_apis_registry, make_faucet_api_cls
     required=True,
 )
 @click.argument("url", metavar="URL", type=str, required=False, default=None)
+@click.argument(
+    "password", metavar="PASSWORD", type=str, default=None, required=False,
+)
 @click.option(
     "--sync", is_flag=True, help="For waiting till the faucet has released the funds."
 )
 @click.pass_context
 @check_aea_project
 def generate_wealth(
-    click_context: click.Context, sync: bool, url: str, type_: str
+    click_context: click.Context, type_: str, url: str, password: str, sync: bool
 ) -> None:
     """Generate wealth for the agent on a test network."""
     ctx = cast(Context, click_context.obj)
-    _try_generate_wealth(ctx, type_, url, sync)
+    _try_generate_wealth(ctx, type_, url, password, sync)
 
 
 def _try_generate_wealth(
-    ctx: Context, type_: str, url: Optional[str], sync: bool
+    ctx: Context, type_: str, url: Optional[str], password: Optional[str], sync: bool
 ) -> None:
     """
     Try generate wealth for the provided network identifier.
@@ -60,10 +63,11 @@ def _try_generate_wealth(
     :param ctx: the click context
     :param type_: the network type
     :param url: the url
+    :param password: the password to encrypt/decrypt the private key.
     :param sync: whether to sync or not
     :return: None
     """
-    wallet = get_wallet_from_context(ctx)
+    wallet = get_wallet_from_context(ctx, password=password)
     try:
         address = wallet.addresses[type_]
         faucet_api_cls = make_faucet_api_cls(type_)
