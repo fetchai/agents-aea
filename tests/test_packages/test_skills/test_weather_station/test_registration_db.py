@@ -62,8 +62,12 @@ class TestDBCommunication(BaseSkillTestCase):
         start_date = "3/10/2019"
         end_date = "15/10/2019"
         result = {"abs_pressure": 100, "hum_in": 20}
-        start = datetime.datetime.strptime(start_date, "%d/%m/%Y").strftime("%s")
-        end = datetime.datetime.strptime(end_date, "%d/%m/%Y").strftime("%s")
+
+        start_dt = datetime.datetime.strptime(start_date, "%d/%m/%Y")
+        end_dt = datetime.datetime.strptime(end_date, "%d/%m/%Y")
+
+        start = int((start_dt - datetime.datetime.fromtimestamp(0)).total_seconds())
+        end = int((end_dt - datetime.datetime.fromtimestamp(0)).total_seconds())
 
         mocked_conn = Mock(wrap=sqlite3.Connection)
         mocked_cursor = Mock(wraps=sqlite3.Cursor)

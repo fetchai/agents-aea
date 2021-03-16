@@ -60,7 +60,11 @@ class TestDummyWeatherStationData(BaseSkillTestCase):
             "delay": 20,
             "hum_in": 20,
             "hum_out": 20,
-            datetime.datetime.now().strftime("%s"): 20,
+            int(
+                (
+                    datetime.datetime.now() - datetime.datetime.fromtimestamp(0)
+                ).total_seconds()
+            ): 20,
             "rain": 20,
             "temp_in": 20,
             "temp_out": 20,
@@ -106,7 +110,11 @@ class TestDummyWeatherStationData(BaseSkillTestCase):
                 tagged_data["delay"],
                 tagged_data["hum_in"],
                 tagged_data["hum_out"],
-                datetime.datetime.now().strftime("%s"),
+                int(
+                    (
+                        datetime.datetime.now() - datetime.datetime.fromtimestamp(0)
+                    ).total_seconds()
+                ),
                 tagged_data["rain"],
                 tagged_data["temp_in"],
                 tagged_data["temp_out"],
