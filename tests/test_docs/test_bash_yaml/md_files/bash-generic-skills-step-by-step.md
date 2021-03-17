@@ -22,6 +22,7 @@ aea init --reset --local --author fetchai
 ``` bash
 aea create my_generic_seller
 cd my_generic_seller
+aea install
 ```
 ``` bash
 aea scaffold skill generic_seller
@@ -32,6 +33,7 @@ aea fingerprint skill fetchai/generic_seller:0.1.0
 ``` bash
 aea create my_generic_buyer
 cd my_generic_buyer
+aea install
 ```
 ``` bash
 aea scaffold skill generic_buyer
@@ -167,6 +169,7 @@ models:
       service_id: generic_service
       unit_price: 10
     class_name: GenericStrategy
+is_abstract: false
 dependencies: {}
 ```
 ``` yaml
@@ -252,6 +255,7 @@ models:
       service_id: generic_service
       stop_searching_on_result: true
     class_name: GenericStrategy
+is_abstract: false
 dependencies: {}
 ```
 ``` yaml
