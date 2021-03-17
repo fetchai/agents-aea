@@ -21,12 +21,15 @@
 import os
 import time
 from pathlib import Path
+from unittest import mock
 
 import pytest
+import yaml
 from aea_ledger_fetchai import FetchAICrypto
 
 import aea
 from aea.configurations.base import AgentConfig
+from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue
@@ -36,6 +39,7 @@ from aea.test_tools.test_cases import (
     AEATestCaseEmpty,
     AEATestCaseEmptyFlaky,
     AEATestCaseManyFlaky,
+    BaseAEATestCase,
 )
 
 from packages.fetchai.connections.stub.connection import PUBLIC_ID as STUB_CONNECTION_ID
@@ -207,6 +211,22 @@ class TestGenericCases(AEATestCaseEmpty):
         diff = self.difference_to_fetched_agent(str(MY_FIRST_AEA_PUBLIC_ID), agent_name)
         assert not diff
 
+    def test_diff_different_overrides(self):
+        """Test difference due to overrides."""
+        agent_name = "some_agent_for_tests4"
+        self.fetch_agent(str(MY_FIRST_AEA_PUBLIC_ID), agent_name)
+        self.set_agent_context(agent_name)
+        self.run_cli_command(
+            "config",
+            "set",
+            "vendor.fetchai.skills.echo.behaviours.echo.args.tick_interval",
+            "2.0",
+            cwd=self._get_cwd(),
+        )
+        diff = self.difference_to_fetched_agent(str(MY_FIRST_AEA_PUBLIC_ID), agent_name)
+        assert diff
+        assert diff[0] == DEFAULT_AEA_CONFIG_FILE
+
     def test_terminate_subprocesses(self):
         """Start and terminate long running python subprocess."""
         proc = self.start_subprocess("-c", "import time; time.sleep(10)")
@@ -235,6 +255,51 @@ class TestGenericCases(AEATestCaseEmpty):
 
         with open(file2, "r") as f:
             assert f.read() == "hi"
+
+
+class TestDifferenceToFetchedAgent(BaseAEATestCase):
+    """Test 'different_to_fetched_agent' in case of component overrides."""
+
+    _mock_called = False
+    original_function = yaml.safe_load_all
+    agent_name: str
+
+    @classmethod
+    def setup_class(cls) -> None:
+        """Set up the class."""
+        super().setup_class()
+
+        # build aea, and override the tick interval
+        cls.test_agent_name: str = "test_agent"
+        cls.fetch_agent(str(MY_FIRST_AEA_PUBLIC_ID), cls.test_agent_name)
+        cls.set_agent_context(cls.test_agent_name)
+        cls.run_cli_command(
+            "config",
+            "set",
+            "vendor.fetchai.skills.echo.behaviours.echo.args.tick_interval",
+            "2.0",
+            cwd=cls._get_cwd(),
+        )
+
+    @classmethod
+    def _safe_load_all_side_effect(cls, file):
+        """Implement yaml.safe_load_all side-effect for testing."""
+        result = list(cls.original_function(file))
+        if not cls._mock_called:
+            cls._mock_called = True
+            fake_override = {}
+            result.append(fake_override)
+        return iter(result)
+
+    def test_difference_to_fetched_agent(self, *_mocks):
+        """Test difference to fetched agent."""
+        with mock.patch(
+            "yaml.safe_load_all", side_effect=self._safe_load_all_side_effect
+        ):
+            file_diff = self.difference_to_fetched_agent(
+                str(MY_FIRST_AEA_PUBLIC_ID), self.test_agent_name
+            )
+            assert file_diff
 
 
 class TestLoadAgentConfig(AEATestCaseEmpty):
