@@ -37,12 +37,23 @@ aea config set --type dict agent.default_routing \
 aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
 '[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
 ```
-``` bash
-aea config set agent.default_ledger ethereum
+```bash
+LEDGER_ID=fetchai
+```
+```bash
+LEDGER_ID=ethereum
+```
+```bash
+aea config set agent.default_ledger $LEDGER_ID
+aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
+'[{"identifier": "acn", "ledger_id": '"\"$LEDGER_ID\""', "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
 ```
 ``` bash
-aea generate-key ethereum
-aea add-key ethereum
+aea generate-key $LEDGER_ID
+aea add-key $LEDGER_ID
+```
+```bash
+aea generate-wealth $LEDGER_ID
 ```
 ``` bash
 aea generate-key fetchai fetchai_connection_private_key.txt
