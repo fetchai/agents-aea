@@ -1011,7 +1011,7 @@ class _SkillComponentLoader:
         class_index: Dict[
             str, Dict[_SKILL_COMPONENT_TYPES, Set[Type[SkillComponent]]]
         ] = {}
-        used_classes = set()
+        used_classes: Set[Type[SkillComponent]] = set()
         not_resolved_configurations: Dict[
             Tuple[_SKILL_COMPONENT_TYPES, str], SkillComponentConfiguration
         ] = {}
@@ -1099,7 +1099,38 @@ class _SkillComponentLoader:
             )
             used_classes.add(not_used_class)
 
+        self._print_warning_message_for_unused_classes(
+            component_classes_by_path, used_classes
+        )
         return result
+
+    def _print_warning_message_for_unused_classes(
+        self,
+        component_classes_by_path: Dict[Path, Set[Tuple[str, Type[SkillComponent]]]],
+        used_classes: Set[Type[SkillComponent]],
+    ) -> None:
+        """
+        Print warning message for every unused class.
+
+        :param component_classes_by_path: the component classes by path.
+        :param used_classes: the classes used.
+        :return: None
+        """
+        for path, set_of_class_name_pairs in component_classes_by_path.items():
+            # take only classes, not class names
+            set_of_classes = {pair[1] for pair in set_of_class_name_pairs}
+            set_of_unused_classes = set(
+                filter(lambda x: x not in used_classes, set_of_classes)
+            )
+            if len(set_of_unused_classes) != 0:
+                for unused_class in set_of_unused_classes:
+                    _print_warning_message_for_non_declared_skill_components(
+                        self.skill_context,
+                        {unused_class.__name__},
+                        set(),
+                        self._type_to_str(self._get_skill_component_type(unused_class)),
+                        str(path),
+                    )
 
     @classmethod
     def _type_to_str(cls, component_type: _SKILL_COMPONENT_TYPES) -> str:
