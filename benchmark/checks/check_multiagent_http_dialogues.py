@@ -17,7 +17,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""?Memory usage across the time."""
+"""Memory usage across the time."""
 import itertools
 import os
 import struct
@@ -152,7 +152,6 @@ def run(
 
     local_node = LocalNode()
     local_node.start()
-
     agents = []
     skills = {}
     handler_name = "httpingpong"
@@ -183,7 +182,6 @@ def run(
 
     runner = AEARunner(agents, runner_mode)
     runner.start(threaded=True)
-
     for agent in agents:
         wait_for_condition(lambda: agent.is_running, timeout=5)
     wait_for_condition(lambda: runner.is_running, timeout=5)
@@ -195,14 +193,11 @@ def run(
                 HttpPingPongHandler,
                 skills[agent1.identity.address].handlers[handler_name],
             ).make_request(agent2.identity.address)
-
     time.sleep(duration)
 
     mem_usage = get_mem_usage_in_mb()
-
     local_node.stop()
     runner.stop(timeout=5)
-
     total_messages = sum(
         [
             cast(HttpPingPongHandler, skill.handlers[handler_name]).count

@@ -18,22 +18,36 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests of the ethereum module."""
 
-import pytest
-from aea_ledger_ethereum import EthereumApi
+from pathlib import Path
+from typing import Dict, cast
 
-from tests.conftest import MAX_FLAKY_RERUNS
+import pytest
+from aea_ledger_ethereum import EthereumApi, EthereumCrypto
+
+from tests.conftest import ETHEREUM_PRIVATE_KEY_PATH, MAX_FLAKY_RERUNS, ROOT_DIR
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 @pytest.mark.integration
 @pytest.mark.ledger
-def test_get_contract_instance(erc1155_contract, ethereum_testnet_config):
+def test_get_contract_instance(ethereum_testnet_config, ganache):
     """Test the get contract instance method."""
-    contract, contract_address = erc1155_contract
+    ec = EthereumCrypto(private_key_path=ETHEREUM_PRIVATE_KEY_PATH)
     ethereum_api = EthereumApi(**ethereum_testnet_config)
+    full_path = Path(ROOT_DIR, "tests", "data", "dummy_contract", "build", "some.json")
+    contract_interface = ethereum_api.load_contract_interface(full_path)
+    tx = ethereum_api.get_deploy_transaction(
+        contract_interface, ec.address, gas=5000000
+    )
+    gas = ethereum_api.api.eth.estimateGas(transaction=tx)
+    tx["gas"] = gas
+    tx_signed = ec.sign_transaction(tx)
+    tx_receipt = ethereum_api.send_signed_transaction(tx_signed)
+    receipt = ethereum_api.get_transaction_receipt(tx_receipt)
+    erc1155_contract_address = cast(Dict, receipt)["contractAddress"]
     interface = {"abi": [], "bytecode": b""}
     instance = ethereum_api.get_contract_instance(
-        contract_interface=interface, contract_address=contract_address,
+        contract_interface=interface, contract_address=erc1155_contract_address,
     )
     assert str(type(instance)) == "<class 'web3._utils.datatypes.Contract'>"
     instance = ethereum_api.get_contract_instance(contract_interface=interface,)

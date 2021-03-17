@@ -30,6 +30,7 @@ import sys
 import tempfile
 import threading
 import time
+from contextlib import contextmanager
 from functools import WRAPPER_ASSIGNMENTS, wraps
 from pathlib import Path
 from types import FunctionType, MethodType
@@ -117,11 +118,6 @@ CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ign
 ROOT_DIR = os.path.join(CUR_PATH, "..")
 CLI_LOG_OPTION = ["-v", "OFF"]
 
-# set PYTHONPATH so all spawned processes can have access to current python code
-os.environ["PYTHONPATH"] = ":".join(
-    filter(None, [os.path.abspath(ROOT_DIR), os.environ.get("PYTHONPATH")])
-)
-
 AUTHOR = DEFAULT_AUTHOR
 CONFIGURATION_SCHEMA_DIR = os.path.join(AEA_DIR, "configurations", "schemas")
 AGENT_CONFIGURATION_SCHEMA = os.path.join(
@@ -160,6 +156,7 @@ FETCHAI_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifi
 ETHEREUM_PRIVATE_KEY_TWO_FILE = "ethereum_private_key_two.txt"
 
 DEFAULT_AMOUNT = 1000000000000000000000
+GAS_PRICE_API_KEY = ""
 
 # private keys with value on testnet
 COSMOS_PRIVATE_KEY_PATH = os.path.join(
@@ -241,7 +238,7 @@ FETCHAI_TESTNET_CONFIG = {"address": FETCHAI_DEFAULT_ADDRESS}
 # common public ids used in the tests
 UNKNOWN_PROTOCOL_PUBLIC_ID = PublicId("unknown_author", "unknown_protocol", "0.1.0")
 UNKNOWN_CONNECTION_PUBLIC_ID = PublicId("unknown_author", "unknown_connection", "0.1.0")
-MY_FIRST_AEA_PUBLIC_ID = PublicId.from_str("fetchai/my_first_aea:0.22.0")
+MY_FIRST_AEA_PUBLIC_ID = PublicId.from_str("fetchai/my_first_aea:0.23.0")
 
 DUMMY_SKILL_PATH = os.path.join(CUR_PATH, "data", "dummy_skill", SKILL_YAML)
 
@@ -365,6 +362,20 @@ protocol_specification_files = [
     os.path.join(PROTOCOL_SPECS_PREF_2, "sample_specification.yaml",),
     os.path.join(PROTOCOL_SPECS_PREF_2, "sample_specification_no_custom_types.yaml",),
 ]
+
+
+@contextmanager
+def project_root_pythonpath():
+    """Set pythonpath to project root."""
+    old_python_path = os.environ.get("PYTHONPATH", None)
+    os.environ["PYTHONPATH"] = ":".join(
+        filter(None, [os.path.abspath(ROOT_DIR), old_python_path])
+    )
+    yield
+    if old_python_path is None:
+        os.environ.pop("PYTHONPATH")
+    else:
+        os.environ["PYTHONPATH"] = old_python_path
 
 
 def match_files(fname1: str, fname2: str) -> Tuple[bool, str]:
@@ -641,6 +652,7 @@ def ethereum_testnet_config(ganache_addr, ganache_port):
         "address": new_uri,
         "chain_id": DEFAULT_GANACHE_CHAIN_ID,
         "denom": ETHEREUM_DEFAULT_CURRENCY_DENOM,
+        "gas_price_api_key": GAS_PRICE_API_KEY,
     }
     return new_config
 
@@ -709,7 +721,7 @@ def reset_aea_cli_config() -> None:
 def get_unused_tcp_port():
     """Get an unused TCP port."""
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(("", 0))
+    s.bind(("127.0.0.1", 0))
     s.listen(1)
     port = s.getsockname()[1]
     s.close()

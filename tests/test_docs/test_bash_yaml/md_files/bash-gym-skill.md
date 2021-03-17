@@ -1,5 +1,5 @@
 ``` bash
-aea fetch fetchai/gym_aea:0.20.0 --alias my_gym_aea
+aea fetch fetchai/gym_aea:0.21.0 --alias my_gym_aea
 cd my_gym_aea
 aea install
 ```

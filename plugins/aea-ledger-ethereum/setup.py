@@ -24,8 +24,8 @@ from setuptools import find_packages, setup
 
 
 setup(
-    name="aea_ledger_ethereum",
-    version="0.1.0",
+    name="aea-ledger-ethereum",
+    version="0.2.0",
     author="Fetch.AI Limited",
     license="Apache-2.0",
     description="Python package wrapping the public and private key cryptography and ledger api of Ethereum.",

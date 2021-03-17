@@ -1,6 +1,6 @@
 agent_name: coin_price_feed
 author: fetchai
-version: 0.8.0
+version: 0.9.0
 license: Apache-2.0
 description: An AEA providing a coin price feed.
 aea_version: '>=0.11.0, <0.12.0'
@@ -32,7 +32,7 @@ logging_config:
 registry_path: ../packages
 dependencies:
   aea-ledger-fetchai:
-    version: <0.2.0,>=0.1.0
+    version: <0.3.0,>=0.2.0
 ---
 public_id: fetchai/http_server:0.18.0
 type: connection

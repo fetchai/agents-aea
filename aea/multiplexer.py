@@ -581,6 +581,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
         :param envelope_protocol_id: the protocol id of the message contained in the envelope
         :return: public id if found
         """
+        self.logger.debug(f"Routing envelope: {envelope}")
         # component to component messages are routed by their component id
         if envelope.is_component_to_component_message:
             connection_id = envelope.to_as_public_id

@@ -23,7 +23,7 @@ from pathlib import Path
 from typing import cast
 from unittest.mock import patch
 
-from vyper.utils import keccak256
+from aea_ledger_ethereum import EthereumApi
 
 from aea.protocols.dialogue.base import DialogueMessage
 from aea.test_tools.test_skill import BaseSkillTestCase
@@ -35,6 +35,11 @@ from packages.fetchai.skills.fetch_beacon.dialogues import LedgerApiDialogues
 from packages.fetchai.skills.fetch_beacon.handlers import LedgerApiHandler
 
 from tests.conftest import ROOT_DIR
+
+
+def keccak256(input_: bytes) -> bytes:
+    """Compute hash."""
+    return bytes(bytearray.fromhex(EthereumApi.get_hash(input_)[2:]))
 
 
 LEDGER_ID = "fetchai"

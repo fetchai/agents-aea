@@ -9,18 +9,18 @@ aea fingerprint skill fetchai/my_search:0.1.0
 aea add protocol fetchai/oef_search:0.14.0
 ```
 ``` bash
-aea add connection fetchai/soef:0.18.0
-aea add connection fetchai/p2p_libp2p:0.17.0
+aea add connection fetchai/soef:0.19.0
+aea add connection fetchai/p2p_libp2p:0.18.0
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.17.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.18.0
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/oef_search:0.14.0": "fetchai/soef:0.18.0"
+  "fetchai/oef_search:0.14.0": "fetchai/soef:0.19.0"
 }'
 ```
 ``` bash
-aea fetch fetchai/simple_service_registration:0.23.0 && cd simple_service_registration && aea install && aea build
+aea fetch fetchai/simple_service_registration:0.24.0 && cd simple_service_registration && aea install && aea build
 ```
 ``` bash
 aea generate-key fetchai
@@ -98,7 +98,7 @@ models:
     class_name: OefSearchDialogues
 dependencies:
   aea-ledger-fetchai:
-    version: <0.2.0,>=0.1.0
+    version: <0.3.0,>=0.2.0
 is_abstract: false
 ```
 ``` yaml
@@ -145,6 +145,6 @@ models:
     class_name: Strategy
 dependencies:
   aea-ledger-fetchai:
-    version: <0.2.0,>=0.1.0
+    version: <0.3.0,>=0.2.0
 is_abstract: false
 ```
