@@ -388,7 +388,18 @@ class AbstractBehaviour(SkillComponent, ABC):
 
 
 class Behaviour(AbstractBehaviour, ABC):
-    """This class implements an abstract behaviour."""
+    """
+    This class implements an abstract behaviour.
+
+    In a subclass of Behaviour, the flag 'is_programmatically_defined'
+     can be used by the developer to signal to the framework that the class
+     is meant to be used programmatically; hence, in case the class is
+     not declared in the configuration file but it is present in a skill
+     module, the framework will just ignore this class instead of printing
+     a warning message.
+    """
+
+    is_programmatically_defined: bool = False
 
     @abstractmethod
     def act(self) -> None:
@@ -433,9 +444,24 @@ class Behaviour(AbstractBehaviour, ABC):
 
 
 class Handler(SkillComponent, ABC):
-    """This class implements an abstract behaviour."""
+    """
+    This class implements an abstract behaviour.
 
-    SUPPORTED_PROTOCOL = None  # type: Optional[PublicId]
+    In a subclass of Handler, the flag 'is_programmatically_defined'
+     can be used by the developer to signal to the framework that the component
+     is meant to be used programmatically; hence, in case the class is
+     not declared in the configuration file but it is present in a skill
+     module, the framework will just ignore this class instead of printing
+     a warning message.
+
+    SUPPORTED_PROTOCOL is read by the framework when the handlers are loaded
+     to register them as 'listeners' to the protocol identified by the specified
+     public id. Whenever a message of protocol 'SUPPORTED_PROTOCOL' is sent
+     to the agent, the framework will call the 'handle' method.
+    """
+
+    SUPPORTED_PROTOCOL: Optional[PublicId] = None
+    is_programmatically_defined: bool = False
 
     @abstractmethod
     def handle(self, message: Message) -> None:
@@ -1122,15 +1148,29 @@ class _SkillComponentLoader:
             set_of_unused_classes = set(
                 filter(lambda x: x not in used_classes, set_of_classes)
             )
-            if len(set_of_unused_classes) != 0:
-                for unused_class in set_of_unused_classes:
-                    _print_warning_message_for_non_declared_skill_components(
-                        self.skill_context,
-                        {unused_class.__name__},
-                        set(),
-                        self._type_to_str(self._get_skill_component_type(unused_class)),
-                        str(path),
-                    )
+            if len(set_of_unused_classes) == 0:
+                # all classes in the module are used!
+                continue
+
+            # for each unused class, print a warning message. However,
+            # if it is a Handler or a Behaviour, print the message
+            # only if 'is_programmatically_defined' is not True
+            for unused_class in set_of_unused_classes:
+                component_type_class = self._get_skill_component_type(unused_class)
+                if (
+                    isinstance(component_type_class, (Handler, Behaviour))
+                    and cast(
+                        Union[Handler, Behaviour], component_type_class
+                    ).is_programmatically_defined
+                ):
+                    continue
+                _print_warning_message_for_non_declared_skill_components(
+                    self.skill_context,
+                    {unused_class.__name__},
+                    set(),
+                    self._type_to_str(component_type_class),
+                    str(path),
+                )
 
     @classmethod
     def _type_to_str(cls, component_type: _SKILL_COMPONENT_TYPES) -> str:
