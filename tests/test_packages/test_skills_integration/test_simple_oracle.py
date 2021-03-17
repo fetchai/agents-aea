@@ -48,6 +48,9 @@ class TestOracleSkills(AEATestCaseManyFlaky, UseGanache):
         oracle_agent_name = "oracle_aea"
         client_agent_name = "client_aea"
 
+        _, erc20_address = erc20_contract
+        _, oracle_address = oracle_contract
+
         self.create_agents(oracle_agent_name, client_agent_name)
 
         # add ethereum ledger in both configuration files
@@ -84,29 +87,10 @@ class TestOracleSkills(AEATestCaseManyFlaky, UseGanache):
             type_="list",
         )
 
-        # set erc20 address
-        _, erc20_address = erc20_contract
-        _, oracle_address = oracle_contract
-
-        setting_path = (
-            "vendor.fetchai.skills.simple_oracle.models.strategy.args.erc20_address"
-        )
-        self.set_config(setting_path, erc20_address)
-        setting_path = (
-            "vendor.fetchai.skills.simple_oracle.models.strategy.args.contract_address"
-        )
-        self.set_config(setting_path, oracle_address)
         setting_path = (
             "vendor.fetchai.skills.simple_oracle.models.strategy.args.oracle_value_name"
         )
         self.set_config(setting_path, "price")
-
-        diff = self.difference_to_fetched_agent(
-            "fetchai/coin_price_oracle:0.8.0", oracle_agent_name
-        )
-        assert (
-            diff == []
-        ), "Difference between created and fetched project for files={}".format(diff)
 
         self.generate_private_key(EthereumCrypto.identifier)
         self.add_private_key(EthereumCrypto.identifier, ETHEREUM_PRIVATE_KEY_FILE)
@@ -137,6 +121,23 @@ class TestOracleSkills(AEATestCaseManyFlaky, UseGanache):
         self.set_config(setting_path, settings, type_="list")
         self.run_install()
 
+        diff = self.difference_to_fetched_agent(
+            "fetchai/coin_price_oracle:0.8.0", oracle_agent_name
+        )
+        assert (
+            diff == []
+        ), "Difference between created and fetched project for files={}".format(diff)
+
+        # set erc20 address
+        setting_path = (
+            "vendor.fetchai.skills.simple_oracle.models.strategy.args.erc20_address"
+        )
+        self.set_config(setting_path, erc20_address)
+        setting_path = (
+            "vendor.fetchai.skills.simple_oracle.models.strategy.args.contract_address"
+        )
+        self.set_config(setting_path, oracle_address)
+
         # add packages for oracle client agent
         self.set_agent_context(client_agent_name)
         self.add_item("connection", "fetchai/ledger:0.14.0")
@@ -155,6 +156,12 @@ class TestOracleSkills(AEATestCaseManyFlaky, UseGanache):
         self.add_item("contract", "fetchai/fet_erc20:0.4.0")
         self.add_item("skill", "fetchai/simple_oracle_client:0.5.0")
 
+        self.generate_private_key(EthereumCrypto.identifier)
+        self.add_private_key(EthereumCrypto.identifier, ETHEREUM_PRIVATE_KEY_FILE)
+        self.replace_private_key_in_file(
+            FUNDED_ETH_PRIVATE_KEY_2, ETHEREUM_PRIVATE_KEY_FILE
+        )
+
         diff = self.difference_to_fetched_agent(
             "fetchai/coin_price_oracle_client:0.5.0", client_agent_name
         )
@@ -162,16 +169,11 @@ class TestOracleSkills(AEATestCaseManyFlaky, UseGanache):
             diff == []
         ), "Difference between created and fetched project for files={}".format(diff)
 
+        # set addresses *after* comparison with fetched agent!
         setting_path = "vendor.fetchai.skills.simple_oracle_client.models.strategy.args.erc20_address"
         self.set_config(setting_path, erc20_address)
         setting_path = "vendor.fetchai.skills.simple_oracle_client.models.strategy.args.oracle_contract_address"
         self.set_config(setting_path, oracle_address)
-
-        self.generate_private_key(EthereumCrypto.identifier)
-        self.add_private_key(EthereumCrypto.identifier, ETHEREUM_PRIVATE_KEY_FILE)
-        self.replace_private_key_in_file(
-            FUNDED_ETH_PRIVATE_KEY_2, ETHEREUM_PRIVATE_KEY_FILE
-        )
 
         # run oracle agent
         self.set_agent_context(oracle_agent_name)

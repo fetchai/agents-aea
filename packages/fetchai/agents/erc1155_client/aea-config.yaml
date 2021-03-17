@@ -42,6 +42,11 @@ dependencies:
   aea-ledger-fetchai:
     version: <0.2.0,>=0.1.0
 ---
+public_id: fetchai/soef:0.18.0
+type: connection
+config:
+  chain_identifier: ethereum
+---
 public_id: fetchai/p2p_libp2p:0.17.0
 type: connection
 cert_requests:
