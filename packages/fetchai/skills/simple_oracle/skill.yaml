@@ -72,9 +72,9 @@ models:
       erc20_address: '0x0000000000000000000000000000000000000000'
       initial_fee_deploy: 1000000000000
       is_oracle_role_granted: false
-      ledger_id: fetchai
+      ledger_id: ethereum
       oracle_value_name: null
-      update_function: update_oracle_value
+      update_function: updateOracleValue
     class_name: Strategy
 dependencies:
   aea-ledger-ethereum:

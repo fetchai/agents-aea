@@ -25,7 +25,7 @@ skills:
 - fetchai/advanced_data_request:0.1.0
 - fetchai/simple_oracle:0.7.0
 default_connection: fetchai/p2p_libp2p:0.17.0
-default_ledger: fetchai
+default_ledger: ethereum
 default_routing:
   fetchai/contract_api:0.12.0: fetchai/ledger:0.14.0
   fetchai/http:0.13.0: fetchai/http_client:0.19.0
@@ -64,7 +64,7 @@ public_id: fetchai/p2p_libp2p:0.17.0
 type: connection
 cert_requests:
 - identifier: acn
-  ledger_id: fetchai
+  ledger_id: ethereum
   not_after: '2022-01-01'
   not_before: '2021-01-01'
   public_key: fetchai
