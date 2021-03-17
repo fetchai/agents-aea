@@ -713,7 +713,16 @@ def test_setup_teardown_methods():
 
 
 class TestSkillLoadingWarningMessages(AEATestCase):
-    """Test warning message in case undeclared skill are found."""
+    """
+    Test warning message in case undeclared skill are found.
+
+    That is:
+    - copy dummy_aea in a temporary directory
+    - add a skill module with two skill components
+      - one that has 'is_programmatically_defined' set to False
+      - one that has 'is_programmatically_defined' set to True
+    - test that we have a warning message only from the first.
+    """
 
     path_to_aea: Path = Path(CUR_PATH, "data", "dummy_aea")
 
