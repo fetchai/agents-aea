@@ -20,6 +20,7 @@
 
 """This test module contains the tests for the `aea run` sub-command."""
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -916,13 +917,11 @@ class TestRunFailsWhenConnectionNotDeclared(AEATestCaseEmpty):
 
     def test_run(self):
         """Run the test."""
-        expected_message = f"Error: Connection ids ['{self.connection_id}'] not declared in the configuration file."
-
-        self.process = self.run_agent("--connections", str(self.connection_id))
-        # check the error message is printed
-        self.missing_from_output(self.process, [expected_message], timeout=1)
-        # Assert that the exit code is equal to 1 (i.e. catchall for general errors).
-        assert self.process.returncode == 1
+        expected_message = f"Connection ids ['{self.connection_id}'] not declared in the configuration file."
+        with pytest.raises(ClickException, match=re.escape(expected_message)):
+            self.run_cli_command(
+                "run", "--connections", str(self.connection_id), cwd=self._get_cwd()
+            )
 
 
 class TestRunFailsWhenConnectionConfigFileNotFound:
