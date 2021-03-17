@@ -20,7 +20,6 @@
 import copy
 import logging
 import os
-import pprint
 import random
 import shutil
 import string
@@ -324,6 +323,8 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
                 "author",
                 "description",
                 "version",
+                "connection_private_key_paths",
+                "private_key_paths",
                 "registry_path",
                 "dependencies",  # temporary
             ]
@@ -376,10 +377,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
                 file_diff.remove("aea-config.yaml")  # won't match!
         else:
             file_diff.append(
-                "Difference in aea-config.yaml: "
-                + pprint.pformat(diff1)
-                + " vs. "
-                + pprint.pformat(diff2)
+                "Difference in aea-config.yaml: " + str(diff1) + " vs. " + str(diff2)
             )
 
         with suppress(OSError, IOError):

@@ -79,13 +79,6 @@ class TestERCSkillsEthereumLedger(AEATestCaseManyFlaky, UseGanache):
         self.nested_set_config(setting_path, default_routing)
         self.add_item("skill", "fetchai/erc1155_deploy:0.23.0")
 
-        diff = self.difference_to_fetched_agent(
-            "fetchai/erc1155_deployer:0.25.0", deploy_aea_name
-        )
-        assert (
-            diff == []
-        ), "Difference between created and fetched project for files={}".format(diff)
-
         self.generate_private_key(EthereumCrypto.identifier)
         self.add_private_key(EthereumCrypto.identifier, ETHEREUM_PRIVATE_KEY_FILE)
         self.replace_private_key_in_file(
@@ -126,6 +119,13 @@ class TestERCSkillsEthereumLedger(AEATestCaseManyFlaky, UseGanache):
         )
         self.nested_set_config(setting_path, location)
 
+        diff = self.difference_to_fetched_agent(
+            "fetchai/erc1155_deployer:0.25.0", deploy_aea_name
+        )
+        assert (
+            diff == []
+        ), "Difference between created and fetched project for files={}".format(diff)
+
         # add packages for agent two
         self.set_agent_context(client_aea_name)
         self.add_item("connection", "fetchai/p2p_libp2p:0.17.0")
@@ -136,13 +136,6 @@ class TestERCSkillsEthereumLedger(AEATestCaseManyFlaky, UseGanache):
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.add_item("skill", "fetchai/erc1155_client:0.22.0")
-
-        diff = self.difference_to_fetched_agent(
-            "fetchai/erc1155_client:0.25.0", client_aea_name
-        )
-        assert (
-            diff == []
-        ), "Difference between created and fetched project for files={}".format(diff)
 
         self.generate_private_key(EthereumCrypto.identifier)
         self.add_private_key(EthereumCrypto.identifier, ETHEREUM_PRIVATE_KEY_FILE)
@@ -182,6 +175,13 @@ class TestERCSkillsEthereumLedger(AEATestCaseManyFlaky, UseGanache):
             "vendor.fetchai.skills.erc1155_client.models.strategy.args.location"
         )
         self.nested_set_config(setting_path, location)
+
+        diff = self.difference_to_fetched_agent(
+            "fetchai/erc1155_client:0.25.0", client_aea_name
+        )
+        assert (
+            diff == []
+        ), "Difference between created and fetched project for files={}".format(diff)
 
         # run agents
         self.set_agent_context(deploy_aea_name)
