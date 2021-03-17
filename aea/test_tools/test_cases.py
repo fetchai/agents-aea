@@ -301,16 +301,19 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
             with open_file(
                 os.path.join(path_to_fetched_aea, "aea-config.yaml"), "r"
             ) as file:
-                content1 = list(yaml.safe_load_all(file))[0]  # only load first page
+                content1 = list(yaml.safe_load_all(file))  # load all contents
             with open_file(
                 os.path.join(path_to_manually_created_aea, "aea-config.yaml"), "r"
             ) as file:
-                content2 = list(yaml.safe_load_all(file))[0]
-            content1c = copy.deepcopy(content1)
-            for key, value in content1c.items():
-                if content2[key] == value:
-                    content1.pop(key)
-                    content2.pop(key)
+                content2 = list(yaml.safe_load_all(file))
+
+            content1_agentconfig = content1[0]
+            content2_agentconfig = content2[0]
+            content1_agentconfig_copy = copy.deepcopy(content1_agentconfig)
+            for key, value in content1_agentconfig_copy.items():
+                if content2_agentconfig[key] == value:
+                    content1_agentconfig.pop(key)
+                    content2_agentconfig.pop(key)
             allowed_diff_keys = [
                 "aea_version",
                 "author",
@@ -319,13 +322,15 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
                 "registry_path",
                 "dependencies",  # temporary
             ]
-            result = all([key in allowed_diff_keys for key in content1.keys()])
+            result = all(
+                [key in allowed_diff_keys for key in content1_agentconfig.keys()]
+            )
             result = result and all(
-                [key in allowed_diff_keys for key in content2.keys()]
+                [key in allowed_diff_keys for key in content2_agentconfig.keys()]
             )
             if result:
                 return result, {}, {}
-            return result, content1, content2
+            return result, content1_agentconfig, content2_agentconfig
 
         path_to_manually_created_aea = os.path.join(cls.t, agent_name)
         new_cwd = os.path.join(cls.t, "fetch_dir")
