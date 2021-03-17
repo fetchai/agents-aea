@@ -2,6 +2,8 @@
 
 ## 0.11.2 (2020-03-17)
 
+- Fixes a package import issue
+- Fixes an issue where `AgentLoop` did not teardown properly under certain conditions
 - Fixes a bug in testing tools
 - Fixes a bug where plugins are not loaded after installation in `MultiAgentManager`
 - Adds unit tests for weather, thermometer and car park skills
