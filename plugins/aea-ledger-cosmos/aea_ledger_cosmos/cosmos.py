@@ -43,8 +43,8 @@ from ecdsa import (  # type: ignore # pylint: disable=wrong-import-order
     SigningKey,
     VerifyingKey,
 )
-from ecdsa.util import (
-    sigencode_string_canonize,  # type: ignore # # pylint: disable=wrong-import-order
+from ecdsa.util import (  # type: ignore # pylint: disable=wrong-import-order
+    sigencode_string_canonize,
 )
 
 from aea.common import Address, JSONLike
@@ -463,7 +463,12 @@ class CosmosCrypto(Crypto[SigningKey]):
         :param password: the password to decrypt.
         :return: the raw private key.
         """
-        return DataEncrypt.decrypt(keyfile_json.encode(), password).decode()
+        try:
+            return DataEncrypt.decrypt(keyfile_json.encode(), password).decode()
+        except UnicodeDecodeError as e:
+            raise ValueError(
+                "key file data can not be translated to string! bad bassword?"
+            ) from e
 
 
 class _CosmosApi(LedgerApi):

@@ -62,6 +62,12 @@ def test_key_file_encryption_decryption(cosmos_private_key_file):
     assert encrypted_data != pk_data
     assert pk_data == decrypted_data
 
+    with pytest.raises(ValueError, match="key file data can not be translated"):
+        cosmos.decrypt(encrypted_data, "BaD_PassWord")
+
+    with pytest.raises(ValueError, match="Bad encrypted key format!"):
+        cosmos.decrypt(b"some_data" * 16, "BaD_PassWord")
+
 
 def test_initialization():
     """Test the initialisation of the variables."""

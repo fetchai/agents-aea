@@ -21,6 +21,7 @@ import base64
 import json
 import os
 from hashlib import pbkdf2_hmac
+from json.decoder import JSONDecodeError
 from typing import Tuple
 
 import pyaes  # type: ignore
@@ -56,7 +57,7 @@ class DataEncrypt:
 
         # Pad data to multiple of 16
         data_length = len(data)
-        if data_length % 16 != 0:
+        if data_length % 16 != 0:  # pragma: nocover
             data += b" " * (16 - data_length % 16)
 
         encrypted = b""
@@ -108,12 +109,13 @@ class DataEncrypt:
     @classmethod
     def encrypt(cls, data: bytes, password: str) -> bytes:
         """Encrypt data with password."""
+        if not isinstance(data, bytes):  # pragma: nocover
+            raise ValueError(f"data has to be bytes! not {type(data)}")
+
         encrypted_data, data_length, initialisation_vector, salt = cls._aes_encrypt(
             password, data
         )
 
-        if not isinstance(data, bytes):
-            raise ValueError(f"data has to be bytes! not {type(data)}")
         json_data = {
             "encrypted_data": cls.bytes_encode(encrypted_data),
             "data_length": data_length,
@@ -135,15 +137,21 @@ class DataEncrypt:
     @classmethod
     def decrypt(cls, encrypted_data: bytes, password: str) -> bytes:
         """Decrypt data with passwod provided."""
-        if not isinstance(encrypted_data, bytes):
+        if not isinstance(encrypted_data, bytes):  # pragma: nocover
             raise ValueError(
-                f"encrypted_data has to be bytes! not {type(encrypted_data)}"
+                f"encrypted_data has to be str! not {type(encrypted_data)}"
             )
-        json_data = json.loads(encrypted_data)
-        return cls._aes_decrypt(
-            password,
-            encrypted_data=cls.bytes_decode(json_data["encrypted_data"]),
-            data_length=json_data["data_length"],
-            initialisation_vector=cls.bytes_decode(json_data["initialisation_vector"]),
-            salt=cls.bytes_decode(json_data["salt"]),
-        )
+
+        try:
+            json_data = json.loads(encrypted_data)
+            return cls._aes_decrypt(
+                password,
+                encrypted_data=cls.bytes_decode(json_data["encrypted_data"]),
+                data_length=json_data["data_length"],
+                initialisation_vector=cls.bytes_decode(
+                    json_data["initialisation_vector"]
+                ),
+                salt=cls.bytes_decode(json_data["salt"]),
+            )
+        except (KeyError, JSONDecodeError) as e:
+            raise ValueError(f"Bad encrypted key format!: {str(e)}") from e
