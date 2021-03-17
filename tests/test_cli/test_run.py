@@ -39,6 +39,7 @@ from aea.configurations.base import (
     DEFAULT_CONNECTION_CONFIG_FILE,
 )
 from aea.exceptions import AEAPackageLoadingError
+from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from packages.fetchai.connections.http_client.connection import (
     PUBLIC_ID as HTTP_ClIENT_PUBLIC_ID,
@@ -903,61 +904,25 @@ class TestRunFailsWhenConfigurationFileInvalid:
             pass
 
 
-class TestRunFailsWhenConnectionNotDeclared:
+class TestRunFailsWhenConnectionNotDeclared(AEATestCaseEmpty):
     """Test that the command 'aea run --connections' fails when the connection is not declared."""
 
     @classmethod
     def setup_class(cls):
         """Set the test up."""
-        cls.runner = CliRunner()
-        cls.agent_name = "myagent"
+        super().setup_class()
         cls.connection_id = "author/unknown_connection:0.1.0"
         cls.connection_name = "unknown_connection"
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        # copy the 'packages' directory in the parent of the agent folder.
-        shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
 
-        os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-        )
-        assert result.exit_code == 0
+    def test_run(self):
+        """Run the test."""
+        expected_message = f"Error: Connection ids ['{self.connection_id}'] not declared in the configuration file."
 
-        result = cls.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-
-        os.chdir(Path(cls.t, cls.agent_name))
-
-        cls.result = cls.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "run", "--connections", cls.connection_id],
-            standalone_mode=False,
-        )
-
-    def test_exit_code_equal_to_1(self):
-        """Assert that the exit code is equal to 1 (i.e. catchall for general errors)."""
-        assert self.result.exit_code == 1
-
-    def test_log_error_message(self):
-        """Test that the log error message is fixed."""
-        s = "Connection ids ['{}'] not declared in the configuration file.".format(
-            self.connection_id
-        )
-        assert self.result.exception.message == s
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear the test down."""
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
+        self.process = self.run_agent("--connections", str(self.connection_id))
+        # check the error message is printed
+        self.missing_from_output(self.process, [expected_message], timeout=1)
+        # Assert that the exit code is equal to 1 (i.e. catchall for general errors).
+        assert self.process.returncode == 1
 
 
 class TestRunFailsWhenConnectionConfigFileNotFound:
