@@ -1110,7 +1110,45 @@ class TestRunFailsWhenConnectionNotComplete:
             pass
 
 
-class TestRunFailsWhenConnectionClassNotPresent:
+class TestRunFailsWhenConnectionClassNotPresent(AEATestCaseEmpty):
+    """Test that the command 'aea run --connections' fails when the connection is not declared."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        super().setup_class()
+        cls.connection_id = str(HTTP_ClIENT_PUBLIC_ID)
+        cls.connection_name = "http_client"
+        cls.add_item("connection", cls.connection_id)
+        cls.set_config("agent.default_connection", cls.connection_id)
+        Path(
+            cls.t,
+            cls.agent_name,
+            "vendor",
+            "fetchai",
+            "connections",
+            cls.connection_name,
+            "connection.py",
+        ).write_text("")
+
+        cls.run_agent("--skip-consistency-check")
+
+    def test_run(self):
+        """Run the test."""
+        expected_message = "Package loading error: An error occurred while loading connection {}: Connection class '{}' not found.".format(
+            self.connection_id, "HTTPClientConnection"
+        )
+        with pytest.raises(ClickException, match=expected_message):
+            self.run_cli_command(
+                "--skip-consistency-check",
+                "run",
+                "--connections",
+                self.connection_id,
+                cwd=self._get_cwd(),
+            )
+
+
+class TestRunFailsWhenConnectionClassNotPresentOld:
     """Test that the command 'aea run --connections' fails when the connection class is missing in connection.py."""
 
     @classmethod
