@@ -20,6 +20,7 @@
 import copy
 import logging
 import os
+import pprint
 import random
 import shutil
 import string
@@ -33,7 +34,7 @@ from filecmp import dircmp
 from io import TextIOWrapper
 from pathlib import Path
 from threading import Thread
-from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple
+from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple, Union
 
 import yaml
 
@@ -297,7 +298,9 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         # for pydocstyle
         def is_allowed_diff_in_agent_config(
             path_to_fetched_aea: str, path_to_manually_created_aea: str
-        ) -> Tuple[bool, Dict[str, str], Dict[str, str]]:
+        ) -> Tuple[
+            bool, Union[Dict[str, str], List[Any]], Union[Dict[str, str], List[Any]]
+        ]:
             with open_file(
                 os.path.join(path_to_fetched_aea, "aea-config.yaml"), "r"
             ) as file:
@@ -310,6 +313,8 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
             content1_agentconfig = content1[0]
             content2_agentconfig = content2[0]
             content1_agentconfig_copy = copy.deepcopy(content1_agentconfig)
+
+            # check only agent part
             for key, value in content1_agentconfig_copy.items():
                 if content2_agentconfig[key] == value:
                     content1_agentconfig.pop(key)
@@ -328,9 +333,27 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
             result = result and all(
                 [key in allowed_diff_keys for key in content2_agentconfig.keys()]
             )
-            if result:
-                return result, {}, {}
-            return result, content1_agentconfig, content2_agentconfig
+            if not result:
+                return result, content1_agentconfig, content2_agentconfig
+
+            # else, additionally check the other YAML pages
+            # (i.e. the component configuration overrides)
+            content1_component_overrides = content1[1:]
+            content2_component_overrides = content2[1:]
+
+            if len(content1_component_overrides) != len(content2_component_overrides):
+                return False, content1_component_overrides, content2_component_overrides
+
+            diff_1, diff_2 = [], []
+            for index, (override_1, override_2) in enumerate(
+                zip(content1_component_overrides, content2_component_overrides)
+            ):
+                if override_1 != override_2:
+                    result = False
+                    diff_1.append((index, override_1))
+                    diff_2.append((index, override_2))
+
+            return result, diff_1, diff_2
 
         path_to_manually_created_aea = os.path.join(cls.t, agent_name)
         new_cwd = os.path.join(cls.t, "fetch_dir")
@@ -353,7 +376,10 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
                 file_diff.remove("aea-config.yaml")  # won't match!
         else:
             file_diff.append(
-                "Difference in aea-config.yaml: " + str(diff1) + " vs. " + str(diff2)
+                "Difference in aea-config.yaml: "
+                + pprint.pformat(diff1)
+                + " vs. "
+                + pprint.pformat(diff2)
             )
 
         with suppress(OSError, IOError):
