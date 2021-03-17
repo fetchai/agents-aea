@@ -66,6 +66,20 @@ class TestStrategy(BaseSkillTestCase):
                     skill_context=self.skill.skill_context,
                 )
 
+    def test__init__ii(self):
+        """Test the __init__ method of the Strategy class where db_is_rel_to_cwd is True."""
+        # operation
+        with patch("os.path.isdir", return_value=True):
+            with patch.object(self.strategy, "_update_service_data") as mock_update:
+                self.strategy.__init__(
+                    db_is_rel_to_cwd=True,
+                    db_rel_dir=self.db_rel_dir,
+                    name="strategy",
+                    skill_context=self.skill.skill_context,
+                )
+
+        mock_update.assert_called_once()
+
     def test_update_service_data(self):
         """Test the _update_service_data method of the Strategy class."""
         lat = 2
