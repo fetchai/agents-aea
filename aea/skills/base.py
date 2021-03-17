@@ -782,13 +782,13 @@ def _print_warning_message_for_non_declared_skill_components(
     classes: Set[str],
     config_components: Set[str],
     item_type: str,
-    skill_path: str,
+    module_path: str,
 ) -> None:
     """Print a warning message if a skill component is not declared in the config files."""
     for class_name in classes.difference(config_components):
         skill_context.logger.warning(
-            "Class {} of type {} found but not declared in the configuration file {}.".format(
-                class_name, item_type, skill_path
+            "Class {} of type {} found in skill module {} but not declared in the configuration file.".format(
+                class_name, item_type, module_path
             )
         )
 
@@ -834,8 +834,6 @@ class _SkillComponentLoader:
         self.skill_context = skill_context
         self.kwargs = kwargs
 
-        self._all_component_names: Set[str] = set()
-
         self.skill = Skill(self.configuration, self.skill_context, **self.kwargs)
         self.skill_dotted_path = f"packages.{self.configuration.public_id.author}.skills.{self.configuration.public_id.name}"
 
@@ -846,11 +844,6 @@ class _SkillComponentLoader:
         declared_component_classes: Dict[
             _SKILL_COMPONENT_TYPES, Dict[str, SkillComponentConfiguration]
         ] = self._get_declared_skill_component_configurations()
-        self._all_component_names = {
-            config.class_name
-            for _, types_ in declared_component_classes.items()
-            for _, config in types_.items()
-        }
         component_classes_by_path: Dict[
             Path, Set[Tuple[str, Type[SkillComponent]]]
         ] = self._load_component_classes(python_modules)
@@ -903,15 +896,16 @@ class _SkillComponentLoader:
         """
         Filter classes of skill components.
 
+        The following filters are applied:
+        - the class must be a subclass of "SkillComponent";
+        - its __module__ attribute must not start with 'aea.' (we exclude classes provided by the framework)
+        - its __module__ attribute starts with the expected dotted path of this skill.
+
         :param classes: a list of pairs (class name, class object)
         :return: a list of the same kind, but filtered with only skill component classes.
         """
         filtered_classes = filter(
-            lambda name_and_class: any(
-                re.match(component, name_and_class[0])
-                for component in self._all_component_names
-            )
-            and issubclass(name_and_class[1], SkillComponent)
+            lambda name_and_class: issubclass(name_and_class[1], SkillComponent)
             and not str.startswith(name_and_class[1].__module__, "aea.")
             and not str.startswith(
                 name_and_class[1].__module__, self.skill_dotted_path
@@ -1158,9 +1152,9 @@ class _SkillComponentLoader:
             for unused_class in set_of_unused_classes:
                 component_type_class = self._get_skill_component_type(unused_class)
                 if (
-                    isinstance(component_type_class, (Handler, Behaviour))
+                    issubclass(unused_class, (Handler, Behaviour))
                     and cast(
-                        Union[Handler, Behaviour], component_type_class
+                        Union[Handler, Behaviour], unused_class
                     ).is_programmatically_defined
                 ):
                     continue

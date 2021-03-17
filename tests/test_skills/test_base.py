@@ -20,6 +20,7 @@
 import unittest.mock
 from pathlib import Path
 from queue import Queue
+from textwrap import dedent
 from types import SimpleNamespace
 from unittest import TestCase, mock
 from unittest.mock import MagicMock, Mock, patch
@@ -32,6 +33,8 @@ import aea
 from aea.aea import AEA
 from aea.common import Address
 from aea.configurations.base import PublicId, SkillComponentConfiguration, SkillConfig
+from aea.configurations.data_types import ComponentType
+from aea.configurations.loader import load_component_configuration
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.gop import DecisionMakerHandler as GOPDecisionMakerHandler
 from aea.decision_maker.gop import GoalPursuitReadiness, OwnershipState, Preferences
@@ -48,10 +51,13 @@ from aea.skills.base import (
     Skill,
     SkillComponent,
     SkillContext,
+    _SkillComponentLoader,
     _print_warning_message_for_non_declared_skill_components,
 )
+from aea.test_tools.test_cases import AEATestCase
 
 from tests.conftest import (
+    CUR_PATH,
     ETHEREUM_PRIVATE_KEY_PATH,
     FETCHAI_PRIVATE_KEY_PATH,
     ROOT_DIR,
@@ -480,10 +486,10 @@ def test_print_warning_message_for_non_declared_skill_components():
             "path",
         )
         mock_logger_warning.assert_any_call(
-            "Class unknown_class_1 of type type found but not declared in the configuration file path."
+            "Class unknown_class_1 of type type found in skill module path but not declared in the configuration file."
         )
         mock_logger_warning.assert_any_call(
-            "Class unknown_class_2 of type type found but not declared in the configuration file path."
+            "Class unknown_class_2 of type type found in skill module path but not declared in the configuration file."
         )
 
 
@@ -704,3 +710,87 @@ def test_setup_teardown_methods():
 
     mock_setup.assert_called_once()
     mock_teardown.assert_called_once()
+
+
+class TestSkillLoadingWarningMessages(AEATestCase):
+    """Test warning message in case undeclared skill are found."""
+
+    path_to_aea: Path = Path(CUR_PATH, "data", "dummy_aea")
+
+    cli_log_options = ["-v", "DEBUG"]
+    _TEST_HANDLER_CLASS_NAME = "TestHandler"
+    _TEST_BEHAVIOUR_CLASS_NAME = "TestBehaviour"
+
+    _test_skill_module_path = "skill_module_for_testing.py"
+    _test_skill_module_content = dedent(
+        f"""
+    from aea.skills.base import Behaviour, Handler
+
+    class {_TEST_HANDLER_CLASS_NAME}(Handler):
+
+        is_programmatically_defined = False
+
+        def setup(self):
+            pass
+        def handle(self, message):
+            pass
+        def teardown(self):
+            pass
+
+    class {_TEST_BEHAVIOUR_CLASS_NAME}(Behaviour):
+
+        is_programmatically_defined = True
+
+        def setup(self):
+            pass
+        def act(self):
+            pass
+        def teardown(self):
+            pass
+    """
+    )
+
+    @classmethod
+    def setup_class(cls):
+        """Set up the test."""
+        super().setup_class()
+
+        # add a module in 'dummy' skill with a Handler and a Behaviour
+        dummy_skill_path = cls.t / cls.agent_name / "skills" / "dummy"
+        (dummy_skill_path / cls._test_skill_module_path).write_text(
+            cls._test_skill_module_content
+        )
+        skill_config = load_component_configuration(
+            ComponentType.SKILL, dummy_skill_path, skip_consistency_check=True
+        )
+        skill_config._directory = dummy_skill_path
+
+        cls.skill_context_mock = MagicMock()
+        cls.skill_component_loader = _SkillComponentLoader(
+            skill_config, cls.skill_context_mock
+        )
+
+        # load the skill - it will trigger the warning messages.
+        cls.skill_component_loader.load_skill()
+
+    def test_warning_message_when_component_not_declared_and_flag_is_false(self):
+        """
+        Test warning message.
+
+        Test that the warning message is printed when component not declared
+         and when the flag 'is_programmatically_defined' is false.
+        """
+        expected_message = f"Class {self._TEST_HANDLER_CLASS_NAME} of type handler found in skill module {self._test_skill_module_path} but not declared in the configuration file."
+        self.skill_context_mock.logger.warning.assert_any_call(expected_message)
+
+    def test_no_warning_message_when_component_not_declared_but_flag_is_true(self):
+        """
+        Test warning message.
+
+        Test that the warning message is NOT printed when component not declared
+         AND the flag 'is_programmatically_defined' is true.
+        """
+        not_expected_message = f"Class {self._TEST_BEHAVIOUR_CLASS_NAME} of type behaviour found in skill module {self._test_skill_module_path} but not declared in the configuration file."
+        # note: we do want the mock assert to fail
+        with pytest.raises(AssertionError):
+            self.skill_context_mock.logger.warning.assert_any_call(not_expected_message)
