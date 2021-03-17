@@ -66,7 +66,7 @@ def test_key_file_encryption_decryption(cosmos_private_key_file):
         cosmos.decrypt(encrypted_data, "BaD_PassWord")
 
     with pytest.raises(ValueError, match="Bad encrypted key format!"):
-        cosmos.decrypt(b"some_data" * 16, "BaD_PassWord")
+        cosmos.decrypt("some_data" * 16, "BaD_PassWord")
 
 
 def test_initialization():
