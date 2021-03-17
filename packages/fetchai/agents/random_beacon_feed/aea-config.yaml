@@ -1,13 +1,13 @@
 agent_name: random_beacon_feed
 author: fetchai
-version: 0.5.0
+version: 0.6.0
 license: Apache-2.0
 description: An agent that retrieves the Fetch.ai decentralised random beacon value.
 aea_version: '>=0.11.0, <0.12.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.14.0
+- fetchai/ledger:0.15.0
 contracts: []
 protocols:
 - fetchai/default:0.13.0
@@ -15,8 +15,8 @@ protocols:
 - fetchai/signing:0.11.0
 - fetchai/state_update:0.11.0
 skills:
-- fetchai/fetch_beacon:0.7.0
-default_connection: fetchai/ledger:0.14.0
+- fetchai/fetch_beacon:0.8.0
+default_connection: fetchai/ledger:0.15.0
 default_ledger: fetchai
 default_routing: {}
 connection_private_key_paths: {}
@@ -29,7 +29,7 @@ dependencies:
   aea-ledger-fetchai:
     version: <0.3.0,>=0.2.0
 ---
-public_id: fetchai/ledger:0.14.0
+public_id: fetchai/ledger:0.15.0
 type: connection
 config:
   ledger_apis:

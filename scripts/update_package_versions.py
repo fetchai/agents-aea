@@ -269,7 +269,8 @@ def get_all_protocol_spec_ids() -> Set[PublicId]:
     :return: a set of package ids.
     """
     result: Set[PublicId] = set()
-    for protocol_package_path in PACKAGES_DIR.rglob("**/**/protocols/**"):
+    protocol_packages = set(PACKAGES_DIR.rglob("**/**/protocols/**")) - set(PACKAGES_DIR.rglob("**/**/protocols"))
+    for protocol_package_path in protocol_packages:
         content = get_protocol_specification_from_readme(protocol_package_path)
         spec_id = get_protocol_specification_id_from_specification(content)
         result.add(PublicId.from_str(spec_id))
