@@ -86,7 +86,7 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
         )
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/coin_price_feed:0.8.0", coin_price_feed_aea_name
+            "fetchai/coin_price_feed:0.9.0", coin_price_feed_aea_name
         )
         assert (
             diff == []
