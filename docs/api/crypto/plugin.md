@@ -70,7 +70,7 @@ Get the entry point path.
 #### load`_`all`_`plugins
 
 ```python
-load_all_plugins() -> None
+load_all_plugins(is_raising_exception: bool = True) -> None
 ```
 
 Load all plugins.

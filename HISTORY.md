@@ -1,5 +1,19 @@
 # Release History
 
+## 0.11.2 (2020-03-17)
+
+- Fixes a bug in testing tools
+- Fixes a bug where plugins are not loaded after installation in `MultiAgentManager`
+- Adds unit tests for weather, thermometer and car park skills
+- Fixes a missing dependency in Windows
+- Improves SOEF connections' error handling
+- Fixes bug in ML skills and adds unit tests
+- Adds script to bump plugin versions
+- Adds gas price strategy support in `aea-ledger-ethereum` plugin
+- Adds CLI plugin for IPFS interactions (add/get)
+- Adds support for CLI plugins to framework
+- Multiple additional tests and test stability fixes
+
 ## 0.11.1 (2020-03-06)
 
 - Bumps `aiohttp` to `>=3.7.4` to address a CVE affecting `http_server`, `http_client` and `webhook` connections
