@@ -32,17 +32,20 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Any, Collection, Dict, List, Optional, Tuple, cast
 
+from aea_ledger_cosmos.crypto import DataEncrypt
 from bech32 import (  # pylint: disable=wrong-import-order
     bech32_decode,
     bech32_encode,
     convertbits,
 )
-from ecdsa import (  # pylint: disable=wrong-import-order
+from ecdsa import (  # type: ignore # pylint: disable=wrong-import-order
     SECP256k1,
     SigningKey,
     VerifyingKey,
 )
-from ecdsa.util import sigencode_string_canonize  # pylint: disable=wrong-import-order
+from ecdsa.util import (
+    sigencode_string_canonize,  # type: ignore # # pylint: disable=wrong-import-order
+)
 
 from aea.common import Address, JSONLike
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
@@ -449,7 +452,7 @@ class CosmosCrypto(Crypto[SigningKey]):
         :param password: the password to decrypt.
         :return: json string containing encrypted private key.
         """
-        raise NotImplementedError  # pylint: disable=W0223
+        return DataEncrypt.encrypt(self.private_key.encode(), password).decode()
 
     @classmethod
     def decrypt(cls, keyfile_json: str, password: str) -> str:
@@ -460,7 +463,7 @@ class CosmosCrypto(Crypto[SigningKey]):
         :param password: the password to decrypt.
         :return: the raw private key.
         """
-        raise NotImplementedError  # pylint: disable=W0223
+        return DataEncrypt.decrypt(keyfile_json.encode(), password).decode()
 
 
 class _CosmosApi(LedgerApi):
