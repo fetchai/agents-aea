@@ -34,7 +34,7 @@ from aea.configurations.constants import (
 from aea.crypto import register_crypto, register_faucet_api, register_ledger_api
 from aea.crypto.registries.base import EntryPoint as EntryPointString
 from aea.crypto.registries.base import ItemId
-from aea.exceptions import AEAPluginError, enforce
+from aea.exceptions import AEAException, AEAPluginError, enforce
 
 
 _from_group_to_register_callable = {
@@ -157,13 +157,17 @@ def _iter_plugins() -> Iterator[Plugin]:
         yield plugin
 
 
-def _register_plugin(plugin: Plugin) -> None:
+def _register_plugin(plugin: Plugin, is_raising_exception: bool = True) -> None:
     """Register a plugin to the right registry."""
     register_function = _from_group_to_register_callable[plugin.group]
-    register_function(plugin.name, entry_point=plugin.entry_point_path)
+    try:
+        register_function(plugin.name, entry_point=plugin.entry_point_path)
+    except AEAException:  # pragma: nocover
+        if is_raising_exception:
+            raise
 
 
-def load_all_plugins() -> None:
+def load_all_plugins(is_raising_exception: bool = True) -> None:
     """Load all plugins."""
     for plugin in _iter_plugins():
-        _register_plugin(plugin)
+        _register_plugin(plugin, is_raising_exception)

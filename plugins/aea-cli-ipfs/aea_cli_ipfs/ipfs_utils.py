@@ -34,7 +34,7 @@ class IPFSDaemon:
     :raises Exception: if IPFS is not installed.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialise IPFS daemon."""
         # check we have ipfs
         self.process = None  # type: Optional[subprocess.Popen]
