@@ -36,7 +36,7 @@ from packages.fetchai.skills.simple_oracle.strategy import Strategy
 from tests.conftest import ROOT_DIR
 
 
-LEDGER_ID = "fetchai"
+LEDGER_ID = "ethereum"
 AGENT_ADDRESS = "some_eth_address"
 DEFAULT_ADDRESS = "0x0000000000000000000000000000000000000000"
 
