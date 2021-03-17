@@ -257,7 +257,7 @@ class LedgerApiHandler(Handler):
                     self.context.behaviours.simple_oracle_behaviour.update_prometheus_metric(
                         metric_name, "inc", 1.0, {}
                     )
-            else:
+            else: # pragma: nocover
                 self.context.logger.error("unexpected transaction receipt!")
         else:
             self.context.logger.error(
