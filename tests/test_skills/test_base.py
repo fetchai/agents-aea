@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests for the base classes for the skills."""
+import shutil
 import unittest.mock
 from pathlib import Path
 from queue import Queue
@@ -54,7 +55,7 @@ from aea.skills.base import (
     _SkillComponentLoader,
     _print_warning_message_for_non_declared_skill_components,
 )
-from aea.test_tools.test_cases import AEATestCase
+from aea.test_tools.test_cases import BaseAEATestCase
 
 from tests.conftest import (
     CUR_PATH,
@@ -712,7 +713,7 @@ def test_setup_teardown_methods():
     mock_teardown.assert_called_once()
 
 
-class TestSkillLoadingWarningMessages(AEATestCase):
+class TestSkillLoadingWarningMessages(BaseAEATestCase):
     """
     Test warning message in case undeclared skill are found.
 
@@ -724,7 +725,7 @@ class TestSkillLoadingWarningMessages(AEATestCase):
     - test that we have a warning message only from the first.
     """
 
-    path_to_aea: Path = Path(CUR_PATH, "data", "dummy_aea")
+    agent_name = "dummy_aea"
 
     cli_log_options = ["-v", "DEBUG"]
     _TEST_HANDLER_CLASS_NAME = "TestHandler"
@@ -763,6 +764,8 @@ class TestSkillLoadingWarningMessages(AEATestCase):
     def setup_class(cls):
         """Set up the test."""
         super().setup_class()
+        path_to_aea = Path(CUR_PATH, "data", "dummy_aea")
+        shutil.copytree(path_to_aea, cls.t / cls.agent_name)
 
         # add a module in 'dummy' skill with a Handler and a Behaviour
         dummy_skill_path = cls.t / cls.agent_name / "skills" / "dummy"
