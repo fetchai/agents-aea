@@ -1,0 +1,4 @@
+include README.md LICENSE HISTORY.md
+
+recursive-include aea_cli_ipfs
+recursive-include tests *

@@ -184,13 +184,20 @@ jobs:
 
   dependencies_checks:
     continue-on-error: False
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python_version: [3.6]
     timeout-minutes: 10
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-python@master
         with:
-          python-version: 3.6
+          python-version: ${{ matrix.python_version }}
+      - name: Install tox
+        run : |
+          pip install tox
       - name: Check Pipfile and tox.ini consistency
         run : |
           python ./scripts/check_pipfile_and_toxini.py
@@ -199,7 +206,7 @@ jobs:
           pip install -e .[all]
       - name: Check aea dependenices and imports
         run: |
-          python ./scripts/check_imports_and_dependencies.py
+          tox -e dependencies_check
 
   protolint:
     continue-on-error: False
@@ -472,6 +479,7 @@ jobs:
         sudo apt-get autoremove
         sudo apt-get autoclean
         pip install tox
+        pip install coverage
         # install Protobuf compiler
         wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
         unzip protoc-3.11.4-linux-x86_64.zip -d protoc
@@ -483,6 +491,9 @@ jobs:
         tox -e py3.7-cov -- --ignore=tests/test_docs --ignore=tests/test_examples --ignore=tests/test_packages/test_contracts --ignore=tests/test_packages/test_skills_integration -m 'not unstable'
         tox -e plugins-py3.7-cov -- --cov-append -m 'not unstable'
       continue-on-error: true
+    - name: Show full coverage report
+      run: |
+        coverage report -m -i
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:

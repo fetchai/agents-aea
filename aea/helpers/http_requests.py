@@ -45,3 +45,6 @@ request = add_default_timeout(requests.request, DEFAULT_TIMEOUT)
 head = add_default_timeout(requests.head, DEFAULT_TIMEOUT)
 
 exceptions = requests.exceptions
+
+Response = requests.Response
+ConnectionError = requests.ConnectionError  # pylint: disable=redefined-builtin

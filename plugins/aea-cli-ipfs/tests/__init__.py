@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
@@ -18,16 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-
-"""Setup script for the plug-in."""
-
-
-from setuptools import setup
-
-
-setup(
-    name="aea-cli-example",
-    version="0.1.0",
-    packages=["cli_plugin_example"],
-    entry_points={"aea.cli": ["print_hello = cli_plugin_example.core:print_hello"]},
-)
+"""Tests for aea clie ipfs plugin."""

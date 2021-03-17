@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2018-2020 Fetch.AI Limited
+#   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,13 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Core components for `print_hello`."""
-
-
-import click
-
-
-@click.command()
-def print_hello() -> None:
-    """Print 'hello'."""
-    click.echo("Hello.")
+"""The tests module contains the tests of the packages/skills/weather_station dir."""

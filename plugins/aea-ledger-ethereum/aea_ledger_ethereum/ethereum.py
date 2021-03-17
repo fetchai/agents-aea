@@ -827,11 +827,11 @@ class EthereumFaucetApi(FaucetApi):
         :return: None
         """
         if url is None:
-            raise ValueError(
+            raise ValueError(  # pragma: nocover
                 "Url is none, no default url provided. Please provide a faucet url."
             )
         response = requests.get(url + address)
-        if response.status_code // 100 == 5:
+        if response.status_code // 100 == 5:  # pragma: no cover
             _default_logger.error("Response: {}".format(response.status_code))
         elif response.status_code // 100 in [3, 4]:  # pragma: nocover
             response_dict = json.loads(response.text)
@@ -840,13 +840,13 @@ class EthereumFaucetApi(FaucetApi):
                     response.status_code, response_dict.get("message")
                 )
             )
-        elif response.status_code // 100 == 2:
+        elif response.status_code // 100 == 2:  # pragma: no cover
             response_dict = json.loads(response.text)
             _default_logger.info(
                 "Response: {}\nMessage: {}".format(
                     response.status_code, response_dict.get("message")
                 )
-            )  # pragma: no cover
+            )
 
 
 class LruLockWrapper:

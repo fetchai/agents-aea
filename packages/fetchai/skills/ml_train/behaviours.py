@@ -34,6 +34,8 @@ from packages.fetchai.skills.ml_train.dialogues import (
     LedgerApiDialogues,
     MlTradeDialogue,
 )
+from packages.fetchai.skills.ml_train.strategy import Strategy
+from packages.fetchai.skills.ml_train.tasks import MLTrainTask
 
 
 DEFAULT_MAX_PROCESSING = 120
@@ -42,7 +44,41 @@ DEFAULT_SEARCH_INTERVAL = 5.0
 LEDGER_API_ADDRESS = str(LEDGER_CONNECTION_PUBLIC_ID)
 
 
-SearchBehaviour = GenericSearchBehaviour
+class SearchBehaviour(GenericSearchBehaviour):
+    """This class implements a search behaviour for the ML skill."""
+
+    def act(self) -> None:
+        """
+        Implement the act.
+
+        :return: None
+        """
+        strategy = cast(Strategy, self.context.strategy)
+
+        if strategy.current_task_id is not None:
+            result = self.context.task_manager.get_task_result(strategy.current_task_id)
+
+            if not result.ready():
+                return
+
+            if not result.successful():
+                return
+
+            ml_task = result.get()
+            strategy.weights = ml_task.result
+            strategy.current_task_id = None
+
+        if len(strategy.data) > 0:
+            data = strategy.data.pop(0)
+            ml_task_id = self.context.task_manager.enqueue_task(
+                MLTrainTask(
+                    train_data=data[:2], epochs_per_batch=5, weights=strategy.weights
+                )
+            )
+            strategy.current_task_id = ml_task_id
+            return
+
+        super().act()
 
 
 class TransactionBehaviour(TickerBehaviour):

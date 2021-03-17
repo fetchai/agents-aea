@@ -63,9 +63,9 @@ class DBCommunication:
         con = self.db_connection()
         cur = con.cursor()
         start_dt = datetime.datetime.strptime(start_date, "%d/%m/%Y")
-        start = start_dt.strftime("%s")
+        start = int((start_dt - datetime.datetime.fromtimestamp(0)).total_seconds())
         end_dt = datetime.datetime.strptime(end_date, "%d/%m/%Y")
-        end = end_dt.strftime("%s")
+        end = int((end_dt - datetime.datetime.fromtimestamp(0)).total_seconds())
         cur.execute(
             "SELECT * FROM data WHERE idx BETWEEN ? AND ?", (str(start), str(end))
         )

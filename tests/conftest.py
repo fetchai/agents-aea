@@ -156,6 +156,7 @@ FETCHAI_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifi
 ETHEREUM_PRIVATE_KEY_TWO_FILE = "ethereum_private_key_two.txt"
 
 DEFAULT_AMOUNT = 1000000000000000000000
+GAS_PRICE_API_KEY = ""
 
 # private keys with value on testnet
 COSMOS_PRIVATE_KEY_PATH = os.path.join(
@@ -651,6 +652,7 @@ def ethereum_testnet_config(ganache_addr, ganache_port):
         "address": new_uri,
         "chain_id": DEFAULT_GANACHE_CHAIN_ID,
         "denom": ETHEREUM_DEFAULT_CURRENCY_DENOM,
+        "gas_price_api_key": GAS_PRICE_API_KEY,
     }
     return new_config
 
@@ -719,7 +721,7 @@ def reset_aea_cli_config() -> None:
 def get_unused_tcp_port():
     """Get an unused TCP port."""
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(("", 0))
+    s.bind(("127.0.0.1", 0))
     s.listen(1)
     port = s.getsockname()[1]
     s.close()

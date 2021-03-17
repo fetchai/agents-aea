@@ -4,14 +4,10 @@ omit =
     packages/fetchai/contracts/*
     packages/fetchai/skills/aries_alice/*
     packages/fetchai/skills/aries_faber/*
-    packages/fetchai/skills/carpark_detection/*
     packages/fetchai/skills/echo/*
     packages/fetchai/skills/erc1155_client/*
     packages/fetchai/skills/erc1155_deploy/*
     packages/fetchai/skills/gym/*
     packages/fetchai/skills/http_echo/*
-    packages/fetchai/skills/ml_data_provider/*
-    packages/fetchai/skills/ml_train/*
     packages/fetchai/skills/registration_aw1/*
-    packages/fetchai/skills/thermometer/*
-    packages/fetchai/skills/weather_station/*
+    plugins/aea-ledger-cosmos/aea_ledger_cosmos/cosmos.py
