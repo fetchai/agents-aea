@@ -179,10 +179,7 @@ class LedgerApiHandler(Handler):
                 kwargs=ContractApiMessage.Kwargs(
                     {
                         "label": "OracleContract",
-                        "init_msg": {
-                            "fee": str(strategy.initial_fee_deploy),
-                            "oracle_value": "0",
-                        },
+                        "init_msg": {"fee": str(strategy.initial_fee_deploy)},
                         "gas": strategy.default_gas_deploy,
                         "amount": 0,
                         "code_id": code_id,
