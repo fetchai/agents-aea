@@ -120,8 +120,8 @@ aea add connection fetchai/ledger:0.14.0
 aea add skill fetchai/tac_control_contract:0.19.0
 aea config set --type dict agent.dependencies \
 '{
-  "aea-ledger-fetchai": {"version": "<0.2.0,>=0.1.0"},
-  "aea-ledger-ethereum": {"version": "<0.2.0,>=0.1.0"}
+  "aea-ledger-fetchai": {"version": "<0.3.0,>=0.2.0"},
+  "aea-ledger-ethereum": {"version": "<0.3.0,>=0.2.0"}
 }'
 aea config set agent.default_connection fetchai/p2p_libp2p:0.17.0
 aea config set agent.default_ledger ethereum
@@ -186,8 +186,8 @@ aea add skill fetchai/tac_participation:0.18.0
 aea add skill fetchai/tac_negotiation:0.21.0
 aea config set --type dict agent.dependencies \
 '{
-  "aea-ledger-fetchai": {"version": "<0.2.0,>=0.1.0"},
-  "aea-ledger-ethereum": {"version": "<0.2.0,>=0.1.0"}
+  "aea-ledger-fetchai": {"version": "<0.3.0,>=0.2.0"},
+  "aea-ledger-ethereum": {"version": "<0.3.0,>=0.2.0"}
 }'
 aea config set agent.default_connection fetchai/p2p_libp2p:0.17.0
 aea config set agent.default_ledger ethereum
@@ -223,8 +223,8 @@ aea add skill fetchai/tac_participation:0.18.0
 aea add skill fetchai/tac_negotiation:0.21.0
 aea config set --type dict agent.dependencies \
 '{
-  "aea-ledger-fetchai": {"version": "<0.2.0,>=0.1.0"},
-  "aea-ledger-ethereum": {"version": "<0.2.0,>=0.1.0"}
+  "aea-ledger-fetchai": {"version": "<0.3.0,>=0.2.0"},
+  "aea-ledger-ethereum": {"version": "<0.3.0,>=0.2.0"}
 }'
 aea config set agent.default_connection fetchai/p2p_libp2p:0.17.0
 aea config set agent.default_ledger ethereum

@@ -17,4 +17,4 @@ contract_interface_paths:
   ethereum: build/staking_erc20.json
 dependencies:
   aea-ledger-ethereum:
-    version: <0.2.0,>=0.1.0
+    version: <0.3.0,>=0.2.0

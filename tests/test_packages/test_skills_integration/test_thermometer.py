@@ -69,7 +69,7 @@ class TestThermometerSkill(AEATestCaseManyFlaky):
         self.set_config(
             "agent.dependencies",
             '{\
-            "aea-ledger-fetchai": {"version": "<0.2.0,>=0.1.0"}\
+            "aea-ledger-fetchai": {"version": "<0.3.0,>=0.2.0"}\
         }',
             type_="dict",
         )
@@ -112,7 +112,7 @@ class TestThermometerSkill(AEATestCaseManyFlaky):
         self.set_config(
             "agent.dependencies",
             '{\
-            "aea-ledger-fetchai": {"version": "<0.2.0,>=0.1.0"}\
+            "aea-ledger-fetchai": {"version": "<0.3.0,>=0.2.0"}\
         }',
             type_="dict",
         )
@@ -265,7 +265,7 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseManyFlaky):
         self.set_config(
             "agent.dependencies",
             '{\
-            "aea-ledger-fetchai": {"version": "<0.2.0,>=0.1.0"}\
+            "aea-ledger-fetchai": {"version": "<0.3.0,>=0.2.0"}\
         }',
             type_="dict",
         )
@@ -311,7 +311,7 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseManyFlaky):
         self.set_config(
             "agent.dependencies",
             '{\
-            "aea-ledger-fetchai": {"version": "<0.2.0,>=0.1.0"}\
+            "aea-ledger-fetchai": {"version": "<0.3.0,>=0.2.0"}\
         }',
             type_="dict",
         )
