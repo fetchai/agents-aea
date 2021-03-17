@@ -115,10 +115,10 @@ class SimpleOracleBehaviour(TickerBehaviour):
             self.context.logger.info("Publishing oracle value")
 
             # add expiration block
-            update_args = observation[strategy.oracle_value_name]
-            update_args["expiration_block"] = EXPIRATION_BLOCK
-            self.context.logger.info(f"Update args: {update_args}")
-            self._request_update_transaction(update_args)
+            update_kwargs = observation[strategy.oracle_value_name]
+            update_kwargs["expiration_block"] = EXPIRATION_BLOCK
+            self.context.logger.info(f"Update kwargs: {update_kwargs}")
+            self._request_update_transaction(update_kwargs)
 
     def _request_contract_deploy_transaction(self) -> None:
         """
@@ -174,7 +174,7 @@ class SimpleOracleBehaviour(TickerBehaviour):
         self.context.outbox.put_message(message=contract_api_msg)
         self.context.logger.info("requesting grant role transaction...")
 
-    def _request_update_transaction(self, update_args: Dict[str, Any]) -> None:
+    def _request_update_transaction(self, update_kwargs: Dict[str, Any]) -> None:
         """
         Request transaction that updates value in Fetch oracle contract
 
@@ -196,7 +196,7 @@ class SimpleOracleBehaviour(TickerBehaviour):
                 {
                     "oracle_address": self.context.agent_address,
                     "update_function": strategy.update_function,
-                    "update_args": list(update_args.values()),
+                    "update_kwargs": update_kwargs,
                     "gas": strategy.default_gas_update,
                 }
             ),

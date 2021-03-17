@@ -28,7 +28,7 @@ from aea.exceptions import enforce
 from aea.helpers.transaction.base import Terms
 from aea.skills.base import Model
 
-from packages.fetchai.protocols.contract_api.custom_types import Kwargs 
+from packages.fetchai.protocols.contract_api.custom_types import Kwargs
 
 
 DEFAULT_LEDGER_ID = DEFAULT_LEDGER

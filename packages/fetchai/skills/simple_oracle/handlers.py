@@ -19,9 +19,9 @@
 
 """This package contians the handlers for the Fetch oracle contract deployer."""
 
-import json
+from typing import Optional, cast
 
-from typing import Optional, cast, Dict, Any
+from aea_ledger_fetchai import FetchAIApi
 
 from aea.common import JSONLike
 from aea.configurations.base import PublicId
@@ -29,11 +29,8 @@ from aea.crypto.ledger_apis import LedgerApis
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
-from aea_ledger_fetchai import FetchAIApi
-from aea_ledger_cosmos import CosmosApi
-from aea_ledger_ethereum import EthereumApi
-
 from packages.fetchai.connections.ledger.base import CONNECTION_ID as LEDGER_API_ADDRESS
+from packages.fetchai.contracts.oracle.contract import PUBLIC_ID as CONTRACT_PUBLIC_ID
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.prometheus.message import PrometheusMessage
@@ -48,7 +45,6 @@ from packages.fetchai.skills.simple_oracle.dialogues import (
     SigningDialogue,
     SigningDialogues,
 )
-from packages.fetchai.contracts.oracle.contract import PUBLIC_ID as CONTRACT_PUBLIC_ID
 from packages.fetchai.skills.simple_oracle.strategy import Strategy
 
 
@@ -171,10 +167,10 @@ class LedgerApiHandler(Handler):
         contract_api_dialogues = cast(
             ContractApiDialogues, self.context.contract_api_dialogues
         )
-        code_id = cast(Optional[int], LedgerApis.get_api(ledger_id).get_code_id(tx_receipt))
-
+        fetchai_api = cast(FetchAIApi, LedgerApis.get_api(ledger_id))
+        code_id = fetchai_api.get_code_id(tx_receipt)  # type: Optional[int]
         if code_id:
-            contract_api_msg, contract_api_dialogue = contract_api_dialogues.create(
+            contract_api_msg, dialogue = contract_api_dialogues.create(
                 counterparty=str(LEDGER_API_ADDRESS),
                 performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
                 ledger_id=ledger_id,
@@ -194,7 +190,10 @@ class LedgerApiHandler(Handler):
                     }
                 ),
             )
-            contract_api_dialogue.terms = strategy.get_deploy_terms(is_init_transaction=True)
+            contract_api_dialogue = cast(ContractApiDialogue, dialogue)
+            contract_api_dialogue.terms = strategy.get_deploy_terms(
+                is_init_transaction=True
+            )
             self.context.outbox.put_message(message=contract_api_msg)
         else:
             self.context.logger.info("Failed to initialize contract: code_id not found")
@@ -211,8 +210,7 @@ class LedgerApiHandler(Handler):
         tx_receipt = cast(JSONLike, ledger_api_msg.transaction_receipt.receipt)
 
         is_transaction_successful = LedgerApis.is_transaction_settled(
-            ledger_id,
-            tx_receipt,
+            ledger_id, tx_receipt,
         )
         if is_transaction_successful:
             self.context.logger.info(
@@ -224,21 +222,28 @@ class LedgerApiHandler(Handler):
             contract_api_dialogue = (
                 ledger_api_dialogue.associated_signing_dialogue.associated_contract_api_dialogue
             )
-
             transaction_label = contract_api_dialogue.terms.kwargs.get("label", "None")
 
             if not strategy.is_contract_deployed:
                 if transaction_label == "store":
                     self._request_init_transaction(ledger_id, tx_receipt)
                 elif transaction_label in {"deploy", "init"}:
-                    contract_address = LedgerApis.get_contract_address(ledger_id, tx_receipt)
+                    contract_address = LedgerApis.get_contract_address(
+                        ledger_id, tx_receipt
+                    )
                     if contract_address is None:
-                        raise ValueError("No contract address found.")  # pragma: nocover
+                        raise ValueError(
+                            "No contract address found."
+                        )  # pragma: nocover
                     strategy.contract_address = contract_address
                     strategy.is_contract_deployed = True
-                    self.context.logger.info(f"Oracle contract successfully deployed at address: {contract_address}")
+                    self.context.logger.info(
+                        f"Oracle contract successfully deployed at address: {contract_address}"
+                    )
                 else:
-                    self.context.logger.error(f"Unrecognized transaction label: {transaction_label}")
+                    self.context.logger.error(
+                        f"Unrecognized transaction label: {transaction_label}"
+                    )
             elif (
                 not strategy.is_oracle_role_granted
                 and transaction_label == "grant_role"

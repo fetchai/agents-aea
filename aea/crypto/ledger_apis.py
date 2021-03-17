@@ -198,7 +198,7 @@ class LedgerApis:
         Get the contract address from a transaction receipt.
 
         :param identifier: the identifier of the ledger
-        :param tx_receipt: the transaction digest
+        :param tx_receipt: the transaction receipt
         :return: the contract address if successful
         """
         enforce(

@@ -169,6 +169,17 @@ class Helper(ABC):
 
     @staticmethod
     @abstractmethod
+    def get_contract_address(tx_receipt: JSONLike) -> Optional[str]:
+        """
+        Get the contract address from a transaction receipt.
+
+        :param identifier: the identifier of the ledger
+        :param tx_receipt: the transaction digest
+        :return: the contract address if successful
+        """
+
+    @staticmethod
+    @abstractmethod
     def generate_tx_nonce(seller: Address, client: Address) -> str:
         """
         Generate a unique hash to distinguish txs with the same terms.

@@ -294,7 +294,8 @@ class TestLedgerApiHandler(BaseSkillTestCase):
             f"transaction was successfully settled. Transaction receipt={transaction_receipt}",
         )
         mock_logger.assert_any_call(
-            logging.INFO, "Oracle contract successfully deployed!",
+            logging.INFO,
+            "Oracle contract successfully deployed at address: some_contract_address",
         )
 
         assert (

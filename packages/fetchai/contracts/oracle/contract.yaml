@@ -8,7 +8,7 @@ aea_version: '>=0.11.0, <0.12.0'
 fingerprint:
   README.md: QmWgKLF6Fe4tESTdhStxYJrEVKP2xSthd2fcMm2LSfkygL
   __init__.py: QmRmf3Q5F6nQMrTEt59suBNw6zfgTVQX68E7CAuKmCnhAM
-  contract.py: QmUKsC1pAsadw16KPqZDDnCAxYN2rYh1eHZAFkrKL8P2iv
+  contract.py: QmZZCf4Bg6G4E11fhw2U9mVZTDNsFB1Rz7TuwMDiDfCjRa
   contracts/FetchOracle.sol: QmadnUCtsVobBGMxiWAkqMptC9acSMBGj5x4Z4V2UhnFx8
 fingerprint_ignore_patterns:
 - build/*

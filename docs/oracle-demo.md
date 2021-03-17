@@ -4,7 +4,7 @@ This demo shows how an AEA can be used to maintain an oracle and how another AEA
 
 **Oracle agents** are agents that have permission to update or validate updates to state variables in a smart contract and whose goal is to accurately estimate or predict some real world quantity or quantities.
 
-This demonstration shows how to set up a simple oracle agent who deploys an oracle contract and updates the contract with a token price fetched from a public API. It also shows how to create an oracle client agent that can request the value from the oracle contract. 
+This demonstration shows how to set up a simple oracle agent who deploys an oracle contract and updates the contract with a token price fetched from a public API. It also shows how to create an oracle client agent that can request the value from the oracle contract.
 
 ## Preparation instructions
  
@@ -58,7 +58,7 @@ Specify the name and JSON path of the data to fetch from the API:
 aea config set --type list vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.outputs '[{"name": "price", "json_path": "fetch-ai.usd"}]'
 ```
 
-Then update the agent configuration with the default routing and cert requests:
+Then update the agent configuration with the default routing:
 ``` bash
 aea config set --type dict agent.default_routing \
 '{
@@ -66,23 +66,37 @@ aea config set --type dict agent.default_routing \
 "fetchai/http:0.13.0": "fetchai/http_client:0.19.0",
 "fetchai/ledger_api:0.11.0": "fetchai/ledger:0.14.0"
 }'
-aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
-'[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
-```
-
-And change the default ledger:
-``` bash
-aea config set agent.default_ledger ethereum
 ```
 
 </p>
 </details>
 
-Additionally, create the private key for the oracle AEA. Generate and add a key for Ethereum use:
+The following steps depend on the type of ledger the oracle will be run on.
+Select a ledger type by setting a temporary variable to either `fetchai` or `ethereum`:
+```bash
+LEDGER_ID=fetchai
+```
+or
+```bash
+LEDGER_ID=ethereum
+```
 
+Update the default ledger and cert requests using the chosen ledger.
+```bash
+aea config set agent.default_ledger $LEDGER_ID
+aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
+'[{"identifier": "acn", "ledger_id": '"\"$LEDGER_ID\""', "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
+```
+
+Additionally, create the private key for the oracle AEA. Generate and add a key for use with the ledger:
 ``` bash
-aea generate-key ethereum
-aea add-key ethereum
+aea generate-key $LEDGER_ID
+aea add-key $LEDGER_ID
+```
+
+If running on a testnet (not including Ganache), generate some wealth for your AEA:
+```bash
+aea generate-wealth $LEDGER_ID
 ```
 
 Next, create a private key used to secure the AEA's communications:
@@ -91,7 +105,7 @@ aea generate-key fetchai fetchai_connection_private_key.txt
 aea add-key fetchai fetchai_connection_private_key.txt --connection
 ```
 
-Finally, certify the key for use by the connections that request that:
+Finally, certify the keys for use by the connections that request them:
 ``` bash
 aea issue-certificates
 ```
@@ -235,7 +249,7 @@ aea run
 
 After a few moments, you should see the following notices in the logs:
 ``` bash
-info: [coin_price_oracle] Oracle contract successfully deployed!
+info: [coin_price_oracle] Oracle contract successfully deployed at address: ...
 ...
 info: [coin_price_oracle] Oracle role successfully granted!
 ...

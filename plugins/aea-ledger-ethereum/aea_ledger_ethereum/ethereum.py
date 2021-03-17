@@ -343,17 +343,14 @@ class EthereumHelper(Helper):
         return is_successful
 
     @staticmethod
-    def get_contract_address(tx_receipt: JSONLike) -> Optional[Address]:
+    def get_contract_address(tx_receipt: JSONLike) -> Optional[str]:
         """
         Retrieve the `contract_address` from a transaction receipt.
 
         :param tx_receipt: the receipt of the transaction.
         :return: the contract address, if present
         """
-        contract_address = cast(
-            Optional[Address],
-            tx_receipt.get("contractAddress", None)
-        )
+        contract_address = cast(Optional[str], tx_receipt.get("contractAddress", None))
         return contract_address
 
     @staticmethod
