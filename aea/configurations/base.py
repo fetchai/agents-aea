@@ -1878,7 +1878,9 @@ class AEAVersionError(ValueError):
 
 def _check_aea_version(package_configuration: PackageConfiguration) -> None:
     """Check the package configuration version against the version of the framework."""
-    current_aea_version = Version(__aea_version__)
+    # temp ignore pre-release!
+    version = __aea_version__[:-5] if "rc" in __aea_version__ else __aea_version__
+    current_aea_version = Version(version)
     version_specifiers = package_configuration.aea_version_specifiers
     if current_aea_version not in version_specifiers:
         raise AEAVersionError(
