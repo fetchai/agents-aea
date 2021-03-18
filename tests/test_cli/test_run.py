@@ -1131,8 +1131,6 @@ class TestRunFailsWhenConnectionClassNotPresent(AEATestCaseEmpty):
             "connection.py",
         ).write_text("")
 
-        cls.run_agent("--skip-consistency-check")
-
     def test_run(self):
         """Run the test."""
         expected_message = "Package loading error: An error occurred while loading connection {}: Connection class '{}' not found.".format(
