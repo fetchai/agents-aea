@@ -160,7 +160,7 @@ class ProcessEnvelopesTestCase(TestCase):
         """Test _process_envelopes method for positive result."""
         agent_name = "agent_name"
         identity_stub = mock.Mock()
-        identity_stub.name = "identity-stub-name"
+        identity_stub.name = "identity_stub_name"
         inbox = mock.Mock()
         inbox.empty = lambda: False
         inbox.get_nowait = lambda: "Not None"
@@ -193,7 +193,7 @@ class ProcessEnvelopesTestCase(TestCase):
         """Test _process_envelopes for couldn't recover envelope result."""
         agent_name = "agent_name"
         identity_stub = mock.Mock()
-        identity_stub.name = "identity-stub-name"
+        identity_stub.name = "identity_stub_name"
         inbox = mock.Mock()
         inbox.empty = lambda: False
         inbox.get_nowait = lambda: None

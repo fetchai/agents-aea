@@ -212,7 +212,7 @@ class RegexConstrainedString(UserString):
         """Initialize a regex constrained string."""
         super().__init__(seq)
 
-        if not self.REGEX.match(self.data):
+        if not self.REGEX.fullmatch(self.data):
             self._handle_no_match()
 
     def _handle_no_match(self) -> None:
@@ -242,6 +242,11 @@ class SimpleId(RegexConstrainedString):
     Traceback (most recent call last):
     ...
     ValueError: Value 0an_identifier does not match the regular expression re.compile('[a-zA-Z_][a-zA-Z0-9_]{0,127}')
+
+    >>> SimpleId("an identifier")
+    Traceback (most recent call last):
+    ...
+    ValueError: Value an identifier does not match the regular expression re.compile('[a-zA-Z_][a-zA-Z0-9_]{0,127}')
 
     >>> SimpleId("")
     Traceback (most recent call last):
