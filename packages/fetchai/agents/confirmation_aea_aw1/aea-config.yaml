@@ -3,7 +3,7 @@ author: fetchai
 version: 0.12.0
 description: This agent manages confirmation of registration for Agent World 1
 license: Apache-2.0
-aea_version: '>=1.0.0, <2.0.0'
+aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
@@ -65,9 +65,9 @@ logging_config:
 registry_path: ../packages
 dependencies:
   aea-ledger-ethereum:
-    version: <2.0.0,>=1.0.0
+    version: <2.0.0,>=1.0.0rc1
   aea-ledger-fetchai:
-    version: <2.0.0,>=1.0.0
+    version: <2.0.0,>=1.0.0rc1
 ---
 public_id: fetchai/p2p_libp2p:0.18.0
 type: connection

@@ -4,7 +4,7 @@ version: 0.6.0
 type: contract
 description: Fetch oracle contract
 license: Apache-2.0
-aea_version: '>=1.0.0, <2.0.0'
+aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint:
   README.md: QmWgKLF6Fe4tESTdhStxYJrEVKP2xSthd2fcMm2LSfkygL
   __init__.py: QmRmf3Q5F6nQMrTEt59suBNw6zfgTVQX68E7CAuKmCnhAM
@@ -17,4 +17,4 @@ contract_interface_paths:
   ethereum: build/FetchOracle.json
 dependencies:
   aea-ledger-ethereum:
-    version: <2.0.0,>=1.0.0
+    version: <2.0.0,>=1.0.0rc1

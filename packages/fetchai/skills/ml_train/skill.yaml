@@ -5,7 +5,7 @@ type: skill
 description: The ml train and predict skill implements a simple skill which buys training
   data, trains a model and sells predictions.
 license: Apache-2.0
-aea_version: '>=1.0.0, <2.0.0'
+aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint:
   README.md: QmUk1XEpYnxte5GKZjSvJY2LJPpVzzP6zLvnxT2Y1g9f4m
   __init__.py: QmZtsYjCjML3ZwQrTkrzyQCAkxSkGRidFe5tigapTsSvL5
@@ -83,7 +83,7 @@ models:
     class_name: Strategy
 dependencies:
   aea-ledger-fetchai:
-    version: <2.0.0,>=1.0.0
+    version: <2.0.0,>=1.0.0rc1
   numpy: {}
   tensorflow:
     version: ~=2.4.0

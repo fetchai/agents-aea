@@ -4,7 +4,7 @@ version: 0.1.0
 type: skill
 description: Retrieve data from an API
 license: Apache-2.0
-aea_version: '>=1.0.0, <2.0.0'
+aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint:
   README.md: QmQEKGxJfUy6vg3aPg6jRNHQ4vzr4rUHYVac5eYG5C6Uxb
   __init__.py: QmPA83WQrVNtbNqawynoRAt4sBh8smZnzseKdqKPtZ9EUn

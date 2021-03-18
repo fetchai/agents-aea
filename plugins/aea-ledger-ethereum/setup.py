@@ -31,7 +31,7 @@ setup(
     description="Python package wrapping the public and private key cryptography and ledger api of Ethereum.",
     packages=find_packages(include=["aea_ledger_ethereum*"]),
     install_requires=[
-        "aea>=1.0.0, <1.1.0",
+        "aea>=1.0.0rc1, <2.0.0",
         "web3==5.12.0",
         "ipfshttpclient==0.6.1",
         "eth-account==0.5.2",

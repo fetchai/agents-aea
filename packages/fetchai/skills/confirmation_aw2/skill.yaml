@@ -5,7 +5,7 @@ type: skill
 description: This skill purchases information from other agents as specified in its
   configuration. It is the confirmation buyer for Agent World 2.
 license: Apache-2.0
-aea_version: '>=1.0.0, <2.0.0'
+aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint:
   README.md: QmQtVnRU5nNhxkaVKX6Go5G4X5dVcocLGM5uynZ1wzHCKK
   __init__.py: QmVfyJkhm29gPMEGsP6iPCZGTBcmv8Xvv5iMSaDPYggkim
@@ -95,5 +95,5 @@ models:
     class_name: Strategy
 dependencies:
   aea-ledger-fetchai:
-    version: <2.0.0,>=1.0.0
+    version: <2.0.0,>=1.0.0rc1
 is_abstract: false
