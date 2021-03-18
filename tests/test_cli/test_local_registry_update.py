@@ -33,7 +33,7 @@ def test_local_registry_update():
     """Test local-registry-sync cli command."""
     PACKAGES = [
         PackageId(PackageType.CONNECTION, PublicId("fetchai", "local", "0.11.0")),
-        PackageId(PackageType.AGENT, PublicId("fetchai", "my_first_aea", "0.10.0")),
+        PackageId(PackageType.AGENT, PublicId("fetchai", "my_first_aea", "0.21.0")),
     ]
     with TemporaryDirectory() as tmp_dir:
         for package_id in PACKAGES:

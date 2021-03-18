@@ -326,7 +326,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
                 "connection_private_key_paths",
                 "private_key_paths",
                 "registry_path",
-                "dependencies",  # temporary
+                "dependencies",
             ]
             result = all(
                 [key in allowed_diff_keys for key in content1_agentconfig.keys()]
