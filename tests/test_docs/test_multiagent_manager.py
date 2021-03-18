@@ -25,7 +25,9 @@ from importlib import import_module
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from tests.conftest import PACKAGES_DIR, ROOT_DIR
+import pytest
+
+from tests.conftest import MAX_FLAKY_RERUNS, PACKAGES_DIR, ROOT_DIR
 from tests.test_docs.helper import BasePythonMarkdownDocs
 
 
@@ -41,6 +43,7 @@ def _import_module_mock(arg):
     return import_module(arg)
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # flaky on Windows
 class TestMultiAgentManager(BasePythonMarkdownDocs):
     """Test the ledger integration code snippets."""
 

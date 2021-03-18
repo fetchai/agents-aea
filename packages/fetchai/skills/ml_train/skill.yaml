@@ -1,6 +1,6 @@
 name: ml_train
 author: fetchai
-version: 0.22.0
+version: 0.23.0
 type: skill
 description: The ml train and predict skill implements a simple skill which buys training
   data, trains a model and sells predictions.
@@ -8,7 +8,7 @@ license: Apache-2.0
 aea_version: '>=0.11.0, <0.12.0'
 fingerprint:
   README.md: QmUk1XEpYnxte5GKZjSvJY2LJPpVzzP6zLvnxT2Y1g9f4m
-  __init__.py: QmVFBbxmXgWHbsQtADYoBaREvWXQ19hf6nfHyPfjdbThQX
+  __init__.py: QmZtsYjCjML3ZwQrTkrzyQCAkxSkGRidFe5tigapTsSvL5
   behaviours.py: QmYSjRj7V1o9u4UkwAnW6qBSW76qXTpVVdRNMV4orxFmC8
   dialogues.py: QmUpSz6RH7QvRjDx2JvyHeZuta2xeU27ddoeJApWRxHmbw
   handlers.py: QmWegQMUN6pw9NMkZ9dFbBSoA3QZ3KSKun7NKtFTQGV3kE
@@ -16,7 +16,7 @@ fingerprint:
   tasks.py: QmUGPgSX3HbhoPsYY8XSrLMrq5BQo1nk4o7oZBa4uG3ZPB
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.14.0
+- fetchai/ledger:0.15.0
 contracts: []
 protocols:
 - fetchai/default:0.13.0
@@ -25,7 +25,7 @@ protocols:
 - fetchai/oef_search:0.14.0
 - fetchai/signing:0.11.0
 skills:
-- fetchai/generic_buyer:0.21.0
+- fetchai/generic_buyer:0.22.0
 behaviours:
   search:
     args:
@@ -83,7 +83,7 @@ models:
     class_name: Strategy
 dependencies:
   aea-ledger-fetchai:
-    version: <0.2.0,>=0.1.0
+    version: <0.3.0,>=0.2.0
   numpy: {}
   tensorflow:
     version: ~=2.4.0

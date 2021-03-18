@@ -223,6 +223,10 @@ nav:
         - Test Cases: 'api/test_tools/test_cases.md'
         - Test Skill: 'api/test_tools/test_skill.md'
       - Plugins:
+        - CLI:
+          - IPFS:
+            - API: 'api/plugins/aea_cli_ipfs/core.md'
+            - Utils: 'api/plugins/aea_cli_ipfs/ipfs_utils.md'
         - Ledger:
           - Cosmos:
             - API: 'api/plugins/aea_ledger_cosmos/cosmos.md'

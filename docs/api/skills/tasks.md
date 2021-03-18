@@ -25,7 +25,7 @@ Initialize a task.
 #### `__`call`__`
 
 ```python
- | __call__(*args: Any, **kwargs: Any) -> "Task"
+ | __call__(*args: Any, **kwargs: Any) -> Any
 ```
 
 Execute the task.
@@ -84,7 +84,7 @@ None
 
 ```python
  | @abstractmethod
- | execute(*args: Any, **kwargs: Any) -> None
+ | execute(*args: Any, **kwargs: Any) -> Any
 ```
 
 Run the task logic.
@@ -135,7 +135,7 @@ A Task manager.
 #### `__`init`__`
 
 ```python
- | __init__(nb_workers: int = 2, is_lazy_pool_start: bool = True, logger: Optional[logging.Logger] = None) -> None
+ | __init__(nb_workers: int = 2, is_lazy_pool_start: bool = True, logger: Optional[logging.Logger] = None, pool_mode: str = "multithread") -> None
 ```
 
 Initialize the task manager.
@@ -144,6 +144,7 @@ Initialize the task manager.
 
 - `nb_workers`: the number of worker processes.
 - `is_lazy_pool_start`: option to postpone pool creation till the first enqueue_task called.
+- `pool_mode`: str. multithread or multiprocess
 
 <a name="aea.skills.tasks.TaskManager.is_started"></a>
 #### is`_`started

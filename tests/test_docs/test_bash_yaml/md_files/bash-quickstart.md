@@ -56,12 +56,12 @@ Confirm password:
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.11.1
+v0.11.2
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
 ``` bash
-aea fetch fetchai/my_first_aea:0.22.0
+aea fetch fetchai/my_first_aea:0.23.0
 cd my_first_aea
 ```
 ``` bash
@@ -93,7 +93,7 @@ aea run
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.11.1
+v0.11.2
 
 Starting AEA 'my_first_aea' in 'async' mode ...
 info: Echo Handler: setup method called.

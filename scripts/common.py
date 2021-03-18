@@ -107,5 +107,5 @@ def get_protocol_specification_id_from_specification(specification: str) -> str:
         len(matches) == 1,
         f"Expected exactly one protocol specification id, found: {matches}",
     )
-    spec_id = matches[0].group(1)
+    spec_id = matches[0]
     return spec_id
