@@ -251,7 +251,7 @@ class OefErrorOperation(Enum):
 
 ## `fetchai/fipa:0.14.0` protocol
 
-This protocol provides classes and functions necessary for communication between AEAs via a variant of the <a href="http://www.fipa.org/repository/aclspecs.html" target="_blank">FIPA</a> Agent Communication Language.
+This protocol provides classes and functions necessary for communication between AEAs via a variant of the <a href="https://en.wikipedia.org/wiki/Foundation_for_Intelligent_Physical_Agents" target="_blank">FIPA</a> Agent Communication Language.
 
 The `fetchai/fipa:0.14.0` protocol definition includes a `FipaMessage` with the following performatives:
 

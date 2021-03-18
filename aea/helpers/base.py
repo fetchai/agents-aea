@@ -857,9 +857,9 @@ def compute_specifier_from_version(version: Version) -> str:
     """
     Compute the specifier set from a version, by varying only on the patch number.
 
-    I.e. from "{major}.{minor}.{patch}", return
+    I.e. from "{major}.{minor}.{patch}.{extra}", return
 
-    ">={major}.{minor}.0, <{major}.{minor + 1}.0"
+    ">=min({major}.{minor}.0, {major}.{minor}.{patch}.{extra}), <{major}.{minor + 1}.0"
 
     :param version: the version
     :return: the specifier set
@@ -868,6 +868,7 @@ def compute_specifier_from_version(version: Version) -> str:
     new_minor_low = version.minor
     new_minor_high = new_minor_low + 1
     lower_bound = Version(f"{new_major}.{new_minor_low}.0")
+    lower_bound = lower_bound if lower_bound < version else version
     upper_bound = Version(f"{new_major}.{new_minor_high}.0")
     specifier_set = f">={lower_bound}, <{upper_bound}"
     return specifier_set

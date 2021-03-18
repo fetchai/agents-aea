@@ -3,14 +3,14 @@ author: dummy_author
 version: 1.0.0
 description: dummy_aea agent description
 license: Apache-2.0
-aea_version: '>=0.11.0, <0.12.0'
+aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/local:0.16.0
-- fetchai/p2p_libp2p:0.17.0
+- fetchai/p2p_libp2p:0.18.0
 contracts:
-- fetchai/erc1155:0.17.0
+- fetchai/erc1155:0.18.0
 protocols:
 - fetchai/default:0.13.0
 - fetchai/fipa:0.14.0

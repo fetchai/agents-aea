@@ -80,7 +80,9 @@ class AEA(Agent):
         execution_timeout: float = 0,
         max_reactions: int = 20,
         error_handler_class: Optional[Type[AbstractErrorHandler]] = None,
+        error_handler_config: Optional[Dict[str, Any]] = None,
         decision_maker_handler_class: Optional[Type[DecisionMakerHandler]] = None,
+        decision_maker_handler_config: Optional[Dict[str, Any]] = None,
         skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
         connection_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
         loop_mode: Optional[str] = None,
@@ -177,14 +179,18 @@ class AEA(Agent):
             )
 
             decision_maker_handler_class = DefaultDecisionMakerHandler
+        if decision_maker_handler_config is None:
+            decision_maker_handler_config = {}
         decision_maker_handler = decision_maker_handler_class(
-            identity=identity, wallet=wallet
+            identity=identity, wallet=wallet, config=decision_maker_handler_config
         )
         self.runtime.set_decision_maker(decision_maker_handler)
 
         if error_handler_class is None:
             error_handler_class = DefaultErrorHandler
-        self._error_handler_class = error_handler_class
+        if error_handler_config is None:
+            error_handler_config = {}
+        self._error_handler = error_handler_class(**error_handler_config)
         default_ledger_id = (
             default_ledger
             if default_ledger is not None
@@ -271,9 +277,9 @@ class AEA(Agent):
         """
         self.filter.handle_new_handlers_and_behaviours()
 
-    def _get_error_handler(self) -> Type[AbstractErrorHandler]:
+    def _get_error_handler(self) -> AbstractErrorHandler:
         """Get error handler."""
-        return self._error_handler_class
+        return self._error_handler
 
     def _get_msg_and_handlers_for_envelope(
         self, envelope: Envelope
@@ -297,7 +303,7 @@ class AEA(Agent):
         self,
         envelope: Envelope,
         protocol: Protocol,
-        error_handler: Type[AbstractErrorHandler],
+        error_handler: AbstractErrorHandler,
     ) -> Tuple[Optional[Message], List[Handler]]:
 
         handlers = self.filter.get_active_handlers(

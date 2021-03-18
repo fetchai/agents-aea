@@ -1,14 +1,14 @@
 name: confirmation_aw1
 author: fetchai
-version: 0.8.0
+version: 0.9.0
 type: skill
 description: The confirmation_aw1 skill is a skill to confirm registration for Agent
   World 1.
 license: Apache-2.0
-aea_version: '>=0.11.0, <0.12.0'
+aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint:
   README.md: QmWEG3A5xRL3yf65UHfrKhUwazR5bjpxSiuuBGMYX7t7Co
-  __init__.py: QmTxheBuqSJGS3381TPWiiegF16Y2pGaqEN7VW7BbrBgQg
+  __init__.py: QmY2HnEY57hCeMY3inTWbyQbx6b8C21qaPNaxC2VcoQz51
   behaviours.py: QmRF2y4UQSRGB7qWGCT45EP1Geb2m94HuHob56GH74px1T
   dialogues.py: Qmb5BnkjZs21o3V6mNkmYmyAj5C7iBMWWvvykBeMEwv1iW
   handlers.py: QmdXRMnghbx1LZD8vPBEiSEnUJnkU7fHwf5mB9R4kfNzhX
@@ -16,9 +16,9 @@ fingerprint:
   strategy.py: QmYmmE267cWU9GSocNKwmamsqGfH1veR1Mxfd6K5Hc31Ft
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.14.0
+- fetchai/ledger:0.15.0
 contracts:
-- fetchai/staking_erc20:0.5.0
+- fetchai/staking_erc20:0.6.0
 protocols:
 - fetchai/default:0.13.0
 - fetchai/ledger_api:0.11.0
@@ -74,7 +74,7 @@ models:
     class_name: Strategy
 dependencies:
   aea-ledger-ethereum:
-    version: <0.2.0,>=0.1.0
+    version: <2.0.0,>=1.0.0rc1
   aea-ledger-fetchai:
-    version: <0.2.0,>=0.1.0
+    version: <2.0.0,>=1.0.0rc1
 is_abstract: false

@@ -4,7 +4,7 @@ version: 0.15.0
 type: connection
 description: The webhook connection that wraps a webhook functionality.
 license: Apache-2.0
-aea_version: '>=0.11.0, <0.12.0'
+aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint:
   README.md: QmXfudvAaXuix5qMU2WVPqkbzZy6tmJ8EWKhnpnmRp6aKB
   __init__.py: QmWUKSmXaBgGMvKgdmzKmMjCx43BnrfW6og2n3afNoAALq

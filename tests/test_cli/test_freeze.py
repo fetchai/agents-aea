@@ -70,7 +70,7 @@ class TestFreeze:
         """Test that the command has printed the correct output."""
         assert (
             self.result.output
-            == """aea-ledger-cosmos<0.2.0,>=0.1.0\naea-ledger-ethereum<0.2.0,>=0.1.0\naea-ledger-fetchai<0.2.0,>=0.1.0\nprotobuf\n"""
+            == """aea-ledger-cosmos<2.0.0,>=1.0.0rc1\naea-ledger-ethereum<2.0.0,>=1.0.0rc1\naea-ledger-fetchai<2.0.0,>=1.0.0rc1\nprotobuf\n"""
         )
 
     def teardown(self):

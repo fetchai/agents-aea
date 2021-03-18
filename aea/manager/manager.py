@@ -30,6 +30,7 @@ from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 from aea.aea import AEA
 from aea.configurations.constants import AEA_MANAGER_DATA_DIRNAME, DEFAULT_REGISTRY_NAME
 from aea.configurations.data_types import PublicId
+from aea.crypto.plugin import load_all_plugins
 from aea.helpers.io import open_file
 from aea.manager.project import AgentAlias, Project
 
@@ -398,6 +399,7 @@ class MultiAgentManager:
 
         if not restore:
             project.install_pypi_dependencies()
+            load_all_plugins(is_raising_exception=False)
             project.build()
 
         try:

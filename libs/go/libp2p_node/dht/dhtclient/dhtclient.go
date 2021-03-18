@@ -100,7 +100,10 @@ func (notifee *Notifee) Disconnected(net network.Network, conn network.Conn) {
 				return
 			}
 		default:
-			notifee.logger.Warn().Msgf("Lost connection to relay peer %s, reconnecting...", pinfo.ID.Pretty())
+			notifee.logger.Warn().Msgf(
+				"Lost connection to relay peer %s, reconnecting...",
+				pinfo.ID.Pretty(),
+			)
 			if err = notifee.myHost.Connect(context.Background(), pinfo); err == nil {
 				break
 			}

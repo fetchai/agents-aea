@@ -34,7 +34,7 @@ max-locals=31
 max-statements=80
 max-parents=11
 max-branches=24
-max-attributes=32
+max-attributes=36
 
 [REFACTORING]
 max-nested-blocks=6

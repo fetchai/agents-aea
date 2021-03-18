@@ -25,13 +25,13 @@ from setuptools import find_packages, setup
 
 setup(
     name="aea-ledger-cosmos",
-    version="0.1.0",
+    version="1.0.0rc1",
     author="Fetch.AI Limited",
     license="Apache-2.0",
     description="Python package wrapping the public and private key cryptography and ledger api of Cosmos.",
     packages=find_packages(include=["aea_ledger_cosmos*"]),
     install_requires=[
-        "aea>=0.11.0, <0.12.0",
+        "aea>=1.0.0rc1, <2.0.0",
         "ecdsa>=0.15",
         "bech32==1.2.0",
         "pyaes>=1.6.1",

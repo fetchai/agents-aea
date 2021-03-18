@@ -71,7 +71,7 @@ class DetectionDatabase:  # pylint: disable=too-many-public-methods
         ret = self.get_system_status("db", False) == "Exists"
         return ret
 
-    def reset_database(self) -> None:
+    def reset_database(self) -> None:  # pragma: nocover
         """Reset the database and remove all data."""
         # If we need to reset the database, then remove the table and any stored images
         self.logger.info("Database being reset.")
@@ -89,7 +89,7 @@ class DetectionDatabase:  # pylint: disable=too-many-public-methods
         self.initialise_backend()
         self.logger.info("Finished initialising backend!")
 
-    def reset_mask(self) -> None:
+    def reset_mask(self) -> None:  # pragma: nocover
         """Just reset the detection mask."""
         # If we need to reset the database, then remove the table and any stored images
         self.logger.info("Mask being reset.")
@@ -135,7 +135,7 @@ class DetectionDatabase:  # pylint: disable=too-many-public-methods
             self.set_system_status("lon", "UNKNOWN")
         self.set_system_status("db", "Exists")
 
-    def set_fet(self, amount: int, t: str) -> None:
+    def set_fet(self, amount: int, t: str) -> None:  # pragma: nocover
         """Record how much FET we have and when we last read it from the ledger."""
         command = (
             "INSERT OR REPLACE INTO fet_table(id, amount, last_updated) values(0, ?, ?)"
@@ -143,18 +143,18 @@ class DetectionDatabase:  # pylint: disable=too-many-public-methods
         variables = (str(amount), str(t))
         self.execute_single_sql(command, variables)
 
-    def get_fet(self) -> int:
+    def get_fet(self) -> int:  # pragma: nocover
         """Read how much FET we have."""
         result = self.execute_single_sql("SELECT amount FROM fet_table WHERE id=0")
         if len(result) != 0:
             return result[0][0]
         return -99
 
-    def save_max_capacity(self, max_capacity: int) -> None:
+    def save_max_capacity(self, max_capacity: int) -> None:  # pragma: nocover
         """Record the maximum number of spaces we can report on."""
         self.set_system_status("max_capacity", str(max_capacity))
 
-    def get_max_capacity(self) -> Optional[int]:
+    def get_max_capacity(self) -> Optional[int]:  # pragma: nocover
         """Read the maximum number of spaces we can report on."""
         max_capacity = self.get_system_status("max_capacity")
 
@@ -162,7 +162,7 @@ class DetectionDatabase:  # pylint: disable=too-many-public-methods
             return None
         return int(max_capacity)
 
-    def save_lat_lon(self, lat: float, lon: float) -> None:
+    def save_lat_lon(self, lat: float, lon: float) -> None:  # pragma: nocover
         """Record the longitude and latitude of our device."""
         self.set_system_status("lat", str(lat))
         self.set_system_status("lon", str(lon))
@@ -194,7 +194,7 @@ class DetectionDatabase:  # pylint: disable=too-many-public-methods
 
     def set_dialogue_status(
         self, dialogue_id: int, other_agent_key: str, received_msg: str, sent_msg: str
-    ) -> None:
+    ) -> None:  # pragma: nocover
         """Record the status of a dialog we are having."""
         t = time.time()
         command = "INSERT INTO dialogue_statuses(dialogue_id, epoch, other_agent_key, received_msg, sent_msg) VALUES(?,?,?,?,?)"
@@ -207,7 +207,7 @@ class DetectionDatabase:  # pylint: disable=too-many-public-methods
         )
         self.execute_single_sql(command, variables)
 
-    def get_dialogue_statuses(self) -> List[Dict]:
+    def get_dialogue_statuses(self) -> List[Dict]:  # pragma: nocover
         """Read the statuses of all the dialog we are having."""
         data = self.execute_single_sql(
             "SELECT * FROM dialogue_statuses ORDER BY epoch DESC LIMIT 100"
@@ -224,7 +224,7 @@ class DetectionDatabase:  # pylint: disable=too-many-public-methods
 
         return results
 
-    def calc_uncleared_fet(self) -> int:
+    def calc_uncleared_fet(self) -> int:  # pragma: nocover
         """Calc our uncleared fet."""
         cleared_fet_result = self.execute_single_sql(
             "SELECT amount FROM fet_table WHERE id=0"
@@ -240,7 +240,7 @@ class DetectionDatabase:  # pylint: disable=too-many-public-methods
 
     def add_friendly_name(
         self, oef_key: str, friendly_name: str, is_self: bool = False
-    ) -> None:
+    ) -> None:  # pragma: nocover
         """Record the friendly name of one the agents we are dealing with (including ourselves)."""
         t = int(time.time())
         command = "INSERT OR REPLACE INTO name_lookup2(oef_key, friendly_name, epoch, is_self) VALUES(?, ?, ?, ?)"
@@ -249,22 +249,24 @@ class DetectionDatabase:  # pylint: disable=too-many-public-methods
 
     def add_in_progress_transaction(
         self, tx: str, oef_key_payer: str, oef_key_payee: str, amount: int
-    ) -> None:
+    ) -> None:  # pragma: nocover
         """Record that a transaction in underway."""
         t = int(time.time())
         command = "INSERT OR REPLACE INTO transaction_history(tx, epoch, oef_key_payer, oef_key_payee, amount, status) VALUES(?, ?, ?, ?, ?, 'in_progress')"
         variables = (str(tx), t, str(oef_key_payer), str(oef_key_payee), amount)
         self.execute_single_sql(command, variables)
 
-    def get_in_progress_transactions(self) -> List[Dict]:
+    def get_in_progress_transactions(self) -> List[Dict]:  # pragma: nocover
         """Read all in-progress transactions."""
         return self.get_transactions_with_status("in_progress")
 
-    def get_complete_transactions(self) -> List[Dict]:
+    def get_complete_transactions(self) -> List[Dict]:  # pragma: nocover
         """Read all complete transactions."""
         return self.get_transactions_with_status("complete")
 
-    def get_transactions_with_status(self, status: str) -> List[Dict]:
+    def get_transactions_with_status(
+        self, status: str
+    ) -> List[Dict]:  # pragma: nocover
         """Read all transactions with a given status."""
         command = (
             "SELECT * from transaction_history WHERE status = ? ORDER BY epoch DESC"
@@ -284,7 +286,7 @@ class DetectionDatabase:  # pylint: disable=too-many-public-methods
 
         return results
 
-    def get_n_transactions(self, count: int) -> List[Dict]:
+    def get_n_transactions(self, count: int) -> List[Dict]:  # pragma: nocover
         """Get the most resent N transactions."""
         command = "SELECT * from transaction_history ORDER BY epoch DESC LIMIT ?"
         variables = (count,)
@@ -302,13 +304,13 @@ class DetectionDatabase:  # pylint: disable=too-many-public-methods
 
         return results
 
-    def set_transaction_complete(self, tx: str) -> None:
+    def set_transaction_complete(self, tx: str) -> None:  # pragma: nocover
         """Set a specific transaction as complete."""
         command = "UPDATE transaction_history SET status ='complete' WHERE tx = ?"
         variables = (str(tx),)
         self.execute_single_sql(command, variables)
 
-    def lookup_friendly_name(self, oef_key: str) -> Optional[str]:
+    def lookup_friendly_name(self, oef_key: str) -> Optional[str]:  # pragma: nocover
         """Look up friendly name given the OEF key."""
         command = "SELECT * FROM name_lookup2 WHERE oef_key = ? ORDER BY epoch DESC"
         variables = (str(oef_key),)
@@ -317,7 +319,9 @@ class DetectionDatabase:  # pylint: disable=too-many-public-methods
             return None
         return results[0][1]
 
-    def lookup_self_names(self) -> Tuple[Optional[str], Optional[str]]:
+    def lookup_self_names(
+        self,
+    ) -> Tuple[Optional[str], Optional[str]]:  # pragma: nocover
         """Return out own name and key."""
         results = self.execute_single_sql(
             "SELECT oef_key, friendly_name FROM name_lookup2 WHERE is_self = 1 ORDER BY epoch DESC"
@@ -335,7 +339,7 @@ class DetectionDatabase:  # pylint: disable=too-many-public-methods
         free_spaces: int,
         lat: float,
         lon: float,
-    ) -> None:
+    ) -> None:  # pragma: nocover
         """Add an entry into the detection database but do not save anything to disk."""
         # need to extract the time!
         t = self.extract_time_from_raw_path(raw_path)
@@ -361,7 +365,7 @@ class DetectionDatabase:  # pylint: disable=too-many-public-methods
         free_spaces: int,
         lat: float,
         lon: float,
-    ) -> None:
+    ) -> None:  # pragma: nocover
         """Add an entry into the detection database and record images to disk."""
         t = int(time.time())
         raw_path = self.generate_raw_image_path(t)
@@ -429,15 +433,15 @@ class DetectionDatabase:  # pylint: disable=too-many-public-methods
 
         return ret_data
 
-    def prune_image_table(self, max_entries: int) -> None:
+    def prune_image_table(self, max_entries: int) -> None:  # pragma: nocover
         """Remove image data if table longer than max_entries."""
         self.prune_table("images", max_entries)
 
-    def prune_transaction_table(self, max_entries: int) -> None:
+    def prune_transaction_table(self, max_entries: int) -> None:  # pragma: nocover
         """Remove transaction data if table longer than max_entries."""
         self.prune_table("transaction_history", max_entries)
 
-    def prune_table(self, table_name: str, max_entries: int) -> None:
+    def prune_table(self, table_name: str, max_entries: int) -> None:  # pragma: nocover
         """Remove any data if table longer than max_entries."""
         command = "SELECT epoch FROM ? ORDER BY epoch DESC LIMIT 1 OFFSET ?"
         variables = (
@@ -464,7 +468,7 @@ class DetectionDatabase:  # pylint: disable=too-many-public-methods
         if not os.path.isdir(self.processed_image_dir):
             os.mkdir(self.processed_image_dir)
 
-    def generate_raw_image_path(self, t: int) -> str:
+    def generate_raw_image_path(self, t: int) -> str:  # pragma: nocover
         """Return path where we store raw images."""
         return (
             self.raw_image_dir
@@ -473,7 +477,7 @@ class DetectionDatabase:  # pylint: disable=too-many-public-methods
             + self.image_file_ext
         )
 
-    def generate_processed_path(self, t: int) -> str:
+    def generate_processed_path(self, t: int) -> str:  # pragma: nocover
         """Return path where we store processed images."""
         return (
             self.processed_image_dir
@@ -482,13 +486,13 @@ class DetectionDatabase:  # pylint: disable=too-many-public-methods
             + self.image_file_ext
         )
 
-    def generate_processed_from_raw_path(self, raw_name: str) -> str:
+    def generate_processed_from_raw_path(self, raw_name: str) -> str:  # pragma: nocover
         """Given the raw path, return the processes path."""
         return raw_name.replace("_raw_image.", "_processed_image.").replace(
             self.raw_image_dir, self.processed_image_dir
         )
 
-    def extract_time_from_raw_path(self, raw_name: str) -> int:
+    def extract_time_from_raw_path(self, raw_name: str) -> int:  # pragma: nocover
         """Given the raw path name, return the time the detection happened."""
         start_index = len(self.raw_image_dir)
         extracted_num = raw_name[start_index : start_index + self.num_digits_time]

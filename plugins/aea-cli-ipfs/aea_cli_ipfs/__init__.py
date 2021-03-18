@@ -16,14 +16,4 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-"""Core components for `print_hello`."""
-
-
-import click
-
-
-@click.command()
-def print_hello() -> None:
-    """Print 'hello'."""
-    click.echo("Hello.")
+"""IPFS CLI plug-in for the AEA CLI tool."""
