@@ -33,7 +33,7 @@ class GetWealthTestCase(TestCase):
     """Test case for _get_wealth method."""
 
     @mock.patch("aea.cli.utils.package_utils.Wallet")
-    @mock.patch("aea.cli.utils.package_utils.verify_or_create_private_keys_ctx")
+    @mock.patch("aea.cli.utils.package_utils.verify_private_keys_ctx")
     @mock.patch("aea.cli.get_wealth.try_get_balance")
     def test__get_wealth_positive(self, *mocks):
         """Test for _get_wealth method positive result."""
@@ -42,7 +42,7 @@ class GetWealthTestCase(TestCase):
 
 
 @mock.patch("aea.cli.utils.decorators.try_to_load_agent_config")
-@mock.patch("aea.cli.utils.package_utils.verify_or_create_private_keys_ctx")
+@mock.patch("aea.cli.utils.package_utils.verify_private_keys_ctx")
 @mock.patch("aea.cli.get_wealth._try_get_wealth")
 @mock.patch("aea.cli.get_wealth.click.echo")
 class GetWealthCommandTestCase(TestCase):

@@ -894,16 +894,6 @@ class TestMultiplexerDisconnectsOnTermination:  # pylint: disable=attribute-defi
 
         os.chdir(Path(self.t, self.agent_name))
 
-    def test_multiplexer_disconnected_on_early_interruption(self):
-        """Test multiplexer disconnected properly on termination before connected."""
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add", "--local", "connection", str(P2P_PUBLIC_ID)]
-        )
-        assert result.exit_code == 0, result.stdout_bytes
-
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "build"])
-        assert result.exit_code == 0, result.stdout_bytes
-
         result = self.runner.invoke(
             cli, [*CLI_LOG_OPTION, "generate-key", DEFAULT_LEDGER, self.key_path]
         )
@@ -912,6 +902,16 @@ class TestMultiplexerDisconnectsOnTermination:  # pylint: disable=attribute-defi
         result = self.runner.invoke(
             cli, [*CLI_LOG_OPTION, "add-key", DEFAULT_LEDGER, self.key_path]
         )
+        assert result.exit_code == 0, result.stdout_bytes
+
+    def test_multiplexer_disconnected_on_early_interruption(self):
+        """Test multiplexer disconnected properly on termination before connected."""
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "add", "--local", "connection", str(P2P_PUBLIC_ID)]
+        )
+        assert result.exit_code == 0, result.stdout_bytes
+
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "build"])
         assert result.exit_code == 0, result.stdout_bytes
 
         result = self.runner.invoke(

@@ -100,18 +100,14 @@ def try_generate_testnet_wealth(
         faucet_api.get_wealth(address, url)
 
 
-def private_key_verify_or_create(
-    aea_conf: AgentConfig,
-    aea_project_path: Path,
-    create_keys: bool = True,
-    password: Optional[str] = None,
+def private_key_verify(
+    aea_conf: AgentConfig, aea_project_path: Path, password: Optional[str] = None,
 ) -> None:
     """
-    Check key or create if none present.
+    Check key.
 
     :param aea_conf: AgentConfig
     :param aea_project_path: Path, where project placed.
-    :param create_keys: whether or not to create keys.
     :param password: the password to encrypt/decrypt the private key.
 
     :return: None
@@ -132,21 +128,7 @@ def private_key_verify_or_create(
             continue
 
         if config_private_key_path is None:
-            private_key_path = PRIVATE_KEY_PATH_SCHEMA.format(identifier)
-            if identifier == aea_conf.default_ledger:  # pragma: nocover
-                if os.path.exists(private_key_path):
-                    raise ValueError(
-                        "File {} for private key {} already exists. Add to aea-config.yaml.".format(
-                            repr(config_private_key_path), identifier
-                        )
-                    )
-                if create_keys:
-                    create_private_key(
-                        identifier,
-                        private_key_file=str(aea_project_path / private_key_path),
-                        password=password,
-                    )
-                    aea_conf.private_key_paths.update(identifier, private_key_path)
+            continue
         else:
             try:
                 try_validate_private_key_path(

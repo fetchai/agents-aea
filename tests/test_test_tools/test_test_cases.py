@@ -151,6 +151,8 @@ class TestRunAgent(AEATestCaseEmpty):
 
     def test_run_agent(self):
         """Run agent and test it's launched."""
+        self.generate_private_key()
+        self.add_private_key()
         process = self.run_agent()
         assert self.is_running(process, timeout=30)
 
@@ -368,6 +370,8 @@ class TestGetWealth(AEATestCaseEmpty):
     def test_get_wealth(self):
         """Test get_wealth."""
         # just call it, network related and quite unstable
+        self.generate_private_key()
+        self.add_private_key()
         self.get_wealth(FetchAICrypto.identifier)
 
 
@@ -398,6 +402,8 @@ class TestSendReceiveEnvelopesSkill(AEATestCaseEmpty):
 
     def test_send_receive_envelope(self):
         """Run the echo skill sequence."""
+        self.generate_private_key()
+        self.add_private_key()
         self.add_item("connection", str(STUB_CONNECTION_ID))
         self.add_item("skill", str(ECHO_SKILL_PUBLIC_ID))
 

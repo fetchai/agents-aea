@@ -546,16 +546,15 @@ class AgentConfigManager:
             )
 
     @classmethod
-    def verify_or_create_private_keys(
+    def verify_private_keys(
         cls,
         aea_project_path: Union[Path, str],
-        private_key_helper: Callable[[AgentConfig, Path, bool, Optional[str]], None],
+        private_key_helper: Callable[[AgentConfig, Path, Optional[str]], None],
         substitude_env_vars: bool = False,
-        create_keys: bool = True,
         password: Optional[str] = None,
     ) -> "AgentConfigManager":
         """
-        Verify or create private keys.
+        Verify private keys.
 
         Does not saves the config! Use AgentConfigManager.dump_config()
 
@@ -571,7 +570,7 @@ class AgentConfigManager:
             aea_project_path, substitude_env_vars=substitude_env_vars
         )
         aea_conf = agent_config_manager.agent_config
-        private_key_helper(aea_conf, Path(aea_project_path), create_keys, password)
+        private_key_helper(aea_conf, Path(aea_project_path), password)
         return agent_config_manager
 
     def get_overridables(self) -> Tuple[Dict, Dict[ComponentId, Dict]]:
