@@ -52,7 +52,7 @@ class AgentConfigMock:
         self.version: str = kwargs.get("version", "")
         self.protocols: List[str] = kwargs.get("protocols", [])
         self.skills: List[str] = kwargs.get("skills", [])
-        self.agent_name: str = kwargs.get("agent_name", "agent-name")
+        self.agent_name: str = kwargs.get("agent_name", "agent_name")
         self.author: str = AUTHOR
         private_key_paths = kwargs.get("private_key_paths", [])
         self.private_key_paths = Mock()
