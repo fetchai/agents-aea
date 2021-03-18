@@ -204,7 +204,7 @@ def password_option(confirmation_prompt: bool = False, **kwargs) -> Callable:  #
     def callback(ctx, _, value: bool) -> bool:  # type: ignore
         if value is True:
             ctx.params["password"] = ctx.params.get("password") or click.prompt(
-                "Enter password please",
+                "Enter password",
                 hide_input=True,
                 confirmation_prompt=confirmation_prompt,
             )
