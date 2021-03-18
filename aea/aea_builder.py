@@ -1657,7 +1657,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         if agent_configuration.decision_maker_handler != {}:
             dotted_path = agent_configuration.decision_maker_handler["dotted_path"]
             file_path = agent_configuration.decision_maker_handler["file_path"]
-            config = agent_configuration.error_handler["config"]
+            config = agent_configuration.decision_maker_handler["config"]
             self.set_decision_maker_handler_details(dotted_path, file_path, config)
         if agent_configuration.error_handler != {}:
             dotted_path = agent_configuration.error_handler["dotted_path"]
