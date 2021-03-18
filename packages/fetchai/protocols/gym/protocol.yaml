@@ -5,9 +5,9 @@ protocol_specification_id: fetchai/gym:0.1.0
 type: protocol
 description: A protocol for interacting with a gym connection.
 license: Apache-2.0
-aea_version: '>=0.11.0, <0.12.0'
+aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmWW8AY4LBXbNGeKfSZHbcobHhKQrkFZFPku5VwsWdzoCK
+  README.md: QmbTMbYYWTZg2S8ZDavm7swPnuDFXwpPdr8uJXqP78rcXQ
   __init__.py: QmeyBLjo4xgz4mXvg9dwwwQCapYsbX4cgBXcpwvegg4zWZ
   custom_types.py: QmbLYSBTMMshVBvcCNRBPXCNngFVssVLBh9V6xGkquX64N
   dialogues.py: QmUx8de3kabB45rkbpddSpYHfmCnw74QjCjeuP7hC522Yb

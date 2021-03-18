@@ -4,7 +4,7 @@ version: 0.1.0
 type: connection
 description: dummy_connection connection description.
 license: Apache-2.0
-aea_version: '>=0.11.0, <0.12.0'
+aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   __init__.py: QmbjcWHRhRiYMqZbgeGkEGVYi8hQ1HnYM8pBYugGKx9YnK
   connection.py: QmZS4eMTj6DbxfMWMm8bioRrZ2M7pUeqgFS6YShxZ5xQ4V

@@ -6,7 +6,7 @@ description: The libp2p client connection implements a tcp connection to a runni
   libp2p node as a traffic delegate to send/receive envelopes to/from agents in the
   DHT.
 license: Apache-2.0
-aea_version: '>=0.11.0, <0.12.0'
+aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmfPaLCAD61CKWKjeQxsjWv23mK1Hqf8kTqPJxeeGNL2of
   __init__.py: QmT1FEHkPGMHV5oiVEfQHHr25N2qdZxydSNRJabJvYiTgf

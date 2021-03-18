@@ -5,7 +5,7 @@ type: skill
 description: The confirmation_aw1 skill is a skill to confirm registration for Agent
   World 1.
 license: Apache-2.0
-aea_version: '>=0.11.0, <0.12.0'
+aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmWEG3A5xRL3yf65UHfrKhUwazR5bjpxSiuuBGMYX7t7Co
   __init__.py: QmY2HnEY57hCeMY3inTWbyQbx6b8C21qaPNaxC2VcoQz51

@@ -1009,7 +1009,7 @@ class TestWrongAEAVersion(AEATestCaseEmpty):
         assert result.exit_code == 0
         mock_click_echo.assert_any_call("Starting project upgrade...")
         mock_click_echo.assert_any_call(
-            "Updating AEA version specifier from ==0.1.0 to >=0.11.0, <0.12.0."
+            "Updating AEA version specifier from ==0.1.0 to >=1.0.0, <1.1.0."
         )
 
         # test 'aea_version' of agent configuration is upgraded

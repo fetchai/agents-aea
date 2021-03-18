@@ -47,7 +47,7 @@ author: dummy_author
 version: 1.0.0
 description: dummy_aea agent description
 license: Apache-2.0
-aea_version: '>=0.11.0, <0.12.0'
+aea_version: '>=1.0.0, <2.0.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
