@@ -271,59 +271,6 @@ Run a coroutine inside the event loop.
 
 Stop event loop in thread.
 
-<a name="aea.helpers.async_utils.ItemGetter"></a>
-## ItemGetter Objects
-
-```python
-class ItemGetter()
-```
-
-Virtual queue like object to get items from getters function.
-
-<a name="aea.helpers.async_utils.ItemGetter.__init__"></a>
-#### `__`init`__`
-
-```python
- | __init__(getters: List[Callable]) -> None
-```
-
-Init ItemGetter.
-
-**Arguments**:
-
-- `getters`: List of couroutines to be awaited.
-
-<a name="aea.helpers.async_utils.ItemGetter.get"></a>
-#### get
-
-```python
- | async get() -> Any
-```
-
-Get item.
-
-<a name="aea.helpers.async_utils.HandlerItemGetter"></a>
-## HandlerItemGetter Objects
-
-```python
-class HandlerItemGetter(ItemGetter)
-```
-
-ItemGetter with handler passed.
-
-<a name="aea.helpers.async_utils.HandlerItemGetter.__init__"></a>
-#### `__`init`__`
-
-```python
- | __init__(getters: List[Tuple[Callable[[Any], None], Callable]]) -> None
-```
-
-Init HandlerItemGetter.
-
-**Arguments**:
-
-- `getters`: List of tuples of handler and couroutine to be awaiteed for an item.
-
 <a name="aea.helpers.async_utils.Runnable"></a>
 ## Runnable Objects
 

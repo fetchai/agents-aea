@@ -1,20 +1,20 @@
 name: generic_buyer
 author: fetchai
-version: 0.21.0
+version: 0.22.0
 type: skill
 description: The weather client skill implements the skill to purchase weather data.
 license: Apache-2.0
 aea_version: '>=0.11.0, <0.12.0'
 fingerprint:
   README.md: Qmd7hF4eNgxUoGaxkPEKVPQNxpLG2aG4DvovSLKkwKxVYt
-  __init__.py: QmPsFfxDLFZz2c8uV23z578wRqatTyBs6cWLTerEhS4wtJ
+  __init__.py: QmZASNCZn5ewLgQJJEkcDXqGZg1jf9X1UZ2su5P9KPoeJr
   behaviours.py: QmcWXsrsZTejfTJTnjLwUScm7eHk9WFG9RtEiwrP5i1Dc1
   dialogues.py: QmVQSd8piQ7sMkfJyTSKLL6Xrga5unjahKHpQGAUFsjdcv
   handlers.py: QmYUjPBz85G2Ey5zB9HUqGGDbihY9Fn4TkE6TLLy1b1URN
   strategy.py: QmY1mnx2KCNqHQjZv4P6GiwXkHXWezfcJxJsbV2VuTtWnF
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.14.0
+- fetchai/ledger:0.15.0
 contracts: []
 protocols:
 - fetchai/default:0.13.0
@@ -83,5 +83,5 @@ models:
     class_name: GenericStrategy
 dependencies:
   aea-ledger-fetchai:
-    version: <0.2.0,>=0.1.0
+    version: <0.3.0,>=0.2.0
 is_abstract: true

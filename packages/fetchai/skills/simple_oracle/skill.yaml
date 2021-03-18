@@ -1,6 +1,6 @@
 name: simple_oracle
 author: fetchai
-version: 0.7.0
+version: 0.8.0
 type: skill
 description: This skill deploys a Fetch oracle contract
 license: Apache-2.0
@@ -14,7 +14,7 @@ fingerprint:
   strategy.py: QmY4bUU98FWDvZuif6TsowUUhSsh1hFSVsawsZ89YiVABK
 fingerprint_ignore_patterns: []
 contracts:
-- fetchai/oracle:0.5.0
+- fetchai/oracle:0.6.0
 protocols:
 - fetchai/contract_api:0.12.0
 - fetchai/default:0.13.0
@@ -78,8 +78,8 @@ models:
     class_name: Strategy
 dependencies:
   aea-ledger-ethereum:
-    version: <0.2.0,>=0.1.0
+    version: <0.3.0,>=0.2.0
   aea-ledger-fetchai:
-    version: <0.2.0,>=0.1.0
+    version: <0.3.0,>=0.2.0
 is_abstract: false
 connections: []

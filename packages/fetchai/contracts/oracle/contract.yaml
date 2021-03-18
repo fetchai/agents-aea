@@ -1,6 +1,6 @@
 name: oracle
 author: fetchai
-version: 0.5.0
+version: 0.6.0
 type: contract
 description: Fetch oracle contract
 license: Apache-2.0
