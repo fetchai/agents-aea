@@ -1135,7 +1135,7 @@ class TestUpgradeWithEjectAccept(BaseTestUpgradeWithEject):
 class BaseTestUpgradeProject(AEATestCaseEmpty):
     """Base test class for testing project upgrader."""
 
-    OLD_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.21.0")
+    OLD_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.23.0")
     EXPECTED_NEW_AGENT_PUBLIC_ID = OLD_AGENT_PUBLIC_ID.to_latest()
     EXPECTED = "expected_agent"
 
@@ -1186,7 +1186,11 @@ class TestUpgradeProjectWithNewerVersion(BaseTestUpgradeProject):
             self.current_agent_context, self.EXPECTED, ignore=ignore
         )
         _left_only, _right_only, diff = dircmp_recursive(dircmp)
-        assert diff == _right_only == _left_only == set()
+        if confirm:
+            assert diff == _right_only == _left_only == set()
+        else:
+            assert diff == _right_only == set()  # temp
+            assert _left_only == {"vendor/fetchai/protocols/__init__.py"}
 
 
 @mock.patch("aea.cli.upgrade.get_latest_version_available_in_registry")
@@ -1212,10 +1216,11 @@ class TestUpgradeProjectWithoutNewerVersion(BaseTestUpgradeProject):
             self.current_agent_context, self.EXPECTED, ignore=ignore
         )
         _left_only, _right_only, diff = dircmp_recursive(dircmp)
-        assert diff == _right_only == _left_only == set()
+        assert diff == _right_only == set()
+        assert _left_only == {"vendor/fetchai/protocols/__init__.py"}
 
 
-@mock.patch.object(aea, "__version__", "0.10.0")
+@mock.patch.object(aea, "__version__", "0.11.0")
 class TestUpgradeAEACompatibility(BaseTestUpgradeProject):
     """
     Test 'aea upgrade' takes into account the current aea version.
@@ -1223,8 +1228,8 @@ class TestUpgradeAEACompatibility(BaseTestUpgradeProject):
     The test works as follows:
     """
 
-    OLD_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.21.0")
-    EXPECTED_NEW_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.22.0")
+    OLD_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.23.0")
+    EXPECTED_NEW_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.24.0")
 
     def test_upgrade(self):
         """Test upgrade."""

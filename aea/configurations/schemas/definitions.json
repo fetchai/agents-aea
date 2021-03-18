@@ -166,6 +166,24 @@
             "loggers": {"type": "object"}
         }
     },
+    "framework_handler": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dotted_path",
+        "file_path",
+        "config"
+      ],
+      "properties": {
+        "dotted_path": {
+          "type": "string"
+        },
+        "file_path": {
+          "type": ["string", "null"]
+        },
+        "config": {"type": "object"}
+      }
+    },
     "cert_requests": {
       "type": "array",
       "uniqueItems": true,

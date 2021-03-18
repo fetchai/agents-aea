@@ -380,7 +380,11 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self._decision_maker_handler_class: Optional[Type[DecisionMakerHandler]] = None
         self._decision_maker_handler_dotted_path: Optional[str] = None
         self._decision_maker_handler_file_path: Optional[str] = None
+        self._decision_maker_handler_config: Optional[Dict[str, Any]] = None
         self._error_handler_class: Optional[Type[AbstractErrorHandler]] = None
+        self._error_handler_dotted_path: Optional[str] = None
+        self._error_handler_file_path: Optional[str] = None
+        self._error_handler_config: Optional[Dict[str, Any]] = None
         self._skill_exception_policy: Optional[ExceptionPolicyEnum] = None
         self._connection_exception_policy: Optional[ExceptionPolicyEnum] = None
         self._default_routing: Dict[PublicId, PublicId] = {}
@@ -436,19 +440,24 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self._max_reactions = max_reactions
         return self
 
-    def set_decision_maker_handler_paths(
-        self, decision_maker_handler_dotted_path: str, file_path: Optional[str]
+    def set_decision_maker_handler_details(
+        self,
+        decision_maker_handler_dotted_path: str,
+        file_path: str,
+        config: Dict[str, Any],
     ) -> "AEABuilder":
         """
-        Set decision maker handler class.
+        Set error handler details.
 
         :param decision_maker_handler_dotted_path: the dotted path to the decision maker handler
         :param file_path: the file path to the file which contains the decision maker handler
+        :param config: the configuration passed to the decision maker handler on instantiation
 
         :return: self
         """
         self._decision_maker_handler_dotted_path = decision_maker_handler_dotted_path
         self._decision_maker_handler_file_path = file_path
+        self._decision_maker_handler_config = config
         return self
 
     def _load_decision_maker_handler_class(
@@ -484,7 +493,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
                     dotted_path, self._decision_maker_handler_file_path, e
                 )
             )
-            raise  # log and re-raise because we should not build an agent from an. invalid configuration
+            raise  # log and re-raise because we should not build an agent from an invalid configuration
 
         try:
             _class = getattr(module, class_name)
@@ -494,37 +503,68 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
                     dotted_path, class_name, self._decision_maker_handler_file_path, e
                 )
             )
-            raise  # log and re-raise because we should not build an agent from an. invalid configuration
+            raise  # log and re-raise because we should not build an agent from an invalid configuration
 
         return _class
 
-    def set_error_handler(
-        self, error_handler_dotted_path: str, file_path: Path
-    ) -> "AEABuilder":
+    def _load_error_handler_class(self,) -> Optional[Type[AbstractErrorHandler]]:
         """
-        Set error handler class.
+        Load error handler class.
 
-        :param error_handler_dotted_path: the dotted path to the error handler
-        :param file_path: the file path to the file which contains the error handler
-
-        :return: self
+        :return: error handler class
         """
-        dotted_path, class_name = error_handler_dotted_path.split(
+        _class = self._get_error_handler_class()
+        if _class is not None and self._error_handler_dotted_path is not None:
+            raise ValueError(  # pragma: nocover
+                "ErrorHandler class and dotted path set: can only set one!"
+            )
+        if _class is not None:
+            return _class  # pragma: nocover
+        if self._error_handler_dotted_path is None:
+            return None
+        dotted_path, class_name = self._error_handler_dotted_path.split(
             DOTTED_PATH_MODULE_ELEMENT_SEPARATOR
         )
-        module = load_module(dotted_path, file_path)
+        try:
+            if self._error_handler_file_path is None:
+                module = import_module(dotted_path)
+            else:
+                module = load_module(dotted_path, Path(self._error_handler_file_path))
+        except Exception as e:  # pragma: nocover
+            self.logger.error(
+                "Could not locate error handler for dotted path '{}' and file path '{}'. Error message: {}".format(
+                    dotted_path, self._error_handler_file_path, e
+                )
+            )
+            raise  # log and re-raise because we should not build an agent from an invalid configuration
 
         try:
             _class = getattr(module, class_name)
-            self._error_handler_class = _class
         except Exception as e:  # pragma: nocover
             self.logger.error(
                 "Could not locate error handler for dotted path '{}', class name '{}' and file path '{}'. Error message: {}".format(
-                    dotted_path, class_name, file_path, e
+                    dotted_path, class_name, self._error_handler_file_path, e
                 )
             )
-            raise  # log and re-raise because we should not build an agent from an. invalid configuration
+            raise  # log and re-raise because we should not build an agent from an invalid configuration
 
+        return _class
+
+    def set_error_handler_details(
+        self, error_handler_dotted_path: str, file_path: str, config: Dict[str, Any]
+    ) -> "AEABuilder":
+        """
+        Set error handler details.
+
+        :param error_handler_dotted_path: the dotted path to the error handler
+        :param file_path: the file path to the file which contains the error handler
+        :param config: the configuration passed to the error handler on instantiation
+
+        :return: self
+        """
+        self._error_handler_dotted_path = error_handler_dotted_path
+        self._error_handler_file_path = file_path
+        self._error_handler_config = config
         return self
 
     def set_skill_exception_policy(
@@ -1262,8 +1302,10 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             period=self._get_agent_act_period(),
             execution_timeout=self._get_execution_timeout(),
             max_reactions=self._get_max_reactions(),
-            error_handler_class=self._get_error_handler_class(),
+            error_handler_class=self._load_error_handler_class(),
+            error_handler_config=self._get_error_handler_config(),
             decision_maker_handler_class=self._load_decision_maker_handler_class(),
+            decision_maker_handler_config=self._get_decision_maker_handler_config(),
             skill_exception_policy=self._get_skill_exception_policy(),
             connection_exception_policy=self._get_connection_exception_policy(),
             currency_denominations=self._get_currency_denominations(),
@@ -1330,6 +1372,14 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         """
         return self._error_handler_class
 
+    def _get_error_handler_config(self,) -> Optional[Dict[str, Any]]:
+        """
+        Return the error handler config.
+
+        :return: error handler config
+        """
+        return self._error_handler_config
+
     def _get_decision_maker_handler_class(
         self,
     ) -> Optional[Type[DecisionMakerHandler]]:
@@ -1339,6 +1389,14 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :return: decision maker handler class
         """
         return self._decision_maker_handler_class
+
+    def _get_decision_maker_handler_config(self,) -> Optional[Dict[str, Any]]:
+        """
+        Return the decision maker handler config.
+
+        :return: decision maker handler config
+        """
+        return self._decision_maker_handler_config
 
     def _get_skill_exception_policy(self) -> ExceptionPolicyEnum:
         """
@@ -1589,11 +1647,13 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         if agent_configuration.decision_maker_handler != {}:
             dotted_path = agent_configuration.decision_maker_handler["dotted_path"]
             file_path = agent_configuration.decision_maker_handler["file_path"]
-            self.set_decision_maker_handler_paths(dotted_path, file_path)
+            config = agent_configuration.error_handler["config"]
+            self.set_decision_maker_handler_details(dotted_path, file_path, config)
         if agent_configuration.error_handler != {}:
             dotted_path = agent_configuration.error_handler["dotted_path"]
             file_path = agent_configuration.error_handler["file_path"]
-            self.set_error_handler(dotted_path, file_path)
+            config = agent_configuration.error_handler["config"]
+            self.set_error_handler_details(dotted_path, file_path, config)
         if agent_configuration.skill_exception_policy is not None:
             self.set_skill_exception_policy(
                 ExceptionPolicyEnum(agent_configuration.skill_exception_policy)
