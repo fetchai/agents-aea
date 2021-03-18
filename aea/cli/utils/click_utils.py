@@ -217,7 +217,7 @@ def password_option(confirmation_prompt: bool = False, **kwargs) -> Callable:  #
             type=bool,
             callback=callback,
             expose_value=False,
-            help="Ask for password interactivly",
+            help="Ask for password interactively",
         )(
             click.option(
                 "--password",
