@@ -13,9 +13,9 @@ aea add connection fetchai/ledger:0.15.0
 aea add skill fetchai/erc1155_deploy:0.24.0
 aea config set --type dict agent.dependencies \
 '{
-  "aea-ledger-fetchai": {"version": "<0.3.0,>=0.2.0"},
-  "aea-ledger-ethereum": {"version": "<0.3.0,>=0.2.0"},
-  "aea-ledger-cosmos": {"version": "<0.3.0,>=0.2.0"}
+  "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"},
+  "aea-ledger-ethereum": {"version": "<2.0.0,>=1.0.0"},
+  "aea-ledger-cosmos": {"version": "<2.0.0,>=1.0.0"}
 }'
 aea config set agent.default_connection fetchai/p2p_libp2p:0.18.0
 aea config set --type dict agent.default_routing \
@@ -58,9 +58,9 @@ aea add connection fetchai/ledger:0.15.0
 aea add skill fetchai/erc1155_client:0.23.0
 aea config set --type dict agent.dependencies \
 '{
-  "aea-ledger-fetchai": {"version": "<0.3.0,>=0.2.0"},
-  "aea-ledger-ethereum": {"version": "<0.3.0,>=0.2.0"},
-  "aea-ledger-cosmos": {"version": "<0.3.0,>=0.2.0"}
+  "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"},
+  "aea-ledger-ethereum": {"version": "<2.0.0,>=1.0.0"},
+  "aea-ledger-cosmos": {"version": "<2.0.0,>=1.0.0"}
 }'
 aea config set agent.default_connection fetchai/p2p_libp2p:0.18.0
 aea config set --type dict agent.default_routing \

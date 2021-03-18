@@ -98,7 +98,7 @@ models:
     class_name: OefSearchDialogues
 dependencies:
   aea-ledger-fetchai:
-    version: <0.3.0,>=0.2.0
+    version: <2.0.0,>=1.0.0
 is_abstract: false
 ```
 ``` yaml
@@ -145,6 +145,6 @@ models:
     class_name: Strategy
 dependencies:
   aea-ledger-fetchai:
-    version: <0.3.0,>=0.2.0
+    version: <2.0.0,>=1.0.0
 is_abstract: false
 ```

@@ -61,9 +61,9 @@ default_routing:
 connection_private_key_paths: {}
 dependencies:
   aea-ledger-ethereum:
-    version: <0.3.0,>=0.2.0
+    version: <2.0.0,>=1.0.0
   aea-ledger-fetchai:
-    version: <0.3.0,>=0.2.0
+    version: <2.0.0,>=1.0.0
 ---
 public_id: fetchai/simple_seller:0.8.0
 type: skill
