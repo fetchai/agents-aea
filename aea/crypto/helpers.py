@@ -129,20 +129,19 @@ def private_key_verify(
 
         if config_private_key_path is None:
             continue
-        else:
-            try:
-                try_validate_private_key_path(
-                    identifier,
-                    str(aea_project_path / config_private_key_path),
-                    password=password,
-                    exit_on_error=False,  # do not exit process
+        try:
+            try_validate_private_key_path(
+                identifier,
+                str(aea_project_path / config_private_key_path),
+                password=password,
+                exit_on_error=False,  # do not exit process
+            )
+        except FileNotFoundError:  # pragma: no cover
+            raise ValueError(
+                "File {} for private key {} not found.".format(
+                    repr(config_private_key_path), identifier,
                 )
-            except FileNotFoundError:  # pragma: no cover
-                raise ValueError(
-                    "File {} for private key {} not found.".format(
-                        repr(config_private_key_path), identifier,
-                    )
-                )
+            )
 
 
 def make_certificate(
