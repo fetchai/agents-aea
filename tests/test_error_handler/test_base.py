@@ -27,6 +27,13 @@ from aea.error_handler.default import ErrorHandler
 _default_logger = logging.getLogger(__name__)
 
 
+def test_config():
+    """Test the config property."""
+    config = {"some": "config"}
+    handler = ErrorHandler(**config)
+    assert handler.config == config
+
+
 def test_send_unsupported_protocol():
     """Test the send_unsupported_protocol method."""
     handler = ErrorHandler()

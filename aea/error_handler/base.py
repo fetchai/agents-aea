@@ -19,7 +19,7 @@
 """This module contains the abstract error handler class."""
 from abc import ABC, abstractmethod
 from logging import Logger
-from typing import Any
+from typing import Any, Dict
 
 from aea.mail.base import Envelope
 
@@ -27,9 +27,16 @@ from aea.mail.base import Envelope
 class AbstractErrorHandler(ABC):
     """Error handler class for handling problematic envelopes."""
 
+    __slots__ = ("_config",)
+
     def __init__(self, **kwargs: Any):
         """Instantiate error handler."""
-        self.config = kwargs
+        self._config = kwargs
+
+    @property
+    def config(self) -> Dict[str, Any]:
+        """Get handler config."""
+        return self._config
 
     @abstractmethod
     def send_unsupported_protocol(self, envelope: Envelope, logger: Logger) -> None:

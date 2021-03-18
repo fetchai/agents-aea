@@ -20,6 +20,7 @@
 """This module contains the default error handler class."""
 
 from logging import Logger
+from typing import Any
 
 from aea.error_handler.base import AbstractErrorHandler
 from aea.mail.base import Envelope
@@ -28,9 +29,18 @@ from aea.mail.base import Envelope
 class ErrorHandler(AbstractErrorHandler):
     """Error handler class for handling problematic envelopes."""
 
-    unsupported_protocol_count = 0
-    no_active_handler_count = 0
-    decoding_error_count = 0
+    __slots__ = (
+        "unsupported_protocol_count",
+        "no_active_handler_count",
+        "decoding_error_count",
+    )
+
+    def __init__(self, **kwargs: Any):
+        """Instantiate error handler."""
+        super().__init__(**kwargs)
+        self.unsupported_protocol_count = 0
+        self.no_active_handler_count = 0
+        self.decoding_error_count = 0
 
     def send_unsupported_protocol(self, envelope: Envelope, logger: Logger) -> None:
         """
