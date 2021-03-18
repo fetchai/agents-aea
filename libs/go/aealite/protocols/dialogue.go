@@ -7,7 +7,7 @@ import (
 )
 
 type Address string
-type Performative string
+type Performative []string
 type SomeMessageType string
 
 const(
@@ -27,23 +27,28 @@ const(
 // }
 
 // TODO
-// Define LableType
 // Define RoleType and figure out how to find role
 
-type Dialogue stuct {
-	dialogueLabel LableType
+type Label struct {
+	dialogueReference [2]string
+	dialogueOpponentAddress Address
+	dialogueStarterAddress Address
+}
+
+type Dialogue struct {
+	dialogueLabel Label
 	dialogueMessage *InitialMessage
 	selfAddress Address
 	// role RoleType
 }
 
-dialogueStorage := make(map[string][]Dialogue)
+var dialogueStorage map[Address][]Label
 
 type InitialMessage struct {
 	dialogueReference [2]string
-	message_id string
+	message_id int
 	target int
-	performative string
+	performative []string
 	message SomeMessageType
 	to Address
 	sender Address
@@ -51,20 +56,21 @@ type InitialMessage struct {
 
 func create(selfAddress Address, counterParty Address, performative Performative, message SomeMessageType) *Dialogue {
 
+	dialogueStorage = make(map[Address][]Label)
+
 	intitialMessage := &InitialMessage{
-		dialogueReference : ,
-		message_id : ,
-		target : ,
+		message_id : 0,
+		target : 1,
 		performative : performative,
 		message : message,
 		to : counterParty,
-		sender : selfAddress
+		sender : selfAddress,
 	}
-	initialMessage.dialogueReference[0] := generateDialogueNonce()
-	initialMessage.dialogueReference[1] := ""
+	intitialMessage.dialogueReference[0] = generateDialogueNonce()
+	intitialMessage.dialogueReference[1] = ""
 	
 	// process dialogue creation 
-	dialogue := initialMessage.createDialogue();
+	dialogue := intitialMessage.createDialogue();
 
 	return dialogue
 }
@@ -75,11 +81,12 @@ func (data *InitialMessage) createDialogue() *Dialogue{
 	// define dialog ROLE for dialog initiator
 	
 	incompleteDialogueLabel := data.checkAndProcessLabels()
-	if dialogueStorage[data.sender+data.to].length() > 0 {
-		for dialogue := range dialogueStorage[data.sender+data.to] {
+	pair := data.sender+data.to
+	if len(dialogueStorage[pair]) > 0 {
+		for _,dialogue := range dialogueStorage[pair] {
 			if incompleteDialogueLabel == dialogue {
 				fmt.Println("Error : incomplete dialogue label already present in storage")
-				return
+				return nil
 			}
 		}
 	}
@@ -91,46 +98,45 @@ func (data *InitialMessage) createDialogue() *Dialogue{
 	// 	dialogueLabel = completeDialogueLabel
 	// }
 
-	if dialogueStorage[data.sender+data.to].length() > 0 {
-		for dialogue := range dialogueStorage[data.sender+data.to] {
+	if len(dialogueStorage[data.sender+data.to]) > 0 {
+		for _,dialogue := range dialogueStorage[data.sender+data.to] {
 			if dialogueLabel == dialogue {
 				fmt.Println("Error : Dialogue label already present in storage")
-				return
+				return nil
 			}
 		}
 	}
 
 	dialogue := &Dialogue{
 		dialogueLabel : dialogueLabel,
-		message : data,
-		selfAddress : data.sender
+		dialogueMessage : data,
+		selfAddress : data.sender,
 	}
 
 	return dialogue
 	
 }
 
-func (data *InitialMessage)checkAndProcessLabels() {
+func (data *InitialMessage)checkAndProcessLabels() Label {
 	if ! (data.dialogueReference[0] != "" && data.dialogueReference[1] == "") {
 		fmt.Println("Error : Reference address label already exists")
-		return
 	}
-	return {
-		dialogueReference := data.dialogueReference,
-		dialogueOpponentAddress := data.to,
-		dialogueStarterAddress := data.sender
+	return Label{
+		dialogueReference : data.dialogueReference,
+		dialogueOpponentAddress : data.to,
+		dialogueStarterAddress : data.sender,
 	}
 }
 
 func generateDialogueNonce() string {
-	hexValue, _ := randomHex(NONCE_BYTES_NB)
-	retuen hexValue
+	hexValue := randomHex(NONCE_BYTES_NB)
+	return hexValue
 }
 
 func randomHex(n int) (string) {
   bytes := make([]byte, n)
   if _, err := rand.Read(bytes); err != nil {
-    return "", err
+    return ""
   }
-  return hex.EncodeToString(bytes), nil
+  return hex.EncodeToString(bytes)
 }
