@@ -234,7 +234,7 @@ TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE,
 For example:
 
 ``` bash
-recipient_aea,sender_aea,fetchai/default:0.1.0,\x08\x01\x12\x011*\x07\n\x05hello,
+recipient_aea,sender_aea,fetchai/default:1.0.0,\x08\x01\x12\x011*\x07\n\x05hello,
 ```
 
 ### Install AEA dependencies
@@ -299,7 +299,7 @@ info: Echo Behaviour: act method called.
 Optionally, from a different terminal and same directory (i.e. the `my_first_aea` project), you can send the AEA a message wrapped in an envelope via the input file.
 
 ``` bash
-echo 'my_first_aea,sender_aea,fetchai/default:0.1.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,' >> input_file
+echo 'my_first_aea,sender_aea,fetchai/default:1.0.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,' >> input_file
 ```
 
 You will see the `Echo Handler` dealing with the envelope and responding with the same message to the `output_file`, and also decoding the Base64 encrypted message in this case.
