@@ -3,7 +3,7 @@ author: fetchai
 version: 0.6.0
 license: Apache-2.0
 description: An AEA providing a coin price oracle client service.
-aea_version: '>=0.11.0, <0.12.0'
+aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
@@ -35,6 +35,6 @@ logging_config:
 registry_path: ../packages
 dependencies:
   aea-ledger-ethereum:
-    version: <0.3.0,>=0.2.0
+    version: <2.0.0,>=1.0.0rc1
   aea-ledger-fetchai:
-    version: <0.3.0,>=0.2.0
+    version: <2.0.0,>=1.0.0rc1

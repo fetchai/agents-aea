@@ -56,7 +56,7 @@ Confirm password:
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.11.2
+v1.0.0rc1
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
@@ -78,7 +78,7 @@ aea add skill fetchai/echo:0.15.0
 TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE,
 ```
 ``` bash
-recipient_aea,sender_aea,fetchai/default:0.1.0,\x08\x01\x12\x011*\x07\n\x05hello,
+recipient_aea,sender_aea,fetchai/default:1.0.0,\x08\x01\x12\x011*\x07\n\x05hello,
 ```
 ``` bash
 aea install
@@ -93,7 +93,7 @@ aea run
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.11.2
+v1.0.0rc1
 
 Starting AEA 'my_first_aea' in 'async' mode ...
 info: Echo Handler: setup method called.
@@ -115,7 +115,7 @@ info: Echo Behaviour: act method called.
 info: Echo Behaviour: act method called.
 ```
 ``` bash
-echo 'my_first_aea,sender_aea,fetchai/default:0.1.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,' >> input_file
+echo 'my_first_aea,sender_aea,fetchai/default:1.0.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,' >> input_file
 ```
 ``` bash
 info: Echo Behaviour: act method called.

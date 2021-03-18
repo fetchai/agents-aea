@@ -154,6 +154,7 @@ class TestTacSkills(AEATestCaseManyFlaky):
             data = {
                 "dotted_path": "aea.decision_maker.gop:DecisionMakerHandler",
                 "file_path": None,
+                "config": {},
             }
             setting_path = "agent.decision_maker_handler"
             self.nested_set_config(setting_path, data)
@@ -445,6 +446,7 @@ class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache):
             data = {
                 "dotted_path": "aea.decision_maker.gop:DecisionMakerHandler",
                 "file_path": None,
+                "config": {},
             }
             setting_path = "agent.decision_maker_handler"
             self.nested_set_config(setting_path, data)

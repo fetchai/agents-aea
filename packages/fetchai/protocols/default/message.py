@@ -38,7 +38,7 @@ class DefaultMessage(Message):
     """A protocol for exchanging any bytes message."""
 
     protocol_id = PublicId.from_str("fetchai/default:0.13.0")
-    protocol_specification_id = PublicId.from_str("fetchai/default:0.1.0")
+    protocol_specification_id = PublicId.from_str("fetchai/default:1.0.0")
 
     ErrorCode = CustomErrorCode
 

@@ -3,7 +3,7 @@ author: fetchai
 version: 0.12.0
 description: This AEA sells data to a simple buyer in Agent World 2.
 license: Apache-2.0
-aea_version: '>=0.11.0, <0.12.0'
+aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
@@ -61,9 +61,9 @@ default_routing:
 connection_private_key_paths: {}
 dependencies:
   aea-ledger-ethereum:
-    version: <0.3.0,>=0.2.0
+    version: <2.0.0,>=1.0.0rc1
   aea-ledger-fetchai:
-    version: <0.3.0,>=0.2.0
+    version: <2.0.0,>=1.0.0rc1
 ---
 public_id: fetchai/simple_seller:0.8.0
 type: skill

@@ -585,6 +585,14 @@ def test_compute_specifier_from_version():
     expected_range = ">=1.1.0, <1.2.0"
     assert expected_range == compute_specifier_from_version(Version(version))
 
+    version = "1.1.0.post1"
+    expected_range = ">=1.1.0, <1.2.0"
+    assert expected_range == compute_specifier_from_version(Version(version))
+
+    version = "1.1.0rc1"
+    expected_range = ">=1.1.0rc1, <1.2.0"
+    assert expected_range == compute_specifier_from_version(Version(version))
+
 
 def test_dict_to_path_value():
     """Test dict_to_path_value."""
