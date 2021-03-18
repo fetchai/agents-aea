@@ -14,7 +14,7 @@ version: 0.13.0
 description: A protocol for interacting with a gym connection.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
-protocol_specification_id: fetchai/gym:0.1.0
+protocol_specification_id: fetchai/gym:1.0.0
 speech_acts:
   act:
     action: ct:AnyObject

@@ -14,7 +14,7 @@ version: 0.11.0
 description: A protocol for communication between skills and decision maker.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
-protocol_specification_id: fetchai/signing:0.1.0
+protocol_specification_id: fetchai/signing:1.0.0
 speech_acts:
   sign_transaction:
     terms: ct:Terms

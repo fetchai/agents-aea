@@ -14,7 +14,7 @@ version: 0.12.0
 description: A protocol for contract APIs requests and responses.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
-protocol_specification_id: fetchai/contract_api:0.1.0
+protocol_specification_id: fetchai/contract_api:1.0.0
 speech_acts:
   get_deploy_transaction:
     ledger_id: pt:str
