@@ -262,7 +262,7 @@ class TestDifferenceToFetchedAgent(BaseAEATestCase):
 
     _mock_called = False
     original_function = yaml.safe_load_all
-    agent_name: str
+    test_agent_name: str
 
     @classmethod
     def setup_class(cls) -> None:
@@ -270,7 +270,7 @@ class TestDifferenceToFetchedAgent(BaseAEATestCase):
         super().setup_class()
 
         # build aea, and override the tick interval
-        cls.test_agent_name: str = "test_agent"
+        cls.test_agent_name = "test_agent"
         cls.fetch_agent(str(MY_FIRST_AEA_PUBLIC_ID), cls.test_agent_name)
         cls.set_agent_context(cls.test_agent_name)
         cls.run_cli_command(
