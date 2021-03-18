@@ -26,84 +26,100 @@ const(
 // 	_incoming_messages
 // }
 
+// TODO
+// Define LableType
+// Define RoleType and figure out how to find role
+
 type Dialogue stuct {
-	counterParty Address
-	performative Performative
-	startingMessageId int
+	dialogueLabel LableType
+	dialogueMessage *InitialMessage
+	selfAddress Address
+	// role RoleType
+}
+
+dialogueStorage := make(map[string][]Dialogue)
+
+type InitialMessage struct {
+	dialogueReference [2]string
+	message_id string
+	target int
+	performative string
+	message SomeMessageType
 	to Address
 	sender Address
-	dialogueReference [2]string
-	incomplete_to_complete_dialogue_labels []string
-	message SomeMessageType
 }
 
-func create(counterParty Address, performative Performative, message SomeMessageType) *Dialogue {
+func create(selfAddress Address, counterParty Address, performative Performative, message SomeMessageType) *Dialogue {
 
-	dialogue := &{
+	intitialMessage := &InitialMessage{
+		dialogueReference : ,
+		message_id : ,
+		target : ,
+		performative : performative,
 		message : message,
-		counterParty : counterParty,
-		startingMessageId : 1,
-		target : 0,
-		performative : performative
 		to : counterParty,
+		sender : selfAddress
 	}
-
-	//TODO
-
-	// figure out what is _message_class ? know more about this.
-
-	// figure out what is performative? how will it be used?
-
-	// create initial message using :
-	// 1. dialog reference
-	// 2. message_id
-	// 3. target
-	// 4. permormative
-	// 5. message
-
-
-	// TODO
-	// get initiaor address
-	// selfAddress := getInititatorAddress()
-
-	// set initial message sender and counterparty address
-	dialogue.sender = selfAddress
-	dialogue.dialogueReference[0] := generateDialogueNonce()
-	dialogue.dialogueReference[1] := ""
-
+	initialMessage.dialogueReference[0] := generateDialogueNonce()
+	initialMessage.dialogueReference[1] := ""
 	
-
 	// process dialogue creation 
-	dialogue.createDialogue();
-	
-	
-	return dialogue
+	dialogue := initialMessage.createDialogue();
 
+	return dialogue
 }
 
-func (dialogue *Dialogue) createDialogue() {
+func (data *InitialMessage) createDialogue() *Dialogue{
 
 	// TODO
-	// define dialog ROLE for dialog inititor
+	// define dialog ROLE for dialog initiator
 	
-	// define 2 lables, incomplete and complete
-	// lable will be set with reference to complete if it exist else incomplete
+	incompleteDialogueLabel := data.checkAndProcessLabels()
+	if dialogueStorage[data.sender+data.to].length() > 0 {
+		for dialogue := range dialogueStorage[data.sender+data.to] {
+			if incompleteDialogueLabel == dialogue {
+				fmt.Println("Error : incomplete dialogue label already present in storage")
+				return
+			}
+		}
+	}
+	dialogueLabel := incompleteDialogueLabel
+	
+	// TODO
+	// initialize completeLabel
+	// if completeLabel != nil {
+	// 	dialogueLabel = completeDialogueLabel
+	// }
 
-	if dialogueReference[0] == "" || dialogueReference[1] != "" {
-		// throw error for responder reference already existing
+	if dialogueStorage[data.sender+data.to].length() > 0 {
+		for dialogue := range dialogueStorage[data.sender+data.to] {
+			if dialogueLabel == dialogue {
+				fmt.Println("Error : Dialogue label already present in storage")
+				return
+			}
+		}
 	}
 
-	if dialog.incomplete_to_complete_dialogue_labels.length() > 0 {
-		// throw error for incomplete label already present
+	dialogue := &Dialogue{
+		dialogueLabel : dialogueLabel,
+		message : data,
+		selfAddress : data.sender
 	}
 
-	// check dialog lable not be present
+	return dialogue
+	
+}
 
-	// add missing relevant fields for dialogue
-	
-	// add dialogue to storage
-	// maybe create a map of dialoges in dialogue struct
-	
+func (data *InitialMessage)checkAndProcessLabels() {
+	if ! (data.dialogueReference[0] != "" && data.dialogueReference[1] == "") {
+		fmt.Println("Error : Reference address label already exists")
+		return
+	}
+	return {
+		dialogueReference := data.dialogueReference,
+		dialogueOpponentAddress := data.to,
+		dialogueStarterAddress := data.sender
+	}
 }
 
 func generateDialogueNonce() string {
