@@ -27,7 +27,7 @@ from aea import __version__
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder, DEFAULT_ENV_DOTFILE
 from aea.cli.install import do_install
-from aea.cli.utils.click_utils import ConnectionsOption
+from aea.cli.utils.click_utils import ConnectionsOption, password_option
 from aea.cli.utils.constants import AEA_LOGO, REQUIREMENTS
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
@@ -42,9 +42,7 @@ from aea.skills.base import Behaviour, Handler, Model, Skill
 
 
 @click.command()
-@click.argument(
-    "password", metavar="PASSWORD", type=str, default=None, required=False,
-)
+@password_option()
 @click.option(
     "--connections",
     "connection_ids",

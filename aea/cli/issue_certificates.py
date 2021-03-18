@@ -22,6 +22,7 @@ from typing import Dict, List, Optional, cast
 import click
 from click import ClickException
 
+from aea.cli.utils.click_utils import password_option
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.loggers import logger
@@ -36,12 +37,10 @@ from aea.helpers.base import CertRequest, prepend_if_not_absolute
 
 
 @click.command()
-@click.argument(
-    "password", metavar="PASSWORD", type=str, default=None, required=False,
-)
+@password_option()
 @click.pass_context
 @check_aea_project
-def issue_certificates(click_context: click.Context, password: str) -> None:
+def issue_certificates(click_context: click.Context, password: Optional[str]) -> None:
     """Issue certificates for connections that require them."""
     ctx = cast(Context, click_context.obj)
     agent_config_manager = AgentConfigManager.load(ctx.cwd)

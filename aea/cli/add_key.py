@@ -16,14 +16,13 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Implementation of the 'aea add_key' subcommand."""
-
 import os
 from typing import Optional, cast
 
 import click
 
+from aea.cli.utils.click_utils import password_option
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.configurations.constants import (
@@ -50,16 +49,18 @@ key_file_argument = click.Path(
 @click.argument(
     "file", metavar="FILE", type=key_file_argument, required=False,
 )
-@click.argument(
-    "password", metavar="PASSWORD", type=str, default=None, required=False,
-)
+@password_option()
 @click.option(
     "--connection", is_flag=True, help="For adding a private key for connections."
 )
 @click.pass_context
 @check_aea_project
 def add_key(
-    click_context: click.Context, type_: str, file: str, password: str, connection: bool
+    click_context: click.Context,
+    type_: str,
+    file: str,
+    password: Optional[str],
+    connection: bool,
 ) -> None:
     """Add a private key to the wallet of the agent."""
     _add_private_key(click_context, type_, file, password, connection)

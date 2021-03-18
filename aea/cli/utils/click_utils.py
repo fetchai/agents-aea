@@ -196,3 +196,37 @@ class MutuallyExclusiveOption(Option):
             )
 
         return super().handle_parse_result(ctx, opts, args)
+
+
+def password_option(confirmation_prompt: bool = False, **kwargs) -> Callable:  # type: ignore
+    """Decorator to ask for input if -p flag was provided or use --password to set password value in command line."""
+
+    def callback(ctx, _, value: bool) -> bool:  # type: ignore
+        if value is True:
+            ctx.params["password"] = ctx.params.get("password") or click.prompt(
+                "Enter password please",
+                hide_input=True,
+                confirmation_prompt=confirmation_prompt,
+            )
+        return value
+
+    def wrap(fn):  # type: ignore
+        return click.option(
+            "-p",
+            is_flag=True,
+            type=bool,
+            callback=callback,
+            expose_value=False,
+            help="Ask for password interactivly",
+        )(
+            click.option(
+                "--password",
+                **kwargs,
+                type=str,
+                is_eager=True,
+                metavar="PASSWORD",
+                help="Set password for key encryption/decryption",
+            )(fn)
+        )  # type: ignore
+
+    return wrap
