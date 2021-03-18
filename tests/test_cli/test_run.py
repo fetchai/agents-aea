@@ -1018,52 +1018,18 @@ class TestRunFailsWhenConnectionConfigFileNotFound:
             pass
 
 
-class TestRunFailsWhenConnectionNotComplete:
+class TestRunFailsWhenConnectionNotComplete(AEATestCaseEmpty):
     """Test that the command 'aea run --connections' fails when the connection.py module is missing."""
 
     @classmethod
     def setup_class(cls):
         """Set the test up."""
-        cls.runner = CliRunner()
-        cls.agent_name = "myagent"
+        super().setup_class()
         cls.connection_id = HTTP_ClIENT_PUBLIC_ID
         cls.connection_author = cls.connection_id.author
         cls.connection_name = cls.connection_id.name
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        # copy the 'packages' directory in the parent of the agent folder.
-        shutil.copytree(Path(ROOT_DIR, "packages"), Path(cls.t, "packages"))
-
-        os.chdir(cls.t)
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-        )
-        assert result.exit_code == 0
-
-        result = cls.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-        os.chdir(Path(cls.t, cls.agent_name))
-        result = cls.runner.invoke(
-            cli,
-            [*CLI_LOG_OPTION, "add", "--local", "connection", str(cls.connection_id)],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-        result = cls.runner.invoke(
-            cli,
-            [
-                *CLI_LOG_OPTION,
-                "config",
-                "set",
-                "agent.default_connection",
-                str(HTTP_ClIENT_PUBLIC_ID),
-            ],
-        )
-        assert result.exit_code == 0
+        cls.add_item("connection", str(cls.connection_id))
+        cls.set_config("agent.default_connection", str(HTTP_ClIENT_PUBLIC_ID))
         connection_module_path = Path(
             cls.t,
             cls.agent_name,
@@ -1077,37 +1043,20 @@ class TestRunFailsWhenConnectionNotComplete:
         cls.relative_connection_module_path = connection_module_path.relative_to(
             Path(cls.t, cls.agent_name)
         )
-        cls.result = cls.runner.invoke(
-            cli,
-            [
-                "--skip-consistency-check",
-                *CLI_LOG_OPTION,
-                "run",
-                "--connections",
-                str(cls.connection_id),
-            ],
-            standalone_mode=False,
-        )
 
-    def test_exit_code_equal_to_1(self):
-        """Assert that the exit code is equal to 1 (i.e. catchall for general errors)."""
-        assert self.result.exit_code == 1
-
-    def test_log_error_message(self):
-        """Test that the log error message is fixed."""
-        s = "Package loading error: An error occurred while loading connection {}: Connection module '{}' not found.".format(
+    def test_run(self):
+        """Run the test."""
+        expected_message = "Package loading error: An error occurred while loading connection {}: Connection module '{}' not found.".format(
             self.connection_id, self.relative_connection_module_path
         )
-        assert self.result.exception.message == s
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear the test down."""
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
+        with pytest.raises(ClickException, match=re.escape(expected_message)):
+            self.run_cli_command(
+                "--skip-consistency-check",
+                "run",
+                "--connections",
+                str(self.connection_id),
+                cwd=self._get_cwd(),
+            )
 
 
 class TestRunFailsWhenConnectionClassNotPresent(AEATestCaseEmpty):
