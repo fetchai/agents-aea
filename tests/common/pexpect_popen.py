@@ -72,7 +72,7 @@ class PexpectWrapper(PopenSpawn):
             self.exitstatus = "Terminated!"  # type: ignore
 
     @classmethod
-    def aea_cli(cls, args) -> "PexpectWrapper":
+    def aea_cli(cls, args, **kwargs) -> "PexpectWrapper":
         """Start aea.cli.
 
         :param args: list of arguments for aea.cli.
@@ -84,6 +84,7 @@ class PexpectWrapper(PopenSpawn):
             env=os.environ.copy(),
             encoding="utf-8",
             logfile=sys.stdout,
+            **kwargs
         )
 
     def expect_all(

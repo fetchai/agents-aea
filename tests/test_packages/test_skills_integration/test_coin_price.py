@@ -20,27 +20,12 @@
 """This test module contains the integration test for the coin price skill."""
 
 import time
-from pathlib import Path
 from typing import Dict
 
 import pytest
 
 from aea.helpers import http_requests as requests
 from aea.test_tools.test_cases import AEATestCaseEmpty
-
-from tests.conftest import ROOT_DIR
-
-
-API_SPEC_PATH = str(
-    Path(
-        ROOT_DIR,
-        "packages",
-        "fetchai",
-        "skills",
-        "advanced_data_request",
-        "api_spec.yaml",
-    ).absolute()
-)
 
 
 def parse_prometheus_output(prom_data: bytes) -> Dict[str, float]:
@@ -75,8 +60,10 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
 
+        # set 'api spec path' *after* comparison with fetched agent.
         self.set_config(
-            "vendor.fetchai.connections.http_server.config.api_spec_path", API_SPEC_PATH
+            "vendor.fetchai.connections.http_server.config.api_spec_path",
+            "vendor/fetchai/skills/advanced_data_request/api_spec.yaml",
         )
         self.set_config(
             "vendor.fetchai.connections.http_server.config.target_skill_id",
@@ -99,7 +86,7 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
         )
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/coin_price_feed:0.8.0", coin_price_feed_aea_name
+            "fetchai/coin_price_feed:0.9.0", coin_price_feed_aea_name
         )
         assert (
             diff == []
