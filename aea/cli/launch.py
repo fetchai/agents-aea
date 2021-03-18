@@ -25,7 +25,7 @@ from typing import List, Optional, cast
 
 import click
 
-from aea.cli.utils.click_utils import AgentDirectory
+from aea.cli.utils.click_utils import AgentDirectory, password_option
 from aea.cli.utils.context import Context
 from aea.cli.utils.loggers import logger
 from aea.helpers.multiple_executor import ExecutorExceptionPolicies
@@ -34,13 +34,14 @@ from aea.launcher import AEALauncher
 
 @click.command()
 @click.argument("agents", nargs=-1, type=AgentDirectory())
-@click.option(
-    "--password", metavar="PASSWORD", type=str, default=None, required=False,
-)
+@password_option()
 @click.option("--multithreaded", is_flag=True)
 @click.pass_context
 def launch(
-    click_context: click.Context, agents: List[str], password: str, multithreaded: bool
+    click_context: click.Context,
+    agents: List[str],
+    password: Optional[str],
+    multithreaded: bool,
 ) -> None:
     """Launch many agents at the same time."""
     _launch_agents(click_context, agents, multithreaded, password)

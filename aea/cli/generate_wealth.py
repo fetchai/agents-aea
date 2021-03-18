@@ -16,13 +16,12 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Implementation of the 'aea generate_wealth' subcommand."""
-
 from typing import Optional, cast
 
 import click
 
+from aea.cli.utils.click_utils import password_option
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.package_utils import get_wallet_from_context
@@ -38,16 +37,18 @@ from aea.crypto.registries import faucet_apis_registry, make_faucet_api_cls
     required=True,
 )
 @click.argument("url", metavar="URL", type=str, required=False, default=None)
-@click.argument(
-    "password", metavar="PASSWORD", type=str, default=None, required=False,
-)
+@password_option()
 @click.option(
     "--sync", is_flag=True, help="For waiting till the faucet has released the funds."
 )
 @click.pass_context
 @check_aea_project
 def generate_wealth(
-    click_context: click.Context, type_: str, url: str, password: str, sync: bool
+    click_context: click.Context,
+    type_: str,
+    url: str,
+    password: Optional[str],
+    sync: bool,
 ) -> None:
     """Generate wealth for the agent on a test network."""
     ctx = cast(Context, click_context.obj)

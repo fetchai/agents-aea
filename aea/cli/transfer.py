@@ -24,6 +24,7 @@ from typing import Optional, cast
 import click
 
 from aea.cli.get_address import _try_get_address
+from aea.cli.utils.click_utils import password_option
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.package_utils import (
@@ -53,9 +54,7 @@ DEFAULT_SETTLE_TIMEOUT = 60
     "amount", type=int, required=True,
 )
 @click.argument("fee", type=int, required=False, default=100)
-@click.argument(
-    "password", metavar="PASSWORD", type=str, default=None, required=False,
-)
+@password_option()
 @click.option("-y", "--yes", type=bool, is_flag=True, default=False)
 @click.option("--settle-timeout", type=int, default=DEFAULT_SETTLE_TIMEOUT)
 @click.option("--sync", type=bool, is_flag=True, default=False)
@@ -67,7 +66,7 @@ def transfer(
     address: str,
     amount: int,
     fee: int,
-    password: str,
+    password: Optional[str],
     yes: bool,
     settle_timeout: int,
     sync: bool,

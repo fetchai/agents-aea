@@ -26,7 +26,7 @@ from typing import Optional, Tuple, cast
 import click
 from click import ClickException
 
-from aea.cli.utils.click_utils import PublicIdParameter
+from aea.cli.utils.click_utils import PublicIdParameter, password_option
 from aea.cli.utils.config import load_item_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
@@ -49,9 +49,7 @@ URI_REGEX = re.compile(r"(?:https?://)?(?P<host>[^:/ ]+):(?P<port>[0-9]*)")
     type=click.Choice(list(crypto_registry.supported_ids)),
     required=True,
 )
-@click.argument(
-    "password", metavar="PASSWORD", type=str, default=None, required=False,
-)
+@password_option()
 @click.option("-c", "--connection", is_flag=True)
 @click.option(
     "-i", "--connection-id", type=PublicIdParameter(), required=False, default=None,
@@ -70,7 +68,7 @@ URI_REGEX = re.compile(r"(?:https?://)?(?P<host>[^:/ ]+):(?P<port>[0-9]*)")
 def get_multiaddress(
     click_context: click.Context,
     ledger_id: str,
-    password: str,
+    password: Optional[str],
     connection: bool,
     connection_id: Optional[PublicId],
     host_field: str,

@@ -17,20 +17,26 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains the tests for aea.cli.utils module."""
-
 from builtins import FileNotFoundError
 from copy import deepcopy
 from typing import cast
 from unittest import TestCase, mock
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
+from uuid import uuid4
 
+import click
 import pytest
 from aea_ledger_fetchai import FetchAICrypto
 from click import BadParameter, ClickException, UsageError
+from click.testing import CliRunner
 from jsonschema import ValidationError
 from yaml import YAMLError
 
-from aea.cli.utils.click_utils import MutuallyExclusiveOption, PublicIdParameter
+from aea.cli.utils.click_utils import (
+    MutuallyExclusiveOption,
+    PublicIdParameter,
+    password_option,
+)
 from aea.cli.utils.config import (
     _init_cli_config,
     get_or_create_cli_config,
@@ -555,3 +561,39 @@ def test_set_cli_author_positive(*_mocks):
     context_mock = MagicMock()
     set_cli_author(context_mock)
     context_mock.obj.set_config.assert_called_with("cli_author", "some_author")
+
+
+def test_password_option():
+    """Test password option."""
+
+    @click.command()
+    @password_option()
+    def cmd(password):
+        raise ValueError(password)
+
+    # no password specified
+    with pytest.raises(ValueError, match="None"):
+        CliRunner().invoke(cmd, [], catch_exceptions=False, standalone_mode=False)
+
+    # --password specified
+    password = uuid4().hex
+    with pytest.raises(ValueError, match=password):
+        CliRunner().invoke(
+            cmd, ["--password", password], catch_exceptions=False, standalone_mode=False
+        )
+
+    # -p to ask with click.prompt
+    with pytest.raises(ValueError, match=password):
+        with patch("click.prompt", return_value=password):
+            CliRunner().invoke(
+                cmd, ["-p"], catch_exceptions=False, standalone_mode=False
+            )
+    # -p and --password togehter, -p in priority
+    with pytest.raises(ValueError, match=password):
+        with patch("click.prompt", return_value="prompted_password"):
+            CliRunner().invoke(
+                cmd,
+                ["-p", "--password", password],
+                catch_exceptions=False,
+                standalone_mode=False,
+            )
