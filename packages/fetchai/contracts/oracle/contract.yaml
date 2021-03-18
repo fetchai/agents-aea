@@ -19,8 +19,8 @@ contract_interface_paths:
   fetchai: build/oracle.wasm
 dependencies:
   aea-ledger-cosmos:
-    version: <0.2.0,>=0.1.0
+    version: <0.3.0,>=0.2.0
   aea-ledger-ethereum:
-    version: <0.2.0,>=0.1.0
+    version: <0.3.0,>=0.2.0
   aea-ledger-fetchai:
-    version: <0.2.0,>=0.1.0
+    version: <0.3.0,>=0.2.0
