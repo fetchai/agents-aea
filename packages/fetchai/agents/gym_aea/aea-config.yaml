@@ -1,6 +1,6 @@
 agent_name: gym_aea
 author: fetchai
-version: 0.20.0
+version: 0.21.0
 description: The gym aea demos the interaction between a skill containing a RL agent
   and a gym connection.
 license: Apache-2.0
@@ -28,4 +28,4 @@ default_routing: {}
 connection_private_key_paths: {}
 dependencies:
   aea-ledger-fetchai:
-    version: <0.2.0,>=0.1.0
+    version: <0.3.0,>=0.2.0

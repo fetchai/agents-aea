@@ -370,7 +370,7 @@ class BaseSkillTestCase:
         if is_agent_to_agent_messages is None:
             is_agent_to_agent_messages = self.is_agent_to_agent_messages
         if counterparty is None:
-            counterparty = (
+            counterparty = (  # pragma: nocover
                 COUNTERPARTY_AGENT_ADDRESS
                 if is_agent_to_agent_messages
                 else COUNTERPARTY_SKILL_ADDRESS

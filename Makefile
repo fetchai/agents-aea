@@ -47,23 +47,21 @@ lint:
 
 .PHONY: pylint
 pylint:
-	pylint -j4 aea benchmark packages scripts plugins/aea-ledger-fetchai/aea_ledger_fetchai plugins/aea-ledger-ethereum/aea_ledger_ethereum plugins/aea-ledger-cosmos/aea_ledger_cosmos examples/*
+	pylint -j4 aea benchmark packages scripts plugins/aea-ledger-fetchai/aea_ledger_fetchai plugins/aea-ledger-ethereum/aea_ledger_ethereum plugins/aea-ledger-cosmos/aea_ledger_cosmos plugins/aea-cli-ipfs/aea_cli_ipfs examples/*
 
 .PHONY: security
 security:
 	bandit -r aea benchmark examples packages \
         plugins/aea-ledger-fetchai/aea_ledger_fetchai \
         plugins/aea-ledger-ethereum/aea_ledger_ethereum \
-        plugins/aea-ledger-cosmos/aea_ledger_cosmos
-	bandit -s B101 -r tests scripts \
-        plugins/aea-ledger-fetchai/tests \
-        plugins/aea-ledger-ethereum/tests \
-        plugins/aea-ledger-cosmos/tests
+        plugins/aea-ledger-cosmos/aea_ledger_cosmos \
+        plugins/aea-cli-ipfs/aea_cli_ipfs
+	bandit -s B101 -r tests scripts
 	safety check -i 37524 -i 38038 -i 37776 -i 38039 -i 39621
 
 .PHONY: static
 static:
-	mypy aea benchmark examples packages plugins/aea-ledger-fetchai/aea_ledger_fetchai plugins/aea-ledger-ethereum/aea_ledger_ethereum plugins/aea-ledger-cosmos/aea_ledger_cosmos scripts --disallow-untyped-defs
+	mypy aea benchmark examples packages plugins/aea-ledger-fetchai/aea_ledger_fetchai plugins/aea-ledger-ethereum/aea_ledger_ethereum plugins/aea-ledger-cosmos/aea_ledger_cosmos plugins/aea-cli-ipfs/aea_cli_ipfs scripts --disallow-untyped-defs
 	mypy tests
 
 .PHONY: package_checks
@@ -84,6 +82,7 @@ test:
 	pytest -rfE plugins/aea-ledger-fetchai/tests --cov=aea_ledger_fetchai --cov-report=term --cov-report=term-missing --cov-config=.coveragerc
 	pytest -rfE plugins/aea-ledger-ethereum/tests --cov=aea_ledger_ethereum --cov-report=term --cov-report=term-missing --cov-config=.coveragerc
 	pytest -rfE plugins/aea-ledger-cosmos/tests --cov=aea_ledger_cosmos --cov-report=term --cov-report=term-missing --cov-config=.coveragerc
+	pytest -rfE plugins/aea-cli-ipfs/tests --cov=aea_cli_ipfs --cov-report=term --cov-report=term-missing --cov-config=.coveragerc
 	pytest -rfE --doctest-modules aea packages/fetchai/protocols packages/fetchai/connections packages/fetchai/skills tests/ --cov=aea --cov=packages/fetchai/connections --cov=packages/fetchai/contracts --cov=packages/fetchai/protocols --cov=packages/fetchai/skills --cov-report=html --cov-report=xml --cov-report=term-missing --cov-report=term --cov=aea --cov=packages/fetchai/protocols --cov=packages/fetchai/connections --cov=packages/fetchai/skills --cov-config=.coveragerc
 	find . -name ".coverage*" -not -name ".coveragerc" -exec rm -fr "{}" \;
 
@@ -137,6 +136,7 @@ new_env: clean
 		pipenv run pip install --no-deps file:plugins/aea-ledger-ethereum;\
 		pipenv run pip install --no-deps file:plugins/aea-ledger-cosmos;\
 		pipenv run pip install --no-deps file:plugins/aea-ledger-fetchai;\
+		pipenv run pip install --no-deps file:plugins/aea-cli-ipfs;\
 		echo "Enter virtual environment with all development dependencies now: 'pipenv shell'.";\
 	else\
 		echo "In a virtual environment! Exit first: 'exit'.";\

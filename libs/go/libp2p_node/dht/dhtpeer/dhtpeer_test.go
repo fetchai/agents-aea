@@ -22,6 +22,8 @@ package dhtpeer
 
 import (
 	"context"
+	"fmt"
+	"log"
 	"math/rand"
 	"net"
 	"strconv"
@@ -756,6 +758,102 @@ func TestRoutingDelegateClientToDHTPeerIndirect(t *testing.T) {
 	}
 
 	expectEnvelope(t, client.Rx)
+}
+
+// TestMessageOrderingWithDelegateClient
+func TestMessageOrderingWithDelegateClient(t *testing.T) {
+	peer1, peerCleanup1, err := SetupLocalDHTPeer(
+		FetchAITestKeys[0], AgentsTestKeys[0], DefaultLocalPort, DefaultDelegatePort,
+		[]string{},
+	)
+	if err != nil {
+		t.Fatal("Failed to initialize DHTPeer:", err)
+	}
+	defer peerCleanup1()
+
+	peer2, peerCleanup2, err := SetupLocalDHTPeer(
+		FetchAITestKeys[1], AgentsTestKeys[1], DefaultLocalPort+1, DefaultDelegatePort+1,
+		[]string{peer1.MultiAddr()},
+	)
+	if err != nil {
+		t.Fatal("Failed to initialize DHTPeer:", err)
+	}
+	defer peerCleanup2()
+
+	time.Sleep(1 * time.Second)
+
+	client, clientCleanup, err := SetupDelegateClient(
+		AgentsTestKeys[2],
+		DefaultLocalHost,
+		DefaultDelegatePort+1,
+		FetchAITestPublicKeys[1],
+	)
+	if err != nil {
+		t.Fatal("Failed to initialize DelegateClient:", err)
+	}
+	defer clientCleanup()
+
+	rxPeer1 := make(chan *aea.Envelope, 20)
+	peer1.ProcessEnvelope(func(envel *aea.Envelope) error {
+		rxPeer1 <- envel
+		return nil
+	})
+	rxPeer2 := make(chan *aea.Envelope, 20)
+	peer2.ProcessEnvelope(func(envel *aea.Envelope) error {
+		rxPeer2 <- envel
+		return nil
+	})
+
+	ensureAddressAnnounced(peer1, peer2)
+
+	max := 100
+	i := 0
+	for x := 0; x < max; x++ {
+		envelope := &aea.Envelope{
+			To:      AgentsTestAddresses[0],
+			Sender:  AgentsTestAddresses[2],
+			Message: []byte(strconv.Itoa(i)),
+		}
+		err = client.Send(envelope)
+		if err != nil {
+			t.Error("Failed to Send envelope from DelegateClient to DHTPeer:", err)
+		}
+		i++
+		t.Log("Sending Envelope : ", envelope)
+		// time.Sleep(100 * time.Millisecond)
+
+		envelope1 := &aea.Envelope{
+			To:      AgentsTestAddresses[1],
+			Sender:  AgentsTestAddresses[2],
+			Message: []byte(strconv.Itoa(i)),
+		}
+		err = client.Send(envelope1)
+		if err != nil {
+			t.Error("Failed to Send envelope from DelegateClient to DHTPeer:", err)
+		}
+		i++
+		t.Log("Sending Envelope : ", envelope1)
+		// time.Sleep(100 * time.Millisecond)
+	}
+
+	// go func() {
+	ii := 0
+	for x := 0; x < max; x++ {
+		expectEnvelopeOrdered(t, rxPeer1, ii)
+		ii++
+		ii++
+	}
+	// }()
+
+	// go func() {
+	iii := 0
+	for x := 0; x < max; x++ {
+		iii++
+		expectEnvelopeOrdered(t, rxPeer2, iii)
+		iii++
+	}
+	// }()
+
 }
 
 // TestRoutingDelegateClientToDHTPeerIndirectTwoHops
@@ -1718,6 +1816,20 @@ func expectEnvelope(t *testing.T, rx chan *aea.Envelope) {
 	select {
 	case envel := <-rx:
 		t.Log("Received envelope", envel)
+	case <-timeout:
+		t.Error("Failed to receive envelope before timeout")
+	}
+}
+
+func expectEnvelopeOrdered(t *testing.T, rx chan *aea.Envelope, counter int) {
+	timeout := time.After(EnvelopeDeliveryTimeout)
+	select {
+	case envel := <-rx:
+		t.Log("Received envelope", envel)
+		message, _ := strconv.Atoi(string(envel.Message))
+		if message != counter {
+			log.Fatal(fmt.Sprintf("Expected counter %d received counter %d", counter, message))
+		}
 	case <-timeout:
 		t.Error("Failed to receive envelope before timeout")
 	}
