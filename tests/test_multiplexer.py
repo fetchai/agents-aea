@@ -1087,7 +1087,7 @@ async def test_connection_timeouts():
 
     multiplexer.SEND_TIMEOUT = 0.1
     await multiplexer.connect()
-    with pytest.raises(asyncio.exceptions.TimeoutError):
+    with pytest.raises(asyncio.TimeoutError):
         await multiplexer._send(envelope)
     await multiplexer.disconnect()
 
