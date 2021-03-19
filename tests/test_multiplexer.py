@@ -1056,3 +1056,49 @@ async def test_connect_after_disconnect_async():
     assert multiplexer.connection_status.is_connected
     await multiplexer.disconnect()
     assert not multiplexer.connection_status.is_connected
+
+
+@pytest.mark.asyncio
+async def test_connection_timeouts():
+    """Test connect,send, disconnect timeouts for connections."""
+
+    async def slow_fn(*asrgs, **kwargs):
+        await asyncio.sleep(100)
+
+    connection = _make_dummy_connection()
+    envelope = Envelope(
+        to="",
+        sender="",
+        message=DefaultMessage(performative=DefaultMessage.Performative.BYTES),
+        context=EnvelopeContext(connection_id=connection.connection_id),
+    )
+
+    connection = _make_dummy_connection()
+    connection.connect = slow_fn
+    multiplexer = AsyncMultiplexer([connection])
+
+    multiplexer.CONNECT_TIMEOUT = 0.1
+    with pytest.raises(AEAConnectionError, match=r"TimeoutError"):
+        await multiplexer.connect()
+
+    connection = _make_dummy_connection()
+    connection.send = slow_fn
+    multiplexer = AsyncMultiplexer([connection])
+
+    multiplexer.SEND_TIMEOUT = 0.1
+    await multiplexer.connect()
+    with pytest.raises(asyncio.TimeoutError):
+        await multiplexer._send(envelope)
+    await multiplexer.disconnect()
+
+    connection = _make_dummy_connection()
+    connection.disconnect = slow_fn
+    multiplexer = AsyncMultiplexer([connection])
+
+    multiplexer.DISCONNECT_TIMEOUT = 0.1
+    await multiplexer.connect()
+    with pytest.raises(
+        AEAConnectionError,
+        match=f"Failed to disconnect multiplexer, some connections are not disconnected.*{str(connection.connection_id)}",
+    ):
+        await multiplexer.disconnect()
