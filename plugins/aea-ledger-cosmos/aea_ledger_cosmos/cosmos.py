@@ -20,6 +20,7 @@
 import base64
 import gzip
 import hashlib
+import hmac
 import json
 import logging
 import os
@@ -170,8 +171,14 @@ class DataEncrypt:
             "data_length": data_length,
             "initialisation_vector": cls.bytes_encode(initialisation_vector),
             "salt": cls.bytes_encode(salt),
+            "hmac": cls.get_hmac_for_data(password, data),
         }
         return json.dumps(json_data).encode()
+
+    @staticmethod
+    def get_hmac_for_data(password: str, data: bytes) -> str:
+        """Get hmac digest for data."""
+        return hmac.new(password.encode(), data, "sha256").hexdigest()
 
     @staticmethod
     def bytes_encode(data: bytes) -> str:
@@ -193,7 +200,7 @@ class DataEncrypt:
 
         try:
             json_data = json.loads(encrypted_data)
-            return cls._aes_decrypt(
+            decrypted_data = cls._aes_decrypt(
                 password,
                 encrypted_data=cls.bytes_decode(json_data["encrypted_data"]),
                 data_length=json_data["data_length"],
@@ -202,6 +209,9 @@ class DataEncrypt:
                 ),
                 salt=cls.bytes_decode(json_data["salt"]),
             )
+            if cls.get_hmac_for_data(password, decrypted_data) != json_data["hmac"]:
+                raise ValueError("Decrypt error! Bad password?")
+            return decrypted_data
         except (KeyError, JSONDecodeError) as e:
             raise ValueError(f"Bad encrypted key format!: {str(e)}") from e
 
