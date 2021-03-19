@@ -862,7 +862,7 @@ def _make_libp2p_connection(
     key = agent_key
     if key is None:
         key = make_crypto(DEFAULT_LEDGER)
-    identity = Identity("", address=key.address)
+    identity = Identity("identity", address=key.address)
     conn_crypto_store = None
     if node_key_file is not None:
         conn_crypto_store = CryptoStore({DEFAULT_LEDGER: node_key_file})
@@ -941,7 +941,7 @@ def _make_libp2p_client_connection(
     if not os.path.isdir(data_dir) or not os.path.exists(data_dir):
         raise ValueError("Data dir must be directory and exist!")
     crypto = make_crypto(ledger_api_id)
-    identity = Identity("", address=crypto.address)
+    identity = Identity("identity", address=crypto.address)
     cert_request = CertRequest(
         peer_public_key,
         POR_DEFAULT_SERVICE_ID,
