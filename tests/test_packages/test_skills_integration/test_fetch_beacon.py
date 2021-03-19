@@ -30,6 +30,8 @@ class TestFetchBeaconSkill(AEATestCaseEmpty):
 
     def test_fetch_beacon(self):
         """Run the fetch beacon skill sequence."""
+        self.generate_private_key()
+        self.add_private_key()
         self.add_item("connection", "fetchai/ledger:0.15.0")
         self.add_item("skill", "fetchai/fetch_beacon:0.8.0")
         self.set_config("agent.default_connection", "fetchai/ledger:0.15.0")

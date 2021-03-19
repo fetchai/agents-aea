@@ -47,6 +47,8 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
 
         coin_price_feed_aea_name = self.agent_name
 
+        self.generate_private_key()
+        self.add_private_key()
         self.add_item("connection", "fetchai/http_client:0.19.0")
         self.add_item("connection", "fetchai/http_server:0.18.0")
         self.add_item("connection", "fetchai/prometheus:0.4.0")

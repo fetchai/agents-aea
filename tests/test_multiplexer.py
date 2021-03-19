@@ -423,7 +423,7 @@ def test_get_from_multiplexer_when_empty():
 def test_send_message_no_supported_protocol():
     """Test the case when we send an envelope with a specific connection that does not support the protocol."""
     with LocalNode() as node:
-        identity_1 = Identity("", address="address_1")
+        identity_1 = Identity("identity", address="address_1")
         connection_1 = _make_local_connection(
             identity_1.address,
             node,
@@ -894,16 +894,6 @@ class TestMultiplexerDisconnectsOnTermination:  # pylint: disable=attribute-defi
 
         os.chdir(Path(self.t, self.agent_name))
 
-    def test_multiplexer_disconnected_on_early_interruption(self):
-        """Test multiplexer disconnected properly on termination before connected."""
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add", "--local", "connection", str(P2P_PUBLIC_ID)]
-        )
-        assert result.exit_code == 0, result.stdout_bytes
-
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "build"])
-        assert result.exit_code == 0, result.stdout_bytes
-
         result = self.runner.invoke(
             cli, [*CLI_LOG_OPTION, "generate-key", DEFAULT_LEDGER, self.key_path]
         )
@@ -912,6 +902,16 @@ class TestMultiplexerDisconnectsOnTermination:  # pylint: disable=attribute-defi
         result = self.runner.invoke(
             cli, [*CLI_LOG_OPTION, "add-key", DEFAULT_LEDGER, self.key_path]
         )
+        assert result.exit_code == 0, result.stdout_bytes
+
+    def test_multiplexer_disconnected_on_early_interruption(self):
+        """Test multiplexer disconnected properly on termination before connected."""
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "add", "--local", "connection", str(P2P_PUBLIC_ID)]
+        )
+        assert result.exit_code == 0, result.stdout_bytes
+
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "build"])
         assert result.exit_code == 0, result.stdout_bytes
 
         result = self.runner.invoke(
@@ -1056,3 +1056,49 @@ async def test_connect_after_disconnect_async():
     assert multiplexer.connection_status.is_connected
     await multiplexer.disconnect()
     assert not multiplexer.connection_status.is_connected
+
+
+@pytest.mark.asyncio
+async def test_connection_timeouts():
+    """Test connect,send, disconnect timeouts for connections."""
+
+    async def slow_fn(*asrgs, **kwargs):
+        await asyncio.sleep(100)
+
+    connection = _make_dummy_connection()
+    envelope = Envelope(
+        to="",
+        sender="",
+        message=DefaultMessage(performative=DefaultMessage.Performative.BYTES),
+        context=EnvelopeContext(connection_id=connection.connection_id),
+    )
+
+    connection = _make_dummy_connection()
+    connection.connect = slow_fn
+    multiplexer = AsyncMultiplexer([connection])
+
+    multiplexer.CONNECT_TIMEOUT = 0.1
+    with pytest.raises(AEAConnectionError, match=r"TimeoutError"):
+        await multiplexer.connect()
+
+    connection = _make_dummy_connection()
+    connection.send = slow_fn
+    multiplexer = AsyncMultiplexer([connection])
+
+    multiplexer.SEND_TIMEOUT = 0.1
+    await multiplexer.connect()
+    with pytest.raises(asyncio.TimeoutError):
+        await multiplexer._send(envelope)
+    await multiplexer.disconnect()
+
+    connection = _make_dummy_connection()
+    connection.disconnect = slow_fn
+    multiplexer = AsyncMultiplexer([connection])
+
+    multiplexer.DISCONNECT_TIMEOUT = 0.1
+    await multiplexer.connect()
+    with pytest.raises(
+        AEAConnectionError,
+        match=f"Failed to disconnect multiplexer, some connections are not disconnected.*{str(connection.connection_id)}",
+    ):
+        await multiplexer.disconnect()

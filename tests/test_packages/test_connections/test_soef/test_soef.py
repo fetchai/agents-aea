@@ -117,7 +117,7 @@ class TestSoefTokenStorage:
         self.crypto = make_crypto(DEFAULT_LEDGER)
         self.crypto2 = make_crypto(DEFAULT_LEDGER)
         self.data_dir = tempfile.mkdtemp()
-        identity = Identity("", address=self.crypto.address)
+        identity = Identity("identity", address=self.crypto.address)
         self.oef_search_dialogues = OefSearchDialogues(self.skill_id)
 
         # create the connection and multiplexer objects
@@ -184,7 +184,7 @@ class TestSoef:
         self.skill_id = "some_author/some_skill:0.1.0"
         self.crypto = make_crypto(DEFAULT_LEDGER)
         self.crypto2 = make_crypto(DEFAULT_LEDGER)
-        identity = Identity("", address=self.crypto.address)
+        identity = Identity("identity", address=self.crypto.address)
         self.oef_search_dialogues = OefSearchDialogues(self.skill_id)
         self.data_dir = tempfile.mkdtemp()
 
@@ -202,7 +202,7 @@ class TestSoef:
         self.connection2 = SOEFConnection(
             configuration=configuration,
             data_dir=self.data_dir,
-            identity=Identity("", address=self.crypto2.address),
+            identity=Identity("identity", address=self.crypto2.address),
         )
         self.loop = asyncio.get_event_loop()
         self.loop.run_until_complete(self.connection.connect())
@@ -738,7 +738,7 @@ class TestSoef:
     def test_chain_identifier_fail(self):
         """Test fail on invalid chain id."""
         chain_identifier = "test"
-        identity = Identity("", "")
+        identity = Identity("identity", "")
 
         configuration = ConnectionConfig(
             api_key="TwiCIriSl0mLahw17pyqoA",
@@ -756,7 +756,7 @@ class TestSoef:
     def test_chain_identifier_ok(self):
         """Test set valid chain id."""
         chain_identifier = "fetchai_cosmos"
-        identity = Identity("", "")
+        identity = Identity("identity", "")
 
         configuration = ConnectionConfig(
             api_key="TwiCIriSl0mLahw17pyqoA",

@@ -44,7 +44,7 @@ class FetchAIHelper(CosmosHelper):
     address_prefix = _FETCH
 
 
-class FetchAICrypto(CosmosCrypto):
+class FetchAICrypto(CosmosCrypto):  # pylint: disable=W0223
     """Class wrapping the Entity Generation from Fetch.AI ledger."""
 
     identifier = _FETCHAI

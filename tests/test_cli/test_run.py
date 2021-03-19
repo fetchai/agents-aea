@@ -29,6 +29,7 @@ from unittest import TestCase, mock
 
 import pytest
 import yaml
+from aea_ledger_fetchai import FetchAICrypto
 from click import ClickException
 from pexpect.exceptions import EOF  # type: ignore
 
@@ -79,6 +80,14 @@ def test_run():
     assert result.exit_code == 0
 
     os.chdir(Path(t, agent_name))
+
+    result = runner.invoke(
+        cli, [*CLI_LOG_OPTION, "generate-key", FetchAICrypto.identifier]
+    )
+    assert result.exit_code == 0
+
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier])
+    assert result.exit_code == 0
 
     result = runner.invoke(
         cli,
@@ -150,6 +159,14 @@ def test_run_with_profiling():
     os.chdir(Path(t, agent_name))
 
     result = runner.invoke(
+        cli, [*CLI_LOG_OPTION, "generate-key", FetchAICrypto.identifier]
+    )
+    assert result.exit_code == 0
+
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier])
+    assert result.exit_code == 0
+
+    result = runner.invoke(
         cli,
         [*CLI_LOG_OPTION, "add", "--local", "connection", str(HTTP_ClIENT_PUBLIC_ID)],
     )
@@ -215,6 +232,14 @@ def test_run_with_default_connection():
 
     os.chdir(Path(t, agent_name))
 
+    result = runner.invoke(
+        cli, [*CLI_LOG_OPTION, "generate-key", FetchAICrypto.identifier]
+    )
+    assert result.exit_code == 0
+
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier])
+    assert result.exit_code == 0
+
     try:
         process = PexpectWrapper(  # nosec
             [sys.executable, "-m", "aea.cli", "run"],
@@ -268,6 +293,14 @@ def test_run_multiple_connections(connection_ids):
     assert result.exit_code == 0
 
     os.chdir(Path(t, agent_name))
+
+    result = runner.invoke(
+        cli, [*CLI_LOG_OPTION, "generate-key", FetchAICrypto.identifier]
+    )
+    assert result.exit_code == 0
+
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier])
+    assert result.exit_code == 0
 
     result = runner.invoke(
         cli,
@@ -541,6 +574,14 @@ def test_run_with_install_deps():
     os.chdir(Path(t, agent_name))
 
     result = runner.invoke(
+        cli, [*CLI_LOG_OPTION, "generate-key", FetchAICrypto.identifier]
+    )
+    assert result.exit_code == 0
+
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier])
+    assert result.exit_code == 0
+
+    result = runner.invoke(
         cli,
         [*CLI_LOG_OPTION, "add", "--local", "connection", str(HTTP_ClIENT_PUBLIC_ID)],
     )
@@ -611,6 +652,14 @@ def test_run_with_install_deps_and_requirement_file():
     assert result.exit_code == 0
 
     os.chdir(Path(t, agent_name))
+
+    result = runner.invoke(
+        cli, [*CLI_LOG_OPTION, "generate-key", FetchAICrypto.identifier]
+    )
+    assert result.exit_code == 0
+
+    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier])
+    assert result.exit_code == 0
 
     result = runner.invoke(
         cli,
@@ -934,6 +983,16 @@ class TestRunFailsWhenConnectionNotDeclared:
 
         os.chdir(Path(cls.t, cls.agent_name))
 
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "generate-key", FetchAICrypto.identifier]
+        )
+        assert result.exit_code == 0
+
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier]
+        )
+        assert result.exit_code == 0
+
         cls.result = cls.runner.invoke(
             cli,
             [*CLI_LOG_OPTION, "run", "--connections", cls.connection_id],
@@ -1083,6 +1142,17 @@ class TestRunFailsWhenConnectionNotComplete:
         )
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
+
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "generate-key", FetchAICrypto.identifier]
+        )
+        assert result.exit_code == 0
+
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier]
+        )
+        assert result.exit_code == 0
+
         result = cls.runner.invoke(
             cli,
             [*CLI_LOG_OPTION, "add", "--local", "connection", str(cls.connection_id)],
@@ -1174,6 +1244,15 @@ class TestRunFailsWhenConnectionClassNotPresent:
         )
         assert result.exit_code == 0
         os.chdir(Path(cls.t, cls.agent_name))
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "generate-key", FetchAICrypto.identifier]
+        )
+        assert result.exit_code == 0
+
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier]
+        )
+        assert result.exit_code == 0
         result = cls.runner.invoke(
             cli,
             [*CLI_LOG_OPTION, "add", "--local", "connection", cls.connection_id],

@@ -337,7 +337,7 @@ version: 0.1.0
 type: skill
 description: A simple search skill utilising the SOEF search node.
 license: Apache-2.0
-aea_version: '>=0.11.0, <0.12.0'
+aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections: []
@@ -368,7 +368,7 @@ models:
     class_name: OefSearchDialogues
 dependencies:
   aea-ledger-fetchai:
-    version: <0.3.0,>=0.2.0
+    version: <2.0.0,>=1.0.0rc1
 is_abstract: false
 ```
 
@@ -853,7 +853,7 @@ version: 0.4.0
 type: skill
 description: The simple service registration skills is a skill to register a service.
 license: Apache-2.0
-aea_version: '>=0.11.0, <0.12.0'
+aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmRr1oe3zWKyPcktzKP4BiKqjCqmKjEDdLUQhn1JzNm4nD
@@ -890,7 +890,7 @@ models:
     class_name: Strategy
 dependencies:
   aea-ledger-fetchai:
-    version: <0.3.0,>=0.2.0
+    version: <2.0.0,>=1.0.0rc1
 is_abstract: false
 ```
 </p>

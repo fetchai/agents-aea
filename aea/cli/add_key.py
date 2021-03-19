@@ -16,14 +16,13 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Implementation of the 'aea add_key' subcommand."""
-
 import os
 from typing import Optional, cast
 
 import click
 
+from aea.cli.utils.click_utils import password_option
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.configurations.constants import (
@@ -50,22 +49,28 @@ key_file_argument = click.Path(
 @click.argument(
     "file", metavar="FILE", type=key_file_argument, required=False,
 )
+@password_option()
 @click.option(
     "--connection", is_flag=True, help="For adding a private key for connections."
 )
 @click.pass_context
 @check_aea_project
 def add_key(
-    click_context: click.Context, type_: str, file: str, connection: bool
+    click_context: click.Context,
+    type_: str,
+    file: str,
+    password: Optional[str],
+    connection: bool,
 ) -> None:
     """Add a private key to the wallet of the agent."""
-    _add_private_key(click_context, type_, file, connection)
+    _add_private_key(click_context, type_, file, password, connection)
 
 
 def _add_private_key(
     click_context: click.core.Context,
     type_: str,
     file: Optional[str] = None,
+    password: Optional[str] = None,
     connection: bool = False,
 ) -> None:
     """
@@ -74,7 +79,8 @@ def _add_private_key(
     :param click_context: click context object.
     :param type_: type.
     :param file: path to file.
-    :param connection: whether or not it is a private key for a connection
+    :param connection: whether or not it is a private key for a connection.
+    :param password: the password to encrypt/decrypt the private key.
 
     :return: None
     """
@@ -84,7 +90,7 @@ def _add_private_key(
 
     key_file_argument.convert(file, None, click_context)
 
-    try_validate_private_key_path(type_, file)
+    try_validate_private_key_path(type_, file, password=password)
     _try_add_key(ctx, type_, file, connection)
 
 

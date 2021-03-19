@@ -51,6 +51,8 @@ _default_logger = logging.getLogger(__name__)
 class GoalPursuitReadiness:
     """The goal pursuit readiness."""
 
+    __slots__ = ("_status",)
+
     class Status(Enum):
         """
         The enum of the readiness status.
@@ -85,6 +87,8 @@ class GoalPursuitReadiness:
 
 class OwnershipState(BaseOwnershipState):
     """Represent the ownership state of an agent (can proxy a ledger)."""
+
+    __slots__ = ("_amount_by_currency_id", "_quantities_by_good_id")
 
     def __init__(self) -> None:
         """
@@ -281,6 +285,8 @@ class OwnershipState(BaseOwnershipState):
 
 class Preferences(BasePreferences):
     """Class to represent the preferences."""
+
+    __slots__ = ("_exchange_params_by_currency_id", "_utility_params_by_good_id")
 
     def __init__(self) -> None:
         """Instantiate an agent preference object."""
@@ -583,21 +589,24 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
                 **kwargs,
             )
 
-    def __init__(self, identity: Identity, wallet: Wallet) -> None:
+    __slots__ = ("signing_dialogues", "state_update_dialogues")
+
+    def __init__(
+        self, identity: Identity, wallet: Wallet, config: Dict[str, Any]
+    ) -> None:
         """
         Initialize the decision maker.
 
         :param identity: the identity
         :param wallet: the wallet
+        :param config: the user defined configuration of the handler
         """
-        kwargs = {
+        kwargs: Dict[str, Any] = {
             "goal_pursuit_readiness": GoalPursuitReadiness(),
             "ownership_state": OwnershipState(),
             "preferences": Preferences(),
         }
-        super().__init__(
-            identity=identity, wallet=wallet, **kwargs,
-        )
+        super().__init__(identity=identity, wallet=wallet, config=config, **kwargs)
         self.signing_dialogues = DecisionMakerHandler.SigningDialogues(
             self.self_address
         )

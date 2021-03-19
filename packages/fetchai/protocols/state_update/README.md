@@ -13,8 +13,8 @@ author: fetchai
 version: 0.11.0
 description: A protocol for state updates to the decision maker state.
 license: Apache-2.0
-aea_version: '>=0.11.0, <0.12.0'
-protocol_specification_id: fetchai/state_update:0.1.0
+aea_version: '>=1.0.0rc1, <2.0.0'
+protocol_specification_id: fetchai/state_update:1.0.0
 speech_acts:
   initialize:
     exchange_params_by_currency_id: pt:dict[pt:str, pt:float]

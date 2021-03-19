@@ -47,16 +47,17 @@ from aea.runtime import AsyncRuntime
 _default_logger = logging.getLogger(__name__)
 
 
-def load_agent(agent_dir: Union[PathLike, str]) -> AEA:
+def load_agent(agent_dir: Union[PathLike, str], password: Optional[str] = None) -> AEA:
     """
     Load AEA from directory.
 
     :param agent_dir: agent configuration directory
+    :param password: the password to encrypt/decrypt the private key.
 
     :return: AEA instance
     """
     with cd(agent_dir):
-        return AEABuilder.from_aea_project(".").build()
+        return AEABuilder.from_aea_project(".").build(password=password)
 
 
 def _set_logger(
@@ -74,7 +75,10 @@ def _set_logger(
 
 
 def _run_agent(
-    agent_dir: Union[PathLike, str], stop_event: Event, log_level: Optional[str] = None
+    agent_dir: Union[PathLike, str],
+    stop_event: Event,
+    log_level: Optional[str] = None,
+    password: Optional[str] = None,
 ) -> None:
     """
     Load and run agent in a dedicated process.
@@ -82,6 +86,7 @@ def _run_agent(
     :param agent_dir: agent configuration directory
     :param stop_event: multithreading Event to stop agent run.
     :param log_level: debug level applied for AEA in subprocess
+    :param password: the password to encrypt/decrypt the private key.
 
     :return: None
     """
@@ -96,7 +101,7 @@ def _run_agent(
 
     _set_logger(log_level=log_level)
 
-    agent = load_agent(agent_dir)
+    agent = load_agent(agent_dir, password=password)
 
     def stop_event_thread() -> None:
         try:
@@ -127,14 +132,17 @@ def _run_agent(
 class AEADirTask(AbstractExecutorTask):
     """Task to run agent from agent configuration directory."""
 
-    def __init__(self, agent_dir: Union[PathLike, str]) -> None:
+    def __init__(
+        self, agent_dir: Union[PathLike, str], password: Optional[str] = None
+    ) -> None:
         """
         Init aea config dir task.
 
         :param agent_dir: direcory with aea config.
+        :param password: the password to encrypt/decrypt the private key.
         """
         self._agent_dir = agent_dir
-        self._agent: AEA = load_agent(self._agent_dir)
+        self._agent: AEA = load_agent(self._agent_dir, password=password)
         super().__init__()
 
     @property
@@ -170,18 +178,23 @@ class AEADirMultiprocessTask(AbstractMultiprocessExecutorTask):
     """
 
     def __init__(
-        self, agent_dir: Union[PathLike, str], log_level: Optional[str] = None
+        self,
+        agent_dir: Union[PathLike, str],
+        log_level: Optional[str] = None,
+        password: Optional[str] = None,
     ) -> None:
         """
         Init aea config dir task.
 
         :param agent_dir: direcory with aea config.
         :param log_level: debug level applied for AEA in subprocess
+        :param password: the password to encrypt/decrypt the private key.
         """
         self._agent_dir = agent_dir
         self._manager = multiprocessing.Manager()
         self._stop_event = self._manager.Event()
         self._log_level = log_level
+        self._password = password
         super().__init__()
 
     @property
@@ -212,7 +225,10 @@ class AEADirMultiprocessTask(AbstractMultiprocessExecutorTask):
 
     def start(self) -> Tuple[Callable, Sequence[Any]]:
         """Return function and arguments to call within subprocess."""
-        return (_run_agent, (self._agent_dir, self._stop_event, self._log_level))
+        return (
+            _run_agent,
+            (self._agent_dir, self._stop_event, self._log_level, self._password),
+        )
 
     def stop(self) -> None:
         """Stop task."""
@@ -245,6 +261,7 @@ class AEALauncher(AbstractMultipleRunner):
         mode: str,
         fail_policy: ExecutorExceptionPolicies = ExecutorExceptionPolicies.propagate,
         log_level: Optional[str] = None,
+        password: Optional[str] = None,
     ) -> None:
         """
         Init AEALauncher.
@@ -253,16 +270,23 @@ class AEALauncher(AbstractMultipleRunner):
         :param mode: executor name to use.
         :param fail_policy: one of ExecutorExceptionPolicies to be used with Executor
         :param log_level: debug level applied for AEA in subprocesses
+        :param password: the password to encrypt/decrypt the private key.
         """
         self._agent_dirs = agent_dirs
         self._log_level = log_level
+        self._password = password
         super().__init__(mode=mode, fail_policy=fail_policy)
 
     def _make_tasks(self) -> Sequence[AbstractExecutorTask]:
         """Make tasks to run with executor."""
         if self._mode == "multiprocess":
             return [
-                AEADirMultiprocessTask(agent_dir, log_level=self._log_level)
+                AEADirMultiprocessTask(
+                    agent_dir, log_level=self._log_level, password=self._password
+                )
                 for agent_dir in self._agent_dirs
             ]
-        return [AEADirTask(agent_dir) for agent_dir in self._agent_dirs]
+        return [
+            AEADirTask(agent_dir, password=self._password)
+            for agent_dir in self._agent_dirs
+        ]

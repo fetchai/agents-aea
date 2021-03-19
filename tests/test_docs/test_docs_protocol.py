@@ -70,7 +70,7 @@ class TestProtocolDocs:
     def test_oef_search_protocol(self):
         """Test the fetchai/oef_search:0.14.0 protocol documentation."""
         # this is the offset of code blocks for the section under testing
-        offset = 4
+        offset = 5
 
         # define a data model and a description
         locals_dict = {"Enum": Enum}

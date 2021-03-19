@@ -1157,6 +1157,7 @@ class AgentConfig(PackageConfiguration):
     CHECK_EXCLUDES = [
         ("private_key_paths",),
         ("connection_private_key_paths",),
+        ("error_handler",),
         ("decision_maker_handler",),
         ("default_routing",),
         ("dependencies",),

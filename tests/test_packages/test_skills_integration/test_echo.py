@@ -68,6 +68,8 @@ class TestEchoSkill(AEATestCaseEmpty):
 
     def test_echo(self):
         """Run the echo skill sequence."""
+        self.generate_private_key()
+        self.add_private_key()
         self.add_item("connection", "fetchai/stub:0.18.0")
         self.add_item("skill", "fetchai/echo:0.15.0")
 

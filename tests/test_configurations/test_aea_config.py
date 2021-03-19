@@ -55,6 +55,8 @@ agent_name: my_seller_aea
 author: solarw
 version: 0.1.0
 license: Apache-2.0
+fingerprint: {}
+fingerprint_ignore_patterns: []
 aea_version: 0.3.0
 description: ''
 connections: []

@@ -326,7 +326,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
                 "connection_private_key_paths",
                 "private_key_paths",
                 "registry_path",
-                "dependencies",  # temporary
+                "dependencies",
             ]
             result = all(
                 [key in allowed_diff_keys for key in content1_agentconfig.keys()]
@@ -951,7 +951,7 @@ class AEATestCaseEmpty(BaseAEATestCase):
     def setup_class(cls) -> None:
         """Set up the test class."""
         super(AEATestCaseEmpty, cls).setup_class()
-        cls.agent_name = "agent-" + "".join(random.choices(string.ascii_lowercase, k=5))
+        cls.agent_name = "agent_" + "".join(random.choices(string.ascii_lowercase, k=5))
         cls.create_agents(cls.agent_name, is_local=cls.IS_LOCAL, is_empty=cls.IS_EMPTY)
         cls.set_agent_context(cls.agent_name)
 

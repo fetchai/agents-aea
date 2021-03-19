@@ -503,10 +503,16 @@ def test_set_from_config_custom():
     agent_configuration.decision_maker_handler = {
         "dotted_path": dm_dotted_path,
         "file_path": dm_file_path,
+        "config": {},
     }
+    error_handler_dotted_path = (
+        f"aea.error_handler.default{DOTTED_PATH_MODULE_ELEMENT_SEPARATOR}ErrorHandler"
+    )
+    error_handler_file_path = ROOT_DIR + "/aea/error_handler/default.py"
     agent_configuration.error_handler = {
-        "dotted_path": f"aea.error_handler.default{DOTTED_PATH_MODULE_ELEMENT_SEPARATOR}ErrorHandler",
-        "file_path": ROOT_DIR + "/aea/error_handler/default.py",
+        "dotted_path": error_handler_dotted_path,
+        "file_path": error_handler_file_path,
+        "config": {},
     }
     agent_configuration.skill_exception_policy = ExceptionPolicyEnum.just_log
     agent_configuration.connection_exception_policy = ExceptionPolicyEnum.just_log
@@ -524,13 +530,21 @@ def test_set_from_config_custom():
         assert builder._decision_maker_handler_dotted_path == dm_dotted_path
         assert builder._decision_maker_handler_file_path == dm_file_path
         assert builder._load_decision_maker_handler_class() is not None
+        assert builder._load_error_handler_class() is not None
         builder.reset(is_full_reset=True)
         agent_configuration.decision_maker_handler = {
             "dotted_path": dm_dotted_path,
             "file_path": None,
+            "config": {},
+        }
+        agent_configuration.error_handler = {
+            "dotted_path": error_handler_dotted_path,
+            "file_path": None,
+            "config": {},
         }
         builder.set_from_configuration(agent_configuration, aea_project_path="/anydir")
         assert builder._load_decision_maker_handler_class() is not None
+        assert builder._load_error_handler_class() is not None
 
 
 def test_load_abstract_component():
@@ -595,6 +609,8 @@ class TestFromAEAProject(AEATestCaseEmpty):
 
     def test_from_project(self):
         """Test builder set from project dir."""
+        self.generate_private_key()
+        self.add_private_key()
         builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
         with cd(self._get_cwd()):
             aea = builder.build()
@@ -606,6 +622,8 @@ class TestFromAEAProjectWithCustomConnectionConfig(AEATestCaseEmpty):
 
     def _add_stub_connection_config(self):
         """Add custom stub connection config."""
+        self.generate_private_key()
+        self.add_private_key()
         cwd = self._get_cwd()
         aea_config_file = Path(cwd, DEFAULT_AEA_CONFIG_FILE)
         configuration = aea_config_file.read_text()

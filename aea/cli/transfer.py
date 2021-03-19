@@ -24,6 +24,7 @@ from typing import Optional, cast
 import click
 
 from aea.cli.get_address import _try_get_address
+from aea.cli.utils.click_utils import password_option
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.package_utils import (
@@ -53,6 +54,7 @@ DEFAULT_SETTLE_TIMEOUT = 60
     "amount", type=int, required=True,
 )
 @click.argument("fee", type=int, required=False, default=100)
+@password_option()
 @click.option("-y", "--yes", type=bool, is_flag=True, default=False)
 @click.option("--settle-timeout", type=int, default=DEFAULT_SETTLE_TIMEOUT)
 @click.option("--sync", type=bool, is_flag=True, default=False)
@@ -64,6 +66,7 @@ def transfer(
     address: str,
     amount: int,
     fee: int,
+    password: Optional[str],
     yes: bool,
     settle_timeout: int,
     sync: bool,
@@ -71,7 +74,7 @@ def transfer(
     """Transfer wealth associated with a private key of the agent to another account."""
     ctx = cast(Context, click_context.obj)
     try:
-        own_address = _try_get_address(ctx, type_)
+        own_address = _try_get_address(ctx, type_, password)
     except KeyError:
         raise click.ClickException(
             f"No private key registered for `{type_}` in wallet!"
@@ -82,7 +85,7 @@ def transfer(
             abort=True,
         )
 
-    tx_digest = do_transfer(ctx, type_, address, amount, fee)
+    tx_digest = do_transfer(ctx, type_, address, amount, fee, password)
 
     if not tx_digest:
         raise click.ClickException("Failed to send a transaction!")
@@ -122,7 +125,12 @@ def wait_tx_settled(
 
 
 def do_transfer(
-    ctx: Context, identifier: str, address: Address, amount: int, tx_fee: int
+    ctx: Context,
+    identifier: str,
+    address: Address,
+    amount: int,
+    tx_fee: int,
+    password: Optional[str] = None,
 ) -> Optional[str]:
     """
     Perform wealth transfer to another account.
@@ -132,11 +140,12 @@ def do_transfer(
     :param address: address of the recepient
     :param amount: int, amount of wealth to transfer
     :param tx_fee: int, fee for transaction
+    :param password: the password to encrypt/decrypt the private key
 
     :return: str, transaction digest or None if failed.
     """
     click.echo("Starting transfer ...")
-    wallet = get_wallet_from_context(ctx)
+    wallet = get_wallet_from_context(ctx, password=password)
     source_address = wallet.addresses[identifier]
 
     _override_ledger_configurations(ctx.agent_config)

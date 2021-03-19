@@ -83,6 +83,8 @@ class AsyncMultiplexer(Runnable, WithLogger):
     """This class can handle multiple connections at once."""
 
     DISCONNECT_TIMEOUT = 5
+    CONNECT_TIMEOUT = 60
+    SEND_TIMEOUT = 60
 
     def __init__(
         self,
@@ -319,10 +321,15 @@ class AsyncMultiplexer(Runnable, WithLogger):
             except (CancelledError, asyncio.CancelledError):  # pragma: nocover
                 await self._stop()
                 raise asyncio.CancelledError()
-            except Exception:
+            except AEAConnectionError:
+                await self._stop()
+                raise
+            except Exception as e:
                 self.logger.exception("Exception on connect:")
                 await self._stop()
-                raise AEAConnectionError("Failed to connect the multiplexer.")
+                raise AEAConnectionError(
+                    f"Failed to connect the multiplexer: Error: {repr(e)}"
+                ) from e
 
     async def disconnect(self) -> None:
         """Disconnect the multiplexer."""
@@ -335,9 +342,14 @@ class AsyncMultiplexer(Runnable, WithLogger):
                 self.connection_status.set(ConnectionStates.disconnecting)
                 await asyncio.wait_for(self._stop(), timeout=60)
                 self.logger.debug("Multiplexer disconnected.")
-            except (CancelledError, Exception):
+            except (CancelledError) as e:
                 self.logger.exception("Exception on disconnect:")
-                raise AEAConnectionError("Failed to disconnect the multiplexer.")
+                raise AEAConnectionError("Failed to disconnect the multiplexer.") from e
+            except Exception as e:
+                self.logger.exception("Exception on disconnect:")
+                raise AEAConnectionError(
+                    f"Failed to disconnect the multiplexer: Error: {repr(e)}"
+                ) from e
 
     async def _stop_receive_send_loops(self) -> None:
         """Stop receive and send loops."""
@@ -368,8 +380,11 @@ class AsyncMultiplexer(Runnable, WithLogger):
         if all([c.is_disconnected for c in self.connections]):
             self.connection_status.set(ConnectionStates.disconnected)
         else:
+            connections_left = [
+                str(c.connection_id) for c in self.connections if not c.is_disconnected
+            ]
             raise AEAConnectionError(
-                "Failed to disconnect multiplexer, some connections are not disconnected!"
+                f"Failed to disconnect multiplexer, some connections are not disconnected within timeout: {', '.join(connections_left)}"
             )
 
     async def _stop(self) -> None:
@@ -393,7 +408,9 @@ class AsyncMultiplexer(Runnable, WithLogger):
         connected = []  # type: List[PublicId]
         for connection_id, connection in self._id_to_connection.items():
             try:
-                await self._connect_one(connection_id)
+                await asyncio.wait_for(
+                    self._connect_one(connection_id), timeout=self.CONNECT_TIMEOUT
+                )
                 connected.append(connection_id)
             except Exception as e:  # pylint: disable=broad-except
                 if not isinstance(e, (asyncio.CancelledError, CancelledError)):
@@ -559,7 +576,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
             return
 
         try:
-            await connection.send(envelope)
+            await asyncio.wait_for(connection.send(envelope), timeout=self.SEND_TIMEOUT)
         except Exception as e:  # pylint: disable=broad-except
             self._handle_exception(self._send, e)
 

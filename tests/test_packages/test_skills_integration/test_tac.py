@@ -136,6 +136,9 @@ class TestTacSkills(AEATestCaseManyFlaky):
             "fetchai/oef_search:0.14.0": "fetchai/soef:0.19.0",
         }
 
+        self.run_cli_command("build", cwd=self._get_cwd())
+        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
+
         # prepare agents for test
         for agent_name, config in (
             (tac_aea_one, NON_GENESIS_CONFIG),
@@ -154,6 +157,7 @@ class TestTacSkills(AEATestCaseManyFlaky):
             data = {
                 "dotted_path": "aea.decision_maker.gop:DecisionMakerHandler",
                 "file_path": None,
+                "config": {},
             }
             setting_path = "agent.decision_maker_handler"
             self.nested_set_config(setting_path, data)
@@ -200,6 +204,9 @@ class TestTacSkills(AEATestCaseManyFlaky):
             )
             self.nested_set_config(setting_path, data)
 
+            self.run_cli_command("build", cwd=self._get_cwd())
+            self.run_cli_command("issue-certificates", cwd=self._get_cwd())
+
         # run tac controller
         self.set_agent_context(tac_controller_name)
         now = datetime.datetime.now().strftime("%d %m %Y %H:%M")
@@ -208,8 +215,6 @@ class TestTacSkills(AEATestCaseManyFlaky):
         start_time = fut.strftime("%d %m %Y %H:%M")
         setting_path = "vendor.fetchai.skills.tac_control.models.parameters.args.registration_start_time"
         self.set_config(setting_path, start_time)
-        self.run_cli_command("build", cwd=self._get_cwd())
-        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
         tac_controller_process = self.run_agent()
 
         check_strings = (
@@ -227,13 +232,9 @@ class TestTacSkills(AEATestCaseManyFlaky):
 
         # run two agents (participants)
         self.set_agent_context(tac_aea_one)
-        self.run_cli_command("build", cwd=self._get_cwd())
-        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
         tac_aea_one_process = self.run_agent()
 
         self.set_agent_context(tac_aea_two)
-        self.run_cli_command("build", cwd=self._get_cwd())
-        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
         tac_aea_two_process = self.run_agent()
 
         check_strings = (
@@ -445,6 +446,7 @@ class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache):
             data = {
                 "dotted_path": "aea.decision_maker.gop:DecisionMakerHandler",
                 "file_path": None,
+                "config": {},
             }
             setting_path = "agent.decision_maker_handler"
             self.nested_set_config(setting_path, data)
