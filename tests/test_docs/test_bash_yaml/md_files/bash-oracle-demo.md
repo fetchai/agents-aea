@@ -90,11 +90,14 @@ aea config set --type dict agent.default_routing \
 }'
 ```
 ``` bash
-aea config set agent.default_ledger ethereum
+aea config set agent.default_ledger $LEDGER_ID
 ```
 ``` bash
-aea generate-key ethereum
-aea add-key ethereum
+aea generate-key $LEDGER_ID
+aea add-key $LEDGER_ID
+```
+```bash
+aea generate-wealth $LEDGER_ID
 ```
 ``` bash
 docker run -p 8545:8545 trufflesuite/ganache-cli:latest --verbose --gasPrice=0 --gasLimit=0x1fffffffffffff --account="$(cat coin_price_oracle/ethereum_private_key.txt),1000000000000000000000" --account="$(cat coin_price_oracle_client/ethereum_private_key.txt),1000000000000000000000"

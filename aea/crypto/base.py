@@ -173,7 +173,6 @@ class Helper(ABC):
         """
         Get the contract address from a transaction receipt.
 
-        :param identifier: the identifier of the ledger
         :param tx_receipt: the transaction digest
         :return: the contract address if successful
         """

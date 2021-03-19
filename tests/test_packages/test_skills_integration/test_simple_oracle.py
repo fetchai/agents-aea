@@ -88,9 +88,17 @@ class TestOracleSkills(AEATestCaseManyFlaky, UseGanache):
         )
 
         setting_path = (
+            "vendor.fetchai.skills.simple_oracle.models.strategy.args.ledger_id"
+        )
+        self.set_config(setting_path, "ethereum")
+        setting_path = (
             "vendor.fetchai.skills.simple_oracle.models.strategy.args.oracle_value_name"
         )
         self.set_config(setting_path, "price")
+        setting_path = (
+            "vendor.fetchai.skills.simple_oracle.models.strategy.args.update_function"
+        )
+        self.set_config(setting_path, "updateOracleValue")
 
         self.generate_private_key(EthereumCrypto.identifier)
         self.add_private_key(EthereumCrypto.identifier, ETHEREUM_PRIVATE_KEY_FILE)
@@ -162,6 +170,13 @@ class TestOracleSkills(AEATestCaseManyFlaky, UseGanache):
             FUNDED_ETH_PRIVATE_KEY_2, ETHEREUM_PRIVATE_KEY_FILE
         )
 
+        setting_path = (
+            "vendor.fetchai.skills.simple_oracle_client.models.strategy.args.ledger_id"
+        )
+        self.set_config(setting_path, "ethereum")
+        setting_path = "vendor.fetchai.skills.simple_oracle_client.models.strategy.args.query_function"
+        self.set_config(setting_path, "queryOracleValue")
+
         diff = self.difference_to_fetched_agent(
             "fetchai/coin_price_oracle_client:0.6.0", client_agent_name
         )
@@ -224,7 +239,6 @@ class TestOracleSkills(AEATestCaseManyFlaky, UseGanache):
             "transaction was successfully submitted. Transaction digest=",
             "requesting transaction receipt.",
             "transaction was successfully settled. Transaction receipt=",
-            "Oracle client contract successfully deployed!",
             "Oracle client transactions approved!",
             "Oracle value successfully requested!",
         )

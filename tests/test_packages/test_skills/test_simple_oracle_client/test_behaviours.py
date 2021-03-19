@@ -156,6 +156,52 @@ class TestSkillBehaviour(BaseSkillTestCase):
         )
         assert has_attributes, error_str
 
+    def test__request_contract_deploy_transaction(self):
+        """Test that the _request_contract_deploy_transaction function sends the right message to the contract_api for ethereum ledger."""
+        strategy = cast(Strategy, self.simple_oracle_client_behaviour.context.strategy)
+        strategy.oracle_contract_address = "some_address"
+        strategy._ledger_id = "ethereum"
+
+        self.simple_oracle_client_behaviour._request_contract_deploy_transaction()
+        self.assert_quantity_in_outbox(1)
+
+        kwargs = strategy.get_deploy_kwargs()
+        assert "fetchOracleContractAddress" in kwargs.body
+
+        msg = cast(ContractApiMessage, self.get_message_from_outbox())
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=ContractApiMessage,
+            performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
+            contract_id=str(CLIENT_CONTRACT_PUBLIC_ID),
+            callable="get_deploy_transaction",
+            kwargs=kwargs,
+        )
+        assert has_attributes, error_str
+
+    def test__request_contract_store_transaction(self):
+        """Test that the _request_contract_deploy_transaction function sends the right message to the contract_api for fetchai ledger."""
+        strategy = cast(Strategy, self.simple_oracle_client_behaviour.context.strategy)
+        strategy.oracle_contract_address = "some_address"
+        strategy._ledger_id = "fetchai"
+
+        self.simple_oracle_client_behaviour._request_contract_deploy_transaction()
+        self.assert_quantity_in_outbox(1)
+
+        kwargs = strategy.get_deploy_kwargs()
+        assert "fetchOracleContractAddress" not in kwargs.body
+
+        msg = cast(ContractApiMessage, self.get_message_from_outbox())
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=ContractApiMessage,
+            performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
+            contract_id=str(CLIENT_CONTRACT_PUBLIC_ID),
+            callable="get_deploy_transaction",
+            kwargs=kwargs,
+        )
+        assert has_attributes, error_str
+
     def test_teardown(self):
         """Test that the teardown method of the simple_oracle_client behaviour leaves no messages in the outbox."""
         assert self.simple_oracle_client_behaviour.teardown() is None

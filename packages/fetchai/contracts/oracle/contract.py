@@ -22,7 +22,6 @@
 import logging
 from typing import Any, Dict, cast
 
-from aea_ledger_cosmos import CosmosApi
 from aea_ledger_ethereum import EthereumApi
 from aea_ledger_fetchai import FetchAIApi
 
@@ -55,6 +54,7 @@ class FetchOracleContract(Contract):
         contract_address: Address,
         oracle_address: Address,
         gas: int = 0,
+        tx_fee: int = 0,
     ) -> JSONLike:
         """
         Get transaction to grant oracle role to recipient_address
@@ -84,7 +84,7 @@ class FetchOracleContract(Contract):
             msg = {"grant_role": {"role": ORACLE_ROLE, "address": oracle_address}}
             fetchai_api = cast(FetchAIApi, ledger_api)
             tx = fetchai_api.get_handle_transaction(
-                oracle_address, contract_address, msg, amount=0, tx_fee=0, gas=gas
+                oracle_address, contract_address, msg, amount=0, tx_fee=tx_fee, gas=gas
             )
             return tx
         raise NotImplementedError
@@ -98,6 +98,7 @@ class FetchOracleContract(Contract):
         update_function: str,
         update_kwargs: Dict[str, Any],
         gas: int = 0,
+        tx_fee: int = 0,
     ) -> JSONLike:
         """
         Update oracle value in contract
@@ -124,7 +125,7 @@ class FetchOracleContract(Contract):
             )
             tx = ledger_api.update_with_gas_estimate(tx)
             return tx
-        if ledger_api.identifier in [CosmosApi.identifier, FetchAIApi.identifier]:
+        if ledger_api.identifier in FetchAIApi.identifier:
 
             # Convert all values to strings for CosmWasm message
             update_kwargs_str = {
@@ -134,7 +135,7 @@ class FetchOracleContract(Contract):
             msg = {update_function: update_kwargs_str}
             fetchai_api = cast(FetchAIApi, ledger_api)
             tx = fetchai_api.get_handle_transaction(
-                oracle_address, contract_address, msg, amount=0, tx_fee=0, gas=gas
+                oracle_address, contract_address, msg, amount=0, tx_fee=tx_fee, gas=gas
             )
             return tx
         raise NotImplementedError

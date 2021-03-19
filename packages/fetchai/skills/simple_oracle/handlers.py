@@ -192,7 +192,7 @@ class LedgerApiHandler(Handler):
                 is_init_transaction=True
             )
             self.context.outbox.put_message(message=contract_api_msg)
-        else:
+        else:  # pragma: nocover
             self.context.logger.info("Failed to initialize contract: code_id not found")
 
     def _handle_transaction_receipt(
@@ -239,7 +239,7 @@ class LedgerApiHandler(Handler):
                     )
                 else:
                     self.context.logger.error(
-                        f"Unrecognized transaction label: {transaction_label}"
+                        f"Invalid transaction label: {transaction_label}"
                     )
             elif (
                 not strategy.is_oracle_role_granted

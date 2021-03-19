@@ -151,19 +151,25 @@ aea config set --type dict agent.default_routing \
 }'
 ```
 
-Change the default ledger:
-``` bash
-aea config set agent.default_ledger ethereum
-```
-
 </p>
 </details>
+
+
+Change the default ledger:
+``` bash
+aea config set agent.default_ledger $LEDGER_ID
+```
 
 Create the private key for the oracle client AEA. Generate and add a key for Ethereum use:
 
 ``` bash
-aea generate-key ethereum
-aea add-key ethereum
+aea generate-key $LEDGER_ID
+aea add-key $LEDGER_ID
+```
+
+If running on a testnet (not including Ganache), generate some wealth for your AEA:
+```bash
+aea generate-wealth $LEDGER_ID
 ```
 
 The oracle AEAs require either a locally running test node or a connection to a remote testnet.
