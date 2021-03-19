@@ -5,7 +5,7 @@ type: skill
 description: The tac participation skill implements the logic for an AEA to participate
   in the TAC.
 license: Apache-2.0
-aea_version: '>=0.11.0, <0.12.0'
+aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint:
   README.md: QmXMADH6TxdWKhQ5EUxq7XjzHN4ECK3rD6Zj8RV2Pt9DYF
   __init__.py: QmVZjTUxR331wn5Eb6CTd3DJgKmDjWMPGCkjMsjhDimBvv

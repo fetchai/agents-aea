@@ -68,7 +68,7 @@ class TestWeatherSkills(AEATestCaseManyFlaky):
         self.set_config(
             "agent.dependencies",
             '{\
-            "aea-ledger-fetchai": {"version": "<0.3.0,>=0.2.0"}\
+            "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0rc1"}\
         }',
             type_="dict",
         )
@@ -113,7 +113,7 @@ class TestWeatherSkills(AEATestCaseManyFlaky):
         self.set_config(
             "agent.dependencies",
             '{\
-            "aea-ledger-fetchai": {"version": "<0.3.0,>=0.2.0"}\
+            "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0rc1"}\
         }',
             type_="dict",
         )
@@ -259,7 +259,7 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseManyFlaky):
         self.set_config(
             "agent.dependencies",
             '{\
-            "aea-ledger-fetchai": {"version": "<0.3.0,>=0.2.0"}\
+            "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0rc1"}\
         }',
             type_="dict",
         )
@@ -307,7 +307,7 @@ class TestWeatherSkillsFetchaiLedger(AEATestCaseManyFlaky):
         self.set_config(
             "agent.dependencies",
             '{\
-            "aea-ledger-fetchai": {"version": "<0.3.0,>=0.2.0"}\
+            "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0rc1"}\
         }',
             type_="dict",
         )

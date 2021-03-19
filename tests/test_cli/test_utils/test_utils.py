@@ -88,7 +88,7 @@ class FormatItemsTestCase(TestCase):
         items = [
             {
                 "public_id": "author/name:version",
-                "name": "obj-name",
+                "name": "obj_name",
                 "description": "Some description",
                 "author": "author",
                 "version": "1.0",
@@ -98,7 +98,7 @@ class FormatItemsTestCase(TestCase):
         expected_result = (
             "------------------------------\n"
             "Public ID: author/name:version\n"
-            "Name: obj-name\n"
+            "Name: obj_name\n"
             "Description: Some description\n"
             "Author: author\n"
             "Version: 1.0\n"
@@ -114,20 +114,20 @@ class TryGetItemSourcePathTestCase(TestCase):
     @mock.patch("aea.cli.utils.package_utils.os.path.exists", return_value=True)
     def test_get_item_source_path_positive(self, exists_mock, join_mock):
         """Test for get_item_source_path positive result."""
-        result = try_get_item_source_path("cwd", AUTHOR, "skills", "skill-name")
+        result = try_get_item_source_path("cwd", AUTHOR, "skills", "skill_name")
         expected_result = "some-path"
         self.assertEqual(result, expected_result)
-        join_mock.assert_called_once_with("cwd", AUTHOR, "skills", "skill-name")
+        join_mock.assert_called_once_with("cwd", AUTHOR, "skills", "skill_name")
         exists_mock.assert_called_once_with("some-path")
 
-        result = try_get_item_source_path("cwd", None, "skills", "skill-name")
+        result = try_get_item_source_path("cwd", None, "skills", "skill_name")
         self.assertEqual(result, expected_result)
 
     @mock.patch("aea.cli.utils.package_utils.os.path.exists", return_value=False)
     def test_get_item_source_path_not_exists(self, exists_mock, join_mock):
         """Test for get_item_source_path item already exists."""
         with self.assertRaises(ClickException):
-            try_get_item_source_path("cwd", AUTHOR, "skills", "skill-name")
+            try_get_item_source_path("cwd", AUTHOR, "skills", "skill_name")
 
 
 @mock.patch("aea.cli.utils.package_utils.os.path.join", return_value="some-path")
@@ -137,17 +137,17 @@ class TryGetItemTargetPathTestCase(TestCase):
     @mock.patch("aea.cli.utils.package_utils.os.path.exists", return_value=False)
     def test_get_item_target_path_positive(self, exists_mock, join_mock):
         """Test for get_item_source_path positive result."""
-        result = try_get_item_target_path("packages", AUTHOR, "skills", "skill-name")
+        result = try_get_item_target_path("packages", AUTHOR, "skills", "skill_name")
         expected_result = "some-path"
         self.assertEqual(result, expected_result)
-        join_mock.assert_called_once_with("packages", AUTHOR, "skills", "skill-name")
+        join_mock.assert_called_once_with("packages", AUTHOR, "skills", "skill_name")
         exists_mock.assert_called_once_with("some-path")
 
     @mock.patch("aea.cli.utils.package_utils.os.path.exists", return_value=True)
     def test_get_item_target_path_already_exists(self, exists_mock, join_mock):
         """Test for get_item_target_path item already exists."""
         with self.assertRaises(ClickException):
-            try_get_item_target_path("skills", AUTHOR, "skill-name", "packages_path")
+            try_get_item_target_path("skills", AUTHOR, "skill_name", "packages_path")
 
 
 class PublicIdParameterTestCase(TestCase):

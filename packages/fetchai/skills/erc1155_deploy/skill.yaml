@@ -5,7 +5,7 @@ type: skill
 description: The ERC1155 deploy skill has the ability to deploy and interact with
   the smart contract.
 license: Apache-2.0
-aea_version: '>=0.11.0, <0.12.0'
+aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint:
   README.md: QmNg45JuqfVzDmvgpWLeaR861LSEvf9pishDKSPihtQnLE
   __init__.py: QmWPX7w5SqgoNTGhb51JPyHHi7tXLmzGoixu5zSRwf5JnR
@@ -93,5 +93,5 @@ models:
     class_name: Strategy
 dependencies:
   aea-ledger-ethereum:
-    version: <0.3.0,>=0.2.0
+    version: <2.0.0,>=1.0.0rc1
 is_abstract: false

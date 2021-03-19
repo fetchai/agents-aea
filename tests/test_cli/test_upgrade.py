@@ -349,7 +349,7 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
         """Set up test case."""
         super(TestUpgradeProject, cls).setup()
         cls.change_directory(Path(".."))
-        cls.agent_name = "generic_buyer_0.18.0"
+        cls.agent_name = "generic_buyer"
         cls.latest_agent_name = "generic_buyer_latest"
         cls.run_cli_command(
             "--skip-consistency-check",
@@ -434,7 +434,7 @@ class TestNonVendorProject(BaseAEATestCase, BaseTestCase):
         """Set up test case."""
         super(TestNonVendorProject, cls).setup()
         cls.change_directory(Path(".."))
-        cls.agent_name = "generic_buyer_0.12.0"
+        cls.agent_name = "generic_buyer"
         cls.run_cli_command(
             "fetch", "fetchai/generic_buyer:0.22.0", "--alias", cls.agent_name
         )
@@ -1009,7 +1009,7 @@ class TestWrongAEAVersion(AEATestCaseEmpty):
         assert result.exit_code == 0
         mock_click_echo.assert_any_call("Starting project upgrade...")
         mock_click_echo.assert_any_call(
-            "Updating AEA version specifier from ==0.1.0 to >=0.11.0, <0.12.0."
+            "Updating AEA version specifier from ==0.1.0 to >=1.0.0rc1, <1.1.0."
         )
 
         # test 'aea_version' of agent configuration is upgraded
@@ -1189,8 +1189,20 @@ class TestUpgradeProjectWithNewerVersion(BaseTestUpgradeProject):
         if confirm:
             assert diff == _right_only == _left_only == set()
         else:
-            assert diff == _right_only == set()  # temp
+            assert _right_only == set()  # temp
             assert _left_only == {"vendor/fetchai/protocols/__init__.py"}
+            assert diff == {
+                "vendor/fetchai/protocols/state_update/README.md",
+                "vendor/fetchai/protocols/signing/signing_pb2.py",
+                "vendor/fetchai/protocols/state_update/state_update.proto",
+                "vendor/fetchai/protocols/signing/signing.proto",
+                "vendor/fetchai/protocols/state_update/message.py",
+                "vendor/fetchai/protocols/state_update/state_update_pb2.py",
+                "vendor/fetchai/protocols/signing/message.py",
+                "vendor/fetchai/protocols/signing/README.md",
+                "vendor/fetchai/protocols/state_update/protocol.yaml",
+                "vendor/fetchai/protocols/signing/protocol.yaml",
+            }
 
 
 @mock.patch("aea.cli.upgrade.get_latest_version_available_in_registry")

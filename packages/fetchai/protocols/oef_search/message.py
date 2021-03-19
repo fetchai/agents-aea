@@ -47,7 +47,7 @@ class OefSearchMessage(Message):
     """A protocol for interacting with an OEF search service."""
 
     protocol_id = PublicId.from_str("fetchai/oef_search:0.14.0")
-    protocol_specification_id = PublicId.from_str("fetchai/oef_search:0.1.0")
+    protocol_specification_id = PublicId.from_str("fetchai/oef_search:1.0.0")
 
     AgentsInfo = CustomAgentsInfo
 
