@@ -23,9 +23,9 @@ The agent operation breaks down into three parts:
 
 * **Setup**: calls the `setup()` method of all registered resources
 * **Operation**:
-    * Main loop (Thread 1 - Synchronous):
-        * `react()`: this function grabs all Envelopes waiting in the `InBox` queue and calls the `handle()` function on the Handler(s) responsible for them. 
-        * `act()`: this function calls the `act()` function of all registered Behaviours. 
+    * Agent loop (Thread 1 - Asynchronous agent loop):
+        * `react()`: this function grabs all Envelopes waiting in the `InBox` queue and calls the `handle()` method on the Handler(s) responsible for them. 
+        * `act()`: this function calls the `act()` method of all registered Behaviours. 
         * `update()`: this function enqueues scheduled tasks for execution with the `TaskManager` and executes the decision maker.
     * Task loop (Thread 2- Synchronous): executes available tasks
     * Decision maker loop (Thread 3- Synchronous): processes internal messages

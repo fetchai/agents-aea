@@ -1,6 +1,6 @@
-<a href="../api/protocols/base#protocol-objects">`Protocols`</a> define the structure of agent-to-agent and component-to-component interactions. Interactions in the AEA world are in the form of communication. This is influenced by established practices in the field of multi-agent systems and the prominent speech-act theory which suggests that a communicative expression is not only about transferring information from the speaker to the hearer, but that there may be meanings and commitments beyond the statement's appearance. Therefore, speech may more suited be considered as action. For example, "I hereby appoint you as chairman" is not just a sequence of words, but an action done by the speaker with wide-ranging consequences for the hearer and any other audience to that sentence.
+<a href="../api/protocols/base#protocol-objects">`Protocols`</a> define the structure of agent-to-agent and component-to-component interactions, which in the AEA world, are in the form of communication. To learn more about interactions and interaction protocols, see <a href="../interaction-protocol">here</a>. 
 
-Technically, protocols in the AEA world provide definitions for:
+Protocols in the AEA world provide definitions for:
 
 * `messages` defining the structure and syntax of messages;
 

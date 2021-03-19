@@ -2,8 +2,6 @@ A <a href="../api/connections/base#connection-objects">`Connection`</a> provides
 
 The messages constructed or received by a connection are eventually processed by one or several <a href="../skill">skills</a> which deal with handling and generating messages related to a specific business objective.
 
-The framework provides a default connection called `stub`. It implements an I/O reader and writer to send and receive messages between the agent and a local file. Additional connections can be added as packages.
-
 <img src="../assets/multiplexer.png" alt="Multiplexer of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:50%;">
 
 An `AEA` can interact with multiple connections at the same time via the <a href="../api/connections/base#connection-objects">`Multiplexer`</a>.
@@ -42,8 +40,7 @@ The developer needs to implement four public coroutines:
 
 - The `receive` coroutine is continuously called by the AEA framework. It either returns `None` or an envelope. The `receive` coroutine must implement the logic of data being received by the agent, and if necessary, its translation into a relevant protocol.
 
-
-When developing your own connection you might benefit from inspecting the `fetchai/http_server:0.18.0` and `fetchai/http_client:0.19.0` connections to gain more familiarity and inspiration. These connections are for interfacing with http clients and servers respectively.
+The framework provides a demo `stub` connection which implements an I/O reader and writer to send and receive messages between the agent and a local file. To gain inspiration and become familiar with the structure of connection packages, you may find it useful to check out `fetchai/stub:0.18.0`, `fetchai/http_server:0.18.0` or `fetchai/http_client:0.19.0` connections. The latter two connections are for external clients to connect with an agent, and for the agent to connect with external servers, respectively.
 
 ### Configuration options
 
