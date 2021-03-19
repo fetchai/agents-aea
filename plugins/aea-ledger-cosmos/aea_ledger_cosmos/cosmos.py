@@ -50,6 +50,7 @@ from ecdsa.util import (  # type: ignore # pylint: disable=wrong-import-order
 
 from aea.common import Address, JSONLike
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
+from aea.crypto.helpers import DecryptError, KeyIsIncorrect, hex_to_bytes_for_key
 from aea.exceptions import AEAEnforceError
 from aea.helpers import http_requests as requests
 from aea.helpers.base import try_decorator
@@ -210,7 +211,7 @@ class DataEncrypt:
                 salt=cls.bytes_decode(json_data["salt"]),
             )
             if cls.get_hmac_for_data(password, decrypted_data) != json_data["hmac"]:
-                raise ValueError("Decrypt error! Bad password?")
+                raise DecryptError()
             return decrypted_data
         except (KeyError, JSONDecodeError) as e:
             raise ValueError(f"Bad encrypted key format!: {str(e)}") from e
@@ -470,9 +471,18 @@ class CosmosCrypto(Crypto[SigningKey]):
         :return: the Entity.
         """
         private_key = cls.load(file_name, password)
-        signing_key = SigningKey.from_string(
-            bytes.fromhex(private_key), curve=SECP256k1
-        )
+        try:
+            signing_key = SigningKey.from_string(
+                hex_to_bytes_for_key(private_key), curve=SECP256k1
+            )
+        except KeyIsIncorrect as e:
+            if not password:
+                raise KeyIsIncorrect(
+                    f"Error on key `{file_name}` load! Try to specify `password`: Error: {repr(e)} "
+                ) from e
+            raise KeyIsIncorrect(
+                f"Error on key `{file_name}` load! Wrong password?: Error: {repr(e)} "
+            ) from e
         return signing_key
 
     def sign_message(  # pylint: disable=unused-argument
