@@ -16,9 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Cosmos module wrapping the public and private key cryptography and ledger api."""
-
 import base64
 import gzip
 import hashlib
@@ -29,20 +27,25 @@ import subprocess  # nosec
 import tempfile
 import time
 from collections import namedtuple
+from hashlib import pbkdf2_hmac
+from json.decoder import JSONDecodeError
 from pathlib import Path
-from typing import Any, BinaryIO, Collection, Dict, List, Optional, Tuple, cast
+from typing import Any, Collection, Dict, List, Optional, Tuple, cast
 
+import pyaes  # type: ignore
 from bech32 import (  # pylint: disable=wrong-import-order
     bech32_decode,
     bech32_encode,
     convertbits,
 )
-from ecdsa import (  # pylint: disable=wrong-import-order
+from ecdsa import (  # type: ignore # pylint: disable=wrong-import-order
     SECP256k1,
     SigningKey,
     VerifyingKey,
 )
-from ecdsa.util import sigencode_string_canonize  # pylint: disable=wrong-import-order
+from ecdsa.util import (  # type: ignore # pylint: disable=wrong-import-order
+    sigencode_string_canonize,
+)
 
 from aea.common import Address, JSONLike
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
@@ -71,6 +74,136 @@ MESSAGE_FORMAT_BY_VERSION = {
     },
     "execute": {"<0.10": "wasm/execute", ">=0.10": "wasm/MsgExecuteContract"},
 }
+
+
+class DataEncrypt:
+    """Class to encrypt/decrypt data strings with password provided."""
+
+    hash_algo = "sha256"
+    hash_iterations = 20000
+
+    @classmethod
+    def _aes_encrypt(
+        cls, password: str, data: bytes
+    ) -> Tuple[bytes, int, bytes, bytes]:
+        """
+        Encryption schema for private keys
+
+        :param password: plaintext password to use for encryption
+        :param data: plaintext data to encrypt
+
+        :return: encrypted data, length of original data, initialisation vector for aes, password hashing salt
+        """
+        # Generate hash from password
+        salt = os.urandom(16)
+        hashed_pass = cls._get_hashed_password(password, salt)
+
+        # Random initialisation vector
+        iv = os.urandom(16)
+
+        # Encrypt data using AES
+        aes = pyaes.AESModeOfOperationCBC(hashed_pass, iv=iv)
+
+        # Pad data to multiple of 16
+        data_length = len(data)
+        if data_length % 16 != 0:  # pragma: nocover
+            data += b" " * (16 - data_length % 16)
+
+        encrypted = b""
+        while data:
+            encrypted += aes.encrypt(data[:16])
+            data = data[16:]
+
+        return encrypted, data_length, iv, salt
+
+    @classmethod
+    def _aes_decrypt(
+        cls,
+        password: str,
+        salt: bytes,
+        encrypted_data: bytes,
+        data_length: int,
+        initialisation_vector: bytes,
+    ) -> bytes:
+        """
+        Decryption schema for private keys.
+
+        :param password: plaintext password used for encryption
+        :param salt: password hashing salt
+        :param encrypted_data: encrypted data string
+        :param data_length: length of original plaintext data
+        :param initialisation_vector: initialisation vector for aes
+
+        :return: decrypted data as plaintext
+        """
+        # Hash password
+        hashed_pass = cls._get_hashed_password(password, salt)
+        # Decrypt data, noting original length
+        aes = pyaes.AESModeOfOperationCBC(hashed_pass, iv=initialisation_vector)
+
+        decrypted = b""
+        while encrypted_data:
+            decrypted += aes.decrypt(encrypted_data[:16])
+            encrypted_data = encrypted_data[16:]
+        decrypted_data = decrypted[:data_length]
+
+        # Return original data
+        return decrypted_data
+
+    @classmethod
+    def _get_hashed_password(cls, password: str, salt: bytes) -> bytes:
+        """Get hashed password."""
+        return pbkdf2_hmac(cls.hash_algo, password.encode(), salt, cls.hash_iterations)
+
+    @classmethod
+    def encrypt(cls, data: bytes, password: str) -> bytes:
+        """Encrypt data with password."""
+        if not isinstance(data, bytes):  # pragma: nocover
+            raise ValueError(f"data has to be bytes! not {type(data)}")
+
+        encrypted_data, data_length, initialisation_vector, salt = cls._aes_encrypt(
+            password, data
+        )
+
+        json_data = {
+            "encrypted_data": cls.bytes_encode(encrypted_data),
+            "data_length": data_length,
+            "initialisation_vector": cls.bytes_encode(initialisation_vector),
+            "salt": cls.bytes_encode(salt),
+        }
+        return json.dumps(json_data).encode()
+
+    @staticmethod
+    def bytes_encode(data: bytes) -> str:
+        """Encode bytes to ascii friendly string."""
+        return base64.b64encode(data).decode()
+
+    @staticmethod
+    def bytes_decode(data: str) -> bytes:
+        """Decode ascii friendly string to bytes."""
+        return base64.b64decode(data)
+
+    @classmethod
+    def decrypt(cls, encrypted_data: bytes, password: str) -> bytes:
+        """Decrypt data with passwod provided."""
+        if not isinstance(encrypted_data, bytes):  # pragma: nocover
+            raise ValueError(
+                f"encrypted_data has to be str! not {type(encrypted_data)}"
+            )
+
+        try:
+            json_data = json.loads(encrypted_data)
+            return cls._aes_decrypt(
+                password,
+                encrypted_data=cls.bytes_decode(json_data["encrypted_data"]),
+                data_length=json_data["data_length"],
+                initialisation_vector=cls.bytes_decode(
+                    json_data["initialisation_vector"]
+                ),
+                salt=cls.bytes_decode(json_data["salt"]),
+            )
+        except (KeyError, JSONDecodeError) as e:
+            raise ValueError(f"Bad encrypted key format!: {str(e)}") from e
 
 
 class CosmosHelper(Helper):
@@ -275,13 +408,16 @@ class CosmosCrypto(Crypto[SigningKey]):
     identifier = _COSMOS
     helper = CosmosHelper
 
-    def __init__(self, private_key_path: Optional[str] = None) -> None:
+    def __init__(
+        self, private_key_path: Optional[str] = None, password: Optional[str] = None
+    ) -> None:
         """
         Instantiate an ethereum crypto object.
 
         :param private_key_path: the private key path of the agent
+        :param password: the password to encrypt/decrypt the private key.
         """
-        super().__init__(private_key_path=private_key_path)
+        super().__init__(private_key_path=private_key_path, password=password)
         self._public_key = self.entity.get_verifying_key().to_string("compressed").hex()
         self._address = self.helper.get_address_from_public_key(self.public_key)
 
@@ -313,17 +449,20 @@ class CosmosCrypto(Crypto[SigningKey]):
         return self._address
 
     @classmethod
-    def load_private_key_from_path(cls, file_name: str) -> SigningKey:
+    def load_private_key_from_path(
+        cls, file_name: str, password: Optional[str] = None
+    ) -> SigningKey:
         """
         Load a private key in hex format from a file.
 
         :param file_name: the path to the hex file.
+        :param password: the password to encrypt/decrypt the private key.
         :return: the Entity.
         """
-        path = Path(file_name)
-        with open_file(path, "r") as key:
-            data = key.read()
-            signing_key = SigningKey.from_string(bytes.fromhex(data), curve=SECP256k1)
+        private_key = cls.load(file_name, password)
+        signing_key = SigningKey.from_string(
+            bytes.fromhex(private_key), curve=SECP256k1
+        )
         return signing_key
 
     def sign_message(  # pylint: disable=unused-argument
@@ -435,14 +574,31 @@ class CosmosCrypto(Crypto[SigningKey]):
         signing_key = SigningKey.generate(curve=SECP256k1)
         return signing_key
 
-    def dump(self, fp: BinaryIO) -> None:
+    def encrypt(self, password: str) -> str:
         """
-        Serialize crypto object as binary stream to `fp` (a `.write()`-supporting file-like object).
+        Encrypt the private key and return in json.
 
-        :param fp: the output file pointer. Must be set in binary mode (mode='wb')
-        :return: None
+        :param private_key: the raw private key.
+        :param password: the password to decrypt.
+        :return: json string containing encrypted private key.
         """
-        fp.write(self.private_key.encode("utf-8"))
+        return DataEncrypt.encrypt(self.private_key.encode(), password).decode()
+
+    @classmethod
+    def decrypt(cls, keyfile_json: str, password: str) -> str:
+        """
+        Decrypt the private key and return in raw form.
+
+        :param keyfile_json: json string containing encrypted private key.
+        :param password: the password to decrypt.
+        :return: the raw private key.
+        """
+        try:
+            return DataEncrypt.decrypt(keyfile_json.encode(), password).decode()
+        except UnicodeDecodeError as e:
+            raise ValueError(
+                "key file data can not be translated to string! bad bassword?"
+            ) from e
 
 
 class _CosmosApi(LedgerApi):

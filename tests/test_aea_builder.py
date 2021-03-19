@@ -609,6 +609,8 @@ class TestFromAEAProject(AEATestCaseEmpty):
 
     def test_from_project(self):
         """Test builder set from project dir."""
+        self.generate_private_key()
+        self.add_private_key()
         builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
         with cd(self._get_cwd()):
             aea = builder.build()
@@ -620,6 +622,8 @@ class TestFromAEAProjectWithCustomConnectionConfig(AEATestCaseEmpty):
 
     def _add_stub_connection_config(self):
         """Add custom stub connection config."""
+        self.generate_private_key()
+        self.add_private_key()
         cwd = self._get_cwd()
         aea_config_file = Path(cwd, DEFAULT_AEA_CONFIG_FILE)
         configuration = aea_config_file.read_text()

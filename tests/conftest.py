@@ -869,8 +869,7 @@ def _make_libp2p_connection(
     else:
         node_key = make_crypto(DEFAULT_LEDGER)
         node_key_path = os.path.join(data_dir, f"{node_key.public_key}.txt")
-        with open(node_key_path, "wb") as f:
-            node_key.dump(f)
+        node_key.dump(node_key_path)
         conn_crypto_store = CryptoStore({DEFAULT_LEDGER: node_key_path})
     cert_request = CertRequest(
         conn_crypto_store.public_keys[DEFAULT_LEDGER],

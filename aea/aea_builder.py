@@ -77,7 +77,7 @@ from aea.configurations.manager import (
 )
 from aea.configurations.pypi import is_satisfiable, merge_dependencies
 from aea.configurations.validation import ExtraPropertiesError
-from aea.crypto.helpers import private_key_verify_or_create
+from aea.crypto.helpers import private_key_verify
 from aea.crypto.ledger_apis import DEFAULT_CURRENCY_DENOMINATIONS
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler
@@ -1142,7 +1142,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         stderr = res.stderr.decode("utf-8")
         return stdout, stderr, code
 
-    def _build_wallet(self, data_directory: str) -> Wallet:
+    def _build_wallet(
+        self, data_directory: str, password: Optional[str] = None
+    ) -> Wallet:
         """
         Build the wallet.
 
@@ -1151,6 +1153,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         the path is not an absolute path.
 
         :param data_directory: the path prefix to be prepended to each private key path.
+        :param password: the password to encrypt/decrypt the private key.
         :return: the wallet instance.
         """
 
@@ -1168,7 +1171,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         connection_private_key_paths = _prepend_if_not_none(
             self.connection_private_key_paths
         )
-        wallet = Wallet(private_key_paths, connection_private_key_paths)
+        wallet = Wallet(
+            private_key_paths, connection_private_key_paths, password=password
+        )
         return wallet
 
     def _build_identity_from_wallet(self, wallet: Wallet) -> Identity:
@@ -1261,7 +1266,11 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         """Install components extra dependecies."""
         self._package_dependency_manager.install_dependencies()
 
-    def build(self, connection_ids: Optional[Collection[PublicId]] = None,) -> AEA:
+    def build(
+        self,
+        connection_ids: Optional[Collection[PublicId]] = None,
+        password: Optional[str] = None,
+    ) -> AEA:
         """
         Build the AEA.
 
@@ -1273,13 +1282,14 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         via 'add_component_instance' and the private keys.
 
         :param connection_ids: select only these connections to run the AEA.
+        :param password: the password to encrypt/decrypt the private key.
         :return: the AEA object.
         :raises ValueError: if we cannot
         """
         datadir = self._get_data_dir()
         self._check_we_can_build()
         logging.config.dictConfig(self._logging_config)
-        wallet = self._build_wallet(datadir)
+        wallet = self._build_wallet(datadir, password=password)
         identity = self._build_identity_from_wallet(wallet)
         resources = Resources(identity.name)
         self._load_and_add_components(ComponentType.PROTOCOL, resources, identity.name)
@@ -1647,7 +1657,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         if agent_configuration.decision_maker_handler != {}:
             dotted_path = agent_configuration.decision_maker_handler["dotted_path"]
             file_path = agent_configuration.decision_maker_handler["file_path"]
-            config = agent_configuration.error_handler["config"]
+            config = agent_configuration.decision_maker_handler["config"]
             self.set_decision_maker_handler_details(dotted_path, file_path, config)
         if agent_configuration.error_handler != {}:
             dotted_path = agent_configuration.error_handler["dotted_path"]
@@ -1757,10 +1767,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
     @classmethod
     def from_aea_project(
-        cls,
-        aea_project_path: PathLike,
-        skip_consistency_check: bool = False,
-        create_keys: bool = True,
+        cls, aea_project_path: PathLike, skip_consistency_check: bool = False,
     ) -> "AEABuilder":
         """
         Construct the builder from an AEA project.
@@ -1774,7 +1781,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
         :param aea_project_path: path to the AEA project.
         :param skip_consistency_check: if True, the consistency check are skipped.
-        :param create_keys: if True, create keys, otherwise just verify
         :return: an AEABuilder.
         """
         aea_project_path = Path(aea_project_path)
@@ -1782,19 +1788,17 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         load_env_file(str(aea_project_path / DEFAULT_ENV_DOTFILE))
 
         # check and create missing, do not replace env variables. updates config
-        AgentConfigManager.verify_or_create_private_keys(
+        AgentConfigManager.verify_private_keys(
             aea_project_path,
             substitude_env_vars=False,
-            private_key_helper=private_key_verify_or_create,
-            create_keys=create_keys,
+            private_key_helper=private_key_verify,
         ).dump_config()
 
         # just validate
-        agent_configuration = AgentConfigManager.verify_or_create_private_keys(
+        agent_configuration = AgentConfigManager.verify_private_keys(
             aea_project_path,
             substitude_env_vars=True,
-            private_key_helper=private_key_verify_or_create,
-            create_keys=create_keys,
+            private_key_helper=private_key_verify,
         ).agent_config
 
         builder = AEABuilder(with_default_packages=False)

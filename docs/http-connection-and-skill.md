@@ -31,6 +31,13 @@ aea config set vendor.fetchai.connections.http_server.config.api_spec_path "../e
 
 Ensure the file exists under the specified path!
 
+Create and add a private key:
+
+``` bash
+aea generate-key fetchai
+aea add-key fetchai
+```
+
 Install the dependencies:
 
 ``` bash
