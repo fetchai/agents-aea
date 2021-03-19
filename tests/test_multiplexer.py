@@ -423,7 +423,7 @@ def test_get_from_multiplexer_when_empty():
 def test_send_message_no_supported_protocol():
     """Test the case when we send an envelope with a specific connection that does not support the protocol."""
     with LocalNode() as node:
-        identity_1 = Identity("", address="address_1")
+        identity_1 = Identity("identity", address="address_1")
         connection_1 = _make_local_connection(
             identity_1.address,
             node,
