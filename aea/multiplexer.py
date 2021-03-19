@@ -348,7 +348,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
             except Exception as e:
                 self.logger.exception("Exception on disconnect:")
                 raise AEAConnectionError(
-                    f"Failed to disconnect the multiplexer cause {repr(e)}"
+                    f"Failed to disconnect the multiplexer: Error: {repr(e)}"
                 ) from e
 
     async def _stop_receive_send_loops(self) -> None:
