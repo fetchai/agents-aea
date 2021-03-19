@@ -328,7 +328,7 @@ class EthereumCrypto(Crypto[Account]):
         :param password: the password to decrypt.
         :return: json string containing encrypted private key.
         """
-        encrypted = self.entity.encrypt(self.private_key, password)
+        encrypted = Account.encrypt(self.private_key, password)
         return json.dumps(encrypted)
 
     @classmethod
