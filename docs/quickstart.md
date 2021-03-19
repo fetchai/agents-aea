@@ -243,6 +243,15 @@ recipient_aea,sender_aea,fetchai/default:1.0.0,\x08\x01\x12\x011*\x07\n\x05hello
 aea install
 ```
 
+### Add and create a private key
+
+All AEAs need a private key to run. Add one now:
+
+``` bash
+aea generate-key fetchai
+aea add-key fetchai
+```
+
 ### Run the AEA
 
 Run the AEA.

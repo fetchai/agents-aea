@@ -67,6 +67,13 @@ cp -a ../examples/gym_ex/gyms/. gyms/
 aea config set vendor.fetchai.connections.gym.config.env 'gyms.env.BanditNArmedRandom'
 ```
 
+#### Create and add a private key
+
+``` bash
+aea generate-key fetchai
+aea add-key fetchai
+```
+
 ### Run the AEA with the gym connection
 
 ``` bash

@@ -209,6 +209,8 @@ class TestLoadFailedCauseImportedPackageNotFound(AEATestCaseEmpty):
 
     def test_load_component_failed_cause_package_not_found(self):
         """Test package not found in import."""
+        self.generate_private_key()
+        self.add_private_key()
         self.add_item("skill", "fetchai/echo:latest", local=True)
 
         with cd(self._get_cwd()):

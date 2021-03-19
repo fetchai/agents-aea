@@ -12,6 +12,10 @@ aea config set agent.default_connection fetchai/http_server:0.18.0
 aea config set vendor.fetchai.connections.http_server.config.api_spec_path "../examples/http_ex/petstore.yaml"
 ```
 ``` bash
+aea generate-key fetchai
+aea add-key fetchai
+```
+``` bash
 aea install
 ```
 ``` bash

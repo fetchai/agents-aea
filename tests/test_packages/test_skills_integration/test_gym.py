@@ -32,6 +32,8 @@ class TestGymSkill(AEATestCaseEmpty):
 
     def test_gym(self):
         """Run the gym skill sequence."""
+        self.generate_private_key()
+        self.add_private_key()
         self.add_item("skill", "fetchai/gym:0.16.0")
         self.run_install()
 

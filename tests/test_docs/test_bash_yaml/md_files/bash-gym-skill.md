@@ -24,6 +24,10 @@ cp -a ../examples/gym_ex/gyms/. gyms/
 aea config set vendor.fetchai.connections.gym.config.env 'gyms.env.BanditNArmedRandom'
 ```
 ``` bash
+aea generate-key fetchai
+aea add-key fetchai
+```
+``` bash
 aea run
 ```
 ``` bash
