@@ -89,8 +89,12 @@ def _add_private_key(
         file = PRIVATE_KEY_PATH_SCHEMA.format(type_)
 
     key_file_argument.convert(file, None, click_context)
-
-    try_validate_private_key_path(type_, file, password=password)
+    try:
+        try_validate_private_key_path(
+            type_, file, password=password, exit_on_error=False
+        )
+    except Exception as e:
+        raise click.ClickException(repr(e)) from e
     _try_add_key(ctx, type_, file, connection)
 
 

@@ -62,7 +62,7 @@ def test_key_file_encryption_decryption(cosmos_private_key_file):
     assert encrypted_data != pk_data
     assert pk_data == decrypted_data
 
-    with pytest.raises(ValueError, match="key file data can not be translated"):
+    with pytest.raises(ValueError, match="Decrypt error! Bad password?"):
         cosmos.decrypt(encrypted_data, "BaD_PassWord")
 
     with pytest.raises(ValueError, match="Bad encrypted key format!"):
