@@ -167,7 +167,6 @@ class FaberHTTPHandler(Handler):
 
         :return: None
         """
-        pass  # pragma: no cover
 
     def handle(self, message: Message) -> None:
         """
@@ -253,7 +252,6 @@ class FaberHTTPHandler(Handler):
 
         :return: None
         """
-        pass
 
 
 class FaberOefSearchHandler(Handler):
@@ -263,7 +261,6 @@ class FaberOefSearchHandler(Handler):
 
     def setup(self) -> None:
         """Call to setup the handler."""
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -300,7 +297,6 @@ class FaberOefSearchHandler(Handler):
 
         :return: None
         """
-        pass
 
     def _handle_unidentified_dialogue(self, oef_search_msg: OefSearchMessage) -> None:
         """

@@ -93,7 +93,6 @@ class AW1RegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
-        pass
 
     def _register_for_aw1(
         self,

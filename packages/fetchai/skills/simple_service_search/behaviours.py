@@ -37,7 +37,6 @@ class ServiceSearchBehaviour(TickerBehaviour):
 
         :return: None
         """
-        pass
 
     def act(self) -> None:
         """
@@ -63,4 +62,3 @@ class ServiceSearchBehaviour(TickerBehaviour):
 
         :return: None
         """
-        pass

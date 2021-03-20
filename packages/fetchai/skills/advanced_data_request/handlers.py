@@ -213,7 +213,6 @@ class HttpHandler(Handler):
 
         :return: None
         """
-        pass
 
 
 class PrometheusHandler(Handler):
@@ -273,4 +272,3 @@ class PrometheusHandler(Handler):
 
         :return: None
         """
-        pass

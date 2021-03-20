@@ -107,7 +107,6 @@ class GenericSearchBehaviour(TickerBehaviour):
 
         :return: None
         """
-        pass
 
 
 class GenericTransactionBehaviour(TickerBehaviour):
@@ -129,7 +128,6 @@ class GenericTransactionBehaviour(TickerBehaviour):
 
     def setup(self) -> None:
         """Setup behaviour."""
-        pass
 
     def act(self) -> None:
         """
@@ -173,7 +171,6 @@ class GenericTransactionBehaviour(TickerBehaviour):
 
     def teardown(self) -> None:
         """Teardown behaviour."""
-        pass
 
     def _timeout_processing(self) -> None:
         """Timeout processing."""

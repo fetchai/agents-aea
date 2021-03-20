@@ -317,7 +317,6 @@ class AgentComponentRegistry(Registry[ComponentId, Component]):
 
         :return: None
         """
-        pass
 
     def teardown(self) -> None:
         """
@@ -325,7 +324,6 @@ class AgentComponentRegistry(Registry[ComponentId, Component]):
 
         :return: None
         """
-        pass
 
 
 class ComponentRegistry(

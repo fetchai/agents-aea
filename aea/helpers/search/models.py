@@ -173,8 +173,6 @@ class AttributeInconsistencyException(Exception):
     are not of an allowed type.
     """
 
-    pass
-
 
 class Attribute:
     """Implements an attribute for an OEF data model."""

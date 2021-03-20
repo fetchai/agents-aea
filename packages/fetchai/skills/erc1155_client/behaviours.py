@@ -88,4 +88,3 @@ class SearchBehaviour(TickerBehaviour):
 
         :return: None
         """
-        pass
