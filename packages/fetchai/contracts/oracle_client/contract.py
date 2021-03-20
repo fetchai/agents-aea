@@ -49,7 +49,7 @@ class FetchOracleClientContract(Contract):
         from_address: Address,
         query_function: str,
         gas: int = 0,
-    ) -> None:
+    ) -> JSONLike:
         """
         Get transaction to query oracle value in contract
 
@@ -58,7 +58,7 @@ class FetchOracleClientContract(Contract):
         :param from_address: the address of the transaction sender.
         :param query_function: the query oracle value function.
         :param gas: the gas limit for the transaction.
-        :return: None
+        :return: the query transaction
         """
         if ledger_api.identifier == EthereumApi.identifier:
             nonce = ledger_api.api.eth.getTransactionCount(from_address)
@@ -70,10 +70,12 @@ class FetchOracleClientContract(Contract):
                 {
                     "gas": gas,
                     "gasPrice": ledger_api.api.toWei("50", "gwei"),
+                    "from": from_address,
                     "nonce": nonce,
                 }
             )
             tx = ledger_api.update_with_gas_estimate(tx)
+            return tx
         if ledger_api.identifier == FetchAIApi.identifier:
             msg = {"query_oracle_value": {}}  # type: JSONLike
             fetchai_api = cast(FetchAIApi, ledger_api)
