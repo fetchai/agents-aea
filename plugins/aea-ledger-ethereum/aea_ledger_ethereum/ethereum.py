@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Ethereum module wrapping the public and private key cryptography and ledger api."""
 import json
 import logging
@@ -42,6 +41,7 @@ from web3.types import TxData, TxParams, TxReceipt, Wei
 
 from aea.common import Address, JSONLike
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
+from aea.crypto.helpers import DecryptError, KeyIsIncorrect, hex_to_bytes_for_key
 from aea.exceptions import enforce
 from aea.helpers import http_requests as requests
 from aea.helpers.base import try_decorator
@@ -276,6 +276,18 @@ class EthereumCrypto(Crypto[Account]):
         :return: the Entity.
         """
         private_key = cls.load(file_name, password)
+        try:
+            if not private_key.startswith("0x"):
+                hex_to_bytes_for_key(private_key)
+        except KeyIsIncorrect as e:
+            if not password:
+                raise KeyIsIncorrect(
+                    f"Error on key `{file_name}` load! Try to specify `password`: Error: {repr(e)} "
+                ) from e
+            raise KeyIsIncorrect(
+                f"Error on key `{file_name}` load! Wrong password?: Error: {repr(e)} "
+            ) from e
+
         account = Account.from_key(  # pylint: disable=no-value-for-parameter
             private_key=private_key
         )
@@ -340,8 +352,13 @@ class EthereumCrypto(Crypto[Account]):
         :param password: the password to decrypt.
         :return: the raw private key.
         """
-        private_key = Account.decrypt(keyfile_json, password)
-        return private_key
+        try:
+            private_key = Account.decrypt(keyfile_json, password)
+        except ValueError as e:
+            if e.args[0] == "MAC mismatch":
+                raise DecryptError() from e
+            raise
+        return private_key.hex()[2:]
 
 
 class EthereumHelper(Helper):

@@ -20,6 +20,7 @@
 
 import hashlib
 import logging
+import tempfile
 import time
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -37,6 +38,8 @@ from aea_ledger_ethereum import (
 from web3 import Web3
 from web3._utils.request import _session_cache as session_cache
 from web3.gas_strategies.rpc import rpc_gas_price_strategy
+
+from aea.crypto.helpers import DecryptError
 
 from tests.conftest import DEFAULT_GANACHE_CHAIN_ID, MAX_FLAKY_RERUNS, ROOT_DIR
 
@@ -348,3 +351,19 @@ def test_gas_price_strategy_no_api_key(caplog):
         "No ethgasstation api key provided. Falling back to `rpc_gas_price_strategy`."
         in caplog.text
     )
+
+
+def test_dump_load_with_password():
+    """Test dumping and loading a key with password."""
+    with tempfile.TemporaryDirectory() as dirname:
+        encrypted_file_name = Path(dirname, "eth_key_encrypted")
+        password = "somePwd"  # nosec
+        ec = EthereumCrypto()
+        ec.dump(encrypted_file_name, password)
+        assert encrypted_file_name.exists()
+        with pytest.raises(DecryptError, match="Decrypt error! Bad password?"):
+            ec2 = EthereumCrypto.load_private_key_from_path(
+                encrypted_file_name, "wrongPassw"
+            )
+        ec2 = EthereumCrypto(encrypted_file_name, password)
+        assert ec2.private_key == ec.private_key
