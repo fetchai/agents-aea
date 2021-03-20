@@ -143,11 +143,11 @@ def run_aea(
     :param ctx: a context object.
     :param connection_ids: list of connections public IDs.
     :param env_file: a path to env file.
-    :param is_install_deps: bool flag is install deps.
+    :param is_install_deps: bool flag is install dependencies.
     :param password: the password to encrypt/decrypt the private key.
 
     :return: None
-    :raises: ClickException if any Exception occures.
+    :raises: ClickException if any Exception occurs.
     """
     skip_consistency_check = ctx.config["skip_consistency_check"]
     _prepare_environment(ctx, env_file, is_install_deps)
@@ -174,7 +174,7 @@ def _prepare_environment(ctx: Context, env_file: str, is_install_deps: bool) -> 
     Prepare the AEA project environment.
 
     :param ctx: a context object.
-    :param env_file: the path to the envrionemtn file.
+    :param env_file: the path to the environment file.
     :param is_install_deps: whether to install the dependencies
     """
     load_env_file(env_file)

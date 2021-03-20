@@ -138,7 +138,7 @@ class AEADirTask(AbstractExecutorTask):
         """
         Init aea config dir task.
 
-        :param agent_dir: direcory with aea config.
+        :param agent_dir: directory with aea config.
         :param password: the password to encrypt/decrypt the private key.
         """
         self._agent_dir = agent_dir
@@ -186,7 +186,7 @@ class AEADirMultiprocessTask(AbstractMultiprocessExecutorTask):
         """
         Init aea config dir task.
 
-        :param agent_dir: direcory with aea config.
+        :param agent_dir: directory with aea config.
         :param log_level: debug level applied for AEA in subprocess
         :param password: the password to encrypt/decrypt the private key.
         """
@@ -209,7 +209,7 @@ class AEADirMultiprocessTask(AbstractMultiprocessExecutorTask):
 
         If it's running it's not failed.
 
-        :rerurn: bool
+        :return: bool
         """
         if not self._future:
             return False

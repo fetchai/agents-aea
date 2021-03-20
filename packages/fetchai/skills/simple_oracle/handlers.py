@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contians the handlers for the Fetch oracle contract deployer."""
+"""This package contains the handlers for the Fetch oracle contract deployer."""
 
 from typing import Optional, cast
 

@@ -460,7 +460,7 @@ class AgentConfigManager:
 
         :param path: dotted path str, list of str with first optional component id
 
-        :return: Tuple of optonal component id if path related to component and List[str]
+        :return: Tuple of optional component id if path related to component and List[str]
         """
         if isinstance(path, str):
             json_path, *_, component_id = handle_dotted_path(
@@ -488,7 +488,7 @@ class AgentConfigManager:
         Validates and applies agent config and component overrides.
         Does not save it on the disc!
 
-        :param overrides: overrided values dictionary
+        :param overrides: overridden values dictionary
 
         :return: None
         """

@@ -402,7 +402,7 @@ class PackageConfiguration(Configuration, ABC):
         self, overrides: Dict, env_vars_friendly: bool = False
     ) -> None:
         """Check overrides is correct, return list of errors if present."""
-        # check for permited overrides
+        # check for permitted overrides
         self._check_overrides_corresponds_to_overridable(
             overrides, env_vars_friendly=env_vars_friendly
         )
@@ -712,7 +712,7 @@ class ConnectionConfig(ComponentConfiguration):
         connections = {PublicId.from_str(id_) for id_ in obj.get(CONNECTIONS, set())}
         cert_requests = (
             [
-                # notice: yaml.load resolves datetimes strings to datetime.datetime objects
+                # notice: yaml.load resolves datetime strings to datetime.datetime objects
                 CertRequest.from_json(cert_request_json)
                 for cert_request_json in obj["cert_requests"]
             ]
@@ -1105,7 +1105,7 @@ class SkillConfig(ComponentConfiguration):
         return instance
 
     def get_overridable(self) -> dict:
-        """Get overrideable confg data."""
+        """Get overridable configuration data."""
         result = {}
         current_config_data = self.json
         if self.abstract_field_name in current_config_data:

@@ -22,7 +22,7 @@ One of the most useful cases is the integration of the dialogues subsystem and s
 ### Keep terminal state dialogues
 
 The Dialogues class has the optional boolean argument `keep_terminal_state_dialogues`
-which specifies whether a dialogue which has reached its terminal state is kept in memory or not. If `keep_terminal_state_dialogues` is `False`, dialogues that reach a terminal state are removed from memory and can not be used any more. If `keep_terminal_state_dialogues` is `True`, dialogues that reach a terminal state are kept in memory or storage (if configured)E.
+which specifies whether a dialogue which has reached its terminal state is kept in memory or not. If `keep_terminal_state_dialogues` is `False`, dialogues that reach a terminal state are removed from memory and can not be used any more. If `keep_terminal_state_dialogues` is `True`, dialogues that reach a terminal state are kept in memory or storage (if configured). If storage is configured, all dialogues in memory are stored on agent stop and restored on agent start.
 
 It useful to save memory with dialogues that are in terminal state and probably will be never used again.
 

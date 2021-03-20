@@ -475,7 +475,7 @@ class LedgerApiHandler(Handler):
 
     def _send_confirmation_details_to_awx_aeas(self, confirmed_aea: str) -> None:
         """
-        Send a confirmation of registration to aw2 aeas.
+        Send a confirmation of registration to aw2 AEAs.
 
         :param confirmed_aea: the confirmed aea's address
         :return: None

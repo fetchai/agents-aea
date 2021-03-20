@@ -422,7 +422,7 @@ class Behaviour(AbstractBehaviour, ABC):
         except Exception as e:  # pylint: disable=broad-except
             e_str = parse_exception(e)
             raise AEAActException(
-                f"An error occured during act of behaviour {self.context.skill_id}/{type(self).__name__}:\n{e_str}"
+                f"An error occurred during act of behaviour {self.context.skill_id}/{type(self).__name__}:\n{e_str}"
             )
 
     @classmethod
@@ -481,7 +481,7 @@ class Handler(SkillComponent, ABC):
         except Exception as e:  # pylint: disable=broad-except
             e_str = parse_exception(e)
             raise AEAHandleException(
-                f"An error occured during handle of handler {self.context.skill_id}/{type(self).__name__}:\n{e_str}"
+                f"An error occurred during handle of handler {self.context.skill_id}/{type(self).__name__}:\n{e_str}"
             )
 
     @classmethod
@@ -770,7 +770,7 @@ def _parse_module(
             except Exception as e:  # pylint: disable=broad-except # pragma: nocover
                 e_str = parse_exception(e)
                 raise AEAInstantiationException(
-                    f"An error occured during instantiation of component {skill_context.skill_id}/{component_config.class_name}:\n{e_str}"
+                    f"An error occurred during instantiation of component {skill_context.skill_id}/{component_config.class_name}:\n{e_str}"
                 )
             components[component_id] = component
 

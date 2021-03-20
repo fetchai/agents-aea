@@ -199,7 +199,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
         return self._connection_status
 
     async def run(self) -> None:
-        """Run multiplexer connect and recv/send tasks."""
+        """Run multiplexer connect and receive/send tasks."""
         self.set_loop(asyncio.get_event_loop())
         try:
             await self.connect()
@@ -229,7 +229,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
 
     def set_loop(self, loop: AbstractEventLoop) -> None:
         """
-        Set event loop and all event loopp related objects.
+        Set event loop and all event loop related objects.
 
         :param loop: asyncio event loop.
         :return: None
@@ -257,7 +257,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
 
     def add_connection(self, connection: Connection, is_default: bool = False) -> None:
         """
-        Add a connection to the mutliplexer.
+        Add a connection to the multiplexer.
 
         :param connection: the connection to add.
         :param is_default: whether the connection added should be the default one.
@@ -353,7 +353,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
 
     async def _stop_receive_send_loops(self) -> None:
         """Stop receive and send loops."""
-        self.logger.debug("Stopping recv loop...")
+        self.logger.debug("Stopping receive loop...")
 
         if self._recv_loop_task:
             self._recv_loop_task.cancel()
@@ -361,7 +361,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
                 await self._recv_loop_task
 
         self._recv_loop_task = None
-        self.logger.debug("Recv loop stopped.")
+        self.logger.debug("Receive loop stopped.")
 
         self.logger.debug("Stopping send loop...")
 
@@ -391,7 +391,7 @@ class AsyncMultiplexer(Runnable, WithLogger):
         """
         Stop the multiplexer.
 
-        Stops recv and send loops.
+        Stops receive and send loops.
         Disconnect every connection.
         """
         self.logger.debug("Stopping multiplexer...")
@@ -802,7 +802,7 @@ class Multiplexer(AsyncMultiplexer):
 
     def set_loop(self, loop: AbstractEventLoop) -> None:
         """
-        Set event loop and all event loopp related objects.
+        Set event loop and all event loop related objects.
 
         :param loop: asyncio event loop.
         :return: None

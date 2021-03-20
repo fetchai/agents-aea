@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contians the handlers for the Fetch oracle client skill."""
+"""This package contains the handlers for the Fetch oracle client skill."""
 
 from typing import Optional, cast
 

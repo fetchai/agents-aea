@@ -1,6 +1,4 @@
-A <a href="../api/connections/base#connection-objects">`Connection`</a> provides an interface for the agent to connect with entities in the outside world. Connections wrap SDKs or APIs and provide interfaces to networks, ledgers and other services. As such, a connection is concerned with I/O bound and continuously connected operations. Where necessary, a connection is responsible for translating between the framework specific <a href="../protocol">protocol</a> (an <a href="../api/mail/base#envelope-objects">`Envelope`</a> with its contained <a href="../api/protocols/base#message-objects">`Message`</a>) and the external service or third-party protocol (e.g. `HTTP`).
-
-There are two types: wrapper and transport connection. The transport connection is responsible to delivering AEA envelopes. 
+A <a href="../api/connections/base#connection-objects">`Connection`</a> provides an interface for the agent to connect with entities in the outside world. Connections wrap SDKs or APIs and provide interfaces to networks, ledgers and other services. As such, a connection is concerned with I/O bound and continuously connected operations. Where necessary, a connection is responsible for translating between the framework specific <a href="../protocol">protocol</a> (an <a href="../api/mail/base#envelope-objects">`Envelope`</a> with its contained <a href="../api/protocols/base#message-objects">`Message`</a>) and the external service or third-party protocol (e.g. `HTTP`). Hence, there are two roles for connections: wrapper and transport connection. The transport connection is responsible to delivering AEA envelopes.
 
 The messages constructed or received by a connection are eventually processed by one or several <a href="../skill">skills</a> which deal with handling and generating messages related to a specific business objective.
 
@@ -9,10 +7,6 @@ The messages constructed or received by a connection are eventually processed by
 An `AEA` can interact with multiple connections at the same time via the <a href="../api/connections/base#connection-objects">`Multiplexer`</a>. Connections are passive in terms of multiplexer interactions (its methods are called by the Multiplexer), but they can run their own async or threaded tasks.
 
 The `Multiplexer` maintains an <a href="../api/multiplexer#inbox-objects">`InBox`</a> and <a href="../api/multiplexer#outbox-objects">`OutBox`</a>, which are, respectively, queues for incoming and outgoing envelopes and their contained messages.
-
-## Configuration
-
-Every connection must have a configuration file in `connection.yaml`, containing meta-information about the connection as well as all the required configuration details. For more details, have a look <a href="../config">here</a>.
 
 ## Developing your connection
 
@@ -28,9 +22,9 @@ This will scaffold a connection package called `my_new_connection` with three fi
 * `connection.py` containing the scaffolded connection class
 * `connection.yaml` containing the scaffolded configuration file
 
-### Primary methods to develop - async connection interface
+As a developer you have the choice between implementing a sync or async interface. The scaffolded `connection.py` file contains two classes: the `MyScaffoldAsyncConnection` inherited from the <a href="../api/connections/base#connection-objects">`Connection`</a> base class and the `MyScaffoldSyncConnection` inherited from the <a href="../api/connections/base#connection-objects">`BaseSyncConnection`</a>. Remove the unused class.
 
-The scaffolded `connection.py` file contains a single class inherited from the <a href="../api/connections/base#connection-objects">`Connection`</a> base class.
+### Primary methods to develop - async connection interface
 
 The developer needs to implement four public coroutines:
 
@@ -46,29 +40,22 @@ The framework provides a demo `stub` connection which implements an I/O reader a
 
 ### Primary methods to develop - sync connection interface
 
-TBD
+The <a href="../api/connections/base#connection-objects">`BaseSyncConnection`</a> useses executors to execute synchronous code from the asynchronous context of the `Multiplexer` in executors/threads, which are limited by the amount of configured workers.
 
+The async methods `connect`, `disconnect` and `send` are converted to callbacks which the developer implements:
+* `on_connect`
+* `on_disconnect`
+* `on_send`
 
-Use executors to execute sync code from async in executors/threads. Limited by the amount of workers.
+All of these methods will be executed in the executor pool.
 
-There are two primary types of connections:
-* reactive - that produce messages only on incoming message (http like, produce response on request)
-* active: like p2p (can generate messages regardless on incoming messages), http_server, yoti, ledger
+Every method can create a message by putting it into the thread/async friendly queue that is consumed by the `Multiplexer`.
 
-For reactive connections we can provide a special kind of connection that converts all the async methods to callbacks:
-* on_connect
-* on_disconnect
-* on_send
+The `receive` coroutine has no direct equivalent. Instead, the developer implements a `main` method which runs synchronously in the background.
 
-All of these methods will be executed in the executor pool without any user attention.
+## Configuration
 
-Every method can create a message by putting it into the thread/async friendly queue that will be consumed by the Multiplexer.
-
-For active connections it looks a bit more complicated and depends on library to use: We need on_receive. In general it can look like the reactive one except we use one background thread for the on_connect method to run some code constantly (polling some library for new messages?). The interaction will be performed the same way, by putting messages into the queue.
-
-Anyway, the developer has to pay attention to timeouts inside callbacks (pool is limited).
-In case of spawning threads or using background thread in active connection, should handle thread close by on_disconnect callback.
-
+Every connection must have a configuration file in `connection.yaml`, containing meta-information about the connection as well as all the required configuration details. For more details, have a look <a href="../config">here</a>.
 
 ### Configuration options
 

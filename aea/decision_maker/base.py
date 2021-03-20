@@ -123,7 +123,7 @@ class Preferences(ABC):
         Compute the marginal utility.
 
         :param ownership_state: the ownership state against which to compute the marginal utility.
-        :param kwargs: optional keyword argyments
+        :param kwargs: optional keyword arguments
         :return: the marginal utility score
         """
 

@@ -1,5 +1,5 @@
 
-The `libp2p_node` is an integratl part of the ACN.
+The `libp2p_node` is an integral part of the ACN.
 
 ## ACN - Agent Communication Network
 
