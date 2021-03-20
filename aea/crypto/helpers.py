@@ -190,3 +190,25 @@ def get_wallet_from_agent_config(
     }
     wallet = Wallet(private_key_paths, connections_private_key_paths, password=password)
     return wallet
+
+
+class DecryptError(ValueError):
+    """Error on bytes decruption with password."""
+
+    msg = "Decrypt error! Bad password?"
+
+    def __init__(self, msg: Optional[str] = None) -> None:
+        """Init execption."""
+        super().__init__(msg or self.msg)
+
+
+class KeyIsIncorrect(ValueError):
+    """Error decoding hex string to bytes for private key."""
+
+
+def hex_to_bytes_for_key(data: str) -> bytes:
+    """Convert hex string to bytes with error handling."""
+    try:
+        return bytes.fromhex(data)
+    except ValueError as e:
+        raise KeyIsIncorrect(str(e)) from e
