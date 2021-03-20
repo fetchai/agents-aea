@@ -193,7 +193,7 @@ def get_wallet_from_agent_config(
 
 
 class DecryptError(ValueError):
-    """Error on bytes decruption with password."""
+    """Error on bytes decryption with password."""
 
     msg = "Decrypt error! Bad password?"
 
