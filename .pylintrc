@@ -16,9 +16,7 @@ disable=C0103,C0201,C0301,C0302,W0105,W0707,W1202,W1203,R0801
 # C0201: consider-iterating-dictionary
 # C0301: http://pylint-messages.wikidot.com/messages:c0301 > Line too long (%s/%s)
 # C0302: http://pylint-messages.wikidot.com/messages:c0302 > Too many lines in module (%s)
-# C0330: Wrong hanging indentation
 # W0105: pointless-string-statement, # kept as no harm
-# W0107: unnecessary-pass, # kept as no harm
 # R0801: similar lines, # too granular
 
 [IMPORTS]
