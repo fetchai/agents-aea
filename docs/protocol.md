@@ -1,18 +1,20 @@
-<a href="../api/protocols/base#protocol-objects">`Protocols`</a> define agent to agent interactions, which include:
+<a href="../api/protocols/base#protocol-objects">`Protocols`</a> define the structure of agent-to-agent and component-to-component interactions, which in the AEA world, are in the form of communication. To learn more about interactions and interaction protocols, see <a href="../interaction-protocol">here</a>. 
 
-* messages, which define the representation;
+Protocols in the AEA world provide definitions for:
 
-* serialization logic, which define how a message is encoded for transport; and, optionally
+* `messages` defining the structure and syntax of messages;
 
-* dialogues, which define rules over message sequences.
+* `serialization` defining how a message is encoded/decoded for transport; and optionally
+
+* `dialogues` defining the structure of dialogues formed from exchanging series of messages.
 
 <img src="../assets/protocol.jpg" alt="Protocol simplified" class="center" style="display: block; margin-left: auto; margin-right: auto;width:80%;">
 
-The framework provides one default protocol, called `default` and introduced below. This protocol provides a bare bones implementation for an AEA protocol which includes a <a href="../api/protocols/default/message#packages.fetchai.protocols.default.message">`DefaultMessage`</a>  class and associated <a href="../api/protocols/default/serialization#packages.fetchai.protocols.default.serialization">`DefaultSerializer`</a> and <a href="../api/protocols/default/dialogues#packages.fetchai.protocols.default.dialogues">`DefaultDialogue`</a> classes.
+The framework provides a `default` protocol. This protocol provides a bare-bones implementation for an AEA protocol which includes a <a href="../api/protocols/default/message#packages.fetchai.protocols.default.message">`DefaultMessage`</a>  class and associated <a href="../api/protocols/default/serialization#packages.fetchai.protocols.default.serialization">`DefaultSerializer`</a> and <a href="../api/protocols/default/dialogues#packages.fetchai.protocols.default.dialogues">`DefaultDialogue`</a> classes.
 
 Additional protocols - i.e. a new type of interaction - can be added as packages or generated with the <a href="../protocol-generator">protocol generator</a>.
 
-We highly recommend you **do not** attempt to write your own protocol code; always use existing packages or the protocol generator!
+We highly recommend you to **not** attempt writing your protocol manually as they tend to have involved logic; always use existing packages or the protocol generator!
 
 ## Components of a protocol
 
@@ -24,7 +26,8 @@ A protocol package contains the following files:
 * two protobuf related files
 
 It optionally also contains
-* `dialogues.py`, which defines rules of the message exchange
+
+* `dialogues.py`, which defines the structure of dialogues formed from the exchange of a series of messages
 * `custom_types.py`, which defines custom types 
 
 All protocols are for point to point interactions between two agents or agent-like services.
@@ -41,16 +44,16 @@ Protocols are not to be conflated with Interaction Protocols. The latter consist
 
 Each `Message` in an interaction protocol has a set of default fields:
 
-* `dialogue_reference: Tuple[str, str]`, a reference of the dialogue the message is part of. The first part of the tuple is the reference assigned to by the agent who first initiates the dialogue (i.e. sends the first message). The second part of the tuple is the reference assigned to by the other agent. * `dialogue_reference: Tuple[str, str]`, a reference of the dialogue the message is part of. The first part of the tuple is the reference assigned to by the dialogue initiator, the second part of the tuple is the reference assigned to by the dialogue responder. The default value is `("", "")`.
+* `dialogue_reference: Tuple[str, str]`, a reference of the dialogue the message is part of. The first part of the tuple is the reference assigned to by the agent who first initiates the dialogue (i.e. sends the first message). The second part of the tuple is the reference assigned to by the other agent. The default value is `("", "")`.
 * `message_id: int`, the identifier of the message in a dialogue. The default value is `1`.
 * `target: int`, the id of the message this message is replying to. The default value is `0`.
 * `performative: Enum`, the purpose/intention of the message. 
-* `is_incoming: bool`, a boolean specifying whether the message is outgoing (from the agent), or incoming (from the other agent). The default value is `False`. 
-* `counterparty: Address`, the address of the counterparty of this agent; the other agent, this agent is communicating with.  
+* `sender: Address`, the address of the sender of this message.
+* `to: Address`, the address of the receiver of this message.
 
-The default values for the above fields assume the message is the first message by the agent in a dialogue. Therefore, the `message_id` is set to `1` indicating the first message in the dialogue, `target` is `0` since the first  message is the only message that does not reply to any other, and `is_incoming` is `False` indicating the message is by the agent itself.
+The default values for `message_id` and `target` assume the message is the first message in a dialogue. Therefore, the `message_id` is set to `1` indicating the first message in the dialogue and `target` is `0` since the first message is the only message that does not reply to any other.
 
-By default, the values of `dialogue_reference`, `message_id`, `target`, `is_incoming`, `counterparty` are set. However, most interactions involve more than one message being sent as part of the interaction and potentially multiple simultaneous interactions utilising the same protocol. In those cases, the `dialogue_reference` allows different interactions to be identified as such. The `message_id` and `target` are used to keep track of messages and their replies. For instance, on receiving of a message with `message_id=1` and `target=0`, the responding agent could respond with a another with `message_id=2` and `target=1` replying to the first message. In particular, `target` holds the id of the message being replied to. This can be the preceding message, or an older one. 
+By default, the values of `dialogue_reference`, `message_id`, `target` are set. However, most interactions involve more than one message being sent as part of the interaction and potentially multiple simultaneous interactions utilising the same protocol. In those cases, the `dialogue_reference` allows different interactions to be identified as such. The `message_id` and `target` are used to keep track of messages and their replies. For instance, on receiving of a message with `message_id=1` and `target=0`, the responding agent could respond with another with `message_id=2` and `target=1` replying to the first message. In particular, `target` holds the id of the message being replied to. This can be the preceding message, or an older one. 
 
 ## Contents
 
@@ -58,7 +61,7 @@ Each message may optionally have any number of contents of varying types.
 
 ## Dialogue rules
 
-Protocols can optionally have a dialogue module. A _dialogue_, respectively _dialogues_ object, maintains the state of a single dialogue, respectively all dialogues, associated with the protocol.
+Protocols can optionally have a dialogue module. A _dialogue_, respectively _dialogues_ object, maintains the state of a single, respectively, all dialogues associated with a protocol.
 
 The framework provides a number of helpful classes which implement most of the logic to maintain dialogues, namely the <a href="../api/protocols/dialogue/base#dialogue-objects">`Dialogue`</a> and <a href="../api/protocols/dialogue/base#dialogues-objects">`Dialogues`</a> base classes.
 
@@ -70,7 +73,7 @@ We highly recommend you **do not** attempt to write your own protocol code; alwa
 
 ## `fetchai/default:0.13.0` protocol
 
-The `fetchai/default:0.13.0` protocol is a protocol which each AEA is meant to implement. It serves AEA to AEA interaction and includes two message performatives:
+The `fetchai/default:0.13.0` protocol is meant to be implemented by every AEA. It serves AEA to AEA interaction and includes three message performatives:
 
 ``` python
 from enum import Enum
@@ -115,6 +118,15 @@ msg = DefaultMessage(
     error_code=DefaultMessage.ErrorCode.UNSUPPORTED_PROTOCOL,
     error_msg="This protocol is not supported by this AEA.",
     error_data={"unsupported_msg": b"serialized unsupported protocol message"},
+)
+```
+
+* The `DefaultMessage` of performative `DefaultMessage.Performative.END` is used to terminate a default protocol dialogue. An example is:
+``` python
+from packages.fetchai.protocols.default.message import DefaultMessage
+
+msg = DefaultMessage(
+    performative=DefaultMessage.Performative.END,
 )
 ```
 
@@ -199,11 +211,7 @@ msg = OefSearchMessage(
 )
 ```
 
-* To search a service, we require a reference to the dialogue in string form, for instance
-``` python
-my_dialogue_reference = "a_unique_search_dialogue_reference"
-```
-and a query we would like the search node to evaluate, for instance
+* To search a service, we simiarly require a reference to the dialogue in string form, and then the query we would like the search node to evaluate, for instance
 ``` python
 from aea.helpers.search.models import Constraint, ConstraintType, Query
 
@@ -234,7 +242,7 @@ oef_msg = OefSearchMessage(
 )
 ```
 
-* The <a href="../simple-oef">SOEF search node</a> will respond with a message, say `msg` of type `OefSearchMessage`, of performative `OefSearchMessage.Performative.SEARCH_RESULT`. To access the tuple of agents which match the query, simply use `msg.agents`. In particular, this will return the agent addresses matching the query. The <a href="../identity">agent address</a> can then be used to send a message to the agent utilising the <a href="../oef-ledger">P2P agent communication network</a> and any protocol other than `fetchai/oef_search:0.14.0`.
+* The <a href="../simple-oef">SOEF search node</a> will respond with a message `msg` of type `OefSearchMessage` with performative `OefSearchMessage.Performative.SEARCH_RESULT`. To access the tuple of agents which match the query, simply use `msg.agents`. In particular, this will return the agent addresses matching the query. The <a href="../identity">agent address</a> can then be used to send a message to the agent utilising the <a href="../oef-ledger">P2P agent communication network</a> and any protocol other than `fetchai/oef_search:0.14.0`.
 
 * If the <a href="../simple-oef">SOEF search node</a> encounters any errors with the messages you send, it will return an `OefSearchMessage` of performative `OefSearchMessage.Performative.OEF_ERROR` and indicate the error operation encountered:
 ``` python
@@ -251,7 +259,7 @@ class OefErrorOperation(Enum):
 
 ## `fetchai/fipa:0.14.0` protocol
 
-This protocol provides classes and functions necessary for communication between AEAs via a variant of the <a href="http://www.fipa.org/repository/aclspecs.html" target="_blank">FIPA</a> Agent Communication Language.
+This protocol provides classes and functions necessary for communication between AEAs via a variant of the <a href="https://en.wikipedia.org/wiki/Foundation_for_Intelligent_Physical_Agents" target="_blank">FIPA</a> Agent Communication Language.
 
 The `fetchai/fipa:0.14.0` protocol definition includes a `FipaMessage` with the following performatives:
 

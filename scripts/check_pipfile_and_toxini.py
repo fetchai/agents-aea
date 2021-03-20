@@ -24,6 +24,10 @@ import sys
 from typing import Dict
 
 
+# specified in setup.py
+WHITELIST = {"base58": ">=1.0.3"}
+
+
 def get_deps_in_pipfile(file: str = "Pipfile") -> Dict[str, str]:
     """
     Get the dependencies of the Pipfile.
@@ -31,7 +35,7 @@ def get_deps_in_pipfile(file: str = "Pipfile") -> Dict[str, str]:
     :param file: the file to check.
     :return: dictionary with dependencies and their versions
     """
-    result: Dict[str, str] = {}
+    result: Dict[str, str] = WHITELIST
     with open(file, "r") as f:
         is_dev_dependency = False
         for line in f:

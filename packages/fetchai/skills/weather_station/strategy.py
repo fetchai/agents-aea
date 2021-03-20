@@ -62,8 +62,8 @@ class Strategy(GenericStrategy):
         row_data = {}  # type: Dict[int, Dict[str, Any]]
         counter = 0
         for items in fetched_data:
-            if counter > 10:
-                break  # so not too much data is sent
+            if counter > 10:  # so not too much data is sent
+                break  # pragma: nocover
             counter += 1
             dict_of_data = {
                 "abs_pressure": items[0],

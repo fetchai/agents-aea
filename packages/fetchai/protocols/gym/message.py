@@ -38,7 +38,7 @@ class GymMessage(Message):
     """A protocol for interacting with a gym connection."""
 
     protocol_id = PublicId.from_str("fetchai/gym:0.13.0")
-    protocol_specification_id = PublicId.from_str("fetchai/gym:0.1.0")
+    protocol_specification_id = PublicId.from_str("fetchai/gym:1.0.0")
 
     AnyObject = CustomAnyObject
 

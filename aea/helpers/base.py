@@ -212,7 +212,7 @@ class RegexConstrainedString(UserString):
         """Initialize a regex constrained string."""
         super().__init__(seq)
 
-        if not self.REGEX.match(self.data):
+        if not self.REGEX.fullmatch(self.data):
             self._handle_no_match()
 
     def _handle_no_match(self) -> None:
@@ -242,6 +242,11 @@ class SimpleId(RegexConstrainedString):
     Traceback (most recent call last):
     ...
     ValueError: Value 0an_identifier does not match the regular expression re.compile('[a-zA-Z_][a-zA-Z0-9_]{0,127}')
+
+    >>> SimpleId("an identifier")
+    Traceback (most recent call last):
+    ...
+    ValueError: Value an identifier does not match the regular expression re.compile('[a-zA-Z_][a-zA-Z0-9_]{0,127}')
 
     >>> SimpleId("")
     Traceback (most recent call last):
@@ -857,9 +862,9 @@ def compute_specifier_from_version(version: Version) -> str:
     """
     Compute the specifier set from a version, by varying only on the patch number.
 
-    I.e. from "{major}.{minor}.{patch}", return
+    I.e. from "{major}.{minor}.{patch}.{extra}", return
 
-    ">={major}.{minor}.0, <{major}.{minor + 1}.0"
+    ">=min({major}.{minor}.0, {major}.{minor}.{patch}.{extra}), <{major}.{minor + 1}.0"
 
     :param version: the version
     :return: the specifier set
@@ -868,6 +873,7 @@ def compute_specifier_from_version(version: Version) -> str:
     new_minor_low = version.minor
     new_minor_high = new_minor_low + 1
     lower_bound = Version(f"{new_major}.{new_minor_low}.0")
+    lower_bound = lower_bound if lower_bound < version else version
     upper_bound = Version(f"{new_major}.{new_minor_high}.0")
     specifier_set = f">={lower_bound}, <{upper_bound}"
     return specifier_set

@@ -3,6 +3,15 @@
 
 Ethereum module wrapping the public and private key cryptography and ledger api.
 
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.get_gas_price_strategy"></a>
+#### get`_`gas`_`price`_`strategy
+
+```python
+get_gas_price_strategy(gas_price_strategy: Optional[str] = None, api_key: Optional[str] = None) -> Callable[[Web3, TxParams], Wei]
+```
+
+Get the gas price strategy.
+
 <a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.SignedTransactionTranslator"></a>
 ## SignedTransactionTranslator Objects
 
@@ -421,7 +430,7 @@ Call a specified function on the ledger API.
 #### get`_`transfer`_`transaction
 
 ```python
- | get_transfer_transaction(sender_address: Address, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, chain_id: Optional[int] = None, gas_price: Optional[str] = None, **kwargs: Any, ,) -> Optional[JSONLike]
+ | get_transfer_transaction(sender_address: Address, destination_address: Address, amount: int, tx_fee: int, tx_nonce: str, chain_id: Optional[int] = None, gas_price: Optional[str] = None, gas_price_strategy: Optional[str] = None, **kwargs: Any, ,) -> Optional[JSONLike]
 ```
 
 Submit a transfer transaction to the ledger.
@@ -430,11 +439,12 @@ Submit a transfer transaction to the ledger.
 
 - `sender_address`: the sender address of the payer.
 - `destination_address`: the destination address of the payee.
-- `amount`: the amount of wealth to be transferred.
-- `tx_fee`: the transaction fee.
-- `tx_nonce`: verifies the authenticity of the tx
-- `chain_id`: the Chain ID of the Ethereum transaction. Default is 3 (i.e. ropsten; mainnet has 1).
-- `gas_price`: the gas price
+- `amount`: the amount of wealth to be transferred (in Wei).
+- `tx_fee`: the transaction fee (gas) to be used (in Wei).
+- `tx_nonce`: verifies the authenticity of the tx.
+- `chain_id`: the Chain ID of the Ethereum transaction.
+- `gas_price`: the gas price (in Wei)
+- `gas_price_strategy`: the gas price strategy to be used.
 
 **Returns**:
 
@@ -530,7 +540,7 @@ the contract instance
 #### get`_`deploy`_`transaction
 
 ```python
- | get_deploy_transaction(contract_interface: Dict[str, str], deployer_address: Address, value: int = 0, gas: int = 0, **kwargs: Any, ,) -> Optional[JSONLike]
+ | get_deploy_transaction(contract_interface: Dict[str, str], deployer_address: Address, value: int = 0, gas: int = 0, gas_price: Optional[str] = None, gas_price_strategy: Optional[str] = None, **kwargs: Any, ,) -> Optional[JSONLike]
 ```
 
 Get the transaction to deploy the smart contract.
@@ -539,8 +549,10 @@ Get the transaction to deploy the smart contract.
 
 - `contract_interface`: the contract interface.
 - `deployer_address`: The address that will deploy the contract.
-- `value`: value to send to contract (ETH in Wei)
-- `gas`: the gas to be used
+- `value`: value to send to contract (in Wei)
+- `gas`: the gas to be used (in Wei)
+- `gas_price`: the gas price (in Wei)
+- `gas_price_strategy`: the gas price strategy to be used.
 :returns tx: the transaction dictionary.
 
 <a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumApi.is_valid_address"></a>

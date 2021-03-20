@@ -16,12 +16,11 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Cosmos module wrapping the public and private key cryptography and ledger api."""
-
 import base64
 import gzip
 import hashlib
+import hmac
 import json
 import logging
 import os
@@ -29,23 +28,29 @@ import subprocess  # nosec
 import tempfile
 import time
 from collections import namedtuple
+from hashlib import pbkdf2_hmac
+from json.decoder import JSONDecodeError
 from pathlib import Path
-from typing import Any, BinaryIO, Collection, Dict, List, Optional, Tuple, cast
+from typing import Any, Collection, Dict, List, Optional, Tuple, cast
 
+import pyaes  # type: ignore
 from bech32 import (  # pylint: disable=wrong-import-order
     bech32_decode,
     bech32_encode,
     convertbits,
 )
-from ecdsa import (  # pylint: disable=wrong-import-order
+from ecdsa import (  # type: ignore # pylint: disable=wrong-import-order
     SECP256k1,
     SigningKey,
     VerifyingKey,
 )
-from ecdsa.util import sigencode_string_canonize  # pylint: disable=wrong-import-order
+from ecdsa.util import (  # type: ignore # pylint: disable=wrong-import-order
+    sigencode_string_canonize,
+)
 
 from aea.common import Address, JSONLike
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
+from aea.crypto.helpers import DecryptError, KeyIsIncorrect, hex_to_bytes_for_key
 from aea.exceptions import AEAEnforceError
 from aea.helpers import http_requests as requests
 from aea.helpers.base import try_decorator
@@ -73,6 +78,145 @@ MESSAGE_FORMAT_BY_VERSION = {
 }
 
 
+class DataEncrypt:
+    """Class to encrypt/decrypt data strings with password provided."""
+
+    hash_algo = "sha256"
+    hash_iterations = 20000
+
+    @classmethod
+    def _aes_encrypt(
+        cls, password: str, data: bytes
+    ) -> Tuple[bytes, int, bytes, bytes]:
+        """
+        Encryption schema for private keys
+
+        :param password: plaintext password to use for encryption
+        :param data: plaintext data to encrypt
+
+        :return: encrypted data, length of original data, initialisation vector for aes, password hashing salt
+        """
+        # Generate hash from password
+        salt = os.urandom(16)
+        hashed_pass = cls._get_hashed_password(password, salt)
+
+        # Random initialisation vector
+        iv = os.urandom(16)
+
+        # Encrypt data using AES
+        aes = pyaes.AESModeOfOperationCBC(hashed_pass, iv=iv)
+
+        # Pad data to multiple of 16
+        data_length = len(data)
+        if data_length % 16 != 0:  # pragma: nocover
+            data += b" " * (16 - data_length % 16)
+
+        encrypted = b""
+        while data:
+            encrypted += aes.encrypt(data[:16])
+            data = data[16:]
+
+        return encrypted, data_length, iv, salt
+
+    @classmethod
+    def _aes_decrypt(
+        cls,
+        password: str,
+        salt: bytes,
+        encrypted_data: bytes,
+        data_length: int,
+        initialisation_vector: bytes,
+    ) -> bytes:
+        """
+        Decryption schema for private keys.
+
+        :param password: plaintext password used for encryption
+        :param salt: password hashing salt
+        :param encrypted_data: encrypted data string
+        :param data_length: length of original plaintext data
+        :param initialisation_vector: initialisation vector for aes
+
+        :return: decrypted data as plaintext
+        """
+        # Hash password
+        hashed_pass = cls._get_hashed_password(password, salt)
+        # Decrypt data, noting original length
+        aes = pyaes.AESModeOfOperationCBC(hashed_pass, iv=initialisation_vector)
+
+        decrypted = b""
+        while encrypted_data:
+            decrypted += aes.decrypt(encrypted_data[:16])
+            encrypted_data = encrypted_data[16:]
+        decrypted_data = decrypted[:data_length]
+
+        # Return original data
+        return decrypted_data
+
+    @classmethod
+    def _get_hashed_password(cls, password: str, salt: bytes) -> bytes:
+        """Get hashed password."""
+        return pbkdf2_hmac(cls.hash_algo, password.encode(), salt, cls.hash_iterations)
+
+    @classmethod
+    def encrypt(cls, data: bytes, password: str) -> bytes:
+        """Encrypt data with password."""
+        if not isinstance(data, bytes):  # pragma: nocover
+            raise ValueError(f"data has to be bytes! not {type(data)}")
+
+        encrypted_data, data_length, initialisation_vector, salt = cls._aes_encrypt(
+            password, data
+        )
+
+        json_data = {
+            "encrypted_data": cls.bytes_encode(encrypted_data),
+            "data_length": data_length,
+            "initialisation_vector": cls.bytes_encode(initialisation_vector),
+            "salt": cls.bytes_encode(salt),
+            "hmac": cls.get_hmac_for_data(password, data),
+        }
+        return json.dumps(json_data).encode()
+
+    @staticmethod
+    def get_hmac_for_data(password: str, data: bytes) -> str:
+        """Get hmac digest for data."""
+        return hmac.new(password.encode(), data, "sha256").hexdigest()
+
+    @staticmethod
+    def bytes_encode(data: bytes) -> str:
+        """Encode bytes to ascii friendly string."""
+        return base64.b64encode(data).decode()
+
+    @staticmethod
+    def bytes_decode(data: str) -> bytes:
+        """Decode ascii friendly string to bytes."""
+        return base64.b64decode(data)
+
+    @classmethod
+    def decrypt(cls, encrypted_data: bytes, password: str) -> bytes:
+        """Decrypt data with passwod provided."""
+        if not isinstance(encrypted_data, bytes):  # pragma: nocover
+            raise ValueError(
+                f"encrypted_data has to be str! not {type(encrypted_data)}"
+            )
+
+        try:
+            json_data = json.loads(encrypted_data)
+            decrypted_data = cls._aes_decrypt(
+                password,
+                encrypted_data=cls.bytes_decode(json_data["encrypted_data"]),
+                data_length=json_data["data_length"],
+                initialisation_vector=cls.bytes_decode(
+                    json_data["initialisation_vector"]
+                ),
+                salt=cls.bytes_decode(json_data["salt"]),
+            )
+            if cls.get_hmac_for_data(password, decrypted_data) != json_data["hmac"]:
+                raise DecryptError()
+            return decrypted_data
+        except (KeyError, JSONDecodeError) as e:
+            raise ValueError(f"Bad encrypted key format!: {str(e)}") from e
+
+
 class CosmosHelper(Helper):
     """Helper class usable as Mixin for CosmosApi or as standalone class."""
 
@@ -91,7 +235,7 @@ class CosmosHelper(Helper):
             code = tx_receipt.get("code", None)
             is_successful = code is None
             if not is_successful:
-                _default_logger.warning(
+                _default_logger.warning(  # pragma: nocover
                     f"Transaction not settled. Raw log: {tx_receipt.get('raw_log')}"
                 )
         return is_successful
@@ -275,13 +419,16 @@ class CosmosCrypto(Crypto[SigningKey]):
     identifier = _COSMOS
     helper = CosmosHelper
 
-    def __init__(self, private_key_path: Optional[str] = None) -> None:
+    def __init__(
+        self, private_key_path: Optional[str] = None, password: Optional[str] = None
+    ) -> None:
         """
         Instantiate an ethereum crypto object.
 
         :param private_key_path: the private key path of the agent
+        :param password: the password to encrypt/decrypt the private key.
         """
-        super().__init__(private_key_path=private_key_path)
+        super().__init__(private_key_path=private_key_path, password=password)
         self._public_key = self.entity.get_verifying_key().to_string("compressed").hex()
         self._address = self.helper.get_address_from_public_key(self.public_key)
 
@@ -313,17 +460,29 @@ class CosmosCrypto(Crypto[SigningKey]):
         return self._address
 
     @classmethod
-    def load_private_key_from_path(cls, file_name: str) -> SigningKey:
+    def load_private_key_from_path(
+        cls, file_name: str, password: Optional[str] = None
+    ) -> SigningKey:
         """
         Load a private key in hex format from a file.
 
         :param file_name: the path to the hex file.
+        :param password: the password to encrypt/decrypt the private key.
         :return: the Entity.
         """
-        path = Path(file_name)
-        with open_file(path, "r") as key:
-            data = key.read()
-            signing_key = SigningKey.from_string(bytes.fromhex(data), curve=SECP256k1)
+        private_key = cls.load(file_name, password)
+        try:
+            signing_key = SigningKey.from_string(
+                hex_to_bytes_for_key(private_key), curve=SECP256k1
+            )
+        except KeyIsIncorrect as e:
+            if not password:
+                raise KeyIsIncorrect(
+                    f"Error on key `{file_name}` load! Try to specify `password`: Error: {repr(e)} "
+                ) from e
+            raise KeyIsIncorrect(
+                f"Error on key `{file_name}` load! Wrong password?: Error: {repr(e)} "
+            ) from e
         return signing_key
 
     def sign_message(  # pylint: disable=unused-argument
@@ -435,14 +594,31 @@ class CosmosCrypto(Crypto[SigningKey]):
         signing_key = SigningKey.generate(curve=SECP256k1)
         return signing_key
 
-    def dump(self, fp: BinaryIO) -> None:
+    def encrypt(self, password: str) -> str:
         """
-        Serialize crypto object as binary stream to `fp` (a `.write()`-supporting file-like object).
+        Encrypt the private key and return in json.
 
-        :param fp: the output file pointer. Must be set in binary mode (mode='wb')
-        :return: None
+        :param private_key: the raw private key.
+        :param password: the password to decrypt.
+        :return: json string containing encrypted private key.
         """
-        fp.write(self.private_key.encode("utf-8"))
+        return DataEncrypt.encrypt(self.private_key.encode(), password).decode()
+
+    @classmethod
+    def decrypt(cls, keyfile_json: str, password: str) -> str:
+        """
+        Decrypt the private key and return in raw form.
+
+        :param keyfile_json: json string containing encrypted private key.
+        :param password: the password to decrypt.
+        :return: the raw private key.
+        """
+        try:
+            return DataEncrypt.decrypt(keyfile_json.encode(), password).decode()
+        except UnicodeDecodeError as e:
+            raise ValueError(
+                "key file data can not be translated to string! bad bassword?"
+            ) from e
 
 
 class _CosmosApi(LedgerApi):
@@ -457,13 +633,13 @@ class _CosmosApi(LedgerApi):
         self.denom = kwargs.pop("denom", DEFAULT_CURRENCY_DENOM)
         self.chain_id = kwargs.pop("chain_id", DEFAULT_CHAIN_ID)
         self.cli_command = kwargs.pop("cli_command", DEFAULT_CLI_COMMAND)
-        self.cosmwasm_versions = kwargs.pop(
+        self.cosmwasm_version = kwargs.pop(
             "cosmwasm_version", DEFAULT_COSMWASM_VERSIONS
         )
         valid_specifiers = list(MESSAGE_FORMAT_BY_VERSION["instantiate"].keys())
-        if self.cosmwasm_versions not in valid_specifiers:
-            raise ValueError(
-                f"Valid CosmWasm version specifiers: {valid_specifiers}. Received invalid specifier={self.cosmwasm_versions}!"
+        if self.cosmwasm_version not in valid_specifiers:
+            raise ValueError(  # pragma: nocover
+                f"Valid CosmWasm version specifiers: {valid_specifiers}. Received invalid specifier={self.cosmwasm_version}!"
             )
 
     @property
@@ -550,7 +726,7 @@ class _CosmosApi(LedgerApi):
             deployer_address
         )
         if account_number is None or sequence is None:
-            return None
+            return None  # pragma: nocover
         label = kwargs.pop("label", None)
         code_id = kwargs.pop("code_id", None)
         amount = kwargs.pop("amount", None)
@@ -624,7 +800,7 @@ class _CosmosApi(LedgerApi):
         :return: the unsigned CosmWasm contract deploy message
         """
         store_msg = {
-            "type": MESSAGE_FORMAT_BY_VERSION["store"][self.cosmwasm_versions],
+            "type": MESSAGE_FORMAT_BY_VERSION["store"][self.cosmwasm_version],
             "value": {
                 "sender": deployer_address,
                 "wasm_byte_code": contract_interface[_BYTECODE],
@@ -669,12 +845,12 @@ class _CosmosApi(LedgerApi):
         :param memo: any string comment.
         :return: the unsigned CosmWasm InitMsg
         """
-        if self.cosmwasm_versions != DEFAULT_COSMWASM_VERSIONS and amount == 0:
+        if self.cosmwasm_version != DEFAULT_COSMWASM_VERSIONS and amount == 0:
             init_funds = []
         else:
             init_funds = [{"amount": str(amount), "denom": denom}]
         instantiate_msg = {
-            "type": MESSAGE_FORMAT_BY_VERSION["instantiate"][self.cosmwasm_versions],
+            "type": MESSAGE_FORMAT_BY_VERSION["instantiate"][self.cosmwasm_version],
             "value": {
                 "sender": deployer_address,
                 "code_id": str(code_id),
@@ -727,13 +903,13 @@ class _CosmosApi(LedgerApi):
             sender_address
         )
         if account_number is None or sequence is None:
-            return None
-        if self.cosmwasm_versions != DEFAULT_COSMWASM_VERSIONS and amount == 0:
+            return None  # pragma: nocover
+        if self.cosmwasm_version != DEFAULT_COSMWASM_VERSIONS and amount == 0:
             sent_funds = []
         else:
             sent_funds = [{"amount": str(amount), "denom": denom}]
         execute_msg = {
-            "type": MESSAGE_FORMAT_BY_VERSION["execute"][self.cosmwasm_versions],
+            "type": MESSAGE_FORMAT_BY_VERSION["execute"][self.cosmwasm_version],
             "value": {
                 "sender": sender_address,
                 "contract": contract_address,
@@ -854,7 +1030,7 @@ class _CosmosApi(LedgerApi):
             sender_address
         )
         if account_number is None or sequence is None:
-            return None
+            return None  # pragma: nocover
         transfer_msg = {
             "type": "cosmos-sdk/MsgSend",
             "value": {
@@ -960,7 +1136,7 @@ class _CosmosApi(LedgerApi):
         try:
             _type = cast(dict, tx_signed.get("value", {})).get("msg", [])[0]["type"]
             result = _type in [
-                value[self.cosmwasm_versions]
+                value[self.cosmwasm_version]
                 for value in MESSAGE_FORMAT_BY_VERSION.values()
             ]
         except (KeyError, IndexError):  # pragma: nocover

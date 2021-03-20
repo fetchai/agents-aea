@@ -1,5 +1,5 @@
 ``` bash
-aea fetch fetchai/gym_aea:0.20.0 --alias my_gym_aea
+aea fetch fetchai/gym_aea:0.21.0 --alias my_gym_aea
 cd my_gym_aea
 aea install
 ```
@@ -22,6 +22,10 @@ cp -a ../examples/gym_ex/gyms/. gyms/
 ```
 ``` bash
 aea config set vendor.fetchai.connections.gym.config.env 'gyms.env.BanditNArmedRandom'
+```
+``` bash
+aea generate-key fetchai
+aea add-key fetchai
 ```
 ``` bash
 aea run

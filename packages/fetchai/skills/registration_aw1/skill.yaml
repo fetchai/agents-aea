@@ -1,14 +1,14 @@
 name: registration_aw1
 author: fetchai
-version: 0.6.0
+version: 0.7.0
 type: skill
 description: The registration_aw1 skill is a skill for registration in Agent World
   1.
 license: Apache-2.0
-aea_version: '>=0.11.0, <0.12.0'
+aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint:
   README.md: Qmc9dfzqAXJWCJxYNqLd1yz8U7p4DQNbGGMmXMP73wUvJR
-  __init__.py: QmRLQJyb1DKtqh2kmA3gnv2Q1dfjBtC6F2JVS6brdR2cVK
+  __init__.py: QmUwzhSGUoim45wWNry4CsFokugnWnj6bEfsqajRrAWrsB
   behaviours.py: QmeHdwnNPzhGfCD8wZGNqaqyhkfozLByTqd8CzqRYXumgU
   dialogues.py: QmQLCbYVWeqhBwqg7KP5WpZcx7eX3g8zhwfNiR1RRufWfe
   handlers.py: QmZJDxpZaCFf5c1jpM1owK66AjsA2oajb2JtC9rqgWkh5n
@@ -49,5 +49,7 @@ models:
       tweet: PUT_THE_LINK_TO_YOUR_TWEET_HERE
       whitelist: []
     class_name: Strategy
-dependencies: {}
+dependencies:
+  aea-ledger-ethereum:
+    version: <2.0.0,>=1.0.0rc1
 is_abstract: false

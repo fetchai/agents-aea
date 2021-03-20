@@ -1,20 +1,20 @@
 name: simple_oracle
 author: fetchai
-version: 0.7.0
+version: 0.8.0
 type: skill
 description: This skill deploys a Fetch oracle contract
 license: Apache-2.0
-aea_version: '>=0.11.0, <0.12.0'
+aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint:
   README.md: QmcvyraEedZd5PEnmbijkkcsDrQQKDVJxPDUXVrwP3Ni3J
-  __init__.py: QmZXoRFUzSr1muZEyJYUeHQjWZp6jPmYTeHTsXJ47fXnV6
+  __init__.py: Qma7RnDbqAVQ2cJ4JP2PpE4d9s8ZkxUbQQtQ82dfR563fe
   behaviours.py: QmdNXfcfA8CUkuj9UDHB7xqYp5vE15jHhuVs44CrV6Yecj
   dialogues.py: QmVCJ1WoW4xEDrYs56VbTvMiKu1YST7T3DrTjhAyYoBFJa
   handlers.py: QmZgXkCbzzBFGxe9vu3jJyWojg1SZDpBuW97XduXaG1MPT
   strategy.py: QmdycLa71UeUGghbBSrXD6g2viZn7BK2njiwTRLPkNLAe4
 fingerprint_ignore_patterns: []
 contracts:
-- fetchai/oracle:0.5.0
+- fetchai/oracle:0.6.0
 protocols:
 - fetchai/contract_api:0.12.0
 - fetchai/default:0.13.0
@@ -76,6 +76,10 @@ models:
       oracle_value_name: null
       update_function: updateOracleValue
     class_name: Strategy
-dependencies: {}
+dependencies:
+  aea-ledger-ethereum:
+    version: <2.0.0,>=1.0.0rc1
+  aea-ledger-fetchai:
+    version: <2.0.0,>=1.0.0rc1
 is_abstract: false
 connections: []

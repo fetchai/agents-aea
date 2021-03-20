@@ -1,14 +1,14 @@
 name: tac_control
 author: fetchai
-version: 0.17.0
+version: 0.18.0
 type: skill
 description: The tac control skill implements the logic for an AEA to control an instance
   of the TAC.
 license: Apache-2.0
-aea_version: '>=0.11.0, <0.12.0'
+aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint:
   README.md: QmPakq2qYHCenyWKfqQHRLWdF7uo6eG24GTprsBfrkyny2
-  __init__.py: QmUrVVRoiGuWHPLhV1aFkTqkKspxwP6bTMVDWZaPFFJGCC
+  __init__.py: QmUBkVL51ihoEUPfn61Rj3eYtWmRz17qURgxosnt6K9LJV
   behaviours.py: QmRjE2BzYjr2UtbpCfesWkRcpqb3v7ifqbqUr7yoZGPNSK
   dialogues.py: QmbQt96MAo8f4xjZKHLwRpiu1jDkyRV6k6FfK16zGkcMid
   game.py: QmfLo38zSkPgwD115waFvXhEhuY3oVTYAZFGb4492o2XN8
@@ -18,7 +18,7 @@ fingerprint:
 fingerprint_ignore_patterns: []
 connections: []
 contracts:
-- fetchai/erc1155:0.17.0
+- fetchai/erc1155:0.18.0
 protocols:
 - fetchai/default:0.13.0
 - fetchai/oef_search:0.14.0
@@ -74,5 +74,9 @@ models:
     args: {}
     class_name: TacDialogues
 dependencies:
+  aea-ledger-ethereum:
+    version: <2.0.0,>=1.0.0rc1
+  aea-ledger-fetchai:
+    version: <2.0.0,>=1.0.0rc1
   numpy: {}
 is_abstract: false

@@ -156,7 +156,7 @@ Confirm password:
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.11.1
+v1.0.0rc1
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
@@ -173,7 +173,7 @@ This is a simple demo that introduces you to the main components of an AEA.
 The fastest way to have your first AEA is to fetch one that already exists!
 
 ``` bash
-aea fetch fetchai/my_first_aea:0.22.0
+aea fetch fetchai/my_first_aea:0.23.0
 cd my_first_aea
 ```
 
@@ -234,13 +234,22 @@ TO,SENDER,PROTOCOL_ID,ENCODED_MESSAGE,
 For example:
 
 ``` bash
-recipient_aea,sender_aea,fetchai/default:0.1.0,\x08\x01\x12\x011*\x07\n\x05hello,
+recipient_aea,sender_aea,fetchai/default:1.0.0,\x08\x01\x12\x011*\x07\n\x05hello,
 ```
 
 ### Install AEA dependencies
 
 ``` bash
 aea install
+```
+
+### Add and create a private key
+
+All AEAs need a private key to run. Add one now:
+
+``` bash
+aea generate-key fetchai
+aea add-key fetchai
 ```
 
 ### Run the AEA
@@ -260,7 +269,7 @@ You will see the echo skill running in the terminal window (an output similar to
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v0.11.1
+v1.0.0rc1
 
 Starting AEA 'my_first_aea' in 'async' mode ...
 info: Echo Handler: setup method called.
@@ -299,7 +308,7 @@ info: Echo Behaviour: act method called.
 Optionally, from a different terminal and same directory (i.e. the <code>my_first_aea</code> project), you can send the AEA a message wrapped in an envelope via the input file.
 
 ``` bash
-echo 'my_first_aea,sender_aea,fetchai/default:0.1.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,' >> input_file
+echo 'my_first_aea,sender_aea,fetchai/default:1.0.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,' >> input_file
 ```
 
 You will see the <code>Echo Handler</code> dealing with the envelope and responding with the same message to the <code>output_file</code>, and also decoding the Base64 encrypted message in this case.

@@ -47,7 +47,7 @@ author: dummy_author
 version: 1.0.0
 description: dummy_aea agent description
 license: Apache-2.0
-aea_version: '>=0.11.0, <0.12.0'
+aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
@@ -232,7 +232,7 @@ def test_agent_attribute_get_set():
         agent_config_manager.get_variable("agent.does_not_exist")
 
     agent_config_manager.validate_current_config()
-    agent_config_manager.verify_or_create_private_keys(DUMMY_AEA, lambda x, y, z: None)
+    agent_config_manager.verify_private_keys(DUMMY_AEA, lambda x, y, z: None)
 
 
 def test_agent_attribute_get_overridables():

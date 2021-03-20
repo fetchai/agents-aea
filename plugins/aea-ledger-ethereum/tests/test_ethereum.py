@@ -20,6 +20,7 @@
 
 import hashlib
 import logging
+import tempfile
 import time
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -31,8 +32,14 @@ from aea_ledger_ethereum import (
     EthereumCrypto,
     EthereumFaucetApi,
     LruLockWrapper,
+    get_gas_price_strategy,
+    requests,
 )
+from web3 import Web3
 from web3._utils.request import _session_cache as session_cache
+from web3.gas_strategies.rpc import rpc_gas_price_strategy
+
+from aea.crypto.helpers import DecryptError
 
 from tests.conftest import DEFAULT_GANACHE_CHAIN_ID, MAX_FLAKY_RERUNS, ROOT_DIR
 
@@ -303,3 +310,60 @@ def test_session_cache():
     assert session_cache[1] == 1
     del session_cache[1]
     assert 1 not in session_cache
+
+
+def test_gas_price_strategy_eth_gasstation():
+    """Test the gas price strategy when using eth gasstation."""
+    gas_price_strategy = "fast"
+    excepted_result = 10
+    callable_ = get_gas_price_strategy(gas_price_strategy, "api_key")
+    with patch.object(
+        requests,
+        "get",
+        return_value=MagicMock(
+            status_code=200,
+            json=MagicMock(return_value={gas_price_strategy: excepted_result}),
+        ),
+    ):
+        result = callable_(Web3, "tx_params")
+    assert result == excepted_result / 10 * 1000000000
+
+
+def test_gas_price_strategy_not_supported(caplog):
+    """Test the gas price strategy when not supported."""
+    gas_price_strategy = "superfast"
+    with caplog.at_level(logging.DEBUG, logger="aea.crypto.ethereum._default_logger"):
+        callable_ = get_gas_price_strategy(gas_price_strategy, "api_key")
+    assert callable_ == rpc_gas_price_strategy
+    assert (
+        f"Gas price strategy `{gas_price_strategy}` not in list of supported modes:"
+        in caplog.text
+    )
+
+
+def test_gas_price_strategy_no_api_key(caplog):
+    """Test the gas price strategy when no api key is provided."""
+    gas_price_strategy = "fast"
+    with caplog.at_level(logging.DEBUG, logger="aea.crypto.ethereum._default_logger"):
+        callable_ = get_gas_price_strategy(gas_price_strategy, None)
+    assert callable_ == rpc_gas_price_strategy
+    assert (
+        "No ethgasstation api key provided. Falling back to `rpc_gas_price_strategy`."
+        in caplog.text
+    )
+
+
+def test_dump_load_with_password():
+    """Test dumping and loading a key with password."""
+    with tempfile.TemporaryDirectory() as dirname:
+        encrypted_file_name = Path(dirname, "eth_key_encrypted")
+        password = "somePwd"  # nosec
+        ec = EthereumCrypto()
+        ec.dump(encrypted_file_name, password)
+        assert encrypted_file_name.exists()
+        with pytest.raises(DecryptError, match="Decrypt error! Bad password?"):
+            ec2 = EthereumCrypto.load_private_key_from_path(
+                encrypted_file_name, "wrongPassw"
+            )
+        ec2 = EthereumCrypto(encrypted_file_name, password)
+        assert ec2.private_key == ec.private_key

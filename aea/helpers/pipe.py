@@ -335,7 +335,7 @@ class TCPSocketChannel(IPCChannel):
         self._sock = None  # type: Optional[TCPSocketProtocol]
 
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.bind(("", 0))
+        s.bind(("127.0.0.1", 0))
         s.listen(1)
         self._port = s.getsockname()[1]
         s.close()
