@@ -20,10 +20,12 @@
 """This module contains the class to connect to an oracle client contract."""
 
 import logging
+from typing import cast
 
 from aea_ledger_ethereum import EthereumApi
+from aea_ledger_fetchai import FetchAIApi
 
-from aea.common import Address
+from aea.common import Address, JSONLike
 from aea.configurations.base import PublicId
 from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
@@ -72,5 +74,9 @@ class FetchOracleClientContract(Contract):
                 }
             )
             tx = ledger_api.update_with_gas_estimate(tx)
+        if ledger_api.identifier == FetchAIApi.identifier:
+            msg = {"query_oracle_value": {}}  # type: JSONLike
+            fetchai_api = cast(FetchAIApi, ledger_api)
+            tx = fetchai_api.execute_contract_query(contract_address, msg)
             return tx
         raise NotImplementedError

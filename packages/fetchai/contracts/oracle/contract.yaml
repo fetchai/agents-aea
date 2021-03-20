@@ -8,13 +8,16 @@ aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint:
   README.md: QmWgKLF6Fe4tESTdhStxYJrEVKP2xSthd2fcMm2LSfkygL
   __init__.py: QmRmf3Q5F6nQMrTEt59suBNw6zfgTVQX68E7CAuKmCnhAM
-  contract.py: QmVgKcox9JLi7HgFw1StN9iAM3jxoi59asg9ssqRL9r6e6
+  contract.py: QmWTQTNYc66krmWHaLesfxhEYYr7sFcVLXRMJbqKcmMwRa
   contracts/FetchOracle.sol: QmadnUCtsVobBGMxiWAkqMptC9acSMBGj5x4Z4V2UhnFx8
 fingerprint_ignore_patterns:
 - build/*
 class_name: FetchOracleContract
 contract_interface_paths:
   ethereum: build/FetchOracle.json
+  fetchai: build/oracle.wasm
 dependencies:
   aea-ledger-ethereum:
-    version: <2.0.0,>=1.0.0rc1
+    version: <0.3.0,>=0.2.0
+  aea-ledger-fetchai:
+    version: <0.3.0,>=0.2.0

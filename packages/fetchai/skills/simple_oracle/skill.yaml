@@ -8,10 +8,10 @@ aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint:
   README.md: QmcvyraEedZd5PEnmbijkkcsDrQQKDVJxPDUXVrwP3Ni3J
   __init__.py: Qma7RnDbqAVQ2cJ4JP2PpE4d9s8ZkxUbQQtQ82dfR563fe
-  behaviours.py: QmdNXfcfA8CUkuj9UDHB7xqYp5vE15jHhuVs44CrV6Yecj
+  behaviours.py: Qmes3sypsSxWdNnjtzhUKUkPVcqjomD1FkmBdWyUtP4ohk
   dialogues.py: QmVCJ1WoW4xEDrYs56VbTvMiKu1YST7T3DrTjhAyYoBFJa
-  handlers.py: QmZgXkCbzzBFGxe9vu3jJyWojg1SZDpBuW97XduXaG1MPT
-  strategy.py: QmdycLa71UeUGghbBSrXD6g2viZn7BK2njiwTRLPkNLAe4
+  handlers.py: QmNkYdBuADjKyusC2s1zbicgpFMik552e2oCaNU71XEi7k
+  strategy.py: QmY4bUU98FWDvZuif6TsowUUhSsh1hFSVsawsZ89YiVABK
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/oracle:0.6.0

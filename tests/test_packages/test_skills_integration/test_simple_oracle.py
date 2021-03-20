@@ -224,7 +224,6 @@ class TestOracleSkills(AEATestCaseManyFlaky, UseGanache):
             "transaction was successfully submitted. Transaction digest=",
             "requesting transaction receipt.",
             "transaction was successfully settled. Transaction receipt=",
-            "Oracle client contract successfully deployed!",
             "Oracle client transactions approved!",
             "Oracle value successfully requested!",
         )
