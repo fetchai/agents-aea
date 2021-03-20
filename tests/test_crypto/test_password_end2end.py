@@ -35,7 +35,7 @@ class TestKeyEncryption(AEATestCaseEmpty):
         with cd(self._get_cwd()):
             plain_file_name = Path(f"{ledger_name}_key")
             encrypted_file_name = Path(f"{ledger_name}_key_encrypted")
-            password = "somePwd"
+            password = "somePwd"  # nosec
             self.invoke("generate-key", ledger_name, str(plain_file_name))
             assert plain_file_name.exists()
 

@@ -26,6 +26,7 @@ import time
 from pathlib import Path
 from unittest import mock
 from unittest.mock import MagicMock, call
+from uuid import uuid4
 
 import pytest
 from aea_ledger_fetchai import FetchAIApi, FetchAICrypto, FetchAIFaucetApi
@@ -70,6 +71,23 @@ def test_creation(fetchai_private_key_file):
     assert FetchAICrypto(
         fetchai_private_key_file
     ), "Did not manage to load the cosmos private key"
+
+
+def test_key_file_encryption_decryption(fetchai_private_key_file):
+    """Test fetchai private key encrypted and decrypted correctly."""
+    fetchai = FetchAICrypto(fetchai_private_key_file)
+    pk_data = Path(fetchai_private_key_file).read_text()
+    password = uuid4().hex
+    encrypted_data = fetchai.encrypt(password)
+    decrypted_data = fetchai.decrypt(encrypted_data, password)
+    assert encrypted_data != pk_data
+    assert pk_data == decrypted_data
+
+    with pytest.raises(ValueError, match="Decrypt error! Bad password?"):
+        fetchai.decrypt(encrypted_data, "BaD_PassWord")
+
+    with pytest.raises(ValueError, match="Bad encrypted key format!"):
+        fetchai.decrypt("some_data" * 16, "BaD_PassWord")
 
 
 def test_initialization():
