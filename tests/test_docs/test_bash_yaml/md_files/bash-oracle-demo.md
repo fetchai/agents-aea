@@ -34,15 +34,24 @@ aea config set --type dict agent.default_routing \
 "fetchai/http:0.13.0": "fetchai/http_client:0.19.0",
 "fetchai/ledger_api:0.11.0": "fetchai/ledger:0.15.0"
 }'
+```
+```bash
+LEDGER_ID=fetchai
+```
+```bash
+LEDGER_ID=ethereum
+```
+```bash
+aea config set agent.default_ledger $LEDGER_ID
 aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
-'[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
+'[{"identifier": "acn", "ledger_id": '"\"$LEDGER_ID\""', "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
 ```
 ``` bash
-aea config set agent.default_ledger ethereum
+aea generate-key $LEDGER_ID
+aea add-key $LEDGER_ID
 ```
-``` bash
-aea generate-key ethereum
-aea add-key ethereum
+```bash
+aea generate-wealth $LEDGER_ID
 ```
 ``` bash
 aea generate-key fetchai fetchai_connection_private_key.txt
@@ -81,11 +90,14 @@ aea config set --type dict agent.default_routing \
 }'
 ```
 ``` bash
-aea config set agent.default_ledger ethereum
+aea config set agent.default_ledger $LEDGER_ID
 ```
 ``` bash
-aea generate-key ethereum
-aea add-key ethereum
+aea generate-key $LEDGER_ID
+aea add-key $LEDGER_ID
+```
+```bash
+aea generate-wealth $LEDGER_ID
 ```
 ``` bash
 docker run -p 8545:8545 trufflesuite/ganache-cli:latest --verbose --gasPrice=0 --gasLimit=0x1fffffffffffff --account="$(cat coin_price_oracle/ethereum_private_key.txt),1000000000000000000000" --account="$(cat coin_price_oracle_client/ethereum_private_key.txt),1000000000000000000000"
@@ -97,7 +109,7 @@ aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.erc20_ad
 aea run
 ```
 ``` bash
-info: [coin_price_oracle] Oracle contract successfully deployed!
+info: [coin_price_oracle] Oracle contract successfully deployed at address: ...
 ...
 info: [coin_price_oracle] Oracle role successfully granted!
 ...

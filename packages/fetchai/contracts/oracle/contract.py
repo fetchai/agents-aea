@@ -20,9 +20,10 @@
 """This module contains the class to connect to an Oracle contract."""
 
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, cast
 
 from aea_ledger_ethereum import EthereumApi
+from aea_ledger_fetchai import FetchAIApi
 
 from aea.common import Address, JSONLike
 from aea.configurations.base import PublicId
@@ -38,7 +39,7 @@ def keccak256(input_: bytes) -> bytes:
     return bytes(bytearray.fromhex(EthereumApi.get_hash(input_)[2:]))
 
 
-CONTRACT_ROLE = keccak256(b"ORACLE_ROLE")
+ORACLE_ROLE = "ORACLE_ROLE"
 
 _default_logger = logging.getLogger("aea.packages.fetchai.contracts.oracle.contract")
 
@@ -53,6 +54,7 @@ class FetchOracleContract(Contract):
         contract_address: Address,
         oracle_address: Address,
         gas: int = 0,
+        tx_fee: int = 0,
     ) -> JSONLike:
         """
         Get transaction to grant oracle role to recipient_address
@@ -66,8 +68,9 @@ class FetchOracleContract(Contract):
         if ledger_api.identifier == EthereumApi.identifier:
             nonce = ledger_api.api.eth.getTransactionCount(oracle_address)
             instance = cls.get_instance(ledger_api, contract_address)
+            oracle_role = keccak256(ORACLE_ROLE.encode("utf-8"))
             tx = instance.functions.grantRole(
-                CONTRACT_ROLE, oracle_address
+                oracle_role, oracle_address
             ).buildTransaction(
                 {
                     "gas": gas,
@@ -76,6 +79,13 @@ class FetchOracleContract(Contract):
                 }
             )
             tx = ledger_api.update_with_gas_estimate(tx)
+            return tx
+        if ledger_api.identifier == FetchAIApi.identifier:
+            msg = {"grant_role": {"role": ORACLE_ROLE, "address": oracle_address}}
+            fetchai_api = cast(FetchAIApi, ledger_api)
+            tx = fetchai_api.get_handle_transaction(
+                oracle_address, contract_address, msg, amount=0, tx_fee=tx_fee, gas=gas
+            )
             return tx
         raise NotImplementedError
 
@@ -86,8 +96,9 @@ class FetchOracleContract(Contract):
         contract_address: Address,
         oracle_address: Address,
         update_function: str,
-        update_args: Dict[str, Any],
+        update_kwargs: Dict[str, Any],
         gas: int = 0,
+        tx_fee: int = 0,
     ) -> JSONLike:
         """
         Update oracle value in contract
@@ -96,13 +107,14 @@ class FetchOracleContract(Contract):
         :param contract_address: the contract address.
         :param oracle_address: the oracle address.
         :param update_function: the oracle value update function.
-        :param update_args: the arguments to the contract's update function.
+        :param update_kwargs: the arguments to the contract's update function.
         :return: None
         """
         if ledger_api.identifier == EthereumApi.identifier:
             nonce = ledger_api.api.eth.getTransactionCount(oracle_address)
             instance = cls.get_instance(ledger_api, contract_address)
             function = getattr(instance.functions, update_function)
+            update_args = list(update_kwargs.values())
             intermediate = function(*update_args)
             tx = intermediate.buildTransaction(
                 {
@@ -112,5 +124,18 @@ class FetchOracleContract(Contract):
                 }
             )
             tx = ledger_api.update_with_gas_estimate(tx)
+            return tx
+        if ledger_api.identifier in FetchAIApi.identifier:
+
+            # Convert all values to strings for CosmWasm message
+            update_kwargs_str = {
+                key: str(value) for (key, value) in update_kwargs.items()
+            }
+
+            msg = {update_function: update_kwargs_str}
+            fetchai_api = cast(FetchAIApi, ledger_api)
+            tx = fetchai_api.get_handle_transaction(
+                oracle_address, contract_address, msg, amount=0, tx_fee=tx_fee, gas=gas
+            )
             return tx
         raise NotImplementedError
