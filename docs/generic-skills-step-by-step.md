@@ -1013,7 +1013,7 @@ The following properties and methods deal with different aspects of the strategy
         Check if the query matches the supply.
 
         :param query: the query
-        :return: bool indiciating whether matches or not
+        :return: bool indicating whether matches or not
         """
         return query.check(self.get_service_description())
 

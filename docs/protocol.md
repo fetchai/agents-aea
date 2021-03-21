@@ -211,7 +211,7 @@ msg = OefSearchMessage(
 )
 ```
 
-* To search a service, we simiarly require a reference to the dialogue in string form, and then the query we would like the search node to evaluate, for instance
+* To search a service, we similarly require a reference to the dialogue in string form, and then the query we would like the search node to evaluate, for instance
 ``` python
 from aea.helpers.search.models import Constraint, ConstraintType, Query
 

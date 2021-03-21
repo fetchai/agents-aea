@@ -28,25 +28,25 @@ golangci-lint run
 ### Messaging patterns inwards ACN:
 
 
-Connection (p2p_libp2p_client) > Delegate Client > Relay Peer > Peer (Discouraged!)
+Connection (`p2p_libp2p_client`) > Delegate Client > Relay Peer > Peer (Discouraged!)
 
-Connection (p2p_libp2p_client)  > Delegate Client > Peer
+Connection (`p2p_libp2p_client`)  > Delegate Client > Peer
 
-Connection (p2p_libp2p) > Relay Peer > Peer
+Connection (`p2p_libp2p`) > Relay Peer > Peer
 
-Connection (p2p_libp2p) > Peer
+Connection (`p2p_libp2p`) > Peer
 
 
 ### Messaging patterns outwards ACN
 
 
-Peer > Relay Peer > Delegate Client > Connection (p2p_libp2p_client) (Discouraged!)
+Peer > Relay Peer > Delegate Client > Connection (`p2p_libp2p_client`) (Discouraged!)
 
-Peer > Relay Peer > Connection (p2p_libp2p)
+Peer > Relay Peer > Connection (`p2p_libp2p`)
 
-Peer > Delegate Client > Connection (p2p_libp2p_client)
+Peer > Delegate Client > Connection (`p2p_libp2p_client`)
 
-Peer > Connection (p2p_libp2p)
+Peer > Connection (`p2p_libp2p`)
 
 
 In total 4*4 = 16 patterns (practically: 3*3 = 9 patterns)
@@ -55,7 +55,7 @@ In total 4*4 = 16 patterns (practically: 3*3 = 9 patterns)
 
 ACN should guarantee total ordering of messages for all agent pairs, independent of the type of connection and ACN messaging pattern used.
 
-## Advanced feature (post v1):
+## Advanced feature (post `v1`):
 
 Furthermore, there is the agent mobility. An agent can move between entry-points (Relay Peer/Peer/Delegate Client). The ACN must ensure that all messaging patterns maintain total ordering of messages for agent pairs during the move.
 
@@ -68,4 +68,3 @@ The ACN has the following protocols:
 - unregister (dealt with by DHT defaults)
 - DHT default protocols in libp2p
 - message delivery protocol
-

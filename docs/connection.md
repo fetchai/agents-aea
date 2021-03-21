@@ -4,7 +4,7 @@ The messages constructed or received by a connection are eventually processed by
 
 <img src="../assets/multiplexer.png" alt="Multiplexer of an AEA" class="center" style="display: block; margin-left: auto; margin-right: auto;width:50%;">
 
-An `AEA` can interact with multiple connections at the same time via the <a href="../api/connections/base#connection-objects">`Multiplexer`</a>. Connections are passive in terms of multiplexer interactions (its methods are called by the Multiplexer), but they can run their own async or threaded tasks.
+An `AEA` can interact with multiple connections at the same time via the <a href="../api/connections/base#connection-objects">`Multiplexer`</a>. Connections are passive in terms of multiplexer interactions (its methods are called by the Multiplexer), but they can run their own asynchronous or threaded tasks.
 
 The `Multiplexer` maintains an <a href="../api/multiplexer#inbox-objects">`InBox`</a> and <a href="../api/multiplexer#outbox-objects">`OutBox`</a>, which are, respectively, queues for incoming and outgoing envelopes and their contained messages.
 
@@ -22,9 +22,9 @@ This will scaffold a connection package called `my_new_connection` with three fi
 * `connection.py` containing the scaffolded connection class
 * `connection.yaml` containing the scaffolded configuration file
 
-As a developer you have the choice between implementing a sync or async interface. The scaffolded `connection.py` file contains two classes: the `MyScaffoldAsyncConnection` inherited from the <a href="../api/connections/base#connection-objects">`Connection`</a> base class and the `MyScaffoldSyncConnection` inherited from the <a href="../api/connections/base#connection-objects">`BaseSyncConnection`</a>. Remove the unused class.
+As a developer you have the choice between implementing a sync or asynchronous interface. The scaffolded `connection.py` file contains two classes: the `MyScaffoldAsyncConnection` inherited from the <a href="../api/connections/base#connection-objects">`Connection`</a> base class and the `MyScaffoldSyncConnection` inherited from the <a href="../api/connections/base#connection-objects">`BaseSyncConnection`</a>. Remove the unused class.
 
-### Primary methods to develop - async connection interface
+### Primary methods to develop - asynchronous connection interface
 
 The developer needs to implement four public coroutines:
 
@@ -40,16 +40,16 @@ The framework provides a demo `stub` connection which implements an I/O reader a
 
 ### Primary methods to develop - sync connection interface
 
-The <a href="../api/connections/base#connection-objects">`BaseSyncConnection`</a> useses executors to execute synchronous code from the asynchronous context of the `Multiplexer` in executors/threads, which are limited by the amount of configured workers.
+The <a href="../api/connections/base#connection-objects">`BaseSyncConnection`</a> uses executors to execute synchronous code from the asynchronous context of the `Multiplexer` in executors/threads, which are limited by the amount of configured workers.
 
-The async methods `connect`, `disconnect` and `send` are converted to callbacks which the developer implements:
+The asynchronous methods `connect`, `disconnect` and `send` are converted to callbacks which the developer implements:
 * `on_connect`
 * `on_disconnect`
 * `on_send`
 
 All of these methods will be executed in the executor pool.
 
-Every method can create a message by putting it into the thread/async friendly queue that is consumed by the `Multiplexer`.
+Every method can create a message by putting it into the thread/asynchronous friendly queue that is consumed by the `Multiplexer`.
 
 The `receive` coroutine has no direct equivalent. Instead, the developer implements a `main` method which runs synchronously in the background.
 
@@ -77,7 +77,7 @@ cert_requests: []
 - `connections` specifies the list of other connection this connection depends on
 - `protocols` specifies the list of protocols this connection depends on
 - `class_name` needs to match the name of the connection class in `connection.py`
-- `config` can contain arbitrary configuration information which is made available in the constructor of the connection as keyword arguments (**kwargs)
+- `config` can contain arbitrary configuration information which is made available in the constructor of the connection as keyword arguments (`**kwargs`)
 - `excluded_protocols` lists the protocols which cannot be used in this connection
 - `restricted_to_protocols` lists the protocols which this connection is restricted to be used by
 - `dependencies` lists any Python dependencies of the connection package

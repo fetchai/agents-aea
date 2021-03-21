@@ -48,7 +48,6 @@ class MyAgent(Agent):
 
     def setup(self):
         """Setup the agent."""
-        pass
 
     def act(self):
         """Act implementation."""
@@ -83,7 +82,6 @@ class MyAgent(Agent):
 
     def teardown(self):
         """Teardown the agent."""
-        pass
 
 
 def run():
