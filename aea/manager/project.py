@@ -16,7 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This module contains the implementation of AEA agents project configuiration."""
+"""This module contains the implementation of AEA agents project configuration."""
 import os
 from copy import deepcopy
 from pathlib import Path
@@ -169,7 +169,7 @@ class AgentAlias(_Base):
         self._ensure_private_keys()
 
     def _ensure_private_keys(self) -> None:
-        """Add proviate keys of not present in the config."""
+        """Add private keys if not present in the config."""
         builder = self._get_builder(self.agent_config, self.project.path)
         default_ledger = builder.get_default_ledger()
 

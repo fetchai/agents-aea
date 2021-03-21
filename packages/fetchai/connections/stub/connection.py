@@ -129,7 +129,7 @@ class StubConnection(Connection):
 
     async def _file_read_and_trunc(self, delay: float = 0.001) -> AsyncIterable[bytes]:
         """
-        Generate input file read chunks and trunc data already read.
+        Generate input file read chunks and truncate data already read.
 
         :param delay: float, delay on empty read.
 
@@ -153,7 +153,7 @@ class StubConnection(Connection):
                 await asyncio.sleep(delay)
 
     async def read_envelopes(self) -> None:
-        """Read envelopes from inptut file, decode and put into in_queue."""
+        """Read envelopes from input file, decode and put into in_queue."""
         self._ensure_connected()
         if self.in_queue is None:  # pragma: nocover
             raise ValueError("Input queue not initialized.")

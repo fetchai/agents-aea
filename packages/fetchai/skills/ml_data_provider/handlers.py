@@ -49,7 +49,6 @@ class MlTradeHandler(Handler):
 
     def setup(self) -> None:
         """Set up the handler."""
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -83,7 +82,6 @@ class MlTradeHandler(Handler):
 
         :return: None
         """
-        pass
 
     def _handle_unidentified_dialogue(self, ml_trade_msg: MlTradeMessage) -> None:
         """
@@ -194,7 +192,6 @@ class LedgerApiHandler(Handler):
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -230,7 +227,6 @@ class LedgerApiHandler(Handler):
 
         :return: None
         """
-        pass
 
     def _handle_unidentified_dialogue(self, ledger_api_msg: LedgerApiMessage) -> None:
         """
@@ -294,7 +290,6 @@ class OefSearchHandler(Handler):
 
     def setup(self) -> None:
         """Call to setup the handler."""
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -328,7 +323,6 @@ class OefSearchHandler(Handler):
 
         :return: None
         """
-        pass
 
     def _handle_unidentified_dialogue(self, oef_search_msg: OefSearchMessage) -> None:
         """

@@ -100,7 +100,6 @@ class TransactionBehaviour(TickerBehaviour):
 
     def setup(self) -> None:
         """Setup behaviour."""
-        pass
 
     def act(self) -> None:
         """
@@ -145,7 +144,6 @@ class TransactionBehaviour(TickerBehaviour):
 
     def teardown(self) -> None:
         """Teardown behaviour."""
-        pass
 
     def _timeout_processing(self) -> None:
         """Timeout processing."""

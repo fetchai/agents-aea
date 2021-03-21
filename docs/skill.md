@@ -182,14 +182,12 @@ class LongTask(Task):
 
     def setup(self):
         """Set the task up before execution."""
-        pass
 
     def execute(self, n: int):
         return nth_prime_number(n)
 
     def teardown(self):
         """Clean the task up after execution."""
-        pass
 
 
 ```
@@ -204,11 +202,13 @@ from packages.my_author_name.skills.my_skill.tasks import LongTask
 class MyBehaviour(TickerBehaviour):
 
     def setup(self):
+        """Setup behaviour."""
         my_task = LongTask()
         task_id = self.context.task_manager.enqueue_task(my_task, args=(10000, ))
         self.async_result = self.context.task_manager.get_task_result(task_id)  # type: multiprocessing.pool.AsyncResult
 
     def act(self):
+        """Act implementation."""
         if self.async_result.ready() is False:
             print("The task is not finished yet.")
         else:
@@ -218,7 +218,7 @@ class MyBehaviour(TickerBehaviour):
             self.context.is_active = False
 
     def teardown(self):
-        pass
+        """Teardown behaviour."""
 
 
 ```

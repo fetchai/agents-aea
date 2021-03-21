@@ -49,7 +49,6 @@ class TacHandler(Handler):
 
         :return: None
         """
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -91,7 +90,6 @@ class TacHandler(Handler):
 
         :return: None
         """
-        pass
 
     def _handle_unidentified_dialogue(self, tac_msg: TacMessage) -> None:
         """
@@ -335,7 +333,6 @@ class OefSearchHandler(Handler):
 
         :return: None
         """
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -369,7 +366,6 @@ class OefSearchHandler(Handler):
 
         :return: None
         """
-        pass
 
     def _handle_unidentified_dialogue(self, oef_search_msg: OefSearchMessage) -> None:
         """

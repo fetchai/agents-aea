@@ -466,7 +466,7 @@ class OEFChannel(OEFAgent):
         return super().connect(timeout)
 
     async def disconnect(self) -> None:  # pylint: disable=invalid-overridden-method
-        """Disconnect chgannel."""
+        """Disconnect channel."""
         if self._in_queue is None and self._loop is None:  # pragma: nocover
             return  # not connected so nothing to do
 

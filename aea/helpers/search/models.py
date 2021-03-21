@@ -118,7 +118,7 @@ class Location:
         Get the distance to another location.
 
         :param other: the other location
-        :retun: the distance
+        :return: the distance
         """
         return haversine(self.latitude, self.longitude, other.latitude, other.longitude)
 
@@ -172,8 +172,6 @@ class AttributeInconsistencyException(Exception):
     Inconsistency is defined when values do not meet their respective schema, or if the values
     are not of an allowed type.
     """
-
-    pass
 
 
 class Attribute:

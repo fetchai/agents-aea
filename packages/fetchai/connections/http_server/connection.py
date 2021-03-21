@@ -171,7 +171,7 @@ class Request(OpenAPIRequest):
         """
         Process incoming API request by packaging into Envelope and sending it in-queue.
 
-        :param dialogue_reference: new dialog refernece for envelope
+        :param dialogue_reference: new dialog reference for envelope
         :param target_skill_id: the target skill id
 
         :return: envelope
@@ -285,7 +285,7 @@ class BaseAsyncChannel(ABC):
         Initialize a channel.
 
         :param address: the address of the agent.
-        :param connection_id: public id of connection using this chanel.
+        :param connection_id: public id of connection using this channel.
         """
         self._in_queue = None  # type: Optional[asyncio.Queue]
         self._loop = None  # type: Optional[asyncio.AbstractEventLoop]
@@ -298,7 +298,7 @@ class BaseAsyncChannel(ABC):
         """
         Connect.
 
-        Upon HTTP Channel connection, kickstart the HTTP Server in its own thread.
+        Upon HTTP Channel connection, start the HTTP Server in its own thread.
 
         :param loop: asyncio event loop
 
@@ -364,7 +364,7 @@ class HTTPChannel(BaseAsyncChannel):
         :param port: RESTful API port number
         :param target_skill_id: the skill id which handles the requests
         :param api_spec_path: Directory API path and filename of the API spec YAML source file.
-        :param connection_id: public id of connection using this chanel.
+        :param connection_id: public id of connection using this channel.
         :param restricted_to_protocols: set of restricted protocols
         :param timeout_window: the timeout (in seconds) for a request to be handled.
         """
@@ -390,7 +390,7 @@ class HTTPChannel(BaseAsyncChannel):
         """
         Connect.
 
-        Upon HTTP Channel connection, kickstart the HTTP Server in its own thread.
+        Upon HTTP Channel connection, start the HTTP Server in its own thread.
 
         :param loop: asyncio event loop
 

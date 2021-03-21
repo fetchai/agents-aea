@@ -180,7 +180,7 @@ def send_control_c(
     process: subprocess.Popen, kill_group: bool = False
 ) -> None:  # pragma: nocover # cause platform dependent
     """
-    Send ctrl-C crossplatform to terminate a subprocess.
+    Send ctrl-C cross-platform to terminate a subprocess.
 
     :param process: the process to send the signal to.
 
@@ -275,7 +275,7 @@ def get_logger_method(fn: Callable, logger_method: Union[str, Callable]) -> Call
     """
     Get logger method for function.
 
-    Get logger in `fn` definion module or creates logger is module.__name__.
+    Get logger in `fn` definition module or creates logger is module.__name__.
     Or return logger_method if it's callable.
 
     :param fn: function to get logger for.
@@ -338,7 +338,7 @@ def retry_decorator(
 
     :param number_of_retries: amount of attempts
     :param error_message: message template with one `{}` for exception
-    :param delay: num of seconds to sleep between retries. default 0
+    :param delay: number of seconds to sleep between retries. default 0
     :param logger_method: name of the logger method or callable to print logs
     """
 
@@ -473,7 +473,7 @@ def find_topological_order(adjacency_list: Dict[T, Set[T]]) -> List[T]:
     visited: Set[T] = set()
     roots: Set[T] = set()
     inverse_adjacency_list: Dict[T, Set[T]] = defaultdict(set)
-    # compute both roots and inv. adj. list in one pass.
+    # compute both roots and inverse adjacent list in one pass.
     for start_node, end_nodes in adjacency_list.items():
         if start_node not in visited:
             roots.add(start_node)
@@ -812,7 +812,7 @@ class CertRequest:
         """
         Get signature from save_path.
 
-        :param path_prefix: the path prefix to be prependend to save_path. Defaults to cwd.
+        :param path_prefix: the path prefix to be prepended to save_path. Defaults to cwd.
         :return: the signature.
         """
         save_path = self.get_absolute_save_path(path_prefix)

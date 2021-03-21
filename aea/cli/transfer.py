@@ -106,11 +106,11 @@ def wait_tx_settled(
     identifier: str, tx_digest: str, timeout: float = DEFAULT_SETTLE_TIMEOUT
 ) -> None:
     """
-    Wait transaction is settled succesfuly.
+    Wait transaction is settled successfully.
 
     :param identifier: str, ledger id
     :param tx_digest: str, transaction digest
-    :param timeout: int, timeout in seconds efore timeout error raised
+    :param timeout: int, timeout in seconds before timeout error raised
 
     :return: None
     raises TimeoutError on timeout
@@ -137,7 +137,7 @@ def do_transfer(
 
     :param ctx: click context
     :param identifier: str, ledger id to perform transfer operation
-    :param address: address of the recepient
+    :param address: address of the recipient
     :param amount: int, amount of wealth to transfer
     :param tx_fee: int, fee for transaction
     :param password: the password to encrypt/decrypt the private key

@@ -96,7 +96,7 @@ def create_aea(
     :param empty: optional boolean flag for skip adding default dependencies.
 
     :return: None
-    :raises: ClickException if an error occured.
+    :raises: ClickException if an error occurred.
     """
     try:
         _check_is_parent_folders_are_aea_projects_recursively()

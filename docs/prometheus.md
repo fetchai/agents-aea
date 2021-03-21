@@ -235,5 +235,4 @@ class PrometheusHandler(Handler):
 
         :return: None
         """
-        pass
 ```

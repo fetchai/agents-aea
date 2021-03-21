@@ -374,7 +374,7 @@ def test_successful_realistic_faucet_operation(mock_post, mock_get):
 @pytest.mark.integration
 @pytest.mark.ledger
 def test_format_default():
-    """Test if default CosmosSDK transaction is correctly formated."""
+    """Test if default CosmosSDK transaction is correctly formatted."""
     account = FetchAICrypto()
     cc2 = FetchAICrypto()
     cosmos_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
@@ -414,7 +414,7 @@ def test_format_default():
 @pytest.mark.integration
 @pytest.mark.ledger
 def test_format_cosmwasm():
-    """Test if CosmWasm transaction is correctly formated."""
+    """Test if CosmWasm transaction is correctly formatted."""
     cc2 = FetchAICrypto()
 
     # Dummy CosmWasm transaction

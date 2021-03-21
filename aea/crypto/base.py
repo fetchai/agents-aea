@@ -43,7 +43,7 @@ class Crypto(Generic[EntityClass], ABC):
         """
         Initialize the crypto object.
 
-        The actual behaivour of this constructor is determined by the abstract
+        The actual behaviour of this constructor is determined by the abstract
         methods 'generate_private_key()' and 'load_private_key_from_path().
         Either way, the entity object will be accessible as a property.
 
@@ -144,7 +144,7 @@ class Crypto(Generic[EntityClass], ABC):
 
         :param private_key_file: the file where the key is stored.
         :param password: the password to encrypt/decrypt the private key.
-        :return: private_key in hex string fromat
+        :return: private_key in hex string format
         """
         path = Path(private_key_file)
         with open_file(path, "r") as key_file:
@@ -226,7 +226,7 @@ class Helper(ABC):
     @abstractmethod
     def generate_tx_nonce(seller: Address, client: Address) -> str:
         """
-        Generate a unique hash to distinguish txs with the same terms.
+        Generate a unique hash to distinguish transactions with the same terms.
 
         :param seller: the address of the seller.
         :param client: the address of the client.

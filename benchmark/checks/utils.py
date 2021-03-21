@@ -61,7 +61,7 @@ PACKAGES_DIR = Path(AEA_DIR, "..", PACKAGES)
 def wait_for_condition(
     condition_checker: Callable, timeout: int = 2, error_msg: str = "Timeout"
 ) -> None:
-    """Wait for condition occures in selected timeout."""
+    """Wait for condition occurs in selected timeout."""
     start_time = time.time()
 
     while not condition_checker():
@@ -147,7 +147,7 @@ class GeneratorConnection(Connection):
         self._state.set(ConnectionStates.connected)
 
     async def disconnect(self) -> None:
-        """Disonnect connection."""
+        """Disconnect connection."""
         self._state.set(ConnectionStates.disconnected)
 
     async def send(self, envelope: "Envelope") -> None:

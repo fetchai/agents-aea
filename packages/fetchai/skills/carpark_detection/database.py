@@ -64,7 +64,7 @@ class DetectionDatabase:  # pylint: disable=too-many-public-methods
         self.logger = logger if logger is not None else _default_logger
 
     def is_db_exits(self) -> bool:
-        """Return true if database exixts and is set up."""
+        """Return true if database exists and is set up."""
         if not os.path.isfile(self.database_path):
             return False
 
@@ -460,7 +460,7 @@ class DetectionDatabase:  # pylint: disable=too-many-public-methods
             self.execute_single_sql(command, variables)
 
     def ensure_dirs_exist(self) -> None:
-        """Test if we have our temp directotries, and if we don't create them."""
+        """Test if we have our temp directories, and if we don't create them."""
         if not os.path.isdir(self.temp_dir):
             os.mkdir(self.temp_dir)
         if not os.path.isdir(self.raw_image_dir):

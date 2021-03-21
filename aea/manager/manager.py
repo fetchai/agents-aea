@@ -705,7 +705,7 @@ class MultiAgentManager:
             if wait_future.done():
                 event_set()  # pragma: nocover
             else:
-                wait_future.add_done_callback(event_set)  # pramga: nocover
+                wait_future.add_done_callback(event_set)  # pragma: nocover
 
         self._loop.call_soon_threadsafe(_add_cb)
         agent_task.stop()

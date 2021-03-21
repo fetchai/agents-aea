@@ -29,7 +29,7 @@ class FakeConnection(Connection):
 
     def __init__(self, envelope: Envelope, num: int, *args: Any, **kwargs: Any):
         """
-        Set fake connection with num of envelops to be generated.
+        Set fake connection with number of envelops to be generated.
 
         :param envelope: any envelope
         :param num: amount of envelopes to generate

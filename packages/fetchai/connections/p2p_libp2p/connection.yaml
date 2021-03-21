@@ -11,8 +11,9 @@ fingerprint:
   README.md: QmXBAgYgEcbGCH3kCZcU4UTp8H3CTak5q3mGd1XoS6Nkww
   __init__.py: QmYQuLNyQ8WTjgRYAoKAzoJEb7ocKXvM2hTyK4hsGch5D6
   check_dependencies.py: QmP14nkQ8senwzdPdrZJLsA6EQ7zaKKEaLGDELhT42gp1P
-  connection.py: QmPMXeJeedv4vwHrYzJLbu72fUKhyn39wmSHrzyiHx9cQm
-  libp2p_node/aea/api.go: QmWNxQQyiaNer92gczQv81efwZYmJMuXCsQWkSt5rdDg5P
+  connection.py: Qme96VnjM19xcuPApZV3dAKAPisfr4Mf94ffBiGh4sJL4n
+  libp2p_node/README.md: QmSNJEQQwh25QSHgQPM4C84xKU6FczRpmJdN7HkCQyDPuC
+  libp2p_node/aea/api.go: QmdFR5Rmkk2FGVDwzgHtjobjAKyLejqk2CAYBCvcF23AG7
   libp2p_node/aea/envelope.pb.go: QmRfUNGpCeVJfsW3H1MzCN4pwDWgumfyWufVFp6xvUjjug
   libp2p_node/aea/envelope.proto: QmVuvesmfgzj5aKnbFoCocoGEv3T9MR7u6KWn7CT5yfjGi
   libp2p_node/aea/pipe_unix.go: QmSzbAexrSUSA9ZE6VT6MmcWF5MhEcmceQjAbnfRoK7Ruv

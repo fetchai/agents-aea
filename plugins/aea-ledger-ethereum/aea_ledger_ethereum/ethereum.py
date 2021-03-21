@@ -404,7 +404,7 @@ class EthereumHelper(Helper):
     @staticmethod
     def generate_tx_nonce(seller: Address, client: Address) -> str:
         """
-        Generate a unique hash to distinguish txs with the same terms.
+        Generate a unique hash to distinguish transactions with the same terms.
 
         :param seller: the address of the seller.
         :param client: the address of the client.

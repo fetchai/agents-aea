@@ -222,7 +222,7 @@ class BaseSkillTestCase:
         Quickly create an incoming message with the provided attributes for a dialogue.
 
         For any attribute not provided, a value based on the dialogue is used.
-        These values are shown in parantheses in the list of parameters below.
+        These values are shown in parentheses in the list of parameters below.
 
         NOTE: This method must be used with care. The dialogue provided is part of the skill
         which is being tested. Because for any unspecified attribute, a "correct" value is used,
@@ -235,7 +235,7 @@ class BaseSkillTestCase:
         :param message_id: (the id of the last message in the provided dialogue + 1) the id of the message
         :param target: (the id of the last message in the provided dialogue) the target of the message
         :param to: (the agent address associated with this skill) the receiver of the message
-        :param sender: (the counterperty in the provided dialogue) the sender of the message
+        :param sender: (the counterparty in the provided dialogue) the sender of the message
         :param kwargs: other attributes
 
         :return: the created incoming message
