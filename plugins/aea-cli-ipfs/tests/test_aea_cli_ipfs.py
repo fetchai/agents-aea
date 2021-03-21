@@ -41,7 +41,7 @@ cli.add_command("ipfs", ipfs)
 
 
 def test_ipfs():
-    """Test aea ipfs command iteself."""
+    """Test aea ipfs command itself."""
     runner = CliRunner()
     with patch("ipfshttpclient.Client.id"):
         r = runner.invoke(cli, ["ipfs"], catch_exceptions=False, standalone_mode=False)

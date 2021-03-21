@@ -306,7 +306,7 @@ class P2PLibp2pClientConnection(Connection):
         self.logger.debug("disconnecting libp2p client connection...")
 
         with suppress(Exception):
-            # supress if writer closed already
+            # suppress if writer closed already
             self._writer.write_eof()
             await self._writer.drain()
             self._writer.close()

@@ -87,7 +87,7 @@ You can inspect the `libp2p_node.log` log files of the AEA to see how they disco
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>
-  <p>Currently `p2p_libp2p` connection limits the total message size to 3 MB.
+  <p>Currently <code>p2p_libp2p</code> connection limits the total message size to 3 MB.
 </p>
 </div>
 

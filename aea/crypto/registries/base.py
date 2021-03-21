@@ -102,7 +102,7 @@ class EntryPoint(Generic[ItemType], RegexConstrainedString):
         """
         Load the item object.
 
-        :return: the cyrpto object, loaded following the spec.
+        :return: the crypto object, loaded following the spec.
         """
         mod_name, attr_name = self.import_path, self.class_name
         mod = importlib.import_module(mod_name)

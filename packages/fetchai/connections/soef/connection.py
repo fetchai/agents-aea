@@ -144,11 +144,11 @@ class BaseHandledException(Exception):
         self.exc = exc
 
     def __repr__(self) -> str:
-        """Get exception repr."""
+        """Get exception representation."""
         return self.MSG.format(str(self.exc))
 
     def __str__(self) -> str:
-        """Get exception str repr."""
+        """Get exception str representation."""
         return self.__repr__()
 
 
@@ -599,7 +599,7 @@ class SOEFChannel:
         """
         Send ping command every `period`.
 
-        :param period: period of ping in secinds
+        :param period: period of ping in seconds
 
         :return: None
         """
@@ -972,7 +972,7 @@ class SOEFChannel:
 
     async def _unregister_agent(self) -> None:  # pylint: disable=unused-argument
         """
-        Unnregister a service_name from the SOEF.
+        Unregister a service_name from the SOEF.
 
         :return: None
         """
@@ -1111,7 +1111,7 @@ class SOEFChannel:
         params: Dict[str, List[str]],
     ) -> None:
         """
-        Add find agent task to queue to process in dedictated loop respectful to timeouts.
+        Add find agent task to queue to process in dedicated loop respectful to timeouts.
 
         :param oef_message: OefSearchMessage
         :param oef_search_dialogue: OefSearchDialogue

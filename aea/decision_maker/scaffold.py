@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains a scaffold of the decision maker class and auxilliary classes."""
+"""This module contains a scaffold of the decision maker class and auxiliary classes."""
 
 from typing import Any, Dict
 

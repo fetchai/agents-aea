@@ -55,7 +55,7 @@ class SqliteStorageBackend(AbstractStorageBackend):
         Execute sql command and return results.
 
         :param query: sql query string
-        :param args: optional argumets to set into sql query.
+        :param args: optional arguments to set into sql query.
 
         :return: List of tuples with sql records
         """
@@ -73,7 +73,7 @@ class SqliteStorageBackend(AbstractStorageBackend):
         Execute sql command and return results in async executor.
 
         :param query: sql query string
-        :param args: optional argumets to set into sql query.
+        :param args: optional arguments to set into sql query.
 
         :return: List of tuples with sql records
         """

@@ -119,7 +119,6 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
-        pass
 
     def teardown(self) -> None:
         """
@@ -304,7 +303,6 @@ class GenericFipaHandler(Handler):
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -340,7 +338,6 @@ class GenericFipaHandler(Handler):
 
         :return: None
         """
-        pass
 ```
 The code above contains the logic for handling `FipaMessages` received by the `my_generic_seller` AEA. We use `FipaDialogues` (more on this <a href="../generic-skills-step-by-step/#step-5-create-the-dialogues">below</a>) to keep track of the progress of the negotiation dialogue between the `my_generic_seller` AEA and the `my_generic_buyer` AEA.
 
@@ -574,7 +571,6 @@ class GenericLedgerApiHandler(Handler):
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -615,7 +611,6 @@ class GenericLedgerApiHandler(Handler):
 
         :return: None
         """
-        pass
 
     def _handle_unidentified_dialogue(self, ledger_api_msg: LedgerApiMessage) -> None:
         """
@@ -728,7 +723,6 @@ class GenericOefSearchHandler(Handler):
 
     def setup(self) -> None:
         """Call to setup the handler."""
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -762,7 +756,6 @@ class GenericOefSearchHandler(Handler):
 
         :return: None
         """
-        pass
 
     def _handle_unidentified_dialogue(self, oef_search_msg: OefSearchMessage) -> None:
         """
@@ -1020,7 +1013,7 @@ The following properties and methods deal with different aspects of the strategy
         Check if the query matches the supply.
 
         :param query: the query
-        :return: bool indiciating whether matches or not
+        :return: bool indicating whether matches or not
         """
         return query.check(self.get_service_description())
 
@@ -1539,7 +1532,6 @@ class GenericSearchBehaviour(TickerBehaviour):
 
         :return: None
         """
-        pass
 
 
 class GenericTransactionBehaviour(TickerBehaviour):
@@ -1561,7 +1553,6 @@ class GenericTransactionBehaviour(TickerBehaviour):
 
     def setup(self) -> None:
         """Setup behaviour."""
-        pass
 
     def act(self) -> None:
         """
@@ -1605,7 +1596,6 @@ class GenericTransactionBehaviour(TickerBehaviour):
 
     def teardown(self) -> None:
         """Teardown behaviour."""
-        pass
 
     def _timeout_processing(self) -> None:
         """Timeout processing."""
@@ -1702,7 +1692,6 @@ class GenericFipaHandler(Handler):
 
         :return: None
         """
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -1738,7 +1727,6 @@ class GenericFipaHandler(Handler):
 
         :return: None
         """
-        pass
 ```
 You will see that we are following similar logic to the `generic_seller` when we develop the `generic_buyer`’s side of the negotiation. First, we create a new dialogue and store it in the dialogues class. Then we are checking what kind of message we received by checking its performative. So lets start creating our handlers:
 
@@ -1948,7 +1936,6 @@ class GenericOefSearchHandler(Handler):
 
     def setup(self) -> None:
         """Call to setup the handler."""
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -1984,7 +1971,6 @@ class GenericOefSearchHandler(Handler):
 
         :return: None
         """
-        pass
 
     def _handle_unidentified_dialogue(self, oef_search_msg: OefSearchMessage) -> None:
         """
@@ -2084,7 +2070,6 @@ class GenericSigningHandler(Handler):
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -2118,7 +2103,6 @@ class GenericSigningHandler(Handler):
 
         :return: None
         """
-        pass
 
     def _handle_unidentified_dialogue(self, signing_msg: SigningMessage) -> None:
         """
@@ -2208,7 +2192,6 @@ class GenericLedgerApiHandler(Handler):
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -2258,7 +2241,6 @@ class GenericLedgerApiHandler(Handler):
 
         :return: None
         """
-        pass
 
     def _handle_unidentified_dialogue(self, ledger_api_msg: LedgerApiMessage) -> None:
         """
@@ -2698,7 +2680,6 @@ The `is_affordable_proposal` method in the following code block checks if we can
         :param data: the data
         :return: False
         """
-        pass
 
     def update_search_query_params(self) -> None:
         """
@@ -2706,7 +2687,6 @@ The `is_affordable_proposal` method in the following code block checks if we can
 
         :return: None
         """
-        pass
 ```
 
 ### Step 5: Create the dialogues

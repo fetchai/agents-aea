@@ -51,3 +51,25 @@ logging_config:
       level: DEBUG
       propagate: False
 ```
+``` yaml
+logging_config:
+  version: 1
+  disable_existing_loggers: false
+  formatters:
+    standard:
+      format: '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+  handlers:
+    http:
+      class: logging.handlers.HTTPHandler
+      formatter: standard
+      level: INFO
+      host: localhost:5000
+      url: /stream
+      method: POST
+  loggers:
+    aea:
+      handlers:
+      - http
+      level: INFO
+      propagate: false
+```

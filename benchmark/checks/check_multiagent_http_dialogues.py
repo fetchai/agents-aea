@@ -99,7 +99,7 @@ class HttpPingPongHandler(Handler):
             self.rtt_total_time += time.time() - rtt_ts
             self.rtt_count += 1
 
-            # got response, make another requet to the same agent
+            # got response, make another request to the same agent
             self.make_request(message.sender)
 
     def make_response(self, dialogue: HttpDialogue, message: HttpMessage) -> None:

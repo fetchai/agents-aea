@@ -187,7 +187,7 @@ cd aries_alice
 <details><summary>Alternatively, create from scratch.</summary>
 <p>
 
-The following steps create **Alice_AEA** from scratch:
+The following steps create <b>Alice_AEA</b> from scratch:
 ``` bash
 aea create aries_alice
 cd aries_alice
@@ -271,7 +271,7 @@ cd aries_faber
 <details><summary>Alternatively, create from scratch.</summary>
 <p>
 
-The following steps create **Faber_AEA** from scratch:
+The following steps create <b>Faber_AEA</b> from scratch:
 ``` bash
 aea create aries_faber
 cd aries_faber

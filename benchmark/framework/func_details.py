@@ -75,7 +75,7 @@ class BaseFuncDetails:
         """
         Get list of argument default values.
 
-        :return: list of default values for funcion arguments
+        :return: list of default values for function arguments
         """
         default_args = []
         for arg in self._arguments:

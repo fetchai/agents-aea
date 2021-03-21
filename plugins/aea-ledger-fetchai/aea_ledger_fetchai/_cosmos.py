@@ -193,7 +193,7 @@ class DataEncrypt:
 
     @classmethod
     def decrypt(cls, encrypted_data: bytes, password: str) -> bytes:
-        """Decrypt data with passwod provided."""
+        """Decrypt data with password provided."""
         if not isinstance(encrypted_data, bytes):  # pragma: nocover
             raise ValueError(
                 f"encrypted_data has to be str! not {type(encrypted_data)}"
@@ -304,7 +304,7 @@ class CosmosHelper(Helper):
     @staticmethod
     def generate_tx_nonce(seller: Address, client: Address) -> str:
         """
-        Generate a unique hash to distinguish txs with the same terms.
+        Generate a unique hash to distinguish transactions with the same terms.
 
         :param seller: the address of the seller.
         :param client: the address of the client.
@@ -1208,7 +1208,7 @@ class _CosmosApi(LedgerApi):
         :param tx_digest: the digest associated to the transaction.
         :return: the tx, if present
         """
-        # Cosmos does not distinguis between transaction receipt and transaction
+        # Cosmos does not distinguish between transaction receipt and transaction
         tx_receipt = self._try_get_transaction_receipt(tx_digest)
         return tx_receipt
 

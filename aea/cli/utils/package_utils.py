@@ -143,7 +143,7 @@ def _is_permitted_author_handle(author: str) -> bool:
     Check that the author handle is permitted.
 
     :param author: the author
-    :retun: bool
+    :return: bool
     """
     result = author not in NOT_PERMITTED_AUTHORS
     return result
@@ -204,9 +204,9 @@ def get_package_path(
     :param project_directory: path to search packages
     :param item_type: item type.
     :param public_id: item public ID.
-    :param is_vendor: flag for vendorized path (True by defaut).
+    :param is_vendor: flag for vendorized path (True by default).
 
-    :return: vendorized estenation path for package.
+    :return: vendorized destination path for package.
     """
     item_type_plural = item_type + "s"
     if is_vendor:
@@ -238,7 +238,7 @@ def get_package_path_unified(
     :param item_type: item type.
     :param public_id: item public ID.
 
-    :return: vendorized estenation path for package.
+    :return: vendorized destination path for package.
     """
     vendor_path = get_package_path(
         project_directory, item_type, public_id, is_vendor=True
@@ -273,7 +273,7 @@ def copy_package_directory(src: Path, dst: str) -> Path:
      Copy a package directory to the agent vendor resources.
 
     :param src: source path to the package to be added.
-    :param dst: str package destenation path.
+    :param dst: str package destination path.
 
     :return: copied folder target path.
     :raises SystemExit: if the copy raises an exception.
@@ -569,7 +569,7 @@ def get_item_public_id_by_author_name(
     agent_config: AgentConfig, item_type: str, author: str, name: str
 ) -> Optional[PublicId]:
     """
-    Get component public_id by author and namme.
+    Get component public_id by author and name.
 
     :param agent_config: AgentConfig
     :param item_type: str. component type: connection, skill, contract, protocol
@@ -636,7 +636,7 @@ def try_get_balance(  # pylint: disable=unused-argument
     :param wallet: wallet object.
     :param type_: type of ledger API.
 
-    :retun: token balance.
+    :return: token balance.
     """
     try:
         if not LedgerApis.has_ledger(type_):  # pragma: no cover

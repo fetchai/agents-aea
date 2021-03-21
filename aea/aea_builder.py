@@ -862,7 +862,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self, currency_denominations: Dict[str, str]
     ) -> "AEABuilder":  # pragma: nocover
         """
-        Set the mapping from ledger ids to currency denomincations.
+        Set the mapping from ledger ids to currency denominations.
 
         :param currency_denominations: the mapping
         :return: the AEABuilder
@@ -1263,7 +1263,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         return sorted_selected_connections_ids
 
     def install_pypi_dependencies(self) -> None:
-        """Install components extra dependecies."""
+        """Install components extra dependencies."""
         self._package_dependency_manager.install_dependencies()
 
     def build(
@@ -1434,7 +1434,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
     def _get_currency_denominations(self) -> Dict[str, str]:
         """
-        Return the mapping from ledger id to currency denom.
+        Return the mapping from ledger id to currency denominations.
 
         :return: the mapping
         """

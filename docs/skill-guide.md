@@ -120,7 +120,7 @@ We place this code in `my_aea/skills/my_search/behaviours.py`. Ensure you replac
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>
-  <p> Note that the import paths to agent packages, for example `packages.fetchai.skills.my_search.dialogues` above, are not actual paths. Package files always reside in your AEA's folder, either under a specific package directory (e.g. connection, protocol, skill) if the package is custom built, or under `vendor` if it is pulled from the registry. These paths are virtual and created automatically when an AEA is run. See <a href="../package-imports"> this page </a> for more details. </p>
+  <p> Note that the import paths to agent packages, for example <code>packages.fetchai.skills.my_search.dialogues</code> above, are not actual paths. Package files always reside in your AEA's folder, either under a specific package directory (e.g. connection, protocol, skill) if the package is custom built, or under <code>vendor</code> if it is pulled from the registry. These paths are virtual and created automatically when an AEA is run. See <a href="../package-imports"> this page </a> for more details. </p>
 </div>
 
 ## Step 3: Develop a Handler
@@ -480,7 +480,7 @@ Once you see a message of the form `To join its network use multiaddr: ['SOME_AD
 <details><summary>Click here to see full code and guide for this AEA</summary>
 <p>
 
-We use a <a href="../api/skills/behaviours#tickerbehaviour-objects">`TickerBehaviour`</a> to update the service registration at regular intervals. The following code is placed in `behaviours.py`.
+We use a <a href="../api/skills/behaviours#tickerbehaviour-objects"><code>TickerBehaviour</code></a> to update the service registration at regular intervals. The following code is placed in <code>behaviours.py</code>.
 
 ``` python
 from typing import cast
@@ -521,7 +521,6 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
-        pass
 
     def teardown(self) -> None:
         """
@@ -617,7 +616,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         self.context.logger.info("unregistering agent from SOEF.")
 ```
 
-We create a <a href="../api/skills/base#model-objects">`Model`</a> type strategy class and place it in `strategy.py`. We use a generic data model to register the service. As part of the registration we register a location and a key pair describing our service.
+We create a <a href="../api/skills/base#model-objects"><code>Model</code></a> type strategy class and place it in <code>strategy.py</code>. We use a generic data model to register the service. As part of the registration we register a location and a key pair describing our service.
 
 ``` python
 from aea.helpers.search.generic import (
@@ -688,7 +687,7 @@ class Strategy(Model):
         return description
 ```
 
-We create a <a href="../api/skills/base#model-objects">`Model`</a> type dialogue class and place it in `dialogues.py`. These classes ensure that the message flow satisfies the `fetchai/oef_search:0.14.0` protocol and keep track of the individual messages being sent and received.
+We create a <a href="../api/skills/base#model-objects"><code>Model</code></a> type dialogue class and place it in <code>dialogues.py</code>. These classes ensure that the message flow satisfies the <code>fetchai/oef_search:0.14.0</code> protocol and keep track of the individual messages being sent and received.
 
 ``` python
 from aea.protocols.base import Message
@@ -738,7 +737,7 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
 
 ```
 
-Finally, we have a handler, placed in `handlers.py`. The handler deals with handling any error messages which might occur during service registration:
+Finally, we have a handler, placed in <code>handlers.py</code>. The handler deals with handling any error messages which might occur during service registration:
 
 ``` python
 from typing import Optional, cast
@@ -763,7 +762,6 @@ class OefSearchHandler(Handler):
 
     def setup(self) -> None:
         """Call to setup the handler."""
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -797,7 +795,6 @@ class OefSearchHandler(Handler):
 
         :return: None
         """
-        pass
 
     def _handle_unidentified_dialogue(self, oef_search_msg: OefSearchMessage) -> None:
         """
@@ -844,7 +841,7 @@ class OefSearchHandler(Handler):
         )
 ```
 
-The associated `skill.yaml` is:
+The associated <code>skill.yaml</code> is:
 
 ``` yaml
 name: simple_service_registration

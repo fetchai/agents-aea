@@ -78,7 +78,6 @@ class HttpHandler(Handler):
 
         :return: None
         """
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -159,7 +158,6 @@ class HttpHandler(Handler):
 
         :return: None
         """
-        pass
 ```
 
 And update the `skill.yaml` accordingly:

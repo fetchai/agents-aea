@@ -124,7 +124,7 @@ def private_key_verify(
         config_private_key_path = aea_conf.private_key_paths.read(identifier)
 
         if is_env_variable(config_private_key_path):
-            # config_private_key_path is env vaariable to be used, skip it. check will be performed after substitution
+            # config_private_key_path is env variable to be used, skip it. check will be performed after substitution
             continue
 
         if config_private_key_path is None:
@@ -198,7 +198,7 @@ class DecryptError(ValueError):
     msg = "Decrypt error! Bad password?"
 
     def __init__(self, msg: Optional[str] = None) -> None:
-        """Init execption."""
+        """Init exception."""
         super().__init__(msg or self.msg)
 
 

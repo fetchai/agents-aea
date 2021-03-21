@@ -78,7 +78,7 @@ class TestTaskManager:
     def test_task_manager_function_with_keyword_arguments(self):
         """Test a function submitted to the task manager with keyword arguments."""
         task_id = self.task_manager.enqueue_task(
-            self._return_a_constant, args=(32,), kwds={"b": 10}
+            self._return_a_constant, args=(32,), kwargs={"b": 10}
         )
         task_result = self.task_manager.get_task_result(task_id)
         assert isinstance(task_result, AsyncResult)
@@ -88,7 +88,7 @@ class TestTaskManager:
     def test_task_manager_function_with_wrong_argument_number(self):
         """Test wrong number of arguments."""
         task_id = self.task_manager.enqueue_task(
-            self._return_a_constant, args=(), kwds={"b": 10}
+            self._return_a_constant, args=(), kwargs={"b": 10}
         )
         task_result = self.task_manager.get_task_result(task_id)
         assert isinstance(task_result, AsyncResult)
@@ -102,7 +102,7 @@ class TestTaskManager:
         expected_return_value = 42
         my_task = MyTask(return_value=expected_return_value)
         task_id = self.task_manager.enqueue_task(
-            my_task, args=expected_args, kwds=expected_kwargs
+            my_task, args=expected_args, kwargs=expected_kwargs
         )
         task_result = self.task_manager.get_task_result(task_id)
         assert isinstance(task_result, AsyncResult)

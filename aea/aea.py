@@ -467,15 +467,18 @@ class AEA(Agent):
         return self.runtime.task_manager.get_task_result(task_id)
 
     def enqueue_task(
-        self, func: Callable, args: Sequence = (), kwds: Optional[Dict[str, Any]] = None
+        self,
+        func: Callable,
+        args: Sequence = (),
+        kwargs: Optional[Dict[str, Any]] = None,
     ) -> int:
         """
         Enqueue a task with the task manager.
 
         :param func: the callable instance to be enqueued
         :param args: the positional arguments to be passed to the function.
-        :param kwds: the keyword arguments to be passed to the function.
+        :param kwargs: the keyword arguments to be passed to the function.
         :return the task id to get the the result.
         :raises ValueError: if the task manager is not running.
         """
-        return self.runtime.task_manager.enqueue_task(func, args, kwds)
+        return self.runtime.task_manager.enqueue_task(func, args, kwargs)

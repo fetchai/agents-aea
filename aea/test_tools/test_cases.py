@@ -165,7 +165,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
 
         :param args: CLI args
         :param cwd: the working directory from where to run the command.
-        :param kwargs: other keyword arguments to click.CLIRunner.invoke.
+        :param kwargs: other keyword arguments to click.CliRunner.invoke.
         :raises AEATestingException: if command fails.
 
         :return: Result
@@ -694,7 +694,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
     @classmethod
     def replace_file_content(cls, src: Path, dest: Path) -> None:  # pragma: nocover
         """
-        Replace the content of the source file to the dest file.
+        Replace the content of the source file to the destination file.
 
         :param src: the source file.
         :param dest: the destination file.

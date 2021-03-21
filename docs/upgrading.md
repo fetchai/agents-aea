@@ -1,4 +1,4 @@
-This page provides some tips on how to upgrade AEA projects between different versions of the AEA framework.
+This page provides some tips on how to upgrade AEA projects between different versions of the AEA framework. For full release notes check the <a href="https://github.com/fetchai/agents-aea/tags" target="_blank">AEA repo</a>.
 
 The primary tool for upgrading AEA projects is the `aea upgrade` command in the <a href="../cli-commands/">CLI</a>.
 
