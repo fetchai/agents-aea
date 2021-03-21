@@ -452,7 +452,6 @@ def try_run_protoc(
     js_commonjs_import_option = (
         "import_style=commonjs,binary:" if language == PROTOCOL_LANGUAGE_JS else ""
     )
-    # js_closure_import_option = "binary:" if language == PROTOCOL_LANGUAGE_JS else ""  # noqa: E800
 
     language_part_of_the_command = f"--{language}_out={js_commonjs_import_option}{path_to_generated_protocol_package}"
 

@@ -17,7 +17,7 @@
 
 8. Write release notes and place them in `HISTORY.md`. Add upgrading tips in `upgrading.md`. If necessary, adjust version references in `SECURITY.md`. Commit if satisfied.
 
-9. Run spell checker `./scripts/spell-check.sh`. Commit if required.
+9. Run spell checker `./scripts/spell-check.sh`. Run `pylint --disable all --enable spelling ...`. Commit if required.
 
 10. Open PRs and merge into main.
 

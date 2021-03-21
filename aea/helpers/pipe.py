@@ -236,7 +236,7 @@ class PosixNamedPipeProtocol:
         if self._fileobj is None:
             raise ValueError("Pipe not connected")  # pragma: nocover
         try:
-            # TOFIX(LR) Hack for MacOSX
+            # hack for MacOSX
             size = struct.pack("!I", 0)
             os.write(self._out, size)
 

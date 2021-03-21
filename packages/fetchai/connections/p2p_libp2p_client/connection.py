@@ -24,7 +24,7 @@ import struct
 from asyncio import CancelledError
 from contextlib import suppress
 from pathlib import Path
-from typing import Any, List, Optional, Union, cast
+from typing import Any, List, Optional, cast
 
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_LEDGER
@@ -156,7 +156,7 @@ class P2PLibp2pClientConnection(Connection):
         self._writer = None  # type: Optional[asyncio.StreamWriter]
 
         self._in_queue = None  # type: Optional[asyncio.Queue]
-        self._process_messages_task = None  # type: Union[asyncio.Future, None]
+        self._process_messages_task = None  # type: Optional[asyncio.Future]
 
     async def connect(self) -> None:
         """
@@ -300,8 +300,7 @@ class P2PLibp2pClientConnection(Connection):
         self.state = ConnectionStates.disconnecting
         if self._process_messages_task is not None:
             self._process_messages_task.cancel()
-            # TOFIX(LR) mypy issue https://github.com/python/mypy/issues/8546
-            # self._process_messages_task = None # noqa: E800
+            self._process_messages_task = None
 
         self.logger.debug("disconnecting libp2p client connection...")
 
