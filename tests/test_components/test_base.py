@@ -33,7 +33,9 @@ class TestComponentProperties:
 
     def setup_class(self):
         """Setup test."""
-        self.configuration = ProtocolConfig("name", "author", "0.1.0")
+        self.configuration = ProtocolConfig(
+            "name", "author", "0.1.0", protocol_specification_id="some/author:0.1.0"
+        )
         self.configuration.build_directory = "test"
         self.component = Component(configuration=self.configuration)
         self.directory = Path()
@@ -70,7 +72,9 @@ class TestComponentProperties:
 
 def test_directory_setter():
     """Test directory."""
-    configuration = ProtocolConfig("author", "name", "0.1.0")
+    configuration = ProtocolConfig(
+        "author", "name", "0.1.0", protocol_specification_id="some/author:0.1.0"
+    )
     component = Component(configuration=configuration)
 
     with pytest.raises(ValueError):

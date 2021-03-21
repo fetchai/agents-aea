@@ -791,6 +791,10 @@ class ProtocolConfig(ComponentConfiguration):
         )
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
+        if protocol_specification_id is None:
+            raise ValueError(  # pragma: nocover
+                "protocol_specification_id not provided!"
+            )
         self.protocol_specification_id = PublicId.from_str(
             str(protocol_specification_id)
         )
