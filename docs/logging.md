@@ -110,20 +110,50 @@ Second, create a log server:
 # -*- coding: utf-8 -*-
 """A simple flask server to serve logs."""
 
-from flask import Flask, request
+import datetime
+import itertools
+import queue
+
+from flask import Flask, Response, request, stream_with_context
+
+
+def format_log(log_dict):
+    """Format a log record."""
+    date = datetime.datetime.fromtimestamp(float(log_dict["created"]))
+    formatted_log = f"[{date.isoformat()}] [{log_dict['levelname']}] {log_dict['name']}: {log_dict['msg']}"
+    return formatted_log
 
 
 def create_app():
     """Create Flask app for streaming logs."""
+    all_logs = []
+    unread_logs = queue.Queue()
     app = Flask(__name__)
 
-    @app.route('/')
+    @app.route("/")
     def index():
-        return {}, 200
+        """Stream logs to client."""
+        def generate():
+            # stream old logs
+            div = "<div>{}</div>"
+            for old_row in all_logs:
+                yield div.format(old_row)
 
-    @app.route('/stream', methods=["POST"])
+            # stream unread logs
+            while True:
+                row = unread_logs.get()
+                all_logs.append(row)
+                yield f"<div>{row}</div>"
+
+        rows = generate()
+        title = "<p>Waiting for logs...</p>"
+        return Response(stream_with_context(itertools.chain([title], rows)))
+
+    @app.route("/stream", methods=["POST"])
     def stream():
-        print(dict(request.form))
+        """Save log record from AEA."""
+        log_record_formatted = format_log(dict(request.form))
+        unread_logs.put(log_record_formatted)
         return {}, 200
 
     app.run()
