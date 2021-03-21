@@ -8,6 +8,8 @@ Handlers can be considered a special cases of a "behaviour that listens for spec
 
 One could implement `Handler` classes in terms of `Behaviours`, after having implemented the feature that behaviours can be activated after an event happens (e.g. receiving a message of a certain protocol).
 
+This was rejected in favour of a clear separation of concerns, and to avoid purely reactive (handlers) and proactive (behaviours) components to be conflated into one concept. The proposal would also add complexity to behaviour development.
+
 
 #### Multiple versions of the same package
 
@@ -232,10 +234,10 @@ Related, the topic of latency in transactions. State channels provide a solution
 
 Problem 1: connection generates too many messages in a short amount of time, that are not consumed by the multiplexer
 Solution: Can be solved by slowing down connections receive method called, controlled by the inbox messages amount
-Side effects: Most of the connections should have an internal queue cause there is no synchronization between internal logic and multiplexer connection `receive` calls.
+Side effects: Most of the connections should have an internal queue because there is no synchronization between internal logic and multiplexer connection `receive` calls.
 
 
-Problem 2: the send method can take a long time (cause send retries logic in connection)
+Problem 2: the send method can take a long time (because send retries logic in connection)
 Solution: Currently, we apply timeouts on send. Other solutions could be considered, like parallelisation.
 
 

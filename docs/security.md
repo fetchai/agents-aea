@@ -11,3 +11,4 @@ The following advice will help you when writing your own code:
 
 - Try to avoid using the `pickle` module. Pickle should never be used for agent-to-agent communication protocols.
 
+- By design, the framework prevents skill code from accessing private keys directly, as they are not reachable from the skill execution context through attribute getters. However, if the flag `-p` or the option `--password` are not used when generating private keys for an AEA project via the aea CLI tool, the private keys will be stored in plaintext. This allows the skills to access them via interaction with the OS file system. We recommend to always specify a password to encrypt private keys by using the flag argument.
