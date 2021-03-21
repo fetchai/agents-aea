@@ -74,7 +74,10 @@
       }
     },
     "default_ledger": {
-      "$ref": "definitions.json#/definitions/ledger_id"
+      "oneOf": [
+        {"$ref": "definitions.json#/definitions/ledger_id"},
+        {"type": "null"}
+      ]
     },
     "currency_denominations": {
       "type": "object"

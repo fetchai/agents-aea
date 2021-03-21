@@ -39,7 +39,6 @@ from aea.configurations.constants import (
     CONTRACTS,
     DEFAULT_AEA_CONFIG_FILE,
     DEFAULT_DEPENDENCIES,
-    DEFAULT_LEDGER,
     DEFAULT_LICENSE,
     DEFAULT_PROTOCOL,
     DEFAULT_REGISTRY_PATH,
@@ -180,7 +179,7 @@ def _create_agent_config(ctx: Context, agent_name: str, set_author: str) -> Agen
         license_=DEFAULT_LICENSE,
         registry_path=os.path.join("..", DEFAULT_REGISTRY_PATH),
         description="",
-        default_ledger=DEFAULT_LEDGER,
+        default_ledger=None,
         default_connection=None,
         dependencies=dependencies_from_json(DEFAULT_DEPENDENCIES),
     )

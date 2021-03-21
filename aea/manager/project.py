@@ -171,7 +171,7 @@ class AgentAlias(_Base):
     def _ensure_private_keys(self) -> None:
         """Add proviate keys of not present in the config."""
         builder = self._get_builder(self.agent_config, self.project.path)
-        default_ledger = builder.get_default_ledger()
+        default_ledger = builder.get_default_ledger_not_null()
 
         if not self.agent_config.private_key_paths.read_all():
             self.agent_config.private_key_paths.create(

@@ -67,6 +67,14 @@ class AEAComponentLoadException(AEAException):
     """Class for component loading errors of an AEA."""
 
 
+class AEAWalletNoAddressException(AEAException):
+    """Class for attempts to instantiate a wallet without addresses."""
+
+
+class AEANoDefaultLedgerException(AEAException):
+    """Class for attempts to build an AEA without default ledger."""
+
+
 class _StopRuntime(Exception):
     """
     Exception to stop runtime.
