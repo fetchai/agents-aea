@@ -851,7 +851,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self, required_ledgers: Optional[List[str]]
     ) -> "AEABuilder":  # pragma: nocover
         """
-        Set the required ledger APIs to use.
+        Set the required ledger identifiers.
+
+        These are the ledgers for which the AEA requires a key pair.
 
         :param required_ledgers: the required ledgers.
         :return: the AEABuilder.
