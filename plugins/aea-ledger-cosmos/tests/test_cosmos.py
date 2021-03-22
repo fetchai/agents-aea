@@ -97,7 +97,6 @@ def test_sign_and_recover_message(cosmos_private_key_file):
 
 def test_sign_and_recover_message_public_key(cosmos_private_key_file):
     """Test the signing and the recovery function for the eth_crypto."""
-    # TOFIX: for some reason this doesn't work with other keys...
     COSMOS_PRIVATE_KEY_PATH = os.path.join(
         ROOT_DIR, "tests", "data", "cosmos_private_key.txt"
     )

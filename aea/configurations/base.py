@@ -791,15 +791,13 @@ class ProtocolConfig(ComponentConfiguration):
         )
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
-
-        # temporary solution till all protocols updated
-        if protocol_specification_id is not None:
-            self.protocol_specification_id = PublicId.from_str(
-                str(protocol_specification_id)
+        if protocol_specification_id is None:
+            raise ValueError(  # pragma: nocover
+                "protocol_specification_id not provided!"
             )
-        else:
-            # make protocol specification same as protocol id
-            self.protocol_specification_id = self.public_id
+        self.protocol_specification_id = PublicId.from_str(
+            str(protocol_specification_id)
+        )
 
     @property
     def json(self) -> Dict:

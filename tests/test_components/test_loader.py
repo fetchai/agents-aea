@@ -39,7 +39,12 @@ from tests.common.pexpect_popen import PexpectWrapper
 @pytest.fixture(scope="module")
 def component_configuration():
     """Return a component configuration."""
-    return ProtocolConfig("a_protocol", "an_author", "0.1.0")
+    return ProtocolConfig(
+        "a_protocol",
+        "an_author",
+        "0.1.0",
+        protocol_specification_id="some/author:0.1.0",
+    )
 
 
 def test_component_loading_generic_exception(component_configuration):

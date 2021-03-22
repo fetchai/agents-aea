@@ -1000,11 +1000,9 @@ def libp2p_log_on_failure_all(cls):
 
     :return: class with decorated methods.
     """
-    # TODO(LR) test it is a type
     for name, fn in inspect.getmembers(cls):
         if isinstance(fn, FunctionType):
             setattr(cls, name, libp2p_log_on_failure(fn))
-        # TOFIX(LR) decorate already @classmethod decorated methods
         continue
         if isinstance(fn, MethodType):
             if fn.im_self is None:
