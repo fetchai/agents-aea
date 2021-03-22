@@ -308,5 +308,6 @@ class GenericStrategy(Model):
         """Aggregate values from all observations from myself and peers"""
         values = [obs["value"] for obs in self._observations.values()]
         self._aggregation = sum(values) / len(values)
+        self.context.shared_state["aggregation"] = self._aggregation
         self.context.logger.info(f"Observations: {values}")
         self.context.logger.info(f"Average: {self._aggregation}")
