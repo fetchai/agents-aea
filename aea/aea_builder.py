@@ -1358,7 +1358,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
     def get_required_ledgers(self) -> List[str]:
         """
-        Get the required ledger APIs to use.
+        Get the required ledger identifiers.
+        
+        These are the ledgers for which the AEA requires a key pair.
 
         :return: the list of required ledgers.
         """
