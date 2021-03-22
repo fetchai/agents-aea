@@ -327,6 +327,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
                 "private_key_paths",
                 "registry_path",
                 "dependencies",
+                "required_ledgers",
             ]
             result = all(
                 [key in allowed_diff_keys for key in content1_agentconfig.keys()]
