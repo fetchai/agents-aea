@@ -29,7 +29,7 @@ skills:                                         # The list of skill public ids t
 - fetchai/error:0.13.0
 default_connection: fetchai/p2p_libp2p:0.18.0   # The default connection used for envelopes sent by the AEA (must satisfy PUBLIC_ID_REGEX).
 default_ledger: fetchai                         # The default ledger identifier the AEA project uses (must satisfy LEDGER_ID_REGEX)
-required_ledgers: []                            # the list of identifiers of ledgers that the AEA project requires (each item must satisfy LEDGER_ID_REGEX)
+required_ledgers: []                            # the list of identifiers of ledgers that the AEA project requires key pairs for (each item must satisfy LEDGER_ID_REGEX)
 default_routing: {}                             # The default routing scheme applied to envelopes sent by the AEA, it maps from protocol public ids to connection public ids (both keys and values must satisfy PUBLIC_ID_REGEX)
 connection_private_key_paths:                   # The private key paths the AEA project uses for its connections (keys must satisfy LEDGER_ID_REGEX, values must be file paths)
   fetchai: fetchai_private_key.txt

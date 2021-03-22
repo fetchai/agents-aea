@@ -27,7 +27,6 @@ default_ledger: ethereum
 required_ledgers:
 - fetchai
 - ethereum
-- cosmos
 logging_config:
   disable_existing_loggers: false
   version: 1
