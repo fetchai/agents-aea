@@ -21,6 +21,8 @@ skills:
 - fetchai/advanced_data_request:0.1.0
 default_connection: fetchai/http_server:0.18.0
 default_ledger: fetchai
+required_ledgers:
+- fetchai
 default_routing:
   fetchai/http:0.13.0: fetchai/http_client:0.19.0
   fetchai/prometheus:0.4.0: fetchai/prometheus:0.4.0

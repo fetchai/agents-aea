@@ -76,7 +76,7 @@
     "default_ledger": {
       "$ref": "definitions.json#/definitions/ledger_id"
     },
-    "required_ledger": {
+    "required_ledgers": {
       "type": "array",
       "uniqueItems": true,
       "items": {
