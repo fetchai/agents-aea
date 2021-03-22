@@ -125,7 +125,7 @@ aea config set --type dict agent.default_routing \
 }'
 ```
 
-Change the default ledger:
+Set the default ledger:
 ``` bash
 aea config set agent.default_ledger ethereum
 ```
@@ -142,9 +142,9 @@ aea add-key ethereum
 
 The oracle AEAs require either a locally running test node or a connection to a remote testnet.
 
-### Setting up with a local Ganache node
+### Setting up with a local Ganache node (Ethereum ledger only)
 
-The easiest way to test the oracle agents is to set up a local Ethereum test node using Ganache. This can be done by running the following docker command from the directory you started from (in a new terminal). This command will also fund the accounts of the AEAs:
+The easiest way to test the oracle agents on an Ethereum-based ledger to set up a local test node using Ganache. This can be done by running the following docker command from the directory you started from (in a new terminal). This command will also fund the accounts of the AEAs:
 
 ``` bash
 docker run -p 8545:8545 trufflesuite/ganache-cli:latest --verbose --gasPrice=0 --gasLimit=0x1fffffffffffff --account="$(cat coin_price_oracle/ethereum_private_key.txt),1000000000000000000000" --account="$(cat coin_price_oracle_client/ethereum_private_key.txt),1000000000000000000000"
