@@ -22,13 +22,13 @@ aea_version: 0.6.0
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/stub:0.16.0
+- fetchai/stub:0.18.0
 contracts: []
 protocols:
-- fetchai/default:0.12.0
+- fetchai/default:0.13.0
 skills:
-- fetchai/error:0.12.0
-default_connection: fetchai/stub:0.16.0
+- fetchai/error:0.13.0
+default_connection: fetchai/stub:0.18.0
 default_ledger: fetchai
 logging_config:
   disable_existing_loggers: false
@@ -74,5 +74,97 @@ logging_config:
 
 This configuration will set up a logger with name `aea`. It prints both on console and on file with a format specified by the `standard` formatter.
 
+
+## Streaming to browser
+
+It is possible to configure the AEA to stream logs to a browser.
+
+First, add the following configuration to your AEA:
+
+``` yaml
+logging_config:
+  version: 1
+  disable_existing_loggers: false
+  formatters:
+    standard:
+      format: '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+  handlers:
+    http:
+      class: logging.handlers.HTTPHandler
+      formatter: standard
+      level: INFO
+      host: localhost:5000
+      url: /stream
+      method: POST
+  loggers:
+    aea:
+      handlers:
+      - http
+      level: INFO
+      propagate: false
+```
+
+Second, create a log server:
+
+``` python
+# -*- coding: utf-8 -*-
+"""A simple flask server to serve logs."""
+
+import datetime
+import itertools
+import queue
+
+from flask import Flask, Response, request, stream_with_context
+
+
+def format_log(log_dict):
+    """Format a log record."""
+    date = datetime.datetime.fromtimestamp(float(log_dict["created"]))
+    formatted_log = f"[{date.isoformat()}] [{log_dict['levelname']}] {log_dict['name']}: {log_dict['msg']}"
+    return formatted_log
+
+
+def create_app():
+    """Create Flask app for streaming logs."""
+    all_logs = []
+    unread_logs = queue.Queue()
+    app = Flask(__name__)
+
+    @app.route("/")
+    def index():
+        """Stream logs to client."""
+        def generate():
+            # stream old logs
+            div = "<div>{}</div>"
+            for old_row in all_logs:
+                yield div.format(old_row)
+
+            # stream unread logs
+            while True:
+                row = unread_logs.get()
+                all_logs.append(row)
+                yield f"<div>{row}</div>"
+
+        rows = generate()
+        title = "<p>Waiting for logs...</p>"
+        return Response(stream_with_context(itertools.chain([title], rows)))
+
+    @app.route("/stream", methods=["POST"])
+    def stream():
+        """Save log record from AEA."""
+        log_record_formatted = format_log(dict(request.form))
+        unread_logs.put(log_record_formatted)
+        return {}, 200
+
+    app.run()
+
+
+if __name__ == "__main__":
+    create_app()
+```
+
+Save the script in a file called `server.py`, install flask with `pip install flask` and run the server with `python server.py`.
+
+Third, run your AEA and visit `localhost:5000` in your browser.
 
 <br />

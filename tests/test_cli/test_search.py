@@ -27,6 +27,7 @@ from pathlib import Path
 from unittest import TestCase, mock
 
 import jsonschema
+import pytest
 from jsonschema import Draft4Validator
 
 from aea.cli import cli
@@ -40,6 +41,7 @@ from tests.conftest import (
     CLI_LOG_OPTION,
     CONFIGURATION_SCHEMA_DIR,
     CliRunner,
+    MAX_FLAKY_RERUNS,
     ROOT_DIR,
 )
 from tests.test_cli.constants import FORMAT_ITEMS_SAMPLE_OUTPUT
@@ -141,6 +143,7 @@ class TestSearchConnectionsLocal:
         os.chdir(cls.cwd)
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 class TestSearchSkillsLocal:
     """Test that the command 'aea search skills' works as expected."""
 

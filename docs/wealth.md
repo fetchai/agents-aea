@@ -1,6 +1,17 @@
 
 To fund an AEA for testing on a test-net you need to request some test tokens from a faucet.
 
+First, make sure you have installed the crypto plugin
+of the target test-net. E.g. for Fetch.AI:
+``` bash
+pip install aea-ledger-fetchai
+```
+
+And for Ethereum:
+``` bash
+pip install aea-ledger-ethereum
+```
+
 Add a private key to the agent
 ``` bash
 aea generate-key fetchai

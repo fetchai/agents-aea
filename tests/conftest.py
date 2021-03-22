@@ -30,6 +30,7 @@ import sys
 import tempfile
 import threading
 import time
+from contextlib import contextmanager
 from functools import WRAPPER_ASSIGNMENTS, wraps
 from pathlib import Path
 from types import FunctionType, MethodType
@@ -49,6 +50,9 @@ from unittest.mock import MagicMock, patch
 import docker as docker
 import gym
 import pytest
+from aea_ledger_cosmos import CosmosCrypto
+from aea_ledger_ethereum import EthereumCrypto
+from aea_ledger_fetchai import FetchAICrypto
 
 from aea import AEA_DIR
 from aea.aea import AEA
@@ -67,17 +71,14 @@ from aea.configurations.loader import load_component_configuration
 from aea.connections.base import Connection
 from aea.contracts.base import Contract, contract_registry
 from aea.crypto.base import Crypto
-from aea.crypto.cosmos import DEFAULT_ADDRESS as COSMOS_DEFAULT_ADDRESS
-from aea.crypto.cosmos import _COSMOS
-from aea.crypto.ethereum import DEFAULT_ADDRESS as ETHEREUM_DEFAULT_ADDRESS
-from aea.crypto.ethereum import DEFAULT_CHAIN_ID as ETHEREUM_DEFAULT_CHAIN_ID
-from aea.crypto.ethereum import (
-    DEFAULT_CURRENCY_DENOM as ETHEREUM_DEFAULT_CURRENCY_DENOM,
+from aea.crypto.ledger_apis import (
+    COSMOS_DEFAULT_ADDRESS,
+    DEFAULT_LEDGER_CONFIGS,
+    ETHEREUM_DEFAULT_ADDRESS,
+    ETHEREUM_DEFAULT_CHAIN_ID,
+    ETHEREUM_DEFAULT_CURRENCY_DENOM,
+    FETCHAI_DEFAULT_ADDRESS,
 )
-from aea.crypto.ethereum import EthereumApi, EthereumCrypto, _ETHEREUM
-from aea.crypto.fetchai import DEFAULT_ADDRESS as FETCHAI_DEFAULT_ADDRESS
-from aea.crypto.fetchai import _FETCHAI
-from aea.crypto.ledger_apis import DEFAULT_LEDGER_CONFIGS
 from aea.crypto.registries import ledger_apis_registry, make_crypto
 from aea.crypto.wallet import CryptoStore
 from aea.helpers.base import CertRequest, SimpleId, cd
@@ -140,11 +141,6 @@ PROTOCOL_SPEC_CONFIGURATION_SCHEMA = os.path.join(
 
 DUMMY_ENV = gym.GoalEnv
 
-# Ledger identifiers
-COSMOS = _COSMOS
-ETHEREUM = _ETHEREUM
-FETCHAI = _FETCHAI
-
 # URL to local Ganache instance
 DEFAULT_GANACHE_ADDR = "http://127.0.0.1"
 DEFAULT_GANACHE_PORT = 8545
@@ -153,13 +149,14 @@ DEFAULT_GANACHE_CHAIN_ID = 1337
 COSMOS_PRIVATE_KEY_FILE_CONNECTION = "cosmos_connection_private_key.txt"
 FETCHAI_PRIVATE_KEY_FILE_CONNECTION = "fetchai_connection_private_key.txt"
 
-COSMOS_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(COSMOS)
-ETHEREUM_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(ETHEREUM)
-FETCHAI_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(FETCHAI)
+COSMOS_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(CosmosCrypto.identifier)
+ETHEREUM_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(EthereumCrypto.identifier)
+FETCHAI_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(FetchAICrypto.identifier)
 
 ETHEREUM_PRIVATE_KEY_TWO_FILE = "ethereum_private_key_two.txt"
 
 DEFAULT_AMOUNT = 1000000000000000000000
+GAS_PRICE_API_KEY = ""
 
 # private keys with value on testnet
 COSMOS_PRIVATE_KEY_PATH = os.path.join(
@@ -241,7 +238,7 @@ FETCHAI_TESTNET_CONFIG = {"address": FETCHAI_DEFAULT_ADDRESS}
 # common public ids used in the tests
 UNKNOWN_PROTOCOL_PUBLIC_ID = PublicId("unknown_author", "unknown_protocol", "0.1.0")
 UNKNOWN_CONNECTION_PUBLIC_ID = PublicId("unknown_author", "unknown_connection", "0.1.0")
-MY_FIRST_AEA_PUBLIC_ID = PublicId.from_str("fetchai/my_first_aea:0.19.0")
+MY_FIRST_AEA_PUBLIC_ID = PublicId.from_str("fetchai/my_first_aea:0.23.0")
 
 DUMMY_SKILL_PATH = os.path.join(CUR_PATH, "data", "dummy_skill", SKILL_YAML)
 
@@ -365,6 +362,20 @@ protocol_specification_files = [
     os.path.join(PROTOCOL_SPECS_PREF_2, "sample_specification.yaml",),
     os.path.join(PROTOCOL_SPECS_PREF_2, "sample_specification_no_custom_types.yaml",),
 ]
+
+
+@contextmanager
+def project_root_pythonpath():
+    """Set pythonpath to project root."""
+    old_python_path = os.environ.get("PYTHONPATH", None)
+    os.environ["PYTHONPATH"] = ":".join(
+        filter(None, [os.path.abspath(ROOT_DIR), old_python_path])
+    )
+    yield
+    if old_python_path is None:
+        os.environ.pop("PYTHONPATH")
+    else:
+        os.environ["PYTHONPATH"] = old_python_path
 
 
 def match_files(fname1: str, fname2: str) -> Tuple[bool, str]:
@@ -641,6 +652,7 @@ def ethereum_testnet_config(ganache_addr, ganache_port):
         "address": new_uri,
         "chain_id": DEFAULT_GANACHE_CHAIN_ID,
         "denom": ETHEREUM_DEFAULT_CURRENCY_DENOM,
+        "gas_price_api_key": GAS_PRICE_API_KEY,
     }
     return new_config
 
@@ -648,11 +660,11 @@ def ethereum_testnet_config(ganache_addr, ganache_port):
 @pytest.fixture(scope="function")
 def update_default_ethereum_ledger_api(ethereum_testnet_config):
     """Change temporarily default Ethereum ledger api configurations to interact with local Ganache."""
-    old_config = DEFAULT_LEDGER_CONFIGS.pop(EthereumApi.identifier, None)
-    DEFAULT_LEDGER_CONFIGS[EthereumApi.identifier] = ethereum_testnet_config
+    old_config = DEFAULT_LEDGER_CONFIGS.pop(EthereumCrypto.identifier, None)
+    DEFAULT_LEDGER_CONFIGS[EthereumCrypto.identifier] = ethereum_testnet_config
     yield
-    DEFAULT_LEDGER_CONFIGS.pop(EthereumApi.identifier)
-    DEFAULT_LEDGER_CONFIGS[EthereumApi.identifier] = old_config
+    DEFAULT_LEDGER_CONFIGS.pop(EthereumCrypto.identifier)
+    DEFAULT_LEDGER_CONFIGS[EthereumCrypto.identifier] = old_config
 
 
 @pytest.mark.integration
@@ -709,7 +721,7 @@ def reset_aea_cli_config() -> None:
 def get_unused_tcp_port():
     """Get an unused TCP port."""
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(("", 0))
+    s.bind(("127.0.0.1", 0))
     s.listen(1)
     port = s.getsockname()[1]
     s.close()
@@ -829,6 +841,7 @@ def _process_cert(key: Crypto, cert: CertRequest, path_prefix: str):
 
 
 def _make_libp2p_connection(
+    data_dir: str,
     port: int = 10234,
     host: str = "127.0.0.1",
     relay: bool = True,
@@ -839,24 +852,24 @@ def _make_libp2p_connection(
     node_key_file: Optional[str] = None,
     agent_key: Optional[Crypto] = None,
     build_directory: Optional[str] = None,
-    data_dir: str = ".",
     peer_registration_delay: str = "0.0",
 ) -> P2PLibp2pConnection:
-    log_file = "libp2p_node_{}.log".format(port)
+    if not os.path.isdir(data_dir) or not os.path.exists(data_dir):
+        raise ValueError("Data dir must be directory and exist!")
+    log_file = os.path.join(data_dir, "libp2p_node_{}.log".format(port))
     if os.path.exists(log_file):
         os.remove(log_file)
     key = agent_key
     if key is None:
         key = make_crypto(DEFAULT_LEDGER)
-    identity = Identity("", address=key.address)
+    identity = Identity("identity", address=key.address)
     conn_crypto_store = None
     if node_key_file is not None:
         conn_crypto_store = CryptoStore({DEFAULT_LEDGER: node_key_file})
     else:
         node_key = make_crypto(DEFAULT_LEDGER)
-        node_key_path = f"./{node_key.public_key}.txt"
-        with open(node_key_path, "wb") as f:
-            node_key.dump(f)
+        node_key_path = os.path.join(data_dir, f"{node_key.public_key}.txt")
+        node_key.dump(node_key_path)
         conn_crypto_store = CryptoStore({DEFAULT_LEDGER: node_key_path})
     cert_request = CertRequest(
         conn_crypto_store.public_keys[DEFAULT_LEDGER],
@@ -918,14 +931,16 @@ def _make_libp2p_connection(
 
 def _make_libp2p_client_connection(
     peer_public_key: str,
+    data_dir: str,
     node_port: int = 11234,
     node_host: str = "127.0.0.1",
     uri: Optional[str] = None,
     ledger_api_id: Union[SimpleId, str] = DEFAULT_LEDGER,
-    data_dir: str = ".",
 ) -> P2PLibp2pClientConnection:
+    if not os.path.isdir(data_dir) or not os.path.exists(data_dir):
+        raise ValueError("Data dir must be directory and exist!")
     crypto = make_crypto(ledger_api_id)
-    identity = Identity("", address=crypto.address)
+    identity = Identity("identity", address=crypto.address)
     cert_request = CertRequest(
         peer_public_key,
         POR_DEFAULT_SERVICE_ID,
@@ -985,11 +1000,9 @@ def libp2p_log_on_failure_all(cls):
 
     :return: class with decorated methods.
     """
-    # TODO(LR) test it is a type
     for name, fn in inspect.getmembers(cls):
         if isinstance(fn, FunctionType):
             setattr(cls, name, libp2p_log_on_failure(fn))
-        # TOFIX(LR) decorate already @classmethod decorated methods
         continue
         if isinstance(fn, MethodType):
             if fn.im_self is None:
@@ -1121,7 +1134,7 @@ async def ledger_apis_connection(request, ethereum_testnet_config):
 @pytest.fixture()
 def ledger_api(ethereum_testnet_config, ganache):
     """Ledger api fixture."""
-    ledger_id, config = ETHEREUM, ethereum_testnet_config
+    ledger_id, config = EthereumCrypto.identifier, ethereum_testnet_config
     api = ledger_apis_registry.make(ledger_id, **config)
     yield api
 
@@ -1145,7 +1158,9 @@ def erc1155_contract(ledger_api, ganache, ganache_addr, ganache_port):
     contract = contract_registry.make(str(configuration.public_id))
 
     # deploy contract
-    crypto = EthereumCrypto(ETHEREUM_PRIVATE_KEY_PATH)
+    crypto = make_crypto(
+        EthereumCrypto.identifier, private_key_path=ETHEREUM_PRIVATE_KEY_PATH
+    )
 
     tx = contract.get_deploy_transaction(
         ledger_api=ledger_api, deployer_address=crypto.address, gas=5000000
@@ -1174,8 +1189,12 @@ def erc20_contract(ledger_api, ganache, ganache_addr, ganache_port):
     contract = contract_registry.make(str(configuration.public_id))
 
     # get two accounts
-    account1 = EthereumCrypto(ETHEREUM_PRIVATE_KEY_PATH)
-    account2 = EthereumCrypto(ETHEREUM_PRIVATE_KEY_TWO_PATH)
+    account1 = make_crypto(
+        EthereumCrypto.identifier, private_key_path=ETHEREUM_PRIVATE_KEY_PATH
+    )
+    account2 = make_crypto(
+        EthereumCrypto.identifier, private_key_path=ETHEREUM_PRIVATE_KEY_TWO_PATH
+    )
 
     tx = contract.get_deploy_transaction(
         ledger_api=ledger_api,
@@ -1225,7 +1244,9 @@ def oracle_contract(ledger_api, ganache, ganache_addr, ganache_port, erc20_contr
     _, erc20_address = erc20_contract
 
     # deploy contract
-    crypto = EthereumCrypto(ETHEREUM_PRIVATE_KEY_PATH)
+    crypto = make_crypto(
+        EthereumCrypto.identifier, private_key_path=ETHEREUM_PRIVATE_KEY_PATH
+    )
 
     tx = contract.get_deploy_transaction(
         ledger_api=ledger_api,

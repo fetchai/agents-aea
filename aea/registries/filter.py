@@ -103,7 +103,7 @@ class Filter(WithLogger):
         return await self.decision_maker_out_queue.async_get()
 
     def handle_internal_message(self, internal_message: Optional[Message]) -> None:
-        """Handlle internal message."""
+        """Handle internal message."""
         if internal_message is None:
             self.logger.warning("Got 'None' while processing internal messages.")
             return

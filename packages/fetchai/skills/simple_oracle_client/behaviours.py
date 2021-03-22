@@ -21,7 +21,8 @@
 
 from typing import Any, cast
 
-from aea.mail.base import EnvelopeContext
+from aea_ledger_ethereum import EthereumApi
+
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.connections.ledger.base import CONNECTION_ID as LEDGER_API_ADDRESS
@@ -81,7 +82,10 @@ class SimpleOracleClientBehaviour(TickerBehaviour):
         if not strategy.is_client_contract_deployed:
             self.context.logger.info("Oracle client contract not yet deployed")
             return
-        if not strategy.is_oracle_transaction_approved:
+        if (
+            strategy.ledger_id == EthereumApi.identifier
+            and not strategy.is_oracle_transaction_approved
+        ):
             self.context.logger.info(
                 "Oracle client contract not yet approved to spend tokens"
             )
@@ -109,22 +113,11 @@ class SimpleOracleClientBehaviour(TickerBehaviour):
             ledger_id=strategy.ledger_id,
             contract_id=str(CLIENT_CONTRACT_PUBLIC_ID),
             callable="get_deploy_transaction",
-            kwargs=ContractApiMessage.Kwargs(
-                {
-                    "deployer_address": self.context.agent_address,
-                    "fetchOracleContractAddress": strategy.oracle_contract_address,
-                    "gas": strategy.default_gas_deploy,
-                }
-            ),
+            kwargs=strategy.get_deploy_kwargs(),
         )
         contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue,)
         contract_api_dialogue.terms = strategy.get_deploy_terms()
-        envelope_context = EnvelopeContext(
-            skill_id=self.context.skill_id, connection_id=LEDGER_API_ADDRESS
-        )
-        self.context.outbox.put_message(
-            message=contract_api_msg, context=envelope_context
-        )
+        self.context.outbox.put_message(message=contract_api_msg)
         self.context.logger.info("requesting contract deployment transaction...")
 
     def _request_approve_transaction(self) -> None:
@@ -156,12 +149,7 @@ class SimpleOracleClientBehaviour(TickerBehaviour):
         )
         contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
         contract_api_dialogue.terms = strategy.get_approve_terms()
-        envelope_context = EnvelopeContext(
-            skill_id=self.context.skill_id, connection_id=LEDGER_API_ADDRESS
-        )
-        self.context.outbox.put_message(
-            message=contract_api_msg, context=envelope_context
-        )
+        self.context.outbox.put_message(message=contract_api_msg)
         self.context.logger.info("requesting query transaction...")
 
     def _request_query_transaction(self) -> None:
@@ -192,12 +180,7 @@ class SimpleOracleClientBehaviour(TickerBehaviour):
         )
         contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
         contract_api_dialogue.terms = strategy.get_query_terms()
-        envelope_context = EnvelopeContext(
-            skill_id=self.context.skill_id, connection_id=LEDGER_API_ADDRESS
-        )
-        self.context.outbox.put_message(
-            message=contract_api_msg, context=envelope_context
-        )
+        self.context.outbox.put_message(message=contract_api_msg)
         self.context.logger.info("requesting query transaction...")
 
     def teardown(self) -> None:

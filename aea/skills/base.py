@@ -22,12 +22,14 @@ import inspect
 import logging
 import queue
 import re
+import types
 from abc import ABC, abstractmethod
+from copy import copy
 from logging import Logger
 from pathlib import Path
 from queue import Queue
 from types import SimpleNamespace
-from typing import Any, Dict, Optional, Sequence, Set, Tuple, Type, cast
+from typing import Any, Dict, List, Optional, Set, Tuple, Type, Union, cast
 
 from aea.common import Address
 from aea.components.base import Component, load_aea_package
@@ -42,15 +44,16 @@ from aea.context.base import AgentContext
 from aea.exceptions import (
     AEAActException,
     AEAComponentLoadException,
-    AEAException,
     AEAHandleException,
     AEAInstantiationException,
     _StopRuntime,
+    enforce,
     parse_exception,
 )
 from aea.helpers.base import _get_aea_logger_name_prefix, load_module
 from aea.helpers.logging import AgentLoggerAdapter
 from aea.helpers.storage.generic_storage import Storage
+from aea.mail.base import Envelope, EnvelopeContext
 from aea.multiplexer import MultiplexerStatus, OutBox
 from aea.protocols.base import Message
 from aea.skills.tasks import TaskManager
@@ -252,6 +255,23 @@ class SkillContext:
         """Get attribute."""
         return super().__getattribute__(item)  # pragma: no cover
 
+    def send_to_skill(
+        self,
+        message_or_envelope: Union[Message, Envelope],
+        context: Optional[EnvelopeContext] = None,
+    ) -> None:
+        """
+        Send message or envelope to another skill.
+
+        :param message_or_envelope: envelope to send to another skill.
+        if message passed it will be wrapped into envelope with optional envelope context.
+
+        :return: None
+        """
+        if self._agent_context is None:  # pragma: nocover
+            raise ValueError("agent context was not set!")
+        self._agent_context.send_to_skill(message_or_envelope, context)
+
 
 class SkillComponent(ABC):
     """This class defines an abstract interface for skill component classes."""
@@ -368,7 +388,18 @@ class AbstractBehaviour(SkillComponent, ABC):
 
 
 class Behaviour(AbstractBehaviour, ABC):
-    """This class implements an abstract behaviour."""
+    """
+    This class implements an abstract behaviour.
+
+    In a subclass of Behaviour, the flag 'is_programmatically_defined'
+     can be used by the developer to signal to the framework that the class
+     is meant to be used programmatically; hence, in case the class is
+     not declared in the configuration file but it is present in a skill
+     module, the framework will just ignore this class instead of printing
+     a warning message.
+    """
+
+    is_programmatically_defined: bool = False
 
     @abstractmethod
     def act(self) -> None:
@@ -391,7 +422,7 @@ class Behaviour(AbstractBehaviour, ABC):
         except Exception as e:  # pylint: disable=broad-except
             e_str = parse_exception(e)
             raise AEAActException(
-                f"An error occured during act of behaviour {self.context.skill_id}/{type(self).__name__}:\n{e_str}"
+                f"An error occurred during act of behaviour {self.context.skill_id}/{type(self).__name__}:\n{e_str}"
             )
 
     @classmethod
@@ -409,76 +440,28 @@ class Behaviour(AbstractBehaviour, ABC):
         :param skill_context: the skill context
         :return: a list of Behaviour.
         """
-        behaviours = {}  # type: Dict[str, "Behaviour"]
-        if behaviour_configs == {}:
-            return behaviours
-        behaviour_names = set(
-            config.class_name for _, config in behaviour_configs.items()
-        )
-        behaviour_module = load_module("behaviours", Path(path))
-        classes = inspect.getmembers(behaviour_module, inspect.isclass)
-        behaviours_classes = list(
-            filter(
-                lambda x: any(
-                    re.match(behaviour, x[0]) for behaviour in behaviour_names
-                )
-                and not str.startswith(x[1].__module__, "aea.")
-                and not str.startswith(
-                    x[1].__module__,
-                    f"packages.{skill_context.skill_id.author}.skills.{skill_context.skill_id.name}",
-                ),
-                classes,
-            )
-        )
-
-        name_to_class = dict(behaviours_classes)
-        _print_warning_message_for_non_declared_skill_components(
-            skill_context,
-            set(name_to_class.keys()),
-            {
-                behaviour_config.class_name
-                for behaviour_config in behaviour_configs.values()
-            },
-            "behaviours",
-            path,
-        )
-
-        for behaviour_id, behaviour_config in behaviour_configs.items():
-            behaviour_class_name = cast(str, behaviour_config.class_name)
-            skill_context.logger.debug(
-                "Processing behaviour {}".format(behaviour_class_name)
-            )
-            if not behaviour_id.isidentifier():
-                raise AEAComponentLoadException(  # pragma: nocover
-                    f"'{behaviour_id}' is not a valid identifier."
-                )
-            behaviour_class = name_to_class.get(behaviour_class_name, None)
-            if behaviour_class is None:
-                skill_context.logger.warning(
-                    "Behaviour '{}' cannot be found.".format(behaviour_class_name)
-                )
-            else:
-                try:
-                    behaviour = behaviour_class(
-                        name=behaviour_id,
-                        configuration=behaviour_config,
-                        skill_context=skill_context,
-                        **dict(behaviour_config.args),
-                    )
-                except Exception as e:  # pylint: disable=broad-except # pragma: nocover
-                    e_str = parse_exception(e)
-                    raise AEAInstantiationException(
-                        f"An error occured during instantiation of behaviour {skill_context.skill_id}/{behaviour_config.class_name}:\n{e_str}"
-                    )
-                behaviours[behaviour_id] = behaviour
-
-        return behaviours
+        return _parse_module(path, behaviour_configs, skill_context, Behaviour)
 
 
 class Handler(SkillComponent, ABC):
-    """This class implements an abstract behaviour."""
+    """
+    This class implements an abstract behaviour.
 
-    SUPPORTED_PROTOCOL = None  # type: Optional[PublicId]
+    In a subclass of Handler, the flag 'is_programmatically_defined'
+     can be used by the developer to signal to the framework that the component
+     is meant to be used programmatically; hence, in case the class is
+     not declared in the configuration file but it is present in a skill
+     module, the framework will just ignore this class instead of printing
+     a warning message.
+
+    SUPPORTED_PROTOCOL is read by the framework when the handlers are loaded
+     to register them as 'listeners' to the protocol identified by the specified
+     public id. Whenever a message of protocol 'SUPPORTED_PROTOCOL' is sent
+     to the agent, the framework will call the 'handle' method.
+    """
+
+    SUPPORTED_PROTOCOL: Optional[PublicId] = None
+    is_programmatically_defined: bool = False
 
     @abstractmethod
     def handle(self, message: Message) -> None:
@@ -498,7 +481,7 @@ class Handler(SkillComponent, ABC):
         except Exception as e:  # pylint: disable=broad-except
             e_str = parse_exception(e)
             raise AEAHandleException(
-                f"An error occured during handle of handler {self.context.skill_id}/{type(self).__name__}:\n{e_str}"
+                f"An error occurred during handle of handler {self.context.skill_id}/{type(self).__name__}:\n{e_str}"
             )
 
     @classmethod
@@ -516,62 +499,7 @@ class Handler(SkillComponent, ABC):
         :param skill_context: the skill context
         :return: an handler, or None if the parsing fails.
         """
-        handlers = {}  # type: Dict[str, "Handler"]
-        if handler_configs == {}:
-            return handlers
-        handler_names = set(config.class_name for _, config in handler_configs.items())
-        handler_module = load_module("handlers", Path(path))
-        classes = inspect.getmembers(handler_module, inspect.isclass)
-        handler_classes = list(
-            filter(
-                lambda x: any(re.match(handler, x[0]) for handler in handler_names)
-                and not str.startswith(x[1].__module__, "aea.")
-                and not str.startswith(
-                    x[1].__module__,
-                    f"packages.{skill_context.skill_id.author}.skills.{skill_context.skill_id.name}",
-                ),
-                classes,
-            )
-        )
-
-        name_to_class = dict(handler_classes)
-        _print_warning_message_for_non_declared_skill_components(
-            skill_context,
-            set(name_to_class.keys()),
-            {handler_config.class_name for handler_config in handler_configs.values()},
-            "handlers",
-            path,
-        )
-        for handler_id, handler_config in handler_configs.items():
-            handler_class_name = cast(str, handler_config.class_name)
-            skill_context.logger.debug(
-                "Processing handler {}".format(handler_class_name)
-            )
-            if not handler_id.isidentifier():
-                raise AEAComponentLoadException(  # pragma: nocover
-                    f"'{handler_id}' is not a valid identifier."
-                )
-            handler_class = name_to_class.get(handler_class_name, None)
-            if handler_class is None:
-                skill_context.logger.warning(
-                    "Handler '{}' cannot be found.".format(handler_class_name)
-                )
-            else:
-                try:
-                    handler = handler_class(
-                        name=handler_id,
-                        configuration=handler_config,
-                        skill_context=skill_context,
-                        **dict(handler_config.args),
-                    )
-                except Exception as e:  # pylint: disable=broad-except # pragma: nocover
-                    e_str = parse_exception(e)
-                    raise AEAInstantiationException(
-                        f"An error occured during instantiation of handler {skill_context.skill_id}/{handler_config.class_name}:\n{e_str}"
-                    )
-                handlers[handler_id] = handler
-
-        return handlers
+        return _parse_module(path, handler_configs, skill_context, Handler)
 
 
 class Model(SkillComponent, ABC):
@@ -621,112 +549,20 @@ class Model(SkillComponent, ABC):
         skill_context: SkillContext,
     ) -> Dict[str, "Model"]:
         """
-        Parse the tasks module.
+        Parse the model module.
 
         :param path: path to the Python skill module.
         :param model_configs: a list of model configurations.
         :param skill_context: the skill context
         :return: a list of Model.
         """
-        instances = {}  # type: Dict[str, "Model"]
-        if model_configs == {}:
-            return instances
-        models = []
-
-        model_names = set(config.class_name for _, config in model_configs.items())
-
-        # get all Python modules except the standard ones
-        ignore_regex = "|".join(["handlers.py", "behaviours.py", "tasks.py", "__.*"])
-        all_python_modules = Path(path).glob("*.py")
-        module_paths = set(
-            map(
-                str,
-                filter(
-                    lambda x: not re.match(ignore_regex, x.name), all_python_modules
-                ),
-            )
-        )
-
-        for module_path in module_paths:
-            skill_context.logger.debug("Trying to load module {}".format(module_path))
-            module_name = module_path.replace(".py", "")
-            model_module = load_module(module_name, Path(module_path))
-            classes = inspect.getmembers(model_module, inspect.isclass)
-            filtered_classes = list(
-                filter(
-                    lambda x: any(re.match(model, x[0]) for model in model_names)
-                    and issubclass(x[1], Model)
-                    and not str.startswith(x[1].__module__, "aea.")
-                    and not str.startswith(
-                        x[1].__module__,
-                        f"packages.{skill_context.skill_id.author}.skills.{skill_context.skill_id.name}",
-                    ),
-                    classes,
-                )
-            )
-            models.extend(filtered_classes)
-
-        _check_duplicate_classes(models)
-        name_to_class = dict(models)
-        _print_warning_message_for_non_declared_skill_components(
-            skill_context,
-            set(name_to_class.keys()),
-            {model_config.class_name for model_config in model_configs.values()},
-            "models",
-            path,
-        )
-        for model_id, model_config in model_configs.items():
-            model_class_name = model_config.class_name
-            skill_context.logger.debug(
-                "Processing model id={}, class={}".format(model_id, model_class_name)
-            )
-            if not model_id.isidentifier():
-                raise AEAComponentLoadException(  # pragma: nocover
-                    f"'{model_id}' is not a valid identifier."
-                )
-            model = name_to_class.get(model_class_name, None)
-            if model is None:
-                skill_context.logger.warning(
-                    "Model '{}' cannot be found.".format(model_class_name)
-                )
-            else:
-                try:
-                    model_instance = model(
-                        name=model_id,
-                        skill_context=skill_context,
-                        configuration=model_config,
-                        **dict(model_config.args),
-                    )
-                except Exception as e:  # pylint: disable=broad-except # pragma: nocover
-                    e_str = parse_exception(e)
-                    raise AEAInstantiationException(
-                        f"An error occured during instantiation of model {skill_context.skill_id}/{model_config.class_name}:\n{e_str}"
-                    )
-                instances[model_id] = model_instance
-                setattr(skill_context, model_id, model_instance)
-        return instances
-
-
-def _check_duplicate_classes(name_class_pairs: Sequence[Tuple[str, Type]]) -> None:
-    """
-    Given a sequence of pairs (class_name, class_obj), check whether there are duplicates in the class names.
-
-    :param name_class_pairs: the sequence of pairs (class_name, class_obj)
-    :return: None
-    :raises AEAException: if there are more than one definition of the same class.
-    """
-    names_to_path: Dict[str, str] = {}
-    for class_name, class_obj in name_class_pairs:
-        module_path = class_obj.__module__
-        if class_name in names_to_path:
-            raise AEAException(
-                f"Model '{class_name}' present both in {names_to_path[class_name]} and {module_path}. Remove one of them."
-            )
-        names_to_path[class_name] = module_path
+        return _parse_module(path, model_configs, skill_context, Model)
 
 
 class Skill(Component):
     """This class implements a skill."""
+
+    __slots__ = ("_skill_context", "_handlers", "_behaviours", "_models")
 
     def __init__(
         self,
@@ -749,7 +585,6 @@ class Skill(Component):
         if kwargs is not None:
             pass
         super().__init__(configuration)
-        self.config = configuration
         self._skill_context = (
             skill_context if skill_context is not None else SkillContext()
         )
@@ -853,30 +688,93 @@ class Skill(Component):
         )
         skill_context.logger = cast(Logger, _logger)
 
-        skill = Skill(configuration, skill_context, **kwargs)
-
-        directory = configuration.directory
-        load_aea_package(configuration)
-        handlers_by_id = dict(configuration.handlers.read_all())
-        handlers = Handler.parse_module(
-            str(directory / "handlers.py"), handlers_by_id, skill_context
+        skill_component_loader = _SkillComponentLoader(
+            configuration, skill_context, **kwargs
         )
-
-        behaviours_by_id = dict(configuration.behaviours.read_all())
-        behaviours = Behaviour.parse_module(
-            str(directory / "behaviours.py"), behaviours_by_id, skill_context,
-        )
-
-        models_by_id = dict(configuration.models.read_all())
-        model_instances = Model.parse_module(
-            str(directory), models_by_id, skill_context
-        )
-
-        skill.handlers.update(handlers)
-        skill.behaviours.update(behaviours)
-        skill.models.update(model_instances)
-
+        skill = skill_component_loader.load_skill()
         return skill
+
+
+def _parse_module(
+    path: str,
+    component_configs: Dict[str, SkillComponentConfiguration],
+    skill_context: SkillContext,
+    component_class: Type,
+) -> Dict[str, Any]:
+    """
+    Parse a module to find skill component classes, and instantiate them.
+
+    This is a private framework function,
+     used in SkillComponentClass.parse_module.
+
+    :param path: path to the Python module.
+    :param component_configs: the component configurations.
+    :param skill_context: the skill context.
+    :param component_class: the class of the skill components to be loaded.
+    :return: A mapping from skill component name to the skill component instance.
+    """
+    components: Dict[str, Any] = {}
+    component_type_name = component_class.__name__.lower()
+    component_type_name_plural = component_type_name + "s"
+    if component_configs == {}:
+        return components
+    component_names = set(config.class_name for _, config in component_configs.items())
+    component_module = load_module(component_type_name_plural, Path(path))
+    classes = inspect.getmembers(component_module, inspect.isclass)
+    component_classes = list(
+        filter(
+            lambda x: any(re.match(component, x[0]) for component in component_names)
+            and issubclass(x[1], component_class)
+            and not str.startswith(x[1].__module__, "aea.")
+            and not str.startswith(
+                x[1].__module__,
+                f"packages.{skill_context.skill_id.author}.skills.{skill_context.skill_id.name}",
+            ),
+            classes,
+        )
+    )
+
+    name_to_class = dict(component_classes)
+    _print_warning_message_for_non_declared_skill_components(
+        skill_context,
+        set(name_to_class.keys()),
+        {
+            component_config.class_name
+            for component_config in component_configs.values()
+        },
+        component_type_name_plural,
+        path,
+    )
+    for component_id, component_config in component_configs.items():
+        component_class_name = cast(str, component_config.class_name)
+        skill_context.logger.debug(
+            f"Processing {component_type_name} {component_class_name}"
+        )
+        if not component_id.isidentifier():
+            raise AEAComponentLoadException(  # pragma: nocover
+                f"'{component_id}' is not a valid identifier."
+            )
+        component_class = name_to_class.get(component_class_name, None)
+        if component_class is None:
+            skill_context.logger.warning(
+                f"{component_type_name.capitalize()} '{component_class_name}' cannot be found."
+            )
+        else:
+            try:
+                component = component_class(
+                    name=component_id,
+                    configuration=component_config,
+                    skill_context=skill_context,
+                    **dict(component_config.args),
+                )
+            except Exception as e:  # pylint: disable=broad-except # pragma: nocover
+                e_str = parse_exception(e)
+                raise AEAInstantiationException(
+                    f"An error occurred during instantiation of component {skill_context.skill_id}/{component_config.class_name}:\n{e_str}"
+                )
+            components[component_id] = component
+
+    return components
 
 
 def _print_warning_message_for_non_declared_skill_components(
@@ -884,12 +782,404 @@ def _print_warning_message_for_non_declared_skill_components(
     classes: Set[str],
     config_components: Set[str],
     item_type: str,
-    skill_path: str,
+    module_path: str,
 ) -> None:
     """Print a warning message if a skill component is not declared in the config files."""
     for class_name in classes.difference(config_components):
         skill_context.logger.warning(
-            "Class {} of type {} found but not declared in the configuration file {}.".format(
-                class_name, item_type, skill_path
+            "Class {} of type {} found in skill module {} but not declared in the configuration file.".format(
+                class_name, item_type, module_path
             )
         )
+
+
+_SKILL_COMPONENT_TYPES = Type[Union[Handler, Behaviour, Model]]
+
+_ComponentsHelperIndex = Dict[_SKILL_COMPONENT_TYPES, Dict[str, SkillComponent]]
+"""
+Helper index to store component instances.
+"""
+
+
+class _SkillComponentLoadingItem:  # pylint: disable=too-few-public-methods
+    """Class to represent a triple (component name, component configuration, component class)."""
+
+    def __init__(
+        self,
+        name: str,
+        config: SkillComponentConfiguration,
+        class_: Type[SkillComponent],
+        type_: _SKILL_COMPONENT_TYPES,
+    ):
+        """Initialize the item."""
+        self.name = name
+        self.config = config
+        self.class_ = class_
+        self.type_ = type_
+
+
+class _SkillComponentLoader:
+    """This class implements the loading policy for skill components."""
+
+    def __init__(
+        self, configuration: SkillConfig, skill_context: SkillContext, **kwargs: Any
+    ):
+        """Initialize the helper class."""
+        enforce(
+            configuration.directory is not None,
+            "Configuration not associated to directory.",
+        )
+        self.configuration = configuration
+        self.skill_directory = cast(Path, configuration.directory)
+        self.skill_context = skill_context
+        self.kwargs = kwargs
+
+        self.skill = Skill(self.configuration, self.skill_context, **self.kwargs)
+        self.skill_dotted_path = f"packages.{self.configuration.public_id.author}.skills.{self.configuration.public_id.name}"
+
+    def load_skill(self) -> Skill:
+        """Load the skill."""
+        load_aea_package(self.configuration)
+        python_modules: Set[Path] = self._get_python_modules()
+        declared_component_classes: Dict[
+            _SKILL_COMPONENT_TYPES, Dict[str, SkillComponentConfiguration]
+        ] = self._get_declared_skill_component_configurations()
+        component_classes_by_path: Dict[
+            Path, Set[Tuple[str, Type[SkillComponent]]]
+        ] = self._load_component_classes(python_modules)
+        component_loading_items = self._match_class_and_configurations(
+            component_classes_by_path, declared_component_classes
+        )
+        components = self._get_component_instances(component_loading_items)
+        self._update_skill(components)
+        return self.skill
+
+    def _update_skill(self, components: _ComponentsHelperIndex) -> None:
+        self.skill.handlers.update(
+            cast(Dict[str, Handler], components.get(Handler, {}))
+        )
+        self.skill.behaviours.update(
+            cast(Dict[str, Behaviour], components.get(Behaviour, {}))
+        )
+        self.skill.models.update(cast(Dict[str, Model], components.get(Model, {})))
+        self.skill._set_models_on_context()  # pylint: disable=protected-access
+
+    def _get_python_modules(self) -> Set[Path]:
+        """
+        Get all the Python modules of the skill package.
+
+        We ignore '__pycache__' Python modules as they are not relevant.
+
+        :return: a set of paths pointing to all the Python modules in the skill.
+        """
+        ignore_regex = "__pycache__*"
+        all_python_modules = self.skill_directory.rglob("*.py")
+        module_paths: Set[Path] = set(
+            map(
+                lambda p: Path(p).relative_to(self.skill_directory),
+                filter(
+                    lambda x: not re.match(ignore_regex, x.name), all_python_modules
+                ),
+            )
+        )
+        return module_paths
+
+    @classmethod
+    def _compute_module_dotted_path(cls, module_path: Path) -> str:
+        """Compute the dotted path for a skill module."""
+        suffix = ".".join(module_path.with_name(module_path.stem).parts)
+        return suffix
+
+    def _filter_classes(
+        self, classes: List[Tuple[str, Type]]
+    ) -> List[Tuple[str, Type[SkillComponent]]]:
+        """
+        Filter classes of skill components.
+
+        The following filters are applied:
+        - the class must be a subclass of "SkillComponent";
+        - its __module__ attribute must not start with 'aea.' (we exclude classes provided by the framework)
+        - its __module__ attribute starts with the expected dotted path of this skill.
+
+        :param classes: a list of pairs (class name, class object)
+        :return: a list of the same kind, but filtered with only skill component classes.
+        """
+        filtered_classes = filter(
+            lambda name_and_class: issubclass(name_and_class[1], SkillComponent)
+            and not str.startswith(name_and_class[1].__module__, "aea.")
+            and not str.startswith(
+                name_and_class[1].__module__, self.skill_dotted_path
+            ),
+            classes,
+        )
+        classes = list(filtered_classes)
+        return cast(List[Tuple[str, Type[SkillComponent]]], classes)
+
+    def _load_component_classes(
+        self, module_paths: Set[Path]
+    ) -> Dict[Path, Set[Tuple[str, Type[SkillComponent]]]]:
+        """
+        Load component classes from Python modules.
+
+        :param module_paths: a set of paths to Python modules.
+        :return: a mapping from path to skill component classes in that module
+          (containing potential duplicates). Skill components in one path
+          are
+        """
+        module_to_classes: Dict[Path, Set[Tuple[str, Type[SkillComponent]]]] = {}
+        for module_path in module_paths:
+            self.skill_context.logger.debug(f"Trying to load module {module_path}")
+            module_dotted_path: str = self._compute_module_dotted_path(module_path)
+            component_module: types.ModuleType = load_module(
+                module_dotted_path, self.skill_directory / module_path
+            )
+            classes: List[Tuple[str, Type]] = inspect.getmembers(
+                component_module, inspect.isclass
+            )
+            filtered_classes: List[
+                Tuple[str, Type[SkillComponent]]
+            ] = self._filter_classes(classes)
+            module_to_classes[module_path] = set(filtered_classes)
+        return module_to_classes
+
+    def _get_declared_skill_component_configurations(
+        self,
+    ) -> Dict[_SKILL_COMPONENT_TYPES, Dict[str, SkillComponentConfiguration]]:
+        """
+        Get all the declared skill component configurations.
+
+        :return:
+        """
+        handlers_by_id = dict(self.configuration.handlers.read_all())
+        behaviours_by_id = dict(self.configuration.behaviours.read_all())
+        models_by_id = dict(self.configuration.models.read_all())
+
+        result: Dict[
+            _SKILL_COMPONENT_TYPES, Dict[str, SkillComponentConfiguration]
+        ] = {}
+        for component_type, components_by_id in [
+            (Handler, handlers_by_id),
+            (Behaviour, behaviours_by_id),
+            (Model, models_by_id),
+        ]:
+            for component_id, component_config in components_by_id.items():
+                result.setdefault(component_type, {})[component_id] = component_config  # type: ignore
+        return result
+
+    def _get_component_instances(
+        self, component_loading_items: List[_SkillComponentLoadingItem],
+    ) -> _ComponentsHelperIndex:
+        """
+        Instantiate classes declared in configuration files.
+
+        :param component_loading_items: a list of loading items.
+        :return: the instances of the skill components.
+        """
+        result: _ComponentsHelperIndex = {}
+        for item in component_loading_items:
+            instance = item.class_(
+                name=item.name,
+                configuration=item.config,
+                skill_context=self.skill_context,
+                **item.config.args,
+            )
+            result.setdefault(item.type_, {})[item.name] = instance
+        return result
+
+    @classmethod
+    def _get_skill_component_type(
+        cls, skill_component_type: Type[SkillComponent],
+    ) -> Type[Union[Handler, Behaviour, Model]]:
+        """Get the concrete skill component type."""
+        parent_skill_component_types = list(
+            filter(
+                lambda class_: class_ in (Handler, Behaviour, Model),
+                skill_component_type.__mro__,
+            )
+        )
+        enforce(
+            len(parent_skill_component_types) == 1,
+            f"Class {skill_component_type.__name__} in module {skill_component_type.__module__} is not allowed to inherit from more than one skill component type. Found: {parent_skill_component_types}.",
+        )
+        return cast(
+            Type[Union[Handler, Behaviour, Model]], parent_skill_component_types[0]
+        )
+
+    def _match_class_and_configurations(
+        self,
+        component_classes_by_path: Dict[Path, Set[Tuple[str, Type[SkillComponent]]]],
+        declared_component_classes: Dict[
+            _SKILL_COMPONENT_TYPES, Dict[str, SkillComponentConfiguration]
+        ],
+    ) -> List[_SkillComponentLoadingItem]:
+        """
+        Match skill component classes to their configurations.
+
+        Given a class of a skill component, we can disambiguate it in three ways:
+        - by its name
+        - by its type (one of 'Handler', 'Behaviour', 'Model')
+        - whether the user has set the 'file_path' field.
+        If one of the skill component cannot be disambiguated, we raise error.
+
+        In this function, the above criteria are applied in that order.
+
+        :param component_classes_by_path:
+        :return: None
+        """
+        result: List[_SkillComponentLoadingItem] = []
+
+        class_index: Dict[
+            str, Dict[_SKILL_COMPONENT_TYPES, Set[Type[SkillComponent]]]
+        ] = {}
+        used_classes: Set[Type[SkillComponent]] = set()
+        not_resolved_configurations: Dict[
+            Tuple[_SKILL_COMPONENT_TYPES, str], SkillComponentConfiguration
+        ] = {}
+
+        # populate indexes
+        for _path, component_classes in component_classes_by_path.items():
+            for (component_classname, _component_class) in component_classes:
+                type_ = self._get_skill_component_type(_component_class)
+                class_index.setdefault(component_classname, {}).setdefault(
+                    type_, set()
+                ).add(_component_class)
+
+        for component_type, by_id in declared_component_classes.items():
+            for component_id, component_config in by_id.items():
+                path = component_config.file_path
+                class_name = component_config.class_name
+                if path is not None:
+                    classes_in_path = component_classes_by_path[path]
+                    component_class_or_none: Optional[Type[SkillComponent]] = next(
+                        (
+                            actual_class
+                            for actual_class_name, actual_class in classes_in_path
+                            if actual_class_name == class_name
+                        ),
+                        None,
+                    )
+                    enforce(
+                        component_class_or_none is not None,
+                        self._get_error_message_prefix()
+                        + f"Cannot find class '{class_name}' for component '{component_id}' of type '{self._type_to_str(component_type)}' of skill '{self.configuration.public_id}' in module {path}",
+                    )
+                    component_class = cast(
+                        Type[SkillComponent], component_class_or_none
+                    )
+                    actual_component_type = self._get_skill_component_type(
+                        component_class
+                    )
+                    enforce(
+                        actual_component_type == component_type,
+                        self._get_error_message_prefix()
+                        + f"Found class '{class_name}' for component '{component_id}' of type '{self._type_to_str(component_type)}' of skill '{self.configuration.public_id}' in module {path}, but the expected type was {self._type_to_str(component_type)}, found {self._type_to_str(actual_component_type)} ",
+                    )
+                    used_classes.add(component_class)
+                    result.append(
+                        _SkillComponentLoadingItem(
+                            component_id,
+                            component_config,
+                            component_class,
+                            component_type,
+                        )
+                    )
+                else:
+                    # process the configuration at the end of the loop
+                    not_resolved_configurations[
+                        (component_type, component_id)
+                    ] = component_config
+
+        for (component_type, component_id), component_config in copy(
+            not_resolved_configurations
+        ).items():
+            class_name = component_config.class_name
+            classes_by_type = class_index.get(class_name, {})
+            enforce(
+                class_name in class_index and component_type in classes_by_type,
+                self._get_error_message_prefix()
+                + f"Cannot find class '{class_name}' for skill component '{component_id}' of type '{self._type_to_str(component_type)}'",
+            )
+            classes = classes_by_type[component_type]
+            not_used_classes = classes.difference(used_classes)
+            enforce(
+                not_used_classes != 0,
+                f"Cannot find class of skill '{self.configuration.public_id}' for component configuration '{component_id}' of type '{self._type_to_str(component_type)}'.",
+            )
+            enforce(
+                len(not_used_classes) == 1,
+                self._get_error_message_ambiguous_classes(
+                    class_name, not_used_classes, component_type, component_id
+                ),
+            )
+            not_used_class = list(not_used_classes)[0]
+            result.append(
+                _SkillComponentLoadingItem(
+                    component_id, component_config, not_used_class, component_type
+                )
+            )
+            used_classes.add(not_used_class)
+
+        self._print_warning_message_for_unused_classes(
+            component_classes_by_path, used_classes
+        )
+        return result
+
+    def _print_warning_message_for_unused_classes(
+        self,
+        component_classes_by_path: Dict[Path, Set[Tuple[str, Type[SkillComponent]]]],
+        used_classes: Set[Type[SkillComponent]],
+    ) -> None:
+        """
+        Print warning message for every unused class.
+
+        :param component_classes_by_path: the component classes by path.
+        :param used_classes: the classes used.
+        :return: None
+        """
+        for path, set_of_class_name_pairs in component_classes_by_path.items():
+            # take only classes, not class names
+            set_of_classes = {pair[1] for pair in set_of_class_name_pairs}
+            set_of_unused_classes = set(
+                filter(lambda x: x not in used_classes, set_of_classes)
+            )
+            if len(set_of_unused_classes) == 0:
+                # all classes in the module are used!
+                continue
+
+            # for each unused class, print a warning message. However,
+            # if it is a Handler or a Behaviour, print the message
+            # only if 'is_programmatically_defined' is not True
+            for unused_class in set_of_unused_classes:
+                component_type_class = self._get_skill_component_type(unused_class)
+                if (
+                    issubclass(unused_class, (Handler, Behaviour))
+                    and cast(
+                        Union[Handler, Behaviour], unused_class
+                    ).is_programmatically_defined
+                ):
+                    continue
+                _print_warning_message_for_non_declared_skill_components(
+                    self.skill_context,
+                    {unused_class.__name__},
+                    set(),
+                    self._type_to_str(component_type_class),
+                    str(path),
+                )
+
+    @classmethod
+    def _type_to_str(cls, component_type: _SKILL_COMPONENT_TYPES) -> str:
+        """Get the string of a component type."""
+        return component_type.__name__.lower()
+
+    def _get_error_message_prefix(self) -> str:
+        """Get error message prefix."""
+        return f"Error while loading skill '{self.configuration.public_id}': "
+
+    def _get_error_message_ambiguous_classes(
+        self,
+        class_name: str,
+        not_used_classes: Set,
+        component_type: _SKILL_COMPONENT_TYPES,
+        component_id: str,
+    ) -> str:
+        return f"{self._get_error_message_prefix()}found many classes with name '{class_name}' for component '{component_id}' of type '{self._type_to_str(component_type)}' in the following modules: {', '.join([c.__module__ for c in not_used_classes])}"

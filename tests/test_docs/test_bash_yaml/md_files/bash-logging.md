@@ -12,13 +12,13 @@ aea_version: 0.6.0
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/stub:0.16.0
+- fetchai/stub:0.18.0
 contracts: []
 protocols:
-- fetchai/default:0.12.0
+- fetchai/default:0.13.0
 skills:
-- fetchai/error:0.12.0
-default_connection: fetchai/stub:0.16.0
+- fetchai/error:0.13.0
+default_connection: fetchai/stub:0.18.0
 default_ledger: fetchai
 logging_config:
   disable_existing_loggers: false
@@ -50,4 +50,26 @@ logging_config:
       - console
       level: DEBUG
       propagate: False
+```
+``` yaml
+logging_config:
+  version: 1
+  disable_existing_loggers: false
+  formatters:
+    standard:
+      format: '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+  handlers:
+    http:
+      class: logging.handlers.HTTPHandler
+      formatter: standard
+      level: INFO
+      host: localhost:5000
+      url: /stream
+      method: POST
+  loggers:
+    aea:
+      handlers:
+      - http
+      level: INFO
+      propagate: false
 ```

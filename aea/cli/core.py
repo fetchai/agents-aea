@@ -21,6 +21,7 @@
 from typing import Optional
 
 import click
+from pkg_resources import iter_entry_points
 
 import aea
 from aea.cli.add import add
@@ -48,6 +49,7 @@ from aea.cli.list import list_command as _list
 from aea.cli.local_registry_sync import local_registry_sync
 from aea.cli.login import login
 from aea.cli.logout import logout
+from aea.cli.plugin import with_plugins
 from aea.cli.publish import publish
 from aea.cli.push import push
 from aea.cli.register import register
@@ -60,13 +62,12 @@ from aea.cli.search import search
 from aea.cli.transfer import transfer
 from aea.cli.upgrade import upgrade
 from aea.cli.utils.click_utils import registry_path_option
-from aea.cli.utils.config import get_or_create_cli_config
-from aea.cli.utils.constants import AUTHOR_KEY
 from aea.cli.utils.context import Context
 from aea.cli.utils.loggers import logger, simple_verbosity_option
 from aea.helpers.win32 import enable_ctrl_c_support
 
 
+@with_plugins(iter_entry_points("aea.cli"))
 @click.group(name="aea")  # type: ignore
 @click.version_option(aea.__version__, prog_name="aea")
 @simple_verbosity_option(logger, default="INFO")
@@ -94,36 +95,6 @@ def cli(
 
     # enables CTRL+C support on windows!
     enable_ctrl_c_support()
-
-
-@cli.command()
-@click.option("-p", "--port", default=8080)
-@click.option("--local", is_flag=True, help="For using local folder.")
-@click.pass_context
-def gui(  # pylint: disable=unused-argument
-    click_context: click.Context, port: int, local: bool
-) -> None:  # pragma: no cover
-    """Run the CLI GUI."""
-    _init_gui()
-    import aea.cli_gui  # pylint: disable=import-outside-toplevel,redefined-outer-name
-
-    click.echo("Running the GUI.....(press Ctrl+C to exit)")
-    aea.cli_gui.run(port)
-
-
-def _init_gui() -> None:
-    """
-    Initialize GUI before start.
-
-    :return: None
-    :raisees: ClickException if author is not set up.
-    """
-    config_ = get_or_create_cli_config()
-    author = config_.get(AUTHOR_KEY, None)
-    if author is None:
-        raise click.ClickException(
-            "Author is not set up. Please run 'aea init' and then restart."
-        )
 
 
 cli.add_command(_list)

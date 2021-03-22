@@ -27,8 +27,7 @@ from aea.mail.base import Envelope
 class ErrorHandler(AbstractErrorHandler):
     """This class implements the error handler."""
 
-    @classmethod
-    def send_unsupported_protocol(cls, envelope: Envelope, logger: Logger) -> None:
+    def send_unsupported_protocol(self, envelope: Envelope, logger: Logger) -> None:
         """
         Handle the received envelope in case the protocol is not supported.
 
@@ -38,22 +37,28 @@ class ErrorHandler(AbstractErrorHandler):
         """
         raise NotImplementedError
 
-    @classmethod
-    def send_decoding_error(cls, envelope: Envelope, logger: Logger) -> None:
+    def send_decoding_error(
+        self, envelope: Envelope, exception: Exception, logger: Logger
+    ) -> None:
         """
         Handle a decoding error.
 
         :param envelope: the envelope
+        :param exception: the exception raised during decoding
+        :param logger: the logger
         :return: None
         """
         raise NotImplementedError
 
-    @classmethod
-    def send_unsupported_skill(cls, envelope: Envelope, logger: Logger) -> None:
+    def send_no_active_handler(
+        self, envelope: Envelope, reason: str, logger: Logger
+    ) -> None:
         """
-        Handle the received envelope in case the skill is not supported.
+        Handle the received envelope in case the handler is not supported.
 
         :param envelope: the envelope
+        :param reason: the reason for the failure
+        :param logger: the logger
         :return: None
         """
         raise NotImplementedError

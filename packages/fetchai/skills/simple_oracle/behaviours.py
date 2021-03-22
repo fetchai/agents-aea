@@ -21,7 +21,6 @@
 
 from typing import Any, Dict, cast
 
-from aea.mail.base import EnvelopeContext
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.connections.ledger.base import CONNECTION_ID as LEDGER_API_ADDRESS
@@ -42,6 +41,7 @@ from packages.fetchai.skills.simple_oracle.strategy import Strategy
 
 
 DEFAULT_UPDATE_INTERVAL = 5
+DEFAULT_DECIMALS = 5
 EXPIRATION_BLOCK = 1000000000000000
 
 
@@ -107,17 +107,18 @@ class SimpleOracleBehaviour(TickerBehaviour):
             self._request_grant_role_transaction()
             return
 
-        # Check for entropy value from fetch oracle skill
-        oracle_data = self.context.shared_state.get("oracle_data", None)
-        if oracle_data is None:
+        # Check for observation from data collecting skill
+        observation = self.context.shared_state.get("observation", None)
+        if observation is None:
             self.context.logger.info("No oracle value to publish")
         else:
             self.context.logger.info("Publishing oracle value")
 
             # add expiration block
-            update_args = oracle_data.copy()
-            update_args["expiration_block"] = EXPIRATION_BLOCK
-            self._request_update_transaction(update_args)
+            update_kwargs = observation[strategy.oracle_value_name]
+            update_kwargs["expiration_block"] = EXPIRATION_BLOCK
+            self.context.logger.info(f"Update kwargs: {update_kwargs}")
+            self._request_update_transaction(update_kwargs)
 
     def _request_contract_deploy_transaction(self) -> None:
         """
@@ -136,23 +137,11 @@ class SimpleOracleBehaviour(TickerBehaviour):
             ledger_id=strategy.ledger_id,
             contract_id=str(CONTRACT_PUBLIC_ID),
             callable="get_deploy_transaction",
-            kwargs=ContractApiMessage.Kwargs(
-                {
-                    "deployer_address": self.context.agent_address,
-                    "ERC20Address": strategy.erc20_address,
-                    "initialFee": strategy.initial_fee_deploy,
-                    "gas": strategy.default_gas_deploy,
-                }
-            ),
+            kwargs=strategy.get_deploy_kwargs(),
         )
         contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue,)
         contract_api_dialogue.terms = strategy.get_deploy_terms()
-        envelope_context = EnvelopeContext(
-            skill_id=self.context.skill_id, connection_id=LEDGER_API_ADDRESS
-        )
-        self.context.outbox.put_message(
-            message=contract_api_msg, context=envelope_context
-        )
+        self.context.outbox.put_message(message=contract_api_msg)
         self.context.logger.info("requesting contract deployment transaction...")
 
     def _request_grant_role_transaction(self) -> None:
@@ -182,15 +171,10 @@ class SimpleOracleBehaviour(TickerBehaviour):
         )
         contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
         contract_api_dialogue.terms = strategy.get_grant_role_terms()
-        envelope_context = EnvelopeContext(
-            skill_id=self.context.skill_id, connection_id=LEDGER_API_ADDRESS
-        )
-        self.context.outbox.put_message(
-            message=contract_api_msg, context=envelope_context
-        )
+        self.context.outbox.put_message(message=contract_api_msg)
         self.context.logger.info("requesting grant role transaction...")
 
-    def _request_update_transaction(self, update_args: Dict[str, Any]) -> None:
+    def _request_update_transaction(self, update_kwargs: Dict[str, Any]) -> None:
         """
         Request transaction that updates value in Fetch oracle contract
 
@@ -212,19 +196,14 @@ class SimpleOracleBehaviour(TickerBehaviour):
                 {
                     "oracle_address": self.context.agent_address,
                     "update_function": strategy.update_function,
-                    "update_args": list(update_args.values()),
+                    "update_kwargs": update_kwargs,
                     "gas": strategy.default_gas_update,
                 }
             ),
         )
         contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
         contract_api_dialogue.terms = strategy.get_update_terms()
-        envelope_context = EnvelopeContext(
-            skill_id=self.context.skill_id, connection_id=LEDGER_API_ADDRESS
-        )
-        self.context.outbox.put_message(
-            message=contract_api_msg, context=envelope_context
-        )
+        self.context.outbox.put_message(message=contract_api_msg)
         self.context.logger.info("requesting update transaction...")
 
     def _get_balance(self) -> None:
@@ -243,12 +222,7 @@ class SimpleOracleBehaviour(TickerBehaviour):
             ledger_id=strategy.ledger_id,
             address=cast(str, self.context.agent_addresses.get(strategy.ledger_id)),
         )
-        envelope_context = EnvelopeContext(
-            skill_id=self.context.skill_id, connection_id=LEDGER_API_ADDRESS
-        )
-        self.context.outbox.put_message(
-            message=ledger_api_msg, context=envelope_context
-        )
+        self.context.outbox.put_message(message=ledger_api_msg)
 
     def add_prometheus_metric(
         self,
@@ -281,10 +255,7 @@ class SimpleOracleBehaviour(TickerBehaviour):
         )
 
         # send message
-        envelope_context = EnvelopeContext(
-            skill_id=self.context.skill_id, connection_id=PROM_CONNECTION_ID
-        )
-        self.context.outbox.put_message(message=message, context=envelope_context)
+        self.context.outbox.put_message(message=message)
 
     def update_prometheus_metric(
         self, metric_name: str, update_func: str, value: float, labels: Dict[str, str],
@@ -313,10 +284,7 @@ class SimpleOracleBehaviour(TickerBehaviour):
         )
 
         # send message
-        envelope_context = EnvelopeContext(
-            skill_id=self.context.skill_id, connection_id=PROM_CONNECTION_ID
-        )
-        self.context.outbox.put_message(message=message, context=envelope_context)
+        self.context.outbox.put_message(message=message)
 
     def teardown(self) -> None:
         """

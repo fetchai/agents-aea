@@ -96,7 +96,11 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay)
     def setup(self):
         """Set the test up"""
         super().setup()
-        self.genesis = _make_libp2p_connection(DEFAULT_PORT + 1, build_directory=self.t)
+        temp_dir_gen = os.path.join(self.t, "temp_dir_gen")
+        os.mkdir(temp_dir_gen)
+        self.genesis = _make_libp2p_connection(
+            data_dir=temp_dir_gen, port=DEFAULT_PORT + 1, build_directory=self.t
+        )
 
         self.multiplexer_genesis = Multiplexer(
             [self.genesis], protocols=[DefaultMessage]
@@ -107,11 +111,14 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay)
 
         genesis_peer = self.genesis.node.multiaddrs[0]
 
-        with open("node_key", "wb") as f:
-            make_crypto(DEFAULT_LEDGER).dump(f)
-            self.relay_key_path = "node_key"
+        file = "node_key"
+        make_crypto(DEFAULT_LEDGER).dump(file)
+        self.relay_key_path = file
 
+        temp_dir_rel = os.path.join(self.t, "temp_dir_rel")
+        os.mkdir(temp_dir_rel)
         self.relay = _make_libp2p_connection(
+            data_dir=temp_dir_rel,
             port=DEFAULT_PORT + 2,
             entry_peers=[genesis_peer],
             node_key_file=self.relay_key_path,
@@ -124,8 +131,11 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay)
 
         relay_peer = self.relay.node.multiaddrs[0]
 
+        temp_dir_1 = os.path.join(self.t, "temp_dir_1")
+        os.mkdir(temp_dir_1)
         self.connection = _make_libp2p_connection(
-            DEFAULT_PORT + 3,
+            data_dir=temp_dir_1,
+            port=DEFAULT_PORT + 3,
             relay=False,
             entry_peers=[relay_peer],
             build_directory=self.t,
@@ -135,8 +145,11 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay)
         self.log_files.append(self.connection.node.log_file)
         self.multiplexers.append(self.multiplexer)
 
+        temp_dir_2 = os.path.join(self.t, "temp_dir_2")
+        os.mkdir(temp_dir_2)
         self.connection2 = _make_libp2p_connection(
-            DEFAULT_PORT + 4,
+            data_dir=temp_dir_2,
+            port=DEFAULT_PORT + 4,
             relay=False,
             entry_peers=[relay_peer],
             build_directory=self.t,
@@ -186,12 +199,7 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay)
         self.multiplexer_relay.disconnect()
         self.change_state_and_wait(self.multiplexer_relay, expected_is_connected=False)
 
-        self.relay = _make_libp2p_connection(
-            port=DEFAULT_PORT + 2,
-            entry_peers=[self.genesis.node.multiaddrs[0]],
-            node_key_file=self.relay_key_path,
-            build_directory=self.t,
-        )
+        # currently, multiplexer cannot be restarted
         self.multiplexer_relay = Multiplexer([self.relay], protocols=[DefaultMessage])
         self.multiplexer_relay.connect()
         self.change_state_and_wait(self.multiplexer_relay, expected_is_connected=True)
@@ -258,12 +266,7 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay)
         self.multiplexer_relay.disconnect()
         self.change_state_and_wait(self.multiplexer_relay, expected_is_connected=False)
 
-        self.relay = _make_libp2p_connection(
-            port=DEFAULT_PORT + 2,
-            entry_peers=[self.genesis.node.multiaddrs[0]],
-            node_key_file=self.relay_key_path,
-            build_directory=self.t,
-        )
+        # currently, multiplexer cannot be restarted
         self.multiplexer_relay = Multiplexer([self.relay], protocols=[DefaultMessage])
         self.multiplexer_relay.connect()
         self.change_state_and_wait(self.multiplexer_relay, expected_is_connected=True)
@@ -284,7 +287,7 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay)
             message=DefaultSerializer().encode(msg),
         )
 
-        time.sleep(2)
+        time.sleep(5)
         self.multiplexer2.put(envelope)
         delivered_envelope = self.multiplexer.get(block=True, timeout=20)
 
@@ -306,7 +309,11 @@ class TestLibp2pConnectionRelayNodeRestartOutgoingEnvelopes(BaseTestLibp2pRelay)
     def setup(self):
         """Set the test up"""
         super().setup()
-        self.genesis = _make_libp2p_connection(DEFAULT_PORT + 1, build_directory=self.t)
+        temp_dir_gen = os.path.join(self.t, "temp_dir_gen")
+        os.mkdir(temp_dir_gen)
+        self.genesis = _make_libp2p_connection(
+            data_dir=temp_dir_gen, port=DEFAULT_PORT + 1, build_directory=self.t
+        )
 
         self.multiplexer_genesis = Multiplexer(
             [self.genesis], protocols=[DefaultMessage]
@@ -317,11 +324,14 @@ class TestLibp2pConnectionRelayNodeRestartOutgoingEnvelopes(BaseTestLibp2pRelay)
 
         genesis_peer = self.genesis.node.multiaddrs[0]
 
-        with open("node_key", "wb") as f:
-            make_crypto(DEFAULT_LEDGER).dump(f)
-            self.relay_key_path = "node_key"
+        file = "node_key"
+        make_crypto(DEFAULT_LEDGER).dump(file)
+        self.relay_key_path = file
 
+        temp_dir_rel = os.path.join(self.t, "temp_dir_rel")
+        os.mkdir(temp_dir_rel)
         self.relay = _make_libp2p_connection(
+            data_dir=temp_dir_rel,
             port=DEFAULT_PORT + 2,
             entry_peers=[genesis_peer],
             node_key_file=self.relay_key_path,
@@ -334,8 +344,11 @@ class TestLibp2pConnectionRelayNodeRestartOutgoingEnvelopes(BaseTestLibp2pRelay)
 
         relay_peer = self.relay.node.multiaddrs[0]
 
+        temp_dir_1 = os.path.join(self.t, "temp_dir_1")
+        os.mkdir(temp_dir_1)
         self.connection = _make_libp2p_connection(
-            DEFAULT_PORT + 3,
+            data_dir=temp_dir_1,
+            port=DEFAULT_PORT + 3,
             relay=False,
             entry_peers=[relay_peer],
             build_directory=self.t,
@@ -401,12 +414,7 @@ class TestLibp2pConnectionRelayNodeRestartOutgoingEnvelopes(BaseTestLibp2pRelay)
         self.multiplexer.put(envelope)
         time.sleep(5)
 
-        self.relay = _make_libp2p_connection(
-            port=DEFAULT_PORT + 2,
-            entry_peers=[self.genesis.node.multiaddrs[0]],
-            node_key_file=self.relay_key_path,
-            build_directory=self.t,
-        )
+        # currently, multiplexer cannot be restarted
         self.multiplexer_relay = Multiplexer([self.relay], protocols=[DefaultMessage])
         self.multiplexer_relay.connect()
         self.change_state_and_wait(self.multiplexer_relay, expected_is_connected=True)
@@ -432,7 +440,9 @@ class TestLibp2pConnectionAgentMobility(BaseTestLibp2pRelay):
     def setup(self):
         """Set the test up"""
         super().setup()
-        self.genesis = _make_libp2p_connection(DEFAULT_PORT)
+        temp_dir_gen = os.path.join(self.t, "temp_dir_gen")
+        os.mkdir(temp_dir_gen)
+        self.genesis = _make_libp2p_connection(data_dir=temp_dir_gen, port=DEFAULT_PORT)
 
         self.multiplexer_genesis = Multiplexer(
             [self.genesis], protocols=[DefaultMessage]
@@ -443,8 +453,10 @@ class TestLibp2pConnectionAgentMobility(BaseTestLibp2pRelay):
 
         genesis_peer = self.genesis.node.multiaddrs[0]
 
+        temp_dir_1 = os.path.join(self.t, "temp_dir_1")
+        os.mkdir(temp_dir_1)
         self.connection1 = _make_libp2p_connection(
-            DEFAULT_PORT + 1, entry_peers=[genesis_peer]
+            data_dir=temp_dir_1, port=DEFAULT_PORT + 1, entry_peers=[genesis_peer]
         )
         self.multiplexer1 = Multiplexer([self.connection1], protocols=[DefaultMessage])
         self.log_files.append(self.connection1.node.log_file)
@@ -452,8 +464,13 @@ class TestLibp2pConnectionAgentMobility(BaseTestLibp2pRelay):
         self.multiplexers.append(self.multiplexer1)
 
         self.connection_key = make_crypto(DEFAULT_LEDGER)
+        temp_dir_2 = os.path.join(self.t, "temp_dir_2")
+        os.mkdir(temp_dir_2)
         self.connection2 = _make_libp2p_connection(
-            DEFAULT_PORT + 2, entry_peers=[genesis_peer], agent_key=self.connection_key,
+            data_dir=temp_dir_2,
+            port=DEFAULT_PORT + 2,
+            entry_peers=[genesis_peer],
+            agent_key=self.connection_key,
         )
         self.multiplexer2 = Multiplexer([self.connection2], protocols=[DefaultMessage])
         self.log_files.append(self.connection2.node.log_file)
@@ -499,11 +516,7 @@ class TestLibp2pConnectionAgentMobility(BaseTestLibp2pRelay):
         self.multiplexer2.disconnect()
         self.change_state_and_wait(self.multiplexer2, expected_is_connected=False)
 
-        self.connection2 = _make_libp2p_connection(
-            port=DEFAULT_PORT + 2,
-            entry_peers=[self.genesis.node.multiaddrs[0]],
-            agent_key=self.connection_key,
-        )
+        # currently, multiplexer cannot be restarted
         self.multiplexer2 = Multiplexer([self.connection2], protocols=[DefaultMessage])
         self.multiplexer2.connect()
         self.change_state_and_wait(self.multiplexer2, expected_is_connected=True)

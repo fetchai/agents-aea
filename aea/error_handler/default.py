@@ -20,6 +20,7 @@
 """This module contains the default error handler class."""
 
 from logging import Logger
+from typing import Any
 
 from aea.error_handler.base import AbstractErrorHandler
 from aea.mail.base import Envelope
@@ -28,50 +29,58 @@ from aea.mail.base import Envelope
 class ErrorHandler(AbstractErrorHandler):
     """Error handler class for handling problematic envelopes."""
 
-    unsupported_protocol_count = 0
-    unsupported_skill_count = 0
-    decoding_error_count = 0
+    __slots__ = (
+        "unsupported_protocol_count",
+        "no_active_handler_count",
+        "decoding_error_count",
+    )
 
-    @classmethod
-    def send_unsupported_protocol(cls, envelope: Envelope, logger: Logger) -> None:
+    def __init__(self, **kwargs: Any):
+        """Instantiate error handler."""
+        super().__init__(**kwargs)
+        self.unsupported_protocol_count = 0
+        self.no_active_handler_count = 0
+        self.decoding_error_count = 0
+
+    def send_unsupported_protocol(self, envelope: Envelope, logger: Logger) -> None:
         """
         Handle the received envelope in case the protocol is not supported.
 
         :param envelope: the envelope
         :return: None
         """
-        cls.unsupported_protocol_count += 1
+        self.unsupported_protocol_count += 1
         logger.warning(
             f"Unsupported protocol: protocol_specification_id={envelope.protocol_specification_id}. You might want to add a handler for a protocol implementing this specification. Sender={envelope.sender}, to={envelope.sender}."
         )
 
-    @classmethod
-    def send_decoding_error(cls, envelope: Envelope, logger: Logger) -> None:
+    def send_decoding_error(
+        self, envelope: Envelope, exception: Exception, logger: Logger
+    ) -> None:
         """
         Handle a decoding error.
 
         :param envelope: the envelope
+        :param exception: the exception raised during decoding
+        :param logger: the logger
         :return: None
         """
-        cls.decoding_error_count += 1
+        self.decoding_error_count += 1
         logger.warning(
-            f"Decoding error for envelope: {envelope}. Protocol_specification_id='{envelope.protocol_specification_id}' and message are inconsistent. Sender={envelope.sender}, to={envelope.sender}."
+            f"Decoding error for envelope: {envelope}. Protocol_specification_id='{envelope.protocol_specification_id}' and message are inconsistent. Sender={envelope.sender}, to={envelope.sender}. Exception={exception}."
         )
 
-    @classmethod
-    def send_unsupported_skill(cls, envelope: Envelope, logger: Logger) -> None:
+    def send_no_active_handler(
+        self, envelope: Envelope, reason: str, logger: Logger
+    ) -> None:
         """
-        Handle the received envelope in case the skill is not supported.
+        Handle the received envelope in case the handler is not supported.
 
         :param envelope: the envelope
+        :param reason: the reason for the failure
         :return: None
         """
-        cls.unsupported_skill_count += 1
-        if envelope.skill_id is None:
-            logger.warning(
-                f"Cannot handle envelope: no active handler registered for the protocol_specification_id='{envelope.protocol_specification_id}'. Sender={envelope.sender}, to={envelope.sender}."
-            )
-        else:
-            logger.warning(
-                f"Cannot handle envelope: no active handler registered for the protocol_specification_id='{envelope.protocol_specification_id}' and skill_id='{envelope.skill_id}'. Sender={envelope.sender}, to={envelope.sender}."
-            )
+        self.no_active_handler_count += 1
+        logger.warning(
+            f"Cannot handle envelope: {reason}. Sender={envelope.sender}, to={envelope.sender}."
+        )

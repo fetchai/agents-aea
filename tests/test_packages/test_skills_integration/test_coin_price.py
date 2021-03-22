@@ -20,22 +20,12 @@
 """This test module contains the integration test for the coin price skill."""
 
 import time
-from pathlib import Path
 from typing import Dict
 
 import pytest
 
 from aea.helpers import http_requests as requests
 from aea.test_tools.test_cases import AEATestCaseEmpty
-
-from tests.conftest import ROOT_DIR
-
-
-API_SPEC_PATH = str(
-    Path(
-        ROOT_DIR, "packages", "fetchai", "skills", "coin_price", "coin_api_spec.yaml"
-    ).absolute()
-)
 
 
 def parse_prometheus_output(prom_data: bytes) -> Dict[str, float]:
@@ -57,30 +47,48 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
 
         coin_price_feed_aea_name = self.agent_name
 
-        self.add_item("connection", "fetchai/http_client:0.17.0")
-        self.add_item("connection", "fetchai/http_server:0.16.0")
-        self.add_item("connection", "fetchai/prometheus:0.3.0")
-        self.add_item("skill", "fetchai/coin_price:0.4.0")
-        self.set_config("agent.default_connection", "fetchai/http_server:0.16.0")
+        self.generate_private_key()
+        self.add_private_key()
+        self.add_item("connection", "fetchai/http_client:0.19.0")
+        self.add_item("connection", "fetchai/http_server:0.18.0")
+        self.add_item("connection", "fetchai/prometheus:0.4.0")
+        self.add_item("skill", "fetchai/advanced_data_request:0.1.0")
+        self.set_config("agent.default_connection", "fetchai/http_server:0.18.0")
 
         default_routing = {
-            "fetchai/http:0.12.0": "fetchai/http_client:0.17.0",
-            "fetchai/prometheus:0.3.0": "fetchai/prometheus:0.3.0",
+            "fetchai/http:0.13.0": "fetchai/http_client:0.19.0",
+            "fetchai/prometheus:0.4.0": "fetchai/prometheus:0.4.0",
         }
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
 
+        # set 'api spec path' *after* comparison with fetched agent.
         self.set_config(
-            "vendor.fetchai.connections.http_server.config.api_spec_path", API_SPEC_PATH
+            "vendor.fetchai.connections.http_server.config.api_spec_path",
+            "vendor/fetchai/skills/advanced_data_request/api_spec.yaml",
         )
         self.set_config(
-            "vendor.fetchai.skills.coin_price.models.coin_price_model.args.use_http_server",
+            "vendor.fetchai.connections.http_server.config.target_skill_id",
+            "fetchai/advanced_data_request:0.1.0",
+        )
+        self.set_config(
+            "vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.use_http_server",
             True,
             type_="bool",
         )
+        self.set_config(
+            "vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.url",
+            "https://api.coingecko.com/api/v3/simple/price?ids=fetch-ai&vs_currencies=usd",
+            type_="str",
+        )
+        self.set_config(
+            "vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.outputs",
+            '[{"name": "price", "json_path": "fetch-ai.usd"}]',
+            type_="list",
+        )
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/coin_price_feed:0.5.0", coin_price_feed_aea_name
+            "fetchai/coin_price_feed:0.9.0", coin_price_feed_aea_name
         )
         assert (
             diff == []
@@ -94,17 +102,16 @@ class TestCoinPriceSkill(AEATestCaseEmpty):
 
         time.sleep(6)  # we wait a bit longer than the tick rate of the behaviour
 
-        response = requests.get("http://127.0.0.1:8000/price")
+        response = requests.get("http://127.0.0.1:8000/data")
         assert response.status_code == 200, "Failed to get response code 200"
-        coin_price = response.content.decode("utf-8")
-        assert "value" in coin_price, "Response does not contain 'value'"
-        assert "decimals" in coin_price, "Response does not contain 'decimals'"
+        coin_price = response.json()
+        assert "price" in coin_price, "Response does not contain 'price'"
 
         response = requests.get("http://127.0.0.1:8000")
         assert response.status_code == 404
         assert response.content == b"", "Get request should not work without valid path"
 
-        response = requests.post("http://127.0.0.1:8000/price")
+        response = requests.post("http://127.0.0.1:8000/data")
         assert response.status_code == 404
         assert response.content == b"", "Post not allowed"
 

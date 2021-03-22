@@ -765,6 +765,8 @@ class BuyerDialogues(FipaDialogues):
 class SellerDialogue(FipaDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
 
+    __slots__ = ("some_object",)
+
     def __init__(
         self,
         dialogue_label: DialogueLabel,

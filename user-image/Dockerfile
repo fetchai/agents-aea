@@ -9,6 +9,7 @@ RUN adduser ubuntu sudo
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 RUN apt install -y python3 python3-pip
+RUN pip3 install --upgrade pip
 
 # utils
 RUN apt install -y wget 

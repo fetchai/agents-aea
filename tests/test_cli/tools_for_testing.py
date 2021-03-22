@@ -20,6 +20,8 @@
 from typing import List
 from unittest.mock import Mock
 
+from aea_ledger_cosmos import CosmosCrypto
+from aea_ledger_ethereum import EthereumCrypto
 from click import ClickException
 from packaging.specifiers import SpecifierSet
 
@@ -27,7 +29,7 @@ import aea
 from aea.configurations.base import PackageVersion
 from aea.configurations.constants import DEFAULT_LEDGER
 
-from tests.conftest import AUTHOR, COSMOS, ETHEREUM
+from tests.conftest import AUTHOR
 from tests.test_cli.constants import DEFAULT_TESTING_VERSION
 
 
@@ -50,7 +52,7 @@ class AgentConfigMock:
         self.version: str = kwargs.get("version", "")
         self.protocols: List[str] = kwargs.get("protocols", [])
         self.skills: List[str] = kwargs.get("skills", [])
-        self.agent_name: str = kwargs.get("agent_name", "agent-name")
+        self.agent_name: str = kwargs.get("agent_name", "agent_name")
         self.author: str = AUTHOR
         private_key_paths = kwargs.get("private_key_paths", [])
         self.private_key_paths = Mock()
@@ -134,8 +136,8 @@ class AEAConfMock:
         self.version = DEFAULT_TESTING_VERSION
         self.ledger_apis = Mock()
         ledger_apis = (
-            (COSMOS, "value"),
-            (ETHEREUM, "value"),
+            (CosmosCrypto.identifier, "value"),
+            (EthereumCrypto.identifier, "value"),
         )
         self.ledger_apis.read_all = Mock(return_value=ledger_apis)
         ledger_api_config = {"host": "host", "port": "port", "address": "address"}

@@ -2,7 +2,7 @@
 ignore-patterns=serialization.py,message.py,__main__.py,.*_pb2.py,tac.sh,tac_local.sh
 
 [MESSAGES CONTROL]
-disable=C0103,C0201,C0301,C0302,C0330,W0105,W0107,W0707,W1202,W1203,R0801
+disable=C0103,C0201,C0301,C0302,W0105,W0707,W1202,W1203,R0801
 
 # See here for more options: https://www.codeac.io/documentation/pylint-configuration.html
 ## Eventually resolve these:
@@ -16,13 +16,11 @@ disable=C0103,C0201,C0301,C0302,C0330,W0105,W0107,W0707,W1202,W1203,R0801
 # C0201: consider-iterating-dictionary
 # C0301: http://pylint-messages.wikidot.com/messages:c0301 > Line too long (%s/%s)
 # C0302: http://pylint-messages.wikidot.com/messages:c0302 > Too many lines in module (%s)
-# C0330: Wrong hanging indentation
 # W0105: pointless-string-statement, # kept as no harm
-# W0107: unnecessary-pass, # kept as no harm
 # R0801: similar lines, # too granular
 
 [IMPORTS]
-ignored-modules=aiohttp,defusedxml,gym,fetch,matplotlib,memory_profiler,numpy,oef,openapi_core,psutil,tensorflow,temper,skimage,vyper,web3,aioprometheus
+ignored-modules=bech32,ecdsa,lru,eth_typing,eth_keys,eth_account,ipfshttpclient,werkzeug,openapi_spec_validator,aiohttp,multidict,yoti_python_sdk,defusedxml,gym,fetch,matplotlib,memory_profiler,numpy,oef,openapi_core,psutil,tensorflow,temper,skimage,web3,aioprometheus,pyaes
 
 [DESIGN]
 min-public-methods=1
@@ -34,7 +32,14 @@ max-locals=31
 max-statements=80
 max-parents=11
 max-branches=24
-max-attributes=32
+max-attributes=36
 
 [REFACTORING]
 max-nested-blocks=6
+
+[SPELLING]
+# uncomment to enable
+# spelling-dict=en_US
+
+# List of comma separated words that should not be checked.
+spelling-ignore-words=nocover,pragma,params,multiaddress,multihash,OEF,wrt,Protobuf,protobuf,backend,coroutine,noqa,ascii,asyncio,awaitable,kwargs,multihashing,interoperable,inlining,datamodel,str,sqlite,sql,async,json,boolean,config,pytest,counterparty,Unregister,unregister,behaviours,crypto,cryptos,args,url,tx,testnet,decrypt,validator,env,jsonschema,URI,uri,entrypoint,initialise,ethereum,traceback,fetchai,apis,api,TCPSocketProtocol,instantiation,ip,Haversine,instantiation,enum,nosec,Init,init,Behaviour,className,AEA,aea,schemas,vendorized,subcommand,filesystem,workdir,ctx,yaml,representer,multiprocess,Struct,struct,Serializers,ValueType,serializer,filepath,subprocesses,Teardown,namespace,LF,maddr,profiler,cpu,myfunction,prepend,mydecorator,CLI,subprocess,ComponentId,bool,satisfiable,unsatisfiable,dicts,utils,entrypoints,prepended,coroutines,functools,ctrl,posix,stdin,Posix,tcp,AbstractServer,StreamReaderProtocol,StreamReader,cli,reraise,SafeLoader,SafeDumper,pathlib,coro,runnable,Runnable,PublicId,stdout,netloc,dest,subgraph,subdict,behaviour,Popen,Interprocess,datetime,isort,runtime,toplevel,callables,Enqueue,Kahn's,myagent,fn,cwd,disjunction,cancelled,Pythonic,pythonic,prepends,subclasses,protolint,Protolint,performatives,programmatically,behaviour's,AsyncResult,sys,enqueued,multithread,teardown,satisfiability,dep,overridables,arg,stderr,multithreading,configs,getters,getter,classmethods,enqueue,interprocess,exc,pydocstyle,linter,programme,compositional,formatter,counterparty's,endstates,EndState,AgentContext,disambiguated,prepending,dir,tarfiles,docstyle,msg,func,ComponentType,PosixNamedPipeProtocol,ungrouped,reformats,protoc,DialogueLabel,Metaclass,responder,UtilityParams,ExchangeParams,GoodHoldings,CurrencyHoldings,rb,auth,dirs,symlink,BadParameter,metavar,readme,multithreads,upgrader,src,pid,mypy,outstream,CliRunner,semver,VersionInfo,reinstantiate,pre,ItemId,serializable,repo,upgraders,addr,endstate,performative's,proto,uncomment,Deserialize,fnctl,Sym,cd,ACN,os,ok,SDK,subtypes,JS,fifos,preprocess,dst,overridable,Mixin,unregistration,multithreaded,iterable,txt,ln,py,Util,ClickException,ai,ABI,approver,deployer,trustless,wei,AppRunner,TCPSite,webhook,Webhook,Webhooks,hostname,http,ClientResponse,TLS,soef,xml,unregisters,FET,eth,nft,AbstractEventLoop,aiohttp,uris,StreamWriter,msgs,oef,watchdogging,webhooks,RequestValidator,ACA,alice,faber,RegisterDialogue,fipa,prometheus,TAC,fet,tac,CFP,GymDialogue,RL,LedgerApiDialogue,faber's,AWx,parametrized,FipaDialogue,MlTradeDialogue,carpark,blockchain,counterparties,dec,mins,Calc,vyper,SigningDialogue,modelling,ContractApiDialogue,alice's,quickfix,StateUpdateDialogue,hacky,aea's,dataset,MessageId,cfp,rl,TacDialogue,BaseFipaDialogue,von,maths,Deque,unregistering,yoti,copyable,deepcopy,multiaddresses,logfile,Vous,ipaddress,clargs,IPCChannel,MultiAddr,Rendez,gcc,aioprometheus,getattr,noop,Noop,multiagent,ttfb,rtt,mem,xaxis,superclass,docstring,execreport,benchmarked,ReportPrinter,plt,kb,num,initialised,bytecode,wasm,denom,mainnet,fp,uid,cosmwasm,Conftest,decrypted,initialisation,hmac,plaintext,aes,ipfs,unlinked,ipfshttpclient,gasstation,Ganache,hexbytes,txs,LRU

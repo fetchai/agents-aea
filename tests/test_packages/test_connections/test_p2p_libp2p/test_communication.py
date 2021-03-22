@@ -25,9 +25,10 @@ import tempfile
 from unittest.mock import Mock
 
 import pytest
+from aea_ledger_ethereum import EthereumCrypto
+from aea_ledger_fetchai import FetchAICrypto
 
-from aea.crypto.ethereum import EthereumCrypto
-from aea.crypto.fetchai import FetchAICrypto
+from aea.crypto.registries import make_crypto
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 
@@ -55,17 +56,18 @@ MockDefaultMessageProtocol.protocol_specification_id = (
 class TestP2PLibp2pConnectionConnectDisconnect:
     """Test that connection is established and torn down correctly"""
 
-    @classmethod
-    def setup_class(cls):
+    def setup(self):
         """Set the test up"""
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        os.chdir(cls.t)
+        self.cwd = os.getcwd()
+        self.t = tempfile.mkdtemp()
+        os.chdir(self.t)
 
     @pytest.mark.asyncio
     async def test_p2plibp2pconnection_connect_disconnect_default(self):
         """Test connect then disconnect."""
-        connection = _make_libp2p_connection()
+        temp_dir = os.path.join(self.t, "temp_dir")
+        os.mkdir(temp_dir)
+        connection = _make_libp2p_connection(data_dir=temp_dir)
 
         assert connection.is_connected is False
         try:
@@ -81,7 +83,10 @@ class TestP2PLibp2pConnectionConnectDisconnect:
     @pytest.mark.asyncio
     async def test_p2plibp2pconnection_connect_disconnect_ethereum(self):
         """Test connect then disconnect."""
-        connection = _make_libp2p_connection(agent_key=EthereumCrypto())
+        temp_dir = os.path.join(self.t, "temp_dir")
+        os.mkdir(temp_dir)
+        crypto = make_crypto(EthereumCrypto.identifier)
+        connection = _make_libp2p_connection(data_dir=temp_dir, agent_key=crypto)
 
         assert connection.is_connected is False
         try:
@@ -94,12 +99,11 @@ class TestP2PLibp2pConnectionConnectDisconnect:
         await connection.disconnect()
         assert connection.is_connected is False
 
-    @classmethod
-    def teardown_class(cls):
+    def teardown(self):
         """Tear down the test"""
-        os.chdir(cls.cwd)
+        os.chdir(self.cwd)
         try:
-            shutil.rmtree(cls.t)
+            shutil.rmtree(self.t)
         except (OSError, IOError):
             pass
 
@@ -119,9 +123,14 @@ class TestP2PLibp2pConnectionEchoEnvelope:
         cls.log_files = []
         cls.multiplexers = []
 
+        aea_ledger_fetchai = make_crypto(FetchAICrypto.identifier)
+        aea_ledger_ethereum = make_crypto(EthereumCrypto.identifier)
+
         try:
+            temp_dir_1 = os.path.join(cls.t, "temp_dir_1")
+            os.mkdir(temp_dir_1)
             cls.connection1 = _make_libp2p_connection(
-                agent_key=FetchAICrypto(), port=DEFAULT_PORT + 1
+                data_dir=temp_dir_1, agent_key=aea_ledger_fetchai, port=DEFAULT_PORT + 1
             )
             cls.multiplexer1 = Multiplexer(
                 [cls.connection1], protocols=[MockDefaultMessageProtocol]
@@ -132,10 +141,13 @@ class TestP2PLibp2pConnectionEchoEnvelope:
 
             genesis_peer = cls.connection1.node.multiaddrs[0]
 
+            temp_dir_2 = os.path.join(cls.t, "temp_dir_2")
+            os.mkdir(temp_dir_2)
             cls.connection2 = _make_libp2p_connection(
+                data_dir=temp_dir_2,
                 port=DEFAULT_PORT + 2,
                 entry_peers=[genesis_peer],
-                agent_key=EthereumCrypto(),
+                agent_key=aea_ledger_ethereum,
             )
             cls.multiplexer2 = Multiplexer(
                 [cls.connection2], protocols=[MockDefaultMessageProtocol]
@@ -244,7 +256,11 @@ class TestP2PLibp2pConnectionRouting:
 
         try:
             port_genesis = DEFAULT_PORT + 10
-            cls.connection_genesis = _make_libp2p_connection(port_genesis)
+            temp_dir_gen = os.path.join(cls.t, "temp_dir_gen")
+            os.mkdir(temp_dir_gen)
+            cls.connection_genesis = _make_libp2p_connection(
+                data_dir=temp_dir_gen, port=port_genesis
+            )
             cls.multiplexer_genesis = Multiplexer(
                 [cls.connection_genesis], protocols=[MockDefaultMessageProtocol]
             )
@@ -257,9 +273,13 @@ class TestP2PLibp2pConnectionRouting:
             cls.connections = [cls.connection_genesis]
 
             port = port_genesis
-            for _ in range(DEFAULT_NET_SIZE):
+            for i in range(DEFAULT_NET_SIZE):
                 port += 1
-                conn = _make_libp2p_connection(port=port, entry_peers=[genesis_peer])
+                temp_dir = os.path.join(cls.t, f"temp_dir_{i}")
+                os.mkdir(temp_dir)
+                conn = _make_libp2p_connection(
+                    data_dir=temp_dir, port=port, entry_peers=[genesis_peer]
+                )
                 mux = Multiplexer([conn], protocols=[MockDefaultMessageProtocol])
 
                 cls.connections.append(conn)
@@ -342,7 +362,11 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
         cls.multiplexers = []
 
         try:
-            cls.relay = _make_libp2p_connection(DEFAULT_PORT + 1)
+            temp_dir_rel = os.path.join(cls.t, "temp_dir_rel")
+            os.mkdir(temp_dir_rel)
+            cls.relay = _make_libp2p_connection(
+                data_dir=temp_dir_rel, port=DEFAULT_PORT + 1
+            )
             cls.multiplexer = Multiplexer([cls.relay])
             cls.log_files.append(cls.relay.node.log_file)
             cls.multiplexer.connect()
@@ -350,8 +374,13 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
 
             relay_peer = cls.relay.node.multiaddrs[0]
 
+            temp_dir_1 = os.path.join(cls.t, "temp_dir_1")
+            os.mkdir(temp_dir_1)
             cls.connection1 = _make_libp2p_connection(
-                DEFAULT_PORT + 2, relay=False, entry_peers=[relay_peer]
+                data_dir=temp_dir_1,
+                port=DEFAULT_PORT + 2,
+                relay=False,
+                entry_peers=[relay_peer],
             )
             cls.multiplexer1 = Multiplexer(
                 [cls.connection1], protocols=[MockDefaultMessageProtocol]
@@ -360,8 +389,10 @@ class TestP2PLibp2pConnectionEchoEnvelopeRelayOneDHTNode:
             cls.multiplexer1.connect()
             cls.multiplexers.append(cls.multiplexer1)
 
+            temp_dir_2 = os.path.join(cls.t, "temp_dir_2")
+            os.mkdir(temp_dir_2)
             cls.connection2 = _make_libp2p_connection(
-                port=DEFAULT_PORT + 3, entry_peers=[relay_peer]
+                data_dir=temp_dir_2, port=DEFAULT_PORT + 3, entry_peers=[relay_peer]
             )
             cls.multiplexer2 = Multiplexer(
                 [cls.connection2], protocols=[MockDefaultMessageProtocol]
@@ -471,8 +502,12 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
         cls.multiplexers = []
 
         try:
+            temp_dir_rel_1 = os.path.join(cls.t, "temp_dir_rel_1")
+            os.mkdir(temp_dir_rel_1)
             port_relay_1 = DEFAULT_PORT + 10
-            cls.connection_relay_1 = _make_libp2p_connection(port_relay_1)
+            cls.connection_relay_1 = _make_libp2p_connection(
+                data_dir=temp_dir_rel_1, port=port_relay_1
+            )
             cls.multiplexer_relay_1 = Multiplexer(
                 [cls.connection_relay_1], protocols=[MockDefaultMessageProtocol]
             )
@@ -482,9 +517,11 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
 
             relay_peer_1 = cls.connection_relay_1.node.multiaddrs[0]
 
+            temp_dir_rel_2 = os.path.join(cls.t, "temp_dir_rel_2")
+            os.mkdir(temp_dir_rel_2)
             port_relay_2 = DEFAULT_PORT + 100
             cls.connection_relay_2 = _make_libp2p_connection(
-                port=port_relay_2, entry_peers=[relay_peer_1]
+                data_dir=temp_dir_rel_2, port=port_relay_2, entry_peers=[relay_peer_1]
             )
             cls.multiplexer_relay_2 = Multiplexer(
                 [cls.connection_relay_2], protocols=[MockDefaultMessageProtocol]
@@ -498,10 +535,15 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
             cls.connections = [cls.connection_relay_1, cls.connection_relay_2]
 
             port = port_relay_1
-            for _ in range(int(DEFAULT_NET_SIZE / 2) + 1):
+            for i in range(int(DEFAULT_NET_SIZE / 2) + 1):
+                temp_dir = os.path.join(cls.t, f"temp_dir_conn_{i}_1")
+                os.mkdir(temp_dir)
                 port += 1
                 conn = _make_libp2p_connection(
-                    port=port, relay=False, entry_peers=[relay_peer_1]
+                    data_dir=temp_dir,
+                    port=port,
+                    relay=False,
+                    entry_peers=[relay_peer_1],
                 )
                 mux = Multiplexer([conn])
                 cls.connections.append(conn)
@@ -510,10 +552,15 @@ class TestP2PLibp2pConnectionRoutingRelayTwoDHTNodes:
                 cls.multiplexers.append(mux)
 
             port = port_relay_2
-            for _ in range(int(DEFAULT_NET_SIZE / 2) + 1):
+            for i in range(int(DEFAULT_NET_SIZE / 2) + 1):
+                temp_dir = os.path.join(cls.t, f"temp_dir_conn_{i}_2")
+                os.mkdir(temp_dir)
                 port += 1
                 conn = _make_libp2p_connection(
-                    port=port, relay=False, entry_peers=[relay_peer_2]
+                    data_dir=temp_dir,
+                    port=port,
+                    relay=False,
+                    entry_peers=[relay_peer_2],
                 )
                 mux = Multiplexer([conn])
                 cls.connections.append(conn)
@@ -585,3 +632,39 @@ def test_libp2pconnection_uri():
     uri = Uri(host="127.0.0.1")
     uri = Uri(host="127.0.0.1", port=10000)
     assert uri.host == "127.0.0.1" and uri.port == 10000
+
+
+@pytest.mark.asyncio
+class TestP2PLibp2pNodeRestart:
+    """Test node restart."""
+
+    def setup(self):
+        """Set the test up"""
+        self.cwd = os.getcwd()
+        self.t = tempfile.mkdtemp()
+        os.chdir(self.t)
+
+    @pytest.mark.asyncio
+    async def test_node_restart(self):
+        """Test node restart works."""
+        temp_dir = os.path.join(self.t, "temp_dir")
+        os.mkdir(temp_dir)
+        connection = _make_libp2p_connection(data_dir=temp_dir)
+        try:
+            await connection.node.start()
+            pipe = connection.node.pipe
+            assert pipe is not None
+            await connection.node.restart()
+            new_pipe = connection.node.pipe
+            assert new_pipe is not None
+            assert new_pipe is not pipe
+        finally:
+            await connection.node.stop()
+
+    def teardown(self):
+        """Tear down the test"""
+        os.chdir(self.cwd)
+        try:
+            shutil.rmtree(self.t)
+        except (OSError, IOError):
+            pass

@@ -17,8 +17,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""?Memory usage across the time."""
-
+"""Memory usage across the time."""
 import itertools
 import os
 import struct
@@ -31,8 +30,10 @@ import click
 from aea.aea import AEA
 from aea.common import Address
 from aea.configurations.base import ConnectionConfig
+from aea.identity.base import Identity
 from aea.protocols.base import Message, Protocol
 from aea.protocols.dialogue.base import Dialogue
+from aea.registries.resources import Resources
 from aea.runner import AEARunner
 from aea.skills.base import Handler
 from benchmark.checks.utils import get_mem_usage_in_mb  # noqa: I100
@@ -98,7 +99,7 @@ class HttpPingPongHandler(Handler):
             self.rtt_total_time += time.time() - rtt_ts
             self.rtt_count += 1
 
-            # got response, make another requet to the same agent
+            # got response, make another request to the same agent
             self.make_request(message.sender)
 
     def make_response(self, dialogue: HttpDialogue, message: HttpMessage) -> None:
@@ -151,21 +152,29 @@ def run(
 
     local_node = LocalNode()
     local_node.start()
-
     agents = []
     skills = {}
     handler_name = "httpingpong"
+
     for i in range(num_of_agents):
         agent_name = f"agent{i}"
-        agent = make_agent(agent_name=agent_name, runtime_mode=runtime_mode)
+        identity = Identity(agent_name, address=agent_name)
+        resources = Resources()
         connection = OEFLocalConnection(
             local_node,
             configuration=ConnectionConfig(
                 connection_id=OEFLocalConnection.connection_id,
             ),
-            identity=agent.identity,
+            identity=identity,
+            data_dir="tmp",
         )
-        agent.resources.add_connection(connection)
+        resources.add_connection(connection)
+        agent = make_agent(
+            agent_name=agent_name,
+            runtime_mode=runtime_mode,
+            resources=resources,
+            identity=identity,
+        )
         skill = make_skill(agent, handlers={handler_name: HttpPingPongHandler})
         agent.resources.add_skill(skill)
         agents.append(agent)
@@ -173,7 +182,6 @@ def run(
 
     runner = AEARunner(agents, runner_mode)
     runner.start(threaded=True)
-
     for agent in agents:
         wait_for_condition(lambda: agent.is_running, timeout=5)
     wait_for_condition(lambda: runner.is_running, timeout=5)
@@ -185,14 +193,11 @@ def run(
                 HttpPingPongHandler,
                 skills[agent1.identity.address].handlers[handler_name],
             ).make_request(agent2.identity.address)
-
     time.sleep(duration)
 
     mem_usage = get_mem_usage_in_mb()
-
     local_node.stop()
-    runner.stop()
-
+    runner.stop(timeout=5)
     total_messages = sum(
         [
             cast(HttpPingPongHandler, skill.handlers[handler_name]).count

@@ -23,7 +23,7 @@ import datetime
 from collections import defaultdict, deque
 from typing import Any, Deque, Dict, List, Tuple, cast
 
-from aea.decision_maker.default import OwnershipState
+from aea.decision_maker.gop import OwnershipState
 from aea.exceptions import enforce
 from aea.helpers.transaction.base import Terms
 from aea.protocols.dialogue.base import DialogueLabel
@@ -261,9 +261,7 @@ class Transactions(Model):
         self._locked_txs_as_seller.pop(transaction_id, None)
         return terms
 
-    def ownership_state_after_locks(
-        self, is_seller: bool
-    ) -> OwnershipState:  # pragma: no cover
+    def ownership_state_after_locks(self, is_seller: bool) -> OwnershipState:
         """
         Apply all the locks to the current ownership state of the agent.
 

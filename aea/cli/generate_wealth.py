@@ -16,13 +16,12 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Implementation of the 'aea generate_wealth' subcommand."""
-
 from typing import Optional, cast
 
 import click
 
+from aea.cli.utils.click_utils import password_option
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.package_utils import get_wallet_from_context
@@ -38,21 +37,30 @@ from aea.crypto.registries import faucet_apis_registry, make_faucet_api_cls
     required=True,
 )
 @click.argument("url", metavar="URL", type=str, required=False, default=None)
+@password_option()
 @click.option(
     "--sync", is_flag=True, help="For waiting till the faucet has released the funds."
 )
 @click.pass_context
 @check_aea_project
 def generate_wealth(
-    click_context: click.Context, sync: bool, url: str, type_: str
+    click_context: click.Context,
+    type_: str,
+    url: str,
+    password: Optional[str],
+    sync: bool,
 ) -> None:
     """Generate wealth for the agent on a test network."""
     ctx = cast(Context, click_context.obj)
-    _try_generate_wealth(ctx, type_, url, sync)
+    _try_generate_wealth(ctx, type_, url, sync, password)
 
 
 def _try_generate_wealth(
-    ctx: Context, type_: str, url: Optional[str], sync: bool
+    ctx: Context,
+    type_: str,
+    url: Optional[str],
+    sync: bool = False,
+    password: Optional[str] = None,
 ) -> None:
     """
     Try generate wealth for the provided network identifier.
@@ -61,9 +69,10 @@ def _try_generate_wealth(
     :param type_: the network type
     :param url: the url
     :param sync: whether to sync or not
+    :param password: the password to encrypt/decrypt the private key.
     :return: None
     """
-    wallet = get_wallet_from_context(ctx)
+    wallet = get_wallet_from_context(ctx, password=password)
     try:
         address = wallet.addresses[type_]
         faucet_api_cls = make_faucet_api_cls(type_)

@@ -34,33 +34,31 @@ import argparse
 import logging
 import os
 import pprint
-import re
 import shutil
 import subprocess  # nosec
 import sys
 import tempfile
-from io import StringIO
 from itertools import chain
 from operator import methodcaller
 from pathlib import Path
-from typing import Any, Iterator, List, Match, Optional, Tuple, cast
+from typing import Any, Iterator, List, Optional, Tuple, cast
 
 import semver
 
 from aea.cli.registry.utils import download_file, extract, request_api
 from aea.common import JSONLike
-from aea.configurations.base import ComponentType, ProtocolConfig, ProtocolSpecification
+from aea.configurations.base import ComponentType, ProtocolConfig
 from aea.configurations.constants import DEFAULT_PROTOCOL_CONFIG_FILE, LIBPROTOC_VERSION
 from aea.configurations.data_types import PackageId, PublicId
-from aea.configurations.loader import (
-    ConfigLoader,
-    ConfigLoaders,
-    load_component_configuration,
+from aea.configurations.loader import ConfigLoaders, load_component_configuration
+from scripts.common import (
+    check_working_tree_is_dirty,
+    enforce,
+    get_protocol_specification_from_readme,
+    setup_logger,
 )
-from scripts.common import check_working_tree_is_dirty
 
 
-SPECIFICATION_REGEX = re.compile(r"(---\nname.*\.\.\.)", re.DOTALL)
 CUSTOM_TYPE_MODULE_NAME = "custom_types.py"
 README_FILENAME = "README.md"
 PACKAGES_DIR = Path("packages")
@@ -83,27 +81,12 @@ def find_protocols_in_local_registry() -> Iterator[Path]:
     return map(methodcaller("absolute"), protocols)
 
 
-def _setup_logger() -> logging.Logger:
-    """Set up the logger."""
-    FORMAT = "[%(asctime)s][%(levelname)s] %(message)s"
-    logging.basicConfig(format=FORMAT)
-    logger_ = logging.getLogger("generate_all_protocols")
-    logger_.setLevel(logging.INFO)
-    return logger_
-
-
-logger = _setup_logger()
-
-
 def log(message: str, level: int = logging.INFO) -> None:
     """Produce a logging message."""
     logger.log(level, message)
 
 
-def enforce(condition: bool, message: str = "") -> None:
-    """Custom assertion."""
-    if not condition:
-        raise AssertionError(message)
+logger = setup_logger("generate_all_protocols")
 
 
 def run_cli(*args: Any, **kwargs: Any) -> None:
@@ -155,39 +138,6 @@ class AEAProject:
         """Exit the context manager."""
         os.chdir(self.old_cwd)
         shutil.rmtree(self.temp_dir)
-
-
-def _load_protocol_specification_from_string(
-    specification_content: str,
-) -> ProtocolSpecification:
-    """Load a protocol specification from string."""
-    file = StringIO(initial_value=specification_content)
-    config_loader = ConfigLoader(
-        "protocol-specification_schema.json", ProtocolSpecification
-    )
-    protocol_spec = config_loader.load_protocol_specification(file)
-    return protocol_spec
-
-
-def _get_protocol_specification_from_readme(package_path: Path) -> str:
-    """Get the protocol specification from the package README."""
-    log(f"Get protocol specification from README {package_path}")
-    readme = package_path / "README.md"
-    readme_content = readme.read_text()
-    enforce(
-        "## Specification" in readme_content,
-        f"Cannot find specification section in {package_path}",
-    )
-
-    search_result = SPECIFICATION_REGEX.search(readme_content)
-    enforce(
-        search_result is not None,
-        f"Cannot find specification section in README of {package_path}",
-    )
-    specification_content = cast(Match, search_result).group(0)
-    # just for validation of the parsed string
-    _load_protocol_specification_from_string(specification_content)
-    return specification_content
 
 
 def _save_specification_in_temporary_file(
@@ -323,7 +273,7 @@ def _process_packages_protocol(package_path: Path) -> None:
     :param package_path: path to the package.
     :return: None
     """
-    specification_content = _get_protocol_specification_from_readme(package_path)
+    specification_content = get_protocol_specification_from_readme(package_path)
     _save_specification_in_temporary_file(package_path.name, specification_content)
     _generate_protocol(package_path)
     _fix_generated_protocol(package_path)
@@ -412,9 +362,7 @@ def _bump_protocol_specification_id_if_needed(package_path: Path) -> None:
     :return: None
     """
     # extract protocol specification file from README
-    current_specification_content = _get_protocol_specification_from_readme(
-        package_path
-    )
+    current_specification_content = get_protocol_specification_from_readme(package_path)
 
     # download latest protocol id and extract its protocol specification as above
     configuration: ProtocolConfig = cast(
@@ -424,13 +372,15 @@ def _bump_protocol_specification_id_if_needed(package_path: Path) -> None:
     temp_directory = Path(tempfile.mkdtemp())
     download_package(configuration.package_id, str(temp_directory))
     downloaded_package_directory = temp_directory / configuration.name
-    old_specification_content = _get_protocol_specification_from_readme(
+    old_specification_content = get_protocol_specification_from_readme(
         downloaded_package_directory
     )
     old_configuration: ProtocolConfig = cast(
         ProtocolConfig,
         load_component_configuration(
-            ComponentType.PROTOCOL, downloaded_package_directory
+            ComponentType.PROTOCOL,
+            downloaded_package_directory,
+            skip_consistency_check=True,
         ),
     )
 

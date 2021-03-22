@@ -44,7 +44,7 @@ class AsyncCollection:
         Init collection object.
 
         :param storage_backend: storage backed to use.
-        :param collection_name: srt
+        :param collection_name: str
         """
         self._storage_backend = storage_backend
         self._collection_name = collection_name
@@ -180,7 +180,7 @@ class Storage(Runnable):
         threaded: bool = False,
     ) -> None:
         """
-        Init stortage.
+        Init storage.
 
         :param storage_uri: configuration string for storage.
         :param loop: asyncio event loop to use.

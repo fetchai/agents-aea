@@ -41,6 +41,6 @@ class BenchmarkControl:
         """
         Wait a message from function being tested.
 
-        :return: messsage from tested function.
+        :return: message from tested function.
         """
         return self._queue.get()

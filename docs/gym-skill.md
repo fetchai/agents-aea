@@ -19,7 +19,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 First, fetch the gym AEA:
 ``` bash
-aea fetch fetchai/gym_aea:0.17.0 --alias my_gym_aea
+aea fetch fetchai/gym_aea:0.21.0 --alias my_gym_aea
 cd my_gym_aea
 aea install
 ```
@@ -36,12 +36,12 @@ cd my_gym_aea
 
 ### Add the gym skill
 ``` bash
-aea add skill fetchai/gym:0.14.0
+aea add skill fetchai/gym:0.16.0
 ```
 
 ### Set gym connection as default
 ``` bash
-aea config set agent.default_connection fetchai/gym:0.12.0
+aea config set agent.default_connection fetchai/gym:0.13.0
 ```
 
 ### Install the skill dependencies
@@ -65,6 +65,13 @@ cp -a ../examples/gym_ex/gyms/. gyms/
 #### Update the connection configuration
 ``` bash
 aea config set vendor.fetchai.connections.gym.config.env 'gyms.env.BanditNArmedRandom'
+```
+
+#### Create and add a private key
+
+``` bash
+aea generate-key fetchai
+aea add-key fetchai
 ```
 
 ### Run the AEA with the gym connection

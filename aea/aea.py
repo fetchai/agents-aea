@@ -80,7 +80,9 @@ class AEA(Agent):
         execution_timeout: float = 0,
         max_reactions: int = 20,
         error_handler_class: Optional[Type[AbstractErrorHandler]] = None,
+        error_handler_config: Optional[Dict[str, Any]] = None,
         decision_maker_handler_class: Optional[Type[DecisionMakerHandler]] = None,
+        decision_maker_handler_config: Optional[Dict[str, Any]] = None,
         skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
         connection_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
         loop_mode: Optional[str] = None,
@@ -153,7 +155,7 @@ class AEA(Agent):
                 "Resource's connections list is empty! Instantiating AEA without connections..."
             )
         elif bool(self.resources.get_all_connections()) and not bool(connections):
-            self.logger.warning(
+            self.logger.warning(  # pragma: nocover
                 "No connection left after filtering! Instantiating AEA without connections..."
             )
 
@@ -177,14 +179,18 @@ class AEA(Agent):
             )
 
             decision_maker_handler_class = DefaultDecisionMakerHandler
+        if decision_maker_handler_config is None:
+            decision_maker_handler_config = {}
         decision_maker_handler = decision_maker_handler_class(
-            identity=identity, wallet=wallet
+            identity=identity, wallet=wallet, config=decision_maker_handler_config
         )
         self.runtime.set_decision_maker(decision_maker_handler)
 
         if error_handler_class is None:
             error_handler_class = DefaultErrorHandler
-        self._error_handler_class = error_handler_class
+        if error_handler_config is None:
+            error_handler_config = {}
+        self._error_handler = error_handler_class(**error_handler_config)
         default_ledger_id = (
             default_ledger
             if default_ledger is not None
@@ -211,6 +217,7 @@ class AEA(Agent):
             data_dir,
             storage_callable=lambda: self.runtime.storage,
             build_dir=self.get_build_dir(),
+            send_to_skill=self.runtime.agent_loop.send_to_skill,
             **kwargs,
         )
         self._execution_timeout = execution_timeout
@@ -270,9 +277,9 @@ class AEA(Agent):
         """
         self.filter.handle_new_handlers_and_behaviours()
 
-    def _get_error_handler(self) -> Type[AbstractErrorHandler]:
+    def _get_error_handler(self) -> AbstractErrorHandler:
         """Get error handler."""
-        return self._error_handler_class
+        return self._error_handler
 
     def _get_msg_and_handlers_for_envelope(
         self, envelope: Envelope
@@ -282,26 +289,34 @@ class AEA(Agent):
             envelope.protocol_specification_id
         )
 
-        msg, handlers = self._handle_decoding(envelope, protocol)
+        error_handler = self._get_error_handler()
+
+        if protocol is None:
+            error_handler.send_unsupported_protocol(envelope, self.logger)
+            return None, []
+
+        msg, handlers = self._handle_decoding(envelope, protocol, error_handler)
 
         return msg, handlers
 
     def _handle_decoding(
-        self, envelope: Envelope, protocol: Optional[Protocol]
+        self,
+        envelope: Envelope,
+        protocol: Protocol,
+        error_handler: AbstractErrorHandler,
     ) -> Tuple[Optional[Message], List[Handler]]:
 
-        handler = self._get_error_handler()
-
-        if protocol is None:
-            handler.send_unsupported_protocol(envelope, self.logger)
-            return None, []  # Tuple[Optional[Message], List[Handler]]
-
         handlers = self.filter.get_active_handlers(
-            protocol.public_id, envelope.skill_id
+            protocol.public_id, envelope.to_as_public_id
         )
 
         if len(handlers) == 0:
-            handler.send_unsupported_skill(envelope, self.logger)
+            reason = (
+                f"no active handler for protocol={protocol.public_id} in skill={envelope.to_as_public_id}"
+                if envelope.is_component_to_component_message
+                else f"no active handler for protocol={protocol.public_id}"
+            )
+            error_handler.send_no_active_handler(envelope, reason, self.logger)
             return None, []
 
         if isinstance(envelope.message, Message):
@@ -313,8 +328,7 @@ class AEA(Agent):
             msg.to = envelope.to
             return msg, handlers
         except Exception as e:  # pylint: disable=broad-except  # thats ok, because we send the decoding error back
-            self.logger.warning("Decoding error. Exception: {}".format(str(e)))
-            handler.send_decoding_error(envelope, self.logger)
+            error_handler.send_decoding_error(envelope, e, self.logger)
             return None, []
 
     def handle_envelope(self, envelope: Envelope) -> None:
@@ -393,6 +407,7 @@ class AEA(Agent):
         """
         return super().get_message_handlers() + [
             (self.filter.handle_internal_message, self.filter.get_internal_message,),
+            (self.handle_envelope, self.runtime.agent_loop.skill2skill_queue.get),
         ]
 
     def exception_handler(self, exception: Exception, function: Callable) -> bool:
@@ -452,15 +467,18 @@ class AEA(Agent):
         return self.runtime.task_manager.get_task_result(task_id)
 
     def enqueue_task(
-        self, func: Callable, args: Sequence = (), kwds: Optional[Dict[str, Any]] = None
+        self,
+        func: Callable,
+        args: Sequence = (),
+        kwargs: Optional[Dict[str, Any]] = None,
     ) -> int:
         """
         Enqueue a task with the task manager.
 
         :param func: the callable instance to be enqueued
         :param args: the positional arguments to be passed to the function.
-        :param kwds: the keyword arguments to be passed to the function.
+        :param kwargs: the keyword arguments to be passed to the function.
         :return the task id to get the the result.
         :raises ValueError: if the task manager is not running.
         """
-        return self.runtime.task_manager.enqueue_task(func, args, kwds)
+        return self.runtime.task_manager.enqueue_task(func, args, kwargs)

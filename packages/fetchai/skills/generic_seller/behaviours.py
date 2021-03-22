@@ -76,7 +76,6 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
-        pass
 
     def teardown(self) -> None:
         """

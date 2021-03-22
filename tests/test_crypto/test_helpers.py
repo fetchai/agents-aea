@@ -24,18 +24,19 @@ from tempfile import TemporaryDirectory
 from unittest.mock import mock_open, patch
 
 import pytest
+from aea_ledger_cosmos import CosmosCrypto
+from aea_ledger_ethereum import EthereumCrypto
+from aea_ledger_fetchai import FetchAICrypto
 
-from aea.crypto.cosmos import CosmosCrypto
-from aea.crypto.ethereum import EthereumCrypto
-from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import (
     create_private_key,
+    get_wallet_from_agent_config,
     make_certificate,
-    private_key_verify_or_create,
+    private_key_verify,
     try_generate_testnet_wealth,
     try_validate_private_key_path,
 )
-from aea.helpers import http_requests as requests
+from aea.crypto.wallet import Wallet
 
 from tests.conftest import (
     COSMOS_PRIVATE_KEY_FILE,
@@ -87,7 +88,7 @@ class TestHelperFile:
         """Test generate wealth for ethereum."""
         address = "my_address"
         with caplog.at_level(
-            logging.DEBUG, logger="aea.crypto.ethereum._default_logger"
+            logging.DEBUG, logger="aea_ledger_ethereum._default_logger"
         ):
             try_generate_testnet_wealth(
                 identifier=EthereumCrypto.identifier, address=address
@@ -101,9 +102,9 @@ class TestHelperFile:
         """Test generate wealth for ethereum."""
         address = "my_address"
         result = ResponseMock(status_code=500)
-        with patch.object(requests, "get", return_value=result):
+        with patch("aea_ledger_ethereum.requests.get", return_value=result):
             with caplog.at_level(
-                logging.DEBUG, logger="aea.crypto.ethereum._default_logger"
+                logging.DEBUG, logger="aea_ledger_ethereum._default_logger"
             ):
                 try_generate_testnet_wealth(
                     identifier=EthereumCrypto.identifier,
@@ -116,9 +117,9 @@ class TestHelperFile:
         """Test generate wealth for ethereum."""
         address = "my_address"
         result = ResponseMock(status_code=200)
-        with patch.object(requests, "get", return_value=result):
+        with patch("aea_ledger_ethereum.requests.get", return_value=result):
             with caplog.at_level(
-                logging.DEBUG, logger="aea.crypto.ethereum._default_logger"
+                logging.DEBUG, logger="aea_ledger_ethereum._default_logger"
             ):
                 try_generate_testnet_wealth(
                     identifier=EthereumCrypto.identifier,
@@ -126,8 +127,8 @@ class TestHelperFile:
                     url="correct_url",
                 )
 
-    @patch("aea.crypto.ethereum.requests.post", return_value=ResponseMock())
-    @patch("aea.crypto.ethereum.json.loads", return_value={"error_message": ""})
+    @patch("aea_ledger_ethereum.requests.post", return_value=ResponseMock())
+    @patch("aea_ledger_ethereum.json.loads", return_value={"error_message": ""})
     def test_try_generate_testnet_wealth_error_resp_ethereum(self, *mocks):
         """Test try_generate_testnet_wealth error_resp."""
         try_generate_testnet_wealth(EthereumCrypto.identifier, "address")
@@ -152,22 +153,17 @@ class TestHelperFile:
         create_private_key(CosmosCrypto.identifier, COSMOS_PRIVATE_KEY_FILE)
 
 
-def test_private_key_verify_or_create():
-    """Test private_key_verify_or_create."""
-    agent_conf = AgentConfigMock()
-    with patch("aea.crypto.helpers.create_private_key") as mock_create:
-        private_key_verify_or_create(agent_conf, Path("."))
-    mock_create.assert_called()
-
+def test_private_key_verify():
+    """Test private_key_verify."""
     agent_conf = AgentConfigMock(private_key_paths=[("fetchai", "test")])
     with patch("aea.crypto.helpers.try_validate_private_key_path") as mock_validate:
-        private_key_verify_or_create(agent_conf, Path("."))
+        private_key_verify(agent_conf, Path("."))
     mock_validate.assert_called()
 
     agent_conf = AgentConfigMock(private_key_paths=[("fetchai", "${var}")])
     with patch("aea.crypto.helpers.try_validate_private_key_path") as mock_validate:
         with patch("aea.crypto.helpers.create_private_key") as mock_create:
-            private_key_verify_or_create(agent_conf, Path("."))
+            private_key_verify(agent_conf, Path("."))
     mock_validate.assert_not_called()
     mock_create.assert_not_called()
 
@@ -181,3 +177,10 @@ def test_make_certificate():
             b"message",
             os.path.join(tmp_dir, "test.txt"),
         )
+
+
+def test_get_wallet_from_agent_config():
+    """Test get_wallet_from_agent_config."""
+    agent_conf = AgentConfigMock()
+    wallet = get_wallet_from_agent_config(agent_conf)
+    assert isinstance(wallet, Wallet)

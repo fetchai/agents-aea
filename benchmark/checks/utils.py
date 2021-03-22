@@ -37,10 +37,10 @@ from aea.configurations.base import ConnectionConfig, PublicId, SkillConfig
 from aea.configurations.constants import (
     DEFAULT_LEDGER,
     DEFAULT_PROTOCOL,
-    FETCHAI,
     PACKAGES,
     PROTOCOLS,
     SKILLS,
+    _FETCHAI_IDENTIFIER,
 )
 from aea.connections.base import Connection, ConnectionStates
 from aea.crypto.wallet import Wallet
@@ -61,7 +61,7 @@ PACKAGES_DIR = Path(AEA_DIR, "..", PACKAGES)
 def wait_for_condition(
     condition_checker: Callable, timeout: int = 2, error_msg: str = "Timeout"
 ) -> None:
-    """Wait for condition occures in selected timeout."""
+    """Wait for condition occurs in selected timeout."""
     start_time = time.time()
 
     while not condition_checker():
@@ -70,11 +70,16 @@ def wait_for_condition(
             raise TimeoutError(error_msg)
 
 
-def make_agent(agent_name: str = "my_agent", runtime_mode: str = "threaded") -> AEA:
+def make_agent(
+    agent_name: str = "my_agent",
+    runtime_mode: str = "threaded",
+    resources: Optional[Resources] = None,
+    identity: Optional[Identity] = None,
+) -> AEA:
     """Make AEA instance."""
     wallet = Wallet({DEFAULT_LEDGER: None})
-    identity = Identity(agent_name, address=agent_name)
-    resources = Resources()
+    identity = identity or Identity(agent_name, address=agent_name)
+    resources = resources or Resources()
     datadir = os.getcwd()
     agent_context = MagicMock()
     agent_context.agent_name = agent_name
@@ -82,7 +87,7 @@ def make_agent(agent_name: str = "my_agent", runtime_mode: str = "threaded") -> 
 
     resources.add_skill(
         Skill.from_dir(
-            str(PACKAGES_DIR / FETCHAI / SKILLS / ERROR_SKILL_NAME),
+            str(PACKAGES_DIR / _FETCHAI_IDENTIFIER / SKILLS / ERROR_SKILL_NAME),
             agent_context=agent_context,
         )
     )
@@ -90,7 +95,7 @@ def make_agent(agent_name: str = "my_agent", runtime_mode: str = "threaded") -> 
         Protocol.from_dir(
             str(
                 PACKAGES_DIR
-                / FETCHAI
+                / _FETCHAI_IDENTIFIER
                 / PROTOCOLS
                 / PublicId.from_str(DEFAULT_PROTOCOL).name
             )
@@ -142,7 +147,7 @@ class GeneratorConnection(Connection):
         self._state.set(ConnectionStates.connected)
 
     async def disconnect(self) -> None:
-        """Disonnect connection."""
+        """Disconnect connection."""
         self._state.set(ConnectionStates.disconnected)
 
     async def send(self, envelope: "Envelope") -> None:
@@ -159,11 +164,13 @@ class GeneratorConnection(Connection):
         return envelope
 
     @classmethod
-    def make(cls) -> "GeneratorConnection":
+    def make(cls,) -> "GeneratorConnection":
         """Construct connection instance."""
         configuration = ConnectionConfig(connection_id=cls.connection_id,)
         test_connection = cls(
-            configuration=configuration, identity=Identity("name", "address")
+            configuration=configuration,
+            identity=Identity("name", "address"),
+            data_dir=".tmp",
         )
         return test_connection
 

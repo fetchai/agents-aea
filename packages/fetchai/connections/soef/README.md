@@ -4,6 +4,6 @@ The SOEF connection is used to connect to an SOEF node. The SOEF provides OEF se
 
 ## Usage
 
-First, add the connection to your AEA project: `aea add connection fetchai/soef:0.16.0`. Then ensure the `config` in `connection.yaml` matches your need. In particular, make sure `chain_identifier` matches your `default_ledger`.
+First, add the connection to your AEA project: `aea add connection fetchai/soef:0.19.0`. Then ensure the `config` in `connection.yaml` matches your need. In particular, make sure `chain_identifier` matches your `default_ledger`.
 
-To register/unregister services and perform searches use the `fetchai/oef_search:0.13.0` protocol
+To register/unregister services and perform searches use the `fetchai/oef_search:0.14.0` protocol

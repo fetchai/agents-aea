@@ -19,7 +19,6 @@
 | `get-address [ledger_id]`                   | Get the address associated with the private key.                             |
 | `get-multiaddress [ledger_id]...`           | Get the multiaddress associated with a private key or connection.            |
 | `get-wealth [ledger_id]`                    | Get the wealth associated with the private key.                              |
-| `gui`                                       | Run the GUI.                                                                 |
 | `init`                                      | Initialize your AEA configurations. (With `--author` to define author.)      |
 | `install [-r <requirements_file>]`          | Install the dependencies. (With `--install-deps` to install dependencies.)   |
 | `interact`                                  | Interact with a running AEA via the stub connection.                         |
@@ -55,7 +54,7 @@ Command  | Description
 
 <div class="admonition tip">
   <p class="admonition-title">Tip</p>
-  <p>You can skip the consistency checks on the AEA project by using the flag `--skip-consistency-check`. E.g. `aea --skip-consistency-check run` will bypass the fingerprint checks.</p>
+  <p>You can skip the consistency checks on the AEA project by using the flag <code>--skip-consistency-check</code>. E.g. <code>aea --skip-consistency-check run</code> will bypass the fingerprint checks.</p>
 </div>
 
 <br />

@@ -79,6 +79,8 @@ from packages.fetchai.skills.tac_negotiation.helpers import (
 class FipaDialogue(BaseFipaDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
 
+    __slots__ = ("_proposal", "_terms", "_counterparty_signature")
+
     def __init__(
         self,
         dialogue_label: DialogueLabel,
@@ -205,6 +207,8 @@ class FipaDialogues(Model, BaseFipaDialogues):
 class ContractApiDialogue(BaseContractApiDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
 
+    __slots__ = ("_associated_fipa_dialogue",)
+
     def __init__(
         self,
         dialogue_label: DialogueLabel,
@@ -271,7 +275,7 @@ class ContractApiDialogues(Model, BaseContractApiDialogues):
 
         BaseContractApiDialogues.__init__(
             self,
-            self_address=self.context.agent_address,
+            self_address=str(self.skill_id),
             role_from_first_message=role_from_first_message,
             dialogue_class=ContractApiDialogue,
         )
@@ -311,6 +315,8 @@ class DefaultDialogues(Model, BaseDefaultDialogues):
 
 class LedgerApiDialogue(BaseLedgerApiDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
+
+    __slots__ = ("_associated_signing_dialogue",)
 
     def __init__(
         self,
@@ -380,7 +386,7 @@ class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
 
         BaseLedgerApiDialogues.__init__(
             self,
-            self_address=self.context.agent_address,
+            self_address=str(self.skill_id),
             role_from_first_message=role_from_first_message,
             dialogue_class=LedgerApiDialogue,
         )
@@ -388,6 +394,8 @@ class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
 
 class OefSearchDialogue(BaseOefSearchDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
+
+    __slots__ = ("_is_seller_search",)
 
     def __init__(
         self,
@@ -453,7 +461,7 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
 
         BaseOefSearchDialogues.__init__(
             self,
-            self_address=self.context.agent_address + "_" + str(self.context.skill_id),
+            self_address=str(self.skill_id),
             role_from_first_message=role_from_first_message,
             dialogue_class=OefSearchDialogue,
         )
@@ -461,6 +469,8 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
 
 class SigningDialogue(BaseSigningDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
+
+    __slots__ = ("_associated_fipa_dialogue",)
 
     def __init__(
         self,
@@ -529,6 +539,7 @@ class SigningDialogues(Model, BaseSigningDialogues):
 
         BaseSigningDialogues.__init__(
             self,
-            self_address=str(self.context.skill_id),
+            self_address=str(self.skill_id),
             role_from_first_message=role_from_first_message,
+            dialogue_class=SigningDialogue,
         )

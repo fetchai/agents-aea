@@ -112,7 +112,7 @@ class MyScaffoldSyncConnection(BaseSyncConnection):
 
     def main(self) -> None:
         """
-        Run syncrhonous code in background.
+        Run synchronous code in background.
 
         SyncConnection `main()` usage:
         The idea of the `main` method in the sync connection
@@ -131,7 +131,7 @@ class MyScaffoldSyncConnection(BaseSyncConnection):
         and generate envelopes for the agent if some updates are available.
         Another example is the case where there is some framework that runs blocking
         code and provides a callback on some internal event.
-        This blocking code can be executed in the main function and new envelopse
+        This blocking code can be executed in the main function and new envelops
         can be created in the event callback.
         """
         raise NotImplementedError  # pragma: no cover

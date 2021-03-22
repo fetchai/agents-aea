@@ -248,7 +248,7 @@ class TestStrategy(ConfirmationAW3TestCase):
             message_type=HttpMessage,
             performative=HttpMessage.Performative.REQUEST,
             to=str(HTTP_CLIENT_PUBLIC_ID),
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             method="POST",
             url=self.strategy.leaderboard_url,
             headers="Content-Type: application/json; charset=utf-8",

@@ -40,6 +40,7 @@ from aea.crypto.registries import (  # noqa # pylint: disable=wrong-import-posit
 )
 
 
+IGNORE: Set[str] = {"pkg_resources"}
 DEP_NAME_RE = re.compile(r"(^[^=><\[]+)", re.I)  # type: ignore
 
 
@@ -64,7 +65,7 @@ class DependenciesTool:
             raise Exception(f"package {package_name} not found")
         files = packages_info[0]["files"]
         location = packages_info[0]["location"]
-        return [str(Path(location) / i) for i in files]
+        return [Path(location) / i for i in files]
 
     @staticmethod
     def clean_dependency_name(dependecy_specification: str) -> str:
@@ -122,7 +123,7 @@ class ImportsTool:
                 continue
             if "site-packages" not in Path(pyfile).parts:
                 continue
-            yield module_name, pyfile
+            yield module_name, Path(pyfile)
 
     @classmethod
     @list_decorator
@@ -134,7 +135,7 @@ class ImportsTool:
             mods = list(cls.get_third_part_imports_for_file(root_path / pyfile))
             if not mods:
                 continue
-            yield str(pyfile), list(set(mods))
+            yield Path(pyfile), list(set(mods))
 
 
 class CheckTool:
@@ -157,7 +158,8 @@ class CheckTool:
         for crypto_id in crypto_registry.supported_ids:  # type: ignore
             if crypto_id == "fetchai":
                 crypto_id = "fetch"
-            sections_dependencies.pop(crypto_id)
+            if crypto_id in sections_dependencies:
+                sections_dependencies.pop(crypto_id)
         sections_dependencies["base"] = base
 
         return cls.sections_dependencies_add_files(sections_dependencies)
@@ -210,17 +212,17 @@ class CheckTool:
 
     @staticmethod
     def make_sections_with_3rdpart_imports(
-        files_and_modules: List[Tuple[str, List[Tuple[str, str]]]],
+        files_and_modules: List[Tuple[str, List[Tuple[str, Path]]]],
         section_names: Set[str],
-    ) -> Dict[str, Set[Tuple[str, str]]]:
+    ) -> Dict[str, Set[Tuple[str, Path]]]:
         """Make sections with list of 3r part imports."""
-        sections_imports: Dict[str, Set[Tuple[str, str]]] = defaultdict(set)
-
+        sections_imports: Dict[str, Set[Tuple[str, Path]]] = defaultdict(set)
         for pyfile, imports in files_and_modules:
             section_name = Path(pyfile).parts[1]
 
             if section_name not in section_names:
                 section_name = "base"
+
             sections_imports[section_name].update(imports)
 
         return sections_imports
@@ -248,7 +250,8 @@ class CheckTool:
                 package = _find_dependency_for_module(
                     sections_dependencies.get(section, {}), pyfile
                 )
-                sections_imports_packages[section][module] = package
+                if module not in IGNORE:
+                    sections_imports_packages[section][module] = package
 
         all_dependencies_set = set(
             sum((list(i.keys()) for _, i in sections_dependencies.items()), [])

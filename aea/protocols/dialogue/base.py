@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """
 This module contains the classes required for dialogue management.
 
@@ -132,11 +131,7 @@ class DialogueLabel:
     def __eq__(self, other: Any) -> bool:
         """Check for equality between two DialogueLabel objects."""
         if isinstance(other, DialogueLabel):
-            return (
-                self.dialogue_reference == other.dialogue_reference
-                and self.dialogue_starter_addr == other.dialogue_starter_addr
-                and self.dialogue_opponent_addr == other.dialogue_opponent_addr
-            )
+            return hash(self) == hash(other)
         return False
 
     def __hash__(self) -> int:
@@ -211,8 +206,7 @@ class _DialogueMeta(type):
     """
     Metaclass for Dialogue.
 
-    Adds slot support forevery subclass
-    Creates classlevvel Rules instance
+    Creates class level Rules instance to share among instances
     """
 
     def __new__(cls, name: str, bases: Tuple[Type], dct: Dict) -> "_DialogueMeta":
@@ -240,6 +234,18 @@ class Dialogue(metaclass=_DialogueMeta):
     VALID_REPLIES = (
         dict()
     )  # type: Dict[Message.Performative, FrozenSet[Message.Performative]]
+
+    __slots__ = (
+        "_self_address",
+        "_dialogue_label",
+        "_role",
+        "_message_class",
+        "_outgoing_messages",
+        "_incoming_messages",
+        "_terminal_state_callbacks",
+        "_last_message_id",
+        "_ordered_message_ids",
+    )
 
     class Rules:
         """This class defines the rules for the dialogue."""
@@ -443,11 +449,11 @@ class Dialogue(metaclass=_DialogueMeta):
     @property
     def dialogue_labels(self) -> Set[DialogueLabel]:
         """
-        Get the dialogue labels (incomplete and complete, if it exists)
+        Get the dialogue labels (incomplete and complete, if it exists).
 
         :return: the dialogue labels
         """
-        return {self._dialogue_label, self.incomplete_dialogue_label}
+        return {self.dialogue_label, self.incomplete_dialogue_label}
 
     @property
     def self_address(self) -> Address:
@@ -689,7 +695,10 @@ class Dialogue(metaclass=_DialogueMeta):
         if last_message is None:
             raise ValueError("Cannot reply in an empty dialogue!")
 
-        if target_message is None and target is None:
+        if target_message is None and target is not None:
+            target_message = self.get_message_by_id(target)
+        elif target_message is None and target is None:
+            target_message = last_message
             target = last_message.message_id
         elif target_message is not None and target is None:
             target = target_message.message_id
@@ -699,6 +708,8 @@ class Dialogue(metaclass=_DialogueMeta):
                     "The provided target and target_message do not match."
                 )
 
+        if target_message is None:
+            raise ValueError("No target message found!")
         enforce(
             self._has_message_id(target),  # type: ignore
             "The target message does not exist in this dialogue.",
@@ -1379,7 +1390,7 @@ class PersistDialoguesStorageWithOffloading(PersistDialoguesStorage):
     """Dialogue Storage with dialogues offloading."""
 
     def dialogue_terminal_state_callback(self, dialogue: "Dialogue") -> None:
-        """Call on dialogue reaches terminal staste."""
+        """Call on dialogue reaches terminal state."""
         if (
             not self.is_terminal_dialogues_kept
             or not self._terminal_dialogues_collection
@@ -1563,7 +1574,7 @@ class Dialogues:
 
     @property
     def is_keep_dialogues_in_terminal_state(self) -> bool:
-        """Is requrired to keep dialogues in terminal state."""
+        """Is required to keep dialogues in terminal state."""
         return self._keep_terminal_state_dialogues
 
     @property
@@ -1905,7 +1916,7 @@ class Dialogues:
         """
         Create a self initiated dialogue.
 
-        :param dialogue_opponent_addr: the pbk of the agent with which the dialogue is kept.
+        :param dialogue_opponent_addr: the address of the agent with which the dialogue is kept.
         :param role: the agent's role
 
         :return: the created dialogue.

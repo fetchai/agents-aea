@@ -287,11 +287,11 @@ Set agent max reaction in one react.
 
 self
 
-<a name="aea.aea_builder.AEABuilder.set_decision_maker_handler"></a>
-#### set`_`decision`_`maker`_`handler
+<a name="aea.aea_builder.AEABuilder.set_decision_maker_handler_paths"></a>
+#### set`_`decision`_`maker`_`handler`_`paths
 
 ```python
- | set_decision_maker_handler(decision_maker_handler_dotted_path: str, file_path: Path) -> "AEABuilder"
+ | set_decision_maker_handler_paths(decision_maker_handler_dotted_path: str, file_path: Optional[str]) -> "AEABuilder"
 ```
 
 Set decision maker handler class.
@@ -673,6 +673,23 @@ You will have to `reset()` the builder before calling `build()` again.
 ```
 
 Set the context namespace.
+
+<a name="aea.aea_builder.AEABuilder.set_agent_pypi_dependencies"></a>
+#### set`_`agent`_`pypi`_`dependencies
+
+```python
+ | set_agent_pypi_dependencies(dependencies: Dependencies) -> "AEABuilder"
+```
+
+Set agent PyPI dependencies.
+
+**Arguments**:
+
+- `dependencies`: PyPI dependencies for the agent.
+
+**Returns**:
+
+the AEABuilder.
 
 <a name="aea.aea_builder.AEABuilder.remove_component"></a>
 #### remove`_`component

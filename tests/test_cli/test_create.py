@@ -134,6 +134,11 @@ class TestCreate:
         version_no_micro = Version(
             f"{expected_aea_version.major}.{expected_aea_version.minor}.0"
         )
+        version_no_micro = (
+            version_no_micro
+            if version_no_micro < expected_aea_version
+            else expected_aea_version
+        )
         version_next_minor = Version(
             f"{expected_aea_version.major}.{expected_aea_version.minor + 1}.0"
         )

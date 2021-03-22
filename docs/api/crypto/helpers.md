@@ -88,3 +88,12 @@ make_certificate(ledger_id: str, crypto_private_key_path: str, message: bytes, o
 
 Create certificate.
 
+<a name="aea.crypto.helpers.get_wallet_from_agent_config"></a>
+#### get`_`wallet`_`from`_`agent`_`config
+
+```python
+get_wallet_from_agent_config(agent_config: AgentConfig) -> Wallet
+```
+
+Get wallet from agent_cofig provided.
+

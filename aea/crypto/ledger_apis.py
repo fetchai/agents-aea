@@ -21,22 +21,13 @@
 from typing import Any, Dict, Optional, Tuple, Union
 
 from aea.common import Address
-from aea.configurations.constants import DEFAULT_LEDGER
-from aea.crypto.base import LedgerApi
-from aea.crypto.cosmos import CosmosApi
-from aea.crypto.cosmos import DEFAULT_ADDRESS as COSMOS_DEFAULT_ADDRESS
-from aea.crypto.cosmos import DEFAULT_CHAIN_ID as COSMOS_DEFAULT_CHAIN_ID
-from aea.crypto.cosmos import DEFAULT_CURRENCY_DENOM as COSMOS_DEFAULT_CURRENCY_DENOM
-from aea.crypto.ethereum import DEFAULT_ADDRESS as ETHEREUM_DEFAULT_ADDRESS
-from aea.crypto.ethereum import DEFAULT_CHAIN_ID as ETHEREUM_DEFAULT_CHAIN_ID
-from aea.crypto.ethereum import (
-    DEFAULT_CURRENCY_DENOM as ETHEREUM_DEFAULT_CURRENCY_DENOM,
+from aea.configurations.constants import (
+    DEFAULT_LEDGER,
+    _COSMOS_IDENTIFIER,
+    _ETHEREUM_IDENTIFIER,
+    _FETCHAI_IDENTIFIER,
 )
-from aea.crypto.ethereum import EthereumApi
-from aea.crypto.fetchai import DEFAULT_ADDRESS as FETCHAI_DEFAULT_ADDRESS
-from aea.crypto.fetchai import DEFAULT_CHAIN_ID as FETCHAI_DEFAULT_CHAIN_ID
-from aea.crypto.fetchai import DEFAULT_CURRENCY_DENOM as FETCHAI_DEFAULT_CURRENCY_DENOM
-from aea.crypto.fetchai import FetchAIApi
+from aea.crypto.base import LedgerApi
 from aea.crypto.registries import (
     ledger_apis_registry,
     make_ledger_api,
@@ -45,27 +36,38 @@ from aea.crypto.registries import (
 from aea.exceptions import enforce
 
 
-DEFAULT_LEDGER_CONFIGS = {
-    CosmosApi.identifier: {
+COSMOS_DEFAULT_ADDRESS = "INVALID_URL"
+COSMOS_DEFAULT_CURRENCY_DENOM = "INVALID_CURRENCY_DENOM"
+COSMOS_DEFAULT_CHAIN_ID = "INVALID_CHAIN_ID"
+ETHEREUM_DEFAULT_ADDRESS = "http://127.0.0.1:8545"
+ETHEREUM_DEFAULT_CHAIN_ID = 1337
+ETHEREUM_DEFAULT_CURRENCY_DENOM = "wei"
+FETCHAI_DEFAULT_ADDRESS = "https://rest-agent-land.fetch.ai"
+FETCHAI_DEFAULT_CURRENCY_DENOM = "atestfet"
+FETCHAI_DEFAULT_CHAIN_ID = "agent-land"
+
+
+DEFAULT_LEDGER_CONFIGS: Dict[str, Dict[str, Union[str, int]]] = {
+    _COSMOS_IDENTIFIER: {
         "address": COSMOS_DEFAULT_ADDRESS,
         "chain_id": COSMOS_DEFAULT_CHAIN_ID,
         "denom": COSMOS_DEFAULT_CURRENCY_DENOM,
     },
-    EthereumApi.identifier: {
+    _ETHEREUM_IDENTIFIER: {
         "address": ETHEREUM_DEFAULT_ADDRESS,
         "chain_id": ETHEREUM_DEFAULT_CHAIN_ID,
         "denom": ETHEREUM_DEFAULT_CURRENCY_DENOM,
     },
-    FetchAIApi.identifier: {
+    _FETCHAI_IDENTIFIER: {
         "address": FETCHAI_DEFAULT_ADDRESS,
         "chain_id": FETCHAI_DEFAULT_CHAIN_ID,
         "denom": FETCHAI_DEFAULT_CURRENCY_DENOM,
     },
-}  # type: Dict[str, Dict[str, Union[str, int]]]
+}
 DEFAULT_CURRENCY_DENOMINATIONS = {
-    CosmosApi.identifier: COSMOS_DEFAULT_CURRENCY_DENOM,
-    EthereumApi.identifier: ETHEREUM_DEFAULT_CURRENCY_DENOM,
-    FetchAIApi.identifier: FETCHAI_DEFAULT_CURRENCY_DENOM,
+    _COSMOS_IDENTIFIER: COSMOS_DEFAULT_CURRENCY_DENOM,
+    _ETHEREUM_IDENTIFIER: ETHEREUM_DEFAULT_CURRENCY_DENOM,
+    _FETCHAI_IDENTIFIER: FETCHAI_DEFAULT_CURRENCY_DENOM,
 }
 
 
@@ -189,6 +191,23 @@ class LedgerApis:
         api = make_ledger_api(identifier, **cls.ledger_api_configs[identifier])
         tx = api.get_transaction(tx_digest)
         return tx
+
+    @staticmethod
+    def get_contract_address(identifier: str, tx_receipt: Any) -> Optional[Address]:
+        """
+        Get the contract address from a transaction receipt.
+
+        :param identifier: the identifier of the ledger
+        :param tx_receipt: the transaction receipt
+        :return: the contract address if successful
+        """
+        enforce(
+            identifier in ledger_apis_registry.supported_ids,
+            "Not a registered ledger api identifier.",
+        )
+        api_class = make_ledger_api_cls(identifier)
+        address = api_class.get_contract_address(tx_receipt)
+        return address
 
     @staticmethod
     def is_transaction_settled(identifier: str, tx_receipt: Any) -> bool:

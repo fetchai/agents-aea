@@ -351,8 +351,37 @@ async def test_send_envelope_with_non_registered_connection():
         context=EnvelopeContext(connection_id=UNKNOWN_CONNECTION_PUBLIC_ID),
     )
 
-    with pytest.raises(AEAConnectionError, match="No connection registered with id:.*"):
+    with unittest.mock.patch.object(
+        multiplexer.logger, "warning"
+    ) as mock_logger_warning:
         await multiplexer._send(envelope)
+        mock_logger_warning.assert_called_with(
+            f"Dropping envelope, no connection available for sending: {envelope}"
+        )
+
+    multiplexer.disconnect()
+
+
+@pytest.mark.asyncio
+async def test_send_envelope_when_no_connection():
+    """Test that sending an envelope with no connection logs a warning."""
+    multiplexer = Multiplexer([], protocols=[DefaultProtocolMock])
+    multiplexer.connect()
+
+    envelope = Envelope(
+        to="",
+        sender="",
+        protocol_specification_id=DefaultMessage.protocol_specification_id,
+        message=b"",
+    )
+
+    with unittest.mock.patch.object(
+        multiplexer.logger, "warning"
+    ) as mock_logger_warning:
+        await multiplexer._send(envelope)
+        mock_logger_warning.assert_called_with(
+            f"Dropping envelope, no connection available for sending: {envelope}"
+        )
 
     multiplexer.disconnect()
 
@@ -376,7 +405,7 @@ def test_send_envelope_error_is_logged_by_send_loop():
         multiplexer.put(envelope)
         time.sleep(0.1)
         mock_logger_error.assert_called_with(
-            "No connection registered with id: {}.".format(fake_connection_id)
+            "No connection registered with id: {}".format(fake_connection_id)
         )
 
     multiplexer.disconnect()
@@ -394,7 +423,7 @@ def test_get_from_multiplexer_when_empty():
 def test_send_message_no_supported_protocol():
     """Test the case when we send an envelope with a specific connection that does not support the protocol."""
     with LocalNode() as node:
-        identity_1 = Identity("", address="address_1")
+        identity_1 = Identity("identity", address="address_1")
         connection_1 = _make_local_connection(
             identity_1.address,
             node,
@@ -468,6 +497,15 @@ def test_autoset_default_connection():
     assert multiplexer._default_connection == connections[0]
 
 
+def test__get_connection():
+    """Test the method _get_connection."""
+    connection_1 = _make_dummy_connection()
+    connections = [connection_1]
+    multiplexer = Multiplexer(connections)
+    conn_ = multiplexer._get_connection(connection_1.connection_id.to_any())
+    assert conn_ == connection_1
+
+
 @pytest.mark.asyncio
 async def test_disconnect_when_not_connected():
     """Test disconnect when not connected."""
@@ -506,8 +544,7 @@ async def test_inbox_outbox():
     msg = DefaultMessage(performative=DefaultMessage.Performative.BYTES, content=b"",)
     msg.to = "to"
     msg.sender = "sender"
-    context = EnvelopeContext(connection_id=connection_1.connection_id)
-    envelope = Envelope(to="to", sender="sender", message=msg, context=context,)
+    envelope = Envelope(to="to", sender="sender", message=msg,)
     try:
         await multiplexer.connect()
         inbox = InBox(multiplexer)
@@ -523,7 +560,7 @@ async def test_inbox_outbox():
         assert inbox.empty()
         assert outbox.empty()
 
-        outbox.put_message(msg, context=context)
+        outbox.put_message(msg)
         await inbox.async_wait()
         received = inbox.get_nowait()
         assert received == envelope
@@ -541,8 +578,7 @@ async def test_threaded_mode():
     msg = DefaultMessage(performative=DefaultMessage.Performative.BYTES, content=b"",)
     msg.to = "to"
     msg.sender = "sender"
-    context = EnvelopeContext(connection_id=connection_1.connection_id)
-    envelope = Envelope(to="to", sender="sender", message=msg, context=context,)
+    envelope = Envelope(to="to", sender="sender", message=msg)
     try:
         await multiplexer.connect()
         await asyncio.sleep(0.5)
@@ -559,7 +595,7 @@ async def test_threaded_mode():
         assert inbox.empty()
         assert outbox.empty()
 
-        outbox.put_message(msg, context=context)
+        outbox.put_message(msg)
         await inbox.async_wait()
         received = inbox.get_nowait()
         assert received == envelope
@@ -659,6 +695,74 @@ async def test_default_route_applied(caplog):
             await multiplexer.disconnect()
 
             assert "Using default routing:" in caplog.text
+
+
+@pytest.mark.asyncio
+async def test_connection_id_in_to_field_detected(caplog):
+    """Test to field is parsed correctly and used for routing."""
+    logger = logging.getLogger("aea.multiplexer")
+    with caplog.at_level(logging.DEBUG, logger="aea.multiplexer"):
+        connection_1 = _make_dummy_connection()
+        connections = [connection_1]
+        multiplexer = AsyncMultiplexer(
+            connections, loop=asyncio.get_event_loop(), protocols=[DefaultProtocolMock]
+        )
+        multiplexer.logger = logger
+        envelope = Envelope(
+            to=str(connection_1.connection_id),
+            sender="some_author/some_skill:0.1.0",
+            protocol_specification_id=DefaultMessage.protocol_specification_id,
+            message=b"",
+        )
+        try:
+            await multiplexer.connect()
+            inbox = InBox(multiplexer)
+            outbox = InBox(multiplexer)
+
+            assert inbox.empty()
+            assert outbox.empty()
+            multiplexer.put(envelope)
+            await outbox.async_get()
+        finally:
+            await multiplexer.disconnect()
+
+            assert "Using envelope `to` field as connection_id:" in caplog.text
+
+
+@pytest.mark.asyncio
+async def test_routing_helper_applied(caplog):
+    """Test the routing helper is used for routing."""
+    logger = logging.getLogger("aea.multiplexer")
+    with caplog.at_level(logging.DEBUG, logger="aea.multiplexer"):
+        connection_1 = _make_dummy_connection()
+        connections = [connection_1]
+        multiplexer = AsyncMultiplexer(
+            connections, loop=asyncio.get_event_loop(), protocols=[DefaultProtocolMock]
+        )
+        multiplexer.logger = logger
+        envelope = Envelope(
+            to="test",
+            sender="",
+            protocol_specification_id=DefaultMessage.protocol_specification_id,
+            message=b"",
+        )
+        multiplexer._routing_helper[envelope.to] = connection_1.connection_id
+        try:
+            await multiplexer.connect()
+            inbox = InBox(multiplexer)
+            outbox = InBox(multiplexer)
+
+            assert inbox.empty()
+            assert outbox.empty()
+            multiplexer.put(envelope)
+            await outbox.async_get()
+        finally:
+            await multiplexer.disconnect()
+
+            assert (
+                f"Using routing helper with connection_id: {connection_1.connection_id}"
+                in caplog.text
+            )
 
 
 def test_multiplexer_setup():
@@ -790,16 +894,6 @@ class TestMultiplexerDisconnectsOnTermination:  # pylint: disable=attribute-defi
 
         os.chdir(Path(self.t, self.agent_name))
 
-    def test_multiplexer_disconnected_on_early_interruption(self):
-        """Test multiplexer disconnected properly on termination before connected."""
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add", "--local", "connection", str(P2P_PUBLIC_ID)]
-        )
-        assert result.exit_code == 0, result.stdout_bytes
-
-        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "build"])
-        assert result.exit_code == 0, result.stdout_bytes
-
         result = self.runner.invoke(
             cli, [*CLI_LOG_OPTION, "generate-key", DEFAULT_LEDGER, self.key_path]
         )
@@ -808,6 +902,16 @@ class TestMultiplexerDisconnectsOnTermination:  # pylint: disable=attribute-defi
         result = self.runner.invoke(
             cli, [*CLI_LOG_OPTION, "add-key", DEFAULT_LEDGER, self.key_path]
         )
+        assert result.exit_code == 0, result.stdout_bytes
+
+    def test_multiplexer_disconnected_on_early_interruption(self):
+        """Test multiplexer disconnected properly on termination before connected."""
+        result = self.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "add", "--local", "connection", str(P2P_PUBLIC_ID)]
+        )
+        assert result.exit_code == 0, result.stdout_bytes
+
+        result = self.runner.invoke(cli, [*CLI_LOG_OPTION, "build"])
         assert result.exit_code == 0, result.stdout_bytes
 
         result = self.runner.invoke(
@@ -919,3 +1023,82 @@ def test_multiplexer_setup_replaces_connections():
     m._setup([MagicMock()], MagicMock())
     assert len(m._id_to_connection) == 1
     assert len(m._connections) == 1
+
+
+def test_connect_after_disconnect_sync():
+    """Test connect-disconnect-connect again for threaded multiplexer."""
+    multiplexer = Multiplexer([_make_dummy_connection()])
+
+    assert not multiplexer.connection_status.is_connected
+    multiplexer.connect()
+    assert multiplexer.connection_status.is_connected
+    multiplexer.disconnect()
+    assert not multiplexer.connection_status.is_connected
+
+    multiplexer.connect()
+    assert multiplexer.connection_status.is_connected
+    multiplexer.disconnect()
+    assert not multiplexer.connection_status.is_connected
+
+
+@pytest.mark.asyncio
+async def test_connect_after_disconnect_async():
+    """Test connect-disconnect-connect again for async multiplexer."""
+    multiplexer = AsyncMultiplexer([_make_dummy_connection()])
+
+    assert not multiplexer.connection_status.is_connected
+    await multiplexer.connect()
+    assert multiplexer.connection_status.is_connected
+    await multiplexer.disconnect()
+    assert not multiplexer.connection_status.is_connected
+
+    await multiplexer.connect()
+    assert multiplexer.connection_status.is_connected
+    await multiplexer.disconnect()
+    assert not multiplexer.connection_status.is_connected
+
+
+@pytest.mark.asyncio
+async def test_connection_timeouts():
+    """Test connect,send, disconnect timeouts for connections."""
+
+    async def slow_fn(*asrgs, **kwargs):
+        await asyncio.sleep(100)
+
+    connection = _make_dummy_connection()
+    envelope = Envelope(
+        to="",
+        sender="",
+        message=DefaultMessage(performative=DefaultMessage.Performative.BYTES),
+        context=EnvelopeContext(connection_id=connection.connection_id),
+    )
+
+    connection = _make_dummy_connection()
+    connection.connect = slow_fn
+    multiplexer = AsyncMultiplexer([connection])
+
+    multiplexer.CONNECT_TIMEOUT = 0.1
+    with pytest.raises(AEAConnectionError, match=r"TimeoutError"):
+        await multiplexer.connect()
+
+    connection = _make_dummy_connection()
+    connection.send = slow_fn
+    multiplexer = AsyncMultiplexer([connection])
+
+    multiplexer.SEND_TIMEOUT = 0.1
+    await multiplexer.connect()
+    with pytest.raises(asyncio.TimeoutError):
+        await multiplexer._send(envelope)
+    await multiplexer.disconnect()
+
+    connection = _make_dummy_connection()
+    connection.disconnect = slow_fn
+    multiplexer = AsyncMultiplexer([connection])
+
+    multiplexer.DISCONNECT_TIMEOUT = 0.1
+    await multiplexer.connect()
+    with pytest.raises(
+        AEAConnectionError,
+        match=f"Failed to disconnect multiplexer, some connections are not disconnected.*{str(connection.connection_id)}",
+    ):
+        await multiplexer.disconnect()

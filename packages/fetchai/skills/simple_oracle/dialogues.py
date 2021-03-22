@@ -64,6 +64,8 @@ PrometheusDialogue = BasePrometheusDialogue
 class ContractApiDialogue(BaseContractApiDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
 
+    __slots__ = ("_terms",)
+
     def __init__(
         self,
         dialogue_label: BaseDialogueLabel,
@@ -127,7 +129,7 @@ class ContractApiDialogues(Model, BaseContractApiDialogues):
 
         BaseContractApiDialogues.__init__(
             self,
-            self_address=self.context.agent_address,
+            self_address=str(self.skill_id),
             role_from_first_message=role_from_first_message,
             dialogue_class=ContractApiDialogue,
         )
@@ -135,6 +137,8 @@ class ContractApiDialogues(Model, BaseContractApiDialogues):
 
 class LedgerApiDialogue(BaseLedgerApiDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
+
+    __slots__ = ("_associated_signing_dialogue", "_associated_transaction_type")
 
     def __init__(
         self,
@@ -205,7 +209,7 @@ class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
 
         BaseLedgerApiDialogues.__init__(
             self,
-            self_address=self.context.agent_address,
+            self_address=str(self.skill_id),
             role_from_first_message=role_from_first_message,
             dialogue_class=LedgerApiDialogue,
         )
@@ -213,6 +217,8 @@ class LedgerApiDialogues(Model, BaseLedgerApiDialogues):
 
 class SigningDialogue(BaseSigningDialogue):
     """The dialogue class maintains state of a dialogue and manages it."""
+
+    __slots__ = ("_associated_contract_api_dialogue",)
 
     def __init__(
         self,
@@ -319,6 +325,6 @@ class PrometheusDialogues(Model, BasePrometheusDialogues):
 
         BasePrometheusDialogues.__init__(
             self,
-            self_address=self.context.agent_address,
+            self_address=str(self.skill_id),
             role_from_first_message=role_from_first_message,
         )

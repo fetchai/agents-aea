@@ -33,7 +33,17 @@ class SigningHandler(Handler):
 
 ## Custom `DecisionMaker`
 
-The framework implements a default <a href="../api/decision_maker/default#decisionmakerhandler-objects">`DecisionMakerHandler`</a>. You can implement your own and mount it. The easiest way to do this is to run the following command to scaffold a custom `DecisionMakerHandler`:
+The framework implements a default <a href="../api/decision_maker/default#decisionmakerhandler-objects">`DecisionMakerHandler`</a> and an advanced <a href="../api/decision_maker/gop#decisionmakerhandler-objects">`DecisionMakerHandler`</a>. You can also implement your own and mount it.
+
+No further configuration is needed to use the default. To use the advanced decision maker handler, add the following configuration to the `aea-config.yaml` of your AEA (on page 1):
+
+``` yaml
+decision_maker_handler:
+   dotted_path: "aea.decision_maker.gop:DecisionMakerHandler"
+   file_path: null
+```
+
+The easiest way to add a custom decision maker handler is to run the following command to scaffold a custom `DecisionMakerHandler`:
 
 ``` bash
 aea scaffold decision-maker-handler
@@ -43,6 +53,6 @@ You can then implement your own custom logic to process messages and interact wi
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>
-  <p>For examples how to use these concepts have a look at the `tac_` skills. These functionalities are experimental and subject to change.
+  <p>For examples how to use these concepts have a look at the <code>tac_</code> skills. These functionalities are experimental and subject to change.
 </p>
 </div>

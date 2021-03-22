@@ -7,8 +7,6 @@ The AEA thermometer skills demonstrate an interaction between two AEAs.
 
 The scope of the specific demo is to demonstrate how to create a very simple AEA with the usage of the AEA framework and a thermometer sensor. The thermometer AEA will read data from the sensor each time a client requests and will deliver to the client upon payment. To keep the demo simple we avoided the usage of a database since this would increase the complexity. As a result, the AEA can provide only one reading from the sensor. This demo does not utilise a smart contract. As a result, we interact with a ledger only to complete a transaction.
 
-<!-- Since the AEA framework enables us to use third-party libraries hosted on PyPI we can directly reference the external dependencies. The `aea install` command will install each dependency that the specific AEA needs and is listed in the skill's YAML file. The AEA must run inside a Raspberry Pi or any other Linux system, and the sensor must be connected to the USB port.
- -->
 ## Communication
 
 This diagram shows the communication between the various entities as data is successfully sold by the thermometer AEA to the client. 
@@ -58,7 +56,7 @@ A demo to run the thermometer scenario with a true ledger transaction This demo 
 
 First, fetch the thermometer AEA:
 ``` bash
-aea fetch fetchai/thermometer_aea:0.19.0 --alias my_thermometer_aea
+aea fetch fetchai/thermometer_aea:0.22.0 --alias my_thermometer_aea
 cd my_thermometer_aea
 aea install
 aea build
@@ -71,17 +69,17 @@ The following steps create the thermometer AEA from scratch:
 ``` bash
 aea create my_thermometer_aea
 cd my_thermometer_aea
-aea add connection fetchai/p2p_libp2p:0.15.0
-aea add connection fetchai/soef:0.16.0
-aea add connection fetchai/ledger:0.13.0
-aea add skill fetchai/thermometer:0.19.0
+aea add connection fetchai/p2p_libp2p:0.18.0
+aea add connection fetchai/soef:0.19.0
+aea add connection fetchai/ledger:0.15.0
+aea add skill fetchai/thermometer:0.21.0
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.15.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.18.0
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
-  "fetchai/oef_search:0.13.0": "fetchai/soef:0.16.0"
+  "fetchai/ledger_api:0.11.0": "fetchai/ledger:0.15.0",
+  "fetchai/oef_search:0.14.0": "fetchai/soef:0.19.0"
 }'
 ```
 
@@ -92,7 +90,7 @@ aea config set --type dict agent.default_routing \
 
 Then, fetch the thermometer client AEA:
 ``` bash
-aea fetch fetchai/thermometer_client:0.20.0 --alias my_thermometer_client
+aea fetch fetchai/thermometer_client:0.23.0 --alias my_thermometer_client
 cd my_thermometer_client
 aea install
 aea build
@@ -105,17 +103,17 @@ The following steps create the thermometer client from scratch:
 ``` bash
 aea create my_thermometer_client
 cd my_thermometer_client
-aea add connection fetchai/p2p_libp2p:0.15.0
-aea add connection fetchai/soef:0.16.0
-aea add connection fetchai/ledger:0.13.0
-aea add skill fetchai/thermometer_client:0.19.0
+aea add connection fetchai/p2p_libp2p:0.18.0
+aea add connection fetchai/soef:0.19.0
+aea add connection fetchai/ledger:0.15.0
+aea add skill fetchai/thermometer_client:0.21.0
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.15.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.18.0
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
-  "fetchai/oef_search:0.13.0": "fetchai/soef:0.16.0"
+  "fetchai/ledger_api:0.11.0": "fetchai/ledger:0.15.0",
+  "fetchai/oef_search:0.14.0": "fetchai/soef:0.19.0"
 }'
 ```
 
@@ -177,24 +175,7 @@ First, run the thermometer AEA:
 aea run
 ```
 
-Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.15.0 -u public_uri` to retrieve the address.) This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the thermometer AEA.
-
-<!-- Then, in the thermometer client, update the configuration of the client AEA's p2p connection by appending the following YAML text at the end of the `aea-config.yaml` file:
-
-``` yaml
----
-public_id: fetchai/p2p_libp2p:0.15.0
-type: connection
-config:
-  delegate_uri: 127.0.0.1:11001
-  entry_peers:
-  - SOME_ADDRESS
-  local_uri: 127.0.0.1:9001
-  log_file: libp2p_node.log
-  public_uri: 127.0.0.1:9001
-```
-
-where `SOME_ADDRESS` is replaced accordingly. -->
+Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.18.0 -u public_uri` to retrieve the address.) This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the thermometer AEA.
 
 Then, in the thermometer client, run this command (replace `SOME_ADDRESS` with the correct value as described above):
 ``` bash

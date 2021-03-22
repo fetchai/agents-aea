@@ -122,6 +122,8 @@ class PublicIdRegistry(Generic[Item], Registry[PublicId, Item]):
     points to the 'latest' version of a package.
     """
 
+    __slots__ = ("_public_id_to_item",)
+
     def __init__(self) -> None:
         """Initialize the registry."""
         super().__init__()
@@ -186,6 +188,8 @@ class PublicIdRegistry(Generic[Item], Registry[PublicId, Item]):
 
 class AgentComponentRegistry(Registry[ComponentId, Component]):
     """This class implements a simple dictionary-based registry for agent components."""
+
+    __slots__ = ("_components_by_type", "_registered_keys")
 
     def __init__(self, **kwargs: Any) -> None:
         """
@@ -313,7 +317,6 @@ class AgentComponentRegistry(Registry[ComponentId, Component]):
 
         :return: None
         """
-        pass
 
     def teardown(self) -> None:
         """
@@ -321,13 +324,14 @@ class AgentComponentRegistry(Registry[ComponentId, Component]):
 
         :return: None
         """
-        pass
 
 
 class ComponentRegistry(
     Registry[Tuple[PublicId, str], SkillComponentType], Generic[SkillComponentType]
 ):
     """This class implements a generic registry for skill components."""
+
+    __slots__ = ("_items", "_dynamically_added")
 
     def __init__(self, **kwargs: Any) -> None:
         """
@@ -516,6 +520,8 @@ class ComponentRegistry(
 
 class HandlerRegistry(ComponentRegistry[Handler]):
     """This class implements the handlers registry."""
+
+    __slots__ = ("_items_by_protocol_and_skill",)
 
     def __init__(self, **kwargs: Any) -> None:
         """

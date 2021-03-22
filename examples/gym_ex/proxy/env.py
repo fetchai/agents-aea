@@ -98,11 +98,10 @@ class ProxyEnv(gym.Env):
         self._agent = ProxyAgent(
             name="proxy", gym_env=gym_env, proxy_env_queue=self._queue
         )
-        self._agent_address = self._agent.identity.address
         self._agent_thread = Thread(target=self._agent.start)
         self._active_dialogue = None  # type: Optional[GymDialogue]
-        self.agent_address = "proxy"
-        self.gym_dialogues = GymDialogues(self.agent_address, role_from_first_message)
+        self.gym_skill = "fetchai/gym:0.1.0"
+        self.gym_dialogues = GymDialogues(self.gym_skill, role_from_first_message)
 
     @property
     def active_dialogue(self) -> GymDialogue:

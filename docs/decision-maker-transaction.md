@@ -8,9 +8,10 @@ import time
 from threading import Thread
 from typing import Optional, cast
 
+from aea_ledger_fetchai import FetchAICrypto
+
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import PublicId, SkillConfig
-from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import create_private_key
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
@@ -84,6 +85,7 @@ Add a simple skill with a signing handler and the signing dialogues.
 
 ## Create a second identity
 ``` python
+    # create a second identity
     create_private_key(
         FetchAICrypto.identifier, private_key_file=FETCHAI_PRIVATE_KEY_FILE_2
     )
@@ -196,7 +198,6 @@ class SigningHandler(Handler):
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -230,7 +231,6 @@ class SigningHandler(Handler):
 
         :return: None
         """
-        pass
 
     def _handle_unidentified_dialogue(self, signing_msg: SigningMessage) -> None:
         """
@@ -300,9 +300,10 @@ import time
 from threading import Thread
 from typing import Optional, cast
 
+from aea_ledger_fetchai import FetchAICrypto
+
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import PublicId, SkillConfig
-from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import create_private_key
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.wallet import Wallet
@@ -461,7 +462,6 @@ class SigningHandler(Handler):
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -495,7 +495,6 @@ class SigningHandler(Handler):
 
         :return: None
         """
-        pass
 
     def _handle_unidentified_dialogue(self, signing_msg: SigningMessage) -> None:
         """

@@ -39,7 +39,7 @@ class TProtocolNoCtMessage(Message):
 
     protocol_id = PublicId.from_str("fetchai/t_protocol_no_ct:0.1.0")
     protocol_specification_id = PublicId.from_str(
-        "some_author/some_protocol_name:0.1.0"
+        "some_author/some_protocol_name:1.0.0"
     )
 
     class Performative(Message.Performative):

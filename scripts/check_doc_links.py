@@ -37,11 +37,13 @@ INDEX_FILE_PATH = Path("docs/index.md")
 
 WHITELIST_URL_TO_CODE = {
     "https://dl.acm.org/doi/10.1145/3212734.3212736": 302,
-    "http://soef.fetch.ai:9002": 405,
+    "https://s-oef.fetch.ai:443": 405,
     "https://golang.org/dl/": 403,
     "https://www.wiley.com/en-gb/An+Introduction+to+MultiAgent+Systems%2C+2nd+Edition-p-9781119959519": 403,
     "https://colab.research.google.com": 403,
 }
+
+IGNORE: Set[str] = set()
 
 
 def is_url_reachable(url: str) -> bool:
@@ -52,6 +54,8 @@ def is_url_reachable(url: str) -> bool:
     :return: bool
     """
     if url.startswith("http://localhost") or url.startswith("http://127.0.0.1"):
+        return True
+    if url in IGNORE:
         return True
     try:
         response = requests.head(url, timeout=3)

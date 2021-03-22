@@ -21,6 +21,7 @@ from unittest import TestCase, mock
 from unittest.mock import MagicMock
 
 import pytest
+from aea_ledger_fetchai import FetchAICrypto
 
 from aea.cli import cli
 from aea.cli.generate_wealth import _try_generate_wealth
@@ -30,7 +31,6 @@ from tests.conftest import (
     CLI_LOG_OPTION,
     COSMOS_ADDRESS_ONE,
     CliRunner,
-    FETCHAI,
     MAX_FLAKY_RERUNS_INTEGRATION,
 )
 from tests.test_cli.tools_for_testing import ContextMock
@@ -53,7 +53,7 @@ class GenerateWealthTestCase(TestCase):
 
 
 @mock.patch("aea.cli.utils.decorators.try_to_load_agent_config")
-@mock.patch("aea.cli.utils.package_utils.verify_or_create_private_keys_ctx")
+@mock.patch("aea.cli.utils.package_utils.verify_private_keys_ctx")
 @mock.patch("aea.cli.generate_wealth._try_generate_wealth")
 class GenerateWealthCommandTestCase(TestCase):
     """Test case for CLI generate_wealth command."""
@@ -71,7 +71,7 @@ class GenerateWealthCommandTestCase(TestCase):
                 "--skip-consistency-check",
                 "generate-wealth",
                 "--sync",
-                FETCHAI,
+                FetchAICrypto.identifier,
             ],
             standalone_mode=False,
         )

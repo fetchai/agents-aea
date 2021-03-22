@@ -27,6 +27,7 @@ import click
 
 from aea.mail.base import Envelope
 from aea.protocols.base import Message
+from aea.registries.resources import Resources
 from aea.skills.base import Handler
 from benchmark.checks.utils import GeneratorConnection  # noqa: I100
 from benchmark.checks.utils import (
@@ -90,8 +91,7 @@ def run(
     # import manually due to some lazy imports in decision_maker
     import aea.decision_maker.default  # noqa: F401
 
-    agent = make_agent(runtime_mode=runtime_mode)
-
+    resources = Resources()
     if connection_mode not in CONNECTION_MODES:
         raise ValueError(
             f"bad connection mode {connection_mode}. valid is one of {list(CONNECTION_MODES.keys())}"
@@ -101,7 +101,9 @@ def run(
 
     conn_cls = type("conn_cls", (TestConnectionMixIn, base_cls), {})
     connection = conn_cls.make()  # type: ignore # pylint: disable=no-member
-    agent.resources.add_connection(connection)
+    resources.add_connection(connection)
+
+    agent = make_agent(runtime_mode=runtime_mode, resources=resources)
     agent.resources.add_skill(make_skill(agent, handlers={"test": TestHandler}))
     t = Thread(target=agent.start, daemon=True)
     t.start()
@@ -110,6 +112,7 @@ def run(
     connection.enable()
     time.sleep(duration)
     connection.disable()
+    time.sleep(0.2)  # possible race condition in stop?
     agent.stop()
     t.join(5)
 

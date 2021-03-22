@@ -1,8 +1,60 @@
-This page provides some tips on how to upgrade AEA projects between different versions of the AEA framework.
+This page provides some tips on how to upgrade AEA projects between different versions of the AEA framework. For full release notes check the <a href="https://github.com/fetchai/agents-aea/tags" target="_blank">AEA repo</a>.
 
 The primary tool for upgrading AEA projects is the `aea upgrade` command in the <a href="../cli-commands/">CLI</a>.
 
 Below we describe the additional manual steps required to upgrade between different versions:
+
+## `v0.11.0` to `v0.11.1`
+
+No backwards incompatible changes.
+
+## `v0.10.1` to `v0.11.0`
+
+Take special care when upgrading to `v0.11.0`. We introduced several breaking changes in preparation for `v1`!
+
+### CLI GUI
+
+We removed the CLI GUI. It was not used by anyone as far as we know and needs to be significantly improved. Soon we will release the AEA Manager App to make up for this.
+
+### Message routing
+
+Routing has been completely revised and simplified. The new message routing logic is described <a href="../message-routing/">here</a>.
+
+When upgrading take the following steps:
+
+- For agent-to-agent communication: ensure the default routing and default connection are correctly defined and that the dialogues used specify the agent's address as the `self_address`. This is most likely already the case. Only in some edge cases will you need to use an `EnvelopeContext` to target a connection different from the one specified in the `default_routing` map.
+
+- For component-to-component communication: there is now only one single way to route component to component (skill to skill, skill to connection, connection to skill) messages, this is by specifying the component id in string form in the `sender`/`to` field. The `EnvelopeContext` can no longer be used, messages are routed based on their target (`to` field). Ensure that dialogues in skills set the `skill_id` as the `self_address` (in connections they need to set the `connection_id`).
+
+### Agent configuration and ledger plugins
+
+Agent configuration files have a new optional field, `dependencies`,  analogous to `dependencies` field in other AEA packages. The default value is the empty object `{}`. The field will be made mandatory in the next release.
+
+Crypto modules have been extracted and released as independent plug-ins, released on PyPI. In particular:
+
+- Fetch.ai crypto classes have been released in the `aea-ledger-fetchai` package;
+- Ethereum crypto classes have been released in the `aea-ledger-ethereum` package;
+- Cosmos crypto classes have been released in the `aea-ledger-cosmos` package.
+
+If an AEA project, or an AEA package, makes use of crypto functionalities, it will be needed to add the above packages as PyPI dependencies with version specifiers ranging from the latest minor and the latest minor + 1 (excluded). E.g. if the latest version if `0.1.0`, the version specifier should be `<0.2.0,>=0.1.0`:
+```yaml
+dependencies:
+  aea-ledger-cosmos:
+    version: <2.0.0,>=1.0.0rc1
+  aea-ledger-ethereum:
+    version: <2.0.0,>=1.0.0rc1
+  aea-ledger-fetchai:
+    version: <2.0.0,>=1.0.0rc1
+```
+The version specifier sets are important, as these plug-ins, at version `0.1.0`, depend on a specific range of the `aea` package.
+
+Then, running `aea install` inside the AEA project should install them in the current Python environment.
+
+For more, read the <a href="../ledger-integration">guide on ledger plugins</a>.
+
+## `v0.10.0` to `v0.10.1`
+
+No backwards incompatible changes for skill and connection development.
 
 ## `v0.9.2` to `v0.10.0`
 
@@ -10,7 +62,7 @@ Skill development sees no backward incompatible changes.
 
 Connection development requires updating the keyword arguments of the constructor: the new `data_dir` argument must be defined.
 
-Protocol specifications now need to contain a `protocol_specification_id` in addition to the public id. The `protocol_specification_id` is used for identifying Envelopes during transport. By being able to set the id independently of the protocol id backwards compatibility in the specification (and therefore wire format) can be maintained even when the Python implementation changes.
+Protocol specifications now need to contain a `protocol_specification_id` in addition to the public id. The `protocol_specification_id` is used for identifying Envelopes during transport. By being able to set the id independently of the protocol id, backwards compatibility in the specification (and therefore wire format) can be maintained even when the Python implementation changes.
 
 Please update to the latest packages by running `aea upgrade` and then re-generating your own protocols.
 

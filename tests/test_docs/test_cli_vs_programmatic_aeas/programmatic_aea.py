@@ -24,10 +24,11 @@ import os
 import sys
 from typing import cast
 
+from aea_ledger_fetchai import FetchAICrypto
+
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import ConnectionConfig
-from aea.crypto.fetchai import FetchAICrypto
 from aea.crypto.helpers import (
     PRIVATE_KEY_PATH_SCHEMA,
     create_private_key,
@@ -50,8 +51,8 @@ from packages.fetchai.skills.weather_client.strategy import Strategy
 
 
 API_KEY = "TwiCIriSl0mLahw17pyqoA"
-SOEF_ADDR = "soef.fetch.ai"
-SOEF_PORT = 9002
+SOEF_ADDR = "s-oef.fetch.ai"
+SOEF_PORT = 443
 ENTRY_PEER_ADDRESS = (
     "/dns4/127.0.0.1/tcp/9000/p2p/16Uiu2HAmLBCAqHL8SuFosyDhAKYsLKXBZBWXBsB9oFw2qU4Kckun"
 )

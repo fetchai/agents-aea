@@ -3,6 +3,33 @@
 
 This module contains the implementation of AEA agents manager.
 
+<a name="aea.manager.manager.ProjectNotFoundError"></a>
+## ProjectNotFoundError Objects
+
+```python
+class ProjectNotFoundError(ValueError)
+```
+
+Project not found exception.
+
+<a name="aea.manager.manager.ProjectCheckError"></a>
+## ProjectCheckError Objects
+
+```python
+class ProjectCheckError(ValueError)
+```
+
+Project check error exception.
+
+<a name="aea.manager.manager.ProjectCheckError.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(msg: str, source_exception: Exception)
+```
+
+Init exception.
+
 <a name="aea.manager.manager.AgentRunAsyncTask"></a>
 ## AgentRunAsyncTask Objects
 
@@ -134,7 +161,7 @@ Multi agents manager.
 #### `__`init`__`
 
 ```python
- | __init__(working_dir: str, mode: str = "async", registry_path: str = DEFAULT_REGISTRY_NAME) -> None
+ | __init__(working_dir: str, mode: str = "async", registry_path: str = DEFAULT_REGISTRY_NAME, auto_add_remove_project: bool = False) -> None
 ```
 
 Initialize manager.
@@ -142,6 +169,13 @@ Initialize manager.
 **Arguments**:
 
 - `working_dir`: directory to store base agents.
+- `mode`: str. async or threaded
+- `registry_path`: str. path to the local packages registry
+- `auto_add_remove_project`: bool. add/remove project on the first agent add/last agent remove
+
+**Returns**:
+
+None
 
 <a name="aea.manager.manager.MultiAgentManager.data_dir"></a>
 #### data`_`dir
@@ -213,6 +247,18 @@ registry, and then from remote registry in case of failure).
 
 the MultiAgentManager instance.
 
+<a name="aea.manager.manager.MultiAgentManager.last_start_status"></a>
+#### last`_`start`_`status
+
+```python
+ | @property
+ | last_start_status() -> Tuple[
+ |         bool, Dict[PublicId, List[Dict]], List[Tuple[PublicId, List[Dict], Exception]],
+ |     ]
+```
+
+Get status of the last agents start loading state.
+
 <a name="aea.manager.manager.MultiAgentManager.stop_manager"></a>
 #### stop`_`manager
 
@@ -249,6 +295,7 @@ registry, and then from remote registry in case of failure).
 **Arguments**:
 
 - `public_id`: the public if of the agent project.
+
 - `local`: whether or not to fetch from local registry.
 - `remote`: whether or not to fetch from remote registry.
 - `restore`: bool flag for restoring already fetched agent.
@@ -279,7 +326,7 @@ list of public ids of projects
 #### add`_`agent
 
 ```python
- | add_agent(public_id: PublicId, agent_name: Optional[str] = None, agent_overrides: Optional[dict] = None, component_overrides: Optional[List[dict]] = None) -> "MultiAgentManager"
+ | add_agent(public_id: PublicId, agent_name: Optional[str] = None, agent_overrides: Optional[dict] = None, component_overrides: Optional[List[dict]] = None, local: bool = False, remote: bool = False, restore: bool = False) -> "MultiAgentManager"
 ```
 
 Create new agent configuration based on project with config overrides applied.
@@ -293,6 +340,10 @@ Alias is stored in memory only!
 - `agent_overrides`: overrides for agent config.
 - `component_overrides`: overrides for component section.
 - `config`: agent config (used for agent re-creation).
+
+- `local`: whether or not to fetch from local registry.
+- `remote`: whether or not to fetch from remote registry.
+- `restore`: bool flag for restoring already fetched agent.
 
 **Returns**:
 
@@ -389,7 +440,7 @@ list of agents names
 #### remove`_`agent
 
 ```python
- | remove_agent(agent_name: str) -> "MultiAgentManager"
+ | remove_agent(agent_name: str, skip_project_auto_remove: bool = False) -> "MultiAgentManager"
 ```
 
 Remove agent alias definition from registry.
@@ -397,6 +448,7 @@ Remove agent alias definition from registry.
 **Arguments**:
 
 - `agent_name`: agent name to remove
+- `skip_project_auto_remove`: disable auto project remove on last agent removed.
 
 **Returns**:
 

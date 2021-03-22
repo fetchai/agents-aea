@@ -105,7 +105,7 @@ class LedgerApiRequestDispatcher(RequestDispatcher):
 
     @property
     def dialogues(self) -> BaseDialogues:
-        """Get the dialouges."""
+        """Get the dialogues."""
         return self._ledger_api_dialogues
 
     def get_balance(

@@ -21,7 +21,6 @@
 
 from typing import Any, Dict, cast
 
-from aea.mail.base import EnvelopeContext
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
@@ -39,7 +38,6 @@ class TacSearchBehaviour(TickerBehaviour):
 
         :return: None
         """
-        pass
 
     def act(self) -> None:
         """
@@ -57,7 +55,6 @@ class TacSearchBehaviour(TickerBehaviour):
 
         :return: None
         """
-        pass
 
     def _search_for_tac(self) -> None:
         """
@@ -78,10 +75,7 @@ class TacSearchBehaviour(TickerBehaviour):
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             query=query,
         )
-        envelope_context = EnvelopeContext(skill_id=self.context.skill_id)
-        self.context.outbox.put_message(
-            message=oef_search_msg, context=envelope_context
-        )
+        self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info(
             "searching for TAC, search_id={}".format(oef_search_msg.dialogue_reference)
         )
@@ -96,7 +90,6 @@ class TransactionProcessBehaviour(TickerBehaviour):
 
         :return: None
         """
-        pass
 
     def act(self) -> None:
         """
@@ -114,7 +107,6 @@ class TransactionProcessBehaviour(TickerBehaviour):
 
         :return: None
         """
-        pass
 
     def _process_transactions(self) -> None:
         """

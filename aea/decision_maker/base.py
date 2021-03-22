@@ -24,7 +24,7 @@ from abc import ABC, abstractmethod
 from queue import Queue
 from threading import Thread
 from types import SimpleNamespace
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 from uuid import uuid4
 
 from aea.crypto.wallet import Wallet
@@ -123,7 +123,7 @@ class Preferences(ABC):
         Compute the marginal utility.
 
         :param ownership_state: the ownership state against which to compute the marginal utility.
-        :param kwargs: optional keyword argyments
+        :param kwargs: optional keyword arguments
         :return: the marginal utility score
         """
 
@@ -238,21 +238,26 @@ class ProtectedQueue(Queue):
 class DecisionMakerHandler(WithLogger, ABC):
     """This class implements the decision maker."""
 
+    __slots__ = ("_identity", "_wallet", "_config", "_context", "_message_out_queue")
+
     self_address: str = "decision_maker"
 
-    def __init__(self, identity: Identity, wallet: Wallet, **kwargs: Any) -> None:
+    def __init__(
+        self, identity: Identity, wallet: Wallet, config: Dict[str, Any], **kwargs: Any
+    ) -> None:
         """
         Initialize the decision maker handler.
 
         :param identity: the identity
         :param wallet: the wallet
-        :param logger: the logger
+        :param config: the user defined configuration of the handler
         :param kwargs: the key word arguments
         """
         logger = get_logger(__name__, identity.name)
         WithLogger.__init__(self, logger=logger)
         self._identity = identity
         self._wallet = wallet
+        self._config = config
         self._context = SimpleNamespace(**kwargs)
         self._message_out_queue = AsyncFriendlyQueue()  # type: AsyncFriendlyQueue
 
@@ -270,6 +275,11 @@ class DecisionMakerHandler(WithLogger, ABC):
     def wallet(self) -> Wallet:
         """Get wallet of the agent."""
         return self._wallet
+
+    @property
+    def config(self) -> Dict[str, Any]:
+        """Get user defined configuration"""
+        return self._config
 
     @property
     def context(self) -> SimpleNamespace:
@@ -294,6 +304,16 @@ class DecisionMakerHandler(WithLogger, ABC):
 class DecisionMaker(WithLogger):
     """This class implements the decision maker."""
 
+    __slots__ = (
+        "_queue_access_code",
+        "_message_in_queue",
+        "_decision_maker_handler",
+        "_thread",
+        "_lock",
+        "_message_out_queue",
+        "_stopped",
+    )
+
     def __init__(self, decision_maker_handler: DecisionMakerHandler,) -> None:
         """
         Initialize the decision maker.
@@ -302,7 +322,6 @@ class DecisionMaker(WithLogger):
         :param decision_maker_handler: the decision maker handler
         """
         WithLogger.__init__(self, logger=decision_maker_handler.logger)
-        self._agent_name = decision_maker_handler.identity.name
         self._queue_access_code = uuid4().hex
         self._message_in_queue = ProtectedQueue(
             self._queue_access_code
@@ -312,6 +331,11 @@ class DecisionMaker(WithLogger):
         self._lock = threading.Lock()
         self._message_out_queue = decision_maker_handler.message_out_queue
         self._stopped = True
+
+    @property
+    def agent_name(self) -> str:
+        """Get the agent name."""
+        return self.decision_maker_handler.identity.name
 
     @property
     def message_in_queue(self) -> ProtectedQueue:
@@ -333,7 +357,7 @@ class DecisionMaker(WithLogger):
         with self._lock:
             if not self._stopped:  # pragma: no cover
                 self.logger.debug(
-                    "[{}]: Decision maker already started.".format(self._agent_name)
+                    "[{}]: Decision maker already started.".format(self.agent_name)
                 )
                 return
 
@@ -348,7 +372,7 @@ class DecisionMaker(WithLogger):
             self.message_in_queue.put(None)
             if self._thread is not None:
                 self._thread.join()
-            self.logger.debug("[{}]: Decision Maker stopped.".format(self._agent_name))
+            self.logger.debug("[{}]: Decision Maker stopped.".format(self.agent_name))
             self._thread = None
 
     def execute(self) -> None:
@@ -369,7 +393,7 @@ class DecisionMaker(WithLogger):
             if message is None:
                 self.logger.debug(
                     "[{}]: Received empty message. Quitting the processing loop...".format(
-                        self._agent_name
+                        self.agent_name
                     )
                 )
                 continue

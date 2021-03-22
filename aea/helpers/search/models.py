@@ -96,6 +96,8 @@ CONSTRAINT_CATEGORIES = [
 class Location:
     """Data structure to represent locations (i.e. a pair of latitude and longitude)."""
 
+    __slots__ = ("latitude", "longitude")
+
     def __init__(self, latitude: float, longitude: float) -> None:
         """
         Initialize a location.
@@ -116,7 +118,7 @@ class Location:
         Get the distance to another location.
 
         :param other: the other location
-        :retun: the distance
+        :return: the distance
         """
         return haversine(self.latitude, self.longitude, other.latitude, other.longitude)
 
@@ -171,8 +173,6 @@ class AttributeInconsistencyException(Exception):
     are not of an allowed type.
     """
 
-    pass
-
 
 class Attribute:
     """Implements an attribute for an OEF data model."""
@@ -184,6 +184,8 @@ class Attribute:
         str: models_pb2.Query.Attribute.STRING,  # type: ignore
         Location: models_pb2.Query.Attribute.LOCATION,  # type: ignore
     }
+
+    __slots__ = ("name", "type", "is_required", "description")
 
     def __init__(
         self,
@@ -254,6 +256,8 @@ class Attribute:
 class DataModel:
     """Implements an OEF data model."""
 
+    __slots__ = ("name", "attributes", "description")
+
     def __init__(
         self, name: str, attributes: List[Attribute], description: str = ""
     ) -> None:
@@ -268,8 +272,12 @@ class DataModel:
             attributes, key=lambda x: x.name
         )  # type: List[Attribute]
         self._check_validity()
-        self.attributes_by_name = {a.name: a for a in self.attributes}
         self.description = description
+
+    @property
+    def attributes_by_name(self) -> Dict[str, Attribute]:
+        """Get the attributes by name."""
+        return {a.name: a for a in self.attributes}
 
     def _check_validity(self) -> None:
         # check if there are duplicated attribute names
@@ -343,6 +351,8 @@ def generate_data_model(
 
 class Description:
     """Implements an OEF description."""
+
+    __slots__ = ("_values", "data_model")
 
     def __init__(
         self,
@@ -596,6 +606,8 @@ class ConstraintType:
         >>> not_in_a_set = ConstraintType("not_in", ("C", "Java", "Python"))
 
     """
+
+    __slots__ = ("type", "value")
 
     def __init__(self, type_: Union[ConstraintTypes, str], value: Any) -> None:
         """
@@ -1115,6 +1127,8 @@ class ConstraintExpr(ABC):
 class And(ConstraintExpr):
     """Implementation of the 'And' constraint expression."""
 
+    __slots__ = ("constraints",)
+
     def __init__(self, constraints: List[ConstraintExpr]) -> None:
         """
         Initialize an 'And' expression.
@@ -1188,6 +1202,8 @@ class And(ConstraintExpr):
 
 class Or(ConstraintExpr):
     """Implementation of the 'Or' constraint expression."""
+
+    __slots__ = ("constraints",)
 
     def __init__(self, constraints: List[ConstraintExpr]) -> None:
         """
@@ -1263,6 +1279,8 @@ class Or(ConstraintExpr):
 class Not(ConstraintExpr):
     """Implementation of the 'Not' constraint expression."""
 
+    __slots__ = ("constraint",)
+
     def __init__(self, constraint: ConstraintExpr) -> None:
         """
         Initialize a 'Not' expression.
@@ -1318,6 +1336,8 @@ class Not(ConstraintExpr):
 
 class Constraint(ConstraintExpr):
     """The atomic component of a constraint expression."""
+
+    __slots__ = ("attribute_name", "constraint_type")
 
     def __init__(self, attribute_name: str, constraint_type: ConstraintType) -> None:
         """
@@ -1481,6 +1501,8 @@ class Constraint(ConstraintExpr):
 
 class Query:
     """This class lets you build a query for the OEF."""
+
+    __slots__ = ("constraints", "model")
 
     def __init__(
         self, constraints: List[ConstraintExpr], model: Optional[DataModel] = None

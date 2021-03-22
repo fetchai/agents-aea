@@ -135,7 +135,7 @@ def determine_package_type_for_directory(package_dir: Path) -> PackageType:
     """
     Find package type for the package directory by checking config file names.
 
-    :param package_dir: package dir to determine pcakge type:
+    :param package_dir: package dir to determine package type:
 
     :return: PackageType
     """

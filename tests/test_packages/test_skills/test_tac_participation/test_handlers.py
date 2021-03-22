@@ -26,7 +26,7 @@ from unittest.mock import patch
 import pytest
 
 from aea.protocols.dialogue.base import DialogueMessage
-from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_ADDRESS
+from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_AGENT_ADDRESS
 
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.state_update.message import StateUpdateMessage
@@ -50,6 +50,7 @@ class TestOefSearchHandler(BaseSkillTestCase):
     """Test oef search handler of tac participation."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "tac_participation")
+    is_agent_to_agent_messages = False
 
     @classmethod
     def setup(cls):
@@ -82,9 +83,7 @@ class TestOefSearchHandler(BaseSkillTestCase):
             message_type=OefSearchMessage,
             dialogue_reference=incorrect_dialogue_reference,
             performative=OefSearchMessage.Performative.SEARCH_RESULT,
-            to=self.skill.skill_context.agent_address
-            + "_"
-            + str(self.skill.skill_context.skill_id),
+            to=str(self.skill.skill_context.skill_id),
         )
 
         # operation
@@ -108,9 +107,7 @@ class TestOefSearchHandler(BaseSkillTestCase):
             self.build_incoming_message_for_skill_dialogue(
                 dialogue=oef_dialogue,
                 performative=OefSearchMessage.Performative.OEF_ERROR,
-                to=self.skill.skill_context.agent_address
-                + "_"
-                + str(self.skill.skill_context.skill_id),
+                to=str(self.skill.skill_context.skill_id),
                 oef_error_operation=OefSearchMessage.OefErrorOperation.SEARCH_SERVICES,
             ),
         )
@@ -136,9 +133,7 @@ class TestOefSearchHandler(BaseSkillTestCase):
             self.build_incoming_message_for_skill_dialogue(
                 dialogue=oef_dialogue,
                 performative=OefSearchMessage.Performative.SEARCH_RESULT,
-                to=self.skill.skill_context.agent_address
-                + "_"
-                + str(self.skill.skill_context.skill_id),
+                to=str(self.skill.skill_context.skill_id),
                 agents=(self.controller_address,),
             ),
         )
@@ -190,9 +185,7 @@ class TestOefSearchHandler(BaseSkillTestCase):
             self.build_incoming_message_for_skill_dialogue(
                 dialogue=oef_dialogue,
                 performative=OefSearchMessage.Performative.SEARCH_RESULT,
-                to=self.skill.skill_context.agent_address
-                + "_"
-                + str(self.skill.skill_context.skill_id),
+                to=str(self.skill.skill_context.skill_id),
                 agents=("agent_1", "agent_2"),
             ),
         )
@@ -226,9 +219,7 @@ class TestOefSearchHandler(BaseSkillTestCase):
             self.build_incoming_message_for_skill_dialogue(
                 dialogue=oef_dialogue,
                 performative=OefSearchMessage.Performative.SEARCH_RESULT,
-                to=self.skill.skill_context.agent_address
-                + "_"
-                + str(self.skill.skill_context.skill_id),
+                to=str(self.skill.skill_context.skill_id),
                 agents=tuple(),
             ),
         )
@@ -261,9 +252,7 @@ class TestOefSearchHandler(BaseSkillTestCase):
             self.build_incoming_message_for_skill_dialogue(
                 dialogue=oef_dialogue,
                 performative=OefSearchMessage.Performative.SEARCH_RESULT,
-                to=self.skill.skill_context.agent_address
-                + "_"
-                + str(self.skill.skill_context.skill_id),
+                to=str(self.skill.skill_context.skill_id),
                 agents=("agent_1", "agent_2"),
             ),
         )
@@ -293,9 +282,7 @@ class TestOefSearchHandler(BaseSkillTestCase):
             message_type=OefSearchMessage,
             dialogue_reference=("1", ""),
             performative=invalid_performative,
-            to=self.skill.skill_context.agent_address
-            + "_"
-            + str(self.skill.skill_context.skill_id),
+            to=str(self.skill.skill_context.skill_id),
             service_description="some_service_description",
         )
 
@@ -338,7 +325,7 @@ class TestTacHandler(BaseSkillTestCase):
         cls.quantities_by_good_id = {"2": 10}
         cls.utility_params_by_good_id = {"2": 1.0}
         cls.fee_by_currency_id = {"1": 1}
-        cls.agent_addr_to_name = {COUNTERPARTY_ADDRESS: "some_name"}
+        cls.agent_addr_to_name = {COUNTERPARTY_AGENT_ADDRESS: "some_name"}
         cls.currency_id_to_name = {"1": "FETCH"}
         cls.good_id_to_name = {"2": "Good_1"}
         cls.version_id = "v1"
@@ -387,7 +374,7 @@ class TestTacHandler(BaseSkillTestCase):
             ),
         )
 
-        cls.game._expected_controller_addr = COUNTERPARTY_ADDRESS
+        cls.game._expected_controller_addr = COUNTERPARTY_AGENT_ADDRESS
 
     def test_setup(self):
         """Test the setup method of the tac handler."""
@@ -544,9 +531,7 @@ class TestTacHandler(BaseSkillTestCase):
             message_type=StateUpdateMessage,
             performative=StateUpdateMessage.Performative.INITIALIZE,
             to=self.skill.skill_context.decision_maker_address,
-            sender=self.skill.skill_context.agent_address
-            + "_"
-            + str(self.skill.skill_context.skill_id),
+            sender=str(self.skill.skill_context.skill_id),
             amount_by_currency_id=incoming_message.amount_by_currency_id,
             quantities_by_good_id=incoming_message.quantities_by_good_id,
             exchange_params_by_currency_id=incoming_message.exchange_params_by_currency_id,
@@ -830,9 +815,7 @@ class TestTacHandler(BaseSkillTestCase):
             message_type=StateUpdateMessage,
             performative=StateUpdateMessage.Performative.APPLY,
             to=self.skill.skill_context.decision_maker_address,
-            sender=self.skill.skill_context.agent_address
-            + "_"
-            + str(self.skill.skill_context.skill_id),
+            sender=str(self.skill.skill_context.skill_id),
             amount_by_currency_id=incoming_message.amount_by_currency_id,
             quantities_by_good_id=incoming_message.quantities_by_good_id,
         )
@@ -928,7 +911,7 @@ class TestTacHandler(BaseSkillTestCase):
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=tac_dialogue,
             performative=TacMessage.Performative.UNREGISTER,
-            sender=COUNTERPARTY_ADDRESS,
+            sender=COUNTERPARTY_AGENT_ADDRESS,
         )
 
         # operation

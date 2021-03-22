@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - develop
-      - master
+      - main
   pull_request:
 
 jobs:
@@ -25,7 +25,27 @@ jobs:
           sudo apt-get autoclean
           pip install pipenv
       - name: Pipenv lock
-        run: pipenv lock
+        run: |
+          pipenv install --dev --skip-lock --clear
+          pipenv run pip install -e .[all]
+          pipenv run pip install --no-deps file:plugins/aea-ledger-ethereum
+          pipenv run pip install --no-deps file:plugins/aea-ledger-cosmos
+          pipenv run pip install --no-deps file:plugins/aea-ledger-fetchai
+          pipenv lock
+      - name: Check plugin consistency
+        run: |
+          # these two files should not be different;
+          # we vendorize main "cosmos.py" module in fetchai crypto plugin package
+          diff plugins/aea-ledger-cosmos/aea_ledger_cosmos/cosmos.py plugins/aea-ledger-fetchai/aea_ledger_fetchai/_cosmos.py
+
+          # check diff between plugins' LICENSE and main LICENSE
+          diff LICENSE plugins/aea-ledger-cosmos/LICENSE
+          diff LICENSE plugins/aea-ledger-ethereum/LICENSE
+          diff LICENSE plugins/aea-ledger-fetchai/LICENSE
+      - name: Check go code consistency
+        run: |
+          # check diff between go code in libs and packages
+          diff libs/go/libp2p_node packages/fetchai/connections/p2p_libp2p/libp2p_node -r
 
   common_checks_2:
     continue-on-error: False
@@ -58,13 +78,20 @@ jobs:
         run: tox -e vulture
       - name: Static type check
         run: tox -e mypy
-      - name: Golang code style check
+      - name: Golang code style check (libp2p_node)
         uses: golangci/golangci-lint-action@v1
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: true
         with:
           version: v1.28
-          working-directory: packages/fetchai/connections/p2p_libp2p/
+          working-directory: libs/go/libp2p_node
+      - name: Golang code style check (aealite)
+        uses: golangci/golangci-lint-action@v1
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+        with:
+          version: v1.28
+          working-directory: libs/go/aealite
 
   common_checks_3:
     continue-on-error: False
@@ -100,6 +127,7 @@ jobs:
           sudo apt-get autoremove
           sudo apt-get autoclean
           pip install tox
+          pip install --user --upgrade setuptools
           # install Protobuf compiler
           wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
           unzip protoc-3.11.4-linux-x86_64.zip -d protoc
@@ -130,7 +158,7 @@ jobs:
     continue-on-error: False
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: github.base_ref == 'master'
+    if: github.base_ref == 'main'
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-python@master
@@ -153,21 +181,33 @@ jobs:
         run: tox -e check_api_docs
       - name: Check spelling
         run: tox -e spell_check
+
   dependencies_checks:
     continue-on-error: False
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python_version: [3.6]
     timeout-minutes: 10
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-python@master
         with:
-          python-version: 3.6
+          python-version: ${{ matrix.python_version }}
+      - name: Install tox
+        run : |
+          pip install tox
+      - name: Check Pipfile and tox.ini consistency
+        run : |
+          python ./scripts/check_pipfile_and_toxini.py
       - name: Install current aea
         run: |
           pip install -e .[all]
-      - name: Check dependecnies and imports
+      - name: Check aea dependenices and imports
         run: |
-          python ./scripts/check_imports_and_dependencies.py
+          tox -e dependencies_check
+
   protolint:
     continue-on-error: False
     runs-on: ubuntu-latest
@@ -189,6 +229,7 @@ jobs:
       - name: Protolint check
         run: |
           make protolint
+
   integration_checks:
     continue-on-error: True
     needs:
@@ -350,6 +391,9 @@ jobs:
       name: Unit tests
       run: |
         tox -e py${{ matrix.python_version }} -- -m 'not integration and not unstable'
+    - name: Plugin tests
+      run: |
+        tox -e plugins-py${{ matrix.python_version }} -- -m 'not integration and not unstable'
 
   platform_checks_sync_aea_loop:
     continue-on-error: True
@@ -392,9 +436,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: [3.6]
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
     - uses: actions/checkout@master
     - uses: actions/setup-python@master
@@ -404,8 +448,12 @@ jobs:
       with:
         go-version: '^1.14.0'
     - if: matrix.python-version == '3.6'
-      name: Golang unit tests
-      working-directory: ./packages/fetchai/connections/p2p_libp2p
+      name: Golang unit tests (libp2p_node)
+      working-directory: ./libs/go/libp2p_node
+      run: go test -p 1 -timeout 0 -count 1 -v ./...
+    - if: matrix.python-version == '3.6'
+      name: Golang unit tests (aealite)
+      working-directory: ./libs/go/aealite
       run: go test -p 1 -timeout 0 -count 1 -v ./...
 
   coverage_checks:
@@ -431,6 +479,7 @@ jobs:
         sudo apt-get autoremove
         sudo apt-get autoclean
         pip install tox
+        pip install coverage
         # install Protobuf compiler
         wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.4/protoc-3.11.4-linux-x86_64.zip
         unzip protoc-3.11.4-linux-x86_64.zip -d protoc
@@ -438,8 +487,13 @@ jobs:
         make protolint_install
     # sudo apt-get install -y protobuf-compiler
     - name: Run all tests
-      run: tox -e py3.7-cov -- --ignore=tests/test_docs --ignore=tests/test_examples --ignore=tests/test_packages/test_contracts --ignore=tests/test_packages/test_skills_integration -m 'not unstable'
+      run: |
+        tox -e py3.7-cov -- --ignore=tests/test_docs --ignore=tests/test_examples --ignore=tests/test_packages/test_contracts --ignore=tests/test_packages/test_skills_integration -m 'not unstable'
+        tox -e plugins-py3.7-cov -- --cov-append -m 'not unstable'
       continue-on-error: true
+    - name: Show full coverage report
+      run: |
+        coverage report -m -i
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:

@@ -34,7 +34,7 @@ from aea.helpers.search.models import (
 )
 from aea.helpers.transaction.base import RawTransaction, Terms
 from aea.protocols.dialogue.base import DialogueLabel
-from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_ADDRESS
+from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_AGENT_ADDRESS
 
 from packages.fetchai.protocols.contract_api.custom_types import Kwargs
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
@@ -105,7 +105,9 @@ class TestDialogues(BaseSkillTestCase):
         """Test the FipaDialogue class."""
         fipa_dialogue = FipaDialogue(
             DialogueLabel(
-                ("", ""), COUNTERPARTY_ADDRESS, self.skill.skill_context.agent_address,
+                ("", ""),
+                COUNTERPARTY_AGENT_ADDRESS,
+                self.skill.skill_context.agent_address,
             ),
             self.skill.skill_context.agent_address,
             role=FipaDialogue.Role.BUYER,
@@ -149,7 +151,7 @@ class TestDialogues(BaseSkillTestCase):
     def test_fipa_dialogues(self):
         """Test the FipaDialogues class."""
         _, dialogue = self.fipa_dialogues.create(
-            counterparty=COUNTERPARTY_ADDRESS,
+            counterparty=COUNTERPARTY_AGENT_ADDRESS,
             performative=FipaMessage.Performative.CFP,
             query=self.query,
         )
@@ -160,7 +162,9 @@ class TestDialogues(BaseSkillTestCase):
         """Test the ContractApiDialogue class."""
         contract_api_dialogue = ContractApiDialogue(
             DialogueLabel(
-                ("", ""), COUNTERPARTY_ADDRESS, self.skill.skill_context.agent_address,
+                ("", ""),
+                COUNTERPARTY_AGENT_ADDRESS,
+                self.skill.skill_context.agent_address,
             ),
             self.skill.skill_context.agent_address,
             role=ContractApiDialogue.Role.AGENT,
@@ -172,7 +176,9 @@ class TestDialogues(BaseSkillTestCase):
 
         fipa_dialogue = FipaDialogue(
             DialogueLabel(
-                ("", ""), COUNTERPARTY_ADDRESS, self.skill.skill_context.agent_address,
+                ("", ""),
+                COUNTERPARTY_AGENT_ADDRESS,
+                self.skill.skill_context.agent_address,
             ),
             self.skill.skill_context.agent_address,
             role=FipaDialogue.Role.BUYER,
@@ -187,7 +193,7 @@ class TestDialogues(BaseSkillTestCase):
     def test_contract_api_dialogues(self):
         """Test the ContractApiDialogues class."""
         _, dialogue = self.contract_api_dialogues.create(
-            counterparty=COUNTERPARTY_ADDRESS,
+            counterparty=COUNTERPARTY_AGENT_ADDRESS,
             performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
             ledger_id="some_ledger_id",
             contract_id="some_contract_id",
@@ -195,12 +201,12 @@ class TestDialogues(BaseSkillTestCase):
             kwargs=Kwargs({"some_key": "some_value"}),
         )
         assert dialogue.role == ContractApiDialogue.Role.AGENT
-        assert dialogue.self_address == self.skill.skill_context.agent_address
+        assert dialogue.self_address == str(self.skill.skill_context.skill_id)
 
     def test_default_dialogues(self):
         """Test the DefaultDialogues class."""
         _, dialogue = self.default_dialogues.create(
-            counterparty=COUNTERPARTY_ADDRESS,
+            counterparty=COUNTERPARTY_AGENT_ADDRESS,
             performative=DefaultMessage.Performative.BYTES,
             content=b"some_content",
         )
@@ -211,7 +217,9 @@ class TestDialogues(BaseSkillTestCase):
         """Test the LedgerApiDialogue class."""
         ledger_api_dialogue = LedgerApiDialogue(
             DialogueLabel(
-                ("", ""), COUNTERPARTY_ADDRESS, self.skill.skill_context.agent_address,
+                ("", ""),
+                COUNTERPARTY_AGENT_ADDRESS,
+                self.skill.skill_context.agent_address,
             ),
             self.skill.skill_context.agent_address,
             role=ContractApiDialogue.Role.AGENT,
@@ -222,7 +230,9 @@ class TestDialogues(BaseSkillTestCase):
             assert ledger_api_dialogue.associated_signing_dialogue
         signing_dialogue = SigningDialogue(
             DialogueLabel(
-                ("", ""), COUNTERPARTY_ADDRESS, self.skill.skill_context.agent_address,
+                ("", ""),
+                COUNTERPARTY_AGENT_ADDRESS,
+                self.skill.skill_context.agent_address,
             ),
             self.skill.skill_context.agent_address,
             role=SigningDialogue.Role.SKILL,
@@ -237,19 +247,21 @@ class TestDialogues(BaseSkillTestCase):
     def test_ledger_api_dialogues(self):
         """Test the LedgerApiDialogues class."""
         _, dialogue = self.ledger_api_dialogues.create(
-            counterparty=COUNTERPARTY_ADDRESS,
+            counterparty=COUNTERPARTY_AGENT_ADDRESS,
             performative=LedgerApiMessage.Performative.GET_BALANCE,
             ledger_id="some_ledger_id",
             address="some_address",
         )
         assert dialogue.role == LedgerApiDialogue.Role.AGENT
-        assert dialogue.self_address == self.skill.skill_context.agent_address
+        assert dialogue.self_address == str(self.skill.skill_context.skill_id)
 
     def test_oef_search_dialogue(self):
         """Test the OefSearchDialogue class."""
         oef_search_dialogue = OefSearchDialogue(
             DialogueLabel(
-                ("", ""), COUNTERPARTY_ADDRESS, self.skill.skill_context.agent_address,
+                ("", ""),
+                COUNTERPARTY_AGENT_ADDRESS,
+                self.skill.skill_context.agent_address,
             ),
             self.skill.skill_context.agent_address,
             role=ContractApiDialogue.Role.AGENT,
@@ -266,23 +278,20 @@ class TestDialogues(BaseSkillTestCase):
     def test_oef_search_dialogues(self):
         """Test the OefSearchDialogues class."""
         _, dialogue = self.oef_search_dialogues.create(
-            counterparty=COUNTERPARTY_ADDRESS,
+            counterparty=COUNTERPARTY_AGENT_ADDRESS,
             performative=OefSearchMessage.Performative.SEARCH_SERVICES,
             query=self.query,
         )
         assert dialogue.role == OefSearchDialogue.Role.AGENT
-        assert (
-            dialogue.self_address
-            == self.skill.skill_context.agent_address
-            + "_"
-            + str(self.skill.skill_context.skill_id)
-        )
+        assert dialogue.self_address == str(self.skill.skill_context.skill_id)
 
     def test_signing_dialogue(self):
         """Test the SigningDialogue class."""
         signing_dialogue = SigningDialogue(
             DialogueLabel(
-                ("", ""), COUNTERPARTY_ADDRESS, self.skill.skill_context.agent_address,
+                ("", ""),
+                COUNTERPARTY_AGENT_ADDRESS,
+                self.skill.skill_context.agent_address,
             ),
             self.skill.skill_context.agent_address,
             role=ContractApiDialogue.Role.AGENT,
@@ -293,7 +302,9 @@ class TestDialogues(BaseSkillTestCase):
             assert signing_dialogue.associated_fipa_dialogue
         fipa_dialogue = FipaDialogue(
             DialogueLabel(
-                ("", ""), COUNTERPARTY_ADDRESS, self.skill.skill_context.agent_address,
+                ("", ""),
+                COUNTERPARTY_AGENT_ADDRESS,
+                self.skill.skill_context.agent_address,
             ),
             self.skill.skill_context.agent_address,
             role=FipaDialogue.Role.BUYER,
@@ -308,7 +319,7 @@ class TestDialogues(BaseSkillTestCase):
     def test_signing_dialogues(self):
         """Test the SigningDialogues class."""
         _, dialogue = self.signing_dialogues.create(
-            counterparty=COUNTERPARTY_ADDRESS,
+            counterparty=COUNTERPARTY_AGENT_ADDRESS,
             performative=SigningMessage.Performative.SIGN_TRANSACTION,
             terms=Terms(
                 "some_ledger_id",

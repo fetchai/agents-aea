@@ -1,0 +1,4 @@
+include README.md LICENSE HISTORY.md
+
+recursive-include aea_ledger_cosmos
+recursive-include tests *

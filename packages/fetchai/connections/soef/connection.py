@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Extension to the Simple OEF and OEF Python SDK."""
 import asyncio
 import copy
@@ -30,11 +29,11 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import suppress
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Type, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Union, cast
 from urllib import parse
 from uuid import uuid4
 
-from defusedxml import ElementTree as ET  # pylint: disable=wrong-import-order
+from defusedxml import ElementTree  # pylint: disable=wrong-import-order
 
 from aea.common import Address
 from aea.configurations.base import PublicId
@@ -48,10 +47,9 @@ from aea.helpers.search.models import (
     Location,
     Query,
 )
-from aea.mail.base import Envelope, EnvelopeContext
+from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
-from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 
 from packages.fetchai.protocols.oef_search.custom_types import (
     AgentsInfo,
@@ -68,7 +66,7 @@ from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.soef")
 
-PUBLIC_ID = PublicId.from_str("fetchai/soef:0.16.0")
+PUBLIC_ID = PublicId.from_str("fetchai/soef:0.19.0")
 
 NOT_SPECIFIED = object()
 
@@ -132,44 +130,38 @@ class SOEFException(Exception):
         return cls(msg)
 
 
-class OefSearchDialogue(BaseOefSearchDialogue):
-    """The dialogue class maintains state of a dialogue and manages it."""
+OefSearchDialogue = BaseOefSearchDialogue
 
-    def __init__(
-        self,
-        dialogue_label: BaseDialogueLabel,
-        self_address: Address,
-        role: BaseDialogue.Role,
-        message_class: Type[OefSearchMessage] = OefSearchMessage,
-    ) -> None:
-        """
-        Initialize a dialogue.
 
-        :param dialogue_label: the identifier of the dialogue
-        :param self_address: the address of the entity for whom this dialogue is maintained
-        :param role: the role of the agent this dialogue is maintained for
+class BaseHandledException(Exception):
+    """Base Exception class."""
 
-        :return: None
-        """
-        BaseOefSearchDialogue.__init__(
-            self,
-            dialogue_label=dialogue_label,
-            self_address=self_address,
-            role=role,
-            message_class=message_class,
-        )
-        self._envelope_context = None  # type: Optional[EnvelopeContext]
+    MSG: str
 
-    @property
-    def envelope_context(self) -> Optional[EnvelopeContext]:
-        """Get envelope_context."""
-        return self._envelope_context
+    def __init__(self, exc: Union[Exception, str]) -> None:
+        """Init exception with message or exception instance."""
+        super().__init__()
+        self.exc = exc
 
-    @envelope_context.setter
-    def envelope_context(self, envelope_context: Optional[EnvelopeContext]) -> None:
-        """Set envelope_context."""
-        enforce(self._envelope_context is None, "envelope_context already set!")
-        self._envelope_context = envelope_context
+    def __repr__(self) -> str:
+        """Get exception representation."""
+        return self.MSG.format(str(self.exc))
+
+    def __str__(self) -> str:
+        """Get exception str representation."""
+        return self.__repr__()
+
+
+class SOEFNetworkConnectionError(BaseHandledException):
+    """Exception class for network connection errors."""
+
+    MSG = "<SOEF Network Connection Error: {}. Check internet connection!>"
+
+
+class SOEFServerBadResponseError(BaseHandledException):
+    """Exception class for bad server responses."""
+
+    MSG = "<SOEF Server Bad Response Error: {}.>"
 
 
 class OefSearchDialogues(BaseOefSearchDialogues):
@@ -228,6 +220,7 @@ class SOEFChannel:
         chain_identifier: Optional[str] = None,
         token_storage_path: Optional[str] = None,
         logger: logging.Logger = _default_logger,
+        connection_check_timeout: float = 15,
     ):
         """
         Initialize.
@@ -237,6 +230,7 @@ class SOEFChannel:
         :param soef_addr: the SOEF IP address.
         :param soef_port: the SOEF port.
         :param chain_identifier: supported chain id
+        :param connection_check_timeout: timeout to check network connection on connect
         """
         if chain_identifier is not None and not any(
             regex.match(chain_identifier) for regex in self.SUPPORTED_CHAIN_IDENTIFIERS
@@ -249,8 +243,9 @@ class SOEFChannel:
         self.api_key = api_key
         self.soef_addr = soef_addr
         self.soef_port = soef_port
-        self.base_url = "http://{}:{}".format(soef_addr, soef_port)
+        self.base_url = "https://{}:{}".format(soef_addr, soef_port)
         self.oef_search_dialogues = OefSearchDialogues()
+        self.connection_check_timeout = connection_check_timeout
 
         self._token_storage_path = token_storage_path
         if self._token_storage_path is not None:
@@ -324,9 +319,15 @@ class SOEFChannel:
                 GeneratorExit,
             ):  # pylint: disable=try-except-raise
                 return
+            except SOEFException:  # pragma: nocover
+                await self._send_error_response(
+                    oef_message,
+                    oef_search_dialogue,
+                    oef_error_operation=OefSearchMessage.OefErrorOperation.OTHER,
+                )
             except Exception:  # pylint: disable=broad-except  # pragma: nocover
                 self.logger.exception(
-                    "Exception occoured in  _find_around_me_processor"
+                    "Exception occurred in  _find_around_me_processor"
                 )
                 await self._send_error_response(
                     oef_message,
@@ -422,10 +423,24 @@ class SOEFChannel:
     async def _request_text(self, *args: Any, **kwargs: Any) -> str:
         """Perform and http request and return text of response."""
 
-        def _do_request() -> str:
-            return requests.request(*args, **kwargs).text
+        def _do_request() -> requests.Response:
+            return requests.request(*args, **kwargs)
 
-        return await self.loop.run_in_executor(self._executor_pool, _do_request)
+        try:
+            response = await self.loop.run_in_executor(self._executor_pool, _do_request)
+        except requests.ConnectionError as e:
+            raise SOEFNetworkConnectionError(e) from e
+
+        if response.status_code < 200 or response.status_code >= 300:
+            raise SOEFServerBadResponseError(
+                f"Bad server response: code {response.status_code} when 2XX expected. Request data: ({args}, {kwargs}) Response content: `{response.text}`"
+            )
+        if not response.text:
+            raise SOEFServerBadResponseError(
+                f"Bad server response: empty response. Request data: ({args}, {kwargs})"
+            )
+
+        return response.text
 
     async def process_envelope(self, envelope: Envelope) -> None:
         """
@@ -446,7 +461,6 @@ class SOEFChannel:
             raise ValueError(
                 "Could not create dialogue for message={}".format(oef_message)
             )
-        oef_search_dialogue.envelope_context = envelope.context
 
         err_ops = OefSearchMessage.OefErrorOperation
         oef_error_operation = err_ops.OTHER
@@ -562,8 +576,8 @@ class SOEFChannel:
         if params:
             params = urllib.parse.parse_qs(params)
 
-        content = await self._generic_oef_command(command, params)
-
+        parsed_text = await self._generic_oef_command(command, params)
+        content = ElementTree.tostring(parsed_text)
         message = oef_search_dialogue.reply(
             performative=OefSearchMessage.Performative.SUCCESS,
             target_message=oef_message,
@@ -574,31 +588,29 @@ class SOEFChannel:
                 }
             ),
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            message=message,
-            context=oef_search_dialogue.envelope_context,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         await self.in_queue.put(envelope)
 
     async def _ping_command(self) -> None:
         """Perform ping on registered agent."""
-        await self._generic_oef_command("ping", {})
+        await self._generic_oef_command("ping", {}, check_success=False)
 
     async def _ping_periodic(self, period: float = 30 * 60) -> None:
         """
         Send ping command every `period`.
 
-        :param period: period of ping in secinds
+        :param period: period of ping in seconds
 
         :return: None
         """
         with suppress(asyncio.CancelledError):
-            while True:
+            while self.unique_page_address:
                 try:
                     await self._ping_command()
-                except asyncio.CancelledError:  # pylint: disable=try-except-raise
+                except (
+                    asyncio.CancelledError,
+                    ConcurrentCancelledError,
+                ):  # pragma: nocover  # pylint: disable=try-except-raise
                     raise
                 except Exception:  # pylint: disable=broad-except  # pragma: nocover
                     self.logger.exception("Error on periodic ping command!")
@@ -626,13 +638,40 @@ class SOEFChannel:
 
         await self._set_service_key(key, value)
 
+    @staticmethod
+    def _parse_soef_response(
+        response_text: str, check_success: bool = True
+    ) -> ElementTree:
+        try:
+            root = ElementTree.fromstring(response_text)
+        except ElementTree.ParseError as e:  # pragma: nocover
+            raise SOEFServerBadResponseError(
+                f"Failed to parse xml from the response: Error {e}. Text: {response_text}"
+            ) from e
+
+        if root.tag != "response":
+            raise SOEFServerBadResponseError(
+                "Not a valid response. Expected `root.tag = response`, received `root.tag = {root.tag}`"
+            )
+        if check_success:
+            el = root.find("./success")
+            if el is None:
+                raise SOEFServerBadResponseError(
+                    "Bad response, no success value present. Found = {response_text}."
+                )
+            if str(el.text).strip() != "1":
+                raise SOEFServerBadResponseError(  # pragma: nocover
+                    "Request was not successful. Found = {response_text}"
+                )
+        return root
+
     async def _generic_oef_command(
         self,
         command: str,
         params: Optional[Dict[str, Union[str, List[str]]]] = None,
         unique_page_address: Optional[str] = None,
         check_success: bool = True,
-    ) -> str:
+    ) -> ElementTree:
         """
         Set service key from service description.
 
@@ -640,27 +679,32 @@ class SOEFChannel:
         :param params: the parameters of the command
         :param unique_page_address: the unique page address
         :param check_success: whether or not to check for success
-        :return: response text
+
+        :return: parsed xml ElementTree
         """
         params = params or {}
         self.logger.debug(f"Perform `{command}` with {params}")
         url = parse.urljoin(
             self.base_url, unique_page_address or self.unique_page_address
         )
-        response_text = await self._request_text(
-            "get", url=url, params={"command": command, **params}
-        )
+
+        response_text = ""
         try:
-            root = ET.fromstring(response_text)
-            enforce(root.tag == "response", "Not a response")
-            if check_success:
-                el = root.find("./success")
-                enforce(el is not None, "No success element")
-                enforce(str(el.text).strip() == "1", "Success is not 1")
+            response_text = await self._request_text(
+                "get", url=url, params={"command": command, **params}
+            )
+            parsed_text = self._parse_soef_response(response_text, check_success)
             self.logger.debug(f"`{command}` SUCCESS!")
-            return response_text
+            return parsed_text
+        except (
+            asyncio.CancelledError,
+            ConcurrentCancelledError,
+        ):  # pragma: nocover  # pylint: disable=try-except-raise
+            raise
         except Exception as e:
-            raise SOEFException.error(f"`{command}` error: {response_text}: {[e]}")
+            raise SOEFException.error(
+                f"Command: `{command}` Params: `{params}` Response: `{response_text}` Exception: {[e]}"
+            ) from e
 
     async def _set_service_key(self, key: str, value: Union[str, int, float]) -> None:
         """
@@ -836,7 +880,8 @@ class SOEFChannel:
             "declared_name": self.declared_name,
         }
         response_text = await self._request_text("get", url=url, params=params)
-        root = ET.fromstring(response_text)
+        root = self._parse_soef_response(response_text, check_success=False)
+
         self.logger.debug("Root tag: {}".format(root.tag))
         unique_page_address = ""
         unique_token = ""  # nosec
@@ -893,12 +938,7 @@ class SOEFChannel:
             target_message=oef_search_message,
             oef_error_operation=oef_error_operation,
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            message=message,
-            context=oef_search_dialogue.envelope_context,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         await self.in_queue.put(envelope)
 
     async def unregister_service(  # pylint: disable=unused-argument
@@ -932,7 +972,7 @@ class SOEFChannel:
 
     async def _unregister_agent(self) -> None:  # pylint: disable=unused-argument
         """
-        Unnregister a service_name from the SOEF.
+        Unregister a service_name from the SOEF.
 
         :return: None
         """
@@ -971,9 +1011,26 @@ class SOEFChannel:
                 await self._ping_periodic_task
             self._ping_periodic_task = None
 
+    async def _check_server_reachable(self) -> None:
+        """Check network connection is ok."""
+        try:
+            await asyncio.wait_for(
+                self._request_text(
+                    "get", self.base_url, timeout=self.connection_check_timeout
+                ),
+                timeout=self.connection_check_timeout,
+            )
+        except asyncio.TimeoutError:
+            raise SOEFNetworkConnectionError(
+                f"Server can not be reached within timeout = {self.connection_check_timeout}!"
+            )
+
     async def connect(self) -> None:
         """Connect channel set queues and executor pool."""
         self._loop = asyncio.get_event_loop()
+
+        await self._check_server_reachable()
+
         self.in_queue = asyncio.Queue()
         self._find_around_me_queue = asyncio.Queue()
         self._unregister_lock = asyncio.Lock()
@@ -1054,7 +1111,7 @@ class SOEFChannel:
         params: Dict[str, List[str]],
     ) -> None:
         """
-        Add find agent task to queue to process in dedictated loop respectful to timeouts.
+        Add find agent task to queue to process in dedicated loop respectful to timeouts.
 
         :param oef_message: OefSearchMessage
         :param oef_search_dialogue: OefSearchDialogue
@@ -1088,10 +1145,9 @@ class SOEFChannel:
             raise ValueError("Inqueue not set!")  # pragma: nocover
         self.logger.debug("Searching in radius={} of myself".format(radius))
 
-        response_text = await self._generic_oef_command(
+        root = await self._generic_oef_command(
             "find_around_me", {"range_in_km": [str(radius)], **params}
         )
-        root = ET.fromstring(response_text)
         agents = {}  # type: Dict[str, Dict[str, Union[str, Dict[str, str]]]]
         for agent in root.findall(path=".//agent"):
             chain_identifier = ""
@@ -1126,12 +1182,7 @@ class SOEFChannel:
             agents=tuple(agents.keys()),
             agents_info=AgentsInfo(agents),
         )
-        envelope = Envelope(
-            to=message.to,
-            sender=message.sender,
-            message=message,
-            context=oef_search_dialogue.envelope_context,
-        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         await self.in_queue.put(envelope)
 
 
@@ -1139,6 +1190,7 @@ class SOEFConnection(Connection):
     """The SOEFConnection connects the Simple OEF to the mailbox."""
 
     connection_id = PUBLIC_ID
+    DEFAULT_CONNECTION_CHECK_TIMEOUT: float = 15
 
     def __init__(self, **kwargs: Any) -> None:
         """Initialize."""
@@ -1150,6 +1202,12 @@ class SOEFConnection(Connection):
 
         super().__init__(**kwargs)
         api_key = cast(str, self.configuration.config.get("api_key"))
+        connection_check_timeout = cast(
+            float,
+            self.configuration.config.get(
+                "connection_check_timeout", self.DEFAULT_CONNECTION_CHECK_TIMEOUT
+            ),
+        )
         soef_addr = cast(str, self.configuration.config.get("soef_addr"))
         soef_port = cast(int, self.configuration.config.get("soef_port"))
         chain_identifier = cast(str, self.configuration.config.get("chain_identifier"))
@@ -1170,6 +1228,7 @@ class SOEFConnection(Connection):
             data_dir=self.data_dir,
             chain_identifier=chain_identifier,
             token_storage_path=token_storage_path,
+            connection_check_timeout=connection_check_timeout,
         )
 
     async def connect(self) -> None:

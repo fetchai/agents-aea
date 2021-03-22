@@ -25,6 +25,7 @@ from pathlib import Path
 from random import uniform
 
 import pytest
+from aea_ledger_fetchai import FetchAICrypto
 
 from aea.test_tools.test_cases import AEATestCaseManyFlaky
 
@@ -32,7 +33,6 @@ from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_ME
 
 from tests.conftest import (
     CUR_PATH,
-    FETCHAI,
     FETCHAI_PRIVATE_KEY_FILE,
     FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
     MAX_FLAKY_RERUNS_INTEGRATION,
@@ -68,7 +68,7 @@ class TestCliVsProgrammaticAEA(AEATestCaseManyFlaky):
         """Test the communication of the two agents."""
 
         weather_station = "weather_station"
-        self.fetch_agent("fetchai/weather_station:0.21.0", weather_station)
+        self.fetch_agent("fetchai/weather_station:0.24.0", weather_station)
         self.set_agent_context(weather_station)
         self.set_config(
             "vendor.fetchai.skills.weather_station.models.strategy.args.is_ledger_tx",
@@ -78,11 +78,15 @@ class TestCliVsProgrammaticAEA(AEATestCaseManyFlaky):
         self.run_install()
 
         # add non-funded key
-        self.generate_private_key(FETCHAI)
-        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.generate_private_key(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        )
+        self.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+            connection=True,
         )
         self.replace_private_key_in_file(
             NON_FUNDED_FETCHAI_PRIVATE_KEY_1, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
@@ -176,7 +180,6 @@ class TestCliVsProgrammaticAEA(AEATestCaseManyFlaky):
         """Inject location into the weather client strategy."""
         file = Path(dst_file_path)
         lines = file.read_text().splitlines()
-
         target_line = "    strategy._is_ledger_tx = False"
         line_insertion_position = lines.index(target_line) + 1
         lines.insert(

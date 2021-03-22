@@ -179,7 +179,7 @@ class Message:
         :param body: the body.
         :return: None
         """
-        self._slots = self._SlotsCls()  # new instsance to clean up all data
+        self._slots = self._SlotsCls()  # new instance to clean up all data
         self._update_slots_from_dict(body)
 
     @property
@@ -334,6 +334,8 @@ class Protocol(Component):
     It includes a serializer to encode/decode a message.
     """
 
+    __slots__ = ("_message_class",)
+
     def __init__(
         self, configuration: ProtocolConfig, message_class: Type[Message], **kwargs: Any
     ) -> None:
@@ -417,5 +419,5 @@ class Protocol(Component):
         return cast(ProtocolConfig, self._configuration).protocol_specification_id
 
     def __repr__(self) -> str:
-        """Get str repr of the protocol."""
+        """Get str representation of the protocol."""
         return f"Protocol({self.protocol_id})"

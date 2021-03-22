@@ -23,6 +23,8 @@ import re
 import shutil
 import subprocess  # nosec
 import sys
+import tempfile
+from pathlib import Path
 from typing import Tuple
 
 from aea.configurations.base import ProtocolSpecification
@@ -30,6 +32,8 @@ from aea.configurations.constants import (
     DEFAULT_PROTOCOL_CONFIG_FILE,
     LIBPROTOC_VERSION,
     PACKAGES,
+    PROTOCOL_LANGUAGE_JS,
+    PROTOCOL_LANGUAGE_PYTHON,
 )
 from aea.configurations.loader import ConfigLoader
 from aea.helpers.io import open_file
@@ -77,6 +81,19 @@ ISORT_CLI_ARGS = [
     ISORT_CONFIGURATION_FILE,
     "--quiet",
 ]
+
+PROTOLINT_CONFIGURATION_FILE_NAME = "protolint.yaml"
+PROTOLINT_CONFIGURATION = """lint:
+  rules:
+    remove:
+      - MESSAGE_NAMES_UPPER_CAMEL_CASE
+      - ENUM_FIELD_NAMES_ZERO_VALUE_END_WITH
+      - PACKAGE_NAME_LOWER_CASE
+      - REPEATED_FIELD_NAMES_PLURALIZED
+      - FIELD_NAMES_LOWER_SNAKE_CASE"""
+
+PROTOLINT_INDENTATION_ERROR_STR = "incorrect indentation style"
+PROTOLINT_ERROR_WHITELIST = [PROTOLINT_INDENTATION_ERROR_STR]
 
 
 def _to_camel_case(text: str) -> str:
@@ -303,6 +320,20 @@ def is_installed(programme: str) -> bool:
     return res is not None
 
 
+def base_protolint_command() -> str:
+    """
+    Return the base protolint command.
+
+    :return: The base protolint command
+    """
+    if sys.platform.startswith("win"):
+        protolint_base_cmd = "protolint"  # pragma: nocover
+    else:
+        protolint_base_cmd = "PATH=${PATH}:${GOPATH}/bin/:~/go/bin protolint"
+
+    return protolint_base_cmd
+
+
 def check_prerequisites() -> None:
     """
     Check whether a programme is installed on the system.
@@ -319,6 +350,12 @@ def check_prerequisites() -> None:
     if not is_installed("isort"):
         raise FileNotFoundError(
             "Cannot find isort code formatter! To install, please follow this link: https://pycqa.github.io/isort/#installing-isort"
+        )
+
+    # check protolint code formatter is installed
+    if subprocess.call(f"{base_protolint_command()} version", shell=True) != 0:  # nosec
+        raise FileNotFoundError(
+            "Cannot find protolint protocol buffer schema file linter! To install, please follow this link: https://github.com/yoheimuta/protolint."
         )
 
     # check protocol buffer compiler is installed
@@ -397,27 +434,79 @@ def try_run_isort_formatting(path_to_protocol_package: str) -> None:
     )
 
 
-def try_run_protoc(path_to_generated_protocol_package: str, name: str) -> None:
+def try_run_protoc(
+    path_to_generated_protocol_package: str,
+    name: str,
+    language: str = PROTOCOL_LANGUAGE_PYTHON,
+) -> None:
     """
     Run 'protoc' protocol buffer compiler via subprocess.
 
     :param path_to_generated_protocol_package: path to the protocol buffer schema file.
     :param name: name of the protocol buffer schema file.
+    :param language: the target language in which to compile the protobuf schema file
 
     :return: A completed process object.
     """
+    # for closure-styled imports for JS, comment the first line and uncomment the second
+    js_commonjs_import_option = (
+        "import_style=commonjs,binary:" if language == PROTOCOL_LANGUAGE_JS else ""
+    )
+
+    language_part_of_the_command = f"--{language}_out={js_commonjs_import_option}{path_to_generated_protocol_package}"
+
     subprocess.run(  # nosec
         [
             "protoc",
-            "-I={}".format(path_to_generated_protocol_package),
-            "--python_out={}".format(path_to_generated_protocol_package),
-            "{}/{}.proto".format(path_to_generated_protocol_package, name),
+            f"-I={path_to_generated_protocol_package}",
+            language_part_of_the_command,
+            f"{path_to_generated_protocol_package}/{name}.proto",
         ],
         stderr=subprocess.PIPE,
         encoding="utf-8",
         check=True,
         env=os.environ.copy(),
     )
+
+
+def try_run_protolint(path_to_generated_protocol_package: str, name: str) -> None:
+    """
+    Run 'protolint' linter via subprocess.
+
+    :param path_to_generated_protocol_package: path to the protocol buffer schema file.
+    :param name: name of the protocol buffer schema file.
+
+    :return: A completed process object.
+    """
+    # path to proto file
+    path_to_proto_file = os.path.join(
+        path_to_generated_protocol_package, f"{name}.proto",
+    )
+
+    # Dump protolint configuration into a temporary file
+    temp_dir = tempfile.mkdtemp()
+    path_to_configuration_in_tmp_file = Path(
+        temp_dir, PROTOLINT_CONFIGURATION_FILE_NAME
+    )
+    with open_file(path_to_configuration_in_tmp_file, "w") as file:
+        file.write(PROTOLINT_CONFIGURATION)
+
+    # Protolint command
+    cmd = f'{base_protolint_command()} lint -config_path={path_to_configuration_in_tmp_file} -fix "{path_to_proto_file}"'
+
+    # Execute protolint command
+    subprocess.run(  # nosec
+        cmd,
+        stderr=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        encoding="utf-8",
+        check=True,
+        env=os.environ.copy(),
+        shell=True,
+    )
+
+    # Delete temporary configuration file
+    shutil.rmtree(temp_dir)  # pragma: no cover
 
 
 def check_protobuf_using_protoc(
@@ -441,4 +530,58 @@ def check_protobuf_using_protoc(
     except subprocess.CalledProcessError as e:
         pattern = name + ".proto:[0-9]+:[0-9]+: "
         error_message = re.sub(pattern, "", e.stderr[:-1])
+        return False, error_message
+
+
+def compile_protobuf_using_protoc(
+    path_to_generated_protocol_package: str, name: str, language: str
+) -> Tuple[bool, str]:
+    """
+    Compile a protocol buffer schema file using protoc.
+
+    If successfully compiled, return True and a success message,
+    otherwise return False and the error thrown by the compiler.
+
+    :param path_to_generated_protocol_package: path to the protocol buffer schema file.
+    :param name: name of the protocol buffer schema file.
+    :param language: the target language in which to compile the protobuf schema file
+
+    :return: Boolean result and an accompanying message
+    """
+    try:
+        try_run_protoc(path_to_generated_protocol_package, name, language)
+        return True, "protobuf schema successfully compiled"
+    except subprocess.CalledProcessError as e:
+        pattern = name + ".proto:[0-9]+:[0-9]+: "
+        error_message = re.sub(pattern, "", e.stderr[:-1])
+        return False, error_message
+
+
+def apply_protolint(path_to_proto_file: str, name: str) -> Tuple[bool, str]:
+    """
+    Apply protolint linter to a protocol buffer schema file.
+
+    If no output, return True and a success message,
+    otherwise return False and the output shown by the linter
+    (minus the indentation suggestions which are automatically fixed by protolint).
+
+    :param path_to_proto_file: path to the protocol buffer schema file.
+    :param name: name of the protocol buffer schema file.
+
+    :return: Boolean result and an accompanying message
+    """
+    try:
+        try_run_protolint(path_to_proto_file, name)
+        return True, "protolint has no output"
+    except subprocess.CalledProcessError as e:
+        lines_to_show = []
+        for line in e.stderr.split("\n"):
+            to_show = True
+            for whitelist_error_str in PROTOLINT_ERROR_WHITELIST:
+                if whitelist_error_str in line:
+                    to_show = False
+                    break
+            if to_show:
+                lines_to_show.append(line)
+        error_message = "\n".join(lines_to_show)
         return False, error_message

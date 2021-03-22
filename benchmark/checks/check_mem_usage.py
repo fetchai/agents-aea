@@ -25,6 +25,7 @@ from typing import List, Tuple, Union
 import click
 
 from aea.protocols.base import Message
+from aea.registries.resources import Resources
 from aea.skills.base import Handler
 from benchmark.checks.utils import SyncedGeneratorConnection  # noqa: I100
 from benchmark.checks.utils import (
@@ -62,10 +63,12 @@ def run(duration: int, runtime_mode: str) -> List[Tuple[str, Union[int, float]]]
     # import manually due to some lazy imports in decision_maker
     import aea.decision_maker.default  # noqa: F401
 
-    agent = make_agent(runtime_mode=runtime_mode)
     connection = SyncedGeneratorConnection.make()
-    agent.resources.add_connection(connection)
+    resources = Resources()
+    resources.add_connection(connection)
+    agent = make_agent(runtime_mode=runtime_mode, resources=resources)
     agent.resources.add_skill(make_skill(agent, handlers={"test": TestHandler}))
+
     t = Thread(target=agent.start, daemon=True)
     t.start()
     wait_for_condition(lambda: agent.is_running, timeout=5)

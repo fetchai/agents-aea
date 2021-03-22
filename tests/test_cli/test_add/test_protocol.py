@@ -16,10 +16,9 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains the tests for the `aea add protocol` sub-command."""
-
 import os
+import re
 import shutil
 import tempfile
 import unittest.mock
@@ -280,7 +279,7 @@ class TestAddProtocolFailsWhenDifferentPublicId:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.protocol_id = "different_author/default:0.1.0"
+        cls.protocol_id = "different_author/default:1.0.0"
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
@@ -375,8 +374,10 @@ class TestAddProtocolFailsWhenConfigFileIsNotCompliant:
 
         The expected message is: 'Protocol configuration file not valid: ...'
         """
-        s = "Protocol configuration file not valid: test error message"
-        assert self.result.exception.message == s
+        assert re.match(
+            "Protocol configuration file '.*' not valid: test error message",
+            self.result.exception.message,
+        )
 
     @classmethod
     def teardown_class(cls):

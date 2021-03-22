@@ -25,7 +25,13 @@ from enum import Enum
 from typing import Dict, Optional, Type, cast
 
 from aea.abstract_agent import AbstractAgent
-from aea.agent_loop import AsyncAgentLoop, AsyncState, BaseAgentLoop, SyncAgentLoop
+from aea.agent_loop import (
+    AgentLoopStates,
+    AsyncAgentLoop,
+    AsyncState,
+    BaseAgentLoop,
+    SyncAgentLoop,
+)
 from aea.connections.base import ConnectionStates
 from aea.decision_maker.base import DecisionMaker, DecisionMakerHandler
 from aea.exceptions import _StopRuntime
@@ -117,7 +123,7 @@ class BaseRuntime(Runnable, WithLogger):
     def _get_storage(agent: AbstractAgent) -> Optional[Storage]:
         """Get storage instance if storage_uri provided."""
         if agent.storage_uri:
-            # threaded has to be always True, cause syncrhonous operations are supported
+            # threaded has to be always True, cause synchronous operations are supported
             return Storage(agent.storage_uri, threaded=True)
         return None  # pragma: nocover
 
@@ -238,6 +244,8 @@ class BaseRuntime(Runnable, WithLogger):
 class AsyncRuntime(BaseRuntime):
     """Asynchronous runtime: uses asyncio loop for multiplexer and async agent main loop."""
 
+    AGENT_LOOP_STARTED_TIMEOUT: float = 5
+
     def __init__(
         self,
         agent: AbstractAgent,
@@ -351,7 +359,14 @@ class AsyncRuntime(BaseRuntime):
         self.logger.debug("[{}] Calling setup method...".format(self._agent.name))
         self._agent.setup()
         self.logger.debug("[{}] Run main loop...".format(self._agent.name))
+
         self.agent_loop.start()
+
+        await asyncio.wait_for(
+            self.agent_loop.wait_state(AgentLoopStates.started),
+            timeout=self.AGENT_LOOP_STARTED_TIMEOUT,
+        )
+
         self._state.set(RuntimeStates.running)
         try:
             await self.agent_loop.wait_completed()

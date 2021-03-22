@@ -12,7 +12,7 @@ An AEA, in technical terms, must satisfy the following requirements:
 ``` proto
 syntax = "proto3";
 
-package aea;
+package aea.base.v0_1_0;
 
 message Envelope{
   string to = 1;
@@ -38,7 +38,7 @@ The format for the above fields are as follows:
 ``` proto
 syntax = "proto3";
 
-package aea;
+package aea.base.v0_1_0;
 
 import "google/protobuf/struct.proto";
 
@@ -69,14 +69,14 @@ message Envelope{
  where <code>content</code> is replaced with the protocol specific content (see <a href="../protocol-generator">here</a> for details).
 </li>
 
-<li> It MUST implement protocols according to their specification (see <a href="../protocol-generator">here</a> for details).
+<li> It MUST implement protocols according to their specification (see <a href="../protocol-generator/#full-mode-vs-protobuf-only-mode">here</a> for details).
 
-<li> It SHOULD implement the <code>fetchai/default:0.12.0</code> protocol which satisfies the following protobuf schema:
+<li> It SHOULD implement the <code>fetchai/default:0.13.0</code> protocol which satisfies the following protobuf schema:
 
 ``` proto
 syntax = "proto3";
 
-package aea.fetchai.default.v0_1_0;
+package aea.fetchai.default.v1_0_0;
 
 message DefaultMessage{
 
@@ -121,7 +121,7 @@ message DefaultMessage{
 </li>
 <li> It MUST have an identity in the form of, at a minimum, an address derived from a public key and its associated private key (where the elliptic curve must be of type <a href="https://en.bitcoin.it/wiki/Secp256k1" target="_blank">SECP256k1</a>).
 </li>
-<li> It SHOULD implement handling of errors using the <code>fetchai/default:0.12.0</code> protocol. The protobuf schema is given above.
+<li> It SHOULD implement handling of errors using the <code>fetchai/default:0.13.0</code> protocol. The protobuf schema is given above.
 </li>
 <li> It MUST implement the following principles when handling messages:
 <ul>

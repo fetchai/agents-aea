@@ -44,6 +44,11 @@ from click.testing import CliRunner
 from aea.cli import cli
 from aea.configurations.base import PackageId, PackageType, PublicId
 from aea.configurations.loader import ConfigLoader
+from scripts.common import (
+    PACKAGES_DIR,
+    get_protocol_specification_from_readme,
+    get_protocol_specification_id_from_specification,
+)
 from scripts.generate_ipfs_hashes import update_hashes
 
 
@@ -253,6 +258,27 @@ def public_id_in_registry(type_: str, name: str) -> PublicId:
     return highest
 
 
+def get_all_protocol_spec_ids() -> Set[PublicId]:
+    """
+    Get all protocol specification ids.
+
+    We return package ids with type "protocol" even though
+    they are not exactly protocol. The reason is that
+    they are only used to find clashes with protocol ids.
+
+    :return: a set of package ids.
+    """
+    result: Set[PublicId] = set()
+    protocol_packages = set(PACKAGES_DIR.rglob("**/**/protocols/**")) - set(
+        PACKAGES_DIR.rglob("**/**/protocols")
+    )
+    for protocol_package_path in protocol_packages:
+        content = get_protocol_specification_from_readme(protocol_package_path)
+        spec_id = get_protocol_specification_id_from_specification(content)
+        result.add(PublicId.from_str(spec_id))
+    return result
+
+
 def get_all_package_ids() -> Set[PackageId]:
     """Get all the package ids in the local repository."""
     result: Set[PackageId] = set()
@@ -327,7 +353,7 @@ def get_public_ids_to_update() -> Set[PackageId]:
 def _get_ambiguous_public_ids() -> Set[PublicId]:
     """Get the public ids that are the public ids of more than one package id."""
     all_package_ids = get_all_package_ids()
-    return set(
+    result: Set[PublicId] = set(
         map(
             operator.itemgetter(0),
             filter(
@@ -336,6 +362,7 @@ def _get_ambiguous_public_ids() -> Set[PublicId]:
             ),
         )
     )
+    return result
 
 
 def _sort_in_update_order(package_ids: Set[PackageId]) -> List[PackageId]:
@@ -377,11 +404,15 @@ def process_packages(
 
     print("*" * 100)
     print("Start processing.")
+    # we need to include this in case some protocol id == spec id of that protocol.
+    spec_protocol_ids = get_all_protocol_spec_ids()
     sorted_package_ids_list = _sort_in_update_order(all_package_ids_to_update)
     for package_id in sorted_package_ids_list:
         print("#" * 50)
         print(f"Processing {package_id}")
-        is_ambiguous = package_id.public_id in ambiguous_public_ids
+        is_ambiguous = package_id.public_id in ambiguous_public_ids.union(
+            spec_protocol_ids
+        )
         process_package(package_id, is_ambiguous)
 
 
@@ -450,6 +481,16 @@ def _can_disambiguate_from_context(
     )
     if match is not None:
         return (match.group(1) + "s") == type_
+
+    # for protocol specification id only:
+    # - if the line contains 'protocol_specification_id: {old_public_id}' or
+    # - if the line contains 'protocol_specification_id = PublicId.from_str("{old_public_id}")'
+    # then DON'T replace it (we only bump protocol ids here).
+    # otherwise, we don't know -> return None and ask to user.
+    case_1 = f"protocol_specification_id: {old_string}"
+    case_2 = rf'protocol_specification_id = PublicId.from_str([\'"]{old_string}[\'"])'
+    if re.search(case_1, line) or re.search(case_2, line):
+        return True
     return None
 
 

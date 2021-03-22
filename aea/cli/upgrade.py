@@ -511,12 +511,15 @@ class InteractiveEjectHelper:
         Stores the result in 'item_to_new_version'.
         """
         for package_id in self.adjacency_list.keys():
-            new_item = get_latest_version_available_in_registry(
-                self.ctx,
-                str(package_id.package_type),
-                package_id.public_id.to_latest(),
-                aea_version=self._current_aea_version,
-            )
+            try:
+                new_item = get_latest_version_available_in_registry(
+                    self.ctx,
+                    str(package_id.package_type),
+                    package_id.public_id.to_latest(),
+                    aea_version=self._current_aea_version,
+                )
+            except click.ClickException:  # pragma: nocover
+                continue
             if package_id.public_id.version == new_item.version:
                 continue
             new_version = new_item.version
@@ -564,7 +567,7 @@ class InteractiveEjectHelper:
             if len(dependencies_to_upgrade) == 0:
                 # if dependencies of the package are not going to be upgraded,
                 # no need to worry about its ejection.
-                continue
+                continue  # pragma: nocover
 
             # if we are here, it means we need to eject the package.
             answer = self._prompt(package_id, dependencies_to_upgrade)
@@ -707,7 +710,7 @@ def _compute_upgraders_and_shared_deps_to_remove(
 
     for dep in shared_deps:
         if required_by_relation[dep] - items_to_upgrade_dependencies:
-            # shared deps not resolved, nothing to do next
+            # shared dependencies not resolved, nothing to do next
             continue  # pragma: nocover
         # add it to remove
         shared_deps_to_remove.add(dep)

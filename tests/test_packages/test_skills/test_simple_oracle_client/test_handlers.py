@@ -65,16 +65,31 @@ from packages.fetchai.skills.simple_oracle_client.strategy import Strategy
 from tests.conftest import ROOT_DIR
 
 
-LEDGER_ID = "ethereum"
+ETHEREUM_LEDGER_ID = "ethereum"
+FETCHAI_LEDGER_ID = "fetchai"
 DEFAULT_TX = {"some_tx_key": "some_tx_value"}
 DEFAULT_TERMS = [
-    LEDGER_ID,
+    ETHEREUM_LEDGER_ID,
     "sender_address",
     "counterparty_address",
     {},
     {},
     "some_nonce",
 ]
+FETCHAI_DEPLOY_RECEIPT = {
+    "logs": [
+        {
+            "events": [
+                {
+                    "attributes": [
+                        {"key": "code_id", "value": "1746"},
+                        {"key": "contract_address", "value": "some_contract_address"},
+                    ]
+                }
+            ]
+        }
+    ]
+}
 
 
 class TestLedgerApiHandler(BaseSkillTestCase):
@@ -83,6 +98,7 @@ class TestLedgerApiHandler(BaseSkillTestCase):
     path_to_skill = Path(
         ROOT_DIR, "packages", "fetchai", "skills", "simple_oracle_client"
     )
+    is_agent_to_agent_messages = False
 
     @classmethod
     def setup(cls, **kwargs):
@@ -109,20 +125,28 @@ class TestLedgerApiHandler(BaseSkillTestCase):
         cls.list_of_ledger_api_messages = (
             DialogueMessage(
                 LedgerApiMessage.Performative.GET_BALANCE,
-                {"ledger_id": LEDGER_ID, "address": "some_eth_address"},
+                {"ledger_id": ETHEREUM_LEDGER_ID, "address": "some_eth_address"},
             ),
             DialogueMessage(
                 LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
-                {"signed_transaction": SignedTransaction(LEDGER_ID, DEFAULT_TX)},
+                {
+                    "signed_transaction": SignedTransaction(
+                        ETHEREUM_LEDGER_ID, DEFAULT_TX
+                    )
+                },
             ),
             DialogueMessage(
                 LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
-                {"transaction_digest": TransactionDigest(LEDGER_ID, "some_digest")},
+                {
+                    "transaction_digest": TransactionDigest(
+                        ETHEREUM_LEDGER_ID, "some_digest"
+                    )
+                },
             ),
             DialogueMessage(
                 LedgerApiMessage.Performative.GET_STATE,
                 {
-                    "ledger_id": LEDGER_ID,
+                    "ledger_id": ETHEREUM_LEDGER_ID,
                     "callable": "some_callable",
                     "args": (),
                     "kwargs": LedgerApiMessage.Kwargs({}),
@@ -133,7 +157,16 @@ class TestLedgerApiHandler(BaseSkillTestCase):
             DialogueMessage(
                 ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
                 {
-                    "ledger_id": LEDGER_ID,
+                    "ledger_id": ETHEREUM_LEDGER_ID,
+                    "contract_id": "some_contract_id",
+                    "callable": "some_callable",
+                    "kwargs": ContractApiKwargs({"some_key": "some_value"}),
+                },
+            ),
+            DialogueMessage(
+                ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
+                {
+                    "ledger_id": FETCHAI_LEDGER_ID,
                     "contract_id": "some_contract_id",
                     "callable": "some_callable",
                     "kwargs": ContractApiKwargs({"some_key": "some_value"}),
@@ -145,7 +178,7 @@ class TestLedgerApiHandler(BaseSkillTestCase):
                 SigningMessage.Performative.SIGN_TRANSACTION,
                 {
                     "terms": Terms(*DEFAULT_TERMS),
-                    "raw_transaction": RawTransaction(LEDGER_ID, DEFAULT_TX),
+                    "raw_transaction": RawTransaction(ETHEREUM_LEDGER_ID, DEFAULT_TX),
                 },
             ),
         )
@@ -163,7 +196,7 @@ class TestLedgerApiHandler(BaseSkillTestCase):
             message_type=LedgerApiMessage,
             dialogue_reference=incorrect_dialogue_reference,
             performative=LedgerApiMessage.Performative.GET_BALANCE,
-            ledger_id=LEDGER_ID,
+            ledger_id=ETHEREUM_LEDGER_ID,
             address="some_eth_address",
         )
 
@@ -189,7 +222,7 @@ class TestLedgerApiHandler(BaseSkillTestCase):
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=dialogue,
             performative=LedgerApiMessage.Performative.BALANCE,
-            ledger_id=LEDGER_ID,
+            ledger_id=ETHEREUM_LEDGER_ID,
             balance=balance,
         )
 
@@ -199,7 +232,7 @@ class TestLedgerApiHandler(BaseSkillTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO, f"starting balance on {LEDGER_ID} ledger={balance}.",
+            logging.INFO, f"starting balance on {ETHEREUM_LEDGER_ID} ledger={balance}.",
         )
 
         self.assert_quantity_in_outbox(0)
@@ -211,7 +244,7 @@ class TestLedgerApiHandler(BaseSkillTestCase):
             self.ledger_api_dialogues, self.list_of_ledger_api_messages[1:2]
         )
         digest = "some_digest"
-        transaction_digest = TransactionDigest(LEDGER_ID, digest)
+        transaction_digest = TransactionDigest(ETHEREUM_LEDGER_ID, digest)
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=dialogue,
             performative=LedgerApiMessage.Performative.TRANSACTION_DIGEST,
@@ -225,7 +258,7 @@ class TestLedgerApiHandler(BaseSkillTestCase):
         # after
         mock_logger.assert_any_call(
             logging.INFO,
-            f"transaction was successfully submitted. Transaction digest=TransactionDigest: ledger_id={LEDGER_ID}, body={digest}",
+            f"transaction was successfully submitted. Transaction digest=TransactionDigest: ledger_id={ETHEREUM_LEDGER_ID}, body={digest}",
         )
 
         self.assert_quantity_in_outbox(1)
@@ -238,7 +271,9 @@ class TestLedgerApiHandler(BaseSkillTestCase):
         )
 
         receipt = {"status": 0}
-        transaction_receipt = TransactionReceipt(LEDGER_ID, receipt, DEFAULT_TX)
+        transaction_receipt = TransactionReceipt(
+            ETHEREUM_LEDGER_ID, receipt, DEFAULT_TX
+        )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=dialogue,
             performative=LedgerApiMessage.Performative.TRANSACTION_RECEIPT,
@@ -270,15 +305,66 @@ class TestLedgerApiHandler(BaseSkillTestCase):
             self.signing_dialogues, self.list_of_signing_messages[:1]
         )
 
-        terms = Terms(*DEFAULT_TERMS, label="deploy")
+        strategy = cast(Strategy, self.simple_oracle_client_behaviour.context.strategy)
 
-        contract_api_dialogue.terms = terms
+        contract_api_dialogue.terms = strategy.get_deploy_terms()
         signing_dialogue.associated_contract_api_dialogue = contract_api_dialogue
         ledger_api_dialogue.associated_signing_dialogue = signing_dialogue
 
-        ledger_id = LEDGER_ID
+        ledger_id = ETHEREUM_LEDGER_ID
         receipt = {"status": 1, "contractAddress": "some_contract_address"}
         transaction_receipt = TransactionReceipt(ledger_id, receipt, DEFAULT_TX)
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
+            dialogue=ledger_api_dialogue,
+            performative=LedgerApiMessage.Performative.TRANSACTION_RECEIPT,
+            transaction_receipt=transaction_receipt,
+        )
+
+        # operation
+        with patch.object(self.ledger_api_handler.context.logger, "log") as mock_logger:
+            with patch(
+                "aea.crypto.ledger_apis.LedgerApis.get_contract_address",
+                return_value="some_contract_address",
+            ):
+                self.ledger_api_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"transaction was successfully settled. Transaction receipt={transaction_receipt}",
+        )
+        mock_logger.assert_any_call(
+            logging.INFO,
+            "Oracle client contract successfully deployed at address: some_contract_address",
+        )
+
+        assert (
+            self.simple_oracle_client_behaviour.context.strategy.is_client_contract_deployed
+        ), "Contract deployment status not set"
+        self.assert_quantity_in_outbox(0)
+
+    def test__handle_transaction_receipt_store(self):
+        """Test handling a store contract code transaction receipt"""
+        # setup
+        ledger_api_dialogue = self.prepare_skill_dialogue(
+            self.ledger_api_dialogues, self.list_of_ledger_api_messages[2:3]
+        )
+        contract_api_dialogue = self.prepare_skill_dialogue(
+            self.contract_api_dialogues, self.list_of_contract_api_messages[1:2]
+        )
+        signing_dialogue = self.prepare_skill_dialogue(
+            self.signing_dialogues, self.list_of_signing_messages[:1]
+        )
+
+        strategy = cast(Strategy, self.simple_oracle_client_behaviour.context.strategy)
+
+        contract_api_dialogue.terms = strategy.get_deploy_terms()
+        signing_dialogue.associated_contract_api_dialogue = contract_api_dialogue
+        ledger_api_dialogue.associated_signing_dialogue = signing_dialogue
+
+        transaction_receipt = TransactionReceipt(
+            FETCHAI_LEDGER_ID, FETCHAI_DEPLOY_RECEIPT, DEFAULT_TX
+        )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=ledger_api_dialogue,
             performative=LedgerApiMessage.Performative.TRANSACTION_RECEIPT,
@@ -295,7 +381,57 @@ class TestLedgerApiHandler(BaseSkillTestCase):
             f"transaction was successfully settled. Transaction receipt={transaction_receipt}",
         )
         mock_logger.assert_any_call(
-            logging.INFO, "Oracle client contract successfully deployed!",
+            logging.INFO,
+            "Oracle client contract successfully deployed at address: some_contract_address",
+        )
+
+        assert (
+            self.simple_oracle_client_behaviour.context.strategy.is_client_contract_deployed
+        ), "Contract deployment status not set"
+        self.assert_quantity_in_outbox(0)
+
+    def test__handle_transaction_receipt_init(self):
+        """Test handling a store contract code transaction receipt"""
+        # setup
+        ledger_api_dialogue = self.prepare_skill_dialogue(
+            self.ledger_api_dialogues, self.list_of_ledger_api_messages[2:3]
+        )
+        contract_api_dialogue = self.prepare_skill_dialogue(
+            self.contract_api_dialogues, self.list_of_contract_api_messages[1:2]
+        )
+        signing_dialogue = self.prepare_skill_dialogue(
+            self.signing_dialogues, self.list_of_signing_messages[:1]
+        )
+
+        strategy = cast(Strategy, self.simple_oracle_client_behaviour.context.strategy)
+
+        contract_api_dialogue.terms = strategy.get_deploy_terms(
+            is_init_transaction=True
+        )
+        signing_dialogue.associated_contract_api_dialogue = contract_api_dialogue
+        ledger_api_dialogue.associated_signing_dialogue = signing_dialogue
+
+        transaction_receipt = TransactionReceipt(
+            FETCHAI_LEDGER_ID, FETCHAI_DEPLOY_RECEIPT, DEFAULT_TX
+        )
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
+            dialogue=ledger_api_dialogue,
+            performative=LedgerApiMessage.Performative.TRANSACTION_RECEIPT,
+            transaction_receipt=transaction_receipt,
+        )
+
+        # operation
+        with patch.object(self.ledger_api_handler.context.logger, "log") as mock_logger:
+            self.ledger_api_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"transaction was successfully settled. Transaction receipt={transaction_receipt}",
+        )
+        mock_logger.assert_any_call(
+            logging.INFO,
+            "Oracle client contract successfully deployed at address: some_contract_address",
         )
 
         assert (
@@ -319,14 +455,16 @@ class TestLedgerApiHandler(BaseSkillTestCase):
         terms = Terms(*DEFAULT_TERMS, label="approve")
 
         strategy = cast(Strategy, self.simple_oracle_client_behaviour.context.strategy)
-        strategy.is_contract_deployed = True
+        strategy.is_client_contract_deployed = True
 
         contract_api_dialogue.terms = terms
         signing_dialogue.associated_contract_api_dialogue = contract_api_dialogue
         ledger_api_dialogue.associated_signing_dialogue = signing_dialogue
 
         receipt = {"status": 1, "contractAddress": "some_contract_address"}
-        transaction_receipt = TransactionReceipt(LEDGER_ID, receipt, DEFAULT_TX)
+        transaction_receipt = TransactionReceipt(
+            ETHEREUM_LEDGER_ID, receipt, DEFAULT_TX
+        )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=ledger_api_dialogue,
             performative=LedgerApiMessage.Performative.TRANSACTION_RECEIPT,
@@ -368,7 +506,7 @@ class TestLedgerApiHandler(BaseSkillTestCase):
         terms = Terms(*DEFAULT_TERMS, label="query")
 
         strategy = cast(Strategy, self.simple_oracle_client_behaviour.context.strategy)
-        strategy.is_contract_deployed = True
+        strategy.is_client_contract_deployed = True
         strategy.is_oracle_role_granted = True
 
         contract_api_dialogue.terms = terms
@@ -376,7 +514,9 @@ class TestLedgerApiHandler(BaseSkillTestCase):
         ledger_api_dialogue.associated_signing_dialogue = signing_dialogue
 
         receipt = {"status": 1, "contractAddress": "some_contract_address"}
-        transaction_receipt = TransactionReceipt(LEDGER_ID, receipt, DEFAULT_TX)
+        transaction_receipt = TransactionReceipt(
+            ETHEREUM_LEDGER_ID, receipt, DEFAULT_TX
+        )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=ledger_api_dialogue,
             performative=LedgerApiMessage.Performative.TRANSACTION_RECEIPT,
@@ -429,8 +569,8 @@ class TestLedgerApiHandler(BaseSkillTestCase):
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=dialogue,
             performative=LedgerApiMessage.Performative.STATE,
-            ledger_id=LEDGER_ID,
-            state=LedgerApiMessage.State(LEDGER_ID, {}),
+            ledger_id=ETHEREUM_LEDGER_ID,
+            state=LedgerApiMessage.State(ETHEREUM_LEDGER_ID, {}),
         )
 
         # operation
@@ -457,6 +597,7 @@ class TestContractApiHandler(BaseSkillTestCase):
     path_to_skill = Path(
         ROOT_DIR, "packages", "fetchai", "skills", "simple_oracle_client"
     )
+    is_agent_to_agent_messages = False
 
     @classmethod
     def setup(cls):
@@ -492,7 +633,7 @@ class TestContractApiHandler(BaseSkillTestCase):
             DialogueMessage(
                 ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
                 {
-                    "ledger_id": LEDGER_ID,
+                    "ledger_id": ETHEREUM_LEDGER_ID,
                     "contract_id": cls.contract_id,
                     "callable": cls.callable,
                     "kwargs": cls.kwargs,
@@ -541,7 +682,7 @@ class TestContractApiHandler(BaseSkillTestCase):
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=contract_api_dialogue,
             performative=ContractApiMessage.Performative.RAW_TRANSACTION,
-            raw_transaction=ContractApiMessage.RawTransaction(LEDGER_ID, {}),
+            raw_transaction=ContractApiMessage.RawTransaction(ETHEREUM_LEDGER_ID, {}),
         )
 
         # operation
@@ -597,7 +738,7 @@ class TestContractApiHandler(BaseSkillTestCase):
             message_type=ContractApiMessage,
             dialogue_reference=("1", ""),
             performative=invalid_performative,
-            ledger_id=LEDGER_ID,
+            ledger_id=ETHEREUM_LEDGER_ID,
             contract_id=self.contract_id,
             callable=self.callable,
             kwargs=self.kwargs,
@@ -625,6 +766,7 @@ class TestSigningHandler(BaseSkillTestCase):
     path_to_skill = Path(
         ROOT_DIR, "packages", "fetchai", "skills", "simple_oracle_client"
     )
+    is_agent_to_agent_messages = False
 
     @classmethod
     def setup(cls):
@@ -725,7 +867,7 @@ class TestSigningHandler(BaseSkillTestCase):
             message_type=LedgerApiMessage,
             performative=LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
             to=str(LEDGER_CONNECTION_PUBLIC_ID),
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             signed_transaction=incoming_message.signed_transaction,
         )
         assert has_attributes, error_str

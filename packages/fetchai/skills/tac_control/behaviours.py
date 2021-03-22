@@ -229,7 +229,7 @@ class TacBehaviour(Behaviour):
                 raise ValueError("Error when retrieving dialogue.")
             tac_dialogue = _tac_dialogues[0]
             last_msg = tac_dialogue.last_message
-            if last_msg is None:
+            if last_msg is None:  # pragma: nocover
                 raise ValueError("Error when retrieving last message.")
             tac_msg = tac_dialogue.reply(
                 performative=TacMessage.Performative.CANCELLED,

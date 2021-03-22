@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains types and helpers for acn Proof-of-Representation."""
+"""This module contains types and helpers for ACN Proof-of-Representation."""
 from typing import Optional
 
 from aea.common import PathLike
@@ -27,6 +27,15 @@ from aea.helpers.base import CertRequest
 
 class AgentRecord:
     """Agent Proof-of-Representation to representative."""
+
+    __slots__ = (
+        "_address",
+        "_representative_public_key",
+        "_message",
+        "_signature",
+        "_ledger_id",
+        "_public_key",
+    )
 
     def __init__(
         self,
@@ -41,7 +50,7 @@ class AgentRecord:
 
         :param address: agent address
         :param representative_public_key: representative's public key
-        :param message: message to be signed as proof-of-represenation of this AgentRecord
+        :param message: message to be signed as proof-of-representation of this AgentRecord
         :param signature: proof-of-representation of this AgentRecord
         :param ledger_id: ledger id
         """
@@ -57,7 +66,7 @@ class AgentRecord:
         """
         Checks validity of record.
 
-        Specificyally:
+        Specifically:
         - if ledger_id is valid
         - if agent signed the message
         - if message is correctly formatted

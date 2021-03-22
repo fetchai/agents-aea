@@ -104,7 +104,6 @@ class AliceDefaultHandler(Handler):
 
         :return: None
         """
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -145,7 +144,6 @@ class AliceDefaultHandler(Handler):
 
         :return: None
         """
-        pass
 
 
 class AliceHttpHandler(Handler):
@@ -168,7 +166,6 @@ class AliceHttpHandler(Handler):
 
         :return: None
         """
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -229,7 +226,6 @@ class AliceHttpHandler(Handler):
 
         :return: None
         """
-        pass
 
 
 class AliceOefSearchHandler(Handler):
@@ -239,7 +235,6 @@ class AliceOefSearchHandler(Handler):
 
     def setup(self) -> None:
         """Call to setup the handler."""
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -273,7 +268,6 @@ class AliceOefSearchHandler(Handler):
 
         :return: None
         """
-        pass
 
     def _handle_unidentified_dialogue(self, oef_search_msg: OefSearchMessage) -> None:
         """

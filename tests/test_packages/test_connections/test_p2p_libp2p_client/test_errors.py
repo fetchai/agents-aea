@@ -16,12 +16,12 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This test module contains negative tests for Libp2p tcp client connection."""
-
+import asyncio
 import os
 import shutil
 import tempfile
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -52,9 +52,12 @@ class TestLibp2pClientConnectionFailureNodeNotConnected:
     @pytest.mark.asyncio
     async def test_node_not_running(self):
         """Test the node is not running."""
-        conn = _make_libp2p_client_connection(make_crypto(DEFAULT_LEDGER).public_key)
-        with pytest.raises(Exception):
-            await conn.connect()
+        with tempfile.TemporaryDirectory() as dirname:
+            conn = _make_libp2p_client_connection(
+                data_dir=dirname, peer_public_key=make_crypto(DEFAULT_LEDGER).public_key
+            )
+            with pytest.raises(Exception):
+                await conn.connect()
 
 
 class TestLibp2pClientConnectionFailureConnectionSetup:
@@ -69,12 +72,10 @@ class TestLibp2pClientConnectionFailureConnectionSetup:
         crypto = make_crypto(DEFAULT_LEDGER)
         cls.node_host = "localhost"
         cls.node_port = "11234"
-        cls.identity = Identity("", address=crypto.address)
+        cls.identity = Identity("identity", address=crypto.address)
 
         cls.key_file = os.path.join(cls.t, "keyfile")
-        key_file_desc = open(cls.key_file, "ab")
-        crypto.dump(key_file_desc)
-        key_file_desc.close()
+        crypto.dump(cls.key_file)
 
         cls.peer_crypto = make_crypto(DEFAULT_LEDGER)
         cls.cert_request = CertRequest(
@@ -138,15 +139,21 @@ class TestLibp2pClientConnectionNodeDisconnected:
         cls.log_files = []
         cls.multiplexers = []
 
+        temp_node_dir = os.path.join(cls.t, "node_dir")
+        os.mkdir(temp_node_dir)
         try:
-            cls.connection_node = _make_libp2p_connection(delegate=True)
+            cls.connection_node = _make_libp2p_connection(
+                data_dir=temp_node_dir, delegate=True
+            )
             cls.multiplexer_node = Multiplexer([cls.connection_node])
             cls.log_files.append(cls.connection_node.node.log_file)
             cls.multiplexer_node.connect()
             cls.multiplexers.append(cls.multiplexer_node)
 
+            temp_client_dir = os.path.join(cls.t, "client_dir")
+            os.mkdir(temp_client_dir)
             cls.connection_client = _make_libp2p_client_connection(
-                cls.connection_node.node.pub
+                data_dir=temp_client_dir, peer_public_key=cls.connection_node.node.pub
             )
             cls.multiplexer_client = Multiplexer([cls.connection_client])
             cls.multiplexer_client.connect()
@@ -171,3 +178,61 @@ class TestLibp2pClientConnectionNodeDisconnected:
             shutil.rmtree(cls.t)
         except (OSError, IOError):
             pass
+
+
+done_future: asyncio.Future = asyncio.Future()
+done_future.set_result(None)
+
+
+@pytest.mark.asyncio
+async def test_connect_attempts():
+    """Test connect attempts."""
+    # test connects
+    with tempfile.TemporaryDirectory() as dirname:
+        con = _make_libp2p_client_connection(
+            data_dir=dirname, peer_public_key=make_crypto(DEFAULT_LEDGER).public_key
+        )
+        con.connect_retries = 2
+        with patch(
+            "asyncio.open_connection",
+            side_effect=Exception("test exception on connect"),
+        ) as open_connection_mock:
+            with pytest.raises(Exception, match="test exception on connect"):
+                await con.connect()
+            assert open_connection_mock.call_count == con.connect_retries
+
+
+@pytest.mark.asyncio
+async def test_reconnect_on_receive_fail():
+    """Test reconnect on receive fails."""
+    with tempfile.TemporaryDirectory() as dirname:
+        con = _make_libp2p_client_connection(
+            data_dir=dirname, peer_public_key=make_crypto(DEFAULT_LEDGER).public_key
+        )
+        mock_reader = Mock()
+        mock_reader.readexactly.side_effect = ConnectionError("oops")
+        con._reader = mock_reader
+        con._in_queue = Mock()
+        with patch.object(
+            con, "_perform_connection_to_node", return_value=done_future
+        ) as connect_mock:
+            assert await con._receive() is None
+            connect_mock.assert_called()
+
+
+@pytest.mark.asyncio
+async def test_reconnect_on_send_fail():
+    """Test reconnect on send fails."""
+    with tempfile.TemporaryDirectory() as dirname:
+        con = _make_libp2p_client_connection(
+            data_dir=dirname, peer_public_key=make_crypto(DEFAULT_LEDGER).public_key
+        )
+        # test reconnect on send fails
+        with patch.object(
+            con, "_perform_connection_to_node", return_value=done_future
+        ) as connect_mock, patch.object(
+            con, "_ensure_valid_envelope_for_external_comms"
+        ):
+            with pytest.raises(ValueError, match="Writer is not set."):
+                await con.send(Mock())
+            connect_mock.assert_called()

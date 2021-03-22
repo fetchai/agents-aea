@@ -1,12 +1,12 @@
 You can use the <a href="../simple-oef">SOEF</a> in the agent framework by using the SOEF connection as a package in your agent project.
 
 ## Add the SOEF package
-Check out the <a href="../cli-commands">CLI guide</a> on details how to add a connection. You will want to add the `fetchai/soef:0.16.0` connection package. 
+Check out the <a href="../cli-commands">CLI guide</a> on details how to add a connection. You will want to add the `fetchai/soef:0.19.0` connection package. 
 
 ## Register your agent and its services
 
 ### Register agent location
-To register your agent's location, you have to send a message in the `fetchai/oef_search:0.13.0` protocol to the SOEF connection.
+To register your agent's location, you have to send a message in the `fetchai/oef_search:0.14.0` protocol to the SOEF connection.
 
 First, define a data model for location data:
 ``` python

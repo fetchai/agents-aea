@@ -93,8 +93,7 @@ nav:
         - Installation: 'cli-how-to.md'
         - Commands: 'cli-commands.md'
         - File structure: 'package-imports.md'
-        - Generating wealth: 'wealth.md' 
-      - GUI: 'cli-gui.md'
+        - Generating wealth: 'wealth.md'
     - Benchmarks:
       - Performance benchmark: 'performance-benchmark.md'
     - API:
@@ -123,23 +122,21 @@ nav:
         - Validation: 'api/configurations/validation.md'
       - Connections:
         - Base: 'api/connections/base.md'
-        - Stub Connection: 'api/connections/stub/connection.md'
       - Context: 'api/context/base.md'
       - Contracts:
         - Base: 'api/contracts/base.md'
       - Crypto:
         - Base: 'api/crypto/base.md'
-        - Cosmos: 'api/crypto/cosmos.md'
-        - Ethereum: 'api/crypto/ethereum.md'
-        - Fetchai: 'api/crypto/fetchai.md'
         - Helpers: 'api/crypto/helpers.md'
         - LedgerApis: 'api/crypto/ledger_apis.md'
+        - Plugin: 'api/crypto/plugin.md'
         - Wallet: 'api/crypto/wallet.md'
         - Registries:
           - Base: 'api/crypto/registries/base.md'
       - Decision Maker:
         - Base: 'api/decision_maker/base.md'
         - Default: 'api/decision_maker/default.md'
+        - GOP: 'api/decision_maker/gop.md'
       - Error Handler:
         - Base: 'api/error_handler/base.md'
         - Default: 'api/error_handler/default.md'
@@ -158,6 +155,7 @@ nav:
         - File Lock: 'api/helpers/file_lock.md'
         - HttpRequests: 'api/helpers/http_requests.md'
         - Install Dependency: 'api/helpers/install_dependency.md'
+        - IO: 'api/helpers/io.md'
         - IPFS:
           - Base: 'api/helpers/ipfs/base.md'
         - Logging: 'api/helpers/logging.md'
@@ -224,6 +222,19 @@ nav:
         - Generic: 'api/test_tools/generic.md'
         - Test Cases: 'api/test_tools/test_cases.md'
         - Test Skill: 'api/test_tools/test_skill.md'
+      - Plugins:
+        - CLI:
+          - IPFS:
+            - API: 'api/plugins/aea_cli_ipfs/core.md'
+            - Utils: 'api/plugins/aea_cli_ipfs/ipfs_utils.md'
+        - Ledger:
+          - Cosmos:
+            - API: 'api/plugins/aea_ledger_cosmos/cosmos.md'
+          - Ethereum:
+            - API: 'api/plugins/aea_ledger_ethereum/ethereum.md'
+          - Fetchai:
+            - API: 'api/plugins/aea_ledger_fetchai/fetchai.md'
+            - Helper: 'api/plugins/aea_ledger_fetchai/_cosmos.md'
   - Development - Use Case:
     - Generic skills: 'generic-skills.md'
     - Front-end intergration: 'connect-a-frontend.md'

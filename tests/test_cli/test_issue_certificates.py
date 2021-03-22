@@ -24,6 +24,8 @@ from pathlib import Path
 from typing import List
 
 import pytest
+from aea_ledger_ethereum import EthereumCrypto
+from aea_ledger_fetchai import FetchAICrypto
 
 from aea.cli.utils.config import dump_item_config
 from aea.helpers.base import CertRequest
@@ -31,10 +33,8 @@ from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from tests.conftest import (
     CUR_PATH,
-    ETHEREUM,
     ETHEREUM_PRIVATE_KEY_FILE,
     ETHEREUM_PRIVATE_KEY_PATH,
-    FETCHAI,
     FETCHAI_PRIVATE_KEY_FILE,
     FETCHAI_PRIVATE_KEY_PATH,
 )
@@ -55,7 +55,7 @@ class BaseTestIssueCertificates(AEATestCaseEmpty):
             os.path.join(cls.current_agent_context, "connections", "dummy"),
         )
         agent_config = cls.load_agent_config(cls.agent_name)
-        agent_config.author = FETCHAI
+        agent_config.author = FetchAICrypto.identifier
         agent_config.connections.add(DummyConnection.connection_id)
         dump_item_config(agent_config, Path(cls.current_agent_context))
 
@@ -81,15 +81,15 @@ class TestIssueCertificatesPositive(BaseTestIssueCertificates):
         cls.cert_id_2 = "cert_id_2"
         cls.cert_request_1 = CertRequest(
             identifier=cls.cert_id_1,
-            ledger_id=FETCHAI,
+            ledger_id=FetchAICrypto.identifier,
             not_after="2020-01-02",
             not_before="2020-01-01",
-            public_key=FETCHAI,
+            public_key=FetchAICrypto.identifier,
             save_path=cls.expected_path_1,
         )
         cls.cert_request_2 = CertRequest(
             identifier=cls.cert_id_2,
-            ledger_id=FETCHAI,
+            ledger_id=FetchAICrypto.identifier,
             not_after="2020-01-02",
             not_before="2020-01-01",
             public_key="0xABCDEF123456",
@@ -150,15 +150,15 @@ class TestIssueCertificatesWithOverride(TestIssueCertificatesPositive):
         cls.expected_path_4 = os.path.abspath("path_4")
         cls.cert_request_3 = CertRequest(
             identifier=cls.cert_id_3,
-            ledger_id=ETHEREUM,
+            ledger_id=EthereumCrypto.identifier,
             not_after="2020-01-02",
             not_before="2020-01-01",
-            public_key=ETHEREUM,
+            public_key=EthereumCrypto.identifier,
             save_path=cls.expected_path_3,
         )
         cls.cert_request_4 = CertRequest(
             identifier=cls.cert_id_4,
-            ledger_id=ETHEREUM,
+            ledger_id=EthereumCrypto.identifier,
             not_after="2020-01-02",
             not_before="2020-01-01",
             public_key="0xABCDEF123456",
@@ -178,10 +178,11 @@ class TestIssueCertificatesWithOverride(TestIssueCertificatesPositive):
             os.path.join(cls.current_agent_context, ETHEREUM_PRIVATE_KEY_FILE),
         )
         cls.add_private_key(
-            ledger_api_id=ETHEREUM, private_key_filepath=ETHEREUM_PRIVATE_KEY_FILE
+            ledger_api_id=EthereumCrypto.identifier,
+            private_key_filepath=ETHEREUM_PRIVATE_KEY_FILE,
         )
         cls.add_private_key(
-            ledger_api_id=ETHEREUM,
+            ledger_api_id=EthereumCrypto.identifier,
             private_key_filepath=ETHEREUM_PRIVATE_KEY_FILE,
             connection=True,
         )
@@ -203,7 +204,7 @@ class TestIssueCertificatesWrongConnectionKey(BaseTestIssueCertificates):
         cls.cert_id_1 = "cert_id_1"
         cls.cert_request_1 = CertRequest(
             identifier=cls.cert_id_1,
-            ledger_id=FETCHAI,
+            ledger_id=FetchAICrypto.identifier,
             not_after="2020-01-02",
             not_before="2020-01-01",
             public_key="bad_ledger_id",
@@ -233,7 +234,7 @@ class TestIssueCertificatesWrongCryptoKey(BaseTestIssueCertificates):
             ledger_id="bad_ledger_id",
             not_after="2020-01-02",
             not_before="2020-01-01",
-            public_key=FETCHAI,
+            public_key=FetchAICrypto.identifier,
             save_path="path",
         )
         cls.add_cert_requests([cls.cert_request_1], DummyConnection.connection_id.name)

@@ -25,11 +25,12 @@ from typing import cast
 from unittest.mock import Mock, patch
 
 import pytest
+from aea_ledger_ethereum import EthereumCrypto
+from aea_ledger_fetchai import FetchAICrypto
 
 from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
-from aea.crypto import EthereumCrypto
 from aea.crypto.ledger_apis import LedgerApis
 from aea.crypto.registries import make_crypto, make_ledger_api
 from aea.helpers.async_utils import AsyncState
@@ -55,9 +56,7 @@ from packages.fetchai.protocols.ledger_api.dialogues import (
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 
 from tests.conftest import (
-    ETHEREUM,
     ETHEREUM_PRIVATE_KEY_PATH,
-    FETCHAI,
     FETCHAI_ADDRESS_ONE,
     FETCHAI_TESTNET_CONFIG,
 )
@@ -69,10 +68,13 @@ logger = logging.getLogger(__name__)
 ledger_ids = pytest.mark.parametrize(
     "ledger_id,address",
     [
-        (FETCHAI, FETCHAI_ADDRESS_ONE),
-        (ETHEREUM, EthereumCrypto(ETHEREUM_PRIVATE_KEY_PATH).address),
+        (FetchAICrypto.identifier, FETCHAI_ADDRESS_ONE),
+        (EthereumCrypto.identifier, EthereumCrypto(ETHEREUM_PRIVATE_KEY_PATH).address),
     ],
 )
+gas_price_strategies = pytest.mark.parametrize("gas_price_strategy", [None, "average"],)
+
+SOME_SKILL_ID = "some/skill:0.1.0"
 
 
 class LedgerApiDialogues(BaseLedgerApiDialogues):
@@ -118,12 +120,12 @@ async def test_get_balance(
     """Test get balance."""
     import aea  # noqa # to load registries
 
-    if ledger_id == FETCHAI:
+    if ledger_id == FetchAICrypto.identifier:
         config = FETCHAI_TESTNET_CONFIG
     else:
         config = ethereum_testnet_config
 
-    ledger_api_dialogues = LedgerApiDialogues(address)
+    ledger_api_dialogues = LedgerApiDialogues(SOME_SKILL_ID)
     request, ledger_api_dialogue = ledger_api_dialogues.create(
         counterparty=str(ledger_apis_connection.connection_id),
         performative=LedgerApiMessage.Performative.GET_BALANCE,
@@ -162,7 +164,7 @@ async def test_get_state(
     """Test get state."""
     import aea  # noqa # to load registries
 
-    if ledger_id == FETCHAI:
+    if ledger_id == FetchAICrypto.identifier:
         config = FETCHAI_TESTNET_CONFIG
     else:
         config = ethereum_testnet_config
@@ -174,7 +176,7 @@ async def test_get_state(
     args = ("latest",)
     kwargs = Kwargs({})
 
-    ledger_api_dialogues = LedgerApiDialogues(address)
+    ledger_api_dialogues = LedgerApiDialogues(SOME_SKILL_ID)
     request, ledger_api_dialogue = ledger_api_dialogues.create(
         counterparty=str(ledger_apis_connection.connection_id),
         performative=LedgerApiMessage.Performative.GET_STATE,
@@ -208,15 +210,21 @@ async def test_get_state(
 @pytest.mark.integration
 @pytest.mark.ledger
 @pytest.mark.asyncio
+@gas_price_strategies
 async def test_send_signed_transaction_ethereum(
-    ledger_apis_connection: Connection, update_default_ethereum_ledger_api, ganache
+    gas_price_strategy,
+    ledger_apis_connection: Connection,
+    update_default_ethereum_ledger_api,
+    ganache,
 ):
     """Test send signed transaction with Ethereum APIs."""
     import aea  # noqa # to load registries
 
-    crypto1 = make_crypto(ETHEREUM, private_key_path=ETHEREUM_PRIVATE_KEY_PATH)
-    crypto2 = make_crypto(ETHEREUM)
-    ledger_api_dialogues = LedgerApiDialogues(crypto1.address)
+    crypto1 = make_crypto(
+        EthereumCrypto.identifier, private_key_path=ETHEREUM_PRIVATE_KEY_PATH
+    )
+    crypto2 = make_crypto(EthereumCrypto.identifier)
+    ledger_api_dialogues = LedgerApiDialogues(SOME_SKILL_ID)
 
     amount = 40000
     fee = 30000
@@ -225,7 +233,7 @@ async def test_send_signed_transaction_ethereum(
         counterparty=str(ledger_apis_connection.connection_id),
         performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
         terms=Terms(
-            ledger_id=ETHEREUM,
+            ledger_id=EthereumCrypto.identifier,
             sender_address=crypto1.address,
             counterparty_address=crypto2.address,
             amount_by_currency_id={"ETH": -amount},
@@ -234,6 +242,7 @@ async def test_send_signed_transaction_ethereum(
             nonce="",
             fee_by_currency_id={"ETH": fee},
             chain_id=3,
+            gas_price_strategy=gas_price_strategy,
         ),
     )
     request = cast(LedgerApiMessage, request)
@@ -259,7 +268,9 @@ async def test_send_signed_transaction_ethereum(
         ledger_api_dialogue.reply(
             performative=LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
             target_message=response_message,
-            signed_transaction=SignedTransaction(ETHEREUM, signed_transaction),
+            signed_transaction=SignedTransaction(
+                EthereumCrypto.identifier, signed_transaction
+            ),
         ),
     )
     envelope = Envelope(to=request.to, sender=request.sender, message=request,)
@@ -327,7 +338,7 @@ async def test_unsupported_protocol(ledger_apis_connection: LedgerConnection):
     """Test fail on protocol not supported."""
     envelope = Envelope(
         to=str(ledger_apis_connection.connection_id),
-        sender="test",
+        sender="test/skill:0.1.0",
         protocol_specification_id=PublicId.from_str("author/package_name:0.1.0"),
         message=b"message",
     )
@@ -352,7 +363,7 @@ async def test_no_balance():
     message = LedgerApiMessage(
         performative=LedgerApiMessage.Performative.GET_BALANCE,
         dialogue_reference=dispatcher.dialogues.new_self_initiated_dialogue_reference(),
-        ledger_id=ETHEREUM,
+        ledger_id=EthereumCrypto.identifier,
         address="test",
     )
     message.to = dispatcher.dialogues.self_address
@@ -374,7 +385,7 @@ async def test_no_raw_tx():
         performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
         dialogue_reference=dispatcher.dialogues.new_self_initiated_dialogue_reference(),
         terms=Terms(
-            ledger_id=ETHEREUM,
+            ledger_id=EthereumCrypto.identifier,
             sender_address="1111",
             counterparty_address="22222",
             amount_by_currency_id={"ETH": -1},

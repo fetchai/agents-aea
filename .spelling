@@ -169,6 +169,10 @@ Shoham
 Yoti
 PowerShell
 deregisters
+plugin
+Fetch.AI
+AEALite
+Pipfile
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id
@@ -181,3 +185,43 @@ v0.2.x
  - docs/questions-and-answers.md
 state_update
 txt
+ - docs/protocol-generator.md
+java
+javascript
+protoc
+ - docs/acn.md
+p2p_libp2p_mailbox
+ - docs/cli-commands.md
+aea
+ - docs/contract.md
+init
+code_id
+init_msg
+fetchai
+erc1155
+ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION
+ - docs/decision-maker.md
+tac_
+ - docs/limits.md
+spec
+micropython
+Subprotocols
+mempool
+ - docs/p2p-connection.md
+p2p_libp2p
+ - docs/quickstart.md
+my_first_aea
+output_file
+AEATestCase
+test.py
+aea-config
+yaml
+ - docs/skill-guide.md
+TickerBehaviour
+behaviours.py
+strategy.py
+dialogues.py
+oef_search
+handlers.py
+skill.yaml
+packages.fetchai.skills.my_search.dialogues

@@ -22,6 +22,7 @@ import json
 import os
 import threading
 from asyncio.tasks import FIRST_COMPLETED
+from collections import defaultdict
 from shutil import rmtree
 from threading import Thread
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple
@@ -29,8 +30,22 @@ from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 from aea.aea import AEA
 from aea.configurations.constants import AEA_MANAGER_DATA_DIRNAME, DEFAULT_REGISTRY_NAME
 from aea.configurations.data_types import PublicId
+from aea.crypto.plugin import load_all_plugins
 from aea.helpers.io import open_file
 from aea.manager.project import AgentAlias, Project
+
+
+class ProjectNotFoundError(ValueError):
+    """Project not found exception."""
+
+
+class ProjectCheckError(ValueError):
+    """Project check error exception."""
+
+    def __init__(self, msg: str, source_exception: Exception):
+        """Init exception."""
+        super().__init__(msg)
+        self.source_exception = source_exception
 
 
 class AgentRunAsyncTask:
@@ -138,13 +153,22 @@ class MultiAgentManager:
         working_dir: str,
         mode: str = "async",
         registry_path: str = DEFAULT_REGISTRY_NAME,
+        auto_add_remove_project: bool = False,
+        password: Optional[str] = None,
     ) -> None:
         """
         Initialize manager.
 
         :param working_dir: directory to store base agents.
+        :param mode: str. async or threaded
+        :param registry_path: str. path to the local packages registry
+        :param auto_add_remove_project: bool. add/remove project on the first agent add/last agent remove
+        :param password: the password to encrypt/decrypt the private key.
+
+        :return: None
         """
         self.working_dir = working_dir
+        self._auto_add_remove_project = auto_add_remove_project
         self._save_path = os.path.join(self.working_dir, self.SAVE_FILENAME)
 
         self.registry_path = registry_path
@@ -163,6 +187,13 @@ class MultiAgentManager:
         self._event: Optional[asyncio.Event] = None
 
         self._error_callbacks: List[Callable[[str, BaseException], None]] = []
+        self._last_start_status: Optional[
+            Tuple[
+                bool,
+                Dict[PublicId, List[Dict]],
+                List[Tuple[PublicId, List[Dict], Exception]],
+            ]
+        ] = None
 
         if mode not in self.MODES:
             raise ValueError(
@@ -170,6 +201,7 @@ class MultiAgentManager:
             )
         self._started_event = threading.Event()
         self._mode = mode
+        self._password = password
 
     @property
     def data_dir(self) -> str:
@@ -249,13 +281,14 @@ class MultiAgentManager:
 
         :param local: whether or not to fetch from local registry.
         :param remote: whether or not to fetch from remote registry.
+
         :return: the MultiAgentManager instance.
         """
         if self._is_running:
             return self
 
         self._ensure_working_dir()
-        self._load_state(local=local, remote=remote)
+        self._last_start_status = self._load_state(local=local, remote=remote)
 
         self._started_event.clear()
         self._is_running = True
@@ -263,6 +296,17 @@ class MultiAgentManager:
         self._thread.start()
         self._started_event.wait(self.DEFAULT_TIMEOUT_FOR_BLOCKING_OPERATIONS)
         return self
+
+    @property
+    def last_start_status(
+        self,
+    ) -> Tuple[
+        bool, Dict[PublicId, List[Dict]], List[Tuple[PublicId, List[Dict], Exception]],
+    ]:
+        """Get status of the last agents start loading state."""
+        if self._last_start_status is None:
+            raise ValueError("Manager was not started")
+        return self._last_start_status
 
     def stop_manager(
         self, cleanup: bool = True, save: bool = False
@@ -292,7 +336,7 @@ class MultiAgentManager:
             self._save_state()
 
         for agent_name in self.list_agents():
-            self.remove_agent(agent_name)
+            self.remove_agent(agent_name, skip_project_auto_remove=True)
 
         if cleanup:
             for project in list(self._projects.keys()):
@@ -332,6 +376,7 @@ class MultiAgentManager:
         registry, and then from remote registry in case of failure).
 
         :param public_id: the public if of the agent project.
+
         :param local: whether or not to fetch from local registry.
         :param remote: whether or not to fetch from remote registry.
         :param restore: bool flag for restoring already fetched agent.
@@ -354,7 +399,16 @@ class MultiAgentManager:
 
         if not restore:
             project.install_pypi_dependencies()
+            load_all_plugins(is_raising_exception=False)
             project.build()
+
+        try:
+            project.check()
+        except Exception as e:
+            project.remove()
+            raise ProjectCheckError(
+                f"Failed to load project: {public_id} Error: {str(e)}", e
+            )
 
         self._projects[public_id] = project
         return self
@@ -392,6 +446,9 @@ class MultiAgentManager:
         agent_name: Optional[str] = None,
         agent_overrides: Optional[dict] = None,
         component_overrides: Optional[List[dict]] = None,
+        local: bool = False,
+        remote: bool = False,
+        restore: bool = False,
     ) -> "MultiAgentManager":
         """
         Create new agent configuration based on project with config overrides applied.
@@ -404,6 +461,10 @@ class MultiAgentManager:
         :param component_overrides: overrides for component section.
         :param config: agent config (used for agent re-creation).
 
+        :param local: whether or not to fetch from local registry.
+        :param remote: whether or not to fetch from remote registry.
+        :param restore: bool flag for restoring already fetched agent.
+
         :return: manager
         """
         agent_name = agent_name or public_id.name
@@ -411,15 +472,20 @@ class MultiAgentManager:
         if agent_name in self._agents:
             raise ValueError(f"Agent with name {agent_name} already exists!")
 
-        if public_id not in self._projects:
-            raise ValueError(f"{public_id} project is not added!")
+        project = self._projects.get(public_id, None)
 
-        project = self._projects[public_id]
+        if project is None and self._auto_add_remove_project:
+            self.add_project(public_id, local, remote, restore)
+            project = self._projects.get(public_id, None)
+
+        if project is None:
+            raise ProjectNotFoundError(f"{public_id} project is not added!")
 
         agent_alias = AgentAlias(
             project=project,
             agent_name=agent_name,
             data_dir=self.get_data_dir_of_agent(agent_name),
+            password=self._password,
         )
         agent_alias.set_overrides(agent_overrides, component_overrides)
         project.agents.add(agent_name)
@@ -454,6 +520,7 @@ class MultiAgentManager:
             project=project,
             agent_name=agent_name,
             data_dir=self.get_data_dir_of_agent(agent_name),
+            password=self._password,
         )
         agent_alias.set_agent_config_from_data(config)
         project.agents.add(agent_name)
@@ -506,6 +573,7 @@ class MultiAgentManager:
             {
                 "agent_name": agent_name,
                 "public_id": str(alias.project.public_id),
+                "addresses": alias.get_addresses(),
                 "is_running": self._is_agent_running(agent_name),
             }
             for agent_name, alias in self._agents.items()
@@ -523,11 +591,14 @@ class MultiAgentManager:
             return [i for i in self._agents.keys() if self._is_agent_running(i)]
         return list(self._agents.keys())
 
-    def remove_agent(self, agent_name: str) -> "MultiAgentManager":
+    def remove_agent(
+        self, agent_name: str, skip_project_auto_remove: bool = False
+    ) -> "MultiAgentManager":
         """
         Remove agent alias definition from registry.
 
         :param agent_name: agent name to remove
+        :param skip_project_auto_remove: disable auto project remove on last agent removed.
 
         :return: None
         """
@@ -539,6 +610,15 @@ class MultiAgentManager:
 
         agent_alias = self._agents.pop(agent_name)
         agent_alias.remove_from_project()
+        project: Project = agent_alias.project
+
+        if (
+            not project.agents
+            and self._auto_add_remove_project
+            and not skip_project_auto_remove
+        ):
+            self.remove_project(project.public_id, keep_files=False)
+
         return self
 
     def start_agent(self, agent_name: str) -> "MultiAgentManager":
@@ -625,7 +705,7 @@ class MultiAgentManager:
             if wait_future.done():
                 event_set()  # pragma: nocover
             else:
-                wait_future.add_done_callback(event_set)  # pramga: nocover
+                wait_future.add_done_callback(event_set)  # pragma: nocover
 
         self._loop.call_soon_threadsafe(_add_cb)
         agent_task.stop()
@@ -691,7 +771,11 @@ class MultiAgentManager:
         if not os.path.exists(self.data_dir):
             os.makedirs(self.data_dir)
 
-    def _load_state(self, local: bool, remote: bool) -> None:
+    def _load_state(
+        self, local: bool, remote: bool
+    ) -> Tuple[
+        bool, Dict[PublicId, List[Dict]], List[Tuple[PublicId, List[Dict], Exception]],
+    ]:
         """
         Load saved state from file.
 
@@ -708,32 +792,44 @@ class MultiAgentManager:
         :raises: ValueError if failed to load state.
         """
         if not os.path.exists(self._save_path):
-            return
+            return False, {}, []
 
         save_json = {}
         with open_file(self._save_path) as f:
             save_json = json.load(f)
 
         if not save_json:
-            return  # pragma: nocover
+            return False, {}, []  # pragma: nocover
 
-        try:
-            for public_id in save_json["projects"]:
+        projects_agents: Dict[PublicId, List] = defaultdict(list)
+
+        for agent_settings in save_json["agents"]:
+            projects_agents[PublicId.from_str(agent_settings["public_id"])].append(
+                agent_settings
+            )
+
+        failed_to_load: List[Tuple[PublicId, List[Dict], Exception]] = []
+        loaded_ok: Dict[PublicId, List[Dict]] = {}
+        for project_public_id, agents_settings in projects_agents.items():
+            try:
                 self.add_project(
-                    PublicId.from_str(public_id),
-                    local=local,
-                    remote=remote,
-                    restore=True,
+                    project_public_id, local=local, remote=remote, restore=True,
                 )
+            except ProjectCheckError as e:
+                failed_to_load.append((project_public_id, agents_settings, e))
+                break
 
-            for agent_settings in save_json["agents"]:
+            for agent_settings in agents_settings:
+
                 self.add_agent_with_config(
                     public_id=PublicId.from_str(agent_settings["public_id"]),
                     agent_name=agent_settings["agent_name"],
                     config=agent_settings["config"],
                 )
-        except ValueError as e:  # pragma: nocover
-            raise ValueError(f"Failed to load state. {e}")
+
+            loaded_ok[project_public_id] = agents_settings
+
+        return True, loaded_ok, failed_to_load
 
     def _save_state(self) -> None:
         """

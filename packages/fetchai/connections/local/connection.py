@@ -24,17 +24,15 @@ from asyncio import AbstractEventLoop, Queue
 from collections import defaultdict
 from concurrent.futures import Future
 from threading import Thread
-from typing import Any, Dict, List, Optional, Tuple, Type, cast
+from typing import Any, Dict, List, Optional, Tuple, cast
 
 from aea.common import Address
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
-from aea.exceptions import enforce
 from aea.helpers.search.models import Description
-from aea.mail.base import Envelope, EnvelopeContext
+from aea.mail.base import Envelope
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
-from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.oef_search.dialogues import (
@@ -53,43 +51,13 @@ MESSAGE_ID = 1
 RESPONSE_TARGET = MESSAGE_ID
 RESPONSE_MESSAGE_ID = MESSAGE_ID + 1
 STUB_DIALOGUE_ID = 0
-PUBLIC_ID = PublicId.from_str("fetchai/local:0.15.0")
+
+PUBLIC_ID = PublicId.from_str("fetchai/local:0.16.0")
 
 
-class OefSearchDialogue(BaseOefSearchDialogue):
-    """The dialogue class maintains state of a dialogue and manages it."""
-
-    def __init__(
-        self,
-        dialogue_label: BaseDialogueLabel,
-        self_address: Address,
-        role: BaseDialogue.Role,
-        message_class: Type[OefSearchMessage] = OefSearchMessage,
-    ) -> None:
-        """
-        Initialize a dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param self_address: the address of the entity for whom this dialogue is maintained
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: None
-        """
-        BaseOefSearchDialogue.__init__(
-            self, dialogue_label=dialogue_label, self_address=self_address, role=role
-        )
-        self._envelope_context = None  # type: Optional[EnvelopeContext]
-
-    @property
-    def envelope_context(self) -> Optional[EnvelopeContext]:
-        """Get envelope_context."""
-        return self._envelope_context
-
-    @envelope_context.setter
-    def envelope_context(self, envelope_context: Optional[EnvelopeContext]) -> None:
-        """Set envelope_context."""
-        enforce(self._envelope_context is None, "envelope_context already set!")
-        self._envelope_context = envelope_context
+OefSearchDialogue = BaseOefSearchDialogue
+OEF_LOCAL_NODE_SEARCH_ADDRESS = "oef_local_node_search"
+OEF_LOCAL_NODE_ADDRESS = "oef_local_node"
 
 
 class OefSearchDialogues(BaseOefSearchDialogues):
@@ -116,7 +84,7 @@ class OefSearchDialogues(BaseOefSearchDialogues):
 
         BaseOefSearchDialogues.__init__(
             self,
-            self_address=str(OEFLocalConnection.connection_id),
+            self_address=OEF_LOCAL_NODE_SEARCH_ADDRESS,
             role_from_first_message=role_from_first_message,
             dialogue_class=OefSearchDialogue,
         )
@@ -287,9 +255,7 @@ class LocalNode:
                 error_data={},
             )
             error_envelope = Envelope(
-                to=envelope.sender,
-                sender=str(OEFLocalConnection.connection_id),
-                message=msg,
+                to=envelope.sender, sender=OEF_LOCAL_NODE_ADDRESS, message=msg,
             )
             await self._send(error_envelope)
             return
@@ -327,12 +293,7 @@ class LocalNode:
                     target_message=oef_search_msg,
                     oef_error_operation=OefSearchMessage.OefErrorOperation.UNREGISTER_SERVICE,
                 )
-                envelope = Envelope(
-                    to=msg.to,
-                    sender=msg.sender,
-                    message=msg,
-                    context=dialogue.envelope_context,
-                )
+                envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
                 await self._send(envelope)
             else:
                 self.services[address].remove(service_description)
@@ -369,12 +330,7 @@ class LocalNode:
                 agents=tuple(sorted(set(result))),
             )
 
-            envelope = Envelope(
-                to=msg.to,
-                sender=msg.sender,
-                message=msg,
-                context=dialogue.envelope_context,
-            )
+            envelope = Envelope(to=msg.to, sender=msg.sender, message=msg,)
             await self._send(envelope)
 
     def _get_message_and_dialogue(
@@ -391,8 +347,6 @@ class LocalNode:
             raise ValueError("Call connect before!")
         message = cast(OefSearchMessage, envelope.message)
         dialogue = cast(Optional[OefSearchDialogue], self._dialogues.update(message))
-        if dialogue is not None:
-            dialogue.envelope_context = envelope.context
         return message, dialogue
 
     async def _send(self, envelope: Envelope) -> None:

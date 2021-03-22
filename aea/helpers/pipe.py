@@ -118,7 +118,7 @@ class PosixNamedPipeProtocol:
         Initialize a new posix named pipe.
 
         :param in_path: rendezvous point for incoming data
-        :param out_path: rendezvous point for outgoing daa
+        :param out_path: rendezvous point for outgoing data
         """
 
         self.logger = logger
@@ -236,7 +236,7 @@ class PosixNamedPipeProtocol:
         if self._fileobj is None:
             raise ValueError("Pipe not connected")  # pragma: nocover
         try:
-            # TOFIX(LR) Hack for MacOSX
+            # hack for MacOSX
             size = struct.pack("!I", 0)
             os.write(self._out, size)
 
@@ -313,6 +313,10 @@ class TCPSocketProtocol:
         self._writer.write_eof()
         await self._writer.drain()
         self._writer.close()
+        wait_closed = getattr(self._writer, "wait_closed", None)
+        if wait_closed:
+            # in py3.6 writer does not have the coroutine
+            await wait_closed()  #  pragma: nocover
 
 
 class TCPSocketChannel(IPCChannel):
@@ -331,7 +335,7 @@ class TCPSocketChannel(IPCChannel):
         self._sock = None  # type: Optional[TCPSocketProtocol]
 
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.bind(("", 0))
+        s.bind(("127.0.0.1", 0))
         s.listen(1)
         self._port = s.getsockname()[1]
         s.close()
@@ -449,7 +453,7 @@ class PosixNamedPipeChannel(IPCChannel):
         Setup communication channel and wait for other end to connect.
 
         :param timeout: timeout for connection to be established
-        :return: bool, indicating sucess
+        :return: bool, indicating success
         """
 
         if self._loop is None:

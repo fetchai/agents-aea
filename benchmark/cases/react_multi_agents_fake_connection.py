@@ -70,7 +70,7 @@ def react_speed_in_loop(
     :param benchmark: benchmark special parameter to communicate with executor
     :param agents_num: number of agents to start
     :param skills_num: number of skills to add to each agent
-    :param inbox_num: num of inbox messages for every agent
+    :param inbox_num: number of inbox messages for every agent
     :param agent_loop_timeout: idle sleep time for agent's loop
 
     :return: None

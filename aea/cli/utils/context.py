@@ -124,6 +124,9 @@ class Context:
         :return a list of dependency version specification. e.g. ["gym >= 1.0.0"]
         """
         dependencies = {}  # type: Dependencies
+
+        dependencies.update(self.agent_config.dependencies)
+
         for protocol_id in self.agent_config.protocols:
             dependencies.update(self._get_item_dependencies(PROTOCOL, protocol_id))
 

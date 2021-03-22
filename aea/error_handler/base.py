@@ -19,6 +19,7 @@
 """This module contains the abstract error handler class."""
 from abc import ABC, abstractmethod
 from logging import Logger
+from typing import Any, Dict
 
 from aea.mail.base import Envelope
 
@@ -26,9 +27,19 @@ from aea.mail.base import Envelope
 class AbstractErrorHandler(ABC):
     """Error handler class for handling problematic envelopes."""
 
-    @classmethod
+    __slots__ = ("_config",)
+
+    def __init__(self, **kwargs: Any):
+        """Instantiate error handler."""
+        self._config = kwargs
+
+    @property
+    def config(self) -> Dict[str, Any]:
+        """Get handler config."""
+        return self._config
+
     @abstractmethod
-    def send_unsupported_protocol(cls, envelope: Envelope, logger: Logger) -> None:
+    def send_unsupported_protocol(self, envelope: Envelope, logger: Logger) -> None:
         """
         Handle the received envelope in case the protocol is not supported.
 
@@ -37,22 +48,28 @@ class AbstractErrorHandler(ABC):
         :return: None
         """
 
-    @classmethod
     @abstractmethod
-    def send_decoding_error(cls, envelope: Envelope, logger: Logger) -> None:
+    def send_decoding_error(
+        self, envelope: Envelope, exception: Exception, logger: Logger
+    ) -> None:
         """
         Handle a decoding error.
 
         :param envelope: the envelope
+        :param exception: the exception raised during decoding
+        :param logger: the logger
         :return: None
         """
 
-    @classmethod
     @abstractmethod
-    def send_unsupported_skill(cls, envelope: Envelope, logger: Logger) -> None:
+    def send_no_active_handler(
+        self, envelope: Envelope, reason: str, logger: Logger
+    ) -> None:
         """
-        Handle the received envelope in case the skill is not supported.
+        Handle the received envelope in case the handler is not supported.
 
         :param envelope: the envelope
+        :param reason: the reason for the failure
+        :param logger: the logger
         :return: None
         """

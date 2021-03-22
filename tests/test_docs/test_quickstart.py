@@ -20,11 +20,24 @@
 """This module contains the tests for the content of quickstart.md file."""
 from pathlib import Path
 
+from packages.fetchai.protocols.default.message import DefaultMessage
+
 from tests.conftest import ROOT_DIR
-from tests.test_docs.helper import BasePythonMarkdownDocs
+from tests.test_docs.helper import BasePythonMarkdownDocs, extract_code_blocks
 
 
 class TestQuickstartTest(BasePythonMarkdownDocs):
     """Test the quickstart test."""
 
     DOC_PATH = Path(ROOT_DIR, "docs", "quickstart.md")
+
+
+def test_correct_echo_string():
+    """Test the echo string in the quickstart is using the correct protocol specification id."""
+    file_path = Path(ROOT_DIR, "docs", "quickstart.md")
+    bash_code_blocks = extract_code_blocks(filepath=file_path, filter_="bash")
+    echo_bloc = bash_code_blocks[21]
+    default_protocol_spec_id = echo_bloc.split(",")[2]
+    assert (
+        str(DefaultMessage.protocol_specification_id) == default_protocol_spec_id
+    ), "Spec ids not matching!"

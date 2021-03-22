@@ -10,11 +10,11 @@ This is a protocol for interacting with prometheus connection.
 ---
 name: prometheus
 author: fetchai
-version: 0.3.0
+version: 0.4.0
 description: A protocol for adding and updating metrics to a prometheus server.
 license: Apache-2.0
-aea_version: '>=0.10.0, <0.11.0'
-protocol_specification_id: fetchai/prometheus:0.1.0
+aea_version: '>=1.0.0rc1, <2.0.0'
+protocol_specification_id: fetchai/prometheus:1.0.0
 speech_acts:
   add_metric:
     type: pt:str

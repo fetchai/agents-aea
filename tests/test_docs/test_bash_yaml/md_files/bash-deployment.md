@@ -1,5 +1,5 @@
 ``` bash
-svn export https://github.com/fetchai/agents-aea/branches/master/deploy-image
+svn export https://github.com/fetchai/agents-aea/branches/main/deploy-image
 cd deploy-image
 rm -rf scripts
 svn export https://github.com/fetchai/docker-images/branches/master/scripts

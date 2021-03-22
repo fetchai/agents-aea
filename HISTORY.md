@@ -1,5 +1,78 @@
 # Release History
 
+## 0.11.2 (2020-03-17)
+
+- Fixes a package import issue
+- Fixes an issue where `AgentLoop` did not teardown properly under certain conditions
+- Fixes a bug in testing tools
+- Fixes a bug where plugins are not loaded after installation in `MultiAgentManager`
+- Adds unit tests for weather, thermometer and car park skills
+- Fixes a missing dependency in Windows
+- Improves SOEF connections' error handling
+- Fixes bug in ML skills and adds unit tests
+- Adds script to bump plugin versions
+- Adds gas price strategy support in `aea-ledger-ethereum` plugin
+- Adds CLI plugin for IPFS interactions (add/get)
+- Adds support for CLI plugins to framework
+- Multiple additional tests and test stability fixes
+
+## 0.11.1 (2020-03-06)
+
+- Bumps `aiohttp` to `>=3.7.4` to address a CVE affecting `http_server`, `http_client` and `webhook` connections
+- Adds script to ensure Pipfile and `tox.ini` dependencies align
+- Enforces presence of `protocol_specification_id` in `protocol.yaml`
+- Adds support for installation of agent-level PyPI dependencies in `AEABuilder`
+- Sets default ledger plugin during `aea create`
+- Updates various agent packages with missing ledger plugin dependencies
+- Bumps various development dependencies
+- Renames `coin_price` skill to `advanced_data_request` skill and generalises it
+- Updates `fetch_beacon` skill to use `ledger` connection
+- Multiple docs updates to fix order of CLI commands with respect to installing dependencies
+- Multiple additional tests and test stability fixes
+
+## 0.11.0 (2020-03-04)
+
+- Adds slots usage in frequently used framework objects, including `Dialogue`
+- Fixes a bug in `aea upgrade` command where eject prompt was not offered
+- Refactors skill component configurations to allow for skill components (`Handler`, `Behaviour`, `Model`) to be placed anywhere in a skill
+- Extends skill component configuration to specify optional `file_path` field
+- Extracts all ledger specific functionality in plugins
+- Improves error logging in http server connection
+- Updates `Development - Use case` documentation
+- Adds restart support to `p2p_libp2p` connection on read/write failure
+- Adds validation of default routing and default connection configuration
+- Refactors and significantly simplifies routing between components
+- Limits usage of `EnvelopeContext`
+- Adds support for new CosmWasm message format in ledger plugins
+- Adds project loading checks and optional auto removal in `MultiAgentManager`
+- Adds support for reuse of threaded `Multiplexer`
+- Fixes bug in TAC which caused agents to make suboptimal trades
+- Adds support to specify dependencies on `aea-config.yaml` level
+- Improves release scripts
+- Adds lightweight Golang AEALite library
+- Adds support for skill-to-skill messages
+- Removes CLI GUI
+- Multiple docs updates based on user feedback
+- Multiple additional tests and test stability fixes
+
+## 0.10.1 (2020-02-21)
+
+- Changes default URL of `soef` connection to https
+- Improves teardown, retry and edge case handling of `p2p_libp2p` and `p2p_libp2p_client` connections
+- Adds auto-generation of private keys to `MultiAgentManager`
+- Exposes address getters on `MultiAgentManager`
+- Improves package validation error messages
+- Simplifies default `DecisionMakerHandler` and extracts advanced features in separate class
+- Fixes task manager and its usage in skills
+- Adds support for multi-language protocol stub generation
+- Adds `data_dir` usage to additional connections
+- Adds IO helper function for consistent file usage
+- Extends release helper scripts
+- Removes stub connection as default connection
+- Adds support for AEA usage without connections
+- Multiple docs updates based on user feedback
+- Multiple additional tests and test stability fixes
+
 ## 0.10.0 (2020-02-11)
 
 - Removes error skill from agents which do not need it

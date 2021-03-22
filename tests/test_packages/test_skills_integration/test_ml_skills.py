@@ -22,13 +22,13 @@ import importlib
 from random import uniform
 
 import pytest
+from aea_ledger_fetchai import FetchAICrypto
 
 from aea.test_tools.test_cases import AEATestCaseManyFlaky
 
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
 from tests.conftest import (
-    FETCHAI,
     FETCHAI_PRIVATE_KEY_FILE,
     FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
     MAX_FLAKY_RERUNS_INTEGRATION,
@@ -47,6 +47,9 @@ def _is_not_tensorflow_installed():
 class TestMLSkills(AEATestCaseManyFlaky):
     """Test that ml skills work."""
 
+    capture_log = True
+    cli_log_options = ["-v", "DEBUG"]
+
     @pytest.mark.flaky(
         reruns=MAX_FLAKY_RERUNS_INTEGRATION
     )  # cause possible network issues
@@ -60,8 +63,8 @@ class TestMLSkills(AEATestCaseManyFlaky):
         self.create_agents(data_provider_aea_name, model_trainer_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
-            "fetchai/oef_search:0.13.0": "fetchai/soef:0.16.0",
+            "fetchai/ledger_api:0.11.0": "fetchai/ledger:0.15.0",
+            "fetchai/oef_search:0.14.0": "fetchai/soef:0.19.0",
         }
 
         # generate random location
@@ -72,11 +75,11 @@ class TestMLSkills(AEATestCaseManyFlaky):
 
         # prepare data provider agent
         self.set_agent_context(data_provider_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.15.0")
-        self.add_item("connection", "fetchai/soef:0.16.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.15.0")
-        self.add_item("connection", "fetchai/ledger:0.13.0")
-        self.add_item("skill", "fetchai/ml_data_provider:0.19.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.18.0")
+        self.add_item("connection", "fetchai/soef:0.19.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.18.0")
+        self.add_item("connection", "fetchai/ledger:0.15.0")
+        self.add_item("skill", "fetchai/ml_data_provider:0.21.0")
         setting_path = (
             "vendor.fetchai.skills.ml_data_provider.models.strategy.args.is_ledger_tx"
         )
@@ -86,18 +89,22 @@ class TestMLSkills(AEATestCaseManyFlaky):
         self.run_install()
 
         # add keys
-        self.generate_private_key(FETCHAI)
-        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.generate_private_key(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        )
+        self.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+            connection=True,
         )
         self.replace_private_key_in_file(
             NON_FUNDED_FETCHAI_PRIVATE_KEY_1, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
         )
 
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.set_config(setting_path, FETCHAI)
+        self.set_config(setting_path, FetchAICrypto.identifier)
 
         # replace location
         setting_path = (
@@ -107,11 +114,11 @@ class TestMLSkills(AEATestCaseManyFlaky):
 
         # prepare model trainer agent
         self.set_agent_context(model_trainer_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.15.0")
-        self.add_item("connection", "fetchai/soef:0.16.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.15.0")
-        self.add_item("connection", "fetchai/ledger:0.13.0")
-        self.add_item("skill", "fetchai/ml_train:0.20.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.18.0")
+        self.add_item("connection", "fetchai/soef:0.19.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.18.0")
+        self.add_item("connection", "fetchai/ledger:0.15.0")
+        self.add_item("skill", "fetchai/ml_train:0.23.0")
         setting_path = (
             "vendor.fetchai.skills.ml_train.models.strategy.args.is_ledger_tx"
         )
@@ -121,11 +128,15 @@ class TestMLSkills(AEATestCaseManyFlaky):
         self.run_install()
 
         # add keys
-        self.generate_private_key(FETCHAI)
-        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.generate_private_key(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        )
+        self.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+            connection=True,
         )
 
         # set p2p configs
@@ -234,8 +245,8 @@ class TestMLSkillsFetchaiLedger(AEATestCaseManyFlaky):
         self.create_agents(data_provider_aea_name, model_trainer_aea_name)
 
         default_routing = {
-            "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
-            "fetchai/oef_search:0.13.0": "fetchai/soef:0.16.0",
+            "fetchai/ledger_api:0.11.0": "fetchai/ledger:0.15.0",
+            "fetchai/oef_search:0.14.0": "fetchai/soef:0.19.0",
         }
 
         # generate random location
@@ -246,35 +257,39 @@ class TestMLSkillsFetchaiLedger(AEATestCaseManyFlaky):
 
         # prepare data provider agent
         self.set_agent_context(data_provider_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.15.0")
-        self.add_item("connection", "fetchai/soef:0.16.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.15.0")
-        self.add_item("connection", "fetchai/ledger:0.13.0")
-        self.add_item("skill", "fetchai/ml_data_provider:0.19.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.18.0")
+        self.add_item("connection", "fetchai/soef:0.19.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.18.0")
+        self.add_item("connection", "fetchai/ledger:0.15.0")
+        self.add_item("skill", "fetchai/ml_data_provider:0.21.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/ml_data_provider:0.21.0", data_provider_aea_name
+            "fetchai/ml_data_provider:0.24.0", data_provider_aea_name
         )
         assert (
             diff == []
         ), "Difference between created and fetched project for files={}".format(diff)
 
         # add keys
-        self.generate_private_key(FETCHAI)
-        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.generate_private_key(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        )
+        self.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+            connection=True,
         )
         self.replace_private_key_in_file(
             NON_FUNDED_FETCHAI_PRIVATE_KEY_1, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
         )
 
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config.ledger_id"
-        self.set_config(setting_path, FETCHAI)
+        self.set_config(setting_path, FetchAICrypto.identifier)
 
         # replace location
         setting_path = (
@@ -284,32 +299,36 @@ class TestMLSkillsFetchaiLedger(AEATestCaseManyFlaky):
 
         # prepare model trainer agent
         self.set_agent_context(model_trainer_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.15.0")
-        self.add_item("connection", "fetchai/soef:0.16.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.15.0")
-        self.add_item("connection", "fetchai/ledger:0.13.0")
-        self.add_item("skill", "fetchai/ml_train:0.20.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.18.0")
+        self.add_item("connection", "fetchai/soef:0.19.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.18.0")
+        self.add_item("connection", "fetchai/ledger:0.15.0")
+        self.add_item("skill", "fetchai/ml_train:0.23.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/ml_model_trainer:0.22.0", model_trainer_aea_name
+            "fetchai/ml_model_trainer:0.25.0", model_trainer_aea_name
         )
         assert (
             diff == []
         ), "Difference between created and fetched project for files={}".format(diff)
 
         # add keys
-        self.generate_private_key(FETCHAI)
-        self.generate_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION)
-        self.add_private_key(FETCHAI, FETCHAI_PRIVATE_KEY_FILE)
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.generate_private_key(
+            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+        )
+        self.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
         self.add_private_key(
-            FETCHAI, FETCHAI_PRIVATE_KEY_FILE_CONNECTION, connection=True
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+            connection=True,
         )
 
         # fund key
-        self.generate_wealth(FETCHAI)
+        self.generate_wealth(FetchAICrypto.identifier)
 
         # set p2p configs
         setting_path = "vendor.fetchai.connections.p2p_libp2p.config"

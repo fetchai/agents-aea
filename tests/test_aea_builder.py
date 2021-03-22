@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains tests for aea/aea_builder.py."""
 import os
 import re
@@ -48,6 +47,7 @@ from aea.configurations.constants import (
     DEFAULT_PRIVATE_KEY_FILE,
     DOTTED_PATH_MODULE_ELEMENT_SEPARATOR,
 )
+from aea.configurations.data_types import PublicId
 from aea.configurations.loader import load_component_configuration
 from aea.contracts.base import Contract
 from aea.exceptions import AEAEnforceError, AEAException
@@ -111,7 +111,7 @@ def test_add_package_already_existing():
     builder.add_component(ComponentType.PROTOCOL, fipa_package_path)
 
     expected_message = re.escape(
-        "Component 'fetchai/fipa:0.13.0' of type 'protocol' already added."
+        "Component 'fetchai/fipa:0.14.0' of type 'protocol' already added."
     )
     with pytest.raises(AEAException, match=expected_message):
         builder.add_component(ComponentType.PROTOCOL, fipa_package_path)
@@ -256,7 +256,13 @@ def test_multiple_builds_with_component_instance():
     builder.add_private_key(DEFAULT_LEDGER)
 
     a_protocol = Protocol(
-        ProtocolConfig("a_protocol", "author", "0.1.0"), DefaultMessage
+        ProtocolConfig(
+            "a_protocol",
+            "author",
+            "0.1.0",
+            protocol_specification_id="some/author:0.1.0",
+        ),
+        DefaultMessage,
     )
     builder.add_component_instance(a_protocol)
 
@@ -280,8 +286,22 @@ def test_multiple_builds_with_component_instance():
 def test_dependency_manager_highest_version():
     """Test dependency version priority."""
     dep_manager = _DependenciesManager()
-    dep_manager.add_component(ProtocolConfig("a_protocol", "author", "0.1.0"))
-    dep_manager.add_component(ProtocolConfig("a_protocol", "author", "0.2.0"))
+    dep_manager.add_component(
+        ProtocolConfig(
+            "a_protocol",
+            "author",
+            "0.1.0",
+            protocol_specification_id="some/author:0.1.0",
+        )
+    )
+    dep_manager.add_component(
+        ProtocolConfig(
+            "a_protocol",
+            "author",
+            "0.2.0",
+            protocol_specification_id="some/author:0.1.0",
+        )
+    )
 
     assert len(dep_manager.dependencies_highest_version) == 1
     assert list(dep_manager.dependencies_highest_version)[0].version == "0.2.0"
@@ -297,14 +317,21 @@ def test_remove_component_not_exists():
     dep_manager = _DependenciesManager()
     with pytest.raises(ValueError, match=r"Component .* of type .* not present."):
         dep_manager.remove_component(
-            ProtocolConfig("a_protocol", "author", "0.1.0").component_id
+            ProtocolConfig(
+                "a_protocol",
+                "author",
+                "0.1.0",
+                protocol_specification_id="some/author:0.1.0",
+            ).component_id
         )
 
 
 def test_remove_component_depends_on_fail():
     """Test component remove fails cause dependency."""
     dep_manager = _DependenciesManager()
-    protocol = ProtocolConfig("a_protocol", "author", "0.1.0")
+    protocol = ProtocolConfig(
+        "a_protocol", "author", "0.1.0", protocol_specification_id="some/author:0.1.0"
+    )
     dep_manager.add_component(protocol)
     dep_manager.add_component(
         SkillConfig("skill", "author", "0.1.0", protocols=[protocol.public_id])
@@ -320,7 +347,9 @@ def test_remove_component_depends_on_fail():
 def test_remove_component_success():
     """Test remove registered component."""
     dep_manager = _DependenciesManager()
-    protocol = ProtocolConfig("a_protocol", "author", "0.1.0")
+    protocol = ProtocolConfig(
+        "a_protocol", "author", "0.1.0", protocol_specification_id="some/author:0.1.0"
+    )
     skill = SkillConfig("skill", "author", "0.1.0", protocols=[protocol.public_id])
     dep_manager.add_component(protocol)
     dep_manager.add_component(skill)
@@ -350,7 +379,9 @@ def test_can_remove_not_exists_component():
     builder = AEABuilder()
     builder.set_name("aea_1")
     builder.add_private_key("fetchai")
-    protocol = ProtocolConfig("a_protocol", "author", "0.1.0")
+    protocol = ProtocolConfig(
+        "a_protocol", "author", "0.1.0", protocol_specification_id="some/author:0.1.0"
+    )
     with pytest.raises(ValueError):
         builder._check_can_remove(protocol.component_id)
 
@@ -361,7 +392,13 @@ def test_remove_protocol():
     builder.set_name("aea_1")
     builder.add_private_key("fetchai")
     a_protocol = Protocol(
-        ProtocolConfig("a_protocol", "author", "0.1.0"), DefaultMessage
+        ProtocolConfig(
+            "a_protocol",
+            "author",
+            "0.1.0",
+            protocol_specification_id="some/author:0.1.0",
+        ),
+        DefaultMessage,
     )
     num_deps = len(builder._package_dependency_manager.all_dependencies)
     builder.add_component_instance(a_protocol)
@@ -437,9 +474,9 @@ def test_process_connection_ids_bad_default_connection():
         ValueError,
         match=r"Default connection not a dependency. Please add it and retry.",
     ):
-        builder.set_default_connection(
-            ConnectionConfig("conn", "author", "0.1.0").public_id
-        )
+        builder._default_connection = ConnectionConfig(
+            "conn", "author", "0.1.0"
+        ).public_id
         builder._process_connection_ids([connection.public_id])
 
 
@@ -455,7 +492,13 @@ def test_component_add_bad_dep():
     builder.add_component_instance(connection)
 
     a_protocol = Protocol(
-        ProtocolConfig("a_protocol", "author", "0.1.0"), DefaultMessage
+        ProtocolConfig(
+            "a_protocol",
+            "author",
+            "0.1.0",
+            protocol_specification_id="some/author:0.1.0",
+        ),
+        DefaultMessage,
     )
     a_protocol.configuration.pypi_dependencies = {
         "something": Dependency("something", "==0.2.0")
@@ -466,18 +509,53 @@ def test_component_add_bad_dep():
         builder.add_component_instance(a_protocol)
 
 
-def test_set_from_config():
+def test_set_from_config_default():
     """Test set configuration from config loaded."""
     builder = AEABuilder()
     agent_configuration = Mock()
     agent_configuration.default_connection = "test/test:0.1.0"
+    agent_configuration.default_routing = {}
+    agent_configuration.decision_maker_handler = {}
+    agent_configuration.error_handler = {}
+    agent_configuration.skill_exception_policy = ExceptionPolicyEnum.just_log
+    agent_configuration.connection_exception_policy = ExceptionPolicyEnum.just_log
+    agent_configuration._default_connection = None
+    agent_configuration.connection_private_key_paths_dict = {"fetchai": None}
+    agent_configuration.ledger_apis_dict = {"fetchai": None}
+    agent_configuration.private_key_paths_dict = {"fetchai": None}
+    agent_configuration.protocols = (
+        agent_configuration.connections
+    ) = agent_configuration.contracts = agent_configuration.skills = []
+
+    with patch.object(builder, "set_default_connection"):
+        builder.set_from_configuration(agent_configuration, aea_project_path="/anydir")
+    assert builder._decision_maker_handler_class is None
+    assert builder._decision_maker_handler_dotted_path is None
+    assert builder._decision_maker_handler_file_path is None
+    assert builder._load_decision_maker_handler_class() is None
+
+
+def test_set_from_config_custom():
+    """Test set configuration from config loaded."""
+    dm_dotted_path = f"aea.decision_maker.default{DOTTED_PATH_MODULE_ELEMENT_SEPARATOR}DecisionMakerHandler"
+    dm_file_path = ROOT_DIR + "/aea/decision_maker/default.py"
+    builder = AEABuilder()
+    agent_configuration = Mock()
+    agent_configuration.default_connection = "test/test:0.1.0"
+    agent_configuration.default_routing = {}
     agent_configuration.decision_maker_handler = {
-        "dotted_path": f"aea.decision_maker.default{DOTTED_PATH_MODULE_ELEMENT_SEPARATOR}DecisionMakerHandler",
-        "file_path": ROOT_DIR + "/aea/decision_maker/default.py",
+        "dotted_path": dm_dotted_path,
+        "file_path": dm_file_path,
+        "config": {},
     }
+    error_handler_dotted_path = (
+        f"aea.error_handler.default{DOTTED_PATH_MODULE_ELEMENT_SEPARATOR}ErrorHandler"
+    )
+    error_handler_file_path = ROOT_DIR + "/aea/error_handler/default.py"
     agent_configuration.error_handler = {
-        "dotted_path": f"aea.error_handler.default{DOTTED_PATH_MODULE_ELEMENT_SEPARATOR}ErrorHandler",
-        "file_path": ROOT_DIR + "/aea/error_handler/default.py",
+        "dotted_path": error_handler_dotted_path,
+        "file_path": error_handler_file_path,
+        "config": {},
     }
     agent_configuration.skill_exception_policy = ExceptionPolicyEnum.just_log
     agent_configuration.connection_exception_policy = ExceptionPolicyEnum.just_log
@@ -489,8 +567,27 @@ def test_set_from_config():
         agent_configuration.connections
     ) = agent_configuration.contracts = agent_configuration.skills = []
 
-    builder.set_from_configuration(agent_configuration, aea_project_path="/anydir")
-    assert builder._decision_maker_handler_class is not None
+    with patch.object(builder, "set_default_connection"):
+        builder.set_from_configuration(agent_configuration, aea_project_path="/anydir")
+        assert builder._decision_maker_handler_class is None
+        assert builder._decision_maker_handler_dotted_path == dm_dotted_path
+        assert builder._decision_maker_handler_file_path == dm_file_path
+        assert builder._load_decision_maker_handler_class() is not None
+        assert builder._load_error_handler_class() is not None
+        builder.reset(is_full_reset=True)
+        agent_configuration.decision_maker_handler = {
+            "dotted_path": dm_dotted_path,
+            "file_path": None,
+            "config": {},
+        }
+        agent_configuration.error_handler = {
+            "dotted_path": error_handler_dotted_path,
+            "file_path": None,
+            "config": {},
+        }
+        builder.set_from_configuration(agent_configuration, aea_project_path="/anydir")
+        assert builder._load_decision_maker_handler_class() is not None
+        assert builder._load_error_handler_class() is not None
 
 
 def test_load_abstract_component():
@@ -555,6 +652,8 @@ class TestFromAEAProject(AEATestCaseEmpty):
 
     def test_from_project(self):
         """Test builder set from project dir."""
+        self.generate_private_key()
+        self.add_private_key()
         builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
         with cd(self._get_cwd()):
             aea = builder.build()
@@ -566,6 +665,8 @@ class TestFromAEAProjectWithCustomConnectionConfig(AEATestCaseEmpty):
 
     def _add_stub_connection_config(self):
         """Add custom stub connection config."""
+        self.generate_private_key()
+        self.add_private_key()
         cwd = self._get_cwd()
         aea_config_file = Path(cwd, DEFAULT_AEA_CONFIG_FILE)
         configuration = aea_config_file.read_text()
@@ -586,7 +687,7 @@ class TestFromAEAProjectWithCustomConnectionConfig(AEATestCaseEmpty):
 
     def test_from_project(self):
         """Test builder set from project dir."""
-        self.add_item("connection", "fetchai/stub:0.16.0")
+        self.add_item("connection", "fetchai/stub:0.18.0")
         self.expected_input_file = "custom_input_file"
         self.expected_output_file = "custom_output_file"
         self._add_stub_connection_config()
@@ -828,3 +929,54 @@ class TestBuildEntrypoint(AEATestCaseEmpty):
         with cd(self._get_cwd()), pytest.raises(AEAException, match=match):
             self.script_path.write_text("")
             self.builder.call_all_build_entrypoints()
+
+
+def test_set_default_connection_and_routing():
+    """Test checks on default connection and routing set."""
+    builder = AEABuilder()
+    builder._package_dependency_manager = Mock()
+    good_connection = ComponentId(
+        "connection", PublicId.from_str("good/connection:0.1.0")
+    )
+    bad_connection = ComponentId(
+        "connection", PublicId.from_str("bad/connection:0.1.0")
+    )
+    good_protocol = ComponentId("protocol", PublicId.from_str("good/protocol:0.1.0"))
+    bad_protocol = ComponentId("protocol", PublicId.from_str("bad/protocol:0.1.0"))
+
+    builder._package_dependency_manager.connections = [good_connection]
+    builder._package_dependency_manager.protocols = [good_protocol]
+
+    builder.set_default_connection(public_id=good_connection.public_id)
+    with pytest.raises(
+        ValueError,
+        match="Connection bad/connection:0.1.0 specified as `default_connection` is not a project dependency!",
+    ):
+        builder.set_default_connection(public_id=bad_connection.public_id)
+
+    builder.set_default_routing({good_protocol.public_id: good_connection.public_id})
+
+    with pytest.raises(
+        ValueError,
+        match="Connection bad/connection:0.1.0 specified in `default_routing` is not a project dependency!",
+    ):
+        builder.set_default_routing({good_protocol.public_id: bad_connection.public_id})
+
+    with pytest.raises(
+        ValueError,
+        match="Protocol bad/protocol:0.1.0 specified in `default_routing` is not a project dependency!",
+    ):
+        builder.set_default_routing({bad_protocol.public_id: good_connection.public_id})
+
+
+def test_builder_pypi_dependencies():
+    """Test getter for PyPI dependencies."""
+    dummy_aea_path = Path(CUR_PATH, "data", "dummy_aea")
+    builder = AEABuilder.from_aea_project(dummy_aea_path)
+    dependencies = builder._package_dependency_manager.pypi_dependencies
+    assert set(dependencies.keys()) == {
+        "protobuf",
+        "aea-ledger-fetchai",
+        "aea-ledger-ethereum",
+        "aea-ledger-cosmos",
+    }

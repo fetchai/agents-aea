@@ -45,6 +45,8 @@ from tests.conftest import get_host, get_unused_tcp_port
 
 logger = logging.getLogger(__name__)
 
+SKILL_ID_STR = "some_author/some_skill:0.1.0"
+
 
 class TestClientServer:
     """Client-Server end-to-end test."""
@@ -53,16 +55,18 @@ class TestClientServer:
         """Set up server connection."""
         self.server_agent_address = "server_agent_address"
         self.server_agent_identity = Identity(
-            "agent running server", address=self.server_agent_address
+            "agent_running_server", address=self.server_agent_address
         )
         self.host = get_host()
         self.port = get_unused_tcp_port()
         self.connection_id = HTTPServerConnection.connection_id
         self.protocol_id = HttpMessage.protocol_id
+        self.target_skill_id = SKILL_ID_STR
 
         self.configuration = ConnectionConfig(
             host=self.host,
             port=self.port,
+            target_skill_id=self.target_skill_id,
             api_spec_path=None,  # do not filter on API spec
             connection_id=HTTPServerConnection.connection_id,
         )
@@ -86,18 +90,19 @@ class TestClientServer:
             """
             return HttpDialogue.Role.SERVER
 
-        self._server_dialogues = HttpDialogues(
-            self.server_agent_address, role_from_first_message=role_from_first_message
+        self._skill_dialogues = HttpDialogues(
+            SKILL_ID_STR, role_from_first_message=role_from_first_message
         )
 
     def setup_client(self):
         """Set up client connection."""
         self.client_agent_address = "client_agent_address"
+        self.client_agent_skill_id = "some/skill:0.1.0"
         self.client_agent_identity = Identity(
-            "agent running client", address=self.client_agent_address
+            "agent_running_client", address=self.client_agent_address
         )
         configuration = ConnectionConfig(
-            host="localost",
+            host="localhost",
             port="8888",  # TODO: remove host/port for client?
             connection_id=HTTPClientConnection.connection_id,
         )
@@ -121,7 +126,7 @@ class TestClientServer:
             return HttpDialogue.Role.CLIENT
 
         self._client_dialogues = HttpDialogues(
-            self.client_agent_address, role_from_first_message=role_from_first_message
+            self.client_agent_skill_id, role_from_first_message=role_from_first_message
         )
 
     def setup(self):
@@ -158,7 +163,7 @@ class TestClientServer:
     ) -> Envelope:
         """Make response envelope."""
         incoming_message = cast(HttpMessage, request_envelope.message)
-        dialogue = self._server_dialogues.update(incoming_message)
+        dialogue = self._skill_dialogues.update(incoming_message)
         assert dialogue is not None
         message = dialogue.reply(
             target_message=incoming_message,

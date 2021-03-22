@@ -1,8 +1,8 @@
-AEAs can create and update prometheus metrics for remote monitoring by sending messages to the prometheus connection `fetchai/prometheus:0.3.0`.
+AEAs can create and update prometheus metrics for remote monitoring by sending messages to the prometheus connection `fetchai/prometheus:0.4.0`.
 
 To see this working in an agent, fetch and run the `coin_price_feed` agent and check `localhost:9090/metrics` to see the latest values of the metrics `num_retrievals` and `num_requests`:
 ``` bash
-aea fetch fetchai/coin_price_feed:0.5.0
+aea fetch fetchai/coin_price_feed:0.9.0
 cd coin_price_feed
 aea install
 aea build
@@ -44,13 +44,13 @@ class PrometheusDialogues(Model, BasePrometheusDialogues):
 
         BasePrometheusDialogues.__init__(
             self,
-            self_address=self.context.agent_address,
+            self_address=str(self.skill_id),
             role_from_first_message=role_from_first_message,
         )
 ```
 </details>
 
-Then configure your metrics in the `skill.yaml` file. For example (from the `coin_price` skill):
+Then configure your metrics in the `skill.yaml` file. For example (from the `advanced_data_request` skill):
 ``` yaml
 models:
   prometheus_dialogues:
@@ -101,10 +101,7 @@ def add_prometheus_metric(
     )
 
     # send message
-    envelope_context = EnvelopeContext(
-        skill_id=self.context.skill_id, connection_id=PROM_CONNECTION_ID
-    )
-    self.context.outbox.put_message(message=message, context=envelope_context)
+    self.context.outbox.put_message(message=message)
 ```
 where `PROM_CONNECTION_ID` should be imported to your skill as follows:
 ``` python
@@ -142,10 +139,7 @@ def update_prometheus_metric(
     )
 
     # send message
-    envelope_context = EnvelopeContext(
-        skill_id=self.context.skill_id, connection_id=PROM_CONNECTION_ID
-    )
-    self.context.outbox.put_message(message=message, context=envelope_context)
+    self.context.outbox.put_message(message=message)
 ```
 
 Initialize the metrics from the configuration file in the behaviour setup:
@@ -162,10 +156,10 @@ def setup(self) -> None:
 ```
 
 Then call the `update_prometheus_metric` function from the appropriate places.
-For example, the following code in `handlers.py` for the `coin_price` skill updates the number of http requests served:
+For example, the following code in `handlers.py` for the `advanced_data_request` skill updates the number of http requests served:
 ``` python
 if self.context.prometheus_dialogues.enabled:
-    self.context.behaviours.coin_price_behaviour.update_prometheus_metric(
+    self.context.behaviours.advanced_data_request_behaviour.update_prometheus_metric(
         "num_requests", "inc", 1.0, {}
     )
 ```
@@ -241,5 +235,4 @@ class PrometheusHandler(Handler):
 
         :return: None
         """
-        pass
 ```

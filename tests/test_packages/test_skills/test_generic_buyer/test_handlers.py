@@ -35,7 +35,7 @@ from aea.helpers.transaction.base import (
     TransactionReceipt,
 )
 from aea.protocols.dialogue.base import DialogueMessage
-from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_ADDRESS
+from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_AGENT_ADDRESS
 
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
@@ -172,11 +172,11 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         incoming_message = cast(FipaMessage, incoming_message)
         mock_logger.assert_any_call(
             logging.INFO,
-            f"received proposal={incoming_message.proposal.values} from sender={COUNTERPARTY_ADDRESS[-5:]}",
+            f"received proposal={incoming_message.proposal.values} from sender={COUNTERPARTY_AGENT_ADDRESS[-5:]}",
         )
         mock_logger.assert_any_call(
             logging.INFO,
-            f"accepting the proposal from sender={COUNTERPARTY_ADDRESS[-5:]}",
+            f"accepting the proposal from sender={COUNTERPARTY_AGENT_ADDRESS[-5:]}",
         )
 
         self.assert_quantity_in_outbox(1)
@@ -228,11 +228,11 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         incoming_message = cast(FipaMessage, incoming_message)
         mock_logger.assert_any_call(
             logging.INFO,
-            f"received proposal={incoming_message.proposal.values} from sender={COUNTERPARTY_ADDRESS[-5:]}",
+            f"received proposal={incoming_message.proposal.values} from sender={COUNTERPARTY_AGENT_ADDRESS[-5:]}",
         )
         mock_logger.assert_any_call(
             logging.INFO,
-            f"declining the proposal from sender={COUNTERPARTY_ADDRESS[-5:]}",
+            f"declining the proposal from sender={COUNTERPARTY_AGENT_ADDRESS[-5:]}",
         )
 
         self.assert_quantity_in_outbox(1)
@@ -272,7 +272,8 @@ class TestGenericFipaHandler(BaseSkillTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO, f"received DECLINE from sender={COUNTERPARTY_ADDRESS[-5:]}"
+            logging.INFO,
+            f"received DECLINE from sender={COUNTERPARTY_AGENT_ADDRESS[-5:]}",
         )
 
         for (
@@ -310,7 +311,8 @@ class TestGenericFipaHandler(BaseSkillTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO, f"received DECLINE from sender={COUNTERPARTY_ADDRESS[-5:]}"
+            logging.INFO,
+            f"received DECLINE from sender={COUNTERPARTY_AGENT_ADDRESS[-5:]}",
         )
 
         for (
@@ -360,7 +362,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         # after
         mock_logger_handler.assert_any_call(
             logging.INFO,
-            f"received MATCH_ACCEPT_W_INFORM from sender={COUNTERPARTY_ADDRESS[-5:]} with info={incoming_message.info}",
+            f"received MATCH_ACCEPT_W_INFORM from sender={COUNTERPARTY_AGENT_ADDRESS[-5:]} with info={incoming_message.info}",
         )
 
         # operation
@@ -375,7 +377,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
             message_type=LedgerApiMessage,
             performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
             to=LEDGER_API_ADDRESS,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             terms=fipa_dialogue.terms,
         )
         assert has_attributes, error_str
@@ -404,7 +406,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
         # after
         mock_logger.assert_any_call(
             logging.INFO,
-            f"received MATCH_ACCEPT_W_INFORM from sender={COUNTERPARTY_ADDRESS[-5:]} with info={incoming_message.info}",
+            f"received MATCH_ACCEPT_W_INFORM from sender={COUNTERPARTY_AGENT_ADDRESS[-5:]} with info={incoming_message.info}",
         )
 
         self.assert_quantity_in_outbox(1)
@@ -421,7 +423,7 @@ class TestGenericFipaHandler(BaseSkillTestCase):
 
         mock_logger.assert_any_call(
             logging.INFO,
-            f"informing counterparty={COUNTERPARTY_ADDRESS[-5:]} of payment.",
+            f"informing counterparty={COUNTERPARTY_AGENT_ADDRESS[-5:]} of payment.",
         )
 
     def test_handle_inform_with_data(self):
@@ -448,7 +450,8 @@ class TestGenericFipaHandler(BaseSkillTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO, f"received INFORM from sender={COUNTERPARTY_ADDRESS[-5:]}"
+            logging.INFO,
+            f"received INFORM from sender={COUNTERPARTY_AGENT_ADDRESS[-5:]}",
         )
         mock_logger.assert_any_call(
             logging.INFO, "received the following data={'data_name': 'data'}"
@@ -485,11 +488,13 @@ class TestGenericFipaHandler(BaseSkillTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO, f"received INFORM from sender={COUNTERPARTY_ADDRESS[-5:]}"
+            logging.INFO,
+            f"received INFORM from sender={COUNTERPARTY_AGENT_ADDRESS[-5:]}",
         )
 
         mock_logger.assert_any_call(
-            logging.INFO, f"received no data from sender={COUNTERPARTY_ADDRESS[-5:]}"
+            logging.INFO,
+            f"received no data from sender={COUNTERPARTY_AGENT_ADDRESS[-5:]}",
         )
 
     def test_handle_invalid(self):
@@ -522,6 +527,7 @@ class TestGenericOefSearchHandler(BaseSkillTestCase):
     """Test oef search handler of generic buyer."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "generic_buyer")
+    is_agent_to_agent_messages = False
 
     @classmethod
     def setup(cls):
@@ -773,6 +779,7 @@ class TestGenericSigningHandler(BaseSkillTestCase):
     """Test signing handler of generic buyer."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "generic_buyer")
+    is_agent_to_agent_messages = False
 
     @classmethod
     def setup(cls):
@@ -942,7 +949,7 @@ class TestGenericSigningHandler(BaseSkillTestCase):
             message_type=LedgerApiMessage,
             performative=LedgerApiMessage.Performative.SEND_SIGNED_TRANSACTION,
             to=LEDGER_API_ADDRESS,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             signed_transaction=incoming_message.signed_transaction,
         )
         assert has_attributes, error_str
@@ -957,7 +964,8 @@ class TestGenericSigningHandler(BaseSkillTestCase):
             self.prepare_skill_dialogue(
                 dialogues=self.fipa_dialogues,
                 messages=self.list_of_fipa_messages[:4],
-                counterparty=COUNTERPARTY_ADDRESS,
+                counterparty=COUNTERPARTY_AGENT_ADDRESS,
+                is_agent_to_agent_messages=True,
             ),
         )
 
@@ -1049,6 +1057,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
     """Test ledger_api handler of generic buyer."""
 
     path_to_skill = Path(ROOT_DIR, "packages", "fetchai", "skills", "generic_buyer")
+    is_agent_to_agent_messages = False
 
     @classmethod
     def setup(cls):
@@ -1249,7 +1258,9 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         fipa_dialogue = cast(
             FipaDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.fipa_dialogues, messages=self.list_of_fipa_messages[:4],
+                dialogues=self.fipa_dialogues,
+                messages=self.list_of_fipa_messages[:4],
+                is_agent_to_agent_messages=True,
             ),
         )
         ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
@@ -1327,7 +1338,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             message_type=LedgerApiMessage,
             performative=LedgerApiMessage.Performative.GET_TRANSACTION_RECEIPT,
             to=incoming_message.sender,
-            sender=self.skill.skill_context.agent_address,
+            sender=str(self.skill.skill_context.skill_id),
             transaction_digest=self.transaction_digest,
         )
         assert has_attributes, error_str
@@ -1350,7 +1361,9 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         fipa_dialogue = cast(
             FipaDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.fipa_dialogues, messages=self.list_of_fipa_messages[:4],
+                dialogues=self.fipa_dialogues,
+                messages=self.list_of_fipa_messages[:4],
+                is_agent_to_agent_messages=True,
             ),
         )
         ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
@@ -1383,7 +1396,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             actual_message=self.get_message_from_outbox(),
             message_type=FipaMessage,
             performative=FipaMessage.Performative.INFORM,
-            to=COUNTERPARTY_ADDRESS,
+            to=COUNTERPARTY_AGENT_ADDRESS,
             sender=self.skill.skill_context.agent_address,
             info={"transaction_digest": self.transaction_digest.body},
         )
@@ -1403,7 +1416,9 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         fipa_dialogue = cast(
             FipaDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.fipa_dialogues, messages=self.list_of_fipa_messages[:4],
+                dialogues=self.fipa_dialogues,
+                messages=self.list_of_fipa_messages[:4],
+                is_agent_to_agent_messages=True,
             ),
         )
         ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
@@ -1448,7 +1463,9 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
         fipa_dialogue = cast(
             FipaDialogue,
             self.prepare_skill_dialogue(
-                dialogues=self.fipa_dialogues, messages=self.list_of_fipa_messages[:4],
+                dialogues=self.fipa_dialogues,
+                messages=self.list_of_fipa_messages[:4],
+                is_agent_to_agent_messages=True,
             ),
         )
         ledger_api_dialogue.associated_fipa_dialogue = fipa_dialogue
@@ -1519,7 +1536,7 @@ class TestGenericLedgerApiHandler(BaseSkillTestCase):
             performative=invalid_performative,
             ledger_id="some_ledger_id",
             address="some_address",
-            to=self.skill.skill_context.agent_address,
+            to=str(self.skill.public_id),
         )
 
         # operation
