@@ -389,7 +389,7 @@ class AsyncAgentLoop(BaseAgentLoop):
             while self.is_running:
                 message = await message_getter()
                 self._execution_control(message_handler, [message])
-        except CancelledError:
+        except CancelledError:  # pylint: disable=try-except-raise
             raise
         except Exception:  # pragma: nocover
             self.logger.exception(
