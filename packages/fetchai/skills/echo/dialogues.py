@@ -60,6 +60,6 @@ class DefaultDialogues(Model, BaseDefaultDialogues):
 
         BaseDefaultDialogues.__init__(
             self,
-            self_address=self.context.agent_name,
+            self_address=self.context.agent_address,
             role_from_first_message=role_from_first_message,
         )
