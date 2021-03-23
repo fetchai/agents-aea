@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 
 """Module to declare constants."""
-from pathlib import Path
 from typing import Dict, List
 
 
@@ -39,8 +38,8 @@ DEFAULT_INPUT_FILE_NAME = "./input_file"
 DEFAULT_OUTPUT_FILE_NAME = "./output_file"
 SCAFFOLD_PUBLIC_ID = "fetchai/scaffold:0.1.0"
 PACKAGES = "packages"
+REGISTRY_PATH_KEY = "registry_path"
 DEFAULT_REGISTRY_NAME = PACKAGES
-DEFAULT_REGISTRY_PATH = Path("./", DEFAULT_REGISTRY_NAME)
 VENDOR = "vendor"
 AGENT = "agent"
 AGENTS = "agents"

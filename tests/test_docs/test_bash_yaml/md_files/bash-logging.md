@@ -24,7 +24,6 @@ logging_config:
   disable_existing_loggers: false
   version: 1
 private_key_paths: {}
-registry_path: ../packages
 ```
 ``` yaml
 logging_config:

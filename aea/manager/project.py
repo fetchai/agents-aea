@@ -94,6 +94,7 @@ class Project(_Base):
         is_local: bool = False,
         is_remote: bool = False,
         is_restore: bool = False,
+        cli_verbosity: str = "INFO",
         registry_path: str = DEFAULT_REGISTRY_NAME,
         skip_consistency_check: bool = False,
     ) -> "Project":
@@ -108,10 +109,13 @@ class Project(_Base):
         :param public_id: the public id
         :param is_local: whether to fetch from local
         :param is_remote whether to fetch from remote
+        :param verbosity: the logging verbosity of the CLI
         :param registry_path: the path to the registry locally
         :param skip_consistency_check: consistency checks flag
         """
-        ctx = Context(cwd=working_dir, registry_path=registry_path)
+        ctx = Context(
+            cwd=working_dir, verbosity=cli_verbosity, registry_path=registry_path
+        )
         ctx.set_config("skip_consistency_check", skip_consistency_check)
 
         path = os.path.join(working_dir, public_id.author, public_id.name)

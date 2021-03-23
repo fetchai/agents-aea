@@ -71,7 +71,6 @@ class AgentConfigMock:
         self.config: dict = {}
         self.default_ledger = DEFAULT_LEDGER
 
-    registry_path = "registry"
     name = "name"
 
 
@@ -96,7 +95,7 @@ class ContextMock:
         self.agent_loader = ConfigLoaderMock()
         self.clean_paths: List = []
         self.obj = self
-        self.registry_path = ""
+        self.registry_path = "packages"
         self.cwd = "cwd"
 
     def set_config(self, key, value):

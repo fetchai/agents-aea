@@ -325,7 +325,6 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
                 "version",
                 "connection_private_key_paths",
                 "private_key_paths",
-                "registry_path",
                 "dependencies",
             ]
             result = all(

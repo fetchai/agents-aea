@@ -62,6 +62,7 @@ from aea.cli.search import search
 from aea.cli.transfer import transfer
 from aea.cli.upgrade import upgrade
 from aea.cli.utils.click_utils import registry_path_option
+from aea.cli.utils.config import get_registry_path_from_cli_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.loggers import logger, simple_verbosity_option
 from aea.helpers.win32 import enable_ctrl_c_support
@@ -89,8 +90,11 @@ def cli(
 ) -> None:
     """Command-line tool for setting up an Autonomous Economic Agent (AEA)."""
     verbosity_option = click_context.meta.pop("verbosity")
-    click_context.obj = Context(cwd=".", verbosity=verbosity_option)
-    click_context.obj.registry_path = registry_path
+    if not registry_path:
+        registry_path = get_registry_path_from_cli_config()
+    click_context.obj = Context(
+        cwd=".", verbosity=verbosity_option, registry_path=registry_path
+    )
     click_context.obj.set_config("skip_consistency_check", skip_consistency_check)
 
     # enables CTRL+C support on windows!

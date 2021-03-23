@@ -34,7 +34,6 @@ logging_config:
   disable_existing_loggers: false
   version: 1
 private_key_paths: {}
-registry_path: ../packages
 ```
 
 By updating the `logging_config` section, you can configure the loggers of your application.

@@ -20,7 +20,7 @@
 """A module with context tools of the aea cli."""
 import os
 from pathlib import Path
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, List, cast
 
 from aea.cli.utils.loggers import logger
 from aea.configurations.base import (
@@ -47,12 +47,7 @@ class Context:
 
     agent_config: AgentConfig
 
-    def __init__(
-        self,
-        cwd: str = ".",
-        verbosity: str = "INFO",
-        registry_path: Optional[str] = None,
-    ) -> None:
+    def __init__(self, cwd: str, verbosity: str, registry_path: str) -> None:
         """Init the context."""
         self.config = dict()  # type: Dict
         self.cwd = cwd

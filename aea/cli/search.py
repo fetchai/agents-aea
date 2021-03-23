@@ -19,7 +19,6 @@
 
 """Implementation of the 'aea search' subcommand."""
 
-import os
 from pathlib import Path
 from typing import Dict, List, Tuple, cast
 
@@ -27,11 +26,9 @@ import click
 
 from aea import AEA_DIR
 from aea.cli.registry.utils import request_api
-from aea.cli.utils.config import try_to_load_agent_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import pass_ctx
 from aea.cli.utils.formatting import format_items, retrieve_details
-from aea.cli.utils.loggers import logger
 from aea.common import JSONLike
 from aea.configurations.constants import (
     AGENT,
@@ -44,7 +41,6 @@ from aea.configurations.constants import (
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_CONTRACT_CONFIG_FILE,
     DEFAULT_PROTOCOL_CONFIG_FILE,
-    DEFAULT_REGISTRY_PATH,
     DEFAULT_SKILL_CONFIG_FILE,
     PROTOCOL,
     PROTOCOLS,
@@ -67,8 +63,6 @@ def search(click_context: click.Context, local: bool) -> None:
         aea search connections
         aea search --local skills
     """
-    ctx = cast(Context, click_context.obj)
-    setup_search_ctx(ctx, local)
 
 
 @search.command()
@@ -121,29 +115,6 @@ def agents(ctx: Context, query: str, page: int) -> None:
     _output_search_results(item_type, *search_items(ctx, item_type, query, page), page)
 
 
-def setup_search_ctx(ctx: Context, local: bool) -> None:
-    """
-    Set up search command.
-
-    :param click_context: click context object.
-    :param local: bool flag for local search.
-
-    :return: None.
-    """
-    if local:
-        ctx.set_config("is_local", True)
-        # if we are in an agent directory, try to load the configuration file.
-        # otherwise, use the default path (i.e. 'packages/' in the current directory.)
-        try:
-            try_to_load_agent_config(ctx, is_exit_on_except=False)
-            registry_directory = ctx.agent_config.registry_path
-        except Exception:  # pylint: disable=broad-except
-            registry_directory = os.path.join(ctx.cwd, DEFAULT_REGISTRY_PATH)
-
-        ctx.set_config("registry_directory", registry_directory)
-        logger.debug("Using registry {}".format(registry_directory))
-
-
 def _is_invalid_item(name: str, dir_path: Path, config_path: Path) -> bool:
     """Return true if this protocol, connection or skill should not be returned in the list."""
     return (
@@ -171,7 +142,6 @@ def _get_details_from_dir(
 
 
 def _search_items_locally(ctx: Context, item_type_plural: str) -> List[Dict]:
-    registry = cast(str, ctx.config.get("registry_directory"))
     result = []  # type: List[Dict]
     configs = {
         AGENTS: {"loader": ctx.agent_loader, "config_file": DEFAULT_AEA_CONFIG_FILE},
@@ -202,7 +172,7 @@ def _search_items_locally(ctx: Context, item_type_plural: str) -> List[Dict]:
     # look in packages dir for all other packages
     _get_details_from_dir(
         cast(ConfigLoader, configs[item_type_plural]["loader"]),
-        registry,
+        ctx.registry_path,
         "*/{}".format(item_type_plural),
         cast(str, configs[item_type_plural]["config_file"]),
         result,
