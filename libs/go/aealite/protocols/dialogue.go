@@ -28,8 +28,9 @@ const (
 )
 
 type RuleType struct {
-	// TODO
-	// define innner data
+	initialPerformative  Performative
+	terminalPerformative Performative
+	// validReplies
 }
 
 type MessageId int
@@ -67,9 +68,6 @@ type DialogueInterface interface {
 	getStringRepresentation() string
 }
 
-// TODO
-// FIgure out this
-type FrozenSet SomeMessageType
 type DialoguesInterface interface {
 	// initialize(dialogue DialogueLabel, endStates FrozenSet, _message_class InitialMessage, dialogueClass Dialogue, roleFromFirstMessage Role, keepTerminalStateDialogues bool)
 	isKeepDIaloguesInTerminalState() bool
@@ -98,7 +96,7 @@ type DialoguesInterface interface {
 }
 
 type AbstractMessage interface {
-	initialize(message SomeMessageType)
+	initialize(diaglogReference [2]string, messagId int, target Target, performative Performative)
 	validPerformatives() []string
 	hasSender() bool
 	sender() Address
