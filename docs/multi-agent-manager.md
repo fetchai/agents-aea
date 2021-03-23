@@ -53,6 +53,7 @@ component_overrides = [{
       "not_after": '2022-01-01',
       "not_before": '2021-01-01',
       "public_key": "fetchai",
+      "message_format": "{public_key}",
       "save_path": "conn_cert.txt"
     }]
 }, {
@@ -83,6 +84,7 @@ component_overrides = [{
       "not_after": '2022-01-01',
       "not_before": '2021-01-01',
       "public_key": "fetchai",
+      "message_format": "{public_key}",
       "save_path": "conn_cert.txt"
     }]
 }, {
