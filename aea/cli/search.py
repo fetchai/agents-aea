@@ -63,6 +63,9 @@ def search(click_context: click.Context, local: bool) -> None:
         aea search connections
         aea search --local skills
     """
+    ctx = cast(Context, click_context.obj)
+    if local:
+        ctx.set_config("is_local", True)
 
 
 @search.command()
