@@ -1673,6 +1673,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         # set name and other configurations
         self.set_name(agent_configuration.name)
         self.set_default_ledger(agent_configuration.default_ledger)
+        self.set_required_ledgers(agent_configuration.required_ledgers)
         self.set_build_entrypoint(agent_configuration.build_entrypoint)
         self.set_currency_denominations(agent_configuration.currency_denominations)
 
@@ -1951,7 +1952,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         default_ledger = self.get_default_ledger()
         required_ledgers = self.get_required_ledgers()
         enforce(
-            default_ledger not in required_ledgers,
+            default_ledger in required_ledgers,
             exception_text=f"Default ledger '{default_ledger}' not declared in the list of required ledgers: {required_ledgers}.",
             exception_class=AEAValidationError,
         )

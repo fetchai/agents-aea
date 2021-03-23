@@ -188,12 +188,12 @@ class AgentAlias(_Base):
         for required_ledger in set(required_ledgers):
             if required_ledger not in available_private_keys:
                 self.agent_config.private_key_paths.create(
-                    default_ledger, self._create_private_key(default_ledger)
+                    required_ledger, self._create_private_key(required_ledger)
                 )
             if required_ledger not in available_connection_private_keys:
                 self.agent_config.connection_private_key_paths.create(
-                    default_ledger,
-                    self._create_private_key(default_ledger, is_connection=True),
+                    required_ledger,
+                    self._create_private_key(required_ledger, is_connection=True),
                 )
 
     @property
