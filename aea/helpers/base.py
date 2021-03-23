@@ -881,6 +881,9 @@ class CertRequest:
     @classmethod
     def from_json(cls, obj: Dict) -> "CertRequest":
         """Compute the JSON representation."""
+        if "message_format" not in obj: # pragma: nocover
+            # for backwards compatibility
+            obj["message_format"] = "{public_key}"
         return cls(**obj)
 
     def __eq__(self, other: Any) -> bool:

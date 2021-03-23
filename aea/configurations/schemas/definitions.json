@@ -200,7 +200,6 @@
         "ledger_id",
         "not_before",
         "not_after",
-        "message_format",
         "save_path"
       ],
       "properties": {
