@@ -124,7 +124,7 @@ the project developer, and the framework does not
 impose any restriction.
 
 One of the provided package, the "HTTP server" connection, 
-relies on Flask, which makes the connection completely
+relies on `aiohttp`, which makes the connection completely
 self-contained—therefore, it satisfies the requirement. 
 
 Another relevant example is the ACN node, which 
@@ -159,14 +159,15 @@ can be detached successfully like
 the persistent storage,
 just to name a few examples.
 
-There has been put some efforts in 
+There has been put some effort into 
 reducing startup time, and to ensure
 that a graceful shut down can happen 
 when the process receives a SIGTERM
-under normal circumstancess,
-but robustness cannot be ensured in general.
+under normal circumstances,
+but robustness cannot be ensured for individual components,
+as it depends on their implementation.
 
-On the other hand,
+Additionally,
 the framework does provide some features to 
 control some aspects of AEA disposability,
 e.g. the possibility to change
@@ -212,9 +213,11 @@ hence not necessarily coupled with the AEA framework.
 
 > Run admin/management tasks as one-off processes
 
-The CLI tools provides commands to
+Support: Good
+
+The CLI tool provides commands to
 manage private keys and ledger related operations, and 
-it is possible to access to databases of AEA's persistent storage
+it is possible to extend it with a plugin to manage databases of AEA's persistent storage
 for maintenance operations.
 
 Moreover, the Python programming language
