@@ -237,7 +237,7 @@ class LedgerApiHandler(Handler):
                 else:
                     self.context.logger.error(
                         f"Invalid transaction label: {transaction_label}"
-                    ) # pragma: nocover
+                    )  # pragma: nocover
             elif (
                 not strategy.is_oracle_transaction_approved
                 and transaction_label == "approve"

@@ -30,6 +30,9 @@ from aea.test_tools.test_skill import BaseSkillTestCase
 from packages.fetchai.connections.ledger.base import (
     CONNECTION_ID as LEDGER_CONNECTION_PUBLIC_ID,
 )
+from packages.fetchai.contracts.oracle_client.contract import (
+    PUBLIC_ID as CONTRACT_PUBLIC_ID,
+)
 from packages.fetchai.protocols.contract_api.custom_types import Kwargs
 from packages.fetchai.protocols.contract_api.custom_types import (
     Kwargs as ContractApiKwargs,
@@ -46,9 +49,6 @@ from packages.fetchai.protocols.signing.custom_types import RawTransaction
 from packages.fetchai.protocols.signing.message import SigningMessage
 from packages.fetchai.skills.simple_oracle_client.behaviours import (
     SimpleOracleClientBehaviour,
-)
-from packages.fetchai.contracts.oracle_client.contract import (
-    PUBLIC_ID as CONTRACT_PUBLIC_ID,
 )
 from packages.fetchai.skills.simple_oracle_client.dialogues import (
     ContractApiDialogue,
@@ -400,9 +400,7 @@ class TestLedgerApiHandler(BaseSkillTestCase):
             kwargs=ContractApiMessage.Kwargs(
                 {
                     "label": "OracleContract",
-                    "init_msg": {
-                        "oracle_address": strategy.oracle_contract_address
-                    },
+                    "init_msg": {"oracle_address": strategy.oracle_contract_address},
                     "gas": strategy.default_gas_deploy,
                     "amount": 0,
                     "code_id": 8888,

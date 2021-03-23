@@ -30,6 +30,7 @@ from aea.test_tools.test_skill import BaseSkillTestCase
 from packages.fetchai.connections.ledger.base import (
     CONNECTION_ID as LEDGER_CONNECTION_PUBLIC_ID,
 )
+from packages.fetchai.contracts.oracle.contract import PUBLIC_ID as CONTRACT_PUBLIC_ID
 from packages.fetchai.protocols.contract_api.custom_types import Kwargs
 from packages.fetchai.protocols.contract_api.custom_types import (
     Kwargs as ContractApiKwargs,
@@ -54,9 +55,6 @@ from packages.fetchai.skills.simple_oracle.dialogues import (
     PrometheusDialogues,
     SigningDialogue,
     SigningDialogues,
-)
-from packages.fetchai.contracts.oracle.contract import (
-    PUBLIC_ID as CONTRACT_PUBLIC_ID,
 )
 from packages.fetchai.skills.simple_oracle.handlers import (
     ContractApiHandler,
