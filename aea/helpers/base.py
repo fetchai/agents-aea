@@ -645,7 +645,7 @@ class CertRequest:
         :param ledger_id: ledger identifier the request is referring to.
         :param not_before: specify the lower bound for certificate validity.
           If it is a string, it must follow the format: 'YYYY-MM-DD'. It
-          will be interpreted as timezone UTC.
+          will be interpreted as timezone UTC-0.
         :param not_before: specify the lower bound for certificate validity.
           if it is a string, it must follow the format: 'YYYY-MM-DD' It
           will be interpreted as timezone UTC-0.
@@ -840,7 +840,7 @@ class CertRequest:
         """
         message = message_format.format(
             public_key=public_key,
-            identifier=identifier,
+            identifier=str(identifier),
             not_before=not_before_string,
             not_after=not_after_string,
         )

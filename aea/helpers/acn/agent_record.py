@@ -22,7 +22,7 @@ from typing import Optional
 
 from aea.common import PathLike
 from aea.crypto.registries import make_ledger_api
-from aea.helpers.base import CertRequest, SimpleIdOrStr
+from aea.helpers.base import CertRequest, SimpleId, SimpleIdOrStr
 
 
 class AgentRecord:
@@ -61,7 +61,7 @@ class AgentRecord:
         :param ledger_id: ledger identifier the request is referring to.
         :param not_before: specify the lower bound for certificate validity.
           If it is a string, it must follow the format: 'YYYY-MM-DD'. It
-          will be interpreted as timezone UTC.
+          will be interpreted as timezone UTC-0.
         :param not_before: specify the lower bound for certificate validity.
           if it is a string, it must follow the format: 'YYYY-MM-DD' It
           will be interpreted as timezone UTC-0.
@@ -70,8 +70,8 @@ class AgentRecord:
         """
         self._address = address
         self._representative_public_key = representative_public_key
-        self._identifier = identifier
-        self._ledger_id = ledger_id
+        self._identifier = str(SimpleId(identifier))
+        self._ledger_id = str(SimpleId(ledger_id))
         self._not_before = not_before
         self._not_after = not_after
         self._message_format = message_format
