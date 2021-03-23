@@ -50,4 +50,4 @@ class TestDialogues(BaseSkillTestCase):
             content=b"some_content",
         )
         assert dialogue.role == DefaultDialogue.Role.AGENT
-        assert dialogue.self_address == self.skill.skill_context.agent_address
+        assert dialogue.self_address == self.skill.skill_context.agent_name
