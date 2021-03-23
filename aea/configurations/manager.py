@@ -460,7 +460,7 @@ class AgentConfigManager:
 
         :param path: dotted path str, list of str with first optional component id
 
-        :return: Tuple of optonal component id if path related to component and List[str]
+        :return: Tuple of optional component id if path related to component and List[str]
         """
         if isinstance(path, str):
             json_path, *_, component_id = handle_dotted_path(
@@ -488,7 +488,7 @@ class AgentConfigManager:
         Validates and applies agent config and component overrides.
         Does not save it on the disc!
 
-        :param overrides: overrided values dictionary
+        :param overrides: overridden values dictionary
 
         :return: None
         """
@@ -546,21 +546,22 @@ class AgentConfigManager:
             )
 
     @classmethod
-    def verify_or_create_private_keys(
+    def verify_private_keys(
         cls,
         aea_project_path: Union[Path, str],
-        private_key_helper: Callable[[AgentConfig, Path, bool], None],
+        private_key_helper: Callable[[AgentConfig, Path, Optional[str]], None],
         substitude_env_vars: bool = False,
-        create_keys: bool = True,
+        password: Optional[str] = None,
     ) -> "AgentConfigManager":
         """
-        Verify or create private keys.
+        Verify private keys.
 
         Does not saves the config! Use AgentConfigManager.dump_config()
 
         :param aea_project_path: path to an AEA project.
         :param private_key_helper: private_key_helper is a function that use agent config to check the keys
         :param substitude_env_vars: replace env vars with values, does not dump config
+        :param password: the password to encrypt/decrypt the private key.
 
         :return: the agent configuration manager.
         """
@@ -569,7 +570,7 @@ class AgentConfigManager:
             aea_project_path, substitude_env_vars=substitude_env_vars
         )
         aea_conf = agent_config_manager.agent_config
-        private_key_helper(aea_conf, Path(aea_project_path), create_keys)
+        private_key_helper(aea_conf, Path(aea_project_path), password)
         return agent_config_manager
 
     def get_overridables(self) -> Tuple[Dict, Dict[ComponentId, Dict]]:

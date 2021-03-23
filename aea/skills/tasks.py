@@ -22,9 +22,8 @@ import logging
 import signal
 import threading
 from abc import abstractmethod
-from multiprocessing.pool import AsyncResult
-from multiprocessing.pool import ThreadPool as Pool
-from typing import Any, Callable, Dict, Optional, Sequence, cast
+from multiprocessing.pool import AsyncResult, Pool, ThreadPool
+from typing import Any, Callable, Dict, Optional, Sequence, Type, cast
 
 from aea.helpers.logging import WithLogger
 
@@ -40,7 +39,7 @@ class Task(WithLogger):
         self._result = None
         self.config = kwargs
 
-    def __call__(self, *args: Any, **kwargs: Any) -> "Task":
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
         """
         Execute the task.
 
@@ -64,7 +63,7 @@ class Task(WithLogger):
         finally:
             self._is_executed = True
             self.teardown()
-        return self
+        return self._result
 
     @property
     def is_executed(self) -> bool:
@@ -91,7 +90,7 @@ class Task(WithLogger):
         """
 
     @abstractmethod
-    def execute(self, *args: Any, **kwargs: Any) -> None:
+    def execute(self, *args: Any, **kwargs: Any) -> Any:
         """
         Run the task logic.
 
@@ -123,17 +122,24 @@ def init_worker() -> None:
 class TaskManager(WithLogger):
     """A Task manager."""
 
+    POOL_MODES: Dict[str, Type[Pool]] = {
+        "multithread": ThreadPool,
+        "multiprocess": Pool,
+    }
+
     def __init__(
         self,
         nb_workers: int = 2,
         is_lazy_pool_start: bool = True,
         logger: Optional[logging.Logger] = None,
+        pool_mode: str = "multithread",
     ) -> None:
         """
         Initialize the task manager.
 
         :param nb_workers: the number of worker processes.
         :param is_lazy_pool_start: option to postpone pool creation till the first enqueue_task called.
+        :param pool_mode: str. multithread or multiprocess
         """
         WithLogger.__init__(self, logger)
         self._nb_workers = nb_workers
@@ -144,6 +150,7 @@ class TaskManager(WithLogger):
 
         self._task_enqueued_counter = 0
         self._results_by_task_id = {}  # type: Dict[int, Any]
+        self._pool_mode = pool_mode
 
     @property
     def is_started(self) -> bool:
@@ -164,14 +171,17 @@ class TaskManager(WithLogger):
         return self._nb_workers
 
     def enqueue_task(
-        self, func: Callable, args: Sequence = (), kwds: Optional[Dict[str, Any]] = None
+        self,
+        func: Callable,
+        args: Sequence = (),
+        kwargs: Optional[Dict[str, Any]] = None,
     ) -> int:
         """
         Enqueue a task with the executor.
 
         :param func: the callable instance to be enqueued
         :param args: the positional arguments to be passed to the function.
-        :param kwds: the keyword arguments to be passed to the function.
+        :param kwargs: the keyword arguments to be passed to the function.
         :return the task id to get the the result.
         :raises ValueError: if the task manager is not running.
         """
@@ -186,7 +196,7 @@ class TaskManager(WithLogger):
             task_id = self._task_enqueued_counter
             self._task_enqueued_counter += 1
             async_result = self._pool.apply_async(
-                func, args=args, kwds=kwds if kwds is not None else {}
+                func, args=args, kwds=kwargs if kwargs is not None else {}
             )
             self._results_by_task_id[task_id] = async_result
             if self._logger:  # pragma: nocover
@@ -247,7 +257,10 @@ class TaskManager(WithLogger):
         if self._pool:
             self.logger.debug("Pool was already started!")
             return
-        self._pool = Pool(self._nb_workers, initializer=init_worker)
+        pool_cls = self.POOL_MODES.get(self._pool_mode)
+        if not pool_cls:  # pragma: nocover
+            raise ValueError(f"Mode: `{self._pool_mode}` is not supported")
+        self._pool = pool_cls(self._nb_workers, initializer=init_worker)
 
     def _stop_pool(self) -> None:
         """

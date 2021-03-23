@@ -180,7 +180,7 @@ def send_control_c(
     process: subprocess.Popen, kill_group: bool = False
 ) -> None:  # pragma: nocover # cause platform dependent
     """
-    Send ctrl-C crossplatform to terminate a subprocess.
+    Send ctrl-C cross-platform to terminate a subprocess.
 
     :param process: the process to send the signal to.
 
@@ -212,7 +212,7 @@ class RegexConstrainedString(UserString):
         """Initialize a regex constrained string."""
         super().__init__(seq)
 
-        if not self.REGEX.match(self.data):
+        if not self.REGEX.fullmatch(self.data):
             self._handle_no_match()
 
     def _handle_no_match(self) -> None:
@@ -243,6 +243,11 @@ class SimpleId(RegexConstrainedString):
     ...
     ValueError: Value 0an_identifier does not match the regular expression re.compile('[a-zA-Z_][a-zA-Z0-9_]{0,127}')
 
+    >>> SimpleId("an identifier")
+    Traceback (most recent call last):
+    ...
+    ValueError: Value an identifier does not match the regular expression re.compile('[a-zA-Z_][a-zA-Z0-9_]{0,127}')
+
     >>> SimpleId("")
     Traceback (most recent call last):
     ...
@@ -270,7 +275,7 @@ def get_logger_method(fn: Callable, logger_method: Union[str, Callable]) -> Call
     """
     Get logger method for function.
 
-    Get logger in `fn` definion module or creates logger is module.__name__.
+    Get logger in `fn` definition module or creates logger is module.__name__.
     Or return logger_method if it's callable.
 
     :param fn: function to get logger for.
@@ -333,7 +338,7 @@ def retry_decorator(
 
     :param number_of_retries: amount of attempts
     :param error_message: message template with one `{}` for exception
-    :param delay: num of seconds to sleep between retries. default 0
+    :param delay: number of seconds to sleep between retries. default 0
     :param logger_method: name of the logger method or callable to print logs
     """
 
@@ -468,7 +473,7 @@ def find_topological_order(adjacency_list: Dict[T, Set[T]]) -> List[T]:
     visited: Set[T] = set()
     roots: Set[T] = set()
     inverse_adjacency_list: Dict[T, Set[T]] = defaultdict(set)
-    # compute both roots and inv. adj. list in one pass.
+    # compute both roots and inverse adjacent list in one pass.
     for start_node, end_nodes in adjacency_list.items():
         if start_node not in visited:
             roots.add(start_node)
@@ -807,7 +812,7 @@ class CertRequest:
         """
         Get signature from save_path.
 
-        :param path_prefix: the path prefix to be prependend to save_path. Defaults to cwd.
+        :param path_prefix: the path prefix to be prepended to save_path. Defaults to cwd.
         :return: the signature.
         """
         save_path = self.get_absolute_save_path(path_prefix)
@@ -857,9 +862,9 @@ def compute_specifier_from_version(version: Version) -> str:
     """
     Compute the specifier set from a version, by varying only on the patch number.
 
-    I.e. from "{major}.{minor}.{patch}", return
+    I.e. from "{major}.{minor}.{patch}.{extra}", return
 
-    ">={major}.{minor}.0, <{major}.{minor + 1}.0"
+    ">=min({major}.{minor}.0, {major}.{minor}.{patch}.{extra}), <{major}.{minor + 1}.0"
 
     :param version: the version
     :return: the specifier set
@@ -868,6 +873,7 @@ def compute_specifier_from_version(version: Version) -> str:
     new_minor_low = version.minor
     new_minor_high = new_minor_low + 1
     lower_bound = Version(f"{new_major}.{new_minor_low}.0")
+    lower_bound = lower_bound if lower_bound < version else version
     upper_bound = Version(f"{new_major}.{new_minor_high}.0")
     specifier_set = f">={lower_bound}, <{upper_bound}"
     return specifier_set

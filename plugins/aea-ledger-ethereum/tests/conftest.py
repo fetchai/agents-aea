@@ -44,6 +44,9 @@ MAX_FLAKY_RERUNS = 3
 ETHEREUM = EthereumCrypto.identifier
 
 ETHEREUM_PRIVATE_KEY_FILE = PRIVATE_KEY_PATH_SCHEMA.format(ETHEREUM)
+ETHEREUM_PRIVATE_KEY_PATH = os.path.join(
+    ROOT_DIR, "tests", "data", ETHEREUM_PRIVATE_KEY_FILE
+)
 
 ETHEREUM_DEFAULT_ADDRESS = "http://127.0.0.1:8545"
 ETHEREUM_DEFAULT_CHAIN_ID = 1337
@@ -54,6 +57,7 @@ ETHEREUM_TESTNET_CONFIG = {"address": ETHEREUM_DEFAULT_ADDRESS}
 DEFAULT_GANACHE_ADDR = "http://127.0.0.1"
 DEFAULT_GANACHE_PORT = 8545
 DEFAULT_GANACHE_CHAIN_ID = 1337
+GAS_PRICE_API_KEY = ""
 
 DEFAULT_AMOUNT = 1000000000000000000000
 FUNDED_ETH_PRIVATE_KEY_1 = (
@@ -151,6 +155,7 @@ def ethereum_testnet_config(ganache_addr, ganache_port):
         "address": new_uri,
         "chain_id": DEFAULT_GANACHE_CHAIN_ID,
         "denom": ETHEREUM_DEFAULT_CURRENCY_DENOM,
+        "gas_price_api_key": GAS_PRICE_API_KEY,
     }
     return new_config
 
@@ -203,7 +208,7 @@ def _launch_image(image: DockerImage, timeout: float = 2.0, max_attempts: int = 
     """
     Launch image.
 
-    :param image: an instancoe of Docker image.
+    :param image: an instance of Docker image.
     :return: None
     """
     image.check_skip()

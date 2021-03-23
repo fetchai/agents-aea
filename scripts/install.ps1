@@ -27,7 +27,7 @@ function install_build_tools {
 
 function install_aea {
 	echo "Install aea"
-    $output=pip install aea[all]==0.10.1 --force --no-cache-dir 2>&1 |out-string;
+    $output=pip install aea[all]==1.0.0rc1 --force --no-cache-dir 2>&1 |out-string;
     if ($LastExitCode -ne 0) {
         echo $output
         echo "AEA install failed!"

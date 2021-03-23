@@ -518,7 +518,7 @@ class InteractiveEjectHelper:
                     package_id.public_id.to_latest(),
                     aea_version=self._current_aea_version,
                 )
-            except click.ClickException:
+            except click.ClickException:  # pragma: nocover
                 continue
             if package_id.public_id.version == new_item.version:
                 continue
@@ -710,7 +710,7 @@ def _compute_upgraders_and_shared_deps_to_remove(
 
     for dep in shared_deps:
         if required_by_relation[dep] - items_to_upgrade_dependencies:
-            # shared deps not resolved, nothing to do next
+            # shared dependencies not resolved, nothing to do next
             continue  # pragma: nocover
         # add it to remove
         shared_deps_to_remove.add(dep)

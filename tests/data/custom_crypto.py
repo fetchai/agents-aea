@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains a custom crypto class for testing purposes."""
-from typing import Any, BinaryIO, Tuple
+from typing import Any, Optional, Tuple
 
 from aea.common import Address
 from aea.crypto.base import Crypto, EntityClass
@@ -33,11 +33,15 @@ class CustomCrypto(Crypto):
         pass
 
     @classmethod
-    def load_private_key_from_path(cls, file_name: str) -> EntityClass:
+    def load_private_key_from_path(
+        cls, file_name: str, password: Optional[str] = None
+    ) -> Any:
         """
-        Load private key from path.
+        Load a private key in hex format from a file.
 
-        :param file_name: file name
+        :param file_name: the path to the hex file.
+        :param password: the password to encrypt/decrypt the private key.
+        :return: the Entity.
         """
         pass
 
@@ -97,11 +101,21 @@ class CustomCrypto(Crypto):
         """
         pass
 
-    def dump(self, fp: BinaryIO) -> None:
+    def encrypt(self, password: str) -> str:
         """
-        Dump the private key.
+        Encrypt the private key and return in json.
 
-        :param fp: the file path
-        :return: None
+        :param private_key: the raw private key.
+        :param password: the password to decrypt.
+        :return: json string containing encrypted private key.
         """
-        pass
+
+    @classmethod
+    def decrypt(cls, keyfile_json: str, password: str) -> str:
+        """
+        Decrypt the private key and return in raw form.
+
+        :param keyfile_json: json string containing encrypted private key.
+        :param password: the password to decrypt.
+        :return: the raw private key.
+        """

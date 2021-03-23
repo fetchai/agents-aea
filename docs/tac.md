@@ -76,14 +76,8 @@ In a new terminal window, enter the virtual environment, and connect a template 
 pipenv shell
 python templates/v1/basic.py --name my_agent --dashboard
 ```
-<!-- Issue: https://github.com/fetchai/agents-tac/issues/389 -->
 
 Click through to the <a href="http://localhost:8097" target="_blank">controller GUI</a>.
-
-<!-- ## Launcher GUI
-
-!!!	Todo
- -->
 
 ## Possible gotchas
 

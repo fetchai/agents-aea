@@ -4,7 +4,7 @@ version: 0.1.0
 type: skill
 description: Raise an exception, at some point.
 license: Apache-2.0
-aea_version: '>=0.10.0, <0.11.0'
+aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint:
   __init__.py: Qmf9TBWb5EEKPZivLtG4T1sE7jeriA24NYSF1BZKL8ntJE
   behaviours.py: QmbvxUwe8dCoj87ozw6YDrPTC17fDLXjAi7ydhJdK3c1aY

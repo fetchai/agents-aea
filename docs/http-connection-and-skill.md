@@ -14,13 +14,13 @@ cd my_aea
 Add the http server connection package:
 
 ``` bash
-aea add connection fetchai/http_server:0.16.0
+aea add connection fetchai/http_server:0.18.0
 ```
 
 Update the default connection:
 
 ``` bash
-aea config set agent.default_connection fetchai/http_server:0.16.0
+aea config set agent.default_connection fetchai/http_server:0.18.0
 ```
 
 Modify the `api_spec_path`:
@@ -30,6 +30,13 @@ aea config set vendor.fetchai.connections.http_server.config.api_spec_path "../e
 ```
 
 Ensure the file exists under the specified path!
+
+Create and add a private key:
+
+``` bash
+aea generate-key fetchai
+aea add-key fetchai
+```
 
 Install the dependencies:
 
@@ -71,7 +78,6 @@ class HttpHandler(Handler):
 
         :return: None
         """
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -152,7 +158,6 @@ class HttpHandler(Handler):
 
         :return: None
         """
-        pass
 ```
 
 And update the `skill.yaml` accordingly:
@@ -166,7 +171,7 @@ handlers:
 
 Finally, run the fingerprinter (note, you will have to replace the author name with your author handle):
 ``` bash
-aea fingerprint skill fetchai/http_echo:0.14.0
+aea fingerprint skill fetchai/http_echo:0.16.0
 ```
 
 You can now run the AEA:

@@ -21,7 +21,7 @@ from multiprocessing.pool import AsyncResult
 
 import pytest
 
-from aea.skills.tasks import Pool, Task, TaskManager
+from aea.skills.tasks import Task, TaskManager
 
 
 class MyTask(Task):
@@ -78,7 +78,7 @@ class TestTaskManager:
     def test_task_manager_function_with_keyword_arguments(self):
         """Test a function submitted to the task manager with keyword arguments."""
         task_id = self.task_manager.enqueue_task(
-            self._return_a_constant, args=(32,), kwds={"b": 10}
+            self._return_a_constant, args=(32,), kwargs={"b": 10}
         )
         task_result = self.task_manager.get_task_result(task_id)
         assert isinstance(task_result, AsyncResult)
@@ -88,7 +88,7 @@ class TestTaskManager:
     def test_task_manager_function_with_wrong_argument_number(self):
         """Test wrong number of arguments."""
         task_id = self.task_manager.enqueue_task(
-            self._return_a_constant, args=(), kwds={"b": 10}
+            self._return_a_constant, args=(), kwargs={"b": 10}
         )
         task_result = self.task_manager.get_task_result(task_id)
         assert isinstance(task_result, AsyncResult)
@@ -102,30 +102,13 @@ class TestTaskManager:
         expected_return_value = 42
         my_task = MyTask(return_value=expected_return_value)
         task_id = self.task_manager.enqueue_task(
-            my_task, args=expected_args, kwds=expected_kwargs
+            my_task, args=expected_args, kwargs=expected_kwargs
         )
         task_result = self.task_manager.get_task_result(task_id)
         assert isinstance(task_result, AsyncResult)
 
-        expected_task = task_result.get(self.WAIT_TIMEOUT)
-        assert expected_task.result == expected_return_value
-        assert expected_task.setup_called
-        assert expected_task.execute_called
-        assert expected_task.teardown_called
-        assert expected_task.execute_args == expected_args
-        assert expected_task.execute_kwargs == expected_kwargs
-
-        # the original instance is different than the one returned by the task manager.
-        if Pool.__name__ != "ThreadPool":
-            with pytest.raises(ValueError):
-                result = my_task.result  # noqa
-
-            assert not my_task.is_executed
-            assert not my_task.setup_called
-            assert not my_task.execute_called
-            assert not my_task.teardown_called
-            assert my_task.execute_args is None
-            assert my_task.execute_kwargs is None
+        result = task_result.get(self.WAIT_TIMEOUT)
+        assert result == expected_return_value
 
     @pytest.mark.skip
     def test_task_manager_task_object_fails_when_not_pickable(self):
@@ -137,7 +120,7 @@ class TestTaskManager:
         assert isinstance(task_result, AsyncResult)
 
         with pytest.raises(AttributeError, match="Can't pickle local object"):
-            expected_task = task_result.get(self.WAIT_TIMEOUT)  # noqa
+            task_result.get(self.WAIT_TIMEOUT)  # noqaexpected_task.result
 
     @classmethod
     def teardown_class(cls):

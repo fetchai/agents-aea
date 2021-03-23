@@ -13,7 +13,7 @@ ENV PYTHONPATH "$PYTHONPATH:/usr/lib/python3.7/site-packages"
 RUN apk add --no-cache go
 
 RUN pip install --upgrade pip
-RUN pip install --upgrade --force-reinstall aea[all]==0.10.1
+RUN pip install --upgrade --force-reinstall aea[all]==1.0.0rc1
 
 # COPY ./packages /home/packages # enable to add packages dir
 WORKDIR home

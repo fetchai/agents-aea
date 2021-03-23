@@ -38,7 +38,7 @@ def _dos2unix(file_content: bytes) -> bytes:
     """
     Replace occurrences of Windows line terminator CR/LF with only LF.
 
-    :param file_content: teh content of the file.
+    :param file_content: the content of the file.
     :return the same content but with the line terminator
     """
     return re.sub(b"\r\n", b"\n", file_content, flags=re.M)

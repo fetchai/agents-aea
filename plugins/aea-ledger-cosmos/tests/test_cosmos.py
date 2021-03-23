@@ -16,13 +16,13 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tests of the ethereum module."""
 import os
 import shutil
 import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
+from uuid import uuid4
 
 import pytest
 from aea_ledger_cosmos import CosmosApi, CosmosCrypto, CosmosHelper
@@ -50,6 +50,23 @@ def test_creation(cosmos_private_key_file):
     assert CosmosCrypto(
         cosmos_private_key_file
     ), "Did not manage to load the cosmos private key"
+
+
+def test_key_file_encryption_decryption(cosmos_private_key_file):
+    """Test cosmos private key encrypted and decrypted correctly."""
+    cosmos = CosmosCrypto(cosmos_private_key_file)
+    pk_data = Path(cosmos_private_key_file).read_text()
+    password = uuid4().hex
+    encrypted_data = cosmos.encrypt(password)
+    decrypted_data = cosmos.decrypt(encrypted_data, password)
+    assert encrypted_data != pk_data
+    assert pk_data == decrypted_data
+
+    with pytest.raises(ValueError, match="Decrypt error! Bad password?"):
+        cosmos.decrypt(encrypted_data, "BaD_PassWord")
+
+    with pytest.raises(ValueError, match="Bad encrypted key format!"):
+        cosmos.decrypt("some_data" * 16, "BaD_PassWord")
 
 
 def test_initialization():
@@ -80,7 +97,6 @@ def test_sign_and_recover_message(cosmos_private_key_file):
 
 def test_sign_and_recover_message_public_key(cosmos_private_key_file):
     """Test the signing and the recovery function for the eth_crypto."""
-    # TOFIX: for some reason this doesn't work with other keys...
     COSMOS_PRIVATE_KEY_PATH = os.path.join(
         ROOT_DIR, "tests", "data", "cosmos_private_key.txt"
     )

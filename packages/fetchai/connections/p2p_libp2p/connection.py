@@ -61,7 +61,7 @@ LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT = 660  # time to download ~66Mb
 
 PIPE_CONN_TIMEOUT = 10.0
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.16.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.18.0")
 
 SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 
@@ -159,7 +159,7 @@ class Libp2pNode:
         :param uri: libp2p node ip address and port number in format ipaddress:port.
         :param public_uri: libp2p node public ip address and port number in format ipaddress:port.
         :param delegate_uri: libp2p node delegate service ip address and port number in format ipaddress:port.
-        :param monitoring_uri: libp2 node monitoring ip address and port in fromat ipaddress:port
+        :param monitoring_uri: libp2 node monitoring ip address and port in format ipaddress:port
         :param entry_peers: libp2p entry peers multiaddresses.
         :param log_file: the logfile path for the libp2p node
         :param env_file: the env file path for the exchange of environment variables
@@ -206,7 +206,7 @@ class Libp2pNode:
         self.source = os.path.abspath(module_path)
         self.clargs = clargs if clargs is not None else []
 
-        # node libp2p multiaddrs
+        # node libp2p multiaddress
         self.multiaddrs = []  # type: Sequence[MultiAddr]
 
         # log file
@@ -384,7 +384,7 @@ class Libp2pNode:
                 return None
 
     def describe_configuration(self) -> None:
-        """Print a message discribing the libp2p node configuration"""
+        """Print a message describing the libp2p node configuration"""
         msg = LIBP2P_SUCCESS_MESSAGE
 
         if self.public_uri is not None:

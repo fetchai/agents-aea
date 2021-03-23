@@ -127,11 +127,9 @@ nav:
         - Base: 'api/contracts/base.md'
       - Crypto:
         - Base: 'api/crypto/base.md'
-        - Cosmos: 'api/crypto/cosmos.md'
-        - Ethereum: 'api/crypto/ethereum.md'
-        - Fetchai: 'api/crypto/fetchai.md'
         - Helpers: 'api/crypto/helpers.md'
         - LedgerApis: 'api/crypto/ledger_apis.md'
+        - Plugin: 'api/crypto/plugin.md'
         - Wallet: 'api/crypto/wallet.md'
         - Registries:
           - Base: 'api/crypto/registries/base.md'
@@ -224,6 +222,19 @@ nav:
         - Generic: 'api/test_tools/generic.md'
         - Test Cases: 'api/test_tools/test_cases.md'
         - Test Skill: 'api/test_tools/test_skill.md'
+      - Plugins:
+        - CLI:
+          - IPFS:
+            - API: 'api/plugins/aea_cli_ipfs/core.md'
+            - Utils: 'api/plugins/aea_cli_ipfs/ipfs_utils.md'
+        - Ledger:
+          - Cosmos:
+            - API: 'api/plugins/aea_ledger_cosmos/cosmos.md'
+          - Ethereum:
+            - API: 'api/plugins/aea_ledger_ethereum/ethereum.md'
+          - Fetchai:
+            - API: 'api/plugins/aea_ledger_fetchai/fetchai.md'
+            - Helper: 'api/plugins/aea_ledger_fetchai/_cosmos.md'
   - Development - Use Case:
     - Generic skills: 'generic-skills.md'
     - Front-end intergration: 'connect-a-frontend.md'

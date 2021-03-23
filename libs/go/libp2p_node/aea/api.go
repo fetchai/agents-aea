@@ -303,7 +303,7 @@ func (aea *AeaApi) Init() error {
 		aea.port_monitoring = 0
 	}
 
-	// parse entry peers multiaddrs
+	// parse entry peers multiaddress
 	if len(entry_peers) > 0 {
 		aea.entry_peers = strings.SplitN(entry_peers, ",", -1)
 	}

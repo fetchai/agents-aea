@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Extension to the Simple OEF and OEF Python SDK."""
 import asyncio
 import copy
@@ -34,7 +33,7 @@ from typing import Any, Callable, Dict, List, Optional, Union, cast
 from urllib import parse
 from uuid import uuid4
 
-from defusedxml import ElementTree as ET  # pylint: disable=wrong-import-order
+from defusedxml import ElementTree  # pylint: disable=wrong-import-order
 
 from aea.common import Address
 from aea.configurations.base import PublicId
@@ -67,7 +66,7 @@ from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.soef")
 
-PUBLIC_ID = PublicId.from_str("fetchai/soef:0.17.0")
+PUBLIC_ID = PublicId.from_str("fetchai/soef:0.19.0")
 
 NOT_SPECIFIED = object()
 
@@ -132,6 +131,37 @@ class SOEFException(Exception):
 
 
 OefSearchDialogue = BaseOefSearchDialogue
+
+
+class BaseHandledException(Exception):
+    """Base Exception class."""
+
+    MSG: str
+
+    def __init__(self, exc: Union[Exception, str]) -> None:
+        """Init exception with message or exception instance."""
+        super().__init__()
+        self.exc = exc
+
+    def __repr__(self) -> str:
+        """Get exception representation."""
+        return self.MSG.format(str(self.exc))
+
+    def __str__(self) -> str:
+        """Get exception str representation."""
+        return self.__repr__()
+
+
+class SOEFNetworkConnectionError(BaseHandledException):
+    """Exception class for network connection errors."""
+
+    MSG = "<SOEF Network Connection Error: {}. Check internet connection!>"
+
+
+class SOEFServerBadResponseError(BaseHandledException):
+    """Exception class for bad server responses."""
+
+    MSG = "<SOEF Server Bad Response Error: {}.>"
 
 
 class OefSearchDialogues(BaseOefSearchDialogues):
@@ -393,10 +423,24 @@ class SOEFChannel:
     async def _request_text(self, *args: Any, **kwargs: Any) -> str:
         """Perform and http request and return text of response."""
 
-        def _do_request() -> str:
-            return requests.request(*args, **kwargs).text
+        def _do_request() -> requests.Response:
+            return requests.request(*args, **kwargs)
 
-        return await self.loop.run_in_executor(self._executor_pool, _do_request)
+        try:
+            response = await self.loop.run_in_executor(self._executor_pool, _do_request)
+        except requests.ConnectionError as e:
+            raise SOEFNetworkConnectionError(e) from e
+
+        if response.status_code < 200 or response.status_code >= 300:
+            raise SOEFServerBadResponseError(
+                f"Bad server response: code {response.status_code} when 2XX expected. Request data: ({args}, {kwargs}) Response content: `{response.text}`"
+            )
+        if not response.text:
+            raise SOEFServerBadResponseError(
+                f"Bad server response: empty response. Request data: ({args}, {kwargs})"
+            )
+
+        return response.text
 
     async def process_envelope(self, envelope: Envelope) -> None:
         """
@@ -532,8 +576,8 @@ class SOEFChannel:
         if params:
             params = urllib.parse.parse_qs(params)
 
-        content = await self._generic_oef_command(command, params)
-
+        parsed_text = await self._generic_oef_command(command, params)
+        content = ElementTree.tostring(parsed_text)
         message = oef_search_dialogue.reply(
             performative=OefSearchMessage.Performative.SUCCESS,
             target_message=oef_message,
@@ -549,21 +593,24 @@ class SOEFChannel:
 
     async def _ping_command(self) -> None:
         """Perform ping on registered agent."""
-        await self._generic_oef_command("ping", {})
+        await self._generic_oef_command("ping", {}, check_success=False)
 
     async def _ping_periodic(self, period: float = 30 * 60) -> None:
         """
         Send ping command every `period`.
 
-        :param period: period of ping in secinds
+        :param period: period of ping in seconds
 
         :return: None
         """
         with suppress(asyncio.CancelledError):
-            while True:
+            while self.unique_page_address:
                 try:
                     await self._ping_command()
-                except asyncio.CancelledError:  # pylint: disable=try-except-raise
+                except (
+                    asyncio.CancelledError,
+                    ConcurrentCancelledError,
+                ):  # pragma: nocover  # pylint: disable=try-except-raise
                     raise
                 except Exception:  # pylint: disable=broad-except  # pragma: nocover
                     self.logger.exception("Error on periodic ping command!")
@@ -591,13 +638,40 @@ class SOEFChannel:
 
         await self._set_service_key(key, value)
 
+    @staticmethod
+    def _parse_soef_response(
+        response_text: str, check_success: bool = True
+    ) -> ElementTree:
+        try:
+            root = ElementTree.fromstring(response_text)
+        except ElementTree.ParseError as e:  # pragma: nocover
+            raise SOEFServerBadResponseError(
+                f"Failed to parse xml from the response: Error {e}. Text: {response_text}"
+            ) from e
+
+        if root.tag != "response":
+            raise SOEFServerBadResponseError(
+                "Not a valid response. Expected `root.tag = response`, received `root.tag = {root.tag}`"
+            )
+        if check_success:
+            el = root.find("./success")
+            if el is None:
+                raise SOEFServerBadResponseError(
+                    "Bad response, no success value present. Found = {response_text}."
+                )
+            if str(el.text).strip() != "1":
+                raise SOEFServerBadResponseError(  # pragma: nocover
+                    "Request was not successful. Found = {response_text}"
+                )
+        return root
+
     async def _generic_oef_command(
         self,
         command: str,
         params: Optional[Dict[str, Union[str, List[str]]]] = None,
         unique_page_address: Optional[str] = None,
         check_success: bool = True,
-    ) -> str:
+    ) -> ElementTree:
         """
         Set service key from service description.
 
@@ -605,25 +679,28 @@ class SOEFChannel:
         :param params: the parameters of the command
         :param unique_page_address: the unique page address
         :param check_success: whether or not to check for success
-        :return: response text
+
+        :return: parsed xml ElementTree
         """
         params = params or {}
         self.logger.debug(f"Perform `{command}` with {params}")
         url = parse.urljoin(
             self.base_url, unique_page_address or self.unique_page_address
         )
-        response_text = await self._request_text(
-            "get", url=url, params={"command": command, **params}
-        )
+
+        response_text = ""
         try:
-            root = ET.fromstring(response_text)
-            enforce(root.tag == "response", "Not a response")
-            if check_success:
-                el = root.find("./success")
-                enforce(el is not None, "Bad response, no success value present")
-                enforce(str(el.text).strip() == "1", "Success is not 1")
+            response_text = await self._request_text(
+                "get", url=url, params={"command": command, **params}
+            )
+            parsed_text = self._parse_soef_response(response_text, check_success)
             self.logger.debug(f"`{command}` SUCCESS!")
-            return response_text
+            return parsed_text
+        except (
+            asyncio.CancelledError,
+            ConcurrentCancelledError,
+        ):  # pragma: nocover  # pylint: disable=try-except-raise
+            raise
         except Exception as e:
             raise SOEFException.error(
                 f"Command: `{command}` Params: `{params}` Response: `{response_text}` Exception: {[e]}"
@@ -803,7 +880,8 @@ class SOEFChannel:
             "declared_name": self.declared_name,
         }
         response_text = await self._request_text("get", url=url, params=params)
-        root = ET.fromstring(response_text)
+        root = self._parse_soef_response(response_text, check_success=False)
+
         self.logger.debug("Root tag: {}".format(root.tag))
         unique_page_address = ""
         unique_token = ""  # nosec
@@ -894,7 +972,7 @@ class SOEFChannel:
 
     async def _unregister_agent(self) -> None:  # pylint: disable=unused-argument
         """
-        Unnregister a service_name from the SOEF.
+        Unregister a service_name from the SOEF.
 
         :return: None
         """
@@ -935,12 +1013,17 @@ class SOEFChannel:
 
     async def _check_server_reachable(self) -> None:
         """Check network connection is ok."""
-        await asyncio.wait_for(
-            self._request_text(
-                "get", self.base_url, timeout=self.connection_check_timeout
-            ),
-            timeout=self.connection_check_timeout,
-        )
+        try:
+            await asyncio.wait_for(
+                self._request_text(
+                    "get", self.base_url, timeout=self.connection_check_timeout
+                ),
+                timeout=self.connection_check_timeout,
+            )
+        except asyncio.TimeoutError:
+            raise SOEFNetworkConnectionError(
+                f"Server can not be reached within timeout = {self.connection_check_timeout}!"
+            )
 
     async def connect(self) -> None:
         """Connect channel set queues and executor pool."""
@@ -1028,7 +1111,7 @@ class SOEFChannel:
         params: Dict[str, List[str]],
     ) -> None:
         """
-        Add find agent task to queue to process in dedictated loop respectful to timeouts.
+        Add find agent task to queue to process in dedicated loop respectful to timeouts.
 
         :param oef_message: OefSearchMessage
         :param oef_search_dialogue: OefSearchDialogue
@@ -1062,10 +1145,9 @@ class SOEFChannel:
             raise ValueError("Inqueue not set!")  # pragma: nocover
         self.logger.debug("Searching in radius={} of myself".format(radius))
 
-        response_text = await self._generic_oef_command(
+        root = await self._generic_oef_command(
             "find_around_me", {"range_in_km": [str(radius)], **params}
         )
-        root = ET.fromstring(response_text)
         agents = {}  # type: Dict[str, Dict[str, Union[str, Dict[str, str]]]]
         for agent in root.findall(path=".//agent"):
             chain_identifier = ""

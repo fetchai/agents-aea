@@ -1,0 +1,20 @@
+openapi: "3.0.0"
+info:
+  version: 0.1.0
+  title: advanced_data_request_api
+paths:
+  /data:
+    get:
+      summary: Advanced data request
+      operationId: data
+      responses:
+        '200':
+          description: A JSON response including the data
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: The specified data was not found.
+        default:
+          description: Unexpected error

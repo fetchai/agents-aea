@@ -10,14 +10,19 @@ cd $TMP_DIR
 echo "Installing the dependencies."
 pip install pipenv
 # this is to install benchmark dependencies
+pipenv --rm
 pipenv install --dev --skip-lock
 # this is to install the AEA in the Pipenv virtual env
-pipenv run pip install --upgrade aea[all]=="0.10.1"
+pipenv run pip install --upgrade .[all] -y
+pipenv run pip uninstall typing -y
+pipenv run pip install --no-deps aea-ledger-fetchai -y
+pipenv run pip install --no-deps aea-ledger-cosmos -y
+pipenv run pip install --no-deps aea-ledger-ethereum -y
 
 chmod +x benchmark/checks/run_benchmark.sh
 echo "Start the experiments."
 # we need to add the current directory to PYTHONPATH so we can import from local dirs
-PYTHONPATH=${PYTHONPATH}:. pipenv run ./benchmark/checks/run_benchmark.sh
+PYTHONPATH=${PYTHONPATH}:$TMP_DIR pipenv run ./benchmark/checks/run_benchmark.sh
 
 rm -fr $TMPDIR
 cd $CURDIR

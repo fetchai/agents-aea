@@ -402,7 +402,7 @@ class PackageConfiguration(Configuration, ABC):
         self, overrides: Dict, env_vars_friendly: bool = False
     ) -> None:
         """Check overrides is correct, return list of errors if present."""
-        # check for permited overrides
+        # check for permitted overrides
         self._check_overrides_corresponds_to_overridable(
             overrides, env_vars_friendly=env_vars_friendly
         )
@@ -712,7 +712,7 @@ class ConnectionConfig(ComponentConfiguration):
         connections = {PublicId.from_str(id_) for id_ in obj.get(CONNECTIONS, set())}
         cert_requests = (
             [
-                # notice: yaml.load resolves datetimes strings to datetime.datetime objects
+                # notice: yaml.load resolves datetime strings to datetime.datetime objects
                 CertRequest.from_json(cert_request_json)
                 for cert_request_json in obj["cert_requests"]
             ]
@@ -791,15 +791,13 @@ class ProtocolConfig(ComponentConfiguration):
         )
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
-
-        # temporary solution till all protocols updated
-        if protocol_specification_id is not None:
-            self.protocol_specification_id = PublicId.from_str(
-                str(protocol_specification_id)
+        if protocol_specification_id is None:
+            raise ValueError(  # pragma: nocover
+                "protocol_specification_id not provided!"
             )
-        else:
-            # make protocol specification same as protocol id
-            self.protocol_specification_id = self.public_id
+        self.protocol_specification_id = PublicId.from_str(
+            str(protocol_specification_id)
+        )
 
     @property
     def json(self) -> Dict:
@@ -1105,7 +1103,7 @@ class SkillConfig(ComponentConfiguration):
         return instance
 
     def get_overridable(self) -> dict:
-        """Get overrideable confg data."""
+        """Get overridable configuration data."""
         result = {}
         current_config_data = self.json
         if self.abstract_field_name in current_config_data:
@@ -1157,6 +1155,7 @@ class AgentConfig(PackageConfiguration):
     CHECK_EXCLUDES = [
         ("private_key_paths",),
         ("connection_private_key_paths",),
+        ("error_handler",),
         ("decision_maker_handler",),
         ("default_routing",),
         ("dependencies",),

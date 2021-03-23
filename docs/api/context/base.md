@@ -16,7 +16,7 @@ Provide read access to relevant objects of the agent for the skills.
 #### `__`init`__`
 
 ```python
- | __init__(identity: Identity, connection_status: MultiplexerStatus, outbox: OutBox, decision_maker_message_queue: Queue, decision_maker_handler_context: SimpleNamespace, task_manager: TaskManager, default_ledger_id: str, currency_denominations: Dict[str, str], default_connection: Optional[PublicId], default_routing: Dict[PublicId, PublicId], search_service_address: Address, decision_maker_address: Address, data_dir: str, storage_callable: Callable[[], Optional[Storage]] = lambda: None, **kwargs: Any) -> None
+ | __init__(identity: Identity, connection_status: MultiplexerStatus, outbox: OutBox, decision_maker_message_queue: Queue, decision_maker_handler_context: SimpleNamespace, task_manager: TaskManager, default_ledger_id: str, currency_denominations: Dict[str, str], default_connection: Optional[PublicId], default_routing: Dict[PublicId, PublicId], search_service_address: Address, decision_maker_address: Address, data_dir: str, storage_callable: Callable[[], Optional[Storage]] = lambda: None, send_to_skill: Optional[Callable] = None, **kwargs: Any) -> None
 ```
 
 Initialize an agent context.
@@ -38,6 +38,24 @@ Initialize an agent context.
 - `data_dir`: directory where to put local files.
 - `storage_callable`: function that returns optional storage attached to agent.
 - `kwargs`: keyword arguments to be attached in the agent context namespace.
+
+<a name="aea.context.base.AgentContext.send_to_skill"></a>
+#### send`_`to`_`skill
+
+```python
+ | send_to_skill(message_or_envelope: Union[Message, Envelope], context: Optional[EnvelopeContext] = None) -> None
+```
+
+Send message or envelope to another skill.
+
+**Arguments**:
+
+- `message_or_envelope`: envelope to send to another skill.
+if message passed it will be wrapped into envelope with optional envelope context.
+
+**Returns**:
+
+None
 
 <a name="aea.context.base.AgentContext.storage"></a>
 #### storage

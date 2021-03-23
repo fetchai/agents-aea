@@ -30,6 +30,7 @@ from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 from aea.aea import AEA
 from aea.configurations.constants import AEA_MANAGER_DATA_DIRNAME, DEFAULT_REGISTRY_NAME
 from aea.configurations.data_types import PublicId
+from aea.crypto.plugin import load_all_plugins
 from aea.helpers.io import open_file
 from aea.manager.project import AgentAlias, Project
 
@@ -153,6 +154,7 @@ class MultiAgentManager:
         mode: str = "async",
         registry_path: str = DEFAULT_REGISTRY_NAME,
         auto_add_remove_project: bool = False,
+        password: Optional[str] = None,
     ) -> None:
         """
         Initialize manager.
@@ -161,6 +163,7 @@ class MultiAgentManager:
         :param mode: str. async or threaded
         :param registry_path: str. path to the local packages registry
         :param auto_add_remove_project: bool. add/remove project on the first agent add/last agent remove
+        :param password: the password to encrypt/decrypt the private key.
 
         :return: None
         """
@@ -198,6 +201,7 @@ class MultiAgentManager:
             )
         self._started_event = threading.Event()
         self._mode = mode
+        self._password = password
 
     @property
     def data_dir(self) -> str:
@@ -395,6 +399,7 @@ class MultiAgentManager:
 
         if not restore:
             project.install_pypi_dependencies()
+            load_all_plugins(is_raising_exception=False)
             project.build()
 
         try:
@@ -480,6 +485,7 @@ class MultiAgentManager:
             project=project,
             agent_name=agent_name,
             data_dir=self.get_data_dir_of_agent(agent_name),
+            password=self._password,
         )
         agent_alias.set_overrides(agent_overrides, component_overrides)
         project.agents.add(agent_name)
@@ -514,6 +520,7 @@ class MultiAgentManager:
             project=project,
             agent_name=agent_name,
             data_dir=self.get_data_dir_of_agent(agent_name),
+            password=self._password,
         )
         agent_alias.set_agent_config_from_data(config)
         project.agents.add(agent_name)
@@ -698,7 +705,7 @@ class MultiAgentManager:
             if wait_future.done():
                 event_set()  # pragma: nocover
             else:
-                wait_future.add_done_callback(event_set)  # pramga: nocover
+                wait_future.add_done_callback(event_set)  # pragma: nocover
 
         self._loop.call_soon_threadsafe(_add_cb)
         agent_task.stop()

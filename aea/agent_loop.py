@@ -32,12 +32,7 @@ from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union, 
 from aea.abstract_agent import AbstractAgent
 from aea.configurations.constants import LAUNCH_SUCCEED_MESSAGE
 from aea.exceptions import AEAException
-from aea.helpers.async_utils import (
-    AsyncState,
-    HandlerItemGetter,
-    PeriodicCaller,
-    Runnable,
-)
+from aea.helpers.async_utils import AsyncState, PeriodicCaller, Runnable
 from aea.helpers.exec_timeout import ExecTimeoutThreadGuard, TimeoutException
 from aea.helpers.logging import WithLogger, get_logger
 from aea.mail.base import Envelope, EnvelopeContext
@@ -111,17 +106,17 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
         return self._state.get() == AgentLoopStates.started
 
     def set_loop(self, loop: AbstractEventLoop) -> None:
-        """Set event loop and all event loopp related objects."""
+        """Set event loop and all event loop related objects."""
         self._loop: AbstractEventLoop = loop
 
     def _setup(self) -> None:  # pylint: disable=no-self-use
         """Set up agent loop before started."""
-        # start and stop methods are classmethods cause one instance shared across muiltiple threads
+        # start and stop methods are classmethods cause one instance shared across multiple threads
         ExecTimeoutThreadGuard.start()
 
     def _teardown(self) -> None:  # pylint: disable=no-self-use
         """Tear down loop on stop."""
-        # start and stop methods are classmethods cause one instance shared across muiltiple threads
+        # start and stop methods are classmethods cause one instance shared across multiple threads
         ExecTimeoutThreadGuard.stop()
 
     async def run(self) -> None:
@@ -142,14 +137,15 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
         self._teardown()
         self._stop_tasks()
         for t in self._tasks:
-            with suppress(BaseException):
+            with suppress(CancelledError, KeyboardInterrupt):
                 await t
+
         self._state.set(AgentLoopStates.stopped)
         self.logger.debug("agent loop stopped")
 
     async def _gather_tasks(self) -> None:
         """Wait till first task exception."""
-        await asyncio.gather(*self._tasks, loop=self._loop)
+        await asyncio.gather(*self._tasks)
 
     @abstractmethod
     def _set_tasks(self) -> None:  # pragma: nocover
@@ -159,8 +155,6 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
     def _stop_tasks(self) -> None:
         """Cancel all tasks."""
         for task in self._tasks:
-            if task.done():
-                continue  #  pragma: nocover
             task.cancel()
 
     @abstractmethod
@@ -210,8 +204,8 @@ class AsyncAgentLoop(BaseAgentLoop):
 
     def _setup(self) -> None:
         """Set up agent loop before started."""
-        self._skill2skill_message_queue = asyncio.Queue()
         super()._setup()
+        self._skill2skill_message_queue = asyncio.Queue()
 
     @property
     def skill2skill_queue(self) -> Queue:
@@ -314,7 +308,7 @@ class AsyncAgentLoop(BaseAgentLoop):
         Register function to run periodically.
 
         :param task_callable: function to be called
-        :param pediod: float: in seconds
+        :param period: float in seconds
         :param start_at: optional datetime, when to run task for the first time, otherwise call it right now
 
         :return: None
@@ -380,24 +374,43 @@ class AsyncAgentLoop(BaseAgentLoop):
 
         :return: list of asyncio Tasks
         """
-        tasks = [
-            self._process_messages(HandlerItemGetter(self._message_handlers())),
+        coros = [
+            self._process_messages(),
             self._task_register_periodic_tasks(),
             self._task_wait_for_error(),
         ]
-        return list(map(self._loop.create_task, tasks))  # type: ignore  # some issue with map and create_task
+        return list(map(self._loop.create_task, coros))  # type: ignore  # some issue with map and create_task
+
+    async def _message_processor(
+        self, message_handler: Callable, message_getter: Callable
+    ) -> None:
+        """Fetch messages from the message getter and process it with message handler."""
+        try:
+            while self.is_running:
+                message = await message_getter()
+                self._execution_control(message_handler, [message])
+        except CancelledError:
+            raise
+        except Exception:  # pragma: nocover
+            self.logger.exception(
+                f"Exception in message processor ({message_handler, message_getter})"
+            )
+            raise
 
     def _message_handlers(self) -> List[Tuple[Callable[[Any], None], Callable]]:
         """Get all agent's message handlers."""
         return self._agent.get_message_handlers()
 
-    async def _process_messages(self, getter: HandlerItemGetter) -> None:
-        """Process message from ItemGetter."""
+    async def _process_messages(self) -> None:
+        """Start tasks for messages handlers and sources."""
+        coros = []
+        for handler, getter in self._message_handlers():
+            coros.append(self._message_processor(handler, getter))
+
         self.logger.info(LAUNCH_SUCCEED_MESSAGE)
         self._state.set(AgentLoopStates.started)
-        while self.is_running:
-            handler, item = await getter.get()
-            self._execution_control(handler, [item])
+
+        await asyncio.gather(*coros)
 
     async def _task_register_periodic_tasks(self) -> None:
         """Process new behaviours added to skills in runtime."""

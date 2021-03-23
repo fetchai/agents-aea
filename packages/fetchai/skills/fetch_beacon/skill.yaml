@@ -1,35 +1,37 @@
 name: fetch_beacon
 author: fetchai
-version: 0.5.0
+version: 0.8.0
 type: skill
 description: Retrieve the value of the Fetch DRB
 license: Apache-2.0
-aea_version: '>=0.10.0, <0.11.0'
+aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint:
   README.md: QmWDGoCDEiYqf9tztY327hH4kY914erKvxkyG26EYPcUeT
-  __init__.py: QmX7NSy3BE9StBmG62F6hKcWN4bxLphLrbkS9ozzkhnZe4
-  behaviours.py: QmYemV7YwWK3XiQmTv9J51WGEdN5Smmq64149pFQNtsYNw
-  dialogues.py: QmaUcgtKK9FNH6Wn4q34yYfbBzjmdnRMyUwSxgt81XbZrA
-  handlers.py: QmQfS2QFn1F4ggNZySy1Timcuxq7r8Dz5H1vVj7PueqtqE
+  __init__.py: QmRJVrSPohpBcDaByU3soJ3U3sY6VgUJdGpMpzW2XiZE4H
+  behaviours.py: QmeCdxLKfvBahJRrCSzUQag9JzGMib7iREpPZ8DFGxMsR1
+  dialogues.py: QmTy9rEFAVKdLQq9qZJCgPbRqvokZBx3DmSQFvfkuqb4jn
+  handlers.py: QmezaqP1jAqVsfEZEuy9nLidEpV6tGmefgR7Cm51KNnjUV
 fingerprint_ignore_patterns: []
+connections:
+- fetchai/ledger:0.15.0
 contracts: []
 protocols:
-- fetchai/http:0.12.0
+- fetchai/ledger_api:0.11.0
 skills: []
 behaviours:
   fetch_beacon_behaviour:
     args:
-      beacon_url: https://rpc-beaconworld.fetch.ai/block
       tick_interval: 5
     class_name: FetchBeaconBehaviour
 handlers:
-  http:
+  ledger_api:
     args: {}
-    class_name: HttpHandler
+    class_name: LedgerApiHandler
 models:
-  http_dialogues:
+  ledger_api_dialogues:
     args: {}
-    class_name: HttpDialogues
-dependencies: {}
+    class_name: LedgerApiDialogues
+dependencies:
+  aea-ledger-ethereum:
+    version: <2.0.0,>=1.0.0rc1
 is_abstract: false
-connections: []

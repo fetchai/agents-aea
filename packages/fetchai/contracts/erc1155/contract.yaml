@@ -1,17 +1,17 @@
 name: erc1155
 author: fetchai
-version: 0.16.0
+version: 0.18.0
 type: contract
 description: The erc1155 contract implements an ERC1155 contract package.
 license: Apache-2.0
-aea_version: '>=0.10.0, <0.11.0'
+aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint:
   README.md: QmbM3Jrh5fFuRR3rfyF3FxiriwGGJ2Q6Bob7LrVQWcHscu
   __init__.py: QmVadErLF2u6xuTP4tnTGcMCvhh34V9VDZm53r7Z4Uts9Z
   build/Migrations.json: QmfFYYWoq1L1Ni6YPBWWoRPvCZKBLZ7qzN3UDX537mCeuE
   build/erc1155.json: Qma5n7au2NDCg1nLwYfYnmFNwWChFuXtu65w5DV7wAZRvw
   build/erc1155.wasm: QmdVxYWSKWoNQV5E8mPXkXn9TJM5AnNme6tsKDPWHp7kQD
-  contract.py: QmNUwXyJntnZwRN57aT57Kf8L8M9hr1jTQS4ePyDShDTSa
+  contract.py: QmRHBmpwCFybXfoyWyr8PWVXwJBQZgejU9cuj8ptN9hjjy
   contracts/Migrations.sol: QmbW34mYrj3uLteyHf3S46pnp9bnwovtCXHbdBHfzMkSZx
   contracts/erc1155.vy: QmXwob8G1uX7fDvtuuKW139LALWtQmGw2vvaTRBVAWRxTx
   migrations/1_initial_migration.js: QmcxaWKQ2yPkQBmnpXmcuxPZQUMuUudmPmX3We8Z9vtAf7
@@ -24,10 +24,8 @@ contract_interface_paths:
   fetchai: build/erc1155.wasm
 dependencies:
   aea-ledger-cosmos:
-    version: <0.2.0,>=0.1.0
+    version: <2.0.0,>=1.0.0rc1
   aea-ledger-ethereum:
-    version: <0.2.0,>=0.1.0
+    version: <2.0.0,>=1.0.0rc1
   aea-ledger-fetchai:
-    version: <0.2.0,>=0.1.0
-  vyper:
-    version: ==0.1.0b12
+    version: <2.0.0,>=1.0.0rc1

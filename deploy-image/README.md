@@ -39,7 +39,3 @@ And then, the `fetchai/aea-deploy:latest` image:
 - Run the publish command again: 
 
       ./develop-image/scripts/docker-publish-img.sh
-
-
-## TODO
-We need to add support for setting the connection endpoints for OEF/Ledger so they can be used a deploy time. I would suggest these are set as environment variables if possible.

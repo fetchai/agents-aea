@@ -3,24 +3,6 @@
 
 Mail module abstract base classes.
 
-<a name="aea.mail.base.AEAConnectionError"></a>
-## AEAConnectionError Objects
-
-```python
-class AEAConnectionError(Exception)
-```
-
-Exception class for connection errors.
-
-<a name="aea.mail.base.Empty"></a>
-## Empty Objects
-
-```python
-class Empty(Exception)
-```
-
-Exception for when the inbox is empty.
-
 <a name="aea.mail.base.URI"></a>
 ## URI Objects
 
@@ -174,13 +156,13 @@ Compare with another object.
 class EnvelopeContext()
 ```
 
-Extra information for the handling of an envelope.
+Contains context information of an envelope.
 
 <a name="aea.mail.base.EnvelopeContext.__init__"></a>
 #### `__`init`__`
 
 ```python
- | __init__(connection_id: Optional[PublicId] = None, skill_id: Optional[PublicId] = None, uri: Optional[URI] = None) -> None
+ | __init__(connection_id: Optional[PublicId] = None, uri: Optional[URI] = None) -> None
 ```
 
 Initialize the envelope context.
@@ -188,8 +170,17 @@ Initialize the envelope context.
 **Arguments**:
 
 - `connection_id`: the connection id used for routing the outgoing envelope in the multiplexer.
-- `skill_id`: the skill id used for routing the incoming envelope in the AEA.
 - `uri`: the URI sent with the envelope.
+
+<a name="aea.mail.base.EnvelopeContext.uri"></a>
+#### uri
+
+```python
+ | @property
+ | uri() -> Optional[URI]
+```
+
+Get the URI.
 
 <a name="aea.mail.base.EnvelopeContext.connection_id"></a>
 #### connection`_`id
@@ -199,27 +190,17 @@ Initialize the envelope context.
  | connection_id() -> Optional[PublicId]
 ```
 
-Get the connection id.
+Get the connection id to route the envelope.
 
-<a name="aea.mail.base.EnvelopeContext.skill_id"></a>
-#### skill`_`id
-
-```python
- | @property
- | skill_id() -> Optional[PublicId]
-```
-
-Get the skill id.
-
-<a name="aea.mail.base.EnvelopeContext.uri_raw"></a>
-#### uri`_`raw
+<a name="aea.mail.base.EnvelopeContext.connection_id"></a>
+#### connection`_`id
 
 ```python
- | @property
- | uri_raw() -> str
+ | @connection_id.setter
+ | connection_id(connection_id: PublicId) -> None
 ```
 
-Get uri in string format.
+Set the 'via' connection id.
 
 <a name="aea.mail.base.EnvelopeContext.__str__"></a>
 #### `__`str`__`
@@ -238,6 +219,24 @@ Get the string representation.
 ```
 
 Compare with another object.
+
+<a name="aea.mail.base.AEAConnectionError"></a>
+## AEAConnectionError Objects
+
+```python
+class AEAConnectionError(Exception)
+```
+
+Exception class for connection errors.
+
+<a name="aea.mail.base.Empty"></a>
+## Empty Objects
+
+```python
+class Empty(Exception)
+```
+
+Exception for when the inbox is empty.
 
 <a name="aea.mail.base.EnvelopeSerializer"></a>
 ## EnvelopeSerializer Objects
@@ -440,38 +439,20 @@ Get the protocol-specific message.
 
 ```python
  | @property
- | context() -> EnvelopeContext
+ | context() -> Optional[EnvelopeContext]
 ```
 
 Get the envelope context.
 
-<a name="aea.mail.base.Envelope.skill_id"></a>
-#### skill`_`id
+<a name="aea.mail.base.Envelope.to_as_public_id"></a>
+#### to`_`as`_`public`_`id
 
 ```python
  | @property
- | skill_id() -> Optional[PublicId]
+ | to_as_public_id() -> Optional[PublicId]
 ```
 
-Get the skill id from an envelope context, if set.
-
-**Returns**:
-
-skill id
-
-<a name="aea.mail.base.Envelope.connection_id"></a>
-#### connection`_`id
-
-```python
- | @property
- | connection_id() -> Optional[PublicId]
-```
-
-Get the connection id from an envelope context, if set.
-
-**Returns**:
-
-connection id
+Get to as public id.
 
 <a name="aea.mail.base.Envelope.is_sender_public_id"></a>
 #### is`_`sender`_`public`_`id
@@ -492,6 +473,16 @@ Check if sender is a public id.
 ```
 
 Check if to is a public id.
+
+<a name="aea.mail.base.Envelope.is_component_to_component_message"></a>
+#### is`_`component`_`to`_`component`_`message
+
+```python
+ | @property
+ | is_component_to_component_message() -> bool
+```
+
+Whether or not the message contained is component to component.
 
 <a name="aea.mail.base.Envelope.__eq__"></a>
 #### `__`eq`__`

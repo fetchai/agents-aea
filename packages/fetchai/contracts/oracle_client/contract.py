@@ -20,16 +20,18 @@
 """This module contains the class to connect to an oracle client contract."""
 
 import logging
+from typing import cast
 
 from aea_ledger_ethereum import EthereumApi
+from aea_ledger_fetchai import FetchAIApi
 
-from aea.common import Address
+from aea.common import Address, JSONLike
 from aea.configurations.base import PublicId
 from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/oracle_client:0.3.0")
+PUBLIC_ID = PublicId.from_str("fetchai/oracle_client:0.5.0")
 
 _default_logger = logging.getLogger(
     "aea.packages.fetchai.contracts.oracle_client.contract"
@@ -47,7 +49,7 @@ class FetchOracleClientContract(Contract):
         from_address: Address,
         query_function: str,
         gas: int = 0,
-    ) -> None:
+    ) -> JSONLike:
         """
         Get transaction to query oracle value in contract
 
@@ -56,7 +58,7 @@ class FetchOracleClientContract(Contract):
         :param from_address: the address of the transaction sender.
         :param query_function: the query oracle value function.
         :param gas: the gas limit for the transaction.
-        :return: None
+        :return: the query transaction
         """
         if ledger_api.identifier == EthereumApi.identifier:
             nonce = ledger_api.api.eth.getTransactionCount(from_address)
@@ -68,9 +70,15 @@ class FetchOracleClientContract(Contract):
                 {
                     "gas": gas,
                     "gasPrice": ledger_api.api.toWei("50", "gwei"),
+                    "from": from_address,
                     "nonce": nonce,
                 }
             )
             tx = ledger_api.update_with_gas_estimate(tx)
+            return tx
+        if ledger_api.identifier == FetchAIApi.identifier:
+            msg = {"query_oracle_value": {}}  # type: JSONLike
+            fetchai_api = cast(FetchAIApi, ledger_api)
+            tx = fetchai_api.execute_contract_query(contract_address, msg)
             return tx
         raise NotImplementedError

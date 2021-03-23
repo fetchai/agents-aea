@@ -39,7 +39,6 @@ class OefSearchHandler(Handler):
 
     def setup(self) -> None:
         """Set up the handler."""
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -143,4 +142,3 @@ class OefSearchHandler(Handler):
 
         :return: None
         """
-        pass

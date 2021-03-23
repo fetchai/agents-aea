@@ -21,6 +21,7 @@
 from typing import Optional
 
 import click
+from pkg_resources import iter_entry_points
 
 import aea
 from aea.cli.add import add
@@ -48,6 +49,7 @@ from aea.cli.list import list_command as _list
 from aea.cli.local_registry_sync import local_registry_sync
 from aea.cli.login import login
 from aea.cli.logout import logout
+from aea.cli.plugin import with_plugins
 from aea.cli.publish import publish
 from aea.cli.push import push
 from aea.cli.register import register
@@ -65,6 +67,7 @@ from aea.cli.utils.loggers import logger, simple_verbosity_option
 from aea.helpers.win32 import enable_ctrl_c_support
 
 
+@with_plugins(iter_entry_points("aea.cli"))
 @click.group(name="aea")  # type: ignore
 @click.version_option(aea.__version__, prog_name="aea")
 @simple_verbosity_option(logger, default="INFO")

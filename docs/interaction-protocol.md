@@ -1,9 +1,12 @@
+Although one can imagine scenarios where single AEAs pursue their goals in isolation without interacting with other AEAs, there is no doubt that by working together, AEAs have the potential of achieving much more, especially when taking into account agents' heterogeneity, specialisations, and differing and often complimentary local views of the environment.
 
-<a href="https://en.wikipedia.org/wiki/Interaction_protocol" target="_blank">Interaction protocols</a> are possible communication scenarios between agents or agent components (specifically, skills and connections).
+Interactions in the AEA world are in the form of communication. This is influenced by established practices in the field of multi-agent systems and the prominent speech-act theory which suggests that a communicative expression is not only about transferring information from the speaker to the hearer, but that there may be meanings and commitments beyond the statement's appearance. Therefore, speech may more suitably be considered as action. For example, "I hereby appoint you as chairman" is not just a sequence of words, but an action done by the speaker with wide-ranging consequences for the hearer and any other audience to that sentence.
+
+<a href="https://en.wikipedia.org/wiki/Interaction_protocol" target="_blank">Interaction protocols</a> are thus possible communication scenarios between agents or agent components (specifically, skills and connections).
 
 There are multiple types of interactions an AEA can have:
 
-- AEA to AEA interactions. You can find some examples in the <a href="../demos">demo section</a>.
+- AEA-to-AEA interactions. You can find some examples in the <a href="../demos">demo section</a>.
 
 - Interactions between an AEA's internal components.
 

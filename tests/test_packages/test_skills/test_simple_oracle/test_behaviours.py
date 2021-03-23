@@ -198,8 +198,9 @@ class TestSkillBehaviour(BaseSkillTestCase):
         strategy.contract_address = DEFAULT_ADDRESS
         strategy.is_contract_deployed = True
         strategy.is_oracle_role_granted = True
-        self.simple_oracle_behaviour.context.shared_state["oracle_data"] = {
-            "some_key": "some_value"
+        strategy._oracle_value_name = "oracle_value"
+        self.simple_oracle_behaviour.context.shared_state["observation"] = {
+            "oracle_value": {"some_key": "some_value"}
         }
         self.simple_oracle_behaviour.context.agent_addresses[
             LEDGER_ID
@@ -257,9 +258,16 @@ class TestSkillBehaviour(BaseSkillTestCase):
         assert has_attributes, error_str
 
     def test__request_contract_deploy_transaction(self):
-        """Test that the _request_contract_deploy_transaction function sends the right message to the contract_api."""
+        """Test that the _request_contract_deploy_transaction function sends the right message to the contract_api for ethereum ledger."""
         self.simple_oracle_behaviour._request_contract_deploy_transaction()
         self.assert_quantity_in_outbox(1)
+
+        strategy = cast(Strategy, self.simple_oracle_behaviour.context.strategy)
+        strategy._ledger_id = "ethereum"
+
+        kwargs = strategy.get_deploy_kwargs()
+        assert "ERC20Address" in kwargs.body
+        assert "initialFee" in kwargs.body
 
         msg = cast(ContractApiMessage, self.get_message_from_outbox())
         has_attributes, error_str = self.message_has_attributes(
@@ -268,6 +276,30 @@ class TestSkillBehaviour(BaseSkillTestCase):
             performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
             contract_id=str(CONTRACT_PUBLIC_ID),
             callable="get_deploy_transaction",
+            kwargs=kwargs,
+        )
+        assert has_attributes, error_str
+
+    def test__request_contract_store_transaction(self):
+        """Test that the _request_contract_deploy_transaction function sends the right message to the contract_api for fetchai ledger."""
+        strategy = cast(Strategy, self.simple_oracle_behaviour.context.strategy)
+        strategy._ledger_id = "fetchai"
+
+        self.simple_oracle_behaviour._request_contract_deploy_transaction()
+        self.assert_quantity_in_outbox(1)
+
+        kwargs = strategy.get_deploy_kwargs()
+        assert "ERC20Address" not in kwargs.body
+        assert "initialFee" not in kwargs.body
+
+        msg = cast(ContractApiMessage, self.get_message_from_outbox())
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=ContractApiMessage,
+            performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
+            contract_id=str(CONTRACT_PUBLIC_ID),
+            callable="get_deploy_transaction",
+            kwargs=kwargs,
         )
         assert has_attributes, error_str
 

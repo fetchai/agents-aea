@@ -55,7 +55,6 @@ class HttpRequestBehaviour(TickerBehaviour):
 
         :return: None
         """
-        pass
 
     def act(self) -> None:
         """
@@ -89,4 +88,3 @@ class HttpRequestBehaviour(TickerBehaviour):
 
         :return: None
         """
-        pass

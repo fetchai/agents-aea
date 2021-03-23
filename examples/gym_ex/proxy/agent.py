@@ -78,7 +78,6 @@ class ProxyAgent(Agent):
 
         :return: None
         """
-        pass
 
     def act(self) -> None:
         """
@@ -86,7 +85,6 @@ class ProxyAgent(Agent):
 
         :return: None
         """
-        pass
 
     def handle_envelope(self, envelope: Envelope) -> None:
         """
@@ -104,4 +102,3 @@ class ProxyAgent(Agent):
 
         :return: None
         """
-        pass

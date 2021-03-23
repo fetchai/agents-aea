@@ -30,9 +30,11 @@ class TestFetchBeaconSkill(AEATestCaseEmpty):
 
     def test_fetch_beacon(self):
         """Run the fetch beacon skill sequence."""
-        self.add_item("connection", "fetchai/http_client:0.17.0")
-        self.add_item("skill", "fetchai/fetch_beacon:0.5.0")
-        self.set_config("agent.default_connection", "fetchai/http_client:0.17.0")
+        self.generate_private_key()
+        self.add_private_key()
+        self.add_item("connection", "fetchai/ledger:0.15.0")
+        self.add_item("skill", "fetchai/fetch_beacon:0.8.0")
+        self.set_config("agent.default_connection", "fetchai/ledger:0.15.0")
 
         self.run_install()
 
@@ -42,7 +44,7 @@ class TestFetchBeaconSkill(AEATestCaseEmpty):
 
         check_strings = (
             "setting up FetchBeaconBehaviour",
-            "Fetching random beacon from https://rpc-beaconworld.fetch.ai/block...",
+            "Fetching random beacon value...",
             "Beacon info:",
             "entropy not present",
         )

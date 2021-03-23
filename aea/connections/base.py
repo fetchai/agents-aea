@@ -128,7 +128,7 @@ class Connection(Component, ABC):
 
     @contextmanager
     def _connect_context(self) -> Generator:
-        """Set state connecting, disconnecteing, dicsconnected during connect method."""
+        """Set state connecting, disconnecting, disconnected during connect method."""
         with self._state.transit(
             initial=ConnectionStates.connecting,
             success=ConnectionStates.connected,
@@ -305,7 +305,7 @@ class Connection(Component, ABC):
         except Exception as e:  # pragma: nocover # pylint: disable=broad-except
             e_str = parse_exception(e)
             raise AEAInstantiationException(
-                f"An error occured during instantiation of connection {configuration.public_id}/{configuration.class_name}:\n{e_str}"
+                f"An error occurred during instantiation of connection {configuration.public_id}/{configuration.class_name}:\n{e_str}"
             )
         return connection
 
@@ -386,7 +386,7 @@ class BaseSyncConnection(Connection):
             # cause task.get_name for python3.8+
             task_name = getattr(task, "task_name", "TASK NAME NOT SET")
             self.logger.exception(
-                f"in task `{task_name}`, exception occured", exc_info=task.exception(),
+                f"in task `{task_name}`, exception occurred", exc_info=task.exception(),
             )
 
     async def _run_in_pool(self, fn: Callable, *args: Any) -> Any:
@@ -462,7 +462,7 @@ class BaseSyncConnection(Connection):
 
     @abstractmethod
     def on_disconnect(self) -> None:
-        """Run on discconnect method called."""
+        """Run on disconnect method called."""
 
     @abstractmethod
     def on_send(self, envelope: "Envelope") -> None:

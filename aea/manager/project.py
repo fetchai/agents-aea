@@ -16,7 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This module contains the implementation of AEA agents project configuiration."""
+"""This module contains the implementation of AEA agents project configuration."""
 import os
 from copy import deepcopy
 from pathlib import Path
@@ -141,7 +141,11 @@ class AgentAlias(_Base):
     __slots__ = ("project", "agent_name", "_data_dir", "_agent_config")
 
     def __init__(
-        self, project: Project, agent_name: str, data_dir: str,
+        self,
+        project: Project,
+        agent_name: str,
+        data_dir: str,
+        password: Optional[str] = None,
     ):
         """Init agent alias with project, config, name, agent, builder."""
         self.project = project
@@ -150,6 +154,7 @@ class AgentAlias(_Base):
         if not os.path.exists(self._data_dir):
             os.makedirs(self._data_dir)
         self._agent_config: AgentConfig = self._get_agent_config(project.path)
+        self._password = password
         self._ensure_private_keys()
 
     def set_agent_config_from_data(self, json_data: List[Dict]) -> None:
@@ -164,7 +169,7 @@ class AgentAlias(_Base):
         self._ensure_private_keys()
 
     def _ensure_private_keys(self) -> None:
-        """Add proviate keys of not present in the config."""
+        """Add private keys if not present in the config."""
         builder = self._get_builder(self.agent_config, self.project.path)
         default_ledger = builder.get_default_ledger()
 
@@ -194,12 +199,16 @@ class AgentAlias(_Base):
         return self._agent_config
 
     def _create_private_key(
-        self, ledger: str, replace: bool = False, is_connection: bool = False
+        self, ledger: str, replace: bool = False, is_connection: bool = False,
     ) -> str:
         """
         Create new key for agent alias in working dir keys dir.
 
         If file exists, check `replace` option.
+
+        :param ledger: the ledger id
+        :param replace: whether or not to replace an existing key
+        :param is_connection: whether or not it is a connection key
         """
         file_name = (
             f"{ledger}_connection_private.key"
@@ -209,7 +218,7 @@ class AgentAlias(_Base):
         filepath = os.path.join(self._data_dir, file_name)
         if os.path.exists(filepath) and not replace:
             return filepath
-        create_private_key(ledger, filepath)
+        create_private_key(ledger, filepath, password=self._password)
         return filepath
 
     def remove_from_project(self) -> None:
@@ -235,7 +244,7 @@ class AgentAlias(_Base):
     def get_aea_instance(self) -> AEA:
         """Build new aea instance."""
         self.issue_certificates()
-        aea = self.builder.build()
+        aea = self.builder.build(password=self._password)
         # override build dir to project's one
         aea.DEFAULT_BUILD_DIR_NAME = os.path.join(
             self.project.path, aea.DEFAULT_BUILD_DIR_NAME
@@ -301,7 +310,9 @@ class AgentAlias(_Base):
 
         :return: dict with crypto id str as key and address str as value
         """
-        wallet = get_wallet_from_agent_config(self.agent_config)
+        wallet = get_wallet_from_agent_config(
+            self.agent_config, password=self._password
+        )
         return wallet.addresses
 
     def get_connections_addresses(self) -> Dict[str, str]:
@@ -310,5 +321,7 @@ class AgentAlias(_Base):
 
         :return: dict with crypto id str as key and address str as value
         """
-        wallet = get_wallet_from_agent_config(self.agent_config)
+        wallet = get_wallet_from_agent_config(
+            self.agent_config, password=self._password
+        )
         return wallet.connection_cryptos.addresses

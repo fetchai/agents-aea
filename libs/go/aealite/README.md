@@ -1,6 +1,6 @@
-# aealite
+# `aealite`
 
-AEALite is a lightweight implementation of an AEA library in Golang.
+`aealite` is a lightweight implementation of an AEA library in Golang.
 
 
 ## Usage example

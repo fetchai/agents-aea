@@ -1,3 +1,5 @@
+This guide explains how to run an AEA inside a Raspberry Pi.
+
 ## Prerequisites
 
 * <a href="https://thepihut.com/products/raspberry-pi-4-model-b?gclid=EAIaIQobChMImcuwvcfh4wIVirHtCh3szg2EEAAYASAAEgJQ_fD_BwE" target="_blank">Raspberry Pi 4</a> (You can also use Raspberry Pi3 b or Raspberry Pi3 b+)
@@ -12,7 +14,7 @@ If you do not have a new Raspberry Pi SD card, you will need to make one. To do 
 
 NOOBS is a way to create an SD card for easy operating system installation on a Raspberry Pi. 
 
-First download noobs from <a href="https://www.raspberrypi.org/downloads/" target="_blank">this link</a>.
+First download noobs from <a href="https://www.raspberrypi.org/software/" target="_blank">this link</a>.
 
 Then follow <a href="https://projects.raspberrypi.org/en/projects/raspberry-pi-setting-up" target="_blank">this guide</a> to set up your SD card.
 
@@ -44,7 +46,7 @@ Once installed, create and launch a clean virtual environment with Python 3.7:
 pipenv --python 3.7 && pipenv shell
 ```
 
-Finally, install the AEA framework from PyPi:
+Finally, install the AEA framework from PyPI:
 
 ``` bash
 pip install aea[all]

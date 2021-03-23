@@ -67,7 +67,7 @@ def request_api(
     :param path: str URL path.
     :param params: dict GET params.
     :param data: dict POST data.
-    :param is_auth: bool is auth requied (default False).
+    :param is_auth: bool is auth required (default False).
     :param files: optional dict {file_field_name: open(filepath, "rb")} (default None).
 
     :return: dict response from Registry API or tuple (dict response, status code).

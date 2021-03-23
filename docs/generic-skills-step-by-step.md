@@ -2,36 +2,6 @@ This guide is a step-by-step introduction to building AEAs that advertise their 
 
 If you simply want to run the resulting AEAs <a href="../generic-skills">go here</a>.
 
-<!-- ## Hardware Requirements (Optional)
-
-To follow this tutorial to completion you will need:
-
- - Raspberry Pi 4
-
- - Mini SD card
-
- - Thermometer sensor
-
- - AEA Framework
-
-The AEA will “live” inside the Raspberry Pi and will read the data from a sensor. Then it will connect to the <a href="../oef-ledger">OEF search and communication networks</a> and will identify itself as a seller of that data.
-
-If you simply want to follow the software part of the guide then you only require the dependencies listed in the <a href="../generic-skills-step-by-step/#dependencies">Dependencies</a> section.
-
-### Setup the environment (Optional)
-
-You can follow the guide <a href="../raspberry-set-up"> here </a> in order to setup your environment and prepare your Raspberry Pi.
-
-Once you setup your Raspberry Pi, open a terminal and navigate to `/etc/udev/rules.d/`. Create a new file there  (I named mine `99-hidraw-permissions.rules`)
-``` bash
-sudo nano 99-hidraw-permissions.rules
-```
-and add the following inside the file:
-``` bash
-KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0664", GROUP="plugdev"
-```
-this assigns all devices coming out of the hidraw subsystem in the kernel to the group `plugdev` and sets the permissions to `r/w r/w r` (for root [the default owner], plugdev, and everyone else respectively). -->
-
 ## Dependencies (Required)
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
@@ -41,16 +11,16 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 This step-by-step guide goes through the creation of two AEAs which are already developed by Fetch.ai. You can get the finished AEAs, and compare your code against them, by following the next steps:
 
 ``` bash
-aea fetch fetchai/generic_seller:0.19.0
+aea fetch fetchai/generic_seller:0.21.0
 cd generic_seller
-aea eject skill fetchai/generic_seller:0.20.0
+aea eject skill fetchai/generic_seller:0.22.0
 cd ..
 ```
 
 ``` bash
-aea fetch fetchai/generic_buyer:0.20.0
+aea fetch fetchai/generic_buyer:0.22.0
 cd generic_buyer
-aea eject skill fetchai/generic_buyer:0.20.0
+aea eject skill fetchai/generic_buyer:0.22.0
 cd ..
 ```
 
@@ -70,6 +40,7 @@ Create a new AEA by typing the following command in the terminal:
 ``` bash
 aea create my_generic_seller
 cd my_generic_seller
+aea install
 ```
 Our newly created AEA is inside the current working directory. Let’s create our new skill that will handle the sale of data. Type the following command:
 ``` bash
@@ -148,7 +119,6 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
-        pass
 
     def teardown(self) -> None:
         """
@@ -333,7 +303,6 @@ class GenericFipaHandler(Handler):
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -369,7 +338,6 @@ class GenericFipaHandler(Handler):
 
         :return: None
         """
-        pass
 ```
 The code above contains the logic for handling `FipaMessages` received by the `my_generic_seller` AEA. We use `FipaDialogues` (more on this <a href="../generic-skills-step-by-step/#step-5-create-the-dialogues">below</a>) to keep track of the progress of the negotiation dialogue between the `my_generic_seller` AEA and the `my_generic_buyer` AEA.
 
@@ -603,7 +571,6 @@ class GenericLedgerApiHandler(Handler):
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -644,7 +611,6 @@ class GenericLedgerApiHandler(Handler):
 
         :return: None
         """
-        pass
 
     def _handle_unidentified_dialogue(self, ledger_api_msg: LedgerApiMessage) -> None:
         """
@@ -757,7 +723,6 @@ class GenericOefSearchHandler(Handler):
 
     def setup(self) -> None:
         """Call to setup the handler."""
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -791,7 +756,6 @@ class GenericOefSearchHandler(Handler):
 
         :return: None
         """
-        pass
 
     def _handle_unidentified_dialogue(self, oef_search_msg: OefSearchMessage) -> None:
         """
@@ -1049,7 +1013,7 @@ The following properties and methods deal with different aspects of the strategy
         Check if the query matches the supply.
 
         :param query: the query
-        :return: bool indiciating whether matches or not
+        :return: bool indicating whether matches or not
         """
         return query.check(self.get_service_description())
 
@@ -1373,7 +1337,7 @@ type: skill
 description: The weather station skill implements the functionality to sell weather
   data.
 license: Apache-2.0
-aea_version: '>=0.10.0, <0.11.0'
+aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint:
   README.md: QmPb5kHYZyhUN87EKmuahyGqDGgqVdGPyfC1KpGC3xfmcP
   __init__.py: QmTSEedzQySy2nzRCY3F66CBSX52f8s3pWHZTejX4hKC9h
@@ -1383,13 +1347,13 @@ fingerprint:
   strategy.py: QmYTUsfv64eRQDevCfMUDQPx2GCtiMLFdacN4sS1E4Fdfx
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.13.0
+- fetchai/ledger:0.15.0
 contracts: []
 protocols:
-- fetchai/default:0.12.0
-- fetchai/fipa:0.13.0
-- fetchai/ledger_api:0.10.0
-- fetchai/oef_search:0.13.0
+- fetchai/default:0.13.0
+- fetchai/fipa:0.14.0
+- fetchai/ledger_api:0.11.0
+- fetchai/oef_search:0.14.0
 skills: []
 behaviours:
   service_registration:
@@ -1434,6 +1398,7 @@ models:
       service_id: generic_service
       unit_price: 10
     class_name: GenericStrategy
+is_abstract: false
 dependencies: {}
 ```
 
@@ -1457,6 +1422,7 @@ In a new terminal, create a new AEA by typing the following command in the termi
 ``` bash
 aea create my_generic_buyer
 cd my_generic_buyer
+aea install
 ```
 
 Our newly created AEA is inside the current working directory. Let’s create a new skill for purchasing data. Type the following command:
@@ -1566,7 +1532,6 @@ class GenericSearchBehaviour(TickerBehaviour):
 
         :return: None
         """
-        pass
 
 
 class GenericTransactionBehaviour(TickerBehaviour):
@@ -1588,7 +1553,6 @@ class GenericTransactionBehaviour(TickerBehaviour):
 
     def setup(self) -> None:
         """Setup behaviour."""
-        pass
 
     def act(self) -> None:
         """
@@ -1632,7 +1596,6 @@ class GenericTransactionBehaviour(TickerBehaviour):
 
     def teardown(self) -> None:
         """Teardown behaviour."""
-        pass
 
     def _timeout_processing(self) -> None:
         """Timeout processing."""
@@ -1729,7 +1692,6 @@ class GenericFipaHandler(Handler):
 
         :return: None
         """
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -1765,7 +1727,6 @@ class GenericFipaHandler(Handler):
 
         :return: None
         """
-        pass
 ```
 You will see that we are following similar logic to the `generic_seller` when we develop the `generic_buyer`’s side of the negotiation. First, we create a new dialogue and store it in the dialogues class. Then we are checking what kind of message we received by checking its performative. So lets start creating our handlers:
 
@@ -1975,7 +1936,6 @@ class GenericOefSearchHandler(Handler):
 
     def setup(self) -> None:
         """Call to setup the handler."""
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -2011,7 +1971,6 @@ class GenericOefSearchHandler(Handler):
 
         :return: None
         """
-        pass
 
     def _handle_unidentified_dialogue(self, oef_search_msg: OefSearchMessage) -> None:
         """
@@ -2111,7 +2070,6 @@ class GenericSigningHandler(Handler):
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -2145,7 +2103,6 @@ class GenericSigningHandler(Handler):
 
         :return: None
         """
-        pass
 
     def _handle_unidentified_dialogue(self, signing_msg: SigningMessage) -> None:
         """
@@ -2235,7 +2192,6 @@ class GenericLedgerApiHandler(Handler):
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -2285,7 +2241,6 @@ class GenericLedgerApiHandler(Handler):
 
         :return: None
         """
-        pass
 
     def _handle_unidentified_dialogue(self, ledger_api_msg: LedgerApiMessage) -> None:
         """
@@ -2725,7 +2680,6 @@ The `is_affordable_proposal` method in the following code block checks if we can
         :param data: the data
         :return: False
         """
-        pass
 
     def update_search_query_params(self) -> None:
         """
@@ -2733,7 +2687,6 @@ The `is_affordable_proposal` method in the following code block checks if we can
 
         :return: None
         """
-        pass
 ```
 
 ### Step 5: Create the dialogues
@@ -3092,7 +3045,7 @@ version: 0.1.0
 type: skill
 description: The weather client skill implements the skill to purchase weather data.
 license: Apache-2.0
-aea_version: '>=0.10.0, <0.11.0'
+aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint:
   README.md: QmTR91jm7WfJpmabisy74NR5mc35YXjDU1zQAUKZeHRw8L
   __init__.py: QmU5vrC8FipyjfS5biNa6qDWdp4aeH5h4YTtbFDmCg8Chj
@@ -3102,14 +3055,14 @@ fingerprint:
   strategy.py: QmcrwaEWvKHDCNti8QjRhB4utJBJn5L8GpD27Uy9zHwKhY
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.13.0
+- fetchai/ledger:0.15.0
 contracts: []
 protocols:
-- fetchai/default:0.12.0
-- fetchai/fipa:0.13.0
-- fetchai/ledger_api:0.10.0
-- fetchai/oef_search:0.13.0
-- fetchai/signing:0.10.0
+- fetchai/default:0.13.0
+- fetchai/fipa:0.14.0
+- fetchai/ledger_api:0.11.0
+- fetchai/oef_search:0.14.0
+- fetchai/signing:0.11.0
 skills: []
 behaviours:
   search:
@@ -3168,6 +3121,7 @@ models:
       service_id: generic_service
       stop_searching_on_result: true
     class_name: GenericStrategy
+is_abstract: false
 dependencies: {}
 ```
 We must pay attention to the models and the strategy’s variables. Here we can change the price we would like to buy each reading at, the maximum transaction fee we are prepared to pay, and so on. 
@@ -3207,8 +3161,8 @@ In both AEAs run:
 ``` bash
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:0.10.0": "fetchai/ledger:0.13.0",
-  "fetchai/oef_search:0.13.0": "fetchai/soef:0.17.0"
+  "fetchai/ledger_api:0.11.0": "fetchai/ledger:0.15.0",
+  "fetchai/oef_search:0.14.0": "fetchai/soef:0.19.0"
 }'
 ```
 
@@ -3225,13 +3179,13 @@ aea generate-wealth fetchai --sync
 Add the remaining packages for the seller AEA, then run it:
 
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.16.0
-aea add connection fetchai/soef:0.17.0
-aea add connection fetchai/ledger:0.13.0
-aea add protocol fetchai/fipa:0.13.0
+aea add connection fetchai/p2p_libp2p:0.18.0
+aea add connection fetchai/soef:0.19.0
+aea add connection fetchai/ledger:0.15.0
+aea add protocol fetchai/fipa:0.14.0
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.16.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.18.0
 aea run
 ```
 
@@ -3242,14 +3196,14 @@ Once you see a message of the form `To join its network use multiaddr: ['SOME_AD
 Add the remaining packages for the buyer AEA:
 
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.16.0
-aea add connection fetchai/soef:0.17.0
-aea add connection fetchai/ledger:0.13.0
-aea add protocol fetchai/fipa:0.13.0
-aea add protocol fetchai/signing:0.10.0
+aea add connection fetchai/p2p_libp2p:0.18.0
+aea add connection fetchai/soef:0.19.0
+aea add connection fetchai/ledger:0.15.0
+aea add protocol fetchai/fipa:0.14.0
+aea add protocol fetchai/signing:0.11.0
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.16.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.18.0
 ```
 
 Then, update the configuration of the buyer AEA's P2P connection:
