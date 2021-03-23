@@ -65,6 +65,7 @@ protocols: []
 skills: []
 default_connection: null
 default_ledger: cosmos
+required_ledgers: [cosmos]
 private_key_paths:
     cosmos: tests/data/cosmos_private_key.txt
 connection_private_key_paths:

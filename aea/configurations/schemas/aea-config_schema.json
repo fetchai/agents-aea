@@ -76,6 +76,13 @@
     "default_ledger": {
       "$ref": "definitions.json#/definitions/ledger_id"
     },
+    "required_ledgers": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "definitions.json#/definitions/ledger_id"
+      }
+    },
     "currency_denominations": {
       "type": "object"
     },

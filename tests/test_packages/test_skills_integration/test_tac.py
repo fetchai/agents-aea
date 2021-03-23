@@ -365,6 +365,10 @@ class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache):
         self.add_item("connection", "fetchai/ledger:0.15.0")
         self.add_item("skill", "fetchai/tac_control_contract:0.20.0")
         self.set_config("agent.default_ledger", EthereumCrypto.identifier)
+        self.nested_set_config(
+            "agent.required_ledgers",
+            [FetchAICrypto.identifier, EthereumCrypto.identifier],
+        )
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()
@@ -442,6 +446,10 @@ class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache):
             # set AEA config (no component overrides)
             self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.18.0")
             self.set_config("agent.default_ledger", EthereumCrypto.identifier)
+            self.nested_set_config(
+                "agent.required_ledgers",
+                [FetchAICrypto.identifier, EthereumCrypto.identifier],
+            )
             setting_path = "agent.default_routing"
             self.nested_set_config(setting_path, default_routing)
             data = {
