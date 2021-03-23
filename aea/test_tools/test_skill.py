@@ -388,18 +388,18 @@ class BaseSkillTestCase:
 
         if is_incoming:  # first message from the opponent
             dialogue_reference = dialogues.new_self_initiated_dialogue_reference()
-            default_to = (
-                self.skill.skill_context.agent_address
-                if is_agent_to_agent_messages
-                else str(self.skill.public_id)
-            )
+            # default_to = (
+            #     self.skill.skill_context.agent_address
+            #     if is_agent_to_agent_messages
+            #     else str(self.skill.public_id)
+            # )
             message = self.build_incoming_message(
                 message_type=dialogues.message_class,
                 dialogue_reference=dialogue_reference,
                 message_id=Dialogue.STARTING_MESSAGE_ID,
                 target=target or Dialogue.STARTING_TARGET,
                 performative=performative,
-                to=default_to,
+                to=dialogues.self_address,
                 sender=counterparty,
                 is_agent_to_agent_messages=is_agent_to_agent_messages,
                 **contents,
@@ -433,18 +433,18 @@ class BaseSkillTestCase:
                 )
                 message_id = dialogue.get_incoming_next_message_id()
 
-                default_to = (
-                    self.skill.skill_context.agent_address
-                    if is_agent_to_agent_messages
-                    else str(self.skill.public_id)
-                )
+                # default_to = (
+                #     self.skill.skill_context.agent_address
+                #     if is_agent_to_agent_messages
+                #     else str(self.skill.public_id)
+                # )
                 message = self.build_incoming_message(
                     message_type=dialogues.message_class,
                     dialogue_reference=dialogue_reference,
                     message_id=message_id,
                     target=target,
                     performative=performative,
-                    to=default_to,
+                    to=dialogues.self_address,
                     sender=counterparty,
                     is_agent_to_agent_messages=is_agent_to_agent_messages,
                     **contents,

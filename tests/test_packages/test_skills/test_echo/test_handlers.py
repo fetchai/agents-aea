@@ -75,6 +75,7 @@ class TestEchoHandler(BaseSkillTestCase):
             dialogue_reference=incorrect_dialogue_reference,
             performative=DefaultMessage.Performative.BYTES,
             content=self.content,
+            to=self.skill.skill_context.agent_name,
         )
 
         # operation
@@ -144,7 +145,7 @@ class TestEchoHandler(BaseSkillTestCase):
             message_type=DefaultMessage,
             performative=DefaultMessage.Performative.BYTES,
             to=incoming_message.sender,
-            sender=self.skill.skill_context.agent_address,
+            sender=self.skill.skill_context.agent_name,
             target=incoming_message.message_id,
             content=incoming_message.content,
         )
