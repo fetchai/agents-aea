@@ -1366,7 +1366,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
         :return: the list of required ledgers.
         """
-        return self._required_ledgers or []
+        return self._required_ledgers or [self.DEFAULT_LEDGER]
 
     def _get_agent_act_period(self) -> float:
         """

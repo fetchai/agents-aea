@@ -69,6 +69,10 @@ class TestOracleSkills(AEATestCaseManyFlaky, UseGanache):
         self.add_item("connection", "fetchai/prometheus:0.4.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.18.0")
         self.set_config("agent.default_ledger", EthereumCrypto.identifier)
+        self.nested_set_config(
+            "agent.required_ledgers",
+            [FetchAICrypto.identifier, EthereumCrypto.identifier],
+        )
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.add_item("skill", "fetchai/advanced_data_request:0.1.0")
@@ -144,6 +148,10 @@ class TestOracleSkills(AEATestCaseManyFlaky, UseGanache):
         self.add_item("connection", "fetchai/http_client:0.19.0")
         self.set_config("agent.default_connection", "fetchai/ledger:0.15.0")
         self.set_config("agent.default_ledger", EthereumCrypto.identifier)
+        self.nested_set_config(
+            "agent.required_ledgers",
+            [FetchAICrypto.identifier, EthereumCrypto.identifier],
+        )
 
         default_routing = {
             "fetchai/ledger_api:0.11.0": "fetchai/ledger:0.15.0",

@@ -1148,6 +1148,7 @@ class AgentConfig(PackageConfiguration):
             "connection_exception_policy",
             "default_connection",
             "default_ledger",
+            "required_ledgers",
             "default_routing",
             "storage_uri",
         ]
