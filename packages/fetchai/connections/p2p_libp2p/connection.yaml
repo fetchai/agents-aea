@@ -54,6 +54,7 @@ config:
 cert_requests:
 - identifier: acn
   ledger_id: fetchai
+  message_format: '{public_key}'
   not_after: '2022-01-01'
   not_before: '2021-01-01'
   public_key: fetchai

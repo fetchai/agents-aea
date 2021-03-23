@@ -200,6 +200,7 @@
         "ledger_id",
         "not_before",
         "not_after",
+        "message_format",
         "save_path"
       ],
       "properties": {
@@ -216,6 +217,9 @@
           "type": "string"
         },
         "not_after": {
+          "type": "string"
+        },
+        "message_format": {
           "type": "string"
         },
         "save_path": {

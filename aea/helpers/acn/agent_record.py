@@ -22,7 +22,7 @@ from typing import Optional
 
 from aea.common import PathLike
 from aea.crypto.registries import make_ledger_api
-from aea.helpers.base import CertRequest
+from aea.helpers.base import CertRequest, SimpleIdOrStr
 
 
 class AgentRecord:
@@ -31,9 +31,13 @@ class AgentRecord:
     __slots__ = (
         "_address",
         "_representative_public_key",
-        "_message",
-        "_signature",
+        "_identifier",
         "_ledger_id",
+        "_not_before",
+        "_not_after",
+        "_message_format",
+        "_signature",
+        "_message",
         "_public_key",
     )
 
@@ -41,38 +45,56 @@ class AgentRecord:
         self,
         address: str,
         representative_public_key: str,
-        message: bytes,
+        identifier: SimpleIdOrStr,
+        ledger_id: SimpleIdOrStr,
+        not_before: str,
+        not_after: str,
+        message_format: str,
         signature: str,
-        ledger_id: str,
     ) -> None:
         """
         Initialize the AgentRecord
 
         :param address: agent address
         :param representative_public_key: representative's public key
-        :param message: message to be signed as proof-of-representation of this AgentRecord
+        :param identifier: certificate identifier.
+        :param ledger_id: ledger identifier the request is referring to.
+        :param not_before: specify the lower bound for certificate validity.
+          If it is a string, it must follow the format: 'YYYY-MM-DD'. It
+          will be interpreted as timezone UTC.
+        :param not_before: specify the lower bound for certificate validity.
+          if it is a string, it must follow the format: 'YYYY-MM-DD' It
+          will be interpreted as timezone UTC-0.
+        :param message_format: message format used for signing
         :param signature: proof-of-representation of this AgentRecord
-        :param ledger_id: ledger id
         """
         self._address = address
         self._representative_public_key = representative_public_key
-        self._message = message
-        self._signature = signature
+        self._identifier = identifier
         self._ledger_id = ledger_id
-        self._public_key: Optional[str] = None
-        self._check_validity()
+        self._not_before = not_before
+        self._not_after = not_after
+        self._message_format = message_format
+        self._signature = signature
+        self._message = CertRequest.construct_message(
+            self.representative_public_key,
+            self.identifier,
+            self.not_before,
+            self.not_after,
+            self.message_format,
+        )
+        self._public_key = self._check_validity()
 
-    def _check_validity(self) -> None:
+    def _check_validity(self) -> str:
         """
         Checks validity of record.
 
         Specifically:
         - if ledger_id is valid
         - if agent signed the message
-        - if message is correctly formatted
+
+        :return: agent public key
         """
-        if self.message != self._get_message(self.representative_public_key):
-            raise ValueError("Invalid message.")  # pragma: no cover
         ledger_api = make_ledger_api(self.ledger_id)
         public_keys = ledger_api.recover_public_keys_from_message(
             self.message, self.signature
@@ -89,7 +111,7 @@ class AgentRecord:
             raise ValueError(
                 "Invalid signature for provided representative_public_key and agent address!"
             )
-        self._public_key = public_key
+        return public_key
 
     @property
     def address(self) -> str:
@@ -99,8 +121,6 @@ class AgentRecord:
     @property
     def public_key(self) -> str:
         """Get agent public key"""
-        if self._public_key is None:
-            raise ValueError("Inconsistent record!")  #  pragma: nocover
         return self._public_key
 
     @property
@@ -119,18 +139,29 @@ class AgentRecord:
         return self._message
 
     @property
-    def ledger_id(self) -> str:
+    def identifier(self) -> SimpleIdOrStr:
+        """Get the identifier."""
+        return self._identifier
+
+    @property
+    def ledger_id(self) -> SimpleIdOrStr:
         """Get ledger id."""
         return self._ledger_id
 
-    def _get_message(self, public_key: str) -> bytes:  # pylint: disable=no-self-use
-        """Get the message."""
-        # Refactor, needs to match CertRequest!
-        message = public_key.encode("ascii")
-        # + self.identifier.encode("ascii")  # noqa: E800
-        # + self.not_before_string.encode("ascii")  # noqa: E800
-        # + self.not_after_string.encode("ascii")  # noqa: E800
-        return message
+    @property
+    def not_before(self) -> str:
+        """Get the not_before field."""
+        return self._not_before
+
+    @property
+    def not_after(self) -> str:
+        """Get the not_after field."""
+        return self._not_after
+
+    @property
+    def message_format(self) -> str:
+        """Get the message format."""
+        return self._message_format
 
     def __str__(self) -> str:  # pragma: no cover
         """Get string representation."""
@@ -145,13 +176,15 @@ class AgentRecord:
         data_dir: Optional[PathLike] = None,
     ) -> "AgentRecord":
         """Get agent record from cert request."""
-        message = cert_request.get_message(representative_public_key)
         signature = cert_request.get_signature(data_dir)
         record = cls(
             address,
             representative_public_key,
-            message,
-            signature,
+            cert_request.identifier,
             cert_request.ledger_id,
+            cert_request.not_before_string,
+            cert_request.not_after_string,
+            cert_request.message_format,
+            signature,
         )
         return record

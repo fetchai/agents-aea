@@ -877,6 +877,7 @@ def _make_libp2p_connection(
         key.identifier,
         "2021-01-01",
         "2021-01-02",
+        "{public_key}",
         f"./{key.address}_cert.txt",
     )
     _process_cert(key, cert_request, path_prefix=data_dir)
@@ -947,6 +948,7 @@ def _make_libp2p_client_connection(
         ledger_api_id,
         "2021-01-01",
         "2021-01-02",
+        "{public_key}",
         f"./{crypto.address}_cert.txt",
     )
     _process_cert(crypto, cert_request, path_prefix=data_dir)

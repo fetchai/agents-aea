@@ -44,6 +44,7 @@ def test_agent_record(change_directory):
         DEFAULT_LEDGER,
         "2021-01-01",
         "2022-01-01",
+        "{public_key}",
         cert_path,
     )
     _process_cert(agent_key_1, cert, change_directory)
@@ -64,9 +65,12 @@ def test_agent_record(change_directory):
     agent_record = AgentRecord(
         agent_key_1.address,
         peer_public_key_1,
-        cert.get_message(peer_public_key_1),
+        cert.identifier,
+        cert.ledger_id,
+        cert.not_before,
+        cert.not_after,
+        cert.message_format,
         cert.get_signature(),
-        DEFAULT_LEDGER,
     )
     assert (
         agent_record.address == agent_key_1.address
