@@ -62,7 +62,7 @@ from aea.helpers.io import open_file
     help="Remove obsolete dependencies not required anymore.",
 )
 @click.pass_context
-@check_aea_project
+@check_aea_project(check_aea_version=False)  # type: ignore  # pylint: disable=no-value-for-parameter
 def remove(
     click_context: click.Context, with_dependencies: bool
 ) -> None:  # pylint: disable=unused-argument
