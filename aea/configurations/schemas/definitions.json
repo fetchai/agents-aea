@@ -218,6 +218,9 @@
         "not_after": {
           "type": "string"
         },
+        "message_format": {
+          "type": "string"
+        },
         "save_path": {
           "type": "string"
         }
