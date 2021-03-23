@@ -59,7 +59,7 @@ nav:
       - Create decision-maker transaction: 'decision-maker-transaction.md'
       - Testing Skills: 'skill-testing.md'
       - Deployment: 'deployment.md'
-      - 12-Factor app and AEAs: '12-factor`'
+      - 12-Factor app and AEAs: '12-factor.md'
       - Prometheus monitoring: 'prometheus.md'
       - Known limitations: 'known-limits.md'
       - Build an AEA programmatically: 'build-aea-programmatically.md'
