@@ -40,31 +40,31 @@ type DialogueInterface interface {
 	getSelfAddress() Address
 	getRole() Role
 	getRules() RuleType
-	getMessageClass() InitialMessage
+	getMessageClass() AbstractMessage
 	isSelfInitiated() bool
-	getLastIncomingMessage() InitialMessage
-	getLastOutgoingMessage() InitialMessage
-	getLastMessage() InitialMessage
+	getLastIncomingMessage() AbstractMessage
+	getLastOutgoingMessage() AbstractMessage
+	getLastMessage() AbstractMessage
 	isEmpty() bool
-	counterPartyForMessage(InitialMessage) bool
-	isMessageBySelf(InitialMessage) bool
-	isMessageByOther(InitialMessage) bool
-	getMessage(MessageId) InitialMessage
+	counterPartyForMessage(AbstractMessage) bool
+	isMessageBySelf(AbstractMessage) bool
+	isMessageByOther(AbstractMessage) bool
+	getMessage(MessageId) AbstractMessage
 	hasMessageId(MessageId) bool
-	update(InitialMessage)
-	isBelongingToADialogue(InitialMessage) bool
-	reply(Performative, Target) InitialMessage
-	validateNextMessage(InitialMessage) (bool, InitialMessage)
-	basicValidations(InitialMessage) (bool, InitialMessage)
-	basicValidationInitialMessage(InitialMessage) (bool, InitialMessage)
-	basicValidationNonInitialMessage(InitialMessage) (bool, InitialMessage)
-	validateMessageTarget(InitialMessage) string
-	validateMessageId(InitialMessage) string
-	getMessageById(MessageId) InitialMessage
+	update(AbstractMessage)
+	isBelongingToADialogue(AbstractMessage) bool
+	reply(Performative, Target) AbstractMessage
+	validateNextMessage(AbstractMessage) (bool, AbstractMessage)
+	basicValidations(AbstractMessage) (bool, AbstractMessage)
+	basicValidationInitialMessage(AbstractMessage) (bool, AbstractMessage)
+	basicValidationNonInitialMessage(AbstractMessage) (bool, AbstractMessage)
+	validateMessageTarget(AbstractMessage) string
+	validateMessageId(AbstractMessage) string
+	getMessageById(MessageId) AbstractMessage
 	getOutgoingNextMessageId() int
 	getIncomingNextMessageId() int
 	updateDIalogueLabel(DialogueLabel)
-	customValidation(InitialMessage) (bool, string)
+	customValidation(AbstractMessage) (bool, string)
 	getStringRepresentation() string
 }
 
@@ -72,19 +72,19 @@ type DialoguesInterface interface {
 	// initialize(dialogue DialogueLabel, endStates FrozenSet, _message_class InitialMessage, dialogueClass Dialogue, roleFromFirstMessage Role, keepTerminalStateDialogues bool)
 	isKeepDIaloguesInTerminalState() bool
 	selfAddress() Address
-	messageClass() InitialMessage
+	messageClass() AbstractMessage
 	dialogueClass() Dialogue
 	getDialoguesWithCounterParty(counterPArty Address) []Dialogue
-	isMessageBySelf(InitialMessage) bool
-	isMessageByOther(InitialMessage) bool
-	counterPartyFromMessage(InitialMessage) Address
+	isMessageBySelf(AbstractMessage) bool
+	isMessageByOther(AbstractMessage) bool
+	counterPartyFromMessage(AbstractMessage) Address
 	newSelfInitiatedDialogueReference() [2]string
-	create(counterParty Address, performative Performative, message SomeMessageType) (InitialMessage, Dialogue)
-	createWithMessage(counterParty Address, intitialMessage InitialMessage) Dialogue
-	createDialogue(counterParty Address, intitialMessage InitialMessage) Dialogue
-	update(InitialMessage) Dialogue
-	completeDialogueReference(InitialMessage)
-	getDialogue(InitialMessage) Dialogue
+	create(counterParty Address, performative Performative, message SomeMessageType) (AbstractMessage, Dialogue)
+	createWithMessage(counterParty Address, intitialMessage AbstractMessage) Dialogue
+	createDialogue(counterParty Address, intitialMessage AbstractMessage) Dialogue
+	update(AbstractMessage) Dialogue
+	completeDialogueReference(AbstractMessage)
+	getDialogue(AbstractMessage) Dialogue
 	getLatestLabel(DialogueLabel) DialogueLabel
 	getDialogueFromLabel(DialogueLabel) Dialogue
 	createSelfInitiated(dialogueOpponentAddress Address, dialogueReference [2]string, role Role) Dialogue
@@ -95,7 +95,7 @@ type DialoguesInterface interface {
 	tearDownDialogueStorage()
 }
 
-type AbstractMessage interface {
+type AbstractMessageInterface interface {
 	initialize(diaglogReference [2]string, messagId int, target Target, performative Performative)
 	validPerformatives() []string
 	hasSender() bool
@@ -106,7 +106,7 @@ type AbstractMessage interface {
 	messageId() MessageId
 	performative() Performative
 	target() int
-	equal(InitialMessage) bool
+	equal(AbstractMessage) bool
 }
 
 type DialogueLabel struct {
@@ -117,13 +117,13 @@ type DialogueLabel struct {
 
 type Dialogue struct {
 	dialogueLabel    DialogueLabel
-	dialogueMessage  *InitialMessage
+	dialogueMessage  *AbstractMessage
 	selfAddress      Address
 	outGoingMessages []MessageId
 	GoingMessages    []MessageId
 	rules            RuleType
 }
-type InitialMessage struct {
+type AbstractMessage struct {
 	dialogueReference [2]string
 	message_id        int
 	target            int
