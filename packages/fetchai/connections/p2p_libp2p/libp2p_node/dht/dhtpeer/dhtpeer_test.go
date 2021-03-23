@@ -22,6 +22,7 @@ package dhtpeer
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"log"
 	"math/rand"
@@ -1750,7 +1751,10 @@ func SetupDelegateClient(
 	client.PoR = signature
 
 	client.Rx = make(chan *aea.Envelope, 2)
-	client.Conn, err = net.Dial("tcp", host+":"+strconv.FormatInt(int64(port), 10))
+	conf := &tls.Config{
+		InsecureSkipVerify: true,
+	}
+	client.Conn, err = tls.Dial("tcp", host+":"+strconv.FormatInt(int64(port), 10), conf)
 	if err != nil {
 		return nil, nil, err
 	}

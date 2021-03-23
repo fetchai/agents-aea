@@ -25,11 +25,19 @@ package dhtpeer
 
 import (
 	"bufio"
+	"bytes"
 	"context"
+	"crypto/elliptic"
+	"crypto/rand"
+	"crypto/tls"
+	"crypto/x509"
+	"crypto/x509/pkix"
 	"encoding/binary"
+	"encoding/pem"
 	"fmt"
 	"io"
 	"log"
+	"math/big"
 	"net"
 	"os"
 	"strconv"
@@ -37,13 +45,14 @@ import (
 	"sync"
 	"time"
 
+	"github.com/btcsuite/btcd/btcec"
 	"github.com/pkg/errors"
 
 	"github.com/rs/zerolog"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/libp2p/go-libp2p"
-	"github.com/libp2p/go-libp2p-core/crypto"
+	cryptop2p "github.com/libp2p/go-libp2p-core/crypto"
 	"github.com/libp2p/go-libp2p-core/network"
 	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/libp2p/go-libp2p-core/peerstore"
@@ -113,8 +122,8 @@ type DHTPeer struct {
 
 	registrationDelay time.Duration
 
-	key             crypto.PrivKey
-	publicKey       crypto.PubKey
+	key             cryptop2p.PrivKey
+	publicKey       cryptop2p.PubKey
 	localMultiaddr  multiaddr.Multiaddr
 	publicMultiaddr multiaddr.Multiaddr
 	bootstrapPeers  []peer.AddrInfo
@@ -122,6 +131,7 @@ type DHTPeer struct {
 	dht         *kaddht.IpfsDHT
 	routedHost  *routedhost.RoutedHost
 	tcpListener net.Listener
+	cert        tls.Certificate
 
 	addressAnnounced bool
 	myAgentAddress   string
@@ -587,13 +597,136 @@ func (dhtPeer *DHTPeer) Close() []error {
 	return status
 }
 
+func (dhtPeer *DHTPeer) generate_x509_cert() (tls.Certificate, error) {
+	var err error
+	///*
+	//privStdKey, err := crypto.PrivKeyToStdKey(dhtPeer.key)
+	if err != nil {
+		panic("error std priv key")
+	}
+	/*
+		pubKey, err := crypto.PubKeyToStdKey(dhtPeer.publicKey)
+		if err != nil {
+			panic("error std public key")
+		}
+	*/
+	//privBtcKey := new(btcec.PrivateKey)
+	//privSecp256k1Key := privStdKey.(*crypto.Secp256k1PrivateKey)
+	//privBtcKey := (*btcec.PrivateKey)(privSecp256k1Key)
+	//privBtcKey.Curve = btcec.S256()
+	//privBtcKey.PublicKey.Curve = btcec.S256()
+	/*
+		bb, err := privSecp256k1Key.Raw()
+			privBtcKey, pubBtcKey := btcec.PrivKeyFromBytes(btcec.S256(), bb)
+			if err != nil {
+				return tls.Certificate{}, err
+			}
+	*/
+	privBtcKey, err := btcec.NewPrivateKey(elliptic.P256())
+	/*
+		privKey := new(ecdsa.PrivateKey)
+		privKey.Curve = elliptic.P256()
+		privKey.D = privBtcKey.D
+		privKey.PublicKey = privBtcKey.PublicKey
+		privKey.PublicKey.Curve = elliptic.P256()
+		privKey.PublicKey.X = privBtcKey.PubKey().X
+		privKey.PublicKey.Y = privBtcKey.PubKey().Y
+		pubKey := &privKey.PublicKey
+	*/
+	/*
+		privKey := privBtcKey.ToECDSA()
+		pubKey := &privKey.PublicKey
+		//pubKey := &privBtcKey.PublicKey
+		privKey.Curve = elliptic.P256()
+		privKey.PublicKey.Curve = elliptic.P256()
+		pubKey.Curve = elliptic.P256()
+		//privKey := privStdKey.(*btcec.PrivateKey).ToECDSA()
+	*/
+	/*
+		if err != nil {
+			panic("error std priv key raw")
+		}
+		_, err = x509.ParseECPrivateKey(bb)
+		if err != nil {
+			panic("error std priv key parsing")
+		}
+	*/
+	/*
+		privKey := new(ecdsa.PrivateKey)
+		privKey.PublicKey.Curve = btcec.S256()
+		privKey.PublicKey.X = dhtPeer.key.
+	*/
+	/*
+		privKey := prKey.PrivateKey()
+		pubKey, ok := pbKey.(ecdsa.PublicKey)
+		if !ok {
+			panic("error conver pub")
+		}
+	*/
+	//privBtcECDSAKey := privBtcKey.ToECDSA()
+	privKey := privBtcKey.ToECDSA()
+	/*
+		privKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+		privKey.D = privBtcECDSAKey.D
+		privKey.X = privBtcECDSAKey.X
+		privKey.Y = privBtcECDSAKey.Y
+		privKey.PublicKey.X = privBtcECDSAKey.PublicKey.X
+		privKey.PublicKey.Y = privBtcECDSAKey.PublicKey.Y
+	*/
+	pubKey := &privKey.PublicKey
+	//fmt.Println("===========>", "\n", privKey, "\n", privBtcECDSAKey, "\n", privBtcKey)
+	ca := &x509.Certificate{
+		SerialNumber: big.NewInt(1),
+		Subject: pkix.Name{
+			Organization: []string{"Acn Node"},
+		},
+		NotBefore: time.Now(),
+		NotAfter:  time.Now().AddDate(1, 0, 0),
+
+		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
+		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
+		BasicConstraintsValid: true,
+	}
+
+	certBytes, err := x509.CreateCertificate(rand.Reader, ca, ca, pubKey, privKey)
+	if err != nil {
+		return tls.Certificate{}, errors.Wrap(err, "while creating ca")
+	}
+	fmt.Println("=========> created certificate")
+	certPEM := new(bytes.Buffer)
+	pem.Encode(certPEM, &pem.Block{
+		Type:  "CERTIFICATE",
+		Bytes: certBytes,
+	})
+
+	privPEM := new(bytes.Buffer)
+	b, err := x509.MarshalECPrivateKey(privKey)
+	//b, err := cryptop2p.MarshalECDSAPrivateKey(privKey)
+	if err != nil {
+		return tls.Certificate{}, errors.Wrap(err, "while marshaling ec private key")
+	}
+	pem.Encode(privPEM, &pem.Block{
+		Type:  "EC PRIVATE KEY",
+		Bytes: b,
+	})
+	fmt.Println("=========> marshaled key")
+
+	dhtPeer.cert, err = tls.X509KeyPair(certPEM.Bytes(), privPEM.Bytes())
+	return dhtPeer.cert, err
+}
+
 func (dhtPeer *DHTPeer) launchDelegateService() {
 	var err error
 
 	lerror, _, _, _ := dhtPeer.getLoggers()
-
+	dhtPeer.cert, err = dhtPeer.generate_x509_cert()
+	if err != nil {
+		lerror(err).Msgf("while generating tls certificate for delegate client server")
+		check(err)
+	}
+	config := &tls.Config{Certificates: []tls.Certificate{dhtPeer.cert}}
 	uri := dhtPeer.host + ":" + strconv.FormatInt(int64(dhtPeer.delegatePort), 10)
-	dhtPeer.tcpListener, err = net.Listen("tcp", uri)
+	dhtPeer.tcpListener, err = tls.Listen("tcp", uri, config)
 	if err != nil {
 		lerror(err).Msgf("while setting up listening tcp socket %s", uri)
 		check(err)
