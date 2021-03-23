@@ -67,57 +67,159 @@ without using the `--env` option.
 
 > Treat backing services as attached resources
 
-TODO
+Support: Good
+
+A persistent storage of an AEA can be seen 
+as an attached resource in the 12-factor terminology. 
+The default storage is SQLite, but the interface 
+`AbstractStorageBacked` allows to implement
+specific wrappers to other backing services,
+without changing the AEA project code.
+The support for integrating
+different storage back-end implementations in an AEA project
+by using a plug-in mechanism is currently missing. 
+
+Moreover, new adapters to backing services
+can be implemented as custom connections, which 
+can connect to attached resources.
+This does not usually requires a change
+in the skill code, especially
+in the case when a custom protocol
+can abstract the details of the interaction with 
+the specific resource.
+
 
 ## Build, release, run
 
 > Strictly separate build and run stages
 
-TODO
+Support: Excellent
+
+The phases of build, release and run
+of an AEA project are neatly separated,
+both for programmatic usage
+and through the usage of the CLI tool,
+as each of them corresponds to different subcommands.
 
 ## Processes
 
 > Execute the app as one or more stateless processes
 
-TODO
+Support: Excellent
+
+Whether the process is stateless depends on the specific AEA. 
+No strict enforcement is applied by the framework.
+Moreover, dialogue histories can be stored
+with persistent storage, if enabled by the developer.
 
 ## Port binding
 
 > Export services via port binding
 
-TODO
+Support: Excellent
+
+An AEA project may not need to expose services via HTTP.
+This property depends on the specific choices of
+the project developer, and the framework does not 
+impose any restriction.
+
+One of the provided package, the "HTTP server" connection, 
+relies on Flask, which makes the connection completely
+self-contained—therefore, it satisfies the requirement. 
+
+Another relevant example is the ACN node, which 
+exposes its service to the Libp2p AEA connection
 
 ## Concurrency
 
 > Scale out via the process model
 
-TODO
+Support: Not Supported
+
+The framework does not easily allow to scale up an
+AEA instance with multiple processes,
+as it is bound to a process.
+However, note that its attached services
+can live in a different process, which could
+give better scalability.
 
 ## Disposability
 
 > Maximize robustness with fast startup and graceful shutdown
 
-TODO
+Support: Good
+
+Disposability of an AEA instance
+depends, in general, on the AEA itself;
+whether the connections can be quickly 
+connected and disconnected,
+whether skills can be easily teared
+down or not, whether other resources
+can be detached successfully like 
+the persistent storage,
+just to name a few examples.
+
+There has been put some efforts in 
+reducing startup time, and to ensure
+that a graceful shut down can happen 
+when the process receives a SIGTERM
+under normal circumstancess,
+but robustness cannot be ensured in general.
+
+On the other hand,
+the framework does provide some features to 
+control some aspects of AEA disposability,
+e.g. the possibility to change
+execution timeout for behaviours or handlers, 
+implementation of an effective exception propagation
+from a component code to the main agent loop.
 
 ## Dev/prod parity
 
 > Keep development, staging, and production as similar as possible
 
-TODO
+Support: Good
+
+This aspect mostly depends on the specific AEA project,
+and the framework does not impose particular restrictions
+on best deployment practices (e.g. continuous integration,
+same backing services between development
+and production stages). 
 
 ## Logs
 
 > Treat logs as event streams
 
-TODO
+Support: Excellent
+
+Thanks to the seamless integration with the 
+Python standard library `logging`,
+the developer or the deployer has great control
+on the routing and filtering of log records.
+The behaviour can be changed by providing
+a proper configuration in the AEA project configuration file,
+according to the standard library specification.
+The framework facilitates this 
+by creating ad-hoc logger names that can be used
+for finer-grained routing or filtering;
+for example, each AEA instance uses its own 
+logging namespace to send logging events.
+Integration with other log handlers
+is delegated to extensions of the standard library,
+hence not necessarily coupled with the AEA framework.
 
 ## Admin processes
 
 > Run admin/management tasks as one-off processes
 
-TODO
+The CLI tools provides commands to
+manage private keys and ledger related operations, and 
+it is possible to access to databases of AEA's persistent storage
+for maintenance operations.
 
-
-## Summary 
-
-TODO table with levels of support: Excellent, Good, Not supported
+Moreover, the Python programming language
+makes it easy to run one-off scripts or running a console
+(also known as REPL) to do management tasks.
+It follows that it is also easy to ensure
+dependency isolation and same configurations
+of the running AEA instance.
