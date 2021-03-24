@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import cast
 from unittest.mock import patch
 
+from aea.crypto.ledger_apis import LedgerApis
 from aea.helpers.transaction.base import Terms
 from aea.protocols.dialogue.base import DialogueMessage
 from aea.test_tools.test_skill import BaseSkillTestCase
@@ -435,8 +436,13 @@ class TestLedgerApiHandler(BaseSkillTestCase):
         )
 
         # operation
-        with patch.object(self.ledger_api_handler.context.logger, "log") as mock_logger:
-            self.ledger_api_handler.handle(incoming_message)
+        with patch.object(
+            LedgerApis, "get_contract_address", return_value="some_contract_address"
+        ):
+            with patch.object(
+                self.ledger_api_handler.context.logger, "log"
+            ) as mock_logger:
+                self.ledger_api_handler.handle(incoming_message)
 
         # after
         mock_logger.assert_any_call(

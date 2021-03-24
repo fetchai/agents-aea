@@ -30,11 +30,12 @@ skills:
 - fetchai/error:0.13.0
 default_connection: fetchai/stub:0.18.0
 default_ledger: fetchai
+required_ledgers:
+- fetchai
 logging_config:
   disable_existing_loggers: false
   version: 1
 private_key_paths: {}
-registry_path: ../packages
 ```
 
 By updating the `logging_config` section, you can configure the loggers of your application.

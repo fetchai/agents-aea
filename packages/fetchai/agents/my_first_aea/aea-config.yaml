@@ -17,11 +17,12 @@ skills:
 - fetchai/echo:0.15.0
 default_connection: fetchai/stub:0.18.0
 default_ledger: fetchai
+required_ledgers:
+- fetchai
 logging_config:
   disable_existing_loggers: false
   version: 1
 private_key_paths: {}
-registry_path: ../packages
 default_routing: {}
 connection_private_key_paths: {}
 dependencies:

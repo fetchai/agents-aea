@@ -42,7 +42,6 @@ from aea.configurations.constants import (
     DEFAULT_LEDGER,
     DEFAULT_LICENSE,
     DEFAULT_PROTOCOL,
-    DEFAULT_REGISTRY_PATH,
     DEFAULT_VERSION,
     PROTOCOL,
     PROTOCOLS,
@@ -178,9 +177,9 @@ def _create_agent_config(ctx: Context, agent_name: str, set_author: str) -> Agen
         author=set_author,
         version=DEFAULT_VERSION,
         license_=DEFAULT_LICENSE,
-        registry_path=os.path.join("..", DEFAULT_REGISTRY_PATH),
         description="",
         default_ledger=DEFAULT_LEDGER,
+        required_ledgers=[DEFAULT_LEDGER],
         default_connection=None,
         dependencies=dependencies_from_json(DEFAULT_DEPENDENCIES),
     )

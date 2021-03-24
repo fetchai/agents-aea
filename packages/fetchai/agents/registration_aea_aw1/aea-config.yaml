@@ -23,6 +23,8 @@ skills:
 - fetchai/simple_service_search:0.6.0
 default_connection: fetchai/p2p_libp2p:0.18.0
 default_ledger: fetchai
+required_ledgers:
+- fetchai
 default_routing:
   fetchai/oef_search:0.14.0: fetchai/soef:0.19.0
 connection_private_key_paths: {}
@@ -52,7 +54,6 @@ logging_config:
       - console
       level: DEBUG
       propagate: false
-registry_path: ../packages
 dependencies:
   aea-ledger-ethereum:
     version: <2.0.0,>=1.0.0rc1

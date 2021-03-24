@@ -76,6 +76,13 @@
     "default_ledger": {
       "$ref": "definitions.json#/definitions/ledger_id"
     },
+    "required_ledgers": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "definitions.json#/definitions/ledger_id"
+      }
+    },
     "currency_denominations": {
       "type": "object"
     },
@@ -148,6 +155,9 @@
     },
     "runtime_mode": {
       "$ref": "definitions.json#/definitions/runtime_mode"
+    },
+    "taskmanager_mode": {
+      "$ref": "definitions.json#/definitions/taskmanager_mode"
     },
     "storage_uri": {
       "$ref": "definitions.json#/definitions/storage_uri"

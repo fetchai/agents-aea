@@ -65,11 +65,11 @@ protocols: []
 skills: []
 default_connection: null
 default_ledger: cosmos
+required_ledgers: [cosmos]
 private_key_paths:
     cosmos: tests/data/cosmos_private_key.txt
 connection_private_key_paths:
     cosmos: tests/data/cosmos_private_key.txt
-registry_path: ../packages
 dependencies: {}
 """
 )
@@ -450,3 +450,15 @@ def test_agent_configuration_dump_multipage_fails_bad_component_configuration():
         match="Configuration of component .* is not valid. ExtraPropertiesError: properties not expected: BAD FIELD",
     ):
         loader.dump(agent_config, fp)
+
+
+class TestTskManagerModeConfigVariable(BaseConfigTestVariable):
+    """Test `taskmanager_mode` aea config option."""
+
+    OPTION_NAME = "taskmanager_mode"
+    CONFIG_ATTR_NAME = "taskmanager_mode"
+    GOOD_VALUES = ["threaded"]
+    INCORRECT_VALUES = [None, "sTrING?", -1]
+    REQUIRED = False
+    AEA_ATTR_NAME = "_taskmanager_mode"
+    AEA_DEFAULT_VALUE = AEABuilder.DEFAULT_TASKMANAGER_MODE

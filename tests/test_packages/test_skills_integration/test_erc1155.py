@@ -75,6 +75,10 @@ class TestERCSkillsEthereumLedger(AEATestCaseManyFlaky, UseGanache):
         self.add_item("connection", "fetchai/soef:0.19.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.18.0")
         self.set_config("agent.default_ledger", EthereumCrypto.identifier)
+        self.nested_set_config(
+            "agent.required_ledgers",
+            [FetchAICrypto.identifier, EthereumCrypto.identifier],
+        )
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.add_item("skill", "fetchai/erc1155_deploy:0.24.0")
@@ -106,6 +110,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseManyFlaky, UseGanache):
                     "not_after": "2022-01-01",
                     "not_before": "2021-01-01",
                     "public_key": FetchAICrypto.identifier,
+                    "message_format": "{public_key}",
                     "save_path": ".certs/conn_cert.txt",
                 }
             ]
@@ -133,6 +138,10 @@ class TestERCSkillsEthereumLedger(AEATestCaseManyFlaky, UseGanache):
         self.add_item("connection", "fetchai/soef:0.19.0")
         self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.18.0")
         self.set_config("agent.default_ledger", EthereumCrypto.identifier)
+        self.nested_set_config(
+            "agent.required_ledgers",
+            [FetchAICrypto.identifier, EthereumCrypto.identifier],
+        )
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.add_item("skill", "fetchai/erc1155_client:0.23.0")
@@ -163,6 +172,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseManyFlaky, UseGanache):
                     "not_after": "2022-01-01",
                     "not_before": "2021-01-01",
                     "public_key": FetchAICrypto.identifier,
+                    "message_format": "{public_key}",
                     "save_path": ".certs/conn_cert.txt",
                 }
             ]

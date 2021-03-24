@@ -18,13 +18,14 @@ skills:
 - fetchai/fetch_beacon:0.8.0
 default_connection: fetchai/ledger:0.15.0
 default_ledger: fetchai
+required_ledgers:
+- fetchai
 default_routing: {}
 connection_private_key_paths: {}
 private_key_paths: {}
 logging_config:
   disable_existing_loggers: false
   version: 1
-registry_path: ../packages
 dependencies:
   aea-ledger-fetchai:
     version: <2.0.0,>=1.0.0rc1

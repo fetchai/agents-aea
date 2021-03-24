@@ -22,11 +22,12 @@ skills:
 - fetchai/aries_alice:0.18.0
 default_connection: fetchai/p2p_libp2p:0.18.0
 default_ledger: fetchai
+required_ledgers:
+- fetchai
 logging_config:
   disable_existing_loggers: false
   version: 1
 private_key_paths: {}
-registry_path: ../packages
 default_routing:
   fetchai/http:0.13.0: fetchai/http_client:0.19.0
   fetchai/oef_search:0.14.0: fetchai/soef:0.19.0

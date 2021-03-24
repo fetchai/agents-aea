@@ -48,7 +48,7 @@ import semver
 from aea.cli.registry.utils import download_file, extract, request_api
 from aea.common import JSONLike
 from aea.configurations.base import ComponentType, ProtocolConfig
-from aea.configurations.constants import DEFAULT_PROTOCOL_CONFIG_FILE, LIBPROTOC_VERSION
+from aea.configurations.constants import DEFAULT_PROTOCOL_CONFIG_FILE
 from aea.configurations.data_types import PackageId, PublicId
 from aea.configurations.loader import ConfigLoaders, load_component_configuration
 from scripts.common import (
@@ -59,6 +59,7 @@ from scripts.common import (
 )
 
 
+LIBPROTOC_VERSION = "libprotoc 3.11.4"
 CUSTOM_TYPE_MODULE_NAME = "custom_types.py"
 README_FILENAME = "README.md"
 PACKAGES_DIR = Path("packages")

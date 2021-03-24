@@ -18,10 +18,11 @@ skills:
 - fetchai/echo:0.15.0
 default_connection: fetchai/oef:0.17.0
 default_ledger: cosmos
+required_ledgers:
+- cosmos
 logging_config:
   disable_existing_loggers: false
   version: 1
 private_key_paths: {}
-registry_path: ../../packages
 data_dir: .
 dependencies: {}

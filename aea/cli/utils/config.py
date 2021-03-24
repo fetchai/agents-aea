@@ -37,7 +37,7 @@
 """A module with config tools of the aea cli."""
 import os
 from pathlib import Path
-from typing import Any, Dict, Set
+from typing import Any, Dict, Optional, Set
 
 import click
 import jsonschema
@@ -53,7 +53,7 @@ from aea.configurations.base import (
     PackageType,
     _get_default_configuration_file_name_from_type,
 )
-from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE
+from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE, REGISTRY_PATH_KEY
 from aea.configurations.loader import ConfigLoader, ConfigLoaders
 from aea.configurations.validation import ExtraPropertiesError
 from aea.exceptions import AEAEnforceError, AEAValidationError
@@ -158,6 +158,12 @@ def set_cli_author(click_context: click.Context) -> None:
             "The AEA configurations are not initialized. Use `aea init` before continuing."
         )
     click_context.obj.set_config("cli_author", cli_author)
+
+
+def get_registry_path_from_cli_config() -> Optional[str]:
+    """Get registry path from config."""
+    config = get_or_create_cli_config()
+    return config.get(REGISTRY_PATH_KEY, None)
 
 
 def load_item_config(item_type: str, package_path: Path) -> PackageConfiguration:

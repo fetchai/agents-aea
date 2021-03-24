@@ -94,6 +94,7 @@ class AEA(Agent):
         connection_ids: Optional[Collection[PublicId]] = None,
         search_service_address: str = DEFAULT_SEARCH_SERVICE_ADDRESS,
         storage_uri: Optional[str] = None,
+        taskmanager_mode: Optional[str] = None,
         **kwargs: Any,
     ) -> None:
         """
@@ -118,7 +119,9 @@ class AEA(Agent):
         :param connection_ids: active connection ids. Default: consider all the ones in the resources.
         :param search_service_address: the address of the search service used.
         :param storage_uri: optional uri to set generic storage
+        :param taskmanager_mode: task manager mode (threaded) to run tasks with.
         :param kwargs: keyword arguments to be attached in the agent context namespace.
+
         :return: None
         """
 
@@ -140,6 +143,7 @@ class AEA(Agent):
             runtime_mode=runtime_mode,
             storage_uri=storage_uri,
             logger=cast(Logger, aea_logger),
+            taskmanager_mode=taskmanager_mode,
         )
 
         default_routing = default_routing if default_routing is not None else {}

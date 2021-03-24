@@ -22,6 +22,8 @@ skills:
 - fetchai/error:0.13.0
 default_connection: fetchai/local:0.16.0
 default_ledger: fetchai
+required_ledgers:
+- fetchai
 logging_config:
   disable_existing_loggers: false
   version: 1
@@ -33,6 +35,5 @@ connection_private_key_paths:
   cosmos: cosmos_private_key.txt
   ethereum: ethereum_private_key.txt
   fetchai: fetchai_private_key.txt
-registry_path: ../../packages
 default_routing: {}
 dependencies: {}

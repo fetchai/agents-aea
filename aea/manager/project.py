@@ -33,6 +33,7 @@ from aea.configurations.constants import DEFAULT_REGISTRY_NAME
 from aea.configurations.data_types import ComponentId
 from aea.configurations.manager import AgentConfigManager
 from aea.crypto.helpers import create_private_key, get_wallet_from_agent_config
+from aea.exceptions import AEAValidationError, enforce
 
 
 class _Base:
@@ -94,6 +95,7 @@ class Project(_Base):
         is_local: bool = False,
         is_remote: bool = False,
         is_restore: bool = False,
+        cli_verbosity: str = "INFO",
         registry_path: str = DEFAULT_REGISTRY_NAME,
         skip_consistency_check: bool = False,
     ) -> "Project":
@@ -108,10 +110,13 @@ class Project(_Base):
         :param public_id: the public id
         :param is_local: whether to fetch from local
         :param is_remote whether to fetch from remote
+        :param verbosity: the logging verbosity of the CLI
         :param registry_path: the path to the registry locally
         :param skip_consistency_check: consistency checks flag
         """
-        ctx = Context(cwd=working_dir, registry_path=registry_path)
+        ctx = Context(
+            cwd=working_dir, verbosity=cli_verbosity, registry_path=registry_path
+        )
         ctx.set_config("skip_consistency_check", skip_consistency_check)
 
         path = os.path.join(working_dir, public_id.author, public_id.name)
@@ -172,17 +177,28 @@ class AgentAlias(_Base):
         """Add private keys if not present in the config."""
         builder = self._get_builder(self.agent_config, self.project.path)
         default_ledger = builder.get_default_ledger()
+        required_ledgers = builder.get_required_ledgers()
+        enforce(
+            default_ledger in required_ledgers,
+            exception_text=f"Default ledger '{default_ledger}' not in required ledgers: {required_ledgers}",
+            exception_class=AEAValidationError,
+        )
 
-        if not self.agent_config.private_key_paths.read_all():
-            self.agent_config.private_key_paths.create(
-                default_ledger, self._create_private_key(default_ledger)
-            )
+        available_private_keys = self.agent_config.private_key_paths.keys()
+        available_connection_private_keys = (
+            self.agent_config.connection_private_key_paths.keys()
+        )
 
-        if not self.agent_config.connection_private_key_paths.read_all():
-            self.agent_config.connection_private_key_paths.create(
-                default_ledger,
-                self._create_private_key(default_ledger, is_connection=True),
-            )
+        for required_ledger in set(required_ledgers):
+            if required_ledger not in available_private_keys:
+                self.agent_config.private_key_paths.create(
+                    required_ledger, self._create_private_key(required_ledger)
+                )
+            if required_ledger not in available_connection_private_keys:
+                self.agent_config.connection_private_key_paths.create(
+                    required_ledger,
+                    self._create_private_key(required_ledger, is_connection=True),
+                )
 
     @property
     def builder(self) -> AEABuilder:
