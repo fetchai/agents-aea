@@ -316,7 +316,9 @@ class SOEFChannel:
             ):  # pylint: disable=try-except-raise  # pragma: nocover
                 return
             except Exception:  # pragma: nocover
-                self.logger.exception('Error on reading messages queue for find around me!')
+                self.logger.exception(
+                    "Error on reading messages queue for find around me!"
+                )
                 raise
 
             try:
