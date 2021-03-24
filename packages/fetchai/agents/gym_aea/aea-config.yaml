@@ -19,6 +19,8 @@ skills:
 - fetchai/gym:0.16.0
 default_connection: fetchai/gym:0.15.0
 default_ledger: fetchai
+required_ledgers:
+- fetchai
 logging_config:
   disable_existing_loggers: false
   version: 1

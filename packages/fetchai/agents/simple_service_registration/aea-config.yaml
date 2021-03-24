@@ -20,6 +20,8 @@ skills:
 - fetchai/simple_service_registration:0.17.0
 default_connection: fetchai/p2p_libp2p:0.18.0
 default_ledger: fetchai
+required_ledgers:
+- fetchai
 logging_config:
   disable_existing_loggers: false
   version: 1

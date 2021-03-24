@@ -19,6 +19,8 @@ skills:
 - dummy_author/dummy:0.1.0
 default_connection: fetchai/oef:0.7.0
 default_ledger: cosmos
+required_ledgers:
+- cosmos
 logging_config:
   disable_existing_loggers: false
   version: 1

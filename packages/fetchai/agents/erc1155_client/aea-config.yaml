@@ -24,6 +24,9 @@ skills:
 - fetchai/erc1155_client:0.23.0
 default_connection: fetchai/p2p_libp2p:0.18.0
 default_ledger: ethereum
+required_ledgers:
+- fetchai
+- ethereum
 logging_config:
   disable_existing_loggers: false
   version: 1

@@ -22,6 +22,7 @@
 # To update; run: vulture aea --exclude "*_pb2.py" --make-whitelist > tests/whitelist.py
 _.dependencies_highest_version  # unused property (aea/aea_builder.py:116)
 _.set_search_service_address  # unused method (aea/aea_builder.py:484)
+_.set_required_ledgers  # unused method (aea/aea_builder.py:850)
 _.remove_private_key  # unused method (aea/aea_builder.py:580)
 _.add_component_instance  # unused method (aea/aea_builder.py:643)
 _.set_context_namespace  # unused method (aea/aea_builder.py:663)

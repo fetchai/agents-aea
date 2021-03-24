@@ -1146,6 +1146,7 @@ class AgentConfig(PackageConfiguration):
             "connection_exception_policy",
             "default_connection",
             "default_ledger",
+            "required_ledgers",
             "default_routing",
             "storage_uri",
         ]
@@ -1209,6 +1210,7 @@ class AgentConfig(PackageConfiguration):
         skill_exception_policy: Optional[str] = None,
         connection_exception_policy: Optional[str] = None,
         default_ledger: Optional[str] = None,
+        required_ledgers: Optional[List[str]] = None,
         currency_denominations: Optional[Dict[str, str]] = None,
         default_connection: Optional[str] = None,
         default_routing: Optional[Dict[str, str]] = None,
@@ -1237,6 +1239,9 @@ class AgentConfig(PackageConfiguration):
 
         self.logging_config = logging_config or DEFAULT_LOGGING_CONFIG
         self.default_ledger = default_ledger
+        self.required_ledgers = (
+            required_ledgers if required_ledgers is not None else None
+        )
         self.currency_denominations = (
             currency_denominations if currency_denominations is not None else {}
         )
@@ -1391,6 +1396,8 @@ class AgentConfig(PackageConfiguration):
             config["build_entrypoint"] = self.build_entrypoint
 
         # framework optional configs are only printed if defined.
+        if self.required_ledgers is not None:
+            config["required_ledgers"] = self.required_ledgers
         if self.period is not None:
             config["period"] = self.period
         if self.execution_timeout is not None:
@@ -1447,6 +1454,7 @@ class AgentConfig(PackageConfiguration):
                 str, obj.get("connection_exception_policy")
             ),
             default_ledger=cast(str, obj.get("default_ledger")),
+            required_ledgers=cast(Optional[List[str]], obj.get("required_ledgers")),
             currency_denominations=cast(Dict, obj.get("currency_denominations", {})),
             default_connection=cast(str, obj.get("default_connection")),
             default_routing=cast(Dict, obj.get("default_routing", {})),

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------------------------
 #
-#   Copyright 2021 fetchai
+#   Copyright 2018-2019 Fetch.AI Limited
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,14 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""
-This module contains the support resources for the register protocol.
-
-It was created with protocol buffer compiler version `libprotoc 3.11.4` and aea version `1.0.0rc1`.
-"""
-
-from packages.fetchai.protocols.register.message import RegisterMessage
-from packages.fetchai.protocols.register.serialization import RegisterSerializer
-
-
-RegisterMessage.serializer = RegisterSerializer
+"""The tests module contains the tests of the packages/skills/http_echo dir."""

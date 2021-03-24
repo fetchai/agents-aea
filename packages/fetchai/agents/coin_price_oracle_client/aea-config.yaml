@@ -23,6 +23,9 @@ skills:
 - fetchai/simple_oracle_client:0.6.0
 default_connection: fetchai/ledger:0.15.0
 default_ledger: ethereum
+required_ledgers:
+- fetchai
+- ethereum
 default_routing:
   fetchai/contract_api:0.12.0: fetchai/ledger:0.15.0
   fetchai/http:0.13.0: fetchai/http_client:0.19.0
