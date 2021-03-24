@@ -28,7 +28,6 @@ logging_config:
   disable_existing_loggers: false
   version: 1
 private_key_paths: {}
-registry_path: ../packages
 default_routing:
   fetchai/http:0.13.0: fetchai/http_client:0.19.0
   fetchai/oef_search:0.14.0: fetchai/soef:0.19.0

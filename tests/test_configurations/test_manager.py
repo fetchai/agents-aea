@@ -69,7 +69,6 @@ private_key_paths:
 connection_private_key_paths:
   cosmos: cosmos_private_key.txt
   ethereum: ethereum_private_key.txt
-registry_path: ../../packages
 default_routing: {}
 """
 )

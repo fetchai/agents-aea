@@ -54,7 +54,6 @@ from aea.configurations.constants import (
     DEFAULT_LICENSE,
     DEFAULT_LOGGING_CONFIG,
     DEFAULT_PROTOCOL_CONFIG_FILE,
-    DEFAULT_REGISTRY_NAME,
     DEFAULT_SKILL_CONFIG_FILE,
     DEFAULT_VERSION,
     PACKAGE_PUBLIC_ID_VAR_NAME,
@@ -1134,7 +1133,6 @@ class AgentConfig(PackageConfiguration):
     FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(
         [
             "description",
-            "registry_path",
             "logging_config",
             "private_key_paths",
             "connection_private_key_paths",
@@ -1166,7 +1164,6 @@ class AgentConfig(PackageConfiguration):
 
     __slots__ = (
         "agent_name",
-        "registry_path",
         "description",
         "private_key_paths",
         "connection_private_key_paths",
@@ -1204,7 +1201,6 @@ class AgentConfig(PackageConfiguration):
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
         build_entrypoint: Optional[str] = None,
-        registry_path: str = DEFAULT_REGISTRY_NAME,
         description: str = "",
         logging_config: Optional[Dict] = None,
         period: Optional[float] = None,
@@ -1239,7 +1235,6 @@ class AgentConfig(PackageConfiguration):
             build_entrypoint,
         )
         self.agent_name = self.name
-        self.registry_path = registry_path
         self.description = description
         self.private_key_paths = CRUDCollection[str]()
         self.connection_private_key_paths = CRUDCollection[str]()
@@ -1395,7 +1390,6 @@ class AgentConfig(PackageConfiguration):
                 "connection_private_key_paths": self.connection_private_key_paths_dict,
                 "private_key_paths": self.private_key_paths_dict,
                 "logging_config": self.logging_config,
-                "registry_path": self.registry_path,
                 "component_configurations": self.component_configurations_json(),
                 "dependencies": dependencies_to_json(self.dependencies),
             }
@@ -1448,7 +1442,6 @@ class AgentConfig(PackageConfiguration):
             version=cast(str, obj.get("version")),
             license_=cast(str, obj.get("license")),
             aea_version=cast(str, obj.get("aea_version", "")),
-            registry_path=cast(str, obj.get("registry_path")),
             description=cast(str, obj.get("description", "")),
             fingerprint=cast(Dict[str, str], obj.get("fingerprint", {})),
             fingerprint_ignore_patterns=cast(

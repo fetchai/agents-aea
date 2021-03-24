@@ -38,7 +38,6 @@ private_key_paths:                              # The private key paths the AEA 
 logging_config:                                 # The logging configurations the AEA project uses
   disable_existing_loggers: false
   version: 1
-registry_path: ../packages                      # The path to the local package registry (must be a directory path and point to a directory called `packages`)
 dependencies: {}                                # The python dependencies the AEA relies on (e.g. plugins).
 ```
 

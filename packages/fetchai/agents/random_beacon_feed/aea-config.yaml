@@ -26,7 +26,6 @@ private_key_paths: {}
 logging_config:
   disable_existing_loggers: false
   version: 1
-registry_path: ../packages
 dependencies:
   aea-ledger-fetchai:
     version: <2.0.0,>=1.0.0rc1
