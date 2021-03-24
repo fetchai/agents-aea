@@ -60,7 +60,9 @@ type: skill
 models:
   strategy:
     args:
+      ledger_id: ethereum
       oracle_value_name: price
+      update_function: updateOracleValue
 ---
 public_id: fetchai/p2p_libp2p:0.19.0
 type: connection

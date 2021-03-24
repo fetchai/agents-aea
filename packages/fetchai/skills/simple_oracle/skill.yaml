@@ -10,7 +10,7 @@ fingerprint:
   __init__.py: QmSMQMrybhgbq3CyZqSBb2s9EGDTy35jLg9GFRX2xzFenr
   behaviours.py: Qmes3sypsSxWdNnjtzhUKUkPVcqjomD1FkmBdWyUtP4ohk
   dialogues.py: QmVCJ1WoW4xEDrYs56VbTvMiKu1YST7T3DrTjhAyYoBFJa
-  handlers.py: QmVTLcGdm7TR1NXeWuP18jciLtfYisoEtvJeVfE3xXz4FQ
+  handlers.py: QmcoWLLQz3UeUxnfQjdhWCabS9i4UfXvvyx7uEQmPwmF9c
   strategy.py: QmY4bUU98FWDvZuif6TsowUUhSsh1hFSVsawsZ89YiVABK
 fingerprint_ignore_patterns: []
 contracts:
@@ -72,9 +72,9 @@ models:
       erc20_address: '0x0000000000000000000000000000000000000000'
       initial_fee_deploy: 1000000000000
       is_oracle_role_granted: false
-      ledger_id: ethereum
+      ledger_id: null
       oracle_value_name: null
-      update_function: updateOracleValue
+      update_function: null
     class_name: Strategy
 dependencies:
   aea-ledger-ethereum:

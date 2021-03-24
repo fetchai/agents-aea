@@ -40,3 +40,11 @@ dependencies:
     version: <2.0.0,>=1.0.0rc1
   aea-ledger-fetchai:
     version: <2.0.0,>=1.0.0rc1
+---
+public_id: fetchai/simple_oracle_client:0.7.0
+type: skill
+models:
+  strategy:
+    args:
+      ledger_id: ethereum
+      query_function: queryOracleValue

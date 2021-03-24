@@ -92,6 +92,14 @@ class TestOracleSkills(AEATestCaseManyFlaky, UseGanache):
         )
 
         setting_path = (
+            "vendor.fetchai.skills.simple_oracle.models.strategy.args.ledger_id"
+        )
+        self.set_config(setting_path, EthereumCrypto.identifier)
+        setting_path = (
+            "vendor.fetchai.skills.simple_oracle.models.strategy.args.update_function"
+        )
+        self.set_config(setting_path, "updateOracleValue")
+        setting_path = (
             "vendor.fetchai.skills.simple_oracle.models.strategy.args.oracle_value_name"
         )
         self.set_config(setting_path, "price")
@@ -170,6 +178,12 @@ class TestOracleSkills(AEATestCaseManyFlaky, UseGanache):
         self.replace_private_key_in_file(
             FUNDED_ETH_PRIVATE_KEY_2, ETHEREUM_PRIVATE_KEY_FILE
         )
+        setting_path = (
+            "vendor.fetchai.skills.simple_oracle_client.models.strategy.args.ledger_id"
+        )
+        self.set_config(setting_path, EthereumCrypto.identifier)
+        setting_path = "vendor.fetchai.skills.simple_oracle_client.models.strategy.args.query_function"
+        self.set_config(setting_path, "queryOracleValue")
 
         diff = self.difference_to_fetched_agent(
             "fetchai/coin_price_oracle_client:0.7.0", client_agent_name

@@ -309,6 +309,19 @@ class SOEFChannel:
             try:
                 task = await self._find_around_me_queue.get()
                 oef_message, oef_search_dialogue, radius, params = task
+            except (
+                asyncio.CancelledError,
+                CancelledError,
+                GeneratorExit,
+            ):  # pylint: disable=try-except-raise  # pragma: nocover
+                return
+            except Exception:  # pragma: nocover
+                self.logger.exception(
+                    "Error on reading messages queue for find around me!"
+                )
+                raise
+
+            try:
                 await self._find_around_me_handle_request(
                     oef_message, oef_search_dialogue, radius, params
                 )
