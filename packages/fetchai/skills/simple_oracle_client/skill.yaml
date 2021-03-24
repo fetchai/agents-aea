@@ -11,7 +11,7 @@ fingerprint:
   __init__.py: QmSNvTLPSBHx7e7Y6ZMKxK4Xm8CWbqRUvL2DPrDmgyCXX2
   behaviours.py: QmQdLKpeUdXumdtmLuJmK2Ji4CebEAR4stxdfTEjsJENdx
   dialogues.py: QmR1KyLjLzHGGnYtLbshvnftsTRuCEPXjs5PzJswjU4hNV
-  handlers.py: QmcJFAdTuD4rgFYHM1SGfN1HzG9husefy8b6zndtQPA7uW
+  handlers.py: QmSv9uZ3iVvmMDVsh6u2Bw85oNS9Rim7yFmqHxSbih7nP2
   strategy.py: QmP5Q6STwQzDEsPMhpzLoRjpj3qNGrdZX8VzVxVv1PZmDL
 fingerprint_ignore_patterns: []
 contracts:
@@ -56,9 +56,9 @@ models:
       default_gas_deploy: 10000000
       default_gas_query: 250000
       erc20_address: null
-      ledger_id: ethereum
+      ledger_id: null
       oracle_contract_address: null
-      query_function: queryOracleValue
+      query_function: null
     class_name: Strategy
 dependencies:
   aea-ledger-ethereum:

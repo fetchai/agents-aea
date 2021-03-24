@@ -31,6 +31,7 @@ from aea.test_tools.test_skill import BaseSkillTestCase
 from packages.fetchai.connections.ledger.base import (
     CONNECTION_ID as LEDGER_CONNECTION_PUBLIC_ID,
 )
+from packages.fetchai.contracts.oracle.contract import PUBLIC_ID as CONTRACT_PUBLIC_ID
 from packages.fetchai.protocols.contract_api.custom_types import Kwargs
 from packages.fetchai.protocols.contract_api.custom_types import (
     Kwargs as ContractApiKwargs,
@@ -84,7 +85,7 @@ FETCHAI_DEPLOY_RECEIPT = {
             "events": [
                 {
                     "attributes": [
-                        {"key": "code_id", "value": "1746"},
+                        {"key": "code_id", "value": "8888"},
                         {"key": "contract_address", "value": "some_contract_address"},
                     ]
                 }
@@ -353,8 +354,11 @@ class TestLedgerApiHandler(BaseSkillTestCase):
         )
 
         strategy = cast(Strategy, self.simple_oracle_behaviour.context.strategy)
+        strategy._ledger_id = "fetchai"
 
         contract_api_dialogue.terms = strategy.get_deploy_terms()
+        assert contract_api_dialogue.terms.kwargs["label"] == "store"
+
         signing_dialogue.associated_contract_api_dialogue = contract_api_dialogue
         ledger_api_dialogue.associated_signing_dialogue = signing_dialogue
 
@@ -376,15 +380,28 @@ class TestLedgerApiHandler(BaseSkillTestCase):
             logging.INFO,
             f"transaction was successfully settled. Transaction receipt={transaction_receipt}",
         )
-        mock_logger.assert_any_call(
-            logging.INFO,
-            "Oracle contract successfully deployed at address: some_contract_address",
-        )
 
-        assert (
-            self.simple_oracle_behaviour.context.strategy.is_contract_deployed
-        ), "Contract deployment status not set"
-        self.assert_quantity_in_outbox(0)
+        self.assert_quantity_in_outbox(1)
+        msg = cast(ContractApiMessage, self.get_message_from_outbox())
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=ContractApiMessage,
+            performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
+            ledger_id="fetchai",
+            contract_id=str(CONTRACT_PUBLIC_ID),
+            callable="get_deploy_transaction",
+            kwargs=ContractApiMessage.Kwargs(
+                {
+                    "label": "OracleContract",
+                    "init_msg": {"fee": str(strategy.initial_fee_deploy)},
+                    "gas": strategy.default_gas_deploy,
+                    "amount": 0,
+                    "code_id": 8888,
+                    "deployer_address": "test_agent_address",
+                }
+            ),
+        )
+        assert has_attributes, error_str
 
     def test__handle_transaction_receipt_init(self):
         """Test handling a store contract code transaction receipt"""
@@ -400,6 +417,7 @@ class TestLedgerApiHandler(BaseSkillTestCase):
         )
 
         strategy = cast(Strategy, self.simple_oracle_behaviour.context.strategy)
+        strategy._ledger_id = "fetchai"
 
         contract_api_dialogue.terms = strategy.get_deploy_terms(
             is_init_transaction=True
