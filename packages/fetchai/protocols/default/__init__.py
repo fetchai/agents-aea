@@ -17,7 +17,12 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the support resources for the default protocol."""
+"""
+This module contains the support resources for the default protocol.
+
+It was created with protocol buffer compiler version `libprotoc 3.11.4
+` and aea version `1.0.0rc1`.
+"""
 
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.default.serialization import DefaultSerializer

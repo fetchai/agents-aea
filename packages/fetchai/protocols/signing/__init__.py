@@ -17,7 +17,12 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the support resources for the signing protocol."""
+"""
+This module contains the support resources for the signing protocol.
+
+It was created with protocol buffer compiler version `libprotoc 3.11.4
+` and aea version `1.0.0rc1`.
+"""
 
 from packages.fetchai.protocols.signing.message import SigningMessage
 from packages.fetchai.protocols.signing.serialization import SigningSerializer

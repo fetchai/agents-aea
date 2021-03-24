@@ -17,7 +17,12 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the support resources for the t_protocol protocol."""
+"""
+This module contains the support resources for the t_protocol protocol.
+
+It was created with protocol buffer compiler version `libprotoc 3.11.4
+` and aea version `1.0.0rc1`.
+"""
 
 from tests.data.generator.t_protocol.message import TProtocolMessage
 from tests.data.generator.t_protocol.serialization import TProtocolSerializer
