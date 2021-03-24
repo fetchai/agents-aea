@@ -78,7 +78,6 @@ IMPORT_TEMPLATE_1 = "from packages.{author}.{type}.{name}"
 IMPORT_TEMPLATE_2 = "import packages.{author}.{type}.{name}"
 DEFAULT_ENV_DOTFILE = ".env"
 DOTTED_PATH_MODULE_ELEMENT_SEPARATOR = ":"
-LIBPROTOC_VERSION = "libprotoc 3.11.4"
 DEFAULT_BUILD_DIR_NAME = ".build"
 DEFAULT_DEPENDENCIES: Dict[str, Dict] = {"aea-ledger-fetchai": {}}
 

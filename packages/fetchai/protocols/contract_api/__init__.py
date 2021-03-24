@@ -20,8 +20,7 @@
 """
 This module contains the support resources for the contract_api protocol.
 
-It was created with protocol buffer compiler version `libprotoc 3.11.4
-` and aea version `1.0.0rc1`.
+It was created with protocol buffer compiler version `libprotoc 3.11.4` and aea version `1.0.0rc1`.
 """
 
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage

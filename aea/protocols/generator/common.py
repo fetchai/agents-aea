@@ -30,7 +30,6 @@ from typing import Tuple
 from aea.configurations.base import ProtocolSpecification
 from aea.configurations.constants import (
     DEFAULT_PROTOCOL_CONFIG_FILE,
-    LIBPROTOC_VERSION,
     PACKAGES,
     PROTOCOL_LANGUAGE_JS,
     PROTOCOL_LANGUAGE_PYTHON,
@@ -364,12 +363,13 @@ def check_prerequisites() -> None:
             "Cannot find protocol buffer compiler! To install, please follow this link: https://developers.google.com/protocol-buffers/"
         )
 
+
 def get_protoc_version() -> str:
     """Get the protoc version used."""
     result = subprocess.run(  # nosec
         ["protoc", "--version"], stdout=subprocess.PIPE, check=True
     )
-    result_str = result.stdout.decode("utf-8")
+    result_str = result.stdout.decode("utf-8").strip("\n")
     return result_str
 
 
