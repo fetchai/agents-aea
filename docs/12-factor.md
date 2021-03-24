@@ -1,6 +1,6 @@
 # Relationship with the Twelve-Factor App methodology.
 
-The [Twelve-Factor App](https://12factor.net/) is
+The <a href="https://12factor.net/" target="_blank">Twelve-Factor App</a> is
 a set of best practices to build modern
 web applications, or *software-as-a-service*.
 
