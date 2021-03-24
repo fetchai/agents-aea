@@ -369,7 +369,7 @@ def get_protoc_version() -> str:
     result = subprocess.run(  # nosec
         ["protoc", "--version"], stdout=subprocess.PIPE, check=True
     )
-    result_str = result.stdout.decode("utf-8").strip("\n")
+    result_str = result.stdout.decode("utf-8").strip("\n").strip("\r")
     return result_str
 
 
