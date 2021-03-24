@@ -182,9 +182,7 @@ class TestOracleSkills(AEATestCaseManyFlaky, UseGanache):
             "vendor.fetchai.skills.simple_oracle_client.models.strategy.args.ledger_id"
         )
         self.set_config(setting_path, EthereumCrypto.identifier)
-        setting_path = (
-            "vendor.fetchai.skills.simple_oracle_client.models.strategy.args.query_function"
-        )
+        setting_path = "vendor.fetchai.skills.simple_oracle_client.models.strategy.args.query_function"
         self.set_config(setting_path, "queryOracleValue")
 
         diff = self.difference_to_fetched_agent(
