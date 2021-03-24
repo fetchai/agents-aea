@@ -10,7 +10,7 @@ This is a protocol for interacting with a gym connection.
 ---
 name: gym
 author: fetchai
-version: 0.13.0
+version: 0.14.0
 description: A protocol for interacting with a gym connection.
 license: Apache-2.0
 aea_version: '>=1.0.0rc1, <2.0.0'
