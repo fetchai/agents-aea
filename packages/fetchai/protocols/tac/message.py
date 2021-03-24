@@ -37,7 +37,7 @@ DEFAULT_BODY_SIZE = 4
 class TacMessage(Message):
     """The tac protocol implements the messages an AEA needs to participate in the TAC."""
 
-    protocol_id = PublicId.from_str("fetchai/tac:0.14.0")
+    protocol_id = PublicId.from_str("fetchai/tac:0.15.0")
     protocol_specification_id = PublicId.from_str("fetchai/tac:1.0.0")
 
     ErrorCode = CustomErrorCode

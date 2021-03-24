@@ -1,6 +1,6 @@
 name: staking_erc20
 author: fetchai
-version: 0.6.0
+version: 0.7.0
 type: contract
 description: The staking_erc20 contract contains the main staking contract of Fetch.ai
   for Ethereum mainnet.
@@ -9,7 +9,7 @@ aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint:
   README.md: QmR5xGpZ8gZkUyWxz6EBkVpsYGuULcN13yNEALoxmDTx6t
   __init__.py: QmWzYodbomKRhKchtYUW9yzRzEPiv2M68rB4FAS7M1WzYj
-  contract.py: QmSyDGBxzRCSTPo3nMkWRBRmh7ZHYi4v1HgFdSpkK8dSbf
+  contract.py: QmSbYaqGrg3mcECnCSnoMyqBWWbJEvhfg6tyim7GWZPwgJ
 fingerprint_ignore_patterns:
 - build/*
 class_name: StakingERC20

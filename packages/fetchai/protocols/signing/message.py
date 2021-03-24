@@ -50,7 +50,7 @@ DEFAULT_BODY_SIZE = 4
 class SigningMessage(Message):
     """A protocol for communication between skills and decision maker."""
 
-    protocol_id = PublicId.from_str("fetchai/signing:0.11.0")
+    protocol_id = PublicId.from_str("fetchai/signing:0.12.0")
     protocol_specification_id = PublicId.from_str("fetchai/signing:1.0.0")
 
     ErrorCode = CustomErrorCode

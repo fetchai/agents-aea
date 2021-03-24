@@ -614,7 +614,7 @@ Return the JSON representation.
  | get_overridable() -> dict
 ```
 
-Get overrideable confg data.
+Get overridable configuration data.
 
 <a name="aea.configurations.base.AgentConfig"></a>
 ## AgentConfig Objects
@@ -629,7 +629,7 @@ Class to represent the agent configuration file.
 #### `__`init`__`
 
 ```python
- | __init__(agent_name: SimpleIdOrStr, author: SimpleIdOrStr, version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, build_entrypoint: Optional[str] = None, registry_path: str = DEFAULT_REGISTRY_NAME, description: str = "", logging_config: Optional[Dict] = None, period: Optional[float] = None, execution_timeout: Optional[float] = None, max_reactions: Optional[int] = None, error_handler: Optional[Dict] = None, decision_maker_handler: Optional[Dict] = None, skill_exception_policy: Optional[str] = None, connection_exception_policy: Optional[str] = None, default_ledger: Optional[str] = None, currency_denominations: Optional[Dict[str, str]] = None, default_connection: Optional[str] = None, default_routing: Optional[Dict[str, str]] = None, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None, storage_uri: Optional[str] = None, data_dir: Optional[str] = None, component_configurations: Optional[Dict[ComponentId, Dict]] = None, dependencies: Optional[Dependencies] = None) -> None
+ | __init__(agent_name: SimpleIdOrStr, author: SimpleIdOrStr, version: str = "", license_: str = "", aea_version: str = "", fingerprint: Optional[Dict[str, str]] = None, fingerprint_ignore_patterns: Optional[Sequence[str]] = None, build_entrypoint: Optional[str] = None, description: str = "", logging_config: Optional[Dict] = None, period: Optional[float] = None, execution_timeout: Optional[float] = None, max_reactions: Optional[int] = None, error_handler: Optional[Dict] = None, decision_maker_handler: Optional[Dict] = None, skill_exception_policy: Optional[str] = None, connection_exception_policy: Optional[str] = None, default_ledger: Optional[str] = None, required_ledgers: Optional[List[str]] = None, currency_denominations: Optional[Dict[str, str]] = None, default_connection: Optional[str] = None, default_routing: Optional[Dict[str, str]] = None, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None, task_manager_mode: Optional[str] = None, storage_uri: Optional[str] = None, data_dir: Optional[str] = None, component_configurations: Optional[Dict[ComponentId, Dict]] = None, dependencies: Optional[Dependencies] = None) -> None
 ```
 
 Instantiate the agent configuration object.

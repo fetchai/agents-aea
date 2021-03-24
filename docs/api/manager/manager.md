@@ -161,7 +161,7 @@ Multi agents manager.
 #### `__`init`__`
 
 ```python
- | __init__(working_dir: str, mode: str = "async", registry_path: str = DEFAULT_REGISTRY_NAME, auto_add_remove_project: bool = False) -> None
+ | __init__(working_dir: str, mode: str = "async", registry_path: str = DEFAULT_REGISTRY_NAME, auto_add_remove_project: bool = False, password: Optional[str] = None) -> None
 ```
 
 Initialize manager.
@@ -172,6 +172,7 @@ Initialize manager.
 - `mode`: str. async or threaded
 - `registry_path`: str. path to the local packages registry
 - `auto_add_remove_project`: bool. add/remove project on the first agent add/last agent remove
+- `password`: the password to encrypt/decrypt the private key.
 
 **Returns**:
 
@@ -215,6 +216,16 @@ Is manager running.
 ```
 
 Create MultiAgentManager dist state.
+
+<a name="aea.manager.manager.MultiAgentManager.projects"></a>
+#### projects
+
+```python
+ | @property
+ | projects() -> Dict[PublicId, Project]
+```
+
+Get all projects.
 
 <a name="aea.manager.manager.MultiAgentManager.add_error_callback"></a>
 #### add`_`error`_`callback

@@ -936,7 +936,7 @@ Dialogue Storage with dialogues offloading.
  | dialogue_terminal_state_callback(dialogue: "Dialogue") -> None
 ```
 
-Call on dialogue reaches terminal staste.
+Call on dialogue reaches terminal state.
 
 <a name="aea.protocols.dialogue.base.PersistDialoguesStorageWithOffloading.get"></a>
 #### get
@@ -1010,7 +1010,7 @@ None
  | is_keep_dialogues_in_terminal_state() -> bool
 ```
 
-Is requrired to keep dialogues in terminal state.
+Is required to keep dialogues in terminal state.
 
 <a name="aea.protocols.dialogue.base.Dialogues.self_address"></a>
 #### self`_`address

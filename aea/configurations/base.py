@@ -1138,7 +1138,7 @@ class AgentConfig(PackageConfiguration):
             "connection_private_key_paths",
             "loop_mode",
             "runtime_mode",
-            "taskmanager_mode",
+            "task_manager_mode",
             "execution_timeout",
             "timeout",
             "period",
@@ -1217,7 +1217,7 @@ class AgentConfig(PackageConfiguration):
         default_routing: Optional[Dict[str, str]] = None,
         loop_mode: Optional[str] = None,
         runtime_mode: Optional[str] = None,
-        taskmanager_mode: Optional[str] = None,
+        task_manager_mode: Optional[str] = None,
         storage_uri: Optional[str] = None,
         data_dir: Optional[str] = None,
         component_configurations: Optional[Dict[ComponentId, Dict]] = None,
@@ -1279,7 +1279,7 @@ class AgentConfig(PackageConfiguration):
         )  # type: Dict[PublicId, PublicId]
         self.loop_mode = loop_mode
         self.runtime_mode = runtime_mode
-        self.taskmanager_mode = taskmanager_mode
+        self.task_manager_mode = task_manager_mode
         self.storage_uri = storage_uri
         self.data_dir = data_dir
         # this attribute will be set through the setter below
@@ -1419,8 +1419,8 @@ class AgentConfig(PackageConfiguration):
             config["loop_mode"] = self.loop_mode
         if self.runtime_mode is not None:
             config["runtime_mode"] = self.runtime_mode
-        if self.taskmanager_mode is not None:
-            config["taskmanager_mode"] = self.taskmanager_mode
+        if self.task_manager_mode is not None:
+            config["task_manager_mode"] = self.task_manager_mode
         if self.storage_uri is not None:
             config["storage_uri"] = self.storage_uri
         if self.data_dir is not None:
@@ -1465,7 +1465,7 @@ class AgentConfig(PackageConfiguration):
             default_routing=cast(Dict, obj.get("default_routing", {})),
             loop_mode=cast(str, obj.get("loop_mode")),
             runtime_mode=cast(str, obj.get("runtime_mode")),
-            taskmanager_mode=cast(str, obj.get("taskmanager_mode")),
+            task_manager_mode=cast(str, obj.get("task_manager_mode")),
             storage_uri=cast(str, obj.get("storage_uri")),
             data_dir=cast(str, obj.get("data_dir")),
             component_configurations=None,

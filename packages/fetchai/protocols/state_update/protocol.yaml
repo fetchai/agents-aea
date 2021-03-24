@@ -1,16 +1,16 @@
 name: state_update
 author: fetchai
-version: 0.11.0
+version: 0.12.0
 protocol_specification_id: fetchai/state_update:1.0.0
 type: protocol
 description: A protocol for state updates to the decision maker state.
 license: Apache-2.0
 aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint:
-  README.md: Qmayxom236xczMmjuX5YVa2Qwj9B4FCLV2VPVPBsES9ADk
+  README.md: QmcQMH8as6BvkRkjLyWy1KpKJgSpdURmpudVsPHUgwjDUk
   __init__.py: QmaQ5HUyXKPW9tUfa5MD57QFJbLuNMhgHtq3eJWuKCM24u
   dialogues.py: QmU4GFxG3DL5F515aF3z2GamzieU6XXWqzRy7V5oA7HnjV
-  message.py: QmRd6dUzERmTLJb381Y3EMey4jZiJ6xzw1T7UtHgmsBAS8
+  message.py: QmcqrzJLYiQHfEhfEWviRPgbtN1miYU1mnsnZiJakGGUBV
   serialization.py: QmQrpKMDr9E4gtoknmjVenVnhGL8jbkgEmWzsSB8YYx4oh
   state_update.proto: QmPqvqnUQtcE475C3kCctNUsmi46JkMFGYE3rqMmqvbyEz
   state_update_pb2.py: QmcVwzLJxYHKK2SqFEtGgEXRCJQBAKSH3hYtWQitaHwG6E

@@ -83,7 +83,7 @@ Class wrapping the Account Generation from Ethereum ledger.
 #### `__`init`__`
 
 ```python
- | __init__(private_key_path: Optional[str] = None)
+ | __init__(private_key_path: Optional[str] = None, password: Optional[str] = None) -> None
 ```
 
 Instantiate an ethereum crypto object.
@@ -91,6 +91,7 @@ Instantiate an ethereum crypto object.
 **Arguments**:
 
 - `private_key_path`: the private key path of the agent
+- `password`: the password to encrypt/decrypt the private key.
 
 <a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.private_key"></a>
 #### private`_`key
@@ -139,7 +140,7 @@ a display_address str
 
 ```python
  | @classmethod
- | load_private_key_from_path(cls, file_name: str) -> Account
+ | load_private_key_from_path(cls, file_name: str, password: Optional[str] = None) -> Account
 ```
 
 Load a private key in hex format from a file.
@@ -147,6 +148,7 @@ Load a private key in hex format from a file.
 **Arguments**:
 
 - `file_name`: the path to the hex file.
+- `password`: the password to encrypt/decrypt the private key.
 
 **Returns**:
 
@@ -197,22 +199,42 @@ signed transaction
 
 Generate a key pair for ethereum network.
 
-<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.dump"></a>
-#### dump
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.encrypt"></a>
+#### encrypt
 
 ```python
- | dump(fp: BinaryIO) -> None
+ | encrypt(password: str) -> str
 ```
 
-Serialize crypto object as binary stream to `fp` (a `.write()`-supporting file-like object).
+Encrypt the private key and return in json.
 
 **Arguments**:
 
-- `fp`: the output file pointer. Must be set in binary mode (mode='wb')
+- `private_key`: the raw private key.
+- `password`: the password to decrypt.
 
 **Returns**:
 
-None
+json string containing encrypted private key.
+
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumCrypto.decrypt"></a>
+#### decrypt
+
+```python
+ | @classmethod
+ | decrypt(cls, keyfile_json: str, password: str) -> str
+```
+
+Decrypt the private key and return in raw form.
+
+**Arguments**:
+
+- `keyfile_json`: json str containing encrypted private key.
+- `password`: the password to decrypt.
+
+**Returns**:
+
+the raw private key.
 
 <a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper"></a>
 ## EthereumHelper Objects
@@ -240,6 +262,24 @@ Check whether a transaction is settled or not.
 **Returns**:
 
 True if the transaction has been settled, False o/w.
+
+<a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper.get_contract_address"></a>
+#### get`_`contract`_`address
+
+```python
+ | @staticmethod
+ | get_contract_address(tx_receipt: JSONLike) -> Optional[str]
+```
+
+Retrieve the `contract_address` from a transaction receipt.
+
+**Arguments**:
+
+- `tx_receipt`: the receipt of the transaction.
+
+**Returns**:
+
+the contract address, if present
 
 <a name="plugins.aea-ledger-ethereum.aea_ledger_ethereum.ethereum.EthereumHelper.is_transaction_valid"></a>
 #### is`_`transaction`_`valid
@@ -271,7 +311,7 @@ True if the random_message is equals to tx['input']
  | generate_tx_nonce(seller: Address, client: Address) -> str
 ```
 
-Generate a unique hash to distinguish txs with the same terms.
+Generate a unique hash to distinguish transactions with the same terms.
 
 **Arguments**:
 

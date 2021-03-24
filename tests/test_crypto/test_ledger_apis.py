@@ -159,7 +159,7 @@ class TestLedgerApis:
             assert addresses == expected_addresses
 
     def test_get_hash(self):
-        """Test the is_transaction_valid."""
+        """Test the get_hash."""
         expected_hash = "hash"
         with mock.patch(
             "aea_ledger_cosmos.CosmosApi.get_hash", return_value=expected_hash,
@@ -168,6 +168,18 @@ class TestLedgerApis:
                 identifier=CosmosCrypto.identifier, message=b"message",
             )
             assert hash_ == expected_hash
+
+    def test_get_contract_address(self):
+        """Test the get_contract_address."""
+        expected_address = "address"
+        with mock.patch(
+            "aea_ledger_cosmos.CosmosApi.get_contract_address",
+            return_value=expected_address,
+        ):
+            address_ = self.ledger_apis.get_contract_address(
+                identifier=CosmosCrypto.identifier, tx_receipt={},
+            )
+            assert address_ == expected_address
 
     def test_generate_tx_nonce_positive(self):
         """Test generate_tx_nonce positive result."""

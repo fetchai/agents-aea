@@ -131,6 +131,25 @@ Get the transaction for a transaction digest.
 
 the tx, if present
 
+<a name="aea.crypto.ledger_apis.LedgerApis.get_contract_address"></a>
+#### get`_`contract`_`address
+
+```python
+ | @staticmethod
+ | get_contract_address(identifier: str, tx_receipt: Any) -> Optional[Address]
+```
+
+Get the contract address from a transaction receipt.
+
+**Arguments**:
+
+- `identifier`: the identifier of the ledger
+- `tx_receipt`: the transaction receipt
+
+**Returns**:
+
+the contract address if successful
+
 <a name="aea.crypto.ledger_apis.LedgerApis.is_transaction_settled"></a>
 #### is`_`transaction`_`settled
 

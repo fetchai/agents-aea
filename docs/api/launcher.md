@@ -7,7 +7,7 @@ This module contains the implementation of multiple AEA configs launcher.
 #### load`_`agent
 
 ```python
-load_agent(agent_dir: Union[PathLike, str]) -> AEA
+load_agent(agent_dir: Union[PathLike, str], password: Optional[str] = None) -> AEA
 ```
 
 Load AEA from directory.
@@ -15,6 +15,7 @@ Load AEA from directory.
 **Arguments**:
 
 - `agent_dir`: agent configuration directory
+- `password`: the password to encrypt/decrypt the private key.
 
 **Returns**:
 
@@ -33,14 +34,15 @@ Task to run agent from agent configuration directory.
 #### `__`init`__`
 
 ```python
- | __init__(agent_dir: Union[PathLike, str]) -> None
+ | __init__(agent_dir: Union[PathLike, str], password: Optional[str] = None) -> None
 ```
 
 Init aea config dir task.
 
 **Arguments**:
 
-- `agent_dir`: direcory with aea config.
+- `agent_dir`: directory with aea config.
+- `password`: the password to encrypt/decrypt the private key.
 
 <a name="aea.launcher.AEADirTask.id"></a>
 #### id
@@ -94,15 +96,16 @@ Version for multiprocess executor mode.
 #### `__`init`__`
 
 ```python
- | __init__(agent_dir: Union[PathLike, str], log_level: Optional[str] = None) -> None
+ | __init__(agent_dir: Union[PathLike, str], log_level: Optional[str] = None, password: Optional[str] = None) -> None
 ```
 
 Init aea config dir task.
 
 **Arguments**:
 
-- `agent_dir`: direcory with aea config.
+- `agent_dir`: directory with aea config.
 - `log_level`: debug level applied for AEA in subprocess
+- `password`: the password to encrypt/decrypt the private key.
 
 <a name="aea.launcher.AEADirMultiprocessTask.id"></a>
 #### id
@@ -126,7 +129,9 @@ Return was exception failed or not.
 
 If it's running it's not failed.
 
-:rerurn: bool
+**Returns**:
+
+bool
 
 <a name="aea.launcher.AEADirMultiprocessTask.start"></a>
 #### start
@@ -159,7 +164,7 @@ Run multiple AEA instances.
 #### `__`init`__`
 
 ```python
- | __init__(agent_dirs: Sequence[Union[PathLike, str]], mode: str, fail_policy: ExecutorExceptionPolicies = ExecutorExceptionPolicies.propagate, log_level: Optional[str] = None) -> None
+ | __init__(agent_dirs: Sequence[Union[PathLike, str]], mode: str, fail_policy: ExecutorExceptionPolicies = ExecutorExceptionPolicies.propagate, log_level: Optional[str] = None, password: Optional[str] = None) -> None
 ```
 
 Init AEALauncher.
@@ -170,4 +175,5 @@ Init AEALauncher.
 - `mode`: executor name to use.
 - `fail_policy`: one of ExecutorExceptionPolicies to be used with Executor
 - `log_level`: debug level applied for AEA in subprocesses
+- `password`: the password to encrypt/decrypt the private key.
 

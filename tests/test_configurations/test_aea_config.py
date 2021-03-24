@@ -453,12 +453,12 @@ def test_agent_configuration_dump_multipage_fails_bad_component_configuration():
 
 
 class TestTskManagerModeConfigVariable(BaseConfigTestVariable):
-    """Test `taskmanager_mode` aea config option."""
+    """Test `task_manager_mode` aea config option."""
 
-    OPTION_NAME = "taskmanager_mode"
-    CONFIG_ATTR_NAME = "taskmanager_mode"
+    OPTION_NAME = "task_manager_mode"
+    CONFIG_ATTR_NAME = "task_manager_mode"
     GOOD_VALUES = ["threaded"]
     INCORRECT_VALUES = [None, "sTrING?", -1]
     REQUIRED = False
-    AEA_ATTR_NAME = "_taskmanager_mode"
+    AEA_ATTR_NAME = "_task_manager_mode"
     AEA_DEFAULT_VALUE = AEABuilder.DEFAULT_TASKMANAGER_MODE

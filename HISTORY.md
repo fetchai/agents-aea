@@ -1,5 +1,29 @@
 # Release History
 
+## 1.0.0rc1 (2020-03-24)
+
+- Adds support for encrypting private keys at rest
+- Adds support for configuration of decision maker and error handler instances from `aea-config.yaml`
+- Adds support for explicitly marking behaviours and handlers as dynamic
+- Adds support for fetchai ledger to oracle skills and contract
+- Adds timeout support on multiplexer calls to connections
+- Fixes bug in regex constrained string for id validation
+- Adds docs section on how AEAs satisfy 12-factor methodology
+- Adds docs section on tradeoffs made in `v1`
+- Adds example for logs streaming to browser
+- Removes multiple temporary hacks for backwards compatibility
+- Adds skills tests coverage for `echo` and `http_echo` skills
+- Adds `required_ledgers` field in `aea-config.yaml`
+- Removes `registry_path` field in `aea-config.yaml`
+- Adds `message_format` field to cert requests
+- Removes requirement for exact protocol buffers compiler, prints version used in protocols
+- Adds support to configure task manager mode via `aea-config.yaml`
+- Fixed spelling across docstrings in code base
+- Multiple minor fixes
+- Multiple docs updates to fix order of CLI commands with respect to installing dependencies
+- Multiple additional tests and test stability fixes
+
+
 ## 0.11.2 (2020-03-17)
 
 - Fixes a package import issue

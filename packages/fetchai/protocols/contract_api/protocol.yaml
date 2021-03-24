@@ -1,19 +1,19 @@
 name: contract_api
 author: fetchai
-version: 0.12.0
+version: 0.13.0
 protocol_specification_id: fetchai/contract_api:1.0.0
 type: protocol
 description: A protocol for contract APIs requests and responses.
 license: Apache-2.0
 aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint:
-  README.md: QmR53eeEQM4Ph8afx27sWgA83wY1Mwr5Js9pvBkqRnhQNP
+  README.md: QmZXmGo18LWWfRMgiTGBLPKtKozDEmEXkBNLfsLAzWTN7s
   __init__.py: QmTBjnV5NxT4HZhqPWBvASwJvvpDMhRVKoAu3ZhLkKV66E
   contract_api.proto: QmVezvQ3vgN19nzJD1CfgvjHxjdaP4yLUSwaQDMQq85vUZ
   contract_api_pb2.py: QmYux5XHsY3u1e81gE33wHpMUN5u3VZy5wq9xSsPMbC7yf
   custom_types.py: QmcGGXMEDGXaXsvzx9J97xy56RZfXQsFNfBPrTzvZzUBSL
   dialogues.py: QmNk7CJhkAJ97e4jVmUFDGPUJaXCk3PQp6pzHcFv9hpsg5
-  message.py: QmfBLW3Fiy6Kxye9565Nt2kM61wZutDCne3WAwc38VS3HH
+  message.py: QmcQyT6fuVuqd9pbzFEFvfNWerp7DV6kFxYLQBX58CNMWV
   serialization.py: QmX2gUAStbfjSotF1k8fsTSLzsVadyVctYNN9fw9jCzgd9
 fingerprint_ignore_patterns: []
 dependencies:

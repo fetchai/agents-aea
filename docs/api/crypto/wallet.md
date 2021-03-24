@@ -16,7 +16,7 @@ Utility class to store and retrieve crypto objects.
 #### `__`init`__`
 
 ```python
- | __init__(crypto_id_to_path: Optional[Dict[str, Optional[str]]] = None) -> None
+ | __init__(crypto_id_to_path: Optional[Dict[str, Optional[str]]] = None, password: Optional[str] = None) -> None
 ```
 
 Initialize the crypto store.
@@ -25,6 +25,7 @@ Initialize the crypto store.
 
 - `crypto_id_to_path`: dictionary from crypto id to an (optional) path
 to the private key.
+- `password`: the password to encrypt/decrypt the private key.
 
 <a name="aea.crypto.wallet.CryptoStore.public_keys"></a>
 #### public`_`keys
@@ -84,7 +85,7 @@ The cryptos are separated into two categories:
 #### `__`init`__`
 
 ```python
- | __init__(private_key_paths: Dict[str, Optional[str]], connection_private_key_paths: Optional[Dict[str, Optional[str]]] = None)
+ | __init__(private_key_paths: Dict[str, Optional[str]], connection_private_key_paths: Optional[Dict[str, Optional[str]]] = None, password: Optional[str] = None)
 ```
 
 Instantiate a wallet object.
@@ -93,6 +94,7 @@ Instantiate a wallet object.
 
 - `private_key_paths`: the private key paths
 - `connection_private_key_paths`: the private key paths for the connections.
+- `password`: the password to encrypt/decrypt the private key.
 
 <a name="aea.crypto.wallet.Wallet.public_keys"></a>
 #### public`_`keys

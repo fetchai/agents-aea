@@ -1,5 +1,5 @@
 ``` bash
-aea fetch fetchai/ml_data_provider:0.24.0
+aea fetch fetchai/ml_data_provider:0.25.0
 cd ml_data_provider
 aea install
 aea build
@@ -7,25 +7,25 @@ aea build
 ``` bash
 aea create ml_data_provider
 cd ml_data_provider
-aea add connection fetchai/p2p_libp2p:0.18.0
-aea add connection fetchai/soef:0.19.0
-aea add connection fetchai/ledger:0.15.0
-aea add skill fetchai/ml_data_provider:0.21.0
+aea add connection fetchai/p2p_libp2p:0.19.0
+aea add connection fetchai/soef:0.20.0
+aea add connection fetchai/ledger:0.16.0
+aea add skill fetchai/ml_data_provider:0.22.0
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0rc1"}
 }'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.18.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.19.0
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:0.11.0": "fetchai/ledger:0.15.0",
-  "fetchai/oef_search:0.14.0": "fetchai/soef:0.19.0"
+  "fetchai/ledger_api:0.12.0": "fetchai/ledger:0.16.0",
+  "fetchai/oef_search:0.15.0": "fetchai/soef:0.20.0"
 }'
 aea install
 aea build
 ```
 ``` bash
-aea fetch fetchai/ml_model_trainer:0.25.0
+aea fetch fetchai/ml_model_trainer:0.26.0
 cd ml_model_trainer
 aea install
 aea build
@@ -33,19 +33,19 @@ aea build
 ``` bash
 aea create ml_model_trainer
 cd ml_model_trainer
-aea add connection fetchai/p2p_libp2p:0.18.0
-aea add connection fetchai/soef:0.19.0
-aea add connection fetchai/ledger:0.15.0
-aea add skill fetchai/ml_train:0.23.0
+aea add connection fetchai/p2p_libp2p:0.19.0
+aea add connection fetchai/soef:0.20.0
+aea add connection fetchai/ledger:0.16.0
+aea add skill fetchai/ml_train:0.24.0
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0rc1"}
 }'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.18.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.19.0
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:0.11.0": "fetchai/ledger:0.15.0",
-  "fetchai/oef_search:0.14.0": "fetchai/soef:0.19.0"
+  "fetchai/ledger_api:0.12.0": "fetchai/ledger:0.16.0",
+  "fetchai/oef_search:0.15.0": "fetchai/soef:0.20.0"
 }'
 aea install
 aea build
@@ -99,7 +99,7 @@ aea delete ml_model_trainer
 ```
 ``` yaml
 ---
-public_id: fetchai/p2p_libp2p:0.18.0
+public_id: fetchai/p2p_libp2p:0.19.0
 type: connection
 config:
   delegate_uri: 127.0.0.1:11001

@@ -60,7 +60,7 @@ class Agent(AbstractAgent, WithLogger):
         runtime_mode: Optional[str] = None,
         storage_uri: Optional[str] = None,
         logger: Logger = _default_logger,
-        taskmanager_mode: Optional[str] = None,
+        task_manager_mode: Optional[str] = None,
     ) -> None:
         """
         Instantiate the agent.
@@ -72,7 +72,7 @@ class Agent(AbstractAgent, WithLogger):
         :param loop_mode: loop_mode to choose agent run loop.
         :param runtime_mode: runtime mode to up agent.
         :param storage_uri: optional uri to set generic storage
-        :param taskmanager_mode: task manager mode.
+        :param task_manager_mode: task manager mode.
 
         :return: None
         """
@@ -81,7 +81,7 @@ class Agent(AbstractAgent, WithLogger):
         self._period = period
         self._tick = 0
         self._runtime_mode = runtime_mode or self.DEFAULT_RUNTIME
-        self._taskmanager_mode = taskmanager_mode
+        self._task_manager_mode = task_manager_mode
         self._storage_uri = storage_uri
 
         runtime_class = self._get_runtime_class()

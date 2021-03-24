@@ -186,7 +186,7 @@ class LedgerApiHandler(Handler):
                 is_init_transaction=True
             )
             self.context.outbox.put_message(message=contract_api_msg)
-        else:
+        else:  # pragma: nocover
             self.context.logger.info("Failed to initialize contract: code_id not found")
 
     def _handle_transaction_receipt(

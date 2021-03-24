@@ -145,7 +145,7 @@
       "type": "string",
       "enum": ["async", "threaded"]
     },
-    "taskmanager_mode": {
+    "task_manager_mode": {
       "type": "string",
       "enum": ["threaded"]
     },
