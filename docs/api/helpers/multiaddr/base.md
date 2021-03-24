@@ -119,5 +119,5 @@ Canonical representation of a multiaddress.
  | __str__() -> str
 ```
 
-Default string representation of a mutliaddress.
+Default string representation of a multiaddress.
 

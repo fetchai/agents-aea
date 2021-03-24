@@ -175,7 +175,7 @@ Get the connection status.
  | async run() -> None
 ```
 
-Run multiplexer connect and recv/send tasks.
+Run multiplexer connect and receive/send tasks.
 
 <a name="aea.multiplexer.AsyncMultiplexer.set_loop"></a>
 #### set`_`loop
@@ -184,7 +184,7 @@ Run multiplexer connect and recv/send tasks.
  | set_loop(loop: AbstractEventLoop) -> None
 ```
 
-Set event loop and all event loopp related objects.
+Set event loop and all event loop related objects.
 
 **Arguments**:
 
@@ -201,7 +201,7 @@ None
  | add_connection(connection: Connection, is_default: bool = False) -> None
 ```
 
-Add a connection to the mutliplexer.
+Add a connection to the multiplexer.
 
 **Arguments**:
 
@@ -327,7 +327,7 @@ Initialize the connection multiplexer.
  | set_loop(loop: AbstractEventLoop) -> None
 ```
 
-Set event loop and all event loopp related objects.
+Set event loop and all event loop related objects.
 
 **Arguments**:
 

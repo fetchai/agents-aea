@@ -1,7 +1,7 @@
 <a name="aea.helpers.install_dependency"></a>
 # aea.helpers.install`_`dependency
 
-Helper to install python dependecies.
+Helper to install python dependencies.
 
 <a name="aea.helpers.install_dependency.install_dependency"></a>
 #### install`_`dependency

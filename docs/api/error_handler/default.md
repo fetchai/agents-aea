@@ -12,12 +12,20 @@ class ErrorHandler(AbstractErrorHandler)
 
 Error handler class for handling problematic envelopes.
 
+<a name="aea.error_handler.default.ErrorHandler.__init__"></a>
+#### `__`init`__`
+
+```python
+ | __init__(**kwargs: Any)
+```
+
+Instantiate error handler.
+
 <a name="aea.error_handler.default.ErrorHandler.send_unsupported_protocol"></a>
 #### send`_`unsupported`_`protocol
 
 ```python
- | @classmethod
- | send_unsupported_protocol(cls, envelope: Envelope, logger: Logger) -> None
+ | send_unsupported_protocol(envelope: Envelope, logger: Logger) -> None
 ```
 
 Handle the received envelope in case the protocol is not supported.
@@ -34,8 +42,7 @@ None
 #### send`_`decoding`_`error
 
 ```python
- | @classmethod
- | send_decoding_error(cls, envelope: Envelope, exception: Exception, logger: Logger) -> None
+ | send_decoding_error(envelope: Envelope, exception: Exception, logger: Logger) -> None
 ```
 
 Handle a decoding error.
@@ -54,8 +61,7 @@ None
 #### send`_`no`_`active`_`handler
 
 ```python
- | @classmethod
- | send_no_active_handler(cls, envelope: Envelope, reason: str, logger: Logger) -> None
+ | send_no_active_handler(envelope: Envelope, reason: str, logger: Logger) -> None
 ```
 
 Handle the received envelope in case the handler is not supported.

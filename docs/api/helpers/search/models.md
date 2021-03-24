@@ -48,7 +48,10 @@ Get the distance to another location.
 **Arguments**:
 
 - `other`: the other location
-:retun: the distance
+
+**Returns**:
+
+the distance
 
 <a name="aea.helpers.search.models.Location.__eq__"></a>
 #### `__`eq`__`

@@ -98,7 +98,7 @@ Get running state of the loop.
  | set_loop(loop: AbstractEventLoop) -> None
 ```
 
-Set event loop and all event loopp related objects.
+Set event loop and all event loop related objects.
 
 <a name="aea.agent_loop.BaseAgentLoop.run"></a>
 #### run
