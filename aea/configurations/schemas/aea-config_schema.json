@@ -156,8 +156,8 @@
     "runtime_mode": {
       "$ref": "definitions.json#/definitions/runtime_mode"
     },
-    "taskmanager_mode": {
-      "$ref": "definitions.json#/definitions/taskmanager_mode"
+    "task_manager_mode": {
+      "$ref": "definitions.json#/definitions/task_manager_mode"
     },
     "storage_uri": {
       "$ref": "definitions.json#/definitions/storage_uri"

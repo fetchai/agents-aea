@@ -883,6 +883,7 @@ def test_agent_config_to_json_with_optional_configurations():
         loop_mode="sync",
         runtime_mode="async",
         storage_uri="some_uri_to_storage",
+        task_manager_mode="threaded",
     )
     agent_config.default_connection = "author/name:0.1.0"
     agent_config.default_ledger = DEFAULT_LEDGER
