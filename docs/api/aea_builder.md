@@ -412,18 +412,18 @@ Set the runtime mode.
 
 self
 
-<a name="aea.aea_builder.AEABuilder.set_taskmanager_mode"></a>
-#### set`_`taskmanager`_`mode
+<a name="aea.aea_builder.AEABuilder.set_task_manager_mode"></a>
+#### set`_`task`_`manager`_`mode
 
 ```python
- | set_taskmanager_mode(taskmanager_mode: Optional[str]) -> "AEABuilder"
+ | set_task_manager_mode(task_manager_mode: Optional[str]) -> "AEABuilder"
 ```
 
-Set the taskmanager_mode.
+Set the task_manager_mode.
 
 **Arguments**:
 
-- `taskmanager_mode`: the agent taskmanager_mode
+- `task_manager_mode`: the agent task_manager_mode
 
 **Returns**:
 
