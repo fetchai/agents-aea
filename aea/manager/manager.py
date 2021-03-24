@@ -225,6 +225,11 @@ class MultiAgentManager:
             "agents": [alias.dict for alias in self._agents.values()],
         }
 
+    @property
+    def projects(self) -> Dict[PublicId, Project]:
+        """Get all projects."""
+        return self._projects
+
     def _run_thread(self) -> None:
         """Run internal thread with own event loop."""
         self._loop = asyncio.new_event_loop()

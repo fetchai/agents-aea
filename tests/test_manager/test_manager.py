@@ -110,6 +110,10 @@ class TestMultiAgentManagerAsyncMode(
         assert not os.path.exists(self.working_dir)
         assert not os.path.exists(self.working_dir)
 
+    def test_projects_property(self, *args):
+        """Test projects property."""
+        self.assertEqual(self.manager.projects, self.manager._projects)
+
     def test_data_dir_presents(self, *args):
         """Check not fails on exists data dir."""
         try:
