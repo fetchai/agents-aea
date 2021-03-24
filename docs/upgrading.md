@@ -4,6 +4,16 @@ The primary tool for upgrading AEA projects is the `aea upgrade` command in the 
 
 Below we describe the additional manual steps required to upgrade between different versions:
 
+## `v0.11.1` to `v1.0.0rc1`
+
+No backwards incompatible changes to component development.
+
+The `aea-config.yaml` now requires the field `required_ledgers` which must specify all ledgers for which private keys are required to run the agent. Please add it to your project.
+
+The `registry_path` field has been removed from the `aea-config.yaml`. Please remove it from your project.
+
+All packages provided by author `fetchai` must be upgraded.
+
 ## `v0.11.0` to `v0.11.1`
 
 No backwards incompatible changes.
