@@ -145,6 +145,10 @@
       "type": "string",
       "enum": ["async", "threaded"]
     },
+    "taskmanager_mode": {
+      "type": "string",
+      "enum": ["threaded"]
+    },
     "storage_uri": {
       "type": "string"
     },
