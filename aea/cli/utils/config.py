@@ -37,7 +37,7 @@
 """A module with config tools of the aea cli."""
 import os
 from pathlib import Path
-from typing import Any, Dict, Set
+from typing import Any, Dict, Optional, Set
 
 import click
 import jsonschema
@@ -47,18 +47,13 @@ from aea.cli.utils.constants import AUTHOR_KEY, CLI_CONFIG_PATH
 from aea.cli.utils.context import Context
 from aea.cli.utils.exceptions import AEAConfigException
 from aea.cli.utils.generic import load_yaml
-from aea.cli.utils.loggers import logger as cli_logger
 from aea.configurations.base import (
     ComponentType,
     PackageConfiguration,
     PackageType,
     _get_default_configuration_file_name_from_type,
 )
-from aea.configurations.constants import (
-    DEFAULT_AEA_CONFIG_FILE,
-    DEFAULT_REGISTRY_NAME,
-    REGISTRY_PATH_KEY,
-)
+from aea.configurations.constants import DEFAULT_AEA_CONFIG_FILE, REGISTRY_PATH_KEY
 from aea.configurations.loader import ConfigLoader, ConfigLoaders
 from aea.configurations.validation import ExtraPropertiesError
 from aea.exceptions import AEAEnforceError, AEAValidationError
@@ -165,22 +160,10 @@ def set_cli_author(click_context: click.Context) -> None:
     click_context.obj.set_config("cli_author", cli_author)
 
 
-def get_registry_path_from_cli_config() -> str:
+def get_registry_path_from_cli_config() -> Optional[str]:
     """Get registry path from config."""
     config = get_or_create_cli_config()
-    registry_path = config.get(REGISTRY_PATH_KEY, None)
-    if registry_path:
-        return registry_path
-    registry_path = Path(DEFAULT_REGISTRY_NAME)
-    if registry_path.absolute().is_dir():
-        return str(registry_path)
-    registry_path = Path("..", DEFAULT_REGISTRY_NAME)
-    if registry_path.absolute().is_dir():
-        return str(registry_path)
-    cli_logger.debug(
-        f"Registry path not provided and `packages` not found in current ({os.getcwd()}) and parent directory."
-    )
-    return ""
+    return config.get(REGISTRY_PATH_KEY, None)
 
 
 def load_item_config(item_type: str, package_path: Path) -> PackageConfiguration:

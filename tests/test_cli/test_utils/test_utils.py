@@ -19,6 +19,7 @@
 """This test module contains the tests for aea.cli.utils module."""
 from builtins import FileNotFoundError
 from copy import deepcopy
+from tempfile import TemporaryDirectory
 from typing import cast
 from unittest import TestCase, mock
 from unittest.mock import MagicMock, patch
@@ -597,3 +598,20 @@ def test_password_option():
                 catch_exceptions=False,
                 standalone_mode=False,
             )
+
+
+def test_context_registry_path_does_not_exist():
+    """Test context registry path specified but not found."""
+    with pytest.raises(
+        ValueError, match="Registry path directory provided .* can not be found."
+    ):
+        Context(
+            cwd=".", verbosity="", registry_path="some_path_does_not_exist"
+        ).registry_path
+
+    with TemporaryDirectory() as tmp_dir:
+        with cd(tmp_dir):
+            with pytest.raises(
+                ValueError, match="Registry path not provided and `packages` not found"
+            ):
+                Context(cwd=".", verbosity="", registry_path=None).registry_path
