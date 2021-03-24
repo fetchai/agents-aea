@@ -1,5 +1,11 @@
 package protocols
 
+import (
+	"crypto/rand"
+	"encoding/hex"
+	"fmt"
+)
+
 type Address string
 type Performative []string
 type SomeMessageType string
@@ -23,8 +29,10 @@ const (
 type Role string
 
 const (
-	Role1 Role = "role1"
-	Role2 Role = "role2"
+	Role1             Role = "role1"
+	Role2             Role = "role2"
+	StartingMessageId      = 1
+	StartingTarget         = 0
 )
 
 type RuleType struct {
@@ -125,12 +133,59 @@ type Dialogue struct {
 }
 type AbstractMessage struct {
 	dialogueReference [2]string
-	message_id        int
+	messageId         int
 	target            int
 	performative      []string
 	message           SomeMessageType
 	to                Address
 	sender            Address
+}
+
+func create(counterParty Address, selfAddress Address, performative Performative) (AbstractMessage, Dialogue) {
+	reference := [2]string{
+		generateDialogueNonce(), "",
+	}
+	initialMessage := AbstractMessage{
+		dialogueReference: reference,
+		messageId:         StartingMessageId,
+		target:            StartingTarget,
+		performative:      performative,
+		to:                counterParty,
+		sender:            selfAddress,
+	}
+	dialogue := createDialogue(initialMessage)
+
+	return initialMessage, dialogue
+}
+
+func createDialogue(message AbstractMessage) Dialogue {
+	// TODO
+	// create dialogue instance and return
+	return Dialogue{}
+}
+
+func checkAndProcessLabels(message AbstractMessage) DialogueLabel {
+	if !(message.dialogueReference[0] != "" && message.dialogueReference[1] == "") {
+		fmt.Println("Error : Reference address label already exists")
+	}
+	return DialogueLabel{
+		dialogueReference:       message.dialogueReference,
+		dialogueOpponentAddress: message.to,
+		dialogueStarterAddress:  message.sender,
+	}
+}
+
+func generateDialogueNonce() string {
+	hexValue := randomHex(NONCE_BYTES_NB)
+	return hexValue
+}
+
+func randomHex(n int) string {
+	bytes := make([]byte, n)
+	if _, err := rand.Read(bytes); err != nil {
+		return ""
+	}
+	return hex.EncodeToString(bytes)
 }
 
 // var dialogueStorage map[Address][]DialogueLabel
@@ -273,28 +328,4 @@ type AbstractMessage struct {
 
 // 	return dialogue
 
-// }
-
-// func (data *InitialMessage) checkAndProcessLabels() DialogueLabel {
-// 	if !(data.dialogueReference[0] != "" && data.dialogueReference[1] == "") {
-// 		fmt.Println("Error : Reference address label already exists")
-// 	}
-// 	return DialogueLabel{
-// 		dialogueReference:       data.dialogueReference,
-// 		dialogueOpponentAddress: data.to,
-// 		dialogueStarterAddress:  data.sender,
-// 	}
-// }
-
-// func generateDialogueNonce() string {
-// 	hexValue := randomHex(NONCE_BYTES_NB)
-// 	return hexValue
-// }
-
-// func randomHex(n int) string {
-// 	bytes := make([]byte, n)
-// 	if _, err := rand.Read(bytes); err != nil {
-// 		return ""
-// 	}
-// 	return hex.EncodeToString(bytes)
 // }
