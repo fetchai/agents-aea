@@ -305,6 +305,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
     DEFAULT_CONNECTION_EXCEPTION_POLICY = ExceptionPolicyEnum.propagate
     DEFAULT_LOOP_MODE = "async"
     DEFAULT_RUNTIME_MODE = "threaded"
+    DEFAULT_TASKMANAGER_MODE = "threaded"
     DEFAULT_SEARCH_SERVICE_ADDRESS = _DEFAULT_SEARCH_SERVICE_ADDRESS
     AEA_CLASS = AEA
     BUILD_TIMEOUT = 120
@@ -391,6 +392,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self._default_routing: Dict[PublicId, PublicId] = {}
         self._loop_mode: Optional[str] = None
         self._runtime_mode: Optional[str] = None
+        self._taskmanager_mode: Optional[str] = None
         self._search_service_address: Optional[str] = None
         self._storage_uri: Optional[str] = None
         self._data_dir: Optional[str] = None
@@ -647,6 +649,18 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :return: self
         """
         self._runtime_mode = runtime_mode
+        return self
+
+    def set_taskmanager_mode(
+        self, taskmanager_mode: Optional[str]
+    ) -> "AEABuilder":  # pragma: nocover
+        """
+        Set the taskmanager_mode.
+
+        :param taskmanager_mode: the agent taskmanager_mode
+        :return: self
+        """
+        self._taskmanager_mode = taskmanager_mode
         return self
 
     def set_storage_uri(
@@ -1339,6 +1353,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             default_connection=self._get_default_connection(),
             loop_mode=self._get_loop_mode(),
             runtime_mode=self._get_runtime_mode(),
+            taskmanager_mode=self._get_taskmanager_mode(),
             connection_ids=connection_ids,
             search_service_address=self._get_search_service_address(),
             storage_uri=self._get_storage_uri(),
@@ -1506,6 +1521,18 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             self._runtime_mode
             if self._runtime_mode is not None
             else self.DEFAULT_RUNTIME_MODE
+        )
+
+    def _get_taskmanager_mode(self) -> str:
+        """
+        Return the askmanager mode name.
+
+        :return: the taskmanager mode name
+        """
+        return (
+            self._taskmanager_mode
+            if self._taskmanager_mode is not None
+            else self.DEFAULT_TASKMANAGER_MODE
         )
 
     def _get_storage_uri(self) -> Optional[str]:
@@ -1702,6 +1729,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
         self.set_loop_mode(agent_configuration.loop_mode)
         self.set_runtime_mode(agent_configuration.runtime_mode)
+        self.set_taskmanager_mode(agent_configuration.taskmanager_mode)
         self.set_storage_uri(agent_configuration.storage_uri)
         self.set_data_dir(agent_configuration.data_dir)
         self.set_logging_config(agent_configuration.logging_config)
