@@ -20,9 +20,12 @@
 """This module contains testing utilities."""
 import asyncio
 import logging
+import os
 import sys
+import tempfile
 import time
 from abc import ABC, abstractmethod
+from pathlib import Path
 from threading import Timer
 from typing import Dict, List, Optional
 
@@ -286,6 +289,91 @@ class GanacheDockerImage(DockerImage):
         container = self._client.containers.run(
             self.tag, command=cmd, detach=True, ports=self._make_ports()
         )
+        return container
+
+    def wait(self, max_attempts: int = 15, sleep_rate: float = 1.0) -> bool:
+        """Wait until the image is up."""
+        request = dict(jsonrpc=2.0, method="web3_clientVersion", params=[], id=1)
+        for i in range(max_attempts):
+            try:
+                response = requests.post(f"{self._addr}:{self._port}", json=request)
+                enforce(response.status_code == 200, "")
+                return True
+            except Exception:
+                logger.info(
+                    "Attempt %s failed. Retrying in %s seconds...", i, sleep_rate
+                )
+                time.sleep(sleep_rate)
+        return False
+
+
+class FetchLedgerDockerImage(DockerImage):
+    """Wrapper to Fetch ledger Docker image."""
+
+    def __init__(
+        self,
+        client: DockerClient,
+        addr: str,
+        port: int,
+        config: Optional[Dict] = None,
+        gas_limit: int = 10000000000000,
+    ):
+        """
+        Initialize the Fetch ledger Docker image.
+
+        :param client: the Docker client.
+        :param addr: the address.
+        :param port: the port.
+        :param config: optional configuration to command line.
+        """
+        super().__init__(client)
+        self._addr = addr
+        self._port = port
+        self._config = config or {}
+        self._gas_limit = gas_limit
+
+    @property
+    def tag(self) -> str:
+        """Get the image tag."""
+        return "fetchai/fetchd:0.2.7"
+
+    def _make_ports(self) -> Dict:
+        """Make ports dictionary for Docker."""
+        return {f"{self._port}/tcp": ("0.0.0.0", self._port)}  # nosec
+
+    def _make_entrypoint_file(self, tmpdirname) -> None:
+        """Make a temporary entrypoint file to setup and run the test ledger node"""
+        run_node_lines = [
+            '#!/usr/bin/env bash',
+            'set -e',
+            'fetchd init test-node --chain-id test'
+            'sed -i "s/stake/atestfet/" ~/.fetchd/config/genesis.json',
+            'sed -i "s/enable = false/enable = true/" ~/.fetchd/config/app.toml',
+            'MNEMONIC="gap bomb bulk border original scare assault pelican resemble found laptop skin gesture height inflict clinic reject giggle hurdle bubble soldier hurt moon hint"',
+            'fetchcli config keyring-backend test',
+            'echo $MNEMONIC | fetchcli keys add validator --recover',
+            'fetchd add-genesis-account $(fetchcli keys show validator -a) 1152997575000000000000000000atestfet',
+            'fetchd gentx --amount 100000000000000000000atestfet --name validator --keyring-backend test',
+            'fetchd collect-gentxs',
+            'fetchd start --rpc.laddr tcp://0.0.0.0:26657'
+        ]
+        entrypoint_file = os.path.join(tmpdirname, "run-node.sh")
+        with open(entrypoint_file, "w") as file:
+            file.writelines(line + "\n" for line in run_node_lines)
+        os.chmod(entrypoint_file, 777)
+
+    def create(self) -> Container:
+        """Create the container."""
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            self._make_entrypoint_file(tmpdirname)
+            mount_path = "/mnt"
+            volumes = {tmpdirname: {"bind": mount_path, "mode": "rw"}}
+            entrypoint = os.path.join(mount_path, "run-node.sh")
+            container = self._client.containers.run(
+                self.tag, detach=True, ports=self._make_ports(),
+                volumes=volumes, entrypoint=str(entrypoint),
+                working_dir=tmpdirname
+                )
         return container
 
     def wait(self, max_attempts: int = 15, sleep_rate: float = 1.0) -> bool:

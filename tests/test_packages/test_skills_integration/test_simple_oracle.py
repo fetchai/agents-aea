@@ -34,8 +34,17 @@ from tests.conftest import (
     FUNDED_ETH_PRIVATE_KEY_3,
     MAX_FLAKY_RERUNS_ETH,
     UseGanache,
+    UseLocalFetchNode,
 )
 
+@pytest.mark.integration
+class TestOracleSkillsFetchLedger(AEATestCaseManyFlaky, UseLocalFetchNode):
+    """Test that oracle skills work on the Fetch ledger."""
+
+    @pytest.mark.ledger
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_ETH)  # cause possible network issues
+    def test_oracle(self, fetchd):
+        assert True
 
 @pytest.mark.integration
 class TestOracleSkills(AEATestCaseManyFlaky, UseGanache):

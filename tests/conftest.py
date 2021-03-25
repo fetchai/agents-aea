@@ -105,6 +105,7 @@ from packages.fetchai.connections.tcp.tcp_server import TCPServerConnection
 from tests.common.docker_image import (
     DockerImage,
     GanacheDockerImage,
+    FetchLedgerDockerImage,
     OEFSearchDockerImage,
 )
 from tests.data.dummy_connection.connection import DummyConnection  # type: ignore
@@ -643,6 +644,17 @@ def ganache_configuration():
         ],
     )
 
+@pytest.fixture(scope="session")
+def fetchd_configuration():
+    """Get the Fetch ledger configuration for testing purposes."""
+    return dict(
+        accounts_balances=[
+            (FUNDED_ETH_PRIVATE_KEY_1, DEFAULT_AMOUNT),
+            (FUNDED_ETH_PRIVATE_KEY_2, DEFAULT_AMOUNT),
+            (FUNDED_ETH_PRIVATE_KEY_3, DEFAULT_AMOUNT),
+            (Path(ETHEREUM_PRIVATE_KEY_PATH).read_text().strip(), DEFAULT_AMOUNT),
+        ],
+    )
 
 @pytest.fixture(scope="session")
 def ethereum_testnet_config(ganache_addr, ganache_port):
@@ -682,6 +694,23 @@ def ganache(
     client = docker.from_env()
     image = GanacheDockerImage(
         client, "http://127.0.0.1", 8545, config=ganache_configuration
+    )
+    yield from _launch_image(image, timeout=timeout, max_attempts=max_attempts)
+
+
+@pytest.mark.integration
+@pytest.mark.ledger
+@pytest.fixture(scope="session")
+@action_for_platform("Linux", skip=False)
+def fetchd(
+    fetchd_configuration,
+    timeout: float = 2.0,
+    max_attempts: int = 10,
+):
+    """Launch the Ganache image."""
+    client = docker.from_env()
+    image = FetchLedgerDockerImage(
+        client, "http://127.0.0.1", 26657, config=fetchd_configuration
     )
     yield from _launch_image(image, timeout=timeout, max_attempts=max_attempts)
 
@@ -1300,6 +1329,15 @@ class UseGanache:
     @pytest.fixture(autouse=True)
     def _start_ganache(self, ganache):
         """Start a Ganache image."""
+
+
+@pytest.mark.integration
+class UseLocalFetchNode:
+    """Inherit from this class to use a local Fetch ledger node."""
+
+    @pytest.fixture(autouse=True)
+    def _start_fetchd(self, fetchd):
+        """Start a Fetch ledger image."""
 
 
 @pytest.fixture()
