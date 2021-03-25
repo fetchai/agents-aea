@@ -3,15 +3,14 @@ set -e
 
 aea --version
 
-if [ -z ${AGENT_REPO_URL+x} ] ; then
-        rm myagent -rf
-        aea fetch fetchai/my_first_aea
-        cd my_first_aea
-    else
-        echo "cloning $AGENT_REPO_URL inside '$(pwd)/my_aea'"
-        echo git clone $AGENT_REPO_URL my_aea
-        git clone $AGENT_REPO_URL my_aea && cd my_aea
-    fi
+# add private keys
+printf ${AGENT_PRIV_KEY} > fetchai_private_key.txt
+printf ${P2P_PRIV_KEY} > p2p_private_key.txt
+aea add-key fetchai 
+aea add-key fetchai p2p_private_key.txt --connection
 
-echo /usr/local/bin/aea run
-/usr/local/bin/aea run
+# issue certs
+aea issue-certificates
+
+# run
+aea run

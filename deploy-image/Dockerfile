@@ -1,5 +1,7 @@
 FROM python:3.8-alpine
 
+USER root
+
 RUN apk add --no-cache make git bash
 
 # cryptography: https://cryptography.io/en/latest/installation/#alpine
@@ -19,6 +21,9 @@ RUN pip install --upgrade --force-reinstall aea[all]==1.0.0rc1
 WORKDIR home
 
 WORKDIR /home/myagent
+
+COPY deploy-image/build.sh /build.sh
+RUN /build.sh
 
 COPY deploy-image/entrypoint.sh /entrypoint.sh
 COPY deploy-image/.aea "/root/.aea"
