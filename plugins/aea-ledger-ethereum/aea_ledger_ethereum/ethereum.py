@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Ethereum module wrapping the public and private key cryptography and ledger api."""
 import json
 import logging
@@ -24,7 +23,7 @@ import threading
 import time
 import warnings
 from pathlib import Path
-from typing import Any, BinaryIO, Callable, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
 import ipfshttpclient  # noqa: F401 # pylint: disable=unused-import
 import web3._utils.request
@@ -42,6 +41,7 @@ from web3.types import TxData, TxParams, TxReceipt, Wei
 
 from aea.common import Address, JSONLike
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
+from aea.crypto.helpers import DecryptError, KeyIsIncorrect, hex_to_bytes_for_key
 from aea.exceptions import enforce
 from aea.helpers import http_requests as requests
 from aea.helpers.base import try_decorator
@@ -223,13 +223,16 @@ class EthereumCrypto(Crypto[Account]):
 
     identifier = _ETHEREUM
 
-    def __init__(self, private_key_path: Optional[str] = None):
+    def __init__(
+        self, private_key_path: Optional[str] = None, password: Optional[str] = None
+    ) -> None:
         """
         Instantiate an ethereum crypto object.
 
         :param private_key_path: the private key path of the agent
+        :param password: the password to encrypt/decrypt the private key.
         """
-        super().__init__(private_key_path=private_key_path)
+        super().__init__(private_key_path=private_key_path, password=password)
         bytes_representation = Web3.toBytes(hexstr=self.entity.key.hex())
         self._public_key = str(keys.PrivateKey(bytes_representation).public_key)
         self._address = str(self.entity.address)
@@ -262,19 +265,32 @@ class EthereumCrypto(Crypto[Account]):
         return self._address
 
     @classmethod
-    def load_private_key_from_path(cls, file_name: str) -> Account:
+    def load_private_key_from_path(
+        cls, file_name: str, password: Optional[str] = None
+    ) -> Account:
         """
         Load a private key in hex format from a file.
 
         :param file_name: the path to the hex file.
+        :param password: the password to encrypt/decrypt the private key.
         :return: the Entity.
         """
-        path = Path(file_name)
-        with open_file(path, "r") as key:
-            data = key.read()
-            account = Account.from_key(  # pylint: disable=no-value-for-parameter
-                private_key=data
-            )
+        private_key = cls.load(file_name, password)
+        try:
+            if not private_key.startswith("0x"):
+                hex_to_bytes_for_key(private_key)
+        except KeyIsIncorrect as e:
+            if not password:
+                raise KeyIsIncorrect(
+                    f"Error on key `{file_name}` load! Try to specify `password`: Error: {repr(e)} "
+                ) from e
+            raise KeyIsIncorrect(
+                f"Error on key `{file_name}` load! Wrong password?: Error: {repr(e)} "
+            ) from e
+
+        account = Account.from_key(  # pylint: disable=no-value-for-parameter
+            private_key=private_key
+        )
         return account
 
     def sign_message(self, message: bytes, is_deprecated_mode: bool = False) -> str:
@@ -316,14 +332,33 @@ class EthereumCrypto(Crypto[Account]):
         account = Account.create()  # pylint: disable=no-value-for-parameter
         return account
 
-    def dump(self, fp: BinaryIO) -> None:
+    def encrypt(self, password: str) -> str:
         """
-        Serialize crypto object as binary stream to `fp` (a `.write()`-supporting file-like object).
+        Encrypt the private key and return in json.
 
-        :param fp: the output file pointer. Must be set in binary mode (mode='wb')
-        :return: None
+        :param private_key: the raw private key.
+        :param password: the password to decrypt.
+        :return: json string containing encrypted private key.
         """
-        fp.write(self.private_key.encode("utf-8"))
+        encrypted = Account.encrypt(self.private_key, password)
+        return json.dumps(encrypted)
+
+    @classmethod
+    def decrypt(cls, keyfile_json: str, password: str) -> str:
+        """
+        Decrypt the private key and return in raw form.
+
+        :param keyfile_json: json str containing encrypted private key.
+        :param password: the password to decrypt.
+        :return: the raw private key.
+        """
+        try:
+            private_key = Account.decrypt(keyfile_json, password)
+        except ValueError as e:
+            if e.args[0] == "MAC mismatch":
+                raise DecryptError() from e
+            raise
+        return private_key.hex()[2:]
 
 
 class EthereumHelper(Helper):
@@ -341,6 +376,17 @@ class EthereumHelper(Helper):
         if tx_receipt is not None:
             is_successful = tx_receipt.get("status", 0) == 1
         return is_successful
+
+    @staticmethod
+    def get_contract_address(tx_receipt: JSONLike) -> Optional[str]:
+        """
+        Retrieve the `contract_address` from a transaction receipt.
+
+        :param tx_receipt: the receipt of the transaction.
+        :return: the contract address, if present
+        """
+        contract_address = cast(Optional[str], tx_receipt.get("contractAddress", None))
+        return contract_address
 
     @staticmethod
     def is_transaction_valid(
@@ -369,7 +415,7 @@ class EthereumHelper(Helper):
     @staticmethod
     def generate_tx_nonce(seller: Address, client: Address) -> str:
         """
-        Generate a unique hash to distinguish txs with the same terms.
+        Generate a unique hash to distinguish transactions with the same terms.
 
         :param seller: the address of the seller.
         :param client: the address of the client.

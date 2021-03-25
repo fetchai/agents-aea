@@ -111,7 +111,7 @@ def test_add_package_already_existing():
     builder.add_component(ComponentType.PROTOCOL, fipa_package_path)
 
     expected_message = re.escape(
-        "Component 'fetchai/fipa:0.14.0' of type 'protocol' already added."
+        "Component 'fetchai/fipa:0.15.0' of type 'protocol' already added."
     )
     with pytest.raises(AEAException, match=expected_message):
         builder.add_component(ComponentType.PROTOCOL, fipa_package_path)
@@ -256,7 +256,13 @@ def test_multiple_builds_with_component_instance():
     builder.add_private_key(DEFAULT_LEDGER)
 
     a_protocol = Protocol(
-        ProtocolConfig("a_protocol", "author", "0.1.0"), DefaultMessage
+        ProtocolConfig(
+            "a_protocol",
+            "author",
+            "0.1.0",
+            protocol_specification_id="some/author:0.1.0",
+        ),
+        DefaultMessage,
     )
     builder.add_component_instance(a_protocol)
 
@@ -280,8 +286,22 @@ def test_multiple_builds_with_component_instance():
 def test_dependency_manager_highest_version():
     """Test dependency version priority."""
     dep_manager = _DependenciesManager()
-    dep_manager.add_component(ProtocolConfig("a_protocol", "author", "0.1.0"))
-    dep_manager.add_component(ProtocolConfig("a_protocol", "author", "0.2.0"))
+    dep_manager.add_component(
+        ProtocolConfig(
+            "a_protocol",
+            "author",
+            "0.1.0",
+            protocol_specification_id="some/author:0.1.0",
+        )
+    )
+    dep_manager.add_component(
+        ProtocolConfig(
+            "a_protocol",
+            "author",
+            "0.2.0",
+            protocol_specification_id="some/author:0.1.0",
+        )
+    )
 
     assert len(dep_manager.dependencies_highest_version) == 1
     assert list(dep_manager.dependencies_highest_version)[0].version == "0.2.0"
@@ -297,14 +317,21 @@ def test_remove_component_not_exists():
     dep_manager = _DependenciesManager()
     with pytest.raises(ValueError, match=r"Component .* of type .* not present."):
         dep_manager.remove_component(
-            ProtocolConfig("a_protocol", "author", "0.1.0").component_id
+            ProtocolConfig(
+                "a_protocol",
+                "author",
+                "0.1.0",
+                protocol_specification_id="some/author:0.1.0",
+            ).component_id
         )
 
 
 def test_remove_component_depends_on_fail():
     """Test component remove fails cause dependency."""
     dep_manager = _DependenciesManager()
-    protocol = ProtocolConfig("a_protocol", "author", "0.1.0")
+    protocol = ProtocolConfig(
+        "a_protocol", "author", "0.1.0", protocol_specification_id="some/author:0.1.0"
+    )
     dep_manager.add_component(protocol)
     dep_manager.add_component(
         SkillConfig("skill", "author", "0.1.0", protocols=[protocol.public_id])
@@ -320,7 +347,9 @@ def test_remove_component_depends_on_fail():
 def test_remove_component_success():
     """Test remove registered component."""
     dep_manager = _DependenciesManager()
-    protocol = ProtocolConfig("a_protocol", "author", "0.1.0")
+    protocol = ProtocolConfig(
+        "a_protocol", "author", "0.1.0", protocol_specification_id="some/author:0.1.0"
+    )
     skill = SkillConfig("skill", "author", "0.1.0", protocols=[protocol.public_id])
     dep_manager.add_component(protocol)
     dep_manager.add_component(skill)
@@ -350,7 +379,9 @@ def test_can_remove_not_exists_component():
     builder = AEABuilder()
     builder.set_name("aea_1")
     builder.add_private_key("fetchai")
-    protocol = ProtocolConfig("a_protocol", "author", "0.1.0")
+    protocol = ProtocolConfig(
+        "a_protocol", "author", "0.1.0", protocol_specification_id="some/author:0.1.0"
+    )
     with pytest.raises(ValueError):
         builder._check_can_remove(protocol.component_id)
 
@@ -361,7 +392,13 @@ def test_remove_protocol():
     builder.set_name("aea_1")
     builder.add_private_key("fetchai")
     a_protocol = Protocol(
-        ProtocolConfig("a_protocol", "author", "0.1.0"), DefaultMessage
+        ProtocolConfig(
+            "a_protocol",
+            "author",
+            "0.1.0",
+            protocol_specification_id="some/author:0.1.0",
+        ),
+        DefaultMessage,
     )
     num_deps = len(builder._package_dependency_manager.all_dependencies)
     builder.add_component_instance(a_protocol)
@@ -455,7 +492,13 @@ def test_component_add_bad_dep():
     builder.add_component_instance(connection)
 
     a_protocol = Protocol(
-        ProtocolConfig("a_protocol", "author", "0.1.0"), DefaultMessage
+        ProtocolConfig(
+            "a_protocol",
+            "author",
+            "0.1.0",
+            protocol_specification_id="some/author:0.1.0",
+        ),
+        DefaultMessage,
     )
     a_protocol.configuration.pypi_dependencies = {
         "something": Dependency("something", "==0.2.0")
@@ -503,10 +546,16 @@ def test_set_from_config_custom():
     agent_configuration.decision_maker_handler = {
         "dotted_path": dm_dotted_path,
         "file_path": dm_file_path,
+        "config": {},
     }
+    error_handler_dotted_path = (
+        f"aea.error_handler.default{DOTTED_PATH_MODULE_ELEMENT_SEPARATOR}ErrorHandler"
+    )
+    error_handler_file_path = ROOT_DIR + "/aea/error_handler/default.py"
     agent_configuration.error_handler = {
-        "dotted_path": f"aea.error_handler.default{DOTTED_PATH_MODULE_ELEMENT_SEPARATOR}ErrorHandler",
-        "file_path": ROOT_DIR + "/aea/error_handler/default.py",
+        "dotted_path": error_handler_dotted_path,
+        "file_path": error_handler_file_path,
+        "config": {},
     }
     agent_configuration.skill_exception_policy = ExceptionPolicyEnum.just_log
     agent_configuration.connection_exception_policy = ExceptionPolicyEnum.just_log
@@ -524,13 +573,21 @@ def test_set_from_config_custom():
         assert builder._decision_maker_handler_dotted_path == dm_dotted_path
         assert builder._decision_maker_handler_file_path == dm_file_path
         assert builder._load_decision_maker_handler_class() is not None
+        assert builder._load_error_handler_class() is not None
         builder.reset(is_full_reset=True)
         agent_configuration.decision_maker_handler = {
             "dotted_path": dm_dotted_path,
             "file_path": None,
+            "config": {},
+        }
+        agent_configuration.error_handler = {
+            "dotted_path": error_handler_dotted_path,
+            "file_path": None,
+            "config": {},
         }
         builder.set_from_configuration(agent_configuration, aea_project_path="/anydir")
         assert builder._load_decision_maker_handler_class() is not None
+        assert builder._load_error_handler_class() is not None
 
 
 def test_load_abstract_component():
@@ -595,6 +652,8 @@ class TestFromAEAProject(AEATestCaseEmpty):
 
     def test_from_project(self):
         """Test builder set from project dir."""
+        self.generate_private_key()
+        self.add_private_key()
         builder = AEABuilder.from_aea_project(Path(self._get_cwd()))
         with cd(self._get_cwd()):
             aea = builder.build()
@@ -606,6 +665,8 @@ class TestFromAEAProjectWithCustomConnectionConfig(AEATestCaseEmpty):
 
     def _add_stub_connection_config(self):
         """Add custom stub connection config."""
+        self.generate_private_key()
+        self.add_private_key()
         cwd = self._get_cwd()
         aea_config_file = Path(cwd, DEFAULT_AEA_CONFIG_FILE)
         configuration = aea_config_file.read_text()
@@ -626,7 +687,7 @@ class TestFromAEAProjectWithCustomConnectionConfig(AEATestCaseEmpty):
 
     def test_from_project(self):
         """Test builder set from project dir."""
-        self.add_item("connection", "fetchai/stub:0.18.0")
+        self.add_item("connection", "fetchai/stub:0.19.0")
         self.expected_input_file = "custom_input_file"
         self.expected_output_file = "custom_output_file"
         self._add_stub_connection_config()

@@ -43,7 +43,7 @@ To satisfy different resource constraints and flexible deployment the ACN is imp
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>
-  <p>The `p2p_libp2p_mailbox` connection is not available yet.
+  <p>The <code>p2p_libp2p_mailbox</code> connection is not available yet.
 </p>
 </div>
 

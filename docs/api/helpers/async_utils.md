@@ -333,7 +333,7 @@ Get running state.
  | async run() -> Any
 ```
 
-Implement run logic respectfull to CancelError on termination.
+Implement run logic respectful to CancelError on termination.
 
 <a name="aea.helpers.async_utils.Runnable.wait_completed"></a>
 #### wait`_`completed
@@ -352,7 +352,7 @@ Wait runnable execution completed.
 
 **Returns**:
 
-awaitable if sync is False, otherise None
+awaitable if sync is False, otherwise None
 
 <a name="aea.helpers.async_utils.Runnable.stop"></a>
 #### stop

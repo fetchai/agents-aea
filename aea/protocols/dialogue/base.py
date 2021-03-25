@@ -583,19 +583,6 @@ class Dialogue(metaclass=_DialogueMeta):
         """
         return not self._is_message_by_self(message)
 
-    def _get_message(self, message_id: int) -> Message:
-        """
-        Get the message whose id is 'message_id'.
-
-        :param message_id: the id of the message
-        :return: the message
-        :raises: AssertionError if message is not present
-        """
-        message = self.get_message_by_id(message_id)
-        if message is None:
-            raise ValueError("Message not present.")
-        return message
-
     def _has_message_id(self, message_id: int) -> bool:
         """
         Check whether a message with the supplied message id exists in this dialogue.
@@ -1390,7 +1377,7 @@ class PersistDialoguesStorageWithOffloading(PersistDialoguesStorage):
     """Dialogue Storage with dialogues offloading."""
 
     def dialogue_terminal_state_callback(self, dialogue: "Dialogue") -> None:
-        """Call on dialogue reaches terminal staste."""
+        """Call on dialogue reaches terminal state."""
         if (
             not self.is_terminal_dialogues_kept
             or not self._terminal_dialogues_collection
@@ -1574,7 +1561,7 @@ class Dialogues:
 
     @property
     def is_keep_dialogues_in_terminal_state(self) -> bool:
-        """Is requrired to keep dialogues in terminal state."""
+        """Is required to keep dialogues in terminal state."""
         return self._keep_terminal_state_dialogues
 
     @property
@@ -1916,7 +1903,7 @@ class Dialogues:
         """
         Create a self initiated dialogue.
 
-        :param dialogue_opponent_addr: the pbk of the agent with which the dialogue is kept.
+        :param dialogue_opponent_addr: the address of the agent with which the dialogue is kept.
         :param role: the agent's role
 
         :return: the created dialogue.

@@ -58,7 +58,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 First, fetch the seller AEA:
 ``` bash
-aea fetch fetchai/generic_seller:0.21.0 --alias my_seller_aea
+aea fetch fetchai/generic_seller:0.22.0 --alias my_seller_aea
 cd my_seller_aea
 aea install
 aea build
@@ -71,19 +71,19 @@ The following steps create the seller from scratch:
 ``` bash
 aea create my_seller_aea
 cd my_seller_aea
-aea add connection fetchai/p2p_libp2p:0.18.0
-aea add connection fetchai/soef:0.19.0
-aea add connection fetchai/ledger:0.15.0
-aea add skill fetchai/generic_seller:0.22.0
+aea add connection fetchai/p2p_libp2p:0.19.0
+aea add connection fetchai/soef:0.20.0
+aea add connection fetchai/ledger:0.16.0
+aea add skill fetchai/generic_seller:0.23.0
 aea config set --type dict agent.dependencies \
 '{
-  "aea-ledger-fetchai": {"version": "<0.3.0,>=0.2.0"}
+  "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0rc1"}
 }'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.18.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.19.0
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:0.11.0": "fetchai/ledger:0.15.0",
-  "fetchai/oef_search:0.14.0": "fetchai/soef:0.19.0"
+  "fetchai/ledger_api:0.12.0": "fetchai/ledger:0.16.0",
+  "fetchai/oef_search:0.15.0": "fetchai/soef:0.20.0"
 }'
 aea install
 aea build
@@ -96,7 +96,7 @@ aea build
 
 Then, in another terminal fetch the buyer AEA:
 ``` bash
-aea fetch fetchai/generic_buyer:0.22.0 --alias my_buyer_aea
+aea fetch fetchai/generic_buyer:0.23.0 --alias my_buyer_aea
 cd my_buyer_aea
 aea install
 aea build
@@ -109,19 +109,19 @@ The following steps create the buyer from scratch:
 ``` bash
 aea create my_buyer_aea
 cd my_buyer_aea
-aea add connection fetchai/p2p_libp2p:0.18.0
-aea add connection fetchai/soef:0.19.0
-aea add connection fetchai/ledger:0.15.0
-aea add skill fetchai/generic_buyer:0.22.0
+aea add connection fetchai/p2p_libp2p:0.19.0
+aea add connection fetchai/soef:0.20.0
+aea add connection fetchai/ledger:0.16.0
+aea add skill fetchai/generic_buyer:0.23.0
 aea config set --type dict agent.dependencies \
 '{
-  "aea-ledger-fetchai": {"version": "<0.3.0,>=0.2.0"}
+  "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0rc1"}
 }'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.18.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.19.0
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:0.11.0": "fetchai/ledger:0.15.0",
-  "fetchai/oef_search:0.14.0": "fetchai/soef:0.19.0"
+  "fetchai/ledger_api:0.12.0": "fetchai/ledger:0.16.0",
+  "fetchai/oef_search:0.15.0": "fetchai/soef:0.20.0"
 }'
 aea install
 aea build
@@ -252,7 +252,7 @@ First, run the seller AEA:
 aea run
 ```
 
-Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of this address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.18.0 -u public_uri` to retrieve the address.)
+Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of this address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.19.0 -u public_uri` to retrieve the address.)
 This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the seller.
 
 Then, configure the buyer to connect to this same local ACN by running the following command in the buyer terminal, replacing `SOME_ADDRESS` with the value you noted above:

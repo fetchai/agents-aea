@@ -30,6 +30,7 @@ from typing import Generator, List, Optional
 
 import pytest
 import yaml
+from aea_ledger_fetchai import FetchAICrypto
 from pexpect.exceptions import EOF  # type: ignore
 
 from aea.cli import cli
@@ -119,10 +120,32 @@ class BaseLaunchTestCase:
             cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name_1]
         )
         assert result.exit_code == 0
+        os.chdir(cls.agent_name_1)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "generate-key", FetchAICrypto.identifier]
+        )
+        assert result.exit_code == 0
+
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier]
+        )
+        assert result.exit_code == 0
+        os.chdir(cls.t)
         result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name_2]
         )
         assert result.exit_code == 0
+        os.chdir(cls.agent_name_2)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "generate-key", FetchAICrypto.identifier]
+        )
+        assert result.exit_code == 0
+
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier]
+        )
+        assert result.exit_code == 0
+        os.chdir(cls.t)
 
     @classmethod
     def teardown_class(cls):

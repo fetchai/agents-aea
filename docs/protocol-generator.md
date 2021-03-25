@@ -62,7 +62,7 @@ author: fetchai
 version: 0.1.0
 description: An example of a protocol specification that describes a protocol for bilateral negotiation.
 license: Apache-2.0
-aea_version: '>=0.11.0, <0.12.0'
+aea_version: '>=1.0.0rc1, <2.0.0'
 speech_acts:
   cfp:
     query: ct:Query
@@ -106,6 +106,7 @@ The allowed fields and what they represent are:
  * `license`: Licensing information
  * `aea_version`: The version(s) of the framework that support this protocol. The format is described <a href="https://www.python.org/dev/peps/pep-0440/" target="_blank">here</a>.
  * `description`: A short description of the protocol
+ * `protocol_specification_id`: The id which identifies the protocol for over-the-wire transport. This id is decoupled from the `protocol_id` (`{author}/{name}:{version}`) which is tied to the Python implementation.
 
 All of the above fields are mandatory and each is a key/value pair, where both key and value are YAML strings. 
 
@@ -167,7 +168,7 @@ The allowed fields and what they represent are:
  * `termination`: The list of terminal performatives
  * `roles`: The roles of players participating in a dialogue
  * `end_states`: The possible outcomes a terminated dialogue.
- * `keep_terminal_state_dialogues`: whether to keep or dismiss a terminated dialogue.
+ * `keep_terminal_state_dialogues`: whether to keep or drop a terminated dialogue. When a storage backend is configured, the dialogues will be persisted in storage when kept.
 
 All of the above fields are mandatory. 
 

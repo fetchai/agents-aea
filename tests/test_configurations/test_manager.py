@@ -47,18 +47,18 @@ author: dummy_author
 version: 1.0.0
 description: dummy_aea agent description
 license: Apache-2.0
-aea_version: '>=0.11.0, <0.12.0'
+aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/local:0.16.0
+- fetchai/local:0.17.0
 contracts: []
 protocols:
-- fetchai/default:0.13.0
+- fetchai/default:0.14.0
 skills:
 - dummy_author/dummy:0.1.0
-- fetchai/error:0.13.0
-default_connection: fetchai/local:0.16.0
+- fetchai/error:0.14.0
+default_connection: fetchai/local:0.17.0
 default_ledger: cosmos
 logging_config:
   disable_existing_loggers: ${DISABLE_LOGS:bool}
@@ -69,7 +69,6 @@ private_key_paths:
 connection_private_key_paths:
   cosmos: cosmos_private_key.txt
   ethereum: ethereum_private_key.txt
-registry_path: ../../packages
 default_routing: {}
 """
 )
@@ -232,7 +231,7 @@ def test_agent_attribute_get_set():
         agent_config_manager.get_variable("agent.does_not_exist")
 
     agent_config_manager.validate_current_config()
-    agent_config_manager.verify_or_create_private_keys(DUMMY_AEA, lambda x, y, z: None)
+    agent_config_manager.verify_private_keys(DUMMY_AEA, lambda x, y, z: None)
 
 
 def test_agent_attribute_get_overridables():

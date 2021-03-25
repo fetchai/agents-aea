@@ -17,7 +17,11 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the support resources for the register protocol."""
+"""
+This module contains the support resources for the register protocol.
+
+It was created with protocol buffer compiler version `libprotoc 3.11.4` and aea version `1.0.0rc1`.
+"""
 
 from packages.fetchai.protocols.register.message import RegisterMessage
 from packages.fetchai.protocols.register.serialization import RegisterSerializer

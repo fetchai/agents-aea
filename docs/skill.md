@@ -4,10 +4,10 @@
 
 A skill encapsulates implementations of the three abstract base classes `Handler`, `Behaviour`, `Model`, and is closely related with the abstract base class `Task`:
 
-* <a href="../api/skills/base#handler-objects">`Handler`</a>: each skill has none, one or more `Handler` objects, each responsible for the registered messaging protocol. Handlers implement AEAs' **reactive** behaviour. If the AEA understands the protocol referenced in a received `Envelope`, the `Handler` reacts appropriately to the corresponding message. Each `Handler` is responsible for only one protocol. A `Handler` is also capable of dealing with internal messages (see next section).
-* <a href="../api/skills/base#behaviour-objects">`Behaviour`</a>: none, one or more `Behaviours` encapsulate actions which further the AEAs goal and are initiated by internals of the AEA, rather than external events. Behaviours implement AEAs' **pro-activeness**. The framework provides a number of <a href="../api/skills/behaviours">abstract base classes</a> implementing different types of behaviours (e.g. cyclic/one-shot/finite-state-machine/etc.).
-* <a href="../api/skills/base#model-objects">`Model`</a>: none, one or more `Models` that inherit from the `Model` can be accessed via the `SkillContext`.
-* <a href="../api/skills/tasks#task-objects">`Task`</a>: none, one or more `Tasks` encapsulate background work internal to the AEA. `Task` differs from the other three in that it is not a part of skills, but `Task`s are declared in or from skills if a packaging approach for AEA creation is used.
+* <a href="../api/skills/base#handler-objects">`Handler`</a>: each skill has zero, one or more `Handler` objects, each responsible for the registered messaging protocol. Handlers implement AEAs' **reactive** behaviour. If the AEA understands the protocol referenced in a received `Envelope`, the `Handler` reacts appropriately to the corresponding message. Each `Handler` is responsible for only one protocol. A `Handler` is also capable of dealing with internal messages (see next section).
+* <a href="../api/skills/base#behaviour-objects">`Behaviour`</a>: zero, one or more `Behaviours` encapsulate actions which further the AEAs goal and are initiated by internals of the AEA, rather than external events. Behaviours implement AEAs' **pro-activeness**. The framework provides a number of <a href="../api/skills/behaviours">abstract base classes</a> implementing different types of behaviours (e.g. cyclic/one-shot/finite-state-machine/etc.).
+* <a href="../api/skills/base#model-objects">`Model`</a>: zero, one or more `Models` that inherit from the `Model` class. `Models` encapsulate custom objects which are made accessible to any part of a skill via the `SkillContext`.
+* <a href="../api/skills/tasks#task-objects">`Task`</a>: zero, one or more `Tasks` encapsulate background work internal to the AEA. `Task` differs from the other three in that it is not a part of skills, but `Task`s are declared in or from skills if a packaging approach for AEA creation is used.
 
 A skill can read (parts of) the state of the the AEA (as summarised in the <a href="../api/context/base#agentcontext-objects">`AgentContext`</a>), and suggest actions to the AEA according to its specific logic. As such, more than one skill could exist per protocol, competing with each other in suggesting to the AEA the best course of actions to take. In technical terms this means skills are horizontally arranged.
 
@@ -182,14 +182,12 @@ class LongTask(Task):
 
     def setup(self):
         """Set the task up before execution."""
-        pass
 
     def execute(self, n: int):
         return nth_prime_number(n)
 
     def teardown(self):
         """Clean the task up after execution."""
-        pass
 
 
 ```
@@ -204,11 +202,13 @@ from packages.my_author_name.skills.my_skill.tasks import LongTask
 class MyBehaviour(TickerBehaviour):
 
     def setup(self):
+        """Setup behaviour."""
         my_task = LongTask()
         task_id = self.context.task_manager.enqueue_task(my_task, args=(10000, ))
         self.async_result = self.context.task_manager.get_task_result(task_id)  # type: multiprocessing.pool.AsyncResult
 
     def act(self):
+        """Act implementation."""
         if self.async_result.ready() is False:
             print("The task is not finished yet.")
         else:
@@ -218,7 +218,7 @@ class MyBehaviour(TickerBehaviour):
             self.context.is_active = False
 
     def teardown(self):
-        pass
+        """Teardown behaviour."""
 
 
 ```
@@ -262,7 +262,7 @@ handlers:
 models: {}
 dependencies: {}
 protocols:
-- fetchai/default:0.13.0
+- fetchai/default:0.14.0
 ```
 
 
@@ -275,7 +275,7 @@ All AEAs have a default `error` skill that contains error handling code for a nu
 * Envelopes with decoding errors
 * Invalid messages with respect to the registered protocol
 
-The error skill relies on the `fetchai/default:0.13.0` protocol which provides error codes for the above.
+The error skill relies on the `fetchai/default:0.14.0` protocol which provides error codes for the above.
 
 
 ## Custom Error handler

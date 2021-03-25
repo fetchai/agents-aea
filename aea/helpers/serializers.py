@@ -37,12 +37,18 @@ class DictProtobufStructSerializer:
 
     @classmethod
     def encode(cls, dictionary: Dict[str, Any]) -> bytes:
-        """Serialize compatible dictionary to bytes"""
+        """
+        Serialize compatible dictionary to bytes.
+
+        Copies entire dictionary in the process.
+
+        :param dictionary: the dictionary to serialize
+        :return: serialized bytes string
+        """
         if not isinstance(dictionary, dict):
             raise TypeError(  # pragma: nocover
                 "dictionary must be of dict type, got type {}".format(type(dictionary))
             )
-        # TOFIX(LR) problematic as it'll copy every message
         patched_dict = copy.deepcopy(dictionary)
         cls._patch_dict(patched_dict)
         pstruct = Struct()

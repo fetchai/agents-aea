@@ -17,20 +17,27 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains the tests for aea.cli.utils module."""
-
 from builtins import FileNotFoundError
 from copy import deepcopy
+from tempfile import TemporaryDirectory
 from typing import cast
 from unittest import TestCase, mock
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
+from uuid import uuid4
 
+import click
 import pytest
 from aea_ledger_fetchai import FetchAICrypto
 from click import BadParameter, ClickException, UsageError
+from click.testing import CliRunner
 from jsonschema import ValidationError
 from yaml import YAMLError
 
-from aea.cli.utils.click_utils import MutuallyExclusiveOption, PublicIdParameter
+from aea.cli.utils.click_utils import (
+    MutuallyExclusiveOption,
+    PublicIdParameter,
+    password_option,
+)
 from aea.cli.utils.config import (
     _init_cli_config,
     get_or_create_cli_config,
@@ -88,7 +95,7 @@ class FormatItemsTestCase(TestCase):
         items = [
             {
                 "public_id": "author/name:version",
-                "name": "obj-name",
+                "name": "obj_name",
                 "description": "Some description",
                 "author": "author",
                 "version": "1.0",
@@ -98,7 +105,7 @@ class FormatItemsTestCase(TestCase):
         expected_result = (
             "------------------------------\n"
             "Public ID: author/name:version\n"
-            "Name: obj-name\n"
+            "Name: obj_name\n"
             "Description: Some description\n"
             "Author: author\n"
             "Version: 1.0\n"
@@ -114,20 +121,20 @@ class TryGetItemSourcePathTestCase(TestCase):
     @mock.patch("aea.cli.utils.package_utils.os.path.exists", return_value=True)
     def test_get_item_source_path_positive(self, exists_mock, join_mock):
         """Test for get_item_source_path positive result."""
-        result = try_get_item_source_path("cwd", AUTHOR, "skills", "skill-name")
+        result = try_get_item_source_path("cwd", AUTHOR, "skills", "skill_name")
         expected_result = "some-path"
         self.assertEqual(result, expected_result)
-        join_mock.assert_called_once_with("cwd", AUTHOR, "skills", "skill-name")
+        join_mock.assert_called_once_with("cwd", AUTHOR, "skills", "skill_name")
         exists_mock.assert_called_once_with("some-path")
 
-        result = try_get_item_source_path("cwd", None, "skills", "skill-name")
+        result = try_get_item_source_path("cwd", None, "skills", "skill_name")
         self.assertEqual(result, expected_result)
 
     @mock.patch("aea.cli.utils.package_utils.os.path.exists", return_value=False)
     def test_get_item_source_path_not_exists(self, exists_mock, join_mock):
         """Test for get_item_source_path item already exists."""
         with self.assertRaises(ClickException):
-            try_get_item_source_path("cwd", AUTHOR, "skills", "skill-name")
+            try_get_item_source_path("cwd", AUTHOR, "skills", "skill_name")
 
 
 @mock.patch("aea.cli.utils.package_utils.os.path.join", return_value="some-path")
@@ -137,17 +144,17 @@ class TryGetItemTargetPathTestCase(TestCase):
     @mock.patch("aea.cli.utils.package_utils.os.path.exists", return_value=False)
     def test_get_item_target_path_positive(self, exists_mock, join_mock):
         """Test for get_item_source_path positive result."""
-        result = try_get_item_target_path("packages", AUTHOR, "skills", "skill-name")
+        result = try_get_item_target_path("packages", AUTHOR, "skills", "skill_name")
         expected_result = "some-path"
         self.assertEqual(result, expected_result)
-        join_mock.assert_called_once_with("packages", AUTHOR, "skills", "skill-name")
+        join_mock.assert_called_once_with("packages", AUTHOR, "skills", "skill_name")
         exists_mock.assert_called_once_with("some-path")
 
     @mock.patch("aea.cli.utils.package_utils.os.path.exists", return_value=True)
     def test_get_item_target_path_already_exists(self, exists_mock, join_mock):
         """Test for get_item_target_path item already exists."""
         with self.assertRaises(ClickException):
-            try_get_item_target_path("skills", AUTHOR, "skill-name", "packages_path")
+            try_get_item_target_path("skills", AUTHOR, "skill_name", "packages_path")
 
 
 class PublicIdParameterTestCase(TestCase):
@@ -296,7 +303,7 @@ class FindItemLocallyTestCase(TestCase):
     )
     def test_find_item_locally_bad_config(self, *mocks):
         """Test find_item_locally for bad config result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.15.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.16.0")
         with self.assertRaises(ClickException) as cm:
             find_item_locally(ContextMock(), "skill", public_id)
 
@@ -310,7 +317,7 @@ class FindItemLocallyTestCase(TestCase):
     )
     def test_find_item_locally_cant_find(self, from_conftype_mock, *mocks):
         """Test find_item_locally for can't find result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.15.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.16.0")
         with self.assertRaises(ClickException) as cm:
             find_item_locally(ContextMock(), "skill", public_id)
 
@@ -329,7 +336,7 @@ class FindItemInDistributionTestCase(TestCase):
     )
     def testfind_item_in_distribution_bad_config(self, *mocks):
         """Test find_item_in_distribution for bad config result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.15.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.16.0")
         with self.assertRaises(ClickException) as cm:
             find_item_in_distribution(ContextMock(), "skill", public_id)
 
@@ -338,7 +345,7 @@ class FindItemInDistributionTestCase(TestCase):
     @mock.patch("aea.cli.utils.package_utils.Path.exists", return_value=False)
     def testfind_item_in_distribution_not_found(self, *mocks):
         """Test find_item_in_distribution for not found result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.15.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.16.0")
         with self.assertRaises(ClickException) as cm:
             find_item_in_distribution(ContextMock(), "skill", public_id)
 
@@ -352,7 +359,7 @@ class FindItemInDistributionTestCase(TestCase):
     )
     def testfind_item_in_distribution_cant_find(self, from_conftype_mock, *mocks):
         """Test find_item_locally for can't find result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.15.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.16.0")
         with self.assertRaises(ClickException) as cm:
             find_item_in_distribution(ContextMock(), "skill", public_id)
 
@@ -555,3 +562,56 @@ def test_set_cli_author_positive(*_mocks):
     context_mock = MagicMock()
     set_cli_author(context_mock)
     context_mock.obj.set_config.assert_called_with("cli_author", "some_author")
+
+
+def test_password_option():
+    """Test password option."""
+
+    @click.command()
+    @password_option()
+    def cmd(password):
+        raise ValueError(password)
+
+    # no password specified
+    with pytest.raises(ValueError, match="None"):
+        CliRunner().invoke(cmd, [], catch_exceptions=False, standalone_mode=False)
+
+    # --password specified
+    password = uuid4().hex
+    with pytest.raises(ValueError, match=password):
+        CliRunner().invoke(
+            cmd, ["--password", password], catch_exceptions=False, standalone_mode=False
+        )
+
+    # -p to ask with click.prompt
+    with pytest.raises(ValueError, match=password):
+        with patch("click.prompt", return_value=password):
+            CliRunner().invoke(
+                cmd, ["-p"], catch_exceptions=False, standalone_mode=False
+            )
+    # -p and --password togehter, -p in priority
+    with pytest.raises(ValueError, match=password):
+        with patch("click.prompt", return_value="prompted_password"):
+            CliRunner().invoke(
+                cmd,
+                ["-p", "--password", password],
+                catch_exceptions=False,
+                standalone_mode=False,
+            )
+
+
+def test_context_registry_path_does_not_exist():
+    """Test context registry path specified but not found."""
+    with pytest.raises(
+        ValueError, match="Registry path directory provided .* can not be found."
+    ):
+        Context(
+            cwd=".", verbosity="", registry_path="some_path_does_not_exist"
+        ).registry_path
+
+    with TemporaryDirectory() as tmp_dir:
+        with cd(tmp_dir):
+            with pytest.raises(
+                ValueError, match="Registry path not provided and `packages` not found"
+            ):
+                Context(cwd=".", verbosity="", registry_path=None).registry_path

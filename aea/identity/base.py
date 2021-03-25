@@ -23,6 +23,7 @@ from typing import Dict, Optional
 
 from aea.common import Address
 from aea.configurations.constants import DEFAULT_LEDGER
+from aea.helpers.base import SimpleId, SimpleIdOrStr
 
 
 class Identity:
@@ -39,7 +40,7 @@ class Identity:
 
     def __init__(
         self,
-        name: str,
+        name: SimpleIdOrStr,
         address: Optional[str] = None,
         addresses: Optional[Dict[str, Address]] = None,
         default_address_key: str = DEFAULT_LEDGER,
@@ -52,7 +53,7 @@ class Identity:
         :param addresses: the addresses of the agent.
         :param default_address_key: the key for the default address.
         """
-        self._name = name
+        self._name = SimpleId(name)
         if default_address_key is None:
             raise ValueError(
                 "Provide a key for the default address."
@@ -79,7 +80,7 @@ class Identity:
     @property
     def name(self) -> str:
         """Get the agent name."""
-        return self._name
+        return str(self._name)
 
     @property
     def addresses(self) -> Dict[str, Address]:

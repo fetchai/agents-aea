@@ -154,6 +154,7 @@ class MultiAgentManager:
         mode: str = "async",
         registry_path: str = DEFAULT_REGISTRY_NAME,
         auto_add_remove_project: bool = False,
+        password: Optional[str] = None,
     ) -> None:
         """
         Initialize manager.
@@ -162,6 +163,7 @@ class MultiAgentManager:
         :param mode: str. async or threaded
         :param registry_path: str. path to the local packages registry
         :param auto_add_remove_project: bool. add/remove project on the first agent add/last agent remove
+        :param password: the password to encrypt/decrypt the private key.
 
         :return: None
         """
@@ -199,6 +201,7 @@ class MultiAgentManager:
             )
         self._started_event = threading.Event()
         self._mode = mode
+        self._password = password
 
     @property
     def data_dir(self) -> str:
@@ -221,6 +224,11 @@ class MultiAgentManager:
             "projects": [str(public_id) for public_id in self._projects.keys()],
             "agents": [alias.dict for alias in self._agents.values()],
         }
+
+    @property
+    def projects(self) -> Dict[PublicId, Project]:
+        """Get all projects."""
+        return self._projects
 
     def _run_thread(self) -> None:
         """Run internal thread with own event loop."""
@@ -482,6 +490,7 @@ class MultiAgentManager:
             project=project,
             agent_name=agent_name,
             data_dir=self.get_data_dir_of_agent(agent_name),
+            password=self._password,
         )
         agent_alias.set_overrides(agent_overrides, component_overrides)
         project.agents.add(agent_name)
@@ -516,6 +525,7 @@ class MultiAgentManager:
             project=project,
             agent_name=agent_name,
             data_dir=self.get_data_dir_of_agent(agent_name),
+            password=self._password,
         )
         agent_alias.set_agent_config_from_data(config)
         project.agents.add(agent_name)
@@ -700,7 +710,7 @@ class MultiAgentManager:
             if wait_future.done():
                 event_set()  # pragma: nocover
             else:
-                wait_future.add_done_callback(event_set)  # pramga: nocover
+                wait_future.add_done_callback(event_set)  # pragma: nocover
 
         self._loop.call_soon_threadsafe(_add_cb)
         agent_task.stop()

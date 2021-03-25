@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tests of the fetchai module."""
 import json
 import logging
@@ -25,10 +24,13 @@ import tempfile
 import time
 from pathlib import Path
 from unittest import mock
-from unittest.mock import MagicMock, call
+from unittest.mock import MagicMock, call, patch
+from uuid import uuid4
 
 import pytest
 from aea_ledger_fetchai import FetchAIApi, FetchAICrypto, FetchAIFaucetApi
+
+from aea.crypto.helpers import KeyIsIncorrect
 
 from tests.conftest import FETCHAI_TESTNET_CONFIG, MAX_FLAKY_RERUNS, ROOT_DIR
 
@@ -70,6 +72,23 @@ def test_creation(fetchai_private_key_file):
     assert FetchAICrypto(
         fetchai_private_key_file
     ), "Did not manage to load the cosmos private key"
+
+
+def test_key_file_encryption_decryption(fetchai_private_key_file):
+    """Test fetchai private key encrypted and decrypted correctly."""
+    fetchai = FetchAICrypto(fetchai_private_key_file)
+    pk_data = Path(fetchai_private_key_file).read_text()
+    password = uuid4().hex
+    encrypted_data = fetchai.encrypt(password)
+    decrypted_data = fetchai.decrypt(encrypted_data, password)
+    assert encrypted_data != pk_data
+    assert pk_data == decrypted_data
+
+    with pytest.raises(ValueError, match="Decrypt error! Bad password?"):
+        fetchai.decrypt(encrypted_data, "BaD_PassWord")
+
+    with pytest.raises(ValueError, match="Bad encrypted key format!"):
+        fetchai.decrypt("some_data" * 16, "BaD_PassWord")
 
 
 def test_initialization():
@@ -356,7 +375,7 @@ def test_successful_realistic_faucet_operation(mock_post, mock_get):
 @pytest.mark.integration
 @pytest.mark.ledger
 def test_format_default():
-    """Test if default CosmosSDK transaction is correctly formated."""
+    """Test if default CosmosSDK transaction is correctly formatted."""
     account = FetchAICrypto()
     cc2 = FetchAICrypto()
     cosmos_api = FetchAIApi(**FETCHAI_TESTNET_CONFIG)
@@ -396,7 +415,7 @@ def test_format_default():
 @pytest.mark.integration
 @pytest.mark.ledger
 def test_format_cosmwasm():
-    """Test if CosmWasm transaction is correctly formated."""
+    """Test if CosmWasm transaction is correctly formatted."""
     cc2 = FetchAICrypto()
 
     # Dummy CosmWasm transaction
@@ -833,3 +852,28 @@ def test_construct_handle_transaction_both_versions():
         isinstance(transaction, dict) and len(transaction) == 6
     ), "Incorrect transfer_transaction constructed."
     assert len(transaction["msgs"][0]["value"]["sent_funds"]) == 0
+
+
+def test_load_errors():
+    """Test load errors: bad password, no password specified."""
+    ec = FetchAICrypto()
+    with patch.object(FetchAICrypto, "load", return_value="bad sTring"):
+        with pytest.raises(KeyIsIncorrect, match="Try to specify `password`"):
+            ec.load_private_key_from_path("any path")
+
+        with pytest.raises(KeyIsIncorrect, match="Wrong password?"):
+            ec.load_private_key_from_path("any path", password="some")
+
+
+def test_decrypt_error():
+    """Test bad password error on decrypt."""
+    ec = FetchAICrypto()
+    ec._pritvate_key = FetchAICrypto.generate_private_key()
+    password = "test"
+    encrypted_data = ec.encrypt(password=password)
+    with patch(
+        "aea_ledger_fetchai._cosmos.DataEncrypt.decrypt",
+        side_effect=UnicodeDecodeError("expected", b"", 2, 3, ""),
+    ):
+        with pytest.raises(ValueError, match="bad password?"):
+            ec.decrypt(encrypted_data, password + "some")

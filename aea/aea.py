@@ -80,7 +80,9 @@ class AEA(Agent):
         execution_timeout: float = 0,
         max_reactions: int = 20,
         error_handler_class: Optional[Type[AbstractErrorHandler]] = None,
+        error_handler_config: Optional[Dict[str, Any]] = None,
         decision_maker_handler_class: Optional[Type[DecisionMakerHandler]] = None,
+        decision_maker_handler_config: Optional[Dict[str, Any]] = None,
         skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
         connection_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate,
         loop_mode: Optional[str] = None,
@@ -92,6 +94,7 @@ class AEA(Agent):
         connection_ids: Optional[Collection[PublicId]] = None,
         search_service_address: str = DEFAULT_SEARCH_SERVICE_ADDRESS,
         storage_uri: Optional[str] = None,
+        task_manager_mode: Optional[str] = None,
         **kwargs: Any,
     ) -> None:
         """
@@ -116,7 +119,9 @@ class AEA(Agent):
         :param connection_ids: active connection ids. Default: consider all the ones in the resources.
         :param search_service_address: the address of the search service used.
         :param storage_uri: optional uri to set generic storage
+        :param task_manager_mode: task manager mode (threaded) to run tasks with.
         :param kwargs: keyword arguments to be attached in the agent context namespace.
+
         :return: None
         """
 
@@ -138,6 +143,7 @@ class AEA(Agent):
             runtime_mode=runtime_mode,
             storage_uri=storage_uri,
             logger=cast(Logger, aea_logger),
+            task_manager_mode=task_manager_mode,
         )
 
         default_routing = default_routing if default_routing is not None else {}
@@ -177,14 +183,18 @@ class AEA(Agent):
             )
 
             decision_maker_handler_class = DefaultDecisionMakerHandler
+        if decision_maker_handler_config is None:
+            decision_maker_handler_config = {}
         decision_maker_handler = decision_maker_handler_class(
-            identity=identity, wallet=wallet
+            identity=identity, wallet=wallet, config=decision_maker_handler_config
         )
         self.runtime.set_decision_maker(decision_maker_handler)
 
         if error_handler_class is None:
             error_handler_class = DefaultErrorHandler
-        self._error_handler_class = error_handler_class
+        if error_handler_config is None:
+            error_handler_config = {}
+        self._error_handler = error_handler_class(**error_handler_config)
         default_ledger_id = (
             default_ledger
             if default_ledger is not None
@@ -271,9 +281,9 @@ class AEA(Agent):
         """
         self.filter.handle_new_handlers_and_behaviours()
 
-    def _get_error_handler(self) -> Type[AbstractErrorHandler]:
+    def _get_error_handler(self) -> AbstractErrorHandler:
         """Get error handler."""
-        return self._error_handler_class
+        return self._error_handler
 
     def _get_msg_and_handlers_for_envelope(
         self, envelope: Envelope
@@ -297,7 +307,7 @@ class AEA(Agent):
         self,
         envelope: Envelope,
         protocol: Protocol,
-        error_handler: Type[AbstractErrorHandler],
+        error_handler: AbstractErrorHandler,
     ) -> Tuple[Optional[Message], List[Handler]]:
 
         handlers = self.filter.get_active_handlers(
@@ -461,15 +471,18 @@ class AEA(Agent):
         return self.runtime.task_manager.get_task_result(task_id)
 
     def enqueue_task(
-        self, func: Callable, args: Sequence = (), kwds: Optional[Dict[str, Any]] = None
+        self,
+        func: Callable,
+        args: Sequence = (),
+        kwargs: Optional[Dict[str, Any]] = None,
     ) -> int:
         """
         Enqueue a task with the task manager.
 
         :param func: the callable instance to be enqueued
         :param args: the positional arguments to be passed to the function.
-        :param kwds: the keyword arguments to be passed to the function.
+        :param kwargs: the keyword arguments to be passed to the function.
         :return the task id to get the the result.
         :raises ValueError: if the task manager is not running.
         """
-        return self.runtime.task_manager.enqueue_task(func, args, kwds)
+        return self.runtime.task_manager.enqueue_task(func, args, kwargs)

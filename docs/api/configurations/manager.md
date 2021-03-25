@@ -163,7 +163,7 @@ Does not save it on the disc!
 
 **Arguments**:
 
-- `overrides`: overrided values dictionary
+- `overrides`: overridden values dictionary
 
 **Returns**:
 
@@ -197,15 +197,15 @@ Return current agent config json representation.
 
 Save agent config on the disc.
 
-<a name="aea.configurations.manager.AgentConfigManager.verify_or_create_private_keys"></a>
-#### verify`_`or`_`create`_`private`_`keys
+<a name="aea.configurations.manager.AgentConfigManager.verify_private_keys"></a>
+#### verify`_`private`_`keys
 
 ```python
  | @classmethod
- | verify_or_create_private_keys(cls, aea_project_path: Union[Path, str], private_key_helper: Callable[[AgentConfig, Path, bool], None], substitude_env_vars: bool = False, create_keys: bool = True) -> "AgentConfigManager"
+ | verify_private_keys(cls, aea_project_path: Union[Path, str], private_key_helper: Callable[[AgentConfig, Path, Optional[str]], None], substitude_env_vars: bool = False, password: Optional[str] = None) -> "AgentConfigManager"
 ```
 
-Verify or create private keys.
+Verify private keys.
 
 Does not saves the config! Use AgentConfigManager.dump_config()
 
@@ -214,6 +214,7 @@ Does not saves the config! Use AgentConfigManager.dump_config()
 - `aea_project_path`: path to an AEA project.
 - `private_key_helper`: private_key_helper is a function that use agent config to check the keys
 - `substitude_env_vars`: replace env vars with values, does not dump config
+- `password`: the password to encrypt/decrypt the private key.
 
 **Returns**:
 

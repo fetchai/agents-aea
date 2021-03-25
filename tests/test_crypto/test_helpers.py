@@ -32,7 +32,7 @@ from aea.crypto.helpers import (
     create_private_key,
     get_wallet_from_agent_config,
     make_certificate,
-    private_key_verify_or_create,
+    private_key_verify,
     try_generate_testnet_wealth,
     try_validate_private_key_path,
 )
@@ -153,22 +153,17 @@ class TestHelperFile:
         create_private_key(CosmosCrypto.identifier, COSMOS_PRIVATE_KEY_FILE)
 
 
-def test_private_key_verify_or_create():
-    """Test private_key_verify_or_create."""
-    agent_conf = AgentConfigMock()
-    with patch("aea.crypto.helpers.create_private_key") as mock_create:
-        private_key_verify_or_create(agent_conf, Path("."))
-    mock_create.assert_called()
-
+def test_private_key_verify():
+    """Test private_key_verify."""
     agent_conf = AgentConfigMock(private_key_paths=[("fetchai", "test")])
     with patch("aea.crypto.helpers.try_validate_private_key_path") as mock_validate:
-        private_key_verify_or_create(agent_conf, Path("."))
+        private_key_verify(agent_conf, Path("."))
     mock_validate.assert_called()
 
     agent_conf = AgentConfigMock(private_key_paths=[("fetchai", "${var}")])
     with patch("aea.crypto.helpers.try_validate_private_key_path") as mock_validate:
         with patch("aea.crypto.helpers.create_private_key") as mock_create:
-            private_key_verify_or_create(agent_conf, Path("."))
+            private_key_verify(agent_conf, Path("."))
     mock_validate.assert_not_called()
     mock_create.assert_not_called()
 

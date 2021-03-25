@@ -387,7 +387,7 @@ Run on connect method called.
  | on_disconnect() -> None
 ```
 
-Run on discconnect method called.
+Run on disconnect method called.
 
 <a name="aea.connections.base.BaseSyncConnection.on_send"></a>
 #### on`_`send

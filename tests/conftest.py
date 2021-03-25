@@ -238,7 +238,7 @@ FETCHAI_TESTNET_CONFIG = {"address": FETCHAI_DEFAULT_ADDRESS}
 # common public ids used in the tests
 UNKNOWN_PROTOCOL_PUBLIC_ID = PublicId("unknown_author", "unknown_protocol", "0.1.0")
 UNKNOWN_CONNECTION_PUBLIC_ID = PublicId("unknown_author", "unknown_connection", "0.1.0")
-MY_FIRST_AEA_PUBLIC_ID = PublicId.from_str("fetchai/my_first_aea:0.23.0")
+MY_FIRST_AEA_PUBLIC_ID = PublicId.from_str("fetchai/my_first_aea:0.24.0")
 
 DUMMY_SKILL_PATH = os.path.join(CUR_PATH, "data", "dummy_skill", SKILL_YAML)
 
@@ -862,15 +862,14 @@ def _make_libp2p_connection(
     key = agent_key
     if key is None:
         key = make_crypto(DEFAULT_LEDGER)
-    identity = Identity("", address=key.address)
+    identity = Identity("identity", address=key.address)
     conn_crypto_store = None
     if node_key_file is not None:
         conn_crypto_store = CryptoStore({DEFAULT_LEDGER: node_key_file})
     else:
         node_key = make_crypto(DEFAULT_LEDGER)
         node_key_path = os.path.join(data_dir, f"{node_key.public_key}.txt")
-        with open(node_key_path, "wb") as f:
-            node_key.dump(f)
+        node_key.dump(node_key_path)
         conn_crypto_store = CryptoStore({DEFAULT_LEDGER: node_key_path})
     cert_request = CertRequest(
         conn_crypto_store.public_keys[DEFAULT_LEDGER],
@@ -878,6 +877,7 @@ def _make_libp2p_connection(
         key.identifier,
         "2021-01-01",
         "2021-01-02",
+        "{public_key}",
         f"./{key.address}_cert.txt",
     )
     _process_cert(key, cert_request, path_prefix=data_dir)
@@ -941,13 +941,14 @@ def _make_libp2p_client_connection(
     if not os.path.isdir(data_dir) or not os.path.exists(data_dir):
         raise ValueError("Data dir must be directory and exist!")
     crypto = make_crypto(ledger_api_id)
-    identity = Identity("", address=crypto.address)
+    identity = Identity("identity", address=crypto.address)
     cert_request = CertRequest(
         peer_public_key,
         POR_DEFAULT_SERVICE_ID,
         ledger_api_id,
         "2021-01-01",
         "2021-01-02",
+        "{public_key}",
         f"./{crypto.address}_cert.txt",
     )
     _process_cert(crypto, cert_request, path_prefix=data_dir)
@@ -1001,11 +1002,9 @@ def libp2p_log_on_failure_all(cls):
 
     :return: class with decorated methods.
     """
-    # TODO(LR) test it is a type
     for name, fn in inspect.getmembers(cls):
         if isinstance(fn, FunctionType):
             setattr(cls, name, libp2p_log_on_failure(fn))
-        # TOFIX(LR) decorate already @classmethod decorated methods
         continue
         if isinstance(fn, MethodType):
             if fn.im_self is None:

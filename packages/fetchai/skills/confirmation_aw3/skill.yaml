@@ -1,32 +1,32 @@
 name: confirmation_aw3
 author: fetchai
-version: 0.7.0
+version: 0.8.0
 type: skill
 description: This skill purchases information from other agents as specified in its
   configuration. It is the confirmation buyer for Agent World 3.
 license: Apache-2.0
-aea_version: '>=0.11.0, <0.12.0'
+aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint:
   README.md: QmNecTgkCBTBCsNB4B5o3YVwdAC3xozJodg8NiAWMT1zyf
-  __init__.py: QmUmJR4gbmwc1nZa3cV3fJ9fbc41VwMo2ic45XYzxUA5tA
+  __init__.py: QmXFgGbZiQWgCpNRPKU4QAj9sJxXcPvvgfEaP9m1pa1HXz
   behaviours.py: QmQrKth2VZDAXnA5ZQXqrrPWd91JRm2sD6KoHxsTtrio2y
   dialogues.py: QmTfx5ZgmWbuWpgA93cn9YB2JuY2QoF62WapXnyprW3SBf
-  handlers.py: QmXU5wYz7mkDYmtPbsunGhseGxRUBbp5N8TxAbvdeuvjDF
+  handlers.py: QmX6ho4hSgAUBtAMxPKsuTCLr5GdiRts2Aeh7sr7wZsuXK
   registration_db.py: QmfA5gSnTsFvKUzYfpyrptURvAC8KVMUk7DM4wU6xvbmV8
   strategy.py: Qme59vQevFQwWcVesHAmUmuQLNK8HKE81s1rM9P7FcQ3dK
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/http_client:0.19.0
-- fetchai/ledger:0.15.0
+- fetchai/http_client:0.20.0
+- fetchai/ledger:0.16.0
 contracts: []
 protocols:
-- fetchai/default:0.13.0
-- fetchai/fipa:0.14.0
-- fetchai/ledger_api:0.11.0
-- fetchai/oef_search:0.14.0
-- fetchai/signing:0.11.0
+- fetchai/default:0.14.0
+- fetchai/fipa:0.15.0
+- fetchai/ledger_api:0.12.0
+- fetchai/oef_search:0.15.0
+- fetchai/signing:0.12.0
 skills:
-- fetchai/generic_buyer:0.22.0
+- fetchai/generic_buyer:0.23.0
 behaviours:
   search:
     args:
@@ -141,5 +141,5 @@ models:
     class_name: Strategy
 dependencies:
   aea-ledger-fetchai:
-    version: <0.3.0,>=0.2.0
+    version: <2.0.0,>=1.0.0rc1
 is_abstract: false

@@ -16,7 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""This module contains the implementation of AEA agents project configuiration."""
+"""This module contains the implementation of AEA agents project configuration."""
 import os
 from copy import deepcopy
 from pathlib import Path
@@ -33,6 +33,7 @@ from aea.configurations.constants import DEFAULT_REGISTRY_NAME
 from aea.configurations.data_types import ComponentId
 from aea.configurations.manager import AgentConfigManager
 from aea.crypto.helpers import create_private_key, get_wallet_from_agent_config
+from aea.exceptions import AEAValidationError, enforce
 
 
 class _Base:
@@ -94,6 +95,7 @@ class Project(_Base):
         is_local: bool = False,
         is_remote: bool = False,
         is_restore: bool = False,
+        cli_verbosity: str = "INFO",
         registry_path: str = DEFAULT_REGISTRY_NAME,
         skip_consistency_check: bool = False,
     ) -> "Project":
@@ -108,10 +110,13 @@ class Project(_Base):
         :param public_id: the public id
         :param is_local: whether to fetch from local
         :param is_remote whether to fetch from remote
+        :param verbosity: the logging verbosity of the CLI
         :param registry_path: the path to the registry locally
         :param skip_consistency_check: consistency checks flag
         """
-        ctx = Context(cwd=working_dir, registry_path=registry_path)
+        ctx = Context(
+            cwd=working_dir, verbosity=cli_verbosity, registry_path=registry_path
+        )
         ctx.set_config("skip_consistency_check", skip_consistency_check)
 
         path = os.path.join(working_dir, public_id.author, public_id.name)
@@ -141,7 +146,11 @@ class AgentAlias(_Base):
     __slots__ = ("project", "agent_name", "_data_dir", "_agent_config")
 
     def __init__(
-        self, project: Project, agent_name: str, data_dir: str,
+        self,
+        project: Project,
+        agent_name: str,
+        data_dir: str,
+        password: Optional[str] = None,
     ):
         """Init agent alias with project, config, name, agent, builder."""
         self.project = project
@@ -150,6 +159,7 @@ class AgentAlias(_Base):
         if not os.path.exists(self._data_dir):
             os.makedirs(self._data_dir)
         self._agent_config: AgentConfig = self._get_agent_config(project.path)
+        self._password = password
         self._ensure_private_keys()
 
     def set_agent_config_from_data(self, json_data: List[Dict]) -> None:
@@ -164,20 +174,31 @@ class AgentAlias(_Base):
         self._ensure_private_keys()
 
     def _ensure_private_keys(self) -> None:
-        """Add proviate keys of not present in the config."""
+        """Add private keys if not present in the config."""
         builder = self._get_builder(self.agent_config, self.project.path)
         default_ledger = builder.get_default_ledger()
+        required_ledgers = builder.get_required_ledgers()
+        enforce(
+            default_ledger in required_ledgers,
+            exception_text=f"Default ledger '{default_ledger}' not in required ledgers: {required_ledgers}",
+            exception_class=AEAValidationError,
+        )
 
-        if not self.agent_config.private_key_paths.read_all():
-            self.agent_config.private_key_paths.create(
-                default_ledger, self._create_private_key(default_ledger)
-            )
+        available_private_keys = self.agent_config.private_key_paths.keys()
+        available_connection_private_keys = (
+            self.agent_config.connection_private_key_paths.keys()
+        )
 
-        if not self.agent_config.connection_private_key_paths.read_all():
-            self.agent_config.connection_private_key_paths.create(
-                default_ledger,
-                self._create_private_key(default_ledger, is_connection=True),
-            )
+        for required_ledger in set(required_ledgers):
+            if required_ledger not in available_private_keys:
+                self.agent_config.private_key_paths.create(
+                    required_ledger, self._create_private_key(required_ledger)
+                )
+            if required_ledger not in available_connection_private_keys:
+                self.agent_config.connection_private_key_paths.create(
+                    required_ledger,
+                    self._create_private_key(required_ledger, is_connection=True),
+                )
 
     @property
     def builder(self) -> AEABuilder:
@@ -194,12 +215,16 @@ class AgentAlias(_Base):
         return self._agent_config
 
     def _create_private_key(
-        self, ledger: str, replace: bool = False, is_connection: bool = False
+        self, ledger: str, replace: bool = False, is_connection: bool = False,
     ) -> str:
         """
         Create new key for agent alias in working dir keys dir.
 
         If file exists, check `replace` option.
+
+        :param ledger: the ledger id
+        :param replace: whether or not to replace an existing key
+        :param is_connection: whether or not it is a connection key
         """
         file_name = (
             f"{ledger}_connection_private.key"
@@ -209,7 +234,7 @@ class AgentAlias(_Base):
         filepath = os.path.join(self._data_dir, file_name)
         if os.path.exists(filepath) and not replace:
             return filepath
-        create_private_key(ledger, filepath)
+        create_private_key(ledger, filepath, password=self._password)
         return filepath
 
     def remove_from_project(self) -> None:
@@ -235,7 +260,7 @@ class AgentAlias(_Base):
     def get_aea_instance(self) -> AEA:
         """Build new aea instance."""
         self.issue_certificates()
-        aea = self.builder.build()
+        aea = self.builder.build(password=self._password)
         # override build dir to project's one
         aea.DEFAULT_BUILD_DIR_NAME = os.path.join(
             self.project.path, aea.DEFAULT_BUILD_DIR_NAME
@@ -301,7 +326,9 @@ class AgentAlias(_Base):
 
         :return: dict with crypto id str as key and address str as value
         """
-        wallet = get_wallet_from_agent_config(self.agent_config)
+        wallet = get_wallet_from_agent_config(
+            self.agent_config, password=self._password
+        )
         return wallet.addresses
 
     def get_connections_addresses(self) -> Dict[str, str]:
@@ -310,5 +337,7 @@ class AgentAlias(_Base):
 
         :return: dict with crypto id str as key and address str as value
         """
-        wallet = get_wallet_from_agent_config(self.agent_config)
+        wallet = get_wallet_from_agent_config(
+            self.agent_config, password=self._password
+        )
         return wallet.connection_cryptos.addresses

@@ -75,7 +75,7 @@ def replace_package(
     Download, extract and replace exists package.
 
     :param package_type: str.
-    :param public_id: pacakge bulic id to download
+    :param public_id: package public id to download
     :param: package_dir: target package dir
 
     :return: None
@@ -112,7 +112,7 @@ def enlist_packages(
 
     :param base_dir: path or str of the local repo.
 
-    :return: generator with Tuple of package_id and package diurectory.
+    :return: generator with Tuple of package_id and package directory.
     """
     for author in os.listdir(base_dir):
         author_dir = os.path.join(base_dir, author)

@@ -30,7 +30,7 @@ from unittest.mock import MagicMock, PropertyMock, patch
 import pytest
 
 import aea  # noqa: F401
-from aea.aea import AEA, DefaultErrorHandler
+from aea.aea import AEA
 from aea.aea_builder import AEABuilder
 from aea.configurations.base import SkillConfig
 from aea.configurations.constants import DEFAULT_LEDGER, DEFAULT_PRIVATE_KEY_FILE
@@ -236,18 +236,7 @@ def test_handle():
 
         encoded_msg = DefaultSerializer.encode(msg)
 
-        # isolate error handler class for this test
-        error_handler_class = type(
-            "error_handler_new_class",
-            (DefaultErrorHandler,),
-            dict(
-                unsupported_protocol_count=0,
-                unsupported_skill_count=0,
-                decoding_error_count=0,
-                no_active_handler_count=0,
-            ),
-        )
-        error_handler = an_aea._error_handler_class = error_handler_class
+        error_handler = an_aea._error_handler
 
         with run_in_thread(an_aea.start, timeout=5):
             wait_for_condition(lambda: an_aea.is_running, timeout=10)

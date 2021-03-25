@@ -479,7 +479,7 @@ class Runnable(ABC):
 
     @abstractmethod
     async def run(self) -> Any:
-        """Implement run logic respectfull to CancelError on termination."""
+        """Implement run logic respectful to CancelError on termination."""
 
     def wait_completed(
         self, sync: bool = False, timeout: float = None, force_result: bool = False
@@ -491,7 +491,7 @@ class Runnable(ABC):
         :param timeout: float seconds
         :param force_result: check result even it was waited.
 
-        :return: awaitable if sync is False, otherise None
+        :return: awaitable if sync is False, otherwise None
         """
         if not self._task:
             _default_logger.warning("Runnable is not started")

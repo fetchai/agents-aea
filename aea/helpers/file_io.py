@@ -85,7 +85,7 @@ def lock_file(
 ) -> Generator:
     """Lock file in context manager.
 
-    :param file_descriptor: file descriptio of file to lock.
+    :param file_descriptor: file descriptor of file to lock.
     """
     with exception_log_and_reraise(
         logger.error, f"Couldn't acquire lock for file {file_descriptor.name}: {{}}",

@@ -55,6 +55,8 @@ agent_name: my_seller_aea
 author: solarw
 version: 0.1.0
 license: Apache-2.0
+fingerprint: {}
+fingerprint_ignore_patterns: []
 aea_version: 0.3.0
 description: ''
 connections: []
@@ -63,11 +65,11 @@ protocols: []
 skills: []
 default_connection: null
 default_ledger: cosmos
+required_ledgers: [cosmos]
 private_key_paths:
     cosmos: tests/data/cosmos_private_key.txt
 connection_private_key_paths:
     cosmos: tests/data/cosmos_private_key.txt
-registry_path: ../packages
 dependencies: {}
 """
 )
@@ -448,3 +450,15 @@ def test_agent_configuration_dump_multipage_fails_bad_component_configuration():
         match="Configuration of component .* is not valid. ExtraPropertiesError: properties not expected: BAD FIELD",
     ):
         loader.dump(agent_config, fp)
+
+
+class TestTskManagerModeConfigVariable(BaseConfigTestVariable):
+    """Test `task_manager_mode` aea config option."""
+
+    OPTION_NAME = "task_manager_mode"
+    CONFIG_ATTR_NAME = "task_manager_mode"
+    GOOD_VALUES = ["threaded"]
+    INCORRECT_VALUES = [None, "sTrING?", -1]
+    REQUIRED = False
+    AEA_ATTR_NAME = "_task_manager_mode"
+    AEA_DEFAULT_VALUE = AEABuilder.DEFAULT_TASKMANAGER_MODE

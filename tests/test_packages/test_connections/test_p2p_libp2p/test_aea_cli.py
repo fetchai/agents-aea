@@ -23,6 +23,7 @@ import json
 import os
 
 from aea_ledger_ethereum.ethereum import EthereumCrypto as Ethereum
+from aea_ledger_fetchai import FetchAICrypto as FetchAI
 
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
@@ -118,6 +119,9 @@ class TestP2PLibp2pConnectionAEARunningEthereumConfigNode(AEATestCaseEmpty):
         self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
         self.run_cli_command("build", cwd=self._get_cwd())
         self.set_config("agent.default_ledger", Ethereum.identifier)
+        self.nested_set_config(
+            "agent.required_ledgers", [FetchAI.identifier, Ethereum.identifier]
+        )
         self.set_config("agent.default_connection", str(P2P_CONNECTION_PUBLIC_ID))
 
         # for logging
@@ -135,6 +139,7 @@ class TestP2PLibp2pConnectionAEARunningEthereumConfigNode(AEATestCaseEmpty):
                     "not_after": "2022-01-01",
                     "not_before": "2021-01-01",
                     "public_key": "fetchai",
+                    "message_format": "{public_key}",
                     "save_path": ".certs/conn_cert.txt",
                 }
             ]

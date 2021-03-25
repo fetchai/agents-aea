@@ -132,7 +132,7 @@ Initialize a new posix named pipe.
 **Arguments**:
 
 - `in_path`: rendezvous point for incoming data
-- `out_path`: rendezvous point for outgoing daa
+- `out_path`: rendezvous point for outgoing data
 
 <a name="aea.helpers.pipe.PosixNamedPipeProtocol.connect"></a>
 #### connect
@@ -363,7 +363,7 @@ Setup communication channel and wait for other end to connect.
 
 **Returns**:
 
-bool, indicating sucess
+bool, indicating success
 
 <a name="aea.helpers.pipe.PosixNamedPipeChannel.write"></a>
 #### write

@@ -56,7 +56,7 @@ A demo to run the thermometer scenario with a true ledger transaction This demo 
 
 First, fetch the thermometer AEA:
 ``` bash
-aea fetch fetchai/thermometer_aea:0.22.0 --alias my_thermometer_aea
+aea fetch fetchai/thermometer_aea:0.23.0 --alias my_thermometer_aea
 cd my_thermometer_aea
 aea install
 aea build
@@ -69,17 +69,17 @@ The following steps create the thermometer AEA from scratch:
 ``` bash
 aea create my_thermometer_aea
 cd my_thermometer_aea
-aea add connection fetchai/p2p_libp2p:0.18.0
-aea add connection fetchai/soef:0.19.0
-aea add connection fetchai/ledger:0.15.0
-aea add skill fetchai/thermometer:0.21.0
+aea add connection fetchai/p2p_libp2p:0.19.0
+aea add connection fetchai/soef:0.20.0
+aea add connection fetchai/ledger:0.16.0
+aea add skill fetchai/thermometer:0.22.0
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.18.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.19.0
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:0.11.0": "fetchai/ledger:0.15.0",
-  "fetchai/oef_search:0.14.0": "fetchai/soef:0.19.0"
+  "fetchai/ledger_api:0.12.0": "fetchai/ledger:0.16.0",
+  "fetchai/oef_search:0.15.0": "fetchai/soef:0.20.0"
 }'
 ```
 
@@ -90,7 +90,7 @@ aea config set --type dict agent.default_routing \
 
 Then, fetch the thermometer client AEA:
 ``` bash
-aea fetch fetchai/thermometer_client:0.23.0 --alias my_thermometer_client
+aea fetch fetchai/thermometer_client:0.24.0 --alias my_thermometer_client
 cd my_thermometer_client
 aea install
 aea build
@@ -103,17 +103,17 @@ The following steps create the thermometer client from scratch:
 ``` bash
 aea create my_thermometer_client
 cd my_thermometer_client
-aea add connection fetchai/p2p_libp2p:0.18.0
-aea add connection fetchai/soef:0.19.0
-aea add connection fetchai/ledger:0.15.0
-aea add skill fetchai/thermometer_client:0.21.0
+aea add connection fetchai/p2p_libp2p:0.19.0
+aea add connection fetchai/soef:0.20.0
+aea add connection fetchai/ledger:0.16.0
+aea add skill fetchai/thermometer_client:0.22.0
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.18.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.19.0
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:0.11.0": "fetchai/ledger:0.15.0",
-  "fetchai/oef_search:0.14.0": "fetchai/soef:0.19.0"
+  "fetchai/ledger_api:0.12.0": "fetchai/ledger:0.16.0",
+  "fetchai/oef_search:0.15.0": "fetchai/soef:0.20.0"
 }'
 ```
 
@@ -175,7 +175,7 @@ First, run the thermometer AEA:
 aea run
 ```
 
-Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.18.0 -u public_uri` to retrieve the address.) This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the thermometer AEA.
+Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.19.0 -u public_uri` to retrieve the address.) This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the thermometer AEA.
 
 Then, in the thermometer client, run this command (replace `SOME_ADDRESS` with the correct value as described above):
 ``` bash

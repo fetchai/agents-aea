@@ -10,13 +10,16 @@
     "description",
     "version",
     "license",
+    "fingerprint",
+    "fingerprint_ignore_patterns",
     "private_key_paths",
     "default_ledger",
     "connections",
     "contracts",
     "default_connection",
     "protocols",
-    "skills"
+    "skills",
+    "dependencies"
   ],
   "properties": {
     "aea_version": {
@@ -27,6 +30,9 @@
     },
     "author": {
       "$ref": "definitions.json#/definitions/author"
+    },
+    "description": {
+      "$ref": "definitions.json#/definitions/description"
     },
     "version": {
       "$ref": "definitions.json#/definitions/package_version"
@@ -70,6 +76,13 @@
     "default_ledger": {
       "$ref": "definitions.json#/definitions/ledger_id"
     },
+    "required_ledgers": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "definitions.json#/definitions/ledger_id"
+      }
+    },
     "currency_denominations": {
       "type": "object"
     },
@@ -104,9 +117,6 @@
         "$ref": "definitions.json#/definitions/public_id"
       }
     },
-    "description": {
-      "$ref": "definitions.json#/definitions/description"
-    },
     "logging_config" : {
       "$ref": "definitions.json#/definitions/logging_config"
     },
@@ -120,10 +130,10 @@
       "$ref": "definitions.json#/definitions/max_reactions"
     },
     "decision_maker_handler": {
-      "type": "object"
+      "$ref": "definitions.json#/definitions/framework_handler"
     },
     "error_handler": {
-      "type": "object"
+      "$ref": "definitions.json#/definitions/framework_handler"
     },
     "skill_exception_policy": {
       "$ref": "definitions.json#/definitions/skill_exception_policy"
@@ -145,6 +155,9 @@
     },
     "runtime_mode": {
       "$ref": "definitions.json#/definitions/runtime_mode"
+    },
+    "task_manager_mode": {
+      "$ref": "definitions.json#/definitions/task_manager_mode"
     },
     "storage_uri": {
       "$ref": "definitions.json#/definitions/storage_uri"

@@ -55,7 +55,7 @@ class TestClientServer:
         """Set up server connection."""
         self.server_agent_address = "server_agent_address"
         self.server_agent_identity = Identity(
-            "agent running server", address=self.server_agent_address
+            "agent_running_server", address=self.server_agent_address
         )
         self.host = get_host()
         self.port = get_unused_tcp_port()
@@ -99,10 +99,10 @@ class TestClientServer:
         self.client_agent_address = "client_agent_address"
         self.client_agent_skill_id = "some/skill:0.1.0"
         self.client_agent_identity = Identity(
-            "agent running client", address=self.client_agent_address
+            "agent_running_client", address=self.client_agent_address
         )
         configuration = ConnectionConfig(
-            host="localost",
+            host="localhost",
             port="8888",  # TODO: remove host/port for client?
             connection_id=HTTPClientConnection.connection_id,
         )

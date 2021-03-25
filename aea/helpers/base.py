@@ -180,7 +180,7 @@ def send_control_c(
     process: subprocess.Popen, kill_group: bool = False
 ) -> None:  # pragma: nocover # cause platform dependent
     """
-    Send ctrl-C crossplatform to terminate a subprocess.
+    Send ctrl-C cross-platform to terminate a subprocess.
 
     :param process: the process to send the signal to.
 
@@ -212,7 +212,7 @@ class RegexConstrainedString(UserString):
         """Initialize a regex constrained string."""
         super().__init__(seq)
 
-        if not self.REGEX.match(self.data):
+        if not self.REGEX.fullmatch(self.data):
             self._handle_no_match()
 
     def _handle_no_match(self) -> None:
@@ -243,6 +243,11 @@ class SimpleId(RegexConstrainedString):
     ...
     ValueError: Value 0an_identifier does not match the regular expression re.compile('[a-zA-Z_][a-zA-Z0-9_]{0,127}')
 
+    >>> SimpleId("an identifier")
+    Traceback (most recent call last):
+    ...
+    ValueError: Value an identifier does not match the regular expression re.compile('[a-zA-Z_][a-zA-Z0-9_]{0,127}')
+
     >>> SimpleId("")
     Traceback (most recent call last):
     ...
@@ -270,7 +275,7 @@ def get_logger_method(fn: Callable, logger_method: Union[str, Callable]) -> Call
     """
     Get logger method for function.
 
-    Get logger in `fn` definion module or creates logger is module.__name__.
+    Get logger in `fn` definition module or creates logger is module.__name__.
     Or return logger_method if it's callable.
 
     :param fn: function to get logger for.
@@ -333,7 +338,7 @@ def retry_decorator(
 
     :param number_of_retries: amount of attempts
     :param error_message: message template with one `{}` for exception
-    :param delay: num of seconds to sleep between retries. default 0
+    :param delay: number of seconds to sleep between retries. default 0
     :param logger_method: name of the logger method or callable to print logs
     """
 
@@ -468,7 +473,7 @@ def find_topological_order(adjacency_list: Dict[T, Set[T]]) -> List[T]:
     visited: Set[T] = set()
     roots: Set[T] = set()
     inverse_adjacency_list: Dict[T, Set[T]] = defaultdict(set)
-    # compute both roots and inv. adj. list in one pass.
+    # compute both roots and inverse adjacent list in one pass.
     for start_node, end_nodes in adjacency_list.items():
         if start_node not in visited:
             roots.add(start_node)
@@ -629,6 +634,7 @@ class CertRequest:
         ledger_id: SimpleIdOrStr,
         not_before: str,
         not_after: str,
+        message_format: str,
         save_path: str,
     ) -> None:
         """
@@ -636,12 +642,14 @@ class CertRequest:
 
         :param public_key: the public key, or the key id.
         :param identifier: certificate identifier.
+        :param ledger_id: ledger identifier the request is referring to.
         :param not_before: specify the lower bound for certificate validity.
           If it is a string, it must follow the format: 'YYYY-MM-DD'. It
-          will be interpreted as timezone UTC.
+          will be interpreted as timezone UTC-0.
         :param not_before: specify the lower bound for certificate validity.
           if it is a string, it must follow the format: 'YYYY-MM-DD' It
           will be interpreted as timezone UTC-0.
+        :param message_format: message format used for signing
         :param save_path: the save_path where to save the certificate.
         """
         self._key_identifier: Optional[str] = None
@@ -652,6 +660,7 @@ class CertRequest:
         self._not_after_string = not_after
         self._not_before = self._parse_datetime(not_before)
         self._not_after = self._parse_datetime(not_after)
+        self._message_format = message_format
         self._save_path = Path(save_path)
 
         self._parse_public_key(public_key)
@@ -752,6 +761,11 @@ class CertRequest:
         return self._not_after
 
     @property
+    def message_format(self) -> str:
+        """Get the message format."""
+        return self._message_format
+
+    @property
     def save_path(self) -> Path:
         """
         Get the save path for the certificate.
@@ -797,17 +811,46 @@ class CertRequest:
 
     def get_message(self, public_key: str) -> bytes:  # pylint: disable=no-self-use
         """Get the message to sign."""
-        message = public_key.encode("ascii")
-        # + self.identifier.encode("ascii")  # noqa: E800
-        # + self.not_before_string.encode("ascii")  # noqa: E800
-        # + self.not_after_string.encode("ascii")  # noqa: E800
+        message = self.construct_message(
+            public_key,
+            self.identifier,
+            self.not_before_string,
+            self.not_after_string,
+            self.message_format,
+        )
         return message
+
+    @classmethod
+    def construct_message(
+        cls,
+        public_key: str,
+        identifier: SimpleIdOrStr,
+        not_before_string: str,
+        not_after_string: str,
+        message_format: str,
+    ) -> bytes:
+        """
+        Construct message for singning.
+
+        :param public_key: the public key
+        :param identifier: identifier to be signed
+        :param not_before_string: signature not valid before
+        :param not_after_string: signature not valid after
+        :param message_format: message format used for signing
+        """
+        message = message_format.format(
+            public_key=public_key,
+            identifier=str(identifier),
+            not_before=not_before_string,
+            not_after=not_after_string,
+        )
+        return message.encode("ascii")
 
     def get_signature(self, path_prefix: Optional[PathLike] = None) -> str:
         """
         Get signature from save_path.
 
-        :param path_prefix: the path prefix to be prependend to save_path. Defaults to cwd.
+        :param path_prefix: the path prefix to be prepended to save_path. Defaults to cwd.
         :return: the signature.
         """
         save_path = self.get_absolute_save_path(path_prefix)
@@ -830,6 +873,7 @@ class CertRequest:
             not_before=self._not_before_string,
             not_after=self._not_after_string,
             public_key=self.public_key_or_identifier,
+            message_format=self.message_format,
             save_path=str(self.save_path),
         )
         return result
@@ -837,6 +881,9 @@ class CertRequest:
     @classmethod
     def from_json(cls, obj: Dict) -> "CertRequest":
         """Compute the JSON representation."""
+        if "message_format" not in obj:  # pragma: nocover
+            # for backwards compatibility
+            obj["message_format"] = "{public_key}"
         return cls(**obj)
 
     def __eq__(self, other: Any) -> bool:
@@ -849,6 +896,7 @@ class CertRequest:
             and self.key_identifier == other.key_identifier
             and self.not_after == other.not_after
             and self.not_before == other.not_before
+            and self.message_format == other.message_format
             and self.save_path == other.save_path
         )
 
@@ -857,9 +905,9 @@ def compute_specifier_from_version(version: Version) -> str:
     """
     Compute the specifier set from a version, by varying only on the patch number.
 
-    I.e. from "{major}.{minor}.{patch}", return
+    I.e. from "{major}.{minor}.{patch}.{extra}", return
 
-    ">={major}.{minor}.0, <{major}.{minor + 1}.0"
+    ">=min({major}.{minor}.0, {major}.{minor}.{patch}.{extra}), <{major}.{minor + 1}.0"
 
     :param version: the version
     :return: the specifier set
@@ -868,6 +916,7 @@ def compute_specifier_from_version(version: Version) -> str:
     new_minor_low = version.minor
     new_minor_high = new_minor_low + 1
     lower_bound = Version(f"{new_major}.{new_minor_low}.0")
+    lower_bound = lower_bound if lower_bound < version else version
     upper_bound = Version(f"{new_major}.{new_minor_high}.0")
     specifier_set = f">={lower_bound}, <{upper_bound}"
     return specifier_set

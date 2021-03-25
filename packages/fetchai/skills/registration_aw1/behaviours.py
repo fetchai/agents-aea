@@ -93,7 +93,6 @@ class AW1RegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
-        pass
 
     def _register_for_aw1(
         self,
@@ -104,7 +103,7 @@ class AW1RegistrationBehaviour(TickerBehaviour):
         """
         Register for Agent World 1.
 
-        :param aw1_registration_aeas: the aeas to register with
+        :param aw1_registration_aeas: the AEAs to register with
         :param registration_info: the info to send
         :param whitelist: the allowed agents
         """

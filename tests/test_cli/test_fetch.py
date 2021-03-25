@@ -359,7 +359,13 @@ def test_fetch_twice_remote():
             ):
                 result = runner.invoke(
                     cli,
-                    ["fetch", "--remote", "fetchai/my_first_aea"],
+                    [
+                        "--registry-path",
+                        PACKAGES_DIR,
+                        "fetch",
+                        "--remote",
+                        "fetchai/my_first_aea",
+                    ],
                     standalone_mode=False,
                     catch_exceptions=False,
                 )

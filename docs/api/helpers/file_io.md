@@ -15,7 +15,7 @@ Lock file in context manager.
 
 **Arguments**:
 
-- `file_descriptor`: file descriptio of file to lock.
+- `file_descriptor`: file descriptor of file to lock.
 
 <a name="aea.helpers.file_io.write_envelope"></a>
 #### write`_`envelope

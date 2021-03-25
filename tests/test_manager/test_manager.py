@@ -31,14 +31,16 @@ import pytest
 
 from aea.configurations.base import PublicId
 from aea.crypto.helpers import create_private_key
+from aea.crypto.plugin import load_all_plugins
 from aea.crypto.registries import crypto_registry
+from aea.helpers.install_dependency import run_install_subprocess
 from aea.manager import MultiAgentManager
 
 from packages.fetchai.connections.stub.connection import StubConnection
 from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
 
 from tests.common.utils import wait_for_condition
-from tests.conftest import MY_FIRST_AEA_PUBLIC_ID, PACKAGES_DIR
+from tests.conftest import MY_FIRST_AEA_PUBLIC_ID, PACKAGES_DIR, ROOT_DIR
 
 
 @patch("aea.aea_builder.AEABuilder.install_pypi_dependencies")
@@ -68,6 +70,37 @@ class TestMultiAgentManagerAsyncMode(
         if os.path.exists(self.working_dir):
             rmtree(self.working_dir)
 
+    def test_plugin_dependencies(self, *args):
+        """Test plugin installed and loaded as a depencndecy."""
+        plugin_path = str(Path(ROOT_DIR) / "plugins" / "aea-ledger-fetchai")
+        install_cmd = f"pip install --no-deps {plugin_path}".split(" ")
+        try:
+            self.manager.start_manager()
+            run_install_subprocess("pip uninstall aea-ledger-fetchai -y".split(" "))
+            from aea.crypto.registries import ledger_apis_registry
+
+            ledger_apis_registry.specs.pop("fetchai", None)
+            load_all_plugins(is_raising_exception=False)
+            assert "fetchai" not in ledger_apis_registry.specs
+
+            self.manager.add_project(self.project_public_id, local=True)
+            assert "fetchai" not in ledger_apis_registry.specs
+
+            self.manager.remove_project(self.project_public_id)
+
+            def install_deps(*_):
+                assert run_install_subprocess(install_cmd) == 0, install_cmd
+
+            with patch(
+                "aea.aea_builder.AEABuilder.install_pypi_dependencies", install_deps
+            ):
+                self.manager.add_project(self.project_public_id, local=True)
+
+            assert "fetchai" in ledger_apis_registry.specs
+        finally:
+            run_install_subprocess("pip uninstall aea-ledger-fetchai -y".split(" "))
+            run_install_subprocess(install_cmd)
+
     def test_workdir_created_removed(self, *args):
         """Check work dit created removed on MultiAgentManager start and stop."""
         assert not os.path.exists(self.working_dir)
@@ -76,6 +109,10 @@ class TestMultiAgentManagerAsyncMode(
         self.manager.stop_manager()
         assert not os.path.exists(self.working_dir)
         assert not os.path.exists(self.working_dir)
+
+    def test_projects_property(self, *args):
+        """Test projects property."""
+        self.assertEqual(self.manager.projects, self.manager._projects)
 
     def test_data_dir_presents(self, *args):
         """Check not fails on exists data dir."""
@@ -434,6 +471,7 @@ class TestMultiAgentManagerAsyncMode(
                         "not_after": "2022-01-01",
                         "not_before": "2021-01-01",
                         "public_key": "fetchai",
+                        "message_format": "{public_key}",
                         "save_path": cert_filename,
                     }
                 ],
@@ -573,7 +611,7 @@ def test_handle_error_on_load_state():
         config_yaml = config_file.read_text()
         new_version = "'>=0.0.1, <0.0.2'"
         new_config = re.sub(
-            r"'>=[0-9]+.[0-9]+.[0-9]+, <[0-9]+.[0-9]+.[0-9]+'",
+            r"'>=[0-9]+.[0-9]+.[0-9]+rc1, <[0-9]+.[0-9]+.[0-9]+'",
             new_version,
             config_yaml,
         )
@@ -598,7 +636,7 @@ def test_handle_error_on_load_state():
             assert isinstance(load_failed[0][1][0], dict)
             assert isinstance(load_failed[0][2], Exception)
             assert re.match(
-                "Failed to load project: fetchai/my_first_aea:latest Error: The CLI version is .*, but package fetchai/echo:0.15.0 requires version <0.0.2,>=0.0.1",
+                "Failed to load project: fetchai/my_first_aea:latest Error: The CLI version is .*, but package fetchai/echo:0.16.0 requires version <0.0.2,>=0.0.1",
                 str(load_failed[0][2]),
             )
             assert not manager.list_projects()

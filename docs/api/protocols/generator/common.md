@@ -46,6 +46,15 @@ Check whether a programme is installed on the system.
 
 None
 
+<a name="aea.protocols.generator.common.get_protoc_version"></a>
+#### get`_`protoc`_`version
+
+```python
+get_protoc_version() -> str
+```
+
+Get the protoc version used.
+
 <a name="aea.protocols.generator.common.load_protocol_specification"></a>
 #### load`_`protocol`_`specification
 

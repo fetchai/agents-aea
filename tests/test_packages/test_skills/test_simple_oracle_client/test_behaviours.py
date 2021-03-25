@@ -39,6 +39,8 @@ from tests.conftest import ROOT_DIR
 
 
 DEFAULT_ADDRESS = "0x0000000000000000000000000000000000000000"
+ETHEREUM_LEDGER_ID = "ethereum"
+FETCHAI_LEDGER_ID = "fetchai"
 
 
 class TestSkillBehaviour(BaseSkillTestCase):
@@ -63,6 +65,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         strategy.oracle_contract_address = DEFAULT_ADDRESS
         strategy.erc20_address = DEFAULT_ADDRESS
         strategy.is_oracle_contract_set = True
+        strategy._ledger_id = ETHEREUM_LEDGER_ID
 
         self.simple_oracle_client_behaviour.setup()
 
@@ -86,6 +89,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         strategy.erc20_address = DEFAULT_ADDRESS
         strategy.is_client_contract_deployed = True
         strategy.is_oracle_contract_set = True
+        strategy._ledger_id = ETHEREUM_LEDGER_ID
 
         with patch.object(
             self.simple_oracle_client_behaviour.context.logger, "log"
@@ -116,6 +120,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         strategy.erc20_address = DEFAULT_ADDRESS
         strategy.is_client_contract_deployed = True
         strategy.is_oracle_contract_set = True
+        strategy._ledger_id = ETHEREUM_LEDGER_ID
 
         self.simple_oracle_client_behaviour.act()
         self.assert_quantity_in_outbox(1)
@@ -140,6 +145,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         strategy.is_client_contract_deployed = True
         strategy.is_oracle_transaction_approved = True
         strategy.is_oracle_contract_set = True
+        strategy._ledger_id = ETHEREUM_LEDGER_ID
 
         self.simple_oracle_client_behaviour.act()
         self.assert_quantity_in_outbox(1)
@@ -153,6 +159,52 @@ class TestSkillBehaviour(BaseSkillTestCase):
             contract_id=str(CLIENT_CONTRACT_PUBLIC_ID),
             contract_address=strategy.client_contract_address,
             callable="get_query_transaction",
+        )
+        assert has_attributes, error_str
+
+    def test__request_contract_deploy_transaction(self):
+        """Test that the _request_contract_deploy_transaction function sends the right message to the contract_api for ethereum ledger."""
+        strategy = cast(Strategy, self.simple_oracle_client_behaviour.context.strategy)
+        strategy.oracle_contract_address = "some_address"
+        strategy._ledger_id = ETHEREUM_LEDGER_ID
+
+        self.simple_oracle_client_behaviour._request_contract_deploy_transaction()
+        self.assert_quantity_in_outbox(1)
+
+        kwargs = strategy.get_deploy_kwargs()
+        assert "fetchOracleContractAddress" in kwargs.body
+
+        msg = cast(ContractApiMessage, self.get_message_from_outbox())
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=ContractApiMessage,
+            performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
+            contract_id=str(CLIENT_CONTRACT_PUBLIC_ID),
+            callable="get_deploy_transaction",
+            kwargs=kwargs,
+        )
+        assert has_attributes, error_str
+
+    def test__request_contract_store_transaction(self):
+        """Test that the _request_contract_deploy_transaction function sends the right message to the contract_api for fetchai ledger."""
+        strategy = cast(Strategy, self.simple_oracle_client_behaviour.context.strategy)
+        strategy.oracle_contract_address = "some_address"
+        strategy._ledger_id = FETCHAI_LEDGER_ID
+
+        self.simple_oracle_client_behaviour._request_contract_deploy_transaction()
+        self.assert_quantity_in_outbox(1)
+
+        kwargs = strategy.get_deploy_kwargs()
+        assert "fetchOracleContractAddress" not in kwargs.body
+
+        msg = cast(ContractApiMessage, self.get_message_from_outbox())
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=ContractApiMessage,
+            performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
+            contract_id=str(CLIENT_CONTRACT_PUBLIC_ID),
+            callable="get_deploy_transaction",
+            kwargs=kwargs,
         )
         assert has_attributes, error_str
 
