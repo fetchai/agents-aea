@@ -14,18 +14,6 @@ const (
 	NONCE_BYTES_NB = 32
 )
 
-// type Dialogue struct {
-// 	_dialogues_storage
-// 	_dialogues_stats
-// 	_keep_terminal_state_dialogues
-// 	_message_class
-// 	_dialogue_class
-// 	_role_from_first_message
-// 	_self_address
-// 	_outgoing_messages
-// 	_incoming_messages
-// }
-
 type Role string
 
 const (
@@ -125,7 +113,7 @@ type DialogueLabel struct {
 
 type Dialogue struct {
 	dialogueLabel    DialogueLabel
-	dialogueMessage  *AbstractMessage
+	dialogueMessage  AbstractMessage
 	selfAddress      Address
 	outGoingMessages []MessageId
 	GoingMessages    []MessageId
@@ -136,12 +124,14 @@ type AbstractMessage struct {
 	messageId         int
 	target            int
 	performative      []string
-	message           SomeMessageType
+	message           []byte
 	to                Address
 	sender            Address
 }
 
-func create(counterParty Address, selfAddress Address, performative Performative) (AbstractMessage, Dialogue) {
+var dialogueStorage = make(map[DialogueLabel][]Dialogue)
+
+func create(counterParty Address, selfAddress Address, performative Performative, content []byte) (AbstractMessage, Dialogue) {
 	reference := [2]string{
 		generateDialogueNonce(), "",
 	}
@@ -152,6 +142,7 @@ func create(counterParty Address, selfAddress Address, performative Performative
 		performative:      performative,
 		to:                counterParty,
 		sender:            selfAddress,
+		message:           content,
 	}
 	dialogue := createDialogue(initialMessage)
 
@@ -159,12 +150,34 @@ func create(counterParty Address, selfAddress Address, performative Performative
 }
 
 func createDialogue(message AbstractMessage) Dialogue {
-	// TODO
-	// create dialogue instance and return
+	dialogueLabel := checkReferencesAndCreateLabels(message)
+	if validation := validateConditionsBeforeDialogueCreation(dialogueLabel); validation {
+		dialogue := Dialogue{
+			dialogueLabel:   dialogueLabel,
+			dialogueMessage: message,
+			selfAddress:     message.sender,
+		}
+		dialogueStorage[dialogueLabel] = append(dialogueStorage[dialogueLabel], dialogue)
+		// update dialogue using abstractmessage
+		updateInitialDialogue(message)
+		return dialogue
+	}
 	return Dialogue{}
 }
 
-func checkAndProcessLabels(message AbstractMessage) DialogueLabel {
+func updateInitialDialogue(message AbstractMessage) {
+	// TODO
+	// check if message has sender
+	// check if message belongs to a dialogue
+	// validate next message
+	// check if dialogue message is valid
+	// check if message is by self
+	// append message to outgoing message, if not append to incoming message
+	// update last message id
+	// append message ids in ordered manner
+}
+
+func checkReferencesAndCreateLabels(message AbstractMessage) DialogueLabel {
 	if !(message.dialogueReference[0] != "" && message.dialogueReference[1] == "") {
 		fmt.Println("Error : Reference address label already exists")
 	}
@@ -173,6 +186,13 @@ func checkAndProcessLabels(message AbstractMessage) DialogueLabel {
 		dialogueOpponentAddress: message.to,
 		dialogueStarterAddress:  message.sender,
 	}
+}
+
+func validateConditionsBeforeDialogueCreation(dalogueLabel DialogueLabel) bool {
+	if _, ok := dialogueStorage[dalogueLabel]; !ok {
+		return false
+	}
+	return true
 }
 
 func generateDialogueNonce() string {
