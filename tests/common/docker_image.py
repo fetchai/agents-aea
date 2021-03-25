@@ -359,7 +359,7 @@ class FetchLedgerDockerImage(DockerImage):
         entrypoint_file = os.path.join(tmpdirname, "run-node.sh")
         with open(entrypoint_file, "w") as file:
             file.writelines(line + "\n" for line in run_node_lines)
-        os.chmod(entrypoint_file, 777)
+        os.chmod(entrypoint_file, 755)
 
     def create(self) -> Container:
         """Create the container."""
