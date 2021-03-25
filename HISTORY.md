@@ -2,6 +2,7 @@
 
 ## 1.0.0rc1 (2020-03-24)
 
+- Adds CLI command `aea get-public-key`
 - Adds support for encrypting private keys at rest
 - Adds support for configuration of decision maker and error handler instances from `aea-config.yaml`
 - Adds support for explicitly marking behaviours and handlers as dynamic
