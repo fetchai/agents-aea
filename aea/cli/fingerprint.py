@@ -195,6 +195,9 @@ def fingerprint_package(
 def fingerprint_agent(click_context: click.Context) -> None:
     """Do a fingerprint for an agent."""
     ctx = cast(Context, click_context.obj)
+    click.echo(
+        f"Fingerprinting files in agent project '{ctx.agent_config.agent_name}'..."
+    )
     fingerprints_dict = _compute_fingerprint(
         Path(ctx.cwd),
         ignore_patterns=ctx.agent_config.fingerprint_ignore_patterns,
