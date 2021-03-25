@@ -36,6 +36,7 @@ setup(
         "ipfshttpclient==0.6.1",
         "eth-account==0.5.2",
     ],
+    tests_require=["pytest"],
     entry_points={
         "aea.cryptos": ["ethereum = aea_ledger_ethereum:EthereumCrypto"],
         "aea.ledger_apis": ["ethereum = aea_ledger_ethereum:EthereumApi"],

@@ -36,6 +36,7 @@ setup(
         "bech32==1.2.0",
         "pyaes>=1.6.1",
     ],
+    tests_require=["pytest"],
     entry_points={
         "aea.cryptos": ["cosmos = aea_ledger_cosmos:CosmosCrypto"],
         "aea.ledger_apis": ["cosmos = aea_ledger_cosmos:CosmosApi"],
