@@ -346,7 +346,7 @@ class FetchLedgerDockerImage(DockerImage):
         run_node_lines = [
             '#!/usr/bin/env bash',
             'set -e',
-            'fetchd init test-node --chain-id test'
+            'fetchd init test-node --chain-id test',
             'sed -i "s/stake/atestfet/" ~/.fetchd/config/genesis.json',
             'sed -i "s/enable = false/enable = true/" ~/.fetchd/config/app.toml',
             'MNEMONIC="gap bomb bulk border original scare assault pelican resemble found laptop skin gesture height inflict clinic reject giggle hurdle bubble soldier hurt moon hint"',
