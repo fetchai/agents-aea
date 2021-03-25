@@ -25,7 +25,6 @@ import sys
 import tempfile
 import time
 from abc import ABC, abstractmethod
-from pathlib import Path
 from threading import Timer
 from typing import Dict, List, Optional
 
@@ -315,8 +314,8 @@ class FetchLedgerDockerImage(DockerImage):
         client: DockerClient,
         addr: str,
         port: int,
+        tag: str,
         config: Optional[Dict] = None,
-        gas_limit: int = 10000000000000,
     ):
         """
         Initialize the Fetch ledger Docker image.
@@ -329,13 +328,13 @@ class FetchLedgerDockerImage(DockerImage):
         super().__init__(client)
         self._addr = addr
         self._port = port
+        self._image_tag = tag
         self._config = config or {}
-        self._gas_limit = gas_limit
 
     @property
     def tag(self) -> str:
         """Get the image tag."""
-        return "fetchai/fetchd:0.2.7"
+        return self._image_tag
 
     def _make_ports(self) -> Dict:
         """Make ports dictionary for Docker."""
@@ -344,18 +343,18 @@ class FetchLedgerDockerImage(DockerImage):
     def _make_entrypoint_file(self, tmpdirname) -> None:
         """Make a temporary entrypoint file to setup and run the test ledger node"""
         run_node_lines = [
-            '#!/usr/bin/env bash',
-            'set -e',
-            'fetchd init test-node --chain-id test',
+            "#!/usr/bin/env bash",
+            "set -e",
+            "fetchd init test-node --chain-id test",
             'sed -i "s/stake/atestfet/" ~/.fetchd/config/genesis.json',
             'sed -i "s/enable = false/enable = true/" ~/.fetchd/config/app.toml',
             f'MNEMONIC="{self._config["mnemonic"]}"',
-            'fetchcli config keyring-backend test',
-            'echo $MNEMONIC | fetchcli keys add validator --recover',
-            'fetchd add-genesis-account $(fetchcli keys show validator -a) 1152997575000000000000000000atestfet',
-            'fetchd gentx --amount 100000000000000000000atestfet --name validator --keyring-backend test',
-            'fetchd collect-gentxs',
-            f'fetchd start --rpc.laddr tcp://0.0.0.0:{self._port}'
+            "fetchcli config keyring-backend test",
+            "echo $MNEMONIC | fetchcli keys add validator --recover",
+            "fetchd add-genesis-account $(fetchcli keys show validator -a) 1152997575000000000000000000atestfet",
+            "fetchd gentx --amount 100000000000000000000atestfet --name validator --keyring-backend test",
+            "fetchd collect-gentxs",
+            f"fetchd start --rpc.laddr tcp://0.0.0.0:{self._port}",
         ]
         entrypoint_file = os.path.join(tmpdirname, "run-node.sh")
         with open(entrypoint_file, "w") as file:
@@ -370,10 +369,13 @@ class FetchLedgerDockerImage(DockerImage):
             volumes = {tmpdirname: {"bind": mount_path, "mode": "rw"}}
             entrypoint = os.path.join(mount_path, "run-node.sh")
             container = self._client.containers.run(
-                self.tag, detach=True, ports=self._make_ports(),
-                volumes=volumes, entrypoint=str(entrypoint),
-                working_dir=tmpdirname
-                )
+                self.tag,
+                detach=True,
+                ports=self._make_ports(),
+                volumes=volumes,
+                entrypoint=str(entrypoint),
+                working_dir=tmpdirname,
+            )
         return container
 
     def wait(self, max_attempts: int = 15, sleep_rate: float = 1.0) -> bool:

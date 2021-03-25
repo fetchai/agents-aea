@@ -37,6 +37,7 @@ from tests.conftest import (
     UseLocalFetchNode,
 )
 
+
 @pytest.mark.integration
 class TestOracleSkillsFetchLedger(AEATestCaseManyFlaky, UseLocalFetchNode):
     """Test that oracle skills work on the Fetch ledger."""
@@ -44,6 +45,7 @@ class TestOracleSkillsFetchLedger(AEATestCaseManyFlaky, UseLocalFetchNode):
     @pytest.mark.ledger
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_ETH)  # cause possible network issues
     def test_oracle(self, fetchd):
+        """Test that oracle skills work on the fetchai ledger"""
         assert True
 
 @pytest.mark.integration

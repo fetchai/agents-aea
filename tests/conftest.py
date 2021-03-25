@@ -104,8 +104,8 @@ from packages.fetchai.connections.tcp.tcp_server import TCPServerConnection
 
 from tests.common.docker_image import (
     DockerImage,
-    GanacheDockerImage,
     FetchLedgerDockerImage,
+    GanacheDockerImage,
     OEFSearchDockerImage,
 )
 from tests.data.dummy_connection.connection import DummyConnection  # type: ignore
@@ -148,6 +148,7 @@ DEFAULT_GANACHE_PORT = 8545
 DEFAULT_GANACHE_CHAIN_ID = 1337
 
 # URL to local Fetch ledger instance
+DEFAULT_FETCH_DOCKER_IMAGE_TAG = "fetchai/fetchd:0.2.7"
 DEFAULT_FETCH_LEDGER_ADDR = "http://127.0.0.1"
 DEFAULT_FETCH_LEDGER_PORT = 26657
 DEFAULT_FETCH_MNEMONIC = "gap bomb bulk border original scare assault pelican resemble found laptop skin gesture height inflict clinic reject giggle hurdle bubble soldier hurt moon hint"
@@ -653,10 +654,7 @@ def ganache_configuration():
 @pytest.fixture(scope="session")
 def fetchd_configuration():
     """Get the Fetch ledger configuration for testing purposes."""
-    return dict(
-        mnemonic=DEFAULT_FETCH_MNEMONIC
-    )
-
+    return dict(mnemonic=DEFAULT_FETCH_MNEMONIC)
 
 
 @pytest.fixture(scope="session")
@@ -706,15 +704,15 @@ def ganache(
 @pytest.fixture(scope="session")
 @action_for_platform("Linux", skip=False)
 def fetchd(
-    fetchd_configuration,
-    timeout: float = 2.0,
-    max_attempts: int = 10,
+    fetchd_configuration, timeout: float = 2.0, max_attempts: int = 10,
 ):
     """Launch the Ganache image."""
     client = docker.from_env()
     image = FetchLedgerDockerImage(
-        client, DEFAULT_FETCH_LEDGER_ADDR,
+        client,
+        DEFAULT_FETCH_LEDGER_ADDR,
         DEFAULT_FETCH_LEDGER_PORT,
+        DEFAULT_FETCH_DOCKER_IMAGE_TAG,
         config=fetchd_configuration,
     )
     yield from _launch_image(image, timeout=timeout, max_attempts=max_attempts)
