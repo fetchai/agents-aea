@@ -147,6 +147,11 @@ DEFAULT_GANACHE_ADDR = "http://127.0.0.1"
 DEFAULT_GANACHE_PORT = 8545
 DEFAULT_GANACHE_CHAIN_ID = 1337
 
+# URL to local Fetch ledger instance
+DEFAULT_FETCH_LEDGER_ADDR = "http://127.0.0.1"
+DEFAULT_FETCH_LEDGER_PORT = 26657
+DEFAULT_FETCH_MNEMONIC = "gap bomb bulk border original scare assault pelican resemble found laptop skin gesture height inflict clinic reject giggle hurdle bubble soldier hurt moon hint"
+
 COSMOS_PRIVATE_KEY_FILE_CONNECTION = "cosmos_connection_private_key.txt"
 FETCHAI_PRIVATE_KEY_FILE_CONNECTION = "fetchai_connection_private_key.txt"
 
@@ -524,7 +529,7 @@ def ganache_addr() -> str:
 
 @pytest.fixture(scope="session")
 def ganache_port() -> int:
-    """Port of the connection to the OEF Node to use during the tests."""
+    """Port of the connection to the Ganache Node to use during the tests."""
     return DEFAULT_GANACHE_PORT
 
 
@@ -644,17 +649,15 @@ def ganache_configuration():
         ],
     )
 
+
 @pytest.fixture(scope="session")
 def fetchd_configuration():
     """Get the Fetch ledger configuration for testing purposes."""
     return dict(
-        accounts_balances=[
-            (FUNDED_ETH_PRIVATE_KEY_1, DEFAULT_AMOUNT),
-            (FUNDED_ETH_PRIVATE_KEY_2, DEFAULT_AMOUNT),
-            (FUNDED_ETH_PRIVATE_KEY_3, DEFAULT_AMOUNT),
-            (Path(ETHEREUM_PRIVATE_KEY_PATH).read_text().strip(), DEFAULT_AMOUNT),
-        ],
+        mnemonic=DEFAULT_FETCH_MNEMONIC
     )
+
+
 
 @pytest.fixture(scope="session")
 def ethereum_testnet_config(ganache_addr, ganache_port):
@@ -710,7 +713,9 @@ def fetchd(
     """Launch the Ganache image."""
     client = docker.from_env()
     image = FetchLedgerDockerImage(
-        client, "http://127.0.0.1", 26657, config=fetchd_configuration
+        client, DEFAULT_FETCH_LEDGER_ADDR,
+        DEFAULT_FETCH_LEDGER_PORT,
+        config=fetchd_configuration,
     )
     yield from _launch_image(image, timeout=timeout, max_attempts=max_attempts)
 

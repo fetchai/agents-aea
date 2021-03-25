@@ -349,13 +349,13 @@ class FetchLedgerDockerImage(DockerImage):
             'fetchd init test-node --chain-id test',
             'sed -i "s/stake/atestfet/" ~/.fetchd/config/genesis.json',
             'sed -i "s/enable = false/enable = true/" ~/.fetchd/config/app.toml',
-            'MNEMONIC="gap bomb bulk border original scare assault pelican resemble found laptop skin gesture height inflict clinic reject giggle hurdle bubble soldier hurt moon hint"',
+            f'MNEMONIC="{self._config["mnemonic"]}"',
             'fetchcli config keyring-backend test',
             'echo $MNEMONIC | fetchcli keys add validator --recover',
             'fetchd add-genesis-account $(fetchcli keys show validator -a) 1152997575000000000000000000atestfet',
             'fetchd gentx --amount 100000000000000000000atestfet --name validator --keyring-backend test',
             'fetchd collect-gentxs',
-            'fetchd start --rpc.laddr tcp://0.0.0.0:26657'
+            f'fetchd start --rpc.laddr tcp://0.0.0.0:{self._port}'
         ]
         entrypoint_file = os.path.join(tmpdirname, "run-node.sh")
         with open(entrypoint_file, "w") as file:
