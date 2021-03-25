@@ -14,17 +14,21 @@ ENV PYTHONPATH "$PYTHONPATH:/usr/lib/python3.7/site-packages"
 # golang
 RUN apk add --no-cache go
 
+# aea installation
 RUN pip install --upgrade pip
 RUN pip install --upgrade --force-reinstall aea[all]==1.0.0rc1
 
-# COPY ./packages /home/packages # enable to add packages dir
-WORKDIR home
+# directories and aea cli config
+COPY /.aea /home/.aea
+WORKDIR /home/agents
+COPY ./packages /home/agents/packages
 
-WORKDIR /home/myagent
+# aea build script
+COPY /build.sh /build.sh
+RUN ["chmod", "+x", "/build.sh"]
+RUN [ "/build.sh" ]
 
-COPY deploy-image/build.sh /build.sh
-RUN /build.sh
-
-COPY deploy-image/entrypoint.sh /entrypoint.sh
-COPY deploy-image/.aea "/root/.aea"
+# aea entrypoint script
+COPY /entrypoint.sh /entrypoint.sh
+RUN ["chmod", "+x", "/entrypoint.sh"]
 CMD [ "/entrypoint.sh" ]

@@ -4,5 +4,5 @@
 DOCKER_IMAGE_TAG=fetchai/aea-deploy:1.0.0rc1
 # DOCKER_IMAGE_TAG=fetchai/aea-deploy:latest
 
-DOCKER_BUILD_CONTEXT_DIR=..
+DOCKER_BUILD_CONTEXT_DIR=.
 DOCKERFILE=./Dockerfile
