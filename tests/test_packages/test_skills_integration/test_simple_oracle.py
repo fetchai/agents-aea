@@ -48,6 +48,7 @@ class TestOracleSkillsFetchLedger(AEATestCaseManyFlaky, UseLocalFetchNode):
         """Test that oracle skills work on the fetchai ledger"""
         assert True
 
+
 @pytest.mark.integration
 class TestOracleSkills(AEATestCaseManyFlaky, UseGanache):
     """Test that oracle skills work."""
