@@ -391,8 +391,6 @@ class MultiAgentManager:
                 f"The project ({public_id.author}/{public_id.name}) was already added!"
             )
 
-        self._versionless_projects_set.add(public_id.to_any())
-
         project = Project.load(
             self.working_dir,
             public_id,
@@ -415,6 +413,7 @@ class MultiAgentManager:
                 f"Failed to load project: {public_id} Error: {str(e)}", e
             )
 
+        self._versionless_projects_set.add(public_id.to_any())
         self._projects[public_id] = project
         return self
 
