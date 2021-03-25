@@ -19,13 +19,13 @@
 """Implementation of the 'aea add' subcommand."""
 import os
 from pathlib import Path
-from typing import Dict, Union
+from typing import Dict, Union, cast
 
 import click
 
 from aea.cli.utils.click_utils import PublicIdParameter
 from aea.cli.utils.context import Context
-from aea.cli.utils.decorators import pass_ctx
+from aea.cli.utils.decorators import check_aea_project, pass_ctx
 from aea.configurations.base import (
     PublicId,
     _compute_fingerprint,
@@ -43,12 +43,12 @@ from aea.configurations.loader import ConfigLoader
 from aea.helpers.io import open_file
 
 
-@click.group()
+@click.group(invoke_without_command=True)
 @click.pass_context
-def fingerprint(
-    click_context: click.core.Context,  # pylint: disable=unused-argument
-) -> None:
+def fingerprint(click_context: click.core.Context,) -> None:
     """Fingerprint a non-vendor package of the agent."""
+    if click_context.invoked_subcommand is None:
+        fingerprint_agent(click_context)
 
 
 @fingerprint.command()
@@ -189,3 +189,17 @@ def fingerprint_package(
     # Load item specification yaml file and add fingerprints
     config.fingerprint = fingerprints_dict
     config_loader.dump(config, open_file(config_file_path, "w"))
+
+
+@check_aea_project(check_finger_prints=False)  # pylint: disable=no-value-for-parameter
+def fingerprint_agent(click_context: click.Context) -> None:
+    """Do a fingerprint for an agent."""
+    ctx = cast(Context, click_context.obj)
+    fingerprints_dict = _compute_fingerprint(
+        Path(ctx.cwd),
+        ignore_patterns=ctx.agent_config.fingerprint_ignore_patterns,
+        is_recursive=False,
+    )  # type: Dict[str, str]
+    ctx.agent_config.fingerprint = fingerprints_dict
+    ctx.dump_agent_config()
+    click.echo(f"Fingerprint for agent `{ctx.agent_config.name}` is calculated!")

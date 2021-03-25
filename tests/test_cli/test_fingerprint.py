@@ -17,18 +17,22 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains the tests for CLI fingerprint command."""
-
+from pathlib import Path
 from unittest import TestCase, mock
+from unittest.mock import MagicMock
 
 import pytest
 from click import ClickException
 
 from aea.cli import cli
 from aea.cli.fingerprint import fingerprint_item
+from aea.cli.utils.context import Context
+from aea.cli.utils.decorators import _check_aea_project
 from aea.configurations.constants import (
     DEFAULT_CONNECTION_CONFIG_FILE,
     DEFAULT_SKILL_CONFIG_FILE,
 )
+from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from tests.conftest import CLI_LOG_OPTION, CliRunner
 from tests.test_cli.tools_for_testing import ConfigLoaderMock, ContextMock, PublicIdMock
@@ -140,3 +144,27 @@ class FingerprintItemTestCase(TestCase):
         public_id = PublicIdMock()
         with self.assertRaises(ClickException):
             fingerprint_item(ContextMock(), "skill", public_id)
+
+
+class TestFingerprintAgent(AEATestCaseEmpty):
+    """Check fingerprint for agent."""
+
+    def test_fingerprint(self):
+        """Check fingerprint calculated and checked properly."""
+        r = self.invoke("fingerprint")
+        assert "calculated" in r.stdout
+
+        click_context = MagicMock()
+        click_context.obj = Context(self._get_cwd(), "", registry_path=None)
+        click_context.obj.config["skip_consistency_check"] = True
+
+        _check_aea_project([click_context], check_finger_prints=True)
+
+        (Path(self._get_cwd()) / "some_file.txt").write_text("sdfds")
+        with pytest.raises(
+            ClickException, match=r"Fingerprints for package .* do not match"
+        ):
+            _check_aea_project([click_context], check_finger_prints=True)
+
+        self.invoke("fingerprint")
+        _check_aea_project([click_context], check_finger_prints=True)
