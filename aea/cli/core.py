@@ -39,6 +39,7 @@ from aea.cli.generate_key import generate_key
 from aea.cli.generate_wealth import generate_wealth
 from aea.cli.get_address import get_address
 from aea.cli.get_multiaddress import get_multiaddress
+from aea.cli.get_public_key import get_public_key
 from aea.cli.get_wealth import get_wealth
 from aea.cli.init import init
 from aea.cli.install import install
@@ -116,6 +117,7 @@ cli.add_command(generate_key)
 cli.add_command(generate_wealth)
 cli.add_command(generate)
 cli.add_command(get_address)
+cli.add_command(get_public_key)
 cli.add_command(get_multiaddress)
 cli.add_command(get_wealth)
 cli.add_command(init)
