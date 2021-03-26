@@ -2,9 +2,9 @@
 
 The HTTP client and HTTP server connections enable an AEA to communicate with external servers, respectively clients, via HTTP. 
 
-The HTTP client connection receives request envelops from the agent, translates each into an HTTP request and sends it to a server. If it receives an HTTP response from the server within a timeout window, it translates it into a response envelope, and sends this back to the agent.
+The HTTP client connection receives request envelops from an agent's skill, translates each into an HTTP request and sends it to a server external to the agent. If it receives an HTTP response from the server within a timeout window, it translates it into a response envelope, and sends this back to the relevant skill inside the agent.
 
-The HTTP server connection allows you to run a server inside the connection itself which accepts requests from clients. The HTTP server connection validates requests it receives against a provided OpenAPI file. It translates each valid request into an envelope and sends it to the agent. If it receives a valid response envelope from the agent within a timeout window, the connection translates the response envelope into an HTTP response and serves it to the client.
+The HTTP server connection allows you to run a server inside the connection itself which accepts requests from clients external to the agent. The HTTP server connection validates requests it receives against a provided OpenAPI file. It translates each valid request into an envelope and sends it to the skill specified in the connections configuration. If it receives a valid response envelope from the skill within a timeout window, the connection translates the response envelope into an HTTP response and serves it to the client.
 
 ## HTTP Client
 
