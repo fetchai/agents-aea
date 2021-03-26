@@ -3,6 +3,7 @@ package protocols
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"errors"
 	"fmt"
 )
 
@@ -94,15 +95,26 @@ type DialoguesInterface interface {
 type AbstractMessageInterface interface {
 	initialize(diaglogReference [2]string, messagId int, target Target, performative Performative)
 	validPerformatives() []string
-	hasSender() bool
-	sender() Address
-	hasTo() bool
-	to() Address
+	hasSender() (Address, error)
+	hasCounterparty() (Address, error)
 	dialogueReference() [2]string
 	messageId() MessageId
 	performative() Performative
 	target() int
-	equal(AbstractMessage) bool
+}
+
+func (message AbstractMessage) hasSender() (Address, error) {
+	if message.sender != "" {
+		return message.sender, nil
+	}
+	return "", errors.New("Sender address does not exist.")
+}
+
+func (message AbstractMessage) hasCounterparty() (Address, error) {
+	if message.to != "" {
+		return message.to, nil
+	}
+	return "", errors.New("Counterparty address does not exist.")
 }
 
 type DialogueLabel struct {
@@ -112,12 +124,14 @@ type DialogueLabel struct {
 }
 
 type Dialogue struct {
-	dialogueLabel    DialogueLabel
-	dialogueMessage  AbstractMessage
-	selfAddress      Address
-	outGoingMessages []MessageId
-	GoingMessages    []MessageId
-	rules            RuleType
+	dialogueLabel     DialogueLabel
+	dialogueMessage   AbstractMessage
+	selfAddress       Address
+	outgoingMessages  []AbstractMessage
+	incomingMessages  []AbstractMessage
+	lastMessageId     int
+	orderedMessageIds []int
+	rules             RuleType
 }
 type AbstractMessage struct {
 	dialogueReference [2]string
@@ -129,7 +143,11 @@ type AbstractMessage struct {
 	sender            Address
 }
 
-var dialogueStorage = make(map[DialogueLabel][]Dialogue)
+// store dialogues by opponent address
+var dialogueStorage = make(map[Address][]Dialogue)
+
+// store dialogue by dialogue label
+var dialogueByDialogueLabel = make(map[DialogueLabel]Dialogue)
 
 func create(counterParty Address, selfAddress Address, performative Performative, content []byte) (AbstractMessage, Dialogue) {
 	reference := [2]string{
@@ -151,30 +169,51 @@ func create(counterParty Address, selfAddress Address, performative Performative
 
 func createDialogue(message AbstractMessage) Dialogue {
 	dialogueLabel := checkReferencesAndCreateLabels(message)
-	if validation := validateConditionsBeforeDialogueCreation(dialogueLabel); validation {
+	if validation := validateDialogueLabelExistence(dialogueLabel); validation {
 		dialogue := Dialogue{
 			dialogueLabel:   dialogueLabel,
 			dialogueMessage: message,
 			selfAddress:     message.sender,
 		}
-		dialogueStorage[dialogueLabel] = append(dialogueStorage[dialogueLabel], dialogue)
+		dialogueStorage[message.to] = append(dialogueStorage[message.to], dialogue)
+		dialogueByDialogueLabel[dialogueLabel] = dialogue
 		// update dialogue using abstractmessage
-		updateInitialDialogue(message)
+		updateInitialDialogue(message, dialogue)
 		return dialogue
 	}
 	return Dialogue{}
 }
 
-func updateInitialDialogue(message AbstractMessage) {
-	// TODO
+func updateInitialDialogue(message AbstractMessage, dialogue Dialogue) {
 	// check if message has sender
+	if _, err := message.hasSender(); err != nil {
+		fmt.Println(err)
+		return
+	}
 	// check if message belongs to a dialogue
+
+	// TODO
+	// create and check labels considering self initiated addresses
+	label := checkReferencesAndCreateLabels(message)
+	if _, ok := dialogueByDialogueLabel[label]; !ok {
+		fmt.Println("Message does not belong to a dialogue")
+	}
+
+	// TODO
 	// validate next message
 	// check if dialogue message is valid
+
 	// check if message is by self
 	// append message to outgoing message, if not append to incoming message
+	if message.sender == dialogue.selfAddress {
+		dialogue.outgoingMessages = append(dialogue.outgoingMessages, message)
+	} else {
+		dialogue.incomingMessages = append(dialogue.incomingMessages, message)
+	}
 	// update last message id
+	dialogue.lastMessageId = message.messageId
 	// append message ids in ordered manner
+	dialogue.orderedMessageIds = append(dialogue.orderedMessageIds, message.messageId)
 }
 
 func checkReferencesAndCreateLabels(message AbstractMessage) DialogueLabel {
@@ -188,8 +227,8 @@ func checkReferencesAndCreateLabels(message AbstractMessage) DialogueLabel {
 	}
 }
 
-func validateConditionsBeforeDialogueCreation(dalogueLabel DialogueLabel) bool {
-	if _, ok := dialogueStorage[dalogueLabel]; !ok {
+func validateDialogueLabelExistence(dialogueLabel DialogueLabel) bool {
+	if _, ok := dialogueByDialogueLabel[dialogueLabel]; ok {
 		return false
 	}
 	return true
@@ -207,145 +246,3 @@ func randomHex(n int) string {
 	}
 	return hex.EncodeToString(bytes)
 }
-
-// var dialogueStorage map[Address][]DialogueLabel
-
-// func create(selfAddress Address, counterParty Address, performative Performative, message SomeMessageType) *Dialogue {
-
-// 	if selfAddress == counterParty {
-// 		fmt.Println("sender and receiver cannot be the same")
-// 	}
-
-// 	dialogueStorage = make(map[Address][]DialogueLabel)
-
-// 	intitialMessage := &InitialMessage{
-// 		message_id:   0,
-// 		target:       1,
-// 		performative: performative,
-// 		message:      message,
-// 		to:           counterParty,
-// 		sender:       selfAddress,
-// 	}
-// 	intitialMessage.dialogueReference[0] = generateDialogueNonce()
-// 	intitialMessage.dialogueReference[1] = ""
-
-// 	// process dialogue creation
-// 	dialogue := intitialMessage.createDialogue()
-
-// 	return dialogue
-// }
-
-// func (dialogue *Dialogue) update(selfAddress Address) {
-
-// 	if dialogue.dialogueMessage.sender != "" || dialogue.dialogueMessage.to != "" {
-// 		fmt.Println("Error : dialogue sender & receiver should not be empty")
-// 	}
-
-// 	if selfAddress != dialogue.selfAddress {
-// 		fmt.Println("Error : Sender should be dialogue initiator")
-// 	}
-
-// 	if dialogue.dialogueMessage.sender == dialogue.dialogueMessage.to {
-// 		fmt.Println("Error : Sender and receiver cannot be the same")
-// 	}
-
-// 	// check if diaglogReference is invalid
-// 	invalid_label := dialogue.dialogueMessage.dialogueReference[0] != "" || dialogue.dialogueMessage.dialogueReference[1] != ""
-
-// 	// check if dialog is new
-// 	new_dialogue := dialogue.dialogueMessage.dialogueReference[0] != "" && dialogue.dialogueMessage.dialogueReference[1] == "" && dialogue.dialogueMessage.message_id == 1
-
-// 	// check if dialogue is incomplete and having non-initial message
-// 	incompleteLableAndNonInitialMessage := dialogue.dialogueMessage.dialogueReference[0] != "" && dialogue.dialogueMessage.dialogueReference[1] == "" && dialogue.dialogueMessage.message_id != 0 || dialogue.dialogueMessage.message_id != 1
-
-// 	if invalid_label {
-// 		// dialogue = empty
-// 		return
-// 	} else if new_dialogue {
-// 		dialogue.createOpponentInitiated()
-// 	} else if incompleteLableAndNonInitialMessage {
-// 		dialogue.getDialogue()
-// 	} else {
-// 		dialogue.completeDialogurReference()
-// 		dialogue.dialogueMessage.getDialogue()
-// 	}
-// 	if dialogue != nil {
-// 		dialogue.internalUpdate()
-// 		// if errors remove from storage
-// 	}
-// }
-
-// func (dialogue *Dialogue) createOpponentInitiated() {
-// 	if dialogue.dialogueMessage.dialogueReference[0] != "" && dialogue.dialogueMessage.dialogueReference[1] == "" {
-// 		fmt.Println("Cannot initiate dialogue with preassigned dialogue responder")
-// 	}
-// 	dialogue.dialogueMessage.dialogueReference[0] = generateDialogueNonce()
-// 	dialogue.dialogueMessage.createDialogue()
-// }
-
-// func (dialogue *Dialogue) getDialogue() {
-// 	// self_inititalted_dialogue_label
-// 	self_inititiated_dialogue_label := &DialogueLabel{
-// 		dialogueReference:       dialogue.dialogueLabel.dialogueReference,
-// 		dialogueOpponentAddress: dialogue.dialogueMessage.to,
-// 		dialogueStarterAddress:  dialogue.selfAddress,
-// 	}
-// 	// other inititalted_dialogue label
-// 	other_inititiated_dialogue_label := &DialogueLabel{
-// 		dialogueReference:       dialogue.dialogueLabel.dialogueReference,
-// 		dialogueOpponentAddress: dialogue.dialogueMessage.to,
-// 		dialogueStarterAddress:  dialogue.dialogueMessage.to,
-// 	}
-// 	// get latest self initiated dialogur label
-// 	pair := dialogue.dialogueMessage.sender + dialogue.dialogueMessage.to
-// 	if len(dialogueStorage[pair]) > 0 {
-// 		index := len(dialogueStorage[pair])
-// 		dialogueStorage[pair][index]
-// 	}
-
-// 	// get other initiated dialogue label
-// 	// get delf initiated dialogue from label
-// 	// get other initiated dialogue from label
-// }
-
-// func (data *InitialMessage) createDialogue() *Dialogue {
-
-// 	// TODO
-// 	// define dialog ROLE for dialog initiator
-
-// 	incompleteDialogueLabel := data.checkAndProcessLabels()
-// 	pair := data.sender + data.to
-// 	if len(dialogueStorage[pair]) > 0 {
-// 		for _, dialogue := range dialogueStorage[pair] {
-// 			if incompleteDialogueLabel == dialogue {
-// 				fmt.Println("Error : incomplete dialogue label already present in storage")
-// 				return nil
-// 			}
-// 		}
-// 	}
-// 	dialogueLabel := incompleteDialogueLabel
-
-// 	// TODO
-// 	// initialize completeLabel
-// 	// if completeLabel != nil {
-// 	// 	dialogueLabel = completeDialogueLabel
-// 	// }
-
-// 	if len(dialogueStorage[data.sender+data.to]) > 0 {
-// 		for _, dialogue := range dialogueStorage[data.sender+data.to] {
-// 			if dialogueLabel == dialogue {
-// 				fmt.Println("Error : Dialogue label already present in storage")
-// 				return nil
-// 			}
-// 		}
-// 	}
-
-// 	dialogue := &Dialogue{
-// 		dialogueLabel:   dialogueLabel,
-// 		dialogueMessage: data,
-// 		selfAddress:     data.sender,
-// 	}
-
-// 	return dialogue
-
-// }
