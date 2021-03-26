@@ -305,6 +305,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
     DEFAULT_CONNECTION_EXCEPTION_POLICY = ExceptionPolicyEnum.propagate
     DEFAULT_LOOP_MODE = "async"
     DEFAULT_RUNTIME_MODE = "threaded"
+    DEFAULT_TASKMANAGER_MODE = "threaded"
     DEFAULT_SEARCH_SERVICE_ADDRESS = _DEFAULT_SEARCH_SERVICE_ADDRESS
     AEA_CLASS = AEA
     BUILD_TIMEOUT = 120
@@ -370,6 +371,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         if not is_full_reset:
             return
         self._default_ledger: Optional[str] = None
+        self._required_ledgers: Optional[List[str]] = None
         self._build_entrypoint: Optional[str] = None
         self._currency_denominations: Dict[str, str] = {}
         self._default_connection: Optional[PublicId] = None
@@ -390,6 +392,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self._default_routing: Dict[PublicId, PublicId] = {}
         self._loop_mode: Optional[str] = None
         self._runtime_mode: Optional[str] = None
+        self._task_manager_mode: Optional[str] = None
         self._search_service_address: Optional[str] = None
         self._storage_uri: Optional[str] = None
         self._data_dir: Optional[str] = None
@@ -648,6 +651,18 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self._runtime_mode = runtime_mode
         return self
 
+    def set_task_manager_mode(
+        self, task_manager_mode: Optional[str]
+    ) -> "AEABuilder":  # pragma: nocover
+        """
+        Set the task_manager_mode.
+
+        :param task_manager_mode: the agent task_manager_mode
+        :return: self
+        """
+        self._task_manager_mode = task_manager_mode
+        return self
+
     def set_storage_uri(
         self, storage_uri: Optional[str]
     ) -> "AEABuilder":  # pragma: nocover
@@ -844,6 +859,20 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :return: the AEABuilder
         """
         self._default_ledger = identifier
+        return self
+
+    def set_required_ledgers(
+        self, required_ledgers: Optional[List[str]]
+    ) -> "AEABuilder":  # pragma: nocover
+        """
+        Set the required ledger identifiers.
+
+        These are the ledgers for which the AEA requires a key pair.
+
+        :param required_ledgers: the required ledgers.
+        :return: the AEABuilder.
+        """
+        self._required_ledgers = required_ledgers
         return self
 
     def set_build_entrypoint(
@@ -1288,6 +1317,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         """
         datadir = self._get_data_dir()
         self._check_we_can_build()
+        self._preliminary_checks_before_build()
         logging.config.dictConfig(self._logging_config)
         wallet = self._build_wallet(datadir, password=password)
         identity = self._build_identity_from_wallet(wallet)
@@ -1323,6 +1353,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             default_connection=self._get_default_connection(),
             loop_mode=self._get_loop_mode(),
             runtime_mode=self._get_runtime_mode(),
+            task_manager_mode=self._get_task_manager_mode(),
             connection_ids=connection_ids,
             search_service_address=self._get_search_service_address(),
             storage_uri=self._get_storage_uri(),
@@ -1341,6 +1372,16 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :return: the default ledger identifier.
         """
         return self._default_ledger or self.DEFAULT_LEDGER
+
+    def get_required_ledgers(self) -> List[str]:
+        """
+        Get the required ledger identifiers.
+
+        These are the ledgers for which the AEA requires a key pair.
+
+        :return: the list of required ledgers.
+        """
+        return self._required_ledgers or [self.DEFAULT_LEDGER]
 
     def _get_agent_act_period(self) -> float:
         """
@@ -1480,6 +1521,18 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             self._runtime_mode
             if self._runtime_mode is not None
             else self.DEFAULT_RUNTIME_MODE
+        )
+
+    def _get_task_manager_mode(self) -> str:
+        """
+        Return the askmanager mode name.
+
+        :return: the taskmanager mode name
+        """
+        return (
+            self._task_manager_mode
+            if self._task_manager_mode is not None
+            else self.DEFAULT_TASKMANAGER_MODE
         )
 
     def _get_storage_uri(self) -> Optional[str]:
@@ -1647,6 +1700,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         # set name and other configurations
         self.set_name(agent_configuration.name)
         self.set_default_ledger(agent_configuration.default_ledger)
+        self.set_required_ledgers(agent_configuration.required_ledgers)
         self.set_build_entrypoint(agent_configuration.build_entrypoint)
         self.set_currency_denominations(agent_configuration.currency_denominations)
 
@@ -1675,6 +1729,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
         self.set_loop_mode(agent_configuration.loop_mode)
         self.set_runtime_mode(agent_configuration.runtime_mode)
+        self.set_task_manager_mode(agent_configuration.task_manager_mode)
         self.set_storage_uri(agent_configuration.storage_uri)
         self.set_data_dir(agent_configuration.data_dir)
         self.set_logging_config(agent_configuration.logging_config)
@@ -1913,6 +1968,22 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
                 component_path,
                 skip_consistency_check=skip_consistency_check,
             )
+
+    def _preliminary_checks_before_build(self) -> None:
+        """
+        Do consistency check on build parameters.
+
+        - Check that the specified default ledger is in the list of specified required ledgers.
+
+        :return: None
+        """
+        default_ledger = self.get_default_ledger()
+        required_ledgers = self.get_required_ledgers()
+        enforce(
+            default_ledger in required_ledgers,
+            exception_text=f"Default ledger '{default_ledger}' not declared in the list of required ledgers: {required_ledgers}.",
+            exception_class=AEAValidationError,
+        )
 
 
 def make_component_logger(

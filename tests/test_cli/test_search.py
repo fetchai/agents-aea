@@ -53,7 +53,6 @@ class TestSearchProtocolsLocal:
     @classmethod
     def setup_class(cls):
         """Set the test up."""
-        cls.cwd = os.getcwd()
         cls.runner = CliRunner()
 
     @mock.patch("aea.cli.search.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT)
@@ -69,11 +68,6 @@ class TestSearchProtocolsLocal:
             "Protocols found:\n\n"
             "{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
         )
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear the test down."""
-        os.chdir(cls.cwd)
 
 
 class TestSearchContractsLocal(TestCase):
@@ -120,7 +114,6 @@ class TestSearchConnectionsLocal:
     @classmethod
     def setup_class(cls):
         """Set the test up."""
-        cls.cwd = os.getcwd()
         cls.runner = CliRunner()
 
     @mock.patch("aea.cli.search.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT)
@@ -137,11 +130,6 @@ class TestSearchConnectionsLocal:
             "{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
         )
 
-    @classmethod
-    def teardown_class(cls):
-        """Tear the test down."""
-        os.chdir(cls.cwd)
-
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 class TestSearchSkillsLocal:
@@ -150,7 +138,6 @@ class TestSearchSkillsLocal:
     @classmethod
     def setup_class(cls):
         """Set the test up."""
-        cls.cwd = os.getcwd()
         cls.runner = CliRunner()
 
     @mock.patch("aea.cli.search.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT)
@@ -164,11 +151,6 @@ class TestSearchSkillsLocal:
             "Skills found:\n\n"
             "{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
         )
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear the test down."""
-        os.chdir(cls.cwd)
 
 
 class TestSearchAgentsLocal:

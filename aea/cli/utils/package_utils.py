@@ -309,13 +309,8 @@ def find_item_locally(
     item_name = item_public_id.name
 
     # check in registry
-    registry_path = (
-        os.path.join(ctx.cwd, ctx.agent_config.registry_path)
-        if ctx.registry_path is None
-        else ctx.registry_path
-    )
     package_path = Path(
-        registry_path, item_public_id.author, item_type_plural, item_name
+        ctx.registry_path, item_public_id.author, item_type_plural, item_name
     )
     config_file_name = _get_default_configuration_file_name_from_type(item_type)
     item_configuration_filepath = package_path / config_file_name
@@ -366,8 +361,7 @@ def find_item_in_distribution(  # pylint: disable=unused-argument
     item_name = item_public_id.name
 
     # check in aea dir
-    registry_path = AEA_DIR
-    package_path = Path(registry_path, item_type_plural, item_name)
+    package_path = Path(AEA_DIR, item_type_plural, item_name)
     config_file_name = _get_default_configuration_file_name_from_type(item_type)
     item_configuration_filepath = package_path / config_file_name
     if not item_configuration_filepath.exists():

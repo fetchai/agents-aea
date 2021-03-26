@@ -27,6 +27,7 @@ from pathlib import Path
 from typing import Optional, Tuple
 
 # pylint: skip-file
+from aea.__version__ import __version__ as __aea_version__
 from aea.configurations.base import ProtocolSpecificationParseError
 from aea.configurations.constants import (
     PROTOCOL_LANGUAGE_PYTHON,
@@ -54,6 +55,7 @@ from aea.protocols.generator.common import (
     apply_protolint,
     check_prerequisites,
     compile_protobuf_using_protoc,
+    get_protoc_version,
     load_protocol_specification,
     try_run_black_formatting,
     try_run_isort_formatting,
@@ -121,6 +123,8 @@ class ProtocolGenerator:
             check_prerequisites()
         except FileNotFoundError:
             raise
+
+        self.protoc_version = get_protoc_version()
 
         # Load protocol specification yaml file
         self.protocol_specification = load_protocol_specification(
@@ -1909,8 +1913,8 @@ class ProtocolGenerator:
         """
         init_str = _copyright_header_str(self.protocol_specification.author)
         init_str += "\n"
-        init_str += '"""This module contains the support resources for the {} protocol."""\n\n'.format(
-            self.protocol_specification.name
+        init_str += '"""\nThis module contains the support resources for the {} protocol.\n\nIt was created with protocol buffer compiler version `{}` and aea version `{}`.\n"""\n\n'.format(
+            self.protocol_specification.name, self.protoc_version, __aea_version__
         )
         init_str += "from {}.message import {}Message\n".format(
             self.dotted_path_to_protocol_package,

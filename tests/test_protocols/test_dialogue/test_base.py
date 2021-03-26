@@ -372,28 +372,6 @@ class TestDialogueBase:
             == self.valid_message_2_by_other
         )
 
-    def test_get_message(self):
-        """Test the 'get_message' method."""
-        with pytest.raises(ValueError) as cm:
-            self.dialogue._get_message(self.valid_message_1_by_self.message_id)
-        assert str(cm.value) == "Message not present."
-
-        self.dialogue._update(self.valid_message_1_by_self)
-        assert (
-            self.dialogue._get_message(self.valid_message_1_by_self.message_id)
-            == self.valid_message_1_by_self
-        )
-
-        with pytest.raises(ValueError) as cm:
-            self.dialogue._get_message(self.valid_message_2_by_other.message_id)
-        assert str(cm.value) == "Message not present."
-
-        self.dialogue._update(self.valid_message_2_by_other)
-        assert (
-            self.dialogue._get_message(self.valid_message_2_by_other.message_id)
-            == self.valid_message_2_by_other
-        )
-
     def test_has_message_id(self):
         """Test the 'has_message_id' method."""
         assert self.dialogue._has_message_id(1) is False

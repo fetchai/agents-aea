@@ -18,6 +18,8 @@
 # ------------------------------------------------------------------------------
 """Test module for aea.cli.remove.remove_item method."""
 import os
+import shutil
+import tempfile
 from pathlib import Path
 from unittest import TestCase, mock
 from unittest.mock import patch
@@ -37,10 +39,15 @@ from aea.configurations.base import (
 from aea.configurations.constants import DEFAULT_PROTOCOL
 from aea.configurations.loader import ConfigLoader
 from aea.helpers.base import cd
+from aea.test_tools.click_testing import CliRunner
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
+from packages.fetchai.connections.http_client.connection import (
+    PUBLIC_ID as HTTP_CLIENT_PUBLIC_ID,
+)
 from packages.fetchai.connections.soef.connection import PUBLIC_ID as SOEF_PUBLIC_ID
 
+from tests.conftest import AUTHOR, CLI_LOG_OPTION, CUR_PATH
 from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
 
 
@@ -183,3 +190,60 @@ class TestRemoveConfig(
                 not in config.component_configurations
             )
             assert config.component_configurations
+
+
+class TestRemoveWithIncompatibleAEAVersion:
+    """Test remove command when agent/package has incompatible aea version."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.runner = CliRunner()
+        cls.agent_name = "myagent"
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        # copy the 'packages' directory in the parent of the agent folder.
+        shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))
+        cls.connection_id = str(HTTP_CLIENT_PUBLIC_ID)
+        cls.connection_name = "http_client"
+
+        os.chdir(cls.t)
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
+        )
+        assert result.exit_code == 0
+        result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],
+            standalone_mode=False,
+        )
+        assert result.exit_code == 0
+        os.chdir(cls.agent_name)
+        result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "--local", "connection", cls.connection_id],
+            standalone_mode=False,
+        )
+        assert result.exit_code == 0
+
+    def test_exit_code_equal_to_zero(self):
+        """Test that the exit code is equal to 1 (i.e. catchall for general errors)."""
+
+        with patch("aea.configurations.base.__aea_version__", "2.0.0"):
+            result = self.runner.invoke(
+                cli,
+                [*CLI_LOG_OPTION, "remove", "connection", self.connection_id],
+                standalone_mode=False,
+                catch_exceptions=False,
+            )
+
+            assert result.exit_code == 0
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass

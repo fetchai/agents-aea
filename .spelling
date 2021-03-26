@@ -173,6 +173,14 @@ plugin
 Fetch.AI
 AEALite
 Pipfile
+12-factor
+Disposability
+disposability
+ad-hoc
+Nuitka
+Perun
+1.0.0rc1
+docstrings
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id

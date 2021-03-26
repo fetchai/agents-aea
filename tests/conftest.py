@@ -238,7 +238,7 @@ FETCHAI_TESTNET_CONFIG = {"address": FETCHAI_DEFAULT_ADDRESS}
 # common public ids used in the tests
 UNKNOWN_PROTOCOL_PUBLIC_ID = PublicId("unknown_author", "unknown_protocol", "0.1.0")
 UNKNOWN_CONNECTION_PUBLIC_ID = PublicId("unknown_author", "unknown_connection", "0.1.0")
-MY_FIRST_AEA_PUBLIC_ID = PublicId.from_str("fetchai/my_first_aea:0.23.0")
+MY_FIRST_AEA_PUBLIC_ID = PublicId.from_str("fetchai/my_first_aea:0.24.0")
 
 DUMMY_SKILL_PATH = os.path.join(CUR_PATH, "data", "dummy_skill", SKILL_YAML)
 
@@ -877,6 +877,7 @@ def _make_libp2p_connection(
         key.identifier,
         "2021-01-01",
         "2021-01-02",
+        "{public_key}",
         f"./{key.address}_cert.txt",
     )
     _process_cert(key, cert_request, path_prefix=data_dir)
@@ -947,6 +948,7 @@ def _make_libp2p_client_connection(
         ledger_api_id,
         "2021-01-01",
         "2021-01-02",
+        "{public_key}",
         f"./{crypto.address}_cert.txt",
     )
     _process_cert(crypto, cert_request, path_prefix=data_dir)

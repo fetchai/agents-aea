@@ -17,7 +17,11 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the support resources for the prometheus protocol."""
+"""
+This module contains the support resources for the prometheus protocol.
+
+It was created with protocol buffer compiler version `libprotoc 3.11.4` and aea version `1.0.0rc1`.
+"""
 
 from packages.fetchai.protocols.prometheus.message import PrometheusMessage
 from packages.fetchai.protocols.prometheus.serialization import PrometheusSerializer

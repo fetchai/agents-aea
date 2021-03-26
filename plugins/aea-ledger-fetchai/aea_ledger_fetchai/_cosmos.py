@@ -617,7 +617,7 @@ class CosmosCrypto(Crypto[SigningKey]):
             return DataEncrypt.decrypt(keyfile_json.encode(), password).decode()
         except UnicodeDecodeError as e:
             raise ValueError(
-                "key file data can not be translated to string! bad bassword?"
+                "key file data can not be translated to string! bad password?"
             ) from e
 
 

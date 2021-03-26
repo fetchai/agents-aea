@@ -1,6 +1,6 @@
 name: simple_oracle_client
 author: fetchai
-version: 0.6.0
+version: 0.7.0
 type: skill
 description: This skill deploys a Fetch oracle client contract and calls this contract
   to request an oracle value
@@ -8,20 +8,20 @@ license: Apache-2.0
 aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint:
   README.md: QmRqzw2aTE6rsUnoB8XvvWoF4sg4ZUpvgQwStZpAVG5sUj
-  __init__.py: QmSNvTLPSBHx7e7Y6ZMKxK4Xm8CWbqRUvL2DPrDmgyCXX2
+  __init__.py: QmZvzxYGzC4DgMXygC197GvWWUHNwuBRweWqiYswR8ZYiK
   behaviours.py: QmQdLKpeUdXumdtmLuJmK2Ji4CebEAR4stxdfTEjsJENdx
   dialogues.py: QmR1KyLjLzHGGnYtLbshvnftsTRuCEPXjs5PzJswjU4hNV
-  handlers.py: QmcJFAdTuD4rgFYHM1SGfN1HzG9husefy8b6zndtQPA7uW
+  handlers.py: Qmdio2768x2d1qTEmDb39K23kw1Va8LxZiuKQDh5f54Z93
   strategy.py: QmP5Q6STwQzDEsPMhpzLoRjpj3qNGrdZX8VzVxVv1PZmDL
 fingerprint_ignore_patterns: []
 contracts:
-- fetchai/fet_erc20:0.5.0
-- fetchai/oracle_client:0.5.0
+- fetchai/fet_erc20:0.6.0
+- fetchai/oracle_client:0.6.0
 protocols:
-- fetchai/contract_api:0.12.0
-- fetchai/default:0.13.0
-- fetchai/ledger_api:0.11.0
-- fetchai/signing:0.11.0
+- fetchai/contract_api:0.13.0
+- fetchai/default:0.14.0
+- fetchai/ledger_api:0.12.0
+- fetchai/signing:0.12.0
 skills: []
 behaviours:
   simple_oracle_client_behaviour:
@@ -56,9 +56,9 @@ models:
       default_gas_deploy: 10000000
       default_gas_query: 250000
       erc20_address: null
-      ledger_id: ethereum
+      ledger_id: null
       oracle_contract_address: null
-      query_function: queryOracleValue
+      query_function: null
     class_name: Strategy
 dependencies:
   aea-ledger-ethereum:

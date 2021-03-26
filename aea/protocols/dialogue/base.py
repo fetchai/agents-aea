@@ -583,19 +583,6 @@ class Dialogue(metaclass=_DialogueMeta):
         """
         return not self._is_message_by_self(message)
 
-    def _get_message(self, message_id: int) -> Message:
-        """
-        Get the message whose id is 'message_id'.
-
-        :param message_id: the id of the message
-        :return: the message
-        :raises: AssertionError if message is not present
-        """
-        message = self.get_message_by_id(message_id)
-        if message is None:
-            raise ValueError("Message not present.")
-        return message
-
     def _has_message_id(self, message_id: int) -> bool:
         """
         Check whether a message with the supplied message id exists in this dialogue.

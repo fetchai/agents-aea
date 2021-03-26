@@ -14,14 +14,15 @@ aea_version: '>=1.0.0rc1, <2.0.0'               # AEA framework version(s) compa
 fingerprint: {}                                 # Fingerprint of AEA project components.
 fingerprint_ignore_patterns: []                 # Ignore pattern for the fingerprinting tool.
 connections:                                    # The list of connection public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX)
-- fetchai/stub:0.18.0
+- fetchai/stub:0.19.0
 contracts: []                                   # The list of contract public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX).
 protocols:                                      # The list of protocol public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX).
-- fetchai/default:0.13.0
+- fetchai/default:0.14.0
 skills:                                         # The list of skill public ids the AEA project depends on (each public id must satisfy PUBLIC_ID_REGEX).
-- fetchai/error:0.13.0
-default_connection: fetchai/p2p_libp2p:0.18.0   # The default connection used for envelopes sent by the AEA (must satisfy PUBLIC_ID_REGEX).
+- fetchai/error:0.14.0
+default_connection: fetchai/p2p_libp2p:0.19.0   # The default connection used for envelopes sent by the AEA (must satisfy PUBLIC_ID_REGEX).
 default_ledger: fetchai                         # The default ledger identifier the AEA project uses (must satisfy LEDGER_ID_REGEX)
+required_ledgers: [fetchai]                            # the list of identifiers of ledgers that the AEA project requires key pairs for (each item must satisfy LEDGER_ID_REGEX)
 default_routing: {}                             # The default routing scheme applied to envelopes sent by the AEA, it maps from protocol public ids to connection public ids (both keys and values must satisfy PUBLIC_ID_REGEX)
 connection_private_key_paths:                   # The private key paths the AEA project uses for its connections (keys must satisfy LEDGER_ID_REGEX, values must be file paths)
   fetchai: fetchai_private_key.txt
@@ -30,7 +31,6 @@ private_key_paths:                              # The private key paths the AEA 
 logging_config:                                 # The logging configurations the AEA project uses
   disable_existing_loggers: false
   version: 1
-registry_path: ../packages                      # The path to the local package registry (must be a directory path and point to a directory called `packages`)
 dependencies: {}                                # The python dependencies the AEA relies on (e.g. plugins).
 ```
 ``` yaml

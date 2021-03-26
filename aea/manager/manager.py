@@ -225,6 +225,11 @@ class MultiAgentManager:
             "agents": [alias.dict for alias in self._agents.values()],
         }
 
+    @property
+    def projects(self) -> Dict[PublicId, Project]:
+        """Get all projects."""
+        return self._projects
+
     def _run_thread(self) -> None:
         """Run internal thread with own event loop."""
         self._loop = asyncio.new_event_loop()
@@ -386,8 +391,6 @@ class MultiAgentManager:
                 f"The project ({public_id.author}/{public_id.name}) was already added!"
             )
 
-        self._versionless_projects_set.add(public_id.to_any())
-
         project = Project.load(
             self.working_dir,
             public_id,
@@ -410,6 +413,7 @@ class MultiAgentManager:
                 f"Failed to load project: {public_id} Error: {str(e)}", e
             )
 
+        self._versionless_projects_set.add(public_id.to_any())
         self._projects[public_id] = project
         return self
 

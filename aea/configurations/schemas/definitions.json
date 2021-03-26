@@ -145,6 +145,10 @@
       "type": "string",
       "enum": ["async", "threaded"]
     },
+    "task_manager_mode": {
+      "type": "string",
+      "enum": ["threaded"]
+    },
     "storage_uri": {
       "type": "string"
     },
@@ -216,6 +220,9 @@
           "type": "string"
         },
         "not_after": {
+          "type": "string"
+        },
+        "message_format": {
           "type": "string"
         },
         "save_path": {

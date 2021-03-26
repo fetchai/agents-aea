@@ -42,7 +42,7 @@ None
 #### `__`init`__`
 
 ```python
- | __init__(identity: Identity, wallet: Wallet) -> None
+ | __init__(identity: Identity, wallet: Wallet, config: Dict[str, Any]) -> None
 ```
 
 Initialize the decision maker.
@@ -51,6 +51,7 @@ Initialize the decision maker.
 
 - `identity`: the identity
 - `wallet`: the wallet
+- `config`: the user defined configuration of the handler
 
 <a name="aea.decision_maker.default.DecisionMakerHandler.handle"></a>
 #### handle

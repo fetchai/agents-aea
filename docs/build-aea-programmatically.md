@@ -62,7 +62,7 @@ We will use the stub connection to pass envelopes in and out of the AEA. Ensure 
 ```
 
 ## Initialise the AEA
-We use the <a href="../api/aea_builder#aeabuilder-objects">`AEABuilder`</a> to readily build an AEA. By default, the `AEABuilder` adds the `fetchai/default:0.13.0`, `fetchai/state_update:0.11.0` and `fetchai/signing:0.11.0` protocols.
+We use the <a href="../api/aea_builder#aeabuilder-objects">`AEABuilder`</a> to readily build an AEA. By default, the `AEABuilder` adds the `fetchai/default:0.14.0`, `fetchai/state_update:0.12.0` and `fetchai/signing:0.12.0` protocols.
 ``` python
     # Instantiate the builder and build the AEA
     # By default, the default protocol, error skill and stub connection are added
@@ -168,8 +168,8 @@ Finally stop our AEA and wait for it to finish
 ## Running the AEA
 If you now run this python script file, you should see this output:
 
-    input message: my_aea,other_agent,fetchai/default:0.13.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,
-    output message: other_agent,my_aea,fetchai/default:0.13.0,...\x05hello
+    input message: my_aea,other_agent,fetchai/default:0.14.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,
+    output message: other_agent,my_aea,fetchai/default:0.14.0,...\x05hello
 
 
 ## Entire code listing

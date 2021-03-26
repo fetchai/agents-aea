@@ -87,10 +87,10 @@ class TestConfigCases(AEATestCaseEmpty):
 
     def test_agent_nested_set_agent_simple(self):
         """Test agent test nested set from path."""
-        key_name = "agent.registry_path"
-        self.nested_set_config(key_name, "some_path")
+        key_name = "agent.default_ledger"
+        self.nested_set_config(key_name, "some_ledger")
         result = self.run_cli_command("config", "get", key_name, cwd=self._get_cwd())
-        assert b"some_path" in result.stdout_bytes
+        assert b"some_ledger" in result.stdout_bytes
 
     def test_agent_nested_set_skill_simple(self):
         """Test agent test nested set from path."""

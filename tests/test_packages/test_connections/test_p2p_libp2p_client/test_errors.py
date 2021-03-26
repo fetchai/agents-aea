@@ -84,6 +84,7 @@ class TestLibp2pClientConnectionFailureConnectionSetup:
             DEFAULT_LEDGER,
             "2021-01-01",
             "2021-01-02",
+            "{public_key}",
             f"./{crypto.address}_cert.txt",
         )
         _process_cert(crypto, cls.cert_request, cls.t)

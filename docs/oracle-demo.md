@@ -19,7 +19,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 Fetch the AEA that will deploy and update the oracle contract.
 
 ``` bash
-aea fetch fetchai/coin_price_oracle:0.9.0
+aea fetch fetchai/coin_price_oracle:0.10.0
 cd coin_price_oracle
 aea install
 aea build
@@ -33,17 +33,17 @@ Create the AEA that will deploy the contract.
 ``` bash
 aea create coin_price_oracle
 cd coin_price_oracle
-aea add connection fetchai/http_client:0.19.0
-aea add connection fetchai/ledger:0.15.0
-aea add connection fetchai/p2p_libp2p:0.18.0
-aea add skill fetchai/advanced_data_request:0.1.0
-aea add skill fetchai/simple_oracle:0.8.0
+aea add connection fetchai/http_client:0.20.0
+aea add connection fetchai/ledger:0.16.0
+aea add connection fetchai/p2p_libp2p:0.19.0
+aea add skill fetchai/advanced_data_request:0.2.0
+aea add skill fetchai/simple_oracle:0.9.0
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0rc1"},
   "aea-ledger-ethereum": {"version": "<2.0.0,>=1.0.0rc1"}
 }'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.18.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.19.0
 aea install
 aea build
 ```
@@ -62,9 +62,9 @@ Then update the agent configuration with the default routing:
 ``` bash
 aea config set --type dict agent.default_routing \
 '{
-"fetchai/contract_api:0.12.0": "fetchai/ledger:0.15.0",
-"fetchai/http:0.13.0": "fetchai/http_client:0.19.0",
-"fetchai/ledger_api:0.11.0": "fetchai/ledger:0.15.0"
+"fetchai/contract_api:0.13.0": "fetchai/ledger:0.16.0",
+"fetchai/http:0.14.0": "fetchai/http_client:0.20.0",
+"fetchai/ledger_api:0.12.0": "fetchai/ledger:0.16.0"
 }'
 ```
 
@@ -115,7 +115,7 @@ aea issue-certificates
 From a new terminal (in the same top-level directory), fetch the AEA that will deploy the oracle client contract and call the function that requests the coin price from the oracle contract.
 
 ``` bash
-aea fetch fetchai/coin_price_oracle_client:0.6.0
+aea fetch fetchai/coin_price_oracle_client:0.7.0
 cd coin_price_oracle_client
 aea install
 ```
@@ -128,15 +128,15 @@ Create the AEA that will deploy the contract.
 ``` bash
 aea create coin_price_oracle_client
 cd coin_price_oracle_client
-aea add connection fetchai/http_client:0.19.0
-aea add connection fetchai/ledger:0.15.0
-aea add skill fetchai/simple_oracle_client:0.6.0
+aea add connection fetchai/http_client:0.20.0
+aea add connection fetchai/ledger:0.16.0
+aea add skill fetchai/simple_oracle_client:0.7.0
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0rc1"},
   "aea-ledger-ethereum": {"version": "<2.0.0,>=1.0.0rc1"}
 }'
-aea config set agent.default_connection fetchai/ledger:0.15.0
+aea config set agent.default_connection fetchai/ledger:0.16.0
 aea install
 aea build
 ```
@@ -145,17 +145,13 @@ Then update the agent configuration with the default routing:
 ``` bash
 aea config set --type dict agent.default_routing \
 '{
-"fetchai/contract_api:0.12.0": "fetchai/ledger:0.15.0",
-"fetchai/http:0.13.0": "fetchai/http_client:0.19.0",
-"fetchai/ledger_api:0.11.0": "fetchai/ledger:0.15.0"
+"fetchai/contract_api:0.13.0": "fetchai/ledger:0.16.0",
+"fetchai/http:0.14.0": "fetchai/http_client:0.20.0",
+"fetchai/ledger_api:0.12.0": "fetchai/ledger:0.16.0"
 }'
 ```
 
-</p>
-</details>
-
-
-Change the default ledger:
+Set the default ledger:
 ``` bash
 aea config set agent.default_ledger $LEDGER_ID
 ```
@@ -174,9 +170,9 @@ aea generate-wealth $LEDGER_ID
 
 The oracle AEAs require either a locally running test node or a connection to a remote testnet.
 
-### Setting up with a local Ganache node
+### Setting up with a local Ganache node (Ethereum ledger only)
 
-The easiest way to test the oracle agents is to set up a local Ethereum test node using Ganache. This can be done by running the following docker command from the directory you started from (in a new terminal). This command will also fund the accounts of the AEAs:
+The easiest way to test the oracle agents on an Ethereum-based ledger to set up a local test node using Ganache. This can be done by running the following docker command from the directory you started from (in a new terminal). This command will also fund the accounts of the AEAs:
 
 ``` bash
 docker run -p 8545:8545 trufflesuite/ganache-cli:latest --verbose --gasPrice=0 --gasLimit=0x1fffffffffffff --account="$(cat coin_price_oracle/ethereum_private_key.txt),1000000000000000000000" --account="$(cat coin_price_oracle_client/ethereum_private_key.txt),1000000000000000000000"

@@ -143,6 +143,7 @@ def run():
         not_after="2022-01-01",
         not_before="2021-01-01",
         public_key="fetchai",
+        message_format="{public_key}",
         save_path=cert_path,
     )
     public_key = wallet.connection_cryptos.public_keys.get(FetchAICrypto.identifier)

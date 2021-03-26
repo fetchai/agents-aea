@@ -1,26 +1,26 @@
 name: simple_oracle
 author: fetchai
-version: 0.8.0
+version: 0.9.0
 type: skill
 description: This skill deploys a Fetch oracle contract
 license: Apache-2.0
 aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint:
   README.md: QmcvyraEedZd5PEnmbijkkcsDrQQKDVJxPDUXVrwP3Ni3J
-  __init__.py: Qma7RnDbqAVQ2cJ4JP2PpE4d9s8ZkxUbQQtQ82dfR563fe
+  __init__.py: QmSMQMrybhgbq3CyZqSBb2s9EGDTy35jLg9GFRX2xzFenr
   behaviours.py: Qmes3sypsSxWdNnjtzhUKUkPVcqjomD1FkmBdWyUtP4ohk
   dialogues.py: QmVCJ1WoW4xEDrYs56VbTvMiKu1YST7T3DrTjhAyYoBFJa
-  handlers.py: QmVTLcGdm7TR1NXeWuP18jciLtfYisoEtvJeVfE3xXz4FQ
+  handlers.py: QmcoWLLQz3UeUxnfQjdhWCabS9i4UfXvvyx7uEQmPwmF9c
   strategy.py: QmY4bUU98FWDvZuif6TsowUUhSsh1hFSVsawsZ89YiVABK
 fingerprint_ignore_patterns: []
 contracts:
-- fetchai/oracle:0.6.0
+- fetchai/oracle:0.7.0
 protocols:
-- fetchai/contract_api:0.12.0
-- fetchai/default:0.13.0
-- fetchai/ledger_api:0.11.0
-- fetchai/prometheus:0.4.0
-- fetchai/signing:0.11.0
+- fetchai/contract_api:0.13.0
+- fetchai/default:0.14.0
+- fetchai/ledger_api:0.12.0
+- fetchai/prometheus:0.5.0
+- fetchai/signing:0.12.0
 skills: []
 behaviours:
   simple_oracle_behaviour:
@@ -72,9 +72,9 @@ models:
       erc20_address: '0x0000000000000000000000000000000000000000'
       initial_fee_deploy: 1000000000000
       is_oracle_role_granted: false
-      ledger_id: ethereum
+      ledger_id: null
       oracle_value_name: null
-      update_function: updateOracleValue
+      update_function: null
     class_name: Strategy
 dependencies:
   aea-ledger-ethereum:

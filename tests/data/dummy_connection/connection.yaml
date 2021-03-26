@@ -16,7 +16,7 @@ class_name: DummyConnection
 config: {}
 excluded_protocols: []
 restricted_to_protocols:
-- fetchai/default:0.13.0
+- fetchai/default:0.14.0
 dependencies:
   dep1:
     version: ==1.0.0
@@ -30,12 +30,14 @@ is_abstract: false
 cert_requests:
 - identifier: cert_id_1
   ledger_id: some_ledger_id
+  message_format: '{public_key}'
   not_after: '2020-01-02'
   not_before: '2020-01-01'
   public_key: key_id
   save_path: /source/some/path_1
 - identifier: cert_id_2
   ledger_id: some_ledger_id
+  message_format: '{public_key}'
   not_after: '2020-01-02'
   not_before: '2020-01-01'
   public_key: '0xABCDEF123456'

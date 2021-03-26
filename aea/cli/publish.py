@@ -158,19 +158,19 @@ def _save_agent_locally(ctx: Context, is_mixed: bool = False) -> None:
                 _check_is_item_in_registry_mixed(
                     PublicId.from_str(str(public_id)),
                     item_type_plural,
-                    ctx.agent_config.registry_path,
+                    ctx.registry_path,
                 )
             else:
                 _check_is_item_in_local_registry(
                     PublicId.from_str(str(public_id)),
                     item_type_plural,
-                    ctx.agent_config.registry_path,
+                    ctx.registry_path,
                 )
 
     item_type_plural = AGENTS
 
     target_dir = try_get_item_target_path(
-        ctx.agent_config.registry_path,
+        ctx.registry_path,
         ctx.agent_config.author,
         item_type_plural,
         ctx.agent_config.name,

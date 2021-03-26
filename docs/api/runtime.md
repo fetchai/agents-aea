@@ -25,7 +25,7 @@ Abstract runtime class to create implementations.
 #### `__`init`__`
 
 ```python
- | __init__(agent: AbstractAgent, multiplexer_options: Dict, loop_mode: Optional[str] = None, loop: Optional[AbstractEventLoop] = None, threaded: bool = False) -> None
+ | __init__(agent: AbstractAgent, multiplexer_options: Dict, loop_mode: Optional[str] = None, loop: Optional[AbstractEventLoop] = None, threaded: bool = False, task_manager_mode: Optional[str] = None) -> None
 ```
 
 Init runtime.

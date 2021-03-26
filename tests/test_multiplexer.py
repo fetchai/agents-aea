@@ -1102,3 +1102,20 @@ async def test_connection_timeouts():
         match=f"Failed to disconnect multiplexer, some connections are not disconnected.*{str(connection.connection_id)}",
     ):
         await multiplexer.disconnect()
+
+
+@pytest.mark.asyncio
+async def test_stops_on_connectionerror_during_connect():
+    """Test multiplexer stopped and reraise exception on connect fails on conection.connect with AEAConnectionError."""
+
+    connection = _make_dummy_connection()
+
+    multiplexer = AsyncMultiplexer([connection])
+
+    with patch.object(
+        connection, "connect", side_effect=AEAConnectionError("expected")
+    ):
+        with pytest.raises(AEAConnectionError, match=r"expected"):
+            await multiplexer.connect()
+
+    assert multiplexer.connection_status.is_disconnected

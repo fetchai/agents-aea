@@ -77,7 +77,7 @@ def handle(msg):
         self._handle_a(msg)
 ```
 
-However, it could be helpful to overwrite this handler reaction with another callback (e.g. consider [this in context](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)):
+However, it could be helpful to overwrite this handler reaction with another callback (e.g. consider <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise" target="_blank">this in context</a>):
 ```
 # callable that handles the reply
 def my_callback(msg):
@@ -150,18 +150,18 @@ The `v1` of the Python AEA implementation makes every effort to minimise the amo
 
 It would be desirable to further reduce the dependencies, and potentially have an implementation that only relies on the Python standard library.
 
-This could be taken further, and a reduced spec version for [micropython](https://micropython.org) could be designed.
+This could be taken further, and a reduced spec version for <a href="https://micropython.org" target="_blank">micropython</a> could be designed.
 
 #### Compiled AEA
 
-Python is not a compiled language. However, various projects attempt this, e.g. [http://nuitka.net/doc/user-manual.html](http://nuitka.net/doc/user-manual.html) and it would be desirable to explore how useful and practical this would be in the context of AEA.
+Python is not a compiled language. However, various projects attempt this, e.g. <a href="https://nuitka.net/doc/user-manual.html" target="_blank">Nuitka</a> and it would be desirable to explore how useful and practical this would be in the context of AEA.
 
 #### DID integration
 
-It would be great to integrate https://www.w3.org/TR/did-core/ in the framework design, specifically identification of packages (most urgently protocols). Other projects and standards worth reviewing in the context (in particular with respect to identity):
+It would be great to integrate <a href="https://www.w3.org/TR/did-core/" target="_blank">DID</a> in the framework design, specifically identification of packages (most urgently protocols). Other projects and standards worth reviewing in the context (in particular with respect to identity):
 
-- [ERC 725: Ethereum Identity Standard](https://docs.ethhub.io/built-on-ethereum/identity/ERC725/) and [here](https://erc725alliance.org)
-- [ERC 735: Claim Holder](ethereum/EIPs#735)
+- <a href="https://docs.ethhub.io/built-on-ethereum/identity/ERC725/" target="_blank">ERC 725: Ethereum Identity Standard</a> and <a href="https://erc725alliance.org" target="_blank">here</a>.
+- <a href="https://github.com/ethereum/eips/issues/735" target="_blank">ERC 735: Claim Holder</a>
 
 #### Optimise protocol schemas and messages
 
@@ -227,7 +227,7 @@ A simple solution looks as follows: each time a transaction is constructed (requ
 
 This approach is currently used and implemented across all the reference skills.
 
-Related, the topic of latency in transactions. State channels provide a solution. E.g. https://github.com/perun-network/go-perun. There could also be an interesting overlap with our protocols here.
+Related, the topic of latency in transactions. State channels provide a solution. E.g. <a href="https://github.com/perun-network/go-perun" target="_blank">Perun</a>. There could also be an interesting overlap with our protocols here.
 
 
 #### Unsolved problems in `Multiplexer` - `AgentLoop` interplay

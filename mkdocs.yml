@@ -59,6 +59,7 @@ nav:
       - Create decision-maker transaction: 'decision-maker-transaction.md'
       - Testing Skills: 'skill-testing.md'
       - Deployment: 'deployment.md'
+      - 12-Factor app and AEAs: '12-factor.md'
       - Prometheus monitoring: 'prometheus.md'
       - Known limitations: 'known-limits.md'
       - Build an AEA programmatically: 'build-aea-programmatically.md'
@@ -70,6 +71,7 @@ nav:
       - Debugging: 'debug.md'
       - Profiling: 'runtime-cost.md'
       - Proof of Representation: 'por.md'
+      - Security: 'security.md'
     - Architecture & component deep-dives:
       - Design principles: 'design-principles.md'
       - Architectural diagram: 'diagram.md'
@@ -81,6 +83,7 @@ nav:
       - Ledger & Crypto APIs: 'ledger-integration.md'
       - Message routing: 'message-routing.md'
       - Configurations: 'config.md'
+      - Limitations of v1: 'limits.md'
     - Agent Communication:
       - Agent Communication Network: 'acn.md'
     - Search & Discovery:

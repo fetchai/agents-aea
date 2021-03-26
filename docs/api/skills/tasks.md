@@ -178,7 +178,7 @@ int
 #### enqueue`_`task
 
 ```python
- | enqueue_task(func: Callable, args: Sequence = (), kwds: Optional[Dict[str, Any]] = None) -> int
+ | enqueue_task(func: Callable, args: Sequence = (), kwargs: Optional[Dict[str, Any]] = None) -> int
 ```
 
 Enqueue a task with the executor.
@@ -187,7 +187,7 @@ Enqueue a task with the executor.
 
 - `func`: the callable instance to be enqueued
 - `args`: the positional arguments to be passed to the function.
-- `kwds`: the keyword arguments to be passed to the function.
+- `kwargs`: the keyword arguments to be passed to the function.
 :return the task id to get the the result.
 
 **Raises**:

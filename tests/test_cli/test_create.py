@@ -317,6 +317,10 @@ class TestCreateFailsWhenConfigFileIsNotCompliant:
 
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
+        dir_path = Path("packages")
+        tmp_dir = cls.t / dir_path
+        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
+        shutil.copytree(str(src_dir), str(tmp_dir))
         os.chdir(cls.t)
 
         result = cls.runner.invoke(
@@ -429,8 +433,6 @@ class TestCreateFailsWhenAlreadyInAEAProject:
 
         # calling 'aea create myagent' again within an AEA project - recursively.
         os.chdir(cls.agent_name)
-        os.mkdir("another_subdir")
-        os.chdir("another_subdir")
         cls.result = cls.runner.invoke(
             cli,
             [*CLI_LOG_OPTION, "create", "--local", cls.agent_name],

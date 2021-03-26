@@ -19,6 +19,7 @@
 """This test module contains the tests for aea.cli.utils module."""
 from builtins import FileNotFoundError
 from copy import deepcopy
+from tempfile import TemporaryDirectory
 from typing import cast
 from unittest import TestCase, mock
 from unittest.mock import MagicMock, patch
@@ -302,7 +303,7 @@ class FindItemLocallyTestCase(TestCase):
     )
     def test_find_item_locally_bad_config(self, *mocks):
         """Test find_item_locally for bad config result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.15.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.16.0")
         with self.assertRaises(ClickException) as cm:
             find_item_locally(ContextMock(), "skill", public_id)
 
@@ -316,7 +317,7 @@ class FindItemLocallyTestCase(TestCase):
     )
     def test_find_item_locally_cant_find(self, from_conftype_mock, *mocks):
         """Test find_item_locally for can't find result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.15.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.16.0")
         with self.assertRaises(ClickException) as cm:
             find_item_locally(ContextMock(), "skill", public_id)
 
@@ -335,7 +336,7 @@ class FindItemInDistributionTestCase(TestCase):
     )
     def testfind_item_in_distribution_bad_config(self, *mocks):
         """Test find_item_in_distribution for bad config result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.15.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.16.0")
         with self.assertRaises(ClickException) as cm:
             find_item_in_distribution(ContextMock(), "skill", public_id)
 
@@ -344,7 +345,7 @@ class FindItemInDistributionTestCase(TestCase):
     @mock.patch("aea.cli.utils.package_utils.Path.exists", return_value=False)
     def testfind_item_in_distribution_not_found(self, *mocks):
         """Test find_item_in_distribution for not found result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.15.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.16.0")
         with self.assertRaises(ClickException) as cm:
             find_item_in_distribution(ContextMock(), "skill", public_id)
 
@@ -358,7 +359,7 @@ class FindItemInDistributionTestCase(TestCase):
     )
     def testfind_item_in_distribution_cant_find(self, from_conftype_mock, *mocks):
         """Test find_item_locally for can't find result."""
-        public_id = PublicIdMock.from_str("fetchai/echo:0.15.0")
+        public_id = PublicIdMock.from_str("fetchai/echo:0.16.0")
         with self.assertRaises(ClickException) as cm:
             find_item_in_distribution(ContextMock(), "skill", public_id)
 
@@ -597,3 +598,20 @@ def test_password_option():
                 catch_exceptions=False,
                 standalone_mode=False,
             )
+
+
+def test_context_registry_path_does_not_exist():
+    """Test context registry path specified but not found."""
+    with pytest.raises(
+        ValueError, match="Registry path directory provided .* can not be found."
+    ):
+        Context(
+            cwd=".", verbosity="", registry_path="some_path_does_not_exist"
+        ).registry_path
+
+    with TemporaryDirectory() as tmp_dir:
+        with cd(tmp_dir):
+            with pytest.raises(
+                ValueError, match="Registry path not provided and `packages` not found"
+            ):
+                Context(cwd=".", verbosity="", registry_path=None).registry_path

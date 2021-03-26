@@ -342,9 +342,9 @@ class AsyncMultiplexer(Runnable, WithLogger):
                 self.connection_status.set(ConnectionStates.disconnecting)
                 await asyncio.wait_for(self._stop(), timeout=60)
                 self.logger.debug("Multiplexer disconnected.")
-            except (CancelledError) as e:
-                self.logger.exception("Exception on disconnect:")
-                raise AEAConnectionError("Failed to disconnect the multiplexer.") from e
+            except CancelledError:  # pragma: nocover
+                self.logger.debug("Multiplexer.disconnect cancellation!")
+                raise
             except Exception as e:
                 self.logger.exception("Exception on disconnect:")
                 raise AEAConnectionError(
