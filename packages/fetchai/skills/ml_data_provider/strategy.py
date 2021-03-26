@@ -52,7 +52,7 @@ DEFAULT_CLASSIFICATION = {"piece": "classification", "value": "seller"}
 class NumpyArrayEncoder(json.JSONEncoder):
     """This class defines a custom JSON encoder for numpy ndarray objects."""
 
-    def default(self, obj: Any) -> Any:
+    def default(self, obj: Any) -> Any:  # pylint: disable=arguments-differ
         """Encode an object (including a numpy ndarray) into its JSON representation."""
         if isinstance(obj, np.ndarray):
             return obj.tolist()
