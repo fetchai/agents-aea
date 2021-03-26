@@ -219,7 +219,7 @@ class Strategy(Model):
 
     @staticmethod
     def encode_sample_data(data: Tuple) -> bytes:
-        """Serialise data (a tuple of two numpy ndarrays) into bytes."""
+        """Serialize data (a tuple of two numpy ndarrays) into bytes."""
         data_dict = {
             "data_0": data[0],
             "data_1": data[1],

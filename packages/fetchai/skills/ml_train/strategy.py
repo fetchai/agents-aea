@@ -259,7 +259,7 @@ class Strategy(Model):
 
     @staticmethod
     def decode_sample_data(payload: bytes) -> Optional[Tuple[np.ndarray, np.ndarray]]:
-        """Deserialise a bytes payload into data (a tuple of two numpy ndarrays or None)."""
+        """Deserialize a bytes payload into data (a tuple of two numpy ndarrays or None)."""
         decoded_payload = json.loads(payload)
         if decoded_payload is None:
             return None
