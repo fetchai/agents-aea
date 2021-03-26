@@ -1,5 +1,5 @@
 ``` bash
-aea fetch fetchai/coin_price_oracle:0.9.0
+aea fetch fetchai/coin_price_oracle:0.10.0
 cd coin_price_oracle
 aea install
 aea build
@@ -7,17 +7,17 @@ aea build
 ``` bash
 aea create coin_price_oracle
 cd coin_price_oracle
-aea add connection fetchai/http_client:0.19.0
-aea add connection fetchai/ledger:0.15.0
-aea add connection fetchai/p2p_libp2p:0.18.0
-aea add skill fetchai/advanced_data_request:0.1.0
-aea add skill fetchai/simple_oracle:0.8.0
+aea add connection fetchai/http_client:0.20.0
+aea add connection fetchai/ledger:0.16.0
+aea add connection fetchai/p2p_libp2p:0.19.0
+aea add skill fetchai/advanced_data_request:0.2.0
+aea add skill fetchai/simple_oracle:0.9.0
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0rc1"},
   "aea-ledger-ethereum": {"version": "<2.0.0,>=1.0.0rc1"}
 }'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.18.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.19.0
 aea install
 aea build
 ```
@@ -30,9 +30,9 @@ aea config set --type list vendor.fetchai.skills.advanced_data_request.models.ad
 ``` bash
 aea config set --type dict agent.default_routing \
 '{
-"fetchai/contract_api:0.12.0": "fetchai/ledger:0.15.0",
-"fetchai/http:0.13.0": "fetchai/http_client:0.19.0",
-"fetchai/ledger_api:0.11.0": "fetchai/ledger:0.15.0"
+"fetchai/contract_api:0.13.0": "fetchai/ledger:0.16.0",
+"fetchai/http:0.14.0": "fetchai/http_client:0.20.0",
+"fetchai/ledger_api:0.12.0": "fetchai/ledger:0.16.0"
 }'
 ```
 ```bash
@@ -61,7 +61,7 @@ aea add-key fetchai fetchai_connection_private_key.txt --connection
 aea issue-certificates
 ```
 ``` bash
-aea fetch fetchai/coin_price_oracle_client:0.6.0
+aea fetch fetchai/coin_price_oracle_client:0.7.0
 cd coin_price_oracle_client
 aea install
 aea build
@@ -69,24 +69,24 @@ aea build
 ``` bash
 aea create coin_price_oracle_client
 cd coin_price_oracle_client
-aea add connection fetchai/http_client:0.19.0
-aea add connection fetchai/ledger:0.15.0
-aea add skill fetchai/simple_oracle_client:0.6.0
+aea add connection fetchai/http_client:0.20.0
+aea add connection fetchai/ledger:0.16.0
+aea add skill fetchai/simple_oracle_client:0.7.0
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0rc1"},
   "aea-ledger-ethereum": {"version": "<2.0.0,>=1.0.0rc1"}
 }'
-aea config set agent.default_connection fetchai/ledger:0.15.0
+aea config set agent.default_connection fetchai/ledger:0.16.0
 aea install
 aea build
 ```
 ``` bash
 aea config set --type dict agent.default_routing \
 '{
-"fetchai/contract_api:0.12.0": "fetchai/ledger:0.15.0",
-"fetchai/http:0.13.0": "fetchai/http_client:0.19.0",
-"fetchai/ledger_api:0.11.0": "fetchai/ledger:0.15.0"
+"fetchai/contract_api:0.13.0": "fetchai/ledger:0.16.0",
+"fetchai/http:0.14.0": "fetchai/http_client:0.20.0",
+"fetchai/ledger_api:0.12.0": "fetchai/ledger:0.16.0"
 }'
 ```
 ``` bash

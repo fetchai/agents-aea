@@ -23,7 +23,17 @@ PrimitiveType = bool | int | float | str | bytes
  | encode(cls, dictionary: Dict[str, Any]) -> bytes
 ```
 
-Serialize compatible dictionary to bytes
+Serialize compatible dictionary to bytes.
+
+Copies entire dictionary in the process.
+
+**Arguments**:
+
+- `dictionary`: the dictionary to serialize
+
+**Returns**:
+
+serialized bytes string
 
 <a name="aea.helpers.serializers.DictProtobufStructSerializer.decode"></a>
 #### decode

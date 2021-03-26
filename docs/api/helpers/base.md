@@ -95,7 +95,7 @@ Return empty dict if platform is not win32
 send_control_c(process: subprocess.Popen, kill_group: bool = False) -> None
 ```
 
-Send ctrl-C crossplatform to terminate a subprocess.
+Send ctrl-C cross-platform to terminate a subprocess.
 
 **Arguments**:
 
@@ -152,6 +152,11 @@ Traceback (most recent call last):
 ...
 ValueError: Value 0an_identifier does not match the regular expression re.compile('[a-zA-Z_][a-zA-Z0-9_]{0,127}')
 
+>>> SimpleId("an identifier")
+Traceback (most recent call last):
+...
+ValueError: Value an identifier does not match the regular expression re.compile('[a-zA-Z_][a-zA-Z0-9_]{0,127}')
+
 >>> SimpleId("")
 Traceback (most recent call last):
 ...
@@ -176,7 +181,7 @@ get_logger_method(fn: Callable, logger_method: Union[str, Callable]) -> Callable
 
 Get logger method for function.
 
-Get logger in `fn` definion module or creates logger is module.__name__.
+Get logger in `fn` definition module or creates logger is module.__name__.
 Or return logger_method if it's callable.
 
 **Arguments**:
@@ -229,7 +234,7 @@ Does not support async or coroutines!
 
 - `number_of_retries`: amount of attempts
 - `error_message`: message template with one `{}` for exception
-- `delay`: num of seconds to sleep between retries. default 0
+- `delay`: number of seconds to sleep between retries. default 0
 - `logger_method`: name of the logger method or callable to print logs
 
 <a name="aea.helpers.base.exception_log_and_reraise"></a>
@@ -388,7 +393,7 @@ Certificate request for proof of representation.
 #### `__`init`__`
 
 ```python
- | __init__(public_key: str, identifier: SimpleIdOrStr, ledger_id: SimpleIdOrStr, not_before: str, not_after: str, save_path: str) -> None
+ | __init__(public_key: str, identifier: SimpleIdOrStr, ledger_id: SimpleIdOrStr, not_before: str, not_after: str, message_format: str, save_path: str) -> None
 ```
 
 Initialize the certificate request.
@@ -397,12 +402,14 @@ Initialize the certificate request.
 
 - `public_key`: the public key, or the key id.
 - `identifier`: certificate identifier.
+- `ledger_id`: ledger identifier the request is referring to.
 - `not_before`: specify the lower bound for certificate validity.
 If it is a string, it must follow the format: 'YYYY-MM-DD'. It
-will be interpreted as timezone UTC.
+will be interpreted as timezone UTC-0.
 - `not_before`: specify the lower bound for certificate validity.
 if it is a string, it must follow the format: 'YYYY-MM-DD' It
 will be interpreted as timezone UTC-0.
+- `message_format`: message format used for signing
 - `save_path`: the save_path where to save the certificate.
 
 <a name="aea.helpers.base.CertRequest.public_key"></a>
@@ -485,6 +492,16 @@ Get the not_before field.
 
 Get the not_after field.
 
+<a name="aea.helpers.base.CertRequest.message_format"></a>
+#### message`_`format
+
+```python
+ | @property
+ | message_format() -> str
+```
+
+Get the message format.
+
 <a name="aea.helpers.base.CertRequest.save_path"></a>
 #### save`_`path
 
@@ -537,6 +554,24 @@ Get the public key or identifier.
 
 Get the message to sign.
 
+<a name="aea.helpers.base.CertRequest.construct_message"></a>
+#### construct`_`message
+
+```python
+ | @classmethod
+ | construct_message(cls, public_key: str, identifier: SimpleIdOrStr, not_before_string: str, not_after_string: str, message_format: str) -> bytes
+```
+
+Construct message for singning.
+
+**Arguments**:
+
+- `public_key`: the public key
+- `identifier`: identifier to be signed
+- `not_before_string`: signature not valid before
+- `not_after_string`: signature not valid after
+- `message_format`: message format used for signing
+
 <a name="aea.helpers.base.CertRequest.get_signature"></a>
 #### get`_`signature
 
@@ -548,7 +583,7 @@ Get signature from save_path.
 
 **Arguments**:
 
-- `path_prefix`: the path prefix to be prependend to save_path. Defaults to cwd.
+- `path_prefix`: the path prefix to be prepended to save_path. Defaults to cwd.
 
 **Returns**:
 
@@ -592,9 +627,9 @@ compute_specifier_from_version(version: Version) -> str
 
 Compute the specifier set from a version, by varying only on the patch number.
 
-I.e. from "{major}.{minor}.{patch}", return
+I.e. from "{major}.{minor}.{patch}.{extra}", return
 
-">={major}.{minor}.0, <{major}.{minor + 1}.0"
+">=min({major}.{minor}.0, {major}.{minor}.{patch}.{extra}), <{major}.{minor + 1}.0"
 
 **Arguments**:
 

@@ -94,7 +94,7 @@ Run AEA CLI command.
 
 - `args`: CLI args
 - `cwd`: the working directory from where to run the command.
-- `kwargs`: other keyword arguments to click.CLIRunner.invoke.
+- `kwargs`: other keyword arguments to click.CliRunner.invoke.
 
 **Raises**:
 
@@ -554,7 +554,7 @@ command line output
  | replace_file_content(cls, src: Path, dest: Path) -> None
 ```
 
-Replace the content of the source file to the dest file.
+Replace the content of the source file to the destination file.
 
 **Arguments**:
 

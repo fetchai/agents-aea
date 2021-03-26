@@ -1,6 +1,6 @@
 # Relationship with the Twelve-Factor App methodology.
 
-The [Twelve-Factor App](https://12factor.net/) is
+The <a href="https://12factor.net/" target="_blank">Twelve-Factor App</a> is
 a set of best practices to build modern
 web applications, or *software-as-a-service*.
 
@@ -44,9 +44,9 @@ which can do the checks manually according to the specific
 requirements of the project.
 
 
-## Config
+## Configuration
 
-> Store config in the environment
+> Store configuration in the environment
 
 Support: Good
 
@@ -153,7 +153,7 @@ Disposability of an AEA instance
 depends, in general, on the AEA itself;
 whether the connections can be quickly 
 connected and disconnected,
-whether skills can be easily teared
+whether skills can be easily torn
 down or not, whether other resources
 can be detached successfully like 
 the persistent storage,

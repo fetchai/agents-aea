@@ -110,7 +110,9 @@ Return was exception failed or not.
 
 If it's running it's not failed.
 
-:rerurn: bool
+**Returns**:
+
+bool
 
 <a name="aea.helpers.multiple_executor.AbstractMultiprocessExecutorTask"></a>
 ## AbstractMultiprocessExecutorTask Objects

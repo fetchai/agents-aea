@@ -66,7 +66,7 @@ from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.soef")
 
-PUBLIC_ID = PublicId.from_str("fetchai/soef:0.19.0")
+PUBLIC_ID = PublicId.from_str("fetchai/soef:0.20.0")
 
 NOT_SPECIFIED = object()
 
@@ -309,6 +309,19 @@ class SOEFChannel:
             try:
                 task = await self._find_around_me_queue.get()
                 oef_message, oef_search_dialogue, radius, params = task
+            except (
+                asyncio.CancelledError,
+                CancelledError,
+                GeneratorExit,
+            ):  # pylint: disable=try-except-raise  # pragma: nocover
+                return
+            except Exception:  # pragma: nocover
+                self.logger.exception(
+                    "Error on reading messages queue for find around me!"
+                )
+                raise
+
+            try:
                 await self._find_around_me_handle_request(
                     oef_message, oef_search_dialogue, radius, params
                 )

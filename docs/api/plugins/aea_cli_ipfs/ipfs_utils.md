@@ -167,9 +167,9 @@ Download dir by it's hash.
 
 **Arguments**:
 
-- `hash_id`: str. hash od fir to download
-- `target_dir`: str. directory to place downlaoded
-- `fix_path`: boo. default True. on download dont wrap result in to hash_id dirrectory.
+- `hash_id`: str. hash of file to download
+- `target_dir`: str. directory to place downloaded
+- `fix_path`: bool. default True. on download don't wrap result in to hash_id directory.
 
 **Returns**:
 

@@ -38,7 +38,7 @@ Change directory and call the cross-platform script.
 
 The working directory must be the parent of the symbolic link name
 when executing 'create_symlink_crossplatform.sh'. Hence, we
-need to translate target_path into the relatve path from the
+need to translate target_path into the relative path from the
 symbolic link directory to the target directory.
 
 So:

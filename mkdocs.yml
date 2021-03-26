@@ -71,6 +71,7 @@ nav:
       - Debugging: 'debug.md'
       - Profiling: 'runtime-cost.md'
       - Proof of Representation: 'por.md'
+      - Security: 'security.md'
     - Architecture & component deep-dives:
       - Design principles: 'design-principles.md'
       - Architectural diagram: 'diagram.md'
@@ -82,6 +83,7 @@ nav:
       - Ledger & Crypto APIs: 'ledger-integration.md'
       - Message routing: 'message-routing.md'
       - Configurations: 'config.md'
+      - Limitations of v1: 'limits.md'
     - Agent Communication:
       - Agent Communication Network: 'acn.md'
     - Search & Discovery:

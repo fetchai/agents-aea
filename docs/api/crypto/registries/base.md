@@ -75,7 +75,7 @@ Load the item object.
 
 **Returns**:
 
-the cyrpto object, loaded following the spec.
+the crypto object, loaded following the spec.
 
 <a name="aea.crypto.registries.base.ItemSpec"></a>
 ## ItemSpec Objects
