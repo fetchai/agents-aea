@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests of the strategy class of the ml_train skill."""
 
+import json
 from pathlib import Path
 
 import numpy as np
@@ -268,7 +269,7 @@ class TestStrategy(BaseSkillTestCase):
         """Test the decode_sample_data method of the Strategy class where data IS None."""
         # setup
         data = None
-        encoded_data = DataProviderStrategy.encode_sample_data(data)
+        encoded_data = json.dumps(data).encode("utf-8")
 
         # operation
         decoded_data = self.strategy.decode_sample_data(encoded_data)
