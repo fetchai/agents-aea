@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests of the handler classes of the ml_train skill."""
+import json
 import logging
 import sys
 import uuid
@@ -347,7 +348,7 @@ class TestMlTradeHandler(BaseSkillTestCase):
         """Test the _handle_data method of the ml_trade handler where data IS None."""
         # setup
         data = None
-        payload = DataProviderStrategy.encode_sample_data(data)
+        payload = json.dumps(data).encode("utf-8")
 
         ml_dialogue = cast(
             MlTradeDialogue,
