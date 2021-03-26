@@ -28,6 +28,9 @@ COPY /build.sh /build.sh
 RUN ["chmod", "+x", "/build.sh"]
 RUN [ "/build.sh" ]
 
+# optionally, specify any ports to expose here
+# EXPOSE 9000
+
 # aea entrypoint script
 COPY /entrypoint.sh /entrypoint.sh
 RUN ["chmod", "+x", "/entrypoint.sh"]
