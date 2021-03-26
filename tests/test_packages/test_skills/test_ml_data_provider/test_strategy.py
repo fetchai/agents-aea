@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 """This module contains the tests of the strategy class of the ml_data_provider skill."""
 
+import json
 import sys
 from pathlib import Path
 from unittest.mock import PropertyMock, patch
@@ -164,6 +165,40 @@ class TestGenericStrategy(BaseSkillTestCase):
         assert len(data) == 2
         assert type(data[0]) == np.ndarray
         assert type(data[0]) == np.ndarray
+
+    def test_encode_sample_data_i(self):
+        """Test the encode_sample_data method of the Strategy class where data is NOT None."""
+        # setup
+        data = self.strategy.sample_data(32)
+
+        # operation
+        encoded_data = self.strategy.encode_sample_data(data)
+
+        # after
+        assert type(encoded_data) == bytes
+
+        # decode it and check identical
+        decoded_arrays = json.loads(encoded_data)
+        numpy_data_0 = np.asarray(decoded_arrays["data_0"])
+        numpy_data_1 = np.asarray(decoded_arrays["data_1"])
+
+        assert (numpy_data_0 == data[0]).all()
+        assert (numpy_data_1 == data[1]).all()
+
+    def test_encode_sample_data_ii(self):
+        """Test the encode_sample_data method of the Strategy class where data IS None."""
+        # setup
+        data = None
+
+        # operation
+        encoded_data = self.strategy.encode_sample_data(data)
+
+        # after
+        assert type(encoded_data) == bytes
+
+        # decode it and check is None
+        decoded_data = json.loads(encoded_data)
+        assert decoded_data is None
 
     def test_is_matching_supply(self):
         """Test the is_matching_supply method of the Strategy class."""

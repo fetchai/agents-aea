@@ -20,6 +20,7 @@
 
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 from aea.exceptions import AEAEnforceError
@@ -27,6 +28,9 @@ from aea.helpers.search.models import Constraint, ConstraintType, Description, Q
 from aea.helpers.transaction.base import Terms
 from aea.test_tools.test_skill import BaseSkillTestCase, COUNTERPARTY_AGENT_ADDRESS
 
+from packages.fetchai.skills.ml_data_provider.strategy import (
+    Strategy as DataProviderStrategy,
+)
 from packages.fetchai.skills.ml_train.strategy import (
     DEFAULT_LOCATION,
     DEFAULT_MAX_NEGOTIATIONS,
@@ -40,6 +44,7 @@ from packages.fetchai.skills.ml_train.strategy import (
 )
 
 from tests.conftest import ROOT_DIR
+from tests.test_packages.test_skills.test_ml_train.helpers import produce_data
 
 
 class TestStrategy(BaseSkillTestCase):
@@ -239,3 +244,34 @@ class TestStrategy(BaseSkillTestCase):
             fee_by_currency_id={self.currency_id: self.max_buyer_tx_fee},
         )
         assert self.strategy.terms_from_proposal(description) == terms
+
+    def test_decode_sample_data_i(self):
+        """Test the decode_sample_data method of the Strategy class where data is NOT None."""
+        # setup
+        data = produce_data(batch_size=32)
+        encoded_data = DataProviderStrategy.encode_sample_data(data)
+
+        # operation
+        decoded_data = self.strategy.decode_sample_data(encoded_data)
+
+        # after
+        assert type(decoded_data) == tuple
+
+        numpy_data_0 = decoded_data[0]
+        numpy_data_1 = decoded_data[1]
+
+        assert type(numpy_data_0) == type(numpy_data_1) == np.ndarray
+        assert (numpy_data_0 == data[0]).all()
+        assert (numpy_data_1 == data[1]).all()
+
+    def test_decode_sample_data_ii(self):
+        """Test the decode_sample_data method of the Strategy class where data IS None."""
+        # setup
+        data = None
+        encoded_data = DataProviderStrategy.encode_sample_data(data)
+
+        # operation
+        decoded_data = self.strategy.decode_sample_data(encoded_data)
+
+        # after
+        assert decoded_data is None

@@ -19,8 +19,9 @@
 
 """This module contains the strategy class."""
 
+import json
 import uuid
-from typing import Any, Tuple
+from typing import Any, Optional, Tuple
 
 import numpy as np
 
@@ -46,6 +47,16 @@ DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
 DEFAULT_PERSONALITY_DATA = {"piece": "genus", "value": "data"}
 DEFAULT_SERVICE_DATA = {"key": "dataset_id", "value": "fmnist"}
 DEFAULT_CLASSIFICATION = {"piece": "classification", "value": "seller"}
+
+
+class NumpyArrayEncoder(json.JSONEncoder):
+    """This class defines a custom JSON encoder for numpy ndarray objects."""
+
+    def default(self, obj):
+        """Encode an object (including a numpy ndarray) into its JSON representation."""
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return json.JSONEncoder.default(self, obj)
 
 
 class Strategy(Model):
@@ -205,6 +216,18 @@ class Strategy(Model):
         x_sample = self.train_x[mask]
         y_sample = self.train_y[mask]
         return x_sample, y_sample
+
+    @staticmethod
+    def encode_sample_data(data: Optional[Tuple[np.ndarray, np.ndarray]]) -> bytes:
+        """Serialise data (a tuple of two numpy ndarrays or Nonw) into bytes."""
+        if data is None:
+            return json.dumps(data, cls=NumpyArrayEncoder).encode("utf-8")
+
+        data_dict = {
+            "data_0": data[0],
+            "data_1": data[1],
+        }
+        return json.dumps(data_dict, cls=NumpyArrayEncoder).encode("utf-8")
 
     def is_matching_supply(self, query: Query) -> bool:
         """

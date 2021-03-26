@@ -19,7 +19,8 @@
 
 """This module contains the strategy class."""
 
-from typing import Any, List, Optional
+import json
+from typing import Any, List, Optional, Tuple
 
 import numpy as np
 
@@ -255,3 +256,16 @@ class Strategy(Model):
 
     def update_search_query_params(self) -> None:
         """Update search query params."""
+
+    @staticmethod
+    def decode_sample_data(payload: bytes) -> Optional[Tuple[np.ndarray, np.ndarray]]:
+        """Deserialise a bytes payload into data (a tuple of two numpy ndarrays or None)."""
+        decoded_payload = json.loads(payload)
+        if decoded_payload is None:
+            return None
+
+        numpy_data_0 = np.asarray(decoded_payload["data_0"])
+        numpy_data_1 = np.asarray(decoded_payload["data_1"])
+
+        decoded_data = (numpy_data_0, numpy_data_1)
+        return decoded_data
