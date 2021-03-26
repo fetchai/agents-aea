@@ -14,6 +14,7 @@
     "fingerprint_ignore_patterns",
     "private_key_paths",
     "default_ledger",
+    "required_ledgers",
     "connections",
     "contracts",
     "default_connection",
@@ -51,9 +52,6 @@
     },
     "build_directory": {
       "$ref": "definitions.json#/definitions/build_directory"
-    },
-    "registry_path": {
-      "type": "string"
     },
     "private_key_paths": {
       "type": "object",
