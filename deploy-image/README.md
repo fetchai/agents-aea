@@ -1,41 +1,51 @@
 # Docker Deployment image
 
-All the commands must be executed from the parent directory, if not stated otherwise.
+This guide explains how to prepare a Docker image containing your AEA for deployment.
 
-## Build
+## Creating your own image
 
-We recommend using the following command for building:
+The example uses the `fetchai/my_first_aea` project. You will likely want to modify it to one of your own agents or an agent from the AEA registry.
 
-    ./deploy-image/scripts/docker-build-img.sh -t fetchai/aea-deploy:latest --
+### Fetch the example directory
+
+Install subversion, then download the example directory to your local working directory
+
+``` bash
+svn export https://github.com/fetchai/agents-aea/trunk/deploy-image
+```
+
+### Modify scripts
+
+First, review the `build.sh` script to make sure you are fetching the correct agent and do all the necessary setup. Here you can modify the agent you want to use. Note, when fetching from local, make sure your local packages are in the (currently empty) `packages` folder.
+
+Second, review the `entrypoint.sh` script to make sure you supply the agent with the right amount of private keys. In the example one key-pair each for the agent and connection is used, you might need more than that depending on your agent (see `required_ledgers` of your agent).
+
+Importantly, do not add any private keys during the build step!
+
+Third, create a local `.env` file with the relevant environment variables:
+```
+AGENT_PRIV_KEY=hex_key_here
+CONNECTION_PRIV_KEY=hex_key_here
+```
+
+Finally, if required, modify the `Dockerfile` to expose any ports needed by the AEA. (The default example does not require this.)
+
+
+### Build the image
+
+``` bash
+docker build -t my_first_aea -f Dockerfile .
+```
 
 ## Run
 
-    docker run --env AGENT_REPO_URL=https://github.com/fetchai/echo_agent.git aea-deploy:latest
+``` bash
+docker run --env-file .env -t my_first_aea
+```
 
-This will run the `entrypoint.sh` script inside the deployment container.
+To stop, use `docker ps` to find the container id and then `docker stop CONTAINER_ID` to stop the container.
 
-Or, you can try a dry run without setting `AGENT_REPO_URL` (it will build an echo agent):
+## Advanced usage and comments
 
-    docker run -it fetchai/aea-deploy:latest
+- The above approach implies that key files remain in the container. To avoid this, a static volume can be mounted with the key files in it (https://docs.docker.com/get-started/06_bind_mounts/).
 
-To run a bash shell inside the container: 
-
-    docker run -it fetchai/aea-deploy:latest bash
-
-## Publish
-
-First, be sure you tagged the image with the `latest` tag: 
-
-    docker tag fetchai/aea-deploy:<latest-version-number> fetchai/aea-deploy:latest
-
-Then, publish the images. First, the `fetchai/aea-deploy:<latest-version-number>`
-
-    ./develop-image/scripts/docker-publish-img.sh
-
-And then, the `fetchai/aea-deploy:latest` image:
-
-- In `docker-env.sh`, uncomment `DOCKER_IMAGE_TAG=fetchai/aea-deploy:latest`  
-
-- Run the publish command again: 
-
-      ./develop-image/scripts/docker-publish-img.sh
