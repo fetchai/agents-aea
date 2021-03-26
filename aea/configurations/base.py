@@ -1384,6 +1384,7 @@ class AgentConfig(PackageConfiguration):
                 if self.default_connection is not None
                 else None,
                 "default_ledger": self.default_ledger,
+                "required_ledgers": self.required_ledgers or [],
                 "default_routing": {
                     str(key): str(value) for key, value in self.default_routing.items()
                 },
@@ -1399,8 +1400,6 @@ class AgentConfig(PackageConfiguration):
             config["build_entrypoint"] = self.build_entrypoint
 
         # framework optional configs are only printed if defined.
-        if self.required_ledgers is not None:
-            config["required_ledgers"] = self.required_ledgers
         if self.period is not None:
             config["period"] = self.period
         if self.execution_timeout is not None:
