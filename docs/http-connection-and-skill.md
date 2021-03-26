@@ -1,8 +1,20 @@
 ## Description
 
-The HTTP server connection allows you to run a server inside a connection which accepts requests from clients. The HTTP server connection validates requests it receives against a provided OpenAPI file. It translates each valid request into an envelope and sends it to the agent. If it receives a valid response envelope from the agent within a timeout window, the connection translates the response envelope into an HTTP response and serves it to the client.
+The HTTP client and HTTP server connections enable an AEA to communicate with external servers, respectively clients, via HTTP. 
 
-## Steps
+The HTTP client connection receives request envelops from the agent, translates each into an HTTP request and sends it to a server. If it receives an HTTP response from the server within a timeout window, it translates it into a response envelope, and sends this back to the agent.
+
+The HTTP server connection allows you to run a server inside the connection itself which accepts requests from clients. The HTTP server connection validates requests it receives against a provided OpenAPI file. It translates each valid request into an envelope and sends it to the agent. If it receives a valid response envelope from the agent within a timeout window, the connection translates the response envelope into an HTTP response and serves it to the client.
+
+## HTTP Client
+
+The `fetchai/simple_data_request:0.9.0` skill demonstrates a simple use case of the HTTP Client connection.
+
+The `HttpRequestBehaviour` in `behaviours.py` periodically sends HTTP envelops to the HTTP client connection. Its `act()` method, periodically called, simply calls `_generate_http_request` which contains the logic for enqueueing an HTTP request envelop.
+
+The `HttpHandler` in `handler.py` is a basic handler for dealing with HTTP response envelops received from the HTTP client connection. In the `handle()` method, the responses are dealt with by the private `_handle_response` method which essentially logs the response and adds the body of the response into the skill's shared state. 
+
+## HTTP Server
 
 Create a new AEA:
 
