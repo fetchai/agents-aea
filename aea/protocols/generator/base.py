@@ -322,7 +322,7 @@ class ProtocolGenerator:
             check_str += self.indent
             check_str += "enforce("
             for unique_type in unique_standard_types_list:
-                check_str += "type({}) == {} or ".format(
+                check_str += "isinstance({}, {}) or ".format(
                     content_variable, self._to_custom_custom(unique_type)
                 )
             check_str = check_str[:-4]
@@ -335,7 +335,7 @@ class ProtocolGenerator:
                 content_variable,
             )
             if "frozenset" in unique_standard_types_list:
-                check_str += self.indent + "if type({}) == frozenset:\n".format(
+                check_str += self.indent + "if isinstance({}, frozenset):\n".format(
                     content_variable
                 )
                 self._change_indent(1)
@@ -351,7 +351,7 @@ class ProtocolGenerator:
                 for frozen_set_element_type in frozen_set_element_types:
                     check_str += (
                         self.indent
-                        + "all(type(element) == {} for element in {}) or\n".format(
+                        + "all(isinstance(element, {}) for element in {}) or\n".format(
                             self._to_custom_custom(frozen_set_element_type),
                             content_variable,
                         )
@@ -386,7 +386,7 @@ class ProtocolGenerator:
                     check_str += '.")\n'
                 self._change_indent(-1)
             if "tuple" in unique_standard_types_list:
-                check_str += self.indent + "if type({}) == tuple:\n".format(
+                check_str += self.indent + "if isinstance({}, tuple):\n".format(
                     content_variable
                 )
                 self._change_indent(1)
@@ -402,7 +402,7 @@ class ProtocolGenerator:
                 for tuple_element_type in tuple_element_types:
                     check_str += (
                         self.indent
-                        + "all(type(element) == {} for element in {}) or \n".format(
+                        + "all(isinstance(element, {}) for element in {}) or \n".format(
                             self._to_custom_custom(tuple_element_type), content_variable
                         )
                     )
@@ -436,7 +436,7 @@ class ProtocolGenerator:
                     check_str += '.")\n'
                 self._change_indent(-1)
             if "dict" in unique_standard_types_list:
-                check_str += self.indent + "if type({}) == dict:\n".format(
+                check_str += self.indent + "if isinstance({}, dict):\n".format(
                     content_variable
                 )
                 self._change_indent(1)
@@ -458,7 +458,7 @@ class ProtocolGenerator:
                 for element1_type in sorted(dict_key_value_types.keys()):
                     check_str += (
                         self.indent
-                        + "(type(key_of_{}) == {} and type(value_of_{}) == {}) or\n".format(
+                        + "(isinstance(key_of_{}, {}) and isinstance(value_of_{}, {})) or\n".format(
                             content_name,
                             self._to_custom_custom(element1_type),
                             content_name,
@@ -497,15 +497,18 @@ class ProtocolGenerator:
             # check the type
             check_str += (
                 self.indent
-                + "enforce(type({}) == frozenset, \"Invalid type for content '{}'. Expected 'frozenset'. Found '{{}}'.\".format(type({})))\n".format(
+                + "enforce(isinstance({}, frozenset), \"Invalid type for content '{}'. Expected 'frozenset'. Found '{{}}'.\".format(type({})))\n".format(
                     content_variable, content_name, content_variable
                 )
             )
             element_type = _get_sub_types_of_compositional_types(content_type)[0]
             check_str += self.indent + "enforce(all(\n"
             self._change_indent(1)
-            check_str += self.indent + "type(element) == {} for element in {}\n".format(
-                self._to_custom_custom(element_type), content_variable
+            check_str += (
+                self.indent
+                + "isinstance(element, {}) for element in {}\n".format(
+                    self._to_custom_custom(element_type), content_variable
+                )
             )
             self._change_indent(-1)
             check_str += (
@@ -518,15 +521,18 @@ class ProtocolGenerator:
             # check the type
             check_str += (
                 self.indent
-                + "enforce(type({}) == tuple, \"Invalid type for content '{}'. Expected 'tuple'. Found '{{}}'.\".format(type({})))\n".format(
+                + "enforce(isinstance({}, tuple), \"Invalid type for content '{}'. Expected 'tuple'. Found '{{}}'.\".format(type({})))\n".format(
                     content_variable, content_name, content_variable
                 )
             )
             element_type = _get_sub_types_of_compositional_types(content_type)[0]
             check_str += self.indent + "enforce(all(\n"
             self._change_indent(1)
-            check_str += self.indent + "type(element) == {} for element in {}\n".format(
-                self._to_custom_custom(element_type), content_variable
+            check_str += (
+                self.indent
+                + "isinstance(element, {}) for element in {}\n".format(
+                    self._to_custom_custom(element_type), content_variable
+                )
             )
             self._change_indent(-1)
             check_str += (
@@ -539,7 +545,7 @@ class ProtocolGenerator:
             # check the type
             check_str += (
                 self.indent
-                + "enforce(type({}) == dict, \"Invalid type for content '{}'. Expected 'dict'. Found '{{}}'.\".format(type({})))\n".format(
+                + "enforce(isinstance({}, dict), \"Invalid type for content '{}'. Expected 'dict'. Found '{{}}'.\".format(type({})))\n".format(
                     content_variable, content_name, content_variable
                 )
             )
@@ -555,7 +561,7 @@ class ProtocolGenerator:
             self._change_indent(1)
             check_str += self.indent + "enforce(\n"
             self._change_indent(1)
-            check_str += self.indent + "type(key_of_{}) == {}\n".format(
+            check_str += self.indent + "isinstance(key_of_{}, {})\n".format(
                 content_name, self._to_custom_custom(element_type_1)
             )
             self._change_indent(-1)
@@ -568,7 +574,7 @@ class ProtocolGenerator:
 
             check_str += self.indent + "enforce(\n"
             self._change_indent(1)
-            check_str += self.indent + "type(value_of_{}) == {}\n".format(
+            check_str += self.indent + "isinstance(value_of_{}, {})\n".format(
                 content_name, self._to_custom_custom(element_type_2)
             )
             self._change_indent(-1)
@@ -582,7 +588,7 @@ class ProtocolGenerator:
         else:
             check_str += (
                 self.indent
-                + "enforce(type({}) == {}, \"Invalid type for content '{}'. Expected '{}'. Found '{{}}'.\".format(type({})))\n".format(
+                + "enforce(isinstance({}, {}), \"Invalid type for content '{}'. Expected '{}'. Found '{{}}'.\".format(type({})))\n".format(
                     content_variable,
                     self._to_custom_custom(content_type),
                     content_name,
@@ -817,27 +823,27 @@ class ProtocolGenerator:
         self._change_indent(1)
         cls_str += (
             self.indent
-            + "enforce(type(self.dialogue_reference) == tuple, \"Invalid type for 'dialogue_reference'. Expected 'tuple'. Found '{}'.\""
+            + "enforce(isinstance(self.dialogue_reference, tuple), \"Invalid type for 'dialogue_reference'. Expected 'tuple'. Found '{}'.\""
             ".format(type(self.dialogue_reference)))\n"
         )
         cls_str += (
             self.indent
-            + "enforce(type(self.dialogue_reference[0]) == str, \"Invalid type for 'dialogue_reference[0]'. Expected 'str'. Found '{}'.\""
+            + "enforce(isinstance(self.dialogue_reference[0], str), \"Invalid type for 'dialogue_reference[0]'. Expected 'str'. Found '{}'.\""
             ".format(type(self.dialogue_reference[0])))\n"
         )
         cls_str += (
             self.indent
-            + "enforce(type(self.dialogue_reference[1]) == str, \"Invalid type for 'dialogue_reference[1]'. Expected 'str'. Found '{}'.\""
+            + "enforce(isinstance(self.dialogue_reference[1], str), \"Invalid type for 'dialogue_reference[1]'. Expected 'str'. Found '{}'.\""
             ".format(type(self.dialogue_reference[1])))\n"
         )
         cls_str += (
             self.indent
-            + "enforce(type(self.message_id) == int, \"Invalid type for 'message_id'. Expected 'int'. Found '{}'.\""
+            + "enforce(isinstance(self.message_id, int), \"Invalid type for 'message_id'. Expected 'int'. Found '{}'.\""
             ".format(type(self.message_id)))\n"
         )
         cls_str += (
             self.indent
-            + "enforce(type(self.target) == int, \"Invalid type for 'target'. Expected 'int'. Found '{}'.\""
+            + "enforce(isinstance(self.target, int), \"Invalid type for 'target'. Expected 'int'. Found '{}'.\""
             ".format(type(self.target)))\n\n"
         )
 
@@ -845,7 +851,7 @@ class ProtocolGenerator:
         cls_str += self.indent + "# Check correct performative\n"
         cls_str += (
             self.indent
-            + "enforce(type(self.performative) == {}Message.Performative".format(
+            + "enforce(isinstance(self.performative, {}Message.Performative)".format(
                 self.protocol_specification_in_camel_case
             )
         )
@@ -1520,6 +1526,8 @@ class ProtocolGenerator:
                 self.protocol_specification.name
             )
         )
+
+        cls_str += "# pylint: disable=no-member\n"
 
         # Imports
         cls_str += self.indent + "from typing import Any, Dict, cast\n\n"

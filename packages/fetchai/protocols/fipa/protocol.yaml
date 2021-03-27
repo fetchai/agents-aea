@@ -13,8 +13,8 @@ fingerprint:
   dialogues.py: QmYioX35NA2PAQNUDaNwu6K6PF1YpnBEwDY6DPqubcUy6B
   fipa.proto: QmS7aXZ2JoG3oyMHWiPYoP9RJ7iChsoTC9KQLsj6vi3ejR
   fipa_pb2.py: QmPNJfKCA5dHA8Uh5wNN6fYKsGyc5FcWevEqyqa6eTjKH4
-  message.py: Qma8FQUFe611mneHBSrEzcha8CsG4Wh9QCbd7fuhj8WSpd
-  serialization.py: QmTRbLt1n8b7c9Yuy4G6WkL9y7iHw6g3GcjNBxU3aKYXtS
+  message.py: QmXujeCYWKbh8tLPXwNm88yECrBVXsfQ4y3u7uX6dRMN9x
+  serialization.py: QmWnqotmxcKAwbhByjqKGFPobJSbWmjiYxepR4UyAxgfAL
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

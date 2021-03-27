@@ -10,8 +10,8 @@ fingerprint:
   README.md: QmYgGkGtp1ARvGXhJ7aVfsTxkuMqBfFmPJXmc3uxCiN2y1
   __init__.py: QmRjV5mbjXCiFaZUNYAbfA8ikFqgFWix4oHno6SYwrkYNf
   dialogues.py: QmNkHJMcahoC7QtkM8k9RHCUozfhu6BvRfSsLxkPvE73xF
-  message.py: QmS5eDw7fzn5Lua8DZ7ooEEQFNBwJhffV1Y8kbo7XzbaEC
-  serialization.py: Qma7eMYAS2hCynyXVV7ZKbgAv94reUqUL9PshugTdFJVng
+  message.py: QmUpzBYo9oFgpguL795FYxtBUFz7LzvfU76cUwxWJGCJEe
+  serialization.py: Qmat5TXaG42mxTPpDwVoonQNqeS1Mmbn3eoeCGmquzhgsZ
   yoti.proto: Qmasuw6KKGB95zygCfMjJwjWMad2Q1XY7KBnf3yA8h4JCB
   yoti_pb2.py: Qmbh9jEZ9rrT5Ys3YAuarRHRDtiyu1cYMR3UJhqoEQi8ZC
 fingerprint_ignore_patterns: []

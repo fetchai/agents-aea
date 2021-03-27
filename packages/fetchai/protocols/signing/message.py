@@ -197,31 +197,31 @@ class SigningMessage(Message):
         """Check that the message follows the signing protocol."""
         try:
             enforce(
-                type(self.dialogue_reference) == tuple,
+                isinstance(self.dialogue_reference, tuple),
                 "Invalid type for 'dialogue_reference'. Expected 'tuple'. Found '{}'.".format(
                     type(self.dialogue_reference)
                 ),
             )
             enforce(
-                type(self.dialogue_reference[0]) == str,
+                isinstance(self.dialogue_reference[0], str),
                 "Invalid type for 'dialogue_reference[0]'. Expected 'str'. Found '{}'.".format(
                     type(self.dialogue_reference[0])
                 ),
             )
             enforce(
-                type(self.dialogue_reference[1]) == str,
+                isinstance(self.dialogue_reference[1], str),
                 "Invalid type for 'dialogue_reference[1]'. Expected 'str'. Found '{}'.".format(
                     type(self.dialogue_reference[1])
                 ),
             )
             enforce(
-                type(self.message_id) == int,
+                isinstance(self.message_id, int),
                 "Invalid type for 'message_id'. Expected 'int'. Found '{}'.".format(
                     type(self.message_id)
                 ),
             )
             enforce(
-                type(self.target) == int,
+                isinstance(self.target, int),
                 "Invalid type for 'target'. Expected 'int'. Found '{}'.".format(
                     type(self.target)
                 ),
@@ -230,7 +230,7 @@ class SigningMessage(Message):
             # Light Protocol Rule 2
             # Check correct performative
             enforce(
-                type(self.performative) == SigningMessage.Performative,
+                isinstance(self.performative, SigningMessage.Performative),
                 "Invalid 'performative'. Expected either of '{}'. Found '{}'.".format(
                     self.valid_performatives, self.performative
                 ),
@@ -242,13 +242,13 @@ class SigningMessage(Message):
             if self.performative == SigningMessage.Performative.SIGN_TRANSACTION:
                 expected_nb_of_contents = 2
                 enforce(
-                    type(self.terms) == CustomTerms,
+                    isinstance(self.terms, CustomTerms),
                     "Invalid type for content 'terms'. Expected 'Terms'. Found '{}'.".format(
                         type(self.terms)
                     ),
                 )
                 enforce(
-                    type(self.raw_transaction) == CustomRawTransaction,
+                    isinstance(self.raw_transaction, CustomRawTransaction),
                     "Invalid type for content 'raw_transaction'. Expected 'RawTransaction'. Found '{}'.".format(
                         type(self.raw_transaction)
                     ),
@@ -256,13 +256,13 @@ class SigningMessage(Message):
             elif self.performative == SigningMessage.Performative.SIGN_MESSAGE:
                 expected_nb_of_contents = 2
                 enforce(
-                    type(self.terms) == CustomTerms,
+                    isinstance(self.terms, CustomTerms),
                     "Invalid type for content 'terms'. Expected 'Terms'. Found '{}'.".format(
                         type(self.terms)
                     ),
                 )
                 enforce(
-                    type(self.raw_message) == CustomRawMessage,
+                    isinstance(self.raw_message, CustomRawMessage),
                     "Invalid type for content 'raw_message'. Expected 'RawMessage'. Found '{}'.".format(
                         type(self.raw_message)
                     ),
@@ -270,7 +270,7 @@ class SigningMessage(Message):
             elif self.performative == SigningMessage.Performative.SIGNED_TRANSACTION:
                 expected_nb_of_contents = 1
                 enforce(
-                    type(self.signed_transaction) == CustomSignedTransaction,
+                    isinstance(self.signed_transaction, CustomSignedTransaction),
                     "Invalid type for content 'signed_transaction'. Expected 'SignedTransaction'. Found '{}'.".format(
                         type(self.signed_transaction)
                     ),
@@ -278,7 +278,7 @@ class SigningMessage(Message):
             elif self.performative == SigningMessage.Performative.SIGNED_MESSAGE:
                 expected_nb_of_contents = 1
                 enforce(
-                    type(self.signed_message) == CustomSignedMessage,
+                    isinstance(self.signed_message, CustomSignedMessage),
                     "Invalid type for content 'signed_message'. Expected 'SignedMessage'. Found '{}'.".format(
                         type(self.signed_message)
                     ),
@@ -286,7 +286,7 @@ class SigningMessage(Message):
             elif self.performative == SigningMessage.Performative.ERROR:
                 expected_nb_of_contents = 1
                 enforce(
-                    type(self.error_code) == CustomErrorCode,
+                    isinstance(self.error_code, CustomErrorCode),
                     "Invalid type for content 'error_code'. Expected 'ErrorCode'. Found '{}'.".format(
                         type(self.error_code)
                     ),

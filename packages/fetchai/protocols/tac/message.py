@@ -294,31 +294,31 @@ class TacMessage(Message):
         """Check that the message follows the tac protocol."""
         try:
             enforce(
-                type(self.dialogue_reference) == tuple,
+                isinstance(self.dialogue_reference, tuple),
                 "Invalid type for 'dialogue_reference'. Expected 'tuple'. Found '{}'.".format(
                     type(self.dialogue_reference)
                 ),
             )
             enforce(
-                type(self.dialogue_reference[0]) == str,
+                isinstance(self.dialogue_reference[0], str),
                 "Invalid type for 'dialogue_reference[0]'. Expected 'str'. Found '{}'.".format(
                     type(self.dialogue_reference[0])
                 ),
             )
             enforce(
-                type(self.dialogue_reference[1]) == str,
+                isinstance(self.dialogue_reference[1], str),
                 "Invalid type for 'dialogue_reference[1]'. Expected 'str'. Found '{}'.".format(
                     type(self.dialogue_reference[1])
                 ),
             )
             enforce(
-                type(self.message_id) == int,
+                isinstance(self.message_id, int),
                 "Invalid type for 'message_id'. Expected 'int'. Found '{}'.".format(
                     type(self.message_id)
                 ),
             )
             enforce(
-                type(self.target) == int,
+                isinstance(self.target, int),
                 "Invalid type for 'target'. Expected 'int'. Found '{}'.".format(
                     type(self.target)
                 ),
@@ -327,7 +327,7 @@ class TacMessage(Message):
             # Light Protocol Rule 2
             # Check correct performative
             enforce(
-                type(self.performative) == TacMessage.Performative,
+                isinstance(self.performative, TacMessage.Performative),
                 "Invalid 'performative'. Expected either of '{}'. Found '{}'.".format(
                     self.valid_performatives, self.performative
                 ),
@@ -339,7 +339,7 @@ class TacMessage(Message):
             if self.performative == TacMessage.Performative.REGISTER:
                 expected_nb_of_contents = 1
                 enforce(
-                    type(self.agent_name) == str,
+                    isinstance(self.agent_name, str),
                     "Invalid type for content 'agent_name'. Expected 'str'. Found '{}'.".format(
                         type(self.agent_name)
                     ),
@@ -349,31 +349,31 @@ class TacMessage(Message):
             elif self.performative == TacMessage.Performative.TRANSACTION:
                 expected_nb_of_contents = 10
                 enforce(
-                    type(self.transaction_id) == str,
+                    isinstance(self.transaction_id, str),
                     "Invalid type for content 'transaction_id'. Expected 'str'. Found '{}'.".format(
                         type(self.transaction_id)
                     ),
                 )
                 enforce(
-                    type(self.ledger_id) == str,
+                    isinstance(self.ledger_id, str),
                     "Invalid type for content 'ledger_id'. Expected 'str'. Found '{}'.".format(
                         type(self.ledger_id)
                     ),
                 )
                 enforce(
-                    type(self.sender_address) == str,
+                    isinstance(self.sender_address, str),
                     "Invalid type for content 'sender_address'. Expected 'str'. Found '{}'.".format(
                         type(self.sender_address)
                     ),
                 )
                 enforce(
-                    type(self.counterparty_address) == str,
+                    isinstance(self.counterparty_address, str),
                     "Invalid type for content 'counterparty_address'. Expected 'str'. Found '{}'.".format(
                         type(self.counterparty_address)
                     ),
                 )
                 enforce(
-                    type(self.amount_by_currency_id) == dict,
+                    isinstance(self.amount_by_currency_id, dict),
                     "Invalid type for content 'amount_by_currency_id'. Expected 'dict'. Found '{}'.".format(
                         type(self.amount_by_currency_id)
                     ),
@@ -383,19 +383,19 @@ class TacMessage(Message):
                     value_of_amount_by_currency_id,
                 ) in self.amount_by_currency_id.items():
                     enforce(
-                        type(key_of_amount_by_currency_id) == str,
+                        isinstance(key_of_amount_by_currency_id, str),
                         "Invalid type for dictionary keys in content 'amount_by_currency_id'. Expected 'str'. Found '{}'.".format(
                             type(key_of_amount_by_currency_id)
                         ),
                     )
                     enforce(
-                        type(value_of_amount_by_currency_id) == int,
+                        isinstance(value_of_amount_by_currency_id, int),
                         "Invalid type for dictionary values in content 'amount_by_currency_id'. Expected 'int'. Found '{}'.".format(
                             type(value_of_amount_by_currency_id)
                         ),
                     )
                 enforce(
-                    type(self.fee_by_currency_id) == dict,
+                    isinstance(self.fee_by_currency_id, dict),
                     "Invalid type for content 'fee_by_currency_id'. Expected 'dict'. Found '{}'.".format(
                         type(self.fee_by_currency_id)
                     ),
@@ -405,19 +405,19 @@ class TacMessage(Message):
                     value_of_fee_by_currency_id,
                 ) in self.fee_by_currency_id.items():
                     enforce(
-                        type(key_of_fee_by_currency_id) == str,
+                        isinstance(key_of_fee_by_currency_id, str),
                         "Invalid type for dictionary keys in content 'fee_by_currency_id'. Expected 'str'. Found '{}'.".format(
                             type(key_of_fee_by_currency_id)
                         ),
                     )
                     enforce(
-                        type(value_of_fee_by_currency_id) == int,
+                        isinstance(value_of_fee_by_currency_id, int),
                         "Invalid type for dictionary values in content 'fee_by_currency_id'. Expected 'int'. Found '{}'.".format(
                             type(value_of_fee_by_currency_id)
                         ),
                     )
                 enforce(
-                    type(self.quantities_by_good_id) == dict,
+                    isinstance(self.quantities_by_good_id, dict),
                     "Invalid type for content 'quantities_by_good_id'. Expected 'dict'. Found '{}'.".format(
                         type(self.quantities_by_good_id)
                     ),
@@ -427,31 +427,31 @@ class TacMessage(Message):
                     value_of_quantities_by_good_id,
                 ) in self.quantities_by_good_id.items():
                     enforce(
-                        type(key_of_quantities_by_good_id) == str,
+                        isinstance(key_of_quantities_by_good_id, str),
                         "Invalid type for dictionary keys in content 'quantities_by_good_id'. Expected 'str'. Found '{}'.".format(
                             type(key_of_quantities_by_good_id)
                         ),
                     )
                     enforce(
-                        type(value_of_quantities_by_good_id) == int,
+                        isinstance(value_of_quantities_by_good_id, int),
                         "Invalid type for dictionary values in content 'quantities_by_good_id'. Expected 'int'. Found '{}'.".format(
                             type(value_of_quantities_by_good_id)
                         ),
                     )
                 enforce(
-                    type(self.nonce) == str,
+                    isinstance(self.nonce, str),
                     "Invalid type for content 'nonce'. Expected 'str'. Found '{}'.".format(
                         type(self.nonce)
                     ),
                 )
                 enforce(
-                    type(self.sender_signature) == str,
+                    isinstance(self.sender_signature, str),
                     "Invalid type for content 'sender_signature'. Expected 'str'. Found '{}'.".format(
                         type(self.sender_signature)
                     ),
                 )
                 enforce(
-                    type(self.counterparty_signature) == str,
+                    isinstance(self.counterparty_signature, str),
                     "Invalid type for content 'counterparty_signature'. Expected 'str'. Found '{}'.".format(
                         type(self.counterparty_signature)
                     ),
@@ -461,7 +461,7 @@ class TacMessage(Message):
             elif self.performative == TacMessage.Performative.GAME_DATA:
                 expected_nb_of_contents = 9
                 enforce(
-                    type(self.amount_by_currency_id) == dict,
+                    isinstance(self.amount_by_currency_id, dict),
                     "Invalid type for content 'amount_by_currency_id'. Expected 'dict'. Found '{}'.".format(
                         type(self.amount_by_currency_id)
                     ),
@@ -471,19 +471,19 @@ class TacMessage(Message):
                     value_of_amount_by_currency_id,
                 ) in self.amount_by_currency_id.items():
                     enforce(
-                        type(key_of_amount_by_currency_id) == str,
+                        isinstance(key_of_amount_by_currency_id, str),
                         "Invalid type for dictionary keys in content 'amount_by_currency_id'. Expected 'str'. Found '{}'.".format(
                             type(key_of_amount_by_currency_id)
                         ),
                     )
                     enforce(
-                        type(value_of_amount_by_currency_id) == int,
+                        isinstance(value_of_amount_by_currency_id, int),
                         "Invalid type for dictionary values in content 'amount_by_currency_id'. Expected 'int'. Found '{}'.".format(
                             type(value_of_amount_by_currency_id)
                         ),
                     )
                 enforce(
-                    type(self.exchange_params_by_currency_id) == dict,
+                    isinstance(self.exchange_params_by_currency_id, dict),
                     "Invalid type for content 'exchange_params_by_currency_id'. Expected 'dict'. Found '{}'.".format(
                         type(self.exchange_params_by_currency_id)
                     ),
@@ -493,19 +493,19 @@ class TacMessage(Message):
                     value_of_exchange_params_by_currency_id,
                 ) in self.exchange_params_by_currency_id.items():
                     enforce(
-                        type(key_of_exchange_params_by_currency_id) == str,
+                        isinstance(key_of_exchange_params_by_currency_id, str),
                         "Invalid type for dictionary keys in content 'exchange_params_by_currency_id'. Expected 'str'. Found '{}'.".format(
                             type(key_of_exchange_params_by_currency_id)
                         ),
                     )
                     enforce(
-                        type(value_of_exchange_params_by_currency_id) == float,
+                        isinstance(value_of_exchange_params_by_currency_id, float),
                         "Invalid type for dictionary values in content 'exchange_params_by_currency_id'. Expected 'float'. Found '{}'.".format(
                             type(value_of_exchange_params_by_currency_id)
                         ),
                     )
                 enforce(
-                    type(self.quantities_by_good_id) == dict,
+                    isinstance(self.quantities_by_good_id, dict),
                     "Invalid type for content 'quantities_by_good_id'. Expected 'dict'. Found '{}'.".format(
                         type(self.quantities_by_good_id)
                     ),
@@ -515,19 +515,19 @@ class TacMessage(Message):
                     value_of_quantities_by_good_id,
                 ) in self.quantities_by_good_id.items():
                     enforce(
-                        type(key_of_quantities_by_good_id) == str,
+                        isinstance(key_of_quantities_by_good_id, str),
                         "Invalid type for dictionary keys in content 'quantities_by_good_id'. Expected 'str'. Found '{}'.".format(
                             type(key_of_quantities_by_good_id)
                         ),
                     )
                     enforce(
-                        type(value_of_quantities_by_good_id) == int,
+                        isinstance(value_of_quantities_by_good_id, int),
                         "Invalid type for dictionary values in content 'quantities_by_good_id'. Expected 'int'. Found '{}'.".format(
                             type(value_of_quantities_by_good_id)
                         ),
                     )
                 enforce(
-                    type(self.utility_params_by_good_id) == dict,
+                    isinstance(self.utility_params_by_good_id, dict),
                     "Invalid type for content 'utility_params_by_good_id'. Expected 'dict'. Found '{}'.".format(
                         type(self.utility_params_by_good_id)
                     ),
@@ -537,19 +537,19 @@ class TacMessage(Message):
                     value_of_utility_params_by_good_id,
                 ) in self.utility_params_by_good_id.items():
                     enforce(
-                        type(key_of_utility_params_by_good_id) == str,
+                        isinstance(key_of_utility_params_by_good_id, str),
                         "Invalid type for dictionary keys in content 'utility_params_by_good_id'. Expected 'str'. Found '{}'.".format(
                             type(key_of_utility_params_by_good_id)
                         ),
                     )
                     enforce(
-                        type(value_of_utility_params_by_good_id) == float,
+                        isinstance(value_of_utility_params_by_good_id, float),
                         "Invalid type for dictionary values in content 'utility_params_by_good_id'. Expected 'float'. Found '{}'.".format(
                             type(value_of_utility_params_by_good_id)
                         ),
                     )
                 enforce(
-                    type(self.fee_by_currency_id) == dict,
+                    isinstance(self.fee_by_currency_id, dict),
                     "Invalid type for content 'fee_by_currency_id'. Expected 'dict'. Found '{}'.".format(
                         type(self.fee_by_currency_id)
                     ),
@@ -559,19 +559,19 @@ class TacMessage(Message):
                     value_of_fee_by_currency_id,
                 ) in self.fee_by_currency_id.items():
                     enforce(
-                        type(key_of_fee_by_currency_id) == str,
+                        isinstance(key_of_fee_by_currency_id, str),
                         "Invalid type for dictionary keys in content 'fee_by_currency_id'. Expected 'str'. Found '{}'.".format(
                             type(key_of_fee_by_currency_id)
                         ),
                     )
                     enforce(
-                        type(value_of_fee_by_currency_id) == int,
+                        isinstance(value_of_fee_by_currency_id, int),
                         "Invalid type for dictionary values in content 'fee_by_currency_id'. Expected 'int'. Found '{}'.".format(
                             type(value_of_fee_by_currency_id)
                         ),
                     )
                 enforce(
-                    type(self.agent_addr_to_name) == dict,
+                    isinstance(self.agent_addr_to_name, dict),
                     "Invalid type for content 'agent_addr_to_name'. Expected 'dict'. Found '{}'.".format(
                         type(self.agent_addr_to_name)
                     ),
@@ -581,19 +581,19 @@ class TacMessage(Message):
                     value_of_agent_addr_to_name,
                 ) in self.agent_addr_to_name.items():
                     enforce(
-                        type(key_of_agent_addr_to_name) == str,
+                        isinstance(key_of_agent_addr_to_name, str),
                         "Invalid type for dictionary keys in content 'agent_addr_to_name'. Expected 'str'. Found '{}'.".format(
                             type(key_of_agent_addr_to_name)
                         ),
                     )
                     enforce(
-                        type(value_of_agent_addr_to_name) == str,
+                        isinstance(value_of_agent_addr_to_name, str),
                         "Invalid type for dictionary values in content 'agent_addr_to_name'. Expected 'str'. Found '{}'.".format(
                             type(value_of_agent_addr_to_name)
                         ),
                     )
                 enforce(
-                    type(self.currency_id_to_name) == dict,
+                    isinstance(self.currency_id_to_name, dict),
                     "Invalid type for content 'currency_id_to_name'. Expected 'dict'. Found '{}'.".format(
                         type(self.currency_id_to_name)
                     ),
@@ -603,19 +603,19 @@ class TacMessage(Message):
                     value_of_currency_id_to_name,
                 ) in self.currency_id_to_name.items():
                     enforce(
-                        type(key_of_currency_id_to_name) == str,
+                        isinstance(key_of_currency_id_to_name, str),
                         "Invalid type for dictionary keys in content 'currency_id_to_name'. Expected 'str'. Found '{}'.".format(
                             type(key_of_currency_id_to_name)
                         ),
                     )
                     enforce(
-                        type(value_of_currency_id_to_name) == str,
+                        isinstance(value_of_currency_id_to_name, str),
                         "Invalid type for dictionary values in content 'currency_id_to_name'. Expected 'str'. Found '{}'.".format(
                             type(value_of_currency_id_to_name)
                         ),
                     )
                 enforce(
-                    type(self.good_id_to_name) == dict,
+                    isinstance(self.good_id_to_name, dict),
                     "Invalid type for content 'good_id_to_name'. Expected 'dict'. Found '{}'.".format(
                         type(self.good_id_to_name)
                     ),
@@ -625,19 +625,19 @@ class TacMessage(Message):
                     value_of_good_id_to_name,
                 ) in self.good_id_to_name.items():
                     enforce(
-                        type(key_of_good_id_to_name) == str,
+                        isinstance(key_of_good_id_to_name, str),
                         "Invalid type for dictionary keys in content 'good_id_to_name'. Expected 'str'. Found '{}'.".format(
                             type(key_of_good_id_to_name)
                         ),
                     )
                     enforce(
-                        type(value_of_good_id_to_name) == str,
+                        isinstance(value_of_good_id_to_name, str),
                         "Invalid type for dictionary values in content 'good_id_to_name'. Expected 'str'. Found '{}'.".format(
                             type(value_of_good_id_to_name)
                         ),
                     )
                 enforce(
-                    type(self.version_id) == str,
+                    isinstance(self.version_id, str),
                     "Invalid type for content 'version_id'. Expected 'str'. Found '{}'.".format(
                         type(self.version_id)
                     ),
@@ -646,20 +646,20 @@ class TacMessage(Message):
                     expected_nb_of_contents += 1
                     info = cast(Dict[str, str], self.info)
                     enforce(
-                        type(info) == dict,
+                        isinstance(info, dict),
                         "Invalid type for content 'info'. Expected 'dict'. Found '{}'.".format(
                             type(info)
                         ),
                     )
                     for key_of_info, value_of_info in info.items():
                         enforce(
-                            type(key_of_info) == str,
+                            isinstance(key_of_info, str),
                             "Invalid type for dictionary keys in content 'info'. Expected 'str'. Found '{}'.".format(
                                 type(key_of_info)
                             ),
                         )
                         enforce(
-                            type(value_of_info) == str,
+                            isinstance(value_of_info, str),
                             "Invalid type for dictionary values in content 'info'. Expected 'str'. Found '{}'.".format(
                                 type(value_of_info)
                             ),
@@ -667,13 +667,13 @@ class TacMessage(Message):
             elif self.performative == TacMessage.Performative.TRANSACTION_CONFIRMATION:
                 expected_nb_of_contents = 3
                 enforce(
-                    type(self.transaction_id) == str,
+                    isinstance(self.transaction_id, str),
                     "Invalid type for content 'transaction_id'. Expected 'str'. Found '{}'.".format(
                         type(self.transaction_id)
                     ),
                 )
                 enforce(
-                    type(self.amount_by_currency_id) == dict,
+                    isinstance(self.amount_by_currency_id, dict),
                     "Invalid type for content 'amount_by_currency_id'. Expected 'dict'. Found '{}'.".format(
                         type(self.amount_by_currency_id)
                     ),
@@ -683,19 +683,19 @@ class TacMessage(Message):
                     value_of_amount_by_currency_id,
                 ) in self.amount_by_currency_id.items():
                     enforce(
-                        type(key_of_amount_by_currency_id) == str,
+                        isinstance(key_of_amount_by_currency_id, str),
                         "Invalid type for dictionary keys in content 'amount_by_currency_id'. Expected 'str'. Found '{}'.".format(
                             type(key_of_amount_by_currency_id)
                         ),
                     )
                     enforce(
-                        type(value_of_amount_by_currency_id) == int,
+                        isinstance(value_of_amount_by_currency_id, int),
                         "Invalid type for dictionary values in content 'amount_by_currency_id'. Expected 'int'. Found '{}'.".format(
                             type(value_of_amount_by_currency_id)
                         ),
                     )
                 enforce(
-                    type(self.quantities_by_good_id) == dict,
+                    isinstance(self.quantities_by_good_id, dict),
                     "Invalid type for content 'quantities_by_good_id'. Expected 'dict'. Found '{}'.".format(
                         type(self.quantities_by_good_id)
                     ),
@@ -705,13 +705,13 @@ class TacMessage(Message):
                     value_of_quantities_by_good_id,
                 ) in self.quantities_by_good_id.items():
                     enforce(
-                        type(key_of_quantities_by_good_id) == str,
+                        isinstance(key_of_quantities_by_good_id, str),
                         "Invalid type for dictionary keys in content 'quantities_by_good_id'. Expected 'str'. Found '{}'.".format(
                             type(key_of_quantities_by_good_id)
                         ),
                     )
                     enforce(
-                        type(value_of_quantities_by_good_id) == int,
+                        isinstance(value_of_quantities_by_good_id, int),
                         "Invalid type for dictionary values in content 'quantities_by_good_id'. Expected 'int'. Found '{}'.".format(
                             type(value_of_quantities_by_good_id)
                         ),
@@ -719,7 +719,7 @@ class TacMessage(Message):
             elif self.performative == TacMessage.Performative.TAC_ERROR:
                 expected_nb_of_contents = 1
                 enforce(
-                    type(self.error_code) == CustomErrorCode,
+                    isinstance(self.error_code, CustomErrorCode),
                     "Invalid type for content 'error_code'. Expected 'ErrorCode'. Found '{}'.".format(
                         type(self.error_code)
                     ),
@@ -728,20 +728,20 @@ class TacMessage(Message):
                     expected_nb_of_contents += 1
                     info = cast(Dict[str, str], self.info)
                     enforce(
-                        type(info) == dict,
+                        isinstance(info, dict),
                         "Invalid type for content 'info'. Expected 'dict'. Found '{}'.".format(
                             type(info)
                         ),
                     )
                     for key_of_info, value_of_info in info.items():
                         enforce(
-                            type(key_of_info) == str,
+                            isinstance(key_of_info, str),
                             "Invalid type for dictionary keys in content 'info'. Expected 'str'. Found '{}'.".format(
                                 type(key_of_info)
                             ),
                         )
                         enforce(
-                            type(value_of_info) == str,
+                            isinstance(value_of_info, str),
                             "Invalid type for dictionary values in content 'info'. Expected 'str'. Found '{}'.".format(
                                 type(value_of_info)
                             ),

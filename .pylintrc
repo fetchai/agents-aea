@@ -1,5 +1,5 @@
 [MASTER]
-ignore-patterns=serialization.py,message.py,__main__.py,.*_pb2.py,tac.sh,tac_local.sh
+ignore-patterns=__main__.py,.*_pb2.py,tac.sh,tac_local.sh
 
 [MESSAGES CONTROL]
 disable=C0103,C0201,C0301,C0302,W0105,W0707,W1202,W1203,R0801

@@ -19,6 +19,7 @@
 
 """Serialization module for ml_trade protocol."""
 
+# pylint: disable=no-member
 from typing import Any, Dict, cast
 
 from aea.mail.base_pb2 import DialogueMessage

@@ -172,31 +172,31 @@ class PrometheusMessage(Message):
         """Check that the message follows the prometheus protocol."""
         try:
             enforce(
-                type(self.dialogue_reference) == tuple,
+                isinstance(self.dialogue_reference, tuple),
                 "Invalid type for 'dialogue_reference'. Expected 'tuple'. Found '{}'.".format(
                     type(self.dialogue_reference)
                 ),
             )
             enforce(
-                type(self.dialogue_reference[0]) == str,
+                isinstance(self.dialogue_reference[0], str),
                 "Invalid type for 'dialogue_reference[0]'. Expected 'str'. Found '{}'.".format(
                     type(self.dialogue_reference[0])
                 ),
             )
             enforce(
-                type(self.dialogue_reference[1]) == str,
+                isinstance(self.dialogue_reference[1], str),
                 "Invalid type for 'dialogue_reference[1]'. Expected 'str'. Found '{}'.".format(
                     type(self.dialogue_reference[1])
                 ),
             )
             enforce(
-                type(self.message_id) == int,
+                isinstance(self.message_id, int),
                 "Invalid type for 'message_id'. Expected 'int'. Found '{}'.".format(
                     type(self.message_id)
                 ),
             )
             enforce(
-                type(self.target) == int,
+                isinstance(self.target, int),
                 "Invalid type for 'target'. Expected 'int'. Found '{}'.".format(
                     type(self.target)
                 ),
@@ -205,7 +205,7 @@ class PrometheusMessage(Message):
             # Light Protocol Rule 2
             # Check correct performative
             enforce(
-                type(self.performative) == PrometheusMessage.Performative,
+                isinstance(self.performative, PrometheusMessage.Performative),
                 "Invalid 'performative'. Expected either of '{}'. Found '{}'.".format(
                     self.valid_performatives, self.performative
                 ),
@@ -217,38 +217,38 @@ class PrometheusMessage(Message):
             if self.performative == PrometheusMessage.Performative.ADD_METRIC:
                 expected_nb_of_contents = 4
                 enforce(
-                    type(self.type) == str,
+                    isinstance(self.type, str),
                     "Invalid type for content 'type'. Expected 'str'. Found '{}'.".format(
                         type(self.type)
                     ),
                 )
                 enforce(
-                    type(self.title) == str,
+                    isinstance(self.title, str),
                     "Invalid type for content 'title'. Expected 'str'. Found '{}'.".format(
                         type(self.title)
                     ),
                 )
                 enforce(
-                    type(self.description) == str,
+                    isinstance(self.description, str),
                     "Invalid type for content 'description'. Expected 'str'. Found '{}'.".format(
                         type(self.description)
                     ),
                 )
                 enforce(
-                    type(self.labels) == dict,
+                    isinstance(self.labels, dict),
                     "Invalid type for content 'labels'. Expected 'dict'. Found '{}'.".format(
                         type(self.labels)
                     ),
                 )
                 for key_of_labels, value_of_labels in self.labels.items():
                     enforce(
-                        type(key_of_labels) == str,
+                        isinstance(key_of_labels, str),
                         "Invalid type for dictionary keys in content 'labels'. Expected 'str'. Found '{}'.".format(
                             type(key_of_labels)
                         ),
                     )
                     enforce(
-                        type(value_of_labels) == str,
+                        isinstance(value_of_labels, str),
                         "Invalid type for dictionary values in content 'labels'. Expected 'str'. Found '{}'.".format(
                             type(value_of_labels)
                         ),
@@ -256,38 +256,38 @@ class PrometheusMessage(Message):
             elif self.performative == PrometheusMessage.Performative.UPDATE_METRIC:
                 expected_nb_of_contents = 4
                 enforce(
-                    type(self.title) == str,
+                    isinstance(self.title, str),
                     "Invalid type for content 'title'. Expected 'str'. Found '{}'.".format(
                         type(self.title)
                     ),
                 )
                 enforce(
-                    type(self.callable) == str,
+                    isinstance(self.callable, str),
                     "Invalid type for content 'callable'. Expected 'str'. Found '{}'.".format(
                         type(self.callable)
                     ),
                 )
                 enforce(
-                    type(self.value) == float,
+                    isinstance(self.value, float),
                     "Invalid type for content 'value'. Expected 'float'. Found '{}'.".format(
                         type(self.value)
                     ),
                 )
                 enforce(
-                    type(self.labels) == dict,
+                    isinstance(self.labels, dict),
                     "Invalid type for content 'labels'. Expected 'dict'. Found '{}'.".format(
                         type(self.labels)
                     ),
                 )
                 for key_of_labels, value_of_labels in self.labels.items():
                     enforce(
-                        type(key_of_labels) == str,
+                        isinstance(key_of_labels, str),
                         "Invalid type for dictionary keys in content 'labels'. Expected 'str'. Found '{}'.".format(
                             type(key_of_labels)
                         ),
                     )
                     enforce(
-                        type(value_of_labels) == str,
+                        isinstance(value_of_labels, str),
                         "Invalid type for dictionary values in content 'labels'. Expected 'str'. Found '{}'.".format(
                             type(value_of_labels)
                         ),
@@ -295,7 +295,7 @@ class PrometheusMessage(Message):
             elif self.performative == PrometheusMessage.Performative.RESPONSE:
                 expected_nb_of_contents = 1
                 enforce(
-                    type(self.code) == int,
+                    isinstance(self.code, int),
                     "Invalid type for content 'code'. Expected 'int'. Found '{}'.".format(
                         type(self.code)
                     ),
@@ -304,7 +304,7 @@ class PrometheusMessage(Message):
                     expected_nb_of_contents += 1
                     message = cast(str, self.message)
                     enforce(
-                        type(message) == str,
+                        isinstance(message, str),
                         "Invalid type for content 'message'. Expected 'str'. Found '{}'.".format(
                             type(message)
                         ),

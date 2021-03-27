@@ -13,8 +13,8 @@ fingerprint:
   dialogues.py: QmUx8de3kabB45rkbpddSpYHfmCnw74QjCjeuP7hC522Yb
   gym.proto: QmSYD1qtmNwKnfuTUtPGzbfW3kww4viJ714aRTPupLdV62
   gym_pb2.py: Qme3KgpxmLJihio9opNK9NHJtacdrkivafAZKvpQ2HGaqE
-  message.py: QmdVAgZCV6L5tN3LRuoLntCGrqASBVxfE8uudx7H17dhwo
-  serialization.py: QmQoL5VtkJCGgceAowdnRE2AvXcVSJJiGNP3dPaiBeQxXF
+  message.py: Qmb125d93ZoMnCjuLL4DeASwAHdmJGd272R8Ufa4LqUawz
+  serialization.py: QmUbn7WrkKEzPYzeWREATz8eFCBV1JAPqyvk6K2s2oh7oZ
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}

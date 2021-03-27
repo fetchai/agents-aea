@@ -187,31 +187,31 @@ class OefSearchMessage(Message):
         """Check that the message follows the oef_search protocol."""
         try:
             enforce(
-                type(self.dialogue_reference) == tuple,
+                isinstance(self.dialogue_reference, tuple),
                 "Invalid type for 'dialogue_reference'. Expected 'tuple'. Found '{}'.".format(
                     type(self.dialogue_reference)
                 ),
             )
             enforce(
-                type(self.dialogue_reference[0]) == str,
+                isinstance(self.dialogue_reference[0], str),
                 "Invalid type for 'dialogue_reference[0]'. Expected 'str'. Found '{}'.".format(
                     type(self.dialogue_reference[0])
                 ),
             )
             enforce(
-                type(self.dialogue_reference[1]) == str,
+                isinstance(self.dialogue_reference[1], str),
                 "Invalid type for 'dialogue_reference[1]'. Expected 'str'. Found '{}'.".format(
                     type(self.dialogue_reference[1])
                 ),
             )
             enforce(
-                type(self.message_id) == int,
+                isinstance(self.message_id, int),
                 "Invalid type for 'message_id'. Expected 'int'. Found '{}'.".format(
                     type(self.message_id)
                 ),
             )
             enforce(
-                type(self.target) == int,
+                isinstance(self.target, int),
                 "Invalid type for 'target'. Expected 'int'. Found '{}'.".format(
                     type(self.target)
                 ),
@@ -220,7 +220,7 @@ class OefSearchMessage(Message):
             # Light Protocol Rule 2
             # Check correct performative
             enforce(
-                type(self.performative) == OefSearchMessage.Performative,
+                isinstance(self.performative, OefSearchMessage.Performative),
                 "Invalid 'performative'. Expected either of '{}'. Found '{}'.".format(
                     self.valid_performatives, self.performative
                 ),
@@ -232,7 +232,7 @@ class OefSearchMessage(Message):
             if self.performative == OefSearchMessage.Performative.REGISTER_SERVICE:
                 expected_nb_of_contents = 1
                 enforce(
-                    type(self.service_description) == CustomDescription,
+                    isinstance(self.service_description, CustomDescription),
                     "Invalid type for content 'service_description'. Expected 'Description'. Found '{}'.".format(
                         type(self.service_description)
                     ),
@@ -240,7 +240,7 @@ class OefSearchMessage(Message):
             elif self.performative == OefSearchMessage.Performative.UNREGISTER_SERVICE:
                 expected_nb_of_contents = 1
                 enforce(
-                    type(self.service_description) == CustomDescription,
+                    isinstance(self.service_description, CustomDescription),
                     "Invalid type for content 'service_description'. Expected 'Description'. Found '{}'.".format(
                         type(self.service_description)
                     ),
@@ -248,7 +248,7 @@ class OefSearchMessage(Message):
             elif self.performative == OefSearchMessage.Performative.SEARCH_SERVICES:
                 expected_nb_of_contents = 1
                 enforce(
-                    type(self.query) == CustomQuery,
+                    isinstance(self.query, CustomQuery),
                     "Invalid type for content 'query'. Expected 'Query'. Found '{}'.".format(
                         type(self.query)
                     ),
@@ -256,17 +256,17 @@ class OefSearchMessage(Message):
             elif self.performative == OefSearchMessage.Performative.SEARCH_RESULT:
                 expected_nb_of_contents = 2
                 enforce(
-                    type(self.agents) == tuple,
+                    isinstance(self.agents, tuple),
                     "Invalid type for content 'agents'. Expected 'tuple'. Found '{}'.".format(
                         type(self.agents)
                     ),
                 )
                 enforce(
-                    all(type(element) == str for element in self.agents),
+                    all(isinstance(element, str) for element in self.agents),
                     "Invalid type for tuple elements in content 'agents'. Expected 'str'.",
                 )
                 enforce(
-                    type(self.agents_info) == CustomAgentsInfo,
+                    isinstance(self.agents_info, CustomAgentsInfo),
                     "Invalid type for content 'agents_info'. Expected 'AgentsInfo'. Found '{}'.".format(
                         type(self.agents_info)
                     ),
@@ -274,7 +274,7 @@ class OefSearchMessage(Message):
             elif self.performative == OefSearchMessage.Performative.SUCCESS:
                 expected_nb_of_contents = 1
                 enforce(
-                    type(self.agents_info) == CustomAgentsInfo,
+                    isinstance(self.agents_info, CustomAgentsInfo),
                     "Invalid type for content 'agents_info'. Expected 'AgentsInfo'. Found '{}'.".format(
                         type(self.agents_info)
                     ),
@@ -282,7 +282,7 @@ class OefSearchMessage(Message):
             elif self.performative == OefSearchMessage.Performative.OEF_ERROR:
                 expected_nb_of_contents = 1
                 enforce(
-                    type(self.oef_error_operation) == CustomOefErrorOperation,
+                    isinstance(self.oef_error_operation, CustomOefErrorOperation),
                     "Invalid type for content 'oef_error_operation'. Expected 'OefErrorOperation'. Found '{}'.".format(
                         type(self.oef_error_operation)
                     ),

@@ -483,31 +483,31 @@ class TProtocolNoCtMessage(Message):
         """Check that the message follows the t_protocol_no_ct protocol."""
         try:
             enforce(
-                type(self.dialogue_reference) == tuple,
+                isinstance(self.dialogue_reference, tuple),
                 "Invalid type for 'dialogue_reference'. Expected 'tuple'. Found '{}'.".format(
                     type(self.dialogue_reference)
                 ),
             )
             enforce(
-                type(self.dialogue_reference[0]) == str,
+                isinstance(self.dialogue_reference[0], str),
                 "Invalid type for 'dialogue_reference[0]'. Expected 'str'. Found '{}'.".format(
                     type(self.dialogue_reference[0])
                 ),
             )
             enforce(
-                type(self.dialogue_reference[1]) == str,
+                isinstance(self.dialogue_reference[1], str),
                 "Invalid type for 'dialogue_reference[1]'. Expected 'str'. Found '{}'.".format(
                     type(self.dialogue_reference[1])
                 ),
             )
             enforce(
-                type(self.message_id) == int,
+                isinstance(self.message_id, int),
                 "Invalid type for 'message_id'. Expected 'int'. Found '{}'.".format(
                     type(self.message_id)
                 ),
             )
             enforce(
-                type(self.target) == int,
+                isinstance(self.target, int),
                 "Invalid type for 'target'. Expected 'int'. Found '{}'.".format(
                     type(self.target)
                 ),
@@ -516,7 +516,7 @@ class TProtocolNoCtMessage(Message):
             # Light Protocol Rule 2
             # Check correct performative
             enforce(
-                type(self.performative) == TProtocolNoCtMessage.Performative,
+                isinstance(self.performative, TProtocolNoCtMessage.Performative),
                 "Invalid 'performative'. Expected either of '{}'. Found '{}'.".format(
                     self.valid_performatives, self.performative
                 ),
@@ -528,31 +528,31 @@ class TProtocolNoCtMessage(Message):
             if self.performative == TProtocolNoCtMessage.Performative.PERFORMATIVE_PT:
                 expected_nb_of_contents = 5
                 enforce(
-                    type(self.content_bytes) == bytes,
+                    isinstance(self.content_bytes, bytes),
                     "Invalid type for content 'content_bytes'. Expected 'bytes'. Found '{}'.".format(
                         type(self.content_bytes)
                     ),
                 )
                 enforce(
-                    type(self.content_int) == int,
+                    isinstance(self.content_int, int),
                     "Invalid type for content 'content_int'. Expected 'int'. Found '{}'.".format(
                         type(self.content_int)
                     ),
                 )
                 enforce(
-                    type(self.content_float) == float,
+                    isinstance(self.content_float, float),
                     "Invalid type for content 'content_float'. Expected 'float'. Found '{}'.".format(
                         type(self.content_float)
                     ),
                 )
                 enforce(
-                    type(self.content_bool) == bool,
+                    isinstance(self.content_bool, bool),
                     "Invalid type for content 'content_bool'. Expected 'bool'. Found '{}'.".format(
                         type(self.content_bool)
                     ),
                 )
                 enforce(
-                    type(self.content_str) == str,
+                    isinstance(self.content_str, str),
                     "Invalid type for content 'content_str'. Expected 'str'. Found '{}'.".format(
                         type(self.content_str)
                     ),
@@ -562,103 +562,115 @@ class TProtocolNoCtMessage(Message):
             ):
                 expected_nb_of_contents = 10
                 enforce(
-                    type(self.content_set_bytes) == frozenset,
+                    isinstance(self.content_set_bytes, frozenset),
                     "Invalid type for content 'content_set_bytes'. Expected 'frozenset'. Found '{}'.".format(
                         type(self.content_set_bytes)
                     ),
                 )
                 enforce(
-                    all(type(element) == bytes for element in self.content_set_bytes),
+                    all(
+                        isinstance(element, bytes) for element in self.content_set_bytes
+                    ),
                     "Invalid type for frozenset elements in content 'content_set_bytes'. Expected 'bytes'.",
                 )
                 enforce(
-                    type(self.content_set_int) == frozenset,
+                    isinstance(self.content_set_int, frozenset),
                     "Invalid type for content 'content_set_int'. Expected 'frozenset'. Found '{}'.".format(
                         type(self.content_set_int)
                     ),
                 )
                 enforce(
-                    all(type(element) == int for element in self.content_set_int),
+                    all(isinstance(element, int) for element in self.content_set_int),
                     "Invalid type for frozenset elements in content 'content_set_int'. Expected 'int'.",
                 )
                 enforce(
-                    type(self.content_set_float) == frozenset,
+                    isinstance(self.content_set_float, frozenset),
                     "Invalid type for content 'content_set_float'. Expected 'frozenset'. Found '{}'.".format(
                         type(self.content_set_float)
                     ),
                 )
                 enforce(
-                    all(type(element) == float for element in self.content_set_float),
+                    all(
+                        isinstance(element, float) for element in self.content_set_float
+                    ),
                     "Invalid type for frozenset elements in content 'content_set_float'. Expected 'float'.",
                 )
                 enforce(
-                    type(self.content_set_bool) == frozenset,
+                    isinstance(self.content_set_bool, frozenset),
                     "Invalid type for content 'content_set_bool'. Expected 'frozenset'. Found '{}'.".format(
                         type(self.content_set_bool)
                     ),
                 )
                 enforce(
-                    all(type(element) == bool for element in self.content_set_bool),
+                    all(isinstance(element, bool) for element in self.content_set_bool),
                     "Invalid type for frozenset elements in content 'content_set_bool'. Expected 'bool'.",
                 )
                 enforce(
-                    type(self.content_set_str) == frozenset,
+                    isinstance(self.content_set_str, frozenset),
                     "Invalid type for content 'content_set_str'. Expected 'frozenset'. Found '{}'.".format(
                         type(self.content_set_str)
                     ),
                 )
                 enforce(
-                    all(type(element) == str for element in self.content_set_str),
+                    all(isinstance(element, str) for element in self.content_set_str),
                     "Invalid type for frozenset elements in content 'content_set_str'. Expected 'str'.",
                 )
                 enforce(
-                    type(self.content_list_bytes) == tuple,
+                    isinstance(self.content_list_bytes, tuple),
                     "Invalid type for content 'content_list_bytes'. Expected 'tuple'. Found '{}'.".format(
                         type(self.content_list_bytes)
                     ),
                 )
                 enforce(
-                    all(type(element) == bytes for element in self.content_list_bytes),
+                    all(
+                        isinstance(element, bytes)
+                        for element in self.content_list_bytes
+                    ),
                     "Invalid type for tuple elements in content 'content_list_bytes'. Expected 'bytes'.",
                 )
                 enforce(
-                    type(self.content_list_int) == tuple,
+                    isinstance(self.content_list_int, tuple),
                     "Invalid type for content 'content_list_int'. Expected 'tuple'. Found '{}'.".format(
                         type(self.content_list_int)
                     ),
                 )
                 enforce(
-                    all(type(element) == int for element in self.content_list_int),
+                    all(isinstance(element, int) for element in self.content_list_int),
                     "Invalid type for tuple elements in content 'content_list_int'. Expected 'int'.",
                 )
                 enforce(
-                    type(self.content_list_float) == tuple,
+                    isinstance(self.content_list_float, tuple),
                     "Invalid type for content 'content_list_float'. Expected 'tuple'. Found '{}'.".format(
                         type(self.content_list_float)
                     ),
                 )
                 enforce(
-                    all(type(element) == float for element in self.content_list_float),
+                    all(
+                        isinstance(element, float)
+                        for element in self.content_list_float
+                    ),
                     "Invalid type for tuple elements in content 'content_list_float'. Expected 'float'.",
                 )
                 enforce(
-                    type(self.content_list_bool) == tuple,
+                    isinstance(self.content_list_bool, tuple),
                     "Invalid type for content 'content_list_bool'. Expected 'tuple'. Found '{}'.".format(
                         type(self.content_list_bool)
                     ),
                 )
                 enforce(
-                    all(type(element) == bool for element in self.content_list_bool),
+                    all(
+                        isinstance(element, bool) for element in self.content_list_bool
+                    ),
                     "Invalid type for tuple elements in content 'content_list_bool'. Expected 'bool'.",
                 )
                 enforce(
-                    type(self.content_list_str) == tuple,
+                    isinstance(self.content_list_str, tuple),
                     "Invalid type for content 'content_list_str'. Expected 'tuple'. Found '{}'.".format(
                         type(self.content_list_str)
                     ),
                 )
                 enforce(
-                    all(type(element) == str for element in self.content_list_str),
+                    all(isinstance(element, str) for element in self.content_list_str),
                     "Invalid type for tuple elements in content 'content_list_str'. Expected 'str'.",
                 )
             elif (
@@ -666,7 +678,7 @@ class TProtocolNoCtMessage(Message):
             ):
                 expected_nb_of_contents = 15
                 enforce(
-                    type(self.content_dict_int_bytes) == dict,
+                    isinstance(self.content_dict_int_bytes, dict),
                     "Invalid type for content 'content_dict_int_bytes'. Expected 'dict'. Found '{}'.".format(
                         type(self.content_dict_int_bytes)
                     ),
@@ -676,19 +688,19 @@ class TProtocolNoCtMessage(Message):
                     value_of_content_dict_int_bytes,
                 ) in self.content_dict_int_bytes.items():
                     enforce(
-                        type(key_of_content_dict_int_bytes) == int,
+                        isinstance(key_of_content_dict_int_bytes, int),
                         "Invalid type for dictionary keys in content 'content_dict_int_bytes'. Expected 'int'. Found '{}'.".format(
                             type(key_of_content_dict_int_bytes)
                         ),
                     )
                     enforce(
-                        type(value_of_content_dict_int_bytes) == bytes,
+                        isinstance(value_of_content_dict_int_bytes, bytes),
                         "Invalid type for dictionary values in content 'content_dict_int_bytes'. Expected 'bytes'. Found '{}'.".format(
                             type(value_of_content_dict_int_bytes)
                         ),
                     )
                 enforce(
-                    type(self.content_dict_int_int) == dict,
+                    isinstance(self.content_dict_int_int, dict),
                     "Invalid type for content 'content_dict_int_int'. Expected 'dict'. Found '{}'.".format(
                         type(self.content_dict_int_int)
                     ),
@@ -698,19 +710,19 @@ class TProtocolNoCtMessage(Message):
                     value_of_content_dict_int_int,
                 ) in self.content_dict_int_int.items():
                     enforce(
-                        type(key_of_content_dict_int_int) == int,
+                        isinstance(key_of_content_dict_int_int, int),
                         "Invalid type for dictionary keys in content 'content_dict_int_int'. Expected 'int'. Found '{}'.".format(
                             type(key_of_content_dict_int_int)
                         ),
                     )
                     enforce(
-                        type(value_of_content_dict_int_int) == int,
+                        isinstance(value_of_content_dict_int_int, int),
                         "Invalid type for dictionary values in content 'content_dict_int_int'. Expected 'int'. Found '{}'.".format(
                             type(value_of_content_dict_int_int)
                         ),
                     )
                 enforce(
-                    type(self.content_dict_int_float) == dict,
+                    isinstance(self.content_dict_int_float, dict),
                     "Invalid type for content 'content_dict_int_float'. Expected 'dict'. Found '{}'.".format(
                         type(self.content_dict_int_float)
                     ),
@@ -720,19 +732,19 @@ class TProtocolNoCtMessage(Message):
                     value_of_content_dict_int_float,
                 ) in self.content_dict_int_float.items():
                     enforce(
-                        type(key_of_content_dict_int_float) == int,
+                        isinstance(key_of_content_dict_int_float, int),
                         "Invalid type for dictionary keys in content 'content_dict_int_float'. Expected 'int'. Found '{}'.".format(
                             type(key_of_content_dict_int_float)
                         ),
                     )
                     enforce(
-                        type(value_of_content_dict_int_float) == float,
+                        isinstance(value_of_content_dict_int_float, float),
                         "Invalid type for dictionary values in content 'content_dict_int_float'. Expected 'float'. Found '{}'.".format(
                             type(value_of_content_dict_int_float)
                         ),
                     )
                 enforce(
-                    type(self.content_dict_int_bool) == dict,
+                    isinstance(self.content_dict_int_bool, dict),
                     "Invalid type for content 'content_dict_int_bool'. Expected 'dict'. Found '{}'.".format(
                         type(self.content_dict_int_bool)
                     ),
@@ -742,19 +754,19 @@ class TProtocolNoCtMessage(Message):
                     value_of_content_dict_int_bool,
                 ) in self.content_dict_int_bool.items():
                     enforce(
-                        type(key_of_content_dict_int_bool) == int,
+                        isinstance(key_of_content_dict_int_bool, int),
                         "Invalid type for dictionary keys in content 'content_dict_int_bool'. Expected 'int'. Found '{}'.".format(
                             type(key_of_content_dict_int_bool)
                         ),
                     )
                     enforce(
-                        type(value_of_content_dict_int_bool) == bool,
+                        isinstance(value_of_content_dict_int_bool, bool),
                         "Invalid type for dictionary values in content 'content_dict_int_bool'. Expected 'bool'. Found '{}'.".format(
                             type(value_of_content_dict_int_bool)
                         ),
                     )
                 enforce(
-                    type(self.content_dict_int_str) == dict,
+                    isinstance(self.content_dict_int_str, dict),
                     "Invalid type for content 'content_dict_int_str'. Expected 'dict'. Found '{}'.".format(
                         type(self.content_dict_int_str)
                     ),
@@ -764,19 +776,19 @@ class TProtocolNoCtMessage(Message):
                     value_of_content_dict_int_str,
                 ) in self.content_dict_int_str.items():
                     enforce(
-                        type(key_of_content_dict_int_str) == int,
+                        isinstance(key_of_content_dict_int_str, int),
                         "Invalid type for dictionary keys in content 'content_dict_int_str'. Expected 'int'. Found '{}'.".format(
                             type(key_of_content_dict_int_str)
                         ),
                     )
                     enforce(
-                        type(value_of_content_dict_int_str) == str,
+                        isinstance(value_of_content_dict_int_str, str),
                         "Invalid type for dictionary values in content 'content_dict_int_str'. Expected 'str'. Found '{}'.".format(
                             type(value_of_content_dict_int_str)
                         ),
                     )
                 enforce(
-                    type(self.content_dict_bool_bytes) == dict,
+                    isinstance(self.content_dict_bool_bytes, dict),
                     "Invalid type for content 'content_dict_bool_bytes'. Expected 'dict'. Found '{}'.".format(
                         type(self.content_dict_bool_bytes)
                     ),
@@ -786,19 +798,19 @@ class TProtocolNoCtMessage(Message):
                     value_of_content_dict_bool_bytes,
                 ) in self.content_dict_bool_bytes.items():
                     enforce(
-                        type(key_of_content_dict_bool_bytes) == bool,
+                        isinstance(key_of_content_dict_bool_bytes, bool),
                         "Invalid type for dictionary keys in content 'content_dict_bool_bytes'. Expected 'bool'. Found '{}'.".format(
                             type(key_of_content_dict_bool_bytes)
                         ),
                     )
                     enforce(
-                        type(value_of_content_dict_bool_bytes) == bytes,
+                        isinstance(value_of_content_dict_bool_bytes, bytes),
                         "Invalid type for dictionary values in content 'content_dict_bool_bytes'. Expected 'bytes'. Found '{}'.".format(
                             type(value_of_content_dict_bool_bytes)
                         ),
                     )
                 enforce(
-                    type(self.content_dict_bool_int) == dict,
+                    isinstance(self.content_dict_bool_int, dict),
                     "Invalid type for content 'content_dict_bool_int'. Expected 'dict'. Found '{}'.".format(
                         type(self.content_dict_bool_int)
                     ),
@@ -808,19 +820,19 @@ class TProtocolNoCtMessage(Message):
                     value_of_content_dict_bool_int,
                 ) in self.content_dict_bool_int.items():
                     enforce(
-                        type(key_of_content_dict_bool_int) == bool,
+                        isinstance(key_of_content_dict_bool_int, bool),
                         "Invalid type for dictionary keys in content 'content_dict_bool_int'. Expected 'bool'. Found '{}'.".format(
                             type(key_of_content_dict_bool_int)
                         ),
                     )
                     enforce(
-                        type(value_of_content_dict_bool_int) == int,
+                        isinstance(value_of_content_dict_bool_int, int),
                         "Invalid type for dictionary values in content 'content_dict_bool_int'. Expected 'int'. Found '{}'.".format(
                             type(value_of_content_dict_bool_int)
                         ),
                     )
                 enforce(
-                    type(self.content_dict_bool_float) == dict,
+                    isinstance(self.content_dict_bool_float, dict),
                     "Invalid type for content 'content_dict_bool_float'. Expected 'dict'. Found '{}'.".format(
                         type(self.content_dict_bool_float)
                     ),
@@ -830,19 +842,19 @@ class TProtocolNoCtMessage(Message):
                     value_of_content_dict_bool_float,
                 ) in self.content_dict_bool_float.items():
                     enforce(
-                        type(key_of_content_dict_bool_float) == bool,
+                        isinstance(key_of_content_dict_bool_float, bool),
                         "Invalid type for dictionary keys in content 'content_dict_bool_float'. Expected 'bool'. Found '{}'.".format(
                             type(key_of_content_dict_bool_float)
                         ),
                     )
                     enforce(
-                        type(value_of_content_dict_bool_float) == float,
+                        isinstance(value_of_content_dict_bool_float, float),
                         "Invalid type for dictionary values in content 'content_dict_bool_float'. Expected 'float'. Found '{}'.".format(
                             type(value_of_content_dict_bool_float)
                         ),
                     )
                 enforce(
-                    type(self.content_dict_bool_bool) == dict,
+                    isinstance(self.content_dict_bool_bool, dict),
                     "Invalid type for content 'content_dict_bool_bool'. Expected 'dict'. Found '{}'.".format(
                         type(self.content_dict_bool_bool)
                     ),
@@ -852,19 +864,19 @@ class TProtocolNoCtMessage(Message):
                     value_of_content_dict_bool_bool,
                 ) in self.content_dict_bool_bool.items():
                     enforce(
-                        type(key_of_content_dict_bool_bool) == bool,
+                        isinstance(key_of_content_dict_bool_bool, bool),
                         "Invalid type for dictionary keys in content 'content_dict_bool_bool'. Expected 'bool'. Found '{}'.".format(
                             type(key_of_content_dict_bool_bool)
                         ),
                     )
                     enforce(
-                        type(value_of_content_dict_bool_bool) == bool,
+                        isinstance(value_of_content_dict_bool_bool, bool),
                         "Invalid type for dictionary values in content 'content_dict_bool_bool'. Expected 'bool'. Found '{}'.".format(
                             type(value_of_content_dict_bool_bool)
                         ),
                     )
                 enforce(
-                    type(self.content_dict_bool_str) == dict,
+                    isinstance(self.content_dict_bool_str, dict),
                     "Invalid type for content 'content_dict_bool_str'. Expected 'dict'. Found '{}'.".format(
                         type(self.content_dict_bool_str)
                     ),
@@ -874,19 +886,19 @@ class TProtocolNoCtMessage(Message):
                     value_of_content_dict_bool_str,
                 ) in self.content_dict_bool_str.items():
                     enforce(
-                        type(key_of_content_dict_bool_str) == bool,
+                        isinstance(key_of_content_dict_bool_str, bool),
                         "Invalid type for dictionary keys in content 'content_dict_bool_str'. Expected 'bool'. Found '{}'.".format(
                             type(key_of_content_dict_bool_str)
                         ),
                     )
                     enforce(
-                        type(value_of_content_dict_bool_str) == str,
+                        isinstance(value_of_content_dict_bool_str, str),
                         "Invalid type for dictionary values in content 'content_dict_bool_str'. Expected 'str'. Found '{}'.".format(
                             type(value_of_content_dict_bool_str)
                         ),
                     )
                 enforce(
-                    type(self.content_dict_str_bytes) == dict,
+                    isinstance(self.content_dict_str_bytes, dict),
                     "Invalid type for content 'content_dict_str_bytes'. Expected 'dict'. Found '{}'.".format(
                         type(self.content_dict_str_bytes)
                     ),
@@ -896,19 +908,19 @@ class TProtocolNoCtMessage(Message):
                     value_of_content_dict_str_bytes,
                 ) in self.content_dict_str_bytes.items():
                     enforce(
-                        type(key_of_content_dict_str_bytes) == str,
+                        isinstance(key_of_content_dict_str_bytes, str),
                         "Invalid type for dictionary keys in content 'content_dict_str_bytes'. Expected 'str'. Found '{}'.".format(
                             type(key_of_content_dict_str_bytes)
                         ),
                     )
                     enforce(
-                        type(value_of_content_dict_str_bytes) == bytes,
+                        isinstance(value_of_content_dict_str_bytes, bytes),
                         "Invalid type for dictionary values in content 'content_dict_str_bytes'. Expected 'bytes'. Found '{}'.".format(
                             type(value_of_content_dict_str_bytes)
                         ),
                     )
                 enforce(
-                    type(self.content_dict_str_int) == dict,
+                    isinstance(self.content_dict_str_int, dict),
                     "Invalid type for content 'content_dict_str_int'. Expected 'dict'. Found '{}'.".format(
                         type(self.content_dict_str_int)
                     ),
@@ -918,19 +930,19 @@ class TProtocolNoCtMessage(Message):
                     value_of_content_dict_str_int,
                 ) in self.content_dict_str_int.items():
                     enforce(
-                        type(key_of_content_dict_str_int) == str,
+                        isinstance(key_of_content_dict_str_int, str),
                         "Invalid type for dictionary keys in content 'content_dict_str_int'. Expected 'str'. Found '{}'.".format(
                             type(key_of_content_dict_str_int)
                         ),
                     )
                     enforce(
-                        type(value_of_content_dict_str_int) == int,
+                        isinstance(value_of_content_dict_str_int, int),
                         "Invalid type for dictionary values in content 'content_dict_str_int'. Expected 'int'. Found '{}'.".format(
                             type(value_of_content_dict_str_int)
                         ),
                     )
                 enforce(
-                    type(self.content_dict_str_float) == dict,
+                    isinstance(self.content_dict_str_float, dict),
                     "Invalid type for content 'content_dict_str_float'. Expected 'dict'. Found '{}'.".format(
                         type(self.content_dict_str_float)
                     ),
@@ -940,19 +952,19 @@ class TProtocolNoCtMessage(Message):
                     value_of_content_dict_str_float,
                 ) in self.content_dict_str_float.items():
                     enforce(
-                        type(key_of_content_dict_str_float) == str,
+                        isinstance(key_of_content_dict_str_float, str),
                         "Invalid type for dictionary keys in content 'content_dict_str_float'. Expected 'str'. Found '{}'.".format(
                             type(key_of_content_dict_str_float)
                         ),
                     )
                     enforce(
-                        type(value_of_content_dict_str_float) == float,
+                        isinstance(value_of_content_dict_str_float, float),
                         "Invalid type for dictionary values in content 'content_dict_str_float'. Expected 'float'. Found '{}'.".format(
                             type(value_of_content_dict_str_float)
                         ),
                     )
                 enforce(
-                    type(self.content_dict_str_bool) == dict,
+                    isinstance(self.content_dict_str_bool, dict),
                     "Invalid type for content 'content_dict_str_bool'. Expected 'dict'. Found '{}'.".format(
                         type(self.content_dict_str_bool)
                     ),
@@ -962,19 +974,19 @@ class TProtocolNoCtMessage(Message):
                     value_of_content_dict_str_bool,
                 ) in self.content_dict_str_bool.items():
                     enforce(
-                        type(key_of_content_dict_str_bool) == str,
+                        isinstance(key_of_content_dict_str_bool, str),
                         "Invalid type for dictionary keys in content 'content_dict_str_bool'. Expected 'str'. Found '{}'.".format(
                             type(key_of_content_dict_str_bool)
                         ),
                     )
                     enforce(
-                        type(value_of_content_dict_str_bool) == bool,
+                        isinstance(value_of_content_dict_str_bool, bool),
                         "Invalid type for dictionary values in content 'content_dict_str_bool'. Expected 'bool'. Found '{}'.".format(
                             type(value_of_content_dict_str_bool)
                         ),
                     )
                 enforce(
-                    type(self.content_dict_str_str) == dict,
+                    isinstance(self.content_dict_str_str, dict),
                     "Invalid type for content 'content_dict_str_str'. Expected 'dict'. Found '{}'.".format(
                         type(self.content_dict_str_str)
                     ),
@@ -984,13 +996,13 @@ class TProtocolNoCtMessage(Message):
                     value_of_content_dict_str_str,
                 ) in self.content_dict_str_str.items():
                     enforce(
-                        type(key_of_content_dict_str_str) == str,
+                        isinstance(key_of_content_dict_str_str, str),
                         "Invalid type for dictionary keys in content 'content_dict_str_str'. Expected 'str'. Found '{}'.".format(
                             type(key_of_content_dict_str_str)
                         ),
                     )
                     enforce(
-                        type(value_of_content_dict_str_str) == str,
+                        isinstance(value_of_content_dict_str_str, str),
                         "Invalid type for dictionary values in content 'content_dict_str_str'. Expected 'str'. Found '{}'.".format(
                             type(value_of_content_dict_str_str)
                         ),
@@ -998,85 +1010,100 @@ class TProtocolNoCtMessage(Message):
             elif self.performative == TProtocolNoCtMessage.Performative.PERFORMATIVE_MT:
                 expected_nb_of_contents = 2
                 enforce(
-                    type(self.content_union_1) == bool
-                    or type(self.content_union_1) == bytes
-                    or type(self.content_union_1) == dict
-                    or type(self.content_union_1) == float
-                    or type(self.content_union_1) == frozenset
-                    or type(self.content_union_1) == int
-                    or type(self.content_union_1) == str
-                    or type(self.content_union_1) == tuple,
+                    isinstance(self.content_union_1, bool)
+                    or isinstance(self.content_union_1, bytes)
+                    or isinstance(self.content_union_1, dict)
+                    or isinstance(self.content_union_1, float)
+                    or isinstance(self.content_union_1, frozenset)
+                    or isinstance(self.content_union_1, int)
+                    or isinstance(self.content_union_1, str)
+                    or isinstance(self.content_union_1, tuple),
                     "Invalid type for content 'content_union_1'. Expected either of '['bool', 'bytes', 'dict', 'float', 'frozenset', 'int', 'str', 'tuple']'. Found '{}'.".format(
                         type(self.content_union_1)
                     ),
                 )
-                if type(self.content_union_1) == frozenset:
+                if isinstance(self.content_union_1, frozenset):
                     enforce(
-                        all(type(element) == int for element in self.content_union_1),
+                        all(
+                            isinstance(element, int) for element in self.content_union_1
+                        ),
                         "Invalid type for elements of content 'content_union_1'. Expected 'int'.",
                     )
-                if type(self.content_union_1) == tuple:
+                if isinstance(self.content_union_1, tuple):
                     enforce(
-                        all(type(element) == bool for element in self.content_union_1),
+                        all(
+                            isinstance(element, bool)
+                            for element in self.content_union_1
+                        ),
                         "Invalid type for tuple elements in content 'content_union_1'. Expected 'bool'.",
                     )
-                if type(self.content_union_1) == dict:
+                if isinstance(self.content_union_1, dict):
                     for (
                         key_of_content_union_1,
                         value_of_content_union_1,
                     ) in self.content_union_1.items():
                         enforce(
                             (
-                                type(key_of_content_union_1) == str
-                                and type(value_of_content_union_1) == int
+                                isinstance(key_of_content_union_1, str)
+                                and isinstance(value_of_content_union_1, int)
                             ),
                             "Invalid type for dictionary key, value in content 'content_union_1'. Expected 'str', 'int'.",
                         )
                 enforce(
-                    type(self.content_union_2) == dict
-                    or type(self.content_union_2) == frozenset
-                    or type(self.content_union_2) == tuple,
+                    isinstance(self.content_union_2, dict)
+                    or isinstance(self.content_union_2, frozenset)
+                    or isinstance(self.content_union_2, tuple),
                     "Invalid type for content 'content_union_2'. Expected either of '['dict', 'frozenset', 'tuple']'. Found '{}'.".format(
                         type(self.content_union_2)
                     ),
                 )
-                if type(self.content_union_2) == frozenset:
+                if isinstance(self.content_union_2, frozenset):
                     enforce(
-                        all(type(element) == bytes for element in self.content_union_2)
-                        or all(type(element) == int for element in self.content_union_2)
+                        all(
+                            isinstance(element, bytes)
+                            for element in self.content_union_2
+                        )
                         or all(
-                            type(element) == str for element in self.content_union_2
+                            isinstance(element, int) for element in self.content_union_2
+                        )
+                        or all(
+                            isinstance(element, str) for element in self.content_union_2
                         ),
                         "Invalid type for frozenset elements in content 'content_union_2'. Expected either 'bytes' or 'int' or 'str'.",
                     )
-                if type(self.content_union_2) == tuple:
+                if isinstance(self.content_union_2, tuple):
                     enforce(
-                        all(type(element) == bool for element in self.content_union_2)
-                        or all(
-                            type(element) == bytes for element in self.content_union_2
+                        all(
+                            isinstance(element, bool)
+                            for element in self.content_union_2
                         )
                         or all(
-                            type(element) == float for element in self.content_union_2
+                            isinstance(element, bytes)
+                            for element in self.content_union_2
+                        )
+                        or all(
+                            isinstance(element, float)
+                            for element in self.content_union_2
                         ),
                         "Invalid type for tuple elements in content 'content_union_2'. Expected either 'bool' or 'bytes' or 'float'.",
                     )
-                if type(self.content_union_2) == dict:
+                if isinstance(self.content_union_2, dict):
                     for (
                         key_of_content_union_2,
                         value_of_content_union_2,
                     ) in self.content_union_2.items():
                         enforce(
                             (
-                                type(key_of_content_union_2) == bool
-                                and type(value_of_content_union_2) == bytes
+                                isinstance(key_of_content_union_2, bool)
+                                and isinstance(value_of_content_union_2, bytes)
                             )
                             or (
-                                type(key_of_content_union_2) == int
-                                and type(value_of_content_union_2) == float
+                                isinstance(key_of_content_union_2, int)
+                                and isinstance(value_of_content_union_2, float)
                             )
                             or (
-                                type(key_of_content_union_2) == str
-                                and type(value_of_content_union_2) == int
+                                isinstance(key_of_content_union_2, str)
+                                and isinstance(value_of_content_union_2, int)
                             ),
                             "Invalid type for dictionary key, value in content 'content_union_2'. Expected 'bool','bytes' or 'int','float' or 'str','int'.",
                         )
@@ -1086,7 +1113,7 @@ class TProtocolNoCtMessage(Message):
                     expected_nb_of_contents += 1
                     content_o_bool = cast(bool, self.content_o_bool)
                     enforce(
-                        type(content_o_bool) == bool,
+                        isinstance(content_o_bool, bool),
                         "Invalid type for content 'content_o_bool'. Expected 'bool'. Found '{}'.".format(
                             type(content_o_bool)
                         ),
@@ -1095,13 +1122,13 @@ class TProtocolNoCtMessage(Message):
                     expected_nb_of_contents += 1
                     content_o_set_int = cast(FrozenSet[int], self.content_o_set_int)
                     enforce(
-                        type(content_o_set_int) == frozenset,
+                        isinstance(content_o_set_int, frozenset),
                         "Invalid type for content 'content_o_set_int'. Expected 'frozenset'. Found '{}'.".format(
                             type(content_o_set_int)
                         ),
                     )
                     enforce(
-                        all(type(element) == int for element in content_o_set_int),
+                        all(isinstance(element, int) for element in content_o_set_int),
                         "Invalid type for frozenset elements in content 'content_o_set_int'. Expected 'int'.",
                     )
                 if self.is_set("content_o_list_bytes"):
@@ -1110,13 +1137,16 @@ class TProtocolNoCtMessage(Message):
                         Tuple[bytes, ...], self.content_o_list_bytes
                     )
                     enforce(
-                        type(content_o_list_bytes) == tuple,
+                        isinstance(content_o_list_bytes, tuple),
                         "Invalid type for content 'content_o_list_bytes'. Expected 'tuple'. Found '{}'.".format(
                             type(content_o_list_bytes)
                         ),
                     )
                     enforce(
-                        all(type(element) == bytes for element in content_o_list_bytes),
+                        all(
+                            isinstance(element, bytes)
+                            for element in content_o_list_bytes
+                        ),
                         "Invalid type for tuple elements in content 'content_o_list_bytes'. Expected 'bytes'.",
                     )
                 if self.is_set("content_o_dict_str_int"):
@@ -1125,7 +1155,7 @@ class TProtocolNoCtMessage(Message):
                         Dict[str, int], self.content_o_dict_str_int
                     )
                     enforce(
-                        type(content_o_dict_str_int) == dict,
+                        isinstance(content_o_dict_str_int, dict),
                         "Invalid type for content 'content_o_dict_str_int'. Expected 'dict'. Found '{}'.".format(
                             type(content_o_dict_str_int)
                         ),
@@ -1135,13 +1165,13 @@ class TProtocolNoCtMessage(Message):
                         value_of_content_o_dict_str_int,
                     ) in content_o_dict_str_int.items():
                         enforce(
-                            type(key_of_content_o_dict_str_int) == str,
+                            isinstance(key_of_content_o_dict_str_int, str),
                             "Invalid type for dictionary keys in content 'content_o_dict_str_int'. Expected 'str'. Found '{}'.".format(
                                 type(key_of_content_o_dict_str_int)
                             ),
                         )
                         enforce(
-                            type(value_of_content_o_dict_str_int) == int,
+                            isinstance(value_of_content_o_dict_str_int, int),
                             "Invalid type for dictionary values in content 'content_o_dict_str_int'. Expected 'int'. Found '{}'.".format(
                                 type(value_of_content_o_dict_str_int)
                             ),
