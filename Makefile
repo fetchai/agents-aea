@@ -47,7 +47,7 @@ lint:
 
 .PHONY: pylint
 pylint:
-	pylint -j4 aea benchmark packages scripts plugins/aea-ledger-fetchai/aea_ledger_fetchai plugins/aea-ledger-ethereum/aea_ledger_ethereum plugins/aea-ledger-cosmos/aea_ledger_cosmos plugins/aea-cli-ipfs/aea_cli_ipfs examples/*
+	pylint -j4 aea benchmark packages scripts plugins/aea-ledger-fetchai/aea_ledger_fetchai plugins/aea-ledger-ethereum/aea_ledger_ethereum plugins/aea-ledger-cosmos/aea_ledger_cosmos plugins/aea-cli-ipfs/aea_cli_ipfs examples/* --disable=E1136
 
 .PHONY: security
 security:
