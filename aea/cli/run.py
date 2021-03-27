@@ -200,10 +200,7 @@ def _build_aea(
     except AEAWalletNoAddressException:
         error_msg = (
             "You haven't specified any private key for the AEA project.\n"
-            "Please add one by using the following commands:\n"
-            "\n"
-            f"    aea generate-key {DEFAULT_LEDGER}\n"
-            f"    aea add-key fetchai {PRIVATE_KEY_PATH_SCHEMA.format(DEFAULT_LEDGER)}\n"
+            "Please add one by using the commands `aea generate-key` and `aea add-key` for the ledger of your choice.\n"
         )
         raise click.ClickException(error_msg)
     except Exception as e:
