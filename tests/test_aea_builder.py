@@ -50,7 +50,7 @@ from aea.configurations.constants import (
 from aea.configurations.data_types import PublicId
 from aea.configurations.loader import load_component_configuration
 from aea.contracts.base import Contract
-from aea.exceptions import AEAEnforceError, AEAException
+from aea.exceptions import AEAEnforceError, AEAException, AEAWalletNoAddressException
 from aea.helpers.base import cd
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.install_dependency import run_install_subprocess
@@ -637,7 +637,7 @@ def test__build_identity_from_wallet():
 
     wallet = Mock()
     wallet.addresses = {}
-    with pytest.raises(ValueError):
+    with pytest.raises(AEAWalletNoAddressException):
         builder._build_identity_from_wallet(wallet)
 
     wallet.addresses = {builder.get_default_ledger(): "addr1"}
