@@ -64,6 +64,23 @@ from aea.protocols.generator.extract_specification import extract
 from aea.protocols.generator.validate import validate
 
 
+PYLINT_DISABLE_SERIALIZATION_PY = [
+    "too-many-statements",
+    "too-many-locals",
+    "no-member",
+    "too-few-public-methods",
+    "redefined-builtin",
+]
+PYLINT_DISABLE_MESSAGE_PY = [
+    "too-many-statements",
+    "too-many-locals",
+    "no-member",
+    "too-few-public-methods",
+    "too-many-branches",
+    "not-an-iterable",
+]
+
+
 def _copyright_header_str(author: str) -> str:
     """
     Produce the copyright header text for a protocol.
@@ -618,6 +635,8 @@ class ProtocolGenerator:
                 self.protocol_specification.name
             )
         )
+
+        cls_str += f"# pylint: disable={','.join(PYLINT_DISABLE_MESSAGE_PY)}\n"
 
         # Imports
         cls_str += self.indent + "import logging\n"
@@ -1527,7 +1546,7 @@ class ProtocolGenerator:
             )
         )
 
-        cls_str += "# pylint: disable=no-member\n"
+        cls_str += f"# pylint: disable={','.join(PYLINT_DISABLE_SERIALIZATION_PY)}\n"
 
         # Imports
         cls_str += self.indent + "from typing import Any, Dict, cast\n\n"

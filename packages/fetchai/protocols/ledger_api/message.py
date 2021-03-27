@@ -19,6 +19,7 @@
 
 """This module contains ledger_api's message definition."""
 
+# pylint: disable=too-many-statements,too-many-locals,no-member,too-few-public-methods,too-many-branches,not-an-iterable
 import logging
 from typing import Any, Optional, Set, Tuple, cast
 

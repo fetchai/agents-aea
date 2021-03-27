@@ -19,7 +19,7 @@
 
 """Serialization module for contract_api protocol."""
 
-# pylint: disable=no-member
+# pylint: disable=too-many-statements,too-many-locals,no-member,too-few-public-methods,redefined-builtin
 from typing import Any, Dict, cast
 
 from aea.mail.base_pb2 import DialogueMessage

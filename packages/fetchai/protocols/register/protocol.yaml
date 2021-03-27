@@ -10,10 +10,10 @@ fingerprint:
   README.md: QmPuATb3Rzav1SVZ9whBJS5sLwek9YC82cVvcLfyVyjR4w
   __init__.py: QmewUrNWxCmJUmUcXcytp9iiBPBmv9U97yCGEBP5QruEZS
   dialogues.py: QmfBmUxThNF1Qgz4bSrvPPPVYqxvdRtaMuXpQUQ5XVTPQC
-  message.py: QmQW8zEYhtDsyQa6pKvuSZsqdbfMrWexqYhsNwvzrzyuVC
+  message.py: Qmc3QFPfh6eZiW9k14XPxjwpBy9sLcwbwXEAYqjv2LN1jn
   register.proto: QmTHG7MpXFwd6hhf9Wawi8k1rGGo6um1i15Rr89eN1nP1Z
   register_pb2.py: QmS4vFkGxv6m63HePdmriumzUHWHM6RXv9ueCr7MLipDaQ
-  serialization.py: QmR6K5rHWP6AvEmaCwBnVsg3nqf9t5ZTPdvthkxEFg6LkG
+  serialization.py: QmfDj1p3d4YjkyAmdMCy2zB99C7X71FZykFsTAtmX9N9kc
 fingerprint_ignore_patterns: []
 dependencies:
   protobuf: {}
