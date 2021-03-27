@@ -35,6 +35,7 @@ from aea.configurations.constants import (  # noqa: F401 # pylint: disable=unuse
     CONFIG_FILE_TO_PACKAGE_TYPE,
     CONNECTION,
     CONTRACT,
+    DEFAULT_IGNORE_DIRS_AGENT_FINGERPRINT,
     PROTOCOL,
     SKILL,
 )
@@ -201,8 +202,8 @@ def fingerprint_agent(click_context: click.Context) -> None:
     fingerprints_dict = _compute_fingerprint(
         Path(ctx.cwd),
         ignore_patterns=ctx.agent_config.fingerprint_ignore_patterns,
-        is_recursive=False,
+        ignore_directories=DEFAULT_IGNORE_DIRS_AGENT_FINGERPRINT,
     )  # type: Dict[str, str]
     ctx.agent_config.fingerprint = fingerprints_dict
     ctx.dump_agent_config()
-    click.echo(f"Fingerprint for agent `{ctx.agent_config.name}` is calculated!")
+    click.echo(f"Fingerprint for agent `{ctx.agent_config.name}` calculated!")

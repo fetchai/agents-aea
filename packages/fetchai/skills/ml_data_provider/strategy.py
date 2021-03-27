@@ -56,7 +56,7 @@ class NumpyArrayEncoder(json.JSONEncoder):
         """Encode an object (including a numpy ndarray) into its JSON representation."""
         if isinstance(obj, np.ndarray):
             return obj.tolist()
-        return json.JSONEncoder.default(self, obj)
+        return json.JSONEncoder.default(self, obj)  # pragma: nocover
 
 
 class Strategy(Model):

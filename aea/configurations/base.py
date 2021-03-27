@@ -1795,8 +1795,10 @@ def _compute_fingerprint(
     package_directory: Path,
     ignore_patterns: Optional[Collection[str]] = None,
     is_recursive: bool = True,
+    ignore_directories: Optional[Collection[str]] = None,
 ) -> Dict[str, str]:
     ignore_patterns = ignore_patterns if ignore_patterns is not None else []
+    ignore_directories = ignore_directories if ignore_directories is not None else []
     ignore_patterns = set(ignore_patterns).union(DEFAULT_FINGERPRINT_IGNORE_PATTERNS)
     hasher = IPFSHashOnly()
     fingerprints = {}  # type: Dict[str, str]
@@ -1805,9 +1807,8 @@ def _compute_fingerprint(
         x
         for x in package_directory.glob("**/*" if is_recursive else "*")
         if x.is_file()
-        and (
-            x.match("*.py") or not any(x.match(pattern) for pattern in ignore_patterns)
-        )
+        and not any(x.match(pattern) for pattern in ignore_patterns)
+        and not (x.parts[0] in ignore_directories)
     ]
 
     for file in all_files:
