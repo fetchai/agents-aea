@@ -32,7 +32,6 @@ from aea.cli.utils.constants import AEA_LOGO, REQUIREMENTS
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.configurations.base import PublicId
-from aea.configurations.constants import DEFAULT_LEDGER, PRIVATE_KEY_PATH_SCHEMA
 from aea.connections.base import Connection
 from aea.contracts.base import Contract
 from aea.exceptions import AEAWalletNoAddressException
