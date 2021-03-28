@@ -249,7 +249,7 @@ class HttpMessage(Message):
                     ),
                 )
                 enforce(
-                    isinstance(self.status_code, int),
+                    type(self.status_code) is int,
                     "Invalid type for content 'status_code'. Expected 'int'. Found '{}'.".format(
                         type(self.status_code)
                     ),

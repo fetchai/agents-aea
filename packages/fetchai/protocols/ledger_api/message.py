@@ -375,7 +375,7 @@ class LedgerApiMessage(Message):
                     ),
                 )
                 enforce(
-                    isinstance(self.balance, int),
+                    type(self.balance) is int,
                     "Invalid type for content 'balance'. Expected 'int'. Found '{}'.".format(
                         type(self.balance)
                     ),
@@ -451,7 +451,7 @@ class LedgerApiMessage(Message):
             elif self.performative == LedgerApiMessage.Performative.ERROR:
                 expected_nb_of_contents = 1
                 enforce(
-                    isinstance(self.code, int),
+                    type(self.code) is int,
                     "Invalid type for content 'code'. Expected 'int'. Found '{}'.".format(
                         type(self.code)
                     ),

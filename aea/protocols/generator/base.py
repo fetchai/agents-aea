@@ -86,9 +86,9 @@ def _type_check(variable_name: str, variable_type: str) -> str:
     """
     Return the type check Python instruction.
 
-    If variable_type == bool:
+    If variable_type == int:
 
-        type(variable_name) == bool
+        type(variable_name) == int
 
     else:
 
@@ -98,10 +98,10 @@ def _type_check(variable_name: str, variable_type: str) -> str:
     :param variable_type: the variable type.
     :return: the Python instruction to check the type, in string form.
     """
-    if variable_type != "bool":
+    if variable_type != "int":
         return f"isinstance({variable_name}, {variable_type})"
     else:
-        return f"type({variable_name}) == {variable_type}"
+        return f"type({variable_name}) is {variable_type}"
 
 
 def _copyright_header_str(author: str) -> str:

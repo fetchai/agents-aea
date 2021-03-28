@@ -427,7 +427,7 @@ class ContractApiMessage(Message):
                     expected_nb_of_contents += 1
                     code = cast(int, self.code)
                     enforce(
-                        isinstance(code, int),
+                        type(code) is int,
                         "Invalid type for content 'code'. Expected 'int'. Found '{}'.".format(
                             type(code)
                         ),

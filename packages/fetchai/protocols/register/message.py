@@ -226,7 +226,7 @@ class RegisterMessage(Message):
             elif self.performative == RegisterMessage.Performative.ERROR:
                 expected_nb_of_contents = 3
                 enforce(
-                    isinstance(self.error_code, int),
+                    type(self.error_code) is int,
                     "Invalid type for content 'error_code'. Expected 'int'. Found '{}'.".format(
                         type(self.error_code)
                     ),

@@ -296,7 +296,7 @@ class PrometheusMessage(Message):
             elif self.performative == PrometheusMessage.Performative.RESPONSE:
                 expected_nb_of_contents = 1
                 enforce(
-                    isinstance(self.code, int),
+                    type(self.code) is int,
                     "Invalid type for content 'code'. Expected 'int'. Found '{}'.".format(
                         type(self.code)
                     ),

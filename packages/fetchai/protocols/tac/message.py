@@ -390,7 +390,7 @@ class TacMessage(Message):
                         ),
                     )
                     enforce(
-                        isinstance(value_of_amount_by_currency_id, int),
+                        type(value_of_amount_by_currency_id) is int,
                         "Invalid type for dictionary values in content 'amount_by_currency_id'. Expected 'int'. Found '{}'.".format(
                             type(value_of_amount_by_currency_id)
                         ),
@@ -412,7 +412,7 @@ class TacMessage(Message):
                         ),
                     )
                     enforce(
-                        isinstance(value_of_fee_by_currency_id, int),
+                        type(value_of_fee_by_currency_id) is int,
                         "Invalid type for dictionary values in content 'fee_by_currency_id'. Expected 'int'. Found '{}'.".format(
                             type(value_of_fee_by_currency_id)
                         ),
@@ -434,7 +434,7 @@ class TacMessage(Message):
                         ),
                     )
                     enforce(
-                        isinstance(value_of_quantities_by_good_id, int),
+                        type(value_of_quantities_by_good_id) is int,
                         "Invalid type for dictionary values in content 'quantities_by_good_id'. Expected 'int'. Found '{}'.".format(
                             type(value_of_quantities_by_good_id)
                         ),
@@ -478,7 +478,7 @@ class TacMessage(Message):
                         ),
                     )
                     enforce(
-                        isinstance(value_of_amount_by_currency_id, int),
+                        type(value_of_amount_by_currency_id) is int,
                         "Invalid type for dictionary values in content 'amount_by_currency_id'. Expected 'int'. Found '{}'.".format(
                             type(value_of_amount_by_currency_id)
                         ),
@@ -522,7 +522,7 @@ class TacMessage(Message):
                         ),
                     )
                     enforce(
-                        isinstance(value_of_quantities_by_good_id, int),
+                        type(value_of_quantities_by_good_id) is int,
                         "Invalid type for dictionary values in content 'quantities_by_good_id'. Expected 'int'. Found '{}'.".format(
                             type(value_of_quantities_by_good_id)
                         ),
@@ -566,7 +566,7 @@ class TacMessage(Message):
                         ),
                     )
                     enforce(
-                        isinstance(value_of_fee_by_currency_id, int),
+                        type(value_of_fee_by_currency_id) is int,
                         "Invalid type for dictionary values in content 'fee_by_currency_id'. Expected 'int'. Found '{}'.".format(
                             type(value_of_fee_by_currency_id)
                         ),
@@ -690,7 +690,7 @@ class TacMessage(Message):
                         ),
                     )
                     enforce(
-                        isinstance(value_of_amount_by_currency_id, int),
+                        type(value_of_amount_by_currency_id) is int,
                         "Invalid type for dictionary values in content 'amount_by_currency_id'. Expected 'int'. Found '{}'.".format(
                             type(value_of_amount_by_currency_id)
                         ),
@@ -712,7 +712,7 @@ class TacMessage(Message):
                         ),
                     )
                     enforce(
-                        isinstance(value_of_quantities_by_good_id, int),
+                        type(value_of_quantities_by_good_id) is int,
                         "Invalid type for dictionary values in content 'quantities_by_good_id'. Expected 'int'. Found '{}'.".format(
                             type(value_of_quantities_by_good_id)
                         ),

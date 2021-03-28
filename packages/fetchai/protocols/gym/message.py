@@ -224,7 +224,7 @@ class GymMessage(Message):
                     ),
                 )
                 enforce(
-                    isinstance(self.step_id, int),
+                    type(self.step_id) is int,
                     "Invalid type for content 'step_id'. Expected 'int'. Found '{}'.".format(
                         type(self.step_id)
                     ),
@@ -232,7 +232,7 @@ class GymMessage(Message):
             elif self.performative == GymMessage.Performative.PERCEPT:
                 expected_nb_of_contents = 5
                 enforce(
-                    isinstance(self.step_id, int),
+                    type(self.step_id) is int,
                     "Invalid type for content 'step_id'. Expected 'int'. Found '{}'.".format(
                         type(self.step_id)
                     ),
@@ -250,7 +250,7 @@ class GymMessage(Message):
                     ),
                 )
                 enforce(
-                    type(self.done) == bool,
+                    isinstance(self.done, bool),
                     "Invalid type for content 'done'. Expected 'bool'. Found '{}'.".format(
                         type(self.done)
                     ),
