@@ -513,6 +513,8 @@ def test_set_from_config_default():
     """Test set configuration from config loaded."""
     builder = AEABuilder()
     agent_configuration = Mock()
+    agent_configuration.default_ledger = "fetchai"
+    agent_configuration.required_ledgers = ["fetchai"]
     agent_configuration.default_connection = "test/test:0.1.0"
     agent_configuration.default_routing = {}
     agent_configuration.decision_maker_handler = {}
@@ -541,6 +543,8 @@ def test_set_from_config_custom():
     dm_file_path = ROOT_DIR + "/aea/decision_maker/default.py"
     builder = AEABuilder()
     agent_configuration = Mock()
+    agent_configuration.default_ledger = "fetchai"
+    agent_configuration.required_ledgers = ["fetchai"]
     agent_configuration.default_connection = "test/test:0.1.0"
     agent_configuration.default_routing = {}
     agent_configuration.decision_maker_handler = {

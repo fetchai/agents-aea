@@ -62,6 +62,7 @@ from aea.exceptions import enforce
 
 
 STRING_LENGTH_LIMIT = 128
+SIMPLE_ID_REGEX = fr"[a-zA-Z_][a-zA-Z0-9_]{{0,{STRING_LENGTH_LIMIT - 1}}}"
 ISO_8601_DATE_FORMAT = "%Y-%m-%d"
 
 _default_logger = logging.getLogger(__name__)
@@ -254,7 +255,7 @@ class SimpleId(RegexConstrainedString):
     ValueError: Value  does not match the regular expression re.compile('[a-zA-Z_][a-zA-Z0-9_]{0,127}')
     """
 
-    REGEX = re.compile(fr"[a-zA-Z_][a-zA-Z0-9_]{{0,{STRING_LENGTH_LIMIT - 1}}}")
+    REGEX = re.compile(SIMPLE_ID_REGEX)
 
 
 SimpleIdOrStr = Union[SimpleId, str]
