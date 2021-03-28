@@ -276,7 +276,7 @@ We place this code in `my_aea/skills/my_search/handlers.py`. Ensure you replace 
 
 ## Step 4: Add dialogues model
 
-We have implemented a behaviour and a handler. We now implement a <a href="../api/skills/base#model-objects">`Model`</a>, in particular we implement the <a href="../api/protocols/dialogue/base#dialogue-objects">`Dialogue`</a> and <a href="../api/protocols/dialogue/base#dialogues-objects">`Dialogues`</a> classes. These ensure that the message flow satisfies the `fetchai/oef_search:0.15.0` protocol and keep track of the individual messages being sent and received.
+We have implemented a behaviour and a handler. We now implement a <a href="../api/skills/base#model-objects">`Model`</a>, in particular we implement the <a href="../api/protocols/dialogue/base#dialogue-objects">`Dialogue`</a> and <a href="../api/protocols/dialogue/base#dialogues-objects">`Dialogues`</a> classes. These ensure that the message flow satisfies the `fetchai/oef_search:0.16.0` protocol and keep track of the individual messages being sent and received.
 
 ``` python
 from aea.protocols.base import Message
@@ -343,7 +343,7 @@ fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/oef_search:0.15.0
+- fetchai/oef_search:0.16.0
 skills: []
 behaviours:
   my_search_behaviour:
@@ -422,21 +422,21 @@ Ensure, you use the correct author name to reference your skill (here we use `fe
 
 Our AEA does not have the OEF protocol yet so let's add it.
 ``` bash
-aea add protocol fetchai/oef_search:0.15.0
+aea add protocol fetchai/oef_search:0.16.0
 ```
 
 This adds the protocol to our AEA and makes it available on the path `packages.fetchai.protocols...`.
 
 At this point we need to add the SOEF and P2P connections to allow the AEA to communicate with the SOEF node and other AEAs, install the AEA's dependencies, and configure the AEA:
 ``` bash
-aea add connection fetchai/soef:0.20.0
-aea add connection fetchai/p2p_libp2p:0.19.0
+aea add connection fetchai/soef:0.21.0
+aea add connection fetchai/p2p_libp2p:0.20.0
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.19.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.20.0
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/oef_search:0.15.0": "fetchai/soef:0.20.0"
+  "fetchai/oef_search:0.16.0": "fetchai/soef:0.21.0"
 }'
 ```
 
@@ -448,7 +448,7 @@ In order for this AEA to find another AEA when searching, the second AEA (let's 
 
 From a different terminal window, we fetch a finished service provider AEA and install its Python dependencies:
 ``` bash
-aea fetch fetchai/simple_service_registration:0.25.0 && cd simple_service_registration && aea install && aea build
+aea fetch fetchai/simple_service_registration:0.26.0 && cd simple_service_registration && aea install && aea build
 ```
 
 This AEA will simply register a location service on the <a href="../simple-oef">SOEF search node</a> so we can search for it.
@@ -475,7 +475,7 @@ Then we run the AEA:
 aea run
 ```
 
-Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.19.0 -u public_uri` to retrieve the address.) This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the `simple_service_registration` (service provider) AEA.
+Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.20.0 -u public_uri` to retrieve the address.) This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the `simple_service_registration` (service provider) AEA.
 
 <details><summary>Click here to see full code and guide for this AEA</summary>
 <p>
@@ -687,7 +687,7 @@ class Strategy(Model):
         return description
 ```
 
-We create a <a href="../api/skills/base#model-objects"><code>Model</code></a> type dialogue class and place it in <code>dialogues.py</code>. These classes ensure that the message flow satisfies the <code>fetchai/oef_search:0.15.0</code> protocol and keep track of the individual messages being sent and received.
+We create a <a href="../api/skills/base#model-objects"><code>Model</code></a> type dialogue class and place it in <code>dialogues.py</code>. These classes ensure that the message flow satisfies the <code>fetchai/oef_search:0.16.0</code> protocol and keep track of the individual messages being sent and received.
 
 ``` python
 from aea.protocols.base import Message
@@ -752,7 +752,7 @@ from packages.fetchai.skills.simple_service_registration.dialogues import (
     OefSearchDialogues,
 )
 
-LEDGER_API_ADDRESS = "fetchai/ledger:0.16.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.17.0"
 
 
 class OefSearchHandler(Handler):
@@ -861,7 +861,7 @@ fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/oef_search:0.15.0
+- fetchai/oef_search:0.16.0
 skills: []
 behaviours:
   service:

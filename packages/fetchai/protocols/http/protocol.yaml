@@ -1,18 +1,18 @@
 name: http
 author: fetchai
-version: 0.14.0
+version: 0.15.0
 protocol_specification_id: fetchai/http:1.0.0
 type: protocol
 description: A protocol for HTTP requests and responses.
 license: Apache-2.0
 aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint:
-  README.md: QmP2wmLjeFuUm9bFESkkQcGXEfS9FiwoR6ho72j6pAi9sY
+  README.md: Qmau6oyZXUUuVftnNBZeQ2oXt4kzWPxEvmfQYJG97HApcW
   __init__.py: QmWWG91jaKF5w7MCNQrJSyWAKPrgQcJPJp7RbQGAAvTDM2
   dialogues.py: QmSBawWTSmg42xnVFZ2HHhQ7XjmhZab7UQ3iMDwwFUshLd
   http.proto: QmfJj4aoNpVCZs8HsQNmf1Zx2y8b9JbuPG2Dysow4LwRQU
   http_pb2.py: QmPs79EZ1UCk1BZPe5g9AKoDNFPaJqjtofKxokxwoacvLE
-  message.py: QmQ9oC3LwoMfYMdyfK66zerGCyCx7CP5TpqmutQTyW6H4q
+  message.py: QmPyCXzbVEPbfrKDTfaoDEWfgZHzQLUUh5vFKRKbWbsxNR
   serialization.py: QmUGssMgiTnKNT7f7iG5wtpsXyM5mspVXRroByT2y1wvKZ
 fingerprint_ignore_patterns: []
 dependencies:

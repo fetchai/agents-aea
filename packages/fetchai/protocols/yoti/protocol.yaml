@@ -1,6 +1,6 @@
 name: yoti
 author: fetchai
-version: 0.3.0
+version: 0.4.0
 protocol_specification_id: fetchai/yoti:1.0.0
 type: protocol
 description: A protocol for communication between yoti skills and yoti connection.
@@ -10,7 +10,7 @@ fingerprint:
   README.md: QmYgGkGtp1ARvGXhJ7aVfsTxkuMqBfFmPJXmc3uxCiN2y1
   __init__.py: Qmc2Ba6YhxjHnbwwM7hrt2bCfrxdS1JBvzoi3JKXHg3VkM
   dialogues.py: QmNkHJMcahoC7QtkM8k9RHCUozfhu6BvRfSsLxkPvE73xF
-  message.py: QmSesQiGYJKJUnzcfaYEvSawupq4t4wJ3vRc9uH1vDG8Dd
+  message.py: Qme8NU1RaDqrS6yssMKVtDmm9CA61jr2SirGCwpZEeq4L5
   serialization.py: QmW8JTbSHCr8e7N6gtRskzUf9eMmSpSFBcZqvgjvFhhjvE
   yoti.proto: Qmasuw6KKGB95zygCfMjJwjWMad2Q1XY7KBnf3yA8h4JCB
   yoti_pb2.py: Qmbh9jEZ9rrT5Ys3YAuarRHRDtiyu1cYMR3UJhqoEQi8ZC
