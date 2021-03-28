@@ -2,8 +2,8 @@
 
 ## 1.0.0rc2 (2020-03-28)
 
-- Extends CLI command `aea fingerprint` for fingerprinting of agents
-- Improves deploy image Docker example
+- Extends CLI command `aea fingerprint` to allow fingerprinting of agents
+- Improves `deploy-image` Docker example
 - Fixes a bug in `MultiAgentManager` which leaves it in an unclean state when project adding fails
 - Fixes dependencies of `aea-legder-fetchai`
 - Improves guide on HTTP client and server connection

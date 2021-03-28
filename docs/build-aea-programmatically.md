@@ -168,8 +168,8 @@ Finally stop our AEA and wait for it to finish
 ## Running the AEA
 If you now run this python script file, you should see this output:
 
-    input message: my_aea,other_agent,fetchai/default:0.15.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,
-    output message: other_agent,my_aea,fetchai/default:0.15.0,...\x05hello
+    input message: my_aea,other_agent,fetchai/default:1.0.0,\x12\x10\x08\x01\x12\x011*\t*\x07\n\x05hello,
+    output message: other_agent,my_aea,fetchai/default:1.0.0,...\x05hello
 
 
 ## Entire code listing
