@@ -39,7 +39,7 @@ setup(
         "aea>=1.0.0rc1, <2.0.0",
         "ecdsa>=0.15",
         "bech32==1.2.0",
-        "pyaes>=1.6.1",
+        "pycryptodome>=3.10.1",
     ],
     tests_require=["pytest"],
     entry_points={
