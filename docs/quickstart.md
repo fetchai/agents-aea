@@ -156,7 +156,7 @@ Confirm password:
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v1.0.0rc1
+v1.0.0rc2
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
@@ -269,7 +269,7 @@ You will see the echo skill running in the terminal window (an output similar to
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v1.0.0rc1
+v1.0.0rc2
 
 Starting AEA 'my_first_aea' in 'async' mode ...
 info: Echo Handler: setup method called.

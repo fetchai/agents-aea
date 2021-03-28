@@ -912,7 +912,7 @@ def compute_specifier_from_version(version: Version) -> str:
 
     ">=min({major}.{minor}.0, {major}.{minor}.{patch}.{extra}), <{major}.{minor + 1}.0"
 
-    Varying on the patch and minor number for versions with major >= 1. 
+    Varying on the patch and minor number for versions with major >= 1.
 
     I.e. from "{major}.{minor}.{patch}.{extra}", return
 
