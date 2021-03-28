@@ -19,7 +19,7 @@
 
 """This module contains yoti's message definition."""
 
-# pylint: disable=too-many-statements,too-many-locals,no-member,too-few-public-methods,too-many-branches,not-an-iterable
+# pylint: disable=too-many-statements,too-many-locals,no-member,too-few-public-methods,too-many-branches,not-an-iterable,unidiomatic-typecheck
 import logging
 from typing import Any, Dict, Set, Tuple, cast
 

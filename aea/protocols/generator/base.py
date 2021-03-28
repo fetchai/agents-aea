@@ -78,6 +78,7 @@ PYLINT_DISABLE_MESSAGE_PY = [
     "too-few-public-methods",
     "too-many-branches",
     "not-an-iterable",
+    "unidiomatic-typecheck",
 ]
 
 
