@@ -141,5 +141,5 @@ models:
     class_name: Strategy
 dependencies:
   aea-ledger-fetchai:
-    version: <2.0.0,>=1.0.0rc1
+    version: <2.0.0,>=1.0.0rc3
 is_abstract: false
