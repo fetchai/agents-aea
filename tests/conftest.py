@@ -52,7 +52,7 @@ import gym
 import pytest
 from aea_ledger_cosmos import CosmosCrypto
 from aea_ledger_ethereum import EthereumCrypto
-from aea_ledger_fetchai import FetchAICrypto
+from aea_ledger_fetchai import DEFAULT_CLI_COMMAND, FetchAICrypto
 
 from aea import AEA_DIR
 from aea.aea import AEA
@@ -150,8 +150,14 @@ DEFAULT_GANACHE_CHAIN_ID = 1337
 # URL to local Fetch ledger instance
 DEFAULT_FETCH_DOCKER_IMAGE_TAG = "fetchai/fetchd:0.2.7"
 DEFAULT_FETCH_LEDGER_ADDR = "http://127.0.0.1"
-DEFAULT_FETCH_LEDGER_PORT = 26657
+DEFAULT_FETCH_LEDGER_RPC_PORT = 26657
+DEFAULT_FETCH_LEDGER_REST_PORT = 1317
 DEFAULT_FETCH_MNEMONIC = "gap bomb bulk border original scare assault pelican resemble found laptop skin gesture height inflict clinic reject giggle hurdle bubble soldier hurt moon hint"
+DEFAULT_MONIKER = "test-node"
+DEFAULT_FETCH_CHAIN_ID = "agent-land"
+DEFAULT_GENESIS_ACCOUNT = "validator"
+DEFAULT_DENOMINATION = "atestfet"
+FETCHD_STARTUP_TIME = 5
 
 COSMOS_PRIVATE_KEY_FILE_CONNECTION = "cosmos_connection_private_key.txt"
 FETCHAI_PRIVATE_KEY_FILE_CONNECTION = "fetchai_connection_private_key.txt"
@@ -194,6 +200,12 @@ NON_FUNDED_COSMOS_PRIVATE_KEY_1 = (
 NON_FUNDED_FETCHAI_PRIVATE_KEY_1 = (
     "b6ef49c3078f300efe2d4480e179362bd39f20cbb2087e970c8f345473661aa5"
 )
+FUNDED_FETCHAI_PRIVATE_KEY_1 = (
+    "f848e125edb124d7752338fdd15825cd031b8c7f38627ec50ccccb7d75ecffdb"
+)
+FUNDED_FETCHAI_PRIVATE_KEY_2 = (
+    "9d6459d1f93dd153335291af940f6b5224a34a9a1e1062e2158a45fa4901ed3f"
+)
 
 # addresses with no value on testnet
 COSMOS_ADDRESS_ONE = "cosmos1z4ftvuae5pe09jy2r7udmk6ftnmx504alwd5qf"
@@ -202,6 +214,8 @@ ETHEREUM_ADDRESS_ONE = "0x46F415F7BF30f4227F98def9d2B22ff62738fD68"
 ETHEREUM_ADDRESS_TWO = "0x7A1236d5195e31f1F573AD618b2b6FEFC85C5Ce6"
 FETCHAI_ADDRESS_ONE = "fetch1paqxtqnfh7da7z9c05l3y3lahe8rhd0nm0jk98"
 FETCHAI_ADDRESS_TWO = "fetch19j4dc3e6fgle98pj06l5ehhj6zdejcddx7teac"
+FUNDED_FETCHAI_ADDRESS_ONE = "fetch1dm72s3yravky6t7rp3daajwwsz2vrqd86g2v47"
+FUNDED_FETCHAI_ADDRESS_TWO = "fetch1x2vfp8ec2yk8nnlzn52agflpmpwtucm6yj2hw4"
 
 # P2P addresses
 COSMOS_P2P_ADDRESS = "/dns4/127.0.0.1/tcp/9000/p2p/16Uiu2HAmAzvu5uNbcnD2qaqrkSULhJsc6GJUg3iikWerJkoD72pr"  # relates to NON_FUNDED_COSMOS_PRIVATE_KEY_1
@@ -654,7 +668,13 @@ def ganache_configuration():
 @pytest.fixture(scope="session")
 def fetchd_configuration():
     """Get the Fetch ledger configuration for testing purposes."""
-    return dict(mnemonic=DEFAULT_FETCH_MNEMONIC)
+    return dict(
+        mnemonic=DEFAULT_FETCH_MNEMONIC,
+        moniker=DEFAULT_MONIKER,
+        chain_id=DEFAULT_FETCH_CHAIN_ID,
+        genesis_account=DEFAULT_GENESIS_ACCOUNT,
+        denom=DEFAULT_DENOMINATION,
+    )
 
 
 @pytest.fixture(scope="session")
@@ -704,14 +724,14 @@ def ganache(
 @pytest.fixture(scope="session")
 @action_for_platform("Linux", skip=False)
 def fetchd(
-    fetchd_configuration, timeout: float = 2.0, max_attempts: int = 10,
+    fetchd_configuration, timeout: float = 2.0, max_attempts: int = 4,
 ):
-    """Launch the Ganache image."""
+    """Launch the Fetch ledger image."""
     client = docker.from_env()
     image = FetchLedgerDockerImage(
         client,
         DEFAULT_FETCH_LEDGER_ADDR,
-        DEFAULT_FETCH_LEDGER_PORT,
+        DEFAULT_FETCH_LEDGER_RPC_PORT,
         DEFAULT_FETCH_DOCKER_IMAGE_TAG,
         config=fetchd_configuration,
     )
@@ -722,7 +742,7 @@ def _launch_image(image: DockerImage, timeout: float = 2.0, max_attempts: int = 
     """
     Launch image.
 
-    :param image: an instancoe of Docker image.
+    :param image: an instance of Docker image.
     :return: None
     """
     image.check_skip()
@@ -1294,6 +1314,34 @@ def oracle_contract(ledger_api, ganache, ganache_addr, ganache_port, erc20_contr
     receipt = ledger_api.get_transaction_receipt(tx_receipt)
     contract_address = cast(Dict, receipt)["contractAddress"]
     yield contract, contract_address
+
+
+def docker_exec_cmd(image_tag: str, cmd: str, **kwargs):
+    """Execute a command in running docker containers matching image tag."""
+    client = docker.from_env()
+    for container in client.containers.list():
+        if image_tag in container.image.tags:
+            logger.info(f"Running command '{cmd}' in docker container {image_tag}")
+            resp = container.exec_run(cmd, **kwargs)
+            logger.info(resp)
+
+
+def fund_accounts_from_local_validator(
+    addresses: str, amount: int, denom: str = DEFAULT_DENOMINATION
+):
+    """Send funds to local accounts from the local genesis validator."""
+    time.sleep(FETCHD_STARTUP_TIME)
+    for address in addresses:
+        cmd = f'sh -c "echo y | {DEFAULT_CLI_COMMAND} tx send {DEFAULT_GENESIS_ACCOUNT} {address} {amount}{denom} --chain-id {DEFAULT_FETCH_CHAIN_ID}"'
+        docker_exec_cmd(DEFAULT_FETCH_DOCKER_IMAGE_TAG, cmd)
+
+
+@pytest.fixture()
+def fund_fetchai_accounts(fetchd):
+    """Fund test accounts from local validator."""
+    fund_accounts_from_local_validator(
+        [FUNDED_FETCHAI_ADDRESS_ONE, FUNDED_FETCHAI_ADDRESS_TWO], 10000000000000000000,
+    )
 
 
 def env_path_separator() -> str:

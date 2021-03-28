@@ -336,25 +336,23 @@ class FetchLedgerDockerImage(DockerImage):
         """Get the image tag."""
         return self._image_tag
 
-    def _make_ports(self) -> Dict:
-        """Make ports dictionary for Docker."""
-        return {f"{self._port}/tcp": ("0.0.0.0", self._port)}  # nosec
-
     def _make_entrypoint_file(self, tmpdirname) -> None:
         """Make a temporary entrypoint file to setup and run the test ledger node"""
         run_node_lines = [
             "#!/usr/bin/env bash",
             "set -e",
-            "fetchd init test-node --chain-id test",
+            f'fetchd init {self._config["moniker"]} --chain-id {self._config["chain_id"]}',
             'sed -i "s/stake/atestfet/" ~/.fetchd/config/genesis.json',
             'sed -i "s/enable = false/enable = true/" ~/.fetchd/config/app.toml',
             f'MNEMONIC="{self._config["mnemonic"]}"',
             "fetchcli config keyring-backend test",
-            "echo $MNEMONIC | fetchcli keys add validator --recover",
-            "fetchd add-genesis-account $(fetchcli keys show validator -a) 1152997575000000000000000000atestfet",
-            "fetchd gentx --amount 100000000000000000000atestfet --name validator --keyring-backend test",
+            f'echo $MNEMONIC | fetchcli keys add {self._config["genesis_account"]} --recover',
+            f'fetchd add-genesis-account $(fetchcli keys show {self._config["genesis_account"]} -a) 1152997575000000000000000000{self._config["denom"]}',
+            f'fetchd gentx --amount 100000000000000000000{self._config["denom"]} --name {self._config["genesis_account"]} --keyring-backend test',
             "fetchd collect-gentxs",
-            f"fetchd start --rpc.laddr tcp://0.0.0.0:{self._port}",
+            f'fetchcli config chain-id {self._config["chain_id"]}',
+            f"fetchd start --rpc.laddr tcp://0.0.0.0:{self._port} &",
+            "fetchcli rest-server --trust-node=true",
         ]
         entrypoint_file = os.path.join(tmpdirname, "run-node.sh")
         with open(entrypoint_file, "w") as file:
@@ -371,7 +369,7 @@ class FetchLedgerDockerImage(DockerImage):
             container = self._client.containers.run(
                 self.tag,
                 detach=True,
-                ports=self._make_ports(),
+                network="host",
                 volumes=volumes,
                 entrypoint=str(entrypoint),
             )

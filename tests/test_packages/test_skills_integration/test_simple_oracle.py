@@ -28,25 +28,29 @@ from aea.test_tools.test_cases import AEATestCaseManyFlaky
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
 from tests.conftest import (
+    DEFAULT_FETCH_LEDGER_ADDR,
+    DEFAULT_FETCH_LEDGER_REST_PORT,
     ETHEREUM_PRIVATE_KEY_FILE,
     FETCHAI_PRIVATE_KEY_FILE,
     FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
     FUNDED_ETH_PRIVATE_KEY_2,
     FUNDED_ETH_PRIVATE_KEY_3,
+    FUNDED_FETCHAI_PRIVATE_KEY_1,
+    FUNDED_FETCHAI_PRIVATE_KEY_2,
     MAX_FLAKY_RERUNS_ETH,
-    NON_FUNDED_FETCHAI_PRIVATE_KEY_1,
     UseGanache,
     UseLocalFetchNode,
 )
 
 
 ledger_ids = pytest.mark.parametrize(
-    "ledger_id,private_key_file,funded_private_key,update_function,query_function",
+    "ledger_id,private_key_file,funded_private_key_1,funded_private_key_2,update_function,query_function",
     [
         (
             FetchAICrypto.identifier,
             FETCHAI_PRIVATE_KEY_FILE,
-            NON_FUNDED_FETCHAI_PRIVATE_KEY_1,
+            FUNDED_FETCHAI_PRIVATE_KEY_1,
+            FUNDED_FETCHAI_PRIVATE_KEY_2,
             "update_oracle_value",
             "query_oracle_value",
         ),
@@ -54,6 +58,7 @@ ledger_ids = pytest.mark.parametrize(
             EthereumCrypto.identifier,
             ETHEREUM_PRIVATE_KEY_FILE,
             FUNDED_ETH_PRIVATE_KEY_3,
+            FUNDED_ETH_PRIVATE_KEY_2,
             "updateOracleValue",
             "queryOracleValue",
         ),
@@ -72,11 +77,13 @@ class TestOracleSkills(AEATestCaseManyFlaky, UseGanache, UseLocalFetchNode):
         self,
         ledger_id,
         private_key_file,
-        funded_private_key,
+        funded_private_key_1,
+        funded_private_key_2,
         update_function,
         query_function,
         erc20_contract,
         oracle_contract,
+        fund_fetchai_accounts,
     ):
         """Run the oracle skills sequence."""
         oracle_agent_name = "oracle_aea"
@@ -139,7 +146,7 @@ class TestOracleSkills(AEATestCaseManyFlaky, UseGanache, UseLocalFetchNode):
 
         self.generate_private_key(ledger_id)
         self.add_private_key(ledger_id, private_key_file)
-        self.replace_private_key_in_file(funded_private_key, private_key_file)
+        self.replace_private_key_in_file(funded_private_key_1, private_key_file)
         self.generate_private_key(
             FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
         )
@@ -180,18 +187,24 @@ class TestOracleSkills(AEATestCaseManyFlaky, UseGanache, UseLocalFetchNode):
                 "vendor.fetchai.skills.simple_oracle.models.strategy.args.erc20_address"
             )
             self.set_config(setting_path, erc20_address)
-
-        setting_path = (
-            "vendor.fetchai.skills.simple_oracle.models.strategy.args.contract_address"
-        )
-        self.set_config(setting_path, oracle_address)
+            setting_path = "vendor.fetchai.skills.simple_oracle.models.strategy.args.contract_address"
+            self.set_config(setting_path, oracle_address)
+        else:
+            # redirect fetchai ledger address to local test node
+            setting_path = (
+                "vendor.fetchai.connections.ledger.config.ledger_apis.fetchai.address"
+            )
+            self.set_config(
+                setting_path,
+                f"{DEFAULT_FETCH_LEDGER_ADDR}:{DEFAULT_FETCH_LEDGER_REST_PORT}",
+            )
 
         # add packages for oracle client agent
         self.set_agent_context(client_agent_name)
         self.add_item("connection", "fetchai/ledger:0.16.0")
         self.add_item("connection", "fetchai/http_client:0.20.0")
         self.set_config("agent.default_connection", "fetchai/ledger:0.16.0")
-        self.set_config("agent.default_ledger", EthereumCrypto.identifier)
+        self.set_config("agent.default_ledger", ledger_id)
         self.nested_set_config(
             "agent.required_ledgers",
             [FetchAICrypto.identifier, EthereumCrypto.identifier],
@@ -208,11 +221,9 @@ class TestOracleSkills(AEATestCaseManyFlaky, UseGanache, UseLocalFetchNode):
         self.add_item("contract", "fetchai/fet_erc20:0.6.0")
         self.add_item("skill", "fetchai/simple_oracle_client:0.7.0")
 
-        self.generate_private_key(EthereumCrypto.identifier)
-        self.add_private_key(EthereumCrypto.identifier, ETHEREUM_PRIVATE_KEY_FILE)
-        self.replace_private_key_in_file(
-            FUNDED_ETH_PRIVATE_KEY_2, ETHEREUM_PRIVATE_KEY_FILE
-        )
+        self.generate_private_key(ledger_id)
+        self.add_private_key(ledger_id, private_key_file)
+        self.replace_private_key_in_file(funded_private_key_2, private_key_file)
         setting_path = (
             "vendor.fetchai.skills.simple_oracle_client.models.strategy.args.ledger_id"
         )
@@ -233,6 +244,15 @@ class TestOracleSkills(AEATestCaseManyFlaky, UseGanache, UseLocalFetchNode):
             # set addresses *after* comparison with fetched agent!
             setting_path = "vendor.fetchai.skills.simple_oracle_client.models.strategy.args.erc20_address"
             self.set_config(setting_path, erc20_address)
+        else:
+            # redirect fetchai ledger address to local test node
+            setting_path = (
+                "vendor.fetchai.connections.ledger.config.ledger_apis.fetchai.address"
+            )
+            self.set_config(
+                setting_path,
+                f"{DEFAULT_FETCH_LEDGER_ADDR}:{DEFAULT_FETCH_LEDGER_REST_PORT}",
+            )
 
         setting_path = "vendor.fetchai.skills.simple_oracle_client.models.strategy.args.oracle_contract_address"
         self.set_config(setting_path, oracle_address)
@@ -266,7 +286,6 @@ class TestOracleSkills(AEATestCaseManyFlaky, UseGanache, UseLocalFetchNode):
             "transaction was successfully submitted. Transaction digest=",
             "requesting transaction receipt.",
             "transaction was successfully settled. Transaction receipt=",
-            "Oracle role successfully granted!",
             "Oracle value successfully updated!",
         )
         missing_strings = self.missing_from_output(
