@@ -1,6 +1,6 @@
 name: yoti
 author: fetchai
-version: 0.3.0
+version: 0.4.0
 type: connection
 description: The yoti connection wraps the Yoti Client SDK and translates to the yoti
   protocol.
@@ -9,18 +9,18 @@ aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint:
   README.md: QmZJYfyacuUnAKrYrNBJUX6kzQdzk4PL3EaXcVopWspxSP
   __init__.py: QmZvYZ5ECcWwqiNGh8qNTg735wu51HqaLxTSifUxkQ4KGj
-  connection.py: QmcM7RgZ3mthWwrPneJjdroMH4Np2y3JPjZev92CBFoyCQ
+  connection.py: QmbkdaWt7GAVfNZzrKe5erxrU8abpDGmiaHSj4YfVoHyBE
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/yoti:0.3.0
+- fetchai/yoti:0.4.0
 class_name: YotiConnection
 config:
   yoti_client_sdk_id: null
   yoti_key_file_path: null
 excluded_protocols: []
 restricted_to_protocols:
-- fetchai/yoti:0.3.0
+- fetchai/yoti:0.4.0
 dependencies:
   yoti:
     version: ==2.14.0

@@ -22,16 +22,6 @@ Class to encrypt/decrypt data strings with password provided.
 
 Encrypt data with password.
 
-<a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.DataEncrypt.get_hmac_for_data"></a>
-#### get`_`hmac`_`for`_`data
-
-```python
- | @staticmethod
- | get_hmac_for_data(password: str, data: bytes) -> str
-```
-
-Get hmac digest for data.
-
 <a name="plugins.aea-ledger-fetchai.aea_ledger_fetchai._cosmos.DataEncrypt.bytes_encode"></a>
 #### bytes`_`encode
 

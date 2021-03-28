@@ -181,6 +181,7 @@ Nuitka
 Perun
 1.0.0rc1
 docstrings
+1.0.0rc2
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id

@@ -1,6 +1,6 @@
 agent_name: tac_participant_contract
 author: fetchai
-version: 0.15.0
+version: 0.16.0
 description: An AEA to participate in the TAC (trading agent competition) using an
   ERC1155 smart contract.
 license: Apache-2.0
@@ -8,22 +8,22 @@ aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.16.0
-- fetchai/p2p_libp2p:0.19.0
-- fetchai/soef:0.20.0
+- fetchai/ledger:0.17.0
+- fetchai/p2p_libp2p:0.20.0
+- fetchai/soef:0.21.0
 contracts:
-- fetchai/erc1155:0.19.0
+- fetchai/erc1155:0.20.0
 protocols:
-- fetchai/default:0.14.0
-- fetchai/fipa:0.15.0
-- fetchai/oef_search:0.15.0
-- fetchai/signing:0.12.0
-- fetchai/state_update:0.12.0
-- fetchai/tac:0.15.0
+- fetchai/default:0.15.0
+- fetchai/fipa:0.16.0
+- fetchai/oef_search:0.16.0
+- fetchai/signing:0.13.0
+- fetchai/state_update:0.13.0
+- fetchai/tac:0.16.0
 skills:
-- fetchai/tac_negotiation:0.23.0
-- fetchai/tac_participation:0.20.0
-default_connection: fetchai/p2p_libp2p:0.19.0
+- fetchai/tac_negotiation:0.24.0
+- fetchai/tac_participation:0.21.0
+default_connection: fetchai/p2p_libp2p:0.20.0
 default_ledger: ethereum
 required_ledgers:
 - fetchai
@@ -33,9 +33,9 @@ logging_config:
   version: 1
 private_key_paths: {}
 default_routing:
-  fetchai/contract_api:0.13.0: fetchai/ledger:0.16.0
-  fetchai/ledger_api:0.12.0: fetchai/ledger:0.16.0
-  fetchai/oef_search:0.15.0: fetchai/soef:0.20.0
+  fetchai/contract_api:0.14.0: fetchai/ledger:0.17.0
+  fetchai/ledger_api:0.13.0: fetchai/ledger:0.17.0
+  fetchai/oef_search:0.16.0: fetchai/soef:0.21.0
 connection_private_key_paths: {}
 decision_maker_handler:
   dotted_path: aea.decision_maker.gop:DecisionMakerHandler
@@ -43,11 +43,11 @@ decision_maker_handler:
   config: {}
 dependencies:
   aea-ledger-ethereum:
-    version: <2.0.0,>=1.0.0rc1
+    version: <2.0.0,>=1.0.0rc2
   aea-ledger-fetchai:
-    version: <2.0.0,>=1.0.0rc1
+    version: <2.0.0,>=1.0.0rc3
 ---
-public_id: fetchai/p2p_libp2p:0.19.0
+public_id: fetchai/p2p_libp2p:0.20.0
 type: connection
 cert_requests:
 - identifier: acn
@@ -58,19 +58,19 @@ cert_requests:
   message_format: '{public_key}'
   save_path: .certs/conn_cert.txt
 ---
-public_id: fetchai/soef:0.20.0
+public_id: fetchai/soef:0.21.0
 type: connection
 config:
   chain_identifier: ethereum
 ---
-public_id: fetchai/tac_participation:0.20.0
+public_id: fetchai/tac_participation:0.21.0
 type: skill
 models:
   game:
     args:
       is_using_contract: true
 ---
-public_id: fetchai/tac_negotiation:0.23.0
+public_id: fetchai/tac_negotiation:0.24.0
 type: skill
 models:
   strategy:

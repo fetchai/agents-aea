@@ -1,14 +1,14 @@
 name: prometheus
 author: fetchai
-version: 0.5.0
+version: 0.6.0
 type: connection
 description: Connection for exposing agent metrics to prometheus server
 license: Apache-2.0
 aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint:
-  README.md: Qmc3xLm1MDgoL79ndKJXXdXbCWPeCpKXgxYpxC9nVxdv4c
+  README.md: QmStL7pJH7TsyVvGyfyZjXBV5aKcGK7XaqR7KiDmZvfk3y
   __init__.py: QmWVrDiiePsr6vTnvbPTcDrayR89ji3hf25rs9V9TiJUPv
-  connection.py: QmUvzYHJtcEDnoPXLES2NCyuvMHvTj8n3EqETPgs9qpz8f
+  connection.py: QmcVXZJL6VjkBqCdE6v3vGHoCnwpZVv63Mv64ejRnekR4z
 fingerprint_ignore_patterns: []
 connections: []
 protocols: []
@@ -18,7 +18,7 @@ config:
   port: 9090
 excluded_protocols: []
 restricted_to_protocols:
-- fetchai/prometheus:0.5.0
+- fetchai/prometheus:0.6.0
 dependencies:
   aioprometheus:
     version: <21.0.0,>=20.0.0
