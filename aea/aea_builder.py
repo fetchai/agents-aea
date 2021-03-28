@@ -88,7 +88,12 @@ from aea.exceptions import (
     AEAWalletNoAddressException,
     enforce,
 )
-from aea.helpers.base import find_topological_order, load_env_file, load_module
+from aea.helpers.base import (
+    SimpleId,
+    find_topological_order,
+    load_env_file,
+    load_module,
+)
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.install_dependency import install_dependency
 from aea.helpers.io import open_file
@@ -863,7 +868,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :param identifier: the identifier of the ledger api
         :return: the AEABuilder
         """
-        self._default_ledger = identifier
+        self._default_ledger = (
+            str(SimpleId(identifier)) if identifier is not None else None
+        )
         return self
 
     def set_required_ledgers(
@@ -877,7 +884,11 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :param required_ledgers: the required ledgers.
         :return: the AEABuilder.
         """
-        self._required_ledgers = required_ledgers
+        self._required_ledgers = (
+            [str(SimpleId(ledger)) for ledger in required_ledgers]
+            if required_ledgers is not None
+            else None
+        )
         return self
 
     def set_build_entrypoint(

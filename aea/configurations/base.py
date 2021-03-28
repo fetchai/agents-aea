@@ -1169,6 +1169,7 @@ class AgentConfig(PackageConfiguration):
         "connection_private_key_paths",
         "logging_config",
         "default_ledger",
+        "required_ledgers",
         "currency_denominations",
         "default_connection",
         "connections",
@@ -1240,9 +1241,13 @@ class AgentConfig(PackageConfiguration):
         self.connection_private_key_paths = CRUDCollection[str]()
 
         self.logging_config = logging_config or DEFAULT_LOGGING_CONFIG
-        self.default_ledger = default_ledger
+        self.default_ledger = (
+            str(SimpleId(default_ledger)) if default_ledger is not None else None
+        )
         self.required_ledgers = (
-            required_ledgers if required_ledgers is not None else None
+            [str(SimpleId(ledger)) for ledger in required_ledgers]
+            if required_ledgers is not None
+            else None
         )
         self.currency_denominations = (
             currency_denominations if currency_denominations is not None else {}
