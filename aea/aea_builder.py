@@ -1225,7 +1225,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             raise AEAWalletNoAddressException("Wallet has no addresses.")
 
         if default_ledger not in wallet.addresses:
-            raise ValueError(
+            raise ValueError(  # pragma: nocover
                 f"Specified default ledger '{default_ledger}' not found in available addresses of types: {'[' + ','.join(wallet.addresses.keys()) + ']'}"
             )
 
