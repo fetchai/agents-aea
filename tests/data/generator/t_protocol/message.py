@@ -581,7 +581,7 @@ class TProtocolMessage(Message):
                     ),
                 )
                 enforce(
-                    isinstance(self.content_bool, bool),
+                    type(self.content_bool) == bool,
                     "Invalid type for content 'content_bool'. Expected 'bool'. Found '{}'.".format(
                         type(self.content_bool)
                     ),
@@ -635,7 +635,7 @@ class TProtocolMessage(Message):
                     ),
                 )
                 enforce(
-                    all(isinstance(element, bool) for element in self.content_set_bool),
+                    all(type(element) == bool for element in self.content_set_bool),
                     "Invalid type for frozenset elements in content 'content_set_bool'. Expected 'bool'.",
                 )
                 enforce(
@@ -691,9 +691,7 @@ class TProtocolMessage(Message):
                     ),
                 )
                 enforce(
-                    all(
-                        isinstance(element, bool) for element in self.content_list_bool
-                    ),
+                    all(type(element) == bool for element in self.content_list_bool),
                     "Invalid type for tuple elements in content 'content_list_bool'. Expected 'bool'.",
                 )
                 enforce(
@@ -791,7 +789,7 @@ class TProtocolMessage(Message):
                         ),
                     )
                     enforce(
-                        isinstance(value_of_content_dict_int_bool, bool),
+                        type(value_of_content_dict_int_bool) == bool,
                         "Invalid type for dictionary values in content 'content_dict_int_bool'. Expected 'bool'. Found '{}'.".format(
                             type(value_of_content_dict_int_bool)
                         ),
@@ -829,7 +827,7 @@ class TProtocolMessage(Message):
                     value_of_content_dict_bool_bytes,
                 ) in self.content_dict_bool_bytes.items():
                     enforce(
-                        isinstance(key_of_content_dict_bool_bytes, bool),
+                        type(key_of_content_dict_bool_bytes) == bool,
                         "Invalid type for dictionary keys in content 'content_dict_bool_bytes'. Expected 'bool'. Found '{}'.".format(
                             type(key_of_content_dict_bool_bytes)
                         ),
@@ -851,7 +849,7 @@ class TProtocolMessage(Message):
                     value_of_content_dict_bool_int,
                 ) in self.content_dict_bool_int.items():
                     enforce(
-                        isinstance(key_of_content_dict_bool_int, bool),
+                        type(key_of_content_dict_bool_int) == bool,
                         "Invalid type for dictionary keys in content 'content_dict_bool_int'. Expected 'bool'. Found '{}'.".format(
                             type(key_of_content_dict_bool_int)
                         ),
@@ -873,7 +871,7 @@ class TProtocolMessage(Message):
                     value_of_content_dict_bool_float,
                 ) in self.content_dict_bool_float.items():
                     enforce(
-                        isinstance(key_of_content_dict_bool_float, bool),
+                        type(key_of_content_dict_bool_float) == bool,
                         "Invalid type for dictionary keys in content 'content_dict_bool_float'. Expected 'bool'. Found '{}'.".format(
                             type(key_of_content_dict_bool_float)
                         ),
@@ -895,13 +893,13 @@ class TProtocolMessage(Message):
                     value_of_content_dict_bool_bool,
                 ) in self.content_dict_bool_bool.items():
                     enforce(
-                        isinstance(key_of_content_dict_bool_bool, bool),
+                        type(key_of_content_dict_bool_bool) == bool,
                         "Invalid type for dictionary keys in content 'content_dict_bool_bool'. Expected 'bool'. Found '{}'.".format(
                             type(key_of_content_dict_bool_bool)
                         ),
                     )
                     enforce(
-                        isinstance(value_of_content_dict_bool_bool, bool),
+                        type(value_of_content_dict_bool_bool) == bool,
                         "Invalid type for dictionary values in content 'content_dict_bool_bool'. Expected 'bool'. Found '{}'.".format(
                             type(value_of_content_dict_bool_bool)
                         ),
@@ -917,7 +915,7 @@ class TProtocolMessage(Message):
                     value_of_content_dict_bool_str,
                 ) in self.content_dict_bool_str.items():
                     enforce(
-                        isinstance(key_of_content_dict_bool_str, bool),
+                        type(key_of_content_dict_bool_str) == bool,
                         "Invalid type for dictionary keys in content 'content_dict_bool_str'. Expected 'bool'. Found '{}'.".format(
                             type(key_of_content_dict_bool_str)
                         ),
@@ -1011,7 +1009,7 @@ class TProtocolMessage(Message):
                         ),
                     )
                     enforce(
-                        isinstance(value_of_content_dict_str_bool, bool),
+                        type(value_of_content_dict_str_bool) == bool,
                         "Invalid type for dictionary values in content 'content_dict_str_bool'. Expected 'bool'. Found '{}'.".format(
                             type(value_of_content_dict_str_bool)
                         ),
@@ -1042,7 +1040,7 @@ class TProtocolMessage(Message):
                 expected_nb_of_contents = 2
                 enforce(
                     isinstance(self.content_union_1, CustomDataModel)
-                    or isinstance(self.content_union_1, bool)
+                    or type(self.content_union_1) == bool
                     or isinstance(self.content_union_1, bytes)
                     or isinstance(self.content_union_1, dict)
                     or isinstance(self.content_union_1, float)
@@ -1063,10 +1061,7 @@ class TProtocolMessage(Message):
                     )
                 if isinstance(self.content_union_1, tuple):
                     enforce(
-                        all(
-                            isinstance(element, bool)
-                            for element in self.content_union_1
-                        ),
+                        all(type(element) == bool for element in self.content_union_1),
                         "Invalid type for tuple elements in content 'content_union_1'. Expected 'bool'.",
                     )
                 if isinstance(self.content_union_1, dict):
@@ -1105,10 +1100,7 @@ class TProtocolMessage(Message):
                     )
                 if isinstance(self.content_union_2, tuple):
                     enforce(
-                        all(
-                            isinstance(element, bool)
-                            for element in self.content_union_2
-                        )
+                        all(type(element) == bool for element in self.content_union_2)
                         or all(
                             isinstance(element, bytes)
                             for element in self.content_union_2
@@ -1126,7 +1118,7 @@ class TProtocolMessage(Message):
                     ) in self.content_union_2.items():
                         enforce(
                             (
-                                isinstance(key_of_content_union_2, bool)
+                                type(key_of_content_union_2) == bool
                                 and isinstance(value_of_content_union_2, bytes)
                             )
                             or (
@@ -1154,7 +1146,7 @@ class TProtocolMessage(Message):
                     expected_nb_of_contents += 1
                     content_o_bool = cast(bool, self.content_o_bool)
                     enforce(
-                        isinstance(content_o_bool, bool),
+                        type(content_o_bool) == bool,
                         "Invalid type for content 'content_o_bool'. Expected 'bool'. Found '{}'.".format(
                             type(content_o_bool)
                         ),

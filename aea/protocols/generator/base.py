@@ -81,6 +81,28 @@ PYLINT_DISABLE_MESSAGE_PY = [
 ]
 
 
+def _type_check(variable_name: str, variable_type: str) -> str:
+    """
+    Return the type check Python instruction.
+
+    If variable_type == bool:
+
+        type(variable_name) == bool
+
+    else:
+
+        isinstance(variable_name, variable_type)
+
+    :param variable_name: the variable name.
+    :param variable_type: the variable type.
+    :return: the Python instruction to check the type, in string form.
+    """
+    if variable_type != "bool":
+        return f"isinstance({variable_name}, {variable_type})"
+    else:
+        return f"type({variable_name}) == {variable_type}"
+
+
 def _copyright_header_str(author: str) -> str:
     """
     Produce the copyright header text for a protocol.
@@ -339,8 +361,8 @@ class ProtocolGenerator:
             check_str += self.indent
             check_str += "enforce("
             for unique_type in unique_standard_types_list:
-                check_str += "isinstance({}, {}) or ".format(
-                    content_variable, self._to_custom_custom(unique_type)
+                check_str += "{} or ".format(
+                    _type_check(content_variable, self._to_custom_custom(unique_type))
                 )
             check_str = check_str[:-4]
             check_str += ", \"Invalid type for content '{}'. Expected either of '{}'. Found '{{}}'.\".format(type({})))\n".format(
@@ -366,12 +388,11 @@ class ProtocolGenerator:
                         )
                 frozen_set_element_types = sorted(frozen_set_element_types_set)
                 for frozen_set_element_type in frozen_set_element_types:
-                    check_str += (
-                        self.indent
-                        + "all(isinstance(element, {}) for element in {}) or\n".format(
-                            self._to_custom_custom(frozen_set_element_type),
-                            content_variable,
-                        )
+                    check_str += self.indent + "all({} for element in {}) or\n".format(
+                        _type_check(
+                            "element", self._to_custom_custom(frozen_set_element_type)
+                        ),
+                        content_variable,
                     )
                 check_str = check_str[:-4]
                 check_str += "\n"
@@ -417,11 +438,11 @@ class ProtocolGenerator:
                         )
                 tuple_element_types = sorted(tuple_element_types_set)
                 for tuple_element_type in tuple_element_types:
-                    check_str += (
-                        self.indent
-                        + "all(isinstance(element, {}) for element in {}) or \n".format(
-                            self._to_custom_custom(tuple_element_type), content_variable
-                        )
+                    check_str += self.indent + "all({} for element in {}) or \n".format(
+                        _type_check(
+                            "element", self._to_custom_custom(tuple_element_type)
+                        ),
+                        content_variable,
                     )
                 check_str = check_str[:-4]
                 check_str += "\n"
@@ -473,14 +494,15 @@ class ProtocolGenerator:
                             _get_sub_types_of_compositional_types(element_type)[0]
                         ] = _get_sub_types_of_compositional_types(element_type)[1]
                 for element1_type in sorted(dict_key_value_types.keys()):
-                    check_str += (
-                        self.indent
-                        + "(isinstance(key_of_{}, {}) and isinstance(value_of_{}, {})) or\n".format(
-                            content_name,
+                    check_str += self.indent + "({} and {}) or\n".format(
+                        _type_check(
+                            "key_of_" + content_name,
                             self._to_custom_custom(element1_type),
-                            content_name,
+                        ),
+                        _type_check(
+                            "value_of_" + content_name,
                             self._to_custom_custom(dict_key_value_types[element1_type]),
-                        )
+                        ),
                     )
                 check_str = check_str[:-4]
                 check_str += "\n"
@@ -521,11 +543,9 @@ class ProtocolGenerator:
             element_type = _get_sub_types_of_compositional_types(content_type)[0]
             check_str += self.indent + "enforce(all(\n"
             self._change_indent(1)
-            check_str += (
-                self.indent
-                + "isinstance(element, {}) for element in {}\n".format(
-                    self._to_custom_custom(element_type), content_variable
-                )
+            check_str += self.indent + "{} for element in {}\n".format(
+                _type_check("element", self._to_custom_custom(element_type)),
+                content_variable,
             )
             self._change_indent(-1)
             check_str += (
@@ -545,11 +565,9 @@ class ProtocolGenerator:
             element_type = _get_sub_types_of_compositional_types(content_type)[0]
             check_str += self.indent + "enforce(all(\n"
             self._change_indent(1)
-            check_str += (
-                self.indent
-                + "isinstance(element, {}) for element in {}\n".format(
-                    self._to_custom_custom(element_type), content_variable
-                )
+            check_str += self.indent + "{} for element in {}\n".format(
+                _type_check("element", self._to_custom_custom(element_type)),
+                content_variable,
             )
             self._change_indent(-1)
             check_str += (
@@ -578,8 +596,10 @@ class ProtocolGenerator:
             self._change_indent(1)
             check_str += self.indent + "enforce(\n"
             self._change_indent(1)
-            check_str += self.indent + "isinstance(key_of_{}, {})\n".format(
-                content_name, self._to_custom_custom(element_type_1)
+            check_str += self.indent + "{}\n".format(
+                _type_check(
+                    "key_of_" + content_name, self._to_custom_custom(element_type_1)
+                )
             )
             self._change_indent(-1)
             check_str += (
@@ -591,8 +611,10 @@ class ProtocolGenerator:
 
             check_str += self.indent + "enforce(\n"
             self._change_indent(1)
-            check_str += self.indent + "isinstance(value_of_{}, {})\n".format(
-                content_name, self._to_custom_custom(element_type_2)
+            check_str += self.indent + "{}\n".format(
+                _type_check(
+                    "value_of_" + content_name, self._to_custom_custom(element_type_2)
+                )
             )
             self._change_indent(-1)
             check_str += (
@@ -605,9 +627,8 @@ class ProtocolGenerator:
         else:
             check_str += (
                 self.indent
-                + "enforce(isinstance({}, {}), \"Invalid type for content '{}'. Expected '{}'. Found '{{}}'.\".format(type({})))\n".format(
-                    content_variable,
-                    self._to_custom_custom(content_type),
+                + "enforce({}, \"Invalid type for content '{}'. Expected '{}'. Found '{{}}'.\".format(type({})))\n".format(
+                    _type_check(content_variable, self._to_custom_custom(content_type)),
                     content_name,
                     content_type,
                     content_variable,

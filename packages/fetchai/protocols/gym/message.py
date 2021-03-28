@@ -250,7 +250,7 @@ class GymMessage(Message):
                     ),
                 )
                 enforce(
-                    isinstance(self.done, bool),
+                    type(self.done) == bool,
                     "Invalid type for content 'done'. Expected 'bool'. Found '{}'.".format(
                         type(self.done)
                     ),
