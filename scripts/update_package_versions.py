@@ -738,7 +738,7 @@ if __name__ == "__main__":
     arguments = parse_arguments()
     check_if_svn_installed()
     run_hashing()
-    #check_if_running_allowed()
+    check_if_running_allowed()
     while run_once():
         run_hashing()
     sys.exit(0)

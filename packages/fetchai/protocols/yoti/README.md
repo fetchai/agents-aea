@@ -10,7 +10,7 @@ This is a protocol for communication between a Skill and the Yoti Connection.
 ---
 name: yoti
 author: fetchai
-version: 0.3.0
+version: 0.4.0
 protocol_specification_id: fetchai/yoti:1.0.0
 description: A protocol for communication between yoti skills and yoti connection.
 license: Apache-2.0
