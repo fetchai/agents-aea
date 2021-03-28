@@ -191,13 +191,13 @@ class GymMessage(Message):
                 ),
             )
             enforce(
-                isinstance(self.message_id, int),
+                type(self.message_id) is int,
                 "Invalid type for 'message_id'. Expected 'int'. Found '{}'.".format(
                     type(self.message_id)
                 ),
             )
             enforce(
-                isinstance(self.target, int),
+                type(self.target) is int,
                 "Invalid type for 'target'. Expected 'int'. Found '{}'.".format(
                     type(self.target)
                 ),
