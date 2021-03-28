@@ -34,6 +34,7 @@ from aea.cli.utils.decorators import check_aea_project
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection
 from aea.contracts.base import Contract
+from aea.exceptions import AEAWalletNoAddressException
 from aea.helpers.base import load_env_file
 from aea.helpers.profiling import Profiling
 from aea.protocols.base import Message, Protocol
@@ -195,5 +196,11 @@ def _build_aea(
         )
         aea = builder.build(connection_ids=connection_ids, password=password)
         return aea
+    except AEAWalletNoAddressException:
+        error_msg = (
+            "You haven't specified any private key for the AEA project.\n"
+            "Please add one by using the commands `aea generate-key` and `aea add-key` for the ledger of your choice.\n"
+        )
+        raise click.ClickException(error_msg)
     except Exception as e:
         raise click.ClickException(str(e))

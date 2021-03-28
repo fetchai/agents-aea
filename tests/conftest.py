@@ -1005,7 +1005,7 @@ def _make_libp2p_client_connection(
     )
     _process_cert(crypto, cert_request, path_prefix=data_dir)
     configuration = ConnectionConfig(
-        client_key_file=None,
+        tcp_key_file=None,
         nodes=[
             {
                 "uri": str(uri)

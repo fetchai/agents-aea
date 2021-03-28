@@ -82,7 +82,12 @@ from aea.crypto.ledger_apis import DEFAULT_CURRENCY_DENOMINATIONS
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler
 from aea.error_handler.base import AbstractErrorHandler
-from aea.exceptions import AEAException, AEAValidationError, enforce
+from aea.exceptions import (
+    AEAException,
+    AEAValidationError,
+    AEAWalletNoAddressException,
+    enforce,
+)
 from aea.helpers.base import find_topological_order, load_env_file, load_module
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.install_dependency import install_dependency
@@ -1215,20 +1220,26 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         if self._name is None:  # pragma: nocover
             raise ValueError("You must set the name of the agent.")
 
+        default_ledger = self.get_default_ledger()
         if not wallet.addresses:
-            raise ValueError("Wallet has no addresses.")
+            raise AEAWalletNoAddressException("Wallet has no addresses.")
+
+        if default_ledger not in wallet.addresses:
+            raise ValueError(  # pragma: nocover
+                f"Specified default ledger '{default_ledger}' not found in available addresses of types: {'[' + ','.join(wallet.addresses.keys()) + ']'}"
+            )
 
         if len(wallet.addresses) > 1:
             identity = Identity(
                 self._name,
                 addresses=wallet.addresses,
-                default_address_key=self.get_default_ledger(),
+                default_address_key=default_ledger,
             )
         else:
             identity = Identity(
                 self._name,
-                address=wallet.addresses[self.get_default_ledger()],
-                default_address_key=self.get_default_ledger(),
+                address=wallet.addresses[default_ledger],
+                default_address_key=default_ledger,
             )
         return identity
 
