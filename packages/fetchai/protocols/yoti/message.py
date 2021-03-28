@@ -19,6 +19,7 @@
 
 """This module contains yoti's message definition."""
 
+# pylint: disable=too-many-statements,too-many-locals,no-member,too-few-public-methods,too-many-branches,not-an-iterable,unidiomatic-typecheck
 import logging
 from typing import Any, Dict, Set, Tuple, cast
 
@@ -159,31 +160,31 @@ class YotiMessage(Message):
         """Check that the message follows the yoti protocol."""
         try:
             enforce(
-                type(self.dialogue_reference) == tuple,
+                isinstance(self.dialogue_reference, tuple),
                 "Invalid type for 'dialogue_reference'. Expected 'tuple'. Found '{}'.".format(
                     type(self.dialogue_reference)
                 ),
             )
             enforce(
-                type(self.dialogue_reference[0]) == str,
+                isinstance(self.dialogue_reference[0], str),
                 "Invalid type for 'dialogue_reference[0]'. Expected 'str'. Found '{}'.".format(
                     type(self.dialogue_reference[0])
                 ),
             )
             enforce(
-                type(self.dialogue_reference[1]) == str,
+                isinstance(self.dialogue_reference[1], str),
                 "Invalid type for 'dialogue_reference[1]'. Expected 'str'. Found '{}'.".format(
                     type(self.dialogue_reference[1])
                 ),
             )
             enforce(
-                type(self.message_id) == int,
+                type(self.message_id) is int,
                 "Invalid type for 'message_id'. Expected 'int'. Found '{}'.".format(
                     type(self.message_id)
                 ),
             )
             enforce(
-                type(self.target) == int,
+                type(self.target) is int,
                 "Invalid type for 'target'. Expected 'int'. Found '{}'.".format(
                     type(self.target)
                 ),
@@ -192,7 +193,7 @@ class YotiMessage(Message):
             # Light Protocol Rule 2
             # Check correct performative
             enforce(
-                type(self.performative) == YotiMessage.Performative,
+                isinstance(self.performative, YotiMessage.Performative),
                 "Invalid 'performative'. Expected either of '{}'. Found '{}'.".format(
                     self.valid_performatives, self.performative
                 ),
@@ -204,44 +205,44 @@ class YotiMessage(Message):
             if self.performative == YotiMessage.Performative.GET_PROFILE:
                 expected_nb_of_contents = 3
                 enforce(
-                    type(self.token) == str,
+                    isinstance(self.token, str),
                     "Invalid type for content 'token'. Expected 'str'. Found '{}'.".format(
                         type(self.token)
                     ),
                 )
                 enforce(
-                    type(self.dotted_path) == str,
+                    isinstance(self.dotted_path, str),
                     "Invalid type for content 'dotted_path'. Expected 'str'. Found '{}'.".format(
                         type(self.dotted_path)
                     ),
                 )
                 enforce(
-                    type(self.args) == tuple,
+                    isinstance(self.args, tuple),
                     "Invalid type for content 'args'. Expected 'tuple'. Found '{}'.".format(
                         type(self.args)
                     ),
                 )
                 enforce(
-                    all(type(element) == str for element in self.args),
+                    all(isinstance(element, str) for element in self.args),
                     "Invalid type for tuple elements in content 'args'. Expected 'str'.",
                 )
             elif self.performative == YotiMessage.Performative.PROFILE:
                 expected_nb_of_contents = 1
                 enforce(
-                    type(self.info) == dict,
+                    isinstance(self.info, dict),
                     "Invalid type for content 'info'. Expected 'dict'. Found '{}'.".format(
                         type(self.info)
                     ),
                 )
                 for key_of_info, value_of_info in self.info.items():
                     enforce(
-                        type(key_of_info) == str,
+                        isinstance(key_of_info, str),
                         "Invalid type for dictionary keys in content 'info'. Expected 'str'. Found '{}'.".format(
                             type(key_of_info)
                         ),
                     )
                     enforce(
-                        type(value_of_info) == str,
+                        isinstance(value_of_info, str),
                         "Invalid type for dictionary values in content 'info'. Expected 'str'. Found '{}'.".format(
                             type(value_of_info)
                         ),
@@ -249,13 +250,13 @@ class YotiMessage(Message):
             elif self.performative == YotiMessage.Performative.ERROR:
                 expected_nb_of_contents = 2
                 enforce(
-                    type(self.error_code) == int,
+                    type(self.error_code) is int,
                     "Invalid type for content 'error_code'. Expected 'int'. Found '{}'.".format(
                         type(self.error_code)
                     ),
                 )
                 enforce(
-                    type(self.error_msg) == str,
+                    isinstance(self.error_msg, str),
                     "Invalid type for content 'error_msg'. Expected 'str'. Found '{}'.".format(
                         type(self.error_msg)
                     ),
