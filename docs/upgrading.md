@@ -4,6 +4,12 @@ The primary tool for upgrading AEA projects is the `aea upgrade` command in the 
 
 Below we describe the additional manual steps required to upgrade between different versions:
 
+## `v1.0.0rc1` to `v1.0.0rc2`
+
+No backwards incompatible changes to component development.
+
+Various configuration changes introduced in `v1.0.0rc1` are now enforced strictly.
+
 ## `v0.11.1` to `v1.0.0rc1`
 
 No backwards incompatible changes to component development.

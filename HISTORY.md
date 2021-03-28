@@ -1,5 +1,19 @@
 # Release History
 
+## 1.0.0rc2 (2020-03-28)
+
+- Extends CLI command `aea fingerprint` for fingerprinting of agents
+- Improves deploy image Docker example
+- Fixes a bug in `MultiAgentManager` which leaves it in an unclean state when project adding fails
+- Fixes dependencies of `aea-legder-fetchai`
+- Improves guide on HTTP client and server connection
+- Removes pickle library usage in the ML skills
+- Adds various consistency checks in configurations
+- Replaces usage of `pyaes` with `pycryptodome` in plugins
+- Changes generator to avoid non-idiomatic usage of type checks
+- Multiple minor fixes
+- Multiple additional tests and test stability fixes
+
 ## 1.0.0rc1 (2020-03-24)
 
 - Adds CLI command `aea get-public-key`
