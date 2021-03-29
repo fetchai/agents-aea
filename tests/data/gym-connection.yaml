@@ -7,7 +7,7 @@ fingerprint:
   __init__.py: QmWwxj1hGGZNteCvRtZxwtY9PuEKsrWsEmMWCKwiYCdvRR
   connection.py: QmPgSzbkwRE9CJ6sve7gvS62M3VdcBMfTozHdSgCnb7FPY
 fingerprint_ignore_patterns: []
-aea_version: '>=1.0.0rc1, <2.0.0'
+aea_version: '>=1.0.0, <2.0.0'
 description: "The gym connection wraps an OpenAI gym."
 class_name: GymConnection
 connections: []

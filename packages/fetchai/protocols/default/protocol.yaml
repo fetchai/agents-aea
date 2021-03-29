@@ -5,7 +5,7 @@ protocol_specification_id: fetchai/default:1.0.0
 type: protocol
 description: A protocol for exchanging any bytes message.
 license: Apache-2.0
-aea_version: '>=1.0.0rc1, <2.0.0'
+aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmbxVfDZvAxjGKtKXmNWggPUFzNXEE3bZcXDU7PkJ468PA
   __init__.py: QmWE5pCVodvLY8e5XqzZG7ieNEknqp9jcBbg4Ntu59mGQK

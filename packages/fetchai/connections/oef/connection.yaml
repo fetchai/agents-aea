@@ -5,7 +5,7 @@ type: connection
 description: The oef connection provides a wrapper around the OEF SDK for connection
   with the OEF search and communication node.
 license: Apache-2.0
-aea_version: '>=1.0.0rc1, <2.0.0'
+aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmSQ8UrcjQppaP9f8u2SGwMg9Ybf48Jb9KK53r3NpfJjpF
   __init__.py: QmUAen8tmoBHuCerjA3FSGKJRLG6JYyUS3chuWzPxKYzez

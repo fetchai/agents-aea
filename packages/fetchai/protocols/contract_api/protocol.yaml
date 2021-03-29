@@ -5,7 +5,7 @@ protocol_specification_id: fetchai/contract_api:1.0.0
 type: protocol
 description: A protocol for contract APIs requests and responses.
 license: Apache-2.0
-aea_version: '>=1.0.0rc1, <2.0.0'
+aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmTTGj8AzeFcnPbxT7E7vAXQ9ZLYWQMgcczT2vfHn4rPBp
   __init__.py: QmP96eD8WoouvA9v34HUmXdbE5p3LTz5Yxu53CgYDL1KsH

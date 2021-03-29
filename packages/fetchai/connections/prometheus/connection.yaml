@@ -4,7 +4,7 @@ version: 0.6.0
 type: connection
 description: Connection for exposing agent metrics to prometheus server
 license: Apache-2.0
-aea_version: '>=1.0.0rc1, <2.0.0'
+aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmStL7pJH7TsyVvGyfyZjXBV5aKcGK7XaqR7KiDmZvfk3y
   __init__.py: QmWVrDiiePsr6vTnvbPTcDrayR89ji3hf25rs9V9TiJUPv

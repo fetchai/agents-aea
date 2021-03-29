@@ -3,7 +3,7 @@ author: fetchai
 version: 0.12.0
 license: Apache-2.0
 description: This AEA buys data from a simple seller in Agent World 2.
-aea_version: '>=1.0.0rc1, <2.0.0'
+aea_version: '>=1.0.0, <2.0.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:

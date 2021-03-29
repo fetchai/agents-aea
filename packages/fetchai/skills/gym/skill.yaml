@@ -4,7 +4,7 @@ version: 0.18.0
 type: skill
 description: The gym skill wraps an RL agent.
 license: Apache-2.0
-aea_version: '>=1.0.0rc1, <2.0.0'
+aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmPwx59WZfJjauEiEXhcfQeUH1zFeEbkr1G8i2KVPWYao6
   __init__.py: QmVQswLyWc88HjwgqngRbw3C3SnWnurj3TQDvKbfa3iQK2

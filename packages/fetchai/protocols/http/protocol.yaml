@@ -5,7 +5,7 @@ protocol_specification_id: fetchai/http:1.0.0
 type: protocol
 description: A protocol for HTTP requests and responses.
 license: Apache-2.0
-aea_version: '>=1.0.0rc1, <2.0.0'
+aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: Qmau6oyZXUUuVftnNBZeQ2oXt4kzWPxEvmfQYJG97HApcW
   __init__.py: QmWWG91jaKF5w7MCNQrJSyWAKPrgQcJPJp7RbQGAAvTDM2

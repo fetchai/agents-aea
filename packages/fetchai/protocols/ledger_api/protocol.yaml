@@ -5,7 +5,7 @@ protocol_specification_id: fetchai/ledger_api:1.0.0
 type: protocol
 description: A protocol for ledger APIs requests and responses.
 license: Apache-2.0
-aea_version: '>=1.0.0rc1, <2.0.0'
+aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmZEuoSxH7yEGCf4wvkGawDUAwygCVFiRcnkXFgXS7kPAE
   __init__.py: QmS4BFbABF6L7kvoZBKQSfR8y9U34HSqMffbAAW7PALM16
