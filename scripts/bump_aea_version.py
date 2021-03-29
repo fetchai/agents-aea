@@ -168,11 +168,16 @@ if __name__ == "__main__":
     arguments = parse_args()
     _new_version_str = arguments.new_version
 
+    # validate new version
+    _new_version: Version = Version(_new_version_str)
+    _new_version_str = str(_new_version)
     _current_version_str = update_version_for_aea(_new_version_str)
+
+    # validate current version
+    _current_version: Version = Version(_current_version_str)
+    _current_version_str = str(_current_version)
     update_version_for_files(_current_version_str, _new_version_str)
 
-    _new_version: Version = Version(_new_version_str)
-    _current_version: Version = Version(_current_version_str)
     have_updated_specifier_set = update_aea_version_specifiers(
         _current_version, _new_version
     )
