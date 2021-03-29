@@ -1,22 +1,22 @@
 name: ledger
 author: fetchai
-version: 0.17.0
+version: 0.18.0
 type: connection
 description: A connection to interact with any ledger API and contract API.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmVrsr5JurbR3ReeCz9VrFgmwozenGnBWAbHnH19x3Zeva
+  README.md: QmPVRejvuQ5UaXviF81nUdgGZaumEkxao91Cbex1JchGSo
   __init__.py: QmZvYZ5ECcWwqiNGh8qNTg735wu51HqaLxTSifUxkQ4KGj
-  base.py: QmSW6wizbkgCCetRwnyiGAJyYBFLfZSytPybpbQ5EtVy3D
+  base.py: QmSfxBihjamyVbv5z2h2Vt7ivXrrPzgu7QpahppFrpx35j
   connection.py: QmaB1Febh2XKZUNQBiohdXJHUfaTTB2rhkUEprHbzwZkYh
   contract_dispatcher.py: Qmc6hu7MhaQtBvkGie2cjMTwo6mtqKmq9NEiZPHKX9DcBA
   ledger_dispatcher.py: QmVBTPs5yX5TyidQMLfiWV976EyuSFm4orsQsLeHJs1iRp
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
-- fetchai/contract_api:0.14.0
-- fetchai/ledger_api:0.13.0
+- fetchai/contract_api:1.0.0
+- fetchai/ledger_api:1.0.0
 class_name: LedgerConnection
 config:
   ledger_apis:
@@ -29,7 +29,7 @@ config:
       chain_id: agent-land
 excluded_protocols: []
 restricted_to_protocols:
-- fetchai/contract_api:0.14.0
-- fetchai/ledger_api:0.13.0
+- fetchai/contract_api:1.0.0
+- fetchai/ledger_api:1.0.0
 dependencies: {}
 is_abstract: false

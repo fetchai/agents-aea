@@ -51,14 +51,14 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/local:0.18.0
+- fetchai/local:0.19.0
 contracts: []
 protocols:
-- fetchai/default:0.15.0
+- fetchai/default:1.0.0
 skills:
 - dummy_author/dummy:0.1.0
-- fetchai/error:0.15.0
-default_connection: fetchai/local:0.18.0
+- fetchai/error:0.16.0
+default_connection: fetchai/local:0.19.0
 default_ledger: cosmos
 logging_config:
   disable_existing_loggers: ${DISABLE_LOGS:bool}

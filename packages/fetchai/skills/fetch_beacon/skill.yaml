@@ -1,22 +1,22 @@
 name: fetch_beacon
 author: fetchai
-version: 0.10.0
+version: 0.11.0
 type: skill
 description: Retrieve the value of the Fetch DRB
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmWDGoCDEiYqf9tztY327hH4kY914erKvxkyG26EYPcUeT
-  __init__.py: Qmb7Xhvq93E7qyd6c77rvkJ5biTvkVuxCr1ExpjRasMvt8
+  __init__.py: QmW6twSLyR5FsWEhHd3ktjF28MuMWUZcmMqsJj5rn8Pkq4
   behaviours.py: QmeCdxLKfvBahJRrCSzUQag9JzGMib7iREpPZ8DFGxMsR1
   dialogues.py: QmTy9rEFAVKdLQq9qZJCgPbRqvokZBx3DmSQFvfkuqb4jn
   handlers.py: QmezaqP1jAqVsfEZEuy9nLidEpV6tGmefgR7Cm51KNnjUV
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.17.0
+- fetchai/ledger:0.18.0
 contracts: []
 protocols:
-- fetchai/ledger_api:0.13.0
+- fetchai/ledger_api:1.0.0
 skills: []
 behaviours:
   fetch_beacon_behaviour:

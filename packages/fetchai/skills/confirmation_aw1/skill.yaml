@@ -1,6 +1,6 @@
 name: confirmation_aw1
 author: fetchai
-version: 0.11.0
+version: 0.12.0
 type: skill
 description: The confirmation_aw1 skill is a skill to confirm registration for Agent
   World 1.
@@ -8,7 +8,7 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmWEG3A5xRL3yf65UHfrKhUwazR5bjpxSiuuBGMYX7t7Co
-  __init__.py: QmfMSVMmXRyzpHGX6HLwfKoAKBpRumYZB7sXX2tQ1LaaWE
+  __init__.py: QmZgsEcNamYb6edzRr2YYj43R2YA4wCXnugeiBtejyoZgS
   behaviours.py: QmZQtQGzopu2gcXpMiC7HgqbRRfL2rG8BtXY5vmt9eFXue
   dialogues.py: Qmb5BnkjZs21o3V6mNkmYmyAj5C7iBMWWvvykBeMEwv1iW
   handlers.py: QmaAyhH6cgC6Cmjm99Tzh2TabMkW2wBq5XSViCVYvDkbCt
@@ -16,14 +16,14 @@ fingerprint:
   strategy.py: Qma48VaXE7vzQe1A1UUC4tEBN6UfEEfrciXCJKYAfcw7vC
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.17.0
+- fetchai/ledger:0.18.0
 contracts:
-- fetchai/staking_erc20:0.8.0
+- fetchai/staking_erc20:0.9.0
 protocols:
-- fetchai/default:0.15.0
-- fetchai/ledger_api:0.13.0
-- fetchai/register:0.8.0
-- fetchai/signing:0.13.0
+- fetchai/default:1.0.0
+- fetchai/ledger_api:1.0.0
+- fetchai/register:1.0.0
+- fetchai/signing:1.0.0
 skills: []
 behaviours:
   transaction:

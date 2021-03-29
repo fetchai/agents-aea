@@ -4,4 +4,4 @@ This connection wraps an HTTP client. It consumes messages from the AEA, transla
 
 ## Usage
 
-First, add the connection to your AEA project (`aea add connection fetchai/http_client:0.21.0`). Then, update the `config` in `connection.yaml` by providing a `host` and `port` of the server.
+First, add the connection to your AEA project (`aea add connection fetchai/http_client:0.22.0`). Then, update the `config` in `connection.yaml` by providing a `host` and `port` of the server.
