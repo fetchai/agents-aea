@@ -1135,7 +1135,7 @@ class TestUpgradeWithEjectAccept(BaseTestUpgradeWithEject):
 class BaseTestUpgradeProject(AEATestCaseEmpty):
     """Base test class for testing project upgrader."""
 
-    OLD_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.27.0")
+    OLD_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.25.0")
     EXPECTED_NEW_AGENT_PUBLIC_ID = OLD_AGENT_PUBLIC_ID.to_latest()
     EXPECTED = "expected_agent"
 
@@ -1162,9 +1162,7 @@ class BaseTestUpgradeProject(AEATestCaseEmpty):
         shutil.rmtree(self.current_agent_context)
 
 
-@mock.patch.object(aea, "__version__", "0.11.0")
 @mock.patch("click.confirm")
-@pytest.mark.skip("Not currently possible to test.")
 class TestUpgradeProjectWithNewerVersion(BaseTestUpgradeProject):
     """Test upgrade project with newer version available."""
 
@@ -1187,14 +1185,7 @@ class TestUpgradeProjectWithNewerVersion(BaseTestUpgradeProject):
             self.current_agent_context, self.EXPECTED, ignore=ignore
         )
         _left_only, _right_only, diff = dircmp_recursive(dircmp)
-        if confirm:
-            assert _right_only == {
-                "vendor/fetchai/connections/p2p_libp2p/libp2p_node/README.md"
-            }
-            assert _left_only == set()
-        else:
-            assert _left_only == set()
-            assert _right_only == set()
+        assert _right_only == diff == _left_only == set()
 
 
 @mock.patch("aea.cli.upgrade.get_latest_version_available_in_registry")
