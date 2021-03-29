@@ -38,11 +38,11 @@ default_routing:
 connection_private_key_paths: {}
 dependencies:
   aea-ledger-cosmos:
-    version: <2.0.0,>=1.0.0rc2
+    version: <2.0.0,>=1.0.0
   aea-ledger-ethereum:
-    version: <2.0.0,>=1.0.0rc2
+    version: <2.0.0,>=1.0.0
   aea-ledger-fetchai:
-    version: <2.0.0,>=1.0.0rc3
+    version: <2.0.0,>=1.0.0
 ---
 public_id: fetchai/soef:0.21.0
 type: connection

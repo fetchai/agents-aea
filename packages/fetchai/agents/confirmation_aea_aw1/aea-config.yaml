@@ -66,9 +66,9 @@ logging_config:
       propagate: false
 dependencies:
   aea-ledger-ethereum:
-    version: <2.0.0,>=1.0.0rc2
+    version: <2.0.0,>=1.0.0
   aea-ledger-fetchai:
-    version: <2.0.0,>=1.0.0rc3
+    version: <2.0.0,>=1.0.0
 ---
 public_id: fetchai/p2p_libp2p:0.20.0
 type: connection

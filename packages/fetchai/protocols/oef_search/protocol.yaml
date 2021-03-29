@@ -7,7 +7,7 @@ description: A protocol for interacting with an OEF search service.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmQUJ3rCtf413yR3fNpdwmJLivLioFWGr5PXfwX24U8Mww
+  README.md: QmRociRL8c7tTAjLCC1VsLXVLAyz86CwAStG8d55Zp27f9
   __init__.py: QmYbssNUqvbcwo3JcmNERNCAk2ThU7uTGUp7mdHUfZnxEW
   custom_types.py: Qmddg9WmPzedoJnfNPDuDx8R67ZZnrSZQruSGg8kgAf6tm
   dialogues.py: QmSs2nefhrSMXE13QUT9U1q3JVSjzr3dPgsHBqYkCw2fUB

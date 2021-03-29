@@ -40,8 +40,8 @@ aea add skill fetchai/advanced_data_request:0.3.0
 aea add skill fetchai/simple_oracle:0.10.0
 aea config set --type dict agent.dependencies \
 '{
-  "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0rc3"},
-  "aea-ledger-ethereum": {"version": "<2.0.0,>=1.0.0rc2"}
+  "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"},
+  "aea-ledger-ethereum": {"version": "<2.0.0,>=1.0.0"}
 }'
 aea config set agent.default_connection fetchai/p2p_libp2p:0.20.0
 aea install
@@ -133,8 +133,8 @@ aea add connection fetchai/ledger:0.17.0
 aea add skill fetchai/simple_oracle_client:0.8.0
 aea config set --type dict agent.dependencies \
 '{
-  "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0rc3"},
-  "aea-ledger-ethereum": {"version": "<2.0.0,>=1.0.0rc2"}
+  "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"},
+  "aea-ledger-ethereum": {"version": "<2.0.0,>=1.0.0"}
 }'
 aea config set agent.default_connection fetchai/ledger:0.17.0
 aea install

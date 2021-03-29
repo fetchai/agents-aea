@@ -33,5 +33,5 @@ models:
     class_name: LedgerApiDialogues
 dependencies:
   aea-ledger-ethereum:
-    version: <2.0.0,>=1.0.0rc2
+    version: <2.0.0,>=1.0.0
 is_abstract: false

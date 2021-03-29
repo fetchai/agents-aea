@@ -7,7 +7,7 @@ description: A protocol for exchanging any bytes message.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmbxVfDZvAxjGKtKXmNWggPUFzNXEE3bZcXDU7PkJ468PA
+  README.md: QmSDPocXZkQJpfewpte3Mpg54AhZM8PPMoaTMkJp5ACUrA
   __init__.py: QmWE5pCVodvLY8e5XqzZG7ieNEknqp9jcBbg4Ntu59mGQK
   custom_types.py: QmbAu5CYv5VtKKbEtzCbGQGE5cPZezDjubLNbiTPycXrHv
   default.proto: QmWYzTSHVbz7FBS84iKFMhGSXPxay2mss29vY7ufz2BFJ8

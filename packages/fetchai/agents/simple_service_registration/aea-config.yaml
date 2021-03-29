@@ -31,4 +31,4 @@ default_routing:
 connection_private_key_paths: {}
 dependencies:
   aea-ledger-fetchai:
-    version: <2.0.0,>=1.0.0rc3
+    version: <2.0.0,>=1.0.0
