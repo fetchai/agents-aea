@@ -400,7 +400,7 @@ class TestLedgerApiHandler(BaseSkillTestCase):
             kwargs=ContractApiMessage.Kwargs(
                 {
                     "label": "OracleContract",
-                    "init_msg": {"oracle_address": strategy.oracle_contract_address},
+                    "init_msg": {"oracle_contract_address": strategy.oracle_contract_address},
                     "gas": strategy.default_gas_deploy,
                     "amount": 0,
                     "code_id": 8888,
