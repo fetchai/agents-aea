@@ -99,6 +99,15 @@ aea add-key $LEDGER_ID
 ```bash
 aea generate-wealth $LEDGER_ID
 ```
+```bash
+aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.ledger_id $LEDGER_ID
+```
+```bash
+aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.update_function update_oracle_value
+```
+```bash
+aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.update_function updateOracleValue
+```
 ``` bash
 docker run -p 8545:8545 trufflesuite/ganache-cli:latest --verbose --gasPrice=0 --gasLimit=0x1fffffffffffff --account="$(cat coin_price_oracle/ethereum_private_key.txt),1000000000000000000000" --account="$(cat coin_price_oracle_client/ethereum_private_key.txt),1000000000000000000000"
 ```
@@ -119,13 +128,14 @@ info: [coin_price_oracle] Oracle value successfully updated!
 aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.erc20_address ERC20_ADDRESS
 aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.oracle_contract_address ORACLE_ADDRESS
 ```
+```bash
+Oracle contract successfully deployed at address: ORACLE_ADDRESS
+```
 ``` bash
 aea run
 ```
 ``` bash
-info: [coin_price_oracle_client] Oracle client contract successfully deployed!
-...
-info: [coin_price_oracle_client] Oracle client transactions approved!
+info: [coin_price_oracle_client] Oracle client contract successfully deployed at address: ...
 ...
 info: [coin_price_oracle_client] Oracle value successfully requested!
 ```
