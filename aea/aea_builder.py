@@ -1254,8 +1254,8 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             )
         return identity
 
-    def _process_connection_ids(
-        self, connection_ids: Optional[Collection[PublicId]] = None
+    def _process_connection_ids(  # pylint: disable=unsubscriptable-object
+        self, connection_ids: Optional[Collection[PublicId]] = None,
     ) -> List[PublicId]:
         """
         Process connection ids.
@@ -1317,7 +1317,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         """Install components extra dependencies."""
         self._package_dependency_manager.install_dependencies()
 
-    def build(
+    def build(  # pylint: disable=unsubscriptable-object
         self,
         connection_ids: Optional[Collection[PublicId]] = None,
         password: Optional[str] = None,

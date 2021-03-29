@@ -1796,7 +1796,7 @@ class ContractConfig(ComponentConfiguration):
 """The following functions are called from aea.cli.utils."""
 
 
-def _compute_fingerprint(
+def _compute_fingerprint(  # pylint: disable=unsubscriptable-object
     package_directory: Path,
     ignore_patterns: Optional[Collection[str]] = None,
     is_recursive: bool = True,

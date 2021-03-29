@@ -305,7 +305,7 @@ def _replace_fingerprint_non_invasive(
     return re.sub(r"\nfingerprint:\W*\n(?:\W+.*\n)*", replacement, text)
 
 
-def compute_fingerprint(
+def compute_fingerprint(  # pylint: disable: unsubscriptable-object
     package_path: Path,
     fingerprint_ignore_patterns: Optional[Collection[str]],
     client: ipfshttpclient.Client,

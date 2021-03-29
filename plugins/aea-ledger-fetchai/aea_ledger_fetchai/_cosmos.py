@@ -1085,7 +1085,6 @@ class _CosmosApi(LedgerApi):
             raise ValueError(
                 "Cannot get account number and sequence: {}".format(response.json())
             )
-            return result
         try:
             result = (
                 int(response.json()["result"]["value"]["account_number"]),
