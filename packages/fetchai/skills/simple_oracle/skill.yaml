@@ -10,8 +10,8 @@ fingerprint:
   __init__.py: QmSMQMrybhgbq3CyZqSBb2s9EGDTy35jLg9GFRX2xzFenr
   behaviours.py: Qmes3sypsSxWdNnjtzhUKUkPVcqjomD1FkmBdWyUtP4ohk
   dialogues.py: QmVCJ1WoW4xEDrYs56VbTvMiKu1YST7T3DrTjhAyYoBFJa
-  handlers.py: QmcoWLLQz3UeUxnfQjdhWCabS9i4UfXvvyx7uEQmPwmF9c
-  strategy.py: QmY4bUU98FWDvZuif6TsowUUhSsh1hFSVsawsZ89YiVABK
+  handlers.py: QmRfB1TV9ZEjYaVKhDEVj5QMZXzyVke1PK7eZCbWv591Cn
+  strategy.py: QmYDqV5e5qujWsh8XFJicsqnoB6VyNhQBFeyrPcZpwPEBa
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/oracle:0.7.0
@@ -66,6 +66,7 @@ models:
   strategy:
     args:
       contract_address: null
+      contract_address_file: null
       default_gas_deploy: 10000000
       default_gas_grant_role: 10000000
       default_gas_update: 15000000

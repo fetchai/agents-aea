@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 """This test module contains the integration test for the generic buyer and seller skills."""
 import json
+import os
 
 import pytest
 from aea_ledger_ethereum import EthereumCrypto
@@ -28,6 +29,7 @@ from aea.test_tools.test_cases import AEATestCaseManyFlaky
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
 from tests.conftest import (
+    CUR_PATH,
     DEFAULT_FETCH_LEDGER_ADDR,
     DEFAULT_FETCH_LEDGER_REST_PORT,
     ETHEREUM_PRIVATE_KEY_FILE,
@@ -42,6 +44,8 @@ from tests.conftest import (
     UseLocalFetchNode,
 )
 
+
+ORACLE_CONTRACT_ADDRESS_FILE = os.path.join(CUR_PATH, "oracle_contract_address.txt")
 
 ledger_ids = pytest.mark.parametrize(
     "ledger_id,private_key_file,funded_private_key_1,funded_private_key_2,update_function,query_function",
@@ -199,6 +203,9 @@ class TestOracleSkills(AEATestCaseManyFlaky, UseGanache, UseLocalFetchNode):
                 f"{DEFAULT_FETCH_LEDGER_ADDR}:{DEFAULT_FETCH_LEDGER_REST_PORT}",
             )
 
+        setting_path = "vendor.fetchai.skills.simple_oracle.models.strategy.args.contract_address_file"
+        self.set_config(setting_path, ORACLE_CONTRACT_ADDRESS_FILE)
+
         # add packages for oracle client agent
         self.set_agent_context(client_agent_name)
         self.add_item("connection", "fetchai/ledger:0.16.0")
@@ -254,9 +261,6 @@ class TestOracleSkills(AEATestCaseManyFlaky, UseGanache, UseLocalFetchNode):
                 f"{DEFAULT_FETCH_LEDGER_ADDR}:{DEFAULT_FETCH_LEDGER_REST_PORT}",
             )
 
-        setting_path = "vendor.fetchai.skills.simple_oracle_client.models.strategy.args.oracle_contract_address"
-        self.set_config(setting_path, oracle_address)
-
         # run oracle agent
         self.set_agent_context(oracle_agent_name)
         self.run_cli_command("build", cwd=self._get_cwd())
@@ -295,8 +299,18 @@ class TestOracleSkills(AEATestCaseManyFlaky, UseGanache, UseLocalFetchNode):
             missing_strings == []
         ), "Strings {} didn't appear in deploy_aea output.".format(missing_strings)
 
+        if ledger_id == FetchAICrypto.identifier:
+            # Get oracle contract address from file
+            with open(ORACLE_CONTRACT_ADDRESS_FILE) as file:
+                oracle_address = file.read()
+
         # run oracle client agent
         self.set_agent_context(client_agent_name)
+
+        # set oracle contract address in oracle client
+        setting_path = "vendor.fetchai.skills.simple_oracle_client.models.strategy.args.oracle_contract_address"
+        self.set_config(setting_path, oracle_address)
+
         client_aea_process = self.run_agent()
 
         check_strings = (
@@ -305,7 +319,6 @@ class TestOracleSkills(AEATestCaseManyFlaky, UseGanache, UseLocalFetchNode):
             "transaction was successfully submitted. Transaction digest=",
             "requesting transaction receipt.",
             "transaction was successfully settled. Transaction receipt=",
-            "Oracle client transactions approved!",
             "Oracle value successfully requested!",
         )
         missing_strings = self.missing_from_output(

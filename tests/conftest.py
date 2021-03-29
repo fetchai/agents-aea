@@ -157,7 +157,7 @@ DEFAULT_MONIKER = "test-node"
 DEFAULT_FETCH_CHAIN_ID = "agent-land"
 DEFAULT_GENESIS_ACCOUNT = "validator"
 DEFAULT_DENOMINATION = "atestfet"
-FETCHD_STARTUP_TIME = 5
+FETCHD_INITIAL_TX_SLEEP = 6
 
 COSMOS_PRIVATE_KEY_FILE_CONNECTION = "cosmos_connection_private_key.txt"
 FETCHAI_PRIVATE_KEY_FILE_CONNECTION = "fetchai_connection_private_key.txt"
@@ -1330,8 +1330,8 @@ def fund_accounts_from_local_validator(
     addresses: str, amount: int, denom: str = DEFAULT_DENOMINATION
 ):
     """Send funds to local accounts from the local genesis validator."""
-    time.sleep(FETCHD_STARTUP_TIME)
     for address in addresses:
+        time.sleep(FETCHD_INITIAL_TX_SLEEP)
         cmd = f'sh -c "echo y | {DEFAULT_CLI_COMMAND} tx send {DEFAULT_GENESIS_ACCOUNT} {address} {amount}{denom} --chain-id {DEFAULT_FETCH_CHAIN_ID}"'
         docker_exec_cmd(DEFAULT_FETCH_DOCKER_IMAGE_TAG, cmd)
 

@@ -193,6 +193,20 @@ class LedgerApiHandler(Handler):
         else:  # pragma: nocover
             self.context.logger.info("Failed to initialize contract: code_id not found")
 
+    def _save_contract_address_to_file(self) -> None:
+        """
+        Save the oracle contract address to a text file if specified in config
+
+        return: None
+        """
+        strategy = cast(Strategy, self.context.strategy)
+        if strategy.contract_address_file:
+            self.context.logger.info(
+                f"Saving contract address to file: {strategy.contract_address_file}"
+            )
+            with open(strategy.contract_address_file, "w") as file:
+                file.write(strategy.contract_address)
+
     def _handle_transaction_receipt(
         self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
     ) -> None:
@@ -232,6 +246,7 @@ class LedgerApiHandler(Handler):
                         )  # pragma: nocover
                     strategy.contract_address = contract_address
                     strategy.is_contract_deployed = True
+                    self._save_contract_address_to_file()
                     self.context.logger.info(
                         f"Oracle contract successfully deployed at address: {contract_address}"
                     )
