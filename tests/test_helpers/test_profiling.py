@@ -33,15 +33,14 @@ def test_profiling():
 
     p = Profiling(1, [Message], [Message], output_function=output_function)
     p.start()
-    import time
 
-    time.sleep(0.5)
+    wait_for_condition(lambda: p.is_running, timeout=20)
     m = Message()
     try:
-        wait_for_condition(lambda: result, timeout=3)
+        wait_for_condition(lambda: result, timeout=20)
 
         assert "Profiling details" in result
     finally:
         p.stop()
-        p.wait_completed(sync=True, timeout=3)
+        p.wait_completed(sync=True, timeout=20)
     del m

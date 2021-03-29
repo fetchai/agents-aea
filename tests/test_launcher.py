@@ -77,14 +77,31 @@ class TestThreadLauncherMode(AEATestCaseMany):
         with open(config_path, "w") as fp:
             yaml.safe_dump(config, fp)
 
-    def test_start_stop(self) -> None:
+    def test_start_stop(self, capfd, caplog) -> None:
         """Test agents started stopped."""
         try:
             runner = AEALauncher(
-                [self.agent_name_1, self.agent_name_2], self.RUNNER_MODE
+                [self.agent_name_1, self.agent_name_2],
+                self.RUNNER_MODE,
+                log_level="DEBUG",
             )
             runner.start(True)
             wait_for_condition(lambda: runner.is_running, timeout=10)
+
+            capfd_out = ""
+
+            def _check():
+                nonlocal capfd_out
+                capfd_out += capfd.readouterr().out
+                log_text = capfd_out + "\n".join(caplog.messages)
+                return (
+                    f"[{self.agent_name_1}]: Runtime state changed to RuntimeStates.running."
+                    in log_text
+                    and f"[{self.agent_name_2}]: Runtime state changed to RuntimeStates.running."
+                    in log_text
+                )
+
+            wait_for_condition(_check, timeout=10, period=0.1)
             assert runner.num_failed == 0
         finally:
             runner.stop()
