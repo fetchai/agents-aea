@@ -149,6 +149,56 @@ var dialogueStorage = make(map[Address][]Dialogue)
 // store dialogue by dialogue label
 var dialogueByDialogueLabel = make(map[DialogueLabel]Dialogue)
 
+func (dialogue Dialogue) update(message AbstractMessage) {
+	if message.sender == "" {
+		message.sender = dialogue.selfAddress
+	}
+	messageExistence := dialogue.isBelongingToADialogue(message)
+	if !messageExistence {
+		fmt.Println("Error: message does not exist to this dialogue")
+	}
+
+	// TODO
+	// validate next message
+	// check if dialogue message is valid
+	dialogue.updateIncomingAndOutgoingMessages(message)
+}
+
+func (dialogue Dialogue) updateIncomingAndOutgoingMessages(message AbstractMessage) {
+	if message.sender == dialogue.selfAddress {
+		dialogue.outgoingMessages = append(dialogue.outgoingMessages, message)
+	} else {
+		dialogue.incomingMessages = append(dialogue.incomingMessages, message)
+	}
+	// update last message id
+	dialogue.lastMessageId = message.messageId
+	// append message ids in ordered manner
+	dialogue.orderedMessageIds = append(dialogue.orderedMessageIds, message.messageId)
+}
+
+func (dialogue Dialogue) isBelongingToADialogue(message AbstractMessage) bool {
+	opponent, err := message.hasCounterparty()
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+	var label DialogueLabel
+	if dialogue.selfAddress == dialogue.dialogueLabel.dialogueStarterAddress {
+		label = DialogueLabel{
+			dialogueReference:       [2]string{message.dialogueReference[0], ""},
+			dialogueOpponentAddress: opponent,
+			dialogueStarterAddress:  dialogue.selfAddress,
+		}
+	} else {
+		label = DialogueLabel{
+			dialogueReference:       message.dialogueReference,
+			dialogueOpponentAddress: opponent,
+			dialogueStarterAddress:  opponent,
+		}
+	}
+	result := validateDialogueLabelExistence(label)
+	return result
+}
+
 func create(counterParty Address, selfAddress Address, performative Performative, content []byte) (AbstractMessage, Dialogue) {
 	reference := [2]string{
 		generateDialogueNonce(), "",
@@ -205,15 +255,7 @@ func updateInitialDialogue(message AbstractMessage, dialogue Dialogue) {
 
 	// check if message is by self
 	// append message to outgoing message, if not append to incoming message
-	if message.sender == dialogue.selfAddress {
-		dialogue.outgoingMessages = append(dialogue.outgoingMessages, message)
-	} else {
-		dialogue.incomingMessages = append(dialogue.incomingMessages, message)
-	}
-	// update last message id
-	dialogue.lastMessageId = message.messageId
-	// append message ids in ordered manner
-	dialogue.orderedMessageIds = append(dialogue.orderedMessageIds, message.messageId)
+	dialogue.updateIncomingAndOutgoingMessages(message)
 }
 
 func checkReferencesAndCreateLabels(message AbstractMessage) DialogueLabel {
