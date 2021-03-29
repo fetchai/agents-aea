@@ -153,7 +153,7 @@ def load_aea_package(configuration: ComponentConfiguration) -> None:
             # this handles the case when 'subpackage_init_file'
             # is path/to/package/__init__.py
             import_path = prefix_pkg
-        else:
+        else:  # pragma: nocover
             import_path = prefix_pkg + "." + ".".join(relative_parent_dir.parts)
 
         spec = importlib.util.spec_from_file_location(import_path, subpackage_init_file)
