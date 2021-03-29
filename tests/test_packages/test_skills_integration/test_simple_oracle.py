@@ -58,7 +58,7 @@ class TestOracleSkills(AEATestCaseManyFlaky, UseGanache):
             "fetchai/ledger_api:1.0.0": "fetchai/ledger:0.18.0",
             "fetchai/contract_api:1.0.0": "fetchai/ledger:0.18.0",
             "fetchai/http:1.0.0": "fetchai/http_client:0.22.0",
-            "fetchai/prometheus:0.7.0": "fetchai/prometheus:0.7.0",
+            "fetchai/prometheus:1.0.0": "fetchai/prometheus:0.7.0",
         }
 
         # add packages for oracle agent
