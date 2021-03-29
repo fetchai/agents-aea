@@ -10,7 +10,7 @@ This is a protocol for two agents exchanging any bytes messages.
 ---
 name: default
 author: fetchai
-version: 0.15.0
+version: 1.0.0
 description: A protocol for exchanging any bytes message.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
