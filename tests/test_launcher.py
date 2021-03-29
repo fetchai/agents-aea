@@ -91,7 +91,7 @@ class TestThreadLauncherMode(AEATestCaseMany):
             capfd_out = ""
 
             def _check():
-                nonlocal capfd_out
+                nonlocal capfd_out  # to accumulate logs from capfd to chgck all the logs captured.
                 capfd_out += capfd.readouterr().out
                 log_text = capfd_out + "\n".join(caplog.messages)
                 return (
