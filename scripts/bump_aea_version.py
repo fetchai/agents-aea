@@ -93,7 +93,7 @@ def update_version_for_aea(new_version: str) -> str:
         for line in fin:
             if "__version__" not in line:
                 continue
-            match = re.search(VERSION_REGEX, line)
+            match = re.search('__version__ = "(.*)"', line)
             if match is None:
                 raise ValueError("Current version is not well formatted.")
             current_version = match.group(1)

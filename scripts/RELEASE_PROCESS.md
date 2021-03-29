@@ -34,6 +34,6 @@
 
 16. Release packages into registry: `python scripts/deploy_to_registry.py`.
 
-17. Create and push Docker images `user-image` and `deploy-image`.
+17. Create and push Docker images `user-image` and `develop-image`.
 
 If something goes wrong and only needs a small fix do `LAST_VERSION.post1` as version, apply fixes, push again to PyPI.
