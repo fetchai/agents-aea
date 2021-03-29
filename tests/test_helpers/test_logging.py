@@ -36,6 +36,7 @@ def test_agent_logger_adapter():
     """Test the agent logger adapter."""
     logger = logging.getLogger("some.logger")
     logger = AgentLoggerAdapter(logger, agent_name="some_agent")
+    logger.setLevel("DEBUG")
     with patch.object(logger.logger, "log") as mock_logger:
         logger.debug("Some log message.")
         mock_logger.assert_any_call(logging.DEBUG, "[some_agent] Some log message.")
@@ -49,7 +50,6 @@ def test_with_logger_default_logger_name():
 
     x = SomeClass()
     assert isinstance(x.logger, logging.Logger)
-
     with patch.object(x.logger, "debug") as mock_logger:
         x.logger.debug("Some log message.")
         mock_logger.assert_any_call("Some log message.")

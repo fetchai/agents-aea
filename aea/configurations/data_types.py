@@ -49,7 +49,7 @@ from aea.configurations.constants import (
 from aea.exceptions import enforce
 from aea.helpers.base import (
     RegexConstrainedString,
-    STRING_LENGTH_LIMIT,
+    SIMPLE_ID_REGEX,
     SimpleId,
     SimpleIdOrStr,
 )
@@ -225,8 +225,8 @@ class PublicId(JSONSerializable):
 
     __slots__ = ("_author", "_name", "_package_version")
 
-    AUTHOR_REGEX = fr"[a-zA-Z_][a-zA-Z0-9_]{{0,{STRING_LENGTH_LIMIT - 1}}}"
-    PACKAGE_NAME_REGEX = fr"[a-zA-Z_][a-zA-Z0-9_]{{0,{STRING_LENGTH_LIMIT  - 1}}}"
+    AUTHOR_REGEX = SIMPLE_ID_REGEX
+    PACKAGE_NAME_REGEX = SIMPLE_ID_REGEX
     VERSION_NUMBER_PART_REGEX = r"(0|[1-9]\d*)"
     VERSION_REGEX = fr"(any|latest|({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)"
     PUBLIC_ID_REGEX = fr"^({AUTHOR_REGEX})/({PACKAGE_NAME_REGEX})(:({VERSION_REGEX}))?$"

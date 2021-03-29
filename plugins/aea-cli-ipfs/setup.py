@@ -27,13 +27,13 @@ from setuptools import setup  # type: ignore
 
 setup(
     name="aea-cli-ipfs",
-    version="1.0.0rc1",
+    version="1.0.0",
     author="Fetch.AI Limited",
     license="Apache-2.0",
     description="CLI extension for AEA framework wrapping IPFS functionality.",
     packages=["aea_cli_ipfs"],
     entry_points={"aea.cli": ["ipfs_cli_command = aea_cli_ipfs.core:ipfs"]},
-    install_requires=["aea>=1.0.0rc1, <2.0.0", "ipfshttpclient>=0.6.1"],
+    install_requires=["aea>=1.0.0, <2.0.0", "ipfshttpclient>=0.6.1"],
     classifiers=[
         "Environment :: Console",
         "Environment :: Web Environment",
