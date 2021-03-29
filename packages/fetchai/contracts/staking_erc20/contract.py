@@ -33,7 +33,7 @@ _default_logger = logging.getLogger(
     "aea.packages.fetchai.contracts.staking_erc20.contract"
 )
 
-PUBLIC_ID = PublicId.from_str("fetchai/staking_erc20:0.8.0")
+PUBLIC_ID = PublicId.from_str("fetchai/staking_erc20:0.9.0")
 
 
 class StakingERC20(Contract):

@@ -20,7 +20,7 @@
 """
 This module contains the support resources for the tac protocol.
 
-It was created with protocol buffer compiler version `libprotoc 3.11.4` and aea version `1.0.0rc2`.
+It was created with protocol buffer compiler version `libprotoc 3.11.4` and aea version `1.0.0`.
 """
 
 from packages.fetchai.protocols.tac.message import TacMessage

@@ -61,7 +61,7 @@ trusts the seller AEA to send the data upon successful payment.
 
 First, fetch the AEA that will provide weather measurements:
 ``` bash
-aea fetch fetchai/weather_station:0.26.0 --alias my_weather_station
+aea fetch fetchai/weather_station:0.27.0 --alias my_weather_station
 cd my_weather_station
 aea install
 aea build
@@ -74,19 +74,19 @@ The following steps create the weather station from scratch:
 ``` bash
 aea create my_weather_station
 cd my_weather_station
-aea add connection fetchai/p2p_libp2p:0.20.0
-aea add connection fetchai/soef:0.21.0
-aea add connection fetchai/ledger:0.17.0
-aea add skill fetchai/weather_station:0.23.0
+aea add connection fetchai/p2p_libp2p:0.21.0
+aea add connection fetchai/soef:0.22.0
+aea add connection fetchai/ledger:0.18.0
+aea add skill fetchai/weather_station:0.24.0
 aea config set --type dict agent.dependencies \
 '{
-  "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0rc3"}
+  "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
 }'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.20.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.21.0
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:0.13.0": "fetchai/ledger:0.17.0",
-  "fetchai/oef_search:0.16.0": "fetchai/soef:0.21.0"
+  "fetchai/ledger_api:1.0.0": "fetchai/ledger:0.18.0",
+  "fetchai/oef_search:1.0.0": "fetchai/soef:0.22.0"
 }'
 aea install
 aea build
@@ -100,7 +100,7 @@ aea build
 
 In another terminal, fetch the AEA that will query the weather station:
 ``` bash
-aea fetch fetchai/weather_client:0.27.0 --alias my_weather_client
+aea fetch fetchai/weather_client:0.28.0 --alias my_weather_client
 cd my_weather_client
 aea install
 aea build
@@ -113,19 +113,19 @@ The following steps create the weather client from scratch:
 ``` bash
 aea create my_weather_client
 cd my_weather_client
-aea add connection fetchai/p2p_libp2p:0.20.0
-aea add connection fetchai/soef:0.21.0
-aea add connection fetchai/ledger:0.17.0
-aea add skill fetchai/weather_client:0.23.0
+aea add connection fetchai/p2p_libp2p:0.21.0
+aea add connection fetchai/soef:0.22.0
+aea add connection fetchai/ledger:0.18.0
+aea add skill fetchai/weather_client:0.24.0
 aea config set --type dict agent.dependencies \
 '{
-  "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0rc3"}
+  "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
 }'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.20.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.21.0
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/ledger_api:0.13.0": "fetchai/ledger:0.17.0",
-  "fetchai/oef_search:0.16.0": "fetchai/soef:0.21.0"
+  "fetchai/ledger_api:1.0.0": "fetchai/ledger:0.18.0",
+  "fetchai/oef_search:1.0.0": "fetchai/soef:0.22.0"
 }'
 aea install
 aea build
@@ -190,7 +190,7 @@ First, run the weather station AEA:
 aea run
 ```
 
-Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.20.0 -u public_uri` to retrieve the address.) This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the weather station.
+Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.21.0 -u public_uri` to retrieve the address.) This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the weather station.
 
 Then, in the weather client, run this command (replace `SOME_ADDRESS` with the correct value as described above):
 ``` bash

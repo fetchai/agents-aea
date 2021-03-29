@@ -56,11 +56,11 @@ If an AEA project, or an AEA package, makes use of crypto functionalities, it wi
 ```yaml
 dependencies:
   aea-ledger-cosmos:
-    version: <2.0.0,>=1.0.0rc2
+    version: <2.0.0,>=1.0.0
   aea-ledger-ethereum:
-    version: <2.0.0,>=1.0.0rc2
+    version: <2.0.0,>=1.0.0
   aea-ledger-fetchai:
-    version: <2.0.0,>=1.0.0rc3
+    version: <2.0.0,>=1.0.0
 ```
 The version specifier sets are important, as these plug-ins, at version `0.1.0`, depend on a specific range of the `aea` package.
 

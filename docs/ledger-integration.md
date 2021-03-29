@@ -146,7 +146,7 @@ Agent Land is our stable, public testnet for the Fetch Ledger v2. As such, most 
 
 You can access more details on <a href="https://github.com/fetchai/networks-agentland" target="_blank">GitHub</a>.
 
-The configurations can be specified for the `fetchai/ledger:0.17.0` connection.
+The configurations can be specified for the `fetchai/ledger:0.18.0` connection.
 
 ## CosmWasm supporting chains
 
