@@ -156,7 +156,7 @@ Confirm password:
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v1.0.0rc1
+v1.0.0rc2
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
@@ -173,7 +173,7 @@ This is a simple demo that introduces you to the main components of an AEA.
 The fastest way to have your first AEA is to fetch one that already exists!
 
 ``` bash
-aea fetch fetchai/my_first_aea:0.24.0
+aea fetch fetchai/my_first_aea:0.25.0
 cd my_first_aea
 ```
 
@@ -200,9 +200,9 @@ aea add connection fetchai/stub:0.19.0
 <br>
 Third, add the echo skill to the project.
 ``` bash
-aea add skill fetchai/echo:0.16.0
+aea add skill fetchai/echo:0.17.0
 ```
-This copies the <code>fetchai/echo:0.16.0</code> skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill <code>fetchai/echo:0.16.0</code> consists of the name of the author of the skill, followed by the skill name and its version.
+This copies the <code>fetchai/echo:0.17.0</code> skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill <code>fetchai/echo:0.17.0</code> consists of the name of the author of the skill, followed by the skill name and its version.
 </details>
 
 ### Echo skill
@@ -269,7 +269,7 @@ You will see the echo skill running in the terminal window (an output similar to
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v1.0.0rc1
+v1.0.0rc2
 
 Starting AEA 'my_first_aea' in 'async' mode ...
 info: Echo Handler: setup method called.

@@ -24,7 +24,7 @@ import struct
 from asyncio import CancelledError
 from contextlib import suppress
 from pathlib import Path
-from typing import Any, List, Optional, cast
+from typing import Any, Dict, List, Optional
 
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DEFAULT_LEDGER
@@ -55,7 +55,7 @@ _default_logger = logging.getLogger(
     "aea.packages.fetchai.connections.p2p_libp2p_client"
 )
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_client:0.15.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p_client:0.16.0")
 
 SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 
@@ -91,12 +91,12 @@ class P2PLibp2pClientConnection(Connection):
                 )
             )
 
-        key_file = self.configuration.config.get("client_key_file")  # Optional[str]
-        nodes = self.configuration.config.get("nodes")
+        key_file: Optional[str] = self.configuration.config.get("tcp_key_file")
+        nodes: Optional[List[Dict[str, Any]]] = self.configuration.config.get("nodes")
 
         if nodes is None:
             raise ValueError("At least one node should be provided")
-        nodes = list(cast(List, nodes))
+        nodes = list(nodes)
 
         nodes_uris = [node.get("uri", None) for node in nodes]
         enforce(
@@ -123,8 +123,9 @@ class P2PLibp2pClientConnection(Connection):
                     "Please ensure that 'issue-certificates' command is called beforehand"
                 )
 
-        # TOFIX(): we cannot use store as the key will be used for TLS tcp connection
-        #   also, as of now all the connections share the same key
+        # we cannot use the key from the connection's crypto store as
+        # the key will be used for TLS tcp connection, whereas the
+        # connection's crypto store key is used for PoR
         if key_file is not None:
             key = make_crypto(ledger_id, private_key_path=key_file)
         else:
@@ -132,7 +133,7 @@ class P2PLibp2pClientConnection(Connection):
 
         # client connection id
         self.key = key
-        self.logger.debug("Public key used by libp2p client: {}".format(key.public_key))
+        self.logger.debug("Public key used for TCP: {}".format(key.public_key))
 
         # delegate uris
         self.delegate_uris = [Uri(node_uri) for node_uri in nodes_uris]

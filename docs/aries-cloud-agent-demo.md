@@ -180,7 +180,7 @@ Now you can create **Alice_AEA** and **Faber_AEA** in terminals 3 and 4 respecti
 In the third terminal, fetch **Alice_AEA** and move into its project folder:
 
 ``` bash
-aea fetch fetchai/aries_alice:0.25.0
+aea fetch fetchai/aries_alice:0.26.0
 cd aries_alice
 ```
 
@@ -191,11 +191,11 @@ The following steps create <b>Alice_AEA</b> from scratch:
 ``` bash
 aea create aries_alice
 cd aries_alice
-aea add connection fetchai/p2p_libp2p:0.19.0
-aea add connection fetchai/soef:0.20.0
-aea add connection fetchai/http_client:0.20.0
-aea add connection fetchai/webhook:0.16.0
-aea add skill fetchai/aries_alice:0.19.0
+aea add connection fetchai/p2p_libp2p:0.20.0
+aea add connection fetchai/soef:0.21.0
+aea add connection fetchai/http_client:0.21.0
+aea add connection fetchai/webhook:0.17.0
+aea add skill fetchai/aries_alice:0.20.0
 ```
 </p>
 </details>
@@ -257,14 +257,14 @@ Finally run **Alice_AEA**:
 aea run
 ```
 
-Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.19.0 -u public_uri` to retrieve the address.) We will refer to this as **Alice_AEA's P2P address**.
+Once you see a message of the form `To join its network use multiaddr 'SOME_ADDRESS'` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.20.0 -u public_uri` to retrieve the address.) We will refer to this as **Alice_AEA's P2P address**.
 
 ### Faber_AEA
 
 In the fourth terminal, fetch **Faber_AEA** and move into its project folder:
 
 ``` bash
-aea fetch fetchai/aries_faber:0.25.0
+aea fetch fetchai/aries_faber:0.26.0
 cd aries_faber
 ```
 
@@ -275,11 +275,11 @@ The following steps create <b>Faber_AEA</b> from scratch:
 ``` bash
 aea create aries_faber
 cd aries_faber
-aea add connection fetchai/p2p_libp2p:0.19.0
-aea add connection fetchai/soef:0.20.0
-aea add connection fetchai/http_client:0.20.0
-aea add connection fetchai/webhook:0.16.0
-aea add skill fetchai/aries_faber:0.18.0
+aea add connection fetchai/p2p_libp2p:0.20.0
+aea add connection fetchai/soef:0.21.0
+aea add connection fetchai/http_client:0.21.0
+aea add connection fetchai/webhook:0.17.0
+aea add skill fetchai/aries_faber:0.19.0
 ```
 </p>
 </details>

@@ -92,7 +92,7 @@ class TestLibp2pClientConnectionFailureConnectionSetup:
     def test_empty_nodes(self):
         """Test empty nodes."""
         configuration = ConnectionConfig(
-            client_key_file=self.key_file,
+            tcp_key_file=self.key_file,
             nodes=[
                 {
                     "uri": "{}:{}".format(self.node_host, self.node_port),
@@ -107,7 +107,7 @@ class TestLibp2pClientConnectionFailureConnectionSetup:
         )
 
         configuration = ConnectionConfig(
-            client_key_file=self.key_file,
+            tcp_key_file=self.key_file,
             nodes=None,
             connection_id=P2PLibp2pClientConnection.connection_id,
         )

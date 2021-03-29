@@ -1,6 +1,6 @@
 name: registration_aw1
 author: fetchai
-version: 0.8.0
+version: 0.9.0
 type: skill
 description: The registration_aw1 skill is a skill for registration in Agent World
   1.
@@ -8,7 +8,7 @@ license: Apache-2.0
 aea_version: '>=1.0.0rc1, <2.0.0'
 fingerprint:
   README.md: Qmc9dfzqAXJWCJxYNqLd1yz8U7p4DQNbGGMmXMP73wUvJR
-  __init__.py: QmNjM6bfzWt8jjRKCZNTU7eE4s5c2eTKGCodj2oVgkqp5d
+  __init__.py: QmfKPn6NHWkevaBHkdL6TxRWdwzKU9fSVm4dRhBcSLCEuJ
   behaviours.py: QmWfKLb7K6ndqvoVXV1snBkqQDkcQkoSafr4QBLR5ogfGg
   dialogues.py: QmQLCbYVWeqhBwqg7KP5WpZcx7eX3g8zhwfNiR1RRufWfe
   handlers.py: QmcgcahHk8XvkTCqkti9mzyZ8cHRSrG2jrs1cjSDTTkvrj
@@ -17,10 +17,10 @@ fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/register:0.7.0
-- fetchai/signing:0.12.0
+- fetchai/register:0.8.0
+- fetchai/signing:0.13.0
 skills:
-- fetchai/simple_service_search:0.7.0
+- fetchai/simple_service_search:0.8.0
 behaviours:
   registration:
     args:
@@ -51,5 +51,5 @@ models:
     class_name: Strategy
 dependencies:
   aea-ledger-ethereum:
-    version: <2.0.0,>=1.0.0rc1
+    version: <2.0.0,>=1.0.0rc2
 is_abstract: false

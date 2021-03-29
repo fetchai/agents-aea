@@ -1169,6 +1169,7 @@ class AgentConfig(PackageConfiguration):
         "connection_private_key_paths",
         "logging_config",
         "default_ledger",
+        "required_ledgers",
         "currency_denominations",
         "default_connection",
         "connections",
@@ -1240,9 +1241,13 @@ class AgentConfig(PackageConfiguration):
         self.connection_private_key_paths = CRUDCollection[str]()
 
         self.logging_config = logging_config or DEFAULT_LOGGING_CONFIG
-        self.default_ledger = default_ledger
+        self.default_ledger = (
+            str(SimpleId(default_ledger)) if default_ledger is not None else None
+        )
         self.required_ledgers = (
-            required_ledgers if required_ledgers is not None else None
+            [str(SimpleId(ledger)) for ledger in required_ledgers]
+            if required_ledgers is not None
+            else None
         )
         self.currency_denominations = (
             currency_denominations if currency_denominations is not None else {}
@@ -1384,6 +1389,7 @@ class AgentConfig(PackageConfiguration):
                 if self.default_connection is not None
                 else None,
                 "default_ledger": self.default_ledger,
+                "required_ledgers": self.required_ledgers or [],
                 "default_routing": {
                     str(key): str(value) for key, value in self.default_routing.items()
                 },
@@ -1399,8 +1405,6 @@ class AgentConfig(PackageConfiguration):
             config["build_entrypoint"] = self.build_entrypoint
 
         # framework optional configs are only printed if defined.
-        if self.required_ledgers is not None:
-            config["required_ledgers"] = self.required_ledgers
         if self.period is not None:
             config["period"] = self.period
         if self.execution_timeout is not None:
@@ -1793,20 +1797,23 @@ class ContractConfig(ComponentConfiguration):
 
 
 def _compute_fingerprint(
-    package_directory: Path, ignore_patterns: Optional[Collection[str]] = None
+    package_directory: Path,
+    ignore_patterns: Optional[Collection[str]] = None,
+    is_recursive: bool = True,
+    ignore_directories: Optional[Collection[str]] = None,
 ) -> Dict[str, str]:
     ignore_patterns = ignore_patterns if ignore_patterns is not None else []
+    ignore_directories = ignore_directories if ignore_directories is not None else []
     ignore_patterns = set(ignore_patterns).union(DEFAULT_FINGERPRINT_IGNORE_PATTERNS)
     hasher = IPFSHashOnly()
     fingerprints = {}  # type: Dict[str, str]
     # find all valid files of the package
     all_files = [
         x
-        for x in package_directory.glob("**/*")
+        for x in package_directory.glob("**/*" if is_recursive else "*")
         if x.is_file()
-        and (
-            x.match("*.py") or not any(x.match(pattern) for pattern in ignore_patterns)
-        )
+        and not any(x.match(pattern) for pattern in ignore_patterns)
+        and not (x.parts[0] in ignore_directories)
     ]
 
     for file in all_files:
@@ -1825,6 +1832,7 @@ def _compare_fingerprints(
     package_directory: Path,
     is_vendor: bool,
     item_type: PackageType,
+    is_recursive: bool = True,
 ) -> None:
     """
     Check fingerprints of a package directory against the fingerprints declared in the configuration file.
@@ -1833,12 +1841,16 @@ def _compare_fingerprints(
     :param package_directory: the directory of the package.
     :param is_vendor: whether the package is vendorized or not.
     :param item_type: the type of the item.
+    :param is_recursive: look up sub directories for files to fingerprint
+
     :return: None
     :raises ValueError: if the fingerprints do not match.
     """
     expected_fingerprints = package_configuration.fingerprint
     ignore_patterns = package_configuration.fingerprint_ignore_patterns
-    actual_fingerprints = _compute_fingerprint(package_directory, ignore_patterns)
+    actual_fingerprints = _compute_fingerprint(
+        package_directory, ignore_patterns, is_recursive=is_recursive
+    )
     if expected_fingerprints != actual_fingerprints:
         if is_vendor:
             raise ValueError(
@@ -1851,6 +1863,17 @@ def _compare_fingerprints(
                     pprint.pformat(actual_fingerprints),
                     str(item_type),
                     package_configuration.public_id,
+                )
+            )
+        if item_type == PackageType.AGENT:
+            raise ValueError(
+                (
+                    "Fingerprints for package {} do not match:\nExpected: {}\nActual: {}\n"
+                    "Please fingerprint the package before continuing: 'aea fingerprint'"
+                ).format(
+                    package_directory,
+                    pprint.pformat(expected_fingerprints),
+                    pprint.pformat(actual_fingerprints),
                 )
             )
         raise ValueError(

@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the handler for the 'ml_train' skill."""
-import pickle  # nosec
+
 from typing import Optional, cast
 
 from aea.configurations.base import PublicId
@@ -184,7 +184,7 @@ class MlTradeHandler(Handler):
         strategy = cast(Strategy, self.context.strategy)
         terms = ml_trade_msg.terms
         payload = ml_trade_msg.payload
-        data = pickle.loads(payload)  # nosec
+        data = strategy.decode_sample_data(payload)
         if data is None:
             self.context.logger.info(
                 "received data message with no data from {}".format(

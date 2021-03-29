@@ -22,4 +22,4 @@
 from aea.configurations.base import PublicId
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/generic_seller:0.23.0")
+PUBLIC_ID = PublicId.from_str("fetchai/generic_seller:0.24.0")

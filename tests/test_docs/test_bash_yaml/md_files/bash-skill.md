@@ -16,7 +16,7 @@ handlers:
 models: {}
 dependencies: {}
 protocols:
-- fetchai/default:0.14.0
+- fetchai/default:0.15.0
 ```
 ```
 aea scaffold error-handler

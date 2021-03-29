@@ -9,7 +9,7 @@ The following table shows which versions of `aea` are currently being supported 
 | Version   | Supported          |
 | --------- | ------------------ |
 | `1.0.x`   | :white_check_mark: |
-| `< 1.0.0rc1` | :x:                |
+| `< 1.0.0rc2` | :x:                |
 
 ## Reporting a Vulnerability
 
