@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """Conftest module for Pytest."""
+import contextlib
 import difflib
 import inspect
 import logging
@@ -26,6 +27,7 @@ import random
 import shutil
 import socket
 import string
+import subprocess
 import sys
 import tempfile
 import threading
@@ -152,6 +154,7 @@ DEFAULT_FETCH_DOCKER_IMAGE_TAG = "fetchai/fetchd:0.2.7"
 DEFAULT_FETCH_LEDGER_ADDR = "http://127.0.0.1"
 DEFAULT_FETCH_LEDGER_RPC_PORT = 26657
 DEFAULT_FETCH_LEDGER_REST_PORT = 1317
+DEFAULT_FETCH_ADDR_REMOTE = "https://rpc-agent-land.fetch.ai:443"
 DEFAULT_FETCH_MNEMONIC = "gap bomb bulk border original scare assault pelican resemble found laptop skin gesture height inflict clinic reject giggle hurdle bubble soldier hurt moon hint"
 DEFAULT_MONIKER = "test-node"
 DEFAULT_FETCH_CHAIN_ID = "agent-land"
@@ -1342,6 +1345,27 @@ def fund_fetchai_accounts(fetchd):
     fund_accounts_from_local_validator(
         [FUNDED_FETCHAI_ADDRESS_ONE, FUNDED_FETCHAI_ADDRESS_TWO], 10000000000000000000,
     )
+
+
+@contextlib.contextmanager
+def use_local_fetchcli_config():
+    """Context manager for temporarily configuring the Fetch CLI for the locally running test node"""
+    cmd = [
+        DEFAULT_CLI_COMMAND,
+        "config",
+        "node",
+        f"{DEFAULT_FETCH_LEDGER_ADDR}:{DEFAULT_FETCH_LEDGER_RPC_PORT}",
+    ]
+    logger.info(
+        f"Directing the Fetch ledger CLI to the locally running test node: {cmd}"
+    )
+    subprocess.run(cmd, stdout=subprocess.PIPE, check=True)  # nosec
+    yield
+    cmd = [DEFAULT_CLI_COMMAND, "config", "node", DEFAULT_FETCH_ADDR_REMOTE]
+    logger.info(
+        f"Directing the Fetch ledger CLI back to the default remote endpoint {cmd}"
+    )
+    subprocess.run(cmd, stdout=subprocess.PIPE, check=True)  # nosec
 
 
 def env_path_separator() -> str:
