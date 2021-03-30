@@ -42,58 +42,31 @@ type DialogueInterface interface {
 	getLastIncomingMessage() AbstractMessage
 	getLastOutgoingMessage() AbstractMessage
 	getLastMessage() AbstractMessage
-	isEmpty() bool
 	counterPartyForMessage(AbstractMessage) bool
 	isMessageBySelf(AbstractMessage) bool
 	isMessageByOther(AbstractMessage) bool
 	getMessage(MessageId) AbstractMessage
 	hasMessageId(MessageId) bool
+
 	update(AbstractMessage)
+	validateNextMessage(AbstractMessage) (bool, string)
+	basicValidations(AbstractMessage) (bool, string)
+	basicValidationInitialMessage(AbstractMessage) (bool, string)
+	basicValidationNonInitialMessage(AbstractMessage) (bool, string)
+	isEmpty() bool
+	updateIncomingAndOutgoingMessages(AbstractMessage)
 	isBelongingToADialogue(AbstractMessage) bool
-	reply(Performative, Target) AbstractMessage
-	validateNextMessage(AbstractMessage) (bool, AbstractMessage)
-	basicValidations(AbstractMessage) (bool, AbstractMessage)
-	basicValidationInitialMessage(AbstractMessage) (bool, AbstractMessage)
-	basicValidationNonInitialMessage(AbstractMessage) (bool, AbstractMessage)
+
 	validateMessageTarget(AbstractMessage) string
 	validateMessageId(AbstractMessage) string
 	getMessageById(MessageId) AbstractMessage
 	getOutgoingNextMessageId() int
 	getIncomingNextMessageId() int
-	updateDIalogueLabel(DialogueLabel)
+	updateDialogueLabel(DialogueLabel)
 	customValidation(AbstractMessage) (bool, string)
 	getStringRepresentation() string
 }
-
-type DialoguesInterface interface {
-	// initialize(dialogue DialogueLabel, endStates FrozenSet, _message_class InitialMessage, dialogueClass Dialogue, roleFromFirstMessage Role, keepTerminalStateDialogues bool)
-	isKeepDIaloguesInTerminalState() bool
-	selfAddress() Address
-	messageClass() AbstractMessage
-	dialogueClass() Dialogue
-	getDialoguesWithCounterParty(counterPArty Address) []Dialogue
-	isMessageBySelf(AbstractMessage) bool
-	isMessageByOther(AbstractMessage) bool
-	counterPartyFromMessage(AbstractMessage) Address
-	newSelfInitiatedDialogueReference() [2]string
-	create(counterParty Address, performative Performative, message SomeMessageType) (AbstractMessage, Dialogue)
-	createWithMessage(counterParty Address, intitialMessage AbstractMessage) Dialogue
-	createDialogue(counterParty Address, intitialMessage AbstractMessage) Dialogue
-	update(AbstractMessage) Dialogue
-	completeDialogueReference(AbstractMessage)
-	getDialogue(AbstractMessage) Dialogue
-	getLatestLabel(DialogueLabel) DialogueLabel
-	getDialogueFromLabel(DialogueLabel) Dialogue
-	createSelfInitiated(dialogueOpponentAddress Address, dialogueReference [2]string, role Role) Dialogue
-	createOpponentInitiated(dialogueOpponentAddress Address, dialogueReference [2]string, role Role) Dialogue
-	createInternal(incompleteDialogueLabel DialogueLabel, role Role, completeDialogueLabel DialogueLabel) Dialogue
-	generateDialogueNonce() string
-	setUpDialogueStorage()
-	tearDownDialogueStorage()
-}
-
 type AbstractMessageInterface interface {
-	initialize(diaglogReference [2]string, messagId int, target Target, performative Performative)
 	validPerformatives() []string
 	hasSender() (Address, error)
 	hasCounterparty() (Address, error)
@@ -161,7 +134,58 @@ func (dialogue Dialogue) update(message AbstractMessage) {
 	// TODO
 	// validate next message
 	// check if dialogue message is valid
+	dialogue.validateNextMessage(message)
 	dialogue.updateIncomingAndOutgoingMessages(message)
+}
+
+func (dialogue Dialogue) validateNextMessage(message AbstractMessage) (bool, string) {
+	is_basic_validated, msg_basic_validation := dialogue.basicValidation(message)
+	if !is_basic_validated {
+		return false, msg_basic_validation
+	}
+	// TODO
+	// check if custom validation
+	return True, "Message is valid with respect to this dialogue."
+}
+
+func (dialogue Dialogue) basicValidation(message AbstractMessage) {
+	if dialogue.isEmpty() {
+		return dialogue.basicValidationInitialMessage(message)
+	}
+	return dialogue.basicValidationNonInitialMessage(message)
+}
+
+func (dialogue Dialogue) basicValidationInitialMessage(message AbstractMessage) (bool, string) {
+	dialogue_reference := message.dialogueReference
+	message_id := message.messageId
+	// performative := message.performative
+	if dialogue_reference[0] != dialogue.dialogueLabel.dialogueReference[0] {
+		return false, "Invalid dialogue_reference[0]."
+	}
+	if message_id != StartingMessageId {
+		return false, "Invalid message_id."
+	}
+
+	// TODO
+	// validate message target
+	// err := dialogue.validateMessageTarget(message)
+	// if err != nil{
+	// 	return false, err
+	// }
+
+	// TODO
+	// check if performative exists in intial performatives
+	// if dialogue.rules.initial_performatives {
+	// 	return (
+	//         false,
+	//         "Invalid initial performative."
+	//     )
+	// }
+	return true, "The initial message passes basic validation."
+}
+
+func (dialogue Dialogue) isEmpty() bool {
+	return len(dialogue.outgoingMessages) == 0 && len(dialogue.incomingMessages) == 0
 }
 
 func (dialogue Dialogue) updateIncomingAndOutgoingMessages(message AbstractMessage) {
