@@ -106,7 +106,7 @@ def test_sign_and_recover_message_public_key(cosmos_private_key_file):
     recovered_public_keys = CosmosApi.recover_public_keys_from_message(
         message=b"hello", signature=sign_bytes
     )
-    assert len(recovered_public_keys) == 2, "Wrong number of public keys recovered."
+    assert len(recovered_public_keys) == 1, "Wrong number of public keys recovered."
     assert (
         CosmosApi.get_address_from_public_key(recovered_public_keys[0])
         == account.address

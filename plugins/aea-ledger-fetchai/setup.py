@@ -37,7 +37,7 @@ setup(
     packages=find_packages(include=["aea_ledger_fetchai*"]),
     install_requires=[
         "aea>=1.0.0, <2.0.0",
-        "ecdsa>=0.15",
+        "coincurve>=15.0.0",
         "bech32==1.2.0",
         "pycryptodome>=3.10.1",
     ],

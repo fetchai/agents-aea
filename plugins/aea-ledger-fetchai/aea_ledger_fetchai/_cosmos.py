@@ -39,18 +39,13 @@ from bech32 import (  # pylint: disable=wrong-import-order
     bech32_encode,
     convertbits,
 )
-from ecdsa import (  # type: ignore # pylint: disable=wrong-import-order
-    SECP256k1,
-    SigningKey,
-    VerifyingKey,
-)
-from ecdsa.util import (  # type: ignore # pylint: disable=wrong-import-order
-    sigencode_string_canonize,
-)
+from coincurve import PrivateKey
+from coincurve.keys import PublicKey
+from coincurve.utils import sha256
 
 from aea.common import Address, JSONLike
 from aea.crypto.base import Crypto, FaucetApi, Helper, LedgerApi
-from aea.crypto.helpers import KeyIsIncorrect, hex_to_bytes_for_key
+from aea.crypto.helpers import KeyIsIncorrect
 from aea.exceptions import AEAEnforceError
 from aea.helpers import http_requests as requests
 from aea.helpers.base import try_decorator
@@ -327,12 +322,15 @@ class CosmosHelper(Helper):
         :param is_deprecated_mode: if the deprecated signing was used
         :return: the recovered public keys
         """
-        signature_b64 = base64.b64decode(signature)
-        verifying_keys = VerifyingKey.from_public_key_recovery(
-            signature_b64, message, SECP256k1, hashfunc=hashlib.sha256,
-        )
+        signature_bytes = base64.b64decode(signature)
+
+        verifying_keys = [
+            PublicKey.from_signature_and_message(
+                signature=signature_bytes, message=message, hasher=sha256
+            )
+        ]
         public_keys = [
-            verifying_key.to_string("compressed").hex()
+            verifying_key.format(compressed=True).hex()
             for verifying_key in verifying_keys
         ]
         return tuple(public_keys)
@@ -377,7 +375,7 @@ class CosmosHelper(Helper):
         return contract_interface
 
 
-class CosmosCrypto(Crypto[SigningKey]):
+class CosmosCrypto(Crypto[PrivateKey]):
     """Class wrapping the Account Generation from Ethereum ledger."""
 
     identifier = _COSMOS
@@ -393,7 +391,7 @@ class CosmosCrypto(Crypto[SigningKey]):
         :param password: the password to encrypt/decrypt the private key.
         """
         super().__init__(private_key_path=private_key_path, password=password)
-        self._public_key = self.entity.get_verifying_key().to_string("compressed").hex()
+        self._public_key = self.entity.public_key.format(compressed=True).hex()
         self._address = self.helper.get_address_from_public_key(self.public_key)
 
     @property
@@ -403,7 +401,7 @@ class CosmosCrypto(Crypto[SigningKey]):
 
         :return: a private key string
         """
-        return self.entity.to_string().hex()
+        return self.entity.to_hex()
 
     @property
     def public_key(self) -> str:
@@ -426,7 +424,7 @@ class CosmosCrypto(Crypto[SigningKey]):
     @classmethod
     def load_private_key_from_path(
         cls, file_name: str, password: Optional[str] = None
-    ) -> SigningKey:
+    ) -> PrivateKey:
         """
         Load a private key in hex format from a file.
 
@@ -436,9 +434,7 @@ class CosmosCrypto(Crypto[SigningKey]):
         """
         private_key = cls.load(file_name, password)
         try:
-            signing_key = SigningKey.from_string(
-                hex_to_bytes_for_key(private_key), curve=SECP256k1
-            )
+            signing_key = PrivateKey.from_hex(private_key)
         except KeyIsIncorrect as e:
             if not password:
                 raise KeyIsIncorrect(
@@ -459,9 +455,7 @@ class CosmosCrypto(Crypto[SigningKey]):
         :param is_deprecated_mode: if the deprecated signing is used
         :return: signature of the message in string form
         """
-        signature_compact = self.entity.sign_deterministic(
-            message, hashfunc=hashlib.sha256, sigencode=sigencode_string_canonize,
-        )
+        signature_compact = self.entity.sign_recoverable(message=message, hasher=sha256)
         signature_base64_str = base64.b64encode(signature_compact).decode("utf-8")
         return signature_base64_str
 
@@ -553,9 +547,9 @@ class CosmosCrypto(Crypto[SigningKey]):
         )
 
     @classmethod
-    def generate_private_key(cls) -> SigningKey:
+    def generate_private_key(cls) -> PrivateKey:
         """Generate a key pair for cosmos network."""
-        signing_key = SigningKey.generate(curve=SECP256k1)
+        signing_key = PrivateKey()
         return signing_key
 
     def encrypt(self, password: str) -> str:
