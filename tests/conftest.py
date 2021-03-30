@@ -27,7 +27,7 @@ import random
 import shutil
 import socket
 import string
-import subprocess
+import subprocess  # nosec
 import sys
 import tempfile
 import threading
