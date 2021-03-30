@@ -2,7 +2,7 @@ If you want to create Autonomous Economic Agents (AEAs) that can act independent
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/mwkAUh-_uxA" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
-This example will take you through a simple AEA to familiarise you with the framework's basics.
+This example will take you through a simple AEA to familiarise you with the basics of the framework.
 
 ## System Requirements
 
@@ -40,7 +40,7 @@ sudo apt-get install python3.7-dev
 
 ### Option 2: Automated install script
 
-We provide a script to automatically install all framework dependencies and the framework itself. This means that if you follow this option, you can skip the `installation` step below.
+We provide a script to automatically install all framework dependencies and the framework itself. This means that if you follow this option, you can skip the `installation` step that comes later on this page.
 
 On MacOS or Ubuntu run:
 
@@ -88,14 +88,9 @@ you can follow the rest of the guide the same way as if not using docker.
 
 ## Preliminaries
 
-We have created a  <a href="https://github.com/fetchai/agents-template" target="_blank">template repo for AEA development</a> here which you can optionally fork and use immediately.
+Follow `Approach 1` in the <a href="../development-setup#approach-1">development setup</a> guide.
 
-Alternatively, create and enter into a new working directory:
-
-``` bash
-mkdir my_aea_projects/
-cd my_aea_projects/
-```
+You must now be in the directory you created as part of the above guide (either following the manual setup or using the template repo).
 
 Unless you are using the docker image, we highly recommend using a virtual environment to ensure consistency across dependencies.
 
@@ -113,7 +108,6 @@ Once installed, create a new environment and open it (here we use Python 3.7 but
 touch Pipfile && pipenv --python 3.7 && pipenv shell
 ```
 
-For more guidance on setting up a development environment check out <a href="../development-setup">this guide</a>.
 
 ## Installation
 
@@ -132,14 +126,14 @@ If the installation steps fail, it might be a dependency issue. Make sure you ha
 
 ## Setup author name
 
-AEAs are composed from components. The components can be developed by anyone and are available on the <a href="https://aea-registry.fetch.ai" target="_blank">AEA registry</a>. To use the registry we need to register an author name.
+AEAs are composed from components. AEAs and AEA components can be developed by anyone and pushed to the <a href="https://aea-registry.fetch.ai" target="_blank">AEA registry</a> for others to use. To use the registry, we need to register an author name.
 
-You can setup your author name using the `init` command:
+You can set up your author name using the `init` command:
 ``` bash
 aea init
 ```
 
-This is your unique author name in the Fetch.ai ecosystem.
+This is your unique author (or developer) name in the AEA ecosystem.
 
 You should see a similar output (with your input instead of the sample username and email):
 ``` bash
@@ -219,7 +213,7 @@ AEAs use envelopes containing messages for communication. To learn more, check o
 
 Besides skills, AEAs may have one or more _connections_ enabling them to interface with entities in the outside world. For example, an HTTP client connection allows an AEA to communicate with HTTP servers. To read more about connections see <a href="../connection/">this page</a>.
 
-In this demo we use a stub connection (`fetchai/stub0.15.0`) to send envelopes to and receive envelopes from the AEA.
+In this demo, we use the stub connection (`fetchai/stub0.15.0`) to send envelopes to and receive envelopes from the AEA.
 
 A stub connection provides an I/O reader and writer. It uses two files for communication: one for incoming envelopes and the other for outgoing envelopes.
 
@@ -285,7 +279,9 @@ The framework first calls the `setup` methods in the skill's `Handler` and `Beha
 
 #### Add a message to the input file
 
-From a different terminal and same directory, you can send the AEA a message wrapped in an envelop using the CLI's `interact` command:
+You can send the AEA a message wrapped in an envelope using the CLI's `interact` command.
+
+From a different terminal and same directory (ensure you are in the same virtual environment: `pipenv shell`):
 
 ``` bash
 cd my_first_aea
