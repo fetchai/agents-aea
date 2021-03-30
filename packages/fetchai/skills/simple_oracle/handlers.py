@@ -200,7 +200,7 @@ class LedgerApiHandler(Handler):
         return: None
         """
         strategy = cast(Strategy, self.context.strategy)
-        if strategy.contract_address_file:
+        if strategy.contract_address_file:  # pragma: nocover
             self.context.logger.info(
                 f"Saving contract address to file: {strategy.contract_address_file}"
             )
