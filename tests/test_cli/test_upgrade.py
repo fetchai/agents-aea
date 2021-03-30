@@ -354,7 +354,7 @@ class TestUpgradeProject(BaseAEATestCase, BaseTestCase):
         cls.run_cli_command(
             "--skip-consistency-check",
             "fetch",
-            "fetchai/generic_buyer:0.24.0",
+            "fetchai/generic_buyer:0.25.0",
             "--alias",
             cls.agent_name,
         )
@@ -436,7 +436,7 @@ class TestNonVendorProject(BaseAEATestCase, BaseTestCase):
         cls.change_directory(Path(".."))
         cls.agent_name = "generic_buyer"
         cls.run_cli_command(
-            "fetch", "fetchai/generic_buyer:0.24.0", "--alias", cls.agent_name
+            "fetch", "fetchai/generic_buyer:0.25.0", "--alias", cls.agent_name
         )
         cls.agents.add(cls.agent_name)
         cls.set_agent_context(cls.agent_name)
@@ -934,7 +934,7 @@ class TestUpdateReferences(AEATestCaseEmpty):
             "agent.default_connection",
             cwd=self._get_cwd(),
         )
-        assert result.stdout == "fetchai/stub:0.19.0\n"
+        assert result.stdout == "fetchai/stub:0.20.0\n"
 
     def test_custom_configuration_updated_correctly(self):
         """Test default routing has been updated correctly."""
@@ -1009,7 +1009,7 @@ class TestWrongAEAVersion(AEATestCaseEmpty):
         assert result.exit_code == 0
         mock_click_echo.assert_any_call("Starting project upgrade...")
         mock_click_echo.assert_any_call(
-            "Updating AEA version specifier from ==0.1.0 to >=1.0.0rc2, <2.0.0."
+            "Updating AEA version specifier from ==0.1.0 to >=1.0.0, <2.0.0."
         )
 
         # test 'aea_version' of agent configuration is upgraded
@@ -1037,7 +1037,7 @@ class BaseTestUpgradeWithEject(AEATestCaseEmpty):
     IS_EMPTY = True
 
     GENERIC_SELLER = ComponentId(
-        ComponentType.SKILL, PublicId.from_str("fetchai/generic_seller:0.23.0")
+        ComponentType.SKILL, PublicId.from_str("fetchai/generic_seller:0.24.0")
     )
     unmocked = get_latest_version_available_in_registry
 
@@ -1095,7 +1095,7 @@ class TestUpgradeWithEjectAbort(BaseTestUpgradeWithEject):
     EXPECTED_CLICK_ECHO_CALLS = ["Abort."]
     EXPECTED_CLICK_CONFIRM_CALLS = [
         RegexComparator(
-            r"Skill fetchai/generic_seller:0.23.0 prevents the upgrade of the following vendor packages:.*as there isn't a compatible version available on the AEA registry\. Would you like to eject it\?"
+            r"Skill fetchai/generic_seller:0.24.0 prevents the upgrade of the following vendor packages:.*as there isn't a compatible version available on the AEA registry\. Would you like to eject it\?"
         )
     ]
 
@@ -1107,14 +1107,14 @@ class TestUpgradeWithEjectAccept(BaseTestUpgradeWithEject):
     CONFIRM_OUTPUT = [True, True]
 
     EXPECTED_CLICK_ECHO_CALLS = [
-        "Ejecting (skill, fetchai/generic_seller:0.23.0)...",
-        "Ejecting item skill fetchai/generic_seller:0.23.0",
+        "Ejecting (skill, fetchai/generic_seller:0.24.0)...",
+        "Ejecting item skill fetchai/generic_seller:0.24.0",
         "Fingerprinting skill components of 'default_author/generic_seller:0.1.0' ...",
-        "Successfully ejected skill fetchai/generic_seller:0.23.0 to ./skills/generic_seller as default_author/generic_seller:0.1.0.",
+        "Successfully ejected skill fetchai/generic_seller:0.24.0 to ./skills/generic_seller as default_author/generic_seller:0.1.0.",
     ]
     EXPECTED_CLICK_CONFIRM_CALLS = [
         RegexComparator(
-            "Skill fetchai/generic_seller:0.23.0 prevents the upgrade of the following vendor packages:"
+            "Skill fetchai/generic_seller:0.24.0 prevents the upgrade of the following vendor packages:"
         ),
         RegexComparator(
             "as there isn't a compatible version available on the AEA registry. Would you like to eject it?"
@@ -1135,7 +1135,7 @@ class TestUpgradeWithEjectAccept(BaseTestUpgradeWithEject):
 class BaseTestUpgradeProject(AEATestCaseEmpty):
     """Base test class for testing project upgrader."""
 
-    OLD_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.26.0")
+    OLD_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.25.0")
     EXPECTED_NEW_AGENT_PUBLIC_ID = OLD_AGENT_PUBLIC_ID.to_latest()
     EXPECTED = "expected_agent"
 
@@ -1162,9 +1162,7 @@ class BaseTestUpgradeProject(AEATestCaseEmpty):
         shutil.rmtree(self.current_agent_context)
 
 
-@mock.patch.object(aea, "__version__", "0.11.0")
 @mock.patch("click.confirm")
-@pytest.mark.skip("Not currently possible to test.")
 class TestUpgradeProjectWithNewerVersion(BaseTestUpgradeProject):
     """Test upgrade project with newer version available."""
 
@@ -1187,14 +1185,7 @@ class TestUpgradeProjectWithNewerVersion(BaseTestUpgradeProject):
             self.current_agent_context, self.EXPECTED, ignore=ignore
         )
         _left_only, _right_only, diff = dircmp_recursive(dircmp)
-        if confirm:
-            assert _right_only == {
-                "vendor/fetchai/connections/p2p_libp2p/libp2p_node/README.md"
-            }
-            assert _left_only == set()
-        else:
-            assert _left_only == set()
-            assert _right_only == set()
+        assert _right_only == diff == _left_only == set()
 
 
 @mock.patch("aea.cli.upgrade.get_latest_version_available_in_registry")
@@ -1232,7 +1223,7 @@ class TestUpgradeAEACompatibility(BaseTestUpgradeProject):
     The test works as follows:
     """
 
-    OLD_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.26.0")
+    OLD_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:0.27.0")
     EXPECTED_NEW_AGENT_PUBLIC_ID = PublicId.from_str("fetchai/weather_station:latest")
 
     def test_upgrade(self):

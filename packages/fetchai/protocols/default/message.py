@@ -19,7 +19,7 @@
 
 """This module contains default's message definition."""
 
-# pylint: disable=too-many-statements,too-many-locals,no-member,too-few-public-methods,too-many-branches,not-an-iterable,unidiomatic-typecheck
+# pylint: disable=too-many-statements,too-many-locals,no-member,too-few-public-methods,too-many-branches,not-an-iterable,unidiomatic-typecheck,unsubscriptable-object
 import logging
 from typing import Any, Dict, Set, Tuple, cast
 
@@ -38,7 +38,7 @@ DEFAULT_BODY_SIZE = 4
 class DefaultMessage(Message):
     """A protocol for exchanging any bytes message."""
 
-    protocol_id = PublicId.from_str("fetchai/default:0.15.0")
+    protocol_id = PublicId.from_str("fetchai/default:1.0.0")
     protocol_specification_id = PublicId.from_str("fetchai/default:1.0.0")
 
     ErrorCode = CustomErrorCode

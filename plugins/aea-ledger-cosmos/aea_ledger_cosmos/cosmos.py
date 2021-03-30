@@ -625,12 +625,18 @@ class _CosmosApi(LedgerApi):
         balance = None  # type: Optional[int]
         url = self.network_address + f"/bank/balances/{address}"
         response = requests.get(url=url)
-        if response.status_code == 200:
+        if response.status_code != 200:  # pragma: nocover
+            raise ValueError("Cannot get balance: {}".format(response.json()))
+        try:
             result = response.json()["result"]
             if len(result) == 0:
                 balance = 0
             else:
                 balance = int(result[0]["amount"])
+        except KeyError:  # pragma: nocover
+            raise ValueError(
+                f"key `amount` or `result` not found in response_json={response.json()}"
+            )
         return balance
 
     def get_state(
@@ -661,6 +667,8 @@ class _CosmosApi(LedgerApi):
         response = requests.get(url=url)
         if response.status_code == 200:
             result = response.json()
+        else:  # pragma: nocover
+            raise ValueError("Cannot get state: {}".format(response.json()))
         return result
 
     def get_deploy_transaction(
@@ -917,9 +925,17 @@ class _CosmosApi(LedgerApi):
                 os.path.join(tmpdirname, signed_tx_filename),
             ]
 
-            tx_digest_json = json.loads(self._execute_shell_command(command))
+            cli_stdout = self._execute_shell_command(command)
 
-        hash_ = cast(str, tx_digest_json["txhash"])
+        try:
+            tx_digest_json = json.loads(cli_stdout)
+            hash_ = cast(str, tx_digest_json["txhash"])
+        except JSONDecodeError:  # pragma: nocover
+            raise ValueError(f"JSONDecodeError for cli_stdout={cli_stdout}")
+        except KeyError:  # pragma: nocover
+            raise ValueError(
+                f"key `txhash` not found in tx_digest_json={tx_digest_json}"
+            )
         return hash_
 
     def execute_contract_query(
@@ -959,7 +975,11 @@ class _CosmosApi(LedgerApi):
             json.dumps(query_msg),
         ]
 
-        return json.loads(self._execute_shell_command(command))
+        cli_stdout = self._execute_shell_command(command)
+        try:
+            return json.loads(cli_stdout)
+        except JSONDecodeError:  # pragma: nocover
+            raise ValueError(f"JSONDecodeError for cli_stdout={cli_stdout}")
 
     def get_transfer_transaction(  # pylint: disable=arguments-differ
         self,
@@ -1068,10 +1088,18 @@ class _CosmosApi(LedgerApi):
         result: Tuple[Optional[int], Optional[int]] = (None, None)
         url = self.network_address + f"/auth/accounts/{address}"
         response = requests.get(url=url)
-        if response.status_code == 200:
+        if response.status_code != 200:  # pragma: nocover
+            raise ValueError(
+                "Cannot get account number and sequence: {}".format(response.json())
+            )
+        try:
             result = (
                 int(response.json()["result"]["value"]["account_number"]),
                 int(response.json()["result"]["value"]["sequence"]),
+            )
+        except KeyError:  # pragma: nocover
+            raise ValueError(
+                f"keys `account_number` and `sequence` not found in response_json={response.json()}."
             )
         return result
 
@@ -1132,9 +1160,14 @@ class _CosmosApi(LedgerApi):
         url = self.network_address + "/txs"
         response = requests.post(url=url, json=tx_signed)
         if response.status_code == 200:
-            tx_digest = response.json()["txhash"]
+            try:
+                tx_digest = response.json()["txhash"]
+            except KeyError:  # pragma: nocover
+                raise ValueError(
+                    f"key `txhash` not found in response_json={response.json()}"
+                )
         else:  # pragma: nocover
-            _default_logger.error("Cannot send transaction: {}".format(response.json()))
+            raise ValueError("Cannot send transaction: {}".format(response.json()))
         return tx_digest
 
     def get_transaction_receipt(self, tx_digest: str) -> Optional[JSONLike]:
@@ -1163,6 +1196,10 @@ class _CosmosApi(LedgerApi):
         response = requests.get(url=url)
         if response.status_code == 200:
             result = response.json()
+        else:  # pragma: nocover
+            raise ValueError(
+                "Cannot get transaction receipt: {}".format(response.json())
+            )
         return result
 
     def get_transaction(self, tx_digest: str) -> Optional[JSONLike]:
@@ -1333,9 +1370,10 @@ class CosmosFaucetApi(FaucetApi):
 
         uid = None
         if response.status_code == 200:
-            data = response.json()
-            uid = data["uid"]
-
+            try:
+                uid = response.json()["uid"]
+            except KeyError:  # pragma: nocover
+                ValueError(f"key `uid` not found in response_json={response.json()}")
             _default_logger.info("Wealth claim generated, uid: {}".format(uid))
         else:  # pragma: no cover
             _default_logger.warning(

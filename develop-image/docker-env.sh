@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Swap the following lines if you want to work with 'latest'
-DOCKER_IMAGE_TAG=fetchai/aea-develop:1.0.0rc2
+DOCKER_IMAGE_TAG=fetchai/aea-develop:1.0.0
 # DOCKER_IMAGE_TAG=aea-develop:latest
 
 DOCKER_BUILD_CONTEXT_DIR=..

@@ -69,7 +69,7 @@ class TestHelperFile:
         try_validate_private_key_path(
             FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_PATH
         )
-        with pytest.raises(SystemExit):
+        with pytest.raises(Exception):
             private_key_path = os.path.join(
                 CUR_PATH, "data", "fet_private_key_wrong.txt"
             )
@@ -78,7 +78,7 @@ class TestHelperFile:
         try_validate_private_key_path(
             EthereumCrypto.identifier, ETHEREUM_PRIVATE_KEY_PATH
         )
-        with pytest.raises(SystemExit):
+        with pytest.raises(Exception):
             private_key_path = os.path.join(
                 CUR_PATH, "data", "fet_private_key_wrong.txt"
             )

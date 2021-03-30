@@ -19,7 +19,7 @@
 
 """This module contains fipa's message definition."""
 
-# pylint: disable=too-many-statements,too-many-locals,no-member,too-few-public-methods,too-many-branches,not-an-iterable,unidiomatic-typecheck
+# pylint: disable=too-many-statements,too-many-locals,no-member,too-few-public-methods,too-many-branches,not-an-iterable,unidiomatic-typecheck,unsubscriptable-object
 import logging
 from typing import Any, Dict, Set, Tuple, cast
 
@@ -41,7 +41,7 @@ DEFAULT_BODY_SIZE = 4
 class FipaMessage(Message):
     """A protocol for FIPA ACL."""
 
-    protocol_id = PublicId.from_str("fetchai/fipa:0.16.0")
+    protocol_id = PublicId.from_str("fetchai/fipa:1.0.0")
     protocol_specification_id = PublicId.from_str("fetchai/fipa:1.0.0")
 
     Description = CustomDescription

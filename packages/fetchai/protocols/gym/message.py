@@ -19,7 +19,7 @@
 
 """This module contains gym's message definition."""
 
-# pylint: disable=too-many-statements,too-many-locals,no-member,too-few-public-methods,too-many-branches,not-an-iterable,unidiomatic-typecheck
+# pylint: disable=too-many-statements,too-many-locals,no-member,too-few-public-methods,too-many-branches,not-an-iterable,unidiomatic-typecheck,unsubscriptable-object
 import logging
 from typing import Any, Dict, Set, Tuple, cast
 
@@ -38,7 +38,7 @@ DEFAULT_BODY_SIZE = 4
 class GymMessage(Message):
     """A protocol for interacting with a gym connection."""
 
-    protocol_id = PublicId.from_str("fetchai/gym:0.15.0")
+    protocol_id = PublicId.from_str("fetchai/gym:1.0.0")
     protocol_specification_id = PublicId.from_str("fetchai/gym:1.0.0")
 
     AnyObject = CustomAnyObject

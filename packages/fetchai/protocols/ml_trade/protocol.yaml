@@ -1,17 +1,17 @@
 name: ml_trade
 author: fetchai
-version: 0.15.0
+version: 1.0.0
 protocol_specification_id: fetchai/ml_trade:1.0.0
 type: protocol
 description: A protocol for trading data for training and prediction purposes.
 license: Apache-2.0
-aea_version: '>=1.0.0rc1, <2.0.0'
+aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmVga6ReMjgEkfkaSvNrupcoVMMH2UGXTKHAJ7JhxgwzWg
-  __init__.py: QmW3rn5hD8WfMTpwxPkPDMm98v4c6BcXeUgfaFhTgLyeQ4
+  README.md: QmRvU5wtaszkw6MiUdbzDZL82T2Y3qRKjoqh2gt8PvpPKg
+  __init__.py: QmakHd5fs1xnJqTqr7P6BocKVFq1mQf86bSsAeobRz4us8
   custom_types.py: QmPa6mxbN8WShsniQxJACfzAPRjGzYLbUFGoVU4N9DewUw
   dialogues.py: QmUZ3BiJYY2bNiqrvwPZyNsjZ3v9Rvj8EW1UkH52XxjAqd
-  message.py: QmTxrMxbujv3VmouCrRovhWRKTmk4AdbxjurPGt2JzSEUi
+  message.py: QmQ4fgF6Lu5Eyh5rqdN9NogS53zNqMNPadBXxfCYiKzY9W
   ml_trade.proto: QmbW2f4qNJJeY8YVgrawHjroqYcTviY5BevCBYVUMVVoH9
   ml_trade_pb2.py: QmV9CwRxVhUEn4Sxz42UPhKNm1PA5CKFDBiwVtTH2snboc
   serialization.py: QmS6iSeX1inNqaFgNmHqfbCRgwUSp93C9jmdhh51DrkaqS

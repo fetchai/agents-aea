@@ -19,7 +19,7 @@
 
 """This module contains prometheus's message definition."""
 
-# pylint: disable=too-many-statements,too-many-locals,no-member,too-few-public-methods,too-many-branches,not-an-iterable,unidiomatic-typecheck
+# pylint: disable=too-many-statements,too-many-locals,no-member,too-few-public-methods,too-many-branches,not-an-iterable,unidiomatic-typecheck,unsubscriptable-object
 import logging
 from typing import Any, Dict, Optional, Set, Tuple, cast
 
@@ -36,7 +36,7 @@ DEFAULT_BODY_SIZE = 4
 class PrometheusMessage(Message):
     """A protocol for adding and updating metrics to a prometheus server."""
 
-    protocol_id = PublicId.from_str("fetchai/prometheus:0.6.0")
+    protocol_id = PublicId.from_str("fetchai/prometheus:1.0.0")
     protocol_specification_id = PublicId.from_str("fetchai/prometheus:1.0.0")
 
     class Performative(Message.Performative):

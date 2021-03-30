@@ -19,7 +19,7 @@
 
 """This module contains http's message definition."""
 
-# pylint: disable=too-many-statements,too-many-locals,no-member,too-few-public-methods,too-many-branches,not-an-iterable,unidiomatic-typecheck
+# pylint: disable=too-many-statements,too-many-locals,no-member,too-few-public-methods,too-many-branches,not-an-iterable,unidiomatic-typecheck,unsubscriptable-object
 import logging
 from typing import Any, Set, Tuple, cast
 
@@ -36,7 +36,7 @@ DEFAULT_BODY_SIZE = 4
 class HttpMessage(Message):
     """A protocol for HTTP requests and responses."""
 
-    protocol_id = PublicId.from_str("fetchai/http:0.15.0")
+    protocol_id = PublicId.from_str("fetchai/http:1.0.0")
     protocol_specification_id = PublicId.from_str("fetchai/http:1.0.0")
 
     class Performative(Message.Performative):

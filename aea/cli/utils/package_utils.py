@@ -20,7 +20,6 @@
 import os
 import re
 import shutil
-import sys
 from pathlib import Path
 from typing import Any, Dict, Optional, Set, Tuple
 
@@ -78,10 +77,7 @@ ROOT = Path(".")
 
 
 def verify_private_keys_ctx(
-    ctx: Context,
-    aea_project_path: Path = ROOT,
-    exit_on_error: bool = False,
-    password: Optional[str] = None,
+    ctx: Context, aea_project_path: Path = ROOT, password: Optional[str] = None,
 ) -> None:
     """
     Verify private keys with ctx provided.
@@ -104,8 +100,6 @@ def verify_private_keys_ctx(
         if ctx is not None:
             ctx.agent_config = agent_config
     except ValueError as e:  # pragma: nocover
-        if exit_on_error:
-            sys.exit(1)
         raise click.ClickException(str(e))
 
 

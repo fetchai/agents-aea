@@ -19,7 +19,7 @@
 
 """This module contains contract_api's message definition."""
 
-# pylint: disable=too-many-statements,too-many-locals,no-member,too-few-public-methods,too-many-branches,not-an-iterable,unidiomatic-typecheck
+# pylint: disable=too-many-statements,too-many-locals,no-member,too-few-public-methods,too-many-branches,not-an-iterable,unidiomatic-typecheck,unsubscriptable-object
 import logging
 from typing import Any, Optional, Set, Tuple, cast
 
@@ -47,7 +47,7 @@ DEFAULT_BODY_SIZE = 4
 class ContractApiMessage(Message):
     """A protocol for contract APIs requests and responses."""
 
-    protocol_id = PublicId.from_str("fetchai/contract_api:0.14.0")
+    protocol_id = PublicId.from_str("fetchai/contract_api:1.0.0")
     protocol_specification_id = PublicId.from_str("fetchai/contract_api:1.0.0")
 
     Kwargs = CustomKwargs
