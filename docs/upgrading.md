@@ -8,7 +8,7 @@ Below we describe the additional manual steps required to upgrade between differ
 
 No backwards incompatible changes to component development.
 
-We advise everyone to upgrade to v1 as soon as possible. When upgrading from versions below `v1.0.0rc1` first upgrade to the first release candidate, then to `v1`.
+We advise everyone to upgrade to `v1` as soon as possible. When upgrading from versions below `v1.0.0rc1` first upgrade to the first release candidate, then to `v1`.
 
 ## `v1.0.0rc1` to `v1.0.0rc2`
 
