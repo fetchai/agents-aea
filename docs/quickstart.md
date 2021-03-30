@@ -14,35 +14,43 @@ You need <a href="https://www.python.org/downloads/" target="_blank">Python 3.6<
 
 Install a compatible Python and Go version on your system (see <a href="https://realpython.com/installing-python/" target="_blank">this external resource</a> for a comprehensive guide).
 
+<details><summary>Manual approach</summary>
+
 The following hints can help:
 
-- To install Go, follow the
- official guide, depending on your platform <a href="https://golang.org/doc/install" target="_blank">here</a>
+<ul>
+<li>To install Go, follow the official guide, depending on your platform <a href="https://golang.org/doc/install" target="_blank">here</a></li>
 
-- Python is already included by default on 
+<li>Python is already included by default on 
 many Linux distributions (e.g. Ubuntu), as well as MacOS.
 To check you have the right version, open a terminal and run: 
 ``` bash
 python3 --version
 ```
+</li>
 
-- To install Python on Windows machines, 
-you can download a specific release <a href="https://www.python.org/downloads/" target="_blank">here</a>.
+<li>To install Python on Windows machines, you can download a specific release <a href="https://www.python.org/downloads/" target="_blank">here</a>.</li>
 
-- Ubuntu/Debian systems only: install Python headers,
+<li>Ubuntu/Debian systems only: install Python headers,
   depending on the Python version you have installed on your machine.
   E.g. for Python 3.7: 
 ``` bash
 sudo apt-get install python3.7-dev
 ```
+</li>
 
-- Windows users: install <a href="https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019" target="_blank">tools for Visual Studio</a>.
+<li>Windows users: install <a href="https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019" target="_blank">tools for Visual Studio</a>.</li>
+</ul>
 
-### Option 2: Automated install script
+</details>
 
-We provide a script to automatically install all framework dependencies and the framework itself. This means that if you follow this option, you can skip the `installation` step that comes later on this page.
+### Option 2: Using an automated install script
 
-On MacOS or Ubuntu run:
+We provide a script to automatically install all framework dependencies and the framework itself. This means that if you follow this option, you can skip the <a href="../quickstart#installation">installation step</a> that comes later on this page.
+
+<details><summary>Automated install script approach</summary>
+
+On MacOS or Ubuntu run the following commands to download and install:
 
 ``` bash
 curl https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.sh --output install.sh
@@ -50,10 +58,9 @@ chmod +x install.sh
 ./install.sh
 ```
 
-On Windows:
+On Windows: download <a href="https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.ps1" target="_blank">https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.ps1</a>, then run <code>install.ps1</code> with the PowerShell terminal.
 
-Download `https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.ps1`, then run `install.ps1` with the PowerShell terminal.
-
+</details>
 
 ### Option 3: Using Docker
 ​
@@ -88,9 +95,13 @@ you can follow the rest of the guide the same way as if not using docker.
 
 ## Preliminaries
 
-Follow `Approach 1` in the <a href="../development-setup#approach-1">development setup</a> guide.
+Ensure, you are in a clean working directory:
 
-You must now be in the directory you created as part of the above guide (either following the manual setup or using the template repo).
+- either you create it manually `mkdir my_aea_projects/ && cd my_aea_projects/`, then add an empty directory called `packages` with the following command `mkdir packages/`,
+
+- or you clone the template repo as described in `Approach 1` in the <a href="../development-setup#approach-1">development setup</a> guide.
+
+At this point, when typing `ls` you should see a single folder called `packages` in your working environment. This will act as your local registry for AEA components.
 
 Unless you are using the docker image, we highly recommend using a virtual environment to ensure consistency across dependencies.
 
@@ -111,7 +122,7 @@ touch Pipfile && pipenv --python 3.7 && pipenv shell
 
 ## Installation
 
-The following installs the entire AEA package which also includes a <a href="../cli-commands">command-line interface (CLI)</a>.
+The following installs the entire AEA package which also includes a <a href="../cli-commands">command-line interface (CLI)</a>. (You can skip this step if you used the install script above: <a href="../quickstart#option-2-using-an-automated-install-script">Option 2 </a>.)
 
 ``` bash
 pip install aea[all]

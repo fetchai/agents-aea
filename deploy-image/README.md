@@ -6,7 +6,7 @@ This guide explains how to prepare a Docker image containing your AEA for deploy
 
 The example uses the `fetchai/my_first_aea` project. You will likely want to modify it to one of your own agents or an agent from the AEA registry.
 
-### Fetch the example directory
+### Fetch the example directory
 
 Install subversion, then download the example directory to your local working directory
 
