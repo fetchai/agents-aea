@@ -925,10 +925,13 @@ class _CosmosApi(LedgerApi):
                 os.path.join(tmpdirname, signed_tx_filename),
             ]
 
-            tx_digest_json = json.loads(self._execute_shell_command(command))
+            cli_stdout = self._execute_shell_command(command)
 
         try:
+            tx_digest_json = json.loads(cli_stdout)
             hash_ = cast(str, tx_digest_json["txhash"])
+        except JSONDecodeError:  # pragma: nocover
+            raise ValueError(f"JSONDecodeError for cli_stdout={cli_stdout}")
         except KeyError:  # pragma: nocover
             raise ValueError(
                 f"key `txhash` not found in tx_digest_json={tx_digest_json}"
@@ -972,7 +975,11 @@ class _CosmosApi(LedgerApi):
             json.dumps(query_msg),
         ]
 
-        return json.loads(self._execute_shell_command(command))
+        cli_stdout = self._execute_shell_command(command)
+        try:
+            return json.loads(cli_stdout)
+        except JSONDecodeError:  # pragma: nocover
+            raise ValueError(f"JSONDecodeError for cli_stdout={cli_stdout}")
 
     def get_transfer_transaction(  # pylint: disable=arguments-differ
         self,
