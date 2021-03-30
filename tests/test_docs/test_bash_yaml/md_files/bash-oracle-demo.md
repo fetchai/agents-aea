@@ -21,11 +21,14 @@ aea config set agent.default_connection fetchai/p2p_libp2p:0.21.0
 aea install
 aea build
 ```
-```bash
+``` bash
 aea config set --type str vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.url "https://api.coingecko.com/api/v3/simple/price?ids=fetch-ai&vs_currencies=usd"
 ```
-```bash
+``` bash
 aea config set --type list vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.outputs '[{"name": "price", "json_path": "fetch-ai.usd"}]'
+```
+``` bash
+aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.oracle_value_name price
 ```
 ``` bash
 aea config set --type dict agent.default_routing \
@@ -35,22 +38,31 @@ aea config set --type dict agent.default_routing \
 "fetchai/ledger_api:1.0.0": "fetchai/ledger:0.18.0"
 }'
 ```
-```bash
+``` bash
 LEDGER_ID=fetchai
 ```
-```bash
+``` bash
 LEDGER_ID=ethereum
 ```
-```bash
+``` bash
 aea config set agent.default_ledger $LEDGER_ID
 aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
-'[{"identifier": "acn", "ledger_id": '"\"$LEDGER_ID\""', "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
+'[{"identifier": "acn", "ledger_id": '"\"$LEDGER_ID\""', "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "message_format": "{public_key}", "save_path": ".certs/conn_cert.txt"}]'
+```
+``` bash
+aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.ledger_id $LEDGER_ID
+```
+``` bash
+aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.update_function update_oracle_value
+```
+``` bash
+aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.update_function updateOracleValue
 ```
 ``` bash
 aea generate-key $LEDGER_ID
 aea add-key $LEDGER_ID
 ```
-```bash
+``` bash
 aea generate-wealth $LEDGER_ID
 ```
 ``` bash
@@ -93,10 +105,19 @@ aea config set --type dict agent.default_routing \
 aea config set agent.default_ledger $LEDGER_ID
 ```
 ``` bash
+aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.ledger_id $LEDGER_ID
+```
+``` bash
+aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.query_function query_oracle_value
+```
+``` bash
+aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.query_function queryOracleValue
+```
+``` bash
 aea generate-key $LEDGER_ID
 aea add-key $LEDGER_ID
 ```
-```bash
+``` bash
 aea generate-wealth $LEDGER_ID
 ```
 ``` bash
@@ -120,12 +141,13 @@ aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.e
 aea config set vendor.fetchai.skills.simple_oracle_client.models.strategy.args.oracle_contract_address ORACLE_ADDRESS
 ```
 ``` bash
+Oracle contract successfully deployed at address: ORACLE_ADDRESS
+```
+``` bash
 aea run
 ```
 ``` bash
-info: [coin_price_oracle_client] Oracle client contract successfully deployed!
-...
-info: [coin_price_oracle_client] Oracle client transactions approved!
+info: [coin_price_oracle_client] Oracle client contract successfully deployed at address: ...
 ...
 info: [coin_price_oracle_client] Oracle value successfully requested!
 ```
