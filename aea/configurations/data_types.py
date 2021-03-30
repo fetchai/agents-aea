@@ -168,7 +168,7 @@ class ComponentType(Enum):
         return PackageType(self.value)
 
     @staticmethod
-    def plurals() -> Collection[str]:
+    def plurals() -> Collection[str]:  # pylint: disable=unsubscriptable-object
         """
         Get the collection of type names, plural.
 
