@@ -19,7 +19,6 @@
 """Module wrapping the helpers of public and private key cryptography."""
 import logging
 import os
-import sys
 from pathlib import Path
 from typing import Dict, Optional
 
@@ -37,10 +36,7 @@ _ = PRIVATE_KEY_PATH_SCHEMA  # some modules expect this here
 
 
 def try_validate_private_key_path(
-    ledger_id: str,
-    private_key_path: str,
-    password: Optional[str] = None,
-    exit_on_error: bool = True,
+    ledger_id: str, private_key_path: str, password: Optional[str] = None,
 ) -> None:
     """
     Try validate a private key path.
@@ -55,16 +51,12 @@ def try_validate_private_key_path(
         # to validate the file, we just try to create a crypto object
         # with private_key_path as parameter
         make_crypto(ledger_id, private_key_path=private_key_path, password=password)
-    except Exception as e:  # pylint: disable=broad-except  # thats ok, will exit or reraise
+    except Exception as e:  # pylint: disable=broad-except  # thats ok, reraise
         error_msg = "This is not a valid private key file: '{}'\n Exception: '{}'".format(
             private_key_path, e
         )
-        if exit_on_error:
-            _default_logger.exception(error_msg)  # show exception traceback on exit
-            sys.exit(1)
-        else:  # pragma: no cover
-            _default_logger.error(error_msg)
-            raise
+        _default_logger.error(error_msg)
+        raise
 
 
 def create_private_key(
@@ -134,7 +126,6 @@ def private_key_verify(
                 identifier,
                 str(aea_project_path / config_private_key_path),
                 password=password,
-                exit_on_error=False,  # do not exit process
             )
         except FileNotFoundError:  # pragma: no cover
             raise ValueError(

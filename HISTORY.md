@@ -1,5 +1,19 @@
 # Release History
 
+## 1.0.0 (2020-03-30)
+
+- Improves contributor guide
+- Enables additional pylint checks
+- Adds configuration support on exception behaviour in ledger plugins
+- Improves exception handling in `aea-ledger-cosmos` and `aea-ledger-fetchai` plugins
+- Improves quickstart guide
+- Fixes multiple flaky tests
+- Fixes various outdated metadata
+- Resolves a CVE (CVE-2021-27291) affecting development dependencies
+- Adds end-to-end support and tests for simple oracle on Ethereum and Fetch.ai ledgers
+- Multiple minor fixes
+- Multiple additional tests and test stability fixes
+
 ## 1.0.0rc2 (2020-03-28)
 
 - Extends CLI command `aea fingerprint` to allow fingerprinting of agents
