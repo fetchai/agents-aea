@@ -25,15 +25,14 @@ const (
 )
 
 type RuleType struct {
-	initialPerformative  Performative
-	terminalPerformative Performative
-	// validReplies
+	initialPerformatives  Performative
+	terminalPerformatives Performative
+	validReplies map[Performative][]Performative
 }
 
 type MessageId int
-type Target []int
+type Target int
 type DialogueInterface interface {
-	initialize(selfAddress Address, counterParty Address, role Role)
 	getSelfAddress() Address
 	getRole() Role
 	getRules() RuleType
@@ -73,7 +72,7 @@ type AbstractMessageInterface interface {
 	dialogueReference() [2]string
 	messageId() MessageId
 	performative() Performative
-	target() int
+	target() Target
 }
 
 func (message AbstractMessage) hasSender() (Address, error) {
@@ -108,8 +107,8 @@ type Dialogue struct {
 }
 type AbstractMessage struct {
 	dialogueReference [2]string
-	messageId         int
-	target            int
+	messageId         MessageId
+	target            Target
 	performative      []string
 	message           []byte
 	to                Address
@@ -145,10 +144,10 @@ func (dialogue Dialogue) validateNextMessage(message AbstractMessage) (bool, str
 	}
 	// TODO
 	// check if custom validation
-	return True, "Message is valid with respect to this dialogue."
+	return true, "Message is valid with respect to this dialogue."
 }
 
-func (dialogue Dialogue) basicValidation(message AbstractMessage) {
+func (dialogue Dialogue) basicValidation(message AbstractMessage) (bool, string) {
 	if dialogue.isEmpty() {
 		return dialogue.basicValidationInitialMessage(message)
 	}
@@ -182,6 +181,130 @@ func (dialogue Dialogue) basicValidationInitialMessage(message AbstractMessage) 
 	//     )
 	// }
 	return true, "The initial message passes basic validation."
+}
+
+func (dialogue Dialogue) basicValidationNonInitialMessage(message AbstractMessage) (bool, string) {
+	dialogue_reference := message.dialogueReference
+	if dialogue_reference[0] != dialogue.dialogueLabel.dialogueReference[0] {
+		return false, "Invalid dialogue_reference[0]."
+	}
+	err := dialogue.validateMessageId(message)
+	if err != nil {
+		return false, err
+	}
+	err = dialogue.validateMessageTarget(message)
+	if err != nil {
+		return false, err
+	}
+	return true, "The non-initial message passes basic validation."
+}
+
+func (dialogue Dialogue) validateMessageTarget(message AbstractMessage) string {
+	target = message.target
+    performative = message.performative
+
+    if message.messageId == StartingMessageId {
+		if target == StartingTarget {
+			return nil
+		}
+        return "Invalid target."
+	}
+    if message.messageId != StartingMessageId && target == StartingTarget {
+		return "Invalid target. Expected a non-zero integer."
+	}
+    var latest_ids []int
+    if ok, id := dialogue.lastIncomingMessage(); ok {
+		latest_ids = append(latest_ids, id)
+	}
+	if ok, id := dialogue.lastOutgoingMessage(); ok {
+		latest_ids = append(latest_ids, id)
+	}
+    if target > max(latest_ids) {
+        return "Invalid target."
+	}
+
+	// TODO
+	// implement function getmessageby id
+	target_message := dialogue.getMessageById(target)
+    
+	if target_message == nil {
+		return "Invalid target"
+	}
+    target_performative = target_message.performative
+    if performative not in self.rules.get_valid_replies(target_performative):
+        return "Invalid performative. Expected one of {}. Found {}.".format(
+            self.rules.get_valid_replies(target_performative), performative
+        )
+    return nil
+}
+
+func max(list []int) int {
+	max := list[0]
+    for i :=1; i < len(s); i++ {
+        if max < list[i] {
+            max = list[i]
+        }
+    }
+	return max
+}
+
+func (dialogue Dialogue) validateMessageId(message AbstractMessage) string {
+	var next_message_id int
+	if message.to != dialogue.selfAddress {
+		next_message_id = dialogue.getOutgoingNextMessageId()
+	} else {
+		next_message_id = dialogue.getIncomingNextMessageId()
+	}
+    if message.message_id != next_message_id {
+		return "Invalid message_id."
+	}
+    return nil
+}
+
+func (dialogue Dialogue) getOutgoingNextMessageId() int {
+	next_message_id := StartingMessageId
+    if dialogue.lastOutgoingMessage() {
+		next_message_id = dialogue.lastMessageId + 1
+	}
+    if dialogue.isSelfInitiated() {
+		next_message_id = 0 - next_message_id
+	}
+	return next_message_id
+}
+
+func (dialogue Dialogue) getIncomingNextMessageId() {
+	next_message_id := StartingMessageId
+    if dialogue.lastIncomingMessage(){
+		next_message_id = dialogue.lastMessageId + 1
+	}
+    if dialogue.isSelfInitiated() {
+		next_message_id = 0 - next_message_id
+	}
+	return next_message_id
+}
+
+func (dialogue Dialogue)lastOutgoingMessage() (bool, int){
+	if len(dialogue.outgoingMessages) > 0 {
+		return true, dialogue.outgoingMessages[-1]
+	} else {
+		false, 0
+	}
+}
+
+func (dialogue Dialogue)lastIncomingMessage() (bool, int){
+	if len(dialogue.incomingMessages) > 0 {
+		return true, dialogue.incomingMessages[-1]
+	} else {
+		false, 0
+	}
+}
+
+func (dialogue Dialogue) isSelfInitiated() bool {
+	return dialogue.dialogueLabel.dialogueStarterAddress == dialogue.dialogueLabel.dialogueOpponentAddress
+}
+
+func (dialogue Dialogue) getIncomingNextMessageId() {
+	
 }
 
 func (dialogue Dialogue) isEmpty() bool {
