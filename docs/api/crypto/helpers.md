@@ -7,7 +7,7 @@ Module wrapping the helpers of public and private key cryptography.
 #### try`_`validate`_`private`_`key`_`path
 
 ```python
-try_validate_private_key_path(ledger_id: str, private_key_path: str, password: Optional[str] = None, exit_on_error: bool = True) -> None
+try_validate_private_key_path(ledger_id: str, private_key_path: str, password: Optional[str] = None) -> None
 ```
 
 Try validate a private key path.

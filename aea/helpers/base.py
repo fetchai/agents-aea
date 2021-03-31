@@ -62,6 +62,7 @@ from aea.exceptions import enforce
 
 
 STRING_LENGTH_LIMIT = 128
+SIMPLE_ID_REGEX = fr"[a-zA-Z_][a-zA-Z0-9_]{{0,{STRING_LENGTH_LIMIT - 1}}}"
 ISO_8601_DATE_FORMAT = "%Y-%m-%d"
 
 _default_logger = logging.getLogger(__name__)
@@ -254,7 +255,7 @@ class SimpleId(RegexConstrainedString):
     ValueError: Value  does not match the regular expression re.compile('[a-zA-Z_][a-zA-Z0-9_]{0,127}')
     """
 
-    REGEX = re.compile(fr"[a-zA-Z_][a-zA-Z0-9_]{{0,{STRING_LENGTH_LIMIT - 1}}}")
+    REGEX = re.compile(SIMPLE_ID_REGEX)
 
 
 SimpleIdOrStr = Union[SimpleId, str]
@@ -311,6 +312,8 @@ def try_decorator(
             try:
                 return fn(*args, **kwargs)
             except Exception as e:  # pylint: disable=broad-except  # pragma: no cover  # generic code
+                if len(args) > 0 and getattr(args[0], "raise_on_try", False):
+                    raise e
                 if error_message:
                     log = get_logger_method(fn, logger_method)
                     log(error_message.format(e))
@@ -903,21 +906,35 @@ class CertRequest:
 
 def compute_specifier_from_version(version: Version) -> str:
     """
-    Compute the specifier set from a version, by varying only on the patch number.
+    Compute the specifier set from a version.
+
+    Varying only on the patch number for versions with major 0.
 
     I.e. from "{major}.{minor}.{patch}.{extra}", return
 
     ">=min({major}.{minor}.0, {major}.{minor}.{patch}.{extra}), <{major}.{minor + 1}.0"
 
+    Varying on the patch and minor number for versions with major >= 1.
+
+    I.e. from "{major}.{minor}.{patch}.{extra}", return
+
+    ">=min({major}.0.0, {major}.{minor}.{patch}.{extra}), <{major+1}.0.0"
+
     :param version: the version
     :return: the specifier set
     """
-    new_major = version.major
+    new_major_low = version.major
+    new_major_high = version.major + 1
     new_minor_low = version.minor
     new_minor_high = new_minor_low + 1
-    lower_bound = Version(f"{new_major}.{new_minor_low}.0")
-    lower_bound = lower_bound if lower_bound < version else version
-    upper_bound = Version(f"{new_major}.{new_minor_high}.0")
+    if new_major_low == 0:
+        lower_bound = Version(f"{new_major_low}.{new_minor_low}.0")
+        lower_bound = lower_bound if lower_bound < version else version
+        upper_bound = Version(f"{new_major_low}.{new_minor_high}.0")
+    else:
+        lower_bound = Version(f"{new_major_low}.0.0")
+        lower_bound = lower_bound if lower_bound < version else version
+        upper_bound = Version(f"{new_major_high}.0.0")
     specifier_set = f">={lower_bound}, <{upper_bound}"
     return specifier_set
 

@@ -71,7 +71,7 @@ message Envelope{
 
 <li> It MUST implement protocols according to their specification (see <a href="../protocol-generator/#full-mode-vs-protobuf-only-mode">here</a> for details).
 
-<li> It SHOULD implement the <code>fetchai/default:0.14.0</code> protocol which satisfies the following protobuf schema:
+<li> It SHOULD implement the <code>fetchai/default:1.0.0</code> protocol which satisfies the following protobuf schema:
 
 ``` proto
 syntax = "proto3";
@@ -121,7 +121,7 @@ message DefaultMessage{
 </li>
 <li> It MUST have an identity in the form of, at a minimum, an address derived from a public key and its associated private key (where the elliptic curve must be of type <a href="https://en.bitcoin.it/wiki/Secp256k1" target="_blank">SECP256k1</a>).
 </li>
-<li> It SHOULD implement handling of errors using the <code>fetchai/default:0.14.0</code> protocol. The protobuf schema is given above.
+<li> It SHOULD implement handling of errors using the <code>fetchai/default:1.0.0</code> protocol. The protobuf schema is given above.
 </li>
 <li> It MUST implement the following principles when handling messages:
 <ul>

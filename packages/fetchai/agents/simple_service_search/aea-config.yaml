@@ -1,24 +1,24 @@
 agent_name: simple_service_search
 author: fetchai
-version: 0.9.0
+version: 0.11.0
 description: A simple example of service search.
 license: Apache-2.0
-aea_version: '>=1.0.0rc1, <2.0.0'
+aea_version: '>=1.0.0, <2.0.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/p2p_libp2p:0.19.0
-- fetchai/soef:0.20.0
+- fetchai/p2p_libp2p:0.21.0
+- fetchai/soef:0.22.0
 contracts: []
 protocols:
-- fetchai/default:0.14.0
-- fetchai/fipa:0.15.0
-- fetchai/oef_search:0.15.0
-- fetchai/signing:0.12.0
-- fetchai/state_update:0.12.0
+- fetchai/default:1.0.0
+- fetchai/fipa:1.0.0
+- fetchai/oef_search:1.0.0
+- fetchai/signing:1.0.0
+- fetchai/state_update:1.0.0
 skills:
-- fetchai/simple_service_search:0.7.0
-default_connection: fetchai/p2p_libp2p:0.19.0
+- fetchai/simple_service_search:0.9.0
+default_connection: fetchai/p2p_libp2p:0.21.0
 default_ledger: fetchai
 required_ledgers:
 - fetchai
@@ -27,8 +27,8 @@ logging_config:
   version: 1
 private_key_paths: {}
 default_routing:
-  fetchai/oef_search:0.15.0: fetchai/soef:0.20.0
+  fetchai/oef_search:1.0.0: fetchai/soef:0.22.0
 connection_private_key_paths: {}
 dependencies:
   aea-ledger-fetchai:
-    version: <2.0.0,>=1.0.0rc1
+    version: <2.0.0,>=1.0.0

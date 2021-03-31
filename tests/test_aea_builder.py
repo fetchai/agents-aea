@@ -50,7 +50,7 @@ from aea.configurations.constants import (
 from aea.configurations.data_types import PublicId
 from aea.configurations.loader import load_component_configuration
 from aea.contracts.base import Contract
-from aea.exceptions import AEAEnforceError, AEAException
+from aea.exceptions import AEAEnforceError, AEAException, AEAWalletNoAddressException
 from aea.helpers.base import cd
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.install_dependency import run_install_subprocess
@@ -111,7 +111,7 @@ def test_add_package_already_existing():
     builder.add_component(ComponentType.PROTOCOL, fipa_package_path)
 
     expected_message = re.escape(
-        "Component 'fetchai/fipa:0.15.0' of type 'protocol' already added."
+        "Component 'fetchai/fipa:1.0.0' of type 'protocol' already added."
     )
     with pytest.raises(AEAException, match=expected_message):
         builder.add_component(ComponentType.PROTOCOL, fipa_package_path)
@@ -513,6 +513,8 @@ def test_set_from_config_default():
     """Test set configuration from config loaded."""
     builder = AEABuilder()
     agent_configuration = Mock()
+    agent_configuration.default_ledger = "fetchai"
+    agent_configuration.required_ledgers = ["fetchai"]
     agent_configuration.default_connection = "test/test:0.1.0"
     agent_configuration.default_routing = {}
     agent_configuration.decision_maker_handler = {}
@@ -541,6 +543,8 @@ def test_set_from_config_custom():
     dm_file_path = ROOT_DIR + "/aea/decision_maker/default.py"
     builder = AEABuilder()
     agent_configuration = Mock()
+    agent_configuration.default_ledger = "fetchai"
+    agent_configuration.required_ledgers = ["fetchai"]
     agent_configuration.default_connection = "test/test:0.1.0"
     agent_configuration.default_routing = {}
     agent_configuration.decision_maker_handler = {
@@ -637,7 +641,7 @@ def test__build_identity_from_wallet():
 
     wallet = Mock()
     wallet.addresses = {}
-    with pytest.raises(ValueError):
+    with pytest.raises(AEAWalletNoAddressException):
         builder._build_identity_from_wallet(wallet)
 
     wallet.addresses = {builder.get_default_ledger(): "addr1"}
@@ -687,7 +691,7 @@ class TestFromAEAProjectWithCustomConnectionConfig(AEATestCaseEmpty):
 
     def test_from_project(self):
         """Test builder set from project dir."""
-        self.add_item("connection", "fetchai/stub:0.19.0")
+        self.add_item("connection", "fetchai/stub:0.20.0")
         self.expected_input_file = "custom_input_file"
         self.expected_output_file = "custom_output_file"
         self._add_stub_connection_config()

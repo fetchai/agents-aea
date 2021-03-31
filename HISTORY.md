@@ -1,5 +1,33 @@
 # Release History
 
+## 1.0.0 (2020-03-30)
+
+- Improves contributor guide
+- Enables additional pylint checks
+- Adds configuration support on exception behaviour in ledger plugins
+- Improves exception handling in `aea-ledger-cosmos` and `aea-ledger-fetchai` plugins
+- Improves quickstart guide
+- Fixes multiple flaky tests
+- Fixes various outdated metadata
+- Resolves a CVE (CVE-2021-27291) affecting development dependencies
+- Adds end-to-end support and tests for simple oracle on Ethereum and Fetch.ai ledgers
+- Multiple minor fixes
+- Multiple additional tests and test stability fixes
+
+## 1.0.0rc2 (2020-03-28)
+
+- Extends CLI command `aea fingerprint` to allow fingerprinting of agents
+- Improves `deploy-image` Docker example
+- Fixes a bug in `MultiAgentManager` which leaves it in an unclean state when project adding fails
+- Fixes dependencies of `aea-legder-fetchai`
+- Improves guide on HTTP client and server connection
+- Removes pickle library usage in the ML skills
+- Adds various consistency checks in configurations
+- Replaces usage of `pyaes` with `pycryptodome` in plugins
+- Changes generator to avoid non-idiomatic usage of type checks
+- Multiple minor fixes
+- Multiple additional tests and test stability fixes
+
 ## 1.0.0rc1 (2020-03-24)
 
 - Adds CLI command `aea get-public-key`

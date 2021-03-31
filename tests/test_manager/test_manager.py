@@ -611,7 +611,7 @@ def test_handle_error_on_load_state():
         config_yaml = config_file.read_text()
         new_version = "'>=0.0.1, <0.0.2'"
         new_config = re.sub(
-            r"'>=[0-9]+.[0-9]+.[0-9]+rc1, <[0-9]+.[0-9]+.[0-9]+'",
+            r"'>=[0-9]+.[0-9]+.[0-9]+, <[0-9]+.[0-9]+.[0-9]+'",
             new_version,
             config_yaml,
         )
@@ -636,7 +636,7 @@ def test_handle_error_on_load_state():
             assert isinstance(load_failed[0][1][0], dict)
             assert isinstance(load_failed[0][2], Exception)
             assert re.match(
-                "Failed to load project: fetchai/my_first_aea:latest Error: The CLI version is .*, but package fetchai/echo:0.16.0 requires version <0.0.2,>=0.0.1",
+                "Failed to load project: fetchai/my_first_aea:latest Error: The CLI version is .*, but package fetchai/echo:0.18.0 requires version <0.0.2,>=0.0.1",
                 str(load_failed[0][2]),
             )
             assert not manager.list_projects()

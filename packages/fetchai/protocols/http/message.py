@@ -19,6 +19,7 @@
 
 """This module contains http's message definition."""
 
+# pylint: disable=too-many-statements,too-many-locals,no-member,too-few-public-methods,too-many-branches,not-an-iterable,unidiomatic-typecheck,unsubscriptable-object
 import logging
 from typing import Any, Set, Tuple, cast
 
@@ -35,7 +36,7 @@ DEFAULT_BODY_SIZE = 4
 class HttpMessage(Message):
     """A protocol for HTTP requests and responses."""
 
-    protocol_id = PublicId.from_str("fetchai/http:0.14.0")
+    protocol_id = PublicId.from_str("fetchai/http:1.0.0")
     protocol_specification_id = PublicId.from_str("fetchai/http:1.0.0")
 
     class Performative(Message.Performative):
@@ -165,31 +166,31 @@ class HttpMessage(Message):
         """Check that the message follows the http protocol."""
         try:
             enforce(
-                type(self.dialogue_reference) == tuple,
+                isinstance(self.dialogue_reference, tuple),
                 "Invalid type for 'dialogue_reference'. Expected 'tuple'. Found '{}'.".format(
                     type(self.dialogue_reference)
                 ),
             )
             enforce(
-                type(self.dialogue_reference[0]) == str,
+                isinstance(self.dialogue_reference[0], str),
                 "Invalid type for 'dialogue_reference[0]'. Expected 'str'. Found '{}'.".format(
                     type(self.dialogue_reference[0])
                 ),
             )
             enforce(
-                type(self.dialogue_reference[1]) == str,
+                isinstance(self.dialogue_reference[1], str),
                 "Invalid type for 'dialogue_reference[1]'. Expected 'str'. Found '{}'.".format(
                     type(self.dialogue_reference[1])
                 ),
             )
             enforce(
-                type(self.message_id) == int,
+                type(self.message_id) is int,
                 "Invalid type for 'message_id'. Expected 'int'. Found '{}'.".format(
                     type(self.message_id)
                 ),
             )
             enforce(
-                type(self.target) == int,
+                type(self.target) is int,
                 "Invalid type for 'target'. Expected 'int'. Found '{}'.".format(
                     type(self.target)
                 ),
@@ -198,7 +199,7 @@ class HttpMessage(Message):
             # Light Protocol Rule 2
             # Check correct performative
             enforce(
-                type(self.performative) == HttpMessage.Performative,
+                isinstance(self.performative, HttpMessage.Performative),
                 "Invalid 'performative'. Expected either of '{}'. Found '{}'.".format(
                     self.valid_performatives, self.performative
                 ),
@@ -210,31 +211,31 @@ class HttpMessage(Message):
             if self.performative == HttpMessage.Performative.REQUEST:
                 expected_nb_of_contents = 5
                 enforce(
-                    type(self.method) == str,
+                    isinstance(self.method, str),
                     "Invalid type for content 'method'. Expected 'str'. Found '{}'.".format(
                         type(self.method)
                     ),
                 )
                 enforce(
-                    type(self.url) == str,
+                    isinstance(self.url, str),
                     "Invalid type for content 'url'. Expected 'str'. Found '{}'.".format(
                         type(self.url)
                     ),
                 )
                 enforce(
-                    type(self.version) == str,
+                    isinstance(self.version, str),
                     "Invalid type for content 'version'. Expected 'str'. Found '{}'.".format(
                         type(self.version)
                     ),
                 )
                 enforce(
-                    type(self.headers) == str,
+                    isinstance(self.headers, str),
                     "Invalid type for content 'headers'. Expected 'str'. Found '{}'.".format(
                         type(self.headers)
                     ),
                 )
                 enforce(
-                    type(self.body) == bytes,
+                    isinstance(self.body, bytes),
                     "Invalid type for content 'body'. Expected 'bytes'. Found '{}'.".format(
                         type(self.body)
                     ),
@@ -242,31 +243,31 @@ class HttpMessage(Message):
             elif self.performative == HttpMessage.Performative.RESPONSE:
                 expected_nb_of_contents = 5
                 enforce(
-                    type(self.version) == str,
+                    isinstance(self.version, str),
                     "Invalid type for content 'version'. Expected 'str'. Found '{}'.".format(
                         type(self.version)
                     ),
                 )
                 enforce(
-                    type(self.status_code) == int,
+                    type(self.status_code) is int,
                     "Invalid type for content 'status_code'. Expected 'int'. Found '{}'.".format(
                         type(self.status_code)
                     ),
                 )
                 enforce(
-                    type(self.status_text) == str,
+                    isinstance(self.status_text, str),
                     "Invalid type for content 'status_text'. Expected 'str'. Found '{}'.".format(
                         type(self.status_text)
                     ),
                 )
                 enforce(
-                    type(self.headers) == str,
+                    isinstance(self.headers, str),
                     "Invalid type for content 'headers'. Expected 'str'. Found '{}'.".format(
                         type(self.headers)
                     ),
                 )
                 enforce(
-                    type(self.body) == bytes,
+                    isinstance(self.body, bytes),
                     "Invalid type for content 'body'. Expected 'bytes'. Found '{}'.".format(
                         type(self.body)
                     ),

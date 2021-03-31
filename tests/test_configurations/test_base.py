@@ -16,12 +16,12 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tests for the aea.configurations.base module."""
 import re
 from copy import copy
 from pathlib import Path
 from unittest import TestCase, mock
+from unittest.mock import Mock
 
 import pytest
 import semver
@@ -823,6 +823,23 @@ def test_component_configuration_check_fingerprint_different_fingerprints_no_ven
             "aea.configurations.base._compute_fingerprint", return_value={"foo": "bar"}
         ):
             _compare_fingerprints(config, package_dir, False, PackageType.PROTOCOL)
+
+
+def test_agent_fingerprint_different_fingerprints():
+    """Test ComponentConfiguration.check_fingerprint for agent."""
+    config = Mock()
+    config.fingerprint = {}
+    package_dir = Path("path", "to", "dir")
+    error_regex = (
+        f"Fingerprints for package {re.escape(str(package_dir))} do not match:\nExpected: {dict()}\nActual: {dict(foo='bar')}\n"
+        + "Please fingerprint the package before continuing: 'aea fingerprint"
+    )
+
+    with pytest.raises(ValueError, match=error_regex):
+        with mock.patch(
+            "aea.configurations.base._compute_fingerprint", return_value={"foo": "bar"}
+        ):
+            _compare_fingerprints(config, package_dir, False, PackageType.AGENT)
 
 
 def test_check_aea_version_when_it_fails():

@@ -181,6 +181,11 @@ Nuitka
 Perun
 1.0.0rc1
 docstrings
+1.0.0rc2
+install.ps1
+pylint
+quickstart
+CVE-2021-27291
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id

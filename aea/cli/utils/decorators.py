@@ -114,7 +114,11 @@ def _validate_config_consistency(ctx: Context, check_aea_version: bool = True) -
         )
 
 
-def _check_aea_project(args: Tuple[Any, ...], check_aea_version: bool = True) -> None:
+def _check_aea_project(
+    args: Tuple[Any, ...],
+    check_aea_version: bool = True,
+    check_finger_prints: bool = False,
+) -> None:
     try:
         click_context = args[0]
         ctx = cast(Context, click_context.obj)
@@ -122,12 +126,22 @@ def _check_aea_project(args: Tuple[Any, ...], check_aea_version: bool = True) ->
         skip_consistency_check = ctx.config["skip_consistency_check"]
         if not skip_consistency_check:
             _validate_config_consistency(ctx, check_aea_version=check_aea_version)
+        if check_finger_prints:
+            _compare_fingerprints(
+                ctx.agent_config,
+                Path(ctx.cwd),
+                is_vendor=False,
+                item_type=PackageType.AGENT,
+                is_recursive=False,
+            )
     except Exception as e:  # pylint: disable=broad-except
-        raise click.ClickException(str(e))
+        raise click.ClickException(str(e)) from e
 
 
 @decorator_with_optional_params
-def check_aea_project(f: Callable, check_aea_version: bool = True) -> Callable:
+def check_aea_project(
+    f: Callable, check_aea_version: bool = True, check_finger_prints: bool = False
+) -> Callable:
     """
     Check the consistency of the project as a decorator.
 
@@ -136,7 +150,11 @@ def check_aea_project(f: Callable, check_aea_version: bool = True) -> Callable:
     """
 
     def wrapper(*args: Any, **kwargs: Any) -> Callable:
-        _check_aea_project(args, check_aea_version=check_aea_version)
+        _check_aea_project(
+            args,
+            check_aea_version=check_aea_version,
+            check_finger_prints=check_finger_prints,
+        )
         return f(*args, **kwargs)
 
     return update_wrapper(wrapper, f)

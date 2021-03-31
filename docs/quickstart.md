@@ -2,7 +2,7 @@ If you want to create Autonomous Economic Agents (AEAs) that can act independent
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/mwkAUh-_uxA" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
-This example will take you through a simple AEA to familiarise you with the framework's basics.
+This example will take you through a simple AEA to familiarise you with the basics of the framework.
 
 ## System Requirements
 
@@ -14,35 +14,43 @@ You need <a href="https://www.python.org/downloads/" target="_blank">Python 3.6<
 
 Install a compatible Python and Go version on your system (see <a href="https://realpython.com/installing-python/" target="_blank">this external resource</a> for a comprehensive guide).
 
+<details><summary>Manual approach</summary>
+
 The following hints can help:
 
-- To install Go, follow the
- official guide, depending on your platform <a href="https://golang.org/doc/install" target="_blank">here</a>
+<ul>
+<li>To install Go, follow the official guide, depending on your platform <a href="https://golang.org/doc/install" target="_blank">here</a></li>
 
-- Python is already included by default on 
+<li>Python is already included by default on 
 many Linux distributions (e.g. Ubuntu), as well as MacOS.
 To check you have the right version, open a terminal and run: 
 ``` bash
 python3 --version
 ```
+</li>
 
-- To install Python on Windows machines, 
-you can download a specific release <a href="https://www.python.org/downloads/" target="_blank">here</a>.
+<li>To install Python on Windows machines, you can download a specific release <a href="https://www.python.org/downloads/" target="_blank">here</a>.</li>
 
-- Ubuntu/Debian systems only: install Python headers,
+<li>Ubuntu/Debian systems only: install Python headers,
   depending on the Python version you have installed on your machine.
   E.g. for Python 3.7: 
 ``` bash
 sudo apt-get install python3.7-dev
 ```
+</li>
 
-- Windows users: install <a href="https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019" target="_blank">tools for Visual Studio</a>.
+<li>Windows users: install <a href="https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019" target="_blank">tools for Visual Studio</a>.</li>
+</ul>
 
-### Option 2: Automated install script
+</details>
 
-We provide a script to automatically install all framework dependencies and the framework itself. This means that if you follow this option, you can skip the `installation` step below.
+### Option 2: Using an automated install script
 
-On MacOS or Ubuntu run:
+We provide a script to automatically install all framework dependencies and the framework itself. This means that if you follow this option, you can skip the <a href="../quickstart#installation">installation step</a> that comes later on this page.
+
+<details><summary>Automated install script approach</summary>
+
+On MacOS or Ubuntu run the following commands to download and install:
 
 ``` bash
 curl https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.sh --output install.sh
@@ -50,10 +58,9 @@ chmod +x install.sh
 ./install.sh
 ```
 
-On Windows:
+On Windows: download <a href="https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.ps1" target="_blank">https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.ps1</a>, then run <code>install.ps1</code> with the PowerShell terminal.
 
-Download `https://raw.githubusercontent.com/fetchai/agents-aea/main/scripts/install.ps1`, then run `install.ps1` with the PowerShell terminal.
-
+</details>
 
 ### Option 3: Using Docker
 ​
@@ -88,14 +95,13 @@ you can follow the rest of the guide the same way as if not using docker.
 
 ## Preliminaries
 
-We have created a  <a href="https://github.com/fetchai/agents-template" target="_blank">template repo for AEA development</a> here which you can optionally fork and use immediately.
+Ensure, you are in a clean working directory:
 
-Alternatively, create and enter into a new working directory:
+- either you create it manually `mkdir my_aea_projects/ && cd my_aea_projects/`, then add an empty directory called `packages` with the following command `mkdir packages/`,
 
-``` bash
-mkdir my_aea_projects/
-cd my_aea_projects/
-```
+- or you clone the template repo as described in `Approach 1` in the <a href="../development-setup#approach-1">development setup</a> guide.
+
+At this point, when typing `ls` you should see a single folder called `packages` in your working environment. This will act as your local registry for AEA components.
 
 Unless you are using the docker image, we highly recommend using a virtual environment to ensure consistency across dependencies.
 
@@ -113,11 +119,10 @@ Once installed, create a new environment and open it (here we use Python 3.7 but
 touch Pipfile && pipenv --python 3.7 && pipenv shell
 ```
 
-For more guidance on setting up a development environment check out <a href="../development-setup">this guide</a>.
 
 ## Installation
 
-The following installs the entire AEA package which also includes a <a href="../cli-commands">command-line interface (CLI)</a>.
+The following installs the entire AEA package which also includes a <a href="../cli-commands">command-line interface (CLI)</a>. (You can skip this step if you used the install script above: <a href="../quickstart#option-2-using-an-automated-install-script">Option 2 </a>.)
 
 ``` bash
 pip install aea[all]
@@ -132,14 +137,14 @@ If the installation steps fail, it might be a dependency issue. Make sure you ha
 
 ## Setup author name
 
-AEAs are composed from components. The components can be developed by anyone and are available on the <a href="https://aea-registry.fetch.ai" target="_blank">AEA registry</a>. To use the registry we need to register an author name.
+AEAs are composed from components. AEAs and AEA components can be developed by anyone and pushed to the <a href="https://aea-registry.fetch.ai" target="_blank">AEA registry</a> for others to use. To use the registry, we need to register an author name.
 
-You can setup your author name using the `init` command:
+You can set up your author name using the `init` command:
 ``` bash
 aea init
 ```
 
-This is your unique author name in the Fetch.ai ecosystem.
+This is your unique author (or developer) name in the AEA ecosystem.
 
 You should see a similar output (with your input instead of the sample username and email):
 ``` bash
@@ -156,7 +161,7 @@ Confirm password:
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v1.0.0rc1
+v1.0.0
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
@@ -173,7 +178,7 @@ This is a simple demo that introduces you to the main components of an AEA.
 The fastest way to have your first AEA is to fetch one that already exists!
 
 ``` bash
-aea fetch fetchai/my_first_aea:0.24.0
+aea fetch fetchai/my_first_aea:0.26.0
 cd my_first_aea
 ```
 
@@ -193,16 +198,16 @@ cd my_first_aea
 <br>
 Second, add the stub connection to the project.
 ``` bash
-aea add connection fetchai/stub:0.19.0
+aea add connection fetchai/stub:0.20.0
 ```
 <br>
 <b>Add the echo skill</b>
 <br>
 Third, add the echo skill to the project.
 ``` bash
-aea add skill fetchai/echo:0.16.0
+aea add skill fetchai/echo:0.18.0
 ```
-This copies the <code>fetchai/echo:0.16.0</code> skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill <code>fetchai/echo:0.16.0</code> consists of the name of the author of the skill, followed by the skill name and its version.
+This copies the <code>fetchai/echo:0.18.0</code> skill code containing the "behaviours", and "handlers" into the project, ready to run. The identifier of the skill <code>fetchai/echo:0.18.0</code> consists of the name of the author of the skill, followed by the skill name and its version.
 </details>
 
 ### Echo skill
@@ -219,7 +224,7 @@ AEAs use envelopes containing messages for communication. To learn more, check o
 
 Besides skills, AEAs may have one or more _connections_ enabling them to interface with entities in the outside world. For example, an HTTP client connection allows an AEA to communicate with HTTP servers. To read more about connections see <a href="../connection/">this page</a>.
 
-In this demo we use a stub connection (`fetchai/stub0.15.0`) to send envelopes to and receive envelopes from the AEA.
+In this demo, we use the stub connection (`fetchai/stub0.15.0`) to send envelopes to and receive envelopes from the AEA.
 
 A stub connection provides an I/O reader and writer. It uses two files for communication: one for incoming envelopes and the other for outgoing envelopes.
 
@@ -269,7 +274,7 @@ You will see the echo skill running in the terminal window (an output similar to
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v1.0.0rc1
+v1.0.0
 
 Starting AEA 'my_first_aea' in 'async' mode ...
 info: Echo Handler: setup method called.
@@ -285,7 +290,9 @@ The framework first calls the `setup` methods in the skill's `Handler` and `Beha
 
 #### Add a message to the input file
 
-From a different terminal and same directory, you can send the AEA a message wrapped in an envelop using the CLI's `interact` command:
+You can send the AEA a message wrapped in an envelope using the CLI's `interact` command.
+
+From a different terminal and same directory (ensure you are in the same virtual environment: `pipenv shell`):
 
 ``` bash
 cd my_first_aea

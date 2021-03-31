@@ -51,7 +51,7 @@ A framework for autonomous economic agent (AEA) development
   <img src="/data/aea.png?raw=true" alt="AEA Description" width="70%"/>
 </p>
 
-## Get started
+## Get started developing AEAs
 
 1. Create and launch a clean virtual environment with Python 3.7 (any Python `>=` 3.6 works):
 
@@ -73,7 +73,7 @@ A framework for autonomous economic agent (AEA) development
   </a>
 </p>
 
-## Alternatively: Use `pipx` (CLI usage only)
+## Alternatively (1): Use `pipx` (CLI usage only)
 
 1. Install [pipx](https://github.com/pipxproject/pipx)
 
@@ -85,7 +85,7 @@ A framework for autonomous economic agent (AEA) development
 
        aea --help
 
-## Alternatively: Install from Source
+## Alternatively (2): Install from Source
 
 This approach is not recommended!
 
@@ -121,81 +121,17 @@ You can have more control on the installed dependencies by leveraging the setupt
 
 - Then, build your agent as described in the [docs](https://fetchai.github.io/agents-aea/).
 
-## Contribute
+## Documentation
 
-The following dependency is **only relevant if you intend to contribute** to the repository:
-
-- All Pull Requests should be opened against the `develop` branch. Do **not** open a Pull Request against `main`!
-
-- The project uses [Google Protocol Buffers](https://developers.google.com/protocol-buffers/) compiler for message serialization. A guide on how to install it is found [here](https://fetchai.github.io/oef-sdk-python/user/install.html#protobuf-compiler).
-
-The following steps are **only relevant if you intend to contribute** to the repository. They are **not required** for agent development.
-
-### Recommended commands
-
-- The simplest way to get setup for development on the framework is to run the following:
-
-      make new_env
-      pipenv shell
-
-- For linting and static analysis use:
-
-      make lint
-      make static
-      make pylint
-      make security
-
-- For checking packages integrity:
-
-      make package_checks
-
-- For testing `aea.{SUBMODULE}` with `tests/test_{TESTMODULE}` use:
-
-      make dir={SUBMODULE} tdir={TESTMODULE} test-sub
-
-  e.g.
-
-      make dir=cli tdir=cli test-sub
-
-### Alternative commands
-
-- To install development dependencies manually (here optionally skipping `Pipfile.lock` creation):
-
-      pipenv install --dev --skip-lock
-
-- To install the package from source in development mode:
-
-      pip install -e .[all]
-
-    Of, if you use `zsh` rather than `bash`:
-
-      pip install -e ".[all]"
-
-- To run tests: `tox -e py3.7` or `make test`. To only test specific modules try `make dir=PATH_TO_MODULE tdir=PATH_TO_TESTS test-sub` where  (e.g. `make dir=cli tdir=cli test-sub`).
-
-- To run linters (code style checks) and code formatters: `tox -e flake8` and `tox -e black` and ` tox -e isort` or `make lint`
-
-- To run static type checks: `tox -e mypy` or `make static`
-
-- To run `pylint`: `tox -e pylint` or `make pylint`
-
-- To run security checks: `tox -e bandit` and `tox -e safety` or `make security`
-
-### Go Development
-
-- The `fetchai/p2p_libp2p` package is partially developed in Go.
-
-- To install Go visit the [Golang site](https://golang.org/doc/install).
-
-- We use [`golines`](https://github.com/segmentio/golines) and [`golangci-lint`](https://golangci-lint.run) for linting.
-
-- To run tests, use `go test -p 1 -timeout 0 -count 1 -v ./...` from the root directory of the package. If you experience installation or build issues run `go clean -modcache`.
-
-### Documentation
+- All documentation is hosted [here](https://docs.fetch.ai/aea).
 
 - To start a live-reloading docs server on localhost: `mkdocs serve`. To amend the docs, create a new documentation file in `docs/` and add a reference to it in `mkdocs.yml`.
 
 - To run demos against local packages use flag `--local` in `aea` CLI commands.
+
+## Contributing
+
+We welcome contributions to the framework, its plugins, related tools and packages. Please consult the [contributing guide](https://github.com/fetchai/agents-aea/blob/main/CONTRIBUTING.md) for details.
 
 ## Cite
 

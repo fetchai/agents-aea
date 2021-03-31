@@ -22,4 +22,4 @@
 from aea.configurations.base import PublicId
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/simple_oracle_client:0.7.0")
+PUBLIC_ID = PublicId.from_str("fetchai/simple_oracle_client:0.9.0")

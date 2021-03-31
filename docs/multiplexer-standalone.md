@@ -58,7 +58,12 @@ We can run a multiplexer by calling, `connect()` which starts the receive and se
         t.start()
 
         # Wait for everything to start up
-        time.sleep(3)
+        for _ in range(20):
+            if multiplexer.is_connected:
+                break
+            time.sleep(1)
+        else:
+            raise Exception("Not connected")
 ```
 
 ## Send and receive an envelope
@@ -72,7 +77,12 @@ We use the input and output text files to send an envelope to our agent and rece
             write_with_lock(f, message_text)
 
         # Wait for the envelope to get processed
-        time.sleep(2)
+        for _ in range(20):
+            if not multiplexer.in_queue.empty():
+                break
+            time.sleep(1)
+        else:
+            raise Exception("No message!")
 
         # get the envelope
         envelope = multiplexer.get()  # type: Optional[Envelope]
@@ -168,7 +178,12 @@ def run():
         t.start()
 
         # Wait for everything to start up
-        time.sleep(3)
+        for _ in range(20):
+            if multiplexer.is_connected:
+                break
+            time.sleep(1)
+        else:
+            raise Exception("Not connected")
 
         # Create a message inside an envelope and get the stub connection to pass it into the multiplexer
         message_text = (
@@ -178,7 +193,12 @@ def run():
             write_with_lock(f, message_text)
 
         # Wait for the envelope to get processed
-        time.sleep(2)
+        for _ in range(20):
+            if not multiplexer.in_queue.empty():
+                break
+            time.sleep(1)
+        else:
+            raise Exception("No message!")
 
         # get the envelope
         envelope = multiplexer.get()  # type: Optional[Envelope]

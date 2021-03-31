@@ -4,6 +4,18 @@ The primary tool for upgrading AEA projects is the `aea upgrade` command in the 
 
 Below we describe the additional manual steps required to upgrade between different versions:
 
+## `v1.0.0rc2` to `v1.0.0`
+
+No backwards incompatible changes to component development.
+
+We advise everyone to upgrade to `v1` as soon as possible. When upgrading from versions below `v1.0.0rc1` first upgrade to the first release candidate, then to `v1`.
+
+## `v1.0.0rc1` to `v1.0.0rc2`
+
+No backwards incompatible changes to component development.
+
+Various configuration changes introduced in `v1.0.0rc1` are now enforced strictly.
+
 ## `v0.11.1` to `v1.0.0rc1`
 
 No backwards incompatible changes to component development.
@@ -50,11 +62,11 @@ If an AEA project, or an AEA package, makes use of crypto functionalities, it wi
 ```yaml
 dependencies:
   aea-ledger-cosmos:
-    version: <2.0.0,>=1.0.0rc1
+    version: <2.0.0,>=1.0.0
   aea-ledger-ethereum:
-    version: <2.0.0,>=1.0.0rc1
+    version: <2.0.0,>=1.0.0
   aea-ledger-fetchai:
-    version: <2.0.0,>=1.0.0rc1
+    version: <2.0.0,>=1.0.0
 ```
 The version specifier sets are important, as these plug-ins, at version `0.1.0`, depend on a specific range of the `aea` package.
 
