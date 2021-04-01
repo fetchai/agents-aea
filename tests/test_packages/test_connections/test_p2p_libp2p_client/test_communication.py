@@ -22,6 +22,7 @@
 import os
 import shutil
 import tempfile
+from unittest import mock
 from unittest.mock import Mock
 
 import pytest
@@ -622,3 +623,114 @@ def test_libp2pclientconnection_uri():
     uri = Uri(host="127.0.0.1")
     uri = Uri(host="127.0.0.1", port=10000)
     assert uri.host == "127.0.0.1" and uri.port == 10000
+
+
+@libp2p_log_on_failure_all
+class TestLibp2pClientReconnectionSendEnvelope:
+    """Test that connection will send envelope with error, and that reconnection fixes it."""
+
+    @classmethod
+    @libp2p_log_on_failure
+    def setup_class(cls):
+        """Set the test up"""
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        os.chdir(cls.t)
+
+        MockDefaultMessageProtocol = Mock()
+        MockDefaultMessageProtocol.protocol_id = DefaultMessage.protocol_id
+        MockDefaultMessageProtocol.protocol_specification_id = (
+            DefaultMessage.protocol_specification_id
+        )
+
+        cls.log_files = []
+        temp_dir = os.path.join(cls.t, "temp_dir_node")
+        os.mkdir(temp_dir)
+        cls.connection_node = _make_libp2p_connection(
+            data_dir=temp_dir, port=DEFAULT_PORT + 1, delegate=True
+        )
+        cls.multiplexer_node = Multiplexer(
+            [cls.connection_node], protocols=[MockDefaultMessageProtocol]
+        )
+        cls.log_files.append(cls.connection_node.node.log_file)
+        cls.multiplexer_node.connect()
+
+        try:
+            temp_dir_client_1 = os.path.join(cls.t, "temp_dir_client_1")
+            os.mkdir(temp_dir_client_1)
+            cls.connection_client_1 = _make_libp2p_client_connection(
+                data_dir=temp_dir_client_1,
+                peer_public_key=cls.connection_node.node.pub,
+                ledger_api_id=FetchAICrypto.identifier,
+            )
+            cls.multiplexer_client_1 = Multiplexer(
+                [cls.connection_client_1], protocols=[MockDefaultMessageProtocol]
+            )
+            cls.multiplexer_client_1.connect()
+
+            temp_dir_client_2 = os.path.join(cls.t, "temp_dir_client_2")
+            os.mkdir(temp_dir_client_2)
+            cls.connection_client_2 = _make_libp2p_client_connection(
+                data_dir=temp_dir_client_2,
+                peer_public_key=cls.connection_node.node.pub,
+                ledger_api_id=EthereumCrypto.identifier,
+            )
+            cls.multiplexer_client_2 = Multiplexer(
+                [cls.connection_client_2], protocols=[MockDefaultMessageProtocol]
+            )
+            cls.multiplexer_client_2.connect()
+        except Exception:
+            cls.multiplexer_node.disconnect()
+            raise
+
+    def test_envelope_sent(self):
+        """Test the envelope is routed."""
+        addr_1 = self.connection_client_1.address
+        addr_2 = self.connection_client_2.address
+
+        msg = DefaultMessage(
+            dialogue_reference=("", ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"hello",
+        )
+        envelope = Envelope(
+            to=addr_2,
+            sender=addr_1,
+            protocol_specification_id=DefaultMessage.protocol_specification_id,
+            message=DefaultSerializer().encode(msg),
+        )
+
+        # make the send to fail
+        with mock.patch.object(
+            self.connection_client_1.logger, "exception"
+        ) as _mock_logger:
+            self.connection_client_1._writer = None
+            self.multiplexer_client_1.put(envelope)
+            delivered_envelope = self.multiplexer_client_2.get(block=True, timeout=20)
+            _mock_logger.assert_called_with(
+                "Exception raised on message send. Try reconnect and send again."
+            )
+
+        assert delivered_envelope is not None
+        assert delivered_envelope.to == envelope.to
+        assert delivered_envelope.sender == envelope.sender
+        assert (
+            delivered_envelope.protocol_specification_id
+            == envelope.protocol_specification_id
+        )
+        assert delivered_envelope.message == envelope.message
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear down the test"""
+        cls.multiplexer_client_1.disconnect()
+        cls.multiplexer_client_2.disconnect()
+        cls.multiplexer_node.disconnect()
+
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
