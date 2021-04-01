@@ -36,6 +36,7 @@ from packages.fetchai.connections.p2p_libp2p_client.connection import Uri
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.default.serialization import DefaultSerializer
 
+from tests.common.mocks import RegexComparator
 from tests.conftest import (
     _make_libp2p_client_connection,
     _make_libp2p_connection,
@@ -626,8 +627,8 @@ def test_libp2pclientconnection_uri():
 
 
 @libp2p_log_on_failure_all
-class TestLibp2pClientReconnectionSendEnvelope:
-    """Test that connection will send envelope with error, and that reconnection fixes it."""
+class BaseTestLibp2pClientReconnection:
+    """Base test class for reconnection tests."""
 
     @classmethod
     @libp2p_log_on_failure
@@ -683,11 +684,21 @@ class TestLibp2pClientReconnectionSendEnvelope:
             cls.multiplexer_node.disconnect()
             raise
 
-    def test_envelope_sent(self):
-        """Test the envelope is routed."""
-        addr_1 = self.connection_client_1.address
-        addr_2 = self.connection_client_2.address
+    @classmethod
+    def teardown_class(cls):
+        """Tear down the test"""
+        cls.multiplexer_client_1.disconnect()
+        cls.multiplexer_client_2.disconnect()
+        cls.multiplexer_node.disconnect()
 
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
+
+    def _make_envelope(self, sender_address: str, receiver_address: str):
+        """Make an envelope for testing purposes."""
         msg = DefaultMessage(
             dialogue_reference=("", ""),
             message_id=1,
@@ -696,16 +707,29 @@ class TestLibp2pClientReconnectionSendEnvelope:
             content=b"hello",
         )
         envelope = Envelope(
-            to=addr_2,
-            sender=addr_1,
+            to=receiver_address,
+            sender=sender_address,
             protocol_specification_id=DefaultMessage.protocol_specification_id,
             message=DefaultSerializer().encode(msg),
         )
+        return envelope
+
+
+class TestLibp2pClientReconnectionSendEnvelope(BaseTestLibp2pClientReconnection):
+    """Test that connection will send envelope with error, and that reconnection fixes it."""
+
+    def test_envelope_sent(self):
+        """Test the envelope is routed."""
+        addr_1 = self.connection_client_1.address
+        addr_2 = self.connection_client_2.address
+        envelope = self._make_envelope(addr_1, addr_2)
 
         # make the send to fail
         with mock.patch.object(
             self.connection_client_1.logger, "exception"
         ) as _mock_logger:
+            # set the current writer to none, to raise error in send
+            self.connection_client_1._writer.close()
             self.connection_client_1._writer = None
             self.multiplexer_client_1.put(envelope)
             delivered_envelope = self.multiplexer_client_2.get(block=True, timeout=20)
@@ -722,15 +746,34 @@ class TestLibp2pClientReconnectionSendEnvelope:
         )
         assert delivered_envelope.message == envelope.message
 
-    @classmethod
-    def teardown_class(cls):
-        """Tear down the test"""
-        cls.multiplexer_client_1.disconnect()
-        cls.multiplexer_client_2.disconnect()
-        cls.multiplexer_node.disconnect()
 
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
+@libp2p_log_on_failure_all
+class TestLibp2pClientReconnectionReceiveEnvelope(BaseTestLibp2pClientReconnection):
+    """Test that connection will receive envelope with error, and that reconnection fixes it."""
+
+    def test_envelope_received(self):
+        """Test the envelope is routed."""
+        sender = self.connection_client_2.address
+        receiver = self.connection_client_1.address
+        envelope = self._make_envelope(sender, receiver)
+
+        # make the receive to fail
+        with mock.patch.object(
+            self.connection_client_1.logger, "exception"
+        ) as _mock_logger, mock.patch.object(
+            self.connection_client_1._reader, "readexactly", side_effect=ConnectionError
+        ):
+            self.multiplexer_client_2.put(envelope)
+            delivered_envelope = self.multiplexer_client_1.get(block=True, timeout=20)
+            _mock_logger.assert_called_with(
+                RegexComparator(f"Connection error:.*. Try to reconnect and read again")
+            )
+
+        assert delivered_envelope is not None
+        assert delivered_envelope.to == envelope.to
+        assert delivered_envelope.sender == envelope.sender
+        assert (
+            delivered_envelope.protocol_specification_id
+            == envelope.protocol_specification_id
+        )
+        assert delivered_envelope.message == envelope.message
