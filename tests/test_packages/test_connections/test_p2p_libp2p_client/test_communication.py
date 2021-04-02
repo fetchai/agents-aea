@@ -22,6 +22,7 @@
 import os
 import shutil
 import tempfile
+import time
 from unittest import mock
 from unittest.mock import Mock
 
@@ -759,15 +760,19 @@ class TestLibp2pClientReconnectionReceiveEnvelope(BaseTestLibp2pClientReconnecti
 
         # make the receive to fail
         with mock.patch.object(
-            self.connection_client_1.logger, "exception"
-        ) as _mock_logger, mock.patch.object(
-            self.connection_client_1._reader, "readexactly", side_effect=ConnectionError
-        ):
+            self.connection_client_1.logger, "error"
+        ) as _mock_logger:
+            self.connection_client_1._reader.set_exception(ConnectionError())
+            # this envelope will be lost.
             self.multiplexer_client_2.put(envelope)
-            delivered_envelope = self.multiplexer_client_1.get(block=True, timeout=20)
+            # give time to reconnect
+            time.sleep(2.0)
             _mock_logger.assert_called_with(
-                RegexComparator(f"Connection error:.*. Try to reconnect and read again")
+                RegexComparator(f"Connection error:.*Try to reconnect and read again")
             )
+        # proceed as usual. Now we expect the connection to have reconnected successfully
+        self.multiplexer_client_2.put(envelope)
+        delivered_envelope = self.multiplexer_client_1.get(block=True, timeout=20)
 
         assert delivered_envelope is not None
         assert delivered_envelope.to == envelope.to
