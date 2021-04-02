@@ -672,8 +672,8 @@ class TestP2PLibp2pNodeRestart:
 
 
 @libp2p_log_on_failure_all
-class TestP2PLibp2pReconnectionSendEnvelope:
-    """Test that connection will send envelope with error, and that reconnection fixes it."""
+class BaseTestP2PLibp2pReconnection:
+    """Base test class for reconnection tests."""
 
     @classmethod
     @libp2p_log_on_failure
@@ -722,6 +722,22 @@ class TestP2PLibp2pReconnectionSendEnvelope:
             cls.teardown_class()
             raise e
 
+    @classmethod
+    def teardown_class(cls):
+        """Tear down the test"""
+        for mux in cls.multiplexers:
+            mux.disconnect()
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
+
+
+@libp2p_log_on_failure_all
+class TestP2PLibp2pReconnectionSendEnvelope(BaseTestP2PLibp2pReconnection):
+    """Test that connection will send envelope with error, and that reconnection fixes it."""
+
     def test_connection_is_established(self):
         """Test connection established."""
         assert self.connection1.is_connected is True
@@ -742,6 +758,7 @@ class TestP2PLibp2pReconnectionSendEnvelope:
         envelope = Envelope(to=addr_2, sender=addr_1, message=msg,)
 
         # make the send to fail
+        # note: we don't mock the genesis peer.
         with mock.patch.object(
             self.connection2.logger, "exception"
         ) as _mock_logger, mock.patch.object(
@@ -766,13 +783,46 @@ class TestP2PLibp2pReconnectionSendEnvelope:
         msg.sender = delivered_envelope.sender
         assert envelope.message == msg
 
-    @classmethod
-    def teardown_class(cls):
-        """Tear down the test"""
-        for mux in cls.multiplexers:
-            mux.disconnect()
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
+
+@libp2p_log_on_failure_all
+class TestP2PLibp2pReconnectionReceiveEnvelope(BaseTestP2PLibp2pReconnection):
+    """Test that connection will receive envelope with error, and that reconnection fixes it."""
+
+    def test_envelope_routed(self):
+        """Test envelope routed."""
+        addr_1 = self.connection1.node.address
+        addr_2 = self.connection2.node.address
+
+        msg = DefaultMessage(
+            dialogue_reference=("", ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"hello",
+        )
+        envelope = Envelope(to=addr_2, sender=addr_1, message=msg,)
+
+        # make the receive to fail
+        with mock.patch.object(
+            self.connection2.logger, "exception"
+        ) as _mock_logger, mock.patch.object(
+            self.connection2.node.pipe, "read", side_effect=Exception("some error")
+        ):
+            self.multiplexer1.put(envelope)
+            delivered_envelope = self.multiplexer2.get(block=True, timeout=20)
+            _mock_logger.assert_called_with(
+                "Failed to read. Exception: some error. Try reconnect to node and read again."
+            )
+
+        assert delivered_envelope is not None
+        assert delivered_envelope.to == envelope.to
+        assert delivered_envelope.sender == envelope.sender
+        assert (
+            delivered_envelope.protocol_specification_id
+            == envelope.protocol_specification_id
+        )
+        assert delivered_envelope.message != envelope.message
+        msg = DefaultMessage.serializer.decode(delivered_envelope.message)
+        msg.to = delivered_envelope.to
+        msg.sender = delivered_envelope.sender
+        assert envelope.message == msg
