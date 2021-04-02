@@ -729,8 +729,8 @@ class TestP2PLibp2pReconnectionSendEnvelope:
 
     def test_envelope_routed(self):
         """Test envelope routed."""
-        addr_1 = self.connection1.node.address
-        addr_2 = self.connection2.node.address
+        addr_1 = self.connection2.node.address
+        addr_2 = self.connection1.node.address
 
         msg = DefaultMessage(
             dialogue_reference=("", ""),
@@ -741,14 +741,14 @@ class TestP2PLibp2pReconnectionSendEnvelope:
         )
         envelope = Envelope(to=addr_2, sender=addr_1, message=msg,)
 
-        # # make the send to fail
+        # make the send to fail
         with mock.patch.object(
-            self.connection1.logger, "exception"
+            self.connection2.logger, "exception"
         ) as _mock_logger, mock.patch.object(
-            self.connection1.node.pipe, "write", side_effect=Exception("some error")
+            self.connection2.node.pipe, "write", side_effect=Exception("some error")
         ):
-            self.multiplexer1.put(envelope)
-            delivered_envelope = self.multiplexer2.get(block=True, timeout=20)
+            self.multiplexer2.put(envelope)
+            delivered_envelope = self.multiplexer1.get(block=True, timeout=20)
             _mock_logger.assert_called_with(
                 "Exception raised on message write. Try reconnect to node and write again."
             )
