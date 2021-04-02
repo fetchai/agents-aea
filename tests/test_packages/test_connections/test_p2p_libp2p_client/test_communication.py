@@ -728,10 +728,9 @@ class TestLibp2pClientReconnectionSendEnvelope(BaseTestLibp2pClientReconnection)
         # make the send to fail
         with mock.patch.object(
             self.connection_client_1.logger, "exception"
-        ) as _mock_logger:
-            # set the current writer to none, to raise error in send
-            self.connection_client_1._writer.close()
-            self.connection_client_1._writer = None
+        ) as _mock_logger, mock.patch.object(
+            self.connection_client_1._writer, "write", side_effect=Exception
+        ):
             self.multiplexer_client_1.put(envelope)
             delivered_envelope = self.multiplexer_client_2.get(block=True, timeout=20)
             _mock_logger.assert_called_with(
