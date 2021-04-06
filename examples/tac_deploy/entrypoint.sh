@@ -10,6 +10,24 @@ MIN=2
 
 BASE_DIR=/data
 
+if [ -z  "$COMPETITION_TIMEOUT" ];
+then
+	COMPETITION_TIMEOUT=86400
+fi
+
+if [ -z  "$INACTIVITY_TIMEOUT" ];
+then
+	INACTIVITY_TIMEOUT=3600
+fi
+
+if [ -z  "$PARTICIPANTS_AMOUNT" ];
+then
+	PARTICIPANTS_AMOUNT=2
+fi
+
+
+
+
 function generate_key (){
 	ledger=$1
 	prefix=$2
@@ -85,8 +103,8 @@ set_agent tac_controller $BASE_PORT
 set_tac_name
 datetime_start=$(date -d@"$(( `date +%s`+$MIN*60))" "+%d %m %Y %H:%M")
 aea config set vendor.fetchai.skills.tac_control.models.parameters.args.registration_start_time "$datetime_start"
-aea config set vendor.fetchai.skills.tac_control.models.parameters.args.competition_timeout 1440
-aea config set vendor.fetchai.skills.tac_control.models.parameters.args.inactivity_timeout 60
+aea config set vendor.fetchai.skills.tac_control.models.parameters.args.competition_timeout $COMPETITION_TIMEOUT
+aea config set vendor.fetchai.skills.tac_control.models.parameters.args.inactivity_timeout $INACTIVITY_TIMEOUT
 cd ..
 
 aea launch tac_controller $agents_list
