@@ -58,6 +58,16 @@ func main() {
 	}
 	log.Print("successfully started AEA!")
 
+	// // Send envelope to target
+	// agent.Put(envel)
+	// // Print out received envelopes
+	// go func() {
+	// 	for envel := range agent.Queue() {
+	// 		envelope := envel
+	// 		logger.Info().Msgf("received envelope: %s", envelope)
+	// 	}
+	// }()
+
 	// Wait until Ctrl+C or a termination call is done.
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)

@@ -37,16 +37,16 @@ type Agent struct {
 	Connection connections.Connection
 }
 
-func (agent *Agent) InitFromEnv(path string) error {
+func (agent *Agent) InitFromEnv(envFile string) error {
 	if agent.Connection == nil {
 		log.Fatal("Must set connection on agent before calling InitFromEnv().")
 	}
 	agent.Wallet = &wallet.Wallet{}
-	err := agent.Wallet.InitFromEnv(path)
+	err := agent.Wallet.InitFromEnv(envFile)
 	if err != nil {
 		log.Fatal("Error initialising identity.")
 	}
-	err = agent.Connection.InitFromEnv(path)
+	err = agent.Connection.InitFromEnv(envFile)
 	if err != nil {
 		log.Fatal("Error initialising connection.")
 	}
