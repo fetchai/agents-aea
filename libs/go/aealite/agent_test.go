@@ -54,7 +54,7 @@ func TestAgent(t *testing.T) {
 	agent.Connection = &connections.P2PClientApi{}
 
 	// initialise
-	err := agent.InitFromEnv("test_env_file.go")
+	err := agent.InitFromEnv("test_env_file.env")
 
 	if err != nil {
 		t.Fatal("Failed to initialise agent", err)
