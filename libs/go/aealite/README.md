@@ -3,14 +3,6 @@
 `aealite` is a lightweight implementation of an AEA library in Golang.
 
 
-## Installation
-
-- Install the dependencies:
-```
-go mod download
-```
-
-
 ## Usage example
 
 ``` golang
