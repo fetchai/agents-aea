@@ -18,7 +18,7 @@
 * ------------------------------------------------------------------------------
  */
 
-// Package dhtpeer provides implementation of an Agent Communication Network node
+// Package dhtpeer provides an implementation of an Agent Communication Network node
 // using libp2p. It participates in data storage and routing for the network.
 // It offers RelayService for dhtclient and DelegateService for tcp clients.
 package dhtpeer
@@ -324,6 +324,7 @@ func New(opts ...Option) (*DHTPeer, error) {
 
 	// if peer is joining an existing network, announce my agent address if set
 	if len(dhtPeer.bootstrapPeers) > 0 {
+		// TOFIX, set to true even when no address present
 		dhtPeer.addressAnnounced = true
 		if dhtPeer.myAgentAddress != "" {
 			opLatencyRegister, _ := dhtPeer.monitor.GetHistogram(metricOpLatencyRegister)
@@ -367,6 +368,7 @@ func New(opts ...Option) (*DHTPeer, error) {
 	return dhtPeer, nil
 }
 
+// saveAgentRecordToPersistentStorage saves the agent record to persistent storage
 func (dhtPeer *DHTPeer) saveAgentRecordToPersistentStorage(record *dhtnode.AgentRecord) error {
 	msg := formatPersistentStorageLine(record)
 	if len(msg) == 0 {
@@ -397,6 +399,7 @@ func formatPersistentStorageLine(record *dhtnode.AgentRecord) []byte {
 	return msg
 }
 
+// initAgentRecordPersistentStorage loads agent records from persistent storage
 func (dhtPeer *DHTPeer) initAgentRecordPersistentStorage() (int, error) {
 	var err error
 	dhtPeer.storage, err = os.OpenFile(
@@ -587,6 +590,7 @@ func (dhtPeer *DHTPeer) Close() []error {
 	return status
 }
 
+// launchDelegateService launches the delegate service on the configured uri
 func (dhtPeer *DHTPeer) launchDelegateService() {
 	var err error
 
@@ -600,6 +604,7 @@ func (dhtPeer *DHTPeer) launchDelegateService() {
 	}
 }
 
+// handleDelegateService listens for new connections to delegate service and handles them
 func (dhtPeer *DHTPeer) handleDelegateService(ready *sync.WaitGroup) {
 	defer dhtPeer.goroutines.Done()
 	defer dhtPeer.tcpListener.Close()
@@ -634,6 +639,9 @@ func (dhtPeer *DHTPeer) handleDelegateService(ready *sync.WaitGroup) {
 	}
 }
 
+// handleNewDelegationConnection handles a new delegate connection
+// verifies agent record and registers agent in DHT, handles incoming envelopes
+// and forwards them for processing
 func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 	defer dhtPeer.goroutines.Done()
 	defer conn.Close()
