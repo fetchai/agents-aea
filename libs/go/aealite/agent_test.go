@@ -113,5 +113,8 @@ func TestAgent(t *testing.T) {
 		t.Fatal("Envelopes don't match")
 	}
 
-	_ = agent.Stop()
+	err = agent.Stop()
+	if err != nil {
+		t.Fatal("Failed to stop agent", err)
+	}
 }
