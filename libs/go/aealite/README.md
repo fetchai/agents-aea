@@ -3,6 +3,14 @@
 `aealite` is a lightweight implementation of an AEA library in Golang.
 
 
+## Installation
+
+- Install the dependencies:
+```
+go mod download
+```
+
+
 ## Usage example
 
 ``` golang
@@ -10,6 +18,8 @@ package main
 
 import (
 	"log"
+	"os"
+	"os/signal"
 
 	aea "aealite"
 	connections "aealite/connections"
@@ -19,37 +29,34 @@ func main() {
 
 	var err error
 
-	logger.Info().Msg("Agent starting ...")
+	// env file
+	if len(os.Args) != 2 {
+		log.Print("Usage: main ENV_FILE")
+		os.Exit(1)
+	}
+	envFile := os.Args[1]
+
+	log.Print("Agent starting ...")
+
 
 	// Create agent
 	agent := aea.Agent{}
 
 	// Set connection
-	agent.connection = &connections.P2PClientApi{}
+	agent.Connection = &connections.P2PClientApi{}
 
 	// Initialise agent from environment file (first arg to process)
-	err = agent.InitFromEnv()
+	err = agent.InitFromEnv(envFile)
 	if err != nil {
 		log.Fatal("Failed to initialise agent", err)
 	}
-	logger.Info().Msg("successfully initialized AEA!")
+	log.Print("successfully initialized AEA!")
 
 	err = agent.Start()
 	if err != nil {
 		log.Fatal("Failed to start agent", err)
 	}
-	logger.Info().Msg("successfully started AEA!")
-
-	// // Send envelope to target
-	// agent.Put(envel)
-
-	// // Print out received envelopes
-	// go func() {
-	// 	for envel := range agent.Queue() {
-	// 		envelope := envel
-	// 		logger.Info().Msgf("received envelope: %s", envelope)
-	// 	}
-	// }()
+	log.Print("successfully started AEA!")
 
 	// Wait until Ctrl+C or a termination call is done.
 	c := make(chan os.Signal, 1)
@@ -58,9 +65,9 @@ func main() {
 
 	err = agent.Stop()
 	if err != nil {
-		log.Info("Failed to stop agent", err)
+		log.Fatal("Failed to stop agent", err)
 	}
-	logger.Info().Msg("Agent stopped")
+	log.Print("Agent stopped")
 }
 ```
 

@@ -34,19 +34,19 @@ const (
 
 type Agent struct {
 	Wallet     *wallet.Wallet
-	connection connections.Connection
+	Connection connections.Connection
 }
 
-func (agent *Agent) InitFromEnv() error {
-	if agent.connection == nil {
+func (agent *Agent) InitFromEnv(path string) error {
+	if agent.Connection == nil {
 		log.Fatal("Must set connection on agent before calling InitFromEnv().")
 	}
 	agent.Wallet = &wallet.Wallet{}
-	err := agent.Wallet.InitFromEnv()
+	err := agent.Wallet.InitFromEnv(path)
 	if err != nil {
 		log.Fatal("Error initialising identity.")
 	}
-	err = agent.connection.InitFromEnv()
+	err = agent.Connection.InitFromEnv(path)
 	if err != nil {
 		log.Fatal("Error initialising connection.")
 	}
@@ -58,20 +58,21 @@ func (agent *Agent) Address() string {
 }
 
 func (agent *Agent) Start() error {
-	return agent.connection.Connect()
+	return agent.Connection.Connect()
 }
 
 func (agent *Agent) Put(envelope *protocols.Envelope) error {
-	return agent.connection.Put(envelope)
+	return agent.Connection.Put(envelope)
 }
 
 func (agent *Agent) Get() *protocols.Envelope {
-	return agent.connection.Get()
+	return agent.Connection.Get()
 }
 
-func (agent *Agent) Stop() {
-	err := agent.connection.Disconnect()
+func (agent *Agent) Stop() error {
+	err := agent.Connection.Disconnect()
 	if err != nil {
 		log.Fatal(err)
 	}
+	return err
 }

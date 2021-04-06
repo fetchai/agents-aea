@@ -33,12 +33,12 @@ const (
 )
 
 var (
-	ledger_id        = "fetchai"
-	address          = "fetch1x9v67meyfq4pkgy2n2yf6797cfkul327kpclqr"
-	public_key       = "02ac514ba70de60ed5c30f90e3acdfc958ecb416d9676706bf013228abfb2c2816"
-	private_key      = "6d8d2b87d987641e2ca3f1991c1cccf08a118759e81fabdbf7e8484f27af015e"
-	test_protocol_id = "test_protocol_id"
-	test_message     = []byte{0x00}
+	ledgerId       = "fetchai"
+	address        = "fetch1x9v67meyfq4pkgy2n2yf6797cfkul327kpclqr"
+	publicKey      = "02ac514ba70de60ed5c30f90e3acdfc958ecb416d9676706bf013228abfb2c2816"
+	privateKey     = "6d8d2b87d987641e2ca3f1991c1cccf08a118759e81fabdbf7e8484f27af015e"
+	testProtocolId = "test_protocol_id"
+	testMessage    = []byte{0x00}
 )
 
 // TestAgent apis
@@ -46,15 +46,15 @@ func TestAgent(t *testing.T) {
 	os.Args = []string{"cmd", EnvTestFile}
 
 	agent := Agent{}
-	if agent.connection != nil {
+	if agent.Connection != nil {
 		t.Fatal("Agent connection not empty")
 	}
 
 	// set p2p client
-	agent.connection = &connections.P2PClientApi{}
+	agent.Connection = &connections.P2PClientApi{}
 
 	// initialise
-	err := agent.InitFromEnv()
+	err := agent.InitFromEnv("test_env_file.go")
 
 	if err != nil {
 		t.Fatal("Failed to initialise agent", err)
@@ -64,7 +64,7 @@ func TestAgent(t *testing.T) {
 		t.Fatal("Wallet not set on Agent")
 	}
 
-	if agent.Wallet.LedgerId != ledger_id {
+	if agent.Wallet.LedgerId != ledgerId {
 		t.Fatal("Wallet.LedgerId not set")
 	}
 
@@ -72,15 +72,15 @@ func TestAgent(t *testing.T) {
 		t.Fatal("Wallet.Address not set")
 	}
 
-	if agent.Wallet.PublicKey != public_key {
+	if agent.Wallet.PublicKey != publicKey {
 		t.Fatal("Wallet.PublicKey not set")
 	}
 
-	if agent.Wallet.PrivateKey != private_key {
+	if agent.Wallet.PrivateKey != privateKey {
 		t.Fatal("Wallet.PrivateKey not set")
 	}
 
-	if !agent.connection.Initialised() {
+	if !agent.Connection.Initialised() {
 		t.Fatal("connection not initialised")
 	}
 
@@ -90,28 +90,28 @@ func TestAgent(t *testing.T) {
 		t.Fatal("Failed to start agent", err)
 	}
 
-	out_envelope := &protocols.Envelope{
+	outEnvelope := &protocols.Envelope{
 		To:         agent.Address(),
 		Sender:     agent.Address(),
-		ProtocolId: test_protocol_id,
-		Message:    test_message,
+		ProtocolId: testProtocolId,
+		Message:    testMessage,
 	}
 
-	err = agent.Put(out_envelope)
+	err = agent.Put(outEnvelope)
 
 	if err != nil {
 		t.Fatal("Failed to send envelope", err)
 	}
 
-	in_envelope := agent.Get()
+	inEnvelope := agent.Get()
 
-	if in_envelope == nil {
+	if inEnvelope == nil {
 		t.Fatal("Failed to get envelope")
 	}
 
-	if (in_envelope.Sender != out_envelope.Sender) || (in_envelope.To != out_envelope.To) {
+	if (inEnvelope.Sender != outEnvelope.Sender) || (inEnvelope.To != outEnvelope.To) {
 		t.Fatal("Envelopes don't match")
 	}
 
-	agent.Stop()
+	_ = agent.Stop()
 }
