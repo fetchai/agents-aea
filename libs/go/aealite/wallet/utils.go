@@ -281,13 +281,13 @@ func VerifyEthereumSignatureETH(message []byte, signature string, pubkey string)
 
 // KeyPairFromFetchAIKey  key pair from hex encoded secp256k1 private key
 func KeyPairFromFetchAIKey(key string) (crypto.PrivKey, crypto.PubKey, error) {
-	pk_bytes, err := hex.DecodeString(key)
+	pkBytes, err := hex.DecodeString(key)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	btc_private_key, _ := btcec.PrivKeyFromBytes(btcec.S256(), pk_bytes)
-	prvKey, pubKey, err := crypto.KeyPairFromStdKey(btc_private_key)
+	btcPrivateKey, _ := btcec.PrivKeyFromBytes(btcec.S256(), pkBytes)
+	prvKey, pubKey, err := crypto.KeyPairFromStdKey(btcPrivateKey)
 	if err != nil {
 		return nil, nil, err
 	}
