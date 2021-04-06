@@ -6,7 +6,7 @@ PEER="/dns4/acn.fetch.ai/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1H
 
 TAC_NAME='some_tac_id'
 BASE_PORT=10000
-MIN=2
+
 
 BASE_DIR=/data
 
@@ -23,6 +23,12 @@ fi
 if [ -z  "$PARTICIPANTS_AMOUNT" ];
 then
 	PARTICIPANTS_AMOUNT=2
+fi
+
+
+if [ -z  "$MINUTES_TILL_START" ];
+then
+	MINUTES_TILL_START=2
 fi
 
 
@@ -101,7 +107,7 @@ done
 cd tac_controller
 set_agent tac_controller $BASE_PORT
 set_tac_name
-datetime_start=$(date -d@"$(( `date +%s`+$MIN*60))" "+%d %m %Y %H:%M")
+datetime_start=$(date -d@"$(( `date +%s`+$MINUTES_TILL_START*60))" "+%d %m %Y %H:%M")
 aea config set vendor.fetchai.skills.tac_control.models.parameters.args.registration_start_time "$datetime_start"
 aea config set vendor.fetchai.skills.tac_control.models.parameters.args.competition_timeout $COMPETITION_TIMEOUT
 aea config set vendor.fetchai.skills.tac_control.models.parameters.args.inactivity_timeout $INACTIVITY_TIMEOUT
