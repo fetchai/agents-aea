@@ -36,18 +36,19 @@ function set_agent(){
 	name=$1
 	port=$2
 	echo name $name port $port
-	agent_dir=$BASE_DIR/$name
-	mkdir -p $agent_dir
-	key_file_name=$(generate_key $LEDGER $name $agent_dir 0)
+	agent_data_dir=$BASE_DIR/$name
+	mkdir -p $agent_data_dir
+	key_file_name=$(generate_key $LEDGER $name $agent_data_dir 0)
 	aea add-key fetchai $key_file_name	
-	key_file_name=$(generate_key $LEDGER $name $agent_dir 1)
+	key_file_name=$(generate_key $LEDGER $name $agent_data_dir 1)
 	aea add-key fetchai $key_file_name --connection
 	aea issue-certificates
 	json=$(printf '{"delegate_uri": null, "entry_peers": ["%s"], "local_uri": "127.0.0.1:%s", "public_uri": null}' "$PEER" "$port")
 	aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config "$json"
-	log_file=$agent_dir/$name.log
+	log_file=$agent_data_dir/$name.log
 	json=$(printf '{"version": 1, "handlers": {"console": {"class": "logging.StreamHandler", "level": "DEBUG"}, "file": {"class": "logging.FileHandler", "filename": "%s", "mode": "w", "level": "DEBUG"}}, "loggers": {"aea": {"level": "DEBUG", "handlers": ["console", "file"]}}}' "$log_file")
 	aea config set --type dict agent.logging_config "$json"
+	aea config set vendor.fetchai.connections.soef.config.token_storage_path $agent_data_dir/soef_token.txt
 }
 
 function set_tac_name (){
@@ -84,6 +85,8 @@ set_agent tac_controller $BASE_PORT
 set_tac_name
 datetime_start=$(date -d@"$(( `date +%s`+$MIN*60))" "+%d %m %Y %H:%M")
 aea config set vendor.fetchai.skills.tac_control.models.parameters.args.registration_start_time "$datetime_start"
+aea config set vendor.fetchai.skills.tac_control.models.parameters.args.competition_timeout 1440
+aea config set vendor.fetchai.skills.tac_control.models.parameters.args.inactivity_timeout 60
 cd ..
 
 aea launch tac_controller $agents_list

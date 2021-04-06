@@ -16,7 +16,7 @@ to `.env` file
 ### Run locally
 
 ``` bash
-docker run --env-file .env -v "$(pwd)/data:/data" -t tac-deploy
+docker run --env-file .env -v "$(pwd)/data:/data" -ti tac-deploy
 ```
 
 
@@ -25,21 +25,21 @@ gcloud should be configured first!
 
 tag it first
 ``` bash
-docker image tag tac_deploy gcr.io/fetch-ai-sandbox/tac_deploy:0.0.0
+docker image tag tac_deploy gcr.io/fetch-ai-sandbox/tac_deploy:0.0.1
 ```
 
 
 push it to remote repo
 ``` bash
-docker push gcr.io/fetch-ai-sandbox/tac_deploy:0.0.0
+docker push gcr.io/fetch-ai-sandbox/tac_deploy:0.0.1
 ```
 
 run it
 ``` bash
-kubectl run tac-deploy-test --image=gcr.io/fetch-ai-sandbox/tac_deploy:0.0.0 --env="PARTICIPANTS_AMOUNT=5" --attach
+kubectl run tac-deploy-test --image=gcr.io/fetch-ai-sandbox/tac_deploy:0.0.1 --env="PARTICIPANTS_AMOUNT=5" --attach
 ```
 
-access container
+access the container
 run it
 ``` bash
 kubectl exec tac-deploy-test -ti -- /bin/sh
@@ -55,3 +55,23 @@ kubectl delete pod tac-deploy-test
 
 
 
+deploy:
+push image first!
+``` bash
+kubectl apply -f ./tac-deployment.yaml
+```
+
+get pods list
+``` bash
+kubectl get pods
+```
+
+fetch logs
+``` bash
+kubectl cp tac-deploy-SOMETHING:/data ./output_dir
+```
+
+delete deployment
+``` bash
+kubectl delete deployment tac-deploy
+```
