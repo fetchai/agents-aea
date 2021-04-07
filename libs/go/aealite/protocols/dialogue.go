@@ -286,25 +286,25 @@ func (dialogue *Dialogue) validateMessageId(message AbstractMessage) error {
 }
 
 func (dialogue *Dialogue) getOutgoingNextMessageId() MessageId {
-	next_message_id := StartingMessageId
+	nextMessageId := StartingMessageId
 	if ok, _ := dialogue.lastOutgoingMessage(); ok {
-		next_message_id = MessageId(math.Abs(float64(dialogue.lastMessageId))) + 1
+		nextMessageId = MessageId(math.Abs(float64(dialogue.lastMessageId))) + 1
 	}
 	if dialogue.isSelfInitiated() {
-		next_message_id = 0 - next_message_id
+		nextMessageId = 0 - nextMessageId
 	}
-	return MessageId(next_message_id)
+	return nextMessageId
 }
 
 func (dialogue *Dialogue) getIncomingNextMessageId() MessageId {
-	next_message_id := StartingMessageId
+	nextMessageId := StartingMessageId
 	if ok, _ := dialogue.lastIncomingMessage(); ok {
-		next_message_id = MessageId(math.Abs(float64(dialogue.lastMessageId))) + 1
+		nextMessageId = MessageId(math.Abs(float64(dialogue.lastMessageId))) + 1
 	}
 	if dialogue.isSelfInitiated() {
-		next_message_id = 0 - next_message_id
+		nextMessageId = 0 - nextMessageId
 	}
-	return MessageId(next_message_id)
+	return nextMessageId
 }
 
 func (dialogue *Dialogue) lastOutgoingMessage() (bool, MessageId) {
