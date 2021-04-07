@@ -73,6 +73,7 @@ class Strategy(Model):
             "shared_storage_key", DEFAULT_SHARED_STORAGE_KEY
         )
         self._whitelist = kwargs.pop("whitelist", DEFAULT_WHITELIST)
+        self.announce_termination_key = kwargs.pop("announce_termination_key", None)
         super().__init__(**kwargs)
         self._is_ready_to_register = False
         self._is_registered = False

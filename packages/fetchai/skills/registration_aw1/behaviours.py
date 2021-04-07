@@ -43,6 +43,9 @@ class AW1RegistrationBehaviour(TickerBehaviour):
         :return: None
         """
         strategy = cast(Strategy, self.context.strategy)
+        if strategy.announce_termination_key is not None:
+            self.context.shared_state[strategy.announce_termination_key] = False
+
         signing_dialogues = cast(SigningDialogues, self.context.signing_dialogues)
         msg, _ = signing_dialogues.create(
             counterparty=self.context.decision_maker_address,
