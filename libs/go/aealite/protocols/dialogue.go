@@ -367,7 +367,7 @@ func (dialogue *Dialogue) isBelongingToADialogue(message AbstractMessage) bool {
 	return result
 }
 
-func InitializeMessage(counterParty Address, selfAddress Address, performative Performative, content []byte, ref [2]string, messageId MessageId) AbstractMessage {
+func InitializeMessage(counterParty Address, selfAddress Address, performative Performative, content []byte, ref [2]string, messageId MessageId, target MessageId) AbstractMessage {
 	var reference [2]string
 	if ref[0] != "" || ref[1] != "" {
 		reference = ref
@@ -376,15 +376,9 @@ func InitializeMessage(counterParty Address, selfAddress Address, performative P
 			generateDialogueNonce(), "",
 		}
 	}
-	var target MessageId
-	if messageId == StartingMessageId {
-		target = StartingTarget
-	} else {
-		target = messageId - 1
-	}
 	initialMessage := AbstractMessage{
 		dialogueReference: reference,
-		messageId:         MessageId(messageId),
+		messageId:         messageId,
 		target:            target,
 		performative:      performative,
 		to:                counterParty,
@@ -402,7 +396,7 @@ func (dialogue *Dialogue) getNextMessageId() MessageId {
 }
 
 func Create(counterParty Address, selfAddress Address, performative Performative, content []byte) (AbstractMessage, Dialogue) {
-	initialMessage := InitializeMessage(counterParty, selfAddress, performative, content, [2]string{"", ""}, StartingMessageId)
+	initialMessage := InitializeMessage(counterParty, selfAddress, performative, content, [2]string{"", ""}, StartingMessageId, StartingTarget)
 	dialogue := createDialogue(initialMessage)
 	return initialMessage, dialogue
 }
