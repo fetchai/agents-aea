@@ -49,7 +49,7 @@ func TestDialogue(t *testing.T) {
 		nextMessageId = dialogue.getIncomingNextMessageId()
 	}
 	// inititlaizing a new message and updating dialogue using it
-	newMessage := InitializeMessage(counterPartyAddress, senderAddress, performative, []byte("second message"), dialogue.dialogueLabel.dialogueReference, nextMessageId, nextMessageId-1)
+	newMessage := InitializeMessage(counterPartyAddress, senderAddress, performative, []byte("second message"), dialogue.dialogueLabel.dialogueReference, nextMessageId, dialogue.lastMessageId)
 	dialogue.update(newMessage)
 	// checking if length of outgoing messages list is 2
 	if len(dialogue.outgoingMessages) != 2 {
