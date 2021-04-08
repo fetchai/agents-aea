@@ -14,23 +14,32 @@ if [ -z  "$COMPETITION_TIMEOUT" ];
 then
 	COMPETITION_TIMEOUT=86400
 fi
+echo COMPETITION_TIMEOUT $COMPETITION_TIMEOUT
 
 if [ -z  "$INACTIVITY_TIMEOUT" ];
 then
 	INACTIVITY_TIMEOUT=3600
 fi
+echo INACTIVITY_TIMEOUT $INACTIVITY_TIMEOUT
 
 if [ -z  "$PARTICIPANTS_AMOUNT" ];
 then
 	PARTICIPANTS_AMOUNT=2
 fi
+echo PARTICIPANTS_AMOUNT $PARTICIPANTS_AMOUNT
 
 
 if [ -z  "$MINUTES_TILL_START" ];
 then
 	MINUTES_TILL_START=2
 fi
+echo MINUTES_TILL_START $MINUTES_TILL_START
 
+if [ -z  "$LOG_LEVEL" ];
+then
+	LOG_LEVEL=INFO
+fi
+echo LOG_LEVEL $LOG_LEVEL
 
 
 
@@ -70,9 +79,12 @@ function set_agent(){
 	json=$(printf '{"delegate_uri": null, "entry_peers": ["%s"], "local_uri": "127.0.0.1:%s", "public_uri": null}' "$PEER" "$port")
 	aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config "$json"
 	log_file=$agent_data_dir/$name.log
-	json=$(printf '{"version": 1, "handlers": {"console": {"class": "logging.StreamHandler", "level": "DEBUG"}, "file": {"class": "logging.FileHandler", "filename": "%s", "mode": "w", "level": "DEBUG"}}, "loggers": {"aea": {"level": "DEBUG", "handlers": ["console", "file"]}}}' "$log_file")
+	json=$(printf '{"version": 1, "handlers": {"console": {"class": "logging.StreamHandler", "level": "%s"}, "file": {"class": "logging.FileHandler", "filename": "%s", "mode": "w", "level": "%s"}}, "loggers": {"aea": {"level": "%s", "handlers": ["console", "file"]}}}' "$LOG_LEVEL" "$log_file" "$LOG_LEVEL" "$LOG_LEVEL")
 	aea config set --type dict agent.logging_config "$json"
 	aea config set vendor.fetchai.connections.soef.config.token_storage_path $agent_data_dir/soef_token.txt
+	aea config set agent.skill_exception_policy just_log
+	aea config set agent.connection_exception_policy just_log
+	
 }
 
 function set_tac_name (){

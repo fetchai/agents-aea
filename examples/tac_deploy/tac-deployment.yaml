@@ -21,13 +21,15 @@ spec:
         image: gcr.io/fetch-ai-sandbox/tac_deploy:0.0.1
         env:
          - name: PARTICIPANTS_AMOUNT
-           value: "100"
+           value: "70"
          - name: MINUTES_TILL_START
-           value: "7"
+           value: "10"
          - name: COMPETITION_TIMEOUT
            value: "86400"
          - name: INACTIVITY_TIMEOUT
            value: "3600"
+         - name: LOG_LEVEL
+           value: "INFO"
         volumeMounts:
          - name: tac-deploy-data-vol
            mountPath: /data
