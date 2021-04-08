@@ -67,6 +67,7 @@ class Strategy(GenericStrategy):
         if leaderboard_token is None:
             raise ValueError("No leader board token provided!")
         self.leaderboard_token = leaderboard_token
+        self.registration_required = kwargs.pop("registration_required", True)
         super().__init__(**kwargs)
 
     def get_acceptable_counterparties(
@@ -89,12 +90,16 @@ class Strategy(GenericStrategy):
 
         :return: bool indicating validity
         """
+        if not self.registration_required:
+            return True
+
         registration_db = cast(RegistrationDB, self.context.registration_db)
         if not registration_db.is_registered(counterparty):
             self.context.logger.info(
                 f"Invalid counterparty={counterparty}, not registered!"
             )
             return False
+
         return True
 
     def successful_trade_with_counterparty(

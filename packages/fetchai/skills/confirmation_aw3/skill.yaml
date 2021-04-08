@@ -13,7 +13,7 @@ fingerprint:
   dialogues.py: QmTfx5ZgmWbuWpgA93cn9YB2JuY2QoF62WapXnyprW3SBf
   handlers.py: QmX6ho4hSgAUBtAMxPKsuTCLr5GdiRts2Aeh7sr7wZsuXK
   registration_db.py: QmfA5gSnTsFvKUzYfpyrptURvAC8KVMUk7DM4wU6xvbmV8
-  strategy.py: Qme59vQevFQwWcVesHAmUmuQLNK8HKE81s1rM9P7FcQ3dK
+  strategy.py: QmNth21SV5UZz7nKkzQmyFieeyvr6miZHoYGTyEff8KT4Y
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/http_client:0.22.0
@@ -127,6 +127,7 @@ models:
       max_tx_fee: 1
       max_unit_price: 20
       min_quantity: 1
+      registration_required: true
       search_queries:
         weather:
           constraint_type: ==
