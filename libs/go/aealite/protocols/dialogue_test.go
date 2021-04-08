@@ -1,7 +1,6 @@
 package protocols
 
 import (
-	"fmt"
 	"log"
 	"testing"
 )
@@ -39,10 +38,25 @@ func TestDialogue(t *testing.T) {
 	if len(dialogue.incomingMessages) != 0 {
 		log.Fatal("dialogue incoming messages length is ", len(dialogue.incomingMessages), " should be 0")
 	}
-	fmt.Println(dialogue.lastMessageId, dialogue.orderedMessageIds, len(dialogue.incomingMessages), len(dialogue.outgoingMessages))
-	nextMessageId := dialogue.getNextMessageId()
+	if dialogue.isEmpty() == true {
+		log.Fatal("dialogue should not be empty")
+	}
+	// fetch message id for next mesaage in the dialogue
+	var nextMessageId MessageId
+	if dialogue.selfAddress == senderAddress {
+		nextMessageId = dialogue.getOutgoingNextMessageId()
+	} else {
+		nextMessageId = dialogue.getIncomingNextMessageId()
+	}
 	// inititlaizing a new message and updating dialogue using it
-	newMessage := InitializeMessage(counterPartyAddress, senderAddress, performative, []byte("second message"), dialogue.dialogueLabel.dialogueReference, nextMessageId)
+	newMessage := InitializeMessage(counterPartyAddress, senderAddress, performative, []byte("second message"), dialogue.dialogueLabel.dialogueReference, nextMessageId, nextMessageId-1)
 	dialogue.update(newMessage)
-	// fmt.Println(dialogue.lastMessageId, dialogue.orderedMessageIds, len(dialogue.incomingMessages), len(dialogue.outgoingMessages))
+	// checking if length of outgoing messages list is 2
+	if len(dialogue.outgoingMessages) != 2 {
+		log.Fatal("dialogue outgoing messages length is ", len(dialogue.outgoingMessages), " should be 2")
+	}
+	// checking if length of incoming messages list is 0
+	if len(dialogue.incomingMessages) != 0 {
+		log.Fatal("dialogue incoming messages length is ", len(dialogue.incomingMessages), " should be 0")
+	}
 }
