@@ -8,6 +8,7 @@ require (
 	github.com/btcsuite/btcutil v0.0.0-20190425235716-9e5f4b9a998d
 	github.com/dave/dst v0.26.2 // indirect
 	github.com/ethereum/go-ethereum v1.9.25
+	github.com/golang/mock v1.5.0
 	github.com/golang/protobuf v1.4.2
 	github.com/ipfs/go-cid v0.0.5
 	github.com/joho/godotenv v1.3.0
@@ -25,6 +26,7 @@ require (
 	github.com/rs/zerolog v1.21.0
 	github.com/segmentio/golines v0.0.0-20200824192126-7f30d3046793 // indirect
 	github.com/sirupsen/logrus v1.7.0 // indirect
+	github.com/stretchr/testify v1.5.1
 	golang.org/x/crypto v0.0.0-20201208171446-5f87f3452ae9
 	golang.org/x/mod v0.4.0 // indirect
 	golang.org/x/term v0.0.0-20201210144234-2321bbc49cbf // indirect

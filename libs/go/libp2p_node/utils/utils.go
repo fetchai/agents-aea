@@ -701,7 +701,13 @@ func WriteBytes(s network.Stream, data []byte) error {
 
 	//logger.Debug().Msgf("writing %d", len(data))
 	_, err = wstream.Write(data)
-	wstream.Flush()
+	if err != nil {
+		logger.Error().
+			Str("err", err.Error()).
+			Msg("while sending size")
+		return err
+	}
+	err = wstream.Flush()
 	return err
 }
 
@@ -737,6 +743,7 @@ func WriteEnvelope(envel *aea.Envelope, s network.Stream) error {
 	wstream.Flush()
 	return nil
 }
+
 
 // ReadEnvelope from a network stream
 func ReadEnvelope(s network.Stream) (*aea.Envelope, error) {
