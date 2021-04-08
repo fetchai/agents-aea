@@ -22,13 +22,11 @@ require (
 	github.com/multiformats/go-multihash v0.0.13
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.7.1
-	github.com/rs/zerolog v1.19.0
+	github.com/rs/zerolog v1.21.0
 	github.com/segmentio/golines v0.0.0-20200824192126-7f30d3046793 // indirect
 	github.com/sirupsen/logrus v1.7.0 // indirect
 	golang.org/x/crypto v0.0.0-20201208171446-5f87f3452ae9
 	golang.org/x/mod v0.4.0 // indirect
-	golang.org/x/sys v0.0.0-20201214210602-f9fddec55a1e // indirect
 	golang.org/x/term v0.0.0-20201210144234-2321bbc49cbf // indirect
-	golang.org/x/tools v0.0.0-20201215171152-6307297f4651 // indirect
 	google.golang.org/protobuf v1.25.0
 )

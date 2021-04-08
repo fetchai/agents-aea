@@ -81,7 +81,7 @@ var logger zerolog.Logger = NewDefaultLogger()
 
 // SetLoggerLevel set utils logger level
 func SetLoggerLevel(lvl zerolog.Level) {
-	logger.Level(lvl)
+	logger = logger.Level(lvl)
 }
 
 func ignore(err error) {
