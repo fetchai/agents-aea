@@ -223,6 +223,7 @@ class MultiAgentManager:
         return {
             "projects": [str(public_id) for public_id in self._projects.keys()],
             "agents": [alias.dict for alias in self._agents.values()],
+            "was_password_set": self._password is not None
         }
 
     @property
