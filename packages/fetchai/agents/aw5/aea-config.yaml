@@ -1,8 +1,8 @@
-agent_name: aw5
+agent_name: simple_seller_aw5
 author: fetchai
 version: 0.1.0
 license: Apache-2.0
-description: An agent that participates in Agent World 5.
+description: An agent that participates in Agent World 5 as a simple seller.
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
@@ -92,7 +92,7 @@ models:
         latitude: 51.5194
         longitude: 0.127
       service_data:
-        key: agentworld-1
+        key: agentworld-5
         value: PUT_YOUR_DEVELOPER_HANDLE_HERE
 ---
 public_id: fetchai/simple_service_search:0.9.0
@@ -106,7 +106,7 @@ models:
       search_query:
         constraint_type: ==
         search_key: registration_service
-        search_value: aw1-registration
+        search_value: aw5-registration
 ---
 public_id: fetchai/p2p_libp2p:0.21.0
 type: connection
