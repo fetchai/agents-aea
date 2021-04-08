@@ -9,7 +9,7 @@ import (
 )
 
 type Address string
-type Performative []string
+type Performative string
 
 const (
 	NonceBytesNb = 32

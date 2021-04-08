@@ -11,7 +11,7 @@ const (
 )
 
 func TestDialogue(t *testing.T) {
-	performative := Performative{}
+	var performative Performative = "sample_performative"
 	// createing initital dialogue instance
 	message, dialogue := Create(counterPartyAddress, senderAddress, performative, []byte("initial message"))
 	// cheking if message returned has a sender same as senderAddress
