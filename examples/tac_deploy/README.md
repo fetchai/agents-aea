@@ -25,18 +25,18 @@ gcloud should be configured first!
 
 tag it first
 ``` bash
-docker image tag tac-deploy gcr.io/fetch-ai-sandbox/tac_deploy:0.0.2
+docker image tag tac-deploy gcr.io/fetch-ai-sandbox/tac_deploy:0.0.3
 ```
 
 
 push it to remote repo
 ``` bash
-docker push gcr.io/fetch-ai-sandbox/tac_deploy:0.0.2
+docker push gcr.io/fetch-ai-sandbox/tac_deploy:0.0.3
 ```
 
 run it
 ``` bash
-kubectl run tac-deploy-test --image=gcr.io/fetch-ai-sandbox/tac_deploy:0.0.2 --env="PARTICIPANTS_AMOUNT=5" --attach
+kubectl run tac-deploy-test --image=gcr.io/fetch-ai-sandbox/tac_deploy:0.0.3 --env="PARTICIPANTS_AMOUNT=5" --attach
 ```
 
 access the container

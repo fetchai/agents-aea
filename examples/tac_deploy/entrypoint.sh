@@ -76,7 +76,7 @@ function set_agent(){
 	key_file_name=$(generate_key $LEDGER $name $agent_data_dir 1)
 	aea add-key fetchai $key_file_name --connection
 	aea issue-certificates
-	json=$(printf '{"delegate_uri": null, "entry_peers": ["%s"], "local_uri": "127.0.0.1:%s", "public_uri": null}' "$PEER" "$port")
+	json=$(printf '{"log_file": "%s", "delegate_uri": null, "entry_peers": ["%s"], "local_uri": "127.0.0.1:%s", "public_uri": null}' "$agent_data_dir/libp2p_node.log" "$PEER" "$port")
 	aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config "$json"
 	log_file=$agent_data_dir/$name.log
 	json=$(printf '{"version": 1, "handlers": {"console": {"class": "logging.StreamHandler", "level": "%s"}, "file": {"class": "logging.FileHandler", "filename": "%s", "mode": "w", "level": "%s"}}, "loggers": {"aea": {"level": "%s", "handlers": ["console", "file"]}}}' "$LOG_LEVEL" "$log_file" "$LOG_LEVEL" "$LOG_LEVEL")
