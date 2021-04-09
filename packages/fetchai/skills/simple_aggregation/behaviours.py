@@ -31,6 +31,8 @@ from packages.fetchai.skills.simple_aggregation.strategy import AggregationStrat
 
 DEFAULT_SEARCH_INTERVAL = 30.0
 DEFAULT_AGGREGATION_INTERVAL = 5.0
+DEFAULT_SOURCE = ""
+DEFAULT_SIGNATURE = ""
 
 
 class SearchBehaviour(TickerBehaviour):
@@ -168,9 +170,7 @@ class AggregationBehaviour(TickerBehaviour):
         obs = self.context.shared_state.get("observation", {})
         quantity = obs.get(strategy.quantity_name, {})
         value = quantity.get("value", None)
-        source = ""
-        signature = ""
         if value:
             strategy.make_observation(
-                value, str(time()), source=source, signature=signature,
+                value, str(time()), source=DEFAULT_SOURCE, signature=DEFAULT_SIGNATURE,
             )
