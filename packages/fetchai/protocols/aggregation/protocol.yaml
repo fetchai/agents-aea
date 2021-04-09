@@ -7,12 +7,12 @@ description: A protocol for agents to aggregate individual observations
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmXQuEbbCuhLvYCWYsDbE2MfjMJJZK3cJAC1raTymLUCqA
+  README.md: QmY9nSubL4m1Y8NKixC7JTgVRuoTTHY1E151g3jwiyKPRs
   __init__.py: QmVtwPzRywY5zF4PfAsr9pwspCBwfiB5LoG6ffLGacAmHS
-  aggregation.proto: QmWNzxjaDVE6LdEEtQihgDjCc6Ls5Fi11TzuT8c3ZHXKyM
-  aggregation_pb2.py: QmWei7Mntvijb3zeJPvc9xhGceSrqveW74rHJwBKnrp2u5
+  aggregation.proto: QmPMqf6ysCcSS6j27zQRisD3YqbkiDaNF7AvHHi9vMYV1n
+  aggregation_pb2.py: QmXKXPDctMS3amwzqDS6kTw2DZ4KpFTVNcyZJpPphsPLXw
   dialogues.py: QmUX5pC7Te8uzgPFKfgP7dPPHVX5VCYeNmg3qwEqCXXw5X
-  message.py: QmQvdroMijCDknw9BFHrE5CVUgsV8cTxJpahhw59HHhBRr
+  message.py: QmSxMzPCRwciRp21TEwBJMgmnddh8hjzQUvCjisQfZHCqs
   serialization.py: QmfUH3z7yg4efdnWtJQAPL8Tihz9m64JY6bkXd2tg8bZ1h
 fingerprint_ignore_patterns: []
 dependencies:

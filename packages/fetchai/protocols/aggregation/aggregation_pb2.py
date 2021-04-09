@@ -17,7 +17,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     package="aea.fetchai.aggregation.v0_1_0",
     syntax="proto3",
     serialized_options=None,
-    serialized_pb=b'\n\x11\x61ggregation.proto\x12\x1e\x61\x65\x61.fetchai.aggregation.v0_1_0"\xaa\x03\n\x12\x41ggregationMessage\x12\x62\n\x0b\x61ggregation\x18\x05 \x01(\x0b\x32K.aea.fetchai.aggregation.v0_1_0.AggregationMessage.Aggregation_PerformativeH\x00\x12\x62\n\x0bobservation\x18\x06 \x01(\x0b\x32K.aea.fetchai.aggregation.v0_1_0.AggregationMessage.Observation_PerformativeH\x00\x1aZ\n\x18Observation_Performative\x12\r\n\x05value\x18\x01 \x01(\x05\x12\x0c\n\x04time\x18\x02 \x01(\t\x12\x0e\n\x06source\x18\x03 \x01(\t\x12\x11\n\tsignature\x18\x04 \x01(\t\x1a`\n\x18\x41ggregation_Performative\x12\r\n\x05value\x18\x01 \x01(\x05\x12\x0c\n\x04time\x18\x02 \x01(\t\x12\x14\n\x0c\x63ontributors\x18\x03 \x03(\x05\x12\x11\n\tsignature\x18\x04 \x01(\tB\x0e\n\x0cperformativeb\x06proto3',
+    serialized_pb=b'\n\x11\x61ggregation.proto\x12\x1e\x61\x65\x61.fetchai.aggregation.v0_1_0"\xaa\x03\n\x12\x41ggregationMessage\x12\x62\n\x0b\x61ggregation\x18\x05 \x01(\x0b\x32K.aea.fetchai.aggregation.v0_1_0.AggregationMessage.Aggregation_PerformativeH\x00\x12\x62\n\x0bobservation\x18\x06 \x01(\x0b\x32K.aea.fetchai.aggregation.v0_1_0.AggregationMessage.Observation_PerformativeH\x00\x1aZ\n\x18Observation_Performative\x12\r\n\x05value\x18\x01 \x01(\x05\x12\x0c\n\x04time\x18\x02 \x01(\t\x12\x0e\n\x06source\x18\x03 \x01(\t\x12\x11\n\tsignature\x18\x04 \x01(\t\x1a`\n\x18\x41ggregation_Performative\x12\r\n\x05value\x18\x01 \x01(\x05\x12\x0c\n\x04time\x18\x02 \x01(\t\x12\x14\n\x0c\x63ontributors\x18\x03 \x03(\t\x12\x11\n\tsignature\x18\x04 \x01(\tB\x0e\n\x0cperformativeb\x06proto3',
 )
 
 
@@ -161,8 +161,8 @@ _AGGREGATIONMESSAGE_AGGREGATION_PERFORMATIVE = _descriptor.Descriptor(
             full_name="aea.fetchai.aggregation.v0_1_0.AggregationMessage.Aggregation_Performative.contributors",
             index=2,
             number=3,
-            type=5,
-            cpp_type=1,
+            type=9,
+            cpp_type=9,
             label=3,
             has_default_value=False,
             default_value=[],

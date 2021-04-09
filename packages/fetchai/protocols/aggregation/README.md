@@ -24,7 +24,7 @@ speech_acts:
   aggregation:
     value: pt:int
     time: pt:str
-    contributors: pt:list[pt:int]
+    contributors: pt:list[pt:str]
     signature: pt:str
 ...
 ---

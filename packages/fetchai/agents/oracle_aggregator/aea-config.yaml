@@ -14,13 +14,13 @@ connections:
 - fetchai/soef:0.22.0
 contracts: []
 protocols:
+- fetchai/aggregation:0.1.0
 - fetchai/default:1.0.0
 - fetchai/http:1.0.0
-- fetchai/prometheus:1.0.0
 - fetchai/oef_search:1.0.0
+- fetchai/prometheus:1.0.0
 - fetchai/signing:1.0.0
 - fetchai/state_update:1.0.0
-- fetchai/aggregation:0.1.0
 skills:
 - fetchai/advanced_data_request:0.4.0
 - fetchai/simple_aggregation:0.1.0

@@ -33,7 +33,6 @@ from packages.fetchai.protocols.aggregation.dialogues import (
 from packages.fetchai.protocols.aggregation.dialogues import (
     AggregationDialogues as BaseAggregationDialogues,
 )
-
 from packages.fetchai.protocols.default.dialogues import (
     DefaultDialogue as BaseDefaultDialogue,
 )
@@ -47,13 +46,14 @@ from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogues as BaseOefSearchDialogues,
 )
 
+
 DefaultDialogue = BaseDefaultDialogue
 
 
 class DefaultDialogues(Model, BaseDefaultDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -85,7 +85,7 @@ AggregationDialogue = BaseAggregationDialogue
 class AggregationDialogues(Model, BaseAggregationDialogues):
     """The dialogues class keeps track of all dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 
@@ -118,7 +118,7 @@ OefSearchDialogue = BaseOefSearchDialogue
 class OefSearchDialogues(Model, BaseOefSearchDialogues):
     """This class keeps track of all oef_search dialogues."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize dialogues.
 

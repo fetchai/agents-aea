@@ -38,6 +38,21 @@ from packages.fetchai.skills.simple_aggregation.dialogues import (
 from packages.fetchai.skills.simple_aggregation.strategy import AggregationStrategy
 
 
+def get_observation_from_message(obs_msg: AggregationMessage) -> Dict[str, Any]:
+    """
+    Extract the observation from an observation message
+
+    :param obs_msg: the message
+    :return: the observation dict
+    """
+    obs = {
+        "value": obs_msg.value,
+        "time": obs_msg.time,
+        "source": obs_msg.source,
+        "signature": obs_msg.signature,
+    }
+    return obs
+
 
 class AggregationHandler(Handler):
     """This class implements a simple aggregation handler."""
@@ -46,7 +61,6 @@ class AggregationHandler(Handler):
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -58,7 +72,9 @@ class AggregationHandler(Handler):
         aggregation_msg = cast(AggregationMessage, message)
 
         # recover dialogue
-        aggregation_dialogues = cast(AggregationDialogues, self.context.aggregation_dialogues)
+        aggregation_dialogues = cast(
+            AggregationDialogues, self.context.aggregation_dialogues
+        )
         aggregation_dialogue = cast(
             AggregationDialogue, aggregation_dialogues.update(aggregation_msg)
         )
@@ -69,20 +85,16 @@ class AggregationHandler(Handler):
         # handle message
         if aggregation_msg.performative == AggregationMessage.Performative.OBSERVATION:
             self._handle_observation(aggregation_msg)
-        elif aggregation_msg.performative == AggregationMessage.Performative.AGGREGATION:
+        elif (
+            aggregation_msg.performative == AggregationMessage.Performative.AGGREGATION
+        ):
             self._handle_aggregation(aggregation_msg)
         else:
             self._handle_invalid(aggregation_msg, aggregation_dialogue)
 
-    def teardown(self) -> None:
-        """
-        Implement the handler teardown.
-
-        :return: None
-        """
-        pass
-
-    def _handle_unidentified_dialogue(self, aggregation_msg: AggregationMessage) -> None:
+    def _handle_unidentified_dialogue(
+        self, aggregation_msg: AggregationMessage
+    ) -> None:
         """
         Handle an unidentified dialogue.
 
@@ -103,16 +115,6 @@ class AggregationHandler(Handler):
         )
         self.context.outbox.put_message(message=default_msg)
 
-    def get_observation_from_message(self, obs_msg: AggregationMessage) -> Dict[str, Any]:
-        """Extract the observation from an observation message"""
-        obs = {
-            "value": obs_msg.value,
-            "time": obs_msg.time,
-            "source": obs_msg.source,
-            "signature": obs_msg.signature,
-        }
-        return obs
-
     def _handle_observation(self, obs_msg: AggregationMessage) -> None:
         """
         Handle the observation.
@@ -127,7 +129,7 @@ class AggregationHandler(Handler):
         )
 
         strategy = cast(AggregationStrategy, self.context.strategy)
-        obs = self.get_observation_from_message(obs_msg)
+        obs = get_observation_from_message(obs_msg)
 
         strategy.add_observation(obs_msg.sender, obs)
         strategy.aggregate_observations()
@@ -147,7 +149,9 @@ class AggregationHandler(Handler):
         )
 
     def _handle_invalid(
-        self, aggregation_msg: AggregationMessage, aggregation_dialogue: AggregationDialogue
+        self,
+        aggregation_msg: AggregationMessage,
+        aggregation_dialogue: AggregationDialogue,
     ) -> None:
         """
         Handle a aggregation message of invalid performative.
@@ -162,6 +166,13 @@ class AggregationHandler(Handler):
             )
         )
 
+    def teardown(self) -> None:
+        """
+        Implement the handler teardown.
+
+        :return: None
+        """
+
 
 class OefSearchHandler(Handler):
     """This class implements an OEF search handler."""
@@ -170,7 +181,6 @@ class OefSearchHandler(Handler):
 
     def setup(self) -> None:
         """Call to setup the handler."""
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -206,7 +216,6 @@ class OefSearchHandler(Handler):
 
         :return: None
         """
-        pass
 
     def _handle_unidentified_dialogue(self, oef_search_msg: OefSearchMessage) -> None:
         """
@@ -256,7 +265,9 @@ class OefSearchHandler(Handler):
                 list(map(lambda x: x[-5:], oef_search_msg.agents)),
             )
         )
-        aggregation_dialogues = cast(AggregationDialogues, self.context.aggregation_dialogues)
+        aggregation_dialogues = cast(
+            AggregationDialogues, self.context.aggregation_dialogues
+        )
         strategy.add_peers(oef_search_msg.agents)
         obs = strategy.observation
         if obs is None:

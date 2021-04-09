@@ -7,10 +7,10 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   __init__.py: QmRiWWZD3akeTSkr5UksPrRc83qvjbQm9eZTqEQ1DsZK3Z
-  behaviours.py: QmUWbTSLACfiTgTxonagi7KsH6iCZ1b7x1hGykkbLEfqix
-  dialogues.py: QmPFiv6unZ9diaRyTYG1esiRb7mDwVropcCmnDt3WCq2gC
-  handlers.py: QmRnnMF2Qmfuyv1g8KHDdJZfFzjBsjhn8UiKgw51X9Rui1
-  strategy.py: Qmevji4SxDTnKCisb77JwMsJ1qiTBZeubGiFqSuWBU8TtF
+  behaviours.py: QmNSwT4eFLZkPEEoZWz4gbwFUmb2FAnuvY88zJuGHjxUfM
+  dialogues.py: QmaAnWJHSrAVqbswjGpJ9ukBA2QDdXxJAy33Gtabet3Bny
+  handlers.py: QmUJrYz33e4tpWEhgcFjnVM7BiBHcdmtvb1Cu8TR1Sdvyv
+  strategy.py: QmWNrDKAG4ZNzkPXVsqLxDVMkeq2YDeZkv2tr3cRYAMBPK
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
@@ -46,6 +46,7 @@ models:
     class_name: OefSearchDialogues
   strategy:
     args:
+      aggregation_function: mean
       location:
         latitude: 51.5194
         longitude: 0.127

@@ -121,10 +121,10 @@ class AggregationMessage(Message):
         return cast(int, self.get("target"))
 
     @property
-    def contributors(self) -> Tuple[int, ...]:
+    def contributors(self) -> Tuple[str, ...]:
         """Get the 'contributors' content from the message."""
         enforce(self.is_set("contributors"), "'contributors' content is not set.")
-        return cast(Tuple[int, ...], self.get("contributors"))
+        return cast(Tuple[str, ...], self.get("contributors"))
 
     @property
     def signature(self) -> str:
@@ -243,8 +243,8 @@ class AggregationMessage(Message):
                     ),
                 )
                 enforce(
-                    all(type(element) is int for element in self.contributors),
-                    "Invalid type for tuple elements in content 'contributors'. Expected 'int'.",
+                    all(isinstance(element, str) for element in self.contributors),
+                    "Invalid type for tuple elements in content 'contributors'. Expected 'str'.",
                 )
                 enforce(
                     isinstance(self.signature, str),

@@ -20,7 +20,7 @@
 """This package contains handlers for the advanced_data_request skill."""
 
 import json
-from typing import Any, Dict, Optional, cast
+from typing import Any, Dict, Optional, SupportsFloat, cast
 
 from aea.configurations.base import PublicId
 from aea.protocols.base import Message
@@ -45,7 +45,8 @@ def find(dotted_path: str, data: Dict[str, Any]) -> Optional[Any]:
         value = value.get(key, {})
     return None if value == {} else value
 
-def is_number(value):
+
+def is_number(value: SupportsFloat) -> bool:
     """Test if value is a number"""
     try:
         float(value)
@@ -125,11 +126,12 @@ class HttpHandler(Handler):
             json_path = output["json_path"]
 
             # find desired output data in msg_body
-            value = find(json_path, msg_body)
+            value = cast(SupportsFloat, find(json_path, msg_body))
 
             # if value is a numeric type, store it as fixed-point with number of decimals
             if is_number(value):
-                int_value = int(float(value) * 10 ** model.decimals)
+                float_value = float(value)
+                int_value = int(float_value * 10 ** model.decimals)
                 observation[output["name"]] = {
                     "value": int_value,
                     "decimals": model.decimals,

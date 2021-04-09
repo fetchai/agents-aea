@@ -19,9 +19,9 @@
 
 """This package contains the strategy for the oracle aggregation skill."""
 
-from random import randint
-from time import time
-from typing import Any, Dict, Set, Tuple
+import statistics
+from sys import modules
+from typing import Any, Dict, Optional, Set, Tuple
 
 from aea.common import Address
 from aea.exceptions import enforce
@@ -41,8 +41,10 @@ from aea.helpers.search.models import (
 )
 from aea.skills.base import Model
 
+
 DEFAULT_SEARCH_RADIUS = 5.0
 DEFAULT_SERVICE_ID = "aggregation"
+DEFAULT_AGGREGATION_FUNCTION = "mean"
 DEFAULT_SERVICE_DATA = {"key": "service", "value": "aggregation"}
 DEFAULT_QUANTITY_NAME = "quantity"
 DEFAULT_PERSONALITY_DATA = {"piece": "genus", "value": "data"}
@@ -53,29 +55,13 @@ DEFAULT_SEARCH_QUERY = {
     "search_value": "aggregation",
     "constraint_type": "==",
 }
-DEFAULT_ORACLE_REQUEST = {
-    "quantity": "price-fetchai-usd",
-    "aggregation_function": "mean",
-    "destination": "contract_address",
-    "trusted_sources": "all",
-    "trusted_agents": "all",
-    "reward": 0,
-    "agg_thresh": 2 / 3,
-    "sign_thresh": 2 / 3,
-    "id": 0,
-}
-DEFAULT_OBSERVATION = {
-    "value": randint(0, 10),
-    "time": str(time()),
-    "source": "source",
-    "signature": "",
-}
+IMPLEMENTED_AGGREGATION_FUCNTIONS = {"mean", "median", "mode"}
 
 
 class AggregationStrategy(Model):
     """This class defines a strategy for the agent."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """
         Initialize the strategy of the agent.
 
@@ -84,14 +70,20 @@ class AggregationStrategy(Model):
 
         super().__init__(**kwargs)
 
-        self._oracle_request = DEFAULT_ORACLE_REQUEST
         self._round = 0
-        self._peers = {}
-        self._observations = {}
-        self._aggregation = None
+        self._peers = set()  # type: Set[Address]
+        self._observations = dict()  # type: Dict[Address, Dict[str, Any]]
+        self._aggregation = None  # type: Optional[Dict[str, Any]]
 
         self._quantity_name = kwargs.pop("quantity_name", DEFAULT_QUANTITY_NAME)
         self._service_id = kwargs.pop("service_id", DEFAULT_SERVICE_ID)
+        aggregation_function = kwargs.pop(
+            "aggregation_function", DEFAULT_AGGREGATION_FUNCTION
+        )
+
+        if aggregation_function not in IMPLEMENTED_AGGREGATION_FUCNTIONS:
+            raise NotImplementedError
+        self._aggregate = getattr(statistics, aggregation_function)
 
         self._search_query = kwargs.pop("search_query", DEFAULT_SEARCH_QUERY)
         location = kwargs.pop("location", DEFAULT_LOCATION)
@@ -135,14 +127,13 @@ class AggregationStrategy(Model):
             ledger_id if ledger_id is not None else self.context.default_ledger_id
         )
 
-
     @property
     def ledger_id(self) -> str:
         """Get the ledger id."""
         return self._ledger_id
 
     @property
-    def observation(self) -> Dict[str, Any]:
+    def observation(self) -> Optional[Dict[str, Any]]:
         """Get latest observation"""
         my_address = self.context.agent_addresses[self._ledger_id]
         return self._observations.get(my_address, None)
@@ -157,34 +148,38 @@ class AggregationStrategy(Model):
         """Get the name of the quantity to aggregate."""
         return self._quantity_name
 
-    def add_peers(self, found_peers: Tuple[str, ...]) -> Tuple[str, ...]:
+    def add_peers(self, found_peers: Tuple[str, ...]) -> None:
         """
         Update registered peers with list found in search
 
         :return: None
         """
         for _, peer in enumerate(found_peers):
-            self._peers.update({peer: {}})
+            self._peers.add(peer)
 
     def add_observation(self, peer: Address, obs: Dict[str, Any]) -> None:
         """Add new observation to list of observations"""
         if peer in self._peers:
             self._observations[peer] = obs
 
-    def make_observation(self, value: int, obs_time: str, source: str="", signature: str="") -> None:
+    def make_observation(
+        self, value: int, obs_time: str, source: str = "", signature: str = ""
+    ) -> None:
         """Make observation of oracle value"""
         my_address = self.context.agent_addresses[self._ledger_id]
-        observation = dict(value=value, time=obs_time, source=source, signature=signature)
+        observation = dict(
+            value=value, time=obs_time, source=source, signature=signature
+        )
         self.context.logger.info(f"Observation: {observation}")
         self._observations[my_address] = observation
 
     def aggregate_observations(self) -> None:
         """Aggregate values from all observations from myself and peers"""
-        values = [obs["value"] for obs in self._observations.values()]
+        values = [float(obs["value"]) for obs in self._observations.values()]
         if len(values) == 0:
             self.context.logger.info("No observations to aggregate")
             return
-        self._aggregation = sum(values) / len(values)
+        self._aggregation = self._aggregate(values)
         self.context.shared_state["aggregation"] = self._aggregation
         self.context.logger.info(f"Observations: {values}")
         self.context.logger.info(f"Average: {self._aggregation}")
@@ -192,6 +187,7 @@ class AggregationStrategy(Model):
     def get_location_description(self) -> Description:
         """
         Get the location description.
+
         :return: a description of the agent's location
         """
         description = Description(
@@ -202,6 +198,7 @@ class AggregationStrategy(Model):
     def get_register_service_description(self) -> Description:
         """
         Get the register service description.
+
         :return: a description of the offered services
         """
         description = Description(
@@ -212,6 +209,7 @@ class AggregationStrategy(Model):
     def get_register_personality_description(self) -> Description:
         """
         Get the register personality description.
+
         :return: a description of the personality
         """
         description = Description(
@@ -222,6 +220,7 @@ class AggregationStrategy(Model):
     def get_register_classification_description(self) -> Description:
         """
         Get the register classification description.
+
         :return: a description of the classification
         """
         description = Description(
@@ -232,6 +231,7 @@ class AggregationStrategy(Model):
     def get_service_description(self) -> Description:
         """
         Get the simple service description.
+
         :return: a description of the offered services
         """
         description = Description(
@@ -242,6 +242,7 @@ class AggregationStrategy(Model):
     def get_unregister_service_description(self) -> Description:
         """
         Get the unregister service description.
+
         :return: a description of the to be removed service
         """
         description = Description(
@@ -252,6 +253,7 @@ class AggregationStrategy(Model):
     def get_location_and_service_query(self) -> Query:
         """
         Get the location and service query of the agent.
+
         :return: the query
         """
         close_to_my_service = Constraint(
@@ -273,6 +275,7 @@ class AggregationStrategy(Model):
     def get_service_query(self) -> Query:
         """
         Get the service query of the agent.
+
         :return: the query
         """
         service_key_filter = Constraint(
@@ -284,4 +287,3 @@ class AggregationStrategy(Model):
         )
         query = Query([service_key_filter], model=SIMPLE_SERVICE_MODEL)
         return query
-

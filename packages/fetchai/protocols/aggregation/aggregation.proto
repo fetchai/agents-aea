@@ -15,7 +15,7 @@ message AggregationMessage{
   message Aggregation_Performative{
     int32 value = 1;
     string time = 2;
-    repeated int32 contributors = 3;
+    repeated string contributors = 3;
     string signature = 4;
   }
 

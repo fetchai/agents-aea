@@ -20,9 +20,10 @@
 """This package contains the behaviours for the oracle aggregation skill."""
 
 from time import time
-from typing import cast
+from typing import Any, cast
 
 from aea.skills.behaviours import TickerBehaviour
+
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.skills.simple_aggregation.dialogues import OefSearchDialogues
 from packages.fetchai.skills.simple_aggregation.strategy import AggregationStrategy
@@ -35,7 +36,7 @@ DEFAULT_AGGREGATION_INTERVAL = 5.0
 class SearchBehaviour(TickerBehaviour):
     """This class implements the service registration behaviour for the simple aggregation skill"""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize the search behaviour."""
         search_interval = cast(
             float, kwargs.pop("search_interval", DEFAULT_SEARCH_INTERVAL)
@@ -50,6 +51,7 @@ class SearchBehaviour(TickerBehaviour):
     def act(self) -> None:
         """
         Implement the act.
+
         :return: None
         """
         strategy = cast(AggregationStrategy, self.context.strategy)
@@ -67,6 +69,7 @@ class SearchBehaviour(TickerBehaviour):
     def _register_agent(self) -> None:
         """
         Register the agent's location.
+
         :return: None
         """
         strategy = cast(AggregationStrategy, self.context.strategy)
@@ -85,6 +88,7 @@ class SearchBehaviour(TickerBehaviour):
     def _register_service_personality_classification(self) -> None:
         """
         Register the agent's service, personality and classification.
+
         :return: None
         """
         strategy = cast(AggregationStrategy, self.context.strategy)
@@ -108,6 +112,7 @@ class SearchBehaviour(TickerBehaviour):
     def _unregister_service(self) -> None:
         """
         Unregister service from the SOEF.
+
         :return: None
         """
         strategy = cast(AggregationStrategy, self.context.strategy)
@@ -126,6 +131,7 @@ class SearchBehaviour(TickerBehaviour):
     def _unregister_agent(self) -> None:
         """
         Unregister agent from the SOEF.
+
         :return: None
         """
         strategy = cast(AggregationStrategy, self.context.strategy)
@@ -145,13 +151,12 @@ class SearchBehaviour(TickerBehaviour):
 class AggregationBehaviour(TickerBehaviour):
     """This class implements an aggregation behaviour."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize the aggregation behaviour."""
         aggregation_interval = cast(
             float, kwargs.pop("aggregation_interval", DEFAULT_AGGREGATION_INTERVAL)
         )
         super().__init__(tick_interval=aggregation_interval, **kwargs)
-
 
     def act(self) -> None:
         """
@@ -163,13 +168,9 @@ class AggregationBehaviour(TickerBehaviour):
         obs = self.context.shared_state.get("observation", {})
         quantity = obs.get(strategy.quantity_name, {})
         value = quantity.get("value", None)
-        # decimals = obs.get("decimals", None)
         source = ""
         signature = ""
         if value:
             strategy.make_observation(
-                value,
-                str(time()),
-                source=source,
-                signature=signature,
+                value, str(time()), source=source, signature=signature,
             )
