@@ -29,7 +29,7 @@ ct:AgentRecord:
   string signature = 6;
   string not_before = 7;
   string not_after = 8;
-ct:StatusCode: |
+ct:StatusBody: |
   enum StatusCodeEnum {
     // common (0x)
     SUCCESS = 0;
