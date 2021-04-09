@@ -17,10 +17,14 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains the support resources for the consensus protocol."""
+"""
+This module contains the support resources for the aggregation protocol.
 
-from packages.fetchai.protocols.consensus.message import ConsensusMessage
-from packages.fetchai.protocols.consensus.serialization import ConsensusSerializer
+It was created with protocol buffer compiler version `libprotoc 3.11.4` and aea version `1.0.0`.
+"""
+
+from packages.fetchai.protocols.aggregation.message import AggregationMessage
+from packages.fetchai.protocols.aggregation.serialization import AggregationSerializer
 
 
-ConsensusMessage.serializer = ConsensusSerializer
+AggregationMessage.serializer = AggregationSerializer

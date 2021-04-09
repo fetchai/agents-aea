@@ -1,0 +1,19 @@
+name: aggregation
+author: fetchai
+version: 0.1.0
+protocol_specification_id: fetchai/aggregation:0.1.0
+type: protocol
+description: A protocol for agents to aggregate individual observations
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  README.md: QmXQuEbbCuhLvYCWYsDbE2MfjMJJZK3cJAC1raTymLUCqA
+  __init__.py: QmVtwPzRywY5zF4PfAsr9pwspCBwfiB5LoG6ffLGacAmHS
+  aggregation.proto: QmWNzxjaDVE6LdEEtQihgDjCc6Ls5Fi11TzuT8c3ZHXKyM
+  aggregation_pb2.py: QmWei7Mntvijb3zeJPvc9xhGceSrqveW74rHJwBKnrp2u5
+  dialogues.py: QmUX5pC7Te8uzgPFKfgP7dPPHVX5VCYeNmg3qwEqCXXw5X
+  message.py: QmQvdroMijCDknw9BFHrE5CVUgsV8cTxJpahhw59HHhBRr
+  serialization.py: QmfUH3z7yg4efdnWtJQAPL8Tihz9m64JY6bkXd2tg8bZ1h
+fingerprint_ignore_patterns: []
+dependencies:
+  protobuf: {}

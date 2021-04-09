@@ -41,22 +41,18 @@ from aea.helpers.search.models import (
 )
 from aea.skills.base import Model
 
-
-DEFAULT_IS_LEDGER_TX = True
-
-DEFAULT_SERVICE_ID = "oracle_aggregation"
-
+DEFAULT_SEARCH_RADIUS = 5.0
+DEFAULT_SERVICE_ID = "aggregation"
+DEFAULT_SERVICE_DATA = {"key": "service", "value": "aggregation"}
+DEFAULT_QUANTITY_NAME = "quantity"
+DEFAULT_PERSONALITY_DATA = {"piece": "genus", "value": "data"}
+DEFAULT_CLASSIFICATION = {"piece": "classification", "value": "agent"}
 DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
 DEFAULT_SEARCH_QUERY = {
     "search_key": "service",
-    "search_value": "oracle_aggregation",
+    "search_value": "aggregation",
     "constraint_type": "==",
 }
-DEFAULT_SEARCH_RADIUS = 5.0
-DEFAULT_SERVICE_DATA = {"key": "service", "value": "oracle_aggregation"}
-DEFAULT_PERSONALITY_DATA = {"piece": "genus", "value": "data"}
-DEFAULT_CLASSIFICATION = {"piece": "classification", "value": "agent"}
-
 DEFAULT_ORACLE_REQUEST = {
     "quantity": "price-fetchai-usd",
     "aggregation_function": "mean",
@@ -68,16 +64,15 @@ DEFAULT_ORACLE_REQUEST = {
     "sign_thresh": 2 / 3,
     "id": 0,
 }
-
 DEFAULT_OBSERVATION = {
     "value": randint(0, 10),
-    "time": int(time()),
+    "time": str(time()),
     "source": "source",
-    "signature": "xxx",
+    "signature": "",
 }
 
 
-class GenericStrategy(Model):
+class AggregationStrategy(Model):
     """This class defines a strategy for the agent."""
 
     def __init__(self, **kwargs) -> None:
@@ -86,10 +81,16 @@ class GenericStrategy(Model):
 
         :return: None
         """
-        ledger_id = kwargs.pop("ledger_id", None)
-        currency_id = kwargs.pop("currency_id", None)
-        self._is_ledger_tx = kwargs.pop("is_ledger_tx", DEFAULT_IS_LEDGER_TX)
 
+        super().__init__(**kwargs)
+
+        self._oracle_request = DEFAULT_ORACLE_REQUEST
+        self._round = 0
+        self._peers = {}
+        self._observations = {}
+        self._aggregation = None
+
+        self._quantity_name = kwargs.pop("quantity_name", DEFAULT_QUANTITY_NAME)
         self._service_id = kwargs.pop("service_id", DEFAULT_SERVICE_ID)
 
         self._search_query = kwargs.pop("search_query", DEFAULT_SEARCH_QUERY)
@@ -100,12 +101,6 @@ class GenericStrategy(Model):
             )
         }
         self._radius = kwargs.pop("search_radius", DEFAULT_SEARCH_RADIUS)
-
-        self._oracle_request = DEFAULT_ORACLE_REQUEST
-        self._round = 0
-        self._peers = {}
-        self._observations = {}
-        self._aggregation = None
 
         self._set_personality_data = kwargs.pop(
             "personality_data", DEFAULT_PERSONALITY_DATA
@@ -135,40 +130,16 @@ class GenericStrategy(Model):
             self._set_service_data["key"]: self._set_service_data["value"]
         }
 
-        super().__init__(**kwargs)
+        ledger_id = kwargs.pop("ledger_id", None)
         self._ledger_id = (
             ledger_id if ledger_id is not None else self.context.default_ledger_id
         )
-        if currency_id is None:
-            currency_id = self.context.currency_denominations.get(self._ledger_id, None)
-            enforce(
-                currency_id is not None,
-                f"Currency denomination for ledger_id={self._ledger_id} not specified.",
-            )
-        self._currency_id = currency_id
-        self._is_searching = True
-        self._balance = 0
+
 
     @property
     def ledger_id(self) -> str:
         """Get the ledger id."""
         return self._ledger_id
-
-    @property
-    def is_ledger_tx(self) -> bool:
-        """Check whether or not tx are settled on a ledger."""
-        return self._is_ledger_tx
-
-    @property
-    def is_searching(self) -> bool:
-        """Check if the agent is searching."""
-        return self._is_searching
-
-    @is_searching.setter
-    def is_searching(self, is_searching: bool) -> None:
-        """Check if the agent is searching."""
-        enforce(isinstance(is_searching, bool), "Can only set bool on is_searching!")
-        self._is_searching = is_searching
 
     @property
     def observation(self) -> Dict[str, Any]:
@@ -181,10 +152,46 @@ class GenericStrategy(Model):
         """Get registered peers."""
         return self._peers
 
+    @property
+    def quantity_name(self) -> str:
+        """Get the name of the quantity to aggregate."""
+        return self._quantity_name
+
+    def add_peers(self, found_peers: Tuple[str, ...]) -> Tuple[str, ...]:
+        """
+        Update registered peers with list found in search
+
+        :return: None
+        """
+        for _, peer in enumerate(found_peers):
+            self._peers.update({peer: {}})
+
+    def add_observation(self, peer: Address, obs: Dict[str, Any]) -> None:
+        """Add new observation to list of observations"""
+        if peer in self._peers:
+            self._observations[peer] = obs
+
+    def make_observation(self, value: int, obs_time: str, source: str="", signature: str="") -> None:
+        """Make observation of oracle value"""
+        my_address = self.context.agent_addresses[self._ledger_id]
+        observation = dict(value=value, time=obs_time, source=source, signature=signature)
+        self.context.logger.info(f"Observation: {observation}")
+        self._observations[my_address] = observation
+
+    def aggregate_observations(self) -> None:
+        """Aggregate values from all observations from myself and peers"""
+        values = [obs["value"] for obs in self._observations.values()]
+        if len(values) == 0:
+            self.context.logger.info("No observations to aggregate")
+            return
+        self._aggregation = sum(values) / len(values)
+        self.context.shared_state["aggregation"] = self._aggregation
+        self.context.logger.info(f"Observations: {values}")
+        self.context.logger.info(f"Average: {self._aggregation}")
+
     def get_location_description(self) -> Description:
         """
         Get the location description.
-
         :return: a description of the agent's location
         """
         description = Description(
@@ -195,7 +202,6 @@ class GenericStrategy(Model):
     def get_register_service_description(self) -> Description:
         """
         Get the register service description.
-
         :return: a description of the offered services
         """
         description = Description(
@@ -206,7 +212,6 @@ class GenericStrategy(Model):
     def get_register_personality_description(self) -> Description:
         """
         Get the register personality description.
-
         :return: a description of the personality
         """
         description = Description(
@@ -217,7 +222,6 @@ class GenericStrategy(Model):
     def get_register_classification_description(self) -> Description:
         """
         Get the register classification description.
-
         :return: a description of the classification
         """
         description = Description(
@@ -228,7 +232,6 @@ class GenericStrategy(Model):
     def get_service_description(self) -> Description:
         """
         Get the simple service description.
-
         :return: a description of the offered services
         """
         description = Description(
@@ -239,7 +242,6 @@ class GenericStrategy(Model):
     def get_unregister_service_description(self) -> Description:
         """
         Get the unregister service description.
-
         :return: a description of the to be removed service
         """
         description = Description(
@@ -250,7 +252,6 @@ class GenericStrategy(Model):
     def get_location_and_service_query(self) -> Query:
         """
         Get the location and service query of the agent.
-
         :return: the query
         """
         close_to_my_service = Constraint(
@@ -272,7 +273,6 @@ class GenericStrategy(Model):
     def get_service_query(self) -> Query:
         """
         Get the service query of the agent.
-
         :return: the query
         """
         service_key_filter = Constraint(
@@ -285,29 +285,3 @@ class GenericStrategy(Model):
         query = Query([service_key_filter], model=SIMPLE_SERVICE_MODEL)
         return query
 
-    def add_peers(self, found_peers: Tuple[str, ...]) -> Tuple[str, ...]:
-        """
-        Update registered peers with list found in search
-
-        :return: None
-        """
-        for _, peer in enumerate(found_peers):
-            self._peers.update({peer: {}})
-
-    def add_observation(self, peer: Address, obs: Dict[str, Any]) -> None:
-        """Add new observation to list of observations"""
-        if peer in self._peers:
-            self._observations[peer] = obs
-
-    def make_observation(self) -> None:
-        """Make observation of oracle value"""
-        my_address = self.context.agent_addresses[self._ledger_id]
-        self._observations[my_address] = DEFAULT_OBSERVATION
-
-    def aggregate_observations(self) -> None:
-        """Aggregate values from all observations from myself and peers"""
-        values = [obs["value"] for obs in self._observations.values()]
-        self._aggregation = sum(values) / len(values)
-        self.context.shared_state["aggregation"] = self._aggregation
-        self.context.logger.info(f"Observations: {values}")
-        self.context.logger.info(f"Average: {self._aggregation}")

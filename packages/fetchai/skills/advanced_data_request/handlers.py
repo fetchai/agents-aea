@@ -45,6 +45,14 @@ def find(dotted_path: str, data: Dict[str, Any]) -> Optional[Any]:
         value = value.get(key, {})
     return None if value == {} else value
 
+def is_number(value):
+    """Test if value is a number"""
+    try:
+        float(value)
+        return True
+    except ValueError:
+        return False
+
 
 class HttpHandler(Handler):
     """This class provides a simple http handler."""
@@ -120,8 +128,8 @@ class HttpHandler(Handler):
             value = find(json_path, msg_body)
 
             # if value is a numeric type, store it as fixed-point with number of decimals
-            if isinstance(value, (int, float)):
-                int_value = int(value * 10 ** model.decimals)
+            if is_number(value):
+                int_value = int(float(value) * 10 ** model.decimals)
                 observation[output["name"]] = {
                     "value": int_value,
                     "decimals": model.decimals,

@@ -19,20 +19,21 @@
 
 """This package contains the behaviours for the oracle aggregation skill."""
 
+from time import time
 from typing import cast
 
 from aea.skills.behaviours import TickerBehaviour
-
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.skills.oracle_aggregation.dialogues import OefSearchDialogues
-from packages.fetchai.skills.oracle_aggregation.strategy import GenericStrategy
+from packages.fetchai.skills.simple_aggregation.dialogues import OefSearchDialogues
+from packages.fetchai.skills.simple_aggregation.strategy import AggregationStrategy
 
 
-DEFAULT_SEARCH_INTERVAL = 5.0
+DEFAULT_SEARCH_INTERVAL = 30.0
+DEFAULT_AGGREGATION_INTERVAL = 5.0
 
 
-class GenericSearchBehaviour(TickerBehaviour):
-    """This class implements a search behaviour."""
+class SearchBehaviour(TickerBehaviour):
+    """This class implements the service registration behaviour for the simple aggregation skill"""
 
     def __init__(self, **kwargs):
         """Initialize the search behaviour."""
@@ -49,30 +50,26 @@ class GenericSearchBehaviour(TickerBehaviour):
     def act(self) -> None:
         """
         Implement the act.
-
         :return: None
         """
-        strategy = cast(GenericStrategy, self.context.strategy)
-        strategy.make_observation()
-        if strategy.is_searching:
-            query = strategy.get_location_and_service_query()
-            oef_search_dialogues = cast(
-                OefSearchDialogues, self.context.oef_search_dialogues
-            )
-            oef_search_msg, _ = oef_search_dialogues.create(
-                counterparty=self.context.search_service_address,
-                performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-                query=query,
-            )
-            self.context.outbox.put_message(message=oef_search_msg)
+        strategy = cast(AggregationStrategy, self.context.strategy)
+        query = strategy.get_location_and_service_query()
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
+        )
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
+            performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+            query=query,
+        )
+        self.context.outbox.put_message(message=oef_search_msg)
 
     def _register_agent(self) -> None:
         """
         Register the agent's location.
-
         :return: None
         """
-        strategy = cast(GenericStrategy, self.context.strategy)
+        strategy = cast(AggregationStrategy, self.context.strategy)
         description = strategy.get_location_description()
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
@@ -88,10 +85,9 @@ class GenericSearchBehaviour(TickerBehaviour):
     def _register_service_personality_classification(self) -> None:
         """
         Register the agent's service, personality and classification.
-
         :return: None
         """
-        strategy = cast(GenericStrategy, self.context.strategy)
+        strategy = cast(AggregationStrategy, self.context.strategy)
         descriptions = [
             strategy.get_register_service_description(),
             strategy.get_register_personality_description(),
@@ -112,10 +108,9 @@ class GenericSearchBehaviour(TickerBehaviour):
     def _unregister_service(self) -> None:
         """
         Unregister service from the SOEF.
-
         :return: None
         """
-        strategy = cast(GenericStrategy, self.context.strategy)
+        strategy = cast(AggregationStrategy, self.context.strategy)
         description = strategy.get_unregister_service_description()
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
@@ -131,10 +126,9 @@ class GenericSearchBehaviour(TickerBehaviour):
     def _unregister_agent(self) -> None:
         """
         Unregister agent from the SOEF.
-
         :return: None
         """
-        strategy = cast(GenericStrategy, self.context.strategy)
+        strategy = cast(AggregationStrategy, self.context.strategy)
         description = strategy.get_location_description()
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
@@ -147,11 +141,35 @@ class GenericSearchBehaviour(TickerBehaviour):
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("unregistering agent from SOEF.")
 
-    def teardown(self) -> None:
+
+class AggregationBehaviour(TickerBehaviour):
+    """This class implements an aggregation behaviour."""
+
+    def __init__(self, **kwargs):
+        """Initialize the aggregation behaviour."""
+        aggregation_interval = cast(
+            float, kwargs.pop("aggregation_interval", DEFAULT_AGGREGATION_INTERVAL)
+        )
+        super().__init__(tick_interval=aggregation_interval, **kwargs)
+
+
+    def act(self) -> None:
         """
-        Implement the task teardown.
+        Implement the act.
 
         :return: None
         """
-        self._unregister_service()
-        self._unregister_agent()
+        strategy = cast(AggregationStrategy, self.context.strategy)
+        obs = self.context.shared_state.get("observation", {})
+        quantity = obs.get(strategy.quantity_name, {})
+        value = quantity.get("value", None)
+        # decimals = obs.get("decimals", None)
+        source = ""
+        signature = ""
+        if value:
+            strategy.make_observation(
+                value,
+                str(time()),
+                source=source,
+                signature=signature,
+            )

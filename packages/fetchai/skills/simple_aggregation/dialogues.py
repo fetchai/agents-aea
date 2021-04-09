@@ -19,21 +19,21 @@
 
 """This package contains the dialogues for the oracle aggregation skill."""
 
-from typing import Type
+
+from typing import Any
 
 from aea.common import Address
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue as BaseDialogue
-from aea.protocols.dialogue.base import DialogueLabel as BaseDialogueLabel
 from aea.skills.base import Model
 
-from packages.fetchai.protocols.consensus.dialogues import (
-    ConsensusDialogue as BaseConsensusDialogue,
+from packages.fetchai.protocols.aggregation.dialogues import (
+    AggregationDialogue as BaseAggregationDialogue,
 )
-from packages.fetchai.protocols.consensus.dialogues import (
-    ConsensusDialogues as BaseConsensusDialogues,
+from packages.fetchai.protocols.aggregation.dialogues import (
+    AggregationDialogues as BaseAggregationDialogues,
 )
-from packages.fetchai.protocols.consensus.message import ConsensusMessage
+
 from packages.fetchai.protocols.default.dialogues import (
     DefaultDialogue as BaseDefaultDialogue,
 )
@@ -46,7 +46,6 @@ from packages.fetchai.protocols.oef_search.dialogues import (
 from packages.fetchai.protocols.oef_search.dialogues import (
     OefSearchDialogues as BaseOefSearchDialogues,
 )
-
 
 DefaultDialogue = BaseDefaultDialogue
 
@@ -80,35 +79,10 @@ class DefaultDialogues(Model, BaseDefaultDialogues):
         )
 
 
-class ConsensusDialogue(BaseConsensusDialogue):
-    """The dialogue class maintains state of a dialogue and manages it."""
-
-    def __init__(
-        self,
-        dialogue_label: BaseDialogueLabel,
-        self_address: Address,
-        role: BaseDialogue.Role,
-        message_class: Type[ConsensusMessage] = ConsensusMessage,
-    ) -> None:
-        """
-        Initialize a dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param self_address: the address of the entity for whom this dialogue is maintained
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: None
-        """
-        BaseConsensusDialogue.__init__(
-            self,
-            dialogue_label=dialogue_label,
-            self_address=self_address,
-            role=role,
-            message_class=message_class,
-        )
+AggregationDialogue = BaseAggregationDialogue
 
 
-class ConsensusDialogues(Model, BaseConsensusDialogues):
+class AggregationDialogues(Model, BaseAggregationDialogues):
     """The dialogues class keeps track of all dialogues."""
 
     def __init__(self, **kwargs) -> None:
@@ -128,13 +102,13 @@ class ConsensusDialogues(Model, BaseConsensusDialogues):
             :param receiver_address: the address of the receiving agent
             :return: The role of the agent
             """
-            return BaseConsensusDialogue.Role.AGENT
+            return BaseAggregationDialogue.Role.AGENT
 
-        BaseConsensusDialogues.__init__(
+        BaseAggregationDialogues.__init__(
             self,
             self_address=self.context.agent_address,
             role_from_first_message=role_from_first_message,
-            dialogue_class=ConsensusDialogue,
+            dialogue_class=AggregationDialogue,
         )
 
 
@@ -166,6 +140,6 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
 
         BaseOefSearchDialogues.__init__(
             self,
-            self_address=self.context.agent_address,
+            self_address=str(self.skill_id),
             role_from_first_message=role_from_first_message,
         )

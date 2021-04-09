@@ -25,23 +25,24 @@ from aea.configurations.base import PublicId
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
-from packages.fetchai.protocols.consensus.message import ConsensusMessage
+from packages.fetchai.protocols.aggregation.message import AggregationMessage
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.skills.oracle_aggregation.dialogues import (
-    ConsensusDialogue,
-    ConsensusDialogues,
+from packages.fetchai.skills.simple_aggregation.dialogues import (
+    AggregationDialogue,
+    AggregationDialogues,
     DefaultDialogues,
     OefSearchDialogue,
     OefSearchDialogues,
 )
-from packages.fetchai.skills.oracle_aggregation.strategy import GenericStrategy
+from packages.fetchai.skills.simple_aggregation.strategy import AggregationStrategy
 
 
-class GenericConsensusHandler(Handler):
-    """This class implements a Consensus handler."""
 
-    SUPPORTED_PROTOCOL = ConsensusMessage.protocol_id  # type: Optional[PublicId]
+class AggregationHandler(Handler):
+    """This class implements a simple aggregation handler."""
+
+    SUPPORTED_PROTOCOL = AggregationMessage.protocol_id  # type: Optional[PublicId]
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
@@ -54,24 +55,24 @@ class GenericConsensusHandler(Handler):
         :param message: the message
         :return: None
         """
-        consensus_msg = cast(ConsensusMessage, message)
+        aggregation_msg = cast(AggregationMessage, message)
 
         # recover dialogue
-        consensus_dialogues = cast(ConsensusDialogues, self.context.consensus_dialogues)
-        consensus_dialogue = cast(
-            ConsensusDialogue, consensus_dialogues.update(consensus_msg)
+        aggregation_dialogues = cast(AggregationDialogues, self.context.aggregation_dialogues)
+        aggregation_dialogue = cast(
+            AggregationDialogue, aggregation_dialogues.update(aggregation_msg)
         )
-        if consensus_dialogue is None:
-            self._handle_unidentified_dialogue(consensus_msg)
+        if aggregation_dialogue is None:
+            self._handle_unidentified_dialogue(aggregation_msg)
             return
 
         # handle message
-        if consensus_msg.performative == ConsensusMessage.Performative.OBSERVATION:
-            self._handle_observation(consensus_msg)
-        elif consensus_msg.performative == ConsensusMessage.Performative.AGGREGATION:
-            self._handle_aggregation(consensus_msg)
+        if aggregation_msg.performative == AggregationMessage.Performative.OBSERVATION:
+            self._handle_observation(aggregation_msg)
+        elif aggregation_msg.performative == AggregationMessage.Performative.AGGREGATION:
+            self._handle_aggregation(aggregation_msg)
         else:
-            self._handle_invalid(consensus_msg, consensus_dialogue)
+            self._handle_invalid(aggregation_msg, aggregation_dialogue)
 
     def teardown(self) -> None:
         """
@@ -81,28 +82,28 @@ class GenericConsensusHandler(Handler):
         """
         pass
 
-    def _handle_unidentified_dialogue(self, consensus_msg: ConsensusMessage) -> None:
+    def _handle_unidentified_dialogue(self, aggregation_msg: AggregationMessage) -> None:
         """
         Handle an unidentified dialogue.
 
-        :param consensus_msg: the message
+        :param aggregation_msg: the message
         """
         self.context.logger.info(
-            "received invalid consensus message={}, unidentified dialogue.".format(
-                consensus_msg
+            "received invalid aggregation message={}, unidentified dialogue.".format(
+                aggregation_msg
             )
         )
         default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
         default_msg, _ = default_dialogues.create(
-            counterparty=consensus_msg.sender,
+            counterparty=aggregation_msg.sender,
             performative=DefaultMessage.Performative.ERROR,
             error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
             error_msg="Invalid dialogue.",
-            error_data={"consensus_message": consensus_msg.encode()},
+            error_data={"aggregation_message": aggregation_msg.encode()},
         )
         self.context.outbox.put_message(message=default_msg)
 
-    def get_observation_from_message(self, obs_msg: ConsensusMessage) -> Dict[str, Any]:
+    def get_observation_from_message(self, obs_msg: AggregationMessage) -> Dict[str, Any]:
         """Extract the observation from an observation message"""
         obs = {
             "value": obs_msg.value,
@@ -112,12 +113,12 @@ class GenericConsensusHandler(Handler):
         }
         return obs
 
-    def _handle_observation(self, obs_msg: ConsensusMessage) -> None:
+    def _handle_observation(self, obs_msg: AggregationMessage) -> None:
         """
         Handle the observation.
 
         :param obs_msg: the message
-        :param consensus_dialogue: the dialogue object
+        :param aggregation_dialogue: the dialogue object
         :return: None
         """
 
@@ -125,7 +126,7 @@ class GenericConsensusHandler(Handler):
             "received observation from sender={}".format(obs_msg.sender[-5:])
         )
 
-        strategy = cast(GenericStrategy, self.context.strategy)
+        strategy = cast(AggregationStrategy, self.context.strategy)
         obs = self.get_observation_from_message(obs_msg)
 
         strategy.add_observation(obs_msg.sender, obs)
@@ -133,36 +134,36 @@ class GenericConsensusHandler(Handler):
 
         self.context.logger.info(f"observation: {obs}")
 
-    def _handle_aggregation(self, consensus_msg: ConsensusMessage) -> None:
+    def _handle_aggregation(self, aggregation_msg: AggregationMessage) -> None:
         """
         Handle the aggregation.
 
-        :param consensus_msg: the message
-        :param consensus_dialogue: the dialogue object
+        :param aggregation_msg: the message
+        :param aggregation_dialogue: the dialogue object
         :return: None
         """
         self.context.logger.info(
-            "received aggregation from sender={}".format(consensus_msg.sender[-5:])
+            "received aggregation from sender={}".format(aggregation_msg.sender[-5:])
         )
 
     def _handle_invalid(
-        self, consensus_msg: ConsensusMessage, consensus_dialogue: ConsensusDialogue
+        self, aggregation_msg: AggregationMessage, aggregation_dialogue: AggregationDialogue
     ) -> None:
         """
-        Handle a consensus message of invalid performative.
+        Handle a aggregation message of invalid performative.
 
-        :param consensus_msg: the message
-        :param consensus_dialogue: the dialogue object
+        :param aggregation_msg: the message
+        :param aggregation_dialogue: the dialogue object
         :return: None
         """
         self.context.logger.warning(
-            "cannot handle consensus message of performative={} in dialogue={}.".format(
-                consensus_msg.performative, consensus_dialogue
+            "cannot handle aggregation message of performative={} in dialogue={}.".format(
+                aggregation_msg.performative, aggregation_dialogue
             )
         )
 
 
-class GenericOefSearchHandler(Handler):
+class OefSearchHandler(Handler):
     """This class implements an OEF search handler."""
 
     SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[PublicId]
@@ -249,19 +250,22 @@ class GenericOefSearchHandler(Handler):
                 f"found no agents in dialogue={oef_search_dialogue}, continue searching."
             )
             return
-        strategy = cast(GenericStrategy, self.context.strategy)
+        strategy = cast(AggregationStrategy, self.context.strategy)
         self.context.logger.info(
             "found agents={}.".format(
                 list(map(lambda x: x[-5:], oef_search_msg.agents)),
             )
         )
-        consensus_dialogues = cast(ConsensusDialogues, self.context.consensus_dialogues)
+        aggregation_dialogues = cast(AggregationDialogues, self.context.aggregation_dialogues)
         strategy.add_peers(oef_search_msg.agents)
         obs = strategy.observation
+        if obs is None:
+            self.context.logger.info("No observation to send")
+            return
         for counterparty in strategy.peers:
-            obs_msg, _ = consensus_dialogues.create(
+            obs_msg, _ = aggregation_dialogues.create(
                 counterparty=counterparty,
-                performative=ConsensusMessage.Performative.OBSERVATION,
+                performative=AggregationMessage.Performative.OBSERVATION,
                 **obs,
             )
             self.context.outbox.put_message(message=obs_msg)

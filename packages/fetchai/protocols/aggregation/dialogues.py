@@ -18,10 +18,10 @@
 # ------------------------------------------------------------------------------
 
 """
-This module contains the classes required for consensus dialogue management.
+This module contains the classes required for aggregation dialogue management.
 
-- ConsensusDialogue: The dialogue class maintains state of a dialogue and manages it.
-- ConsensusDialogues: The dialogues class keeps track of all dialogues.
+- AggregationDialogue: The dialogue class maintains state of a dialogue and manages it.
+- AggregationDialogues: The dialogues class keeps track of all dialogues.
 """
 
 from abc import ABC
@@ -31,36 +31,36 @@ from aea.common import Address
 from aea.protocols.base import Message
 from aea.protocols.dialogue.base import Dialogue, DialogueLabel, Dialogues
 
-from packages.fetchai.protocols.consensus.message import ConsensusMessage
+from packages.fetchai.protocols.aggregation.message import AggregationMessage
 
 
-class ConsensusDialogue(Dialogue):
-    """The consensus dialogue class maintains state of a dialogue and manages it."""
+class AggregationDialogue(Dialogue):
+    """The aggregation dialogue class maintains state of a dialogue and manages it."""
 
     INITIAL_PERFORMATIVES = frozenset(
         {
-            ConsensusMessage.Performative.OBSERVATION,
-            ConsensusMessage.Performative.AGGREGATION,
+            AggregationMessage.Performative.OBSERVATION,
+            AggregationMessage.Performative.AGGREGATION,
         }
     )
     TERMINAL_PERFORMATIVES = frozenset(
         {
-            ConsensusMessage.Performative.OBSERVATION,
-            ConsensusMessage.Performative.AGGREGATION,
+            AggregationMessage.Performative.OBSERVATION,
+            AggregationMessage.Performative.AGGREGATION,
         }
     )
     VALID_REPLIES = {
-        ConsensusMessage.Performative.AGGREGATION: frozenset(),
-        ConsensusMessage.Performative.OBSERVATION: frozenset(),
+        AggregationMessage.Performative.AGGREGATION: frozenset(),
+        AggregationMessage.Performative.OBSERVATION: frozenset(),
     }
 
     class Role(Dialogue.Role):
-        """This class defines the agent's role in a consensus dialogue."""
+        """This class defines the agent's role in a aggregation dialogue."""
 
         AGENT = "agent"
 
     class EndState(Dialogue.EndState):
-        """This class defines the end states of a consensus dialogue."""
+        """This class defines the end states of a aggregation dialogue."""
 
         SUCCESSFUL = 0
         FAILED = 1
@@ -70,7 +70,7 @@ class ConsensusDialogue(Dialogue):
         dialogue_label: DialogueLabel,
         self_address: Address,
         role: Dialogue.Role,
-        message_class: Type[ConsensusMessage] = ConsensusMessage,
+        message_class: Type[AggregationMessage] = AggregationMessage,
     ) -> None:
         """
         Initialize a dialogue.
@@ -89,11 +89,11 @@ class ConsensusDialogue(Dialogue):
         )
 
 
-class ConsensusDialogues(Dialogues, ABC):
-    """This class keeps track of all consensus dialogues."""
+class AggregationDialogues(Dialogues, ABC):
+    """This class keeps track of all aggregation dialogues."""
 
     END_STATES = frozenset(
-        {ConsensusDialogue.EndState.SUCCESSFUL, ConsensusDialogue.EndState.FAILED}
+        {AggregationDialogue.EndState.SUCCESSFUL, AggregationDialogue.EndState.FAILED}
     )
 
     _keep_terminal_state_dialogues = False
@@ -102,7 +102,7 @@ class ConsensusDialogues(Dialogues, ABC):
         self,
         self_address: Address,
         role_from_first_message: Callable[[Message, Address], Dialogue.Role],
-        dialogue_class: Type[ConsensusDialogue] = ConsensusDialogue,
+        dialogue_class: Type[AggregationDialogue] = AggregationDialogue,
     ) -> None:
         """
         Initialize dialogues.
@@ -114,7 +114,7 @@ class ConsensusDialogues(Dialogues, ABC):
             self,
             self_address=self_address,
             end_states=cast(FrozenSet[Dialogue.EndState], self.END_STATES),
-            message_class=ConsensusMessage,
+            message_class=AggregationMessage,
             dialogue_class=dialogue_class,
             role_from_first_message=role_from_first_message,
         )

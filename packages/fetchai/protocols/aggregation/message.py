@@ -17,34 +17,37 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains consensus's message definition."""
+"""This module contains aggregation's message definition."""
 
+# pylint: disable=too-many-statements,too-many-locals,no-member,too-few-public-methods,too-many-branches,not-an-iterable,unidiomatic-typecheck,unsubscriptable-object
 import logging
-from typing import Set, Tuple, cast
+from typing import Any, Set, Tuple, cast
 
 from aea.configurations.base import PublicId
 from aea.exceptions import AEAEnforceError, enforce
 from aea.protocols.base import Message
 
 
-_default_logger = logging.getLogger("aea.packages.fetchai.protocols.consensus.message")
+_default_logger = logging.getLogger(
+    "aea.packages.fetchai.protocols.aggregation.message"
+)
 
 DEFAULT_BODY_SIZE = 4
 
 
-class ConsensusMessage(Message):
+class AggregationMessage(Message):
     """A protocol for agents to aggregate individual observations"""
 
-    protocol_id = PublicId.from_str("fetchai/consensus:0.1.0")
-    protocol_specification_id = PublicId.from_str("fetchai/consensus:0.1.0")
+    protocol_id = PublicId.from_str("fetchai/aggregation:0.1.0")
+    protocol_specification_id = PublicId.from_str("fetchai/aggregation:0.1.0")
 
     class Performative(Message.Performative):
-        """Performatives for the consensus protocol."""
+        """Performatives for the aggregation protocol."""
 
         AGGREGATION = "aggregation"
         OBSERVATION = "observation"
 
-        def __str__(self):
+        def __str__(self) -> str:
             """Get the string representation."""
             return str(self.value)
 
@@ -70,10 +73,10 @@ class ConsensusMessage(Message):
         dialogue_reference: Tuple[str, str] = ("", ""),
         message_id: int = 1,
         target: int = 0,
-        **kwargs,
+        **kwargs: Any,
     ):
         """
-        Initialise an instance of ConsensusMessage.
+        Initialise an instance of AggregationMessage.
 
         :param message_id: the message id.
         :param dialogue_reference: the dialogue reference.
@@ -84,7 +87,7 @@ class ConsensusMessage(Message):
             dialogue_reference=dialogue_reference,
             message_id=message_id,
             target=target,
-            performative=ConsensusMessage.Performative(performative),
+            performative=AggregationMessage.Performative(performative),
             **kwargs,
         )
 
@@ -109,7 +112,7 @@ class ConsensusMessage(Message):
     def performative(self) -> Performative:  # type: ignore # noqa: F821
         """Get the performative of the message."""
         enforce(self.is_set("performative"), "performative is not set.")
-        return cast(ConsensusMessage.Performative, self.get("performative"))
+        return cast(AggregationMessage.Performative, self.get("performative"))
 
     @property
     def target(self) -> int:
@@ -136,10 +139,10 @@ class ConsensusMessage(Message):
         return cast(str, self.get("source"))
 
     @property
-    def time(self) -> int:
+    def time(self) -> str:
         """Get the 'time' content from the message."""
         enforce(self.is_set("time"), "'time' content is not set.")
-        return cast(int, self.get("time"))
+        return cast(str, self.get("time"))
 
     @property
     def value(self) -> int:
@@ -148,34 +151,34 @@ class ConsensusMessage(Message):
         return cast(int, self.get("value"))
 
     def _is_consistent(self) -> bool:
-        """Check that the message follows the consensus protocol."""
+        """Check that the message follows the aggregation protocol."""
         try:
             enforce(
-                type(self.dialogue_reference) == tuple,
+                isinstance(self.dialogue_reference, tuple),
                 "Invalid type for 'dialogue_reference'. Expected 'tuple'. Found '{}'.".format(
                     type(self.dialogue_reference)
                 ),
             )
             enforce(
-                type(self.dialogue_reference[0]) == str,
+                isinstance(self.dialogue_reference[0], str),
                 "Invalid type for 'dialogue_reference[0]'. Expected 'str'. Found '{}'.".format(
                     type(self.dialogue_reference[0])
                 ),
             )
             enforce(
-                type(self.dialogue_reference[1]) == str,
+                isinstance(self.dialogue_reference[1], str),
                 "Invalid type for 'dialogue_reference[1]'. Expected 'str'. Found '{}'.".format(
                     type(self.dialogue_reference[1])
                 ),
             )
             enforce(
-                type(self.message_id) == int,
+                type(self.message_id) is int,
                 "Invalid type for 'message_id'. Expected 'int'. Found '{}'.".format(
                     type(self.message_id)
                 ),
             )
             enforce(
-                type(self.target) == int,
+                type(self.target) is int,
                 "Invalid type for 'target'. Expected 'int'. Found '{}'.".format(
                     type(self.target)
                 ),
@@ -184,7 +187,7 @@ class ConsensusMessage(Message):
             # Light Protocol Rule 2
             # Check correct performative
             enforce(
-                type(self.performative) == ConsensusMessage.Performative,
+                isinstance(self.performative, AggregationMessage.Performative),
                 "Invalid 'performative'. Expected either of '{}'. Found '{}'.".format(
                     self.valid_performatives, self.performative
                 ),
@@ -193,58 +196,58 @@ class ConsensusMessage(Message):
             # Check correct contents
             actual_nb_of_contents = len(self._body) - DEFAULT_BODY_SIZE
             expected_nb_of_contents = 0
-            if self.performative == ConsensusMessage.Performative.OBSERVATION:
+            if self.performative == AggregationMessage.Performative.OBSERVATION:
                 expected_nb_of_contents = 4
                 enforce(
-                    type(self.value) == int,
+                    type(self.value) is int,
                     "Invalid type for content 'value'. Expected 'int'. Found '{}'.".format(
                         type(self.value)
                     ),
                 )
                 enforce(
-                    type(self.time) == int,
-                    "Invalid type for content 'time'. Expected 'int'. Found '{}'.".format(
+                    isinstance(self.time, str),
+                    "Invalid type for content 'time'. Expected 'str'. Found '{}'.".format(
                         type(self.time)
                     ),
                 )
                 enforce(
-                    type(self.source) == str,
+                    isinstance(self.source, str),
                     "Invalid type for content 'source'. Expected 'str'. Found '{}'.".format(
                         type(self.source)
                     ),
                 )
                 enforce(
-                    type(self.signature) == str,
+                    isinstance(self.signature, str),
                     "Invalid type for content 'signature'. Expected 'str'. Found '{}'.".format(
                         type(self.signature)
                     ),
                 )
-            elif self.performative == ConsensusMessage.Performative.AGGREGATION:
+            elif self.performative == AggregationMessage.Performative.AGGREGATION:
                 expected_nb_of_contents = 4
                 enforce(
-                    type(self.value) == int,
+                    type(self.value) is int,
                     "Invalid type for content 'value'. Expected 'int'. Found '{}'.".format(
                         type(self.value)
                     ),
                 )
                 enforce(
-                    type(self.time) == int,
-                    "Invalid type for content 'time'. Expected 'int'. Found '{}'.".format(
+                    isinstance(self.time, str),
+                    "Invalid type for content 'time'. Expected 'str'. Found '{}'.".format(
                         type(self.time)
                     ),
                 )
                 enforce(
-                    type(self.contributors) == tuple,
+                    isinstance(self.contributors, tuple),
                     "Invalid type for content 'contributors'. Expected 'tuple'. Found '{}'.".format(
                         type(self.contributors)
                     ),
                 )
                 enforce(
-                    all(type(element) == int for element in self.contributors),
+                    all(type(element) is int for element in self.contributors),
                     "Invalid type for tuple elements in content 'contributors'. Expected 'int'.",
                 )
                 enforce(
-                    type(self.signature) == str,
+                    isinstance(self.signature, str),
                     "Invalid type for content 'signature'. Expected 'str'. Found '{}'.".format(
                         type(self.signature)
                     ),

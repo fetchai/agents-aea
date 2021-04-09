@@ -11,7 +11,7 @@ fingerprint:
   api_spec.yaml: QmUPhCYr6tWDMysdMCQxT67oAKRdMbGpgqDfAA5wpei12s
   behaviours.py: QmZ3NMvZPHuxqxisew8UM7z6ti4STti3YAAXm42NSMUiG5
   dialogues.py: QmdYcNTCowajkMMCccYpNL83KRYm4v2WE2FguT3my7nqBw
-  handlers.py: QmeYzB2SBSuNwJo8RPhJ5f19kvZK7kLJ6a2DgwsmkeUo4q
+  handlers.py: QmTy73RC4VdRcvEx31kVo8y57fkHMzopXW6Fvp6f114FV4
   models.py: QmemVqxiExXw8LpJZKmnfzy1f8XyhG2sRofffPYqrNEJrT
 fingerprint_ignore_patterns: []
 contracts: []
@@ -35,6 +35,7 @@ models:
   advanced_data_request_model:
     args:
       body: ''
+      decimals: null
       method: GET
       outputs: []
       url: ''
