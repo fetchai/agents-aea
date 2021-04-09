@@ -20,7 +20,6 @@
 """This package contains the strategy for the oracle aggregation skill."""
 
 import statistics
-from sys import modules
 from typing import Any, Dict, Optional, Set, Tuple
 
 from aea.common import Address
