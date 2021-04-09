@@ -44,10 +44,9 @@ type Wallet struct {
 	PrivateKey string
 }
 
-func (wallet *Wallet) InitFromEnv() error {
-	env_file := os.Args[1]
-	logger.Debug().Msgf("env_file: %s", env_file)
-	err := godotenv.Overload(env_file)
+func (wallet *Wallet) InitFromEnv(envFile string) error {
+	logger.Debug().Msgf("env_file: %s", envFile)
+	err := godotenv.Overload(envFile)
 	if err != nil {
 		logger.Error().Str("err", err.Error()).
 			Msg("Error loading env file")
