@@ -265,24 +265,7 @@ class OefSearchHandler(Handler):
                 list(map(lambda x: x[-5:], oef_search_msg.agents)),
             )
         )
-        aggregation_dialogues = cast(
-            AggregationDialogues, self.context.aggregation_dialogues
-        )
         strategy.add_peers(oef_search_msg.agents)
-        obs = strategy.observation
-        if obs is None:
-            self.context.logger.info("No observation to send")
-            return
-        for counterparty in strategy.peers:
-            obs_msg, _ = aggregation_dialogues.create(
-                counterparty=counterparty,
-                performative=AggregationMessage.Performative.OBSERVATION,
-                **obs,
-            )
-            self.context.outbox.put_message(message=obs_msg)
-            self.context.logger.info(
-                "sending observation to peer={}".format(counterparty[-5:])
-            )
 
     def _handle_invalid(
         self, oef_search_msg: OefSearchMessage, oef_search_dialogue: OefSearchDialogue

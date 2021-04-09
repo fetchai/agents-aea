@@ -79,9 +79,10 @@ class AggregationStrategy(Model):
         aggregation_function = kwargs.pop(
             "aggregation_function", DEFAULT_AGGREGATION_FUNCTION
         )
-
-        if aggregation_function not in IMPLEMENTED_AGGREGATION_FUCNTIONS:
-            raise NotImplementedError
+        enforce(
+            aggregation_function in IMPLEMENTED_AGGREGATION_FUCNTIONS,
+            f"aggregation_function must be one of {IMPLEMENTED_AGGREGATION_FUCNTIONS}",
+        )
         self._aggregate = getattr(statistics, aggregation_function)
 
         self._search_query = kwargs.pop("search_query", DEFAULT_SEARCH_QUERY)

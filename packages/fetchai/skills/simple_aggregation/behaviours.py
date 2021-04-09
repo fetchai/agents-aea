@@ -24,8 +24,12 @@ from typing import Any, cast
 
 from aea.skills.behaviours import TickerBehaviour
 
+from packages.fetchai.protocols.aggregation.message import AggregationMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
-from packages.fetchai.skills.simple_aggregation.dialogues import OefSearchDialogues
+from packages.fetchai.skills.simple_aggregation.dialogues import (
+    AggregationDialogues,
+    OefSearchDialogues,
+)
 from packages.fetchai.skills.simple_aggregation.strategy import AggregationStrategy
 
 
@@ -173,4 +177,30 @@ class AggregationBehaviour(TickerBehaviour):
         if value:
             strategy.make_observation(
                 value, str(time()), source=DEFAULT_SOURCE, signature=DEFAULT_SIGNATURE,
+            )
+        self.broadcast_observation()
+
+    def broadcast_observation(self) -> None:
+        """
+        Send latest observation to current list of peers
+
+        :return: None
+        """
+        strategy = cast(AggregationStrategy, self.context.strategy)
+        obs = strategy.observation
+        if obs is None:
+            self.context.logger.info("No observation to send")
+            return
+        aggregation_dialogues = cast(
+            AggregationDialogues, self.context.aggregation_dialogues
+        )
+        for counterparty in strategy.peers:
+            obs_msg, _ = aggregation_dialogues.create(
+                counterparty=counterparty,
+                performative=AggregationMessage.Performative.OBSERVATION,
+                **obs,
+            )
+            self.context.outbox.put_message(message=obs_msg)
+            self.context.logger.info(
+                "sending observation to peer={}".format(counterparty[-5:])
             )
