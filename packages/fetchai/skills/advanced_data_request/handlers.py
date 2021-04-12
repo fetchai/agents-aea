@@ -48,6 +48,8 @@ def find(dotted_path: str, data: Dict[str, Any]) -> Optional[Any]:
 
 def is_number(value: SupportsFloat) -> bool:
     """Test if value is a number"""
+    if value is None:
+        return False
     try:
         float(value)
         return True
