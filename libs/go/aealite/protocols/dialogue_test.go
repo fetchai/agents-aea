@@ -17,8 +17,8 @@ const (
 func getTestDialogueLabel() DialogueLabel {
 	return DialogueLabel{
 		[2]string{starterReference, responderReference},
-		senderAddress,
 		counterPartyAddress,
+		senderAddress,
 	}
 }
 
@@ -28,15 +28,15 @@ func TestDialogueLabelGetters(t *testing.T) {
 	responderReference := "responderReference"
 	label := DialogueLabel{
 		[2]string{starterReference, responderReference},
-		senderAddress,
 		counterPartyAddress,
+		senderAddress,
 	}
 
 	if actual := label.getDialogueStarterReference(); actual != starterReference {
-		t.Errorf("Expected %s, got: %s", starterReference, actual)
+		t.Fatalf("Expected %s, got: %s", starterReference, actual)
 	}
 	if actual := label.getDialogueResponderReference(); actual != responderReference {
-		t.Errorf("Expected %s, got: %s", responderReference, actual)
+		t.Fatalf("Expected %s, got: %s", responderReference, actual)
 	}
 
 }
@@ -47,8 +47,8 @@ func TestGetIncompleteVersion(t *testing.T) {
 	actualIncompleteVersion := label.getIncompleteVersion()
 	expectedIncompleteVersion := DialogueLabel{
 		[2]string{label.getDialogueStarterReference(), UnassignedDialogueReference},
-		label.DialogueStarterAddress,
 		label.DialogueOpponentAddress,
+		label.DialogueStarterAddress,
 	}
 	if actualIncompleteVersion != expectedIncompleteVersion {
 		t.Errorf("getIncompleteVersion gave unexpected result.")
@@ -61,16 +61,29 @@ func TestMarshalAndUnmarshal(t *testing.T) {
 
 	data, err := json.Marshal(label)
 	if err != nil {
-		t.Errorf("DialogueLabel JSON marshalling failed with error: %s", err.Error())
+		t.Fatalf("DialogueLabel JSON marshalling failed with error: %s", err.Error())
 	}
 
 	result := DialogueLabel{}
 	err = json.Unmarshal(data, &result)
 	if err != nil {
-		t.Errorf("DialogueLabel JSON unmarshalling failed with error: %s", err.Error())
+		t.Fatalf("DialogueLabel JSON unmarshalling failed with error: %s", err.Error())
 	}
 	if result != label {
-		t.Errorf("decoded DialogueLabel is not the same of the original one.")
+		t.Fatal("the DialogueLabel parsed from JSON is not the same of the original one.")
+	}
+}
+
+// Test ToString and FromString methods.
+func TestToStringAndFromString(t *testing.T) {
+	label := getTestDialogueLabel()
+	result := DialogueLabel{}
+	err := result.FromString(label.String())
+	if err != nil {
+		t.Fatalf("Cannot parse string: %s", err.Error())
+	}
+	if label != result {
+		t.Fatal("the DialogueLabel parsed from string is not the same of the original one.")
 	}
 }
 

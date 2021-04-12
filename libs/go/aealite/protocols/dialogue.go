@@ -144,16 +144,22 @@ func (dialogueLabel *DialogueLabel) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func (dialogueLabel *DialogueLabel) ToString() string {
+func (dialogueLabel *DialogueLabel) String() string {
 	return strings.Join([]string{dialogueLabel.getDialogueStarterReference(),
 		dialogueLabel.getDialogueResponderReference(),
 		string(dialogueLabel.DialogueOpponentAddress),
 		string(dialogueLabel.DialogueStarterAddress)}, DialogueLabelStringSeparator)
 }
 
-func DialogueLabelFromString(s string) DialogueLabel {
+func (dialogueLabel *DialogueLabel) FromString(s string) error {
 	result := strings.Split(s, DialogueLabelStringSeparator)
-	return DialogueLabel{[2]string{result[0], result[1]}, Address(result[2]), Address(result[3])}
+	if length := len(result); length != 4 {
+		return errors.New(fmt.Sprintf("Expected exactly 4 parts, got %d", length))
+	}
+	dialogueLabel.DialogueReference = [2]string{result[0], result[1]}
+	dialogueLabel.DialogueOpponentAddress = Address(result[2])
+	dialogueLabel.DialogueStarterAddress = Address(result[3])
+	return nil
 }
 
 type Dialogue struct {
