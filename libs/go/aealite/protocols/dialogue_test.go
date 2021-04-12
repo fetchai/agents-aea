@@ -1,6 +1,7 @@
 package protocols
 
 import (
+	"encoding/json"
 	"log"
 	"testing"
 )
@@ -8,7 +9,70 @@ import (
 const (
 	senderAddress       = "ba6b08b13043e83a962a3a5eeaad3b6c"
 	counterPartyAddress = "1ba5cb6f46f426a27ec53064032419f1"
+	starterReference    = "starterReference"
+	responderReference  = "responderReference"
 )
+
+// get a default dialogue label for testing purposes
+func getTestDialogueLabel() DialogueLabel {
+	return DialogueLabel{
+		[2]string{starterReference, responderReference},
+		senderAddress,
+		counterPartyAddress,
+	}
+}
+
+// Test DialogueLabel initialization and getters
+func TestDialogueLabelGetters(t *testing.T) {
+	starterReference := "starterReference"
+	responderReference := "responderReference"
+	label := DialogueLabel{
+		[2]string{starterReference, responderReference},
+		senderAddress,
+		counterPartyAddress,
+	}
+
+	if actual := label.getDialogueStarterReference(); actual != starterReference {
+		t.Errorf("Expected %s, got: %s", starterReference, actual)
+	}
+	if actual := label.getDialogueResponderReference(); actual != responderReference {
+		t.Errorf("Expected %s, got: %s", responderReference, actual)
+	}
+
+}
+
+// Test getIncompleteVersion function
+func TestGetIncompleteVersion(t *testing.T) {
+	label := getTestDialogueLabel()
+	actualIncompleteVersion := label.getIncompleteVersion()
+	expectedIncompleteVersion := DialogueLabel{
+		[2]string{label.getDialogueStarterReference(), UnassignedDialogueReference},
+		label.DialogueStarterAddress,
+		label.DialogueOpponentAddress,
+	}
+	if actualIncompleteVersion != expectedIncompleteVersion {
+		t.Errorf("getIncompleteVersion gave unexpected result.")
+	}
+}
+
+// Test marshalling and unmarshalling
+func TestMarshalAndUnmarshal(t *testing.T) {
+	label := getTestDialogueLabel()
+
+	data, err := json.Marshal(label)
+	if err != nil {
+		t.Errorf("DialogueLabel JSON marshalling failed with error: %s", err.Error())
+	}
+
+	result := DialogueLabel{}
+	err = json.Unmarshal(data, &result)
+	if err != nil {
+		t.Errorf("DialogueLabel JSON unmarshalling failed with error: %s", err.Error())
+	}
+	if result != label {
+		t.Errorf("decoded DialogueLabel is not the same of the original one.")
+	}
+}
 
 func TestDialogue(t *testing.T) {
 	var performative Performative = "sample_performative"
@@ -67,7 +131,7 @@ func TestDialogue(t *testing.T) {
 		senderAddress,
 		performative,
 		[]byte("second message"),
-		dialogue.dialogueLabel.dialogueReference,
+		dialogue.dialogueLabel.DialogueReference,
 		nextMessageId,
 		dialogue.lastMessageId,
 	)

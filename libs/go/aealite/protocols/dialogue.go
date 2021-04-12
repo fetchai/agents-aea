@@ -1,27 +1,28 @@
 package protocols
 
 import (
+	"bytes"
 	"crypto/rand"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
+	"strings"
 )
 
 type Address string
 type Performative string
-
-const (
-	NonceBytesNb = 32
-)
-
 type Role string
 
 const (
-	Role1             Role      = "role1"
-	Role2             Role      = "role2"
-	StartingMessageId MessageId = 1
-	StartingTarget    MessageId = 0
+	NonceBytesNb                           = 32
+	Role1                        Role      = "role1"
+	Role2                        Role      = "role2"
+	StartingMessageId            MessageId = 1
+	StartingTarget               MessageId = 0
+	UnassignedDialogueReference            = ""
+	DialogueLabelStringSeparator           = "_"
 )
 
 type RuleType struct {
@@ -89,9 +90,70 @@ func (message AbstractMessage) hasCounterparty() (Address, error) {
 }
 
 type DialogueLabel struct {
-	dialogueReference       [2]string
-	dialogueOpponentAddress Address
-	dialogueStarterAddress  Address
+	DialogueReference       [2]string
+	DialogueOpponentAddress Address
+	DialogueStarterAddress  Address
+}
+
+// Get the dialogue starter reference.
+func (dialogueLabel *DialogueLabel) getDialogueStarterReference() string {
+	return dialogueLabel.DialogueReference[0]
+}
+
+// Get the dialogue responder reference.
+func (dialogueLabel *DialogueLabel) getDialogueResponderReference() string {
+	return dialogueLabel.DialogueReference[1]
+}
+
+// Get the incomplete version of the label.
+func (dialogueLabel *DialogueLabel) getIncompleteVersion() DialogueLabel {
+	return DialogueLabel{
+		[2]string{dialogueLabel.getDialogueStarterReference(), UnassignedDialogueReference},
+		dialogueLabel.DialogueOpponentAddress,
+		dialogueLabel.DialogueStarterAddress,
+	}
+}
+
+func (dialogueLabel DialogueLabel) MarshalJSON() ([]byte, error) {
+	data := map[string]string{
+		"dialogue_starter_reference":   dialogueLabel.getDialogueStarterReference(),
+		"dialogue_responder_reference": dialogueLabel.getDialogueResponderReference(),
+		"dialogue_opponent_addr":       string(dialogueLabel.DialogueOpponentAddress),
+		"dialogue_starter_addr":        string(dialogueLabel.DialogueStarterAddress),
+	}
+	buffer := bytes.NewBufferString("{")
+	for key, value := range data {
+		buffer.WriteString(fmt.Sprintf("\"%s\": \"%s\",", key, value))
+	}
+	buffer.Truncate(buffer.Len() - 1)
+	buffer.WriteString("}")
+	return buffer.Bytes(), nil
+}
+
+func (dialogueLabel *DialogueLabel) UnmarshalJSON(b []byte) error {
+	var data map[string]string
+	err := json.Unmarshal(b, &data)
+	if err != nil {
+		return err
+	}
+	starterReference := data["dialogue_starter_reference"]
+	responderReference := data["dialogue_responder_reference"]
+	dialogueLabel.DialogueReference = [2]string{starterReference, responderReference}
+	dialogueLabel.DialogueOpponentAddress = Address(data["dialogue_opponent_addr"])
+	dialogueLabel.DialogueStarterAddress = Address(data["dialogue_starter_addr"])
+	return nil
+}
+
+func (dialogueLabel *DialogueLabel) ToString() string {
+	return strings.Join([]string{dialogueLabel.getDialogueStarterReference(),
+		dialogueLabel.getDialogueResponderReference(),
+		string(dialogueLabel.DialogueOpponentAddress),
+		string(dialogueLabel.DialogueStarterAddress)}, DialogueLabelStringSeparator)
+}
+
+func DialogueLabelFromString(s string) DialogueLabel {
+	result := strings.Split(s, DialogueLabelStringSeparator)
+	return DialogueLabel{[2]string{result[0], result[1]}, Address(result[2]), Address(result[3])}
 }
 
 type Dialogue struct {
@@ -156,7 +218,7 @@ func (dialogue *Dialogue) basicValidationInitialMessage(message AbstractMessage)
 	dialogueReference := message.dialogueReference
 	messageId := message.messageId
 	// performative := message.performative
-	if dialogueReference[0] != dialogue.dialogueLabel.dialogueReference[0] {
+	if dialogueReference[0] != dialogue.dialogueLabel.DialogueReference[0] {
 		return false, errors.New("Invalid dialogue_reference[0].")
 	}
 	if messageId != StartingMessageId {
@@ -181,7 +243,7 @@ func (dialogue *Dialogue) basicValidationInitialMessage(message AbstractMessage)
 
 func (dialogue *Dialogue) basicValidationNonInitialMessage(message AbstractMessage) (bool, error) {
 	dialogueReference := message.dialogueReference
-	if dialogueReference[0] != dialogue.dialogueLabel.dialogueReference[0] {
+	if dialogueReference[0] != dialogue.dialogueLabel.DialogueReference[0] {
 		return false, errors.New("Invalid dialogue_reference[0].")
 	}
 	err := dialogue.validateMessageId(message)
@@ -221,12 +283,13 @@ func (dialogue *Dialogue) validateMessageTarget(message AbstractMessage) error {
 	if lastOutgoingMessage != nil {
 		latestIds = append(latestIds, lastOutgoingMessage.messageId)
 	}
-	targetMessage, err := dialogue.getMessageById(target)
-	if err != nil {
-		return err
-	}
-	targetPerformative := targetMessage.performative
 	// TODO
+	//targetMessage, err := dialogue.getMessageById(target)
+	//if err != nil {
+	//	return err
+	//}
+	//targetPerformative := targetMessage.performative
+
 	// check performatives
 
 	// target_performative = target_message.performative
@@ -320,7 +383,7 @@ func (dialogue Dialogue) lastIncomingMessage() *AbstractMessage {
 }
 
 func (dialogue *Dialogue) isSelfInitiated() bool {
-	return dialogue.dialogueLabel.dialogueStarterAddress != dialogue.dialogueLabel.dialogueOpponentAddress
+	return dialogue.dialogueLabel.DialogueStarterAddress != dialogue.dialogueLabel.DialogueOpponentAddress
 }
 
 func (dialogue *Dialogue) isEmpty() bool {
@@ -328,7 +391,7 @@ func (dialogue *Dialogue) isEmpty() bool {
 }
 
 func (dialogue *Dialogue) updateIncomingAndOutgoingMessages(message AbstractMessage) {
-	if dialogue.dialogueLabel.dialogueStarterAddress == dialogue.selfAddress {
+	if dialogue.dialogueLabel.DialogueStarterAddress == dialogue.selfAddress {
 		dialogue.outgoingMessages = append(dialogue.outgoingMessages, message)
 	} else {
 		dialogue.incomingMessages = append(dialogue.incomingMessages, message)
@@ -346,17 +409,17 @@ func (dialogue *Dialogue) isBelongingToADialogue(message AbstractMessage) bool {
 		return false
 	}
 	var label DialogueLabel
-	if dialogue.selfAddress == dialogue.dialogueLabel.dialogueStarterAddress {
+	if dialogue.selfAddress == dialogue.dialogueLabel.DialogueStarterAddress {
 		label = DialogueLabel{
-			dialogueReference:       [2]string{message.dialogueReference[0], ""},
-			dialogueOpponentAddress: opponent,
-			dialogueStarterAddress:  dialogue.selfAddress,
+			DialogueReference:       [2]string{message.dialogueReference[0], ""},
+			DialogueOpponentAddress: opponent,
+			DialogueStarterAddress:  dialogue.selfAddress,
 		}
 	} else {
 		label = DialogueLabel{
-			dialogueReference:       message.dialogueReference,
-			dialogueOpponentAddress: opponent,
-			dialogueStarterAddress:  opponent,
+			DialogueReference:       message.dialogueReference,
+			DialogueOpponentAddress: opponent,
+			DialogueStarterAddress:  opponent,
 		}
 	}
 	result := validateDialogueLabelExistence(label)
@@ -462,9 +525,9 @@ func checkReferencesAndCreateLabels(message AbstractMessage) DialogueLabel {
 		fmt.Println("Error : Reference address label already exists")
 	}
 	return DialogueLabel{
-		dialogueReference:       message.dialogueReference,
-		dialogueOpponentAddress: message.to,
-		dialogueStarterAddress:  message.sender,
+		DialogueReference:       message.dialogueReference,
+		DialogueOpponentAddress: message.to,
+		DialogueStarterAddress:  message.sender,
 	}
 }
 
