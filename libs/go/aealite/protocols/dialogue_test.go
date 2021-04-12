@@ -13,7 +13,12 @@ const (
 func TestDialogue(t *testing.T) {
 	var performative Performative = "sample_performative"
 	// createing initital dialogue instance
-	message, dialogue := Create(counterPartyAddress, senderAddress, performative, []byte("initial message"))
+	message, dialogue := Create(
+		counterPartyAddress,
+		senderAddress,
+		performative,
+		[]byte("initial message"),
+	)
 	// cheking if message returned has a sender same as senderAddress
 	if address, err := message.hasSender(); err != nil {
 		log.Fatal(err)
@@ -32,11 +37,19 @@ func TestDialogue(t *testing.T) {
 	}
 	// checking if length of outgoing messages list is 1
 	if len(dialogue.outgoingMessages) != 1 {
-		log.Fatal("dialogue outgoing messages length is ", len(dialogue.outgoingMessages), " should be 1")
+		log.Fatal(
+			"dialogue outgoing messages length is ",
+			len(dialogue.outgoingMessages),
+			" should be 1",
+		)
 	}
 	// checking if length of incoming messages list is 0
 	if len(dialogue.incomingMessages) != 0 {
-		log.Fatal("dialogue incoming messages length is ", len(dialogue.incomingMessages), " should be 0")
+		log.Fatal(
+			"dialogue incoming messages length is ",
+			len(dialogue.incomingMessages),
+			" should be 0",
+		)
 	}
 	if dialogue.isEmpty() == true {
 		log.Fatal("dialogue should not be empty")
@@ -49,14 +62,30 @@ func TestDialogue(t *testing.T) {
 		nextMessageId = dialogue.getIncomingNextMessageId()
 	}
 	// inititlaizing a new message and updating dialogue using it
-	newMessage := InitializeMessage(counterPartyAddress, senderAddress, performative, []byte("second message"), dialogue.dialogueLabel.dialogueReference, nextMessageId, dialogue.lastMessageId)
+	newMessage := InitializeMessage(
+		counterPartyAddress,
+		senderAddress,
+		performative,
+		[]byte("second message"),
+		dialogue.dialogueLabel.dialogueReference,
+		nextMessageId,
+		dialogue.lastMessageId,
+	)
 	dialogue.update(newMessage)
 	// checking if length of outgoing messages list is 2
 	if len(dialogue.outgoingMessages) != 2 {
-		log.Fatal("dialogue outgoing messages length is ", len(dialogue.outgoingMessages), " should be 2")
+		log.Fatal(
+			"dialogue outgoing messages length is ",
+			len(dialogue.outgoingMessages),
+			" should be 2",
+		)
 	}
 	// checking if length of incoming messages list is 0
 	if len(dialogue.incomingMessages) != 0 {
-		log.Fatal("dialogue incoming messages length is ", len(dialogue.incomingMessages), " should be 0")
+		log.Fatal(
+			"dialogue incoming messages length is ",
+			len(dialogue.incomingMessages),
+			" should be 0",
+		)
 	}
 }
