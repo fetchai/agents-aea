@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package aea.fetchai.acn.v1_0_0;
+package aea.aea.acn.v1_0_0;
 
 message AcnMessage{
 
