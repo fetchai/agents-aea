@@ -152,6 +152,7 @@ class StatusBody:
     class StatusCode(Enum):
         """Status code enum."""
 
+        SUCCESS = 0
         ERROR_UNSUPPORTED_VERSION = 1
         ERROR_UNEXPECTED_PAYLOAD = 2
         ERROR_GENERIC = 3
