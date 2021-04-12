@@ -319,7 +319,7 @@ class PeerDialogues(AggregationDialogues):
             :param receiver_address: the address of the receiving agent
             :return: The role of the agent
             """
-            return AggregationDialogue.Role.SERVER
+            return AggregationDialogue.Role.AGENT
 
         AggregationDialogues.__init__(
             self,
