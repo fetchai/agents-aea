@@ -165,9 +165,9 @@ class StatusBody:
         ERROR_UNKNOWN_AGENT_ADDRESS = 20
         ERROR_AGENT_NOT_READY = 21
 
-        def __str__(self) -> str:
+        def __int__(self) -> int:
             """Get string representation."""
-            return str(self.value)
+            return self.value
 
     def __init__(self, status_code: StatusCode, msgs: List[str]) -> None:
         """Initialise an instance of StatusBody."""
@@ -197,8 +197,8 @@ class StatusBody:
         :param status_body_object: an instance of this class to be encoded in the protocol buffer object.
         :return: None
         """
-        status_body_protobuf_object.status_code = str(status_body_object.status_code)
-        status_body_protobuf_object.msgs = status_body_object.msgs
+        status_body_protobuf_object.code = int(status_body_object.status_code)
+        status_body_protobuf_object.msgs.extend(status_body_object.msgs)
 
     @classmethod
     def decode(cls, status_body_protobuf_object: Any) -> "StatusBody":
@@ -211,7 +211,7 @@ class StatusBody:
         :return: A new instance of this class that matches the protocol buffer object in the 'status_body_protobuf_object' argument.
         """
         status_body = cls(
-            status_code=cls.StatusCode(status_body_protobuf_object.status_code),
+            status_code=cls.StatusCode(status_body_protobuf_object.code),
             msgs=status_body_protobuf_object.msgs,
         )
         return status_body

@@ -37,7 +37,7 @@ fingerprint:
   libp2p_node/libp2p_node.go: QmZFR2bdi1EjFmPkjwtYeA19kSQKPtcGoNVafQnZRWotaN
   libp2p_node/protocols/acn/v1_0_0/acn.pb.go: QmQqkU1XA1UrKBrMd3MawxWiqNRSHH4cLKjwcYqFexJx6F
   libp2p_node/protocols/acn/v1_0_0/acn.proto: QmYNCxKy5NXnPRGZQCn2VmtFYLg2GyuWMHCwu6x99o2vsp
-  libp2p_node/protocols/acn/v1_0_0/acn.yaml: QmR97yJQmCpu4PRXntqbw8mECp9yHkb2oNNut49yESTrsS
+  libp2p_node/protocols/acn/v1_0_0/acn.yaml: QmUTxkycEYsDZYXNekhPXd8s66qCvuCUvN15JeG4PHhXK2
   libp2p_node/utils/utils.go: QmawKkyn8nZtmgULM7vYWfHqMD4o49TQZGF4arwVxyYeCL
 fingerprint_ignore_patterns: []
 build_entrypoint: check_dependencies.py
