@@ -24,6 +24,12 @@ golangci-lint run
 
 ## Messaging patterns
 
+Interaction protocol
+___
+ACN
+___
+TCP/UDP/...
+___
 
 ### Messaging patterns inwards ACN:
 
