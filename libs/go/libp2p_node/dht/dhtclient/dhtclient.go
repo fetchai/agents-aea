@@ -49,8 +49,8 @@ import (
 
 	aea "libp2p_node/aea"
 	"libp2p_node/dht/dhtnode"
-	utils "libp2p_node/utils"
 	acn_protocol "libp2p_node/protocols/acn/v1_0_0"
+	utils "libp2p_node/utils"
 )
 
 type AcnMessage = acn_protocol.AcnMessage
@@ -65,6 +65,7 @@ type StatusBody = acn_protocol.AcnMessage_StatusBody
 type Register = acn_protocol.AcnMessage_Register
 type AeaEnvelope = acn_protocol.AcnMessage_AeaEnvelope
 type AeaEnvelopePerformative = acn_protocol.AcnMessage_Aea_Envelope_Performative
+
 const ERROR_SERIALIZATION = acn_protocol.AcnMessage_StatusBody_ERROR_SERIALIZATION
 const SUCCESS = acn_protocol.AcnMessage_StatusBody_SUCCESS
 const ERROR_UNEXPECTED_PAYLOAD = acn_protocol.AcnMessage_StatusBody_ERROR_UNEXPECTED_PAYLOAD
@@ -546,7 +547,12 @@ func (dhtClient *DHTClient) RouteEnvelope(envel *aea.Envelope) error {
 	}
 
 	if statusPerformative != nil {
-		err = errors.New(statusPerformative.Body.Code.String() + " : " + strings.Join(statusPerformative.Body.Msgs, ":"))
+		err = errors.New(
+			statusPerformative.Body.Code.String() + " : " + strings.Join(
+				statusPerformative.Body.Msgs,
+				":",
+			),
+		)
 		lerror(err).Str("op", "route").Str("target", target).
 			Msgf("failed agent lookup")
 		return err
@@ -556,7 +562,10 @@ func (dhtClient *DHTClient) RouteEnvelope(envel *aea.Envelope) error {
 	record := lookupResponsePerformative.Record
 	valid, err := dhtnode.IsValidProofOfRepresentation(record, target, record.PeerPublicKey)
 	if err != nil || valid.Code != SUCCESS {
-		errMsg := statusPerformative.Body.Code.String() + " : " + strings.Join(statusPerformative.Body.Msgs, ":")
+		errMsg := statusPerformative.Body.Code.String() + " : " + strings.Join(
+			statusPerformative.Body.Msgs,
+			":",
+		)
 		if err == nil {
 			err = errors.New(errMsg)
 		} else {
@@ -636,8 +645,8 @@ func (dhtClient *DHTClient) RouteEnvelope(envel *aea.Envelope) error {
 	}
 	// TODO(LR) check if source is my agent
 	aeaEnvelope := &AeaEnvelopePerformative{
-		Envelope:  envelBytes,
-		Record: dhtClient.myAgentRecord,
+		Envelope: envelBytes,
+		Record:   dhtClient.myAgentRecord,
 	}
 	msg = &AcnMessage{
 		// Version: dhtnode.CurrentVersion,
@@ -708,7 +717,12 @@ func (dhtClient *DHTClient) RouteEnvelope(envel *aea.Envelope) error {
 	}
 
 	if statusPerformative.Body.Code != SUCCESS {
-		err = errors.New(statusPerformative.Body.Code.String() + " : " + strings.Join(statusPerformative.Body.Msgs, ":"))
+		err = errors.New(
+			statusPerformative.Body.Code.String() + " : " + strings.Join(
+				statusPerformative.Body.Msgs,
+				":",
+			),
+		)
 		lerror(err).
 			Str("op", "route").
 			Str("target", target).
@@ -921,7 +935,7 @@ func (dhtClient *DHTClient) handleAeaAddressStream(stream network.Stream) {
 		status := &StatusBody{Code: ERROR_UNEXPECTED_PAYLOAD, Msgs: []string{err.Error()}}
 		statusPerformative := &StatusPerformative{Body: status}
 		response := &AcnMessage{
-			// Version: dhtnode.CurrentVersion, 
+			// Version: dhtnode.CurrentVersion,
 			Performative: &Status{Status: statusPerformative},
 		}
 		buf, err = proto.Marshal(response)

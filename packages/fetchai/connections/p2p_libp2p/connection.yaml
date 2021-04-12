@@ -18,14 +18,14 @@ fingerprint:
   libp2p_node/aea/envelope.proto: QmVuvesmfgzj5aKnbFoCocoGEv3T9MR7u6KWn7CT5yfjGi
   libp2p_node/aea/pipe_unix.go: QmSzbAexrSUSA9ZE6VT6MmcWF5MhEcmceQjAbnfRoK7Ruv
   libp2p_node/aea/pipe_windows.go: QmdYpfjgdgFbA6Pothg65NYM45ubfpZeKr8cVQoqbFzgUK
-  libp2p_node/dht/dhtclient/dhtclient.go: QmVVYVxJVbnTNJWUf5NW6zCDL4Uaccy25miBcJ9SbbZWro
+  libp2p_node/dht/dhtclient/dhtclient.go: QmUc4aK5hXcDcEeVCRqbLV26vwWJ2h1fmPDoCW9exVG45b
   libp2p_node/dht/dhtclient/dhtclient_test.go: QmS9SiLAojXYobqV9m5yeRpyPzt6JcSbQD78RNvSp6LPx6
   libp2p_node/dht/dhtclient/options.go: QmaoJiavHescgx98inQjVUipPFRvcFFrodrScZ3fvrXJ4z
   libp2p_node/dht/dhtnode/dhtnode.go: QmbyhgbCSAbQ1QsDw7FM7Nt5sZcvhbupA1jv5faxutbV7N
   libp2p_node/dht/dhtnode/streams.go: Qmc2JcyiU4wHsgDj6aUunMAp4c5yMzo2ixeqRZHSW5PVwo
-  libp2p_node/dht/dhtnode/utils.go: QmPivEZaC33GypLihyUAGFJQYbqpgrXvUtK4FpE45AGnhd
+  libp2p_node/dht/dhtnode/utils.go: QmdfLaWEtzmCZsjPc7APfJkZv9vbH75njdnCpeRCf54wan
   libp2p_node/dht/dhtpeer/benchmarks_test.go: QmX2KWsaFaVd9KGjvgYNgkLtgnu1CUhBPtTe9abKYndq4C
-  libp2p_node/dht/dhtpeer/dhtpeer.go: QmTtN1emsBj2B3aroLvZRvMTRpP7pudwfZqfnEumCy8549
+  libp2p_node/dht/dhtpeer/dhtpeer.go: QmYqfb1NcBYF9F6EFHehC78NcZvR2qFbK3NJHTSEs5fnSe
   libp2p_node/dht/dhtpeer/dhtpeer_test.go: QmeytCFyRZuT98GLJw1VK7FpHyqUN2MRzpKpN5owKHzAZL
   libp2p_node/dht/dhtpeer/options.go: QmRbB1dnA5TEeJZQpKBJQoxFNHSPLRiEtwtkK6ZJDZdjAX
   libp2p_node/dht/dhttests/dhttests.go: QmWTwAqXy4xPBWx49dvg91pBfaeyh79bgbh4yYc3u6kGhg

@@ -31,6 +31,7 @@ import (
 
 type AgentRecord = acn_protocol.AcnMessage_AgentRecord
 type Status = acn_protocol.AcnMessage_StatusBody
+
 const ERROR_WRONG_AGENT_ADDRESS = acn_protocol.AcnMessage_StatusBody_ERROR_WRONG_AGENT_ADDRESS
 const ERROR_UNSUPPORTED_LEDGER = acn_protocol.AcnMessage_StatusBody_ERROR_UNSUPPORTED_LEDGER
 const ERROR_WRONG_PUBLIC_KEY = acn_protocol.AcnMessage_StatusBody_ERROR_WRONG_PUBLIC_KEY

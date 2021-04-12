@@ -56,8 +56,8 @@ import (
 	aea "libp2p_node/aea"
 	"libp2p_node/dht/dhtnode"
 	monitoring "libp2p_node/dht/monitoring"
-	utils "libp2p_node/utils"
 	acn_protocol "libp2p_node/protocols/acn/v1_0_0"
+	utils "libp2p_node/utils"
 )
 
 type AcnMessage = acn_protocol.AcnMessage
@@ -72,6 +72,7 @@ type StatusBody = acn_protocol.AcnMessage_StatusBody
 type Register = acn_protocol.AcnMessage_Register
 type AeaEnvelope = acn_protocol.AcnMessage_AeaEnvelope
 type AeaEnvelopePerformative = acn_protocol.AcnMessage_Aea_Envelope_Performative
+
 const ERROR_SERIALIZATION = acn_protocol.AcnMessage_StatusBody_ERROR_SERIALIZATION
 const SUCCESS = acn_protocol.AcnMessage_StatusBody_SUCCESS
 const ERROR_UNEXPECTED_PAYLOAD = acn_protocol.AcnMessage_StatusBody_ERROR_UNEXPECTED_PAYLOAD
@@ -999,8 +1000,8 @@ func (dhtPeer *DHTPeer) RouteEnvelope(envel *aea.Envelope) error {
 			return err
 		}
 		aeaEnvelope := &AeaEnvelopePerformative{
-			Envelope:  envelBytes,
-			Record: envelRec,
+			Envelope: envelBytes,
+			Record:   envelRec,
 		}
 		msg := &AcnMessage{
 			// Version: dhtnode.CurrentVersion,
@@ -1206,7 +1207,9 @@ func (dhtPeer *DHTPeer) lookupAddressDHT(address string) (peer.ID, *dhtnode.Agen
 			}
 
 			if status != nil {
-				err = errors.New(status.Body.Code.String() + " : " + strings.Join(status.Body.Msgs, ":"))
+				err = errors.New(
+					status.Body.Code.String() + " : " + strings.Join(status.Body.Msgs, ":"),
+				)
 				lwarn().Str("op", "lookup").Str("addr", address).
 					Msgf("Failed agent lookup response from provider %s (%s), looking up other providers...", provider, err.Error())
 				continue
