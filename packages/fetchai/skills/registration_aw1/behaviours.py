@@ -46,24 +46,25 @@ class AW1RegistrationBehaviour(TickerBehaviour):
         if strategy.announce_termination_key is not None:
             self.context.shared_state[strategy.announce_termination_key] = False
 
-        signing_dialogues = cast(SigningDialogues, self.context.signing_dialogues)
-        msg, _ = signing_dialogues.create(
-            counterparty=self.context.decision_maker_address,
-            performative=SigningMessage.Performative.SIGN_MESSAGE,
-            raw_message=RawMessage(
-                strategy.ledger_id, strategy.ethereum_address.encode("utf-8")
-            ),
-            terms=Terms(
-                ledger_id=strategy.ledger_id,
-                sender_address="",
-                counterparty_address="",
-                amount_by_currency_id={},
-                quantities_by_good_id={},
-                nonce="",
-            ),
-        )
-        self.context.logger.info("sending signing_msg to decision maker...")
-        self.context.decision_maker_message_queue.put_nowait(msg)
+        if not strategy.developer_handle_only:
+            signing_dialogues = cast(SigningDialogues, self.context.signing_dialogues)
+            msg, _ = signing_dialogues.create(
+                counterparty=self.context.decision_maker_address,
+                performative=SigningMessage.Performative.SIGN_MESSAGE,
+                raw_message=RawMessage(
+                    strategy.ledger_id, strategy.ethereum_address.encode("utf-8")
+                ),
+                terms=Terms(
+                    ledger_id=strategy.ledger_id,
+                    sender_address="",
+                    counterparty_address="",
+                    amount_by_currency_id={},
+                    quantities_by_good_id={},
+                    nonce="",
+                ),
+            )
+            self.context.logger.info("sending signing_msg to decision maker...")
+            self.context.decision_maker_message_queue.put_nowait(msg)
 
     def act(self) -> None:
         """

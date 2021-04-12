@@ -9,10 +9,10 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: Qmc9dfzqAXJWCJxYNqLd1yz8U7p4DQNbGGMmXMP73wUvJR
   __init__.py: QmQHMPLNj2XTU8AuyuYHpsLWSoehevTp9LzjYktEPUeNsz
-  behaviours.py: QmPWnr1A7uEJ1DPTnDe4WLPvrSHbbv4GkgxyguWV83Fn1Y
+  behaviours.py: QmQPjdZaKCvDJYLMag52hUpuzyUCEDEX95Y9RDZXCquAWa
   dialogues.py: QmQLCbYVWeqhBwqg7KP5WpZcx7eX3g8zhwfNiR1RRufWfe
   handlers.py: QmVGZFoDrhLLmDnxjb4gUEe7H4o27eZmcbZfXNdDeciHet
-  strategy.py: QmcoS8azhNqjfJwoeEnVjyTKvAhDJtG84TVmJMVgqC69CE
+  strategy.py: QmPTAGeJGedFUt5rbUMihCnPqMgzTPtNiWihZnzG9hsztr
 fingerprint_ignore_patterns: []
 connections: []
 contracts: []
@@ -44,6 +44,7 @@ models:
     args:
       announce_termination_key: null
       developer_handle: PUT_YOUR_DEVELOPER_HANDLE_HERE
+      developer_handle_only: false
       ethereum_address: PUT_YOUR_ETHEREUM_ADDRESS_HERE
       shared_storage_key: agents_found
       signature_of_fetchai_address: PUT_YOUR_SIGNATURE_HERE
