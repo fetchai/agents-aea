@@ -127,8 +127,7 @@ class Strategy(Model):
         registration_db = cast(RegistrationDB, self.context.registration_db)
         if self.developer_handle_only:
             registration_db.set_registered_developer_only(
-                address=address,
-                developer_handle=info["developer_handle"],
+                address=address, developer_handle=info["developer_handle"],
             )
         else:
             registration_db.set_registered(
@@ -194,7 +193,9 @@ class Strategy(Model):
         :param sender: the sender
         :return: tuple of success, error code and error message
         """
-        is_valid, error_code, error_msg = self._valid_registration_developer_only(registration_info, sender)
+        is_valid, error_code, error_msg = self._valid_registration_developer_only(
+            registration_info, sender
+        )
 
         if self.developer_handle_only or not is_valid:
             return (is_valid, error_code, error_msg)

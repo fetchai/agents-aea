@@ -81,9 +81,7 @@ class RegistrationDB(Model):
         self._execute_single_sql(command, variables)
 
     def set_registered_developer_only(
-        self,
-        address: str,
-        developer_handle: str,
+        self, address: str, developer_handle: str,
     ) -> None:
         """Record a registration."""
         command = "INSERT OR REPLACE INTO registered_table(address, developer_handle) values(?, ?)"
