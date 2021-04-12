@@ -240,8 +240,10 @@ class P2PLibp2pClientConnection(Connection):
 
         acn_msg = acn_pb2.AcnMessage()
         performative = acn_pb2.AcnMessage.Register_Performative()  # type: ignore
-        AcnMessage.AgentRecord.encode(performative.record, agent_record)
-        acn_msg.register.CopyFrom(performative)
+        AcnMessage.AgentRecord.encode(
+            performative.record, agent_record  # pylint: disable=no-member
+        )
+        acn_msg.register.CopyFrom(performative)  # pylint: disable=no-member
 
         buf = acn_msg.SerializeToString()
         await self._send(buf)
