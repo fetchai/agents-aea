@@ -20,13 +20,6 @@
 
 package protocols
 
-const (
-	senderAddress       Address = "ba6b08b13043e83a962a3a5eeaad3b6c"
-	counterPartyAddress Address = "1ba5cb6f46f426a27ec53064032419f1"
-	starterReference    string  = "starterReference"
-	responderReference  string  = "responderReference"
-)
-
 //func TestDialogue(t *testing.T) {
 //	var performative Performative = "sample_performative"
 //	// createing initital dialogue instance

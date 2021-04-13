@@ -22,26 +22,27 @@ package protocols
 
 import (
 	"encoding/json"
+	"errors"
 )
 
 type MessageId int
 type Address string
 type Performative string
 
-type AbstractMessage interface {
+type ProtocolMessageInterface interface {
 	Sender() Address
-	SetSender(Address)
+	SetSender(Address) error
 	To() Address
-	SetTo(Address)
+	SetTo(Address) error
 	MessageId() MessageId
 	DialogueReference() DialogueReference
 	Target() MessageId
 	Performative() Performative
 	Body() map[string]interface{}
-	ValidPerformatives() []string
 	HasSender() bool
 	HasTo() bool
 	GetField(name string) interface{}
+	//ValidPerformatives() []Performative TODO temporarily removed
 }
 
 type DialogueMessageWrapper struct {
@@ -51,8 +52,16 @@ type DialogueMessageWrapper struct {
 	messageId         MessageId
 	target            MessageId
 	body              map[string]interface{}
+	//validPerformatives helpers.Set TODO understand how to set this
 }
 
+// InitFromProtobuf initializes a message from a DialogueMessage protobuf message.
+//  It unpacks 'message id', 'target' and 'dialogue reference'; moreover,
+//  it decodes the content as a JSON object.
+//  Returns error if:
+//  - the JSON decoding fails
+//  - the body does not contain the 'performative'
+//  It performs side-effect on the method receiver.
 func (message *DialogueMessageWrapper) InitFromProtobuf(dialogueMessage *DialogueMessage) error {
 	message.messageId = MessageId(dialogueMessage.MessageId)
 	message.target = MessageId(dialogueMessage.Target)
@@ -67,16 +76,76 @@ func (message *DialogueMessageWrapper) InitFromProtobuf(dialogueMessage *Dialogu
 	if err != nil {
 		return err
 	}
+	if _, ok := message.body["performative"]; ok {
+		return errors.New("'performative' field not set")
+	}
+	performative := message.body["performative"]
+	if _, ok := performative.(Performative); ok {
+		return errors.New("cannot cast performative field")
+	}
+
 	message.body = data
 	return nil
 }
 
-func (message DialogueMessageWrapper) HasSender() bool {
+func (message *DialogueMessageWrapper) Sender() Address {
+	return message.sender
+}
+
+func (message *DialogueMessageWrapper) SetSender(newAddress Address) error {
+	if message.sender != "" {
+		return errors.New("'sender' field already set")
+	}
+	message.sender = newAddress
+	return nil
+}
+
+func (message *DialogueMessageWrapper) To() Address {
+	return message.to
+}
+
+func (message *DialogueMessageWrapper) SetTo(newAddress Address) error {
+	if message.to != "" {
+		return errors.New("'to' field already set")
+	}
+	message.to = newAddress
+	return nil
+}
+
+func (message *DialogueMessageWrapper) MessageId() MessageId {
+	return message.messageId
+}
+
+func (message *DialogueMessageWrapper) DialogueReference() DialogueReference {
+	return message.dialogueReference
+}
+
+func (message *DialogueMessageWrapper) Target() MessageId {
+	return message.target
+}
+
+func (message *DialogueMessageWrapper) Performative() Performative {
+	return message.body["performative"].(Performative)
+}
+
+func (message *DialogueMessageWrapper) Body() map[string]interface{} {
+	return message.body
+}
+
+func (message *DialogueMessageWrapper) HasSender() bool {
 	return message.sender != ""
 }
 
-func (message DialogueMessageWrapper) HasTo() bool {
+func (message *DialogueMessageWrapper) HasTo() bool {
 	return message.sender != ""
+}
+
+// GetField returns the value of the field associated with the name
+//  provided in input. If not present, then nil is returned. As we
+//  don't know the type, the callre has to do a type assertion
+//  in order to process the returned value.
+func (message *DialogueMessageWrapper) GetField(name string) interface{} {
+	return message.body[name]
 }
 
 //func InitializeMessage(
@@ -87,7 +156,7 @@ func (message DialogueMessageWrapper) HasTo() bool {
 //	ref [2]string,
 //	messageId MessageId,
 //	target MessageId,
-//) AbstractMessage {
+//) ProtocolMessageInterface {
 //	var reference [2]string
 //	if ref[0] != "" || ref[1] != "" {
 //		reference = ref
@@ -96,7 +165,7 @@ func (message DialogueMessageWrapper) HasTo() bool {
 //			generateDialogueNonce(), "",
 //		}
 //	}
-//	initialMessage := AbstractMessage{
+//	initialMessage := ProtocolMessageInterface{
 //		dialogueReference: reference,
 //		messageId:         messageId,
 //		target:            target,

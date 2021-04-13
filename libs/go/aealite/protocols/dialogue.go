@@ -72,50 +72,50 @@ type DialogueInterface interface {
 	SelfAddress() Address
 	Role() Role
 	Rules() Rules
-	getMessageClass() AbstractMessage
+	getMessageClass() ProtocolMessageInterface
 	IsSelfInitiated() bool
-	LastIncomingMessage() AbstractMessage
-	LastOutgoingMessage() AbstractMessage
-	LastMessage() AbstractMessage
+	LastIncomingMessage() ProtocolMessageInterface
+	LastOutgoingMessage() ProtocolMessageInterface
+	LastMessage() ProtocolMessageInterface
 
-	counterPartyFromMessage(AbstractMessage) Address
-	isMessageBySelf(AbstractMessage) bool
-	isMessageByOther(AbstractMessage) bool
-	getMessage(MessageId) AbstractMessage
+	counterPartyFromMessage(ProtocolMessageInterface) Address
+	isMessageBySelf(ProtocolMessageInterface) bool
+	isMessageByOther(ProtocolMessageInterface) bool
+	getMessage(MessageId) ProtocolMessageInterface
 	hasMessageId(MessageId) bool
 
-	update(AbstractMessage)
-	validateNextMessage(AbstractMessage) (bool, string)
-	basicValidations(AbstractMessage) (bool, string)
-	basicValidationInitialMessage(AbstractMessage) (bool, string)
-	basicValidationNonInitialMessage(AbstractMessage) (bool, string)
+	update(ProtocolMessageInterface)
+	validateNextMessage(ProtocolMessageInterface) (bool, string)
+	basicValidations(ProtocolMessageInterface) (bool, string)
+	basicValidationInitialMessage(ProtocolMessageInterface) (bool, string)
+	basicValidationNonInitialMessage(ProtocolMessageInterface) (bool, string)
 	isEmpty() bool
-	updateIncomingAndOutgoingMessages(AbstractMessage)
-	isBelongingToADialogue(AbstractMessage) bool
+	updateIncomingAndOutgoingMessages(ProtocolMessageInterface)
+	isBelongingToADialogue(ProtocolMessageInterface) bool
 
-	validateMessageTarget(AbstractMessage) string
-	validateMessageId(AbstractMessage) string
-	getMessageById(MessageId) AbstractMessage
+	validateMessageTarget(ProtocolMessageInterface) string
+	validateMessageId(ProtocolMessageInterface) string
+	getMessageById(MessageId) ProtocolMessageInterface
 	getOutgoingNextMessageId() MessageId
 	getIncomingNextMessageId() MessageId
 	updateDialogueLabel(DialogueLabel)
-	customValidation(AbstractMessage) (bool, string)
+	customValidation(ProtocolMessageInterface) (bool, string)
 	getStringRepresentation() string
 }
 
 /* Dialogue definition and methods */
 
 type Dialogue struct {
-	dialogueLabel          DialogueLabel     // dialogueLabel: the dialogue label for this dialogue
-	role                   Role              // role: the role of the agent this dialogue is maintained for
-	selfAddress            Address           // selfAddress: the address of the entity for whom this dialogue is maintained
-	dialogueMessage        AbstractMessage   // TODO (should be a type but golang does not support type variables)
-	outgoingMessages       []AbstractMessage // outgoingMessages: list of outgoing messages
-	incomingMessages       []AbstractMessage // incomingMessages: list of incoming messages
-	lastMessageId          MessageId         // lastMessageId: the last message id for this dialogue.
-	orderedMessageIds      []MessageId       // orderedMessageIds: the ordered message ids.
-	rules                  Rules             // rules: the rules for this dialogue
-	terminalStateCallbacks []func(Dialogue)  // terminalStateCallbacks: the callbacks to be called when the dialogue reaches a terminal state.
+	dialogueLabel          DialogueLabel              // dialogueLabel: the dialogue label for this dialogue
+	role                   Role                       // role: the role of the agent this dialogue is maintained for
+	selfAddress            Address                    // selfAddress: the address of the entity for whom this dialogue is maintained
+	dialogueMessage        ProtocolMessageInterface   // TODO (should be a type but golang does not support type variables)
+	outgoingMessages       []ProtocolMessageInterface // outgoingMessages: list of outgoing messages
+	incomingMessages       []ProtocolMessageInterface // incomingMessages: list of incoming messages
+	lastMessageId          MessageId                  // lastMessageId: the last message id for this dialogue.
+	orderedMessageIds      []MessageId                // orderedMessageIds: the ordered message ids.
+	rules                  Rules                      // rules: the rules for this dialogue
+	terminalStateCallbacks []func(Dialogue)           // terminalStateCallbacks: the callbacks to be called when the dialogue reaches a terminal state.
 }
 
 // DialogueLabel return the dialogue label.
@@ -155,21 +155,21 @@ func (dialogue *Dialogue) IsSelfInitiated() bool {
 	return dialogue.dialogueLabel.dialogueStarterAddress != dialogue.dialogueLabel.dialogueOpponentAddress
 }
 
-func (dialogue *Dialogue) LastIncomingMessage() *AbstractMessage {
+func (dialogue *Dialogue) LastIncomingMessage() *ProtocolMessageInterface {
 	if length := len(dialogue.incomingMessages); length > 0 {
 		return &dialogue.incomingMessages[length-1]
 	}
 	return nil
 }
 
-func (dialogue *Dialogue) LastOutgoingMessage() *AbstractMessage {
+func (dialogue *Dialogue) LastOutgoingMessage() *ProtocolMessageInterface {
 	if length := len(dialogue.outgoingMessages); length > 0 {
 		return &dialogue.outgoingMessages[length-1]
 	}
 	return nil
 }
 
-func (dialogue *Dialogue) LastMessage() *AbstractMessage {
+func (dialogue *Dialogue) LastMessage() *ProtocolMessageInterface {
 	// check if message id is unset
 	if dialogue.lastMessageId == 0 {
 		return nil
@@ -185,21 +185,21 @@ func (dialogue *Dialogue) isEmpty() bool {
 	return len(dialogue.outgoingMessages) == 0 && len(dialogue.incomingMessages) == 0
 }
 
-func (dialogue *Dialogue) isMessageBySelf(message *AbstractMessage) bool {
+func (dialogue *Dialogue) isMessageBySelf(message *ProtocolMessageInterface) bool {
 	return (*message).Sender() == dialogue.selfAddress
 }
-func (dialogue *Dialogue) isMessageByOther(message *AbstractMessage) bool {
+func (dialogue *Dialogue) isMessageByOther(message *ProtocolMessageInterface) bool {
 	return !dialogue.isMessageBySelf(message)
 }
 
-func (dialogue *Dialogue) counterPartyFromMessage(message *AbstractMessage) Address {
+func (dialogue *Dialogue) counterPartyFromMessage(message *ProtocolMessageInterface) Address {
 	if dialogue.isMessageBySelf(message) {
 		return (*message).To()
 	}
 	return (*message).Sender()
 }
 
-func (dialogue *Dialogue) update(message AbstractMessage) error {
+func (dialogue *Dialogue) update(message ProtocolMessageInterface) error {
 	if sender := message.Sender(); sender == "" {
 		message.SetSender(dialogue.selfAddress)
 	}
@@ -214,7 +214,7 @@ func (dialogue *Dialogue) update(message AbstractMessage) error {
 	return nil
 }
 
-func (dialogue *Dialogue) validateNextMessage(message AbstractMessage) (bool, error) {
+func (dialogue *Dialogue) validateNextMessage(message ProtocolMessageInterface) (bool, error) {
 	isBasicValidated, msgBasicValidation := dialogue.basicValidation(message)
 	if !isBasicValidated {
 		return false, msgBasicValidation
@@ -224,14 +224,16 @@ func (dialogue *Dialogue) validateNextMessage(message AbstractMessage) (bool, er
 	return true, nil
 }
 
-func (dialogue *Dialogue) basicValidation(message AbstractMessage) (bool, error) {
+func (dialogue *Dialogue) basicValidation(message ProtocolMessageInterface) (bool, error) {
 	if dialogue.isEmpty() {
 		return dialogue.basicValidationInitialMessage(message)
 	}
 	return dialogue.basicValidationNonInitialMessage(message)
 }
 
-func (dialogue *Dialogue) basicValidationInitialMessage(message AbstractMessage) (bool, error) {
+func (dialogue *Dialogue) basicValidationInitialMessage(
+	message ProtocolMessageInterface,
+) (bool, error) {
 	dialogueReference := message.DialogueReference()
 	messageId := message.MessageId()
 	// performative := message.performative
@@ -258,7 +260,9 @@ func (dialogue *Dialogue) basicValidationInitialMessage(message AbstractMessage)
 	return true, errors.New("The initial message passes basic validation.")
 }
 
-func (dialogue *Dialogue) basicValidationNonInitialMessage(message AbstractMessage) (bool, error) {
+func (dialogue *Dialogue) basicValidationNonInitialMessage(
+	message ProtocolMessageInterface,
+) (bool, error) {
 	dialogueReference := message.DialogueReference()
 	if dialogueReference.dialogueStarterReference != dialogue.dialogueLabel.dialogueReference.dialogueStarterReference {
 		return false, errors.New("Invalid dialogue_reference.dialogueStarterReference.")
@@ -274,7 +278,7 @@ func (dialogue *Dialogue) basicValidationNonInitialMessage(message AbstractMessa
 	return true, errors.New("The non-initial message passes basic validation.")
 }
 
-func (dialogue *Dialogue) validateMessageTarget(message AbstractMessage) error {
+func (dialogue *Dialogue) validateMessageTarget(message ProtocolMessageInterface) error {
 	target := message.Target()
 	// performative := message.performative
 
@@ -317,7 +321,7 @@ func (dialogue *Dialogue) validateMessageTarget(message AbstractMessage) error {
 	return nil
 }
 
-func (dialogue *Dialogue) getMessageById(messageId MessageId) (*AbstractMessage, error) {
+func (dialogue *Dialogue) getMessageById(messageId MessageId) (*ProtocolMessageInterface, error) {
 	if dialogue.isEmpty() {
 		return nil, errors.New("Error : Dialogue is empty.")
 	}
@@ -325,7 +329,7 @@ func (dialogue *Dialogue) getMessageById(messageId MessageId) (*AbstractMessage,
 		return nil, errors.New("message_id = 0 is invalid!")
 
 	}
-	var messages_list []AbstractMessage
+	var messages_list []ProtocolMessageInterface
 	if messageId > 0 && dialogue.IsSelfInitiated() {
 		messages_list = dialogue.outgoingMessages
 	} else {
@@ -350,7 +354,7 @@ func max(list []MessageId) MessageId {
 	return max
 }
 
-func (dialogue *Dialogue) validateMessageId(message AbstractMessage) error {
+func (dialogue *Dialogue) validateMessageId(message ProtocolMessageInterface) error {
 	var nextMessageId MessageId
 	if message.To() != dialogue.selfAddress {
 		nextMessageId = dialogue.getOutgoingNextMessageId()
@@ -385,7 +389,7 @@ func (dialogue *Dialogue) getIncomingNextMessageId() MessageId {
 	return nextMessageId
 }
 
-func (dialogue *Dialogue) updateIncomingAndOutgoingMessages(message AbstractMessage) {
+func (dialogue *Dialogue) updateIncomingAndOutgoingMessages(message ProtocolMessageInterface) {
 	if dialogue.dialogueLabel.dialogueStarterAddress == dialogue.selfAddress {
 		dialogue.outgoingMessages = append(dialogue.outgoingMessages, message)
 	} else {
@@ -397,7 +401,7 @@ func (dialogue *Dialogue) updateIncomingAndOutgoingMessages(message AbstractMess
 	dialogue.orderedMessageIds = append(dialogue.orderedMessageIds, message.MessageId())
 }
 
-func (dialogue *Dialogue) isBelongingToADialogue(message AbstractMessage) bool {
+func (dialogue *Dialogue) isBelongingToADialogue(message ProtocolMessageInterface) bool {
 	return false
 	//opponent := message.HasCounterparty()
 	//var label DialogueLabel
@@ -436,7 +440,7 @@ var dialogueByDialogueLabel = make(map[DialogueLabel]Dialogue)
 //func Create(counterParty Address,
 //	selfAddress Address,
 //	performative Performative,
-//	content []byte) (AbstractMessage, Dialogue) {
+//	content []byte) (ProtocolMessageInterface, Dialogue) {
 //	initialMessage := InitializeMessage(
 //		counterParty,
 //		selfAddress,
@@ -450,7 +454,7 @@ var dialogueByDialogueLabel = make(map[DialogueLabel]Dialogue)
 //	return initialMessage, dialogue
 //}
 
-func createDialogue(message AbstractMessage) Dialogue {
+func createDialogue(message ProtocolMessageInterface) Dialogue {
 	dialogueLabel := checkReferencesAndCreateLabels(message)
 	if validation := validateDialogueLabelExistence(dialogueLabel); !validation {
 		dialogue := Dialogue{
@@ -460,14 +464,14 @@ func createDialogue(message AbstractMessage) Dialogue {
 		}
 		dialogueStorage[message.To()] = append(dialogueStorage[message.To()], dialogue)
 		dialogueByDialogueLabel[dialogueLabel] = dialogue
-		// update dialogue using AbstractMessage
+		// update dialogue using ProtocolMessageInterface
 		dialogue.updateInitialDialogue(message)
 		return dialogue
 	}
 	return Dialogue{}
 }
 
-func (dialogue *Dialogue) updateInitialDialogue(message AbstractMessage) {
+func (dialogue *Dialogue) updateInitialDialogue(message ProtocolMessageInterface) {
 	// check if message has sender
 	//if _, err := message.HasSender(); err != nil {
 	//	fmt.Println(err)
@@ -491,7 +495,7 @@ func (dialogue *Dialogue) updateInitialDialogue(message AbstractMessage) {
 	dialogue.updateIncomingAndOutgoingMessages(message)
 }
 
-func checkReferencesAndCreateLabels(message AbstractMessage) DialogueLabel {
+func checkReferencesAndCreateLabels(message ProtocolMessageInterface) DialogueLabel {
 	dialogueReference := message.DialogueReference()
 	if !(dialogueReference.dialogueStarterReference != "" && dialogueReference.dialogueResponderReference == "") {
 		fmt.Println("Error : Reference address label already exists")

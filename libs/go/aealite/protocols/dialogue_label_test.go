@@ -26,6 +26,13 @@ import (
 	"testing"
 )
 
+const (
+	senderAddress       Address = "ba6b08b13043e83a962a3a5eeaad3b6c"
+	counterPartyAddress Address = "1ba5cb6f46f426a27ec53064032419f1"
+	starterReference    string  = "starterReference"
+	responderReference  string  = "responderReference"
+)
+
 // get a default dialogue label for testing purposes
 func getTestDialogueLabel() DialogueLabel {
 	return DialogueLabel{

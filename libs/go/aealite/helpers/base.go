@@ -40,6 +40,12 @@ func (set *Set) Init() {
 	set.container = make(map[Generic]bool)
 }
 
+func (set *Set) AddFromArray(array []Generic) {
+	for _, element := range array {
+		set.Add(element)
+	}
+}
+
 // Add add an element.
 func (set *Set) Add(element Generic) {
 	set.container[element] = true
