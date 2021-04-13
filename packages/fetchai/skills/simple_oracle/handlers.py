@@ -17,16 +17,20 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This package contians the handlers for the Fetch oracle contract deployer."""
+"""This package contains the handlers for the Fetch oracle contract deployer."""
 
 from typing import Optional, cast
 
+from aea_ledger_fetchai import FetchAIApi
+
+from aea.common import JSONLike
 from aea.configurations.base import PublicId
 from aea.crypto.ledger_apis import LedgerApis
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
 from packages.fetchai.connections.ledger.base import CONNECTION_ID as LEDGER_API_ADDRESS
+from packages.fetchai.contracts.oracle.contract import PUBLIC_ID as CONTRACT_PUBLIC_ID
 from packages.fetchai.protocols.contract_api.message import ContractApiMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.prometheus.message import PrometheusMessage
@@ -51,7 +55,6 @@ class LedgerApiHandler(Handler):
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -100,7 +103,6 @@ class LedgerApiHandler(Handler):
 
         :return: None
         """
-        pass
 
     def _handle_unidentified_dialogue(self, ledger_api_msg: LedgerApiMessage) -> None:
         """
@@ -153,6 +155,58 @@ class LedgerApiHandler(Handler):
         self.context.outbox.put_message(message=msg)
         self.context.logger.info("requesting transaction receipt.")
 
+    def _request_init_transaction(self, ledger_id: str, tx_receipt: JSONLike) -> None:
+        """
+        Send a message to request the initialisation transaction to finalise contract deployment
+
+        :param ledger_api_message: the ledger api message
+        """
+        strategy = cast(Strategy, self.context.strategy)
+        contract_api_dialogues = cast(
+            ContractApiDialogues, self.context.contract_api_dialogues
+        )
+        fetchai_api = cast(FetchAIApi, LedgerApis.get_api(ledger_id))
+        code_id = fetchai_api.get_code_id(tx_receipt)  # type: Optional[int]
+        if code_id:
+            contract_api_msg, dialogue = contract_api_dialogues.create(
+                counterparty=str(LEDGER_API_ADDRESS),
+                performative=ContractApiMessage.Performative.GET_DEPLOY_TRANSACTION,
+                ledger_id=ledger_id,
+                contract_id=str(CONTRACT_PUBLIC_ID),
+                callable="get_deploy_transaction",
+                kwargs=ContractApiMessage.Kwargs(
+                    {
+                        "label": "OracleContract",
+                        "init_msg": {"fee": str(strategy.initial_fee_deploy)},
+                        "gas": strategy.default_gas_deploy,
+                        "amount": 0,
+                        "code_id": code_id,
+                        "deployer_address": self.context.agent_address,
+                    }
+                ),
+            )
+            contract_api_dialogue = cast(ContractApiDialogue, dialogue)
+            contract_api_dialogue.terms = strategy.get_deploy_terms(
+                is_init_transaction=True
+            )
+            self.context.outbox.put_message(message=contract_api_msg)
+        else:  # pragma: nocover
+            self.context.logger.info("Failed to initialize contract: code_id not found")
+
+    def _save_contract_address_to_file(self) -> None:
+        """
+        Save the oracle contract address to a text file if specified in config
+
+        return: None
+        """
+        strategy = cast(Strategy, self.context.strategy)
+        if strategy.contract_address_file:  # pragma: nocover
+            self.context.logger.info(
+                f"Saving contract address to file: {strategy.contract_address_file}"
+            )
+            with open(strategy.contract_address_file, "w") as file:
+                file.write(strategy.contract_address)
+
     def _handle_transaction_receipt(
         self, ledger_api_msg: LedgerApiMessage, ledger_api_dialogue: LedgerApiDialogue
     ) -> None:
@@ -161,9 +215,11 @@ class LedgerApiHandler(Handler):
 
         :param ledger_api_message: the ledger api message
         """
+        ledger_id = cast(str, ledger_api_msg.transaction_receipt.ledger_id)
+        tx_receipt = cast(JSONLike, ledger_api_msg.transaction_receipt.receipt)
+
         is_transaction_successful = LedgerApis.is_transaction_settled(
-            ledger_api_msg.transaction_receipt.ledger_id,
-            ledger_api_msg.transaction_receipt.receipt,
+            ledger_id, tx_receipt,
         )
         if is_transaction_successful:
             self.context.logger.info(
@@ -172,26 +228,32 @@ class LedgerApiHandler(Handler):
                 )
             )
             strategy = cast(Strategy, self.context.strategy)
-
             contract_api_dialogue = (
                 ledger_api_dialogue.associated_signing_dialogue.associated_contract_api_dialogue
             )
-
             transaction_label = contract_api_dialogue.terms.kwargs.get("label", "None")
 
-            if not strategy.is_contract_deployed and transaction_label == "deploy":
-                contract_address = cast(
-                    Optional[str],
-                    ledger_api_msg.transaction_receipt.receipt.get(
-                        "contractAddress", None
-                    ),
-                )
-                if contract_address is None:
-                    raise ValueError("No contract address found.")  # pragma: nocover
-                strategy.contract_address = contract_address
-                strategy.is_contract_deployed = is_transaction_successful
-                strategy.is_behaviour_active = is_transaction_successful
-                self.context.logger.info("Oracle contract successfully deployed!")
+            if not strategy.is_contract_deployed:
+                if transaction_label == "store":
+                    self._request_init_transaction(ledger_id, tx_receipt)
+                elif transaction_label in {"deploy", "init"}:
+                    contract_address = LedgerApis.get_contract_address(
+                        ledger_id, tx_receipt
+                    )
+                    if contract_address is None:
+                        raise ValueError(
+                            "No contract address found."
+                        )  # pragma: nocover
+                    strategy.contract_address = contract_address
+                    strategy.is_contract_deployed = True
+                    self._save_contract_address_to_file()
+                    self.context.logger.info(
+                        f"Oracle contract successfully deployed at address: {contract_address}"
+                    )
+                else:
+                    self.context.logger.error(
+                        f"Invalid transaction label: {transaction_label}"
+                    )  # pragma: nocover
             elif (
                 not strategy.is_oracle_role_granted
                 and transaction_label == "grant_role"
@@ -255,7 +317,6 @@ class ContractApiHandler(Handler):
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -298,7 +359,6 @@ class ContractApiHandler(Handler):
 
         :return: None
         """
-        pass
 
     def _handle_unidentified_dialogue(
         self, contract_api_msg: ContractApiMessage
@@ -382,7 +442,6 @@ class SigningHandler(Handler):
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -416,7 +475,6 @@ class SigningHandler(Handler):
 
         :return: None
         """
-        pass
 
     def _handle_unidentified_dialogue(self, signing_msg: SigningMessage) -> None:
         """
@@ -545,4 +603,3 @@ class PrometheusHandler(Handler):
 
         :return: None
         """
-        pass

@@ -59,7 +59,7 @@ class DefaultArgumentsMultiple(Argument):
         """
         Parse arguments string to tuple.
 
-        :param args: arguments string sperated by comma
+        :param args: arguments string separated by comma
 
         :return: tuple of parsed arguments
         """
@@ -91,7 +91,7 @@ class TestCli:
         func - should be function with first parameter multithreading.Queue
         func  - should have docstring, and default values for every extra argument.
 
-        Exmple of usage:
+        Example of usage:
 
         def test_fn(benchmark: BenchmarkControl, list_size: int = 1000000):
             # test list iteration

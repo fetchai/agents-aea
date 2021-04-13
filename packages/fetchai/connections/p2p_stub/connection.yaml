@@ -1,18 +1,18 @@
 name: p2p_stub
 author: fetchai
-version: 0.15.0
+version: 0.17.0
 type: connection
 description: The stub p2p connection implements a local p2p connection allowing agents
   to communicate with each other through files created in the namespace directory.
 license: Apache-2.0
-aea_version: '>=0.11.0, <0.12.0'
+aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmWXDErX4tKA7Mfi88ZVVDNQvY69xgaVLMjsdjs8eY7zh1
+  README.md: Qmbcn1KQsAM3Ad3y4xdB7aSR5VstFjGv33TzPA7ty6nsrg
   __init__.py: QmW9XFKGsea4u3fupkFMcQutgsjqusCMBMyTcTmLLmQ4tR
-  connection.py: QmWadqRXVLs97JVjwUjvp4b2v4X9ZyGkaboWmhG3ZNpyJj
+  connection.py: QmeiQPNANzjj85drwi4uvxUJrZALHfXtabk5wr6vd6dqYy
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/stub:0.18.0
+- fetchai/stub:0.20.0
 protocols: []
 class_name: P2PStubConnection
 config:

@@ -54,7 +54,6 @@ from aea.configurations.constants import (
     DEFAULT_LICENSE,
     DEFAULT_LOGGING_CONFIG,
     DEFAULT_PROTOCOL_CONFIG_FILE,
-    DEFAULT_REGISTRY_NAME,
     DEFAULT_SKILL_CONFIG_FILE,
     DEFAULT_VERSION,
     PACKAGE_PUBLIC_ID_VAR_NAME,
@@ -402,7 +401,7 @@ class PackageConfiguration(Configuration, ABC):
         self, overrides: Dict, env_vars_friendly: bool = False
     ) -> None:
         """Check overrides is correct, return list of errors if present."""
-        # check for permited overrides
+        # check for permitted overrides
         self._check_overrides_corresponds_to_overridable(
             overrides, env_vars_friendly=env_vars_friendly
         )
@@ -712,7 +711,7 @@ class ConnectionConfig(ComponentConfiguration):
         connections = {PublicId.from_str(id_) for id_ in obj.get(CONNECTIONS, set())}
         cert_requests = (
             [
-                # notice: yaml.load resolves datetimes strings to datetime.datetime objects
+                # notice: yaml.load resolves datetime strings to datetime.datetime objects
                 CertRequest.from_json(cert_request_json)
                 for cert_request_json in obj["cert_requests"]
             ]
@@ -791,15 +790,13 @@ class ProtocolConfig(ComponentConfiguration):
         )
         self.dependencies = dependencies if dependencies is not None else {}
         self.description = description
-
-        # temporary solution till all protocols updated
-        if protocol_specification_id is not None:
-            self.protocol_specification_id = PublicId.from_str(
-                str(protocol_specification_id)
+        if protocol_specification_id is None:
+            raise ValueError(  # pragma: nocover
+                "protocol_specification_id not provided!"
             )
-        else:
-            # make protocol specification same as protocol id
-            self.protocol_specification_id = self.public_id
+        self.protocol_specification_id = PublicId.from_str(
+            str(protocol_specification_id)
+        )
 
     @property
     def json(self) -> Dict:
@@ -1105,7 +1102,7 @@ class SkillConfig(ComponentConfiguration):
         return instance
 
     def get_overridable(self) -> dict:
-        """Get overrideable confg data."""
+        """Get overridable configuration data."""
         result = {}
         current_config_data = self.json
         if self.abstract_field_name in current_config_data:
@@ -1136,12 +1133,12 @@ class AgentConfig(PackageConfiguration):
     FIELDS_ALLOWED_TO_UPDATE: FrozenSet[str] = frozenset(
         [
             "description",
-            "registry_path",
             "logging_config",
             "private_key_paths",
             "connection_private_key_paths",
             "loop_mode",
             "runtime_mode",
+            "task_manager_mode",
             "execution_timeout",
             "timeout",
             "period",
@@ -1150,6 +1147,7 @@ class AgentConfig(PackageConfiguration):
             "connection_exception_policy",
             "default_connection",
             "default_ledger",
+            "required_ledgers",
             "default_routing",
             "storage_uri",
         ]
@@ -1157,6 +1155,7 @@ class AgentConfig(PackageConfiguration):
     CHECK_EXCLUDES = [
         ("private_key_paths",),
         ("connection_private_key_paths",),
+        ("error_handler",),
         ("decision_maker_handler",),
         ("default_routing",),
         ("dependencies",),
@@ -1165,12 +1164,12 @@ class AgentConfig(PackageConfiguration):
 
     __slots__ = (
         "agent_name",
-        "registry_path",
         "description",
         "private_key_paths",
         "connection_private_key_paths",
         "logging_config",
         "default_ledger",
+        "required_ledgers",
         "currency_denominations",
         "default_connection",
         "connections",
@@ -1203,7 +1202,6 @@ class AgentConfig(PackageConfiguration):
         fingerprint: Optional[Dict[str, str]] = None,
         fingerprint_ignore_patterns: Optional[Sequence[str]] = None,
         build_entrypoint: Optional[str] = None,
-        registry_path: str = DEFAULT_REGISTRY_NAME,
         description: str = "",
         logging_config: Optional[Dict] = None,
         period: Optional[float] = None,
@@ -1214,11 +1212,13 @@ class AgentConfig(PackageConfiguration):
         skill_exception_policy: Optional[str] = None,
         connection_exception_policy: Optional[str] = None,
         default_ledger: Optional[str] = None,
+        required_ledgers: Optional[List[str]] = None,
         currency_denominations: Optional[Dict[str, str]] = None,
         default_connection: Optional[str] = None,
         default_routing: Optional[Dict[str, str]] = None,
         loop_mode: Optional[str] = None,
         runtime_mode: Optional[str] = None,
+        task_manager_mode: Optional[str] = None,
         storage_uri: Optional[str] = None,
         data_dir: Optional[str] = None,
         component_configurations: Optional[Dict[ComponentId, Dict]] = None,
@@ -1236,13 +1236,19 @@ class AgentConfig(PackageConfiguration):
             build_entrypoint,
         )
         self.agent_name = self.name
-        self.registry_path = registry_path
         self.description = description
         self.private_key_paths = CRUDCollection[str]()
         self.connection_private_key_paths = CRUDCollection[str]()
 
         self.logging_config = logging_config or DEFAULT_LOGGING_CONFIG
-        self.default_ledger = default_ledger
+        self.default_ledger = (
+            str(SimpleId(default_ledger)) if default_ledger is not None else None
+        )
+        self.required_ledgers = (
+            [str(SimpleId(ledger)) for ledger in required_ledgers]
+            if required_ledgers is not None
+            else None
+        )
         self.currency_denominations = (
             currency_denominations if currency_denominations is not None else {}
         )
@@ -1278,6 +1284,7 @@ class AgentConfig(PackageConfiguration):
         )  # type: Dict[PublicId, PublicId]
         self.loop_mode = loop_mode
         self.runtime_mode = runtime_mode
+        self.task_manager_mode = task_manager_mode
         self.storage_uri = storage_uri
         self.data_dir = data_dir
         # this attribute will be set through the setter below
@@ -1382,13 +1389,13 @@ class AgentConfig(PackageConfiguration):
                 if self.default_connection is not None
                 else None,
                 "default_ledger": self.default_ledger,
+                "required_ledgers": self.required_ledgers or [],
                 "default_routing": {
                     str(key): str(value) for key, value in self.default_routing.items()
                 },
                 "connection_private_key_paths": self.connection_private_key_paths_dict,
                 "private_key_paths": self.private_key_paths_dict,
                 "logging_config": self.logging_config,
-                "registry_path": self.registry_path,
                 "component_configurations": self.component_configurations_json(),
                 "dependencies": dependencies_to_json(self.dependencies),
             }
@@ -1416,6 +1423,8 @@ class AgentConfig(PackageConfiguration):
             config["loop_mode"] = self.loop_mode
         if self.runtime_mode is not None:
             config["runtime_mode"] = self.runtime_mode
+        if self.task_manager_mode is not None:
+            config["task_manager_mode"] = self.task_manager_mode
         if self.storage_uri is not None:
             config["storage_uri"] = self.storage_uri
         if self.data_dir is not None:
@@ -1437,7 +1446,6 @@ class AgentConfig(PackageConfiguration):
             version=cast(str, obj.get("version")),
             license_=cast(str, obj.get("license")),
             aea_version=cast(str, obj.get("aea_version", "")),
-            registry_path=cast(str, obj.get("registry_path")),
             description=cast(str, obj.get("description", "")),
             fingerprint=cast(Dict[str, str], obj.get("fingerprint", {})),
             fingerprint_ignore_patterns=cast(
@@ -1455,11 +1463,13 @@ class AgentConfig(PackageConfiguration):
                 str, obj.get("connection_exception_policy")
             ),
             default_ledger=cast(str, obj.get("default_ledger")),
+            required_ledgers=cast(Optional[List[str]], obj.get("required_ledgers")),
             currency_denominations=cast(Dict, obj.get("currency_denominations", {})),
             default_connection=cast(str, obj.get("default_connection")),
             default_routing=cast(Dict, obj.get("default_routing", {})),
             loop_mode=cast(str, obj.get("loop_mode")),
             runtime_mode=cast(str, obj.get("runtime_mode")),
+            task_manager_mode=cast(str, obj.get("task_manager_mode")),
             storage_uri=cast(str, obj.get("storage_uri")),
             data_dir=cast(str, obj.get("data_dir")),
             component_configurations=None,
@@ -1786,21 +1796,24 @@ class ContractConfig(ComponentConfiguration):
 """The following functions are called from aea.cli.utils."""
 
 
-def _compute_fingerprint(
-    package_directory: Path, ignore_patterns: Optional[Collection[str]] = None
+def _compute_fingerprint(  # pylint: disable=unsubscriptable-object
+    package_directory: Path,
+    ignore_patterns: Optional[Collection[str]] = None,
+    is_recursive: bool = True,
+    ignore_directories: Optional[Collection[str]] = None,
 ) -> Dict[str, str]:
     ignore_patterns = ignore_patterns if ignore_patterns is not None else []
+    ignore_directories = ignore_directories if ignore_directories is not None else []
     ignore_patterns = set(ignore_patterns).union(DEFAULT_FINGERPRINT_IGNORE_PATTERNS)
     hasher = IPFSHashOnly()
     fingerprints = {}  # type: Dict[str, str]
     # find all valid files of the package
     all_files = [
         x
-        for x in package_directory.glob("**/*")
+        for x in package_directory.glob("**/*" if is_recursive else "*")
         if x.is_file()
-        and (
-            x.match("*.py") or not any(x.match(pattern) for pattern in ignore_patterns)
-        )
+        and not any(x.match(pattern) for pattern in ignore_patterns)
+        and not (x.parts[0] in ignore_directories)
     ]
 
     for file in all_files:
@@ -1819,6 +1832,7 @@ def _compare_fingerprints(
     package_directory: Path,
     is_vendor: bool,
     item_type: PackageType,
+    is_recursive: bool = True,
 ) -> None:
     """
     Check fingerprints of a package directory against the fingerprints declared in the configuration file.
@@ -1827,12 +1841,16 @@ def _compare_fingerprints(
     :param package_directory: the directory of the package.
     :param is_vendor: whether the package is vendorized or not.
     :param item_type: the type of the item.
+    :param is_recursive: look up sub directories for files to fingerprint
+
     :return: None
     :raises ValueError: if the fingerprints do not match.
     """
     expected_fingerprints = package_configuration.fingerprint
     ignore_patterns = package_configuration.fingerprint_ignore_patterns
-    actual_fingerprints = _compute_fingerprint(package_directory, ignore_patterns)
+    actual_fingerprints = _compute_fingerprint(
+        package_directory, ignore_patterns, is_recursive=is_recursive
+    )
     if expected_fingerprints != actual_fingerprints:
         if is_vendor:
             raise ValueError(
@@ -1845,6 +1863,17 @@ def _compare_fingerprints(
                     pprint.pformat(actual_fingerprints),
                     str(item_type),
                     package_configuration.public_id,
+                )
+            )
+        if item_type == PackageType.AGENT:
+            raise ValueError(
+                (
+                    "Fingerprints for package {} do not match:\nExpected: {}\nActual: {}\n"
+                    "Please fingerprint the package before continuing: 'aea fingerprint'"
+                ).format(
+                    package_directory,
+                    pprint.pformat(expected_fingerprints),
+                    pprint.pformat(actual_fingerprints),
                 )
             )
         raise ValueError(

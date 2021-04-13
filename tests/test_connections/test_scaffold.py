@@ -70,6 +70,8 @@ class TestScaffoldConnectionAndRun(AEATestCaseEmpty):
 
     def test_run_and_not_implemented_error(self):
         """Test aea run crashes with connect not implemented for scaffolded connection."""
+        self.generate_private_key()
+        self.add_private_key()
         with cd(self._get_cwd()):
             proc = PexpectWrapper(  # nosec
                 [sys.executable, "-m", "aea.cli", "-v", "DEBUG", "run"],

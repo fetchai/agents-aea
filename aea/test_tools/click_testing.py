@@ -21,7 +21,7 @@
 This module contains an adaptation of click.testing.CliRunner.
 
 In particular, it fixes an issue in
-CLIRunner.invoke, in the 'finally' clause. More precisely, before reading from
+CliRunner.invoke, in the 'finally' clause. More precisely, before reading from
 the testing outstream, it checks whether it has been already closed.
 
 Links:

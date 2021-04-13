@@ -27,6 +27,7 @@ from pathlib import Path
 from unittest import TestCase, mock
 
 import jsonschema
+import pytest
 from jsonschema import Draft4Validator
 
 from aea.cli import cli
@@ -40,6 +41,7 @@ from tests.conftest import (
     CLI_LOG_OPTION,
     CONFIGURATION_SCHEMA_DIR,
     CliRunner,
+    MAX_FLAKY_RERUNS,
     ROOT_DIR,
 )
 from tests.test_cli.constants import FORMAT_ITEMS_SAMPLE_OUTPUT
@@ -51,7 +53,6 @@ class TestSearchProtocolsLocal:
     @classmethod
     def setup_class(cls):
         """Set the test up."""
-        cls.cwd = os.getcwd()
         cls.runner = CliRunner()
 
     @mock.patch("aea.cli.search.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT)
@@ -67,11 +68,6 @@ class TestSearchProtocolsLocal:
             "Protocols found:\n\n"
             "{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
         )
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear the test down."""
-        os.chdir(cls.cwd)
 
 
 class TestSearchContractsLocal(TestCase):
@@ -118,7 +114,6 @@ class TestSearchConnectionsLocal:
     @classmethod
     def setup_class(cls):
         """Set the test up."""
-        cls.cwd = os.getcwd()
         cls.runner = CliRunner()
 
     @mock.patch("aea.cli.search.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT)
@@ -135,19 +130,14 @@ class TestSearchConnectionsLocal:
             "{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
         )
 
-    @classmethod
-    def teardown_class(cls):
-        """Tear the test down."""
-        os.chdir(cls.cwd)
 
-
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 class TestSearchSkillsLocal:
     """Test that the command 'aea search skills' works as expected."""
 
     @classmethod
     def setup_class(cls):
         """Set the test up."""
-        cls.cwd = os.getcwd()
         cls.runner = CliRunner()
 
     @mock.patch("aea.cli.search.format_items", return_value=FORMAT_ITEMS_SAMPLE_OUTPUT)
@@ -161,11 +151,6 @@ class TestSearchSkillsLocal:
             "Skills found:\n\n"
             "{}\n".format(FORMAT_ITEMS_SAMPLE_OUTPUT)
         )
-
-    @classmethod
-    def teardown_class(cls):
-        """Tear the test down."""
-        os.chdir(cls.cwd)
 
 
 class TestSearchAgentsLocal:

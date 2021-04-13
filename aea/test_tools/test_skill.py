@@ -222,7 +222,7 @@ class BaseSkillTestCase:
         Quickly create an incoming message with the provided attributes for a dialogue.
 
         For any attribute not provided, a value based on the dialogue is used.
-        These values are shown in parantheses in the list of parameters below.
+        These values are shown in parentheses in the list of parameters below.
 
         NOTE: This method must be used with care. The dialogue provided is part of the skill
         which is being tested. Because for any unspecified attribute, a "correct" value is used,
@@ -235,7 +235,7 @@ class BaseSkillTestCase:
         :param message_id: (the id of the last message in the provided dialogue + 1) the id of the message
         :param target: (the id of the last message in the provided dialogue) the target of the message
         :param to: (the agent address associated with this skill) the receiver of the message
-        :param sender: (the counterperty in the provided dialogue) the sender of the message
+        :param sender: (the counterparty in the provided dialogue) the sender of the message
         :param kwargs: other attributes
 
         :return: the created incoming message
@@ -388,18 +388,13 @@ class BaseSkillTestCase:
 
         if is_incoming:  # first message from the opponent
             dialogue_reference = dialogues.new_self_initiated_dialogue_reference()
-            default_to = (
-                self.skill.skill_context.agent_address
-                if is_agent_to_agent_messages
-                else str(self.skill.public_id)
-            )
             message = self.build_incoming_message(
                 message_type=dialogues.message_class,
                 dialogue_reference=dialogue_reference,
                 message_id=Dialogue.STARTING_MESSAGE_ID,
                 target=target or Dialogue.STARTING_TARGET,
                 performative=performative,
-                to=default_to,
+                to=dialogues.self_address,
                 sender=counterparty,
                 is_agent_to_agent_messages=is_agent_to_agent_messages,
                 **contents,
@@ -433,18 +428,13 @@ class BaseSkillTestCase:
                 )
                 message_id = dialogue.get_incoming_next_message_id()
 
-                default_to = (
-                    self.skill.skill_context.agent_address
-                    if is_agent_to_agent_messages
-                    else str(self.skill.public_id)
-                )
                 message = self.build_incoming_message(
                     message_type=dialogues.message_class,
                     dialogue_reference=dialogue_reference,
                     message_id=message_id,
                     target=target,
                     performative=performative,
-                    to=default_to,
+                    to=dialogues.self_address,
                     sender=counterparty,
                     is_agent_to_agent_messages=is_agent_to_agent_messages,
                     **contents,

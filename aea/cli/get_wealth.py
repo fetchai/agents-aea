@@ -19,10 +19,11 @@
 
 """Implementation of the 'aea get_wealth' subcommand."""
 
-from typing import cast
+from typing import Optional, cast
 
 import click
 
+from aea.cli.utils.click_utils import password_option
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.cli.utils.package_utils import (
@@ -40,16 +41,20 @@ from aea.crypto.registries import ledger_apis_registry
     type=click.Choice(ledger_apis_registry.supported_ids),
     required=True,
 )
+@password_option()
 @click.pass_context
 @check_aea_project
-def get_wealth(click_context: click.Context, type_: str) -> None:
+def get_wealth(
+    click_context: click.Context, type_: str, password: Optional[str]
+) -> None:
     """Get the wealth associated with the private key of the agent."""
     ctx = cast(Context, click_context.obj)
-    wealth = _try_get_wealth(ctx, type_)
+    wealth = _try_get_wealth(ctx, type_, password)
     click.echo(wealth)
 
 
-def _try_get_wealth(ctx: Context, type_: str) -> int:
-    wallet = get_wallet_from_context(ctx)
+def _try_get_wealth(ctx: Context, type_: str, password: Optional[str] = None) -> int:
+    """Try get wealth."""
+    wallet = get_wallet_from_context(ctx, password=password)
     _override_ledger_configurations(ctx.agent_config)
     return try_get_balance(ctx.agent_config, wallet, type_)

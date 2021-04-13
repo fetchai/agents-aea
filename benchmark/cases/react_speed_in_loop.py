@@ -31,7 +31,7 @@ def react_speed_in_loop(benchmark: BenchmarkControl, inbox_amount: int = 1000) -
     Test inbox message processing in a loop.
 
     :param benchmark: benchmark special parameter to communicate with executor
-    :param inbox_amount: num of inbox messages for every agent
+    :param inbox_amount: number of inbox messages for every agent
 
     :return: None
     """

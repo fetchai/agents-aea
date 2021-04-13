@@ -16,12 +16,12 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """This module contains the tests for the aea.configurations.base module."""
 import re
 from copy import copy
 from pathlib import Path
 from unittest import TestCase, mock
+from unittest.mock import Mock
 
 import pytest
 import semver
@@ -516,11 +516,19 @@ class ProtocolSpecificationTestCase(TestCase):
 
     def test_init_positive(self):
         """Test case for __init__ method positive result."""
-        ProtocolSpecification(name="my_protocol", author="fetchai")
+        ProtocolSpecification(
+            name="my_protocol",
+            author="fetchai",
+            protocol_specification_id="some/author:0.1.0",
+        )
 
     def test_json_positive(self):
         """Test case for json property positive result."""
-        obj = ProtocolSpecification(name="my_protocol", author="fetchai")
+        obj = ProtocolSpecification(
+            name="my_protocol",
+            author="fetchai",
+            protocol_specification_id="some/author:0.1.0",
+        )
         obj.json
 
     @mock.patch("aea.configurations.base.SpeechActContentConfig.from_json")
@@ -533,6 +541,7 @@ class ProtocolSpecificationTestCase(TestCase):
             "license": "license",
             "description": "description",
             "speech_acts": {"arg1": "arg1", "arg2": "arg2"},
+            "protocol_specification_id": "some/author:0.1.0",
         }
         ProtocolSpecification.from_json(json_disc)
 
@@ -565,7 +574,9 @@ def test_component_type_str():
 
 def test_configuration_ordered_json():
     """Test configuration ordered json."""
-    configuration = ProtocolConfig("name", "author", "0.1.0")
+    configuration = ProtocolConfig(
+        "name", "author", "0.1.0", protocol_specification_id="some/author:0.1.0"
+    )
     configuration._key_order = ["aea_version"]
     configuration.ordered_json
 
@@ -771,14 +782,18 @@ def test_component_configuration_load_file_not_found():
 
 def test_component_configuration_check_fingerprint_bad_directory():
     """Test ComponentConfiguration.check_fingerprint when a bad directory is provided."""
-    config = ProtocolConfig("name", "author", "0.1.0")
+    config = ProtocolConfig(
+        "name", "author", "0.1.0", protocol_specification_id="some/author:0.1.0"
+    )
     with pytest.raises(ValueError, match="Directory .* is not valid."):
         config.check_fingerprint(Path("non_existing_directory"))
 
 
 def test_component_configuration_check_fingerprint_different_fingerprints_vendor():
     """Test ComponentConfiguration.check_fingerprint when the fingerprints differ for a vendor package."""
-    config = ProtocolConfig("name", "author", "0.1.0")
+    config = ProtocolConfig(
+        "name", "author", "0.1.0", protocol_specification_id="some/author:0.1.0"
+    )
     package_dir = Path("path", "to", "dir")
     error_regex = (
         f"Fingerprints for package {re.escape(str(package_dir))} do not match:\nExpected: {dict()}\nActual: {dict(foo='bar')}\n"
@@ -794,7 +809,9 @@ def test_component_configuration_check_fingerprint_different_fingerprints_vendor
 
 def test_component_configuration_check_fingerprint_different_fingerprints_no_vendor():
     """Test ComponentConfiguration.check_fingerprint when the fingerprints differ for a non-vendor package."""
-    config = ProtocolConfig("name", "author", "0.1.0")
+    config = ProtocolConfig(
+        "name", "author", "0.1.0", protocol_specification_id="some/author:0.1.0"
+    )
     package_dir = Path("path", "to", "dir")
     error_regex = (
         f"Fingerprints for package {re.escape(str(package_dir))} do not match:\nExpected: {dict()}\nActual: {dict(foo='bar')}\n"
@@ -808,9 +825,32 @@ def test_component_configuration_check_fingerprint_different_fingerprints_no_ven
             _compare_fingerprints(config, package_dir, False, PackageType.PROTOCOL)
 
 
+def test_agent_fingerprint_different_fingerprints():
+    """Test ComponentConfiguration.check_fingerprint for agent."""
+    config = Mock()
+    config.fingerprint = {}
+    package_dir = Path("path", "to", "dir")
+    error_regex = (
+        f"Fingerprints for package {re.escape(str(package_dir))} do not match:\nExpected: {dict()}\nActual: {dict(foo='bar')}\n"
+        + "Please fingerprint the package before continuing: 'aea fingerprint"
+    )
+
+    with pytest.raises(ValueError, match=error_regex):
+        with mock.patch(
+            "aea.configurations.base._compute_fingerprint", return_value={"foo": "bar"}
+        ):
+            _compare_fingerprints(config, package_dir, False, PackageType.AGENT)
+
+
 def test_check_aea_version_when_it_fails():
     """Test the check for the AEA version when it fails."""
-    config = ProtocolConfig("name", "author", "0.1.0", aea_version=">0.1.0")
+    config = ProtocolConfig(
+        "name",
+        "author",
+        "0.1.0",
+        aea_version=">0.1.0",
+        protocol_specification_id="some/author:0.1.0",
+    )
     with mock.patch("aea.configurations.base.__aea_version__", "0.1.0"):
         with pytest.raises(
             ValueError,
@@ -860,6 +900,7 @@ def test_agent_config_to_json_with_optional_configurations():
         loop_mode="sync",
         runtime_mode="async",
         storage_uri="some_uri_to_storage",
+        task_manager_mode="threaded",
     )
     agent_config.default_connection = "author/name:0.1.0"
     agent_config.default_ledger = DEFAULT_LEDGER
@@ -869,7 +910,9 @@ def test_agent_config_to_json_with_optional_configurations():
 
 def test_protocol_specification_attributes():
     """Test protocol specification attributes."""
-    protocol_specification = ProtocolSpecification("name", "author", "0.1.0")
+    protocol_specification = ProtocolSpecification(
+        "name", "author", "0.1.0", protocol_specification_id="some/author:0.1.0"
+    )
 
     # test getter and setter for 'protobuf_snippets'
     assert protocol_specification.protobuf_snippets == {}
@@ -1002,7 +1045,9 @@ def test_check_public_id_consistency_negative():
     """Test ComponentId.check_public_id_consistency raises error when directory does not exists."""
     random_dir_name = random_string()
     with pytest.raises(ValueError, match=f"Directory {random_dir_name} is not valid."):
-        component_configuration = ProtocolConfig("name", "author")
+        component_configuration = ProtocolConfig(
+            "name", "author", protocol_specification_id="some/author:0.1.0"
+        )
         component_configuration.check_public_id_consistency(Path(random_dir_name))
 
 

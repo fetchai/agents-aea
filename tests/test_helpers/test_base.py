@@ -434,6 +434,7 @@ class BaseTestCertRequestError:
     LEDGER_ID = "a_ledger_id"
     NOT_BEFORE = "2020-01-01"
     NOT_AFTER = "2020-01-02"
+    MESSAGE_FORMAT = "{public_key}"
     PATH = "some/path"
     ERROR_MESSAGE_PATTERN = ""
 
@@ -446,6 +447,7 @@ class BaseTestCertRequestError:
                 self.LEDGER_ID,
                 self.NOT_BEFORE,
                 self.NOT_AFTER,
+                self.MESSAGE_FORMAT,
                 self.PATH,
             )
 
@@ -516,6 +518,7 @@ class BaseTestCertRequestInstantiation:
         cls.expected_ledger_id = "ledger_id"
         cls.not_before = "2020-01-01"
         cls.not_after = "2020-01-02"
+        cls.message_format = "{public_key}"
         cls.expected_path = os.path.abspath("some/path")
         cls.cert_request = CertRequest(
             cls.expected_public_key,
@@ -523,6 +526,7 @@ class BaseTestCertRequestInstantiation:
             cls.expected_ledger_id,
             cls.not_before,
             cls.not_after,
+            cls.message_format,
             cls.expected_path,
         )
 
@@ -549,7 +553,8 @@ class BaseTestCertRequestInstantiation:
         assert self.cert_request.not_after_string == expected_not_after.strftime(
             "%Y-%m-%d"
         )
-        assert self.cert_request.get_message("some_key")
+        some_key = "some_key"
+        assert self.cert_request.get_message(some_key) == "some_key".encode("ascii")
 
         assert self.cert_request.save_path == Path(self.expected_path)
 
@@ -581,8 +586,16 @@ def test_compute_specifier_from_version():
     expected_range = ">=0.1.0, <0.2.0"
     assert expected_range == compute_specifier_from_version(Version(version))
 
-    version = "1.1.5"
-    expected_range = ">=1.1.0, <1.2.0"
+    version = "1.0.0rc1"
+    expected_range = ">=1.0.0rc1, <2.0.0"
+    assert expected_range == compute_specifier_from_version(Version(version))
+
+    version = "1.0.0.post1"
+    expected_range = ">=1.0.0, <2.0.0"
+    assert expected_range == compute_specifier_from_version(Version(version))
+
+    version = "1.1.0rc1"
+    expected_range = ">=1.0.0, <2.0.0"
     assert expected_range == compute_specifier_from_version(Version(version))
 
 

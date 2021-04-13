@@ -55,7 +55,7 @@ class PublishAgentTestCase(TestCase):
             "POST",
             "/agents/create",
             data={
-                "name": "agent-name",
+                "name": "agent_name",
                 "description": description,
                 "version": version,
                 "connections": [],
@@ -80,7 +80,7 @@ class PublishAgentTestCase(TestCase):
             "POST",
             "/agents/create",
             data={
-                "name": "agent-name",
+                "name": "agent_name",
                 "description": description,
                 "version": version,
                 "connections": [],

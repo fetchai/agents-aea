@@ -271,7 +271,6 @@ class GenericStrategy(Model):
         :param data: the data
         :return: False
         """
-        pass
 
     def update_search_query_params(self) -> None:
         """
@@ -279,4 +278,3 @@ class GenericStrategy(Model):
 
         :return: None
         """
-        pass

@@ -217,7 +217,7 @@ class GenericStrategy(Model):
         Check if the query matches the supply.
 
         :param query: the query
-        :return: bool indiciating whether matches or not
+        :return: bool indicating whether matches or not
         """
         return query.check(self.get_service_description())
 

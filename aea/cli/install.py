@@ -56,7 +56,7 @@ def do_install(ctx: Context, requirement: Optional[str] = None) -> None:
     :param requirement: optional str requirement.
 
     :return: None
-    :raises: ClickException if AEAException occurres.
+    :raises: ClickException if AEAException occurs.
     """
     try:
         if requirement:

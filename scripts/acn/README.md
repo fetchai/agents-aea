@@ -17,6 +17,23 @@ To deploy a test network do the following steps:
 4. a) If this is the first time deploying run `helm install agents-dht-test .`
    b) If you are upgrading an existing installation (see if there is one by `helm ls`) run `helm upgrade agents-dht-test .`
 
+## Simple image update:
+
+Run `./build_upload_img.sh` and take note of the image tag.
+
+Replace below `IMAGE_TAG_HERE` with the image tag.
+``` bash
+kubens agents-p2p-dht-testnet
+kubectl set image sts/acn-node-9005 acn-node=gcr.io/fetch-ai-colearn/acn_node:{IMAGE_TAG_HERE}
+kubectl set image sts/acn-node-9003 acn-node=gcr.io/fetch-ai-colearn/acn_node:{IMAGE_TAG_HERE}
+kubectl set image sts/acn-node-9004 acn-node=gcr.io/fetch-ai-colearn/acn_node:{IMAGE_TAG_HERE}
+
+kubens agents-p2p-dht
+kubectl set image sts/acn-node-9002 acn-node=gcr.io/fetch-ai-colearn/acn_node:{IMAGE_TAG_HERE}
+kubectl set image sts/acn-node-9000 acn-node=gcr.io/fetch-ai-colearn/acn_node:{IMAGE_TAG_HERE}
+kubectl set image sts/acn-node-9001 acn-node=gcr.io/fetch-ai-colearn/acn_node:{IMAGE_TAG_HERE}
+```
+
 # The agent communication network (ACN) Kubernetes deployment script
 
 The `k8s_deploy_acn_node.py` script provides a configurable, reproducible, and verifiable deployment of the ACN node to a Kubernetes cluster.

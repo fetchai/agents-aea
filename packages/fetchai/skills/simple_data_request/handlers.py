@@ -49,7 +49,6 @@ class HttpHandler(Handler):
 
         :return: None
         """
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -127,4 +126,3 @@ class HttpHandler(Handler):
 
         :return: None
         """
-        pass

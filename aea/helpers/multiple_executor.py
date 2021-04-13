@@ -101,7 +101,7 @@ class AbstractExecutorTask(ABC):
 
         If it's running it's not failed.
 
-        :rerurn: bool
+        :return: bool
         """
         if not self._future:
             return False
@@ -439,6 +439,6 @@ class AbstractMultipleRunner:  # pragma: nocover
         """Try to join thread if running in thread mode."""
         if self._thread is None:
             raise ValueError("Not started in thread mode.")
-        # do not block with join, helpful to catch Keyboardiinterrupted exception
+        # do not block with join, helpful to catch KeyboardInterrupt exception
         while self._thread.is_alive():
             self._thread.join(0.1)

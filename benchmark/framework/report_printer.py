@@ -27,7 +27,7 @@ from .func_details import BaseFuncDetails
 
 
 class ContextPrinter:
-    """Printer for test execution context: function, arguments, execution aprameters."""
+    """Printer for test execution context: function, arguments, execution parameters."""
 
     def __init__(self, func_details: BaseFuncDetails, executor_params: dict) -> None:
         """

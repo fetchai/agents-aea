@@ -20,10 +20,14 @@
 """This module contains the strategy class."""
 from typing import Any
 
+from aea_ledger_ethereum import EthereumApi
+
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.exceptions import enforce
 from aea.helpers.transaction.base import Terms
 from aea.skills.base import Model
+
+from packages.fetchai.protocols.contract_api.custom_types import Kwargs
 
 
 DEFAULT_LEDGER_ID = DEFAULT_LEDGER
@@ -171,12 +175,20 @@ class Strategy(Model):
         )
         self._is_client_contract_deployed = is_client_contract_deployed
 
-    def get_deploy_terms(self) -> Terms:
+    def get_deploy_terms(self, is_init_transaction: bool = False) -> Terms:
         """
         Get terms of deployment.
 
         :return: terms
         """
+        if self.ledger_id == EthereumApi.identifier:
+            label = "deploy"
+        else:
+            if is_init_transaction:
+                label = "init"
+            else:
+                label = "store"
+
         terms = Terms(
             ledger_id=self.ledger_id,
             sender_address=self.context.agent_address,
@@ -184,7 +196,7 @@ class Strategy(Model):
             amount_by_currency_id={},
             quantities_by_good_id={},
             nonce="",
-            label="deploy",
+            label=label,
         )
         return terms
 
@@ -221,3 +233,26 @@ class Strategy(Model):
             label="approve",
         )
         return terms
+
+    def get_deploy_kwargs(self) -> Kwargs:
+        """
+        Get kwargs for the contract deployment
+
+        :return: kwargs
+        """
+        if self.ledger_id == EthereumApi.identifier:
+            kwargs = Kwargs(
+                {
+                    "deployer_address": self.context.agent_address,
+                    "fetchOracleContractAddress": self.oracle_contract_address,
+                    "gas": self.default_gas_deploy,
+                }
+            )
+        else:
+            kwargs = Kwargs(
+                {
+                    "deployer_address": self.context.agent_address,
+                    "gas": self.default_gas_deploy,
+                }
+            )
+        return kwargs

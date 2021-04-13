@@ -120,7 +120,7 @@ We place this code in `my_aea/skills/my_search/behaviours.py`. Ensure you replac
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>
-  <p> Note that the import paths to agent packages, for example `packages.fetchai.skills.my_search.dialogues` above, are not actual paths. Package files always reside in your AEA's folder, either under a specific package directory (e.g. connection, protocol, skill) if the package is custom built, or under `vendor` if it is pulled from the registry. These paths are virtual and created automatically when an AEA is run. See <a href="../package-imports"> this page </a> for more details. </p>
+  <p> Note that the import paths to agent packages, for example <code>packages.fetchai.skills.my_search.dialogues</code> above, are not actual paths. Package files always reside in your AEA's folder, either under a specific package directory (e.g. connection, protocol, skill) if the package is custom built, or under <code>vendor</code> if it is pulled from the registry. These paths are virtual and created automatically when an AEA is run. See <a href="../package-imports"> this page </a> for more details. </p>
 </div>
 
 ## Step 3: Develop a Handler
@@ -276,7 +276,7 @@ We place this code in `my_aea/skills/my_search/handlers.py`. Ensure you replace 
 
 ## Step 4: Add dialogues model
 
-We have implemented a behaviour and a handler. We now implement a <a href="../api/skills/base#model-objects">`Model`</a>, in particular we implement the <a href="../api/protocols/dialogue/base#dialogue-objects">`Dialogue`</a> and <a href="../api/protocols/dialogue/base#dialogues-objects">`Dialogues`</a> classes. These ensure that the message flow satisfies the `fetchai/oef_search:0.14.0` protocol and keep track of the individual messages being sent and received.
+We have implemented a behaviour and a handler. We now implement a <a href="../api/skills/base#model-objects">`Model`</a>, in particular we implement the <a href="../api/protocols/dialogue/base#dialogue-objects">`Dialogue`</a> and <a href="../api/protocols/dialogue/base#dialogues-objects">`Dialogues`</a> classes. These ensure that the message flow satisfies the `fetchai/oef_search:1.0.0` protocol and keep track of the individual messages being sent and received.
 
 ``` python
 from aea.protocols.base import Message
@@ -337,13 +337,13 @@ version: 0.1.0
 type: skill
 description: A simple search skill utilising the SOEF search node.
 license: Apache-2.0
-aea_version: '>=0.11.0, <0.12.0'
+aea_version: '>=1.0.0, <2.0.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/oef_search:0.14.0
+- fetchai/oef_search:1.0.0
 skills: []
 behaviours:
   my_search_behaviour:
@@ -368,7 +368,7 @@ models:
     class_name: OefSearchDialogues
 dependencies:
   aea-ledger-fetchai:
-    version: <0.3.0,>=0.2.0
+    version: <2.0.0,>=1.0.0
 is_abstract: false
 ```
 
@@ -422,21 +422,21 @@ Ensure, you use the correct author name to reference your skill (here we use `fe
 
 Our AEA does not have the OEF protocol yet so let's add it.
 ``` bash
-aea add protocol fetchai/oef_search:0.14.0
+aea add protocol fetchai/oef_search:1.0.0
 ```
 
 This adds the protocol to our AEA and makes it available on the path `packages.fetchai.protocols...`.
 
 At this point we need to add the SOEF and P2P connections to allow the AEA to communicate with the SOEF node and other AEAs, install the AEA's dependencies, and configure the AEA:
 ``` bash
-aea add connection fetchai/soef:0.19.0
-aea add connection fetchai/p2p_libp2p:0.18.0
+aea add connection fetchai/soef:0.22.0
+aea add connection fetchai/p2p_libp2p:0.21.0
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.18.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.21.0
 aea config set --type dict agent.default_routing \
 '{
-  "fetchai/oef_search:0.14.0": "fetchai/soef:0.19.0"
+  "fetchai/oef_search:1.0.0": "fetchai/soef:0.22.0"
 }'
 ```
 
@@ -448,7 +448,7 @@ In order for this AEA to find another AEA when searching, the second AEA (let's 
 
 From a different terminal window, we fetch a finished service provider AEA and install its Python dependencies:
 ``` bash
-aea fetch fetchai/simple_service_registration:0.24.0 && cd simple_service_registration && aea install && aea build
+aea fetch fetchai/simple_service_registration:0.27.0 && cd simple_service_registration && aea install && aea build
 ```
 
 This AEA will simply register a location service on the <a href="../simple-oef">SOEF search node</a> so we can search for it.
@@ -475,12 +475,12 @@ Then we run the AEA:
 aea run
 ```
 
-Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.18.0 -u public_uri` to retrieve the address.) This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the `simple_service_registration` (service provider) AEA.
+Once you see a message of the form `To join its network use multiaddr: ['SOME_ADDRESS']` take note of the address. (Alternatively, use `aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.21.0 -u public_uri` to retrieve the address.) This is the entry peer address for the local <a href="../acn">agent communication network</a> created by the `simple_service_registration` (service provider) AEA.
 
 <details><summary>Click here to see full code and guide for this AEA</summary>
 <p>
 
-We use a <a href="../api/skills/behaviours#tickerbehaviour-objects">`TickerBehaviour`</a> to update the service registration at regular intervals. The following code is placed in `behaviours.py`.
+We use a <a href="../api/skills/behaviours#tickerbehaviour-objects"><code>TickerBehaviour</code></a> to update the service registration at regular intervals. The following code is placed in <code>behaviours.py</code>.
 
 ``` python
 from typing import cast
@@ -521,7 +521,6 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
-        pass
 
     def teardown(self) -> None:
         """
@@ -617,7 +616,7 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
         self.context.logger.info("unregistering agent from SOEF.")
 ```
 
-We create a <a href="../api/skills/base#model-objects">`Model`</a> type strategy class and place it in `strategy.py`. We use a generic data model to register the service. As part of the registration we register a location and a key pair describing our service.
+We create a <a href="../api/skills/base#model-objects"><code>Model</code></a> type strategy class and place it in <code>strategy.py</code>. We use a generic data model to register the service. As part of the registration we register a location and a key pair describing our service.
 
 ``` python
 from aea.helpers.search.generic import (
@@ -688,7 +687,7 @@ class Strategy(Model):
         return description
 ```
 
-We create a <a href="../api/skills/base#model-objects">`Model`</a> type dialogue class and place it in `dialogues.py`. These classes ensure that the message flow satisfies the `fetchai/oef_search:0.14.0` protocol and keep track of the individual messages being sent and received.
+We create a <a href="../api/skills/base#model-objects"><code>Model</code></a> type dialogue class and place it in <code>dialogues.py</code>. These classes ensure that the message flow satisfies the <code>fetchai/oef_search:1.0.0</code> protocol and keep track of the individual messages being sent and received.
 
 ``` python
 from aea.protocols.base import Message
@@ -738,7 +737,7 @@ class OefSearchDialogues(Model, BaseOefSearchDialogues):
 
 ```
 
-Finally, we have a handler, placed in `handlers.py`. The handler deals with handling any error messages which might occur during service registration:
+Finally, we have a handler, placed in <code>handlers.py</code>. The handler deals with handling any error messages which might occur during service registration:
 
 ``` python
 from typing import Optional, cast
@@ -753,7 +752,7 @@ from packages.fetchai.skills.simple_service_registration.dialogues import (
     OefSearchDialogues,
 )
 
-LEDGER_API_ADDRESS = "fetchai/ledger:0.15.0"
+LEDGER_API_ADDRESS = "fetchai/ledger:0.18.0"
 
 
 class OefSearchHandler(Handler):
@@ -763,7 +762,6 @@ class OefSearchHandler(Handler):
 
     def setup(self) -> None:
         """Call to setup the handler."""
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -797,7 +795,6 @@ class OefSearchHandler(Handler):
 
         :return: None
         """
-        pass
 
     def _handle_unidentified_dialogue(self, oef_search_msg: OefSearchMessage) -> None:
         """
@@ -844,7 +841,7 @@ class OefSearchHandler(Handler):
         )
 ```
 
-The associated `skill.yaml` is:
+The associated <code>skill.yaml</code> is:
 
 ``` yaml
 name: simple_service_registration
@@ -853,7 +850,7 @@ version: 0.4.0
 type: skill
 description: The simple service registration skills is a skill to register a service.
 license: Apache-2.0
-aea_version: '>=0.11.0, <0.12.0'
+aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
   behaviours.py: QmRr1oe3zWKyPcktzKP4BiKqjCqmKjEDdLUQhn1JzNm4nD
@@ -864,7 +861,7 @@ fingerprint_ignore_patterns: []
 connections: []
 contracts: []
 protocols:
-- fetchai/oef_search:0.14.0
+- fetchai/oef_search:1.0.0
 skills: []
 behaviours:
   service:
@@ -890,7 +887,7 @@ models:
     class_name: Strategy
 dependencies:
   aea-ledger-fetchai:
-    version: <0.3.0,>=0.2.0
+    version: <2.0.0,>=1.0.0
 is_abstract: false
 ```
 </p>

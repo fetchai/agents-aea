@@ -106,17 +106,17 @@ class BaseAgentLoop(Runnable, WithLogger, ABC):
         return self._state.get() == AgentLoopStates.started
 
     def set_loop(self, loop: AbstractEventLoop) -> None:
-        """Set event loop and all event loopp related objects."""
+        """Set event loop and all event loop related objects."""
         self._loop: AbstractEventLoop = loop
 
     def _setup(self) -> None:  # pylint: disable=no-self-use
         """Set up agent loop before started."""
-        # start and stop methods are classmethods cause one instance shared across muiltiple threads
+        # start and stop methods are classmethods cause one instance shared across multiple threads
         ExecTimeoutThreadGuard.start()
 
     def _teardown(self) -> None:  # pylint: disable=no-self-use
         """Tear down loop on stop."""
-        # start and stop methods are classmethods cause one instance shared across muiltiple threads
+        # start and stop methods are classmethods cause one instance shared across multiple threads
         ExecTimeoutThreadGuard.stop()
 
     async def run(self) -> None:
@@ -308,7 +308,7 @@ class AsyncAgentLoop(BaseAgentLoop):
         Register function to run periodically.
 
         :param task_callable: function to be called
-        :param pediod: float: in seconds
+        :param period: float in seconds
         :param start_at: optional datetime, when to run task for the first time, otherwise call it right now
 
         :return: None
@@ -389,7 +389,9 @@ class AsyncAgentLoop(BaseAgentLoop):
             while self.is_running:
                 message = await message_getter()
                 self._execution_control(message_handler, [message])
-        except Exception:
+        except CancelledError:  # pylint: disable=try-except-raise
+            raise
+        except Exception:  # pragma: nocover
             self.logger.exception(
                 f"Exception in message processor ({message_handler, message_getter})"
             )

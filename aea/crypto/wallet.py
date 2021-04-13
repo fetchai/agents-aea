@@ -36,13 +36,16 @@ class CryptoStore:
     __slots__ = ("_crypto_objects", "_public_keys", "_addresses", "_private_keys")
 
     def __init__(
-        self, crypto_id_to_path: Optional[Dict[str, Optional[str]]] = None
+        self,
+        crypto_id_to_path: Optional[Dict[str, Optional[str]]] = None,
+        password: Optional[str] = None,
     ) -> None:
         """
         Initialize the crypto store.
 
         :param crypto_id_to_path: dictionary from crypto id to an (optional) path
             to the private key.
+        :param password: the password to encrypt/decrypt the private key.
         """
         if crypto_id_to_path is None:
             crypto_id_to_path = {}
@@ -52,7 +55,7 @@ class CryptoStore:
         private_keys = {}  # type: Dict[str, str]
 
         for identifier, path in crypto_id_to_path.items():
-            crypto = make_crypto(identifier, private_key_path=path)
+            crypto = make_crypto(identifier, private_key_path=path, password=password)
             crypto_objects[identifier] = crypto
             public_keys[identifier] = cast(str, crypto.public_key)
             addresses[identifier] = cast(str, crypto.address)
@@ -99,15 +102,19 @@ class Wallet:
         self,
         private_key_paths: Dict[str, Optional[str]],
         connection_private_key_paths: Optional[Dict[str, Optional[str]]] = None,
+        password: Optional[str] = None,
     ):
         """
         Instantiate a wallet object.
 
         :param private_key_paths: the private key paths
         :param connection_private_key_paths: the private key paths for the connections.
+        :param password: the password to encrypt/decrypt the private key.
         """
-        self._main_cryptos = CryptoStore(private_key_paths)
-        self._connection_cryptos = CryptoStore(connection_private_key_paths)
+        self._main_cryptos = CryptoStore(private_key_paths, password=password)
+        self._connection_cryptos = CryptoStore(
+            connection_private_key_paths, password=password
+        )
 
     @property
     def public_keys(self) -> Dict[str, str]:

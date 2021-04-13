@@ -44,7 +44,7 @@ The Python implementation of the AEA Framework currently integrates with three l
 
 - <a href="https://docs.fetch.ai/ledger/" target="_blank">Fetch.ai ledger</a>
 - <a href="https://ethereum.org/en/developers/learning-tools/" target="_blank">Ethereum ledger</a>
-- <a href="https://cosmos.network/sdk" target="_blank">Cosmos ledger</a>
+- <a href="https://v1.cosmos.network/sdk" target="_blank">Cosmos ledger</a>
 
 However, the framework makes it straightforward for any developer to add support for other ledgers.
 

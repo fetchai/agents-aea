@@ -388,7 +388,18 @@ class AbstractBehaviour(SkillComponent, ABC):
 
 
 class Behaviour(AbstractBehaviour, ABC):
-    """This class implements an abstract behaviour."""
+    """
+    This class implements an abstract behaviour.
+
+    In a subclass of Behaviour, the flag 'is_programmatically_defined'
+     can be used by the developer to signal to the framework that the class
+     is meant to be used programmatically; hence, in case the class is
+     not declared in the configuration file but it is present in a skill
+     module, the framework will just ignore this class instead of printing
+     a warning message.
+    """
+
+    is_programmatically_defined: bool = False
 
     @abstractmethod
     def act(self) -> None:
@@ -411,7 +422,7 @@ class Behaviour(AbstractBehaviour, ABC):
         except Exception as e:  # pylint: disable=broad-except
             e_str = parse_exception(e)
             raise AEAActException(
-                f"An error occured during act of behaviour {self.context.skill_id}/{type(self).__name__}:\n{e_str}"
+                f"An error occurred during act of behaviour {self.context.skill_id}/{type(self).__name__}:\n{e_str}"
             )
 
     @classmethod
@@ -433,9 +444,24 @@ class Behaviour(AbstractBehaviour, ABC):
 
 
 class Handler(SkillComponent, ABC):
-    """This class implements an abstract behaviour."""
+    """
+    This class implements an abstract behaviour.
 
-    SUPPORTED_PROTOCOL = None  # type: Optional[PublicId]
+    In a subclass of Handler, the flag 'is_programmatically_defined'
+     can be used by the developer to signal to the framework that the component
+     is meant to be used programmatically; hence, in case the class is
+     not declared in the configuration file but it is present in a skill
+     module, the framework will just ignore this class instead of printing
+     a warning message.
+
+    SUPPORTED_PROTOCOL is read by the framework when the handlers are loaded
+     to register them as 'listeners' to the protocol identified by the specified
+     public id. Whenever a message of protocol 'SUPPORTED_PROTOCOL' is sent
+     to the agent, the framework will call the 'handle' method.
+    """
+
+    SUPPORTED_PROTOCOL: Optional[PublicId] = None
+    is_programmatically_defined: bool = False
 
     @abstractmethod
     def handle(self, message: Message) -> None:
@@ -455,7 +481,7 @@ class Handler(SkillComponent, ABC):
         except Exception as e:  # pylint: disable=broad-except
             e_str = parse_exception(e)
             raise AEAHandleException(
-                f"An error occured during handle of handler {self.context.skill_id}/{type(self).__name__}:\n{e_str}"
+                f"An error occurred during handle of handler {self.context.skill_id}/{type(self).__name__}:\n{e_str}"
             )
 
     @classmethod
@@ -744,7 +770,7 @@ def _parse_module(
             except Exception as e:  # pylint: disable=broad-except # pragma: nocover
                 e_str = parse_exception(e)
                 raise AEAInstantiationException(
-                    f"An error occured during instantiation of component {skill_context.skill_id}/{component_config.class_name}:\n{e_str}"
+                    f"An error occurred during instantiation of component {skill_context.skill_id}/{component_config.class_name}:\n{e_str}"
                 )
             components[component_id] = component
 
@@ -756,13 +782,13 @@ def _print_warning_message_for_non_declared_skill_components(
     classes: Set[str],
     config_components: Set[str],
     item_type: str,
-    skill_path: str,
+    module_path: str,
 ) -> None:
     """Print a warning message if a skill component is not declared in the config files."""
     for class_name in classes.difference(config_components):
         skill_context.logger.warning(
-            "Class {} of type {} found but not declared in the configuration file {}.".format(
-                class_name, item_type, skill_path
+            "Class {} of type {} found in skill module {} but not declared in the configuration file.".format(
+                class_name, item_type, module_path
             )
         )
 
@@ -808,8 +834,6 @@ class _SkillComponentLoader:
         self.skill_context = skill_context
         self.kwargs = kwargs
 
-        self._all_component_names: Set[str] = set()
-
         self.skill = Skill(self.configuration, self.skill_context, **self.kwargs)
         self.skill_dotted_path = f"packages.{self.configuration.public_id.author}.skills.{self.configuration.public_id.name}"
 
@@ -820,11 +844,6 @@ class _SkillComponentLoader:
         declared_component_classes: Dict[
             _SKILL_COMPONENT_TYPES, Dict[str, SkillComponentConfiguration]
         ] = self._get_declared_skill_component_configurations()
-        self._all_component_names = {
-            config.class_name
-            for _, types_ in declared_component_classes.items()
-            for _, config in types_.items()
-        }
         component_classes_by_path: Dict[
             Path, Set[Tuple[str, Type[SkillComponent]]]
         ] = self._load_component_classes(python_modules)
@@ -877,15 +896,16 @@ class _SkillComponentLoader:
         """
         Filter classes of skill components.
 
+        The following filters are applied:
+        - the class must be a subclass of "SkillComponent";
+        - its __module__ attribute must not start with 'aea.' (we exclude classes provided by the framework)
+        - its __module__ attribute starts with the expected dotted path of this skill.
+
         :param classes: a list of pairs (class name, class object)
         :return: a list of the same kind, but filtered with only skill component classes.
         """
         filtered_classes = filter(
-            lambda name_and_class: any(
-                re.match(component, name_and_class[0])
-                for component in self._all_component_names
-            )
-            and issubclass(name_and_class[1], SkillComponent)
+            lambda name_and_class: issubclass(name_and_class[1], SkillComponent)
             and not str.startswith(name_and_class[1].__module__, "aea.")
             and not str.startswith(
                 name_and_class[1].__module__, self.skill_dotted_path
@@ -1011,7 +1031,7 @@ class _SkillComponentLoader:
         class_index: Dict[
             str, Dict[_SKILL_COMPONENT_TYPES, Set[Type[SkillComponent]]]
         ] = {}
-        used_classes = set()
+        used_classes: Set[Type[SkillComponent]] = set()
         not_resolved_configurations: Dict[
             Tuple[_SKILL_COMPONENT_TYPES, str], SkillComponentConfiguration
         ] = {}
@@ -1099,7 +1119,52 @@ class _SkillComponentLoader:
             )
             used_classes.add(not_used_class)
 
+        self._print_warning_message_for_unused_classes(
+            component_classes_by_path, used_classes
+        )
         return result
+
+    def _print_warning_message_for_unused_classes(
+        self,
+        component_classes_by_path: Dict[Path, Set[Tuple[str, Type[SkillComponent]]]],
+        used_classes: Set[Type[SkillComponent]],
+    ) -> None:
+        """
+        Print warning message for every unused class.
+
+        :param component_classes_by_path: the component classes by path.
+        :param used_classes: the classes used.
+        :return: None
+        """
+        for path, set_of_class_name_pairs in component_classes_by_path.items():
+            # take only classes, not class names
+            set_of_classes = {pair[1] for pair in set_of_class_name_pairs}
+            set_of_unused_classes = set(
+                filter(lambda x: x not in used_classes, set_of_classes)
+            )
+            if len(set_of_unused_classes) == 0:
+                # all classes in the module are used!
+                continue
+
+            # for each unused class, print a warning message. However,
+            # if it is a Handler or a Behaviour, print the message
+            # only if 'is_programmatically_defined' is not True
+            for unused_class in set_of_unused_classes:
+                component_type_class = self._get_skill_component_type(unused_class)
+                if (
+                    issubclass(unused_class, (Handler, Behaviour))
+                    and cast(
+                        Union[Handler, Behaviour], unused_class
+                    ).is_programmatically_defined
+                ):
+                    continue
+                _print_warning_message_for_non_declared_skill_components(
+                    self.skill_context,
+                    {unused_class.__name__},
+                    set(),
+                    self._type_to_str(component_type_class),
+                    str(path),
+                )
 
     @classmethod
     def _type_to_str(cls, component_type: _SKILL_COMPONENT_TYPES) -> str:

@@ -119,7 +119,6 @@ class BanditEnv(gym.Env):
         :param close: a bool, true if ending
         :return: None
         """
-        pass
 
 
 class BanditNArmedRandom(BanditEnv):

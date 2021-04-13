@@ -10,6 +10,8 @@ clean-build:
 	find . -name '*.egg-info' -exec rm -fr {} +
 	find . -name '*.egg' -exec rm -fr {} +
 	rm -fr Pipfile.lock
+	rm -rf plugins/*/build
+	rm -rf plugins/*/dist
 
 .PHONY: clean-docs
 clean-docs:

@@ -48,6 +48,8 @@ class TestInteractCommand(AEATestCaseManyFlaky):
 
         # prepare agent
         self.set_agent_context(agent_name)
+        self.generate_private_key()
+        self.add_private_key()
         self.add_item("connection", str(STUB_CONNECTION_ID))
         self.run_install()
 
@@ -160,7 +162,7 @@ class ProcessEnvelopesTestCase(TestCase):
         """Test _process_envelopes method for positive result."""
         agent_name = "agent_name"
         identity_stub = mock.Mock()
-        identity_stub.name = "identity-stub-name"
+        identity_stub.name = "identity_stub_name"
         inbox = mock.Mock()
         inbox.empty = lambda: False
         inbox.get_nowait = lambda: "Not None"
@@ -193,7 +195,7 @@ class ProcessEnvelopesTestCase(TestCase):
         """Test _process_envelopes for couldn't recover envelope result."""
         agent_name = "agent_name"
         identity_stub = mock.Mock()
-        identity_stub.name = "identity-stub-name"
+        identity_stub.name = "identity_stub_name"
         inbox = mock.Mock()
         inbox.empty = lambda: False
         inbox.get_nowait = lambda: None
@@ -212,6 +214,8 @@ class TestInteractEcho(AEATestCaseEmptyFlaky):
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)  # can be flaky on Windows
     def test_interact(self):
         """Test the 'aea interact' command with the echo skill."""
+        self.generate_private_key()
+        self.add_private_key()
         self.add_item("connection", str(STUB_CONNECTION_ID))
         self.add_item("skill", str(ECHO_SKILL_PUBLIC_ID))
         self.run_agent()

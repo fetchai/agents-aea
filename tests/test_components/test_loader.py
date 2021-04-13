@@ -39,7 +39,12 @@ from tests.common.pexpect_popen import PexpectWrapper
 @pytest.fixture(scope="module")
 def component_configuration():
     """Return a component configuration."""
-    return ProtocolConfig("a_protocol", "an_author", "0.1.0")
+    return ProtocolConfig(
+        "a_protocol",
+        "an_author",
+        "0.1.0",
+        protocol_specification_id="some/author:0.1.0",
+    )
 
 
 def test_component_loading_generic_exception(component_configuration):
@@ -209,6 +214,8 @@ class TestLoadFailedCauseImportedPackageNotFound(AEATestCaseEmpty):
 
     def test_load_component_failed_cause_package_not_found(self):
         """Test package not found in import."""
+        self.generate_private_key()
+        self.add_private_key()
         self.add_item("skill", "fetchai/echo:latest", local=True)
 
         with cd(self._get_cwd()):
@@ -222,7 +229,7 @@ class TestLoadFailedCauseImportedPackageNotFound(AEATestCaseEmpty):
             )
             handlers_file.write_text(file_data)
             with cd("./vendor/fetchai"):
-                self.run_cli_command("fingerprint", "skill", "fetchai/echo:0.15.0")
+                self.run_cli_command("fingerprint", "skill", "fetchai/echo:0.18.0")
 
             proc = PexpectWrapper.aea_cli(["run"], cwd=self._get_cwd())
             proc.expect_all(

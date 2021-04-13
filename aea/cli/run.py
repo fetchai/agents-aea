@@ -27,13 +27,14 @@ from aea import __version__
 from aea.aea import AEA
 from aea.aea_builder import AEABuilder, DEFAULT_ENV_DOTFILE
 from aea.cli.install import do_install
-from aea.cli.utils.click_utils import ConnectionsOption
+from aea.cli.utils.click_utils import ConnectionsOption, password_option
 from aea.cli.utils.constants import AEA_LOGO, REQUIREMENTS
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection
 from aea.contracts.base import Contract
+from aea.exceptions import AEAWalletNoAddressException
 from aea.helpers.base import load_env_file
 from aea.helpers.profiling import Profiling
 from aea.protocols.base import Message, Protocol
@@ -42,6 +43,7 @@ from aea.skills.base import Behaviour, Handler, Model, Skill
 
 
 @click.command()
+@password_option()
 @click.option(
     "--connections",
     "connection_ids",
@@ -81,6 +83,7 @@ def run(
     env_file: str,
     is_install_deps: bool,
     profiling: int,
+    password: str,
 ) -> None:
     """Run the agent."""
     ctx = cast(Context, click_context.obj)
@@ -89,7 +92,7 @@ def run(
         with _profiling_context(period=profiling):
             run_aea(ctx, connection_ids, env_file, is_install_deps)
             return
-    run_aea(ctx, connection_ids, env_file, is_install_deps)
+    run_aea(ctx, connection_ids, env_file, is_install_deps, password)
 
 
 @contextmanager
@@ -129,7 +132,11 @@ def _profiling_context(period: int) -> Generator:
 
 
 def run_aea(
-    ctx: Context, connection_ids: List[PublicId], env_file: str, is_install_deps: bool,
+    ctx: Context,
+    connection_ids: List[PublicId],
+    env_file: str,
+    is_install_deps: bool,
+    password: Optional[str] = None,
 ) -> None:
     """
     Prepare and run an agent.
@@ -137,14 +144,15 @@ def run_aea(
     :param ctx: a context object.
     :param connection_ids: list of connections public IDs.
     :param env_file: a path to env file.
-    :param is_install_deps: bool flag is install deps.
+    :param is_install_deps: bool flag is install dependencies.
+    :param password: the password to encrypt/decrypt the private key.
 
     :return: None
-    :raises: ClickException if any Exception occures.
+    :raises: ClickException if any Exception occurs.
     """
     skip_consistency_check = ctx.config["skip_consistency_check"]
     _prepare_environment(ctx, env_file, is_install_deps)
-    aea = _build_aea(connection_ids, skip_consistency_check)
+    aea = _build_aea(connection_ids, skip_consistency_check, password)
 
     click.echo(AEA_LOGO + "v" + __version__ + "\n")
     click.echo(
@@ -167,7 +175,7 @@ def _prepare_environment(ctx: Context, env_file: str, is_install_deps: bool) -> 
     Prepare the AEA project environment.
 
     :param ctx: a context object.
-    :param env_file: the path to the envrionemtn file.
+    :param env_file: the path to the environment file.
     :param is_install_deps: whether to install the dependencies
     """
     load_env_file(env_file)
@@ -177,13 +185,22 @@ def _prepare_environment(ctx: Context, env_file: str, is_install_deps: bool) -> 
 
 
 def _build_aea(
-    connection_ids: Optional[List[PublicId]], skip_consistency_check: bool
+    connection_ids: Optional[List[PublicId]],
+    skip_consistency_check: bool,
+    password: Optional[str] = None,
 ) -> AEA:
+    """Build the AEA."""
     try:
         builder = AEABuilder.from_aea_project(
             Path("."), skip_consistency_check=skip_consistency_check
         )
-        aea = builder.build(connection_ids=connection_ids)
+        aea = builder.build(connection_ids=connection_ids, password=password)
         return aea
+    except AEAWalletNoAddressException:
+        error_msg = (
+            "You haven't specified any private key for the AEA project.\n"
+            "Please add one by using the commands `aea generate-key` and `aea add-key` for the ledger of your choice.\n"
+        )
+        raise click.ClickException(error_msg)
     except Exception as e:
         raise click.ClickException(str(e))

@@ -207,7 +207,39 @@ jobs:
       - name: Check aea dependenices and imports
         run: |
           tox -e dependencies_check
-
+  plugins_install_check:
+    continue-on-error: False
+    runs-on: ${{ matrix.sys.os }}
+    strategy:
+      matrix:
+        sys:
+          - { os: windows-latest, shell: 'msys2 {0}' }
+          - { os: ubuntu-latest,  shell: bash  }
+          - { os: macos-latest,   shell: bash  }
+        python_version: [3.6]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@master
+      - if: matrix.sys.os == 'windows-latest'
+        uses: msys2/setup-msys2@v2
+      - uses: actions/setup-python@master
+        with:
+          python-version: ${{ matrix.python_version }}
+      - name: Install tox
+        run : |
+          pip install tox
+      - name: Check plugin aea-ledger-cosmos
+        run : |
+          tox -r -e plugins_env -- sh -c "pip install ./plugins/aea-ledger-cosmos && aea generate-key cosmos && echo aea-ledger-cosmos checked!"
+      - name: Check plugin aea-ledger-ethereum
+        run : |
+          tox -r -e plugins_env -- sh -c "pip install ./plugins/aea-ledger-ethereum && aea generate-key ethereum && echo aea-ledger-ethereum checked!"
+      - name: Check plugin aea-ledger-fetchai
+        run : |
+          tox -r -e plugins_env -- sh -c "pip install ./plugins/aea-ledger-fetchai && aea generate-key fetchai && echo aea-ledger-fetchai checked!"
+      - name: Check plugin aea-cli-ipfs
+        run : |
+          tox -r -e plugins_env -- sh -c "pip install ./plugins/aea-cli-ipfs && aea ipfs --help && echo aea-cli-ipfs checked!"
   protolint:
     continue-on-error: False
     runs-on: ubuntu-latest
@@ -436,9 +468,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: [3.6]
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
     - uses: actions/checkout@master
     - uses: actions/setup-python@master

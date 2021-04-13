@@ -437,5 +437,5 @@ Get protocol specification id.
  | __repr__() -> str
 ```
 
-Get str repr of the protocol.
+Get str representation of the protocol.
 

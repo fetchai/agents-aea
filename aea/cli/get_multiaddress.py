@@ -26,7 +26,7 @@ from typing import Optional, Tuple, cast
 import click
 from click import ClickException
 
-from aea.cli.utils.click_utils import PublicIdParameter
+from aea.cli.utils.click_utils import PublicIdParameter, password_option
 from aea.cli.utils.config import load_item_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
@@ -49,6 +49,7 @@ URI_REGEX = re.compile(r"(?:https?://)?(?P<host>[^:/ ]+):(?P<port>[0-9]*)")
     type=click.Choice(list(crypto_registry.supported_ids)),
     required=True,
 )
+@password_option()
 @click.option("-c", "--connection", is_flag=True)
 @click.option(
     "-i", "--connection-id", type=PublicIdParameter(), required=False, default=None,
@@ -67,6 +68,7 @@ URI_REGEX = re.compile(r"(?:https?://)?(?P<host>[^:/ ]+):(?P<port>[0-9]*)")
 def get_multiaddress(
     click_context: click.Context,
     ledger_id: str,
+    password: Optional[str],
     connection: bool,
     connection_id: Optional[PublicId],
     host_field: str,
@@ -77,6 +79,7 @@ def get_multiaddress(
     address = _try_get_multiaddress(
         click_context,
         ledger_id,
+        password,
         connection,
         connection_id,
         host_field,
@@ -89,17 +92,19 @@ def get_multiaddress(
 def _try_get_multiaddress(
     click_context: click.Context,
     ledger_id: str,
-    is_connection: bool,
-    connection_id: Optional[PublicId],
-    host_field: str,
-    port_field: str,
-    uri_field: str,
+    password: Optional[str] = None,
+    is_connection: bool = False,
+    connection_id: Optional[PublicId] = None,
+    host_field: Optional[str] = None,
+    port_field: Optional[str] = None,
+    uri_field: str = "public_uri",
 ) -> str:
     """
     Try to get the multi-address.
 
     :param click_context: click context object.
     :param ledger_id: the ledger id.
+    :param password: the password to encrypt/decrypt the private key.
     :param is_connection: whether the key to load is from the wallet or from connections.
     :param connection_id: the connection id.
     :param host_field: if connection_id specified, the config field to retrieve the host
@@ -124,7 +129,9 @@ def _try_get_multiaddress(
         )
 
     path_to_key = Path(private_key_path)
-    crypto = crypto_registry.make(ledger_id, private_key_path=path_to_key)
+    crypto = crypto_registry.make(
+        ledger_id, private_key_path=path_to_key, password=password
+    )
 
     if connection_id is None:
         return _try_get_peerid(crypto)

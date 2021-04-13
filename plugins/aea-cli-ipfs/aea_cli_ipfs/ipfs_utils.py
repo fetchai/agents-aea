@@ -126,9 +126,9 @@ class IPFSTool:
         """
         Download dir by it's hash.
 
-        :param hash_id: str. hash od fir to download
-        :param target_dir: str. directory to place downlaoded
-        :param fix_path: boo. default True. on download dont wrap result in to hash_id dirrectory.
+        :param hash_id: str. hash of file to download
+        :param target_dir: str. directory to place downloaded
+        :param fix_path: bool. default True. on download don't wrap result in to hash_id directory.
 
         :return: None
         """

@@ -208,7 +208,7 @@ def _launch_image(image: DockerImage, timeout: float = 2.0, max_attempts: int = 
     """
     Launch image.
 
-    :param image: an instancoe of Docker image.
+    :param image: an instance of Docker image.
     :return: None
     """
     image.check_skip()

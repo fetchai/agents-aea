@@ -1,23 +1,23 @@
 name: advanced_data_request
 author: fetchai
-version: 0.1.0
+version: 0.4.0
 type: skill
 description: Retrieve data from an API
 license: Apache-2.0
-aea_version: '>=0.11.0, <0.12.0'
+aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmQEKGxJfUy6vg3aPg6jRNHQ4vzr4rUHYVac5eYG5C6Uxb
-  __init__.py: QmPA83WQrVNtbNqawynoRAt4sBh8smZnzseKdqKPtZ9EUn
+  __init__.py: QmQYqVCj5sVHdYU8Lzgouq6RXghL1TaALVX7AzPMZXt1iy
   api_spec.yaml: QmUPhCYr6tWDMysdMCQxT67oAKRdMbGpgqDfAA5wpei12s
   behaviours.py: QmZ3NMvZPHuxqxisew8UM7z6ti4STti3YAAXm42NSMUiG5
   dialogues.py: QmdYcNTCowajkMMCccYpNL83KRYm4v2WE2FguT3my7nqBw
-  handlers.py: Qmc89nrQCoA8yQLxc9kCSVnyAksZWZcGrm7CSecnBVhiWB
+  handlers.py: QmeYzB2SBSuNwJo8RPhJ5f19kvZK7kLJ6a2DgwsmkeUo4q
   models.py: QmemVqxiExXw8LpJZKmnfzy1f8XyhG2sRofffPYqrNEJrT
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
-- fetchai/http:0.13.0
-- fetchai/prometheus:0.4.0
+- fetchai/http:1.0.0
+- fetchai/prometheus:1.0.0
 skills: []
 behaviours:
   advanced_data_request_behaviour:

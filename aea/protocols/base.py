@@ -179,7 +179,7 @@ class Message:
         :param body: the body.
         :return: None
         """
-        self._slots = self._SlotsCls()  # new instsance to clean up all data
+        self._slots = self._SlotsCls()  # new instance to clean up all data
         self._update_slots_from_dict(body)
 
     @property
@@ -419,5 +419,5 @@ class Protocol(Component):
         return cast(ProtocolConfig, self._configuration).protocol_specification_id
 
     def __repr__(self) -> str:
-        """Get str repr of the protocol."""
+        """Get str representation of the protocol."""
         return f"Protocol({self.protocol_id})"

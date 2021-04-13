@@ -176,7 +176,7 @@ class LedgerConnection(Connection):
         Process a done receiving task.
 
         :param task: the done task.
-        :return: the reponse envelope.
+        :return: the response envelope.
         """
         request = self.task_to_request.pop(task)
         self.receiving_tasks.remove(task)

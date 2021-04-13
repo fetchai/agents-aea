@@ -10,11 +10,11 @@ This is a protocol for two agents to negotiate over a fixed set of resources.
 ---
 name: fipa
 author: fetchai
-version: 0.14.0
+version: 1.0.0
 description: A protocol for FIPA ACL.
 license: Apache-2.0
-aea_version: '>=0.11.0, <0.12.0'
-protocol_specification_id: fetchai/fipa:0.1.0
+aea_version: '>=1.0.0, <2.0.0'
+protocol_specification_id: fetchai/fipa:1.0.0
 speech_acts:
   cfp:
     query: ct:Query

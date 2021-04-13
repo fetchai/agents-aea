@@ -197,7 +197,7 @@ class Strategy(Model):
         :param signature: the signature
         :param message_str: the message
         :param ledger_id: the ledger id
-        :return: bool indiciating validity
+        :return: bool indicating validity
         """
         try:
             result = expected_signer in LedgerApis.recover_message(

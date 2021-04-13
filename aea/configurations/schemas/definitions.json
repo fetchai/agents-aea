@@ -33,7 +33,7 @@
     },
     "resource_name": {
       "type": "string",
-      "pattern": "[a-zA-Z_][a-zA-Z0-9_]{0,127}"
+      "pattern": "^[a-zA-Z_][a-zA-Z0-9_]{0,127}$"
     },
     "component_type": {
       "type": "string",
@@ -56,7 +56,7 @@
     },
     "author": {
       "type": "string",
-      "pattern": "[a-zA-Z_][a-zA-Z0-9_]{0,127}"
+      "pattern": "^[a-zA-Z_][a-zA-Z0-9_]{0,127}$"
     },
     "package_version": {
       "$ref": "definitions.json#/definitions/semantic_version"
@@ -94,7 +94,7 @@
     "class_name": {
       "type": "string",
       "description": "The class name of a skill component.",
-      "pattern": "[A-Za-z_][A-Za-z0-9_]{0,127}"
+      "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,127}$"
     },
     "fingerprint_ignore_patterns": {
       "type": "array",
@@ -145,6 +145,10 @@
       "type": "string",
       "enum": ["async", "threaded"]
     },
+    "task_manager_mode": {
+      "type": "string",
+      "enum": ["threaded"]
+    },
     "storage_uri": {
       "type": "string"
     },
@@ -166,6 +170,24 @@
             "loggers": {"type": "object"}
         }
     },
+    "framework_handler": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dotted_path",
+        "file_path",
+        "config"
+      ],
+      "properties": {
+        "dotted_path": {
+          "type": "string"
+        },
+        "file_path": {
+          "type": ["string", "null"]
+        },
+        "config": {"type": "object"}
+      }
+    },
     "cert_requests": {
       "type": "array",
       "uniqueItems": true,
@@ -182,6 +204,7 @@
         "ledger_id",
         "not_before",
         "not_after",
+        "message_format",
         "save_path"
       ],
       "properties": {
@@ -198,6 +221,9 @@
           "type": "string"
         },
         "not_after": {
+          "type": "string"
+        },
+        "message_format": {
           "type": "string"
         },
         "save_path": {

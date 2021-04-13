@@ -45,8 +45,8 @@ from tests.test_cli.tools_for_testing import ContextMock, PublicIdMock
     return_value={
         "description": "some-description",
         "version": PublicIdMock.DEFAULT_VERSION,
-        "author": "some-author",
-        "name": "some-name",
+        "author": "some_author",
+        "name": "some_name",
         "protocols": ["protocol_id"],
     },
 )
@@ -71,8 +71,8 @@ class PushItemTestCase(TestCase):
     ):
         """Test for push_item positive result."""
         public_id = PublicIdMock(
-            name="some-name",
-            author="some-author",
+            name="some_name",
+            author="some_author",
             version="{}".format(PublicIdMock.DEFAULT_VERSION),
         )
         push_item(ContextMock(), "some-type", public_id)
@@ -80,7 +80,7 @@ class PushItemTestCase(TestCase):
             "POST",
             "/some-types/create",
             data={
-                "name": "some-name",
+                "name": "some_name",
                 "description": "some-description",
                 "version": PublicIdMock.DEFAULT_VERSION,
                 "protocols": ["protocol_id"],
@@ -96,8 +96,8 @@ class PushItemTestCase(TestCase):
     ):
         """Test for push_item without readme positive result."""
         public_id = PublicIdMock(
-            name="some-name",
-            author="some-author",
+            name="some_name",
+            author="some_author",
             version="{}".format(PublicIdMock.DEFAULT_VERSION),
         )
         push_item(ContextMock(), "some-type", public_id)
@@ -105,7 +105,7 @@ class PushItemTestCase(TestCase):
             "POST",
             "/some-types/create",
             data={
-                "name": "some-name",
+                "name": "some_name",
                 "description": "some-description",
                 "version": PublicIdMock.DEFAULT_VERSION,
                 "protocols": ["protocol_id"],

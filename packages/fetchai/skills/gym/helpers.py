@@ -133,7 +133,6 @@ class ProxyEnv(gym.Env):
 
         :return: None
         """
-        pass
 
     def reset(self) -> None:
         """
