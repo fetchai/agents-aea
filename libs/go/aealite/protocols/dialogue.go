@@ -91,7 +91,7 @@ type DialogueInterface interface {
 	basicValidationNonInitialMessage(*ProtocolMessageInterface) (bool, string)
 	isEmpty() bool
 	updateIncomingAndOutgoingMessages(*ProtocolMessageInterface)
-	isBelongingToADialogue(*ProtocolMessageInterface) bool
+	isBelongingToDialogue(*ProtocolMessageInterface) bool
 
 	validateMessageTarget(*ProtocolMessageInterface) string
 	validateMessageId(*ProtocolMessageInterface) string
@@ -204,15 +204,42 @@ func (dialogue *Dialogue) update(message *ProtocolMessageInterface) error {
 		// the error is safe to ignore thanks to the above check
 		_ = (*message).SetSender(dialogue.selfAddress)
 	}
-	isBelongingToADialogue := dialogue.isBelongingToADialogue(message)
-	if !isBelongingToADialogue {
-		return errors.New("message does not exist to this dialogue")
+	isBelongingToDialogue := dialogue.isBelongingToDialogue(message)
+	if !isBelongingToDialogue {
+		return errors.New("message does not belong to this dialogue")
 	}
 	if _, err := dialogue.validateNextMessage(message); err != nil {
 		return err
 	}
 	dialogue.updateIncomingAndOutgoingMessages(message)
 	return nil
+}
+
+func (dialogue *Dialogue) isBelongingToDialogue(message *ProtocolMessageInterface) bool {
+	opponent := dialogue.counterPartyFromMessage(message)
+	var label DialogueLabel
+	if dialogue.IsSelfInitiated() {
+		label = DialogueLabel{
+			dialogueReference: DialogueReference{
+				(*message).DialogueReference().dialogueStarterReference,
+				UnassignedDialogueReference,
+			},
+			dialogueOpponentAddress: opponent,
+			dialogueStarterAddress:  dialogue.selfAddress,
+		}
+	} else {
+		label = DialogueLabel{
+			dialogueReference:       (*message).DialogueReference(),
+			dialogueOpponentAddress: opponent,
+			dialogueStarterAddress:  opponent,
+		}
+	}
+	result := dialogue.checkLabelBelongsToDialogue(label)
+	return result
+}
+
+func (dialogue *Dialogue) checkLabelBelongsToDialogue(label DialogueLabel) bool {
+	return label == dialogue.dialogueLabel || label == dialogue.dialogueLabel.IncompleteVersion()
 }
 
 func (dialogue *Dialogue) validateNextMessage(message *ProtocolMessageInterface) (bool, error) {
@@ -400,29 +427,6 @@ func (dialogue *Dialogue) updateIncomingAndOutgoingMessages(message *ProtocolMes
 	dialogue.lastMessageId = (*message).MessageId()
 	// append message ids in ordered manner
 	dialogue.orderedMessageIds = append(dialogue.orderedMessageIds, (*message).MessageId())
-}
-
-func (dialogue *Dialogue) isBelongingToADialogue(message *ProtocolMessageInterface) bool {
-	opponent := dialogue.counterPartyFromMessage(message)
-	var label DialogueLabel
-	if dialogue.selfAddress == dialogue.dialogueLabel.dialogueStarterAddress {
-		label = DialogueLabel{
-			dialogueReference: DialogueReference{
-				(*message).DialogueReference().dialogueStarterReference,
-				"",
-			},
-			dialogueOpponentAddress: opponent,
-			dialogueStarterAddress:  dialogue.selfAddress,
-		}
-	} else {
-		label = DialogueLabel{
-			dialogueReference:       (*message).DialogueReference(),
-			dialogueOpponentAddress: opponent,
-			dialogueStarterAddress:  opponent,
-		}
-	}
-	result := validateDialogueLabelExistence(label)
-	return result
 }
 
 // func (dialogue *Dialogue) getNextMessageId() MessageId {
