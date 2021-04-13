@@ -514,10 +514,9 @@ jobs:
           make test
       - name: Upload coverage report
         uses: codecov/codecov-action@v1.0.2
-        working-directory: ./libs/go/libp2p_node/
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./coverage.out
+          file: ./libs/go/libp2p_node/coverage.out
           flags: unittests_go
           name: codecov-umbrella
   coverage_checks:
