@@ -22,6 +22,7 @@
 import os
 import shutil
 import tempfile
+from unittest import mock
 from unittest.mock import Mock
 
 import pytest
@@ -668,3 +669,160 @@ class TestP2PLibp2pNodeRestart:
             shutil.rmtree(self.t)
         except (OSError, IOError):
             pass
+
+
+@libp2p_log_on_failure_all
+class BaseTestP2PLibp2pReconnection:
+    """Base test class for reconnection tests."""
+
+    @classmethod
+    @libp2p_log_on_failure
+    def setup_class(cls):
+        """Set the test up"""
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        os.chdir(cls.t)
+
+        cls.log_files = []
+        cls.multiplexers = []
+
+        aea_ledger_fetchai = make_crypto(FetchAICrypto.identifier)
+        aea_ledger_ethereum = make_crypto(EthereumCrypto.identifier)
+
+        try:
+            temp_dir_1 = os.path.join(cls.t, "temp_dir_1")
+            os.mkdir(temp_dir_1)
+            cls.connection1 = _make_libp2p_connection(
+                data_dir=temp_dir_1, agent_key=aea_ledger_fetchai, port=DEFAULT_PORT + 1
+            )
+            cls.multiplexer1 = Multiplexer(
+                [cls.connection1], protocols=[MockDefaultMessageProtocol]
+            )
+            cls.log_files.append(cls.connection1.node.log_file)
+            cls.multiplexer1.connect()
+            cls.multiplexers.append(cls.multiplexer1)
+
+            genesis_peer = cls.connection1.node.multiaddrs[0]
+
+            temp_dir_2 = os.path.join(cls.t, "temp_dir_2")
+            os.mkdir(temp_dir_2)
+            cls.connection2 = _make_libp2p_connection(
+                data_dir=temp_dir_2,
+                port=DEFAULT_PORT + 2,
+                entry_peers=[genesis_peer],
+                agent_key=aea_ledger_ethereum,
+            )
+            cls.multiplexer2 = Multiplexer(
+                [cls.connection2], protocols=[MockDefaultMessageProtocol]
+            )
+            cls.log_files.append(cls.connection2.node.log_file)
+            cls.multiplexer2.connect()
+            cls.multiplexers.append(cls.multiplexer2)
+        except Exception as e:
+            cls.teardown_class()
+            raise e
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear down the test"""
+        for mux in cls.multiplexers:
+            mux.disconnect()
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
+
+
+@libp2p_log_on_failure_all
+class TestP2PLibp2pReconnectionSendEnvelope(BaseTestP2PLibp2pReconnection):
+    """Test that connection will send envelope with error, and that reconnection fixes it."""
+
+    def test_connection_is_established(self):
+        """Test connection established."""
+        assert self.connection1.is_connected is True
+        assert self.connection2.is_connected is True
+
+    def test_envelope_routed(self):
+        """Test envelope routed."""
+        addr_1 = self.connection2.node.address
+        addr_2 = self.connection1.node.address
+
+        msg = DefaultMessage(
+            dialogue_reference=("", ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"hello",
+        )
+        envelope = Envelope(to=addr_2, sender=addr_1, message=msg,)
+
+        # make the send to fail
+        # note: we don't mock the genesis peer.
+        with mock.patch.object(
+            self.connection2.logger, "exception"
+        ) as _mock_logger, mock.patch.object(
+            self.connection2.node.pipe, "write", side_effect=Exception("some error")
+        ):
+            self.multiplexer2.put(envelope)
+            delivered_envelope = self.multiplexer1.get(block=True, timeout=20)
+            _mock_logger.assert_called_with(
+                "Exception raised on message write. Try reconnect to node and write again."
+            )
+
+        assert delivered_envelope is not None
+        assert delivered_envelope.to == envelope.to
+        assert delivered_envelope.sender == envelope.sender
+        assert (
+            delivered_envelope.protocol_specification_id
+            == envelope.protocol_specification_id
+        )
+        assert delivered_envelope.message != envelope.message
+        msg = DefaultMessage.serializer.decode(delivered_envelope.message)
+        msg.to = delivered_envelope.to
+        msg.sender = delivered_envelope.sender
+        assert envelope.message == msg
+
+
+@libp2p_log_on_failure_all
+class TestP2PLibp2pReconnectionReceiveEnvelope(BaseTestP2PLibp2pReconnection):
+    """Test that connection will receive envelope with error, and that reconnection fixes it."""
+
+    def test_envelope_routed(self):
+        """Test envelope routed."""
+        addr_1 = self.connection1.node.address
+        addr_2 = self.connection2.node.address
+
+        msg = DefaultMessage(
+            dialogue_reference=("", ""),
+            message_id=1,
+            target=0,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"hello",
+        )
+        envelope = Envelope(to=addr_2, sender=addr_1, message=msg,)
+
+        # make the receive to fail
+        with mock.patch.object(
+            self.connection2.logger, "exception"
+        ) as _mock_logger, mock.patch.object(
+            self.connection2.node.pipe, "read", side_effect=Exception("some error")
+        ):
+            self.multiplexer1.put(envelope)
+            delivered_envelope = self.multiplexer2.get(block=True, timeout=20)
+            _mock_logger.assert_called_with(
+                "Failed to read. Exception: some error. Try reconnect to node and read again."
+            )
+
+        assert delivered_envelope is not None
+        assert delivered_envelope.to == envelope.to
+        assert delivered_envelope.sender == envelope.sender
+        assert (
+            delivered_envelope.protocol_specification_id
+            == envelope.protocol_specification_id
+        )
+        assert delivered_envelope.message != envelope.message
+        msg = DefaultMessage.serializer.decode(delivered_envelope.message)
+        msg.to = delivered_envelope.to
+        msg.sender = delivered_envelope.sender
+        assert envelope.message == msg
