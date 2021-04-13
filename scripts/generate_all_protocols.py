@@ -43,6 +43,7 @@ from operator import methodcaller
 from pathlib import Path
 from typing import Any, Iterator, List, Optional, Tuple, cast
 
+import click
 import semver
 
 from aea.cli.registry.utils import download_file, extract, request_api
@@ -371,7 +372,11 @@ def _bump_protocol_specification_id_if_needed(package_path: Path) -> None:
         load_component_configuration(ComponentType.PROTOCOL, package_path),
     )
     temp_directory = Path(tempfile.mkdtemp())
-    download_package(configuration.package_id, str(temp_directory))
+    try:
+        download_package(configuration.package_id, str(temp_directory))
+    except click.ClickException:
+        log("Protocol specification id not bumped - new protocol.")
+        return
     downloaded_package_directory = temp_directory / configuration.name
     old_specification_content = get_protocol_specification_from_readme(
         downloaded_package_directory
