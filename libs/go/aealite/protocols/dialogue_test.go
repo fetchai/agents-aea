@@ -26,17 +26,27 @@ func getTestDialogueLabel() DialogueLabel {
 func TestDialogueLabelGetters(t *testing.T) {
 	starterReference := "starterReference"
 	responderReference := "responderReference"
+	dialogueReference := [2]string{starterReference, responderReference}
 	label := DialogueLabel{
-		[2]string{starterReference, responderReference},
+		dialogueReference,
 		counterPartyAddress,
 		senderAddress,
 	}
 
-	if actual := label.getDialogueStarterReference(); actual != starterReference {
-		t.Fatalf("Expected %s, got: %s", starterReference, actual)
+	if actual := label.DialogueOpponentAddress(); actual != counterPartyAddress {
+		t.Errorf("Expected %s, got: %s", responderReference, actual)
 	}
-	if actual := label.getDialogueResponderReference(); actual != responderReference {
-		t.Fatalf("Expected %s, got: %s", responderReference, actual)
+	if actual := label.DialogueStarterAddress(); actual != senderAddress {
+		t.Errorf("Expected %s, got: %s", starterReference, actual)
+	}
+	if actual := label.DialogueStarterReference(); actual != starterReference {
+		t.Errorf("Expected %s, got: %s", starterReference, actual)
+	}
+	if actual := label.DialogueResponderReference(); actual != responderReference {
+		t.Errorf("Expected %s, got: %s", responderReference, actual)
+	}
+	if actual := label.DialogueReference(); actual != dialogueReference {
+		t.Errorf("Expected %s, got: %s", dialogueReference, actual)
 	}
 
 }
@@ -44,11 +54,11 @@ func TestDialogueLabelGetters(t *testing.T) {
 // Test getIncompleteVersion function
 func TestGetIncompleteVersion(t *testing.T) {
 	label := getTestDialogueLabel()
-	actualIncompleteVersion := label.getIncompleteVersion()
+	actualIncompleteVersion := label.IncompleteVersion()
 	expectedIncompleteVersion := DialogueLabel{
-		[2]string{label.getDialogueStarterReference(), UnassignedDialogueReference},
-		label.DialogueOpponentAddress,
-		label.DialogueStarterAddress,
+		[2]string{label.DialogueStarterReference(), UnassignedDialogueReference},
+		label.DialogueOpponentAddress(),
+		label.DialogueStarterAddress(),
 	}
 	if actualIncompleteVersion != expectedIncompleteVersion {
 		t.Errorf("getIncompleteVersion gave unexpected result.")
@@ -144,7 +154,7 @@ func TestDialogue(t *testing.T) {
 		senderAddress,
 		performative,
 		[]byte("second message"),
-		dialogue.dialogueLabel.DialogueReference,
+		dialogue.dialogueLabel.DialogueReference(),
 		nextMessageId,
 		dialogue.lastMessageId,
 	)
