@@ -3,6 +3,7 @@ module libp2p_node
 go 1.13
 
 require (
+	bou.ke/monkey v1.0.2
 	github.com/alecthomas/units v0.0.0-20201120081800-1786d5ef83d4 // indirect
 	github.com/btcsuite/btcd v0.20.1-beta
 	github.com/btcsuite/btcutil v0.0.0-20190425235716-9e5f4b9a998d
@@ -17,6 +18,7 @@ require (
 	github.com/libp2p/go-libp2p-circuit v0.2.2
 	github.com/libp2p/go-libp2p-core v0.5.3
 	github.com/libp2p/go-libp2p-kad-dht v0.7.11
+	github.com/libp2p/go-libp2p-kbucket v0.4.1
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d // indirect
 	github.com/multiformats/go-multiaddr v0.2.1

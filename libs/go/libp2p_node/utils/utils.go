@@ -179,7 +179,6 @@ func BootstrapConnect(
 	if count == len(peers) {
 		return errors.New("failed to bootstrap: " + err.Error())
 	}
-
 	// workaround: to avoid getting `failed to find any peer in table`
 	//  when calling dht.Provide (happens occasionally)
 	logger.Debug().Msg("waiting for bootstrap peers to be added to dht routing table...")
@@ -744,9 +743,9 @@ func WriteEnvelope(envel *aea.Envelope, s network.Stream) error {
 	return nil
 }
 
-
 // ReadEnvelope from a network stream
 func ReadEnvelope(s network.Stream) (*aea.Envelope, error) {
+	// TODO: use ReadBytes?
 	envel := &aea.Envelope{}
 	rstream := bufio.NewReader(s)
 

@@ -2,7 +2,7 @@
 // Source: github.com/libp2p/go-libp2p-core/network (interfaces: Stream)
 
 // Package mock_network is a generated GoMock package.
-package mock_network
+package mocks
 
 import (
 	reflect "reflect"

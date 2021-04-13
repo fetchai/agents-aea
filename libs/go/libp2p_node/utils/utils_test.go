@@ -21,19 +21,28 @@
 package utils
 
 import (
-	"encoding/json"
+	"bou.ke/monkey"
+	"bufio"
 	"bytes"
-	"testing"
+	"context"
+	"encoding/json"
 	"errors"
+	gomock "github.com/golang/mock/gomock"
+	"github.com/libp2p/go-libp2p-core/peer"
+	dht "github.com/libp2p/go-libp2p-kad-dht"
+	kb "github.com/libp2p/go-libp2p-kbucket"
+	ma "github.com/multiformats/go-multiaddr"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
+	"io"
+	"libp2p_node/aea"
 	mocks "libp2p_node/mocks"
-	gomock "github.com/golang/mock/gomock"
-
+	"net"
+	"reflect"
+	"testing"
 )
 
 // Crypto operations
-
 
 func TestEthereumCrypto(t *testing.T) {
 	//privateKey := "0xb60fe8027fb82f1a1bd6b8e66d4400f858989a2c67428a4e7f589441700339b0"
@@ -77,7 +86,6 @@ func TestEthereumCrypto(t *testing.T) {
 	}
 }
 
-
 func TestFetchAICrypto(t *testing.T) {
 	publicKey := "02358e3e42a6ba15cf6b2ba6eb05f02b8893acf82b316d7dd9cda702b0892b8c71"
 	address := "fetch19dq2mkcpp6x0aypxt9c9gz6n4fqvax0x9a7t5r"
@@ -109,22 +117,21 @@ func TestFetchAICrypto(t *testing.T) {
 	}
 }
 
-
 func TestSetLoggerLevel(t *testing.T) {
 	assert.Equal(t, logger.GetLevel(), zerolog.Level(0), "Initial log level is not 0")
-	
+
 	lvl := zerolog.InfoLevel
 	SetLoggerLevel(lvl)
-	
+
 	assert.Equal(t, logger.GetLevel(), lvl, "Waited for logger level %d but got %d", lvl, logger.GetLevel())
 }
 
 func ExampleIgnore() {
 	ignore(errors.New("Test"))
-    // Output: IGNORED: Test
+	// Output: IGNORED: Test
 }
 
-func TestNewDefaultLoggerWithFields(t *testing.T){
+func TestNewDefaultLoggerWithFields(t *testing.T) {
 	fields := map[string]string{
 		"test_field": "test_value",
 	}
@@ -132,29 +139,269 @@ func TestNewDefaultLoggerWithFields(t *testing.T){
 	logger := NewDefaultLoggerWithFields(fields).Output(&log_buffer)
 	logger.Info().Msg("test")
 	var json_result map[string]interface{}
-    json.Unmarshal(log_buffer.Bytes(), &json_result)
+	json.Unmarshal(log_buffer.Bytes(), &json_result)
 	assert.Equal(t, json_result["test_field"], "test_value")
 }
 
-func TestComputeCID(t *testing.T){
+func TestComputeCID(t *testing.T) {
 	address := "fetch19dq2mkcpp6x0aypxt9c9gz6n4fqvax0x9a7t5r"
 	cid, err := ComputeCID(address)
 	assert.Equal(t, nil, err)
 	assert.Equal(t, "QmZ6ryKyS9rSnesX8YnFLAmFwFuRMdHpE7pQ2V6SjXTbqM", cid.String())
 }
 
-
-
-func TestWriteBytes(t * testing.T) {
+func TestWriteBytes(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
-    defer mockCtrl.Finish()
+	defer mockCtrl.Finish()
 	mock_stream := mocks.NewMockStream(mockCtrl)
 	mock_stream.EXPECT().Write([]byte{0, 0, 0, 5, 104, 101, 108, 108, 111}).Return(0, nil).Times(1)
 	WriteBytes(mock_stream, []byte("hello"))
-	
+
 	mock_stream.EXPECT().Write([]byte{0, 0, 0, 4, 104, 101, 108, 108}).Return(8, errors.New("oops")).Times(1)
 	err := WriteBytes(mock_stream, []byte("hell"))
 	assert.NotEqual(t, err, nil)
-	
-	
+}
+
+func TestReadBytesConn(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mock_conn := mocks.NewMockConn(mockCtrl)
+	mock_conn.EXPECT().Read(gomock.Any()).Return(4, nil).Times(2)
+	buf, err := ReadBytesConn(mock_conn)
+	assert.Equal(t, nil, err)
+	assert.Equal(t, "", string(buf))
+}
+
+func TestWriteBytesConn(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mock_conn := mocks.NewMockConn(mockCtrl)
+	mock_conn.EXPECT().Write(gomock.Any()).Return(0, nil).Times(1)
+	err := WriteBytesConn(mock_conn, []byte("ABC"))
+	assert.Equal(t, nil, err)
+}
+
+func TestReadString(t *testing.T) {
+	// test ReadString and ReadBytes
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mock_stream := mocks.NewMockStream(mockCtrl)
+
+	defer monkey.UnpatchAll()
+
+	t.Run("TestReadString", func(t *testing.T) {
+		monkey.Patch(bufio.NewReader, func(reader io.Reader) *bufio.Reader {
+			return bufio.NewReaderSize(bytes.NewReader([]byte{0, 0, 0, 5, 104, 101, 108, 108, 111}), 100)
+		})
+		buf, err := ReadString(mock_stream)
+		assert.Equal(t, nil, err)
+		assert.Equal(t, "hello", buf)
+	})
+}
+
+func TestReadWriteEnvelope(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mock_stream := mocks.NewMockStream(mockCtrl)
+	defer monkey.UnpatchAll()
+	address := "0xb8d8c62d4a1999b7aea0aebBD5020244a4a9bAD8"
+	buffer := bytes.NewBuffer([]byte{})
+
+	t.Run("TestWriteEnvelope", func(t *testing.T) {
+		monkey.Patch(bufio.NewWriter, func(writer io.Writer) *bufio.Writer {
+			return bufio.NewWriterSize(buffer, 100)
+		})
+		err := WriteEnvelope(&aea.Envelope{
+			To:     address,
+			Sender: address,
+		}, mock_stream)
+		assert.Equal(t, nil, err)
+	})
+
+	t.Run("TestReadEnvelope", func(t *testing.T) {
+		monkey.Patch(bufio.NewReader, func(reader io.Reader) *bufio.Reader {
+			return bufio.NewReaderSize(bytes.NewReader(buffer.Bytes()), 100)
+		})
+		env, err := ReadEnvelope(mock_stream)
+		assert.Equal(t, nil, err)
+		assert.Equal(t, address, env.To)
+	})
+}
+
+func TestReadWriteEnvelopeFromConnection(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	defer monkey.UnpatchAll()
+	address := "0xb8d8c62d4a1999b7aea0aebBD5020244a4a9bAD8"
+	buffer := bytes.NewBuffer([]byte{})
+	mock_conn := mocks.NewMockConn(mockCtrl)
+
+	t.Run("TestWriteEnvelope", func(t *testing.T) {
+		monkey.PatchInstanceMethod(reflect.TypeOf(mock_conn), "Write", func(_ *mocks.MockConn, b []byte) (int, error) {
+			buffer.Write(b)
+			return 0, nil
+		})
+
+		err := WriteEnvelopeConn(mock_conn, &aea.Envelope{
+			To:     address,
+			Sender: address,
+		})
+		assert.Equal(t, nil, err)
+		assert.NotEqual(t, 0, buffer)
+	})
+
+	t.Run("TestReadEnvelope", func(t *testing.T) {
+		monkey.Patch(ReadBytesConn, func(conn net.Conn) ([]byte, error) {
+			return buffer.Bytes()[4:], nil
+		})
+		env, err := ReadEnvelopeConn(mock_conn)
+		assert.Equal(t, nil, err)
+		assert.Equal(t, address, env.To)
+	})
+}
+
+func TestGetPeersAddrInfo(t *testing.T) {
+	addrs, err := GetPeersAddrInfo([]string{"/dns4/acn.fetch.ai/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW"})
+	assert.Equal(t, nil, err)
+	assert.Equal(t, 1, len(addrs))
+}
+
+func TestFetchAIPublicKeyFromPubKey(t *testing.T) {
+	//(publicKey crypto.PubKey) (string, error) {
+	_, pub_key, err := KeyPairFromFetchAIKey("3e7a1f43b2d8a4b9f63a2ffeb1d597f971a8db7ffd95453173268b453106cadc")
+	assert.Equal(t, nil, err)
+	key, err := FetchAIPublicKeyFromPubKey(pub_key)
+	assert.Equal(t, nil, err)
+	assert.Equal(t, "03b7e977f498dce004e2614764ff576e17cc6691135497e7bcb5d3441e816ba9e1", key)
+}
+
+func TestIDFromFetchAIPublicKey(t *testing.T) {
+	_, pub_key, err := KeyPairFromFetchAIKey("3e7a1f43b2d8a4b9f63a2ffeb1d597f971a8db7ffd95453173268b453106cadc")
+	assert.Equal(t, nil, err)
+	key, err := FetchAIPublicKeyFromPubKey(pub_key)
+	assert.Equal(t, nil, err)
+	peer_id, err := IDFromFetchAIPublicKey(key)
+	assert.Equal(t, nil, err)
+	assert.NotEqual(t, 0, len(peer_id))
+}
+
+func TestAgentAddressFromPublicKey(t *testing.T) {
+	address, err := AgentAddressFromPublicKey("fetchai", "3e7a1f43b2d8a4b9f63a2ffeb1d597f971a8db7ffd95453173268b453106cadc")
+	assert.Equal(t, nil, err)
+	assert.NotEqual(t, 0, len(address))
+}
+
+func TestCosmosAddressFromPublicKey(t *testing.T) {
+	address, err := CosmosAddressFromPublicKey("3e7a1f43b2d8a4b9f63a2ffeb1d597f971a8db7ffd95453173268b453106cadc")
+	assert.Equal(t, nil, err)
+	assert.NotEqual(t, 0, len(address))
+}
+
+func TestFetchAIPublicKeyFromFetchAIPrivateKey(t *testing.T) {
+	key, err := FetchAIPublicKeyFromFetchAIPrivateKey("3e7a1f43b2d8a4b9f63a2ffeb1d597f971a8db7ffd95453173268b453106cadc")
+	assert.Equal(t, nil, err)
+	assert.Equal(t, "03b7e977f498dce004e2614764ff576e17cc6691135497e7bcb5d3441e816ba9e1", key)
+}
+
+func TestIDFromFetchAIPublicKeyUncompressed(t *testing.T) {
+	//bad pub key
+	id, err := IDFromFetchAIPublicKeyUncompressed("some")
+	assert.NotEqual(t, nil, err)
+	// good pub key
+	id, err = IDFromFetchAIPublicKeyUncompressed("50863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6")
+	assert.Equal(t, nil, err)
+	assert.Equal(t, peer.ID("\x00%\b\x02\x12!\x02P\x86:\xd6J\x87\xae\x8a/\xe8<\x1a\xf1\xa8@<\xb5?S\xe4\x86\xd8Q\x1d\xad\x8a\x04\x88~[#R"), id)
+}
+
+func TestSignFetchAI(t *testing.T) {
+	priv_key := "3e7a1f43b2d8a4b9f63a2ffeb1d597f971a8db7ffd95453173268b453106cadc"
+	message := []byte("somebytes")
+
+	_, pub_key, err := KeyPairFromFetchAIKey(priv_key)
+	assert.Equal(t, nil, err)
+	fetch_pub_key, err := FetchAIPublicKeyFromPubKey(pub_key)
+
+	signature, err := SignFetchAI(message, priv_key)
+	assert.Equal(t, nil, err)
+	assert.NotEqual(t, 0, len(signature))
+
+	is_valid, err := VerifyLedgerSignature("fetchai", message, signature, fetch_pub_key)
+	assert.Equal(t, nil, err)
+	assert.Equal(t, true, is_valid)
+
+}
+
+func TestBootstrapConnect(t *testing.T) {
+	ctx := context.Background()
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	defer monkey.UnpatchAll()
+	var ipfsdht *dht.IpfsDHT
+	var routing_table *kb.RoutingTable
+
+	mock_peerstore := mocks.NewMockPeerstore(mockCtrl)
+	peers := make([]peer.AddrInfo, 2)
+	var addrs []ma.Multiaddr
+	peers[0] = peer.AddrInfo{peer.ID("123"), addrs}
+	peers[1] = peer.AddrInfo{peer.ID("123"), addrs}
+
+	mock_host := mocks.NewMockHost(mockCtrl)
+
+	mock_host.EXPECT().ID().Return(peer.ID("host_id")).Times(2)
+	mock_host.EXPECT().Peerstore().Return(mock_peerstore).Times(2)
+	mock_host.EXPECT().Connect(gomock.Any(), gomock.Any()).Return(nil).Times(2)
+	mock_peerstore.EXPECT().AddAddrs(gomock.Any(), gomock.Any(), gomock.Any()).Return().Times(2)
+
+	t.Run("TestOk", func(t *testing.T) {
+		monkey.PatchInstanceMethod(reflect.TypeOf(routing_table), "Find", func(_ *kb.RoutingTable, _ peer.ID) peer.ID {
+			return peer.ID("som peer")
+		})
+		monkey.PatchInstanceMethod(reflect.TypeOf(ipfsdht), "RoutingTable", func(_ *dht.IpfsDHT) *kb.RoutingTable {
+			return routing_table
+		})
+
+		err := BootstrapConnect(ctx, mock_host, ipfsdht, peers)
+		assert.Equal(t, nil, err)
+	})
+
+	mock_host = mocks.NewMockHost(mockCtrl)
+
+	mock_host.EXPECT().ID().Return(peer.ID("host_id")).Times(2)
+	mock_host.EXPECT().Peerstore().Return(mock_peerstore).Times(2)
+	mock_host.EXPECT().Connect(gomock.Any(), gomock.Any()).Return(nil).Times(2)
+	mock_peerstore.EXPECT().AddAddrs(gomock.Any(), gomock.Any(), gomock.Any()).Return().Times(2)
+
+	t.Run("Test_PeersNotAdded", func(t *testing.T) {
+		monkey.PatchInstanceMethod(reflect.TypeOf(routing_table), "Find", func(_ *kb.RoutingTable, _ peer.ID) peer.ID {
+			return peer.ID("")
+		})
+		monkey.PatchInstanceMethod(reflect.TypeOf(ipfsdht), "RoutingTable", func(_ *dht.IpfsDHT) *kb.RoutingTable {
+			return routing_table
+		})
+
+		err := BootstrapConnect(ctx, mock_host, ipfsdht, peers)
+		assert.NotEqual(t, nil, err)
+		assert.Contains(t, err.Error(), "timeout: entry peer haven't been added to DHT")
+	})
+
+	mock_host = mocks.NewMockHost(mockCtrl)
+
+	mock_host.EXPECT().ID().Return(peer.ID("host_id")).Times(2)
+	mock_host.EXPECT().Peerstore().Return(mock_peerstore).Times(2)
+	mock_host.EXPECT().Connect(gomock.Any(), gomock.Any()).Return(errors.New("some error")).Times(2)
+	mock_peerstore.EXPECT().AddAddrs(gomock.Any(), gomock.Any(), gomock.Any()).Return().Times(2)
+
+	t.Run("Test_PeersNotConnected", func(t *testing.T) {
+		monkey.PatchInstanceMethod(reflect.TypeOf(routing_table), "Find", func(_ *kb.RoutingTable, _ peer.ID) peer.ID {
+			return peer.ID("")
+		})
+		monkey.PatchInstanceMethod(reflect.TypeOf(ipfsdht), "RoutingTable", func(_ *dht.IpfsDHT) *kb.RoutingTable {
+			return routing_table
+		})
+
+		err := BootstrapConnect(ctx, mock_host, ipfsdht, peers)
+		assert.NotEqual(t, nil, err)
+		assert.Equal(t, "failed to bootstrap: some error", err.Error())
+	})
+
 }
