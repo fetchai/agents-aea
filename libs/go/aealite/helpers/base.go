@@ -23,12 +23,14 @@ package helpers
 // Generic a generic type (every type implements at least zero methods).
 type Generic interface{}
 
-// Set implementation of a set of generic types.
-//   It uses the built-in 'map' type, which is
-//   based on hash tables:
-//       https://golang.org/src/runtime/map.go
-//   This guarantees (amortized) constant-time complexity
-//   for addition, deletion, and lookup.
+/*
+Set implementation of a set of generic types.
+It uses the built-in 'map' type, which is
+based on hash tables:
+    https://golang.org/src/runtime/map.go
+This guarantees (amortized) constant-time complexity
+for addition, deletion, and lookup.
+*/
 type Set struct {
 	container map[Generic]bool // container: a private container.
 }
