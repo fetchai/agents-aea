@@ -77,22 +77,20 @@ type DialogueInterface interface {
 	LastIncomingMessage() *ProtocolMessageInterface
 	LastOutgoingMessage() *ProtocolMessageInterface
 	LastMessage() *ProtocolMessageInterface
+	IsEmpty() bool
+	Reply(Performative, *ProtocolMessageInterface, *MessageId, map[string]interface{})
+	String() string
 
 	counterPartyFromMessage(*ProtocolMessageInterface) Address
 	isMessageBySelf(*ProtocolMessageInterface) bool
 	isMessageByOther(*ProtocolMessageInterface) bool
-	getMessage(MessageId) *ProtocolMessageInterface
 	hasMessageId(MessageId) bool
-
 	update(*ProtocolMessageInterface)
+	isBelongingToDialogue(*ProtocolMessageInterface) bool
 	validateNextMessage(*ProtocolMessageInterface) (bool, string)
 	basicValidations(*ProtocolMessageInterface) (bool, string)
 	basicValidationInitialMessage(*ProtocolMessageInterface) (bool, string)
 	basicValidationNonInitialMessage(*ProtocolMessageInterface) (bool, string)
-	isEmpty() bool
-	updateIncomingAndOutgoingMessages(*ProtocolMessageInterface)
-	isBelongingToDialogue(*ProtocolMessageInterface) bool
-
 	validateMessageTarget(*ProtocolMessageInterface) string
 	validateMessageId(*ProtocolMessageInterface) string
 	getMessageById(MessageId) *ProtocolMessageInterface
@@ -100,7 +98,9 @@ type DialogueInterface interface {
 	getIncomingNextMessageId() MessageId
 	updateDialogueLabel(DialogueLabel)
 	customValidation(*ProtocolMessageInterface) (bool, string)
-	getStringRepresentation() string
+
+	//TODO remove
+	updateIncomingAndOutgoingMessages(*ProtocolMessageInterface)
 }
 
 /* Dialogue definition and methods */

@@ -61,7 +61,7 @@ package protocols
 //			" should be 0",
 //		)
 //	}
-//	if dialogue.isEmpty() == true {
+//	if dialogue.IsEmpty() == true {
 //		log.Fatal("dialogue should not be empty")
 //	}
 //	// fetch message id for next mesaage in the dialogue
