@@ -1,27 +1,28 @@
 package protocols
 
 import (
+	"bytes"
 	"crypto/rand"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
+	"strings"
 )
 
 type Address string
 type Performative string
-
-const (
-	NonceBytesNb = 32
-)
-
 type Role string
 
 const (
-	Role1             Role      = "role1"
-	Role2             Role      = "role2"
-	StartingMessageId MessageId = 1
-	StartingTarget    MessageId = 0
+	NonceBytesNb                           = 32
+	Role1                        Role      = "role1"
+	Role2                        Role      = "role2"
+	StartingMessageId            MessageId = 1
+	StartingTarget               MessageId = 0
+	UnassignedDialogueReference            = ""
+	DialogueLabelStringSeparator           = "_"
 )
 
 type RuleType struct {
@@ -31,7 +32,6 @@ type RuleType struct {
 }
 
 type MessageId int
-type Target int
 type DialogueInterface interface {
 	getSelfAddress() Address
 	getRole() Role
@@ -93,6 +93,92 @@ type DialogueLabel struct {
 	dialogueReference       [2]string
 	dialogueOpponentAddress Address
 	dialogueStarterAddress  Address
+}
+
+// DialogueReference Get the dialogue reference.
+func (dialogueLabel *DialogueLabel) DialogueReference() [2]string {
+	return dialogueLabel.dialogueReference
+}
+
+// DialogueStarterReference Get the dialogue starter reference.
+func (dialogueLabel *DialogueLabel) DialogueStarterReference() string {
+	return dialogueLabel.dialogueReference[0]
+}
+
+// DialogueResponderReference Get the dialogue responder reference.
+func (dialogueLabel *DialogueLabel) DialogueResponderReference() string {
+	return dialogueLabel.dialogueReference[1]
+}
+
+// DialogueOpponentAddress Get the dialogue opponent address.
+func (dialogueLabel *DialogueLabel) DialogueOpponentAddress() Address {
+	return dialogueLabel.dialogueOpponentAddress
+}
+
+// DialogueStarterAddress Get the dialogue starter address.
+func (dialogueLabel *DialogueLabel) DialogueStarterAddress() Address {
+	return dialogueLabel.dialogueStarterAddress
+}
+
+// IncompleteVersion Get the incomplete version of the label.
+func (dialogueLabel *DialogueLabel) IncompleteVersion() DialogueLabel {
+	return DialogueLabel{
+		[2]string{dialogueLabel.DialogueStarterReference(), UnassignedDialogueReference},
+		dialogueLabel.dialogueOpponentAddress,
+		dialogueLabel.dialogueStarterAddress,
+	}
+}
+
+// MarshalJSON custom DialogueLabel JSON serializer
+func (dialogueLabel DialogueLabel) MarshalJSON() ([]byte, error) {
+	data := map[string]string{
+		"dialogue_starter_reference":   dialogueLabel.DialogueStarterReference(),
+		"dialogue_responder_reference": dialogueLabel.DialogueResponderReference(),
+		"dialogue_opponent_addr":       string(dialogueLabel.DialogueOpponentAddress()),
+		"dialogue_starter_addr":        string(dialogueLabel.DialogueStarterAddress()),
+	}
+	buffer := bytes.NewBufferString("{")
+	for key, value := range data {
+		buffer.WriteString(fmt.Sprintf("\"%s\": \"%s\",", key, value))
+	}
+	buffer.Truncate(buffer.Len() - 1)
+	buffer.WriteString("}")
+	return buffer.Bytes(), nil
+}
+
+// UnmarshalJSON custom DialogueLabel JSON deserializer
+func (dialogueLabel *DialogueLabel) UnmarshalJSON(b []byte) error {
+	var data map[string]string
+	err := json.Unmarshal(b, &data)
+	if err != nil {
+		return err
+	}
+	starterReference := data["dialogue_starter_reference"]
+	responderReference := data["dialogue_responder_reference"]
+	dialogueLabel.dialogueReference = [2]string{starterReference, responderReference}
+	dialogueLabel.dialogueOpponentAddress = Address(data["dialogue_opponent_addr"])
+	dialogueLabel.dialogueStarterAddress = Address(data["dialogue_starter_addr"])
+	return nil
+}
+
+// String transform DialogueLabel to its string representation
+func (dialogueLabel *DialogueLabel) String() string {
+	return strings.Join([]string{dialogueLabel.DialogueStarterReference(),
+		dialogueLabel.DialogueResponderReference(),
+		string(dialogueLabel.dialogueOpponentAddress),
+		string(dialogueLabel.dialogueStarterAddress)}, DialogueLabelStringSeparator)
+}
+
+// FromString update a DialogueLabel from a string representation
+func (dialogueLabel *DialogueLabel) FromString(s string) error {
+	result := strings.Split(s, DialogueLabelStringSeparator)
+	if length := len(result); length != 4 {
+		return errors.New(fmt.Sprintf("Expected exactly 4 parts, got %d", length))
+	}
+	dialogueLabel.dialogueReference = [2]string{result[0], result[1]}
+	dialogueLabel.dialogueOpponentAddress = Address(result[2])
+	dialogueLabel.dialogueStarterAddress = Address(result[3])
+	return nil
 }
 
 type Dialogue struct {
@@ -214,19 +300,21 @@ func (dialogue *Dialogue) validateMessageTarget(message AbstractMessage) error {
 	}
 
 	var latestIds []MessageId
-	if ok, id := dialogue.lastIncomingMessage(); ok {
-		latestIds = append(latestIds, id)
+	var lastIncomingMessage = dialogue.lastIncomingMessage()
+	if lastIncomingMessage != nil {
+		latestIds = append(latestIds, lastIncomingMessage.messageId)
 	}
-	if ok, id := dialogue.lastOutgoingMessage(); ok {
-		latestIds = append(latestIds, id)
-	}
-	if target > max(latestIds) {
-		return errors.New("invalid target")
-	}
-	if _, err := dialogue.getMessageById(target); err != nil {
-		return err
+	var lastOutgoingMessage = dialogue.lastOutgoingMessage()
+	if lastOutgoingMessage != nil {
+		latestIds = append(latestIds, lastOutgoingMessage.messageId)
 	}
 	// TODO
+	//targetMessage, err := dialogue.getMessageById(target)
+	//if err != nil {
+	//	return err
+	//}
+	//targetPerformative := targetMessage.performative
+
 	// check performatives
 
 	// target_performative = target_message.performative
@@ -237,12 +325,12 @@ func (dialogue *Dialogue) validateMessageTarget(message AbstractMessage) error {
 	return nil
 }
 
-func (dialogue *Dialogue) getMessageById(messageId MessageId) (AbstractMessage, error) {
+func (dialogue *Dialogue) getMessageById(messageId MessageId) (*AbstractMessage, error) {
 	if dialogue.isEmpty() {
-		return AbstractMessage{}, errors.New("Error : Dialogue is empty.")
+		return nil, errors.New("Error : Dialogue is empty.")
 	}
 	if messageId == 0 {
-		return AbstractMessage{}, errors.New("message_id = 0 is invalid!")
+		return nil, errors.New("message_id = 0 is invalid!")
 
 	}
 	var messages_list []AbstractMessage
@@ -252,13 +340,12 @@ func (dialogue *Dialogue) getMessageById(messageId MessageId) (AbstractMessage, 
 		messages_list = dialogue.incomingMessages
 	}
 	if len(messages_list) == 0 {
-		return AbstractMessage{}, nil
-		// errors.New("Dialogue is empty.")
+		return nil, errors.New("Dialogue is empty.")
 	}
 	if MessageId(messageId) > messages_list[len(messages_list)-1].messageId {
-		return AbstractMessage{}, errors.New("Message id is invalid,  > max existing.")
+		return nil, errors.New("Message id is invalid,  > max existing.")
 	}
-	return messages_list[MessageId(math.Abs(float64(messageId)))-1], nil
+	return &messages_list[MessageId(math.Abs(float64(messageId)))-1], nil
 }
 
 func max(list []MessageId) MessageId {
@@ -286,8 +373,8 @@ func (dialogue *Dialogue) validateMessageId(message AbstractMessage) error {
 
 func (dialogue *Dialogue) getOutgoingNextMessageId() MessageId {
 	nextMessageId := StartingMessageId
-	if ok, _ := dialogue.lastOutgoingMessage(); ok {
-		nextMessageId = MessageId(math.Abs(float64(dialogue.lastMessageId))) + 1
+	if dialogue.lastOutgoingMessage() != nil {
+		nextMessageId = dialogue.lastMessageId + 1
 	}
 	if dialogue.isSelfInitiated() {
 		nextMessageId = 0 - nextMessageId
@@ -297,8 +384,8 @@ func (dialogue *Dialogue) getOutgoingNextMessageId() MessageId {
 
 func (dialogue *Dialogue) getIncomingNextMessageId() MessageId {
 	nextMessageId := StartingMessageId
-	if ok, _ := dialogue.lastIncomingMessage(); ok {
-		nextMessageId = MessageId(math.Abs(float64(dialogue.lastMessageId))) + 1
+	if dialogue.lastIncomingMessage() != nil {
+		nextMessageId = dialogue.lastMessageId + 1
 	}
 	if dialogue.isSelfInitiated() {
 		nextMessageId = 0 - nextMessageId
@@ -306,20 +393,18 @@ func (dialogue *Dialogue) getIncomingNextMessageId() MessageId {
 	return nextMessageId
 }
 
-func (dialogue *Dialogue) lastOutgoingMessage() (bool, MessageId) {
-	if len(dialogue.outgoingMessages) > 0 {
-		return true, dialogue.outgoingMessages[len(dialogue.outgoingMessages)-1].messageId
-	} else {
-		return false, 0
+func (dialogue Dialogue) lastOutgoingMessage() *AbstractMessage {
+	if length := len(dialogue.outgoingMessages); length > 0 {
+		return &dialogue.outgoingMessages[length-1]
 	}
+	return nil
 }
 
-func (dialogue *Dialogue) lastIncomingMessage() (bool, MessageId) {
-	if len(dialogue.incomingMessages) > 0 {
-		return true, dialogue.incomingMessages[len(dialogue.incomingMessages)-1].messageId
-	} else {
-		return false, 0
+func (dialogue Dialogue) lastIncomingMessage() *AbstractMessage {
+	if length := len(dialogue.incomingMessages); length > 0 {
+		return &dialogue.incomingMessages[length-1]
 	}
+	return nil
 }
 
 func (dialogue *Dialogue) isSelfInitiated() bool {
@@ -366,7 +451,15 @@ func (dialogue *Dialogue) isBelongingToADialogue(message AbstractMessage) bool {
 	return result
 }
 
-func InitializeMessage(counterParty Address, selfAddress Address, performative Performative, content []byte, ref [2]string, messageId MessageId, target MessageId) AbstractMessage {
+func InitializeMessage(
+	counterParty Address,
+	selfAddress Address,
+	performative Performative,
+	content []byte,
+	ref [2]string,
+	messageId MessageId,
+	target MessageId,
+) AbstractMessage {
 	var reference [2]string
 	if ref[0] != "" || ref[1] != "" {
 		reference = ref
@@ -394,8 +487,19 @@ func InitializeMessage(counterParty Address, selfAddress Address, performative P
 // 	return dialogue.orderedMessageIds[len(dialogue.orderedMessageIds)-1] + 1
 // }
 
-func Create(counterParty Address, selfAddress Address, performative Performative, content []byte) (AbstractMessage, Dialogue) {
-	initialMessage := InitializeMessage(counterParty, selfAddress, performative, content, [2]string{"", ""}, StartingMessageId, StartingTarget)
+func Create(counterParty Address,
+	selfAddress Address,
+	performative Performative,
+	content []byte) (AbstractMessage, Dialogue) {
+	initialMessage := InitializeMessage(
+		counterParty,
+		selfAddress,
+		performative,
+		content,
+		[2]string{"", ""},
+		StartingMessageId,
+		StartingTarget,
+	)
 	dialogue := createDialogue(initialMessage)
 	return initialMessage, dialogue
 }
