@@ -35,14 +35,8 @@ from aea.helpers.acn.agent_record import AgentRecord
 from aea.helpers.acn.uri import Uri
 from aea.mail.base import Envelope
 
-from packages.fetchai.connections.p2p_libp2p_client.acn_message_pb2 import AcnMessage
-from packages.fetchai.connections.p2p_libp2p_client.acn_message_pb2 import (
-    AgentRecord as AgentRecordPb,
-)
-from packages.fetchai.connections.p2p_libp2p_client.acn_message_pb2 import (
-    Register,
-    Status,
-)
+from packages.fetchai.protocols.acn import acn_pb2
+from packages.fetchai.protocols.acn.message import AcnMessage
 
 
 try:
@@ -235,21 +229,23 @@ class P2PLibp2pClientConnection(Connection):
 
     async def _setup_connection(self) -> None:
         """Set up connection to node over tcp connection."""
-        record = AgentRecordPb()
-        record.address = self.node_por.address
-        record.public_key = self.node_por.public_key
-        record.peer_public_key = self.node_por.representative_public_key
-        record.signature = self.node_por.signature
-        record.service_id = POR_DEFAULT_SERVICE_ID
-        record.ledger_id = self.node_por.ledger_id
+        agent_record = AcnMessage.AgentRecord(
+            address=self.node_por.address,
+            public_key=self.node_por.public_key,
+            peer_public_key=self.node_por.representative_public_key,
+            signature=self.node_por.signature,
+            service_id=POR_DEFAULT_SERVICE_ID,
+            ledger_id=self.node_por.ledger_id,
+        )
 
-        registration = Register()
-        registration.record.CopyFrom(record)  # pylint: disable=no-member
-        msg = AcnMessage()
-        msg.version = ACN_CURRENT_VERSION
-        msg.register.CopyFrom(registration)  # pylint: disable=no-member
+        acn_msg = acn_pb2.AcnMessage()
+        performative = acn_pb2.AcnMessage.Register_Performative()  # type: ignore
+        AcnMessage.AgentRecord.encode(
+            performative.record, agent_record  # pylint: disable=no-member
+        )
+        acn_msg.register.CopyFrom(performative)  # pylint: disable=no-member
 
-        buf = msg.SerializeToString()
+        buf = acn_msg.SerializeToString()
         await self._send(buf)
 
         self.logger.debug("Waiting for registration message...")
@@ -269,17 +265,17 @@ class P2PLibp2pClientConnection(Connection):
             raise ConnectionError(
                 "Error on connection setup. Incoming buffer is empty!"
             )
-        msg = AcnMessage()
-        msg.ParseFromString(buf)
-        payload = msg.WhichOneof("payload")
-        if payload != "status":  # pragma: nocover
-            raise Exception(f"Wrong response message from peer: {payload}")
-        response = msg.status  # pylint: disable=no-member
+        acn_msg = acn_pb2.AcnMessage()
+        acn_msg.ParseFromString(buf)
+        performative = acn_msg.WhichOneof("performative")
+        if performative != "status":  # pragma: nocover
+            raise Exception(f"Wrong response message from peer: {performative}")
+        response = acn_msg.status  # pylint: disable=no-member
 
-        if response.code != Status.SUCCESS:  # type: ignore # pylint: disable=no-member
+        if response.body.code != int(AcnMessage.StatusBody.StatusCode.SUCCESS):  # type: ignore # pylint: disable=no-member
             raise Exception(  # pragma: nocover
                 "Registration to peer failed: {}".format(
-                    Status.ErrCode.Name(response.code)  # type: ignore # pylint: disable=no-member
+                    AcnMessage.StatusBody.StatusCode(response.body.code)  # type: ignore # pylint: disable=no-member
                 )
             )
 

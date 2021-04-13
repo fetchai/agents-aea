@@ -1685,10 +1685,10 @@ func SetupDelegateClient(
 	record.PublicKey = pubKey
 	record.PeerPublicKey = peerPubKey
 	record.Signature = signature
-	registration := &dhtnode.Register{Record: record}
-	msg := &dhtnode.AcnMessage{
-		Version: dhtnode.CurrentVersion,
-		Payload: &dhtnode.AcnMessage_Register{Register: registration},
+	registration := &RegisterPerformative{Record: record}
+	msg := &AcnMessage{
+		// Version: dhtnode.CurrentVersion,
+		Performative: &Register{Register: registration},
 	}
 	data, err := proto.Marshal(msg)
 	ignore(err)
@@ -1698,24 +1698,24 @@ func SetupDelegateClient(
 	if err != nil {
 		return nil, nil, err
 	}
-	response := &dhtnode.AcnMessage{}
+	response := &AcnMessage{}
 	err = proto.Unmarshal(data, response)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	// Get Status message
-	var status *dhtnode.Status
-	switch pl := response.Payload.(type) {
-	case *dhtnode.AcnMessage_Status:
+	var status *StatusPerformative
+	switch pl := response.Performative.(type) {
+	case *Status:
 		status = pl.Status
 	default:
 		return nil, nil, err
 	}
 
-	if status.Code != dhtnode.Status_SUCCESS {
-		println("Registration error:", status.String())
-		return nil, nil, errors.New(status.String())
+	if status.Body.Code != SUCCESS {
+		println("Registration error:", status.Body.String())
+		return nil, nil, errors.New(status.Body.String())
 	}
 
 	go func() {

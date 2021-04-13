@@ -18,14 +18,26 @@
 * ------------------------------------------------------------------------------
  */
 
-// Package dhtnode (in progress) contains the common interface between dhtpeer and dhtclient
+// Package dhtnode contains the common interface between dhtpeer and dhtclient
+// TODO: extraction of shared functionality is work in progress
 package dhtnode
 
 import (
 	"errors"
 	utils "libp2p_node/utils"
 	"strings"
+
+	acn_protocol "libp2p_node/protocols/acn/v1_0_0"
 )
+
+type AgentRecord = acn_protocol.AcnMessage_AgentRecord
+type Status = acn_protocol.AcnMessage_StatusBody
+
+const ERROR_WRONG_AGENT_ADDRESS = acn_protocol.AcnMessage_StatusBody_ERROR_WRONG_AGENT_ADDRESS
+const ERROR_UNSUPPORTED_LEDGER = acn_protocol.AcnMessage_StatusBody_ERROR_UNSUPPORTED_LEDGER
+const ERROR_WRONG_PUBLIC_KEY = acn_protocol.AcnMessage_StatusBody_ERROR_WRONG_PUBLIC_KEY
+const ERROR_INVALID_PROOF = acn_protocol.AcnMessage_StatusBody_ERROR_INVALID_PROOF
+const SUCCESS = acn_protocol.AcnMessage_StatusBody_SUCCESS
 
 const (
 	DefaultLedger  = "fetchai"
@@ -42,7 +54,7 @@ func IsValidProofOfRepresentation(
 	// check agent address matches
 	if record.Address != agentAddress {
 		err := errors.New("Wrong agent address, expected " + agentAddress)
-		response := &Status{Code: Status_ERROR_WRONG_AGENT_ADDRESS, Msgs: []string{err.Error()}}
+		response := &Status{Code: ERROR_WRONG_AGENT_ADDRESS, Msgs: []string{err.Error()}}
 		return response, err
 	}
 
@@ -61,14 +73,14 @@ func IsValidProofOfRepresentation(
 				",",
 			),
 		)
-		response := &Status{Code: Status_ERROR_UNSUPPORTED_LEDGER, Msgs: []string{err.Error()}}
+		response := &Status{Code: ERROR_UNSUPPORTED_LEDGER, Msgs: []string{err.Error()}}
 		return response, err
 	}
 
 	// check public key matches
 	if record.PeerPublicKey != representativePeerPubKey {
 		err := errors.New("Wrong peer public key, expected " + representativePeerPubKey)
-		response := &Status{Code: Status_ERROR_WRONG_PUBLIC_KEY, Msgs: []string{err.Error()}}
+		response := &Status{Code: ERROR_WRONG_PUBLIC_KEY, Msgs: []string{err.Error()}}
 		return response, err
 	}
 
@@ -78,7 +90,7 @@ func IsValidProofOfRepresentation(
 		if err == nil {
 			err = errors.New("Agent address and public key don't match")
 		}
-		response := &Status{Code: Status_ERROR_WRONG_AGENT_ADDRESS}
+		response := &Status{Code: ERROR_WRONG_AGENT_ADDRESS}
 		return response, err
 	}
 
@@ -93,13 +105,13 @@ func IsValidProofOfRepresentation(
 		if err == nil {
 			err = errors.New("Signature is not valid")
 		}
-		response := &Status{Code: Status_ERROR_INVALID_PROOF}
+		response := &Status{Code: ERROR_INVALID_PROOF}
 		return response, err
 
 	}
 
 	// PoR is valid
-	response := &Status{Code: Status_SUCCESS}
+	response := &Status{Code: SUCCESS}
 	return response, nil
 
 }
