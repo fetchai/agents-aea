@@ -2,6 +2,7 @@ package protocols
 
 import (
 	"encoding/json"
+	"gotest.tools/assert"
 	"log"
 	"testing"
 )
@@ -33,21 +34,11 @@ func TestDialogueLabelGetters(t *testing.T) {
 		senderAddress,
 	}
 
-	if actual := label.DialogueOpponentAddress(); actual != counterPartyAddress {
-		t.Errorf("Expected %s, got: %s", responderReference, actual)
-	}
-	if actual := label.DialogueStarterAddress(); actual != senderAddress {
-		t.Errorf("Expected %s, got: %s", starterReference, actual)
-	}
-	if actual := label.DialogueStarterReference(); actual != starterReference {
-		t.Errorf("Expected %s, got: %s", starterReference, actual)
-	}
-	if actual := label.DialogueResponderReference(); actual != responderReference {
-		t.Errorf("Expected %s, got: %s", responderReference, actual)
-	}
-	if actual := label.DialogueReference(); actual != dialogueReference {
-		t.Errorf("Expected %s, got: %s", dialogueReference, actual)
-	}
+	assert.Equal(t, label.DialogueOpponentAddress(), counterPartyAddress)
+	assert.Equal(t, label.DialogueStarterAddress(), senderAddress)
+	assert.Equal(t, label.DialogueStarterReference(), starterReference)
+	assert.Equal(t, label.DialogueResponderReference(), responderReference)
+	assert.Equal(t, label.DialogueReference(), dialogueReference)
 
 }
 
@@ -60,9 +51,13 @@ func TestGetIncompleteVersion(t *testing.T) {
 		label.DialogueOpponentAddress(),
 		label.DialogueStarterAddress(),
 	}
-	if actualIncompleteVersion != expectedIncompleteVersion {
-		t.Errorf("getIncompleteVersion gave unexpected result.")
-	}
+
+	assert.Equal(
+		t,
+		actualIncompleteVersion,
+		expectedIncompleteVersion,
+		"getIncompleteVersion gave unexpected result.",
+	)
 }
 
 // Test marshalling and unmarshalling
@@ -79,9 +74,12 @@ func TestMarshalAndUnmarshal(t *testing.T) {
 	if err != nil {
 		t.Fatalf("DialogueLabel JSON unmarshalling failed with error: %s", err.Error())
 	}
-	if result != label {
-		t.Fatal("the DialogueLabel parsed from JSON is not the same of the original one.")
-	}
+	assert.Equal(
+		t,
+		result,
+		label,
+		"the DialogueLabel parsed from JSON is not the same of the original one.",
+	)
 }
 
 // Test ToString and FromString methods.
