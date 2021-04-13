@@ -18,7 +18,7 @@ fingerprint:
   libp2p_node/aea/envelope.proto: QmVuvesmfgzj5aKnbFoCocoGEv3T9MR7u6KWn7CT5yfjGi
   libp2p_node/aea/pipe_unix.go: QmSzbAexrSUSA9ZE6VT6MmcWF5MhEcmceQjAbnfRoK7Ruv
   libp2p_node/aea/pipe_windows.go: QmdYpfjgdgFbA6Pothg65NYM45ubfpZeKr8cVQoqbFzgUK
-  libp2p_node/dht/dhtclient/dhtclient.go: QmQgqAqT7PjqxExA9fhRzB1ReTyaYZQX96SBgAM5mk58kN
+  libp2p_node/dht/dhtclient/dhtclient.go: QmdqYdcyzPUPgtmnQXykxwdxWG4wjScztJuCpcxGTBmaUF
   libp2p_node/dht/dhtclient/dhtclient_test.go: QmS9SiLAojXYobqV9m5yeRpyPzt6JcSbQD78RNvSp6LPx6
   libp2p_node/dht/dhtclient/options.go: QmaoJiavHescgx98inQjVUipPFRvcFFrodrScZ3fvrXJ4z
   libp2p_node/dht/dhtnode/dhtnode.go: QmbyhgbCSAbQ1QsDw7FM7Nt5sZcvhbupA1jv5faxutbV7N

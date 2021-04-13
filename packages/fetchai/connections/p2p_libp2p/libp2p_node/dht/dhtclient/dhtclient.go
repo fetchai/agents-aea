@@ -19,7 +19,7 @@
  */
 
 // Package dhtclient provides implementation of a lightweight Agent Communication Network
-// node. It doesn't particiapate in network maintenance. It doesn't require a public IP
+// node. It doesn't participate in network maintenance. It doesn't require a public IP
 // address either, as it relies on a DHTPeer (relay peer) to communicate with other peers.
 package dhtclient
 
