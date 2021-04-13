@@ -19,8 +19,8 @@
  */
 
 // Package dhtclient provides implementation of a lightweight Agent Communication Network
-// node. It doesn't particiapate in network maintenance. It doesn't require a public
-// address as well, as it relays on a DHTPeer to communicate with other peers
+// node. It doesn't participate in network maintenance. It doesn't require a public IP
+// address either, as it relies on a DHTPeer (relay peer) to communicate with other peers.
 package dhtclient
 
 import (
@@ -104,6 +104,7 @@ func (notifee *Notifee) ListenClose(network.Network, multiaddr.Multiaddr) {}
 func (notifee *Notifee) Connected(network.Network, network.Conn) {}
 
 // Disconnected called when a connection closed
+// Reconnects if connection is to relay peer and not currenctly closing connection.
 func (notifee *Notifee) Disconnected(net network.Network, conn network.Conn) {
 
 	pinfo := notifee.myRelayPeer
@@ -113,7 +114,7 @@ func (notifee *Notifee) Disconnected(net network.Network, conn network.Conn) {
 
 	notifee.myHost.Peerstore().AddAddrs(pinfo.ID, pinfo.Addrs, peerstore.PermanentAddrTTL)
 	for {
-		var err error
+		var err error // where is this error comming from?
 		select {
 		case _, open := <-notifee.closing:
 			if !open {
@@ -193,7 +194,7 @@ func New(opts ...Option) (*DHTClient, error) {
 		return nil, errors.New("missing agent record")
 	}
 
-	// check if the PoR is delivered for my public  key
+	// check if the PoR is delivered for my public key
 	myPublicKey, err := utils.FetchAIPublicKeyFromPubKey(dhtClient.publicKey)
 	status, errPoR := dhtnode.IsValidProofOfRepresentation(
 		dhtClient.myAgentRecord,
@@ -211,7 +212,7 @@ func New(opts ...Option) (*DHTClient, error) {
 		return nil, errors.New(msg)
 	}
 
-	// bootsrap peers
+	// bootstrap peers
 	if len(dhtClient.bootstrapPeers) < 1 {
 		return nil, errors.New("at least one boostrap peer should be provided")
 	}
@@ -299,6 +300,7 @@ func New(opts ...Option) (*DHTClient, error) {
 	return dhtClient, nil
 }
 
+// bootstrapLoopUntilTimeout loops until connection to bootstrap peers established or timeout reached
 func (dhtClient *DHTClient) bootstrapLoopUntilTimeout() error {
 	lerror, _, _, _ := dhtClient.getLoggers()
 	ctx, cancel := context.WithTimeout(context.Background(), bootstrapTimeout)
@@ -335,6 +337,7 @@ func (dhtClient *DHTClient) bootstrapLoopUntilTimeout() error {
 	return err
 }
 
+// newStreamLoopUntilTimeout loops until stream to peer established or timeout reached
 func (dhtClient *DHTClient) newStreamLoopUntilTimeout(
 	peerID peer.ID,
 	streamType protocol.ID,
@@ -371,6 +374,7 @@ func (dhtClient *DHTClient) newStreamLoopUntilTimeout(
 	return stream, err
 }
 
+// setupLogger sets up a logger for the DHTClient
 func (dhtClient *DHTClient) setupLogger() {
 	fields := map[string]string{
 		"package": "DHTClient",
@@ -382,6 +386,7 @@ func (dhtClient *DHTClient) setupLogger() {
 	dhtClient.logger = utils.NewDefaultLoggerWithFields(fields)
 }
 
+// getLoggers gets the various logger levels of the DHTClient
 func (dhtClient *DHTClient) getLoggers() (func(error) *zerolog.Event, func() *zerolog.Event, func() *zerolog.Event, func() *zerolog.Event) {
 	ldebug := dhtClient.logger.Debug
 	linfo := dhtClient.logger.Info
@@ -397,6 +402,7 @@ func (dhtClient *DHTClient) getLoggers() (func(error) *zerolog.Event, func() *ze
 }
 
 // Close stops the DHTClient
+// Closes the DHT and routedHost of the DHTClient
 func (dhtClient *DHTClient) Close() []error {
 	var err error
 	var status []error
@@ -425,11 +431,11 @@ func (dhtClient *DHTClient) MultiAddr() string {
 	return ""
 }
 
-// RouteEnvelope to its destination
+// RouteEnvelope routes the provided envelope to its destination contact peer
 func (dhtClient *DHTClient) RouteEnvelope(envel *aea.Envelope) error {
 	lerror, lwarn, _, ldebug := dhtClient.getLoggers()
 
-	//
+	// only send envelopes from own agent
 	if envel.Sender != dhtClient.myAgentAddress {
 		err := errors.New("Sender (" + envel.Sender + ") must match registered address")
 		lerror(err).Str("addr", dhtClient.myAgentAddress).
@@ -465,11 +471,6 @@ func (dhtClient *DHTClient) RouteEnvelope(envel *aea.Envelope) error {
 			return nil
 		}
 	}
-
-	//ldebug().
-	//	Str("op", "route").
-	//	Str("target", target).
-	//	Msg("looking up peer ID for agent Address")
 
 	// client can get addresses only through bootstrap peer
 	stream, err := dhtClient.newStreamLoopUntilTimeout(
@@ -578,6 +579,7 @@ func (dhtClient *DHTClient) RouteEnvelope(envel *aea.Envelope) error {
 
 	stream.Close()
 
+	// retrieve peerID
 	peerID, err := utils.IDFromFetchAIPublicKey(record.PeerPublicKey)
 	if err != nil {
 		lerror(err).
@@ -593,6 +595,7 @@ func (dhtClient *DHTClient) RouteEnvelope(envel *aea.Envelope) error {
 		Msgf("got peer ID %s for agent Address", peerID.Pretty())
 
 	// TODO(LR): test if representative peer is relay peer, and skip the Connect if it is the case
+	// TODO(DM): extract below multi-address creation for reuse and consistency
 	multiAddr := "/p2p/" + dhtClient.relayPeer.Pretty() + "/p2p-circuit/p2p/" + peerID.Pretty()
 	relayMultiaddr, err := multiaddr.NewMultiaddr(multiAddr)
 	if err != nil {
@@ -730,9 +733,13 @@ func (dhtClient *DHTClient) RouteEnvelope(envel *aea.Envelope) error {
 		return err
 	}
 
+	// TODO(DM) check how we handle case when envelope not routable.
 	return err
 }
 
+// handleAeaEnvelopeStream deals with incoming envelopes on the AeaEnvelopeStream
+// envelopes arrive from other peers (full or client) and are processed
+// by processEnvelope
 func (dhtClient *DHTClient) handleAeaEnvelopeStream(stream network.Stream) {
 	lerror, lwarn, _, ldebug := dhtClient.getLoggers()
 
@@ -857,7 +864,7 @@ func (dhtClient *DHTClient) handleAeaEnvelopeStream(stream network.Stream) {
 			return
 		}
 	} else {
-		lwarn().Msgf("ignored envelope %s", envel.String())
+		lwarn().Msgf("ignored envelope from unknown agent %s", envel.String())
 		status := &StatusBody{Code: ERROR_UNKNOWN_AGENT_ADDRESS}
 		statusPerformative := &StatusPerformative{Body: status}
 		response := &AcnMessage{
@@ -887,6 +894,9 @@ func (dhtClient *DHTClient) handleAeaEnvelopeStream(stream network.Stream) {
 	ignore(err)
 }
 
+// handleAeaAddressStream deals with incoming envelopes on the AeaAddressStream
+// agent record lookup requests arrive from other peers (full or client) and are
+// served with the agent record (if applicable)
 func (dhtClient *DHTClient) handleAeaAddressStream(stream network.Stream) {
 	lerror, _, _, ldebug := dhtClient.getLoggers()
 
@@ -905,7 +915,7 @@ func (dhtClient *DHTClient) handleAeaAddressStream(stream network.Stream) {
 	msg := &AcnMessage{}
 	err = proto.Unmarshal(buf, msg)
 	if err != nil {
-		lerror(err).Str("op", "resolve").Msg("couldn't deserialize acn registration message")
+		lerror(err).Str("op", "resolve").Msg("couldn't deserialize acn message")
 		// TOFIX(LR) setting Msgs to err.Error is potentially a security vulnerability
 		status := &StatusBody{
 			Code: ERROR_SERIALIZATION,
@@ -931,7 +941,7 @@ func (dhtClient *DHTClient) handleAeaAddressStream(stream network.Stream) {
 	case *LookupRequest:
 		lookupRequest = pl.LookupRequest
 	default:
-		err = errors.New("Unexpected payload")
+		err = errors.New("Unexpected payload, expected LookupRequest")
 		status := &StatusBody{Code: ERROR_UNEXPECTED_PAYLOAD, Msgs: []string{err.Error()}}
 		statusPerformative := &StatusPerformative{Body: status}
 		response := &AcnMessage{
@@ -990,6 +1000,7 @@ func (dhtClient *DHTClient) handleAeaAddressStream(stream network.Stream) {
 
 }
 
+// registerAgentAddress registers agent address to relay peer
 func (dhtClient *DHTClient) registerAgentAddress() error {
 	lerror, _, _, ldebug := dhtClient.getLoggers()
 
@@ -1068,7 +1079,8 @@ func (dhtClient *DHTClient) registerAgentAddress() error {
 
 }
 
-//ProcessEnvelope register a callback function
+// ProcessEnvelope register a callback function for processing of envelopes
+// the function processes envelopes received in handleAeaEnvelopeStream
 func (dhtClient *DHTClient) ProcessEnvelope(fn func(*aea.Envelope) error) {
 	dhtClient.processEnvelope = fn
 }

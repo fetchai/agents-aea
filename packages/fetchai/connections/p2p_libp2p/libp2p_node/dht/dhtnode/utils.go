@@ -18,7 +18,8 @@
 * ------------------------------------------------------------------------------
  */
 
-// Package dhtnode (in progress) contains the common interface between dhtpeer and dhtclient
+// Package dhtnode contains the common interface between dhtpeer and dhtclient
+// TODO: extraction of shared functionality is work in progress
 package dhtnode
 
 import (
