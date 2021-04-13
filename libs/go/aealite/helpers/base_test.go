@@ -45,36 +45,36 @@ func TestSet(t *testing.T) {
 	set := Set{}
 	set.Init()
 
-	element_1 := "hello"
-	element_2 := 42
-	element_3 := struct {
+	element1 := "hello"
+	element2 := 42
+	element3 := struct {
 		Name    string
 		Surname string
 	}{"Alan", "Turing"}
 
-	checkNotIn(t, &set, element_1)
-	checkNotIn(t, &set, element_2)
-	checkNotIn(t, &set, element_3)
+	checkNotIn(t, &set, element1)
+	checkNotIn(t, &set, element2)
+	checkNotIn(t, &set, element3)
 	checkExpectedSize(t, &set, 0)
 
-	set.Add(element_1)
-	checkIn(t, &set, element_1)
-	checkNotIn(t, &set, element_2)
-	checkNotIn(t, &set, element_3)
+	set.Add(element1)
+	checkIn(t, &set, element1)
+	checkNotIn(t, &set, element2)
+	checkNotIn(t, &set, element3)
 	checkExpectedSize(t, &set, 1)
 
-	set.Add(element_2)
-	set.Add(element_3)
-	checkIn(t, &set, element_1)
-	checkIn(t, &set, element_2)
-	checkIn(t, &set, element_3)
+	set.Add(element2)
+	set.Add(element3)
+	checkIn(t, &set, element1)
+	checkIn(t, &set, element2)
+	checkIn(t, &set, element3)
 	checkExpectedSize(t, &set, 3)
 
-	set.Remove(element_1)
-	set.Remove(element_2)
-	set.Remove(element_3)
-	checkNotIn(t, &set, element_1)
-	checkNotIn(t, &set, element_2)
-	checkNotIn(t, &set, element_3)
+	set.Remove(element1)
+	set.Remove(element2)
+	set.Remove(element3)
+	checkNotIn(t, &set, element1)
+	checkNotIn(t, &set, element2)
+	checkNotIn(t, &set, element3)
 	checkExpectedSize(t, &set, 0)
 }
