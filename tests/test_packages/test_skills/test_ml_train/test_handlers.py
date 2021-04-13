@@ -17,12 +17,12 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains the tests of the handler classes of the ml_train skill."""
+import json
 import logging
-import pickle  # nosec
 import sys
 import uuid
 from pathlib import Path
-from typing import Tuple, cast
+from typing import cast
 from unittest.mock import patch
 
 import numpy as np
@@ -46,6 +46,9 @@ from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.ml_trade.message import MlTradeMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.signing.message import SigningMessage
+from packages.fetchai.skills.ml_data_provider.strategy import (
+    Strategy as DataProviderStrategy,
+)
 from packages.fetchai.skills.ml_train.behaviours import TransactionBehaviour
 from packages.fetchai.skills.ml_train.dialogues import (
     LedgerApiDialogue,
@@ -67,6 +70,7 @@ from packages.fetchai.skills.ml_train.handlers import (
 from packages.fetchai.skills.ml_train.strategy import Strategy
 
 from tests.conftest import ROOT_DIR
+from tests.test_packages.test_skills.test_ml_train.helpers import produce_data
 
 
 class TestMlTradeHandler(BaseSkillTestCase):
@@ -303,23 +307,6 @@ class TestMlTradeHandler(BaseSkillTestCase):
         assert ml_dialogue.terms == mocked_terms_from_proposal
         assert ml_dialogue in self.tx_behaviour.waiting
 
-    @staticmethod
-    def produce_data(batch_size) -> Tuple:
-        """Prodice the data."""
-        from tensorflow import keras  # pylint: disable=import-outside-toplevel
-
-        ((train_x, train_y), _) = keras.datasets.fashion_mnist.load_data()
-
-        idx = np.arange(train_x.shape[0])
-        mask = np.zeros_like(idx, dtype=bool)
-
-        selected = np.random.choice(idx, batch_size, replace=False)
-        mask[selected] = True
-
-        x_sample = train_x[mask]
-        y_sample = train_y[mask]
-        return x_sample, y_sample
-
     @pytest.mark.skipif(
         sys.version_info >= (3, 9),
         reason="These tests use tensorflow which, at the time of writing, does not yet support python version 3.9.",
@@ -327,8 +314,8 @@ class TestMlTradeHandler(BaseSkillTestCase):
     def test_handle_data_with_data(self):
         """Test the _handle_data method of the ml_trade handler where data is NOT None."""
         # setup
-        data = self.produce_data(self.batch_size)
-        payload = pickle.dumps(data)
+        data = produce_data(self.batch_size)
+        payload = DataProviderStrategy.encode_sample_data(data)
 
         ml_dialogue = cast(
             MlTradeDialogue,
@@ -361,7 +348,7 @@ class TestMlTradeHandler(BaseSkillTestCase):
         """Test the _handle_data method of the ml_trade handler where data IS None."""
         # setup
         data = None
-        payload = pickle.dumps(data)
+        payload = json.dumps(data).encode("utf-8")
 
         ml_dialogue = cast(
             MlTradeDialogue,

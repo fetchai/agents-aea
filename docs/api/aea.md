@@ -16,7 +16,7 @@ This class implements an autonomous economic agent.
 #### `__`init`__`
 
 ```python
- | __init__(identity: Identity, wallet: Wallet, resources: Resources, data_dir: str, loop: Optional[AbstractEventLoop] = None, period: float = 0.05, execution_timeout: float = 0, max_reactions: int = 20, error_handler_class: Optional[Type[AbstractErrorHandler]] = None, decision_maker_handler_class: Optional[Type[DecisionMakerHandler]] = None, skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate, connection_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None, default_ledger: Optional[str] = None, currency_denominations: Optional[Dict[str, str]] = None, default_connection: Optional[PublicId] = None, default_routing: Optional[Dict[PublicId, PublicId]] = None, connection_ids: Optional[Collection[PublicId]] = None, search_service_address: str = DEFAULT_SEARCH_SERVICE_ADDRESS, storage_uri: Optional[str] = None, **kwargs: Any, ,) -> None
+ | __init__(identity: Identity, wallet: Wallet, resources: Resources, data_dir: str, loop: Optional[AbstractEventLoop] = None, period: float = 0.05, execution_timeout: float = 0, max_reactions: int = 20, error_handler_class: Optional[Type[AbstractErrorHandler]] = None, error_handler_config: Optional[Dict[str, Any]] = None, decision_maker_handler_class: Optional[Type[DecisionMakerHandler]] = None, decision_maker_handler_config: Optional[Dict[str, Any]] = None, skill_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate, connection_exception_policy: ExceptionPolicyEnum = ExceptionPolicyEnum.propagate, loop_mode: Optional[str] = None, runtime_mode: Optional[str] = None, default_ledger: Optional[str] = None, currency_denominations: Optional[Dict[str, str]] = None, default_connection: Optional[PublicId] = None, default_routing: Optional[Dict[PublicId, PublicId]] = None, connection_ids: Optional[Collection[PublicId]] = None, search_service_address: str = DEFAULT_SEARCH_SERVICE_ADDRESS, storage_uri: Optional[str] = None, task_manager_mode: Optional[str] = None, **kwargs: Any, ,) -> None
 ```
 
 Instantiate the agent.
@@ -42,6 +42,7 @@ Instantiate the agent.
 - `connection_ids`: active connection ids. Default: consider all the ones in the resources.
 - `search_service_address`: the address of the search service used.
 - `storage_uri`: optional uri to set generic storage
+- `task_manager_mode`: task manager mode (threaded) to run tasks with.
 - `kwargs`: keyword arguments to be attached in the agent context namespace.
 
 **Returns**:
@@ -241,7 +242,7 @@ async result for task_id
 #### enqueue`_`task
 
 ```python
- | enqueue_task(func: Callable, args: Sequence = (), kwds: Optional[Dict[str, Any]] = None) -> int
+ | enqueue_task(func: Callable, args: Sequence = (), kwargs: Optional[Dict[str, Any]] = None) -> int
 ```
 
 Enqueue a task with the task manager.
@@ -250,7 +251,7 @@ Enqueue a task with the task manager.
 
 - `func`: the callable instance to be enqueued
 - `args`: the positional arguments to be passed to the function.
-- `kwds`: the keyword arguments to be passed to the function.
+- `kwargs`: the keyword arguments to be passed to the function.
 :return the task id to get the the result.
 
 **Raises**:

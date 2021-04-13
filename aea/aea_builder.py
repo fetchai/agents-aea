@@ -77,13 +77,23 @@ from aea.configurations.manager import (
 )
 from aea.configurations.pypi import is_satisfiable, merge_dependencies
 from aea.configurations.validation import ExtraPropertiesError
-from aea.crypto.helpers import private_key_verify_or_create
+from aea.crypto.helpers import private_key_verify
 from aea.crypto.ledger_apis import DEFAULT_CURRENCY_DENOMINATIONS
 from aea.crypto.wallet import Wallet
 from aea.decision_maker.base import DecisionMakerHandler
 from aea.error_handler.base import AbstractErrorHandler
-from aea.exceptions import AEAException, AEAValidationError, enforce
-from aea.helpers.base import find_topological_order, load_env_file, load_module
+from aea.exceptions import (
+    AEAException,
+    AEAValidationError,
+    AEAWalletNoAddressException,
+    enforce,
+)
+from aea.helpers.base import (
+    SimpleId,
+    find_topological_order,
+    load_env_file,
+    load_module,
+)
 from aea.helpers.exception_policy import ExceptionPolicyEnum
 from aea.helpers.install_dependency import install_dependency
 from aea.helpers.io import open_file
@@ -305,6 +315,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
     DEFAULT_CONNECTION_EXCEPTION_POLICY = ExceptionPolicyEnum.propagate
     DEFAULT_LOOP_MODE = "async"
     DEFAULT_RUNTIME_MODE = "threaded"
+    DEFAULT_TASKMANAGER_MODE = "threaded"
     DEFAULT_SEARCH_SERVICE_ADDRESS = _DEFAULT_SEARCH_SERVICE_ADDRESS
     AEA_CLASS = AEA
     BUILD_TIMEOUT = 120
@@ -370,6 +381,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         if not is_full_reset:
             return
         self._default_ledger: Optional[str] = None
+        self._required_ledgers: Optional[List[str]] = None
         self._build_entrypoint: Optional[str] = None
         self._currency_denominations: Dict[str, str] = {}
         self._default_connection: Optional[PublicId] = None
@@ -380,12 +392,17 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self._decision_maker_handler_class: Optional[Type[DecisionMakerHandler]] = None
         self._decision_maker_handler_dotted_path: Optional[str] = None
         self._decision_maker_handler_file_path: Optional[str] = None
+        self._decision_maker_handler_config: Optional[Dict[str, Any]] = None
         self._error_handler_class: Optional[Type[AbstractErrorHandler]] = None
+        self._error_handler_dotted_path: Optional[str] = None
+        self._error_handler_file_path: Optional[str] = None
+        self._error_handler_config: Optional[Dict[str, Any]] = None
         self._skill_exception_policy: Optional[ExceptionPolicyEnum] = None
         self._connection_exception_policy: Optional[ExceptionPolicyEnum] = None
         self._default_routing: Dict[PublicId, PublicId] = {}
         self._loop_mode: Optional[str] = None
         self._runtime_mode: Optional[str] = None
+        self._task_manager_mode: Optional[str] = None
         self._search_service_address: Optional[str] = None
         self._storage_uri: Optional[str] = None
         self._data_dir: Optional[str] = None
@@ -436,19 +453,24 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self._max_reactions = max_reactions
         return self
 
-    def set_decision_maker_handler_paths(
-        self, decision_maker_handler_dotted_path: str, file_path: Optional[str]
+    def set_decision_maker_handler_details(
+        self,
+        decision_maker_handler_dotted_path: str,
+        file_path: str,
+        config: Dict[str, Any],
     ) -> "AEABuilder":
         """
-        Set decision maker handler class.
+        Set error handler details.
 
         :param decision_maker_handler_dotted_path: the dotted path to the decision maker handler
         :param file_path: the file path to the file which contains the decision maker handler
+        :param config: the configuration passed to the decision maker handler on instantiation
 
         :return: self
         """
         self._decision_maker_handler_dotted_path = decision_maker_handler_dotted_path
         self._decision_maker_handler_file_path = file_path
+        self._decision_maker_handler_config = config
         return self
 
     def _load_decision_maker_handler_class(
@@ -484,7 +506,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
                     dotted_path, self._decision_maker_handler_file_path, e
                 )
             )
-            raise  # log and re-raise because we should not build an agent from an. invalid configuration
+            raise  # log and re-raise because we should not build an agent from an invalid configuration
 
         try:
             _class = getattr(module, class_name)
@@ -494,37 +516,68 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
                     dotted_path, class_name, self._decision_maker_handler_file_path, e
                 )
             )
-            raise  # log and re-raise because we should not build an agent from an. invalid configuration
+            raise  # log and re-raise because we should not build an agent from an invalid configuration
 
         return _class
 
-    def set_error_handler(
-        self, error_handler_dotted_path: str, file_path: Path
-    ) -> "AEABuilder":
+    def _load_error_handler_class(self,) -> Optional[Type[AbstractErrorHandler]]:
         """
-        Set error handler class.
+        Load error handler class.
 
-        :param error_handler_dotted_path: the dotted path to the error handler
-        :param file_path: the file path to the file which contains the error handler
-
-        :return: self
+        :return: error handler class
         """
-        dotted_path, class_name = error_handler_dotted_path.split(
+        _class = self._get_error_handler_class()
+        if _class is not None and self._error_handler_dotted_path is not None:
+            raise ValueError(  # pragma: nocover
+                "ErrorHandler class and dotted path set: can only set one!"
+            )
+        if _class is not None:
+            return _class  # pragma: nocover
+        if self._error_handler_dotted_path is None:
+            return None
+        dotted_path, class_name = self._error_handler_dotted_path.split(
             DOTTED_PATH_MODULE_ELEMENT_SEPARATOR
         )
-        module = load_module(dotted_path, file_path)
+        try:
+            if self._error_handler_file_path is None:
+                module = import_module(dotted_path)
+            else:
+                module = load_module(dotted_path, Path(self._error_handler_file_path))
+        except Exception as e:  # pragma: nocover
+            self.logger.error(
+                "Could not locate error handler for dotted path '{}' and file path '{}'. Error message: {}".format(
+                    dotted_path, self._error_handler_file_path, e
+                )
+            )
+            raise  # log and re-raise because we should not build an agent from an invalid configuration
 
         try:
             _class = getattr(module, class_name)
-            self._error_handler_class = _class
         except Exception as e:  # pragma: nocover
             self.logger.error(
                 "Could not locate error handler for dotted path '{}', class name '{}' and file path '{}'. Error message: {}".format(
-                    dotted_path, class_name, file_path, e
+                    dotted_path, class_name, self._error_handler_file_path, e
                 )
             )
-            raise  # log and re-raise because we should not build an agent from an. invalid configuration
+            raise  # log and re-raise because we should not build an agent from an invalid configuration
 
+        return _class
+
+    def set_error_handler_details(
+        self, error_handler_dotted_path: str, file_path: str, config: Dict[str, Any]
+    ) -> "AEABuilder":
+        """
+        Set error handler details.
+
+        :param error_handler_dotted_path: the dotted path to the error handler
+        :param file_path: the file path to the file which contains the error handler
+        :param config: the configuration passed to the error handler on instantiation
+
+        :return: self
+        """
+        self._error_handler_dotted_path = error_handler_dotted_path
+        self._error_handler_file_path = file_path
+        self._error_handler_config = config
         return self
 
     def set_skill_exception_policy(
@@ -606,6 +659,18 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :return: self
         """
         self._runtime_mode = runtime_mode
+        return self
+
+    def set_task_manager_mode(
+        self, task_manager_mode: Optional[str]
+    ) -> "AEABuilder":  # pragma: nocover
+        """
+        Set the task_manager_mode.
+
+        :param task_manager_mode: the agent task_manager_mode
+        :return: self
+        """
+        self._task_manager_mode = task_manager_mode
         return self
 
     def set_storage_uri(
@@ -803,7 +868,27 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :param identifier: the identifier of the ledger api
         :return: the AEABuilder
         """
-        self._default_ledger = identifier
+        self._default_ledger = (
+            str(SimpleId(identifier)) if identifier is not None else None
+        )
+        return self
+
+    def set_required_ledgers(
+        self, required_ledgers: Optional[List[str]]
+    ) -> "AEABuilder":  # pragma: nocover
+        """
+        Set the required ledger identifiers.
+
+        These are the ledgers for which the AEA requires a key pair.
+
+        :param required_ledgers: the required ledgers.
+        :return: the AEABuilder.
+        """
+        self._required_ledgers = (
+            [str(SimpleId(ledger)) for ledger in required_ledgers]
+            if required_ledgers is not None
+            else None
+        )
         return self
 
     def set_build_entrypoint(
@@ -822,7 +907,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self, currency_denominations: Dict[str, str]
     ) -> "AEABuilder":  # pragma: nocover
         """
-        Set the mapping from ledger ids to currency denomincations.
+        Set the mapping from ledger ids to currency denominations.
 
         :param currency_denominations: the mapping
         :return: the AEABuilder
@@ -1102,7 +1187,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         stderr = res.stderr.decode("utf-8")
         return stdout, stderr, code
 
-    def _build_wallet(self, data_directory: str) -> Wallet:
+    def _build_wallet(
+        self, data_directory: str, password: Optional[str] = None
+    ) -> Wallet:
         """
         Build the wallet.
 
@@ -1111,6 +1198,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         the path is not an absolute path.
 
         :param data_directory: the path prefix to be prepended to each private key path.
+        :param password: the password to encrypt/decrypt the private key.
         :return: the wallet instance.
         """
 
@@ -1128,7 +1216,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         connection_private_key_paths = _prepend_if_not_none(
             self.connection_private_key_paths
         )
-        wallet = Wallet(private_key_paths, connection_private_key_paths)
+        wallet = Wallet(
+            private_key_paths, connection_private_key_paths, password=password
+        )
         return wallet
 
     def _build_identity_from_wallet(self, wallet: Wallet) -> Identity:
@@ -1141,25 +1231,31 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         if self._name is None:  # pragma: nocover
             raise ValueError("You must set the name of the agent.")
 
+        default_ledger = self.get_default_ledger()
         if not wallet.addresses:
-            raise ValueError("Wallet has no addresses.")
+            raise AEAWalletNoAddressException("Wallet has no addresses.")
+
+        if default_ledger not in wallet.addresses:
+            raise ValueError(  # pragma: nocover
+                f"Specified default ledger '{default_ledger}' not found in available addresses of types: {'[' + ','.join(wallet.addresses.keys()) + ']'}"
+            )
 
         if len(wallet.addresses) > 1:
             identity = Identity(
                 self._name,
                 addresses=wallet.addresses,
-                default_address_key=self.get_default_ledger(),
+                default_address_key=default_ledger,
             )
         else:
             identity = Identity(
                 self._name,
-                address=wallet.addresses[self.get_default_ledger()],
-                default_address_key=self.get_default_ledger(),
+                address=wallet.addresses[default_ledger],
+                default_address_key=default_ledger,
             )
         return identity
 
-    def _process_connection_ids(
-        self, connection_ids: Optional[Collection[PublicId]] = None
+    def _process_connection_ids(  # pylint: disable=unsubscriptable-object
+        self, connection_ids: Optional[Collection[PublicId]] = None,
     ) -> List[PublicId]:
         """
         Process connection ids.
@@ -1218,10 +1314,14 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         return sorted_selected_connections_ids
 
     def install_pypi_dependencies(self) -> None:
-        """Install components extra dependecies."""
+        """Install components extra dependencies."""
         self._package_dependency_manager.install_dependencies()
 
-    def build(self, connection_ids: Optional[Collection[PublicId]] = None,) -> AEA:
+    def build(  # pylint: disable=unsubscriptable-object
+        self,
+        connection_ids: Optional[Collection[PublicId]] = None,
+        password: Optional[str] = None,
+    ) -> AEA:
         """
         Build the AEA.
 
@@ -1233,13 +1333,15 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         via 'add_component_instance' and the private keys.
 
         :param connection_ids: select only these connections to run the AEA.
+        :param password: the password to encrypt/decrypt the private key.
         :return: the AEA object.
         :raises ValueError: if we cannot
         """
         datadir = self._get_data_dir()
         self._check_we_can_build()
+        self._preliminary_checks_before_build()
         logging.config.dictConfig(self._logging_config)
-        wallet = self._build_wallet(datadir)
+        wallet = self._build_wallet(datadir, password=password)
         identity = self._build_identity_from_wallet(wallet)
         resources = Resources(identity.name)
         self._load_and_add_components(ComponentType.PROTOCOL, resources, identity.name)
@@ -1262,8 +1364,10 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             period=self._get_agent_act_period(),
             execution_timeout=self._get_execution_timeout(),
             max_reactions=self._get_max_reactions(),
-            error_handler_class=self._get_error_handler_class(),
+            error_handler_class=self._load_error_handler_class(),
+            error_handler_config=self._get_error_handler_config(),
             decision_maker_handler_class=self._load_decision_maker_handler_class(),
+            decision_maker_handler_config=self._get_decision_maker_handler_config(),
             skill_exception_policy=self._get_skill_exception_policy(),
             connection_exception_policy=self._get_connection_exception_policy(),
             currency_denominations=self._get_currency_denominations(),
@@ -1271,6 +1375,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             default_connection=self._get_default_connection(),
             loop_mode=self._get_loop_mode(),
             runtime_mode=self._get_runtime_mode(),
+            task_manager_mode=self._get_task_manager_mode(),
             connection_ids=connection_ids,
             search_service_address=self._get_search_service_address(),
             storage_uri=self._get_storage_uri(),
@@ -1289,6 +1394,16 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :return: the default ledger identifier.
         """
         return self._default_ledger or self.DEFAULT_LEDGER
+
+    def get_required_ledgers(self) -> List[str]:
+        """
+        Get the required ledger identifiers.
+
+        These are the ledgers for which the AEA requires a key pair.
+
+        :return: the list of required ledgers.
+        """
+        return self._required_ledgers or [self.DEFAULT_LEDGER]
 
     def _get_agent_act_period(self) -> float:
         """
@@ -1330,6 +1445,14 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         """
         return self._error_handler_class
 
+    def _get_error_handler_config(self,) -> Optional[Dict[str, Any]]:
+        """
+        Return the error handler config.
+
+        :return: error handler config
+        """
+        return self._error_handler_config
+
     def _get_decision_maker_handler_class(
         self,
     ) -> Optional[Type[DecisionMakerHandler]]:
@@ -1339,6 +1462,14 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :return: decision maker handler class
         """
         return self._decision_maker_handler_class
+
+    def _get_decision_maker_handler_config(self,) -> Optional[Dict[str, Any]]:
+        """
+        Return the decision maker handler config.
+
+        :return: decision maker handler config
+        """
+        return self._decision_maker_handler_config
 
     def _get_skill_exception_policy(self) -> ExceptionPolicyEnum:
         """
@@ -1366,7 +1497,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
     def _get_currency_denominations(self) -> Dict[str, str]:
         """
-        Return the mapping from ledger id to currency denom.
+        Return the mapping from ledger id to currency denominations.
 
         :return: the mapping
         """
@@ -1412,6 +1543,18 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             self._runtime_mode
             if self._runtime_mode is not None
             else self.DEFAULT_RUNTIME_MODE
+        )
+
+    def _get_task_manager_mode(self) -> str:
+        """
+        Return the askmanager mode name.
+
+        :return: the taskmanager mode name
+        """
+        return (
+            self._task_manager_mode
+            if self._task_manager_mode is not None
+            else self.DEFAULT_TASKMANAGER_MODE
         )
 
     def _get_storage_uri(self) -> Optional[str]:
@@ -1579,6 +1722,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         # set name and other configurations
         self.set_name(agent_configuration.name)
         self.set_default_ledger(agent_configuration.default_ledger)
+        self.set_required_ledgers(agent_configuration.required_ledgers)
         self.set_build_entrypoint(agent_configuration.build_entrypoint)
         self.set_currency_denominations(agent_configuration.currency_denominations)
 
@@ -1589,11 +1733,13 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         if agent_configuration.decision_maker_handler != {}:
             dotted_path = agent_configuration.decision_maker_handler["dotted_path"]
             file_path = agent_configuration.decision_maker_handler["file_path"]
-            self.set_decision_maker_handler_paths(dotted_path, file_path)
+            config = agent_configuration.decision_maker_handler["config"]
+            self.set_decision_maker_handler_details(dotted_path, file_path, config)
         if agent_configuration.error_handler != {}:
             dotted_path = agent_configuration.error_handler["dotted_path"]
             file_path = agent_configuration.error_handler["file_path"]
-            self.set_error_handler(dotted_path, file_path)
+            config = agent_configuration.error_handler["config"]
+            self.set_error_handler_details(dotted_path, file_path, config)
         if agent_configuration.skill_exception_policy is not None:
             self.set_skill_exception_policy(
                 ExceptionPolicyEnum(agent_configuration.skill_exception_policy)
@@ -1605,6 +1751,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
         self.set_loop_mode(agent_configuration.loop_mode)
         self.set_runtime_mode(agent_configuration.runtime_mode)
+        self.set_task_manager_mode(agent_configuration.task_manager_mode)
         self.set_storage_uri(agent_configuration.storage_uri)
         self.set_data_dir(agent_configuration.data_dir)
         self.set_logging_config(agent_configuration.logging_config)
@@ -1697,10 +1844,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
     @classmethod
     def from_aea_project(
-        cls,
-        aea_project_path: PathLike,
-        skip_consistency_check: bool = False,
-        create_keys: bool = True,
+        cls, aea_project_path: PathLike, skip_consistency_check: bool = False,
     ) -> "AEABuilder":
         """
         Construct the builder from an AEA project.
@@ -1714,7 +1858,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
         :param aea_project_path: path to the AEA project.
         :param skip_consistency_check: if True, the consistency check are skipped.
-        :param create_keys: if True, create keys, otherwise just verify
         :return: an AEABuilder.
         """
         aea_project_path = Path(aea_project_path)
@@ -1722,19 +1865,17 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         load_env_file(str(aea_project_path / DEFAULT_ENV_DOTFILE))
 
         # check and create missing, do not replace env variables. updates config
-        AgentConfigManager.verify_or_create_private_keys(
+        AgentConfigManager.verify_private_keys(
             aea_project_path,
             substitude_env_vars=False,
-            private_key_helper=private_key_verify_or_create,
-            create_keys=create_keys,
+            private_key_helper=private_key_verify,
         ).dump_config()
 
         # just validate
-        agent_configuration = AgentConfigManager.verify_or_create_private_keys(
+        agent_configuration = AgentConfigManager.verify_private_keys(
             aea_project_path,
             substitude_env_vars=True,
-            private_key_helper=private_key_verify_or_create,
-            create_keys=create_keys,
+            private_key_helper=private_key_verify,
         ).agent_config
 
         builder = AEABuilder(with_default_packages=False)
@@ -1849,6 +1990,22 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
                 component_path,
                 skip_consistency_check=skip_consistency_check,
             )
+
+    def _preliminary_checks_before_build(self) -> None:
+        """
+        Do consistency check on build parameters.
+
+        - Check that the specified default ledger is in the list of specified required ledgers.
+
+        :return: None
+        """
+        default_ledger = self.get_default_ledger()
+        required_ledgers = self.get_required_ledgers()
+        enforce(
+            default_ledger in required_ledgers,
+            exception_text=f"Default ledger '{default_ledger}' not declared in the list of required ledgers: {required_ledgers}.",
+            exception_class=AEAValidationError,
+        )
 
 
 def make_component_logger(

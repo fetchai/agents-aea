@@ -1,5 +1,7 @@
 FROM python:3.8-alpine
 
+USER root
+
 RUN apk add --no-cache make git bash
 
 # cryptography: https://cryptography.io/en/latest/installation/#alpine
@@ -12,14 +14,24 @@ ENV PYTHONPATH "$PYTHONPATH:/usr/lib/python3.7/site-packages"
 # golang
 RUN apk add --no-cache go
 
+# aea installation
 RUN pip install --upgrade pip
-RUN pip install --upgrade --force-reinstall aea[all]==0.11.2
+RUN pip install --upgrade --force-reinstall aea[all]==1.0.0
 
-# COPY ./packages /home/packages # enable to add packages dir
-WORKDIR home
+# directories and aea cli config
+COPY /.aea /home/.aea
+WORKDIR /home/agents
+COPY ./packages /home/agents/packages
 
-WORKDIR /home/myagent
+# aea build script
+COPY /build.sh /build.sh
+RUN ["chmod", "+x", "/build.sh"]
+RUN [ "/build.sh" ]
 
-COPY deploy-image/entrypoint.sh /entrypoint.sh
-COPY deploy-image/.aea "/root/.aea"
+# optionally, specify any ports to expose here
+# EXPOSE 9000
+
+# aea entrypoint script
+COPY /entrypoint.sh /entrypoint.sh
+RUN ["chmod", "+x", "/entrypoint.sh"]
 CMD [ "/entrypoint.sh" ]

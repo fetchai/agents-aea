@@ -23,7 +23,7 @@ RUN python3 -m pip install pymultihash ecdsa base58
 WORKDIR /acn/
 
 # get node source code
-RUN svn export https://github.com/fetchai/agents-aea/trunk/packages/fetchai/connections/p2p_libp2p/ /acn/node
+RUN svn export https://github.com/fetchai/agents-aea/trunk/packages/fetchai/connections/p2p_libp2p/libp2p_node/ /acn/node
 
 # get deployment script
 RUN svn export https://github.com/fetchai/agents-aea/trunk/scripts/acn/run_acn_node_standalone.py /acn/

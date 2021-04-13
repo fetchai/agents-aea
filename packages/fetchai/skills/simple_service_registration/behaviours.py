@@ -58,7 +58,6 @@ class ServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
-        pass
 
     def teardown(self) -> None:
         """

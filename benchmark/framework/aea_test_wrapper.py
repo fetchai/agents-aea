@@ -206,7 +206,7 @@ class AEATestWrapper:
         return self.aea.runtime.multiplexer.in_queue.empty()
 
     def __enter__(self) -> None:
-        """Contenxt manager enter."""
+        """Context manager enter."""
         self.start_loop()
 
     def __exit__(  # type: ignore # pylint: disable=useless-return

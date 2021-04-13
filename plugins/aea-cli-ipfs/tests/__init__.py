@@ -17,4 +17,4 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Tests for aea clie ipfs plugin."""
+"""Tests for aea client ipfs plugin."""

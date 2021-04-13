@@ -474,6 +474,13 @@ class Behaviour(AbstractBehaviour,  ABC)
 
 This class implements an abstract behaviour.
 
+In a subclass of Behaviour, the flag 'is_programmatically_defined'
+ can be used by the developer to signal to the framework that the class
+ is meant to be used programmatically; hence, in case the class is
+ not declared in the configuration file but it is present in a skill
+ module, the framework will just ignore this class instead of printing
+ a warning message.
+
 <a name="aea.skills.base.Behaviour.act"></a>
 #### act
 
@@ -534,6 +541,18 @@ class Handler(SkillComponent,  ABC)
 ```
 
 This class implements an abstract behaviour.
+
+In a subclass of Handler, the flag 'is_programmatically_defined'
+ can be used by the developer to signal to the framework that the component
+ is meant to be used programmatically; hence, in case the class is
+ not declared in the configuration file but it is present in a skill
+ module, the framework will just ignore this class instead of printing
+ a warning message.
+
+SUPPORTED_PROTOCOL is read by the framework when the handlers are loaded
+ to register them as 'listeners' to the protocol identified by the specified
+ public id. Whenever a message of protocol 'SUPPORTED_PROTOCOL' is sent
+ to the agent, the framework will call the 'handle' method.
 
 <a name="aea.skills.base.Handler.handle"></a>
 #### handle

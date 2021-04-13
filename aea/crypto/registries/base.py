@@ -26,12 +26,12 @@ from typing import Any, Dict, Generic, Optional, Set, Type, TypeVar, Union
 from aea.configurations.base import PublicId
 from aea.configurations.constants import DOTTED_PATH_MODULE_ELEMENT_SEPARATOR
 from aea.exceptions import AEAException
-from aea.helpers.base import RegexConstrainedString
+from aea.helpers.base import RegexConstrainedString, SIMPLE_ID_REGEX
 
 
 """A regex to match a Python identifier (i.e. a module/class name)."""
 PY_ID_REGEX = r"[^\d\W]\w*"
-ITEM_ID_REGEX = fr"([_A-Za-z][_A-Za-z0-9]*)|{PublicId.PUBLIC_ID_REGEX}"
+ITEM_ID_REGEX = fr"({SIMPLE_ID_REGEX})|{PublicId.PUBLIC_ID_REGEX}"
 ItemType = TypeVar("ItemType")
 
 
@@ -102,7 +102,7 @@ class EntryPoint(Generic[ItemType], RegexConstrainedString):
         """
         Load the item object.
 
-        :return: the cyrpto object, loaded following the spec.
+        :return: the crypto object, loaded following the spec.
         """
         mod_name, attr_name = self.import_path, self.class_name
         mod = importlib.import_module(mod_name)

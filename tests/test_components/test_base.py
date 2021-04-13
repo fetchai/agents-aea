@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains tests for aea/components/base.py"""
+import sys
 from pathlib import Path
 
 import pytest
@@ -33,7 +34,9 @@ class TestComponentProperties:
 
     def setup_class(self):
         """Setup test."""
-        self.configuration = ProtocolConfig("name", "author", "0.1.0")
+        self.configuration = ProtocolConfig(
+            "name", "author", "0.1.0", protocol_specification_id="some/author:0.1.0"
+        )
         self.configuration.build_directory = "test"
         self.component = Component(configuration=self.configuration)
         self.directory = Path()
@@ -70,7 +73,9 @@ class TestComponentProperties:
 
 def test_directory_setter():
     """Test directory."""
-    configuration = ProtocolConfig("author", "name", "0.1.0")
+    configuration = ProtocolConfig(
+        "author", "name", "0.1.0", protocol_specification_id="some/author:0.1.0"
+    )
     component = Component(configuration=configuration)
 
     with pytest.raises(ValueError):
@@ -84,5 +89,26 @@ def test_directory_setter():
 def test_load_aea_package():
     """Test aea package load."""
     config = ConnectionConfig("http_client", "fetchai", "0.5.0")
-    config.directory = Path(ROOT_DIR) / "packages"
+    config.directory = (
+        Path(ROOT_DIR) / "packages" / "fetchai" / "connections" / "http_client"
+    )
     load_aea_package(config)
+
+
+def test_load_aea_package_twice():
+    """Test aea package load twice and ensure python objects stay the same."""
+    config = ConnectionConfig("http_client", "fetchai", "0.5.0")
+    config.directory = (
+        Path(ROOT_DIR) / "packages" / "fetchai" / "connections" / "http_client"
+    )
+    sys.modules.pop("packages.fetchai.connections.http_client.connection", None)
+    load_aea_package(config)
+    assert "packages.fetchai.connections.http_client.connection" not in sys.modules
+    from packages.fetchai.connections.http_client.connection import HTTPClientConnection
+
+    assert "packages.fetchai.connections.http_client.connection" in sys.modules
+    BaseHTTPCLientConnection = HTTPClientConnection
+    load_aea_package(config)
+    from packages.fetchai.connections.http_client.connection import HTTPClientConnection
+
+    assert BaseHTTPCLientConnection is HTTPClientConnection

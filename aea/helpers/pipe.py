@@ -118,7 +118,7 @@ class PosixNamedPipeProtocol:
         Initialize a new posix named pipe.
 
         :param in_path: rendezvous point for incoming data
-        :param out_path: rendezvous point for outgoing daa
+        :param out_path: rendezvous point for outgoing data
         """
 
         self.logger = logger
@@ -236,7 +236,7 @@ class PosixNamedPipeProtocol:
         if self._fileobj is None:
             raise ValueError("Pipe not connected")  # pragma: nocover
         try:
-            # TOFIX(LR) Hack for MacOSX
+            # hack for MacOSX
             size = struct.pack("!I", 0)
             os.write(self._out, size)
 
@@ -453,7 +453,7 @@ class PosixNamedPipeChannel(IPCChannel):
         Setup communication channel and wait for other end to connect.
 
         :param timeout: timeout for connection to be established
-        :return: bool, indicating sucess
+        :return: bool, indicating success
         """
 
         if self._loop is None:

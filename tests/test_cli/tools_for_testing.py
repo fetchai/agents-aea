@@ -52,7 +52,7 @@ class AgentConfigMock:
         self.version: str = kwargs.get("version", "")
         self.protocols: List[str] = kwargs.get("protocols", [])
         self.skills: List[str] = kwargs.get("skills", [])
-        self.agent_name: str = kwargs.get("agent_name", "agent-name")
+        self.agent_name: str = kwargs.get("agent_name", "agent_name")
         self.author: str = AUTHOR
         private_key_paths = kwargs.get("private_key_paths", [])
         self.private_key_paths = Mock()
@@ -71,7 +71,6 @@ class AgentConfigMock:
         self.config: dict = {}
         self.default_ledger = DEFAULT_LEDGER
 
-    registry_path = "registry"
     name = "name"
 
 
@@ -96,7 +95,7 @@ class ContextMock:
         self.agent_loader = ConfigLoaderMock()
         self.clean_paths: List = []
         self.obj = self
-        self.registry_path = ""
+        self.registry_path = "packages"
         self.cwd = "cwd"
 
     def set_config(self, key, value):

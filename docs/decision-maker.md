@@ -53,6 +53,6 @@ You can then implement your own custom logic to process messages and interact wi
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>
-  <p>For examples how to use these concepts have a look at the `tac_` skills. These functionalities are experimental and subject to change.
+  <p>For examples how to use these concepts have a look at the <code>tac_</code> skills. These functionalities are experimental and subject to change.
 </p>
 </div>

@@ -171,14 +171,17 @@ class TaskManager(WithLogger):
         return self._nb_workers
 
     def enqueue_task(
-        self, func: Callable, args: Sequence = (), kwds: Optional[Dict[str, Any]] = None
+        self,
+        func: Callable,
+        args: Sequence = (),
+        kwargs: Optional[Dict[str, Any]] = None,
     ) -> int:
         """
         Enqueue a task with the executor.
 
         :param func: the callable instance to be enqueued
         :param args: the positional arguments to be passed to the function.
-        :param kwds: the keyword arguments to be passed to the function.
+        :param kwargs: the keyword arguments to be passed to the function.
         :return the task id to get the the result.
         :raises ValueError: if the task manager is not running.
         """
@@ -193,7 +196,7 @@ class TaskManager(WithLogger):
             task_id = self._task_enqueued_counter
             self._task_enqueued_counter += 1
             async_result = self._pool.apply_async(
-                func, args=args, kwds=kwds if kwds is not None else {}
+                func, args=args, kwds=kwargs if kwargs is not None else {}
             )
             self._results_by_task_id[task_id] = async_result
             if self._logger:  # pragma: nocover

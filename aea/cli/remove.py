@@ -62,7 +62,7 @@ from aea.helpers.io import open_file
     help="Remove obsolete dependencies not required anymore.",
 )
 @click.pass_context
-@check_aea_project
+@check_aea_project(check_aea_version=False)  # type: ignore  # pylint: disable=no-value-for-parameter
 def remove(
     click_context: click.Context, with_dependencies: bool
 ) -> None:  # pylint: disable=unused-argument
@@ -445,7 +445,7 @@ class RemoveItem:
         self.ctx.dump_agent_config()
 
     def remove_dependencies(self) -> None:
-        """Remove all the dependecies related only to the package."""
+        """Remove all the dependencies related only to the package."""
         if not self.dependencies_can_be_removed:
             return
         for dependency in self.dependencies_can_be_removed:
@@ -473,7 +473,7 @@ def remove_item(ctx: Context, item_type: str, item_id: PublicId) -> None:
     :param item_id: item public ID.
 
     :return: None
-    :raises ClickException: if some error occures.
+    :raises ClickException: if some error occurs.
     """
     with remove_unused_component_configurations(ctx):
         RemoveItem(

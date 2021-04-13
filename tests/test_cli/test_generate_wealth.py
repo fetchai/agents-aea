@@ -53,7 +53,7 @@ class GenerateWealthTestCase(TestCase):
 
 
 @mock.patch("aea.cli.utils.decorators.try_to_load_agent_config")
-@mock.patch("aea.cli.utils.package_utils.verify_or_create_private_keys_ctx")
+@mock.patch("aea.cli.utils.package_utils.verify_private_keys_ctx")
 @mock.patch("aea.cli.generate_wealth._try_generate_wealth")
 class GenerateWealthCommandTestCase(TestCase):
     """Test case for CLI generate_wealth command."""

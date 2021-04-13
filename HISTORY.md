@@ -1,5 +1,58 @@
 # Release History
 
+## 1.0.0 (2020-03-30)
+
+- Improves contributor guide
+- Enables additional pylint checks
+- Adds configuration support on exception behaviour in ledger plugins
+- Improves exception handling in `aea-ledger-cosmos` and `aea-ledger-fetchai` plugins
+- Improves quickstart guide
+- Fixes multiple flaky tests
+- Fixes various outdated metadata
+- Resolves a CVE (CVE-2021-27291) affecting development dependencies
+- Adds end-to-end support and tests for simple oracle on Ethereum and Fetch.ai ledgers
+- Multiple minor fixes
+- Multiple additional tests and test stability fixes
+
+## 1.0.0rc2 (2020-03-28)
+
+- Extends CLI command `aea fingerprint` to allow fingerprinting of agents
+- Improves `deploy-image` Docker example
+- Fixes a bug in `MultiAgentManager` which leaves it in an unclean state when project adding fails
+- Fixes dependencies of `aea-legder-fetchai`
+- Improves guide on HTTP client and server connection
+- Removes pickle library usage in the ML skills
+- Adds various consistency checks in configurations
+- Replaces usage of `pyaes` with `pycryptodome` in plugins
+- Changes generator to avoid non-idiomatic usage of type checks
+- Multiple minor fixes
+- Multiple additional tests and test stability fixes
+
+## 1.0.0rc1 (2020-03-24)
+
+- Adds CLI command `aea get-public-key`
+- Adds support for encrypting private keys at rest
+- Adds support for configuration of decision maker and error handler instances from `aea-config.yaml`
+- Adds support for explicitly marking behaviours and handlers as dynamic
+- Adds support for fetchai ledger to oracle skills and contract
+- Adds timeout support on multiplexer calls to connections
+- Fixes bug in regex constrained string for id validation
+- Adds docs section on how AEAs satisfy 12-factor methodology
+- Adds docs section on tradeoffs made in `v1`
+- Adds example for logs streaming to browser
+- Removes multiple temporary hacks for backwards compatibility
+- Adds skills tests coverage for `echo` and `http_echo` skills
+- Adds `required_ledgers` field in `aea-config.yaml`
+- Removes `registry_path` field in `aea-config.yaml`
+- Adds `message_format` field to cert requests
+- Removes requirement for exact protocol buffers compiler, prints version used in protocols
+- Adds support to configure task manager mode via `aea-config.yaml`
+- Fixed spelling across docstrings in code base
+- Multiple minor fixes
+- Multiple docs updates to fix order of CLI commands with respect to installing dependencies
+- Multiple additional tests and test stability fixes
+
+
 ## 0.11.2 (2020-03-17)
 
 - Fixes a package import issue

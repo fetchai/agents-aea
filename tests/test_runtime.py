@@ -31,7 +31,7 @@ from aea.exceptions import _StopRuntime
 from aea.runtime import AsyncRuntime, BaseRuntime, RuntimeStates, ThreadedRuntime
 
 from tests.common.utils import wait_for_condition
-from tests.conftest import CUR_PATH
+from tests.conftest import CUR_PATH, MAX_FLAKY_RERUNS
 from tests.data.dummy_skill import PUBLIC_ID as DUMMY_SKILL_PUBLIC_ID
 
 
@@ -72,6 +72,7 @@ class TestAsyncRuntime:
         self.runtime.stop()
         self.runtime.wait_completed(sync=True)
 
+    @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     @pytest.mark.asyncio
     async def test_stop_with_stopped_exception(self):
         """Test runtime stopped by stopruntime exception."""
@@ -80,15 +81,8 @@ class TestAsyncRuntime:
             behaviour, "act", side_effect=_StopRuntime(reraise=ValueError("expected"))
         ):
             self.runtime.start()
-            await asyncio.wait_for(
-                self.runtime._state.wait(RuntimeStates.running), timeout=10
-            )
-            await asyncio.wait_for(
-                self.runtime._state.wait([RuntimeStates.stopped, RuntimeStates.error]),
-                timeout=10,
-            )
-        with pytest.raises(ValueError, match="expected"):
-            self.runtime.wait_completed(timeout=20, sync=True)
+            with pytest.raises(ValueError, match="expected"):
+                self.runtime.wait_completed(timeout=20, sync=True)
 
     def test_double_start(self):
         """Test runtime double start do nothing."""

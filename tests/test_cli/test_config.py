@@ -308,6 +308,7 @@ class TestConfigSet:
             catch_exceptions=False,
         )
         assert result.exit_code == 0
+
         result = self.runner.invoke(
             cli,
             [
@@ -317,6 +318,7 @@ class TestConfigSet:
                 "agent.logging_config.disable_existing_loggers",
             ],
             standalone_mode=False,
+            catch_exceptions=False,
         )
         assert result.exit_code == 0
         assert result.output == "True\n"

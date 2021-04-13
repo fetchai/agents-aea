@@ -19,6 +19,7 @@
 
 """This module contains default's message definition."""
 
+# pylint: disable=too-many-statements,too-many-locals,no-member,too-few-public-methods,too-many-branches,not-an-iterable,unidiomatic-typecheck,unsubscriptable-object
 import logging
 from typing import Any, Dict, Set, Tuple, cast
 
@@ -37,8 +38,8 @@ DEFAULT_BODY_SIZE = 4
 class DefaultMessage(Message):
     """A protocol for exchanging any bytes message."""
 
-    protocol_id = PublicId.from_str("fetchai/default:0.13.0")
-    protocol_specification_id = PublicId.from_str("fetchai/default:0.1.0")
+    protocol_id = PublicId.from_str("fetchai/default:1.0.0")
+    protocol_specification_id = PublicId.from_str("fetchai/default:1.0.0")
 
     ErrorCode = CustomErrorCode
 
@@ -149,31 +150,31 @@ class DefaultMessage(Message):
         """Check that the message follows the default protocol."""
         try:
             enforce(
-                type(self.dialogue_reference) == tuple,
+                isinstance(self.dialogue_reference, tuple),
                 "Invalid type for 'dialogue_reference'. Expected 'tuple'. Found '{}'.".format(
                     type(self.dialogue_reference)
                 ),
             )
             enforce(
-                type(self.dialogue_reference[0]) == str,
+                isinstance(self.dialogue_reference[0], str),
                 "Invalid type for 'dialogue_reference[0]'. Expected 'str'. Found '{}'.".format(
                     type(self.dialogue_reference[0])
                 ),
             )
             enforce(
-                type(self.dialogue_reference[1]) == str,
+                isinstance(self.dialogue_reference[1], str),
                 "Invalid type for 'dialogue_reference[1]'. Expected 'str'. Found '{}'.".format(
                     type(self.dialogue_reference[1])
                 ),
             )
             enforce(
-                type(self.message_id) == int,
+                type(self.message_id) is int,
                 "Invalid type for 'message_id'. Expected 'int'. Found '{}'.".format(
                     type(self.message_id)
                 ),
             )
             enforce(
-                type(self.target) == int,
+                type(self.target) is int,
                 "Invalid type for 'target'. Expected 'int'. Found '{}'.".format(
                     type(self.target)
                 ),
@@ -182,7 +183,7 @@ class DefaultMessage(Message):
             # Light Protocol Rule 2
             # Check correct performative
             enforce(
-                type(self.performative) == DefaultMessage.Performative,
+                isinstance(self.performative, DefaultMessage.Performative),
                 "Invalid 'performative'. Expected either of '{}'. Found '{}'.".format(
                     self.valid_performatives, self.performative
                 ),
@@ -194,7 +195,7 @@ class DefaultMessage(Message):
             if self.performative == DefaultMessage.Performative.BYTES:
                 expected_nb_of_contents = 1
                 enforce(
-                    type(self.content) == bytes,
+                    isinstance(self.content, bytes),
                     "Invalid type for content 'content'. Expected 'bytes'. Found '{}'.".format(
                         type(self.content)
                     ),
@@ -202,32 +203,32 @@ class DefaultMessage(Message):
             elif self.performative == DefaultMessage.Performative.ERROR:
                 expected_nb_of_contents = 3
                 enforce(
-                    type(self.error_code) == CustomErrorCode,
+                    isinstance(self.error_code, CustomErrorCode),
                     "Invalid type for content 'error_code'. Expected 'ErrorCode'. Found '{}'.".format(
                         type(self.error_code)
                     ),
                 )
                 enforce(
-                    type(self.error_msg) == str,
+                    isinstance(self.error_msg, str),
                     "Invalid type for content 'error_msg'. Expected 'str'. Found '{}'.".format(
                         type(self.error_msg)
                     ),
                 )
                 enforce(
-                    type(self.error_data) == dict,
+                    isinstance(self.error_data, dict),
                     "Invalid type for content 'error_data'. Expected 'dict'. Found '{}'.".format(
                         type(self.error_data)
                     ),
                 )
                 for key_of_error_data, value_of_error_data in self.error_data.items():
                     enforce(
-                        type(key_of_error_data) == str,
+                        isinstance(key_of_error_data, str),
                         "Invalid type for dictionary keys in content 'error_data'. Expected 'str'. Found '{}'.".format(
                             type(key_of_error_data)
                         ),
                     )
                     enforce(
-                        type(value_of_error_data) == bytes,
+                        isinstance(value_of_error_data, bytes),
                         "Invalid type for dictionary values in content 'error_data'. Expected 'bytes'. Found '{}'.".format(
                             type(value_of_error_data)
                         ),

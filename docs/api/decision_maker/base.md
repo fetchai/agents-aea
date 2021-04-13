@@ -156,7 +156,7 @@ Compute the marginal utility.
 **Arguments**:
 
 - `ownership_state`: the ownership state against which to compute the marginal utility.
-- `kwargs`: optional keyword argyments
+- `kwargs`: optional keyword arguments
 
 **Returns**:
 
@@ -322,7 +322,7 @@ This class implements the decision maker.
 #### `__`init`__`
 
 ```python
- | __init__(identity: Identity, wallet: Wallet, **kwargs: Any) -> None
+ | __init__(identity: Identity, wallet: Wallet, config: Dict[str, Any], **kwargs: Any) -> None
 ```
 
 Initialize the decision maker handler.
@@ -331,7 +331,7 @@ Initialize the decision maker handler.
 
 - `identity`: the identity
 - `wallet`: the wallet
-- `logger`: the logger
+- `config`: the user defined configuration of the handler
 - `kwargs`: the key word arguments
 
 <a name="aea.decision_maker.base.DecisionMakerHandler.agent_name"></a>
@@ -363,6 +363,16 @@ Get identity of the agent.
 ```
 
 Get wallet of the agent.
+
+<a name="aea.decision_maker.base.DecisionMakerHandler.config"></a>
+#### config
+
+```python
+ | @property
+ | config() -> Dict[str, Any]
+```
+
+Get user defined configuration
 
 <a name="aea.decision_maker.base.DecisionMakerHandler.context"></a>
 #### context
@@ -424,6 +434,16 @@ Initialize the decision maker.
 
 - `agent_name`: the agent name
 - `decision_maker_handler`: the decision maker handler
+
+<a name="aea.decision_maker.base.DecisionMaker.agent_name"></a>
+#### agent`_`name
+
+```python
+ | @property
+ | agent_name() -> str
+```
+
+Get the agent name.
 
 <a name="aea.decision_maker.base.DecisionMaker.message_in_queue"></a>
 #### message`_`in`_`queue

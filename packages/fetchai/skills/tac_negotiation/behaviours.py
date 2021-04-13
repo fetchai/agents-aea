@@ -52,7 +52,6 @@ class GoodsRegisterAndSearchBehaviour(TickerBehaviour):
 
         :return: None
         """
-        pass
 
     def act(self) -> None:
         """
@@ -216,7 +215,6 @@ class TransactionCleanUpBehaviour(TickerBehaviour):
 
         :return: None
         """
-        pass
 
     def act(self) -> None:
         """
@@ -234,4 +232,3 @@ class TransactionCleanUpBehaviour(TickerBehaviour):
 
         :return: None
         """
-        pass

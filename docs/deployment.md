@@ -5,32 +5,17 @@ If you would like to run an AEA from a browser you can use <a href="https://cola
 
 For deployment, we recommend you use <a href="https://www.docker.com/" target="_blank">Docker</a>.
 
-## Building a Docker Image
+## Deployment using a Docker Image
 
 First, we fetch a directory containing a Dockerfile and some dependencies:
 ``` bash
 svn export https://github.com/fetchai/agents-aea/branches/main/deploy-image
 cd deploy-image
-rm -rf scripts
-svn export https://github.com/fetchai/docker-images/branches/master/scripts
-cd ..
 ```
 
-Next, we build the image:
-``` bash
-./deploy-image/scripts/docker-build-img.sh -t aea-deploy:latest --
-```
+Then follow the `README.md` contained in the folder.
 
-## Running a Docker Image
-
-Finally, we run it:
-``` bash
-docker run -it aea-deploy:latest
-```
-
-This will run the `fetchai/my_first_aea:0.23.0` demo project. You can edit `entrypoint.sh` to run whatever project you would like.
-
-## Deployment
+## Deployment using Kubernetes
 
 <div class="admonition note">
   <p class="admonition-title">Note</p>

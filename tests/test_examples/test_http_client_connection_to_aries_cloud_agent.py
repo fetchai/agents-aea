@@ -66,7 +66,7 @@ class TestAEAToACA:
         cls.aca_admin_port = 8020
 
         cls.aea_address = "some string"
-        cls.aea_identity = Identity("", address=cls.aea_address)
+        cls.aea_identity = Identity("identity", address=cls.aea_address)
 
         cls.cwd = os.getcwd()
 

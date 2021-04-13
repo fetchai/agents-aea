@@ -27,4 +27,4 @@ class AEAConfigException(AEAException):
 
 
 class InterruptInputException(Exception):
-    """An exception to mark an interuption event."""
+    """An exception to mark an interruption event."""

@@ -30,7 +30,6 @@ from typing import Tuple
 from aea.configurations.base import ProtocolSpecification
 from aea.configurations.constants import (
     DEFAULT_PROTOCOL_CONFIG_FILE,
-    LIBPROTOC_VERSION,
     PACKAGES,
     PROTOCOL_LANGUAGE_JS,
     PROTOCOL_LANGUAGE_PYTHON,
@@ -364,14 +363,14 @@ def check_prerequisites() -> None:
             "Cannot find protocol buffer compiler! To install, please follow this link: https://developers.google.com/protocol-buffers/"
         )
 
+
+def get_protoc_version() -> str:
+    """Get the protoc version used."""
     result = subprocess.run(  # nosec
         ["protoc", "--version"], stdout=subprocess.PIPE, check=True
     )
-    result_str = result.stdout.decode("utf-8")
-    if LIBPROTOC_VERSION not in result_str:
-        raise FileNotFoundError(  # pragma: nocover
-            f"Invalid version for protoc. Found: {result_str}. Required: {LIBPROTOC_VERSION}."
-        )
+    result_str = result.stdout.decode("utf-8").strip("\n").strip("\r")
+    return result_str
 
 
 def load_protocol_specification(specification_path: str) -> ProtocolSpecification:
@@ -452,7 +451,6 @@ def try_run_protoc(
     js_commonjs_import_option = (
         "import_style=commonjs,binary:" if language == PROTOCOL_LANGUAGE_JS else ""
     )
-    # js_closure_import_option = "binary:" if language == PROTOCOL_LANGUAGE_JS else ""  # noqa: E800
 
     language_part_of_the_command = f"--{language}_out={js_commonjs_import_option}{path_to_generated_protocol_package}"
 

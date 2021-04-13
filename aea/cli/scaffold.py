@@ -132,7 +132,7 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
     :param item_name: item name.
 
     :return: None
-    :raises ClickException: if some error occures.
+    :raises ClickException: if some error occurs.
     """
     validate_package_name(item_name)
     author_name = ctx.agent_config.author

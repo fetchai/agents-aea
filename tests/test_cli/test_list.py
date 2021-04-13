@@ -27,6 +27,7 @@ from pathlib import Path
 from unittest import TestCase, mock
 
 import jsonschema
+import pytest
 from jsonschema import Draft4Validator
 
 from aea.cli import cli
@@ -37,10 +38,12 @@ from tests.conftest import (
     CONFIGURATION_SCHEMA_DIR,
     CUR_PATH,
     CliRunner,
+    MAX_FLAKY_RERUNS,
 )
 from tests.test_cli.constants import FORMAT_ITEMS_SAMPLE_OUTPUT
 
 
+@pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
 class TestListProtocols:
     """Test that the command 'aea list protocols' works as expected."""
 

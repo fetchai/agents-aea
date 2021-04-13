@@ -24,7 +24,7 @@ Init profiler.
 **Arguments**:
 
 - `period`: delay between profiling output in seconds.
-- `output_function`: function to display ouput, one str argument.
+- `output_function`: function to display output, one str argument.
 
 <a name="aea.helpers.profiling.Profiling.set_counters"></a>
 #### set`_`counters

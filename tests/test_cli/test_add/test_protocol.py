@@ -279,7 +279,7 @@ class TestAddProtocolFailsWhenDifferentPublicId:
         cls.agent_name = "myagent"
         cls.cwd = os.getcwd()
         cls.t = tempfile.mkdtemp()
-        cls.protocol_id = "different_author/default:0.1.0"
+        cls.protocol_id = "different_author/default:1.0.0"
 
         # copy the 'packages' directory in the parent of the agent folder.
         shutil.copytree(Path(CUR_PATH, "..", "packages"), Path(cls.t, "packages"))

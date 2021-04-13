@@ -38,7 +38,6 @@ from aea.configurations.constants import (
     CONNECTION,
     CONTRACT,
     DEFAULT_AEA_CONFIG_FILE,
-    DEFAULT_REGISTRY_NAME,
     PROTOCOL,
     SKILL,
 )
@@ -132,11 +131,8 @@ def fetch_agent_locally(
     :param target_dir: the target directory to which the agent is fetched.
     :return: None
     """
-    packages_path = (
-        DEFAULT_REGISTRY_NAME if ctx.registry_path is None else ctx.registry_path
-    )
     source_path = try_get_item_source_path(
-        packages_path, public_id.author, AGENTS, public_id.name
+        ctx.registry_path, public_id.author, AGENTS, public_id.name
     )
     enforce(
         ctx.config.get("is_local") is True or ctx.config.get("is_mixed") is True,

@@ -1,8 +1,8 @@
-AEAs can create and update prometheus metrics for remote monitoring by sending messages to the prometheus connection `fetchai/prometheus:0.4.0`.
+AEAs can create and update prometheus metrics for remote monitoring by sending messages to the prometheus connection `fetchai/prometheus:0.7.0`.
 
 To see this working in an agent, fetch and run the `coin_price_feed` agent and check `localhost:9090/metrics` to see the latest values of the metrics `num_retrievals` and `num_requests`:
 ``` bash
-aea fetch fetchai/coin_price_feed:0.9.0
+aea fetch fetchai/coin_price_feed:0.12.0
 cd coin_price_feed
 aea install
 aea build
@@ -235,5 +235,4 @@ class PrometheusHandler(Handler):
 
         :return: None
         """
-        pass
 ```

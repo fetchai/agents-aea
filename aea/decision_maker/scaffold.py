@@ -17,7 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 
-"""This module contains a scaffold of the decision maker class and auxilliary classes."""
+"""This module contains a scaffold of the decision maker class and auxiliary classes."""
 
 from typing import Any, Dict
 
@@ -30,12 +30,15 @@ from aea.protocols.base import Message
 class DecisionMakerHandler(BaseDecisionMakerHandler):
     """This class implements the decision maker."""
 
-    def __init__(self, identity: Identity, wallet: Wallet) -> None:
+    def __init__(
+        self, identity: Identity, wallet: Wallet, config: Dict[str, Any]
+    ) -> None:
         """
         Initialize the decision maker.
 
         :param identity: the identity
         :param wallet: the wallet
+        :param config: the user defined configuration of the handler
         """
         kwargs = {
             # Add your objects here, they will be accessible in the `handle` method via `self.context`.
@@ -43,7 +46,7 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         }  # type: Dict[str, Any]
         # You MUST NOT modify the constructor below:
         super().__init__(
-            identity=identity, wallet=wallet, **kwargs,
+            identity=identity, wallet=wallet, config=config, **kwargs,
         )
 
     def handle(self, message: Message) -> None:

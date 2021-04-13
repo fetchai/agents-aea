@@ -38,7 +38,6 @@ class TacSearchBehaviour(TickerBehaviour):
 
         :return: None
         """
-        pass
 
     def act(self) -> None:
         """
@@ -56,7 +55,6 @@ class TacSearchBehaviour(TickerBehaviour):
 
         :return: None
         """
-        pass
 
     def _search_for_tac(self) -> None:
         """
@@ -92,7 +90,6 @@ class TransactionProcessBehaviour(TickerBehaviour):
 
         :return: None
         """
-        pass
 
     def act(self) -> None:
         """
@@ -110,7 +107,6 @@ class TransactionProcessBehaviour(TickerBehaviour):
 
         :return: None
         """
-        pass
 
     def _process_transactions(self) -> None:
         """

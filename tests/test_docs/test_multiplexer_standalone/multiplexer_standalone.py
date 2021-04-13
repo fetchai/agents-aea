@@ -66,17 +66,27 @@ def run():
         t.start()
 
         # Wait for everything to start up
-        time.sleep(3)
+        for _ in range(20):
+            if multiplexer.is_connected:
+                break
+            time.sleep(1)
+        else:
+            raise Exception("Not connected")
 
         # Create a message inside an envelope and get the stub connection to pass it into the multiplexer
         message_text = (
-            "multiplexer,some_agent,fetchai/default:0.1.0,\x08\x01*\x07\n\x05hello,"
+            "multiplexer,some_agent,fetchai/default:1.0.0,\x08\x01*\x07\n\x05hello,"
         )
         with open(INPUT_FILE, "w") as f:
             write_with_lock(f, message_text)
 
         # Wait for the envelope to get processed
-        time.sleep(2)
+        for _ in range(20):
+            if not multiplexer.in_queue.empty():
+                break
+            time.sleep(1)
+        else:
+            raise Exception("No message!")
 
         # get the envelope
         envelope = multiplexer.get()  # type: Optional[Envelope]

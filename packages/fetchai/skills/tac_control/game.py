@@ -193,7 +193,7 @@ class Initialization:
 
         :param agent_addr_to_currency_endowments: the currency endowments of the agents. A nested dict where the outer key is the agent id
                             and the inner key is the currency id.
-        :param agent_addr_to_exchange_params: the exchange params representing the exchange rate the agetns use between currencies.
+        :param agent_addr_to_exchange_params: the exchange params representing the exchange rate the agents use between currencies.
         :param agent_addr_to_good_endowments: the good endowments of the agents. A nested dict where the outer key is the agent id
                             and the inner key is the good id.
         :param agent_addr_to_utility_params: the utility params representing the preferences of the agents.

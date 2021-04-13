@@ -150,7 +150,7 @@ def _eject_item(
     :param quiet: if false, the function will ask the user in case of recursive eject.
 
     :return: None
-    :raises: ClickException if item is absent at source path or present at destenation path.
+    :raises: ClickException if item is absent at source path or present at destination path.
     """
     # we know cli_author is set because of the above checks.
     cli_author: str = cast(str, ctx.config.get("cli_author"))

@@ -66,7 +66,7 @@ from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.soef")
 
-PUBLIC_ID = PublicId.from_str("fetchai/soef:0.19.0")
+PUBLIC_ID = PublicId.from_str("fetchai/soef:0.22.0")
 
 NOT_SPECIFIED = object()
 
@@ -144,11 +144,11 @@ class BaseHandledException(Exception):
         self.exc = exc
 
     def __repr__(self) -> str:
-        """Get exception repr."""
+        """Get exception representation."""
         return self.MSG.format(str(self.exc))
 
     def __str__(self) -> str:
-        """Get exception str repr."""
+        """Get exception str representation."""
         return self.__repr__()
 
 
@@ -309,6 +309,19 @@ class SOEFChannel:
             try:
                 task = await self._find_around_me_queue.get()
                 oef_message, oef_search_dialogue, radius, params = task
+            except (
+                asyncio.CancelledError,
+                CancelledError,
+                GeneratorExit,
+            ):  # pylint: disable=try-except-raise  # pragma: nocover
+                return
+            except Exception:  # pragma: nocover
+                self.logger.exception(
+                    "Error on reading messages queue for find around me!"
+                )
+                raise
+
+            try:
                 await self._find_around_me_handle_request(
                     oef_message, oef_search_dialogue, radius, params
                 )
@@ -599,7 +612,7 @@ class SOEFChannel:
         """
         Send ping command every `period`.
 
-        :param period: period of ping in secinds
+        :param period: period of ping in seconds
 
         :return: None
         """
@@ -972,7 +985,7 @@ class SOEFChannel:
 
     async def _unregister_agent(self) -> None:  # pylint: disable=unused-argument
         """
-        Unnregister a service_name from the SOEF.
+        Unregister a service_name from the SOEF.
 
         :return: None
         """
@@ -1111,7 +1124,7 @@ class SOEFChannel:
         params: Dict[str, List[str]],
     ) -> None:
         """
-        Add find agent task to queue to process in dedictated loop respectful to timeouts.
+        Add find agent task to queue to process in dedicated loop respectful to timeouts.
 
         :param oef_message: OefSearchMessage
         :param oef_search_dialogue: OefSearchDialogue

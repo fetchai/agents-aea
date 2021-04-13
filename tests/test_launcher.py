@@ -17,9 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """This module contains tests for aea launcher."""
-import os
 import shutil
-import tempfile
 import time
 from multiprocessing import Event
 from pathlib import Path
@@ -29,21 +27,18 @@ from unittest.mock import patch
 import pytest
 import yaml
 
-from aea.cli.core import cli
 from aea.configurations.base import DEFAULT_AEA_CONFIG_FILE
-from aea.helpers.base import cd
 from aea.launcher import AEADirMultiprocessTask, AEALauncher, _run_agent
-from aea.test_tools.test_cases import CLI_LOG_OPTION
+from aea.test_tools.test_cases import AEATestCaseMany
 
 from tests.common.utils import wait_for_condition
-from tests.conftest import AUTHOR, CUR_PATH, CliRunner, ROOT_DIR
+from tests.conftest import CUR_PATH
 
 
-class TestThreadLauncherMode:
+class TestThreadLauncherMode(AEATestCaseMany):
     """Test launcher in threaded mode."""
 
     RUNNER_MODE = "threaded"
-    t: str = ""
     agent_name_1 = "myagent_1"
     agent_name_2 = "myagent_2"
     failing_agent = "failing_agent"
@@ -51,36 +46,9 @@ class TestThreadLauncherMode:
     @classmethod
     def setup_class(cls):
         """Set the test up."""
-        cls.runner = CliRunner()
-        cls.cwd = os.getcwd()
-        cls.t = tempfile.mkdtemp()
-        dir_path = Path("packages")
-        tmp_dir = cls.t / dir_path
-        src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
-        shutil.copytree(str(src_dir), str(tmp_dir))
-        os.chdir(cls.t)
-
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
-        )
-        assert result.exit_code == 0
-
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name_1]
-        )
-        assert result.exit_code == 0
-
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", "--local", cls.agent_name_2]
-        )
-        assert result.exit_code == 0
-
-        result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "create", "--local", cls.failing_agent]
-        )
-        assert result.exit_code == 0
-
-        os.chdir(cls.failing_agent)
+        super(AEATestCaseMany, cls).setup_class()
+        cls.create_agents(cls.agent_name_1, cls.agent_name_2, cls.failing_agent)
+        cls.set_agent_context(cls.failing_agent)
         shutil.copytree(
             Path(CUR_PATH, "data", "exception_skill"),
             Path(cls.t, cls.failing_agent, "skills", "exception"),
@@ -90,39 +58,50 @@ class TestThreadLauncherMode:
             config = yaml.safe_load(fp)
         config.setdefault("skills", []).append("fetchai/exception:0.1.0")
         yaml.safe_dump(config, open(config_path, "w"))
-        os.chdir(cls.t)
+        cls.unset_agent_context()
 
         for agent_name in (cls.agent_name_1, cls.agent_name_2, cls.failing_agent):
+            cls.set_agent_context(agent_name)
+            cls.generate_private_key()
+            cls.add_private_key()
             cls.set_runtime_mode_to_async(agent_name)
+            cls.unset_agent_context()
 
     @classmethod
     def set_runtime_mode_to_async(cls, agent_name: str) -> None:
         """Set runtime mode of the agent to async."""
-        with cd(agent_name):
-            config_path = Path(cls.t, agent_name, DEFAULT_AEA_CONFIG_FILE)
-            with open(config_path) as fp:
-                config = yaml.safe_load(fp)
-            config.setdefault("runtime_mode", "async")
-            with open(config_path, "w") as fp:
-                yaml.safe_dump(config, fp)
+        config_path = Path(cls.t, agent_name, DEFAULT_AEA_CONFIG_FILE)
+        with open(config_path) as fp:
+            config = yaml.safe_load(fp)
+        config.setdefault("runtime_mode", "async")
+        with open(config_path, "w") as fp:
+            yaml.safe_dump(config, fp)
 
-    @classmethod
-    def teardown_class(cls):
-        """Tear the test down."""
-        os.chdir(cls.cwd)
-        try:
-            shutil.rmtree(cls.t)
-        except (OSError, IOError):
-            pass
-
-    def test_start_stop(self) -> None:
+    def test_start_stop(self, capfd, caplog) -> None:
         """Test agents started stopped."""
         try:
             runner = AEALauncher(
-                [self.agent_name_1, self.agent_name_2], self.RUNNER_MODE
+                [self.agent_name_1, self.agent_name_2],
+                self.RUNNER_MODE,
+                log_level="DEBUG",
             )
             runner.start(True)
             wait_for_condition(lambda: runner.is_running, timeout=10)
+
+            capfd_out = ""
+
+            def _check():
+                nonlocal capfd_out  # to accumulate logs from capfd to chgck all the logs captured.
+                capfd_out += capfd.readouterr().out
+                log_text = capfd_out + "\n".join(caplog.messages)
+                return (
+                    f"[{self.agent_name_1}]: Runtime state changed to RuntimeStates.running."
+                    in log_text
+                    and f"[{self.agent_name_2}]: Runtime state changed to RuntimeStates.running."
+                    in log_text
+                )
+
+            wait_for_condition(_check, timeout=10, period=0.1)
             assert runner.num_failed == 0
         finally:
             runner.stop()

@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 """This module contains the handler for the 'ml_train' skill."""
-import pickle  # nosec
+
 from typing import Optional, cast
 
 from aea.configurations.base import PublicId
@@ -64,7 +64,6 @@ class MlTradeHandler(Handler):
 
         :return: None
         """
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -98,7 +97,6 @@ class MlTradeHandler(Handler):
 
         :return: None
         """
-        pass
 
     def _handle_unidentified_dialogue(self, ml_trade_msg: MlTradeMessage) -> None:
         """
@@ -186,7 +184,7 @@ class MlTradeHandler(Handler):
         strategy = cast(Strategy, self.context.strategy)
         terms = ml_trade_msg.terms
         payload = ml_trade_msg.payload
-        data = pickle.loads(payload)  # nosec
+        data = strategy.decode_sample_data(payload)
         if data is None:
             self.context.logger.info(
                 "received data message with no data from {}".format(
@@ -226,7 +224,6 @@ class OEFSearchHandler(Handler):
 
     def setup(self) -> None:
         """Call to setup the handler."""
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -262,7 +259,6 @@ class OEFSearchHandler(Handler):
 
         :return: None
         """
-        pass
 
     def _handle_unidentified_dialogue(self, oef_search_msg: OefSearchMessage) -> None:
         """
@@ -355,7 +351,6 @@ class LedgerApiHandler(Handler):
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -405,7 +400,6 @@ class LedgerApiHandler(Handler):
 
         :return: None
         """
-        pass
 
     def _handle_unidentified_dialogue(self, ledger_api_msg: LedgerApiMessage) -> None:
         """
@@ -591,7 +585,6 @@ class SigningHandler(Handler):
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -625,7 +618,6 @@ class SigningHandler(Handler):
 
         :return: None
         """
-        pass
 
     def _handle_unidentified_dialogue(self, signing_msg: SigningMessage) -> None:
         """

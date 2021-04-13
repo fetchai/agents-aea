@@ -106,8 +106,9 @@ class BaseTestDecisionMaker:
             addresses=cls.wallet.addresses,
             default_address_key=FetchAICrypto.identifier,
         )
+        cls.config = {}
         cls.decision_maker_handler = decision_maker_handler_cls(
-            identity=cls.identity, wallet=cls.wallet
+            identity=cls.identity, wallet=cls.wallet, config=cls.config
         )
         cls.decision_maker = decision_maker_cls(cls.decision_maker_handler)
 
@@ -117,6 +118,10 @@ class BaseTestDecisionMaker:
         cls.ledger_id = FetchAICrypto.identifier
 
         cls.decision_maker.start()
+
+    def test_decision_maker_config(self):
+        """Test config property."""
+        assert self.decision_maker_handler.config == self.config
 
     def test_decision_maker_execute_w_wrong_input(self):
         """Test the execute method with wrong input."""

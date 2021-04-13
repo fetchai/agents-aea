@@ -85,6 +85,7 @@ class TestIssueCertificatesPositive(BaseTestIssueCertificates):
             not_after="2020-01-02",
             not_before="2020-01-01",
             public_key=FetchAICrypto.identifier,
+            message_format="{public_key}",
             save_path=cls.expected_path_1,
         )
         cls.cert_request_2 = CertRequest(
@@ -93,6 +94,7 @@ class TestIssueCertificatesPositive(BaseTestIssueCertificates):
             not_after="2020-01-02",
             not_before="2020-01-01",
             public_key="0xABCDEF123456",
+            message_format="{public_key}",
             save_path=cls.expected_path_2,
         )
         cls.add_cert_requests(
@@ -154,6 +156,7 @@ class TestIssueCertificatesWithOverride(TestIssueCertificatesPositive):
             not_after="2020-01-02",
             not_before="2020-01-01",
             public_key=EthereumCrypto.identifier,
+            message_format="{public_key}",
             save_path=cls.expected_path_3,
         )
         cls.cert_request_4 = CertRequest(
@@ -162,6 +165,7 @@ class TestIssueCertificatesWithOverride(TestIssueCertificatesPositive):
             not_after="2020-01-02",
             not_before="2020-01-01",
             public_key="0xABCDEF123456",
+            message_format="{public_key}",
             save_path=cls.expected_path_4,
         )
 
@@ -208,6 +212,7 @@ class TestIssueCertificatesWrongConnectionKey(BaseTestIssueCertificates):
             not_after="2020-01-02",
             not_before="2020-01-01",
             public_key="bad_ledger_id",
+            message_format="{public_key}",
             save_path="path",
         )
         cls.add_cert_requests([cls.cert_request_1], DummyConnection.connection_id.name)
@@ -235,6 +240,7 @@ class TestIssueCertificatesWrongCryptoKey(BaseTestIssueCertificates):
             not_after="2020-01-02",
             not_before="2020-01-01",
             public_key=FetchAICrypto.identifier,
+            message_format="{public_key}",
             save_path="path",
         )
         cls.add_cert_requests([cls.cert_request_1], DummyConnection.connection_id.name)

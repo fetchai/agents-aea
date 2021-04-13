@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """A module with context tools of the aea cli."""
 import os
 from pathlib import Path
@@ -34,6 +33,7 @@ from aea.configurations.constants import (
     CONNECTION,
     CONTRACT,
     DEFAULT_AEA_CONFIG_FILE,
+    DEFAULT_REGISTRY_NAME,
     PROTOCOL,
     SKILL,
     VENDOR,
@@ -47,18 +47,35 @@ class Context:
 
     agent_config: AgentConfig
 
-    def __init__(
-        self,
-        cwd: str = ".",
-        verbosity: str = "INFO",
-        registry_path: Optional[str] = None,
-    ) -> None:
+    def __init__(self, cwd: str, verbosity: str, registry_path: Optional[str]) -> None:
         """Init the context."""
         self.config = dict()  # type: Dict
         self.cwd = cwd
         self.verbosity = verbosity
         self.clean_paths: List = []
-        self.registry_path = registry_path
+        self._registry_path = registry_path
+
+    @property
+    def registry_path(self) -> str:
+        """Get registry path specified or from config or default one with check is it present."""
+        # registry path is provided or in config or default
+        if self._registry_path:
+            registry_path = Path(self._registry_path)
+            if not (registry_path.exists() and registry_path.is_dir()):
+                raise ValueError(
+                    f"Registry path directory provided ({self._registry_path}) can not be found. Current work dir is {self.cwd}"
+                )
+            return str(registry_path)
+
+        registry_path = (Path(self.cwd) / DEFAULT_REGISTRY_NAME).absolute()
+        if registry_path.is_dir():
+            return str(registry_path)
+        registry_path = (Path(self.cwd) / ".." / DEFAULT_REGISTRY_NAME).absolute()
+        if registry_path.is_dir():
+            return str(registry_path)
+        raise ValueError(
+            f"Registry path not provided and `{DEFAULT_REGISTRY_NAME}` not found in current ({self.cwd}) and parent directory."
+        )
 
     @property
     def agent_loader(self) -> ConfigLoader:

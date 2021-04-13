@@ -89,7 +89,7 @@ class Profiling(Runnable):
         Init profiler.
 
         :param period: delay between profiling output in seconds.
-        :param output_function: function to display ouput, one str argument.
+        :param output_function: function to display output, one str argument.
         """
         if period < 1:  # pragma: nocover
             raise ValueError("Period should be at least 1 second!")

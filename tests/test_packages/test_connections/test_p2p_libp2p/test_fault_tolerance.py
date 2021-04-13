@@ -111,9 +111,9 @@ class TestLibp2pConnectionRelayNodeRestartIncomingEnvelopes(BaseTestLibp2pRelay)
 
         genesis_peer = self.genesis.node.multiaddrs[0]
 
-        with open("node_key", "wb") as f:
-            make_crypto(DEFAULT_LEDGER).dump(f)
-            self.relay_key_path = "node_key"
+        file = "node_key"
+        make_crypto(DEFAULT_LEDGER).dump(file)
+        self.relay_key_path = file
 
         temp_dir_rel = os.path.join(self.t, "temp_dir_rel")
         os.mkdir(temp_dir_rel)
@@ -324,9 +324,9 @@ class TestLibp2pConnectionRelayNodeRestartOutgoingEnvelopes(BaseTestLibp2pRelay)
 
         genesis_peer = self.genesis.node.multiaddrs[0]
 
-        with open("node_key", "wb") as f:
-            make_crypto(DEFAULT_LEDGER).dump(f)
-            self.relay_key_path = "node_key"
+        file = "node_key"
+        make_crypto(DEFAULT_LEDGER).dump(file)
+        self.relay_key_path = file
 
         temp_dir_rel = os.path.join(self.t, "temp_dir_rel")
         os.mkdir(temp_dir_rel)

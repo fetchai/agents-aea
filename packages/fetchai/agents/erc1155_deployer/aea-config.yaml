@@ -1,53 +1,55 @@
 agent_name: erc1155_deployer
 author: fetchai
-version: 0.26.0
+version: 0.29.0
 description: An AEA to deploy and interact with an ERC1155
 license: Apache-2.0
-aea_version: '>=0.11.0, <0.12.0'
+aea_version: '>=1.0.0, <2.0.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/ledger:0.15.0
-- fetchai/p2p_libp2p:0.18.0
-- fetchai/soef:0.19.0
+- fetchai/ledger:0.18.0
+- fetchai/p2p_libp2p:0.21.0
+- fetchai/soef:0.22.0
 contracts:
-- fetchai/erc1155:0.18.0
+- fetchai/erc1155:0.21.0
 protocols:
-- fetchai/contract_api:0.12.0
-- fetchai/default:0.13.0
-- fetchai/fipa:0.14.0
-- fetchai/ledger_api:0.11.0
-- fetchai/oef_search:0.14.0
-- fetchai/signing:0.11.0
-- fetchai/state_update:0.11.0
+- fetchai/contract_api:1.0.0
+- fetchai/default:1.0.0
+- fetchai/fipa:1.0.0
+- fetchai/ledger_api:1.0.0
+- fetchai/oef_search:1.0.0
+- fetchai/signing:1.0.0
+- fetchai/state_update:1.0.0
 skills:
-- fetchai/erc1155_deploy:0.24.0
-default_connection: fetchai/p2p_libp2p:0.18.0
+- fetchai/erc1155_deploy:0.27.0
+default_connection: fetchai/p2p_libp2p:0.21.0
 default_ledger: ethereum
+required_ledgers:
+- fetchai
+- ethereum
 logging_config:
   disable_existing_loggers: false
   version: 1
 private_key_paths: {}
-registry_path: ../packages
 default_routing:
-  fetchai/contract_api:0.12.0: fetchai/ledger:0.15.0
-  fetchai/ledger_api:0.11.0: fetchai/ledger:0.15.0
-  fetchai/oef_search:0.14.0: fetchai/soef:0.19.0
+  fetchai/contract_api:1.0.0: fetchai/ledger:0.18.0
+  fetchai/ledger_api:1.0.0: fetchai/ledger:0.18.0
+  fetchai/oef_search:1.0.0: fetchai/soef:0.22.0
 connection_private_key_paths: {}
 dependencies:
   aea-ledger-cosmos:
-    version: <0.3.0,>=0.2.0
+    version: <2.0.0,>=1.0.0
   aea-ledger-ethereum:
-    version: <0.3.0,>=0.2.0
+    version: <2.0.0,>=1.0.0
   aea-ledger-fetchai:
-    version: <0.3.0,>=0.2.0
+    version: <2.0.0,>=1.0.0
 ---
-public_id: fetchai/soef:0.19.0
+public_id: fetchai/soef:0.22.0
 type: connection
 config:
   chain_identifier: ethereum
 ---
-public_id: fetchai/p2p_libp2p:0.18.0
+public_id: fetchai/p2p_libp2p:0.21.0
 type: connection
 cert_requests:
 - identifier: acn
@@ -55,4 +57,5 @@ cert_requests:
   not_after: '2022-01-01'
   not_before: '2021-01-01'
   public_key: fetchai
+  message_format: '{public_key}'
   save_path: .certs/conn_cert.txt

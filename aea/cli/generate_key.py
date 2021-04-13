@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Implementation of the 'aea generate_key' subcommand."""
 
 from pathlib import Path
@@ -24,6 +23,7 @@ from typing import Optional
 
 import click
 
+from aea.cli.utils.click_utils import password_option
 from aea.configurations.constants import PRIVATE_KEY_PATH_SCHEMA
 from aea.crypto.helpers import create_private_key
 from aea.crypto.registries import crypto_registry
@@ -42,17 +42,21 @@ from aea.crypto.registries import crypto_registry
     type=click.Path(exists=False, file_okay=True, dir_okay=False, readable=True),
     required=False,
 )
-def generate_key(type_: str, file: str) -> None:
+@password_option(confirmation_prompt=True)
+def generate_key(type_: str, file: str, password: Optional[str]) -> None:
     """Generate a private key and place it in a file."""
-    _generate_private_key(type_, file)
+    _generate_private_key(type_, file, password)
 
 
-def _generate_private_key(type_: str, file: Optional[str] = None) -> None:
+def _generate_private_key(
+    type_: str, file: Optional[str] = None, password: Optional[str] = None
+) -> None:
     """
     Generate private key.
 
     :param type_: type.
     :param file: path to file.
+    :param password: the password to encrypt/decrypt the private key.
 
     :return: None
     """
@@ -64,7 +68,7 @@ def _generate_private_key(type_: str, file: Optional[str] = None) -> None:
             PRIVATE_KEY_PATH_SCHEMA.format(type__) if file is None else file
         )
         if _can_write(private_key_file):
-            create_private_key(type__, private_key_file)
+            create_private_key(type__, private_key_file, password)
 
 
 def _can_write(path: str) -> bool:

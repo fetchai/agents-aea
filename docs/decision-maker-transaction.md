@@ -198,7 +198,6 @@ class SigningHandler(Handler):
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -232,7 +231,6 @@ class SigningHandler(Handler):
 
         :return: None
         """
-        pass
 
     def _handle_unidentified_dialogue(self, signing_msg: SigningMessage) -> None:
         """
@@ -464,7 +462,6 @@ class SigningHandler(Handler):
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -498,7 +495,6 @@ class SigningHandler(Handler):
 
         :return: None
         """
-        pass
 
     def _handle_unidentified_dialogue(self, signing_msg: SigningMessage) -> None:
         """

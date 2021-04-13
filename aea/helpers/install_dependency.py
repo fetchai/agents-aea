@@ -16,7 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-"""Helper to install python dependecies."""
+"""Helper to install python dependencies."""
 import subprocess  # nosec
 import sys
 from logging import Logger

@@ -19,7 +19,6 @@
 
 """This module contains the handler for the 'ml_data_provider' skill."""
 
-import pickle  # nosec
 from typing import Optional, cast
 
 from aea.configurations.base import PublicId
@@ -49,7 +48,6 @@ class MlTradeHandler(Handler):
 
     def setup(self) -> None:
         """Set up the handler."""
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -83,7 +81,6 @@ class MlTradeHandler(Handler):
 
         :return: None
         """
-        pass
 
     def _handle_unidentified_dialogue(self, ml_trade_msg: MlTradeMessage) -> None:
         """
@@ -161,7 +158,7 @@ class MlTradeHandler(Handler):
                 ml_trade_msg.sender[-5:], data[0].shape
             )
         )
-        payload = pickle.dumps(data)  # nosec
+        payload = strategy.encode_sample_data(data)
         data_msg = ml_trade_dialogue.reply(
             performative=MlTradeMessage.Performative.DATA,
             target_message=ml_trade_msg,
@@ -194,7 +191,6 @@ class LedgerApiHandler(Handler):
 
     def setup(self) -> None:
         """Implement the setup for the handler."""
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -230,7 +226,6 @@ class LedgerApiHandler(Handler):
 
         :return: None
         """
-        pass
 
     def _handle_unidentified_dialogue(self, ledger_api_msg: LedgerApiMessage) -> None:
         """
@@ -294,7 +289,6 @@ class OefSearchHandler(Handler):
 
     def setup(self) -> None:
         """Call to setup the handler."""
-        pass
 
     def handle(self, message: Message) -> None:
         """
@@ -328,7 +322,6 @@ class OefSearchHandler(Handler):
 
         :return: None
         """
-        pass
 
     def _handle_unidentified_dialogue(self, oef_search_msg: OefSearchMessage) -> None:
         """

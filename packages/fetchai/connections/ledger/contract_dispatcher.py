@@ -89,7 +89,7 @@ class ContractApiRequestDispatcher(RequestDispatcher):
 
     @property
     def dialogues(self) -> BaseDialogues:
-        """Get the dialouges."""
+        """Get the dialogues."""
         return self._contract_api_dialogues
 
     @property

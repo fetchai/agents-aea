@@ -22,4 +22,4 @@
 from aea.configurations.base import PublicId
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/tac_control_contract:0.20.0")
+PUBLIC_ID = PublicId.from_str("fetchai/tac_control_contract:0.23.0")

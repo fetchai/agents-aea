@@ -27,16 +27,16 @@ from aea.error_handler.scaffold import ErrorHandler
 def test_scaffold_send_unsupported_protocol_raises_not_implemented_error():
     """Test 'send_unsupported_protocol' raises not implemented error."""
     with pytest.raises(NotImplementedError):
-        ErrorHandler.send_unsupported_protocol(None, None)
+        ErrorHandler().send_unsupported_protocol(None, None)
 
 
 def test_scaffold_send_decoding_error_raises_not_implemented_error():
     """Test 'send_decoding_error' raises not implemented error."""
     with pytest.raises(NotImplementedError):
-        ErrorHandler.send_decoding_error(None, None, None)
+        ErrorHandler().send_decoding_error(None, None, None)
 
 
 def test_scaffold_send_no_active_handler_raises_not_implemented_error():
     """Test 'send_no_active_handler' raises not implemented error."""
     with pytest.raises(NotImplementedError):
-        ErrorHandler.send_no_active_handler(None, None, None)
+        ErrorHandler().send_no_active_handler(None, None, None)

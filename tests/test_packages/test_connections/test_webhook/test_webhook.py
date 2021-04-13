@@ -85,7 +85,7 @@ class TestWebhookConnection:
         self.host = get_host()
         self.port = get_unused_tcp_port()
         self.target_skill_id = "some_author/some_skill:0.1.0"
-        self.identity = Identity("", address="some string")
+        self.identity = Identity("identity", address="some string")
         self.path = "/webhooks/topic/{topic}/"
         self.loop = asyncio.get_event_loop()
 

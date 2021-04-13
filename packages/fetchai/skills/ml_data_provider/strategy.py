@@ -19,6 +19,7 @@
 
 """This module contains the strategy class."""
 
+import json
 import uuid
 from typing import Any, Tuple
 
@@ -46,6 +47,16 @@ DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
 DEFAULT_PERSONALITY_DATA = {"piece": "genus", "value": "data"}
 DEFAULT_SERVICE_DATA = {"key": "dataset_id", "value": "fmnist"}
 DEFAULT_CLASSIFICATION = {"piece": "classification", "value": "seller"}
+
+
+class NumpyArrayEncoder(json.JSONEncoder):
+    """This class defines a custom JSON encoder for numpy ndarray objects."""
+
+    def default(self, obj: Any) -> Any:  # pylint: disable=arguments-differ
+        """Encode an object (including a numpy ndarray) into its JSON representation."""
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return json.JSONEncoder.default(self, obj)  # pragma: nocover
 
 
 class Strategy(Model):
@@ -206,12 +217,21 @@ class Strategy(Model):
         y_sample = self.train_y[mask]
         return x_sample, y_sample
 
+    @staticmethod
+    def encode_sample_data(data: Tuple) -> bytes:
+        """Serialize data (a tuple of two numpy ndarrays) into bytes."""
+        data_dict = {
+            "data_0": data[0],
+            "data_1": data[1],
+        }
+        return json.dumps(data_dict, cls=NumpyArrayEncoder).encode("utf-8")
+
     def is_matching_supply(self, query: Query) -> bool:
         """
         Check if the query matches the supply.
 
         :param query: the query
-        :return: bool indiciating whether matches or not
+        :return: bool indicating whether matches or not
         """
         service_desc = self.get_service_description()
         return query.check(service_desc)

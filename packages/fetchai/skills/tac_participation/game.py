@@ -268,7 +268,7 @@ class Game(Model):
 
     @property
     def expected_controller_addr(self) -> Address:
-        """Get the expected controller pbk."""
+        """Get the expected controller address."""
         if self._expected_controller_addr is None:
             raise AEAEnforceError("Expected controller address not assigned!")
         return self._expected_controller_addr
@@ -311,7 +311,7 @@ class Game(Model):
 
     def update_expected_controller_addr(self, controller_addr: Address) -> None:
         """
-        Overwrite the expected controller pbk.
+        Overwrite the expected controller address.
 
         :param controller_addr: the address of the controller
 

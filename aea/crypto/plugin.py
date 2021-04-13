@@ -22,7 +22,7 @@ import itertools
 import pprint
 from typing import Iterator, List, Set
 
-from pkg_resources import EntryPoint, iter_entry_points
+from pkg_resources import EntryPoint, WorkingSet
 
 from aea.configurations.constants import (
     ALLOWED_GROUPS,
@@ -129,7 +129,8 @@ def _get_plugins(group: str) -> List[Plugin]:
     :param group: the plugin group.
     :return: a mapping from plugin name to Plugin objects.
     """
-    entry_points: List[EntryPoint] = list(iter_entry_points(group=group))
+
+    entry_points: List[EntryPoint] = list(WorkingSet().iter_entry_points(group=group))
     _check_no_duplicates(entry_points)
     return [Plugin(group, entry_point) for entry_point in entry_points]
 

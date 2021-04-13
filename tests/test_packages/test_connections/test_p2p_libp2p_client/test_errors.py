@@ -72,12 +72,10 @@ class TestLibp2pClientConnectionFailureConnectionSetup:
         crypto = make_crypto(DEFAULT_LEDGER)
         cls.node_host = "localhost"
         cls.node_port = "11234"
-        cls.identity = Identity("", address=crypto.address)
+        cls.identity = Identity("identity", address=crypto.address)
 
         cls.key_file = os.path.join(cls.t, "keyfile")
-        key_file_desc = open(cls.key_file, "ab")
-        crypto.dump(key_file_desc)
-        key_file_desc.close()
+        crypto.dump(cls.key_file)
 
         cls.peer_crypto = make_crypto(DEFAULT_LEDGER)
         cls.cert_request = CertRequest(
@@ -86,6 +84,7 @@ class TestLibp2pClientConnectionFailureConnectionSetup:
             DEFAULT_LEDGER,
             "2021-01-01",
             "2021-01-02",
+            "{public_key}",
             f"./{crypto.address}_cert.txt",
         )
         _process_cert(crypto, cls.cert_request, cls.t)
@@ -93,7 +92,7 @@ class TestLibp2pClientConnectionFailureConnectionSetup:
     def test_empty_nodes(self):
         """Test empty nodes."""
         configuration = ConnectionConfig(
-            client_key_file=self.key_file,
+            tcp_key_file=self.key_file,
             nodes=[
                 {
                     "uri": "{}:{}".format(self.node_host, self.node_port),
@@ -108,7 +107,7 @@ class TestLibp2pClientConnectionFailureConnectionSetup:
         )
 
         configuration = ConnectionConfig(
-            client_key_file=self.key_file,
+            tcp_key_file=self.key_file,
             nodes=None,
             connection_id=P2PLibp2pClientConnection.connection_id,
         )

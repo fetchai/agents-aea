@@ -113,4 +113,3 @@ class FaberBehaviour(TickerBehaviour):
 
         :return: None
         """
-        pass

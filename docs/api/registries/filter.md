@@ -106,5 +106,5 @@ Get a message from decision_maker_out_queue.
  | handle_internal_message(internal_message: Optional[Message]) -> None
 ```
 
-Handlle internal message.
+Handle internal message.
 
