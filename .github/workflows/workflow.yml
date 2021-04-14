@@ -482,7 +482,7 @@ jobs:
     - if: matrix.python-version == '3.6'
       name: Golang unit tests (libp2p_node)
       working-directory: ./libs/go/libp2p_node
-      run: go test -p 1 -timeout 0 -count 1 -v ./...
+      run: make test
     - if: matrix.python-version == '3.6'
       name: Golang unit tests (aealite)
       working-directory: ./libs/go/aealite
@@ -512,13 +512,16 @@ jobs:
         working-directory: ./libs/go/libp2p_node/
         run: |
           make test
+      - name: Upload with shell script
+        run: |
+           bash <(curl -s https://codecov.io/bash) -R ./libs/go/libp2p_node -Z -n codecov-libp2p -t ${{ secrets.CODECOV_TOKEN }}
       - name: Upload coverage report
         uses: codecov/codecov-action@v1.0.2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./libs/go/libp2p_node/coverage.out
-          flags: unittests_go
-          name: codecov-umbrella
+          file: ./libs/go/libp2p_node/coverage.txt
+          flags: unittests,go,libp2p
+          name: codecov-libp2p
   coverage_checks:
     continue-on-error: True
     needs:

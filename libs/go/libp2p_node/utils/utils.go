@@ -250,7 +250,7 @@ func FetchAIPublicKeyFromPubKey(publicKey crypto.PubKey) (string, error) {
 	return hex.EncodeToString(raw), nil
 }
 
-// BTCPubKeyFromFetchAIPublicKey
+// BTCPubKeyFromFetchAIPublicKey from public key string
 func BTCPubKeyFromFetchAIPublicKey(publicKey string) (*btcec.PublicKey, error) {
 	pbkBytes, err := hex.DecodeString(publicKey)
 	if err != nil {
@@ -266,7 +266,7 @@ func BTCPubKeyFromEthereumPublicKey(publicKey string) (*btcec.PublicKey, error) 
 	return BTCPubKeyFromUncompressedHex(publicKey[2:])
 }
 
-// ConvertStrEncodedSignatureToDER
+// ConvertStrEncodedSignatureToDER to convert signature to DER format
 // References:
 //  - https://github.com/fetchai/agents-aea/blob/main/aea/crypto/cosmos.py#L258
 //  - https://github.com/btcsuite/btcd/blob/master/btcec/signature.go#L47
@@ -286,7 +286,7 @@ func ConvertStrEncodedSignatureToDER(signature []byte) []byte {
 	return sigDER
 }
 
-// ConvertDEREncodedSignatureToStr
+// ConvertDEREncodedSignatureToStr Convert signatue from der format to string
 // References:
 //  - https://github.com/fetchai/agents-aea/blob/main/aea/crypto/cosmos.py#L258
 //  - https://github.com/btcsuite/btcd/blob/master/btcec/signature.go#L47
@@ -314,14 +314,14 @@ func ParseFetchAISignature(signature string) (*btcec.Signature, error) {
 
 // VerifyLedgerSignature verify signature of message using public key for supported ledgers
 func VerifyLedgerSignature(
-	ledgerId string,
+	ledgerID string,
 	message []byte,
 	signature string,
-	pubkey string,
+	pubKey string,
 ) (bool, error) {
-	verifySignature, found := verifyLedgerSignatureTable[ledgerId]
+	verifySignature, found := verifyLedgerSignatureTable[ledgerID]
 	if found {
-		return verifySignature(message, signature, pubkey)
+		return verifySignature(message, signature, pubKey)
 	}
 	return false, errors.New("Unsupported ledger")
 }
@@ -369,6 +369,7 @@ func VerifyFetchAISignatureLibp2p(message []byte, signature string, pubkey strin
 	return verifyKey.Verify(message, sigDER)
 }
 
+// SignFetchAI signs message with private key
 func SignFetchAI(message []byte, privKey string) (string, error) {
 	signingKey, _, err := KeyPairFromFetchAIKey(privKey)
 	if err != nil {
@@ -439,13 +440,13 @@ func VerifyEthereumSignatureETH(message []byte, signature string, pubkey string)
 
 // KeyPairFromFetchAIKey  key pair from hex encoded secp256k1 private key
 func KeyPairFromFetchAIKey(key string) (crypto.PrivKey, crypto.PubKey, error) {
-	pk_bytes, err := hex.DecodeString(key)
+	pkBytes, err := hex.DecodeString(key)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	btc_private_key, _ := btcec.PrivKeyFromBytes(btcec.S256(), pk_bytes)
-	prvKey, pubKey, err := crypto.KeyPairFromStdKey(btc_private_key)
+	btcPrivateKey, _ := btcec.PrivKeyFromBytes(btcec.S256(), pkBytes)
+	prvKey, pubKey, err := crypto.KeyPairFromStdKey(btcPrivateKey)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -455,11 +456,11 @@ func KeyPairFromFetchAIKey(key string) (crypto.PrivKey, crypto.PubKey, error) {
 
 // AgentAddressFromPublicKey get wallet address from public key associated with ledgerId
 // format from: https://github.com/fetchai/agents-aea/blob/main/aea/crypto/cosmos.py#L120
-func AgentAddressFromPublicKey(ledgerId string, publicKey string) (string, error) {
-	if addressFromPublicKey, found := addressFromPublicKeyTable[ledgerId]; found {
+func AgentAddressFromPublicKey(ledgerID string, publicKey string) (string, error) {
+	if addressFromPublicKey, found := addressFromPublicKeyTable[ledgerID]; found {
 		return addressFromPublicKey(publicKey)
 	}
-	return "", errors.New("Unsupported ledger " + ledgerId)
+	return "", errors.New("Unsupported ledger " + ledgerID)
 }
 
 // FetchAIAddressFromPublicKey get wallet address from hex encoded secp256k1 public key
@@ -547,18 +548,18 @@ func encodeChecksumEIP55(address []byte) string {
 }
 
 // IDFromFetchAIPublicKey Get PeeID (multihash) from fetchai public key
-func IDFromFetchAIPublicKey(public_key string) (peer.ID, error) {
-	b, err := hex.DecodeString(public_key)
+func IDFromFetchAIPublicKey(publicKey string) (peer.ID, error) {
+	b, err := hex.DecodeString(publicKey)
 	if err != nil {
 		return "", err
 	}
 
-	pub_key, err := btcec.ParsePubKey(b, btcec.S256())
+	pubKey, err := btcec.ParsePubKey(b, btcec.S256())
 	if err != nil {
 		return "", err
 	}
 
-	multihash, err := peer.IDFromPublicKey((*crypto.Secp256k1PublicKey)(pub_key))
+	multihash, err := peer.IDFromPublicKey((*crypto.Secp256k1PublicKey)(pubKey))
 	if err != nil {
 		return "", err
 	}
@@ -595,6 +596,7 @@ func IDFromFetchAIPublicKeyUncompressed(publicKey string) (peer.ID, error) {
 	return multihash, nil
 }
 
+// FetchAIPublicKeyFromFetchAIPrivateKey get fetchai public key from fetchai private key
 func FetchAIPublicKeyFromFetchAIPrivateKey(privateKey string) (string, error) {
 	pkBytes, err := hex.DecodeString(privateKey)
 	if err != nil {
@@ -745,7 +747,6 @@ func WriteEnvelope(envel *aea.Envelope, s network.Stream) error {
 
 // ReadEnvelope from a network stream
 func ReadEnvelope(s network.Stream) (*aea.Envelope, error) {
-	// TODO: use ReadBytes?
 	envel := &aea.Envelope{}
 	rstream := bufio.NewReader(s)
 

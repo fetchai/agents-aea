@@ -22,6 +22,9 @@ golines . -w
 golangci-lint run
 ```
 
+For mocks generation:
+check https://github.com/golang/mock
+
 ## Messaging patterns
 
 Interaction protocol
