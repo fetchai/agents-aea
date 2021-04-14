@@ -380,20 +380,30 @@ class OefSearchHandler(Handler):
         )
 
     def _handle_error(
-        self, oef_search_msg: OefSearchMessage, oef_search_dialogue: OefSearchDialogue
+        self, oef_search_error_msg: OefSearchMessage, oef_search_dialogue: OefSearchDialogue
     ) -> None:
         """
         Handle an oef search message.
 
-        :param oef_search_msg: the oef search message
+        :param oef_search_error_msg: the oef search message
         :param oef_search_dialogue: the dialogue
         :return: None
         """
         self.context.logger.info(
             "received oef_search error message={} in dialogue={}.".format(
-                oef_search_msg, oef_search_dialogue
+                oef_search_error_msg, oef_search_dialogue
             )
         )
+        target_message = cast(OefSearchMessage, oef_search_dialogue.get_message_by_id(oef_search_error_msg.target))
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
+        )
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=target_message.to,
+            performative=target_message.performative,
+        )
+        self.context.outbox.put_message(message=oef_search_msg)
+        self.context.logger.info("registering TAC data model on SOEF.")
 
     def _handle_invalid(
         self, oef_search_msg: OefSearchMessage, oef_search_dialogue: OefSearchDialogue
