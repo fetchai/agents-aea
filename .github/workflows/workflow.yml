@@ -512,16 +512,10 @@ jobs:
         working-directory: ./libs/go/libp2p_node/
         run: |
           make test
-      - name: Upload codecov data with shell script
+      - name: Print coverage report
+        working-directory: ./libs/go/libp2p_node/
         run: |
-           bash <(curl -s https://codecov.io/bash) -R ./libs/go/libp2p_node -Z -n codecov-libp2p -t ${{ secrets.CODECOV_TOKEN }}
-      - name: Upload coverage report
-        uses: codecov/codecov-action@v1.0.2
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./libs/go/libp2p_node/coverage.txt
-          flags: unittests,go,libp2p
-          name: codecov-libp2p
+          go tool cover -func=coverage.txt
   coverage_checks:
     continue-on-error: True
     needs:
