@@ -29,7 +29,7 @@ from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_ME
 from tests.conftest import FETCHAI_PRIVATE_KEY_FILE, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
 
 
-MAX_RERUNS = 0
+MAX_RERUNS = 1
 
 COIN_URLS = [
     "https://api.coinbase.com/v2/prices/BTC-USD/buy",
@@ -161,7 +161,7 @@ class TestSimpleAggregationSkill(AEATestCaseManyFlaky):
             # run agent
             aea_processes.append(self.run_agent())
 
-        for (i, agent) in enumerate(agents):
+        for agent in agents:
             self.set_agent_context(agent)
             check_strings = (
                 "Starting libp2p node...",

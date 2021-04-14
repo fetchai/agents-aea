@@ -767,7 +767,7 @@ class TestLibp2pClientReconnectionReceiveEnvelope(BaseTestLibp2pClientReconnecti
             # give time to reconnect
             time.sleep(2.0)
             _mock_logger.assert_called_with(
-                RegexComparator(f"Connection error:.*Try to reconnect and read again")
+                RegexComparator("Connection error:.*Try to reconnect and read again")
             )
         # proceed as usual. Now we expect the connection to have reconnected successfully
         self.multiplexer_client_2.put(envelope)
