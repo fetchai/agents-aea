@@ -512,7 +512,7 @@ jobs:
         working-directory: ./libs/go/libp2p_node/
         run: |
           make test
-      - name: Upload with shell script
+      - name: Upload codecov data with shell script
         run: |
            bash <(curl -s https://codecov.io/bash) -R ./libs/go/libp2p_node -Z -n codecov-libp2p -t ${{ secrets.CODECOV_TOKEN }}
       - name: Upload coverage report
