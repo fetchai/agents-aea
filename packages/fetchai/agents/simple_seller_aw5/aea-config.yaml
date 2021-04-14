@@ -76,10 +76,7 @@ models:
   strategy:
     args:
       announce_termination_key: aw-registration
-      ethereum_address: PUT_YOUR_ETHEREUM_ADDRESS_HERE
       developer_handle: PUT_YOUR_DEVELOPER_HANDLE_HERE
-      signature_of_fetchai_address: PUT_YOUR_SIGNATURE_HERE
-      tweet: PUT_THE_LINK_TO_YOUR_TWEET_HERE
       whitelist:
       - PUT_WHITELIST_ADDRESSES_HERE
 ---
