@@ -24,14 +24,12 @@ from aea_ledger_fetchai import FetchAICrypto
 
 from aea.test_tools.test_cases import AEATestCaseManyFlaky
 
-from tests.conftest import (
-    FETCHAI_PRIVATE_KEY_FILE,
-    FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
-)
-
 from packages.fetchai.connections.p2p_libp2p.connection import LIBP2P_SUCCESS_MESSAGE
 
-MAX_RERUNS = 1
+from tests.conftest import FETCHAI_PRIVATE_KEY_FILE, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+
+
+MAX_RERUNS = 0
 
 COIN_URLS = [
     "https://api.coinbase.com/v2/prices/BTC-USD/buy",
@@ -45,6 +43,7 @@ JSON_PATHS = [
     "result.price",
     "bitcoin.usd",
 ]
+
 
 @pytest.mark.integration
 class TestSimpleAggregationSkill(AEATestCaseManyFlaky):
@@ -63,6 +62,7 @@ class TestSimpleAggregationSkill(AEATestCaseManyFlaky):
 
         self.create_agents(*agents)
 
+        aea_processes = []
         for (i, agent) in enumerate(agents):
             # add packages for agent
             self.set_agent_context(agent)
@@ -89,69 +89,109 @@ class TestSimpleAggregationSkill(AEATestCaseManyFlaky):
                 f'[{{"name": "price", "json_path": "{JSON_PATHS[i]}"}}]',
                 type_="list",
             )
+            self.set_config(
+                "vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.decimals",
+                0,
+                type_="int",
+            )
+            self.set_config(
+                "vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.use_http_server",
+                "false",
+                type_="bool",
+            )
+            setting_path = (
+                "vendor.fetchai.connections.http_server.config.target_skill_id"
+            )
+            self.set_config(setting_path, "fetchai/advanced_data_request:0.4.0")
+            self.set_config(
+                "vendor.fetchai.skills.simple_aggregation.models.strategy.args.quantity_name",
+                "price",
+            )
 
-        self.generate_private_key(FetchAICrypto.identifier)
-        self.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
-        self.generate_private_key(
-            FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
-        )
-        self.add_private_key(
-            FetchAICrypto.identifier,
-            FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
-            connection=True,
-        )
-        setting_path = "vendor.fetchai.connections.p2p_libp2p.cert_requests"
-        settings = json.dumps(
-            [
-                {
-                    "identifier": "acn",
-                    "ledger_id": FetchAICrypto.identifier,
-                    "not_after": "2022-01-01",
-                    "not_before": "2021-01-01",
-                    "public_key": FetchAICrypto.identifier,
-                    "message_format": "{public_key}",
-                    "save_path": ".certs/conn_cert.txt",
-                }
-            ]
-        )
-        self.set_config(setting_path, settings, type_="list")
-        self.run_install()
+            self.generate_private_key(FetchAICrypto.identifier)
+            self.add_private_key(FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE)
+            self.generate_private_key(
+                FetchAICrypto.identifier, FETCHAI_PRIVATE_KEY_FILE_CONNECTION
+            )
+            self.add_private_key(
+                FetchAICrypto.identifier,
+                FETCHAI_PRIVATE_KEY_FILE_CONNECTION,
+                connection=True,
+            )
+            self.run_install()
+            self.run_cli_command("issue-certificates", cwd=self._get_cwd())
+            self.run_cli_command("build", cwd=self._get_cwd())
+            setting_path = "vendor.fetchai.connections.p2p_libp2p.cert_requests"
+            settings = json.dumps(
+                [
+                    {
+                        "identifier": "acn",
+                        "ledger_id": FetchAICrypto.identifier,
+                        "not_after": "2022-01-01",
+                        "not_before": "2021-01-01",
+                        "public_key": FetchAICrypto.identifier,
+                        "message_format": "{public_key}",
+                        "save_path": ".certs/conn_cert.txt",
+                    }
+                ]
+            )
+            self.set_config(setting_path, settings, type_="list")
+            if i == 0:
+                result = self.run_cli_command(
+                    "get-multiaddress", "fetchai", "--connection", cwd=self._get_cwd()
+                )
+                multiaddr = result.stdout
+            else:
+                setting_path = "vendor.fetchai.connections.p2p_libp2p.config"
+                settings = json.dumps(
+                    {
+                        "delegate_uri": f"127.0.0.1:{11000 + i}",
+                        "entry_peers": [f"/dns4/127.0.0.1/tcp/9000/p2p/{multiaddr}"],
+                        "local_uri": f"127.0.0.1:{9000 + i}",
+                        "log_file": "libp2p_node.log",
+                        "public_uri": f"127.0.0.1:{9000 + i}",
+                    }
+                )
+                self.set_config(setting_path, settings, type_="dict")
+                setting_path = "vendor.fetchai.connections.prometheus.config.port"
+                self.set_config(setting_path, 20000 + i)
+                setting_path = "vendor.fetchai.connections.http_server.config.port"
+                self.set_config(setting_path, 8000 + i)
 
-        # run first agent
-        self.set_agent_context(agents[0])
-        self.run_cli_command("build", cwd=self._get_cwd())
-        self.run_cli_command("issue-certificates", cwd=self._get_cwd())
-        aea_processes = [self.run_agent()]
+            # run agent
+            aea_processes.append(self.run_agent())
 
-        check_strings = (
-            "Starting libp2p node...",
-            "Connecting to libp2p node...",
-            "Successfully connected to libp2p node!",
-            LIBP2P_SUCCESS_MESSAGE,
-        )
-        missing_strings = self.missing_from_output(
-            aea_processes[0], check_strings, timeout=30, is_terminating=False
-        )
-        assert (
-            missing_strings == []
-        ), "Strings {} didn't appear in deploy_aea output.".format(missing_strings)
+        for (i, agent) in enumerate(agents):
+            self.set_agent_context(agent)
+            check_strings = (
+                "Starting libp2p node...",
+                "Connecting to libp2p node...",
+                "Successfully connected to libp2p node!",
+                LIBP2P_SUCCESS_MESSAGE,
+                "setting up HttpHandler",
+                "setting up PrometheusHandler",
+                "setting up AdvancedDataRequestBehaviour",
+                "Adding Prometheus metric: num_retrievals",
+                "Adding Prometheus metric: num_requests",
+                "registering agent on SOEF.",
+                "registering service on SOEF.",
+                "Start processing messages...",
+                "Fetching data from",
+                "Observation: {'price': {'value': ",
+                "found agents=",
+                "sending observation to peer=",
+                "received observation from sender=",
+                "Observations:",
+                "Average:",
+            )
+            missing_strings = self.missing_from_output(
+                aea_processes[0], check_strings, timeout=30, is_terminating=False
+            )
+            assert (
+                missing_strings == []
+            ), "Strings {} didn't appear in deploy_aea output.".format(missing_strings)
 
-
-        # # Get oracle contract address from file
-        # with open(ORACLE_CONTRACT_ADDRESS_FILE) as file:
-        #     oracle_address = file.read()
-
-        # # run oracle client agent
-        # self.set_agent_context(client_agent_name)
-
-        # # set oracle contract address in oracle client
-        # setting_path = "vendor.fetchai.skills.simple_oracle_client.models.strategy.args.oracle_contract_address"
-        # self.set_config(setting_path, oracle_address)
-
-        # client_aea_process = self.run_agent()
-
-
-        self.terminate_agents(aea_processes)
+        self.terminate_agents(*aea_processes, timeout=30)
         assert (
             self.is_successfully_terminated()
         ), "Agents weren't successfully terminated."
