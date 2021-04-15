@@ -14,12 +14,12 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 
 ### Create the AEAs
 
-Repeat the following process four times (for each `i` in the set {0,1,2,3}):
+Repeat the following process four times in four different terminals (for each {`i=0`, `i=1`, `i=2`, `i=3`}):
 
 Fetch the aggregator AEA:
 ``` bash
 agent_name="agg$i"
-aea fetch --local fetchai/simple_aggregator:0.1.0 --alias $agent_name
+aea fetch fetchai/simple_aggregator:0.1.0 --alias $agent_name
 cd $agent_name
 aea install
 aea build
