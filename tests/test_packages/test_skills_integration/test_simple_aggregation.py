@@ -183,6 +183,15 @@ class TestSimpleAggregationSkill(AEATestCaseManyFlaky):
                 "Connecting to libp2p node...",
                 "Successfully connected to libp2p node!",
                 LIBP2P_SUCCESS_MESSAGE,
+            )
+            missing_strings = self.missing_from_output(
+                aea_processes[0], check_strings, timeout=30, is_terminating=False
+            )
+            assert (
+                missing_strings == []
+            ), "Strings {} didn't appear in aea output.".format(missing_strings)
+
+            check_strings = (
                 "setting up HttpHandler",
                 "setting up PrometheusHandler",
                 "setting up AdvancedDataRequestBehaviour",
@@ -204,7 +213,7 @@ class TestSimpleAggregationSkill(AEATestCaseManyFlaky):
             )
             assert (
                 missing_strings == []
-            ), "Strings {} didn't appear in deploy_aea output.".format(missing_strings)
+            ), "Strings {} didn't appear in aea output.".format(missing_strings)
 
         self.terminate_agents(*aea_processes, timeout=30)
         assert (
