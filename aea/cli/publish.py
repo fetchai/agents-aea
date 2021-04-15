@@ -151,29 +151,26 @@ def _save_agent_locally(ctx: Context, is_mixed: bool = False) -> None:
 
     :return: None
     """
+    try:
+        registry_path = ctx.registry_path
+    except ValueError as e:  # pragma: nocover
+        raise click.ClickException(str(e))
     for item_type_plural in (CONNECTIONS, CONTRACTS, PROTOCOLS, SKILLS):
         dependencies = getattr(ctx.agent_config, item_type_plural)
         for public_id in dependencies:
             if is_mixed:
                 _check_is_item_in_registry_mixed(
-                    PublicId.from_str(str(public_id)),
-                    item_type_plural,
-                    ctx.registry_path,
+                    PublicId.from_str(str(public_id)), item_type_plural, registry_path,
                 )
             else:
                 _check_is_item_in_local_registry(
-                    PublicId.from_str(str(public_id)),
-                    item_type_plural,
-                    ctx.registry_path,
+                    PublicId.from_str(str(public_id)), item_type_plural, registry_path,
                 )
 
     item_type_plural = AGENTS
 
     target_dir = try_get_item_target_path(
-        ctx.registry_path,
-        ctx.agent_config.author,
-        item_type_plural,
-        ctx.agent_config.name,
+        registry_path, ctx.agent_config.author, item_type_plural, ctx.agent_config.name,
     )
     if not os.path.exists(target_dir):
         os.makedirs(target_dir, exist_ok=True)

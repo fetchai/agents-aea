@@ -116,8 +116,12 @@ def _save_item_locally(ctx: Context, item_type: str, item_id: PublicId) -> None:
 
     check_package_public_id(source_path, item_type, item_id)
 
+    try:
+        registry_path = ctx.registry_path
+    except ValueError as e:  # pragma: nocover
+        raise click.ClickException(str(e))
     target_path = try_get_item_target_path(
-        ctx.registry_path, ctx.agent_config.author, item_type_plural, item_id.name,
+        registry_path, ctx.agent_config.author, item_type_plural, item_id.name,
     )
     copytree(source_path, target_path)
     click.echo(
