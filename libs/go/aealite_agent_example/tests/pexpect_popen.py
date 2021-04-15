@@ -71,22 +71,6 @@ class PexpectWrapper(PopenSpawn):
             self.wait()
             self.exitstatus = "Terminated!"  # type: ignore
 
-    @classmethod
-    def aea_cli(cls, args, **kwargs) -> "PexpectWrapper":
-        """Start aea.cli.
-
-        :param args: list of arguments for aea.cli.
-
-        :return: PexpectWrapper
-        """
-        return cls(
-            [sys.executable, "-m", "aea.cli", "-v", "DEBUG", *args],
-            env=os.environ.copy(),
-            encoding="utf-8",
-            logfile=sys.stdout,
-            **kwargs
-        )
-
     def expect_all(
         self, pattern_list: List[str], timeout: float = 10, strict: bool = True
     ) -> None:
@@ -125,4 +109,4 @@ class PexpectWrapper(PopenSpawn):
     def terminate(self, *args, **kwargs) -> None:
         """Terminate process."""
         if self.proc.poll() is None:
-            self.kill(signal.SIGTERM)
+            self.kill(signal.SIGKILL)
