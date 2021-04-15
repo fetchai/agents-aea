@@ -20,7 +20,7 @@ aea add skill fetchai/simple_aggregation:0.1.0
 aea config set agent.default_connection fetchai/p2p_libp2p:0.21.0
 aea install
 aea build
-``
+```
 ``` bash
 aea config set --type int vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.decimals 0
 ```
