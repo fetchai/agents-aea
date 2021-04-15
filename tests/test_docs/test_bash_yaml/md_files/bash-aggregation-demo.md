@@ -1,6 +1,6 @@
 ``` bash
 agent_name="agg$i"
-aea fetch --local fetchai/simple_aggregator:0.1.0 --alias $agent_name
+aea fetch fetchai/simple_aggregator:0.1.0 --alias $agent_name
 cd $agent_name
 aea install
 aea build
@@ -20,7 +20,7 @@ aea add skill fetchai/simple_aggregation:0.1.0
 aea config set agent.default_connection fetchai/p2p_libp2p:0.21.0
 aea install
 aea build
-```
+``
 ``` bash
 aea config set --type int vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.decimals 0
 ```
@@ -53,7 +53,7 @@ MULTIADDR=$(cd ../agg0 && aea get-multiaddress fetchai --connection)
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 '{
 "delegate_uri": "127.0.0.1:'$((11000+i))'",
-"entry_peers": [],
+"entry_peers": ["/dns4/127.0.0.1/tcp/9000/p2p/'"$MULTIADDR\""'],
 "local_uri": "127.0.0.1:'$((9000+i))'",
 "log_file": "libp2p_node.log",
 "public_uri": "127.0.0.1:'$((9000+i))'"
