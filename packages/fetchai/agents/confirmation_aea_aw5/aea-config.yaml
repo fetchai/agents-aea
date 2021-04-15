@@ -98,8 +98,8 @@ models:
   strategy:
     args:
       location:
-        latitude: 51.5194
-        longitude: 0.127
+        latitude: 51.5074
+        longitude: -0.1278
       service_data:
         key: registration_service
         value: aw5-registration
