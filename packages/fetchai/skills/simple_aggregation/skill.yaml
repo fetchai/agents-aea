@@ -6,6 +6,7 @@ description: The skill for aggregating observations between AEAs
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
+  README.md: QmSFsC6K217XxwuH5fXGQYU29J44VvW9Qim5yNPAbXLegV
   __init__.py: QmRiWWZD3akeTSkr5UksPrRc83qvjbQm9eZTqEQ1DsZK3Z
   behaviours.py: QmfZxhaVLdwZRssra8sfGmxgSNfpAMnvCNtRP8FUjKcPE8
   dialogues.py: QmaAnWJHSrAVqbswjGpJ9ukBA2QDdXxJAy33Gtabet3Bny
