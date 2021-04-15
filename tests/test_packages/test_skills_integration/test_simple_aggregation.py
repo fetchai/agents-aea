@@ -78,17 +78,6 @@ class TestSimpleAggregationSkill(AEATestCaseManyFlaky):
             self.add_item("skill", "fetchai/advanced_data_request:0.4.0")
             self.add_item("skill", "fetchai/simple_aggregation:0.1.0")
 
-            # set up data request skill to fetch coin price
-            self.set_config(
-                "vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.url",
-                COIN_URLS[i],
-                type_="str",
-            )
-            self.set_config(
-                "vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.outputs",
-                f'[{{"name": "price", "json_path": "{JSON_PATHS[i]}"}}]',
-                type_="list",
-            )
             self.set_config(
                 "vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.decimals",
                 0,
@@ -106,6 +95,10 @@ class TestSimpleAggregationSkill(AEATestCaseManyFlaky):
             self.set_config(
                 "vendor.fetchai.skills.simple_aggregation.models.strategy.args.quantity_name",
                 "price",
+            )
+            self.set_config(
+                "vendor.fetchai.skills.simple_aggregation.models.strategy.args.aggregation_function",
+                "mean",
             )
 
             self.generate_private_key(FetchAICrypto.identifier)
@@ -136,7 +129,17 @@ class TestSimpleAggregationSkill(AEATestCaseManyFlaky):
                 ]
             )
             self.set_config(setting_path, settings, type_="list")
+
             if i == 0:
+                diff = self.difference_to_fetched_agent(
+                    "fetchai/simple_aggregator:0.1.0", agent
+                )
+                assert (
+                    diff == []
+                ), "Difference between created and fetched project for files={}".format(
+                    diff
+                )
+
                 result = self.run_cli_command(
                     "get-multiaddress", "fetchai", "--connection", cwd=self._get_cwd()
                 )
@@ -157,6 +160,18 @@ class TestSimpleAggregationSkill(AEATestCaseManyFlaky):
                 self.set_config(setting_path, 20000 + i)
                 setting_path = "vendor.fetchai.connections.http_server.config.port"
                 self.set_config(setting_path, 8000 + i)
+
+            # set up data request skill to fetch coin price
+            self.set_config(
+                "vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.url",
+                COIN_URLS[i],
+                type_="str",
+            )
+            self.set_config(
+                "vendor.fetchai.skills.advanced_data_request.models.advanced_data_request_model.args.outputs",
+                f'[{{"name": "price", "json_path": "{JSON_PATHS[i]}"}}]',
+                type_="list",
+            )
 
             # run agent
             aea_processes.append(self.run_agent())
