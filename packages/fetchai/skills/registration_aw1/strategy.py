@@ -77,9 +77,9 @@ class Strategy(Model):
             tweet = kwargs.pop("tweet", DEFAULT_TWEET)
             enforce(isinstance(tweet, str), "Not a valid tweet link")
             self._tweet = tweet
-            self._is_ready_to_register = True
-        else:
             self._is_ready_to_register = False
+        else:
+            self._is_ready_to_register = True
             self._ethereum_address = "some_dummy_address"
             self._signature_of_fetchai_address = None
             self._tweet = None

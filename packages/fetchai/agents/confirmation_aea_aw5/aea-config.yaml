@@ -80,7 +80,7 @@ public_id: fetchai/soef:0.22.0
 type: connection
 config:
   chain_identifier: fetchai_v2_testnet_incentivised
-  token_storage_path: /data/soef_key.txt
+  token_storage_path: soef_key.txt
 ---
 public_id: fetchai/ledger:0.18.0
 type: connection
@@ -109,7 +109,7 @@ type: skill
 models:
   registration_db:
     args:
-      custom_path: /data/registration.db
+      custom_path: registration.db
   strategy:
     args:
       developer_handle_only: true
