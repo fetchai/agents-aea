@@ -106,7 +106,7 @@ MULTIADDR=$(cd ../agg0 && aea get-multiaddress fetchai --connection)
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \
 '{
 "delegate_uri": "127.0.0.1:'$((11000+i))'",
-"entry_peers": [],
+"entry_peers": ["/dns4/127.0.0.1/tcp/9000/p2p/'"$MULTIADDR\""'],
 "local_uri": "127.0.0.1:'$((9000+i))'",
 "log_file": "libp2p_node.log",
 "public_uri": "127.0.0.1:'$((9000+i))'"
