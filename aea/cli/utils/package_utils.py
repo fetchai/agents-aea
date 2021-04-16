@@ -302,9 +302,14 @@ def find_item_locally(
     item_type_plural = item_type + "s"
     item_name = item_public_id.name
 
+    try:
+        registry_path = ctx.registry_path
+    except ValueError as e:
+        raise click.ClickException(str(e))
+
     # check in registry
     package_path = Path(
-        ctx.registry_path, item_public_id.author, item_type_plural, item_name
+        registry_path, item_public_id.author, item_type_plural, item_name
     )
     config_file_name = _get_default_configuration_file_name_from_type(item_type)
     item_configuration_filepath = package_path / config_file_name

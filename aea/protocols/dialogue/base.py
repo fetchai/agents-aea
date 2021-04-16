@@ -130,9 +130,12 @@ class DialogueLabel:
 
     def __eq__(self, other: Any) -> bool:
         """Check for equality between two DialogueLabel objects."""
-        if isinstance(other, DialogueLabel):
-            return hash(self) == hash(other)
-        return False
+        return (
+            isinstance(other, DialogueLabel)
+            and self.dialogue_reference == other.dialogue_reference
+            and self.dialogue_opponent_addr == other.dialogue_opponent_addr
+            and self.dialogue_starter_addr == other.dialogue_starter_addr
+        )
 
     def __hash__(self) -> int:
         """Turn object into hash."""

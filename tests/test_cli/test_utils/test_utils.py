@@ -612,6 +612,7 @@ def test_context_registry_path_does_not_exist():
     with TemporaryDirectory() as tmp_dir:
         with cd(tmp_dir):
             with pytest.raises(
-                ValueError, match="Registry path not provided and `packages` not found"
+                ValueError,
+                match="Registry path not provided and local registry `packages` not found",
             ):
                 Context(cwd=".", verbosity="", registry_path=None).registry_path
