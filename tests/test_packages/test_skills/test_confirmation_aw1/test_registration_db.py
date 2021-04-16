@@ -89,6 +89,23 @@ class TestStrategy(BaseSkillTestCase):
             ),
         )
 
+    def test_set_registered_developer_only(self):
+        """Test the set_registered_developer_only method of the RegistrationDB class."""
+        # setup
+        developer_handle = "some_developer_handle"
+
+        # operation
+        with patch.object(self.db, "_execute_single_sql") as mock_exe:
+            self.db.set_registered_developer_only(
+                self.address, developer_handle,
+            )
+
+        # after
+        mock_exe.assert_any_call(
+            "INSERT OR REPLACE INTO registered_table(address, developer_handle) values(?, ?)",
+            (self.address, developer_handle,),
+        )
+
     def test_is_registered_i(self):
         """Test the is_registered method of the RegistrationDB class where result is NOT empty."""
         # setup

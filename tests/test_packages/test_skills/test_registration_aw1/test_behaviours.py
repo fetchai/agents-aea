@@ -43,8 +43,12 @@ class TestAW1Registration(RegiatrationAW1TestCase):
         """Setup the test class."""
         super().setup()
 
-    def test_setup(self):
-        """Test the setup method of the registration behaviour."""
+    def test_setup_i(self):
+        """Test the setup method of the registration behaviour NOT developer_handle_mode and announce_termination_key is None."""
+        # setup
+        self.strategy.announce_termination_key = None
+        self.strategy.developer_handle_mode = False
+
         # operation
         with patch.object(self.logger, "log") as mock_logger:
             self.register_behaviour.setup()
@@ -75,6 +79,21 @@ class TestAW1Registration(RegiatrationAW1TestCase):
         mock_logger.assert_any_call(
             logging.INFO, "sending signing_msg to decision maker..."
         )
+
+    def test_setup_ii(self):
+        """Test the setup method of the registration behaviour IN developer_handle_mode and announce_termination_key is NOT None."""
+        # setup
+        key = "some_key"
+        self.strategy.announce_termination_key = key
+        self.strategy.developer_handle_only = True
+
+        # operation
+        self.register_behaviour.setup()
+
+        # after
+        self.assert_quantity_in_decision_making_queue(0)
+
+        assert self.skill.skill_context.shared_state[key] is False
 
     def test_act_i(self):
         """Test the act method of the registration behaviour where is_ready_to_register is False."""
