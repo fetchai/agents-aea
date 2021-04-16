@@ -58,3 +58,6 @@ models:
     args:
       aggregation_function: mean
       quantity_name: price
+      search_query:
+        search_value: generic_aggregation_service
+      service_id: generic_aggregation_service

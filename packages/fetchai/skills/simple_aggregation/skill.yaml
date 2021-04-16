@@ -8,10 +8,10 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmSFsC6K217XxwuH5fXGQYU29J44VvW9Qim5yNPAbXLegV
   __init__.py: QmRiWWZD3akeTSkr5UksPrRc83qvjbQm9eZTqEQ1DsZK3Z
-  behaviours.py: QmfZxhaVLdwZRssra8sfGmxgSNfpAMnvCNtRP8FUjKcPE8
+  behaviours.py: QmekLZAoSRBcu39eNxFMPJYaKo6DnwGNBRR64HGqfAALf7
   dialogues.py: QmaAnWJHSrAVqbswjGpJ9ukBA2QDdXxJAy33Gtabet3Bny
-  handlers.py: QmSoSJzzBdJg31Vj8zemtjpGzfDaUy123K5kNC3rzPA8ms
-  strategy.py: QmYjrktC2irTgqmmsS4sTtC5YLN7bUuohDf2noiaEDLkxg
+  handlers.py: QmZXG4YLsoYDWWPgZLhAusQsfFaNC6muHYdUiS5tW7MtoD
+  strategy.py: QmdTfLQsZK56cC57vPJCck8bAoPixBuV6sdihNNcdwokWj
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
@@ -55,9 +55,9 @@ models:
       search_query:
         constraint_type: ==
         search_key: service
-        search_value: aggregation
+        search_value: generic_aggregation_service
       search_radius: 5.0
-      service_id: aggregation
+      service_id: generic_aggregation_service
     class_name: AggregationStrategy
 dependencies: {}
 is_abstract: false

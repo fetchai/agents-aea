@@ -29,7 +29,6 @@ from aea.helpers.search.generic import (
     AGENT_PERSONALITY_MODEL,
     AGENT_REMOVE_SERVICE_MODEL,
     AGENT_SET_SERVICE_MODEL,
-    SIMPLE_SERVICE_MODEL,
 )
 from aea.helpers.search.models import (
     Constraint,
@@ -44,17 +43,17 @@ from aea.skills.base import Model
 DEFAULT_SEARCH_RADIUS = 5.0
 DEFAULT_SERVICE_ID = "aggregation"
 DEFAULT_AGGREGATION_FUNCTION = "mean"
-DEFAULT_SERVICE_DATA = {"key": "service", "value": "aggregation"}
+DEFAULT_SERVICE_DATA = {"key": "service", "value": "generic_aggregation_service"}
 DEFAULT_QUANTITY_NAME = "quantity"
 DEFAULT_PERSONALITY_DATA = {"piece": "genus", "value": "data"}
 DEFAULT_CLASSIFICATION = {"piece": "classification", "value": "agent"}
 DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
 DEFAULT_SEARCH_QUERY = {
     "search_key": "service",
-    "search_value": "aggregation",
+    "search_value": "generic_aggregation_service",
     "constraint_type": "==",
 }
-IMPLEMENTED_AGGREGATION_FUCNTIONS = {"mean", "median", "mode"}
+IMPLEMENTED_AGGREGATION_FUNCTIONS = {"mean", "median", "mode"}
 
 
 class AggregationStrategy(Model):
@@ -67,8 +66,6 @@ class AggregationStrategy(Model):
         :return: None
         """
 
-        super().__init__(**kwargs)
-
         self._round = 0
         self._peers = set()  # type: Set[Address]
         self._observations = dict()  # type: Dict[Address, Dict[str, Any]]
@@ -76,14 +73,14 @@ class AggregationStrategy(Model):
 
         self._quantity_name = kwargs.pop("quantity_name", DEFAULT_QUANTITY_NAME)
         self._service_id = kwargs.pop("service_id", DEFAULT_SERVICE_ID)
-        aggregation_function = kwargs.pop(
+        self._aggregation_function = kwargs.pop(
             "aggregation_function", DEFAULT_AGGREGATION_FUNCTION
         )
         enforce(
-            aggregation_function in IMPLEMENTED_AGGREGATION_FUCNTIONS,
-            f"aggregation_function must be one of {IMPLEMENTED_AGGREGATION_FUCNTIONS}",
+            self._aggregation_function in IMPLEMENTED_AGGREGATION_FUNCTIONS,
+            f"aggregation_function must be one of {IMPLEMENTED_AGGREGATION_FUNCTIONS}",
         )
-        self._aggregate = getattr(statistics, aggregation_function)
+        self._aggregate = getattr(statistics, self._aggregation_function)
 
         self._search_query = kwargs.pop("search_query", DEFAULT_SEARCH_QUERY)
         location = kwargs.pop("location", DEFAULT_LOCATION)
@@ -122,6 +119,8 @@ class AggregationStrategy(Model):
             self._set_service_data["key"]: self._set_service_data["value"]
         }
 
+        super().__init__(**kwargs)
+
         ledger_id = kwargs.pop("ledger_id", None)
         self._ledger_id = (
             ledger_id if ledger_id is not None else self.context.default_ledger_id
@@ -130,7 +129,7 @@ class AggregationStrategy(Model):
     @property
     def ledger_id(self) -> str:
         """Get the ledger id."""
-        return self._ledger_id
+        return self._ledger_id  # pragma: nocover
 
     @property
     def observation(self) -> Optional[Dict[str, Any]]:
@@ -176,13 +175,15 @@ class AggregationStrategy(Model):
     def aggregate_observations(self) -> None:
         """Aggregate values from all observations from myself and peers"""
         values = [float(obs["value"]) for obs in self._observations.values()]
-        if len(values) == 0:
+        if len(values) == 0:  # pragma: nocover
             self.context.logger.info("No observations to aggregate")
             return
         self._aggregation = self._aggregate(values)
         self.context.shared_state["aggregation"] = self._aggregation
         self.context.logger.info(f"Observations: {values}")
-        self.context.logger.info(f"Average: {self._aggregation}")
+        self.context.logger.info(
+            f"Aggregation ({self._aggregation_function}): {self._aggregation}"
+        )
 
     def get_location_description(self) -> Description:
         """
@@ -228,17 +229,6 @@ class AggregationStrategy(Model):
         )
         return description
 
-    def get_service_description(self) -> Description:
-        """
-        Get the simple service description.
-
-        :return: a description of the offered services
-        """
-        description = Description(
-            self._simple_service_data, data_model=SIMPLE_SERVICE_MODEL,
-        )
-        return description
-
     def get_unregister_service_description(self) -> Description:
         """
         Get the unregister service description.
@@ -270,20 +260,4 @@ class AggregationStrategy(Model):
             ),
         )
         query = Query([close_to_my_service, service_key_filter],)
-        return query
-
-    def get_service_query(self) -> Query:
-        """
-        Get the service query of the agent.
-
-        :return: the query
-        """
-        service_key_filter = Constraint(
-            self._search_query["search_key"],
-            ConstraintType(
-                self._search_query["constraint_type"],
-                self._search_query["search_value"],
-            ),
-        )
-        query = Query([service_key_filter], model=SIMPLE_SERVICE_MODEL)
         return query

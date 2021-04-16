@@ -40,6 +40,11 @@ aea config set vendor.fetchai.skills.simple_aggregation.models.strategy.args.qua
 aea config set vendor.fetchai.skills.simple_aggregation.models.strategy.args.aggregation_function mean
 ```
 ``` bash
+SERVICE_ID=my_btc_aggregation_service
+aea config set vendor.fetchai.skills.simple_aggregation.models.strategy.args.service_id $SERVICE_ID
+aea config set vendor.fetchai.skills.simple_aggregation.models.strategy.args.search_query.search_value $SERVICE_ID
+```
+``` bash
 aea generate-key fetchai
 aea add-key fetchai
 aea generate-key fetchai fetchai_connection_private_key.txt
@@ -77,6 +82,6 @@ info: [agg_i] received observation from sender...
 ...
 info: [agg_i] Observations:...
 ...
-info: [agg_i] Average:...
+info: [agg_i] Aggregation (mean):...
 ```
 

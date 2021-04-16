@@ -43,6 +43,7 @@ JSON_PATHS = [
     "result.price",
     "bitcoin.usd",
 ]
+SERVICE_ID = "generic_aggregation_service"
 
 
 @pytest.mark.integration
@@ -99,6 +100,14 @@ class TestSimpleAggregationSkill(AEATestCaseManyFlaky):
             self.set_config(
                 "vendor.fetchai.skills.simple_aggregation.models.strategy.args.aggregation_function",
                 "mean",
+            )
+            self.set_config(
+                "vendor.fetchai.skills.simple_aggregation.models.strategy.args.search_query.search_value",
+                SERVICE_ID,
+            )
+            self.set_config(
+                "vendor.fetchai.skills.simple_aggregation.models.strategy.args.service_id",
+                SERVICE_ID,
             )
 
             self.generate_private_key(FetchAICrypto.identifier)
@@ -191,6 +200,8 @@ class TestSimpleAggregationSkill(AEATestCaseManyFlaky):
                 missing_strings == []
             ), "Strings {} didn't appear in aea output.".format(missing_strings)
 
+        for agent in agents:
+            self.set_agent_context(agent)
             check_strings = (
                 "setting up HttpHandler",
                 "setting up PrometheusHandler",
@@ -206,7 +217,7 @@ class TestSimpleAggregationSkill(AEATestCaseManyFlaky):
                 "sending observation to peer=",
                 "received observation from sender=",
                 "Observations:",
-                "Average:",
+                "Aggregation (mean):",
             )
             missing_strings = self.missing_from_output(
                 aea_processes[0], check_strings, timeout=30, is_terminating=False
