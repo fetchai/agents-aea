@@ -129,24 +129,32 @@ class AW1RegistrationHandler(Handler):
             self.context.logger.info(
                 f"valid registration={register_msg.info}. Verifying if tokens staked."
             )
-            contract_api_dialogues = cast(
-                ContractApiDialogues, self.context.contract_api_dialogues
-            )
-            kwargs = strategy.get_kwargs(register_msg.info)
             terms = strategy.get_terms(register_msg.sender)
-            contract_api_msg, contract_api_dialogue = contract_api_dialogues.create(
-                counterparty=LEDGER_API_ADDRESS,
-                performative=ContractApiMessage.Performative.GET_STATE,
-                ledger_id=strategy.contract_ledger_id,
-                contract_id=strategy.contract_id,
-                contract_address=strategy.contract_address,
-                callable=strategy.contract_callable,
-                kwargs=ContractApiMessage.Kwargs(kwargs),
-            )
-            contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
-            contract_api_dialogue.terms = terms
-            contract_api_dialogue.associated_register_dialogue = register_dialogue
-            self.context.outbox.put_message(contract_api_msg)
+            if not strategy.developer_handle_only:
+                contract_api_dialogues = cast(
+                    ContractApiDialogues, self.context.contract_api_dialogues
+                )
+                kwargs = strategy.get_kwargs(register_msg.info)
+                contract_api_msg, contract_api_dialogue = contract_api_dialogues.create(
+                    counterparty=LEDGER_API_ADDRESS,
+                    performative=ContractApiMessage.Performative.GET_STATE,
+                    ledger_id=strategy.contract_ledger_id,
+                    contract_id=strategy.contract_id,
+                    contract_address=strategy.contract_address,
+                    callable=strategy.contract_callable,
+                    kwargs=ContractApiMessage.Kwargs(kwargs),
+                )
+                contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
+                contract_api_dialogue.terms = terms
+                contract_api_dialogue.associated_register_dialogue = register_dialogue
+                self.context.outbox.put_message(contract_api_msg)
+            else:
+                strategy.finalize_registration(register_msg.sender)
+                register_dialogue.terms = terms
+                tx_behaviour = cast(
+                    TransactionBehaviour, self.context.behaviours.transaction
+                )
+                tx_behaviour.waiting.append(register_dialogue)
         else:
             self.context.logger.info(
                 f"invalid registration={register_msg.info}. Rejecting."

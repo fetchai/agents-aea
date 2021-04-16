@@ -80,6 +80,10 @@ class TestAW1RegistrationHandler(BaseSkillTestCase):
         cls.logger = cls._skill.skill_context.logger
         cls.strategy = cast(Strategy, cls._skill.skill_context.strategy)
 
+        cls.tx_behaviour = cast(
+            TransactionBehaviour, cls._skill.skill_context.behaviours.transaction
+        )
+
         cls.register_dialogues = cast(
             RegisterDialogues, cls._skill.skill_context.register_dialogues
         )
@@ -129,8 +133,8 @@ class TestAW1RegistrationHandler(BaseSkillTestCase):
             f"received invalid register_msg message={incoming_message}, unidentified dialogue.",
         )
 
-    def test_handle_register_is_valid(self):
-        """Test the _handle_register method of the register handler where is_valid is True."""
+    def test_handle_register_is_valid_i(self):
+        """Test the _handle_register method of the register handler where is_valid is True and NOT in developer_only_mode."""
         # setup
         incoming_message = cast(
             RegisterMessage,
@@ -193,6 +197,55 @@ class TestAW1RegistrationHandler(BaseSkillTestCase):
 
         assert contract_api_dialogue.terms == self.terms
         assert contract_api_dialogue.associated_register_dialogue == register_dialogue
+
+    def test_handle_register_is_valid_ii(self):
+        """Test the _handle_register method of the register handler where is_valid is True and IN developer_only_mode."""
+        # setup
+        self.strategy.developer_handle_only = True
+
+        incoming_message = cast(
+            RegisterMessage,
+            self.build_incoming_message(
+                message_type=RegisterMessage,
+                performative=RegisterMessage.Performative.REGISTER,
+                info=self.info,
+            ),
+        )
+
+        # operation
+        with patch.object(
+            self.strategy, "valid_registration", return_value=(True, 0, "all good!"),
+        ) as mock_valid:
+            with patch.object(
+                self.strategy, "lock_registration_temporarily"
+            ) as mock_lock:
+                with patch.object(
+                    self.strategy, "get_terms", return_value=self.terms
+                ) as mock_terms:
+                    with patch.object(
+                        self.strategy, "finalize_registration"
+                    ) as mock_finalize:
+                        with patch.object(self.logger, "log") as mock_logger:
+                            self.register_handler.handle(incoming_message)
+
+        # after
+        self.assert_quantity_in_outbox(0)
+
+        mock_valid.called_once()
+        mock_lock.called_once()
+        mock_terms.called_once()
+
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"valid registration={incoming_message.info}. Verifying if tokens staked.",
+        )
+
+        mock_finalize.assert_called_once()
+        register_dialogue = cast(
+            RegisterDialogue, self.register_dialogues.get_dialogue(incoming_message)
+        )
+        assert register_dialogue.terms == self.terms
+        assert register_dialogue in self.tx_behaviour.waiting
 
     def test_handle_register_is_not_valid(self):
         """Test the _handle_register method of the register handler where is_valid is False."""

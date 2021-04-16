@@ -88,9 +88,11 @@ class TestAW1RegistrationHandler(RegiatrationAW1TestCase):
             f"received invalid register_msg message={incoming_message}, unidentified dialogue.",
         )
 
-    def test_handle_success(self):
-        """Test the _handle_success method of the registration_aw1 handler."""
+    def test_handle_success_i(self):
+        """Test the _handle_success method of the registration_aw1 handler where announce_termination_key IS None."""
         # setup
+        self.strategy.announce_termination_key = None
+
         register_dialogue = cast(
             RegisterDialogue,
             self.prepare_skill_dialogue(
@@ -127,6 +129,51 @@ class TestAW1RegistrationHandler(RegiatrationAW1TestCase):
         assert self.strategy.is_registered is True
         assert self.strategy.is_registration_pending is False
         assert self.strategy.is_ready_to_register is False
+
+    def test_handle_success_ii(self):
+        """Test the _handle_success method of the registration_aw1 handler where announce_termination_key is NOT None."""
+        # setup
+        key = "some_key"
+        self.strategy.announce_termination_key = key
+
+        register_dialogue = cast(
+            RegisterDialogue,
+            self.prepare_skill_dialogue(
+                dialogues=self.register_dialogues,
+                messages=self.list_of_messages,
+                is_agent_to_agent_messages=True,
+            ),
+        )
+        incoming_message = cast(
+            RegisterMessage,
+            self.build_incoming_message_for_skill_dialogue(
+                dialogue=register_dialogue,
+                performative=RegisterMessage.Performative.SUCCESS,
+                info={"transaction_digest": "some_transaction_digest"},
+            ),
+        )
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger:
+            self.register_handler.handle(incoming_message)
+
+        # after
+        self.assert_quantity_in_outbox(0)
+
+        mock_logger.assert_any_call(
+            logging.DEBUG,
+            f"received register_msg success message={incoming_message} in dialogue={register_dialogue}.",
+        )
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received register message success, info={incoming_message.info}. Stop me now!",
+        )
+
+        assert self.strategy.is_registered is True
+        assert self.strategy.is_registration_pending is False
+        assert self.strategy.is_ready_to_register is False
+
+        assert self.skill.skill_context.shared_state[key] is True
 
     def test_handle_error(self):
         """Test the _handle_error method of the registration_aw1 handler."""
