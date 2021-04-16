@@ -90,7 +90,9 @@ class AggregationHandler(Handler):
         ):
             self._handle_aggregation(aggregation_msg)
         else:
-            self._handle_invalid(aggregation_msg, aggregation_dialogue)
+            self._handle_invalid(
+                aggregation_msg, aggregation_dialogue
+            )  # pragma: nocover
 
     def _handle_unidentified_dialogue(
         self, aggregation_msg: AggregationMessage
@@ -164,7 +166,7 @@ class AggregationHandler(Handler):
             "cannot handle aggregation message of performative={} in dialogue={}.".format(
                 aggregation_msg.performative, aggregation_dialogue
             )
-        )
+        )  # pragma: nocover
 
     def teardown(self) -> None:
         """

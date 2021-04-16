@@ -191,6 +191,8 @@ class TestSimpleAggregationSkill(AEATestCaseManyFlaky):
                 missing_strings == []
             ), "Strings {} didn't appear in aea output.".format(missing_strings)
 
+        for agent in agents:
+            self.set_agent_context(agent)
             check_strings = (
                 "setting up HttpHandler",
                 "setting up PrometheusHandler",
@@ -206,7 +208,7 @@ class TestSimpleAggregationSkill(AEATestCaseManyFlaky):
                 "sending observation to peer=",
                 "received observation from sender=",
                 "Observations:",
-                "Average:",
+                "Aggregation (mean):",
             )
             missing_strings = self.missing_from_output(
                 aea_processes[0], check_strings, timeout=30, is_terminating=False

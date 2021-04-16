@@ -72,6 +72,15 @@ class SearchBehaviour(TickerBehaviour):
         )
         self.context.outbox.put_message(message=oef_search_msg)
 
+    def teardown(self) -> None:
+        """
+        Implement the task teardown.
+
+        :return: None
+        """
+        self._unregister_service()
+        self._unregister_agent()
+
     def _register_agent(self) -> None:
         """
         Register the agent's location.

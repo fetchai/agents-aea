@@ -54,7 +54,7 @@ DEFAULT_SEARCH_QUERY = {
     "search_value": "aggregation",
     "constraint_type": "==",
 }
-IMPLEMENTED_AGGREGATION_FUCNTIONS = {"mean", "median", "mode"}
+IMPLEMENTED_AGGREGATION_FUNCTIONS = {"mean", "median", "mode"}
 
 
 class AggregationStrategy(Model):
@@ -67,8 +67,6 @@ class AggregationStrategy(Model):
         :return: None
         """
 
-        super().__init__(**kwargs)
-
         self._round = 0
         self._peers = set()  # type: Set[Address]
         self._observations = dict()  # type: Dict[Address, Dict[str, Any]]
@@ -76,14 +74,14 @@ class AggregationStrategy(Model):
 
         self._quantity_name = kwargs.pop("quantity_name", DEFAULT_QUANTITY_NAME)
         self._service_id = kwargs.pop("service_id", DEFAULT_SERVICE_ID)
-        aggregation_function = kwargs.pop(
+        self._aggregation_function = kwargs.pop(
             "aggregation_function", DEFAULT_AGGREGATION_FUNCTION
         )
         enforce(
-            aggregation_function in IMPLEMENTED_AGGREGATION_FUCNTIONS,
-            f"aggregation_function must be one of {IMPLEMENTED_AGGREGATION_FUCNTIONS}",
+            self._aggregation_function in IMPLEMENTED_AGGREGATION_FUNCTIONS,
+            f"aggregation_function must be one of {IMPLEMENTED_AGGREGATION_FUNCTIONS}",
         )
-        self._aggregate = getattr(statistics, aggregation_function)
+        self._aggregate = getattr(statistics, self._aggregation_function)
 
         self._search_query = kwargs.pop("search_query", DEFAULT_SEARCH_QUERY)
         location = kwargs.pop("location", DEFAULT_LOCATION)
@@ -121,6 +119,8 @@ class AggregationStrategy(Model):
         self._simple_service_data = {
             self._set_service_data["key"]: self._set_service_data["value"]
         }
+
+        super().__init__(**kwargs)
 
         ledger_id = kwargs.pop("ledger_id", None)
         self._ledger_id = (
@@ -182,7 +182,9 @@ class AggregationStrategy(Model):
         self._aggregation = self._aggregate(values)
         self.context.shared_state["aggregation"] = self._aggregation
         self.context.logger.info(f"Observations: {values}")
-        self.context.logger.info(f"Average: {self._aggregation}")
+        self.context.logger.info(
+            f"Aggregation ({self._aggregation_function}): {self._aggregation}"
+        )
 
     def get_location_description(self) -> Description:
         """
