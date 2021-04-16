@@ -29,7 +29,6 @@ from aea.helpers.search.generic import (
     AGENT_PERSONALITY_MODEL,
     AGENT_REMOVE_SERVICE_MODEL,
     AGENT_SET_SERVICE_MODEL,
-    SIMPLE_SERVICE_MODEL,
 )
 from aea.helpers.search.models import (
     Constraint,
@@ -130,7 +129,7 @@ class AggregationStrategy(Model):
     @property
     def ledger_id(self) -> str:
         """Get the ledger id."""
-        return self._ledger_id
+        return self._ledger_id  # pragma: nocover
 
     @property
     def observation(self) -> Optional[Dict[str, Any]]:
@@ -176,7 +175,7 @@ class AggregationStrategy(Model):
     def aggregate_observations(self) -> None:
         """Aggregate values from all observations from myself and peers"""
         values = [float(obs["value"]) for obs in self._observations.values()]
-        if len(values) == 0:
+        if len(values) == 0:  # pragma: nocover
             self.context.logger.info("No observations to aggregate")
             return
         self._aggregation = self._aggregate(values)
@@ -230,17 +229,6 @@ class AggregationStrategy(Model):
         )
         return description
 
-    def get_service_description(self) -> Description:
-        """
-        Get the simple service description.
-
-        :return: a description of the offered services
-        """
-        description = Description(
-            self._simple_service_data, data_model=SIMPLE_SERVICE_MODEL,
-        )
-        return description
-
     def get_unregister_service_description(self) -> Description:
         """
         Get the unregister service description.
@@ -272,20 +260,4 @@ class AggregationStrategy(Model):
             ),
         )
         query = Query([close_to_my_service, service_key_filter],)
-        return query
-
-    def get_service_query(self) -> Query:
-        """
-        Get the service query of the agent.
-
-        :return: the query
-        """
-        service_key_filter = Constraint(
-            self._search_query["search_key"],
-            ConstraintType(
-                self._search_query["constraint_type"],
-                self._search_query["search_value"],
-            ),
-        )
-        query = Query([service_key_filter], model=SIMPLE_SERVICE_MODEL)
         return query

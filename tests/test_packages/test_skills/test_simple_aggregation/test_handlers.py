@@ -250,6 +250,56 @@ class TestOefSearchHandler(BaseSkillTestCase):
             f"received oef_search error message={incoming_message} in dialogue={oef_dialogue}.",
         )
 
+    def test_handle_search_no_agents(self):
+        """Test the _handle_search method of the oef_search handler."""
+        # setup
+        oef_dialogue = self.prepare_skill_dialogue(
+            dialogues=self.oef_dialogues, messages=self.list_of_messages[:1],
+        )
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
+            dialogue=oef_dialogue,
+            performative=OefSearchMessage.Performative.SEARCH_RESULT,
+            agents=tuple(),
+            agents_info=OefSearchMessage.AgentsInfo({}),
+        )
+
+        # operation
+        with patch.object(self.oef_search_handler.context.logger, "log") as mock_logger:
+            self.oef_search_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"found no agents in dialogue={oef_dialogue}, continue searching.",
+        )
+
+    def test_handle_search_found_agents(self):
+        """Test the _handle_search method of the oef_search handler."""
+        # setup
+        oef_dialogue = self.prepare_skill_dialogue(
+            dialogues=self.oef_dialogues, messages=self.list_of_messages[:1],
+        )
+        agents = ("agnt1", "agnt2")
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
+            dialogue=oef_dialogue,
+            performative=OefSearchMessage.Performative.SEARCH_RESULT,
+            agents=agents,
+            agents_info=OefSearchMessage.AgentsInfo(
+                {"agent_1": {"key_1": "value_1"}, "agent_2": {"key_2": "value_2"}}
+            ),
+        )
+
+        # operation
+        with patch.object(self.oef_search_handler.context.logger, "log") as mock_logger:
+            self.oef_search_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(logging.INFO, f"found agents={list(agents)}.")
+
+        assert len(self.strategy._peers) == 2
+        for agent in agents:
+            assert agent in self.strategy._peers
+
     def test_handle_invalid(self):
         """Test the _handle_invalid method of the oef_search handler."""
         # setup
