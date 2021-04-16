@@ -43,6 +43,7 @@ JSON_PATHS = [
     "result.price",
     "bitcoin.usd",
 ]
+SERVICE_ID = "generic_aggregation_service"
 
 
 @pytest.mark.integration
@@ -99,6 +100,14 @@ class TestSimpleAggregationSkill(AEATestCaseManyFlaky):
             self.set_config(
                 "vendor.fetchai.skills.simple_aggregation.models.strategy.args.aggregation_function",
                 "mean",
+            )
+            self.set_config(
+                "vendor.fetchai.skills.simple_aggregation.models.strategy.args.search_query.search_value",
+                SERVICE_ID,
+            )
+            self.set_config(
+                "vendor.fetchai.skills.simple_aggregation.models.strategy.args.service_id",
+                SERVICE_ID,
             )
 
             self.generate_private_key(FetchAICrypto.identifier)

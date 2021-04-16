@@ -85,6 +85,13 @@ aea config set vendor.fetchai.skills.simple_aggregation.models.strategy.args.qua
 aea config set vendor.fetchai.skills.simple_aggregation.models.strategy.args.aggregation_function mean
 ```
 
+Specify a name for your aggregation service:
+``` bash
+SERVICE_ID=my_btc_aggregation_service
+aea config set vendor.fetchai.skills.simple_aggregation.models.strategy.args.service_id $SERVICE_ID
+aea config set vendor.fetchai.skills.simple_aggregation.models.strategy.args.search_query.search_value $SERVICE_ID
+```
+
 Additionally, create private keys for use with the ledger the peer-to-peer connection:
 ``` bash
 aea generate-key fetchai

@@ -43,14 +43,14 @@ from aea.skills.base import Model
 DEFAULT_SEARCH_RADIUS = 5.0
 DEFAULT_SERVICE_ID = "aggregation"
 DEFAULT_AGGREGATION_FUNCTION = "mean"
-DEFAULT_SERVICE_DATA = {"key": "service", "value": "aggregation"}
+DEFAULT_SERVICE_DATA = {"key": "service", "value": "generic_aggregation_service"}
 DEFAULT_QUANTITY_NAME = "quantity"
 DEFAULT_PERSONALITY_DATA = {"piece": "genus", "value": "data"}
 DEFAULT_CLASSIFICATION = {"piece": "classification", "value": "agent"}
 DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
 DEFAULT_SEARCH_QUERY = {
     "search_key": "service",
-    "search_value": "aggregation",
+    "search_value": "generic_aggregation_service",
     "constraint_type": "==",
 }
 IMPLEMENTED_AGGREGATION_FUNCTIONS = {"mean", "median", "mode"}

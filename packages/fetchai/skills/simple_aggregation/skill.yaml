@@ -11,7 +11,7 @@ fingerprint:
   behaviours.py: QmekLZAoSRBcu39eNxFMPJYaKo6DnwGNBRR64HGqfAALf7
   dialogues.py: QmaAnWJHSrAVqbswjGpJ9ukBA2QDdXxJAy33Gtabet3Bny
   handlers.py: QmZXG4YLsoYDWWPgZLhAusQsfFaNC6muHYdUiS5tW7MtoD
-  strategy.py: QmPQYNZnKnUK6Qg2bEvFLiaxiQyvti61aiZvWVHLNxTrPd
+  strategy.py: QmdTfLQsZK56cC57vPJCck8bAoPixBuV6sdihNNcdwokWj
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
@@ -55,9 +55,9 @@ models:
       search_query:
         constraint_type: ==
         search_key: service
-        search_value: aggregation
+        search_value: generic_aggregation_service
       search_radius: 5.0
-      service_id: aggregation
+      service_id: generic_aggregation_service
     class_name: AggregationStrategy
 dependencies: {}
 is_abstract: false

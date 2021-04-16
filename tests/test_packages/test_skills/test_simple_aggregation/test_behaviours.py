@@ -75,10 +75,6 @@ class TestAggregationBehaviour(BaseSkillTestCase):
     def test_act(self):
         """Test the act method of the aggregation behaviour."""
 
-        strategy = cast(
-            AggregationStrategy, self.aggregation_behaviour.context.strategy
-        )
-
         with patch.object(
             self.aggregation_behaviour.context.logger, "log"
         ) as mock_logger:
@@ -94,8 +90,8 @@ class TestAggregationBehaviour(BaseSkillTestCase):
             "observation"
         ] = DATA_REQUEST_OBS
 
-        strategy.add_peers(PEERS)
-        assert all([peer in strategy.peers for peer in PEERS])
+        self.aggregation_strategy.add_peers(PEERS)
+        assert all([peer in self.aggregation_strategy.peers for peer in PEERS])
 
         with patch.object(
             self.aggregation_behaviour.context.logger, "log"
@@ -109,7 +105,7 @@ class TestAggregationBehaviour(BaseSkillTestCase):
             logging.INFO, f"sending observation to peer={PEERS[1]}",
         )
 
-        obs = strategy.observation
+        obs = self.aggregation_strategy.observation
         assert obs["value"] == OBSERVATION["value"]
 
         # test broadcast_observation
