@@ -162,12 +162,6 @@ class Strategy(Model):
         :param sender: the sender
         :return: tuple of success, error code and error message
         """
-        if not all([key in registration_info for key in DEVELOPER_ONLY_REQUIRED_KEYS]):
-            return (
-                False,
-                1,
-                f"missing keys in registration info, required: {DEVELOPER_ONLY_REQUIRED_KEYS}!",
-            )
         if not sender == registration_info["fetchai_address"]:
             return (
                 False,
@@ -193,11 +187,19 @@ class Strategy(Model):
         :param sender: the sender
         :return: tuple of success, error code and error message
         """
-        is_valid, error_code, error_msg = self._valid_registration_developer_only(
-            registration_info, sender
-        )
+        if self.developer_handle_only:
+            if not all(
+                [key in registration_info for key in DEVELOPER_ONLY_REQUIRED_KEYS]
+            ):
+                return (
+                    False,
+                    1,
+                    f"missing keys in registration info, required: {DEVELOPER_ONLY_REQUIRED_KEYS}!",
+                )
 
-        if self.developer_handle_only or not is_valid:
+            is_valid, error_code, error_msg = self._valid_registration_developer_only(
+                registration_info, sender
+            )
             return (is_valid, error_code, error_msg)
 
         if not all([key in registration_info for key in REQUIRED_KEYS]):
@@ -206,6 +208,12 @@ class Strategy(Model):
                 1,
                 f"missing keys in registration info, required: {REQUIRED_KEYS}!",
             )
+        is_valid, error_code, error_msg = self._valid_registration_developer_only(
+            registration_info, sender
+        )
+        if not is_valid:
+            return (is_valid, error_code, error_msg)
+
         if not self._valid_signature(
             registration_info["ethereum_address"],
             registration_info["signature_of_fetchai_address"],

@@ -62,7 +62,6 @@ class TestStrategy(RegiatrationAW1TestCase):
             "developer_handle": self.developer_handle,
             "tweet": self.tweet,
         }
-
         assert self.strategy.registration_info == info_i
 
         self.strategy._tweet = "PUT_THE_LINK_TO_YOUR_TWEET_HERE"
@@ -73,5 +72,11 @@ class TestStrategy(RegiatrationAW1TestCase):
             "signature_of_fetchai_address": self.signature_of_fetchai_address,
             "developer_handle": self.developer_handle,
         }
-
         assert self.strategy.registration_info == info_ii
+
+        info_iii = {
+            "fetchai_address": self.skill.skill_context.agent_address,
+            "developer_handle": self.developer_handle,
+        }
+        self.strategy.developer_handle_only = True
+        assert self.strategy.registration_info == info_iii
