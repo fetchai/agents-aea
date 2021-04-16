@@ -231,15 +231,30 @@ def test_build_dir_not_set():
 @pytest.mark.asyncio
 async def test_reconnect_on_write_failed():
     """Test node restart on write fail."""
+    host = "localhost"
+    port = "10000"
+    with patch(
+        "packages.fetchai.connections.p2p_libp2p.connection.P2PLibp2pConnection._check_node_built"
+    ), patch("tests.conftest.build_node"), tempfile.TemporaryDirectory() as data_dir:
+        con = _make_libp2p_connection(
+            port=port, host=host, data_dir=data_dir, build_directory=data_dir
+        )
+
     node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
+    con.node = node
     node.pipe = Mock()
     node.pipe.write = Mock(side_effect=Exception("expected"))
+    con._node_client = node.get_client()
     f = Future()
     f.set_result(None)
-    with patch.object(node, "restart", return_value=f) as restart_mock, pytest.raises(
+    with patch.object(
+        con, "_restart_node", return_value=f
+    ) as restart_mock, patch.object(
+        con, "_ensure_valid_envelope_for_external_comms"
+    ), pytest.raises(
         Exception, match="expected"
     ):
-        await node.write(b"some_data")
+        await con.send(Mock())
 
     assert node.pipe.write.call_count == 2
     restart_mock.assert_called_once()
@@ -248,15 +263,28 @@ async def test_reconnect_on_write_failed():
 @pytest.mark.asyncio
 async def test_reconnect_on_read_failed():
     """Test node restart on read fail."""
+    host = "localhost"
+    port = "10000"
+    with patch(
+        "packages.fetchai.connections.p2p_libp2p.connection.P2PLibp2pConnection._check_node_built"
+    ), patch("tests.conftest.build_node"), tempfile.TemporaryDirectory() as data_dir:
+        con = _make_libp2p_connection(
+            port=port, host=host, data_dir=data_dir, build_directory=data_dir
+        )
     node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
+    con.node = node
     node.pipe = Mock()
     node.pipe.read = Mock(side_effect=Exception("expected"))
+    con._node_client = node.get_client()
     f = Future()
     f.set_result(None)
-    with patch.object(node, "restart", return_value=f) as restart_mock:
-        result = await node.read()
+    with patch.object(
+        con, "_restart_node", return_value=f
+    ) as restart_mock, pytest.raises(Exception, match="expected"):
+        await con._read_envelope_from_node()
 
-    assert result is None
+    assert node.pipe.read.call_count == 2
+    restart_mock.assert_called_once()
 
     assert node.pipe.read.call_count == 2
     restart_mock.assert_called_once()

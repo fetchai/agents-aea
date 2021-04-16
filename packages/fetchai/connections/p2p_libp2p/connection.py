@@ -126,6 +126,44 @@ def _golang_module_run(
     return proc
 
 
+class NodeClient:
+    def __init__(self, pipe: IPCChannel):
+        self.pipe = pipe
+
+    async def connect(self) -> bool:
+        return await self.pipe.connect()
+
+    async def register(self):
+        pass
+
+    async def send_envelope(self, envelope: Envelope):
+        await self._write(envelope.encode())
+
+    async def read_envelope(self) -> Optional[Envelope]:
+        data = await self._read()
+
+        if not data:
+            return None
+
+        return Envelope.decode(data)
+
+    async def _write(self, data: bytes) -> None:
+        """
+        Write to the writer stream.
+
+        :param data: data to write to stream
+        """
+        await self.pipe.write(data)
+
+    async def _read(self) -> Optional[bytes]:
+        """
+        Read from the reader stream.
+
+        :return: bytes
+        """
+        return await self.pipe.read()
+
+
 class Libp2pNode:
     """Libp2p p2p node as a subprocess with named pipes interface."""
 
@@ -225,13 +263,73 @@ class Libp2pNode:
         self.proc = None  # type: Optional[subprocess.Popen]
         self._log_file_desc = None  # type: Optional[IO[str]]
 
-        self._config = ""
         self.logger = logger
         self._connection_timeout = (
             connection_timeout if connection_timeout is not None else PIPE_CONN_TIMEOUT
         )
         self._max_restarts = max_restarts
         self._restart_counter: int = 0
+
+    def _make_env_file(self, pipe_in_path: str, pipe_out_path: str) -> str:
+        # setup config
+        if os.path.exists(self.env_file):
+            os.remove(self.env_file)  # pragma: nocover
+
+        config = ""
+        config += "AEA_AGENT_ADDR={}\n".format(self.address)
+        config += "AEA_P2P_ID={}\n".format(self.key)
+        config += "AEA_P2P_URI={}\n".format(str(self.uri))
+        config += "AEA_P2P_ENTRY_URIS={}\n".format(
+            ",".join(
+                [
+                    str(maddr)
+                    for maddr in self.entry_peers
+                    if str(maddr) != str(self.uri)  # TOFIX(LR) won't exclude self
+                ]
+            )
+        )
+        config += "NODE_TO_AEA={}\n".format(pipe_in_path)
+        config += "AEA_TO_NODE={}\n".format(pipe_out_path)
+        config += "AEA_P2P_URI_PUBLIC={}\n".format(
+            str(self.public_uri) if self.public_uri is not None else ""
+        )
+        config += "AEA_P2P_DELEGATE_URI={}\n".format(
+            str(self.delegate_uri) if self.delegate_uri is not None else ""
+        )
+        config += "AEA_P2P_URI_MONITORING={}\n".format(
+            str(self.monitoring_uri) if self.monitoring_uri is not None else ""
+        )
+        config += "AEA_P2P_POR_ADDRESS={}\n".format(self.record.address)
+        config += "AEA_P2P_POR_PUBKEY={}\n".format(self.record.public_key)
+        config += "AEA_P2P_POR_PEER_PUBKEY={}\n".format(
+            self.record.representative_public_key
+        )
+        config += "AEA_P2P_POR_SIGNATURE={}\n".format(self.record.signature)
+        config += "AEA_P2P_POR_SERVICE_ID={}\n".format(POR_DEFAULT_SERVICE_ID)
+        config += "AEA_P2P_POR_LEDGER_ID={}\n".format(self.record.ledger_id)
+        config += "AEA_P2P_CFG_REGISTRATION_DELAY={}\n".format(
+            str(self.peer_registration_delay)
+            if self.peer_registration_delay is not None
+            else str(0.0)
+        )
+        config += "AEA_P2P_CFG_STORAGE_PATH={}\n".format(
+            self.records_storage_path if self.records_storage_path is not None else ""
+        )
+
+        with open(self.env_file, "w") as env_file:  # overwrite if exists
+            env_file.write(config)
+
+        return config
+
+    async def _check_connection_to_node(self) -> bool:
+        if self.pipe is None:
+            raise Exception("pipe was not set")
+        return await self.pipe.connect(timeout=self._connection_timeout)
+
+    def get_client(self) -> NodeClient:
+        if self.pipe is None:
+            raise Exception("pipe was not set")
+        return NodeClient(self.pipe)
 
     async def start(self) -> None:
         """
@@ -246,57 +344,12 @@ class Libp2pNode:
         self._log_file_desc.write("test")
         self._log_file_desc.flush()
 
-        # setup fifos
+        # setup fifos or tcp socket on windows
         self.pipe = make_ipc_channel(logger=self.logger)
 
-        # setup config
-        if os.path.exists(self.env_file):
-            os.remove(self.env_file)  # pragma: nocover
-        self._config = ""
-        with open(self.env_file, "a") as env_file:
-            self._config += "AEA_AGENT_ADDR={}\n".format(self.address)
-            self._config += "AEA_P2P_ID={}\n".format(self.key)
-            self._config += "AEA_P2P_URI={}\n".format(str(self.uri))
-            self._config += "AEA_P2P_ENTRY_URIS={}\n".format(
-                ",".join(
-                    [
-                        str(maddr)
-                        for maddr in self.entry_peers
-                        if str(maddr) != str(self.uri)  # TOFIX(LR) won't exclude self
-                    ]
-                )
-            )
-            self._config += "NODE_TO_AEA={}\n".format(self.pipe.in_path)
-            self._config += "AEA_TO_NODE={}\n".format(self.pipe.out_path)
-            self._config += "AEA_P2P_URI_PUBLIC={}\n".format(
-                str(self.public_uri) if self.public_uri is not None else ""
-            )
-            self._config += "AEA_P2P_DELEGATE_URI={}\n".format(
-                str(self.delegate_uri) if self.delegate_uri is not None else ""
-            )
-            self._config += "AEA_P2P_URI_MONITORING={}\n".format(
-                str(self.monitoring_uri) if self.monitoring_uri is not None else ""
-            )
-            self._config += "AEA_P2P_POR_ADDRESS={}\n".format(self.record.address)
-            self._config += "AEA_P2P_POR_PUBKEY={}\n".format(self.record.public_key)
-            self._config += "AEA_P2P_POR_PEER_PUBKEY={}\n".format(
-                self.record.representative_public_key
-            )
-            self._config += "AEA_P2P_POR_SIGNATURE={}\n".format(self.record.signature)
-            self._config += "AEA_P2P_POR_SERVICE_ID={}\n".format(POR_DEFAULT_SERVICE_ID)
-            self._config += "AEA_P2P_POR_LEDGER_ID={}\n".format(self.record.ledger_id)
-            self._config += "AEA_P2P_CFG_REGISTRATION_DELAY={}\n".format(
-                str(self.peer_registration_delay)
-                if self.peer_registration_delay is not None
-                else str(0.0)
-            )
-            self._config += "AEA_P2P_CFG_STORAGE_PATH={}\n".format(
-                self.records_storage_path
-                if self.records_storage_path is not None
-                else ""
-            )
-            env_file.write(self._config)
-
+        env_file_data = self._make_env_file(
+            pipe_in_path=self.pipe.in_path, pipe_out_path=self.pipe.out_path
+        )
         # run node
         self.logger.info("Starting libp2p node...")
         self.proc = _golang_module_run(
@@ -306,14 +359,14 @@ class Libp2pNode:
         self.logger.info("Connecting to libp2p node...")
 
         try:
-            connected = await self.pipe.connect(timeout=self._connection_timeout)
+            connected = await self._check_connection_to_node()
             if not connected:
                 raise Exception("Couldn't connect to libp2p process within timeout")
         except Exception as e:
             err_msg = self.get_libp2p_node_error()
             self.logger.error("Couldn't connect to libp2p process: {}".format(err_msg))
             self.logger.error(
-                "Libp2p process configuration:\n{}".format(self._config.strip())
+                "Libp2p process configuration:\n{}".format(env_file_data.strip())
             )
             if err_msg == "":
                 with open(self.log_file, "r") as f:
@@ -341,47 +394,6 @@ class Libp2pNode:
         await self.stop()
         await self.start()
         self._restart_counter += 1
-
-    async def write(self, data: bytes) -> None:
-        """
-        Write to the writer stream.
-
-        :param data: data to write to stream
-        """
-        if self.pipe is None:
-            raise ValueError("pipe is not set.")  # pragma: nocover
-
-        try:
-            await self.pipe.write(data)
-        except Exception:  # pylint: disable=broad-except
-            self.logger.exception(
-                "Exception raised on message write. Try reconnect to node and write again."
-            )
-            await self.restart()
-            await self.pipe.write(data)
-
-    async def read(self) -> Optional[bytes]:
-        """
-        Read from the reader stream.
-
-        :return: bytes
-        """
-        if self.pipe is None:
-            raise ValueError("pipe is not set.")  # pragma: nocover
-        try:
-            return await self.pipe.read()
-        except Exception as e:  # pylint: disable=broad-except
-            self.logger.exception(
-                f"Failed to read. Exception: {e}. Try reconnect to node and read again."
-            )
-            await self.restart()
-            try:
-                return await self.pipe.read()
-            except Exception:  # pragma: nocover pylint: disable=broad-except
-                self.logger.exception(
-                    f"Failed to read after node restart. Exception: {e}."
-                )
-                return None
 
     def describe_configuration(self) -> None:
         """Print a message describing the libp2p node configuration"""
@@ -413,7 +425,6 @@ class Libp2pNode:
 
         multiaddrs = []  # type: List[MultiAddr]
 
-        lines = []
         with open(self.log_file, "r") as f:
             lines = f.readlines()
 
@@ -444,7 +455,6 @@ class Libp2pNode:
         error_msg = ""
         panic_msg = ""
 
-        lines = []
         with open(self.log_file, "r") as f:
             lines = f.readlines()
 
@@ -633,6 +643,7 @@ class P2PLibp2pConnection(Connection):
 
         self._in_queue = None  # type: Optional[asyncio.Queue]
         self._receive_from_node_task = None  # type: Optional[asyncio.Future]
+        self._node_client: Optional[NodeClient] = None
 
     def _check_node_built(self) -> str:
         """Check node built."""
@@ -660,7 +671,7 @@ class P2PLibp2pConnection(Connection):
             # start libp2p node
             self.state = ConnectionStates.connecting
             self.node.logger = self.logger
-            await self.node.start()
+            await self._start_node()
             # starting receiving msgs
             self._in_queue = asyncio.Queue()
             self._receive_from_node_task = asyncio.ensure_future(
@@ -670,6 +681,14 @@ class P2PLibp2pConnection(Connection):
         except (CancelledError, Exception) as e:
             self.state = ConnectionStates.disconnected
             raise e
+
+    async def _start_node(self):
+        await self.node.start()
+        self._node_client = self.node.get_client()
+
+    async def _restart_node(self):
+        await self.node.stop()
+        await self._start_node()
 
     async def disconnect(self) -> None:
         """
@@ -701,12 +720,11 @@ class P2PLibp2pConnection(Connection):
         try:
             if self._in_queue is None:
                 raise ValueError("Input queue not initialized.")  # pragma: nocover
-            data = await self._in_queue.get()
-            if data is None:
+            envelope = await self._in_queue.get()
+            if envelope is None:
                 self.logger.debug("Received None.")
                 return None
-            self.logger.debug("Received data: {}".format(data))
-            return Envelope.decode(data)
+            return envelope
         except CancelledError:  # pragma: no cover
             self.logger.debug("Receive cancelled.")
             return None
@@ -720,8 +738,35 @@ class P2PLibp2pConnection(Connection):
 
         :return: None
         """
+        if not self._node_client:
+            raise ValueError("Node is not connected!")  # pragma: nocover
+
         self._ensure_valid_envelope_for_external_comms(envelope)
-        await self.node.write(envelope.encode())
+        try:
+            await self._node_client.send_envelope(envelope)
+        except asyncio.CancelledError:
+            raise
+        except Exception as e:
+            self.logger.exception(
+                f"Failed to send. Exception: {e}. Try reconnect to node and read again."
+            )
+            await self._restart_node()
+            await self._node_client.send_envelope(envelope)
+
+    async def _read_envelope_from_node(self) -> Optional[Envelope]:
+        if not self._node_client:
+            raise ValueError("Node is not connected!")  # pragma: nocover
+        try:
+            return await self._node_client.read_envelope()
+        except asyncio.CancelledError:
+            raise
+        except Exception as e:
+            self.logger.exception(
+                f"Failed to read. Exception: {e}. Try reconnect to node and read again."
+            )
+
+            self._restart_node()
+            return await self._node_client.read_envelope()
 
     async def _receive_from_node(self) -> None:
         """
@@ -730,9 +775,12 @@ class P2PLibp2pConnection(Connection):
         :return: None
         """
         while True:
-            data = await self.node.read()
             if self._in_queue is None:
                 raise ValueError("Input queue not initialized.")  # pragma: nocover
-            self._in_queue.put_nowait(data)
-            if data is None:
+
+            if not self._node_client:
+                raise ValueError("Node is not connected!")  # pragma: nocover
+            envelope = await self._read_envelope_from_node()
+            if envelope is None:
                 break
+            self._in_queue.put_nowait(envelope)
