@@ -92,7 +92,7 @@ aea config set vendor.fetchai.skills.simple_aggregation.models.strategy.args.ser
 aea config set vendor.fetchai.skills.simple_aggregation.models.strategy.args.search_query.search_value $SERVICE_ID
 ```
 
-Additionally, create private keys for use with the ledger the peer-to-peer connection:
+Additionally, create private keys for use with the ledger and the peer-to-peer connection:
 ``` bash
 aea generate-key fetchai
 aea add-key fetchai
