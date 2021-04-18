@@ -31,12 +31,12 @@ func checkExpectedSize(t *testing.T, set *Set, expectedSize int) {
 }
 
 func checkIn(t *testing.T, set *Set, element Generic) {
-	if !set.In(element) {
+	if !set.Contains(element) {
 		t.Fatalf("expected to find element %s, but not found it", element)
 	}
 }
 func checkNotIn(t *testing.T, set *Set, element Generic) {
-	if set.In(element) {
+	if set.Contains(element) {
 		t.Fatalf("expected to find element %s, but not found it", element)
 	}
 }

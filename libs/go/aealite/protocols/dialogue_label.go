@@ -23,7 +23,6 @@ package protocols
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"strings"
 )
@@ -124,7 +123,7 @@ func (dialogueLabel *DialogueLabel) String() string {
 func (dialogueLabel *DialogueLabel) FromString(s string) error {
 	result := strings.Split(s, DialogueLabelStringSeparator)
 	if length := len(result); length != 4 {
-		return errors.New(fmt.Sprintf("Expected exactly 4 parts, got %d", length))
+		return fmt.Errorf("expected exactly 4 parts, got %d", length)
 	}
 	dialogueLabel.dialogueReference = DialogueReference{result[0], result[1]}
 	dialogueLabel.dialogueOpponentAddress = Address(result[2])

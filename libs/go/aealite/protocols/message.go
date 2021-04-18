@@ -147,32 +147,3 @@ func (message *DialogueMessageWrapper) HasTo() bool {
 func (message *DialogueMessageWrapper) GetField(name string) interface{} {
 	return message.body[name]
 }
-
-//func InitializeMessage(
-//	counterParty Address,
-//	selfAddress Address,
-//	performative Performative,
-//	content []byte,
-//	ref [2]string,
-//	messageId MessageId,
-//	target MessageId,
-//) ProtocolMessageInterface {
-//	var reference [2]string
-//	if ref[0] != "" || ref[1] != "" {
-//		reference = ref
-//	} else {
-//		reference = [2]string{
-//			generateDialogueNonce(), "",
-//		}
-//	}
-//	initialMessage := ProtocolMessageInterface{
-//		dialogueReference: reference,
-//		messageId:         messageId,
-//		target:            target,
-//		performative:      performative,
-//		to:                counterParty,
-//		sender:            selfAddress,
-//		message:           content,
-//	}
-//	return initialMessage
-//}

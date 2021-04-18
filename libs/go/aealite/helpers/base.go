@@ -56,8 +56,8 @@ func (set *Set) Remove(element Generic) {
 	delete(set.container, element)
 }
 
-// In check an element is in the set.
-func (set *Set) In(element Generic) bool {
+// Contains check an element is in the set.
+func (set *Set) Contains(element Generic) bool {
 	val, ok := set.container[element]
 	return val && ok
 }
