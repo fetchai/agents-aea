@@ -29,6 +29,7 @@ import (
 )
 
 type Role string
+type EndStates string
 
 const (
 	NonceBytesNb                           = 32
