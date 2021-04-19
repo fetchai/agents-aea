@@ -20,9 +20,7 @@
 import asyncio
 import logging
 import random
-import struct
 from asyncio import CancelledError
-from contextlib import suppress
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -33,6 +31,8 @@ from aea.crypto.registries import make_crypto
 from aea.exceptions import enforce
 from aea.helpers.acn.agent_record import AgentRecord
 from aea.helpers.acn.uri import Uri
+from aea.helpers.base import SimpleIdOrStr
+from aea.helpers.pipe import IPCChannelClient, TCPSocketChannelClient
 from aea.mail.base import Envelope
 
 from packages.fetchai.protocols.acn import acn_pb2
@@ -56,6 +56,131 @@ SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 POR_DEFAULT_SERVICE_ID = "acn"
 
 ACN_CURRENT_VERSION = "0.1.0"
+
+
+class NodeClient:
+    """Client to communicate with node using ipc channel(pipe)."""
+
+    def __init__(self, pipe: IPCChannelClient, logger: logging.Logger) -> None:
+        """Set node client with pipe."""
+        self.pipe = pipe
+        self._buffer = b""
+        self.logger = logger
+
+    async def connect(self) -> bool:
+        """Connect to node with pipe."""
+        return await self.pipe.connect()
+
+    async def send_envelope(self, envelope: Envelope) -> None:
+        """Send envelope to node."""
+        await self._write(envelope.encode())
+
+    async def read_envelope(self) -> Optional[Envelope]:
+        """Read envelope from the node."""
+        data = await self._read()
+
+        if not data:
+            return None
+
+        return Envelope.decode(data)
+
+    async def _read_to_buffer(self) -> None:
+        """Read data from pipe to internal buffer."""
+        buf = await self.pipe.read()
+        if not buf:
+            return
+        self._buffer += buf
+
+    async def read_message(self) -> Optional[bytes]:
+        """Read message from pipe."""
+        # tcp client will follow message format with size prefix
+        return await self.pipe.read()
+
+    async def write_message(self, data: bytes) -> None:
+        """Write message to pipe."""
+        # tcp client will follow message format with size prefix
+        await self._write(data)
+
+    async def _write(self, data: bytes) -> None:
+        """
+        Write to the writer stream.
+
+        :param data: data to write to stream
+        """
+        await self.pipe.write(data)
+
+    async def _read(self) -> Optional[bytes]:
+        """
+        Read from the reader stream.
+
+        :return: bytes
+        """
+        return await self.pipe.read()
+
+    async def register(
+        self,
+        address: str,
+        public_key: str,
+        peer_public_key: str,
+        signature: str,
+        service_id: SimpleIdOrStr,
+        ledger_id: SimpleIdOrStr,
+    ) -> None:
+        """Register agent on the remote node."""
+        agent_record = AcnMessage.AgentRecord(
+            address=address,
+            public_key=public_key,
+            peer_public_key=peer_public_key,
+            signature=signature,
+            service_id=service_id,
+            ledger_id=ledger_id,
+        )
+
+        acn_msg = acn_pb2.AcnMessage()
+        performative = acn_pb2.AcnMessage.Register_Performative()  # type: ignore
+        AcnMessage.AgentRecord.encode(
+            performative.record, agent_record  # pylint: disable=no-member
+        )
+        acn_msg.register.CopyFrom(performative)  # pylint: disable=no-member
+
+        buf = acn_msg.SerializeToString()
+        await self.write_message(buf)
+
+        self.logger.debug("Waiting for registration message...")
+        try:
+            buf = await self.read_message()
+        except ConnectionError as e:  # pragma: nocover
+            self.logger.error(f"Connection error: {e}.")
+            raise e
+        except IncompleteReadError as e:  # pragma: no cover
+            self.logger.error(
+                "Connection disconnected while reading from node ({}/{})".format(
+                    len(e.partial), e.expected
+                )
+            )
+            raise e
+        if buf is None:  # pragma: nocover
+            raise ConnectionError(
+                "Error on connection setup. Incoming buffer is empty!"
+            )
+        acn_msg = acn_pb2.AcnMessage()
+        acn_msg.ParseFromString(buf)
+        performative = acn_msg.WhichOneof("performative")
+        if performative != "status":  # pragma: nocover
+            raise Exception(f"Wrong response message from peer: {performative}")
+        response = acn_msg.status  # pylint: disable=no-member
+
+        if response.body.code != int(AcnMessage.StatusBody.StatusCode.SUCCESS):  # type: ignore # pylint: disable=no-member
+            raise Exception(  # pragma: nocover
+                "Registration to peer failed: {}".format(
+                    AcnMessage.StatusBody.StatusCode(response.body.code)  # type: ignore # pylint: disable=no-member
+                )
+            )
+
+    async def close(self) -> None:
+        """Close client and pipe."""
+        self._buffer = b""
+        await self.pipe.close()
 
 
 class P2PLibp2pClientConnection(Connection):
@@ -152,6 +277,7 @@ class P2PLibp2pClientConnection(Connection):
 
         self._in_queue = None  # type: Optional[asyncio.Queue]
         self._process_messages_task = None  # type: Optional[asyncio.Future]
+        self._node_client: Optional[NodeClient] = None
 
     async def connect(self) -> None:
         """
@@ -193,15 +319,12 @@ class P2PLibp2pClientConnection(Connection):
                         str(self.node_uri), attempt + 1
                     )
                 )
-
-                # connect the tcp socket
-                self._reader, self._writer = await asyncio.open_connection(
-                    self.node_uri.host,
-                    self.node_uri._port,  # pylint: disable=protected-access
-                    loop=self.loop,
+                pipe = TCPSocketChannelClient(
+                    f"{self.node_uri.host}:{self.node_uri._port}",  # pylint: disable=protected-access
+                    "",
                 )
-
-                # send agent address to node
+                await pipe.connect()
+                self._node_client = NodeClient(pipe, logger=self.logger)
                 await self._setup_connection()
 
                 self.logger.info(
@@ -229,7 +352,9 @@ class P2PLibp2pClientConnection(Connection):
 
     async def _setup_connection(self) -> None:
         """Set up connection to node over tcp connection."""
-        agent_record = AcnMessage.AgentRecord(
+        if not self._node_client:
+            raise ValueError("Connection was not connected!")
+        await self._node_client.register(
             address=self.node_por.address,
             public_key=self.node_por.public_key,
             peer_public_key=self.node_por.representative_public_key,
@@ -237,47 +362,6 @@ class P2PLibp2pClientConnection(Connection):
             service_id=POR_DEFAULT_SERVICE_ID,
             ledger_id=self.node_por.ledger_id,
         )
-
-        acn_msg = acn_pb2.AcnMessage()
-        performative = acn_pb2.AcnMessage.Register_Performative()  # type: ignore
-        AcnMessage.AgentRecord.encode(
-            performative.record, agent_record  # pylint: disable=no-member
-        )
-        acn_msg.register.CopyFrom(performative)  # pylint: disable=no-member
-
-        buf = acn_msg.SerializeToString()
-        await self._send(buf)
-
-        self.logger.debug("Waiting for registration message...")
-        try:
-            buf = await self._read_message_from_reader()
-        except ConnectionError as e:  # pragma: nocover
-            self.logger.error(f"Connection error: {e}.")
-            raise e
-        except IncompleteReadError as e:  # pragma: no cover
-            self.logger.error(
-                "Connection disconnected while reading from node ({}/{})".format(
-                    len(e.partial), e.expected
-                )
-            )
-            raise e
-        if buf is None:  # pragma: nocover
-            raise ConnectionError(
-                "Error on connection setup. Incoming buffer is empty!"
-            )
-        acn_msg = acn_pb2.AcnMessage()
-        acn_msg.ParseFromString(buf)
-        performative = acn_msg.WhichOneof("performative")
-        if performative != "status":  # pragma: nocover
-            raise Exception(f"Wrong response message from peer: {performative}")
-        response = acn_msg.status  # pylint: disable=no-member
-
-        if response.body.code != int(AcnMessage.StatusBody.StatusCode.SUCCESS):  # type: ignore # pylint: disable=no-member
-            raise Exception(  # pragma: nocover
-                "Registration to peer failed: {}".format(
-                    AcnMessage.StatusBody.StatusCode(response.body.code)  # type: ignore # pylint: disable=no-member
-                )
-            )
 
     async def disconnect(self) -> None:
         """
@@ -291,9 +375,6 @@ class P2PLibp2pClientConnection(Connection):
         if self._process_messages_task is None:
             raise ValueError("Message task is not set.")  # pragma: nocover
 
-        if self._writer is None:
-            raise ValueError("Writer is not set.")  # pragma: nocover
-
         self.state = ConnectionStates.disconnecting
         if self._process_messages_task is not None:
             self._process_messages_task.cancel()
@@ -301,11 +382,8 @@ class P2PLibp2pClientConnection(Connection):
 
         self.logger.debug("disconnecting libp2p client connection...")
 
-        with suppress(Exception):
-            # suppress if writer closed already
-            self._writer.write_eof()
-            await self._writer.drain()
-            self._writer.close()
+        if self._node_client is not None:
+            await self._node_client.close()
 
         if self._in_queue is not None:
             self._in_queue.put_nowait(None)
@@ -322,12 +400,12 @@ class P2PLibp2pClientConnection(Connection):
         try:
             if self._in_queue is None:
                 raise ValueError("Input queue not initialized.")  # pragma: nocover
-            data = await self._in_queue.get()
-            if data is None:  # pragma: no cover
+            envelope = await self._in_queue.get()
+            if envelope is None:  # pragma: no cover
                 self.logger.debug("Received None.")
                 return None
-            self.logger.debug("Received data: {}".format(data))
-            return Envelope.decode(data)
+            self.logger.debug("Received envelope: {}".format(envelope))
+            return envelope
         except CancelledError:  # pragma: no cover
             self.logger.debug("Receive cancelled.")
             return None
@@ -341,57 +419,26 @@ class P2PLibp2pClientConnection(Connection):
 
         :return: None
         """
+        if not self._node_client:
+            raise ValueError("Connection not connected to node!")
         self._ensure_valid_envelope_for_external_comms(envelope)
         try:
-            await self._send(envelope.encode())
+            await self._node_client.send_envelope(envelope)
         except Exception:  # pylint: disable=broad-except
             self.logger.exception(
                 "Exception raised on message send. Try reconnect and send again."
             )
             await self._perform_connection_to_node()
-            await self._send(envelope.encode())
+            await self._node_client.send_envelope(envelope)
 
-    async def _process_messages(self) -> None:
-        """
-        Receive data from node.
-
-        :return: None
-        """
-        while True:
-            data = await self._receive()
-            if self._in_queue is None:
-                raise ValueError("Input queue not initialized.")  # pragma: nocover
-            self._in_queue.put_nowait(data)
-            if data is None:
-                break  # pragma: no cover
-
-    async def _send(self, data: bytes) -> None:
-        if self._writer is None:
-            raise ValueError("Writer is not set.")  # pragma: nocover
-        size = struct.pack("!I", len(data))
-        self._writer.write(size)
-        self._writer.write(data)
-        await self._writer.drain()
-
-    async def _read_message_from_reader(self) -> Optional[bytes]:
-        """Try to read message from reader."""
-        if self._reader is None:
-            raise ValueError("Reader is not set.")  # pragma: nocover
-
-        buf = await self._reader.readexactly(4)
-        if not buf:  # pragma: no cover
-            return None
-        size = struct.unpack("!I", buf)[0]
-        data = await self._reader.readexactly(size)
-        if not data:  # pragma: no cover
-            return None
-        return data
-
-    async def _receive(self) -> Optional[bytes]:
-        """Receive binary message."""
+    async def _read_envelope_from_node(self) -> Optional[Envelope]:
+        """Read envelope from node, reconnec on error."""
+        if not self._node_client:
+            raise ValueError("Connection not connected to node!")
         try:
             self.logger.debug("Waiting for messages...")
-            return await self._read_message_from_reader()
+            envelope = await self._node_client.read_envelope()
+            return envelope
         except ConnectionError as e:  # pragma: nocover
             self.logger.error(f"Connection error: {e}. Try to reconnect and read again")
         except IncompleteReadError as e:  # pragma: no cover
@@ -400,9 +447,27 @@ class P2PLibp2pClientConnection(Connection):
                     len(e.partial), e.expected
                 )
             )
+
         try:
             await self._perform_connection_to_node()
-            return await self._read_message_from_reader()
+            envelope = await self._node_client.read_envelope()
+            return envelope
         except Exception:  # pragma: no cover  # pylint: disable=broad-except
             self.logger.exception("Failed to read with reconnect!")
             return None
+
+    async def _process_messages(self) -> None:
+        """
+        Receive data from node.
+
+        :return: None
+        """
+        if not self._node_client:
+            raise ValueError("Connection not connected to node!")
+        while True:
+            envelope = await self._read_envelope_from_node()
+            if self._in_queue is None:
+                raise ValueError("Input queue not initialized.")  # pragma: nocover
+            self._in_queue.put_nowait(envelope)
+            if envelope is None:
+                break  # pragma: no cover

@@ -511,8 +511,13 @@ class TCPSocketChannelClient(IPCChannelClient):
         """
         self.logger = logger
         self._loop = loop
-
-        self._port = int(in_path)
+        if len(in_path.split(":")) == 1:
+            self._port = int(in_path)
+            self._host = "127.0.0.1"
+        else:
+            parts = in_path.split(":")
+            self._port = int(parts[1])
+            self._host = parts[0]
         self._sock = None  # type: Optional[TCPSocketProtocol]
 
         self._attempts = TCP_SOCKET_PIPE_CLIENT_CONN_ATTEMPTS
@@ -538,7 +543,7 @@ class TCPSocketChannelClient(IPCChannelClient):
             self._attempts -= 1
             try:
                 reader, writer = await asyncio.open_connection(
-                    "127.0.0.1",
+                    self._host,
                     self._port,  # pylint: disable=protected-access
                     loop=self._loop,
                 )

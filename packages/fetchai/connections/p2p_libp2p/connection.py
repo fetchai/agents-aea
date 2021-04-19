@@ -127,19 +127,22 @@ def _golang_module_run(
 
 
 class NodeClient:
-    def __init__(self, pipe: IPCChannel):
+    """Client to communicate with node using ipc channel(pipe)."""
+
+    def __init__(self, pipe: IPCChannel) -> None:
+        """Set node client with pipe."""
         self.pipe = pipe
 
     async def connect(self) -> bool:
+        """Connect to node with pipe."""
         return await self.pipe.connect()
 
-    async def register(self):
-        pass
-
-    async def send_envelope(self, envelope: Envelope):
+    async def send_envelope(self, envelope: Envelope) -> None:
+        """Send envelope to node."""
         await self._write(envelope.encode())
 
     async def read_envelope(self) -> Optional[Envelope]:
+        """Read envelope from the node."""
         data = await self._read()
 
         if not data:
@@ -327,6 +330,7 @@ class Libp2pNode:
         return await self.pipe.connect(timeout=self._connection_timeout)
 
     def get_client(self) -> NodeClient:
+        """Get client instance to communicate to node."""
         if self.pipe is None:
             raise Exception("pipe was not set")
         return NodeClient(self.pipe)
@@ -682,11 +686,13 @@ class P2PLibp2pConnection(Connection):
             self.state = ConnectionStates.disconnected
             raise e
 
-    async def _start_node(self):
+    async def _start_node(self) -> None:
+        """Start node and set node client instance."""
         await self.node.start()
         self._node_client = self.node.get_client()
 
-    async def _restart_node(self):
+    async def _restart_node(self) -> None:
+        """Stop and start node again."""
         await self.node.stop()
         await self._start_node()
 
@@ -744,9 +750,9 @@ class P2PLibp2pConnection(Connection):
         self._ensure_valid_envelope_for_external_comms(envelope)
         try:
             await self._node_client.send_envelope(envelope)
-        except asyncio.CancelledError:
+        except asyncio.CancelledError:  # pylint: disable=try-except-raise
             raise
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-except
             self.logger.exception(
                 f"Failed to send. Exception: {e}. Try reconnect to node and read again."
             )
@@ -758,9 +764,9 @@ class P2PLibp2pConnection(Connection):
             raise ValueError("Node is not connected!")  # pragma: nocover
         try:
             return await self._node_client.read_envelope()
-        except asyncio.CancelledError:
+        except asyncio.CancelledError:  # pylint: disable=try-except-raise
             raise
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-except
             self.logger.exception(
                 f"Failed to read. Exception: {e}. Try reconnect to node and read again."
             )

@@ -16,8 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
 """This test module contains tests for Libp2p tcp client connection."""
 import os
 import shutil
@@ -729,7 +727,7 @@ class TestLibp2pClientReconnectionSendEnvelope(BaseTestLibp2pClientReconnection)
         with mock.patch.object(
             self.connection_client_1.logger, "exception"
         ) as _mock_logger, mock.patch.object(
-            self.connection_client_1._writer, "write", side_effect=Exception
+            self.connection_client_1._node_client, "_write", side_effect=Exception
         ):
             self.multiplexer_client_1.put(envelope)
             delivered_envelope = self.multiplexer_client_2.get(block=True, timeout=20)
@@ -760,14 +758,17 @@ class TestLibp2pClientReconnectionReceiveEnvelope(BaseTestLibp2pClientReconnecti
         # make the receive to fail
         with mock.patch.object(
             self.connection_client_1.logger, "error"
-        ) as _mock_logger:
-            self.connection_client_1._reader.set_exception(ConnectionError())
+        ) as _mock_logger, mock.patch.object(
+            self.connection_client_1._node_client,
+            "_read",
+            side_effect=ConnectionError(),
+        ):
             # this envelope will be lost.
             self.multiplexer_client_2.put(envelope)
             # give time to reconnect
             time.sleep(2.0)
             _mock_logger.assert_called_with(
-                RegexComparator(f"Connection error:.*Try to reconnect and read again")
+                RegexComparator("Connection error:.*Try to reconnect and read again")
             )
         # proceed as usual. Now we expect the connection to have reconnected successfully
         self.multiplexer_client_2.put(envelope)
