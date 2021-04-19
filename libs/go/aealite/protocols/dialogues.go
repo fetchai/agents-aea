@@ -53,9 +53,9 @@ func newSelfInitiatedDialogueReference() DialogueReference {
 type Dialogues struct {
 	selfAddress                Address
 	endStates                  helpers.Set
-	message                    *ProtocolMessageInterface // type
-	dialogue                   *Dialogue                 // type
-	roleFromFirstMessage       func(*ProtocolMessageInterface, Address) Role
+	message                    ProtocolMessageInterface // type
+	dialogue                   *Dialogue                // type
+	roleFromFirstMessage       func(ProtocolMessageInterface, Address) Role
 	keepTerminalStateDialogues bool
 
 	dialogueName    string
@@ -70,12 +70,31 @@ func (dialogues *Dialogues) SelfAddress() Address {
 	return dialogues.selfAddress
 }
 
-func (dialogues *Dialogues) Message() *ProtocolMessageInterface {
+func (dialogues *Dialogues) Message() ProtocolMessageInterface {
 	return dialogues.message
 }
 
 func (dialogues *Dialogues) Dialogue() *Dialogue {
 	return dialogues.dialogue
+}
+
+func (dialogues *Dialogues) GetDialoguesWithCounterparty(counterparty Address) []*Dialogue {
+	return dialogues.dialogueStorage.GetDialoguesWithCounterparty(counterparty)
+}
+
+func (dialogues *Dialogues) isMessageBySelf(message ProtocolMessageInterface) bool {
+	return message.Sender() == dialogues.selfAddress
+}
+
+func (dialogues *Dialogues) isMessageByOther(message ProtocolMessageInterface) bool {
+	return !dialogues.isMessageBySelf(message)
+}
+
+func (dialogues *Dialogues) counterpartyFromMessage(message ProtocolMessageInterface) Address {
+	if dialogues.isMessageBySelf(message) {
+		return message.To()
+	}
+	return message.Sender()
 }
 
 func (dialogues *Dialogues) Create(
@@ -93,10 +112,74 @@ func (dialogues *Dialogues) Create(
 	// safe to ignore errors as the message was just created
 	_ = initialMessage.SetSender(dialogues.selfAddress)
 	_ = initialMessage.SetTo(counterparty)
-	return &initialMessage, nil
+
+	dialogue := dialogues.createDialogue(counterparty, &initialMessage)
+
+	return &initialMessage, dialogue
+}
+
+func (dialogues *Dialogues) CreateWithMessage(
+	counterparty Address,
+	initialMessage ProtocolMessageInterface,
+) *Dialogue {
+	_ = initialMessage.SetSender(dialogues.selfAddress)
+	_ = initialMessage.SetTo(counterparty)
+	return dialogues.createDialogue(counterparty, initialMessage)
 }
 
 func (dialogues *Dialogues) createDialogue(
+	counterparty Address,
+	initialMessage ProtocolMessageInterface,
+) *Dialogue {
+	dialogue := dialogues.createSelfInitiated(counterparty,
+		initialMessage.DialogueReference(),
+		dialogues.roleFromFirstMessage(initialMessage, dialogues.selfAddress))
+	err := dialogue.update(initialMessage)
+	if err != nil {
+		return nil
+	}
+	return dialogue
+}
+
+func (dialogues *Dialogues) update(message ProtocolMessageInterface) *Dialogue {
+
+}
+
+func (dialogues *Dialogues) completeDialogueReference(message ProtocolMessageInterface) {
+
+}
+
+func (dialogues *Dialogues) GetDialogue(message ProtocolMessageInterface) *Dialogue {
+
+}
+
+func (dialogues *Dialogues) getLatestLabel(label DialogueLabel) DialogueLabel {
+
+}
+
+func (dialogues *Dialogues) GetDialogueFromLabel(label DialogueLabel) *Dialogue {
+
+}
+
+func (dialogues *Dialogues) createSelfInitiated(
+	dialogueOpponentAddress Address,
+	dialogueReference DialogueReference,
+	role Role,
+) *Dialogue {
+	incompleteDialogueLabel := DialogueLabel{
+		dialogueReference:       dialogueReference,
+		dialogueOpponentAddress: dialogueOpponentAddress,
+		dialogueStarterAddress:  dialogues.selfAddress,
+	}
+	dialogue := dialogues.create(incompleteDialogueLabel, role, nil)
+	return dialogue
+}
+
+func (dialogues *Dialogues) createOpponentInitiated() Dialogues {
+
+}
+
+func (dialogues *Dialogues) create(
 	incompleteDialogueLabel DialogueLabel,
 	role Role,
 	completeDialogueLabel *DialogueLabel,
@@ -120,53 +203,12 @@ func (dialogues *Dialogues) createDialogue(
 	return &dialogue
 }
 
-func (dialogues *Dialogues) createSelfInitiated(
-	dialogueOpponentAddress Address,
-	dialogueReference DialogueReference,
-	role Role,
-) *Dialogue {
-	incompleteDialogueLabel := DialogueLabel{
-		dialogueReference:       dialogueReference,
-		dialogueOpponentAddress: dialogueOpponentAddress,
-		dialogueStarterAddress:  dialogues.selfAddress,
-	}
-	dialogue := dialogues.createDialogue(incompleteDialogueLabel, role, nil)
-	return dialogue
-}
-
-//func (dialogues *Dialogues) GetDialoguesByOpponentAddress(counterparty Address) []*Dialogue {
-//	result, ok := dialogues.dialoguesByAddress[counterparty]
-//	if !ok {
-//		return make([]*Dialogue, 0)
-//	}
-//	return result
-//}
-
-func (dialogues *Dialogues) isMessageBySelf(message ProtocolMessageInterface) bool {
-	return message.Sender() == dialogues.selfAddress
-}
-
-func (dialogues *Dialogues) isMessageByOther(message ProtocolMessageInterface) bool {
-	return !dialogues.isMessageBySelf(message)
-}
-
-func (dialogues *Dialogues) counterpartyFromMessage(message ProtocolMessageInterface) Address {
-	if dialogues.isMessageBySelf(message) {
-		return message.To()
-	}
-	return message.Sender()
-}
-
-func (dialogues *Dialogues) GetDialoguesWithCounterparty(counterparty Address) []*Dialogue {
-	return dialogues.dialogueStorage.GetDialoguesWithCounterparty(counterparty)
-}
-
 func NewDialogues(
 	selfAddress Address,
 	endStates helpers.Set,
-	message *ProtocolMessageInterface,
+	message ProtocolMessageInterface,
 	dialogue *Dialogue,
-	roleFromFirstMessage func(*ProtocolMessageInterface, Address) Role,
+	roleFromFirstMessage func(ProtocolMessageInterface, Address) Role,
 	keepTerminalStateDialogues bool,
 	dialogueName string,
 ) *Dialogues {
