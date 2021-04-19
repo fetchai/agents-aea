@@ -25,8 +25,24 @@ import "aealite/helpers"
 type Dialogues struct {
 	selfAddress                Address
 	endStates                  helpers.Set
-	messageType                *ProtocolMessageInterface
-	dialougueType              *Dialogue
+	message                    *ProtocolMessageInterface // type
+	dialogue                   *Dialogue                 // type
 	roleFromFirstMessage       func(*ProtocolMessageInterface, Address) Role
 	keepTerminalStateDialogues bool
+}
+
+func (dialogues *Dialogues) IsKeepDialoguesInTerminalStates() bool {
+	return dialogues.keepTerminalStateDialogues
+}
+
+func (dialogues *Dialogues) SelfAddress() Address {
+	return dialogues.selfAddress
+}
+
+func (dialogues *Dialogues) Message() *ProtocolMessageInterface {
+	return dialogues.message
+}
+
+func (dialogues *Dialogues) Dialogue() *Dialogue {
+	return dialogues.dialogue
 }
