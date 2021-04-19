@@ -324,7 +324,7 @@ class Libp2pNode:
 
         return config
 
-    async def _check_connection_to_node(self) -> bool:
+    async def _set_connection_to_node(self) -> bool:
         if self.pipe is None:
             raise Exception("pipe was not set")
         return await self.pipe.connect(timeout=self._connection_timeout)
@@ -363,7 +363,7 @@ class Libp2pNode:
         self.logger.info("Connecting to libp2p node...")
 
         try:
-            connected = await self._check_connection_to_node()
+            connected = await self._set_connection_to_node()
             if not connected:
                 raise Exception("Couldn't connect to libp2p process within timeout")
         except Exception as e:

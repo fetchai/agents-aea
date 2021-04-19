@@ -234,7 +234,8 @@ async def test_reconnect_on_write_failed():
     host = "localhost"
     port = "10000"
     with patch(
-        "packages.fetchai.connections.p2p_libp2p.connection.P2PLibp2pConnection._check_node_built"
+        "packages.fetchai.connections.p2p_libp2p.connection.P2PLibp2pConnection._check_node_built",
+        return_value="./",
     ), patch("tests.conftest.build_node"), tempfile.TemporaryDirectory() as data_dir:
         con = _make_libp2p_connection(
             port=port, host=host, data_dir=data_dir, build_directory=data_dir
@@ -266,7 +267,8 @@ async def test_reconnect_on_read_failed():
     host = "localhost"
     port = "10000"
     with patch(
-        "packages.fetchai.connections.p2p_libp2p.connection.P2PLibp2pConnection._check_node_built"
+        "packages.fetchai.connections.p2p_libp2p.connection.P2PLibp2pConnection._check_node_built",
+        return_value="./",
     ), patch("tests.conftest.build_node"), tempfile.TemporaryDirectory() as data_dir:
         con = _make_libp2p_connection(
             port=port, host=host, data_dir=data_dir, build_directory=data_dir

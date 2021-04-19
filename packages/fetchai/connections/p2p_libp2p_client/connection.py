@@ -61,11 +61,9 @@ ACN_CURRENT_VERSION = "0.1.0"
 class NodeClient:
     """Client to communicate with node using ipc channel(pipe)."""
 
-    def __init__(self, pipe: IPCChannelClient, logger: logging.Logger) -> None:
+    def __init__(self, pipe: IPCChannelClient) -> None:
         """Set node client with pipe."""
         self.pipe = pipe
-        self._buffer = b""
-        self.logger = logger
 
     async def connect(self) -> bool:
         """Connect to node with pipe."""
@@ -83,13 +81,6 @@ class NodeClient:
             return None
 
         return Envelope.decode(data)
-
-    async def _read_to_buffer(self) -> None:
-        """Read data from pipe to internal buffer."""
-        buf = await self.pipe.read()
-        if not buf:
-            return
-        self._buffer += buf
 
     async def read_message(self) -> Optional[bytes]:
         """Read message from pipe."""
@@ -146,18 +137,11 @@ class NodeClient:
         buf = acn_msg.SerializeToString()
         await self.write_message(buf)
 
-        self.logger.debug("Waiting for registration message...")
         try:
             buf = await self.read_message()
         except ConnectionError as e:  # pragma: nocover
-            self.logger.error(f"Connection error: {e}.")
             raise e
         except IncompleteReadError as e:  # pragma: no cover
-            self.logger.error(
-                "Connection disconnected while reading from node ({}/{})".format(
-                    len(e.partial), e.expected
-                )
-            )
             raise e
         if buf is None:  # pragma: nocover
             raise ConnectionError(
@@ -179,7 +163,6 @@ class NodeClient:
 
     async def close(self) -> None:
         """Close client and pipe."""
-        self._buffer = b""
         await self.pipe.close()
 
 
@@ -324,7 +307,7 @@ class P2PLibp2pClientConnection(Connection):
                     "",
                 )
                 await pipe.connect()
-                self._node_client = NodeClient(pipe, logger=self.logger)
+                self._node_client = NodeClient(pipe)
                 await self._setup_connection()
 
                 self.logger.info(
