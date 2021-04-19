@@ -21,6 +21,7 @@ import asyncio
 import os
 import shutil
 import tempfile
+from asyncio.futures import Future
 from unittest.mock import Mock, patch
 
 import pytest
@@ -195,7 +196,7 @@ async def test_connect_attempts():
         )
         con.connect_retries = 2
         with patch(
-            "asyncio.open_connection",
+            "aea.helpers.pipe.TCPSocketChannelClient.connect",
             side_effect=Exception("test exception on connect"),
         ) as open_connection_mock:
             with pytest.raises(Exception, match="test exception on connect"):
@@ -210,14 +211,16 @@ async def test_reconnect_on_receive_fail():
         con = _make_libp2p_client_connection(
             data_dir=dirname, peer_public_key=make_crypto(DEFAULT_LEDGER).public_key
         )
-        mock_reader = Mock()
-        mock_reader.readexactly.side_effect = ConnectionError("oops")
-        con._reader = mock_reader
         con._in_queue = Mock()
+        con._node_client = Mock()
+        f = Future()
+        f.set_exception(ConnectionError("oops"))
+        con._node_client.read_envelope.return_value = f
+
         with patch.object(
             con, "_perform_connection_to_node", return_value=done_future
         ) as connect_mock:
-            assert await con._receive() is None
+            assert await con._read_envelope_from_node() is None
             connect_mock.assert_called()
 
 
@@ -228,12 +231,16 @@ async def test_reconnect_on_send_fail():
         con = _make_libp2p_client_connection(
             data_dir=dirname, peer_public_key=make_crypto(DEFAULT_LEDGER).public_key
         )
+        con._node_client = Mock()
+        f = Future()
+        f.set_exception(Exception("oops"))
+        con._node_client.send_envelope.return_value = f
         # test reconnect on send fails
         with patch.object(
             con, "_perform_connection_to_node", return_value=done_future
         ) as connect_mock, patch.object(
             con, "_ensure_valid_envelope_for_external_comms"
         ):
-            with pytest.raises(ValueError, match="Writer is not set."):
+            with pytest.raises(Exception, match="oops"):
                 await con.send(Mock())
             connect_mock.assert_called()
