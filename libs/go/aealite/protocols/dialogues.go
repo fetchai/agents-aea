@@ -29,6 +29,8 @@ type Dialogues struct {
 	dialogue                   *Dialogue                 // type
 	roleFromFirstMessage       func(*ProtocolMessageInterface, Address) Role
 	keepTerminalStateDialogues bool
+
+	storage StorageInterface
 }
 
 func (dialogues *Dialogues) IsKeepDialoguesInTerminalStates() bool {
@@ -45,4 +47,29 @@ func (dialogues *Dialogues) Message() *ProtocolMessageInterface {
 
 func (dialogues *Dialogues) Dialogue() *Dialogue {
 	return dialogues.dialogue
+}
+
+func (dialogues *Dialogues) GetDialoguesWithCounterparty() {
+}
+
+func NewDialogues(
+	selfAddress Address,
+	endStates helpers.Set,
+	message *ProtocolMessageInterface,
+	dialogue *Dialogue,
+	roleFromFirstMessage func(*ProtocolMessageInterface, Address) Role,
+	keepTerminalStateDialogues bool,
+) *Dialogues {
+	dialogues := Dialogues{
+		selfAddress,
+		endStates,
+		message,
+		dialogue,
+		roleFromFirstMessage,
+		keepTerminalStateDialogues,
+		nil,
+	}
+	storage := NewSimpleStorage()
+	dialogues.storage = &storage
+	return &dialogues
 }
