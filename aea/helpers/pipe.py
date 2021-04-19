@@ -511,11 +511,11 @@ class TCPSocketChannelClient(IPCChannelClient):
         """
         self.logger = logger
         self._loop = loop
-        if len(in_path.split(":")) == 1:
+        parts = in_path.split(":")
+        if len(parts) == 1:
             self._port = int(in_path)
             self._host = "127.0.0.1"
         else:
-            parts = in_path.split(":")
             self._port = int(parts[1])
             self._host = parts[0]
         self._sock = None  # type: Optional[TCPSocketProtocol]
