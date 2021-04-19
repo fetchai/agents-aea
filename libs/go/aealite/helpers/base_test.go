@@ -42,8 +42,7 @@ func checkNotIn(t *testing.T, set *Set, element Generic) {
 }
 
 func TestSet(t *testing.T) {
-	set := Set{}
-	set.Init()
+	set := NewSet()
 
 	element1 := "hello"
 	element2 := 42

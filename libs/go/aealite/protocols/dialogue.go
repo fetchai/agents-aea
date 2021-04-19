@@ -22,8 +22,6 @@ package protocols
 
 import (
 	"aealite/helpers"
-	"crypto/rand"
-	"encoding/hex"
 	"errors"
 	"fmt"
 )
@@ -42,19 +40,6 @@ const (
 )
 
 /* Utility methods */
-
-func generateDialogueNonce() string {
-	hexValue := randomHex(NonceBytesNb)
-	return hexValue
-}
-
-func randomHex(n int) string {
-	bytes := make([]byte, n)
-	if _, err := rand.Read(bytes); err != nil {
-		return ""
-	}
-	return hex.EncodeToString(bytes)
-}
 
 func max(list []MessageId) MessageId {
 	max := list[0]
@@ -166,7 +151,9 @@ func (dialogue *Dialogue) Rules() Rules {
 	return dialogue.rules
 }
 
-// TODO message class
+func (dialogue *Dialogue) AddTerminalStateCallback(fn func(*Dialogue)) {
+	dialogue.terminalStateCallbacks = append(dialogue.terminalStateCallbacks, fn)
+}
 
 // IsSelfInitiated Check whether the agent initiated the dialogue.
 func (dialogue *Dialogue) IsSelfInitiated() bool {

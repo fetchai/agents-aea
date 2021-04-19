@@ -35,11 +35,6 @@ type Set struct {
 	container map[Generic]bool // container: a private container.
 }
 
-// Init initialize a set.
-func (set *Set) Init() {
-	set.container = make(map[Generic]bool)
-}
-
 func (set *Set) AddFromArray(array []Generic) {
 	for _, element := range array {
 		set.Add(element)
@@ -65,4 +60,10 @@ func (set *Set) Contains(element Generic) bool {
 // Size return the size of the set.
 func (set *Set) Size() int {
 	return len(set.container)
+}
+
+func NewSet() Set {
+	result := Set{}
+	result.container = make(map[Generic]bool)
+	return result
 }

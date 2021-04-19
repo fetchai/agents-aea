@@ -51,6 +51,7 @@ type DialogueMessageWrapper struct {
 	dialogueReference DialogueReference
 	messageId         MessageId
 	target            MessageId
+	performative      Performative
 	body              map[string]interface{}
 	//validPerformatives helpers.Set TODO understand how to set this
 }
@@ -83,7 +84,7 @@ func (message *DialogueMessageWrapper) InitFromProtobuf(dialogueMessage *Dialogu
 	if _, ok := performative.(Performative); ok {
 		return errors.New("cannot cast performative field")
 	}
-
+	message.performative = performative.(Performative)
 	message.body = data
 	return nil
 }
@@ -125,7 +126,7 @@ func (message *DialogueMessageWrapper) Target() MessageId {
 }
 
 func (message *DialogueMessageWrapper) Performative() Performative {
-	return message.body["performative"].(Performative)
+	return message.performative
 }
 
 func (message *DialogueMessageWrapper) Body() map[string]interface{} {
@@ -146,4 +147,13 @@ func (message *DialogueMessageWrapper) HasTo() bool {
 //  in order to process the returned value.
 func (message *DialogueMessageWrapper) GetField(name string) interface{} {
 	return message.body[name]
+}
+
+func FromProtobuf(dialogueMessage *DialogueMessage) (*DialogueMessageWrapper, error) {
+	message := DialogueMessageWrapper{}
+	err := message.InitFromProtobuf(dialogueMessage)
+	if err != nil {
+		return nil, err
+	}
+	return &message, nil
 }
