@@ -24,6 +24,8 @@ import (
 	"aealite/helpers"
 	"crypto/rand"
 	"encoding/hex"
+	"errors"
+	"fmt"
 )
 
 const (
@@ -66,8 +68,11 @@ func (dialogues *Dialogues) IsKeepDialoguesInTerminalStates() bool {
 	return dialogues.keepTerminalStateDialogues
 }
 
-func (dialogues *Dialogues) SelfAddress() Address {
-	return dialogues.selfAddress
+func (dialogues *Dialogues) SelfAddress() (Address, error) {
+	if dialogues.selfAddress == "" {
+		return "", errors.New("'self address' is not set")
+	}
+	return dialogues.selfAddress, nil
 }
 
 func (dialogues *Dialogues) Message() ProtocolMessageInterface {
@@ -101,7 +106,7 @@ func (dialogues *Dialogues) Create(
 	counterparty Address,
 	performative Performative,
 	body map[string]interface{},
-) (ProtocolMessageInterface, *Dialogue) {
+) (ProtocolMessageInterface, *Dialogue, error) {
 	dialogueReference := newSelfInitiatedDialogueReference()
 	initialMessage := DialogueMessageWrapper{
 		dialogueReference: dialogueReference,
@@ -113,36 +118,63 @@ func (dialogues *Dialogues) Create(
 	_ = initialMessage.SetSender(dialogues.selfAddress)
 	_ = initialMessage.SetTo(counterparty)
 
-	dialogue := dialogues.createDialogue(counterparty, &initialMessage)
-
-	return &initialMessage, dialogue
+	dialogue, err := dialogues.createDialogue(counterparty, &initialMessage)
+	if err != nil {
+		return nil, nil, err
+	}
+	return &initialMessage, dialogue, nil
 }
 
 func (dialogues *Dialogues) CreateWithMessage(
 	counterparty Address,
 	initialMessage ProtocolMessageInterface,
-) *Dialogue {
-	_ = initialMessage.SetSender(dialogues.selfAddress)
-	_ = initialMessage.SetTo(counterparty)
+) (*Dialogue, error) {
+	err := initialMessage.SetSender(dialogues.selfAddress)
+	if err != nil {
+		return nil, err
+	}
+	err = initialMessage.SetTo(counterparty)
+	if err != nil {
+		return nil, err
+	}
 	return dialogues.createDialogue(counterparty, initialMessage)
 }
 
 func (dialogues *Dialogues) createDialogue(
 	counterparty Address,
 	initialMessage ProtocolMessageInterface,
-) *Dialogue {
-	dialogue := dialogues.createSelfInitiated(counterparty,
+) (*Dialogue, error) {
+	dialogue, err := dialogues.createSelfInitiated(counterparty,
 		initialMessage.DialogueReference(),
 		dialogues.roleFromFirstMessage(initialMessage, dialogues.selfAddress))
-	err := dialogue.update(initialMessage)
 	if err != nil {
-		return nil
+		return nil, err
 	}
-	return dialogue
+	err = dialogue.update(initialMessage)
+	if err != nil {
+		// if update fails, we don't propagate the error.
+		return nil, nil
+	}
+	return dialogue, nil
 }
 
-func (dialogues *Dialogues) Update(message ProtocolMessageInterface) *Dialogue {
-	// TODO do validation
+func (dialogues *Dialogues) Update(message ProtocolMessageInterface) (*Dialogue, error) {
+	if !(message.HasSender() && dialogues.isMessageByOther(message)) {
+		return nil, errors.New(
+			"invalid update: this method must only be used with a message by another agent",
+		)
+	}
+	if !message.HasTo() {
+		return nil, errors.New("the message's 'to' field is not set")
+	}
+	if message.To() != dialogues.selfAddress {
+		return nil, fmt.Errorf(
+			"message 'to' and dialogue 'self address' do not match: got 'to=%s' expected 'to=%s'",
+			message.To(),
+			dialogues.selfAddress,
+		)
+	}
+
 	dialogueReference := message.DialogueReference()
 	starterRefAssigned := dialogueReference.dialogueStarterReference != UnassignedDialogueReference
 	responderRefAssigned := dialogueReference.dialogueResponderReference != UnassignedDialogueReference
@@ -154,16 +186,24 @@ func (dialogues *Dialogues) Update(message ProtocolMessageInterface) *Dialogue {
 		!isStartingTarget
 
 	var dialogue *Dialogue
+	var err error
 	if isInvalidLabel {
 		dialogue = nil
 	} else if isNewDialogue {
-		dialogue = dialogues.createOpponentInitiated(message.Sender(), dialogueReference, dialogues.roleFromFirstMessage(message, dialogues.selfAddress))
+		dialogue, err = dialogues.createOpponentInitiated(message.Sender(), dialogueReference, dialogues.roleFromFirstMessage(message, dialogues.selfAddress))
+		if err != nil {
+			// propagate the error
+			return nil, err
+		}
 	} else if isIncompleteLabelAndNotInitialMsg {
 		// we can allow a dialogue to have incomplete reference
 		// as multiple messages can be sent before one is received with complete reference
 		dialogue = dialogues.GetDialogue(message)
 	} else {
-		dialogues.completeDialogueReference(message)
+		err = dialogues.completeDialogueReference(message)
+		if err != nil {
+			return nil, err
+		}
 		dialogue = dialogues.GetDialogue(message)
 	}
 
@@ -177,15 +217,52 @@ func (dialogues *Dialogues) Update(message ProtocolMessageInterface) *Dialogue {
 			}
 			dialogue = nil
 		}
-		return dialogue
+		return dialogue, nil
 	}
 	// couldn't find the dialogue referenced by the message
-	return nil
+	return nil, nil
 
 }
 
-func (dialogues *Dialogues) completeDialogueReference(message ProtocolMessageInterface) {
+func (dialogues *Dialogues) completeDialogueReference(message ProtocolMessageInterface) error {
+	completeDialogueReference := message.DialogueReference()
+	starterRef := completeDialogueReference.dialogueStarterReference
+	responderRef := completeDialogueReference.dialogueResponderReference
+	if !(starterRef != UnassignedDialogueReference && responderRef != UnassignedDialogueReference) {
+		return errors.New("only complete dialogue references allowed")
+	}
+	incompleteDialogueReference := DialogueReference{
+		starterRef,
+		UnassignedDialogueReference,
+	}
+	incompleteDialogueLabel := DialogueLabel{
+		incompleteDialogueReference,
+		message.Sender(),
+		dialogues.selfAddress,
+	}
 
+	if dialogues.dialogueStorage.IsDialoguePresent(incompleteDialogueLabel) &&
+		!(dialogues.dialogueStorage.IsInIncomplete(incompleteDialogueLabel)) {
+		dialogue := dialogues.dialogueStorage.GetDialogue(incompleteDialogueLabel)
+		if dialogue == nil {
+			return errors.New("dialogue not found")
+		}
+		dialogues.dialogueStorage.RemoveDialogue(incompleteDialogueLabel)
+		finalDialogueLabel := DialogueLabel{
+			completeDialogueReference,
+			incompleteDialogueLabel.dialogueOpponentAddress,
+			incompleteDialogueLabel.dialogueStarterAddress,
+		}
+		err := dialogue.updateDialogueLabel(finalDialogueLabel)
+		if err != nil {
+			// propagate error
+			return err
+		}
+		dialogues.dialogueStorage.AddDialogue(dialogue)
+		dialogues.dialogueStorage.SetIncompleteDialogue(incompleteDialogueLabel, finalDialogueLabel)
+	}
+
+	return nil
 }
 
 func (dialogues *Dialogues) GetDialogue(message ProtocolMessageInterface) *Dialogue {
@@ -227,21 +304,37 @@ func (dialogues *Dialogues) createSelfInitiated(
 	dialogueOpponentAddress Address,
 	dialogueReference DialogueReference,
 	role Role,
-) *Dialogue {
+) (*Dialogue, error) {
+	starterRef := dialogueReference.DialogueStarterReference()
+	responderRef := dialogueReference.DialogueResponderReference()
+	if !(starterRef != UnassignedDialogueReference && responderRef == UnassignedDialogueReference) {
+		return nil, errors.New(
+			"cannot initiate dialogue with preassigned dialogue_responder_reference",
+		)
+	}
 	incompleteDialogueLabel := DialogueLabel{
 		dialogueReference:       dialogueReference,
 		dialogueOpponentAddress: dialogueOpponentAddress,
 		dialogueStarterAddress:  dialogues.selfAddress,
 	}
-	dialogue := dialogues.create(incompleteDialogueLabel, role, nil)
-	return dialogue
+	dialogue, err := dialogues.create(incompleteDialogueLabel, role, nil)
+	if err != nil {
+		return nil, err
+	}
+	return dialogue, nil
 }
 
 func (dialogues *Dialogues) createOpponentInitiated(dialogueOpponentAddress Address,
 	dialogueReference DialogueReference,
 	role Role,
-) *Dialogue {
-	// TODO do validation
+) (*Dialogue, error) {
+	starterRef := dialogueReference.DialogueStarterReference()
+	responderRef := dialogueReference.DialogueResponderReference()
+	if !(starterRef != UnassignedDialogueReference && responderRef == UnassignedDialogueReference) {
+		return nil, errors.New(
+			"cannot initiate dialogue with preassigned dialogue_responder_reference",
+		)
+	}
 	incompleteDialogueLabel := DialogueLabel{
 		dialogueReference,
 		dialogueOpponentAddress,
@@ -256,33 +349,38 @@ func (dialogues *Dialogues) createOpponentInitiated(dialogueOpponentAddress Addr
 		dialogueOpponentAddress,
 		dialogueOpponentAddress,
 	}
-	dialogue := dialogues.create(incompleteDialogueLabel, role, &completeDialogueLabel)
-	return dialogue
+	dialogue, err := dialogues.create(incompleteDialogueLabel, role, &completeDialogueLabel)
+	if err != nil {
+		return nil, err
+	}
+	return dialogue, nil
 }
 
 func (dialogues *Dialogues) create(
 	incompleteDialogueLabel DialogueLabel,
 	role Role,
 	completeDialogueLabel *DialogueLabel,
-) *Dialogue {
+) (*Dialogue, error) {
 	var dialogueLabel DialogueLabel
-	// TODO if true, stop here
-	dialogues.dialogueStorage.IsInIncomplete(incompleteDialogueLabel)
+	if dialogues.dialogueStorage.IsInIncomplete(incompleteDialogueLabel) {
+		return nil, errors.New("incomplete dialogue label already present")
+	}
 	if completeDialogueLabel == nil {
 		dialogueLabel = incompleteDialogueLabel
 	} else {
 		copyLabel := *completeDialogueLabel
-		dialogues.dialogueStorage.SetIncompleteDialogueLabel(incompleteDialogueLabel, copyLabel)
+		dialogues.dialogueStorage.SetIncompleteDialogue(incompleteDialogueLabel, copyLabel)
 	}
-	// TODO if true, stop here
-	dialogues.dialogueStorage.IsDialoguePresent(dialogueLabel)
+	if dialogues.dialogueStorage.IsDialoguePresent(dialogueLabel) {
+		return nil, errors.New("dialogue label already present in dialogues")
+	}
 	dialogue := Dialogue{
 		dialogueLabel: dialogueLabel,
 		selfAddress:   dialogues.selfAddress,
 		role:          role,
 	}
 	dialogues.dialogueStorage.AddDialogue(&dialogue)
-	return &dialogue
+	return &dialogue, nil
 }
 
 func NewDialogues(

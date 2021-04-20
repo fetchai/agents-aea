@@ -101,9 +101,6 @@ type DialogueInterface interface {
 	getIncomingNextMessageId() MessageId
 	updateDialogueLabel(DialogueLabel) error
 	customValidation(*ProtocolMessageInterface) error
-
-	//TODO remove
-	updateIncomingAndOutgoingMessages(*ProtocolMessageInterface)
 }
 
 /* Dialogue definition and methods */

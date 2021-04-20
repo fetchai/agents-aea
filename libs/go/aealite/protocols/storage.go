@@ -27,7 +27,7 @@ type DialogueMap map[DialogueLabel]*Dialogue
 // Dialogue storage
 type DialogueStorageInterface interface {
 	IsInIncomplete(dialogueLabel DialogueLabel) bool
-	SetIncompleteDialogueLabel(
+	SetIncompleteDialogue(
 		incompleteDialogueLabel DialogueLabel,
 		completeDialogueLabel DialogueLabel,
 	)
@@ -52,7 +52,7 @@ func (dialogueStorage *SimpleDialogueStorage) IsInIncomplete(dialogueLabel Dialo
 	return ok
 }
 
-func (dialogueStorage *SimpleDialogueStorage) SetIncompleteDialogueLabel(
+func (dialogueStorage *SimpleDialogueStorage) SetIncompleteDialogue(
 	incompleteDialogueLabel DialogueLabel,
 	completeDialogueLabel DialogueLabel,
 ) {
