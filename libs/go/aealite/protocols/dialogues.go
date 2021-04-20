@@ -141,7 +141,46 @@ func (dialogues *Dialogues) createDialogue(
 	return dialogue
 }
 
-func (dialogues *Dialogues) update(message ProtocolMessageInterface) *Dialogue {
+func (dialogues *Dialogues) Update(message ProtocolMessageInterface) *Dialogue {
+	// TODO do validation
+	dialogueReference := message.DialogueReference()
+	starterRefAssigned := dialogueReference.dialogueStarterReference != UnassignedDialogueReference
+	responderRefAssigned := dialogueReference.dialogueResponderReference != UnassignedDialogueReference
+	isStartingMsgId := message.MessageId() == StartingMessageId
+	isStartingTarget := message.MessageId() == StartingTarget
+	isInvalidLabel := !starterRefAssigned && responderRefAssigned
+	isNewDialogue := starterRefAssigned && !responderRefAssigned && isStartingMsgId
+	isIncompleteLabelAndNotInitialMsg := starterRefAssigned && !responderRefAssigned && !isStartingMsgId &&
+		!isStartingTarget
+
+	var dialogue *Dialogue
+	if isInvalidLabel {
+		dialogue = nil
+	} else if isNewDialogue {
+		dialogue = dialogues.createOpponentInitiated(message.Sender(), dialogueReference, dialogues.roleFromFirstMessage(message, dialogues.selfAddress))
+	} else if isIncompleteLabelAndNotInitialMsg {
+		// we can allow a dialogue to have incomplete reference
+		// as multiple messages can be sent before one is received with complete reference
+		dialogue = dialogues.GetDialogue(message)
+	} else {
+		dialogues.completeDialogueReference(message)
+		dialogue = dialogues.GetDialogue(message)
+	}
+
+	if dialogue != nil {
+		err := dialogue.update(message)
+		if err != nil {
+			// invalid message for the dialogue found
+			if isNewDialogue {
+				// remove the newly created dialogue if the initial message is invalid
+				dialogues.dialogueStorage.RemoveDialogue(dialogue.dialogueLabel)
+			}
+			dialogue = nil
+		}
+		return dialogue
+	}
+	// couldn't find the dialogue referenced by the message
+	return nil
 
 }
 
@@ -150,15 +189,38 @@ func (dialogues *Dialogues) completeDialogueReference(message ProtocolMessageInt
 }
 
 func (dialogues *Dialogues) GetDialogue(message ProtocolMessageInterface) *Dialogue {
+	counterpartyFromMessage := dialogues.counterpartyFromMessage(message)
+	dialogueReference := message.DialogueReference()
+
+	selfInitiatedDialogueLabel := DialogueLabel{
+		dialogueReference,
+		counterpartyFromMessage,
+		dialogues.selfAddress,
+	}
+	otherInitiatedDialogueLabel := DialogueLabel{
+		dialogueReference,
+		counterpartyFromMessage,
+		counterpartyFromMessage,
+	}
+
+	selfInitiatedDialogueLabel = dialogues.getLatestLabel(selfInitiatedDialogueLabel)
+	otherInitiatedDialogueLabel = dialogues.getLatestLabel(otherInitiatedDialogueLabel)
+
+	selfInitiatedDialogue := dialogues.GetDialogueFromLabel(selfInitiatedDialogueLabel)
+	otherInitiatedDialogue := dialogues.GetDialogueFromLabel(otherInitiatedDialogueLabel)
+	if selfInitiatedDialogue != nil {
+		return selfInitiatedDialogue
+	}
+	return otherInitiatedDialogue
 
 }
 
 func (dialogues *Dialogues) getLatestLabel(label DialogueLabel) DialogueLabel {
-
+	return dialogues.dialogueStorage.GetLatestLabel(label)
 }
 
 func (dialogues *Dialogues) GetDialogueFromLabel(label DialogueLabel) *Dialogue {
-
+	return dialogues.dialogueStorage.GetDialogue(label)
 }
 
 func (dialogues *Dialogues) createSelfInitiated(
@@ -175,8 +237,27 @@ func (dialogues *Dialogues) createSelfInitiated(
 	return dialogue
 }
 
-func (dialogues *Dialogues) createOpponentInitiated() Dialogues {
-
+func (dialogues *Dialogues) createOpponentInitiated(dialogueOpponentAddress Address,
+	dialogueReference DialogueReference,
+	role Role,
+) *Dialogue {
+	// TODO do validation
+	incompleteDialogueLabel := DialogueLabel{
+		dialogueReference,
+		dialogueOpponentAddress,
+		dialogueOpponentAddress,
+	}
+	newDialogueReference := DialogueReference{
+		dialogueReference.dialogueStarterReference,
+		generateDialogueNonce(),
+	}
+	completeDialogueLabel := DialogueLabel{
+		newDialogueReference,
+		dialogueOpponentAddress,
+		dialogueOpponentAddress,
+	}
+	dialogue := dialogues.create(incompleteDialogueLabel, role, &completeDialogueLabel)
+	return dialogue
 }
 
 func (dialogues *Dialogues) create(
@@ -190,7 +271,8 @@ func (dialogues *Dialogues) create(
 	if completeDialogueLabel == nil {
 		dialogueLabel = incompleteDialogueLabel
 	} else {
-		dialogues.dialogueStorage.SetIncompleteDialogueLabel(incompleteDialogueLabel, *completeDialogueLabel)
+		copyLabel := *completeDialogueLabel
+		dialogues.dialogueStorage.SetIncompleteDialogueLabel(incompleteDialogueLabel, copyLabel)
 	}
 	// TODO if true, stop here
 	dialogues.dialogueStorage.IsDialoguePresent(dialogueLabel)
