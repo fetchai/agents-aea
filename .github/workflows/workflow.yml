@@ -85,13 +85,13 @@ jobs:
         with:
           version: v1.28
           working-directory: libs/go/libp2p_node
-#      - name: Golang code style check (aealite)
-#        uses: golangci/golangci-lint-action@v1
-#        env:
-#          ACTIONS_ALLOW_UNSECURE_COMMANDS: true
-#        with:
-#          version: v1.28
-#          working-directory: libs/go/aealite
+      - name: Golang code style check (aealite)
+        uses: golangci/golangci-lint-action@v1
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+        with:
+          version: v1.28
+          working-directory: libs/go/aealite
 
   common_checks_3:
     continue-on-error: False

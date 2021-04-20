@@ -81,7 +81,12 @@ type DialogueInterface interface {
 	LastOutgoingMessage() *ProtocolMessageInterface
 	LastMessage() *ProtocolMessageInterface
 	IsEmpty() bool
-	Reply(Performative, *ProtocolMessageInterface, *MessageId, map[string]interface{})
+	Reply(
+		Performative,
+		ProtocolMessageInterface,
+		*MessageId,
+		map[string]interface{},
+	) (ProtocolMessageInterface, error)
 	String() string
 
 	counterPartyFromMessage(*ProtocolMessageInterface) Address
@@ -196,9 +201,6 @@ func (dialogue *Dialogue) counterPartyFromMessage(message ProtocolMessageInterfa
 func (dialogue *Dialogue) isMessageBySelf(message ProtocolMessageInterface) bool {
 	return message.Sender() == dialogue.selfAddress
 }
-func (dialogue *Dialogue) isMessageByOther(message ProtocolMessageInterface) bool {
-	return !dialogue.isMessageBySelf(message)
-}
 
 func (dialogue *Dialogue) hasMessageId(messageId MessageId) bool {
 	return dialogue.getMessageById(messageId) != nil
@@ -257,6 +259,60 @@ func (dialogue *Dialogue) isBelongingToDialogue(message ProtocolMessageInterface
 	}
 	result := dialogue.checkLabelBelongsToDialogue(label)
 	return result
+}
+
+func (dialogue *Dialogue) Reply(
+	performative Performative,
+	targetMessage ProtocolMessageInterface,
+	targetPtr *MessageId,
+	body map[string]interface{},
+) (ProtocolMessageInterface, error) {
+	lastMessage := dialogue.LastMessage()
+	if lastMessage == nil {
+		return nil, errors.New("cannot reply in an empty dialogue")
+	}
+	var target MessageId
+	msgIsNone := targetMessage == nil
+	targetIsNone := targetPtr == nil
+
+	if msgIsNone && !targetIsNone {
+		target = *targetPtr
+		targetMessage = dialogue.getMessageById(*targetPtr)
+	} else if msgIsNone && targetIsNone {
+		targetMessage = lastMessage
+		target = lastMessage.MessageId()
+	} else if !msgIsNone && targetIsNone {
+		target = targetMessage.MessageId()
+	} else if !msgIsNone && !targetIsNone {
+		target = *targetPtr
+		if target != targetMessage.MessageId() {
+			return nil, errors.New("the provided target and target_message do not match")
+		}
+	}
+
+	if targetMessage == nil {
+		return nil, errors.New("no target message found")
+	}
+
+	if dialogue.hasMessageId(target) {
+		return nil, errors.New("the target message does not exist in this dialogue")
+	}
+
+	reply := DialogueMessageWrapper{
+		dialogueReference: dialogue.dialogueLabel.dialogueReference,
+		messageId:         dialogue.getOutgoingNextMessageId(),
+		sender:            dialogue.selfAddress,
+		to:                dialogue.dialogueLabel.dialogueOpponentAddress,
+		target:            target,
+		performative:      performative,
+		body:              body,
+	}
+
+	err := dialogue.update(&reply)
+	if err != nil {
+		return nil, err
+	}
+	return &reply, nil
 }
 
 func (dialogue *Dialogue) validateNextMessage(message ProtocolMessageInterface) error {
