@@ -66,6 +66,34 @@ type Rules struct {
 	validReplies          map[Performative]helpers.Set
 }
 
+func NewRules(initialPerformatives []Performative, terminalPerformatives []Performative,
+	validReplies map[Performative][]Performative) Rules {
+	initialPerformativesSet := helpers.NewSet()
+	for _, initialPeformative := range initialPerformatives {
+		initialPerformativesSet.Add(initialPeformative)
+	}
+
+	terminalPerformativesSet := helpers.NewSet()
+	for _, terminalPerformative := range terminalPerformatives {
+		terminalPerformativesSet.Add(terminalPerformative)
+	}
+
+	validRepliesMap := make(map[Performative]helpers.Set)
+	for performative, validPerformatives := range validReplies {
+		set := helpers.NewSet()
+		for _, validPerformative := range validPerformatives {
+			set.Add(validPerformative)
+		}
+		validRepliesMap[performative] = set
+	}
+	rules := Rules{
+		initialPerformatives:  initialPerformativesSet,
+		terminalPerformatives: terminalPerformativesSet,
+		validReplies:          validRepliesMap,
+	}
+	return rules
+}
+
 type DialogueInterface interface {
 	// getters
 
@@ -506,4 +534,23 @@ func (dialogue *Dialogue) updateDialogueLabel(finalDialogueLabel DialogueLabel) 
 	}
 	dialogue.dialogueLabel = finalDialogueLabel
 	return nil
+}
+
+func NewDialogue(dialogueLabel DialogueLabel,
+	selfAddress Address,
+	role Role,
+	initialPerformatives []Performative,
+	terminalPerformatives []Performative,
+	validReplies map[Performative][]Performative) *Dialogue {
+	dialogue := Dialogue{
+		dialogueLabel: dialogueLabel,
+		selfAddress:   selfAddress,
+		role:          role,
+	}
+	dialogue.incomingMessages = make([]ProtocolMessageInterface, 0)
+	dialogue.outgoingMessages = make([]ProtocolMessageInterface, 0)
+	dialogue.orderedMessageIds = make([]MessageId, 0)
+	dialogue.rules = NewRules(initialPerformatives, terminalPerformatives, validReplies)
+	dialogue.terminalStateCallbacks = make([]func(*Dialogue), 0)
+	return &dialogue
 }

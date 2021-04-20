@@ -26,16 +26,20 @@ type DialogueMap map[DialogueLabel]*Dialogue
 
 // Dialogue storage
 type DialogueStorageInterface interface {
+	GetDialoguesInTerminalState() []*Dialogue
+	GetDialoguesInActiveState() []*Dialogue
+	IsTerminalDialoguesKept() bool
+	DialogueTerminalStateCallback(*Dialogue)
+	AddDialogue(dialogue *Dialogue)
+	RemoveDialogue(dialogueLabel DialogueLabel)
+	GetDialogue(label DialogueLabel) *Dialogue
+	GetDialoguesWithCounterparty(counterparty Address) []*Dialogue
 	IsInIncomplete(dialogueLabel DialogueLabel) bool
 	SetIncompleteDialogue(
 		incompleteDialogueLabel DialogueLabel,
 		completeDialogueLabel DialogueLabel,
 	)
 	IsDialoguePresent(dialogueLabel DialogueLabel) bool
-	AddDialogue(dialogue *Dialogue)
-	RemoveDialogue(dialogueLabel DialogueLabel)
-	GetDialogue(label DialogueLabel) *Dialogue
-	GetDialoguesWithCounterparty(counterparty Address) []*Dialogue
 	GetLatestLabel(dialogueLabel DialogueLabel) DialogueLabel
 }
 
@@ -47,20 +51,41 @@ type SimpleDialogueStorage struct {
 	terminalStateDialogueLabels        helpers.Set
 }
 
-func (dialogueStorage *SimpleDialogueStorage) IsInIncomplete(dialogueLabel DialogueLabel) bool {
-	_, ok := dialogueStorage.incompleteToCompleteDialogueLabels[dialogueLabel]
-	return ok
+/* methods */
+
+func (dialogueStorage *SimpleDialogueStorage) GetDialoguesInTerminalState() []*Dialogue {
+	result := make([]*Dialogue, 0)
+	for _, labelInterface := range dialogueStorage.terminalStateDialogueLabels.ToArray() {
+		label := labelInterface.(DialogueLabel)
+		dialogue, ok := dialogueStorage.dialoguesByDialogueLabel[label]
+		if ok {
+			result = append(result, dialogue)
+		}
+	}
+	return result
 }
 
-func (dialogueStorage *SimpleDialogueStorage) SetIncompleteDialogue(
-	incompleteDialogueLabel DialogueLabel,
-	completeDialogueLabel DialogueLabel,
-) {
-	dialogueStorage.incompleteToCompleteDialogueLabels[incompleteDialogueLabel] = completeDialogueLabel
+func (dialogueStorage *SimpleDialogueStorage) GetDialoguesInActiveState() []*Dialogue {
+	result := make([]*Dialogue, 0)
+	for label, dialogue := range dialogueStorage.dialoguesByDialogueLabel {
+		if !dialogueStorage.terminalStateDialogueLabels.Contains(label) {
+			result = append(result, dialogue)
+		}
+	}
+	return result
 }
-
+func (dialogueStorage *SimpleDialogueStorage) IsTerminalDialoguesKept() bool {
+	return dialogueStorage.dialogues.IsKeepDialoguesInTerminalStates()
+}
+func (dialogueStorage *SimpleDialogueStorage) DialogueTerminalStateCallback(dialogue *Dialogue) {
+	if dialogueStorage.dialogues.IsKeepDialoguesInTerminalStates() {
+		dialogueStorage.terminalStateDialogueLabels.Add(dialogue.dialogueLabel)
+	} else {
+		dialogueStorage.RemoveDialogue(dialogue.dialogueLabel)
+	}
+}
 func (dialogueStorage *SimpleDialogueStorage) AddDialogue(dialogue *Dialogue) {
-	dialogue.AddTerminalStateCallback(dialogueStorage.dialogueTerminalStateCallback)
+	dialogue.AddTerminalStateCallback(dialogueStorage.DialogueTerminalStateCallback)
 	dialogueStorage.dialoguesByDialogueLabel[dialogue.dialogueLabel] = dialogue
 
 	opponent := dialogue.dialogueLabel.dialogueOpponentAddress
@@ -71,7 +96,6 @@ func (dialogueStorage *SimpleDialogueStorage) AddDialogue(dialogue *Dialogue) {
 	}
 	dialogueStorage.dialoguesByAddress[opponent] = append(dialogueList, dialogue)
 }
-
 func (dialogueStorage *SimpleDialogueStorage) RemoveDialogue(dialogueLabel DialogueLabel) {
 	_, ok := dialogueStorage.dialoguesByDialogueLabel[dialogueLabel]
 	delete(dialogueStorage.dialoguesByDialogueLabel, dialogueLabel)
@@ -86,6 +110,44 @@ func (dialogueStorage *SimpleDialogueStorage) RemoveDialogue(dialogueLabel Dialo
 		)
 	}
 }
+func (dialogueStorage *SimpleDialogueStorage) GetDialogue(label DialogueLabel) *Dialogue {
+	return dialogueStorage.dialoguesByDialogueLabel[label]
+}
+
+func (dialogueStorage *SimpleDialogueStorage) GetDialoguesWithCounterparty(
+	counterparty Address,
+) []*Dialogue {
+	result := make([]*Dialogue, 0)
+	result = append(result, dialogueStorage.dialoguesByAddress[counterparty]...)
+	return result
+}
+func (dialogueStorage *SimpleDialogueStorage) IsInIncomplete(dialogueLabel DialogueLabel) bool {
+	_, ok := dialogueStorage.incompleteToCompleteDialogueLabels[dialogueLabel]
+	return ok
+}
+
+func (dialogueStorage *SimpleDialogueStorage) SetIncompleteDialogue(
+	incompleteDialogueLabel DialogueLabel,
+	completeDialogueLabel DialogueLabel,
+) {
+	dialogueStorage.incompleteToCompleteDialogueLabels[incompleteDialogueLabel] = completeDialogueLabel
+}
+func (dialogueStorage *SimpleDialogueStorage) IsDialoguePresent(dialogueLabel DialogueLabel) bool {
+	_, ok := dialogueStorage.dialoguesByDialogueLabel[dialogueLabel]
+	return ok
+}
+
+func (dialogueStorage *SimpleDialogueStorage) GetLatestLabel(
+	dialogueLabel DialogueLabel,
+) DialogueLabel {
+	result, ok := dialogueStorage.incompleteToCompleteDialogueLabels[dialogueLabel]
+	if !ok {
+		result = dialogueLabel
+	}
+	return result
+}
+
+/* helper functions */
 
 func removeDialogueFromArray(array []*Dialogue, dialogueLabel DialogueLabel) []*Dialogue {
 	var index int
@@ -99,40 +161,7 @@ func removeDialogueFromArray(array []*Dialogue, dialogueLabel DialogueLabel) []*
 	return newArray
 }
 
-func (dialogueStorage *SimpleDialogueStorage) IsDialoguePresent(dialogueLabel DialogueLabel) bool {
-	_, ok := dialogueStorage.dialoguesByDialogueLabel[dialogueLabel]
-	return ok
-}
-
-func (dialogueStorage *SimpleDialogueStorage) dialogueTerminalStateCallback(dialogue *Dialogue) {
-	if dialogueStorage.dialogues.IsKeepDialoguesInTerminalStates() {
-		dialogueStorage.terminalStateDialogueLabels.Add(dialogue.dialogueLabel)
-	} else {
-		dialogueStorage.RemoveDialogue(dialogue.dialogueLabel)
-	}
-}
-
-func (dialogueStorage *SimpleDialogueStorage) GetDialoguesWithCounterparty(
-	counterparty Address,
-) []*Dialogue {
-	result := make([]*Dialogue, 0)
-	result = append(result, dialogueStorage.dialoguesByAddress[counterparty]...)
-	return result
-}
-
-func (dialogueStorage *SimpleDialogueStorage) GetLatestLabel(
-	dialogueLabel DialogueLabel,
-) DialogueLabel {
-	result, ok := dialogueStorage.incompleteToCompleteDialogueLabels[dialogueLabel]
-	if !ok {
-		result = dialogueLabel
-	}
-	return result
-}
-
-func (dialogueStorage *SimpleDialogueStorage) GetDialogue(label DialogueLabel) *Dialogue {
-	return dialogueStorage.dialoguesByDialogueLabel[label]
-}
+/* global functions */
 
 func NewSimpleDialogueStorage() *SimpleDialogueStorage {
 	result := SimpleDialogueStorage{
