@@ -100,7 +100,8 @@ func removeDialogueFromArray(array []*Dialogue, dialogueLabel DialogueLabel) []*
 }
 
 func (dialogueStorage *SimpleDialogueStorage) IsDialoguePresent(dialogueLabel DialogueLabel) bool {
-	panic("implement me")
+	_, ok := dialogueStorage.dialoguesByDialogueLabel[dialogueLabel]
+	return ok
 }
 
 func (dialogueStorage *SimpleDialogueStorage) dialogueTerminalStateCallback(dialogue *Dialogue) {
