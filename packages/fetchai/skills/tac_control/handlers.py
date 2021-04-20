@@ -384,6 +384,7 @@ class OefSearchHandler(Handler):
     ) -> None:
         """
         Handle an oef search message.
+
         :param oef_search_msg: the oef search message
         :param oef_search_dialogue: the dialogue
         :return: None

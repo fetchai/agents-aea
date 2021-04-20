@@ -490,22 +490,28 @@ class GenericOefSearchHandler(Handler):
         )
 
     def _handle_error(
-        self, oef_search_msg: OefSearchMessage, oef_search_dialogue: OefSearchDialogue
+        self, oef_search_error_msg: OefSearchMessage, oef_search_dialogue: OefSearchDialogue
     ) -> None:
         """
         Handle an oef search message.
 
-        :param oef_search_msg: the oef search message
+        :param oef_search_error_msg: the oef search message
         :param oef_search_dialogue: the dialogue
         :return: None
         """
         self.context.logger.info(
             "received oef_search error message={} in dialogue={}.".format(
-                oef_search_msg, oef_search_dialogue
+                oef_search_error_msg, oef_search_dialogue
             )
         )
-        target_message = cast(OefSearchMessage, oef_search_dialogue.get_message_by_id(oef_search_msg.target))
-        if target_message.performative == OefSearchMessage.Performative.REGISTER_SERVICE:
+        target_message = cast(
+            OefSearchMessage,
+            oef_search_dialogue.get_message_by_id(oef_search_error_msg.target),
+        )
+        if (
+            target_message.performative
+            == OefSearchMessage.Performative.REGISTER_SERVICE
+        ):
             oef_search_dialogues = cast(
                 OefSearchDialogues, self.context.oef_search_dialogues
             )
