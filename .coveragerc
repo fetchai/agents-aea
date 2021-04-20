@@ -7,5 +7,4 @@ omit =
     packages/fetchai/skills/erc1155_client/*
     packages/fetchai/skills/erc1155_deploy/*
     packages/fetchai/skills/gym/*
-    packages/fetchai/skills/registration_aw1/*
     plugins/aea-ledger-cosmos/aea_ledger_cosmos/cosmos.py

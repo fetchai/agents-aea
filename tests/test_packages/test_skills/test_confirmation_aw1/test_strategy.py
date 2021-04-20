@@ -29,6 +29,7 @@ from aea.test_tools.test_skill import BaseSkillTestCase
 
 from packages.fetchai.skills.confirmation_aw1.registration_db import RegistrationDB
 from packages.fetchai.skills.confirmation_aw1.strategy import (
+    DEVELOPER_ONLY_REQUIRED_KEYS,
     PUBLIC_ID,
     REQUIRED_KEYS,
     Strategy,
@@ -107,9 +108,10 @@ class TestStrategy(BaseSkillTestCase):
         # after
         assert self.strategy._in_process_registrations[self.address] == self.info
 
-    def test_finalize_registration(self):
-        """Test the finalize_registration method of the Strategy class."""
+    def test_finalize_registration_i(self):
+        """Test the finalize_registration method of the Strategy class where NOT developer_only_mode."""
         # setup
+        self.strategy.developer_handle_only = False
         self.strategy.lock_registration_temporarily(self.address, self.info)
 
         # operation
@@ -132,6 +134,29 @@ class TestStrategy(BaseSkillTestCase):
             fetchai_signature=self.info["signature_of_fetchai_address"],
             developer_handle=self.info["developer_handle"],
             tweet=self.info.get("tweet", ""),
+        )
+
+    def test_finalize_registration_ii(self):
+        """Test the finalize_registration method of the Strategy class where IS developer_only_mode."""
+        # setup
+        self.strategy.developer_handle_only = True
+        self.strategy.lock_registration_temporarily(self.address, self.info)
+
+        # operation
+        with patch.object(self.db, "set_registered_developer_only") as mock_set:
+            with patch.object(self.logger, "log") as mock_logger:
+                self.strategy.finalize_registration(self.address)
+
+        # after
+        assert self.address not in self.strategy._in_process_registrations
+
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"finalizing registration for address={self.address}, info={self.info}",
+        )
+
+        mock_set.assert_any_call(
+            address=self.address, developer_handle=self.info["developer_handle"],
         )
 
     def test_unlock_registration(self):
@@ -297,16 +322,11 @@ class TestStrategy(BaseSkillTestCase):
         }
 
         # operation
-        with patch.object(
-            self.strategy, "_valid_signature", return_value=True
-        ) as mock_valid:
-            is_valid, code, msg = self.strategy.valid_registration(
-                incorrect_registration_info, self.address
-            )
+        is_valid, code, msg = self.strategy.valid_registration(
+            incorrect_registration_info, self.address
+        )
 
         # after
-        mock_valid.assert_called()
-
         assert not is_valid
         assert code == 1
         assert msg == "missing developer_handle!"
@@ -324,16 +344,11 @@ class TestStrategy(BaseSkillTestCase):
         self.strategy.lock_registration_temporarily(self.address, self.info)
 
         # operation
-        with patch.object(
-            self.strategy, "_valid_signature", return_value=True
-        ) as mock_valid:
-            is_valid, code, msg = self.strategy.valid_registration(
-                registration_info, self.address
-            )
+        is_valid, code, msg = self.strategy.valid_registration(
+            registration_info, self.address
+        )
 
         # after
-        mock_valid.assert_called()
-
         assert not is_valid
         assert code == 1
         assert msg == "registration in process for this address!"
@@ -350,21 +365,58 @@ class TestStrategy(BaseSkillTestCase):
         }
 
         # operation
-        with patch.object(
-            self.strategy, "_valid_signature", return_value=True
-        ) as mock_valid:
-            with patch.object(self.db, "is_registered", return_value=True) as mock_is:
-                is_valid, code, msg = self.strategy.valid_registration(
-                    registration_info, self.address
-                )
+        with patch.object(self.db, "is_registered", return_value=True) as mock_is:
+            is_valid, code, msg = self.strategy.valid_registration(
+                registration_info, self.address
+            )
 
         # after
-        mock_valid.assert_called()
         mock_is.assert_called_once()
 
         assert not is_valid
         assert code == 1
         assert msg == "already registered!"
+
+    def test_valid_registration_fails_developer_only_mode_i(self):
+        """Test the valid_registration method of the Strategy class in developer_only_mode which fails because some key is missing."""
+        # setup
+        self.strategy.developer_handle_only = True
+        incorrect_registration_info = {
+            "fetchai_address": self.address,
+        }
+
+        # operation
+        is_valid, code, msg = self.strategy.valid_registration(
+            incorrect_registration_info, self.address
+        )
+
+        # after
+        assert not is_valid
+        assert code == 1
+        assert (
+            msg
+            == f"missing keys in registration info, required: {DEVELOPER_ONLY_REQUIRED_KEYS}!"
+        )
+
+    def test_valid_registration_fails_developer_only_mode_ii(self):
+        """Test the valid_registration method of the Strategy class which fails because addresses do not match."""
+        # setup
+        self.strategy.developer_handle_only = True
+        different_addres = "some_other_address"
+        incorrect_registration_info = {
+            "fetchai_address": different_addres,
+            "developer_handle": "some_developer_handle",
+        }
+
+        # operation
+        is_valid, code, msg = self.strategy.valid_registration(
+            incorrect_registration_info, self.address
+        )
+
+        # after
+        assert not is_valid
+        assert code == 1
+        assert msg == "fetchai address of agent and registration info do not match!"
 
     def test__valid_signature_i(self):
         """Test the _valid_signature method of the Strategy class where result is True."""

@@ -511,3 +511,107 @@ class TestAddConnectionWithLatestVersion(AEATestCaseEmpty):
         items_folders = os.listdir(items_path)
         item_name = "local"
         assert item_name in items_folders
+
+
+class TestAddConnectionMixedWhenNoLocalRegistryExists:
+    """Test that the command 'aea add connection' works in mixed mode when the local registry does not exists (it swaps to remote)."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.runner = CliRunner()
+        cls.agent_name = "myagent"
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        cls.connection_id = str(HTTP_CLIENT_PUBLIC_ID)
+        cls.connection_name = "http_client"
+
+        os.chdir(cls.t)
+        result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            standalone_mode=False,
+        )
+
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False,
+        )
+        assert result.exit_code == 0
+
+        os.chdir(cls.agent_name)
+        cls.result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "connection", cls.connection_id],
+            standalone_mode=False,
+        )
+
+    def test_exit_code_equal_to_0(self):
+        """Test that the exit code is equal to 0."""
+        assert self.result.exit_code == 0
+
+    def test_standard_output_mentions_swap_to_remote(self):
+        """Test standard output contains information on swap to remote."""
+        assert "Trying remote registry (`--remote`)." in self.result.stdout
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
+
+
+class TestAddConnectionLocalWhenNoLocalRegistryExists:
+    """Test that the command 'aea add connection' fails in local mode when the local registry does not exists."""
+
+    @classmethod
+    def setup_class(cls):
+        """Set the test up."""
+        cls.runner = CliRunner()
+        cls.agent_name = "myagent"
+        cls.cwd = os.getcwd()
+        cls.t = tempfile.mkdtemp()
+        cls.connection_id = str(HTTP_CLIENT_PUBLIC_ID)
+        cls.connection_name = "http_client"
+
+        os.chdir(cls.t)
+        result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR],
+            standalone_mode=False,
+        )
+        assert result.exit_code == 0, result.stdout
+
+        result = cls.runner.invoke(
+            cli, [*CLI_LOG_OPTION, "create", cls.agent_name], standalone_mode=False,
+        )
+        assert result.exit_code == 0, result.stdout
+
+        os.chdir(cls.agent_name)
+        cls.result = cls.runner.invoke(
+            cli,
+            [*CLI_LOG_OPTION, "add", "--local", "connection", cls.connection_id],
+            standalone_mode=False,
+        )
+
+    def test_exit_code_equal_to_1(self):
+        """Test that the exit code is equal to 1."""
+        assert self.result.exit_code == 1, self.result.stdout
+
+    def test_standard_output_mentions_failure(self):
+        """Test standard output contains information on failure."""
+        assert (
+            "Registry path not provided and local registry `packages` not found in current (.) and parent directory."
+            in self.result.exception.message
+        )
+
+    @classmethod
+    def teardown_class(cls):
+        """Tear the test down."""
+        os.chdir(cls.cwd)
+        try:
+            shutil.rmtree(cls.t)
+        except (OSError, IOError):
+            pass
