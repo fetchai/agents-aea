@@ -27,6 +27,7 @@ behaviours:
   service_registration:
     args:
       services_interval: 20
+      max_retries: 20
     class_name: GenericServiceRegistrationBehaviour
 handlers:
   fipa:
@@ -36,8 +37,7 @@ handlers:
     args: {}
     class_name: GenericLedgerApiHandler
   oef_search:
-    args:
-      max_retries: 20
+    args: {}
     class_name: GenericOefSearchHandler
 models:
   default_dialogues:

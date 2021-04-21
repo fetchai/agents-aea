@@ -19,7 +19,7 @@
 
 """This package contains the handlers of a generic seller AEA."""
 
-from typing import Any, Optional, cast
+from typing import Optional, cast
 
 from aea.configurations.base import PublicId
 from aea.crypto.ledger_apis import LedgerApis
@@ -50,7 +50,6 @@ from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 
 
 LEDGER_API_ADDRESS = str(LEDGER_CONNECTION_PUBLIC_ID)
-DEFAULT_MAX_RETRIES = 20
 
 
 class GenericFipaHandler(Handler):
@@ -445,12 +444,6 @@ class GenericOefSearchHandler(Handler):
 
     SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[PublicId]
 
-    def __init__(self, **kwargs: Any):
-        """Initialise the behaviour."""
-        self._max_retries = kwargs.pop("max_retries", DEFAULT_MAX_RETRIES)  # type: int
-        super().__init__(max_retries=self._max_retries, **kwargs)
-        self._nb_retries = 0
-
     def setup(self) -> None:
         """Call to setup the handler."""
 
@@ -558,21 +551,11 @@ class GenericOefSearchHandler(Handler):
             target_message.performative
             == OefSearchMessage.Performative.REGISTER_SERVICE
         ):
-            self._nb_retries += 1
-            if self._nb_retries >= self._max_retries:
-                self.context.is_active = False
-                return
-
-            oef_search_dialogues = cast(
-                OefSearchDialogues, self.context.oef_search_dialogues
+            registration_behaviour = cast(
+                GenericServiceRegistrationBehaviour,
+                self.context.behaviours.service_registration,
             )
-            oef_search_msg, _ = oef_search_dialogues.create(
-                counterparty=target_message.to,
-                performative=target_message.performative,
-                service_description=target_message.service_description,
-            )
-            self.context.outbox.put_message(message=oef_search_msg)
-            self.context.logger.info("retrying registration on SOEF.")
+            registration_behaviour.failed_registration_msg = target_message
 
     def _handle_invalid(
         self, oef_search_msg: OefSearchMessage, oef_search_dialogue: OefSearchDialogue

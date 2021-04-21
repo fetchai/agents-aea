@@ -19,7 +19,7 @@
 
 """This package contains the behaviour of a generic seller AEA."""
 
-from typing import Any, cast
+from typing import Any, Optional, cast
 
 from aea.skills.behaviours import TickerBehaviour
 
@@ -36,6 +36,7 @@ from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 
 
 DEFAULT_SERVICES_INTERVAL = 60.0
+DEFAULT_MAX_RETRIES = 20
 LEDGER_API_ADDRESS = str(LEDGER_CONNECTION_PUBLIC_ID)
 
 
@@ -47,7 +48,11 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         services_interval = kwargs.pop(
             "services_interval", DEFAULT_SERVICES_INTERVAL
         )  # type: int
+        self._max_retries = kwargs.pop("max_retries", DEFAULT_MAX_RETRIES)  # type: int
         super().__init__(tick_interval=services_interval, **kwargs)
+
+        self.failed_registration_msg = None  # type: Optional[OefSearchMessage]
+        self._nb_retries = 0
 
     def setup(self) -> None:
         """
@@ -75,6 +80,7 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
+        self._retry_failed_registration()
 
     def teardown(self) -> None:
         """
@@ -84,6 +90,29 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         """
         self._unregister_service()
         self._unregister_agent()
+
+    def _retry_failed_registration(self) -> None:
+        """
+        Retry a failed registration.
+
+        :return: None
+        """
+        if self.failed_registration_msg is not None:
+            self._nb_retries += 1
+            if self._nb_retries >= self._max_retries:
+                self.context.is_active = False
+                return
+
+            oef_search_dialogues = cast(
+                OefSearchDialogues, self.context.oef_search_dialogues
+            )
+            oef_search_msg, _ = oef_search_dialogues.create(
+                counterparty=self.failed_registration_msg.to,
+                performative=self.failed_registration_msg.performative,
+                service_description=self.failed_registration_msg.service_description,
+            )
+            self.context.outbox.put_message(message=oef_search_msg)
+            self.context.logger.info("retrying registration on SOEF.")
 
     def _register_agent(self) -> None:
         """
