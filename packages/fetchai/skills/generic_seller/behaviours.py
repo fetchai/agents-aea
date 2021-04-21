@@ -68,7 +68,6 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
             )
             self.context.outbox.put_message(message=ledger_api_msg)
         self._register_agent()
-        self._register_service_personality_classification()
 
     def act(self) -> None:
         """
@@ -105,7 +104,7 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("registering agent on SOEF.")
 
-    def _register_service_personality_classification(self) -> None:
+    def register_service_personality_classification(self) -> None:
         """
         Register the agent's service, personality and classification.
 

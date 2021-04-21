@@ -36,7 +36,8 @@ handlers:
     args: {}
     class_name: GenericLedgerApiHandler
   oef_search:
-    args: {}
+    args:
+      max_retries: 20
     class_name: GenericOefSearchHandler
 models:
   default_dialogues:

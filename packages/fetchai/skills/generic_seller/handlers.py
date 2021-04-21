@@ -19,7 +19,7 @@
 
 """This package contains the handlers of a generic seller AEA."""
 
-from typing import Optional, cast
+from typing import Any, Optional, cast
 
 from aea.configurations.base import PublicId
 from aea.crypto.ledger_apis import LedgerApis
@@ -34,6 +34,9 @@ from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.skills.generic_seller.behaviours import (
+    GenericServiceRegistrationBehaviour,
+)
 from packages.fetchai.skills.generic_seller.dialogues import (
     DefaultDialogues,
     FipaDialogue,
@@ -47,6 +50,7 @@ from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 
 
 LEDGER_API_ADDRESS = str(LEDGER_CONNECTION_PUBLIC_ID)
+DEFAULT_MAX_RETRIES = 20
 
 
 class GenericFipaHandler(Handler):
@@ -441,6 +445,12 @@ class GenericOefSearchHandler(Handler):
 
     SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[PublicId]
 
+    def __init__(self, **kwargs: Any):
+        """Initialise the behaviour."""
+        self._max_retries = kwargs.pop("max_retries", DEFAULT_MAX_RETRIES)  # type: int
+        super().__init__(max_retries=self._max_retries, **kwargs)
+        self._nb_retries = 0
+
     def setup(self) -> None:
         """Call to setup the handler."""
 
@@ -465,7 +475,9 @@ class GenericOefSearchHandler(Handler):
             return
 
         # handle message
-        if oef_search_msg.performative is OefSearchMessage.Performative.OEF_ERROR:
+        if oef_search_msg.performative is OefSearchMessage.Performative.SUCCESS:
+            self._handle_success(oef_search_msg, oef_search_dialogue)
+        elif oef_search_msg.performative is OefSearchMessage.Performative.OEF_ERROR:
             self._handle_error(oef_search_msg, oef_search_dialogue)
         else:
             self._handle_invalid(oef_search_msg, oef_search_dialogue)
@@ -489,8 +501,42 @@ class GenericOefSearchHandler(Handler):
             )
         )
 
+    def _handle_success(
+        self,
+        oef_search_success_msg: OefSearchMessage,
+        oef_search_dialogue: OefSearchDialogue,
+    ) -> None:
+        """
+        Handle an oef search message.
+
+        :param oef_search_success_msg: the oef search message
+        :param oef_search_dialogue: the dialogue
+        :return: None
+        """
+        self.context.logger.info(
+            "received oef_search success message={} in dialogue={}.".format(
+                oef_search_success_msg, oef_search_dialogue
+            )
+        )
+        target_message = cast(
+            OefSearchMessage,
+            oef_search_dialogue.get_message_by_id(oef_search_success_msg.target),
+        )
+        if (
+            target_message.performative
+            == OefSearchMessage.Performative.REGISTER_SERVICE
+        ):
+            if "location" in target_message.service_description.values:
+                registration_behaviour = cast(
+                    GenericServiceRegistrationBehaviour,
+                    self.context.behaviours.service_registration,
+                )
+                registration_behaviour.register_service_personality_classification()
+
     def _handle_error(
-        self, oef_search_error_msg: OefSearchMessage, oef_search_dialogue: OefSearchDialogue
+        self,
+        oef_search_error_msg: OefSearchMessage,
+        oef_search_dialogue: OefSearchDialogue,
     ) -> None:
         """
         Handle an oef search message.
@@ -512,6 +558,11 @@ class GenericOefSearchHandler(Handler):
             target_message.performative
             == OefSearchMessage.Performative.REGISTER_SERVICE
         ):
+            self._nb_retries += 1
+            if self._nb_retries >= self._max_retries:
+                self.context.is_active = False
+                return
+
             oef_search_dialogues = cast(
                 OefSearchDialogues, self.context.oef_search_dialogues
             )
