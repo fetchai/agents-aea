@@ -55,8 +55,6 @@ func newSelfInitiatedDialogueReference() DialogueReference {
 type Dialogues struct {
 	selfAddress                Address
 	endStates                  helpers.Set
-	message                    ProtocolMessageInterface // type
-	dialogue                   *Dialogue                // type
 	roleFromFirstMessage       func(ProtocolMessageInterface, Address) Role
 	keepTerminalStateDialogues bool
 
@@ -73,14 +71,6 @@ func (dialogues *Dialogues) SelfAddress() (Address, error) {
 		return "", errors.New("'self address' is not set")
 	}
 	return dialogues.selfAddress, nil
-}
-
-func (dialogues *Dialogues) Message() ProtocolMessageInterface {
-	return dialogues.message
-}
-
-func (dialogues *Dialogues) Dialogue() *Dialogue {
-	return dialogues.dialogue
 }
 
 func (dialogues *Dialogues) GetDialoguesWithCounterparty(counterparty Address) []*Dialogue {
@@ -386,8 +376,6 @@ func (dialogues *Dialogues) create(
 func NewDialogues(
 	selfAddress Address,
 	endStates helpers.Set,
-	message ProtocolMessageInterface,
-	dialogue *Dialogue,
 	roleFromFirstMessage func(ProtocolMessageInterface, Address) Role,
 	keepTerminalStateDialogues bool,
 	dialogueName string,
@@ -395,8 +383,6 @@ func NewDialogues(
 	dialogues := Dialogues{
 		selfAddress:                selfAddress,
 		endStates:                  endStates,
-		message:                    message,
-		dialogue:                   dialogue,
 		roleFromFirstMessage:       roleFromFirstMessage,
 		keepTerminalStateDialogues: keepTerminalStateDialogues,
 		dialogueName:               dialogueName,
