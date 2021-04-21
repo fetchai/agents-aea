@@ -20,7 +20,7 @@
 import os
 from pathlib import Path
 from threading import Thread
-from typing import Optional
+from typing import Optional, cast
 
 import pytest
 
@@ -111,11 +111,11 @@ class BuyerBehaviour(TickerBehaviour):
 
     def act(self) -> None:
         """Make an action."""
-        self.dialogues = self.context.shared_state["dialogues"]
+        dialogues = cast(FipaDialogues, self.context.dialogues)
         if not self.is_started or self.was_called:
             return
 
-        cfp_msg, _ = self.dialogues.create(
+        cfp_msg, _ = dialogues.create(
             counterparty=self.addr,
             performative=FipaMessage.Performative.CFP,
             query=Query([Constraint("something", ConstraintType(">", 1))]),
@@ -143,8 +143,8 @@ class BuyerHandler(Handler):
 
     def handle(self, message) -> None:
         """Handle an evelope."""
-        self.dialogues = self.context.shared_state["dialogues"]
-        buyer_dialogue = self.dialogues.update(message)
+        dialogues = cast(FipaDialogues, self.context.dialogues)
+        buyer_dialogue = dialogues.update(message)
         if not buyer_dialogue:
             return
         self.got_proposal = True
@@ -157,7 +157,6 @@ class SellerHandler(Handler):
 
     def setup(self) -> None:
         """Set up behaviour."""
-        self.counter = 0
         self.dialogues: Optional[FipaDialogues] = None
 
     def teardown(self) -> None:
@@ -274,8 +273,12 @@ class TestFipaEnd2End(Base):
         )
         assert result.exit_code == 0
         multi_addr = result.stdout.strip()
+        result = self.invoke("get-address", "fetchai",)
+        assert result.exit_code == 0
+        my_addr = result.stdout.strip()
         builder = AEABuilder.from_aea_project(self._get_cwd())
         skill_context = SkillContext()
+        skill_context.dialogues = BuyerDialogues(my_addr)  # type: ignore
         behaviour = BuyerBehaviour(name="behaviour", skill_context=skill_context)
         handler = BuyerHandler(name="handler", skill_context=skill_context)
         test_skill = Skill(
@@ -287,9 +290,6 @@ class TestFipaEnd2End(Base):
         builder.add_component_instance(test_skill)
         with cd(self._get_cwd()):
             agent = builder.build()
-            agent.context.shared_state["dialogues"] = BuyerDialogues(
-                agent.context.address
-            )
             skill_context.set_agent_context(agent.context)
 
         try:
