@@ -35,34 +35,79 @@ type Set struct {
 	container map[Generic]bool // container: a private container.
 }
 
-// Init initialize a set.
-func (set *Set) Init() {
-	set.container = make(map[Generic]bool)
-}
-
+//AddFromArray adds elements to the set from an array
 func (set *Set) AddFromArray(array []Generic) {
 	for _, element := range array {
 		set.Add(element)
 	}
 }
 
-// Add add an element.
+// ToArray gives an array of 'interface{}' built from the set.
+func (set *Set) ToArray() []interface{} {
+	keys := make([]interface{}, 0, len(set.container))
+	for k := range set.container {
+		keys = append(keys, k)
+	}
+	return keys
+}
+
+// Add adds an element.
 func (set *Set) Add(element Generic) {
 	set.container[element] = true
 }
 
-// Remove remove an element.
+// Remove removes an element.
 func (set *Set) Remove(element Generic) {
 	delete(set.container, element)
 }
 
-// Contains check an element is in the set.
+// Contains checks an element is in the set.
 func (set *Set) Contains(element Generic) bool {
 	val, ok := set.container[element]
 	return val && ok
 }
 
-// Size return the size of the set.
+// Size returns the size of the set.
 func (set *Set) Size() int {
 	return len(set.container)
+}
+
+// Copy instantiate a new copy of the set.
+func (set *Set) Copy() Set {
+	newSet := NewSet()
+	for element := range set.container {
+		newSet.Add(element)
+	}
+	return newSet
+}
+
+// Difference computes the difference from set 1 to set 2
+func Difference(set1 Set, set2 Set) Set {
+	result := set1.Copy()
+	for element := range set2.container {
+		result.Remove(element)
+	}
+	return result
+}
+
+// NewSet returns a new set.
+func NewSet() Set {
+	result := Set{}
+	result.container = make(map[Generic]bool)
+	return result
+}
+
+// NewSetFromArray returns a new set initialized from an array.
+func NewSetFromArray(array []interface{}) Set {
+	result := NewSet()
+	result.AddFromArray(fromInterfaceToGenericArray(array))
+	return result
+}
+
+func fromInterfaceToGenericArray(array []interface{}) []Generic {
+	newArray := make([]Generic, len(array))
+	for index, element := range array {
+		newArray[index] = element
+	}
+	return newArray
 }

@@ -42,8 +42,7 @@ func checkNotIn(t *testing.T, set *Set, element Generic) {
 }
 
 func TestSet(t *testing.T) {
-	set := Set{}
-	set.Init()
+	set := NewSet()
 
 	element1 := "hello"
 	element2 := 42
@@ -77,4 +76,15 @@ func TestSet(t *testing.T) {
 	checkNotIn(t, &set, element2)
 	checkNotIn(t, &set, element3)
 	checkExpectedSize(t, &set, 0)
+}
+
+func TestSetFromArray(t *testing.T) {
+	elements := []interface{}{"hello", 42, "world", "world"}
+	set := NewSetFromArray(elements)
+
+	expectedSize := 3
+	actualSize := set.Size()
+	if expectedSize != actualSize {
+		t.Fatalf("expected %v, found %v", expectedSize, actualSize)
+	}
 }
