@@ -77,14 +77,15 @@ func (message *DialogueMessageWrapper) InitFromProtobuf(dialogueMessage *Dialogu
 	if err != nil {
 		return err
 	}
-	if _, ok := message.body["performative"]; ok {
+	if _, ok := data["performative"]; !ok {
 		return errors.New("'performative' field not set")
 	}
-	performative := message.body["performative"]
-	if _, ok := performative.(Performative); ok {
+	performativeValue := data["performative"]
+	if _, ok := performativeValue.(string); !ok {
 		return errors.New("cannot cast performative field")
 	}
-	message.performative = performative.(Performative)
+	performativeStr := performativeValue.(string)
+	message.performative = Performative(performativeStr)
 	message.body = data
 	return nil
 }

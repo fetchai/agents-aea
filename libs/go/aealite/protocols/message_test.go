@@ -41,7 +41,7 @@ func TestMessage(t *testing.T) {
 	result := DialogueMessageWrapper{}
 	err := result.InitFromProtobuf(&message)
 	if err != nil {
-		t.Fatalf("Error")
+		t.Fatalf("Error: %s", err.Error())
 	}
 
 	assert.Equal(t, result.messageId, StartingMessageId)
