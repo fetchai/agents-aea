@@ -89,4 +89,4 @@ You can use the CLI to interact with the registry. By default the CLI points to 
 
 By default, the AEA can only handle one version per package. That is, a project should never use both `some_author/some_package_name:0.1.0` and `some_author/some_package_name:0.2.0`.
 
-If two packages with different versions are used in the same `subprocess`, then only the code from the last loaded package will be available in `sys.modules`. This can lead to inconsistencies and exceptions at runtime.
+If two AEA packages with the same author and name but different versions are used in the same Python process, then only the code from one of the packages (generally not deterministic) will be available in `sys.modules`. This can lead to inconsistencies and exceptions at runtime.
