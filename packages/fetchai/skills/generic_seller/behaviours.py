@@ -36,7 +36,7 @@ from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 
 
 DEFAULT_SERVICES_INTERVAL = 60.0
-DEFAULT_MAX_RETRIES = 20
+DEFAULT_MAX_SOEF_REGISTRATION_RETRIES = 5
 LEDGER_API_ADDRESS = str(LEDGER_CONNECTION_PUBLIC_ID)
 
 
@@ -48,7 +48,9 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         services_interval = kwargs.pop(
             "services_interval", DEFAULT_SERVICES_INTERVAL
         )  # type: int
-        self._max_retries = kwargs.pop("max_retries", DEFAULT_MAX_RETRIES)  # type: int
+        self._max_soef_registration_retries = kwargs.pop(
+            "max_retries", DEFAULT_MAX_SOEF_REGISTRATION_RETRIES
+        )  # type: int
         super().__init__(tick_interval=services_interval, **kwargs)
 
         self.failed_registration_msg = None  # type: Optional[OefSearchMessage]
@@ -99,7 +101,7 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         """
         if self.failed_registration_msg is not None:
             self._nb_retries += 1
-            if self._nb_retries >= self._max_retries:
+            if self._nb_retries >= self._max_soef_registration_retries:
                 self.context.is_active = False
                 return
 
@@ -113,6 +115,8 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
             )
             self.context.outbox.put_message(message=oef_search_msg)
             self.context.logger.info("retrying registration on SOEF.")
+
+            self.failed_registration_msg = None
 
     def _register_agent(self) -> None:
         """
