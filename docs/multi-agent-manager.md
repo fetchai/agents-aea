@@ -147,4 +147,4 @@ manager.stop_manager()
 
 # Limitations
 
-The `MultiAgentManager` can only be used with compatible package versions, in particular the same package (wrt author and name) cannot be used in different versions. If you want to run multiple agents with differing versions of the same package then use the `aea launch` command in the multi-processing mode, or simply launch each agent individually with `aea run`.
+The `MultiAgentManager` can only be used with compatible package versions, in particular the same package (with respect to author and name) cannot be used in different versions. If you want to run multiple agents with differing versions of the same package then use the `aea launch` command in the multi-processing mode, or simply launch each agent individually with `aea run`.
