@@ -115,7 +115,7 @@ function set_participant(){
 	set_agent $agent_name $(expr $BASE_PORT + $agent_id)
 	aea config set vendor.fetchai.skills.tac_negotiation.behaviours.clean_up.args.tick_interval $CLEANUP_INTERVAL
 	aea config set vendor.fetchai.skills.tac_negotiation.behaviours.tac_negotiation.args.search_interval $SEARCH_INTERVAL
-	aea config set vendor.fetchai.skills.soef.config.token_storage_path $agent_data_dir/soef_token.txt
+	aea config set vendor.fetchai.skills.tac_participation.models.game.args.search_query.search_value $TAC_NAME
 	cd ..
 }
 
