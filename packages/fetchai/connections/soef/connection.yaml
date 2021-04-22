@@ -8,7 +8,7 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmSRWpRqN5SaZTmLsoapZoVdenmZRC7ewLfeJosFqL1kNd
   __init__.py: Qmd5VBGFJHXFe1H45XoUh5mMSYBwvLSViJuGFeMgbPdQts
-  connection.py: QmfZ6ooEhxB6Js5uG3cmoGzBoh4qzELvWZMy4rPkr92mzJ
+  connection.py: QmUn85Qw9G2wdtUhSF4cSy6STsu6VevYdKJrwiq4zNKzx5
 fingerprint_ignore_patterns: []
 connections: []
 protocols:

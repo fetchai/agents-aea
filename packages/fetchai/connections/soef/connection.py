@@ -1036,13 +1036,6 @@ class SOEFChannel:
 
             try:
                 response = await asyncio.shield(task)
-            except SOEFException as e:
-                if (
-                    "<reason>Bad Request</reason><detail>agent lookup failed"
-                    not in str(e)
-                ):
-                    raise e
-                self.logger.debug("Unregister on soef failed. Agent not registered.")
             finally:
                 response = await task
                 if (
@@ -1090,7 +1083,12 @@ class SOEFChannel:
             self._find_around_me_processor()
         )
         # make sure we first unregister, in case of improper previous termination
-        await self._unregister_agent()
+        try:
+            await self._unregister_agent()
+        except SOEFException as e:  # pragma: nocover
+            if "<reason>Bad Request</reason><detail>agent lookup failed" not in str(e):
+                raise e
+            self.logger.debug("Unregister on SOEF failed. Agent not registered.")
 
     async def disconnect(self) -> None:
         """
@@ -1108,7 +1106,10 @@ class SOEFChannel:
                 self._find_around_me_processor_task.cancel()
             await self._find_around_me_processor_task
 
-        await self._unregister_agent()
+        try:
+            await self._unregister_agent()
+        except SOEFException as e:  # pragma: nocover
+            self.logger.exception(str(e))
 
         await self.in_queue.put(None)
         self._find_around_me_queue = None
