@@ -261,7 +261,7 @@ class TestFipaEnd2End(Base):
     """Test that the FIPA end-to-end demo works."""
 
     def test_run(self):
-        """Run the echo skill sequence."""
+        """Run the FIPA end-to-end demo."""
         result = self.invoke(
             "get-multiaddress",
             "fetchai",
