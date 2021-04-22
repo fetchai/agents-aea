@@ -33,6 +33,7 @@ from aea.helpers.search.models import (
     ConstraintType,
     DataModel,
     Description,
+    Location,
     Query,
 )
 from aea.helpers.transaction.base import (
@@ -54,6 +55,9 @@ from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 from packages.fetchai.protocols.signing.message import SigningMessage
+from packages.fetchai.skills.tac_negotiation.behaviours import (
+    GoodsRegisterAndSearchBehaviour,
+)
 from packages.fetchai.skills.tac_negotiation.dialogues import (
     ContractApiDialogue,
     ContractApiDialogues,
@@ -1952,6 +1956,10 @@ class TestOefSearchHandler(BaseSkillTestCase):
         )
         cls.strategy = cast(Strategy, cls._skill.skill_context.strategy)
         cls.logger = cls._skill.skill_context.logger
+        cls.service_registration_behaviour = cast(
+            GoodsRegisterAndSearchBehaviour,
+            cls._skill.skill_context.behaviours.tac_negotiation,
+        )
 
         cls.oef_dialogues = cast(
             OefSearchDialogues, cls._skill.skill_context.oef_search_dialogues
@@ -1994,6 +2002,44 @@ class TestOefSearchHandler(BaseSkillTestCase):
             ),
         )
 
+        cls.register_description = Description(
+            {"location": Location(51.5194, 0.1270)},
+            data_model=DataModel("location", [Attribute("location", Location, True)]),
+        )
+        cls.list_of_messages_register_service = (
+            DialogueMessage(
+                OefSearchMessage.Performative.REGISTER_SERVICE,
+                {"service_description": cls.register_description},
+                is_incoming=False,
+            ),
+        )
+
+        cls.register_description_key_value = Description(
+            {"key": "seller_service", "value": "generic_service"},
+            data_model=DataModel(
+                "set", [Attribute("key", str, True), Attribute("value", str, True)]
+            ),
+        )
+        cls.list_of_messages_register_service_key_value = (
+            DialogueMessage(
+                OefSearchMessage.Performative.REGISTER_SERVICE,
+                {"service_description": cls.register_description_key_value},
+                is_incoming=False,
+            ),
+        )
+
+        cls.unregister_description = Description(
+            {"key": "seller_service"},
+            data_model=DataModel("remove", [Attribute("key", str, True)]),
+        )
+        cls.list_of_messages_unregister_service = (
+            DialogueMessage(
+                OefSearchMessage.Performative.UNREGISTER_SERVICE,
+                {"service_description": cls.unregister_description},
+                is_incoming=False,
+            ),
+        )
+
     def test_setup(self):
         """Test the setup method of the oef handler."""
         assert self.oef_search_handler.setup() is None
@@ -2020,31 +2066,157 @@ class TestOefSearchHandler(BaseSkillTestCase):
             f"received invalid oef_search message={incoming_message}, unidentified dialogue.",
         )
 
-    def test_handle_error(self):
-        """Test the _handle_error method of the oef handler."""
+    def test_handle_success_i(self):
+        """Test the _handle_success method of the oef_search handler where the oef success targets register_service WITH location description."""
         # setup
         oef_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.oef_dialogues, messages=self.list_of_messages[:1],
+            dialogues=self.oef_dialogues,
+            messages=self.list_of_messages_register_service[:1],
+        )
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
+            dialogue=oef_dialogue,
+            performative=OefSearchMessage.Performative.SUCCESS,
+            agents_info=OefSearchMessage.AgentsInfo({"address": {"key": "value"}}),
+        )
+
+        # before
+        assert self.service_registration_behaviour.is_registered is False
+
+        # operation
+        with patch.object(self.oef_search_handler.context.logger, "log") as mock_logger:
+            with patch.object(
+                self.service_registration_behaviour, "register_service",
+            ) as mock_reg:
+                self.oef_search_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received oef_search success message={incoming_message} in dialogue={oef_dialogue}.",
+        )
+        mock_reg.assert_called_once()
+        assert self.service_registration_behaviour.is_registered is False
+
+    def test_handle_success_ii(self):
+        """Test the _handle_success method of the oef_search handler where the oef success targets register_service WITH `key` and `value` description."""
+        # setup
+        oef_dialogue = self.prepare_skill_dialogue(
+            dialogues=self.oef_dialogues,
+            messages=self.list_of_messages_register_service_key_value[:1],
+        )
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
+            dialogue=oef_dialogue,
+            performative=OefSearchMessage.Performative.SUCCESS,
+            agents_info=OefSearchMessage.AgentsInfo({"address": {"key": "value"}}),
+        )
+
+        # before
+        assert self.service_registration_behaviour.is_registered is False
+
+        # operation
+        with patch.object(self.oef_search_handler.context.logger, "log") as mock_logger:
+            with patch.object(
+                self.service_registration_behaviour, "register_service",
+            ) as mock_reg:
+                self.oef_search_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received oef_search success message={incoming_message} in dialogue={oef_dialogue}.",
+        )
+        mock_reg.assert_not_called()
+        assert self.service_registration_behaviour.is_registered is True
+
+    def test_handle_success_iii(self):
+        """Test the _handle_success method of the oef_search handler where the oef success targets register_service WITHOUT location description."""
+        # setup
+        oef_dialogue = self.prepare_skill_dialogue(
+            dialogues=self.oef_dialogues,
+            messages=self.list_of_messages_unregister_service[:1],
+        )
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
+            dialogue=oef_dialogue,
+            performative=OefSearchMessage.Performative.SUCCESS,
+            agents_info=OefSearchMessage.AgentsInfo({"address": {"key": "value"}}),
+        )
+
+        # before
+        assert self.service_registration_behaviour.is_registered is False
+
+        # operation
+        with patch.object(self.oef_search_handler.context.logger, "log") as mock_logger:
+            with patch.object(
+                self.service_registration_behaviour, "register_service",
+            ) as mock_reg:
+                self.oef_search_handler.handle(incoming_message)
+
+        # after
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"received oef_search success message={incoming_message} in dialogue={oef_dialogue}.",
+        )
+        mock_reg.assert_not_called()
+        assert self.service_registration_behaviour.is_registered is False
+
+    def test_on_oef_error_i(self):
+        """Test the _handle_error method of the oef_search handler where the oef error targets register_service."""
+        # setup
+        oef_dialogue = self.prepare_skill_dialogue(
+            dialogues=self.oef_dialogues,
+            messages=self.list_of_messages_register_service[:1],
         )
         incoming_message = cast(
             OefSearchMessage,
             self.build_incoming_message_for_skill_dialogue(
                 dialogue=oef_dialogue,
                 performative=OefSearchMessage.Performative.OEF_ERROR,
-                to=str(self.skill.skill_context.skill_id),
                 oef_error_operation=OefSearchMessage.OefErrorOperation.SEARCH_SERVICES,
             ),
         )
 
         # operation
-        with patch.object(self.logger, "log") as mock_logger:
+        with patch.object(self.oef_search_handler.context.logger, "log") as mock_logger:
             self.oef_search_handler.handle(incoming_message)
 
         # after
+        self.assert_quantity_in_outbox(0)
+
         mock_logger.assert_any_call(
             logging.WARNING,
             f"received OEF Search error: dialogue_reference={oef_dialogue.dialogue_label.dialogue_reference}, oef_error_operation={incoming_message.oef_error_operation}",
         )
+        assert (
+            self.service_registration_behaviour.failed_registration_msg
+            == oef_dialogue.get_message_by_id(incoming_message.target)
+        )
+
+    def test_on_oef_error_ii(self):
+        """Test the _handle_error method of the oef_search handler where the oef error does NOT target register_service."""
+        # setup
+        oef_dialogue = self.prepare_skill_dialogue(
+            dialogues=self.oef_dialogues,
+            messages=self.list_of_messages_unregister_service[:1],
+        )
+        incoming_message = self.build_incoming_message_for_skill_dialogue(
+            dialogue=oef_dialogue,
+            performative=OefSearchMessage.Performative.OEF_ERROR,
+            oef_error_operation=OefSearchMessage.OefErrorOperation.SEARCH_SERVICES,
+        )
+
+        # operation
+        with patch.object(self.oef_search_handler.context.logger, "log") as mock_logger:
+            self.oef_search_handler.handle(incoming_message)
+
+        # after
+        self.assert_quantity_in_outbox(0)
+
+        mock_logger.assert_any_call(
+            logging.WARNING,
+            f"received OEF Search error: dialogue_reference={oef_dialogue.dialogue_label.dialogue_reference}, oef_error_operation={incoming_message.oef_error_operation}",
+        )
+
+        assert self.service_registration_behaviour.failed_registration_msg is None
 
     def test_on_search_result_i(self):
         """Test the _on_search_result method of the oef handler."""

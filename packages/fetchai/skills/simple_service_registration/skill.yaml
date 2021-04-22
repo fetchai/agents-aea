@@ -8,9 +8,9 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmUgCcR7sDBQeeCBRKwDT7tPBTi3t4zSibyEqR3xdQUKmh
   __init__.py: QmZd48HmYDr7FMxNaVeGfWRvVtieEdEV78hd7h7roTceP2
-  behaviours.py: QmeqPmMeW1kuM9pq4kxLXUMVs6EjB5bwpVfPY2uLG665tG
+  behaviours.py: QmXP8HLr1yQprSPGjT21t5ZcyDzwLuTt9tssmmWYX9QSP6
   dialogues.py: QmTT9dvFhWt6qvxjwBfMFDTrgEtgWbvgANYafyRg2BXwcR
-  handlers.py: QmUvPXQx3yhkw26dv6ALqeGccTUgLGcdRVzwrHXdtKbRCP
+  handlers.py: QmPkQacXoiG5NNgu1peuWEKVFtNWvnoe7D6df9pUgHTNjj
   strategy.py: QmdwMutXdsDC9qz8m9H3SB3bQJaGThaG4TdGgzyFzPBca6
 fingerprint_ignore_patterns: []
 connections: []
@@ -21,6 +21,7 @@ skills: []
 behaviours:
   service:
     args:
+      max_retries: 5
       services_interval: 30
     class_name: ServiceRegistrationBehaviour
 handlers:

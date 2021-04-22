@@ -9,10 +9,10 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmPakq2qYHCenyWKfqQHRLWdF7uo6eG24GTprsBfrkyny2
   __init__.py: QmNU8w3ZCUYFgSBgfxHB9YkPthD7nj6CTHR1ct9m5fH9vT
-  behaviours.py: QmRjE2BzYjr2UtbpCfesWkRcpqb3v7ifqbqUr7yoZGPNSK
+  behaviours.py: QmWRMKaeFdMYDs8zZinKDPy88r3QHwdvH3gVrxnRyUkKqm
   dialogues.py: QmbQt96MAo8f4xjZKHLwRpiu1jDkyRV6k6FfK16zGkcMid
-  game.py: QmaLDE2JBjUgk6XsMdut2eNPduSxtugbB3LeXettne16Sg
-  handlers.py: QmR6ba4c3z7B2X9fRiM2D2gcr8DEcTAT99KVGhsWhESFQG
+  game.py: QmQRKAUrDehqMurYthpw57hhYQz5mZzKhAgpox5F2u6Rmn
+  handlers.py: QmVgfpcPenFZ6c5xtFAqLj3ndPHDpnWzuseJTPLqkifpfH
   helpers.py: QmdgSxjFPGr19Ptw4gLKLD4mvgZurzitwF9MzTNy1cZF2P
   parameters.py: Qmb6rSHw8d4gxH3rMFuRqajW5W8NnjnWTwrmBSuNyZkK9w
 fingerprint_ignore_patterns: []
@@ -26,7 +26,8 @@ protocols:
 skills: []
 behaviours:
   tac:
-    args: {}
+    args:
+      max_retries: 5
     class_name: TacBehaviour
 handlers:
   oef:

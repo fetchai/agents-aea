@@ -35,13 +35,21 @@ from packages.fetchai.skills.tac_control.game import Game, Phase
 from packages.fetchai.skills.tac_control.parameters import Parameters
 
 
+DEFAULT_MAX_SOEF_REGISTRATION_RETRIES = 5
+
+
 class TacBehaviour(Behaviour):
     """This class implements the TAC control behaviour."""
 
     def __init__(self, **kwargs: Any):
         """Instantiate the behaviour."""
+        self._max_soef_registration_retries = kwargs.pop(
+            "max_retries", DEFAULT_MAX_SOEF_REGISTRATION_RETRIES
+        )  # type: int
         super().__init__(**kwargs)
         self._registered_description = None  # type: Optional[Description]
+        self.failed_registration_msg = None  # type: Optional[OefSearchMessage]
+        self._nb_retries = 0
 
     def setup(self) -> None:
         """
@@ -57,12 +65,15 @@ class TacBehaviour(Behaviour):
 
         :return: None
         """
+        self._retry_failed_registration()
+
         game = cast(Game, self.context.game)
         parameters = cast(Parameters, self.context.parameters)
         now = datetime.datetime.now()
         if (
             game.phase.value == Phase.PRE_GAME.value
             and parameters.registration_start_time < now < parameters.start_time
+            and game.is_registered_agent
         ):
             game.phase = Phase.GAME_REGISTRATION
             self._register_tac()
@@ -95,6 +106,31 @@ class TacBehaviour(Behaviour):
         """
         self._unregister_tac()
         self._unregister_agent()
+
+    def _retry_failed_registration(self) -> None:
+        """
+        Retry a failed registration.
+
+        :return: None
+        """
+        if self.failed_registration_msg is not None:
+            self._nb_retries += 1
+            if self._nb_retries >= self._max_soef_registration_retries:
+                self.context.is_active = False
+                return
+
+            oef_search_dialogues = cast(
+                OefSearchDialogues, self.context.oef_search_dialogues
+            )
+            oef_search_msg, _ = oef_search_dialogues.create(
+                counterparty=self.failed_registration_msg.to,
+                performative=self.failed_registration_msg.performative,
+                service_description=self.failed_registration_msg.service_description,
+            )
+            self.context.outbox.put_message(message=oef_search_msg)
+            self.context.logger.info("retrying registration on SOEF.")
+
+            self.failed_registration_msg = None
 
     def _register_agent(self) -> None:
         """
