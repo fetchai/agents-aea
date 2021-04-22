@@ -151,7 +151,7 @@ class BuyerHandler(Handler):
 
 
 class SellerHandler(Handler):
-    """Simple behaviour to count how many acts were called."""
+    """Test SellerHandler."""
 
     SUPPORTED_PROTOCOL = FipaMessage.protocol_id
 
