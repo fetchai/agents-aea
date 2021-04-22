@@ -172,10 +172,14 @@ def _search_items_locally(ctx: Context, item_type_plural: str) -> List[Dict]:
             result,
         )
 
+    try:
+        registry_path = ctx.registry_path
+    except ValueError as e:  # pragma: nocover
+        raise click.ClickException(str(e))
     # look in packages dir for all other packages
     _get_details_from_dir(
         cast(ConfigLoader, configs[item_type_plural]["loader"]),
-        ctx.registry_path,
+        registry_path,
         "*/{}".format(item_type_plural),
         cast(str, configs[item_type_plural]["config_file"]),
         result,

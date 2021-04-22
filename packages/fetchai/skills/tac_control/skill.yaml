@@ -12,7 +12,7 @@ fingerprint:
   behaviours.py: QmRjE2BzYjr2UtbpCfesWkRcpqb3v7ifqbqUr7yoZGPNSK
   dialogues.py: QmbQt96MAo8f4xjZKHLwRpiu1jDkyRV6k6FfK16zGkcMid
   game.py: QmaLDE2JBjUgk6XsMdut2eNPduSxtugbB3LeXettne16Sg
-  handlers.py: QmR6ba4c3z7B2X9fRiM2D2gcr8DEcTAT99KVGhsWhESFQG
+  handlers.py: QmdXZinVfDwUVBUEpm2kHa5uJmMmCdeFbgXHXecSTxmMvp
   helpers.py: QmdgSxjFPGr19Ptw4gLKLD4mvgZurzitwF9MzTNy1cZF2P
   parameters.py: Qmb6rSHw8d4gxH3rMFuRqajW5W8NnjnWTwrmBSuNyZkK9w
 fingerprint_ignore_patterns: []

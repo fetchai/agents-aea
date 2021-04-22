@@ -89,6 +89,12 @@ def do_fetch(
     enforce(
         not (local and remote), "'local' and 'remote' options are mutually exclusive."
     )
+    if not local and not remote:
+        try:
+            ctx.registry_path
+        except ValueError as e:
+            click.echo(f"{e}\nTrying remote registry (`--remote`).")
+            remote = True
     is_mixed = not local and not remote
     ctx.set_config("is_local", local and not remote)
     ctx.set_config("is_mixed", is_mixed)
@@ -131,8 +137,13 @@ def fetch_agent_locally(
     :param target_dir: the target directory to which the agent is fetched.
     :return: None
     """
+    try:
+        registry_path = ctx.registry_path
+    except ValueError as e:
+        raise click.ClickException(str(e))
+
     source_path = try_get_item_source_path(
-        ctx.registry_path, public_id.author, AGENTS, public_id.name
+        registry_path, public_id.author, AGENTS, public_id.name
     )
     enforce(
         ctx.config.get("is_local") is True or ctx.config.get("is_mixed") is True,

@@ -171,7 +171,9 @@ class TacHandler(Handler):
             return
 
         game.registration.register_agent(tac_msg.sender, agent_name)
-        self.context.logger.info("agent registered: '{}'".format(agent_name))
+        self.context.logger.info(
+            "agent '{}' registered as '{}'".format(tac_msg.sender, agent_name)
+        )
 
     def _on_unregister(self, tac_msg: TacMessage, tac_dialogue: TacDialogue) -> None:
         """
@@ -286,7 +288,14 @@ class TacHandler(Handler):
 
         # log messages
         self.context.logger.info(
-            "transaction '{}' settled successfully.".format(transaction.id[-10:])
+            "transaction '{}' between '{}' and '{}' settled successfully.".format(
+                transaction.id[-10:], sender_tac_msg.sender, counterparty_tac_msg.sender
+            )
+        )
+        self.context.logger.info(
+            "total number of transactions settled: {}".format(
+                len(game.transactions.confirmed)
+            )
         )
         self.context.logger.info("current state:\n{}".format(game.holdings_summary))
 

@@ -1036,7 +1036,7 @@ def libp2p_log_on_failure(fn: Callable) -> Callable:
     @wraps(fn)
     def wrapper(self, *args, **kwargs):
         try:
-            fn(self, *args, **kwargs)
+            return fn(self, *args, **kwargs)
         except Exception:
             for log_file in self.log_files:
                 print("libp2p log file ======================= {}".format(log_file))
