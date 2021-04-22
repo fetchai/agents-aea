@@ -31,7 +31,7 @@ private_key_paths:                              # The private key paths the AEA 
 logging_config:                                 # The logging configurations the AEA project uses
   disable_existing_loggers: false
   version: 1
-dependencies: {}                                # The python dependencies the AEA relies on (e.g. plugins).
+dependencies: {}                                # The python dependencies the AEA relies on (e.g. plugins). They will be installed when `aea install` is run.
 ```
 ``` yaml
 period: 0.05                                    # The period to call agent's act
@@ -87,7 +87,7 @@ config:                                         # A dictionary containing the kw
   foo: bar
 excluded_protocols: []                          # The list of protocol public ids the package does not permit (each public id must satisfy PUBLIC_ID_REGEX).
 restricted_to_protocols: []                     # The list of protocol public ids the package is limited to (each public id must satisfy PUBLIC_ID_REGEX).
-dependencies: {}                                # The python dependencies the package relies on.
+dependencies: {}                                # The python dependencies the package relies on. They will be installed when `aea install` is run.
 is_abstract: false                              # An optional boolean that if `true` makes the connection
 ```
 ``` yaml
@@ -106,7 +106,7 @@ class_name: MyScaffoldContract                  # The class name of the class im
 contract_interface_paths: {}                    # The paths to the contract interfaces (one for each ledger identifier).
 config:                                         # A dictionary containing the kwargs for the contract instantiation.
   foo: bar
-dependencies: {}                                # The python dependencies the package relies on.
+dependencies: {}                                # The python dependencies the package relies on. They will be installed when `aea install` is run.
 ```
 ``` yaml
 name: scaffold                                  # Name of the package (must satisfy PACKAGE_REGEX)
@@ -121,7 +121,7 @@ fingerprint:                                    # Fingerprint of package compone
   message.py: QmdvAdYSHNdZyUMrK3ue7quHAuSNwgZZSHqxYXyvh8Nie4
   serialization.py: QmVUzwaSMErJgNFYQZkzsDhuuT2Ht4EdbGJ443usHmPxVv
 fingerprint_ignore_patterns: []                 # Ignore pattern for the fingerprinting tool.
-dependencies: {}                                # The python dependencies the package relies on.
+dependencies: {}                                # The python dependencies the package relies on. They will be installed when `aea install` is run.
 ```
 ``` yaml
 name: scaffold                                  # Name of the package (must satisfy PACKAGE_REGEX)
@@ -156,5 +156,5 @@ models:                                         # The dictionary describing the 
     args:                                       # Keyword arguments provided to the skill component on instantiation.
       foo: bar
     class_name: MyModel                         # The class name of the class implementing the model interface.
-dependencies: {}                                # The python dependencies the package relies on.
+dependencies: {}                                # The python dependencies the package relies on. They will be installed when `aea install` is run.
 ```
