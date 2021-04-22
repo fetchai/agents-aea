@@ -266,7 +266,8 @@ class TestTacHandler(BaseSkillTestCase):
 
         # after
         mock_logger.assert_any_call(
-            logging.INFO, f"agent registered: '{self.agent_name}'"
+            logging.INFO,
+            f"agent '{incoming_message.sender}' registered as '{self.agent_name}'",
         )
         assert self.game.registration.nb_agents == 1
 
@@ -495,7 +496,12 @@ class TestTacHandler(BaseSkillTestCase):
         )
         assert has_attributes, error_str
         mock_logger.assert_any_call(
-            logging.INFO, f"transaction '{tx_id[-10:]}' settled successfully."
+            logging.INFO,
+            f"transaction '{tx_id[-10:]}' between '{self.skill.skill_context.agent_address}' and '{self.skill.skill_context.agent_address}' settled successfully.",
+        )
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"total number of transactions settled: {len(self.game.transactions.confirmed)}",
         )
         mock_logger.assert_any_call(
             logging.INFO, f"current state:\n{mocked_holdings_summary}"

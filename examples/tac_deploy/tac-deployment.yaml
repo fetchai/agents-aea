@@ -28,6 +28,10 @@ spec:
            value: "86400"
          - name: INACTIVITY_TIMEOUT
            value: "3600"
+         - name: SEARCH_INTERVAL
+           value: "300"
+         - name: CLEANUP_INTERVAL
+           value: "300"
          - name: LOG_LEVEL
            value: "INFO"
         volumeMounts:

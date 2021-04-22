@@ -17,4 +17,5 @@ require (
 	github.com/rs/zerolog v1.20.0
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	google.golang.org/protobuf v1.25.0
+	gotest.tools v2.2.0+incompatible
 )
