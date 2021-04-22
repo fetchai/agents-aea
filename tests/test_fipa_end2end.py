@@ -258,7 +258,7 @@ class FipaSellerAgent(Base):
 
 
 class TestFipaEnd2End(Base):
-    """Test that echo skill works."""
+    """Test that the FIPA end-to-end demo works."""
 
     def test_run(self):
         """Run the echo skill sequence."""
