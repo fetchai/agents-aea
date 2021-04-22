@@ -62,7 +62,7 @@ A <a href="../api/skills/base#behaviour-objects">`Behaviour`</a> class contains 
 Open the `behaviours.py` file (`my_generic_seller/skills/generic_seller/behaviours.py`) and replace the stub code with the following:
 
 ``` python
-from typing import Any, cast
+from typing import Any, Optional, cast
 
 from aea.skills.behaviours import TickerBehaviour
 
@@ -79,6 +79,7 @@ from packages.fetchai.skills.generic_seller.strategy import GenericStrategy
 
 
 DEFAULT_SERVICES_INTERVAL = 60.0
+DEFAULT_MAX_SOEF_REGISTRATION_RETRIES = 5
 LEDGER_API_ADDRESS = str(LEDGER_CONNECTION_PUBLIC_ID)
 
 
@@ -90,7 +91,13 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         services_interval = kwargs.pop(
             "services_interval", DEFAULT_SERVICES_INTERVAL
         )  # type: int
+        self._max_soef_registration_retries = kwargs.pop(
+            "max_retries", DEFAULT_MAX_SOEF_REGISTRATION_RETRIES
+        )  # type: int
         super().__init__(tick_interval=services_interval, **kwargs)
+
+        self.failed_registration_msg = None  # type: Optional[OefSearchMessage]
+        self._nb_retries = 0
 
     def setup(self) -> None:
         """
@@ -111,7 +118,6 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
             )
             self.context.outbox.put_message(message=ledger_api_msg)
         self._register_agent()
-        self._register_service_personality_classification()
 
     def act(self) -> None:
         """
@@ -119,6 +125,7 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
 
         :return: None
         """
+        self._retry_failed_registration()
 
     def teardown(self) -> None:
         """
@@ -128,6 +135,31 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         """
         self._unregister_service()
         self._unregister_agent()
+
+    def _retry_failed_registration(self) -> None:
+        """
+        Retry a failed registration.
+
+        :return: None
+        """
+        if self.failed_registration_msg is not None:
+            self._nb_retries += 1
+            if self._nb_retries >= self._max_soef_registration_retries:
+                self.context.is_active = False
+                return
+
+            oef_search_dialogues = cast(
+                OefSearchDialogues, self.context.oef_search_dialogues
+            )
+            oef_search_msg, _ = oef_search_dialogues.create(
+                counterparty=self.failed_registration_msg.to,
+                performative=self.failed_registration_msg.performative,
+                service_description=self.failed_registration_msg.service_description,
+            )
+            self.context.outbox.put_message(message=oef_search_msg)
+            self.context.logger.info("retrying registration on SOEF.")
+
+            self.failed_registration_msg = None
 
     def _register_agent(self) -> None:
         """
@@ -148,7 +180,7 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("registering agent on SOEF.")
 
-    def _register_service_personality_classification(self) -> None:
+    def register_service_personality_classification(self) -> None:
         """
         Register the agent's service, personality and classification.
 
@@ -281,6 +313,9 @@ from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.fipa.message import FipaMessage
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.skills.generic_seller.behaviours import (
+    GenericServiceRegistrationBehaviour,
+)
 from packages.fetchai.skills.generic_seller.dialogues import (
     DefaultDialogues,
     FipaDialogue,
@@ -745,7 +780,9 @@ class GenericOefSearchHandler(Handler):
             return
 
         # handle message
-        if oef_search_msg.performative is OefSearchMessage.Performative.OEF_ERROR:
+        if oef_search_msg.performative == OefSearchMessage.Performative.SUCCESS:
+            self._handle_success(oef_search_msg, oef_search_dialogue)
+        elif oef_search_msg.performative == OefSearchMessage.Performative.OEF_ERROR:
             self._handle_error(oef_search_msg, oef_search_dialogue)
         else:
             self._handle_invalid(oef_search_msg, oef_search_dialogue)
@@ -769,21 +806,68 @@ class GenericOefSearchHandler(Handler):
             )
         )
 
-    def _handle_error(
-        self, oef_search_msg: OefSearchMessage, oef_search_dialogue: OefSearchDialogue
+    def _handle_success(
+        self,
+        oef_search_success_msg: OefSearchMessage,
+        oef_search_dialogue: OefSearchDialogue,
     ) -> None:
         """
         Handle an oef search message.
 
-        :param oef_search_msg: the oef search message
+        :param oef_search_success_msg: the oef search message
+        :param oef_search_dialogue: the dialogue
+        :return: None
+        """
+        self.context.logger.info(
+            "received oef_search success message={} in dialogue={}.".format(
+                oef_search_success_msg, oef_search_dialogue
+            )
+        )
+        target_message = cast(
+            OefSearchMessage,
+            oef_search_dialogue.get_message_by_id(oef_search_success_msg.target),
+        )
+        if (
+            target_message.performative
+            == OefSearchMessage.Performative.REGISTER_SERVICE
+        ):
+            if "location" in target_message.service_description.values:
+                registration_behaviour = cast(
+                    GenericServiceRegistrationBehaviour,
+                    self.context.behaviours.service_registration,
+                )
+                registration_behaviour.register_service_personality_classification()
+
+    def _handle_error(
+        self,
+        oef_search_error_msg: OefSearchMessage,
+        oef_search_dialogue: OefSearchDialogue,
+    ) -> None:
+        """
+        Handle an oef search message.
+
+        :param oef_search_error_msg: the oef search message
         :param oef_search_dialogue: the dialogue
         :return: None
         """
         self.context.logger.info(
             "received oef_search error message={} in dialogue={}.".format(
-                oef_search_msg, oef_search_dialogue
+                oef_search_error_msg, oef_search_dialogue
             )
         )
+        target_message = cast(
+            OefSearchMessage,
+            oef_search_dialogue.get_message_by_id(oef_search_error_msg.target),
+        )
+        if (
+            target_message.performative
+            == OefSearchMessage.Performative.REGISTER_SERVICE
+        ):
+            registration_behaviour = cast(
+                GenericServiceRegistrationBehaviour,
+                self.context.behaviours.service_registration,
+            )
+            registration_behaviour.failed_registration_msg = target_message
 
     def _handle_invalid(
         self, oef_search_msg: OefSearchMessage, oef_search_dialogue: OefSearchDialogue

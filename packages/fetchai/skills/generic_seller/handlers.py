@@ -468,9 +468,9 @@ class GenericOefSearchHandler(Handler):
             return
 
         # handle message
-        if oef_search_msg.performative is OefSearchMessage.Performative.SUCCESS:
+        if oef_search_msg.performative == OefSearchMessage.Performative.SUCCESS:
             self._handle_success(oef_search_msg, oef_search_dialogue)
-        elif oef_search_msg.performative is OefSearchMessage.Performative.OEF_ERROR:
+        elif oef_search_msg.performative == OefSearchMessage.Performative.OEF_ERROR:
             self._handle_error(oef_search_msg, oef_search_dialogue)
         else:
             self._handle_invalid(oef_search_msg, oef_search_dialogue)
