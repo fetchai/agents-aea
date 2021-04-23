@@ -9,7 +9,7 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmNg45JuqfVzDmvgpWLeaR861LSEvf9pishDKSPihtQnLE
   __init__.py: QmVJk21DRyL2GDUBjGnZHfiRuWXMieyBX3axr754G334GA
-  behaviours.py: QmVshBSJYkadoT2BNWPsFeLtg4ExE7pxZa52o8nB32wmLE
+  behaviours.py: QmWjq7DDFz3xyh7ZDqZp6rZJeLEqS1ckXcQmzuxE2w3CBq
   dialogues.py: QmU1T8Ag8kTTqhL2vPsMBd5eb6siZMkyGsTHsVHGBbLktP
   handlers.py: QmQuG2uqj8UrF6JueMA9WtrRma2D8dHKNuYwK1zmevxbed
   strategy.py: QmUDturpVPqMf6FqkTcd7byE61Vc9dCsdbecpmPHrsWqKM
@@ -29,7 +29,7 @@ skills: []
 behaviours:
   service_registration:
     args:
-      max_retries: 5
+      max_soef_registration_retries: 5
       services_interval: 20
     class_name: ServiceRegistrationBehaviour
 handlers:

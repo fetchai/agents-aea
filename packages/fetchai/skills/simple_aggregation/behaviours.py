@@ -49,7 +49,7 @@ class SearchBehaviour(TickerBehaviour):
             float, kwargs.pop("search_interval", DEFAULT_SEARCH_INTERVAL)
         )
         self._max_soef_registration_retries = kwargs.pop(
-            "max_retries", DEFAULT_MAX_SOEF_REGISTRATION_RETRIES
+            "max_soef_registration_retries", DEFAULT_MAX_SOEF_REGISTRATION_RETRIES
         )  # type: int
         super().__init__(tick_interval=search_interval, **kwargs)
 
@@ -97,7 +97,7 @@ class SearchBehaviour(TickerBehaviour):
         """
         if self.failed_registration_msg is not None:
             self._nb_retries += 1
-            if self._nb_retries >= self._max_soef_registration_retries:
+            if self._nb_retries > self._max_soef_registration_retries:
                 self.context.is_active = False
                 return
 

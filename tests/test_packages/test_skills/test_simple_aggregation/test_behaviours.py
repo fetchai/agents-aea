@@ -153,7 +153,6 @@ class TestSearchBehaviour(BaseSkillTestCase):
 
     def test_setup(self):
         """Test the setup method of the search behaviour."""
-
         with patch.object(self.search_behaviour.context.logger, "log") as mock_logger:
             self.search_behaviour.setup()
 

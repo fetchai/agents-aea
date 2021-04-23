@@ -133,6 +133,8 @@ class TestSkillBehaviour(BaseSkillTestCase):
         searching_for_types = [(True, "sellers"), (False, "buyers")]
         no_searches = len(searching_for_types)
 
+        self.tac_negotiation.failed_registration_msg = None
+
         # operation
         with patch.object(
             self.strategy,
@@ -159,7 +161,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
                             self.tac_negotiation.act()
 
         # after
-        self.assert_quantity_in_outbox(no_searches + 2)
+        self.assert_quantity_in_outbox(no_searches + 1)
 
         # _register_agent
         has_attributes, error_str = self.message_has_attributes(
@@ -173,23 +175,6 @@ class TestSkillBehaviour(BaseSkillTestCase):
         assert has_attributes, error_str
 
         mock_logger.assert_any_call(logging.INFO, "registering agent on SOEF.")
-
-        # _register_service
-        mock_logger.assert_any_call(
-            logging.DEBUG,
-            f"updating service directory as {self.strategy.registering_as}.",
-        )
-        has_attributes, error_str = self.message_has_attributes(
-            actual_message=self.get_message_from_outbox(),
-            message_type=OefSearchMessage,
-            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            to=self.skill.skill_context.search_service_address,
-            sender=self.sender,
-            service_description=self.mocked_description,
-        )
-        assert has_attributes, error_str
-
-        assert self.tac_negotiation.is_registered is True
 
         # _search_services
         for search in searching_for_types:
@@ -457,10 +442,16 @@ class TestSkillBehaviour(BaseSkillTestCase):
             "get_register_service_description",
             return_value=mocked_description_1,
         ):
-            self.tac_negotiation.register_service()
+            with patch.object(self.logger, "log") as mock_logger:
+                self.tac_negotiation.register_service()
 
         # after
         self.assert_quantity_in_outbox(1)
+
+        mock_logger.assert_any_call(
+            logging.DEBUG,
+            f"updating service directory as {self.strategy.registering_as}.",
+        )
 
         message = self.get_message_from_outbox()
         has_attributes, error_str = self.message_has_attributes(

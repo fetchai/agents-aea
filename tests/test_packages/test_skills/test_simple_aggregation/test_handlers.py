@@ -239,6 +239,14 @@ class TestOefSearchHandler(BaseSkillTestCase):
             ),
         )
 
+        cls.list_of_messages_search = (
+            DialogueMessage(
+                OefSearchMessage.Performative.SEARCH_SERVICES,
+                {"query": cls.strategy.get_location_and_service_query()},
+                is_incoming=False,
+            ),
+        )
+
     def test_setup(self):
         """Test the setup method of the oef_search handler."""
         assert self.oef_search_handler.setup() is None
@@ -381,7 +389,7 @@ class TestOefSearchHandler(BaseSkillTestCase):
         """Test the _handle_search method of the oef_search handler."""
         # setup
         oef_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.oef_dialogues, messages=self.list_of_messages[:1],
+            dialogues=self.oef_dialogues, messages=self.list_of_messages_search[:1],
         )
         incoming_message = self.build_incoming_message_for_skill_dialogue(
             dialogue=oef_dialogue,
@@ -404,7 +412,7 @@ class TestOefSearchHandler(BaseSkillTestCase):
         """Test the _handle_search method of the oef_search handler."""
         # setup
         oef_dialogue = self.prepare_skill_dialogue(
-            dialogues=self.oef_dialogues, messages=self.list_of_messages[:1],
+            dialogues=self.oef_dialogues, messages=self.list_of_messages_search[:1],
         )
         agents = ("agnt1", "agnt2")
         incoming_message = self.build_incoming_message_for_skill_dialogue(

@@ -9,7 +9,7 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmdpJypf1uoDBW54DC2req7bst1Hw548piYmMKUaPPVHeB
   __init__.py: QmTRmHgiGa89g5t3n8WBtEEBirnRUt3rsJAeDWin8nZtaB
-  behaviours.py: QmQiVfGQGqjyW7GbS36JpW1ZLZNW7GecY3EXhEzHjRAeKs
+  behaviours.py: QmP6fKNn1eKr1eTMLK6W9g27KqLzPsMc7pyRTA4JbdZV4m
   dialogues.py: Qmes8sm5yw7pYsKbGbfZNvihJnmtqDdzbdWmrZdx8p8P18
   handlers.py: QmT8d97s6Ne1MphkuTBbM49wLoaEdSHiQn88TvsCSNYywB
   helpers.py: QmTJbGL8V6CLhbVhLekqKkHbu7cJMfBcv8DtWLSpkKP5tk
@@ -36,7 +36,7 @@ behaviours:
     class_name: TransactionCleanUpBehaviour
   tac_negotiation:
     args:
-      max_retries: 5
+      max_soef_registration_retries: 5
       search_interval: 5.0
     class_name: GoodsRegisterAndSearchBehaviour
 handlers:
