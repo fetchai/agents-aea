@@ -541,7 +541,8 @@ func NewDialogue(dialogueLabel DialogueLabel,
 	role Role,
 	initialPerformatives []Performative,
 	terminalPerformatives []Performative,
-	validReplies map[Performative][]Performative) *Dialogue {
+	validReplies map[Performative][]Performative) Dialogue {
+	
 	dialogue := Dialogue{
 		dialogueLabel: dialogueLabel,
 		selfAddress:   selfAddress,
@@ -552,5 +553,5 @@ func NewDialogue(dialogueLabel DialogueLabel,
 	dialogue.orderedMessageIds = make([]MessageId, 0)
 	dialogue.rules = NewRules(initialPerformatives, terminalPerformatives, validReplies)
 	dialogue.terminalStateCallbacks = make([]func(*Dialogue), 0)
-	return &dialogue
+	return dialogue
 }

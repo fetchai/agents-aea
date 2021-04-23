@@ -23,24 +23,60 @@ import (
 	"log"
 	"os"
 	"os/signal"
-
 	aea "aealite"
 	connections "aealite/connections"
 	protocols "aealite/protocols"
-	helpers "aealite/helpers"
 )
 
 
-func getRole (protocols.ProtocolMessageInterface, protocols.Address) protocols.Role{
+func getRole(protocols.ProtocolMessageInterface, protocols.Address) protocols.Role {
 	return protocols.Role("some")
 }
 
-func makeSellerDialogues(address string) * protocols.Dialogues{
-	set := helpers.NewSet()
-    set.Add("Some")
-    dialogues := protocols.NewDialogues(protocols.Address(address), set, getRole, false, "my dialogues")
-    return dialogues
+
+func makeSellerDialogues(address string) *protocols.Dialogues {
+	initialPerformatives := []protocols.Performative{"a", "b"}
+	terminalPerformatives := []protocols.Performative{"a", "b"}
+	validReplies := map[protocols.Performative][]protocols.Performative{
+		"pi": []protocols.Performative{"a", "b"},
+		"e":  []protocols.Performative{"a", "b"},
+	}
+	dialogues := protocols.NewDialogues(protocols.Address(address), getRole, false, "my dialogues", initialPerformatives, terminalPerformatives, validReplies)
+	return dialogues
 }
+
+
+
+
+func handleEnvelope(envelope *protocols.Envelope, dialogues *protocols.Dialogues){
+	fipa_protocol_id := "fetchai/fipa:1.0.0"
+	
+	if envelope.GetProtocolId() != fipa_protocol_id {
+		log.Printf("Not Fipa message!.")
+		return
+	}
+	
+	
+	fipa_message := &FipaMessage{}
+	dialogue_message_wrapped, err := protocols.GetDialogueMessageWrappedAndSetContentFromEnvelope(envelope, fipa_message)
+	if err != nil {
+		log.Printf("Failed to get dialogue message message: %s", err)
+		return
+	}
+	log.Printf("Fipa message:  %s", fipa_message)
+	log.Printf("dialogue message sender:  %s", dialogue_message_wrapped.Sender())
+	log.Printf("dialogue message to:  %s", dialogue_message_wrapped.To())
+	log.Printf("dialogue message wrapped:  %s", dialogue_message_wrapped)
+	
+
+	dialogue, err := dialogues.Update(dialogue_message_wrapped)
+	if err != nil {
+		log.Printf("Failed to update dialogue:  %s", err)
+		return
+	}
+	log.Printf("Dialogue: %s", dialogue)
+}
+
 
 
 func main() {
@@ -55,7 +91,6 @@ func main() {
 	envFile := os.Args[1]
 
 	log.Print("Agent starting ...")
-
 
 	// Create agent
 	agent := aea.Agent{}
@@ -75,12 +110,16 @@ func main() {
 		log.Fatal("Failed to start agent", err)
 	}
 	log.Print("successfully started AEA!")
-	
-	
+	log.Print("My Address is", agent.Address())
+
 	dialogues := makeSellerDialogues(agent.Address())
 	envelope := agent.Get()
-    log.Printf("got incoming envelope: %s", envelope)
-    dialogues.Update(envelope)
+	
+	handleEnvelope(envelope, dialogues)
+		
+	log.Printf("got incoming envelope: %s", envelope.String())
+	
+	
 
 	// Wait until Ctrl+C or a termination call is done.
 	c := make(chan os.Signal, 1)
