@@ -607,7 +607,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         # setup
         self.tac_behaviour.failed_registration_msg = self.registration_message
         self.tac_behaviour._max_soef_registration_retries = 2
-        self.tac_behaviour._nb_retries = 1
+        self.tac_behaviour._nb_retries = 2
 
         self.tac_behaviour.act()
 

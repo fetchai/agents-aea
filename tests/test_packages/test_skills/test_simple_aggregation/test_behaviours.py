@@ -233,7 +233,7 @@ class TestSearchBehaviour(BaseSkillTestCase):
         # setup
         self.search_behaviour.failed_registration_msg = self.registration_message
         self.search_behaviour._max_soef_registration_retries = 2
-        self.search_behaviour._nb_retries = 1
+        self.search_behaviour._nb_retries = 2
 
         query = self.aggregation_strategy.get_location_and_service_query()
 

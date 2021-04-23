@@ -307,7 +307,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
 
         self.tac_negotiation.failed_registration_msg = self.registration_message
         self.tac_negotiation._max_soef_registration_retries = 2
-        self.tac_negotiation._nb_retries = 1
+        self.tac_negotiation._nb_retries = 2
 
         # operation
         with patch.object(

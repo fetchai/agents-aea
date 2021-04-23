@@ -180,7 +180,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         # setup
         self.service_registration.failed_registration_msg = self.registration_message
         self.service_registration._max_soef_registration_retries = 2
-        self.service_registration._nb_retries = 1
+        self.service_registration._nb_retries = 2
 
         # operation
         self.service_registration.act()
