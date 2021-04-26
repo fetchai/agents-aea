@@ -39,6 +39,24 @@ func TestDialogue(t *testing.T) {
 	if dialogue.DialogueLabel() != label {
 		t.Fatalf("unexpected return value of DialogueLabel()")
 	}
+	if dialogue.IncompleteDialogueLabel() != label.IncompleteVersion() {
+		t.Fatalf("unexpected return value of IncompleteDialogueLabel()")
+	}
+	if dialogue.DialogueLabels() != [2]DialogueLabel{label, label.IncompleteVersion()} {
+		t.Fatalf("unexpected return value of DialogueLabels()")
+	}
+	if dialogue.SelfAddress() != senderAddress {
+		t.Fatalf("unexpected return value of SelfAddress()")
+	}
+	if dialogue.LastIncomingMessage() != nil {
+		t.Fatalf("unexpected return value of LastIncomingMessage(): the dialogue should be empty")
+	}
+	if dialogue.LastOutgoingMessage() != nil {
+		t.Fatalf("unexpected return value of LastOutgoingMessage(): the dialogue should be empty")
+	}
+	if dialogue.LastMessage() != nil {
+		t.Fatalf("unexpected return value of LastMessage(): the dialogue should be empty")
+	}
 
 }
 
