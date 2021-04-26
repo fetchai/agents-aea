@@ -39,7 +39,7 @@ func TestMessage(t *testing.T) {
 	message.Content = []byte(`{"performative": "request", "data": "hello"}`)
 
 	result := DialogueMessageWrapper{}
-	err := result.InitFromProtobuf(&message)
+	err := result.InitFromProtobufAndPerfofrmative(&message, "request")
 	if err != nil {
 		t.Fatalf("Error: %s", err.Error())
 	}

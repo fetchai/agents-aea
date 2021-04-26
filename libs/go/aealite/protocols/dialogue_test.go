@@ -20,7 +20,29 @@
 
 package protocols
 
-//func TestDialogue(t *testing.T) {
+import "testing"
+
+func TestDialogue(t *testing.T) {
+	label := getTestDialogueLabel()
+	initialPerformatives := []Performative{"start"}
+	terminalPerformatives := []Performative{"end"}
+	validReplies := map[Performative][]Performative{"start": {"end"}}
+	dialogue := NewDialogue(
+		label,
+		senderAddress,
+		Role1,
+		initialPerformatives,
+		terminalPerformatives,
+		validReplies,
+	)
+	// test getters
+	if dialogue.DialogueLabel() != label {
+		t.Fatalf("unexpected return value of DialogueLabel()")
+	}
+
+}
+
+////func TestDialogue(t *testing.T) {
 //	var performative Performative = "sample_performative"
 //	// createing initital dialogue instance
 //	message, dialogue := Create(

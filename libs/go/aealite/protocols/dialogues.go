@@ -61,10 +61,10 @@ type Dialogues struct {
 
 	dialogueName    string
 	dialogueStorage DialogueStorageInterface
-	
-	initialPerformatives []Performative
+
+	initialPerformatives  []Performative
 	terminalPerformatives []Performative
-	validReplies map[Performative][]Performative
+	validReplies          map[Performative][]Performative
 }
 
 func (dialogues *Dialogues) IsKeepDialoguesInTerminalStates() bool {
@@ -179,18 +179,16 @@ func (dialogues *Dialogues) Update(message ProtocolMessageInterface) (*Dialogue,
 	isNewDialogue := starterRefAssigned && !responderRefAssigned && isStartingMsgId
 	isIncompleteLabelAndNotInitialMsg := starterRefAssigned && !responderRefAssigned && !isStartingMsgId &&
 		!isStartingTarget
-	
-	log.Printf("dialogueReference:  %s", message.DialogueReference())
-	log.Printf("starterRefAssigned:  %s", starterRefAssigned, dialogueReference.dialogueStarterReference, UnassignedDialogueReference)
-	log.Printf("responderRefAssigned:  %s", responderRefAssigned, dialogueReference.dialogueResponderReference, UnassignedDialogueReference)
-	log.Printf("isStartingMsgId:  %s", isStartingMsgId, message.MessageId(), StartingMessageId)
-	log.Printf("isStartingTarget:  %s", isStartingTarget,message.MessageId(), StartingTarget)
-	log.Printf("isInvalidLabel:  %s", isInvalidLabel, starterRefAssigned, responderRefAssigned)
-	log.Printf("isNewDialogue:  %s", isNewDialogue,starterRefAssigned,responderRefAssigned,isStartingMsgId)
-	log.Printf("isIncompleteLabelAndNotInitialMsg:  %s", isIncompleteLabelAndNotInitialMsg, starterRefAssigned,responderRefAssigned,isStartingMsgId, isStartingTarget)
-	
-		
-	
+
+	//log.Printf("dialogueReference:  %s", message.DialogueReference())
+	//log.Printf("starterRefAssigned:  %s", starterRefAssigned, dialogueReference.dialogueStarterReference, UnassignedDialogueReference)
+	//log.Printf("responderRefAssigned:  %s", responderRefAssigned, dialogueReference.dialogueResponderReference, UnassignedDialogueReference)
+	//log.Printf("isStartingMsgId:  %s", isStartingMsgId, message.MessageId(), StartingMessageId)
+	//log.Printf("isStartingTarget:  %s", isStartingTarget,message.MessageId(), StartingTarget)
+	//log.Printf("isInvalidLabel:  %s", isInvalidLabel, starterRefAssigned, responderRefAssigned)
+	//log.Printf("isNewDialogue:  %s", isNewDialogue,starterRefAssigned,responderRefAssigned,isStartingMsgId)
+	//log.Printf("isIncompleteLabelAndNotInitialMsg:  %s", isIncompleteLabelAndNotInitialMsg, starterRefAssigned,responderRefAssigned,isStartingMsgId, isStartingTarget)
+
 	var dialogue *Dialogue
 	var err error
 	if isInvalidLabel {
@@ -219,7 +217,7 @@ func (dialogues *Dialogues) Update(message ProtocolMessageInterface) (*Dialogue,
 
 	if dialogue != nil {
 		err := dialogue.update(message)
-		
+
 		if err != nil {
 			// invalid message for the dialogue found
 			if isNewDialogue {
@@ -406,13 +404,13 @@ func NewDialogues(
 	roleFromFirstMessage func(ProtocolMessageInterface, Address) Role,
 	keepTerminalStateDialogues bool,
 	dialogueName string,
-	
+
 	initialPerformatives []Performative,
 	terminalPerformatives []Performative,
 	validReplies map[Performative][]Performative) *Dialogues {
-	
+
 	endStatesSet := helpers.NewSet()
-	
+
 	for _, endState := range terminalPerformatives {
 		endStatesSet.Add(endState)
 	}
@@ -423,9 +421,9 @@ func NewDialogues(
 		roleFromFirstMessage:       roleFromFirstMessage,
 		keepTerminalStateDialogues: keepTerminalStateDialogues,
 		dialogueName:               dialogueName,
-		initialPerformatives: initialPerformatives,
-		terminalPerformatives: terminalPerformatives,
-		validReplies: validReplies,
+		initialPerformatives:       initialPerformatives,
+		terminalPerformatives:      terminalPerformatives,
+		validReplies:               validReplies,
 	}
 	storage := NewSimpleDialogueStorage()
 	dialogues.dialogueStorage = storage
