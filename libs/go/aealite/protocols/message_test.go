@@ -48,6 +48,5 @@ func TestMessage(t *testing.T) {
 	assert.Equal(t, result.dialogueReference.dialogueStarterReference, DialogueStarterReference)
 	assert.Equal(t, result.dialogueReference.dialogueResponderReference, DialogueResponderReference)
 	assert.Equal(t, result.target, StartingTarget)
-	assert.Equal(t, result.body["performative"], "request")
-	assert.Equal(t, result.body["data"], "hello")
+	assert.Equal(t, result.performative, Performative("request"))
 }
