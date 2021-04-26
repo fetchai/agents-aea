@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package aea.fetchai.fipa.v1_0_0;
 
-option go_package = "aea_end2end/protocols";
+option go_package = "seller_agent/protocols";
 
 message FipaMessage{
 

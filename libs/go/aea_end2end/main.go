@@ -26,6 +26,7 @@ import (
 	aea "aealite"
 	connections "aealite/connections"
 	protocols "aealite/protocols"
+	local_protocols "seller_agent/protocols"
 )
 
 
@@ -57,7 +58,7 @@ func handleEnvelope(envelope *protocols.Envelope, dialogues *protocols.Dialogues
 	}
 	
 	
-	fipa_message := &FipaMessage{}
+	fipa_message := &local_protocols.FipaMessage{}
 	dialogue_message_wrapped, err := protocols.GetDialogueMessageWrappedAndSetContentFromEnvelope(envelope, fipa_message)
 	if err != nil {
 		log.Printf("Failed to get dialogue message message: %s", err)
