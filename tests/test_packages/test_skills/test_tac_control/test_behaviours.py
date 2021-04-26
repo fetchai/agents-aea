@@ -599,7 +599,10 @@ class TestSkillBehaviour(BaseSkillTestCase):
         )
         assert has_attributes, error_str
 
-        mock_logger.assert_any_call(logging.INFO, "retrying registration on SOEF.")
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"Retrying registration on SOEF. Retry {self.tac_behaviour._nb_retries} out of {self.tac_behaviour._max_soef_registration_retries}.",
+        )
         assert self.tac_behaviour.failed_registration_msg is None
 
     def test_act_vi(self):

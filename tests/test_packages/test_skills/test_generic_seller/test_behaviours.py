@@ -172,7 +172,10 @@ class TestSkillBehaviour(BaseSkillTestCase):
         )
         assert has_attributes, error_str
 
-        mock_logger.assert_any_call(logging.INFO, "retrying registration on SOEF.")
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"Retrying registration on SOEF. Retry {self.service_registration._nb_retries} out of {self.service_registration._max_soef_registration_retries}.",
+        )
         assert self.service_registration.failed_registration_msg is None
 
     def test_act_iii(self):

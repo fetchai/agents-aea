@@ -215,7 +215,10 @@ class TestSearchBehaviour(BaseSkillTestCase):
         )
         assert has_attributes, error_str
 
-        mock_logger.assert_any_call(logging.INFO, "retrying registration on SOEF.")
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"Retrying registration on SOEF. Retry {self.search_behaviour._nb_retries} out of {self.search_behaviour._max_soef_registration_retries}.",
+        )
         assert self.search_behaviour.failed_registration_msg is None
 
         # act
@@ -270,17 +273,17 @@ class TestSearchBehaviour(BaseSkillTestCase):
             self.aggregation_strategy,
             "get_register_service_description",
             return_value=mocked_description_1,
-        ):
+        ) as mock_reg_service:
             with patch.object(
                 self.aggregation_strategy,
                 "get_register_personality_description",
                 return_value=mocked_description_2,
-            ):
+            ) as mock_reg_personalities:
                 with patch.object(
                     self.aggregation_strategy,
                     "get_register_classification_description",
                     return_value=mocked_description_3,
-                ):
+                ) as mock_reg_classification:
                     with patch.object(
                         self.search_behaviour.context.logger, "log"
                     ) as mock_logger:
@@ -288,6 +291,10 @@ class TestSearchBehaviour(BaseSkillTestCase):
 
         # after
         self.assert_quantity_in_outbox(3)
+
+        mock_reg_service.assert_called_once()
+        mock_reg_personalities.assert_called_once()
+        mock_reg_classification.assert_called_once()
 
         for description in descriptions:
             message = self.get_message_from_outbox()
