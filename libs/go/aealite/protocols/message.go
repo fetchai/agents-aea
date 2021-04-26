@@ -21,8 +21,10 @@
 package protocols
 
 import (
-	"encoding/json"
 	"errors"
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	proto "google.golang.org/protobuf/proto"
+	"log"
 )
 
 type MessageId int
@@ -63,30 +65,15 @@ type DialogueMessageWrapper struct {
 //  - the JSON decoding fails
 //  - the body does not contain the 'performative'
 //  It performs side-effect on the method receiver.
-func (message *DialogueMessageWrapper) InitFromProtobuf(dialogueMessage *DialogueMessage) error {
+func (message *DialogueMessageWrapper) InitFromProtobufAndPerfofrmative(dialogueMessage *DialogueMessage,  performativeStr string) error {
 	message.messageId = MessageId(dialogueMessage.MessageId)
 	message.target = MessageId(dialogueMessage.Target)
 	message.dialogueReference = DialogueReference{
 		dialogueMessage.DialogueStarterReference,
 		dialogueMessage.DialogueResponderReference,
 	}
-
-	content := dialogueMessage.Content
-	var data map[string]interface{}
-	err := json.Unmarshal(content, &data)
-	if err != nil {
-		return err
-	}
-	if _, ok := data["performative"]; !ok {
-		return errors.New("'performative' field not set")
-	}
-	performativeValue := data["performative"]
-	if _, ok := performativeValue.(string); !ok {
-		return errors.New("cannot cast performative field")
-	}
-	performativeStr := performativeValue.(string)
+	message.target = MessageId(dialogueMessage.Target)
 	message.performative = Performative(performativeStr)
-	message.body = data
 	return nil
 }
 
@@ -150,11 +137,60 @@ func (message *DialogueMessageWrapper) GetField(name string) interface{} {
 	return message.body[name]
 }
 
-func FromProtobuf(dialogueMessage *DialogueMessage) (*DialogueMessageWrapper, error) {
-	message := DialogueMessageWrapper{}
-	err := message.InitFromProtobuf(dialogueMessage)
-	if err != nil {
-		return nil, err
+
+func GetPerformative(message MessageInterface) (string, error) {
+	performative := ""
+	m := message.ProtoReflect()
+	m.Range(func(fd protoreflect.FieldDescriptor, v protoreflect.Value) bool {
+	    performative = fd.JSONName()
+	    return false
+	})
+	
+	if performative == "" {
+		return performative, errors.New("can not determine performative")
 	}
-	return &message, nil
+	return performative, nil
 }
+
+type MessageInterface interface{
+	ProtoReflect() protoreflect.Message
+}
+
+
+
+func GetDialogueMessageWrappedAndSetContentFromEnvelope(envelope *Envelope, content_message MessageInterface) (*DialogueMessageWrapper, error) {
+		data := envelope.GetMessage()
+		message := &Message{}
+		err:= proto.Unmarshal(data, message)
+		if err != nil {
+			log.Printf("can not unmarshal message: %s", err)
+			return nil, err
+		}
+		dialogue_message := message.GetDialogueMessage()
+		log.Printf("Content: %s", dialogue_message.GetContent())
+	
+		err = proto.Unmarshal(dialogue_message.GetContent(), content_message)
+		if err != nil {
+			log.Printf("err on decode message content: %s", err)
+			return nil, err
+		}
+
+		performative, err := GetPerformative(content_message)
+		if err != nil {
+			log.Printf("can not get performative: %s", err)
+			return nil, err
+		}
+
+		dialogue_message_wrapper := DialogueMessageWrapper{}
+		err = dialogue_message_wrapper.InitFromProtobufAndPerfofrmative(dialogue_message, performative)
+		if err != nil {
+			log.Printf("can not init dialogue wrapper: %s", err)
+			return nil, err
+		}
+		dialogue_message_wrapper.SetSender(Address(envelope.GetSender()))
+		dialogue_message_wrapper.SetTo(Address(envelope.GetTo()))
+		
+		return &dialogue_message_wrapper, nil
+}
+
+

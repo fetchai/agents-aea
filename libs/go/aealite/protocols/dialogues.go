@@ -26,6 +26,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"log"
 )
 
 const (
@@ -60,6 +61,10 @@ type Dialogues struct {
 
 	dialogueName    string
 	dialogueStorage DialogueStorageInterface
+	
+	initialPerformatives []Performative
+	terminalPerformatives []Performative
+	validReplies map[Performative][]Performative
 }
 
 func (dialogues *Dialogues) IsKeepDialoguesInTerminalStates() bool {
@@ -174,15 +179,29 @@ func (dialogues *Dialogues) Update(message ProtocolMessageInterface) (*Dialogue,
 	isNewDialogue := starterRefAssigned && !responderRefAssigned && isStartingMsgId
 	isIncompleteLabelAndNotInitialMsg := starterRefAssigned && !responderRefAssigned && !isStartingMsgId &&
 		!isStartingTarget
-
+	
+	log.Printf("dialogueReference:  %s", message.DialogueReference())
+	log.Printf("starterRefAssigned:  %s", starterRefAssigned, dialogueReference.dialogueStarterReference, UnassignedDialogueReference)
+	log.Printf("responderRefAssigned:  %s", responderRefAssigned, dialogueReference.dialogueResponderReference, UnassignedDialogueReference)
+	log.Printf("isStartingMsgId:  %s", isStartingMsgId, message.MessageId(), StartingMessageId)
+	log.Printf("isStartingTarget:  %s", isStartingTarget,message.MessageId(), StartingTarget)
+	log.Printf("isInvalidLabel:  %s", isInvalidLabel, starterRefAssigned, responderRefAssigned)
+	log.Printf("isNewDialogue:  %s", isNewDialogue,starterRefAssigned,responderRefAssigned,isStartingMsgId)
+	log.Printf("isIncompleteLabelAndNotInitialMsg:  %s", isIncompleteLabelAndNotInitialMsg, starterRefAssigned,responderRefAssigned,isStartingMsgId, isStartingTarget)
+	
+		
+	
 	var dialogue *Dialogue
 	var err error
 	if isInvalidLabel {
+		log.Print("invalid label")
 		dialogue = nil
 	} else if isNewDialogue {
+		log.Print("Go new dialogue")
 		dialogue, err = dialogues.createOpponentInitiated(message.Sender(), dialogueReference, dialogues.roleFromFirstMessage(message, dialogues.selfAddress))
 		if err != nil {
 			// propagate the error
+			log.Print("2")
 			return nil, err
 		}
 	} else if isIncompleteLabelAndNotInitialMsg {
@@ -192,6 +211,7 @@ func (dialogues *Dialogues) Update(message ProtocolMessageInterface) (*Dialogue,
 	} else {
 		err = dialogues.completeDialogueReference(message)
 		if err != nil {
+			log.Print("3")
 			return nil, err
 		}
 		dialogue = dialogues.GetDialogue(message)
@@ -199,17 +219,22 @@ func (dialogues *Dialogues) Update(message ProtocolMessageInterface) (*Dialogue,
 
 	if dialogue != nil {
 		err := dialogue.update(message)
+		
 		if err != nil {
 			// invalid message for the dialogue found
 			if isNewDialogue {
 				// remove the newly created dialogue if the initial message is invalid
 				dialogues.dialogueStorage.RemoveDialogue(dialogue.dialogueLabel)
 			}
+			log.Printf("fail to update!!! %s", err)
 			dialogue = nil
+			return dialogue, err
 		}
+		log.Print("ok ret dialogue!!!")
 		return dialogue, nil
 	}
 	// couldn't find the dialogue referenced by the message
+	log.Print("default one?")
 	return nil, nil
 
 }
@@ -364,28 +389,43 @@ func (dialogues *Dialogues) create(
 	if dialogues.dialogueStorage.IsDialoguePresent(dialogueLabel) {
 		return nil, errors.New("dialogue label already present in dialogues")
 	}
-	dialogue := Dialogue{
-		dialogueLabel: dialogueLabel,
-		selfAddress:   dialogues.selfAddress,
-		role:          role,
-	}
+	dialogue := NewDialogue(
+		dialogueLabel,
+		dialogues.selfAddress,
+		role,
+		dialogues.initialPerformatives,
+		dialogues.terminalPerformatives,
+		dialogues.validReplies,
+	)
 	dialogues.dialogueStorage.AddDialogue(&dialogue)
 	return &dialogue, nil
 }
 
 func NewDialogues(
 	selfAddress Address,
-	endStates helpers.Set,
 	roleFromFirstMessage func(ProtocolMessageInterface, Address) Role,
 	keepTerminalStateDialogues bool,
 	dialogueName string,
-) *Dialogues {
+	
+	initialPerformatives []Performative,
+	terminalPerformatives []Performative,
+	validReplies map[Performative][]Performative) *Dialogues {
+	
+	endStatesSet := helpers.NewSet()
+	
+	for _, endState := range terminalPerformatives {
+		endStatesSet.Add(endState)
+	}
+
 	dialogues := Dialogues{
 		selfAddress:                selfAddress,
-		endStates:                  endStates,
+		endStates:                  endStatesSet,
 		roleFromFirstMessage:       roleFromFirstMessage,
 		keepTerminalStateDialogues: keepTerminalStateDialogues,
 		dialogueName:               dialogueName,
+		initialPerformatives: initialPerformatives,
+		terminalPerformatives: terminalPerformatives,
+		validReplies: validReplies,
 	}
 	storage := NewSimpleDialogueStorage()
 	dialogues.dialogueStorage = storage
