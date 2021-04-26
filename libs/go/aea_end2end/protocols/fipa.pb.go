@@ -4,7 +4,7 @@
 // 	protoc        v3.11.4
 // source: fipa.proto
 
-package aea_fetchai_fipa_v1_0_0
+package protocols
 
 import (
 	proto "github.com/golang/protobuf/proto"
