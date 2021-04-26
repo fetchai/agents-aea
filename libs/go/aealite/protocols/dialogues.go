@@ -197,8 +197,9 @@ func (dialogues *Dialogues) Update(message ProtocolMessageInterface) (*Dialogue,
 		log.Print("invalid label")
 		dialogue = nil
 	} else if isNewDialogue {
-		log.Print("Go new dialogue")
+		log.Print("Go new dialogue ref:", dialogueReference)
 		dialogue, err = dialogues.createOpponentInitiated(message.Sender(), dialogueReference, dialogues.roleFromFirstMessage(message, dialogues.selfAddress))
+		log.Print("Go new dialogue with label", dialogue.DialogueLabel())
 		if err != nil {
 			// propagate the error
 			log.Print("2")
@@ -364,6 +365,7 @@ func (dialogues *Dialogues) createOpponentInitiated(dialogueOpponentAddress Addr
 		dialogueOpponentAddress,
 		dialogueOpponentAddress,
 	}
+	log.Print("1111111", incompleteDialogueLabel, newDialogueReference, completeDialogueLabel)
 	dialogue, err := dialogues.create(incompleteDialogueLabel, role, &completeDialogueLabel)
 	if err != nil {
 		return nil, err
@@ -377,6 +379,8 @@ func (dialogues *Dialogues) create(
 	completeDialogueLabel *DialogueLabel,
 ) (*Dialogue, error) {
 	var dialogueLabel DialogueLabel
+	log.Print("incompleteDialogueLabel label", incompleteDialogueLabel)
+	log.Print("completeDialogueLabel", completeDialogueLabel)
 	if dialogues.dialogueStorage.IsInIncomplete(incompleteDialogueLabel) {
 		return nil, errors.New("incomplete dialogue label already present")
 	}
@@ -385,10 +389,12 @@ func (dialogues *Dialogues) create(
 	} else {
 		copyLabel := *completeDialogueLabel
 		dialogues.dialogueStorage.SetIncompleteDialogue(incompleteDialogueLabel, copyLabel)
+		dialogueLabel = *completeDialogueLabel
 	}
 	if dialogues.dialogueStorage.IsDialoguePresent(dialogueLabel) {
 		return nil, errors.New("dialogue label already present in dialogues")
 	}
+	log.Print("new dialogue label", dialogueLabel)
 	dialogue := NewDialogue(
 		dialogueLabel,
 		dialogues.selfAddress,

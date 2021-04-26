@@ -35,11 +35,18 @@ func getRole(protocols.ProtocolMessageInterface, protocols.Address) protocols.Ro
 
 
 func makeSellerDialogues(address string) *protocols.Dialogues {
-	initialPerformatives := []protocols.Performative{"a", "b"}
-	terminalPerformatives := []protocols.Performative{"a", "b"}
+	initialPerformatives := []protocols.Performative{"cfp"}
+	terminalPerformatives := []protocols.Performative{"decline", "end"}
 	validReplies := map[protocols.Performative][]protocols.Performative{
-		"pi": []protocols.Performative{"a", "b"},
-		"e":  []protocols.Performative{"a", "b"},
+		  "cfp": []protocols.Performative{"propose", "decline"},
+		  "propose": []protocols.Performative{"accept", "accept_w_inform", "decline", "propose"},
+		  "accept": []protocols.Performative{"decline", "match_accept", "match_accept_w_inform"},
+		  "accept_w_inform": []protocols.Performative{"decline", "match_accept", "match_accept_w_inform"},
+		  "decline": []protocols.Performative{},
+		  "match_accept": []protocols.Performative{"inform", "end"},
+		  "match_accept_w_inform": []protocols.Performative{"inform", "end"},
+		  "inform": []protocols.Performative{"inform", "end"},
+		  "end": []protocols.Performative{},
 	}
 	dialogues := protocols.NewDialogues(protocols.Address(address), getRole, false, "my dialogues", initialPerformatives, terminalPerformatives, validReplies)
 	return dialogues
