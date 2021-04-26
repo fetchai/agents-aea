@@ -26,7 +26,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"log"
 )
 
 const (
@@ -61,10 +60,10 @@ type Dialogues struct {
 
 	dialogueName    string
 	dialogueStorage DialogueStorageInterface
-	
-	initialPerformatives []Performative
+
+	initialPerformatives  []Performative
 	terminalPerformatives []Performative
-	validReplies map[Performative][]Performative
+	validReplies          map[Performative][]Performative
 }
 
 func (dialogues *Dialogues) IsKeepDialoguesInTerminalStates() bool {
@@ -179,30 +178,15 @@ func (dialogues *Dialogues) Update(message ProtocolMessageInterface) (*Dialogue,
 	isNewDialogue := starterRefAssigned && !responderRefAssigned && isStartingMsgId
 	isIncompleteLabelAndNotInitialMsg := starterRefAssigned && !responderRefAssigned && !isStartingMsgId &&
 		!isStartingTarget
-	
-	log.Printf("dialogueReference:  %s", message.DialogueReference())
-	log.Printf("starterRefAssigned:  %s", starterRefAssigned, dialogueReference.dialogueStarterReference, UnassignedDialogueReference)
-	log.Printf("responderRefAssigned:  %s", responderRefAssigned, dialogueReference.dialogueResponderReference, UnassignedDialogueReference)
-	log.Printf("isStartingMsgId:  %s", isStartingMsgId, message.MessageId(), StartingMessageId)
-	log.Printf("isStartingTarget:  %s", isStartingTarget,message.MessageId(), StartingTarget)
-	log.Printf("isInvalidLabel:  %s", isInvalidLabel, starterRefAssigned, responderRefAssigned)
-	log.Printf("isNewDialogue:  %s", isNewDialogue,starterRefAssigned,responderRefAssigned,isStartingMsgId)
-	log.Printf("isIncompleteLabelAndNotInitialMsg:  %s", isIncompleteLabelAndNotInitialMsg, starterRefAssigned,responderRefAssigned,isStartingMsgId, isStartingTarget)
-	
-		
-	
+
 	var dialogue *Dialogue
 	var err error
 	if isInvalidLabel {
-		log.Print("invalid label")
 		dialogue = nil
 	} else if isNewDialogue {
-		log.Print("Go new dialogue ref:", dialogueReference)
 		dialogue, err = dialogues.createOpponentInitiated(message.Sender(), dialogueReference, dialogues.roleFromFirstMessage(message, dialogues.selfAddress))
-		log.Print("Go new dialogue with label", dialogue.DialogueLabel())
 		if err != nil {
 			// propagate the error
-			log.Print("2")
 			return nil, err
 		}
 	} else if isIncompleteLabelAndNotInitialMsg {
@@ -212,7 +196,6 @@ func (dialogues *Dialogues) Update(message ProtocolMessageInterface) (*Dialogue,
 	} else {
 		err = dialogues.completeDialogueReference(message)
 		if err != nil {
-			log.Print("3")
 			return nil, err
 		}
 		dialogue = dialogues.GetDialogue(message)
@@ -220,22 +203,19 @@ func (dialogues *Dialogues) Update(message ProtocolMessageInterface) (*Dialogue,
 
 	if dialogue != nil {
 		err := dialogue.update(message)
-		
+
 		if err != nil {
 			// invalid message for the dialogue found
 			if isNewDialogue {
 				// remove the newly created dialogue if the initial message is invalid
 				dialogues.dialogueStorage.RemoveDialogue(dialogue.dialogueLabel)
 			}
-			log.Printf("fail to update!!! %s", err)
 			dialogue = nil
 			return dialogue, err
 		}
-		log.Print("ok ret dialogue!!!")
 		return dialogue, nil
 	}
 	// couldn't find the dialogue referenced by the message
-	log.Print("default one?")
 	return nil, nil
 
 }
@@ -365,7 +345,6 @@ func (dialogues *Dialogues) createOpponentInitiated(dialogueOpponentAddress Addr
 		dialogueOpponentAddress,
 		dialogueOpponentAddress,
 	}
-	log.Print("1111111", incompleteDialogueLabel, newDialogueReference, completeDialogueLabel)
 	dialogue, err := dialogues.create(incompleteDialogueLabel, role, &completeDialogueLabel)
 	if err != nil {
 		return nil, err
@@ -379,8 +358,6 @@ func (dialogues *Dialogues) create(
 	completeDialogueLabel *DialogueLabel,
 ) (*Dialogue, error) {
 	var dialogueLabel DialogueLabel
-	log.Print("incompleteDialogueLabel label", incompleteDialogueLabel)
-	log.Print("completeDialogueLabel", completeDialogueLabel)
 	if dialogues.dialogueStorage.IsInIncomplete(incompleteDialogueLabel) {
 		return nil, errors.New("incomplete dialogue label already present")
 	}
@@ -394,7 +371,6 @@ func (dialogues *Dialogues) create(
 	if dialogues.dialogueStorage.IsDialoguePresent(dialogueLabel) {
 		return nil, errors.New("dialogue label already present in dialogues")
 	}
-	log.Print("new dialogue label", dialogueLabel)
 	dialogue := NewDialogue(
 		dialogueLabel,
 		dialogues.selfAddress,
@@ -412,13 +388,13 @@ func NewDialogues(
 	roleFromFirstMessage func(ProtocolMessageInterface, Address) Role,
 	keepTerminalStateDialogues bool,
 	dialogueName string,
-	
+
 	initialPerformatives []Performative,
 	terminalPerformatives []Performative,
 	validReplies map[Performative][]Performative) *Dialogues {
-	
+
 	endStatesSet := helpers.NewSet()
-	
+
 	for _, endState := range terminalPerformatives {
 		endStatesSet.Add(endState)
 	}
@@ -429,9 +405,9 @@ func NewDialogues(
 		roleFromFirstMessage:       roleFromFirstMessage,
 		keepTerminalStateDialogues: keepTerminalStateDialogues,
 		dialogueName:               dialogueName,
-		initialPerformatives: initialPerformatives,
-		terminalPerformatives: terminalPerformatives,
-		validReplies: validReplies,
+		initialPerformatives:       initialPerformatives,
+		terminalPerformatives:      terminalPerformatives,
+		validReplies:               validReplies,
 	}
 	storage := NewSimpleDialogueStorage()
 	dialogues.dialogueStorage = storage

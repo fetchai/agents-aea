@@ -22,8 +22,8 @@ package protocols
 
 import (
 	"errors"
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	proto "google.golang.org/protobuf/proto"
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	"log"
 )
 
@@ -65,7 +65,7 @@ type DialogueMessageWrapper struct {
 //  - the JSON decoding fails
 //  - the body does not contain the 'performative'
 //  It performs side-effect on the method receiver.
-func (message *DialogueMessageWrapper) InitFromProtobufAndPerfofrmative(dialogueMessage *DialogueMessage,  performativeStr string) error {
+func (message *DialogueMessageWrapper) InitFromProtobufAndPerfofrmative(dialogueMessage *DialogueMessage, performativeStr string) error {
 	message.messageId = MessageId(dialogueMessage.MessageId)
 	message.target = MessageId(dialogueMessage.Target)
 	message.dialogueReference = DialogueReference{
@@ -137,60 +137,55 @@ func (message *DialogueMessageWrapper) GetField(name string) interface{} {
 	return message.body[name]
 }
 
-
 func GetPerformative(message MessageInterface) (string, error) {
 	performative := ""
 	m := message.ProtoReflect()
 	m.Range(func(fd protoreflect.FieldDescriptor, v protoreflect.Value) bool {
-	    performative = fd.JSONName()
-	    return false
+		performative = fd.JSONName()
+		return false
 	})
-	
+
 	if performative == "" {
 		return performative, errors.New("can not determine performative")
 	}
 	return performative, nil
 }
 
-type MessageInterface interface{
+type MessageInterface interface {
 	ProtoReflect() protoreflect.Message
 }
 
-
-
 func GetDialogueMessageWrappedAndSetContentFromEnvelope(envelope *Envelope, content_message MessageInterface) (*DialogueMessageWrapper, error) {
-		data := envelope.GetMessage()
-		message := &Message{}
-		err:= proto.Unmarshal(data, message)
-		if err != nil {
-			log.Printf("can not unmarshal message: %s", err)
-			return nil, err
-		}
-		dialogue_message := message.GetDialogueMessage()
-		log.Printf("Content: %s", dialogue_message.GetContent())
-	
-		err = proto.Unmarshal(dialogue_message.GetContent(), content_message)
-		if err != nil {
-			log.Printf("err on decode message content: %s", err)
-			return nil, err
-		}
+	data := envelope.GetMessage()
+	message := &Message{}
+	err := proto.Unmarshal(data, message)
+	if err != nil {
+		log.Printf("can not unmarshal message: %s", err)
+		return nil, err
+	}
+	dialogue_message := message.GetDialogueMessage()
+	log.Printf("Content: %s", dialogue_message.GetContent())
 
-		performative, err := GetPerformative(content_message)
-		if err != nil {
-			log.Printf("can not get performative: %s", err)
-			return nil, err
-		}
+	err = proto.Unmarshal(dialogue_message.GetContent(), content_message)
+	if err != nil {
+		log.Printf("err on decode message content: %s", err)
+		return nil, err
+	}
 
-		dialogue_message_wrapper := DialogueMessageWrapper{}
-		err = dialogue_message_wrapper.InitFromProtobufAndPerfofrmative(dialogue_message, performative)
-		if err != nil {
-			log.Printf("can not init dialogue wrapper: %s", err)
-			return nil, err
-		}
-		dialogue_message_wrapper.SetSender(Address(envelope.GetSender()))
-		dialogue_message_wrapper.SetTo(Address(envelope.GetTo()))
-		
-		return &dialogue_message_wrapper, nil
+	performative, err := GetPerformative(content_message)
+	if err != nil {
+		log.Printf("can not get performative: %s", err)
+		return nil, err
+	}
+
+	dialogue_message_wrapper := DialogueMessageWrapper{}
+	err = dialogue_message_wrapper.InitFromProtobufAndPerfofrmative(dialogue_message, performative)
+	if err != nil {
+		log.Printf("can not init dialogue wrapper: %s", err)
+		return nil, err
+	}
+	dialogue_message_wrapper.SetSender(Address(envelope.GetSender()))
+	dialogue_message_wrapper.SetTo(Address(envelope.GetTo()))
+
+	return &dialogue_message_wrapper, nil
 }
-
-
