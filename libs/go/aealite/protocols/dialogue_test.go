@@ -20,13 +20,17 @@
 
 package protocols
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 func TestDialogue(t *testing.T) {
 	label := getTestDialogueLabel()
 	initialPerformatives := []Performative{"start"}
 	terminalPerformatives := []Performative{"end"}
 	validReplies := map[Performative][]Performative{"start": {"end"}}
+	rules := NewRules(initialPerformatives, terminalPerformatives, validReplies)
 	dialogue := NewDialogue(
 		label,
 		senderAddress,
@@ -47,6 +51,12 @@ func TestDialogue(t *testing.T) {
 	}
 	if dialogue.SelfAddress() != senderAddress {
 		t.Fatalf("unexpected return value of SelfAddress()")
+	}
+	if dialogue.Role() != Role1 {
+		t.Fatalf("unexpected return value of Role()")
+	}
+	if !reflect.DeepEqual(dialogue.Rules(), rules) {
+		t.Fatalf("unexpected return value of Rules()")
 	}
 	if dialogue.LastIncomingMessage() != nil {
 		t.Fatalf("unexpected return value of LastIncomingMessage(): the dialogue should be empty")
