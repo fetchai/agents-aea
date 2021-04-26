@@ -157,7 +157,9 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
                 service_description=self.failed_registration_msg.service_description,
             )
             self.context.outbox.put_message(message=oef_search_msg)
-            self.context.logger.info("retrying registration on SOEF.")
+            self.context.logger.info(
+                f"Retrying registration on SOEF. Retry {self._nb_retries} out of {self._max_soef_registration_retries}."
+            )
 
             self.failed_registration_msg = None
 
