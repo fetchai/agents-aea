@@ -124,7 +124,9 @@ def _process_certificate(
             connection_private_key_path, path_prefix
         )
         connection_crypto = crypto_registry.make(
-            key_identifier, private_key_path=new_connection_private_key_path
+            key_identifier,
+            private_key_path=new_connection_private_key_path,
+            password=password,
         )
         public_key = connection_crypto.public_key
     else:
