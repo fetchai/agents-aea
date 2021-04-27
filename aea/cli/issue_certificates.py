@@ -44,7 +44,7 @@ def issue_certificates(click_context: click.Context, password: Optional[str]) ->
     """Issue certificates for connections that require them."""
     ctx = cast(Context, click_context.obj)
     agent_config_manager = AgentConfigManager.load(ctx.cwd)
-    issue_certificates_(ctx.cwd, agent_config_manager, password)
+    issue_certificates_(ctx.cwd, agent_config_manager, password=password)
 
 
 def issue_certificates_(
