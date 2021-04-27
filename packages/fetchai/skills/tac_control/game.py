@@ -748,6 +748,7 @@ class Game(Model):
         self._transactions = Transactions()
         self._already_minted_agents = []  # type: List[str]
         self._is_allowed_to_mint = True
+        self.is_registered_agent = False
 
     @property
     def phase(self) -> Phase:
