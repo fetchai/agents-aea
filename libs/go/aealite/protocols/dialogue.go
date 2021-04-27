@@ -353,12 +353,6 @@ func (dialogue *Dialogue) validateNextMessage(message ProtocolMessageInterface) 
 }
 
 func (dialogue *Dialogue) checkLabelBelongsToDialogue(label DialogueLabel) bool {
-	log.Printf(
-		"dialogue: checkLabelBelongsToDialogue label=|%s|  dialogue_label=|%s|  dialogue_label_inc=|%s|",
-		label,
-		dialogue.dialogueLabel,
-		dialogue.dialogueLabel.IncompleteVersion(),
-	)
 	return label == dialogue.dialogueLabel || label == dialogue.dialogueLabel.IncompleteVersion()
 }
 
