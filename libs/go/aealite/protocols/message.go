@@ -171,7 +171,6 @@ func GetDialogueMessageWrappedAndSetContentFromEnvelope(
 		return nil, err
 	}
 	dialogue_message := message.GetDialogueMessage()
-	log.Printf("Content: %s", dialogue_message.GetContent())
 
 	err = proto.Unmarshal(dialogue_message.GetContent(), content_message)
 	if err != nil {

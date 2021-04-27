@@ -506,7 +506,7 @@ func (dialogue *Dialogue) getMessageById(messageId MessageId) ProtocolMessageInt
 func (dialogue *Dialogue) getOutgoingNextMessageId() MessageId {
 	nextMessageId := StartingMessageId
 	if dialogue.LastOutgoingMessage() != nil {
-		nextMessageId = abs(dialogue.lastMessageId) + 1
+		nextMessageId = abs(dialogue.LastOutgoingMessage().MessageId()) + 1
 	}
 	if !dialogue.IsSelfInitiated() {
 		nextMessageId = 0 - nextMessageId

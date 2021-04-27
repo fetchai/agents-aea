@@ -409,7 +409,7 @@ func NewDialogues(
 		terminalPerformatives:      terminalPerformatives,
 		validReplies:               validReplies,
 	}
-	storage := NewSimpleDialogueStorage()
+	storage := NewSimpleDialogueStorage(&dialogues)
 	dialogues.dialogueStorage = storage
 
 	return &dialogues

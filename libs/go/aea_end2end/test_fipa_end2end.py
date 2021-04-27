@@ -113,22 +113,40 @@ class BuyerHandler(Handler):
     """Test BuyerHandler."""
 
     SUPPORTED_PROTOCOL = FipaMessage.protocol_id
+    got_proposal: bool
 
     def setup(self) -> None:
         """Set up behaviour."""
-        self.got_proposal = False
+        self.done = False
 
     def teardown(self) -> None:
         """Tear down handler."""
 
     def handle(self, message) -> None:
         """Handle an evelope."""
-        print("GOT MESSAGE", message)
         dialogues = cast(FipaDialogues, self.context.dialogues)
-        buyer_dialogue = dialogues.update(message)
-        if not buyer_dialogue:
-            return
-        self.got_proposal = True
+        if message.performative == FipaMessage.Performative.PROPOSE:
+            buyer_dialogue = dialogues.update(message)
+            if not buyer_dialogue:
+                print("error on propose message dialogue update")
+                return
+            accept_msg = buyer_dialogue.reply(
+                performative=FipaMessage.Performative.ACCEPT, target_message=message
+            )
+            self.context.outbox.put_message(message=accept_msg)
+        elif message.performative == FipaMessage.Performative.MATCH_ACCEPT:
+            buyer_dialogue = dialogues.update(message)
+            if not buyer_dialogue:
+                print("error on MATCH_ACCEPT message dialogue update", message)
+                print(dialogues._dialogues_storage.dialogues_in_active_state)
+                return
+            self.done = True
+            end_msg = buyer_dialogue.reply(
+                performative=FipaMessage.Performative.END, target_message=message
+            )
+            self.context.outbox.put_message(message=end_msg)
+        else:
+            print("unsupported performative", message.performative)
 
 
 class Base(AEATestCaseEmpty):
@@ -233,7 +251,7 @@ class FipaSellerAgent:
 
     @classmethod
     def wait_for_envelope(cls):
-        cls.proc.expect("got incoming envelope", timeout=20)
+        cls.proc.expect("envelope handled successfully", timeout=20)
 
     @classmethod
     def stop(cls):
@@ -288,10 +306,11 @@ class TestFipaEnd2End(Base):
                 addr = FipaSellerAgent.start(multi_addr)
                 behaviour.start(addr)
                 wait_for_condition(lambda: behaviour.was_called, timeout=30)
-                FipaSellerAgent.wait_for_envelope()
-                wait_for_condition(lambda: handler.got_proposal, timeout=30)
+                wait_for_condition(lambda: handler.done, timeout=30)
+                FipaSellerAgent.proc.expect("It's done", timeout=30)
         finally:
             FipaSellerAgent.stop()
+            FipaSellerAgent.proc.wait_eof()
 
 
 if __name__ == "__main__":

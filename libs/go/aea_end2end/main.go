@@ -75,7 +75,6 @@ func makeSellerDialogues(address string) *protocols.Dialogues {
 	return dialogues
 }
 
-
 func handleEnvelope(
 	envelope *protocols.Envelope,
 	dialogues *protocols.Dialogues,
@@ -102,52 +101,102 @@ func handleEnvelope(
 		log.Printf("Failed to update dialogue:  %s", err)
 		return
 	}
+	switch dialogueMessageWrapped.Performative() {
+	case "cfp":
+		{
+			msg, err := dialogue.Reply("propose", dialogueMessageWrapped, nil)
+			if err != nil {
+				log.Printf("Failed to reply dialogue:  %s", err)
+				return
+			}
+			q := &protocols.Query_Instance{
+				Model: &protocols.Query_DataModel{
+					Name:        "string",
+					Attributes:  []*protocols.Query_Attribute{},
+					Description: "desc",
+				},
+				Values: []*protocols.Query_KeyValue{},
+			}
 
-	msg, err := dialogue.Reply("propose", dialogueMessageWrapped, nil)
-	if err != nil {
-		log.Printf("Failed to reply dialogue:  %s", err)
-		return
-	}
-	log.Printf("msg: %s", msg)
+			out, err := proto.Marshal(q)
+			if err != nil {
+				log.Printf("Failed to encode q:  %s", err)
+				return
+			}
+			proposeMsg := &local_protocols.FipaMessage{
+				Performative: &local_protocols.FipaMessage_Propose{
+					Propose: &local_protocols.FipaMessage_Propose_Performative{
+						Proposal: &local_protocols.FipaMessage_Description{DescriptionBytes: out},
+					},
+				},
+			}
 
-	q := &protocols.Query_Instance{
-		Model: &protocols.Query_DataModel{
-			Name:        "string",
-			Attributes:  []*protocols.Query_Attribute{},
-			Description: "desc",
-		},
-		Values: []*protocols.Query_KeyValue{},
+			content, err := proto.Marshal(proposeMsg)
+			if err != nil {
+				log.Printf("Failed to encode content:  %s", err)
+				return
+			}
+			replyEnvelope, err := protocols.MakeResponseEnvelope(msg, fipaProtocolID, content)
+			if err != nil {
+				log.Printf("Failed to make envelope  %s", err)
+				return
+			}
+			err = agent.Put(replyEnvelope)
+			if err != nil {
+				log.Printf("Error on send reply: %s", err)
+				return
+			}
+		}
+	case "accept":
+		{
+			msg, err := dialogue.Reply("match_accept", dialogueMessageWrapped, nil)
+			if err != nil {
+				log.Printf("Failed to reply dialogue:  %s", err)
+				return
+			}
+			matchMsg := &local_protocols.FipaMessage{
+				Performative: &local_protocols.FipaMessage_MatchAccept{},
+			}
+
+			content, err := proto.Marshal(matchMsg)
+			if err != nil {
+				log.Printf("Failed to encode content:  %s", err)
+				return
+			}
+			replyEnvelope, err := protocols.MakeResponseEnvelope(msg, fipaProtocolID, content)
+			if err != nil {
+				log.Printf("Failed to make envelope  %s", err)
+				return
+			}
+			err = agent.Put(replyEnvelope)
+			if err != nil {
+				log.Printf("Error on send reply: %s", err)
+				return
+			}
+		}
+	case "end":
+		{
+			log.Print("It's done")
+		}
+	default:
+		{
+			log.Printf("Unsupported performative:  %s", dialogueMessageWrapped.Performative())
+			return
+		}
+
 	}
 
-	out, err := proto.Marshal(q)
-	if err != nil {
-		log.Printf("Failed to encode q:  %s", err)
-		return
-	}
-	proposeMsg := &local_protocols.FipaMessage{
-		Performative: &local_protocols.FipaMessage_Propose{
-			Propose: &local_protocols.FipaMessage_Propose_Performative{
-				Proposal: &local_protocols.FipaMessage_Description{DescriptionBytes: out},
-			},
-		},
-	}
+	log.Print("envelope handled successfully")
+}
 
-	content, err := proto.Marshal(proposeMsg)
-	if err != nil {
-		log.Printf("Failed to encode content:  %s", err)
-		return
+func getEnvelopeAndProcess(
+	dialogues *protocols.Dialogues,
+	agent *aea.Agent) {
+	for {
+		envelope := agent.Get()
+		log.Printf("got incoming envelope: %s", envelope.String())
+		handleEnvelope(envelope, dialogues, agent)
 	}
-	replyEnvelope, err := protocols.MakeResponseEnvelope(msg, fipaProtocolID, content)
-	if err != nil {
-		log.Printf("Failed to make envelope  %s", err)
-		return
-	}
-	err = agent.Put(replyEnvelope)
-	if err != nil {
-		log.Printf("Error on send reply: %s", err)
-		return
-	}
-	log.Print("Reply sent successfully")
 }
 
 func main() {
@@ -184,11 +233,8 @@ func main() {
 	log.Print("My Address is", agent.Address())
 
 	dialogues := makeSellerDialogues(agent.Address())
-	envelope := agent.Get()
 
-	handleEnvelope(envelope, dialogues, &agent)
-
-	log.Printf("got incoming envelope: %s", envelope.String())
+	go getEnvelopeAndProcess(dialogues, &agent)
 
 	// Wait until Ctrl+C or a termination call is done.
 	c := make(chan os.Signal, 1)
