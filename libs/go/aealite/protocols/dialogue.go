@@ -24,7 +24,6 @@ import (
 	"aealite/helpers"
 	"errors"
 	"fmt"
-	"log"
 )
 
 type Role string

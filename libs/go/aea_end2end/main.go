@@ -17,17 +17,19 @@
 *
 * ------------------------------------------------------------------------------
  */
+
 package main
 
 import (
 	aea "aealite"
 	connections "aealite/connections"
 	protocols "aealite/protocols"
-	proto "google.golang.org/protobuf/proto"
 	"log"
 	"os"
 	"os/signal"
 	local_protocols "seller_agent/protocols"
+
+	proto "google.golang.org/protobuf/proto"
 )
 
 func getRole(protocols.ProtocolMessageInterface, protocols.Address) protocols.Role {
@@ -38,77 +40,70 @@ func makeSellerDialogues(address string) *protocols.Dialogues {
 	initialPerformatives := []protocols.Performative{"cfp"}
 	terminalPerformatives := []protocols.Performative{"decline", "end"}
 	validReplies := map[protocols.Performative][]protocols.Performative{
-		"cfp":                   []protocols.Performative{"propose", "decline"},
-		"propose":               []protocols.Performative{"accept", "accept_w_inform", "decline", "propose"},
-		"accept":                []protocols.Performative{"decline", "match_accept", "match_accept_w_inform"},
-		"accept_w_inform":       []protocols.Performative{"decline", "match_accept", "match_accept_w_inform"},
+		"cfp": []protocols.Performative{"propose", "decline"},
+		"propose": []protocols.Performative{
+			"accept",
+			"accept_w_inform",
+			"decline",
+			"propose",
+		},
+		"accept": []protocols.Performative{
+			"decline",
+			"match_accept",
+			"match_accept_w_inform",
+		},
+		"accept_w_inform": []protocols.Performative{
+			"decline",
+			"match_accept",
+			"match_accept_w_inform",
+		},
 		"decline":               []protocols.Performative{},
 		"match_accept":          []protocols.Performative{"inform", "end"},
 		"match_accept_w_inform": []protocols.Performative{"inform", "end"},
 		"inform":                []protocols.Performative{"inform", "end"},
 		"end":                   []protocols.Performative{},
 	}
-	dialogues := protocols.NewDialogues(protocols.Address(address), getRole, false, "my dialogues", initialPerformatives, terminalPerformatives, validReplies)
+	dialogues := protocols.NewDialogues(
+		protocols.Address(address),
+		getRole,
+		false,
+		"my dialogues",
+		initialPerformatives,
+		terminalPerformatives,
+		validReplies,
+	)
 	return dialogues
 }
 
-func makeResponseEnvelope(wrapped_msg_dialogue protocols.ProtocolMessageInterface, protocol_id string, content []byte) (protocols.Envelope, error) {
-	dialogueRef := wrapped_msg_dialogue.DialogueReference()
 
-	message := protocols.Message{
-		Message: &protocols.Message_DialogueMessage{
-			DialogueMessage: &protocols.DialogueMessage{
-				MessageId:                  int32(wrapped_msg_dialogue.MessageId()),
-				DialogueStarterReference:   dialogueRef.DialogueStarterReference(),
-				DialogueResponderReference: dialogueRef.DialogueResponderReference(),
-				Target:                     int32(wrapped_msg_dialogue.Target()),
-				Content:                    content,
-			},
-		},
-	}
+func handleEnvelope(
+	envelope *protocols.Envelope,
+	dialogues *protocols.Dialogues,
+	agent *aea.Agent,
+) {
+	fipaProtocolID := "fetchai/fipa:1.0.0"
 
-	out, err := proto.Marshal(&message)
-	if err != nil {
-		log.Print("marshal dialogue messge failed")
-		return protocols.Envelope{}, err
-	}
-	env := protocols.Envelope{
-		To:         string(wrapped_msg_dialogue.To()),
-		Sender:     string(wrapped_msg_dialogue.Sender()),
-		ProtocolId: protocol_id,
-		Message:    out,
-		Uri:        "",
-	}
-	return env, nil
-
-}
-
-func handleEnvelope(envelope *protocols.Envelope, dialogues *protocols.Dialogues, agent *aea.Agent) {
-	fipa_protocol_id := "fetchai/fipa:1.0.0"
-
-	if envelope.GetProtocolId() != fipa_protocol_id {
+	if envelope.GetProtocolId() != fipaProtocolID {
 		log.Printf("Not Fipa message!.")
 		return
 	}
 
-	fipa_message := &local_protocols.FipaMessage{}
-	dialogue_message_wrapped, err := protocols.GetDialogueMessageWrappedAndSetContentFromEnvelope(envelope, fipa_message)
+	fipaMessage := &local_protocols.FipaMessage{}
+	dialogueMessageWrapped, err := protocols.GetDialogueMessageWrappedAndSetContentFromEnvelope(
+		envelope,
+		fipaMessage,
+	)
 	if err != nil {
 		log.Printf("Failed to get dialogue message message: %s", err)
 		return
 	}
-	log.Printf("Fipa message:  %s", fipa_message)
-	log.Printf("dialogue message sender:  %s", dialogue_message_wrapped.Sender())
-	log.Printf("dialogue message to:  %s", dialogue_message_wrapped.To())
-	log.Printf("dialogue message wrapped:  %s", dialogue_message_wrapped)
-
-	dialogue, err := dialogues.Update(dialogue_message_wrapped)
+	dialogue, err := dialogues.Update(dialogueMessageWrapped)
 	if err != nil {
 		log.Printf("Failed to update dialogue:  %s", err)
 		return
 	}
 
-	msg, err := dialogue.Reply("propose", dialogue_message_wrapped, nil)
+	msg, err := dialogue.Reply("propose", dialogueMessageWrapped, nil)
 	if err != nil {
 		log.Printf("Failed to reply dialogue:  %s", err)
 		return
@@ -129,7 +124,7 @@ func handleEnvelope(envelope *protocols.Envelope, dialogues *protocols.Dialogues
 		log.Printf("Failed to encode q:  %s", err)
 		return
 	}
-	propose_msg := &local_protocols.FipaMessage{
+	proposeMsg := &local_protocols.FipaMessage{
 		Performative: &local_protocols.FipaMessage_Propose{
 			Propose: &local_protocols.FipaMessage_Propose_Performative{
 				Proposal: &local_protocols.FipaMessage_Description{DescriptionBytes: out},
@@ -137,20 +132,22 @@ func handleEnvelope(envelope *protocols.Envelope, dialogues *protocols.Dialogues
 		},
 	}
 
-	log.Printf("propose_msg %s", propose_msg)
-	content, err := proto.Marshal(propose_msg)
-	log.Printf("content %s", content, len(content))
+	content, err := proto.Marshal(proposeMsg)
 	if err != nil {
 		log.Printf("Failed to encode content:  %s", err)
 		return
 	}
-	reply_envelope, err := makeResponseEnvelope(msg, fipa_protocol_id, content)
+	replyEnvelope, err := protocols.MakeResponseEnvelope(msg, fipaProtocolID, content)
 	if err != nil {
 		log.Printf("Failed to make envelope  %s", err)
 		return
 	}
-	agent.Put(&reply_envelope)
-
+	err = agent.Put(replyEnvelope)
+	if err != nil {
+		log.Printf("Error on send reply: %s", err)
+		return
+	}
+	log.Print("Reply sent successfully")
 }
 
 func main() {

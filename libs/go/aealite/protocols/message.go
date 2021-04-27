@@ -22,9 +22,10 @@ package protocols
 
 import (
 	"errors"
+	"log"
+
 	proto "google.golang.org/protobuf/proto"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	"log"
 )
 
 type MessageId int
@@ -194,4 +195,39 @@ func GetDialogueMessageWrappedAndSetContentFromEnvelope(
 	dialogue_message_wrapper.SetTo(Address(envelope.GetTo()))
 
 	return &dialogue_message_wrapper, nil
+}
+
+
+func MakeResponseEnvelope(
+	wrappedMsgDialogue ProtocolMessageInterface,
+	protocolID string,
+	content []byte,
+) (*Envelope, error) {
+	dialogueRef := wrappedMsgDialogue.DialogueReference()
+
+	message := Message{
+		Message: &Message_DialogueMessage{
+			DialogueMessage: &DialogueMessage{
+				MessageId:                  int32(wrappedMsgDialogue.MessageId()),
+				DialogueStarterReference:   dialogueRef.DialogueStarterReference(),
+				DialogueResponderReference: dialogueRef.DialogueResponderReference(),
+				Target:                     int32(wrappedMsgDialogue.Target()),
+				Content:                    content,
+			},
+		},
+	}
+
+	out, err := proto.Marshal(&message)
+	if err != nil {
+		log.Print("marshal dialogue messge failed")
+		return nil, err
+	}
+	env := &Envelope{
+		To:         string(wrappedMsgDialogue.To()),
+		Sender:     string(wrappedMsgDialogue.Sender()),
+		ProtocolId: protocolID,
+		Message:    out,
+		Uri:        "",
+	}
+	return env, nil
 }

@@ -41,7 +41,6 @@ func main() {
 
 	log.Print("Agent starting ...")
 
-
 	// Create agent
 	agent := aea.Agent{}
 

@@ -16,21 +16,18 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-from libs.go.aea_end2end.pexpect_popen import PexpectWrapper
-import sys
-from pexpect.exceptions import EOF
-from tests.conftest import _make_libp2p_connection
-from tempfile import TemporaryDirectory
-import asyncio
-from packages.fetchai.connections.p2p_libp2p.connection import P2PLibp2pConnection
-
 """This module contains the end to end test for dialogues on python and golang."""
+import asyncio
 import os
+import sys
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from threading import Thread
-from typing import Optional, cast, Any
+from typing import Any, Optional, cast
 
 import pytest
+from aea_ledger_fetchai import FetchAICrypto
+from pexpect.exceptions import EOF
 
 from aea.aea_builder import AEABuilder
 from aea.common import Address
@@ -42,40 +39,14 @@ from aea.protocols.dialogue.base import Dialogue as BaseDialogue
 from aea.skills.base import Handler, Skill, SkillContext
 from aea.skills.behaviours import TickerBehaviour
 from aea.test_tools.test_cases import AEATestCaseEmpty
+from libs.go.aea_end2end.pexpect_popen import PexpectWrapper
 
+from packages.fetchai.connections.p2p_libp2p.connection import P2PLibp2pConnection
 from packages.fetchai.protocols.fipa.dialogues import FipaDialogue, FipaDialogues
 from packages.fetchai.protocols.fipa.message import FipaMessage
 
 from tests.common.utils import run_in_thread, wait_for_condition
-
-
-class SellerDialogues(FipaDialogues):
-    """The dialogues class keeps track of all dialogues."""
-
-    def __init__(self, self_address: Address) -> None:
-        """
-        Initialize dialogues.
-
-        :return: None
-        """
-
-        def role_from_first_message(  # pylint: disable=unused-argument
-            message: Message, receiver_address: Address
-        ) -> BaseDialogue.Role:
-            """Infer the role of the agent from an incoming/outgoing first message
-
-            :param message: an incoming/outgoing first message
-            :param receiver_address: the address of the receiving agent
-            :return: The role of the agent
-            """
-            return FipaDialogue.Role.SELLER
-
-        FipaDialogues.__init__(
-            self,
-            self_address=self_address,
-            role_from_first_message=role_from_first_message,
-            dialogue_class=FipaDialogue,
-        )
+from tests.conftest import _make_libp2p_connection
 
 
 class BuyerDialogues(FipaDialogues):
@@ -152,7 +123,7 @@ class BuyerHandler(Handler):
 
     def handle(self, message) -> None:
         """Handle an evelope."""
-        print('GOT MESSAGE', message)
+        print("GOT MESSAGE", message)
         dialogues = cast(FipaDialogues, self.context.dialogues)
         buyer_dialogue = dialogues.update(message)
         if not buyer_dialogue:
@@ -196,8 +167,6 @@ export AEA_P2P_DELEGATE_PORT=11234
 """
 
 
-from aea_ledger_fetchai import FetchAICrypto
-
 class FipaSellerAgent:
     """Threaded FIPA Seller agent."""
 
@@ -221,15 +190,16 @@ class FipaSellerAgent:
         cls.loop.run_until_complete(cls.connection_node.node.start())
 
         priv_key_file = Path(cls.temp_dir.name) / "priv_key.txt"
-        priv_key_file.write_text("6d8d2b87d987641e2ca3f1991c1cccf08a118759e81fabdbf7e8484f27af015e")
+        priv_key_file.write_text(
+            "6d8d2b87d987641e2ca3f1991c1cccf08a118759e81fabdbf7e8484f27af015e"
+        )
         crypto = FetchAICrypto(str(priv_key_file))
         signature = crypto.sign_message(cls.connection_node.node.pub.encode())
 
         env_file = Path(cls.temp_dir.name) / "test.env"
         env_file.write_text(
             ENV_TEMPLATE.format(
-                peer_pubkey=cls.connection_node.node.pub,
-                signature=signature
+                peer_pubkey=cls.connection_node.node.pub, signature=signature
             )
         )
 
@@ -268,7 +238,7 @@ class FipaSellerAgent:
     @classmethod
     def stop(cls):
         """Stop agent and tear down."""
-        node_log = Path(cls.temp_dir.name) / 'libp2p_node_10234.log'
+        node_log = Path(cls.temp_dir.name) / "libp2p_node_10234.log"
         print(node_log.read_text())
         cls.loop.run_until_complete(cls.connection_node.node.stop())
         cls.proc.terminate()

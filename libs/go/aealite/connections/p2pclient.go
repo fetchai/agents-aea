@@ -34,6 +34,7 @@ import (
 
 	protocols "aealite/protocols"
 	wallet "aealite/wallet"
+
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 	proto "google.golang.org/protobuf/proto"
