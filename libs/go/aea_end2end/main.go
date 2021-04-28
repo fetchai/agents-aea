@@ -177,6 +177,7 @@ func handleEnvelope(
 	case "end":
 		{
 			log.Print("It's done")
+			log.Print("FIPA INTERACTION COMPLETE")
 		}
 	default:
 		{
@@ -230,7 +231,7 @@ func main() {
 		log.Fatal("Failed to start agent", err)
 	}
 	log.Print("successfully started AEA!")
-	log.Print("My Address is", agent.Address())
+	log.Print("My Address is ", agent.Address())
 
 	dialogues := makeSellerDialogues(agent.Address())
 
