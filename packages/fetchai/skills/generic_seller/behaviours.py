@@ -139,29 +139,62 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("registering agent on SOEF.")
 
-    def register_service_personality_classification(self) -> None:
+    def register_service(self) -> None:
         """
-        Register the agent's service, personality and classification.
+        Register the agent's service.
 
         :return: None
         """
         strategy = cast(GenericStrategy, self.context.strategy)
-        descriptions = [
-            strategy.get_register_service_description(),
-            strategy.get_register_personality_description(),
-            strategy.get_register_classification_description(),
-        ]
+        description = (strategy.get_register_service_description(),)
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
-        for description in descriptions:
-            oef_search_msg, _ = oef_search_dialogues.create(
-                counterparty=self.context.search_service_address,
-                performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-                service_description=description,
-            )
-            self.context.outbox.put_message(message=oef_search_msg)
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            service_description=description,
+        )
+        self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("registering service on SOEF.")
+
+    def register_genus(self) -> None:
+        """
+        Register the agent's personality genus.
+
+        :return: None
+        """
+        strategy = cast(GenericStrategy, self.context.strategy)
+        description = (strategy.get_register_personality_description(),)
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
+        )
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            service_description=description,
+        )
+        self.context.outbox.put_message(message=oef_search_msg)
+        self.context.logger.info("registering personality genus on SOEF.")
+
+    def register_classification(self) -> None:
+        """
+        Register the agent's personality classification.
+
+        :return: None
+        """
+        strategy = cast(GenericStrategy, self.context.strategy)
+        description = (strategy.get_register_classification_description(),)
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
+        )
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            service_description=description,
+        )
+        self.context.outbox.put_message(message=oef_search_msg)
+        self.context.logger.info("registering personality classification on SOEF.")
 
     def _unregister_service(self) -> None:
         """

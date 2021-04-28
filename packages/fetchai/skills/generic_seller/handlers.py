@@ -519,12 +519,26 @@ class GenericOefSearchHandler(Handler):
             target_message.performative
             == OefSearchMessage.Performative.REGISTER_SERVICE
         ):
-            if "location" in target_message.service_description.values:
-                registration_behaviour = cast(
-                    GenericServiceRegistrationBehaviour,
-                    self.context.behaviours.service_registration,
-                )
-                registration_behaviour.register_service_personality_classification()
+            registration_behaviour = cast(
+                GenericServiceRegistrationBehaviour,
+                self.context.behaviours.service_registration,
+            )
+            if "location_agent" in target_message.service_description.data_model.name:
+                registration_behaviour.register_service()
+            elif (
+                "set_service_key" in target_message.service_description.data_model.name
+            ):
+                registration_behaviour.register_genus()
+            elif (
+                "personality_agent"
+                in target_message.service_description.data_model.name
+            ):
+                if target_message.service_description.values["key"] == "genus":
+                    registration_behaviour.register_classification()
+                else:
+                    self.context.logger.info(
+                        "agent's service, genus and classification are successfully registered on the SOEF."
+                    )
 
     def _handle_error(
         self,
