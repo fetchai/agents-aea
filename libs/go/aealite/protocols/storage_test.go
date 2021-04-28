@@ -38,7 +38,7 @@ func getTestDialogue() Dialogue {
 }
 
 func TestStorage(t *testing.T) {
-	storage := NewSimpleDialogueStorage()
+	storage := NewSimpleDialogueStorage(nil)
 	dialogue := getTestDialogue()
 
 	// Test storage methods without dialogues

@@ -190,12 +190,19 @@ func GetDialogueMessageWrappedAndSetContentFromEnvelope(
 		log.Printf("can not init dialogue wrapper: %s", err)
 		return nil, err
 	}
-	dialogue_message_wrapper.SetSender(Address(envelope.GetSender()))
-	dialogue_message_wrapper.SetTo(Address(envelope.GetTo()))
+	err = dialogue_message_wrapper.SetSender(Address(envelope.GetSender()))
+	if err != nil {
+		log.Printf("can not set Sender: %s", err)
+		return nil, err
+	}
+	err = dialogue_message_wrapper.SetTo(Address(envelope.GetTo()))
+	if err != nil {
+		log.Printf("can not set To: %s", err)
+		return nil, err
+	}
 
 	return &dialogue_message_wrapper, nil
 }
-
 
 func MakeResponseEnvelope(
 	wrappedMsgDialogue ProtocolMessageInterface,
