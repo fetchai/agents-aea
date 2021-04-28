@@ -78,6 +78,7 @@ class GenericStrategy(Model):
                 latitude=location["latitude"], longitude=location["longitude"]
             )
         }
+
         self._set_personality_data = kwargs.pop(
             "personality_data", DEFAULT_PERSONALITY_DATA
         )
@@ -85,16 +86,25 @@ class GenericStrategy(Model):
             len(self._set_personality_data) == 2
             and "piece" in self._set_personality_data
             and "value" in self._set_personality_data,
-            "personality_data must contain keys `key` and `value`",
+            "personality_data must contain only keys `key` and `value`",
         )
+        enforce("," not in self._set_personality_data["piece"], "personality_data piece must not contain a comma character")
+        enforce("," not in self._set_personality_data["value"], "personality_data value must not contain a comma character")
         self._set_classification = kwargs.pop("classification", DEFAULT_CLASSIFICATION)
         enforce(
             len(self._set_classification) == 2
             and "piece" in self._set_classification
             and "value" in self._set_classification,
-            "classification must contain keys `key` and `value`",
+            "classification must contain only keys `key` and `value`",
         )
+        enforce("," not in self._set_classification["piece"], "classification piece must not contain a comma character")
+        enforce("," not in self._set_classification["value"], "classification value must not contain a comma character")
         self._set_service_data = kwargs.pop("service_data", DEFAULT_SERVICE_DATA)
+        self._set_registration_data = {
+            "piece": f"{self._set_personality_data['piece']},{self._set_classification['piece']}",
+            "value": f"{self._set_personality_data['value']},{self._set_classification['value']}",
+        }
+
         enforce(
             len(self._set_service_data) == 2
             and "key" in self._set_service_data
@@ -187,6 +197,17 @@ class GenericStrategy(Model):
         """
         description = Description(
             self._set_classification, data_model=AGENT_PERSONALITY_MODEL,
+        )
+        return description
+
+    def get_registration_description(self) -> Description:
+        """
+        Get the registration  description.
+
+        :return: a description of the classification
+        """
+        description = Description(
+            self._set_registration_data, data_model=AGENT_PERSONALITY_MODEL,
         )
         return description
 

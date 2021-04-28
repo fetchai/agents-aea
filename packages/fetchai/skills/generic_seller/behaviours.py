@@ -148,8 +148,7 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
         strategy = cast(GenericStrategy, self.context.strategy)
         descriptions = [
             strategy.get_register_service_description(),
-            strategy.get_register_personality_description(),
-            strategy.get_register_classification_description(),
+            strategy.get_registration_description(),
         ]
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues

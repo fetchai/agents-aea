@@ -879,7 +879,13 @@ class SOEFChannel:
         if not (isinstance(piece, str) and isinstance(value, str)):  # pragma: nocover
             raise SOEFException.debug("Personality piece bad values provided.")
 
-        await self._set_personality_piece(piece, value)
+        pieces = piece.split(",")
+        values = value.split(",")
+        if len(pieces) != len(values):
+            raise SOEFException.debug("Mismatched number of personality pieces and values.")
+
+        for idx in range(len(pieces)):
+            await self._set_personality_piece(pieces[idx], values[idx])
         await self._send_success_response(oef_message, oef_search_dialogue)
 
     async def _set_personality_piece(self, piece: str, value: str) -> None:
