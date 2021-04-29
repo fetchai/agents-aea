@@ -19,7 +19,7 @@
 
 """This package contains a scaffold of a behaviour."""
 
-from typing import Any, cast
+from typing import Any, Optional, cast
 
 from aea.skills.behaviours import TickerBehaviour
 
@@ -32,6 +32,7 @@ from packages.fetchai.skills.tac_negotiation.strategy import Strategy
 from packages.fetchai.skills.tac_negotiation.transactions import Transactions
 
 
+DEFAULT_MAX_SOEF_REGISTRATION_RETRIES = 5
 DEFAULT_REGISTER_AND_SEARCH_INTERVAL = 5.0
 
 
@@ -43,8 +44,13 @@ class GoodsRegisterAndSearchBehaviour(TickerBehaviour):
         search_interval = cast(
             float, kwargs.pop("search_interval", DEFAULT_REGISTER_AND_SEARCH_INTERVAL)
         )
+        self._max_soef_registration_retries = kwargs.pop(
+            "max_soef_registration_retries", DEFAULT_MAX_SOEF_REGISTRATION_RETRIES
+        )  # type: int
         super().__init__(tick_interval=search_interval, **kwargs)
         self.is_registered = False
+        self.failed_registration_msg = None  # type: Optional[OefSearchMessage]
+        self._nb_retries = 0
 
     def setup(self) -> None:
         """
@@ -71,9 +77,8 @@ class GoodsRegisterAndSearchBehaviour(TickerBehaviour):
             return
 
         if not self.is_registered:
+            self._retry_failed_registration()
             self._register_agent()
-            self._register_service()
-            self.is_registered = True
         self._search_services()
 
     def teardown(self) -> None:
@@ -86,6 +91,33 @@ class GoodsRegisterAndSearchBehaviour(TickerBehaviour):
             self._unregister_service()
             self._unregister_agent()
             self.is_registered = False
+
+    def _retry_failed_registration(self) -> None:
+        """
+        Retry a failed registration.
+
+        :return: None
+        """
+        if self.failed_registration_msg is not None:
+            self._nb_retries += 1
+            if self._nb_retries > self._max_soef_registration_retries:
+                self.context.is_active = False
+                return
+
+            oef_search_dialogues = cast(
+                OefSearchDialogues, self.context.oef_search_dialogues
+            )
+            oef_search_msg, _ = oef_search_dialogues.create(
+                counterparty=self.failed_registration_msg.to,
+                performative=self.failed_registration_msg.performative,
+                service_description=self.failed_registration_msg.service_description,
+            )
+            self.context.outbox.put_message(message=oef_search_msg)
+            self.context.logger.info(
+                f"Retrying registration on SOEF. Retry {self._nb_retries} out of {self._max_soef_registration_retries}."
+            )
+
+            self.failed_registration_msg = None
 
     def _register_agent(self) -> None:
         """
@@ -106,7 +138,7 @@ class GoodsRegisterAndSearchBehaviour(TickerBehaviour):
         self.context.outbox.put_message(message=oef_search_msg)
         self.context.logger.info("registering agent on SOEF.")
 
-    def _register_service(self) -> None:
+    def register_service(self) -> None:
         """
         Register to the OEF Service Directory.
 

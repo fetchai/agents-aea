@@ -56,6 +56,14 @@ class TestServiceRegistrationBehaviour(BaseSkillTestCase):
         cls.mocked_description_1 = Description({"foo1": 1, "bar1": 2})
         cls.mocked_description_2 = Description({"foo2": 1, "bar2": 2})
 
+        cls.registration_message = OefSearchMessage(
+            dialogue_reference=("", ""),
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            service_description="some_service_description",
+        )
+        cls.registration_message.sender = str(cls._skill.skill_context.skill_id)
+        cls.registration_message.to = cls._skill.skill_context.search_service_address
+
     def test_setup(self):
         """Test the setup method of the service behaviour."""
         # operation
@@ -73,7 +81,7 @@ class TestServiceRegistrationBehaviour(BaseSkillTestCase):
                     self.service_behaviour.setup()
 
         # after
-        self.assert_quantity_in_outbox(2)
+        self.assert_quantity_in_outbox(1)
 
         # _register_agent
         has_attributes, error_str = self.message_has_attributes(
@@ -88,23 +96,86 @@ class TestServiceRegistrationBehaviour(BaseSkillTestCase):
 
         mock_logger.assert_any_call(logging.INFO, "registering agent on SOEF.")
 
-        # _register_service
+    def test_act_i(self):
+        """Test the act method of the service behaviour where failed_registration_msg IS None."""
+        # setup
+        self.service_behaviour.failed_registration_msg = None
+
+        # operation
+        assert self.service_behaviour.act() is None
+
+        # after
+        self.assert_quantity_in_outbox(0)
+
+    def test_act_ii(self):
+        """Test the act method of the service behaviour where failed_registration_msg is NOT None."""
+        # setup
+        self.service_behaviour.failed_registration_msg = self.registration_message
+
+        # operation
+        with patch.object(self.logger, "log") as mock_logger:
+            self.service_behaviour.act()
+
+        # after
+        self.assert_quantity_in_outbox(1)
         has_attributes, error_str = self.message_has_attributes(
             actual_message=self.get_message_from_outbox(),
+            message_type=type(self.registration_message),
+            performative=self.registration_message.performative,
+            to=self.registration_message.to,
+            sender=str(self.skill.skill_context.skill_id),
+            service_description=self.registration_message.service_description,
+        )
+        assert has_attributes, error_str
+
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"Retrying registration on SOEF. Retry {self.service_behaviour._nb_retries} out of {self.service_behaviour._max_soef_registration_retries}.",
+        )
+        assert self.service_behaviour.failed_registration_msg is None
+
+    def test_act_iii(self):
+        """Test the act method of the service behaviour where failed_registration_msg is NOT None and max retries is reached."""
+        # setup
+        self.service_behaviour.failed_registration_msg = self.registration_message
+        self.service_behaviour._max_soef_registration_retries = 2
+        self.service_behaviour._nb_retries = 2
+
+        # operation
+        self.service_behaviour.act()
+
+        # after
+        self.assert_quantity_in_outbox(0)
+        assert self.skill.skill_context.is_active is False
+
+    def test_register_service(self):
+        """Test the register_service method of the service_registration behaviour."""
+        # setup
+        mocked_description_1 = "some_description_1"
+
+        # operation
+        with patch.object(
+            self.strategy,
+            "get_register_service_description",
+            return_value=mocked_description_1,
+        ):
+            with patch.object(self.logger, "log") as mock_logger:
+                self.service_behaviour.register_service()
+
+        # after
+        self.assert_quantity_in_outbox(1)
+
+        message = self.get_message_from_outbox()
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=message,
             message_type=OefSearchMessage,
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             to=self.skill.skill_context.search_service_address,
             sender=str(self.skill.skill_context.skill_id),
-            service_description=self.mocked_description_2,
+            service_description=mocked_description_1,
         )
         assert has_attributes, error_str
-
         mock_logger.assert_any_call(logging.INFO, "registering service on SOEF.")
-
-    def test_act(self):
-        """Test the act method of the service behaviour."""
-        assert self.service_behaviour.act() is None
-        self.assert_quantity_in_outbox(0)
 
     def test_teardown(self):
         """Test the teardown method of the service behaviour."""

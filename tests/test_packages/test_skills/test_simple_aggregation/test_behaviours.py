@@ -143,40 +143,38 @@ class TestSearchBehaviour(BaseSkillTestCase):
         cls.aggregation_strategy._quantity_name = "some_quantity"
         cls.agent_address = cls.search_behaviour.context.agent_addresses[LEDGER_ID]
 
+        cls.registration_message = OefSearchMessage(
+            dialogue_reference=("", ""),
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            service_description="some_service_description",
+        )
+        cls.registration_message.sender = str(cls._skill.skill_context.skill_id)
+        cls.registration_message.to = cls._skill.skill_context.search_service_address
+
     def test_setup(self):
         """Test the setup method of the search behaviour."""
-
         with patch.object(self.search_behaviour.context.logger, "log") as mock_logger:
             self.search_behaviour.setup()
 
         mock_logger.assert_any_call(
             logging.INFO, "registering agent on SOEF.",
         )
-        mock_logger.assert_any_call(
-            logging.INFO, "registering service on SOEF.",
-        )
 
-        descriptions = [
-            self.aggregation_strategy.get_location_description(),
-            self.aggregation_strategy.get_register_service_description(),
-            self.aggregation_strategy.get_register_personality_description(),
-            self.aggregation_strategy.get_register_classification_description(),
-        ]
+        description = self.aggregation_strategy.get_location_description()
 
         # test SOEF messages
-        self.assert_quantity_in_outbox(len(descriptions))
-        for description in descriptions:
-            msg = cast(OefSearchMessage, self.get_message_from_outbox())
-            has_attributes, error_str = self.message_has_attributes(
-                actual_message=msg,
-                message_type=OefSearchMessage,
-                performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-                service_description=description,
-            )
-            assert has_attributes, error_str
+        self.assert_quantity_in_outbox(1)
+        msg = cast(OefSearchMessage, self.get_message_from_outbox())
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=OefSearchMessage,
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            service_description=description,
+        )
+        assert has_attributes, error_str
 
-    def test_act(self):
-        """Test the act method of the search behaviour."""
+    def test_act_i(self):
+        """Test the act method of the search behaviour where failed_registration_msg IS None."""
 
         query = self.aggregation_strategy.get_location_and_service_query()
 
@@ -192,6 +190,124 @@ class TestSearchBehaviour(BaseSkillTestCase):
             query=query,
         )
         assert has_attributes, error_str
+
+    def test_act_ii(self):
+        """Test the act method of the service_registration behaviour where failed_registration_msg is NOT None."""
+        # setup
+        self.search_behaviour.failed_registration_msg = self.registration_message
+        query = self.aggregation_strategy.get_location_and_service_query()
+
+        # operation
+        with patch.object(self.search_behaviour.context.logger, "log") as mock_logger:
+            self.search_behaviour.act()
+
+        # after
+        self.assert_quantity_in_outbox(2)
+
+        # _retry_failed_registration
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=self.get_message_from_outbox(),
+            message_type=type(self.registration_message),
+            performative=self.registration_message.performative,
+            to=self.registration_message.to,
+            sender=str(self.skill.skill_context.skill_id),
+            service_description=self.registration_message.service_description,
+        )
+        assert has_attributes, error_str
+
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"Retrying registration on SOEF. Retry {self.search_behaviour._nb_retries} out of {self.search_behaviour._max_soef_registration_retries}.",
+        )
+        assert self.search_behaviour.failed_registration_msg is None
+
+        # act
+        msg = cast(OefSearchMessage, self.get_message_from_outbox())
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=OefSearchMessage,
+            performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+            query=query,
+        )
+        assert has_attributes, error_str
+
+    def test_act_iii(self):
+        """Test the act method of the service_registration behaviour where failed_registration_msg is NOT None and max retries is reached."""
+        # setup
+        self.search_behaviour.failed_registration_msg = self.registration_message
+        self.search_behaviour._max_soef_registration_retries = 2
+        self.search_behaviour._nb_retries = 2
+
+        query = self.aggregation_strategy.get_location_and_service_query()
+
+        # operation
+        self.search_behaviour.act()
+
+        # after
+        self.assert_quantity_in_outbox(1)
+        msg = cast(OefSearchMessage, self.get_message_from_outbox())
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=msg,
+            message_type=OefSearchMessage,
+            performative=OefSearchMessage.Performative.SEARCH_SERVICES,
+            query=query,
+        )
+        assert has_attributes, error_str
+
+        assert self.skill.skill_context.is_active is False
+
+    def test_register_service_personality_classification(self):
+        """Test the register_service_personality_classification method of the service_registration behaviour."""
+        # setup
+        mocked_description_1 = "some_description_1"
+        mocked_description_2 = "some_description_2"
+        mocked_description_3 = "some_description_3"
+        descriptions = [
+            mocked_description_1,
+            mocked_description_2,
+            mocked_description_3,
+        ]
+
+        # operation
+        with patch.object(
+            self.aggregation_strategy,
+            "get_register_service_description",
+            return_value=mocked_description_1,
+        ) as mock_reg_service:
+            with patch.object(
+                self.aggregation_strategy,
+                "get_register_personality_description",
+                return_value=mocked_description_2,
+            ) as mock_reg_personalities:
+                with patch.object(
+                    self.aggregation_strategy,
+                    "get_register_classification_description",
+                    return_value=mocked_description_3,
+                ) as mock_reg_classification:
+                    with patch.object(
+                        self.search_behaviour.context.logger, "log"
+                    ) as mock_logger:
+                        self.search_behaviour.register_service_personality_classification()
+
+        # after
+        self.assert_quantity_in_outbox(3)
+
+        mock_reg_service.assert_called_once()
+        mock_reg_personalities.assert_called_once()
+        mock_reg_classification.assert_called_once()
+
+        for description in descriptions:
+            message = self.get_message_from_outbox()
+            has_attributes, error_str = self.message_has_attributes(
+                actual_message=message,
+                message_type=OefSearchMessage,
+                performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+                to=self.skill.skill_context.search_service_address,
+                sender=str(self.skill.skill_context.skill_id),
+                service_description=description,
+            )
+            assert has_attributes, error_str
+        mock_logger.assert_any_call(logging.INFO, "registering service on SOEF.")
 
     def test_teardown(self):
         """Test the teardown method of the search behaviour."""

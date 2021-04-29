@@ -35,6 +35,18 @@ then
 fi
 echo MINUTES_TILL_START $MINUTES_TILL_START
 
+if [ -z  "$SEARCH_INTERVAL" ];
+then
+	SEARCH_INTERVAL=300
+fi
+echo SEARCH_INTERVAL $SEARCH_INTERVAL
+
+if [ -z  "$CLEANUP_INTERVAL" ];
+then
+	CLEANUP_INTERVAL=600
+fi
+echo CLEANUP_INTERVAL $CLEANUP_INTERVAL
+
 if [ -z  "$LOG_LEVEL" ];
 then
 	LOG_LEVEL=INFO
@@ -79,7 +91,7 @@ function set_agent(){
 	json=$(printf '{"log_file": "%s", "delegate_uri": null, "entry_peers": ["%s"], "local_uri": "127.0.0.1:%s", "public_uri": null}' "$agent_data_dir/libp2p_node.log" "$PEER" "$port")
 	aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config "$json"
 	log_file=$agent_data_dir/$name.log
-	json=$(printf '{"version": 1, "handlers": {"console": {"class": "logging.StreamHandler", "level": "%s"}, "file": {"class": "logging.FileHandler", "filename": "%s", "mode": "w", "level": "%s"}}, "loggers": {"aea": {"level": "%s", "handlers": ["console", "file"]}}}' "$LOG_LEVEL" "$log_file" "$LOG_LEVEL" "$LOG_LEVEL")
+	json=$(printf '{"version": 1, "formatters": {"standard": {"format": '%(asctime)s [%(levelname)s] %(name)s: %(message)s'}} "handlers": {"console": {"class": "logging.StreamHandler", "formatter": "standard", "level": "%s"}, "file": {"class": "logging.FileHandler", "filename": "%s", "mode": "w", "level": "%s"}}, "loggers": {"aea": {"level": "%s", "handlers": ["console", "file"]}}}' "$LOG_LEVEL" "$log_file" "$LOG_LEVEL" "$LOG_LEVEL")
 	aea config set --type dict agent.logging_config "$json"
 	aea config set vendor.fetchai.connections.soef.config.token_storage_path $agent_data_dir/soef_token.txt
 	aea config set agent.skill_exception_policy just_log
@@ -101,6 +113,8 @@ function set_participant(){
 	# cause set agent name is not allowed!
 	sed -e "s/tac_participant_template/$agent_name/" -i ./aea-config.yaml
 	set_agent $agent_name $(expr $BASE_PORT + $agent_id)
+	aea config set vendor.fetchai.skills.tac_negotiation.behaviours.clean_up.args.tick_interval $CLEANUP_INTERVAL
+	aea config set vendor.fetchai.skills.tac_negotiation.behaviours.tac_negotiation.args.search_interval $SEARCH_INTERVAL
 	aea config set vendor.fetchai.skills.tac_participation.models.game.args.search_query.search_value $TAC_NAME
 	cd ..
 }
