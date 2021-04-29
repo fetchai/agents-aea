@@ -73,6 +73,7 @@ aea add --local skill fetchai/simple_oracle
 ``` bash
 aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.ledger_id fetchai
 aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.update_function update_oracle_value
+aea config set --type bool vendor.fetchai.skills.simple_oracle.models.strategy.args.aggregation true
 ```
 ```
 aea generate-wealth fetchai
