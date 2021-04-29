@@ -162,7 +162,7 @@ class TacBehaviour(Behaviour):
         """
         game = cast(Game, self.context.game)
         description = game.get_location_description()
-        self._register(description, "registering agent's location on the SOEF.")
+        self._register(description, "registering agent on SOEF.")
 
     def register_genus(self) -> None:
         """

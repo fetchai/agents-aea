@@ -38,6 +38,7 @@ from aea.test_tools.test_skill import BaseSkillTestCase
 from packages.fetchai.protocols.tac.message import TacMessage
 from packages.fetchai.skills.tac_control.game import (
     AGENT_LOCATION_MODEL,
+    AGENT_PERSONALITY_MODEL,
     AGENT_REMOVE_SERVICE_MODEL,
     AGENT_SET_SERVICE_MODEL,
     AgentState,
@@ -1356,6 +1357,24 @@ class TestGame(BaseSkillTestCase):
         assert description.data_model is AGENT_SET_SERVICE_MODEL
         assert description.values.get("key", "") == "tac"
         assert description.values.get("value", "") == "v1"
+
+    def test_get_register_personality_description(self):
+        """Test the get_register_personality_description method of the GenericStrategy class."""
+        description = self.game.get_register_personality_description()
+
+        assert type(description) == Description
+        assert description.data_model is AGENT_PERSONALITY_MODEL
+        assert description.values.get("piece", "") == "genus"
+        assert description.values.get("value", "") == "service"
+
+    def test_get_register_classification_description(self):
+        """Test the get_register_classification_description method of the GenericStrategy class."""
+        description = self.game.get_register_classification_description()
+
+        assert type(description) == Description
+        assert description.data_model is AGENT_PERSONALITY_MODEL
+        assert description.values.get("piece", "") == "classification"
+        assert description.values.get("value", "") == "tac.controller"
 
     def test_get_unregister_tac_description(self):
         """Test the get_unregister_tac_description method of the Game class."""

@@ -166,7 +166,7 @@ class AliceBehaviour(TickerBehaviour):
         """
         strategy = cast(AliceStrategy, self.context.strategy)
         description = strategy.get_location_description()
-        self._register(description, "registering agent's location on the SOEF.")
+        self._register(description, "registering agent on SOEF.")
 
     def register_service(self) -> None:
         """

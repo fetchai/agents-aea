@@ -44,6 +44,7 @@ from packages.fetchai.skills.tac_negotiation.helpers import (
 )
 from packages.fetchai.skills.tac_negotiation.strategy import (
     AGENT_LOCATION_MODEL,
+    AGENT_PERSONALITY_MODEL,
     AGENT_REMOVE_SERVICE_MODEL,
     AGENT_SET_SERVICE_MODEL,
     CONTRACT_ID,
@@ -171,6 +172,24 @@ class TestStrategy(BaseSkillTestCase):
         assert description.data_model is AGENT_SET_SERVICE_MODEL
         assert description.values.get("key", "") == self.service_key
         assert description.values.get("value", "") == self.register_as
+
+    def test_get_register_personality_description(self):
+        """Test the get_register_personality_description method of the GenericStrategy class."""
+        description = self.strategy.get_register_personality_description()
+
+        assert type(description) == Description
+        assert description.data_model is AGENT_PERSONALITY_MODEL
+        assert description.values.get("piece", "") == "genus"
+        assert description.values.get("value", "") == "data"
+
+    def test_get_register_classification_description(self):
+        """Test the get_register_classification_description method of the GenericStrategy class."""
+        description = self.strategy.get_register_classification_description()
+
+        assert type(description) == Description
+        assert description.data_model is AGENT_PERSONALITY_MODEL
+        assert description.values.get("piece", "") == "classification"
+        assert description.values.get("value", "") == "tac.trader"
 
     def test_get_unregister_service_description(self):
         """Test the get_unregister_service_description method of the GenericStrategy class."""
