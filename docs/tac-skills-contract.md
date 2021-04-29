@@ -152,14 +152,14 @@ aea add-key ethereum ethereum_private_key.txt
 
 In a separate terminal, in the root directory, fetch at least two participants:
 ``` bash
-aea fetch fetchai/tac_participant:0.27.0 --alias tac_participant_one
+aea fetch fetchai/tac_participant_contract:0.17.0 --alias tac_participant_one
 cd tac_participant_one
 aea install
 aea build
 aea generate-key ethereum
 aea add-key ethereum ethereum_private_key.txt
 cd ..
-aea fetch fetchai/tac_participant:0.27.0 --alias tac_participant_two
+aea fetch fetchai/tac_participant_contract:0.17.0 --alias tac_participant_two
 cd tac_participant_two
 aea install
 aea build
@@ -206,7 +206,7 @@ aea config set --type dict agent.decision_maker_handler \
   "file_path": null
 }'
 aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
-'[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
+'''[{"identifier": "acn", "ledger_id": "ethereum", "message_format": "'{public_key}'", "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'''
 aea install
 aea build
 aea generate-key ethereum
@@ -243,7 +243,7 @@ aea config set --type dict agent.decision_maker_handler \
   "file_path": null
 }'
 aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
-'[{"identifier": "acn", "ledger_id": "ethereum", "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'
+'''[{"identifier": "acn", "ledger_id": "ethereum", "message_format": "'{public_key}'", "not_after": "2022-01-01", "not_before": "2021-01-01", "public_key": "fetchai", "save_path": ".certs/conn_cert.txt"}]'''
 aea install
 aea build
 aea generate-key ethereum
