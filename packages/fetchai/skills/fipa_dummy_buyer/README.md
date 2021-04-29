@@ -2,4 +2,4 @@
 
 ## Description
 
-A sample skill to interct with simple fipa seller.
+A sample skill to interact with a simple seller using the `fetchai/fipa` protocol.
