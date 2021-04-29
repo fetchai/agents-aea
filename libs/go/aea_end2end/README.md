@@ -2,23 +2,23 @@
 
 ## Run example
 
-ensure all dependencies are installed: python, aea, golang
+Ensure all dependencies are installed: python, aea and golang.
 
-run to launch buyer agent
+To launch the buyer agent run:
 `./run_buyer.sh`
 
-run in another terminal to launch seller agent 
+In another terminal, to launch the seller agent run:
 `./run_seller.sh`
 
-after a while both agents get connected to p2p fetchai network,
-perform fipa message exchange and show `FIPA INTERACTION COMPLETE` in output logs
+After a while both agents get connected to the ACN, perform a `fetchai/fipa` message exchange and show `FIPA INTERACTION COMPLETE` in output logs.
 
-terminate every agent with `ctrl+c`
+Terminate every agent with `ctrl+c`.
 
 ## Generate protocol
+
+To generate a protocol, use the following approach:
 
 ``` bash
 aea create temp_agent
 cd temp_agent
 aea generate protocol -l PATH_TO_SPEC
-```
