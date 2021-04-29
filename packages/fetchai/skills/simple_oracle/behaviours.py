@@ -108,7 +108,7 @@ class SimpleOracleBehaviour(TickerBehaviour):
             return
 
         # Check for oracle from data collecting skill
-        if strategy.aggregation: # pragma: nocover
+        if strategy.aggregation:  # pragma: nocover
             oracle_data = self.context.shared_state.get("aggregation", None)
         else:
             oracle_data = self.context.shared_state.get("observation", None)

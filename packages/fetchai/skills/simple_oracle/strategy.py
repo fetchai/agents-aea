@@ -61,7 +61,6 @@ class Strategy(Model):
         self.is_behaviour_active = True
         self._is_contract_deployed = self._contract_address is not None
 
-
     @property
     def ledger_id(self) -> str:
         """Get the ledger id."""
@@ -101,6 +100,11 @@ class Strategy(Model):
     def contract_address_file(self) -> str:
         """Get the filename where the oracle contract is to be stored."""
         return self._contract_address_file
+
+    @property
+    def aggregation(self) -> str: # pragma: nocover
+        """Get whether the oracle value is aggregated."""
+        return self._aggregation
 
     @property
     def contract_address(self) -> str:

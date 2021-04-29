@@ -114,15 +114,18 @@ class TestAggregationHandler(BaseSkillTestCase):
             logging.INFO, f"received observation from sender={sender[-5:]}"
         )
 
-        expected_aggregation = {"some_quantity": {"value": aggregate(values), "decimals": 0}}
+        expected_aggregation = {
+            "some_quantity": {"value": aggregate(values), "decimals": 0}
+        }
 
         obs = get_observation_from_message(incoming_message)
         assert len(self.aggregation_strategy._observations) == 2
         assert self.aggregation_strategy._observations[sender] == obs
         assert self.aggregation_strategy._aggregation == aggregate(values)
-        assert self.aggregation_handler.context.shared_state[
-            "aggregation"
-        ] == expected_aggregation
+        assert (
+            self.aggregation_handler.context.shared_state["aggregation"]
+            == expected_aggregation
+        )
 
         mock_logger.assert_any_call(logging.INFO, f"Observations: {values}")
         mock_logger.assert_any_call(

@@ -70,7 +70,7 @@ class AggregationStrategy(Model):
         self._round = 0
         self._peers = set()  # type: Set[Address]
         self._observations = dict()  # type: Dict[Address, Dict[str, Any]]
-        self._aggregation = None  # type: Optional[Dict[str, Any]]
+        self._aggregation = None  # type: Optional[Any]
 
         self._quantity_name = kwargs.pop("quantity_name", DEFAULT_QUANTITY_NAME)
         self._service_id = kwargs.pop("service_id", DEFAULT_SERVICE_ID)
