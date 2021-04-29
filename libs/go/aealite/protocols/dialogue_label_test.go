@@ -22,8 +22,9 @@ package protocols
 
 import (
 	"encoding/json"
-	"gotest.tools/assert"
 	"testing"
+
+	"gotest.tools/assert"
 )
 
 const (
