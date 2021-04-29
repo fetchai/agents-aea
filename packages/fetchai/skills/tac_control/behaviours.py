@@ -134,6 +134,26 @@ class TacBehaviour(Behaviour):
 
             self.failed_registration_msg = None
 
+    def _register(self, description: Description, logger_msg: str) -> None:
+        """
+        Register something on the SOEF.
+
+        :param description: the description of what is being registered
+        :param logger_msg: the logger message to print after the registration
+
+        :return: None
+        """
+        oef_search_dialogues = cast(
+            OefSearchDialogues, self.context.oef_search_dialogues
+        )
+        oef_search_msg, _ = oef_search_dialogues.create(
+            counterparty=self.context.search_service_address,
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            service_description=description,
+        )
+        self.context.outbox.put_message(message=oef_search_msg)
+        self.context.logger.info(logger_msg)
+
     def _register_agent(self) -> None:
         """
         Register the agent's location.
@@ -142,35 +162,41 @@ class TacBehaviour(Behaviour):
         """
         game = cast(Game, self.context.game)
         description = game.get_location_description()
-        oef_search_dialogues = cast(
-            OefSearchDialogues, self.context.oef_search_dialogues
+        self._register(description, "registering agent's location on the SOEF.")
+
+    def register_genus(self) -> None:
+        """
+        Register the agent's personality genus.
+
+        :return: None
+        """
+        game = cast(Game, self.context.game)
+        description = game.get_register_personality_description()
+        self._register(
+            description, "registering agent's personality genus on the SOEF."
         )
-        oef_search_msg, _ = oef_search_dialogues.create(
-            counterparty=self.context.search_service_address,
-            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            service_description=description,
+
+    def register_classification(self) -> None:
+        """
+        Register the agent's personality classification.
+
+        :return: None
+        """
+        game = cast(Game, self.context.game)
+        description = game.get_register_classification_description()
+        self._register(
+            description, "registering agent's personality classification on the SOEF."
         )
-        self.context.outbox.put_message(message=oef_search_msg)
-        self.context.logger.info("registering agent on SOEF.")
 
     def _register_tac(self) -> None:
         """
-        Register on the OEF as a TAC controller agent.
+        Register the agent's TAC controller service on the SOEF.
 
-        :return: None.
+        :return: None
         """
         game = cast(Game, self.context.game)
         description = game.get_register_tac_description()
-        oef_search_dialogues = cast(
-            OefSearchDialogues, self.context.oef_search_dialogues
-        )
-        oef_search_msg, _ = oef_search_dialogues.create(
-            counterparty=self.context.search_service_address,
-            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            service_description=description,
-        )
-        self.context.outbox.put_message(message=oef_search_msg)
-        self.context.logger.info("registering TAC data model on SOEF.")
+        self._register(description, "registering TAC data model on SOEF.")
 
     def _unregister_tac(self) -> None:
         """

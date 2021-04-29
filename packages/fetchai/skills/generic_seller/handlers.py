@@ -539,11 +539,11 @@ class GenericOefSearchHandler(Handler):
                 and description.values["key"] == "classification"
             ):
                 self.context.logger.info(
-                    "agent's service, genus and classification are successfully registered on the SOEF."
+                    "the agent, with its genus and classification, and its service are successfully registered on the SOEF."
                 )
             else:
                 self.context.logger.warning(
-                    f"received soef SUCCESS message to the following unexpected message: {target_message}"
+                    f"received soef SUCCESS message as a reply to the following unexpected message: {target_message}"
                 )
 
     def _handle_error(

@@ -9,10 +9,10 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: Qmc88RFakLqDTqT42YGJDCDrH22tW2dkCBAs8wLKMGt5TV
   __init__.py: QmdNLGHkVT4PwHz3NcaSJDpCi7JLMsPZiya7zPhhJTX1jX
-  behaviours.py: QmYWDLBa5Yc2ZG3VNUEfsPpDXt87gKT7kSy3gCDe4e6F6H
+  behaviours.py: QmbbAw1tzWbjhc8LQ6r22sMpgz8pzDNFSvSQbJN3i44okg
   dialogues.py: QmS74KVR3EHXSTFa7P1dcqbJsFjNNo4gPzekhKXfKbD3Wj
-  handlers.py: QmcrMY7gpC4bNWK3fe3uatyfZEaH7MxWmELJ23i1EAq8kk
-  strategy.py: QmPumiGj27yCP3Jjkz9ndYgjxqvGsZbHqBynJ8syZ4GPvH
+  handlers.py: QmShS768Kingw8mZ8XtPAFj2Xb8d4NRCoGZnWEsTwbsUer
+  strategy.py: QmWrmq5x7JyfgTy9CRHRzoCnAvZqS7g2dCxc2e2oTmFBFM
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/http_client:0.22.0
@@ -52,9 +52,15 @@ models:
     args:
       admin_host: 127.0.0.1
       admin_port: 8031
+      classification:
+        piece: classification
+        value: alice
       location:
         latitude: 51.5194
         longitude: 0.127
+      personality_data:
+        piece: genus
+        value: data
       service_data:
         key: intro_service
         value: intro_alice

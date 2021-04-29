@@ -9,11 +9,11 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmdpJypf1uoDBW54DC2req7bst1Hw548piYmMKUaPPVHeB
   __init__.py: QmTRmHgiGa89g5t3n8WBtEEBirnRUt3rsJAeDWin8nZtaB
-  behaviours.py: QmXqrGJcmYuH7FUibi4FPfxDNDgWdiS8taGf7GVaTipHRP
+  behaviours.py: QmR1hQckfuo14h63bweyxBA557e8D3eTyAaA9u7k5im73V
   dialogues.py: Qmes8sm5yw7pYsKbGbfZNvihJnmtqDdzbdWmrZdx8p8P18
-  handlers.py: QmT8d97s6Ne1MphkuTBbM49wLoaEdSHiQn88TvsCSNYywB
+  handlers.py: QmfRVWvcte4iCfTG23FDBE6Aoy3Vdac4LJR12un1Yqr37J
   helpers.py: QmTJbGL8V6CLhbVhLekqKkHbu7cJMfBcv8DtWLSpkKP5tk
-  strategy.py: QmVmmo1n1yKtCm54MkVhvQeHLjsANAG3Wdy7UQuKbgDpRr
+  strategy.py: QmaStW29GxiwYmsF6Yuvh8KLAiCo5uFFV9kZfgMJ3fadz3
   transactions.py: QmPZoTBt1otvnkdMDwWdPExLKA7kk6fyUS1prVZqipVUVM
 fingerprint_ignore_patterns: []
 connections:
@@ -76,10 +76,16 @@ models:
     class_name: SigningDialogues
   strategy:
     args:
+      classification:
+        piece: classification
+        value: tac.trader
       is_contract_tx: false
       location:
         latitude: 51.5194
         longitude: 0.127
+      personality_data:
+        piece: genus
+        value: data
       register_as: both
       search_for: both
       search_radius: 5.0

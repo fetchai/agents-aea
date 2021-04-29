@@ -29,6 +29,7 @@ from aea.decision_maker.gop import OwnershipState, Preferences
 from aea.exceptions import enforce
 from aea.helpers.search.generic import (
     AGENT_LOCATION_MODEL,
+    AGENT_PERSONALITY_MODEL,
     AGENT_REMOVE_SERVICE_MODEL,
     AGENT_SET_SERVICE_MODEL,
 )
@@ -59,6 +60,8 @@ DEFAULT_SEARCH_QUERY = {
     "search_value": "generic_service",
     "constraint_type": "==",
 }
+DEFAULT_PERSONALITY_DATA = {"piece": "genus", "value": "data"}
+DEFAULT_CLASSIFICATION = {"piece": "classification", "value": "tac.trader"}
 DEFAULT_SEARCH_RADIUS = 5.0
 
 
@@ -99,6 +102,22 @@ class Strategy(Model):
                 latitude=location["latitude"], longitude=location["longitude"]
             )
         }
+        self._set_personality_data = kwargs.pop(
+            "personality_data", DEFAULT_PERSONALITY_DATA
+        )
+        enforce(
+            len(self._set_personality_data) == 2
+            and "piece" in self._set_personality_data
+            and "value" in self._set_personality_data,
+            "personality_data must contain keys `key` and `value`",
+        )
+        self._set_classification = kwargs.pop("classification", DEFAULT_CLASSIFICATION)
+        enforce(
+            len(self._set_classification) == 2
+            and "piece" in self._set_classification
+            and "value" in self._set_classification,
+            "classification must contain keys `key` and `value`",
+        )
         service_key = kwargs.pop("service_key", DEFAULT_SERVICE_KEY)
         self._set_service_data = {"key": service_key, "value": self._register_as.value}
         self._remove_service_data = {"key": service_key}
@@ -188,6 +207,28 @@ class Strategy(Model):
         """
         description = Description(
             self._set_service_data, data_model=AGENT_SET_SERVICE_MODEL,
+        )
+        return description
+
+    def get_register_personality_description(self) -> Description:
+        """
+        Get the register personality description.
+
+        :return: a description of the personality
+        """
+        description = Description(
+            self._set_personality_data, data_model=AGENT_PERSONALITY_MODEL,
+        )
+        return description
+
+    def get_register_classification_description(self) -> Description:
+        """
+        Get the register classification description.
+
+        :return: a description of the classification
+        """
+        description = Description(
+            self._set_classification, data_model=AGENT_PERSONALITY_MODEL,
         )
         return description
 

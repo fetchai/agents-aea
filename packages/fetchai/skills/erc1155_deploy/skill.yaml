@@ -9,10 +9,10 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmNg45JuqfVzDmvgpWLeaR861LSEvf9pishDKSPihtQnLE
   __init__.py: QmVJk21DRyL2GDUBjGnZHfiRuWXMieyBX3axr754G334GA
-  behaviours.py: QmdLoNFmcbE21XYRGMXaFkw71kJ6t3H3qaNTtAWVrYqhp6
+  behaviours.py: QmcNUkQu6b46mirV7PNohr3uCdFAPpEvuHVxENwDx2nV6b
   dialogues.py: QmU1T8Ag8kTTqhL2vPsMBd5eb6siZMkyGsTHsVHGBbLktP
-  handlers.py: QmQuG2uqj8UrF6JueMA9WtrRma2D8dHKNuYwK1zmevxbed
-  strategy.py: QmUDturpVPqMf6FqkTcd7byE61Vc9dCsdbecpmPHrsWqKM
+  handlers.py: QmNWEuwWi69iaWbaKqVreQwyfRa8Ygxj1PPXgnDya63QnU
+  strategy.py: QmRDcYs2XBT4TcrhMi81Vhg5oEQExQzkdz3dU2vmZwsRCs
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/ledger:0.18.0
@@ -69,6 +69,9 @@ models:
     class_name: SigningDialogues
   strategy:
     args:
+      classification:
+        piece: classification
+        value: seller
       from_supply: 10
       location:
         latitude: 51.5194
@@ -85,6 +88,9 @@ models:
       - 100
       - 100
       nb_tokens: 10
+      personality_data:
+        piece: genus
+        value: data
       service_data:
         key: seller_service
         value: erc1155_contract
