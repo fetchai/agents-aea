@@ -44,7 +44,7 @@ def issue_certificates(click_context: click.Context, password: Optional[str]) ->
     """Issue certificates for connections that require them."""
     ctx = cast(Context, click_context.obj)
     agent_config_manager = AgentConfigManager.load(ctx.cwd)
-    issue_certificates_(ctx.cwd, agent_config_manager, password)
+    issue_certificates_(ctx.cwd, agent_config_manager, password=password)
 
 
 def issue_certificates_(
@@ -124,7 +124,9 @@ def _process_certificate(
             connection_private_key_path, path_prefix
         )
         connection_crypto = crypto_registry.make(
-            key_identifier, private_key_path=new_connection_private_key_path
+            key_identifier,
+            private_key_path=new_connection_private_key_path,
+            password=password,
         )
         public_key = connection_crypto.public_key
     else:

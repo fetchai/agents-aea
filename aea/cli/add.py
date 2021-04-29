@@ -47,6 +47,7 @@ from aea.configurations.base import (
     SkillConfig,
 )
 from aea.configurations.constants import CONNECTION, CONTRACT, PROTOCOL, SKILL
+from aea.exceptions import enforce
 
 
 @click.group()
@@ -56,8 +57,18 @@ from aea.configurations.constants import CONNECTION, CONTRACT, PROTOCOL, SKILL
 def add(click_context: click.Context, local: bool, remote: bool) -> None:
     """Add a package to the agent."""
     ctx = cast(Context, click_context.obj)
+    enforce(
+        not (local and remote), "'local' and 'remote' options are mutually exclusive."
+    )
+    if not local and not remote:
+        try:
+            ctx.registry_path
+        except ValueError as e:
+            click.echo(f"{e}\nTrying remote registry (`--remote`).")
+            remote = True
+    is_mixed = not local and not remote
     ctx.set_config("is_local", local and not remote)
-    ctx.set_config("is_mixed", not local and not remote)
+    ctx.set_config("is_mixed", is_mixed)
 
 
 @add.command()

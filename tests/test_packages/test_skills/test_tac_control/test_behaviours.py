@@ -70,6 +70,14 @@ class TestSkillBehaviour(BaseSkillTestCase):
         cls.agent_2_address = "agent_address_2"
         cls.agent_2_name = "agent_name_2"
 
+        cls.registration_message = OefSearchMessage(
+            dialogue_reference=("", ""),
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            service_description="some_service_description",
+        )
+        cls.registration_message.sender = str(cls._skill.skill_context.skill_id)
+        cls.registration_message.to = cls._skill.skill_context.search_service_address
+
     def test_init(self):
         """Test the __init__ method of the tac behaviour."""
         assert self.tac_behaviour._registered_description is None
@@ -108,6 +116,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
         """Test the act method of the tac behaviour where phase is pre_game and reg_start_time < now < start_time."""
         # setup
         self.game._phase = Phase.PRE_GAME
+        self.game.is_registered_agent = True
 
         mocked_now_time = self._time("00:03")
         datetime_mock = Mock(wraps=datetime.datetime)
@@ -566,6 +575,47 @@ class TestSkillBehaviour(BaseSkillTestCase):
 
         # phase is POST_GAME
         assert self.game.phase == Phase.POST_GAME
+        assert self.skill.skill_context.is_active is False
+
+    def test_act_v(self):
+        """Test the act method of the tac behaviour where failed_registration_msg is NOT None."""
+        # setup
+        self.tac_behaviour.failed_registration_msg = self.registration_message
+
+        with patch.object(self.tac_behaviour.context.logger, "log") as mock_logger:
+            self.tac_behaviour.act()
+
+        # after
+        self.assert_quantity_in_outbox(1)
+
+        # _retry_failed_registration
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=self.get_message_from_outbox(),
+            message_type=type(self.registration_message),
+            performative=self.registration_message.performative,
+            to=self.registration_message.to,
+            sender=str(self.skill.skill_context.skill_id),
+            service_description=self.registration_message.service_description,
+        )
+        assert has_attributes, error_str
+
+        mock_logger.assert_any_call(
+            logging.INFO,
+            f"Retrying registration on SOEF. Retry {self.tac_behaviour._nb_retries} out of {self.tac_behaviour._max_soef_registration_retries}.",
+        )
+        assert self.tac_behaviour.failed_registration_msg is None
+
+    def test_act_vi(self):
+        """Test the act method of the tac behaviour where failed_registration_msg is NOT None and max retries is reached."""
+        # setup
+        self.tac_behaviour.failed_registration_msg = self.registration_message
+        self.tac_behaviour._max_soef_registration_retries = 2
+        self.tac_behaviour._nb_retries = 2
+
+        self.tac_behaviour.act()
+
+        # after
+        self.assert_quantity_in_outbox(0)
         assert self.skill.skill_context.is_active is False
 
     def test_teardown(self):

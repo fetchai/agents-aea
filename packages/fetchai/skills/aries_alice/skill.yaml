@@ -9,9 +9,9 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: Qmc88RFakLqDTqT42YGJDCDrH22tW2dkCBAs8wLKMGt5TV
   __init__.py: QmdNLGHkVT4PwHz3NcaSJDpCi7JLMsPZiya7zPhhJTX1jX
-  behaviours.py: QmbRM4Gv555K4iNCNXzM7J8xjyHRZiMbWnDeo56TN2KZyx
+  behaviours.py: QmYWDLBa5Yc2ZG3VNUEfsPpDXt87gKT7kSy3gCDe4e6F6H
   dialogues.py: QmS74KVR3EHXSTFa7P1dcqbJsFjNNo4gPzekhKXfKbD3Wj
-  handlers.py: QmQ3hj2HwLDr9zjvFu68jmsgvGiPPjz3QSYSmQVrfhErDP
+  handlers.py: QmcrMY7gpC4bNWK3fe3uatyfZEaH7MxWmELJ23i1EAq8kk
   strategy.py: QmPumiGj27yCP3Jjkz9ndYgjxqvGsZbHqBynJ8syZ4GPvH
 fingerprint_ignore_patterns: []
 connections:
@@ -25,6 +25,7 @@ skills: []
 behaviours:
   alice:
     args:
+      max_soef_registration_retries: 5
       services_interval: 20
     class_name: AliceBehaviour
 handlers:

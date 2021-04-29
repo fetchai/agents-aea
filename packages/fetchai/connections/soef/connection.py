@@ -35,7 +35,7 @@ from uuid import uuid4
 
 from defusedxml import ElementTree  # pylint: disable=wrong-import-order
 
-from aea.common import Address
+from aea.common import Address, JSONLike
 from aea.configurations.base import PublicId
 from aea.connections.base import Connection, ConnectionStates
 from aea.exceptions import enforce
@@ -520,7 +520,7 @@ class SOEFChannel:
             )
             raise
 
-    async def register_service(  # pylint: disable=unused-argument
+    async def register_service(
         self, oef_message: OefSearchMessage, oef_search_dialogue: OefSearchDialogue
     ) -> None:
         """
@@ -543,7 +543,7 @@ class SOEFChannel:
 
         if data_model_name not in data_model_handlers:
             raise SOEFException.error(
-                f'Data model name: {data_model_name} is not supported. Valid models are: {", ".join(data_model_handlers.keys())}'
+                f'Data model name: {data_model_name} is not supported for `register`. Valid models for performative {oef_message.performative} are: {", ".join(data_model_handlers.keys())}'
             )
 
         handler = data_model_handlers[data_model_name]
@@ -552,8 +552,8 @@ class SOEFChannel:
     async def _ping_handler(
         self,
         service_description: Description,
-        oef_message: OefSearchMessage,  # pylint: disable=unused-argument
-        oef_search_dialogue: OefSearchDialogue,  # pylint: disable=unused-argument
+        oef_message: OefSearchMessage,
+        oef_search_dialogue: OefSearchDialogue,
     ) -> None:
         """
         Perform ping command.
@@ -564,6 +564,7 @@ class SOEFChannel:
         """
         self._check_data_model(service_description, ModelNames.PING.value)
         await self._ping_command()
+        await self._send_success_response(oef_message, oef_search_dialogue)
 
     async def _generic_command_handler(
         self,
@@ -591,18 +592,11 @@ class SOEFChannel:
 
         parsed_text = await self._generic_oef_command(command, params)
         content = ElementTree.tostring(parsed_text)
-        message = oef_search_dialogue.reply(
-            performative=OefSearchMessage.Performative.SUCCESS,
-            target_message=oef_message,
-            agents_info=AgentsInfo(
-                {
-                    "response": {"content": content},
-                    "command": service_description.values,
-                }
-            ),
-        )
-        envelope = Envelope(to=message.to, sender=message.sender, message=message,)
-        await self.in_queue.put(envelope)
+        agents_info: JSONLike = {
+            "response": {"content": content},
+            "command": service_description.values,
+        }
+        await self._send_success_response(oef_message, oef_search_dialogue, agents_info)
 
     async def _ping_command(self) -> None:
         """Perform ping on registered agent."""
@@ -632,8 +626,8 @@ class SOEFChannel:
     async def _set_service_key_handler(
         self,
         service_description: Description,
-        oef_message: OefSearchMessage,  # pylint: disable=unused-argument
-        oef_search_dialogue: OefSearchDialogue,  # pylint: disable=unused-argument
+        oef_message: OefSearchMessage,
+        oef_search_dialogue: OefSearchDialogue,
     ) -> None:
         """
         Set service key from service description.
@@ -650,6 +644,7 @@ class SOEFChannel:
             raise SOEFException.error("Bad values provided!")
 
         await self._set_service_key(key, value)
+        await self._send_success_response(oef_message, oef_search_dialogue)
 
     @staticmethod
     def _parse_soef_response(
@@ -734,8 +729,8 @@ class SOEFChannel:
     async def _remove_service_key_handler(
         self,
         service_description: Description,
-        oef_message: OefSearchMessage,  # pylint: disable=unused-argument
-        oef_search_dialogue: OefSearchDialogue,  # pylint: disable=unused-argument
+        oef_message: OefSearchMessage,
+        oef_search_dialogue: OefSearchDialogue,
     ) -> None:
         """
         Remove service key from service description.
@@ -750,6 +745,7 @@ class SOEFChannel:
             raise SOEFException.error("Bad values provided!")
 
         await self._remove_service_key(key)
+        await self._send_success_response(oef_message, oef_search_dialogue)
 
     async def _remove_service_key(self, key: str) -> None:
         """
@@ -763,8 +759,8 @@ class SOEFChannel:
     async def _register_location_handler(
         self,
         service_description: Description,
-        oef_message: OefSearchMessage,  # pylint: disable=unused-argument
-        oef_search_dialogue: OefSearchDialogue,  # pylint: disable=unused-argument
+        oef_message: OefSearchMessage,
+        oef_search_dialogue: OefSearchDialogue,
     ) -> None:
         """
         Register service with location.
@@ -796,6 +792,32 @@ class SOEFChannel:
             raise SOEFException.debug("Bad disclosure_accuracy.")  # pragma: nocover
 
         await self._set_location(agent_location, disclosure_accuracy)
+        await self._send_success_response(oef_message, oef_search_dialogue)
+
+    async def _send_success_response(
+        self,
+        oef_message: OefSearchMessage,
+        oef_search_dialogue: OefSearchDialogue,
+        agents_info: Optional[JSONLike] = None,
+    ) -> None:
+        """
+        Send success message in response to the given dialogue and message.
+
+        :param oef_search_dialogue: the oef search dialogue
+        :param oef_message: the oef message
+        :return None
+        """
+        if self.in_queue is None:
+            raise ValueError("Inqueue not set!")  # pragma: nocover
+        if agents_info is None:
+            agents_info = {}
+        message = oef_search_dialogue.reply(
+            performative=OefSearchMessage.Performative.SUCCESS,
+            target_message=oef_message,
+            agents_info=AgentsInfo(cast(Dict[str, Any], agents_info)),
+        )
+        envelope = Envelope(to=message.to, sender=message.sender, message=message)
+        await self.in_queue.put(envelope)
 
     @staticmethod
     def _check_data_model(
@@ -841,8 +863,8 @@ class SOEFChannel:
     async def _set_personality_piece_handler(
         self,
         service_description: Description,
-        oef_message: OefSearchMessage,  # pylint: disable=unused-argument
-        oef_search_dialogue: OefSearchDialogue,  # pylint: disable=unused-argument
+        oef_message: OefSearchMessage,
+        oef_search_dialogue: OefSearchDialogue,
     ) -> None:
         """
         Set the personality piece.
@@ -858,6 +880,7 @@ class SOEFChannel:
             raise SOEFException.debug("Personality piece bad values provided.")
 
         await self._set_personality_piece(piece, value)
+        await self._send_success_response(oef_message, oef_search_dialogue)
 
     async def _set_personality_piece(self, piece: str, value: str) -> None:
         """
@@ -954,7 +977,7 @@ class SOEFChannel:
         envelope = Envelope(to=message.to, sender=message.sender, message=message,)
         await self.in_queue.put(envelope)
 
-    async def unregister_service(  # pylint: disable=unused-argument
+    async def unregister_service(
         self, oef_message: OefSearchMessage, oef_search_dialogue: OefSearchDialogue
     ) -> None:
         """
@@ -974,19 +997,25 @@ class SOEFChannel:
 
         if data_model_name not in data_model_handlers:  # pragma: nocover
             raise SOEFException.error(
-                f'Data model name: {data_model_name} is not supported. Valid models are: {", ".join(data_model_handlers.keys())}'
+                f'Data model name: {data_model_name} is not supported for `unregister`. Valid models for performative {oef_message.performative} are: {", ".join(data_model_handlers.keys())}'
             )
 
         handler = data_model_handlers[data_model_name]
         if data_model_name == "location_agent":
-            await handler()
+            await handler(oef_message, oef_search_dialogue)
         else:
             await handler(service_description, oef_message, oef_search_dialogue)
 
-    async def _unregister_agent(self) -> None:  # pylint: disable=unused-argument
+    async def _unregister_agent(
+        self,
+        oef_message: Optional[OefSearchMessage] = None,
+        oef_search_dialogue: Optional[OefSearchDialogue] = None,
+    ) -> None:
         """
-        Unregister a service_name from the SOEF.
+        Unregister a location agent from the SOEF.
 
+        :param oef_message: OefSearchMessage
+        :param oef_search_dialogue: OefSearchDialogue
         :return: None
         """
         if not self._unregister_lock:
@@ -1014,6 +1043,8 @@ class SOEFChannel:
                 ):  # pragma: nocover
                     self.logger.debug(f"No Goodbye response. Response={response}")
                 self.unique_page_address = None
+        if oef_message is not None and oef_search_dialogue is not None:
+            await self._send_success_response(oef_message, oef_search_dialogue)
 
     async def _stop_periodic_ping_task(self) -> None:
         """Cancel periodic ping task."""
@@ -1052,7 +1083,12 @@ class SOEFChannel:
             self._find_around_me_processor()
         )
         # make sure we first unregister, in case of improper previous termination
-        await self._unregister_agent()
+        try:
+            await self._unregister_agent()
+        except SOEFException as e:  # pragma: nocover
+            if "<reason>Bad Request</reason><detail>agent lookup failed" not in str(e):
+                raise e
+            self.logger.debug("Unregister on SOEF failed. Agent not registered.")
 
     async def disconnect(self) -> None:
         """
@@ -1070,7 +1106,10 @@ class SOEFChannel:
                 self._find_around_me_processor_task.cancel()
             await self._find_around_me_processor_task
 
-        await self._unregister_agent()
+        try:
+            await self._unregister_agent()
+        except SOEFException as e:  # pragma: nocover
+            self.logger.exception(str(e))
 
         await self.in_queue.put(None)
         self._find_around_me_queue = None

@@ -28,6 +28,7 @@ from aea.skills.base import Handler
 from packages.fetchai.protocols.aggregation.message import AggregationMessage
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
+from packages.fetchai.skills.simple_aggregation.behaviours import SearchBehaviour
 from packages.fetchai.skills.simple_aggregation.dialogues import (
     AggregationDialogue,
     AggregationDialogues,
@@ -90,7 +91,9 @@ class AggregationHandler(Handler):
         ):
             self._handle_aggregation(aggregation_msg)
         else:
-            self._handle_invalid(aggregation_msg, aggregation_dialogue)
+            self._handle_invalid(
+                aggregation_msg, aggregation_dialogue
+            )  # pragma: nocover
 
     def _handle_unidentified_dialogue(
         self, aggregation_msg: AggregationMessage
@@ -164,7 +167,7 @@ class AggregationHandler(Handler):
             "cannot handle aggregation message of performative={} in dialogue={}.".format(
                 aggregation_msg.performative, aggregation_dialogue
             )
-        )
+        )  # pragma: nocover
 
     def teardown(self) -> None:
         """
@@ -203,7 +206,9 @@ class OefSearchHandler(Handler):
             return
 
         # handle message
-        if oef_search_msg.performative is OefSearchMessage.Performative.OEF_ERROR:
+        if oef_search_msg.performative == OefSearchMessage.Performative.SUCCESS:
+            self._handle_success(oef_search_msg, oef_search_dialogue)
+        elif oef_search_msg.performative == OefSearchMessage.Performative.OEF_ERROR:
             self._handle_error(oef_search_msg, oef_search_dialogue)
         elif oef_search_msg.performative is OefSearchMessage.Performative.SEARCH_RESULT:
             self._handle_search(oef_search_msg, oef_search_dialogue)
@@ -229,21 +234,66 @@ class OefSearchHandler(Handler):
             )
         )
 
-    def _handle_error(
-        self, oef_search_msg: OefSearchMessage, oef_search_dialogue: OefSearchDialogue
+    def _handle_success(
+        self,
+        oef_search_success_msg: OefSearchMessage,
+        oef_search_dialogue: OefSearchDialogue,
     ) -> None:
         """
         Handle an oef search message.
 
-        :param oef_search_msg: the oef search message
+        :param oef_search_success_msg: the oef search message
+        :param oef_search_dialogue: the dialogue
+        :return: None
+        """
+        self.context.logger.info(
+            "received oef_search success message={} in dialogue={}.".format(
+                oef_search_success_msg, oef_search_dialogue
+            )
+        )
+        target_message = cast(
+            OefSearchMessage,
+            oef_search_dialogue.get_message_by_id(oef_search_success_msg.target),
+        )
+        if (
+            target_message.performative
+            == OefSearchMessage.Performative.REGISTER_SERVICE
+        ):
+            if "location" in target_message.service_description.values:
+                registration_behaviour = cast(
+                    SearchBehaviour, self.context.behaviours.search,
+                )
+                registration_behaviour.register_service_personality_classification()
+
+    def _handle_error(
+        self,
+        oef_search_error_msg: OefSearchMessage,
+        oef_search_dialogue: OefSearchDialogue,
+    ) -> None:
+        """
+        Handle an oef search message.
+
+        :param oef_search_error_msg: the oef search message
         :param oef_search_dialogue: the dialogue
         :return: None
         """
         self.context.logger.info(
             "received oef_search error message={} in dialogue={}.".format(
-                oef_search_msg, oef_search_dialogue
+                oef_search_error_msg, oef_search_dialogue
             )
         )
+        target_message = cast(
+            OefSearchMessage,
+            oef_search_dialogue.get_message_by_id(oef_search_error_msg.target),
+        )
+        if (
+            target_message.performative
+            == OefSearchMessage.Performative.REGISTER_SERVICE
+        ):
+            registration_behaviour = cast(
+                SearchBehaviour, self.context.behaviours.search,
+            )
+            registration_behaviour.failed_registration_msg = target_message
 
     def _handle_search(
         self, oef_search_msg: OefSearchMessage, oef_search_dialogue: OefSearchDialogue

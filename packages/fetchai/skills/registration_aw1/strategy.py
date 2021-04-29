@@ -43,22 +43,6 @@ class Strategy(Model):
 
         :return: None
         """
-        ethereum_address = kwargs.pop("ethereum_address", DEFAULT_ETHEREUM_ADDRESS)
-        enforce(
-            ethereum_address != DEFAULT_ETHEREUM_ADDRESS
-            and LedgerApis.is_valid_address("ethereum", ethereum_address),
-            f"Not a valid ethereum_address: {ethereum_address}",
-        )
-        self._ethereum_address = ethereum_address
-        signature_of_fetchai_address = kwargs.pop(
-            "signature_of_fetchai_address", DEFAULT_SIGNATURE_OF_FETCHAI_ADDRESS
-        )
-        enforce(
-            signature_of_fetchai_address != DEFAULT_SIGNATURE_OF_FETCHAI_ADDRESS
-            and isinstance(signature_of_fetchai_address, str),
-            f"Not a valid signature_of_fetchai_address: {signature_of_fetchai_address}",
-        )
-        self._signature_of_fetchai_address = signature_of_fetchai_address
         developer_handle = kwargs.pop("developer_handle", DEFAULT_DEVELOPER_HANDLE)
         enforce(
             developer_handle != DEFAULT_DEVELOPER_HANDLE
@@ -66,15 +50,40 @@ class Strategy(Model):
             f"Not a valid developer_handle: {developer_handle}",
         )
         self._developer_handle = developer_handle
-        tweet = kwargs.pop("tweet", DEFAULT_TWEET)
-        enforce(isinstance(tweet, str), "Not a valid tweet link")
-        self._tweet = tweet
+        self._whitelist = kwargs.pop("whitelist", DEFAULT_WHITELIST)
         self._shared_storage_key = kwargs.pop(
             "shared_storage_key", DEFAULT_SHARED_STORAGE_KEY
         )
-        self._whitelist = kwargs.pop("whitelist", DEFAULT_WHITELIST)
+        self.announce_termination_key = kwargs.pop("announce_termination_key", None)
+
+        self.developer_handle_only = kwargs.pop("developer_handle_only", False)
+        if not self.developer_handle_only:
+            ethereum_address = kwargs.pop("ethereum_address", DEFAULT_ETHEREUM_ADDRESS)
+            enforce(
+                ethereum_address != DEFAULT_ETHEREUM_ADDRESS
+                and LedgerApis.is_valid_address("ethereum", ethereum_address),
+                f"Not a valid ethereum_address: {ethereum_address}",
+            )
+            self._ethereum_address = ethereum_address
+            signature_of_fetchai_address = kwargs.pop(
+                "signature_of_fetchai_address", DEFAULT_SIGNATURE_OF_FETCHAI_ADDRESS
+            )
+            enforce(
+                signature_of_fetchai_address != DEFAULT_SIGNATURE_OF_FETCHAI_ADDRESS
+                and isinstance(signature_of_fetchai_address, str),
+                f"Not a valid signature_of_fetchai_address: {signature_of_fetchai_address}",
+            )
+            self._signature_of_fetchai_address = signature_of_fetchai_address
+            tweet = kwargs.pop("tweet", DEFAULT_TWEET)
+            enforce(isinstance(tweet, str), "Not a valid tweet link")
+            self._tweet = tweet
+            self._is_ready_to_register = False
+        else:
+            self._is_ready_to_register = True
+            self._ethereum_address = "some_dummy_address"
+            self._signature_of_fetchai_address = None
+            self._tweet = None
         super().__init__(**kwargs)
-        self._is_ready_to_register = False
         self._is_registered = False
         self.is_registration_pending = False
         self.signature_of_ethereum_address: Optional[str] = None
@@ -128,13 +137,19 @@ class Strategy(Model):
 
         :return: a description of the agent's location
         """
-        info = {
-            "ethereum_address": self._ethereum_address,
-            "fetchai_address": self.context.agent_address,
-            "signature_of_ethereum_address": self.signature_of_ethereum_address,
-            "signature_of_fetchai_address": self._signature_of_fetchai_address,
-            "developer_handle": self._developer_handle,
-        }
-        if self._tweet != DEFAULT_TWEET:
-            info.update({"tweet": self._tweet})
+        if self.developer_handle_only:
+            info = {
+                "fetchai_address": self.context.agent_address,
+                "developer_handle": self._developer_handle,
+            }
+        else:
+            info = {
+                "ethereum_address": self._ethereum_address,
+                "fetchai_address": self.context.agent_address,
+                "signature_of_ethereum_address": self.signature_of_ethereum_address,
+                "signature_of_fetchai_address": self._signature_of_fetchai_address,
+                "developer_handle": self._developer_handle,
+            }
+            if self._tweet != DEFAULT_TWEET:
+                info.update({"tweet": self._tweet})
         return info

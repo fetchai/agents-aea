@@ -138,3 +138,4 @@ libs/go/libp2p_node/libp2p_node
 libs/go/libp2p_node/coverage.txt
 libs/go/libp2p_node/dht/dhtclient/agent_records_store*
 libs/go/libp2p_node/dht/dhtpeer/agent_records_store*
+!libs/go/aea_end2end/seller_agent

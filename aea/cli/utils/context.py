@@ -74,7 +74,7 @@ class Context:
         if registry_path.is_dir():
             return str(registry_path)
         raise ValueError(
-            f"Registry path not provided and `{DEFAULT_REGISTRY_NAME}` not found in current ({self.cwd}) and parent directory."
+            f"Registry path not provided and local registry `{DEFAULT_REGISTRY_NAME}` not found in current ({self.cwd}) and parent directory."
         )
 
     @property

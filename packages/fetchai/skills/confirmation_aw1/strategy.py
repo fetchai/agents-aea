@@ -37,6 +37,10 @@ REQUIRED_KEYS = [
     "signature_of_fetchai_address",
     "developer_handle",
 ]
+DEVELOPER_ONLY_REQUIRED_KEYS = [
+    "fetchai_address",
+    "developer_handle",
+]
 DEFAULT_TOKEN_DISPENSE_AMOUNT = 100000
 DEFAULT_TOKEN_DENOMINATION = "atestfet"  # nosec
 DEFAULT_CONTRACT_ADDRESS = "0x351bac612b50e87b46e4b10a282f632d41397de2"
@@ -64,6 +68,7 @@ class Strategy(Model):
         self._override_staking_check = kwargs.pop(
             "override_staking_check", DEFAULT_OVERRIDE
         )
+        self.developer_handle_only = kwargs.pop("developer_handle_only", False)
         self._awx_aeas: List[str] = kwargs.pop("awx_aeas", [])
         super().__init__(**kwargs)
         self._is_ready_to_register = False
@@ -120,14 +125,19 @@ class Strategy(Model):
             f"finalizing registration for address={address}, info={info}"
         )
         registration_db = cast(RegistrationDB, self.context.registration_db)
-        registration_db.set_registered(
-            address=address,
-            ethereum_address=info["ethereum_address"],
-            ethereum_signature=info["signature_of_ethereum_address"],
-            fetchai_signature=info["signature_of_fetchai_address"],
-            developer_handle=info["developer_handle"],
-            tweet=info.get("tweet", ""),
-        )
+        if self.developer_handle_only:
+            registration_db.set_registered_developer_only(
+                address=address, developer_handle=info["developer_handle"],
+            )
+        else:
+            registration_db.set_registered(
+                address=address,
+                ethereum_address=info["ethereum_address"],
+                ethereum_signature=info["signature_of_ethereum_address"],
+                fetchai_signature=info["signature_of_fetchai_address"],
+                developer_handle=info["developer_handle"],
+                tweet=info.get("tweet", ""),
+            )
 
     def unlock_registration(self, address: str) -> None:
         """Unlock this address for registration."""
@@ -142,6 +152,31 @@ class Strategy(Model):
         handle = registration_db.get_developer_handle(address)
         return handle
 
+    def _valid_registration_developer_only(
+        self, registration_info: Dict[str, str], sender: str
+    ) -> Tuple[bool, int, str]:
+        """
+        Check if the registration info is valid.
+
+        :param registration_info: the registration info
+        :param sender: the sender
+        :return: tuple of success, error code and error message
+        """
+        if not sender == registration_info["fetchai_address"]:
+            return (
+                False,
+                1,
+                "fetchai address of agent and registration info do not match!",
+            )
+        if registration_info["developer_handle"] in ("", None):
+            return (False, 1, "missing developer_handle!")
+        if sender in self._in_process_registrations:
+            return (False, 1, "registration in process for this address!")
+        registration_db = cast(RegistrationDB, self.context.registration_db)
+        if registration_db.is_registered(sender):
+            return (False, 1, "already registered!")
+        return (True, 0, "all good!")
+
     def valid_registration(
         self, registration_info: Dict[str, str], sender: str
     ) -> Tuple[bool, int, str]:
@@ -152,18 +187,33 @@ class Strategy(Model):
         :param sender: the sender
         :return: tuple of success, error code and error message
         """
+        if self.developer_handle_only:
+            if not all(
+                [key in registration_info for key in DEVELOPER_ONLY_REQUIRED_KEYS]
+            ):
+                return (
+                    False,
+                    1,
+                    f"missing keys in registration info, required: {DEVELOPER_ONLY_REQUIRED_KEYS}!",
+                )
+
+            is_valid, error_code, error_msg = self._valid_registration_developer_only(
+                registration_info, sender
+            )
+            return (is_valid, error_code, error_msg)
+
         if not all([key in registration_info for key in REQUIRED_KEYS]):
             return (
                 False,
                 1,
                 f"missing keys in registration info, required: {REQUIRED_KEYS}!",
             )
-        if not sender == registration_info["fetchai_address"]:
-            return (
-                False,
-                1,
-                "fetchai address of agent and registration info do not match!",
-            )
+        is_valid, error_code, error_msg = self._valid_registration_developer_only(
+            registration_info, sender
+        )
+        if not is_valid:
+            return (is_valid, error_code, error_msg)
+
         if not self._valid_signature(
             registration_info["ethereum_address"],
             registration_info["signature_of_fetchai_address"],
@@ -178,13 +228,6 @@ class Strategy(Model):
             "fetchai",
         ):
             return (False, 1, "ethereum address and signature do not match!")
-        if registration_info["developer_handle"] in ("", None):
-            return (False, 1, "missing developer_handle!")
-        if sender in self._in_process_registrations:
-            return (False, 1, "registration in process for this address!")
-        registration_db = cast(RegistrationDB, self.context.registration_db)
-        if registration_db.is_registered(sender):
-            return (False, 1, "already registered!")
         return (True, 0, "all good!")
 
     def _valid_signature(
