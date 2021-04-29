@@ -43,6 +43,47 @@ This diagram shows the communication between the various entities as data is suc
         deactivate Car_Park_AEA
         deactivate Blockchain
 </div>
+<br>
+
+# Option 1: AEA Manager approach
+
+Follow this approach when using the AEA Manager Desktop app. Otherwise, skip and follow the CLI approach below. 
+
+## Preparation instructions
+
+Install the <a href="https://aea-manager.fetch.ai" target="_blank">AEA Manager</a>.
+
+## Demo instructions
+
+The following steps assume you have launched the AEA Manager Desktop app.
+
+1. Add a new AEA called `car_detector` with public id `fetchai/car_detector:0.27.0`.
+
+2. Add another new AEA called `car_data_buyer` with public id `fetchai/car_data_buyer:0.28.0`.
+
+3. Copy the address from the `car_data_buyer` into your clip board. Then go to the <a href="https://explore-agent-land.fetch.ai" target="_blank">AgentLand block explorer</a> and request some test tokens via `Get Funds`.
+
+4. Run the `car_detector` AEA. Navigate to its logs and copy the multiaddress displayed.
+
+5. Navigate to the settings of the `car_data_buyer` and update as follows:
+``` bash
+{
+  "delegate_uri": "127.0.0.1:11001",
+  "entry_peers": ["REPLACE_WITH_MULTI_ADDRESS_HERE"],
+  "local_uri": "127.0.0.1:9001",
+  "log_file": "libp2p_node.log",
+  "public_uri": "127.0.0.1:9001"
+}
+```
+
+6. Run the `car_data_buyer`.
+
+In the AEA's logs should see the agent trading sucessfully.
+<br>
+
+# Option 2: CLI approach
+
+Follow this approach when using the `aea` CLI.
 
 ## Preparation instructions
 
