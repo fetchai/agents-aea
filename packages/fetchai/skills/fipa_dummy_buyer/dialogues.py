@@ -39,51 +39,7 @@ from packages.fetchai.protocols.fipa.dialogues import FipaDialogues as BaseFipaD
 from packages.fetchai.protocols.fipa.message import FipaMessage
 
 
-class FipaDialogue(BaseFipaDialogue):
-    """The dialogue class maintains state of a dialogue and manages it."""
-
-    __slots__ = (
-        "_terms",
-        "_associated_ledger_api_dialogue",
-    )
-
-    def __init__(
-        self,
-        dialogue_label: BaseDialogueLabel,
-        self_address: Address,
-        role: BaseDialogue.Role,
-        message_class: Type[FipaMessage] = FipaMessage,
-    ) -> None:
-        """
-        Initialize a dialogue.
-
-        :param dialogue_label: the identifier of the dialogue
-        :param self_address: the address of the entity for whom this dialogue is maintained
-        :param role: the role of the agent this dialogue is maintained for
-
-        :return: None
-        """
-        BaseFipaDialogue.__init__(
-            self,
-            dialogue_label=dialogue_label,
-            self_address=self_address,
-            role=role,
-            message_class=message_class,
-        )
-        self._terms = None  # type: Optional[Terms]
-
-    @property
-    def terms(self) -> Terms:
-        """Get terms."""
-        if self._terms is None:
-            raise AEAEnforceError("Terms not set!")
-        return self._terms
-
-    @terms.setter
-    def terms(self, terms: Terms) -> None:
-        """Set terms."""
-        enforce(self._terms is None, "Terms already set!")
-        self._terms = terms
+FipaDialogue = BaseFipaDialogue
 
 
 class FipaDialogues(Model, BaseFipaDialogues):
