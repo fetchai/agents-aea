@@ -8,10 +8,10 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmcvyraEedZd5PEnmbijkkcsDrQQKDVJxPDUXVrwP3Ni3J
   __init__.py: QmRArLavnCiajtodirFNK98rb4wv5C7xptxgijR8KJVNVP
-  behaviours.py: Qmes3sypsSxWdNnjtzhUKUkPVcqjomD1FkmBdWyUtP4ohk
+  behaviours.py: QmPPj6iR7adTtKY8m9FEYHs5TQXCxLYoRMnqJU9yyndWdh
   dialogues.py: QmVCJ1WoW4xEDrYs56VbTvMiKu1YST7T3DrTjhAyYoBFJa
   handlers.py: QmaGFBAK9LTEAYVGxFBS69AUej3wFtXPrf6EPi6kVVZQhs
-  strategy.py: QmYDqV5e5qujWsh8XFJicsqnoB6VyNhQBFeyrPcZpwPEBa
+  strategy.py: QmPfFF9Kn3kn7e3Qg9As4rWZtLAE6FTa2oarrEigZ6EV8v
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/oracle:0.9.0
@@ -65,6 +65,7 @@ models:
     class_name: SigningDialogues
   strategy:
     args:
+      aggregation: false
       contract_address: null
       contract_address_file: null
       default_gas_deploy: 10000000

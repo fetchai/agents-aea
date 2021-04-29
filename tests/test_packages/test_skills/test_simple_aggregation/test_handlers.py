@@ -80,6 +80,8 @@ class TestAggregationHandler(BaseSkillTestCase):
     def test_handle_observation(self):
         """Test the _handle_observation method of the aggregation handler to a valid observation."""
 
+        self.aggregation_strategy._quantity_name = "some_quantity"
+
         sender = "some_sender_address"
         sender_value = 100
         my_value = 50
@@ -110,13 +112,15 @@ class TestAggregationHandler(BaseSkillTestCase):
             logging.INFO, f"received observation from sender={sender[-5:]}"
         )
 
+        expected_aggregation = {"some_quantity": {"value": aggregate(values), "decimals": 0}}
+
         obs = get_observation_from_message(incoming_message)
         assert len(self.aggregation_strategy._observations) == 2
         assert self.aggregation_strategy._observations[sender] == obs
         assert self.aggregation_strategy._aggregation == aggregate(values)
         assert self.aggregation_handler.context.shared_state[
             "aggregation"
-        ] == aggregate(values)
+        ] == expected_aggregation
 
         mock_logger.assert_any_call(logging.INFO, f"Observations: {values}")
         mock_logger.assert_any_call(

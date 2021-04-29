@@ -11,7 +11,7 @@ fingerprint:
   behaviours.py: QmekLZAoSRBcu39eNxFMPJYaKo6DnwGNBRR64HGqfAALf7
   dialogues.py: QmaAnWJHSrAVqbswjGpJ9ukBA2QDdXxJAy33Gtabet3Bny
   handlers.py: QmZXG4YLsoYDWWPgZLhAusQsfFaNC6muHYdUiS5tW7MtoD
-  strategy.py: QmdTfLQsZK56cC57vPJCck8bAoPixBuV6sdihNNcdwokWj
+  strategy.py: QmRfTE4QoVeHUP1PM952psXToBvssj1mi3UKQUt394iNxL
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
@@ -48,6 +48,7 @@ models:
   strategy:
     args:
       aggregation_function: mean
+      decimals: 0
       location:
         latitude: 51.5194
         longitude: 0.127

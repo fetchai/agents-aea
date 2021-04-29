@@ -68,10 +68,10 @@ aea config set --type list vendor.fetchai.connections.p2p_libp2p.cert_requests \
 ```
 
 Match the agent index `i` to the `COIN_URL` and `JSON_PATH` below:
-- `i == 0: COIN_URL="https://api.coinbase.com/v2/prices/BTC-USD/buy" && JSON_PATH="data.amount"`
-- `i == 1: COIN_URL="https://api.coinpaprika.com/v1/tickers/btc-bitcoin" && JSON_PATH="quotes.USD.price"`
-- `i == 2: COIN_URL="https://api.cryptowat.ch/markets/kraken/btcusd/price" && JSON_PATH="result.price"`
-- `i == 3: COIN_URL="https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd" && JSON_PATH="bitcoin.usd"`
+- `agg0`: `COIN_URL="https://api.coinbase.com/v2/prices/BTC-USD/buy" && JSON_PATH="data.amount"`
+- `agg1`: `COIN_URL="https://api.coinpaprika.com/v1/tickers/btc-bitcoin" && JSON_PATH="quotes.USD.price"`
+- `agg2`: `COIN_URL="https://api.cryptowat.ch/markets/kraken/btcusd/price" && JSON_PATH="result.price"`
+- `agg3`: `COIN_URL="https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd" && JSON_PATH="bitcoin.usd"`
 
 Set the following configuration for the `advanced_data_request` skill:
 ``` bash
@@ -122,6 +122,30 @@ aea config set vendor.fetchai.connections.prometheus.config.port $((20000+i))
 aea config set vendor.fetchai.connections.http_server.config.port $((8000+i))
 ```
 
+### Oracle integration (optional)
+
+To publish the aggregated value to an oracle smart contract, add the ledger connection and simple oracle skill to one of the aggregators:
+``` bash
+aea add connection fetchai/ledger
+aea add --local skill fetchai/simple_oracle
+```
+
+Configure the simple oracle skill for the `fetchai` ledger:
+``` bash
+aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.ledger_id fetchai
+aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.update_function update_oracle_value
+```
+
+Generate some wealth to use for transactions on the testnet ledger:
+```
+aea generate-wealth fetchai
+```
+
+Set the name of the oracle value to match the value collected by the aggregators:
+``` bash
+aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.oracle_value_name price
+```
+
 ### Run the AEAs
 
 Run each of the aggregator AEAs in separate terminals: 
@@ -145,4 +169,3 @@ info: [agg_i] Observations:...
 ...
 info: [agg_i] Aggregation (mean):...
 ```
-

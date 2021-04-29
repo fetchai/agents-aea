@@ -67,6 +67,20 @@ aea config set vendor.fetchai.connections.prometheus.config.port $((20000+i))
 aea config set vendor.fetchai.connections.http_server.config.port $((8000+i))
 ```
 ``` bash
+aea add connection fetchai/ledger
+aea add --local skill fetchai/simple_oracle
+```
+``` bash
+aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.ledger_id fetchai
+aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.update_function update_oracle_value
+```
+```
+aea generate-wealth fetchai
+```
+``` bash
+aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.oracle_value_name price
+```
+``` bash
 aea run
 ```
 ``` bash

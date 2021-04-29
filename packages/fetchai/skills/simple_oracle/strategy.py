@@ -54,11 +54,13 @@ class Strategy(Model):
             "oracle_value_name", DEFAULT_ORACLE_VALUE_NAME
         )
         self._contract_address_file = kwargs.pop("contract_address_file", None)
+        self._aggregation = kwargs.pop("aggregation", False)
 
         super().__init__(**kwargs)
 
         self.is_behaviour_active = True
         self._is_contract_deployed = self._contract_address is not None
+
 
     @property
     def ledger_id(self) -> str:
