@@ -247,6 +247,8 @@ def test_get_batch_atomic_swap(ledger_api, crypto_api, erc1155_contract):
     ), "Error, found: {}".format(tx)
 
 
+@pytest.mark.integration
+@pytest.mark.ledger
 def test_full(update_default_ethereum_ledger_api, ganache):
     """Setup."""
     ledger_api = ledger_apis_registry.make(EthereumCrypto.identifier)
