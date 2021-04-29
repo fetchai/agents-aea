@@ -102,7 +102,7 @@ class Strategy(Model):
         return self._contract_address_file
 
     @property
-    def aggregation(self) -> str: # pragma: nocover
+    def aggregation(self) -> str:  # pragma: nocover
         """Get whether the oracle value is aggregated."""
         return self._aggregation
 

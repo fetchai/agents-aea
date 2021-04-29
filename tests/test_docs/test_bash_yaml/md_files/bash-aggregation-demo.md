@@ -67,8 +67,8 @@ aea config set vendor.fetchai.connections.prometheus.config.port $((20000+i))
 aea config set vendor.fetchai.connections.http_server.config.port $((8000+i))
 ```
 ``` bash
-aea add connection fetchai/ledger
-aea add skill fetchai/simple_oracle
+aea add connection fetchai/ledger:0.18.0
+aea add skill fetchai/simple_oracle:0.11.0
 ```
 ``` bash
 aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.ledger_id fetchai

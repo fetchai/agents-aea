@@ -126,8 +126,8 @@ aea config set vendor.fetchai.connections.http_server.config.port $((8000+i))
 
 To publish the aggregated value to an oracle smart contract, add the ledger connection and simple oracle skill to one of the aggregators:
 ``` bash
-aea add connection fetchai/ledger
-aea add skill fetchai/simple_oracle
+aea add connection fetchai/ledger:0.18.0
+aea add skill fetchai/simple_oracle:0.11.0
 ```
 
 Configure the simple oracle skill for the `fetchai` ledger:
