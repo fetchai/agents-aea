@@ -134,7 +134,6 @@ Configure the simple oracle skill for the `fetchai` ledger:
 ``` bash
 aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.ledger_id fetchai
 aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.update_function update_oracle_value
-aea config set bool vendor.fetchai.skills.simple_oracle.models.strategy.args.oracle_value_name price_mean
 ```
 
 Generate some wealth to use for transactions on the testnet ledger:
@@ -144,7 +143,7 @@ aea generate-wealth fetchai
 
 Set the name of the oracle value to match the value collected by the aggregators:
 ``` bash
-aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.oracle_value_name price
+aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.oracle_value_name price_mean
 ```
 
 ### Run the AEAs

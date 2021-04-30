@@ -73,13 +73,12 @@ aea add skill fetchai/simple_oracle:0.11.0
 ``` bash
 aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.ledger_id fetchai
 aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.update_function update_oracle_value
-aea config set bool vendor.fetchai.skills.simple_oracle.models.strategy.args.oracle_value_name price_mean
 ```
 ```
 aea generate-wealth fetchai
 ```
 ``` bash
-aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.oracle_value_name price
+aea config set vendor.fetchai.skills.simple_oracle.models.strategy.args.oracle_value_name price_mean
 ```
 ``` bash
 aea run
