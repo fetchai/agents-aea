@@ -792,7 +792,25 @@ class TestStrategy(BaseSkillTestCase):
             "signature": self.signature,
         }
 
-        actual_kwargs = self.strategy.kwargs_from_terms(terms, self.signature)
+        actual_kwargs = self.strategy.kwargs_from_terms(
+            terms, self.signature, is_from_terms_sender=True
+        )
+
+        assert actual_kwargs == expected_kwargs
+
+        expected_kwargs = {
+            "from_address": self.counterparty,
+            "to_address": self.sender,
+            "token_ids": [1, 2],
+            "from_supplies": [10, 0],
+            "to_supplies": [0, 5],
+            "value": 0,
+            "trade_nonce": 125,
+            "signature": self.signature,
+        }
+        actual_kwargs = self.strategy.kwargs_from_terms(
+            terms, self.signature, is_from_terms_sender=False
+        )
 
         assert actual_kwargs == expected_kwargs
 
