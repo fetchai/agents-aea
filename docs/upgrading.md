@@ -4,6 +4,12 @@ The primary tool for upgrading AEA projects is the `aea upgrade` command in the 
 
 Below we describe the additional manual steps required to upgrade between different versions:
 
+## `v1.0.0` to `v1.0.1`
+
+No backwards incompatible changes.
+
+We advise everyone to upgrade their `fetchai` packages to get the latest fixes.
+
 ## `v1.0.0rc2` to `v1.0.0`
 
 No backwards incompatible changes to component development.

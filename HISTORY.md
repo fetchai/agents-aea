@@ -1,5 +1,36 @@
 # Release History
 
+## 1.0.1 (2020-04-30)
+
+AEA:
+- Fixes wheels issue for Windows
+- Fixes password propagation for certificate issuance in `MultiAgentManager`
+- Improves error message when local registry not present
+
+AEALite:
+- Adds full protocol support
+- Adds end-to-end interaction example with AEA (based on `fetchai/fipa` protocol)
+- Multiple additional tests and test stability fixes
+
+Packages:
+- Fixes multiple bugs in `ERC1155` version of TAC
+- Refactors p2p connections for better separation of concerns and maintainability
+- Integrates aggregation with simple oracle skill
+- Ensures genus and classifications are used in all skills using SOEF
+- Extends SOEF connection to implement `oef_search` protocol fully
+- Handles SOEF failures in skills
+- Adds simple aggregation skills including tests and docs
+- Adds tests for registration AW agents
+- Adds tests for reconnection logic in p2p connections
+- Multiple additional tests and test stability fixes
+
+Docs:
+- Extends car park demo with usage guide for AEA manager
+- Multiple additional docs updates
+
+Examples:
+- Adds TAC deployment example 
+
 ## 1.0.0 (2020-03-30)
 
 - Improves contributor guide

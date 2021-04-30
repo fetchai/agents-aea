@@ -66,7 +66,7 @@ from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.soef")
 
-PUBLIC_ID = PublicId.from_str("fetchai/soef:0.22.0")
+PUBLIC_ID = PublicId.from_str("fetchai/soef:0.23.0")
 
 NOT_SPECIFIED = object()
 
@@ -338,9 +338,9 @@ class SOEFChannel:
                     oef_search_dialogue,
                     oef_error_operation=OefSearchMessage.OefErrorOperation.OTHER,
                 )
-            except Exception:  # pylint: disable=broad-except  # pragma: nocover
+            except Exception as e:  # pylint: disable=broad-except  # pragma: nocover
                 self.logger.exception(
-                    "Exception occurred in  _find_around_me_processor"
+                    f"Exception occurred in  _find_around_me_processor: {e}"
                 )
                 await self._send_error_response(
                     oef_message,
@@ -480,6 +480,7 @@ class SOEFChannel:
 
         try:
             if self.unique_page_address is None:  # pragma: nocover
+                # first time registration or we previously unregistered
                 await self._register_agent()
 
             handlers_and_errors = {
@@ -511,14 +512,17 @@ class SOEFChannel:
             )
         except (asyncio.CancelledError, ConcurrentCancelledError):  # pragma: nocover
             pass
-        except Exception:  # pylint: disable=broad-except # pragma: nocover
-            self.logger.exception("Exception during envelope processing")
+        except Exception as e:  # pylint: disable=broad-except # pragma: nocover
+            if "<reason>Forbidden</reason><detail>already in lobby" in str(e):
+                raise ValueError(
+                    "Could not register with SOEF. Agent address already registered from elsewhere."
+                )
+            self.logger.exception(f"Exception during envelope processing: {e}")
             await self._send_error_response(
                 oef_message,
                 oef_search_dialogue,
                 oef_error_operation=oef_error_operation,
             )
-            raise
 
     async def register_service(
         self, oef_message: OefSearchMessage, oef_search_dialogue: OefSearchDialogue
@@ -1043,6 +1047,7 @@ class SOEFChannel:
                 ):  # pragma: nocover
                     self.logger.debug(f"No Goodbye response. Response={response}")
                 self.unique_page_address = None
+                await self._stop_periodic_ping_task()
         if oef_message is not None and oef_search_dialogue is not None:
             await self._send_success_response(oef_message, oef_search_dialogue)
 
@@ -1087,8 +1092,10 @@ class SOEFChannel:
             await self._unregister_agent()
         except SOEFException as e:  # pragma: nocover
             if "<reason>Bad Request</reason><detail>agent lookup failed" not in str(e):
+                # i.e. we're not trying to unregister and already unregistered agent
                 raise e
             self.logger.debug("Unregister on SOEF failed. Agent not registered.")
+            self.unique_page_address = None
 
     async def disconnect(self) -> None:
         """

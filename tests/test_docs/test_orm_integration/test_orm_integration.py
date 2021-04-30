@@ -128,7 +128,7 @@ class TestOrmIntegrationDocs(AEATestCaseManyFlaky):
 
         default_routing = {
             "fetchai/ledger_api:1.0.0": "fetchai/ledger:0.18.0",
-            "fetchai/oef_search:1.0.0": "fetchai/soef:0.22.0",
+            "fetchai/oef_search:1.0.0": "fetchai/soef:0.23.0",
         }
 
         # generate random location
@@ -139,15 +139,15 @@ class TestOrmIntegrationDocs(AEATestCaseManyFlaky):
 
         # Setup seller
         self.set_agent_context(seller_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.21.0")
-        self.add_item("connection", "fetchai/soef:0.22.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.21.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.22.0")
+        self.add_item("connection", "fetchai/soef:0.23.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.22.0")
         self.add_item("connection", "fetchai/ledger:0.18.0")
-        self.add_item("skill", "fetchai/thermometer:0.24.0")
+        self.add_item("skill", "fetchai/thermometer:0.25.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         # ejecting changes author and version!
-        self.eject_item("skill", "fetchai/thermometer:0.24.0")
+        self.eject_item("skill", "fetchai/thermometer:0.25.0")
         seller_skill_config_replacement = yaml.safe_load(seller_strategy_replacement)
         self.nested_set_config(
             "skills.thermometer.models.strategy.args",
@@ -190,9 +190,9 @@ class TestOrmIntegrationDocs(AEATestCaseManyFlaky):
 
         # Setup Buyer
         self.set_agent_context(buyer_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.21.0")
-        self.add_item("connection", "fetchai/soef:0.22.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.21.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.22.0")
+        self.add_item("connection", "fetchai/soef:0.23.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.22.0")
         self.add_item("connection", "fetchai/ledger:0.18.0")
         self.add_item("skill", "fetchai/thermometer_client:0.24.0")
         setting_path = "agent.default_routing"

@@ -7,7 +7,7 @@
 docker build -t tac-deploy -f Dockerfile .
 ```
 ### Configure
-add preffered amount of tac participants agents
+add preferred amount of tac participants agents
 ```
 PARTICIPANTS_AMOUNT=5
 ```
@@ -21,7 +21,7 @@ docker run --env-file .env -v "$(pwd)/data:/data" -ti tac-deploy
 
 
 ### Run in the cloud
-gcloud should be configured first!
+GCloud should be configured first!
 
 tag it first
 ``` bash
