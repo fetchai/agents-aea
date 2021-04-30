@@ -8,10 +8,10 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmSFsC6K217XxwuH5fXGQYU29J44VvW9Qim5yNPAbXLegV
   __init__.py: QmRiWWZD3akeTSkr5UksPrRc83qvjbQm9eZTqEQ1DsZK3Z
-  behaviours.py: QmYQdFED8mr4HWnDbramcLhxJUFirCNnmfgkDeT2pqPa2B
+  behaviours.py: QmaKqoxGNfFCriEXbCBZLqcbvo1DhqoUdiRnDpitCJhJBq
   dialogues.py: QmaAnWJHSrAVqbswjGpJ9ukBA2QDdXxJAy33Gtabet3Bny
   handlers.py: QmTzg7SbhJDbnmTmz914QAJyNtEuZqWK2cSVdhwgT6otfL
-  strategy.py: QmdTfLQsZK56cC57vPJCck8bAoPixBuV6sdihNNcdwokWj
+  strategy.py: QmNpKikbpCJ9vMrpSdaPPk4FKQe8GTiBBovpMEHcfnDHoh
 fingerprint_ignore_patterns: []
 contracts: []
 protocols:
@@ -52,6 +52,7 @@ models:
       classification:
         piece: classification
         value: agent
+      decimals: 0
       location:
         latitude: 51.5194
         longitude: 0.127

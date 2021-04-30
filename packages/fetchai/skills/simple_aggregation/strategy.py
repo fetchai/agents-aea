@@ -54,6 +54,7 @@ DEFAULT_SEARCH_QUERY = {
     "constraint_type": "==",
 }
 IMPLEMENTED_AGGREGATION_FUNCTIONS = {"mean", "median", "mode"}
+DEFAULT_DECIMALS = 0
 
 
 class AggregationStrategy(Model):
@@ -69,7 +70,7 @@ class AggregationStrategy(Model):
         self._round = 0
         self._peers = set()  # type: Set[Address]
         self._observations = dict()  # type: Dict[Address, Dict[str, Any]]
-        self._aggregation = None  # type: Optional[Dict[str, Any]]
+        self._aggregation = None  # type: Optional[Any]
 
         self._quantity_name = kwargs.pop("quantity_name", DEFAULT_QUANTITY_NAME)
         self._service_id = kwargs.pop("service_id", DEFAULT_SERVICE_ID)
@@ -90,6 +91,7 @@ class AggregationStrategy(Model):
             )
         }
         self._radius = kwargs.pop("search_radius", DEFAULT_SEARCH_RADIUS)
+        self._decimals = kwargs.pop("decimals", DEFAULT_DECIMALS)
 
         self._set_personality_data = kwargs.pop(
             "personality_data", DEFAULT_PERSONALITY_DATA
@@ -179,7 +181,11 @@ class AggregationStrategy(Model):
             self.context.logger.info("No observations to aggregate")
             return
         self._aggregation = self._aggregate(values)
-        self.context.shared_state["aggregation"] = self._aggregation
+        aggregated_key = self.quantity_name + "_" + self._aggregation_function
+        self.context.shared_state[aggregated_key] = {
+            "value": int(self._aggregation),
+            "decimals": self._decimals,
+        }
         self.context.logger.info(f"Observations: {values}")
         self.context.logger.info(
             f"Aggregation ({self._aggregation_function}): {self._aggregation}"
