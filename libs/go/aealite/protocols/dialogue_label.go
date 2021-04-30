@@ -60,6 +60,11 @@ func (dialogueLabel *DialogueLabel) DialogueResponderReference() string {
 	return dialogueLabel.dialogueReference.DialogueResponderReference()
 }
 
+// IsSelfInitiated Check whether the agent initiated the dialogue.
+func (dialogueLabel *DialogueLabel) IsSelfInitiated() bool {
+	return dialogueLabel.dialogueStarterAddress != dialogueLabel.dialogueOpponentAddress
+}
+
 // DialogueOpponentAddress Get the dialogue opponent address.
 func (dialogueLabel *DialogueLabel) DialogueOpponentAddress() Address {
 	return dialogueLabel.dialogueOpponentAddress

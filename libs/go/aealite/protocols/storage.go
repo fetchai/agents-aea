@@ -163,8 +163,9 @@ func removeDialogueFromArray(array []*Dialogue, dialogueLabel DialogueLabel) []*
 
 /* global functions */
 
-func NewSimpleDialogueStorage() *SimpleDialogueStorage {
+func NewSimpleDialogueStorage(dialogues *Dialogues) *SimpleDialogueStorage {
 	result := SimpleDialogueStorage{
+		dialogues:                          dialogues,
 		dialoguesByDialogueLabel:           make(map[DialogueLabel]*Dialogue),
 		dialoguesByAddress:                 make(map[Address][]*Dialogue),
 		incompleteToCompleteDialogueLabels: make(map[DialogueLabel]DialogueLabel),

@@ -112,8 +112,7 @@ type DialogueInterface interface {
 	Reply(
 		Performative,
 		ProtocolMessageInterface,
-		*MessageId,
-		map[string]interface{},
+		MessageId,
 	) (ProtocolMessageInterface, error)
 	String() string
 
@@ -231,7 +230,8 @@ func (dialogue *Dialogue) isMessageBySelf(message ProtocolMessageInterface) bool
 }
 
 func (dialogue *Dialogue) hasMessageId(messageId MessageId) bool {
-	return dialogue.getMessageById(messageId) != nil
+	msg := dialogue.getMessageById(messageId)
+	return msg != nil
 }
 
 func (dialogue *Dialogue) update(message ProtocolMessageInterface) error {
@@ -293,7 +293,6 @@ func (dialogue *Dialogue) Reply(
 	performative Performative,
 	targetMessage ProtocolMessageInterface,
 	targetPtr *MessageId,
-	body map[string]interface{},
 ) (ProtocolMessageInterface, error) {
 	lastMessage := dialogue.LastMessage()
 	if lastMessage == nil {
@@ -322,7 +321,7 @@ func (dialogue *Dialogue) Reply(
 		return nil, errors.New("no target message found")
 	}
 
-	if dialogue.hasMessageId(target) {
+	if !dialogue.hasMessageId(target) {
 		return nil, errors.New("the target message does not exist in this dialogue")
 	}
 
@@ -333,7 +332,6 @@ func (dialogue *Dialogue) Reply(
 		to:                dialogue.dialogueLabel.dialogueOpponentAddress,
 		target:            target,
 		performative:      performative,
-		body:              body,
 	}
 
 	err := dialogue.update(&reply)
@@ -459,7 +457,7 @@ func (dialogue *Dialogue) validateMessageTarget(message ProtocolMessageInterface
 
 	// check performatives
 	setValidReplies := dialogue.rules.validReplies[targetPerformative]
-	if setValidReplies.Contains(performative) {
+	if !setValidReplies.Contains(performative) {
 		return fmt.Errorf("invalid performative: '%s' is not a valid reply", performative)
 	}
 	return nil
@@ -508,7 +506,7 @@ func (dialogue *Dialogue) getMessageById(messageId MessageId) ProtocolMessageInt
 func (dialogue *Dialogue) getOutgoingNextMessageId() MessageId {
 	nextMessageId := StartingMessageId
 	if dialogue.LastOutgoingMessage() != nil {
-		nextMessageId = abs(dialogue.lastMessageId) + 1
+		nextMessageId = abs(dialogue.LastOutgoingMessage().MessageId()) + 1
 	}
 	if !dialogue.IsSelfInitiated() {
 		nextMessageId = 0 - nextMessageId
@@ -541,7 +539,8 @@ func NewDialogue(dialogueLabel DialogueLabel,
 	role Role,
 	initialPerformatives []Performative,
 	terminalPerformatives []Performative,
-	validReplies map[Performative][]Performative) *Dialogue {
+	validReplies map[Performative][]Performative) Dialogue {
+
 	dialogue := Dialogue{
 		dialogueLabel: dialogueLabel,
 		selfAddress:   selfAddress,
@@ -552,5 +551,5 @@ func NewDialogue(dialogueLabel DialogueLabel,
 	dialogue.orderedMessageIds = make([]MessageId, 0)
 	dialogue.rules = NewRules(initialPerformatives, terminalPerformatives, validReplies)
 	dialogue.terminalStateCallbacks = make([]func(*Dialogue), 0)
-	return &dialogue
+	return dialogue
 }

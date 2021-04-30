@@ -76,7 +76,7 @@ There can be one or more `Behaviour` classes per skill. The developer must creat
 A behaviour can be registered in two ways:
 
 - By declaring it in the skill configuration file `skill.yaml` (see <a href="../skill/#skill-config">below</a>)
-- In any part of the code of the skill, by enqueuing new `Behaviour` instances in the queue `context.new_behaviours`.
+- In any part of the code of the skill, by enqueuing new `Behaviour` instances in the queue `context.new_behaviours`. In that case, `setup`is not called by the framework, as the behaviour will be added after the AEA setup is complete.
 
 The framework supports different types of behaviours:
 

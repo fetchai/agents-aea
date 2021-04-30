@@ -540,26 +540,54 @@ class Strategy(Model):
 
     @staticmethod
     def kwargs_from_terms(
-        terms: Terms, signature: Optional[str] = None,
+        terms: Terms,
+        signature: Optional[str] = None,
+        is_from_terms_sender: bool = True,
     ) -> Dict[str, Any]:
         """
         Get the contract api message kwargs from the terms.
 
         :param terms: the terms
         :param signature: the signature
+        :param is_from_terms_sender: whether from == terms.sender_address (i.e. agent submitting tx is the
+        one which terms are considered)
         :return: the kwargs
         """
         all_tokens = {**terms.amount_by_currency_id, **terms.quantities_by_good_id}
-        token_ids = [int(key) for key in all_tokens.keys()]
-        from_supplies = [
-            0 if int(value) <= 0 else int(value) for value in all_tokens.values()
-        ]
-        to_supplies = [
-            0 if int(value) >= 0 else -int(value) for value in all_tokens.values()
-        ]
+        token_ids = sorted([int(key) for key in all_tokens.keys()])
+        if is_from_terms_sender:
+            from_supplies = [
+                0
+                if int(all_tokens[str(token_id)]) >= 0
+                else -int(all_tokens[str(token_id)])
+                for token_id in token_ids
+            ]
+            to_supplies = [
+                0
+                if int(all_tokens[str(token_id)]) <= 0
+                else int(all_tokens[str(token_id)])
+                for token_id in token_ids
+            ]
+        else:
+            from_supplies = [
+                0
+                if int(all_tokens[str(token_id)]) <= 0
+                else int(all_tokens[str(token_id)])
+                for token_id in token_ids
+            ]
+            to_supplies = [
+                0
+                if int(all_tokens[str(token_id)]) >= 0
+                else -int(all_tokens[str(token_id)])
+                for token_id in token_ids
+            ]
         kwargs = {
-            "from_address": terms.sender_address,
-            "to_address": terms.counterparty_address,
+            "from_address": terms.sender_address
+            if is_from_terms_sender
+            else terms.counterparty_address,
+            "to_address": terms.counterparty_address
+            if is_from_terms_sender
+            else terms.sender_address,
             "token_ids": token_ids,
             "from_supplies": from_supplies,
             "to_supplies": to_supplies,

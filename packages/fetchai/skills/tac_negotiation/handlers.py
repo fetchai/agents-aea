@@ -293,7 +293,9 @@ class FipaNegotiationHandler(Handler):
                     contract_address=strategy.contract_address,
                     callable="get_hash_batch",
                     kwargs=ContractApiMessage.Kwargs(
-                        strategy.kwargs_from_terms(fipa_dialogue.terms)
+                        strategy.kwargs_from_terms(
+                            fipa_dialogue.terms, is_from_terms_sender=False
+                        )
                     ),
                 )
                 contract_api_dialogue = cast(ContractApiDialogue, contract_api_dialogue)
