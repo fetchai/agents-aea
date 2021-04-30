@@ -78,7 +78,7 @@ The following steps assume you have launched the AEA Manager Desktop app.
 
 6. Run the `car_data_buyer`.
 
-In the AEA's logs should see the agent trading sucessfully.
+In the AEA's logs should see the agent trading successfully.
 <br>
 
 # Option 2: CLI approach

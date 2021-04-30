@@ -186,6 +186,9 @@ install.ps1
 pylint
 quickstart
 CVE-2021-27291
+AgentLand
+GCloud
+p2p
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id
