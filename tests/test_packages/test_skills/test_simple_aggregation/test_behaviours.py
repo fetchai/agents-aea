@@ -87,8 +87,8 @@ class TestAggregationBehaviour(BaseSkillTestCase):
 
         # mock an observation
         self.aggregation_behaviour.context.shared_state[
-            "observation"
-        ] = DATA_REQUEST_OBS
+            "some_quantity"
+        ] = DATA_REQUEST_OBS["some_quantity"]
 
         self.aggregation_strategy.add_peers(PEERS)
         assert all([peer in self.aggregation_strategy.peers for peer in PEERS])
