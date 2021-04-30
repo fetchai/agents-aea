@@ -78,7 +78,7 @@ models:
     args:
       classification:
         piece: classification
-        value: tac.trader
+        value: tac.participant
       is_contract_tx: false
       location:
         latitude: 51.5194

@@ -54,7 +54,7 @@ models:
       admin_port: 8031
       classification:
         piece: classification
-        value: alice
+        value: identity.aries.alice
       location:
         latitude: 51.5194
         longitude: 0.127

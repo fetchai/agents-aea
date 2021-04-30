@@ -47,7 +47,7 @@ HTTP_COUNTERPARTY = "HTTP Server"
 DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
 DEFAULT_SERVICE_DATA = {"key": "intro_service", "value": "intro_alice"}
 DEFAULT_PERSONALITY_DATA = {"piece": "genus", "value": "data"}
-DEFAULT_CLASSIFICATION = {"piece": "classification", "value": "alice"}
+DEFAULT_CLASSIFICATION = {"piece": "classification", "value": "identity.aries.alice"}
 
 
 class AliceStrategy(Model):

@@ -61,7 +61,7 @@ DEFAULT_SEARCH_QUERY = {
     "constraint_type": "==",
 }
 DEFAULT_PERSONALITY_DATA = {"piece": "genus", "value": "data"}
-DEFAULT_CLASSIFICATION = {"piece": "classification", "value": "tac.trader"}
+DEFAULT_CLASSIFICATION = {"piece": "classification", "value": "tac.participant"}
 DEFAULT_SEARCH_RADIUS = 5.0
 
 
