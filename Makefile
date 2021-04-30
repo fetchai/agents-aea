@@ -151,3 +151,10 @@ protolint_install_win:
 	powershell -command '$$env:GO111MODULE="on"; go get -u -v github.com/yoheimuta/protolint/cmd/protolint@v0.27.0'
 protolint_win:
 	protolint lint -config_path=./protolint.yaml -fix ./aea/mail ./packages/fetchai/protocols
+dist:
+	python setup.py sdist
+	WIN_BUILD_WHEEL=1 python setup.py bdist_wheel --plat-name=win_amd64
+	WIN_BUILD_WHEEL=1 python setup.py bdist_wheel --plat-name=win32
+	python setup.py bdist_wheel --plat-name=manylinux1_x86_64
+	python setup.py bdist_wheel --plat-name=manylinux2014_aarch64
+	python setup.py bdist_wheel --plat-name=macosx_10_9_x86_64
