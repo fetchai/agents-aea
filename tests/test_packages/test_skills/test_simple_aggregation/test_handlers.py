@@ -116,7 +116,7 @@ class TestAggregationHandler(BaseSkillTestCase):
 
         expected_aggregation = {"value": aggregate(values), "decimals": 0}
         aggregated_key = (
-            "some_quantity" + self.aggregation_strategy._aggregation_function
+            "some_quantity" + "_" + self.aggregation_strategy._aggregation_function
         )
 
         obs = get_observation_from_message(incoming_message)
@@ -124,7 +124,7 @@ class TestAggregationHandler(BaseSkillTestCase):
         assert self.aggregation_strategy._observations[sender] == obs
         assert self.aggregation_strategy._aggregation == aggregate(values)
         assert (
-            self.aggregation_handler.context.shared_state["some_quantity_mean"]
+            self.aggregation_handler.context.shared_state[aggregated_key]
             == expected_aggregation
         )
 

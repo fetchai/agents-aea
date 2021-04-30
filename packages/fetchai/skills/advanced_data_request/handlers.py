@@ -135,10 +135,10 @@ class HttpHandler(Handler):
                 float_value = float(value)
                 int_value = int(float_value * 10 ** model.decimals)
                 observation = {
-                    output["name"]: {"value": int_value, "decimals": model.decimals,}
+                    output["name"]: {"value": int_value, "decimals": model.decimals}
                 }
             elif isinstance(value, str):
-                observation = {output["name"]: {"value": value,}}
+                observation = {output["name"]: {"value": value}}
             else:
                 self.context.logger.warning(
                     f"No valid output for {output['name']} found in response."
