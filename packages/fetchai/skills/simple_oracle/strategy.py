@@ -54,7 +54,6 @@ class Strategy(Model):
             "oracle_value_name", DEFAULT_ORACLE_VALUE_NAME
         )
         self._contract_address_file = kwargs.pop("contract_address_file", None)
-        self._aggregation = kwargs.pop("aggregation", False)
 
         super().__init__(**kwargs)
 
@@ -100,11 +99,6 @@ class Strategy(Model):
     def contract_address_file(self) -> str:
         """Get the filename where the oracle contract is to be stored."""
         return self._contract_address_file
-
-    @property
-    def aggregation(self) -> str:  # pragma: nocover
-        """Get whether the oracle value is aggregated."""
-        return self._aggregation
 
     @property
     def contract_address(self) -> str:
