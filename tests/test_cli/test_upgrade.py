@@ -1092,10 +1092,14 @@ class BaseTestUpgradeWithEject(AEATestCaseEmpty):
 class TestUpgradeWithEjectAbort(BaseTestUpgradeWithEject):
     """Test 'aea upgrade' command with request for ejection, refused."""
 
+    GENERIC_SELLER = ComponentId(
+        ComponentType.SKILL, PublicId.from_str("fetchai/generic_seller:0.24.0")
+    )
+
     EXPECTED_CLICK_ECHO_CALLS = ["Abort."]
     EXPECTED_CLICK_CONFIRM_CALLS = [
         RegexComparator(
-            r"Skill fetchai/generic_seller:0.25.0 prevents the upgrade of the following vendor packages:.*as there isn't a compatible version available on the AEA registry\. Would you like to eject it\?"
+            r"Skill fetchai/generic_seller:0.24.0 prevents the upgrade of the following vendor packages:.*as there isn't a compatible version available on the AEA registry\. Would you like to eject it\?"
         )
     ]
 
@@ -1106,15 +1110,19 @@ class TestUpgradeWithEjectAccept(BaseTestUpgradeWithEject):
 
     CONFIRM_OUTPUT = [True, True]
 
+    GENERIC_SELLER = ComponentId(
+        ComponentType.SKILL, PublicId.from_str("fetchai/generic_seller:0.24.0")
+    )
+
     EXPECTED_CLICK_ECHO_CALLS = [
-        "Ejecting (skill, fetchai/generic_seller:0.25.0)...",
-        "Ejecting item skill fetchai/generic_seller:0.25.0",
+        "Ejecting (skill, fetchai/generic_seller:0.24.0)...",
+        "Ejecting item skill fetchai/generic_seller:0.24.0",
         "Fingerprinting skill components of 'default_author/generic_seller:0.1.0' ...",
-        "Successfully ejected skill fetchai/generic_seller:0.25.0 to ./skills/generic_seller as default_author/generic_seller:0.1.0.",
+        "Successfully ejected skill fetchai/generic_seller:0.24.0 to ./skills/generic_seller as default_author/generic_seller:0.1.0.",
     ]
     EXPECTED_CLICK_CONFIRM_CALLS = [
         RegexComparator(
-            "Skill fetchai/generic_seller:0.25.0 prevents the upgrade of the following vendor packages:"
+            "Skill fetchai/generic_seller:0.24.0 prevents the upgrade of the following vendor packages:"
         ),
         RegexComparator(
             "as there isn't a compatible version available on the AEA registry. Would you like to eject it?"
