@@ -11,7 +11,7 @@ fingerprint:
   api_spec.yaml: QmUPhCYr6tWDMysdMCQxT67oAKRdMbGpgqDfAA5wpei12s
   behaviours.py: QmZ3NMvZPHuxqxisew8UM7z6ti4STti3YAAXm42NSMUiG5
   dialogues.py: QmdYcNTCowajkMMCccYpNL83KRYm4v2WE2FguT3my7nqBw
-  handlers.py: Qmf2GqRHSJ7uUBey9HzVvVJFU2ovzEedqxGrUhu9fcwfdz
+  handlers.py: QmQfXtT5CsgjHgCkyzakRAv7gyRQPhS5crDzpx6zG1AC37
   models.py: QmemVqxiExXw8LpJZKmnfzy1f8XyhG2sRofffPYqrNEJrT
 fingerprint_ignore_patterns: []
 contracts: []

@@ -17,6 +17,7 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains tests for Libp2p tcp client connection."""
+import asyncio
 import os
 import shutil
 import tempfile
@@ -31,7 +32,7 @@ from aea_ledger_fetchai import FetchAICrypto
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 
-from packages.fetchai.connections.p2p_libp2p_client.connection import Uri
+from packages.fetchai.connections.p2p_libp2p_client.connection import NodeClient, Uri
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.default.serialization import DefaultSerializer
 
@@ -782,3 +783,15 @@ class TestLibp2pClientReconnectionReceiveEnvelope(BaseTestLibp2pClientReconnecti
             == envelope.protocol_specification_id
         )
         assert delivered_envelope.message == envelope.message
+
+
+@pytest.mark.asyncio
+async def test_nodeclient_pipe_connect():
+    """Test pipe.connect called on NodeClient.connect."""
+    f = asyncio.Future()
+    f.set_result(None)
+    pipe = Mock()
+    pipe.connect.return_value = f
+    node_client = NodeClient(pipe)
+    await node_client.connect()
+    pipe.connect.assert_called_once()

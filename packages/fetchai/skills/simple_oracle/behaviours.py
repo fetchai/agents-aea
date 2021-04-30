@@ -107,18 +107,18 @@ class SimpleOracleBehaviour(TickerBehaviour):
             self._request_grant_role_transaction()
             return
 
-        # Check for observation from data collecting skill
-        observation = self.context.shared_state.get("observation", None)
-        if observation is None:
+        # Check for oracle from data collecting skill
+        oracle_data = self.context.shared_state.get(strategy.oracle_value_name, None)
+
+        if oracle_data is None:
             self.context.logger.info("No oracle value to publish")
         else:
             self.context.logger.info("Publishing oracle value")
 
             # add expiration block
-            update_kwargs = observation[strategy.oracle_value_name]
-            update_kwargs["expiration_block"] = EXPIRATION_BLOCK
-            self.context.logger.info(f"Update kwargs: {update_kwargs}")
-            self._request_update_transaction(update_kwargs)
+            oracle_data["expiration_block"] = EXPIRATION_BLOCK
+            self.context.logger.info(f"Update kwargs: {oracle_data}")
+            self._request_update_transaction(oracle_data)
 
     def _request_contract_deploy_transaction(self) -> None:
         """

@@ -625,7 +625,8 @@ class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache):
         ), "Strings {} didn't appear in tac_aea_two output.".format(missing_strings)
 
         check_strings = (
-            "agent registered:",
+            "registered as 'tac_participant_one'",
+            "registered as 'tac_participant_two'",
             "closing registration!",
             "unregistering TAC data model from SOEF.",
             "requesting create items transaction...",
@@ -675,6 +676,8 @@ class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache):
             "received signed_message from decision_maker, message=",
             "received signed_transaction from decision_maker, message=",
             "sending send_signed_transaction to ledger ethereum, message=",
+            "transaction was successfully submitted. Transaction digest=",
+            "transaction was successfully settled. Transaction receipt=",
         )
         missing_strings = self.missing_from_output(
             tac_aea_one_process, check_strings, timeout=300, is_terminating=False
@@ -708,6 +711,8 @@ class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache):
             "received signed_message from decision_maker, message=",
             "received signed_transaction from decision_maker, message=",
             "sending send_signed_transaction to ledger ethereum, message=",
+            "transaction was successfully submitted. Transaction digest=",
+            "transaction was successfully settled. Transaction receipt=",
         )
         missing_strings = self.missing_from_output(
             tac_aea_two_process, check_strings, timeout=360, is_terminating=False

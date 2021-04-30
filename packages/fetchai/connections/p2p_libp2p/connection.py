@@ -326,13 +326,15 @@ class Libp2pNode:
 
     async def _set_connection_to_node(self) -> bool:
         if self.pipe is None:
-            raise Exception("pipe was not set")
+            raise Exception("pipe was not set")  # pragma: nocover
+
         return await self.pipe.connect(timeout=self._connection_timeout)
 
     def get_client(self) -> NodeClient:
         """Get client instance to communicate to node."""
         if self.pipe is None:
-            raise Exception("pipe was not set")
+            raise Exception("pipe was not set")  # pragma: nocover
+
         return NodeClient(self.pipe)
 
     async def start(self) -> None:
@@ -405,7 +407,7 @@ class Libp2pNode:
 
         if self.public_uri is not None:
             msg += "full DHT mode with "
-            if self.delegate_uri is not None:
+            if self.delegate_uri is not None:  # pragma: nocover
                 msg += "delegate service reachable at '{}:{}' and relay service enabled. ".format(
                     self.public_uri.host, self.delegate_uri.port
                 )
@@ -561,7 +563,7 @@ class P2PLibp2pConnection(Connection):
             public_uri = Uri(libp2p_public_uri)
 
         delegate_uri = None
-        if libp2p_delegate_uri is not None:
+        if libp2p_delegate_uri is not None:  # pragma: nocover
             delegate_uri = Uri(libp2p_delegate_uri)
 
         monitoring_uri = None
@@ -727,7 +729,7 @@ class P2PLibp2pConnection(Connection):
             if self._in_queue is None:
                 raise ValueError("Input queue not initialized.")  # pragma: nocover
             envelope = await self._in_queue.get()
-            if envelope is None:
+            if envelope is None:  # pragma: nocover
                 self.logger.debug("Received None.")
                 return None
             return envelope
@@ -751,7 +753,7 @@ class P2PLibp2pConnection(Connection):
         try:
             await self._node_client.send_envelope(envelope)
         except asyncio.CancelledError:  # pylint: disable=try-except-raise
-            raise
+            raise  # pragma: nocover
         except Exception as e:  # pylint: disable=broad-except
             self.logger.exception(
                 f"Failed to send. Exception: {e}. Try reconnect to node and read again."
@@ -765,7 +767,7 @@ class P2PLibp2pConnection(Connection):
         try:
             return await self._node_client.read_envelope()
         except asyncio.CancelledError:  # pylint: disable=try-except-raise
-            raise
+            raise  # pragma: nocover
         except Exception as e:  # pylint: disable=broad-except
             self.logger.exception(
                 f"Failed to read. Exception: {e}. Try reconnect to node and read again."

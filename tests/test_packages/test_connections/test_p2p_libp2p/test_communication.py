@@ -16,9 +16,8 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
 """This test module contains tests for P2PLibp2p connection."""
+import asyncio
 import os
 import shutil
 import tempfile
@@ -33,7 +32,7 @@ from aea.crypto.registries import make_crypto
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 
-from packages.fetchai.connections.p2p_libp2p.connection import Uri
+from packages.fetchai.connections.p2p_libp2p.connection import NodeClient, Uri
 from packages.fetchai.protocols.default.message import DefaultMessage
 
 from tests.conftest import (
@@ -826,3 +825,15 @@ class TestP2PLibp2pReconnectionReceiveEnvelope(BaseTestP2PLibp2pReconnection):
         msg.to = delivered_envelope.to
         msg.sender = delivered_envelope.sender
         assert envelope.message == msg
+
+
+@pytest.mark.asyncio
+async def test_nodeclient_pipe_connect():
+    """Test pipe.connect called on NodeClient.connect."""
+    f = asyncio.Future()
+    f.set_result(None)
+    pipe = Mock()
+    pipe.connect.return_value = f
+    node_client = NodeClient(pipe)
+    await node_client.connect()
+    pipe.connect.assert_called_once()

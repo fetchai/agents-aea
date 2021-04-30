@@ -215,8 +215,7 @@ class AggregationBehaviour(TickerBehaviour):
         :return: None
         """
         strategy = cast(AggregationStrategy, self.context.strategy)
-        obs = self.context.shared_state.get("observation", {})
-        quantity = obs.get(strategy.quantity_name, {})
+        quantity = self.context.shared_state.get(strategy.quantity_name, {})
         value = quantity.get("value", None)
         if value:
             strategy.make_observation(
