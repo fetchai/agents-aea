@@ -98,10 +98,10 @@ class TestOefSearchHandler(BaseSkillTestCase):
         )
 
         cls.register_genus_description = Description(
-            {"key": "genus", "value": "some_value"},
+            {"piece": "genus", "value": "some_value"},
             data_model=DataModel(
                 "personality_agent",
-                [Attribute("key", str, True), Attribute("value", str, True)],
+                [Attribute("piece", str, True), Attribute("value", str, True)],
             ),
         )
         cls.list_of_messages_register_genus = (
@@ -113,10 +113,10 @@ class TestOefSearchHandler(BaseSkillTestCase):
         )
 
         cls.register_classification_description = Description(
-            {"key": "classification", "value": "some_value"},
+            {"piece": "classification", "value": "some_value"},
             data_model=DataModel(
                 "personality_agent",
-                [Attribute("key", str, True), Attribute("value", str, True)],
+                [Attribute("piece", str, True), Attribute("value", str, True)],
             ),
         )
         cls.list_of_messages_register_classification = (
@@ -128,10 +128,10 @@ class TestOefSearchHandler(BaseSkillTestCase):
         )
 
         cls.register_invalid_description = Description(
-            {"key": "classification", "value": "some_value"},
+            {"piece": "classification", "value": "some_value"},
             data_model=DataModel(
                 "some_different_name",
-                [Attribute("key", str, True), Attribute("value", str, True)],
+                [Attribute("piece", str, True), Attribute("value", str, True)],
             ),
         )
         cls.list_of_messages_register_invalid = (

@@ -423,12 +423,12 @@ class OefSearchHandler(Handler):
                 registration_behaviour.register_genus()
             elif (
                 "personality_agent" in data_model_name
-                and description.values["key"] == "genus"
+                and description.values["piece"] == "genus"
             ):
                 registration_behaviour.register_classification()
             elif (
                 "personality_agent" in data_model_name
-                and description.values["key"] == "classification"
+                and description.values["piece"] == "classification"
             ):
                 game = cast(Game, self.context.game)
                 game.is_registered_agent = True

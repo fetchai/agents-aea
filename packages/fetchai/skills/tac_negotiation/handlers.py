@@ -870,12 +870,12 @@ class OefSearchHandler(Handler):
                 registration_behaviour.register_genus()
             elif (
                 "personality_agent" in data_model_name
-                and description.values["key"] == "genus"
+                and description.values["piece"] == "genus"
             ):
                 registration_behaviour.register_classification()
             elif (
                 "personality_agent" in data_model_name
-                and description.values["key"] == "classification"
+                and description.values["piece"] == "classification"
             ):
                 registration_behaviour.is_registered = True
                 self.context.logger.info(
