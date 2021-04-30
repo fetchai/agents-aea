@@ -189,7 +189,7 @@ class TestStrategy(BaseSkillTestCase):
         assert type(description) == Description
         assert description.data_model is AGENT_PERSONALITY_MODEL
         assert description.values.get("piece", "") == "classification"
-        assert description.values.get("value", "") == "tac.trader"
+        assert description.values.get("value", "") == "tac.participant"
 
     def test_get_unregister_service_description(self):
         """Test the get_unregister_service_description method of the GenericStrategy class."""
