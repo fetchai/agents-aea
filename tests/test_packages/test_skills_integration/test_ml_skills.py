@@ -189,7 +189,9 @@ class TestMLSkills(AEATestCaseManyFlaky):
 
         check_strings = (
             "registering agent on SOEF.",
-            "registering service on SOEF.",
+            "registering agent's service on the SOEF.",
+            "registering agent's personality genus on the SOEF.",
+            "registering agent's personality classification on the SOEF.",
             "got a Call for Terms from",
             "a Terms message:",
             "got an Accept from",
@@ -380,7 +382,9 @@ class TestMLSkillsFetchaiLedger(AEATestCaseManyFlaky):
 
         check_strings = (
             "registering agent on SOEF.",
-            "registering service on SOEF.",
+            "registering agent's service on the SOEF.",
+            "registering agent's personality genus on the SOEF.",
+            "registering agent's personality classification on the SOEF.",
             "got a Call for Terms from",
             "a Terms message:",
             "got an Accept from",
