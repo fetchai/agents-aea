@@ -104,17 +104,18 @@ is_abstract: false
 ``` yaml
 name: simple_service_registration
 author: fetchai
-version: 0.4.0
+version: 0.20.0
 type: skill
 description: The simple service registration skills is a skill to register a service.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  __init__.py: QmNkZAetyctaZCUf6ACxP5onGWsSxu2hjSNoFmJ3ta6Lta
-  behaviours.py: QmRr1oe3zWKyPcktzKP4BiKqjCqmKjEDdLUQhn1JzNm4nD
-  dialogues.py: QmayFh6ytPefJng5ENTUg46zsd6guHCZSsG3Cc2sy3xz6y
-  handlers.py: QmViyyV5KvR3kkLEMpvDfqH5QtHowTbnpDxRYnKABpVvpC
-  strategy.py: Qmdp6LCPZSnnyfM4EdRDTGZPqwxiJ3A1jsc3oF2Hv4m5Mv
+  README.md: QmUgCcR7sDBQeeCBRKwDT7tPBTi3t4zSibyEqR3xdQUKmh
+  __init__.py: QmZd48HmYDr7FMxNaVeGfWRvVtieEdEV78hd7h7roTceP2
+  behaviours.py: QmQHf6QL5aBtLJ34D2tdcbjJLbzom9gaA3HWgRn3rWyigM
+  dialogues.py: QmTT9dvFhWt6qvxjwBfMFDTrgEtgWbvgANYafyRg2BXwcR
+  handlers.py: QmZqPt8toGbJgTT6NZBLxjkusrQCZ8GmUEwcmqZ1sd7DpG
+  strategy.py: QmVXfQpk4cjDw576H2ELE12tEiN5brPkwvffvcTeMbsugA
 fingerprint_ignore_patterns: []
 connections: []
 contracts: []
@@ -124,6 +125,7 @@ skills: []
 behaviours:
   service:
     args:
+      max_soef_registration_retries: 5
       services_interval: 30
     class_name: ServiceRegistrationBehaviour
 handlers:
@@ -136,15 +138,19 @@ models:
     class_name: OefSearchDialogues
   strategy:
     args:
+      classification:
+        piece: classification
+        value: seller
       location:
         latitude: 51.5194
         longitude: 0.127
+      personality_data:
+        piece: genus
+        value: data
       service_data:
         key: seller_service
         value: generic_service
     class_name: Strategy
-dependencies:
-  aea-ledger-fetchai:
-    version: <2.0.0,>=1.0.0
+dependencies: {}
 is_abstract: false
 ```

@@ -116,6 +116,11 @@ service_description = Description(
 )
 ```
 
+<div class="admonition note">
+  <p class="admonition-title">Note</p>
+  <p>Currently, the soef does not allow for multiple registrations to be combined into a single command.
+</div>
+
 ## Perform a search
 
 To perform a search for services registered you have to define a search query consisting of constraints. The location constraints is required, personality pieces or services keys constraints are optional.

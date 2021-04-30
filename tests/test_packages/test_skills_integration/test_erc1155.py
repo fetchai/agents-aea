@@ -224,7 +224,9 @@ class TestERCSkillsEthereumLedger(AEATestCaseManyFlaky, UseGanache):
             "requesting create batch transaction...",
             "requesting mint batch transaction...",
             "registering agent on SOEF.",
-            "registering service on SOEF.",
+            "registering agent's service on the SOEF.",
+            "registering agent's personality genus on the SOEF.",
+            "registering agent's personality classification on the SOEF.",
         )
         missing_strings = self.missing_from_output(
             deploy_aea_process, check_strings, timeout=420, is_terminating=False

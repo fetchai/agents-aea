@@ -176,7 +176,9 @@ class TestCarPark(AEATestCaseManyFlaky):
 
         check_strings = (
             "registering agent on SOEF.",
-            "registering service on SOEF.",
+            "registering agent's service on the SOEF.",
+            "registering agent's personality genus on the SOEF.",
+            "registering agent's personality classification on the SOEF.",
             "received CFP from sender=",
             "sending a PROPOSE with proposal=",
             "received ACCEPT from sender=",
@@ -363,7 +365,9 @@ class TestCarParkFetchaiLedger(AEATestCaseManyFlaky):
 
         check_strings = (
             "registering agent on SOEF.",
-            "registering service on SOEF.",
+            "registering agent's service on the SOEF.",
+            "registering agent's personality genus on the SOEF.",
+            "registering agent's personality classification on the SOEF.",
             "received CFP from sender=",
             "sending a PROPOSE with proposal=",
             "received ACCEPT from sender=",

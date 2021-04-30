@@ -64,6 +64,7 @@ Open the `behaviours.py` file (`my_generic_seller/skills/generic_seller/behaviou
 ``` python
 from typing import Any, Optional, cast
 
+from aea.helpers.search.models import Description
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.connections.ledger.base import (
@@ -163,14 +164,15 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
 
             self.failed_registration_msg = None
 
-    def _register_agent(self) -> None:
+    def _register(self, description: Description, logger_msg: str) -> None:
         """
-        Register the agent's location.
+        Register something on the SOEF.
+
+        :param description: the description of what is being registered
+        :param logger_msg: the logger message to print after the registration
 
         :return: None
         """
-        strategy = cast(GenericStrategy, self.context.strategy)
-        description = strategy.get_location_description()
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
@@ -180,31 +182,51 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
             service_description=description,
         )
         self.context.outbox.put_message(message=oef_search_msg)
-        self.context.logger.info("registering agent on SOEF.")
+        self.context.logger.info(logger_msg)
 
-    def register_service_personality_classification(self) -> None:
+    def _register_agent(self) -> None:
         """
-        Register the agent's service, personality and classification.
+        Register the agent's location.
 
         :return: None
         """
         strategy = cast(GenericStrategy, self.context.strategy)
-        descriptions = [
-            strategy.get_register_service_description(),
-            strategy.get_register_personality_description(),
-            strategy.get_register_classification_description(),
-        ]
-        oef_search_dialogues = cast(
-            OefSearchDialogues, self.context.oef_search_dialogues
+        description = strategy.get_location_description()
+        self._register(description, "registering agent on SOEF.")
+
+    def register_service(self) -> None:
+        """
+        Register the agent's service.
+
+        :return: None
+        """
+        strategy = cast(GenericStrategy, self.context.strategy)
+        description = strategy.get_register_service_description()
+        self._register(description, "registering agent's service on the SOEF.")
+
+    def register_genus(self) -> None:
+        """
+        Register the agent's personality genus.
+
+        :return: None
+        """
+        strategy = cast(GenericStrategy, self.context.strategy)
+        description = strategy.get_register_personality_description()
+        self._register(
+            description, "registering agent's personality genus on the SOEF."
         )
-        for description in descriptions:
-            oef_search_msg, _ = oef_search_dialogues.create(
-                counterparty=self.context.search_service_address,
-                performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-                service_description=description,
-            )
-            self.context.outbox.put_message(message=oef_search_msg)
-        self.context.logger.info("registering service on SOEF.")
+
+    def register_classification(self) -> None:
+        """
+        Register the agent's personality classification.
+
+        :return: None
+        """
+        strategy = cast(GenericStrategy, self.context.strategy)
+        description = strategy.get_register_classification_description()
+        self._register(
+            description, "registering agent's personality classification on the SOEF."
+        )
 
     def _unregister_service(self) -> None:
         """
@@ -833,12 +855,32 @@ class GenericOefSearchHandler(Handler):
             target_message.performative
             == OefSearchMessage.Performative.REGISTER_SERVICE
         ):
-            if "location" in target_message.service_description.values:
-                registration_behaviour = cast(
-                    GenericServiceRegistrationBehaviour,
-                    self.context.behaviours.service_registration,
+            description = target_message.service_description
+            data_model_name = description.data_model.name
+            registration_behaviour = cast(
+                GenericServiceRegistrationBehaviour,
+                self.context.behaviours.service_registration,
+            )
+            if "location_agent" in data_model_name:
+                registration_behaviour.register_service()
+            elif "set_service_key" in data_model_name:
+                registration_behaviour.register_genus()
+            elif (
+                "personality_agent" in data_model_name
+                and description.values["piece"] == "genus"
+            ):
+                registration_behaviour.register_classification()
+            elif (
+                "personality_agent" in data_model_name
+                and description.values["piece"] == "classification"
+            ):
+                self.context.logger.info(
+                    "the agent, with its genus and classification, and its service are successfully registered on the SOEF."
                 )
-                registration_behaviour.register_service_personality_classification()
+            else:
+                self.context.logger.warning(
+                    f"received soef SUCCESS message as a reply to the following unexpected message: {target_message}"
+                )
 
     def _handle_error(
         self,

@@ -715,14 +715,34 @@ class OefSearchHandler(Handler):
             target_message.performative
             == OefSearchMessage.Performative.REGISTER_SERVICE
         ):
+            description = target_message.service_description
+            data_model_name = description.data_model.name
             registration_behaviour = cast(
                 ServiceRegistrationBehaviour,
                 self.context.behaviours.service_registration,
             )
-            if "location" in target_message.service_description.values:
+            if "location_agent" in data_model_name:
                 registration_behaviour.register_service()
-            elif "service_data" in target_message.service_description.values:
-                registration_behaviour.is_service_registered = True
+            elif "set_service_key" in data_model_name:
+                registration_behaviour.register_genus()
+            elif (
+                "personality_agent" in data_model_name
+                and description.values["piece"] == "genus"
+            ):
+                registration_behaviour.register_classification()
+            elif (
+                "personality_agent" in data_model_name
+                and description.values["piece"] == "classification"
+            ):
+                registration_behaviour.is_registered = True
+                registration_behaviour.registration_in_progress = False
+                self.context.logger.info(
+                    "the agent, with its genus and classification, and its service are successfully registered on the SOEF."
+                )
+            else:
+                self.context.logger.warning(
+                    f"received soef SUCCESS message as a reply to the following unexpected message: {target_message}"
+                )
 
     def _handle_error(
         self,

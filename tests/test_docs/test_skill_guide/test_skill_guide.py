@@ -223,7 +223,9 @@ class TestBuildSkill(AEATestCaseManyFlaky):
 
         check_strings = (
             "registering agent on SOEF.",
-            "registering service on SOEF.",
+            "registering agent's service on the SOEF.",
+            "registering agent's personality genus on the SOEF.",
+            "registering agent's personality classification on the SOEF.",
         )
         missing_strings = self.missing_from_output(
             simple_service_registration_aea_process,
