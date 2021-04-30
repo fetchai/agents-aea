@@ -88,16 +88,6 @@ class NodeClient:
 
         return Envelope.decode(data)
 
-    async def read_message(self) -> Optional[bytes]:
-        """Read message from pipe."""
-        # tcp client will follow message format with size prefix
-        return await self.pipe.read()
-
-    async def write_message(self, data: bytes) -> None:
-        """Write message to pipe."""
-        # tcp client will follow message format with size prefix
-        await self._write(data)
-
     async def _write(self, data: bytes) -> None:
         """
         Write to the writer stream.
@@ -339,8 +329,9 @@ class P2PLibp2pClientConnection(Connection):
 
     async def _setup_connection(self) -> None:
         """Set up connection to node over tcp connection."""
-        if not self._node_client:
+        if not self._node_client:  # pragma: nocover
             raise ValueError("Connection was not connected!")
+
         await self._node_client.register(
             address=self.node_por.address,
             public_key=self.node_por.public_key,
@@ -406,8 +397,9 @@ class P2PLibp2pClientConnection(Connection):
 
         :return: None
         """
-        if not self._node_client:
+        if not self._node_client:  # pragma: nocover
             raise ValueError("Connection not connected to node!")
+
         self._ensure_valid_envelope_for_external_comms(envelope)
         try:
             await self._node_client.send_envelope(envelope)
@@ -420,8 +412,9 @@ class P2PLibp2pClientConnection(Connection):
 
     async def _read_envelope_from_node(self) -> Optional[Envelope]:
         """Read envelope from node, reconnec on error."""
-        if not self._node_client:
+        if not self._node_client:  # pragma: nocover
             raise ValueError("Connection not connected to node!")
+
         try:
             self.logger.debug("Waiting for messages...")
             envelope = await self._node_client.read_envelope()
@@ -449,8 +442,9 @@ class P2PLibp2pClientConnection(Connection):
 
         :return: None
         """
-        if not self._node_client:
+        if not self._node_client:  # pragma: nocover
             raise ValueError("Connection not connected to node!")
+
         while True:
             envelope = await self._read_envelope_from_node()
             if self._in_queue is None:
