@@ -67,16 +67,16 @@ class TestSimpleAggregationSkill(AEATestCaseManyFlaky):
         for (i, agent) in enumerate(agents):
             # add packages for agent
             self.set_agent_context(agent)
-            self.add_item("connection", "fetchai/p2p_libp2p:0.21.0")
+            self.add_item("connection", "fetchai/p2p_libp2p:0.22.0")
             self.add_item("connection", "fetchai/http_client:0.22.0")
             self.add_item("connection", "fetchai/http_server:0.21.0")
-            self.add_item("connection", "fetchai/soef:0.22.0")
+            self.add_item("connection", "fetchai/soef:0.23.0")
             self.add_item("connection", "fetchai/prometheus:0.7.0")
-            self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.21.0")
+            self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.22.0")
             self.nested_set_config(
                 "agent.required_ledgers", [FetchAICrypto.identifier],
             )
-            self.add_item("skill", "fetchai/advanced_data_request:0.4.0")
+            self.add_item("skill", "fetchai/advanced_data_request:0.5.0")
             self.add_item("skill", "fetchai/simple_aggregation:0.1.0")
 
             self.set_config(
@@ -92,7 +92,7 @@ class TestSimpleAggregationSkill(AEATestCaseManyFlaky):
             setting_path = (
                 "vendor.fetchai.connections.http_server.config.target_skill_id"
             )
-            self.set_config(setting_path, "fetchai/advanced_data_request:0.4.0")
+            self.set_config(setting_path, "fetchai/advanced_data_request:0.5.0")
             self.set_config(
                 "vendor.fetchai.skills.simple_aggregation.models.strategy.args.quantity_name",
                 "price",
