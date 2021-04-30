@@ -21,8 +21,9 @@
 package protocols
 
 import (
-	"gotest.tools/assert"
 	"testing"
+
+	"gotest.tools/assert"
 )
 
 const (
@@ -39,7 +40,7 @@ func TestMessage(t *testing.T) {
 	message.Content = []byte(`{"performative": "request", "data": "hello"}`)
 
 	result := DialogueMessageWrapper{}
-	err := result.InitFromProtobuf(&message)
+	err := result.InitFromProtobufAndPerfofrmative(&message, "request")
 	if err != nil {
 		t.Fatalf("Error: %s", err.Error())
 	}
@@ -48,6 +49,5 @@ func TestMessage(t *testing.T) {
 	assert.Equal(t, result.dialogueReference.dialogueStarterReference, DialogueStarterReference)
 	assert.Equal(t, result.dialogueReference.dialogueResponderReference, DialogueResponderReference)
 	assert.Equal(t, result.target, StartingTarget)
-	assert.Equal(t, result.body["performative"], "request")
-	assert.Equal(t, result.body["data"], "hello")
+	assert.Equal(t, result.performative, Performative("request"))
 }

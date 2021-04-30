@@ -1196,13 +1196,8 @@ def ledger_api(ethereum_testnet_config, ganache):
     yield api
 
 
-@pytest.fixture()
-def erc1155_contract(ledger_api, ganache, ganache_addr, ganache_port):
-    """
-    Instantiate an ERC1155 contract instance.
-
-    As a side effect, register it to the registry, if not already registered.
-    """
+def get_register_erc1155() -> Contract:
+    """Get and register the erc1155 contract package."""
     directory = Path(ROOT_DIR, "packages", "fetchai", "contracts", "erc1155")
     configuration = load_component_configuration(ComponentType.CONTRACT, directory)
     configuration._directory = directory
@@ -1213,7 +1208,17 @@ def erc1155_contract(ledger_api, ganache, ganache_addr, ganache_port):
         Contract.from_config(configuration)
 
     contract = contract_registry.make(str(configuration.public_id))
+    return contract
 
+
+@pytest.fixture()
+def erc1155_contract(ledger_api, ganache, ganache_addr, ganache_port):
+    """
+    Instantiate an ERC1155 contract instance.
+
+    As a side effect, register it to the registry, if not already registered.
+    """
+    contract = get_register_erc1155()
     # deploy contract
     crypto = make_crypto(
         EthereumCrypto.identifier, private_key_path=ETHEREUM_PRIVATE_KEY_PATH

@@ -25,7 +25,7 @@ import (
 )
 
 // getTestDialogue builds a dialogue object for testing purposes.
-func getTestDialogue() *Dialogue {
+func getTestDialogue() Dialogue {
 	return NewDialogue(
 		getTestDialogueLabel(),
 		senderAddress,
@@ -38,7 +38,7 @@ func getTestDialogue() *Dialogue {
 }
 
 func TestStorage(t *testing.T) {
-	storage := NewSimpleDialogueStorage()
+	storage := NewSimpleDialogueStorage(nil)
 	dialogue := getTestDialogue()
 
 	// Test storage methods without dialogues
@@ -48,7 +48,7 @@ func TestStorage(t *testing.T) {
 	}
 
 	// Test storage methods after a dialogue is added
-	storage.AddDialogue(dialogue)
+	storage.AddDialogue(&dialogue)
 	result = storage.GetDialogue(dialogue.dialogueLabel)
 	if result == nil {
 		t.Fatal("dialogue expected")

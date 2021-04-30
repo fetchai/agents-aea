@@ -370,7 +370,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             kwargs=ContractApiMessage.Kwargs(
                 {
                     "deployer_address": self.skill.skill_context.agent_address,
-                    "recipient_address": self.skill.skill_context.agent_address,
+                    "recipient_address": self.agent_1_address,
                     "token_ids": [2, 3, 1],
                     "mint_quantities": [1, 2, 10],
                     "gas": 5000000,
@@ -469,7 +469,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             kwargs=ContractApiMessage.Kwargs(
                 {
                     "deployer_address": self.skill.skill_context.agent_address,
-                    "recipient_address": self.skill.skill_context.agent_address,
+                    "recipient_address": self.agent_1_address,
                     "token_ids": [2, 3, 1],
                     "mint_quantities": [1, 2, 10],
                     "gas": 5000000,

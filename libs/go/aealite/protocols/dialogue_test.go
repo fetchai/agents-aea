@@ -20,7 +20,57 @@
 
 package protocols
 
-//func TestDialogue(t *testing.T) {
+import (
+	"reflect"
+	"testing"
+)
+
+func TestDialogue(t *testing.T) {
+	label := getTestDialogueLabel()
+	initialPerformatives := []Performative{"start"}
+	terminalPerformatives := []Performative{"end"}
+	validReplies := map[Performative][]Performative{"start": {"end"}}
+	rules := NewRules(initialPerformatives, terminalPerformatives, validReplies)
+	dialogue := NewDialogue(
+		label,
+		senderAddress,
+		Role1,
+		initialPerformatives,
+		terminalPerformatives,
+		validReplies,
+	)
+	// test getters
+	if dialogue.DialogueLabel() != label {
+		t.Fatalf("unexpected return value of DialogueLabel()")
+	}
+	if dialogue.IncompleteDialogueLabel() != label.IncompleteVersion() {
+		t.Fatalf("unexpected return value of IncompleteDialogueLabel()")
+	}
+	if dialogue.DialogueLabels() != [2]DialogueLabel{label, label.IncompleteVersion()} {
+		t.Fatalf("unexpected return value of DialogueLabels()")
+	}
+	if dialogue.SelfAddress() != senderAddress {
+		t.Fatalf("unexpected return value of SelfAddress()")
+	}
+	if dialogue.Role() != Role1 {
+		t.Fatalf("unexpected return value of Role()")
+	}
+	if !reflect.DeepEqual(dialogue.Rules(), rules) {
+		t.Fatalf("unexpected return value of Rules()")
+	}
+	if dialogue.LastIncomingMessage() != nil {
+		t.Fatalf("unexpected return value of LastIncomingMessage(): the dialogue should be empty")
+	}
+	if dialogue.LastOutgoingMessage() != nil {
+		t.Fatalf("unexpected return value of LastOutgoingMessage(): the dialogue should be empty")
+	}
+	if dialogue.LastMessage() != nil {
+		t.Fatalf("unexpected return value of LastMessage(): the dialogue should be empty")
+	}
+
+}
+
+////func TestDialogue(t *testing.T) {
 //	var performative Performative = "sample_performative"
 //	// createing initital dialogue instance
 //	message, dialogue := Create(

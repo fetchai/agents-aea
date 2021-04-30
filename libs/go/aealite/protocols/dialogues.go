@@ -60,6 +60,10 @@ type Dialogues struct {
 
 	dialogueName    string
 	dialogueStorage DialogueStorageInterface
+
+	initialPerformatives  []Performative
+	terminalPerformatives []Performative
+	validReplies          map[Performative][]Performative
 }
 
 func (dialogues *Dialogues) IsKeepDialoguesInTerminalStates() bool {
@@ -199,6 +203,7 @@ func (dialogues *Dialogues) Update(message ProtocolMessageInterface) (*Dialogue,
 
 	if dialogue != nil {
 		err := dialogue.update(message)
+
 		if err != nil {
 			// invalid message for the dialogue found
 			if isNewDialogue {
@@ -206,6 +211,7 @@ func (dialogues *Dialogues) Update(message ProtocolMessageInterface) (*Dialogue,
 				dialogues.dialogueStorage.RemoveDialogue(dialogue.dialogueLabel)
 			}
 			dialogue = nil
+			return dialogue, err
 		}
 		return dialogue, nil
 	}
@@ -360,34 +366,50 @@ func (dialogues *Dialogues) create(
 	} else {
 		copyLabel := *completeDialogueLabel
 		dialogues.dialogueStorage.SetIncompleteDialogue(incompleteDialogueLabel, copyLabel)
+		dialogueLabel = *completeDialogueLabel
 	}
 	if dialogues.dialogueStorage.IsDialoguePresent(dialogueLabel) {
 		return nil, errors.New("dialogue label already present in dialogues")
 	}
-	dialogue := Dialogue{
-		dialogueLabel: dialogueLabel,
-		selfAddress:   dialogues.selfAddress,
-		role:          role,
-	}
+	dialogue := NewDialogue(
+		dialogueLabel,
+		dialogues.selfAddress,
+		role,
+		dialogues.initialPerformatives,
+		dialogues.terminalPerformatives,
+		dialogues.validReplies,
+	)
 	dialogues.dialogueStorage.AddDialogue(&dialogue)
 	return &dialogue, nil
 }
 
 func NewDialogues(
 	selfAddress Address,
-	endStates helpers.Set,
 	roleFromFirstMessage func(ProtocolMessageInterface, Address) Role,
 	keepTerminalStateDialogues bool,
 	dialogueName string,
-) *Dialogues {
+
+	initialPerformatives []Performative,
+	terminalPerformatives []Performative,
+	validReplies map[Performative][]Performative) *Dialogues {
+
+	endStatesSet := helpers.NewSet()
+
+	for _, endState := range terminalPerformatives {
+		endStatesSet.Add(endState)
+	}
+
 	dialogues := Dialogues{
 		selfAddress:                selfAddress,
-		endStates:                  endStates,
+		endStates:                  endStatesSet,
 		roleFromFirstMessage:       roleFromFirstMessage,
 		keepTerminalStateDialogues: keepTerminalStateDialogues,
 		dialogueName:               dialogueName,
+		initialPerformatives:       initialPerformatives,
+		terminalPerformatives:      terminalPerformatives,
+		validReplies:               validReplies,
 	}
-	storage := NewSimpleDialogueStorage()
+	storage := NewSimpleDialogueStorage(&dialogues)
 	dialogues.dialogueStorage = storage
 
 	return &dialogues
