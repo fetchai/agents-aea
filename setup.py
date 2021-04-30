@@ -61,7 +61,7 @@ base_deps = [
     "ecdsa>=0.15"
 ]
 
-if os.name == "nt":
+if os.name == "nt" or os.getenv("WIN_BUILD_WHEEL", None) == "1":
     base_deps.append("pywin32>=300")
 
 here = os.path.abspath(os.path.dirname(__file__))
