@@ -181,11 +181,10 @@ class AggregationStrategy(Model):
             self.context.logger.info("No observations to aggregate")
             return
         self._aggregation = self._aggregate(values)
-        self.context.shared_state["aggregation"] = {
-            self.quantity_name: {
-                "value": int(self._aggregation),
-                "decimals": self._decimals,
-            }
+        aggregated_key = self.quantity_name + "_" + self._aggregation_function
+        self.context.shared_state[aggregated_key] = {
+            "value": int(self._aggregation),
+            "decimals": self._decimals,
         }
         self.context.logger.info(f"Observations: {values}")
         self.context.logger.info(

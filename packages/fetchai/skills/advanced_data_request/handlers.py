@@ -123,7 +123,7 @@ class HttpHandler(Handler):
 
         msg_body = json.loads(http_msg.body)
 
-        observation = {}
+        success = False
         for output in model.outputs:
             json_path = output["json_path"]
 
@@ -134,22 +134,21 @@ class HttpHandler(Handler):
             if is_number(value):
                 float_value = float(value)
                 int_value = int(float_value * 10 ** model.decimals)
-                observation[output["name"]] = {
-                    "value": int_value,
-                    "decimals": model.decimals,
+                observation = {
+                    output["name"]: {"value": int_value, "decimals": model.decimals,}
                 }
             elif isinstance(value, str):
-                observation[output["name"]] = {
-                    "value": value,
-                }
+                observation = {output["name"]: {"value": value,}}
             else:
                 self.context.logger.warning(
                     f"No valid output for {output['name']} found in response."
                 )
+                continue
+            success = True
+            self.context.shared_state.update(observation)
+            self.context.logger.info(f"Observation: {observation}")
 
-        self.context.shared_state["observation"] = observation
-        self.context.logger.info(f"Observation: {observation}")
-        if observation and self.context.prometheus_dialogues.enabled:
+        if success and self.context.prometheus_dialogues.enabled:
             metric_name = "num_retrievals"
             self.context.behaviours.advanced_data_request_behaviour.update_prometheus_metric(
                 metric_name, "inc", 1.0, {}
@@ -187,6 +186,15 @@ class HttpHandler(Handler):
         :param http_dialogue: the http dialogue
         :return: None
         """
+
+        model = self.context.advanced_data_request_model
+        outputs = [output["name"] for output in model.outputs]
+        data = {
+            key: value
+            for (key, value) in self.context.shared_state.items()
+            if key in outputs
+        }
+
         http_response = http_dialogue.reply(
             performative=HttpMessage.Performative.RESPONSE,
             target_message=http_msg,
@@ -194,9 +202,7 @@ class HttpHandler(Handler):
             status_code=200,
             status_text="Success",
             headers=http_msg.headers,
-            body=json.dumps(self.context.shared_state.get("observation", "")).encode(
-                "utf-8"
-            ),
+            body=json.dumps(data).encode("utf-8"),
         )
         self.context.logger.info("responding with: {}".format(http_response))
         self.context.outbox.put_message(message=http_response)
