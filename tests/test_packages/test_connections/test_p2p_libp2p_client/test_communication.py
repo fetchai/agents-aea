@@ -16,9 +16,8 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
-
 """This test module contains tests for Libp2p tcp client connection."""
+import asyncio
 import os
 import shutil
 import tempfile
@@ -33,7 +32,7 @@ from aea_ledger_fetchai import FetchAICrypto
 from aea.mail.base import Envelope
 from aea.multiplexer import Multiplexer
 
-from packages.fetchai.connections.p2p_libp2p_client.connection import Uri
+from packages.fetchai.connections.p2p_libp2p_client.connection import NodeClient, Uri
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.default.serialization import DefaultSerializer
 
@@ -729,7 +728,7 @@ class TestLibp2pClientReconnectionSendEnvelope(BaseTestLibp2pClientReconnection)
         with mock.patch.object(
             self.connection_client_1.logger, "exception"
         ) as _mock_logger, mock.patch.object(
-            self.connection_client_1._writer, "write", side_effect=Exception
+            self.connection_client_1._node_client, "_write", side_effect=Exception
         ):
             self.multiplexer_client_1.put(envelope)
             delivered_envelope = self.multiplexer_client_2.get(block=True, timeout=20)
@@ -760,8 +759,11 @@ class TestLibp2pClientReconnectionReceiveEnvelope(BaseTestLibp2pClientReconnecti
         # make the receive to fail
         with mock.patch.object(
             self.connection_client_1.logger, "error"
-        ) as _mock_logger:
-            self.connection_client_1._reader.set_exception(ConnectionError())
+        ) as _mock_logger, mock.patch.object(
+            self.connection_client_1._node_client,
+            "_read",
+            side_effect=ConnectionError(),
+        ):
             # this envelope will be lost.
             self.multiplexer_client_2.put(envelope)
             # give time to reconnect
@@ -781,3 +783,15 @@ class TestLibp2pClientReconnectionReceiveEnvelope(BaseTestLibp2pClientReconnecti
             == envelope.protocol_specification_id
         )
         assert delivered_envelope.message == envelope.message
+
+
+@pytest.mark.asyncio
+async def test_nodeclient_pipe_connect():
+    """Test pipe.connect called on NodeClient.connect."""
+    f = asyncio.Future()
+    f.set_result(None)
+    pipe = Mock()
+    pipe.connect.return_value = f
+    node_client = NodeClient(pipe)
+    await node_client.connect()
+    pipe.connect.assert_called_once()
