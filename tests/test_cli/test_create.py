@@ -84,7 +84,7 @@ class TestCreate:
         result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
         )
-        assert result.exit_code == 0
+        assert result.exit_code == 0, result.stdout
 
         cls.result = cls.runner.invoke(
             cli,

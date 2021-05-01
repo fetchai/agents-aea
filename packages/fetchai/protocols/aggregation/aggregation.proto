@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package aea.fetchai.aggregation.v0_1_0;
+
+message AggregationMessage{
+
+  // Performatives and contents
+  message Observation_Performative{
+    int32 value = 1;
+    string time = 2;
+    string source = 3;
+    string signature = 4;
+  }
+
+  message Aggregation_Performative{
+    int32 value = 1;
+    string time = 2;
+    repeated string contributors = 3;
+    string signature = 4;
+  }
+
+
+  oneof performative{
+    Aggregation_Performative aggregation = 5;
+    Observation_Performative observation = 6;
+  }
+}

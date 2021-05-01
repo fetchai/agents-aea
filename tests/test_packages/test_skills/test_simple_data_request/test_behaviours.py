@@ -65,8 +65,50 @@ class TestHttpRequestBehaviour(SimpleDataRequestTestCase):
         assert self.http_request_behaviour.setup() is None
         self.assert_quantity_in_outbox(0)
 
-    def test_act(self):
-        """Test the act method of the http_request behaviour."""
+    def test_act_i(self):
+        """Test the act method of the http_request behaviour where lookup_termination_key IS None."""
+        # setup
+        self.http_request_behaviour.lookup_termination_key = None
+
+        # operation
+        self.http_request_behaviour.act()
+
+        # after
+        self.assert_quantity_in_outbox(1)
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=self.get_message_from_outbox(),
+            message_type=HttpMessage,
+            performative=HttpMessage.Performative.REQUEST,
+            to=str(HTTP_CLIENT_PUBLIC_ID),
+            sender=str(self.skill.skill_context.skill_id),
+            method=self.mocked_method,
+            url=self.mocked_url,
+            headers="",
+            version="",
+            body=json.dumps(self.http_request_behaviour.body).encode("utf-8"),
+        )
+        assert has_attributes, error_str
+
+    def test_act_ii(self):
+        """Test the act method of the http_request behaviour where lookup_termination_key is NOT None and lookup_termination_key is False."""
+        # setup
+        key = "some_key"
+        self.http_request_behaviour.lookup_termination_key = key
+        self.skill.skill_context.shared_state[key] = False
+
+        # operation
+        self.http_request_behaviour.act()
+
+        # after
+        self.assert_quantity_in_outbox(0)
+
+    def test_act_iii(self):
+        """Test the act method of the http_request behaviour where lookup_termination_key is NOT None and lookup_termination_key is True."""
+        # setup
+        key = "some_key"
+        self.http_request_behaviour.lookup_termination_key = key
+        self.skill.skill_context.shared_state[key] = True
+
         # operation
         self.http_request_behaviour.act()
 

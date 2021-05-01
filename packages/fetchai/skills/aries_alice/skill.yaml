@@ -1,6 +1,6 @@
 name: aries_alice
 author: fetchai
-version: 0.21.0
+version: 0.22.0
 type: skill
 description: The aries_alice skill implements the alice player in the aries cloud
   agent demo
@@ -8,11 +8,11 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: Qmc88RFakLqDTqT42YGJDCDrH22tW2dkCBAs8wLKMGt5TV
-  __init__.py: QmdNLGHkVT4PwHz3NcaSJDpCi7JLMsPZiya7zPhhJTX1jX
-  behaviours.py: QmbRM4Gv555K4iNCNXzM7J8xjyHRZiMbWnDeo56TN2KZyx
+  __init__.py: QmTiLfLMvHMUzrgQ7tMtYewLrz5DDihRV2YoLkq6ycCBby
+  behaviours.py: QmeVpN2b4M3w84Q8MeBxfcdSB7tFQcgDYHgAcWEqEyibcC
   dialogues.py: QmS74KVR3EHXSTFa7P1dcqbJsFjNNo4gPzekhKXfKbD3Wj
-  handlers.py: QmQ3hj2HwLDr9zjvFu68jmsgvGiPPjz3QSYSmQVrfhErDP
-  strategy.py: QmPumiGj27yCP3Jjkz9ndYgjxqvGsZbHqBynJ8syZ4GPvH
+  handlers.py: QmXmxZ8kcpPHPZBCUUzoBoma7UjyYPayBdLkDaCHtHQGTr
+  strategy.py: Qmb6naFGGHgcirrwNf6VUxyVa4BYKNFwyCttqkKn7mER8U
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/http_client:0.22.0
@@ -25,6 +25,7 @@ skills: []
 behaviours:
   alice:
     args:
+      max_soef_registration_retries: 5
       services_interval: 20
     class_name: AliceBehaviour
 handlers:
@@ -51,9 +52,15 @@ models:
     args:
       admin_host: 127.0.0.1
       admin_port: 8031
+      classification:
+        piece: classification
+        value: identity.aries.alice
       location:
         latitude: 51.5194
         longitude: 0.127
+      personality_data:
+        piece: genus
+        value: data
       service_data:
         key: intro_service
         value: intro_alice

@@ -1,0 +1,158 @@
+agent_name: simple_seller_aw5
+author: fetchai
+version: 0.1.0
+license: Apache-2.0
+description: An agent that participates in Agent World 5 as a simple seller.
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint: {}
+fingerprint_ignore_patterns: []
+connections:
+- fetchai/http_client:0.22.0
+- fetchai/ledger:0.18.0
+- fetchai/p2p_libp2p:0.22.0
+- fetchai/soef:0.23.0
+contracts: []
+protocols:
+- fetchai/contract_api:1.0.0
+- fetchai/default:1.0.0
+- fetchai/fipa:1.0.0
+- fetchai/http:1.0.0
+- fetchai/ledger_api:1.0.0
+- fetchai/oef_search:1.0.0
+- fetchai/register:1.0.0
+- fetchai/signing:1.0.0
+- fetchai/state_update:1.0.0
+skills:
+- fetchai/generic_seller:0.26.0
+- fetchai/registration_aw1:0.11.0
+- fetchai/simple_data_request:0.12.0
+- fetchai/simple_seller:0.12.0
+- fetchai/simple_service_registration:0.21.0
+- fetchai/simple_service_search:0.9.0
+default_connection: fetchai/p2p_libp2p:0.22.0
+default_ledger: fetchai
+required_ledgers:
+- fetchai
+default_routing:
+  fetchai/http:1.0.0: fetchai/http_client:0.22.0
+  fetchai/ledger_api:1.0.0: fetchai/ledger:0.18.0
+  fetchai/oef_search:1.0.0: fetchai/soef:0.23.0
+connection_private_key_paths: {}
+private_key_paths: {}
+logging_config:
+  disable_existing_loggers: false
+  version: 1
+  formatters:
+    standard:
+      format: '[%(levelname)s]: %(message)s'
+    extra:
+      format: '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+  handlers:
+    logfile:
+      class: logging.FileHandler
+      formatter: extra
+      level: DEBUG
+      filename: all.log
+    console:
+      class: logging.StreamHandler
+      formatter: standard
+      level: INFO
+  loggers:
+    aea:
+      handlers:
+      - logfile
+      - console
+      level: DEBUG
+      propagate: false
+dependencies:
+  aea-ledger-ethereum:
+    version: <2.0.0,>=1.0.0
+  aea-ledger-fetchai:
+    version: <2.0.0,>=1.0.0
+---
+public_id: fetchai/registration_aw1:0.11.0
+type: skill
+models:
+  strategy:
+    args:
+      announce_termination_key: aw-registration
+      developer_handle: PUT_YOUR_DEVELOPER_HANDLE_HERE
+      developer_handle_only: true
+      whitelist:
+      - PUT_WHITELIST_ADDRESSES_HERE
+---
+public_id: fetchai/simple_service_registration:0.21.0
+type: skill
+models:
+  strategy:
+    args:
+      location:
+        latitude: 51.5194
+        longitude: 0.127
+      service_data:
+        key: agentworld-5
+        value: PUT_YOUR_DEVELOPER_HANDLE_HERE
+---
+public_id: fetchai/simple_service_search:0.9.0
+type: skill
+models:
+  strategy:
+    args:
+      search_location:
+        latitude: 51.5194
+        longitude: 0.127
+      search_query:
+        constraint_type: ==
+        search_key: registration_service
+        search_value: aw5-registration
+---
+public_id: fetchai/p2p_libp2p:0.22.0
+type: connection
+config:
+  delegate_uri: null
+  public_uri: null
+  entry_peers:
+  - /dns4/acn.fetch.ai/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW
+---
+public_id: fetchai/soef:0.23.0
+type: connection
+config:
+  chain_identifier: fetchai_v2_testnet_incentivised
+---
+public_id: fetchai/ledger:0.18.0
+type: connection
+config:
+  ledger_apis:
+    fetchai:
+      address: https://rest-agentworld.prod.fetch-ai.com:443
+      chain_id: agentworld-1
+---
+public_id: fetchai/simple_seller:0.12.0
+type: skill
+models:
+  strategy:
+    args:
+      location:
+        latitude: 51.5074
+        longitude: -0.1278
+      service_data:
+        key: seller_service
+        value: weather_data
+      service_id: weather_data
+      shared_state_key: my_data
+      unit_price: 10
+---
+public_id: fetchai/simple_data_request:0.12.0
+type: skill
+behaviours:
+  http_request:
+    args:
+      request_interval: 20
+      body: ''
+      method: null
+      url: null
+      lookup_termination_key: aw-registration
+handlers:
+  http:
+    args:
+      shared_state_key: my_data

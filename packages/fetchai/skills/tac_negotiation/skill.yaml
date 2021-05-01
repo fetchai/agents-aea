@@ -1,6 +1,6 @@
 name: tac_negotiation
 author: fetchai
-version: 0.25.0
+version: 0.26.0
 type: skill
 description: The tac negotiation skill implements the logic for an AEA to do fipa
   negotiation in the TAC.
@@ -8,12 +8,12 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmdpJypf1uoDBW54DC2req7bst1Hw548piYmMKUaPPVHeB
-  __init__.py: QmTRmHgiGa89g5t3n8WBtEEBirnRUt3rsJAeDWin8nZtaB
-  behaviours.py: QmWG6gEXaUB44H9xdHcAT6QqjqxPeG18QdVmB42L5YrVfd
+  __init__.py: QmUz2i53GeSpQVmuQSrZQABdT83k39tSPi4qTUiFKZTvJw
+  behaviours.py: QmQrguMfyMXUnSgGBhNE4D6ep1or3TxPQ2zXj7EVFwtwcT
   dialogues.py: Qmes8sm5yw7pYsKbGbfZNvihJnmtqDdzbdWmrZdx8p8P18
-  handlers.py: QmeYmgtii47STzcvw4k4WFwQ1Zqmtjf9ygJwmUtHQaQNAp
+  handlers.py: QmNXd9d5aBVmPK1bPsp28voaN4becNHKnpAvABFcHfdB38
   helpers.py: QmTJbGL8V6CLhbVhLekqKkHbu7cJMfBcv8DtWLSpkKP5tk
-  strategy.py: QmVmmo1n1yKtCm54MkVhvQeHLjsANAG3Wdy7UQuKbgDpRr
+  strategy.py: QmfYTikXbLjEsjNUt6ayr61pPhUYVbMSVqhQt7L1E53NT8
   transactions.py: QmPZoTBt1otvnkdMDwWdPExLKA7kk6fyUS1prVZqipVUVM
 fingerprint_ignore_patterns: []
 connections:
@@ -36,6 +36,7 @@ behaviours:
     class_name: TransactionCleanUpBehaviour
   tac_negotiation:
     args:
+      max_soef_registration_retries: 5
       search_interval: 5.0
     class_name: GoodsRegisterAndSearchBehaviour
 handlers:
@@ -75,10 +76,16 @@ models:
     class_name: SigningDialogues
   strategy:
     args:
+      classification:
+        piece: classification
+        value: tac.participant
       is_contract_tx: false
       location:
         latitude: 51.5194
         longitude: 0.127
+      personality_data:
+        piece: genus
+        value: data
       register_as: both
       search_for: both
       search_radius: 5.0

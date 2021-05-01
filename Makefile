@@ -110,7 +110,11 @@ install: clean
 .PHONY: dist
 dist: clean
 	python setup.py sdist
-	python setup.py bdist_wheel
+	WIN_BUILD_WHEEL=1 python setup.py bdist_wheel --plat-name=win_amd64
+	WIN_BUILD_WHEEL=1 python setup.py bdist_wheel --plat-name=win32
+	python setup.py bdist_wheel --plat-name=manylinux1_x86_64
+	python setup.py bdist_wheel --plat-name=manylinux2014_aarch64
+	python setup.py bdist_wheel --plat-name=macosx_10_9_x86_64
 
 h := $(shell git rev-parse --abbrev-ref HEAD)
 

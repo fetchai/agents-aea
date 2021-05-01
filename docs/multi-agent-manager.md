@@ -23,8 +23,8 @@ We first add a couple of finished AEA project:
 ``` python
 from aea.configurations.base import PublicId
 
-weather_station_id = PublicId.from_str("fetchai/weather_station:0.27.0")
-weather_client_id = PublicId.from_str("fetchai/weather_client:0.28.0")
+weather_station_id = PublicId.from_str("fetchai/weather_station:0.28.0")
+weather_client_id = PublicId.from_str("fetchai/weather_client:0.29.0")
 manager.add_project(weather_station_id)
 manager.add_project(weather_client_id)
 weather_station_name = weather_station_id.name
@@ -41,8 +41,8 @@ agent_overrides = {
     "connection_private_key_paths": {"fetchai": "fetchai_connection_private_key.txt"}
 }
 
-p2p_public_id = PublicId.from_str("fetchai/p2p_libp2p:0.21.0")
-soef_public_id = PublicId.from_str("fetchai/soef:0.22.0")
+p2p_public_id = PublicId.from_str("fetchai/p2p_libp2p:0.22.0")
+soef_public_id = PublicId.from_str("fetchai/soef:0.23.0")
 
 component_overrides = [{
     **p2p_public_id.json,
@@ -144,3 +144,7 @@ manager.stop_all_agents()
 ``` python
 manager.stop_manager()
 ```
+
+# Limitations
+
+The `MultiAgentManager` can only be used with compatible package versions, in particular the same package (with respect to author and name) cannot be used in different versions. If you want to run multiple agents with differing versions of the same package then use the `aea launch` command in the multi-processing mode, or simply launch each agent individually with `aea run`.

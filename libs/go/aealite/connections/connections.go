@@ -32,7 +32,7 @@ type Socket interface {
 }
 
 type Connection interface {
-	InitFromEnv() error
+	InitFromEnv(envFile string) error
 	Connect() error
 	Get() *protocols.Envelope
 	Put(envelope *protocols.Envelope) error

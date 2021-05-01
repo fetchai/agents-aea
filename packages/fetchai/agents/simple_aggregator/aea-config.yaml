@@ -1,0 +1,63 @@
+agent_name: simple_aggregator
+author: fetchai
+version: 0.1.0
+license: Apache-2.0
+description: AEA that aggregates observations
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint: {}
+fingerprint_ignore_patterns: []
+connections:
+- fetchai/http_client:0.22.0
+- fetchai/http_server:0.21.0
+- fetchai/p2p_libp2p:0.22.0
+- fetchai/prometheus:0.7.0
+- fetchai/soef:0.23.0
+contracts: []
+protocols:
+- fetchai/aggregation:0.1.0
+- fetchai/default:1.0.0
+- fetchai/http:1.0.0
+- fetchai/oef_search:1.0.0
+- fetchai/prometheus:1.0.0
+- fetchai/signing:1.0.0
+- fetchai/state_update:1.0.0
+skills:
+- fetchai/advanced_data_request:0.5.0
+- fetchai/simple_aggregation:0.1.0
+default_connection: fetchai/p2p_libp2p:0.22.0
+default_ledger: fetchai
+required_ledgers:
+- fetchai
+logging_config:
+  disable_existing_loggers: false
+  version: 1
+default_routing: {}
+connection_private_key_paths: {}
+private_key_paths: {}
+dependencies:
+  aea-ledger-fetchai:
+    version: <2.0.0,>=1.0.0
+---
+public_id: fetchai/advanced_data_request:0.5.0
+type: skill
+models:
+  advanced_data_request_model:
+    args:
+      decimals: 0
+      use_http_server: false
+---
+public_id: fetchai/http_server:0.21.0
+type: connection
+config:
+  target_skill_id: fetchai/advanced_data_request:0.5.0
+---
+public_id: fetchai/simple_aggregation:0.1.0
+type: skill
+models:
+  strategy:
+    args:
+      aggregation_function: mean
+      quantity_name: price
+      search_query:
+        search_value: generic_aggregation_service
+      service_id: generic_aggregation_service

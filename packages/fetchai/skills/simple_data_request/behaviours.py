@@ -45,6 +45,7 @@ class HttpRequestBehaviour(TickerBehaviour):
         self.url = kwargs.pop("url", None)
         self.method = kwargs.pop("method", None)
         self.body = kwargs.pop("body", None)
+        self.lookup_termination_key = kwargs.pop("lookup_termination_key", None)
         if self.url is None or self.method is None or self.body is None:
             raise ValueError("Url, method and body must be provided.")
         super().__init__(tick_interval=request_interval, **kwargs)
@@ -62,6 +63,13 @@ class HttpRequestBehaviour(TickerBehaviour):
 
         :return: None
         """
+        if self.lookup_termination_key is not None:
+            prerequisite_satisfied = self.context.shared_state.get(
+                self.lookup_termination_key, False
+            )
+            if not prerequisite_satisfied:
+                return
+
         self._generate_http_request()
 
     def _generate_http_request(self) -> None:

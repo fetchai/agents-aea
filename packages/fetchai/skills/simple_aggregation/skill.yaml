@@ -1,0 +1,72 @@
+name: simple_aggregation
+author: fetchai
+version: 0.1.0
+type: skill
+description: The skill for aggregating observations between AEAs
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint:
+  README.md: QmSFsC6K217XxwuH5fXGQYU29J44VvW9Qim5yNPAbXLegV
+  __init__.py: QmRiWWZD3akeTSkr5UksPrRc83qvjbQm9eZTqEQ1DsZK3Z
+  behaviours.py: QmaKqoxGNfFCriEXbCBZLqcbvo1DhqoUdiRnDpitCJhJBq
+  dialogues.py: QmaAnWJHSrAVqbswjGpJ9ukBA2QDdXxJAy33Gtabet3Bny
+  handlers.py: QmTzg7SbhJDbnmTmz914QAJyNtEuZqWK2cSVdhwgT6otfL
+  strategy.py: QmNpKikbpCJ9vMrpSdaPPk4FKQe8GTiBBovpMEHcfnDHoh
+fingerprint_ignore_patterns: []
+contracts: []
+protocols:
+- fetchai/aggregation:0.1.0
+- fetchai/default:1.0.0
+- fetchai/oef_search:1.0.0
+skills: []
+behaviours:
+  aggregation:
+    args:
+      aggregation_interval: 10
+    class_name: AggregationBehaviour
+  search:
+    args:
+      max_soef_registration_retries: 5
+      search_interval: 10
+    class_name: SearchBehaviour
+handlers:
+  aggregation:
+    args: {}
+    class_name: AggregationHandler
+  oef_search:
+    args: {}
+    class_name: OefSearchHandler
+models:
+  aggregation_dialogues:
+    args: {}
+    class_name: AggregationDialogues
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
+  oef_search_dialogues:
+    args: {}
+    class_name: OefSearchDialogues
+  strategy:
+    args:
+      aggregation_function: mean
+      classification:
+        piece: classification
+        value: agent
+      decimals: 0
+      location:
+        latitude: 51.5194
+        longitude: 0.127
+      personality_data:
+        piece: genus
+        value: data
+      quantity_name: null
+      search_query:
+        constraint_type: ==
+        search_key: service
+        search_value: generic_aggregation_service
+      search_radius: 5.0
+      service_id: generic_aggregation_service
+    class_name: AggregationStrategy
+dependencies: {}
+is_abstract: false
+connections: []

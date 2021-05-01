@@ -182,4 +182,4 @@ class MyContract(Contract):
 ```
 Above, we implement a method to create a transaction, in this case a transaction to create a batch of tokens. The method will be called by the framework, specifically the `fetchai/ledger:0.18.0` connection once it receives a message (see bullet point 2 above). The method first gets the latest transaction nonce of the `deployer_address`, then constructs the contract instance, then uses the instance to build the transaction and finally updates the gas on the transaction.
 
-It helps to look at existing contract packages, like `fetchai/erc1155:0.21.0`, and skills using them, like `fetchai/erc1155_client:0.11.0` and `fetchai/erc1155_deploy:0.27.0`, for inspiration and guidance.
+It helps to look at existing contract packages, like `fetchai/erc1155:0.21.0`, and skills using them, like `fetchai/erc1155_client:0.11.0` and `fetchai/erc1155_deploy:0.28.0`, for inspiration and guidance.

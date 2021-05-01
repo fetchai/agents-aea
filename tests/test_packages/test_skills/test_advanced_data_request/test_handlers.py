@@ -126,7 +126,12 @@ class TestHttpHandler(BaseSkillTestCase):
             "output1": {"value": 100000, "decimals": 5},
             "output2": {"value": "XXX"},
         }
-        assert self.http_handler.context.shared_state["observation"] == observation
+        assert (
+            self.http_handler.context.shared_state["output1"] == observation["output1"]
+        )
+        assert (
+            self.http_handler.context.shared_state["output2"] == observation["output2"]
+        )
 
         # check that outbox contains update_prometheus metric message
         self.assert_quantity_in_outbox(1)
@@ -178,7 +183,7 @@ class TestHttpHandler(BaseSkillTestCase):
         with patch.object(self.logger, "log") as mock_logger:
             self.http_handler.handle(incoming_message)
 
-        assert self.http_handler.context.shared_state["observation"] == {}
+        assert "output1" not in self.http_handler.context.shared_state
 
         # after
         mock_logger.assert_any_call(
@@ -205,9 +210,7 @@ class TestHttpHandler(BaseSkillTestCase):
         with patch.object(self.logger, "log") as mock_logger:
             self.http_handler.handle(incoming_message)
 
-        assert self.http_handler.context.shared_state["observation"] == {
-            "output2": {"value": "XXX"}
-        }
+        assert self.http_handler.context.shared_state["output2"] == {"value": "XXX"}
 
         # after
         mock_logger.assert_any_call(
@@ -237,7 +240,7 @@ class TestHttpHandler(BaseSkillTestCase):
         with patch.object(self.logger, "log") as mock_logger:
             self.http_handler.handle(incoming_message)
 
-        assert "observation" not in self.http_handler.context.shared_state
+        assert "output1" not in self.http_handler.context.shared_state
 
         # after
         mock_logger.assert_any_call(

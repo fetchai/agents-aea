@@ -53,7 +53,7 @@ class TestThermometerSkill(AEATestCaseManyFlaky):
 
         default_routing = {
             "fetchai/ledger_api:1.0.0": "fetchai/ledger:0.18.0",
-            "fetchai/oef_search:1.0.0": "fetchai/soef:0.22.0",
+            "fetchai/oef_search:1.0.0": "fetchai/soef:0.23.0",
         }
 
         # generate random location
@@ -64,8 +64,8 @@ class TestThermometerSkill(AEATestCaseManyFlaky):
 
         # add packages for agent one and run it
         self.set_agent_context(thermometer_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.21.0")
-        self.add_item("connection", "fetchai/soef:0.22.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.22.0")
+        self.add_item("connection", "fetchai/soef:0.23.0")
         self.set_config(
             "agent.dependencies",
             '{\
@@ -73,9 +73,9 @@ class TestThermometerSkill(AEATestCaseManyFlaky):
         }',
             type_="dict",
         )
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.21.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.22.0")
         self.add_item("connection", "fetchai/ledger:0.18.0")
-        self.add_item("skill", "fetchai/thermometer:0.24.0")
+        self.add_item("skill", "fetchai/thermometer:0.25.0")
         setting_path = (
             "vendor.fetchai.skills.thermometer.models.strategy.args.is_ledger_tx"
         )
@@ -107,8 +107,8 @@ class TestThermometerSkill(AEATestCaseManyFlaky):
 
         # add packages for agent two and run it
         self.set_agent_context(thermometer_client_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.21.0")
-        self.add_item("connection", "fetchai/soef:0.22.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.22.0")
+        self.add_item("connection", "fetchai/soef:0.23.0")
         self.set_config(
             "agent.dependencies",
             '{\
@@ -116,7 +116,7 @@ class TestThermometerSkill(AEATestCaseManyFlaky):
         }',
             type_="dict",
         )
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.21.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.22.0")
         self.add_item("connection", "fetchai/ledger:0.18.0")
         self.add_item("skill", "fetchai/thermometer_client:0.24.0")
         setting_path = (
@@ -193,7 +193,9 @@ class TestThermometerSkill(AEATestCaseManyFlaky):
 
         check_strings = (
             "registering agent on SOEF.",
-            "registering service on SOEF.",
+            "registering agent's service on the SOEF.",
+            "registering agent's personality genus on the SOEF.",
+            "registering agent's personality classification on the SOEF.",
             "received CFP from sender=",
             "sending a PROPOSE with proposal=",
             "received ACCEPT from sender=",
@@ -249,7 +251,7 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseManyFlaky):
 
         default_routing = {
             "fetchai/ledger_api:1.0.0": "fetchai/ledger:0.18.0",
-            "fetchai/oef_search:1.0.0": "fetchai/soef:0.22.0",
+            "fetchai/oef_search:1.0.0": "fetchai/soef:0.23.0",
         }
 
         # generate random location
@@ -260,8 +262,8 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseManyFlaky):
 
         # add packages for agent one and run it
         self.set_agent_context(thermometer_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.21.0")
-        self.add_item("connection", "fetchai/soef:0.22.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.22.0")
+        self.add_item("connection", "fetchai/soef:0.23.0")
         self.set_config(
             "agent.dependencies",
             '{\
@@ -269,15 +271,15 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseManyFlaky):
         }',
             type_="dict",
         )
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.21.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.22.0")
         self.add_item("connection", "fetchai/ledger:0.18.0")
-        self.add_item("skill", "fetchai/thermometer:0.24.0")
+        self.add_item("skill", "fetchai/thermometer:0.25.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/thermometer_aea:0.25.0", thermometer_aea_name
+            "fetchai/thermometer_aea:0.26.0", thermometer_aea_name
         )
         assert (
             diff == []
@@ -306,8 +308,8 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseManyFlaky):
 
         # add packages for agent two and run it
         self.set_agent_context(thermometer_client_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.21.0")
-        self.add_item("connection", "fetchai/soef:0.22.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.22.0")
+        self.add_item("connection", "fetchai/soef:0.23.0")
         self.set_config(
             "agent.dependencies",
             '{\
@@ -315,7 +317,7 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseManyFlaky):
         }',
             type_="dict",
         )
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.21.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.22.0")
         self.add_item("connection", "fetchai/ledger:0.18.0")
         self.add_item("skill", "fetchai/thermometer_client:0.24.0")
         setting_path = "agent.default_routing"
@@ -323,7 +325,7 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseManyFlaky):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/thermometer_client:0.26.0", thermometer_client_aea_name
+            "fetchai/thermometer_client:0.27.0", thermometer_client_aea_name
         )
         assert (
             diff == []
@@ -398,7 +400,9 @@ class TestThermometerSkillFetchaiLedger(AEATestCaseManyFlaky):
 
         check_strings = (
             "registering agent on SOEF.",
-            "registering service on SOEF.",
+            "registering agent's service on the SOEF.",
+            "registering agent's personality genus on the SOEF.",
+            "registering agent's personality classification on the SOEF.",
             "received CFP from sender=",
             "sending a PROPOSE with proposal=",
             "received ACCEPT from sender=",

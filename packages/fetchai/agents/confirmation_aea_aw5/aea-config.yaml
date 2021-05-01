@@ -1,0 +1,117 @@
+agent_name: confirmation_aea_aw5
+author: fetchai
+version: 0.1.0
+license: Apache-2.0
+description: This agent manages confirmation of registration for Agent World 5
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint: {}
+fingerprint_ignore_patterns: []
+connections:
+- fetchai/ledger:0.18.0
+- fetchai/p2p_libp2p:0.22.0
+- fetchai/soef:0.23.0
+contracts:
+- fetchai/staking_erc20:0.9.0
+protocols:
+- fetchai/contract_api:1.0.0
+- fetchai/default:1.0.0
+- fetchai/ledger_api:1.0.0
+- fetchai/oef_search:1.0.0
+- fetchai/register:1.0.0
+- fetchai/signing:1.0.0
+- fetchai/state_update:1.0.0
+skills:
+- fetchai/confirmation_aw1:0.13.0
+- fetchai/simple_service_registration:0.21.0
+default_ledger: fetchai
+required_ledgers:
+- fetchai
+default_routing:
+  fetchai/contract_api:1.0.0: fetchai/ledger:0.18.0
+  fetchai/ledger_api:1.0.0: fetchai/ledger:0.18.0
+  fetchai/oef_search:1.0.0: fetchai/soef:0.23.0
+connection_private_key_paths: {}
+private_key_paths: {}
+logging_config:
+  disable_existing_loggers: false
+  version: 1
+  formatters:
+    standard:
+      format: '[%(levelname)s]: %(message)s'
+    extra:
+      format: '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+  handlers:
+    logfile:
+      class: logging.FileHandler
+      formatter: extra
+      level: NOTSET
+      filename: all.log
+    logfile_error:
+      class: logging.FileHandler
+      formatter: extra
+      level: ERROR
+      filename: error.log
+    console:
+      class: logging.StreamHandler
+      formatter: standard
+      level: INFO
+  loggers:
+    aea:
+      handlers:
+      - logfile
+      - logfile_error
+      - console
+      level: DEBUG
+      propagate: false
+dependencies:
+  aea-ledger-fetchai:
+    version: <2.0.0,>=1.0.0
+default_connection: fetchai/p2p_libp2p:0.22.0
+---
+public_id: fetchai/p2p_libp2p:0.22.0
+type: connection
+config:
+  delegate_uri: null
+  public_uri: null
+  entry_peers:
+  - /dns4/acn.fetch.ai/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW
+---
+public_id: fetchai/soef:0.23.0
+type: connection
+config:
+  chain_identifier: fetchai_v2_testnet_incentivised
+  token_storage_path: soef_key.txt
+---
+public_id: fetchai/ledger:0.18.0
+type: connection
+config:
+  ledger_apis:
+    ethereum:
+      address: null
+    fetchai:
+      address: https://rest-agentworld.prod.fetch-ai.com:443
+      chain_id: agentworld-1
+---
+public_id: fetchai/simple_service_registration:0.21.0
+type: skill
+models:
+  strategy:
+    args:
+      location:
+        latitude: 51.5074
+        longitude: -0.1278
+      service_data:
+        key: registration_service
+        value: aw5-registration
+---
+public_id: fetchai/confirmation_aw1:0.13.0
+type: skill
+models:
+  registration_db:
+    args:
+      custom_path: registration.db
+  strategy:
+    args:
+      developer_handle_only: true
+      token_dispense_amount: 100000000000000000000
+      awx_aeas: []

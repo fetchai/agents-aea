@@ -222,7 +222,7 @@ class TacBehaviour(BaseTacBehaviour):
             kwargs=ContractApiMessage.Kwargs(
                 {
                     "deployer_address": self.context.agent_address,
-                    "recipient_address": self.context.agent_address,
+                    "recipient_address": agent_state.agent_address,
                     "token_ids": token_ids,
                     "mint_quantities": mint_quantities,
                     "gas": parameters.gas,

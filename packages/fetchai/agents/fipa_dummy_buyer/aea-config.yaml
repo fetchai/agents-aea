@@ -1,0 +1,39 @@
+agent_name: fipa_dummy_buyer
+author: fetchai
+version: 0.1.0
+description: Sample agent for FIPA interaction
+license: Apache-2.0
+aea_version: '>=1.0.0, <2.0.0'
+fingerprint: {}
+fingerprint_ignore_patterns: []
+connections:
+- fetchai/p2p_libp2p:0.22.0
+protocols:
+- fetchai/fipa:1.0.0
+- fetchai/signing:1.0.0
+skills:
+- fetchai/fipa_dummy_buyer:0.1.0
+default_connection: fetchai/p2p_libp2p:0.22.0
+default_ledger: fetchai
+contracts: []
+required_ledgers:
+- fetchai
+logging_config:
+  disable_existing_loggers: false
+  version: 1
+private_key_paths: {}
+default_routing: {}
+connection_private_key_paths: {}
+dependencies:
+  aea-ledger-fetchai:
+    version: <2.0.0,>=1.0.0
+---
+public_id: fetchai/p2p_libp2p:0.22.0
+type: connection
+config:
+  delegate_uri: null
+  entry_peers:
+  - /dns4/acn.fetch.ai/tcp/9000/p2p/16Uiu2HAkw1ypeQYQbRFV5hKUxGRHocwU5ohmVmCnyJNg36tnPFdx
+  - /dns4/acn.fetch.ai/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW
+  public_uri: null
+  local_uri: 127.0.0.1:9000
