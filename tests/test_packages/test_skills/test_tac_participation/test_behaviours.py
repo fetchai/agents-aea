@@ -274,14 +274,8 @@ class TestTransactionProcessBehaviour(BaseSkillTestCase):
         self.game._tac_dialogue = tac_dialogue
 
         # operation
-        with patch.object(self.logger, "log") as mock_logger:
-            with pytest.raises(ValueError, match="No last message available."):
-                self.transaction_process_behaviour.act()
-
-        # after
-        mock_logger.assert_any_call(
-            logging.INFO, f"sending transaction {self.tx_ids[0]} to controller."
-        )
+        with pytest.raises(ValueError, match="No last message available."):
+            self.transaction_process_behaviour.act()
 
     def test_process_transactions_invalid_tx(self):
         """Test the _process_transactions method of the transaction_process behaviour where transactions are None."""
@@ -297,16 +291,8 @@ class TestTransactionProcessBehaviour(BaseSkillTestCase):
         self.game._tac_dialogue = tac_dialogue
 
         # operation
-        with patch.object(self.logger, "log") as mock_logger:
-            with pytest.raises(
-                ValueError, match=f"Tx for id={self.tx_ids[0]} not found."
-            ):
-                self.transaction_process_behaviour.act()
-
-        # after
-        mock_logger.assert_any_call(
-            logging.INFO, f"sending transaction {self.tx_ids[0]} to controller."
-        )
+        with pytest.raises(ValueError, match=f"Tx for id={self.tx_ids[0]} not found."):
+            self.transaction_process_behaviour.act()
 
     def test_teardown(self):
         """Test the teardown method of the transaction_process behaviour."""

@@ -94,6 +94,9 @@ Handy commands to analyse logs:
 grep -rl 'TAKE CARE! Circumventing controller identity check!' output_dir/ | sort
 grep -rl 'TAKE CARE! Circumventing controller identity check!' output_dir/ | wc -l
 grep -rnw 'SOEF Network Connection Error' output_dir/ |  wc -l
+grep -rnw 'SOEF Server Bad Response Error' output_dir/ |  wc -l
+grep -rnw 'Failure during pipe closing.' output_dir/ |  wc -l
+grep -rnw 'Exception' output_dir/ |  wc -l
 grep -rnw 'connect to libp2p process within timeout' output_dir/ |  wc -l
 grep -rnw 'handling valid transaction' output_dir/tac_controller/ | wc -l
 grep -rnw 'received invalid tac message' output_dir/tac_controller/ | wc -l
