@@ -3,11 +3,8 @@ set -e
 
 LEDGER=fetchai
 PEER="/dns4/acn.fetch.ai/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW"
-
 TAC_NAME='some_tac_id'
 BASE_PORT=10000
-
-
 BASE_DIR=/data
 
 if [ -z  "$COMPETITION_TIMEOUT" ];
@@ -37,13 +34,13 @@ echo MINUTES_TILL_START $MINUTES_TILL_START
 
 if [ -z  "$SEARCH_INTERVAL" ];
 then
-	SEARCH_INTERVAL=300
+	SEARCH_INTERVAL=600
 fi
 echo SEARCH_INTERVAL $SEARCH_INTERVAL
 
 if [ -z  "$CLEANUP_INTERVAL" ];
 then
-	CLEANUP_INTERVAL=600
+	CLEANUP_INTERVAL=1800
 fi
 echo CLEANUP_INTERVAL $CLEANUP_INTERVAL
 
@@ -52,8 +49,6 @@ then
 	LOG_LEVEL=INFO
 fi
 echo LOG_LEVEL $LOG_LEVEL
-
-
 
 function generate_key (){
 	ledger=$1
@@ -91,12 +86,12 @@ function set_agent(){
 	json=$(printf '{"log_file": "%s", "delegate_uri": null, "entry_peers": ["%s"], "local_uri": "127.0.0.1:%s", "public_uri": null}' "$agent_data_dir/libp2p_node.log" "$PEER" "$port")
 	aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config "$json"
 	log_file=$agent_data_dir/$name.log
-	json=$(printf '{"version": 1, "formatters": {"standard": {"format": '%(asctime)s [%(levelname)s] %(name)s: %(message)s'}} "handlers": {"console": {"class": "logging.StreamHandler", "formatter": "standard", "level": "%s"}, "file": {"class": "logging.FileHandler", "filename": "%s", "mode": "w", "level": "%s"}}, "loggers": {"aea": {"level": "%s", "handlers": ["console", "file"]}}}' "$LOG_LEVEL" "$log_file" "$LOG_LEVEL" "$LOG_LEVEL")
+	json=$(printf '{"version": 1, "formatters": {"standard": {"format": ""}}, "handlers": {"console": {"class": "logging.StreamHandler", "formatter": "standard", "level": "%s"}, "file": {"class": "logging.FileHandler", "filename": "%s", "mode": "w", "level": "%s", "formatter": "standard"}}, "loggers": {"aea": {"level": "%s", "handlers": ["file"]}}}' "$LOG_LEVEL" "$log_file" "$LOG_LEVEL" "$LOG_LEVEL")
 	aea config set --type dict agent.logging_config "$json"
+	aea config set agent.logging_config.formatters.standard.format '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
 	aea config set vendor.fetchai.connections.soef.config.token_storage_path $agent_data_dir/soef_token.txt
 	aea config set agent.skill_exception_policy just_log
 	aea config set agent.connection_exception_policy just_log
-	
 }
 
 function set_tac_name (){
@@ -119,7 +114,6 @@ function set_participant(){
 	cd ..
 }
 
-
 agents_list=''
 for i in $(seq $PARTICIPANTS_AMOUNT);
 do
@@ -127,8 +121,6 @@ do
 	set_participant $i $agent_name
 	agents_list="$agent_name $agents_list"
 done
-
-
 
 cd tac_controller
 set_agent tac_controller $BASE_PORT
@@ -139,4 +131,5 @@ aea config set vendor.fetchai.skills.tac_control.models.parameters.args.competit
 aea config set vendor.fetchai.skills.tac_control.models.parameters.args.inactivity_timeout $INACTIVITY_TIMEOUT
 cd ..
 
+echo "Launching agents..."
 aea launch tac_controller $agents_list

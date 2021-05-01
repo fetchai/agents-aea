@@ -18,7 +18,7 @@ spec:
         kubernetes.io/os: linux
       containers:
       - name: tac-deploy-container
-        image: gcr.io/fetch-ai-sandbox/tac_deploy:0.0.3
+        image: gcr.io/fetch-ai-sandbox/tac_deploy:0.0.6
         env:
          - name: PARTICIPANTS_AMOUNT
            value: "70"
@@ -29,9 +29,9 @@ spec:
          - name: INACTIVITY_TIMEOUT
            value: "3600"
          - name: SEARCH_INTERVAL
-           value: "300"
+           value: "600"
          - name: CLEANUP_INTERVAL
-           value: "300"
+           value: "1800"
          - name: LOG_LEVEL
            value: "INFO"
         volumeMounts:
