@@ -338,6 +338,7 @@ class TacHandler(Handler):
         :param tac_msg: the game data
         :return: None
         """
+        self.context.logger.info("processing game data, message={}".format(tac_msg))
         state_update_dialogues = cast(
             StateUpdateDialogues, self.context.state_update_dialogues
         )

@@ -29,19 +29,19 @@ GCloud should be configured first!
 
 Tag the image first with the latest tag:
 ``` bash
-docker image tag tac-deploy gcr.io/fetch-ai-sandbox/tac_deploy:0.0.6
+docker image tag tac-deploy gcr.io/fetch-ai-sandbox/tac_deploy:0.0.7
 ```
 
 Push it to remote repo:
 ``` bash
-docker push gcr.io/fetch-ai-sandbox/tac_deploy:0.0.6
+docker push gcr.io/fetch-ai-sandbox/tac_deploy:0.0.7
 ```
 
 ### Run it manually
 
 Run it
 ``` bash
-kubectl run tac-deploy-{SOMETHING} --image=gcr.io/fetch-ai-sandbox/tac_deploy:0.0.6 --env="PARTICIPANTS_AMOUNT=5" --attach
+kubectl run tac-deploy-{SOMETHING} --image=gcr.io/fetch-ai-sandbox/tac_deploy:0.0.7 --env="PARTICIPANTS_AMOUNT=5" --attach
 ```
 
 Or simply restart existing deployment and latest image will be used with default configs (see below):
@@ -85,4 +85,16 @@ kubectl cp tac-deploy-{SOMETHING}:/data ./output_dir
 To delete deployment:
 ``` bash
 kubectl delete deployment tac-deploy
+```
+
+### Analysing Logs:
+
+Handy commands to analyse logs:
+``` bash
+grep -rl 'TAKE CARE! Circumventing controller identity check!' output_dir/ | sort
+grep -rl 'TAKE CARE! Circumventing controller identity check!' output_dir/ | wc -l
+grep -rnw 'SOEF Network Connection Error' output_dir/ |  wc -l
+grep -rnw 'connect to libp2p process within timeout' output_dir/ |  wc -l
+grep -rnw 'handling valid transaction' output_dir/tac_controller/ | wc -l
+grep -rnw 'received invalid tac message' output_dir/tac_controller/ | wc -l
 ```

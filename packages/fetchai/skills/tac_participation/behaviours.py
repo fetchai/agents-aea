@@ -121,10 +121,9 @@ class TransactionProcessBehaviour(TickerBehaviour):
         )
         tx_ids = list(transactions.keys())
         for tx_id in tx_ids:
-            self.context.logger.info(
-                "sending transaction {} to controller.".format(tx_id)
-            )
-            last_msg = tac_dialogue.last_message
+            last_msg = (
+                tac_dialogue.last_message
+            )  # could be a problem if messages are delivered out of order
             if last_msg is None:
                 raise ValueError("No last message available.")
             tx_content = transactions.pop(tx_id, None)
@@ -146,5 +145,8 @@ class TransactionProcessBehaviour(TickerBehaviour):
                 sender_signature=sender_signature,
                 counterparty_signature=counterparty_signature,
                 nonce=terms.nonce,
+            )
+            self.context.logger.info(
+                "sending transaction {} to controller, message={}.".format(tx_id, msg)
             )
             self.context.outbox.put_message(message=msg)
