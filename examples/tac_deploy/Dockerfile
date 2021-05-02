@@ -9,13 +9,13 @@ RUN apk add --no-cache gcc musl-dev python3-dev libffi-dev openssl-dev
 
 # https://stackoverflow.com/a/57485724
 RUN apk add --update --no-cache py3-numpy py3-scipy py3-pillow
-ENV PYTHONPATH "$PYTHONPATH:/usr/lib/python3.8/site-packages"
+ENV PYTHONPATH "${PYTHONPATH}:/usr/lib/python3.8/site-packages"
 
 # golang
 RUN apk add --no-cache go
 
 # aea installation
-RUN pip install --upgrade pip
+RUN python -m pip install --upgrade pip
 RUN pip install --upgrade --force-reinstall aea[all]==1.0.0
 
 # directories and aea cli config

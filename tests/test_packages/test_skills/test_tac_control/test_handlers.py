@@ -106,7 +106,7 @@ class TestTacHandler(BaseSkillTestCase):
         # after
         mock_logger.assert_any_call(
             logging.INFO,
-            f"received invalid tac message={incoming_message}, unidentified dialogue.",
+            f"received invalid tac message={incoming_message}, unidentified dialogue (reference={incoming_message.dialogue_reference}).",
         )
         self.assert_quantity_in_outbox(1)
         has_attributes, error_str = self.message_has_attributes(

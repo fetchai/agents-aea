@@ -541,7 +541,7 @@ class P2PLibp2pConnection(Connection):
             "storage_path"
         )
         node_connection_timeout: Optional[float] = self.configuration.config.get(
-            "node_connection_timeout"
+            "node_connection_timeout", PIPE_CONN_TIMEOUT
         )
         if (
             self.has_crypto_store
