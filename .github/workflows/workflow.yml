@@ -534,3 +534,49 @@ jobs:
         flags: unittests
         name: codecov-umbrella
         fail_ci_if_error: false
+
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@master
+ 
+    - name: Setup GCloud - sandbox
+      uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+      if: github.ref == 'refs/heads/develop'
+      with:
+          project_id: ${{ secrets.GCLOUD_FETCH_AI_SANDBOX_PROJECT }}
+          service_account_key: ${{ secrets.GCLOUD_FETCH_AI_SANDBOX_KEY }}
+
+    - name: Configure Docker
+      run: |
+        gcloud auth configure-docker
+    
+    - name: Set Image Tag
+      id: vars
+      run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+    
+    # Push image to Google Container Registry
+    - name: Build and Push Images
+      run: |
+        chmod +x ./scripts/acn/build_upload_img.sh
+        
+        if [ ${{ github.ref }} == 'refs/heads/develop' ]
+        then
+          ./scripts/acn/build_upload_img.sh
+        fi
+
+    - name: Repository Dispatch
+      env:
+        IMAGE_TAG: ${{ steps.vars.outputs.sha_short }}
+      run: |
+        if [ ${{ github.ref }} == 'refs/heads/develop' ]
+        then
+          curl -H "Accept: application/vnd.github.everest-preview+json" \
+          -H "Authorization: token ${{ secrets.GH_PAT }}" \
+          --request POST \
+          --data '{"event_type": "agents-dht-testnet", "client_payload": {"image": "gcr.io/fetch-ai-sandbox/acn_node", "tag": "'"$IMAGE_TAG"'"}}' \
+          https://api.github.com/repos/fetchai/infra-sandbox-london-b-deployment/dispatches
+        fi
