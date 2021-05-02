@@ -19,6 +19,7 @@
 """This module contains the tests of the behaviour classes of the tac participation skill."""
 
 import logging
+from collections import OrderedDict
 from pathlib import Path
 from typing import cast
 from unittest.mock import patch
@@ -177,18 +178,20 @@ class TestTransactionProcessBehaviour(BaseSkillTestCase):
             "counterparty_signature_2",
         ]
 
-        cls.txs = {
-            cls.tx_ids[0]: {
-                "terms": cls.terms[0],
-                "sender_signature": cls.sender_signatures[0],
-                "counterparty_signature": cls.counterparty_signatures[0],
-            },
-            cls.tx_ids[1]: {
-                "terms": cls.terms[1],
-                "sender_signature": cls.sender_signatures[1],
-                "counterparty_signature": cls.counterparty_signatures[1],
-            },
-        }
+        cls.txs = OrderedDict(
+            {
+                cls.tx_ids[0]: {
+                    "terms": cls.terms[0],
+                    "sender_signature": cls.sender_signatures[0],
+                    "counterparty_signature": cls.counterparty_signatures[0],
+                },
+                cls.tx_ids[1]: {
+                    "terms": cls.terms[1],
+                    "sender_signature": cls.sender_signatures[1],
+                    "counterparty_signature": cls.counterparty_signatures[1],
+                },
+            }
+        )
 
     def test_setup(self):
         """Test the setup method of the transaction_process behaviour."""
@@ -216,7 +219,6 @@ class TestTransactionProcessBehaviour(BaseSkillTestCase):
         self.skill.skill_context._agent_context._shared_state = {
             "transactions": self.txs
         }
-
         tac_dialogue = self.prepare_skill_dialogue(
             self.tac_dialogues, self.list_of_tac_messages,
         )
@@ -232,10 +234,11 @@ class TestTransactionProcessBehaviour(BaseSkillTestCase):
         # _process_transactions
         count = 0
         while count != no_tx:
-            mock_logger.assert_any_call(
-                logging.INFO, f"sending transaction {self.tx_ids[count]} to controller."
-            )
             message = self.get_message_from_outbox()
+            mock_logger.assert_any_call(
+                logging.INFO,
+                f"sending transaction {self.tx_ids[count]} to controller, message={message}.",
+            )
             has_attributes, error_str = self.message_has_attributes(
                 actual_message=message,
                 message_type=TacMessage,

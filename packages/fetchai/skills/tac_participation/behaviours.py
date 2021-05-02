@@ -19,6 +19,7 @@
 
 """This package contains a tac search behaviour."""
 
+from collections import OrderedDict
 from typing import Any, Dict, cast
 
 from aea.skills.behaviours import TickerBehaviour
@@ -117,7 +118,8 @@ class TransactionProcessBehaviour(TickerBehaviour):
         game = cast(Game, self.context.game)
         tac_dialogue = game.tac_dialogue
         transactions = cast(
-            Dict[str, Dict[str, Any]], self.context.shared_state.get("transactions", {})
+            Dict[str, Dict[str, Any]],
+            self.context.shared_state.get("transactions", OrderedDict()),
         )
         tx_ids = list(transactions.keys())
         for tx_id in tx_ids:
