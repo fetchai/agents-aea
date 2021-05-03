@@ -36,7 +36,7 @@ fingerprint:
   libp2p_node/dht/monitoring/service.go: QmT47y2LHZECYcoE2uJ9QCGh3Kq8ePhYedo8dQE7X7v6YV
   libp2p_node/go.mod: QmT2LQXkSen6Th4QLS2RU3tRVxJSLjdZTxRULUcnQFXfEL
   libp2p_node/go.sum: QmZc6oiDqQhB6ZKVojN26JxoTNH1QetyuYd9zjSksQnTFt
-  libp2p_node/libp2p_node.go: QmZFR2bdi1EjFmPkjwtYeA19kSQKPtcGoNVafQnZRWotaN
+  libp2p_node/libp2p_node.go: QmVgVVxGDKsycgfTFu7TPPoXfgwEA2anh7ye89Kz1rgMXq
   libp2p_node/utils/utils.go: QmawKkyn8nZtmgULM7vYWfHqMD4o49TQZGF4arwVxyYeCL
 fingerprint_ignore_patterns: []
 build_entrypoint: check_dependencies.py
