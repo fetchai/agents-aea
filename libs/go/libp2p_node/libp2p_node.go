@@ -157,10 +157,8 @@ func main() {
 		for envel := range agent.Queue() {
 			envelope := envel
 			logger.Info().Msgf("received envelope from agent: %s", envelope)
-			go func() {
-				err := node.RouteEnvelope(envelope)
-				ignore(err)
-			}()
+			err := node.RouteEnvelope(envelope)
+			ignore(err)
 		}
 	}()
 

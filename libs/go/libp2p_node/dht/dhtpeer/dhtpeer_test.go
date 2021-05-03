@@ -856,6 +856,123 @@ func TestMessageOrderingWithDelegateClient(t *testing.T) {
 
 }
 
+// TestMessageOrderingWithDelegateClientTwoHops
+func TestMessageOrderingWithDelegateClientTwoHops(t *testing.T) {
+	peer1Index := 0
+	peer2Index := 1
+	client1Index := 2
+	client2Index := 3
+	peer1, peerCleanup1, err := SetupLocalDHTPeer(
+		FetchAITestKeys[peer1Index],
+		AgentsTestKeys[peer1Index],
+		DefaultLocalPort,
+		DefaultDelegatePort,
+		[]string{},
+	)
+	if err != nil {
+		t.Fatal("Failed to initialize DHTPeer:", err)
+	}
+	defer peerCleanup1()
+
+	peer2, peerCleanup2, err := SetupLocalDHTPeer(
+		FetchAITestKeys[peer2Index],
+		AgentsTestKeys[peer2Index],
+		DefaultLocalPort+1,
+		DefaultDelegatePort+1,
+		[]string{peer1.MultiAddr()},
+	)
+	if err != nil {
+		t.Fatal("Failed to initialize DHTPeer:", err)
+	}
+	defer peerCleanup2()
+
+	time.Sleep(1 * time.Second)
+
+	client1, clientCleanup1, err := SetupDelegateClient(
+		AgentsTestKeys[client1Index],
+		DefaultLocalHost,
+		DefaultDelegatePort,
+		FetchAITestPublicKeys[peer1Index],
+	)
+	if err != nil {
+		t.Fatal("Failed to initialize DelegateClient:", err)
+	}
+	defer clientCleanup1()
+
+	client2, clientCleanup2, err := SetupDelegateClient(
+		AgentsTestKeys[client2Index],
+		DefaultLocalHost,
+		DefaultDelegatePort+1,
+		FetchAITestPublicKeys[peer2Index],
+	)
+	if err != nil {
+		t.Fatal("Failed to initialize DelegateClient:", err)
+	}
+	defer clientCleanup2()
+
+	rxClient1 := make(chan *aea.Envelope, 20)
+	client1.ProcessEnvelope(func(envel *aea.Envelope) error {
+		rxClient1 <- envel
+		return nil
+	})
+	rxClient2 := make(chan *aea.Envelope, 20)
+	client2.ProcessEnvelope(func(envel *aea.Envelope) error {
+		rxClient2 <- envel
+		return nil
+	})
+
+	ensureAddressAnnounced(peer1, peer2)
+
+	max := 100
+	i := 0
+	for x := 0; x < max; x++ {
+		envelope := &aea.Envelope{
+			To:      AgentsTestAddresses[client2Index],
+			Sender:  AgentsTestAddresses[client1Index],
+			Message: []byte(strconv.Itoa(i)),
+		}
+		err = client1.Send(envelope)
+		if err != nil {
+			t.Error("Failed to Send envelope from DelegateClient to DHTPeer:", err)
+		}
+		i++
+		t.Log("Sending Envelope : ", envelope)
+		// time.Sleep(100 * time.Millisecond)
+
+		envelope1 := &aea.Envelope{
+			To:      AgentsTestAddresses[client1Index],
+			Sender:  AgentsTestAddresses[client2Index],
+			Message: []byte(strconv.Itoa(i)),
+		}
+		err = client2.Send(envelope1)
+		if err != nil {
+			t.Error("Failed to Send envelope from DelegateClient to DHTPeer:", err)
+		}
+		i++
+		t.Log("Sending Envelope : ", envelope1)
+		// time.Sleep(100 * time.Millisecond)
+	}
+
+	// go func() {
+	ii := 0
+	for x := 0; x < max; x++ {
+		expectEnvelopeOrdered(t, rxClient2, ii)
+		ii++
+		ii++
+	}
+	// }()
+
+	// go func() {
+	iii := 0
+	for x := 0; x < max; x++ {
+		iii++
+		expectEnvelopeOrdered(t, rxClient1, iii)
+		iii++
+	}
+	// }()
+
+}
+
 // TestRoutingDelegateClientToDHTPeerIndirectTwoHops
 func TestRoutingDelegateClientToDHTPeerIndirectTwoHops(t *testing.T) {
 	entryPeer, entryPeerCleanup, err := SetupLocalDHTPeer(
