@@ -84,6 +84,9 @@ class DockerImage(ABC):
         """
         return True
 
+    def cleanup(self) -> None:
+        """Perform clean-up operations (default: do nothing)."""
+
 
 class OEFHealthCheck(object):
     """A health check class."""

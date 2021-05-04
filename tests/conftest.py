@@ -765,6 +765,7 @@ def _launch_image(image: DockerImage, timeout: float = 2.0, max_attempts: int = 
         logger.info(f"Stopping the image {image.tag}...")
         container.stop()
         container.remove()
+    image.cleanup()
 
 
 @pytest.fixture(scope="session", autouse=True)
