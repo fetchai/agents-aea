@@ -24,6 +24,8 @@ package aea
 
 import (
 	"encoding/binary"
+	"errors"
+	"math"
 	"net"
 	"strconv"
 )
@@ -63,6 +65,9 @@ func (sock *TCPSocketChannel) Read() ([]byte, error) {
 func (sock *TCPSocketChannel) Write(data []byte) error {
 	// TOFIX(LR) duplicated code to avoid circular dep
 	//    		 utils.WriteBytesConn(sock.conn, data)
+	if len(data) > math.MaxInt32 {
+		return errors.New("value too large")
+	}
 	size := uint32(len(data))
 	buf := make([]byte, 4, 4+size)
 	binary.BigEndian.PutUint32(buf, size)
