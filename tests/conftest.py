@@ -1402,7 +1402,6 @@ def make_uri(addr: str, port: int):
     return f"{addr}:{port}"
 
 
-@pytest.mark.skip_in_ci
 @pytest.mark.integration
 class UseGanache:
     """Inherit from this class to use Ganache."""
