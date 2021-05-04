@@ -293,7 +293,7 @@ jobs:
       run: |
         tox -e py3.8 -- -m 'sync'  # --aea-loop sync
     - name: Async integration tests
-      run: tox -e py3.8 -- -m 'integration and not unstable and not ledger'
+      run: tox -e py3.8 -- -m 'integration and not unstable and not ledger and not skip_in_ci'
 
   integration_checks_ledger:
     continue-on-error: True
@@ -349,7 +349,7 @@ jobs:
           fetchcli config indent true
           fetchcli config broadcast-mode block
       - name: Integration tests
-        run: tox -e py3.8 -- -m 'integration and not unstable and ledger'
+        run: tox -e py3.8 -- -m 'integration and not unstable and ledger and not skip_in_ci'
 
   platform_checks:
     continue-on-error: True

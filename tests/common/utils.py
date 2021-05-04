@@ -395,6 +395,7 @@ def run_aea_subprocess(*args, cwd: str = ".") -> Tuple[subprocess.Popen, str, st
     return result, stdout.decode("utf-8"), stderr.decode("utf-8")
 
 
+@pytest.mark.skip_in_ci
 @pytest.mark.integration
 class UseOef:  # pylint: disable=too-few-public-methods
     """Inherit from this class to launch an OEF node."""
