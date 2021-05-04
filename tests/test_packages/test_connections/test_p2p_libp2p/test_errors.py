@@ -17,8 +17,10 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains Negative tests for Libp2p connection."""
+import asyncio
 import os
 import shutil
+import subprocess  # nosec
 import tempfile
 from asyncio.futures import Future
 from unittest.mock import Mock, patch
@@ -298,3 +300,31 @@ async def test_max_restarts():
     node = Libp2pNode(Mock(), Mock(), "tmp", "tmp", max_restarts=0)
     with pytest.raises(ValueError, match="Max restarts attempts reached:"):
         await node.restart()
+
+
+@pytest.mark.asyncio
+async def test_node_stopped_callback():
+    """Test node stopped callback called."""
+    host = "127.0.0.1"
+    port = "10000"
+
+    with tempfile.TemporaryDirectory() as data_dir:
+        con = _make_libp2p_connection(
+            port=port, host=host, data_dir=data_dir, build_directory=data_dir
+        )
+        con.node.logger.error = Mock()
+        await con.node.start()
+        subprocess.Popen.terminate(con.node.proc)
+        await asyncio.sleep(2)
+        con.node.logger.error.assert_called_once()
+        await con.node.stop()
+
+    with tempfile.TemporaryDirectory() as data_dir:
+        con = _make_libp2p_connection(
+            port=port, host=host, data_dir=data_dir, build_directory=data_dir
+        )
+        con.node.logger.error = Mock()
+        await con.node.start()
+        await con.node.stop()
+        await asyncio.sleep(2)
+        con.node.logger.error.assert_not_called()

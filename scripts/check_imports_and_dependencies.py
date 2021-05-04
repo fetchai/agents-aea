@@ -58,14 +58,14 @@ class DependenciesTool:
     """Tool to work with setup.py dependencies."""
 
     @staticmethod
-    def get_package_files(package_name: str) -> List[str]:
+    def get_package_files(package_name: str) -> List[str]:  # type: ignore
         """Get package files list."""
         packages_info = list(search_packages_info([package_name]))
         if len(packages_info) == 0:
             raise Exception(f"package {package_name} not found")
         files = packages_info[0]["files"]
         location = packages_info[0]["location"]
-        return [Path(location) / i for i in files]
+        return [Path(location) / i for i in files]  # type: ignore
 
     @staticmethod
     def clean_dependency_name(dependecy_specification: str) -> str:
@@ -246,12 +246,12 @@ class CheckTool:
             dict
         )
         for section, modules in sections_imports.items():
-            for module, pyfile in modules:
+            for module, pyfile in modules:  # type: ignore
                 package = _find_dependency_for_module(
-                    sections_dependencies.get(section, {}), pyfile
+                    sections_dependencies.get(section, {}), pyfile  # type: ignore
                 )
-                if module not in IGNORE:
-                    sections_imports_packages[section][module] = package
+                if module not in IGNORE:  # type: ignore
+                    sections_imports_packages[section][module] = package  # type: ignore
 
         all_dependencies_set = set(
             sum((list(i.keys()) for _, i in sections_dependencies.items()), [])

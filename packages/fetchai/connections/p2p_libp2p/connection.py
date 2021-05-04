@@ -22,7 +22,7 @@ import logging
 import os
 import platform
 import subprocess  # nosec
-from asyncio import AbstractEventLoop, CancelledError
+from asyncio import AbstractEventLoop, CancelledError, events
 from ipaddress import ip_address
 from pathlib import Path
 from socket import gethostbyname
@@ -106,7 +106,6 @@ def _golang_module_run(
     cmd.extend(args)
 
     env = os.environ
-
     try:
         logger.debug(cmd)
         proc = subprocess.Popen(  # nosec
@@ -272,6 +271,7 @@ class Libp2pNode:
         )
         self._max_restarts = max_restarts
         self._restart_counter: int = 0
+        self._is_on_stop: bool = False
 
     def _make_env_file(self, pipe_in_path: str, pipe_out_path: str) -> str:
         # setup config
@@ -337,12 +337,25 @@ class Libp2pNode:
 
         return NodeClient(self.pipe)
 
+    def _child_watcher_callback(self, *_) -> None:  # type:ignore
+        """Log if process was terminated before stop was called."""
+        if self._is_on_stop:
+            return
+        if self.proc is None:
+            return
+        self.proc.poll()
+        returncode = self.proc.returncode
+        self.logger.error(
+            f"Node process with pid {self.proc.pid} was terminated with returncode {returncode}"
+        )
+
     async def start(self) -> None:
         """
         Start the node.
 
         :return: None
         """
+        self._is_on_stop = False
         if self._loop is None:
             self._loop = asyncio.get_event_loop()
 
@@ -362,10 +375,28 @@ class Libp2pNode:
             self.source, LIBP2P_NODE_MODULE_NAME, [self.env_file], self._log_file_desc
         )
 
+        if platform.system() == "Windows":
+            try:
+                asyncio.get_event_loop()._proactor.wait_for_handle(  # type: ignore  # pylint: disable=protected-access
+                    int(self.proc._handle)  # type: ignore  # pylint: disable=no-member,protected-access
+                ).add_done_callback(
+                    self._child_watcher_callback
+                )
+            except Exception as e:  # pragma: nocover  # pylint:disable=broad-except
+                self.logger.debug(f"failed to set process monitoring on windows: {e}")
+        else:
+            with events.get_child_watcher() as watcher:
+                if watcher:
+                    watcher.attach_loop(asyncio.get_event_loop())
+                    watcher.add_child_handler(
+                        self.proc.pid, self._child_watcher_callback
+                    )
+
         self.logger.info("Connecting to libp2p node...")
 
         try:
             connected = await self._set_connection_to_node()
+
             if not connected:
                 raise Exception("Couldn't connect to libp2p process within timeout")
         except Exception as e:
@@ -482,6 +513,8 @@ class Libp2pNode:
         """
         if self.proc is not None:
             self.logger.debug("Terminating node process {}...".format(self.proc.pid))
+            self._is_on_stop = True
+            self.proc.poll()
             self.proc.terminate()
             self.logger.debug(
                 "Waiting for node process {} to terminate...".format(self.proc.pid)
@@ -492,6 +525,7 @@ class Libp2pNode:
             self._log_file_desc.close()
         else:
             self.logger.debug("Called stop when process not set!")  # pragma: no cover
+
         if self.pipe is not None:
             try:
                 await self.pipe.close()
@@ -500,6 +534,7 @@ class Libp2pNode:
             self.pipe = None
         else:
             self.logger.debug("Called stop when pipe not set!")  # pragma: no cover
+
         if os.path.exists(self.env_file):
             os.remove(self.env_file)
 
