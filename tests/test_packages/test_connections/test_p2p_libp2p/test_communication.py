@@ -851,6 +851,7 @@ class TestP2PLibp2PReceiveEnvelope(BaseTestP2PLibp2p):
         assert envelope.message == msg
 
 
+@libp2p_log_on_failure_all
 class TestLibp2pEnvelopeOrder(BaseTestP2PLibp2p):
     """
     Test message ordering.
