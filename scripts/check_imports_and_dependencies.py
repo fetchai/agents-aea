@@ -58,7 +58,7 @@ class DependenciesTool:
     """Tool to work with setup.py dependencies."""
 
     @staticmethod
-    def get_package_files(package_name: str) -> List[str]:
+    def get_package_files(package_name: str) -> List[Path]:
         """Get package files list."""
         packages_info = list(search_packages_info([package_name]))
         if len(packages_info) == 0:
@@ -142,7 +142,7 @@ class CheckTool:
     """Tool to check imports in sources match dependencies in setup.py."""
 
     @classmethod
-    def get_section_dependencies_from_setup(cls) -> Dict[str, Dict[str, List[str]]]:
+    def get_section_dependencies_from_setup(cls) -> Dict[str, Dict[str, List[Path]]]:
         """Get sections with dependencies with files lists."""
         spec = importlib.util.spec_from_file_location(
             "setup", str(AEA_ROOT_DIR / "setup.py")
@@ -167,9 +167,11 @@ class CheckTool:
     @staticmethod
     def sections_dependencies_add_files(
         sections_dependencies: Dict[str, List[str]]
-    ) -> Dict[str, Dict[str, List[str]]]:
+    ) -> Dict[str, Dict[str, List[Path]]]:
         """Add packages file lists to dependencies in sections."""
-        result: Dict[str, Dict[str, List[str]]] = defaultdict(lambda: defaultdict(list))
+        result: Dict[str, Dict[str, List[Path]]] = defaultdict(
+            lambda: defaultdict(list)
+        )
         for section, deps in sections_dependencies.items():
             for dep in deps:
                 dep = DependenciesTool.clean_dependency_name(dep)
