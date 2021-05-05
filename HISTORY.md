@@ -1,6 +1,19 @@
 # Release History
 
-## 1.0.1 (2020-04-30)
+## - (2021-05-05)
+
+Packages:
+- Adds node watcher to `p2p_libp2p` connection
+- Improves logging and error handling in `p2p_libp2p` node
+- Addresses potential overflow issue in `p2p_libp2p` node
+- Fixes concurrency issue in `p2p_libp2p` node which could lead to wrongly ordered envelopes
+- Improves logging in TAC skills
+- Fixes Exception handling in connect/disconnect calls of soef connection
+- Extends public DHT tests to include staging
+- Adds tests for envelope ordering for all routes
+- Multiple additional tests and test stability fixes
+
+## 1.0.1 (2021-04-30)
 
 AEA:
 - Fixes wheels issue for Windows
@@ -31,7 +44,7 @@ Docs:
 Examples:
 - Adds TAC deployment example 
 
-## 1.0.0 (2020-03-30)
+## 1.0.0 (2021-03-30)
 
 - Improves contributor guide
 - Enables additional pylint checks
@@ -45,7 +58,7 @@ Examples:
 - Multiple minor fixes
 - Multiple additional tests and test stability fixes
 
-## 1.0.0rc2 (2020-03-28)
+## 1.0.0rc2 (2021-03-28)
 
 - Extends CLI command `aea fingerprint` to allow fingerprinting of agents
 - Improves `deploy-image` Docker example
@@ -59,7 +72,7 @@ Examples:
 - Multiple minor fixes
 - Multiple additional tests and test stability fixes
 
-## 1.0.0rc1 (2020-03-24)
+## 1.0.0rc1 (2021-03-24)
 
 - Adds CLI command `aea get-public-key`
 - Adds support for encrypting private keys at rest
@@ -84,7 +97,7 @@ Examples:
 - Multiple additional tests and test stability fixes
 
 
-## 0.11.2 (2020-03-17)
+## 0.11.2 (2021-03-17)
 
 - Fixes a package import issue
 - Fixes an issue where `AgentLoop` did not teardown properly under certain conditions
@@ -100,7 +113,7 @@ Examples:
 - Adds support for CLI plugins to framework
 - Multiple additional tests and test stability fixes
 
-## 0.11.1 (2020-03-06)
+## 0.11.1 (2021-03-06)
 
 - Bumps `aiohttp` to `>=3.7.4` to address a CVE affecting `http_server`, `http_client` and `webhook` connections
 - Adds script to ensure Pipfile and `tox.ini` dependencies align
@@ -114,7 +127,7 @@ Examples:
 - Multiple docs updates to fix order of CLI commands with respect to installing dependencies
 - Multiple additional tests and test stability fixes
 
-## 0.11.0 (2020-03-04)
+## 0.11.0 (2021-03-04)
 
 - Adds slots usage in frequently used framework objects, including `Dialogue`
 - Fixes a bug in `aea upgrade` command where eject prompt was not offered
@@ -139,7 +152,7 @@ Examples:
 - Multiple docs updates based on user feedback
 - Multiple additional tests and test stability fixes
 
-## 0.10.1 (2020-02-21)
+## 0.10.1 (2021-02-21)
 
 - Changes default URL of `soef` connection to https
 - Improves teardown, retry and edge case handling of `p2p_libp2p` and `p2p_libp2p_client` connections
@@ -157,7 +170,7 @@ Examples:
 - Multiple docs updates based on user feedback
 - Multiple additional tests and test stability fixes
 
-## 0.10.0 (2020-02-11)
+## 0.10.0 (2021-02-11)
 
 - Removes error skill from agents which do not need it
 - Adds support for relay connection reconnect in ACN
@@ -178,7 +191,7 @@ Examples:
 - Multiple docs updates based on user feedback
 - Multiple additional tests and test stability fixes
 
-## 0.9.2 (2020-01-21)
+## 0.9.2 (2021-01-21)
 
 - Fixes `CosmosApi`, in particular for CosmWasm
 - Fixes error output from `add-key` CLI command
@@ -190,7 +203,7 @@ Examples:
 - Multiple docs updates based on user feedback
 - Multiple additional tests and test stability fixes
 
-## 0.9.1 (2020-01-14)
+## 0.9.1 (2021-01-14)
 
 - Fixes multiple issues with `MultiAgentManager` including overrides not being correctly applied
 - Restructures docs navigation
@@ -203,7 +216,7 @@ Examples:
 - Multiple docs updates based on user feedback
 - Multiple additional tests and test stability fixes
 
-## 0.9.0 (2020-01-06)
+## 0.9.0 (2021-01-06)
 
 - Adds multiple bug fixes on `MultiAgentManager`
 - Adds `AgentConfigManager` for better programmatic configuration management
