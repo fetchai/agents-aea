@@ -1,6 +1,6 @@
 agent_name: registration_aea_aw1
 author: fetchai
-version: 0.14.0
+version: 0.15.0
 description: This is an agent to register for Agent World 1.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
@@ -8,8 +8,8 @@ fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/ledger:0.18.0
-- fetchai/p2p_libp2p:0.22.0
-- fetchai/soef:0.23.0
+- fetchai/p2p_libp2p:0.23.0
+- fetchai/soef:0.24.0
 contracts: []
 protocols:
 - fetchai/default:1.0.0
@@ -21,12 +21,12 @@ skills:
 - fetchai/registration_aw1:0.11.0
 - fetchai/simple_service_registration:0.21.0
 - fetchai/simple_service_search:0.9.0
-default_connection: fetchai/p2p_libp2p:0.22.0
+default_connection: fetchai/p2p_libp2p:0.23.0
 default_ledger: fetchai
 required_ledgers:
 - fetchai
 default_routing:
-  fetchai/oef_search:1.0.0: fetchai/soef:0.23.0
+  fetchai/oef_search:1.0.0: fetchai/soef:0.24.0
 connection_private_key_paths: {}
 private_key_paths: {}
 logging_config:
@@ -72,7 +72,7 @@ models:
       whitelist:
       - PUT_WHITELIST_ADDRESSES_HERE
 ---
-public_id: fetchai/p2p_libp2p:0.22.0
+public_id: fetchai/p2p_libp2p:0.23.0
 type: connection
 config:
   delegate_uri: null
@@ -80,7 +80,7 @@ config:
   entry_peers:
   - /dns4/acn.fetch.ai/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW
 ---
-public_id: fetchai/soef:0.23.0
+public_id: fetchai/soef:0.24.0
 type: connection
 config:
   chain_identifier: fetchai_v2_testnet_incentivised

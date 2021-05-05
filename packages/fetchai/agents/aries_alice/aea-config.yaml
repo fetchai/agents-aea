@@ -1,6 +1,6 @@
 agent_name: aries_alice
 author: fetchai
-version: 0.28.0
+version: 0.29.0
 description: An AEA representing Alice in the Aries demo.
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
@@ -8,8 +8,8 @@ fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/http_client:0.22.0
-- fetchai/p2p_libp2p:0.22.0
-- fetchai/soef:0.23.0
+- fetchai/p2p_libp2p:0.23.0
+- fetchai/soef:0.24.0
 - fetchai/webhook:0.18.0
 contracts: []
 protocols:
@@ -20,7 +20,7 @@ protocols:
 - fetchai/state_update:1.0.0
 skills:
 - fetchai/aries_alice:0.22.0
-default_connection: fetchai/p2p_libp2p:0.22.0
+default_connection: fetchai/p2p_libp2p:0.23.0
 default_ledger: fetchai
 required_ledgers:
 - fetchai
@@ -30,7 +30,7 @@ logging_config:
 private_key_paths: {}
 default_routing:
   fetchai/http:1.0.0: fetchai/http_client:0.22.0
-  fetchai/oef_search:1.0.0: fetchai/soef:0.23.0
+  fetchai/oef_search:1.0.0: fetchai/soef:0.24.0
 connection_private_key_paths: {}
 dependencies:
   aea-ledger-fetchai:

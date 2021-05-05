@@ -1,5 +1,5 @@
 ``` bash
-aea fetch fetchai/weather_station:0.28.0 --alias my_weather_station
+aea fetch fetchai/weather_station:0.29.0 --alias my_weather_station
 cd my_weather_station
 aea install
 aea build
@@ -7,25 +7,25 @@ aea build
 ``` bash
 aea create my_weather_station
 cd my_weather_station
-aea add connection fetchai/p2p_libp2p:0.22.0
-aea add connection fetchai/soef:0.23.0
+aea add connection fetchai/p2p_libp2p:0.23.0
+aea add connection fetchai/soef:0.24.0
 aea add connection fetchai/ledger:0.18.0
 aea add skill fetchai/weather_station:0.25.0
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
 }'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.22.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.23.0
 aea config set --type dict agent.default_routing \
 '{
   "fetchai/ledger_api:1.0.0": "fetchai/ledger:0.18.0",
-  "fetchai/oef_search:1.0.0": "fetchai/soef:0.23.0"
+  "fetchai/oef_search:1.0.0": "fetchai/soef:0.24.0"
 }'
 aea install
 aea build
 ```
 ``` bash
-aea fetch fetchai/weather_client:0.29.0 --alias my_weather_client
+aea fetch fetchai/weather_client:0.30.0 --alias my_weather_client
 cd my_weather_client
 aea install
 aea build
@@ -33,19 +33,19 @@ aea build
 ``` bash
 aea create my_weather_client
 cd my_weather_client
-aea add connection fetchai/p2p_libp2p:0.22.0
-aea add connection fetchai/soef:0.23.0
+aea add connection fetchai/p2p_libp2p:0.23.0
+aea add connection fetchai/soef:0.24.0
 aea add connection fetchai/ledger:0.18.0
 aea add skill fetchai/weather_client:0.24.0
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"}
 }'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.22.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.23.0
 aea config set --type dict agent.default_routing \
 '{
   "fetchai/ledger_api:1.0.0": "fetchai/ledger:0.18.0",
-  "fetchai/oef_search:1.0.0": "fetchai/soef:0.23.0"
+  "fetchai/oef_search:1.0.0": "fetchai/soef:0.24.0"
 }'
 aea install
 aea build
@@ -99,7 +99,7 @@ aea delete my_weather_client
 ```
 ``` yaml
 ---
-public_id: fetchai/p2p_libp2p:0.22.0
+public_id: fetchai/p2p_libp2p:0.23.0
 type: connection
 config:
   delegate_uri: 127.0.0.1:11001
