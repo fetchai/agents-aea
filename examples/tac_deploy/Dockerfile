@@ -20,6 +20,7 @@ RUN pip install --upgrade --force-reinstall aea[all]==1.0.0
 
 # directories and aea cli config
 COPY /.aea /home/.aea
+
 WORKDIR /home/agents
 COPY ./packages /home/agents/packages
 

@@ -646,6 +646,8 @@ func (dhtClient *DHTClient) RouteEnvelope(envel *aea.Envelope) error {
 			Str("target", target).
 			Msg("couldn't send envelope")
 		errReset := stream.Reset()
+		lerror(errReset).
+			Msg("stream.Reset error")
 		ignore(errReset)
 		return err
 	}
