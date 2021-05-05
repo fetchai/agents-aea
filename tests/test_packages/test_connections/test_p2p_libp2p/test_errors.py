@@ -19,8 +19,10 @@
 """This test module contains Negative tests for Libp2p connection."""
 import asyncio
 import os
+import platform
 import shutil
 import subprocess  # nosec
+import sys
 import tempfile
 from asyncio.futures import Future
 from unittest.mock import Mock, patch
@@ -305,6 +307,14 @@ async def test_max_restarts():
 @pytest.mark.asyncio
 async def test_node_stopped_callback():
     """Test node stopped callback called."""
+    if not (
+        platform.system() != "Windows"
+        and sys.version_info.major == 3
+        and sys.version_info.minor >= 8
+    ):
+        pytest.skip(
+            "Not supported on this platform. Unix and python >= 3.8 supported only"
+        )
     host = "127.0.0.1"
     port = "10000"
 

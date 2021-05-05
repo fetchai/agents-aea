@@ -13,15 +13,14 @@
 #   distributed under the License is distributed on an "AS IS" BASIS,
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
-#   limitations under the License.
-#
-# ------------------------------------------------------------------------------
+
 """This module contains the p2p libp2p connection."""
 import asyncio
 import logging
 import os
 import platform
 import subprocess  # nosec
+import sys
 from asyncio import AbstractEventLoop, CancelledError, events
 from ipaddress import ip_address
 from pathlib import Path
@@ -375,19 +374,13 @@ class Libp2pNode:
             self.source, LIBP2P_NODE_MODULE_NAME, [self.env_file], self._log_file_desc
         )
 
-        if platform.system() == "Windows":
-            try:
-                asyncio.get_event_loop()._proactor.wait_for_handle(  # type: ignore  # pylint: disable=protected-access
-                    int(self.proc._handle)  # type: ignore  # pylint: disable=no-member,protected-access
-                ).add_done_callback(
-                    self._child_watcher_callback
-                )
-            except Exception as e:  # pragma: nocover  # pylint:disable=broad-except
-                self.logger.debug(f"failed to set process monitoring on windows: {e}")
-        else:
+        if (
+            platform.system() != "Windows"
+            and sys.version_info.major == 3
+            and sys.version_info.minor >= 8
+        ):
             with events.get_child_watcher() as watcher:
                 if watcher:
-                    watcher.attach_loop(asyncio.get_event_loop())
                     watcher.add_child_handler(
                         self.proc.pid, self._child_watcher_callback
                     )
