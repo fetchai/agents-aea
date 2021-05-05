@@ -44,7 +44,7 @@ Run it
 kubectl run tac-deploy-{SOMETHING} --image=gcr.io/fetch-ai-sandbox/tac_deploy:0.0.7 --env="PARTICIPANTS_AMOUNT=5" --attach
 ```
 
-Or simply restart existing deployment and latest image will be used with default configs (see below):
+Or simply restart existing deployment and latest image will be used with default configurations (see below):
 ``` bash
 kubectl delete pod tac-deploy-{SOMETHING}
 ```

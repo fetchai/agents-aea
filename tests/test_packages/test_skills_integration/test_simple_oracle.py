@@ -80,11 +80,11 @@ class TestOracleSkillsFetchAI(AEATestCaseManyFlaky, UseLocalFetchNode):
 
         # add packages for oracle agent
         self.set_agent_context(oracle_agent_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.22.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.23.0")
         self.add_item("connection", "fetchai/ledger:0.18.0")
         self.add_item("connection", "fetchai/http_client:0.22.0")
         self.add_item("connection", "fetchai/prometheus:0.7.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.22.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.23.0")
         self.set_config("agent.default_ledger", ledger_id)
         self.nested_set_config(
             "agent.required_ledgers", [FetchAICrypto.identifier],
@@ -307,11 +307,11 @@ class TestOracleSkillsETH(AEATestCaseManyFlaky, UseGanache):
 
         # add packages for oracle agent
         self.set_agent_context(oracle_agent_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.22.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.23.0")
         self.add_item("connection", "fetchai/ledger:0.18.0")
         self.add_item("connection", "fetchai/http_client:0.22.0")
         self.add_item("connection", "fetchai/prometheus:0.7.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.22.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.23.0")
         self.set_config("agent.default_ledger", ledger_id)
         self.nested_set_config(
             "agent.required_ledgers",
@@ -377,7 +377,7 @@ class TestOracleSkillsETH(AEATestCaseManyFlaky, UseGanache):
         self.run_install()
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/coin_price_oracle:0.13.0", oracle_agent_name
+            "fetchai/coin_price_oracle:0.14.0", oracle_agent_name
         )
         assert (
             diff == []
