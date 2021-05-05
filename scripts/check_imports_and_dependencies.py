@@ -65,7 +65,7 @@ class DependenciesTool:
             raise Exception(f"package {package_name} not found")
         files = packages_info[0]["files"]
         location = packages_info[0]["location"]
-        return [Path(location) / i for i in files]
+        return [str(Path(location) / i) for i in files]
 
     @staticmethod
     def clean_dependency_name(dependecy_specification: str) -> str:
