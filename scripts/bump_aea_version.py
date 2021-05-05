@@ -71,6 +71,7 @@ def update_version_for_files(current_version: str, new_version: str) -> None:
         Path("deploy-image", "Dockerfile"),
         Path("develop-image", "docker-env.sh"),
         Path("docs", "quickstart.md"),
+        Path("examples", "tac_deploy", "Dockerfile"),
         Path("scripts", "install.ps1"),
         Path("scripts", "install.sh"),
         Path("tests", "test_docs", "test_bash_yaml", "md_files", "bash-quickstart.md"),
