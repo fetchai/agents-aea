@@ -13,6 +13,7 @@
 #   distributed under the License is distributed on an "AS IS" BASIS,
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
+#   limitations under the License.
 #
 # ------------------------------------------------------------------------------
 """This module contains the p2p libp2p connection."""
@@ -379,7 +380,7 @@ class Libp2pNode:
             platform.system() != "Windows"
             and sys.version_info.major == 3
             and sys.version_info.minor >= 8
-        ):
+        ):  # pragma: nocover
             with events.get_child_watcher() as watcher:
                 if watcher:
                     watcher.add_child_handler(
