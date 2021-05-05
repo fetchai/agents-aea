@@ -239,6 +239,11 @@ class TacBehaviour(Behaviour):
 
     def _start_tac(self, game: Game) -> None:
         """Create a game and send the game configuration to every registered agent."""
+        count = len(game.conf.agent_addr_to_name)
+        participant_names = sorted(list(game.conf.agent_addr_to_name.values()))
+        self.context.logger.info(
+            f"starting competition with {count} participants and list of participants: {participant_names}"
+        )
         self.context.logger.info(
             "started competition:\n{}".format(game.holdings_summary)
         )

@@ -30,6 +30,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math"
 	"net"
 	"os"
 	"sync"
@@ -612,6 +613,14 @@ func FetchAIPublicKeyFromFetchAIPrivateKey(privateKey string) (string, error) {
 
 // WriteBytesConn send bytes to `conn`
 func WriteBytesConn(conn net.Conn, data []byte) error {
+	if len(data) > math.MaxInt32 {
+		logger.Error().Msg("data size too large")
+		return errors.New("data size too large")
+	}
+	if len(data) == 0 {
+		logger.Error().Msg("No data to write")
+		return nil
+	}
 	size := uint32(len(data))
 	buf := make([]byte, 4, 4+size)
 	binary.BigEndian.PutUint32(buf, size)
@@ -685,6 +694,15 @@ func ReadBytes(s network.Stream) ([]byte, error) {
 
 // WriteBytes to a network stream
 func WriteBytes(s network.Stream, data []byte) error {
+	if len(data) > math.MaxInt32 {
+		logger.Error().Msg("data size too large")
+		return errors.New("data size too large")
+	}
+	if len(data) == 0 {
+		logger.Error().Msg("No data to write")
+		return nil
+	}
+
 	wstream := bufio.NewWriter(s)
 
 	size := uint32(len(data))
@@ -699,9 +717,20 @@ func WriteBytes(s network.Stream, data []byte) error {
 		return err
 	}
 
-	//logger.Debug().Msgf("writing %d", len(data))
 	_, err = wstream.Write(data)
-	wstream.Flush()
+	if err != nil {
+		logger.Error().
+			Str("err", err.Error()).
+			Msg("Error on data write")
+		return err
+	}
+	err = wstream.Flush()
+	if err != nil {
+		logger.Error().
+			Str("err", err.Error()).
+			Msg("Error on stream flush")
+		return err
+	}
 	return err
 }
 
@@ -734,7 +763,10 @@ func WriteEnvelope(envel *aea.Envelope, s network.Stream) error {
 		return err
 	}
 
-	wstream.Flush()
+	err = wstream.Flush()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

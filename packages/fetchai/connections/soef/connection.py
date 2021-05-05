@@ -66,7 +66,7 @@ from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.soef")
 
-PUBLIC_ID = PublicId.from_str("fetchai/soef:0.23.0")
+PUBLIC_ID = PublicId.from_str("fetchai/soef:0.24.0")
 
 NOT_SPECIFIED = object()
 
@@ -1090,7 +1090,7 @@ class SOEFChannel:
         # make sure we first unregister, in case of improper previous termination
         try:
             await self._unregister_agent()
-        except SOEFException as e:  # pragma: nocover
+        except Exception as e:  # pylint: disable=broad-except # pragma: nocover
             if "<reason>Bad Request</reason><detail>agent lookup failed" not in str(e):
                 # i.e. we're not trying to unregister and already unregistered agent
                 raise e
@@ -1115,7 +1115,7 @@ class SOEFChannel:
 
         try:
             await self._unregister_agent()
-        except SOEFException as e:  # pragma: nocover
+        except Exception as e:  # pylint: disable=broad-except # pragma: nocover
             self.logger.exception(str(e))
 
         await self.in_queue.put(None)

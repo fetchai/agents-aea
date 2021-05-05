@@ -19,6 +19,7 @@
 
 """This package contains a scaffold of a handler."""
 
+from collections import OrderedDict
 from typing import Optional, Tuple, cast
 
 from aea.configurations.base import PublicId
@@ -516,7 +517,7 @@ class SigningHandler(Handler):
             counterparty_signature = fipa_dialogue.counterparty_signature
             tx_id = fipa_dialogue.terms.sender_hash
             if "transactions" not in self.context.shared_state.keys():
-                self.context.shared_state["transactions"] = {}
+                self.context.shared_state["transactions"] = OrderedDict()
             tx = {
                 "terms": fipa_dialogue.terms,
                 "sender_signature": signing_msg.signed_message.body,

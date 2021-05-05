@@ -29,7 +29,7 @@ import pytest
 from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_fetchai import FetchAICrypto
 
-from aea.mail.base import Envelope
+from aea.mail.base import Empty, Envelope
 from aea.multiplexer import Multiplexer
 
 from packages.fetchai.connections.p2p_libp2p_client.connection import NodeClient, Uri
@@ -627,7 +627,7 @@ def test_libp2pclientconnection_uri():
 
 
 @libp2p_log_on_failure_all
-class BaseTestLibp2pClientReconnection:
+class BaseTestLibp2pClientSamePeer:
     """Base test class for reconnection tests."""
 
     @classmethod
@@ -697,12 +697,18 @@ class BaseTestLibp2pClientReconnection:
         except (OSError, IOError):
             pass
 
-    def _make_envelope(self, sender_address: str, receiver_address: str):
+    def _make_envelope(
+        self,
+        sender_address: str,
+        receiver_address: str,
+        message_id: int = 1,
+        target: int = 0,
+    ):
         """Make an envelope for testing purposes."""
         msg = DefaultMessage(
             dialogue_reference=("", ""),
-            message_id=1,
-            target=0,
+            message_id=message_id,
+            target=target,
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
@@ -715,7 +721,8 @@ class BaseTestLibp2pClientReconnection:
         return envelope
 
 
-class TestLibp2pClientReconnectionSendEnvelope(BaseTestLibp2pClientReconnection):
+@libp2p_log_on_failure_all
+class TestLibp2pClientReconnectionSendEnvelope(BaseTestLibp2pClientSamePeer):
     """Test that connection will send envelope with error, and that reconnection fixes it."""
 
     def test_envelope_sent(self):
@@ -747,7 +754,7 @@ class TestLibp2pClientReconnectionSendEnvelope(BaseTestLibp2pClientReconnection)
 
 
 @libp2p_log_on_failure_all
-class TestLibp2pClientReconnectionReceiveEnvelope(BaseTestLibp2pClientReconnection):
+class TestLibp2pClientReconnectionReceiveEnvelope(BaseTestLibp2pClientSamePeer):
     """Test that connection will receive envelope with error, and that reconnection fixes it."""
 
     def test_envelope_received(self):
@@ -783,6 +790,42 @@ class TestLibp2pClientReconnectionReceiveEnvelope(BaseTestLibp2pClientReconnecti
             == envelope.protocol_specification_id
         )
         assert delivered_envelope.message == envelope.message
+
+
+class TestLibp2pClientEnvelopeOrderSamePeer(BaseTestLibp2pClientSamePeer):
+    """Test that the order of envelope is the guaranteed to be the same."""
+
+    NB_ENVELOPES = 1000
+
+    def test_burst_order(self):
+        """Test order of envelope burst is guaranteed on receiving end."""
+        addr_1 = self.connection_client_1.address
+        addr_2 = self.connection_client_2.address
+
+        sent_envelopes = [
+            self._make_envelope(addr_1, addr_2, i, i - 1)
+            for i in range(1, self.NB_ENVELOPES + 1)
+        ]
+        for envelope in sent_envelopes:
+            self.multiplexer_client_1.put(envelope)
+
+        received_envelopes = []
+        for _ in range(1, self.NB_ENVELOPES + 1):
+            envelope = self.multiplexer_client_2.get(block=True, timeout=20)
+            received_envelopes.append(envelope)
+
+        # test no new message is "created"
+        with pytest.raises(Empty):
+            self.multiplexer_client_2.get(block=True, timeout=1)
+
+        assert len(sent_envelopes) == len(
+            received_envelopes
+        ), f"expected number of envelopes {len(sent_envelopes)}, got {len(received_envelopes)}"
+        for expected, actual in zip(sent_envelopes, received_envelopes):
+            assert expected.message == actual.message, (
+                "message content differ; probably a wrong message "
+                "ordering on the receiving end"
+            )
 
 
 @pytest.mark.asyncio

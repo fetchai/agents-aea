@@ -1,6 +1,6 @@
 name: tac_negotiation
 author: fetchai
-version: 0.26.0
+version: 0.27.0
 type: skill
 description: The tac negotiation skill implements the logic for an AEA to do fipa
   negotiation in the TAC.
@@ -8,10 +8,10 @@ license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmdpJypf1uoDBW54DC2req7bst1Hw548piYmMKUaPPVHeB
-  __init__.py: QmUz2i53GeSpQVmuQSrZQABdT83k39tSPi4qTUiFKZTvJw
+  __init__.py: Qmc57bJM6xc9CNAvC7qjUq2wfNpdDmHx7XpGacZE7kStXJ
   behaviours.py: QmQrguMfyMXUnSgGBhNE4D6ep1or3TxPQ2zXj7EVFwtwcT
   dialogues.py: Qmes8sm5yw7pYsKbGbfZNvihJnmtqDdzbdWmrZdx8p8P18
-  handlers.py: QmNXd9d5aBVmPK1bPsp28voaN4becNHKnpAvABFcHfdB38
+  handlers.py: QmSAevkXv9ZCnYVAwB3J3o1FkyFYaNTnDSsPmqy26m7cMg
   helpers.py: QmTJbGL8V6CLhbVhLekqKkHbu7cJMfBcv8DtWLSpkKP5tk
   strategy.py: QmfYTikXbLjEsjNUt6ayr61pPhUYVbMSVqhQt7L1E53NT8
   transactions.py: QmPZoTBt1otvnkdMDwWdPExLKA7kk6fyUS1prVZqipVUVM
@@ -28,7 +28,7 @@ protocols:
 - fetchai/oef_search:1.0.0
 - fetchai/signing:1.0.0
 skills:
-- fetchai/tac_participation:0.22.0
+- fetchai/tac_participation:0.23.0
 behaviours:
   clean_up:
     args:

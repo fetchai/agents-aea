@@ -99,7 +99,9 @@ class TacHandler(Handler):
         :param tac_msg: the message
         """
         self.context.logger.info(
-            "received invalid tac message={}, unidentified dialogue.".format(tac_msg)
+            "received invalid tac message={}, unidentified dialogue (reference={}).".format(
+                tac_msg, tac_msg.dialogue_reference
+            )
         )
         default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
         default_msg, _ = default_dialogues.create(

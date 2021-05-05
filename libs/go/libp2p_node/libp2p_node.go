@@ -37,7 +37,6 @@ import (
 
 const (
 	libp2pNodePanicError      = "LIBP2P_NODE_PANIC_ERROR"
-	libp2pNodeIgnored         = "IGNORED"
 	libp2pMultiaddrsListStart = "MULTIADDRS_LIST_START"
 	libp2pMultiaddrsListEnd   = "MULTIADDRS_LIST_END"
 )
@@ -49,12 +48,6 @@ func check(err error) {
 	if err != nil {
 		fmt.Println(libp2pNodePanicError, ":", err.Error())
 		panic(err)
-	}
-}
-
-func ignore(err error) {
-	if err != nil {
-		fmt.Println(libp2pNodeIgnored, ":", err)
 	}
 }
 
@@ -157,10 +150,10 @@ func main() {
 		for envel := range agent.Queue() {
 			envelope := envel
 			logger.Info().Msgf("received envelope from agent: %s", envelope)
-			go func() {
-				err := node.RouteEnvelope(envelope)
-				ignore(err)
-			}()
+			err := node.RouteEnvelope(envelope)
+			if err != nil {
+				logger.Error().Msgf("Route envelope error: %s", err.Error())
+			}
 		}
 	}()
 

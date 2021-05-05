@@ -25,6 +25,7 @@ package aea
 import (
 	"encoding/binary"
 	"errors"
+	"math"
 	"os"
 )
 
@@ -66,6 +67,9 @@ func (pipe *UnixPipe) Read() ([]byte, error) {
 }
 
 func (pipe *UnixPipe) Write(data []byte) error {
+	if len(data) > math.MaxInt32 {
+		return errors.New("value too large")
+	}
 	size := uint32(len(data))
 	buf := make([]byte, 4, 4+size)
 	binary.BigEndian.PutUint32(buf, size)
