@@ -154,7 +154,7 @@ def sigint_crossplatform(process: subprocess.Popen) -> None:  # pragma: nocover
     if os.name == "posix":
         process.send_signal(signal.SIGINT)  # pylint: disable=no-member
     elif os.name == "nt":
-        process.send_signal(signal.CTRL_C_EVENT)  # type: ignore # pylint: disable=no-member
+        process.send_signal(signal.CTRL_C_EVENT)  # pylint: disable=no-member
     else:
         raise ValueError("Other platforms not supported.")
 
@@ -190,7 +190,7 @@ def send_control_c(
     if platform.system() == "Windows":
         if process.stdin:  # cause ctrl-c event will be handled with stdin
             process.stdin.close()
-        os.kill(process.pid, signal.CTRL_C_EVENT)  # type: ignore  # pylint: disable=no-member
+        os.kill(process.pid, signal.CTRL_C_EVENT)  # pylint: disable=no-member
     elif kill_group:
         pgid = os.getpgid(process.pid)
         os.killpg(pgid, signal.SIGINT)
@@ -488,7 +488,7 @@ def find_topological_order(adjacency_list: Dict[T, Set[T]]) -> List[T]:
     # compute the topological order
     queue: Deque[T] = deque()
     order = []
-    queue.extendleft(sorted(roots))  # type: ignore
+    queue.extendleft(sorted(roots))
     while len(queue) > 0:
         current = queue.pop()
         order.append(current)
