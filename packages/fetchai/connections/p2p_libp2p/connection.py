@@ -338,7 +338,7 @@ class Libp2pNode:
 
         return NodeClient(self.pipe)
 
-    def _child_watcher_callback(self, *_) -> None:  # pragma: nocover # type: ignore
+    def _child_watcher_callback(self, *_) -> None:  # type: ignore # pragma: nocover
         """Log if process was terminated before stop was called."""
         if self._is_on_stop:
             return
