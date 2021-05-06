@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-if [ -z  "$USE_CLIENT" ];
+if [ -z "$USE_CLIENT" ];
 then
 	USE_CLIENT=false
 fi
@@ -12,7 +12,7 @@ mkdir /data
 # setup the agent
 aea fetch fetchai/tac_controller:latest
 cd tac_controller
-if [[ "$USE_CLIENT" ]]
+if [[ "$USE_CLIENT" == "true" ]]
 then
 	aea remove connection fetchai/p2p_libp2p
 	aea add connection fetchai/p2p_libp2p_client
@@ -24,7 +24,7 @@ cd ..
 
 aea fetch fetchai/tac_participant:latest --alias tac_participant_template
 cd tac_participant_template
-if [[ "$USE_CLIENT" ]]
+if [[ "$USE_CLIENT" == "true" ]]
 then
 	aea remove connection fetchai/p2p_libp2p
 	aea add connection fetchai/p2p_libp2p_client
