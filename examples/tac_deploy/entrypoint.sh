@@ -114,9 +114,12 @@ function set_agent(){
 	aea add-key fetchai $key_file_name	
 	key_file_name=$(generate_key $LEDGER $name $agent_data_dir 1)
 	aea add-key fetchai $key_file_name --connection
+	if [[ ! "$USE_CLIENT" ]]
+	then
+		json=$(printf '{"log_file": "%s", "delegate_uri": null, "entry_peers": ["%s"], "local_uri": "127.0.0.1:%s", "public_uri": null, "node_connection_timeout": '%i'}' "$agent_data_dir/libp2p_node.log" "$PEER" "$port" "$(($NODE_CONNECTION_TIMEOUT))")
+		aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config "$json"
+	fi
 	aea issue-certificates
-	json=$(printf '{"log_file": "%s", "delegate_uri": null, "entry_peers": ["%s"], "local_uri": "127.0.0.1:%s", "public_uri": null, "node_connection_timeout": '%i'}' "$agent_data_dir/libp2p_node.log" "$PEER" "$port" "$(($NODE_CONNECTION_TIMEOUT))")
-	aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config "$json"
 	log_file=$agent_data_dir/$name.log
 	json=$(printf '{"version": 1, "formatters": {"standard": {"format": ""}}, "handlers": {"console": {"class": "logging.StreamHandler", "formatter": "standard", "level": "%s"}, "file": {"class": "logging.FileHandler", "filename": "%s", "mode": "w", "level": "%s", "formatter": "standard"}}, "loggers": {"aea": {"level": "%s", "handlers": ["file"]}}}' "$LOG_LEVEL" "$log_file" "$LOG_LEVEL" "$LOG_LEVEL")
 	aea config set --type dict agent.logging_config "$json"
