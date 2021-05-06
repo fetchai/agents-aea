@@ -10,7 +10,7 @@ echo USE_CLIENT $USE_CLIENT
 mkdir /data
 
 # setup the agent
-aea fetch --local fetchai/tac_controller:latest
+aea fetch fetchai/tac_controller:latest
 cd tac_controller
 if [[ "$USE_CLIENT" == "true" ]]
 then
@@ -22,7 +22,7 @@ aea install
 aea build
 cd ..
 
-aea fetch --local fetchai/tac_participant:latest --alias tac_participant_template
+aea fetch fetchai/tac_participant:latest --alias tac_participant_template
 cd tac_participant_template
 if [[ "$USE_CLIENT" == "true" ]]
 then
