@@ -669,6 +669,9 @@ func ReadEnvelopeConn(conn net.Conn) (*aea.Envelope, error) {
 
 // ReadBytes from a network stream
 func ReadBytes(s network.Stream) ([]byte, error) {
+	if s == nil {
+		panic("GOTCHAAAAAAA 1, can not write to nil stream")
+	}
 	rstream := bufio.NewReader(s)
 
 	buf := make([]byte, 4)
@@ -703,6 +706,9 @@ func WriteBytes(s network.Stream, data []byte) error {
 		return nil
 	}
 
+	if s == nil {
+		panic("GOTCHAAAAAAA 1, can not write to nil stream")
+	}
 	wstream := bufio.NewWriter(s)
 
 	size := uint32(len(data))
@@ -724,6 +730,9 @@ func WriteBytes(s network.Stream, data []byte) error {
 			Msg("Error on data write")
 		return err
 	}
+	if s == nil {
+		panic("GOTCHAAAAAAA 2, can not write to nil stream")
+	}
 	err = wstream.Flush()
 	if err != nil {
 		logger.Error().
@@ -732,73 +741,4 @@ func WriteBytes(s network.Stream, data []byte) error {
 		return err
 	}
 	return err
-}
-
-// ReadString from a network stream
-func ReadString(s network.Stream) (string, error) {
-	data, err := ReadBytes(s)
-	return string(data), err
-}
-
-// WriteEnvelope to a network stream
-func WriteEnvelope(envel *aea.Envelope, s network.Stream) error {
-	wstream := bufio.NewWriter(s)
-	data, err := proto.Marshal(envel)
-	if err != nil {
-		return err
-	}
-	size := uint32(len(data))
-
-	buf := make([]byte, 4)
-	binary.BigEndian.PutUint32(buf, size)
-	//log.Println("DEBUG writing size:", size, buf)
-	_, err = wstream.Write(buf)
-	if err != nil {
-		return err
-	}
-
-	//log.Println("DEBUG writing data:", data)
-	_, err = wstream.Write(data)
-	if err != nil {
-		return err
-	}
-
-	err = wstream.Flush()
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// ReadEnvelope from a network stream
-func ReadEnvelope(s network.Stream) (*aea.Envelope, error) {
-	envel := &aea.Envelope{}
-	rstream := bufio.NewReader(s)
-
-	buf := make([]byte, 4)
-	_, err := io.ReadFull(rstream, buf)
-
-	if err != nil {
-		logger.Error().
-			Str("err", err.Error()).
-			Msg("while reading size")
-		return envel, err
-	}
-
-	size := binary.BigEndian.Uint32(buf)
-	if size > maxMessageSizeDelegateConnection {
-		return nil, errors.New("Expected message size larger than maximum allowed")
-	}
-	//logger.Debug().Msgf("received size: %d %x", size, buf)
-	buf = make([]byte, size)
-	_, err = io.ReadFull(rstream, buf)
-	if err != nil {
-		logger.Error().
-			Str("err", err.Error()).
-			Msg("while reading data")
-		return envel, err
-	}
-
-	err = proto.Unmarshal(buf, envel)
-	return envel, err
 }
