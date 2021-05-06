@@ -29,22 +29,22 @@ GCloud should be configured first!
 
 Tag the image first with the latest tag:
 ``` bash
-docker image tag tac-deploy gcr.io/fetch-ai-sandbox/tac_deploy:0.0.7
+docker image tag tac-deploy gcr.io/fetch-ai-sandbox/tac_deploy:0.0.10
 ```
 
 Push it to remote repo:
 ``` bash
-docker push gcr.io/fetch-ai-sandbox/tac_deploy:0.0.7
+docker push gcr.io/fetch-ai-sandbox/tac_deploy:0.0.10
 ```
 
 ### Run it manually
 
 Run it
 ``` bash
-kubectl run tac-deploy-{SOMETHING} --image=gcr.io/fetch-ai-sandbox/tac_deploy:0.0.7 --env="PARTICIPANTS_AMOUNT=5" --attach
+kubectl run tac-deploy-{SOMETHING} --image=gcr.io/fetch-ai-sandbox/tac_deploy:0.0.10 --env="PARTICIPANTS_AMOUNT=5" --attach
 ```
 
-Or simply restart existing deployment and latest image will be used with default configs (see below):
+Or simply restart existing deployment and latest image will be used with default configurations (see below):
 ``` bash
 kubectl delete pod tac-deploy-{SOMETHING}
 ```
@@ -96,6 +96,7 @@ grep -rl 'TAKE CARE! Circumventing controller identity check!' output_dir/ | wc 
 grep -rnw 'SOEF Network Connection Error' output_dir/ |  wc -l
 grep -rnw 'SOEF Server Bad Response Error' output_dir/ |  wc -l
 grep -rnw 'Failure during pipe closing.' output_dir/ |  wc -l
+grep -rnw "Couldn't connect to libp2p process within timeout" output_dir/ |  wc -l
 grep -rnw 'Exception' output_dir/ |  wc -l
 grep -rnw 'connect to libp2p process within timeout' output_dir/ |  wc -l
 grep -rnw 'handling valid transaction' output_dir/tac_controller/ | wc -l

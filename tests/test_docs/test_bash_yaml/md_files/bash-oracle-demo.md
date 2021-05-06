@@ -1,5 +1,5 @@
 ``` bash
-aea fetch fetchai/coin_price_oracle:0.13.0
+aea fetch fetchai/coin_price_oracle:0.14.0
 cd coin_price_oracle
 aea install
 aea build
@@ -9,7 +9,7 @@ aea create coin_price_oracle
 cd coin_price_oracle
 aea add connection fetchai/http_client:0.22.0
 aea add connection fetchai/ledger:0.18.0
-aea add connection fetchai/p2p_libp2p:0.22.0
+aea add connection fetchai/p2p_libp2p:0.23.0
 aea add skill fetchai/advanced_data_request:0.5.0
 aea add skill fetchai/simple_oracle:0.12.0
 aea config set --type dict agent.dependencies \
@@ -17,7 +17,7 @@ aea config set --type dict agent.dependencies \
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"},
   "aea-ledger-ethereum": {"version": "<2.0.0,>=1.0.0"}
 }'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.22.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.23.0
 aea install
 aea build
 ```
