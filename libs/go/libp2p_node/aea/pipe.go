@@ -1,4 +1,4 @@
-// +build windows !linux !darwin
+// +build windows linux darwin
 
 /* -*- coding: utf-8 -*-
 * ------------------------------------------------------------------------------

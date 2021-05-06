@@ -37,7 +37,7 @@ from aea.exceptions import enforce
 from aea.helpers.acn.agent_record import AgentRecord
 from aea.helpers.acn.uri import Uri
 from aea.helpers.multiaddr.base import MultiAddr
-from aea.helpers.pipe import IPCChannel, make_ipc_channel
+from aea.helpers.pipe import IPCChannel, TCPSocketChannel
 from aea.mail.base import Envelope
 
 
@@ -364,8 +364,8 @@ class Libp2pNode:
         self._log_file_desc.write("test")
         self._log_file_desc.flush()
 
-        # setup fifos or tcp socket on windows
-        self.pipe = make_ipc_channel(logger=self.logger)
+        # tcp socket on every platform
+        self.pipe = TCPSocketChannel(logger=self.logger)
 
         env_file_data = self._make_env_file(
             pipe_in_path=self.pipe.in_path, pipe_out_path=self.pipe.out_path
