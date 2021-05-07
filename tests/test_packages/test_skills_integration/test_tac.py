@@ -82,6 +82,7 @@ class TestTacSkills(AEATestCaseManyFlaky):
 
         # tac name
         tac_id = uuid.uuid4().hex
+        tac_service = f"tac_service_{tac_id}"
 
         # prepare tac controller for test
         self.set_agent_context(tac_controller_name)
@@ -203,6 +204,10 @@ class TestTacSkills(AEATestCaseManyFlaky):
                 "vendor.fetchai.skills.tac_participation.models.game.args.search_query"
             )
             self.nested_set_config(setting_path, data)
+            self.set_config(
+                "vendor.fetchai.skills.tac_negotiation.models.strategy.args.service_key",
+                tac_service,
+            )
 
             self.run_cli_command("build", cwd=self._get_cwd())
             self.run_cli_command("issue-certificates", cwd=self._get_cwd())
@@ -356,6 +361,7 @@ class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache):
 
         # tac name
         tac_id = uuid.uuid4().hex
+        tac_service = f"tac_service_{tac_id}"
 
         # prepare tac controller for test
         self.set_agent_context(tac_controller_name)
@@ -537,6 +543,10 @@ class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache):
                 diff == []
             ), "Difference between created and fetched project for files={}".format(
                 diff
+            )
+            self.set_config(
+                "vendor.fetchai.skills.tac_negotiation.models.strategy.args.service_key",
+                tac_service,
             )
 
         # run tac controller
