@@ -86,6 +86,10 @@ if [ "$CLEAR_KEY_DATA_ON_LAUNCH" == true ]; then
 	find "$BASE_DIR" -name \*.txt -type f -delete
 fi
 
+if [ -z "$USE_CLIENT" ]; then
+	USE_CLIENT=false
+fi
+
 function generate_key (){
 	ledger=$1
 	prefix=$2
