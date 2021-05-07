@@ -1959,7 +1959,6 @@ func ensureAddressAnnounced(peers ...*DHTPeer) {
 		for !peer.addressAnnounced {
 			select {
 			case <-ctx.Done():
-				break
 			case <-time.After(5 * time.Millisecond):
 			}
 		}

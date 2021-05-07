@@ -629,7 +629,6 @@ func (dhtPeer *DHTPeer) handleDelegateService(ready *sync.WaitGroup) {
 				go dhtPeer.handleNewDelegationConnection(conn)
 			}
 		case <-dhtPeer.closing:
-			break
 		}
 	}
 }

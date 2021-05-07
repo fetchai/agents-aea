@@ -325,7 +325,7 @@ func VerifyLedgerSignature(
 	if found {
 		return verifySignature(message, signature, pubkey)
 	}
-	return false, errors.New("Unsupported ledger")
+	return false, errors.New("unsupported ledger")
 }
 
 // VerifyFetchAISignatureBTC verify the RFC6967 string-encoded signature of message using FetchAI public key
@@ -433,7 +433,7 @@ func VerifyEthereumSignatureETH(message []byte, signature string, pubkey string)
 	}
 
 	if recoveredAddress != expectedAddress {
-		return false, errors.New("Recovered and expected addresses don't match")
+		return false, errors.New("recovered and expected addresses don't match")
 	}
 
 	return true, nil
@@ -461,7 +461,7 @@ func AgentAddressFromPublicKey(ledgerId string, publicKey string) (string, error
 	if addressFromPublicKey, found := addressFromPublicKeyTable[ledgerId]; found {
 		return addressFromPublicKey(publicKey)
 	}
-	return "", errors.New("Unsupported ledger " + ledgerId)
+	return "", errors.New("unsupported ledger " + ledgerId)
 }
 
 // FetchAIAddressFromPublicKey get wallet address from hex encoded secp256k1 public key
@@ -639,7 +639,7 @@ func ReadBytesConn(conn net.Conn) ([]byte, error) {
 
 	size := binary.BigEndian.Uint32(buf)
 	if size > maxMessageSizeDelegateConnection {
-		return nil, errors.New("Expected message size larger than maximum allowed")
+		return nil, errors.New("expected message size larger than maximum allowed")
 	}
 
 	buf = make([]byte, size)
@@ -670,7 +670,7 @@ func ReadEnvelopeConn(conn net.Conn) (*aea.Envelope, error) {
 // ReadBytes from a network stream
 func ReadBytes(s network.Stream) ([]byte, error) {
 	if s == nil {
-		panic("GOTCHAAAAAAA 1, can not write to nil stream")
+		panic("CRITICAL can not write to nil stream")
 	}
 	rstream := bufio.NewReader(s)
 
@@ -685,7 +685,7 @@ func ReadBytes(s network.Stream) ([]byte, error) {
 
 	size := binary.BigEndian.Uint32(buf)
 	if size > maxMessageSizeDelegateConnection {
-		return nil, errors.New("Expected message size larger than maximum allowed")
+		return nil, errors.New("expected message size larger than maximum allowed")
 	}
 	//logger.Debug().Msgf("expecting %d", size)
 
@@ -707,7 +707,7 @@ func WriteBytes(s network.Stream, data []byte) error {
 	}
 
 	if s == nil {
-		panic("GOTCHAAAAAAA 1, can not write to nil stream")
+		panic("CRITICAL, can not write to nil stream")
 	}
 	wstream := bufio.NewWriter(s)
 
@@ -731,7 +731,7 @@ func WriteBytes(s network.Stream, data []byte) error {
 		return err
 	}
 	if s == nil {
-		panic("GOTCHAAAAAAA 2, can not write to nil stream")
+		panic("CRITICAL, can not flush nil stream")
 	}
 	err = wstream.Flush()
 	if err != nil {

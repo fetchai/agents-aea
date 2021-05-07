@@ -306,7 +306,6 @@ func (dhtClient *DHTClient) bootstrapLoopUntilTimeout() error {
 			)
 		case <-ctx.Done():
 			sleepTime = 0
-			break
 		}
 		if sleepTime == 0 {
 			break
@@ -338,11 +337,13 @@ func (dhtClient *DHTClient) newStreamLoopUntilTimeout(
 			stream, err = dhtClient.routedHost.NewStream(ctx, peerID, streamType)
 		case <-ctx.Done():
 			sleepTime = 0
-			break
 		}
 		if sleepTime == 0 {
 			break
 		}
+	}
+	if stream == nil {
+		return stream, errors.New("stream nil" + err.Error())
 	}
 	// register again in case of disconnection
 	if disconnected {

@@ -176,7 +176,6 @@ func (fm *FileMonitoring) Start() {
 		select {
 		case <-fm.closing:
 			file.Close()
-			break
 		default:
 			ignore(file.Truncate(0))
 			_, err := file.Seek(0, 0)
