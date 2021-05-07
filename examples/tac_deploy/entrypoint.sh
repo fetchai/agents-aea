@@ -118,7 +118,7 @@ function set_agent(){
 	aea add-key fetchai $key_file_name	
 	key_file_name=$(generate_key $LEDGER $name $agent_data_dir 1)
 	aea add-key fetchai $key_file_name --connection
-	if [ "$USE_CLIENT" == false ];
+	if [ "$USE_CLIENT" == "false" ];
 	then
 		json=$(printf '{"log_file": "%s", "delegate_uri": null, "entry_peers": ["%s"], "local_uri": "127.0.0.1:%s", "public_uri": null, "node_connection_timeout": '%i'}' "$agent_data_dir/libp2p_node.log" "$PEER" "$port" "$(($NODE_CONNECTION_TIMEOUT))")
 		aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config "$json"

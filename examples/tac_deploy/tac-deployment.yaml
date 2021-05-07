@@ -42,6 +42,8 @@ spec:
            value: "true"
          - name: CLEAR_KEY_DATA_ON_LAUNCH
            value: "true"
+         - name: USE_CLIENT
+           value: "false"
         volumeMounts:
          - name: tac-deploy-data-vol
            mountPath: /data
