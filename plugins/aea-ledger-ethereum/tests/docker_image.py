@@ -19,11 +19,15 @@
 
 """This module contains testing utilities."""
 import logging
+import re
+import shutil
+import subprocess
 import time
 from abc import ABC, abstractmethod
 from typing import Dict, List, Optional
 
 import docker
+import pytest
 import requests
 from docker import DockerClient
 from docker.models.containers import Container
@@ -35,7 +39,9 @@ logger = logging.getLogger(__name__)
 
 
 class DockerImage(ABC):
-    """A class to wrap interaction with a Docker image."""
+    """A class to wrap interatction with a Docker image."""
+
+    MINIMUM_DOCKER_VERSION = (19, 0, 0)
 
     def __init__(self, client: docker.DockerClient):
         """Initialize."""
@@ -47,6 +53,31 @@ class DockerImage(ABC):
 
         By default, nothing happens.
         """
+        self._check_docker_binary_available()
+
+    def _check_docker_binary_available(self):
+        """Check the 'Docker' CLI tool is in the OS PATH."""
+        result = shutil.which("docker")
+        if result is None:
+            pytest.skip("Docker not in the OS Path; skipping the test")
+
+        result = subprocess.run(  # nosec
+            ["docker", "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
+        if result.returncode != 0:
+            pytest.skip(f"'docker --version' failed with exit code {result.returncode}")
+
+        match = re.search(
+            r"Docker version ([0-9]+)\.([0-9]+)\.([0-9]+)",
+            result.stdout.decode("utf-8"),
+        )
+        if match is None:
+            pytest.skip(f"cannot read version from the output of 'docker --version'")
+        version = (int(match.group(1)), int(match.group(2)), int(match.group(3)))
+        if version < self.MINIMUM_DOCKER_VERSION:
+            pytest.skip(
+                f"expected Docker version to be at least {'.'.join(self.MINIMUM_DOCKER_VERSION)}, found {'.'.join(version)}"
+            )
 
     @property
     @abstractmethod
