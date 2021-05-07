@@ -803,7 +803,7 @@ class P2PLibp2pConnection(Connection):
                 f"Failed to read. Exception: {e}. Try reconnect to node and read again."
             )
 
-            self._restart_node()
+            await self._restart_node()
             return await self._node_client.read_envelope()
 
     async def _receive_from_node(self) -> None:
