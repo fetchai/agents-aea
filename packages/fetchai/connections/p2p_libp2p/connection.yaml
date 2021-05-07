@@ -17,7 +17,7 @@ fingerprint:
   libp2p_node/aea/envelope.pb.go: QmRfUNGpCeVJfsW3H1MzCN4pwDWgumfyWufVFp6xvUjjug
   libp2p_node/aea/envelope.proto: QmVuvesmfgzj5aKnbFoCocoGEv3T9MR7u6KWn7CT5yfjGi
   libp2p_node/aea/pipe.go: QmWLBjZNRCcg3BSM9Cxb95yAXdT6wPjgw8DSYHxMuux4JA
-  libp2p_node/dht/dhtclient/dhtclient.go: Qmf2x9NZNr7gM1VJfTgzp8Wdjfu2w1krTgLt1PgTgjrY3m
+  libp2p_node/dht/dhtclient/dhtclient.go: QmQpfFiHT7vwrdt6o7EuzgAbweXzP5rpndUiD3UAH2Naw7
   libp2p_node/dht/dhtclient/dhtclient_test.go: QmS9SiLAojXYobqV9m5yeRpyPzt6JcSbQD78RNvSp6LPx6
   libp2p_node/dht/dhtclient/options.go: QmaoJiavHescgx98inQjVUipPFRvcFFrodrScZ3fvrXJ4z
   libp2p_node/dht/dhtnode/dhtnode.go: QmbyhgbCSAbQ1QsDw7FM7Nt5sZcvhbupA1jv5faxutbV7N
@@ -27,10 +27,10 @@ fingerprint:
   libp2p_node/dht/dhtnode/utils.go: QmcSEvmhU5TwL92qB1Nu3E28Lhs6UZ1GRnHwQ9knMdiyGx
   libp2p_node/dht/dhtpeer/benchmarks_test.go: QmX2KWsaFaVd9KGjvgYNgkLtgnu1CUhBPtTe9abKYndq4C
   libp2p_node/dht/dhtpeer/dhtpeer.go: QmUS4bDXngfGL5X4CTPbb7qk2uN9rc2txerqdAuEi2QKQg
-  libp2p_node/dht/dhtpeer/dhtpeer_test.go: QmT8KpPtxwAFA9rHLJjh4wboGQ7bmLGFowQ2U94adzhWUL
+  libp2p_node/dht/dhtpeer/dhtpeer_test.go: QmbygeomT8dmpo6qbj1VyqMujgqfnmvN9kbQKYh77HcvdK
   libp2p_node/dht/dhtpeer/options.go: QmRbB1dnA5TEeJZQpKBJQoxFNHSPLRiEtwtkK6ZJDZdjAX
   libp2p_node/dht/dhttests/dhttests.go: QmWTwAqXy4xPBWx49dvg91pBfaeyh79bgbh4yYc3u6kGhg
-  libp2p_node/dht/monitoring/file.go: Qmb8U557xYB3gA3xRXSsjtZNTn5Cyn6VyHhDEseFfHpuTL
+  libp2p_node/dht/monitoring/file.go: Qmc4QpKtjXaEFqGPeunV6TR4qR5RcMzoy8atzJH4ouBkfH
   libp2p_node/dht/monitoring/prometheus.go: QmQvXjEozVPMvRjda5WGRAU5b7cfUcRZUACQkTESG7Aewu
   libp2p_node/dht/monitoring/service.go: QmT47y2LHZECYcoE2uJ9QCGh3Kq8ePhYedo8dQE7X7v6YV
   libp2p_node/go.mod: QmU2MJhhvwTCfyztCei5R9LKStadFuFVUDb16s3tZwrZP8

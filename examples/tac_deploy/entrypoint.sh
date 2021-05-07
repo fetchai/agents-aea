@@ -3,7 +3,8 @@ set -e
 
 LEDGER=fetchai
 PEER="/dns4/acn.fetch.ai/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW"
-TAC_NAME='some_tac_id'
+TAC_NAME='v'$((10 + $RANDOM % 1000))
+TAC_SERVICE=tac_service_$TAC_NAME
 BASE_PORT=10000
 BASE_DIR=/data
 OLD_DIR=/$(date "+%d_%m_%Y_%H%M")
@@ -148,6 +149,7 @@ function set_participant(){
 	set_agent $agent_name $(expr $BASE_PORT + $agent_id)
 	aea config set vendor.fetchai.skills.tac_negotiation.behaviours.clean_up.args.tick_interval $CLEANUP_INTERVAL
 	aea config set vendor.fetchai.skills.tac_negotiation.behaviours.tac_negotiation.args.search_interval $SEARCH_INTERVAL_TRADING
+	aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.service_key $TAC_SERVICE
 	aea config set vendor.fetchai.skills.tac_participation.behaviours.tac_search.args.tick_interval $SEARCH_INTERVAL_GAME
 	aea config set vendor.fetchai.skills.tac_participation.models.game.args.search_query.search_value $TAC_NAME
 	cd ..
