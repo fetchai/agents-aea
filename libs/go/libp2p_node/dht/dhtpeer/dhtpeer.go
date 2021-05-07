@@ -607,6 +607,7 @@ func (dhtPeer *DHTPeer) handleDelegateService(ready *sync.WaitGroup) {
 	lerror, _, linfo, _ := dhtPeer.getLoggers()
 
 	done := false
+L:
 	for {
 		select {
 		default:
@@ -629,6 +630,7 @@ func (dhtPeer *DHTPeer) handleDelegateService(ready *sync.WaitGroup) {
 				go dhtPeer.handleNewDelegationConnection(conn)
 			}
 		case <-dhtPeer.closing:
+			break L
 		}
 	}
 }
