@@ -67,7 +67,7 @@ func IsValidProofOfRepresentation(
 
 	// check public key matches
 	if record.PeerPublicKey != representativePeerPubKey {
-		err := errors.New("Wrong peer public key, expected " + representativePeerPubKey)
+		err := errors.New("wrong peer public key, expected " + representativePeerPubKey)
 		response := &Status{Code: Status_ERROR_WRONG_PUBLIC_KEY, Msgs: []string{err.Error()}}
 		return response, err
 	}
@@ -76,7 +76,7 @@ func IsValidProofOfRepresentation(
 	addrFromPubKey, err := utils.AgentAddressFromPublicKey(record.LedgerId, record.PublicKey)
 	if err != nil || addrFromPubKey != record.Address {
 		if err == nil {
-			err = errors.New("Agent address and public key don't match")
+			err = errors.New("agent address and public key don't match")
 		}
 		response := &Status{Code: Status_ERROR_WRONG_AGENT_ADDRESS}
 		return response, err
@@ -91,7 +91,7 @@ func IsValidProofOfRepresentation(
 	)
 	if !ok || err != nil {
 		if err == nil {
-			err = errors.New("Signature is not valid")
+			err = errors.New("signature is not valid")
 		}
 		response := &Status{Code: Status_ERROR_INVALID_PROOF}
 		return response, err

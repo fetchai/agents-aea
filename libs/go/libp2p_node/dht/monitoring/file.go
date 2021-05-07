@@ -172,11 +172,12 @@ func (fm *FileMonitoring) Start() {
 	fm.closing = make(chan struct{})
 
 	file, _ := os.OpenFile(fm.path, os.O_WRONLY|os.O_CREATE, 0666)
+L:
 	for {
 		select {
 		case <-fm.closing:
 			file.Close()
-			break
+			break L
 		default:
 			ignore(file.Truncate(0))
 			_, err := file.Seek(0, 0)

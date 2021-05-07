@@ -1956,10 +1956,11 @@ func ensureAddressAnnounced(peers ...*DHTPeer) {
 	for _, peer := range peers {
 		ctx, cancel := context.WithTimeout(context.Background(), DHTPeerSetupTimeout)
 		defer cancel()
+	L:
 		for !peer.addressAnnounced {
 			select {
 			case <-ctx.Done():
-				break
+				break L
 			case <-time.After(5 * time.Millisecond):
 			}
 		}

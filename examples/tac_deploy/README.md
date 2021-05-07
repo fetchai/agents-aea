@@ -29,19 +29,19 @@ GCloud should be configured first!
 
 Tag the image first with the latest tag:
 ``` bash
-docker image tag tac-deploy gcr.io/fetch-ai-sandbox/tac_deploy:0.0.10
+docker image tag tac-deploy gcr.io/fetch-ai-sandbox/tac_deploy:0.0.13
 ```
 
 Push it to remote repo:
 ``` bash
-docker push gcr.io/fetch-ai-sandbox/tac_deploy:0.0.10
+docker push gcr.io/fetch-ai-sandbox/tac_deploy:0.0.13
 ```
 
 ### Run it manually
 
 Run it
 ``` bash
-kubectl run tac-deploy-{SOMETHING} --image=gcr.io/fetch-ai-sandbox/tac_deploy:0.0.10 --env="PARTICIPANTS_AMOUNT=5" --attach
+kubectl run tac-deploy-{SOMETHING} --image=gcr.io/fetch-ai-sandbox/tac_deploy:0.0.13 --env="PARTICIPANTS_AMOUNT=5" --attach
 ```
 
 Or simply restart existing deployment and latest image will be used with default configurations (see below):
