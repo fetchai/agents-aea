@@ -811,12 +811,11 @@ class P2PLibp2pConnection(Connection):
             if self.node.is_proccess_running():
                 await self.node.pipe.connect()
                 await self._node_client.send_envelope(envelope)
-                self.logger.info("Envelope sent after reconnect to node")
+                self.logger.debug("Envelope sent after reconnect to node")
                 return
         except asyncio.CancelledError:  # pylint: disable=try-except-raise
             raise  # pragma: nocover
         except Exception as e:  # pylint: disable=broad-except
-            self.logger.info("Envelope sending failed after reconnect to node")
             self.logger.exception(
                 f"Failed to send after pipe reconnect. Exception: {e}. Try recover connection to node and send again."
             )
