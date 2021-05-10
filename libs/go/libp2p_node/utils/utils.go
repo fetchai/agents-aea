@@ -82,7 +82,7 @@ var logger zerolog.Logger = NewDefaultLogger()
 
 // SetLoggerLevel set utils logger level
 func SetLoggerLevel(lvl zerolog.Level) {
-	logger.Level(lvl)
+	logger = logger.Level(lvl)
 }
 
 func ignore(err error) {
@@ -180,7 +180,6 @@ func BootstrapConnect(
 	if count == len(peers) {
 		return errors.New("failed to bootstrap: " + err.Error())
 	}
-
 	// workaround: to avoid getting `failed to find any peer in table`
 	//  when calling dht.Provide (happens occasionally)
 	logger.Debug().Msg("waiting for bootstrap peers to be added to dht routing table...")
@@ -252,7 +251,7 @@ func FetchAIPublicKeyFromPubKey(publicKey crypto.PubKey) (string, error) {
 	return hex.EncodeToString(raw), nil
 }
 
-// BTCPubKeyFromFetchAIPublicKey
+// BTCPubKeyFromFetchAIPublicKey from public key string
 func BTCPubKeyFromFetchAIPublicKey(publicKey string) (*btcec.PublicKey, error) {
 	pbkBytes, err := hex.DecodeString(publicKey)
 	if err != nil {
@@ -268,7 +267,7 @@ func BTCPubKeyFromEthereumPublicKey(publicKey string) (*btcec.PublicKey, error) 
 	return BTCPubKeyFromUncompressedHex(publicKey[2:])
 }
 
-// ConvertStrEncodedSignatureToDER
+// ConvertStrEncodedSignatureToDER to convert signature to DER format
 // References:
 //  - https://github.com/fetchai/agents-aea/blob/main/aea/crypto/cosmos.py#L258
 //  - https://github.com/btcsuite/btcd/blob/master/btcec/signature.go#L47
@@ -288,7 +287,7 @@ func ConvertStrEncodedSignatureToDER(signature []byte) []byte {
 	return sigDER
 }
 
-// ConvertDEREncodedSignatureToStr
+// ConvertDEREncodedSignatureToStr Convert signatue from der format to string
 // References:
 //  - https://github.com/fetchai/agents-aea/blob/main/aea/crypto/cosmos.py#L258
 //  - https://github.com/btcsuite/btcd/blob/master/btcec/signature.go#L47
@@ -316,14 +315,14 @@ func ParseFetchAISignature(signature string) (*btcec.Signature, error) {
 
 // VerifyLedgerSignature verify signature of message using public key for supported ledgers
 func VerifyLedgerSignature(
-	ledgerId string,
+	ledgerID string,
 	message []byte,
 	signature string,
-	pubkey string,
+	pubKey string,
 ) (bool, error) {
-	verifySignature, found := verifyLedgerSignatureTable[ledgerId]
+	verifySignature, found := verifyLedgerSignatureTable[ledgerID]
 	if found {
-		return verifySignature(message, signature, pubkey)
+		return verifySignature(message, signature, pubKey)
 	}
 	return false, errors.New("unsupported ledger")
 }
@@ -371,6 +370,7 @@ func VerifyFetchAISignatureLibp2p(message []byte, signature string, pubkey strin
 	return verifyKey.Verify(message, sigDER)
 }
 
+// SignFetchAI signs message with private key
 func SignFetchAI(message []byte, privKey string) (string, error) {
 	signingKey, _, err := KeyPairFromFetchAIKey(privKey)
 	if err != nil {
@@ -420,8 +420,8 @@ func RecoverAddressFromEthereumSignature(message []byte, signature string) (stri
 
 // VerifyEthereumSignatureETH verify ethereum signature using ethereum public key
 func VerifyEthereumSignatureETH(message []byte, signature string, pubkey string) (bool, error) {
-	// get expected signer address
-	expectedAddress, err := EthereumAddressFromPublicKey(pubkey)
+	// get ted signer address
+	tedAddress, err := EthereumAddressFromPublicKey(pubkey)
 	if err != nil {
 		return false, err
 	}
@@ -432,8 +432,8 @@ func VerifyEthereumSignatureETH(message []byte, signature string, pubkey string)
 		return false, err
 	}
 
-	if recoveredAddress != expectedAddress {
-		return false, errors.New("recovered and expected addresses don't match")
+	if recoveredAddress != tedAddress {
+		return false, errors.New("recovered and ted addresses don't match")
 	}
 
 	return true, nil
@@ -441,13 +441,13 @@ func VerifyEthereumSignatureETH(message []byte, signature string, pubkey string)
 
 // KeyPairFromFetchAIKey  key pair from hex encoded secp256k1 private key
 func KeyPairFromFetchAIKey(key string) (crypto.PrivKey, crypto.PubKey, error) {
-	pk_bytes, err := hex.DecodeString(key)
+	pkBytes, err := hex.DecodeString(key)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	btc_private_key, _ := btcec.PrivKeyFromBytes(btcec.S256(), pk_bytes)
-	prvKey, pubKey, err := crypto.KeyPairFromStdKey(btc_private_key)
+	btcPrivateKey, _ := btcec.PrivKeyFromBytes(btcec.S256(), pkBytes)
+	prvKey, pubKey, err := crypto.KeyPairFromStdKey(btcPrivateKey)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -457,11 +457,11 @@ func KeyPairFromFetchAIKey(key string) (crypto.PrivKey, crypto.PubKey, error) {
 
 // AgentAddressFromPublicKey get wallet address from public key associated with ledgerId
 // format from: https://github.com/fetchai/agents-aea/blob/main/aea/crypto/cosmos.py#L120
-func AgentAddressFromPublicKey(ledgerId string, publicKey string) (string, error) {
-	if addressFromPublicKey, found := addressFromPublicKeyTable[ledgerId]; found {
+func AgentAddressFromPublicKey(ledgerID string, publicKey string) (string, error) {
+	if addressFromPublicKey, found := addressFromPublicKeyTable[ledgerID]; found {
 		return addressFromPublicKey(publicKey)
 	}
-	return "", errors.New("unsupported ledger " + ledgerId)
+	return "", errors.New("Unsupported ledger " + ledgerID)
 }
 
 // FetchAIAddressFromPublicKey get wallet address from hex encoded secp256k1 public key
@@ -549,18 +549,18 @@ func encodeChecksumEIP55(address []byte) string {
 }
 
 // IDFromFetchAIPublicKey Get PeeID (multihash) from fetchai public key
-func IDFromFetchAIPublicKey(public_key string) (peer.ID, error) {
-	b, err := hex.DecodeString(public_key)
+func IDFromFetchAIPublicKey(publicKey string) (peer.ID, error) {
+	b, err := hex.DecodeString(publicKey)
 	if err != nil {
 		return "", err
 	}
 
-	pub_key, err := btcec.ParsePubKey(b, btcec.S256())
+	pubKey, err := btcec.ParsePubKey(b, btcec.S256())
 	if err != nil {
 		return "", err
 	}
 
-	multihash, err := peer.IDFromPublicKey((*crypto.Secp256k1PublicKey)(pub_key))
+	multihash, err := peer.IDFromPublicKey((*crypto.Secp256k1PublicKey)(pubKey))
 	if err != nil {
 		return "", err
 	}
@@ -597,6 +597,7 @@ func IDFromFetchAIPublicKeyUncompressed(publicKey string) (peer.ID, error) {
 	return multihash, nil
 }
 
+// FetchAIPublicKeyFromFetchAIPrivateKey get fetchai public key from fetchai private key
 func FetchAIPublicKeyFromFetchAIPrivateKey(privateKey string) (string, error) {
 	pkBytes, err := hex.DecodeString(privateKey)
 	if err != nil {
@@ -613,6 +614,7 @@ func FetchAIPublicKeyFromFetchAIPrivateKey(privateKey string) (string, error) {
 
 // WriteBytesConn send bytes to `conn`
 func WriteBytesConn(conn net.Conn, data []byte) error {
+
 	if len(data) > math.MaxInt32 {
 		logger.Error().Msg("data size too large")
 		return errors.New("data size too large")
@@ -621,6 +623,7 @@ func WriteBytesConn(conn net.Conn, data []byte) error {
 		logger.Error().Msg("No data to write")
 		return nil
 	}
+
 	size := uint32(len(data))
 	buf := make([]byte, 4, 4+size)
 	binary.BigEndian.PutUint32(buf, size)
@@ -672,6 +675,7 @@ func ReadBytes(s network.Stream) ([]byte, error) {
 	if s == nil {
 		panic("CRITICAL can not write to nil stream")
 	}
+
 	rstream := bufio.NewReader(s)
 
 	buf := make([]byte, 4)
@@ -687,6 +691,7 @@ func ReadBytes(s network.Stream) ([]byte, error) {
 	if size > maxMessageSizeDelegateConnection {
 		return nil, errors.New("expected message size larger than maximum allowed")
 	}
+
 	//logger.Debug().Msgf("expecting %d", size)
 
 	buf = make([]byte, size)
@@ -709,6 +714,7 @@ func WriteBytes(s network.Stream, data []byte) error {
 	if s == nil {
 		panic("CRITICAL, can not write to nil stream")
 	}
+
 	wstream := bufio.NewWriter(s)
 
 	size := uint32(len(data))
@@ -723,6 +729,7 @@ func WriteBytes(s network.Stream, data []byte) error {
 		return err
 	}
 
+	//logger.Debug().Msgf("writing %d", len(data))
 	_, err = wstream.Write(data)
 	if err != nil {
 		logger.Error().
@@ -733,12 +740,73 @@ func WriteBytes(s network.Stream, data []byte) error {
 	if s == nil {
 		panic("CRITICAL, can not flush nil stream")
 	}
+
 	err = wstream.Flush()
+	return err
+}
+
+// ReadString from a network stream
+func ReadString(s network.Stream) (string, error) {
+	data, err := ReadBytes(s)
+	return string(data), err
+}
+
+// WriteEnvelope to a network stream
+func WriteEnvelope(envel *aea.Envelope, s network.Stream) error {
+	wstream := bufio.NewWriter(s)
+	data, err := proto.Marshal(envel)
+	if err != nil {
+		return err
+	}
+	size := uint32(len(data))
+
+	buf := make([]byte, 4)
+	binary.BigEndian.PutUint32(buf, size)
+	//log.Println("DEBUG writing size:", size, buf)
+	_, err = wstream.Write(buf)
+	if err != nil {
+		return err
+	}
+
+	//log.Println("DEBUG writing data:", data)
+	_, err = wstream.Write(data)
+	if err != nil {
+		return err
+	}
+
+	wstream.Flush()
+	return nil
+}
+
+// ReadEnvelope from a network stream
+func ReadEnvelope(s network.Stream) (*aea.Envelope, error) {
+	envel := &aea.Envelope{}
+	rstream := bufio.NewReader(s)
+
+	buf := make([]byte, 4)
+	_, err := io.ReadFull(rstream, buf)
+
 	if err != nil {
 		logger.Error().
 			Str("err", err.Error()).
-			Msg("Error on stream flush")
-		return err
+			Msg("while reading size")
+		return envel, err
 	}
-	return err
+
+	size := binary.BigEndian.Uint32(buf)
+	if size > maxMessageSizeDelegateConnection {
+		return nil, errors.New("ted message size larger than maximum allowed")
+	}
+	//logger.Debug().Msgf("received size: %d %x", size, buf)
+	buf = make([]byte, size)
+	_, err = io.ReadFull(rstream, buf)
+	if err != nil {
+		logger.Error().
+			Str("err", err.Error()).
+			Msg("while reading data")
+		return envel, err
+	}
+
+	err = proto.Unmarshal(buf, envel)
+	return envel, err
 }
