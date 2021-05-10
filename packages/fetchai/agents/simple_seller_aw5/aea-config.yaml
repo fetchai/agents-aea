@@ -99,8 +99,8 @@ models:
   strategy:
     args:
       search_location:
-        latitude: 51.5194
-        longitude: 0.127
+        latitude: 51.5074
+        longitude: -0.1278
       search_query:
         constraint_type: ==
         search_key: registration_service
