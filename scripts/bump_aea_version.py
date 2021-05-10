@@ -21,9 +21,13 @@
 """Bump the AEA version throughout the code base."""
 
 import argparse
+import inspect
+import os
 import re
 import sys
+from functools import wraps
 from pathlib import Path
+from typing import Optional
 
 from packaging.version import Version
 
@@ -44,6 +48,8 @@ VERSION_REGEX = fr"(any|latest|({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_P
 PACKAGES_DIR = Path("packages")
 TESTS_DIR = Path("tests")
 AEA_DIR = Path("aea")
+CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
+ROOT_DIR = os.path.join(CUR_PATH, "..")
 CONFIGURATION_FILENAME_REGEX = re.compile(
     "|".join(
         [
@@ -59,62 +65,126 @@ CONFIGURATION_FILENAME_REGEX = re.compile(
 IGNORE_DIRS = [Path(".git")]
 
 
-def update_version_for_files(current_version: str, new_version: str) -> None:
-    """
-    Update the version.
+def check_executed(func):
+    """Check a functor has been already executed; if yes, raise error."""
 
-    :param current_version: the current version
-    :param new_version: the new version
-    """
-    files = [
-        Path("benchmark", "run_from_branch.sh"),
-        Path("deploy-image", "Dockerfile"),
-        Path("develop-image", "docker-env.sh"),
-        Path("docs", "quickstart.md"),
-        Path("examples", "tac_deploy", "Dockerfile"),
-        Path("scripts", "install.ps1"),
-        Path("scripts", "install.sh"),
-        Path("tests", "test_docs", "test_bash_yaml", "md_files", "bash-quickstart.md"),
-        Path("user-image", "docker-env.sh"),
-    ]
-    for filepath in files:
-        update_version_for_file(filepath, current_version, new_version)
+    @wraps(func)
+    def wrapper(self, *args, **kwargs):
+        if self.is_executed:
+            raise ValueError("already executed")
+        self._executed = True
+        self._result = func(self, *args, **kwargs)
+
+    return wrapper
 
 
-def update_version_for_aea(new_version: str) -> str:
-    """
-    Update version for file.
+class PythonPackageVersionBumper:
+    """Utility class to bump Python package versions."""
 
-    :param new_version: the new version
-    :return: the current version
-    """
-    current_version = ""
-    path = Path("aea", "__version__.py")
-    with open(path, "rt") as fin:
-        for line in fin:
-            if "__version__" not in line:
-                continue
-            match = re.search('__version__ = "(.*)"', line)
-            if match is None:
-                raise ValueError("Current version is not well formatted.")
-            current_version = match.group(1)
-    if current_version == "":
-        raise ValueError("No version found!")
-    update_version_for_file(path, current_version, new_version)
-    return current_version
+    def __init__(self, root_dir: Path, python_pkg_dir: Path, new_version: Version):
+        """
+        Initialize the utility class.
 
+        :param root_dir: the root directory from which to look for files.
+        :param python_pkg_dir: the path to the Python package to upgrade.
+        :param new_version: the new version.
+        """
+        self.root_dir = root_dir
+        self.python_pkg_dir = python_pkg_dir
+        self.new_version = new_version
 
-def update_version_for_file(path: Path, current_version: str, new_version: str) -> None:
-    """
-    Update version for file.
+        self._current_version = None
 
-    :param path: the file path
-    :param current_version: the current version
-    :param new_version: the new version
-    """
-    content = path.read_text()
-    content = content.replace(current_version, new_version)
-    path.write_text(content)
+        # functor pattern
+        self._executed: bool = False
+        self._result: Optional[bool] = None
+
+    @property
+    def is_executed(self) -> bool:
+        """
+        Return true if the functor has been executed; false otherwise.
+
+        :return: True if it has been executed, False otherwise.
+        """
+        return self._executed
+
+    @property
+    def result(self) -> bool:
+        """Get the result."""
+        if not self.is_executed:
+            raise ValueError("not executed yet")
+        return self._result
+
+    @check_executed
+    def run(self) -> bool:
+        """Main entrypoint."""
+        new_version_string = str(self.new_version)
+        current_version_str = self.update_version_for_aea(new_version_string)
+
+        # validate current version
+        current_version: Version = Version(current_version_str)
+        current_version_str = str(current_version)
+        self._current_version = current_version_str
+        self.update_version_for_files()
+
+        return update_aea_version_specifiers(current_version, self.new_version)
+
+    def update_version_for_files(self) -> None:
+        """Update the version."""
+        files = [
+            Path("benchmark", "run_from_branch.sh"),
+            Path("deploy-image", "Dockerfile"),
+            Path("develop-image", "docker-env.sh"),
+            Path("docs", "quickstart.md"),
+            Path("examples", "tac_deploy", "Dockerfile"),
+            Path("scripts", "install.ps1"),
+            Path("scripts", "install.sh"),
+            Path(
+                "tests", "test_docs", "test_bash_yaml", "md_files", "bash-quickstart.md"
+            ),
+            Path("user-image", "docker-env.sh"),
+        ]
+        for filepath in files:
+            self.update_version_for_file(
+                filepath, self._current_version, str(self.new_version)
+            )
+
+    def update_version_for_aea(self, new_version: str) -> str:
+        """
+        Update version for file.
+
+        :param new_version: the new version
+        :return: the current version
+        """
+        current_version = ""
+        path = Path("aea", "__version__.py")
+        with open(path, "rt") as fin:
+            for line in fin:
+                if "__version__" not in line:
+                    continue
+                match = re.search('__version__ = "(.*)"', line)
+                if match is None:
+                    raise ValueError("Current version is not well formatted.")
+                current_version = match.group(1)
+        if current_version == "":
+            raise ValueError("No version found!")
+        self.update_version_for_file(path, current_version, new_version)
+        return current_version
+
+    @classmethod
+    def update_version_for_file(
+        cls, path: Path, current_version: str, new_version: str
+    ) -> None:
+        """
+        Update version for file.
+
+        :param path: the file path
+        :param current_version: the current version
+        :param new_version: the new version
+        """
+        content = path.read_text()
+        content = content.replace(current_version, new_version)
+        path.write_text(content)
 
 
 def update_aea_version_specifiers(old_version: Version, new_version: Version) -> bool:
@@ -158,37 +228,21 @@ def parse_args() -> argparse.Namespace:
 
     parser = argparse.ArgumentParser("bump_aea_version")
     parser.add_argument(
-        "--new-version", type=str, required=True, help="The new version."
+        "--new-version", type=str, required=True, help="The new AEA version."
     )
     parser.add_argument("--no-fingerprint", action="store_true")
     arguments_ = parser.parse_args()
     return arguments_
 
 
-def update_aea_version(new_version_string: str) -> bool:
-    """
-    Update aea version.
-
-    :param new_version_string: the new version string.
-    :return: True if the update actually happened; False otherwise.
-    """
-    # validate new version
-    new_version: Version = Version(new_version_string)
-    new_version_string = str(new_version)
-    _current_version_str = update_version_for_aea(new_version_string)
-
-    # validate current version
-    _current_version: Version = Version(_current_version_str)
-    _current_version_str = str(_current_version)
-    update_version_for_files(_current_version_str, new_version_string)
-
-    return update_aea_version_specifiers(_current_version, new_version)
-
-
 if __name__ == "__main__":
     arguments = parse_args()
-    new_version_str = arguments.new_version
-    have_updated_specifier_set = update_aea_version(new_version_str)
+    new_aea_version = Version(arguments.new_version)
+
+    aea_version_bumper = PythonPackageVersionBumper(
+        AEA_DIR.parent, AEA_DIR, new_aea_version
+    )
+    have_updated_specifier_set = aea_version_bumper.run()
 
     print("OK")
     return_code = 0
