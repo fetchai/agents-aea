@@ -220,7 +220,8 @@ class SOEFChannel:
         chain_identifier: Optional[str] = None,
         token_storage_path: Optional[str] = None,
         logger: logging.Logger = _default_logger,
-        connection_check_timeout: float = 15,
+        connection_check_timeout: float = 15.0,
+        connection_check_max_retries: int = 3,
     ):
         """
         Initialize.
@@ -246,6 +247,7 @@ class SOEFChannel:
         self.base_url = "https://{}:{}".format(soef_addr, soef_port)
         self.oef_search_dialogues = OefSearchDialogues()
         self.connection_check_timeout = connection_check_timeout
+        self.connection_check_max_retries = connection_check_max_retries
 
         self._token_storage_path = token_storage_path
         if self._token_storage_path is not None:
@@ -1071,14 +1073,23 @@ class SOEFChannel:
             )
         except asyncio.TimeoutError:
             raise SOEFNetworkConnectionError(
-                f"Server can not be reached within timeout = {self.connection_check_timeout}!"
+                f"Server can not be reached within timeout={self.connection_check_timeout}!"
             )
 
     async def connect(self) -> None:
         """Connect channel set queues and executor pool."""
         self._loop = asyncio.get_event_loop()
 
-        await self._check_server_reachable()
+        reachable_check_count = 0
+        while reachable_check_count < self.connection_check_max_retries:
+            reachable_check_count += 1
+            try:
+                await self._check_server_reachable()
+                reachable_check_count = self.connection_check_max_retries
+            except Exception as e:  # pylint: disable=broad-except # pragma: nocover
+                if reachable_check_count == self.connection_check_max_retries:
+                    raise e
+                self.logger.debug(f"Exception during SOEF reachability check: {e}.")
 
         self.in_queue = asyncio.Queue()
         self._find_around_me_queue = asyncio.Queue()
@@ -1249,7 +1260,8 @@ class SOEFConnection(Connection):
     """The SOEFConnection connects the Simple OEF to the mailbox."""
 
     connection_id = PUBLIC_ID
-    DEFAULT_CONNECTION_CHECK_TIMEOUT: float = 15
+    DEFAULT_CONNECTION_CHECK_TIMEOUT: float = 15.0
+    DEFAULT_CONNECTION_CHECK_MAX_RETRIES: int = 3
 
     def __init__(self, **kwargs: Any) -> None:
         """Initialize."""
@@ -1265,6 +1277,13 @@ class SOEFConnection(Connection):
             float,
             self.configuration.config.get(
                 "connection_check_timeout", self.DEFAULT_CONNECTION_CHECK_TIMEOUT
+            ),
+        )
+        connection_check_max_retries = cast(
+            int,
+            self.configuration.config.get(
+                "connection_check_max_retries",
+                self.DEFAULT_CONNECTION_CHECK_MAX_RETRIES,
             ),
         )
         soef_addr = cast(str, self.configuration.config.get("soef_addr"))
@@ -1288,6 +1307,7 @@ class SOEFConnection(Connection):
             chain_identifier=chain_identifier,
             token_storage_path=token_storage_path,
             connection_check_timeout=connection_check_timeout,
+            connection_check_max_retries=connection_check_max_retries,
         )
 
     async def connect(self) -> None:
