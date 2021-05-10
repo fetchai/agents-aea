@@ -266,6 +266,38 @@ async def test_reconnect_on_write_failed():
 
 
 @pytest.mark.asyncio
+async def test_reconnect_on_write_failed_reconnect_pipe():
+    """Test node restart on write fail."""
+    host = "localhost"
+    port = "10000"
+    with patch(
+        "packages.fetchai.connections.p2p_libp2p.connection.P2PLibp2pConnection._check_node_built",
+        return_value="./",
+    ), patch("tests.conftest.build_node"), tempfile.TemporaryDirectory() as data_dir:
+        con = _make_libp2p_connection(
+            port=port, host=host, data_dir=data_dir, build_directory=data_dir
+        )
+
+    node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
+    f = Future()
+    f.set_result(None)
+    con.node = node
+    node.pipe = Mock()
+    node.pipe.connect = Mock(return_value=f)
+    node.pipe.write = Mock(side_effect=[Exception("expected"), f])
+
+    con._node_client = node.get_client()
+
+    with patch.object(con, "_ensure_valid_envelope_for_external_comms"), patch.object(
+        node, "is_proccess_running", return_value=True
+    ):
+        await con._send_envelope_with_node_client(Mock())
+
+    assert node.pipe.write.call_count == 2
+    assert node.pipe.connect.call_count == 1
+
+
+@pytest.mark.asyncio
 async def test_reconnect_on_read_failed():
     """Test node restart on read fail."""
     host = "localhost"

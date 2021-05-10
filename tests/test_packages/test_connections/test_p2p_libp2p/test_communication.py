@@ -790,7 +790,7 @@ class TestP2PLibp2PSendEnvelope(BaseTestP2PLibp2p):
             self.multiplexer2.put(envelope)
             delivered_envelope = self.multiplexer1.get(block=True, timeout=20)
             _mock_logger.assert_called_with(
-                "Failed to send. Exception: some error. Try reconnect to node and read again."
+                "Failed to send after pipe reconnect. Exception: some error. Try recover connection to node and send again."
             )
 
         assert delivered_envelope is not None
