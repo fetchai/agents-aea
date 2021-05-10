@@ -165,23 +165,30 @@ def parse_args() -> argparse.Namespace:
     return arguments_
 
 
-if __name__ == "__main__":
-    arguments = parse_args()
-    _new_version_str = arguments.new_version
+def update_aea_version(new_version_string: str) -> bool:
+    """
+    Update aea version.
 
+    :param new_version_string: the new version string.
+    :return: True if the update actually happened; False otherwise.
+    """
     # validate new version
-    _new_version: Version = Version(_new_version_str)
-    _new_version_str = str(_new_version)
-    _current_version_str = update_version_for_aea(_new_version_str)
+    new_version: Version = Version(new_version_string)
+    new_version_string = str(new_version)
+    _current_version_str = update_version_for_aea(new_version_string)
 
     # validate current version
     _current_version: Version = Version(_current_version_str)
     _current_version_str = str(_current_version)
-    update_version_for_files(_current_version_str, _new_version_str)
+    update_version_for_files(_current_version_str, new_version_string)
 
-    have_updated_specifier_set = update_aea_version_specifiers(
-        _current_version, _new_version
-    )
+    return update_aea_version_specifiers(_current_version, new_version)
+
+
+if __name__ == "__main__":
+    arguments = parse_args()
+    new_version_str = arguments.new_version
+    have_updated_specifier_set = update_aea_version(new_version_str)
 
     print("OK")
     return_code = 0
