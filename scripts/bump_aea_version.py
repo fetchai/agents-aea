@@ -27,8 +27,9 @@ import re
 import sys
 from functools import wraps
 from pathlib import Path
-from typing import Optional
+from typing import Any, Callable, Collection, Optional, Pattern, Tuple, cast
 
+from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 
 from aea.configurations.constants import (
@@ -62,14 +63,27 @@ CONFIGURATION_FILENAME_REGEX = re.compile(
     )
 )
 
-IGNORE_DIRS = [Path(".git")]
+_AEA_ALL_PATTERN = "(?<={package_name}\[all\]==){version}"
+AEA_PATHS = [
+    (Path("deploy-image", "Dockerfile"), _AEA_ALL_PATTERN),
+    (Path("develop-image", "docker-env.sh"), "(?<=aea-develop:){version}"),
+    (Path("docs", "quickstart.md"), "(?<=v){version}"),
+    (Path("examples", "tac_deploy", "Dockerfile"), _AEA_ALL_PATTERN),
+    (Path("scripts", "install.ps1"), _AEA_ALL_PATTERN),
+    (Path("scripts", "install.sh"), _AEA_ALL_PATTERN),
+    (
+        Path("tests", "test_docs", "test_bash_yaml", "md_files", "bash-quickstart.md"),
+        "(?<=v){version}",
+    ),
+    (Path("user-image", "docker-env.sh"), "(?<=aea-user:){version}"),
+]
 
 
-def check_executed(func):
+def check_executed(func: Callable) -> Callable:
     """Check a functor has been already executed; if yes, raise error."""
 
     @wraps(func)
-    def wrapper(self, *args, **kwargs):
+    def wrapper(self: Any, *args: Any, **kwargs: Any) -> None:
         if self.is_executed:
             raise ValueError("already executed")
         self._executed = True
@@ -81,19 +95,35 @@ def check_executed(func):
 class PythonPackageVersionBumper:
     """Utility class to bump Python package versions."""
 
-    def __init__(self, root_dir: Path, python_pkg_dir: Path, new_version: Version):
+    IGNORE_DIRS = (Path(".git"),)
+
+    def __init__(
+        self,
+        root_dir: Path,
+        python_pkg_dir: Path,
+        new_version: Version,
+        package_name: Optional[str] = None,
+        files_to_pattern: Collection[Tuple[Path, str]] = (),
+        ignore_dirs: Collection[Path] = (),
+    ):
         """
         Initialize the utility class.
 
         :param root_dir: the root directory from which to look for files.
         :param python_pkg_dir: the path to the Python package to upgrade.
         :param new_version: the new version.
+        :param package_name: the Python package name aliases (defaults to
+           dirname of python_pkg_dir).
+        :param ignore_dirs: a list of paths to ignore during the substitution.
         """
         self.root_dir = root_dir
         self.python_pkg_dir = python_pkg_dir
         self.new_version = new_version
+        self.package_name = package_name or self.python_pkg_dir.name
+        self.ignore_dirs = ignore_dirs or self.IGNORE_DIRS
+        self.files_to_pattern = files_to_pattern
 
-        self._current_version = None
+        self._current_version: Optional[str] = None
 
         # functor pattern
         self._executed: bool = False
@@ -113,13 +143,13 @@ class PythonPackageVersionBumper:
         """Get the result."""
         if not self.is_executed:
             raise ValueError("not executed yet")
-        return self._result
+        return cast(bool, self._result)
 
     @check_executed
     def run(self) -> bool:
         """Main entrypoint."""
         new_version_string = str(self.new_version)
-        current_version_str = self.update_version_for_aea(new_version_string)
+        current_version_str = self.update_version_for_package(new_version_string)
 
         # validate current version
         current_version: Version = Version(current_version_str)
@@ -127,29 +157,19 @@ class PythonPackageVersionBumper:
         self._current_version = current_version_str
         self.update_version_for_files()
 
-        return update_aea_version_specifiers(current_version, self.new_version)
+        return self.update_version_specifiers(current_version, self.new_version)
 
     def update_version_for_files(self) -> None:
         """Update the version."""
-        files = [
-            Path("benchmark", "run_from_branch.sh"),
-            Path("deploy-image", "Dockerfile"),
-            Path("develop-image", "docker-env.sh"),
-            Path("docs", "quickstart.md"),
-            Path("examples", "tac_deploy", "Dockerfile"),
-            Path("scripts", "install.ps1"),
-            Path("scripts", "install.sh"),
-            Path(
-                "tests", "test_docs", "test_bash_yaml", "md_files", "bash-quickstart.md"
-            ),
-            Path("user-image", "docker-env.sh"),
-        ]
-        for filepath in files:
+        for filepath, regex_template in self.files_to_pattern:
             self.update_version_for_file(
-                filepath, self._current_version, str(self.new_version)
+                filepath,
+                cast(str, self._current_version),
+                str(self.new_version),
+                version_regex_template=regex_template,
             )
 
-    def update_version_for_aea(self, new_version: str) -> str:
+    def update_version_for_package(self, new_version: str) -> str:
         """
         Update version for file.
 
@@ -157,7 +177,7 @@ class PythonPackageVersionBumper:
         :return: the current version
         """
         current_version = ""
-        path = Path("aea", "__version__.py")
+        path = self.python_pkg_dir / Path("__version__.py")
         with open(path, "rt") as fin:
             for line in fin:
                 if "__version__" not in line:
@@ -171,56 +191,93 @@ class PythonPackageVersionBumper:
         self.update_version_for_file(path, current_version, new_version)
         return current_version
 
-    @classmethod
     def update_version_for_file(
-        cls, path: Path, current_version: str, new_version: str
+        self,
+        path: Path,
+        current_version: str,
+        new_version: str,
+        version_regex_template: Optional[str] = None,
     ) -> None:
         """
         Update version for file.
 
         :param path: the file path
-        :param current_version: the current version
+        :param current_version: the regex for the current version
         :param new_version: the new version
+        :param version_regex_template: the regex template
+          to replace with the current version. Defaults to exactly
+          the current version.
         """
+        if version_regex_template is not None:
+            regex_str = version_regex_template.format(package_name=self.package_name, version=current_version)
+        else:
+            regex_str = current_version
+        pattern = re.compile(regex_str)
         content = path.read_text()
-        content = content.replace(current_version, new_version)
+        content = pattern.sub(new_version, content)
         path.write_text(content)
 
+    def update_version_specifiers(
+        self, old_version: Version, new_version: Version
+    ) -> bool:
+        """
+        Update specifier set.
 
-def update_aea_version_specifiers(old_version: Version, new_version: Version) -> bool:
-    """
-    Update aea_version specifier set in docs.
+        :param old_version: the old version.
+        :param new_version: the new version.
+        :return: True if the update has been done, False otherwise.
+        """
+        old_specifier_set = compute_specifier_from_version(old_version)
+        new_specifier_set = compute_specifier_from_version(new_version)
+        print(f"Old version specifier: {old_specifier_set}")
+        print(f"New version specifier: {new_specifier_set}")
+        old_specifier_set_regex = self.get_regex_from_specifier_set(old_specifier_set)
+        if old_specifier_set == new_specifier_set:
+            print("Not updating version specifier - they haven't changed.")
+            return False
+        for file in filter(lambda p: not p.is_dir(), self.root_dir.rglob("*")):
+            dir_root = Path(file.parts[0])
+            if dir_root in self.ignore_dirs:
+                print(f"Skipping '{file}'...")
+                continue
+            print(
+                f"Replacing '{old_specifier_set}' with '{new_specifier_set}' in '{file}'... ",
+                end="",
+            )
+            try:
+                content = file.read_text()
+            except UnicodeDecodeError as e:
+                print(f"Cannot read {file}: {str(e)}. Continue...")
+            else:
+                if old_specifier_set_regex.search(content) is not None:
+                    content = old_specifier_set_regex.sub(new_specifier_set, content)
+                    file.write_text(content)
+        return True
 
-    :param old_version: the old version.
-    :param new_version: the new version.
-    :return: True if the update has been done, False otherwise.
-    """
-    old_specifier_set = compute_specifier_from_version(old_version)
-    new_specifier_set = compute_specifier_from_version(new_version)
-    print(f"Old version specifier: {old_specifier_set}")
-    print(f"New version specifier: {new_specifier_set}")
-    old_specifier_set_regex = re.compile(str(old_specifier_set).replace(" ", " *"))
-    if old_specifier_set == new_specifier_set:
-        print("Not updating version specifier - they haven't changed.")
-        return False
-    for file in filter(lambda p: not p.is_dir(), Path(".").rglob("*")):
-        dir_root = Path(file.parts[0])
-        if dir_root in IGNORE_DIRS:
-            print(f"Skipping '{file}'...")
-            continue
-        print(
-            f"Replacing '{old_specifier_set}' with '{new_specifier_set}' in '{file}'... ",
-            end="",
-        )
-        try:
-            content = file.read_text()
-        except UnicodeDecodeError as e:
-            print(f"Cannot read {file}: {str(e)}. Continue...")
-        else:
-            if old_specifier_set_regex.search(content) is not None:
-                content = old_specifier_set_regex.sub(new_specifier_set, content)
-                file.write_text(content)
-    return True
+    def get_regex_from_specifier_set(self, specifier_set: str) -> Pattern:
+        """
+        Get the regex for specifier sets.
+
+        This function accepts input of the form:
+
+            ">={lower_bound_version}, <{upper_bound_version}"
+
+        And computes a regex pattern:
+
+            ">={lower_bound_version}, *<{upper_bound_version}|<{upper_bound_version}, *>={lower_bound_version}"
+
+        i.e. not considering the order of the specifiers.
+
+        :param specifier_set: The string representation of the specifier set
+        :return: a regex pattern
+        """
+        # TODO add different type of matches
+        specifiers = SpecifierSet(specifier_set)
+        upper, lower = sorted(specifiers, key=lambda x: str(x))
+        alternatives = list()
+        alternatives.append(f"{upper} *{lower}")
+        alternatives.append(f"{lower} *{upper}")
+        return re.compile("|".join(alternatives))
 
 
 def parse_args() -> argparse.Namespace:
@@ -240,7 +297,7 @@ if __name__ == "__main__":
     new_aea_version = Version(arguments.new_version)
 
     aea_version_bumper = PythonPackageVersionBumper(
-        AEA_DIR.parent, AEA_DIR, new_aea_version
+        AEA_DIR.parent, AEA_DIR, new_aea_version, files_to_pattern=AEA_PATHS
     )
     have_updated_specifier_set = aea_version_bumper.run()
 
