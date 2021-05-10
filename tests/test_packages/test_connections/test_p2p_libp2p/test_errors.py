@@ -259,7 +259,7 @@ async def test_reconnect_on_write_failed():
     ), pytest.raises(
         Exception, match="expected"
     ):
-        await con.send(Mock())
+        await con._send_envelope_with_node_client(Mock())
 
     assert node.pipe.write.call_count == 2
     restart_mock.assert_called_once()
