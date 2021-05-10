@@ -65,7 +65,7 @@ class DockerImage(ABC):
             ["docker", "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
         if result.returncode != 0:
-            pytest.skip(f"'docker --version' failed with exit code {result.returncode}")
+            pytest.skip("'docker --version' failed with exit code {result.returncode}")
 
         match = re.search(
             r"Docker version ([0-9]+)\.([0-9]+)\.([0-9]+)",

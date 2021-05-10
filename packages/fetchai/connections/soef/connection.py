@@ -1086,7 +1086,7 @@ class SOEFChannel:
             try:
                 await self._check_server_reachable()
                 reachable_check_count = self.connection_check_max_retries
-            except Exception as e:  # pragma: nocover
+            except Exception as e:  # pylint: disable=broad-except # pragma: nocover
                 if reachable_check_count == self.connection_check_max_retries:
                     raise e
                 self.logger.debug(f"Exception during SOEF reachability check: {e}.")
