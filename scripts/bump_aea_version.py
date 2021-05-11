@@ -22,7 +22,7 @@
 Bump the AEA version throughout the code base.
 
 usage: bump_aea_version [-h] --new-version NEW_VERSION
-                        [-p KEY=VALUE [KEY=VALUE ...]] [--no-fingerprint]
+                        [-p KEY=VALUE [KEY=VALUE ...]] [--no-fingerprints]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -31,7 +31,7 @@ optional arguments:
   -p KEY=VALUE [KEY=VALUE ...], --plugin-new-version KEY=VALUE [KEY=VALUE ...]
                         Set a number of key-value pairs plugin-name=new-
                         plugin-version
-  --no-fingerprint
+  --no-fingerprints
 
 Example of usage:
 
@@ -47,7 +47,7 @@ import re
 import sys
 from functools import wraps
 from pathlib import Path
-from typing import Any, Callable, Collection, Dict, List, Optional, cast
+from typing import Any, Callable, Dict, List, Optional, Sequence, cast
 
 from git import Repo
 from packaging.specifiers import SpecifierSet
@@ -138,8 +138,33 @@ def compute_specifier_from_version_custom(version: Version) -> str:
     """
     specifier_set_str = compute_specifier_from_version(version)
     specifiers = SpecifierSet(specifier_set_str)
-    upper, lower = sorted(specifiers, key=lambda x: str(x))
+    upper, lower = sorted(specifiers, key=str)
     return f"{upper},{lower}"
+
+
+def get_regex_from_specifier_set(specifier_set: str) -> str:
+    """
+    Get the regex for specifier sets.
+
+    This function accepts input of the form:
+
+        ">={lower_bound_version}, <{upper_bound_version}"
+
+    And computes a regex pattern:
+
+        ">={lower_bound_version}, *<{upper_bound_version}|<{upper_bound_version}, *>={lower_bound_version}"
+
+    i.e. not considering the order of the specifiers.
+
+    :param specifier_set: The string representation of the specifier set
+    :return: a regex pattern
+    """
+    specifiers = SpecifierSet(specifier_set)
+    upper, lower = sorted(specifiers, key=str)
+    alternatives = list()
+    alternatives.append(f"{upper} *, *{lower}")
+    alternatives.append(f"{lower} *, *{upper}")
+    return "|".join(alternatives)
 
 
 class PythonPackageVersionBumper:
@@ -153,9 +178,9 @@ class PythonPackageVersionBumper:
         python_pkg_dir: Path,
         new_version: Version,
         files_to_pattern: PatternByPath,
-        specifier_set_patterns: Collection[str],
+        specifier_set_patterns: Sequence[str],
         package_name: Optional[str] = None,
-        ignore_dirs: Collection[Path] = (),
+        ignore_dirs: Sequence[Path] = (),
     ):
         """
         Initialize the utility class.
@@ -332,7 +357,7 @@ class PythonPackageVersionBumper:
     def _replace_specifier_sets(
         self, old_specifier_set: str, new_specifier_set: str, content: str
     ) -> str:
-        old_specifier_set_regex = self.get_regex_from_specifier_set(old_specifier_set)
+        old_specifier_set_regex = get_regex_from_specifier_set(old_specifier_set)
         for pattern_template in self.specifier_set_patterns:
             regex = pattern_template.format(
                 package_name=self.package_name, specifier_set=old_specifier_set_regex,
@@ -341,30 +366,6 @@ class PythonPackageVersionBumper:
             if pattern.search(content) is not None:
                 content = pattern.sub(new_specifier_set, content)
         return content
-
-    def get_regex_from_specifier_set(self, specifier_set: str) -> str:
-        """
-        Get the regex for specifier sets.
-
-        This function accepts input of the form:
-
-            ">={lower_bound_version}, <{upper_bound_version}"
-
-        And computes a regex pattern:
-
-            ">={lower_bound_version}, *<{upper_bound_version}|<{upper_bound_version}, *>={lower_bound_version}"
-
-        i.e. not considering the order of the specifiers.
-
-        :param specifier_set: The string representation of the specifier set
-        :return: a regex pattern
-        """
-        specifiers = SpecifierSet(specifier_set)
-        upper, lower = sorted(specifiers, key=lambda x: str(x))
-        alternatives = list()
-        alternatives.append(f"{upper} *, *{lower}")
-        alternatives.append(f"{lower} *, *{upper}")
-        return "|".join(alternatives)
 
     def is_different_from_latest_tag(self) -> bool:
         """Check whether the package has changes since the latest tag."""
@@ -391,22 +392,22 @@ def parse_args() -> argparse.Namespace:
         help="Set a number of key-value pairs plugin-name=new-plugin-version",
         default={},
     )
-    parser.add_argument("--no-fingerprint", action="store_true")
+    parser.add_argument("--no-fingerprints", action="store_true")
     arguments_ = parser.parse_args()
     return arguments_
 
 
-def process_plugins(new_plugin_versions: Dict[str, Version]) -> bool:
+def process_plugins(new_versions: Dict[str, Version]) -> bool:
     """Process plugins."""
     result = False
     for plugin_dir in ALL_PLUGINS:
         plugin_dir_name = plugin_dir.name
-        if plugin_dir_name not in new_plugin_versions:
+        if plugin_dir_name not in new_versions:
             logging.info(
-                f"Skipping {plugin_dir_name} as it is not specified in input {new_plugin_versions}"
+                f"Skipping {plugin_dir_name} as it is not specified in input {new_versions}"
             )
             continue
-        new_version = new_plugin_versions[plugin_dir_name]
+        new_version = new_versions[plugin_dir_name]
         logging.info(
             f"Processing {plugin_dir_name}: upgrading at version {new_version}"
         )
@@ -448,7 +449,7 @@ if __name__ == "__main__":
         logging.info(
             "Repository is dirty. Please clean it up before running this script."
         )
-        exit(1)
+        sys.exit(1)
 
     new_aea_version = Version(arguments.new_version)
     aea_version_bumper = PythonPackageVersionBumper(
@@ -470,13 +471,15 @@ if __name__ == "__main__":
 
     logging.info("OK")
     return_code = 0
-    if arguments.no_fingerprint:
-        logging.info("Not updating fingerprint, since --no-fingerprint was specified.")
+    if arguments.no_fingerprints:
+        logging.info(
+            "Not updating fingerprints, since --no-fingerprints was specified."
+        )
     elif have_updated_specifier_set is False:
         logging.info(
-            "Not updating fingerprint, since no specifier set has been updated."
+            "Not updating fingerprints, since no specifier set has been updated."
         )
     else:
-        logging.info("Updating hashes and fingerprint.")
+        logging.info("Updating hashes and fingerprints.")
         return_code = update_hashes()
     sys.exit(return_code)
