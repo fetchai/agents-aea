@@ -26,6 +26,8 @@ import (
 	"log"
 	"math/rand"
 	"net"
+	"os"
+	"path"
 	"strconv"
 	"testing"
 	"time"
@@ -120,6 +122,7 @@ func TestRoutingDHTPeerToSelf(t *testing.T) {
 		IdentityFromFetchAIKey(FetchAITestKeys[0]),
 		EnableRelayService(),
 		EnableDelegateService(DefaultDelegatePort),
+		StoreRecordsTo(path.Join(os.TempDir(), "agents_records_"+randSeq(5))),
 	}
 
 	agentPubKey, err := utils.FetchAIPublicKeyFromFetchAIPrivateKey(AgentsTestKeys[0])
@@ -1718,7 +1721,7 @@ func SetupLocalDHTPeer(
 		IdentityFromFetchAIKey(key),
 		EnableRelayService(),
 		BootstrapFrom(entry),
-		StoreRecordsTo("agents_records_" + randSeq(5)),
+		StoreRecordsTo(path.Join(os.TempDir(), "agents_records_"+randSeq(5))),
 	}
 
 	if agentKey != "" {

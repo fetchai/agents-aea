@@ -134,3 +134,4 @@ packages/fetchai/connections/p2p_libp2p/libp2p_node/libp2p_node
 deploy-image/.env
 
 !libs/go/aea_end2end/seller_agent
+coverage.txt

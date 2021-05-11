@@ -8,7 +8,6 @@ on:
   pull_request:
 
 jobs:
-
   common_checks_1:
     continue-on-error: False
     runs-on: ubuntu-latest
@@ -478,6 +477,14 @@ jobs:
     - uses: actions/setup-go@master
       with:
         go-version: '^1.14.0'
+    - if: matrix.os == 'macos-latest'
+      working-directory: ./libs/go/libp2p_node
+      run: |
+         export LINKPATH=$GOROOT/pkg/tool/darwin_amd64/link
+         echo $LINKPATH
+         sudo cp $LINKPATH ${LINKPATH}_orig
+         sudo cp link $LINKPATH
+         sudo chmod a+x $LINKPATH
     - if: matrix.python-version == '3.6'
       name: Golang unit tests (libp2p_node)
       working-directory: ./libs/go/libp2p_node
