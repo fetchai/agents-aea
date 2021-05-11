@@ -22,51 +22,60 @@
 
 import argparse
 import inspect
+import logging
+import operator
 import os
 import re
 import sys
 from functools import wraps
 from pathlib import Path
-from typing import Any, Callable, Collection, Dict, Optional, cast
+from typing import Any, Callable, Collection, Dict, List, Optional, cast
 
 from git import Repo
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 
-from aea.configurations.constants import (
-    DEFAULT_AEA_CONFIG_FILE,
-    DEFAULT_CONNECTION_CONFIG_FILE,
-    DEFAULT_CONTRACT_CONFIG_FILE,
-    DEFAULT_PROTOCOL_CONFIG_FILE,
-    DEFAULT_SKILL_CONFIG_FILE,
-)
 from aea.helpers.base import compute_specifier_from_version
 from scripts.generate_ipfs_hashes import update_hashes
 
+
+logging.basicConfig(
+    level=logging.INFO, format="[%(asctime)s][%(name)s][%(levelname)s] %(message)s"
+)
 
 # if the key is a file, just process it
 # if the key is a directory, process all files below it
 PatternByPath = Dict[Path, str]
 
-VERSION_NUMBER_PART_REGEX = r"(0|[1-9]\d*)"
-VERSION_REGEX = fr"(any|latest|({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)"
-
-PACKAGES_DIR = Path("packages")
-TESTS_DIR = Path("tests")
 AEA_DIR = Path("aea")
 CUR_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))  # type: ignore
-ROOT_DIR = os.path.join(CUR_PATH, "..")
-CONFIGURATION_FILENAME_REGEX = re.compile(
-    "|".join(
-        [
-            DEFAULT_AEA_CONFIG_FILE,
-            DEFAULT_SKILL_CONFIG_FILE,
-            DEFAULT_CONNECTION_CONFIG_FILE,
-            DEFAULT_CONTRACT_CONFIG_FILE,
-            DEFAULT_PROTOCOL_CONFIG_FILE,
-        ]
-    )
+ROOT_DIR = Path(os.path.join(CUR_PATH, ".."))
+
+PLUGINS_DIR = Path("plugins")
+ALL_PLUGINS = tuple(PLUGINS_DIR.iterdir())
+
+"""
+This pattern captures a specifier set in the dependencies section
+of an AEA package configuration file, e.g.:
+
+dependencies:
+    ...
+    aea-ledger-fetchai:
+        version: >=1.0.0,<2.0.0
+"""
+YAML_DEPENDENCY_SPECIFIER_SET_PATTERN = "(?<={package_name}:\n    version: )({specifier_set})"
+
+"""
+This pattern captures a specifier set for PyPI dependencies
+in JSON format.
+
+e.g.:
+"aea-ledger-fetchai": {"version": ">=2.0.0, <3.0.0"}
+"""
+JSON_DEPENDENCY_SPECIFIER_SET_PATTERN = (
+    '(?<="{package_name}": ."version": ")({specifier_set})(?=".)'
 )
+
 
 _AEA_ALL_PATTERN = r"(?<={package_name}\[all\]==){version}"
 AEA_PATHS: PatternByPath = {
@@ -94,6 +103,23 @@ def check_executed(func: Callable) -> Callable:
         self._result = func(self, *args, **kwargs)
 
     return wrapper
+
+
+def compute_specifier_from_version_custom(version: Version) -> str:
+    """
+    Post-process aea.helpers.compute_specifier_from_version
+
+    The output is post-process in the following way:
+    - remove spaces between specifier sets
+    - put upper bound before lower bound
+
+    :param version: the version
+    :return: the specifier set according to the version and semantic versioning.
+    """
+    specifier_set_str = compute_specifier_from_version(version)
+    specifiers = SpecifierSet(specifier_set_str)
+    upper, lower = sorted(specifiers, key=lambda x: str(x))
+    return f"{upper},{lower}"
 
 
 class PythonPackageVersionBumper:
@@ -158,7 +184,9 @@ class PythonPackageVersionBumper:
     def run(self) -> bool:
         """Main entrypoint."""
         if not self.is_different_from_latest_tag():
-            print(f"The package {self.python_pkg_dir} has no changes since last tag.")
+            logging.info(
+                f"The package {self.python_pkg_dir} has no changes since last tag."
+            )
             return False
         new_version_string = str(self.new_version)
         current_version_str = self.update_version_for_package(new_version_string)
@@ -195,23 +223,24 @@ class PythonPackageVersionBumper:
         version_path = self.python_pkg_dir / Path("__version__.py")
         setup_path = self.python_pkg_dir.parent / "setup.py"
         if version_path.exists():
-            regex = re.compile('(?<=__version__ = [\'"])(.*)(?=")')
+            regex_template = '(?<=__version__ = [\'"])({version})(?=")'
             path = version_path
         elif setup_path.exists():
-            regex = re.compile(r'(?<=version=[\'"])(.*)(?=[\'"],)')
+            regex_template = r'(?<=version=[\'"])({version})(?=[\'"],)'
             path = setup_path
         else:
             raise ValueError("cannot fine neither '__version__.py' nor 'setup.py'")
 
         content = path.read_text()
-        current_version_candidates = regex.findall(content)
-        more_than_one_match = len(current_version_candidates) > 0
+        pattern = regex_template.format(version=".*")
+        current_version_candidates = re.findall(pattern, content)
+        more_than_one_match = len(current_version_candidates) > 1
         if more_than_one_match:
             raise ValueError(
                 f"find more than one match for current version in {path}: {current_version_candidates}"
             )
-        current_version = current_version_candidates[0][0]
-        self.update_version_for_file(path, current_version, new_version)
+        current_version = current_version_candidates[0]
+        self.update_version_for_file(path, current_version, new_version, version_regex_template=regex_template)
         return current_version
 
     def update_version_for_file(
@@ -252,27 +281,28 @@ class PythonPackageVersionBumper:
         :param new_version: the new version.
         :return: True if the update has been done, False otherwise.
         """
-        old_specifier_set = compute_specifier_from_version(old_version)
-        new_specifier_set = compute_specifier_from_version(new_version)
-        print(f"Old version specifier: {old_specifier_set}")
-        print(f"New version specifier: {new_specifier_set}")
+        old_specifier_set = compute_specifier_from_version_custom(old_version)
+        new_specifier_set = compute_specifier_from_version_custom(new_version)
+        logging.info(f"Old version specifier: {old_specifier_set}")
+        logging.info(f"New version specifier: {new_specifier_set}")
         if old_specifier_set == new_specifier_set:
-            print("Not updating version specifier - they haven't changed.")
+            logging.info("Not updating version specifier - they haven't changed.")
             return False
         for file in filter(lambda p: not p.is_dir(), self.root_dir.rglob("*")):
             dir_root = Path(file.parts[0])
             if dir_root in self.ignore_dirs:
-                print(f"Skipping '{file}'...")
+                logging.info(f"Skipping '{file}'...")
                 continue
-            print(
+            logging.info(
                 f"Replacing '{old_specifier_set}' with '{new_specifier_set}' in '{file}'... ",
-                end="",
             )
             try:
                 content = file.read_text()
             except UnicodeDecodeError as e:
-                print(f"Cannot read {file}: {str(e)}. Continue...")
+                logging.info(f"Cannot read {file}: {str(e)}. Continue...")
             else:
+                if file.name == "test_thermometer.py":
+                    print("HA!")
                 content = self._replace_specifier_sets(
                     old_specifier_set, new_specifier_set, content
                 )
@@ -284,12 +314,11 @@ class PythonPackageVersionBumper:
     ) -> str:
         old_specifier_set_regex = self.get_regex_from_specifier_set(old_specifier_set)
         for pattern_template in self.specifier_set_patterns:
-            pattern = re.compile(
-                pattern_template.format(
-                    package_name=self.package_name,
-                    specifier_set=old_specifier_set_regex,
-                )
+            regex = pattern_template.format(
+                package_name=self.package_name,
+                specifier_set=old_specifier_set_regex,
             )
+            pattern = re.compile(regex)
             if pattern.search(content) is not None:
                 content = pattern.sub(new_specifier_set, content)
         return content
@@ -314,8 +343,8 @@ class PythonPackageVersionBumper:
         specifiers = SpecifierSet(specifier_set)
         upper, lower = sorted(specifiers, key=lambda x: str(x))
         alternatives = list()
-        alternatives.append(f"{upper} *{lower}")
-        alternatives.append(f"{lower} *{upper}")
+        alternatives.append(f"{upper} *, *{lower}")
+        alternatives.append(f"{lower} *, *{upper}")
         return "|".join(alternatives)
 
     def is_different_from_latest_tag(self) -> bool:
@@ -323,8 +352,8 @@ class PythonPackageVersionBumper:
         assert len(self.repo.tags) > 0, "no git tags found"
         latest_tag_str = str(self.repo.tags[-1])
         args = latest_tag_str, "--", str(self.python_pkg_dir)
-        print(f"Running 'git diff with args: {args}'")
-        diff = self.repo.git.diff()
+        logging.info(f"Running 'git diff with args: {args}'")
+        diff = self.repo.git.diff(*args)
         return diff != ""
 
 
@@ -335,36 +364,76 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--new-version", type=str, required=True, help="The new AEA version."
     )
+    parser.add_argument(
+        "-p",
+        "--plugin-new-version",
+        metavar="KEY=VALUE",
+        nargs="+",
+        help="Set a number of key-value pairs plugin-name=new-plugin-version",
+        default={},
+    )
     parser.add_argument("--no-fingerprint", action="store_true")
     arguments_ = parser.parse_args()
     return arguments_
 
 
-class RepositoryBumper:
-    """A functor-class to manage AEA repository version bump."""
+def process_plugins(new_plugin_versions: Dict[str, Version]) -> bool:
+    """Process plugins."""
+    result = False
+    for plugin_dir in ALL_PLUGINS:
+        plugin_dir_name = plugin_dir.name
+        if plugin_dir_name not in new_plugin_versions:
+            logging.info(
+                f"Skipping {plugin_dir_name} as it is not specified in input {new_plugin_versions}"
+            )
+            continue
+        new_version = new_plugin_versions[plugin_dir_name]
+        logging.info(
+            f"Processing {plugin_dir_name}: upgrading at version {new_version}"
+        )
+        plugin_package_dir = plugin_dir / plugin_dir.name.replace("-", "_")
+        plugin_bumper = PythonPackageVersionBumper(
+            ROOT_DIR,
+            plugin_package_dir,
+            new_version,
+            files_to_pattern={},
+            specifier_set_patterns=[
+                YAML_DEPENDENCY_SPECIFIER_SET_PATTERN,
+                JSON_DEPENDENCY_SPECIFIER_SET_PATTERN,
+            ],
+            package_name=plugin_dir.name
+        )
+        plugin_bumper.run()
+        result |= plugin_bumper.result
+    return result
 
-    def __init__(self, root_dir: str = ROOT_DIR):
-        """
-        Initialize the helper class.
 
-        :param root_dir: the root directory.
-        """
-        self.root_dir = root_dir
-
-        self.repo = Repo(self.root_dir)
+def parse_plugin_versions(key_value_strings: List[str]) -> Dict[str, Version]:
+    """Parse plugin versions."""
+    return {
+        plugin_name: Version(version)
+        for plugin_name, version in map(
+            operator.methodcaller("split", "="), key_value_strings
+        )
+    }
 
 
 if __name__ == "__main__":
-    repo = Repo(ROOT_DIR)
+    repo = Repo(str(ROOT_DIR))
     if repo.is_dirty():
-        print("Repository is dirty. Please clean it up before running this script.")
+        logging.info(
+            "Repository is dirty. Please clean it up before running this script."
+        )
         exit(1)
 
     arguments = parse_args()
-    new_aea_version = Version(arguments.new_version)
+    new_plugin_versions = parse_plugin_versions(arguments.plugin_new_version)
+    logging.info(f"Parsed arguments: {arguments}")
+    logging.info(f"Parsed plugin versions: {new_plugin_versions}")
 
+    new_aea_version = Version(arguments.new_version)
     aea_version_bumper = PythonPackageVersionBumper(
-        AEA_DIR.parent,
+        ROOT_DIR,
         AEA_DIR,
         new_aea_version,
         specifier_set_patterns=[
@@ -375,14 +444,20 @@ if __name__ == "__main__":
     )
     aea_version_bumper.run()
     have_updated_specifier_set = aea_version_bumper.result
+    logging.info("AEA package processed.")
 
-    print("OK")
+    logging.info("Processing plugins:")
+    have_updated_specifier_set |= process_plugins(new_plugin_versions)
+
+    logging.info("OK")
     return_code = 0
     if arguments.no_fingerprint:
-        print("Not updating fingerprints, since --no-fingerprint was specified.")
+        logging.info("Not updating fingerprint, since --no-fingerprint was specified.")
     elif have_updated_specifier_set is False:
-        print("Not updating fingerprints, since no specifier set has been updated.")
+        logging.info(
+            "Not updating fingerprint, since no specifier set has been updated."
+        )
     else:
-        print("Updating hashes and fingerprints.")
+        logging.info("Updating hashes and fingerprint.")
         return_code = update_hashes()
     sys.exit(return_code)
