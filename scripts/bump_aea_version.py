@@ -29,6 +29,7 @@ from functools import wraps
 from pathlib import Path
 from typing import Any, Callable, Collection, Dict, Optional, cast
 
+from git import Repo
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 
@@ -42,6 +43,10 @@ from aea.configurations.constants import (
 from aea.helpers.base import compute_specifier_from_version
 from scripts.generate_ipfs_hashes import update_hashes
 
+
+# if the key is a file, just process it
+# if the key is a directory, process all files below it
+PatternByPath = Dict[Path, str]
 
 VERSION_NUMBER_PART_REGEX = r"(0|[1-9]\d*)"
 VERSION_REGEX = fr"(any|latest|({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})\.({VERSION_NUMBER_PART_REGEX})(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)"
@@ -64,7 +69,7 @@ CONFIGURATION_FILENAME_REGEX = re.compile(
 )
 
 _AEA_ALL_PATTERN = r"(?<={package_name}\[all\]==){version}"
-AEA_PATHS = {
+AEA_PATHS: PatternByPath = {
     Path("deploy-image", "Dockerfile"): _AEA_ALL_PATTERN,
     Path("develop-image", "docker-env.sh"): "(?<=aea-develop:){version}",
     Path("docs", "quickstart.md"): "(?<=v){version}",
@@ -94,16 +99,14 @@ def check_executed(func: Callable) -> Callable:
 class PythonPackageVersionBumper:
     """Utility class to bump Python package versions."""
 
-    IGNORE_DIRS = (
-        Path(".git"),
-    )
+    IGNORE_DIRS = (Path(".git"),)
 
     def __init__(
         self,
         root_dir: Path,
         python_pkg_dir: Path,
         new_version: Version,
-        files_to_pattern: Dict[Path, str],
+        files_to_pattern: PatternByPath,
         specifier_set_patterns: Collection[str],
         package_name: Optional[str] = None,
         ignore_dirs: Collection[Path] = (),
@@ -128,6 +131,7 @@ class PythonPackageVersionBumper:
         self.package_name = package_name or self.python_pkg_dir.name
         self.ignore_dirs = ignore_dirs or self.IGNORE_DIRS
 
+        self.repo = Repo(self.root_dir)
         self._current_version: Optional[str] = None
 
         # functor pattern
@@ -153,6 +157,9 @@ class PythonPackageVersionBumper:
     @check_executed
     def run(self) -> bool:
         """Main entrypoint."""
+        if not self.is_different_from_latest_tag():
+            print(f"The package {self.python_pkg_dir} has no changes since last tag.")
+            return False
         new_version_string = str(self.new_version)
         current_version_str = self.update_version_for_package(new_version_string)
 
@@ -178,21 +185,32 @@ class PythonPackageVersionBumper:
         """
         Update version for file.
 
+        If __version__.py is available, parse it and check for __version__ variable.
+        Otherwise, try to parse setup.py.
+        Otherwise, raise error.
+
         :param new_version: the new version
         :return: the current version
         """
-        current_version = ""
-        path = self.python_pkg_dir / Path("__version__.py")
-        with open(path, "rt") as fin:
-            for line in fin:
-                if "__version__" not in line:
-                    continue
-                match = re.search('__version__ = "(.*)"', line)
-                if match is None:
-                    raise ValueError("Current version is not well formatted.")
-                current_version = match.group(1)
-        if current_version == "":
-            raise ValueError("No version found!")
+        version_path = self.python_pkg_dir / Path("__version__.py")
+        setup_path = self.python_pkg_dir.parent / "setup.py"
+        if version_path.exists():
+            regex = re.compile('(?<=__version__ = [\'"])(.*)(?=")')
+            path = version_path
+        elif setup_path.exists():
+            regex = re.compile(r'(?<=version=[\'"])(.*)(?=[\'"],)')
+            path = setup_path
+        else:
+            raise ValueError("cannot fine neither '__version__.py' nor 'setup.py'")
+
+        content = path.read_text()
+        current_version_candidates = regex.findall(content)
+        more_than_one_match = len(current_version_candidates) > 0
+        if more_than_one_match:
+            raise ValueError(
+                f"find more than one match for current version in {path}: {current_version_candidates}"
+            )
+        current_version = current_version_candidates[0][0]
         self.update_version_for_file(path, current_version, new_version)
         return current_version
 
@@ -300,6 +318,15 @@ class PythonPackageVersionBumper:
         alternatives.append(f"{lower} *{upper}")
         return "|".join(alternatives)
 
+    def is_different_from_latest_tag(self) -> bool:
+        """Check whether the package has changes since the latest tag."""
+        assert len(self.repo.tags) > 0, "no git tags found"
+        latest_tag_str = str(self.repo.tags[-1])
+        args = latest_tag_str, "--", str(self.python_pkg_dir)
+        print(f"Running 'git diff with args: {args}'")
+        diff = self.repo.git.diff()
+        return diff != ""
+
 
 def parse_args() -> argparse.Namespace:
     """Parse arguments."""
@@ -313,7 +340,26 @@ def parse_args() -> argparse.Namespace:
     return arguments_
 
 
+class RepositoryBumper:
+    """A functor-class to manage AEA repository version bump."""
+
+    def __init__(self, root_dir: str = ROOT_DIR):
+        """
+        Initialize the helper class.
+
+        :param root_dir: the root directory.
+        """
+        self.root_dir = root_dir
+
+        self.repo = Repo(self.root_dir)
+
+
 if __name__ == "__main__":
+    repo = Repo(ROOT_DIR)
+    if repo.is_dirty():
+        print("Repository is dirty. Please clean it up before running this script.")
+        exit(1)
+
     arguments = parse_args()
     new_aea_version = Version(arguments.new_version)
 
@@ -327,13 +373,14 @@ if __name__ == "__main__":
         ],
         files_to_pattern=AEA_PATHS,
     )
-    have_updated_specifier_set = aea_version_bumper.run()
+    aea_version_bumper.run()
+    have_updated_specifier_set = aea_version_bumper.result
 
     print("OK")
     return_code = 0
     if arguments.no_fingerprint:
         print("Not updating fingerprints, since --no-fingerprint was specified.")
-    elif not have_updated_specifier_set:
+    elif have_updated_specifier_set is False:
         print("Not updating fingerprints, since no specifier set has been updated.")
     else:
         print("Updating hashes and fingerprints.")
