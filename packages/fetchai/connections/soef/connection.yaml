@@ -8,7 +8,7 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmZk6CdnvtRHMRCiq9JjUsQ3jhyJyeGdnfn7VpgHvQEccK
   __init__.py: Qmd5VBGFJHXFe1H45XoUh5mMSYBwvLSViJuGFeMgbPdQts
-  connection.py: QmYn2wUxiTxT3hGoJeKvCUyP6NMYWeAzot7FdCkPBx6ydD
+  connection.py: QmQCvwPhyGZYwsUCekjuHvpBPpkjGmNGGPyphqbqwBaZwy
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
@@ -17,7 +17,8 @@ class_name: SOEFConnection
 config:
   api_key: TwiCIriSl0mLahw17pyqoA
   chain_identifier: fetchai_v2_testnet_stable
-  connection_check_timeout: 15
+  connection_check_max_retries: 3
+  connection_check_timeout: 15.0
   soef_addr: s-oef.fetch.ai
   soef_port: 443
   token_storage_path: soef_token.txt

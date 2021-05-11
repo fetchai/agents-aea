@@ -79,7 +79,7 @@ class DockerImage(ABC):
             result.stdout.decode("utf-8"),
         )
         if match is None:
-            pytest.skip(f"cannot read version from the output of 'docker --version'")
+            pytest.skip("cannot read version from the output of 'docker --version'")
         version = (int(match.group(1)), int(match.group(2)), int(match.group(3)))
         if version < self.MINIMUM_DOCKER_VERSION:
             pytest.skip(

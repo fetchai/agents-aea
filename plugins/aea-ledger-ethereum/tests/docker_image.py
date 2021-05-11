@@ -65,14 +65,14 @@ class DockerImage(ABC):
             ["docker", "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
         if result.returncode != 0:
-            pytest.skip(f"'docker --version' failed with exit code {result.returncode}")
+            pytest.skip("'docker --version' failed with exit code {result.returncode}")
 
         match = re.search(
             r"Docker version ([0-9]+)\.([0-9]+)\.([0-9]+)",
             result.stdout.decode("utf-8"),
         )
         if match is None:
-            pytest.skip(f"cannot read version from the output of 'docker --version'")
+            pytest.skip("cannot read version from the output of 'docker --version'")
         version = (int(match.group(1)), int(match.group(2)), int(match.group(3)))
         if version < self.MINIMUM_DOCKER_VERSION:
             pytest.skip(
