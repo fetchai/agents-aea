@@ -482,7 +482,7 @@ jobs:
     - if: matrix.python-version == '3.6'
       name: Golang unit tests (libp2p_node)
       working-directory: ./libs/go/libp2p_node
-      run: go test -gcflags=-l -p 1 -timeout 0 -count 1 -covermode=atomic -coverprofile=coverage.txt -v ./...
+      run: go test -p 1 -timeout 0 -count 1 -v ./...
     - if: matrix.python-version == '3.6'
       name: Golang unit tests (aealite)
       working-directory: ./libs/go/aealite
