@@ -323,8 +323,6 @@ class PythonPackageVersionBumper:
             except UnicodeDecodeError as e:
                 logging.info(f"Cannot read {file}: {str(e)}. Continue...")
             else:
-                if file.name == "test_thermometer.py":
-                    print("HA!")
                 content = self._replace_specifier_sets(
                     old_specifier_set, new_specifier_set, content
                 )
