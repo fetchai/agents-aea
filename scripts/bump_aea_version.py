@@ -18,7 +18,25 @@
 #
 # ------------------------------------------------------------------------------
 
-"""Bump the AEA version throughout the code base."""
+"""
+Bump the AEA version throughout the code base.
+
+usage: bump_aea_version [-h] --new-version NEW_VERSION
+                        [-p KEY=VALUE [KEY=VALUE ...]] [--no-fingerprint]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --new-version NEW_VERSION
+                        The new AEA version.
+  -p KEY=VALUE [KEY=VALUE ...], --plugin-new-version KEY=VALUE [KEY=VALUE ...]
+                        Set a number of key-value pairs plugin-name=new-
+                        plugin-version
+  --no-fingerprint
+
+Example of usage:
+
+python scripts/bump_aea_version.py --new-version 1.1.0 -p aea-ledger-fetchai=2.0.0 -p aea-ledger-ethereum=3.0.0
+"""
 
 import argparse
 import inspect
@@ -422,17 +440,17 @@ def parse_plugin_versions(key_value_strings: List[str]) -> Dict[str, Version]:
 
 
 if __name__ == "__main__":
+    arguments = parse_args()
+    new_plugin_versions = parse_plugin_versions(arguments.plugin_new_version)
+    logging.info(f"Parsed arguments: {arguments}")
+    logging.info(f"Parsed plugin versions: {new_plugin_versions}")
+
     repo = Repo(str(ROOT_DIR))
     if repo.is_dirty():
         logging.info(
             "Repository is dirty. Please clean it up before running this script."
         )
         exit(1)
-
-    arguments = parse_args()
-    new_plugin_versions = parse_plugin_versions(arguments.plugin_new_version)
-    logging.info(f"Parsed arguments: {arguments}")
-    logging.info(f"Parsed plugin versions: {new_plugin_versions}")
 
     new_aea_version = Version(arguments.new_version)
     aea_version_bumper = PythonPackageVersionBumper(
