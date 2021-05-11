@@ -407,8 +407,13 @@ def _bump_protocol_specification_id_if_needed(package_path: Path) -> None:
     )
 
 
-def main() -> None:
-    """Run the script."""
+def main(no_bump: bool = False) -> None:
+    """
+    Run the script.
+
+    :param no_bump: if True, the (default: False)
+    :return: None
+    """
     _check_preliminaries()
 
     all_protocols = list(find_protocols_in_local_registry())
@@ -427,7 +432,8 @@ def main() -> None:
         for package_path in all_protocols:
             log("=" * 100)
             log(f"Processing protocol at path {package_path}")
-            _bump_protocol_specification_id_if_needed(package_path)
+            if not no_bump:
+                _bump_protocol_specification_id_if_needed(package_path)
             _process_packages_protocol(package_path)
 
 
@@ -436,9 +442,10 @@ if __name__ == "__main__":
     parser.add_argument(
         "--check-clean", action="store_true", help="Check if the working tree is clean."
     )
+    parser.add_argument("--no-bump", action="store_true", help="Prevent version bump.")
     arguments = parser.parse_args()
 
-    main()
+    main(arguments.no_bump)
 
     if arguments.check_clean:
         check_working_tree_is_dirty()
