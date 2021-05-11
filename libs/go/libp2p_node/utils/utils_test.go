@@ -21,12 +21,10 @@
 package utils
 
 import (
-	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
-	"io"
 	"libp2p_node/aea"
 	mocks "libp2p_node/mocks"
 	"net"
@@ -192,56 +190,6 @@ func TestWriteBytesConn(t *testing.T) {
 	mockConn.EXPECT().Write(gomock.Any()).Return(0, nil).Times(1)
 	err := WriteBytesConn(mockConn, []byte("ABC"))
 	assert.Equal(t, nil, err)
-}
-
-func TestReadString(t *testing.T) {
-	// test ReadString and ReadBytes
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-	mockStream := mocks.NewMockStream(mockCtrl)
-
-	defer monkey.UnpatchAll()
-
-	t.Run("TestReadString", func(t *testing.T) {
-		monkey.Patch(bufio.NewReader, func(reader io.Reader) *bufio.Reader {
-			return bufio.NewReaderSize(
-				bytes.NewReader([]byte{0, 0, 0, 5, 104, 101, 108, 108, 111}),
-				100,
-			)
-		})
-		buf, err := ReadString(mockStream)
-		assert.Equal(t, nil, err)
-		assert.Equal(t, "hello", buf)
-	})
-}
-
-func TestReadWriteEnvelope(t *testing.T) {
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-	mockStream := mocks.NewMockStream(mockCtrl)
-	defer monkey.UnpatchAll()
-	address := "0xb8d8c62d4a1999b7aea0aebBD5020244a4a9bAD8"
-	buffer := bytes.NewBuffer([]byte{})
-
-	t.Run("TestWriteEnvelope", func(t *testing.T) {
-		monkey.Patch(bufio.NewWriter, func(writer io.Writer) *bufio.Writer {
-			return bufio.NewWriterSize(buffer, 100)
-		})
-		err := WriteEnvelope(&aea.Envelope{
-			To:     address,
-			Sender: address,
-		}, mockStream)
-		assert.Equal(t, nil, err)
-	})
-
-	t.Run("TestReadEnvelope", func(t *testing.T) {
-		monkey.Patch(bufio.NewReader, func(reader io.Reader) *bufio.Reader {
-			return bufio.NewReaderSize(bytes.NewReader(buffer.Bytes()), 100)
-		})
-		env, err := ReadEnvelope(mockStream)
-		assert.Equal(t, nil, err)
-		assert.Equal(t, address, env.To)
-	})
 }
 
 func TestReadWriteEnvelopeFromConnection(t *testing.T) {

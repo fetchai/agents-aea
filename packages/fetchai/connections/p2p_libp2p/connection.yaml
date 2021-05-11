@@ -41,8 +41,8 @@ fingerprint:
   libp2p_node/mocks/mock_net.go: QmVKnkDdH8XCJ9jriEkZui4NoB36GBYF2DtfX8uCqAthMw
   libp2p_node/mocks/mock_network.go: QmbVVvd3wrY6PnVs1rn9T9m6FD5kbmSVJLwhSxUgSLAiM5
   libp2p_node/mocks/mock_peerstore.go: QmaPCBrwsTeWCHZoAKDzaxN6uhY3bez1karzeGeovWYwkB
-  libp2p_node/utils/utils.go: QmXxQCCsEFZH1wkzze1Z1MfcBi6rQ7ZEzACGKptQsgL8Zg
-  libp2p_node/utils/utils_test.go: QmX5bBqCwFVky6ix7pu9QNvScntr3GMDvon9cNC8dKhJiS
+  libp2p_node/utils/utils.go: QmW8ri6vw6CwyJXYHUMhYWoH8RwuMBnbryf5fb6YzE8Fik
+  libp2p_node/utils/utils_test.go: QmaUTrtqhPYcCLTHnJic4EN7R1pZY8ra7QbeRrPuedgAuc
 fingerprint_ignore_patterns: []
 build_entrypoint: check_dependencies.py
 connections: []
