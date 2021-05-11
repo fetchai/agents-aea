@@ -457,7 +457,6 @@ jobs:
     - name: Unit tests with sync agent loop
       run: |
         tox -e py3.8 -- --aea-loop sync -m 'not integration and not unstable'
-
   golang_checks:
     continue-on-error: True
     needs:
@@ -482,12 +481,40 @@ jobs:
     - if: matrix.python-version == '3.6'
       name: Golang unit tests (libp2p_node)
       working-directory: ./libs/go/libp2p_node
-      run: go test -p 1 -timeout 0 -count 1 -v ./...
+      run: make test
     - if: matrix.python-version == '3.6'
       name: Golang unit tests (aealite)
       working-directory: ./libs/go/aealite
       run: go test -p 1 -timeout 0 -count 1 -v ./...
-
+  libp2p_coverage:
+    name: libp2p_coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go 1.14
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.14
+        id: go
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v1
+      - name: Install dependencies (ubuntu-latest)
+        run: |
+          sudo apt-get update --fix-missing
+          sudo apt-get autoremove
+          sudo apt-get autoclean
+          sudo apt-get install make -y
+      - name: Get dependencies
+        working-directory: ./libs/go/libp2p_node/
+        run: |
+          make install
+      - name: Generate coverage report
+        working-directory: ./libs/go/libp2p_node/
+        run: |
+          make test
+      - name: Print coverage report
+        working-directory: ./libs/go/libp2p_node/
+        run: |
+          go tool cover -func=coverage.txt
   coverage_checks:
     continue-on-error: True
     needs:
