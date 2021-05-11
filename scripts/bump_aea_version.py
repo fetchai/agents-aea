@@ -63,7 +63,9 @@ dependencies:
     aea-ledger-fetchai:
         version: >=1.0.0,<2.0.0
 """
-YAML_DEPENDENCY_SPECIFIER_SET_PATTERN = "(?<={package_name}:\n    version: )({specifier_set})"
+YAML_DEPENDENCY_SPECIFIER_SET_PATTERN = (
+    "(?<={package_name}:\n    version: )({specifier_set})"
+)
 
 """
 This pattern captures a specifier set for PyPI dependencies
@@ -240,7 +242,9 @@ class PythonPackageVersionBumper:
                 f"find more than one match for current version in {path}: {current_version_candidates}"
             )
         current_version = current_version_candidates[0]
-        self.update_version_for_file(path, current_version, new_version, version_regex_template=regex_template)
+        self.update_version_for_file(
+            path, current_version, new_version, version_regex_template=regex_template
+        )
         return current_version
 
     def update_version_for_file(
@@ -315,8 +319,7 @@ class PythonPackageVersionBumper:
         old_specifier_set_regex = self.get_regex_from_specifier_set(old_specifier_set)
         for pattern_template in self.specifier_set_patterns:
             regex = pattern_template.format(
-                package_name=self.package_name,
-                specifier_set=old_specifier_set_regex,
+                package_name=self.package_name, specifier_set=old_specifier_set_regex,
             )
             pattern = re.compile(regex)
             if pattern.search(content) is not None:
@@ -401,7 +404,7 @@ def process_plugins(new_plugin_versions: Dict[str, Version]) -> bool:
                 YAML_DEPENDENCY_SPECIFIER_SET_PATTERN,
                 JSON_DEPENDENCY_SPECIFIER_SET_PATTERN,
             ],
-            package_name=plugin_dir.name
+            package_name=plugin_dir.name,
         )
         plugin_bumper.run()
         result |= plugin_bumper.result
