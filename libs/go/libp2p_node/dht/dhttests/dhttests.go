@@ -27,6 +27,9 @@ import (
 	"libp2p_node/dht/dhtpeer"
 	"libp2p_node/utils"
 	"log"
+	"math/rand"
+	"os"
+	"path"
 )
 
 //
@@ -43,6 +46,15 @@ const (
 	DHTPeerDefaultAgentAddress   = "fetch134rg4n3wgmwctxsrm7gp6l65uwv6hxtxyfdwgw"
 )
 
+func randSeq(n int) string {
+	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
+}
+
 // NewDHTPeerWithDefaults for testing
 func NewDHTPeerWithDefaults(inbox chan<- *aea.Envelope) (*dhtpeer.DHTPeer, func(), error) {
 	opts := []dhtpeer.Option{
@@ -51,6 +63,7 @@ func NewDHTPeerWithDefaults(inbox chan<- *aea.Envelope) (*dhtpeer.DHTPeer, func(
 		dhtpeer.IdentityFromFetchAIKey(DHTPeerDefaultFetchAIKey),
 		dhtpeer.EnableRelayService(),
 		dhtpeer.EnableDelegateService(DHTPeerDefaultDelegatePort),
+		dhtpeer.StoreRecordsTo(path.Join(os.TempDir(), "agents_records_"+randSeq(5))),
 	}
 
 	signature, err := utils.SignFetchAI(
