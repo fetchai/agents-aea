@@ -34,6 +34,7 @@ import argparse
 import logging
 import os
 import pprint
+import re
 import shutil
 import subprocess  # nosec
 import sys
@@ -67,6 +68,7 @@ PACKAGES_DIR = Path("packages")
 TEST_DATA = Path("tests", "data").absolute()
 PROTOCOLS_PLURALS = "protocols"
 ROOT_DIR = Path(".").absolute()
+PROTOCOL_GENERATOR_DOCSTRING_REGEX = "It was created with protocol buffer compiler version `libprotoc .*` and aea version `.*`."
 
 
 def subdirs(path: Path) -> Iterator[Path]:
@@ -260,9 +262,56 @@ def _fingerprint_protocol(name: str) -> None:
     run_aea("fingerprint", "protocol", str(protocol_config.public_id))
 
 
-def _process_packages_protocol(package_path: Path) -> None:
+def _parse_generator_docstring(package_path: Path) -> str:
+    """
+    Parse protocol generator docstring.
+
+    The docstring this function searches is in the __init__.py module
+    and it is of the form:
+
+        It was created with protocol buffer compiler version `libprotoc ...` and aea version `...`.
+
+
+    :param package_path: path to the protocol package
+    :return: the docstring
+    """
+    content = (package_path / "__init__.py").read_text()
+    regex = re.compile(PROTOCOL_GENERATOR_DOCSTRING_REGEX)
+    match = regex.search(content)
+    if match is None:
+        raise ValueError("protocol generator docstring not found")
+    return match.group(0)
+
+
+def _replace_generator_docstring(package_path: Path, replacement: str) -> None:
+    """
+    Replace the generator docstring in the __init__.py module.
+
+    (see _parse_generator_docstring for more details).
+
+    :param package_path: path to the
+    :param replacement: the replacement to use.
+    :return: None
+    """
+    protocol_name = package_path.name
+    init_module = Path(PROTOCOLS_PLURALS) / protocol_name / "__init__.py"
+    content = init_module.read_text()
+    content = re.sub(PROTOCOL_GENERATOR_DOCSTRING_REGEX, replacement, content)
+    init_module.write_text(content)
+
+
+def _process_packages_protocol(
+    package_path: Path, preserve_generator_docstring: bool = False
+) -> None:
     """
     Process protocol package from local registry.
+
+    If the flag '--no-bump' is specified, it means the protocol generator
+    string that records the AEA and the protoc version used, i.e.:
+
+        It was created with protocol buffer compiler version `libprotoc ...` and aea version `...`.
+
+    must not be updated, as the 'AEA' version could have been changed.
 
     It means:
     - extract protocol specification from README
@@ -273,12 +322,19 @@ def _process_packages_protocol(package_path: Path) -> None:
     It assumes the working directory is an AEA project.
 
     :param package_path: path to the package.
+    :param preserve_generator_docstring: if True, the protocol generator docstring
+      is preserved (see above).
     :return: None
     """
+    if preserve_generator_docstring:
+        # save the old protocol generator docstring
+        old_protocol_generator_docstring = _parse_generator_docstring(package_path)
     specification_content = get_protocol_specification_from_readme(package_path)
     _save_specification_in_temporary_file(package_path.name, specification_content)
     _generate_protocol(package_path)
     _fix_generated_protocol(package_path)
+    if preserve_generator_docstring:
+        _replace_generator_docstring(package_path, old_protocol_generator_docstring)
     run_isort_and_black(Path(PROTOCOLS_PLURALS, package_path.name), cwd=str(ROOT_DIR))
     _fingerprint_protocol(package_path.name)
     _update_original_protocol(package_path)
@@ -407,8 +463,13 @@ def _bump_protocol_specification_id_if_needed(package_path: Path) -> None:
     )
 
 
-def main() -> None:
-    """Run the script."""
+def main(no_bump: bool = False) -> None:
+    """
+    Run the script.
+
+    :param no_bump: if True, the (default: False)
+    :return: None
+    """
     _check_preliminaries()
 
     all_protocols = list(find_protocols_in_local_registry())
@@ -427,8 +488,11 @@ def main() -> None:
         for package_path in all_protocols:
             log("=" * 100)
             log(f"Processing protocol at path {package_path}")
-            _bump_protocol_specification_id_if_needed(package_path)
-            _process_packages_protocol(package_path)
+            if not no_bump:
+                _bump_protocol_specification_id_if_needed(package_path)
+            # no_bump implies to ignore the docstring:
+            #  'It was created with protocol buffer compiler ... and aea version ...'
+            _process_packages_protocol(package_path, no_bump)
 
 
 if __name__ == "__main__":
@@ -436,9 +500,10 @@ if __name__ == "__main__":
     parser.add_argument(
         "--check-clean", action="store_true", help="Check if the working tree is clean."
     )
+    parser.add_argument("--no-bump", action="store_true", help="Prevent version bump.")
     arguments = parser.parse_args()
 
-    main()
+    main(arguments.no_bump)
 
     if arguments.check_clean:
         check_working_tree_is_dirty()
