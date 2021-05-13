@@ -34,6 +34,7 @@ from aea.crypto.registries import make_crypto
 from aea.identity.base import Identity
 from aea.multiplexer import Multiplexer
 
+from packages.fetchai.connections.p2p_libp2p.acn_message_pb2 import Status
 from packages.fetchai.connections.p2p_libp2p.connection import (
     LIBP2P_NODE_MODULE_NAME,
     Libp2pNode,
@@ -244,7 +245,6 @@ async def test_reconnect_on_write_failed():
         con = _make_libp2p_connection(
             port=port, host=host, data_dir=data_dir, build_directory=data_dir
         )
-
     node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
     con.node = node
     node.pipe = Mock()
@@ -256,6 +256,8 @@ async def test_reconnect_on_write_failed():
         con, "_restart_node", return_value=f
     ) as restart_mock, patch.object(
         con, "_ensure_valid_envelope_for_external_comms"
+    ), patch.object(
+        con._node_client, "make_acn_envelope_message", return_value=b"some_data"
     ), pytest.raises(
         Exception, match="expected"
     ):
@@ -287,9 +289,16 @@ async def test_reconnect_on_write_failed_reconnect_pipe():
     node.pipe.write = Mock(side_effect=[Exception("expected"), f])
 
     con._node_client = node.get_client()
-
+    status_ok = Mock()
+    status_ok.code = Status.SUCCESS
+    status_ok_future = Future()
+    status_ok_future.set_result(status_ok)
     with patch.object(con, "_ensure_valid_envelope_for_external_comms"), patch.object(
         node, "is_proccess_running", return_value=True
+    ), patch.object(
+        con._node_client, "make_acn_envelope_message", return_value=b"some_data"
+    ), patch.object(
+        con._node_client, "wait_for_status", lambda: status_ok_future
     ):
         await con._send_envelope_with_node_client(Mock())
 

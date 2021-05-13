@@ -32,6 +32,7 @@ import (
 	"testing"
 	"time"
 
+	"libp2p_node/acn"
 	"libp2p_node/aea"
 	"libp2p_node/dht/dhtclient"
 	"libp2p_node/dht/dhtnode"
@@ -135,7 +136,7 @@ func TestRoutingDHTPeerToSelf(t *testing.T) {
 		t.Fatal("Failed at DHTPeer initialization:", err)
 	}
 
-	record := &aea.AgentRecord{LedgerId: DefaultLedger}
+	record := &acn.AgentRecord{LedgerId: DefaultLedger}
 	record.Address = AgentsTestAddresses[0]
 	record.PublicKey = agentPubKey
 	record.PeerPublicKey = FetchAITestPublicKeys[0]
@@ -1745,7 +1746,7 @@ func SetupLocalDHTPeer(
 			return nil, nil, err
 		}
 
-		record := &aea.AgentRecord{LedgerId: DefaultLedger}
+		record := &acn.AgentRecord{LedgerId: DefaultLedger}
 		record.Address = agentAddress
 		record.PublicKey = agentPubKey
 		record.PeerPublicKey = peerPubKey
@@ -1795,7 +1796,7 @@ func SetupDHTClient(
 		return nil, nil, err
 	}
 
-	record := &aea.AgentRecord{LedgerId: DefaultLedger}
+	record := &acn.AgentRecord{LedgerId: DefaultLedger}
 	record.Address = agentAddress
 	record.PublicKey = agentPubKey
 	record.PeerPublicKey = peerPubKey

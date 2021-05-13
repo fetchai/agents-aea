@@ -900,6 +900,6 @@ async def test_nodeclient_pipe_connect():
     f.set_result(None)
     pipe = Mock()
     pipe.connect.return_value = f
-    node_client = NodeClient(pipe)
+    node_client = NodeClient(pipe, Mock())
     await node_client.connect()
     pipe.connect.assert_called_once()

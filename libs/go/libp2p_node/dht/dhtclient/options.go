@@ -21,7 +21,7 @@
 package dhtclient
 
 import (
-	"libp2p_node/aea"
+	acn "libp2p_node/acn"
 	"libp2p_node/dht/dhtnode"
 	"libp2p_node/utils"
 )
@@ -42,7 +42,7 @@ func IdentityFromFetchAIKey(key string) Option {
 }
 
 // RegisterAgentAddress for dhtclient.New
-func RegisterAgentAddress(record *aea.AgentRecord, isReady func() bool) Option {
+func RegisterAgentAddress(record *acn.AgentRecord, isReady func() bool) Option {
 	return func(dhtClient *DHTClient) error {
 		pbRecord := &dhtnode.AgentRecord{}
 		pbRecord.Address = record.Address

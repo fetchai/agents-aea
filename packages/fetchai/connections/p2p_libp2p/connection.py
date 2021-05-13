@@ -40,6 +40,17 @@ from aea.helpers.multiaddr.base import MultiAddr
 from aea.helpers.pipe import IPCChannel, TCPSocketChannel
 from aea.mail.base import Envelope
 
+from packages.fetchai.connections.p2p_libp2p.acn_message_pb2 import (
+    AcnMessage,
+    AeaEnvelope,
+)
+from packages.fetchai.connections.p2p_libp2p.acn_message_pb2 import (
+    AgentRecord as AgentRecordPb,
+)
+from packages.fetchai.connections.p2p_libp2p.acn_message_pb2 import Status
+
+
+ACN_CURRENT_VERSION = "0.1.0"
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p")
 
@@ -129,9 +140,13 @@ def _golang_module_run(
 class NodeClient:
     """Client to communicate with node using ipc channel(pipe)."""
 
-    def __init__(self, pipe: IPCChannel) -> None:
+    ACN_ACK_TIMEOUT = 5
+
+    def __init__(self, pipe: IPCChannel, agent_record: AgentRecord) -> None:
         """Set node client with pipe."""
         self.pipe = pipe
+        self.agent_record = agent_record
+        self._wait_status: Optional[asyncio.Future] = None
 
     async def connect(self) -> bool:
         """Connect to node with pipe."""
@@ -139,16 +154,103 @@ class NodeClient:
 
     async def send_envelope(self, envelope: Envelope) -> None:
         """Send envelope to node."""
-        await self._write(envelope.encode())
+        self._wait_status = asyncio.Future()
+        buf = self.make_acn_envelope_message(envelope)
+        await self._write(buf)
+        try:
+            status = await self.wait_for_status()
+            if status.code != Status.SUCCESS:  # type: ignore  # pylint: disable=no-member
+                raise Exception("failed to send envelope", status)
+        except asyncio.TimeoutError:
+            if not self._wait_status.done():
+                self._wait_status.set_exception(Exception("Timeout"))
+            await asyncio.sleep(0)
+            raise Exception("acn status await timeout!")
+        finally:
+            self._wait_status = None
+
+    async def wait_for_status(self) -> Any:
+        """Get status."""
+        return await asyncio.wait_for(self._wait_status, self.ACN_ACK_TIMEOUT)
+
+    def make_acn_envelope_message(self, envelope: Envelope) -> bytes:
+        """Make acn message with envelope in."""
+        aea_envelope = AeaEnvelope()
+        aea_envelope.record.CopyFrom(  # pylint: disable=no-member
+            self.make_agent_record()
+        )
+        aea_envelope.envel = envelope.encode()
+        msg = AcnMessage()
+        msg.version = ACN_CURRENT_VERSION
+        msg.aea_envelope.CopyFrom(aea_envelope)  # pylint: disable=no-member
+        buf = msg.SerializeToString()
+        return buf
+
+    def make_agent_record(self) -> AgentRecordPb:  # type: ignore
+        """Make acn agent record."""
+        record = AgentRecordPb()
+        record.address = self.agent_record.address
+        record.public_key = self.agent_record.public_key
+        record.peer_public_key = self.agent_record.representative_public_key
+        record.signature = self.agent_record.signature
+        record.service_id = POR_DEFAULT_SERVICE_ID
+        record.ledger_id = self.agent_record.ledger_id
+        return record
 
     async def read_envelope(self) -> Optional[Envelope]:
         """Read envelope from the node."""
-        data = await self._read()
+        while True:
+            data = await self._read()
 
-        if not data:
-            return None
+            if not data:
+                return None
 
-        return Envelope.decode(data)
+            try:
+                msg = AcnMessage()
+                msg.ParseFromString(data)
+            except Exception as e:
+                await self.write_acn_status_error(f"Failed to pase acn message {e}")
+                raise
+
+            payload = msg.WhichOneof("payload")
+            if payload == "aea_envelope":  # pragma: nocover
+                aea_envelope = msg.aea_envelope  # pylint: disable=no-member
+                try:
+                    envelope = Envelope.decode(aea_envelope.envel)
+                    await self.write_acn_status_ok()
+                    return envelope
+                except Exception as e:
+                    await self.write_acn_status_error(f"Failed to decode envelope: {e}")
+                    raise
+
+            elif payload == "status":
+                if self._wait_status is not None:
+                    self._wait_status.set_result(
+                        msg.status  # pylint: disable=no-member
+                    )
+            else:
+                await self.write_acn_status_error(f"Bad acn message {payload}")
+
+    async def write_acn_status_ok(self) -> None:
+        """Send acn status ok."""
+        status = Status()
+        status.code = Status.SUCCESS  # type: ignore # pylint: disable=no-member
+        msg = AcnMessage()
+        msg.version = ACN_CURRENT_VERSION
+        msg.status.CopyFrom(status)  # pylint: disable=no-member
+        buf = msg.SerializeToString()
+        await self._write(buf)
+
+    async def write_acn_status_error(self, msg: str) -> None:
+        """Send acn status error generic."""
+        status = Status()
+        status.code = Status.ERROR_GENERIC  # type: ignore # pylint: disable=no-member
+        status.msgs = [msg]
+        msg = AcnMessage()
+        msg.version = ACN_CURRENT_VERSION  # type: ignore  # pylint: disable=no-member
+        msg.status.CopyFrom(status)  # type: ignore # pylint: disable=no-member
+        buf = msg.SerializeToString()  # type: ignore # pylint: disable=no-member
+        await self._write(buf)
 
     async def _write(self, data: bytes) -> None:
         """
@@ -336,7 +438,7 @@ class Libp2pNode:
         if self.pipe is None:
             raise Exception("pipe was not set")  # pragma: nocover
 
-        return NodeClient(self.pipe)
+        return NodeClient(self.pipe, self.record)
 
     def _child_watcher_callback(self, *_) -> None:  # type: ignore # pragma: nocover
         """Log if process was terminated before stop was called."""
