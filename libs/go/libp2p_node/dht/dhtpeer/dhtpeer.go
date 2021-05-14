@@ -53,11 +53,11 @@ import (
 	kaddht "github.com/libp2p/go-libp2p-kad-dht"
 	routedhost "github.com/libp2p/go-libp2p/p2p/host/routed"
 
+	acn "libp2p_node/acn"
 	aea "libp2p_node/aea"
 	"libp2p_node/dht/dhtnode"
 	monitoring "libp2p_node/dht/monitoring"
 	utils "libp2p_node/utils"
-	acn "libp2p_node/acn"
 )
 
 // panics if err is not nil

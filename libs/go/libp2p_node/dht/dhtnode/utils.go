@@ -23,8 +23,8 @@ package dhtnode
 
 import (
 	"errors"
-	utils "libp2p_node/utils"
 	acn "libp2p_node/acn"
+	utils "libp2p_node/utils"
 	"strings"
 )
 
@@ -43,7 +43,10 @@ func IsValidProofOfRepresentation(
 	// check agent address matches
 	if record.Address != agentAddress {
 		err := errors.New("Wrong agent address, expected " + agentAddress)
-		response := &acn.Status{Code: acn.Status_ERROR_WRONG_AGENT_ADDRESS, Msgs: []string{err.Error()}}
+		response := &acn.Status{
+			Code: acn.Status_ERROR_WRONG_AGENT_ADDRESS,
+			Msgs: []string{err.Error()},
+		}
 		return response, err
 	}
 
@@ -62,14 +65,20 @@ func IsValidProofOfRepresentation(
 				",",
 			),
 		)
-		response := &acn.Status{Code: acn.Status_ERROR_UNSUPPORTED_LEDGER, Msgs: []string{err.Error()}}
+		response := &acn.Status{
+			Code: acn.Status_ERROR_UNSUPPORTED_LEDGER,
+			Msgs: []string{err.Error()},
+		}
 		return response, err
 	}
 
 	// check public key matches
 	if record.PeerPublicKey != representativePeerPubKey {
 		err := errors.New("wrong peer public key, expected " + representativePeerPubKey)
-		response := &acn.Status{Code: acn.Status_ERROR_WRONG_PUBLIC_KEY, Msgs: []string{err.Error()}}
+		response := &acn.Status{
+			Code: acn.Status_ERROR_WRONG_PUBLIC_KEY,
+			Msgs: []string{err.Error()},
+		}
 		return response, err
 	}
 

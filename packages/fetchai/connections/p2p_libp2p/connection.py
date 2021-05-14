@@ -40,14 +40,9 @@ from aea.helpers.multiaddr.base import MultiAddr
 from aea.helpers.pipe import IPCChannel, TCPSocketChannel
 from aea.mail.base import Envelope
 
-from packages.fetchai.connections.p2p_libp2p.acn_message_pb2 import (
-    AcnMessage,
-    AeaEnvelope,
-)
-from packages.fetchai.connections.p2p_libp2p.acn_message_pb2 import (
-    AgentRecord as AgentRecordPb,
-)
-from packages.fetchai.connections.p2p_libp2p.acn_message_pb2 import Status
+from .acn_message_pb2 import AcnMessage, AeaEnvelope
+from .acn_message_pb2 import AgentRecord as AgentRecordPb
+from .acn_message_pb2 import Status
 
 
 ACN_CURRENT_VERSION = "0.1.0"
@@ -173,6 +168,8 @@ class NodeClient:
 
     async def wait_for_status(self) -> Any:
         """Get status."""
+        if self._wait_status is None:  # pragma: nocover
+            raise ValueError("value failed!")
         return await asyncio.wait_for(self._wait_status, timeout=self.ACN_ACK_TIMEOUT)
 
     def make_acn_envelope_message(self, envelope: Envelope) -> bytes:
@@ -247,7 +244,7 @@ class NodeClient:
         """Send acn status error generic."""
         status = Status()
         status.code = Status.ERROR_GENERIC  # type: ignore # pylint: disable=no-member
-        status.msgs.append(msg)
+        status.msgs.append(msg)  # type: ignore # pylint: disable=no-member
         msg = AcnMessage()
         msg.version = ACN_CURRENT_VERSION  # type: ignore  # pylint: disable=no-member
         msg.status.CopyFrom(status)  # type: ignore # pylint: disable=no-member

@@ -80,8 +80,9 @@ type AeaApi struct {
 	registrationDelay  float64
 	recordsStoragePath string
 
-	pipe      Pipe
-	out_queue chan *Envelope
+	pipe       Pipe
+	out_queue  chan *Envelope
+	send_queue chan *Envelope
 
 	closing         bool
 	connected       bool
@@ -136,7 +137,8 @@ func (aea AeaApi) Put(envelope *Envelope) error {
 		logger.Warn().Msgf(errorMsg)
 		return errors.New(errorMsg)
 	}
-	return aea.SendEnvelope(envelope)
+	aea.send_queue <- envelope
+	return nil
 }
 
 func (aea *AeaApi) Get() *Envelope {
@@ -157,9 +159,11 @@ func (aea *AeaApi) Connected() bool {
 }
 
 func (aea *AeaApi) Stop() {
+	aea.send_queue <- nil
 	aea.closing = true
 	aea.stop()
 	close(aea.out_queue)
+	close(aea.send_queue)
 }
 
 func (aea *AeaApi) Init() error {
@@ -342,7 +346,9 @@ func (aea *AeaApi) Connect() error {
 	aea.closing = false
 	//TOFIX(LR) trade-offs between bufferd vs unbuffered channel
 	aea.out_queue = make(chan *Envelope, 10)
+	aea.send_queue = make(chan *Envelope, 10)
 	go aea.listenForEnvelopes()
+	go aea.envelopeSendLoop()
 	logger.Info().Msg("connected to agent")
 
 	aea.connected = true
@@ -388,6 +394,29 @@ func (aea *AeaApi) listenForEnvelopes() {
 	}
 }
 
+func (aea *AeaApi) envelopeSendLoop() {
+	logger.Debug().Msg("send loop started")
+	var err error
+	for {
+		envelope := <-aea.send_queue
+		logger.Debug().Msg("send lopp: got envelope")
+
+		if envelope == nil {
+			logger.Info().Msg("envelope is nil. exit send loop")
+			return
+		}
+		err = aea.SendEnvelope(envelope)
+		if err != nil {
+			logger.Error().Str("err", err.Error()).Msg("while sending envelope")
+		} else {
+			logger.Debug().Msg("envelope sent")
+		}
+
+		if aea.closing {
+			return
+		}
+	}
+}
 func (aea *AeaApi) stop() {
 	aea.pipe.Close()
 }
