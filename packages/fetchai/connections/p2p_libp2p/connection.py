@@ -34,15 +34,14 @@ from aea.configurations.constants import DEFAULT_LEDGER
 from aea.connections.base import Connection, ConnectionStates
 from aea.crypto.base import Crypto
 from aea.exceptions import enforce
+from aea.helpers.acn.acn_message_pb2 import AcnMessage, AeaEnvelope
+from aea.helpers.acn.acn_message_pb2 import AgentRecord as AgentRecordPb
+from aea.helpers.acn.acn_message_pb2 import Status
 from aea.helpers.acn.agent_record import AgentRecord
 from aea.helpers.acn.uri import Uri
 from aea.helpers.multiaddr.base import MultiAddr
 from aea.helpers.pipe import IPCChannel, TCPSocketChannel
 from aea.mail.base import Envelope
-
-from .acn_message_pb2 import AcnMessage, AeaEnvelope
-from .acn_message_pb2 import AgentRecord as AgentRecordPb
-from .acn_message_pb2 import Status
 
 
 ACN_CURRENT_VERSION = "0.1.0"

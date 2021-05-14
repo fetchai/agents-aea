@@ -10,16 +10,14 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmWcd2zHiRZLgXCSGw9gZ35WfcKsMeNSQouqNAaZnPBDDR
   __init__.py: QmYQuLNyQ8WTjgRYAoKAzoJEb7ocKXvM2hTyK4hsGch5D6
-  acn_message.proto: QmQtqmAqRM6KhYyfXGPYbYLBLuwfTRwTbvt5Rmt1ghS33J
-  acn_message_pb2.py: QmRmTieVDVaRoiynFx9YJbXEf41JfTTWdqTWuRYWFpM8iw
   check_dependencies.py: QmP14nkQ8senwzdPdrZJLsA6EQ7zaKKEaLGDELhT42gp1P
-  connection.py: QmQcGHD4NMgXRagKoXxQFXmeKCtB9NY9P7THuW7aYksCr8
+  connection.py: QmVqTc4vkMPNZeyUi59pwWwomMLgSdaCq7U3tLzivGS9TG
   libp2p_node/Makefile: QmPpjEgNQD59BBDefLS5C8gbY7CEppeVGACJeAL9rufSgv
   libp2p_node/README.md: Qmak56XnWfarVxasiaGqYQWJaNVnEAh2hsLWstuFVND98w
   libp2p_node/acn/acn_message.pb.go: QmXWS3njZsFfdbuvXYv3iHy9YF9nGtmJomSQFTbSgRQb8H
   libp2p_node/acn/acn_message.proto: QmbgFcGVbxx4CP53cefW7JhXLYha6meSYqZ9hZJgBpcinF
-  libp2p_node/acn/utils.go: QmRAjJ5X66iWuqmVqXZHH9PmUwCyzR8wa5HtkAnhXFkYDR
-  libp2p_node/aea/api.go: QmatTckS48hdouhNhhcExSVNtSD5GxtsETqnAHdm7xd75E
+  libp2p_node/acn/utils.go: QmV2iCekvuT1ddwYqJug7q2tqb3sPuLiPKX7LxUTGxKVdD
+  libp2p_node/aea/api.go: QmYjBAzmPNXA3csspZWF9tMznGFyomCspwVHijLFKYMz5S
   libp2p_node/aea/envelope.pb.go: QmRfUNGpCeVJfsW3H1MzCN4pwDWgumfyWufVFp6xvUjjug
   libp2p_node/aea/envelope.proto: QmVuvesmfgzj5aKnbFoCocoGEv3T9MR7u6KWn7CT5yfjGi
   libp2p_node/aea/pipe.go: QmWLBjZNRCcg3BSM9Cxb95yAXdT6wPjgw8DSYHxMuux4JA
