@@ -160,9 +160,11 @@ class NodeClient:
         try:
             status = await self.wait_for_status()
             if status.code != Status.SUCCESS:  # type: ignore  # pylint: disable=no-member
-                raise Exception("failed to send envelope", status)
+                raise Exception(
+                    f"failed to send envelope. got error confirmation: {status}"
+                )
         except asyncio.TimeoutError:
-            if not self._wait_status.done():
+            if not self._wait_status.done():  # pragma: nocover
                 self._wait_status.set_exception(Exception("Timeout"))
             await asyncio.sleep(0)
             raise Exception("acn status await timeout!")
@@ -171,7 +173,7 @@ class NodeClient:
 
     async def wait_for_status(self) -> Any:
         """Get status."""
-        return await asyncio.wait_for(self._wait_status, self.ACN_ACK_TIMEOUT)
+        return await asyncio.wait_for(self._wait_status, timeout=self.ACN_ACK_TIMEOUT)
 
     def make_acn_envelope_message(self, envelope: Envelope) -> bytes:
         """Make acn message with envelope in."""
@@ -228,7 +230,7 @@ class NodeClient:
                     self._wait_status.set_result(
                         msg.status  # pylint: disable=no-member
                     )
-            else:
+            else:  # pragma: nocover
                 await self.write_acn_status_error(f"Bad acn message {payload}")
 
     async def write_acn_status_ok(self) -> None:
@@ -245,7 +247,7 @@ class NodeClient:
         """Send acn status error generic."""
         status = Status()
         status.code = Status.ERROR_GENERIC  # type: ignore # pylint: disable=no-member
-        status.msgs = [msg]
+        status.msgs.append(msg)
         msg = AcnMessage()
         msg.version = ACN_CURRENT_VERSION  # type: ignore  # pylint: disable=no-member
         msg.status.CopyFrom(status)  # type: ignore # pylint: disable=no-member

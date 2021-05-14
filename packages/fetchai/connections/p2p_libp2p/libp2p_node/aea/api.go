@@ -36,6 +36,8 @@ import (
 	proto "google.golang.org/protobuf/proto"
 )
 
+const ACN_STATUS_TIMEOUT = 5.0 * time.Second
+
 // code redandency to avoid import cycle
 var logger zerolog.Logger = zerolog.New(zerolog.ConsoleWriter{
 	Out:        os.Stdout,
@@ -52,8 +54,6 @@ type Pipe interface {
 	Write(data []byte) error
 	Close() error
 }
-
-const ACN_STATUS_TIMEOUT = 5.0 * time.Second
 
 /*
 
@@ -342,7 +342,7 @@ func (aea *AeaApi) Connect() error {
 	aea.closing = false
 	//TOFIX(LR) trade-offs between bufferd vs unbuffered channel
 	aea.out_queue = make(chan *Envelope, 10)
-	go aea.listen_for_envelopes()
+	go aea.listenForEnvelopes()
 	logger.Info().Msg("connected to agent")
 
 	aea.connected = true
@@ -356,10 +356,10 @@ func UnmarshalEnvelope(buf []byte) (*Envelope, error) {
 	return envelope, err
 }
 
-func (aea *AeaApi) listen_for_envelopes() {
+func (aea *AeaApi) listenForEnvelopes() {
 	//TOFIX(LR) add an exit strategy
 	for {
-		envel, err := aea.ReadFromPipe()
+		envel, err := aea.ReceiveEnvelope()
 		if envel == nil {
 			// ACN STATUS MSG
 			continue
@@ -431,7 +431,7 @@ func (aea AeaApi) SendEnvelope(envelope *Envelope) error {
 	return err
 }
 
-func (aea AeaApi) ReadFromPipe() (*Envelope, error) {
+func (aea AeaApi) ReceiveEnvelope() (*Envelope, error) {
 	envelope := &Envelope{}
 	var acn_err error
 	data, err := aea.pipe.Read()
