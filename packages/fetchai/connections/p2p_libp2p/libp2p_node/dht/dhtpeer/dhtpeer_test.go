@@ -1876,15 +1876,15 @@ func SetupDelegateClient(
 		return nil, nil, err
 	}
 
-	record := &dhtnode.AgentRecord{LedgerId: DefaultLedger}
+	record := &acn.AgentRecord{LedgerId: DefaultLedger}
 	record.Address = address
 	record.PublicKey = pubKey
 	record.PeerPublicKey = peerPubKey
 	record.Signature = signature
-	registration := &dhtnode.Register{Record: record}
-	msg := &dhtnode.AcnMessage{
-		Version: dhtnode.CurrentVersion,
-		Payload: &dhtnode.AcnMessage_Register{Register: registration},
+	registration := &acn.Register{Record: record}
+	msg := &acn.AcnMessage{
+		Version: acn.CurrentVersion,
+		Payload: &acn.AcnMessage_Register{Register: registration},
 	}
 	data, err := proto.Marshal(msg)
 	ignore(err)
@@ -1894,22 +1894,22 @@ func SetupDelegateClient(
 	if err != nil {
 		return nil, nil, err
 	}
-	response := &dhtnode.AcnMessage{}
+	response := &acn.AcnMessage{}
 	err = proto.Unmarshal(data, response)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	// Get Status message
-	var status *dhtnode.Status
+	var status *acn.Status
 	switch pl := response.Payload.(type) {
-	case *dhtnode.AcnMessage_Status:
+	case *acn.AcnMessage_Status:
 		status = pl.Status
 	default:
 		return nil, nil, err
 	}
 
-	if status.Code != dhtnode.Status_SUCCESS {
+	if status.Code != acn.Status_SUCCESS {
 		println("Registration error:", status.String())
 		return nil, nil, errors.New(status.String())
 	}

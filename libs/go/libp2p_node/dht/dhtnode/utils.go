@@ -24,6 +24,7 @@ package dhtnode
 import (
 	"errors"
 	utils "libp2p_node/utils"
+	acn "libp2p_node/acn"
 	"strings"
 )
 
@@ -35,14 +36,14 @@ const (
 var supportedLedgers = []string{"fetchai", "cosmos", "ethereum"}
 
 func IsValidProofOfRepresentation(
-	record *AgentRecord,
+	record *acn.AgentRecord,
 	agentAddress string,
 	representativePeerPubKey string,
-) (*Status, error) {
+) (*acn.Status, error) {
 	// check agent address matches
 	if record.Address != agentAddress {
 		err := errors.New("Wrong agent address, expected " + agentAddress)
-		response := &Status{Code: Status_ERROR_WRONG_AGENT_ADDRESS, Msgs: []string{err.Error()}}
+		response := &acn.Status{Code: acn.Status_ERROR_WRONG_AGENT_ADDRESS, Msgs: []string{err.Error()}}
 		return response, err
 	}
 
@@ -61,14 +62,14 @@ func IsValidProofOfRepresentation(
 				",",
 			),
 		)
-		response := &Status{Code: Status_ERROR_UNSUPPORTED_LEDGER, Msgs: []string{err.Error()}}
+		response := &acn.Status{Code: acn.Status_ERROR_UNSUPPORTED_LEDGER, Msgs: []string{err.Error()}}
 		return response, err
 	}
 
 	// check public key matches
 	if record.PeerPublicKey != representativePeerPubKey {
 		err := errors.New("wrong peer public key, expected " + representativePeerPubKey)
-		response := &Status{Code: Status_ERROR_WRONG_PUBLIC_KEY, Msgs: []string{err.Error()}}
+		response := &acn.Status{Code: acn.Status_ERROR_WRONG_PUBLIC_KEY, Msgs: []string{err.Error()}}
 		return response, err
 	}
 
@@ -78,7 +79,7 @@ func IsValidProofOfRepresentation(
 		if err == nil {
 			err = errors.New("agent address and public key don't match")
 		}
-		response := &Status{Code: Status_ERROR_WRONG_AGENT_ADDRESS}
+		response := &acn.Status{Code: acn.Status_ERROR_WRONG_AGENT_ADDRESS}
 		return response, err
 	}
 
@@ -93,13 +94,13 @@ func IsValidProofOfRepresentation(
 		if err == nil {
 			err = errors.New("signature is not valid")
 		}
-		response := &Status{Code: Status_ERROR_INVALID_PROOF}
+		response := &acn.Status{Code: acn.Status_ERROR_INVALID_PROOF}
 		return response, err
 
 	}
 
 	// PoR is valid
-	response := &Status{Code: Status_SUCCESS}
+	response := &acn.Status{Code: acn.Status_SUCCESS}
 	return response, nil
 
 }
