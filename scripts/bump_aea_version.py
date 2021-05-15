@@ -382,7 +382,7 @@ def parse_args() -> argparse.Namespace:
 
     parser = argparse.ArgumentParser("bump_aea_version")
     parser.add_argument(
-        "--new-version", type=str, required=True, help="The new AEA version."
+        "--new-version", type=str, required=False, help="The new AEA version."
     )
     parser.add_argument(
         "-p",
@@ -392,9 +392,50 @@ def parse_args() -> argparse.Namespace:
         help="Set a number of key-value pairs plugin-name=new-plugin-version",
         default={},
     )
-    parser.add_argument("--no-fingerprints", action="store_true")
+    parser.add_argument(
+        "--no-fingerprints",
+        action="store_true",
+        help="Skip the recomputation of fingerprints.",
+    )
+    parser.add_argument(
+        "--only-check", action="store_true", help="Only check the need of upgrade."
+    )
     arguments_ = parser.parse_args()
     return arguments_
+
+
+def make_aea_bumper(new_aea_version: Version) -> PythonPackageVersionBumper:
+    """Build the AEA Python package version bumper."""
+    aea_version_bumper = PythonPackageVersionBumper(
+        ROOT_DIR,
+        AEA_DIR,
+        new_aea_version,
+        specifier_set_patterns=[
+            "(?<=aea_version:) *({specifier_set})",
+            "(?<={package_name})({specifier_set})",
+        ],
+        files_to_pattern=AEA_PATHS,
+    )
+    return aea_version_bumper
+
+
+def make_plugin_bumper(
+    plugin_dir: Path, new_version: Version
+) -> PythonPackageVersionBumper:
+    """Build the plugin Python package version bumper."""
+    plugin_package_dir = plugin_dir / plugin_dir.name.replace("-", "_")
+    plugin_version_bumper = PythonPackageVersionBumper(
+        ROOT_DIR,
+        plugin_package_dir,
+        new_version,
+        files_to_pattern={},
+        specifier_set_patterns=[
+            YAML_DEPENDENCY_SPECIFIER_SET_PATTERN,
+            JSON_DEPENDENCY_SPECIFIER_SET_PATTERN,
+        ],
+        package_name=plugin_dir.name,
+    )
+    return plugin_version_bumper
 
 
 def process_plugins(new_versions: Dict[str, Version]) -> bool:
@@ -411,18 +452,7 @@ def process_plugins(new_versions: Dict[str, Version]) -> bool:
         logging.info(
             f"Processing {plugin_dir_name}: upgrading at version {new_version}"
         )
-        plugin_package_dir = plugin_dir / plugin_dir.name.replace("-", "_")
-        plugin_bumper = PythonPackageVersionBumper(
-            ROOT_DIR,
-            plugin_package_dir,
-            new_version,
-            files_to_pattern={},
-            specifier_set_patterns=[
-                YAML_DEPENDENCY_SPECIFIER_SET_PATTERN,
-                JSON_DEPENDENCY_SPECIFIER_SET_PATTERN,
-            ],
-            package_name=plugin_dir.name,
-        )
+        plugin_bumper = make_plugin_bumper(plugin_dir, new_version)
         plugin_bumper.run()
         result |= plugin_bumper.result
     return result
@@ -438,33 +468,58 @@ def parse_plugin_versions(key_value_strings: List[str]) -> Dict[str, Version]:
     }
 
 
-if __name__ == "__main__":
-    arguments = parse_args()
+def only_check_bump_needed() -> int:
+    """
+    Check whether a version bump is needed for AEA and plugins.
+
+    :return: the return code
+    """
+    bumpers: List[PythonPackageVersionBumper] = list()
+    to_upgrade: List[Path] = list()
+    bumpers.append(make_aea_bumper(None))  # type: ignore
+    for plugin_dir in ALL_PLUGINS:
+        bumpers.append(make_plugin_bumper(plugin_dir, None))  # type: ignore
+
+    latest_tag = str(bumpers[0].repo.tags[-1])
+    logging.info(
+        f"Checking packages that have changes from tag {latest_tag} and that require a new release..."
+    )
+    for bumper in bumpers:
+        if bumper.is_different_from_latest_tag():
+            logging.info(
+                f"Package {bumper.python_pkg_dir} is different from latest tag {latest_tag}."
+            )
+            to_upgrade.append(bumper.python_pkg_dir)
+
+    if len(to_upgrade) > 0:
+        logging.info("Packages to upgrade:")
+        for path in to_upgrade:
+            logging.info(path)
+    else:
+        logging.info("No packages to upgrade.")
+    return 0
+
+
+def bump(arguments: argparse.Namespace) -> int:
+    """
+    Bump versions.
+
+    :param arguments: arguments from argparse
+    :return: the return code
+    """
     new_plugin_versions = parse_plugin_versions(arguments.plugin_new_version)
     logging.info(f"Parsed arguments: {arguments}")
     logging.info(f"Parsed plugin versions: {new_plugin_versions}")
 
-    repo = Repo(str(ROOT_DIR))
-    if repo.is_dirty():
-        logging.info(
-            "Repository is dirty. Please clean it up before running this script."
-        )
-        sys.exit(1)
-
-    new_aea_version = Version(arguments.new_version)
-    aea_version_bumper = PythonPackageVersionBumper(
-        ROOT_DIR,
-        AEA_DIR,
-        new_aea_version,
-        specifier_set_patterns=[
-            "(?<=aea_version:) *({specifier_set})",
-            "(?<={package_name})({specifier_set})",
-        ],
-        files_to_pattern=AEA_PATHS,
-    )
-    aea_version_bumper.run()
-    have_updated_specifier_set = aea_version_bumper.result
-    logging.info("AEA package processed.")
+    have_updated_specifier_set = False
+    if arguments.new_version is not None:
+        new_aea_version = Version(arguments.new_version)
+        aea_version_bumper = make_aea_bumper(new_aea_version)
+        aea_version_bumper.run()
+        have_updated_specifier_set = aea_version_bumper.result
+        logging.info("AEA package processed.")
+    else:
+        logging.info("AEA package not processed - no version provided.")
 
     logging.info("Processing plugins:")
     have_updated_specifier_set |= process_plugins(new_plugin_versions)
@@ -482,4 +537,25 @@ if __name__ == "__main__":
     else:
         logging.info("Updating hashes and fingerprints.")
         return_code = update_hashes()
+    return return_code
+
+
+def main() -> None:
+    """Run the script."""
+    repo = Repo(str(ROOT_DIR))
+    if repo.is_dirty():
+        logging.info(
+            "Repository is dirty. Please clean it up before running this script."
+        )
+        sys.exit(1)
+
+    arguments = parse_args()
+    if arguments.only_check:
+        sys.exit(only_check_bump_needed())
+
+    return_code = bump(arguments)
     sys.exit(return_code)
+
+
+if __name__ == "__main__":
+    main()
