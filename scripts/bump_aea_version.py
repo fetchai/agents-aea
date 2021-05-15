@@ -372,7 +372,7 @@ class PythonPackageVersionBumper:
         assert len(self.repo.tags) > 0, "no git tags found"
         latest_tag_str = str(self.repo.tags[-1])
         args = latest_tag_str, "--", str(self.python_pkg_dir)
-        logging.info(f"Running 'git diff with args: {args}'")
+        logging.info(f"Running 'git diff {' '.join(args)}'")
         diff = self.repo.git.diff(*args)
         return diff != ""
 
