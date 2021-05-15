@@ -21,8 +21,9 @@
 """
 Bump the AEA version throughout the code base.
 
-usage: bump_aea_version [-h] --new-version NEW_VERSION
+usage: bump_aea_version [-h] [--new-version NEW_VERSION]
                         [-p KEY=VALUE [KEY=VALUE ...]] [--no-fingerprints]
+                        [--only-check]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -31,11 +32,14 @@ optional arguments:
   -p KEY=VALUE [KEY=VALUE ...], --plugin-new-version KEY=VALUE [KEY=VALUE ...]
                         Set a number of key-value pairs plugin-name=new-
                         plugin-version
-  --no-fingerprints
+  --no-fingerprints     Skip the computation of fingerprints.
+  --only-check          Only check the need of upgrade.
+
 
 Example of usage:
 
 python scripts/bump_aea_version.py --new-version 1.1.0 -p aea-ledger-fetchai=2.0.0 -p aea-ledger-ethereum=3.0.0
+python scripts/bump_aea_version.py --only-check
 """
 
 import argparse
@@ -395,7 +399,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--no-fingerprints",
         action="store_true",
-        help="Skip the recomputation of fingerprints.",
+        help="Skip the computation of fingerprints.",
     )
     parser.add_argument(
         "--only-check", action="store_true", help="Only check the need of upgrade."
