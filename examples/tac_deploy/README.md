@@ -25,7 +25,7 @@ docker run --env-file .env -v "$(pwd)/data:/data" -ti tac-deploy
 
 ## Run in the cloud (here using GCloud)
 
-GCloud should be configured first!
+GCloud should be [configured](https://cloud.google.com/sdk/docs/initializing) first!
 
 ### Push image
 
