@@ -105,11 +105,11 @@ The following steps assume you have launched the AEA Manager Desktop app.
 
 3. Add another new AEA called `participant_2` with public id `fetchai/tac_participant:0.28.0`.
 
-4. Navigate to the settings of `controller` and under `components > skills/fetchai/tac_controller:0.22.0 > models > parameters > args` update `registration_start_time` to the time you want TAC to begin (e.g. 2 minutes in the future)
+4. Navigate to the settings of `controller` and under `components > skill >` `fetchai/fetchai/tac_controller:0.22.0` `> models > parameters > args` update `registration_start_time` to the time you want TAC to begin (e.g. 2 minutes in the future)
 
 5. Run the `controller` AEA. Navigate to its logs and copy the multiaddress displayed. Stop the `controller`.
 
-5. Navigate to the settings of `participant_1` and under `components > connections/fetchai/p2p_libp2p:0.22.0` update as follows (make sure to replace the placeholder with the multiaddress):
+5. Navigate to the settings of `participant_1` and under `components > connection >` `fetchai/p2p_libp2p:0.22.0` update as follows (make sure to replace the placeholder with the multiaddress):
 ``` bash
 {
   "delegate_uri": "127.0.0.1:11001",
@@ -120,7 +120,7 @@ The following steps assume you have launched the AEA Manager Desktop app.
 }
 ```
 
-6. Navigate to the settings of `participant_2` and under `components > connections/fetchai/p2p_libp2p:0.22.0` update as follows (make sure to replace the placeholder with the multiaddress):
+6. Navigate to the settings of `participant_2` and under `components > connection >` `fetchai/p2p_libp2p:0.22.0` update as follows (make sure to replace the placeholder with the multiaddress):
 ``` bash
 {
   "delegate_uri": "127.0.0.1:11002",

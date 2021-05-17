@@ -65,7 +65,7 @@ The following steps assume you have launched the AEA Manager Desktop app.
 
 4. Run the `car_detector` AEA. Navigate to its logs and copy the multiaddress displayed.
 
-5. Navigate to the settings of the `car_data_buyer` and under `components > connections/fetchai/p2p_libp2p:0.22.0` update as follows (make sure to replace the placeholder with the multiaddress):
+5. Navigate to the settings of the `car_data_buyer` and under `components > connection >` `fetchai/p2p_libp2p:0.22.0` update as follows (make sure to replace the placeholder with the multiaddress):
 ``` bash
 {
   "delegate_uri": "127.0.0.1:11001",
