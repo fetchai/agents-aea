@@ -63,7 +63,7 @@ The following steps assume you have launched the AEA Manager Desktop app.
 
 4. Run the `my_thermometer_aea` AEA. Navigate to its logs and copy the multiaddress displayed.
 
-5. Navigate to the settings of the `my_thermometer_client` and under `components > connections/fetchai/p2p_libp2p:0.22.0` update as follows:
+5. Navigate to the settings of the `my_thermometer_client` and under `components > connections/fetchai/p2p_libp2p:0.22.0` update as follows (make sure to replace the placeholder with the multiaddress):
 ``` bash
 {
   "delegate_uri": "127.0.0.1:11001",
@@ -76,7 +76,7 @@ The following steps assume you have launched the AEA Manager Desktop app.
 
 6. Run the `my_thermometer_client`.
 
-In the AEA's logs should see the agent trading successfully.
+In the AEA's logs, you should see the agent trading successfully.
 <br>
 
 ## Option 2: CLI approach
