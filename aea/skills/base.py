@@ -900,15 +900,19 @@ class _SkillComponentLoader:
         - the class must be a subclass of "SkillComponent";
         - its __module__ attribute must not start with 'aea.' (we exclude classes provided by the framework)
         - its __module__ attribute starts with the expected dotted path of this skill.
+            In particular, it should not be imported from another skill.
 
         :param classes: a list of pairs (class name, class object)
         :return: a list of the same kind, but filtered with only skill component classes.
         """
         filtered_classes = filter(
             lambda name_and_class: issubclass(name_and_class[1], SkillComponent)
+            # the following condition filters out classes imported from 'aea'
             and not str.startswith(name_and_class[1].__module__, "aea.")
+            # the following condition filters out classes imported
+            # from other skills
             and not str.startswith(
-                name_and_class[1].__module__, self.skill_dotted_path
+                name_and_class[1].__module__, self.skill_dotted_path + "."
             ),
             classes,
         )
@@ -1142,6 +1146,14 @@ class _SkillComponentLoader:
             set_of_unused_classes = set(
                 filter(lambda x: x not in used_classes, set_of_classes)
             )
+            # filter out classes that are from other packages
+            set_of_unused_classes = set(
+                filter(
+                    lambda x: not str.startswith(x.__module__, "packages."),
+                    set_of_unused_classes,
+                )
+            )
+
             if len(set_of_unused_classes) == 0:
                 # all classes in the module are used!
                 continue
