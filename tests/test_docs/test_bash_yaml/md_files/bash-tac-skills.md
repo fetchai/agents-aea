@@ -1,4 +1,22 @@
 ``` bash
+{
+  "delegate_uri": "127.0.0.1:11001",
+  "entry_peers": ["REPLACE_WITH_MULTI_ADDRESS_HERE"],
+  "local_uri": "127.0.0.1:9001",
+  "log_file": "libp2p_node.log",
+  "public_uri": "127.0.0.1:9001"
+}
+```
+``` bash
+{
+  "delegate_uri": "127.0.0.1:11002",
+  "entry_peers": ["REPLACE_WITH_MULTI_ADDRESS_HERE"],
+  "local_uri": "127.0.0.1:9002",
+  "log_file": "libp2p_node.log",
+  "public_uri": "127.0.0.1:9002"
+}
+```
+``` bash
 aea fetch fetchai/tac_controller:0.27.0
 cd tac_controller
 aea install

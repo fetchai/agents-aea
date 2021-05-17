@@ -1,4 +1,13 @@
 ``` bash
+{
+  "delegate_uri": "127.0.0.1:11001",
+  "entry_peers": ["REPLACE_WITH_MULTI_ADDRESS_HERE"],
+  "local_uri": "127.0.0.1:9001",
+  "log_file": "libp2p_node.log",
+  "public_uri": "127.0.0.1:9001"
+}
+```
+``` bash
 aea fetch fetchai/ml_data_provider:0.29.0
 cd ml_data_provider
 aea install
