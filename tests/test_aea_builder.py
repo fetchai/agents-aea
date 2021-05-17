@@ -602,15 +602,11 @@ def test_load_abstract_component():
     builder.add_private_key("fetchai")
 
     builder.add_component(ComponentType.SKILL, dummy_skill_path)
-    with mock.patch(
-        "aea.aea_builder.load_aea_package", return_value=True
-    ), mock.patch.object(
+    with mock.patch("aea.aea_builder.load_aea_package"), mock.patch.object(
         builder,
         "_overwrite_custom_configuration",
         return_value=Mock(is_abstract_component=True),
-    ), mock.patch.object(
-        builder.logger, "info"
-    ) as mock_logger:
+    ), mock.patch.object(builder.logger, "info") as mock_logger:
         builder._load_and_add_components(
             ComponentType.SKILL,
             resources,
