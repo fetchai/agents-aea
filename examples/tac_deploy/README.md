@@ -4,14 +4,16 @@ The TAC deployment deploys one controller and `n` tac participants.
 
 ### Build the image
 
-To build the image:
+First, ensure the specifications in `.env` match your requirements.
+
+Then, to build the image run:
 ``` bash
 docker build -t tac-deploy -f Dockerfile . --no-cache
 ```
 
 ## Run locally
 
-Add preferred amount of tac participants agents to `.env` file:
+Specify preferred amount of tac participants agents in `.env` file, e.g.:
 ```
 PARTICIPANTS_AMOUNT=5
 ```
@@ -21,7 +23,7 @@ Run:
 docker run --env-file .env -v "$(pwd)/data:/data" -ti tac-deploy
 ```
 
-## Run in the cloud
+## Run in the cloud (here using GCloud)
 
 GCloud should be configured first!
 
@@ -29,12 +31,12 @@ GCloud should be configured first!
 
 Tag the image first with the latest tag:
 ``` bash
-docker image tag tac-deploy gcr.io/fetch-ai-sandbox/tac_deploy:0.0.13
+docker image tag tac-deploy gcr.io/fetch-ai-sandbox/tac_deploy:0.0.14
 ```
 
 Push it to remote repo:
 ``` bash
-docker push gcr.io/fetch-ai-sandbox/tac_deploy:0.0.13
+docker push gcr.io/fetch-ai-sandbox/tac_deploy:0.0.14
 ```
 
 ### Run it manually
@@ -67,7 +69,7 @@ find . -name \*.txt -type f -delete
 
 First, push the latest image, as per above.
 
-Second, update the `tac-deployment.yaml` file and then run:
+Second, update the `tac-deployment.yaml` file with the correct image tag and configurations and then run:
 ``` bash
 kubectl apply -f ./tac-deployment.yaml
 ```

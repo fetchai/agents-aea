@@ -18,7 +18,7 @@ spec:
         kubernetes.io/os: linux
       containers:
       - name: tac-deploy-container
-        image: gcr.io/fetch-ai-sandbox/tac_deploy:0.0.13
+        image: gcr.io/fetch-ai-sandbox/tac_deploy:0.0.14
         resources:
           requests:
             memory: "12000000Ki"
