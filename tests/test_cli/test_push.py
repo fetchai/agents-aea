@@ -90,9 +90,10 @@ class TestPushLocally(AEATestCaseEmpty):
     def test_fail_no_item(
         self, *mocks,
     ):
-        """Test fail, item_noit_exists ."""
+        """Test fail, item_not_exists ."""
         with pytest.raises(
-            ClickException, match='Item "not_exists" not found in source folder.'
+            ClickException,
+            match='Item "fetchai/not_exists" not found in source folder "./vendor/fetchai/skills/not_exists".',
         ):
             self.invoke("push", "--local", "skill", "fetchai/not_exists")
 
