@@ -87,6 +87,60 @@ In the above case, the proposal received contains a set of good which the seller
 
 There is an equivalent diagram for seller AEAs set up to search for buyers and their interaction with AEAs which are registered as buyers. In that scenario, the proposal will instead, be a list of goods that the buyer wishes to buy and the price it is willing to pay for them.   
 
+## Option 1: AEA Manager approach
+
+Follow this approach when using the AEA Manager Desktop app. Otherwise, skip and follow the CLI approach below. 
+
+### Preparation instructions
+
+Install the <a href="https://aea-manager.fetch.ai" target="_blank">AEA Manager</a>.
+
+### Demo instructions
+
+The following steps assume you have launched the AEA Manager Desktop app.
+
+1. Add a new AEA called `controller` with public id `fetchai/tac_controller:0.26.0`.
+
+2. Add another new AEA called `participant_1` with public id `fetchai/tac_participant:0.28.0`.
+
+3. Add another new AEA called `participant_2` with public id `fetchai/tac_participant:0.28.0`.
+
+4. Navigate to the settings of `controller` and under `components > skills/fetchai/tac_controller:0.22.0 > models > parameters > args` update `registration_start_time` to the time you want TAC to begin (e.g. 2 minutes in the future)
+
+5. Run the `controller` AEA. Navigate to its logs and copy the multiaddress displayed. Stop the `controller`.
+
+5. Navigate to the settings of `participant_1` and under `components > connections/fetchai/p2p_libp2p:0.22.0` update as follows:
+``` bash
+{
+  "delegate_uri": "127.0.0.1:11001",
+  "entry_peers": ["REPLACE_WITH_MULTI_ADDRESS_HERE"],
+  "local_uri": "127.0.0.1:9001",
+  "log_file": "libp2p_node.log",
+  "public_uri": "127.0.0.1:9001"
+}
+```
+
+6. Navigate to the settings of `participant_2` and under `components > connections/fetchai/p2p_libp2p:0.22.0` update as follows:
+``` bash
+{
+  "delegate_uri": "127.0.0.1:11002",
+  "entry_peers": ["REPLACE_WITH_MULTI_ADDRESS_HERE"],
+  "local_uri": "127.0.0.1:9002",
+  "log_file": "libp2p_node.log",
+  "public_uri": "127.0.0.1:9002"
+}
+```
+
+7. You may add more participants by repeating steps 3 (with an updated name) and 6 (bumping the port numbers. See the difference between steps 5 and 6). 
+
+8. Run the `controller`, then `participant_1` and `participant_2` (and any other participants you added).
+
+In the `controller`'s log, you should see the details of the transactions participants submit as well as changes in their scores and holdings. In participants' logs, you should see the agents trading.
+<br>
+
+## Option 2: CLI approach
+
+Follow this approach when using the `aea` CLI.
 
 ## Preparation instructions
 
