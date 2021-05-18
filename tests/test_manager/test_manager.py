@@ -547,7 +547,7 @@ class TestMultiAgentManagerAsyncModeWithPassword(
 ):  # pylint: disable=unused-argument,protected-access,attribute-defined-outside-init
     """Tests for MultiAgentManager in async mode, with password."""
 
-    PASSWORD = "password"
+    PASSWORD = "password"  # nosec
 
 
 class TestMultiAgentManagerThreadedMode(BaseTestMultiAgentManager):
@@ -560,7 +560,7 @@ class TestMultiAgentManagerThreadedModeWithPassword(BaseTestMultiAgentManager):
     """Tests for MultiAgentManager in threaded mode, with password."""
 
     MODE = "threaded"
-    PASSWORD = "password"
+    PASSWORD = "password"  # nosec
 
 
 def test_project_auto_added_removed():
