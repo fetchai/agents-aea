@@ -234,7 +234,7 @@ async def test_reconnect_on_send_fail():
         con._node_client = Mock()
         f = Future()
         f.set_exception(Exception("oops"))
-        con._node_client.send_envelope.return_value = f
+        con._node_client.send_envelope.side_effect = Exception("oops")
         # test reconnect on send fails
         with patch.object(
             con, "_perform_connection_to_node", return_value=done_future
@@ -242,5 +242,5 @@ async def test_reconnect_on_send_fail():
             con, "_ensure_valid_envelope_for_external_comms"
         ):
             with pytest.raises(Exception, match="oops"):
-                await con.send(Mock())
+                await con._send_envelope_with_node_client(Mock())
             connect_mock.assert_called()

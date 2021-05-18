@@ -365,11 +365,8 @@ func UnmarshalEnvelope(buf []byte) (*Envelope, error) {
 func (aea *AeaApi) listenForEnvelopes() {
 	//TOFIX(LR) add an exit strategy
 	for {
-		envel, err := aea.ReceiveEnvelope()
-		if envel == nil {
-			// ACN STATUS MSG
-			continue
-		}
+		envel, err := HandleAcnMessageFromPipe(aea.pipe, aea, aea.AeaAddress())
+
 		if err != nil {
 			logger.Error().Str("err", err.Error()).Msg("while receiving envelope")
 			logger.Info().Msg("disconnecting")
@@ -378,6 +375,10 @@ func (aea *AeaApi) listenForEnvelopes() {
 				aea.stop()
 			}
 			return
+		}
+		if envel == nil {
+			// ACN STATUS MSG
+			continue
 		}
 		if envel.Sender != aea.agent_record.Address {
 			logger.Error().
@@ -461,6 +462,11 @@ func (aea AeaApi) SendEnvelope(envelope *Envelope) error {
 	return err
 }
 
+func (aea AeaApi) AddACNStatusMessage(status *acn.Status, counterpartyID string) {
+	aea.acn_status_chan <- status
+	logger.Info().Msgf("chan len is %d", len(aea.acn_status_chan))
+}
+
 func (aea AeaApi) ReceiveEnvelope() (*Envelope, error) {
 	envelope := &Envelope{}
 	var acn_err error
@@ -482,7 +488,8 @@ func (aea AeaApi) ReceiveEnvelope() (*Envelope, error) {
 	}
 
 	switch msg_type {
-		case "aea_envelope":{
+	case "aea_envelope":
+		{
 			err = proto.Unmarshal(acn_envelope.Envel, envelope)
 			if err != nil {
 				logger.Error().Str("err", err.Error()).Msg("while decoding envelope")
@@ -494,21 +501,23 @@ func (aea AeaApi) ReceiveEnvelope() (*Envelope, error) {
 			}
 			err = acn.SendAcnSuccess(aea.pipe)
 			return envelope, err
-		
+
 		}
-		case "status": {
+	case "status":
+		{
 			logger.Info().Msgf("acn status %d", status.Code)
 			aea.acn_status_chan <- status
 			logger.Info().Msgf("chan len is %d", len(aea.acn_status_chan))
 			return nil, nil
 
 		}
-		default:{
+	default:
+		{
 			acn_err = acn.SendAcnError(aea.pipe, "BAD ACN MESSAGE")
 			if acn_err != nil {
 				logger.Error().Str("err", err.Error()).Msg("on acn send error")
 			}
 			return nil, errors.New("bad ACN message!")
-		}	
+		}
 	}
 }

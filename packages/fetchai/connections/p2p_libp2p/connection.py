@@ -947,7 +947,7 @@ class P2PLibp2pConnection(Connection):
             self.logger.exception(
                 f"Failed to send an aenvelope {envelope}. Stop connection."
             )
-            await self.disconnect()
+            await asyncio.shield(self.disconnect())
 
     async def send(self, envelope: Envelope) -> None:
         """

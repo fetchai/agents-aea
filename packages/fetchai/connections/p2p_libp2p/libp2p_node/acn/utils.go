@@ -39,13 +39,6 @@ var logger zerolog.Logger = zerolog.New(zerolog.ConsoleWriter{
 
 const CurrentVersion = "0.1.0"
 
-type Pipe interface {
-	Connect() error
-	Read() ([]byte, error)
-	Write(data []byte) error
-	Close() error
-}
-
 func DecodeACNMessage(buf []byte) (string, *AeaEnvelope, *Status, error) {
 	response := &AcnMessage{}
 	err := proto.Unmarshal(buf, response)
@@ -129,4 +122,15 @@ func EncodeACNEnvelope(envelope_bytes []byte) (error, []byte) {
 	}
 	buf, err := proto.Marshal(msg)
 	return err, buf
+}
+
+type Pipe interface {
+	Connect() error
+	Read() ([]byte, error)
+	Write(data []byte) error
+	Close() error
+}
+
+type StatusQueue interface {
+	AddACNStatusMessage(status *Status, counterpartyID string)
 }

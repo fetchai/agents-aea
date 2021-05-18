@@ -1,7 +1,7 @@
 /* -*- coding: utf-8 -*-
 * ------------------------------------------------------------------------------
 *
-*   Copyright 2018-2019 Fetch.AI Limited
+*   Copyright 2018-2021 Fetch.AI Limited
 *
 *   Licensed under the Apache License, Version 2.0 (the "License");
 *   you may not use this file except in compliance with the License.
@@ -39,19 +39,13 @@ var logger zerolog.Logger = zerolog.New(zerolog.ConsoleWriter{
 
 const CurrentVersion = "0.1.0"
 
-type Pipe interface {
-	Connect() error
-	Read() ([]byte, error)
-	Write(data []byte) error
-	Close() error
-}
-
-func DecodeACNMessage(buf []byte) (error, *AeaEnvelope, *Status) {
+func DecodeACNMessage(buf []byte) (string, *AeaEnvelope, *Status, error) {
 	response := &AcnMessage{}
 	err := proto.Unmarshal(buf, response)
+	msg_type := ""
 	if err != nil {
 		logger.Error().Str("err", err.Error()).Msgf("while decoding acn message")
-		return err, nil, nil
+		return msg_type, nil, nil, err
 	}
 	// response is either a LookupResponse or Status
 	var aeaEnvelope *AeaEnvelope = nil
@@ -60,14 +54,16 @@ func DecodeACNMessage(buf []byte) (error, *AeaEnvelope, *Status) {
 	switch pl := response.Payload.(type) {
 	case *AcnMessage_AeaEnvelope:
 		aeaEnvelope = pl.AeaEnvelope
+		msg_type = "aea_envelope"
 	case *AcnMessage_Status:
 		status = pl.Status
+		msg_type = "status"
 	default:
-		logger.Error().Str("err", err.Error()).Msgf("Unexpected Acn Message")
-		err = errors.New("Unexpected Acn Message")
-		return err, nil, nil
+		logger.Error().Str("err", err.Error()).Msgf("unexpected ACN Message")
+		err = errors.New("unexpected ACN Message")
+		return msg_type, nil, nil, err
 	}
-	return nil, aeaEnvelope, status
+	return msg_type, aeaEnvelope, status, err
 }
 
 func WaitForStatus(ch chan *Status, timeout time.Duration) (*Status, error) {
@@ -88,12 +84,12 @@ func SendAcnSuccess(pipe Pipe) error {
 	}
 	buf, err := proto.Marshal(msg)
 	if err != nil {
-		logger.Error().Str("err", err.Error()).Msgf("Error on encoding acn status message")
+		logger.Error().Str("err", err.Error()).Msgf("error on encoding acn status message")
 		return err
 	}
 	err = pipe.Write(buf)
 	if err != nil {
-		logger.Error().Str("err", err.Error()).Msgf("Error on sending acn status message")
+		logger.Error().Str("err", err.Error()).Msgf("error on sending acn status message")
 
 	}
 	return err
@@ -107,12 +103,12 @@ func SendAcnError(pipe Pipe, error_msg string) error {
 	}
 	buf, err := proto.Marshal(msg)
 	if err != nil {
-		logger.Error().Str("err", err.Error()).Msgf("Error on encoding acn status message")
+		logger.Error().Str("err", err.Error()).Msgf("error on encoding acn status message")
 		return err
 	}
 	err = pipe.Write(buf)
 	if err != nil {
-		logger.Error().Str("err", err.Error()).Msgf("Error on sending acn status message")
+		logger.Error().Str("err", err.Error()).Msgf("error on sending acn status message")
 
 	}
 	return err
@@ -126,4 +122,15 @@ func EncodeACNEnvelope(envelope_bytes []byte) (error, []byte) {
 	}
 	buf, err := proto.Marshal(msg)
 	return err, buf
+}
+
+type Pipe interface {
+	Connect() error
+	Read() ([]byte, error)
+	Write(data []byte) error
+	Close() error
+}
+
+type StatusQueue interface {
+	AddACNStatusMessage(status *Status, counterpartyID string)
 }

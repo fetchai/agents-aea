@@ -48,7 +48,7 @@ from tests.conftest import (
 DEFAULT_PORT = 10234
 DEFAULT_DELEGATE_PORT = 11234
 DEFAULT_HOST = "127.0.0.1"
-DEFAULT_CLIENTS_PER_NODE = 4
+DEFAULT_CLIENTS_PER_NODE = 1
 
 MockDefaultMessageProtocol = Mock()
 MockDefaultMessageProtocol.protocol_id = DefaultMessage.protocol_id
@@ -563,6 +563,8 @@ class TestLibp2pClientConnectionRouting:
 
                     mux.connect()
                     cls.multiplexers.append(mux)
+                break
+
         except Exception:
             cls.teardown_class()
             raise
@@ -581,7 +583,6 @@ class TestLibp2pClientConnectionRouting:
             performative=DefaultMessage.Performative.BYTES,
             content=b"hello",
         )
-
         for source in range(len(self.multiplexers)):
             for destination in range(len(self.multiplexers)):
                 if destination == source:
@@ -597,7 +598,6 @@ class TestLibp2pClientConnectionRouting:
                 delivered_envelope = self.multiplexers[destination].get(
                     block=True, timeout=10
                 )
-
                 assert delivered_envelope is not None
                 assert delivered_envelope.to == envelope.to
                 assert delivered_envelope.sender == envelope.sender
@@ -835,6 +835,6 @@ async def test_nodeclient_pipe_connect():
     f.set_result(None)
     pipe = Mock()
     pipe.connect.return_value = f
-    node_client = NodeClient(pipe)
+    node_client = NodeClient(pipe, Mock())
     await node_client.connect()
     pipe.connect.assert_called_once()
