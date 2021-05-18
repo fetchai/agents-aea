@@ -606,7 +606,7 @@ def test_load_abstract_component():
         builder,
         "_overwrite_custom_configuration",
         return_value=Mock(is_abstract_component=True),
-    ), mock.patch.object(builder.logger, "info") as mock_logger:
+    ), mock.patch.object(builder.logger, "debug") as mock_logger:
         builder._load_and_add_components(
             ComponentType.SKILL,
             resources,
