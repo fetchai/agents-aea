@@ -20,6 +20,7 @@
 import asyncio
 import os
 import re
+import sys
 from contextlib import suppress
 from pathlib import Path
 from shutil import rmtree
@@ -44,12 +45,11 @@ from tests.conftest import MY_FIRST_AEA_PUBLIC_ID, PACKAGES_DIR, ROOT_DIR
 
 
 @patch("aea.aea_builder.AEABuilder.install_pypi_dependencies")
-class TestMultiAgentManagerAsyncMode(
-    TestCase
-):  # pylint: disable=unused-argument,protected-access,attribute-defined-outside-init
-    """Tests for MultiAgentManager in async mode."""
+class BaseTestMultiAgentManager(TestCase):
+    """Base test class for multi-agent manager"""
 
     MODE = "async"
+    PASSWORD = None
 
     echo_skill_id = ECHO_SKILL_PUBLIC_ID
 
@@ -62,7 +62,9 @@ class TestMultiAgentManagerAsyncMode(
             self.working_dir, self.project_public_id.author, self.project_public_id.name
         )
         assert not os.path.exists(self.working_dir)
-        self.manager = MultiAgentManager(self.working_dir, mode=self.MODE)
+        self.manager = MultiAgentManager(
+            self.working_dir, mode=self.MODE, password=self.PASSWORD
+        )
 
     def tearDown(self):
         """Tear down test case."""
@@ -73,10 +75,14 @@ class TestMultiAgentManagerAsyncMode(
     def test_plugin_dependencies(self, *args):
         """Test plugin installed and loaded as a depencndecy."""
         plugin_path = str(Path(ROOT_DIR) / "plugins" / "aea-ledger-fetchai")
-        install_cmd = f"pip install --no-deps {plugin_path}".split(" ")
+        install_cmd = f"{sys.executable} -m pip install --no-deps {plugin_path}".split(
+            " "
+        )
         try:
             self.manager.start_manager()
-            run_install_subprocess("pip uninstall aea-ledger-fetchai -y".split(" "))
+            run_install_subprocess(
+                f"{sys.executable} -m pip uninstall aea-ledger-fetchai -y".split(" ")
+            )
             from aea.crypto.registries import ledger_apis_registry
 
             ledger_apis_registry.specs.pop("fetchai", None)
@@ -98,7 +104,9 @@ class TestMultiAgentManagerAsyncMode(
 
             assert "fetchai" in ledger_apis_registry.specs
         finally:
-            run_install_subprocess("pip uninstall aea-ledger-fetchai -y".split(" "))
+            run_install_subprocess(
+                f"{sys.executable} -m pip uninstall aea-ledger-fetchai -y".split(" ")
+            )
             run_install_subprocess(install_cmd)
 
     def test_workdir_created_removed(self, *args):
@@ -457,7 +465,7 @@ class TestMultiAgentManagerAsyncMode(
         assert not os.path.exists(cert_filename)
 
         priv_key_path = os.path.abspath(os.path.join(self.working_dir, "priv_key.txt"))
-        create_private_key("fetchai", priv_key_path)
+        create_private_key("fetchai", priv_key_path, password=self.PASSWORD)
         assert os.path.exists(priv_key_path)
 
         component_overrides = [
@@ -528,10 +536,31 @@ class TestMultiAgentManagerAsyncMode(
         assert len(agent_alias.get_connections_addresses()) == 1
 
 
-class TestMultiAgentManagerThreadedMode(TestMultiAgentManagerAsyncMode):
+class TestMultiAgentManagerAsyncMode(
+    BaseTestMultiAgentManager
+):  # pylint: disable=unused-argument,protected-access,attribute-defined-outside-init
+    """Tests for MultiAgentManager in async mode."""
+
+
+class TestMultiAgentManagerAsyncModeWithPassword(
+    BaseTestMultiAgentManager
+):  # pylint: disable=unused-argument,protected-access,attribute-defined-outside-init
+    """Tests for MultiAgentManager in async mode, with password."""
+
+    PASSWORD = "password"
+
+
+class TestMultiAgentManagerThreadedMode(BaseTestMultiAgentManager):
     """Tests for MultiAgentManager in threaded mode."""
 
     MODE = "threaded"
+
+
+class TestMultiAgentManagerThreadedModeWithPassword(BaseTestMultiAgentManager):
+    """Tests for MultiAgentManager in threaded mode, with password."""
+
+    MODE = "threaded"
+    PASSWORD = "password"
 
 
 def test_project_auto_added_removed():
