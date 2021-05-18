@@ -23,7 +23,6 @@ import os
 import shutil
 import tempfile
 from pathlib import Path
-from typing import List, Optional
 
 from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_fetchai import FetchAICrypto
@@ -51,40 +50,34 @@ class TestGenerateKey:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-    def _append_password_option_if_not_none(
-        self, args, password: Optional[str]
-    ) -> List:
-        """Append '--password' option if not None."""
-        if password is None:
-            return args
-        return args + ["--password", password]
-
-    def test_fetchai(self, password):
+    def test_fetchai(self, password_or_none):
         """Test that the fetch private key is created correctly."""
-        args = [*CLI_LOG_OPTION, "generate-key", FetchAICrypto.identifier]
-        args = self._append_password_option_if_not_none(args, password)
+        args = [*CLI_LOG_OPTION, "generate-key", FetchAICrypto.identifier] + (
+            ["--password", password_or_none] if password_or_none is not None else []
+        )
         result = self.runner.invoke(cli, args)
         assert result.exit_code == 0
         assert Path(FETCHAI_PRIVATE_KEY_FILE).exists()
         make_crypto(
             FetchAICrypto.identifier,
             private_key_path=FETCHAI_PRIVATE_KEY_FILE,
-            password=password,
+            password=password_or_none,
         )
 
         Path(FETCHAI_PRIVATE_KEY_FILE).unlink()
 
-    def test_ethereum(self, password):
+    def test_ethereum(self, password_or_none):
         """Test that the fetch private key is created correctly."""
-        args = [*CLI_LOG_OPTION, "generate-key", EthereumCrypto.identifier]
-        args = self._append_password_option_if_not_none(args, password)
+        args = [*CLI_LOG_OPTION, "generate-key", EthereumCrypto.identifier] + (
+            ["--password", password_or_none] if password_or_none is not None else []
+        )
         result = self.runner.invoke(cli, args)
         assert result.exit_code == 0
         assert Path(ETHEREUM_PRIVATE_KEY_FILE).exists()
         make_crypto(
             EthereumCrypto.identifier,
             private_key_path=ETHEREUM_PRIVATE_KEY_FILE,
-            password=password,
+            password=password_or_none,
         )
 
         Path(ETHEREUM_PRIVATE_KEY_FILE).unlink()

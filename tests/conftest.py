@@ -1442,7 +1442,7 @@ def change_directory():
 @pytest.fixture(params=[None, "fake-password"])
 def password_or_none(request) -> Optional[str]:
     """
-    Return a password for testing purposes.
+    Return a password for testing purposes, including None.
 
     Note that this is a parametrized fixture.
     """

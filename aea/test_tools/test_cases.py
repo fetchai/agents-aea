@@ -579,7 +579,10 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
 
     @classmethod
     def generate_private_key(
-        cls, ledger_api_id: str = DEFAULT_LEDGER, private_key_file: Optional[str] = None
+        cls,
+        ledger_api_id: str = DEFAULT_LEDGER,
+        private_key_file: Optional[str] = None,
+        password: Optional[str] = None,
     ) -> Result:
         """
         Generate AEA private key with CLI command.
@@ -588,12 +591,14 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
 
         :param ledger_api_id: ledger API ID.
         :param private_key_file: the private key file.
+        :param password: the password option.
 
         :return: Result
         """
         cli_args = ["generate-key", ledger_api_id]
         if private_key_file is not None:  # pragma: nocover
             cli_args.append(private_key_file)
+        cli_args += _get_password_option_args(password)
         return cls.run_cli_command(*cli_args, cwd=cls._get_cwd())
 
     @classmethod
@@ -602,6 +607,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         ledger_api_id: str = DEFAULT_LEDGER,
         private_key_filepath: str = DEFAULT_PRIVATE_KEY_FILE,
         connection: bool = False,
+        password: Optional[str] = None,
     ) -> Result:
         """
         Add private key with CLI command.
@@ -614,16 +620,22 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
 
         :return: Result
         """
+        password_option = _get_password_option_args(password)
         if connection:
             return cls.run_cli_command(
                 "add-key",
                 ledger_api_id,
                 private_key_filepath,
                 "--connection",
+                *password_option,
                 cwd=cls._get_cwd(),
             )
         return cls.run_cli_command(
-            "add-key", ledger_api_id, private_key_filepath, cwd=cls._get_cwd()
+            "add-key",
+            ledger_api_id,
+            private_key_filepath,
+            *password_option,
+            cwd=cls._get_cwd(),
         )
 
     @classmethod
@@ -661,18 +673,26 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
                 f.write(private_key)
 
     @classmethod
-    def generate_wealth(cls, ledger_api_id: str = DEFAULT_LEDGER) -> Result:
+    def generate_wealth(
+        cls, ledger_api_id: str = DEFAULT_LEDGER, password: Optional[str] = None
+    ) -> Result:
         """
         Generate wealth with CLI command.
 
         Run from agent's directory.
 
         :param ledger_api_id: ledger API ID.
+        :param password: the password option.
 
         :return: Result
         """
+        password_option = _get_password_option_args(password)
         return cls.run_cli_command(
-            "generate-wealth", ledger_api_id, "--sync", cwd=cls._get_cwd()
+            "generate-wealth",
+            ledger_api_id,
+            *password_option,
+            "--sync",
+            cwd=cls._get_cwd(),
         )
 
     @classmethod
@@ -934,6 +954,16 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
             shutil.rmtree(cls.t)
 
         cls._is_teardown_class_called = True
+
+
+def _get_password_option_args(password: Optional[str]):
+    """
+    Get password option arguments.
+
+    :param password: the password (optional).
+    :return: empty list if password is None, else ['--password', password].
+    """
+    return [] if password is None else ["--password", password]
 
 
 class AEATestCaseEmpty(BaseAEATestCase):
