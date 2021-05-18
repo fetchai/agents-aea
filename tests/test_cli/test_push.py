@@ -93,11 +93,11 @@ class TestPushLocally(AEATestCaseEmpty):
     ):
         """Test fail, item_not_exists ."""
         expected_path_string = os.path.join(
-            ".", "vendor", "fetchai", "skills", "not_exists"
+            r"\.", "vendor", "fetchai", "skills", "not_exists"
         )
         with pytest.raises(
             ClickException,
-            match=f'Item "fetchai/not_exists" not found in source folder "{expected_path_string}".',
+            match=rf'Item "fetchai/not_exists" not found in source folder "{expected_path_string}"\.',
         ):
             self.invoke("push", "--local", "skill", "fetchai/not_exists")
 
