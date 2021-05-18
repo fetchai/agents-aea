@@ -25,6 +25,7 @@ from contextlib import suppress
 from pathlib import Path
 from shutil import rmtree
 from tempfile import TemporaryDirectory
+from typing import Optional
 from unittest.case import TestCase
 from unittest.mock import Mock, patch
 
@@ -49,7 +50,7 @@ class BaseTestMultiAgentManager(TestCase):
     """Base test class for multi-agent manager"""
 
     MODE = "async"
-    PASSWORD = None
+    PASSWORD: Optional[str] = None
 
     echo_skill_id = ECHO_SKILL_PUBLIC_ID
 
