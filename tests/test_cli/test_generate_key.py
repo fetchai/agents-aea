@@ -23,13 +23,13 @@ import os
 import shutil
 import tempfile
 from pathlib import Path
+from typing import List, Optional
 
 from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_fetchai import FetchAICrypto
 
 from aea.cli import cli
 from aea.crypto.registries import make_crypto
-from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from tests.conftest import (
     CLI_LOG_OPTION,
@@ -51,26 +51,40 @@ class TestGenerateKey:
         cls.t = tempfile.mkdtemp()
         os.chdir(cls.t)
 
-    def test_fetchai(self):
+    def _append_password_option_if_not_none(
+        self, args, password: Optional[str]
+    ) -> List:
+        """Append '--password' option if not None."""
+        if password is None:
+            return args
+        return args + ["--password", password]
+
+    def test_fetchai(self, password):
         """Test that the fetch private key is created correctly."""
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "generate-key", FetchAICrypto.identifier]
-        )
+        args = [*CLI_LOG_OPTION, "generate-key", FetchAICrypto.identifier]
+        args = self._append_password_option_if_not_none(args, password)
+        result = self.runner.invoke(cli, args)
         assert result.exit_code == 0
         assert Path(FETCHAI_PRIVATE_KEY_FILE).exists()
-        make_crypto(FetchAICrypto.identifier, private_key_path=FETCHAI_PRIVATE_KEY_FILE)
+        make_crypto(
+            FetchAICrypto.identifier,
+            private_key_path=FETCHAI_PRIVATE_KEY_FILE,
+            password=password,
+        )
 
         Path(FETCHAI_PRIVATE_KEY_FILE).unlink()
 
-    def test_ethereum(self):
+    def test_ethereum(self, password):
         """Test that the fetch private key is created correctly."""
-        result = self.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "generate-key", EthereumCrypto.identifier]
-        )
+        args = [*CLI_LOG_OPTION, "generate-key", EthereumCrypto.identifier]
+        args = self._append_password_option_if_not_none(args, password)
+        result = self.runner.invoke(cli, args)
         assert result.exit_code == 0
         assert Path(ETHEREUM_PRIVATE_KEY_FILE).exists()
         make_crypto(
-            EthereumCrypto.identifier, private_key_path=ETHEREUM_PRIVATE_KEY_FILE
+            EthereumCrypto.identifier,
+            private_key_path=ETHEREUM_PRIVATE_KEY_FILE,
+            password=password,
         )
 
         Path(ETHEREUM_PRIVATE_KEY_FILE).unlink()
@@ -182,23 +196,3 @@ class TestGenerateKeyWithFile:
         """Tear the test down."""
         os.chdir(cls.cwd)
         shutil.rmtree(cls.t)
-
-
-class TestGenerateKeyWithPassword(AEATestCaseEmpty):
-    """Test that the command 'aea generate-key' with a password argument works as expected."""
-
-    def test_fetchai(self):
-        """Test that the fetch private key is created correctly."""
-        password = "password"
-        result = self.run_cli_command(
-            "generate-key", FetchAICrypto.identifier, "--password", password
-        )
-        assert result.exit_code == 0
-        assert Path(FETCHAI_PRIVATE_KEY_FILE).exists()
-
-        # check the key can be read again with the same password.
-        make_crypto(
-            FetchAICrypto.identifier,
-            private_key_path=FETCHAI_PRIVATE_KEY_FILE,
-            password=password,
-        )

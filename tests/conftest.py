@@ -1437,3 +1437,13 @@ def change_directory():
             yield temporary_directory
     finally:
         shutil.rmtree(temporary_directory)
+
+
+@pytest.fixture(params=[None, "fake-password"])
+def password_or_none(request) -> Optional[str]:
+    """
+    Return a password for testing purposes.
+
+    Note that this is a parametrized fixture.
+    """
+    return request.param
