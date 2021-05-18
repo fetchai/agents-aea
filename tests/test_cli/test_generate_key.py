@@ -29,6 +29,7 @@ from aea_ledger_fetchai import FetchAICrypto
 
 from aea.cli import cli
 from aea.crypto.registries import make_crypto
+from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from tests.conftest import (
     CLI_LOG_OPTION,
@@ -181,3 +182,23 @@ class TestGenerateKeyWithFile:
         """Tear the test down."""
         os.chdir(cls.cwd)
         shutil.rmtree(cls.t)
+
+
+class TestGenerateKeyWithPassword(AEATestCaseEmpty):
+    """Test that the command 'aea generate-key' with a password argument works as expected."""
+
+    def test_fetchai(self):
+        """Test that the fetch private key is created correctly."""
+        password = "password"
+        result = self.run_cli_command(
+            "generate-key", FetchAICrypto.identifier, "--password", password
+        )
+        assert result.exit_code == 0
+        assert Path(FETCHAI_PRIVATE_KEY_FILE).exists()
+
+        # check the key can be read again with the same password.
+        make_crypto(
+            FetchAICrypto.identifier,
+            private_key_path=FETCHAI_PRIVATE_KEY_FILE,
+            password=password,
+        )
