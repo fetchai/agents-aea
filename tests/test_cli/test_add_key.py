@@ -434,7 +434,7 @@ class CheckFileNotExistsTestCase(TestCase):
 class TestAddKeyWithPassword(AEATestCaseEmpty):
     """Test the '--password' option to 'add-key' command."""
 
-    FAKE_PASSWORD = "password"
+    FAKE_PASSWORD = "password"  # nosec
 
     @classmethod
     def setup_class(cls) -> None:
