@@ -207,8 +207,8 @@ class NodeClient:
                 msg = AcnMessage()
                 msg.ParseFromString(data)
             except Exception as e:
-                await self.write_acn_status_error(f"Failed to pase acn message {e}")
-                raise
+                await self.write_acn_status_error(f"Failed to parse acn message {e}")
+                raise ValueError(f"Error parsing acn message: {e}") from e
 
             payload = msg.WhichOneof("payload")
             if payload == "aea_envelope":  # pragma: nocover

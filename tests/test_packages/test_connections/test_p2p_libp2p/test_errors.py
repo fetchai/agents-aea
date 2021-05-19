@@ -443,7 +443,7 @@ async def test_acn_decode_error_on_read():
     with patch.object(node_client, "_read", lambda: f), patch.object(
         node_client, "write_acn_status_error", return_value=f
     ) as mocked_write_acn_status_error, pytest.raises(
-        Exception, match=r"Error parsing message"
+        Exception, match=r"Error parsing acn message:"
     ):
         await node_client.read_envelope()
 

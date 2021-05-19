@@ -23,7 +23,7 @@ import shutil
 import tempfile
 import time
 from unittest import mock
-from unittest.mock import Mock
+from unittest.mock import Mock, call
 
 import pytest
 from aea_ledger_ethereum import EthereumCrypto
@@ -37,6 +37,7 @@ from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.default.serialization import DefaultSerializer
 
 from tests.common.mocks import RegexComparator
+from tests.common.utils import wait_for_condition
 from tests.conftest import (
     _make_libp2p_client_connection,
     _make_libp2p_connection,
@@ -151,6 +152,9 @@ class TestLibp2pClientConnectionEchoEnvelope:
                 [cls.connection_client_2], protocols=[MockDefaultMessageProtocol]
             )
             cls.multiplexer_client_2.connect()
+
+            wait_for_condition(lambda: cls.connection_client_1.is_connected is True, 10)
+            wait_for_condition(lambda: cls.connection_client_2.is_connected is True, 10)
         except Exception:
             cls.multiplexer_node.disconnect()
             raise
@@ -355,6 +359,12 @@ class TestLibp2pClientConnectionEchoEnvelopeTwoDHTNode:
             )
             cls.multiplexer_client_2.connect()
             cls.mutliplexers.append(cls.multiplexer_client_2)
+
+            wait_for_condition(lambda: cls.connection_node_1.is_connected is True, 10)
+            wait_for_condition(lambda: cls.connection_node_2.is_connected is True, 10)
+            wait_for_condition(lambda: cls.connection_client_1.is_connected is True, 10)
+            wait_for_condition(lambda: cls.connection_client_2.is_connected is True, 10)
+
         except Exception:
             cls.teardown_class()
             raise
@@ -532,8 +542,13 @@ class TestLibp2pClientConnectionRouting:
             )
             cls.log_files.append(cls.connection_node_2.node.log_file)
             cls.multiplexer_node_2.connect()
+
             cls.multiplexers.append(cls.multiplexer_node_2)
 
+            wait_for_condition(lambda: cls.multiplexer_node_1.is_connected, 10)
+            wait_for_condition(lambda: cls.multiplexer_node_2.is_connected, 10)
+            wait_for_condition(lambda: cls.connection_node_1.is_connected, 10)
+            wait_for_condition(lambda: cls.connection_node_2.is_connected, 10)
             cls.connections = [cls.connection_node_1, cls.connection_node_2]
             cls.addresses = [
                 cls.connection_node_1.address,
@@ -562,6 +577,8 @@ class TestLibp2pClientConnectionRouting:
                     cls.addresses.append(conn.address)
 
                     mux.connect()
+                    wait_for_condition(lambda: mux.is_connected, 10)
+                    wait_for_condition(lambda: conn.is_connected, 10)
                     cls.multiplexers.append(mux)
                 break
 
@@ -680,6 +697,11 @@ class BaseTestLibp2pClientSamePeer:
                 [cls.connection_client_2], protocols=[MockDefaultMessageProtocol]
             )
             cls.multiplexer_client_2.connect()
+            wait_for_condition(lambda: cls.multiplexer_client_2.is_connected, 20)
+            wait_for_condition(lambda: cls.multiplexer_client_1.is_connected, 20)
+            wait_for_condition(lambda: cls.connection_client_2.is_connected, 20)
+            wait_for_condition(lambda: cls.connection_client_1.is_connected, 20)
+            wait_for_condition(lambda: cls.connection_node.is_connected, 20)
         except Exception:
             cls.multiplexer_node.disconnect()
             raise
@@ -739,8 +761,12 @@ class TestLibp2pClientReconnectionSendEnvelope(BaseTestLibp2pClientSamePeer):
         ):
             self.multiplexer_client_1.put(envelope)
             delivered_envelope = self.multiplexer_client_2.get(block=True, timeout=20)
-            _mock_logger.assert_called_with(
-                "Exception raised on message send. Try reconnect and send again."
+            _mock_logger.assert_has_calls(
+                [
+                    call(
+                        "Exception raised on message send. Try reconnect and send again."
+                    )
+                ]
             )
 
         assert delivered_envelope is not None
@@ -774,9 +800,15 @@ class TestLibp2pClientReconnectionReceiveEnvelope(BaseTestLibp2pClientSamePeer):
             # this envelope will be lost.
             self.multiplexer_client_2.put(envelope)
             # give time to reconnect
-            time.sleep(2.0)
-            _mock_logger.assert_called_with(
-                RegexComparator("Connection error:.*Try to reconnect and read again")
+            time.sleep(10.0)
+            _mock_logger.assert_has_calls(
+                [
+                    call(
+                        RegexComparator(
+                            "Connection error:.*Try to reconnect and read again"
+                        )
+                    )
+                ]
             )
         # proceed as usual. Now we expect the connection to have reconnected successfully
         self.multiplexer_client_2.put(envelope)
