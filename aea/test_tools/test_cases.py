@@ -591,7 +591,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
 
         :param ledger_api_id: ledger API ID.
         :param private_key_file: the private key file.
-        :param password: the password option.
+        :param password: the password.
 
         :return: Result
         """
