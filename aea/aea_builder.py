@@ -1918,6 +1918,10 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
                 new_configuration = self._overwrite_custom_configuration(configuration)
                 if new_configuration.is_abstract_component:
                     load_aea_package(configuration)
+                    self.logger.debug(
+                        f"Package {configuration.public_id} of type {configuration.component_type} is abstract, "
+                        f"therefore only the Python modules have been loaded."
+                    )
                     continue
                 _logger = make_component_logger(new_configuration, agent_name)
                 component = load_component_from_config(
