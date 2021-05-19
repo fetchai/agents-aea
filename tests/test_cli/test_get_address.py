@@ -17,7 +17,6 @@
 #
 # ------------------------------------------------------------------------------
 """This test module contains the tests for commands in aea.cli.get_address module."""
-
 from unittest import TestCase, mock
 from unittest.mock import MagicMock
 
@@ -25,6 +24,8 @@ from aea_ledger_fetchai import FetchAICrypto
 
 from aea.cli import cli
 from aea.cli.get_address import _try_get_address
+from aea.configurations.constants import DEFAULT_LEDGER
+from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from tests.conftest import CLI_LOG_OPTION, COSMOS_ADDRESS_ONE, CliRunner
 from tests.test_cli.tools_for_testing import ContextMock
@@ -67,3 +68,43 @@ class GetAddressCommandTestCase(TestCase):
             standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)
+
+
+class TestGetAddressCommand(AEATestCaseEmpty):
+    """Test 'get-address' command."""
+
+    @classmethod
+    def setup_class(cls) -> None:
+        """
+        Override the 'setup_class' method.
+
+        This will prevent setup of tests at class-level.
+        """
+
+    def setup(self):
+        """Set up the test."""
+        super().setup_class()
+
+    def test_get_address(self, password_or_none):
+        """Run the main test."""
+        self.generate_private_key(password=password_or_none)
+        self.add_private_key(password=password_or_none)
+
+        password_option = ["--password", password_or_none] if password_or_none else []
+        result = self.run_cli_command(
+            "get-address", DEFAULT_LEDGER, *password_option, cwd=self._get_cwd()
+        )
+
+        assert result.exit_code == 0
+
+    def teardown(self) -> None:
+        """Tear down the test."""
+        super().teardown_class()
+
+    @classmethod
+    def teardown_class(cls) -> None:
+        """
+        Override the 'teardown_class' method.
+
+        This will prevent teardown of tests at class-level.
+        """
