@@ -18,7 +18,6 @@
 # ------------------------------------------------------------------------------
 """Test module for Registry push methods."""
 import filecmp
-import os.path
 from unittest import TestCase, mock
 
 import pytest
@@ -92,12 +91,12 @@ class TestPushLocally(AEATestCaseEmpty):
         self, *mocks,
     ):
         """Test fail, item_not_exists ."""
-        expected_path_string = os.path.join(
-            r"\.", "vendor", "fetchai", "skills", "not_exists"
+        expected_path_pattern = ".*" + ".*".join(
+            ["vendor", "fetchai", "skills", "not_exists"]
         )
         with pytest.raises(
             ClickException,
-            match=rf'Item "fetchai/not_exists" not found in source folder "{expected_path_string}"\.',
+            match=rf'Item "fetchai/not_exists" not found in source folder "{expected_path_pattern}"\.',
         ):
             self.invoke("push", "--local", "skill", "fetchai/not_exists")
 
