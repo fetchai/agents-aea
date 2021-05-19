@@ -45,15 +45,15 @@ This diagram shows the communication between the various entities as data is suc
 </div>
 <br>
 
-# Option 1: AEA Manager approach
+## Option 1: AEA Manager approach
 
 Follow this approach when using the AEA Manager Desktop app. Otherwise, skip and follow the CLI approach below. 
 
-## Preparation instructions
+### Preparation instructions
 
 Install the <a href="https://aea-manager.fetch.ai" target="_blank">AEA Manager</a>.
 
-## Demo instructions
+### Demo instructions
 
 The following steps assume you have launched the AEA Manager Desktop app.
 
@@ -65,7 +65,7 @@ The following steps assume you have launched the AEA Manager Desktop app.
 
 4. Run the `car_detector` AEA. Navigate to its logs and copy the multiaddress displayed.
 
-5. Navigate to the settings of the `car_data_buyer` and update as follows:
+5. Navigate to the settings of the `car_data_buyer` and under `components > connection >` `fetchai/p2p_libp2p:0.22.0` update as follows (make sure to replace the placeholder with the multiaddress):
 ``` bash
 {
   "delegate_uri": "127.0.0.1:11001",
@@ -78,22 +78,22 @@ The following steps assume you have launched the AEA Manager Desktop app.
 
 6. Run the `car_data_buyer`.
 
-In the AEA's logs should see the agent trading successfully.
+In the AEA's logs, you should see the agent trading successfully.
 <br>
 
-# Option 2: CLI approach
+## Option 2: CLI approach
 
 Follow this approach when using the `aea` CLI.
 
-## Preparation instructions
+### Preparation instructions
 
-### Dependencies
+#### Dependencies
 
 Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href="../quickstart/#installation">Installation</a> sections from the AEA quick start.
 
-## Demo instructions
+### Demo instructions
 
-### Create car detector AEA
+#### Create car detector AEA
 
 First, fetch the car detector AEA:
 ``` bash
@@ -131,7 +131,7 @@ aea build
 </p>
 </details>
 
-### Create car data buyer AEA
+#### Create car data buyer AEA
 
 Then, fetch the car data client AEA:
 ``` bash
@@ -170,7 +170,7 @@ aea build
 </p>
 </details>
 
-### Add keys for the car data seller AEA
+#### Add keys for the car data seller AEA
 
 First, create the private key for the car data seller AEA based on the network you want to transact. To generate and add a private-public key pair for Fetch.ai `AgentLand` use:
 ``` bash
@@ -189,7 +189,7 @@ Finally, certify the key for use by the connections that request that:
 aea issue-certificates
 ```
 
-### Add keys and generate wealth for the car data buyer AEA
+#### Add keys and generate wealth for the car data buyer AEA
 
 The buyer needs to have some wealth to purchase the service from the seller.
 
@@ -215,7 +215,7 @@ Finally, certify the key for use by the connections that request that:
 aea issue-certificates
 ```
 
-## Run the AEAs
+### Run the AEAs
 
 Run both AEAs from their respective terminals.
 
@@ -248,7 +248,7 @@ aea run
 
 You will see that the AEAs negotiate and then transact using the Fetch.ai testnet.
 
-### Cleaning up
+#### Cleaning up
 
 When you're finished, delete your AEAs:
 ``` bash
