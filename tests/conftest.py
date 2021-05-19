@@ -109,6 +109,7 @@ from tests.common.docker_image import (
     FetchLedgerDockerImage,
     GanacheDockerImage,
     OEFSearchDockerImage,
+    SOEFDockerImage,
 )
 from tests.data.dummy_connection.connection import DummyConnection  # type: ignore
 
@@ -726,6 +727,22 @@ def ganache(
     client = docker.from_env()
     image = GanacheDockerImage(
         client, "http://127.0.0.1", 8545, config=ganache_configuration
+    )
+    yield from _launch_image(image, timeout=timeout, max_attempts=max_attempts)
+
+
+@pytest.mark.integration
+@pytest.fixture(scope="function")
+def soef(
+    soef_addr: str = "http://127.0.0.1",
+    soef_port: int = 9002,
+    timeout: float = 2.0,
+    max_attempts: int = 10,
+):
+    """Launch the Ganache image."""
+    client = docker.from_env()
+    image = SOEFDockerImage(
+        client, soef_addr, soef_port
     )
     yield from _launch_image(image, timeout=timeout, max_attempts=max_attempts)
 
