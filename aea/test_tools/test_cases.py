@@ -956,7 +956,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         cls._is_teardown_class_called = True
 
 
-def _get_password_option_args(password: Optional[str]):
+def _get_password_option_args(password: Optional[str]) -> List[str]:
     """
     Get password option arguments.
 
