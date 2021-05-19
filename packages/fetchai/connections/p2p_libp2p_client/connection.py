@@ -29,20 +29,13 @@ from aea.configurations.constants import DEFAULT_LEDGER
 from aea.connections.base import Connection, ConnectionStates
 from aea.crypto.registries import make_crypto
 from aea.exceptions import enforce
-from aea.helpers.acn.acn_message_pb2 import AeaEnvelope
+from aea.helpers.acn.acn_message_pb2 import AcnMessage, AeaEnvelope
+from aea.helpers.acn.acn_message_pb2 import AgentRecord as AgentRecordPb
+from aea.helpers.acn.acn_message_pb2 import Register, Status
 from aea.helpers.acn.agent_record import AgentRecord
 from aea.helpers.acn.uri import Uri
 from aea.helpers.pipe import IPCChannelClient, TCPSocketChannelClient
 from aea.mail.base import Envelope
-
-from packages.fetchai.connections.p2p_libp2p_client.acn_message_pb2 import AcnMessage
-from packages.fetchai.connections.p2p_libp2p_client.acn_message_pb2 import (
-    AgentRecord as AgentRecordPb,
-)
-from packages.fetchai.connections.p2p_libp2p_client.acn_message_pb2 import (
-    Register,
-    Status,
-)
 
 
 try:
@@ -355,7 +348,7 @@ class P2PLibp2pClientConnection(Connection):
             raise  # pragma: nocover
         except Exception:  # pylint: disable=broad-except # pragma: nocover
             self.logger.exception(
-                f"Failed to send an aenvelope {envelope}. Stop connection."
+                f"Failed to send an envelope {envelope}. Stop connection."
             )
             await asyncio.shield(self.disconnect())
 
@@ -537,8 +530,11 @@ class P2PLibp2pClientConnection(Connection):
                     len(e.partial), e.expected
                 )
             )
+        except Exception as e:  # pylint: disable=broad-except
+            self.logger.exception(f"On envelope read: {e}")
 
         try:
+            self.logger.debug("Read envelope retry! Reconnect first!")
             await self._perform_connection_to_node()
             envelope = await self._node_client.read_envelope()
             return envelope

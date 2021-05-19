@@ -800,7 +800,7 @@ class TestLibp2pClientReconnectionReceiveEnvelope(BaseTestLibp2pClientSamePeer):
             # this envelope will be lost.
             self.multiplexer_client_2.put(envelope)
             # give time to reconnect
-            time.sleep(10.0)
+            time.sleep(2.0)
             _mock_logger.assert_has_calls(
                 [
                     call(
