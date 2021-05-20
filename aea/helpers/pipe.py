@@ -298,7 +298,7 @@ class TCPSocketProtocol:
             if not data:  # pragma: no cover
                 return None
             if len(data) != size:
-                raise ValueError("Incomplete Read Error!")
+                raise ValueError("Incomplete Read Error! Expected size={size}, got: {data}")
             return data
         except asyncio.IncompleteReadError as e:  # pragma: no cover
             self.logger.info(
