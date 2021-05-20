@@ -48,6 +48,7 @@ class FetchOracleClientContract(Contract):
         contract_address: Address,
         from_address: Address,
         query_function: str,
+        amount: int = 0,
         gas: int = 0,
         tx_fee: int = 0,
     ) -> JSONLike:
@@ -84,7 +85,7 @@ class FetchOracleClientContract(Contract):
                 from_address,
                 contract_address,
                 msg,
-                amount=1000000000000,
+                amount=amount,
                 tx_fee=tx_fee,
                 gas=gas,
             )
