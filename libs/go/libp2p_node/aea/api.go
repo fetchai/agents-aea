@@ -400,7 +400,7 @@ func (aea *AeaApi) envelopeSendLoop() {
 	var err error
 	for {
 		envelope := <-aea.send_queue
-		logger.Debug().Msg("send lopp: got envelope")
+		logger.Debug().Msg("send loop: got envelope")
 
 		if envelope == nil {
 			logger.Info().Msg("envelope is nil. exit send loop")
