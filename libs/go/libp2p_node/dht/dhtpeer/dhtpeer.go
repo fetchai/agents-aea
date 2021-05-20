@@ -78,7 +78,7 @@ func ignore(err error) {
 const (
 	addressLookupTimeout                 = 20 * time.Second
 	routingTableConnectionUpdateTimeout  = 5 * time.Second
-	newStreamTimeout                     = 5 * time.Second
+	newStreamTimeout                     = 10 * time.Second
 	addressRegisterTimeout               = 3 * time.Second
 	addressRegistrationDelay             = 0 * time.Second
 	monitoringNamespace                  = "acn"
@@ -150,7 +150,8 @@ type DHTPeer struct {
 	logger     zerolog.Logger
 
 	// syncMessages map[string]*sync.WaitGroup
-	syncMessages map[string](chan *aea.Envelope)
+	syncMessagesLock sync.RWMutex
+	syncMessages     map[string](chan *aea.Envelope)
 }
 
 // New creates a new DHTPeer
@@ -405,6 +406,8 @@ func formatPersistentStorageLine(record *acn.AgentRecord) []byte {
 
 func (dhtPeer *DHTPeer) initAgentRecordPersistentStorage() (int, error) {
 	var err error
+	_, _, linfo, _ := dhtPeer.getLoggers()
+	linfo().Msg("Load records from store " + dhtPeer.persistentStoragePath)
 	dhtPeer.storage, err = os.OpenFile(
 		dhtPeer.persistentStoragePath,
 		os.O_APPEND|os.O_RDWR|os.O_CREATE,
@@ -443,6 +446,7 @@ func (dhtPeer *DHTPeer) initAgentRecordPersistentStorage() (int, error) {
 			return 0, errors.Wrap(err, "While loading agent records")
 		}
 		dhtPeer.dhtAddresses[record.Address] = relayPeerID.Pretty()
+		println("1111111111 added ", record.Address, relayPeerID.Pretty())
 		counter++
 	}
 
@@ -586,9 +590,11 @@ func (dhtPeer *DHTPeer) Close() []error {
 
 	//linfo().Msg("Stopping DHTPeer: waiting for goroutines to cancel...")
 	// dhtPeer.goroutines.Wait()
+	dhtPeer.syncMessagesLock.Lock()
 	for _, channel := range dhtPeer.syncMessages {
 		close(channel)
 	}
+	dhtPeer.syncMessagesLock.Unlock()
 
 	return status
 }
@@ -755,7 +761,7 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 	dhtPeer.tcpAddressesLock.Unlock()
 
 	dhtPeer.acnStatusesLock.Lock()
-	dhtPeer.acnStatuses[addr] = make(chan *acn.Status, 1)
+	dhtPeer.acnStatuses[addr] = make(chan *acn.Status, 1000)
 	dhtPeer.acnStatusesLock.Unlock()
 
 	if dhtPeer.addressAnnounced {
@@ -813,15 +819,23 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 
 		// initializing pairwise channel queues and one go routine per pair
 		pair := envel.To + envel.Sender
-		if _, ok := dhtPeer.syncMessages[pair]; !ok {
+		dhtPeer.syncMessagesLock.Lock()
+		_, ok := dhtPeer.syncMessages[pair]
+		dhtPeer.syncMessagesLock.Unlock()
+		if !ok {
+			dhtPeer.syncMessagesLock.Lock()
 			dhtPeer.syncMessages[pair] = make(chan *aea.Envelope, 1000)
+			dhtPeer.syncMessagesLock.Unlock()
 
 			// route envelope
 			dhtPeer.goroutines.Add(1)
 			go func() {
 				defer dhtPeer.goroutines.Done()
+				dhtPeer.syncMessagesLock.Lock()
+				pair_range := dhtPeer.syncMessages[pair]
+				dhtPeer.syncMessagesLock.Unlock()
 
-				for e := range dhtPeer.syncMessages[pair] {
+				for e := range pair_range {
 					err := dhtPeer.RouteEnvelope(e)
 					if err != nil {
 						lerror(err).Str("addr", addr).
@@ -832,14 +846,19 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 			}()
 		}
 		// add to queue (nonblocking - buffered queue)
+		dhtPeer.syncMessagesLock.Lock()
+
 		select {
 		case dhtPeer.syncMessages[pair] <- envel:
 		default:
 			// send back! error
 			fmt.Println("CHANNEL FULL, DISCARDING <<<-------- ", string(envel.Message))
 		}
+		dhtPeer.syncMessagesLock.Unlock()
 	}
 
+	linfo().Str("addr", addr).
+		Msg("111 delegate client disconnected")
 	// Remove connection from map
 	dhtPeer.tcpAddressesLock.Lock()
 	delete(dhtPeer.tcpAddresses, addr)
@@ -969,6 +988,8 @@ func (dhtPeer *DHTPeer) RouteEnvelope(envel *aea.Envelope) error {
 			linfo().Str("op", "route").Str("addr", target).
 				Msgf("destination is a relay client %s", sPeerID)
 			peerID, err = peer.Decode(sPeerID)
+			linfo().Str("op", "route").Str("addr", target).
+				Msgf("relay client peer is %s", peerID)
 			if err != nil {
 				lerror(err).Str("op", "route").Str("addr", target).
 					Msgf("CRITICAL couldn't parse peer id from relay client id")
@@ -1839,6 +1860,9 @@ func (dhtPeer *DHTPeer) handleAeaRegisterStream(stream network.Stream) {
 			Msg("while saving agent record to persistent storage")
 	}
 	dhtPeer.dhtAddressesLock.Unlock()
+	linfo().Str("op", "register").
+		Str("addr", clientAddr).
+		Msgf("peer added: %s", clientPeerID)
 	if dhtPeer.addressAnnounced {
 		linfo().Str("op", "register").
 			Str("addr", clientAddr).

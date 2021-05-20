@@ -324,7 +324,7 @@ func (aea *AeaApi) Init() error {
 		aea.pipe = NewPipe(aea.msgin_path, aea.msgout_path)
 	}
 
-	aea.acn_status_chan = make(chan *acn.Status, 1)
+	aea.acn_status_chan = make(chan *acn.Status, 1000)
 	return nil
 }
 
@@ -345,8 +345,8 @@ func (aea *AeaApi) Connect() error {
 
 	aea.closing = false
 	//TOFIX(LR) trade-offs between bufferd vs unbuffered channel
-	aea.out_queue = make(chan *Envelope, 10)
-	aea.send_queue = make(chan *Envelope, 10)
+	aea.out_queue = make(chan *Envelope, 100)
+	aea.send_queue = make(chan *Envelope, 100)
 	go aea.listenForEnvelopes()
 	go aea.envelopeSendLoop()
 	logger.Info().Msg("connected to agent")
@@ -465,59 +465,4 @@ func (aea AeaApi) SendEnvelope(envelope *Envelope) error {
 func (aea AeaApi) AddACNStatusMessage(status *acn.Status, counterpartyID string) {
 	aea.acn_status_chan <- status
 	logger.Info().Msgf("chan len is %d", len(aea.acn_status_chan))
-}
-
-func (aea AeaApi) ReceiveEnvelope() (*Envelope, error) {
-	envelope := &Envelope{}
-	var acn_err error
-	data, err := aea.pipe.Read()
-
-	if err != nil {
-		logger.Error().Str("err", err.Error()).Msg("while receiving data")
-		return envelope, err
-	}
-	msg_type, acn_envelope, status, err := acn.DecodeACNMessage(data)
-
-	if err != nil {
-		logger.Error().Str("err", err.Error()).Msg("while decoding acn")
-		acn_err = acn.SendAcnError(aea.pipe, "error on decoding acn message")
-		if acn_err != nil {
-			logger.Error().Str("err", err.Error()).Msg("on acn send error")
-		}
-		return envelope, err
-	}
-
-	switch msg_type {
-	case "aea_envelope":
-		{
-			err = proto.Unmarshal(acn_envelope.Envel, envelope)
-			if err != nil {
-				logger.Error().Str("err", err.Error()).Msg("while decoding envelope")
-				acn_err = acn.SendAcnError(aea.pipe, "error on decoding envelope")
-				if acn_err != nil {
-					logger.Error().Str("err", err.Error()).Msg("on acn send error")
-				}
-				return envelope, err
-			}
-			err = acn.SendAcnSuccess(aea.pipe)
-			return envelope, err
-
-		}
-	case "status":
-		{
-			logger.Info().Msgf("acn status %d", status.Code)
-			aea.acn_status_chan <- status
-			logger.Info().Msgf("chan len is %d", len(aea.acn_status_chan))
-			return nil, nil
-
-		}
-	default:
-		{
-			acn_err = acn.SendAcnError(aea.pipe, "BAD ACN MESSAGE")
-			if acn_err != nil {
-				logger.Error().Str("err", err.Error()).Msg("on acn send error")
-			}
-			return nil, errors.New("bad ACN message!")
-		}
-	}
 }

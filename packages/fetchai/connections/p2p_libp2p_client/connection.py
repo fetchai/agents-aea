@@ -16,6 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This module contains the libp2p client connection."""
 import asyncio
 import logging
@@ -29,13 +30,22 @@ from aea.configurations.constants import DEFAULT_LEDGER
 from aea.connections.base import Connection, ConnectionStates
 from aea.crypto.registries import make_crypto
 from aea.exceptions import enforce
-from aea.helpers.acn.acn_message_pb2 import AcnMessage, AeaEnvelope
-from aea.helpers.acn.acn_message_pb2 import AgentRecord as AgentRecordPb
-from aea.helpers.acn.acn_message_pb2 import Register, Status
 from aea.helpers.acn.agent_record import AgentRecord
 from aea.helpers.acn.uri import Uri
 from aea.helpers.pipe import IPCChannelClient, TCPSocketChannelClient
 from aea.mail.base import Envelope
+
+from packages.fetchai.connections.p2p_libp2p_client.acn_message_pb2 import (
+    AcnMessage,
+    AeaEnvelope,
+)
+from packages.fetchai.connections.p2p_libp2p_client.acn_message_pb2 import (
+    AgentRecord as AgentRecordPb,
+)
+from packages.fetchai.connections.p2p_libp2p_client.acn_message_pb2 import (
+    Register,
+    Status,
+)
 
 
 try:

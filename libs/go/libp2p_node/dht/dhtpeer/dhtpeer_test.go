@@ -51,7 +51,7 @@ const (
 	DefaultLocalPort    = 2000
 	DefaultDelegatePort = 3000
 
-	EnvelopeDeliveryTimeout = 20 * time.Second
+	EnvelopeDeliveryTimeout = 1 * time.Second
 	DHTPeerSetupTimeout     = 5 * time.Second
 
 	DefaultLedger = dhtnode.DefaultLedger
@@ -723,7 +723,7 @@ func TestRoutingDelegateClientToDHTPeerIndirect(t *testing.T) {
 	}
 	defer peerCleanup2()
 
-	time.Sleep(1 * time.Second)
+	time.Sleep(3 * time.Second)
 	client, clientCleanup, err := SetupDelegateClient(
 		AgentsTestKeys[2],
 		DefaultLocalHost,
@@ -735,7 +735,7 @@ func TestRoutingDelegateClientToDHTPeerIndirect(t *testing.T) {
 	}
 	defer clientCleanup()
 
-	rxPeer1 := make(chan *aea.Envelope, 2)
+	rxPeer1 := make(chan *aea.Envelope, 20)
 	peer1.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxPeer1 <- envel
 		return nil
@@ -750,7 +750,6 @@ func TestRoutingDelegateClientToDHTPeerIndirect(t *testing.T) {
 	if err != nil {
 		t.Error("Failed to Send envelope from DelegateClient to DHTPeer:", err)
 	}
-
 	expectEnvelope(t, rxPeer1)
 
 	err = peer1.RouteEnvelope(&aea.Envelope{
@@ -760,7 +759,6 @@ func TestRoutingDelegateClientToDHTPeerIndirect(t *testing.T) {
 	if err != nil {
 		t.Error("Failed to RouteEnvelope from peer to delegate client:", err)
 	}
-
 	expectEnvelope(t, client.Rx)
 }
 
@@ -810,7 +808,7 @@ func TestMessageOrderingWithDelegateClient(t *testing.T) {
 
 	ensureAddressAnnounced(peer1, peer2)
 
-	max := 100
+	max := 10
 	i := 0
 	for x := 0; x < max; x++ {
 		envelope := &aea.Envelope{
@@ -1266,7 +1264,8 @@ func TestRoutingDelegateClientToDHTClientIndirect(t *testing.T) {
 
 	ensureAddressAnnounced(peer1, peer2)
 
-	time.Sleep(1 * time.Second)
+	time.Sleep(3 * time.Second)
+
 	err = delegateClient.Send(&aea.Envelope{
 		To:     AgentsTestAddresses[2],
 		Sender: AgentsTestAddresses[3],
@@ -1354,6 +1353,7 @@ func TestRoutingAllToAll(t *testing.T) {
 	})
 
 	rxs = append(rxs, rxPeerDHT2)
+
 	send = append(send, func(envel *aea.Envelope) error {
 		return dhtPeer2.RouteEnvelope(envel)
 	})
@@ -1701,6 +1701,7 @@ func TestEthereumCrypto(t *testing.T) {
 */
 
 func randSeq(n int) string {
+	rand.Seed(time.Now().UnixNano())
 	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 	b := make([]rune, n)
 	for i := range b {
@@ -1828,14 +1829,29 @@ type DelegateClient struct {
 	Rx              chan *aea.Envelope
 	Conn            net.Conn
 	processEnvelope func(*aea.Envelope) error
+	acn_status_chan chan *acn.Status
+}
+
+func (client *DelegateClient) AddACNStatusMessage(status *acn.Status, counterpartyID string) {
+	//client.acn_status_chan <- status
 }
 
 func (client *DelegateClient) Close() error {
 	return client.Conn.Close()
 }
 
-func (client *DelegateClient) Send(envel *aea.Envelope) error {
-	return utils.WriteEnvelopeConn(client.Conn, envel)
+func (client *DelegateClient) Send(envelope *aea.Envelope) error {
+	err, data := aea.MakeACNMessageFromEnvelope(envelope)
+	if err != nil {
+		println("while serializing envelope:", err.Error())
+		return err
+	}
+	err = utils.WriteBytesConn(client.Conn, data)
+	if err != nil {
+		println("while sending envelope:", err.Error())
+		return err
+	}
+	return err
 }
 
 func (client *DelegateClient) ProcessEnvelope(fn func(*aea.Envelope) error) {
@@ -1851,6 +1867,8 @@ func SetupDelegateClient(
 	var err error
 	client := &DelegateClient{}
 	client.AgentKey = key
+
+	client.acn_status_chan = make(chan *acn.Status, 10000)
 
 	pubKey, err := utils.FetchAIPublicKeyFromFetchAIPrivateKey(key)
 	if err != nil {
@@ -1914,12 +1932,18 @@ func SetupDelegateClient(
 		return nil, nil, errors.New(status.String())
 	}
 
+	pipe := utils.ConnPipe{Conn: client.Conn}
 	go func() {
 		for {
-			envel, err := utils.ReadEnvelopeConn(client.Conn)
+			envel, err := aea.HandleAcnMessageFromPipe(pipe, client, "")
 			if err != nil {
 				break
 			}
+			if envel == nil {
+				continue
+			}
+			_ = acn.SendAcnSuccess(pipe)
+
 			if client.processEnvelope != nil {
 				err = client.processEnvelope(envel)
 				ignore(err)
@@ -1947,6 +1971,10 @@ func expectEnvelopeOrdered(t *testing.T, rx chan *aea.Envelope, counter int) {
 	select {
 	case envel := <-rx:
 		t.Log("Received envelope", envel)
+		if envel == nil {
+			t.Log("Empty envelope. exit")
+			return
+		}
 		message, _ := strconv.Atoi(string(envel.Message))
 		if message != counter {
 			log.Fatal(fmt.Sprintf("Expected counter %d received counter %d", counter, message))

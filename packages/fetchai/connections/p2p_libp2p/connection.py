@@ -34,28 +34,26 @@ from aea.configurations.constants import DEFAULT_LEDGER
 from aea.connections.base import Connection, ConnectionStates
 from aea.crypto.base import Crypto
 from aea.exceptions import enforce
-from aea.helpers.acn.acn_message_pb2 import AcnMessage, AeaEnvelope
-from aea.helpers.acn.acn_message_pb2 import AgentRecord as AgentRecordPb
-from aea.helpers.acn.acn_message_pb2 import Status
 from aea.helpers.acn.agent_record import AgentRecord
 from aea.helpers.acn.uri import Uri
 from aea.helpers.multiaddr.base import MultiAddr
 from aea.helpers.pipe import IPCChannel, TCPSocketChannel
 from aea.mail.base import Envelope
 
+from packages.fetchai.connections.p2p_libp2p.acn_message_pb2 import (
+    AcnMessage,
+    AeaEnvelope,
+)
+from packages.fetchai.connections.p2p_libp2p.acn_message_pb2 import (
+    AgentRecord as AgentRecordPb,
+)
+from packages.fetchai.connections.p2p_libp2p.acn_message_pb2 import Status
+from packages.fetchai.connections.p2p_libp2p.consts import LIBP2P_NODE_MODULE_NAME
 
-ACN_CURRENT_VERSION = "0.1.0"
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.p2p_libp2p")
 
-LIBP2P_NODE_MODULE_NAME = "libp2p_node"
-
-LIBP2P_NODE_MODULE = str(
-    os.path.join(os.path.abspath(os.path.dirname(__file__)), LIBP2P_NODE_MODULE_NAME)
-)
-
-if platform.system() == "Windows":  # pragma: nocover
-    LIBP2P_NODE_MODULE_NAME += ".exe"
+ACN_CURRENT_VERSION = "0.1.0"
 
 LIBP2P_NODE_LOG_FILE = "libp2p_node.log"
 
@@ -63,7 +61,6 @@ LIBP2P_NODE_ENV_FILE = ".env.libp2p"
 
 LIBP2P_NODE_CLARGS = list()  # type: List[str]
 
-LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT = 660  # time to download ~66Mb
 
 PIPE_CONN_TIMEOUT = 10.0
 

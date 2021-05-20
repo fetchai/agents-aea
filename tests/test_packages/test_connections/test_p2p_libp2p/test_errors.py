@@ -16,6 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This test module contains Negative tests for Libp2p connection."""
 import asyncio
 import os
@@ -31,10 +32,10 @@ import pytest
 
 from aea.configurations.base import ConnectionConfig
 from aea.crypto.registries import make_crypto
-from aea.helpers.acn.acn_message_pb2 import Status
 from aea.identity.base import Identity
 from aea.multiplexer import Multiplexer
 
+from packages.fetchai.connections.p2p_libp2p.acn_message_pb2 import Status
 from packages.fetchai.connections.p2p_libp2p.connection import (
     LIBP2P_NODE_MODULE_NAME,
     Libp2pNode,
