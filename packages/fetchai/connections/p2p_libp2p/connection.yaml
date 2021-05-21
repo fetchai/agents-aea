@@ -20,7 +20,7 @@ fingerprint:
   libp2p_node/acn/acn_message.pb.go: QmXWS3njZsFfdbuvXYv3iHy9YF9nGtmJomSQFTbSgRQb8H
   libp2p_node/acn/acn_message.proto: QmbgFcGVbxx4CP53cefW7JhXLYha6meSYqZ9hZJgBpcinF
   libp2p_node/acn/utils.go: QmRmNVKKM1wAXZCmC53U4arkzgiAXXq58JdpSeBiqyhEzZ
-  libp2p_node/aea/api.go: QmfFHyntNvkA93MiRAen1cDTUfM1G9M1PXSFBLWC5CiRW4
+  libp2p_node/aea/api.go: QmcpuqLaZNRAEqrLAbyHsvH6h8Bn7MG3KbaUs5VSt1HoAe
   libp2p_node/aea/envelope.pb.go: QmRfUNGpCeVJfsW3H1MzCN4pwDWgumfyWufVFp6xvUjjug
   libp2p_node/aea/envelope.proto: QmVuvesmfgzj5aKnbFoCocoGEv3T9MR7u6KWn7CT5yfjGi
   libp2p_node/aea/pipe.go: QmWLBjZNRCcg3BSM9Cxb95yAXdT6wPjgw8DSYHxMuux4JA
