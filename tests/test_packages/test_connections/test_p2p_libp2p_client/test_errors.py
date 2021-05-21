@@ -34,6 +34,7 @@ from aea.identity.base import Identity
 from aea.multiplexer import Multiplexer
 
 from packages.fetchai.connections.p2p_libp2p_client.connection import (
+    NodeClient,
     P2PLibp2pClientConnection,
     POR_DEFAULT_SERVICE_ID,
 )
@@ -244,3 +245,22 @@ async def test_reconnect_on_send_fail():
             with pytest.raises(Exception, match="oops"):
                 await con._send_envelope_with_node_client(Mock())
             connect_mock.assert_called()
+
+
+@pytest.mark.asyncio
+async def test_acn_decode_error_on_read():
+    """Test nodeclient send fails on read."""
+    f = Future()
+    f.set_result(b"some_data")
+    pipe = Mock()
+    pipe.connect = Mock(return_value=f)
+
+    node_client = NodeClient(pipe, Mock())
+    with patch.object(node_client, "_read", lambda: f), patch.object(
+        node_client, "write_acn_status_error", return_value=f
+    ) as mocked_write_acn_status_error, pytest.raises(
+        Exception, match=r"Error parsing acn message:"
+    ):
+        await node_client.read_envelope()
+
+    mocked_write_acn_status_error.assert_called_once()

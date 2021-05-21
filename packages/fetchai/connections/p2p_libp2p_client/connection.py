@@ -130,14 +130,14 @@ class NodeClient:
         try:
             status = await self.wait_for_status()
             if status.code != Status.SUCCESS:  # type: ignore  # pylint: disable=no-member
-                raise Exception(
+                raise ValueError(  # pragma: nocover
                     f"failed to send envelope. got error confirmation: {status}"
                 )
-        except asyncio.TimeoutError:
+        except asyncio.TimeoutError:  # pragma: nocover
             if not self._wait_status.done():  # pragma: nocover
                 self._wait_status.set_exception(Exception("Timeout"))
             await asyncio.sleep(0)
-            raise Exception("acn status await timeout!")
+            raise ValueError("acn status await timeout!")
         finally:
             self._wait_status = None
 
@@ -164,8 +164,8 @@ class NodeClient:
                 msg = AcnMessage()
                 msg.ParseFromString(data)
             except Exception as e:
-                await self.write_acn_status_error(f"Failed to pase acn message {e}")
-                raise
+                await self.write_acn_status_error(f"Failed to parse acn message {e}")
+                raise ValueError(f"Error parsing acn message: {e}") from e
 
             payload = msg.WhichOneof("payload")
             if payload == "aea_envelope":  # pragma: nocover
@@ -540,7 +540,7 @@ class P2PLibp2pClientConnection(Connection):
                     len(e.partial), e.expected
                 )
             )
-        except Exception as e:  # pylint: disable=broad-except
+        except Exception as e:  # pylint: disable=broad-except  # pragma: nocover
             self.logger.exception(f"On envelope read: {e}")
 
         try:

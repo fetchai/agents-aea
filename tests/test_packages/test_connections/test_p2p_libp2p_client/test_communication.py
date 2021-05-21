@@ -870,3 +870,15 @@ async def test_nodeclient_pipe_connect():
     node_client = NodeClient(pipe, Mock())
     await node_client.connect()
     pipe.connect.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_write_acn_error():
+    """Test pipe.connect called on NodeClient.connect."""
+    f = asyncio.Future()
+    f.set_result(None)
+    pipe = Mock()
+    pipe.write.return_value = f
+    node_client = NodeClient(pipe, Mock())
+    await node_client.write_acn_status_error("some message")
+    pipe.write.assert_called_once()
