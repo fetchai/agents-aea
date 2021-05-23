@@ -301,7 +301,8 @@ class AgentAlias(_Base):
                 )
 
         overrides["component_configurations"] = component_configurations
-        return self.agent_config_manager.update_config(overrides)
+        self.agent_config_manager.update_config(overrides)
+        self._ensure_private_keys()
 
     @property
     def agent_config_manager(self) -> AgentConfigManager:
