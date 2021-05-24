@@ -53,7 +53,7 @@ logger = logging.getLogger(__name__)
 class BaseLaunchTestCase:
     """Base Test case for launch tests."""
 
-    PASSWORD: Optional[str] = None
+    PASSWORD: Optional[str] = None  # nosec
 
     @contextmanager
     def _cli_launch(
