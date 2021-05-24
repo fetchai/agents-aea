@@ -83,17 +83,17 @@ class TestWealthCommandsPositive(AEATestCaseManyFlaky):
 
     @pytest.mark.integration
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS_INTEGRATION)
-    def test_wealth_commands(self):
+    def test_wealth_commands(self, password_or_none):
         """Test wealth commands."""
         agent_name = "test_aea"
         self.create_agents(agent_name)
 
         self.set_agent_context(agent_name)
 
-        self.generate_private_key()
-        self.add_private_key()
+        self.generate_private_key(password=password_or_none)
+        self.add_private_key(password=password_or_none)
 
-        self.generate_wealth()
+        self.generate_wealth(password=password_or_none)
 
 
 class TestWealthCommandsNegative(AEATestCaseMany):

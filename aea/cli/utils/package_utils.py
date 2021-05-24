@@ -162,7 +162,7 @@ def try_get_item_source_path(
         source_path = os.path.join(path, author_name, item_type_plural, item_name)
     if not os.path.exists(source_path):
         raise click.ClickException(
-            'Item "{}" not found in source folder.'.format(item_name)
+            f'Item "{author_name}/{item_name}" not found in source folder "{source_path}".'
         )
     return source_path
 
