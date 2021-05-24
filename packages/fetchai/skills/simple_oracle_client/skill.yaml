@@ -9,10 +9,10 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmRqzw2aTE6rsUnoB8XvvWoF4sg4ZUpvgQwStZpAVG5sUj
   __init__.py: QmQPTQNhdgQSXmK4GG3XXBYZtFwKWwigdPAETFc3pMFj2b
-  behaviours.py: QmQdLKpeUdXumdtmLuJmK2Ji4CebEAR4stxdfTEjsJENdx
+  behaviours.py: QmYrAKttGKRgvkZAX2qJ5DT9VY3LAu7aWd3vT1FKEgUQCb
   dialogues.py: QmR1KyLjLzHGGnYtLbshvnftsTRuCEPXjs5PzJswjU4hNV
   handlers.py: QmesNKU9no8vivyC6KCaFenBEp33v6yzn8LCQg7zWhDFBG
-  strategy.py: QmP5Q6STwQzDEsPMhpzLoRjpj3qNGrdZX8VzVxVv1PZmDL
+  strategy.py: QmWuAsBWq1URbxmpzDmdBZFoKouRueJ8wAmSJgJqDXUzoG
 fingerprint_ignore_patterns: []
 contracts:
 - fetchai/fet_erc20:0.8.0
@@ -59,6 +59,7 @@ models:
       ledger_id: null
       oracle_contract_address: null
       query_function: null
+      query_oracle_fee: 1000000000000
     class_name: Strategy
 dependencies:
   aea-ledger-ethereum:
