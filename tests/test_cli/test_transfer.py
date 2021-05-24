@@ -289,4 +289,4 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
 class TestCliTransferFetchAINetworkWithPassword(TestCliTransferFetchAINetwork):
     """Test cli transfer command, with '--password' option."""
 
-    PASSWORD = "fake-password"
+    PASSWORD = "fake-password"  # nosec

@@ -203,7 +203,7 @@ class TestLaunch(BaseLaunchTestCase):
 class TestLaunchWithPassword(TestLaunch):
     """Test that the command 'aea launch <agent_name> --password <password>' works as expected."""
 
-    PASSWORD = "fake-password"
+    PASSWORD = "fake-password"  # nosec
 
 
 class TestLaunchWithOneFailingAgent(BaseLaunchTestCase):
