@@ -341,10 +341,7 @@ class SOEFDockerImage(DockerImage):
     """Wrapper to SOEF Docker image."""
 
     def __init__(
-        self,
-        client: DockerClient,
-        addr: str,
-        port: int = 9002,
+        self, client: DockerClient, addr: str, port: int = 9002,
     ):
         """
         Initialize the SOEF Docker image.
@@ -369,9 +366,7 @@ class SOEFDockerImage(DockerImage):
     def create(self) -> Container:
         """Create the container."""
         container = self._client.containers.run(
-            self.tag,
-            detach=True,
-            ports=self._make_ports()
+            self.tag, detach=True, ports=self._make_ports()
         )
         return container
 

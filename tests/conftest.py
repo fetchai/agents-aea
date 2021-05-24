@@ -741,9 +741,7 @@ def soef(
 ):
     """Launch the Ganache image."""
     client = docker.from_env()
-    image = SOEFDockerImage(
-        client, soef_addr, soef_port
-    )
+    image = SOEFDockerImage(client, soef_addr, soef_port)
     yield from _launch_image(image, timeout=timeout, max_attempts=max_attempts)
 
 
