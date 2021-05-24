@@ -203,6 +203,10 @@ class MultiAgentManager:
         self._mode = mode
         self._password = password
 
+        # this flags will control whether we have already printed the warning message
+        # for a certain agent
+        self._warning_message_printed_for_agent: Dict[str, bool] = {}
+
     @property
     def data_dir(self) -> str:
         """Get the certs directory."""
@@ -263,8 +267,11 @@ class MultiAgentManager:
                 agent_name = agents_run_tasks_futures[task]
                 self._agents_tasks.pop(agent_name)
                 if task.exception():
-                    for callback in self._error_callbacks:
-                        callback(agent_name, task.exception())
+                    if len(self._error_callbacks) == 0:
+                        self._print_exception_occurred_but_no_error_callback(agent_name)
+                    else:
+                        for callback in self._error_callbacks:
+                            callback(agent_name, task.exception())
                 else:
                     await task
 
@@ -843,3 +850,20 @@ class MultiAgentManager:
         """
         with open_file(self._save_path, "w") as f:
             json.dump(self.dict_state, f, indent=4, sort_keys=True)
+
+    def _print_exception_occurred_but_no_error_callback(self, agent_name: str) -> None:
+        """
+        Print a warning message when an exception occurred but no error callback is registered.
+
+        :param agent_name: the agent name.
+        :return: None
+        """
+        if self._warning_message_printed_for_agent.get(agent_name, False):
+            return
+        self._warning_message_printed_for_agent[agent_name] = True
+        self._print_exception_occurred_but_no_error_callback(agent_name)
+        print(
+            f"WARNING: An exception occurred during the execution of agent '{agent_name}', "
+            f"but since no error callback was found the exception is handled silently. Please "
+            f"add an error callback using the method 'add_error_callback' of the MultiAgentManager instance."
+        )
