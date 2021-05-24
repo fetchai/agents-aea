@@ -27,7 +27,7 @@ from aea.cli.get_address import _try_get_address
 from aea.configurations.constants import DEFAULT_LEDGER
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
-from tests.conftest import CLI_LOG_OPTION, COSMOS_ADDRESS_ONE, CliRunner
+from tests.conftest import CLI_LOG_OPTION, COSMOS_ADDRESS_ONE, CliRunner, method_scope
 from tests.test_cli.tools_for_testing import ContextMock
 
 
@@ -70,20 +70,9 @@ class GetAddressCommandTestCase(TestCase):
         self.assertEqual(result.exit_code, 0)
 
 
+@method_scope
 class TestGetAddressCommand(AEATestCaseEmpty):
     """Test 'get-address' command."""
-
-    @classmethod
-    def setup_class(cls) -> None:
-        """
-        Override the 'setup_class' method.
-
-        This will prevent setup of tests at class-level.
-        """
-
-    def setup(self):
-        """Set up the test."""
-        super().setup_class()
 
     def test_get_address(self, password_or_none):
         """Run the main test."""
@@ -96,15 +85,3 @@ class TestGetAddressCommand(AEATestCaseEmpty):
         )
 
         assert result.exit_code == 0
-
-    def teardown(self) -> None:
-        """Tear down the test."""
-        super().teardown_class()
-
-    @classmethod
-    def teardown_class(cls) -> None:
-        """
-        Override the 'teardown_class' method.
-
-        This will prevent teardown of tests at class-level.
-        """
