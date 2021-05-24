@@ -530,7 +530,7 @@ class SigningHandler(Handler):
             signing_dialogue.associated_contract_api_dialogue.associated_fipa_dialogue
         )
         last_fipa_msg = fipa_dialogue.last_incoming_message
-        if last_fipa_msg is None:
+        if last_fipa_msg is None:  # pragma: nocover
             raise ValueError("Could not retrieve last fipa message.")
         inform_msg = fipa_dialogue.reply(
             performative=FipaMessage.Performative.ACCEPT_W_INFORM,

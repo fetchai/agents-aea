@@ -31,7 +31,10 @@ from aea.helpers.search.models import Description, Location
 from aea.helpers.transaction.base import Terms
 
 from packages.fetchai.contracts.erc1155.contract import ERC1155Contract
-from packages.fetchai.skills.erc1155_deploy.strategy import SIMPLE_SERVICE_MODEL
+from packages.fetchai.skills.erc1155_deploy.strategy import (
+    SIMPLE_SERVICE_MODEL,
+    Strategy,
+)
 
 from tests.test_packages.test_skills.test_erc1155_deploy.intermediate_class import (
     ERC1155DeployTestCase,
@@ -41,12 +44,32 @@ from tests.test_packages.test_skills.test_erc1155_deploy.intermediate_class impo
 class TestStrategy(ERC1155DeployTestCase):
     """Test Strategy of erc1155_deploy."""
 
+    def test__init__(self):
+        """Test the properties of Strategy class."""
+        assert Strategy(
+            location=self.location,
+            mint_quantities=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            service_data=self.service_data,
+            personality_data=self.personality_data,
+            classification=self.classification,
+            from_supply=self.from_supply,
+            to_supply=self.to_supply,
+            value=self.value,
+            token_type=1,
+            name="strategy",
+            skill_context=self.skill.skill_context,
+        )
+
     def test_properties(self):
         """Test the properties of Strategy class."""
         assert self.strategy.ledger_id == self.skill.skill_context.default_ledger_id
         assert self.strategy.contract_id == str(ERC1155Contract.contract_id)
         assert self.strategy.mint_quantities == self.mint_quantities
         assert self.strategy.token_ids == self.strategy._token_ids
+
+        self.strategy._token_ids = None
+        with pytest.raises(ValueError, match="Token ids not set."):
+            assert self.strategy.token_ids
 
         with pytest.raises(ValueError, match="Contract address not set!"):
             assert self.strategy.contract_address

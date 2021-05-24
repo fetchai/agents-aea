@@ -86,6 +86,7 @@ class ERC1155DeployTestCase(BaseSkillTestCase):
         cls.from_supply = 756
         cls.to_supply = 12
         cls.value = 87
+        cls.token_type = 2
         config_overrides = {
             "models": {
                 "strategy": {
@@ -98,6 +99,7 @@ class ERC1155DeployTestCase(BaseSkillTestCase):
                         "from_supply": cls.from_supply,
                         "to_supply": cls.to_supply,
                         "value": cls.value,
+                        "token_type": cls.token_type,
                     }
                 }
             },
