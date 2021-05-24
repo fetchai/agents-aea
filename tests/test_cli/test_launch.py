@@ -53,6 +53,8 @@ logger = logging.getLogger(__name__)
 class BaseLaunchTestCase:
     """Base Test case for launch tests."""
 
+    PASSWORD: Optional[str] = None
+
     @contextmanager
     def _cli_launch(
         self, agents: List[str], options: Optional[List[str]] = None
@@ -65,6 +67,7 @@ class BaseLaunchTestCase:
 
         :return: PexpectWrapper
         """
+        password_options = self.get_password_args(self.PASSWORD)
         proc = PexpectWrapper(  # nosec
             [
                 sys.executable,
@@ -73,6 +76,7 @@ class BaseLaunchTestCase:
                 "-v",
                 "DEBUG",
                 "launch",
+                *password_options,
                 *(options or []),
                 *(agents or []),
             ],
@@ -112,6 +116,7 @@ class BaseLaunchTestCase:
         src_dir = cls.cwd / Path(ROOT_DIR, dir_path)
         shutil.copytree(str(src_dir), str(tmp_dir))
         os.chdir(cls.t)
+        password_option = cls.get_password_args(cls.PASSWORD)
         result = cls.runner.invoke(
             cli, [*CLI_LOG_OPTION, "init", "--local", "--author", AUTHOR]
         )
@@ -122,12 +127,19 @@ class BaseLaunchTestCase:
         assert result.exit_code == 0
         os.chdir(cls.agent_name_1)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "generate-key", FetchAICrypto.identifier]
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "generate-key",
+                FetchAICrypto.identifier,
+                *password_option,
+            ],
         )
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier]
+            cli,
+            [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier, *password_option],
         )
         assert result.exit_code == 0
         os.chdir(cls.t)
@@ -137,15 +149,27 @@ class BaseLaunchTestCase:
         assert result.exit_code == 0
         os.chdir(cls.agent_name_2)
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "generate-key", FetchAICrypto.identifier]
+            cli,
+            [
+                *CLI_LOG_OPTION,
+                "generate-key",
+                FetchAICrypto.identifier,
+                *password_option,
+            ],
         )
         assert result.exit_code == 0
 
         result = cls.runner.invoke(
-            cli, [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier]
+            cli,
+            [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier, *password_option],
         )
         assert result.exit_code == 0
         os.chdir(cls.t)
+
+    @classmethod
+    def get_password_args(cls, password: Optional[str]) -> List[str]:
+        """Get password arguments."""
+        return [] if password is None else ["--password", password]
 
     @classmethod
     def teardown_class(cls):
@@ -174,6 +198,12 @@ class TestLaunch(BaseLaunchTestCase):
             process_launch.expect_all(
                 ["Exit cli. code: 0"], timeout=20,
             )
+
+
+class TestLaunchWithPassword(TestLaunch):
+    """Test that the command 'aea launch <agent_name> --password <password>' works as expected."""
+
+    PASSWORD = "fake-password"
 
 
 class TestLaunchWithOneFailingAgent(BaseLaunchTestCase):
