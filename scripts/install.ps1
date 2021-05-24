@@ -25,6 +25,13 @@ function install_build_tools {
 
 }
 
+
+function instal_choco_golang_gcc {
+   echo "Choco, golang and gcc will be installed"
+   echo "You'll be asked for admin shell"
+   sleep 5
+   Start-Process powershell -Verb runAs -ArgumentList "Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1')); choco install -y golang mingw"
+}
 function install_aea {
 	echo "Install aea"
     $output=pip install aea[all]==1.0.1 --force --no-cache-dir 2>&1 |out-string;
@@ -66,6 +73,7 @@ function main{
     install_build_tools
     refresh-path
     install_aea
+    instal_choco_golang_gcc
     pause
 }
 
