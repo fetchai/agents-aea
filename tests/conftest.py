@@ -1462,8 +1462,10 @@ def method_scope(cls):
         issubclass(cls, BaseAEATestCase),
         "cannot use decorator if class is not instance of BaseAEATestCase",
     )
+    old_setup_class = cls.setup_class
+    old_teardown_class = cls.teardown_class
     cls.setup_class = classmethod(lambda _cls: None)
     cls.teardown_class = classmethod(lambda _cls: None)
-    cls.setup = lambda self: super(cls, self).setup_class()
-    cls.teardown = lambda self: super(cls, self).teardown_class()
+    cls.setup = lambda self: old_setup_class()
+    cls.teardown = lambda self: old_teardown_class()
     return cls
