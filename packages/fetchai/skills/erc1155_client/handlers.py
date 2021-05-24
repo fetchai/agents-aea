@@ -440,7 +440,7 @@ class ContractApiHandler(Handler):
         :param contract_api_dialogue: the ledger api dialogue
         """
         self.context.logger.info(
-            "received ledger_api error message={} in dialogue={}.".format(
+            "received contract_api error message={} in dialogue={}.".format(
                 contract_api_msg, contract_api_dialogue
             )
         )
@@ -530,7 +530,7 @@ class SigningHandler(Handler):
             signing_dialogue.associated_contract_api_dialogue.associated_fipa_dialogue
         )
         last_fipa_msg = fipa_dialogue.last_incoming_message
-        if last_fipa_msg is None:
+        if last_fipa_msg is None:  # pragma: nocover
             raise ValueError("Could not retrieve last fipa message.")
         inform_msg = fipa_dialogue.reply(
             performative=FipaMessage.Performative.ACCEPT_W_INFORM,
