@@ -861,7 +861,6 @@ class MultiAgentManager:
         if self._warning_message_printed_for_agent.get(agent_name, False):
             return
         self._warning_message_printed_for_agent[agent_name] = True
-        self._print_exception_occurred_but_no_error_callback(agent_name)
         print(
             f"WARNING: An exception occurred during the execution of agent '{agent_name}', "
             f"but since no error callback was found the exception is handled silently. Please "
