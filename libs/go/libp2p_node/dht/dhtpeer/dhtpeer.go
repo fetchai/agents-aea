@@ -60,8 +60,8 @@ import (
 	utils "libp2p_node/utils"
 )
 
-const ACN_STATUS_TIMEOUT = 5.0 * time.Second
-
+const AcnStatusTimeout = 5.0 * time.Second
+const AcnStatusesQueueSize = 1000
 // panics if err is not nil
 func check(err error) {
 	if err != nil {
@@ -446,7 +446,6 @@ func (dhtPeer *DHTPeer) initAgentRecordPersistentStorage() (int, error) {
 			return 0, errors.Wrap(err, "While loading agent records")
 		}
 		dhtPeer.dhtAddresses[record.Address] = relayPeerID.Pretty()
-		println("1111111111 added ", record.Address, relayPeerID.Pretty())
 		counter++
 	}
 
@@ -761,7 +760,7 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 	dhtPeer.tcpAddressesLock.Unlock()
 
 	dhtPeer.acnStatusesLock.Lock()
-	dhtPeer.acnStatuses[addr] = make(chan *acn.Status, 1000)
+	dhtPeer.acnStatuses[addr] = make(chan *acn.Status, AcnStatusesQueueSize)
 	dhtPeer.acnStatusesLock.Unlock()
 
 	if dhtPeer.addressAnnounced {
@@ -858,7 +857,7 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 	}
 
 	linfo().Str("addr", addr).
-		Msg("111 delegate client disconnected")
+		Msg("delegate client disconnected")
 	// Remove connection from map
 	dhtPeer.tcpAddressesLock.Lock()
 	delete(dhtPeer.tcpAddresses, addr)
@@ -900,7 +899,7 @@ func (dhtPeer *DHTPeer) RouteEnvelope(envel *aea.Envelope) error {
 	routeCount.Inc()
 	routeCountAll.Inc()
 	start := timer.NewTimer()
-	println("-> Routing envelope:", envel.String())
+	ldebug().Str("addr", envel.To).Msgf("-> Routing envelope: %s", envel.String())
 
 	// get sender agent envelRec
 	// TODO can change function signature to force the caller to provide the envelRec
@@ -971,7 +970,7 @@ func (dhtPeer *DHTPeer) RouteEnvelope(envel *aea.Envelope) error {
 			return err
 		}
 		linfo().Str("addr", target).Msg("wait for acn ack")
-		err = dhtPeer.AwaitACNStatus(target)
+		err = dhtPeer.AwaitAcnStatus(target)
 		linfo().Str("addr", target).Msg("got acn ack")
 		if err != nil {
 			lerror(err).Msgf("while waiting acn ack for envelope: %s", envel)
@@ -1444,7 +1443,7 @@ func (dhtPeer *DHTPeer) handleAeaEnvelopeStream(stream network.Stream) {
 			ignore(err)
 			return
 		}
-		err = dhtPeer.AwaitACNStatus(envel.To)
+		err = dhtPeer.AwaitAcnStatus(envel.To)
 		if err != nil {
 			lerror(
 				err,
@@ -1909,13 +1908,22 @@ func (dhtPeer *DHTPeer) registerAgentAddress(addr string) error {
 	return nil
 }
 
-func (dhtPeer *DHTPeer) AddACNStatusMessage(status *acn.Status, counterpartyID string) {
-	dhtPeer.acnStatuses[counterpartyID] <- status
+func (dhtPeer *DHTPeer) AddAcnStatusMessage(status *acn.Status, counterpartyID string) {
+	dhtPeer.acnStatusesLock.Lock()
+	queue := dhtPeer.acnStatuses[counterpartyID]
+	dhtPeer.acnStatusesLock.Unlock()
+
+	queue <- status
 }
 
-func (dhtPeer *DHTPeer) AwaitACNStatus(counterpartyID string) error {
+func (dhtPeer *DHTPeer) AwaitAcnStatus(counterpartyID string) error {
 	lerror, _, _, _ := dhtPeer.getLoggers()
-	status, err := acn.WaitForStatus(dhtPeer.acnStatuses[counterpartyID], ACN_STATUS_TIMEOUT)
+
+	dhtPeer.acnStatusesLock.Lock()
+	counterParty := dhtPeer.acnStatuses[counterpartyID]
+	dhtPeer.acnStatusesLock.Unlock()
+
+	status, err := acn.WaitForStatus(counterParty, AcnStatusTimeout)
 
 	if err != nil {
 		lerror(err).Msg("timeout on status wait")

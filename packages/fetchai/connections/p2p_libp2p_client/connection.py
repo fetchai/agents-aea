@@ -484,7 +484,7 @@ class P2PLibp2pClientConnection(Connection):
 
         if self._in_queue is not None:
             self._in_queue.put_nowait(None)
-        else:  # pragma: no cover1
+        else:  # pragma: no cover
             self.logger.debug("Called disconnect when input queue not initialized.")
         self.state = ConnectionStates.disconnected
         self.logger.debug("libp2p client connection disconnected.")

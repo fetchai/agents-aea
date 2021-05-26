@@ -1832,7 +1832,7 @@ type DelegateClient struct {
 	acn_status_chan chan *acn.Status
 }
 
-func (client *DelegateClient) AddACNStatusMessage(status *acn.Status, counterpartyID string) {
+func (client *DelegateClient) AddAcnStatusMessage(status *acn.Status, counterpartyID string) {
 	//client.acn_status_chan <- status
 }
 

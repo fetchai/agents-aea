@@ -24,12 +24,13 @@ import (
 	"errors"
 
 	acn "libp2p_node/acn"
+	common "libp2p_node/common"
 
 	proto "google.golang.org/protobuf/proto"
 )
 
 func HandleAcnMessageFromPipe(
-	pipe Pipe,
+	pipe common.Pipe,
 	statusQueue acn.StatusQueue,
 	counterpartyID string,
 ) (*Envelope, error) {
@@ -40,10 +41,10 @@ func HandleAcnMessageFromPipe(
 
 	if err != nil {
 		logger.Error().Str("err", err.Error()).Msg("while receiving data")
-		return envelope, err
+		return envelope, &common.PipeError{err, "Pipe error during envelope read"}
 	}
 
-	msg_type, acn_envelope, status, err := acn.DecodeACNMessage(data)
+	msg_type, acn_envelope, status, err := acn.DecodeAcnMessage(data)
 
 	if err != nil {
 		logger.Error().Str("err", err.Error()).Msg("while decoding acn")
@@ -62,7 +63,7 @@ func HandleAcnMessageFromPipe(
 				logger.Error().Str("err", err.Error()).Msg("while decoding envelope")
 				acn_err = acn.SendAcnError(pipe, "error on decoding envelope")
 				if acn_err != nil {
-					logger.Error().Str("err", err.Error()).Msg("11111 on acn send error")
+					logger.Error().Str("err", acn_err.Error()).Msg("on acn send error")
 				}
 				return envelope, err
 			}
@@ -73,17 +74,17 @@ func HandleAcnMessageFromPipe(
 	case "status":
 		{
 			logger.Debug().Msgf("got acn status %d", status.Code)
-			statusQueue.AddACNStatusMessage(status, counterpartyID)
+			statusQueue.AddAcnStatusMessage(status, counterpartyID)
 			return nil, nil
 
 		}
 	default:
 		{
-			acn_err = acn.SendAcnError(pipe, "BAD ACN MESSAGE")
+			acn_err = acn.SendAcnError(pipe, "Unsupported ACN message")
 			if acn_err != nil {
-				logger.Error().Str("err", err.Error()).Msg("on acn send error")
+				logger.Error().Str("err", acn_err.Error()).Msg("on acn send error")
 			}
-			return nil, errors.New("bad ACN message!")
+			return nil, errors.New("unsupported ACN message")
 		}
 	}
 }

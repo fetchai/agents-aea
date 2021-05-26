@@ -773,9 +773,7 @@ func (streamPipe StreamPipe) Read() ([]byte, error) {
 	return ReadBytes(streamPipe.Stream)
 }
 func (streamPipe StreamPipe) Write(data []byte) error {
-	err := WriteBytes(streamPipe.Stream, data)
-	logger.Debug().Msgf("Written for stream pipe 11111111 %s", err.Error())
-	return err
+	return WriteBytes(streamPipe.Stream, data)
 }
 func (streamPipe StreamPipe) Close() error {
 	return nil

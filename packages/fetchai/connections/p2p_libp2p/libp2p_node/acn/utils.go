@@ -39,7 +39,7 @@ var logger zerolog.Logger = zerolog.New(zerolog.ConsoleWriter{
 
 const CurrentVersion = "0.1.0"
 
-func DecodeACNMessage(buf []byte) (string, *AeaEnvelope, *Status, error) {
+func DecodeAcnMessage(buf []byte) (string, *AeaEnvelope, *Status, error) {
 	response := &AcnMessage{}
 	err := proto.Unmarshal(buf, response)
 	msg_type := ""
@@ -59,8 +59,9 @@ func DecodeACNMessage(buf []byte) (string, *AeaEnvelope, *Status, error) {
 		status = pl.Status
 		msg_type = "status"
 	default:
-		logger.Error().Str("err", err.Error()).Msgf("unexpected ACN Message")
+		
 		err = errors.New("unexpected ACN Message")
+		logger.Error().Msg(err.Error())
 		return msg_type, nil, nil, err
 	}
 	return msg_type, aeaEnvelope, status, err
@@ -71,8 +72,9 @@ func WaitForStatus(ch chan *Status, timeout time.Duration) (*Status, error) {
 	case m := <-ch:
 		return m, nil
 	case <-time.After(timeout):
-		logger.Error().Msgf("ACN send acknowledge timeout")
-		return nil, errors.New("ACN send acknowledge timeout")
+		err := errors.New("ACN send acknowledge timeout")
+		logger.Error().Msg(err.Error())
+		return nil,  err
 	}
 }
 
@@ -114,7 +116,7 @@ func SendAcnError(pipe Pipe, error_msg string) error {
 	return err
 }
 
-func EncodeACNEnvelope(envelope_bytes []byte) (error, []byte) {
+func EncodeAcnEnvelope(envelope_bytes []byte) (error, []byte) {
 	aeaEnvelope := &AeaEnvelope{Envel: envelope_bytes}
 	msg := &AcnMessage{
 		Version: CurrentVersion,
@@ -132,5 +134,5 @@ type Pipe interface {
 }
 
 type StatusQueue interface {
-	AddACNStatusMessage(status *Status, counterpartyID string)
+	AddAcnStatusMessage(status *Status, counterpartyID string)
 }
