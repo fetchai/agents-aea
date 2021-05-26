@@ -52,7 +52,9 @@ class DefaultHandler(Handler):
 
     SUPPORTED_PROTOCOL = DefaultMessage.protocol_id  # type: Optional[PublicId]
 
-    def _handle_received_invite(self, invite_detail: Dict[str, str]) -> Optional[str]:
+    def _handle_received_invite(
+        self, invite_detail: Dict[str, str]
+    ) -> Optional[str]:  # pragma: no cover
         """
         Prepare an invitation detail received from Faber_AEA to be send to the Alice ACA.
 
