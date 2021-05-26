@@ -340,8 +340,10 @@ class GanacheDockerImage(DockerImage):
 class SOEFDockerImage(DockerImage):
     """Wrapper to SOEF Docker image."""
 
+    PORT = 9002
+
     def __init__(
-        self, client: DockerClient, addr: str, port: int = 9002,
+        self, client: DockerClient, addr: str, port: int = PORT,
     ):
         """
         Initialize the SOEF Docker image.
@@ -357,7 +359,7 @@ class SOEFDockerImage(DockerImage):
     @property
     def tag(self) -> str:
         """Get the image tag."""
-        return "fetchai/soef:latest"
+        return "gcr.io/fetch-ai-images/soef:9e78611"
 
     def _make_ports(self) -> Dict:
         """Make ports dictionary for Docker."""
