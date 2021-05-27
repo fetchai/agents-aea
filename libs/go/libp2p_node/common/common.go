@@ -19,13 +19,13 @@
  */
 package common
 
-type PipeError struct{
+type PipeError struct {
 	Err error
 	Msg string
 }
 
-func (err *PipeError) Error() string{
-	return err.Msg 
+func (err *PipeError) Error() string {
+	return err.Msg
 }
 
 func (err *PipeError) Unwrap() error {

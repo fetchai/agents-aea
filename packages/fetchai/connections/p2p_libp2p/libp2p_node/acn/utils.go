@@ -59,7 +59,7 @@ func DecodeAcnMessage(buf []byte) (string, *AeaEnvelope, *Status, error) {
 		status = pl.Status
 		msg_type = "status"
 	default:
-		
+
 		err = errors.New("unexpected ACN Message")
 		logger.Error().Msg(err.Error())
 		return msg_type, nil, nil, err
@@ -74,7 +74,7 @@ func WaitForStatus(ch chan *Status, timeout time.Duration) (*Status, error) {
 	case <-time.After(timeout):
 		err := errors.New("ACN send acknowledge timeout")
 		logger.Error().Msg(err.Error())
-		return nil,  err
+		return nil, err
 	}
 }
 

@@ -41,7 +41,7 @@ func HandleAcnMessageFromPipe(
 
 	if err != nil {
 		logger.Error().Str("err", err.Error()).Msg("while receiving data")
-		return envelope, &common.PipeError{err, "Pipe error during envelope read"}
+		return envelope, &common.PipeError{Err: err, Msg: "Pipe error during envelope read"}
 	}
 
 	msg_type, acn_envelope, status, err := acn.DecodeAcnMessage(data)

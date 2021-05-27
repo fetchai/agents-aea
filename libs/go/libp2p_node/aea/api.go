@@ -21,8 +21,8 @@
 package aea
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
 	"log"
 	"net"
 	"os"
@@ -33,7 +33,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 	proto "google.golang.org/protobuf/proto"
-	
+
 	acn "libp2p_node/acn"
 	common "libp2p_node/common"
 )
@@ -363,11 +363,13 @@ func (aea *AeaApi) listenForEnvelopes() {
 	//TOFIX(LR) add an exit strategy
 	for {
 		envel, err := HandleAcnMessageFromPipe(aea.pipe, aea, aea.AeaAddress())
-		
+
 		var e *common.PipeError
-		
+
 		if errors.As(err, &e) {
-			logger.Error().Str("err", err.Error()).Msg("pip error while receiving envelope. disconnect")
+			logger.Error().
+				Str("err", err.Error()).
+				Msg("pip error while receiving envelope. disconnect")
 			logger.Info().Msg("disconnecting")
 			if !aea.closing {
 				aea.stop()
@@ -459,8 +461,13 @@ func (aea AeaApi) SendEnvelope(envelope *Envelope) error {
 		return err
 	}
 	if status.Code != acn.Status_SUCCESS {
-		logger.Error().Str("op", "send_envelope").Msgf("acn confirmation status is not Status Success: %d", status.Code)
-		return fmt.Errorf("send envelope: acn confirmation status is not Status Success: %d", status.Code)
+		logger.Error().
+			Str("op", "send_envelope").
+			Msgf("acn confirmation status is not Status Success: %d", status.Code)
+		return fmt.Errorf(
+			"send envelope: acn confirmation status is not Status Success: %d",
+			status.Code,
+		)
 	}
 	return err
 }

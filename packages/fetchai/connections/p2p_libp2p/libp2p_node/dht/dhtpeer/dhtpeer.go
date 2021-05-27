@@ -62,6 +62,7 @@ import (
 
 const AcnStatusTimeout = 5.0 * time.Second
 const AcnStatusesQueueSize = 1000
+
 // panics if err is not nil
 func check(err error) {
 	if err != nil {
