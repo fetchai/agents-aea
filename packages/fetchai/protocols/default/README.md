@@ -1,4 +1,3 @@
-
 # Default Protocol
 
 ## Description
