@@ -18,7 +18,7 @@ spec:
         kubernetes.io/os: linux
       containers:
       - name: tac-deploy-container
-        image: gcr.io/fetch-ai-sandbox/tac_deploy:0.0.13t3
+        image: gcr.io/fetch-ai-sandbox/tac_deploy:0.0.14
         resources:
           requests:
             memory: "12000000Ki"
@@ -28,7 +28,7 @@ spec:
             cpu: "3700m"
         env:
          - name: PARTICIPANTS_AMOUNT
-           value: "10"
+           value: "70"
          - name: MINUTES_TILL_START
            value: "10"
          - name: COMPETITION_TIMEOUT

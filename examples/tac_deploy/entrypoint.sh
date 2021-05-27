@@ -159,21 +159,6 @@ function set_participant(){
 	cd ..
 }
 
-
-cd tac_controller
-set_agent tac_controller $BASE_PORT
-set_tac_name
-
-PEER=`aea get-multiaddress fetchai -c -i fetchai/p2p_libp2p:0.23.0 -u public_uri|sed -e "s/9000/$BASE_PORT/"`
-aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config.entry_peers "[]"
-aea config set --type str vendor.fetchai.connections.p2p_libp2p.config.public_uri 127.0.0.1:$BASE_PORT
-datetime_start=$(date -d@"$(( `date +%s`+$MINUTES_TILL_START*60))" "+%d %m %Y %H:%M")
-aea config set vendor.fetchai.skills.tac_control.models.parameters.args.registration_start_time "$datetime_start"
-aea config set vendor.fetchai.skills.tac_control.models.parameters.args.competition_timeout $COMPETITION_TIMEOUT
-aea config set vendor.fetchai.skills.tac_control.models.parameters.args.inactivity_timeout $INACTIVITY_TIMEOUT
-cd ..
-
-
 agents_list=''
 for i in $(seq $PARTICIPANTS_AMOUNT);
 do
@@ -182,6 +167,14 @@ do
 	agents_list="$agent_name $agents_list"
 done
 
+cd tac_controller
+set_agent tac_controller $BASE_PORT
+set_tac_name
+datetime_start=$(date -d@"$(( `date +%s`+$MINUTES_TILL_START*60))" "+%d %m %Y %H:%M")
+aea config set vendor.fetchai.skills.tac_control.models.parameters.args.registration_start_time "$datetime_start"
+aea config set vendor.fetchai.skills.tac_control.models.parameters.args.competition_timeout $COMPETITION_TIMEOUT
+aea config set vendor.fetchai.skills.tac_control.models.parameters.args.inactivity_timeout $INACTIVITY_TIMEOUT
+cd ..
 
 echo "Launching agents..."
 aea launch tac_controller $agents_list
