@@ -32,7 +32,7 @@ from tests.test_packages.test_skills.test_aries_alice.intermediate_class import 
 
 
 class TestAliceBehaviour(AriesAliceTestCase):
-    """Test registration behaviour of aries_alice."""
+    """Test alice behaviour of aries_alice."""
 
     def test_init(self):
         """Test the __init__ method of the alice behaviour."""
@@ -40,7 +40,7 @@ class TestAliceBehaviour(AriesAliceTestCase):
         assert self.alice_behaviour._nb_retries == 0
 
     def test_send_http_request_message(self):
-        """Test the send_http_request_message method of the registration behaviour."""
+        """Test the send_http_request_message method of the alice behaviour."""
         # operation
         self.alice_behaviour.send_http_request_message(
             self.mocked_method, self.mocked_url, self.body_dict
@@ -98,7 +98,7 @@ class TestAliceBehaviour(AriesAliceTestCase):
         mock_logger.assert_any_call(logging.INFO, "registering agent on SOEF.")
 
     def test_act_i(self):
-        """Test the act method of the registration behaviour where failed_registration_msg is NOT None."""
+        """Test the act method of the alice behaviour where failed_registration_msg is NOT None."""
         # setup
         self.alice_behaviour.failed_registration_msg = self.registration_message
 
@@ -126,7 +126,7 @@ class TestAliceBehaviour(AriesAliceTestCase):
         assert self.alice_behaviour.failed_registration_msg is None
 
     def test_act_ii(self):
-        """Test the act method of the registration behaviour where failed_registration_msg is NOT None and max retries is reached."""
+        """Test the act method of the alice behaviour where failed_registration_msg is NOT None and max retries is reached."""
         # setup
         self.alice_behaviour.failed_registration_msg = self.registration_message
         self.alice_behaviour._max_soef_registration_retries = 2
@@ -139,7 +139,7 @@ class TestAliceBehaviour(AriesAliceTestCase):
         assert self.skill.skill_context.is_active is False
 
     def test_register_service(self):
-        """Test the register_service method of the registration behaviour."""
+        """Test the register_service method of the alice behaviour."""
         # operation
         with patch.object(
             self.strategy,
@@ -167,7 +167,7 @@ class TestAliceBehaviour(AriesAliceTestCase):
         )
 
     def test_register_genus(self):
-        """Test the register_genus method of the registration behaviour."""
+        """Test the register_genus method of the alice behaviour."""
         # operation
         with patch.object(
             self.strategy,
@@ -195,7 +195,7 @@ class TestAliceBehaviour(AriesAliceTestCase):
         )
 
     def test_register_classification(self):
-        """Test the register_classification method of the registration behaviour."""
+        """Test the register_classification method of the alice behaviour."""
         # operation
         with patch.object(
             self.strategy,
@@ -223,7 +223,7 @@ class TestAliceBehaviour(AriesAliceTestCase):
         )
 
     def test_teardown(self):
-        """Test the teardown method of the service_registration behaviour."""
+        """Test the teardown method of the alice behaviour."""
         # operation
         with patch.object(
             self.strategy,
