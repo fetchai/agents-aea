@@ -194,7 +194,6 @@ def nested_set_config(
     settings_keys, config_file_path, config_loader, _ = handle_dotted_path(
         dotted_path, author
     )
-
     with open_file(config_file_path) as fp:
         config = config_loader.load(fp)
 
