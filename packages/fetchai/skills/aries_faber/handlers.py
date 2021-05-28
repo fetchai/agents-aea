@@ -43,15 +43,16 @@ from packages.fetchai.skills.aries_faber.strategy import (
     ADMIN_COMMAND_SCEHMAS,
     ADMIN_COMMAND_STATUS,
     FABER_ACA_IDENTITY,
-    FaberStrategy,
     LEDGER_COMMAND_REGISTER_DID,
+    Strategy,
 )
 
 
+DEFAULT_SEARCH_INTERVAL = 5.0
 SUPPORT_REVOCATION = False
 
 
-class FaberHTTPHandler(Handler):
+class HttpHandler(Handler):
     """This class represents faber's handler for default messages."""
 
     SUPPORTED_PROTOCOL = HttpMessage.protocol_id  # type: Optional[PublicId]
@@ -89,7 +90,7 @@ class FaberHTTPHandler(Handler):
         :return: None
         """
         # context
-        strategy = cast(FaberStrategy, self.context.strategy)
+        strategy = cast(Strategy, self.context.strategy)
         default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
 
         # default message
@@ -107,8 +108,8 @@ class FaberHTTPHandler(Handler):
 
         :return: None
         """
-        strategy = cast(FaberStrategy, self.context.strategy)
-        self.context.logger.info("Registering Faber_ACA with seed " + str(self.seed))
+        strategy = cast(Strategy, self.context.strategy)
+        self.context.logger.info(f"Registering Faber_ACA with seed {str(self.seed)}")
         data = {"alias": self.faber_identity, "seed": self.seed, "role": "TRUST_ANCHOR"}
         self.context.behaviours.faber.send_http_request_message(
             method="POST",
@@ -128,15 +129,15 @@ class FaberHTTPHandler(Handler):
 
         :return: None
         """
-        strategy = cast(FaberStrategy, self.context.strategy)
+        strategy = cast(Strategy, self.context.strategy)
         schema_body = {
             "schema_name": schema_name,
             "schema_version": version,
             "attributes": schema_attrs,
         }
-        self.context.logger.info("Registering schema " + str(schema_body))
+        self.context.logger.info(f"Registering schema {str(schema_body)}")
         # The following call isn't responded to. This is most probably because of missing options when running the accompanying ACA.
-        # THe accompanying ACA is not properly connected to the von network ledger (missing pointer to genesis file/wallet type)
+        # The accompanying ACA is not properly connected to the von network ledger (missing pointer to genesis file/wallet type)
         self.context.behaviours.faber.send_http_request_message(
             method="POST",
             url=strategy.admin_url + ADMIN_COMMAND_SCEHMAS,
@@ -150,7 +151,7 @@ class FaberHTTPHandler(Handler):
         :param schema_id: the id of the schema definition registered on the ledger
         :return: None
         """
-        strategy = cast(FaberStrategy, self.context.strategy)
+        strategy = cast(Strategy, self.context.strategy)
         credential_definition_body = {
             "schema_id": schema_id,
             "support_revocation": SUPPORT_REVOCATION,
@@ -176,32 +177,30 @@ class FaberHTTPHandler(Handler):
         :return: None
         """
         message = cast(HttpMessage, message)
+
+        # recover dialogue
         http_dialogues = cast(HttpDialogues, self.context.http_dialogues)
-        strategy = cast(FaberStrategy, self.context.strategy)
+        http_dialogue = cast(Optional[HttpDialogue], http_dialogues.update(message))
+        if http_dialogue is None:
+            self.context.logger.error(
+                "something went wrong when adding the incoming HTTP message to the dialogue."
+            )
+            return
+
+        strategy = cast(Strategy, self.context.strategy)
 
         if (
             message.performative == HttpMessage.Performative.RESPONSE
             and message.status_code == 200
         ):  # response to http request
-            http_dialogue = cast(Optional[HttpDialogue], http_dialogues.update(message))
-            if http_dialogue is None:
-                self.context.logger.exception(
-                    "faber -> http_handler -> handle() -> RESPONSE: "
-                    "something went wrong when adding the incoming HTTP response message to the dialogue."
-                )
-                return
-
             content_bytes = message.body  # type: ignore
             content = json.loads(content_bytes)
-            self.context.logger.info("Received message: " + str(content))
+            self.context.logger.info(f"Received message: {str(content)}")
             if "version" in content:  # response to /status
                 self._register_did()
             elif "did" in content:
+                self.context.logger.info(f"Received DID: {self.did}")
                 self.did = content["did"]
-                if self.did is not None:
-                    self.context.logger.info("Got DID: " + self.did)
-                else:
-                    self.context.logger.info("DID is None")
                 self._register_schema(
                     schema_name="degree schema",
                     version="0.0.1",
@@ -220,9 +219,9 @@ class FaberHTTPHandler(Handler):
                 connection = content
                 self.connection_id = content["connection_id"]
                 invitation = connection["invitation"]
-                self.context.logger.info("connection: " + str(connection))
-                self.context.logger.info("connection id: " + self.connection_id)  # type: ignore
-                self.context.logger.info("invitation: " + str(invitation))
+                self.context.logger.info(f"connection: {str(connection)}")
+                self.context.logger.info(f"connection id: {self.connection_id}")  # type: ignore
+                self.context.logger.info(f"invitation: {str(invitation)}")
                 self.context.logger.info(
                     "Sent invitation to Alice. Waiting for the invitation from Alice to finalise the connection..."
                 )
@@ -230,16 +229,9 @@ class FaberHTTPHandler(Handler):
         elif (
             message.performative == HttpMessage.Performative.REQUEST
         ):  # webhook request
-            http_dialogue = cast(Optional[HttpDialogue], http_dialogues.update(message))
-            if http_dialogue is None:
-                self.context.logger.exception(
-                    "faber -> http_handler -> handle() -> REQUEST: "
-                    "something went wrong when adding the incoming HTTP webhook request message to the dialogue."
-                )
-                return
             content_bytes = message.body
             content = json.loads(content_bytes)
-            self.context.logger.info("Received webhook message content:" + str(content))
+            self.context.logger.info(f"Received webhook message content:{str(content)}")
             if "connection_id" in content:
                 if content["connection_id"] == self.connection_id:
                     if content["state"] == "active" and not self.is_connected_to_Alice:
@@ -254,7 +246,7 @@ class FaberHTTPHandler(Handler):
         """
 
 
-class FaberOefSearchHandler(Handler):
+class OefSearchHandler(Handler):
     """This class implements an OEF search handler."""
 
     SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[PublicId]
@@ -336,18 +328,14 @@ class FaberOefSearchHandler(Handler):
         """
         if len(oef_search_msg.agents) != 1:
             self.context.logger.info(
-                "did not find Alice. found {} agents. continue searching.".format(
-                    len(oef_search_msg.agents)
-                )
+                f"did not find Alice. found {len(oef_search_msg.agents)} agents. continue searching."
             )
             return
 
         self.context.logger.info(
-            "found Alice with address {}, stopping search.".format(
-                oef_search_msg.agents[0]
-            )
+            f"found Alice with address {oef_search_msg.agents[0]}, stopping search."
         )
-        strategy = cast(FaberStrategy, self.context.strategy)
+        strategy = cast(Strategy, self.context.strategy)
         strategy.is_searching = False  # stopping search
 
         # set alice address
