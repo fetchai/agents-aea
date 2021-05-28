@@ -18,6 +18,7 @@
 # ------------------------------------------------------------------------------
 """Test module for Registry push methods."""
 import filecmp
+import os
 from unittest import TestCase, mock
 
 import pytest
@@ -69,7 +70,7 @@ class SaveItemLocallyTestCase(TestCase):
 
 @mock.patch("aea.cli.push.copytree")
 class TestPushLocally(AEATestCaseEmpty):
-    """Test case for clu push --local."""
+    """Test case for cli push --local."""
 
     ITEM_PUBLIC_ID = PUBLIC_ID
     ITEM_TYPE = "skill"
@@ -84,8 +85,32 @@ class TestPushLocally(AEATestCaseEmpty):
         self, copy_tree_mock,
     ):
         """Test ok for vendor's item."""
-        self.invoke("push", "--local", "skill", "fetchai/echo")
+        with mock.patch("os.path.exists", side_effect=[False, True, False]):
+            self.invoke("push", "--local", "skill", "fetchai/echo")
         copy_tree_mock.assert_called_once()
+        src_path, dst_path = copy_tree_mock.mock_calls[0][1]
+        # check for correct author, type, name
+        assert (
+            os.path.normpath(src_path).split(os.sep)[-3:]
+            == os.path.normpath(dst_path).split(os.sep)[-3:]
+        )
+
+    def test_user_ok(
+        self, copy_tree_mock,
+    ):
+        """Test ok for users's item."""
+        with mock.patch(
+            "aea.cli.push.try_get_item_source_path",
+            return_value=f"{self.author}/skills/echo",
+        ), mock.patch("aea.cli.push.check_package_public_id"):
+            self.invoke("push", "--local", "skill", f"{self.author}/echo")
+        copy_tree_mock.assert_called_once()
+        src_path, dst_path = copy_tree_mock.mock_calls[0][1]
+        # check for correct author, type, name
+        assert (
+            os.path.normpath(src_path).split(os.sep)[-3:]
+            == os.path.normpath(dst_path).split(os.sep)[-3:]
+        )
 
     def test_fail_no_item(
         self, *mocks,
