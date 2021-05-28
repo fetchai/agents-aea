@@ -25,6 +25,9 @@ from aea_ledger_fetchai import FetchAICrypto
 
 from aea.test_tools.test_cases import AEATestCaseEmpty
 
+from packages.fetchai.connections.p2p_libp2p.connection import (
+    PUBLIC_ID as P2P_CONNECTION_PUBLIC_ID,
+)
 from packages.fetchai.connections.stub.connection import (
     PUBLIC_ID as STUB_CONNECTION_PUBLIC_ID,
 )
@@ -64,7 +67,6 @@ class TestGetMultiAddressCommandConnectionPositive(AEATestCaseEmpty):
 
         assert result.exit_code == 0
         # test we can decode the output
-        base58.b58decode(result.stdout)
 
 
 class TestGetMultiAddressCommandConnectionIdPositive(AEATestCaseEmpty):
@@ -111,8 +113,10 @@ class TestGetMultiAddressCommandConnectionIdURIPositive(AEATestCaseEmpty):
         self.generate_private_key(FetchAICrypto.identifier)
         self.add_private_key(FetchAICrypto.identifier, connection=True)
 
+        port = 10101
+        host = "127.0.0.1"
         self.nested_set_config(
-            "vendor.fetchai.connections.stub.config", {"public_uri": "127.0.0.1:10000"}
+            "vendor.fetchai.connections.stub.config", {"public_uri": f"{host}:{port}"}
         )
 
         result = self.run_cli_command(
@@ -128,7 +132,47 @@ class TestGetMultiAddressCommandConnectionIdURIPositive(AEATestCaseEmpty):
 
         assert result.exit_code == 0
         # multiaddr test
-        expected_multiaddr_prefix = "/dns4/127.0.0.1/tcp/10000/p2p/"
+        expected_multiaddr_prefix = f"/dns4/{host}/tcp/{port}/p2p/"
+        assert expected_multiaddr_prefix in result.stdout
+        base58_addr = str(result.stdout).replace(expected_multiaddr_prefix, "")
+        base58.b58decode(base58_addr)
+
+
+class TestGetMultiAddressCommandConnectionIdURIAgentOverridesPositive(AEATestCaseEmpty):
+    """Test case for CLI get-multiaddress command with --connection flag and --uri for agent overrides."""
+
+    def test_run(self, *mocks):
+        """Run the test."""
+        self.add_item("connection", str(P2P_CONNECTION_PUBLIC_ID))
+        self.generate_private_key(FetchAICrypto.identifier)
+        self.add_private_key(FetchAICrypto.identifier, connection=True)
+
+        port = 10101
+        host = "127.0.0.1"
+        self.run_cli_command(
+            "config",
+            "set",
+            "--type",
+            "dict",
+            "vendor.fetchai.connections.p2p_libp2p.config",
+            f'{{"public_uri": "{host}:{port}"}}',
+            cwd=self.current_agent_context,
+        )
+
+        result = self.run_cli_command(
+            "get-multiaddress",
+            FetchAICrypto.identifier,
+            "--connection",
+            "--connection-id",
+            str(P2P_CONNECTION_PUBLIC_ID),
+            "--uri-field",
+            "public_uri",
+            cwd=self.current_agent_context,
+        )
+
+        assert result.exit_code == 0
+        # multiaddr test
+        expected_multiaddr_prefix = f"/dns4/{host}/tcp/{port}/p2p/"
         assert expected_multiaddr_prefix in result.stdout
         base58_addr = str(result.stdout).replace(expected_multiaddr_prefix, "")
         base58.b58decode(base58_addr)
