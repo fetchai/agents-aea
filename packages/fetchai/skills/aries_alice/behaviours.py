@@ -34,7 +34,7 @@ from packages.fetchai.skills.aries_alice.dialogues import (
     HttpDialogues,
     OefSearchDialogues,
 )
-from packages.fetchai.skills.aries_alice.strategy import AliceStrategy
+from packages.fetchai.skills.aries_alice.strategy import Strategy
 
 
 DEFAULT_MAX_SOEF_REGISTRATION_RETRIES = 5
@@ -83,7 +83,7 @@ class AliceBehaviour(TickerBehaviour):
             body=b"" if content is None else json.dumps(content).encode("utf-8"),
         )
         # send
-        self.context.outbox.put_message(message=request_http_message,)
+        self.context.outbox.put_message(message=request_http_message)
 
     def setup(self) -> None:
         """
@@ -164,7 +164,7 @@ class AliceBehaviour(TickerBehaviour):
 
         :return: None
         """
-        strategy = cast(AliceStrategy, self.context.strategy)
+        strategy = cast(Strategy, self.context.strategy)
         description = strategy.get_location_description()
         self._register(description, "registering agent on SOEF.")
 
@@ -174,7 +174,7 @@ class AliceBehaviour(TickerBehaviour):
 
         :return: None
         """
-        strategy = cast(AliceStrategy, self.context.strategy)
+        strategy = cast(Strategy, self.context.strategy)
         description = strategy.get_register_service_description()
         self._register(description, "registering agent's service on the SOEF.")
 
@@ -184,7 +184,7 @@ class AliceBehaviour(TickerBehaviour):
 
         :return: None
         """
-        strategy = cast(AliceStrategy, self.context.strategy)
+        strategy = cast(Strategy, self.context.strategy)
         description = strategy.get_register_personality_description()
         self._register(
             description, "registering agent's personality genus on the SOEF."
@@ -196,7 +196,7 @@ class AliceBehaviour(TickerBehaviour):
 
         :return: None
         """
-        strategy = cast(AliceStrategy, self.context.strategy)
+        strategy = cast(Strategy, self.context.strategy)
         description = strategy.get_register_classification_description()
         self._register(
             description, "registering agent's personality classification on the SOEF."
@@ -208,7 +208,7 @@ class AliceBehaviour(TickerBehaviour):
 
         :return: None
         """
-        strategy = cast(AliceStrategy, self.context.strategy)
+        strategy = cast(Strategy, self.context.strategy)
         description = strategy.get_unregister_service_description()
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
@@ -227,7 +227,7 @@ class AliceBehaviour(TickerBehaviour):
 
         :return: None
         """
-        strategy = cast(AliceStrategy, self.context.strategy)
+        strategy = cast(Strategy, self.context.strategy)
         description = strategy.get_location_description()
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
