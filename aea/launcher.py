@@ -87,8 +87,6 @@ def _run_agent(
     :param stop_event: multithreading Event to stop agent run.
     :param log_level: debug level applied for AEA in subprocess
     :param password: the password to encrypt/decrypt the private key.
-
-    :return: None
     """
     import asyncio  # pylint: disable=import-outside-toplevel
     import select  # pylint: disable=import-outside-toplevel
