@@ -22,6 +22,8 @@ import logging
 from typing import cast
 from unittest.mock import patch
 
+import pytest
+
 from packages.fetchai.protocols.default.message import DefaultMessage
 from packages.fetchai.protocols.http.message import HttpMessage
 from packages.fetchai.protocols.oef_search.message import OefSearchMessage
@@ -63,6 +65,14 @@ class TestHttpHandler(AriesFaberTestCase):
         """Test the setup method of the http_handler handler."""
         assert self.http_handler.setup() is None
         self.assert_quantity_in_outbox(0)
+
+    def test_properties(self):
+        """Test the properties of the http_handler handler."""
+        self.http_handler._schema_id = None
+        with pytest.raises(ValueError, match="schema_id not set"):
+            assert self.http_handler.schema_id is None
+        self.http_handler._schema_id = "some_schema_id"
+        assert self.http_handler.schema_id == "some_schema_id"
 
     def test_handle_unidentified_dialogue(self):
         """Test the handle method of the http handler where incoming message is invalid."""
