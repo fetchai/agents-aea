@@ -9,10 +9,10 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmUQB9uBtWGWY5zETSyJnbPZixRj1c4suedVwGPegrTQWs
   __init__.py: QmQUvEQaaNhSK3ZB35QXnKx93FPb5p9sWysFHuDP7zNsBu
-  behaviours.py: QmWCwW1oWBWMvPnPRt2v88aTBtEteTVaDrXfHsWAvWoZVj
-  dialogues.py: QmckxpUSmT9iNGDp7q1GaTtYPJDSMgHro9Y7z9zVWt2pdp
-  handlers.py: Qmab7KMKAwLfuWVGgfuYBFbLtQuTHoFA2NBqsWD4WkAbhU
-  strategy.py: QmPEoVGckc8e9L1c4rRa7aYDKMQWg6o8UbN5QgDd1M4c32
+  behaviours.py: QmTw8RsAFpYKjfnxNyN3aoV4jDAxNXYsoFpvBxnJpmGUGx
+  dialogues.py: QmRDG1pHppiRJqdZ2yWRY44h2tFVq2XnKVQw3EZ5TVg1oG
+  handlers.py: QmeSyQ3Wd7pxghUasKuj4CeLuvSD71LMKk2jaAi94ETanz
+  strategy.py: QmUFzkeRJGeT4eybSsQGkV3c1iQ2Fj4YDkpmmYk4nV6HmM
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/http_client:0.22.0
@@ -25,15 +25,15 @@ skills: []
 behaviours:
   faber:
     args:
-      services_interval: 20
+      search_interval: 5
     class_name: FaberBehaviour
 handlers:
   http:
     args: {}
-    class_name: FaberHTTPHandler
+    class_name: HttpHandler
   oef_search:
     args: {}
-    class_name: FaberOefSearchHandler
+    class_name: OefSearchHandler
 models:
   default_dialogues:
     args: {}
@@ -57,6 +57,6 @@ models:
         search_key: intro_service
         search_value: intro_alice
       search_radius: 5.0
-    class_name: FaberStrategy
+    class_name: Strategy
 dependencies: {}
 is_abstract: false

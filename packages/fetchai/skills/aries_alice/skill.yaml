@@ -9,10 +9,10 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: Qmc88RFakLqDTqT42YGJDCDrH22tW2dkCBAs8wLKMGt5TV
   __init__.py: QmTiLfLMvHMUzrgQ7tMtYewLrz5DDihRV2YoLkq6ycCBby
-  behaviours.py: QmeVpN2b4M3w84Q8MeBxfcdSB7tFQcgDYHgAcWEqEyibcC
-  dialogues.py: QmS74KVR3EHXSTFa7P1dcqbJsFjNNo4gPzekhKXfKbD3Wj
-  handlers.py: QmXmxZ8kcpPHPZBCUUzoBoma7UjyYPayBdLkDaCHtHQGTr
-  strategy.py: Qmb6naFGGHgcirrwNf6VUxyVa4BYKNFwyCttqkKn7mER8U
+  behaviours.py: QmZUD3AYp9Tw51zFC5tyS49yunAZvXD6qtWX8buu7jou11
+  dialogues.py: QmPPyGaizHVdJdLzuD4xebhSx6jehNc3oQ9UnZBu6xqu3b
+  handlers.py: QmZMH8RvMCXHXYKz4fS6AhnfiuUHNDXtfnEqhxwgwECnW5
+  strategy.py: Qmaa1usbr2duj3yMm2gF5AbuCpBSyFfkRVHVceeQT8XVGE
 fingerprint_ignore_patterns: []
 connections:
 - fetchai/http_client:0.22.0
@@ -31,13 +31,13 @@ behaviours:
 handlers:
   default:
     args: {}
-    class_name: AliceDefaultHandler
+    class_name: DefaultHandler
   http:
     args: {}
-    class_name: AliceHttpHandler
+    class_name: HttpHandler
   oef_search:
     args: {}
-    class_name: AliceOefSearchHandler
+    class_name: OefSearchHandler
 models:
   default_dialogues:
     args: {}
@@ -64,6 +64,6 @@ models:
       service_data:
         key: intro_service
         value: intro_alice
-    class_name: AliceStrategy
+    class_name: Strategy
 dependencies: {}
 is_abstract: false

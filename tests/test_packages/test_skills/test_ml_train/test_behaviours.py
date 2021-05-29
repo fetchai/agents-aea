@@ -29,7 +29,7 @@ import pytest
 
 from aea.helpers.search.models import Description
 from aea.protocols.dialogue.base import DialogueMessage
-from aea.skills.tasks import Task, TaskManager
+from aea.skills.tasks import TaskManager
 from aea.test_tools.test_skill import BaseSkillTestCase
 
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
@@ -126,14 +126,12 @@ class TestSearchBehaviour(BaseSkillTestCase):
         """Test the act method of the search behaviour where task is ready and successful."""
         # setup
         self.strategy._current_task_id = 1
-
-        mock_task = Mock(wraps=Task)
-        mock_task.result = "some_weights"
+        mocked_weights = "some_weights"
 
         mock_task_result = Mock(wraps=ApplyResult)
         mock_task_result.ready.return_value = True
         mock_task_result.successful.return_value = True
-        mock_task_result.get.return_value = mock_task
+        mock_task_result.get.return_value = mocked_weights
 
         # operation
         with patch.object(
@@ -144,7 +142,7 @@ class TestSearchBehaviour(BaseSkillTestCase):
 
         # after
         assert self.strategy._current_task_id is None
-        assert self.strategy._weights == "some_weights"
+        assert self.strategy._weights == mocked_weights
         mock_generic_act.assert_called_once()
 
     def test_act_data_exists(self):
