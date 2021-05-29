@@ -84,7 +84,8 @@ The following steps assume you have launched the AEA Manager Desktop app.
 
 6. Run the `ml_model_trainer`.
 
-In the AEA's logs, you should see the agent trading successfully.
+In the AEA's logs, you should see the agents trading successfully, and the training agent training its machine learning model using the data purchased. 
+The trainer keeps purchasing data and training its model until stopped.  
 <br>
 
 ## Option 2: CLI approach
@@ -271,7 +272,8 @@ Then run the model trainer AEA:
 aea run
 ```
 
-You can see that the AEAs find each other, negotiate and eventually trade.
+You can see that the AEAs find each other, negotiate and eventually trade. After the trade, the model trainer AEA trains its ML model using the data it has purchased. 
+This AEA keeps purchasing data and training its model until stopped.
 
 #### Cleaning up
 
