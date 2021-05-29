@@ -186,7 +186,10 @@ class MultiAgentManager:
         self._loop: Optional[asyncio.AbstractEventLoop] = None
         self._event: Optional[asyncio.Event] = None
 
-        self._error_callbacks: List[Callable[[str, BaseException], None]] = []
+        self._error_callbacks: List[Callable[[str, BaseException], None]] = [
+            self._default_error_callback
+        ]
+        self._custom_callback_added: bool = False
         self._last_start_status: Optional[
             Tuple[
                 bool,
@@ -267,11 +270,8 @@ class MultiAgentManager:
                 agent_name = agents_run_tasks_futures[task]
                 self._agents_tasks.pop(agent_name)
                 if task.exception():
-                    if len(self._error_callbacks) == 0:
-                        self._print_exception_occurred_but_no_error_callback(agent_name)
-                    else:
-                        for callback in self._error_callbacks:
-                            callback(agent_name, task.exception())
+                    for callback in self._error_callbacks:
+                        callback(agent_name, task.exception())
                 else:
                     await task
 
@@ -279,6 +279,10 @@ class MultiAgentManager:
         self, error_callback: Callable[[str, BaseException], None]
     ) -> None:
         """Add error callback to call on error raised."""
+        if len(self._error_callbacks) == 1 and not self._custom_callback_added:
+            # only default callback present, reset before adding new callback
+            self._custom_callback_added = True
+            self._error_callbacks = []
         self._error_callbacks.append(error_callback)
 
     def start_manager(
@@ -851,7 +855,24 @@ class MultiAgentManager:
         with open_file(self._save_path, "w") as f:
             json.dump(self.dict_state, f, indent=4, sort_keys=True)
 
-    def _print_exception_occurred_but_no_error_callback(self, agent_name: str) -> None:
+    def _default_error_callback(
+        self, agent_name: str, exception: BaseException
+    ) -> None:
+        """
+        Handle errors from running agents.
+
+        This is the default error callback. To replace it
+        with another one, use the method 'add_error_callback'.
+
+        :param agent_name: the agent name
+        :param exception: the caught exception
+        :return None
+        """
+        self._print_exception_occurred_but_no_error_callback(agent_name, exception)
+
+    def _print_exception_occurred_but_no_error_callback(
+        self, agent_name: str, exception: BaseException
+    ) -> None:
         """
         Print a warning message when an exception occurred but no error callback is registered.
 
@@ -862,7 +883,8 @@ class MultiAgentManager:
             return
         self._warning_message_printed_for_agent[agent_name] = True
         print(
-            f"WARNING: An exception occurred during the execution of agent '{agent_name}', "
-            f"but since no error callback was found the exception is handled silently. Please "
-            f"add an error callback using the method 'add_error_callback' of the MultiAgentManager instance."
+            f"WARNING: An exception occurred during the execution of agent '{agent_name}':\n",
+            str(exception),
+            f"\nHowever, since no error callback was found the exception is handled silently. Please "
+            f"add an error callback using the method 'add_error_callback' of the MultiAgentManager instance.",
         )
