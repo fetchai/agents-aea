@@ -885,6 +885,6 @@ class MultiAgentManager:
         print(
             f"WARNING: An exception occurred during the execution of agent '{agent_name}':\n",
             str(exception),
-            f"\nHowever, since no error callback was found the exception is handled silently. Please "
-            f"add an error callback using the method 'add_error_callback' of the MultiAgentManager instance.",
+            "\nHowever, since no error callback was found the exception is handled silently. Please "
+            "add an error callback using the method 'add_error_callback' of the MultiAgentManager instance.",
         )
