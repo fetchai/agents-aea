@@ -260,7 +260,7 @@ class BaseTestMultiAgentManager(TestCase):
             wait_for_condition(lambda: act_mock.call_count > 0, timeout=10)
 
     def test_exception_handling(self, *args):
-        """Test erro callback works."""
+        """Test error callback works."""
         self.test_add_agent()
         self.manager.start_all_agents()
         agent = self.manager._agents_tasks[self.agent_name].agent
@@ -274,6 +274,22 @@ class BaseTestMultiAgentManager(TestCase):
         with patch.object(behaviour, "act", side_effect=ValueError("expected")):
             self.manager.start_all_agents()
             wait_for_condition(lambda: callback_mock.call_count > 0, timeout=10)
+
+    def test_default_exception_handling(self, *args):
+        """Test that the default error callback works."""
+        self.test_add_agent()
+        self.manager.start_all_agents()
+        agent = self.manager._agents_tasks[self.agent_name].agent
+        behaviour = agent.resources.get_behaviour(self.echo_skill_id, "echo")
+        assert behaviour
+
+        with patch.object(
+            self.manager, "_print_exception_occurred_but_no_error_callback"
+        ) as callback_mock:
+            with patch.object(behaviour, "act", side_effect=ValueError("expected")):
+                self.manager.start_all_agents()
+                wait_for_condition(lambda: callback_mock.call_count > 0, timeout=10)
+            callback_mock.assert_called_once()
 
     def test_stop_from_exception_handling(self, *args):
         """Test stop MultiAgentManager from error callback."""
