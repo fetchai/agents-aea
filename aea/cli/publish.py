@@ -16,17 +16,20 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Implementation of the 'aea publish' subcommand."""
 
 import os
+from abc import ABC, abstractmethod
+from contextlib import suppress
 from pathlib import Path
 from shutil import copyfile
 from typing import cast
 
 import click
 
+from aea.cli.push import _save_item_locally as _push_item_locally
 from aea.cli.registry.publish import publish_agent
+from aea.cli.registry.push import push_item as _push_item_remote
 from aea.cli.registry.utils import get_package_meta
 from aea.cli.utils.click_utils import registry_flag
 from aea.cli.utils.config import validate_item_config
@@ -37,16 +40,20 @@ from aea.cli.utils.package_utils import (
     try_get_item_source_path,
     try_get_item_target_path,
 )
-from aea.configurations.base import CRUDCollection, PublicId
+from aea.configurations.base import AgentConfig, CRUDCollection, PublicId
 from aea.configurations.constants import (
     AGENT,
     AGENTS,
     CONNECTIONS,
     CONTRACTS,
     DEFAULT_AEA_CONFIG_FILE,
+    ITEM_TYPE_PLURAL_TO_TYPE,
     PROTOCOLS,
     SKILLS,
 )
+
+
+PUSH_ITEMS_FLAG = "--push-missing"
 
 
 @click.command(name="publish")
@@ -54,19 +61,25 @@ from aea.configurations.constants import (
     help_local="For publishing agent to local folder.",
     help_remote="For publishing agent to remote registry.",
 )
+@click.option(
+    "--push-missing", is_flag=True, help="Push missing components to registry."
+)
 @click.pass_context
 @check_aea_project
 def publish(
-    click_context: click.Context, local: bool, remote: bool
+    click_context: click.Context, local: bool, remote: bool, push_missing: bool
 ) -> None:  # pylint: disable=unused-argument
     """Publish the agent to the registry."""
     ctx = cast(Context, click_context.obj)
     _validate_pkp(ctx.agent_config.private_key_paths)
     _validate_config(ctx)
+
     if remote:
-        publish_agent(ctx)
+        _publish_agent_remote(ctx, push_missing=push_missing)
     else:
-        _save_agent_locally(ctx, is_mixed=not local and not remote)
+        _save_agent_locally(
+            ctx, is_mixed=not local and not remote, push_missing=push_missing
+        )
 
 
 def _validate_config(ctx: Context) -> None:
@@ -112,7 +125,7 @@ def _check_is_item_in_registry_mixed(
             click.echo("Found!")
         except click.ClickException as e:
             raise click.ClickException(
-                f"Package not found neither in local nor in remote registry: {str(e)}"
+                f"Package not found neither in local nor in remote registry: {str(e)}. You can try to add {PUSH_ITEMS_FLAG}."
             )
 
 
@@ -139,15 +152,174 @@ def _check_is_item_in_local_registry(
         )
     except click.ClickException as e:
         raise click.ClickException(
-            f"Dependency is missing. {str(e)}\nPlease push it first and then retry."
+            f"Dependency is missing. {str(e)}\nPlease push it first and then retry or use {PUSH_ITEMS_FLAG} flag to push automatically"
         )
 
 
-def _save_agent_locally(ctx: Context, is_mixed: bool = False) -> None:
+class BaseRegistry(ABC):
+    """Base registry class."""
+
+    @abstractmethod
+    def check_item_present(self, item_type_plural: str, public_id: PublicId) -> None:
+        """
+        Check item present in registry.
+
+        Raise ClickException if not found.
+
+        :param item_type_plural: str, item type.
+        :param public_id: PublicId of the item to check.
+
+        :return: None
+        """
+
+    @abstractmethod
+    def push_item(self, item_type_plural: str, public_id: PublicId) -> None:
+        """
+        Push item to registry.
+
+        :param item_type_plural: str, item type.
+        :param public_id: PublicId of the item to check.
+
+        :return: None
+        """
+
+    def check_item_present_and_push(
+        self, item_type_plural: str, public_id: PublicId
+    ) -> None:
+        """
+        Check item present in registry and push if needed.
+
+        Raise ClickException if not found.
+
+        :param item_type_plural: str, item type.
+        :param public_id: PublicId of the item to check.
+
+        :return: None
+        """
+
+        with suppress(click.ClickException):
+            return self.check_item_present(item_type_plural, public_id)
+
+        try:
+            self.push_item(item_type_plural, public_id)
+        except Exception as e:
+            raise click.ClickException(
+                f"Failed to push missing item: {item_type_plural} {public_id}: {e}"
+            ) from e
+
+        try:
+            self.check_item_present(item_type_plural, public_id)
+        except Exception as e:
+            raise click.ClickException(
+                f"Failed to find item after push: {item_type_plural} {public_id}: {e}"
+            ) from e
+
+
+class LocalRegistry(BaseRegistry):
+    """Local directory registry."""
+
+    def __init__(self, ctx: Context, is_mixed: bool = False):
+        """Init registry."""
+        self.ctx = ctx
+        self.is_mixed = is_mixed
+        try:
+            self.registry_path = ctx.registry_path
+        except ValueError as e:  # pragma: nocover
+            raise click.ClickException(str(e))
+
+    def check_item_present(self, item_type_plural: str, public_id: PublicId) -> None:
+        """
+        Check item present in registry.
+
+        Raise ClickException if not found.
+
+        :param item_type_plural: str, item type.
+        :param public_id: PublicId of the item to check.
+
+        :return: None
+        """
+        if self.is_mixed:
+            _check_is_item_in_registry_mixed(
+                PublicId.from_str(str(public_id)), item_type_plural, self.registry_path,
+            )
+        else:
+            _check_is_item_in_local_registry(
+                PublicId.from_str(str(public_id)), item_type_plural, self.registry_path,
+            )
+
+    def push_item(self, item_type_plural: str, public_id: PublicId) -> None:
+        """
+        Push item to registry.
+
+        :param item_type_plural: str, item type.
+        :param public_id: PublicId of the item to check.
+
+        :return: None
+        """
+        item_type = ITEM_TYPE_PLURAL_TO_TYPE[item_type_plural]
+        _push_item_locally(self.ctx, item_type, public_id)
+
+
+class RemoteRegistry(BaseRegistry):
+    """Remote components registry."""
+
+    def __init__(self, ctx: Context) -> None:
+        """Init registry."""
+        self.ctx = ctx
+
+    def check_item_present(self, item_type_plural: str, public_id: PublicId) -> None:
+        """
+        Check item present in registry.
+
+        Raise ClickException if not found.
+
+        :param item_type_plural: str, item type.
+        :param public_id: PublicId of the item to check.
+
+        :return: None
+        """
+
+        try:
+            _check_is_item_in_remote_registry(public_id, item_type_plural)
+        except click.ClickException as e:
+            raise click.ClickException(
+                f"Package not found in remote registry: {str(e)}. You can try to add {PUSH_ITEMS_FLAG} flag."
+            )
+
+    def push_item(self, item_type_plural: str, public_id: PublicId) -> None:
+        """
+        Push item to registry.
+
+        :param item_type_plural: str, item type.
+        :param public_id: PublicId of the item to check.
+
+        :return: None
+        """
+        item_type = ITEM_TYPE_PLURAL_TO_TYPE[item_type_plural]
+        _push_item_remote(self.ctx, item_type, public_id)
+
+
+def _check_dependencies_in_registry(
+    registry: BaseRegistry, agent_config: AgentConfig, push_missing: bool
+) -> None:
+    """Check all agent dependencies present in registry."""
+    for item_type_plural in (PROTOCOLS, CONTRACTS, CONNECTIONS, SKILLS):
+        dependencies = getattr(agent_config, item_type_plural)
+        for public_id in dependencies:
+            if push_missing:
+                registry.check_item_present_and_push(item_type_plural, public_id)
+            else:
+                registry.check_item_present(item_type_plural, public_id)
+
+
+def _save_agent_locally(
+    ctx: Context, is_mixed: bool = False, push_missing: bool = False
+) -> None:
     """
     Save agent to local packages.
 
     :param ctx: the context
+    :param push_missing: bool. flag to push missing items
 
     :return: None
     """
@@ -155,17 +327,10 @@ def _save_agent_locally(ctx: Context, is_mixed: bool = False) -> None:
         registry_path = ctx.registry_path
     except ValueError as e:  # pragma: nocover
         raise click.ClickException(str(e))
-    for item_type_plural in (CONNECTIONS, CONTRACTS, PROTOCOLS, SKILLS):
-        dependencies = getattr(ctx.agent_config, item_type_plural)
-        for public_id in dependencies:
-            if is_mixed:
-                _check_is_item_in_registry_mixed(
-                    PublicId.from_str(str(public_id)), item_type_plural, registry_path,
-                )
-            else:
-                _check_is_item_in_local_registry(
-                    PublicId.from_str(str(public_id)), item_type_plural, registry_path,
-                )
+
+    registry = LocalRegistry(ctx, is_mixed)
+
+    _check_dependencies_in_registry(registry, ctx.agent_config, push_missing)
 
     item_type_plural = AGENTS
 
@@ -181,3 +346,17 @@ def _save_agent_locally(ctx: Context, is_mixed: bool = False) -> None:
     click.echo(
         f'Agent "{ctx.agent_config.name}" successfully saved in packages folder.'
     )
+
+
+def _publish_agent_remote(ctx: Context, push_missing: bool) -> None:
+    """
+    Push agent to remote registry.
+
+    :param ctx: the context
+    :param push_missing: bool. flag to push missing items
+
+    :return: None
+    """
+    registry = RemoteRegistry(ctx)
+    _check_dependencies_in_registry(registry, ctx.agent_config, push_missing)
+    publish_agent(ctx)

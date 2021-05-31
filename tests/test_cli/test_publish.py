@@ -17,7 +17,8 @@
 #
 # ------------------------------------------------------------------------------
 """Test module for Registry publish methods."""
-
+from pathlib import Path
+from shutil import rmtree
 from unittest import TestCase, mock
 
 import click
@@ -34,6 +35,8 @@ from aea.cli.publish import (
 )
 from aea.configurations.base import PublicId
 from aea.test_tools.test_cases import AEATestCaseEmpty
+
+from packages.fetchai.skills.echo import PUBLIC_ID as ECHO_SKILL_PUBLIC_ID
 
 from tests.conftest import CLI_LOG_OPTION, CliRunner
 from tests.test_cli.tools_for_testing import (
@@ -184,3 +187,75 @@ def test_positive_check_is_item_in_registry_mixed_not_locally_but_remotely():
         "protocols",
         "nonexisting_packages_path",
     )
+
+
+class TestPublishLocallyWithDeps(AEATestCaseEmpty):
+    """Test case for cli publish --local --push-missing."""
+
+    ITEM_PUBLIC_ID = ECHO_SKILL_PUBLIC_ID
+    ITEM_TYPE = "skill"
+
+    NEW_ITEM_TYPE = "skill"
+    NEW_ITEM_NAME = "my_test_skill"
+
+    @classmethod
+    def setup_class(cls):
+        """Set up test case."""
+        super(TestPublishLocallyWithDeps, cls).setup_class()
+        cls.add_item(cls.ITEM_TYPE, str(cls.ITEM_PUBLIC_ID), local=True)
+        cls.scaffold_item(cls.NEW_ITEM_TYPE, cls.NEW_ITEM_NAME)
+
+    def test_publish_ok_with_missing_push(self,):
+        """Test ok for missing push."""
+        with pytest.raises(ClickException, match=r"Dependency is missing") as e:
+            self.invoke("publish", "--local")
+        assert "use --push-missing" in str(e)
+
+        self.invoke("publish", "--local", "--push-missing")
+
+        # remove agents published and publish again
+        packages_dir = self.t / self.packages_dir_path  # type: ignore
+        rmtree(Path(packages_dir) / self.author / "agents")
+        self.invoke("publish", "--local")
+
+
+@mock.patch("aea.cli.publish._push_item_remote")
+@mock.patch("aea.cli.publish.publish_agent")
+class TestPublishRemotellyWithDeps(AEATestCaseEmpty):
+    """Test case for cli publish --push-missing."""
+
+    ITEM_PUBLIC_ID = ECHO_SKILL_PUBLIC_ID
+    ITEM_TYPE = "skill"
+
+    NEW_ITEM_TYPE = "skill"
+    NEW_ITEM_NAME = "my_test_skill"
+
+    @classmethod
+    def setup_class(cls):
+        """Set up test case."""
+        super(TestPublishRemotellyWithDeps, cls).setup_class()
+        cls.add_item(cls.ITEM_TYPE, str(cls.ITEM_PUBLIC_ID), local=True)
+        cls.scaffold_item(cls.NEW_ITEM_TYPE, cls.NEW_ITEM_NAME)
+
+    def test_publish_ok_with_missing_push(
+        self, publish_agent_mock, push_item_remote_mock
+    ):
+        """Test ok for missing push."""
+        with pytest.raises(
+            ClickException, match=r"Package not found in remote registry"
+        ) as e, mock.patch(
+            "aea.cli.publish._check_is_item_in_remote_registry",
+            side_effect=ClickException("expected"),
+        ):
+            self.invoke("publish", "--remote")
+        assert "--push-missing" in str(e)
+        publish_agent_mock.assert_not_called()
+
+        with mock.patch(
+            "aea.cli.publish._check_is_item_in_remote_registry",
+            side_effect=[ClickException("expected")] + [mock.DEFAULT] * 100,
+        ):
+            self.invoke("publish", "--remote", "--push-missing")
+
+        push_item_remote_mock.assert_called()
+        publish_agent_mock.assert_called()
