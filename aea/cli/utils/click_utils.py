@@ -45,7 +45,7 @@ class ConnectionsOption(click.Option):
 
         :param ctx: the click context
         :param value: the list of connection names, as a string.
-        :return:
+        :return: list of public ids
         """
         if value is None:
             return None
@@ -78,6 +78,9 @@ class PublicIdParameter(click.ParamType):
         Initialize the Public Id parameter.
 
         Just forwards arguments to parent constructor.
+
+        :param args: positional arguments
+        :param kwargs: keyword arguments
         """
         super().__init__(*args, **kwargs)  # type: ignore
 
@@ -187,7 +190,7 @@ class MutuallyExclusiveOption(Option):
         :param ctx: the click context.
         :param opts: the options.
         :param args: the list of arguments (to be forwarded to the parent class).
-        :return:
+        :return: tuple of results
         """
         if self.mutually_exclusive.intersection(opts) and self.name in opts:
             raise UsageError(

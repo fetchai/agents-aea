@@ -53,8 +53,7 @@ def do_local_registry_update(
     Perform local registry update.
 
     :param base_dir: root directory of the local registry.
-
-    :return: None
+    :param skip_consistency_check: whether or not to skip consistency checks.
     """
     for package_id, package_dir in enlist_packages(base_dir, skip_consistency_check):
         current_public_id = package_id.public_id
@@ -77,8 +76,6 @@ def replace_package(
     :param package_type: str.
     :param public_id: package public id to download
     :param: package_dir: target package dir
-
-    :return: None
     """
     with TemporaryDirectory() as tmp_dir:
         new_package_dir = os.path.join(tmp_dir, public_id.name)
@@ -111,8 +108,9 @@ def enlist_packages(
     Generate list of the packages in local repo directory.
 
     :param base_dir: path or str of the local repo.
+    :param skip_consistency_check: whether or not to skip consistency checks.
 
-    :return: generator with Tuple of package_id and package directory.
+    :yield: generator with Tuple of package_id and package directory.
     """
     for author in os.listdir(base_dir):
         author_dir = os.path.join(base_dir, author)

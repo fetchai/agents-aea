@@ -71,6 +71,9 @@ def check_package_public_id(
     """
     Check component version is corresponds to specified version.
 
+    :param source_path: the source path
+    :param item_type: str type of item (connection/protocol/skill).
+    :param item_id: item public id.
     :return: actual package public id
     """
     # we load only based on item_name, hence also check item_version and item_author match.
@@ -98,10 +101,9 @@ def push_item(ctx: Context, item_type: str, item_id: PublicId) -> None:
     """
     Push item to the Registry.
 
+    :param ctx: click context
     :param item_type: str type of item (connection/protocol/skill).
-    :param item_id: str item name.
-
-    :return: None
+    :param item_id: item public id.
     """
     item_type_plural = item_type + "s"
 

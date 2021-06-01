@@ -57,8 +57,6 @@ def _remove_private_key(
     :param click_context: click context object.
     :param type_: type.
     :param connection: whether or not it is a private key for a connection
-
-    :return: None
     """
     ctx = cast(Context, click_context.obj)
     _try_remove_key(ctx, type_, connection)

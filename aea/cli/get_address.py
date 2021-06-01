@@ -53,7 +53,7 @@ def _try_get_address(ctx: Context, type_: str, password: Optional[str] = None) -
     """
     Try to get address.
 
-    :param click_context: click context object.
+    :param ctx: click context object.
     :param type_: type.
     :param password: the password to encrypt/decrypt the private key.
 

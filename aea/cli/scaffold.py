@@ -131,7 +131,6 @@ def scaffold_item(ctx: Context, item_type: str, item_name: str) -> None:
     :param item_type: type of item.
     :param item_name: item name.
 
-    :return: None
     :raises ClickException: if some error occurs.
     """
     validate_package_name(item_name)
@@ -244,7 +243,6 @@ def _scaffold_non_package_item(
     :param type_name: the type name (e.g. "decision maker")
     :param class_name: the class name (e.g. "DecisionMakerHandler")
     :param aea_dir: the AEA directory that contains the scaffold module
-    :return: None
     """
     existing_item = getattr(ctx.agent_config, item_type)
     if existing_item != {}:

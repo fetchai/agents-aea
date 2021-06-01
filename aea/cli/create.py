@@ -102,8 +102,7 @@ def create_aea(
     :param author: optional author name (valid with local=True and remote=False only).
     :param empty: optional boolean flag for skip adding default dependencies.
 
-    :return: None
-    :raises: ClickException if an error occurred.
+    :raises ClickException: if an error occurred.
     """
     enforce(
         not (local and remote), "'local' and 'remote' options are mutually exclusive."
@@ -215,8 +214,7 @@ def _create_agent_config(ctx: Context, agent_name: str, set_author: str) -> Agen
 def _check_is_parent_folders_are_aea_projects_recursively() -> None:
     """Look for 'aea-config.yaml' in parent folders recursively up to the user home directory.
 
-    :return: None
-    :raise ValueError: if a parent folder has a file named 'aea-config.yaml'.
+    :raises ValueError: if a parent folder has a file named 'aea-config.yaml'.
     """
     current = Path(".").resolve()
     root = Path("/").resolve()

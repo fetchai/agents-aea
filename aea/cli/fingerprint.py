@@ -104,7 +104,6 @@ def fingerprint_item(ctx: Context, item_type: str, item_public_id: PublicId) -> 
     :param ctx: the context.
     :param item_type: the item type.
     :param item_public_id: the item public id.
-    :return: None
     """
     item_type_plural = item_type + "s"
 
@@ -125,8 +124,6 @@ def fingerprint_package_by_path(package_dir: Path) -> None:
     Fingerprint package placed in package_dir.
 
     :param package_dir: directory of the package
-
-    :return: None
     """
     package_type = determine_package_type_for_directory(package_dir)
     fingerprint_package(package_dir, package_type)
@@ -167,10 +164,8 @@ def fingerprint_package(
     """
     Fingerprint components of an item.
 
-    :param ctx: the context.
-    :param item_type: the item type.
-    :param item_public_id: the item public id.
-    :return: None
+    :param package_dir: the package directory.
+    :param package_type: the package type.
     """
     package_type = PackageType(package_type)
     item_type = str(package_type)
