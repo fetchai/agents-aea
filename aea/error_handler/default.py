@@ -47,7 +47,7 @@ class ErrorHandler(AbstractErrorHandler):
         Handle the received envelope in case the protocol is not supported.
 
         :param envelope: the envelope
-        :return: None
+        :param logger: the logger
         """
         self.unsupported_protocol_count += 1
         logger.warning(
@@ -63,7 +63,6 @@ class ErrorHandler(AbstractErrorHandler):
         :param envelope: the envelope
         :param exception: the exception raised during decoding
         :param logger: the logger
-        :return: None
         """
         self.decoding_error_count += 1
         logger.warning(
@@ -78,7 +77,7 @@ class ErrorHandler(AbstractErrorHandler):
 
         :param envelope: the envelope
         :param reason: the reason for the failure
-        :return: None
+        :param logger: the logger
         """
         self.no_active_handler_count += 1
         logger.warning(

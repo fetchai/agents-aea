@@ -109,10 +109,12 @@ class Project(_Base):
         :param working_dir: the working directory
         :param public_id: the public id
         :param is_local: whether to fetch from local
-        :param is_remote whether to fetch from remote
-        :param verbosity: the logging verbosity of the CLI
+        :param is_remote: whether to fetch from remote
+        :param is_restore: whether to restore or not
+        :param cli_verbosity: the logging verbosity of the CLI
         :param registry_path: the path to the registry locally
         :param skip_consistency_check: consistency checks flag
+        :return: project
         """
         ctx = Context(
             cwd=working_dir, verbosity=cli_verbosity, registry_path=registry_path
@@ -167,8 +169,6 @@ class AgentAlias(_Base):
         Set agent config instance constructed from json data.
 
         :param json_data: agent config json data
-
-        :return: None
         """
         self._agent_config = AEABuilder.loader.load_agent_config_from_json(json_data)
         self._ensure_private_keys()
@@ -225,6 +225,7 @@ class AgentAlias(_Base):
         :param ledger: the ledger id
         :param replace: whether or not to replace an existing key
         :param is_connection: whether or not it is a connection key
+        :return: file path to private key
         """
         file_name = (
             f"{ledger}_connection_private.key"

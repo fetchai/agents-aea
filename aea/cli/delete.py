@@ -45,10 +45,10 @@ def delete_aea(ctx: Context, agent_name: str) -> None:
     """
     Delete agent's directory.
 
+    :param ctx: click context
     :param agent_name: name of the agent (equal to folder name).
 
-    :return: None
-    :raises: ClickException if OSError occurred.
+    :raises ClickException: if OSError occurred.
     """
     agent_path = os.path.join(ctx.cwd, agent_name)
     try:

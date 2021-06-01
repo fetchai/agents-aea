@@ -94,9 +94,9 @@ def _save_item_locally(ctx: Context, item_type: str, item_id: PublicId) -> None:
     """
     Save item to local packages.
 
+    :param ctx: click context
     :param item_type: str type of item (connection/protocol/skill).
     :param item_id: the public id of the item.
-    :return: None
     """
     item_type_plural = item_type + "s"
     try:

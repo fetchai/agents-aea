@@ -44,7 +44,6 @@ def build_aea(skip_consistency_check: bool) -> None:
     That is, run the 'build entrypoint' script of each AEA package of the project.
 
     :param skip_consistency_check: the skip consistency check boolean.
-    :return: None
     """
     try:
         builder = AEABuilder.from_aea_project(

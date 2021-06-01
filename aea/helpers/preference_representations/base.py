@@ -35,8 +35,7 @@ def logarithmic_utility(
 
     :param utility_params_by_good_id: utility params by good identifier
     :param quantities_by_good_id: quantities by good identifier
-    :param quantity_shift: a non-negative factor to shift the quantities in the utility function (to
-    ensure the natural logarithm can be used on the entire range of quantities)
+    :param quantity_shift: a non-negative factor to shift the quantities in the utility function (to ensure the natural logarithm can be used on the entire range of quantities)
     :return: utility value
     """
     enforce(

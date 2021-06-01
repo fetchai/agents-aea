@@ -38,8 +38,6 @@ def _do_password_reset(email: str) -> None:
     Request Registry to reset password.
 
     :param email: str email.
-
-    :return:
     """
     registry_reset_password(email)
     click.echo("An email with a password reset link was sent to {}".format(email))

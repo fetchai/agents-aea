@@ -54,8 +54,6 @@ def do_init(author: str, reset: bool, registry: bool, no_subscribe: bool) -> Non
     :param reset: True, if resetting the author name
     :param registry: True, if registry is used
     :param no_subscribe: bool flag for developers subscription skip on register.
-
-    :return: None.
     """
     config = get_or_create_cli_config()
     if reset or config.get(AUTHOR_KEY, None) is None:
@@ -80,10 +78,8 @@ def _registry_init(username: str, no_subscribe: bool) -> None:
     """
     Create an author name on the registry.
 
-    :param author: the author name
+    :param username: the user name
     :param no_subscribe: bool flag for developers subscription skip on register.
-
-    :return: None.
     """
     if username is not None and is_auth_token_present():
         check_is_author_logged_in(username)

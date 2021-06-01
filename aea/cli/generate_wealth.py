@@ -70,7 +70,6 @@ def _try_generate_wealth(
     :param url: the url
     :param sync: whether to sync or not
     :param password: the password to encrypt/decrypt the private key.
-    :return: None
     """
     wallet = get_wallet_from_context(ctx, password=password)
     try:

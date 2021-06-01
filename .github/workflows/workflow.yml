@@ -73,6 +73,8 @@ jobs:
           tox -e black-check
           tox -e isort-check
           tox -e flake8
+      - name: Docstring check
+        run: tox -e darglint
       - name: Unused code check
         run: tox -e vulture
       - name: Static type check

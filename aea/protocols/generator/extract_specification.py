@@ -146,11 +146,7 @@ class PythonicProtocolSpecification:  # pylint: disable=too-few-public-methods
     """This class represents a protocol specification in python."""
 
     def __init__(self) -> None:
-        """
-        Instantiate a Pythonic protocol specification.
-
-        :return: None
-        """
+        """Instantiate a Pythonic protocol specification."""
         self.speech_acts = dict()  # type: Dict[str, Dict[str, str]]
         self.all_performatives = list()  # type: List[str]
         self.all_unique_contents = dict()  # type: Dict[str, str]
