@@ -275,7 +275,7 @@ class MultiAgentManager:
 
     def add_error_callback(
         self, error_callback: Callable[[str, BaseException], None]
-    ) -> None:
+    ) -> "MultiAgentManager":
         """Add error callback to call on error raised."""
         if len(self._error_callbacks) == 1 and not self._custom_callback_added:
             # only default callback present, reset before adding new callback
@@ -556,7 +556,7 @@ class MultiAgentManager:
         agent_name: str,
         agent_overides: Optional[Dict],
         components_overrides: Optional[List[Dict]],
-    ) -> None:
+    ) -> "MultiAgentManager":
         """
         Set agent overrides.
 
