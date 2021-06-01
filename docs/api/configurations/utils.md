@@ -36,10 +36,6 @@ It breaks down in:
 - `arg`: the agent configuration.
 - `replacements`: the replacement mapping.
 
-**Returns**:
-
-None
-
 <a name="aea.configurations.utils._"></a>
 #### `_`
 

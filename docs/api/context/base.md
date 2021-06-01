@@ -30,13 +30,14 @@ Initialize an agent context.
 - `decision_maker_handler_context`: the decision maker's name space
 - `task_manager`: the task manager
 - `default_ledger_id`: the default ledger id
-- `ledger_it_to_currency_denom`: mapping from ledger ids to currency denominations
+- `currency_denominations`: mapping from ledger ids to currency denominations
 - `default_connection`: the default connection
 - `default_routing`: the default routing
 - `search_service_address`: the address of the search service
 - `decision_maker_address`: the address of the decision maker
 - `data_dir`: directory where to put local files.
 - `storage_callable`: function that returns optional storage attached to agent.
+- `send_to_skill`: callable for sending envelopes to skills.
 - `kwargs`: keyword arguments to be attached in the agent context namespace.
 
 <a name="aea.context.base.AgentContext.send_to_skill"></a>
@@ -48,14 +49,12 @@ Initialize an agent context.
 
 Send message or envelope to another skill.
 
+If message passed it will be wrapped into envelope with optional envelope context.
+
 **Arguments**:
 
 - `message_or_envelope`: envelope to send to another skill.
-if message passed it will be wrapped into envelope with optional envelope context.
-
-**Returns**:
-
-None
+- `context`: the optional envelope context
 
 <a name="aea.context.base.AgentContext.storage"></a>
 #### storage
@@ -90,6 +89,10 @@ Get the shared state dictionary.
 The shared state is the only object which skills can use
 to exchange state directly. It is accessible (read and write) from
 all skills.
+
+**Returns**:
+
+dictionary of the shared state.
 
 <a name="aea.context.base.AgentContext.identity"></a>
 #### identity

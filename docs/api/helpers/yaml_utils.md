@@ -30,6 +30,11 @@ Initialize the AEAYamlLoader.
 
 It adds a YAML Loader constructor to use 'OderedDict' to load the files.
 
+**Arguments**:
+
+- `args`: the positional arguments.
+- `kwargs`: the keyword arguments.
+
 <a name="aea.helpers.yaml_utils._AEAYamlDumper"></a>
 ## `_`AEAYamlDumper Objects
 
@@ -55,6 +60,11 @@ the public functions of the module 'yaml_dump' and 'yaml_dump_all'.
 Initialize the AEAYamlDumper.
 
 It adds a YAML Dumper representer to use 'OderedDict' to dump the files.
+
+**Arguments**:
+
+- `args`: the positional arguments.
+- `kwargs`: the keyword arguments.
 
 <a name="aea.helpers.yaml_utils.yaml_load"></a>
 #### yaml`_`load
@@ -104,10 +114,6 @@ Dump YAML data to a yaml file in an ordered way.
 - `data`: the data to write.
 - `stream`: (optional) the file to write on.
 
-**Returns**:
-
-None
-
 <a name="aea.helpers.yaml_utils.yaml_dump_all"></a>
 #### yaml`_`dump`_`all
 
@@ -121,8 +127,4 @@ Dump YAML data to a yaml file in an ordered way.
 
 - `data`: the data to write.
 - `stream`: (optional) the file to write on.
-
-**Returns**:
-
-None
 
