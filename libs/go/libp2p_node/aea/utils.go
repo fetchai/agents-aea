@@ -48,7 +48,11 @@ func HandleAcnMessageFromPipe(
 
 	if err != nil {
 		logger.Error().Str("err", err.Error()).Msg("while decoding acn")
-		acn_err = acn.SendAcnError(pipe, "error on decoding acn message")
+		acn_err = acn.SendAcnError(
+			pipe,
+			"error on decoding acn message",
+			acn.Status_ERROR_SERIALIZATION,
+		)
 		if acn_err != nil {
 			logger.Error().Str("err", err.Error()).Msg("on acn send error")
 		}
@@ -61,7 +65,11 @@ func HandleAcnMessageFromPipe(
 			err = proto.Unmarshal(acn_envelope.Envel, envelope)
 			if err != nil {
 				logger.Error().Str("err", err.Error()).Msg("while decoding envelope")
-				acn_err = acn.SendAcnError(pipe, "error on decoding envelope")
+				acn_err = acn.SendAcnError(
+					pipe,
+					"error on decoding envelope",
+					acn.Status_ERROR_SERIALIZATION,
+				)
 				if acn_err != nil {
 					logger.Error().Str("err", acn_err.Error()).Msg("on acn send error")
 				}

@@ -960,7 +960,7 @@ func (dhtPeer *DHTPeer) RouteEnvelope(envel *aea.Envelope) error {
 		duration := timer.GetTimer(start)
 		opLatencyRoute.Observe(float64(duration.Microseconds()))
 
-		err, data := aea.MakeACNMessageFromEnvelope(envel)
+		err, data := aea.MakeAcnMessageFromEnvelope(envel)
 		if err != nil {
 			lerror(err).Msgf("while serializing envelope: %s", envel)
 			return err
@@ -1417,7 +1417,7 @@ func (dhtPeer *DHTPeer) handleAeaEnvelopeStream(stream network.Stream) {
 			"Sending envelope to tcp delegate client %s...",
 			connDelegate.RemoteAddr().String(),
 		)
-		err, data := aea.MakeACNMessageFromEnvelope(envel)
+		err, data := aea.MakeAcnMessageFromEnvelope(envel)
 		if err != nil {
 			lerror(err).Msgf("while serializing envelope: %s", envel)
 			return

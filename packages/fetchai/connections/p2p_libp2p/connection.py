@@ -236,10 +236,10 @@ class NodeClient:
         buf = msg.SerializeToString()
         await self._write(buf)
 
-    async def write_acn_status_error(self, msg: str) -> None:
+    async def write_acn_status_error(self, msg: str, code: Status = Status.ERROR_GENERIC) -> None:  # type: ignore # pylint: disable=no-member
         """Send acn status error generic."""
         status = Status()
-        status.code = Status.ERROR_GENERIC  # type: ignore # pylint: disable=no-member
+        status.code = code  # type: ignore # pylint: disable=no-member
         status.msgs.append(msg)  # type: ignore # pylint: disable=no-member
         msg = AcnMessage()
         msg.version = ACN_CURRENT_VERSION  # type: ignore  # pylint: disable=no-member

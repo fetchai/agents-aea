@@ -443,7 +443,7 @@ func MakeAcnMessageFromEnvelope(envelope *Envelope) (error, []byte) {
 }
 
 func (aea AeaApi) SendEnvelope(envelope *Envelope) error {
-	err, data := MakeACNMessageFromEnvelope(envelope)
+	err, data := MakeAcnMessageFromEnvelope(envelope)
 	if err != nil {
 		logger.Error().Str("err", err.Error()).Msgf("while serializing envelope: %s", envelope)
 		return err

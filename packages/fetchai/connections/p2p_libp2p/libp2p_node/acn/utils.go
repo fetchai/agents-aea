@@ -97,8 +97,16 @@ func SendAcnSuccess(pipe Pipe) error {
 	return err
 }
 
-func SendAcnError(pipe Pipe, error_msg string) error {
-	status := &Status{Code: Status_ERROR_GENERIC, Msgs: []string{error_msg}}
+func SendAcnError(pipe Pipe, error_msg string, err_codes ...Status_ErrCode) error {
+	var err_code Status_ErrCode
+
+	if len(err_codes) == 0 {
+		err_code = Status_ERROR_GENERIC
+	} else {
+		err_code = err_codes[0]
+	}
+
+	status := &Status{Code: err_code, Msgs: []string{error_msg}}
 	msg := &AcnMessage{
 		Version: CurrentVersion,
 		Payload: &AcnMessage_Status{Status: status},
