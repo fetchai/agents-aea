@@ -187,8 +187,6 @@ def _fetch_agent_deps(ctx: Context) -> None:
     Fetch agent dependencies.
 
     :param ctx: context object.
-
-    :raises ClickException: re-raises if occurs in add_item call.
     """
     for item_type in (PROTOCOL, CONTRACT, CONNECTION, SKILL):
         item_type_plural = "{}s".format(item_type)

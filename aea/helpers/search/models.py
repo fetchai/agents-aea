@@ -616,7 +616,7 @@ class ConstraintType:
                    | Either an instance of the ConstraintTypes enum,
                    | or a string representation associated with the type.
         :param value: the value that defines the constraint.
-        :raises ValueError: if the type of the constraint is not
+        :raises AEAEnforceError: if the type of the constraint is not  # noqa: DAR402
         """
         self.type = ConstraintTypes(type_)
         self.value = value
@@ -627,7 +627,7 @@ class ConstraintType:
         Check the validity of the input provided.
 
         :return: boolean to indicate validity
-        :raises ValueError: if the value is not valid wrt the constraint type.
+        :raises AEAEnforceError: if the value is not valid wrt the constraint type.  # noqa: DAR402
         """
         try:
             if self.type == ConstraintTypes.EQUAL:
@@ -1067,7 +1067,7 @@ class ConstraintExpr(ABC):
         """
         Check whether a Constraint Expression satisfies some basic requirements.
 
-        :raises ValueError: if the object does not satisfy some requirements.
+        :raises AEAEnforceError: if the object does not satisfy some requirements.  # noqa: DAR402
         """
 
     @staticmethod

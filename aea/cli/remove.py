@@ -462,8 +462,6 @@ def remove_item(ctx: Context, item_type: str, item_id: PublicId) -> None:
     :param ctx: Context object.
     :param item_type: type of item.
     :param item_id: item public ID.
-
-    :raises ClickException: if some error occurs.
     """
     with remove_unused_component_configurations(ctx):
         RemoveItem(

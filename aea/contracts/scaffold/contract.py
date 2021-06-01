@@ -45,7 +45,7 @@ class MyScaffoldContract(Contract):
         :param ledger_api: the ledger apis.
         :param contract_address: the contract address.
         :param kwargs: the keyword arguments.
-        :return: the tx
+        :return: the tx  # noqa: DAR202
         """
         raise NotImplementedError
 
@@ -62,7 +62,7 @@ class MyScaffoldContract(Contract):
         :param ledger_api: the ledger apis.
         :param contract_address: the contract address.
         :param kwargs: the keyword arguments.
-        :return: the tx
+        :return: the tx  # noqa: DAR202
         """
         raise NotImplementedError
 
@@ -79,6 +79,6 @@ class MyScaffoldContract(Contract):
         :param ledger_api: the ledger apis.
         :param contract_address: the contract address.
         :param kwargs: the keyword arguments.
-        :return: the tx
+        :return: the tx  # noqa: DAR202
         """
         raise NotImplementedError

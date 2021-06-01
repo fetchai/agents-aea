@@ -87,7 +87,7 @@ class MyScaffoldAsyncConnection(Connection):
 
         :param args: arguments to receive
         :param kwargs: keyword arguments to receive
-        :return: the envelope received, if present.
+        :return: the envelope received, if present.  # noqa: DAR202
         """
         raise NotImplementedError  # pragma: no cover
 

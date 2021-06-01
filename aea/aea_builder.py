@@ -924,8 +924,8 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :param component_type: the component type.
         :param directory: the directory path.
         :param skip_consistency_check: if True, the consistency check are skipped.
-        :raises AEAException: if a component is already registered with the same component id.
-                            | or if there's a missing dependency.
+        :raises AEAException: if a component is already registered with the same component id.   # noqa: DAR402
+                            | or if there's a missing dependency.  # noqa: DAR402
         :return: the AEABuilder
         """
         directory = Path(directory)
@@ -1799,7 +1799,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         - load the skill/connection configurations to find the import order
         - detect if there are cycles
         - import skills/connections from the leaves of the dependency graph, by finding a topological ordering.
-        
+
         :param component_ids: component ids to check
         :param aea_project_path: project path to AEA
         :param skip_consistency_check: consistency check of AEA

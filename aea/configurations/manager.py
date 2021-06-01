@@ -121,7 +121,7 @@ def _try_get_component_id_from_prefix(
     :param component_ids: the set of component id.
     :param component_prefix: the component prefix.
     :return: the component id that matches the prefix.
-    :raises ValueError: if there are more than two components as candidate results.
+    :raises AEAEnforceError: if there are more than two components as candidate results.  # noqa: DAR402
     """
     type_, author, name = component_prefix
     results = list(

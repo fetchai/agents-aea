@@ -214,7 +214,7 @@ def clean_after(func: Callable) -> Callable:
         :param args: positional arguments.
         :param kwargs: keyword arguments.
 
-        :raises ClickException: if caught re-raises it.
+        :raises ClickException: if caught re-raises it.  # noqa: DAR402
 
         :return: source method output.
         """

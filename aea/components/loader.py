@@ -102,7 +102,7 @@ def _handle_error_while_loading_component_module_not_found(
 
     :param configuration: the configuration
     :param e: the exception
-    :raises ModuleNotFoundError: if it is not
+    :raises ModuleNotFoundError: if it is not  # noqa: DAR402
     :raises AEAPackageLoadingError: the same exception, but prepending an informative message.
     """
     error_message = str(e)
@@ -171,7 +171,7 @@ def _handle_error_while_loading_component_generic_error(
 
     :param configuration: the configuration
     :param e: the exception
-    :raises Exception: the same exception, but prepending an informative message.
+    :raises AEAPackageLoadingError: the same exception, but prepending an informative message.
     """
     e_str = parse_exception(e)
     raise AEAPackageLoadingError(

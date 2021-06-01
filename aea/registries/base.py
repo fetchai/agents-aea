@@ -562,7 +562,7 @@ class HandlerRegistry(ComponentRegistry[Handler]):
         Unregister a item.
 
         :param item_id: a pair (skill id, item name).
-        :return: the unregistered handler 
+        :return: the unregistered handler
         :raises: ValueError if no item is registered with that item id.
         """
         skill_id = item_id[0]

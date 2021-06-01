@@ -121,7 +121,6 @@ def _check_is_item_in_remote_registry(
 
     :param public_id: the public id.
     :param item_type_plural: the type of the item.
-    :raises ClickException: if the item is not present.
     """
     get_package_meta(item_type_plural[:-1], public_id)
 

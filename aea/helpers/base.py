@@ -118,8 +118,8 @@ def load_module(dotted_path: str, filepath: Path) -> types.ModuleType:
     :param dotted_path: the dotted save_path of the package/module.
     :param filepath: the file to the package/module.
     :return: module type
-    :raises ValueError: if the filepath provided is not a module.
-    :raises Exception: if the execution of the module raises exception.
+    :raises ValueError: if the filepath provided is not a module.  # noqa: DAR402
+    :raises Exception: if the execution of the module raises exception.  # noqa: DAR402
     """
     spec = importlib.util.spec_from_file_location(dotted_path, str(filepath))
     module = importlib.util.module_from_spec(spec)
