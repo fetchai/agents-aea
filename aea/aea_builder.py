@@ -1841,7 +1841,10 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
     @classmethod
     def from_aea_project(
-        cls, aea_project_path: PathLike, skip_consistency_check: bool = False,
+        cls,
+        aea_project_path: PathLike,
+        skip_consistency_check: bool = False,
+        password: Optional[str] = None,
     ) -> "AEABuilder":
         """
         Construct the builder from an AEA project.
@@ -1855,6 +1858,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
         :param aea_project_path: path to the AEA project.
         :param skip_consistency_check: if True, the consistency check are skipped.
+        :param password: the password to encrypt/decrypt private keys.
         :return: an AEABuilder.
         """
         aea_project_path = Path(aea_project_path)
@@ -1866,6 +1870,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             aea_project_path,
             substitude_env_vars=False,
             private_key_helper=private_key_verify,
+            password=password,
         ).dump_config()
 
         # just validate
@@ -1873,6 +1878,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             aea_project_path,
             substitude_env_vars=True,
             private_key_helper=private_key_verify,
+            password=password,
         ).agent_config
 
         builder = AEABuilder(with_default_packages=False)

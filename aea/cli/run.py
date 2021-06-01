@@ -90,7 +90,7 @@ def run(
     profiling = int(profiling)
     if profiling > 0:
         with _profiling_context(period=profiling):
-            run_aea(ctx, connection_ids, env_file, is_install_deps)
+            run_aea(ctx, connection_ids, env_file, is_install_deps, password)
             return
     run_aea(ctx, connection_ids, env_file, is_install_deps, password)
 
@@ -191,7 +191,7 @@ def _build_aea(
     """Build the AEA."""
     try:
         builder = AEABuilder.from_aea_project(
-            Path("."), skip_consistency_check=skip_consistency_check
+            Path("."), skip_consistency_check=skip_consistency_check, password=password
         )
         aea = builder.build(connection_ids=connection_ids, password=password)
         return aea

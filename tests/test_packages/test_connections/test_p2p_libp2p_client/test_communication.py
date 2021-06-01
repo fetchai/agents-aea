@@ -779,7 +779,6 @@ class TestLibp2pClientReconnectionReceiveEnvelope(BaseTestLibp2pClientSamePeer):
                 RegexComparator("Connection error:.*Try to reconnect and read again")
             )
         # proceed as usual. Now we expect the connection to have reconnected successfully
-        self.multiplexer_client_2.put(envelope)
         delivered_envelope = self.multiplexer_client_1.get(block=True, timeout=20)
 
         assert delivered_envelope is not None

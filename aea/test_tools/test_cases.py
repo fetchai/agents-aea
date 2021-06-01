@@ -682,7 +682,9 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         )
 
     @classmethod
-    def get_wealth(cls, ledger_api_id: str = DEFAULT_LEDGER) -> str:
+    def get_wealth(
+        cls, ledger_api_id: str = DEFAULT_LEDGER, password: Optional[str] = None
+    ) -> str:
         """
         Get wealth with CLI command.
 
@@ -692,7 +694,10 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
 
         :return: command line output
         """
-        cls.run_cli_command("get-wealth", ledger_api_id, cwd=cls._get_cwd())
+        password_option = _get_password_option_args(password)
+        cls.run_cli_command(
+            "get-wealth", ledger_api_id, *password_option, cwd=cls._get_cwd()
+        )
         if cls.last_cli_runner_result is None:
             raise ValueError("Runner result not set!")  # pragma: nocover
         return str(cls.last_cli_runner_result.stdout_bytes, "utf-8")
