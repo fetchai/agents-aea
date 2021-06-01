@@ -434,7 +434,7 @@ func (aea *AeaApi) stop() {
 */
 const CurrentVersion = "0.1.0"
 
-func MakeACNMessageFromEnvelope(envelope *Envelope) (error, []byte) {
+func MakeAcnMessageFromEnvelope(envelope *Envelope) (error, []byte) {
 	envelope_bytes, err := proto.Marshal(envelope)
 	if err != nil {
 		return err, envelope_bytes
