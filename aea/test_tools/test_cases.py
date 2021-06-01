@@ -691,6 +691,7 @@ class BaseAEATestCase(ABC):  # pylint: disable=too-many-public-methods
         Run from agent's directory.
 
         :param ledger_api_id: ledger API ID.
+        :param password: the password to encrypt/decrypt private keys.
 
         :return: command line output
         """

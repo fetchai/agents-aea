@@ -861,7 +861,6 @@ class MultiAgentManager:
 
         :param agent_name: the agent name
         :param exception: the caught exception
-        :return None
         """
         self._print_exception_occurred_but_no_error_callback(agent_name, exception)
 
@@ -872,7 +871,7 @@ class MultiAgentManager:
         Print a warning message when an exception occurred but no error callback is registered.
 
         :param agent_name: the agent name.
-        :return: None
+        :param exception: the caught exception.
         """
         if self._warning_message_printed_for_agent.get(agent_name, False):
             return

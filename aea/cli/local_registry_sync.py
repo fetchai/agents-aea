@@ -110,7 +110,7 @@ def enlist_packages(
     :param base_dir: path or str of the local repo.
     :param skip_consistency_check: whether or not to skip consistency checks.
 
-    :yield: generator with Tuple of package_id and package directory.
+    :yield: a Tuple of package_id and package directory.
     """
     for author in os.listdir(base_dir):
         author_dir = os.path.join(base_dir, author)

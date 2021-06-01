@@ -174,7 +174,7 @@ class ItemRemoveHelper:
 
         :param item: the item package configuration
         :param ignore_non_vendor: whether or not to ignore vendor packages
-        :yield: generator with package ids: (type, public_id)
+        :yield: package ids: (type, public_id)
         """
         for item_type in map(str, ComponentType):
             items = getattr(item, f"{item_type}s", set())
@@ -273,7 +273,7 @@ def remove_unused_component_configurations(ctx: Context) -> Generator:
     Clean all configurations on enter, restore actual configurations and dump agent config.
 
     :param ctx: click context
-    :yield: generator
+    :yield: None
     """
     saved_configuration = ctx.agent_config.component_configurations
     ctx.agent_config.component_configurations = {}
