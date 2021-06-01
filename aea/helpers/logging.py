@@ -37,6 +37,7 @@ class AgentLoggerAdapter(LoggerAdapter):
         """
         Initialize the logger adapter.
 
+        :param logger: the logger.
         :param agent_name: the agent name.
         """
         super().__init__(logger, dict(agent_name=agent_name))

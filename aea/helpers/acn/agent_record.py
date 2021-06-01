@@ -59,12 +59,8 @@ class AgentRecord:
         :param representative_public_key: representative's public key
         :param identifier: certificate identifier.
         :param ledger_id: ledger identifier the request is referring to.
-        :param not_before: specify the lower bound for certificate validity.
-          If it is a string, it must follow the format: 'YYYY-MM-DD'. It
-          will be interpreted as timezone UTC-0.
-        :param not_before: specify the lower bound for certificate validity.
-          if it is a string, it must follow the format: 'YYYY-MM-DD' It
-          will be interpreted as timezone UTC-0.
+        :param not_before: specify the lower bound for certificate validity. If it is a string, it must follow the format: 'YYYY-MM-DD'. It will be interpreted as timezone UTC-0.
+        :param not_after: specify the lower bound for certificate validity. If it is a string, it must follow the format: 'YYYY-MM-DD'. It will be interpreted as timezone UTC-0.
         :param message_format: message format used for signing
         :param signature: proof-of-representation of this AgentRecord
         """

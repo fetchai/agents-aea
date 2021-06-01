@@ -117,7 +117,7 @@ def load_module(dotted_path: str, filepath: Path) -> types.ModuleType:
 
     :param dotted_path: the dotted save_path of the package/module.
     :param filepath: the file to the package/module.
-    :return: None
+    :return: module type
     :raises ValueError: if the filepath provided is not a module.
     :raises Exception: if the execution of the module raises exception.
     """
@@ -132,7 +132,6 @@ def load_env_file(env_file: str) -> None:
     Load the content of the environment file into the process environment.
 
     :param env_file: save_path to the env file.
-    :return: None.
     """
     load_dotenv(dotenv_path=Path(env_file), override=False)
 
@@ -149,7 +148,6 @@ def sigint_crossplatform(process: subprocess.Popen) -> None:  # pragma: nocover
     'send_signal' that gives more flexibility in this terms.
 
     :param process: the process to send the signal to.
-    :return: None
     """
     if os.name == "posix":
         process.send_signal(signal.SIGINT)  # pylint: disable=no-member
@@ -165,6 +163,8 @@ def win_popen_kwargs() -> dict:
 
     Help to handle ctrl c properly.
     Return empty dict if platform is not win32
+
+    :return: windows popen kwargs
     """
     kwargs: dict = {}
 
@@ -184,8 +184,7 @@ def send_control_c(
     Send ctrl-C cross-platform to terminate a subprocess.
 
     :param process: the process to send the signal to.
-
-    :return: None
+    :param kill_group: whether or not to kill group
     """
     if platform.system() == "Windows":
         if process.stdin:  # cause ctrl-c event will be handled with stdin
@@ -303,6 +302,7 @@ def try_decorator(
     :param error_message: message template with one `{}` for exception
     :param default_return: value to return on exception, by default None
     :param logger_method: name of the logger method or callable to print logs
+    :return: the callable
     """
 
     # for pydocstyle
@@ -343,6 +343,7 @@ def retry_decorator(
     :param error_message: message template with one `{}` for exception
     :param delay: number of seconds to sleep between retries. default 0
     :param logger_method: name of the logger method or callable to print logs
+    :return: the callable
     """
 
     # for pydocstyle
@@ -372,6 +373,7 @@ def exception_log_and_reraise(log_method: Callable, message: str) -> Generator:
 
     :param log_method: function to print log
     :param message: message template to add error text.
+    :yield: the generator
     """
     try:
         yield
@@ -406,7 +408,7 @@ def recursive_update(
 
     :param to_update: the dictionary to update.
     :param new_values: the dictionary of new values to replace.
-    :return: None
+    :param allow_new_values: whether or not to allow new values.
     """
     for key, value in new_values.items():
         if (not allow_new_values) and key not in to_update:
@@ -646,12 +648,8 @@ class CertRequest:
         :param public_key: the public key, or the key id.
         :param identifier: certificate identifier.
         :param ledger_id: ledger identifier the request is referring to.
-        :param not_before: specify the lower bound for certificate validity.
-          If it is a string, it must follow the format: 'YYYY-MM-DD'. It
-          will be interpreted as timezone UTC-0.
-        :param not_before: specify the lower bound for certificate validity.
-          if it is a string, it must follow the format: 'YYYY-MM-DD' It
-          will be interpreted as timezone UTC-0.
+        :param not_before: specify the lower bound for certificate validity. If it is a string, it must follow the format: 'YYYY-MM-DD'. It will be interpreted as timezone UTC-0.
+        :param not_after: specify the lower bound for certificate validity. If it is a string, it must follow the format: 'YYYY-MM-DD'. It will be interpreted as timezone UTC-0.
         :param message_format: message format used for signing
         :param save_path: the save_path where to save the certificate.
         """
@@ -705,6 +703,8 @@ class CertRequest:
 
         It first tries to parse it as an identifier,
         and in case of failure as a sequence of hexadecimals, starting with "0x".
+
+        :param public_key_str: the public key
         """
         with contextlib.suppress(ValueError):
             # if this raises ValueError, we don't return
@@ -775,6 +775,8 @@ class CertRequest:
 
         Note: if the path is *not* absolute, then
         the actual save path might depend on the context.
+
+        :return: the save path
         """
         return self._save_path
 
@@ -840,6 +842,7 @@ class CertRequest:
         :param not_before_string: signature not valid before
         :param not_after_string: signature not valid after
         :param message_format: message format used for signing
+        :return: the message
         """
         message = message_format.format(
             public_key=public_key,
@@ -956,6 +959,8 @@ def decorator_with_optional_params(decorator: Callable) -> Callable:
     def myfunction():
         ...
 
+    :param decorator: a decorator callable
+    :return: a decorator callable
     """
 
     @wraps(decorator)

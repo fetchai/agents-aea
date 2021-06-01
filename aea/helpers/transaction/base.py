@@ -69,7 +69,6 @@ class RawTransaction:
 
         :param raw_transaction_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :param raw_transaction_object: an instance of this class to be encoded in the protocol buffer object.
-        :return: None
         """
 
         raw_transaction_dict = {
@@ -160,7 +159,6 @@ class RawMessage:
 
         :param raw_message_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :param raw_message_object: an instance of this class to be encoded in the protocol buffer object.
-        :return: None
         """
         raw_message_dict = {
             "ledger_id": raw_message_object.ledger_id,
@@ -245,7 +243,6 @@ class SignedTransaction:
 
         :param signed_transaction_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :param signed_transaction_object: an instance of this class to be encoded in the protocol buffer object.
-        :return: None
         """
         signed_transaction_dict = {
             "ledger_id": signed_transaction_object.ledger_id,
@@ -337,7 +334,6 @@ class SignedMessage:
 
         :param signed_message_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :param signed_message_object: an instance of this class to be encoded in the protocol buffer object.
-        :return: None
         """
         signed_message_dict = {
             "ledger_id": signed_message_object.ledger_id,
@@ -419,7 +415,6 @@ class State:
 
         :param state_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :param state_object: an instance of this class to be encoded in the protocol buffer object.
-        :return: None
         """
         state_dict = {
             "ledger_id": state_object.ledger_id,
@@ -496,10 +491,11 @@ class Terms:
         :param counterparty_address: the counterparty address of the transaction.
         :param amount_by_currency_id: the amount by the currency of the transaction.
         :param quantities_by_good_id: a map from good id to the quantity of that good involved in the transaction.
-        :param is_sender_payable_tx_fee: whether the sender or counterparty pays the tx fee.
         :param nonce: nonce to be included in transaction to discriminate otherwise identical transactions.
+        :param is_sender_payable_tx_fee: whether the sender or counterparty pays the tx fee.
         :param fee_by_currency_id: the fee associated with the transaction.
         :param is_strict: whether or not terms must have quantities and amounts of opposite signs.
+        :param kwargs: keyword arguments
         """
         self._ledger_id = ledger_id
         self._sender_address = sender_address
@@ -837,14 +833,15 @@ class Terms:
         """
         Generate a hash from transaction information.
 
-        :param sender_addr: the sender address
-        :param counterparty_addr: the counterparty address
+        :param ledger_id: the ledger id
+        :param sender_address: the sender address
+        :param counterparty_address: the counterparty address
         :param good_ids: the list of good ids
         :param sender_supplied_quantities: the quantities supplied by the sender (must all be positive)
         :param counterparty_supplied_quantities: the quantities supplied by the counterparty (must all be positive)
         :param sender_payable_amount: the amount payable by the sender
         :param counterparty_payable_amount: the amount payable by the counterparty
-        :param tx_nonce: the nonce of the transaction
+        :param nonce: the nonce of the transaction
         :return: the hash
         """
         if len(good_ids) == 0:
@@ -894,7 +891,6 @@ class Terms:
 
         :param terms_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :param terms_object: an instance of this class to be encoded in the protocol buffer object.
-        :return: None
         """
         terms_dict = {
             "ledger_id": terms_object.ledger_id,
@@ -1005,7 +1001,6 @@ class TransactionDigest:
 
         :param transaction_digest_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :param transaction_digest_object: an instance of this class to be encoded in the protocol buffer object.
-        :return: None
         """
         transaction_digest_dict = {
             "ledger_id": transaction_digest_object.ledger_id,
@@ -1096,7 +1091,6 @@ class TransactionReceipt:
 
         :param transaction_receipt_protobuf_object: the protocol buffer object whose type corresponds with this class.
         :param transaction_receipt_object: an instance of this class to be encoded in the protocol buffer object.
-        :return: None
         """
         transaction_receipt_dict = {
             "ledger_id": transaction_receipt_object.ledger_id,

@@ -52,7 +52,7 @@ class Resources:
         """
         Instantiate the resources.
 
-        :return None
+        :param agent_name: the name of the agent
         """
         self._agent_name = agent_name
         self._component_registry = AgentComponentRegistry(agent_name=agent_name)
@@ -115,7 +115,6 @@ class Resources:
         Add a protocol to the set of resources.
 
         :param protocol: a protocol
-        :return: None
         """
         self._component_registry.register(protocol.component_id, protocol)
         self._specification_to_protocol_id[
@@ -166,7 +165,6 @@ class Resources:
         Remove a protocol from the set of resources.
 
         :param protocol_id: the protocol id for the protocol to be removed.
-        :return: None
         """
         protocol = cast(
             Optional[Protocol],
@@ -182,7 +180,6 @@ class Resources:
         Add a contract to the set of resources.
 
         :param contract: a contract
-        :return: None
         """
         self._component_registry.register(contract.component_id, contract)
 
@@ -212,7 +209,6 @@ class Resources:
         Remove a contract from the set of resources.
 
         :param contract_id: the contract id for the contract to be removed.
-        :return: None
         """
         self._component_registry.unregister(
             ComponentId(ComponentType.CONTRACT, contract_id)
@@ -223,7 +219,6 @@ class Resources:
         Add a connection to the set of resources.
 
         :param connection: a connection
-        :return: None
         """
         self._component_registry.register(connection.component_id, connection)
 
@@ -253,7 +248,6 @@ class Resources:
         Remove a connection from the set of resources.
 
         :param connection_id: the connection id for the connection to be removed.
-        :return: None
         """
         self._component_registry.unregister(
             ComponentId(ComponentType.CONNECTION, connection_id)
@@ -264,7 +258,6 @@ class Resources:
         Add a skill to the set of resources.
 
         :param skill: a skill
-        :return: None
         """
         self._component_registry.register(skill.component_id, skill)
         if skill.handlers is not None:
@@ -307,7 +300,6 @@ class Resources:
         Remove a skill from the set of resources.
 
         :param skill_id: the skill id for the skill to be removed.
-        :return: None
         """
         self._component_registry.unregister(ComponentId(ComponentType.SKILL, skill_id))
         with suppress(ValueError):
@@ -390,8 +382,6 @@ class Resources:
         Set up the resources.
 
         Calls setup on all resources.
-
-        :return: None
         """
         for r in self._registries:
             r.setup()
@@ -401,8 +391,6 @@ class Resources:
         Teardown the resources.
 
         Calls teardown on all resources.
-
-        :return: None
         """
         for r in self._registries:
             r.teardown()

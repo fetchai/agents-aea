@@ -34,8 +34,7 @@ def install_dependency(
 
     :param dependency_name: name of the python package
     :param dependency: Dependency specification
-
-    :return: None
+    :param logger: the logger
     """
     try:
         pip_args = dependency.get_pip_install_args()

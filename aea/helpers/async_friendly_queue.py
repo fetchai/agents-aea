@@ -40,7 +40,8 @@ class AsyncFriendlyQueue(queue.Queue):
         Put an item into the queue.
 
         :param item: item to put in the queue
-        :param args, kwargs: similar to queue.Queue.put
+        :param args: similar to queue.Queue.put
+        :param kwargs: similar to queue.Queue.put
         """
         super().put(item, *args, **kwargs)
         if self._non_empty_waiters:
@@ -62,7 +63,9 @@ class AsyncFriendlyQueue(queue.Queue):
         """
         Get an item into the queue.
 
-        :param args, kwargs: similar to queue.Queue.get
+        :param args: similar to queue.Queue.get
+        :param kwargs: similar to queue.Queue.get
+        :return: similar to queue.Queue.get
         """
         return super().get(*args, **kwargs)
 
