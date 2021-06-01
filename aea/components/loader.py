@@ -59,6 +59,8 @@ def load_component_from_config(  # type: ignore
     Load a component from a directory.
 
     :param configuration: the component configuration.
+    :param args: the positional arguments.
+    :param kwargs: the keyword arguments.
     :return: the component instance.
     """
     component_type = configuration.component_type
@@ -98,6 +100,8 @@ def _handle_error_while_loading_component_module_not_found(
     - "'{}' is not a valid type name, choose one of ['protocols', 'connections', 'skills', 'contracts']"
     - "The package '{}/{}' of type '{}' exists, but cannot find module '{}'"
 
+    :param configuration: the configuration
+    :param e: the exception
     :raises ModuleNotFoundError: if it is not
     :raises AEAPackageLoadingError: the same exception, but prepending an informative message.
     """
@@ -165,6 +169,8 @@ def _handle_error_while_loading_component_generic_error(
     """
     Handle Exception for AEA packages.
 
+    :param configuration: the configuration
+    :param e: the exception
     :raises Exception: the same exception, but prepending an informative message.
     """
     e_str = parse_exception(e)

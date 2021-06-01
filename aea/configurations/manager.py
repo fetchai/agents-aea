@@ -91,9 +91,8 @@ def _try_get_configuration_object_from_aea_config(
 
     The result is not guaranteed because there might not be any
 
-    :param ctx: the CLI context.
-    :param component_id: the component id whose prefix points to the relevant
-        custom configuration in the AEA configuration file.
+    :param agent_config: the agent configuration.
+    :param component_id: the component id whose prefix points to the relevant custom configuration in the AEA configuration file.
     :return: the configuration object to get/set an attribute.
     """
     if component_id is None:
@@ -303,6 +302,7 @@ class AgentConfigManager:
 
         :param agent_config: AgentConfig to manage.
         :param aea_project_directory: directory where project for agent_config placed.
+        :param env_vars_friendly: whether or not it is env vars friendly
         """
         self.agent_config = agent_config
         self.aea_project_directory = aea_project_directory
@@ -366,8 +366,6 @@ class AgentConfigManager:
 
         :param path: str dotted path  or List[Union[ComponentId, str]]
         :param value: one of the json friendly objects.
-
-        :return: None
         """
         component_id, json_path = self._parse_path(path)
         data = self._make_dict_for_path_and_value(json_path, value)

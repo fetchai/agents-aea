@@ -128,6 +128,7 @@ class LedgerApis:
         :param amount: the amount
         :param tx_nonce: verifies the authenticity of the tx
         :param tx_fee: the tx fee
+        :param kwargs: the keyword arguments.
 
         :return: tx
         """
@@ -321,7 +322,9 @@ class LedgerApis:
         """
         Check if the address is valid.
 
-        :param address: the address to validate
+        :param identifier: ledger identifier.
+        :param address: the address to validate.
+        :return: whether it is a valid address or not.
         """
         identifier = (
             identifier
