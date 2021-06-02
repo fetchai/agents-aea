@@ -110,6 +110,10 @@ Return True if the behaviour is terminated, False otherwise.
 
 The user should implement it properly to determine the stopping condition.
 
+**Returns**:
+
+bool indicating status
+
 <a name="aea.skills.behaviours.OneShotBehaviour"></a>
 ## OneShotBehaviour Objects
 
@@ -168,6 +172,7 @@ Initialize the ticker behaviour.
 
 - `tick_interval`: interval of the behaviour in seconds.
 - `start_at`: whether to start the behaviour with an offset.
+- `kwargs`: the keyword arguments.
 
 <a name="aea.skills.behaviours.TickerBehaviour.tick_interval"></a>
 #### tick`_`interval
@@ -242,7 +247,7 @@ Initialize the sequence behaviour.
 **Arguments**:
 
 - `behaviour_sequence`: the sequence of behaviour.
-- `kwargs`: 
+- `kwargs`: the keyword arguments
 
 <a name="aea.skills.behaviours.SequenceBehaviour.current_behaviour"></a>
 #### current`_`behaviour
@@ -255,6 +260,10 @@ Initialize the sequence behaviour.
 Get the current behaviour.
 
 If None, the sequence behaviour can be considered done.
+
+**Returns**:
+
+current behaviour or None
 
 <a name="aea.skills.behaviours.SequenceBehaviour.act"></a>
 #### act
@@ -370,10 +379,6 @@ Register a state.
 - `state`: the behaviour in that state.
 - `initial`: whether the state is an initial state.
 
-**Returns**:
-
-None
-
 **Raises**:
 
 - `ValueError`: if a state with the provided name already exists.
@@ -392,10 +397,6 @@ Register a final state.
 - `name`: the name of the state.
 - `state`: the state.
 
-**Returns**:
-
-None
-
 **Raises**:
 
 - `ValueError`: if a state with the provided name already exists.
@@ -412,10 +413,6 @@ Unregister a state.
 **Arguments**:
 
 - `name`: the state name to unregister.
-
-**Returns**:
-
-None
 
 **Raises**:
 
@@ -505,10 +502,6 @@ No sanity check is done.
 - `destination`: the destination state name.
 - `event`: the event.
 
-**Returns**:
-
-None
-
 **Raises**:
 
 - `ValueError`: if a transition from source with event is already present.
@@ -527,10 +520,6 @@ Unregister a transition.
 - `source`: the source state name.
 - `destination`: the destination state name.
 - `event`: the event.
-
-**Returns**:
-
-None
 
 **Raises**:
 

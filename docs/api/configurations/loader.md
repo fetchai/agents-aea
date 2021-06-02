@@ -48,10 +48,6 @@ Validate a JSON object.
 
 - `json_data`: the JSON data.
 
-**Returns**:
-
-None.
-
 <a name="aea.configurations.loader.BaseConfigLoader.required_fields"></a>
 #### required`_`fields
 
@@ -148,10 +144,6 @@ Dump a configuration.
 - `configuration`: the configuration to be dumped.
 - `file_pointer`: the file pointer to the configuration file
 
-**Returns**:
-
-None
-
 <a name="aea.configurations.loader.ConfigLoader.from_configuration_type"></a>
 #### from`_`configuration`_`type
 
@@ -174,6 +166,7 @@ Load agent configuration from configuration json data.
 **Arguments**:
 
 - `configuration_json`: list of dicts with aea configuration
+- `validate`: whether or not to validate
 
 **Returns**:
 
@@ -200,7 +193,11 @@ Get a config loader from the configuration type.
 
 **Arguments**:
 
-- `configuration_type`: the configuration type
+- `configuration_type`: the configuration type.
+
+**Returns**:
+
+configuration loader
 
 <a name="aea.configurations.loader.load_component_configuration"></a>
 #### load`_`component`_`configuration

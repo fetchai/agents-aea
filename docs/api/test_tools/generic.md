@@ -17,10 +17,6 @@ Write an envelope to a file.
 - `envelope`: Envelope.
 - `file_path`: the file path
 
-**Returns**:
-
-None
-
 <a name="aea.test_tools.generic.read_envelope_from_file"></a>
 #### read`_`envelope`_`from`_`file
 
@@ -30,7 +26,9 @@ read_envelope_from_file(file_path: str) -> Envelope
 
 Read an envelope from a file.
 
-:param file_path the file path.
+**Arguments**:
+
+- `file_path`: the file path.
 
 **Returns**:
 
@@ -48,20 +46,16 @@ Set an AEA config with nested values.
 Run from agent's directory.
 
 Allowed dotted_path:
-'agent.an_attribute_name'
-'protocols.my_protocol.an_attribute_name'
-'connections.my_connection.an_attribute_name'
-'contracts.my_contract.an_attribute_name'
-'skills.my_skill.an_attribute_name'
-'vendor.author.[protocols|connections|skills].package_name.attribute_name
+    'agent.an_attribute_name'
+    'protocols.my_protocol.an_attribute_name'
+    'connections.my_connection.an_attribute_name'
+    'contracts.my_contract.an_attribute_name'
+    'skills.my_skill.an_attribute_name'
+    'vendor.author.[protocols|connections|skills].package_name.attribute_name
 
 **Arguments**:
 
 - `dotted_path`: dotted path to a setting.
 - `value`: a value to assign. Must be of yaml serializable type.
 - `author`: the author name, used to parse the dotted path.
-
-**Returns**:
-
-None.
 

@@ -33,12 +33,11 @@ Init runtime.
 **Arguments**:
 
 - `agent`: Agent to run.
+- `multiplexer_options`: options for the multiplexer.
 - `loop_mode`: agent main loop mode.
 - `loop`: optional event loop. if not provided a new one will be created.
-
-**Returns**:
-
-None
+- `threaded`: if True, run in threaded mode, else async
+- `task_manager_mode`: mode of the task manager.
 
 <a name="aea.runtime.BaseRuntime.storage"></a>
 #### storage
@@ -187,12 +186,10 @@ Init runtime.
 **Arguments**:
 
 - `agent`: Agent to run.
+- `multiplexer_options`: options for the multiplexer.
 - `loop_mode`: agent main loop mode.
 - `loop`: optional event loop. if not provided a new one will be created.
-
-**Returns**:
-
-None
+- `threaded`: if True, run in threaded mode, else async
 
 <a name="aea.runtime.AsyncRuntime.set_loop"></a>
 #### set`_`loop

@@ -50,11 +50,7 @@ Create collection if not exits.
 
 **Arguments**:
 
-- `collection_name`: str.
-
-**Returns**:
-
-None
+- `collection_name`: name of the collection.
 
 <a name="aea.helpers.storage.backends.sqlite.SqliteStorageBackend.put"></a>
 #### put
@@ -70,10 +66,6 @@ Put object into collection.
 - `collection_name`: str.
 - `object_id`: str object id
 - `object_body`: python dict, json compatible.
-
-**Returns**:
-
-None
 
 <a name="aea.helpers.storage.backends.sqlite.SqliteStorageBackend.get"></a>
 #### get
@@ -107,10 +99,6 @@ Remove object from the collection.
 - `collection_name`: str.
 - `object_id`: str object id
 
-**Returns**:
-
-None
-
 <a name="aea.helpers.storage.backends.sqlite.SqliteStorageBackend.find"></a>
 #### find
 
@@ -128,7 +116,7 @@ Get objects from the collection by filtering by field value.
 
 **Returns**:
 
-None
+list of object ids and body
 
 <a name="aea.helpers.storage.backends.sqlite.SqliteStorageBackend.list"></a>
 #### list
