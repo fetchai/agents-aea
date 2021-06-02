@@ -445,25 +445,25 @@ func MakeAcnMessageFromEnvelope(envelope *Envelope) (error, []byte) {
 func (aea AeaApi) SendEnvelope(envelope *Envelope) error {
 	err, data := MakeAcnMessageFromEnvelope(envelope)
 	if err != nil {
-		logger.Error().Str("err", err.Error()).Msgf("while serializing envelope: %s", envelope)
+		logger.Error().Str("err", err.Error()).Msgf("while serializing envelope: %s", envelope.String())
 		return err
 	}
 	err = aea.pipe.Write(data)
 	if err != nil {
-		logger.Error().Str("err", err.Error()).Msgf("on pipe write")
+		logger.Error().Str("err", err.Error()).Msgf("on pipe write. envelope: %s", envelope.String())
 		return err
 	}
 
 	status, err := acn.WaitForStatus(aea.acn_status_chan, AcnStatusTimeout)
 
 	if err != nil {
-		logger.Error().Str("err", err.Error()).Msgf("on status wait")
+		logger.Error().Str("err", err.Error()).Msgf("on status wait. envelope: %s", envelope.String())
 		return err
 	}
 	if status.Code != acn.Status_SUCCESS {
 		logger.Error().
 			Str("op", "send_envelope").
-			Msgf("acn confirmation status is not Status Success: %d", status.Code)
+			Msgf("acn confirmation status is not Status Success: %d. envelope: %s", status.Code, envelope.String())
 		return fmt.Errorf(
 			"send envelope: acn confirmation status is not Status Success: %d",
 			status.Code,
