@@ -1292,7 +1292,7 @@ class SOEFConnection(Connection):
                 self.DEFAULT_CONNECTION_CHECK_MAX_RETRIES,
             ),
         )
-        is_https = cast(bool, self.configuration.config.get("is_https"), True)
+        is_https = cast(bool, self.configuration.config.get("is_https", True))
         soef_addr = cast(str, self.configuration.config.get("soef_addr"))
         soef_port = cast(int, self.configuration.config.get("soef_port"))
         chain_identifier = cast(str, self.configuration.config.get("chain_identifier"))
