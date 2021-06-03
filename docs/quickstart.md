@@ -12,7 +12,8 @@ You need <a href="https://www.python.org/downloads/" target="_blank">Python 3.6<
 
 ​GCC installation is required:
 * Ubuntu: `apt-get install gcc`
-* Windows (with choco installed https://chocolatey.org/): `choco install mingw`
+* Windows (with <a href="https://chocolatey.org/" target="_blank">`choco`</a>
+ installed): `choco install mingw`
 * MacOS X (with home brew): `brew install gcc`
 
 ### Option 1: Manual system preparation
