@@ -164,8 +164,6 @@ class MultiAgentManager:
         :param registry_path: str. path to the local packages registry
         :param auto_add_remove_project: bool. add/remove project on the first agent add/last agent remove
         :param password: the password to encrypt/decrypt the private key.
-
-        :return: None
         """
         self.working_dir = working_dir
         self._auto_add_remove_project = auto_add_remove_project
@@ -186,7 +184,10 @@ class MultiAgentManager:
         self._loop: Optional[asyncio.AbstractEventLoop] = None
         self._event: Optional[asyncio.Event] = None
 
-        self._error_callbacks: List[Callable[[str, BaseException], None]] = []
+        self._error_callbacks: List[Callable[[str, BaseException], None]] = [
+            self._default_error_callback
+        ]
+        self._custom_callback_added: bool = False
         self._last_start_status: Optional[
             Tuple[
                 bool,
@@ -202,6 +203,10 @@ class MultiAgentManager:
         self._started_event = threading.Event()
         self._mode = mode
         self._password = password
+
+        # this flags will control whether we have already printed the warning message
+        # for a certain agent
+        self._warning_message_printed_for_agent: Dict[str, bool] = {}
 
     @property
     def data_dir(self) -> str:
@@ -270,9 +275,14 @@ class MultiAgentManager:
 
     def add_error_callback(
         self, error_callback: Callable[[str, BaseException], None]
-    ) -> None:
+    ) -> "MultiAgentManager":
         """Add error callback to call on error raised."""
+        if len(self._error_callbacks) == 1 and not self._custom_callback_added:
+            # only default callback present, reset before adding new callback
+            self._custom_callback_added = True
+            self._error_callbacks = []
         self._error_callbacks.append(error_callback)
+        return self
 
     def start_manager(
         self, local: bool = False, remote: bool = False
@@ -356,6 +366,7 @@ class MultiAgentManager:
             self._thread.join(self.DEFAULT_TIMEOUT_FOR_BLOCKING_OPERATIONS)
 
         self._thread = None
+        self._warning_message_printed_for_agent = {}
         return self
 
     def _cleanup(self, only_data: bool = False) -> None:
@@ -381,10 +392,10 @@ class MultiAgentManager:
         registry, and then from remote registry in case of failure).
 
         :param public_id: the public if of the agent project.
-
         :param local: whether or not to fetch from local registry.
         :param remote: whether or not to fetch from remote registry.
         :param restore: bool flag for restoring already fetched agent.
+        :return: self
         """
         if public_id.to_any() in self._versionless_projects_set:
             raise ValueError(
@@ -463,13 +474,10 @@ class MultiAgentManager:
         :param agent_name: unique name for the agent
         :param agent_overrides: overrides for agent config.
         :param component_overrides: overrides for component section.
-        :param config: agent config (used for agent re-creation).
-
         :param local: whether or not to fetch from local registry.
         :param remote: whether or not to fetch from remote registry.
         :param restore: bool flag for restoring already fetched agent.
-
-        :return: manager
+        :return: self
         """
         agent_name = agent_name or public_id.name
 
@@ -549,15 +557,14 @@ class MultiAgentManager:
         agent_name: str,
         agent_overides: Optional[Dict],
         components_overrides: Optional[List[Dict]],
-    ) -> None:
+    ) -> "MultiAgentManager":
         """
         Set agent overrides.
 
         :param agent_name: str
         :param agent_overides: optional dict of agent config overrides
         :param components_overrides: optional list of dict of components overrides
-
-        :return: None
+        :return: self
         """
         if agent_name not in self._agents:  # pragma: nocover
             raise ValueError(f"Agent with name {agent_name} does not exist!")
@@ -566,6 +573,7 @@ class MultiAgentManager:
             raise ValueError("Agent is running. stop it first!")
 
         self._agents[agent_name].set_overrides(agent_overides, components_overrides)
+        return self
 
     def list_agents_info(self) -> List[Dict[str, Any]]:
         """
@@ -686,7 +694,7 @@ class MultiAgentManager:
 
         :param agent_name: agent name to stop
 
-        :return: None
+        :return: self
         """
         if not self._is_agent_running(agent_name) or not self._thread or not self._loop:
             raise ValueError(f"{agent_name} is not running!")
@@ -721,7 +729,7 @@ class MultiAgentManager:
         """
         Stop all agents running.
 
-        :return: None
+        :return: self
         """
         agents_list = self.list_agents(running_only=True)
         self.stop_agents(agents_list)
@@ -732,7 +740,8 @@ class MultiAgentManager:
         """
         Stop specified agents.
 
-        :return: None
+        :param agent_names: names of agents
+        :return: self
         """
         for agent_name in agent_names:
             if not self._is_agent_running(agent_name):
@@ -747,7 +756,8 @@ class MultiAgentManager:
         """
         Stop specified agents.
 
-        :return: None
+        :param agent_names: names of agents
+        :return: self
         """
         for agent_name in agent_names:
             self.start_agent(agent_name)
@@ -758,6 +768,7 @@ class MultiAgentManager:
         """
         Return details about agent alias definition.
 
+        :param agent_name: name of agent
         :return: AgentAlias
         """
         if agent_name not in self._agents:  # pragma: nocover
@@ -792,7 +803,7 @@ class MultiAgentManager:
         :param local: whether or not to fetch from local registry.
         :param remote: whether or not to fetch from remote registry.
 
-        :return: None
+        :return: Tuple of bool indicating load success, settings of loaded, list of failed
         :raises: ValueError if failed to load state.
         """
         if not os.path.exists(self._save_path):
@@ -836,10 +847,39 @@ class MultiAgentManager:
         return True, loaded_ok, failed_to_load
 
     def _save_state(self) -> None:
-        """
-        Save MultiAgentManager state.
-
-        :return: None.
-        """
+        """Save MultiAgentManager state."""
         with open_file(self._save_path, "w") as f:
             json.dump(self.dict_state, f, indent=4, sort_keys=True)
+
+    def _default_error_callback(
+        self, agent_name: str, exception: BaseException
+    ) -> None:
+        """
+        Handle errors from running agents.
+
+        This is the default error callback. To replace it
+        with another one, use the method 'add_error_callback'.
+
+        :param agent_name: the agent name
+        :param exception: the caught exception
+        """
+        self._print_exception_occurred_but_no_error_callback(agent_name, exception)
+
+    def _print_exception_occurred_but_no_error_callback(
+        self, agent_name: str, exception: BaseException
+    ) -> None:
+        """
+        Print a warning message when an exception occurred but no error callback is registered.
+
+        :param agent_name: the agent name.
+        :param exception: the caught exception.
+        """
+        if self._warning_message_printed_for_agent.get(agent_name, False):
+            return  # pragma: nocover
+        self._warning_message_printed_for_agent[agent_name] = True
+        print(
+            f"WARNING: An exception occurred during the execution of agent '{agent_name}':\n",
+            str(exception),
+            "\nHowever, since no error callback was found the exception is handled silently. Please "
+            "add an error callback using the method 'add_error_callback' of the MultiAgentManager instance.",
+        )

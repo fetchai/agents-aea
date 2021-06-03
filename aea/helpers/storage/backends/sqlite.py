@@ -117,8 +117,7 @@ class SqliteStorageBackend(AbstractStorageBackend):
         """
         Create collection if not exits.
 
-        :param collection_name: str.
-        :return: None
+        :param collection_name: name of the collection.
         """
         self._check_collection_name(collection_name)
         sql = f"""CREATE TABLE IF NOT EXISTS {collection_name} (
@@ -136,7 +135,6 @@ class SqliteStorageBackend(AbstractStorageBackend):
         :param collection_name: str.
         :param object_id: str object id
         :param object_body: python dict, json compatible.
-        :return: None
         """
         self._check_collection_name(collection_name)
         sql = f"""INSERT OR REPLACE INTO {collection_name} (object_id, object_body)
@@ -172,8 +170,6 @@ class SqliteStorageBackend(AbstractStorageBackend):
 
         :param collection_name: str.
         :param object_id: str object id
-
-        :return: None
         """
         self._check_collection_name(collection_name)
         sql = f"""DELETE FROM {collection_name} WHERE object_id = ?;"""  # nosec
@@ -188,8 +184,7 @@ class SqliteStorageBackend(AbstractStorageBackend):
         :param collection_name: str.
         :param field: field name to search: example "parent.field"
         :param equals: value field should be equal to
-
-        :return: None
+        :return: list of object ids and body
         """
         self._check_collection_name(collection_name)
         sql = f"""SELECT object_id, object_body FROM {collection_name} WHERE json_extract(object_body, ?) = ?;"""  # nosec

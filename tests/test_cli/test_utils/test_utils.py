@@ -133,8 +133,12 @@ class TryGetItemSourcePathTestCase(TestCase):
     @mock.patch("aea.cli.utils.package_utils.os.path.exists", return_value=False)
     def test_get_item_source_path_not_exists(self, exists_mock, join_mock):
         """Test for get_item_source_path item already exists."""
-        with self.assertRaises(ClickException):
-            try_get_item_source_path("cwd", AUTHOR, "skills", "skill_name")
+        item_name = "skill_name"
+        with pytest.raises(
+            ClickException,
+            match=f'Item "{AUTHOR}/{item_name}" not found in source folder "some-path"',
+        ):
+            try_get_item_source_path("cwd", AUTHOR, "skills", item_name)
 
 
 @mock.patch("aea.cli.utils.package_utils.os.path.join", return_value="some-path")

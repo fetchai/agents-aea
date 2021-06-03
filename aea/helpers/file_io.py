@@ -86,6 +86,8 @@ def lock_file(
     """Lock file in context manager.
 
     :param file_descriptor: file descriptor of file to lock.
+    :param logger: the logger.
+    :yield: generator
     """
     with exception_log_and_reraise(
         logger.error, f"Couldn't acquire lock for file {file_descriptor.name}: {{}}",
@@ -125,8 +127,10 @@ def envelope_from_bytes(
     """
     Decode bytes to get the envelope.
 
+    :param bytes_: the encoded envelope
+    :param separator: the separator used
+    :param logger: the logger
     :return: Envelope
-    :raise: Exception
     """
     logger.debug("processing: {!r}".format(bytes_))
     envelope = None  # type: Optional[Envelope]

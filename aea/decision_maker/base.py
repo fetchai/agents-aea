@@ -55,7 +55,6 @@ class OwnershipState(ABC):
         Set values on the ownership state.
 
         :param kwargs: the relevant keyword arguments
-        :return: None
         """
 
     @abstractmethod
@@ -66,7 +65,6 @@ class OwnershipState(ABC):
         This method is used to apply a raw state update without a transaction.
 
         :param kwargs: the relevant keyword arguments
-        :return: None
         """
 
     @property
@@ -174,8 +172,9 @@ class ProtectedQueue(Queue):
         ignored in that case).
 
         :param internal_message: the internal message to put on the queue
+        :param block: whether to block or not
+        :param timeout: timeout on block
         :raises: ValueError, if the item is not an internal message
-        :return: None
         """
         if not (isinstance(internal_message, Message) or internal_message is None):
             raise ValueError("Only messages are allowed!")
@@ -191,7 +190,6 @@ class ProtectedQueue(Queue):
 
         :param internal_message: the internal message to put on the queue
         :raises: ValueError, if the item is not an internal message
-        :return: None
         """
         if not (isinstance(internal_message, Message) or internal_message is None):
             raise ValueError("Only messages are allowed!")
@@ -201,8 +199,9 @@ class ProtectedQueue(Queue):
         """
         Inaccessible get method.
 
+        :param block: whether to block or not
+        :param timeout: timeout on block
         :raises: ValueError, access not permitted.
-        :return: None
         """
         raise ValueError("Access not permitted!")
 
@@ -211,7 +210,6 @@ class ProtectedQueue(Queue):
         Inaccessible get_nowait method.
 
         :raises: ValueError, access not permitted.
-        :return: None
         """
         raise ValueError("Access not permitted!")
 
@@ -297,7 +295,6 @@ class DecisionMakerHandler(WithLogger, ABC):
         Handle an internal message from the skills.
 
         :param message: the internal message
-        :return: None
         """
 
 
@@ -318,7 +315,6 @@ class DecisionMaker(WithLogger):
         """
         Initialize the decision maker.
 
-        :param agent_name: the agent name
         :param decision_maker_handler: the decision maker handler
         """
         WithLogger.__init__(self, logger=decision_maker_handler.logger)
@@ -382,8 +378,6 @@ class DecisionMaker(WithLogger):
         Performs the following while not stopped:
 
         - gets internal messages from the in queue and calls handle() on them
-
-        :return: None
         """
         while not self._stopped:
             message = self.message_in_queue.protected_get(
@@ -405,6 +399,5 @@ class DecisionMaker(WithLogger):
         Handle an internal message from the skills.
 
         :param message: the internal message
-        :return: None
         """
         self.decision_maker_handler.handle(message)

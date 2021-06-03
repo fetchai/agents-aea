@@ -111,7 +111,6 @@ def add_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None:
     :param ctx: Context object.
     :param item_type: the item type.
     :param item_public_id: the item public id.
-    :return: None
     """
     click.echo(f"Adding {item_type} '{item_public_id}'...")
     if is_item_present(ctx.cwd, ctx.agent_config, item_type, item_public_id):
@@ -161,8 +160,6 @@ def _add_item_deps(
     :param ctx: Context object.
     :param item_type: type of item.
     :param item_config: item configuration object.
-
-    :return: None
     """
     if item_type in {CONNECTION, SKILL}:
         item_config = cast(Union[SkillConfig, ConnectionConfig], item_config)

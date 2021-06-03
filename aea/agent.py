@@ -73,8 +73,8 @@ class Agent(AbstractAgent, WithLogger):
         :param runtime_mode: runtime mode to up agent.
         :param storage_uri: optional uri to set generic storage
         :param task_manager_mode: task manager mode.
-
-        :return: None
+        :param logger: the logger.
+        :param task_manager_mode: mode of the task manager.
         """
         WithLogger.__init__(self, logger=logger)
         self._identity = identity
@@ -173,6 +173,8 @@ class Agent(AbstractAgent, WithLogger):
         Get the tick or agent loop count.
 
         Each agent loop (one call to each one of act(), react(), update()) increments the tick.
+
+        :return: tick count
         """
         return self._tick
 
@@ -196,11 +198,7 @@ class Agent(AbstractAgent, WithLogger):
         return self._runtime
 
     def setup(self) -> None:
-        """
-        Set up the agent.
-
-        :return: None
-        """
+        """Set up the agent."""
         raise NotImplementedError  # pragma: nocover
 
     def start(self) -> None:
@@ -211,8 +209,6 @@ class Agent(AbstractAgent, WithLogger):
 
         - calls start() on runtime.
         - waits for runtime to complete running (blocking)
-
-        :return: None
         """
         was_started = self.runtime.start()
 
@@ -226,16 +222,11 @@ class Agent(AbstractAgent, WithLogger):
         Handle an envelope.
 
         :param envelope: the envelope to handle.
-        :return: None
         """
         raise NotImplementedError  # pragma: nocover
 
     def act(self) -> None:
-        """
-        Perform actions on period.
-
-        :return: None
-        """
+        """Perform actions on period."""
         raise NotImplementedError  # pragma: nocover
 
     def stop(self) -> None:
@@ -246,18 +237,12 @@ class Agent(AbstractAgent, WithLogger):
 
         - calls stop() on runtime
         - waits for runtime to stop (blocking)
-
-        :return: None
         """
         self.runtime.stop()
         self.runtime.wait_completed(sync=True)
 
     def teardown(self) -> None:
-        """
-        Tear down the agent.
-
-        :return: None
-        """
+        """Tear down the agent."""
         raise NotImplementedError  # pragma: nocover
 
     def get_periodic_tasks(

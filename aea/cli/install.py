@@ -55,8 +55,7 @@ def do_install(ctx: Context, requirement: Optional[str] = None) -> None:
     :param ctx: context object.
     :param requirement: optional str requirement.
 
-    :return: None
-    :raises: ClickException if AEAException occurs.
+    :raises ClickException: if AEAException occurs.
     """
     try:
         if requirement:
@@ -79,7 +78,7 @@ def _install_from_requirement(file: str, install_timeout: float = 300) -> None:
     :param file: requirement.txt file path
     :param install_timeout: timeout to wait pip to install
 
-    :return: None
+    :raises AEAException: if an error occurs during installation.
     """
     try:
         returncode = run_install_subprocess(

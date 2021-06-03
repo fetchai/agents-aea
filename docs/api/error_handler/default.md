@@ -33,10 +33,7 @@ Handle the received envelope in case the protocol is not supported.
 **Arguments**:
 
 - `envelope`: the envelope
-
-**Returns**:
-
-None
+- `logger`: the logger
 
 <a name="aea.error_handler.default.ErrorHandler.send_decoding_error"></a>
 #### send`_`decoding`_`error
@@ -53,10 +50,6 @@ Handle a decoding error.
 - `exception`: the exception raised during decoding
 - `logger`: the logger
 
-**Returns**:
-
-None
-
 <a name="aea.error_handler.default.ErrorHandler.send_no_active_handler"></a>
 #### send`_`no`_`active`_`handler
 
@@ -70,8 +63,5 @@ Handle the received envelope in case the handler is not supported.
 
 - `envelope`: the envelope
 - `reason`: the reason for the failure
-
-**Returns**:
-
-None
+- `logger`: the logger
 

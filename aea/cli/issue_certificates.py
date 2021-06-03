@@ -60,7 +60,6 @@ def issue_certificates_(
     :param agent_config_manager: the agent configuration manager.
     :param path_prefix: the path prefix for "save_path". Defaults to project directory.
     :param password: the password to encrypt/decrypt the private key.
-    :return: None
     """
     path_prefix = path_prefix or project_directory
     for connection_id in agent_config_manager.agent_config.connections:

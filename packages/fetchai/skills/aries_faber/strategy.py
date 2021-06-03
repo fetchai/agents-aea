@@ -52,7 +52,7 @@ DEFAULT_SEARCH_QUERY = {
 DEFAULT_SEARCH_RADIUS = 5.0
 
 
-class FaberStrategy(Model):
+class Strategy(Model):
     """This class defines a strategy for the agent."""
 
     def __init__(self, **kwargs: Any) -> None:
@@ -67,7 +67,7 @@ class FaberStrategy(Model):
         self._ledger_url = kwargs.pop("ledger_url", DEFAULT_LEDGER_URL)
 
         # derived config
-        self._admin_url = "http://{}:{}".format(self.admin_host, self.admin_port)
+        self._admin_url = f"http://{self.admin_host}:{self.admin_port}"
         self._alice_aea_address = ""
 
         # Search

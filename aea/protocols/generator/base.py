@@ -156,8 +156,6 @@ class ProtocolGenerator:
         :raises FileNotFoundError if any prerequisite application is not installed
         :raises yaml.YAMLError if yaml parser encounters an error condition
         :raises ProtocolSpecificationParseError if specification fails generator's validation
-
-        :return: None
         """
         # Check the prerequisite applications are installed
         try:
@@ -211,8 +209,6 @@ class ProtocolGenerator:
 
         :param number: the number of indentation levels to set/increment/decrement
         :param mode: the mode of indentation change
-
-        :return: None
         """
         if mode and mode == "s":
             if number >= 0:
@@ -2061,6 +2057,7 @@ class ProtocolGenerator:
         e) applies black formatting
         f) applies isort formatting
 
+        :param language: the language for which to create protobuf files
         :return: optional warning message
         """
         if language != PROTOCOL_LANGUAGE_PYTHON:

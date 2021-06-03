@@ -32,6 +32,7 @@ Initialize the logger adapter.
 
 **Arguments**:
 
+- `logger`: the logger.
 - `agent_name`: the agent name.
 
 <a name="aea.helpers.logging.AgentLoggerAdapter.process"></a>

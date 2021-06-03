@@ -77,10 +77,15 @@ registry, and then from remote registry in case of failure).
 - `working_dir`: the working directory
 - `public_id`: the public id
 - `is_local`: whether to fetch from local
-:param is_remote whether to fetch from remote
-- `verbosity`: the logging verbosity of the CLI
+- `is_remote`: whether to fetch from remote
+- `is_restore`: whether to restore or not
+- `cli_verbosity`: the logging verbosity of the CLI
 - `registry_path`: the path to the registry locally
 - `skip_consistency_check`: consistency checks flag
+
+**Returns**:
+
+project
 
 <a name="aea.manager.project.Project.remove"></a>
 #### remove
@@ -140,10 +145,6 @@ Set agent config instance constructed from json data.
 **Arguments**:
 
 - `json_data`: agent config json data
-
-**Returns**:
-
-None
 
 <a name="aea.manager.project.AgentAlias.builder"></a>
 #### builder
