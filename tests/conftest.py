@@ -1435,6 +1435,15 @@ class UseGanache:
 
 
 @pytest.mark.integration
+class UseSOEF:
+    """Inherit from this class to use SOEF."""
+
+    @pytest.fixture(autouse=True)
+    def _start_soef(self, soef):
+        """Start an SOEF image."""
+
+
+@pytest.mark.integration
 class UseLocalFetchNode:
     """Inherit from this class to use a local Fetch ledger node."""
 

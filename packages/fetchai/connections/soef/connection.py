@@ -244,7 +244,7 @@ class SOEFChannel:
         self.api_key = api_key
         self.soef_addr = soef_addr
         self.soef_port = soef_port
-        self.base_url = "https://{}:{}".format(soef_addr, soef_port)
+        self.base_url = "http://{}:{}".format(soef_addr, soef_port)
         self.oef_search_dialogues = OefSearchDialogues()
         self.connection_check_timeout = connection_check_timeout
         self.connection_check_max_retries = connection_check_max_retries

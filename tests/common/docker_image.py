@@ -340,6 +340,7 @@ class GanacheDockerImage(DockerImage):
 class SOEFDockerImage(DockerImage):
     """Wrapper to SOEF Docker image."""
 
+    DEFAULT_PORT = 9000
     PORT = 9002
 
     def __init__(
@@ -363,7 +364,7 @@ class SOEFDockerImage(DockerImage):
 
     def _make_ports(self) -> Dict:
         """Make ports dictionary for Docker."""
-        return {f"{self._port}/tcp": ("0.0.0.0", self._port)}  # nosec
+        return {f"{self.DEFAULT_PORT}/tcp": ("0.0.0.0", self._port)}  # nosec
 
     def create(self) -> Container:
         """Create the container."""
@@ -374,10 +375,10 @@ class SOEFDockerImage(DockerImage):
 
     def wait(self, max_attempts: int = 15, sleep_rate: float = 1.0) -> bool:
         """Wait until the image is up."""
-        request = dict(jsonrpc=2.0, method="web3_clientVersion", params=[], id=1)
+        # request = dict(jsonrpc=2.0, method="web3_clientVersion", params=[], id=1)
         for i in range(max_attempts):
             try:
-                response = requests.post(f"{self._addr}:{self._port}", json=request)
+                response = requests.get(f"{self._addr}:{self._port}")
                 enforce(response.status_code == 200, "")
                 return True
             except Exception:
