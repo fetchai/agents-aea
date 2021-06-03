@@ -38,7 +38,7 @@ import (
 	common "libp2p_node/common"
 )
 
-const AcnStatusTimeout = 5.0 * time.Second
+const AcnStatusTimeout = 15.0 * time.Second
 const SendQueueSize = 100
 const OutQueueSize = 100
 
