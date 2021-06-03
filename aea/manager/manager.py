@@ -875,7 +875,7 @@ class MultiAgentManager:
         :param exception: the caught exception.
         """
         if self._warning_message_printed_for_agent.get(agent_name, False):
-            return  # nocover
+            return  # pragma: nocover
         self._warning_message_printed_for_agent[agent_name] = True
         print(
             f"WARNING: An exception occurred during the execution of agent '{agent_name}':\n",
