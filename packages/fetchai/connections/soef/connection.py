@@ -1292,7 +1292,7 @@ class SOEFConnection(Connection):
                 self.DEFAULT_CONNECTION_CHECK_MAX_RETRIES,
             ),
         )
-        is_https = cast(bool, self.configuration.config.get("is_https"))
+        is_https = cast(bool, self.configuration.config.get("is_https"), True)
         soef_addr = cast(str, self.configuration.config.get("soef_addr"))
         soef_port = cast(int, self.configuration.config.get("soef_port"))
         chain_identifier = cast(str, self.configuration.config.get("chain_identifier"))
@@ -1308,7 +1308,7 @@ class SOEFConnection(Connection):
             if param_value is None:
                 raise ValueError(f"{param_name} must be set!")
         self.api_key = api_key
-        self.is_https = is_https if is_https is not None else True
+        self.is_https = is_https
         self.soef_addr = soef_addr
         self.soef_port = soef_port
         self.channel = SOEFChannel(
