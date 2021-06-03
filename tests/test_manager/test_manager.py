@@ -284,12 +284,13 @@ class BaseTestMultiAgentManager(TestCase):
         assert behaviour
 
         with patch.object(
-            self.manager, "_print_exception_occurred_but_no_error_callback"
+            self.manager,
+            "_print_exception_occurred_but_no_error_callback",
+            side_effect=self.manager._print_exception_occurred_but_no_error_callback,
         ) as callback_mock:
             with patch.object(behaviour, "act", side_effect=ValueError("expected")):
-                self.manager.start_all_agents()
                 wait_for_condition(lambda: callback_mock.call_count > 0, timeout=10)
-            callback_mock.assert_called_once()
+                callback_mock.assert_called_once()
 
     def test_stop_from_exception_handling(self, *args):
         """Test stop MultiAgentManager from error callback."""

@@ -366,6 +366,7 @@ class MultiAgentManager:
             self._thread.join(self.DEFAULT_TIMEOUT_FOR_BLOCKING_OPERATIONS)
 
         self._thread = None
+        self._warning_message_printed_for_agent = {}
         return self
 
     def _cleanup(self, only_data: bool = False) -> None:
@@ -874,7 +875,7 @@ class MultiAgentManager:
         :param exception: the caught exception.
         """
         if self._warning_message_printed_for_agent.get(agent_name, False):
-            return
+            return  # pragma: nocover
         self._warning_message_printed_for_agent[agent_name] = True
         print(
             f"WARNING: An exception occurred during the execution of agent '{agent_name}':\n",
