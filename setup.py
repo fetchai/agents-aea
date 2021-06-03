@@ -30,10 +30,10 @@ here = os.path.abspath(os.path.dirname(__file__))
 def get_all_extras() -> Dict:
 
     cli_deps = [
-        "click",
-        "pyyaml>=4.2b1",
-        "jsonschema>=3.0.0",
-        "packaging>=20.3",
+        "click>=7.0.0,<8.0.0",
+        "pyyaml>=4.2b1,<6.0",
+        "jsonschema>=3.0.0,<4.0.0",
+        "packaging>=20.3,<21.0",
     ]
 
     extras = {
@@ -49,16 +49,16 @@ def get_all_extras() -> Dict:
 all_extras = get_all_extras()
 
 base_deps = [
-    "base58>=1.0.3",
-    "jsonschema>=3.0.0",
-    "packaging>=20.3",
-    "semver>=2.9.1",
+    "base58>=1.0.3,<3.0.0",
+    "jsonschema>=3.0.0,<4.0.0",
+    "packaging>=20.3,<21.0",
+    "semver>=2.9.1,<3.0.0",
     "protobuf==3.13.0",
     "pymultihash==0.8.2",
-    "pyyaml>=4.2b1",
-    "requests>=2.22.0",
-    "python-dotenv>=0.14.0",
-    "ecdsa>=0.15"
+    "pyyaml>=4.2b1,<6.0",
+    "requests>=2.22.0,<3.0.0",
+    "python-dotenv>=0.14.0,<0.18.0",
+    "ecdsa>=0.15,<0.17.0"
 ]
 
 if os.name == "nt" or os.getenv("WIN_BUILD_WHEEL", None) == "1":

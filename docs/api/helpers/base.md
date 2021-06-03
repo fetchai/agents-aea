@@ -28,12 +28,12 @@ Load a module.
 
 **Returns**:
 
-None
+module type
 
 **Raises**:
 
-- `ValueError`: if the filepath provided is not a module.
-- `Exception`: if the execution of the module raises exception.
+- `ValueError`: if the filepath provided is not a module.  # noqa: DAR402
+- `Exception`: if the execution of the module raises exception.  # noqa: DAR402
 
 <a name="aea.helpers.base.load_env_file"></a>
 #### load`_`env`_`file
@@ -47,10 +47,6 @@ Load the content of the environment file into the process environment.
 **Arguments**:
 
 - `env_file`: save_path to the env file.
-
-**Returns**:
-
-None.
 
 <a name="aea.helpers.base.sigint_crossplatform"></a>
 #### sigint`_`crossplatform
@@ -72,10 +68,6 @@ However, a subprocess.Popen class has the method
 
 - `process`: the process to send the signal to.
 
-**Returns**:
-
-None
-
 <a name="aea.helpers.base.win_popen_kwargs"></a>
 #### win`_`popen`_`kwargs
 
@@ -87,6 +79,10 @@ Return kwargs to start a process in windows with new process group.
 
 Help to handle ctrl c properly.
 Return empty dict if platform is not win32
+
+**Returns**:
+
+windows popen kwargs
 
 <a name="aea.helpers.base.send_control_c"></a>
 #### send`_`control`_`c
@@ -100,10 +96,7 @@ Send ctrl-C cross-platform to terminate a subprocess.
 **Arguments**:
 
 - `process`: the process to send the signal to.
-
-**Returns**:
-
-None
+- `kill_group`: whether or not to kill group
 
 <a name="aea.helpers.base.RegexConstrainedString"></a>
 ## RegexConstrainedString Objects
@@ -210,6 +203,10 @@ Does not support async or coroutines!
 - `default_return`: value to return on exception, by default None
 - `logger_method`: name of the logger method or callable to print logs
 
+**Returns**:
+
+the callable
+
 <a name="aea.helpers.base.MaxRetriesError"></a>
 ## MaxRetriesError Objects
 
@@ -237,6 +234,10 @@ Does not support async or coroutines!
 - `delay`: number of seconds to sleep between retries. default 0
 - `logger_method`: name of the logger method or callable to print logs
 
+**Returns**:
+
+the callable
+
 <a name="aea.helpers.base.exception_log_and_reraise"></a>
 #### exception`_`log`_`and`_`reraise
 
@@ -251,6 +252,7 @@ Run code in context to log and re raise exception.
 
 - `log_method`: function to print log
 - `message`: message template to add error text.
+:yield: the generator
 
 <a name="aea.helpers.base.recursive_update"></a>
 #### recursive`_`update
@@ -273,10 +275,7 @@ It does side-effects to the first dictionary.
 
 - `to_update`: the dictionary to update.
 - `new_values`: the dictionary of new values to replace.
-
-**Returns**:
-
-None
+- `allow_new_values`: whether or not to allow new values.
 
 <a name="aea.helpers.base.find_topological_order"></a>
 #### find`_`topological`_`order
@@ -403,12 +402,8 @@ Initialize the certificate request.
 - `public_key`: the public key, or the key id.
 - `identifier`: certificate identifier.
 - `ledger_id`: ledger identifier the request is referring to.
-- `not_before`: specify the lower bound for certificate validity.
-If it is a string, it must follow the format: 'YYYY-MM-DD'. It
-will be interpreted as timezone UTC-0.
-- `not_before`: specify the lower bound for certificate validity.
-if it is a string, it must follow the format: 'YYYY-MM-DD' It
-will be interpreted as timezone UTC-0.
+- `not_before`: specify the lower bound for certificate validity. If it is a string, it must follow the format: 'YYYY-MM-DD'. It will be interpreted as timezone UTC-0.
+- `not_after`: specify the lower bound for certificate validity. If it is a string, it must follow the format: 'YYYY-MM-DD'. It will be interpreted as timezone UTC-0.
 - `message_format`: message format used for signing
 - `save_path`: the save_path where to save the certificate.
 
@@ -515,6 +510,10 @@ Get the save path for the certificate.
 Note: if the path is *not* absolute, then
 the actual save path might depend on the context.
 
+**Returns**:
+
+the save path
+
 <a name="aea.helpers.base.CertRequest.get_absolute_save_path"></a>
 #### get`_`absolute`_`save`_`path
 
@@ -571,6 +570,10 @@ Construct message for singning.
 - `not_before_string`: signature not valid before
 - `not_after_string`: signature not valid after
 - `message_format`: message format used for signing
+
+**Returns**:
+
+the message
 
 <a name="aea.helpers.base.CertRequest.get_signature"></a>
 #### get`_`signature
@@ -668,6 +671,14 @@ or as:
 @mydecorator(arg1, kwarg1="value")
 def myfunction():
     ...
+
+**Arguments**:
+
+- `decorator`: a decorator callable
+
+**Returns**:
+
+a decorator callable
 
 <a name="aea.helpers.base.delete_directory_contents"></a>
 #### delete`_`directory`_`contents

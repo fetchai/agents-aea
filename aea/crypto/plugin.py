@@ -64,7 +64,7 @@ class Plugin:
         """
         Check consistency of input.
 
-        :raises AEAPluginError: if some input is not correct.
+        :raises AEAPluginError: if some input is not correct.  # noqa: DAR402
         """
         _error_message_prefix = f"Error with plugin '{self._entry_point.name}':"
         enforce(

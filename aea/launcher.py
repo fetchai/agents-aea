@@ -57,7 +57,9 @@ def load_agent(agent_dir: Union[PathLike, str], password: Optional[str] = None) 
     :return: AEA instance
     """
     with cd(agent_dir):
-        return AEABuilder.from_aea_project(".").build(password=password)
+        return AEABuilder.from_aea_project(".", password=password).build(
+            password=password
+        )
 
 
 def _set_logger(
@@ -87,8 +89,6 @@ def _run_agent(
     :param stop_event: multithreading Event to stop agent run.
     :param log_level: debug level applied for AEA in subprocess
     :param password: the password to encrypt/decrypt the private key.
-
-    :return: None
     """
     import asyncio  # pylint: disable=import-outside-toplevel
     import select  # pylint: disable=import-outside-toplevel

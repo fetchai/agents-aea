@@ -136,10 +136,6 @@ Init _StopRuntime exception.
 
 - `reraise`: exception to reraise.
 
-**Returns**:
-
-None
-
 <a name="aea.exceptions.enforce"></a>
 #### enforce
 
@@ -166,6 +162,7 @@ Parse an exception to get the relevant lines.
 
 **Arguments**:
 
+- `exception`: the exception to be parsed
 - `limit`: the limit
 
 **Returns**:

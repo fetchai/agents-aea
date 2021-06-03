@@ -16,7 +16,6 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
-
 """Implementation of the 'aea get_multiaddress' subcommand."""
 import re
 import typing
@@ -27,12 +26,11 @@ import click
 from click import ClickException
 
 from aea.cli.utils.click_utils import PublicIdParameter, password_option
-from aea.cli.utils.config import load_item_config
 from aea.cli.utils.context import Context
 from aea.cli.utils.decorators import check_aea_project
-from aea.cli.utils.package_utils import get_package_path_unified
-from aea.configurations.base import ConnectionConfig, PublicId
-from aea.configurations.constants import CONNECTION
+from aea.configurations.base import PublicId
+from aea.configurations.constants import CONNECTIONS
+from aea.configurations.manager import AgentConfigManager
 from aea.crypto.base import Crypto
 from aea.crypto.registries import crypto_registry
 from aea.exceptions import enforce
@@ -109,6 +107,7 @@ def _try_get_multiaddress(
     :param connection_id: the connection id.
     :param host_field: if connection_id specified, the config field to retrieve the host
     :param port_field: if connection_id specified, the config field to retrieve the port
+    :param uri_field: uri field
 
     :return: address.
     """
@@ -155,7 +154,8 @@ def _try_get_peerid(crypto: Crypto) -> str:
 
 
 def _read_host_and_port_from_config(
-    connection_config: ConnectionConfig,
+    connection_config: dict,
+    connection_id: PublicId,
     uri_field: str,
     host_field: Optional[str],
     port_field: Optional[str],
@@ -163,9 +163,11 @@ def _read_host_and_port_from_config(
     """
     Read host and port from config connection.
 
+    :param connection_config: connection configuration.
+    :param connection_id: the connection id.
+    :param uri_field: the uri field.
     :param host_field: the host field.
     :param port_field: the port field.
-    :param uri_field: the uri field.
     :return: the host and the port.
     """
     host_is_none = host_field is None
@@ -174,26 +176,26 @@ def _read_host_and_port_from_config(
         host_is_none and not port_is_none
     )
     if not host_is_none and not port_is_none:
-        if host_field not in connection_config.config:
+        if host_field not in connection_config:
             raise ClickException(
-                f"Host field '{host_field}' not present in connection configuration {connection_config.public_id}"
+                f"Host field '{host_field}' not present in connection configuration {connection_id}"
             )
-        if port_field not in connection_config.config:
+        if port_field not in connection_config:
             raise ClickException(
-                f"Port field '{port_field}' not present in connection configuration {connection_config.public_id}"
+                f"Port field '{port_field}' not present in connection configuration {connection_id}"
             )
-        host = connection_config.config[host_field]
-        port = int(connection_config.config[port_field])
+        host = connection_config[host_field]
+        port = int(connection_config[port_field])
         return host, port
     if one_is_none:
         raise ClickException(
             "-h/--host-field and -p/--port-field must be specified together."
         )
-    if uri_field not in connection_config.config:
+    if uri_field not in connection_config:
         raise ClickException(
-            f"URI field '{uri_field}' not present in connection configuration {connection_config.public_id}"
+            f"URI field '{uri_field}' not present in connection configuration {connection_id}"
         )
-    url_value = connection_config.config[uri_field]
+    url_value = connection_config[uri_field]
     try:
         m = URI_REGEX.search(url_value)
         enforce(m is not None, f"URI Doesn't match regex '{URI_REGEX}'")
@@ -232,15 +234,16 @@ def _try_get_connection_multiaddress(
     if connection_id not in ctx.agent_config.connections:
         raise ValueError(f"Cannot find connection with the public id {connection_id}.")
 
-    package_path = Path(
-        get_package_path_unified(ctx.cwd, ctx.agent_config, CONNECTION, connection_id)
-    )
+    agent_config_manager = AgentConfigManager.load(ctx.cwd)
     connection_config = cast(
-        ConnectionConfig, load_item_config(CONNECTION, package_path)
+        dict,
+        agent_config_manager.get_variable(
+            f"vendor.{connection_id.author}.{CONNECTIONS}.{connection_id.name}.config"
+        ),
     )
 
     host, port = _read_host_and_port_from_config(
-        connection_config, uri_field, host_field, port_field
+        connection_config, connection_id, uri_field, host_field, port_field
     )
 
     try:

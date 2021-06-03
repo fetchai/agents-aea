@@ -176,10 +176,6 @@ Register an item type.
 - `class_kwargs`: keyword arguments to be attached on the class as class variables.
 - `kwargs`: arguments to provide to the crypto class.
 
-**Returns**:
-
-None.
-
 <a name="aea.crypto.registries.base.Registry.make"></a>
 #### make
 
@@ -192,15 +188,15 @@ Create an instance of the associated type item id.
 **Arguments**:
 
 - `id_`: the id of the item class. Make sure it has been registered earlier
-before calling this function.
+    before calling this function.
 - `module`: dotted path to a module.
-whether a module should be loaded before creating the object.
-this argument is useful when the item might not be registered
-beforehand, and loading the specified module will make the registration.
-E.g. suppose the call to 'register' for a custom object
-is located in some_package/__init__.py. By providing module="some_package",
-the call to 'register' in such module gets triggered and
-the make can then find the identifier.
+    whether a module should be loaded before creating the object.
+    this argument is useful when the item might not be registered
+    beforehand, and loading the specified module will make the registration.
+    E.g. suppose the call to 'register' for a custom object
+    is located in some_package/__init__.py. By providing module="some_package",
+    the call to 'register' in such module gets triggered and
+    the make can then find the identifier.
 - `kwargs`: keyword arguments to be forwarded to the object.
 
 **Returns**:
@@ -219,15 +215,15 @@ Load a class of the associated type item id.
 **Arguments**:
 
 - `id_`: the id of the item class. Make sure it has been registered earlier
-before calling this function.
+    before calling this function.
 - `module`: dotted path to a module.
-whether a module should be loaded before creating the object.
-this argument is useful when the item might not be registered
-beforehand, and loading the specified module will make the registration.
-E.g. suppose the call to 'register' for a custom object
-is located in some_package/__init__.py. By providing module="some_package",
-the call to 'register' in such module gets triggered and
-the make can then find the identifier.
+    whether a module should be loaded before creating the object.
+    this argument is useful when the item might not be registered
+    beforehand, and loading the specified module will make the registration.
+    E.g. suppose the call to 'register' for a custom object
+    is located in some_package/__init__.py. By providing module="some_package",
+    the call to 'register' in such module gets triggered and
+    the make can then find the identifier.
 
 **Returns**:
 

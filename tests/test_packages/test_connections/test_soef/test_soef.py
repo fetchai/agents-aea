@@ -620,7 +620,7 @@ class TestSoef:
         ), patch.object(self.connection.channel, "connection_check_timeout", 0.01):
             with pytest.raises(
                 SOEFNetworkConnectionError,
-                match="<SOEF Network Connection Error: Server can not be reached within timeout =",
+                match="<SOEF Network Connection Error: Server can not be reached within timeout=",
             ):
                 await self.connection.channel._check_server_reachable()
 

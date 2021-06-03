@@ -37,7 +37,7 @@ from aea.exceptions import enforce
 from aea.helpers.acn.agent_record import AgentRecord
 from aea.helpers.acn.uri import Uri
 from aea.helpers.multiaddr.base import MultiAddr
-from aea.helpers.pipe import IPCChannel, make_ipc_channel
+from aea.helpers.pipe import IPCChannel, TCPSocketChannel
 from aea.mail.base import Envelope
 
 
@@ -62,7 +62,7 @@ LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT = 660  # time to download ~66Mb
 
 PIPE_CONN_TIMEOUT = 10.0
 
-PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.23.0")
+PUBLIC_ID = PublicId.from_str("fetchai/p2p_libp2p:0.24.0")
 
 SUPPORTED_LEDGER_IDS = ["fetchai", "cosmos", "ethereum"]
 
@@ -338,7 +338,7 @@ class Libp2pNode:
 
         return NodeClient(self.pipe)
 
-    def _child_watcher_callback(self, *_) -> None:  # type:ignore
+    def _child_watcher_callback(self, *_) -> None:  # type: ignore # pragma: nocover
         """Log if process was terminated before stop was called."""
         if self._is_on_stop:
             return
@@ -349,6 +349,14 @@ class Libp2pNode:
         self.logger.error(
             f"Node process with pid {self.proc.pid} was terminated with returncode {returncode}"
         )
+
+    def is_proccess_running(self) -> bool:
+        """Check process is running."""
+        if not self.proc:
+            return False
+
+        self.proc.poll()
+        return self.proc.returncode is None
 
     async def start(self) -> None:
         """
@@ -364,8 +372,8 @@ class Libp2pNode:
         self._log_file_desc.write("test")
         self._log_file_desc.flush()
 
-        # setup fifos or tcp socket on windows
-        self.pipe = make_ipc_channel(logger=self.logger)
+        # tcp socket on every platform
+        self.pipe = TCPSocketChannel(logger=self.logger)
 
         env_file_data = self._make_env_file(
             pipe_in_path=self.pipe.in_path, pipe_out_path=self.pipe.out_path
@@ -681,6 +689,9 @@ class P2PLibp2pConnection(Connection):
         self._receive_from_node_task = None  # type: Optional[asyncio.Future]
         self._node_client: Optional[NodeClient] = None
 
+        self._send_queue: Optional[asyncio.Queue] = None
+        self._send_task: Optional[asyncio.Task] = None
+
     def _check_node_built(self) -> str:
         """Check node built."""
         if self.configuration.build_directory is None:
@@ -710,9 +721,11 @@ class P2PLibp2pConnection(Connection):
             await self._start_node()
             # starting receiving msgs
             self._in_queue = asyncio.Queue()
+            self._send_queue = asyncio.Queue()
             self._receive_from_node_task = asyncio.ensure_future(
                 self._receive_from_node(), loop=self.loop
             )
+            self._send_task = self.loop.create_task(self._send_loop())
             self.state = ConnectionStates.connected
         except (CancelledError, Exception) as e:
             self.state = ConnectionStates.disconnected
@@ -736,10 +749,17 @@ class P2PLibp2pConnection(Connection):
         """
         if self.is_disconnected:
             return  # pragma: nocover
+
         self.state = ConnectionStates.disconnecting
+
         if self._receive_from_node_task is not None:
             self._receive_from_node_task.cancel()
             self._receive_from_node_task = None
+
+        if self._send_task is not None:
+            self._send_task.cancel()
+            self._send_task = None
+
         await self.node.stop()
         if self._in_queue is not None:
             self._in_queue.put_nowait(None)
@@ -770,26 +790,76 @@ class P2PLibp2pConnection(Connection):
             self.logger.exception(e)
             return None
 
+    async def _send_envelope_with_node_client(self, envelope: Envelope) -> None:
+        if not self._node_client:  # pragma: nocover
+            raise ValueError(f"Node client not set! Can not send envelope: {envelope}")
+
+        if not self.node.pipe:  # pragma: nocover
+            raise ValueError("Node is not connected")
+
+        try:
+            await self._node_client.send_envelope(envelope)
+            return
+        except asyncio.CancelledError:  # pylint: disable=try-except-raise
+            raise  # pragma: nocover
+        except Exception as e:  # pylint: disable=broad-except
+            self.logger.exception(
+                f"Failed to send. Exception: {e}. Try recover connection to node and send again."
+            )
+
+        try:
+            if self.node.is_proccess_running():
+                await self.node.pipe.connect()
+                await self._node_client.send_envelope(envelope)
+                self.logger.debug("Envelope sent after reconnect to node")
+                return
+        except asyncio.CancelledError:  # pylint: disable=try-except-raise
+            raise  # pragma: nocover
+        except Exception as e:  # pylint: disable=broad-except
+            self.logger.exception(
+                f"Failed to send after pipe reconnect. Exception: {e}. Try recover connection to node and send again."
+            )
+
+        try:
+            await self._restart_node()
+            await self._node_client.send_envelope(envelope)
+        except asyncio.CancelledError:  # pylint: disable=try-except-raise
+            raise  # pragma: nocover
+        except Exception as e:  # pylint: disable=broad-except
+            self.logger.exception(
+                f"Failed to send after node restart. Exception: {e}. Try recover connection to node and send again."
+            )
+            raise
+
+    async def _send_loop(self) -> None:
+        """Handle message in  the send queue."""
+
+        if not self._send_queue or not self._node_client:  # pragma: nocover
+            self.logger.error("Send loop not started cause not connected properly.")
+            return
+        try:
+            while self.is_connected:
+                envelope = await self._send_queue.get()
+                await self._send_envelope_with_node_client(envelope)
+        except asyncio.CancelledError:  # pylint: disable=try-except-raise
+            raise  # pragma: nocover
+        except Exception:  # pylint: disable=broad-except # pragma: nocover
+            self.logger.exception(
+                f"Failed to send an aenvelope {envelope}. Stop connection."
+            )
+            await self.disconnect()
+
     async def send(self, envelope: Envelope) -> None:
         """
         Send messages.
 
         :return: None
         """
-        if not self._node_client:
+        if not self._node_client or not self._send_queue:
             raise ValueError("Node is not connected!")  # pragma: nocover
 
         self._ensure_valid_envelope_for_external_comms(envelope)
-        try:
-            await self._node_client.send_envelope(envelope)
-        except asyncio.CancelledError:  # pylint: disable=try-except-raise
-            raise  # pragma: nocover
-        except Exception as e:  # pylint: disable=broad-except
-            self.logger.exception(
-                f"Failed to send. Exception: {e}. Try reconnect to node and read again."
-            )
-            await self._restart_node()
-            await self._node_client.send_envelope(envelope)
+        await self._send_queue.put(envelope)
 
     async def _read_envelope_from_node(self) -> Optional[Envelope]:
         if not self._node_client:
@@ -803,7 +873,7 @@ class P2PLibp2pConnection(Connection):
                 f"Failed to read. Exception: {e}. Try reconnect to node and read again."
             )
 
-            self._restart_node()
+            await self._restart_node()
             return await self._node_client.read_envelope()
 
     async def _receive_from_node(self) -> None:

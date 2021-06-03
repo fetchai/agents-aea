@@ -33,6 +33,7 @@ import aea
 from aea.cli import cli
 from aea.cli.add_key import _try_add_key
 from aea.configurations.base import AgentConfig, DEFAULT_AEA_CONFIG_FILE
+from aea.test_tools.test_cases import AEATestCaseEmpty
 
 from tests.conftest import (
     AUTHOR,
@@ -428,3 +429,32 @@ class CheckFileNotExistsTestCase(TestCase):
                 standalone_mode=False,
                 catch_exceptions=False,
             )
+
+
+class TestAddKeyWithPassword(AEATestCaseEmpty):
+    """Test the '--password' option to 'add-key' command."""
+
+    FAKE_PASSWORD = "password"  # nosec
+
+    @classmethod
+    def setup_class(cls) -> None:
+        """Set up the class."""
+        super().setup_class()
+        cls.run_cli_command(
+            "generate-key",
+            FetchAICrypto.identifier,
+            FETCHAI_PRIVATE_KEY_FILE,
+            "--password",
+            cls.FAKE_PASSWORD,
+            cwd=cls._get_cwd(),
+        )
+
+    def test_add_key_with_password(self):
+        """Test add key with password."""
+        self.run_cli_command(
+            "add-key",
+            FetchAICrypto.identifier,
+            "--password",
+            self.FAKE_PASSWORD,
+            cwd=self._get_cwd(),
+        )

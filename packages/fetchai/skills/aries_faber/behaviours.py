@@ -33,7 +33,7 @@ from packages.fetchai.skills.aries_faber.dialogues import (
     HttpDialogues,
     OefSearchDialogues,
 )
-from packages.fetchai.skills.aries_faber.strategy import FaberStrategy
+from packages.fetchai.skills.aries_faber.strategy import Strategy
 
 
 DEFAULT_SEARCH_INTERVAL = 5.0
@@ -83,7 +83,7 @@ class FaberBehaviour(TickerBehaviour):
 
         :return: None
         """
-        strategy = cast(FaberStrategy, self.context.strategy)
+        strategy = cast(Strategy, self.context.strategy)
         strategy.is_searching = True
 
     def act(self) -> None:
@@ -92,7 +92,7 @@ class FaberBehaviour(TickerBehaviour):
 
         :return: None
         """
-        strategy = cast(FaberStrategy, self.context.strategy)
+        strategy = cast(Strategy, self.context.strategy)
         if strategy.is_searching:
             query = strategy.get_location_and_service_query()
             oef_search_dialogues = cast(
@@ -101,7 +101,6 @@ class FaberBehaviour(TickerBehaviour):
             oef_search_msg, _ = oef_search_dialogues.create(
                 counterparty=self.context.search_service_address,
                 performative=OefSearchMessage.Performative.SEARCH_SERVICES,
-                dialogue_reference=oef_search_dialogues.new_self_initiated_dialogue_reference(),
                 query=query,
             )
             self.context.outbox.put_message(message=oef_search_msg)

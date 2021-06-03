@@ -44,6 +44,7 @@ class Strategy(Model):
         self._client_contract_address = kwargs.pop("client_contract_address", None)
         self._erc20_address = kwargs.pop("erc20_address", None)
         self._query_function = kwargs.pop("query_function", None)
+        self._query_oracle_fee = kwargs.pop("query_oracle_fee", 0)
         self._default_gas_deploy = kwargs.pop("default_gas_deploy", 0)
         self._default_gas_query = kwargs.pop("default_gas_query", 0)
         self._default_gas_approve = kwargs.pop("default_gas_approve", 0)
@@ -65,6 +66,11 @@ class Strategy(Model):
     def query_function(self) -> str:
         """Get the name of the oracle value query function."""
         return self._query_function
+
+    @property
+    def query_oracle_fee(self) -> str:
+        """Get the fee amount for querying the oracle contract."""
+        return self._query_oracle_fee
 
     @property
     def default_gas_deploy(self) -> str:

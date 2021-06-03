@@ -31,7 +31,7 @@ from aea.contracts.base import Contract
 from aea.crypto.base import LedgerApi
 
 
-PUBLIC_ID = PublicId.from_str("fetchai/oracle_client:0.8.0")
+PUBLIC_ID = PublicId.from_str("fetchai/oracle_client:0.9.0")
 
 _default_logger = logging.getLogger(
     "aea.packages.fetchai.contracts.oracle_client.contract"
@@ -48,6 +48,7 @@ class FetchOracleClientContract(Contract):
         contract_address: Address,
         from_address: Address,
         query_function: str,
+        amount: int = 0,
         gas: int = 0,
         tx_fee: int = 0,
     ) -> JSONLike:
@@ -84,7 +85,7 @@ class FetchOracleClientContract(Contract):
                 from_address,
                 contract_address,
                 msg,
-                amount=1000000000000,
+                amount=amount,
                 tx_fee=tx_fee,
                 gas=gas,
             )

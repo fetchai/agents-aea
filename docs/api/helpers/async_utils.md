@@ -57,10 +57,6 @@ Add callback to track state changes.
 
 - `callback_fn`: callable object to be called on state changed.
 
-**Returns**:
-
-None
-
 <a name="aea.helpers.async_utils.AsyncState.get"></a>
 #### get
 
@@ -102,10 +98,7 @@ Change state context according to success or not.
 - `initial`: set state on context enter, not_set by default
 - `success`: set state on context block done, not_set by default
 - `fail`: set state on context block raises exception, not_set by default
-
-**Returns**:
-
-None
+:yield: generator
 
 <a name="aea.helpers.async_utils.PeriodicCaller"></a>
 ## PeriodicCaller Objects
@@ -191,6 +184,10 @@ Wait for coroutine execution result.
 
 - `timeout`: optional timeout to wait in seconds.
 
+**Returns**:
+
+result
+
 <a name="aea.helpers.async_utils.AnotherThreadTask.cancel"></a>
 #### cancel
 
@@ -262,6 +259,10 @@ Run a coroutine inside the event loop.
 
 - `coro`: a coroutine to run.
 
+**Returns**:
+
+task
+
 <a name="aea.helpers.async_utils.ThreadedAsyncRunner.stop"></a>
 #### stop
 
@@ -297,10 +298,6 @@ Init runnable.
 
 - `loop`: asyncio event loop to use.
 - `threaded`: bool. start in thread if True.
-
-**Returns**:
-
-None
 
 <a name="aea.helpers.async_utils.Runnable.start"></a>
 #### start

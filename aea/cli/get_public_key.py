@@ -53,7 +53,7 @@ def _try_get_public_key(
     """
     Try to get public key.
 
-    :param click_context: click context object.
+    :param ctx: click context object.
     :param type_: type.
     :param password: the password to encrypt/decrypt the private key.
 

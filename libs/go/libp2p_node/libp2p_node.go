@@ -121,6 +121,7 @@ func main() {
 			opts = append(opts, dhtpeer.EnablePrometheusMonitoring(nodePortMonitoring))
 		}
 		if registrationDelay != 0 {
+			//lint:ignore ST1011 don't use unit-specific suffix "Seconds"
 			durationSeconds := time.Duration(registrationDelay)
 			opts = append(opts, dhtpeer.WithRegistrationDelay(durationSeconds*1000000*time.Microsecond))
 		}

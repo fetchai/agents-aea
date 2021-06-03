@@ -3,9 +3,13 @@ set -e
 
 LEDGER=fetchai
 PEER="/dns4/acn.fetch.ai/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW"
-TAC_NAME='some_tac_id'
+TAC_NAME='v'$((10 + $RANDOM % 1000))
+TAC_SERVICE=tac_service_$TAC_NAME
 BASE_PORT=10000
 BASE_DIR=/data
+OLD_DIR=/$(date "+%d_%m_%Y_%H%M")
+
+cp -R "$BASE_DIR" "$OLD_DIR"
 
 if [ -z  "$COMPETITION_TIMEOUT" ];
 then
@@ -52,7 +56,7 @@ echo CLEANUP_INTERVAL $CLEANUP_INTERVAL
 
 if [ -z  "$NODE_CONNECTION_TIMEOUT" ];
 then
-	NODE_CONNECTION_TIMEOUT=20
+	NODE_CONNECTION_TIMEOUT=30
 fi
 echo NODE_CONNECTION_TIMEOUT $NODE_CONNECTION_TIMEOUT
 
@@ -80,6 +84,10 @@ fi
 
 if [ "$CLEAR_KEY_DATA_ON_LAUNCH" == true ]; then
 	find "$BASE_DIR" -name \*.txt -type f -delete
+fi
+
+if [ -z "$USE_CLIENT" ]; then
+	USE_CLIENT=false
 fi
 
 function generate_key (){
@@ -114,9 +122,12 @@ function set_agent(){
 	aea add-key fetchai $key_file_name	
 	key_file_name=$(generate_key $LEDGER $name $agent_data_dir 1)
 	aea add-key fetchai $key_file_name --connection
+	if [ "$USE_CLIENT" == "false" ];
+	then
+		json=$(printf '{"log_file": "%s", "delegate_uri": null, "entry_peers": ["%s"], "local_uri": "127.0.0.1:%s", "public_uri": null, "node_connection_timeout": '%i'}' "$agent_data_dir/libp2p_node.log" "$PEER" "$port" "$(($NODE_CONNECTION_TIMEOUT))")
+		aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config "$json"
+	fi
 	aea issue-certificates
-	json=$(printf '{"log_file": "%s", "delegate_uri": null, "entry_peers": ["%s"], "local_uri": "127.0.0.1:%s", "public_uri": null}' "$agent_data_dir/libp2p_node.log" "$PEER" "$port")
-	aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config "$json"
 	log_file=$agent_data_dir/$name.log
 	json=$(printf '{"version": 1, "formatters": {"standard": {"format": ""}}, "handlers": {"console": {"class": "logging.StreamHandler", "formatter": "standard", "level": "%s"}, "file": {"class": "logging.FileHandler", "filename": "%s", "mode": "w", "level": "%s", "formatter": "standard"}}, "loggers": {"aea": {"level": "%s", "handlers": ["file"]}}}' "$LOG_LEVEL" "$log_file" "$LOG_LEVEL" "$LOG_LEVEL")
 	aea config set --type dict agent.logging_config "$json"
@@ -142,6 +153,7 @@ function set_participant(){
 	set_agent $agent_name $(expr $BASE_PORT + $agent_id)
 	aea config set vendor.fetchai.skills.tac_negotiation.behaviours.clean_up.args.tick_interval $CLEANUP_INTERVAL
 	aea config set vendor.fetchai.skills.tac_negotiation.behaviours.tac_negotiation.args.search_interval $SEARCH_INTERVAL_TRADING
+	aea config set vendor.fetchai.skills.tac_negotiation.models.strategy.args.service_key $TAC_SERVICE
 	aea config set vendor.fetchai.skills.tac_participation.behaviours.tac_search.args.tick_interval $SEARCH_INTERVAL_GAME
 	aea config set vendor.fetchai.skills.tac_participation.models.game.args.search_query.search_value $TAC_NAME
 	cd ..

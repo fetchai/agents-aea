@@ -18,7 +18,14 @@ spec:
         kubernetes.io/os: linux
       containers:
       - name: tac-deploy-container
-        image: gcr.io/fetch-ai-sandbox/tac_deploy:0.0.7
+        image: gcr.io/fetch-ai-sandbox/tac_deploy:0.0.14
+        resources:
+          requests:
+            memory: "12000000Ki"
+            cpu: "3700m"
+          limits:
+            memory: "12000000Ki"
+            cpu: "3700m"
         env:
          - name: PARTICIPANTS_AMOUNT
            value: "70"
@@ -35,12 +42,14 @@ spec:
          - name: CLEANUP_INTERVAL
            value: "1800"
          - name: NODE_CONNECTION_TIMEOUT
-           value: "20"
+           value: "30"
          - name: LOG_LEVEL
            value: "INFO"
          - name: CLEAR_LOG_DATA_ON_LAUNCH
            value: "true"
          - name: CLEAR_KEY_DATA_ON_LAUNCH
+           value: "true"
+         - name: USE_CLIENT
            value: "false"
         volumeMounts:
          - name: tac-deploy-data-vol

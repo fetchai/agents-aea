@@ -33,7 +33,8 @@ Put an item into the queue.
 **Arguments**:
 
 - `item`: item to put in the queue
-:param args, kwargs: similar to queue.Queue.put
+- `args`: similar to queue.Queue.put
+- `kwargs`: similar to queue.Queue.put
 
 <a name="aea.helpers.async_friendly_queue.AsyncFriendlyQueue.get"></a>
 #### get
@@ -44,7 +45,14 @@ Put an item into the queue.
 
 Get an item into the queue.
 
-:param args, kwargs: similar to queue.Queue.get
+**Arguments**:
+
+- `args`: similar to queue.Queue.get
+- `kwargs`: similar to queue.Queue.get
+
+**Returns**:
+
+similar to queue.Queue.get
 
 <a name="aea.helpers.async_friendly_queue.AsyncFriendlyQueue.async_wait"></a>
 #### async`_`wait

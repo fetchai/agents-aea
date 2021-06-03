@@ -69,6 +69,7 @@ Get a transaction to transfer from self to destination.
 - `amount`: the amount
 - `tx_nonce`: verifies the authenticity of the tx
 - `tx_fee`: the tx fee
+- `kwargs`: the keyword arguments.
 
 **Returns**:
 
@@ -264,5 +265,10 @@ Check if the address is valid.
 
 **Arguments**:
 
-- `address`: the address to validate
+- `identifier`: ledger identifier.
+- `address`: the address to validate.
+
+**Returns**:
+
+whether it is a valid address or not.
 

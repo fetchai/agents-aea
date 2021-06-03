@@ -61,7 +61,6 @@ def _(
 
     :param arg: the agent configuration.
     :param replacements: the replacement mapping.
-    :return: None
     """
     _replace_component_id(
         arg,
@@ -172,7 +171,6 @@ def _replace_component_id(
     :param config: the component configuration to update.
     :param types_to_update: the types to update.
     :param replacements: the replacements.
-    :return:
     """
     for component_type in types_to_update:
         public_id_set = getattr(config, component_type.to_plural(), set())

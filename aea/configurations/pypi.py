@@ -51,7 +51,6 @@ def _handle_compatibility_operator(
     :param all_specifiers: the list of all specifiers (to be populated).
     :param operator_to_specifiers: a mapping from operator to specifiers (to be populated).
     :param specifier: the specifier to process.
-    :return: None
     """
     spec_version = Version(specifier.version)
     base_version = spec_version.base_version

@@ -31,10 +31,6 @@ Instantiate a protocol generator.
 :raises yaml.YAMLError if yaml parser encounters an error condition
 :raises ProtocolSpecificationParseError if specification fails generator's validation
 
-**Returns**:
-
-None
-
 <a name="aea.protocols.generator.base.ProtocolGenerator.generate_protobuf_only_mode"></a>
 #### generate`_`protobuf`_`only`_`mode
 
@@ -67,13 +63,17 @@ None
 Run the generator in "full" mode:
 
 Runs the generator in protobuf only mode:
-a) validate the protocol specification.
-b) create the protocol buffer schema file.
-c) create the protocol buffer implementation file via 'protoc'.
+    a) validate the protocol specification.
+    b) create the protocol buffer schema file.
+    c) create the protocol buffer implementation file via 'protoc'.
 Additionally:
 d) generates python modules.
 e) applies black formatting
 f) applies isort formatting
+
+**Arguments**:
+
+- `language`: the language for which to create protobuf files
 
 **Returns**:
 

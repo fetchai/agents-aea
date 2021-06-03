@@ -96,8 +96,6 @@ class DialogueLabel:
         :param dialogue_reference: the reference of the dialogue.
         :param dialogue_opponent_addr: the addr of the agent with which the dialogue is kept.
         :param dialogue_starter_addr: the addr of the agent which started the dialogue.
-
-        :return: None
         """
         self._dialogue_reference = dialogue_reference
         self._dialogue_opponent_addr = dialogue_opponent_addr
@@ -265,8 +263,6 @@ class Dialogue(metaclass=_DialogueMeta):
             :param initial_performatives: the set of all initial performatives.
             :param terminal_performatives: the set of all terminal performatives.
             :param valid_replies: the reply structure of speech-acts.
-
-            :return: None
             """
             self._initial_performatives = initial_performatives
             self._terminal_performatives = terminal_performatives
@@ -343,10 +339,9 @@ class Dialogue(metaclass=_DialogueMeta):
         Initialize a dialogue.
 
         :param dialogue_label: the identifier of the dialogue
+        :param message_class: the message class used
         :param self_address: the address of the entity for whom this dialogue is maintained
         :param role: the role of the agent this dialogue is maintained for
-
-        :return: None
         """
         self._self_address = self_address
         self._dialogue_label = dialogue_label
@@ -369,7 +364,6 @@ class Dialogue(metaclass=_DialogueMeta):
         Add callback to be called on dialogue reach terminal state.
 
         :param fn: callable to be called with one argument: Dialogue
-        :return: None
         """
         self._terminal_state_callbacks.add(fn)
 
@@ -600,7 +594,6 @@ class Dialogue(metaclass=_DialogueMeta):
         Extend the list of incoming/outgoing messages with 'message', if 'message' belongs to dialogue and is valid.
 
         :param message: a message to be added
-        :return: None
         :raises: InvalidDialogueMessage: if message does not belong to this dialogue, or if message is invalid
         """
         if not message.has_sender:
@@ -1030,8 +1023,6 @@ class DialogueStats:
 
         :param end_state: the end state of the dialogue
         :param is_self_initiated: whether the dialogue is initiated by the agent or the opponent
-
-        :return: None
         """
         if is_self_initiated:
             enforce(end_state in self._self_initiated, "End state not present!")
@@ -1120,7 +1111,6 @@ class BasicDialoguesStorage:
         Add dialogue to storage.
 
         :param dialogue: dialogue to add.
-        :return: None
         """
         dialogue.add_terminal_state_callback(self.dialogue_terminal_state_callback)
         self._dialogues_by_dialogue_label[dialogue.dialogue_label] = dialogue
@@ -1133,7 +1123,6 @@ class BasicDialoguesStorage:
         Add terminal state dialogue to storage.
 
         :param dialogue: dialogue to add.
-        :return: None
         """
         self.add(dialogue)
         self._terminal_state_dialogues_labels.add(dialogue.dialogue_label)
@@ -1143,7 +1132,6 @@ class BasicDialoguesStorage:
         Remove dialogue from storage by it's label.
 
         :param dialogue_label: label of the dialogue to remove
-        :return: None
         """
         dialogue = self._dialogues_by_dialogue_label.pop(dialogue_label, None)
 
@@ -1504,9 +1492,10 @@ class Dialogues:
 
         :param self_address: the address of the entity for whom dialogues are maintained
         :param end_states: the list of dialogue endstates
+        :param message_class: the message class used
+        :param dialogue_class: the dialogue class used
+        :param role_from_first_message: the callable determining role from first message
         :param keep_terminal_state_dialogues: specify do dialogues in terminal state should stay or not
-
-        :return: None
         """
 
         self._dialogues_storage = PersistDialoguesStorageWithOffloading(self)
@@ -1804,7 +1793,6 @@ class Dialogues:
         Update a self initiated dialogue label with a complete dialogue reference from counterparty's first message.
 
         :param message: A message in the dialogue (the first by the counterparty with a complete reference)
-        :return: None
         """
         complete_dialogue_reference = message.dialogue_reference
         enforce(
@@ -1882,7 +1870,7 @@ class Dialogues:
         Retrieve the latest dialogue label if present otherwise return same label.
 
         :param dialogue_label: the dialogue label
-        :return dialogue_label: the dialogue label
+        :return: the dialogue label
         """
         return self._dialogues_storage.get_latest_label(dialogue_label)
 
@@ -1907,6 +1895,7 @@ class Dialogues:
         Create a self initiated dialogue.
 
         :param dialogue_opponent_addr: the address of the agent with which the dialogue is kept.
+        :param dialogue_reference: the reference of the dialogue
         :param role: the agent's role
 
         :return: the created dialogue.

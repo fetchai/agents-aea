@@ -90,7 +90,6 @@ class BrokenCommand(click.Command):
         Print the traceback instead of doing nothing.
 
         :param ctx: the click.Context object.
-        :return: None
         """
 
         click.echo(self.help, color=ctx.color)
