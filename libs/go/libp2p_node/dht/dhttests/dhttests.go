@@ -22,6 +22,7 @@
 package dhttests
 
 import (
+	"libp2p_node/acn"
 	"libp2p_node/aea"
 	"libp2p_node/dht/dhtnode"
 	"libp2p_node/dht/dhtpeer"
@@ -74,7 +75,7 @@ func NewDHTPeerWithDefaults(inbox chan<- *aea.Envelope) (*dhtpeer.DHTPeer, func(
 		return nil, nil, err
 	}
 
-	record := &aea.AgentRecord{LedgerId: dhtnode.DefaultLedger}
+	record := &acn.AgentRecord{LedgerId: dhtnode.DefaultLedger}
 	record.Address = DHTPeerDefaultAgentAddress
 	record.PublicKey = DHTPeerDefaultAgentPublicKey
 	record.PeerPublicKey = DHTPeerDefaultFetchAIPublicKey

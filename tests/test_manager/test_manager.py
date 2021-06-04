@@ -57,8 +57,9 @@ class BaseTestMultiAgentManager(TestCase):
     def setUp(self):
         """Set test case."""
         self.agent_name = "test_what_ever12"
-        self.working_dir = "MultiAgentManager_dir"
         self.project_public_id = MY_FIRST_AEA_PUBLIC_ID
+        self.tmp_dir = TemporaryDirectory()
+        self.working_dir = os.path.join(self.tmp_dir.name, "MultiAgentManager_dir")
         self.project_path = os.path.join(
             self.working_dir, self.project_public_id.author, self.project_public_id.name
         )
@@ -69,9 +70,12 @@ class BaseTestMultiAgentManager(TestCase):
 
     def tearDown(self):
         """Tear down test case."""
-        self.manager.stop_manager()
-        if os.path.exists(self.working_dir):
-            rmtree(self.working_dir)
+        try:
+            self.manager.stop_manager()
+            if os.path.exists(self.working_dir):
+                rmtree(self.working_dir)
+        finally:
+            self.tmp_dir.cleanup()
 
     def test_plugin_dependencies(self, *args):
         """Test plugin installed and loaded as a depencndecy."""

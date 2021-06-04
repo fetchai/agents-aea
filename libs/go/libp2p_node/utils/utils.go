@@ -744,3 +744,37 @@ func WriteBytes(s network.Stream, data []byte) error {
 	err = wstream.Flush()
 	return err
 }
+
+type ConnPipe struct {
+	Conn net.Conn
+}
+
+func (conPipe ConnPipe) Connect() error {
+	return nil
+}
+func (conPipe ConnPipe) Read() ([]byte, error) {
+	return ReadBytesConn(conPipe.Conn)
+}
+func (conPipe ConnPipe) Write(data []byte) error {
+	return WriteBytesConn(conPipe.Conn, data)
+}
+func (conPipe ConnPipe) Close() error {
+	return nil
+}
+
+type StreamPipe struct {
+	Stream network.Stream
+}
+
+func (streamPipe StreamPipe) Connect() error {
+	return nil
+}
+func (streamPipe StreamPipe) Read() ([]byte, error) {
+	return ReadBytes(streamPipe.Stream)
+}
+func (streamPipe StreamPipe) Write(data []byte) error {
+	return WriteBytes(streamPipe.Stream, data)
+}
+func (streamPipe StreamPipe) Close() error {
+	return nil
+}
