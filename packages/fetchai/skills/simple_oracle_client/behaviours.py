@@ -174,6 +174,7 @@ class SimpleOracleClientBehaviour(TickerBehaviour):
                 {
                     "from_address": self.context.agent_address,
                     "query_function": strategy.query_function,
+                    "amount": strategy.query_oracle_fee,
                     "gas": strategy.default_gas_query,
                 }
             ),

@@ -331,7 +331,7 @@ class BaseSkillTestCase:
 
         :param message: the dialogue message
         :param index: the index of this dialogue message in the sequence of messages
-        :param message: the is_incoming of the last message in the sequence
+        :param last_is_incoming: the is_incoming of the last message in the sequence
 
         :return: the performative, contents, message_id, is_incoming, target of the message
         """

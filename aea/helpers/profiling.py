@@ -89,6 +89,8 @@ class Profiling(Runnable):
         Init profiler.
 
         :param period: delay between profiling output in seconds.
+        :param objects_instances_to_count: object to count
+        :param objects_created_to_count: object created to count
         :param output_function: function to display output, one str argument.
         """
         if period < 1:  # pragma: nocover

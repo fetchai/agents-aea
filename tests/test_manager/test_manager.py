@@ -20,10 +20,12 @@
 import asyncio
 import os
 import re
+import sys
 from contextlib import suppress
 from pathlib import Path
 from shutil import rmtree
 from tempfile import TemporaryDirectory
+from typing import Optional
 from unittest.case import TestCase
 from unittest.mock import Mock, patch
 
@@ -44,12 +46,11 @@ from tests.conftest import MY_FIRST_AEA_PUBLIC_ID, PACKAGES_DIR, ROOT_DIR
 
 
 @patch("aea.aea_builder.AEABuilder.install_pypi_dependencies")
-class TestMultiAgentManagerAsyncMode(
-    TestCase
-):  # pylint: disable=unused-argument,protected-access,attribute-defined-outside-init
-    """Tests for MultiAgentManager in async mode."""
+class BaseTestMultiAgentManager(TestCase):
+    """Base test class for multi-agent manager"""
 
     MODE = "async"
+    PASSWORD: Optional[str] = None
 
     echo_skill_id = ECHO_SKILL_PUBLIC_ID
 
@@ -63,7 +64,9 @@ class TestMultiAgentManagerAsyncMode(
             self.working_dir, self.project_public_id.author, self.project_public_id.name
         )
         assert not os.path.exists(self.working_dir)
-        self.manager = MultiAgentManager(self.working_dir, mode=self.MODE)
+        self.manager = MultiAgentManager(
+            self.working_dir, mode=self.MODE, password=self.PASSWORD
+        )
 
     def tearDown(self):
         """Tear down test case."""
@@ -77,10 +80,14 @@ class TestMultiAgentManagerAsyncMode(
     def test_plugin_dependencies(self, *args):
         """Test plugin installed and loaded as a depencndecy."""
         plugin_path = str(Path(ROOT_DIR) / "plugins" / "aea-ledger-fetchai")
-        install_cmd = f"pip install --no-deps {plugin_path}".split(" ")
+        install_cmd = f"{sys.executable} -m pip install --no-deps {plugin_path}".split(
+            " "
+        )
         try:
             self.manager.start_manager()
-            run_install_subprocess("pip uninstall aea-ledger-fetchai -y".split(" "))
+            run_install_subprocess(
+                f"{sys.executable} -m pip uninstall aea-ledger-fetchai -y".split(" ")
+            )
             from aea.crypto.registries import ledger_apis_registry
 
             ledger_apis_registry.specs.pop("fetchai", None)
@@ -102,7 +109,9 @@ class TestMultiAgentManagerAsyncMode(
 
             assert "fetchai" in ledger_apis_registry.specs
         finally:
-            run_install_subprocess("pip uninstall aea-ledger-fetchai -y".split(" "))
+            run_install_subprocess(
+                f"{sys.executable} -m pip uninstall aea-ledger-fetchai -y".split(" ")
+            )
             run_install_subprocess(install_cmd)
 
     def test_workdir_created_removed(self, *args):
@@ -255,7 +264,7 @@ class TestMultiAgentManagerAsyncMode(
             wait_for_condition(lambda: act_mock.call_count > 0, timeout=10)
 
     def test_exception_handling(self, *args):
-        """Test erro callback works."""
+        """Test error callback works."""
         self.test_add_agent()
         self.manager.start_all_agents()
         agent = self.manager._agents_tasks[self.agent_name].agent
@@ -269,6 +278,23 @@ class TestMultiAgentManagerAsyncMode(
         with patch.object(behaviour, "act", side_effect=ValueError("expected")):
             self.manager.start_all_agents()
             wait_for_condition(lambda: callback_mock.call_count > 0, timeout=10)
+
+    def test_default_exception_handling(self, *args):
+        """Test that the default error callback works."""
+        self.test_add_agent()
+        self.manager.start_all_agents()
+        agent = self.manager._agents_tasks[self.agent_name].agent
+        behaviour = agent.resources.get_behaviour(self.echo_skill_id, "echo")
+        assert behaviour
+
+        with patch.object(
+            self.manager,
+            "_print_exception_occurred_but_no_error_callback",
+            side_effect=self.manager._print_exception_occurred_but_no_error_callback,
+        ) as callback_mock:
+            with patch.object(behaviour, "act", side_effect=ValueError("expected")):
+                wait_for_condition(lambda: callback_mock.call_count > 0, timeout=10)
+                callback_mock.assert_called_once()
 
     def test_stop_from_exception_handling(self, *args):
         """Test stop MultiAgentManager from error callback."""
@@ -461,7 +487,7 @@ class TestMultiAgentManagerAsyncMode(
         assert not os.path.exists(cert_filename)
 
         priv_key_path = os.path.abspath(os.path.join(self.working_dir, "priv_key.txt"))
-        create_private_key("fetchai", priv_key_path)
+        create_private_key("fetchai", priv_key_path, password=self.PASSWORD)
         assert os.path.exists(priv_key_path)
 
         component_overrides = [
@@ -532,10 +558,31 @@ class TestMultiAgentManagerAsyncMode(
         assert len(agent_alias.get_connections_addresses()) == 1
 
 
-class TestMultiAgentManagerThreadedMode(TestMultiAgentManagerAsyncMode):
+class TestMultiAgentManagerAsyncMode(
+    BaseTestMultiAgentManager
+):  # pylint: disable=unused-argument,protected-access,attribute-defined-outside-init
+    """Tests for MultiAgentManager in async mode."""
+
+
+class TestMultiAgentManagerAsyncModeWithPassword(
+    BaseTestMultiAgentManager
+):  # pylint: disable=unused-argument,protected-access,attribute-defined-outside-init
+    """Tests for MultiAgentManager in async mode, with password."""
+
+    PASSWORD = "password"  # nosec
+
+
+class TestMultiAgentManagerThreadedMode(BaseTestMultiAgentManager):
     """Tests for MultiAgentManager in threaded mode."""
 
     MODE = "threaded"
+
+
+class TestMultiAgentManagerThreadedModeWithPassword(BaseTestMultiAgentManager):
+    """Tests for MultiAgentManager in threaded mode, with password."""
+
+    MODE = "threaded"
+    PASSWORD = "password"  # nosec
 
 
 def test_project_auto_added_removed():

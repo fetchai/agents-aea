@@ -24,8 +24,9 @@ from aea_ledger_fetchai import FetchAICrypto
 
 from aea.cli import cli
 from aea.cli.get_wealth import _try_get_wealth
+from aea.test_tools.test_cases import AEATestCaseEmpty
 
-from tests.conftest import CLI_LOG_OPTION, CliRunner
+from tests.conftest import CLI_LOG_OPTION, CliRunner, method_scope
 from tests.test_cli.tools_for_testing import ContextMock
 
 
@@ -65,3 +66,18 @@ class GetWealthCommandTestCase(TestCase):
             standalone_mode=False,
         )
         self.assertEqual(result.exit_code, 0)
+
+
+@method_scope
+class TestGetWealth(AEATestCaseEmpty):
+    """Test 'get-wealth' command."""
+
+    @mock.patch("click.echo")
+    def test_get_wealth(self, _echo_mock, password_or_none):
+        """Run the main test."""
+        self.generate_private_key(password=password_or_none)
+        self.add_private_key(password=password_or_none)
+        self.get_wealth(password=password_or_none)
+
+        expected_wealth = 0
+        _echo_mock.assert_called_with(expected_wealth)

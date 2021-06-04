@@ -79,6 +79,7 @@ class CyclicBehaviour(SimpleBehaviour, ABC):
         Return True if the behaviour is terminated, False otherwise.
 
         The user should implement it properly to determine the stopping condition.
+        :return: bool indicating status
         """
         return False
 
@@ -116,6 +117,7 @@ class TickerBehaviour(SimpleBehaviour, ABC):
 
         :param tick_interval: interval of the behaviour in seconds.
         :param start_at: whether to start the behaviour with an offset.
+        :param kwargs: the keyword arguments.
         """
         super().__init__(**kwargs)
 
@@ -170,7 +172,7 @@ class SequenceBehaviour(CompositeBehaviour, ABC):
         Initialize the sequence behaviour.
 
         :param behaviour_sequence: the sequence of behaviour.
-        :param kwargs:
+        :param kwargs: the keyword arguments
         """
         super().__init__(**kwargs)
 
@@ -184,6 +186,8 @@ class SequenceBehaviour(CompositeBehaviour, ABC):
         Get the current behaviour.
 
         If None, the sequence behaviour can be considered done.
+
+        :return: current behaviour or None
         """
         return (
             None
@@ -273,8 +277,7 @@ class FSMBehaviour(CompositeBehaviour, ABC):
         :param name: the name of the state.
         :param state: the behaviour in that state.
         :param initial: whether the state is an initial state.
-        :return: None
-        :raise ValueError: if a state with the provided name already exists.
+        :raises ValueError: if a state with the provided name already exists.
         """
         if name in self._name_to_state:
             raise ValueError("State name already existing.")
@@ -289,8 +292,7 @@ class FSMBehaviour(CompositeBehaviour, ABC):
 
         :param name: the name of the state.
         :param state: the state.
-        :return: None
-        :raise ValueError: if a state with the provided name already exists.
+        :raises ValueError: if a state with the provided name already exists.
         """
         if name in self._name_to_state:
             raise ValueError("State name already existing.")
@@ -302,8 +304,7 @@ class FSMBehaviour(CompositeBehaviour, ABC):
         Unregister a state.
 
         :param name: the state name to unregister.
-        :return: None
-        :raise ValueError: if the state is not registered.
+        :raises ValueError: if the state is not registered.
         """
         if name not in self._name_to_state:
             raise ValueError("State name not registered.")
@@ -375,10 +376,9 @@ class FSMBehaviour(CompositeBehaviour, ABC):
         No sanity check is done.
 
         :param source: the source state name.
-        :param destination:  the destination state name.
+        :param destination: the destination state name.
         :param event: the event.
-        :return: None
-        :raise ValueError: if a transition from source with event is already present.
+        :raises ValueError: if a transition from source with event is already present.
         """
         if source in self.transitions and event in self.transitions.get(source, {}):
             raise ValueError("Transition already registered.")
@@ -392,10 +392,9 @@ class FSMBehaviour(CompositeBehaviour, ABC):
         Unregister a transition.
 
         :param source: the source state name.
-        :param destination:  the destination state name.
+        :param destination: the destination state name.
         :param event: the event.
-        :return: None
-        :raise ValueError: if a transition from source with event is not present.
+        :raises ValueError: if a transition from source with event is not present.
         """
         if (
             source not in self.transitions.keys()

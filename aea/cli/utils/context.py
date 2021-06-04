@@ -108,7 +108,6 @@ class Context:
 
         :param key: the key for the configuration.
         :param value: the value associated with the key.
-        :return: None
         """
         self.config[key] = value
         logger.debug("  config[{}] = {}".format(key, value))
@@ -138,7 +137,7 @@ class Context:
     def get_dependencies(self) -> Dependencies:
         """Aggregate the dependencies from every component.
 
-        :return a list of dependency version specification. e.g. ["gym >= 1.0.0"]
+        :return: a list of dependency version specification. e.g. ["gym >= 1.0.0"]
         """
         dependencies = {}  # type: Dependencies
 

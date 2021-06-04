@@ -6,7 +6,7 @@ The DHT provides proper messages delivery by mapping agents addresses to their l
 
 ## Usage
 
-First, add the connection to your AEA project: `aea add connection fetchai/p2p_libp2p:0.23.0`.
+First, add the connection to your AEA project: `aea add connection fetchai/p2p_libp2p:0.24.0`.
 
 Next, ensure that the connection is properly configured by setting:
 

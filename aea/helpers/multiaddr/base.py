@@ -58,7 +58,6 @@ if ENABLE_INLINING:
             Update data to hash.
 
             :param input_data: the data
-            :return: None
             """
             self._digest += input_data
 
@@ -166,6 +165,7 @@ class MultiAddr:
         Construct a MultiAddr object from its string format
 
         :param maddr: multiaddress string
+        :return: multiaddress object
         """
         parts = maddr.split("/")
         if len(parts) != 7 or not parts[4].isdigit():

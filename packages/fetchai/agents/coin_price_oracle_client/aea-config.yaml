@@ -1,6 +1,6 @@
 agent_name: coin_price_oracle_client
 author: fetchai
-version: 0.9.0
+version: 0.10.0
 license: Apache-2.0
 description: An AEA providing a coin price oracle client service.
 aea_version: '>=1.0.0, <2.0.0'
@@ -11,7 +11,7 @@ connections:
 - fetchai/ledger:0.18.0
 contracts:
 - fetchai/fet_erc20:0.8.0
-- fetchai/oracle_client:0.8.0
+- fetchai/oracle_client:0.9.0
 protocols:
 - fetchai/contract_api:1.0.0
 - fetchai/default:1.0.0
@@ -20,7 +20,7 @@ protocols:
 - fetchai/signing:1.0.0
 - fetchai/state_update:1.0.0
 skills:
-- fetchai/simple_oracle_client:0.9.0
+- fetchai/simple_oracle_client:0.10.0
 default_connection: fetchai/ledger:0.18.0
 default_ledger: ethereum
 required_ledgers:
@@ -41,7 +41,7 @@ dependencies:
   aea-ledger-fetchai:
     version: <2.0.0,>=1.0.0
 ---
-public_id: fetchai/simple_oracle_client:0.9.0
+public_id: fetchai/simple_oracle_client:0.10.0
 type: skill
 models:
   strategy:

@@ -1,5 +1,51 @@
 # Release History
 
+## 1.0.2 (2021-06-03)
+
+AEA:
+- Bounds versions of dependencies by next major
+- Fixes incoherent warning message during package loading
+- Improves various incomprehensible error messages
+- Adds debug log message when abstract components are loaded
+- Adds tests and minor fixes for password related CLI commands and password usage in `MultiAgentManager`
+- Adds default error handler in `MultiAgentManager`
+- Ensures private key checks are performed after override setting in `MultiAgentManager`
+- Applies docstring fixes suggested by `darglint`
+- Fixes `aea push --local` command to use correct author
+- Fixes `aea get-multiaddress` command to consider overrides
+
+Plugins:
+- Bounds versions of dependencies by next major
+
+Packages:
+- Updates `p2p_libp2p` connection to use TCP sockets for all platforms
+- Multiple fixes on `libp2p_node` including better error handling and stream creation
+- Adds sending queue in `p2p_libp2p` connection to handle sending failures
+- Adds unit tests for `libp2p_node` utils
+- Adds additional tests for `p2p_libp2p` connection
+- Fixes location bug in AW5
+- Improves connection check handling in soef connection
+- Updates oracle and oracle client contracts for better access control
+- Adds skill tests for `erc1155` skills
+- Adds skill tests for `aries` skills
+- Fixes minor bug in ML skills
+- Multiple additional tests and test stability fixes
+
+Docs:
+- Extends demo docs to include guidance of usage in AEA Manager
+- Adds short guide on Kubernetes deployment
+- Multiple additional docs updates
+
+Chores:
+- Adds `--no-bump` option to `generate_all_protocols` script
+- Adds script to detect if aea or plugins need bumping
+- Bumps various development dependencies
+- Adds Golang and GCC in Windows install script
+- Adds `darglint` to CI
+
+Examples:
+- Updates TAC deployment scripts and images
+
 ## - (2021-05-05)
 
 Packages:

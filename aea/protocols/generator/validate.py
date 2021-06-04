@@ -667,6 +667,7 @@ def _validate_termination(
 
     :param termination: List of terminal messages of a dialogue.
     :param performatives_set: set of all performatives in the dialogue.
+    :param terminal_performatives_from_reply: terminal performatives extracted from reply structure.
 
     :return: Boolean result, and associated message.
     """

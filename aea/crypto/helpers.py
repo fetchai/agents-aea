@@ -44,7 +44,6 @@ def try_validate_private_key_path(
     :param ledger_id: one of 'fetchai', 'ethereum'
     :param private_key_path: the path to the private key.
     :param password: the password to encrypt/decrypt the private key.
-    :return: None
     :raises: ValueError if the identifier is invalid.
     """
     try:
@@ -68,7 +67,6 @@ def create_private_key(
     :param ledger_id: the ledger identifier.
     :param private_key_file: the private key file.
     :param password: the password to encrypt/decrypt the private key.
-    :return: None
     :raises: ValueError if the identifier is invalid.
     """
     crypto = make_crypto(ledger_id)
@@ -85,7 +83,6 @@ def try_generate_testnet_wealth(
     :param address: the address to check for
     :param url: the url
     :param _sync: whether to wait to sync or not; currently unused
-    :return: None
     """
     faucet_api = make_faucet_api(identifier)
     if faucet_api is not None:
@@ -101,8 +98,6 @@ def private_key_verify(
     :param aea_conf: AgentConfig
     :param aea_project_path: Path, where project placed.
     :param password: the password to encrypt/decrypt the private key.
-
-    :return: None
     """
     for identifier, _ in aea_conf.private_key_paths.read_all():
         if identifier not in crypto_registry.supported_ids:  # pragma: nocover

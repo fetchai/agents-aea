@@ -19,7 +19,7 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 Fetch the AEA that will deploy and update the oracle contract.
 
 ``` bash
-aea fetch fetchai/coin_price_oracle:0.14.0
+aea fetch fetchai/coin_price_oracle:0.15.0
 cd coin_price_oracle
 aea install
 aea build
@@ -35,15 +35,15 @@ aea create coin_price_oracle
 cd coin_price_oracle
 aea add connection fetchai/http_client:0.22.0
 aea add connection fetchai/ledger:0.18.0
-aea add connection fetchai/p2p_libp2p:0.23.0
+aea add connection fetchai/p2p_libp2p:0.24.0
 aea add skill fetchai/advanced_data_request:0.5.0
-aea add skill fetchai/simple_oracle:0.12.0
+aea add skill fetchai/simple_oracle:0.13.0
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"},
   "aea-ledger-ethereum": {"version": "<2.0.0,>=1.0.0"}
 }'
-aea config set agent.default_connection fetchai/p2p_libp2p:0.23.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.24.0
 aea install
 aea build
 ```
@@ -133,7 +133,7 @@ aea issue-certificates
 From a new terminal (in the same top-level directory), fetch the AEA that will deploy the oracle client contract and call the function that requests the coin price from the oracle contract.
 
 ``` bash
-aea fetch fetchai/coin_price_oracle_client:0.9.0
+aea fetch fetchai/coin_price_oracle_client:0.10.0
 cd coin_price_oracle_client
 aea install
 ```
@@ -148,7 +148,7 @@ aea create coin_price_oracle_client
 cd coin_price_oracle_client
 aea add connection fetchai/http_client:0.22.0
 aea add connection fetchai/ledger:0.18.0
-aea add skill fetchai/simple_oracle_client:0.9.0
+aea add skill fetchai/simple_oracle_client:0.10.0
 aea config set --type dict agent.dependencies \
 '{
   "aea-ledger-fetchai": {"version": "<2.0.0,>=1.0.0"},

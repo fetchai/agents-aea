@@ -45,7 +45,6 @@ class URI:
         Must follow: https://tools.ietf.org/html/rfc3986.html
 
         :param uri_raw: the raw form uri
-        :raises ValueError: if uri_raw is not RFC3986 compliant
         """
         self._uri_raw = uri_raw
 

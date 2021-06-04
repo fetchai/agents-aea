@@ -51,6 +51,7 @@ class IPCChannelClient(ABC):
         Connect to communication channel
 
         :param timeout: timeout for other end to connect
+        :return: connection status
         """
 
     @abstractmethod
@@ -75,11 +76,7 @@ class IPCChannelClient(ABC):
 
     @abstractmethod
     async def close(self) -> None:
-        """
-        Close the communication channel.
-
-        :return: None
-        """
+        """Close the communication channel."""
 
 
 class IPCChannel(IPCChannelClient):
@@ -119,6 +116,8 @@ class PosixNamedPipeProtocol:
 
         :param in_path: rendezvous point for incoming data
         :param out_path: rendezvous point for outgoing data
+        :param logger: the logger
+        :param loop: the event loop
         """
 
         self.logger = logger
@@ -262,6 +261,8 @@ class TCPSocketProtocol:
 
         :param reader: established asyncio reader
         :param writer: established asyncio writer
+        :param logger: the logger
+        :param loop: the event loop
         """
 
         self.logger = logger
@@ -349,6 +350,7 @@ class TCPSocketChannel(IPCChannel):
         Setup communication channel and wait for other end to connect.
 
         :param timeout: timeout for the connection to be established
+        :return: connection status
         """
 
         if self._loop is None:
@@ -398,7 +400,7 @@ class TCPSocketChannel(IPCChannel):
         """
         Read from channel.
 
-        :param data: read bytes
+        :return: read bytes
         """
         if self._sock is None:
             raise ValueError("Socket pipe not connected.")  # pragma: nocover
@@ -512,6 +514,8 @@ class TCPSocketChannelClient(IPCChannelClient):
 
         :param in_path: rendezvous point for incoming data
         :param out_path: rendezvous point for outgoing data
+        :param logger: the logger
+        :param loop: the event loop
         """
         self.logger = logger
         self._loop = loop
@@ -532,6 +536,7 @@ class TCPSocketChannelClient(IPCChannelClient):
         Connect to the other end of the communication channel.
 
         :param timeout: timeout for connection to be established
+        :return: connection status
         """
         if self._loop is None:
             self._loop = asyncio.get_event_loop()
@@ -605,6 +610,8 @@ class PosixNamedPipeChannelClient(IPCChannelClient):
 
         :param in_path: rendezvous point for incoming data
         :param out_path: rendezvous point for outgoing data
+        :param logger: the logger
+        :param loop: the event loop
         """
 
         self.logger = logger
@@ -619,6 +626,7 @@ class PosixNamedPipeChannelClient(IPCChannelClient):
         Connect to the other end of the communication channel.
 
         :param timeout: timeout for connection to be established
+        :return: connection status
         """
 
         if self._loop is None:

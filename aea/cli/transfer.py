@@ -112,8 +112,7 @@ def wait_tx_settled(
     :param tx_digest: str, transaction digest
     :param timeout: int, timeout in seconds before timeout error raised
 
-    :return: None
-    raises TimeoutError on timeout
+    :raises TimeoutError: on timeout
     """
     t = time.time()
     while True:

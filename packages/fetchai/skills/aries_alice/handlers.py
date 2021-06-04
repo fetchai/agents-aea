@@ -43,22 +43,18 @@ from packages.fetchai.skills.aries_alice.dialogues import (
 )
 from packages.fetchai.skills.aries_alice.strategy import (
     ADMIN_COMMAND_RECEIVE_INVITE,
-    AliceStrategy,
+    Strategy,
 )
 
 
-class AliceDefaultHandler(Handler):
+class DefaultHandler(Handler):
     """This class represents alice's handler for default messages."""
 
     SUPPORTED_PROTOCOL = DefaultMessage.protocol_id  # type: Optional[PublicId]
 
-    def __init__(self, **kwargs: Any) -> None:
-        """Initialize the handler."""
-        super().__init__(**kwargs)
-
-        self.handled_message: Optional[DefaultMessage] = None
-
-    def _handle_received_invite(self, invite_detail: Dict[str, str]) -> Optional[str]:
+    def _handle_received_invite(
+        self, invite_detail: Dict[str, str]
+    ) -> Optional[str]:  # pragma: no cover
         """
         Prepare an invitation detail received from Faber_AEA to be send to the Alice ACA.
 
@@ -114,24 +110,24 @@ class AliceDefaultHandler(Handler):
         :return: None
         """
         message = cast(DefaultMessage, message)
+
+        # recover dialogue
         default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
-
-        strategy = cast(AliceStrategy, self.context.strategy)
-
-        self.handled_message = message
-        if message.performative == DefaultMessage.Performative.BYTES:
-            http_dialogue = cast(
-                Optional[DefaultDialogue], default_dialogues.update(message)
+        default_dialogue = cast(
+            Optional[DefaultDialogue], default_dialogues.update(message)
+        )
+        if default_dialogue is None:
+            self.context.logger.error(
+                "alice -> default_handler -> handle(): something went wrong when adding the incoming default message to the dialogue."
             )
-            if http_dialogue is None:
-                self.context.logger.exception(
-                    "alice -> default_handler -> handle(): something went wrong when adding the incoming HTTP response message to the dialogue."
-                )
-                return
+            return
+
+        if message.performative == DefaultMessage.Performative.BYTES:
             content_bytes = message.content
             content = json.loads(content_bytes)
             self.context.logger.info("Received message content:" + str(content))
             if "@type" in content:
+                strategy = cast(Strategy, self.context.strategy)
                 details = self._handle_received_invite(content)
                 self.context.behaviours.alice.send_http_request_message(
                     method="POST",
@@ -147,7 +143,7 @@ class AliceDefaultHandler(Handler):
         """
 
 
-class AliceHttpHandler(Handler):
+class HttpHandler(Handler):
     """This class represents alice's handler for HTTP messages."""
 
     SUPPORTED_PROTOCOL = HttpMessage.protocol_id  # type: Optional[PublicId]
@@ -158,8 +154,6 @@ class AliceHttpHandler(Handler):
 
         self.connection_id = None  # type: Optional[str]
         self.is_connected_to_Faber = False
-
-        self.handled_message: Optional[HttpMessage] = None
 
     def setup(self) -> None:
         """
@@ -176,16 +170,17 @@ class AliceHttpHandler(Handler):
         :return: None
         """
         message = cast(HttpMessage, message)
-        http_dialogues = cast(HttpDialogues, self.context.http_dialogues)
 
-        self.handled_message = message
+        # recover dialogue
+        http_dialogues = cast(HttpDialogues, self.context.http_dialogues)
+        http_dialogue = cast(Optional[HttpDialogue], http_dialogues.update(message))
+        if http_dialogue is None:
+            self.context.logger.error(
+                "alice -> http_handler -> handle() -> REQUEST: something went wrong when adding the incoming HTTP webhook request message to the dialogue."
+            )
+            return
+
         if message.performative == HttpMessage.Performative.REQUEST:  # webhook
-            http_dialogue = cast(Optional[HttpDialogue], http_dialogues.update(message))
-            if http_dialogue is None:
-                self.context.logger.exception(
-                    "alice -> http_handler -> handle() -> REQUEST: something went wrong when adding the incoming HTTP webhook request message to the dialogue."
-                )
-                return
             content_bytes = message.body
             content = json.loads(content_bytes)
             self.context.logger.info("Received webhook message content:" + str(content))
@@ -197,29 +192,23 @@ class AliceHttpHandler(Handler):
         elif (
             message.performative == HttpMessage.Performative.RESPONSE
         ):  # response to http_client request
-            http_dialogue = cast(Optional[HttpDialogue], http_dialogues.update(message))
-            if http_dialogue is None:
-                self.context.logger.exception(
-                    "alice -> http_handler -> handle() -> RESPONSE: something went wrong when adding the incoming HTTP response message to the dialogue."
-                )
-                return
             content_bytes = message.body
-            content = content_bytes.decode("utf-8")
+            content = json.loads(content_bytes)
             if "Error" in content:
                 self.context.logger.error(
                     "Something went wrong after I sent the administrative command of 'invitation receive'"
                 )
             else:
                 self.context.logger.info(
-                    "Received http response message content:" + str(content)
+                    f"Received http response message content:{str(content)}"
                 )
                 if "connection_id" in content:
                     connection = content
                     self.connection_id = content["connection_id"]
                     invitation = connection["invitation"]
-                    self.context.logger.info("invitation response: " + str(connection))
-                    self.context.logger.info("connection id: " + self.connection_id)  # type: ignore
-                    self.context.logger.info("invitation: " + str(invitation))
+                    self.context.logger.info(f"invitation response: {str(connection)}")
+                    self.context.logger.info(f"connection id: {self.connection_id}")  # type: ignore
+                    self.context.logger.info(f"invitation: {str(invitation)}")
 
     def teardown(self) -> None:
         """
@@ -229,7 +218,7 @@ class AliceHttpHandler(Handler):
         """
 
 
-class AliceOefSearchHandler(Handler):
+class OefSearchHandler(Handler):
     """This class implements an OEF search handler."""
 
     SUPPORTED_PROTOCOL = OefSearchMessage.protocol_id  # type: Optional[PublicId]

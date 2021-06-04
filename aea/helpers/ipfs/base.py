@@ -39,7 +39,7 @@ def _dos2unix(file_content: bytes) -> bytes:
     Replace occurrences of Windows line terminator CR/LF with only LF.
 
     :param file_content: the content of the file.
-    :return the same content but with the line terminator
+    :return: the same content but with the line terminator
     """
     return re.sub(b"\r\n", b"\n", file_content, flags=re.M)
 
@@ -73,6 +73,7 @@ class IPFSHashOnly:
         Get the IPFS hash for a single file.
 
         :param file_path: the file path
+        :return: the ipfs hash
         """
         file_b = _read(file_path)
         file_pb = self._pb_serialize_file(file_b)

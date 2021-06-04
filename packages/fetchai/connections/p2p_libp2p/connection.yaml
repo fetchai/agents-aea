@@ -1,6 +1,6 @@
 name: p2p_libp2p
 author: fetchai
-version: 0.23.0
+version: 0.24.0
 type: connection
 description: The p2p libp2p connection implements an interface to standalone golang
   go-libp2p node that can exchange aea envelopes with other agents connected to the
@@ -8,12 +8,12 @@ description: The p2p libp2p connection implements an interface to standalone gol
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmWcd2zHiRZLgXCSGw9gZ35WfcKsMeNSQouqNAaZnPBDDR
+  README.md: QmVz8npmRFFHqHwTLCHoHUDEzr5r7fu4eM3L3CP5CDx1g4
   __init__.py: QmYQuLNyQ8WTjgRYAoKAzoJEb7ocKXvM2hTyK4hsGch5D6
   acn_message.proto: QmQtqmAqRM6KhYyfXGPYbYLBLuwfTRwTbvt5Rmt1ghS33J
   acn_message_pb2.py: QmRmTieVDVaRoiynFx9YJbXEf41JfTTWdqTWuRYWFpM8iw
   check_dependencies.py: QmTs1ydcs71QsqrVEyPmZpUNRntmjgQbx5d5t1xUKg8sad
-  connection.py: QmVGAZJ9zNcH2ErWGzVacZSJsxUY9qRf38trkHogNXMSQc
+  connection.py: QmYPAu7KC8XMXmwKx8ezE2AnX2vk9Zabqje4G3FRYDMi9M
   consts.py: QmNup63K21nAMgQ8VLjNGZgceus97gUpsgBMNpDxcSTmCr
   libp2p_node/Makefile: QmPpjEgNQD59BBDefLS5C8gbY7CEppeVGACJeAL9rufSgv
   libp2p_node/README.md: Qmak56XnWfarVxasiaGqYQWJaNVnEAh2hsLWstuFVND98w

@@ -50,7 +50,7 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
             Initialize dialogues.
 
             :param self_address: the address of the entity for whom dialogues are maintained
-            :return: None
+            :param kwargs: the keyword arguments
             """
 
             def role_from_first_message(  # pylint: disable=unused-argument
@@ -108,7 +108,6 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         Handle an internal message from the skills.
 
         :param message: the internal message
-        :return: None
         """
         if isinstance(message, self.signing_msg_class):
             self._handle_signing_message(message)
@@ -124,7 +123,6 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         Handle a signing message.
 
         :param signing_msg: the transaction message
-        :return: None
         """
         signing_dialogue = self.signing_dialogues.update(signing_msg)  # type: ignore
         if signing_dialogue is None or not isinstance(
@@ -159,7 +157,6 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
 
         :param signing_msg: the signing message
         :param signing_dialogue: the signing dialogue
-        :return: None
         """
         performative = self.signing_msg_class.Performative.ERROR
         kwargs = {
@@ -191,7 +188,6 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
 
         :param signing_msg: the signing message
         :param signing_dialogue: the signing dialogue
-        :return: None
         """
         performative = self.signing_msg_class.Performative.ERROR
         kwargs = {
