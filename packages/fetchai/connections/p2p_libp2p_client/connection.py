@@ -333,10 +333,6 @@ class P2PLibp2pClientConnection(Connection):
         self.node_por = self.delegate_pors[index]
         self.logger.debug("Node to use as delegate: {}".format(self.node_uri))
 
-        # tcp connection
-        self._reader = None  # type: Optional[asyncio.StreamReader]
-        self._writer = None  # type: Optional[asyncio.StreamWriter]
-
         self._in_queue = None  # type: Optional[asyncio.Queue]
         self._process_messages_task = None  # type: Optional[asyncio.Future]
         self._node_client: Optional[NodeClient] = None

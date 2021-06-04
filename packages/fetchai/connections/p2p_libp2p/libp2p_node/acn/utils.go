@@ -59,7 +59,6 @@ func DecodeAcnMessage(buf []byte) (string, *AeaEnvelope, *Status, error) {
 		status = pl.Status
 		msg_type = "status"
 	default:
-
 		err = errors.New("unexpected ACN Message")
 		logger.Error().Msg(err.Error())
 		return msg_type, nil, nil, err

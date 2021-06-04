@@ -353,12 +353,6 @@ func (aea *AeaApi) Connect() error {
 	return nil
 }
 
-func UnmarshalEnvelope(buf []byte) (*Envelope, error) {
-	envelope := &Envelope{}
-	err := proto.Unmarshal(buf, envelope)
-	return envelope, err
-}
-
 func (aea *AeaApi) listenForEnvelopes() {
 	//TOFIX(LR) add an exit strategy
 	for {
@@ -369,11 +363,13 @@ func (aea *AeaApi) listenForEnvelopes() {
 		if errors.As(err, &e) {
 			logger.Error().
 				Str("err", err.Error()).
-				Msg("pip error while receiving envelope. disconnect")
+				Msg("pipe error while receiving envelope. disconnect")
 			logger.Info().Msg("disconnecting")
+
 			if !aea.closing {
-				aea.stop()
+				aea.Stop()
 			}
+
 			return
 		}
 		if err != nil {
@@ -445,19 +441,25 @@ func MakeAcnMessageFromEnvelope(envelope *Envelope) (error, []byte) {
 func (aea AeaApi) SendEnvelope(envelope *Envelope) error {
 	err, data := MakeAcnMessageFromEnvelope(envelope)
 	if err != nil {
-		logger.Error().Str("err", err.Error()).Msgf("while serializing envelope: %s", envelope.String())
+		logger.Error().
+			Str("err", err.Error()).
+			Msgf("while serializing envelope: %s", envelope.String())
 		return err
 	}
 	err = aea.pipe.Write(data)
 	if err != nil {
-		logger.Error().Str("err", err.Error()).Msgf("on pipe write. envelope: %s", envelope.String())
+		logger.Error().
+			Str("err", err.Error()).
+			Msgf("on pipe write. envelope: %s", envelope.String())
 		return err
 	}
 
 	status, err := acn.WaitForStatus(aea.acn_status_chan, AcnStatusTimeout)
 
 	if err != nil {
-		logger.Error().Str("err", err.Error()).Msgf("on status wait. envelope: %s", envelope.String())
+		logger.Error().
+			Str("err", err.Error()).
+			Msgf("on status wait. envelope: %s", envelope.String())
 		return err
 	}
 	if status.Code != acn.Status_SUCCESS {
