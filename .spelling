@@ -189,6 +189,26 @@ CVE-2021-27291
 AgentLand
 GCloud
 p2p
+LookupRequest
+LookupResponse
+AeaEnvelope
+_envelope_bytes_
+AgentRecord
+AgentApi
+DHTPeer
+sequenceDiagram
+listenLoop
+OutputQueue
+outputLoop
+SendQueue
+sendLoop
+DhtNode
+alt
+ack-timeout
+conn-error
+generic_error
+DESERIALIZATION_ERROR
+RouteEnvelope
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id

@@ -87,6 +87,7 @@ nav:
       - Limitations of v1: 'limits.md'
     - Agent Communication:
       - Agent Communication Network: 'acn.md'
+      - ACN Internals: 'acn-internals.md'
     - Search & Discovery:
       - Simple OEF: 'simple-oef.md'
       - Defining Data Models: 'defining-data-models.md'

@@ -1,0 +1,166 @@
+
+The aim of this document is to describe at a high-level
+the main implementation of the Agent Communication Network (ACN).
+
+## Introduction
+
+The ACN protocol implements transmission control over the ACN.
+The message serialization is based on 
+<a href="https://developers.google.com/protocol-buffers" target="_blank">Protocol Buffers</a>.
+and the definition of the data structures involved is defined
+<a href="https://github.com/fetchai/agents-aea/blob/develop/libs/go/libp2p_node/acn/acn_message.proto" target="_blank">here</a>.
+
+## Messages
+
+### Agent Record
+
+An _Agent Record_ is a data structure containing information about an agent connected to the ACN.
+
+> TODO: list and explain fields types and purpose
+
+### ACN Message
+
+Entities in the ACN (i.e. either agents or peers) exchange _ACN messages_.
+An ACN message contains the following fields:
+
+- _version_: a string that stores the protocol version, following <a href="https://semver.org/" target="_blank">Semantic Versioning</a>.
+- _payload_: the actual content of the message
+
+There are different types of payloads:
+
+- Status
+- Register
+- LookupRequest
+- LookupResponse
+- AeaEnvelope
+
+### Status
+
+The _Status_ payload is used as a response message for certain requests (TODO).
+It contains:
+
+- the _status code_, a positive integer among the ones in the 
+  <a href="https://github.com/fetchai/agents-aea/blob/develop/libs/go/libp2p_node/acn/acn_message.proto" target="_blank">Protobuf file</a>.
+- a list of error messages (string).
+
+A status code `0` means that the request has been processed successfully. Status codes greater than `0` can be: TODO
+
+### Register
+
+The _Register_ payload is used to request a peer to register an agent among his known ones. TODO
+
+### LookupRequest
+
+The _Lookup Request_ payload is sent between peer to look-up addresses in the Distributed Hash Table (DHT).
+It contains the agent address (a string) that the sender needs to correctly route an envelope.
+
+### LookupResponse
+
+The _LookupResponse_ payload is the response sent by a peer that received a LookupRequest.
+
+### AeaEnvelope
+
+The _AeaEnvelope_ payload contains the envelope sent by an agent and to be delivered to another agent.
+It contains:
+
+- _envelope_bytes_: the envelope to be forwarded, in byte representation.
+- an _AgentRecord_ (see above)
+
+## ACN Entrance
+
+In this section, we will describe the interaction protocols between agents and peers 
+for the messages sent by the agent to the ACN network.
+
+### Envelope entrance: Agent -> AgentApi -> DHTPeer (direct connection)
+
+The following diagram explains the exchange of messages on entering an envelope in the ACN.
+Agent is a Python process, whereas AgentApi and Peer are in a separate (Golang) process.
+
+<div class="mermaid">
+    sequenceDiagram
+        participant Agent
+        participant AgentApi
+        participant DHTPeer
+        loop until Status(success) received
+            Agent->>AgentApi: AcnMessage(AeaEnvelope)
+            Agent->>Agent: wait
+            note left of Agent: Wait until Status(success)
+            alt successful case
+                AgentApi->>Agent: Status(success)
+                note over Agent: break loop
+            else ack-timeout OR conn-error
+                note left of Agent: continue (Try to resend/reconnect)
+            else error on decoding of ACN message
+                AgentApi->>Agent: Status(generic_error)
+                note left of Agent: use DESERIALIZATION_ERROR
+            else error on decoding of Envelope payload
+                AgentApi->>Agent: Status(generic_error)
+                note left of Agent: use DESERIALIZATION_ERROR
+            else wrong payload
+                AgentApi->>Agent: Status(generic_error)
+                note left of Agent: use some custom error code
+            end
+        end
+        AgentApi ->> DHTPeer: RouteEnvelope
+</div>
+
+
+This diagram shows the internals of the above communication:
+
+TODO
+<div class="mermaid">
+sequenceDiagram
+    participant Agent
+    queue Pipe
+    participant listenLoop
+    queue OutputQueue
+    participant outputLoop
+    queue SendQueue
+    participant sendLoop
+    participant DhtNode
+
+    note left of Agent: message = AcnMessage(Envelope)
+    Agent ->> Pipe: message
+    Pipe ->> listenLoop: message
+    listenLoop ->> OutputQueue: message
+    listenLoop ->> Pipe: Status(success)
+    Pipe ->> Agent: Status(success)
+    OutputQueue ->> outputLoop: message
+    outputLoop ->> DhtNode: RouteEnvelope(message)
+</div>
+
+
+## ACN Exit
+
+### Envelope exit: DHTPeer -> AgentApi -> Agent (direct connection)
+
+The following diagram explains the exchange of messages on exiting an envelope in the ACN.
+Agent is a Python process, whereas AgentApi and Peer are in a separate (Golang) process.
+
+
+<div class="mermaid">
+sequenceDiagram
+    participant Agent
+    participant AgentApi
+    participant DHTPeer
+    DHTPeer->>AgentApi: AeaEnvelope
+    note right of Agent Put envelope in AgentApi incoming queue
+    AgentApi->>Agent: AeaEnvelope
+    alt successful case
+        Agent->>AgentApi: Status(success)
+    else ack-timeout OR conn-error
+        note left of AgentApi: do nothing
+    else error on decoding of ACN message
+        Agent->>AgentApi: Status(generic_error)
+        note left of Agent: use DESERIALIZATION_ERROR
+    else error on decoding of Envelope payload
+        Agent->>AgentApi: Status(generic_error)
+        note left of Agent: use DESERIALIZATION_ERROR
+    else wrong payload
+        Agent->>AgentApi: Status(generic_error)
+        note left of Agent: use some custom error code
+    end
+    AgentApi ->> DHTPeer: RouteEnvelope
+</div>
+
+TODO
