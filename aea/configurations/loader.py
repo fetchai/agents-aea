@@ -22,6 +22,7 @@ from typing import Dict, Generic, List, TextIO, Type, TypeVar, Union, cast
 
 import yaml
 
+import aea
 from aea.configurations.base import (
     AgentConfig,
     ComponentConfiguration,
@@ -37,6 +38,7 @@ from aea.configurations.base import (
     SkillConfig,
 )
 from aea.configurations.validation import ConfigValidator, make_jsonschema_base_uri
+from aea.exceptions import enforce
 from aea.helpers.io import open_file
 from aea.helpers.yaml_utils import yaml_dump, yaml_dump_all, yaml_load, yaml_load_all
 
@@ -108,6 +110,25 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
     def configuration_class(self) -> Type[T]:
         """Get the configuration class of the loader."""
         return self._configuration_class
+
+    def validate(self, json_data: Dict) -> None:
+        """
+        Validate a JSON representation of an AEA package.
+
+        First, checks whether the AEA version is compatible with the configuration file.
+        Then, validates the JSON object against the specific schema.
+
+        :param json_data: the JSON data.
+        """
+        aea_version_specifier_set = AgentConfig.parse_aea_version_specifier(
+            json_data["aea_version"]
+        )
+        aea_version = aea.__version__
+        enforce(
+            aea_version_specifier_set.contains(aea_version),
+            f"AEA version in use '{aea_version}' is not compatible with the specifier set '{aea_version_specifier_set}'.",
+        )
+        super().validate(json_data)
 
     def load_protocol_specification(
         self, file_pointer: TextIO

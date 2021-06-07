@@ -20,6 +20,7 @@
 
 """This module contains the tests for the aea.configurations.loader module."""
 import os
+from io import StringIO
 from pathlib import Path
 from unittest import mock
 from unittest.mock import MagicMock
@@ -30,11 +31,8 @@ import yaml
 import aea
 from aea.configurations.base import PackageType, ProtocolSpecification
 from aea.configurations.loader import ConfigLoader
-from aea.configurations.validation import (
-    ConfigValidator,
-    OwnDraft4Validator,
-    make_jsonschema_base_uri,
-)
+from aea.configurations.validation import make_jsonschema_base_uri
+from aea.exceptions import AEAEnforceError
 from aea.protocols.generator.common import load_protocol_specification
 
 from tests.conftest import protocol_specification_files
@@ -57,24 +55,24 @@ def test_config_loader_get_required_fields():
     config_loader.required_fields
 
 
-def test_config_loader_dump_component():
+@mock.patch.object(aea.configurations.loader, "yaml_dump")
+@mock.patch.object(ConfigLoader, "validate")
+@mock.patch("builtins.open")
+def test_config_loader_dump_component(*_mocks):
     """Test ConfigLoader.dump"""
     config_loader = ConfigLoader.from_configuration_type(PackageType.PROTOCOL)
     configuration = MagicMock()
-    with mock.patch.object(aea.configurations.loader, "yaml_dump"), mock.patch.object(
-        ConfigValidator, "_validate"
-    ), mock.patch("builtins.open"):
-        config_loader.dump(configuration, open("foo"))
+    config_loader.dump(configuration, open("foo"))
 
 
-def test_config_loader_dump_agent_config():
+@mock.patch.object(aea.configurations.loader, "yaml_dump_all")
+@mock.patch.object(ConfigLoader, "validate")
+@mock.patch("builtins.open")
+def test_config_loader_dump_agent_config(*_mocks):
     """Test ConfigLoader.dump"""
     config_loader = ConfigLoader.from_configuration_type(PackageType.AGENT)
     configuration = MagicMock(ordered_json={"component_configurations": []})
-    with mock.patch.object(
-        aea.configurations.loader, "yaml_dump_all"
-    ), mock.patch.object(ConfigValidator, "_validate"), mock.patch("builtins.open"):
-        config_loader.dump(configuration, open("foo"))
+    config_loader.dump(configuration, open("foo"))
 
 
 @pytest.mark.parametrize("spec_file_path", protocol_specification_files)
@@ -84,7 +82,9 @@ def test_load_protocol_specification(spec_file_path):
     assert type(result) == ProtocolSpecification
 
 
-def test_load_protocol_specification_only_first_part():
+@mock.patch("aea.protocols.generator.common.open_file")
+@mock.patch.object(ConfigLoader, "validate")
+def test_load_protocol_specification_only_first_part(*_mocks):
     """Test 'load_protocol_specification' with only the first part."""
     valid_protocol_specification = dict(
         name="name",
@@ -98,13 +98,13 @@ def test_load_protocol_specification_only_first_part():
     )
     with mock.patch.object(
         yaml, "safe_load_all", return_value=[valid_protocol_specification]
-    ), mock.patch("aea.protocols.generator.common.open_file"), mock.patch.object(
-        OwnDraft4Validator, "validate"
     ):
         load_protocol_specification("foo")
 
 
-def test_load_protocol_specification_two_parts():
+@mock.patch("aea.protocols.generator.common.open_file")
+@mock.patch.object(ConfigLoader, "validate")
+def test_load_protocol_specification_two_parts(*_mocks):
     """Test 'load_protocol_specification' with two parts."""
     valid_protocol_specification = dict(
         name="name",
@@ -120,8 +120,6 @@ def test_load_protocol_specification_two_parts():
         yaml,
         "safe_load_all",
         return_value=[valid_protocol_specification, valid_protocol_specification],
-    ), mock.patch("aea.protocols.generator.common.open_file"), mock.patch.object(
-        OwnDraft4Validator, "validate"
     ):
         load_protocol_specification("foo")
 
@@ -136,3 +134,16 @@ def test_load_protocol_specification_too_many_parts():
             yaml, "safe_load_all", return_value=[{}] * 4
         ), mock.patch("aea.protocols.generator.common.open_file"):
             load_protocol_specification("foo")
+
+
+@mock.patch.object(aea, "__version__", "0.1.0")
+def test_load_package_configuration_with_incompatible_aea_version(*_mocks):
+    """Test that loading a package configuration with incompatible AEA version raises an error."""
+    config_loader = ConfigLoader.from_configuration_type(PackageType.PROTOCOL)
+    specifier_set = "<2.0.0,>=1.0.0"
+    file = StringIO(f"name: some_protocol\naea_version: '{specifier_set}'")
+    with pytest.raises(
+        AEAEnforceError,
+        match=f"AEA version in use '0.1.0' is not compatible with the specifier set '{specifier_set}'.",
+    ):
+        config_loader.load(file)
