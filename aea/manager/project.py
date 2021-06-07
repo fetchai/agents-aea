@@ -133,9 +133,14 @@ class Project(_Base):
         rmtree(self.path)
 
     @property
+    def agent_config(self) -> AgentConfig:
+        """Get the agent configuration."""
+        return self._get_agent_config(self.path)
+
+    @property
     def builder(self) -> AEABuilder:
         """Get builder instance."""
-        return self._get_builder(self._get_agent_config(self.path), self.path)
+        return self._get_builder(self.agent_config, self.path)
 
     def check(self) -> None:
         """Check we can still construct an AEA from the project with builder.build."""
