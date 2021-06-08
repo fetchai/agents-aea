@@ -139,7 +139,9 @@ def test_load_protocol_specification_too_many_parts():
 @mock.patch.object(aea, "__version__", "0.1.0")
 def test_load_package_configuration_with_incompatible_aea_version(*_mocks):
     """Test that loading a package configuration with incompatible AEA version raises an error."""
-    config_loader = ConfigLoader.from_configuration_type(PackageType.PROTOCOL)
+    config_loader = ConfigLoader.from_configuration_type(
+        PackageType.PROTOCOL, skip_aea_validation=False
+    )
     specifier_set = "<2.0.0,>=1.0.0"
     file = StringIO(f"name: some_protocol\naea_version: '{specifier_set}'")
     with pytest.raises(

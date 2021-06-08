@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 """Implementation of the parser for configuration file."""
 from pathlib import Path
-from typing import Dict, Generic, List, TextIO, Type, TypeVar, Union, cast
+from typing import Any, Dict, Generic, List, TextIO, Type, TypeVar, Union, cast
 
 import yaml
 
@@ -44,7 +44,6 @@ from aea.helpers.yaml_utils import yaml_dump, yaml_dump_all, yaml_load, yaml_loa
 
 
 _STARTING_INDEX_CUSTOM_CONFIGS = 1
-
 
 _ = make_jsonschema_base_uri  # for tests compatibility
 
@@ -96,15 +95,22 @@ class BaseConfigLoader:
 class ConfigLoader(Generic[T], BaseConfigLoader):
     """Parsing, serialization and validation for package configuration files."""
 
-    def __init__(self, schema_filename: str, configuration_class: Type[T]) -> None:
+    def __init__(
+        self,
+        schema_filename: str,
+        configuration_class: Type[T],
+        skip_aea_validation: bool = True,
+    ) -> None:
         """
         Initialize the parser for configuration files.
 
         :param schema_filename: the path to the JSON-schema file in 'aea/configurations/schemas'.
         :param configuration_class: the configuration class (e.g. AgentConfig, SkillConfig etc.)
+        :param skip_aea_validation: if True, the validation of the AEA version is skipped.
         """
         super().__init__(schema_filename)
         self._configuration_class = configuration_class  # type: Type[T]
+        self._skip_aea_validation = skip_aea_validation
 
     @property
     def configuration_class(self) -> Type[T]:
@@ -120,14 +126,15 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
 
         :param json_data: the JSON data.
         """
-        aea_version_specifier_set = AgentConfig.parse_aea_version_specifier(
-            json_data["aea_version"]
-        )
-        aea_version = aea.__version__
-        enforce(
-            aea_version_specifier_set.contains(aea_version),
-            f"AEA version in use '{aea_version}' is not compatible with the specifier set '{aea_version_specifier_set}'.",
-        )
+        if not self._skip_aea_validation:
+            aea_version_specifier_set = AgentConfig.parse_aea_version_specifier(
+                json_data["aea_version"]
+            )
+            aea_version = aea.__version__
+            enforce(
+                aea_version_specifier_set.contains(aea_version),
+                f"AEA version in use '{aea_version}' is not compatible with the specifier set '{aea_version_specifier_set}'.",
+            )
         super().validate(json_data)
 
     def load_protocol_specification(
@@ -195,11 +202,17 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
 
     @classmethod
     def from_configuration_type(
-        cls, configuration_type: Union[PackageType, str]
+        cls, configuration_type: Union[PackageType, str], **kwargs: Any
     ) -> "ConfigLoader":
-        """Get the configuration loader from the type."""
+        """
+        Get the configuration loader from the type.
+
+        :param configuration_type: the type of configuration
+        :param kwargs: keyword arguments to the configuration loader constructor.
+        :return: the configuration loader
+        """
         configuration_type = PackageType(configuration_type)
-        return ConfigLoaders.from_package_type(configuration_type)
+        return ConfigLoaders.from_package_type(configuration_type, **kwargs)
 
     def _load_component_config(self, file_pointer: TextIO) -> T:
         """Load a component configuration."""
@@ -320,24 +333,26 @@ class ConfigLoaders:
 
     @classmethod
     def from_package_type(
-        cls, configuration_type: Union[PackageType, str]
+        cls, configuration_type: Union[PackageType, str], **kwargs: Any
     ) -> "ConfigLoader":
         """
         Get a config loader from the configuration type.
 
         :param configuration_type: the configuration type.
+        :param kwargs: keyword arguments to the configuration loader constructor.
         :return: configuration loader
         """
         config_class: Type[PackageConfiguration] = PACKAGE_TYPE_TO_CONFIG_CLASS[
             PackageType(configuration_type)
         ]
-        return ConfigLoader(config_class.schema, config_class)
+        return ConfigLoader(config_class.schema, config_class, **kwargs)
 
 
 def load_component_configuration(
     component_type: ComponentType,
     directory: Path,
     skip_consistency_check: bool = False,
+    skip_aea_validation: bool = True,
 ) -> ComponentConfiguration:
     """
     Load configuration and check that it is consistent against the directory.
@@ -345,18 +360,22 @@ def load_component_configuration(
     :param component_type: the component type.
     :param directory: the root of the package
     :param skip_consistency_check: if True, the consistency check are skipped.
+    :param skip_aea_validation: if True, the validation of the AEA version is skipped.
     :return: the configuration object.
     """
     package_type = component_type.to_package_type()
     configuration_object = load_package_configuration(
-        package_type, directory, skip_consistency_check
+        package_type, directory, skip_consistency_check, skip_aea_validation
     )
     configuration_object = cast(ComponentConfiguration, configuration_object)
     return configuration_object
 
 
 def load_package_configuration(
-    package_type: PackageType, directory: Path, skip_consistency_check: bool = False,
+    package_type: PackageType,
+    directory: Path,
+    skip_consistency_check: bool = False,
+    skip_aea_validation: bool = True,
 ) -> PackageConfiguration:
     """
     Load configuration and check that it is consistent against the directory.
@@ -364,9 +383,12 @@ def load_package_configuration(
     :param package_type: the package type.
     :param directory: the root of the package
     :param skip_consistency_check: if True, the consistency check are skipped.
+    :param skip_aea_validation: if True, the validation of the AEA version is skipped.
     :return: the configuration object.
     """
-    configuration_object = _load_configuration_object(package_type, directory)
+    configuration_object = _load_configuration_object(
+        package_type, directory, skip_aea_validation
+    )
     if not skip_consistency_check and isinstance(
         configuration_object, ComponentConfiguration
     ):
@@ -377,17 +399,20 @@ def load_package_configuration(
 
 
 def _load_configuration_object(
-    package_type: PackageType, directory: Path
+    package_type: PackageType, directory: Path, skip_aea_validation: bool = True
 ) -> PackageConfiguration:
     """
     Load the configuration object, without consistency checks.
 
     :param package_type: the package type.
     :param directory: the directory of the configuration.
+    :param skip_aea_validation: if True, the validation of the AEA version is skipped.
     :return: the configuration object.
     :raises FileNotFoundError: if the configuration file is not found.
     """
-    configuration_loader = ConfigLoader.from_configuration_type(package_type)
+    configuration_loader = ConfigLoader.from_configuration_type(
+        package_type, skip_aea_validation=skip_aea_validation
+    )
     configuration_filename = (
         configuration_loader.configuration_class.default_configuration_filename
     )

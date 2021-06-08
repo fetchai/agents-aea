@@ -409,6 +409,7 @@ class MultiAgentManager:
             remote,
             registry_path=self.registry_path,
             is_restore=restore,
+            skip_aea_validation=False,
         )
 
         if not restore:
