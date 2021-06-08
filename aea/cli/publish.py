@@ -194,6 +194,7 @@ class LocalRegistry(BaseRegistry):
             try_get_item_source_path(
                 self.registry_path, public_id.author, item_type_plural, public_id.name
             )
+            return
         except click.ClickException as e:
             raise click.ClickException(
                 f"Dependency is missing. {str(e)}\nPlease push it first and then retry or use {PUSH_ITEMS_FLAG} flag to push automatically."
@@ -210,6 +211,7 @@ class LocalRegistry(BaseRegistry):
         """
         item_type = ITEM_TYPE_PLURAL_TO_TYPE[item_type_plural]
         _push_item_locally(self.ctx, item_type, public_id)
+        return
 
 
 class MixedRegistry(LocalRegistry):
@@ -265,6 +267,7 @@ class RemoteRegistry(BaseRegistry):
         item_type = ITEM_TYPE_PLURAL_TO_TYPE[item_type_plural]
         try:
             get_package_meta(item_type, public_id)
+            return
         except click.ClickException as e:
             raise click.ClickException(
                 f"Package not found in remote registry: {str(e)}. You can try to add {PUSH_ITEMS_FLAG} flag."
@@ -281,6 +284,7 @@ class RemoteRegistry(BaseRegistry):
         """
         item_type = ITEM_TYPE_PLURAL_TO_TYPE[item_type_plural]
         _push_item_remote(self.ctx, item_type, public_id)
+        return
 
 
 def _check_dependencies_in_registry(
@@ -303,13 +307,10 @@ def _save_agent_locally(
     Save agent to local packages.
 
     :param ctx: the context
-<<<<<<< HEAD
+    :param is_mixed: bool.
     :param push_missing: bool. flag to push missing items
 
     :return: None
-=======
-    :param is_mixed: whether or not to fetch in mixed mode
->>>>>>> 34307e9119cc5af67c51d6a87f376dc4a103324d
     """
     try:
         registry_path = ctx.registry_path
@@ -334,6 +335,7 @@ def _save_agent_locally(
     click.echo(
         f'Agent "{ctx.agent_config.name}" successfully saved in packages folder.'
     )
+    return
 
 
 def _publish_agent_remote(ctx: Context, push_missing: bool) -> None:
@@ -348,3 +350,4 @@ def _publish_agent_remote(ctx: Context, push_missing: bool) -> None:
     registry = RemoteRegistry(ctx)
     _check_dependencies_in_registry(registry, ctx.agent_config, push_missing)
     publish_agent(ctx)
+    return
