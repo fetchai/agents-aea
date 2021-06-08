@@ -142,7 +142,6 @@ class TestMyRLAgent(GymTestCase):
         # fit
         mocked_reset.assert_called_once()
 
-        # for counter in range(self.nb_steps):
         # _pick_an_action
         mocked_price_exp.assert_called()
         assert mocked_price_exp.call_count == self.nb_steps

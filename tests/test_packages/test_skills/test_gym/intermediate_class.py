@@ -50,7 +50,7 @@ class GymTestCase(BaseSkillTestCase):
         """Setup the test class."""
         cls.nb_steps = 4000
         config_overrides = {
-            "handlers": {"gym": {"args": {"nb_steps": cls.nb_steps,}}},
+            "handlers": {"gym": {"args": {"nb_steps": cls.nb_steps}}},
         }
 
         super().setup(config_overrides=config_overrides)
