@@ -184,7 +184,6 @@ class Registry(Generic[ItemType]):
         :param entry_point: the entry point to load the crypto object.
         :param class_kwargs: keyword arguments to be attached on the class as class variables.
         :param kwargs: arguments to provide to the crypto class.
-        :return: None.
         """
         item_id = ItemId(id_)
         entry_point = EntryPoint[ItemType](entry_point)

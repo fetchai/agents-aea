@@ -78,7 +78,6 @@ class BaseConfigLoader:
         Validate a JSON object.
 
         :param json_data: the JSON data.
-        :return: None.
         """
         self.validator.validate(json_data)
 
@@ -167,7 +166,6 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
 
         :param configuration: the configuration to be dumped.
         :param file_pointer: the file pointer to the configuration file
-        :return: None
         """
         if self.configuration_class.package_type == PackageType.AGENT:
             self._dump_agent_config(cast(AgentConfig, configuration), file_pointer)
@@ -204,6 +202,7 @@ class ConfigLoader(Generic[T], BaseConfigLoader):
         Load agent configuration from configuration json data.
 
         :param configuration_json: list of dicts with aea configuration
+        :param validate: whether or not to validate
 
         :return: AgentConfig instance
         """
@@ -305,7 +304,8 @@ class ConfigLoaders:
         """
         Get a config loader from the configuration type.
 
-        :param configuration_type: the configuration type
+        :param configuration_type: the configuration type.
+        :return: configuration loader
         """
         config_class: Type[PackageConfiguration] = PACKAGE_TYPE_TO_CONFIG_CLASS[
             PackageType(configuration_type)

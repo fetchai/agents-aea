@@ -30,10 +30,6 @@ Init.
 
 Set code was terminated cause timeout.
 
-**Returns**:
-
-None
-
 <a name="aea.helpers.exec_timeout.TimeoutResult.is_cancelled_by_timeout"></a>
 #### is`_`cancelled`_`by`_`timeout
 
@@ -104,9 +100,11 @@ TimeoutResult
 
 Exit context manager.
 
-**Returns**:
+**Arguments**:
 
-bool
+- `exc_type`: the exception type
+- `exc_val`: the exception
+- `exc_tb`: the traceback
 
 <a name="aea.helpers.exec_timeout.ExecTimeoutSigAlarm"></a>
 ## ExecTimeoutSigAlarm Objects
@@ -157,10 +155,6 @@ Start supervisor thread to check timeouts.
 
 Supervisor starts once but number of start counted.
 
-**Returns**:
-
-None
-
 <a name="aea.helpers.exec_timeout.ExecTimeoutThreadGuard.stop"></a>
 #### stop
 
@@ -176,8 +170,4 @@ Actual stop performed on force == True or if  number of stops == number of start
 **Arguments**:
 
 - `force`: force stop regardless number of start.
-
-**Returns**:
-
-None
 

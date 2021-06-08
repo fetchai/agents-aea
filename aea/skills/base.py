@@ -73,8 +73,8 @@ class SkillContext:
         """
         Initialize a skill context.
 
-        :agent_context: the agent context.
-        :skill: the skill.
+        :param agent_context: the agent context.
+        :param skill: the skill.
         """
         self._agent_context = agent_context  # type: Optional[AgentContext]
         self._in_queue = Queue()  # type: Queue
@@ -147,7 +147,7 @@ class SkillContext:
         This queue can be used to send messages to the framework
         to request the registration of a behaviour.
 
-        :return the queue of new behaviours.
+        :return: the queue of new behaviours.
         """
         return self._new_behaviours_queue
 
@@ -159,7 +159,7 @@ class SkillContext:
         This queue can be used to send messages to the framework
         to request the registration of a handler.
 
-        :return the queue of new handlers.
+        :return: the queue of new handlers.
         """
         return self._new_handlers_queue
 
@@ -263,10 +263,10 @@ class SkillContext:
         """
         Send message or envelope to another skill.
 
-        :param message_or_envelope: envelope to send to another skill.
-        if message passed it will be wrapped into envelope with optional envelope context.
+        If message passed it will be wrapped into envelope with optional envelope context.
 
-        :return: None
+        :param message_or_envelope: envelope to send to another skill.
+        :param context: the optional envelope context
         """
         if self._agent_context is None:  # pragma: nocover
             raise ValueError("agent context was not set!")
@@ -289,6 +289,7 @@ class SkillComponent(ABC):
         :param name: the name of the component.
         :param configuration: the configuration for the component.
         :param skill_context: the skill context.
+        :param kwargs: the keyword arguments.
         """
         if name is None:
             raise ValueError("SkillComponent name is not provided.")
@@ -334,22 +335,14 @@ class SkillComponent(ABC):
 
     @abstractmethod
     def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
+        """Implement the setup."""
         super_obj = super()
         if hasattr(super_obj, "setup"):
             super_obj.setup()  # type: ignore  # pylint: disable=no-member
 
     @abstractmethod
     def teardown(self) -> None:
-        """
-        Implement the teardown.
-
-        :return: None
-        """
+        """Implement the teardown."""
         super_obj = super()
         if hasattr(super_obj, "teardown"):
             super_obj.teardown()  # type: ignore  # pylint: disable=no-member
@@ -520,8 +513,7 @@ class Model(SkillComponent, ABC):
         :param configuration: the configuration for the component.
         :param skill_context: the skill context.
         :param keep_terminal_state_dialogues: specify do dialogues in terminal state should stay or not
-
-        :return: None
+        :param kwargs: the keyword arguments.
         """
         super().__init__(name, skill_context, configuration=configuration, **kwargs)
 
@@ -581,6 +573,7 @@ class Skill(Component):
         :param handlers: dictionary of handlers.
         :param behaviours: dictionary of behaviours.
         :param models: dictionary of models.
+        :param kwargs: the keyword arguments.
         """
         if kwargs is not None:
             pass
@@ -636,7 +629,8 @@ class Skill(Component):
         Load the skill from a directory.
 
         :param directory: the directory to the skill package.
-        :param agent_context: the skill context
+        :param agent_context: the skill context.
+        :param kwargs: the keyword arguments.
         :return: the skill object.
         """
         configuration = cast(
@@ -653,6 +647,8 @@ class Skill(Component):
 
         In the case of a skill, return the
         logger provided by the skill context.
+
+        :return: the logger
         """
         return self.skill_context.logger
 
@@ -670,6 +666,7 @@ class Skill(Component):
 
         :param configuration: a skill configuration. Must be associated with a directory.
         :param agent_context: the agent context.
+        :param kwargs: the keyword arguments.
         :return: the skill.
         """
 
@@ -926,9 +923,7 @@ class _SkillComponentLoader:
         Load component classes from Python modules.
 
         :param module_paths: a set of paths to Python modules.
-        :return: a mapping from path to skill component classes in that module
-          (containing potential duplicates). Skill components in one path
-          are
+        :return: a mapping from path to skill component classes in that module (containing potential duplicates). Skill components in one path are
         """
         module_to_classes: Dict[Path, Set[Tuple[str, Type[SkillComponent]]]] = {}
         for module_path in module_paths:
@@ -952,7 +947,7 @@ class _SkillComponentLoader:
         """
         Get all the declared skill component configurations.
 
-        :return:
+        :return: dictionary of declared skill component configurations
         """
         handlers_by_id = dict(self.configuration.handlers.read_all())
         behaviours_by_id = dict(self.configuration.behaviours.read_all())
@@ -1027,8 +1022,9 @@ class _SkillComponentLoader:
 
         In this function, the above criteria are applied in that order.
 
-        :param component_classes_by_path:
-        :return: None
+        :param component_classes_by_path: the component classes by path
+        :param declared_component_classes: the declared component classes
+        :return: list of skill component loading items
         """
         result: List[_SkillComponentLoadingItem] = []
 
@@ -1138,7 +1134,6 @@ class _SkillComponentLoader:
 
         :param component_classes_by_path: the component classes by path.
         :param used_classes: the classes used.
-        :return: None
         """
         for path, set_of_class_name_pairs in component_classes_by_path.items():
             # take only classes, not class names

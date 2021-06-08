@@ -60,8 +60,6 @@ def _launch_agents(
     :param agents: agents names.
     :param multithreaded: bool flag to run as multithreads.
     :param password: the password to encrypt/decrypt the private key.
-
-    :return: None.
     """
     agents_directories = list(map(Path, list(OrderedDict.fromkeys(agents))))
     mode = "threaded" if multithreaded else "multiprocess"

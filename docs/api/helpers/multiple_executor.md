@@ -148,9 +148,9 @@ Raise error, cause async mode is not supported, cause this task for multiprocess
 
 - `loop`: the event loop
 
-**Returns**:
+**Raises**:
 
-task to run in asyncio loop.
+- `ValueError`: async task construction not possible
 
 <a name="aea.helpers.multiple_executor.AbstractMultipleExecutor"></a>
 ## AbstractMultipleExecutor Objects
@@ -306,10 +306,6 @@ Run agents.
 
 - `threaded`: run in dedicated thread without blocking current thread.
 
-**Returns**:
-
-None
-
 <a name="aea.helpers.multiple_executor.AbstractMultipleRunner.stop"></a>
 #### stop
 
@@ -322,10 +318,6 @@ Stop agents.
 **Arguments**:
 
 - `timeout`: timeout in seconds to wait thread stopped, only if started in thread mode.
-
-**Returns**:
-
-None
 
 <a name="aea.helpers.multiple_executor.AbstractMultipleRunner.num_failed"></a>
 #### num`_`failed

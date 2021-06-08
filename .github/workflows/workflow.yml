@@ -23,7 +23,7 @@ jobs:
           sudo apt-get autoremove
           sudo apt-get autoclean
           pip install pipenv
-      - name: Pipenv lock
+      - name: Pipenv install requirements and check it can be locked
         run: |
           pipenv install --dev --skip-lock --clear
           pipenv run pip install -e .[all]
@@ -73,6 +73,8 @@ jobs:
           tox -e black-check
           tox -e isort-check
           tox -e flake8
+      - name: Docstring check
+        run: tox -e darglint
       - name: Unused code check
         run: tox -e vulture
       - name: Static type check
@@ -206,6 +208,7 @@ jobs:
       - name: Check aea dependenices and imports
         run: |
           tox -e dependencies_check
+
   plugins_install_check:
     continue-on-error: False
     runs-on: ${{ matrix.sys.os }}
@@ -239,6 +242,7 @@ jobs:
       - name: Check plugin aea-cli-ipfs
         run : |
           tox -r -e plugins_env -- sh -c "pip install ./plugins/aea-cli-ipfs && aea ipfs --help && echo aea-cli-ipfs checked!"
+
   protolint:
     continue-on-error: False
     runs-on: ubuntu-latest
@@ -268,6 +272,8 @@ jobs:
     - common_checks_2
     - common_checks_3
     - common_checks_4
+    - dependencies_checks
+    - plugins_install_check
     runs-on: ubuntu-latest
     timeout-minutes: 50
     steps:
@@ -301,6 +307,8 @@ jobs:
       - common_checks_2
       - common_checks_3
       - common_checks_4
+      - dependencies_checks
+      - plugins_install_check
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -357,6 +365,8 @@ jobs:
     - common_checks_2
     - common_checks_3
     - common_checks_4
+    - dependencies_checks
+    - plugins_install_check
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -433,6 +443,8 @@ jobs:
     - common_checks_2
     - common_checks_3
     - common_checks_4
+    - dependencies_checks
+    - plugins_install_check
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -456,6 +468,7 @@ jobs:
     - name: Unit tests with sync agent loop
       run: |
         tox -e py3.8 -- --aea-loop sync -m 'not integration and not unstable'
+
   golang_checks:
     continue-on-error: True
     needs:
@@ -463,6 +476,8 @@ jobs:
     - common_checks_2
     - common_checks_3
     - common_checks_4
+    - dependencies_checks
+    - plugins_install_check
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -493,6 +508,7 @@ jobs:
       name: Golang unit tests (aealite)
       working-directory: ./libs/go/aealite
       run: go test -p 1 -timeout 0 -count 1 -v ./...
+
   libp2p_coverage:
     name: libp2p_coverage
     runs-on: ubuntu-latest
@@ -522,6 +538,7 @@ jobs:
         working-directory: ./libs/go/libp2p_node/
         run: |
           go tool cover -func=coverage.txt
+
   coverage_checks:
     continue-on-error: True
     needs:

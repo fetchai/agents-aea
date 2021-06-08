@@ -17,4 +17,4 @@ Then follow the `README.md` contained in the folder.
 
 ## Deployment using Kubernetes
 
-For an example of how to use <a href="https://kubernetes.io" target="_blank">Kubernets</a> navigate to our <a href="https://github.com/fetchai/agents-aea/tree/main/examples/tac_deploy" target="_blank">TAC deployment example</a>.
+For an example of how to use <a href="https://kubernetes.io" target="_blank">Kubernetes</a> navigate to our <a href="https://github.com/fetchai/agents-aea/tree/main/examples/tac_deploy" target="_blank">TAC deployment example</a>.

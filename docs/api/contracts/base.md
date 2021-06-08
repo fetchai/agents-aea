@@ -24,6 +24,7 @@ Initialize the contract.
 **Arguments**:
 
 - `contract_config`: the contract configurations.
+- `kwargs`: the keyword arguments.
 
 <a name="aea.contracts.base.Contract.id"></a>
 #### id
@@ -77,6 +78,7 @@ Load the protocol from a directory.
 **Arguments**:
 
 - `directory`: the directory to the skill package.
+- `kwargs`: the keyword arguments.
 
 **Returns**:
 
@@ -95,6 +97,7 @@ Load contract from configuration.
 **Arguments**:
 
 - `configuration`: the contract configuration.
+- `kwargs`: the keyword arguments.
 
 **Returns**:
 
@@ -140,10 +143,11 @@ to handle the contract requests manually.
 
 - `ledger_api`: the ledger apis.
 - `contract_address`: the contract address.
+- `kwargs`: the keyword arguments.
 
 **Returns**:
 
-the tx
+the tx  # noqa: DAR202
 
 <a name="aea.contracts.base.Contract.get_raw_message"></a>
 #### get`_`raw`_`message
@@ -162,10 +166,11 @@ to handle the contract requests manually.
 
 - `ledger_api`: the ledger apis.
 - `contract_address`: the contract address.
+- `kwargs`: the keyword arguments.
 
 **Returns**:
 
-the tx
+the tx  # noqa: DAR202
 
 <a name="aea.contracts.base.Contract.get_state"></a>
 #### get`_`state
@@ -184,8 +189,9 @@ to handle the contract requests manually.
 
 - `ledger_api`: the ledger apis.
 - `contract_address`: the contract address.
+- `kwargs`: the keyword arguments.
 
 **Returns**:
 
-the tx
+the tx  # noqa: DAR202
 

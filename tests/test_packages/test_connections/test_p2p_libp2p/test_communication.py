@@ -22,7 +22,7 @@ import os
 import shutil
 import tempfile
 from unittest import mock
-from unittest.mock import Mock
+from unittest.mock import Mock, call
 
 import pytest
 from aea_ledger_ethereum import EthereumCrypto
@@ -833,8 +833,12 @@ class TestP2PLibp2PReceiveEnvelope(BaseTestP2PLibp2p):
         ):
             self.multiplexer1.put(envelope)
             delivered_envelope = self.multiplexer2.get(block=True, timeout=20)
-            _mock_logger.assert_called_with(
-                "Failed to read. Exception: some error. Try reconnect to node and read again."
+            _mock_logger.assert_has_calls(
+                [
+                    call(
+                        "Failed to read. Exception: some error. Try reconnect to node and read again."
+                    )
+                ]
             )
 
         assert delivered_envelope is not None
@@ -900,6 +904,6 @@ async def test_nodeclient_pipe_connect():
     f.set_result(None)
     pipe = Mock()
     pipe.connect.return_value = f
-    node_client = NodeClient(pipe)
+    node_client = NodeClient(pipe, Mock())
     await node_client.connect()
     pipe.connect.assert_called_once()

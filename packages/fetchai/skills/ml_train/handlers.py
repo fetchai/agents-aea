@@ -129,16 +129,16 @@ class MlTradeHandler(Handler):
         :param ml_trade_dialogue: the dialogue object
         :return: None
         """
-        terms = ml_trade_msg.terms
+        proposal_terms = ml_trade_msg.terms
         self.context.logger.info(
             "received terms message from {}: terms={}".format(
-                ml_trade_msg.sender[-5:], terms.values
+                ml_trade_msg.sender[-5:], proposal_terms.values
             )
         )
 
         strategy = cast(Strategy, self.context.strategy)
-        acceptable = strategy.is_acceptable_terms(terms)
-        affordable = strategy.is_affordable_terms(terms)
+        acceptable = strategy.is_acceptable_terms(proposal_terms)
+        affordable = strategy.is_affordable_terms(proposal_terms)
         if not (acceptable and affordable):
             self.context.logger.info(
                 "rejecting, terms are not acceptable and/or affordable"
@@ -146,19 +146,8 @@ class MlTradeHandler(Handler):
             return
 
         if strategy.is_ledger_tx:
-            # construct a tx for settlement on the ledger
-            ledger_api_dialogues = cast(
-                LedgerApiDialogues, self.context.ledger_api_dialogues
-            )
-            terms_ = strategy.terms_from_proposal(ml_trade_msg.terms)
-            ml_trade_dialogue.terms = terms_
-            _, ledger_api_dialogue = ledger_api_dialogues.create(
-                counterparty=LEDGER_API_ADDRESS,
-                performative=LedgerApiMessage.Performative.GET_RAW_TRANSACTION,
-                terms=terms_,
-            )
-            ledger_api_dialogue = cast(LedgerApiDialogue, ledger_api_dialogue)
-            ledger_api_dialogue.associated_ml_trade_dialogue = ml_trade_dialogue
+            terms = strategy.terms_from_proposal(proposal_terms)
+            ml_trade_dialogue.terms = terms
             tx_behaviour = cast(
                 TransactionBehaviour, self.context.behaviours.transaction
             )
@@ -169,7 +158,7 @@ class MlTradeHandler(Handler):
                 performative=MlTradeMessage.Performative.ACCEPT,
                 target_message=ml_trade_msg,
                 tx_digest=DUMMY_DIGEST,
-                terms=terms,
+                terms=proposal_terms,
             )
             self.context.outbox.put_message(message=ml_accept)
             self.context.logger.info("sending dummy transaction digest ...")

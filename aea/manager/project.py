@@ -109,10 +109,12 @@ class Project(_Base):
         :param working_dir: the working directory
         :param public_id: the public id
         :param is_local: whether to fetch from local
-        :param is_remote whether to fetch from remote
-        :param verbosity: the logging verbosity of the CLI
+        :param is_remote: whether to fetch from remote
+        :param is_restore: whether to restore or not
+        :param cli_verbosity: the logging verbosity of the CLI
         :param registry_path: the path to the registry locally
         :param skip_consistency_check: consistency checks flag
+        :return: project
         """
         ctx = Context(
             cwd=working_dir, verbosity=cli_verbosity, registry_path=registry_path
@@ -131,9 +133,14 @@ class Project(_Base):
         rmtree(self.path)
 
     @property
+    def agent_config(self) -> AgentConfig:
+        """Get the agent configuration."""
+        return self._get_agent_config(self.path)
+
+    @property
     def builder(self) -> AEABuilder:
         """Get builder instance."""
-        return self._get_builder(self._get_agent_config(self.path), self.path)
+        return self._get_builder(self.agent_config, self.path)
 
     def check(self) -> None:
         """Check we can still construct an AEA from the project with builder.build."""
@@ -167,8 +174,6 @@ class AgentAlias(_Base):
         Set agent config instance constructed from json data.
 
         :param json_data: agent config json data
-
-        :return: None
         """
         self._agent_config = AEABuilder.loader.load_agent_config_from_json(json_data)
         self._ensure_private_keys()
@@ -225,6 +230,7 @@ class AgentAlias(_Base):
         :param ledger: the ledger id
         :param replace: whether or not to replace an existing key
         :param is_connection: whether or not it is a connection key
+        :return: file path to private key
         """
         file_name = (
             f"{ledger}_connection_private.key"
@@ -301,7 +307,9 @@ class AgentAlias(_Base):
                 )
 
         overrides["component_configurations"] = component_configurations
-        return self.agent_config_manager.update_config(overrides)
+        self.agent_config_manager.update_config(overrides)
+        if agent_overrides:
+            self._ensure_private_keys()
 
     @property
     def agent_config_manager(self) -> AgentConfigManager:

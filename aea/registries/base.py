@@ -196,8 +196,6 @@ class AgentComponentRegistry(Registry[ComponentId, Component]):
         Instantiate the registry.
 
         :param kwargs: kwargs
-
-        :return: None
         """
         super().__init__(**kwargs)
         self._components_by_type: Dict[ComponentType, Dict[PublicId, Component]] = {}
@@ -234,7 +232,6 @@ class AgentComponentRegistry(Registry[ComponentId, Component]):
 
         :param component_id: the component id
         :param component: the component to register
-        :return: None
         """
         self._components_by_type.setdefault(component_id.component_type, {})[
             component_id.public_id
@@ -290,7 +287,7 @@ class AgentComponentRegistry(Registry[ComponentId, Component]):
         """
         Fetch all the components.
 
-        :return the list of registered components.
+        :return: the list of registered components.
         """
         return [
             component
@@ -303,7 +300,7 @@ class AgentComponentRegistry(Registry[ComponentId, Component]):
         Fetch all the components by a given type..
 
         :param component_type: a component type
-        :return the list of registered components of a given type.
+        :return: the list of registered components of a given type.
         """
         return list(self._components_by_type.get(component_type, {}).values())
 
@@ -312,18 +309,10 @@ class AgentComponentRegistry(Registry[ComponentId, Component]):
         return self._registered_keys
 
     def setup(self) -> None:
-        """
-        Set up the registry.
-
-        :return: None
-        """
+        """Set up the registry."""
 
     def teardown(self) -> None:
-        """
-        Teardown the registry.
-
-        :return: None
-        """
+        """Teardown the registry."""
 
 
 class ComponentRegistry(
@@ -338,8 +327,6 @@ class ComponentRegistry(
         Instantiate the registry.
 
         :param kwargs: kwargs
-
-        :return: None
         """
         super().__init__(**kwargs)
         self._items: PublicIdRegistry[
@@ -359,7 +346,6 @@ class ComponentRegistry(
         :param item_id: a pair (skill id, item name).
         :param item: the item to register.
         :param is_dynamically_added: whether or not the item is dynamically added.
-        :return: None
         :raises: ValueError if an item is already registered with that item id.
         """
         skill_id = item_id[0]
@@ -467,11 +453,7 @@ class ComponentRegistry(
         return result
 
     def setup(self) -> None:
-        """
-        Set up the items in the registry.
-
-        :return: None
-        """
+        """Set up the items in the registry."""
         for item in self.fetch_all():
             if item.context.is_active:
                 self.logger.debug(
@@ -493,11 +475,7 @@ class ComponentRegistry(
                 )
 
     def teardown(self) -> None:
-        """
-        Teardown the registry.
-
-        :return: None
-        """
+        """Teardown the registry."""
         for name_to_items in self._items.fetch_all():
             for _, item in name_to_items.items():
                 self.logger.debug(
@@ -528,8 +506,6 @@ class HandlerRegistry(ComponentRegistry[Handler]):
         Instantiate the registry.
 
         :param kwargs: kwargs
-
-        :return: None
         """
         super().__init__(**kwargs)
         # nested public id registries; one for protocol ids, one for skill ids
@@ -549,7 +525,6 @@ class HandlerRegistry(ComponentRegistry[Handler]):
         :param item_id: the item id.
         :param item: the handler.
         :param is_dynamically_added: whether or not the item is dynamically added.
-        :return: None
         :raises ValueError: if the protocol is None, or an item with pair (skill_id, protocol_id_ already exists.
         """
         skill_id = item_id[0]
@@ -587,7 +562,7 @@ class HandlerRegistry(ComponentRegistry[Handler]):
         Unregister a item.
 
         :param item_id: a pair (skill id, item name).
-        :return: None
+        :return: the unregistered handler
         :raises: ValueError if no item is registered with that item id.
         """
         skill_id = item_id[0]

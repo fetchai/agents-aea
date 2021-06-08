@@ -29,15 +29,9 @@ from aea_ledger_fetchai import FetchAICrypto
 
 from aea.cli.utils.config import dump_item_config
 from aea.helpers.base import CertRequest
-from aea.test_tools.test_cases import AEATestCaseEmpty
+from aea.test_tools.test_cases import AEATestCaseEmpty, _get_password_option_args
 
-from tests.conftest import (
-    CUR_PATH,
-    ETHEREUM_PRIVATE_KEY_FILE,
-    ETHEREUM_PRIVATE_KEY_PATH,
-    FETCHAI_PRIVATE_KEY_FILE,
-    FETCHAI_PRIVATE_KEY_PATH,
-)
+from tests.conftest import CUR_PATH, ETHEREUM_PRIVATE_KEY_FILE, FETCHAI_PRIVATE_KEY_FILE
 from tests.data.dummy_connection.connection import DummyConnection
 
 
@@ -101,19 +95,25 @@ class TestIssueCertificatesPositive(BaseTestIssueCertificates):
             [cls.cert_request_1, cls.cert_request_2], DummyConnection.connection_id.name
         )
 
-        # add fetchai key and connection key
-        shutil.copy(
-            FETCHAI_PRIVATE_KEY_PATH,
-            os.path.join(cls.current_agent_context, FETCHAI_PRIVATE_KEY_FILE),
-        )
-        cls.add_private_key()
-        cls.add_private_key(connection=True)
-
-    def test_issue_certificate(self):
+    def test_issue_certificate(self, password_or_none):
         """Test 'aea issue-certificates' in case of success."""
-        result = self.run_cli_command("issue-certificates", cwd=self._get_cwd())
+        # setup: add private key with password
+        self.generate_private_key(password=password_or_none)
+        self.add_private_key(password=password_or_none)
+        self.add_private_key(connection=True, password=password_or_none)
+
+        # issue certificates and check
+        password_options = _get_password_option_args(password_or_none)
+        result = self.run_cli_command(
+            "issue-certificates", *password_options, cwd=self._get_cwd()
+        )
         self._check_signature(self.cert_id_1, self.expected_path_1, result.stdout)
         self._check_signature(self.cert_id_2, self.expected_path_2, result.stdout)
+
+        # teardown: remove private key
+        Path(self._get_cwd(), FETCHAI_PRIVATE_KEY_FILE).unlink()
+        self.remove_private_key()
+        self.remove_private_key(connection=True)
 
     def _check_signature(self, cert_id, filename, stdout):
         """Check signature has been generated correctly."""
@@ -176,26 +176,34 @@ class TestIssueCertificatesWithOverride(TestIssueCertificatesPositive):
         new_cert_requests = f"[{json_3}, {json_4}]"
         cls.set_config(dotted_path, new_cert_requests, type_="list")
 
-        # add ethereum key and connection key
-        shutil.copy(
-            ETHEREUM_PRIVATE_KEY_PATH,
-            os.path.join(cls.current_agent_context, ETHEREUM_PRIVATE_KEY_FILE),
+    def test_issue_certificate(self, password_or_none):
+        """Test 'aea issue-certificates' in case of success."""
+        # setup: add private key with password
+        ledger_id = EthereumCrypto.identifier
+        self.generate_private_key(
+            ledger_id, ETHEREUM_PRIVATE_KEY_FILE, password=password_or_none
         )
-        cls.add_private_key(
-            ledger_api_id=EthereumCrypto.identifier,
-            private_key_filepath=ETHEREUM_PRIVATE_KEY_FILE,
+        self.add_private_key(
+            ledger_id, ETHEREUM_PRIVATE_KEY_FILE, password=password_or_none
         )
-        cls.add_private_key(
-            ledger_api_id=EthereumCrypto.identifier,
-            private_key_filepath=ETHEREUM_PRIVATE_KEY_FILE,
+        self.add_private_key(
+            ledger_id,
+            ETHEREUM_PRIVATE_KEY_FILE,
             connection=True,
+            password=password_or_none,
         )
 
-    def test_issue_certificate(self):
-        """Test 'aea issue-certificates' in case of success."""
-        result = self.run_cli_command("issue-certificates", cwd=self._get_cwd())
+        password_options = _get_password_option_args(password_or_none)
+        result = self.run_cli_command(
+            "issue-certificates", *password_options, cwd=self._get_cwd()
+        )
         self._check_signature(self.cert_id_3, self.expected_path_3, result.stdout)
         self._check_signature(self.cert_id_4, self.expected_path_4, result.stdout)
+
+        # teardown: remove private key
+        Path(self._get_cwd(), ETHEREUM_PRIVATE_KEY_FILE).unlink()
+        self.remove_private_key(ledger_id)
+        self.remove_private_key(ledger_id, connection=True)
 
 
 class TestIssueCertificatesWrongConnectionKey(BaseTestIssueCertificates):

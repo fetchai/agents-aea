@@ -41,6 +41,9 @@ class _AEAYamlLoader(yaml.SafeLoader):
         Initialize the AEAYamlLoader.
 
         It adds a YAML Loader constructor to use 'OderedDict' to load the files.
+
+        :param args: the positional arguments.
+        :param kwargs: the keyword arguments.
         """
         super().__init__(*args, **kwargs)
         _AEAYamlLoader.add_constructor(
@@ -71,6 +74,9 @@ class _AEAYamlDumper(yaml.SafeDumper):
         Initialize the AEAYamlDumper.
 
         It adds a YAML Dumper representer to use 'OderedDict' to dump the files.
+
+        :param args: the positional arguments.
+        :param kwargs: the keyword arguments.
         """
         super().__init__(*args, **kwargs)
         _AEAYamlDumper.add_representer(OrderedDict, self._dict_representer)
@@ -110,7 +116,6 @@ def yaml_dump(data: Dict, stream: Optional[TextIO] = None) -> None:
 
     :param data: the data to write.
     :param stream: (optional) the file to write on.
-    :return: None
     """
     yaml.dump(data, stream=stream, Dumper=_AEAYamlDumper)  # nosec
 
@@ -121,6 +126,5 @@ def yaml_dump_all(data: Sequence[Dict], stream: Optional[TextIO] = None) -> None
 
     :param data: the data to write.
     :param stream: (optional) the file to write on.
-    :return: None
     """
     yaml.dump_all(data, stream=stream, Dumper=_AEAYamlDumper)  # nosec

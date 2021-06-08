@@ -27,10 +27,6 @@ Must follow: https://tools.ietf.org/html/rfc3986.html
 
 - `uri_raw`: the raw form uri
 
-**Raises**:
-
-- `ValueError`: if uri_raw is not RFC3986 compliant
-
 <a name="aea.mail.base.URI.scheme"></a>
 #### scheme
 

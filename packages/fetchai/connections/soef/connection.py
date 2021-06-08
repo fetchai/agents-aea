@@ -66,7 +66,7 @@ from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.soef")
 
-PUBLIC_ID = PublicId.from_str("fetchai/soef:0.24.0")
+PUBLIC_ID = PublicId.from_str("fetchai/soef:0.25.0")
 
 NOT_SPECIFIED = object()
 
@@ -214,6 +214,7 @@ class SOEFChannel:
         self,
         address: Address,
         api_key: str,
+        is_https: bool,
         soef_addr: str,
         soef_port: int,
         data_dir: str,
@@ -242,9 +243,14 @@ class SOEFChannel:
 
         self.address = address
         self.api_key = api_key
+        self.is_https = is_https
         self.soef_addr = soef_addr
         self.soef_port = soef_port
-        self.base_url = "https://{}:{}".format(soef_addr, soef_port)
+        self.base_url = (
+            f"https://{soef_addr}:{soef_port}"
+            if self.is_https
+            else f"http://{soef_addr}:{soef_port}"
+        )
         self.oef_search_dialogues = OefSearchDialogues()
         self.connection_check_timeout = connection_check_timeout
         self.connection_check_max_retries = connection_check_max_retries
@@ -1286,21 +1292,29 @@ class SOEFConnection(Connection):
                 self.DEFAULT_CONNECTION_CHECK_MAX_RETRIES,
             ),
         )
+        is_https = cast(bool, self.configuration.config.get("is_https", True))
         soef_addr = cast(str, self.configuration.config.get("soef_addr"))
         soef_port = cast(int, self.configuration.config.get("soef_port"))
         chain_identifier = cast(str, self.configuration.config.get("chain_identifier"))
         token_storage_path = cast(
             Optional[str], self.configuration.config.get("token_storage_path")
         )
-        if api_key is None or soef_addr is None or soef_port is None:  # pragma: nocover
-            raise ValueError("api_key, soef_addr and soef_port must be set!")
-
+        not_none_params = {
+            "api_key": api_key,
+            "soef_addr": soef_addr,
+            "soef_port": soef_port,
+        }
+        for param_name, param_value in not_none_params.items():  # pragma: nocover
+            if param_value is None:
+                raise ValueError(f"{param_name} must be set!")
         self.api_key = api_key
+        self.is_https = is_https
         self.soef_addr = soef_addr
         self.soef_port = soef_port
         self.channel = SOEFChannel(
             self.address,
             self.api_key,
+            self.is_https,
             self.soef_addr,
             self.soef_port,
             data_dir=self.data_dir,

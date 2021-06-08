@@ -27,8 +27,7 @@ import (
 	"github.com/multiformats/go-multiaddr"
 	"github.com/rs/zerolog"
 
-	"libp2p_node/aea"
-	"libp2p_node/dht/dhtnode"
+	acn "libp2p_node/acn"
 	utils "libp2p_node/utils"
 )
 
@@ -48,9 +47,9 @@ func IdentityFromFetchAIKey(key string) Option {
 }
 
 // RegisterAgentAddress for dhtpeer.New
-func RegisterAgentAddress(record *aea.AgentRecord, isReady func() bool) Option {
+func RegisterAgentAddress(record *acn.AgentRecord, isReady func() bool) Option {
 	return func(dhtPeer *DHTPeer) error {
-		pbRecord := &dhtnode.AgentRecord{}
+		pbRecord := &acn.AgentRecord{}
 		pbRecord.Address = record.Address
 		pbRecord.PublicKey = record.PublicKey
 		pbRecord.PeerPublicKey = record.PeerPublicKey

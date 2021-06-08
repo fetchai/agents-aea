@@ -21,7 +21,9 @@ This class implements the object that holds the resources of an AEA.
 
 Instantiate the resources.
 
-:return None
+**Arguments**:
+
+- `agent_name`: the name of the agent
 
 <a name="aea.registries.resources.Resources.agent_name"></a>
 #### agent`_`name
@@ -95,10 +97,6 @@ Add a protocol to the set of resources.
 
 - `protocol`: a protocol
 
-**Returns**:
-
-None
-
 <a name="aea.registries.resources.Resources.get_protocol"></a>
 #### get`_`protocol
 
@@ -159,10 +157,6 @@ Remove a protocol from the set of resources.
 
 - `protocol_id`: the protocol id for the protocol to be removed.
 
-**Returns**:
-
-None
-
 <a name="aea.registries.resources.Resources.add_contract"></a>
 #### add`_`contract
 
@@ -175,10 +169,6 @@ Add a contract to the set of resources.
 **Arguments**:
 
 - `contract`: a contract
-
-**Returns**:
-
-None
 
 <a name="aea.registries.resources.Resources.get_contract"></a>
 #### get`_`contract
@@ -223,10 +213,6 @@ Remove a contract from the set of resources.
 
 - `contract_id`: the contract id for the contract to be removed.
 
-**Returns**:
-
-None
-
 <a name="aea.registries.resources.Resources.add_connection"></a>
 #### add`_`connection
 
@@ -239,10 +225,6 @@ Add a connection to the set of resources.
 **Arguments**:
 
 - `connection`: a connection
-
-**Returns**:
-
-None
 
 <a name="aea.registries.resources.Resources.get_connection"></a>
 #### get`_`connection
@@ -287,10 +269,6 @@ Remove a connection from the set of resources.
 
 - `connection_id`: the connection id for the connection to be removed.
 
-**Returns**:
-
-None
-
 <a name="aea.registries.resources.Resources.add_skill"></a>
 #### add`_`skill
 
@@ -303,10 +281,6 @@ Add a skill to the set of resources.
 **Arguments**:
 
 - `skill`: a skill
-
-**Returns**:
-
-None
 
 <a name="aea.registries.resources.Resources.get_skill"></a>
 #### get`_`skill
@@ -350,10 +324,6 @@ Remove a skill from the set of resources.
 **Arguments**:
 
 - `skill_id`: the skill id for the skill to be removed.
-
-**Returns**:
-
-None
 
 <a name="aea.registries.resources.Resources.get_handler"></a>
 #### get`_`handler
@@ -462,10 +432,6 @@ Set up the resources.
 
 Calls setup on all resources.
 
-**Returns**:
-
-None
-
 <a name="aea.registries.resources.Resources.teardown"></a>
 #### teardown
 
@@ -476,8 +442,4 @@ None
 Teardown the resources.
 
 Calls teardown on all resources.
-
-**Returns**:
-
-None
 

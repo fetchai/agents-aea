@@ -63,6 +63,10 @@ Construct a MultiAddr object from its string format
 
 - `maddr`: multiaddress string
 
+**Returns**:
+
+multiaddress object
+
 <a name="aea.helpers.multiaddr.base.MultiAddr.public_key"></a>
 #### public`_`key
 

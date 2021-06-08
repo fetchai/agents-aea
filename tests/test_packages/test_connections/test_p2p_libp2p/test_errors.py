@@ -16,6 +16,7 @@
 #   limitations under the License.
 #
 # ------------------------------------------------------------------------------
+
 """This test module contains Negative tests for Libp2p connection."""
 import asyncio
 import os
@@ -34,6 +35,7 @@ from aea.crypto.registries import make_crypto
 from aea.identity.base import Identity
 from aea.multiplexer import Multiplexer
 
+from packages.fetchai.connections.p2p_libp2p.acn_message_pb2 import Status
 from packages.fetchai.connections.p2p_libp2p.connection import (
     LIBP2P_NODE_MODULE_NAME,
     Libp2pNode,
@@ -244,7 +246,6 @@ async def test_reconnect_on_write_failed():
         con = _make_libp2p_connection(
             port=port, host=host, data_dir=data_dir, build_directory=data_dir
         )
-
     node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
     con.node = node
     node.pipe = Mock()
@@ -256,6 +257,8 @@ async def test_reconnect_on_write_failed():
         con, "_restart_node", return_value=f
     ) as restart_mock, patch.object(
         con, "_ensure_valid_envelope_for_external_comms"
+    ), patch.object(
+        con._node_client, "make_acn_envelope_message", return_value=b"some_data"
     ), pytest.raises(
         Exception, match="expected"
     ):
@@ -287,9 +290,16 @@ async def test_reconnect_on_write_failed_reconnect_pipe():
     node.pipe.write = Mock(side_effect=[Exception("expected"), f])
 
     con._node_client = node.get_client()
-
+    status_ok = Mock()
+    status_ok.code = Status.SUCCESS
+    status_ok_future = Future()
+    status_ok_future.set_result(status_ok)
     with patch.object(con, "_ensure_valid_envelope_for_external_comms"), patch.object(
         node, "is_proccess_running", return_value=True
+    ), patch.object(
+        con._node_client, "make_acn_envelope_message", return_value=b"some_data"
+    ), patch.object(
+        con._node_client, "wait_for_status", lambda: status_ok_future
     ):
         await con._send_envelope_with_node_client(Mock())
 
@@ -370,3 +380,89 @@ async def test_node_stopped_callback():
         await con.node.stop()
         await asyncio.sleep(2)
         con.node.logger.error.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_send_acn_confirm_failed():
+    """Test nodeclient send fails on confirmation from other point ."""
+    node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
+    f = Future()
+    f.set_result(None)
+    node.pipe = Mock()
+    node.pipe.connect = Mock(return_value=f)
+    node.pipe.write = Mock(return_value=f)
+
+    node_client = node.get_client()
+    status = Mock()
+    status.code = Status.ERROR_GENERIC
+    status_future = Future()
+    status_future.set_result(status)
+    with patch.object(
+        node_client, "make_acn_envelope_message", return_value=b"some_data"
+    ), patch.object(
+        node_client, "wait_for_status", lambda: status_future
+    ), pytest.raises(
+        Exception, match=r"failed to send envelope. got error confirmation"
+    ):
+        await node_client.send_envelope(Mock())
+
+
+@pytest.mark.asyncio
+async def test_send_acn_confirm_timeout():
+    """Test nodeclient send fails on timeout."""
+    node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
+    f = Future()
+    f.set_result(None)
+    node.pipe = Mock()
+    node.pipe.connect = Mock(return_value=f)
+    node.pipe.write = Mock(return_value=f)
+
+    node_client = node.get_client()
+    node_client.ACN_ACK_TIMEOUT = 0.5
+    with patch.object(
+        node_client, "make_acn_envelope_message", return_value=b"some_data"
+    ), patch.object(
+        node_client, "wait_for_status", side_effect=asyncio.TimeoutError()
+    ), pytest.raises(
+        Exception, match=r"acn status await timeout!"
+    ):
+        await node_client.send_envelope(Mock())
+
+
+@pytest.mark.asyncio
+async def test_acn_decode_error_on_read():
+    """Test nodeclient send fails on read."""
+    node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
+    f = Future()
+    f.set_result(b"some_data")
+    node.pipe = Mock()
+    node.pipe.connect = Mock(return_value=f)
+
+    node_client = node.get_client()
+    node_client.ACN_ACK_TIMEOUT = 0.5
+
+    with patch.object(node_client, "_read", lambda: f), patch.object(
+        node_client, "write_acn_status_error", return_value=f
+    ) as mocked_write_acn_status_error, pytest.raises(
+        Exception, match=r"Error parsing acn message:"
+    ):
+        await node_client.read_envelope()
+
+    mocked_write_acn_status_error.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_write_acn_error():
+    """Test nodeclient write acn error."""
+    node = Libp2pNode(Mock(), Mock(), "tmp", "tmp")
+    f = Future()
+    f.set_result(b"some_data")
+    node.pipe = Mock()
+    node.pipe.connect = Mock(return_value=f)
+
+    node_client = node.get_client()
+
+    with patch.object(node_client, "_write", return_value=f) as write_mock:
+        await node_client.write_acn_status_error("some error")
+
+    write_mock.assert_called_once()
