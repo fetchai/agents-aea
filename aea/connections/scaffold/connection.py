@@ -45,11 +45,15 @@ class MyScaffoldAsyncConnection(Connection):
         The configuration must be specified if and only if the following
         parameters are None: connection_id, excluded_protocols or restricted_to_protocols.
 
-        :param configuration: the connection configuration.
-        :param identity: the identity object held by the agent.
-        :param crypto_store: the crypto store for encrypted communication.
-        :param restricted_to_protocols: the set of protocols ids of the only supported protocols for this connection.
-        :param excluded_protocols: the set of protocols ids that we want to exclude for this connection.
+        Possible keyword arguments:
+        - configuration: the connection configuration.
+        - data_dir: directory where to put local files.
+        - identity: the identity object held by the agent.
+        - crypto_store: the crypto store for encrypted communication.
+        - restricted_to_protocols: the set of protocols ids of the only supported protocols for this connection.
+        - excluded_protocols: the set of protocols ids that we want to exclude for this connection.
+
+        :param kwargs: keyword arguments passed to component base
         """
         super().__init__(**kwargs)  # pragma: no cover
 
@@ -74,7 +78,6 @@ class MyScaffoldAsyncConnection(Connection):
         Send an envelope.
 
         :param envelope: the envelope to send.
-        :return: None
         """
         raise NotImplementedError  # pragma: no cover
 
@@ -82,7 +85,9 @@ class MyScaffoldAsyncConnection(Connection):
         """
         Receive an envelope. Blocking.
 
-        :return: the envelope received, or None.
+        :param args: arguments to receive
+        :param kwargs: keyword arguments to receive
+        :return: the envelope received, if present.  # noqa: DAR202
         """
         raise NotImplementedError  # pragma: no cover
 
@@ -101,11 +106,16 @@ class MyScaffoldSyncConnection(BaseSyncConnection):
         The configuration must be specified if and only if the following
         parameters are None: connection_id, excluded_protocols or restricted_to_protocols.
 
-        :param configuration: the connection configuration.
-        :param identity: the identity object held by the agent.
-        :param crypto_store: the crypto store for encrypted communication.
-        :param restricted_to_protocols: the set of protocols ids of the only supported protocols for this connection.
-        :param excluded_protocols: the set of protocols ids that we want to exclude for this connection.
+        Possible arguments:
+        - configuration: the connection configuration.
+        - data_dir: directory where to put local files.
+        - identity: the identity object held by the agent.
+        - crypto_store: the crypto store for encrypted communication.
+        - restricted_to_protocols: the set of protocols ids of the only supported protocols for this connection.
+        - excluded_protocols: the set of protocols ids that we want to exclude for this connection.
+
+        :param args: arguments passed to component base
+        :param kwargs: keyword arguments passed to component base
         """
         super().__init__(*args, **kwargs)
         raise NotImplementedError
@@ -141,7 +151,6 @@ class MyScaffoldSyncConnection(BaseSyncConnection):
         Send an envelope.
 
         :param envelope: the envelope to send.
-        :return: None.
         """
         raise NotImplementedError  # pragma: no cover
 

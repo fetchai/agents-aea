@@ -78,9 +78,11 @@ class BaseRuntime(Runnable, WithLogger):
         Init runtime.
 
         :param agent: Agent to run.
+        :param multiplexer_options: options for the multiplexer.
         :param loop_mode: agent main loop mode.
         :param loop: optional event loop. if not provided a new one will be created.
-        :return: None
+        :param threaded: if True, run in threaded mode, else async
+        :param task_manager_mode: mode of the task manager.
         """
         Runnable.__init__(self, threaded=threaded, loop=loop if not threaded else None)
         logger = get_logger(__name__, agent.name)
@@ -272,9 +274,10 @@ class AsyncRuntime(BaseRuntime):
         Init runtime.
 
         :param agent: Agent to run.
+        :param multiplexer_options: options for the multiplexer.
         :param loop_mode: agent main loop mode.
         :param loop: optional event loop. if not provided a new one will be created.
-        :return: None
+        :param threaded: if True, run in threaded mode, else async
         """
         super().__init__(
             agent=agent,

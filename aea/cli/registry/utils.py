@@ -69,6 +69,8 @@ def request_api(
     :param data: dict POST data.
     :param is_auth: bool is auth required (default False).
     :param files: optional dict {file_field_name: open(filepath, "rb")} (default None).
+    :param handle_400: whether or not to handle 400 response
+    :param return_code: whether or not to return return_code
 
     :return: dict response from Registry API or tuple (dict response, status code).
     """
@@ -156,8 +158,6 @@ def extract(source: str, target: str) -> None:
 
     :param source: str path to a source tarball file.
     :param target: str path to target directory.
-
-    :return: None
     """
     if source.endswith("tar.gz"):
         tar = tarfile.open(source, "r:gz")
@@ -200,7 +200,6 @@ def check_is_author_logged_in(author_name: str) -> None:
     :param author_name: str item author username.
 
     :raise ClickException: if username and author's name are not equal.
-    :return: None.
     """
     resp = cast(JSONLike, request_api("GET", "/rest-auth/user/", is_auth=True))
     if not author_name == resp["username"]:

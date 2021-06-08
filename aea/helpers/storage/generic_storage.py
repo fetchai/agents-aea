@@ -185,8 +185,6 @@ class Storage(Runnable):
         :param storage_uri: configuration string for storage.
         :param loop: asyncio event loop to use.
         :param threaded: bool. start in thread if True.
-
-        :return: None
         """
         super().__init__(loop=loop, threaded=threaded)
         self._storage_uri = storage_uri

@@ -128,7 +128,6 @@ def update_agent_config(ctx: Context) -> None:
     - update author name if it is different
 
     :param ctx: the context.
-    :return: None
     """
     update_aea_version_range(ctx.agent_config)
     cli_author = ctx.config.get("cli_author")
@@ -145,7 +144,6 @@ def update_aea_version_in_nonvendor_packages(cwd: str) -> None:
     Update aea_version in non-vendor packages.
 
     :param cwd: the current working directory.
-    :return: None
     """
     for package_path in get_non_vendor_package_path(Path(cwd)):
         package_type = PackageType(package_path.parent.name[:-1])
@@ -313,11 +311,7 @@ class ProjectUpgrader:
         return True
 
     def _unpack_fetched_agent(self) -> None:
-        """
-        Unpack fetched agent in current directory and remove temporary directory.
-
-        :return: None
-        """
+        """Unpack fetched agent in current directory and remove temporary directory."""
         current_path = Path(self.ctx.cwd)
         fetched_agent_dir = current_path / self._TEMP_ALIAS
         for subpath in fetched_agent_dir.iterdir():
@@ -608,6 +602,10 @@ def _try_to_confirm(message: str, yes_by_default: bool) -> bool:
     In particular:
     - if "yes_by_default" is True, never prompt and return True.
     - if "yes_by_default" is False, ask to the user.
+
+    :param message: the message
+    :param yes_by_default: bool to override confirm
+    :return: result
     """
     return click.confirm(message) if not yes_by_default else True
 
@@ -620,7 +618,6 @@ def upgrade_item(ctx: Context, item_type: str, item_public_id: PublicId) -> None
     :param ctx: Context object.
     :param item_type: the item type.
     :param item_public_id: the item public id.
-    :return: None
     """
     try:
         with remove_unused_component_configurations(ctx):

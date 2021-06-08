@@ -17,10 +17,6 @@ Try validate a private key path.
 - `ledger_id`: one of 'fetchai', 'ethereum'
 - `private_key_path`: the path to the private key.
 - `password`: the password to encrypt/decrypt the private key.
-
-**Returns**:
-
-None
 :raises: ValueError if the identifier is invalid.
 
 <a name="aea.crypto.helpers.create_private_key"></a>
@@ -37,10 +33,6 @@ Create a private key for the specified ledger identifier.
 - `ledger_id`: the ledger identifier.
 - `private_key_file`: the private key file.
 - `password`: the password to encrypt/decrypt the private key.
-
-**Returns**:
-
-None
 :raises: ValueError if the identifier is invalid.
 
 <a name="aea.crypto.helpers.try_generate_testnet_wealth"></a>
@@ -59,10 +51,6 @@ Try generate wealth on a testnet.
 - `url`: the url
 - `_sync`: whether to wait to sync or not; currently unused
 
-**Returns**:
-
-None
-
 <a name="aea.crypto.helpers.private_key_verify"></a>
 #### private`_`key`_`verify
 
@@ -77,10 +65,6 @@ Check key.
 - `aea_conf`: AgentConfig
 - `aea_project_path`: Path, where project placed.
 - `password`: the password to encrypt/decrypt the private key.
-
-**Returns**:
-
-None
 
 <a name="aea.crypto.helpers.make_certificate"></a>
 #### make`_`certificate

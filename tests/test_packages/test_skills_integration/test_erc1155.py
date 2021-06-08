@@ -59,7 +59,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseManyFlaky, UseGanache):
         default_routing = {
             "fetchai/ledger_api:1.0.0": "fetchai/ledger:0.18.0",
             "fetchai/contract_api:1.0.0": "fetchai/ledger:0.18.0",
-            "fetchai/oef_search:1.0.0": "fetchai/soef:0.24.0",
+            "fetchai/oef_search:1.0.0": "fetchai/soef:0.25.0",
         }
 
         # generate random location
@@ -70,10 +70,10 @@ class TestERCSkillsEthereumLedger(AEATestCaseManyFlaky, UseGanache):
 
         # add packages for agent one
         self.set_agent_context(deploy_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.23.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.24.0")
         self.add_item("connection", "fetchai/ledger:0.18.0")
-        self.add_item("connection", "fetchai/soef:0.24.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.23.0")
+        self.add_item("connection", "fetchai/soef:0.25.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.24.0")
         self.set_config("agent.default_ledger", EthereumCrypto.identifier)
         self.nested_set_config(
             "agent.required_ledgers",
@@ -81,7 +81,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseManyFlaky, UseGanache):
         )
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
-        self.add_item("skill", "fetchai/erc1155_deploy:0.28.0")
+        self.add_item("skill", "fetchai/erc1155_deploy:0.29.0")
 
         self.generate_private_key(EthereumCrypto.identifier)
         self.add_private_key(EthereumCrypto.identifier, ETHEREUM_PRIVATE_KEY_FILE)
@@ -125,7 +125,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseManyFlaky, UseGanache):
         self.nested_set_config(setting_path, location)
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/erc1155_deployer:0.31.0", deploy_aea_name
+            "fetchai/erc1155_deployer:0.32.0", deploy_aea_name
         )
         assert (
             diff == []
@@ -133,10 +133,10 @@ class TestERCSkillsEthereumLedger(AEATestCaseManyFlaky, UseGanache):
 
         # add packages for agent two
         self.set_agent_context(client_aea_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.23.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.24.0")
         self.add_item("connection", "fetchai/ledger:0.18.0")
-        self.add_item("connection", "fetchai/soef:0.24.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.23.0")
+        self.add_item("connection", "fetchai/soef:0.25.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.24.0")
         self.set_config("agent.default_ledger", EthereumCrypto.identifier)
         self.nested_set_config(
             "agent.required_ledgers",
@@ -144,7 +144,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseManyFlaky, UseGanache):
         )
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
-        self.add_item("skill", "fetchai/erc1155_client:0.26.0")
+        self.add_item("skill", "fetchai/erc1155_client:0.27.0")
 
         self.generate_private_key(EthereumCrypto.identifier)
         self.add_private_key(EthereumCrypto.identifier, ETHEREUM_PRIVATE_KEY_FILE)
@@ -187,7 +187,7 @@ class TestERCSkillsEthereumLedger(AEATestCaseManyFlaky, UseGanache):
         self.nested_set_config(setting_path, location)
 
         diff = self.difference_to_fetched_agent(
-            "fetchai/erc1155_client:0.31.0", client_aea_name
+            "fetchai/erc1155_client:0.32.0", client_aea_name
         )
         assert (
             diff == []

@@ -186,8 +186,6 @@ def _process_envelopes(
     :param outbox: an outbox object.
     :param dialogues: the dialogues object.
     :param message_class: the message class.
-
-    :return: None.
     """
     envelope = _try_construct_envelope(agent_name, dialogues, message_class)
     if envelope is None:

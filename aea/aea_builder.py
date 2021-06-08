@@ -70,6 +70,7 @@ from aea.configurations.constants import (
     STATE_UPDATE_PROTOCOL,
     _FETCHAI_IDENTIFIER,
 )
+from aea.configurations.data_types import PackageIdPrefix
 from aea.configurations.loader import ConfigLoader, load_component_configuration
 from aea.configurations.manager import (
     AgentConfigManager,
@@ -116,9 +117,7 @@ class _DependenciesManager:
         self._all_dependencies_by_type = (
             {}
         )  # type: Dict[ComponentType, Dict[ComponentId, ComponentConfiguration]]
-        self._prefix_to_components = (
-            {}
-        )  # type: Dict[Tuple[ComponentType, str, str], Set[ComponentId]]
+        self._prefix_to_components = {}  # type: Dict[PackageIdPrefix, Set[ComponentId]]
         self._inverse_dependency_graph = {}  # type: Dict[ComponentId, Set[ComponentId]]
 
         self.agent_pypi_dependencies: Dependencies = {}
@@ -174,10 +173,9 @@ class _DependenciesManager:
 
     def add_component(self, configuration: ComponentConfiguration) -> None:
         """
-        Add a component to the dependency manager..
+        Add a component to the dependency manager.
 
         :param configuration: the component configuration to add.
-        :return: None
         """
         # add to main index
         self._dependencies[configuration.component_id] = configuration
@@ -199,7 +197,7 @@ class _DependenciesManager:
         """
         Remove a component.
 
-        :return None
+        :param component_id: the component id
         :raises ValueError: if some component depends on this package.
         """
         if component_id not in self.all_dependencies:
@@ -333,6 +331,8 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         Initialize the builder.
 
         :param with_default_packages: add the default packages.
+        :param registry_dir: the registry directory.
+        :param build_dir_root: the root of the build directory.
         """
         WithLogger.__init__(self, logger=_default_logger)
         self.registry_dir = os.path.join(os.getcwd(), registry_dir)
@@ -351,7 +351,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
             - component instances
 
         :param is_full_reset: whether it is a full reset or not.
-        :return: None
         """
         self._reset(is_full_reset)
 
@@ -360,7 +359,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         Reset the builder (private usage).
 
         :param is_full_reset: whether it is a full reset or not.
-        :return: None.
         """
         self._name: Optional[str] = None
         self._private_key_paths: Dict[str, Optional[str]] = {}
@@ -597,9 +595,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         self, connection_exception_policy: Optional[ExceptionPolicyEnum]
     ) -> "AEABuilder":  # pragma: nocover
         """
-        Set skill exception policy.
+        Set connection exception policy.
 
-        :param skill_exception_policy: the policy
+        :param connection_exception_policy: the policy
 
         :return: self
         """
@@ -679,7 +677,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         """
         Set the storage uri.
 
-        :param storage uri:  storage uri
+        :param storage_uri: storage uri
         :return: self
         """
         self._storage_uri = storage_uri
@@ -755,7 +753,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         Check if a component can be removed.
 
         :param component_id: the component id.
-        :return: None
         :raises ValueError: if the component is already present.
         """
         if component_id not in self._package_dependency_manager.all_dependencies:
@@ -770,7 +767,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         Check if the component can be added, given its configuration.
 
         :param configuration: the configuration of the component.
-        :return: None
         """
         self._check_configuration_not_already_added(configuration)
         self._check_package_dependencies(configuration)
@@ -927,8 +923,8 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :param component_type: the component type.
         :param directory: the directory path.
         :param skip_consistency_check: if True, the consistency check are skipped.
-        :raises AEAException: if a component is already registered with the same component id.
-                            | or if there's a missing dependency.
+        :raises AEAException: if a component is already registered with the same component id.   # noqa: DAR402
+                            | or if there's a missing dependency.  # noqa: DAR402
         :return: the AEABuilder
         """
         directory = Path(directory)
@@ -950,8 +946,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         Set component build directory, create if not presents.
 
         :param configuration: component configuration
-
-        :return: None
         """
         configuration.build_directory = os.path.join(
             self.get_build_root_directory(),
@@ -970,6 +964,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         You will have to `reset()` the builder before calling `build()` again.
 
         :param component: Component instance already initialized.
+        :return: self
         """
         self._to_reset = True
         self._check_can_add(component.configuration)
@@ -1145,10 +1140,9 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         Run a build entrypoint script.
 
         :param build_entrypoint: the path to the build script relative to directory.
-        :param directory: the directory root for the entrypoint path.
+        :param source_directory: the source directory.
+        :param target_directory: the target directory.
         :param logger: logger
-
-        :return: None
         """
         cls._check_valid_entrypoint(build_entrypoint, source_directory)
 
@@ -1172,6 +1166,8 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         """
         Run in subprocess.
 
+        :param command: command to run
+        :param source_directory: source directory
         :return: stdout, stderr, code
         """
         res = subprocess.run(  # nosec
@@ -1335,7 +1331,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :param connection_ids: select only these connections to run the AEA.
         :param password: the password to encrypt/decrypt the private key.
         :return: the AEA object.
-        :raises ValueError: if we cannot
         """
         datadir = self._get_data_dir()
         self._check_we_can_build()
@@ -1591,8 +1586,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         """
         Check the component configuration has not already been added.
 
-        :param configuration: the configuration being added
-        :return: None
+        :param configuration: the component configuration being added
         :raises AEAException: if the component is already present.
         """
         if (
@@ -1611,7 +1605,7 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         """
         Check that we have all the dependencies needed to the package.
 
-        :return: None
+        :param configuration: the component configuration
         :raises AEAException: if there's a missing dependency.
         """
         not_supported_packages = configuration.package_dependencies.difference(
@@ -1632,7 +1626,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         Check that PyPI dependencies of a package don't conflict with the existing ones.
 
         :param configuration: the component configuration.
-        :return: None
         :raises AEAException: if some PyPI dependency is conflicting.
         """
         all_pypi_dependencies = self._package_dependency_manager.pypi_dependencies
@@ -1682,7 +1675,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
 
         :param build_entrypoint: the build entrypoint.
         :param directory: the directory from where to start reading the script.
-        :return: None
         """
         enforce(
             build_entrypoint is not None,
@@ -1716,8 +1708,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :param agent_configuration: AgentConfig to get values from.
         :param aea_project_path: PathLike root directory of the agent project.
         :param skip_consistency_check: if True, the consistency check are skipped.
-
-        :return: None
         """
         # set name and other configurations
         self.set_name(agent_configuration.name)
@@ -1799,7 +1789,8 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         aea_project_path: Path,
         skip_consistency_check: bool,
     ) -> List[ComponentId]:
-        """Find import order for skills/connections.
+        """
+        Find import order for skills/connections.
 
         We need to handle skills and connections separately, since skills/connections can depend on each other.
 
@@ -1807,6 +1798,11 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         - load the skill/connection configurations to find the import order
         - detect if there are cycles
         - import skills/connections from the leaves of the dependency graph, by finding a topological ordering.
+
+        :param component_ids: component ids to check
+        :param aea_project_path: project path to AEA
+        :param skip_consistency_check: consistency check of AEA
+        :return: list of component ids ordered for import
         """
         # the adjacency list for the inverse dependency graph
         dependency_to_supported_dependencies: Dict[
@@ -1909,7 +1905,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :param resources: the resources object to populate.
         :param agent_name: the AEA name for logging purposes.
         :param kwargs: keyword argument to forward to the component loader.
-        :return: None
         """
         for configuration in self._package_dependency_manager.get_components_by_type(
             component_type
@@ -1978,7 +1973,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         :param agent_configuration: the agent configuration from where to retrieve the components.
         :param aea_project_path: path to the AEA project.
         :param skip_consistency_check: if true, skip consistency checks.
-        :return: None
         """
         public_ids = getattr(agent_configuration, component_type.to_plural())
         component_ids = [
@@ -2006,8 +2000,6 @@ class AEABuilder(WithLogger):  # pylint: disable=too-many-public-methods
         Do consistency check on build parameters.
 
         - Check that the specified default ledger is in the list of specified required ledgers.
-
-        :return: None
         """
         default_ledger = self.get_default_ledger()
         required_ledgers = self.get_required_ledgers()

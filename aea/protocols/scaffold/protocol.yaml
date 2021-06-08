@@ -8,7 +8,7 @@ aea_version: '>=1.0.0, <2.0.0'
 protocol_specification_id: fetchai/scaffold:0.1.0
 fingerprint:
   __init__.py: Qmc9Ln8THrWmwou4nr3Acag7vcZ1fv8v5oRSkCWtv1aH6t
-  message.py: QmReBFhGWJLt56LU9En8hmbkUvcH8ZxU4zLNQxu1TbUA68
-  serialization.py: QmaAf5fppirUWe8JaeBbsqfbeofTHe8DDGHJooe2X389qo
+  message.py: QmSTvkiRCT9SEvKkNsMHABM1L2i88tFeKBdVaQDV8ntxBz
+  serialization.py: QmZbSDKy54EuhX8QN5BFP8pgZyUYMZWwPKRkdiqHudRcVL
 fingerprint_ignore_patterns: []
 dependencies: {}

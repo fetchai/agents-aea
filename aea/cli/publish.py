@@ -88,7 +88,6 @@ def _validate_config(ctx: Context) -> None:
 
     :param ctx: Context object.
 
-    :return: None
     :raises ClickException: if validation is failed.
     """
     try:
@@ -102,9 +101,7 @@ def _validate_pkp(private_key_paths: CRUDCollection) -> None:
     Prevent to publish agents with non-empty private_key_paths.
 
     :param private_key_paths: private_key_paths from agent config.
-    :raises: ClickException if private_key_paths is not empty.
-
-    :return: None.
+    :raises ClickException: if private_key_paths is not empty.
     """
     if private_key_paths.read_all() != []:
         raise click.ClickException(
@@ -306,9 +303,13 @@ def _save_agent_locally(
     Save agent to local packages.
 
     :param ctx: the context
+<<<<<<< HEAD
     :param push_missing: bool. flag to push missing items
 
     :return: None
+=======
+    :param is_mixed: whether or not to fetch in mixed mode
+>>>>>>> 34307e9119cc5af67c51d6a87f376dc4a103324d
     """
     try:
         registry_path = ctx.registry_path

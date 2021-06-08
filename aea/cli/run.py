@@ -147,8 +147,7 @@ def run_aea(
     :param is_install_deps: bool flag is install dependencies.
     :param password: the password to encrypt/decrypt the private key.
 
-    :return: None
-    :raises: ClickException if any Exception occurs.
+    :raises ClickException: if any Exception occurs.
     """
     skip_consistency_check = ctx.config["skip_consistency_check"]
     _prepare_environment(ctx, env_file, is_install_deps)

@@ -69,8 +69,6 @@ def try_to_load_agent_config(
     :param ctx: click command context object.
     :param is_exit_on_except: bool option to exit on exception (default = True).
     :param agent_src_path: path to an agent dir if needed to load a custom config.
-
-    :return None
     """
     if agent_src_path is None:
         agent_src_path = ctx.cwd
@@ -103,11 +101,7 @@ def try_to_load_agent_config(
 
 
 def _init_cli_config() -> None:
-    """
-    Create cli config folder and file.
-
-    :return: None
-    """
+    """Create cli config folder and file."""
     conf_dir = os.path.dirname(CLI_CONFIG_PATH)
     if not os.path.exists(conf_dir):
         os.makedirs(conf_dir)
@@ -120,8 +114,6 @@ def update_cli_config(dict_conf: Dict) -> None:
     Update CLI config and write to yaml file.
 
     :param dict_conf: dict config to write.
-
-    :return: None
     """
     config = get_or_create_cli_config()
     config.update(dict_conf)
@@ -149,7 +141,6 @@ def set_cli_author(click_context: click.Context) -> None:
     The key of the new field is 'cli_author'.
 
     :param click_context: the Click context
-    :return: None.
     """
     config = get_or_create_cli_config()
     cli_author = config.get(AUTHOR_KEY, None)
@@ -191,8 +182,6 @@ def dump_item_config(
 
     :param package_configuration: the package configuration.
     :param package_path: path to package from which config should be dumped.
-
-    :return: None
     """
     configuration_file_name = _get_default_configuration_file_name_from_type(
         package_configuration.package_type
@@ -212,8 +201,6 @@ def update_item_config(item_type: str, package_path: Path, **kwargs: Any) -> Non
     :param item_type: type of item.
     :param package_path: path to a package folder.
     :param kwargs: pairs of config key-value to update.
-
-    :return: None
     """
     item_config = load_item_config(item_type, package_path)
     for key, value in kwargs.items():
@@ -234,7 +221,6 @@ def validate_item_config(item_type: str, package_path: Path) -> None:
     :param item_type: type of item.
     :param package_path: path to a package folder.
 
-    :return: None
     :raises AEAConfigException: if something is wrong with item configuration.
     """
     item_config = load_item_config(item_type, package_path)

@@ -161,7 +161,6 @@ class Crypto(Generic[EntityClass], ABC):
 
         :param private_key_file: the file where the key is stored.
         :param password: the password to encrypt/decrypt the private key.
-        :return: None
         """
         if password is None:
             with open(private_key_file, "wb") as fpb:
@@ -176,7 +175,6 @@ class Crypto(Generic[EntityClass], ABC):
         """
         Encrypt the private key and return in json.
 
-        :param private_key: the raw private key.
         :param password: the password to decrypt.
         :return: json string containing encrypted private key.
         """
@@ -202,7 +200,7 @@ class Helper(ABC):
         """
         Check whether a transaction is settled or not.
 
-        :param tx_digest: the digest associated to the transaction.
+        :param tx_receipt: the receipt associated to the transaction.
         :return: True if the transaction has been settled, False o/w.
         """
 
@@ -370,6 +368,7 @@ class LedgerApi(Helper, ABC):
         :param amount: the amount of wealth to be transferred.
         :param tx_fee: the transaction fee.
         :param tx_nonce: verifies the authenticity of the tx
+        :param kwargs: the keyword arguments.
         :return: the transfer transaction
         """
 
@@ -425,6 +424,7 @@ class LedgerApi(Helper, ABC):
 
         :param contract_interface: the contract interface.
         :param deployer_address: The address that will deploy the contract.
+        :param kwargs: the keyword arguments.
         :returns tx: the transaction dictionary.
         """
 

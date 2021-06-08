@@ -90,11 +90,7 @@ class Filter(WithLogger):
         return active_behaviour
 
     def handle_new_handlers_and_behaviours(self) -> None:
-        """
-        Handle the messages from the decision maker.
-
-        :return: None
-        """
+        """Handle the messages from the decision maker."""
         self._handle_new_behaviours()
         self._handle_new_handlers()
 

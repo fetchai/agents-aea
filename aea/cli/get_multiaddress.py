@@ -107,6 +107,7 @@ def _try_get_multiaddress(
     :param connection_id: the connection id.
     :param host_field: if connection_id specified, the config field to retrieve the host
     :param port_field: if connection_id specified, the config field to retrieve the port
+    :param uri_field: uri field
 
     :return: address.
     """
@@ -162,9 +163,11 @@ def _read_host_and_port_from_config(
     """
     Read host and port from config connection.
 
+    :param connection_config: connection configuration.
+    :param connection_id: the connection id.
+    :param uri_field: the uri field.
     :param host_field: the host field.
     :param port_field: the port field.
-    :param uri_field: the uri field.
     :return: the host and the port.
     """
     host_is_none = host_field is None
