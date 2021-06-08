@@ -65,9 +65,14 @@ aea scaffold skill http_echo
 You can implement a simple http echo skill (modelled after the standard echo skill) which prints out the content of received messages and responds with success.
 
 
-First, delete the `my_model.py` and `behaviour.py` files (in `my_aea/skills/http_echo/`). The server will be purely reactive, so you only need the `handlers.py` file. Update `skill.yaml` accordingly, so set `models: {}` and `behaviours: {}`.
+First, delete the `my_model.py` and `behaviour.py` files (in `my_aea/skills/http_echo/`). The server will be purely reactive, so you only need the `handlers.py` file, and the `dialogues.py` to record the state of the dialogues. Update `skill.yaml` accordingly, so set `models: {}` and `behaviours: {}`.
 
-Next implement a basic handler which prints the received envelopes and responds:
+Next implement a basic handler which prints the received envelopes and responds.
+
+
+Then, replace the content of `handlers.py` with the following code snippet,
+after having replaced the placeholder `YOUR_USERNAME` with 
+the author username (i.e. the output of `aea config get agent.author`):
 
 ``` python
 import json
@@ -76,7 +81,13 @@ from typing import cast
 from aea.protocols.base import Message
 from aea.skills.base import Handler
 
+from packages.fetchai.protocols.default import DefaultMessage
 from packages.fetchai.protocols.http.message import HttpMessage
+from packages.YOUR_USERNAME.skills.http_echo.dialogues import (
+    DefaultDialogues,
+    HttpDialogue,
+    HttpDialogues,
+)
 
 
 class HttpHandler(Handler):
@@ -99,70 +110,114 @@ class HttpHandler(Handler):
         :return: None
         """
         http_msg = cast(HttpMessage, message)
-        if http_msg.performative == HttpMessage.Performative.REQUEST:
-            self.context.logger.info(
-                "received http request with method={}, url={} and body={}".format(
-                    http_msg.method,
-                    http_msg.url,
-                    http_msg.bodyy,
-                )
-            )
-            if http_msg.method == "get":
-                self._handle_get(http_msg)
-            elif http_msg.method == "post":
-                self._handle_post(http_msg)
-        else:
-            self.context.logger.info(
-                "received response ({}) unexpectedly!".format(http_msg)
-            )
 
-    def _handle_get(self, http_msg: HttpMessage) -> None:
+        # recover dialogue
+        http_dialogues = cast(HttpDialogues, self.context.http_dialogues)
+        http_dialogue = cast(HttpDialogue, http_dialogues.update(http_msg))
+        if http_dialogue is None:
+            self._handle_unidentified_dialogue(http_msg)
+            return
+
+        # handle message
+        if http_msg.performative == HttpMessage.Performative.REQUEST:
+            self._handle_request(http_msg, http_dialogue)
+        else:
+            self._handle_invalid(http_msg, http_dialogue)
+
+    def _handle_unidentified_dialogue(self, http_msg: HttpMessage) -> None:
+        """
+        Handle an unidentified dialogue.
+
+        :param http_msg: the message
+        """
+        self.context.logger.info(
+            "received invalid http message={}, unidentified dialogue.".format(http_msg)
+        )
+        default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
+        default_msg, _ = default_dialogues.create(
+            counterparty=http_msg.sender,
+            performative=DefaultMessage.Performative.ERROR,
+            error_code=DefaultMessage.ErrorCode.INVALID_DIALOGUE,
+            error_msg="Invalid dialogue.",
+            error_data={"http_message": http_msg.encode()},
+        )
+        self.context.outbox.put_message(message=default_msg)
+
+    def _handle_request(
+        self, http_msg: HttpMessage, http_dialogue: HttpDialogue
+    ) -> None:
+        """
+        Handle a Http request.
+
+        :param http_msg: the http message
+        :param http_dialogue: the http dialogue
+        :return: None
+        """
+        self.context.logger.info(
+            "received http request with method={}, url={} and body={!r}".format(
+                http_msg.method, http_msg.url, http_msg.body,
+            )
+        )
+        if http_msg.method == "get":
+            self._handle_get(http_msg, http_dialogue)
+        elif http_msg.method == "post":
+            self._handle_post(http_msg, http_dialogue)
+
+    def _handle_get(self, http_msg: HttpMessage, http_dialogue: HttpDialogue) -> None:
         """
         Handle a Http request of verb GET.
 
         :param http_msg: the http message
+        :param http_dialogue: the http dialogue
         :return: None
         """
-        http_response = HttpMessage(
-            dialogue_reference=http_msg.dialogue_reference,
-            target=http_msg.message_id,
-            message_id=http_msg.message_id + 1,
+        http_response = http_dialogue.reply(
             performative=HttpMessage.Performative.RESPONSE,
+            target_message=http_msg,
             version=http_msg.version,
             status_code=200,
             status_text="Success",
             headers=http_msg.headers,
-            bodyy=json.dumps({"tom": {"type": "cat", "age": 10}}).encode("utf-8"),
+            body=json.dumps({"tom": {"type": "cat", "age": 10}}).encode("utf-8"),
         )
-        self.context.logger.info(
-            "responding with: {}".format(http_response)
-        )
-        http_response.counterparty = http_msg.counterparty
+        self.context.logger.info("responding with: {}".format(http_response))
         self.context.outbox.put_message(message=http_response)
 
-    def _handle_post(self, http_msg: HttpMessage) -> None:
+    def _handle_post(self, http_msg: HttpMessage, http_dialogue: HttpDialogue) -> None:
         """
         Handle a Http request of verb POST.
 
         :param http_msg: the http message
+        :param http_dialogue: the http dialogue
         :return: None
         """
-        http_response = HttpMessage(
-            dialogue_reference=http_msg.dialogue_reference,
-            target=http_msg.message_id,
-            message_id=http_msg.message_id + 1,
+        http_response = http_dialogue.reply(
             performative=HttpMessage.Performative.RESPONSE,
+            target_message=http_msg,
             version=http_msg.version,
             status_code=200,
             status_text="Success",
             headers=http_msg.headers,
-            bodyy=b"",
+            body=b"",
         )
-        self.context.logger.info(
-            "responding with: {}".format(http_response)
-        )
-        http_response.counterparty = http_msg.counterparty
+        self.context.logger.info("responding with: {}".format(http_response))
         self.context.outbox.put_message(message=http_response)
+
+    def _handle_invalid(
+        self, http_msg: HttpMessage, http_dialogue: HttpDialogue
+    ) -> None:
+        """
+        Handle an invalid http message.
+
+        :param http_msg: the http message
+        :param http_dialogue: the http dialogue
+        :return: None
+        """
+        self.context.logger.warning(
+            "cannot handle http message of performative={} in dialogue={}.".format(
+                http_msg.performative, http_dialogue
+            )
+        )
 
     def teardown(self) -> None:
         """
@@ -172,18 +227,118 @@ class HttpHandler(Handler):
         """
 ```
 
-And update the `skill.yaml` accordingly:
+Moreover, add a `dialogues.py` file with the following codeL
+``` python
+from typing import Any
+
+from aea.protocols.base import Address, Message
+from aea.protocols.dialogue.base import Dialogue as BaseDialogue
+from aea.skills.base import Model
+
+from packages.fetchai.protocols.default.dialogues import (
+    DefaultDialogue as BaseDefaultDialogue,
+)
+from packages.fetchai.protocols.default.dialogues import (
+    DefaultDialogues as BaseDefaultDialogues,
+)
+from packages.fetchai.protocols.http.dialogues import HttpDialogue as BaseHttpDialogue
+from packages.fetchai.protocols.http.dialogues import HttpDialogues as BaseHttpDialogues
+
+
+DefaultDialogue = BaseDefaultDialogue
+
+
+class DefaultDialogues(Model, BaseDefaultDialogues):
+    """The dialogues class keeps track of all dialogues."""
+
+    def __init__(self, **kwargs: Any) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+        Model.__init__(self, **kwargs)
+
+        def role_from_first_message(  # pylint: disable=unused-argument
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return DefaultDialogue.Role.AGENT
+
+        BaseDefaultDialogues.__init__(
+            self,
+            self_address=self.context.agent_address,
+            role_from_first_message=role_from_first_message,
+        )
+
+
+HttpDialogue = BaseHttpDialogue
+
+
+class HttpDialogues(Model, BaseHttpDialogues):
+    """The dialogues class keeps track of all dialogues."""
+
+    def __init__(self, **kwargs: Any) -> None:
+        """
+        Initialize dialogues.
+
+        :return: None
+        """
+        Model.__init__(self, **kwargs)
+
+        def role_from_first_message(  # pylint: disable=unused-argument
+            message: Message, receiver_address: Address
+        ) -> BaseDialogue.Role:
+            """Infer the role of the agent from an incoming/outgoing first message
+
+            :param message: an incoming/outgoing first message
+            :param receiver_address: the address of the receiving agent
+            :return: The role of the agent
+            """
+            return BaseHttpDialogue.Role.SERVER
+
+        BaseHttpDialogues.__init__(
+            self,
+            self_address=str(self.skill_id),
+            role_from_first_message=role_from_first_message,
+        )
+```
+
+Then, update the `skill.yaml` accordingly:
 
 ``` yaml
 handlers:
   http_handler:
     args: {}
     class_name: HttpHandler
+models:
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
+  http_dialogues:
+    args: {}
+    class_name: HttpDialogues
 ```
 
-Finally, run the fingerprinter (note, you will have to replace the author name with your author handle):
+
+Run the fingerprinter (note, you will have to replace the author name with your author handle):
 ``` bash
 aea fingerprint skill fetchai/http_echo:0.19.0
+```
+
+
+Moreover, we need to tell to the `http_server` connection to what skill
+the HTTP requests should be forwarded.
+In our case, this is the `http_echo` that you have just scaffolded.
+Its public id will be `<your-author-name>/http_echo:0.1.0`.
+
+``` bash
+aea config set vendor.fetchai.connections.http_server.config.target_skill_id "$(aea config get agent.author)/http_echo:0.1.0" 
 ```
 
 You can now run the AEA:
