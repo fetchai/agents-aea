@@ -227,7 +227,7 @@ class HttpHandler(Handler):
         """
 ```
 
-Moreover, add a `dialogues.py` file with the following codeL
+Moreover, add a `dialogues.py` file with the following code:
 ``` python
 from typing import Any
 

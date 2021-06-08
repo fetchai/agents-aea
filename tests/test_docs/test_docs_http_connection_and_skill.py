@@ -78,7 +78,7 @@ class TestHttpConnectionAndSkill(BaseTestMarkdownDocs):
         """Test the 'requests' code snippet."""
         _globals, locals_ = {}, {}
         requests_code_snippet = self.python_blocks[2]["text"]
-        exec(requests_code_snippet, _globals, locals_)
+        exec(requests_code_snippet, _globals, locals_)  # nosec
 
         assert "requests" in locals_
         assert "response" in locals_
