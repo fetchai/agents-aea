@@ -98,7 +98,7 @@ class Project(_Base):
         cli_verbosity: str = "INFO",
         registry_path: str = DEFAULT_REGISTRY_NAME,
         skip_consistency_check: bool = False,
-        skip_aea_validation: bool = True,
+        skip_aea_validation: bool = False,
     ) -> "Project":
         """
         Load project with given public_id to working_dir.
