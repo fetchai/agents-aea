@@ -25,6 +25,9 @@ aea scaffold skill http_echo
 aea fingerprint skill fetchai/http_echo:0.19.0
 ```
 ``` bash
+aea config set vendor.fetchai.connections.http_server.config.target_skill_id "$(aea config get agent.author)/http_echo:0.1.0" 
+```
+``` bash
 aea run
 ```
 ``` yaml
@@ -32,4 +35,11 @@ handlers:
   http_handler:
     args: {}
     class_name: HttpHandler
+models:
+  default_dialogues:
+    args: {}
+    class_name: DefaultDialogues
+  http_dialogues:
+    args: {}
+    class_name: HttpDialogues
 ```
