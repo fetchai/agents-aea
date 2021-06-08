@@ -22,9 +22,5 @@ from aea.cli.registry.utils import request_api
 
 
 def registry_logout() -> None:
-    """
-    Logout from Registry account.
-
-    :return: None
-    """
+    """Logout from Registry account."""
     request_api("POST", "/rest-auth/logout/")

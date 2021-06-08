@@ -24,7 +24,7 @@ Initialize the crypto store.
 **Arguments**:
 
 - `crypto_id_to_path`: dictionary from crypto id to an (optional) path
-to the private key.
+    to the private key.
 - `password`: the password to encrypt/decrypt the private key.
 
 <a name="aea.crypto.wallet.CryptoStore.public_keys"></a>

@@ -1,8 +1,8 @@
-# End2end example Go <> Python
+# End-to-end example Go <> Python
 
 ## Run example
 
-Ensure all dependencies are installed: python, aea and golang.
+Ensure all dependencies are installed: python, aea and Golang.
 
 To launch the buyer agent run:
 `./run_buyer.sh`
@@ -22,3 +22,4 @@ To generate a protocol, use the following approach:
 aea create temp_agent
 cd temp_agent
 aea generate protocol -l PATH_TO_SPEC
+```

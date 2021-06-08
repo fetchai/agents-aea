@@ -19,7 +19,7 @@ Repeat the following process four times in four different terminals (for each {`
 Fetch the aggregator AEA:
 ``` bash
 agent_name="agg$i"
-aea fetch fetchai/simple_aggregator:0.1.0 --alias $agent_name
+aea fetch fetchai/simple_aggregator:0.3.0 --alias $agent_name
 cd $agent_name
 aea install
 aea build
@@ -36,13 +36,13 @@ aea create agent_name
 cd agent_name
 aea add connection fetchai/http_client:0.22.0
 aea add connection fetchai/http_server:0.21.0
-aea add connection fetchai/p2p_libp2p:0.21.0
-aea add connection fetchai/soef:0.22.0
+aea add connection fetchai/p2p_libp2p:0.24.0
+aea add connection fetchai/soef:0.25.0
 aea add connection fetchai/prometheus:0.7.0
-aea add skill fetchai/advanced_data_request:0.4.0
+aea add skill fetchai/advanced_data_request:0.5.0
 aea add skill fetchai/simple_aggregation:0.1.0
 
-aea config set agent.default_connection fetchai/p2p_libp2p:0.21.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.24.0
 aea install
 aea build
 ```
@@ -127,7 +127,7 @@ aea config set vendor.fetchai.connections.http_server.config.port $((8000+i))
 To publish the aggregated value to an oracle smart contract, add the ledger connection and simple oracle skill to one of the aggregators:
 ``` bash
 aea add connection fetchai/ledger:0.18.0
-aea add skill fetchai/simple_oracle:0.11.0
+aea add skill fetchai/simple_oracle:0.13.0
 ```
 
 Configure the simple oracle skill for the `fetchai` ledger:

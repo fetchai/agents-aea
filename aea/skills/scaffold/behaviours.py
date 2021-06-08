@@ -26,25 +26,13 @@ class MyScaffoldBehaviour(Behaviour):
     """This class scaffolds a behaviour."""
 
     def setup(self) -> None:
-        """
-        Implement the setup.
-
-        :return: None
-        """
+        """Implement the setup."""
         raise NotImplementedError
 
     def act(self) -> None:
-        """
-        Implement the act.
-
-        :return: None
-        """
+        """Implement the act."""
         raise NotImplementedError
 
     def teardown(self) -> None:
-        """
-        Implement the task teardown.
-
-        :return: None
-        """
+        """Implement the task teardown."""
         raise NotImplementedError

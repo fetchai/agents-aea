@@ -41,7 +41,8 @@ class AbstractStorageBackend(ABC):
         """
         Check collection name is valid.
 
-        raises ValueError if bad collection name provided.
+        :param collection_name: the collection name.
+        :raises ValueError: if bad collection name provided.
         """
         if not self.VALID_COL_NAME.match(collection_name):
             raise ValueError(

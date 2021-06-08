@@ -25,6 +25,7 @@ Initialize a package.
 
 - `configuration`: the package configuration.
 - `is_vendor`: whether the package is vendorized.
+- `kwargs`: the keyword arguments for the logger.
 
 <a name="aea.components.base.Component.component_type"></a>
 #### component`_`type
@@ -130,8 +131,4 @@ It adds all the __init__.py modules into `sys.modules`.
 **Arguments**:
 
 - `configuration`: the configuration object.
-
-**Returns**:
-
-None
 

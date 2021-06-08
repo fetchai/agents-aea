@@ -45,7 +45,7 @@ class Task(WithLogger):
 
         :param args: positional arguments forwarded to the 'execute' method.
         :param kwargs: keyword arguments forwarded to the 'execute' method.
-        :return the task instance
+        :return: the task instance
         :raises ValueError: if the task has already been executed.
         """
         if self._is_executed:
@@ -75,7 +75,7 @@ class Task(WithLogger):
         """
         Get the result.
 
-        :return the result from the execute method.
+        :return: the result from the execute method.
         :raises ValueError: if the task has not been executed yet.
         """
         if not self._is_executed:
@@ -83,26 +83,20 @@ class Task(WithLogger):
         return self._result
 
     def setup(self) -> None:
-        """
-        Implement the task setup.
-
-        :return: None
-        """
+        """Implement the task setup."""
 
     @abstractmethod
     def execute(self, *args: Any, **kwargs: Any) -> Any:
         """
         Run the task logic.
 
-        :return: None
+        :param args: the positional arguments
+        :param kwargs: the keyword arguments
+        :return: any
         """
 
     def teardown(self) -> None:
-        """
-        Implement the task teardown.
-
-        :return: None
-        """
+        """Implement the task teardown."""
 
 
 def init_worker() -> None:
@@ -111,8 +105,6 @@ def init_worker() -> None:
 
     Disable the SIGINT handler of process pool is using.
     Related to a well-known bug: https://bugs.python.org/issue8296
-
-    :return: None
     """
     if Pool.__class__.__name__ == "Pool":  # pragma: nocover
         # Process worker
@@ -139,6 +131,7 @@ class TaskManager(WithLogger):
 
         :param nb_workers: the number of worker processes.
         :param is_lazy_pool_start: option to postpone pool creation till the first enqueue_task called.
+        :param logger: the logger.
         :param pool_mode: str. multithread or multiprocess
         """
         WithLogger.__init__(self, logger)
@@ -182,7 +175,7 @@ class TaskManager(WithLogger):
         :param func: the callable instance to be enqueued
         :param args: the positional arguments to be passed to the function.
         :param kwargs: the keyword arguments to be passed to the function.
-        :return the task id to get the the result.
+        :return: the task id to get the the result.
         :raises ValueError: if the task manager is not running.
         """
         with self._lock:
@@ -207,6 +200,7 @@ class TaskManager(WithLogger):
         """
         Get the result from a task.
 
+        :param task_id: the task id
         :return: async result for task_id
         """
         task_result = self._results_by_task_id.get(
@@ -218,11 +212,7 @@ class TaskManager(WithLogger):
         return task_result
 
     def start(self) -> None:
-        """
-        Start the task manager.
-
-        :return: None
-        """
+        """Start the task manager."""
         with self._lock:
             if self._stopped is False:
                 self.logger.debug("Task manager already running.")
@@ -233,11 +223,7 @@ class TaskManager(WithLogger):
                     self._start_pool()
 
     def stop(self) -> None:
-        """
-        Stop the task manager.
-
-        :return: None
-        """
+        """Stop the task manager."""
         with self._lock:
             if self._stopped is True:
                 self.logger.debug("Task manager already stopped.")
@@ -251,8 +237,6 @@ class TaskManager(WithLogger):
         Start internal task pool.
 
         Only one pool will be created.
-
-        :return: None
         """
         if self._pool:
             self.logger.debug("Pool was already started!")
@@ -263,11 +247,7 @@ class TaskManager(WithLogger):
         self._pool = pool_cls(self._nb_workers, initializer=init_worker)
 
     def _stop_pool(self) -> None:
-        """
-        Stop internal task pool.
-
-        :return: None
-        """
+        """Stop internal task pool."""
         if not self._pool:
             self.logger.debug("Pool is not started!.")
             return

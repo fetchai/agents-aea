@@ -66,7 +66,7 @@ from packages.fetchai.protocols.oef_search.message import OefSearchMessage
 
 _default_logger = logging.getLogger("aea.packages.fetchai.connections.soef")
 
-PUBLIC_ID = PublicId.from_str("fetchai/soef:0.22.0")
+PUBLIC_ID = PublicId.from_str("fetchai/soef:0.25.0")
 
 NOT_SPECIFIED = object()
 
@@ -214,13 +214,15 @@ class SOEFChannel:
         self,
         address: Address,
         api_key: str,
+        is_https: bool,
         soef_addr: str,
         soef_port: int,
         data_dir: str,
         chain_identifier: Optional[str] = None,
         token_storage_path: Optional[str] = None,
         logger: logging.Logger = _default_logger,
-        connection_check_timeout: float = 15,
+        connection_check_timeout: float = 15.0,
+        connection_check_max_retries: int = 3,
     ):
         """
         Initialize.
@@ -241,11 +243,17 @@ class SOEFChannel:
 
         self.address = address
         self.api_key = api_key
+        self.is_https = is_https
         self.soef_addr = soef_addr
         self.soef_port = soef_port
-        self.base_url = "https://{}:{}".format(soef_addr, soef_port)
+        self.base_url = (
+            f"https://{soef_addr}:{soef_port}"
+            if self.is_https
+            else f"http://{soef_addr}:{soef_port}"
+        )
         self.oef_search_dialogues = OefSearchDialogues()
         self.connection_check_timeout = connection_check_timeout
+        self.connection_check_max_retries = connection_check_max_retries
 
         self._token_storage_path = token_storage_path
         if self._token_storage_path is not None:
@@ -338,9 +346,9 @@ class SOEFChannel:
                     oef_search_dialogue,
                     oef_error_operation=OefSearchMessage.OefErrorOperation.OTHER,
                 )
-            except Exception:  # pylint: disable=broad-except  # pragma: nocover
+            except Exception as e:  # pylint: disable=broad-except  # pragma: nocover
                 self.logger.exception(
-                    "Exception occurred in  _find_around_me_processor"
+                    f"Exception occurred in  _find_around_me_processor: {e}"
                 )
                 await self._send_error_response(
                     oef_message,
@@ -480,6 +488,7 @@ class SOEFChannel:
 
         try:
             if self.unique_page_address is None:  # pragma: nocover
+                # first time registration or we previously unregistered
                 await self._register_agent()
 
             handlers_and_errors = {
@@ -511,14 +520,17 @@ class SOEFChannel:
             )
         except (asyncio.CancelledError, ConcurrentCancelledError):  # pragma: nocover
             pass
-        except Exception:  # pylint: disable=broad-except # pragma: nocover
-            self.logger.exception("Exception during envelope processing")
+        except Exception as e:  # pylint: disable=broad-except # pragma: nocover
+            if "<reason>Forbidden</reason><detail>already in lobby" in str(e):
+                raise ValueError(
+                    "Could not register with SOEF. Agent address already registered from elsewhere."
+                )
+            self.logger.exception(f"Exception during envelope processing: {e}")
             await self._send_error_response(
                 oef_message,
                 oef_search_dialogue,
                 oef_error_operation=oef_error_operation,
             )
-            raise
 
     async def register_service(
         self, oef_message: OefSearchMessage, oef_search_dialogue: OefSearchDialogue
@@ -1043,6 +1055,7 @@ class SOEFChannel:
                 ):  # pragma: nocover
                     self.logger.debug(f"No Goodbye response. Response={response}")
                 self.unique_page_address = None
+                await self._stop_periodic_ping_task()
         if oef_message is not None and oef_search_dialogue is not None:
             await self._send_success_response(oef_message, oef_search_dialogue)
 
@@ -1066,14 +1079,23 @@ class SOEFChannel:
             )
         except asyncio.TimeoutError:
             raise SOEFNetworkConnectionError(
-                f"Server can not be reached within timeout = {self.connection_check_timeout}!"
+                f"Server can not be reached within timeout={self.connection_check_timeout}!"
             )
 
     async def connect(self) -> None:
         """Connect channel set queues and executor pool."""
         self._loop = asyncio.get_event_loop()
 
-        await self._check_server_reachable()
+        reachable_check_count = 0
+        while reachable_check_count < self.connection_check_max_retries:
+            reachable_check_count += 1
+            try:
+                await self._check_server_reachable()
+                reachable_check_count = self.connection_check_max_retries
+            except Exception as e:  # pylint: disable=broad-except # pragma: nocover
+                if reachable_check_count == self.connection_check_max_retries:
+                    raise e
+                self.logger.debug(f"Exception during SOEF reachability check: {e}.")
 
         self.in_queue = asyncio.Queue()
         self._find_around_me_queue = asyncio.Queue()
@@ -1085,10 +1107,12 @@ class SOEFChannel:
         # make sure we first unregister, in case of improper previous termination
         try:
             await self._unregister_agent()
-        except SOEFException as e:  # pragma: nocover
+        except Exception as e:  # pylint: disable=broad-except # pragma: nocover
             if "<reason>Bad Request</reason><detail>agent lookup failed" not in str(e):
+                # i.e. we're not trying to unregister and already unregistered agent
                 raise e
             self.logger.debug("Unregister on SOEF failed. Agent not registered.")
+            self.unique_page_address = None
 
     async def disconnect(self) -> None:
         """
@@ -1108,7 +1132,7 @@ class SOEFChannel:
 
         try:
             await self._unregister_agent()
-        except SOEFException as e:  # pragma: nocover
+        except Exception as e:  # pylint: disable=broad-except # pragma: nocover
             self.logger.exception(str(e))
 
         await self.in_queue.put(None)
@@ -1242,7 +1266,8 @@ class SOEFConnection(Connection):
     """The SOEFConnection connects the Simple OEF to the mailbox."""
 
     connection_id = PUBLIC_ID
-    DEFAULT_CONNECTION_CHECK_TIMEOUT: float = 15
+    DEFAULT_CONNECTION_CHECK_TIMEOUT: float = 15.0
+    DEFAULT_CONNECTION_CHECK_MAX_RETRIES: int = 3
 
     def __init__(self, **kwargs: Any) -> None:
         """Initialize."""
@@ -1260,27 +1285,43 @@ class SOEFConnection(Connection):
                 "connection_check_timeout", self.DEFAULT_CONNECTION_CHECK_TIMEOUT
             ),
         )
+        connection_check_max_retries = cast(
+            int,
+            self.configuration.config.get(
+                "connection_check_max_retries",
+                self.DEFAULT_CONNECTION_CHECK_MAX_RETRIES,
+            ),
+        )
+        is_https = cast(bool, self.configuration.config.get("is_https", True))
         soef_addr = cast(str, self.configuration.config.get("soef_addr"))
         soef_port = cast(int, self.configuration.config.get("soef_port"))
         chain_identifier = cast(str, self.configuration.config.get("chain_identifier"))
         token_storage_path = cast(
             Optional[str], self.configuration.config.get("token_storage_path")
         )
-        if api_key is None or soef_addr is None or soef_port is None:  # pragma: nocover
-            raise ValueError("api_key, soef_addr and soef_port must be set!")
-
+        not_none_params = {
+            "api_key": api_key,
+            "soef_addr": soef_addr,
+            "soef_port": soef_port,
+        }
+        for param_name, param_value in not_none_params.items():  # pragma: nocover
+            if param_value is None:
+                raise ValueError(f"{param_name} must be set!")
         self.api_key = api_key
+        self.is_https = is_https
         self.soef_addr = soef_addr
         self.soef_port = soef_port
         self.channel = SOEFChannel(
             self.address,
             self.api_key,
+            self.is_https,
             self.soef_addr,
             self.soef_port,
             data_dir=self.data_dir,
             chain_identifier=chain_identifier,
             token_storage_path=token_storage_path,
             connection_check_timeout=connection_check_timeout,
+            connection_check_max_retries=connection_check_max_retries,
         )
 
     async def connect(self) -> None:

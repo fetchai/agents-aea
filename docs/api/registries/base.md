@@ -253,10 +253,6 @@ Instantiate the registry.
 
 - `kwargs`: kwargs
 
-**Returns**:
-
-None
-
 <a name="aea.registries.base.AgentComponentRegistry.register"></a>
 #### register
 
@@ -315,7 +311,9 @@ the component or None if the component is not registered
 
 Fetch all the components.
 
-:return the list of registered components.
+**Returns**:
+
+the list of registered components.
 
 <a name="aea.registries.base.AgentComponentRegistry.fetch_by_type"></a>
 #### fetch`_`by`_`type
@@ -329,7 +327,10 @@ Fetch all the components by a given type..
 **Arguments**:
 
 - `component_type`: a component type
-:return the list of registered components of a given type.
+
+**Returns**:
+
+the list of registered components of a given type.
 
 <a name="aea.registries.base.AgentComponentRegistry.ids"></a>
 #### ids
@@ -349,10 +350,6 @@ Get the item ids.
 
 Set up the registry.
 
-**Returns**:
-
-None
-
 <a name="aea.registries.base.AgentComponentRegistry.teardown"></a>
 #### teardown
 
@@ -361,10 +358,6 @@ None
 ```
 
 Teardown the registry.
-
-**Returns**:
-
-None
 
 <a name="aea.registries.base.ComponentRegistry"></a>
 ## ComponentRegistry Objects
@@ -389,10 +382,6 @@ Instantiate the registry.
 
 - `kwargs`: kwargs
 
-**Returns**:
-
-None
-
 <a name="aea.registries.base.ComponentRegistry.register"></a>
 #### register
 
@@ -407,10 +396,6 @@ Register a item.
 - `item_id`: a pair (skill id, item name).
 - `item`: the item to register.
 - `is_dynamically_added`: whether or not the item is dynamically added.
-
-**Returns**:
-
-None
 :raises: ValueError if an item is already registered with that item id.
 
 <a name="aea.registries.base.ComponentRegistry.unregister"></a>
@@ -493,10 +478,6 @@ Get the item ids.
 
 Set up the items in the registry.
 
-**Returns**:
-
-None
-
 <a name="aea.registries.base.ComponentRegistry.teardown"></a>
 #### teardown
 
@@ -505,10 +486,6 @@ None
 ```
 
 Teardown the registry.
-
-**Returns**:
-
-None
 
 <a name="aea.registries.base.HandlerRegistry"></a>
 ## HandlerRegistry Objects
@@ -532,10 +509,6 @@ Instantiate the registry.
 
 - `kwargs`: kwargs
 
-**Returns**:
-
-None
-
 <a name="aea.registries.base.HandlerRegistry.register"></a>
 #### register
 
@@ -550,10 +523,6 @@ Register a handler.
 - `item_id`: the item id.
 - `item`: the handler.
 - `is_dynamically_added`: whether or not the item is dynamically added.
-
-**Returns**:
-
-None
 
 **Raises**:
 
@@ -574,7 +543,7 @@ Unregister a item.
 
 **Returns**:
 
-None
+the unregistered handler
 :raises: ValueError if no item is registered with that item id.
 
 <a name="aea.registries.base.HandlerRegistry.unregister_by_skill"></a>

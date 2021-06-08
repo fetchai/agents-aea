@@ -83,6 +83,7 @@ class Connection(Component, ABC):
         :param crypto_store: the crypto store for encrypted communication.
         :param restricted_to_protocols: the set of protocols ids of the only supported protocols for this connection.
         :param excluded_protocols: the set of protocols ids that we want to exclude for this connection.
+        :param kwargs: keyword arguments passed to component base
         """
         enforce(configuration is not None, "The configuration must be provided.")
         super().__init__(configuration, **kwargs)
@@ -222,6 +223,8 @@ class Connection(Component, ABC):
         """
         Receive an envelope.
 
+        :param args: positional arguments
+        :param kwargs: keyword arguments
         :return: the received envelope, or None if an error occurred.
         """
 
@@ -241,6 +244,7 @@ class Connection(Component, ABC):
         :param identity: the identity object.
         :param crypto_store: object to access the connection crypto objects.
         :param data_dir: the assets directory.
+        :param kwargs: keyword arguments passed to connection base
         :return: the connection object.
         """
         configuration = cast(
@@ -268,6 +272,7 @@ class Connection(Component, ABC):
         :param identity: the identity object.
         :param crypto_store: object to access the connection crypto objects.
         :param data_dir: the directory of the AEA project data.
+        :param kwargs: keyword arguments passed to component base
         :return: an instance of the concrete connection class.
         """
         configuration = cast(ConnectionConfig, configuration)
@@ -356,6 +361,7 @@ class BaseSyncConnection(Connection):
         :param crypto_store: the crypto store for encrypted communication.
         :param restricted_to_protocols: the set of protocols ids of the only supported protocols for this connection.
         :param excluded_protocols: the set of protocols ids that we want to exclude for this connection.
+        :param kwargs: keyword arguments passed to connection base
         """
         super().__init__(
             configuration=configuration,

@@ -26,6 +26,10 @@ Connect to communication channel
 
 - `timeout`: timeout for other end to connect
 
+**Returns**:
+
+connection status
+
 <a name="aea.helpers.pipe.IPCChannelClient.write"></a>
 #### write
 
@@ -67,10 +71,6 @@ read bytes
 ```
 
 Close the communication channel.
-
-**Returns**:
-
-None
 
 <a name="aea.helpers.pipe.IPCChannel"></a>
 ## IPCChannel Objects
@@ -133,6 +133,8 @@ Initialize a new posix named pipe.
 
 - `in_path`: rendezvous point for incoming data
 - `out_path`: rendezvous point for outgoing data
+- `logger`: the logger
+- `loop`: the event loop
 
 <a name="aea.helpers.pipe.PosixNamedPipeProtocol.connect"></a>
 #### connect
@@ -208,6 +210,8 @@ Initialize the tcp socket protocol.
 
 - `reader`: established asyncio reader
 - `writer`: established asyncio writer
+- `logger`: the logger
+- `loop`: the event loop
 
 <a name="aea.helpers.pipe.TCPSocketProtocol.write"></a>
 #### write
@@ -275,6 +279,10 @@ Setup communication channel and wait for other end to connect.
 
 - `timeout`: timeout for the connection to be established
 
+**Returns**:
+
+connection status
+
 <a name="aea.helpers.pipe.TCPSocketChannel.write"></a>
 #### write
 
@@ -297,9 +305,9 @@ Write to channel.
 
 Read from channel.
 
-**Arguments**:
+**Returns**:
 
-- `data`: read bytes
+read bytes
 
 <a name="aea.helpers.pipe.TCPSocketChannel.close"></a>
 #### close
@@ -442,6 +450,8 @@ Initialize a tcp socket communication channel client.
 
 - `in_path`: rendezvous point for incoming data
 - `out_path`: rendezvous point for outgoing data
+- `logger`: the logger
+- `loop`: the event loop
 
 <a name="aea.helpers.pipe.TCPSocketChannelClient.connect"></a>
 #### connect
@@ -455,6 +465,10 @@ Connect to the other end of the communication channel.
 **Arguments**:
 
 - `timeout`: timeout for connection to be established
+
+**Returns**:
+
+connection status
 
 <a name="aea.helpers.pipe.TCPSocketChannelClient.write"></a>
 #### write
@@ -513,6 +527,8 @@ Initialize a posix named pipe communication channel client.
 
 - `in_path`: rendezvous point for incoming data
 - `out_path`: rendezvous point for outgoing data
+- `logger`: the logger
+- `loop`: the event loop
 
 <a name="aea.helpers.pipe.PosixNamedPipeChannelClient.connect"></a>
 #### connect
@@ -526,6 +542,10 @@ Connect to the other end of the communication channel.
 **Arguments**:
 
 - `timeout`: timeout for connection to be established
+
+**Returns**:
+
+connection status
 
 <a name="aea.helpers.pipe.PosixNamedPipeChannelClient.write"></a>
 #### write

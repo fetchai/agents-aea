@@ -102,8 +102,6 @@ class AsyncState:
         Add callback to track state changes.
 
         :param callback_fn: callable object to be called on state changed.
-
-        :return: None
         """
         self._callbacks.append(callback_fn)
 
@@ -176,8 +174,7 @@ class AsyncState:
         :param initial: set state on context enter, not_set by default
         :param success: set state on context block done, not_set by default
         :param fail: set state on context block raises exception, not_set by default
-
-        :return: None
+        :yield: generator
         """
         try:
             if initial is not not_set:
@@ -291,6 +288,7 @@ class AnotherThreadTask:
         Wait for coroutine execution result.
 
         :param timeout: optional timeout to wait in seconds.
+        :return: result
         """
         return self._future.result(timeout)
 
@@ -339,6 +337,7 @@ class ThreadedAsyncRunner(Thread):
         Run a coroutine inside the event loop.
 
         :param coro: a coroutine to run.
+        :return: task
         """
         return AnotherThreadTask(coro, self._loop)
 
@@ -379,8 +378,6 @@ class Runnable(ABC):
 
         :param loop: asyncio event loop to use.
         :param threaded: bool. start in thread if True.
-
-        :return: None
         """
         if loop and threaded:
             raise ValueError(

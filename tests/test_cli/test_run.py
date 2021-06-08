@@ -41,7 +41,7 @@ from aea.configurations.base import (
     DEFAULT_CONNECTION_CONFIG_FILE,
 )
 from aea.exceptions import AEAPackageLoadingError
-from aea.test_tools.test_cases import AEATestCaseEmpty
+from aea.test_tools.test_cases import AEATestCaseEmpty, _get_password_option_args
 
 from packages.fetchai.connections.http_client.connection import (
     PUBLIC_ID as HTTP_ClIENT_PUBLIC_ID,
@@ -63,7 +63,7 @@ from tests.conftest import (
 
 
 @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
-def test_run():
+def test_run(password_or_none):
     """Test that the command 'aea run' works as expected."""
     runner = CliRunner()
     agent_name = "myagent"
@@ -71,6 +71,7 @@ def test_run():
     t = tempfile.mkdtemp()
     # copy the 'packages' directory in the parent of the agent folder.
     shutil.copytree(Path(ROOT_DIR, "packages"), Path(t, "packages"))
+    password_options = _get_password_option_args(password_or_none)
 
     os.chdir(t)
     result = runner.invoke(
@@ -84,11 +85,14 @@ def test_run():
     os.chdir(Path(t, agent_name))
 
     result = runner.invoke(
-        cli, [*CLI_LOG_OPTION, "generate-key", FetchAICrypto.identifier]
+        cli,
+        [*CLI_LOG_OPTION, "generate-key", FetchAICrypto.identifier, *password_options],
     )
     assert result.exit_code == 0
 
-    result = runner.invoke(cli, [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier])
+    result = runner.invoke(
+        cli, [*CLI_LOG_OPTION, "add-key", FetchAICrypto.identifier, *password_options]
+    )
     assert result.exit_code == 0
 
     result = runner.invoke(
@@ -111,7 +115,7 @@ def test_run():
 
     try:
         process = PexpectWrapper(  # nosec
-            [sys.executable, "-m", "aea.cli", "run"],
+            [sys.executable, "-m", "aea.cli", "run", *password_options],
             env=os.environ.copy(),
             maxread=10000,
             encoding="utf-8",

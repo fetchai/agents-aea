@@ -80,7 +80,6 @@ class GoalPursuitReadiness:
         Update the goal pursuit readiness.
 
         :param new_status: the new status
-        :return: None
         """
         self._status = new_status
 
@@ -91,11 +90,7 @@ class OwnershipState(BaseOwnershipState):
     __slots__ = ("_amount_by_currency_id", "_quantities_by_good_id")
 
     def __init__(self) -> None:
-        """
-        Instantiate an ownership state object.
-
-        :param decision_maker: the decision maker
-        """
+        """Instantiate an ownership state object."""
         self._amount_by_currency_id = None  # type: Optional[CurrencyHoldings]
         self._quantities_by_good_id = None  # type: Optional[GoodHoldings]
 
@@ -110,6 +105,7 @@ class OwnershipState(BaseOwnershipState):
 
         :param amount_by_currency_id: the currency endowment of the agent in this state.
         :param quantities_by_good_id: the good endowment of the agent in this state.
+        :param kwargs: the keyword arguments.
         """
         if amount_by_currency_id is None:  # pragma: nocover
             raise ValueError("Must provide amount_by_currency_id.")
@@ -136,7 +132,7 @@ class OwnershipState(BaseOwnershipState):
 
         :param delta_amount_by_currency_id: the delta in the currency amounts
         :param delta_quantities_by_good_id: the delta in the quantities by good
-        :return: None
+        :param kwargs: the keyword arguments
         """
         if delta_amount_by_currency_id is None:  # pragma: nocover
             raise ValueError("Must provide delta_amount_by_currency_id.")
@@ -249,7 +245,6 @@ class OwnershipState(BaseOwnershipState):
         Update the agent state from a transaction.
 
         :param terms: the transaction terms
-        :return: None
         """
         if self._amount_by_currency_id is None or self._quantities_by_good_id is None:
             raise ValueError(  # pragma: nocover
@@ -304,6 +299,7 @@ class Preferences(BasePreferences):
 
         :param exchange_params_by_currency_id: the exchange params.
         :param utility_params_by_good_id: the utility params for every asset.
+        :param kwargs: the keyword arguments.
         """
         if exchange_params_by_currency_id is None:  # pragma: nocover
             raise ValueError("Must provide exchange_params_by_currency_id.")
@@ -322,7 +318,7 @@ class Preferences(BasePreferences):
         """
         Get the initialization status.
 
-        Returns True if exchange_params_by_currency_id and utility_params_by_good_id are not None.
+        :return: True if exchange_params_by_currency_id and utility_params_by_good_id are not None.
         """
         return (self._exchange_params_by_currency_id is not None) and (
             self._utility_params_by_good_id is not None
@@ -399,6 +395,7 @@ class Preferences(BasePreferences):
         :param ownership_state: the ownership state against which to compute the marginal utility.
         :param delta_quantities_by_good_id: the change in good holdings
         :param delta_amount_by_currency_id: the change in money holdings
+        :param kwargs: the keyword arguments
         :return: the marginal utility score
         """
         enforce(self.is_initialized, "Preferences params not set!")
@@ -521,7 +518,7 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
             Initialize dialogues.
 
             :param self_address: the address of the entity for whom dialogues are maintained
-            :return: None
+            :param kwargs: the keyword arguments
             """
 
             def role_from_first_message(  # pylint: disable=unused-argument
@@ -559,7 +556,7 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
             Initialize dialogues.
 
             :param self_address: the address of the entity for whom dialogues are maintained
-            :return: None
+            :param kwargs: the keyword arguments
             """
 
             def role_from_first_message(  # pylint: disable=unused-argument
@@ -619,7 +616,6 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         Handle an internal message from the skills.
 
         :param message: the internal message
-        :return: None
         """
         if isinstance(message, self.signing_msg_class):
             self._handle_signing_message(message)
@@ -637,7 +633,6 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         Handle a signing message.
 
         :param signing_msg: the transaction message
-        :return: None
         """
         if not self.context.goal_pursuit_readiness.is_ready:
             self.logger.debug(
@@ -680,7 +675,6 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
 
         :param signing_msg: the signing message
         :param signing_dialogue: the signing dialogue
-        :return: None
         """
         performative = self.signing_msg_class.Performative.ERROR
         kwargs = {
@@ -713,7 +707,6 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
 
         :param signing_msg: the signing message
         :param signing_dialogue: the signing dialogue
-        :return: None
         """
         performative = self.signing_msg_class.Performative.ERROR
         kwargs = {
@@ -752,8 +745,7 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
         """
         Handle a state update message.
 
-        :param state_update_message: the state update message
-        :return: None
+        :param state_update_msg: the state update message
         """
         state_update_dialogue = self.state_update_dialogues.update(state_update_msg)
         if state_update_dialogue is None or not isinstance(

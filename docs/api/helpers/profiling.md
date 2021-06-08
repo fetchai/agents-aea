@@ -24,6 +24,8 @@ Init profiler.
 **Arguments**:
 
 - `period`: delay between profiling output in seconds.
+- `objects_instances_to_count`: object to count
+- `objects_created_to_count`: object created to count
 - `output_function`: function to display output, one str argument.
 
 <a name="aea.helpers.profiling.Profiling.set_counters"></a>

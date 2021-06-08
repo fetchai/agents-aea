@@ -22,6 +22,7 @@
 import json
 from typing import Any, Dict, Optional, cast
 
+from aea.helpers.search.models import Description
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.connections.http_client.connection import (
@@ -33,7 +34,7 @@ from packages.fetchai.skills.aries_alice.dialogues import (
     HttpDialogues,
     OefSearchDialogues,
 )
-from packages.fetchai.skills.aries_alice.strategy import AliceStrategy
+from packages.fetchai.skills.aries_alice.strategy import Strategy
 
 
 DEFAULT_MAX_SOEF_REGISTRATION_RETRIES = 5
@@ -82,7 +83,7 @@ class AliceBehaviour(TickerBehaviour):
             body=b"" if content is None else json.dumps(content).encode("utf-8"),
         )
         # send
-        self.context.outbox.put_message(message=request_http_message,)
+        self.context.outbox.put_message(message=request_http_message)
 
     def setup(self) -> None:
         """
@@ -137,14 +138,15 @@ class AliceBehaviour(TickerBehaviour):
 
             self.failed_registration_msg = None
 
-    def _register_agent(self) -> None:
+    def _register(self, description: Description, logger_msg: str) -> None:
         """
-        Register the agent's location.
+        Register something on the SOEF.
+
+        :param description: the description of what is being registered
+        :param logger_msg: the logger message to print after the registration
 
         :return: None
         """
-        strategy = cast(AliceStrategy, self.context.strategy)
-        description = strategy.get_location_description()
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
@@ -154,7 +156,17 @@ class AliceBehaviour(TickerBehaviour):
             service_description=description,
         )
         self.context.outbox.put_message(message=oef_search_msg)
-        self.context.logger.info("registering Alice on SOEF.")
+        self.context.logger.info(logger_msg)
+
+    def _register_agent(self) -> None:
+        """
+        Register the agent's location.
+
+        :return: None
+        """
+        strategy = cast(Strategy, self.context.strategy)
+        description = strategy.get_location_description()
+        self._register(description, "registering agent on SOEF.")
 
     def register_service(self) -> None:
         """
@@ -162,18 +174,33 @@ class AliceBehaviour(TickerBehaviour):
 
         :return: None
         """
-        strategy = cast(AliceStrategy, self.context.strategy)
+        strategy = cast(Strategy, self.context.strategy)
         description = strategy.get_register_service_description()
-        oef_search_dialogues = cast(
-            OefSearchDialogues, self.context.oef_search_dialogues
+        self._register(description, "registering agent's service on the SOEF.")
+
+    def register_genus(self) -> None:
+        """
+        Register the agent's personality genus.
+
+        :return: None
+        """
+        strategy = cast(Strategy, self.context.strategy)
+        description = strategy.get_register_personality_description()
+        self._register(
+            description, "registering agent's personality genus on the SOEF."
         )
-        oef_search_msg, _ = oef_search_dialogues.create(
-            counterparty=self.context.search_service_address,
-            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-            service_description=description,
+
+    def register_classification(self) -> None:
+        """
+        Register the agent's personality classification.
+
+        :return: None
+        """
+        strategy = cast(Strategy, self.context.strategy)
+        description = strategy.get_register_classification_description()
+        self._register(
+            description, "registering agent's personality classification on the SOEF."
         )
-        self.context.outbox.put_message(message=oef_search_msg)
-        self.context.logger.info("registering Alice service on SOEF.")
 
     def _unregister_service(self) -> None:
         """
@@ -181,7 +208,7 @@ class AliceBehaviour(TickerBehaviour):
 
         :return: None
         """
-        strategy = cast(AliceStrategy, self.context.strategy)
+        strategy = cast(Strategy, self.context.strategy)
         description = strategy.get_unregister_service_description()
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
@@ -200,7 +227,7 @@ class AliceBehaviour(TickerBehaviour):
 
         :return: None
         """
-        strategy = cast(AliceStrategy, self.context.strategy)
+        strategy = cast(Strategy, self.context.strategy)
         description = strategy.get_location_description()
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues

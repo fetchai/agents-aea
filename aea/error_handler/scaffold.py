@@ -33,7 +33,6 @@ class ErrorHandler(AbstractErrorHandler):
 
         :param envelope: the envelope
         :param logger: the logger
-        :return: None
         """
         raise NotImplementedError
 
@@ -46,7 +45,6 @@ class ErrorHandler(AbstractErrorHandler):
         :param envelope: the envelope
         :param exception: the exception raised during decoding
         :param logger: the logger
-        :return: None
         """
         raise NotImplementedError
 
@@ -59,6 +57,5 @@ class ErrorHandler(AbstractErrorHandler):
         :param envelope: the envelope
         :param reason: the reason for the failure
         :param logger: the logger
-        :return: None
         """
         raise NotImplementedError

@@ -50,6 +50,7 @@ class Contract(Component):
         Initialize the contract.
 
         :param contract_config: the contract configurations.
+        :param kwargs: the keyword arguments.
         """
         super().__init__(contract_config, **kwargs)
 
@@ -88,6 +89,7 @@ class Contract(Component):
         Load the protocol from a directory.
 
         :param directory: the directory to the skill package.
+        :param kwargs: the keyword arguments.
         :return: the contract object.
         """
         configuration = cast(
@@ -103,6 +105,7 @@ class Contract(Component):
         Load contract from configuration.
 
         :param configuration: the contract configuration.
+        :param kwargs: the keyword arguments.
         :return: the contract object.
         """
         if configuration.directory is None:  # pragma: nocover
@@ -160,7 +163,8 @@ class Contract(Component):
 
         :param ledger_api: the ledger apis.
         :param contract_address: the contract address.
-        :return: the tx
+        :param kwargs: the keyword arguments.
+        :return: the tx  # noqa: DAR202
         """
         raise NotImplementedError
 
@@ -176,7 +180,8 @@ class Contract(Component):
 
         :param ledger_api: the ledger apis.
         :param contract_address: the contract address.
-        :return: the tx
+        :param kwargs: the keyword arguments.
+        :return: the tx  # noqa: DAR202
         """
         raise NotImplementedError
 
@@ -192,7 +197,8 @@ class Contract(Component):
 
         :param ledger_api: the ledger apis.
         :param contract_address: the contract address.
-        :return: the tx
+        :param kwargs: the keyword arguments.
+        :return: the tx  # noqa: DAR202
         """
         raise NotImplementedError
 

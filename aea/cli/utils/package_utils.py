@@ -84,7 +84,6 @@ def verify_private_keys_ctx(
 
     :param ctx: Context
     :param aea_project_path: the path to the aea project
-    :param exit_on_error: whether or not to exit on error
     :param password: the password to encrypt/decrypt the private key.
     """
     try:
@@ -111,6 +110,8 @@ def validate_package_name(package_name: str) -> None:
     Traceback (most recent call last):
     ...
     click.exceptions.BadParameter: this-is-not is not a valid package name.
+
+    :param package_name: the package name
     """
     if re.fullmatch(PublicId.PACKAGE_NAME_REGEX, package_name) is None:
         raise click.BadParameter("{} is not a valid package name.".format(package_name))
@@ -126,6 +127,9 @@ def _is_valid_author_handle(author: str) -> bool:
     >>> _is_valid_author_handle("this-is-not")
     ...
     False
+
+    :param author: author name
+    :return: bool indicating whether author name is valid
     """
     if re.fullmatch(PublicId.AUTHOR_REGEX, author) is None:
         return False
@@ -162,7 +166,7 @@ def try_get_item_source_path(
         source_path = os.path.join(path, author_name, item_type_plural, item_name)
     if not os.path.exists(source_path):
         raise click.ClickException(
-            'Item "{}" not found in source folder.'.format(item_name)
+            f'Item "{author_name}/{item_name}" not found in source folder "{source_path}".'
         )
     return source_path
 
@@ -174,7 +178,7 @@ def try_get_item_target_path(
     Get the item target path.
 
     :param path: the target path root
-    :param author_name the author name
+    :param author_name: the author name
     :param item_type_plural: the item type (plural)
     :param item_name: the item name
 
@@ -229,6 +233,7 @@ def get_package_path_unified(
     - Otherwise, first look into local packages, then into vendor/.
 
     :param project_directory: directory to look for packages.
+    :param agent_config: agent configuration.
     :param item_type: item type.
     :param public_id: item public ID.
 
@@ -270,7 +275,7 @@ def copy_package_directory(src: Path, dst: str) -> Path:
     :param dst: str package destination path.
 
     :return: copied folder target path.
-    :raises SystemExit: if the copy raises an exception.
+    :raises ClickException: if the copy raises an exception.
     """
     # copy the item package into the agent's supported packages.
     src_path = str(src.absolute())
@@ -297,7 +302,7 @@ def find_item_locally(
 
     :return: tuple of path to the package directory (either in registry or in aea directory) and component configuration
 
-    :raises SystemExit: if the search fails.
+    :raises ClickException: if the search fails.
     """
     item_type_plural = item_type + "s"
     item_name = item_public_id.name
@@ -354,7 +359,7 @@ def find_item_in_distribution(  # pylint: disable=unused-argument
     :param item_type: the type of the item to load. One of: protocols, connections, skills
     :param item_public_id: the public id of the item to find.
     :return: path to the package directory (either in registry or in aea directory).
-    :raises SystemExit: if the search fails.
+    :raises ClickException: if the search fails.
     """
     item_type_plural = item_type + "s"
     item_name = item_public_id.name
@@ -399,6 +404,7 @@ def validate_author_name(author: Optional[str] = None) -> str:
     Validate an author name.
 
     :param author: the author name (optional)
+    :return: validated author name
     """
     is_acceptable_author = False
     if (
@@ -444,8 +450,7 @@ def is_fingerprint_correct(
 
     :param package_path: path to a package folder.
     :param item_config: item configuration.
-
-    :return: None.
+    :return: bool indicating correctness of fingerprint.
     """
     fingerprint = _compute_fingerprint(
         package_path, ignore_patterns=item_config.fingerprint_ignore_patterns
@@ -460,8 +465,6 @@ def register_item(ctx: Context, item_type: str, item_public_id: PublicId) -> Non
     :param ctx: click context object.
     :param item_type: type of item.
     :param item_public_id: PublicId of item.
-
-    :return: None.
     """
     logger.debug(
         "Registering the {} into {}".format(item_type, DEFAULT_AEA_CONFIG_FILE)
@@ -596,6 +599,9 @@ def is_distributed_item(item_public_id: PublicId) -> bool:
 
     If the provided item has version 'latest', only the prefixes are compared.
     Otherwise, the function will try to match the exact version occurrence among the distributed packages.
+
+    :param item_public_id: public id of the item
+    :return: bool, indicating whether distributed or not
     """
     if item_public_id.package_version.is_latest:
         return any(item_public_id.same_prefix(other) for other in DISTRIBUTED_PACKAGES)
@@ -650,6 +656,7 @@ def get_wallet_from_context(ctx: Context, password: Optional[str] = None) -> Wal
     Get wallet from current click Context.
 
     :param ctx: click context
+    :param password: the password to encrypt/decrypt private keys
 
     :return: wallet
     """
@@ -667,8 +674,6 @@ def update_item_public_id_in_init(
     :param item_type: type of item.
     :param package_path: path to a package folder.
     :param item_id: public_id
-
-    :return: None
     """
     if item_type != SKILL:
         return
@@ -698,7 +703,6 @@ def update_references(
 
     :param ctx: the context.
     :param replacements: mapping from old component ids to new component ids.
-    :return: None.
     """
     # preprocess replacement so to index them by component type
     replacements_by_type: Dict[ComponentType, Dict[PublicId, PublicId]] = {}
@@ -730,8 +734,6 @@ def create_symlink_vendor_to_local(
     :param ctx: click context
     :param item_type: item type
     :param public_id: public_id of the item
-
-    :return: None
     """
     vendor_path_str = get_package_path(ctx.cwd, item_type, public_id, is_vendor=True)
     local_path = get_package_path(ctx.cwd, item_type, public_id, is_vendor=False)
@@ -746,8 +748,6 @@ def create_symlink_packages_to_vendor(ctx: Context) -> None:
     Creates a symlink from a local packages to the vendor folder.
 
     :param ctx: click context
-
-    :return: None
     """
     if not os.path.exists(PACKAGES):
         create_symlink(Path(PACKAGES), Path(VENDOR), Path(ctx.cwd))
@@ -770,7 +770,6 @@ def replace_all_import_statements(
     :param item_type: the item type.
     :param old_public_id: the old public id.
     :param new_public_id: the new public id.
-    :return: None
     """
     old_formats = dict(
         author=old_public_id.author, type=item_type.to_plural(), name=old_public_id.name
@@ -799,7 +798,6 @@ def fingerprint_all(ctx: Context) -> None:
     Fingerprint all non-vendor packages.
 
     :param ctx: the CLI context.
-    :return: None
     """
     aea_project_path = Path(ctx.cwd)
     for package_path in get_non_vendor_package_path(aea_project_path):

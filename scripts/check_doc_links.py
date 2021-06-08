@@ -43,7 +43,7 @@ WHITELIST_URL_TO_CODE = {
     "https://colab.research.google.com": 403,
 }
 
-IGNORE: Set[str] = set()
+IGNORE: Set[str] = {"https://faucet.metamask.io/"}
 
 
 def is_url_reachable(url: str) -> bool:

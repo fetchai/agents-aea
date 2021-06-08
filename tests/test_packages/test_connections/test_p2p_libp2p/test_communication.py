@@ -22,17 +22,18 @@ import os
 import shutil
 import tempfile
 from unittest import mock
-from unittest.mock import Mock
+from unittest.mock import Mock, call
 
 import pytest
 from aea_ledger_ethereum import EthereumCrypto
 from aea_ledger_fetchai import FetchAICrypto
 
 from aea.crypto.registries import make_crypto
-from aea.mail.base import Envelope
+from aea.mail.base import Empty, Envelope
 from aea.multiplexer import Multiplexer
 
 from packages.fetchai.connections.p2p_libp2p.connection import NodeClient, Uri
+from packages.fetchai.protocols.default import DefaultSerializer
 from packages.fetchai.protocols.default.message import DefaultMessage
 
 from tests.conftest import (
@@ -671,8 +672,31 @@ class TestP2PLibp2pNodeRestart:
 
 
 @libp2p_log_on_failure_all
-class BaseTestP2PLibp2pReconnection:
-    """Base test class for reconnection tests."""
+class BaseTestP2PLibp2p:
+    """Base test class for p2p libp2p tests with two peers."""
+
+    def _make_envelope(
+        self,
+        sender_address: str,
+        receiver_address: str,
+        message_id: int = 1,
+        target: int = 0,
+    ):
+        """Make an envelope for testing purposes."""
+        msg = DefaultMessage(
+            dialogue_reference=("", ""),
+            message_id=message_id,
+            target=target,
+            performative=DefaultMessage.Performative.BYTES,
+            content=b"hello",
+        )
+        envelope = Envelope(
+            to=receiver_address,
+            sender=sender_address,
+            protocol_specification_id=DefaultMessage.protocol_specification_id,
+            message=DefaultSerializer().encode(msg),
+        )
+        return envelope
 
     @classmethod
     @libp2p_log_on_failure
@@ -734,7 +758,7 @@ class BaseTestP2PLibp2pReconnection:
 
 
 @libp2p_log_on_failure_all
-class TestP2PLibp2pReconnectionSendEnvelope(BaseTestP2PLibp2pReconnection):
+class TestP2PLibp2PSendEnvelope(BaseTestP2PLibp2p):
     """Test that connection will send envelope with error, and that reconnection fixes it."""
 
     def test_connection_is_established(self):
@@ -766,7 +790,7 @@ class TestP2PLibp2pReconnectionSendEnvelope(BaseTestP2PLibp2pReconnection):
             self.multiplexer2.put(envelope)
             delivered_envelope = self.multiplexer1.get(block=True, timeout=20)
             _mock_logger.assert_called_with(
-                "Failed to send. Exception: some error. Try reconnect to node and read again."
+                "Failed to send after pipe reconnect. Exception: some error. Try recover connection to node and send again."
             )
 
         assert delivered_envelope is not None
@@ -784,7 +808,7 @@ class TestP2PLibp2pReconnectionSendEnvelope(BaseTestP2PLibp2pReconnection):
 
 
 @libp2p_log_on_failure_all
-class TestP2PLibp2pReconnectionReceiveEnvelope(BaseTestP2PLibp2pReconnection):
+class TestP2PLibp2PReceiveEnvelope(BaseTestP2PLibp2p):
     """Test that connection will receive envelope with error, and that reconnection fixes it."""
 
     def test_envelope_routed(self):
@@ -809,8 +833,12 @@ class TestP2PLibp2pReconnectionReceiveEnvelope(BaseTestP2PLibp2pReconnection):
         ):
             self.multiplexer1.put(envelope)
             delivered_envelope = self.multiplexer2.get(block=True, timeout=20)
-            _mock_logger.assert_called_with(
-                "Failed to read. Exception: some error. Try reconnect to node and read again."
+            _mock_logger.assert_has_calls(
+                [
+                    call(
+                        "Failed to read. Exception: some error. Try reconnect to node and read again."
+                    )
+                ]
             )
 
         assert delivered_envelope is not None
@@ -827,6 +855,48 @@ class TestP2PLibp2pReconnectionReceiveEnvelope(BaseTestP2PLibp2pReconnection):
         assert envelope.message == msg
 
 
+@libp2p_log_on_failure_all
+class TestLibp2pEnvelopeOrder(BaseTestP2PLibp2p):
+    """
+    Test message ordering.
+
+    Test that the order of envelope is the guaranteed to be the same
+    when communicating between two peers.
+    """
+
+    NB_ENVELOPES = 1000
+
+    def test_burst_order(self):
+        """Test order of envelope burst is guaranteed on receiving end."""
+        addr_1 = self.connection1.address
+        addr_2 = self.connection2.address
+
+        sent_envelopes = [
+            self._make_envelope(addr_1, addr_2, i, i - 1)
+            for i in range(1, self.NB_ENVELOPES + 1)
+        ]
+        for envelope in sent_envelopes:
+            self.multiplexer1.put(envelope)
+
+        received_envelopes = []
+        for _ in range(1, self.NB_ENVELOPES + 1):
+            envelope = self.multiplexer2.get(block=True, timeout=20)
+            received_envelopes.append(envelope)
+
+        # test no new message is "created"
+        with pytest.raises(Empty):
+            self.multiplexer2.get(block=True, timeout=1)
+
+        assert len(sent_envelopes) == len(
+            received_envelopes
+        ), f"expected number of envelopes {len(sent_envelopes)}, got {len(received_envelopes)}"
+        for expected, actual in zip(sent_envelopes, received_envelopes):
+            assert expected.message == actual.message, (
+                "message content differ; probably a wrong message "
+                "ordering on the receiving end"
+            )
+
+
 @pytest.mark.asyncio
 async def test_nodeclient_pipe_connect():
     """Test pipe.connect called on NodeClient.connect."""
@@ -834,6 +904,6 @@ async def test_nodeclient_pipe_connect():
     f.set_result(None)
     pipe = Mock()
     pipe.connect.return_value = f
-    node_client = NodeClient(pipe)
+    node_client = NodeClient(pipe, Mock())
     await node_client.connect()
     pipe.connect.assert_called_once()

@@ -22,6 +22,7 @@ package aea
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"net"
 	"os"
@@ -32,7 +33,14 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 	proto "google.golang.org/protobuf/proto"
+
+	acn "libp2p_node/acn"
+	common "libp2p_node/common"
 )
+
+const AcnStatusTimeout = 15.0 * time.Second
+const SendQueueSize = 100
+const OutQueueSize = 100
 
 // code redandency to avoid import cycle
 var logger zerolog.Logger = zerolog.New(zerolog.ConsoleWriter{
@@ -44,23 +52,6 @@ var logger zerolog.Logger = zerolog.New(zerolog.ConsoleWriter{
 	Str("package", "AeaApi").
 	Logger()
 
-type Pipe interface {
-	Connect() error
-	Read() ([]byte, error)
-	Write(data []byte) error
-	Close() error
-}
-
-// Needed to break import cycle
-type AgentRecord struct {
-	ServiceId     string
-	LedgerId      string
-	Address       string
-	PublicKey     string
-	PeerPublicKey string
-	Signature     string
-}
-
 /*
 
   AeaApi type
@@ -71,7 +62,7 @@ type AeaApi struct {
 	msgin_path      string
 	msgout_path     string
 	agent_addr      string
-	agent_record    *AgentRecord
+	agent_record    *acn.AgentRecord
 	id              string
 	entry_peers     []string
 	host            string
@@ -86,13 +77,15 @@ type AeaApi struct {
 	registrationDelay  float64
 	recordsStoragePath string
 
-	pipe      Pipe
-	out_queue chan *Envelope
+	pipe       common.Pipe
+	out_queue  chan *Envelope
+	send_queue chan *Envelope
 
-	closing    bool
-	connected  bool
-	sandbox    bool
-	standalone bool
+	closing         bool
+	connected       bool
+	sandbox         bool
+	standalone      bool
+	acn_status_chan chan *acn.StatusBody
 }
 
 func (aea AeaApi) AeaAddress() string {
@@ -123,7 +116,7 @@ func (aea AeaApi) EntryPeers() []string {
 	return aea.entry_peers
 }
 
-func (aea AeaApi) AgentRecord() *AgentRecord {
+func (aea AeaApi) AgentRecord() *acn.AgentRecord {
 	return aea.agent_record
 }
 
@@ -141,7 +134,8 @@ func (aea AeaApi) Put(envelope *Envelope) error {
 		logger.Warn().Msgf(errorMsg)
 		return errors.New(errorMsg)
 	}
-	return write_envelope(aea.pipe, envelope)
+	aea.send_queue <- envelope
+	return nil
 }
 
 func (aea *AeaApi) Get() *Envelope {
@@ -162,9 +156,11 @@ func (aea *AeaApi) Connected() bool {
 }
 
 func (aea *AeaApi) Stop() {
+	aea.send_queue <- nil
 	aea.closing = true
 	aea.stop()
 	close(aea.out_queue)
+	close(aea.send_queue)
 }
 
 func (aea *AeaApi) Init() error {
@@ -199,7 +195,7 @@ func (aea *AeaApi) Init() error {
 
 	por_address := os.Getenv("AEA_P2P_POR_ADDRESS")
 	if por_address != "" {
-		record := &AgentRecord{Address: por_address}
+		record := &acn.AgentRecord{Address: por_address}
 		record.PublicKey = os.Getenv("AEA_P2P_POR_PUBKEY")
 		record.PeerPublicKey = os.Getenv("AEA_P2P_POR_PEER_PUBKEY")
 		record.Signature = os.Getenv("AEA_P2P_POR_SIGNATURE")
@@ -325,6 +321,7 @@ func (aea *AeaApi) Init() error {
 		aea.pipe = NewPipe(aea.msgin_path, aea.msgout_path)
 	}
 
+	aea.acn_status_chan = make(chan *acn.StatusBody, 1000)
 	return nil
 }
 
@@ -345,8 +342,10 @@ func (aea *AeaApi) Connect() error {
 
 	aea.closing = false
 	//TOFIX(LR) trade-offs between bufferd vs unbuffered channel
-	aea.out_queue = make(chan *Envelope, 10)
-	go aea.listen_for_envelopes()
+	aea.out_queue = make(chan *Envelope, OutQueueSize)
+	aea.send_queue = make(chan *Envelope, SendQueueSize)
+	go aea.listenForEnvelopes()
+	go aea.envelopeSendLoop()
 	logger.Info().Msg("connected to agent")
 
 	aea.connected = true
@@ -354,24 +353,32 @@ func (aea *AeaApi) Connect() error {
 	return nil
 }
 
-func UnmarshalEnvelope(buf []byte) (*Envelope, error) {
-	envelope := &Envelope{}
-	err := proto.Unmarshal(buf, envelope)
-	return envelope, err
-}
-
-func (aea *AeaApi) listen_for_envelopes() {
+func (aea *AeaApi) listenForEnvelopes() {
 	//TOFIX(LR) add an exit strategy
 	for {
-		envel, err := read_envelope(aea.pipe)
-		if err != nil {
-			logger.Error().Str("err", err.Error()).Msg("while receiving envelope")
+		envel, err := HandleAcnMessageFromPipe(aea.pipe, aea, aea.AeaAddress())
+
+		var e *common.PipeError
+
+		if errors.As(err, &e) {
+			logger.Error().
+				Str("err", err.Error()).
+				Msg("pipe error while receiving envelope. disconnect")
 			logger.Info().Msg("disconnecting")
-			// TOFIX(LR) see above
+
 			if !aea.closing {
-				aea.stop()
+				aea.Stop()
 			}
+
 			return
+		}
+		if err != nil {
+			logger.Error().Str("err", err.Error()).Msg("while receiving envelope. skip")
+			continue
+		}
+		if envel == nil {
+			// ACN STATUS MSG
+			continue
 		}
 		if envel.Sender != aea.agent_record.Address {
 			logger.Error().
@@ -388,8 +395,32 @@ func (aea *AeaApi) listen_for_envelopes() {
 	}
 }
 
+func (aea *AeaApi) envelopeSendLoop() {
+	logger.Debug().Msg("send loop started")
+	var err error
+	for {
+		envelope := <-aea.send_queue
+		if envelope == nil {
+			logger.Info().Msg("envelope is nil. exit send loop")
+			return
+		}
+		err = aea.SendEnvelope(envelope)
+		if err != nil {
+			logger.Error().Str("err", err.Error()).Msg("while sending envelope")
+		} else {
+			logger.Debug().Msg("envelope sent")
+		}
+
+		if aea.closing {
+			return
+		}
+	}
+}
 func (aea *AeaApi) stop() {
-	aea.pipe.Close()
+	err := aea.pipe.Close()
+	if err != nil {
+		logger.Error().Str("err", err.Error()).Msgf("on pipe close during aeaapi stop")
+	}
 }
 
 /*
@@ -397,23 +428,53 @@ func (aea *AeaApi) stop() {
   Pipes helpers
 
 */
+const CurrentVersion = "0.1.0"
 
-func write_envelope(pipe Pipe, envelope *Envelope) error {
-	data, err := proto.Marshal(envelope)
+func MakeAcnMessageFromEnvelope(envelope *Envelope) (error, []byte) {
+	envelope_bytes, err := proto.Marshal(envelope)
 	if err != nil {
-		logger.Error().Str("err", err.Error()).Msgf("while serializing envelope: %s", envelope)
-		return err
+		return err, envelope_bytes
 	}
-	return pipe.Write(data)
+	return acn.EncodeAcnEnvelope(envelope_bytes)
 }
 
-func read_envelope(pipe Pipe) (*Envelope, error) {
-	envelope := &Envelope{}
-	data, err := pipe.Read()
+func (aea AeaApi) SendEnvelope(envelope *Envelope) error {
+	err, data := MakeAcnMessageFromEnvelope(envelope)
 	if err != nil {
-		logger.Error().Str("err", err.Error()).Msg("while receiving data")
-		return envelope, err
+		logger.Error().
+			Str("err", err.Error()).
+			Msgf("while serializing envelope: %s", envelope.String())
+		return err
 	}
-	err = proto.Unmarshal(data, envelope)
-	return envelope, err
+	err = aea.pipe.Write(data)
+	if err != nil {
+		logger.Error().
+			Str("err", err.Error()).
+			Msgf("on pipe write. envelope: %s", envelope.String())
+		return err
+	}
+
+	status, err := acn.WaitForStatus(aea.acn_status_chan, AcnStatusTimeout)
+
+	if err != nil {
+		logger.Error().
+			Str("err", err.Error()).
+			Msgf("on status wait. envelope: %s", envelope.String())
+		return err
+	}
+	if status.Code != acn.SUCCESS {
+		logger.Error().
+			Str("op", "send_envelope").
+			Msgf("acn confirmation status is not Status Success: %d. envelope: %s", status.Code, envelope.String())
+		return fmt.Errorf(
+			"send envelope: acn confirmation status is not Status Success: %d",
+			status.Code,
+		)
+	}
+	return err
+}
+
+func (aea AeaApi) AddAcnStatusMessage(status *acn.StatusBody, counterpartyID string) {
+	aea.acn_status_chan <- status
+	logger.Info().Msgf("chan len is %d", len(aea.acn_status_chan))
 }

@@ -53,7 +53,7 @@ def _validate_config_consistency(ctx: Context, check_aea_version: bool = True) -
 
     :param ctx: the context
     :param check_aea_version: whether it should check also the AEA version.
-    :raise ValueError: if there is a missing configuration file.
+    :raises ValueError: if there is a missing configuration file.
                        or if the configuration file is not valid.
                        or if the fingerprints do not match
     """
@@ -147,6 +147,11 @@ def check_aea_project(
 
     - try to load agent configuration file
     - iterate over all the agent packages and check for consistency.
+
+    :param f: callable
+    :param check_aea_version: whether or not to check aea version
+    :param check_finger_prints: whether or not to check fingerprints
+    :return: callable
     """
 
     def wrapper(*args: Any, **kwargs: Any) -> Callable:
@@ -165,8 +170,6 @@ def _rmdirs(*paths: str) -> None:
     Remove directories.
 
     :param paths: paths to folders to remove.
-
-    :return: None
     """
     for path in paths:
         if os.path.exists(path):
@@ -208,8 +211,10 @@ def clean_after(func: Callable) -> Callable:
         Call a source method, remove dirs listed in ctx.clean_paths if ClickException is raised.
 
         :param context: context object.
+        :param args: positional arguments.
+        :param kwargs: keyword arguments.
 
-        :raises ClickException: if caught re-raises it.
+        :raises ClickException: if caught re-raises it.  # noqa: DAR402
 
         :return: source method output.
         """

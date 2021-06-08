@@ -1,6 +1,6 @@
 name: p2p_libp2p
 author: fetchai
-version: 0.21.0
+version: 0.24.0
 type: connection
 description: The p2p libp2p connection implements an interface to standalone golang
   go-libp2p node that can exchange aea envelopes with other agents connected to the
@@ -8,34 +8,38 @@ description: The p2p libp2p connection implements an interface to standalone gol
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
-  README.md: QmRBaHwQLYrC9r1vddxUVeGASZjH5cGjmBb7UXhuJzU43N
+  README.md: QmVz8npmRFFHqHwTLCHoHUDEzr5r7fu4eM3L3CP5CDx1g4
   __init__.py: QmYQuLNyQ8WTjgRYAoKAzoJEb7ocKXvM2hTyK4hsGch5D6
-  check_dependencies.py: QmP14nkQ8senwzdPdrZJLsA6EQ7zaKKEaLGDELhT42gp1P
-  connection.py: QmdytVEU3dKsd1hXutqBXEHE51vD3TkoA69zbYBe1yotXX
-  libp2p_node/Makefile: QmQ7bjtiHcW5m5xfuvA6rzrZYptGkTcrcX74wCndjuX5ZA
-  libp2p_node/README.md: QmZZQgzwjCbjFVWUgRLDB2RHhPdv6dePNHPGyuju39air4
-  libp2p_node/aea/api.go: QmdFR5Rmkk2FGVDwzgHtjobjAKyLejqk2CAYBCvcF23AG7
+  check_dependencies.py: QmTs1ydcs71QsqrVEyPmZpUNRntmjgQbx5d5t1xUKg8sad
+  connection.py: QmeL1ATu3Uort85edXPsZRji3W4nHjAyhQJVDTkvT1pYLv
+  consts.py: QmNup63K21nAMgQ8VLjNGZgceus97gUpsgBMNpDxcSTmCr
+  libp2p_node/Makefile: QmPpjEgNQD59BBDefLS5C8gbY7CEppeVGACJeAL9rufSgv
+  libp2p_node/README.md: QmRBC7o5y1TBQGwviJ9XxywdeuSSz6dNgvGE9wQhFPES4D
+  libp2p_node/acn/utils.go: QmQZxu5PecVXgMve6nopRD7vV1iSAdadXRgzBqbDix7XRm
+  libp2p_node/aea/api.go: QmR55Loa5FxbHzQTzJyhzXNuk3takGqQ8fd9TY3ufuYHmu
   libp2p_node/aea/envelope.pb.go: QmRfUNGpCeVJfsW3H1MzCN4pwDWgumfyWufVFp6xvUjjug
   libp2p_node/aea/envelope.proto: QmVuvesmfgzj5aKnbFoCocoGEv3T9MR7u6KWn7CT5yfjGi
-  libp2p_node/aea/pipe_unix.go: QmSzbAexrSUSA9ZE6VT6MmcWF5MhEcmceQjAbnfRoK7Ruv
-  libp2p_node/aea/pipe_windows.go: QmdYpfjgdgFbA6Pothg65NYM45ubfpZeKr8cVQoqbFzgUK
-  libp2p_node/dht/dhtclient/dhtclient.go: QmdqYdcyzPUPgtmnQXykxwdxWG4wjScztJuCpcxGTBmaUF
-  libp2p_node/dht/dhtclient/dhtclient_test.go: QmS9SiLAojXYobqV9m5yeRpyPzt6JcSbQD78RNvSp6LPx6
-  libp2p_node/dht/dhtclient/options.go: QmaoJiavHescgx98inQjVUipPFRvcFFrodrScZ3fvrXJ4z
+  libp2p_node/aea/pipe.go: QmdY77nQhJt5ojfcpJn2quaxdseGxS8GymQbzNvizkXNoz
+  libp2p_node/aea/utils.go: QmcUY6pR9qNQhHAR7i7UTTMzvY8G3JuYqvJwUVD25LvUZz
+  libp2p_node/common/common.go: QmeGr6xMzqkBVJMnWzCTcXJVQj2A8RK64mhTSewZJKpiJa
+  libp2p_node/dht/dhtclient/dhtclient.go: QmVbDNJG4FH32pcu52A1zQDkKV4fvgk7uYFaNpejB5YoCw
+  libp2p_node/dht/dhtclient/dhtclient_test.go: QmY5YQVYPHYdHc3GXPgbMQBtMstEpYiik1KtZH9ZchJVNh
+  libp2p_node/dht/dhtclient/options.go: QmbjHT3ZXFo5GaMDTFbpZVRNiq3KPeoQWuGQuDaz7QJfaU
   libp2p_node/dht/dhtnode/dhtnode.go: QmbyhgbCSAbQ1QsDw7FM7Nt5sZcvhbupA1jv5faxutbV7N
   libp2p_node/dht/dhtnode/streams.go: Qmc2JcyiU4wHsgDj6aUunMAp4c5yMzo2ixeqRZHSW5PVwo
-  libp2p_node/dht/dhtnode/utils.go: QmYrcXGiYQnPvJczhm61YN5f65RbNdRE2EnjBBURVqHqtc
-  libp2p_node/dht/dhtpeer/benchmarks_test.go: QmX2KWsaFaVd9KGjvgYNgkLtgnu1CUhBPtTe9abKYndq4C
-  libp2p_node/dht/dhtpeer/dhtpeer.go: QmXRH6Wetr8KL12yVhgvewQak1VQGsf2hXawTR4K6WiKz6
-  libp2p_node/dht/dhtpeer/dhtpeer_test.go: Qmd6yLa5Hny5nP7EtZ4NGf7GuHP7RiDXWnuEQsA3tghzUu
-  libp2p_node/dht/dhtpeer/options.go: QmRbB1dnA5TEeJZQpKBJQoxFNHSPLRiEtwtkK6ZJDZdjAX
-  libp2p_node/dht/dhttests/dhttests.go: QmWTwAqXy4xPBWx49dvg91pBfaeyh79bgbh4yYc3u6kGhg
-  libp2p_node/dht/monitoring/file.go: QmfSw8prwiuxqcaTrEkWAL4dZYi7EzWGA4ZCgPgQ99ZnGN
+  libp2p_node/dht/dhtnode/utils.go: Qme7Vmyso5dUpCRti1gggEHuDqMLPbi9QeAPzuh5o9FWcJ
+  libp2p_node/dht/dhtpeer/benchmarks_test.go: QmcXvXrdwJtczmqj29Qx4AAmHzSgHSo8fASh91g8AfhVQf
+  libp2p_node/dht/dhtpeer/dhtpeer.go: QmYh2X6zVn1bQoVJpuipvXuC1fuGxQNgerYf5mB5R734JJ
+  libp2p_node/dht/dhtpeer/dhtpeer_test.go: QmdhQhSqyD2HqSRbGPvC1nXoe77Gck9EmvwcFi3GxdfqJ4
+  libp2p_node/dht/dhtpeer/options.go: QmYmMiuX9sEKZ3M94AZSnpM8RxuvUCeHGTBjMvifRdXucp
+  libp2p_node/dht/dhttests/dhttests.go: QmSe8XsEhMJAWuokeWtPLXP4m9G5rDEAXrrQWBcma8t71c
+  libp2p_node/dht/monitoring/file.go: Qmc4QpKtjXaEFqGPeunV6TR4qR5RcMzoy8atzJH4ouBkfH
   libp2p_node/dht/monitoring/prometheus.go: QmQvXjEozVPMvRjda5WGRAU5b7cfUcRZUACQkTESG7Aewu
   libp2p_node/dht/monitoring/service.go: QmT47y2LHZECYcoE2uJ9QCGh3Kq8ePhYedo8dQE7X7v6YV
-  libp2p_node/go.mod: QmNRdkYr9wNvQXwv3kVr9e4yqarZmB6sJGjcQ2EQFZJbBu
-  libp2p_node/go.sum: QmX2ha31S9zytNiLyBCx7YrExedBPF9mmMNxJG37sknPBc
-  libp2p_node/libp2p_node.go: QmZFR2bdi1EjFmPkjwtYeA19kSQKPtcGoNVafQnZRWotaN
+  libp2p_node/go.mod: QmZAefiBvioX9DfJvKWibSbDGnAEo1w9LuoEVzjRoWJGWT
+  libp2p_node/go.sum: QmchXxL6fqJWqxPpEQzE6moZpxvpNtP36WHtKWHuuP7oAx
+  libp2p_node/libp2p_node.go: QmPgMQ3g93Jqu4GAv8e7fTWbrGK8hjSp7BDrKj1EuR1WcS
+  libp2p_node/link: QmXoSqhnHAFDZiZYT3F1txkjrsjtxDAkPVg9oG9Kvpv2dx
   libp2p_node/mocks/mock_host.go: QmSJ7g6S2PGhC5j8xBQyrjs56hXJGEewkgFgiivyZDthbW
   libp2p_node/mocks/mock_net.go: QmVKnkDdH8XCJ9jriEkZui4NoB36GBYF2DtfX8uCqAthMw
   libp2p_node/mocks/mock_network.go: QmbVVvd3wrY6PnVs1rn9T9m6FD5kbmSVJLwhSxUgSLAiM5
@@ -43,12 +47,13 @@ fingerprint:
   libp2p_node/protocols/acn/v1_0_0/acn.pb.go: QmQqkU1XA1UrKBrMd3MawxWiqNRSHH4cLKjwcYqFexJx6F
   libp2p_node/protocols/acn/v1_0_0/acn.proto: QmYNCxKy5NXnPRGZQCn2VmtFYLg2GyuWMHCwu6x99o2vsp
   libp2p_node/protocols/acn/v1_0_0/acn.yaml: QmUTxkycEYsDZYXNekhPXd8s66qCvuCUvN15JeG4PHhXK2
-  libp2p_node/utils/utils.go: QmZ9HZwVBVAgVv8CtL6QTXyvvdh4Fh2CTedvKvndN3fRmf
-  libp2p_node/utils/utils_test.go: QmX5bBqCwFVky6ix7pu9QNvScntr3GMDvon9cNC8dKhJiS
+  libp2p_node/utils/utils.go: QmUPs4SB7p1b4BEScZHD6Zp1ZUc7R8hbvzQLFkdYGhPCFx
+  libp2p_node/utils/utils_test.go: QmaUTrtqhPYcCLTHnJic4EN7R1pZY8ra7QbeRrPuedgAuc
 fingerprint_ignore_patterns: []
 build_entrypoint: check_dependencies.py
 connections: []
-protocols: []
+protocols:
+- fetchai/acn:1.0.0
 class_name: P2PLibp2pConnection
 config:
   delegate_uri: 127.0.0.1:11000
@@ -57,7 +62,10 @@ config:
   local_uri: 127.0.0.1:9000
   log_file: libp2p_node.log
   max_node_restarts: 5
+  monitoring_uri: null
+  node_connection_timeout: 10
   public_uri: 127.0.0.1:9000
+  storage_path: null
 cert_requests:
 - identifier: acn
   ledger_id: fetchai

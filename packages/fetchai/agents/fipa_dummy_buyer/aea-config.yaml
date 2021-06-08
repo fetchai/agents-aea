@@ -1,19 +1,19 @@
 agent_name: fipa_dummy_buyer
 author: fetchai
-version: 0.1.0
+version: 0.3.0
 description: Sample agent for FIPA interaction
 license: Apache-2.0
 aea_version: '>=1.0.0, <2.0.0'
 fingerprint: {}
 fingerprint_ignore_patterns: []
 connections:
-- fetchai/p2p_libp2p:0.21.0
+- fetchai/p2p_libp2p:0.24.0
 protocols:
 - fetchai/fipa:1.0.0
 - fetchai/signing:1.0.0
 skills:
 - fetchai/fipa_dummy_buyer:0.1.0
-default_connection: fetchai/p2p_libp2p:0.21.0
+default_connection: fetchai/p2p_libp2p:0.24.0
 default_ledger: fetchai
 contracts: []
 required_ledgers:
@@ -28,7 +28,7 @@ dependencies:
   aea-ledger-fetchai:
     version: <2.0.0,>=1.0.0
 ---
-public_id: fetchai/p2p_libp2p:0.21.0
+public_id: fetchai/p2p_libp2p:0.24.0
 type: connection
 config:
   delegate_uri: null

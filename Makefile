@@ -46,6 +46,7 @@ lint:
 	isort aea benchmark examples packages plugins scripts tests
 	flake8 aea benchmark examples packages plugins scripts tests
 	vulture aea scripts/whitelist.py --exclude "*_pb2.py"
+	darglint aea
 
 .PHONY: pylint
 pylint:
@@ -59,7 +60,7 @@ security:
         plugins/aea-ledger-cosmos/aea_ledger_cosmos \
         plugins/aea-cli-ipfs/aea_cli_ipfs
 	bandit -s B101 -r tests scripts
-	safety check -i 37524 -i 38038 -i 37776 -i 38039 -i 39621
+	safety check -i 37524 -i 38038 -i 37776 -i 38039 -i 39621 -i 40291 -i 39706
 
 .PHONY: static
 static:
@@ -110,7 +111,11 @@ install: clean
 .PHONY: dist
 dist: clean
 	python setup.py sdist
-	python setup.py bdist_wheel
+	WIN_BUILD_WHEEL=1 python setup.py bdist_wheel --plat-name=win_amd64
+	WIN_BUILD_WHEEL=1 python setup.py bdist_wheel --plat-name=win32
+	python setup.py bdist_wheel --plat-name=manylinux1_x86_64
+	python setup.py bdist_wheel --plat-name=manylinux2014_aarch64
+	python setup.py bdist_wheel --plat-name=macosx_10_9_x86_64
 
 h := $(shell git rev-parse --abbrev-ref HEAD)
 

@@ -46,6 +46,7 @@ class MyScaffoldMessage(Message):
         Initialize.
 
         :param performative: the type of message.
+        :param kwargs: the keyword arguments.
         """
         super().__init__(performative=performative, **kwargs)
         enforce(  # pragma: no cover

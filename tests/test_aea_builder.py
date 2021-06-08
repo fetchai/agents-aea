@@ -596,16 +596,32 @@ def test_set_from_config_custom():
 
 def test_load_abstract_component():
     """Test abstract component loading."""
+    resources = Resources()
     builder = AEABuilder()
     builder.set_name("aea_1")
     builder.add_private_key("fetchai")
 
-    skill = Skill.from_dir(dummy_skill_path, Mock(agent_name="name"))
-    skill.configuration.is_abstract = True
-    builder.add_component_instance(skill)
-    builder._load_and_add_components(
-        ComponentType.SKILL, Resources(), "aea_1", agent_context=Mock(agent_name="name")
-    )
+    builder.add_component(ComponentType.SKILL, dummy_skill_path)
+    with mock.patch("aea.aea_builder.load_aea_package"), mock.patch.object(
+        builder,
+        "_overwrite_custom_configuration",
+        return_value=Mock(is_abstract_component=True),
+    ), mock.patch.object(builder.logger, "debug") as mock_logger:
+        builder._load_and_add_components(
+            ComponentType.SKILL,
+            resources,
+            "aea_1",
+            agent_context=Mock(agent_name="name"),
+        )
+
+        mock_logger.assert_called_with(
+            f"Package {DUMMY_SKILL_PUBLIC_ID} of type skill is abstract, "
+            f"therefore only the Python modules have been loaded."
+        )
+
+    assert (
+        len(resources.get_all_skills()) == 0
+    ), "expected 0 skills because the loaded skill is abstract"
 
 
 def test_find_import_order():

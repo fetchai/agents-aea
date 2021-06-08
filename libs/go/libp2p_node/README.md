@@ -20,6 +20,7 @@ To lint:
 ``` bash
 golines . -w
 golangci-lint run
+staticcheck ./...
 ```
 
 For mocks generation:

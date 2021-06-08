@@ -86,10 +86,6 @@ the list of behaviours currently active
 
 Handle the messages from the decision maker.
 
-**Returns**:
-
-None
-
 <a name="aea.registries.filter.Filter.get_internal_message"></a>
 #### get`_`internal`_`message
 
