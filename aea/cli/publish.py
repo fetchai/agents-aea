@@ -112,50 +112,6 @@ def _validate_pkp(private_key_paths: CRUDCollection) -> None:
         )
 
 
-def _check_is_item_in_registry_mixed(
-    public_id: PublicId, item_type_plural: str, registry_path: str
-) -> None:
-    """Check first locally, then on remote registry, if a package is present."""
-    try:
-        _check_is_item_in_local_registry(public_id, item_type_plural, registry_path)
-    except click.ClickException:
-        try:
-            click.echo("Couldn't find item locally. Trying on remote registry...")
-            _check_is_item_in_remote_registry(public_id, item_type_plural)
-            click.echo("Found!")
-        except click.ClickException as e:
-            raise click.ClickException(
-                f"Package not found neither in local nor in remote registry: {str(e)}. You can try to add {PUSH_ITEMS_FLAG}."
-            )
-
-
-def _check_is_item_in_remote_registry(
-    public_id: PublicId, item_type_plural: str
-) -> None:
-    """
-    Check if an item is in the remote registry.
-
-    :param public_id: the public id.
-    :param item_type_plural: the type of the item.
-    :return: None
-    :raises click.ClickException: if the item is not present.
-    """
-    get_package_meta(item_type_plural[:-1], public_id)
-
-
-def _check_is_item_in_local_registry(
-    public_id: PublicId, item_type_plural: str, registry_path: str
-) -> None:
-    try:
-        try_get_item_source_path(
-            registry_path, public_id.author, item_type_plural, public_id.name
-        )
-    except click.ClickException as e:
-        raise click.ClickException(
-            f"Dependency is missing. {str(e)}\nPlease push it first and then retry or use {PUSH_ITEMS_FLAG} flag to push automatically"
-        )
-
-
 class BaseRegistry(ABC):
     """Base registry class."""
 
@@ -218,10 +174,9 @@ class BaseRegistry(ABC):
 class LocalRegistry(BaseRegistry):
     """Local directory registry."""
 
-    def __init__(self, ctx: Context, is_mixed: bool = False):
+    def __init__(self, ctx: Context):
         """Init registry."""
         self.ctx = ctx
-        self.is_mixed = is_mixed
         try:
             self.registry_path = ctx.registry_path
         except ValueError as e:  # pragma: nocover
@@ -238,13 +193,13 @@ class LocalRegistry(BaseRegistry):
 
         :return: None
         """
-        if self.is_mixed:
-            _check_is_item_in_registry_mixed(
-                PublicId.from_str(str(public_id)), item_type_plural, self.registry_path,
+        try:
+            try_get_item_source_path(
+                self.registry_path, public_id.author, item_type_plural, public_id.name
             )
-        else:
-            _check_is_item_in_local_registry(
-                PublicId.from_str(str(public_id)), item_type_plural, self.registry_path,
+        except click.ClickException as e:
+            raise click.ClickException(
+                f"Dependency is missing. {str(e)}\nPlease push it first and then retry or use {PUSH_ITEMS_FLAG} flag to push automatically."
             )
 
     def push_item(self, item_type_plural: str, public_id: PublicId) -> None:
@@ -258,6 +213,38 @@ class LocalRegistry(BaseRegistry):
         """
         item_type = ITEM_TYPE_PLURAL_TO_TYPE[item_type_plural]
         _push_item_locally(self.ctx, item_type, public_id)
+
+
+class MixedRegistry(LocalRegistry):
+    """Mixed remote and local component registry."""
+
+    def check_item_present(self, item_type_plural: str, public_id: PublicId) -> None:
+        """
+        Check item present in registry.
+
+        Raise ClickException if not found.
+
+        :param item_type_plural: str, item type.
+        :param public_id: PublicId of the item to check.
+
+        :return: None
+        """
+        item_type = ITEM_TYPE_PLURAL_TO_TYPE[item_type_plural]
+        try:
+            LocalRegistry.check_item_present(self, item_type_plural, public_id)
+            return
+        except click.ClickException:
+            click.echo(
+                f"Can not find dependency locally: {item_type} {public_id}. Trying remote registry..."
+            )
+
+        try:
+            RemoteRegistry(self.ctx).check_item_present(item_type_plural, public_id)
+            return
+        except click.ClickException:
+            raise click.ClickException(
+                f"Can not find dependency locally or remotely: {item_type} {public_id}. Try to add flag `{PUSH_ITEMS_FLAG}` to push dependency package to the registry."
+            )
 
 
 class RemoteRegistry(BaseRegistry):
@@ -278,9 +265,9 @@ class RemoteRegistry(BaseRegistry):
 
         :return: None
         """
-
+        item_type = ITEM_TYPE_PLURAL_TO_TYPE[item_type_plural]
         try:
-            _check_is_item_in_remote_registry(public_id, item_type_plural)
+            get_package_meta(item_type, public_id)
         except click.ClickException as e:
             raise click.ClickException(
                 f"Package not found in remote registry: {str(e)}. You can try to add {PUSH_ITEMS_FLAG} flag."
@@ -328,7 +315,7 @@ def _save_agent_locally(
     except ValueError as e:  # pragma: nocover
         raise click.ClickException(str(e))
 
-    registry = LocalRegistry(ctx, is_mixed)
+    registry = MixedRegistry(ctx) if is_mixed else LocalRegistry(ctx)
 
     _check_dependencies_in_registry(registry, ctx.agent_config, push_missing)
 

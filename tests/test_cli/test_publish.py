@@ -27,9 +27,9 @@ from click import ClickException
 
 from aea.cli import cli
 from aea.cli.publish import (
-    _check_is_item_in_local_registry,
-    _check_is_item_in_registry_mixed,
-    _check_is_item_in_remote_registry,
+    LocalRegistry,
+    MixedRegistry,
+    RemoteRegistry,
     _save_agent_locally,
     _validate_pkp,
 )
@@ -47,7 +47,7 @@ from tests.test_cli.tools_for_testing import (
 
 
 @mock.patch("aea.cli.publish.PublicId", PublicIdMock)
-@mock.patch("aea.cli.publish._check_is_item_in_local_registry")
+@mock.patch("aea.cli.publish.LocalRegistry.check_item_present")
 @mock.patch("aea.cli.publish.copyfile")
 @mock.patch("aea.cli.publish.os.makedirs")
 @mock.patch("aea.cli.publish.os.path.exists", return_value=False)
@@ -82,21 +82,23 @@ class CheckIsItemInLocalRegistryTestCase(TestCase):
     def test__check_is_item_in_local_registry_positive(self, get_path_mock):
         """Test for _check_is_item_in_local_registry positive result."""
         public_id = PublicIdMock.from_str("author/name:version")
-        registry_path = "some-registry-path"
         item_type_plural = "items"
-        _check_is_item_in_local_registry(public_id, item_type_plural, registry_path)
+        ctx = mock.Mock()
+        ctx.registry_path = "some-registry-path"
+        LocalRegistry(ctx).check_item_present(item_type_plural, public_id)
         get_path_mock.assert_called_once_with(
-            registry_path, public_id.author, item_type_plural, public_id.name
+            ctx.registry_path, public_id.author, item_type_plural, public_id.name
         )
 
     @mock.patch("aea.cli.publish.try_get_item_source_path", raise_click_exception)
     def test__check_is_item_in_local_registry_negative(self):
         """Test for _check_is_item_in_local_registry negative result."""
         public_id = PublicIdMock.from_str("author/name:version")
-        registry_path = "some-registry-path"
         item_type_plural = "items"
         with self.assertRaises(ClickException):
-            _check_is_item_in_local_registry(public_id, item_type_plural, registry_path)
+            ctx = mock.Mock()
+            ctx.registry_path = "some-registry-path"
+            LocalRegistry(ctx).check_item_present(item_type_plural, public_id)
 
 
 @mock.patch("aea.cli.utils.decorators._check_aea_project")
@@ -147,8 +149,7 @@ class ValidatePkpTestCase(TestCase):
         private_key_paths.read_all.assert_called_once()
 
 
-@mock.patch("aea.cli.publish._check_is_item_in_registry_mixed")
-@mock.patch("aea.cli.publish._check_is_item_in_local_registry")
+@mock.patch("aea.cli.publish.MixedRegistry.check_item_present")
 class TestPublishMixedMode(AEATestCaseEmpty):
     """Test the execution branch with in mixed mode."""
 
@@ -161,31 +162,32 @@ class TestPublishMixedMode(AEATestCaseEmpty):
 def test_negative_check_is_item_in_remote_registry():
     """Test the utility function (negative) to check if an item is in the remote registry"""
     with pytest.raises(click.ClickException, match="Not found in Registry."):
-        _check_is_item_in_remote_registry(
+        RemoteRegistry(mock.Mock()).check_item_present(
+            "protocols",
             PublicId("nonexisting_package_author", "nonexisting_package_name", "0.0.0"),
-            "protocol",
         )
 
 
 def test_negative_check_is_item_in_registry_mixed():
     """Check if item in registry, mixed mode."""
+    ctx = mock.Mock()
+    ctx.registry_path = "some-registry-path"
+
     with pytest.raises(
         click.ClickException,
-        match="Package not found neither in local nor in remote registry: Not found in Registry.",
+        match="Can not find dependency locally or remotely: .*. Try to add flag `--push-missing` to push dependency package to the registry.",
     ):
-        _check_is_item_in_registry_mixed(
-            PublicId("nonexisting_package_author", "nonexisting_package_name", "0.0.0"),
-            "protocol",
-            "nonexisting_packages_path",
+        MixedRegistry(ctx).check_item_present(
+            "protocols", PublicId.from_str("bad_author/bad_package_name:0.8.0")
         )
 
 
 def test_positive_check_is_item_in_registry_mixed_not_locally_but_remotely():
     """Check if item in registry, mixed mode, when not in local registry but only in remote."""
-    _check_is_item_in_registry_mixed(
-        PublicId.from_str("fetchai/default:0.8.0"),
-        "protocols",
-        "nonexisting_packages_path",
+    ctx = mock.Mock()
+    ctx.registry_path = "some-registry-path"
+    MixedRegistry(ctx).check_item_present(
+        "protocols", PublicId.from_str("fetchai/default:0.8.0")
     )
 
 
@@ -244,15 +246,14 @@ class TestPublishRemotellyWithDeps(AEATestCaseEmpty):
         with pytest.raises(
             ClickException, match=r"Package not found in remote registry"
         ) as e, mock.patch(
-            "aea.cli.publish._check_is_item_in_remote_registry",
-            side_effect=ClickException("expected"),
+            "aea.cli.publish.get_package_meta", side_effect=ClickException("expected"),
         ):
             self.invoke("publish", "--remote")
         assert "--push-missing" in str(e)
         publish_agent_mock.assert_not_called()
 
         with mock.patch(
-            "aea.cli.publish._check_is_item_in_remote_registry",
+            "aea.cli.publish.get_package_meta",
             side_effect=[ClickException("expected")] + [mock.DEFAULT] * 100,
         ):
             self.invoke("publish", "--remote", "--push-missing")
