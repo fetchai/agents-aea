@@ -202,6 +202,9 @@ class ComponentType(Enum):
         return str(self.value)
 
 
+PackageIdPrefix = Tuple[ComponentType, str, str]
+
+
 class PublicId(JSONSerializable):
     """This class implement a public identifier.
 
@@ -604,7 +607,7 @@ class ComponentId(PackageId):
         return ComponentType(self.package_type.value)
 
     @property
-    def component_prefix(self) -> Tuple[ComponentType, str, str]:
+    def component_prefix(self) -> PackageIdPrefix:
         """Get the component identifier without the version."""
         package_prefix = super().package_prefix
         package_type, author, name = package_prefix

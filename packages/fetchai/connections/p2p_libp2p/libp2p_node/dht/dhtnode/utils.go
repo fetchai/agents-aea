@@ -24,20 +24,11 @@ package dhtnode
 
 import (
 	"errors"
-	utils "libp2p_node/utils"
 	"strings"
 
-	acn_protocol "libp2p_node/protocols/acn/v1_0_0"
+	acn "libp2p_node/acn"
+	utils "libp2p_node/utils"
 )
-
-type AgentRecord = acn_protocol.AcnMessage_AgentRecord
-type Status = acn_protocol.AcnMessage_StatusBody
-
-const ERROR_WRONG_AGENT_ADDRESS = acn_protocol.AcnMessage_StatusBody_ERROR_WRONG_AGENT_ADDRESS
-const ERROR_UNSUPPORTED_LEDGER = acn_protocol.AcnMessage_StatusBody_ERROR_UNSUPPORTED_LEDGER
-const ERROR_WRONG_PUBLIC_KEY = acn_protocol.AcnMessage_StatusBody_ERROR_WRONG_PUBLIC_KEY
-const ERROR_INVALID_PROOF = acn_protocol.AcnMessage_StatusBody_ERROR_INVALID_PROOF
-const SUCCESS = acn_protocol.AcnMessage_StatusBody_SUCCESS
 
 const (
 	DefaultLedger  = "fetchai"
@@ -47,14 +38,17 @@ const (
 var supportedLedgers = []string{"fetchai", "cosmos", "ethereum"}
 
 func IsValidProofOfRepresentation(
-	record *AgentRecord,
+	record *acn.AgentRecord,
 	agentAddress string,
 	representativePeerPubKey string,
-) (*Status, error) {
+) (*acn.StatusBody, error) {
 	// check agent address matches
 	if record.Address != agentAddress {
 		err := errors.New("Wrong agent address, expected " + agentAddress)
-		response := &Status{Code: ERROR_WRONG_AGENT_ADDRESS, Msgs: []string{err.Error()}}
+		response := &acn.StatusBody{
+			Code: acn.ERROR_WRONG_AGENT_ADDRESS,
+			Msgs: []string{err.Error()},
+		}
 		return response, err
 	}
 
@@ -73,14 +67,14 @@ func IsValidProofOfRepresentation(
 				",",
 			),
 		)
-		response := &Status{Code: ERROR_UNSUPPORTED_LEDGER, Msgs: []string{err.Error()}}
+		response := &acn.StatusBody{Code: acn.ERROR_UNSUPPORTED_LEDGER, Msgs: []string{err.Error()}}
 		return response, err
 	}
 
 	// check public key matches
 	if record.PeerPublicKey != representativePeerPubKey {
 		err := errors.New("Wrong peer public key, expected " + representativePeerPubKey)
-		response := &Status{Code: ERROR_WRONG_PUBLIC_KEY, Msgs: []string{err.Error()}}
+		response := &acn.StatusBody{Code: acn.ERROR_WRONG_PUBLIC_KEY, Msgs: []string{err.Error()}}
 		return response, err
 	}
 
@@ -90,7 +84,7 @@ func IsValidProofOfRepresentation(
 		if err == nil {
 			err = errors.New("agent address and public key don't match")
 		}
-		response := &Status{Code: ERROR_WRONG_AGENT_ADDRESS}
+		response := &acn.StatusBody{Code: acn.ERROR_WRONG_AGENT_ADDRESS}
 		return response, err
 	}
 
@@ -105,13 +99,13 @@ func IsValidProofOfRepresentation(
 		if err == nil {
 			err = errors.New("signature is not valid")
 		}
-		response := &Status{Code: ERROR_INVALID_PROOF}
+		response := &acn.StatusBody{Code: acn.ERROR_INVALID_PROOF}
 		return response, err
 
 	}
 
 	// PoR is valid
-	response := &Status{Code: SUCCESS}
+	response := &acn.StatusBody{Code: acn.SUCCESS}
 	return response, nil
 
 }

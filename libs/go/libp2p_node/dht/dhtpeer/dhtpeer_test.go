@@ -1826,7 +1826,6 @@ func SetupDelegateClient(
 	record.Signature = signature
 	registration := &acn.RegisterPerformative{Record: record}
 	msg := &acn.AcnMessage{
-		// Version: dhtnode.CurrentVersion,
 		Performative: &acn.Register{Register: registration},
 	}
 	data, err := proto.Marshal(msg)

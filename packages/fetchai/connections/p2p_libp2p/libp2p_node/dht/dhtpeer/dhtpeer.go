@@ -377,7 +377,7 @@ func New(opts ...Option) (*DHTPeer, error) {
 }
 
 // saveAgentRecordToPersistentStorage saves the agent record to persistent storage
-func (dhtPeer *DHTPeer) saveAgentRecordToPersistentStorage(record *dhtnode.AgentRecord) error {
+func (dhtPeer *DHTPeer) saveAgentRecordToPersistentStorage(record *acn.AgentRecord) error {
 	msg := formatPersistentStorageLine(record)
 	if len(msg) == 0 {
 		return errors.New("while formating record " + record.String())
@@ -395,13 +395,13 @@ func (dhtPeer *DHTPeer) saveAgentRecordToPersistentStorage(record *dhtnode.Agent
 	return nil
 }
 
-func parsePersistentStorageLine(line []byte) (*dhtnode.AgentRecord, error) {
-	record := &dhtnode.AgentRecord{}
+func parsePersistentStorageLine(line []byte) (*acn.AgentRecord, error) {
+	record := &acn.AgentRecord{}
 	err := proto.Unmarshal(line, record)
 	return record, err
 }
 
-func formatPersistentStorageLine(record *dhtnode.AgentRecord) []byte {
+func formatPersistentStorageLine(record *acn.AgentRecord) []byte {
 	msg, err := proto.Marshal(record)
 	ignore(err)
 	return msg
@@ -577,10 +577,12 @@ func (dhtPeer *DHTPeer) Close() []error {
 	if dhtPeer.tcpListener != nil {
 		err = dhtPeer.tcpListener.Close()
 		errappend(err)
+		dhtPeer.tcpAddressesLock.Lock()
 		for _, conn := range dhtPeer.tcpAddresses {
 			err = conn.Close()
 			errappend(err)
 		}
+		dhtPeer.tcpAddressesLock.Unlock()
 	}
 
 	err = dhtPeer.dht.Close()
@@ -1644,7 +1646,6 @@ func (dhtPeer *DHTPeer) handleAeaAddressStream(stream network.Stream) {
 			status := &acn.StatusBody{Code: acn.ERROR_UNKNOWN_AGENT_ADDRESS}
 			statusPerformative := &acn.StatusPerformative{Body: status}
 			response := &acn.AcnMessage{
-				// Version: dhtnode.CurrentVersion,
 				Performative: &acn.Status{Status: statusPerformative},
 			}
 			buf, err = proto.Marshal(response)
@@ -1663,7 +1664,6 @@ func (dhtPeer *DHTPeer) handleAeaAddressStream(stream network.Stream) {
 
 		lookupResponse := &acn.LookupResponsePerformative{Record: sRecord}
 		response := &acn.AcnMessage{
-			// Version: dhtnode.CurrentVersion,
 			Performative: &acn.LookupResponse{LookupResponse: lookupResponse},
 		}
 		buf, err := proto.Marshal(response)
@@ -1683,7 +1683,6 @@ func (dhtPeer *DHTPeer) handleAeaAddressStream(stream network.Stream) {
 	}
 	statusPerformative := &acn.StatusPerformative{Body: status}
 	response := &acn.AcnMessage{
-		// Version: dhtnode.CurrentVersion,
 		Performative: &acn.Status{Status: statusPerformative},
 	}
 	buf, err = proto.Marshal(response)
@@ -1848,7 +1847,6 @@ func (dhtPeer *DHTPeer) handleAeaRegisterStream(stream network.Stream) {
 		}
 		lerror(err).Msg("PoR is not valid")
 		response := &acn.AcnMessage{
-			// Version: dhtnode.CurrentVersion,
 			Performative: &acn.Status{Status: statusPerformative},
 		}
 		buf, err = proto.Marshal(response)
@@ -1862,7 +1860,6 @@ func (dhtPeer *DHTPeer) handleAeaRegisterStream(stream network.Stream) {
 
 	// TOFIX(LR) post-pone answer until address successfully registered
 	msg = &acn.AcnMessage{
-		// Version: dhtnode.CurrentVersion,
 		Performative: &acn.Status{Status: statusPerformative},
 	}
 	buf, err = proto.Marshal(msg)
