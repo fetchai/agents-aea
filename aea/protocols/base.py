@@ -71,7 +71,7 @@ class Message:
         """
         Initialize a Message object.
 
-        :param body: the dictionary of values to hold.
+        :param _body: the dictionary of values to hold.
         :param kwargs: any additional value to add to the body. It will overwrite the body values.
         """
         self._slots = self._SlotsCls()
@@ -122,11 +122,7 @@ class Message:
 
     @property
     def sender(self) -> Address:
-        """
-        Get the sender of the message in Address form.
-
-        :return the address
-        """
+        """Get the sender of the message in Address form."""
         if self._sender is None:
             raise ValueError("Message's 'Sender' field must be set.")  # pragma: nocover
         return self._sender
@@ -177,7 +173,6 @@ class Message:
         Set the body of the message.
 
         :param body: the body.
-        :return: None
         """
         self._slots = self._SlotsCls()  # new instance to clean up all data
         self._update_slots_from_dict(body)
@@ -216,7 +211,6 @@ class Message:
 
         :param key: the key.
         :param value: the value.
-        :return: None
         """
         try:
             setattr(self._slots, key, value)
@@ -344,6 +338,7 @@ class Protocol(Component):
 
         :param configuration: the protocol configurations.
         :param message_class: the message class.
+        :param kwargs: the keyword arguments.
         """
         super().__init__(configuration, **kwargs)
         self._message_class = message_class
@@ -359,6 +354,7 @@ class Protocol(Component):
         Load the protocol from a directory.
 
         :param directory: the directory to the skill package.
+        :param kwargs: the keyword arguments.
         :return: the protocol object.
         """
         configuration = cast(
@@ -374,6 +370,7 @@ class Protocol(Component):
         Load the protocol from configuration.
 
         :param configuration: the protocol configuration.
+        :param kwargs: the keyword arguments.
         :return: the protocol object.
         """
         if configuration.directory is None:  # pragma: nocover

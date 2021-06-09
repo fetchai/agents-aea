@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import cast
 from unittest.mock import patch
 
+from aea.helpers.search.models import Description
 from aea.test_tools.test_skill import BaseSkillTestCase
 
 from packages.fetchai.protocols.ledger_api.message import LedgerApiMessage
@@ -51,6 +52,7 @@ class TestSkillBehaviour(BaseSkillTestCase):
             cls._skill.skill_context.behaviours.service_registration,
         )
         cls.strategy = cast(GenericStrategy, cls._skill.skill_context.strategy)
+        cls.logger = cls._skill.skill_context.logger
 
         cls.registration_message = OefSearchMessage(
             dialogue_reference=("", ""),
@@ -59,6 +61,8 @@ class TestSkillBehaviour(BaseSkillTestCase):
         )
         cls.registration_message.sender = str(cls._skill.skill_context.skill_id)
         cls.registration_message.to = cls._skill.skill_context.search_service_address
+
+        cls.mocked_description = Description({"foo1": 1, "bar1": 2})
 
     def test_setup_is_ledger_tx(self):
         """Test the setup method of the service_registration behaviour where is_ledger_tx is True."""
@@ -192,54 +196,89 @@ class TestSkillBehaviour(BaseSkillTestCase):
         self.assert_quantity_in_outbox(0)
         assert self.skill.skill_context.is_active is False
 
-    def test_register_service_personality_classification(self):
-        """Test the register_service_personality_classification method of the service_registration behaviour."""
-        # setup
-        mocked_description_1 = "some_description_1"
-        mocked_description_2 = "some_description_2"
-        mocked_description_3 = "some_description_3"
-        descriptions = [
-            mocked_description_1,
-            mocked_description_2,
-            mocked_description_3,
-        ]
-
+    def test_register_service(self):
+        """Test the register_service method of the service_registration behaviour."""
         # operation
         with patch.object(
             self.strategy,
             "get_register_service_description",
-            return_value=mocked_description_1,
+            return_value=self.mocked_description,
         ):
-            with patch.object(
-                self.strategy,
-                "get_register_personality_description",
-                return_value=mocked_description_2,
-            ):
-                with patch.object(
-                    self.strategy,
-                    "get_register_classification_description",
-                    return_value=mocked_description_3,
-                ):
-                    with patch.object(
-                        self.service_registration.context.logger, "log"
-                    ) as mock_logger:
-                        self.service_registration.register_service_personality_classification()
+            with patch.object(self.logger, "log") as mock_logger:
+                self.service_registration.register_service()
 
         # after
-        self.assert_quantity_in_outbox(3)
+        self.assert_quantity_in_outbox(1)
 
-        for description in descriptions:
-            message = self.get_message_from_outbox()
-            has_attributes, error_str = self.message_has_attributes(
-                actual_message=message,
-                message_type=OefSearchMessage,
-                performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-                to=self.skill.skill_context.search_service_address,
-                sender=str(self.skill.skill_context.skill_id),
-                service_description=description,
-            )
-            assert has_attributes, error_str
-        mock_logger.assert_any_call(logging.INFO, "registering service on SOEF.")
+        message = self.get_message_from_outbox()
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=message,
+            message_type=OefSearchMessage,
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            to=self.skill.skill_context.search_service_address,
+            sender=str(self.skill.skill_context.skill_id),
+            service_description=self.mocked_description,
+        )
+        assert has_attributes, error_str
+        mock_logger.assert_any_call(
+            logging.INFO, "registering agent's service on the SOEF."
+        )
+
+    def test_register_genus(self):
+        """Test the register_genus method of the service_registration behaviour."""
+        # operation
+        with patch.object(
+            self.strategy,
+            "get_register_personality_description",
+            return_value=self.mocked_description,
+        ):
+            with patch.object(self.logger, "log") as mock_logger:
+                self.service_registration.register_genus()
+
+        # after
+        self.assert_quantity_in_outbox(1)
+
+        message = self.get_message_from_outbox()
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=message,
+            message_type=OefSearchMessage,
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            to=self.skill.skill_context.search_service_address,
+            sender=str(self.skill.skill_context.skill_id),
+            service_description=self.mocked_description,
+        )
+        assert has_attributes, error_str
+        mock_logger.assert_any_call(
+            logging.INFO, "registering agent's personality genus on the SOEF."
+        )
+
+    def test_register_classification(self):
+        """Test the register_classification method of the service_registration behaviour."""
+        # operation
+        with patch.object(
+            self.strategy,
+            "get_register_classification_description",
+            return_value=self.mocked_description,
+        ):
+            with patch.object(self.logger, "log") as mock_logger:
+                self.service_registration.register_classification()
+
+        # after
+        self.assert_quantity_in_outbox(1)
+
+        message = self.get_message_from_outbox()
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=message,
+            message_type=OefSearchMessage,
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            to=self.skill.skill_context.search_service_address,
+            sender=str(self.skill.skill_context.skill_id),
+            service_description=self.mocked_description,
+        )
+        assert has_attributes, error_str
+        mock_logger.assert_any_call(
+            logging.INFO, "registering agent's personality classification on the SOEF."
+        )
 
     def test_teardown(self):
         """Test the teardown method of the service_registration behaviour."""

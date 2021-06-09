@@ -83,13 +83,14 @@ class AgentContext:
         :param decision_maker_handler_context: the decision maker's name space
         :param task_manager: the task manager
         :param default_ledger_id: the default ledger id
-        :param ledger_it_to_currency_denom: mapping from ledger ids to currency denominations
+        :param currency_denominations: mapping from ledger ids to currency denominations
         :param default_connection: the default connection
         :param default_routing: the default routing
         :param search_service_address: the address of the search service
         :param decision_maker_address: the address of the decision maker
         :param data_dir: directory where to put local files.
         :param storage_callable: function that returns optional storage attached to agent.
+        :param send_to_skill: callable for sending envelopes to skills.
         :param kwargs: keyword arguments to be attached in the agent context namespace.
         """
         self._shared_state = {}  # type: Dict[str, Any]
@@ -118,14 +119,14 @@ class AgentContext:
         """
         Send message or envelope to another skill.
 
-        :param message_or_envelope: envelope to send to another skill.
-        if message passed it will be wrapped into envelope with optional envelope context.
+        If message passed it will be wrapped into envelope with optional envelope context.
 
-        :return: None
+        :param message_or_envelope: envelope to send to another skill.
+        :param context: the optional envelope context
         """
         if self._send_to_skill is None:  # pragma: nocover
             raise ValueError("Send to skill feature is not supported")
-        return self._send_to_skill(message_or_envelope, context)
+        self._send_to_skill(message_or_envelope, context)
 
     @property
     def storage(self) -> Optional[Storage]:
@@ -145,6 +146,8 @@ class AgentContext:
         The shared state is the only object which skills can use
         to exchange state directly. It is accessible (read and write) from
         all skills.
+
+        :return: dictionary of the shared state.
         """
         return self._shared_state
 

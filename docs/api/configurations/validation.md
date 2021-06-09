@@ -95,6 +95,7 @@ Initialize the parser for configuration files.
 **Arguments**:
 
 - `schema_filename`: the path to the JSON-schema file in 'aea/configurations/schemas'.
+- `env_vars_friendly`: whether or not it is env var friendly.
 
 <a name="aea.configurations.validation.ConfigValidator.split_component_id_and_config"></a>
 #### split`_`component`_`id`_`and`_`config
@@ -137,10 +138,6 @@ This check is to detect inconsistencies in the specified fields.
 - `configuration`: the configuration dictionary.
 - `env_vars_friendly`: bool, if set True, will not raise errors over the env variable definitions.
 
-**Returns**:
-
-None
-
 **Raises**:
 
 - `ValueError`: if the configuration is not valid.
@@ -158,10 +155,6 @@ Validate a JSON object against the right JSON schema.
 
 - `json_data`: the JSON data.
 
-**Returns**:
-
-None.
-
 <a name="aea.configurations.validation.ConfigValidator.validate_agent_components_configuration"></a>
 #### validate`_`agent`_`components`_`configuration
 
@@ -173,11 +166,7 @@ Validate agent component configurations overrides.
 
 **Arguments**:
 
-- `component_configurations`: 
-
-**Returns**:
-
-None
+- `component_configurations`: the component configurations to validate.
 
 <a name="aea.configurations.validation.ConfigValidator.required_fields"></a>
 #### required`_`fields
@@ -204,6 +193,7 @@ Validate data dict with pattern dict for attributes present and type match.
 
 **Arguments**:
 
+- `data`: data dict to validate
 - `pattern`: dict with pattern to check over
 - `excludes`: list of tuples of str of paths to be skipped during the check
 - `skip_env_vars`: is set True will not check data type over env variables.

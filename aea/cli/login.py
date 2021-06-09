@@ -40,8 +40,6 @@ def do_login(username: str, password: str) -> None:
 
     :param username: str username.
     :param password: str password.
-
-    :return: None
     """
     click.echo("Signing in as {}...".format(username))
     token = registry_login(username, password)

@@ -4,7 +4,7 @@ An agent that is generated using the AEA framework is a modular system with diff
 
 The file structure of an AEA is fixed.
 
-The top level directory has the AEA's name. Below is a `aea-config.yaml` configuration file, then directories containing the connections, contracts, protocols, and skills developed by the developer as part of the given project. The connections, contracts, protocols and skills used from the registry (local or remote - added via `aea fetch` or `aea add`) are located in `vendor` and sorted by author. Build artifacts are placed in the `.build/` directory and certificates are placed in the `.certs/` directory. Finally, there are files containing the private keys of the AEA.
+The top level directory has the AEA's name. Below is a `aea-config.yaml` configuration file, then directories containing the connections, contracts, protocols, and skills developed by the developer as part of the given project. The connections, contracts, protocols and skills used from the registry (local or remote - added via `aea fetch` or `aea add`) are located in `vendor` and sorted by author. Build artefacts are placed in the `.build/` directory and certificates are placed in the `.certs/` directory. Finally, there are files containing the private keys of the AEA.
 
 When we create a new agent with the command `aea create my_aea` we create the file structure that looks like the following:
 

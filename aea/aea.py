@@ -108,8 +108,12 @@ class AEA(Agent):
         :param period: period to call agent's act
         :param execution_timeout: amount of time to limit single act/handle to execute.
         :param max_reactions: the processing rate of envelopes per tick (i.e. single loop).
+        :param error_handler_class: the class implementing the error handler
+        :param error_handler_config: the configuration of the error handler
         :param decision_maker_handler_class: the class implementing the decision maker handler to be used.
+        :param decision_maker_handler_config: the configuration of the decision maker handler
         :param skill_exception_policy: the skill exception policy enum
+        :param connection_exception_policy: the connection exception policy enum
         :param loop_mode: loop_mode to choose agent run loop.
         :param runtime_mode: runtime mode (async, threaded) to run AEA in.
         :param default_ledger: default ledger id
@@ -121,8 +125,6 @@ class AEA(Agent):
         :param storage_uri: optional uri to set generic storage
         :param task_manager_mode: task manager mode (threaded) to run tasks with.
         :param kwargs: keyword arguments to be attached in the agent context namespace.
-
-        :return: None
         """
 
         self._skills_exception_policy = skill_exception_policy
@@ -266,8 +268,6 @@ class AEA(Agent):
         Set up the agent.
 
         Calls setup() on the resources.
-
-        :return: None
         """
         self.resources.setup()
 
@@ -276,8 +276,6 @@ class AEA(Agent):
         Perform actions.
 
         Adds new handlers and behaviours for use/execution by the runtime.
-
-        :return: None
         """
         self.filter.handle_new_handlers_and_behaviours()
 
@@ -457,8 +455,6 @@ class AEA(Agent):
         Performs the following:
 
         - tears down the resources.
-
-        :return: None
         """
         self.resources.teardown()
 
@@ -466,6 +462,7 @@ class AEA(Agent):
         """
         Get the result from a task.
 
+        :param task_id: the id of the task
         :return: async result for task_id
         """
         return self.runtime.task_manager.get_task_result(task_id)
@@ -482,7 +479,6 @@ class AEA(Agent):
         :param func: the callable instance to be enqueued
         :param args: the positional arguments to be passed to the function.
         :param kwargs: the keyword arguments to be passed to the function.
-        :return the task id to get the the result.
-        :raises ValueError: if the task manager is not running.
+        :return: the task id to get the the result.
         """
         return self.runtime.task_manager.enqueue_task(func, args, kwargs)

@@ -83,10 +83,12 @@ from aea.crypto.ledger_apis import (
 )
 from aea.crypto.registries import ledger_apis_registry, make_crypto
 from aea.crypto.wallet import CryptoStore
+from aea.exceptions import enforce
 from aea.helpers.base import CertRequest, SimpleId, cd
 from aea.identity.base import Identity
 from aea.test_tools.click_testing import CliRunner as ImportedCliRunner
 from aea.test_tools.constants import DEFAULT_AUTHOR
+from aea.test_tools.test_cases import BaseAEATestCase
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 from packages.fetchai.connections.oef.connection import OEFConnection
@@ -248,6 +250,16 @@ PUBLIC_DHT_P2P_PUBLIC_KEY_1 = (
 )
 PUBLIC_DHT_P2P_PUBLIC_KEY_2 = (
     "03fa7cfae1037cba5218f0f5743802eced8de3247c55ecebaae46c7d3679e3f91d"
+)
+PUBLIC_STAGING_DHT_P2P_MADDR_1 = "/dns4/acn.fetch-ai.com/tcp/9003/p2p/16Uiu2HAmQo6EHbmwhkMJkyhjz1DCxE8Ahsy5zFZtw97tWCFckLUp"
+PUBLIC_STAGING_DHT_P2P_MADDR_2 = "/dns4/acn.fetch-ai.com/tcp/9004/p2p/16Uiu2HAmEvey5siPHzdEb5QcTYCkh16squbeFHYHvRCWP9Jzp4bV"
+PUBLIC_STAGING_DHT_DELEGATE_URI_1 = "acn.fetch-ai.com:11003"
+PUBLIC_STAGING_DHT_DELEGATE_URI_2 = "acn.fetch-ai.com:11004"
+PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_1 = (
+    "03b45f898bde437ace4728b3ba097988306930b1600b7991d384e6d08452e340e1"
+)
+PUBLIC_STAGING_DHT_P2P_PUBLIC_KEY_2 = (
+    "0321bac023b7f7cf655cf5e0f988a4c1cf758f7b530528362c4ba8d563f7b090c4"
 )
 
 # testnets
@@ -645,7 +657,6 @@ def apply_aea_loop(request) -> None:
 
 
 @pytest.fixture(scope="session")
-@action_for_platform("Linux", skip=False)
 def network_node(
     oef_addr, oef_port, pytestconfig, timeout: float = 2.0, max_attempts: int = 10
 ):
@@ -706,7 +717,6 @@ def update_default_ethereum_ledger_api(ethereum_testnet_config):
 @pytest.mark.integration
 @pytest.mark.ledger
 @pytest.fixture(scope="session")
-@action_for_platform("Linux", skip=False)
 def ganache(
     ganache_configuration,
     ganache_addr,
@@ -1429,3 +1439,33 @@ def change_directory():
             yield temporary_directory
     finally:
         shutil.rmtree(temporary_directory)
+
+
+@pytest.fixture(params=[None, "fake-password"])
+def password_or_none(request) -> Optional[str]:
+    """
+    Return a password for testing purposes, including None.
+
+    Note that this is a parametrized fixture.
+    """
+    return request.param
+
+
+def method_scope(cls):
+    """
+    Class decorator to make the setup/teardown to have the 'method' scope.
+
+    :param cls: the class. It must be a subclass of
+    :return:
+    """
+    enforce(
+        issubclass(cls, BaseAEATestCase),
+        "cannot use decorator if class is not instance of BaseAEATestCase",
+    )
+    old_setup_class = cls.setup_class
+    old_teardown_class = cls.teardown_class
+    cls.setup_class = classmethod(lambda _cls: None)
+    cls.teardown_class = classmethod(lambda _cls: None)
+    cls.setup = lambda self: old_setup_class()
+    cls.teardown = lambda self: old_teardown_class()
+    return cls

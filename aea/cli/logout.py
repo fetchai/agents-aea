@@ -35,10 +35,6 @@ def logout() -> None:
 
 
 def do_logout() -> None:
-    """
-    Logout from Registry account.
-
-    :return: None.
-    """
+    """Logout from Registry account."""
     registry_logout()
     update_cli_config({AUTH_TOKEN_KEY: None})

@@ -2,10 +2,6 @@
 omit =
     */.tox/*
     packages/fetchai/contracts/*
-    packages/fetchai/skills/aries_alice/*
-    packages/fetchai/skills/aries_faber/*
-    packages/fetchai/skills/erc1155_client/*
-    packages/fetchai/skills/erc1155_deploy/*
     packages/fetchai/skills/gym/*
     packages/fetchai/skills/fipa_dummy_buyer/*
     plugins/aea-ledger-cosmos/aea_ledger_cosmos/cosmos.py

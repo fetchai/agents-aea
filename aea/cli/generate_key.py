@@ -57,8 +57,6 @@ def _generate_private_key(
     :param type_: type.
     :param file: path to file.
     :param password: the password to encrypt/decrypt the private key.
-
-    :return: None
     """
     if type_ == "all" and file is not None:
         raise click.ClickException("Type all cannot be used in combination with file.")

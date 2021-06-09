@@ -81,8 +81,6 @@ def _add_private_key(
     :param file: path to file.
     :param connection: whether or not it is a private key for a connection.
     :param password: the password to encrypt/decrypt the private key.
-
-    :return: None
     """
     ctx = cast(Context, click_context.obj)
     if file is None:

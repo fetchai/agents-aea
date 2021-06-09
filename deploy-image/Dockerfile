@@ -16,7 +16,7 @@ RUN apk add --no-cache go
 
 # aea installation
 RUN pip install --upgrade pip
-RUN pip install --upgrade --force-reinstall aea[all]==1.0.0
+RUN pip install --upgrade --force-reinstall aea[all]==1.0.2
 
 # directories and aea cli config
 COPY /.aea /home/.aea

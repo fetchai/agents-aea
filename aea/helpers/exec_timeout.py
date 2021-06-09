@@ -42,11 +42,7 @@ class TimeoutResult:
         self._cancelled_by_timeout = False
 
     def set_cancelled_by_timeout(self) -> None:
-        """
-        Set code was terminated cause timeout.
-
-        :return: None
-        """
+        """Set code was terminated cause timeout."""
         self._cancelled_by_timeout = True
 
     def is_cancelled_by_timeout(self) -> bool:
@@ -105,7 +101,9 @@ class BaseExecTimeout(ABC):
         """
         Exit context manager.
 
-        :return: bool
+        :param exc_type: the exception type
+        :param exc_val: the exception
+        :param exc_tb: the traceback
         """
         if self.timeout:
             self._remove_timeout_watch()
@@ -119,8 +117,6 @@ class BaseExecTimeout(ABC):
         Start control over execution time.
 
         Should be implemented in concrete class.
-
-        :return: None
         """
         raise NotImplementedError  # pragma: nocover
 
@@ -130,8 +126,6 @@ class BaseExecTimeout(ABC):
         Stop control over execution time.
 
         Should be implemented in concrete class.
-
-        :return: None
         """
         raise NotImplementedError  # pragma: nocover
 
@@ -144,20 +138,12 @@ class ExecTimeoutSigAlarm(BaseExecTimeout):  # pylint: disable=too-few-public-me
     """
 
     def _set_timeout_watch(self) -> None:
-        """
-        Start control over execution time.
-
-        :return: None
-        """
+        """Start control over execution time."""
         signal.setitimer(signal.ITIMER_REAL, self.timeout, 0)
         signal.signal(signal.SIGALRM, self._on_timeout)
 
     def _remove_timeout_watch(self) -> None:
-        """
-        Stop control over execution time.
-
-        :return: None
-        """
+        """Stop control over execution time."""
         signal.setitimer(signal.ITIMER_REAL, 0, 0)
 
 
@@ -193,8 +179,6 @@ class ExecTimeoutThreadGuard(BaseExecTimeout):
         Start supervisor thread to check timeouts.
 
         Supervisor starts once but number of start counted.
-
-        :return: None
         """
         with cls._lock:
             cls._start_count += 1
@@ -217,7 +201,6 @@ class ExecTimeoutThreadGuard(BaseExecTimeout):
         Actual stop performed on force == True or if  number of stops == number of starts
 
         :param force: force stop regardless number of start.
-        :return: None
         """
         with cls._lock:
             if not cls._supervisor_thread:  # pragma: nocover
@@ -249,21 +232,13 @@ class ExecTimeoutThreadGuard(BaseExecTimeout):
         cls._loop.run_until_complete(wait_stopped())  # type: ignore
 
     async def _guard_task(self) -> None:
-        """
-        Task to terminate thread on timeout.
-
-        :return: None
-        """
+        """Task to terminate thread on timeout."""
         await asyncio.sleep(self.timeout)
         self._set_thread_exception(self._thread_id, self.exception_class)  # type: ignore
 
     @staticmethod
     def _set_thread_exception(thread_id: int, exception_class: Type[Exception]) -> None:
-        """
-        Terminate code execution in specific thread by setting exception.
-
-        :return: None
-        """
+        """Terminate code execution in specific thread by setting exception."""
         ctypes.pythonapi.PyThreadState_SetAsyncExc(
             ctypes.c_long(thread_id), ctypes.py_object(exception_class)
         )
@@ -274,8 +249,6 @@ class ExecTimeoutThreadGuard(BaseExecTimeout):
 
         Set task checking code execution time.
         ExecTimeoutThreadGuard.start is required at least once in project before usage!
-
-        :return: None
         """
         if not self._supervisor_thread:
             _default_logger.warning(
@@ -293,8 +266,6 @@ class ExecTimeoutThreadGuard(BaseExecTimeout):
         Stop control over execution time.
 
         Cancel task checking code execution time.
-
-        :return: None
         """
         if self._future_guard_task and not self._future_guard_task.done():
             self._future_guard_task.cancel()

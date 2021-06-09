@@ -49,6 +49,8 @@ DEFAULT_COMPETITION_TIMEOUT = 300
 DEFAULT_INACTIVITY_TIMEOUT = 30
 DEFAULT_LOCATION = {"longitude": 0.1270, "latitude": 51.5194}
 DEFAULT_SERVICE_DATA = {"key": "tac", "value": "v1"}
+DEFAULT_PERSONALITY_DATA = {"piece": "genus", "value": "service"}
+DEFAULT_CLASSIFICATION = {"piece": "classification", "value": "tac.controller"}
 
 
 class Parameters(Model):
@@ -118,6 +120,22 @@ class Parameters(Model):
                 longitude=self._location["longitude"],
             )
         }
+        self._set_personality_data = kwargs.pop(
+            "personality_data", DEFAULT_PERSONALITY_DATA
+        )
+        enforce(
+            len(self._set_personality_data) == 2
+            and "piece" in self._set_personality_data
+            and "value" in self._set_personality_data,
+            "personality_data must contain keys `key` and `value`",
+        )
+        self._set_classification = kwargs.pop("classification", DEFAULT_CLASSIFICATION)
+        enforce(
+            len(self._set_classification) == 2
+            and "piece" in self._set_classification
+            and "value" in self._set_classification,
+            "classification must contain keys `key` and `value`",
+        )
         self._set_service_data = self._service_data
         self._remove_service_data = {"key": self._service_data["key"]}
         self._simple_service_data = {
@@ -302,6 +320,16 @@ class Parameters(Model):
     def set_service_data(self) -> Dict[str, str]:
         """Get the set service data."""
         return self._set_service_data
+
+    @property
+    def set_personality_data(self) -> Dict[str, str]:
+        """Get the set service data."""
+        return self._set_personality_data
+
+    @property
+    def set_classification(self) -> Dict[str, str]:
+        """Get the set service data."""
+        return self._set_classification
 
     @property
     def remove_service_data(self) -> Dict[str, str]:

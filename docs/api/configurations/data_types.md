@@ -122,6 +122,10 @@ Get the plural name.
 >>> PackageType.CONTRACT.to_plural()
 'contracts'
 
+**Returns**:
+
+pluralised package type
+
 <a name="aea.configurations.data_types.PackageType.__str__"></a>
 #### `__`str`__`
 
@@ -162,6 +166,10 @@ Get the collection of type names, plural.
 >>> ComponentType.plurals()
 ['protocols', 'connections', 'skills', 'contracts']
 
+**Returns**:
+
+list of all pluralised component types
+
 <a name="aea.configurations.data_types.ComponentType.to_plural"></a>
 #### to`_`plural
 
@@ -179,6 +187,10 @@ Get the plural version of the component type.
 'skills'
 >>> ComponentType.CONTRACT.to_plural()
 'contracts'
+
+**Returns**:
+
+pluralised component type
 
 <a name="aea.configurations.data_types.ComponentType.__str__"></a>
 #### `__`str`__`
@@ -485,6 +497,18 @@ True
 Traceback (most recent call last):
 ...
 ValueError: The public IDs author_1/name_1:0.1.0 and author_1/name_2:0.1.0 cannot be compared. Their author or name attributes are different.
+
+**Arguments**:
+
+- `other`: the object to compate to
+
+**Raises**:
+
+- `ValueError`: if the public ids cannot be confirmed
+
+**Returns**:
+
+whether or not the inequality is satisfied
 
 <a name="aea.configurations.data_types.PackageId"></a>
 ## PackageId Objects
@@ -943,10 +967,6 @@ Add an item.
 - `item_id`: the item id.
 - `item`: the item to be added.
 
-**Returns**:
-
-None
-
 **Raises**:
 
 - `ValueError`: if the item with the same id is already in the collection.
@@ -981,10 +1001,6 @@ Update an existing item.
 
 - `item_id`: the item id.
 - `item`: the item to be added.
-
-**Returns**:
-
-None
 
 <a name="aea.configurations.data_types.CRUDCollection.delete"></a>
 #### delete

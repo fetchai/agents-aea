@@ -134,7 +134,7 @@ class AbstractMultiprocessExecutorTask(AbstractExecutorTask):
         Raise error, cause async mode is not supported, cause this task for multiprocess executor only.
 
         :param loop: the event loop
-        :return: task to run in asyncio loop.
+        :raises ValueError: async task construction not possible
         """
         raise ValueError(
             "This task was designed only for multiprocess executor, not for async!"
@@ -203,6 +203,7 @@ class AbstractMultipleExecutor(ABC):  # pragma: nocover
         Wait tasks execution to complete.
 
         :param skip_exceptions: skip exceptions if raised in tasks
+        :param on_stop: bool, indicating if stopping
         """
         if not on_stop:
             self._is_running = True
@@ -238,7 +239,6 @@ class AbstractMultipleExecutor(ABC):  # pragma: nocover
 
         :param task: task exception handled in
         :param exc: Exception raised
-        :return: None
         """
         _default_logger.exception(f"Exception raised during {task.id} running.")
         _default_logger.info(f"Exception raised during {task.id} running.")
@@ -274,7 +274,6 @@ class AbstractMultipleExecutor(ABC):  # pragma: nocover
         Stop particular task.
 
         :param task: AbstractExecutorTask instance to stop.
-        :return: None
         """
         task.stop()
 
@@ -383,7 +382,6 @@ class AbstractMultipleRunner:  # pragma: nocover
         Run agents.
 
         :param threaded: run in dedicated thread without blocking current thread.
-        :return: None
         """
         if threaded:
             self._thread = Thread(target=self._executor.start, daemon=True)
@@ -396,7 +394,6 @@ class AbstractMultipleRunner:  # pragma: nocover
         Stop agents.
 
         :param timeout: timeout in seconds to wait thread stopped, only if started in thread mode.
-        :return: None
         """
         self._executor.stop()
         if self._thread is not None:

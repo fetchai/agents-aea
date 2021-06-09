@@ -81,10 +81,9 @@ def do_fetch(
     :param ctx: the CLI context.
     :param public_id: the public id.
     :param local: whether to fetch from local
-    :param remote whether to fetch from remote
+    :param remote: whether to fetch from remote
     :param alias: the agent alias.
     :param target_dir: the target directory, in case fetching locally.
-    :return: None
     """
     enforce(
         not (local and remote), "'local' and 'remote' options are mutually exclusive."
@@ -135,7 +134,6 @@ def fetch_agent_locally(
     :param public_id: public ID of agent to be fetched.
     :param alias: an optional alias.
     :param target_dir: the target directory to which the agent is fetched.
-    :return: None
     """
     try:
         registry_path = ctx.registry_path
@@ -189,9 +187,6 @@ def _fetch_agent_deps(ctx: Context) -> None:
     Fetch agent dependencies.
 
     :param ctx: context object.
-
-    :return: None
-    :raises: ClickException re-raises if occurs in add_item call.
     """
     for item_type in (PROTOCOL, CONTRACT, CONNECTION, SKILL):
         item_type_plural = "{}s".format(item_type)
@@ -213,7 +208,6 @@ def fetch_mixed(
     :param public_id: the public id.
     :param alias: the alias to the agent.
     :param target_dir: the target directory.
-    :return: None
     """
     try:
         fetch_agent_locally(ctx, public_id, alias=alias, target_dir=target_dir)

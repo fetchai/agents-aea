@@ -412,6 +412,62 @@ class TestSkillBehaviour(BaseSkillTestCase):
             logging.INFO, "unregistering TAC data model from SOEF."
         )
 
+    def test_register_genus(self):
+        """Test the register_genus method of the service_registration behaviour."""
+        # operation
+        with patch.object(
+            self.game,
+            "get_register_personality_description",
+            return_value=self.mocked_description,
+        ):
+            with patch.object(self.tac_behaviour.context.logger, "log") as mock_logger:
+                self.tac_behaviour.register_genus()
+
+        # after
+        self.assert_quantity_in_outbox(1)
+
+        message = self.get_message_from_outbox()
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=message,
+            message_type=OefSearchMessage,
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            to=self.skill.skill_context.search_service_address,
+            sender=str(self.skill.skill_context.skill_id),
+            service_description=self.mocked_description,
+        )
+        assert has_attributes, error_str
+        mock_logger.assert_any_call(
+            logging.INFO, "registering agent's personality genus on the SOEF."
+        )
+
+    def test_register_classification(self):
+        """Test the register_classification method of the service_registration behaviour."""
+        # operation
+        with patch.object(
+            self.game,
+            "get_register_classification_description",
+            return_value=self.mocked_description,
+        ):
+            with patch.object(self.tac_behaviour.context.logger, "log") as mock_logger:
+                self.tac_behaviour.register_classification()
+
+        # after
+        self.assert_quantity_in_outbox(1)
+
+        message = self.get_message_from_outbox()
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=message,
+            message_type=OefSearchMessage,
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            to=self.skill.skill_context.search_service_address,
+            sender=str(self.skill.skill_context.skill_id),
+            service_description=self.mocked_description,
+        )
+        assert has_attributes, error_str
+        mock_logger.assert_any_call(
+            logging.INFO, "registering agent's personality classification on the SOEF."
+        )
+
     def test_start_tac_not_1_dialogue(self):
         """Test the _start_tac method of the tac behaviour where number of dialogues for an agent is 0."""
         # setup

@@ -243,10 +243,7 @@ class PackageConfiguration(Configuration, ABC):
         :param author: the author of the package.
         :param version: the version of the package (SemVer format).
         :param license_: the license.
-        :param aea_version: either a fixed version, or a set of specifiers
-           describing the AEA versions allowed.
-           (default: empty string - no constraint).
-           The fixed version is interpreted with the specifier '=='.
+        :param aea_version: either a fixed version, or a set of specifiers describing the AEA versions allowed. (default: empty string - no constraint). The fixed version is interpreted with the specifier '=='.
         :param fingerprint: the fingerprint.
         :param fingerprint_ignore_patterns: a list of file patterns to ignore files to fingerprint.
         :param build_entrypoint: path to a script to execute at build time.
@@ -357,7 +354,7 @@ class PackageConfiguration(Configuration, ABC):
         Update configuration with other data.
 
         :param data: the data to replace.
-        :return: None
+        :param env_vars_friendly: whether or not it is env vars friendly.
         """
         if not data:  # do nothing if nothing to update
             return
@@ -389,9 +386,13 @@ class PackageConfiguration(Configuration, ABC):
         raise NotImplementedError  # pragma: nocover
 
     def make_resulting_config_data(self, overrides: Dict) -> Dict:
-        """Make config data with overrides applied.
+        """
+        Make config data with overrides applied.
 
-        Does not update config, just creates json representation
+        Does not update config, just creates json representation.
+
+        :param overrides: the overrides
+        :return: config with overrides applied
         """
         current_config = self.json
         recursive_update(current_config, overrides, allow_new_values=True)
@@ -523,7 +524,8 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         """
         Check that the fingerprint are correct against a directory path.
 
-        :raises ValueError if:
+        :param directory: the directory path.
+        :raises ValueError: if
             - the argument is not a valid package directory
             - the fingerprints do not match.
         """
@@ -537,7 +539,8 @@ class ComponentConfiguration(PackageConfiguration, ABC):
         """
         Check that the public ids in the init file match the config.
 
-        :raises ValueError if:
+        :param directory: the directory path.
+        :raises ValueError: if
             - the argument is not a valid package directory
             - the public ids do not match.
         """
@@ -861,8 +864,8 @@ class SkillComponentConfiguration:
         """
         Initialize a skill component configuration.
 
-        :param skill_component_type: the skill component type.
         :param class_name: the class name of the component.
+        :param file_path: the file path.
         :param args: keyword arguments.
         """
         self.class_name = class_name
@@ -1538,7 +1541,7 @@ class AgentConfig(PackageConfiguration):
         mapping from ComponentId to configurations.
 
         :param data: the data to replace.
-        :return: None
+        :param env_vars_friendly: whether or not it is env vars friendly.
         """
         data = copy(data)
         # update component parts
@@ -1843,7 +1846,6 @@ def _compare_fingerprints(
     :param item_type: the type of the item.
     :param is_recursive: look up sub directories for files to fingerprint
 
-    :return: None
     :raises ValueError: if the fingerprints do not match.
     """
     expected_fingerprints = package_configuration.fingerprint

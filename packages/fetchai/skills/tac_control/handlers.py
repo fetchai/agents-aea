@@ -99,7 +99,9 @@ class TacHandler(Handler):
         :param tac_msg: the message
         """
         self.context.logger.info(
-            "received invalid tac message={}, unidentified dialogue.".format(tac_msg)
+            "received invalid tac message={}, unidentified dialogue (reference={}).".format(
+                tac_msg, tac_msg.dialogue_reference
+            )
         )
         default_dialogues = cast(DefaultDialogues, self.context.default_dialogues)
         default_msg, _ = default_dialogues.create(
@@ -416,9 +418,29 @@ class OefSearchHandler(Handler):
             target_message.performative
             == OefSearchMessage.Performative.REGISTER_SERVICE
         ):
-            if "location" in target_message.service_description.values:
+            description = target_message.service_description
+            data_model_name = description.data_model.name
+            registration_behaviour = cast(TacBehaviour, self.context.behaviours.tac,)
+            if "location_agent" in data_model_name:
+                registration_behaviour.register_genus()
+            elif (
+                "personality_agent" in data_model_name
+                and description.values["piece"] == "genus"
+            ):
+                registration_behaviour.register_classification()
+            elif (
+                "personality_agent" in data_model_name
+                and description.values["piece"] == "classification"
+            ):
                 game = cast(Game, self.context.game)
                 game.is_registered_agent = True
+                self.context.logger.info(
+                    "the agent, with its genus and classification, is successfully registered on the SOEF."
+                )
+            else:
+                self.context.logger.warning(
+                    f"received soef SUCCESS message as a reply to the following unexpected message: {target_message}"
+                )
 
     def _handle_error(
         self,

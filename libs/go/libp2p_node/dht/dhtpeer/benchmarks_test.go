@@ -27,6 +27,7 @@ import (
 	"os"
 	"testing"
 
+	"libp2p_node/acn"
 	"libp2p_node/aea"
 	"libp2p_node/utils"
 
@@ -229,7 +230,7 @@ func setupLocalDHTPeerForBench(
 			return nil, nil, err
 		}
 
-		record := &aea.AgentRecord{}
+		record := &acn.AgentRecord{}
 		record.Address = agentAddress
 		record.PublicKey = agentPubKey
 		record.PeerPublicKey = peerPubKey

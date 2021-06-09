@@ -32,7 +32,7 @@ class MyScaffoldSerializer(Serializer):  # pragma: no cover
         Decode the message.
 
         :param msg: the message object
-        :return: the bytes
+        :return: the bytes  # noqa: DAR202
         """
         raise NotImplementedError  # pragma: no cover
 
@@ -42,6 +42,6 @@ class MyScaffoldSerializer(Serializer):  # pragma: no cover
         Decode the message.
 
         :param obj: the bytes object
-        :return: the message
+        :return: the message  # noqa: DAR202
         """
         raise NotImplementedError  # pragma: no cover

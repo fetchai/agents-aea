@@ -5,13 +5,13 @@ sudo nano 99-hidraw-permissions.rules
 KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0664", GROUP="plugdev"
 ```
 ``` bash
-aea fetch fetchai/generic_seller:0.24.0
+aea fetch fetchai/generic_seller:0.27.0
 cd generic_seller
-aea eject skill fetchai/generic_seller:0.25.0
+aea eject skill fetchai/generic_seller:0.26.0
 cd ..
 ```
 ``` bash
-aea fetch fetchai/generic_buyer:0.25.0
+aea fetch fetchai/generic_buyer:0.28.0
 cd generic_buyer
 aea eject skill fetchai/generic_buyer:0.25.0
 cd ..
@@ -56,31 +56,31 @@ aea issue-certificates
 aea config set --type dict agent.default_routing \
 '{
   "fetchai/ledger_api:1.0.0": "fetchai/ledger:0.18.0",
-  "fetchai/oef_search:1.0.0": "fetchai/soef:0.22.0"
+  "fetchai/oef_search:1.0.0": "fetchai/soef:0.25.0"
 }'
 ```
 ``` bash
 aea generate-wealth fetchai --sync
 ```
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.21.0
-aea add connection fetchai/soef:0.22.0
+aea add connection fetchai/p2p_libp2p:0.24.0
+aea add connection fetchai/soef:0.25.0
 aea add connection fetchai/ledger:0.18.0
 aea add protocol fetchai/fipa:1.0.0
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.21.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.24.0
 aea run
 ```
 ``` bash 
-aea add connection fetchai/p2p_libp2p:0.21.0
-aea add connection fetchai/soef:0.22.0
+aea add connection fetchai/p2p_libp2p:0.24.0
+aea add connection fetchai/soef:0.25.0
 aea add connection fetchai/ledger:0.18.0
 aea add protocol fetchai/fipa:1.0.0
 aea add protocol fetchai/signing:1.0.0
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.21.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.24.0
 ```
 ``` bash
 aea config set --type dict vendor.fetchai.connections.p2p_libp2p.config \

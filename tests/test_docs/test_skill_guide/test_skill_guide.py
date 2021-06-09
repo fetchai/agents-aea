@@ -77,7 +77,7 @@ class TestBuildSkill(AEATestCaseManyFlaky):
 
         simple_service_registration_aea = "simple_service_registration"
         self.fetch_agent(
-            "fetchai/simple_service_registration:0.27.0",
+            "fetchai/simple_service_registration:0.30.0",
             simple_service_registration_aea,
         )
         self.set_agent_context(simple_service_registration_aea)
@@ -99,7 +99,7 @@ class TestBuildSkill(AEATestCaseManyFlaky):
         self.set_config(setting_path, FetchAICrypto.identifier)
 
         default_routing = {
-            "fetchai/oef_search:1.0.0": "fetchai/soef:0.22.0",
+            "fetchai/oef_search:1.0.0": "fetchai/soef:0.25.0",
         }
 
         # replace location
@@ -112,9 +112,9 @@ class TestBuildSkill(AEATestCaseManyFlaky):
         skill_name = "my_search"
         skill_id = AUTHOR + "/" + skill_name + ":" + DEFAULT_VERSION
         self.scaffold_item("skill", skill_name)
-        self.add_item("connection", "fetchai/p2p_libp2p:0.21.0")
-        self.add_item("connection", "fetchai/soef:0.22.0")
-        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.21.0")
+        self.add_item("connection", "fetchai/p2p_libp2p:0.24.0")
+        self.add_item("connection", "fetchai/soef:0.25.0")
+        self.set_config("agent.default_connection", "fetchai/p2p_libp2p:0.24.0")
         setting_path = "agent.default_routing"
         self.nested_set_config(setting_path, default_routing)
 
@@ -223,7 +223,9 @@ class TestBuildSkill(AEATestCaseManyFlaky):
 
         check_strings = (
             "registering agent on SOEF.",
-            "registering service on SOEF.",
+            "registering agent's service on the SOEF.",
+            "registering agent's personality genus on the SOEF.",
+            "registering agent's personality classification on the SOEF.",
         )
         missing_strings = self.missing_from_output(
             simple_service_registration_aea_process,

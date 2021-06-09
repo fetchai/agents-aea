@@ -1,6 +1,6 @@
 agent_name: simple_buyer_aw5
 author: fetchai
-version: 0.1.0
+version: 0.3.0
 license: Apache-2.0
 description: This agent purchases information from other agents as specified in its
   configuration. It acts as the confirmation AEA in Agent World 5.
@@ -10,8 +10,8 @@ fingerprint_ignore_patterns: []
 connections:
 - fetchai/http_client:0.22.0
 - fetchai/ledger:0.18.0
-- fetchai/p2p_libp2p:0.21.0
-- fetchai/soef:0.22.0
+- fetchai/p2p_libp2p:0.24.0
+- fetchai/soef:0.25.0
 contracts: []
 protocols:
 - fetchai/contract_api:1.0.0
@@ -31,7 +31,7 @@ required_ledgers:
 default_routing:
   fetchai/http:1.0.0: fetchai/http_client:0.22.0
   fetchai/ledger_api:1.0.0: fetchai/ledger:0.18.0
-  fetchai/oef_search:1.0.0: fetchai/soef:0.22.0
+  fetchai/oef_search:1.0.0: fetchai/soef:0.25.0
 connection_private_key_paths: {}
 private_key_paths: {}
 logging_config:
@@ -68,9 +68,9 @@ logging_config:
 dependencies:
   aea-ledger-fetchai:
     version: <2.0.0,>=1.0.0
-default_connection: fetchai/p2p_libp2p:0.21.0
+default_connection: fetchai/p2p_libp2p:0.24.0
 ---
-public_id: fetchai/p2p_libp2p:0.21.0
+public_id: fetchai/p2p_libp2p:0.24.0
 type: connection
 config:
   delegate_uri: null
@@ -78,7 +78,7 @@ config:
   entry_peers:
   - /dns4/acn.fetch.ai/tcp/9001/p2p/16Uiu2HAmVWnopQAqq4pniYLw44VRvYxBUoRHqjz1Hh2SoCyjbyRW
 ---
-public_id: fetchai/soef:0.22.0
+public_id: fetchai/soef:0.25.0
 type: connection
 config:
   chain_identifier: fetchai_v2_testnet_incentivised

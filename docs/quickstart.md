@@ -9,7 +9,13 @@ This example will take you through a simple AEA to familiarise you with the basi
 The AEA framework can be used on `Windows`, `Ubuntu/Debian` and `MacOS`.
 
 You need <a href="https://www.python.org/downloads/" target="_blank">Python 3.6</a> or higher as well as <a href="https://golang.org/dl/" target="_blank">Go 1.14.2</a> or higher installed.
-​
+
+​GCC installation is required:
+* Ubuntu: `apt-get install gcc`
+* Windows (with <a href="https://chocolatey.org/" target="_blank">`choco`</a>
+ installed): `choco install mingw`
+* MacOS X (with home brew): `brew install gcc`
+
 ### Option 1: Manual system preparation
 
 Install a compatible Python and Go version on your system (see <a href="https://realpython.com/installing-python/" target="_blank">this external resource</a> for a comprehensive guide).
@@ -161,7 +167,7 @@ Confirm password:
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v1.0.0
+v1.0.2
 
 AEA configurations successfully initialized: {'author': 'fetchai'}
 ```
@@ -274,7 +280,7 @@ You will see the echo skill running in the terminal window (an output similar to
  / ___ \ | |___  / ___ \
 /_/   \_\|_____|/_/   \_\
 
-v1.0.0
+v1.0.2
 
 Starting AEA 'my_first_aea' in 'async' mode ...
 info: Echo Handler: setup method called.

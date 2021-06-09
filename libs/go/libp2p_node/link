@@ -1,0 +1,39 @@
+#!/usr/bin/python2
+import argparse
+import os
+import subprocess
+import sys
+
+
+# renamed 'link' file
+original_link_file = 'link_orig'
+
+# link first
+output=None
+code=0
+try:
+    output = subprocess.check_output([os.path.dirname(__file__) + '/' + original_link_file] + sys.argv[1:], cwd=os.getcwd())
+except subprocess.CalledProcessError as e:
+    output = e.output
+    code = e.returncode
+
+if output:
+    print output.replace(original_link_file, 'link')
+
+# change max_prot value to 0x7
+parser = argparse.ArgumentParser()
+parser.add_argument('-o')
+args, _ = parser.parse_known_args()
+
+if args.o:
+    binary_target = args.o
+    # only for testing
+    if binary_target.endswith('.test') or binary_target.endswith('_test_go'):
+        with open(os.devnull, 'wb') as DEVNULL:
+            try:
+                subprocess.check_call(["printf '\x07' | dd of=%s bs=1 seek=160 count=1 conv=notrunc" % binary_target], shell=True, stdout=DEVNULL, stderr=DEVNULL)
+            except subprocess.CalledProcessError as e:
+                pass
+
+sys.exit(code)
+

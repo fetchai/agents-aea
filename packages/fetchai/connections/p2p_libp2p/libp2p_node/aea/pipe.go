@@ -1,4 +1,4 @@
-// +build linux darwin !windows
+// +build windows linux darwin
 
 /* -*- coding: utf-8 -*-
 * ------------------------------------------------------------------------------
@@ -25,62 +25,64 @@ package aea
 import (
 	"encoding/binary"
 	"errors"
-	"os"
+	common "libp2p_node/common"
+	"math"
+	"net"
+	"strconv"
 )
 
-type UnixPipe struct {
-	msgin_path  string
-	msgout_path string
-	msgin       *os.File
-	msgout      *os.File
+type TCPSocketChannel struct {
+	port uint16
+	conn net.Conn
 }
 
-func (pipe *UnixPipe) Connect() error {
-	// open pipes
-	var erro, erri error
-	pipe.msgout, erro = os.OpenFile(pipe.msgout_path, os.O_WRONLY, os.ModeNamedPipe)
-	pipe.msgin, erri = os.OpenFile(pipe.msgin_path, os.O_RDONLY, os.ModeNamedPipe)
+func (sock *TCPSocketChannel) Connect() error {
+	// open tcp connection
+	var err error
+	sock.conn, err = net.Dial("tcp", "127.0.0.1:"+strconv.FormatInt(int64(sock.port), 10))
 
-	if erri != nil || erro != nil {
-		if erri != nil {
-			return erri
-		}
-		return erro
+	if err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func (pipe *UnixPipe) Read() ([]byte, error) {
+func (sock *TCPSocketChannel) Read() ([]byte, error) {
+	// TOFIX(LR) duplicated code to avoid circular dep
+	//           utils.ReadBytesConn(sock.conn)
 	buf := make([]byte, 4)
-	_, err := pipe.msgin.Read(buf)
+	_, err := sock.conn.Read(buf)
 	if err != nil {
-		return buf, errors.New("while receiving size" + err.Error())
+		return buf, err
 	}
 	size := binary.BigEndian.Uint32(buf)
 
 	buf = make([]byte, size)
-	_, err = pipe.msgin.Read(buf)
+	_, err = sock.conn.Read(buf)
 	return buf, err
-
 }
 
-func (pipe *UnixPipe) Write(data []byte) error {
+func (sock *TCPSocketChannel) Write(data []byte) error {
+	// TOFIX(LR) duplicated code to avoid circular dep
+	//    		 utils.WriteBytesConn(sock.conn, data)
+	if len(data) > math.MaxInt32 {
+		return errors.New("value too large")
+	}
 	size := uint32(len(data))
 	buf := make([]byte, 4, 4+size)
 	binary.BigEndian.PutUint32(buf, size)
 	buf = append(buf, data...)
-	_, err := pipe.msgout.Write(buf)
+	_, err := sock.conn.Write(buf)
 	logger.Debug().Msgf("wrote data to pipe: %d bytes", size)
 	return err
 }
 
-func (pipe *UnixPipe) Close() error {
-	pipe.msgin.Close()
-	pipe.msgout.Close()
-	return nil
+func (sock *TCPSocketChannel) Close() error {
+	return sock.conn.Close()
 }
 
-func NewPipe(msgin_path string, msgout_path string) Pipe {
-	return &UnixPipe{msgin_path: msgin_path, msgout_path: msgout_path, msgin: nil, msgout: nil}
+func NewPipe(msgin_path string, msgout_path string) common.Pipe {
+	port, _ := strconv.ParseUint(msgin_path, 10, 16)
+	return &TCPSocketChannel{port: uint16(port)}
 }

@@ -64,6 +64,8 @@ class TestServiceRegistrationBehaviour(BaseSkillTestCase):
         cls.registration_message.sender = str(cls._skill.skill_context.skill_id)
         cls.registration_message.to = cls._skill.skill_context.search_service_address
 
+        cls.mocked_description = Description({"foo1": 1, "bar1": 2})
+
     def test_setup(self):
         """Test the setup method of the service behaviour."""
         # operation
@@ -150,14 +152,11 @@ class TestServiceRegistrationBehaviour(BaseSkillTestCase):
 
     def test_register_service(self):
         """Test the register_service method of the service_registration behaviour."""
-        # setup
-        mocked_description_1 = "some_description_1"
-
         # operation
         with patch.object(
             self.strategy,
             "get_register_service_description",
-            return_value=mocked_description_1,
+            return_value=self.mocked_description,
         ):
             with patch.object(self.logger, "log") as mock_logger:
                 self.service_behaviour.register_service()
@@ -172,10 +171,68 @@ class TestServiceRegistrationBehaviour(BaseSkillTestCase):
             performative=OefSearchMessage.Performative.REGISTER_SERVICE,
             to=self.skill.skill_context.search_service_address,
             sender=str(self.skill.skill_context.skill_id),
-            service_description=mocked_description_1,
+            service_description=self.mocked_description,
         )
         assert has_attributes, error_str
-        mock_logger.assert_any_call(logging.INFO, "registering service on SOEF.")
+        mock_logger.assert_any_call(
+            logging.INFO, "registering agent's service on the SOEF."
+        )
+
+    def test_register_genus(self):
+        """Test the register_genus method of the service_registration behaviour."""
+        # operation
+        with patch.object(
+            self.strategy,
+            "get_register_personality_description",
+            return_value=self.mocked_description,
+        ):
+            with patch.object(self.logger, "log") as mock_logger:
+                self.service_behaviour.register_genus()
+
+        # after
+        self.assert_quantity_in_outbox(1)
+
+        message = self.get_message_from_outbox()
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=message,
+            message_type=OefSearchMessage,
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            to=self.skill.skill_context.search_service_address,
+            sender=str(self.skill.skill_context.skill_id),
+            service_description=self.mocked_description,
+        )
+        assert has_attributes, error_str
+        mock_logger.assert_any_call(
+            logging.INFO, "registering agent's personality genus on the SOEF."
+        )
+
+    def test_register_classification(self):
+        """Test the register_classification method of the service_registration behaviour."""
+        # operation
+        with patch.object(
+            self.strategy,
+            "get_register_classification_description",
+            return_value=self.mocked_description,
+        ):
+            with patch.object(self.logger, "log") as mock_logger:
+                self.service_behaviour.register_classification()
+
+        # after
+        self.assert_quantity_in_outbox(1)
+
+        message = self.get_message_from_outbox()
+        has_attributes, error_str = self.message_has_attributes(
+            actual_message=message,
+            message_type=OefSearchMessage,
+            performative=OefSearchMessage.Performative.REGISTER_SERVICE,
+            to=self.skill.skill_context.search_service_address,
+            sender=str(self.skill.skill_context.skill_id),
+            service_description=self.mocked_description,
+        )
+        assert has_attributes, error_str
+        mock_logger.assert_any_call(
+            logging.INFO, "registering agent's personality classification on the SOEF."
+        )
 
     def test_teardown(self):
         """Test the teardown method of the service behaviour."""

@@ -11,14 +11,14 @@ Follow the <a href="../quickstart/#preliminaries">Preliminaries</a> and <a href=
 This step-by-step guide goes through the creation of two AEAs which are already developed by Fetch.ai. You can get the finished AEAs, and compare your code against them, by following the next steps:
 
 ``` bash
-aea fetch fetchai/generic_seller:0.24.0
+aea fetch fetchai/generic_seller:0.27.0
 cd generic_seller
-aea eject skill fetchai/generic_seller:0.25.0
+aea eject skill fetchai/generic_seller:0.26.0
 cd ..
 ```
 
 ``` bash
-aea fetch fetchai/generic_buyer:0.25.0
+aea fetch fetchai/generic_buyer:0.28.0
 cd generic_buyer
 aea eject skill fetchai/generic_buyer:0.25.0
 cd ..
@@ -64,6 +64,7 @@ Open the `behaviours.py` file (`my_generic_seller/skills/generic_seller/behaviou
 ``` python
 from typing import Any, Optional, cast
 
+from aea.helpers.search.models import Description
 from aea.skills.behaviours import TickerBehaviour
 
 from packages.fetchai.connections.ledger.base import (
@@ -163,14 +164,15 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
 
             self.failed_registration_msg = None
 
-    def _register_agent(self) -> None:
+    def _register(self, description: Description, logger_msg: str) -> None:
         """
-        Register the agent's location.
+        Register something on the SOEF.
+
+        :param description: the description of what is being registered
+        :param logger_msg: the logger message to print after the registration
 
         :return: None
         """
-        strategy = cast(GenericStrategy, self.context.strategy)
-        description = strategy.get_location_description()
         oef_search_dialogues = cast(
             OefSearchDialogues, self.context.oef_search_dialogues
         )
@@ -180,31 +182,51 @@ class GenericServiceRegistrationBehaviour(TickerBehaviour):
             service_description=description,
         )
         self.context.outbox.put_message(message=oef_search_msg)
-        self.context.logger.info("registering agent on SOEF.")
+        self.context.logger.info(logger_msg)
 
-    def register_service_personality_classification(self) -> None:
+    def _register_agent(self) -> None:
         """
-        Register the agent's service, personality and classification.
+        Register the agent's location.
 
         :return: None
         """
         strategy = cast(GenericStrategy, self.context.strategy)
-        descriptions = [
-            strategy.get_register_service_description(),
-            strategy.get_register_personality_description(),
-            strategy.get_register_classification_description(),
-        ]
-        oef_search_dialogues = cast(
-            OefSearchDialogues, self.context.oef_search_dialogues
+        description = strategy.get_location_description()
+        self._register(description, "registering agent on SOEF.")
+
+    def register_service(self) -> None:
+        """
+        Register the agent's service.
+
+        :return: None
+        """
+        strategy = cast(GenericStrategy, self.context.strategy)
+        description = strategy.get_register_service_description()
+        self._register(description, "registering agent's service on the SOEF.")
+
+    def register_genus(self) -> None:
+        """
+        Register the agent's personality genus.
+
+        :return: None
+        """
+        strategy = cast(GenericStrategy, self.context.strategy)
+        description = strategy.get_register_personality_description()
+        self._register(
+            description, "registering agent's personality genus on the SOEF."
         )
-        for description in descriptions:
-            oef_search_msg, _ = oef_search_dialogues.create(
-                counterparty=self.context.search_service_address,
-                performative=OefSearchMessage.Performative.REGISTER_SERVICE,
-                service_description=description,
-            )
-            self.context.outbox.put_message(message=oef_search_msg)
-        self.context.logger.info("registering service on SOEF.")
+
+    def register_classification(self) -> None:
+        """
+        Register the agent's personality classification.
+
+        :return: None
+        """
+        strategy = cast(GenericStrategy, self.context.strategy)
+        description = strategy.get_register_classification_description()
+        self._register(
+            description, "registering agent's personality classification on the SOEF."
+        )
 
     def _unregister_service(self) -> None:
         """
@@ -833,12 +855,32 @@ class GenericOefSearchHandler(Handler):
             target_message.performative
             == OefSearchMessage.Performative.REGISTER_SERVICE
         ):
-            if "location" in target_message.service_description.values:
-                registration_behaviour = cast(
-                    GenericServiceRegistrationBehaviour,
-                    self.context.behaviours.service_registration,
+            description = target_message.service_description
+            data_model_name = description.data_model.name
+            registration_behaviour = cast(
+                GenericServiceRegistrationBehaviour,
+                self.context.behaviours.service_registration,
+            )
+            if "location_agent" in data_model_name:
+                registration_behaviour.register_service()
+            elif "set_service_key" in data_model_name:
+                registration_behaviour.register_genus()
+            elif (
+                "personality_agent" in data_model_name
+                and description.values["piece"] == "genus"
+            ):
+                registration_behaviour.register_classification()
+            elif (
+                "personality_agent" in data_model_name
+                and description.values["piece"] == "classification"
+            ):
+                self.context.logger.info(
+                    "the agent, with its genus and classification, and its service are successfully registered on the SOEF."
                 )
-                registration_behaviour.register_service_personality_classification()
+            else:
+                self.context.logger.warning(
+                    f"received soef SUCCESS message as a reply to the following unexpected message: {target_message}"
+                )
 
     def _handle_error(
         self,
@@ -3248,7 +3290,7 @@ In both AEAs run:
 aea config set --type dict agent.default_routing \
 '{
   "fetchai/ledger_api:1.0.0": "fetchai/ledger:0.18.0",
-  "fetchai/oef_search:1.0.0": "fetchai/soef:0.22.0"
+  "fetchai/oef_search:1.0.0": "fetchai/soef:0.25.0"
 }'
 ```
 
@@ -3265,13 +3307,13 @@ aea generate-wealth fetchai --sync
 Add the remaining packages for the seller AEA, then run it:
 
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.21.0
-aea add connection fetchai/soef:0.22.0
+aea add connection fetchai/p2p_libp2p:0.24.0
+aea add connection fetchai/soef:0.25.0
 aea add connection fetchai/ledger:0.18.0
 aea add protocol fetchai/fipa:1.0.0
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.21.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.24.0
 aea run
 ```
 
@@ -3282,14 +3324,14 @@ Once you see a message of the form `To join its network use multiaddr: ['SOME_AD
 Add the remaining packages for the buyer AEA:
 
 ``` bash
-aea add connection fetchai/p2p_libp2p:0.21.0
-aea add connection fetchai/soef:0.22.0
+aea add connection fetchai/p2p_libp2p:0.24.0
+aea add connection fetchai/soef:0.25.0
 aea add connection fetchai/ledger:0.18.0
 aea add protocol fetchai/fipa:1.0.0
 aea add protocol fetchai/signing:1.0.0
 aea install
 aea build
-aea config set agent.default_connection fetchai/p2p_libp2p:0.21.0
+aea config set agent.default_connection fetchai/p2p_libp2p:0.24.0
 ```
 
 Then, update the configuration of the buyer AEA's P2P connection:

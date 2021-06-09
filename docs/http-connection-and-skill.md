@@ -8,7 +8,7 @@ The HTTP server connection allows you to run a server inside the connection itse
 
 ## HTTP Client
 
-The `fetchai/simple_data_request:0.11.0` skill demonstrates a simple use case of the HTTP Client connection.
+The `fetchai/simple_data_request:0.12.0` skill demonstrates a simple use case of the HTTP Client connection.
 
 The `HttpRequestBehaviour` in `behaviours.py` periodically sends HTTP envelops to the HTTP client connection. Its `act()` method, periodically called, simply calls `_generate_http_request` which contains the logic for enqueueing an HTTP request envelop.
 

@@ -25,6 +25,7 @@ package dhtclient
 
 import (
 	"context"
+	acn "libp2p_node/acn"
 	"log"
 	"math/rand"
 	"strings"
@@ -49,28 +50,8 @@ import (
 
 	aea "libp2p_node/aea"
 	"libp2p_node/dht/dhtnode"
-	acn_protocol "libp2p_node/protocols/acn/v1_0_0"
 	utils "libp2p_node/utils"
 )
-
-type AcnMessage = acn_protocol.AcnMessage
-type LookupRequest = acn_protocol.AcnMessage_LookupRequest
-type LookupResponse = acn_protocol.AcnMessage_LookupResponse
-type Status = acn_protocol.AcnMessage_Status
-type LookupRequestPerformative = acn_protocol.AcnMessage_Lookup_Request_Performative
-type LookupResponsePerformative = acn_protocol.AcnMessage_Lookup_Response_Performative
-type StatusPerformative = acn_protocol.AcnMessage_Status_Performative
-type RegisterPerformative = acn_protocol.AcnMessage_Register_Performative
-type StatusBody = acn_protocol.AcnMessage_StatusBody
-type Register = acn_protocol.AcnMessage_Register
-type AeaEnvelope = acn_protocol.AcnMessage_AeaEnvelope
-type AeaEnvelopePerformative = acn_protocol.AcnMessage_Aea_Envelope_Performative
-
-const ERROR_SERIALIZATION = acn_protocol.AcnMessage_StatusBody_ERROR_SERIALIZATION
-const SUCCESS = acn_protocol.AcnMessage_StatusBody_SUCCESS
-const ERROR_UNEXPECTED_PAYLOAD = acn_protocol.AcnMessage_StatusBody_ERROR_UNEXPECTED_PAYLOAD
-const ERROR_AGENT_NOT_READY = acn_protocol.AcnMessage_StatusBody_ERROR_AGENT_NOT_READY
-const ERROR_UNKNOWN_AGENT_ADDRESS = acn_protocol.AcnMessage_StatusBody_ERROR_UNKNOWN_AGENT_ADDRESS
 
 func ignore(err error) {
 	if err != nil {
@@ -156,7 +137,7 @@ type DHTClient struct {
 	routedHost *routedhost.RoutedHost
 
 	myAgentAddress  string
-	myAgentRecord   *dhtnode.AgentRecord
+	myAgentRecord   *acn.AgentRecord
 	myAgentReady    func() bool
 	processEnvelope func(*aea.Envelope) error
 
@@ -201,7 +182,7 @@ func New(opts ...Option) (*DHTClient, error) {
 		dhtClient.myAgentRecord.Address,
 		myPublicKey,
 	)
-	if err != nil || errPoR != nil || status.Code != SUCCESS {
+	if err != nil || errPoR != nil || status.Code != acn.SUCCESS {
 		msg := "Invalid AgentRecord"
 		if err != nil {
 			msg += " - " + err.Error()
@@ -327,11 +308,7 @@ func (dhtClient *DHTClient) bootstrapLoopUntilTimeout() error {
 				dhtClient.bootstrapPeers,
 			)
 		case <-ctx.Done():
-			sleepTime = 0
-			break
-		}
-		if sleepTime == 0 {
-			break
+			err = errors.New("bootstrap connect timeout reached")
 		}
 	}
 	return err
@@ -360,12 +337,11 @@ func (dhtClient *DHTClient) newStreamLoopUntilTimeout(
 			sleepTime = sleepTime * sleepTimeIncreaseMFactor
 			stream, err = dhtClient.routedHost.NewStream(ctx, peerID, streamType)
 		case <-ctx.Done():
-			sleepTime = 0
-			break
+			err = errors.New("new stream loop timeout reached")
 		}
-		if sleepTime == 0 {
-			break
-		}
+	}
+	if stream == nil && err == nil {
+		return nil, errors.New("stream nil and err nil")
 	}
 	// register again in case of disconnection
 	if disconnected {
@@ -487,10 +463,10 @@ func (dhtClient *DHTClient) RouteEnvelope(envel *aea.Envelope) error {
 		Str("target", target).
 		Msg("requesting agent record from relay...")
 
-	lookupRequestPerformative := &LookupRequestPerformative{AgentAddress: target}
-	msg := &AcnMessage{
+	lookupRequestPerformative := &acn.LookupRequestPerformative{AgentAddress: target}
+	msg := &acn.AcnMessage{
 		// Version: dhtnode.CurrentVersion,
-		Performative: &LookupRequest{LookupRequest: lookupRequestPerformative},
+		Performative: &acn.LookupRequest{LookupRequest: lookupRequestPerformative},
 	}
 	buf, err := proto.Marshal(msg)
 	if err != nil {
@@ -524,7 +500,7 @@ func (dhtClient *DHTClient) RouteEnvelope(envel *aea.Envelope) error {
 		return err
 	}
 
-	response := &AcnMessage{}
+	response := &acn.AcnMessage{}
 	err = proto.Unmarshal(buf, response)
 	if err != nil {
 		lerror(err).Str("op", "route").Str("target", target).
@@ -533,12 +509,12 @@ func (dhtClient *DHTClient) RouteEnvelope(envel *aea.Envelope) error {
 	}
 
 	// response is either a LookupResponse or Status
-	var lookupResponsePerformative *LookupResponsePerformative = nil
-	var statusPerformative *StatusPerformative = nil
+	var lookupResponsePerformative *acn.LookupResponsePerformative = nil
+	var statusPerformative *acn.StatusPerformative = nil
 	switch pl := response.Performative.(type) {
-	case *LookupResponse:
+	case *acn.LookupResponse:
 		lookupResponsePerformative = pl.LookupResponse
-	case *Status:
+	case *acn.Status:
 		statusPerformative = pl.Status
 	default:
 		err = errors.New("Unexpected Acn Message")
@@ -562,7 +538,7 @@ func (dhtClient *DHTClient) RouteEnvelope(envel *aea.Envelope) error {
 	// lookupResponse must be set
 	record := lookupResponsePerformative.Record
 	valid, err := dhtnode.IsValidProofOfRepresentation(record, target, record.PeerPublicKey)
-	if err != nil || valid.Code != SUCCESS {
+	if err != nil || valid.Code != acn.SUCCESS {
 		errMsg := statusPerformative.Body.Code.String() + " : " + strings.Join(
 			statusPerformative.Body.Msgs,
 			":",
@@ -647,13 +623,13 @@ func (dhtClient *DHTClient) RouteEnvelope(envel *aea.Envelope) error {
 		return err
 	}
 	// TODO(LR) check if source is my agent
-	aeaEnvelope := &AeaEnvelopePerformative{
+	aeaEnvelope := &acn.AeaEnvelopePerformative{
 		Envelope: envelBytes,
 		Record:   dhtClient.myAgentRecord,
 	}
-	msg = &AcnMessage{
+	msg = &acn.AcnMessage{
 		// Version: dhtnode.CurrentVersion,
-		Performative: &AeaEnvelope{AeaEnvelope: aeaEnvelope},
+		Performative: &acn.AeaEnvelope{AeaEnvelope: aeaEnvelope},
 	}
 	buf, err = proto.Marshal(msg)
 	if err != nil {
@@ -677,6 +653,8 @@ func (dhtClient *DHTClient) RouteEnvelope(envel *aea.Envelope) error {
 			Str("target", target).
 			Msg("couldn't send envelope")
 		errReset := stream.Reset()
+		lerror(errReset).
+			Msg("stream.Reset error")
 		ignore(errReset)
 		return err
 	}
@@ -695,7 +673,7 @@ func (dhtClient *DHTClient) RouteEnvelope(envel *aea.Envelope) error {
 
 	stream.Close()
 
-	response = &AcnMessage{}
+	response = &acn.AcnMessage{}
 	err = proto.Unmarshal(buf, response)
 	if err != nil {
 		lerror(err).
@@ -708,7 +686,7 @@ func (dhtClient *DHTClient) RouteEnvelope(envel *aea.Envelope) error {
 	// response is expected to be a Status
 	statusPerformative = nil
 	switch pl := response.Performative.(type) {
-	case *Status:
+	case *acn.Status:
 		statusPerformative = pl.Status
 	default:
 		err = errors.New("Unexpected Acn Message")
@@ -719,7 +697,7 @@ func (dhtClient *DHTClient) RouteEnvelope(envel *aea.Envelope) error {
 		return err
 	}
 
-	if statusPerformative.Body.Code != SUCCESS {
+	if statusPerformative.Body.Code != acn.SUCCESS {
 		err = errors.New(
 			statusPerformative.Body.Code.String() + " : " + strings.Join(
 				statusPerformative.Body.Msgs,
@@ -753,15 +731,15 @@ func (dhtClient *DHTClient) handleAeaEnvelopeStream(stream network.Stream) {
 	}
 
 	// get envelope
-	msg := &AcnMessage{}
+	msg := &acn.AcnMessage{}
 	err = proto.Unmarshal(buf, msg)
 	if err != nil {
 		lerror(err).Msg("while deserializing acn aea envelope message")
-		status := &StatusBody{Code: ERROR_SERIALIZATION}
-		statusPerformative := &StatusPerformative{Body: status}
-		response := &AcnMessage{
+		status := &acn.StatusBody{Code: acn.ERROR_SERIALIZATION}
+		statusPerformative := &acn.StatusPerformative{Body: status}
+		response := &acn.AcnMessage{
 			// Version: dhtnode.CurrentVersion,
-			Performative: &Status{Status: statusPerformative},
+			Performative: &acn.Status{Status: statusPerformative},
 		}
 		buf, err = proto.Marshal(response)
 		ignore(err)
@@ -773,18 +751,18 @@ func (dhtClient *DHTClient) handleAeaEnvelopeStream(stream network.Stream) {
 	}
 
 	// payload is expected to be AeaEnvelope
-	var aeaEnvelope *AeaEnvelopePerformative = nil
+	var aeaEnvelope *acn.AeaEnvelopePerformative = nil
 	switch pl := msg.Performative.(type) {
-	case *AeaEnvelope:
+	case *acn.AeaEnvelope:
 		aeaEnvelope = pl.AeaEnvelope
 	default:
 		err = errors.New("Unexpected payload")
 		lerror(err).Msg("while deserializing acn aea envelope message")
-		status := &StatusBody{Code: ERROR_UNEXPECTED_PAYLOAD}
-		statusPerformative := &StatusPerformative{Body: status}
-		response := &AcnMessage{
+		status := &acn.StatusBody{Code: acn.ERROR_UNEXPECTED_PAYLOAD}
+		statusPerformative := &acn.StatusPerformative{Body: status}
+		response := &acn.AcnMessage{
 			// Version: dhtnode.CurrentVersion,
-			Performative: &Status{Status: statusPerformative},
+			Performative: &acn.Status{Status: statusPerformative},
 		}
 		buf, err = proto.Marshal(response)
 		ignore(err)
@@ -799,14 +777,13 @@ func (dhtClient *DHTClient) handleAeaEnvelopeStream(stream network.Stream) {
 	err = proto.Unmarshal(aeaEnvelope.Envelope, envel)
 	if err != nil {
 		lerror(err).Msg("while deserializing acn aea envelope message")
-		status := &StatusBody{
-			Code: ERROR_SERIALIZATION,
+		status := &acn.StatusBody{
+			Code: acn.ERROR_SERIALIZATION,
 			Msgs: []string{err.Error()},
 		}
-		statusPerformative := &StatusPerformative{Body: status}
-		response := &AcnMessage{
-			// Version: dhtnode.CurrentVersion,
-			Performative: &Status{Status: statusPerformative},
+		statusPerformative := &acn.StatusPerformative{Body: status}
+		response := &acn.AcnMessage{
+			Performative: &acn.Status{Status: statusPerformative},
 		}
 		buf, err = proto.Marshal(response)
 		ignore(err)
@@ -824,15 +801,15 @@ func (dhtClient *DHTClient) handleAeaEnvelopeStream(stream network.Stream) {
 		aeaEnvelope.Record.Address,
 		remotePubkey,
 	)
-	if err != nil || status.Code != SUCCESS {
+	if err != nil || status.Code != acn.SUCCESS {
 		if err == nil {
 			err = errors.New(status.Code.String() + ":" + strings.Join(status.Msgs, ":"))
 		}
 		lerror(err).Msg("incoming envelope PoR is not valid")
-		statusPerformative := &StatusPerformative{Body: status}
-		response := &AcnMessage{
+		statusPerformative := &acn.StatusPerformative{Body: status}
+		response := &acn.AcnMessage{
 			// Version: dhtnode.CurrentVersion,
-			Performative: &Status{Status: statusPerformative},
+			Performative: &acn.Status{Status: statusPerformative},
 		}
 		buf, err = proto.Marshal(response)
 		ignore(err)
@@ -849,11 +826,10 @@ func (dhtClient *DHTClient) handleAeaEnvelopeStream(stream network.Stream) {
 		err = dhtClient.processEnvelope(envel)
 		if err != nil {
 			lerror(err).Msgf("while processing envelope by agent")
-			status := &StatusBody{Code: ERROR_AGENT_NOT_READY}
-			statusPerformative := &StatusPerformative{Body: status}
-			response := &AcnMessage{
-				// Version: dhtnode.CurrentVersion,
-				Performative: &Status{Status: statusPerformative},
+			status := &acn.StatusBody{Code: acn.ERROR_AGENT_NOT_READY}
+			statusPerformative := &acn.StatusPerformative{Body: status}
+			response := &acn.AcnMessage{
+				Performative: &acn.Status{Status: statusPerformative},
 			}
 			buf, err = proto.Marshal(response)
 			ignore(err)
@@ -865,11 +841,11 @@ func (dhtClient *DHTClient) handleAeaEnvelopeStream(stream network.Stream) {
 		}
 	} else {
 		lwarn().Msgf("ignored envelope from unknown agent %s", envel.String())
-		status := &StatusBody{Code: ERROR_UNKNOWN_AGENT_ADDRESS}
-		statusPerformative := &StatusPerformative{Body: status}
-		response := &AcnMessage{
+		status := &acn.StatusBody{Code: acn.ERROR_UNKNOWN_AGENT_ADDRESS}
+		statusPerformative := &acn.StatusPerformative{Body: status}
+		response := &acn.AcnMessage{
 			// Version: dhtnode.CurrentVersion,
-			Performative: &Status{Status: statusPerformative},
+			Performative: &acn.Status{Status: statusPerformative},
 		}
 		buf, err = proto.Marshal(response)
 		ignore(err)
@@ -880,11 +856,11 @@ func (dhtClient *DHTClient) handleAeaEnvelopeStream(stream network.Stream) {
 		return
 	}
 
-	status = &StatusBody{Code: SUCCESS}
-	statusPerformative := &StatusPerformative{Body: status}
-	response := &AcnMessage{
+	status = &acn.StatusBody{Code: acn.SUCCESS}
+	statusPerformative := &acn.StatusPerformative{Body: status}
+	response := &acn.AcnMessage{
 		// Version: dhtnode.CurrentVersion,
-		Performative: &Status{Status: statusPerformative},
+		Performative: &acn.Status{Status: statusPerformative},
 	}
 	buf, err = proto.Marshal(response)
 	ignore(err)
@@ -912,19 +888,18 @@ func (dhtClient *DHTClient) handleAeaAddressStream(stream network.Stream) {
 		return
 	}
 
-	msg := &AcnMessage{}
+	msg := &acn.AcnMessage{}
 	err = proto.Unmarshal(buf, msg)
 	if err != nil {
 		lerror(err).Str("op", "resolve").Msg("couldn't deserialize acn message")
 		// TOFIX(LR) setting Msgs to err.Error is potentially a security vulnerability
-		status := &StatusBody{
-			Code: ERROR_SERIALIZATION,
+		status := &acn.StatusBody{
+			Code: acn.ERROR_SERIALIZATION,
 			Msgs: []string{err.Error()},
 		}
-		statusPerformative := &StatusPerformative{Body: status}
-		response := &AcnMessage{
-			// Version: dhtnode.CurrentVersion,
-			Performative: &Status{Status: statusPerformative},
+		statusPerformative := &acn.StatusPerformative{Body: status}
+		response := &acn.AcnMessage{
+			Performative: &acn.Status{Status: statusPerformative},
 		}
 		buf, err = proto.Marshal(response)
 		ignore(err)
@@ -936,17 +911,17 @@ func (dhtClient *DHTClient) handleAeaAddressStream(stream network.Stream) {
 	}
 
 	// Get LookupRequest message
-	var lookupRequest *LookupRequestPerformative
+	var lookupRequest *acn.LookupRequestPerformative
 	switch pl := msg.Performative.(type) {
-	case *LookupRequest:
+	case *acn.LookupRequest:
 		lookupRequest = pl.LookupRequest
 	default:
 		err = errors.New("Unexpected payload, expected LookupRequest")
-		status := &StatusBody{Code: ERROR_UNEXPECTED_PAYLOAD, Msgs: []string{err.Error()}}
-		statusPerformative := &StatusPerformative{Body: status}
-		response := &AcnMessage{
+		status := &acn.StatusBody{Code: acn.ERROR_UNEXPECTED_PAYLOAD, Msgs: []string{err.Error()}}
+		statusPerformative := &acn.StatusPerformative{Body: status}
+		response := &acn.AcnMessage{
 			// Version: dhtnode.CurrentVersion,
-			Performative: &Status{Status: statusPerformative},
+			Performative: &acn.Status{Status: statusPerformative},
 		}
 		buf, err = proto.Marshal(response)
 		ignore(err)
@@ -968,11 +943,10 @@ func (dhtClient *DHTClient) handleAeaAddressStream(stream network.Stream) {
 			Str("op", "resolve").
 			Str("target", reqAddress).
 			Msgf("requested address different from advertised one %s", dhtClient.myAgentAddress)
-		status := &dhtnode.Status{Code: ERROR_UNKNOWN_AGENT_ADDRESS}
-		statusPerformative := &StatusPerformative{Body: status}
-		response := &AcnMessage{
-			// Version: dhtnode.CurrentVersion,
-			Performative: &Status{Status: statusPerformative},
+		status := &acn.StatusBody{Code: acn.ERROR_UNKNOWN_AGENT_ADDRESS}
+		statusPerformative := &acn.StatusPerformative{Body: status}
+		response := &acn.AcnMessage{
+			Performative: &acn.Status{Status: statusPerformative},
 		}
 		buf, err = proto.Marshal(response)
 		ignore(err)
@@ -982,10 +956,9 @@ func (dhtClient *DHTClient) handleAeaAddressStream(stream network.Stream) {
 		ignore(err)
 		return
 	} else {
-		lookupResponse := &LookupResponsePerformative{Record: dhtClient.myAgentRecord}
-		response := &AcnMessage{
-			// Version: dhtnode.CurrentVersion,
-			Performative: &LookupResponse{LookupResponse: lookupResponse},
+		lookupResponse := &acn.LookupResponsePerformative{Record: dhtClient.myAgentRecord}
+		response := &acn.AcnMessage{
+			Performative: &acn.LookupResponse{LookupResponse: lookupResponse},
 		}
 		buf, err := proto.Marshal(response)
 		ignore(err)
@@ -1029,10 +1002,9 @@ func (dhtClient *DHTClient) registerAgentAddress() error {
 		Str("addr", dhtClient.myAgentAddress).
 		Msgf("registering addr and peerID to relay peer")
 
-	registration := &RegisterPerformative{Record: dhtClient.myAgentRecord}
-	msg := &AcnMessage{
-		// Version: dhtnode.CurrentVersion,
-		Performative: &Register{Register: registration},
+	registration := &acn.RegisterPerformative{Record: dhtClient.myAgentRecord}
+	msg := &acn.AcnMessage{
+		Performative: &acn.Register{Register: registration},
 	}
 	buf, err := proto.Marshal(msg)
 	ignore(err)
@@ -1049,7 +1021,7 @@ func (dhtClient *DHTClient) registerAgentAddress() error {
 		ignore(errReset)
 		return err
 	}
-	response := &AcnMessage{}
+	response := &acn.AcnMessage{}
 	err = proto.Unmarshal(buf, response)
 	if err != nil {
 		errReset := stream.Reset()
@@ -1058,9 +1030,9 @@ func (dhtClient *DHTClient) registerAgentAddress() error {
 	}
 
 	// Get Status message
-	var status *StatusPerformative
+	var status *acn.StatusPerformative
 	switch pl := response.Performative.(type) {
-	case *Status:
+	case *acn.Status:
 		status = pl.Status
 	default:
 		errReset := stream.Close()
@@ -1068,7 +1040,7 @@ func (dhtClient *DHTClient) registerAgentAddress() error {
 		return err
 	}
 
-	if status.Body.Code != SUCCESS {
+	if status.Body.Code != acn.SUCCESS {
 		errReset := stream.Close()
 		ignore(errReset)
 		return errors.New("Registration failed: " + strings.Join(status.Body.Msgs, ":"))
