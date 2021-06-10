@@ -1922,3 +1922,76 @@ func ensureAddressAnnounced(peers ...*DHTPeer) {
 		}
 	}
 }
+
+func TestFetchAICrypto(t *testing.T) {
+	publicKey := "02358e3e42a6ba15cf6b2ba6eb05f02b8893acf82b316d7dd9cda702b0892b8c71"
+	address := "fetch19dq2mkcpp6x0aypxt9c9gz6n4fqvax0x9a7t5r"
+	peerPublicKey := "027af21aff853b9d9589867ea142b0a60a9611fc8e1fae04c2f7144113fa4e938e"
+	pySigStrCanonize := "N/GOa7/m3HU8/gpLJ88VCQ6vXsdrfiiYcqnNtF+c2N9VG9ZIiycykN4hdbpbOCGrChMYZQA3G1GpozsShrUBgg=="
+
+	addressFromPublicKey, _ := utils.FetchAIAddressFromPublicKey(publicKey)
+	if address != addressFromPublicKey {
+		t.Error("[ERR] Addresses don't match")
+	} else {
+		t.Log("[OK] Agent address matches its public key")
+	}
+
+	valid, err := utils.VerifyFetchAISignatureBTC(
+		[]byte(peerPublicKey),
+		pySigStrCanonize,
+		publicKey,
+	)
+	if !valid {
+		t.Errorf("Signature using BTC don't match %s", err.Error())
+	}
+	valid, err = utils.VerifyFetchAISignatureLibp2p(
+		[]byte(peerPublicKey),
+		pySigStrCanonize,
+		publicKey,
+	)
+	if !valid {
+		t.Errorf("Signature using LPP don't match %s", err.Error())
+	}
+}
+
+func TestEthereumCrypto(t *testing.T) {
+	//privateKey := "0xb60fe8027fb82f1a1bd6b8e66d4400f858989a2c67428a4e7f589441700339b0"
+	publicKey := "0xf753e5a9e2368e97f4db869a0d956d3ffb64672d6392670572906c786b5712ada13b6bff882951b3ba3dd65bdacc915c2b532efc3f183aa44657205c6c337225"
+	address := "0xb8d8c62d4a1999b7aea0aebBD5020244a4a9bAD8"
+	publicKeySignature := "0x304c2ba4ae7fa71295bfc2920b9c1268d574d65531f1f4d2117fc1439a45310c37ab75085a9df2a4169a4d47982b330a4387b1ded0c8881b030629db30bbaf3a1c"
+
+	addFromPublicKey, err := utils.EthereumAddressFromPublicKey(publicKey)
+	if err != nil || addFromPublicKey != address {
+		t.Error(
+			"Error when computing address from public key or address and public key don't match",
+		)
+	}
+
+	_, err = utils.BTCPubKeyFromEthereumPublicKey(publicKey)
+	if err != nil {
+		t.Errorf("While building BTC public key from string: %s", err.Error())
+	}
+
+	/*
+		ethSig, err := secp256k1.Sign(hashedPublicKey, hexutil.MustDecode(privateKey))
+		if err != nil {
+			t.Error(err.Error())
+		}
+		println(hexutil.Encode(ethSig))
+		hash := sha3.NewLegacyKeccak256()
+		_, err = hash.Write([]byte(publicKey))
+		if err != nil {
+			t.Error(err.Error())
+		}
+		sha3KeccakHash := hash.Sum(nil)
+	*/
+
+	valid, err := utils.VerifyEthereumSignatureETH([]byte(publicKey), publicKeySignature, publicKey)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	if !valid {
+		t.Errorf("Signer address don't match %s", addFromPublicKey)
+	}
+}

@@ -95,7 +95,7 @@ func (notifee *Notifee) Disconnected(net network.Network, conn network.Conn) {
 
 	notifee.myHost.Peerstore().AddAddrs(pinfo.ID, pinfo.Addrs, peerstore.PermanentAddrTTL)
 	for {
-		var err error // where is this error comming from?
+		var err error
 		select {
 		case _, open := <-notifee.closing:
 			if !open {
@@ -465,7 +465,6 @@ func (dhtClient *DHTClient) RouteEnvelope(envel *aea.Envelope) error {
 
 	lookupRequestPerformative := &acn.LookupRequestPerformative{AgentAddress: target}
 	msg := &acn.AcnMessage{
-		// Version: dhtnode.CurrentVersion,
 		Performative: &acn.LookupRequest{LookupRequest: lookupRequestPerformative},
 	}
 	buf, err := proto.Marshal(msg)
