@@ -219,13 +219,10 @@ class MixedRegistry(LocalRegistry):
 
         :param item_type_plural: str, item type.
         :param public_id: PublicId of the item to check.
-
-        :return: None
         """
         item_type = ITEM_TYPE_PLURAL_TO_TYPE[item_type_plural]
         try:
             LocalRegistry.check_item_present(self, item_type_plural, public_id)
-            return
         except click.ClickException:
             click.echo(
                 f"Can not find dependency locally: {item_type} {public_id}. Trying remote registry..."
@@ -233,7 +230,6 @@ class MixedRegistry(LocalRegistry):
 
         try:
             RemoteRegistry(self.ctx).check_item_present(item_type_plural, public_id)
-            return
         except click.ClickException:
             raise click.ClickException(
                 f"Can not find dependency locally or remotely: {item_type} {public_id}. Try to add flag `{PUSH_ITEMS_FLAG}` to push dependency package to the registry."

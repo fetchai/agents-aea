@@ -260,3 +260,49 @@ class TestPublishRemotellyWithDeps(AEATestCaseEmpty):
 
         push_item_remote_mock.assert_called()
         publish_agent_mock.assert_called()
+
+
+class CheckAndPublishCommandTestCase(TestCase):
+    """Test case for Registry.check_item_present_and_push method."""
+
+    def test_publish_not_present_positive(self, *mocks):
+        """Test for publish positive result."""
+        ctx = mock.Mock()
+        registry = LocalRegistry(ctx)
+        with mock.patch(
+            "aea.cli.publish.LocalRegistry.check_item_present",
+            side_effect=[ClickException("expected"), None],
+        ), mock.patch("aea.cli.publish.LocalRegistry.push_item") as push_item_mock:
+            registry.check_item_present_and_push("connections", mock.Mock())
+
+        push_item_mock.assert_called_once()
+
+    def test_publish_not_present_failed_to_push(self, *mocks):
+        """Test for publish failed."""
+        ctx = mock.Mock()
+        registry = LocalRegistry(ctx)
+        with mock.patch(
+            "aea.cli.publish.LocalRegistry.check_item_present",
+            side_effect=[ClickException("expected"), None],
+        ), mock.patch(
+            "aea.cli.publish.LocalRegistry.push_item", side_effect=Exception("expected")
+        ):
+            with pytest.raises(
+                ClickException, match="Failed to push missing item.*expected"
+            ):
+                registry.check_item_present_and_push("connections", mock.Mock())
+
+    def test_publish_not_present_failed_to_check(self, *mocks):
+        """Test for publish failed lookup after push."""
+        ctx = mock.Mock()
+        registry = LocalRegistry(ctx)
+        with mock.patch(
+            "aea.cli.publish.LocalRegistry.check_item_present",
+            side_effect=ClickException("expected"),
+        ), mock.patch("aea.cli.publish.LocalRegistry.push_item") as push_item_mock:
+            with pytest.raises(
+                ClickException, match="Failed to find item after push:.*expected"
+            ):
+                registry.check_item_present_and_push("connections", mock.Mock())
+
+        push_item_mock.assert_called_once()
