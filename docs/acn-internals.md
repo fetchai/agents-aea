@@ -19,6 +19,7 @@ agent and its Proof-of-Representation (PoR) to be used by a peer for other peers
 This data structure is used as a payload in other ACN messages (see below).
 
 The `AgentRecord` data structure contains the following fields:
+
 - `service_id`: a string describing the service identifier.
 - `ledger_id`: a string. It is the identifier of the ledger 
     this agent record is associated to.
