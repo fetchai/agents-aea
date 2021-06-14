@@ -209,6 +209,9 @@ conn-error
 generic_error
 DESERIALIZATION_ERROR
 RouteEnvelope
+PoR
+choco
+utc-0
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id

@@ -32,9 +32,9 @@ It contains the following fields:
 - `peer_public_key`: a string. The public key of the peer.
 - `signature`: a string. The signature for PoR.
 - `not_before`: a string. Specify the lower bound for certificate validity.
-    If it is a string, it must follow the format: `YYYY-MM-DD`. It will be interpreted as timezone UTC-0
+    If it is a string, it must follow the format: `YYYY-MM-DD`. It will be interpreted as time zone UTC-0
 - `not_after`: a string. Specify the upper bound for certificate validity. 
-    If it is a string, it must follow the format: `YYYY-MM-DD`. It will be interpreted as timezone UTC-0.
+    If it is a string, it must follow the format: `YYYY-MM-DD`. It will be interpreted as time zone UTC-0.
 
 
 ### ACN Message
@@ -71,7 +71,7 @@ Status codes greater than `0` can be:
   - `ERROR_UNSUPPORTED_VERSION`, with integer value `1`: the receiver of the message
        does not support the protocol version of the sender;
   - `ERROR_UNEXPECTED_PAYLOAD`, with integer value `2`: the payload could not be
-       deserialized on the receiver side;
+       deserialised on the receiver side;
   - `ERROR_GENERIC`, with integer value `3`: an internal error;
   - `ERROR_SERIALIZATION`, with integer value `4`: a serialization error occurred
        on the receiving end;
