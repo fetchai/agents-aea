@@ -10,12 +10,13 @@ The message serialization is based on
 and the definition of the data structures involved is defined
 <a href="https://github.com/fetchai/agents-aea/blob/develop/libs/go/libp2p_node/acn/acn_message.proto" target="_blank">here</a>.
 
-## Messages
+## Messages and Data Structures
 
 ### Agent Record
 
 An _Agent Record_ is a data structure containing information about an
-agent Proof-of-Representation (PoR) to representative.
+agent and its Proof-of-Representation (PoR) to be used by a peer for other peers.
+This data structure is used as a payload in other ACN messages (see below).
 
 It contains the following fields:
 - `service_id`: a string describing the service identifier.
@@ -54,14 +55,38 @@ There are different types of payloads:
 
 ### Status
 
-The _Status_ payload is used as a response message for certain requests (TODO).
+The _Status_ payload is used as a response message to inform 
+the sender about the handling of certain requests.
 It contains:
 
 - the _status code_, a positive integer among the ones in the 
   <a href="https://github.com/fetchai/agents-aea/blob/develop/libs/go/libp2p_node/acn/acn_message.proto" target="_blank">Protobuf file</a>.
 - a list of error messages (string).
 
-A status code `0` means that the request has been processed successfully. Status codes greater than `0` can be: TODO
+A status code `0`, identified as `SUCCESS`, 
+means that the request has been processed successfully.
+Status codes greater than `0` can be:
+
+- Generic errors: errors that occur under generic circumstances.
+  - `ERROR_UNSUPPORTED_VERSION`, with integer value `1`: the receiver of the message
+       does not support the protocol version of the sender;
+  - `ERROR_UNEXPECTED_PAYLOAD`, with integer value `2`: the payload could not be
+       deserialized on the receiver side;
+  - `ERROR_GENERIC`, with integer value `3`: an internal error;
+  - `ERROR_SERIALIZATION`, with integer value `4`: a serialization error occurred
+       on the receiving end;
+- Register errors: errors that occur during agent registration operations in the ACN. 
+  - `ERROR_WRONG_AGENT_ADDRESS`, with integer value `10`:
+       the PoR by a peer from another peer does not match the destination address of
+       the envelope to be routed by the receiving peer.
+  - `ERROR_WRONG_PUBLIC_KEY`, with integer value `11`: the
+       representative peer public key does not match the one in the agent record;
+  - `ERROR_INVALID_PROOF`, with integer value `12`: the signature is invalid;
+  - `ERROR_UNSUPPORTED_LEDGER`, with integer value `13`: the ledger of the PoR is not supported by the peer; 
+- Lookup and delivery errors: errors that occur during lookup to the DHT and envelope delivery operations in the ACN.
+  - `ERROR_UNKNOWN_AGENT_ADDRESS`, with integer value `20`: the requested agent address has not been found in the local DHT of the peer;
+  - `ERROR_AGENT_NOT_READY`, with integer value `21`: the agent is not ready for envelope delivery.
+
 
 ### Register
 
