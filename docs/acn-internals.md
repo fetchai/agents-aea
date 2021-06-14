@@ -14,9 +14,27 @@ and the definition of the data structures involved is defined
 
 ### Agent Record
 
-An _Agent Record_ is a data structure containing information about an agent connected to the ACN.
+An _Agent Record_ is a data structure containing information about an
+agent Proof-of-Representation (PoR) to representative.
 
-> TODO: list and explain fields types and purpose
+It contains the following fields:
+- `service_id`: a string describing the service identifier.
+- `ledger_id`: a string. It is the identifier of the ledger 
+    this agent record is associated to.
+    Currently, the allowed values are:
+    - `fetchai`, the identifier for the Fetch.AI ledger;
+    - `ethereum`, the identifier for the Ethereum ledger;
+    - `cosmos`, the identifier for the Cosmos ledger;
+- `address`: a string. It is the public key of a public-private key pair.
+    It is used as an identifier for routing purposes.
+- `public_key`: a string. The representative's public key. Used in case of (PoR).
+- `peer_public_key`: a string. The public key of the peer.
+- `signature`: a string. The signature for PoR.
+- `not_before`: a string. Specify the lower bound for certificate validity.
+    If it is a string, it must follow the format: `YYYY-MM-DD`. It will be interpreted as timezone UTC-0
+- `not_after`: a string. Specify the upper bound for certificate validity. 
+    If it is a string, it must follow the format: `YYYY-MM-DD`. It will be interpreted as timezone UTC-0.
+
 
 ### ACN Message
 
