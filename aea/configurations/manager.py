@@ -43,7 +43,7 @@ from aea.configurations.constants import (
     SKILLS,
     VENDOR,
 )
-from aea.configurations.data_types import ComponentType, PublicId
+from aea.configurations.data_types import ComponentType, PackageIdPrefix, PublicId
 from aea.configurations.loader import ConfigLoader, load_component_configuration
 from aea.configurations.validation import SAME_MARK, filter_data
 from aea.exceptions import AEAException, enforce
@@ -113,7 +113,7 @@ def _try_get_configuration_object_from_aea_config(
 
 
 def _try_get_component_id_from_prefix(
-    component_ids: Set[ComponentId], component_prefix: Tuple[ComponentType, str, str]
+    component_ids: Set[ComponentId], component_prefix: PackageIdPrefix
 ) -> Optional[ComponentId]:
     """
     Find the component id matching a component prefix.

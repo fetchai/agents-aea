@@ -155,7 +155,7 @@ class ProxyEnv(gym.Env):
         if response_msg.performative != GymMessage.Performative.STATUS:
             raise ValueError(
                 "Unexpected performative. Expected={} got={}".format(
-                    GymMessage.Performative.PERCEPT, response_msg.performative
+                    GymMessage.Performative.STATUS, response_msg.performative
                 )
             )
 
@@ -167,7 +167,7 @@ class ProxyEnv(gym.Env):
         """
         self._is_rl_agent_trained = True
         last_msg = self.active_gym_dialogue.last_message
-        if last_msg is None:
+        if last_msg is None:  # pragma: nocover
             raise ValueError("Cannot retrieve last message.")
         gym_msg = self.active_gym_dialogue.reply(
             performative=GymMessage.Performative.CLOSE, target_message=last_msg,
@@ -183,7 +183,7 @@ class ProxyEnv(gym.Env):
         :return: an envelope
         """
         last_msg = self.active_gym_dialogue.last_message
-        if last_msg is None:
+        if last_msg is None:  # pragma: nocover
             raise ValueError("Cannot retrieve last message.")
         gym_msg = self.active_gym_dialogue.reply(
             performative=GymMessage.Performative.ACT,

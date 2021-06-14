@@ -70,6 +70,7 @@ from aea.configurations.constants import (
     STATE_UPDATE_PROTOCOL,
     _FETCHAI_IDENTIFIER,
 )
+from aea.configurations.data_types import PackageIdPrefix
 from aea.configurations.loader import ConfigLoader, load_component_configuration
 from aea.configurations.manager import (
     AgentConfigManager,
@@ -116,9 +117,7 @@ class _DependenciesManager:
         self._all_dependencies_by_type = (
             {}
         )  # type: Dict[ComponentType, Dict[ComponentId, ComponentConfiguration]]
-        self._prefix_to_components = (
-            {}
-        )  # type: Dict[Tuple[ComponentType, str, str], Set[ComponentId]]
+        self._prefix_to_components = {}  # type: Dict[PackageIdPrefix, Set[ComponentId]]
         self._inverse_dependency_graph = {}  # type: Dict[ComponentId, Set[ComponentId]]
 
         self.agent_pypi_dependencies: Dependencies = {}
