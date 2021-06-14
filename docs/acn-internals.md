@@ -172,24 +172,21 @@ This diagram shows the internals of the above communication:
 
 TODO
 <div class="mermaid">
-sequenceDiagram
-    participant Agent
-    queue Pipe
-    participant listenLoop
-    queue OutputQueue
-    participant outputLoop
-    queue SendQueue
-    participant sendLoop
-    participant DhtNode
-
-    note left of Agent: message = AcnMessage(Envelope)
-    Agent ->> Pipe: message
-    Pipe ->> listenLoop: message
-    listenLoop ->> OutputQueue: message
-    listenLoop ->> Pipe: Status(success)
-    Pipe ->> Agent: Status(success)
-    OutputQueue ->> outputLoop: message
-    outputLoop ->> DhtNode: RouteEnvelope(message)
+    sequenceDiagram
+        participant Agent
+        participant Pipe
+        participant listenLoop
+        participant OutputQueue
+        participant outputLoop
+        participant DhtNode
+        note left of Agent: message = AcnMessage(Envelope)
+        Agent ->> Pipe: message
+        Pipe ->> listenLoop: message
+        listenLoop ->> OutputQueue: message
+        listenLoop ->> Pipe: Status(success)
+        Pipe ->> Agent: Status(success)
+        OutputQueue ->> outputLoop: message
+        outputLoop ->> DhtNode: RouteEnvelope(message)
 </div>
 
 
@@ -202,28 +199,27 @@ Agent is a Python process, whereas AgentApi and Peer are in a separate (Golang) 
 
 
 <div class="mermaid">
-sequenceDiagram
-    participant Agent
-    participant AgentApi
-    participant DHTPeer
-    DHTPeer->>AgentApi: AeaEnvelope
-    note right of Agent Put envelope in AgentApi incoming queue
-    AgentApi->>Agent: AeaEnvelope
-    alt successful case
-        Agent->>AgentApi: Status(success)
-    else ack-timeout OR conn-error
-        note left of AgentApi: do nothing
-    else error on decoding of ACN message
-        Agent->>AgentApi: Status(generic_error)
-        note left of Agent: use DESERIALIZATION_ERROR
-    else error on decoding of Envelope payload
-        Agent->>AgentApi: Status(generic_error)
-        note left of Agent: use DESERIALIZATION_ERROR
-    else wrong payload
-        Agent->>AgentApi: Status(generic_error)
-        note left of Agent: use some custom error code
-    end
-    AgentApi ->> DHTPeer: RouteEnvelope
+    sequenceDiagram
+        participant Agent
+        participant AgentApi
+        participant DHTPeer
+        DHTPeer->>AgentApi: AeaEnvelope
+        note right of Agent: Put envelope in AgentApi incoming queue
+        AgentApi->>Agent: AeaEnvelope
+        alt successful case
+            Agent->>AgentApi: Status(success)
+        else ack-timeout OR conn-error
+            note left of AgentApi: do nothing
+        else error on decoding of ACN message
+            Agent->>AgentApi: Status(generic_error)
+            note left of Agent: use DESERIALIZATION_ERROR
+        else error on decoding of Envelope payload
+            Agent->>AgentApi: Status(generic_error)
+            note left of Agent: use DESERIALIZATION_ERROR
+        else wrong payload
+            Agent->>AgentApi: Status(generic_error)
+            note left of Agent: use some custom error code
+        end
 </div>
 
 TODO
