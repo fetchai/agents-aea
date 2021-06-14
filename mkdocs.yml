@@ -263,4 +263,4 @@ extra_css:
     - css/my-styles.css
 
 extra_javascript:
-    - https://unpkg.com/mermaid@7.1.2/dist/mermaid.min.js
+    - https://unpkg.com/mermaid@8.10.1/dist/mermaid.min.js
