@@ -14,11 +14,11 @@ and the definition of the data structures involved is defined
 
 ### Agent Record
 
-An _Agent Record_ is a data structure containing information about an
+An _agent record_ is a data structure containing information about an
 agent and its Proof-of-Representation (PoR) to be used by a peer for other peers.
 This data structure is used as a payload in other ACN messages (see below).
 
-It contains the following fields:
+The `AgentRecord` data structure contains the following fields:
 - `service_id`: a string describing the service identifier.
 - `ledger_id`: a string. It is the identifier of the ledger 
     this agent record is associated to.
@@ -40,26 +40,24 @@ It contains the following fields:
 ### ACN Message
 
 Entities in the ACN (i.e. either agents or peers) exchange _ACN messages_.
-An ACN message contains the following fields:
-
-- _version_: a string that stores the protocol version, following <a href="https://semver.org/" target="_blank">Semantic Versioning</a>.
-- _payload_: the actual content of the message
+An ACN message contains a `payload` field,
+which is the actual content of the message.
 
 There are different types of payloads:
 
-- Status
-- Register
-- LookupRequest
-- LookupResponse
-- AeaEnvelope
+- `Status`
+- `Register`
+- `LookupRequest`
+- `LookupResponse`
+- `AeaEnvelope`
 
 ### Status
 
-The _Status_ payload is used as a response message to inform 
+The `Status` payload is used as a response message to inform 
 the sender about the handling of certain requests.
-It contains:
+The payload contains:
 
-- the _status code_, a positive integer among the ones in the 
+- the `status_code`, a positive integer among the ones in the 
   <a href="https://github.com/fetchai/agents-aea/blob/develop/libs/go/libp2p_node/acn/acn_message.proto" target="_blank">Protobuf file</a>.
 - a list of error messages (string).
 
@@ -90,24 +88,25 @@ Status codes greater than `0` can be:
 
 ### Register
 
-The _Register_ payload is used to request a peer to register an agent among his known ones. TODO
+The `Register` payload is used to request a peer to register an agent among his known ones.
+The payload contains the field `record`, which is an instance of `AgentRecord`.
 
 ### LookupRequest
 
-The _Lookup Request_ payload is sent between peer to look-up addresses in the Distributed Hash Table (DHT).
+The `LookupRequest` payload is sent between peer to look-up addresses in the Distributed Hash Table (DHT).
 It contains the agent address (a string) that the sender needs to correctly route an envelope.
 
 ### LookupResponse
 
-The _LookupResponse_ payload is the response sent by a peer that received a LookupRequest.
+The `LookupResponse` payload is the response sent by a peer that received a `LookupRequest`.
 
 ### AeaEnvelope
 
-The _AeaEnvelope_ payload contains the envelope sent by an agent and to be delivered to another agent.
+The `AeaEnvelope` payload contains the envelope sent by an agent and to be delivered to another agent.
 It contains:
 
-- _envelope_bytes_: the envelope to be forwarded, in byte representation.
-- an _AgentRecord_ (see above)
+- `envelope`: the envelope to be forwarded, in byte representation;
+- an `AgentRecord` (see above).
 
 ## ACN Entrance
 
