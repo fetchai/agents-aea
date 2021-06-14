@@ -66,24 +66,29 @@ means that the request has been processed successfully.
 Status codes greater than `0` can be:
 
 - Generic errors: errors that occur under generic circumstances.
-  - `ERROR_UNSUPPORTED_VERSION`, with integer value `1`: the receiver of the message
-       does not support the protocol version of the sender;
-  - `ERROR_UNEXPECTED_PAYLOAD`, with integer value `2`: the payload could not be
-       deserialised on the receiver side;
-  - `ERROR_GENERIC`, with integer value `3`: an internal error;
-  - `ERROR_SERIALIZATION`, with integer value `4`: a serialization error occurred
-       on the receiving end;
+
+    - `ERROR_UNSUPPORTED_VERSION`, with integer value `1`: the receiver of the message
+         does not support the protocol version of the sender;
+    - `ERROR_UNEXPECTED_PAYLOAD`, with integer value `2`: the payload could not be
+         deserialised on the receiver side;
+    - `ERROR_GENERIC`, with integer value `3`: an internal error;
+    - `ERROR_SERIALIZATION`, with integer value `4`: a serialization error occurred
+         on the receiving end;
+
 - Register errors: errors that occur during agent registration operations in the ACN. 
-  - `ERROR_WRONG_AGENT_ADDRESS`, with integer value `10`:
-       the PoR by a peer from another peer does not match the destination address of
-       the envelope to be routed by the receiving peer.
-  - `ERROR_WRONG_PUBLIC_KEY`, with integer value `11`: the
-       representative peer public key does not match the one in the agent record;
-  - `ERROR_INVALID_PROOF`, with integer value `12`: the signature is invalid;
-  - `ERROR_UNSUPPORTED_LEDGER`, with integer value `13`: the ledger of the PoR is not supported by the peer; 
+
+    - `ERROR_WRONG_AGENT_ADDRESS`, with integer value `10`:
+         the PoR by a peer from another peer does not match the destination address of
+         the envelope to be routed by the receiving peer.
+    - `ERROR_WRONG_PUBLIC_KEY`, with integer value `11`: the
+         representative peer public key does not match the one in the agent record;
+    - `ERROR_INVALID_PROOF`, with integer value `12`: the signature is invalid;
+    - `ERROR_UNSUPPORTED_LEDGER`, with integer value `13`: the ledger of the PoR is not supported by the peer;
+
 - Lookup and delivery errors: errors that occur during lookup to the DHT and envelope delivery operations in the ACN.
-  - `ERROR_UNKNOWN_AGENT_ADDRESS`, with integer value `20`: the requested agent address has not been found in the local DHT of the peer;
-  - `ERROR_AGENT_NOT_READY`, with integer value `21`: the agent is not ready for envelope delivery.
+  
+    - `ERROR_UNKNOWN_AGENT_ADDRESS`, with integer value `20`: the requested agent address has not been found in the local DHT of the peer;
+    - `ERROR_AGENT_NOT_READY`, with integer value `21`: the agent is not ready for envelope delivery.
 
 
 ### Register
@@ -108,12 +113,27 @@ It contains:
 - `envelope`: the envelope to be forwarded, in byte representation;
 - an `AgentRecord` (see above).
 
-## ACN Entrance
+
+### ACN with direct connection
+
+In the following sections, we describe the main three steps of the routing
+of an envelope through the ACN:
+
+- _ACN entrance_: when an envelope sent by an agent enters 
+  the peer-to-peer network via the peer the agent is connected to
+  i.e. agent-to-peer communication;
+- _ACN middle_: when an envelope gets routed through the peer-to-peer network,
+  i.e. peer-to-peer communication;
+- _ACN exit_: when an envelope gets delivered to the receiving agent
+  through its representative peer, i.e. peer-to-agent communication.
+  
+
+### ACN Entrance
 
 In this section, we will describe the interaction protocols between agents and peers 
 for the messages sent by the agent to the ACN network.
 
-### Envelope entrance: Agent -> AgentApi -> DHTPeer (direct connection)
+#### Envelope entrance: Agent -> AgentApi -> DHTPeer (direct connection)
 
 The following diagram explains the exchange of messages on entering an envelope in the ACN.
 Agent is a Python process, whereas AgentApi and Peer are in a separate (Golang) process.
@@ -172,9 +192,9 @@ sequenceDiagram
 </div>
 
 
-## ACN Exit
+### ACN Exit
 
-### Envelope exit: DHTPeer -> AgentApi -> Agent (direct connection)
+#### Envelope exit: DHTPeer -> AgentApi -> Agent (direct connection)
 
 The following diagram explains the exchange of messages on exiting an envelope in the ACN.
 Agent is a Python process, whereas AgentApi and Peer are in a separate (Golang) process.
