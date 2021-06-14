@@ -114,7 +114,7 @@ It contains:
 - an `AgentRecord` (see above).
 
 
-### ACN with direct connection
+## ACN with direct connection
 
 In the following sections, we describe the main three steps of the routing
 of an envelope through the ACN:
