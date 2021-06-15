@@ -414,7 +414,7 @@ class BaseTestMultiAgentManager(TestCase):
         self.manager.stop_all_agents()
         wait_for_condition(
             lambda: self.agent_name not in self.manager.list_agents(running_only=True),
-            timeout=5,
+            timeout=10,
         )
         self.manager.remove_agent(self.agent_name)
         assert self.agent_name not in self.manager.list_agents()

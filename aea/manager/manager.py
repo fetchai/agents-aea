@@ -771,6 +771,9 @@ class MultiAgentManager:
         agent_task.stop()
         event.wait(self.DEFAULT_TIMEOUT_FOR_BLOCKING_OPERATIONS)
 
+        if agent_task.is_running:
+            raise ValueError(f"cannot stop task of agent {agent_name}")
+
         return self
 
     def stop_all_agents(self) -> "MultiAgentManager":
