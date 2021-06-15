@@ -142,29 +142,27 @@ Agent is a Python process, whereas AgentApi and Peer are in a separate (Golang) 
 <div class="mermaid">
     sequenceDiagram
         participant Agent
-        participant AgentApi
         participant DHTPeer
         loop until Status(success) received
-            Agent->>AgentApi: AcnMessage(AeaEnvelope)
+            Agent->>DHTPeer: AcnMessage(AeaEnvelope)
             Agent->>Agent: wait
             note left of Agent: Wait until Status(success)
             alt successful case
-                AgentApi->>Agent: Status(success)
+                DHTPeer->>Agent: Status(success)
                 note over Agent: break loop
             else ack-timeout OR conn-error
                 note left of Agent: continue (Try to resend/reconnect)
+            else version not supported
+                DHTPeer->>Agent: Status(ERROR_UNSUPPORTED_VERSION)
             else error on decoding of ACN message
-                AgentApi->>Agent: Status(generic_error)
-                note left of Agent: use DESERIALIZATION_ERROR
+                DHTPeer->>Agent: Status(SERIALIZATION_ERROR)
             else error on decoding of Envelope payload
-                AgentApi->>Agent: Status(generic_error)
-                note left of Agent: use DESERIALIZATION_ERROR
-            else wrong payload
-                AgentApi->>Agent: Status(generic_error)
-                note left of Agent: use some custom error code
+                DHTPeer->>Agent: Status(SERIALIZATION_ERROR)
+            else the payload cannot be handled
+                DHTPeer->>Agent: Status(SERIALIZATION_ERROR)
             end
         end
-        AgentApi ->> DHTPeer: RouteEnvelope
+        note over DHTPeer: route envelope to next peer
 </div>
 
 
