@@ -8,7 +8,7 @@ aea_version: '>=1.0.0, <2.0.0'
 fingerprint:
   README.md: QmZSX1U4HtM5guCtaQtiszhiNS3ZedvLZD6n3YXmy6E3AS
   __init__.py: Qmd5VBGFJHXFe1H45XoUh5mMSYBwvLSViJuGFeMgbPdQts
-  connection.py: QmXyYFNtgPvNcV3bVfBnQNqe61kvGirPHYvKrHhjDYyZoF
+  connection.py: QmdrjSTwbDgtC6KxyzEnA8Wf2MKjpPJukZtZaRFjg61ejH
 fingerprint_ignore_patterns: []
 connections: []
 protocols:
@@ -19,6 +19,7 @@ config:
   chain_identifier: fetchai_v2_testnet_stable
   connection_check_max_retries: 3
   connection_check_timeout: 15.0
+  is_https: true
   soef_addr: s-oef.fetch.ai
   soef_port: 443
   token_storage_path: soef_token.txt

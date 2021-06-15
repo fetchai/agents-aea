@@ -98,6 +98,7 @@ class Project(_Base):
         cli_verbosity: str = "INFO",
         registry_path: str = DEFAULT_REGISTRY_NAME,
         skip_consistency_check: bool = False,
+        skip_aea_validation: bool = False,
     ) -> "Project":
         """
         Load project with given public_id to working_dir.
@@ -114,12 +115,14 @@ class Project(_Base):
         :param cli_verbosity: the logging verbosity of the CLI
         :param registry_path: the path to the registry locally
         :param skip_consistency_check: consistency checks flag
+        :param skip_aea_validation: aea validation flag
         :return: project
         """
         ctx = Context(
             cwd=working_dir, verbosity=cli_verbosity, registry_path=registry_path
         )
         ctx.set_config("skip_consistency_check", skip_consistency_check)
+        ctx.set_config("skip_aea_validation", skip_aea_validation)
 
         path = os.path.join(working_dir, public_id.author, public_id.name)
         target_dir = os.path.join(public_id.author, public_id.name)
@@ -133,9 +136,14 @@ class Project(_Base):
         rmtree(self.path)
 
     @property
+    def agent_config(self) -> AgentConfig:
+        """Get the agent configuration."""
+        return self._get_agent_config(self.path)
+
+    @property
     def builder(self) -> AEABuilder:
         """Get builder instance."""
-        return self._get_builder(self._get_agent_config(self.path), self.path)
+        return self._get_builder(self.agent_config, self.path)
 
     def check(self) -> None:
         """Check we can still construct an AEA from the project with builder.build."""

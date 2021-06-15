@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package dhtnode;
+
+message AgentRecord {
+    string service_id = 1;
+    string ledger_id = 2;
+    string address = 3;
+    string public_key = 4;
+    string peer_public_key = 5;
+    string signature = 6;
+    string not_before = 7;
+    string not_after = 8;
+}
+
+message Register {
+    AgentRecord record = 1;
+}
+
+message LookupRequest {
+    string agent_address = 1;
+}
+
+message LookupResponse {
+    AgentRecord agent_record = 1;
+}
+
+message AeaEnvelope {
+    // TOFIX(LR) import aea.Envelop type
+    bytes envel = 1;
+    AgentRecord record = 2;
+}
+
+message Status {
+    enum ErrCode {
+        // common (0x)
+        SUCCESS = 0;
+        ERROR_UNSUPPORTED_VERSION = 1;
+        ERROR_UNEXPECTED_PAYLOAD = 2;
+        ERROR_GENERIC = 3;
+        ERROR_SERIALIZATION = 4;
+        // register (1x)
+        ERROR_WRONG_AGENT_ADDRESS = 10;
+        ERROR_WRONG_PUBLIC_KEY = 11;
+        ERROR_INVALID_PROOF = 12;
+        ERROR_UNSUPPORTED_LEGDER = 13;
+        // lookup & delivery (2x) 
+        ERROR_UNKNOWN_AGENT_ADDRESS = 20;
+        ERROR_AGENT_NOT_READY = 21;
+    }
+
+    ErrCode code = 1;
+    repeated string msgs = 2;
+}
+
+message AcnMessage {
+    string version = 1;
+    oneof payload {
+        Status status = 2;
+        Register register = 3;
+        LookupRequest lookup_request = 4;
+        LookupResponse lookup_response = 5;
+        AeaEnvelope aea_envelope = 6;
+    }
+}

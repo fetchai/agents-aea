@@ -337,56 +337,6 @@ class GanacheDockerImage(DockerImage):
         return False
 
 
-class SOEFDockerImage(DockerImage):
-    """Wrapper to SOEF Docker image."""
-
-    DEFAULT_PORT = 9000
-    PORT = 9002
-
-    def __init__(
-        self, client: DockerClient, addr: str, port: int = PORT,
-    ):
-        """
-        Initialize the SOEF Docker image.
-
-        :param client: the Docker client.
-        :param addr: the address.
-        :param port: the port.
-        """
-        super().__init__(client)
-        self._addr = addr
-        self._port = port
-
-    @property
-    def tag(self) -> str:
-        """Get the image tag."""
-        return "gcr.io/fetch-ai-images/soef:9e78611"
-
-    def _make_ports(self) -> Dict:
-        """Make ports dictionary for Docker."""
-        return {f"{self.DEFAULT_PORT}/tcp": ("0.0.0.0", self._port)}  # nosec
-
-    def create(self) -> Container:
-        """Create the container."""
-        container = self._client.containers.run(
-            self.tag, detach=True, ports=self._make_ports()
-        )
-        return container
-
-    def wait(self, max_attempts: int = 15, sleep_rate: float = 1.0) -> bool:
-        """Wait until the image is up."""
-        # request = dict(jsonrpc=2.0, method="web3_clientVersion", params=[], id=1)
-        for i in range(max_attempts):
-            try:
-                response = requests.get(f"{self._addr}:{self._port}")
-                enforce(response.status_code == 200, "")
-                return True
-            except Exception:
-                logger.info(f"Attempt {i} failed. Retrying in {sleep_rate} seconds...")
-                time.sleep(sleep_rate)
-        return False
-
-
 class FetchLedgerDockerImage(DockerImage):
     """Wrapper to Fetch ledger Docker image."""
 

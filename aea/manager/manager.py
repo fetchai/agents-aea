@@ -28,9 +28,11 @@ from threading import Thread
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 
 from aea.aea import AEA
+from aea.configurations.base import AgentConfig
 from aea.configurations.constants import AEA_MANAGER_DATA_DIRNAME, DEFAULT_REGISTRY_NAME
-from aea.configurations.data_types import PublicId
+from aea.configurations.data_types import PackageIdPrefix, PublicId
 from aea.crypto.plugin import load_all_plugins
+from aea.exceptions import enforce
 from aea.helpers.io import open_file
 from aea.manager.project import AgentAlias, Project
 
@@ -46,6 +48,38 @@ class ProjectCheckError(ValueError):
         """Init exception."""
         super().__init__(msg)
         self.source_exception = source_exception
+
+
+class ProjectPackageConsistencyCheckError(ValueError):
+    """Check consistency of package versions against already added project."""
+
+    def __init__(
+        self,
+        agent_project_id: PublicId,
+        conflicting_packages: List[Tuple[PackageIdPrefix, str, str, Set[PublicId]]],
+    ):
+        """
+        Initialize the exception.
+
+        :param agent_project_id: the agent project id whose addition has failed.
+        :param conflicting_packages: the conflicting packages.
+        """
+        self.agent_project_id = agent_project_id
+        self.conflicting_packages = conflicting_packages
+        super().__init__(self._build_error_message())
+
+    def _build_error_message(self) -> str:
+        """Build the error message."""
+        conflicting_packages = sorted(self.conflicting_packages, key=str)
+        message = f"cannot add project '{self.agent_project_id}': the following AEA dependencies have conflicts with previously added projects:\n"
+        for (
+            (type_, author, name),
+            existing_version,
+            new_version,
+            agents,
+        ) in conflicting_packages:
+            message += f"- '{author}/{name}' of type {type_}: the new version '{new_version}' conflicts with existing version '{existing_version}' of the same package required by agents: {list(agents)}\n"
+        return message
 
 
 class AgentRunAsyncTask:
@@ -207,6 +241,15 @@ class MultiAgentManager:
         # this flags will control whether we have already printed the warning message
         # for a certain agent
         self._warning_message_printed_for_agent: Dict[str, bool] = {}
+
+        # the dictionary keeps track of the AEA packages used across
+        # AEA projects in the same MAM.
+        # It maps package prefixes to a pair: (version, agent_ids)
+        # where agent_ids is the set of agent ids whose projects
+        # have the package in the key at the specific version.
+        self._package_id_prefix_to_version: Dict[
+            PackageIdPrefix, Tuple[str, Set[PublicId]]
+        ] = {}
 
     @property
     def data_dir(self) -> str:
@@ -409,12 +452,15 @@ class MultiAgentManager:
             remote,
             registry_path=self.registry_path,
             is_restore=restore,
+            skip_aea_validation=False,
         )
 
         if not restore:
             project.install_pypi_dependencies()
             load_all_plugins(is_raising_exception=False)
             project.build()
+
+        self._check_version_consistency(project.agent_config)
 
         try:
             project.check()
@@ -424,6 +470,7 @@ class MultiAgentManager:
                 f"Failed to load project: {public_id} Error: {str(e)}", e
             )
 
+        self._add_new_package_versions(project.agent_config)
         self._versionless_projects_set.add(public_id.to_any())
         self._projects[public_id] = project
         return self
@@ -441,6 +488,7 @@ class MultiAgentManager:
             )
 
         project = self._projects.pop(public_id)
+        self._remove_package_versions(project.agent_config)
         self._versionless_projects_set.remove(public_id.to_any())
         if not keep_files:
             project.remove()
@@ -835,7 +883,6 @@ class MultiAgentManager:
                 break
 
             for agent_settings in agents_settings:
-
                 self.add_agent_with_config(
                     public_id=PublicId.from_str(agent_settings["public_id"]),
                     agent_name=agent_settings["agent_name"],
@@ -883,3 +930,100 @@ class MultiAgentManager:
             "\nHowever, since no error callback was found the exception is handled silently. Please "
             "add an error callback using the method 'add_error_callback' of the MultiAgentManager instance.",
         )
+
+    def _check_version_consistency(self, agent_config: AgentConfig) -> None:
+        """
+        Check that the agent dependencies in input are consistent with the other projects.
+
+        :param agent_config: the agent configuration we are going to add.
+        :return: None
+        :raises ProjectPackageConsistencyCheckError: if a version conflict is detected.
+        """
+        existing_packages = set(self._package_id_prefix_to_version.keys())
+        prefix_to_version = {
+            component_id.component_prefix: component_id.version
+            for component_id in agent_config.package_dependencies
+        }
+        component_prefixes_to_be_added = set(prefix_to_version.keys())
+
+        potentially_conflicting_packages = existing_packages.intersection(
+            component_prefixes_to_be_added
+        )
+        if len(potentially_conflicting_packages) == 0:
+            return
+
+        # conflicting_packages is a list of tuples whose elements are:
+        # - package id prefix: the triple (component type, author, name)
+        # - current_version: the version currently present in the MAM, across all projects
+        # - new_version: the version of the package in the new project
+        # - agents: the set of agents in the MAM that have the package;
+        #           used to provide a better error message
+        conflicting_packages: List[Tuple[PackageIdPrefix, str, str, Set[PublicId]]] = []
+        for package_prefix in potentially_conflicting_packages:
+            existing_version, agents = self._package_id_prefix_to_version[
+                package_prefix
+            ]
+            new_version = prefix_to_version[package_prefix]
+            if existing_version != new_version:
+                conflicting_packages.append(
+                    (package_prefix, existing_version, new_version, agents)
+                )
+
+        if len(conflicting_packages) == 0:
+            return
+
+        raise ProjectPackageConsistencyCheckError(
+            agent_config.public_id, conflicting_packages
+        )
+
+    def _add_new_package_versions(self, agent_config: AgentConfig) -> None:
+        """
+        Add new package versions.
+
+        This method is called whenever a project agent is added.
+        It updates an internal data structure that it is used to
+        check inconsistencies of AEA package versions across projects.
+        In particular, all the AEA packages with the same "prefix" must
+        be of the same version.
+
+        :param agent_config: the agent configuration.
+        """
+        for component_id in agent_config.package_dependencies:
+            if component_id.component_prefix not in self._package_id_prefix_to_version:
+                self._package_id_prefix_to_version[component_id.component_prefix] = (
+                    component_id.version,
+                    set(),
+                )
+            version, agents = self._package_id_prefix_to_version[
+                component_id.component_prefix
+            ]
+            enforce(
+                version == component_id.version,
+                f"internal consistency error: expected version '{version}', found {component_id.version}",
+            )
+            agents.add(agent_config.public_id)
+
+    def _remove_package_versions(self, agent_config: AgentConfig) -> None:
+        """
+        Remove package versions.
+
+        This method is called whenever a project agent is removed.
+        It updates an internal data structure that it is used to
+        check inconsistencies of AEA package versions across projects.
+        In particular, all the AEA packages with the same "prefix" must
+        be of the same version.
+
+        :param agent_config: the agent configuration.
+        """
+        package_prefix_to_remove = set()
+        for (
+            package_prefix,
+            (_version, agents),
+        ) in self._package_id_prefix_to_version.items():
+            if agent_config.public_id in agents:
+                agents.remove(agent_config.public_id)
+                if len(agents) == 0:
+                    package_prefix_to_remove.add(package_prefix)
+
+        for package_prefix in package_prefix_to_remove:
+            self._package_id_prefix_to_version.pop(package_prefix)

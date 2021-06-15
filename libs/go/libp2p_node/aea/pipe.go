@@ -25,6 +25,7 @@ package aea
 import (
 	"encoding/binary"
 	"errors"
+	common "libp2p_node/common"
 	"math"
 	"net"
 	"strconv"
@@ -81,7 +82,7 @@ func (sock *TCPSocketChannel) Close() error {
 	return sock.conn.Close()
 }
 
-func NewPipe(msgin_path string, msgout_path string) Pipe {
+func NewPipe(msgin_path string, msgout_path string) common.Pipe {
 	port, _ := strconv.ParseUint(msgin_path, 10, 16)
 	return &TCPSocketChannel{port: uint16(port)}
 }
