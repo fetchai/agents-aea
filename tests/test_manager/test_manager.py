@@ -566,25 +566,10 @@ class TestMultiAgentManagerAsyncMode(
     """Tests for MultiAgentManager in async mode."""
 
 
-class TestMultiAgentManagerAsyncModeWithPassword(
-    BaseTestMultiAgentManager
-):  # pylint: disable=unused-argument,protected-access,attribute-defined-outside-init
-    """Tests for MultiAgentManager in async mode, with password."""
-
-    PASSWORD = "password"  # nosec
-
-
 class TestMultiAgentManagerThreadedMode(BaseTestMultiAgentManager):
     """Tests for MultiAgentManager in threaded mode."""
 
     MODE = "threaded"
-
-
-class TestMultiAgentManagerThreadedModeWithPassword(BaseTestMultiAgentManager):
-    """Tests for MultiAgentManager in threaded mode, with password."""
-
-    MODE = "threaded"
-    PASSWORD = "password"  # nosec
 
 
 class TestMultiAgentManagerPackageConsistencyError:
