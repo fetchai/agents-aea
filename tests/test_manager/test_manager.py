@@ -656,6 +656,56 @@ class TestMultiAgentManagerPackageConsistencyError:
             self.tmp_dir.cleanup()
 
 
+class TestMultiAgentManagerWithPotentiallyConflictingPackages:
+    """
+    Test that the MultiAgentManager (MAM) handles correctly potentially conflicting packages.
+
+    "Potentially conflicting packages" are packages that have the same
+    package id prefix. The reason why they are "potentially conflicting"
+    is that their version may be different, i.e. conflicting,
+    and therefore are incompatible within the same MAM.
+
+    This test checks that, when adding a new project,
+    in case there are potentially conflicting packages but that
+    are not in fact conflicting, the operation is completed successfully.
+    """
+
+    def setup(self):
+        """Set up the test case."""
+        self.project_public_id = MY_FIRST_AEA_PUBLIC_ID
+        self.tmp_dir = TemporaryDirectory()
+        self.working_dir = os.path.join(self.tmp_dir.name, "MultiAgentManager_dir")
+        self.project_path = os.path.join(
+            self.working_dir, self.project_public_id.author, self.project_public_id.name
+        )
+        assert not os.path.exists(self.working_dir)
+        self.manager = MultiAgentManager(self.working_dir)
+
+    def test_run(self):
+        """
+        Run the test.
+
+        First add agent project "fetchai/weather_station:0.27.0",
+        and then add "fetchai/weather_client:0.27.0".
+        The second addition will fail because the projects
+        contain conflicting AEA package versions.
+        """
+        self.manager.start_manager()
+        weather_station_id = PublicId.from_str("fetchai/weather_station:0.27.0")
+        self.manager.add_project(weather_station_id)
+        weather_client_id = PublicId.from_str("fetchai/weather_client:0.28.0")
+        self.manager.add_project(weather_client_id)
+
+    def teardown(self):
+        """Tear down test case."""
+        try:
+            self.manager.stop_manager()
+            if os.path.exists(self.working_dir):
+                rmtree(self.working_dir)
+        finally:
+            self.tmp_dir.cleanup()
+
+
 def test_project_auto_added_removed():
     """Check project auto added and auto removed on agent added/removed."""
     agent_name = "test_agent"
