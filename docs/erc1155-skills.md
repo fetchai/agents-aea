@@ -263,11 +263,11 @@ This diagram shows the communication between the various entities in this intera
         participant Client_AEA
         participant Deployer_AEA
         participant Blockchain
-    
-        activate Deployer_AEA
+
         activate Search
-        activate Client_AEA
         activate Erc1155_contract
+        activate Client_AEA
+        activate Deployer_AEA
         activate Blockchain
         
         Deployer_AEA->>Blockchain: deployes smart contract
@@ -282,10 +282,10 @@ This diagram shows the communication between the various entities in this intera
         Deployer_AEA->>Blockchain: send_transaction
         Client_AEA->>ERC1155_contract: asks_balance
         
-        deactivate Deployer_AEA
         deactivate Search
+        deactivate Erc1155_contract
         deactivate Client_AEA
-        deactivate ERC1155_contract
+        deactivate Deployer_AEA
         deactivate Blockchain
        
 </div>
