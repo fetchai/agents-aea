@@ -165,28 +165,25 @@ Agent is a Python process, whereas AgentApi and Peer are in a separate (Golang) 
         note over DHTPeer: route envelope to next peer
 </div>
 
+An envelope sent via the `fetchai/p2p_libp2p` connection 
+by an AEA's skill passes through:
 
-This diagram shows the internals of the above communication:
+1. the `fetchai/p2p_libp2p` connection; 
+2. a pipe for Inter-Process Communication (IPC) between the AEA's process and the libp2p node process, and then
+   it gets enqueued to an output queue by an input coroutine;
+3. an output queue, which is processed by an output coroutine and routed to the next peer. 
 
-TODO
+
+### ACN middle
+
+In this section, we describe the interaction between peers.
+
+
 <div class="mermaid">
     sequenceDiagram
-        participant Agent
-        participant Pipe
-        participant listenLoop
-        participant OutputQueue
-        participant outputLoop
-        participant DhtNode
-        note left of Agent: message = AcnMessage(Envelope)
-        Agent ->> Pipe: message
-        Pipe ->> listenLoop: message
-        listenLoop ->> OutputQueue: message
-        listenLoop ->> Pipe: Status(success)
-        Pipe ->> Agent: Status(success)
-        OutputQueue ->> outputLoop: message
-        outputLoop ->> DhtNode: RouteEnvelope(message)
+        participant DHTPeer1
+        participant DHTPeer2
 </div>
-
 
 ### ACN Exit
 
@@ -219,5 +216,3 @@ Agent is a Python process, whereas AgentApi and Peer are in a separate (Golang) 
             note left of Agent: use some custom error code
         end
 </div>
-
-TODO
