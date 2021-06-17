@@ -127,18 +127,19 @@ type DHTPeer struct {
 	routedHost  *routedhost.RoutedHost
 	tcpListener net.Listener
 
-	addressAnnounced bool
-	myAgentAddress   string
-	myAgentRecord    *acn.AgentRecord
-	myAgentReady     func() bool
-	dhtAddresses     map[string]string
-	acnStatuses      map[string]chan *acn.Status
-	tcpAddresses     map[string]net.Conn
-	agentRecords     map[string]*acn.AgentRecord
-	acnStatusesLock  sync.RWMutex
-	dhtAddressesLock sync.RWMutex
-	tcpAddressesLock sync.RWMutex
-	agentRecordsLock sync.RWMutex
+	addressAnnounced   bool
+	addressAnnouncedWg sync.WaitGroup
+	myAgentAddress     string
+	myAgentRecord      *acn.AgentRecord
+	myAgentReady       func() bool
+	dhtAddresses       map[string]string
+	acnStatuses        map[string]chan *acn.Status
+	tcpAddresses       map[string]net.Conn
+	agentRecords       map[string]*acn.AgentRecord
+	acnStatusesLock    sync.RWMutex
+	dhtAddressesLock   sync.RWMutex
+	tcpAddressesLock   sync.RWMutex
+	agentRecordsLock   sync.RWMutex
 	// TOFIX(LR): maps and locks need refactoring for better abstraction
 	processEnvelope func(*aea.Envelope) error
 
@@ -169,6 +170,8 @@ func New(opts ...Option) (*DHTPeer, error) {
 	dhtPeer.agentRecordsLock = sync.RWMutex{}
 	dhtPeer.persistentStoragePath = defaultPersistentStoragePath
 	dhtPeer.syncMessages = make(map[string](chan *aea.Envelope))
+	dhtPeer.addressAnnounced = false
+	dhtPeer.addressAnnouncedWg = sync.WaitGroup{}
 	for _, opt := range opts {
 		if err := opt(dhtPeer); err != nil {
 			return nil, err
@@ -333,6 +336,7 @@ func New(opts ...Option) (*DHTPeer, error) {
 	// if peer is joining an existing network, announce my agent address if set
 	if len(dhtPeer.bootstrapPeers) > 0 {
 		dhtPeer.addressAnnounced = true
+		ldebug().Msg("Address was announced on bootstrap peers")
 		if dhtPeer.myAgentAddress != "" {
 			opLatencyRegister, _ := dhtPeer.monitor.GetHistogram(metricOpLatencyRegister)
 			timer := dhtPeer.monitor.Timer()
@@ -574,10 +578,12 @@ func (dhtPeer *DHTPeer) Close() []error {
 	if dhtPeer.tcpListener != nil {
 		err = dhtPeer.tcpListener.Close()
 		errappend(err)
+		dhtPeer.tcpAddressesLock.Lock()
 		for _, conn := range dhtPeer.tcpAddresses {
 			err = conn.Close()
 			errappend(err)
 		}
+		dhtPeer.tcpAddressesLock.Unlock()
 	}
 
 	err = dhtPeer.dht.Close()
@@ -764,6 +770,7 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 	dhtPeer.acnStatuses[addr] = make(chan *acn.Status, AcnStatusesQueueSize)
 	dhtPeer.acnStatusesLock.Unlock()
 
+	dhtPeer.addressAnnouncedWg.Wait()
 	if dhtPeer.addressAnnounced {
 		//linfo().Msgf("announcing tcp client address %s...", addr)
 		// TOFIX(LR) disconnect client?
@@ -955,8 +962,10 @@ func (dhtPeer *DHTPeer) RouteEnvelope(envel *aea.Envelope) error {
 	} else if existsDelegate {
 		linfo().Str("op", "route").Str("addr", target).
 			Msgf("destination is a delegate client %s", connDelegate.RemoteAddr().String())
+
 		routeCount.Dec()
 		routeCountSuccess.Inc()
+
 		duration := timer.GetTimer(start)
 		opLatencyRoute.Observe(float64(duration.Microseconds()))
 
@@ -1669,7 +1678,9 @@ func (dhtPeer *DHTPeer) handleAeaNotifStream(stream network.Stream) {
 
 	//linfo().Str("op", "notif").
 	//	Msgf("Got a new notif stream")
-
+	dhtPeer.addressAnnouncedWg.Wait()
+	dhtPeer.addressAnnouncedWg.Add(1)
+	defer dhtPeer.addressAnnouncedWg.Done()
 	if !dhtPeer.addressAnnounced {
 		opLatencyRegister, _ := dhtPeer.monitor.GetHistogram(metricOpLatencyRegister)
 		timer := dhtPeer.monitor.Timer()
@@ -1731,6 +1742,7 @@ func (dhtPeer *DHTPeer) handleAeaNotifStream(stream network.Stream) {
 		duration := timer.GetTimer(start)
 		opLatencyRegister.Observe(float64(duration.Microseconds()))
 	}
+	ldebug().Msg("Address was announced")
 	dhtPeer.addressAnnounced = true
 }
 
@@ -1848,9 +1860,11 @@ func (dhtPeer *DHTPeer) handleAeaRegisterStream(stream network.Stream) {
 	//	Str("addr", string(clientAddr)).
 	//	Msgf("Received address registration request for peer id %s", string(clientPeerID))
 	clientPeerID := stream.Conn().RemotePeer().Pretty()
+
 	dhtPeer.agentRecordsLock.Lock()
 	dhtPeer.agentRecords[clientAddr] = record
 	dhtPeer.agentRecordsLock.Unlock()
+
 	dhtPeer.dhtAddressesLock.Lock()
 	dhtPeer.dhtAddresses[clientAddr] = clientPeerID
 	err = dhtPeer.saveAgentRecordToPersistentStorage(record)
@@ -1860,9 +1874,12 @@ func (dhtPeer *DHTPeer) handleAeaRegisterStream(stream network.Stream) {
 			Msg("while saving agent record to persistent storage")
 	}
 	dhtPeer.dhtAddressesLock.Unlock()
+
 	linfo().Str("op", "register").
 		Str("addr", clientAddr).
 		Msgf("peer added: %s", clientPeerID)
+
+	dhtPeer.addressAnnouncedWg.Wait()
 	if dhtPeer.addressAnnounced {
 		linfo().Str("op", "register").
 			Str("addr", clientAddr).
