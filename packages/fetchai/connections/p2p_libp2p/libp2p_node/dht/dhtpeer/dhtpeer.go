@@ -693,7 +693,6 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 		}
 		statusPerformative := &acn.StatusPerformative{Body: status}
 		response := &acn.AcnMessage{
-			// Version: dhtnode.CurrentVersion,
 			Performative: &acn.Status{Status: statusPerformative},
 		}
 		buf, err = proto.Marshal(response)
@@ -717,7 +716,6 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 		status := &acn.StatusBody{Code: acn.ERROR_UNEXPECTED_PAYLOAD, Msgs: []string{err.Error()}}
 		statusPerformative := &acn.StatusPerformative{Body: status}
 		response := &acn.AcnMessage{
-			// Version: dhtnode.CurrentVersion,
 			Performative: &acn.Status{Status: statusPerformative},
 		}
 		buf, err = proto.Marshal(response)
@@ -742,7 +740,6 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 	if err != nil || status.Code != acn.SUCCESS {
 		lerror(err).Msg("PoR is not valid")
 		response := &acn.AcnMessage{
-			// Version: dhtnode.CurrentVersion,
 			Performative: &acn.Status{Status: statusPerformative},
 		}
 		buf, err = proto.Marshal(response)
@@ -756,7 +753,6 @@ func (dhtPeer *DHTPeer) handleNewDelegationConnection(conn net.Conn) {
 
 	// TOFIX(LR) post-pone answer until address successfully registered
 	msg = &acn.AcnMessage{
-		// Version: dhtnode.CurrentVersion,
 		Performative: &acn.Status{Status: statusPerformative},
 	}
 	buf, err = proto.Marshal(msg)
@@ -1213,7 +1209,6 @@ func (dhtPeer *DHTPeer) lookupAddressDHT(address string) (peer.ID, *acn.AgentRec
 			// prepare LookupRequest
 			lookupRequest := &acn.LookupRequestPerformative{AgentAddress: address}
 			msg := &acn.AcnMessage{
-				// Version: dhtnode.CurrentVersion,
 				Performative: &acn.LookupRequest{LookupRequest: lookupRequest},
 			}
 			buf, err := proto.Marshal(msg)
@@ -1341,7 +1336,6 @@ func (dhtPeer *DHTPeer) handleAeaEnvelopeStream(stream network.Stream) {
 		status := &acn.StatusBody{Code: acn.ERROR_SERIALIZATION}
 		statusPerformative := &acn.StatusPerformative{Body: status}
 		response := &acn.AcnMessage{
-			// Version: dhtnode.CurrentVersion,
 			Performative: &acn.Status{Status: statusPerformative},
 		}
 		buf, err = proto.Marshal(response)
@@ -1364,7 +1358,6 @@ func (dhtPeer *DHTPeer) handleAeaEnvelopeStream(stream network.Stream) {
 		status := &acn.StatusBody{Code: acn.ERROR_UNEXPECTED_PAYLOAD}
 		statusPerformative := &acn.StatusPerformative{Body: status}
 		response := &acn.AcnMessage{
-			// Version: dhtnode.CurrentVersion,
 			Performative: &acn.Status{Status: statusPerformative},
 		}
 		buf, err = proto.Marshal(response)
@@ -1386,7 +1379,6 @@ func (dhtPeer *DHTPeer) handleAeaEnvelopeStream(stream network.Stream) {
 		}
 		statusPerformative := &acn.StatusPerformative{Body: status}
 		response := &acn.AcnMessage{
-			// Version: dhtnode.CurrentVersion,
 			Performative: &acn.Status{Status: statusPerformative},
 		}
 		buf, err = proto.Marshal(response)
@@ -1412,7 +1404,6 @@ func (dhtPeer *DHTPeer) handleAeaEnvelopeStream(stream network.Stream) {
 		}
 		lerror(err).Msg("incoming envelope PoR is not valid")
 		response := &acn.AcnMessage{
-			// Version: dhtnode.CurrentVersion,
 			Performative: &acn.Status{Status: statusPerformative},
 		}
 		buf, err = proto.Marshal(response)
@@ -1454,7 +1445,6 @@ func (dhtPeer *DHTPeer) handleAeaEnvelopeStream(stream network.Stream) {
 			status := &acn.StatusBody{Code: acn.ERROR_AGENT_NOT_READY}
 			statusPerformative := &acn.StatusPerformative{Body: status}
 			response := &acn.AcnMessage{
-				// Version: dhtnode.CurrentVersion,
 				Performative: &acn.Status{Status: statusPerformative},
 			}
 			buf, err = proto.Marshal(response)
@@ -1482,7 +1472,6 @@ func (dhtPeer *DHTPeer) handleAeaEnvelopeStream(stream network.Stream) {
 			status := &acn.StatusBody{Code: acn.ERROR_AGENT_NOT_READY}
 			statusPerformative := &acn.StatusPerformative{Body: status}
 			response := &acn.AcnMessage{
-				// Version: dhtnode.CurrentVersion,
 				Performative: &acn.Status{Status: statusPerformative},
 			}
 			buf, err = proto.Marshal(response)
@@ -1501,7 +1490,6 @@ func (dhtPeer *DHTPeer) handleAeaEnvelopeStream(stream network.Stream) {
 		status := &acn.StatusBody{Code: acn.ERROR_UNKNOWN_AGENT_ADDRESS}
 		statusPerformative := &acn.StatusPerformative{Body: status}
 		response := &acn.AcnMessage{
-			// Version: dhtnode.CurrentVersion,
 			Performative: &acn.Status{Status: statusPerformative},
 		}
 		buf, err = proto.Marshal(response)
@@ -1517,7 +1505,6 @@ func (dhtPeer *DHTPeer) handleAeaEnvelopeStream(stream network.Stream) {
 	status = &acn.StatusBody{Code: acn.SUCCESS}
 	statusPerformative = &acn.StatusPerformative{Body: status}
 	response := &acn.AcnMessage{
-		// Version: dhtnode.CurrentVersion,
 		Performative: &acn.Status{Status: statusPerformative},
 	}
 	buf, err = proto.Marshal(response)
@@ -1554,7 +1541,6 @@ func (dhtPeer *DHTPeer) handleAeaAddressStream(stream network.Stream) {
 		}
 		statusPerformative := &acn.StatusPerformative{Body: status}
 		response := &acn.AcnMessage{
-			// Version: dhtnode.CurrentVersion,
 			Performative: &acn.Status{Status: statusPerformative},
 		}
 		buf, err = proto.Marshal(response)
@@ -1678,7 +1664,7 @@ func (dhtPeer *DHTPeer) handleAeaAddressStream(stream network.Stream) {
 	}
 
 	status := &acn.StatusBody{
-		Code: acn.ERROR_GENERIC,
+		Code: acn.ERROR_UNKNOWN_AGENT_ADDRESS,
 		Msgs: []string{"Internal error: Couldn't get AgentRecord"},
 	}
 	statusPerformative := &acn.StatusPerformative{Body: status}
@@ -1796,7 +1782,6 @@ func (dhtPeer *DHTPeer) handleAeaRegisterStream(stream network.Stream) {
 		}
 		statusPerformative := &acn.StatusPerformative{Body: status}
 		response := &acn.AcnMessage{
-			// Version: dhtnode.CurrentVersion,
 			Performative: &acn.Status{Status: statusPerformative},
 		}
 		buf, err = proto.Marshal(response)

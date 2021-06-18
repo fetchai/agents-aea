@@ -69,13 +69,23 @@ var logger zerolog.Logger = zerolog.New(zerolog.ConsoleWriter{
 
 const CurrentVersion = "0.1.0"
 
-func DecodeAcnMessage(buf []byte) (string, *AeaEnvelopePerformative, *StatusBody, error) {
+type ACNError struct {
+	ErrorCode Status_ErrCode
+	Err       error
+}
+
+func (err *ACNError) Error() string {
+	return err.Err.Error()
+}
+
+func DecodeAcnMessage(buf []byte) (string, *AeaEnvelopePerformative, *StatusBody, *ACNError) {
 	response := &AcnMessage{}
 	err := proto.Unmarshal(buf, response)
 	msg_type := ""
+
 	if err != nil {
 		logger.Error().Str("err", err.Error()).Msgf("while decoding acn message")
-		return msg_type, nil, nil, err
+		return msg_type, nil, nil, &ACNError{ErrorCode: ERROR_SERIALIZATION, Err: err}
 	}
 	// response is either a LookupResponse or Status
 	var aeaEnvelope *AeaEnvelopePerformative = nil
@@ -91,9 +101,9 @@ func DecodeAcnMessage(buf []byte) (string, *AeaEnvelopePerformative, *StatusBody
 	default:
 		err = fmt.Errorf("unexpected ACN Message: %s", response)
 		logger.Error().Msg(err.Error())
-		return msg_type, nil, nil, err
+		return msg_type, nil, nil, &ACNError{ErrorCode: ERROR_UNEXPECTED_PAYLOAD, Err: err}
 	}
-	return msg_type, aeaEnvelope, status, err
+	return msg_type, aeaEnvelope, status, nil
 }
 
 func WaitForStatus(ch chan *StatusBody, timeout time.Duration) (*StatusBody, error) {
