@@ -20,6 +20,7 @@
 import random
 import string
 from pathlib import Path
+from typing import List, Optional
 from unittest.mock import patch
 
 import pytest
@@ -43,6 +44,7 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
 
     LEDGER_ID = FetchAICrypto.identifier
     ANOTHER_LEDGER_ID = CosmosCrypto.identifier
+    PASSWORD: Optional[str] = None
 
     @classmethod
     def setup_class(cls):
@@ -61,16 +63,28 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
         """Generate crypto key."""
         cls.set_agent_context(agent_name)
         key_file = f"{cls.LEDGER_ID}.key"
+        password_options = cls.get_password_args(cls.PASSWORD)
         assert cls.run_cli_command(
-            "generate-key", cls.LEDGER_ID, key_file, cwd=cls._get_cwd()
+            "generate-key",
+            cls.LEDGER_ID,
+            key_file,
+            *password_options,
+            cwd=cls._get_cwd(),
         )
         assert cls.run_cli_command(
-            "add-key", cls.LEDGER_ID, key_file, cwd=cls._get_cwd()
+            "add-key", cls.LEDGER_ID, key_file, *password_options, cwd=cls._get_cwd()
         )
+
+    @classmethod
+    def get_password_args(cls, password: Optional[str]) -> List[str]:
+        """Get password arguments."""
+        return [] if password is None else ["--password", password]
 
     def get_address(self) -> str:
         """Get current agent address."""
-        result = self.invoke("get-address", self.LEDGER_ID)
+        result = self.invoke(
+            "get-address", self.LEDGER_ID, *self.get_password_args(self.PASSWORD)
+        )
         return result.stdout_bytes.decode("utf-8").strip()
 
     def get_balance(self) -> int:
@@ -80,20 +94,22 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
                 Path("."),
                 substitude_env_vars=False,
                 private_key_helper=private_key_verify,
+                password=self.PASSWORD,
             ).agent_config
-            wallet = get_wallet_from_agent_config(agent_config)
+            wallet = get_wallet_from_agent_config(agent_config, password=self.PASSWORD)
             return int(try_get_balance(agent_config, wallet, self.LEDGER_ID))
 
     @pytest.mark.flaky(reruns=MAX_FLAKY_RERUNS)
     def test_integration(self):
         """Perform integration tests of cli transfer command with real transfer."""
         self.set_agent_context(self.agent_name2)
+        password_option = self.get_password_args(self.PASSWORD)
         agent2_balance = self.get_balance()
         agent2_address = self.get_address()
         assert agent2_balance == 0
 
         self.set_agent_context(self.agent_name)
-        self.generate_wealth()
+        self.generate_wealth(password=self.PASSWORD)
 
         wait_for_condition(lambda: self.get_balance() > 0, timeout=15, period=1)
 
@@ -104,7 +120,13 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
         fee = round(agent1_balance / 20)
 
         self.invoke(
-            "transfer", self.LEDGER_ID, agent2_address, str(amount), str(fee), "-y"
+            "transfer",
+            self.LEDGER_ID,
+            agent2_address,
+            str(amount),
+            str(fee),
+            "-y",
+            *password_option,
         )
 
         wait_for_condition(
@@ -127,8 +149,15 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
         self, wait_tx_settled_mock, confirm_mock, do_transfer_mock
     ):
         """Test yes option is enabled."""
+        password_option = self.get_password_args(self.PASSWORD)
         self.invoke(
-            "transfer", self.LEDGER_ID, self.get_address(), "100000", "100", "-y"
+            "transfer",
+            self.LEDGER_ID,
+            self.get_address(),
+            "100000",
+            "100",
+            "-y",
+            *password_option,
         )
         confirm_mock.assert_not_called()
 
@@ -139,7 +168,15 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
         self, wait_tx_settled_mock, confirm_mock, do_transfer_mock
     ):
         """Test yes option is disabled."""
-        self.invoke("transfer", self.LEDGER_ID, self.get_address(), "100000", "100")
+        password_option = self.get_password_args(self.PASSWORD)
+        self.invoke(
+            "transfer",
+            self.LEDGER_ID,
+            self.get_address(),
+            "100000",
+            "100",
+            *password_option,
+        )
         confirm_mock.assert_called_once()
 
     @patch("aea.cli.transfer.do_transfer", return_value="some_digest")
@@ -149,8 +186,15 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
         self, wait_tx_settled_mock, confirm_mock, do_transfer_mock
     ):
         """Test sync option is enabled."""
+        password_option = self.get_password_args(self.PASSWORD)
         self.invoke(
-            "transfer", self.LEDGER_ID, self.get_address(), "100000", "100", "-y"
+            "transfer",
+            self.LEDGER_ID,
+            self.get_address(),
+            "100000",
+            "100",
+            "-y",
+            *password_option,
         )
         wait_tx_settled_mock.assert_not_called()
 
@@ -161,6 +205,7 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
         self, wait_tx_settled_mock, confirm_mock, do_transfer_mock
     ):
         """Test sync option is disabled."""
+        password_option = self.get_password_args(self.PASSWORD)
         self.invoke(
             "transfer",
             self.LEDGER_ID,
@@ -169,6 +214,7 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
             "100",
             "-y",
             "--sync",
+            *password_option,
         )
         wait_tx_settled_mock.assert_called_once()
 
@@ -178,17 +224,31 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
     def test_failed_on_send(self, wait_tx_settled_mock, confirm_mock, do_transfer_mock):
         """Test fail to send a transaction."""
         with pytest.raises(ClickException, match=r"Failed to send a transaction!"):
-            self.invoke("transfer", self.LEDGER_ID, self.get_address(), "100000", "100")
+            password_option = self.get_password_args(self.PASSWORD)
+            self.invoke(
+                "transfer",
+                self.LEDGER_ID,
+                self.get_address(),
+                "100000",
+                "100",
+                *password_option,
+            )
 
     @patch("aea.cli.transfer.click.confirm", return_value=None)
     @patch("aea.cli.transfer.wait_tx_settled", return_value=None)
     def test_no_wallet_registered(self, wait_tx_settled_mock, confirm_mock):
         """Test no wallet for crypto id registered."""
+        password_option = self.get_password_args(self.PASSWORD)
         with pytest.raises(
             ClickException, match=r"No private key registered for `.*` in wallet!"
         ):
             self.invoke(
-                "transfer", self.ANOTHER_LEDGER_ID, self.get_address(), "100000", "100"
+                "transfer",
+                self.ANOTHER_LEDGER_ID,
+                self.get_address(),
+                "100000",
+                "100",
+                *password_option,
             )
 
     @patch("aea.cli.transfer.try_get_balance", return_value=10)
@@ -198,11 +258,19 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
         self, wait_tx_settled_mock, confirm_mock, do_transfer_mock
     ):
         """Test balance too low exception."""
+        password_option = self.get_password_args(self.PASSWORD)
         with pytest.raises(
             ClickException,
             match=r"Balance is not enough! Available=[0-9]+, required=[0-9]+!",
         ):
-            self.invoke("transfer", self.LEDGER_ID, self.get_address(), "100000", "100")
+            self.invoke(
+                "transfer",
+                self.LEDGER_ID,
+                self.get_address(),
+                "100000",
+                "100",
+                *password_option,
+            )
 
     @patch(
         "aea.cli.transfer.LedgerApis.is_transaction_settled", side_effects=[False, True]
@@ -216,3 +284,9 @@ class TestCliTransferFetchAINetwork(AEATestCaseEmpty):
         """Test wait tx settle fails with timeout error."""
         with pytest.raises(TimeoutError):
             wait_tx_settled("some", "some", timeout=0.5)
+
+
+class TestCliTransferFetchAINetworkWithPassword(TestCliTransferFetchAINetwork):
+    """Test cli transfer command, with '--password' option."""
+
+    PASSWORD = "fake-password"  # nosec

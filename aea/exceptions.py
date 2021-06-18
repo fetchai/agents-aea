@@ -84,8 +84,6 @@ class _StopRuntime(Exception):
         Init _StopRuntime exception.
 
         :param reraise: exception to reraise.
-
-        :return: None
         """
         self.reraise = reraise
         super().__init__("Stop runtime exception.")
@@ -111,6 +109,7 @@ def parse_exception(exception: Exception, limit: int = -1) -> str:
     """
     Parse an exception to get the relevant lines.
 
+    :param exception: the exception to be parsed
     :param limit: the limit
     :return: exception as string
     """

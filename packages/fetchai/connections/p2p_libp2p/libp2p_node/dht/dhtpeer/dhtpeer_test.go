@@ -32,6 +32,7 @@ import (
 	"testing"
 	"time"
 
+	"libp2p_node/acn"
 	"libp2p_node/aea"
 	"libp2p_node/dht/dhtclient"
 	"libp2p_node/dht/dhtnode"
@@ -50,7 +51,7 @@ const (
 	DefaultLocalPort    = 2000
 	DefaultDelegatePort = 3000
 
-	EnvelopeDeliveryTimeout = 20 * time.Second
+	EnvelopeDeliveryTimeout = 1 * time.Second
 	DHTPeerSetupTimeout     = 5 * time.Second
 
 	DefaultLedger = dhtnode.DefaultLedger
@@ -135,7 +136,7 @@ func TestRoutingDHTPeerToSelf(t *testing.T) {
 		t.Fatal("Failed at DHTPeer initialization:", err)
 	}
 
-	record := &aea.AgentRecord{LedgerId: DefaultLedger}
+	record := &acn.AgentRecord{LedgerId: DefaultLedger}
 	record.Address = AgentsTestAddresses[0]
 	record.PublicKey = agentPubKey
 	record.PeerPublicKey = FetchAITestPublicKeys[0]
@@ -722,7 +723,7 @@ func TestRoutingDelegateClientToDHTPeerIndirect(t *testing.T) {
 	}
 	defer peerCleanup2()
 
-	time.Sleep(1 * time.Second)
+	time.Sleep(3 * time.Second)
 	client, clientCleanup, err := SetupDelegateClient(
 		AgentsTestKeys[2],
 		DefaultLocalHost,
@@ -734,7 +735,7 @@ func TestRoutingDelegateClientToDHTPeerIndirect(t *testing.T) {
 	}
 	defer clientCleanup()
 
-	rxPeer1 := make(chan *aea.Envelope, 2)
+	rxPeer1 := make(chan *aea.Envelope, 20)
 	peer1.ProcessEnvelope(func(envel *aea.Envelope) error {
 		rxPeer1 <- envel
 		return nil
@@ -749,7 +750,6 @@ func TestRoutingDelegateClientToDHTPeerIndirect(t *testing.T) {
 	if err != nil {
 		t.Error("Failed to Send envelope from DelegateClient to DHTPeer:", err)
 	}
-
 	expectEnvelope(t, rxPeer1)
 
 	err = peer1.RouteEnvelope(&aea.Envelope{
@@ -759,7 +759,6 @@ func TestRoutingDelegateClientToDHTPeerIndirect(t *testing.T) {
 	if err != nil {
 		t.Error("Failed to RouteEnvelope from peer to delegate client:", err)
 	}
-
 	expectEnvelope(t, client.Rx)
 }
 
@@ -809,7 +808,7 @@ func TestMessageOrderingWithDelegateClient(t *testing.T) {
 
 	ensureAddressAnnounced(peer1, peer2)
 
-	max := 100
+	max := 10
 	i := 0
 	for x := 0; x < max; x++ {
 		envelope := &aea.Envelope{
@@ -1265,7 +1264,8 @@ func TestRoutingDelegateClientToDHTClientIndirect(t *testing.T) {
 
 	ensureAddressAnnounced(peer1, peer2)
 
-	time.Sleep(1 * time.Second)
+	time.Sleep(3 * time.Second)
+
 	err = delegateClient.Send(&aea.Envelope{
 		To:     AgentsTestAddresses[2],
 		Sender: AgentsTestAddresses[3],
@@ -1353,6 +1353,7 @@ func TestRoutingAllToAll(t *testing.T) {
 	})
 
 	rxs = append(rxs, rxPeerDHT2)
+
 	send = append(send, func(envel *aea.Envelope) error {
 		return dhtPeer2.RouteEnvelope(envel)
 	})
@@ -1700,6 +1701,7 @@ func TestEthereumCrypto(t *testing.T) {
 */
 
 func randSeq(n int) string {
+	rand.Seed(time.Now().UnixNano())
 	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 	b := make([]rune, n)
 	for i := range b {
@@ -1745,7 +1747,7 @@ func SetupLocalDHTPeer(
 			return nil, nil, err
 		}
 
-		record := &aea.AgentRecord{LedgerId: DefaultLedger}
+		record := &acn.AgentRecord{LedgerId: DefaultLedger}
 		record.Address = agentAddress
 		record.PublicKey = agentPubKey
 		record.PeerPublicKey = peerPubKey
@@ -1795,7 +1797,7 @@ func SetupDHTClient(
 		return nil, nil, err
 	}
 
-	record := &aea.AgentRecord{LedgerId: DefaultLedger}
+	record := &acn.AgentRecord{LedgerId: DefaultLedger}
 	record.Address = agentAddress
 	record.PublicKey = agentPubKey
 	record.PeerPublicKey = peerPubKey
@@ -1827,14 +1829,29 @@ type DelegateClient struct {
 	Rx              chan *aea.Envelope
 	Conn            net.Conn
 	processEnvelope func(*aea.Envelope) error
+	acn_status_chan chan *acn.Status
+}
+
+func (client *DelegateClient) AddAcnStatusMessage(status *acn.Status, counterpartyID string) {
+	//client.acn_status_chan <- status
 }
 
 func (client *DelegateClient) Close() error {
 	return client.Conn.Close()
 }
 
-func (client *DelegateClient) Send(envel *aea.Envelope) error {
-	return utils.WriteEnvelopeConn(client.Conn, envel)
+func (client *DelegateClient) Send(envelope *aea.Envelope) error {
+	err, data := aea.MakeAcnMessageFromEnvelope(envelope)
+	if err != nil {
+		println("while serializing envelope:", err.Error())
+		return err
+	}
+	err = utils.WriteBytesConn(client.Conn, data)
+	if err != nil {
+		println("while sending envelope:", err.Error())
+		return err
+	}
+	return err
 }
 
 func (client *DelegateClient) ProcessEnvelope(fn func(*aea.Envelope) error) {
@@ -1850,6 +1867,8 @@ func SetupDelegateClient(
 	var err error
 	client := &DelegateClient{}
 	client.AgentKey = key
+
+	client.acn_status_chan = make(chan *acn.Status, 10000)
 
 	pubKey, err := utils.FetchAIPublicKeyFromFetchAIPrivateKey(key)
 	if err != nil {
@@ -1875,15 +1894,15 @@ func SetupDelegateClient(
 		return nil, nil, err
 	}
 
-	record := &dhtnode.AgentRecord{LedgerId: DefaultLedger}
+	record := &acn.AgentRecord{LedgerId: DefaultLedger}
 	record.Address = address
 	record.PublicKey = pubKey
 	record.PeerPublicKey = peerPubKey
 	record.Signature = signature
-	registration := &dhtnode.Register{Record: record}
-	msg := &dhtnode.AcnMessage{
-		Version: dhtnode.CurrentVersion,
-		Payload: &dhtnode.AcnMessage_Register{Register: registration},
+	registration := &acn.Register{Record: record}
+	msg := &acn.AcnMessage{
+		Version: acn.CurrentVersion,
+		Payload: &acn.AcnMessage_Register{Register: registration},
 	}
 	data, err := proto.Marshal(msg)
 	ignore(err)
@@ -1893,32 +1912,38 @@ func SetupDelegateClient(
 	if err != nil {
 		return nil, nil, err
 	}
-	response := &dhtnode.AcnMessage{}
+	response := &acn.AcnMessage{}
 	err = proto.Unmarshal(data, response)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	// Get Status message
-	var status *dhtnode.Status
+	var status *acn.Status
 	switch pl := response.Payload.(type) {
-	case *dhtnode.AcnMessage_Status:
+	case *acn.AcnMessage_Status:
 		status = pl.Status
 	default:
 		return nil, nil, err
 	}
 
-	if status.Code != dhtnode.Status_SUCCESS {
+	if status.Code != acn.Status_SUCCESS {
 		println("Registration error:", status.String())
 		return nil, nil, errors.New(status.String())
 	}
 
+	pipe := utils.ConnPipe{Conn: client.Conn}
 	go func() {
 		for {
-			envel, err := utils.ReadEnvelopeConn(client.Conn)
+			envel, err := aea.HandleAcnMessageFromPipe(pipe, client, "")
 			if err != nil {
 				break
 			}
+			if envel == nil {
+				continue
+			}
+			_ = acn.SendAcnSuccess(pipe)
+
 			if client.processEnvelope != nil {
 				err = client.processEnvelope(envel)
 				ignore(err)
@@ -1946,6 +1971,10 @@ func expectEnvelopeOrdered(t *testing.T, rx chan *aea.Envelope, counter int) {
 	select {
 	case envel := <-rx:
 		t.Log("Received envelope", envel)
+		if envel == nil {
+			t.Log("Empty envelope. exit")
+			return
+		}
 		message, _ := strconv.Atoi(string(envel.Message))
 		if message != counter {
 			log.Fatal(fmt.Sprintf("Expected counter %d received counter %d", counter, message))
@@ -1957,6 +1986,7 @@ func expectEnvelopeOrdered(t *testing.T, rx chan *aea.Envelope, counter int) {
 
 func ensureAddressAnnounced(peers ...*DHTPeer) {
 	for _, peer := range peers {
+		peer.addressAnnouncedWg.Wait()
 		ctx, cancel := context.WithTimeout(context.Background(), DHTPeerSetupTimeout)
 		defer cancel()
 	L:

@@ -21,10 +21,6 @@ This class represents a protocol specification in python.
 
 Instantiate a Pythonic protocol specification.
 
-**Returns**:
-
-None
-
 <a name="aea.protocols.generator.extract_specification.extract"></a>
 #### extract
 

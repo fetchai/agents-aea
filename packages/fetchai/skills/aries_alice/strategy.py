@@ -50,7 +50,7 @@ DEFAULT_PERSONALITY_DATA = {"piece": "genus", "value": "data"}
 DEFAULT_CLASSIFICATION = {"piece": "classification", "value": "identity.aries.alice"}
 
 
-class AliceStrategy(Model):
+class Strategy(Model):
     """This class defines a strategy for the agent."""
 
     def __init__(self, **kwargs: Any) -> None:
@@ -66,7 +66,7 @@ class AliceStrategy(Model):
         self._admin_host = kwargs.pop("admin_host", DEFAULT_ADMIN_HOST)
         self._admin_port = kwargs.pop("admin_port", DEFAULT_ADMIN_PORT)
 
-        self._admin_url = "http://{}:{}".format(self.admin_host, self.admin_port)
+        self._admin_url = f"http://{self.admin_host}:{self.admin_port}"
 
         # search
         location = kwargs.pop("location", DEFAULT_LOCATION)

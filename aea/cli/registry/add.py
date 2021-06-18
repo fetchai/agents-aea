@@ -35,6 +35,7 @@ def fetch_package(obj_type: str, public_id: PublicId, cwd: str, dest: str) -> Pa
         'connection', 'protocol', 'skill'
     :param public_id: str public ID of object.
     :param cwd: str path to current working directory.
+    :param dest: destination where to save package.
 
     :return: package path
     """

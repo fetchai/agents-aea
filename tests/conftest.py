@@ -83,10 +83,12 @@ from aea.crypto.ledger_apis import (
 )
 from aea.crypto.registries import ledger_apis_registry, make_crypto
 from aea.crypto.wallet import CryptoStore
+from aea.exceptions import enforce
 from aea.helpers.base import CertRequest, SimpleId, cd
 from aea.identity.base import Identity
 from aea.test_tools.click_testing import CliRunner as ImportedCliRunner
 from aea.test_tools.constants import DEFAULT_AUTHOR
+from aea.test_tools.test_cases import BaseAEATestCase
 
 from packages.fetchai.connections.local.connection import LocalNode, OEFLocalConnection
 from packages.fetchai.connections.oef.connection import OEFConnection
@@ -109,7 +111,6 @@ from tests.common.docker_image import (
     FetchLedgerDockerImage,
     GanacheDockerImage,
     OEFSearchDockerImage,
-    SOEFDockerImage,
 )
 from tests.data.dummy_connection.connection import DummyConnection  # type: ignore
 
@@ -728,20 +729,6 @@ def ganache(
     image = GanacheDockerImage(
         client, "http://127.0.0.1", 8545, config=ganache_configuration
     )
-    yield from _launch_image(image, timeout=timeout, max_attempts=max_attempts)
-
-
-@pytest.mark.integration
-@pytest.fixture(scope="class")
-def soef(
-    soef_addr: str = "http://127.0.0.1",
-    soef_port: int = 9002,
-    timeout: float = 2.0,
-    max_attempts: int = 10,
-):
-    """Launch the soef image."""
-    client = docker.from_env()
-    image = SOEFDockerImage(client, soef_addr, soef_port)
     yield from _launch_image(image, timeout=timeout, max_attempts=max_attempts)
 
 
@@ -1435,15 +1422,6 @@ class UseGanache:
 
 
 @pytest.mark.integration
-class UseSOEF:
-    """Inherit from this class to use SOEF."""
-
-    @pytest.fixture(autouse=True)
-    def _start_soef(self, soef):
-        """Start an SOEF image."""
-
-
-@pytest.mark.integration
 class UseLocalFetchNode:
     """Inherit from this class to use a local Fetch ledger node."""
 
@@ -1461,3 +1439,33 @@ def change_directory():
             yield temporary_directory
     finally:
         shutil.rmtree(temporary_directory)
+
+
+@pytest.fixture(params=[None, "fake-password"])
+def password_or_none(request) -> Optional[str]:
+    """
+    Return a password for testing purposes, including None.
+
+    Note that this is a parametrized fixture.
+    """
+    return request.param
+
+
+def method_scope(cls):
+    """
+    Class decorator to make the setup/teardown to have the 'method' scope.
+
+    :param cls: the class. It must be a subclass of
+    :return:
+    """
+    enforce(
+        issubclass(cls, BaseAEATestCase),
+        "cannot use decorator if class is not instance of BaseAEATestCase",
+    )
+    old_setup_class = cls.setup_class
+    old_teardown_class = cls.teardown_class
+    cls.setup_class = classmethod(lambda _cls: None)
+    cls.teardown_class = classmethod(lambda _cls: None)
+    cls.setup = lambda self: old_setup_class()
+    cls.teardown = lambda self: old_teardown_class()
+    return cls

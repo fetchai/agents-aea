@@ -189,6 +189,8 @@ CVE-2021-27291
 AgentLand
 GCloud
 p2p
+docstring
+utils
  - docs/language-agnostic-definition.md
 fetchai
 protocol_id

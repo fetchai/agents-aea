@@ -94,9 +94,9 @@ def _save_item_locally(ctx: Context, item_type: str, item_id: PublicId) -> None:
     """
     Save item to local packages.
 
+    :param ctx: click context
     :param item_type: str type of item (connection/protocol/skill).
     :param item_id: the public id of the item.
-    :return: None
     """
     item_type_plural = item_type + "s"
     try:
@@ -121,7 +121,7 @@ def _save_item_locally(ctx: Context, item_type: str, item_id: PublicId) -> None:
     except ValueError as e:  # pragma: nocover
         raise click.ClickException(str(e))
     target_path = try_get_item_target_path(
-        registry_path, ctx.agent_config.author, item_type_plural, item_id.name,
+        registry_path, item_id.author, item_type_plural, item_id.name,
     )
     copytree(source_path, target_path)
     click.echo(

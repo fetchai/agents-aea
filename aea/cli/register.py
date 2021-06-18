@@ -57,8 +57,6 @@ def do_register(
     :param password: str password.
     :param password_confirmation: str password confirmation.
     :param no_subscribe: bool flag for developers subscription skip on register.
-
-    :return: None
     """
     username = validate_author_name(username)
     token = register_new_account(username, email, password, password_confirmation)

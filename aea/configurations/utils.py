@@ -19,7 +19,7 @@
 
 """AEA configuration utils."""
 from functools import singledispatch
-from typing import Dict, Optional, Set, Tuple
+from typing import Dict, Optional, Set
 
 from aea.configurations.base import (
     AgentConfig,
@@ -32,6 +32,7 @@ from aea.configurations.base import (
     PublicId,
     SkillConfig,
 )
+from aea.configurations.data_types import PackageIdPrefix
 
 
 @singledispatch
@@ -61,7 +62,6 @@ def _(
 
     :param arg: the agent configuration.
     :param replacements: the replacement mapping.
-    :return: None
     """
     _replace_component_id(
         arg,
@@ -172,7 +172,6 @@ def _replace_component_id(
     :param config: the component configuration to update.
     :param types_to_update: the types to update.
     :param replacements: the replacements.
-    :return:
     """
     for component_type in types_to_update:
         public_id_set = getattr(config, component_type.to_plural(), set())
@@ -184,7 +183,7 @@ def _replace_component_id(
 
 
 def get_latest_component_id_from_prefix(
-    agent_config: AgentConfig, component_prefix: Tuple[ComponentType, str, str]
+    agent_config: AgentConfig, component_prefix: PackageIdPrefix
 ) -> Optional[ComponentId]:
     """
     Get component id with the greatest version in an agent configuration given its prefix.

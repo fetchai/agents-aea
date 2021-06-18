@@ -37,7 +37,7 @@ from aea.helpers.base import ensure_dir
 try:
     # flake8: noqa
     # pylint: disable=unused-import,ungrouped-imports
-    from .connection import (  # type: ignore
+    from .consts import (  # type: ignore
         LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT,
         LIBP2P_NODE_MODULE,
         LIBP2P_NODE_MODULE_NAME,
@@ -45,7 +45,7 @@ try:
 except ImportError:  # pragma: nocover
     # flake8: noqa
     # pylint: disable=unused-import,ungrouped-imports
-    from connection import (  # type: ignore
+    from consts import (  # type: ignore
         LIBP2P_NODE_DEPS_DOWNLOAD_TIMEOUT,
         LIBP2P_NODE_MODULE,
         LIBP2P_NODE_MODULE_NAME,

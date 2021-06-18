@@ -4,7 +4,7 @@
 // 	protoc        (unknown)
 // source: dht/dhtnode/message.proto
 
-package dhtnode
+package acn
 
 import (
 	proto "github.com/golang/protobuf/proto"

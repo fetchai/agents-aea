@@ -16,10 +16,7 @@ Install python dependency to the current python environment.
 
 - `dependency_name`: name of the python package
 - `dependency`: Dependency specification
-
-**Returns**:
-
-None
+- `logger`: the logger
 
 <a name="aea.helpers.install_dependency.run_install_subprocess"></a>
 #### run`_`install`_`subprocess

@@ -33,10 +33,7 @@ Initialize dialogues.
 **Arguments**:
 
 - `self_address`: the address of the entity for whom dialogues are maintained
-
-**Returns**:
-
-None
+- `kwargs`: the keyword arguments
 
 <a name="aea.decision_maker.default.DecisionMakerHandler.__init__"></a>
 #### `__`init`__`
@@ -65,8 +62,4 @@ Handle an internal message from the skills.
 **Arguments**:
 
 - `message`: the internal message
-
-**Returns**:
-
-None
 

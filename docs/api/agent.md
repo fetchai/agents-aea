@@ -31,10 +31,8 @@ Instantiate the agent.
 - `runtime_mode`: runtime mode to up agent.
 - `storage_uri`: optional uri to set generic storage
 - `task_manager_mode`: task manager mode.
-
-**Returns**:
-
-None
+- `logger`: the logger.
+- `task_manager_mode`: mode of the task manager.
 
 <a name="aea.agent.Agent.storage_uri"></a>
 #### storage`_`uri
@@ -132,6 +130,10 @@ Get the tick or agent loop count.
 
 Each agent loop (one call to each one of act(), react(), update()) increments the tick.
 
+**Returns**:
+
+tick count
+
 <a name="aea.agent.Agent.state"></a>
 #### state
 
@@ -175,10 +177,6 @@ Get the runtime.
 
 Set up the agent.
 
-**Returns**:
-
-None
-
 <a name="aea.agent.Agent.start"></a>
 #### start
 
@@ -193,10 +191,6 @@ Performs the following:
 - calls start() on runtime.
 - waits for runtime to complete running (blocking)
 
-**Returns**:
-
-None
-
 <a name="aea.agent.Agent.handle_envelope"></a>
 #### handle`_`envelope
 
@@ -210,10 +204,6 @@ Handle an envelope.
 
 - `envelope`: the envelope to handle.
 
-**Returns**:
-
-None
-
 <a name="aea.agent.Agent.act"></a>
 #### act
 
@@ -222,10 +212,6 @@ None
 ```
 
 Perform actions on period.
-
-**Returns**:
-
-None
 
 <a name="aea.agent.Agent.stop"></a>
 #### stop
@@ -241,10 +227,6 @@ Performs the following:
 - calls stop() on runtime
 - waits for runtime to stop (blocking)
 
-**Returns**:
-
-None
-
 <a name="aea.agent.Agent.teardown"></a>
 #### teardown
 
@@ -253,10 +235,6 @@ None
 ```
 
 Tear down the agent.
-
-**Returns**:
-
-None
 
 <a name="aea.agent.Agent.get_periodic_tasks"></a>
 #### get`_`periodic`_`tasks

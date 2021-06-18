@@ -27,12 +27,8 @@ Initialize the AgentRecord
 - `representative_public_key`: representative's public key
 - `identifier`: certificate identifier.
 - `ledger_id`: ledger identifier the request is referring to.
-- `not_before`: specify the lower bound for certificate validity.
-If it is a string, it must follow the format: 'YYYY-MM-DD'. It
-will be interpreted as timezone UTC-0.
-- `not_before`: specify the lower bound for certificate validity.
-if it is a string, it must follow the format: 'YYYY-MM-DD' It
-will be interpreted as timezone UTC-0.
+- `not_before`: specify the lower bound for certificate validity. If it is a string, it must follow the format: 'YYYY-MM-DD'. It will be interpreted as timezone UTC-0.
+- `not_after`: specify the lower bound for certificate validity. If it is a string, it must follow the format: 'YYYY-MM-DD'. It will be interpreted as timezone UTC-0.
 - `message_format`: message format used for signing
 - `signature`: proof-of-representation of this AgentRecord
 

@@ -32,6 +32,8 @@ Load a component from a directory.
 **Arguments**:
 
 - `configuration`: the component configuration.
+- `args`: the positional arguments.
+- `kwargs`: the keyword arguments.
 
 **Returns**:
 

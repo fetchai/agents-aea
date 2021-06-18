@@ -46,8 +46,6 @@ def write_envelope_to_file(envelope: Envelope, file_path: str) -> None:
 
     :param envelope: Envelope.
     :param file_path: the file path
-
-    :return: None
     """
     with open(Path(file_path), "ab+") as f:
         write_envelope(envelope, f)
@@ -57,7 +55,7 @@ def read_envelope_from_file(file_path: str) -> Envelope:
     """
     Read an envelope from a file.
 
-    :param file_path the file path.
+    :param file_path: the file path.
 
     :return: envelope
     """
@@ -94,8 +92,6 @@ def _nested_set(
     :param configuration_obj: configuration object
     :param keys: list of keys.
     :param value: a value to set.
-
-    :return: None.
     """
 
     def get_nested_ordered_dict_from_dict(input_dict: Dict) -> Dict:
@@ -188,13 +184,10 @@ def nested_set_config(
     :param dotted_path: dotted path to a setting.
     :param value: a value to assign. Must be of yaml serializable type.
     :param author: the author name, used to parse the dotted path.
-
-    :return: None.
     """
     settings_keys, config_file_path, config_loader, _ = handle_dotted_path(
         dotted_path, author
     )
-
     with open_file(config_file_path) as fp:
         config = config_loader.load(fp)
 

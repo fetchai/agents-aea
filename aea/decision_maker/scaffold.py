@@ -58,6 +58,5 @@ class DecisionMakerHandler(BaseDecisionMakerHandler):
             - check transactions satisfy the preferences
 
         :param message: the message
-        :return: None
         """
         raise NotImplementedError
