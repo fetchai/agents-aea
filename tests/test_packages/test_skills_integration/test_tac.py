@@ -412,14 +412,24 @@ class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache, UseSOEF):
             ]
         )
         self.set_config(setting_path, settings, type_="list")
-        setting_path = "vendor.fetchai.connections.soef.config"
-        settings = {
-            "chain_identifier": EthereumCrypto.identifier,
-            "api_key": "TwiCIriSl0mLahw17pyqoA",
-            "soef_addr": "127.0.0.1",
-            "soef_port": 9002,
-        }
-        self.nested_set_config(setting_path, settings)
+        # setting_path = "vendor.fetchai.connections.soef.config"
+        # settings = {
+        #     "chain_identifier": EthereumCrypto.identifier,
+        #     # "api_key": "TwiCIriSl0mLahw17pyqoA",
+        #     "is_https": False,
+        #     "soef_addr": "127.0.0.1",
+        #     "soef_port": 9002,
+        # }
+        # self.nested_set_config(setting_path, settings)
+        setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
+        self.set_config(setting_path, EthereumCrypto.identifier)
+        setting_path = "vendor.fetchai.connections.soef.config.soef_addr"
+        self.set_config(setting_path, "127.0.0.1")
+        setting_path = "vendor.fetchai.connections.soef.config.soef_port"
+        self.set_config(setting_path, 9002)
+        setting_path = "vendor.fetchai.connections.soef.config.is_https"
+        self.set_config(setting_path, False)
+
         setting_path = "vendor.fetchai.skills.tac_control.is_abstract"
         self.set_config(setting_path, True, "bool")
 
@@ -509,14 +519,23 @@ class TestTacSkillsContract(AEATestCaseManyFlaky, UseGanache, UseSOEF):
             self.set_config(setting_path, settings, type_="list")
 
             # set SOEF configuration
-            setting_path = "vendor.fetchai.connections.soef.config"
-            settings = {
-                "chain_identifier": EthereumCrypto.identifier,
-                "api_key": "TwiCIriSl0mLahw17pyqoA",
-                "soef_addr": "127.0.0.1",
-                "soef_port": 9002,
-            }
-            self.nested_set_config(setting_path, settings)
+            # setting_path = "vendor.fetchai.connections.soef.config"
+            # settings = {
+            #     "chain_identifier": EthereumCrypto.identifier,
+            #     # "api_key": "TwiCIriSl0mLahw17pyqoA",
+            #     "is_https": False,
+            #     "soef_addr": "127.0.0.1",
+            #     "soef_port": 9002,
+            # }
+            # self.nested_set_config(setting_path, settings)
+            setting_path = "vendor.fetchai.connections.soef.config.chain_identifier"
+            self.set_config(setting_path, EthereumCrypto.identifier)
+            setting_path = "vendor.fetchai.connections.soef.config.soef_addr"
+            self.set_config(setting_path, "127.0.0.1")
+            setting_path = "vendor.fetchai.connections.soef.config.soef_port"
+            self.set_config(setting_path, 9002)
+            setting_path = "vendor.fetchai.connections.soef.config.is_https"
+            self.set_config(setting_path, False)
 
             # set tac participant configuration
             self.set_config(

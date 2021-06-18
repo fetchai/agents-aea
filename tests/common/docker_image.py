@@ -43,6 +43,7 @@ from aea.helpers import http_requests as requests
 
 
 logger = logging.getLogger(__name__)
+SOEF_MOUNT_PATH = os.path.abspath(os.path.join(os.sep, "etc", "soef"))
 
 
 class DockerImage(ABC):
@@ -362,15 +363,53 @@ class SOEFDockerImage(DockerImage):
         """Get the image tag."""
         return "gcr.io/fetch-ai-images/soef:9e78611"
 
+    @staticmethod
+    def _make_soef_config_file(tmpdirname) -> None:
+        """Make a temporary soef_config file to setup and run the an soef instance."""
+        soef_config_lines = [
+            "# SIMPLE OEF CONFIGURATION FILE"
+            "# Save as /etc/soef/soef.conf"
+            "#"
+            "# 27th May 2020"
+            "# (Author Toby Simpson)"
+            "#"
+            "# Port we're listening on"
+            "port 9002"
+            "#"
+            "# Our declared location"
+            "latitude 52.205278"
+            "longitude 0.119167"
+            "#"
+            "# Various API keys"
+            "agent_registration_api_key TwiCIriSl0mLahw17pyqoA"
+            "get_log_api_key TwigsriSl0mLahw48pyqoA"
+            "get_agent_partial_list_api_key SnakesiSl0mLahw48pyqoA"
+            "#"
+            "# Start cold being 1 means 'do not load agents'"
+            "start_cold 0"
+            "#"
+            "# End."
+        ]
+        soef_config_file = os.path.join(tmpdirname, "soef.config")
+        with open(soef_config_file, "w") as file:
+            file.writelines(line + "\n" for line in soef_config_lines)
+        os.chmod(soef_config_file, 400)  # nosec
+
     def _make_ports(self) -> Dict:
         """Make ports dictionary for Docker."""
         return {f"{self.DEFAULT_PORT}/tcp": ("0.0.0.0", self._port)}  # nosec
 
     def create(self) -> Container:
         """Create the container."""
-        container = self._client.containers.run(
-            self.tag, detach=True, ports=self._make_ports()
-        )
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            self._make_soef_config_file(tmpdirname)
+            volumes = {tmpdirname: {"bind": SOEF_MOUNT_PATH, "mode": "rw"}}
+            container = self._client.containers.run(
+                self.tag,
+                detach=True,
+                volumes=volumes,
+                ports=self._make_ports()
+            )
         return container
 
     def wait(self, max_attempts: int = 15, sleep_rate: float = 1.0) -> bool:
