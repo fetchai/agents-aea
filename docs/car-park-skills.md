@@ -20,9 +20,9 @@ This diagram shows the communication between the various entities as data is suc
         participant Car_Data_Buyer_AEA
         participant Car_Park_AEA
         participant Blockchain
-    
-        activate Car_Data_Buyer_AEA
+
         activate Search
+        activate Car_Data_Buyer_AEA
         activate Car_Park_AEA
         activate Blockchain
         
@@ -38,8 +38,8 @@ This diagram shows the communication between the various entities as data is suc
         Car_Park_AEA->>Blockchain: check_transaction_status
         Car_Park_AEA->>Car_Data_Buyer_AEA: send_data
         
-        deactivate Client_AEA
         deactivate Search
+        deactivate Car_Data_Buyer_AEA
         deactivate Car_Park_AEA
         deactivate Blockchain
 </div>
