@@ -404,16 +404,12 @@ class SOEFDockerImage(DockerImage):
             self._make_soef_config_file(tmpdirname)
             volumes = {tmpdirname: {"bind": self.SOEF_MOUNT_PATH, "mode": "ro"}}
             container = self._client.containers.run(
-                self.tag,
-                detach=True,
-                volumes=volumes,
-                ports=self._make_ports()
+                self.tag, detach=True, volumes=volumes, ports=self._make_ports()
             )
         return container
 
     def wait(self, max_attempts: int = 15, sleep_rate: float = 1.0) -> bool:
         """Wait until the image is up."""
-        # request = dict(jsonrpc=2.0, method="web3_clientVersion", params=[], id=1)
         for i in range(max_attempts):
             try:
                 response = requests.get(f"{self._addr}:{self._port}")

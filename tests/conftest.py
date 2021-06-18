@@ -740,7 +740,7 @@ def soef(
     soef_port: int = 9002,
     timeout: float = 2.0,
     max_attempts: int = 10,
- ):
+):
     """Launch the soef image."""
     client = docker.from_env()
     image = SOEFDockerImage(client, soef_addr, soef_port)
