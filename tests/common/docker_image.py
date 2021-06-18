@@ -43,7 +43,6 @@ from aea.helpers import http_requests as requests
 
 
 logger = logging.getLogger(__name__)
-SOEF_MOUNT_PATH = os.path.abspath(os.path.join(os.sep, "etc", "soef"))
 
 
 class DockerImage(ABC):
@@ -341,8 +340,9 @@ class GanacheDockerImage(DockerImage):
 class SOEFDockerImage(DockerImage):
     """Wrapper to SOEF Docker image."""
 
-    DEFAULT_PORT = 9000
     PORT = 9002
+    SOEF_MOUNT_PATH = os.path.abspath(os.path.join(os.sep, "etc", "soef"))
+    SOEF_CONFIG_FILE_NAME = "soef.conf"
 
     def __init__(
         self, client: DockerClient, addr: str, port: int = PORT,
@@ -363,47 +363,46 @@ class SOEFDockerImage(DockerImage):
         """Get the image tag."""
         return "gcr.io/fetch-ai-images/soef:9e78611"
 
-    @staticmethod
-    def _make_soef_config_file(tmpdirname) -> None:
+    def _make_soef_config_file(self, tmpdirname) -> None:
         """Make a temporary soef_config file to setup and run the an soef instance."""
         soef_config_lines = [
-            "# SIMPLE OEF CONFIGURATION FILE"
-            "# Save as /etc/soef/soef.conf"
-            "#"
-            "# 27th May 2020"
-            "# (Author Toby Simpson)"
-            "#"
-            "# Port we're listening on"
-            "port 9002"
-            "#"
-            "# Our declared location"
-            "latitude 52.205278"
-            "longitude 0.119167"
-            "#"
-            "# Various API keys"
-            "agent_registration_api_key TwiCIriSl0mLahw17pyqoA"
-            "get_log_api_key TwigsriSl0mLahw48pyqoA"
-            "get_agent_partial_list_api_key SnakesiSl0mLahw48pyqoA"
-            "#"
-            "# Start cold being 1 means 'do not load agents'"
-            "start_cold 0"
-            "#"
-            "# End."
+            "# SIMPLE OEF CONFIGURATION FILE",
+            "# Save as /etc/soef/soef.conf",
+            "#",
+            "# 27th May 2020",
+            "# (Author Toby Simpson)",
+            "#",
+            "# Port we're listening on",
+            "port 9002",
+            "#",
+            "# Our declared location",
+            "latitude 52.205278",
+            "longitude 0.119167",
+            "#",
+            "# Various API keys",
+            "agent_registration_api_key TwiCIriSl0mLahw17pyqoA",
+            "get_log_api_key TwigsriSl0mLahw48pyqoA",
+            "get_agent_partial_list_api_key SnakesiSl0mLahw48pyqoA",
+            "#",
+            "# Start cold being 1 means 'do not load agents'",
+            "start_cold 0",
+            "#",
+            "# End.",
         ]
-        soef_config_file = os.path.join(tmpdirname, "soef.config")
+        soef_config_file = os.path.join(tmpdirname, self.SOEF_CONFIG_FILE_NAME)
         with open(soef_config_file, "w") as file:
             file.writelines(line + "\n" for line in soef_config_lines)
         os.chmod(soef_config_file, 400)  # nosec
 
     def _make_ports(self) -> Dict:
         """Make ports dictionary for Docker."""
-        return {f"{self.DEFAULT_PORT}/tcp": ("0.0.0.0", self._port)}  # nosec
+        return {f"{self.PORT}/tcp": ("0.0.0.0", self._port)}  # nosec
 
     def create(self) -> Container:
         """Create the container."""
         with tempfile.TemporaryDirectory() as tmpdirname:
             self._make_soef_config_file(tmpdirname)
-            volumes = {tmpdirname: {"bind": SOEF_MOUNT_PATH, "mode": "rw"}}
+            volumes = {tmpdirname: {"bind": self.SOEF_MOUNT_PATH, "mode": "ro"}}
             container = self._client.containers.run(
                 self.tag,
                 detach=True,

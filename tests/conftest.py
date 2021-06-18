@@ -235,11 +235,11 @@ NON_GENESIS_CONFIG = {
     "ledger_id": "fetchai",
 }
 NON_GENESIS_CONFIG_TWO = {
-    "delegate_uri": "127.0.0.1:11002",
+    "delegate_uri": "127.0.0.1:11003",
     "entry_peers": [FETCHAI_P2P_ADDRESS],
-    "local_uri": "127.0.0.1:9002",
+    "local_uri": "127.0.0.1:9003",
     "log_file": "libp2p_node.log",
-    "public_uri": "127.0.0.1:9002",
+    "public_uri": "127.0.0.1:9003",
     "ledger_id": "fetchai",
 }
 PUBLIC_DHT_P2P_MADDR_1 = "/dns4/acn.fetch.ai/tcp/9000/p2p/16Uiu2HAkw1ypeQYQbRFV5hKUxGRHocwU5ohmVmCnyJNg36tnPFdx"
