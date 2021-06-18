@@ -44,31 +44,31 @@ func HandleAcnMessageFromPipe(
 		return nil, &common.PipeError{Err: err, Msg: "Pipe error during envelope read"}
 	}
 
-	msg_type, acn_envelope, status, err := acn.DecodeAcnMessage(data)
+	msg_type, acn_envelope, status, acnErr := acn.DecodeAcnMessage(data)
 
-	if err != nil {
-		logger.Error().Str("err", err.Error()).Msg("while decoding acn")
+	if acnErr != nil {
+		logger.Error().Str("err", acnErr.Error()).Msg("while handling acn message")
 		acn_err = acn.SendAcnError(
 			pipe,
-			"error on decoding acn message",
-			acn.Status_ERROR_SERIALIZATION,
+			acnErr.Error(),
+			acnErr.ErrorCode,
 		)
 		if acn_err != nil {
-			logger.Error().Str("err", err.Error()).Msg("on acn send error")
+			logger.Error().Str("err", acn_err.Error()).Msg("on acn send error")
 		}
-		return envelope, err
+		return envelope, acnErr
 	}
 
 	switch msg_type {
 	case "aea_envelope":
 		{
-			err = proto.Unmarshal(acn_envelope.Envel, envelope)
+			err = proto.Unmarshal(acn_envelope.Envelope, envelope)
 			if err != nil {
 				logger.Error().Str("err", err.Error()).Msg("while decoding envelope")
 				acn_err = acn.SendAcnError(
 					pipe,
 					"error on decoding envelope",
-					acn.Status_ERROR_SERIALIZATION,
+					acn.ERROR_SERIALIZATION,
 				)
 				if acn_err != nil {
 					logger.Error().Str("err", acn_err.Error()).Msg("on acn send error")
