@@ -114,6 +114,9 @@ It contains:
 - `envelope`: the envelope to be forwarded, in byte representation;
 - an `AgentRecord` (see above).
 
+## Overview of ACN 
+
+TODO: add picture from paper
 
 ## ACN with direct connection
 
@@ -178,18 +181,98 @@ by an AEA's skill passes through:
 
 In this section, we describe the interaction between peers.
 
+Assume an envelope arrives from an agent to peer `DHTPeer1`,
+i.e. `DHTPeer1` is the first hop 
+of the routing.
+Let `Agent` be the local agent directly connected
+to `DHTPeer1`, and let `DHTPeer2` a direct peer
+of peer `DHTPeer1`.
+
+
+We may have different scenario:
+
+1) the field `sender` of the envelope
+   is not registered in any of the one connected
+   to the peer locally: 
+   the message is considered invalid, and it is dropped. 
 
 <div class="mermaid">
     sequenceDiagram
+        participant Agent
         participant DHTPeer1
         participant DHTPeer2
+        Agent->>DHTPeer1: AeaEnvelope
         alt envelope sender not registered locally
             note over DHTPeer1: stop, log error
         end
-        alt target == peer1.my_agent
-            note over DHTPeer1: route envelope destinated to <br/>local agent, not routing
-        end
+</div>
 
+2) the `target` of the envelope is 
+   the local agent connected to the peer:
+   the envelope is routed to the local agent.
+
+<div class="mermaid">
+    sequenceDiagram
+        participant Agent
+        participant DHTPeer1
+        participant DHTPeer2
+        Agent->>DHTPeer1: AeaEnvelope
+        alt target == peer1.my_agent
+            note over DHTPeer1: envelope destinated<br/> to local agent,<br/> not routing
+            loop agent not ready
+                note over DHTPeer1: sleep for 100ms
+            end
+            DHTPeer1->>Agent: AeaEnvelope
+            Agent->>DHTPeer1: Status(Success)
+        end
+</div>
+
+3) the `target` is a delegate client.
+   Send the envelope via TCP.
+
+<div class="mermaid">
+    sequenceDiagram
+        participant Delegate
+        participant DHTPeer1
+        participant DHTPeer2
+        Delegate->>DHTPeer1: AeaEnvelope
+        alt destination is a delegate
+            note over DHTPeer1: send envelope<br/> to delegate via TCP
+            DHTPeer1->>Delegate: AeaEnvelope
+            Delegate->>DHTPeer1: Status(Success)
+        end
+</div>
+
+4) Otherwise, look up the local DHT.
+  If an entry is found, use it;
+   otherwise, send a look-up request
+   to connected peers.
+
+<div class="mermaid">
+    sequenceDiagram
+        participant Agent
+        participant DHTPeer1
+        participant DHTPeer2
+        Agent->>DHTPeer1: AeaEnvelope
+        alt address found in DHT
+            note over DHTPeer1: destination is a relay client
+        else lookup address in DHT
+            note over DHTPeer1: send lookup request<br/> to all peers
+            DHTPeer1->>DHTPeer2: LookUpRequest
+            alt error
+                DHTPeer2->>DHTPeer1: Status(Error)
+            else success
+                DHTPeer2->>DHTPeer1: LookUpResponse
+                note over DHTPeer1: Check PoR
+            end
+        end
+        note over DHTPeer1,DHTPeer2: assume next peer is DHTPeer2
+        DHTPeer1->>DHTPeer2: AeaEnvelope
+        alt success
+            DHTPeer2->>DHTPeer1: Status(Success)
+        else error
+            DHTPeer2->>DHTPeer1: Status(Error)
+        end
 </div>
 
 ### ACN Exit
