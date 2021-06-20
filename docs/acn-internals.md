@@ -183,6 +183,13 @@ In this section, we describe the interaction between peers.
     sequenceDiagram
         participant DHTPeer1
         participant DHTPeer2
+        alt envelope sender not registered locally
+            note over DHTPeer1: stop, log error
+        end
+        alt target == peer1.my_agent
+            note over DHTPeer1: route envelope destinated to <br/>local agent, not routing
+        end
+
 </div>
 
 ### ACN Exit
