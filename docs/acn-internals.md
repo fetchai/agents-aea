@@ -113,6 +113,7 @@ It contains the agent address (a string) that the sender needs to correctly rout
 ### LookupResponse
 
 The `LookupResponse` payload is the response sent by a peer that received a `LookupRequest`.
+It contains the `AgentRecord` associated to the requested address.
 
 ### AeaEnvelope
 
@@ -123,6 +124,8 @@ It contains:
 - an `AgentRecord` (see above).
 
 ## Overview of ACN 
+
+TODO
 
 ## Joining the ACN network
 
@@ -183,21 +186,22 @@ of an envelope through the ACN:
 - _ACN entrance_: when an envelope sent by an agent enters 
   the peer-to-peer network via the peer the agent is connected to
   i.e. agent-to-peer communication;
-- _ACN middle_: when an envelope gets routed through the peer-to-peer network,
+- _ACN routing_: when an envelope gets routed through the peer-to-peer network,
   i.e. peer-to-peer communication;
 - _ACN exit_: when an envelope gets delivered to the receiving agent
   through its representative peer, i.e. peer-to-agent communication.
   
 
-### ACN Envelope Entrance (with direct connection)
+### ACN Envelope Entrance
 
 In this section, we will describe the interaction protocols between agents and peers 
 for the messages sent by the agent to the ACN network.
 
-#### Envelope entrance: Agent -> AgentApi -> DHTPeer
+#### Envelope entrance: Agent -> AgentApi -> DHTPeer  (with direct connection)
 
-The following diagram explains the exchange of messages on entering an envelope in the ACN.
-Agent is a Python process, whereas AgentApi and Peer are in a separate (Golang) process.
+The following diagram explains the exchange of messages on entering an envelope in the ACN,
+in the case of _direct connection_.
+`Agent` is a Python process, whereas `AgentApi` and `Peer` are in a separate (Golang) process.
 
 <div class="mermaid">
     sequenceDiagram
@@ -243,15 +247,15 @@ Assume an envelope arrives from an agent to peer `DHTPeer1`,
 i.e. `DHTPeer1` is the first hop 
 of the routing.
 Let `Agent` be the local agent directly connected
-to `DHTPeer1`, and let `DHTPeer2` a direct peer
+to `DHTPeer1`, `DHTPeer2` a direct peer
 of peer `DHTPeer1`.
 
+When the envelope is leaving `DHTPeer1`,
+we may have different scenario:
 
-We may have different scenario:
-
-1) the field `sender` of the envelope
-   is not registered in any of the one connected
-   to the peer locally: 
+1) In case of direct connection,
+   and the field `sender` of the envelope
+   is not the local agent address: 
    the message is considered invalid, and it is dropped. 
 
 <div class="mermaid">
@@ -313,7 +317,7 @@ We may have different scenario:
         participant DHTPeer2
         Agent->>DHTPeer1: AeaEnvelope
         alt address found in DHT
-            note over DHTPeer1: destination is a relay client
+            note over DHTPeer1: destination is a<br/>relay client
         else lookup address in DHT
             note over DHTPeer1: send lookup request<br/> to all peers
             DHTPeer1->>DHTPeer2: LookupRequest
@@ -326,13 +330,7 @@ We may have different scenario:
                 DHTPeer2->>DHTPeer1:Status(UNKNOWN_AGENT_ADDRESS)
             end
         end
-        note over DHTPeer1,DHTPeer2: assume next peer is DHTPeer2
-        DHTPeer1->>DHTPeer2: AeaEnvelope
-        alt success
-            DHTPeer2->>DHTPeer1: Status(Success)
-        else error
-            DHTPeer2->>DHTPeer1: Status(Error)
-        end
+        note over DHTPeer1,DHTPeer2: Now DHTPeer1 knows the contact peer<br/>is DHTPeerX
 </div>
 
 In particular, when a peer receives a LookupRequest message,
@@ -361,12 +359,55 @@ it does the following:
         end
 </div>
 
-### ACN Envelope Exit (direct connection)
+Let `DHTPeer3` the contact peer of the recipient of the envelope. 
+The following diagram shows how the contact peer of the 
+envelope recipient handles the incoming envelope:
 
-#### Envelope exit: DHTPeer -> AgentApi -> Agent
+<div class="mermaid">
+    sequenceDiagram
+        participant DHTPeer1
+        participant DHTPeer3
+        DHTPeer1->>DHTPeer3: AeaEnvelope
+        alt decoding error of ACN message
+            DHTPeer3->>DHTPeer1: Status(ERROR_SERIALIZATION)
+        else unexpected payload
+            DHTPeer3->>DHTPeer1: Status(ERROR_UNEXPECTED_PAYLOAD)
+        else decoding error of envelope payload
+            DHTPeer3->>DHTPeer1: Status(ERROR_SERIALIZATION)        
+        else PoR check fails
+            alt wrong agent address
+                DHTPeer3->>DHTPeer1: Status(ERROR_WRONG_AGENT_ADDRESS)
+            else unsupported ledger
+                DHTPeer3->>DHTPeer1: Status(ERROR_UNSUPPORTED_LEDGER)
+            else agent address and public key don't match
+                DHTPeer3->>DHTPeer1: Status(ERROR_WRONG_AGENT_ADDRESS)
+            else invalid proof
+                DHTPeer3->>DHTPeer1: Status(ERROR_INVALID_PROOF)
+            end
+        else PoR check succeeds
+            alt target is delegate, not ready
+                DHTPeer3->>DHTPeer1: Status(ERROR_AGENT_NOT_READY)
+            else exists delegate, ready
+                note over DHTPeer3: forward envelope via<br/>delegate connection
+                DHTPeer3->>DHTPeer1: Status(SUCCESS)
+            else target is local agent, not ready
+                DHTPeer3->>DHTPeer1: Status(ERROR_AGENT_NOT_READY)
+            else target is local agent, ready
+                note over DHTPeer3: forward envelope via<br/>direct connection
+                DHTPeer3->>DHTPeer1: Status(SUCCESS)
+            else agent does not exist
+                DHTPeer3->>DHTPeer1: Status(ERROR_UNKNOWN_AGENT_ADDRESS)
+            end
+        end
+</div>
 
-The following diagram explains the exchange of messages on exiting an envelope in the ACN.
-Agent is a Python process, whereas AgentApi and Peer are in a separate (Golang) process.
+### ACN Envelope Exit
+
+#### Envelope exit: DHTPeer -> AgentApi -> Agent (direct connection)
+
+The following diagram explains the exchange of messages on exiting an envelope in the ACN,
+in the case of direct connection.
+`Agent` is a Python process, whereas `AgentApi` and `Peer` are in a separate (Golang) process.
 
 
 <div class="mermaid">
