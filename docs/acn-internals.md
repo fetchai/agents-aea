@@ -306,3 +306,54 @@ Agent is a Python process, whereas AgentApi and Peer are in a separate (Golang) 
             note left of Agent: use some custom error code
         end
 </div>
+
+
+## Known issues and limitations
+
+In this section, we provide a list of known issues
+and limitations of the current implementation
+of the ACN, considering both the ACN nodes (written in Golang)
+and the AEA connections, for the Python AEA framework, to interact with them.
+
+### Delegate client on client disconnection/reconnection
+
+In case of disconnection/reconnection, delegate client record will be removed.
+This can cause two problems: either the delegate client is not found, 
+or connection is closed during the send operation.
+
+Possible solutions:
+- Create more complicated structure for clients storage;
+- Keep the delegate client record for longer; 
+- Clean up the record by timeout, per client queues.
+
+Code references:
+
+- record removed: <a href="https://github.com/fetchai/agents-aea/blob/1db1720081969bcec1be5a2000ca176475d2b487/libs/go/libp2p_node/dht/dhtpeer/dhtpeer.go#L864" target="_blank">https://github.com/fetchai/agents-aea/blob/1db1720081969bcec1be5a2000ca176475d2b487/libs/go/libp2p_node/dht/dhtpeer/dhtpeer.go#L864</a>
+- send code: <a href="https://github.com/fetchai/agents-aea/blob/1db1720081969bcec1be5a2000ca176475d2b487/libs/go/libp2p_node/dht/dhtpeer/dhtpeer.go#L955" target="_blank">https://github.com/fetchai/agents-aea/blob/1db1720081969bcec1be5a2000ca176475d2b487/libs/go/libp2p_node/dht/dhtpeer/dhtpeer.go#L955</a>
+
+
+### Golang Node <> Python Client `libp2p` connection
+
+In case of connection between the Golang side (i.e. ACN node) 
+and the Python side (i.e. the `libp2p` AEA connection) is broken, 
+there is no reconnection attempt.
+The Golang side connect to the Python server opened, 
+but if the connection is broken Golang can try to reconnect; 
+however, the Python side does not know about this and will restart
+the node completely.
+
+Possible solutions: the problem requires updates on both sides and assume possible timeouts on broken connection.
+If connection is broken, the Python side awaits for reconnection from Golang side, 
+and restart node completely after timeout.
+
+### What a peer should do if it receives an acknowledgment with an error?
+
+If an ACN response is the `Status` with error code different from `SUCCESS`,
+the forwarding to other peers is not repeated. 
+
+A possible solution is to resend the message; however,
+not clear why it should help in case of healthy connection,
+how many times the sender should retry, and how it would help.
+
+Discussion on GitHub: 
+<a href="https://github.com/fetchai/agents-aea/pull/2509#discussion_r642628983" target="_blank">https://github.com/fetchai/agents-aea/pull/2509#discussion_r642628983</a>
