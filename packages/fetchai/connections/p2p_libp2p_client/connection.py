@@ -35,17 +35,8 @@ from aea.helpers.acn.uri import Uri
 from aea.helpers.pipe import IPCChannelClient, TCPSocketChannelClient
 from aea.mail.base import Envelope
 
-from packages.fetchai.connections.p2p_libp2p_client.acn_message_pb2 import (
-    AcnMessage,
-    AeaEnvelope,
-)
-from packages.fetchai.connections.p2p_libp2p_client.acn_message_pb2 import (
-    AgentRecord as AgentRecordPb,
-)
-from packages.fetchai.connections.p2p_libp2p_client.acn_message_pb2 import (
-    Register,
-    Status,
-)
+from packages.fetchai.protocols.acn import acn_pb2
+from packages.fetchai.protocols.acn.message import AcnMessage
 
 
 try:
@@ -84,38 +75,44 @@ class NodeClient:
             raise ValueError("waiter for status not set!")
         return await asyncio.wait_for(self._wait_status, timeout=self.ACN_ACK_TIMEOUT)
 
-    def make_acn_envelope_message(self, envelope: Envelope) -> bytes:
+    @staticmethod
+    def make_acn_envelope_message(envelope: Envelope) -> bytes:
         """Make acn message with envelope in."""
-        aea_envelope = AeaEnvelope()
-        aea_envelope.record.CopyFrom(  # pylint: disable=no-member
-            self.make_agent_record()
-        )
-        aea_envelope.envel = envelope.encode()
-        msg = AcnMessage()
-        msg.version = ACN_CURRENT_VERSION
-        msg.aea_envelope.CopyFrom(aea_envelope)  # pylint: disable=no-member
-        buf = msg.SerializeToString()
+        acn_msg = acn_pb2.AcnMessage()
+        performative = acn_pb2.AcnMessage.Aea_Envelope_Performative()  # type: ignore
+        performative.envelope = envelope.encode()
+        acn_msg.aea_envelope.CopyFrom(performative)  # pylint: disable=no-member
+        buf = acn_msg.SerializeToString()
         return buf
 
     async def write_acn_status_ok(self) -> None:
         """Send acn status ok."""
-        status = Status()
-        status.code = Status.SUCCESS  # type: ignore # pylint: disable=no-member
-        msg = AcnMessage()
-        msg.version = ACN_CURRENT_VERSION
-        msg.status.CopyFrom(status)  # pylint: disable=no-member
-        buf = msg.SerializeToString()
+        acn_msg = acn_pb2.AcnMessage()
+        performative = acn_pb2.AcnMessage.Status_Performative()  # type: ignore
+        status = AcnMessage.StatusBody(
+            status_code=AcnMessage.StatusBody.StatusCode.SUCCESS, msgs=[]
+        )
+        AcnMessage.StatusBody.encode(
+            performative.body, status  # pylint: disable=no-member
+        )
+        acn_msg.status.CopyFrom(performative)  # pylint: disable=no-member
+        buf = acn_msg.SerializeToString()
         await self._write(buf)
 
     async def write_acn_status_error(self, msg: str) -> None:
         """Send acn status error generic."""
-        status = Status()
-        status.code = Status.ERROR_GENERIC  # type: ignore # pylint: disable=no-member
-        status.msgs.append(msg)  # type: ignore # pylint: disable=no-member
-        msg = AcnMessage()
-        msg.version = ACN_CURRENT_VERSION  # type: ignore  # pylint: disable=no-member
-        msg.status.CopyFrom(status)  # type: ignore # pylint: disable=no-member
-        buf = msg.SerializeToString()  # type: ignore # pylint: disable=no-member
+        acn_msg = acn_pb2.AcnMessage()
+        performative = acn_pb2.AcnMessage.Status_Performative()  # type: ignore
+        status = AcnMessage.StatusBody(
+            status_code=AcnMessage.StatusBody.StatusCode.ERROR_GENERIC, msgs=[msg]
+        )
+        AcnMessage.StatusBody.encode(
+            performative.body, status  # pylint: disable=no-member
+        )
+        acn_msg.status.CopyFrom(performative)  # pylint: disable=no-member
+
+        buf = acn_msg.SerializeToString()
+
         await self._write(buf)
 
     async def connect(self) -> bool:
@@ -129,7 +126,7 @@ class NodeClient:
         await self._write(buf)
         try:
             status = await self.wait_for_status()
-            if status.code != Status.SUCCESS:  # type: ignore  # pylint: disable=no-member
+            if status.code != int(AcnMessage.StatusBody.StatusCode.SUCCESS):  # type: ignore  # pylint: disable=no-member
                 raise ValueError(  # pragma: nocover
                     f"failed to send envelope. got error confirmation: {status}"
                 )
@@ -141,50 +138,52 @@ class NodeClient:
         finally:
             self._wait_status = None
 
-    def make_agent_record(self) -> AgentRecordPb:  # type: ignore
+    def make_agent_record(self) -> AcnMessage.AgentRecord:  # type: ignore
         """Make acn agent record."""
-        record = AgentRecordPb()
-        record.address = self.agent_record.address
-        record.public_key = self.agent_record.public_key
-        record.peer_public_key = self.agent_record.representative_public_key
-        record.signature = self.agent_record.signature
-        record.service_id = POR_DEFAULT_SERVICE_ID
-        record.ledger_id = self.agent_record.ledger_id
-        return record
+        agent_record = AcnMessage.AgentRecord(
+            address=self.agent_record.address,
+            public_key=self.agent_record.public_key,
+            peer_public_key=self.agent_record.representative_public_key,
+            signature=self.agent_record.signature,
+            service_id=POR_DEFAULT_SERVICE_ID,
+            ledger_id=self.agent_record.ledger_id,
+        )
+        return agent_record
 
     async def read_envelope(self) -> Optional[Envelope]:
         """Read envelope from the node."""
         while True:
-            data = await self._read()
+            buf = await self._read()
 
-            if not data:
+            if not buf:
                 return None
 
             try:
-                msg = AcnMessage()
-                msg.ParseFromString(data)
+                acn_msg = acn_pb2.AcnMessage()
+                acn_msg.ParseFromString(buf)
+
             except Exception as e:
                 await self.write_acn_status_error(f"Failed to parse acn message {e}")
                 raise ValueError(f"Error parsing acn message: {e}") from e
 
-            payload = msg.WhichOneof("payload")
-            if payload == "aea_envelope":  # pragma: nocover
-                aea_envelope = msg.aea_envelope  # pylint: disable=no-member
+            performative = acn_msg.WhichOneof("performative")
+            if performative == "aea_envelope":  # pragma: nocover
+                aea_envelope = acn_msg.aea_envelope  # pylint: disable=no-member
                 try:
-                    envelope = Envelope.decode(aea_envelope.envel)
+                    envelope = Envelope.decode(aea_envelope.envelope)
                     await self.write_acn_status_ok()
                     return envelope
                 except Exception as e:
                     await self.write_acn_status_error(f"Failed to decode envelope: {e}")
                     raise
 
-            elif payload == "status":
+            elif performative == "status":
                 if self._wait_status is not None:
                     self._wait_status.set_result(
-                        msg.status  # pylint: disable=no-member
+                        acn_msg.status.body  # pylint: disable=no-member
                     )
             else:  # pragma: nocover
-                await self.write_acn_status_error(f"Bad acn message {payload}")
+                await self.write_acn_status_error(f"Bad acn message {performative}")
 
     async def _write(self, data: bytes) -> None:
         """
@@ -204,15 +203,15 @@ class NodeClient:
 
     async def register(self,) -> None:
         """Register agent on the remote node."""
-        record = self.make_agent_record()
+        agent_record = self.make_agent_record()
+        acn_msg = acn_pb2.AcnMessage()
+        performative = acn_pb2.AcnMessage.Register_Performative()  # type: ignore
+        AcnMessage.AgentRecord.encode(
+            performative.record, agent_record  # pylint: disable=no-member
+        )
+        acn_msg.register.CopyFrom(performative)  # pylint: disable=no-member
 
-        registration = Register()
-        registration.record.CopyFrom(record)  # pylint: disable=no-member
-        msg = AcnMessage()
-        msg.version = ACN_CURRENT_VERSION
-        msg.register.CopyFrom(registration)  # pylint: disable=no-member
-
-        buf = msg.SerializeToString()
+        buf = acn_msg.SerializeToString()
         await self._write(buf)
 
         try:
@@ -226,17 +225,17 @@ class NodeClient:
             raise ConnectionError(
                 "Error on connection setup. Incoming buffer is empty!"
             )
-        msg = AcnMessage()
-        msg.ParseFromString(buf)
-        payload = msg.WhichOneof("payload")
-        if payload != "status":  # pragma: nocover
-            raise Exception(f"Wrong response message from peer: {payload}")
-        response = msg.status  # pylint: disable=no-member
+        acn_msg = acn_pb2.AcnMessage()
+        acn_msg.ParseFromString(buf)
+        performative = acn_msg.WhichOneof("performative")
+        if performative != "status":  # pragma: nocover
+            raise Exception(f"Wrong response message from peer: {performative}")
+        response = acn_msg.status  # pylint: disable=no-member
 
-        if response.code != Status.SUCCESS:  # type: ignore # pylint: disable=no-member
+        if response.body.code != int(AcnMessage.StatusBody.StatusCode.SUCCESS):  # type: ignore # pylint: disable=no-member
             raise Exception(  # pragma: nocover
                 "Registration to peer failed: {}".format(
-                    Status.ErrCode.Name(response.code)  # type: ignore # pylint: disable=no-member
+                    AcnMessage.StatusBody.StatusCode(response.body.code)  # type: ignore # pylint: disable=no-member
                 )
             )
 

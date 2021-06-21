@@ -35,7 +35,6 @@ from aea.crypto.registries import make_crypto
 from aea.identity.base import Identity
 from aea.multiplexer import Multiplexer
 
-from packages.fetchai.connections.p2p_libp2p.acn_message_pb2 import Status
 from packages.fetchai.connections.p2p_libp2p.connection import (
     LIBP2P_NODE_MODULE_NAME,
     Libp2pNode,
@@ -43,6 +42,7 @@ from packages.fetchai.connections.p2p_libp2p.connection import (
     _golang_module_run,
     _ip_all_private_or_all_public,
 )
+from packages.fetchai.protocols.acn.message import AcnMessage
 
 from tests.conftest import DEFAULT_LEDGER, _make_libp2p_connection
 
@@ -288,10 +288,11 @@ async def test_reconnect_on_write_failed_reconnect_pipe():
     node.pipe = Mock()
     node.pipe.connect = Mock(return_value=f)
     node.pipe.write = Mock(side_effect=[Exception("expected"), f])
+    node.pipe.close = Mock(return_value=f)
 
     con._node_client = node.get_client()
     status_ok = Mock()
-    status_ok.code = Status.SUCCESS
+    status_ok.code = int(AcnMessage.StatusBody.StatusCode.SUCCESS)
     status_ok_future = Future()
     status_ok_future.set_result(status_ok)
     with patch.object(con, "_ensure_valid_envelope_for_external_comms"), patch.object(
@@ -394,7 +395,7 @@ async def test_send_acn_confirm_failed():
 
     node_client = node.get_client()
     status = Mock()
-    status.code = Status.ERROR_GENERIC
+    status.code = int(AcnMessage.StatusBody.StatusCode.ERROR_GENERIC)
     status_future = Future()
     status_future.set_result(status)
     with patch.object(
